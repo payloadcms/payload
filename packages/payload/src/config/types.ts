@@ -66,7 +66,7 @@ import type {
 } from '../index.js'
 import type { QueryPreset, QueryPresetConstraints } from '../query-presets/types.js'
 import type { SanitizedJobsConfig } from '../queues/config/types/index.js'
-import type { PayloadRequest, Where } from '../types/index.js'
+import type { AllOperations, PayloadRequest, Where } from '../types/index.js'
 import type { PayloadLogger } from '../utilities/logger.js'
 
 /**
@@ -403,6 +403,19 @@ export type AccessArgs<TData = any> = {
  * @see https://payloadcms.com/docs/access-control/overview
  */
 export type Access<TData = any> = (args: AccessArgs<TData>) => AccessResult | Promise<AccessResult>
+
+export type BaseAccessArgs<TData = any> = {
+  /** The type of resource being accessed. */
+  entityType: 'collection' | 'global'
+  /** The operation being performed. */
+  operation: AllOperations
+  /** The slug of the resource being accessed. */
+  slug: string
+} & AccessArgs<TData>
+
+export type BaseAccess<TData = any> = (
+  args: BaseAccessArgs<TData>,
+) => AccessResult | Promise<AccessResult>
 
 /** Web Request/Response model, but the req has more payload specific properties added to it. */
 export type PayloadHandler = (req: PayloadRequest) => Promise<Response> | Response
@@ -1229,6 +1242,12 @@ export type Config = {
      */
     jwtOrder: ('Bearer' | 'cookie' | 'JWT')[]
   }
+  /**
+   * Define an access constraint that is applied to every Collection and Global operation.
+   *
+   * The result is combined with each resource's access result using AND semantics.
+   */
+  baseAccess?: BaseAccess
   /** Custom Payload bin scripts can be injected via the config. */
   bin?: BinScriptConfig[]
   blocks?: Block[]
@@ -1682,6 +1701,7 @@ export type SanitizedConfig = {
     dashboard: Required<NonNullable<NonNullable<Config['admin']>['dashboard']>>
     timezones: SanitizedTimezoneConfig
   } & DeepRequired<Omit<NonNullable<Config['admin']>, 'dashboard'>>
+  baseAccess?: BaseAccess
   blocks?: FlattenedBlock[]
   collections: SanitizedCollectionConfig[]
   /** Default richtext editor to use for richText fields */
@@ -1709,6 +1729,7 @@ export type SanitizedConfig = {
   // the result type is different
   DeepRequired<Config>,
   | 'admin'
+  | 'baseAccess'
   | 'blocks'
   | 'collections'
   | 'editor'

@@ -50,6 +50,44 @@ const defaultPayloadAccess = ({ req: { payload, user } }) => {
   `false` in your requests.
 </Banner>
 
+## Base Access Control
+
+Use the top-level `baseAccess` config to apply an additional constraint to
+every Collection and Global operation:
+
+```ts
+export default buildConfig({
+  baseAccess: ({ operation, req }) => {
+    if (operation === 'read' || operation === 'readVersions') {
+      return true
+    }
+
+    return req.user?.role === 'admin'
+  },
+  // ...
+})
+```
+
+Payload combines `baseAccess` with each Collection or Global Access Control
+function using `AND` semantics. Returning `false` denies the operation before
+the resource-specific function runs. For operations that support query
+constraints, returning one combines it with a resource-specific constraint
+using an `and` query. Collection `create` access only supports booleans, so
+returning a query constraint for that operation throws an error.
+
+In addition to the standard Access Control arguments, `baseAccess` receives:
+
+- `entityType`: either `collection` or `global`
+- `operation`: the operation being performed
+- `slug`: the Collection or Global slug
+
+`baseAccess` applies only to Collection and Global Access Control. It does not
+apply to Field Access Control, custom endpoints, direct database adapter calls,
+job access, or other APIs with dedicated access configuration.
+
+Like other Access Control, `baseAccess` is skipped when Local API operations use
+`overrideAccess: true`.
+
 ## The Access Operation
 
 The Admin Panel responds dynamically to your changes to Access Control. For example, if you restrict editing `ExampleCollection` to only users that feature an "admin" role, Payload will **hide** that Collection from the Admin Panel entirely. This is super powerful and allows you to control who can do what within your Admin Panel using the same functions that secure your APIs.

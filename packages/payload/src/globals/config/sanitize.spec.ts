@@ -23,6 +23,10 @@ describe('baseAccess', () => {
     }
     const baseAccess = vi.fn(() => baseConstraint)
     const globalAccess = vi.fn(() => globalConstraint)
+    const config = {
+      ...minimalConfig,
+      baseAccess,
+    }
     const global: GlobalConfig = {
       slug: 'settings',
       access: {
@@ -30,15 +34,13 @@ describe('baseAccess', () => {
       },
       fields: [],
     }
-    const req = {} as any
-
-    const result = sanitizeGlobal(
-      {
-        ...minimalConfig,
-        baseAccess,
+    const req = {
+      payload: {
+        config,
       },
-      global,
-    )
+    } as any
+
+    const result = sanitizeGlobal(config, global)
     const accessResult = await result.access.update({ req })
 
     expect(accessResult).toEqual({
@@ -53,6 +55,81 @@ describe('baseAccess', () => {
       req,
       slug: 'settings',
     })
+  })
+
+  it('should not grant access when resource access uses the authenticated fallback', async () => {
+    const config = {
+      ...minimalConfig,
+      baseAccess: () => true,
+    }
+    const global: GlobalConfig = {
+      slug: 'settings',
+      fields: [],
+    }
+
+    const result = sanitizeGlobal(config, global)
+
+    expect(
+      await result.access.readVersions?.({
+        req: {
+          payload: {
+            config,
+          },
+        } as any,
+      }),
+    ).toBe(false)
+    expect(
+      await result.access.readVersions?.({
+        req: {
+          payload: {
+            config,
+          },
+          user: {
+            id: 'user-1',
+          },
+        } as any,
+      }),
+    ).toBe(true)
+  })
+
+  it('should resolve base access from the current request for reused resources', async () => {
+    const global: GlobalConfig = {
+      slug: 'settings',
+      access: {
+        read: () => true,
+      },
+      fields: [],
+    }
+    const deniedConfig = {
+      ...minimalConfig,
+      baseAccess: () => false,
+    }
+    const allowedConfig = {
+      ...minimalConfig,
+      baseAccess: () => true,
+    }
+
+    const firstResult = sanitizeGlobal(deniedConfig, global)
+    expect(
+      await firstResult.access.read({
+        req: {
+          payload: {
+            config: deniedConfig,
+          },
+        } as any,
+      }),
+    ).toBe(false)
+
+    const reusedResult = sanitizeGlobal(allowedConfig, global)
+    expect(
+      await reusedResult.access.read({
+        req: {
+          payload: {
+            config: allowedConfig,
+          },
+        } as any,
+      }),
+    ).toBe(true)
   })
 })
 

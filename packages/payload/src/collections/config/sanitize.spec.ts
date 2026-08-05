@@ -30,7 +30,11 @@ describe('baseAccess', () => {
       },
       fields: [],
     }
-    const req = {} as any
+    const req = {
+      payload: {
+        config,
+      },
+    } as any
 
     const result = sanitizeCollection(config, collection)
     const accessResult = await result.access.read({ req })
@@ -63,12 +67,44 @@ describe('baseAccess', () => {
       },
       fields: [],
     }
+    const req = {
+      payload: {
+        config,
+      },
+    } as any
 
     const result = sanitizeCollection(config, collection)
-    const accessResult = await result.access.update({ req: {} as any })
+    const accessResult = await result.access.update({ req })
 
     expect(accessResult).toBe(false)
     expect(collectionAccess).not.toHaveBeenCalled()
+  })
+
+  it('should reject query constraints for collection create operations', async () => {
+    const config = {
+      baseAccess: () => ({
+        tenant: {
+          equals: 'tenant-1',
+        },
+      }),
+      collections: [],
+      globals: [],
+    } as any
+    const collection: CollectionConfig = {
+      slug: 'posts',
+      fields: [],
+    }
+    const req = {
+      payload: {
+        config,
+      },
+    } as any
+
+    const result = sanitizeCollection(config, collection)
+
+    await expect(result.access.create({ req })).rejects.toThrow(
+      'baseAccess must return a boolean for collection create operations.',
+    )
   })
 })
 
