@@ -116,9 +116,9 @@ export default withPayload(
     additionalIgnoreImporters: [
       /^\.\.\/packages\/tanstack-start\/src\/views\/AdminView\.tsx(?:\?.*)?$/,
     ],
-    // In the monorepo, Payload's `.client.*` files resolve to `packages/*/src`
-    // (not `node_modules`), so exempt them from the `.client.*` SSR denial too.
-    clientDenialExcludeFiles: ['**/packages/*/src/**'],
+    // Payload's monorepo packages and Next.js test fixtures both use `.client.*` modules.
+    // The server-only specifier protection remains enabled for other source files.
+    clientDenialExcludeFiles: ['**/packages/*/src/**', '**/*.client.*'],
     payloadConfigPath: path.resolve(__dirname, testSuite, 'config.ts'),
     routesDirectory: 'app',
     srcDirectory,
