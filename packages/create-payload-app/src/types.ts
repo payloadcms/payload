@@ -7,7 +7,6 @@ export interface Args extends arg.Spec {
   '--beta': BooleanConstructor
   '--branch': StringConstructor
   '--db': StringConstructor
-  '--db-accept-recommended': BooleanConstructor
   '--db-connection-string': StringConstructor
   '--debug': BooleanConstructor
   '--dry-run': BooleanConstructor
@@ -28,6 +27,7 @@ export interface Args extends arg.Spec {
   '--use-npm': BooleanConstructor
   '--use-pnpm': BooleanConstructor
   '--use-yarn': BooleanConstructor
+  '--yes': BooleanConstructor
 
   // Aliases
 
@@ -36,6 +36,7 @@ export interface Args extends arg.Spec {
   '-h': string
   '-n': string
   '-t': string
+  '-y': string
 }
 
 export type CliArgs = arg.Result<Args>

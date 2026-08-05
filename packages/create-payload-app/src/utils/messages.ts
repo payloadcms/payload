@@ -30,11 +30,19 @@ export function helpMessage(): void {
       {dim $} {bold npx create-payload-app} my-project
       {dim $} {bold npx create-payload-app} -n my-project -t template-name
 
+      {dim Non-interactive (AI agents / CI) — no prompts}
+
+      {dim $} {bold npx create-payload-app} my-project --db sqlite -y
+
   {bold OPTIONS}
 
       -n     {underline my-payload-app}         Set project name
       -t     {underline template_name}          Choose specific template
       -e     {underline example_name}           Choose specific example
+
+      --db   {underline type}                   Database adapter (mongodb, postgres, sqlite, vercel-postgres, d1-sqlite)
+      --db-connection-string {underline value}  Use a specific database connection string
+      --secret {underline value}                Set the Payload secret (auto-generated if omitted)
 
         {dim Available templates: ${formatTemplates(validTemplates)}}
 
@@ -49,6 +57,8 @@ export function helpMessage(): void {
       --use-bun                     Use bun to install dependencies (experimental)
       --no-deps                     Do not install any dependencies
       --payload-version {underline value}       Install a specific Payload version or npm dist-tag (default: canary)
+      -y, --yes                     Non-interactive mode for AI agents / CI: use defaults for all
+                                    unset prompts. Requires a name and --db (see USAGE above).
       -h                            Show help
 `)
 }
