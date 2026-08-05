@@ -25,9 +25,10 @@ import { tenant2 } from './tenant-2.js'
 import { trashedPost } from './trashed-post.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
-const seedDir = process.env.ROOT_DIR
-  ? path.resolve(process.env.ROOT_DIR, 'live-preview/seed')
-  : dirname
+const seedDir =
+  process.env.PAYLOAD_FRAMEWORK === 'tanstack-start' && process.env.ROOT_DIR
+    ? path.resolve(process.env.ROOT_DIR, 'live-preview/seed')
+    : dirname
 
 export const seed: Config['onInit'] = async (payload) => {
   const existingUser = await payload.find({
