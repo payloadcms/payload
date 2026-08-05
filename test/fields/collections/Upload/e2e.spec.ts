@@ -275,38 +275,44 @@ describe('Upload', () => {
   })
 
   describe.skip('A11y', () => {
-    test.fixme('Create view should have no accessibility violations', async (_args, testInfo) => {
-      await page.goto(url.create)
-      await page.locator('#field-text').waitFor()
+    test.fixme(
+      'Create view should have no accessibility violations',
+      async ({ page: _unusedPage }, testInfo) => {
+        await page.goto(url.create)
+        await page.locator('#field-text').waitFor()
 
-      const scanResults = await runAxeScan({
-        exclude: ['.field-description'], // known issue - reported elsewhere @todo: remove this once fixed - see report https://github.com/payloadcms/payload/discussions/14489
-        include: ['.collection-edit__main'],
-        page,
-        testInfo,
-      })
+        const scanResults = await runAxeScan({
+          exclude: ['.field-description'], // known issue - reported elsewhere @todo: remove this once fixed - see report https://github.com/payloadcms/payload/discussions/14489
+          include: ['.collection-edit__main'],
+          page,
+          testInfo,
+        })
 
-      expect(scanResults.violations.length).toBe(0)
-    })
+        expect(scanResults.violations.length).toBe(0)
+      },
+    )
 
-    test.fixme('Edit view should have no accessibility violations', async (_args, testInfo) => {
-      await page.goto(url.list)
-      const firstItem = page.locator('.cell-filename a').nth(0)
-      await firstItem.click()
+    test.fixme(
+      'Edit view should have no accessibility violations',
+      async ({ page: _unusedPage }, testInfo) => {
+        await page.goto(url.list)
+        const firstItem = page.locator('.cell-filename a').nth(0)
+        await firstItem.click()
 
-      await page.locator('#field-text').waitFor()
+        await page.locator('#field-text').waitFor()
 
-      const scanResults = await runAxeScan({
-        exclude: ['.field-description'], // known issue - reported elsewhere @todo: remove this once fixed - see report https://github.com/payloadcms/payload/discussions/14489
-        include: ['.collection-edit__main'],
-        page,
-        testInfo,
-      })
+        const scanResults = await runAxeScan({
+          exclude: ['.field-description'], // known issue - reported elsewhere @todo: remove this once fixed - see report https://github.com/payloadcms/payload/discussions/14489
+          include: ['.collection-edit__main'],
+          page,
+          testInfo,
+        })
 
-      expect(scanResults.violations.length).toBe(0)
-    })
+        expect(scanResults.violations.length).toBe(0)
+      },
+    )
 
-    test('Upload fields have focus indicators', async (_args, testInfo) => {
+    test('Upload fields have focus indicators', async ({ page: _unusedPage }, testInfo) => {
       await page.goto(url.create)
       await page.locator('#field-text').waitFor()
 

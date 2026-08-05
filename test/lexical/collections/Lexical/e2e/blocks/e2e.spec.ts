@@ -778,6 +778,7 @@ describe('lexicalBlocks', () => {
       // scroll slash menu down
       await popoverHeading2Button.hover()
       await page.mouse.wheel(0, 250)
+      await popoverHeading2Button.scrollIntoViewIfNeeded()
 
       await expect(async () => {
         // Make sure that, even though it's "visible", it's not actually covered by something else due to z-index issues
