@@ -1,6 +1,7 @@
 import fse from 'fs-extra'
 import os from 'node:os'
 import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { NextAppDetails, TanStackAppDetails } from '../types.js'
@@ -10,6 +11,8 @@ import {
   updatePayloadInTanStackProject,
   updatePayloadPackages,
 } from './update-payload-in-project.js'
+
+const dirname = path.dirname(fileURLToPath(import.meta.url))
 
 const mocks = vi.hoisted(() => ({
   getPackageManager: vi.fn(),
@@ -124,8 +127,8 @@ describe('Payload project updates', () => {
     const importMapPath = path.join(payloadDir, 'admin/importMap.js')
     const customCssPath = path.join(payloadDir, 'custom.css')
     const sourceImportMapPath = path.resolve(
-      process.cwd(),
-      '../../templates/blank/src/app/(payload)/admin/importMap.js',
+      dirname,
+      '../../../../templates/blank/src/app/(payload)/admin/importMap.js',
     )
     fse.outputFileSync(importMapPath, 'stale import map\n')
     fse.outputFileSync(customCssPath, '.custom { color: rebeccapurple; }\n')
@@ -226,8 +229,8 @@ describe('Payload project updates', () => {
     writeProjectPackage(projectDir)
     const payloadLayoutPath = path.join(projectDir, 'src/routes/_payload.tsx')
     const sourcePayloadLayoutPath = path.resolve(
-      process.cwd(),
-      '../../templates/blank-tanstack/src/app/_payload.tsx',
+      dirname,
+      '../../../../templates/blank-tanstack/src/app/_payload.tsx',
     )
     fse.outputFileSync(payloadLayoutPath, 'stale payload layout\n')
 

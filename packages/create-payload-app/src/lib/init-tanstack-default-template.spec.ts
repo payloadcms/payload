@@ -1,11 +1,14 @@
 import fse from 'fs-extra'
 import os from 'node:os'
 import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { TanStackAppDetails } from '../types.js'
 
 import { initTanStack } from './init-tanstack.js'
+
+const dirname = path.dirname(fileURLToPath(import.meta.url))
 
 const mocks = vi.hoisted(() => ({ resolvePackageVersion: vi.fn() }))
 
@@ -92,8 +95,8 @@ describe('initTanStack default template', () => {
 
   it('should initialize from the raw source template without a templateRoot override', async () => {
     const rawPayloadLayoutPath = path.resolve(
-      process.cwd(),
-      '../../templates/blank-tanstack/src/app/_payload.tsx',
+      dirname,
+      '../../../../templates/blank-tanstack/src/app/_payload.tsx',
     )
 
     const result = await initTanStack({
