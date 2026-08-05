@@ -417,14 +417,14 @@ export function UploadInput(props: UploadInputProps) {
     try {
       const files = await getFilesFromClipboard()
       if (!files) {
-        toast.error('No file found in clipboard.')
+        toast.error(t('error:noFileFoundInClipboard'))
         return
       }
       onLocalFileSelection(files)
     } catch (_err) {
-      toast.error('Unable to read from clipboard.')
+      toast.error(t('error:unableToReadClipboard'))
     }
-  }, [onLocalFileSelection])
+  }, [onLocalFileSelection, t])
 
   // only hasMany can bulk select
   const onListBulkSelect = React.useCallback<NonNullable<ListDrawerProps['onBulkSelect']>>(

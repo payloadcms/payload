@@ -26,14 +26,14 @@ export function AddFilesView({ acceptMimeTypes, modalSlug: modalSlug, onDrop }: 
     try {
       const files = await getFilesFromClipboard()
       if (!files) {
-        toast.error('No file found in clipboard.')
+        toast.error(t('error:noFileFoundInClipboard'))
         return
       }
       onDrop(files)
     } catch (_err) {
-      toast.error('Unable to read from clipboard.')
+      toast.error(t('error:unableToReadClipboard'))
     }
-  }, [onDrop])
+  }, [onDrop, t])
 
   return (
     <DialogModal className={baseClass} size="large" slug={modalSlug}>

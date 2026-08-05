@@ -1,7 +1,5 @@
 @layer payload-default {
   .dropzone {
-    --accessibility-outline-offset: -2px;
-
     position: relative;
     display: flex;
     align-items: flex-start;
@@ -21,7 +19,7 @@
 
     &:focus {
       outline: var(--accessibility-outline);
-      outline-offset: var(--accessibility-outline-offset);
+      outline-offset: calc(-2 * var(--accessibility-outline-offset));
     }
 
     &.dragging {

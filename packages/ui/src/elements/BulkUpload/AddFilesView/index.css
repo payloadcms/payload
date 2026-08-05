@@ -42,7 +42,7 @@
     text-transform: lowercase;
   }
 
-  @media (min-width: 769px) {
+  @media (min-width: 768px) {
     .bulk-upload--add-files__dragAndDropText {
       display: block;
     }
