@@ -15,6 +15,7 @@ const TEST_SUITES = [
   'admin-root',
   'array-update',
   'auth',
+  'base-access',
   'collections-graphql',
   'collections-rest',
   'config',
@@ -336,7 +337,7 @@ function getExplicitSkippedTestCount(suiteName: string): number {
     }
 
     if (ts.isCallExpression(node) && ts.isPropertyAccessExpression(node.expression)) {
-      const { expression, name } = node.expression
+      const { name, expression } = node.expression
       if (
         ts.isIdentifier(expression) &&
         (expression.text === 'it' || expression.text === 'test') &&
@@ -357,10 +358,10 @@ function runTestSuite(suiteName: string): SuiteResult {
   const startTime = Date.now()
   const result: SuiteResult = {
     name: suiteName,
+    duration: 0,
+    failed: false,
     passed: 0,
     total: 0,
-    failed: false,
-    duration: 0,
   }
 
   try {
