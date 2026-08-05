@@ -422,7 +422,7 @@ describe('List View', () => {
       // ensure the ID column is active
       const idButton = getColumnSelectorItem({ container: columnContainer, label: 'ID' })
 
-      const id = (await page.locator('.cell-id').first().innerText()).replace('ID: ', '')
+      const id = await page.locator('.cell-id .id-label__value').first().innerText()
 
       const buttonClasses = await idButton.getAttribute('class')
 
@@ -445,10 +445,25 @@ describe('List View', () => {
 
       await expect(tableRows).toHaveCount(1)
       const firstId = page.locator(tableRowLocator).first().locator('.cell-id')
-      await expect(firstId).toHaveText(`ID: ${id}`)
+      await expect(firstId.locator('.id-label__prefix')).toHaveText('ID')
+      await expect(firstId.locator('.id-label__value')).toHaveText(id)
 
       await page.locator('.condition__actions-remove').click()
       await expect(page.locator(tableRowLocator)).toHaveCount(2)
+    })
+
+    test('should render the ID cell as a pill with a hover background instead of an underline', async () => {
+      const idLink = page.locator('.cell-id > a').first()
+      const idLabel = idLink.locator('.id-label')
+
+      await expect(idLabel.locator('.id-label__prefix')).toHaveText('ID')
+      await expect(idLabel).toHaveCSS('background-color', 'rgb(245, 245, 245)')
+      await expect(idLink).toHaveCSS('text-decoration-line', 'none')
+
+      await idLabel.hover()
+
+      await expect(idLabel).toHaveCSS('background-color', 'rgb(230, 230, 230)')
+      await expect(idLink).toHaveCSS('text-decoration-line', 'none')
     })
 
     test('should search for nested fields in field dropdown', async () => {
@@ -532,7 +547,7 @@ describe('List View', () => {
     })
 
     test('should reset filter value when a different field is selected', async () => {
-      const id = (await page.locator('.cell-id').first().innerText()).replace('ID: ', '')
+      const id = await page.locator('.cell-id .id-label__value').first().innerText()
 
       const { whereBuilder } = await addListFilter({
         fieldLabel: 'ID',

@@ -1530,7 +1530,6 @@ describe('Versions', () => {
       // nothing in scheduled
       await expect(page.locator('.drawer__content')).toContainText('No upcoming events scheduled.')
 
-      // set date and time
       await page.locator('.date-time-picker input').fill('Feb 21, 2050 12:00 AM')
       await page.keyboard.press('Enter')
 
@@ -1649,12 +1648,10 @@ describe('Versions', () => {
       const dateInput = drawerContent.locator('.date-time-picker__input-wrapper input')
       // Create a date for 2049-01-01 18:00:00 UTC, so it is timezone-invariant across CI environments
       const date = new Date(Date.UTC(2049, 0, 1, 18, 0))
-
       await dateInput.fill(date.toISOString())
-      await localPage.keyboard.press('Enter') // formats the date to the correct format
+      await localPage.keyboard.press('Enter')
 
       const saveButton = drawerContent.locator('.schedule-publish__actions button')
-
       await saveButton.click()
 
       const upcomingContent = localPage.locator('.schedule-publish__upcoming')
@@ -1678,6 +1675,36 @@ describe('Versions', () => {
       expect(createdJob).toBeTruthy()
 
       expect(createdJob?.waitUntil).toEqual('2049-01-01T17:00:00.000Z')
+    })
+
+    test('greys out past times in the date picker', async () => {
+      await page.goto(url.create)
+      await page.locator('#field-title').fill('test past times')
+      await page.locator('#field-description').fill('test past times description')
+
+      await saveDocAndAssert(page)
+      await page.locator('#schedule-publish-button').click()
+      await expect(page.locator('.drawer__header')).toBeVisible()
+
+      await page.locator('.date-time-picker input').click()
+      const popper = page.locator('.react-datepicker-popper')
+      await expect(popper).toBeVisible()
+
+      // With no date selected, times before now should be disabled (minTime = now)
+      const firstTimeItem = popper.locator('.react-datepicker__time-list-item').first()
+      await expect(firstTimeItem).toHaveClass(/react-datepicker__time-list-item--disabled/)
+
+      // Select a far-future date — minTime becomes startOfDay, enabling all times
+      await popper.locator('.react-datepicker__year-select').selectOption('2050')
+      await popper.locator('.react-datepicker__month-select').selectOption('1') // February
+      await popper
+        .locator(
+          `.react-datepicker__day--021:not(.react-datepicker__day--outside-month):not(.react-datepicker__day--disabled)`,
+        )
+        .first()
+        .click()
+
+      await expect(firstTimeItem).not.toHaveClass(/react-datepicker__time-list-item--disabled/)
     })
   })
 
