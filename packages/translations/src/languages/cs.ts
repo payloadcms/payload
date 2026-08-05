@@ -570,6 +570,7 @@ export const csTranslations: DefaultTranslationsObject = {
     addFile: 'Přidat soubor',
     addFiles: 'Přidat soubory',
     bulkUpload: 'Hromadné nahrání',
+    copyLinkToFile: 'Zkopírovat odkaz na soubor',
     crop: 'Ořez',
     cropToolDescription:
       'Přetáhněte rohy vybrané oblasti, nakreslete novou oblast nebo upravte níže uvedené hodnoty.',

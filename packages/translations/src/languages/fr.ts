@@ -587,6 +587,7 @@ export const frTranslations: DefaultTranslationsObject = {
     addFile: 'Ajouter un fichier',
     addFiles: 'Ajouter des fichiers',
     bulkUpload: 'Téléchargement en masse',
+    copyLinkToFile: 'Copier le lien vers le fichier',
     crop: 'Recadrer',
     cropToolDescription:
       'Faites glisser les coins de la zone sélectionnée, dessinez une nouvelle zone ou ajustez les valeurs ci-dessous.',

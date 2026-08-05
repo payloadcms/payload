@@ -577,6 +577,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     addFile: 'Legg til fil',
     addFiles: 'Legg til filer',
     bulkUpload: 'Bulk opplasting',
+    copyLinkToFile: 'Kopier lenke til fil',
     crop: 'Beskjær',
     cropToolDescription:
       'Dra hjørnene av det valgte området, tegn et nytt område eller juster verdiene nedenfor.',

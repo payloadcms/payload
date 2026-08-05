@@ -572,6 +572,7 @@ export const slTranslations: DefaultTranslationsObject = {
     addFile: 'Dodaj datoteko',
     addFiles: 'Dodaj datoteke',
     bulkUpload: 'Množično nalaganje',
+    copyLinkToFile: 'Kopiraj povezavo do datoteke',
     crop: 'Obreži',
     cropToolDescription:
       'Povlecite kote izbranega območja, narišite novo območje ali prilagodite vrednosti spodaj.',

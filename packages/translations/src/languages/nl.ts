@@ -582,6 +582,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     addFile: 'Bestand toevoegen',
     addFiles: 'Bestanden toevoegen',
     bulkUpload: 'Bulk Upload',
+    copyLinkToFile: 'Kopieer link naar bestand',
     crop: 'Bijsnijden',
     cropToolDescription:
       'Sleep de hoeken van het geselecteerde gebied, teken een nieuw gebied of pas de waarden hieronder aan.',

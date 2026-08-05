@@ -566,6 +566,7 @@ export const faTranslations: DefaultTranslationsObject = {
     addFile: 'افزودن فایل',
     addFiles: 'افزودن فایل‌ها',
     bulkUpload: 'آپلود گروهی',
+    copyLinkToFile: 'کپی پیوند به فایل',
     crop: 'برش',
     cropToolDescription:
       'گوشه‌های ناحیه انتخاب شده را بکشید، یک ناحیه جدید رسم کنید یا مقادیر زیر را تنظیم نمایید.',

@@ -563,6 +563,7 @@ export const arTranslations: DefaultTranslationsObject = {
     addFile: 'إضافة ملف',
     addFiles: 'أضف ملفات',
     bulkUpload: 'تحميل بالجملة',
+    copyLinkToFile: 'نسخ الرابط إلى الملف',
     crop: 'محصول',
     cropToolDescription: 'اسحب الزوايا المحددة للمنطقة، رسم منطقة جديدة أو قم بضبط القيم أدناه.',
     download: 'تحميل',

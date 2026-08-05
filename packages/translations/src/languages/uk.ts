@@ -570,6 +570,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     addFile: 'Додати файл',
     addFiles: 'Додати файли',
     bulkUpload: 'Масове завантаження',
+    copyLinkToFile: 'Скопіювати посилання на файл',
     crop: 'Обрізати',
     cropToolDescription:
       'Перетягніть кути обраної області, намалюйте нову область або скоригуйте значення нижче.',

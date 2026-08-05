@@ -574,6 +574,7 @@ export const daTranslations: DefaultTranslationsObject = {
     addFile: 'Tilføj fil',
     addFiles: 'Tilføj Filer',
     bulkUpload: 'Masseupload',
+    copyLinkToFile: 'Kopier link til fil',
     crop: 'Beskær',
     cropToolDescription:
       'Træk i hjørnerne af det valgte område, tegn et nyt område eller juster værdierne nedenfor.',

@@ -573,6 +573,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     addFile: 'Додај датотеку',
     addFiles: 'Dodaj datoteke',
     bulkUpload: 'Masovno otpremanje',
+    copyLinkToFile: 'Kopiraj vezu ka fajlu',
     crop: 'Исеците слику',
     cropToolDescription:
       'Превуците углове изабраног подручја, нацртајте ново подручје или прилагодите вредности испод.',

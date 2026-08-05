@@ -583,6 +583,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     addFile: 'ফাইল যোগ করুন',
     addFiles: 'ফাইলগুলি যোগ করুন',
     bulkUpload: 'বাল্ক আপলোড',
+    copyLinkToFile: 'ফাইলের লিঙ্ক কপি করুন',
     crop: 'ক্রপ করুন',
     cropToolDescription:
       'নির্বাচিত অঞ্চলের কোণগুলি টানুন, একটি নতুন অঞ্চল আঁকুন বা নিচের মানগুলি সামঞ্জস্য করুন।',

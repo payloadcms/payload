@@ -580,6 +580,7 @@ export const roTranslations: DefaultTranslationsObject = {
     addFile: 'Adaugă fișier',
     addFiles: 'Adăugați fișiere',
     bulkUpload: 'Încărcare în masă',
+    copyLinkToFile: 'Copiați linkul către fișier',
     crop: 'Cultură',
     cropToolDescription:
       'Trageți colțurile zonei selectate, desenați o nouă zonă sau ajustați valorile de mai jos.',

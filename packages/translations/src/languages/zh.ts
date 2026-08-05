@@ -549,6 +549,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     addFile: '添加文件',
     addFiles: '添加文件',
     bulkUpload: '批量上传',
+    copyLinkToFile: '复制文件链接',
     crop: '裁剪',
     cropToolDescription: '拖动所选区域的角落，绘制一个新区域或调整以下的值。',
     download: '下载',

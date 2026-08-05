@@ -576,6 +576,7 @@ export const svTranslations: DefaultTranslationsObject = {
     addFile: 'Lägg till fil',
     addFiles: 'Lägg till filer',
     bulkUpload: 'Massuppladdning',
+    copyLinkToFile: 'Kopiera länk till fil',
     crop: 'Beskär',
     cropToolDescription:
       'Dra i hörnen på det valda området, rita ett nytt område eller justera värdena nedan.',

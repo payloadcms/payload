@@ -572,6 +572,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     addFile: 'Pievienot failu',
     addFiles: 'Pievienot failus',
     bulkUpload: 'Masveida augšupielāde',
+    copyLinkToFile: 'Kopēt saiti uz failu',
     crop: 'Apgriezt',
     cropToolDescription:
       'Velciet atlasītā apgabala stūrus, uzzīmējiet jaunu apgabalu vai pielāgojiet vērtības zemāk.',

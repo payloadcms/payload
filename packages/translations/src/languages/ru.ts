@@ -579,6 +579,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     addFile: 'Добавить файл',
     addFiles: 'Добавить файлы',
     bulkUpload: 'Массовая загрузка',
+    copyLinkToFile: 'Скопировать ссылку на файл',
     crop: 'Обрезать',
     cropToolDescription:
       'Перетащите углы выбранной области, нарисуйте новую область или отрегулируйте значения ниже.',

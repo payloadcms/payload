@@ -580,6 +580,7 @@ export const itTranslations: DefaultTranslationsObject = {
     addFile: 'Aggiungi file',
     addFiles: 'Aggiungi File',
     bulkUpload: 'Caricamento in Blocco',
+    copyLinkToFile: 'Copia link al file',
     crop: 'Raccolto',
     cropToolDescription:
       "Trascina gli angoli dell'area selezionata, disegna una nuova area o regola i valori qui sotto.",

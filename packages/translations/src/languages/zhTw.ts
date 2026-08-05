@@ -547,6 +547,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     addFile: '新增檔案',
     addFiles: '新增多個檔案',
     bulkUpload: '大量上傳',
+    copyLinkToFile: '複製檔案連結',
     crop: '裁剪',
     cropToolDescription: '拖曳選取區域的角落、重新繪製區域或調整下方數值以進行裁剪。',
     download: '下載',

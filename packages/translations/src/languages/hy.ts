@@ -578,6 +578,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     addFile: 'Ավելացնել ֆայլ',
     addFiles: 'Ավելացնել ֆայլեր',
     bulkUpload: 'Զանգվածային վերբեռնում',
+    copyLinkToFile: 'Պատճենել հղումը ֆայլին',
     crop: 'Կտրել',
     cropToolDescription:
       'Քաշեք ընտրված տարածքի անկյունները, նշեք նոր տարածք կամ կարգավորեք ստորև նշված արժեքները։',

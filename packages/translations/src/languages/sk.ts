@@ -571,6 +571,7 @@ export const skTranslations: DefaultTranslationsObject = {
     addFile: 'Pridať súbor',
     addFiles: 'Pridať súbory',
     bulkUpload: 'Hromadné nahranie',
+    copyLinkToFile: 'Kopírovať odkaz na súbor',
     crop: 'Orezať',
     cropToolDescription:
       'Potiahnite rohy vybranej oblasti, nakreslite novú oblasť alebo upravte hodnoty nižšie.',

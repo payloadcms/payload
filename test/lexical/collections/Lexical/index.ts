@@ -378,7 +378,7 @@ export const getLexicalFieldsCollection: (args: {
         hooks: {
           afterRead: [
             async ({ data, req, siblingData }) => {
-              const yourSanitizedEditorConfig = await sanitizeServerEditorConfig(
+              const yourSanitizedEditorConfig = sanitizeServerEditorConfig(
                 editorConfig,
                 req.payload.config,
               )
