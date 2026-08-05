@@ -78,10 +78,10 @@ export function BulkUploadModal() {
   const {
     modalSlug,
     onCancel,
+    setCurrentActivePath,
     setInitialFiles,
     setInitialForms,
     setOnCancel,
-    setOnSuccess,
     setParentID,
     setSelectableCollections,
     setSuccessfullyUploaded,
@@ -116,7 +116,7 @@ export function BulkUploadModal() {
         setInitialFiles(undefined)
         setInitialForms(undefined)
         setOnCancel(() => () => null)
-        setOnSuccess(() => () => null)
+        setCurrentActivePath(undefined)
         setSelectableCollections(null)
         setSuccessfullyUploaded(false)
       }
@@ -147,6 +147,14 @@ export function BulkUploadModal() {
 
 export type BulkUploadContext = {
   collectionSlug: CollectionSlug
+  /**
+   * The field path (or collection slug, for the list view's bulk upload) that currently owns the
+   * open bulk upload modal. Used to look up the correct entry in the onSuccess map below, so that
+   * when multiple hasMany upload fields are mounted on the same page (e.g. a top-level gallery
+   * plus per-row galleries inside an array field), an upload always resolves against the field
+   * whose "Create New" button was actually clicked — not whichever field's effect last ran.
+   */
+  currentActivePath: string
   initialFiles: FileList
   /**
    * Like initialFiles, but allows manually providing initial form state or the form ID for each file
@@ -173,13 +181,14 @@ export type BulkUploadContext = {
    */
   selectableCollections?: null | string[]
   setCollectionSlug: (slug: string) => void
+  setCurrentActivePath: (path: string) => void
   setInitialFiles: (files: FileList) => void
   setInitialForms: (
     forms: ((forms: InitialForms | undefined) => InitialForms | undefined) | InitialForms,
   ) => void
   setMaxFiles: (maxFiles: number) => void
   setOnCancel: (onCancel: BulkUploadContext['onCancel']) => void
-  setOnSuccess: (onSuccess: BulkUploadContext['onSuccess']) => void
+  setOnSuccess: (path: string, onSuccess: BulkUploadContext['onSuccess']) => void
   setParentID: (parentID: number | string | undefined) => void
   /**
    * Set the collections that can be selected in the collection dropdown (if applicable)
@@ -193,6 +202,7 @@ export type BulkUploadContext = {
 
 const Context = React.createContext<BulkUploadContext>({
   collectionSlug: '',
+  currentActivePath: undefined,
   initialFiles: undefined,
   initialForms: [],
   maxFiles: undefined,
@@ -202,6 +212,7 @@ const Context = React.createContext<BulkUploadContext>({
   parentID: undefined,
   selectableCollections: null,
   setCollectionSlug: () => null,
+  setCurrentActivePath: () => null,
   setInitialFiles: () => null,
   setInitialForms: () => null,
   setMaxFiles: () => null,
@@ -222,7 +233,9 @@ export function BulkUploadProvider({
   const [selectableCollections, setSelectableCollections] = React.useState<null | string[]>(null)
   const [collection, setCollection] = React.useState<string>()
   const [parentID, setParentID] = React.useState<number | string | undefined>(undefined)
-  const [onSuccessFunction, setOnSuccessFunction] = React.useState<BulkUploadContext['onSuccess']>()
+  const [currentActivePath, setCurrentActivePath] = React.useState<string>(undefined)
+  const [onSuccessFunctionMap, setOnSuccessFunctionMap] =
+    React.useState<Record<string, BulkUploadContext['onSuccess']>>()
   const [onCancelFunction, setOnCancelFunction] = React.useState<BulkUploadContext['onCancel']>()
   const [initialFiles, setInitialFiles] = React.useState<FileList>(undefined)
   const [initialForms, setInitialForms] = React.useState<InitialForms>(undefined)
@@ -231,9 +244,12 @@ export function BulkUploadProvider({
 
   const modalSlug = `${modalSlugPrefix ? `${modalSlugPrefix}-` : ''}${useBulkUploadModalSlug()}`
 
-  const setOnSuccess: BulkUploadContext['setOnSuccess'] = (onSuccess) => {
-    setOnSuccessFunction(() => onSuccess)
-  }
+  const setOnSuccess: BulkUploadContext['setOnSuccess'] = React.useCallback((path, onSuccess) => {
+    setOnSuccessFunctionMap((prev) => ({
+      ...prev,
+      [path]: onSuccess,
+    }))
+  }, [])
   const setOnCancel: BulkUploadContext['setOnCancel'] = (onCancel) => {
     setOnCancelFunction(() => onCancel)
   }
@@ -242,6 +258,7 @@ export function BulkUploadProvider({
     <Context
       value={{
         collectionSlug: collection,
+        currentActivePath,
         initialFiles,
         initialForms,
         maxFiles,
@@ -252,6 +269,8 @@ export function BulkUploadProvider({
           }
         },
         onSuccess: (newDocs, errorCount) => {
+          const onSuccessFunction =
+            currentActivePath !== undefined ? onSuccessFunctionMap?.[currentActivePath] : undefined
           if (typeof onSuccessFunction === 'function') {
             onSuccessFunction(newDocs, errorCount)
           }
@@ -259,6 +278,7 @@ export function BulkUploadProvider({
         parentID,
         selectableCollections,
         setCollectionSlug: setCollection,
+        setCurrentActivePath,
         setInitialFiles,
         setInitialForms,
         setMaxFiles,
