@@ -148,6 +148,7 @@ export const frTranslations: DefaultTranslationsObject = {
     emailOrPasswordIncorrect: 'L’adresse e-mail ou le mot de passe fourni est incorrect.',
     failedToResetLayout: 'Échec de la réinitialisation de la mise en page.',
     failedToSaveLayout: "Échec de l'enregistrement de la disposition.",
+    fileFetchFailed: 'Échec de la récupération du fichier.',
     followingFieldsInvalid_one: 'Le champ suivant n’est pas valide :',
     followingFieldsInvalid_other: 'Les champs suivants ne sont pas valides :',
     incorrectCollection: 'Collection incorrecte',
@@ -166,6 +167,7 @@ export const frTranslations: DefaultTranslationsObject = {
     missingIDOfDocument: 'Il manque l’identifiant du document à mettre à jour.',
     missingIDOfVersion: 'Il manque l’identifiant de la version.',
     missingRequiredData: 'Données requises manquantes.',
+    noFileFoundInClipboard: 'Aucun fichier trouvé dans le presse-papiers.',
     noFilesUploaded: 'Aucun fichier n’a été téléversé.',
     noMatchedField: 'Aucun champ correspondant n’a été trouvé pour "{{label}}"',
     notAllowedToAccessPage: 'Vous n’êtes pas autorisé à accéder à cette page.',
@@ -181,6 +183,7 @@ export const frTranslations: DefaultTranslationsObject = {
     tokenNotProvided: 'Jeton non fourni.',
     unableToCopy: 'Impossible de copier.',
     unableToDeleteCount: 'Impossible de supprimer {{count}} sur {{total}} {{label}}.',
+    unableToReadClipboard: 'Impossible de lire à partir du presse-papiers.',
     unableToReindexCollection:
       'Erreur lors de la réindexation de la collection {{collection}}. Opération annulée.',
     unableToUpdateCount: 'Impossible de mettre à jour {{count}} sur {{total}} {{label}}.',
@@ -191,6 +194,7 @@ export const frTranslations: DefaultTranslationsObject = {
       'Un problème est survenu lors de l’annulation de la publication de ce document.',
     unspecific: 'Une erreur est survenue.',
     unverifiedEmail: 'Veuillez vérifier votre e-mail avant de vous connecter.',
+    urlNotAllowed: 'L’URL fournie n’est pas autorisée.',
     userEmailAlreadyRegistered: "Un utilisateur avec l'email donné est déjà enregistré.",
     userLocked:
       'Cet utilisateur est verrouillé en raison d’un trop grand nombre de tentatives de connexion infructueuses.',
