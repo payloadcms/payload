@@ -16,7 +16,7 @@ export function buildAgentConfigFile(agentType: AgentType): {
 } {
   const { configFile } = getAgentChoice(agentType)
 
-  const content = `# AI Agent\n\nFor any Payload-related work, reference the skill at \`${SKILL_PATH}/\`.\n`
+  const content = `# AI Agent\n\nFor any Payload-related work, reference the skill at \`${SKILL_PATH}/SKILL.md\`.\n`
 
   return { content, fileName: configFile }
 }

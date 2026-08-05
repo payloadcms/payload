@@ -26,7 +26,7 @@ describe('buildAgentConfigFile', () => {
     (agent) => {
       const { content } = buildAgentConfigFile(agent)
 
-      expect(content).toContain('node_modules/payload/skills/payload/')
+      expect(content).toContain('node_modules/payload/skills/payload/SKILL.md')
       expect(content).not.toContain('.claude/skills')
     },
   )
