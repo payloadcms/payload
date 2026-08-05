@@ -102,7 +102,10 @@ export const seed = async (_payload: Payload) => {
   })
 
   // create an upload with image.png
-  const imageFilePath = path.resolve(process.env.ROOT_DIR ?? process.cwd(), 'joins/image.png')
+  const imageFilePath = path.resolve(
+    process.env.ROOT_DIR ?? path.resolve(process.cwd(), 'test'),
+    'joins/image.png',
+  )
   const imageFile = await getFileByPath(imageFilePath)
   const { id: uploadedImage } = await _payload.create({
     collection: uploadsSlug,
