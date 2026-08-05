@@ -146,6 +146,7 @@ import { fieldAffectsData, type FlattenedBlock } from './fields/config/types.js'
 import { getJobsLocalAPI } from './queues/localAPI.js'
 import { _internal_jobSystemGlobals } from './queues/utilities/getCurrentDate.js'
 import { formatAdminURL } from './utilities/formatAdminURL.js'
+import { getNextJsHMRURL } from './utilities/getNextJsHMRURL.js'
 import { isNextBuild } from './utilities/isNextBuild.js'
 import { getLogger } from './utilities/logger.js'
 import { serverInit as serverInitTelemetry } from './utilities/telemetry/events/serverInit.js'
@@ -1232,18 +1233,7 @@ export const getPayload = async (
       process.env.DISABLE_PAYLOAD_HMR !== 'true'
     ) {
       try {
-        const port = process.env.PORT || '3000'
-        const hasHTTPS =
-          process.env.USE_HTTPS === 'true' || process.argv.includes('--experimental-https')
-        const protocol = hasHTTPS ? 'wss' : 'ws'
-
-        const path = '/_next/webpack-hmr'
-        // The __NEXT_ASSET_PREFIX env variable is set for both assetPrefix and basePath (tested in Next.js 15.1.6)
-        const prefix = process.env.__NEXT_ASSET_PREFIX ?? ''
-
-        cached.ws = new WebSocket(
-          process.env.PAYLOAD_HMR_URL_OVERRIDE ?? `${protocol}://localhost:${port}${prefix}${path}`,
-        )
+        cached.ws = new WebSocket(getNextJsHMRURL())
 
         cached.ws.onmessage = (event) => {
           if (cached.reload instanceof Promise) {
