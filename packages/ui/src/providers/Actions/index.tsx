@@ -1,6 +1,6 @@
 'use client'
 
-import React, { createContext, use, useState } from 'react'
+import React, { createContext, use, useEffect, useRef, useState } from 'react'
 
 type ActionsContextType = {
   Actions: {
@@ -21,8 +21,15 @@ export const ActionsProvider: React.FC<{
     [key: string]: React.ReactNode
   }
   readonly children: React.ReactNode
-}> = ({ Actions, children }) => {
+  readonly viewKey?: string
+}> = ({ Actions, children, viewKey }) => {
   const [viewActions, setViewActions] = useState(Actions)
+  const actionsRef = useRef(Actions)
+  actionsRef.current = Actions
+
+  useEffect(() => {
+    setViewActions(actionsRef.current)
+  }, [viewKey])
 
   return (
     <ActionsContext

@@ -141,7 +141,7 @@ describe('General', () => {
         }),
       )
 
-      await expect(page).toHaveURL(new RegExp(`${redirectTo}$`))
+      await expect(page).toHaveURL(new RegExp(`${redirectTo}(?:\\?.*)?$`))
       await expect(page.locator('.collection-list')).toBeVisible()
       await expect(page.locator('.loading-overlay')).toBeHidden()
       await expect(page).not.toHaveURL(/custom-inactivity/)

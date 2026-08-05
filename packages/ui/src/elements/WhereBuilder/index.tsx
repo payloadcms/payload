@@ -136,6 +136,13 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
 
         // Skip if nothing changed
         const existingValue = existingCondition[String(field.fieldPath)]?.[validOperator]
+        if (
+          type === 'value' &&
+          (existingValue === '' || existingValue === null ? undefined : existingValue) === value
+        ) {
+          return
+        }
+
         if (typeof existingValue !== 'undefined' && existingValue === value) {
           return
         }
