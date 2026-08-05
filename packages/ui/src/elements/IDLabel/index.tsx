@@ -11,11 +11,13 @@ import './index.css'
 
 const baseClass = 'id-label'
 
-export const IDLabel: React.FC<{ className?: string; id: string; prefix?: string }> = ({
-  id,
-  className,
-  prefix = 'ID',
-}) => {
+export const IDLabel: React.FC<{
+  className?: string
+  id: number | string
+  /** Set when the label is already wrapped in a link by a parent, e.g. a linked list view cell. */
+  isLink?: boolean
+  prefix?: string
+}> = ({ id, className, isLink, prefix = 'ID' }) => {
   const {
     config: {
       routes: { admin: adminRoute },
@@ -30,6 +32,10 @@ export const IDLabel: React.FC<{ className?: string; id: string; prefix?: string
   // Only render as link if we're inside a drawer and have document context
   const shouldRenderLink = drawerDepth > 0 && (collectionSlug || globalSlug)
 
+  const classes = [baseClass, (isLink || shouldRenderLink) && `${baseClass}--is-link`, className]
+    .filter(Boolean)
+    .join(' ')
+
   if (shouldRenderLink) {
     const docPath = formatAdminURL({
       adminRoute,
@@ -37,7 +43,7 @@ export const IDLabel: React.FC<{ className?: string; id: string; prefix?: string
     })
 
     return (
-      <div className={[baseClass, className].filter(Boolean).join(' ')} title={id}>
+      <div className={classes} title={String(id)}>
         <span className={`${baseClass}__prefix`}>{prefix}</span>
         <Link className={`${baseClass}__link`} href={docPath}>
           {sanitizedID}
@@ -47,7 +53,7 @@ export const IDLabel: React.FC<{ className?: string; id: string; prefix?: string
   }
 
   return (
-    <div className={[baseClass, className].filter(Boolean).join(' ')} title={id}>
+    <div className={classes} title={String(id)}>
       <span className={`${baseClass}__prefix`}>{prefix}</span>
       <span className={`${baseClass}__value`}>{sanitizedID}</span>
     </div>

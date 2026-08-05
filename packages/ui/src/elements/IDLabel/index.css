@@ -18,6 +18,10 @@
     white-space: nowrap;
   }
 
+  .id-label--is-link:hover {
+    background: var(--color-bg-secondary-hover);
+  }
+
   .id-label__prefix {
     color: var(--color-text-secondary);
   }

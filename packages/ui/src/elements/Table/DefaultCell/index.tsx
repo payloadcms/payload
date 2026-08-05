@@ -9,9 +9,9 @@ import { useConfig } from '../../../providers/Config/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { getDisplayedFieldValue } from '../../../utilities/getDisplayedFieldValue.js'
 import { isValidReactElement } from '../../../utilities/isValidReactElement.js'
+import { IDLabel } from '../../IDLabel/index.js'
 import { Link } from '../../Link/index.js'
 import { HierarchyCell } from './fields/Hierarchy/index.js'
-import { IdCell } from './fields/Id/index.js'
 import { cellComponents } from './fields/index.js'
 import { StatusCell } from './fields/Status/index.js'
 
@@ -93,7 +93,7 @@ export const DefaultCell: React.FC<DefaultCellComponentProps> = (props) => {
   if (fieldIsID(field)) {
     return (
       <WrapElement {...wrapElementProps}>
-        <IdCell id={cellData} />
+        <IDLabel id={cellData} isLink={WrapElement !== 'span'} />
       </WrapElement>
     )
   }
