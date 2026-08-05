@@ -6,7 +6,6 @@ import { fileURLToPath } from 'node:url'
 import path from 'path'
 
 import type {
-  AgentType,
   CliArgs,
   DbDetails,
   PackageManager,
@@ -20,7 +19,7 @@ import {
   DEFAULT_PAYLOAD_VERSION_TAG,
   resolvePackageVersion,
 } from '../utils/resolvePackageVersion.js'
-import { buildAgentConfigFile } from './agent-config.js'
+import { buildAgentConfigFiles } from './agent-config.js'
 import { configurePayloadConfig } from './configure-payload-config.js'
 import { configurePluginProject } from './configure-plugin-project.js'
 import { ensurePnpmBuildApprovals } from './configure-pnpm-builds.js'
@@ -81,7 +80,6 @@ type TemplateOrExample =
 
 export async function createProject(
   args: {
-    agentType?: AgentType
     cliArgs: CliArgs
     dbDetails?: DbDetails
     packageManager: PackageManager
@@ -89,7 +87,7 @@ export async function createProject(
     projectName: string
   } & TemplateOrExample,
 ): Promise<void> {
-  const { agentType, cliArgs, dbDetails, packageManager, projectDir, projectName } = args
+  const { cliArgs, dbDetails, packageManager, projectDir, projectName } = args
 
   if (cliArgs['--dry-run']) {
     debug(`Dry run: Creating project in ${chalk.green(projectDir)}`)
@@ -172,9 +170,10 @@ export async function createProject(
     template: 'template' in args ? args.template : undefined,
   })
 
-  if (agentType) {
-    const { content, fileName } = buildAgentConfigFile(agentType)
-    await fse.writeFile(path.resolve(projectDir, fileName), content)
+  if (!cliArgs['--no-agent']) {
+    for (const { content, fileName } of buildAgentConfigFiles()) {
+      await fse.writeFile(path.resolve(projectDir, fileName), content)
+    }
   }
 
   if (!cliArgs['--no-deps']) {

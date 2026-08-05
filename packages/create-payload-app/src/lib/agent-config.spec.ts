@@ -1,33 +1,25 @@
 import { describe, expect, it } from 'vitest'
 
-import { buildAgentConfigFile } from './agent-config.js'
+import { buildAgentConfigFiles } from './agent-config.js'
 
-describe('buildAgentConfigFile', () => {
-  it('should write CLAUDE.md for the claude agent', () => {
-    expect(buildAgentConfigFile('claude').fileName).toBe('CLAUDE.md')
+describe('buildAgentConfigFiles', () => {
+  it('should write both AGENTS.md and CLAUDE.md', () => {
+    const fileNames = buildAgentConfigFiles().map((file) => file.fileName)
+
+    expect(fileNames).toEqual(['AGENTS.md', 'CLAUDE.md'])
   })
 
-  it.each(['codex', 'cursor'] as const)('should write AGENTS.md for %s', (agent) => {
-    expect(buildAgentConfigFile(agent).fileName).toBe('AGENTS.md')
+  it('should point AGENTS.md at the skill inside node_modules', () => {
+    const agents = buildAgentConfigFiles().find((file) => file.fileName === 'AGENTS.md')
+
+    expect(agents?.content).toContain('# AI Agent')
+    expect(agents?.content).toContain('node_modules/payload/skills/payload/SKILL.md')
+    expect(agents?.content).not.toContain('.claude/skills')
   })
 
-  it.each(['claude', 'codex', 'cursor'] as const)(
-    'should use an agent-neutral heading for %s',
-    (agent) => {
-      const { content } = buildAgentConfigFile(agent)
+  it('should import AGENTS.md from CLAUDE.md rather than duplicating it', () => {
+    const claude = buildAgentConfigFiles().find((file) => file.fileName === 'CLAUDE.md')
 
-      expect(content).toContain('# AI Agent')
-      expect(content).not.toContain('Claude Code')
-    },
-  )
-
-  it.each(['claude', 'codex', 'cursor'] as const)(
-    'should point %s at the skill inside node_modules rather than a local copy',
-    (agent) => {
-      const { content } = buildAgentConfigFile(agent)
-
-      expect(content).toContain('node_modules/payload/skills/payload/SKILL.md')
-      expect(content).not.toContain('.claude/skills')
-    },
-  )
+    expect(claude?.content.trim()).toBe('@AGENTS.md')
+  })
 })

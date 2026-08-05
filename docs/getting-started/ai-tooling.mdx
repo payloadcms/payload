@@ -30,16 +30,22 @@ needs rather than loading everything up front. Those reference docs cover:
 
 ## Setup
 
-New projects created with `create-payload-app` are configured automatically — the CLI asks
-which assistant you use and writes the correct file for you.
+New projects created with `create-payload-app` are configured automatically. Pass
+`--no-agent` to skip it.
 
-For an existing project, add this to your `CLAUDE.md` (Claude Code) or `AGENTS.md` (Codex,
-Cursor) at the project root:
+For an existing project, add `AGENTS.md` at the project root:
 
 ```md
 # AI Agent
 
 For any Payload-related work, reference the skill at `node_modules/payload/skills/payload/SKILL.md`.
+```
+
+Claude Code reads `CLAUDE.md` rather than `AGENTS.md`. Add a `CLAUDE.md` that imports it,
+so both read the same instructions:
+
+```md
+@AGENTS.md
 ```
 
 <Banner type="info">
