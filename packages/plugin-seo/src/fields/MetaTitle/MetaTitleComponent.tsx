@@ -5,6 +5,7 @@ import type { TextFieldClientProps } from 'payload'
 
 import {
   FieldLabel,
+  Spinner,
   TextInput,
   useConfig,
   useDocumentInfo,
@@ -16,7 +17,7 @@ import {
 } from '@payloadcms/ui'
 import { reduceToSerializableFields } from '@payloadcms/ui/shared'
 import { formatAdminURL } from 'payload/shared'
-import React, { useCallback } from 'react'
+import React, { useCallback, useState } from 'react'
 
 import type { PluginSEOTranslationKeys, PluginSEOTranslations } from '../../translations/index.js'
 import type { GenerateTitle } from '../../types.js'
@@ -66,6 +67,8 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
   const docInfo = useDocumentInfo()
   const { title } = useDocumentTitle()
 
+  const [isLoading, setIsLoading] = useState(false)
+
   const minLength = minLengthFromProps || minLengthDefault
   const maxLength = maxLengthFromProps || maxLengthDefault
 
@@ -74,38 +77,44 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
       return
     }
 
-    const endpoint = formatAdminURL({
-      apiRoute: api,
-      path: '/plugin-seo/generate-title',
-    })
+    setIsLoading(true)
 
-    const genTitleResponse = await fetch(endpoint, {
-      body: JSON.stringify({
-        id: docInfo.id,
-        collectionSlug: docInfo.collectionSlug,
-        doc: getData(),
-        docPermissions: docInfo.docPermissions,
-        globalSlug: docInfo.globalSlug,
-        hasPublishPermission: docInfo.hasPublishPermission,
-        hasSavePermission: docInfo.hasSavePermission,
-        initialData: docInfo.initialData,
-        initialState: reduceToSerializableFields(docInfo.initialState ?? {}),
-        locale: typeof locale === 'object' ? locale?.code : locale,
-        title,
-      } satisfies Omit<
-        Parameters<GenerateTitle>[0],
-        'collectionConfig' | 'globalConfig' | 'hasPublishedDoc' | 'req' | 'versionCount'
-      >),
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      method: 'POST',
-    })
+    try {
+      const endpoint = formatAdminURL({
+        apiRoute: api,
+        path: '/plugin-seo/generate-title',
+      })
 
-    const { result: generatedTitle } = await genTitleResponse.json()
+      const genTitleResponse = await fetch(endpoint, {
+        body: JSON.stringify({
+          id: docInfo.id,
+          collectionSlug: docInfo.collectionSlug,
+          doc: getData(),
+          docPermissions: docInfo.docPermissions,
+          globalSlug: docInfo.globalSlug,
+          hasPublishPermission: docInfo.hasPublishPermission,
+          hasSavePermission: docInfo.hasSavePermission,
+          initialData: docInfo.initialData,
+          initialState: reduceToSerializableFields(docInfo.initialState ?? {}),
+          locale: typeof locale === 'object' ? locale?.code : locale,
+          title,
+        } satisfies Omit
+          Parameters < GenerateTitle > [0],
+          'collectionConfig' | 'globalConfig' | 'hasPublishedDoc' | 'req' | 'versionCount'
+          >),
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        method: 'POST',
+      })
 
-    setValue(generatedTitle || '')
+      const { result: generatedTitle } = await genTitleResponse.json()
+
+      setValue(generatedTitle || '')
+    } finally {
+      setIsLoading(false)
+    }
   }, [
     hasGenerateTitleFn,
     api,
@@ -143,7 +152,8 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
             <React.Fragment>
               &nbsp; &mdash; &nbsp;
               <button
-                disabled={readOnly}
+                aria-busy={isLoading}
+                disabled={readOnly || isLoading}
                 onClick={() => {
                   void regenerateTitle()
                 }}
@@ -152,13 +162,13 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
                   backgroundColor: 'transparent',
                   border: 'none',
                   color: 'currentcolor',
-                  cursor: 'pointer',
+                  cursor: isLoading ? 'wait' : 'pointer',
                   padding: 0,
                   textDecoration: 'underline',
                 }}
                 type="button"
               >
-                {t('plugin-seo:autoGenerate')}
+                {isLoading ? <Spinner loadingText={null} size="sm" /> : t('plugin-seo:autoGenerate')}
               </button>
             </React.Fragment>
           )}
@@ -169,7 +179,7 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
           }}
         >
           {t('plugin-seo:lengthTipTitle', { maxLength, minLength })}
-          <a
+          
             href="https://developers.google.com/search/docs/advanced/appearance/title-link#page-titles"
             rel="noopener noreferrer"
             target="_blank"
@@ -209,6 +219,6 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
       >
         <LengthIndicator maxLength={maxLength} minLength={minLength} text={value} />
       </div>
-    </div>
+    </div >
   )
 }
