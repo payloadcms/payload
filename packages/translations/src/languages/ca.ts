@@ -485,6 +485,8 @@ export const caTranslations: DefaultTranslationsObject = {
     sorryNotFound: "Ho sento, no s'ha trobat la pàgina que busques.",
     sort: 'Ordena',
     sortByLabelDirection: 'Ordena per {{label}} {{direction}}',
+    sortByOrderToReorder:
+      'Per reordenar les files, primer les heu d\'ordenar per la columna "Order".',
     stayOnThisPage: 'Permaneix en aquesta pàgina',
     submissionSuccessful: 'Enviament exitós',
     submit: 'Envia',
@@ -574,6 +576,7 @@ export const caTranslations: DefaultTranslationsObject = {
     addFile: 'Afegir fitxer',
     addFiles: 'Afegir fitxers',
     bulkUpload: 'Carregar arxius massius',
+    copyLinkToFile: "Copia l'enllaç al fitxer",
     crop: 'Retallar',
     cropToolDescription:
       'Arrossega les cantonades de l’àrea seleccionada, dibuixa una nova àrea o ajusta els valors a continuació.',

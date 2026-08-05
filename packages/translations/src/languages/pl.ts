@@ -480,6 +480,8 @@ export const plTranslations: DefaultTranslationsObject = {
     sorryNotFound: 'Przepraszamy — nie ma nic, co odpowiadałoby twojemu zapytaniu.',
     sort: 'Sortuj',
     sortByLabelDirection: 'Sortuj według {{label}} {{direction}}',
+    sortByOrderToReorder:
+      'Aby zmienić kolejność wierszy, należy najpierw posortować je według kolumny "Order".',
     stayOnThisPage: 'Pozostań na stronie',
     submissionSuccessful: 'Zgłoszenie zakończone powodzeniem.',
     submit: 'Zatwierdź',
@@ -569,6 +571,7 @@ export const plTranslations: DefaultTranslationsObject = {
     addFile: 'Dodaj plik',
     addFiles: 'Dodaj pliki',
     bulkUpload: 'Załaduj masowo',
+    copyLinkToFile: 'Kopiuj link do pliku',
     crop: 'Przytnij',
     cropToolDescription:
       'Przeciągnij narożniki wybranego obszaru, narysuj nowy obszar lub dostosuj poniższe wartości.',

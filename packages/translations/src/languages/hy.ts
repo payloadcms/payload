@@ -483,6 +483,8 @@ export const hyTranslations: DefaultTranslationsObject = {
     sorryNotFound: 'Ներողություն, Ձեր հարցմանը համապատասխան ոչինչ չկա։',
     sort: 'Տեսակավորել',
     sortByLabelDirection: 'Տեսակավորել ըստ {{label}} {{direction}}',
+    sortByOrderToReorder:
+      'Տողերը վերադասավորելու համար նախ անհրաժեշտ է դրանք դասավորել "Order" սյան միջոցով:',
     stayOnThisPage: 'Մնալ այս էջում',
     submissionSuccessful: 'Հայտը հաջողությամբ ուղարկվել է։',
     submit: 'Հաստատել',
@@ -574,6 +576,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     addFile: 'Ավելացնել ֆայլ',
     addFiles: 'Ավելացնել ֆայլեր',
     bulkUpload: 'Զանգվածային վերբեռնում',
+    copyLinkToFile: 'Պատճենել հղումը ֆայլին',
     crop: 'Կտրել',
     cropToolDescription:
       'Քաշեք ընտրված տարածքի անկյունները, նշեք նոր տարածք կամ կարգավորեք ստորև նշված արժեքները։',

@@ -481,6 +481,8 @@ export const daTranslations: DefaultTranslationsObject = {
     sorryNotFound: 'Beklager—der er intet, der svarer til din handling.',
     sort: 'Sorter',
     sortByLabelDirection: 'Sorter efter {{label}} {{direction}}',
+    sortByOrderToReorder:
+      'For at omarrangere rækkerne skal du først sortere dem efter kolonnen "Order".',
     stayOnThisPage: 'Forbliv på siden',
     submissionSuccessful: 'Indsendt.',
     submit: 'Send',
@@ -570,6 +572,7 @@ export const daTranslations: DefaultTranslationsObject = {
     addFile: 'Tilføj fil',
     addFiles: 'Tilføj Filer',
     bulkUpload: 'Masseupload',
+    copyLinkToFile: 'Kopier link til fil',
     crop: 'Beskær',
     cropToolDescription:
       'Træk i hjørnerne af det valgte område, tegn et nyt område eller juster værdierne nedenfor.',

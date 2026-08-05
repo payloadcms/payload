@@ -482,6 +482,8 @@ export const viTranslations: DefaultTranslationsObject = {
     sorryNotFound: 'Xin lỗi, không có kết quả nào tương ứng với yêu cầu của bạn.',
     sort: 'Sắp xếp',
     sortByLabelDirection: 'Sắp xếp theo {{label}} {{direction}}',
+    sortByOrderToReorder:
+      'Để sắp xếp lại các hàng, trước tiên bạn phải sắp xếp chúng theo cột "Order".',
     stayOnThisPage: 'Ở lại trang này',
     submissionSuccessful: 'Gửi thành công.',
     submit: 'Gửi',
@@ -571,6 +573,7 @@ export const viTranslations: DefaultTranslationsObject = {
     addFile: 'Thêm tập tin',
     addFiles: 'Thêm tệp',
     bulkUpload: 'Tải lên số lượng lớn',
+    copyLinkToFile: 'Sao chép liên kết đến tệp',
     crop: 'Cắt xén',
     cropToolDescription:
       'Kéo các góc của khu vực đã chọn, vẽ một khu vực mới hoặc điều chỉnh các giá trị dưới đây.',

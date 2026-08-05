@@ -483,6 +483,8 @@ export const idTranslations: DefaultTranslationsObject = {
     sorryNotFound: 'Maaf—tidak ada yang sesuai dengan permintaan Anda.',
     sort: 'Urutkan',
     sortByLabelDirection: 'Urutkan berdasarkan {{label}} {{direction}}',
+    sortByOrderToReorder:
+      'Untuk mengubah urutan baris, Anda harus terlebih dahulu mengurutkannya berdasarkan kolom "Order".',
     stayOnThisPage: 'Tetap di halaman ini',
     submissionSuccessful: 'Pengiriman Berhasil.',
     submit: 'Kirim',
@@ -574,6 +576,7 @@ export const idTranslations: DefaultTranslationsObject = {
     addFile: 'Tambah file',
     addFiles: 'Tambah file',
     bulkUpload: 'Unggah Massal',
+    copyLinkToFile: 'Salin tautan ke file',
     crop: 'Pangkas',
     cropToolDescription:
       'Seret sudut area yang dipilih, gambar area baru atau sesuaikan nilai di bawah ini.',

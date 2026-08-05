@@ -489,6 +489,8 @@ export const nlTranslations: DefaultTranslationsObject = {
     sorryNotFound: 'Sorry, er is niets dat overeen komt met uw verzoek.',
     sort: 'Sorteer',
     sortByLabelDirection: 'Sorteer op {{label}} {{direction}}',
+    sortByOrderToReorder:
+      'Om de rijen opnieuw te rangschikken, moet u ze eerst sorteren op de kolom "Order".',
     stayOnThisPage: 'Blijf op deze pagina',
     submissionSuccessful: 'Indiening succesvol.',
     submit: 'Indienen',
@@ -578,6 +580,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     addFile: 'Bestand toevoegen',
     addFiles: 'Bestanden toevoegen',
     bulkUpload: 'Bulk Upload',
+    copyLinkToFile: 'Kopieer link naar bestand',
     crop: 'Bijsnijden',
     cropToolDescription:
       'Sleep de hoeken van het geselecteerde gebied, teken een nieuw gebied of pas de waarden hieronder aan.',

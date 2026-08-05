@@ -82,9 +82,9 @@ export const RootProvider: React.FC<Props> = ({
 
   return (
     <ClickOutsideProvider>
-      <RouterAdapter>
-        <ServerFunctionsProvider serverFunction={serverFunction}>
-          <RouteTransitionProvider>
+      <RouteTransitionProvider>
+        <RouterAdapter>
+          <ServerFunctionsProvider serverFunction={serverFunction}>
             <RouteCache
               cachingEnabled={process.env.NEXT_PUBLIC_ENABLE_ROUTER_CACHE_REFRESH === 'true'}
             >
@@ -148,9 +148,9 @@ export const RootProvider: React.FC<Props> = ({
                 </ClientFunctionProvider>
               </ConfigProvider>
             </RouteCache>
-          </RouteTransitionProvider>
-        </ServerFunctionsProvider>
-      </RouterAdapter>
+          </ServerFunctionsProvider>
+        </RouterAdapter>
+      </RouteTransitionProvider>
       <ToastContainer config={config} />
     </ClickOutsideProvider>
   )

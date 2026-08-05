@@ -481,6 +481,8 @@ export const bgTranslations: DefaultTranslationsObject = {
     sorryNotFound: 'Съжаляваме-няма нищо, което да отговаря на търсенето ти.',
     sort: 'Сортирай',
     sortByLabelDirection: 'Сортирай по {{label}} {{direction}}',
+    sortByOrderToReorder:
+      'За да пренаредите редовете, първо трябва да ги сортирате по колоната "Order".',
     stayOnThisPage: 'Остани на тази страница',
     submissionSuccessful: 'Успешно подаване.',
     submit: 'Подай',
@@ -570,6 +572,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     addFile: 'Добавяне на файл',
     addFiles: 'Добави файлове',
     bulkUpload: 'Масово Качване',
+    copyLinkToFile: 'Копиране на връзка към файла',
     crop: 'Изрязване',
     cropToolDescription:
       'Плъзни ъглите на избраната област, избери нова област или коригирай стойностите по-долу.',

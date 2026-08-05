@@ -53,13 +53,13 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
       ],
     })
   }
-  return async ({ config, isRoot, parentIsLocalized }) => {
+  return ({ config, isRoot, parentIsLocalized }) => {
     let features: FeatureProviderServer<unknown, unknown, unknown>[] = []
     let resolvedFeatureMap: ResolvedServerFeatureMap
 
     let finalSanitizedEditorConfig: SanitizedServerEditorConfig // For server only
     if (!args || (!args.features && !args.lexical)) {
-      finalSanitizedEditorConfig = await getDefaultSanitizedEditorConfig({
+      finalSanitizedEditorConfig = getDefaultSanitizedEditorConfig({
         config,
         parentIsLocalized,
       })
@@ -68,7 +68,7 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
 
       resolvedFeatureMap = finalSanitizedEditorConfig.resolvedFeatureMap
     } else {
-      const result = await featuresInputToEditorConfig({
+      const result = featuresInputToEditorConfig({
         config,
         features: args?.features,
         isRoot,

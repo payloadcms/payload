@@ -483,6 +483,8 @@ export const ltTranslations: DefaultTranslationsObject = {
     sorryNotFound: 'Atsiprašau - nėra nieko, atitinkančio jūsų užklausą.',
     sort: 'Rūšiuoti',
     sortByLabelDirection: 'Rūšiuoti pagal {{label}} {{direction}}',
+    sortByOrderToReorder:
+      'Norėdami pertvarkyti eilutes, pirmiausia turite jas surikiuoti pagal „Order“ stulpelį.',
     stayOnThisPage: 'Likite šiame puslapyje',
     submissionSuccessful: 'Pateikimas sėkmingas.',
     submit: 'Pateikti',
@@ -572,6 +574,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     addFile: 'Pridėti failą',
     addFiles: 'Pridėti failus',
     bulkUpload: 'Masinis įkėlimas',
+    copyLinkToFile: 'Kopijuoti nuorodą į failą',
     crop: 'Pasėlis',
     cropToolDescription:
       'Temkite pasirinktos srities kampus, nubrėžkite naują sritį arba koreguokite žemiau esančias reikšmes.',

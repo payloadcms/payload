@@ -479,6 +479,8 @@ export const slTranslations: DefaultTranslationsObject = {
     sorryNotFound: 'Oprostite - ničesar ni mogoče najti, kar bi ustrezalo vaši zahtevi.',
     sort: 'Razvrsti',
     sortByLabelDirection: 'Razvrsti po {{label}} {{direction}}',
+    sortByOrderToReorder:
+      'Za ponovno razvrstitev vrstic jih morate najprej razvrstiti po stolpcu "Order".',
     stayOnThisPage: 'Ostani na tej strani',
     submissionSuccessful: 'Oddaja uspešna.',
     submit: 'Oddaj',
@@ -568,6 +570,7 @@ export const slTranslations: DefaultTranslationsObject = {
     addFile: 'Dodaj datoteko',
     addFiles: 'Dodaj datoteke',
     bulkUpload: 'Množično nalaganje',
+    copyLinkToFile: 'Kopiraj povezavo do datoteke',
     crop: 'Obreži',
     cropToolDescription:
       'Povlecite kote izbranega območja, narišite novo območje ali prilagodite vrednosti spodaj.',

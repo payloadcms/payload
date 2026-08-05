@@ -2,12 +2,13 @@ import type {
   SerializedEditorState,
   SerializedParagraphNode,
 } from '@payloadcms/richtext-lexical/lexical'
-import type { Config, PaginatedDocs, Payload } from 'payload'
+import type { Block, BlocksField, BlockSlug, Config, PaginatedDocs, Payload } from 'payload'
 
 import {
   BlocksFeature,
   buildEditorState,
   type DefaultNodeTypes,
+  type LexicalRichTextAdapter,
   lexicalEditor,
   LinkFeature,
   type SerializedBlockNode,
@@ -1274,6 +1275,42 @@ describe('Lexical', () => {
   })
 })
 
+describe('Lexical root editor sanitization', () => {
+  vitestIt('should resolve referenced blocks after their fields are sanitized', () => {
+    const config = {
+      blocks: [
+        {
+          slug: 'rootBlock',
+          fields: [{ name: 'title', type: 'text' }],
+        },
+      ],
+      collections: [
+        {
+          slug: 'articles',
+          fields: [{ name: 'content', type: 'richText' }],
+        },
+      ],
+      editor: lexicalEditor({
+        features: [BlocksFeature({ blocks: ['rootBlock' as BlockSlug] })],
+      }),
+    } as unknown as Config
+
+    const sanitizedConfig = sanitizeConfig(config)
+    const editor = sanitizedConfig.editor as LexicalRichTextAdapter
+    const blocksFeature = editor.editorConfig.resolvedFeatureMap.get('blocks')!
+    const [blocksField] = blocksFeature.nodes![0]!.getSubFields!({})!
+    const [block] = (blocksField as BlocksField).blocks as Block[]
+
+    expect(block!.fields).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: 'title' }),
+        expect.objectContaining({ name: 'id' }),
+        expect.objectContaining({ name: 'blockName' }),
+      ]),
+    )
+  })
+})
+
 describe('Lexical block interface generation', () => {
   // A lexical block's interface is named after its slug (PascalCase) or its `interfaceName`.
   // When two differently-shaped blocks resolve to the same name, each must get its own
@@ -1305,7 +1342,7 @@ describe('Lexical block interface generation', () => {
         ],
       } as unknown as Config
 
-      const sanitizedConfig = await sanitizeConfig(config)
+      const sanitizedConfig = sanitizeConfig(config)
       const { jsonSchema } = configToJSONSchema(sanitizedConfig, 'text')
       const defs = jsonSchema.$defs!
 
@@ -1353,7 +1390,7 @@ describe('Lexical link fields interface generation', () => {
         ],
       } as unknown as Config
 
-      const sanitizedConfig = await sanitizeConfig(config)
+      const sanitizedConfig = sanitizeConfig(config)
       const { jsonSchema } = configToJSONSchema(sanitizedConfig, 'text')
       const defs = jsonSchema.$defs!
 
@@ -1397,7 +1434,7 @@ describe('Lexical upload node type generation', () => {
       ],
     } as unknown as Config
 
-    const sanitizedConfig = await sanitizeConfig(config)
+    const sanitizedConfig = sanitizeConfig(config)
     // `generateTypes` only needs the ID type - avoid standing up a DB adapter.
     ;(sanitizedConfig as unknown as { db: { defaultIDType: string } }).db = {
       defaultIDType: 'text',
@@ -1436,7 +1473,7 @@ describe('Lexical inline block node type generation', () => {
       ],
     } as unknown as Config
 
-    const sanitizedConfig = await sanitizeConfig(config)
+    const sanitizedConfig = sanitizeConfig(config)
     // `generateTypes` only needs the ID type - avoid standing up a DB adapter.
     ;(sanitizedConfig as unknown as { db: { defaultIDType: string } }).db = {
       defaultIDType: 'text',

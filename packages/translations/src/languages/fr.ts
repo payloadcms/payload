@@ -492,6 +492,8 @@ export const frTranslations: DefaultTranslationsObject = {
     sorryNotFound: 'Désolé, rien ne correspond à votre demande.',
     sort: 'Trier',
     sortByLabelDirection: 'Trier par {{label}} {{direction}}',
+    sortByOrderToReorder:
+      "Pour réorganiser les lignes, vous devez d'abord les trier selon la colonne « Ordre ».",
     stayOnThisPage: 'Rester sur cette page',
     submissionSuccessful: 'Soumission réussie.',
     submit: 'Soumettre',
@@ -583,6 +585,7 @@ export const frTranslations: DefaultTranslationsObject = {
     addFile: 'Ajouter un fichier',
     addFiles: 'Ajouter des fichiers',
     bulkUpload: 'Téléchargement en masse',
+    copyLinkToFile: 'Copier le lien vers le fichier',
     crop: 'Recadrer',
     cropToolDescription:
       'Faites glisser les coins de la zone sélectionnée, dessinez une nouvelle zone ou ajustez les valeurs ci-dessous.',

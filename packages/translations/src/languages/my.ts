@@ -487,6 +487,8 @@ export const myTranslations: DefaultTranslationsObject = {
     sorryNotFound: 'ဝမ်းနည်းပါသည်။ သင်ရှာနေတဲ့ဟာ ဒီမှာမရှိပါ။',
     sort: 'အစဉ်လိုက်',
     sortByLabelDirection: 'အစဉ်အလိုက် စီမံခန့်ခွဲထားသည် {{label}} {{direction}}',
+    sortByOrderToReorder:
+      'အတန်းတန်းများကို ပြန်စီရန်အတွက် မူရင်းအားဖြင့် "Order" column ကို အရင်ဆုံး စီတန်းရပါမည်။',
     stayOnThisPage: 'ဒီမှာပဲ ဆက်နေမည်။',
     submissionSuccessful: 'သိမ်းဆည်းမှု အောင်မြင်ပါသည်။',
     submit: 'သိမ်းဆည်းမည်။',
@@ -578,6 +580,7 @@ export const myTranslations: DefaultTranslationsObject = {
     addFile: 'ဖိုင်ထည့်ပါ',
     addFiles: 'ဖိုင်များ ထည့်ပါ',
     bulkUpload: 'အစုလိုက် အပ်လုဒ်',
+    copyLinkToFile: 'ဖိုင်အတွက်လင့်ခ်ကို ကူးယူပါ',
     crop: 'သုန်း',
     cropToolDescription:
       'ရွေးထားသည့်ဧရိယာတွင်မွေးလျှက်မှုများကိုဆွဲပြီး, အသစ်တည်ပြီးသို့မဟုတ်အောက်ပါတ',

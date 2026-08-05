@@ -484,6 +484,8 @@ export const ruTranslations: DefaultTranslationsObject = {
     sorryNotFound: 'К сожалению, ничего подходящего под ваш запрос нет.',
     sort: 'Сортировать',
     sortByLabelDirection: 'Сортировать по {{label}} {{direction}}',
+    sortByOrderToReorder:
+      'Чтобы изменить порядок строк, сначала отсортируйте их по столбцу «Порядок».',
     stayOnThisPage: 'Остаться на этой странице',
     submissionSuccessful: 'Успешно отправлено.',
     submit: 'Отправить',
@@ -575,6 +577,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     addFile: 'Добавить файл',
     addFiles: 'Добавить файлы',
     bulkUpload: 'Массовая загрузка',
+    copyLinkToFile: 'Скопировать ссылку на файл',
     crop: 'Обрезать',
     cropToolDescription:
       'Перетащите углы выбранной области, нарисуйте новую область или отрегулируйте значения ниже.',
