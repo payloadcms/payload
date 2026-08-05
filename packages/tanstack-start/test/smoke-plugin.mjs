@@ -14,7 +14,7 @@ import {
   payloadRscOptions,
   payloadTanstackStartOptions,
   withPayload,
-} from '../dist/exports/vite.js'
+} from '../dist/withPayload/index.js'
 
 const factory = withPayload(undefined, {
   payloadConfigPath: '/tmp/fake-payload.config.ts',
@@ -30,6 +30,7 @@ const expectKey = (obj, key) => {
 expectKey(config, 'css')
 expectKey(config, 'define')
 expectKey(config, 'environments')
+expectKey(config, 'nitro')
 expectKey(config, 'optimizeDeps')
 expectKey(config, 'plugins')
 expectKey(config, 'resolve')
@@ -78,11 +79,19 @@ if (!config.optimizeDeps.exclude.includes('@payloadcms/ui')) {
   errors.push("optimizeDeps.exclude missing '@payloadcms/ui'")
 }
 
+// tslib must be full-traced (`*`) so Nitro copies its subpath entries — a bare
+// `tslib` selector leaves `tslib/modules/index.js` out of the server output and
+// the built server 500s with ERR_MODULE_NOT_FOUND on the first request.
+if (!config.nitro?.traceDeps?.includes('tslib*')) {
+  errors.push("nitro.traceDeps missing 'tslib*'")
+}
+
 // The `vite` override must be merged on top of the defaults: arrays appended,
 // objects deep-merged, and the Payload base preserved.
 const mergedFactory = withPayload(undefined, {
   payloadConfigPath: '/tmp/fake-payload.config.ts',
   vite: {
+    nitro: { traceDeps: ['sharp'] },
     optimizeDeps: { include: ['recharts'] },
     server: { port: 4000 },
   },
@@ -97,6 +106,10 @@ if (!merged.optimizeDeps.include.includes('recharts')) {
 }
 if (!merged.optimizeDeps.include.includes('react-dom > scheduler')) {
   errors.push('vite override clobbered base: optimizeDeps.include lost defaults')
+}
+// A consumer adding its own traceDeps must not drop Payload's tslib entry.
+if (!merged.nitro?.traceDeps?.includes('tslib*') || !merged.nitro.traceDeps.includes('sharp')) {
+  errors.push('vite override clobbered base: nitro.traceDeps lost an entry')
 }
 
 // Payload's required plugin options are exposed so the consumer can call the
@@ -180,6 +193,9 @@ if (builtConfig.server?.port !== 4000) {
 }
 if (!builtConfig.ssr?.external?.includes('drizzle-kit')) {
   errors.push('builder result missing base ssr.external (base not merged)')
+}
+if (!builtConfig.nitro?.traceDeps?.includes('tslib*')) {
+  errors.push('builder result missing base nitro.traceDeps (base not merged)')
 }
 if (!builtConfig.customLogger) {
   errors.push('warning suppression not applied to builder result')

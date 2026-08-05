@@ -77,6 +77,15 @@ function applyDependencyWarningSuppression(config: UserConfig, enabled: boolean)
   return config
 }
 
+/**
+ * Vite's `UserConfig` plus the `nitro` key Nitro's Vite plugin augments it with.
+ * Declared locally because `nitro` is an optional peer of a Payload app, not a
+ * dependency of this package, so its type augmentation may not be loaded.
+ */
+type ViteConfigWithNitro = {
+  nitro?: { traceDeps?: (RegExp | string)[] }
+} & UserConfig
+
 export type WithPayloadOptions = {
   /** Extra import-protection `ignoreImporters` patterns for the TanStack Start plugin. */
   additionalIgnoreImporters?: RegExp[]
@@ -179,7 +188,7 @@ export function withPayload(
     // `noExternal` and re-emit the bare specifier.
     const ssrExternal = isBuild ? buildExternalPackages : ssrExternalPackages
 
-    const base: UserConfig = {
+    const base: ViteConfigWithNitro = {
       build: {
         cssMinify: 'esbuild',
       },
@@ -204,6 +213,17 @@ export function withPayload(
           resolve: { noExternal: noExternalPatterns },
         },
       } as any,
+      // Nitro's node-server output only copies the dependency files it traced.
+      // `tslib` is the recurring casualty: pinning it to its ESM build with a
+      // `{ find: /^tslib$/ }` resolve alias — the usual fix for its UMD wrapper
+      // breaking CJS interop at boot — rewrites only the *bare* specifier. An
+      // externalized dependency that imports the `tslib/modules/index.js`
+      // subpath (where tslib's own `exports` map sends Node) still resolves to
+      // the real package, but the alias narrowed what Nitro traced, so that file
+      // was never copied. The build stays green and the server 500s on the first
+      // request with ERR_MODULE_NOT_FOUND. The `*` suffix full-traces tslib, so
+      // every file in the package ships. Ignored when the app isn't using Nitro.
+      nitro: { traceDeps: ['tslib*'] },
       optimizeDeps: {
         exclude: optimizeDepsExcludeDefaults,
         include: optimizeDepsIncludeDefaults,
