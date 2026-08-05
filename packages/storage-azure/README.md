@@ -42,8 +42,8 @@ export default buildConfig({
   plugins: [
     azureStorage({
       collections: {
-        media: true,
-        'media-with-prefix': {
+        [Media.slug]: true,
+        [MediaWithPrefix.slug]: {
           prefix,
         },
       },
