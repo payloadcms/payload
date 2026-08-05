@@ -79,13 +79,13 @@ describe('sanitizeGlobal — versions default', () => {
       fields: [],
       access: {
         read: async () => ({
-          or: [{ id: { equals: 'global-id' } }, { visible: { equals: true } }],
+          or: [{ title: { equals: 'Header' } }, { visible: { equals: true } }],
         }),
       },
     })
 
     await expect(result.access.readVersions({ req })).resolves.toEqual({
-      or: [{ 'version.id': { equals: 'global-id' } }, { 'version.visible': { equals: true } }],
+      or: [{ 'version.title': { equals: 'Header' } }, { 'version.visible': { equals: true } }],
     })
   })
 })
