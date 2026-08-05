@@ -237,6 +237,68 @@ describe('@payloadcms/storage-s3', () => {
       await payload.delete({ collection: mediaWithDirectAccessSlug, id: upload.id })
     })
 
+    it('should resolve thumbnailURL to the direct S3 URL on a full (non-select) read', async () => {
+      // Regression test: when `serverURL` is not configured (the default in this
+      // test suite, and common in real-world configs that rely on relative URLs),
+      // `thumbnailURL` incorrectly fell back to the internal `/api/.../file/...`
+      // path instead of passing through the direct S3 URL already resolved on
+      // `sizes.thumbnail.url`.
+      const upload = await payload.create({
+        collection: mediaWithDirectAccessSlug,
+        data: {},
+        filePath: path.resolve(dirname, '../uploads/image.png'),
+      })
+
+      expect(upload.thumbnailURL).toContain(process.env.S3_ENDPOINT)
+      expect(upload.thumbnailURL).toContain(getTestBucketName())
+      expect(upload.thumbnailURL).not.toMatch(/^\/api\//)
+
+      const fullRead = await payload.findByID({
+        id: upload.id,
+        collection: mediaWithDirectAccessSlug,
+      })
+
+      expect(fullRead.thumbnailURL).toContain(process.env.S3_ENDPOINT)
+      expect(fullRead.thumbnailURL).not.toMatch(/^\/api\//)
+
+      await payload.delete({ id: upload.id, collection: mediaWithDirectAccessSlug })
+    })
+
+    it('should resolve thumbnailURL to the direct S3 URL when querying with a select that only includes upload fields', async () => {
+      // Mirrors the `select` shape that `appendUploadSelectFields` builds for the
+      // admin list view and relationship fields: only `sizes.<adminThumbnail>.filename`
+      // and `.url`, not the rest of the document.
+      const upload = await payload.create({
+        collection: mediaWithDirectAccessSlug,
+        data: {},
+        filePath: path.resolve(dirname, '../uploads/image.png'),
+      })
+
+      const { docs } = await payload.find({
+        collection: mediaWithDirectAccessSlug,
+        select: {
+          mimeType: true,
+          sizes: {
+            thumbnail: {
+              filename: true,
+              url: true,
+            },
+          },
+          thumbnailURL: true,
+        },
+        where: { id: { equals: upload.id } },
+      })
+
+      // Without `url: true` in the `sizes.thumbnail` select, this field is never
+      // fetched from the database, so `thumbnailURL` falls back to the internal
+      // `/api/.../file/...` path instead of the direct S3 URL.
+      expect(docs[0]?.thumbnailURL).toContain(process.env.S3_ENDPOINT)
+      expect(docs[0]?.thumbnailURL).toContain(getTestBucketName())
+      expect(docs[0]?.thumbnailURL).not.toMatch(/^\/api\//)
+
+      await payload.delete({ id: upload.id, collection: mediaWithDirectAccessSlug })
+    })
+
     it('should return direct S3 URL without encoding issues for normal filenames', async () => {
       const upload = await payload.create({
         collection: mediaWithDirectAccessSlug,
