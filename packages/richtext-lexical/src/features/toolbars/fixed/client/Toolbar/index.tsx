@@ -18,6 +18,7 @@ import { useEditorConfigContext } from '../../../../../lexical/config/client/Edi
 import { ToolbarButton } from '../../../shared/ToolbarButton/index.js'
 import { ToolbarDropdown } from '../../../shared/ToolbarDropdown/index.js'
 import { useToolbarStates } from '../../../shared/useToolbarStates.js'
+import { useRedirectVerticalWheelToHorizontalScroll } from './horizontalWheelScroll.js'
 import './index.css'
 
 function ButtonGroupItem({
@@ -161,37 +162,11 @@ function FixedToolbar({
   parentWithFixedToolbar: EditorConfigContextType | false
 }): React.ReactNode {
   const currentToolbarRef = React.useRef<HTMLDivElement>(null)
-  const scrollContainerRef = React.useRef<HTMLDivElement>(null)
   const isEditable = useLexicalEditable()
 
   const { y } = useScrollInfo()
 
-  React.useEffect(() => {
-    const scrollContainer = scrollContainerRef.current
-    if (!scrollContainer) {
-      return
-    }
-
-    const redirectVerticalWheelToHorizontalScroll = (event: WheelEvent): void => {
-      const isPrimarilyVerticalWheelInput = Math.abs(event.deltaY) > Math.abs(event.deltaX)
-      const canScrollHorizontally = scrollContainer.scrollWidth > scrollContainer.clientWidth
-
-      if (!isPrimarilyVerticalWheelInput || !canScrollHorizontally) {
-        return
-      }
-
-      event.preventDefault()
-      scrollContainer.scrollLeft += event.deltaY
-    }
-
-    scrollContainer.addEventListener('wheel', redirectVerticalWheelToHorizontalScroll, {
-      passive: false,
-    })
-
-    return () => {
-      scrollContainer.removeEventListener('wheel', redirectVerticalWheelToHorizontalScroll)
-    }
-  }, [])
+  useRedirectVerticalWheelToHorizontalScroll()
 
   const toolbarStates = useToolbarStates(editor, editorConfig?.features?.toolbarFixed?.groups)
 
@@ -261,7 +236,7 @@ function FixedToolbar({
       ref={currentToolbarRef}
     >
       {isEditable && (
-        <div className="fixed-toolbar__scroll" ref={scrollContainerRef}>
+        <div className="fixed-toolbar__scroll">
           {editorConfig?.features &&
             editorConfig.features?.toolbarFixed?.groups.map((group, i) => {
               return (
