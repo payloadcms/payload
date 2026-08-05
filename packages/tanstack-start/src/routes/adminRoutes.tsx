@@ -86,7 +86,7 @@ const adminRouteOptions = ({
       }
       return data
     },
-    staleReloadMode: 'blocking',
+    staleReloadMode: 'blocking' as const,
   },
   // Surface query params in `loaderDeps` so `?locale=es` re-runs the loader.
   loaderDeps: ({ search }: { search: Record<string, unknown> }) => ({

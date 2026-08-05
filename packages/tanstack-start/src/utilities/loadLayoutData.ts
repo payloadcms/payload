@@ -1,3 +1,4 @@
+import type { Serializable } from '@tanstack/react-router'
 import type { ImportMap, SanitizedConfig } from 'payload'
 
 import { renderServerComponent } from '@tanstack/react-start/rsc'
@@ -20,11 +21,11 @@ export async function loadLayoutData({
 }: {
   config: SanitizedConfig
   importMap: ImportMap
-}): Promise<Record<string, unknown>> {
+}): Promise<Record<string, unknown> & Serializable> {
   const { providers, ...data } = await getLayoutData({ configPromise: config, importMap })
 
   return {
     ...(toSerializable(data) as Record<string, unknown>),
     providers: providers ? await renderServerComponent(providers as any) : undefined,
-  }
+  } as unknown as Record<string, unknown> & Serializable
 }
