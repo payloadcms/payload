@@ -240,4 +240,44 @@ describe('buildRawSchema', () => {
 
     expect(warn).not.toHaveBeenCalled()
   })
+
+  it('should warn about raw inline sub-table index and foreign key names that exceed 63 chars', async () => {
+    // Array sub-tables assign structural index/FK names inline (not via buildIndexName/
+    // buildForeignKeyName), so a long-but-valid array table name still overflows them.
+    const arrayFieldName = 'a'.repeat(58)
+
+    const config = sanitizeConfig({
+      collections: [
+        {
+          slug: 'p',
+          fields: [
+            {
+              name: arrayFieldName,
+              type: 'array',
+              fields: [{ name: 'title', type: 'text' }],
+            },
+          ],
+          timestamps: false,
+          versions: false,
+        },
+      ],
+    } as Config)
+
+    const warn = vi.fn()
+    const adapter = createAdapter(config, warn)
+
+    buildRawSchema({ adapter, setColumnID })
+
+    const arrayTable = `p_${arrayFieldName}`
+
+    checkTruncatedIdentifiers({ adapter, logWarnings: true })
+
+    expect(arrayTable.length).toBeLessThanOrEqual(63)
+    expect(warn).toHaveBeenCalledTimes(1)
+
+    const message: string = warn.mock.calls[0][0]
+
+    expect(message).toContain(`${arrayTable}_order_idx`)
+    expect(message).toContain(`${arrayTable}_parent_id_fk`)
+  })
 })
