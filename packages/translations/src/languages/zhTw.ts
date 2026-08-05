@@ -446,6 +446,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     selectAllRows: '選取所有列',
     selectedCount: '已選取 {{count}} 個 {{label}}',
     selectLabel: '選取 {{label}}',
+    selectRow: undefined,
     selectValue: '請選取一個值',
     settings: '設定',
     showAllLabel: '顯示所有 {{label}}',

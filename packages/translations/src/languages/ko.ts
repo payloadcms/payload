@@ -469,6 +469,7 @@ export const koTranslations: DefaultTranslationsObject = {
     selectAllRows: '모든 행 선택',
     selectedCount: '{{count}}개의 {{label}} 선택됨',
     selectLabel: '{{label}}을 선택하십시오.',
+    selectRow: undefined,
     selectValue: '값 선택',
     settings: '설정',
     showAllLabel: '{{label}} 모두 표시',

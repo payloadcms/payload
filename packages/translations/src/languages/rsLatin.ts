@@ -471,6 +471,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     selectAllRows: 'Odaberite sve redove',
     selectedCount: '{{count}} {{label}} odabrano',
     selectLabel: 'Izaberite {{label}}',
+    selectRow: undefined,
     selectValue: 'Odaberi vrednost',
     settings: 'Podešavanja',
     showAllLabel: 'Prikaži sve {{label}}',

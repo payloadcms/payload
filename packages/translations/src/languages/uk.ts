@@ -467,6 +467,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     selectAllRows: 'Обрати всі рядки',
     selectedCount: 'Обрано {{count}} {{label}}',
     selectLabel: 'Виберіть {{label}}',
+    selectRow: undefined,
     selectValue: 'Обрати значення',
     settings: 'Налаштування',
     showAllLabel: 'Показати всі {{label}}',

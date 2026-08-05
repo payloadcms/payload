@@ -475,6 +475,7 @@ export const azTranslations: DefaultTranslationsObject = {
     selectAllRows: 'Bütün sıraları seçin',
     selectedCount: '{{count}} {{label}} seçildi',
     selectLabel: '{{label}} seçin',
+    selectRow: undefined,
     selectValue: 'Dəyər seçin',
     settings: 'Ayarlar',
     showAllLabel: 'Bütün {{label}}-ı göstər',

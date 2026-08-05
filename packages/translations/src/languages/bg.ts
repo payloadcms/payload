@@ -471,6 +471,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     selectAllRows: 'Избери всички редове',
     selectedCount: '{{count}} {{label}} избрани',
     selectLabel: 'Изберете {{label}}',
+    selectRow: undefined,
     selectValue: 'Избери стойност',
     settings: 'Настройки',
     showAllLabel: 'Покажи всички {{label}}',

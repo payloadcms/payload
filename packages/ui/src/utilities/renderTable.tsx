@@ -252,6 +252,7 @@ export const renderTable = ({
         hidden: true,
       },
       Heading: <SelectAll />,
+
       renderedCells: (data?.docs || []).map((row, i) => (
         <SelectRow
           key={i}

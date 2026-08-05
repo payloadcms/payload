@@ -462,6 +462,7 @@ export const faTranslations: DefaultTranslationsObject = {
     selectAllRows: 'انتخاب همه ردیف‌ها',
     selectedCount: '{{count}} {{label}} انتخاب شد',
     selectLabel: 'انتخاب {{label}}',
+    selectRow: undefined,
     selectValue: 'یک مقدار انتخاب کنید',
     settings: 'تنظیمات',
     showAllLabel: 'نمایش همه {{label}}',

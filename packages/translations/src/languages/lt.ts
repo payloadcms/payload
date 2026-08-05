@@ -473,6 +473,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     selectAllRows: 'Pasirinkite visas eilutes',
     selectedCount: '{{count}} {{label}} pasirinkta',
     selectLabel: 'Pasirinkite {{label}}',
+    selectRow: undefined,
     selectValue: 'Pasirinkite reikšmę',
     settings: 'Nustatymai',
     showAllLabel: 'Rodyti visus {{label}}',

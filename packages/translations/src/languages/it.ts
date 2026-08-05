@@ -477,6 +477,7 @@ export const itTranslations: DefaultTranslationsObject = {
     selectAllRows: 'Seleziona tutte le righe',
     selectedCount: '{{count}} {{label}} selezionato',
     selectLabel: 'Seleziona {{label}}',
+    selectRow: undefined,
     selectValue: 'Seleziona un valore',
     settings: 'Impostazioni',
     showAllLabel: 'Mostra tutti {{label}}',

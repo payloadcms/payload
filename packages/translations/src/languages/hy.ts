@@ -473,6 +473,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     selectAllRows: 'Ընտրել բոլոր տողերը',
     selectedCount: '{{count}} {{label}} ընտրված է',
     selectLabel: 'ընտրել {{label}}',
+    selectRow: undefined,
     selectValue: 'Ընտրեք արժեք',
     settings: 'Կարգավորումներ',
     showAllLabel: 'Ցուցադրել բոլոր {{label}}-ները',
