@@ -2,12 +2,12 @@ import { describe, expect, it } from 'vitest'
 
 import type { NextAppDetails, TanStackAppDetails, TanStackDetectionResult } from './types.js'
 
-import { resolveExistingHost } from './main.js'
+import { resolveAppFramework } from './main.js'
 
-describe('resolveExistingHost', () => {
+describe('resolveAppFramework', () => {
   it('should reject ambiguous recognized hosts before choosing a framework', () => {
     expect(
-      resolveExistingHost({
+      resolveAppFramework({
         nextAppDetails: createNextAppDetails({ isPayloadInstalled: true }),
         tanStackDetection: createTanStackDetection({ isPayloadInstalled: true }),
       }),
@@ -17,7 +17,7 @@ describe('resolveExistingHost', () => {
   it('should resolve a Next host', () => {
     const nextAppDetails = createNextAppDetails({ isPayloadInstalled: true })
 
-    expect(resolveExistingHost({ nextAppDetails, tanStackDetection: { detected: false } })).toEqual(
+    expect(resolveAppFramework({ nextAppDetails, tanStackDetection: { detected: false } })).toEqual(
       { appDetails: nextAppDetails, kind: 'next' },
     )
   })
@@ -26,7 +26,7 @@ describe('resolveExistingHost', () => {
     const tanStackDetection = createTanStackDetection({ isPayloadInstalled: false })
 
     expect(
-      resolveExistingHost({ nextAppDetails: createNoNextAppDetails(), tanStackDetection }),
+      resolveAppFramework({ nextAppDetails: createNoNextAppDetails(), tanStackDetection }),
     ).toEqual({ appDetails: tanStackDetection.details, kind: 'tanstack' })
   })
 
@@ -38,13 +38,13 @@ describe('resolveExistingHost', () => {
     }
 
     expect(
-      resolveExistingHost({ nextAppDetails: createNoNextAppDetails(), tanStackDetection }),
+      resolveAppFramework({ nextAppDetails: createNoNextAppDetails(), tanStackDetection }),
     ).toEqual({ kind: 'unsupported-tanstack', reason: tanStackDetection.reason })
   })
 
   it('should continue the new-project flow when no host is detected', () => {
     expect(
-      resolveExistingHost({
+      resolveAppFramework({
         nextAppDetails: createNoNextAppDetails(),
         tanStackDetection: { detected: false },
       }),

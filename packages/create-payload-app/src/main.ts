@@ -124,9 +124,9 @@ export class Main {
 
       const tanStackDetection = await getTanStackAppDetails({ projectDir: process.cwd() })
       const nextAppDetails = await getNextAppDetails(process.cwd())
-      const existingHost = resolveExistingHost({ nextAppDetails, tanStackDetection })
+      const appFramework = resolveAppFramework({ nextAppDetails, tanStackDetection })
 
-      if (existingHost.kind === 'ambiguous') {
+      if (appFramework.kind === 'ambiguous') {
         p.log.warn(
           'Both Next.js and TanStack project markers were detected. Remove one framework before installing Payload.',
         )
@@ -134,21 +134,21 @@ export class Main {
         return
       }
 
-      if (existingHost.kind === 'unsupported-tanstack') {
-        p.log.warn(existingHost.reason)
+      if (appFramework.kind === 'unsupported-tanstack') {
+        p.log.warn(appFramework.reason)
         p.outro(feedbackOutro())
         return
       }
 
-      if (existingHost.kind === 'next' && !existingHost.appDetails.isSupportedNextVersion) {
+      if (appFramework.kind === 'next' && !appFramework.appDetails.isSupportedNextVersion) {
         p.log.warn(
-          `Next.js v${existingHost.appDetails.nextVersion} is unsupported. Next.js >= 15 is required to use Payload.`,
+          `Next.js v${appFramework.appDetails.nextVersion} is unsupported. Next.js >= 15 is required to use Payload.`,
         )
         p.outro(feedbackOutro())
         process.exit(0)
       }
 
-      const hasPayload = existingHost.kind !== 'none' && existingHost.appDetails.isPayloadInstalled
+      const hasPayload = appFramework.kind !== 'none' && appFramework.appDetails.isPayloadInstalled
 
       if (hasPayload) {
         p.log.warn(`Payload installation detected in current project.`)
@@ -160,13 +160,13 @@ export class Main {
         if (!p.isCancel(shouldUpdate) && shouldUpdate) {
           const versionOrTag = this.args['--payload-version'] ?? DEFAULT_PAYLOAD_VERSION_TAG
           const updateResult =
-            existingHost.kind === 'next'
+            appFramework.kind === 'next'
               ? await updatePayloadInNextProject({
-                  appDetails: existingHost.appDetails,
+                  appDetails: appFramework.appDetails,
                   versionOrTag,
                 })
               : await updatePayloadInTanStackProject({
-                  appDetails: existingHost.appDetails,
+                  appDetails: appFramework.appDetails,
                   versionOrTag,
                 })
 
@@ -182,28 +182,28 @@ export class Main {
         return
       }
 
-      if (existingHost.kind === 'next') {
+      if (appFramework.kind === 'next') {
         this.args['--name'] = slugify(
-          path.basename(path.dirname(existingHost.appDetails.nextConfigPath!)),
+          path.basename(path.dirname(appFramework.appDetails.nextConfigPath!)),
         )
-      } else if (existingHost.kind === 'tanstack') {
-        this.args['--name'] = slugify(path.basename(existingHost.appDetails.projectDir))
+      } else if (appFramework.kind === 'tanstack') {
+        this.args['--name'] = slugify(path.basename(appFramework.appDetails.projectDir))
       }
 
       const projectName = await parseProjectName(this.args)
       let projectDir: string
-      if (existingHost.kind === 'next') {
-        projectDir = path.dirname(existingHost.appDetails.nextConfigPath!)
-      } else if (existingHost.kind === 'tanstack') {
-        projectDir = existingHost.appDetails.projectDir
+      if (appFramework.kind === 'next') {
+        projectDir = path.dirname(appFramework.appDetails.nextConfigPath!)
+      } else if (appFramework.kind === 'tanstack') {
+        projectDir = appFramework.appDetails.projectDir
       } else {
         projectDir = path.resolve(process.cwd(), slugify(projectName))
       }
 
       const packageManager = await getPackageManager({ cliArgs: this.args, projectDir })
 
-      if (existingHost.kind === 'next') {
-        const { hasTopLevelLayout, nextAppDir } = existingHost.appDetails
+      if (appFramework.kind === 'next') {
+        const { hasTopLevelLayout, nextAppDir } = appFramework.appDetails
 
         p.log.step(
           chalk.bold(`${chalk.bgBlack(` ${figures.triangleUp} Next.js `)} project detected!`),
@@ -230,7 +230,7 @@ export class Main {
         const result = await initNext({
           ...this.args,
           dbType: dbDetails.type,
-          nextAppDetails: existingHost.appDetails,
+          nextAppDetails: appFramework.appDetails,
           packageManager,
           projectDir,
         })
@@ -261,15 +261,15 @@ export class Main {
         return
       }
 
-      if (existingHost.kind === 'tanstack') {
+      if (appFramework.kind === 'tanstack') {
         const frameworkName =
-          existingHost.appDetails.kind === 'start' ? 'TanStack Start' : 'TanStack Router'
+          appFramework.appDetails.kind === 'start' ? 'TanStack Start' : 'TanStack Router'
         p.log.step(chalk.bold(`${chalk.bgBlack(` ${frameworkName} `)} project detected!`))
 
         const proceed = await p.confirm({
           initialValue: true,
           message: chalk.bold(
-            existingHost.appDetails.kind === 'start'
+            appFramework.appDetails.kind === 'start'
               ? 'Install Payload in this TanStack Start project?'
               : 'Convert this project to TanStack Start and install Payload?',
           ),
@@ -282,7 +282,7 @@ export class Main {
         const dbDetails = await selectDb(this.args, projectName)
         const result = await initTanStack({
           ...this.args,
-          appDetails: existingHost.appDetails,
+          appDetails: appFramework.appDetails,
           dbType: dbDetails.type,
           packageManager,
           projectDir,
@@ -404,20 +404,20 @@ export class Main {
   }
 }
 
-type ExistingHost =
+type AppFramework =
   | { appDetails: NextAppDetails; kind: 'next' }
   | { appDetails: TanStackAppDetails; kind: 'tanstack' }
   | { kind: 'ambiguous' }
   | { kind: 'none' }
   | { kind: 'unsupported-tanstack'; reason: string }
 
-export function resolveExistingHost({
+export function resolveAppFramework({
   nextAppDetails,
   tanStackDetection,
 }: {
   nextAppDetails: NextAppDetails
   tanStackDetection: TanStackDetectionResult
-}): ExistingHost {
+}): AppFramework {
   if (nextAppDetails.nextConfigPath && tanStackDetection.detected) {
     return { kind: 'ambiguous' }
   }
