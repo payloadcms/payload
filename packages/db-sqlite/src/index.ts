@@ -1,4 +1,4 @@
-import type { DrizzleAdapter, Operators } from '@payloadcms/drizzle'
+import type { DrizzleAdapter, Operators, RequireDrizzleKit } from '@payloadcms/drizzle'
 import type { DatabaseAdapterObj, Payload } from 'payload'
 
 import {
@@ -45,6 +45,7 @@ import {
   columnToCodeConverter,
   convertPathToJSONTraversal,
   countDistinct,
+  createRequireDrizzleKit,
   createJSONQuery,
   defaultDrizzleSnapshot,
   deleteWhere,
@@ -52,10 +53,9 @@ import {
   execute,
   init,
   insert,
-  requireDrizzleKit,
 } from '@payloadcms/drizzle/sqlite'
 import { like, notLike } from 'drizzle-orm'
-import { createDatabaseAdapter, defaultBeginTransaction, findMigrationDir } from 'payload'
+import { createDatabaseAdapter, defaultBeginTransaction, dynamicImport, findMigrationDir } from 'payload'
 import { fileURLToPath } from 'url'
 
 import type { Args, SQLiteAdapter, WalConfig } from './types.js'
@@ -63,6 +63,16 @@ import type { Args, SQLiteAdapter, WalConfig } from './types.js'
 import { connect } from './connect.js'
 
 const filename = fileURLToPath(import.meta.url)
+
+const requireDrizzleKit = createRequireDrizzleKit({
+  load: async () => {
+    const drizzleKitModule = await dynamicImport<{ requireDrizzleKit: RequireDrizzleKit }>(
+      '@payloadcms/drizzle/sqlite',
+    )
+
+    return drizzleKitModule.requireDrizzleKit()
+  },
+})
 
 export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
   const sqliteIDType = args.idType || 'number'
