@@ -3222,7 +3222,6 @@ describe('Localization', () => {
             toLocale: 'es',
           })) as ArrayField
 
-          console.log('res', res)
           expect(res.items?.[0]?.nestedItems?.[0]?.text).toBe('nested text')
         } finally {
           await payload.delete({
