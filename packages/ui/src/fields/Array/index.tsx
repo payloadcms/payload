@@ -253,9 +253,9 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
 
   const pasteRow = useCallback(
     (rowIndex: number) => {
-      const formState = { ...getFields() }
       const pasteArgs = {
         onPaste: (dataFromClipboard: ClipboardPasteData) => {
+          const formState = { ...getFields() }
           const newState = mergeFormStateFromClipboard({
             dataFromClipboard,
             formState,
@@ -281,9 +281,9 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
 
   const pasteRowBelow = useCallback(
     (rowIndex: number) => {
-      const formState = { ...getFields() }
       const pasteArgs = {
         onPaste: (dataFromClipboard: ClipboardPasteData) => {
+          const formState = { ...getFields() }
           const newState = insertRowFromClipboard({
             dataFromClipboard,
             formState,

@@ -309,7 +309,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
           setModified(true)
 
           setTimeout(() => {
-            scrollToID(`${path}-row-${rowIndex + 1}`)
+            scrollToID(`${path?.split('.').join('-')}-row-${rowIndex + 1}`)
           }, 0)
         },
         path,
