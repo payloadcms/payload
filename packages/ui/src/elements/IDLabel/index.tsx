@@ -14,10 +14,9 @@ const baseClass = 'id-label'
 export const IDLabel: React.FC<{
   className?: string
   id: number | string
-  /** Set when the label is already wrapped in a link by a parent, e.g. a linked list view cell. */
-  isLink?: boolean
   prefix?: string
-}> = ({ id, className, isLink, prefix = 'ID' }) => {
+  styleAsLink?: boolean
+}> = ({ id, className, prefix = 'ID', styleAsLink }) => {
   const {
     config: {
       routes: { admin: adminRoute },
@@ -32,7 +31,11 @@ export const IDLabel: React.FC<{
   // Only render as link if we're inside a drawer and have document context
   const shouldRenderLink = drawerDepth > 0 && (collectionSlug || globalSlug)
 
-  const classes = [baseClass, (isLink || shouldRenderLink) && `${baseClass}--is-link`, className]
+  const classes = [
+    baseClass,
+    (styleAsLink || shouldRenderLink) && `${baseClass}--is-link`,
+    className,
+  ]
     .filter(Boolean)
     .join(' ')
 
