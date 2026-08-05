@@ -730,6 +730,35 @@ describe('Access Control', () => {
       await payload.delete({ collection: inheritedReadVersionsSlug, where: {} })
     })
 
+    it('should preserve the document id when checking inherited version permissions', async () => {
+      await payload.delete({ collection: inheritedReadVersionsSlug, where: {} })
+
+      const { id: allowedID } = await payload.create({
+        collection: inheritedReadVersionsSlug,
+        data: { secret: 'denied' },
+      })
+      const deniedDoc = await payload.create({
+        collection: inheritedReadVersionsSlug,
+        data: { secret: 'allowed' },
+      })
+      setInheritedReadVersionsAllowedID(allowedID)
+
+      const permissions = await getEntityPermissions({
+        id: deniedDoc.id,
+        blockReferencesPermissions: {},
+        entity: payload.collections[inheritedReadVersionsSlug].config,
+        entityType: 'collection',
+        fetchData: true,
+        operations: ['read', 'readVersions'],
+        req: await createLocalReq({}, payload),
+      })
+
+      expect(permissions.read?.permission).toBe(false)
+      expect(permissions.readVersions?.permission).toBe(false)
+
+      await payload.delete({ collection: inheritedReadVersionsSlug, where: {} })
+    })
+
     it('should pass the parent document id to inherited read access for findVersionByID', async () => {
       await payload.delete({ collection: inheritedReadVersionsSlug, where: {} })
 
@@ -767,6 +796,38 @@ describe('Access Control', () => {
           overrideAccess: false,
         }),
       ).resolves.toBeNull()
+
+      await payload.delete({ collection: inheritedReadVersionsSlug, where: {} })
+    })
+
+    it('should reuse the version lookup when inherited read access returns a boolean', async () => {
+      await payload.delete({ collection: inheritedReadVersionsSlug, where: {} })
+
+      const { id: allowedID } = await payload.create({
+        collection: inheritedReadVersionsSlug,
+        data: { secret: 'allowed' },
+      })
+      setInheritedReadVersionsAllowedID(allowedID)
+
+      const { docs } = await payload.findVersions({
+        collection: inheritedReadVersionsSlug,
+        overrideAccess: true,
+      })
+      const findVersions = vitest.spyOn(payload.db, 'findVersions')
+
+      try {
+        await expect(
+          payload.findVersionByID({
+            id: docs[0].id,
+            collection: inheritedReadVersionsSlug,
+            overrideAccess: false,
+          }),
+        ).resolves.toMatchObject({ parent: allowedID })
+
+        expect(findVersions).toHaveBeenCalledTimes(1)
+      } finally {
+        findVersions.mockRestore()
+      }
 
       await payload.delete({ collection: inheritedReadVersionsSlug, where: {} })
     })

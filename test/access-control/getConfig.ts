@@ -854,11 +854,14 @@ export const getConfig: () => Partial<Config> = () => ({
     {
       slug: inheritedReadVersionsGlobalSlug,
       access: {
-        read: () => ({
-          visible: {
-            equals: true,
-          },
-        }),
+        read: ({ id }) =>
+          id
+            ? false
+            : {
+                visible: {
+                  equals: true,
+                },
+              },
       },
       fields: [
         {

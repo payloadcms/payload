@@ -4,6 +4,7 @@ import type { CollectionConfig, SanitizedCollectionConfig } from './types.js'
 import { defaultAccess } from '../../auth/defaultAccess.js'
 import { hasWhereAccessResult } from '../../auth/types.js'
 import { appendVersionToQueryKey } from '../../versions/drafts/appendVersionToQueryKey.js'
+import { markInheritedReadVersionsAccess } from '../../versions/isInheritedReadVersionsAccess.js'
 
 /**
  * @deprecated - remove in 4.0. This is error-prone, as mutating this object will affect any objects that use the defaults as a base.
@@ -68,24 +69,8 @@ export const addDefaultsToCollectionConfig = (collection: CollectionConfig): Col
     read,
     readVersions:
       access?.readVersions ??
-      (async (args) => {
-        let readArgs = args
-
-        if (args.id !== undefined) {
-          const { docs } = await args.req.payload.db.findVersions({
-            collection: collection.slug,
-            limit: 1,
-            locale: args.req.locale ?? undefined,
-            pagination: false,
-            req: args.req,
-            select: { parent: true },
-            where: { id: { equals: args.id } },
-          })
-
-          readArgs = { ...args, id: docs[0]?.parent }
-        }
-
-        const result = await read(readArgs)
+      markInheritedReadVersionsAccess(async (args) => {
+        const result = await read(args)
 
         return hasWhereAccessResult(result) ? appendVersionToQueryKey(result) : result
       }),

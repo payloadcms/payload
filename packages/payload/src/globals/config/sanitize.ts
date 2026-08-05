@@ -51,7 +51,7 @@ export const sanitizeGlobal = (
 
   global.access.read = read
   global.access.readVersions ??= async (args) => {
-    const result = await read(args)
+    const result = await read({ ...args, id: undefined })
 
     return hasWhereAccessResult(result) ? appendGlobalVersionToQueryKey(result) : result
   }
