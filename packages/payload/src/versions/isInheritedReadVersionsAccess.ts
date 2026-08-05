@@ -1,14 +1,21 @@
 import type { Access } from '../config/types.js'
 
-const inheritedReadVersionsAccess = new WeakSet<Access>()
+const inheritedReadVersionsAccess = Symbol('inheritedReadVersionsAccess')
+
+type InheritedReadVersionsAccess = {
+  [inheritedReadVersionsAccess]: true
+} & Access
 
 export const markInheritedReadVersionsAccess = <TAccess extends Access>(
   access: TAccess,
 ): TAccess => {
-  inheritedReadVersionsAccess.add(access)
+  Object.defineProperty(access, inheritedReadVersionsAccess, { value: true })
 
   return access
 }
 
 export const isInheritedReadVersionsAccess = (access?: Access): boolean =>
-  access ? inheritedReadVersionsAccess.has(access) : false
+  Boolean(
+    access &&
+      (access as Partial<InheritedReadVersionsAccess>)[inheritedReadVersionsAccess] === true,
+  )
