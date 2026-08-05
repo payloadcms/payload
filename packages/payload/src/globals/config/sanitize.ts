@@ -4,6 +4,7 @@ import type { SanitizedDrafts } from '../../versions/types.js'
 import type { GlobalConfig, SanitizedGlobalConfig } from './types.js'
 
 import { defaultAccess } from '../../auth/defaultAccess.js'
+import { hasWhereAccessResult } from '../../auth/types.js'
 import { sanitizeFields } from '../../fields/config/sanitize.js'
 import { fieldAffectsData } from '../../fields/config/types.js'
 import { mergeBaseFields } from '../../fields/mergeBaseFields.js'
@@ -12,6 +13,7 @@ import { toWords } from '../../utilities/formatLabels.js'
 import { traverseForLocalizedFields } from '../../utilities/traverseForLocalizedFields.js'
 import { baseVersionFields } from '../../versions/baseFields.js'
 import { versionDefaults } from '../../versions/defaults.js'
+import { appendGlobalVersionToQueryKey } from '../../versions/drafts/appendVersionToQueryKey.js'
 import { defaultGlobalEndpoints } from '../endpoints/index.js'
 export const sanitizeGlobal = (
   config: Config,
@@ -45,8 +47,13 @@ export const sanitizeGlobal = (
     global.admin = {}
   }
 
-  if (!global.access.read) {
-    global.access.read = defaultAccess
+  const read = global.access.read ?? defaultAccess
+
+  global.access.read = read
+  global.access.readVersions ??= async (args) => {
+    const result = await read(args)
+
+    return hasWhereAccessResult(result) ? appendGlobalVersionToQueryKey(result) : result
   }
 
   if (!global.access.update) {

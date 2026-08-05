@@ -69,7 +69,23 @@ export const addDefaultsToCollectionConfig = (collection: CollectionConfig): Col
     readVersions:
       access?.readVersions ??
       (async (args) => {
-        const result = await read(args)
+        let readArgs = args
+
+        if (args.id !== undefined) {
+          const { docs } = await args.req.payload.db.findVersions({
+            collection: collection.slug,
+            limit: 1,
+            locale: args.req.locale ?? undefined,
+            pagination: false,
+            req: args.req,
+            select: { parent: true },
+            where: { id: { equals: args.id } },
+          })
+
+          readArgs = { ...args, id: docs[0]?.parent }
+        }
+
+        const result = await read(readArgs)
 
         return hasWhereAccessResult(result) ? appendVersionToQueryKey(result) : result
       }),

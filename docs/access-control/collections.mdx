@@ -338,6 +338,8 @@ If the Collection has [Versions](../versions/overview) enabled, the `readVersion
 
 If `readVersions` is not configured, Payload uses the Collection's `read` Access Control. Boolean results are preserved, and query constraints are automatically adjusted to target fields within the stored version document.
 
+For `findVersionByID`, the inherited `read` function receives the parent Document's `id`, not the version record's `id`.
+
 To add Read Versions Access Control to a Collection, use the `readVersions` property in the [Collection Config](../configuration/collections):
 
 ```ts

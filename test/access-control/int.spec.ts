@@ -17,7 +17,7 @@ import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { FullyRestricted, Post } from './payload-types.js'
 
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
-import { requestHeaders } from './getConfig.js'
+import { requestHeaders, setInheritedReadVersionsAllowedID } from './getConfig.js'
 import {
   asyncParentSlug,
   firstArrayText,
@@ -26,6 +26,7 @@ import {
   hiddenAccessSlug,
   hiddenFieldsSlug,
   hooksSlug,
+  inheritedReadVersionsGlobalSlug,
   inheritedReadVersionsSlug,
   publicUserEmail,
   publicUsersSlug,
@@ -50,6 +51,8 @@ describe('Access Control', () => {
   })
 
   beforeEach(async () => {
+    setInheritedReadVersionsAllowedID(undefined)
+
     post1 = await payload.create({
       collection: slug,
       data: {},
@@ -696,7 +699,7 @@ describe('Access Control', () => {
       expect(res).toBeTruthy()
     })
 
-    it('should inherit collection read access when readVersions is not configured', async () => {
+    it('should use the query fallback from id-based read access for version lists', async () => {
       await payload.delete({ collection: inheritedReadVersionsSlug, where: {} })
 
       await payload.create({
@@ -707,6 +710,7 @@ describe('Access Control', () => {
         collection: inheritedReadVersionsSlug,
         data: { secret: 'allowed' },
       })
+      setInheritedReadVersionsAllowedID(allowedID)
 
       const allowedVersions = await payload.findVersions({
         collection: inheritedReadVersionsSlug,
@@ -723,20 +727,41 @@ describe('Access Control', () => {
 
       expect(allowedVersionsCount.totalDocs).toBe(1)
 
-      const deniedVersions = await payload.findVersions({
+      await payload.delete({ collection: inheritedReadVersionsSlug, where: {} })
+    })
+
+    it('should pass the parent document id to inherited read access for findVersionByID', async () => {
+      await payload.delete({ collection: inheritedReadVersionsSlug, where: {} })
+
+      const { id: deniedID } = await payload.create({
         collection: inheritedReadVersionsSlug,
-        limit: 1,
-        overrideAccess: true,
-        where: {
-          'version.secret': {
-            equals: 'denied',
-          },
-        },
+        data: { secret: 'denied' },
       })
+      const { id: allowedID } = await payload.create({
+        collection: inheritedReadVersionsSlug,
+        data: { secret: 'allowed' },
+      })
+      setInheritedReadVersionsAllowedID(allowedID)
+
+      const versions = await payload.findVersions({
+        collection: inheritedReadVersionsSlug,
+        overrideAccess: true,
+      })
+      const allowedVersion = versions.docs.find(({ parent }) => parent === allowedID)!
+      const deniedVersion = versions.docs.find(({ parent }) => parent === deniedID)!
 
       await expect(
         payload.findVersionByID({
-          id: deniedVersions.docs[0].id,
+          id: allowedVersion.id,
+          collection: inheritedReadVersionsSlug,
+          disableErrors: true,
+          overrideAccess: false,
+        }),
+      ).resolves.toMatchObject({ parent: allowedID })
+
+      await expect(
+        payload.findVersionByID({
+          id: deniedVersion.id,
           collection: inheritedReadVersionsSlug,
           disableErrors: true,
           overrideAccess: false,
@@ -744,6 +769,59 @@ describe('Access Control', () => {
       ).resolves.toBeNull()
 
       await payload.delete({ collection: inheritedReadVersionsSlug, where: {} })
+    })
+
+    it('should inherit global read access for version operations', async () => {
+      await payload.updateGlobal({
+        slug: inheritedReadVersionsGlobalSlug,
+        data: { visible: false },
+      })
+      await payload.updateGlobal({
+        slug: inheritedReadVersionsGlobalSlug,
+        data: { visible: true },
+      })
+
+      const allVersions = await payload.findGlobalVersions({
+        slug: inheritedReadVersionsGlobalSlug,
+        overrideAccess: true,
+        pagination: false,
+      })
+      const allowedVersion = allVersions.docs.find(({ version }) => version.visible === true)!
+      const deniedVersion = allVersions.docs.find(({ version }) => version.visible === false)!
+
+      const allowedVersions = await payload.findGlobalVersions({
+        slug: inheritedReadVersionsGlobalSlug,
+        overrideAccess: false,
+        pagination: false,
+      })
+
+      expect(allowedVersions.docs.length).toBeGreaterThan(0)
+      expect(allowedVersions.docs.every(({ version }) => version.visible === true)).toBe(true)
+
+      const allowedVersionsCount = await payload.countGlobalVersions({
+        global: inheritedReadVersionsGlobalSlug,
+        overrideAccess: false,
+      })
+
+      expect(allowedVersionsCount.totalDocs).toBe(allowedVersions.totalDocs)
+
+      await expect(
+        payload.findGlobalVersionByID({
+          id: allowedVersion.id,
+          slug: inheritedReadVersionsGlobalSlug,
+          disableErrors: true,
+          overrideAccess: false,
+        }),
+      ).resolves.toMatchObject({ id: allowedVersion.id })
+
+      await expect(
+        payload.findGlobalVersionByID({
+          id: deniedVersion.id,
+          slug: inheritedReadVersionsGlobalSlug,
+          disableErrors: true,
+          overrideAccess: false,
+        }),
+      ).resolves.toBeNull()
     })
   })
 

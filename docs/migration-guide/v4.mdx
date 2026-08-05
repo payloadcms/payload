@@ -236,10 +236,9 @@ If you only use `DefaultValue` to type a `defaultValue` property passed into a C
 
 `SanitizedCollectionConfig` and its auth type no longer use `DeepRequired`. This reduces TypeScript checker work and makes optionality match runtime defaults.
 
-Properties Payload does not default, such as `access.readVersions`, `auth.cookies.domain`, `auth.useAPIKey`, and `auth.depth`, now require undefined handling:
+Properties Payload does not default, such as `auth.cookies.domain`, `auth.useAPIKey`, and `auth.depth`, now require undefined handling:
 
 ```ts
-if (collection.access.readVersions) await collection.access.readVersions(args)
 const useAPIKey = collection.auth.useAPIKey ?? false
 ```
 
