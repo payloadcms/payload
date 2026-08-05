@@ -41,6 +41,7 @@ test.describe('Import Export Plugin', () => {
 
   test.beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
+    fs.mkdirSync(path.join(__dirname, 'uploads'), { recursive: true })
     const { payload: payloadFromInit, serverURL: url } = await initPayloadE2ENoConfig<Config>({
       dirname: __dirname,
     })
@@ -1760,8 +1761,11 @@ test.describe('Import Export Plugin', () => {
 
       expect(exports.docs).toHaveLength(1)
       const exportDoc = exports.docs[0]! as unknown as { filename: string; id: number | string }
-      const csvPath = path.join(__dirname, 'uploads', exportDoc.filename)
-      const rows = await readCSV(csvPath)
+      const response = await page.request.get(
+        `${serverURL}/api/posts-with-column-map-export/file/${encodeURIComponent(exportDoc.filename)}`,
+      )
+      expect(response.ok()).toBe(true)
+      const rows = await readCSV(await response.body())
 
       const matching = rows.find((row) => row['Post Title'] === 'E2E Export Rename')
       expect(matching).toBeDefined()

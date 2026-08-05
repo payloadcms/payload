@@ -115,6 +115,10 @@ export default withPayload(
   {
     additionalIgnoreImporters: [
       /^\.\.\/packages\/tanstack-start\/src\/views\/AdminView\.tsx(?:\?.*)?$/,
+      // Azure's browser SDK imports the browser-compatible `events` package.
+      /@azure\/storage-blob\/dist\/browser\//,
+      // Vercel Blob's client SDK resolves `undici` to its browser shim.
+      /@vercel\/blob\/dist\//,
     ],
     // Payload's monorepo packages and Next.js test fixtures both use `.client.*` modules.
     // The server-only specifier protection remains enabled for other source files.
