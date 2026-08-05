@@ -568,6 +568,7 @@ export const isTranslations: DefaultTranslationsObject = {
     addFile: 'Bæta við skrá',
     addFiles: 'Bæta við skrám',
     bulkUpload: 'Magn upphal',
+    copyLinkToFile: 'Afrita hlekk á skrá',
     crop: 'Skera',
     cropToolDescription:
       'Dragðu horn valda svæðisins, teiknaðu nýtt svæði eða stilltu gildin hér að neðan.',

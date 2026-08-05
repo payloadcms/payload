@@ -576,6 +576,7 @@ export const azTranslations: DefaultTranslationsObject = {
     addFile: 'Fayl əlavə et',
     addFiles: 'Faylları Əlavə Edin',
     bulkUpload: 'Kütləvi Yükləmə',
+    copyLinkToFile: 'Fayla keçidi kopyalayın',
     crop: 'Məhsul',
     cropToolDescription:
       'Seçilmiş sahənin köşələrini sürükləyin, yeni bir sahə çəkin və ya aşağıdakı dəyərləri düzəltin.',

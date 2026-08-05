@@ -572,6 +572,7 @@ export const taTranslations: DefaultTranslationsObject = {
     addFile: 'கோப்பை சேர்க்கவும்',
     addFiles: 'கோப்புகளை சேர்க்கவும்',
     bulkUpload: 'மொத்தமாக பதிவேற்றம்',
+    copyLinkToFile: 'கோப்புக்கான இணைப்பை நகலெடுக்கவும்',
     crop: 'வெட்டுக',
     cropToolDescription:
       'தேர்ந்த பகுதியின் மூலைகளை இழுத்து, புதிய பகுதியை வரையுங்கள் அல்லது கீழே உள்ள மதிப்புகளைச் சரிசெய்யவும்.',

@@ -574,6 +574,7 @@ export const idTranslations: DefaultTranslationsObject = {
     addFile: 'Tambah file',
     addFiles: 'Tambah file',
     bulkUpload: 'Unggah Massal',
+    copyLinkToFile: 'Salin tautan ke file',
     crop: 'Pangkas',
     cropToolDescription:
       'Seret sudut area yang dipilih, gambar area baru atau sesuaikan nilai di bawah ini.',

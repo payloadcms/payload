@@ -576,6 +576,7 @@ export const huTranslations: DefaultTranslationsObject = {
     addFile: 'Fájl hozzáadása',
     addFiles: 'Fájlok hozzáadása',
     bulkUpload: 'Tömeges feltöltés',
+    copyLinkToFile: 'Hivatkozás másolása a fájlhoz',
     crop: 'Termés',
     cropToolDescription:
       'Húzza a kijelölt terület sarkait, rajzoljon új területet, vagy igazítsa a lentebb található értékeket.',

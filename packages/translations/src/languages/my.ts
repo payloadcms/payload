@@ -578,6 +578,7 @@ export const myTranslations: DefaultTranslationsObject = {
     addFile: 'ဖိုင်ထည့်ပါ',
     addFiles: 'ဖိုင်များ ထည့်ပါ',
     bulkUpload: 'အစုလိုက် အပ်လုဒ်',
+    copyLinkToFile: 'ဖိုင်အတွက်လင့်ခ်ကို ကူးယူပါ',
     crop: 'သုန်း',
     cropToolDescription:
       'ရွေးထားသည့်ဧရိယာတွင်မွေးလျှက်မှုများကိုဆွဲပြီး, အသစ်တည်ပြီးသို့မဟုတ်အောက်ပါတ',

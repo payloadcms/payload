@@ -480,6 +480,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'upload:addFile',
   'upload:addFiles',
   'upload:bulkUpload',
+  'upload:copyLinkToFile',
   'upload:crop',
   'upload:cropToolDescription',
   'upload:dragAndDrop',
