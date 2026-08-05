@@ -85,7 +85,19 @@ const StepNav: React.FC<{
     const observer = new ResizeObserver(measure)
     observer.observe(container)
 
-    return () => observer.disconnect()
+    // A web font finishing loading can change the measured width without the
+    // container resizing, so the ResizeObserver alone won't catch it.
+    let isEffectActive = true
+    void document.fonts?.ready.then(() => {
+      if (isEffectActive) {
+        measure()
+      }
+    })
+
+    return () => {
+      isEffectActive = false
+      observer.disconnect()
+    }
   }, [canCollapse, stepNav, i18n, admin, t])
 
   const renderItem = (
