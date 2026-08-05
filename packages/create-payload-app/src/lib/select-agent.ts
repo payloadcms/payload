@@ -5,16 +5,14 @@ import type { AgentType, CliArgs } from '../types.js'
 type AgentChoice = {
   /** File to write at project root pointing agents to the skill */
   configFile: 'AGENTS.md' | 'CLAUDE.md'
-  /** Heading written at the top of the generated config file */
-  configHeading: string
   label: string
   value: AgentType
 }
 
 export const agentChoices: AgentChoice[] = [
-  { configFile: 'CLAUDE.md', configHeading: 'Claude Code', label: 'Claude Code', value: 'claude' },
-  { configFile: 'AGENTS.md', configHeading: 'Agents', label: 'Codex', value: 'codex' },
-  { configFile: 'AGENTS.md', configHeading: 'Agents', label: 'Cursor', value: 'cursor' },
+  { configFile: 'CLAUDE.md', label: 'Claude Code', value: 'claude' },
+  { configFile: 'AGENTS.md', label: 'Codex', value: 'codex' },
+  { configFile: 'AGENTS.md', label: 'Cursor', value: 'cursor' },
 ]
 
 const validAgentValues = agentChoices.map((c) => c.value)

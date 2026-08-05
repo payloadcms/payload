@@ -14,9 +14,9 @@ export function buildAgentConfigFile(agentType: AgentType): {
   content: string
   fileName: 'AGENTS.md' | 'CLAUDE.md'
 } {
-  const { configFile, configHeading } = getAgentChoice(agentType)
+  const { configFile } = getAgentChoice(agentType)
 
-  const content = `# ${configHeading}\n\nThis project uses the Payload CMS skill at \`${SKILL_PATH}/\`.\nStart with \`${SKILL_PATH}/SKILL.md\` for a quick reference, then see \`${SKILL_PATH}/reference/\` for detailed docs.\n`
+  const content = `# AI Agent\n\nFor any Payload-related work, reference the skill at \`${SKILL_PATH}/\`.\n`
 
   return { content, fileName: configFile }
 }
