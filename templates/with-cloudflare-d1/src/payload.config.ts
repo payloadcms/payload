@@ -13,9 +13,22 @@ import { Media } from './collections/Media'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
-const realpath = (value: string) => (fs.existsSync(value) ? fs.realpathSync(value) : undefined)
+const realpath = (value: string) => {
+  try {
+    return fs.existsSync(value) ? fs.realpathSync(value) : undefined
+  } catch {
+    return undefined
+  }
+}
 
-const isCLI = process.argv.some((value) => realpath(value).endsWith(path.join('payload', 'bin.js')))
+const isCLI = process.argv.some((value) => {
+  const resolved = realpath(value)
+  if (!resolved) return false
+  return (
+    resolved.endsWith(path.join('payload', 'bin.js')) ||
+    resolved.endsWith(path.join('next', 'dist', 'bin', 'next'))
+  )
+})
 const isProduction = process.env.NODE_ENV === 'production'
 
 const createLog =
@@ -49,6 +62,14 @@ export default buildConfig({
     importMap: {
       baseDir: path.resolve(dirname),
     },
+    meta: {
+      // Disabling OG image generation here and aliasing the endpoint module
+      // to a stub in next.config.ts keeps @vercel/og (~744 KiB gzip) out of
+      // the Worker bundle. @vercel/og works on Workers through OpenNext's
+      // compatibility patches, but the size cost exceeds the free-tier limit.
+      // To re-enable, remove this setting and the alias in next.config.ts.
+      defaultOGImageType: 'off',
+    },
   },
   collections: [Users, Media],
   editor: lexicalEditor(),
@@ -58,7 +79,7 @@ export default buildConfig({
   },
   db: sqliteD1Adapter({ binding: cloudflare.env.D1 }),
   logger: isProduction ? cloudflareLogger : undefined,
-  storage: [
+  plugins: [
     r2Storage({
       bucket: cloudflare.env.R2,
       collections: { media: true },
@@ -72,7 +93,7 @@ function getCloudflareContextFromWrangler(): Promise<CloudflareContext> {
     ({ getPlatformProxy }) =>
       getPlatformProxy({
         environment: process.env.CLOUDFLARE_ENV,
-        remoteBindings: isProduction,
+        remoteBindings: false,
       } satisfies GetPlatformProxyOptions),
   )
 }
