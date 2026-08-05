@@ -55,7 +55,12 @@ import {
   insert,
 } from '@payloadcms/drizzle/sqlite'
 import { like, notLike } from 'drizzle-orm'
-import { createDatabaseAdapter, defaultBeginTransaction, dynamicImport, findMigrationDir } from 'payload'
+import {
+  createDatabaseAdapter,
+  defaultBeginTransaction,
+  dynamicImport,
+  findMigrationDir,
+} from 'payload'
 import { fileURLToPath } from 'url'
 
 import type { Args, SQLiteAdapter, WalConfig } from './types.js'
