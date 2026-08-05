@@ -15,8 +15,7 @@ export const IDLabel: React.FC<{
   className?: string
   id: number | string
   prefix?: string
-  styleAsLink?: boolean
-}> = ({ id, className, prefix = 'ID', styleAsLink }) => {
+}> = ({ id, className, prefix = 'ID' }) => {
   const {
     config: {
       routes: { admin: adminRoute },
@@ -31,11 +30,7 @@ export const IDLabel: React.FC<{
   // Only render as link if we're inside a drawer and have document context
   const shouldRenderLink = drawerDepth > 0 && (collectionSlug || globalSlug)
 
-  const classes = [
-    baseClass,
-    (styleAsLink || shouldRenderLink) && `${baseClass}--is-link`,
-    className,
-  ]
+  const classes = [baseClass, shouldRenderLink && `${baseClass}--is-link`, className]
     .filter(Boolean)
     .join(' ')
 

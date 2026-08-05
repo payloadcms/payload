@@ -18,7 +18,9 @@
     white-space: nowrap;
   }
 
-  .id-label--is-link:hover {
+  .id-label--is-link:hover,
+  a:not([aria-disabled='true']):hover > .id-label,
+  button:not(:disabled):hover > .id-label {
     background: var(--color-bg-secondary-hover);
   }
 

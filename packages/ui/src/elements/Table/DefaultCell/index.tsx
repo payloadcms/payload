@@ -93,7 +93,7 @@ export const DefaultCell: React.FC<DefaultCellComponentProps> = (props) => {
   if (fieldIsID(field)) {
     return (
       <WrapElement {...wrapElementProps}>
-        <IDLabel id={cellData} styleAsLink={WrapElement !== 'span'} />
+        <IDLabel id={cellData} />
       </WrapElement>
     )
   }
