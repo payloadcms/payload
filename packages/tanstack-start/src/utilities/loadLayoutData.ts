@@ -1,10 +1,13 @@
-import type { Serializable } from '@tanstack/react-router'
+import type { SerializableExtensions } from '@tanstack/react-router'
 import type { ImportMap, SanitizedConfig } from 'payload'
 
 import { renderServerComponent } from '@tanstack/react-start/rsc'
 
 import { getLayoutData } from '../layouts/Root/getLayoutData.js'
 import { toSerializable } from './toSerializable.js'
+
+export type LoadLayoutDataResult = Record<string, unknown> &
+  SerializableExtensions['TsrSerializable']
 
 /**
  * Resolves the admin layout data for TanStack Start and returns a serializable
@@ -21,11 +24,13 @@ export async function loadLayoutData({
 }: {
   config: SanitizedConfig
   importMap: ImportMap
-}): Promise<Record<string, unknown> & Serializable> {
+}): Promise<LoadLayoutDataResult> {
   const { providers, ...data } = await getLayoutData({ configPromise: config, importMap })
 
-  return {
-    ...(toSerializable(data) as Record<string, unknown>),
+  const result: Record<string, unknown> = {
+    ...toSerializable(data),
     providers: providers ? await renderServerComponent(providers as any) : undefined,
-  } as unknown as Record<string, unknown> & Serializable
+  }
+
+  return result as LoadLayoutDataResult
 }
