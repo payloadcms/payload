@@ -133,11 +133,12 @@
     margin: 0;
     text-transform: lowercase;
     color: var(--color-text-tertiary);
+    display: none;
   }
 
-  @media (max-width: 768px) {
+  @media (min-width: 768px) {
     .file-manager__drag-text {
-      display: none;
+      display: block;
     }
   }
 
