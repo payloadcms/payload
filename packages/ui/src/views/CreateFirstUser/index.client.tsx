@@ -124,7 +124,7 @@ export const CreateFirstUserClient: React.FC<{
         />
         <ConfirmPasswordField />
         <RenderFields
-          fields={collectionConfig.fields}
+          fields={collectionConfig?.fields || []}
           forceRender
           parentIndexPath=""
           parentPath=""

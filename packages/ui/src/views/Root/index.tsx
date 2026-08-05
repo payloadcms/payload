@@ -183,7 +183,7 @@ export const renderRoot = async ({
 
   let collectionPreferences: CollectionPreferences = undefined
 
-  if (collectionConfig && segments.length === 2) {
+  if (req?.user?.id && collectionConfig && segments.length === 2) {
     await getPreferences<CollectionPreferences>(
       `collection-${collectionConfig.slug}`,
       req.payload,
