@@ -137,6 +137,12 @@ const tanstackSuites: TestConfig[] = [
   { file: 'joins', framework: 'tanstack-start', optional: false, shards: 1 },
   { file: 'admin-root', framework: 'tanstack-start', optional: false, shards: 1 },
   { file: 'queues', framework: 'tanstack-start', optional: false, shards: 1 },
+  {
+    file: 'fields__collections__UI',
+    framework: 'tanstack-start',
+    optional: false,
+    shards: 1,
+  },
 ]
 
 export default createE2EConfig([...nextSuites, ...tanstackSuites])
