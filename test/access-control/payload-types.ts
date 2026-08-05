@@ -62,15 +62,15 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_BCC128A5".
+ * via the `definition` "LexicalNodes_2332B802".
  */
-export type LexicalNodes_BCC128A5 =
+export type LexicalNodes_2332B802 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_BCC128A5>
+  | SerializedParagraphNode<LexicalNodes_2332B802>
   | SerializedBlockNode<MyBlock>
-  | SerializedHeadingNode<LexicalNodes_BCC128A5>
+  | SerializedHeadingNode<LexicalNodes_2332B802>
   | {
       type: 'upload';
       /**
@@ -79,11 +79,11 @@ export type LexicalNodes_BCC128A5 =
       version: number;
       [k: string]: unknown;
     }
-  | SerializedQuoteNode<LexicalNodes_BCC128A5>
-  | SerializedListNode<LexicalNodes_BCC128A5>
-  | SerializedListItemNode<LexicalNodes_BCC128A5>
-  | SerializedAutoLinkNode<LexicalNodes_BCC128A5, LexicalLinkFields_0A7E9EC0>
-  | SerializedLinkNode<LexicalNodes_BCC128A5, LexicalLinkFields_0A7E9EC0>
+  | SerializedQuoteNode<LexicalNodes_2332B802>
+  | SerializedListNode<LexicalNodes_2332B802>
+  | SerializedListItemNode<LexicalNodes_2332B802>
+  | SerializedAutoLinkNode<LexicalNodes_2332B802, LexicalLinkFields_0A7E9EC0>
+  | SerializedLinkNode<LexicalNodes_2332B802, LexicalLinkFields_0A7E9EC0>
   | SerializedRelationshipNode<
       | 'users'
       | 'public-users'
@@ -103,7 +103,6 @@ export type LexicalNodes_BCC128A5 =
       | 'hidden-access'
       | 'hidden-access-count'
       | 'fields-and-top-access'
-      | 'inherited-read-versions'
       | 'blocks-field-access'
       | 'disabled'
       | 'rich-text'
@@ -125,13 +124,13 @@ export type LexicalNodes_BCC128A5 =
     >;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_5EE3E368".
+ * via the `definition` "LexicalNodes_ACB93F89".
  */
-export type LexicalNodes_5EE3E368 =
+export type LexicalNodes_ACB93F89 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_5EE3E368>
+  | SerializedParagraphNode<LexicalNodes_ACB93F89>
   | SerializedHorizontalRuleNode
   | {
       type: 'upload';
@@ -141,7 +140,7 @@ export type LexicalNodes_5EE3E368 =
       version: number;
       [k: string]: unknown;
     }
-  | SerializedQuoteNode<LexicalNodes_5EE3E368>
+  | SerializedQuoteNode<LexicalNodes_ACB93F89>
   | SerializedRelationshipNode<
       | 'users'
       | 'public-users'
@@ -161,7 +160,6 @@ export type LexicalNodes_5EE3E368 =
       | 'hidden-access'
       | 'hidden-access-count'
       | 'fields-and-top-access'
-      | 'inherited-read-versions'
       | 'blocks-field-access'
       | 'disabled'
       | 'rich-text'
@@ -181,11 +179,11 @@ export type LexicalNodes_5EE3E368 =
       | 'payload-preferences'
       | 'payload-migrations'
     >
-  | SerializedAutoLinkNode<LexicalNodes_5EE3E368, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_5EE3E368, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_5EE3E368>
-  | SerializedListItemNode<LexicalNodes_5EE3E368>
-  | SerializedHeadingNode<LexicalNodes_5EE3E368>;
+  | SerializedAutoLinkNode<LexicalNodes_ACB93F89, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_ACB93F89, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_ACB93F89>
+  | SerializedListItemNode<LexicalNodes_ACB93F89>
+  | SerializedHeadingNode<LexicalNodes_ACB93F89>;
 
 export interface Config {
   auth: {
@@ -215,7 +213,6 @@ export interface Config {
     'hidden-access': HiddenAccess;
     'hidden-access-count': HiddenAccessCount;
     'fields-and-top-access': FieldsAndTopAccess;
-    'inherited-read-versions': InheritedReadVersion;
     'blocks-field-access': BlocksFieldAccess;
     disabled: Disabled;
     'rich-text': RichText;
@@ -255,7 +252,6 @@ export interface Config {
     'hidden-access': HiddenAccessSelect<false> | HiddenAccessSelect<true>;
     'hidden-access-count': HiddenAccessCountSelect<false> | HiddenAccessCountSelect<true>;
     'fields-and-top-access': FieldsAndTopAccessSelect<false> | FieldsAndTopAccessSelect<true>;
-    'inherited-read-versions': InheritedReadVersionsSelect<false> | InheritedReadVersionsSelect<true>;
     'blocks-field-access': BlocksFieldAccessSelect<false> | BlocksFieldAccessSelect<true>;
     disabled: DisabledSelect<false> | DisabledSelect<true>;
     'rich-text': RichTextSelect<false> | RichTextSelect<true>;
@@ -296,8 +292,6 @@ export interface Config {
   locale: null;
   widgets: {
     collections: CollectionsWidget;
-    'collection-query': CollectionQueryWidget;
-    activity: ActivityWidget;
   };
   user: User | PublicUser | AuthCollection;
   jobs: {
@@ -620,16 +614,6 @@ export interface FieldsAndTopAccess {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "inherited-read-versions".
- */
-export interface InheritedReadVersion {
-  id: string;
-  secret?: string | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "blocks-field-access".
  */
 export interface BlocksFieldAccess {
@@ -716,7 +700,7 @@ export interface RichText {
  * via the `definition` "RichText".
  */
 export interface RichText1 {
-  richText?: LexicalRichText<LexicalNodes_BCC128A5> | null;
+  richText?: LexicalRichText<LexicalNodes_2332B802> | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'richText';
@@ -728,24 +712,24 @@ export interface RichText1 {
 export interface Regression1 {
   id: string;
   group1?: {
-    richText1?: LexicalRichText<LexicalNodes_5EE3E368> | null;
+    richText1?: LexicalRichText<LexicalNodes_ACB93F89> | null;
     text?: string | null;
   };
   tab1?: {
-    richText2?: LexicalRichText<LexicalNodes_5EE3E368> | null;
-    blocks2?: MyBlock_CB3FAE6A[] | null;
+    richText2?: LexicalRichText<LexicalNodes_ACB93F89> | null;
+    blocks2?: MyBlock_80E55F5A[] | null;
   };
-  richText4?: LexicalRichText<LexicalNodes_5EE3E368> | null;
+  richText4?: LexicalRichText<LexicalNodes_ACB93F89> | null;
   blocks3?: MyBlock2[] | null;
   array?:
     | {
-        art?: LexicalRichText<LexicalNodes_5EE3E368> | null;
+        art?: LexicalRichText<LexicalNodes_ACB93F89> | null;
         id?: string | null;
       }[]
     | null;
   arrayWithAccessFalse?:
     | {
-        richText6?: LexicalRichText<LexicalNodes_5EE3E368> | null;
+        richText6?: LexicalRichText<LexicalNodes_ACB93F89> | null;
         id?: string | null;
       }[]
     | null;
@@ -757,10 +741,10 @@ export interface Regression1 {
  * Multiple blocks resolve to the `MyBlock` interface with different fields, so a content hash is appended to keep the generated types stable and unambiguous. Set a unique `interfaceName` on the block to choose the name yourself. See https://payloadcms.com/docs/typescript/generating-types#block-interface-name-collisions
  *
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "MyBlock_CB3FAE6A".
+ * via the `definition` "MyBlock_80E55F5A".
  */
-export interface MyBlock_CB3FAE6A {
-  richText3?: LexicalRichText<LexicalNodes_5EE3E368> | null;
+export interface MyBlock_80E55F5A {
+  richText3?: LexicalRichText<LexicalNodes_ACB93F89> | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'myBlock';
@@ -770,7 +754,7 @@ export interface MyBlock_CB3FAE6A {
  * via the `definition` "MyBlock2".
  */
 export interface MyBlock2 {
-  richText5?: LexicalRichText<LexicalNodes_5EE3E368> | null;
+  richText5?: LexicalRichText<LexicalNodes_ACB93F89> | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'myBlock2';
@@ -780,7 +764,7 @@ export interface MyBlock2 {
  * via the `definition` "MyBlock3".
  */
 export interface MyBlock3 {
-  richText7?: LexicalRichText<LexicalNodes_5EE3E368> | null;
+  richText7?: LexicalRichText<LexicalNodes_ACB93F89> | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'myBlock3';
@@ -792,12 +776,12 @@ export interface MyBlock3 {
 export interface Regression2 {
   id: string;
   group?: {
-    richText1?: LexicalRichText<LexicalNodes_5EE3E368> | null;
+    richText1?: LexicalRichText<LexicalNodes_ACB93F89> | null;
     text?: string | null;
   };
   array?:
     | {
-        richText2?: LexicalRichText<LexicalNodes_5EE3E368> | null;
+        richText2?: LexicalRichText<LexicalNodes_ACB93F89> | null;
         id?: string | null;
       }[]
     | null;
@@ -1075,10 +1059,6 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'fields-and-top-access';
         value: string | FieldsAndTopAccess;
-      } | null)
-    | ({
-        relationTo: 'inherited-read-versions';
-        value: string | InheritedReadVersion;
       } | null)
     | ({
         relationTo: 'blocks-field-access';
@@ -1428,15 +1408,6 @@ export interface FieldsAndTopAccessSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "inherited-read-versions_select".
- */
-export interface InheritedReadVersionsSelect<T extends boolean = true> {
-  secret?: T;
-  updatedAt?: T;
-  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1950,108 +1921,6 @@ export interface CollectionsWidget {
     [k: string]: unknown;
   };
   width: 'full';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "collection-query_widget".
- */
-export interface CollectionQueryWidget {
-  data?: {
-    title?: string | null;
-    relatedCollection:
-      | 'users'
-      | 'public-users'
-      | 'posts'
-      | 'unrestricted'
-      | 'relation-restricted'
-      | 'fully-restricted'
-      | 'read-only-collection'
-      | 'user-restricted-collection'
-      | 'can-create-not-update-collection'
-      | 'restricted-versions'
-      | 'restricted-versions-admin-panel'
-      | 'sibling-data'
-      | 'rely-on-request-headers'
-      | 'doc-level-access'
-      | 'hidden-fields'
-      | 'hidden-access'
-      | 'hidden-access-count'
-      | 'fields-and-top-access'
-      | 'inherited-read-versions'
-      | 'blocks-field-access'
-      | 'disabled'
-      | 'rich-text'
-      | 'regression1'
-      | 'regression2'
-      | 'hooks'
-      | 'auth-collection'
-      | 'read-restricted'
-      | 'differentiated-trash'
-      | 'restricted-trash'
-      | 'field-restricted-update-based-on-data'
-      | 'where-cache-same'
-      | 'where-cache-unique'
-      | 'async-parent';
-    where?:
-      | {
-          [k: string]: unknown;
-        }
-      | unknown[]
-      | string
-      | number
-      | boolean
-      | null;
-    sortField?: string | null;
-    sortDirection?: ('asc' | 'desc') | null;
-    limit?: number | null;
-  };
-  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "activity_widget".
- */
-export interface ActivityWidget {
-  data?: {
-    excludedCollections?:
-      | (
-          | 'users'
-          | 'public-users'
-          | 'posts'
-          | 'unrestricted'
-          | 'relation-restricted'
-          | 'fully-restricted'
-          | 'read-only-collection'
-          | 'user-restricted-collection'
-          | 'can-create-not-update-collection'
-          | 'restricted-versions'
-          | 'restricted-versions-admin-panel'
-          | 'sibling-data'
-          | 'rely-on-request-headers'
-          | 'doc-level-access'
-          | 'hidden-fields'
-          | 'hidden-access'
-          | 'hidden-access-count'
-          | 'fields-and-top-access'
-          | 'inherited-read-versions'
-          | 'blocks-field-access'
-          | 'disabled'
-          | 'rich-text'
-          | 'regression1'
-          | 'regression2'
-          | 'hooks'
-          | 'auth-collection'
-          | 'read-restricted'
-          | 'differentiated-trash'
-          | 'restricted-trash'
-          | 'field-restricted-update-based-on-data'
-          | 'where-cache-same'
-          | 'where-cache-unique'
-          | 'async-parent'
-        )[]
-      | null;
-  };
-  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
