@@ -700,6 +700,7 @@ pnpm add stripe
 | `webhooks`       | `WebhookHandler[]` | An array of webhook handlers to register within Payload's REST API for Stripe to callback.                                                                                           |
 | `apiVersion`     | `string`           | The Stripe API version to use. See [docs](https://stripe.com/docs/api/versioning). This will be deprecated soon by Stripe's SDK, configure the API version in your Stripe Dashboard. |
 | `appInfo`        | `object`           | The application info to pass to Stripe. See [docs](https://stripe.com/docs/api/app_info).                                                                                            |
+| `httpClient`     | `HttpClient`       | The HTTP client used for Stripe API requests. Use Stripe's fetch HTTP client for fetch-only runtimes such as Cloudflare Workers.                                                     |
 
 ```ts
 import { stripeAdapter } from '@payloadcms/plugin-ecommerce/payments/stripe'
@@ -708,6 +709,18 @@ stripeAdapter({
   secretKey: process.env.STRIPE_SECRET_KEY!,
   publishableKey: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!,
   webhookSecret: process.env.STRIPE_WEBHOOKS_SIGNING_SECRET!,
+})
+```
+
+For fetch-only runtimes such as Cloudflare Workers, pass Stripe's fetch HTTP client:
+
+```ts
+import Stripe from 'stripe'
+
+stripeAdapter({
+  httpClient: Stripe.createFetchHttpClient(),
+  publishableKey: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!,
+  secretKey: process.env.STRIPE_SECRET_KEY!,
 })
 ```
 
