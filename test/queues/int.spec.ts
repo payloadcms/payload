@@ -3189,9 +3189,12 @@ describe('Queues - Payload', () => {
       })
       expect(afterRecoveryDocs.totalDocs).toBe(1)
 
-      // The cron's blocking flag should NOT be stuck
+      // The cron's blocking flag should NOT be stuck. The cron keeps ticking every second, so a
+      // tick can legitimately be in flight here - poll until the flag clears instead of reading it
+      // once. A stuck flag never clears and still fails this assertion.
       const cronInstance = payload.crons[0] as any
-      expect(cronInstance._states.blocking).toBe(false)
+
+      await expect.poll(() => cronInstance._states.blocking, { timeout: 10000 }).toBe(false)
     })
   })
 })
