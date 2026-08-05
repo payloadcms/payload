@@ -40,7 +40,6 @@ import {
   type Options as VerifyEmailOptions,
 } from './auth/operations/local/verifyEmail.js'
 export {
-  DEV_RELOAD_STRATEGY_GLOBAL_KEY,
   getRegisteredDevReloadStrategy,
   registerDevReloadStrategy,
 } from './admin/adapters/devReload.js'
@@ -1187,16 +1186,16 @@ export const reload = async (
   ;(global as any)._payload_doNotCacheClientSchemaMap = true
 }
 
-let _cached: Map<
-  string,
-  {
-    devReloadCleanup: (() => void) | null
-    initializedCrons: boolean
-    payload: null | Payload
-    promise: null | Promise<Payload>
-    reload: boolean | Promise<void>
-  }
-> = (global as any)._payload
+type CachedPayload = {
+  devReloadCleanup: (() => void) | null
+  devReloadStrategy: DevReloadStrategy | null
+  initializedCrons: boolean
+  payload: null | Payload
+  promise: null | Promise<Payload>
+  reload: boolean | Promise<void>
+}
+
+let _cached: Map<string, CachedPayload> = (global as any)._payload
 
 if (!_cached) {
   _cached = (global as any)._payload = new Map()
@@ -1257,12 +1256,80 @@ function defaultNextJsDevReloadStrategy(): DevReloadStrategy | null {
   }
 }
 
+/**
+ * Memoized so the strategy has a stable identity across `getPayload` calls -
+ * {@link connectDevReload} reconnects whenever the strategy in effect changes.
+ */
+let memoizedNextJsDevReloadStrategy: DevReloadStrategy | null | undefined
+
+/**
+ * Subscribes the cached instance to the dev reload strategy currently in effect,
+ * reconnecting if that strategy has been replaced since the last call.
+ *
+ * Reconnecting matters for adapters whose server runtime is itself hot-reloadable:
+ * Vite discards and re-evaluates the module that called `registerDevReloadStrategy`,
+ * orphaning its subscription, while the cached instance lives on the Node global
+ * and survives. Connecting only once would leave the instance permanently deaf to
+ * further config changes.
+ */
+function connectDevReload({
+  cached,
+  strategyFromOptions,
+}: {
+  cached: CachedPayload
+  strategyFromOptions: DevReloadStrategy | undefined
+}): void {
+  if (
+    process.env.NODE_ENV === 'production' ||
+    process.env.NODE_ENV === 'test' ||
+    process.env.DISABLE_PAYLOAD_HMR === 'true'
+  ) {
+    return
+  }
+
+  if (memoizedNextJsDevReloadStrategy === undefined) {
+    memoizedNextJsDevReloadStrategy = defaultNextJsDevReloadStrategy()
+  }
+
+  const strategy =
+    strategyFromOptions ?? getRegisteredDevReloadStrategy() ?? memoizedNextJsDevReloadStrategy
+
+  if (!strategy || strategy === cached.devReloadStrategy) {
+    return
+  }
+
+  cached.devReloadStrategy = strategy
+
+  try {
+    cached.devReloadCleanup?.()
+  } catch (_) {
+    // swallow cleanup errors from the strategy being replaced
+  }
+
+  cached.devReloadCleanup = null
+
+  try {
+    cached.devReloadCleanup = strategy.connect(() => {
+      if (cached.reload instanceof Promise) {
+        return
+      }
+      cached.reload = true
+    })
+  } catch (_) {
+    // swallow connection errors
+  }
+}
+
 export const getPayload = async (
   options: {
     /**
-     * Custom dev reload strategy. If provided, replaces the default
-     * Next.js HMR WebSocket listener. The strategy's `connect` function
-     * receives a callback to trigger config reload.
+     * Custom dev reload strategy. If provided, takes precedence over any strategy
+     * passed to `registerDevReloadStrategy` and over the default Next.js HMR
+     * WebSocket listener. The strategy's `connect` function receives a callback to
+     * trigger config reload.
+     *
+     * Pass a stable reference: a strategy is reconnected whenever its identity
+     * changes, so a new object literal on every call reconnects on every call.
      */
     devReloadStrategy?: DevReloadStrategy
     /**
@@ -1284,6 +1351,7 @@ export const getPayload = async (
   if (!cached) {
     cached = {
       devReloadCleanup: null,
+      devReloadStrategy: null,
       initializedCrons: Boolean(options.cron),
       payload: null,
       promise: null,
@@ -1301,6 +1369,8 @@ export const getPayload = async (
   }
 
   if (cached.payload) {
+    connectDevReload({ cached, strategyFromOptions: options.devReloadStrategy })
+
     if (options.cron && !cached.initializedCrons) {
       // getPayload called with crons enabled, but existing cached version does not have crons initialized. => Initialize crons in existing cached version
       cached.initializedCrons = true
@@ -1349,33 +1419,7 @@ export const getPayload = async (
 
     cached.payload = await cached.promise
 
-    if (
-      !cached.devReloadCleanup &&
-      process.env.NODE_ENV !== 'production' &&
-      process.env.NODE_ENV !== 'test' &&
-      process.env.DISABLE_PAYLOAD_HMR !== 'true'
-    ) {
-      // Without the registered strategy, adapters only reach the `getPayload`
-      // calls they make themselves; internal ones like `createPayloadRequest`
-      // would fall through to the Next.js websocket and never see a reload.
-      const strategy =
-        options.devReloadStrategy ??
-        getRegisteredDevReloadStrategy() ??
-        defaultNextJsDevReloadStrategy()
-
-      if (strategy) {
-        try {
-          cached.devReloadCleanup = strategy.connect(() => {
-            if (cached.reload instanceof Promise) {
-              return
-            }
-            cached.reload = true
-          })
-        } catch (_) {
-          // swallow connection errors
-        }
-      }
-    }
+    connectDevReload({ cached, strategyFromOptions: options.devReloadStrategy })
   } catch (e) {
     cached.promise = null
     // add identifier to error object, so that our error logger in routeError.ts does not attempt to re-initialize getPayload

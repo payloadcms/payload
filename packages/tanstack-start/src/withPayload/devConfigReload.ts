@@ -1,26 +1,18 @@
-import type { EnvironmentModuleNode, Logger, PluginOption } from 'vite'
+import type { EnvironmentModuleNode, PluginOption, ViteDevServer } from 'vite'
 
 import path from 'node:path'
 import { normalizePath } from 'vite'
 
-/**
- * Must match `DEV_RELOAD_STRATEGY_GLOBAL_KEY` in `payload`. Set directly rather
- * than via `registerDevReloadStrategy` so loading `vite.config.ts` doesn't pull
- * in the whole CMS runtime. Dev serve bundles its own copy of `payload` anyway,
- * so `globalThis` is the only channel shared with the running instance.
- */
-const DEV_RELOAD_STRATEGY_GLOBAL_KEY = '_payload_devReloadStrategy'
-
-type DevReloadStrategy = {
-  connect: (onReload: () => void) => () => void
-}
+import { PAYLOAD_CONFIG_CHANGED_EVENT } from '../utilities/devConfigReloadEvent.js'
 
 /**
  * Reloads Payload when `payload.config.ts`, or anything it imports, changes.
  *
  * Vite re-evaluates the config module on its own, but `getPayload` keeps
- * serving its cached instance until a `DevReloadStrategy` marks it stale. The
- * instance is only marked here; `getPayload` reloads on its next call.
+ * serving its cached instance until a `DevReloadStrategy` marks it stale. This
+ * plugin only broadcasts the change; `devConfigReload.server.ts` subscribes
+ * from inside the server runtime and marks the instance, which `getPayload`
+ * then reloads on its next call.
  */
 export function payloadDevConfigReload({
   payloadConfigPath,
@@ -28,45 +20,21 @@ export function payloadDevConfigReload({
   payloadConfigPath: string
 }): PluginOption {
   const configFile = normalizePath(path.resolve(payloadConfigPath))
-  const listeners = new Set<() => void>()
 
-  const strategy: DevReloadStrategy = {
-    connect: (onReload) => {
-      listeners.add(onReload)
-      return () => {
-        listeners.delete(onReload)
-      }
-    },
-  }
-
-  let logger: Logger | undefined
+  let server: undefined | ViteDevServer
 
   // Vite runs `hotUpdate` once per environment (client, ssr, rsc) per change,
   // sharing one timestamp; without this the notice prints three times.
   let lastHandled = ''
 
-  const setGlobalStrategy = (value: DevReloadStrategy | null) => {
-    ;(globalThis as unknown as Record<string, unknown>)[DEV_RELOAD_STRATEGY_GLOBAL_KEY] = value
-  }
-
   return {
     name: 'payload:dev-config-reload',
     apply: 'serve',
-    configureServer(server) {
-      logger = server.config.logger
-
-      // `getPayload` reads the strategy once, when it constructs the instance,
-      // so this has to land before the first request.
-      setGlobalStrategy(strategy)
-
-      server.httpServer?.once('close', () => {
-        listeners.clear()
-        setGlobalStrategy(null)
-      })
+    configureServer(devServer) {
+      server = devServer
     },
     hotUpdate({ file, modules, timestamp }) {
-      // No instance yet, so nothing is stale.
-      if (listeners.size === 0) {
+      if (!server) {
         return
       }
 
@@ -82,12 +50,18 @@ export function payloadDevConfigReload({
 
       lastHandled = changeKey
 
-      logger?.info(`payload config changed, reloading Payload (${path.basename(file)})`, {
-        timestamp: true,
-      })
+      server.config.logger.info(
+        `payload config changed, reloading Payload (${path.basename(file)})`,
+        { timestamp: true },
+      )
 
-      for (const onReload of listeners) {
-        onReload()
+      // Broadcast to every environment rather than just `this.environment`: the
+      // changed module may only be in the graph of the environment that saw it,
+      // while the Payload instance was built in another. Each environment's
+      // runtime subscribes with its own copy of `payload`, and environments with
+      // no subscriber (e.g. `client`) simply ignore the event.
+      for (const environment of Object.values(server.environments)) {
+        environment.hot.send({ type: 'custom', event: PAYLOAD_CONFIG_CHANGED_EVENT })
       }
     },
   }
