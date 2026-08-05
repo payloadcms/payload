@@ -167,6 +167,7 @@ jobs:
       - run: pnpm run build:all
         env:
           DO_NOT_TRACK: 1 # Disable Turbopack telemetry
+          NODE_OPTIONS: --max-old-space-size=4096
 
       - name: Cache build
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5

@@ -16,7 +16,7 @@ inputs:
   pnpm-install-cache-key:
     description: The cache key override for the pnpm install cache
   restore-build:
-    description: Whether to restore the build cache (polls for availability, falls back to full build on miss)
+    description: Whether to restore the build cache (falls back to full build on miss)
     default: 'false'
 
 outputs:
@@ -112,50 +112,16 @@ runs:
       shell: bash
       id: compute-output
 
-    - name: Poll for build cache
-      if: ${{ inputs.restore-build == 'true' }}
-      shell: bash
-      env:
-        GH_TOKEN: ${{ github.token }}
-      run: |
-        CACHE_KEY="${{ github.sha }}"
-        POLL_INTERVAL=10
-        TIMEOUT=120
-        ELAPSED=0
-        CACHE_FOUND=false
-
-        echo "Polling for build cache key: $CACHE_KEY"
-
-        while [ $ELAPSED -lt $TIMEOUT ]; do
-          if ! RESULT=$(gh cache list --repo "$GITHUB_REPOSITORY" --key "$CACHE_KEY" --json key --jq "[.[] | select(.key == \"$CACHE_KEY\")] | length"); then
-            echo "::warning::gh cache list failed, falling back to full build"
-            break
-          fi
-          if [ "$RESULT" -gt 0 ]; then
-            echo "Cache found after ${ELAPSED}s"
-            CACHE_FOUND=true
-            break
-          fi
-          echo "Cache not found yet (${ELAPSED}s elapsed), retrying in ${POLL_INTERVAL}s..."
-          sleep $POLL_INTERVAL
-          ELAPSED=$((ELAPSED + POLL_INTERVAL))
-        done
-
-        if [ "$CACHE_FOUND" = "false" ]; then
-          echo "::warning::Build cache not found after ${TIMEOUT}s — will run full build as fallback"
-        fi
-
-        echo "CACHE_FOUND=$CACHE_FOUND" >> $GITHUB_ENV
-
     - name: Restore build cache
-      if: ${{ inputs.restore-build == 'true' && env.CACHE_FOUND == 'true' }}
+      id: restore-build-cache
+      if: ${{ inputs.restore-build == 'true' }}
       uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
       with:
         path: ./*
         key: ${{ github.sha }}
 
     - name: Fallback — install and build
-      if: ${{ inputs.restore-build == 'true' && env.CACHE_FOUND != 'true' }}
+      if: ${{ inputs.restore-build == 'true' && steps.restore-build-cache.outputs.cache-hit != 'true' }}
       shell: bash
       run: |
         echo "::warning::Build cache miss — running full build as fallback"
@@ -163,3 +129,4 @@ runs:
         pnpm run build:all
       env:
         DO_NOT_TRACK: 1
+        NODE_OPTIONS: --max-old-space-size=4096
