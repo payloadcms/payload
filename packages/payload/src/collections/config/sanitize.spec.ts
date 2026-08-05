@@ -130,6 +130,35 @@ describe('baseAccess', () => {
     expect(await result.access.read({ req })).toBe(false)
   })
 
+  it('should not apply base access to auth collection admin access', async () => {
+    const adminAccess = vi.fn(() => true)
+    const baseAccess = vi.fn(() => false)
+    const config = {
+      baseAccess,
+      collections: [],
+      globals: [],
+    } as any
+    const collection: CollectionConfig = {
+      slug: 'users',
+      access: {
+        admin: adminAccess,
+      },
+      auth: true,
+      fields: [],
+    }
+    const req = {
+      payload: {
+        config,
+      },
+    } as any
+
+    const result = sanitizeCollection(config, collection)
+
+    expect(await result.access.admin({ req })).toBe(true)
+    expect(adminAccess).toHaveBeenCalledOnce()
+    expect(baseAccess).not.toHaveBeenCalled()
+  })
+
   it('should reject query constraints for collection create operations', async () => {
     const config = {
       baseAccess: () => ({

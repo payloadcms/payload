@@ -53,7 +53,7 @@ const defaultPayloadAccess = ({ req: { payload, user } }) => {
 ## Base Access Control
 
 Use the top-level `baseAccess` config to apply an additional constraint to
-every Collection and Global operation:
+standard Collection and Global Access Control operations:
 
 ```ts
 export default buildConfig({
@@ -82,8 +82,9 @@ In addition to the standard Access Control arguments, `baseAccess` receives:
 - `slug`: the Collection or Global slug
 
 `baseAccess` applies only to Collection and Global Access Control. It does not
-apply to Field Access Control, custom endpoints, direct database adapter calls,
-job access, or other APIs with dedicated access configuration.
+apply to an auth Collection's `access.admin` function, Field Access Control,
+custom endpoints, direct database adapter calls, job access, or other APIs with
+dedicated access configuration.
 
 Like other Access Control, `baseAccess` is skipped when Local API operations use
 `overrideAccess: true`.

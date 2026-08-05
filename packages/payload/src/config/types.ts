@@ -1243,9 +1243,9 @@ export type Config = {
     jwtOrder: ('Bearer' | 'cookie' | 'JWT')[]
   }
   /**
-   * Define an access constraint that is applied to every Collection and Global operation.
+   * Define an access constraint that is combined with standard Collection and Global Access Control using AND semantics.
    *
-   * The result is combined with each resource's access result using AND semantics.
+   * This does not apply to an auth Collection's `access.admin` function.
    */
   baseAccess?: BaseAccess
   /** Custom Payload bin scripts can be injected via the config. */
