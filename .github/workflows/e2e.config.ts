@@ -134,6 +134,7 @@ const tanstackSuites: TestConfig[] = [
   { file: 'i18n', framework: 'tanstack-start', optional: false, shards: 1 },
   { file: 'hierarchy', framework: 'tanstack-start', optional: false, shards: 1 },
   { file: 'query-presets', framework: 'tanstack-start', optional: false, shards: 1 },
+  { file: 'joins', framework: 'tanstack-start', optional: false, shards: 1 },
 ]
 
 export default createE2EConfig([...nextSuites, ...tanstackSuites])
