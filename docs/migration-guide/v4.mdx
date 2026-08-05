@@ -269,6 +269,7 @@ The `collection` property remains available on authenticated users and in client
 - `ClientUser` is removed — replace it with `AuthenticatedUser` for `useAuth().user`, `me` responses, and other client auth APIs.
 - `User` and `AuthenticatedUser` no longer have a `{ [key: string]: any }` index signature. Custom auth-collection fields require generated types or an explicit augmented type or cast.
 - `req.user` and `payload.auth().user` are now typed as `AuthenticatedUser`, so `_strategy` and `_sid` type-check.
+- The deprecated top-level `strategy` field is removed from `me` and `refresh` responses (REST, GraphQL, and the SDK). Read `user._strategy` instead.
 - `@payloadcms/plugin-ecommerce`'s `ClientUserWithCart` is removed — replace it with `UserWithCart`.
 - `MeOperationResult.user` and `refreshCookieAsync()` can be `null`, matching their existing runtime behavior. `refreshCookieAsync()` also preserves the custom user type passed to `useAuth<T>()`.
 - Collection `admin.hidden` callbacks now receive `PayloadRequest['user']`, including `null` when there is no authenticated user.

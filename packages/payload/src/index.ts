@@ -8,7 +8,6 @@ import { spawn } from 'child_process'
 import crypto from 'crypto'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
-import WebSocket from 'ws'
 
 import type { DevReloadStrategy } from './admin/adapters/devReload.js'
 import type { AuthArgs } from './auth/operations/auth.js'
@@ -154,6 +153,7 @@ import { _internal_jobSystemGlobals } from './queues/utilities/getCurrentDate.js
 import { formatAdminURL } from './utilities/formatAdminURL.js'
 import { isNextBuild } from './utilities/isNextBuild.js'
 import { getLogger } from './utilities/logger.js'
+import { defaultNextJsDevReloadStrategy } from './utilities/nextJsDevReloadStrategy.js'
 import { serverInit as serverInitTelemetry } from './utilities/telemetry/events/serverInit.js'
 import { traverseFields } from './utilities/traverseFields.js'
 
@@ -1202,61 +1202,6 @@ if (!_cached) {
 }
 
 /**
- * Get a payload instance.
- * This function is a wrapper around new BasePayload().init() that adds the following functionality on top of that:
- *
- * - smartly caches Payload instance on the module scope. That way, we prevent unnecessarily initializing Payload over and over again
- * when calling getPayload multiple times or from multiple locations.
- * - adds HMR support and reloads the payload instance when the config changes.
- */
-/**
- * Default HMR reload strategy using Next.js webpack-hmr WebSocket.
- * Used as fallback when no custom devReloadStrategy is provided.
- */
-function defaultNextJsDevReloadStrategy(): DevReloadStrategy | null {
-  try {
-    const port = process.env.PORT || '3000'
-    const hasHTTPS =
-      process.env.USE_HTTPS === 'true' || process.argv.includes('--experimental-https')
-    const protocol = hasHTTPS ? 'wss' : 'ws'
-
-    const hmrPath = '/_next/webpack-hmr'
-    const prefix = process.env.__NEXT_ASSET_PREFIX ?? ''
-
-    const url =
-      process.env.PAYLOAD_HMR_URL_OVERRIDE ?? `${protocol}://localhost:${port}${prefix}${hmrPath}`
-
-    return {
-      connect(onReload) {
-        const ws = new WebSocket(url)
-
-        ws.onmessage = (event) => {
-          if (typeof event.data === 'string') {
-            const data = JSON.parse(event.data)
-            if (
-              data.type === 'serverComponentChanges' ||
-              data.action === 'serverComponentChanges'
-            ) {
-              onReload()
-            }
-          }
-        }
-
-        ws.onerror = () => {
-          // swallow any websocket connection error
-        }
-
-        return () => {
-          ws.close()
-        }
-      },
-    }
-  } catch (_) {
-    return null
-  }
-}
-
-/**
  * Memoized so the strategy has a stable identity across `getPayload` calls -
  * {@link connectDevReload} reconnects whenever the strategy in effect changes.
  */
@@ -1320,6 +1265,14 @@ function connectDevReload({
   }
 }
 
+/**
+ * Get a payload instance.
+ * This function is a wrapper around new BasePayload().init() that adds the following functionality on top of that:
+ *
+ * - smartly caches Payload instance on the module scope. That way, we prevent unnecessarily initializing Payload over and over again
+ * when calling getPayload multiple times or from multiple locations.
+ * - adds HMR support and reloads the payload instance when the config changes.
+ */
 export const getPayload = async (
   options: {
     /**
