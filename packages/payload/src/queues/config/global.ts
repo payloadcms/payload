@@ -1,7 +1,6 @@
-import type { Config } from '../../config/types.js'
 import type { GlobalConfig } from '../../globals/config/types.js'
-import type { TaskType } from './types/taskTypes.js'
-import type { WorkflowTypes } from './types/workflowTypes.js'
+import type { TaskSlug } from './types/taskTypes.js'
+import type { WorkflowSlug } from './types/workflowTypes.js'
 
 export const jobStatsGlobalSlug = 'payload-jobs-stats'
 
@@ -14,12 +13,12 @@ export type JobStats = {
       queues?: {
         [queueSlug: string]: {
           tasks?: {
-            [taskSlug: TaskType]: {
+            [taskSlug: TaskSlug]: {
               lastScheduledRun: string
             }
           }
           workflows?: {
-            [workflowSlug: WorkflowTypes]: {
+            [workflowSlug: WorkflowSlug]: {
               lastScheduledRun: string
             }
           }

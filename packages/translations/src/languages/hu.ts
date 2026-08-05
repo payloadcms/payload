@@ -485,6 +485,8 @@ export const huTranslations: DefaultTranslationsObject = {
     sorryNotFound: 'Sajnáljuk – nincs semmi, ami megfelelne a kérésének.',
     sort: 'Rendezés',
     sortByLabelDirection: 'Rendezés {{label}} {{direction}} szerint',
+    sortByOrderToReorder:
+      'A sorok átrendezéséhez először az "Order" oszlop szerint kell rendezni őket.',
     stayOnThisPage: 'Maradjon ezen az oldalon',
     submissionSuccessful: 'Beküldés sikeres.',
     submit: 'Beküldés',
@@ -574,6 +576,7 @@ export const huTranslations: DefaultTranslationsObject = {
     addFile: 'Fájl hozzáadása',
     addFiles: 'Fájlok hozzáadása',
     bulkUpload: 'Tömeges feltöltés',
+    copyLinkToFile: 'Hivatkozás másolása a fájlhoz',
     crop: 'Termés',
     cropToolDescription:
       'Húzza a kijelölt terület sarkait, rajzoljon új területet, vagy igazítsa a lentebb található értékeket.',

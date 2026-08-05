@@ -263,7 +263,7 @@ export const ScheduleDrawer: React.FC<Props> = ({
   }, [upcoming, fetchUpcoming])
 
   const minTime = useMemo(() => {
-    if (date && isToday(date)) {
+    if (!date || isToday(date)) {
       return new Date()
     }
 

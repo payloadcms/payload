@@ -15,6 +15,7 @@ import {
 } from './config/external.js'
 import { optimizeDepsExcludeDefaults, optimizeDepsIncludeDefaults } from './config/optimizeDeps.js'
 import { payloadScssImporters } from './config/scss.js'
+import { payloadDevConfigReload } from './devConfigReload.js'
 import {
   defaultImportProtectionIgnoreImporters,
   onImportProtectionViolation,
@@ -31,8 +32,18 @@ import { wrapCjsForClient } from './workarounds/wrapCjsForClient.js'
  * Vite dependency warnings Payload consumers can't act on: third-party packages
  * ship sourcemaps whose original sources aren't published, so Vite warns on
  * every one. Suppressed by default (see `silenceDependencyWarnings`).
+ *
+ * `Failed to load source map` covers deps that ship a `sourceMappingURL` comment
+ * without the `.map` file it points at (e.g. `undici`'s `lib/llhttp/*.js`, pulled
+ * in via `@vercel/blob`). Vite appends the underlying `ENOENT` stack to that one,
+ * so each occurrence is a ~10-line block that buries real log output.
  */
-const suppressibleWarningPatterns = ['points to missing source files', 'Sourcemap for']
+const suppressibleWarningPatterns = [
+  'points to missing source files',
+  'Sourcemap for',
+  'Failed to load source map',
+  'references a map file outside its package',
+]
 
 /**
  * Wraps a Vite logger so warnings matching {@link suppressibleWarningPatterns}
@@ -207,6 +218,7 @@ export function withPayload(
         reactDomServerInRsc(),
         stubPrettierInClient(),
         payloadDevTransforms(),
+        payloadDevConfigReload({ payloadConfigPath }),
       ],
       resolve: {
         alias: [{ find: '@payload-config', replacement: path.resolve(payloadConfigPath) }],

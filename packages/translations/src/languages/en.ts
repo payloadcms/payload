@@ -479,6 +479,7 @@ export const enTranslations = {
     sorryNotFound: 'Sorry—there is nothing to correspond with your request.',
     sort: 'Sort',
     sortByLabelDirection: 'Sort by {{label}} {{direction}}',
+    sortByOrderToReorder: 'To reorder the rows you must first sort them by the "Order" column.',
     stayOnThisPage: 'Stay on this page',
     submissionSuccessful: 'Submission Successful.',
     submit: 'Submit',
@@ -568,6 +569,7 @@ export const enTranslations = {
     addFile: 'Add file',
     addFiles: 'Add files',
     bulkUpload: 'Bulk Upload',
+    copyLinkToFile: 'Copy link to file',
     crop: 'Crop',
     cropToolDescription:
       'Drag the corners of the selected area, draw a new area or adjust the values below.',

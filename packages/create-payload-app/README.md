@@ -20,6 +20,7 @@ CLI for easily starting new Payload project
         Available templates:
 
         blank                       Blank Template
+        blank-tanstack              Blank TanStack Start Template
         website                     Website Template
         ecommerce                   E-commerce Template
         plugin                      Template for creating a Payload plugin

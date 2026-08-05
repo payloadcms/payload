@@ -475,6 +475,8 @@ export const csTranslations: DefaultTranslationsObject = {
     sorryNotFound: 'Je nám líto, ale neexistuje nic, co by odpovídalo vašemu požadavku.',
     sort: 'Třídit',
     sortByLabelDirection: 'Seřadit podle {{label}} {{direction}}',
+    sortByOrderToReorder:
+      'Pro přeuspořádání řádků je nejprve nutné je seřadit podle sloupce „Pořadí“.',
     stayOnThisPage: 'Zůstat na této stránce',
     submissionSuccessful: 'Odeslání úspěšné.',
     submit: 'Odeslat',
@@ -564,6 +566,7 @@ export const csTranslations: DefaultTranslationsObject = {
     addFile: 'Přidat soubor',
     addFiles: 'Přidat soubory',
     bulkUpload: 'Hromadné nahrání',
+    copyLinkToFile: 'Zkopírovat odkaz na soubor',
     crop: 'Ořez',
     cropToolDescription:
       'Přetáhněte rohy vybrané oblasti, nakreslete novou oblast nebo upravte níže uvedené hodnoty.',

@@ -478,6 +478,8 @@ export const rsTranslations: DefaultTranslationsObject = {
     sorryNotFound: 'Нажалост, не постоји ништа што одговара вашем захтеву.',
     sort: 'Сортирај',
     sortByLabelDirection: 'Сортирај према {{label}} {{дирецтион}}',
+    sortByOrderToReorder:
+      'Da biste preuredili redove, prvo ih morate sortirati prema koloni „Redosled”.',
     stayOnThisPage: 'Остани на овој страници',
     submissionSuccessful: 'Успешно слање',
     submit: 'Потврди',
@@ -567,6 +569,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     addFile: 'Додај датотеку',
     addFiles: 'Dodaj datoteke',
     bulkUpload: 'Masovno otpremanje',
+    copyLinkToFile: 'Kopiraj vezu ka fajlu',
     crop: 'Исеците слику',
     cropToolDescription:
       'Превуците углове изабраног подручја, нацртајте ново подручје или прилагодите вредности испод.',

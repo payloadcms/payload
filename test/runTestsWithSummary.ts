@@ -54,7 +54,7 @@ const TEST_SUITES = [
   'plugin-stripe',
   'plugins',
   'query-presets',
-  // 'queues', Not supported yet in content api
+  'queues',
   'relationships',
   'sdk',
   'select',

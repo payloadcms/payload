@@ -496,7 +496,7 @@ export type LexicalRichTextAdapterProvider =
     config: SanitizedConfig
     isRoot?: boolean
     parentIsLocalized: boolean
-  }) => Promise<LexicalRichTextAdapter>
+  }) => LexicalRichTextAdapter
 
 export type SingleFeatureClientSchemaMap = {
   [key: string]: ClientField[]

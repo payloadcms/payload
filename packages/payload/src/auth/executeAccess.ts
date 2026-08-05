@@ -12,7 +12,7 @@ type OperationArgs = {
 }
 export const executeAccess = async (
   { id, data, disableErrors, isReadingStaticFile = false, req }: OperationArgs,
-  access: Access,
+  access?: Access,
 ): Promise<AccessResult> => {
   if (access) {
     const resolvedConstraint = await access({
