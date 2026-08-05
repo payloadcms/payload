@@ -118,6 +118,10 @@ const nextSuites: TestConfig[] = [
  *  - Drop the per-suite `optional` overrides and remove the `optional` default for tanstack-start in e2e matrix.
  */
 const tanstackSuites: TestConfig[] = [
+  { file: 'plugin-nested-docs', framework: 'tanstack-start', optional: false, shards: 1 },
+  { file: 'plugin-seo', framework: 'tanstack-start', optional: false, shards: 1 },
+  { file: 'bulk-edit', framework: 'tanstack-start', optional: false, shards: 1 },
+  { file: 'localization', framework: 'tanstack-start', optional: false, shards: 1 },
   { file: 'group-by', framework: 'tanstack-start', optional: false, shards: 1 },
   { file: 'locked-documents', framework: 'tanstack-start', optional: false, shards: 1 },
   { file: 'trash', framework: 'tanstack-start', optional: false, shards: 1 },
