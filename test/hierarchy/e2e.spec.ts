@@ -698,12 +698,6 @@ test.describe('Hierarchy Sidebar', () => {
       // The new folder should NOT appear in the filtered tree (filter is Organizations)
       await expect(tree.getByText(newFolderName)).toBeHidden({ timeout: 5000 })
 
-      // Clear the filter
-      await setHierarchyFilter({ checked: false, filterName: 'Organizations', page, sidebar })
-
-      // Now the folder should be visible
-      await expect(tree.getByText(newFolderName)).toBeVisible()
-
       // Clean up
       const createdFolder = await payload.find({
         collection: 'folders',

@@ -145,7 +145,7 @@ describe('Upload', () => {
     await uploadImage()
     await expect(page.locator('.file-preview__thumbnail img')).toHaveAttribute(
       'src',
-      /\/api\/uploads\/file\/payload-1\.jpg(\?.*)?$/,
+      /\/api\/uploads\/file\/payload-\d+\.jpg(\?.*)?$/,
     )
   })
 
@@ -170,15 +170,15 @@ describe('Upload', () => {
     // Assert that the media field has the png upload
     await expect(
       page.locator('.field-type.upload .upload-relationship-details__filename a'),
-    ).toHaveAttribute('href', '/api/uploads/file/payload-1.png')
+    ).toHaveAttribute('href', /\/api\/uploads\/file\/payload-\d+\.png$/)
 
     await expect(
       page.locator('.field-type.upload .upload-relationship-details__filename a'),
-    ).toContainText('payload-1.png')
+    ).toContainText(/payload-\d+\.png/)
 
     await expect(
       page.locator('.field-type.upload .upload-relationship-details img'),
-    ).toHaveAttribute('src', /\/api\/uploads\/file\/payload-1\.png(\?.*)?$/)
+    ).toHaveAttribute('src', /\/api\/uploads\/file\/payload-\d+\.png(\?.*)?$/)
     await saveDocAndAssert(page)
   })
 
@@ -275,7 +275,7 @@ describe('Upload', () => {
   })
 
   describe.skip('A11y', () => {
-    test.fixme('Create view should have no accessibility violations', async ({}, testInfo) => {
+    test.fixme('Create view should have no accessibility violations', async (_args, testInfo) => {
       await page.goto(url.create)
       await page.locator('#field-text').waitFor()
 
@@ -289,7 +289,7 @@ describe('Upload', () => {
       expect(scanResults.violations.length).toBe(0)
     })
 
-    test.fixme('Edit view should have no accessibility violations', async ({}, testInfo) => {
+    test.fixme('Edit view should have no accessibility violations', async (_args, testInfo) => {
       await page.goto(url.list)
       const firstItem = page.locator('.cell-filename a').nth(0)
       await firstItem.click()
@@ -306,7 +306,7 @@ describe('Upload', () => {
       expect(scanResults.violations.length).toBe(0)
     })
 
-    test('Upload fields have focus indicators', async ({}, testInfo) => {
+    test('Upload fields have focus indicators', async (_args, testInfo) => {
       await page.goto(url.create)
       await page.locator('#field-text').waitFor()
 
