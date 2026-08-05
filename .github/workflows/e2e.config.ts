@@ -143,6 +143,12 @@ const tanstackSuites: TestConfig[] = [
     optional: false,
     shards: 1,
   },
+  {
+    file: 'fields__collections__Indexed',
+    framework: 'tanstack-start',
+    optional: false,
+    shards: 1,
+  },
 ]
 
 export default createE2EConfig([...nextSuites, ...tanstackSuites])
