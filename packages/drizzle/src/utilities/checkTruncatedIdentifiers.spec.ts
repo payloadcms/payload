@@ -156,4 +156,79 @@ describe('checkTruncatedIdentifiers', () => {
       'truncate to the same name',
     )
   })
+
+  it('should warn about a single over-long inline index name', () => {
+    const indexName = `${'a'.repeat(maxIdentifierLength)}_idx`
+    const warn = vi.fn()
+
+    const adapter = buildAdapter(
+      {
+        posts: {
+          name: 'posts',
+          columns: { id: { name: 'id', type: 'serial' } },
+          indexes: { a: { name: indexName, on: 'id' } },
+        },
+      },
+      warn,
+    )
+
+    checkTruncatedIdentifiers({ adapter, logWarnings: true })
+
+    expect(warn).toHaveBeenCalledTimes(1)
+    expect(warn.mock.calls[0][0]).toContain(indexName)
+  })
+
+  it('should throw when two inline index names truncate to the same name', () => {
+    const shared = 'a'.repeat(maxIdentifierLength)
+
+    const adapter = buildAdapter({
+      posts: {
+        name: 'posts',
+        columns: { id: { name: 'id', type: 'serial' } },
+        indexes: { a: { name: `${shared}_one`, on: 'id' } },
+      },
+      pages: {
+        name: 'pages',
+        columns: { id: { name: 'id', type: 'serial' } },
+        indexes: { b: { name: `${shared}_two`, on: 'id' } },
+      },
+    })
+
+    expect(() => checkTruncatedIdentifiers({ adapter, logWarnings: true })).toThrow(
+      'truncate to the same name',
+    )
+  })
+
+  it('should throw when two inline foreign key names truncate to the same name', () => {
+    const shared = 'a'.repeat(maxIdentifierLength)
+
+    const adapter = buildAdapter({
+      posts: {
+        name: 'posts',
+        columns: { author_id: { name: 'author_id', type: 'integer' } },
+        foreignKeys: {
+          a: {
+            name: `${shared}_one`,
+            columns: ['author_id'],
+            foreignColumns: [{ name: 'id', table: 'authors' }],
+          },
+        },
+      },
+      pages: {
+        name: 'pages',
+        columns: { author_id: { name: 'author_id', type: 'integer' } },
+        foreignKeys: {
+          b: {
+            name: `${shared}_two`,
+            columns: ['author_id'],
+            foreignColumns: [{ name: 'id', table: 'authors' }],
+          },
+        },
+      },
+    })
+
+    expect(() => checkTruncatedIdentifiers({ adapter, logWarnings: true })).toThrow(
+      'truncate to the same name',
+    )
+  })
 })
