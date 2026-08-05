@@ -80,6 +80,56 @@ describe('baseAccess', () => {
     expect(collectionAccess).not.toHaveBeenCalled()
   })
 
+  it('should fail closed when base access returns undefined', async () => {
+    const collectionAccess = vi.fn(() => true)
+    const config = {
+      baseAccess: (() => undefined) as any,
+      collections: [],
+      globals: [],
+    } as any
+    const collection: CollectionConfig = {
+      slug: 'posts',
+      access: {
+        read: collectionAccess,
+      },
+      fields: [],
+    }
+    const req = {
+      payload: {
+        config,
+      },
+    } as any
+
+    const result = sanitizeCollection(config, collection)
+
+    expect(await result.access.read({ req })).toBe(false)
+    expect(collectionAccess).not.toHaveBeenCalled()
+  })
+
+  it('should fail closed when collection access returns undefined', async () => {
+    const config = {
+      baseAccess: () => true,
+      collections: [],
+      globals: [],
+    } as any
+    const collection: CollectionConfig = {
+      slug: 'posts',
+      access: {
+        read: (() => undefined) as any,
+      },
+      fields: [],
+    }
+    const req = {
+      payload: {
+        config,
+      },
+    } as any
+
+    const result = sanitizeCollection(config, collection)
+
+    expect(await result.access.read({ req })).toBe(false)
+  })
+
   it('should reject query constraints for collection create operations', async () => {
     const config = {
       baseAccess: () => ({

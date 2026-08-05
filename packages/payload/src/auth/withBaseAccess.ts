@@ -27,7 +27,7 @@ export const withBaseAccess = ({ slug, access, entityType, operation }: Args): A
       operation,
     })
 
-    if (baseResult === false) {
+    if (!baseResult) {
       return false
     }
 
@@ -37,7 +37,7 @@ export const withBaseAccess = ({ slug, access, entityType, operation }: Args): A
 
     const resourceResult = await resourceAccess(args)
 
-    if (resourceResult === false) {
+    if (!resourceResult) {
       return false
     }
 
