@@ -574,6 +574,37 @@ describe('Join Field', () => {
     await expect(siblingField.locator('tbody tr td', { hasText: exactText(title) })).toBeHidden()
   })
 
+  test('should keep the drawer closed after deleting through a polymorphic join table', async () => {
+    const title = 'Polymorphic Drawer Delete Post'
+
+    await payload.create({
+      collection: postsSlug,
+      data: {
+        title,
+        category: categoryID as string,
+      },
+    })
+
+    await page.goto(categoriesURL.edit(categoryID))
+
+    const joinField = page.locator('#field-polymorphicJoin.field-type.join')
+    const editRow = joinField.locator('tbody tr', { hasText: title })
+    await expect(editRow).toBeVisible()
+    await editRow.locator('button.drawer-link__doc-drawer-toggler').first().click()
+
+    const editDrawer = page.locator('[id^=doc-drawer_posts_1_]')
+    await expect(editDrawer).toBeVisible()
+    await editDrawer.locator('.doc-controls__popup .popup__trigger-wrap button').click()
+    await page.locator('.popup__content #action-delete').click()
+
+    const deleteConfirmModal = page.locator('dialog[id^="delete-"][open]')
+    await expect(deleteConfirmModal).toBeVisible()
+    await deleteConfirmModal.locator('button[data-dialog-action="confirm"]').click()
+
+    await expect(joinField.locator('tbody tr', { hasText: title })).toBeHidden()
+    await expect(page.locator('.drawer--is-open')).toHaveCount(0)
+  })
+
   test('should edit joined document and update relationship table', async () => {
     await page.goto(categoriesURL.edit(categoryID))
 
