@@ -835,7 +835,7 @@ importers:
         specifier: 2.1.0
         version: 2.1.0
       next:
-        specifier: '>=16.3.0 <17.0.0'
+        specifier: '>=16.2.6 <17.0.0'
         version: 16.3.0(@babel/core@7.27.3)(@opentelemetry/api@1.9.1)(@playwright/test@1.59.1)(@types/node@24.12.3)(babel-plugin-react-compiler@19.1.0-rc.3)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(sass@1.77.4)
       path-to-regexp:
         specifier: 6.3.0
