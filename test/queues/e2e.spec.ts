@@ -114,6 +114,11 @@ describe('Queues', () => {
     })
 
     test('can queue and run external task with file path handler within Next.js', async () => {
+      test.skip(
+        process.env.PAYLOAD_FRAMEWORK === 'tanstack-start',
+        'Next.js-bundled-environment specific; generic behaviour covered by int.spec.ts.',
+      )
+
       // Queue a task directly using the ExternalTask which uses a file path handler
       await payload.create({
         collection: 'payload-jobs',
