@@ -140,6 +140,7 @@ const tanstackSuites: TestConfig[] = [
   { file: 'group-by', framework: 'tanstack-start', optional: false, shards: 1 },
   { file: 'locked-documents', framework: 'tanstack-start', optional: false, shards: 1 },
   { file: 'trash', framework: 'tanstack-start', optional: false, shards: 1 },
+  { file: 'versions', framework: 'tanstack-start', optional: false, shards: 3 },
   { file: 'fields-relationship', framework: 'tanstack-start', optional: false, shards: 1 },
   { file: '_community', framework: 'tanstack-start', optional: false, shards: 1 },
   { file: 'auth', framework: 'tanstack-start', optional: false, shards: 1 },
