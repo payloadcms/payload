@@ -2,7 +2,75 @@ import type { CollectionConfig } from './types.js'
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { warnOnInvalidCustomViews } from './sanitize.js'
+import { sanitizeCollection, warnOnInvalidCustomViews } from './sanitize.js'
+
+describe('baseAccess', () => {
+  it('should combine base and collection access constraints', async () => {
+    const baseConstraint = {
+      tenant: {
+        equals: 'tenant-1',
+      },
+    }
+    const collectionConstraint = {
+      status: {
+        equals: 'published',
+      },
+    }
+    const baseAccess = vi.fn(() => baseConstraint)
+    const collectionAccess = vi.fn(() => collectionConstraint)
+    const config = {
+      baseAccess,
+      collections: [],
+      globals: [],
+    } as any
+    const collection: CollectionConfig = {
+      slug: 'posts',
+      access: {
+        read: collectionAccess,
+      },
+      fields: [],
+    }
+    const req = {} as any
+
+    const result = sanitizeCollection(config, collection)
+    const accessResult = await result.access.read({ req })
+
+    expect(accessResult).toEqual({
+      and: [baseConstraint, collectionConstraint],
+    })
+    expect(baseAccess).toHaveBeenCalledWith({
+      data: undefined,
+      entityType: 'collection',
+      id: undefined,
+      isReadingStaticFile: undefined,
+      operation: 'read',
+      req,
+      slug: 'posts',
+    })
+  })
+
+  it('should not run collection access when base access denies the operation', async () => {
+    const collectionAccess = vi.fn(() => true)
+    const config = {
+      baseAccess: () => false,
+      collections: [],
+      globals: [],
+    } as any
+    const collection: CollectionConfig = {
+      slug: 'posts',
+      access: {
+        update: collectionAccess,
+      },
+      fields: [],
+    }
+
+    const result = sanitizeCollection(config, collection)
+    const accessResult = await result.access.update({ req: {} as any })
+
+    expect(accessResult).toBe(false)
+    expect(collectionAccess).not.toHaveBeenCalled()
+  })
+})
 
 describe('warnOnInvalidCustomViews', () => {
   let warnSpy: ReturnType<typeof vi.spyOn>
