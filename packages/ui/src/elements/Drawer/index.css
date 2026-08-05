@@ -33,12 +33,18 @@
     position: relative;
     z-index: 2;
     width: clamp(600px, 40vw, 1080px);
-    max-width: 100vw;
+    max-width: calc(100vw - var(--spacer-3));
     background-color: var(--color-bg);
     box-shadow: var(--elevation-400-menu-panel);
     container: drawer / inline-size;
     /* Animate the leftward shift when a nested drawer stacks on top. */
     transition: transform 100ms ease-out;
+  }
+
+  @media (min-width: 768px) {
+    .drawer__content {
+      max-width: 100vw;
+    }
   }
 
   .drawer__content-children {
