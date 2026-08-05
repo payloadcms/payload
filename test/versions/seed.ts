@@ -18,6 +18,10 @@ import {
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+const seedDir =
+  process.env.PAYLOAD_FRAMEWORK === 'tanstack-start' && process.env.ROOT_DIR
+    ? path.resolve(process.env.ROOT_DIR, 'versions')
+    : dirname
 
 export async function seed(_payload: Payload, parallel: boolean = false) {
   const blocksField: DraftPost['blocksField'] = [
@@ -28,7 +32,7 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
     },
   ]
 
-  const imageFilePath = path.resolve(dirname, './image.jpg')
+  const imageFilePath = path.resolve(seedDir, './image.jpg')
   const imageFile = await getFileByPath(imageFilePath)
 
   const { id: uploadedImage } = await _payload.create({
@@ -43,7 +47,7 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
     file: imageFile,
   })
 
-  const imageFilePath2 = path.resolve(dirname, './image.png')
+  const imageFilePath2 = path.resolve(seedDir, './image.png')
   const imageFile2 = await getFileByPath(imageFilePath2)
 
   const { id: uploadedImage2 } = await _payload.create({
