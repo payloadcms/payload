@@ -429,7 +429,7 @@ describe('List View', () => {
       // ensure the ID column is active
       const idButton = getColumnSelectorItem({ container: columnContainer, label: 'ID' })
 
-      const id = await page.locator('.cell-id .id-cell__value').first().innerText()
+      const id = await page.locator('.cell-id .id-label__value').first().innerText()
 
       const buttonClasses = await idButton.getAttribute('class')
 
@@ -452,8 +452,8 @@ describe('List View', () => {
 
       await expect(tableRows).toHaveCount(1)
       const firstId = page.locator(tableRowLocator).first().locator('.cell-id')
-      await expect(firstId.locator('.id-cell__prefix')).toHaveText('ID')
-      await expect(firstId.locator('.id-cell__value')).toHaveText(id)
+      await expect(firstId.locator('.id-label__prefix')).toHaveText('ID')
+      await expect(firstId.locator('.id-label__value')).toHaveText(id)
 
       await page.locator('.condition__actions-remove').click()
       await expect(page.locator(tableRowLocator)).toHaveCount(2)
@@ -461,15 +461,15 @@ describe('List View', () => {
 
     test('should render the ID cell as a pill with a hover background instead of an underline', async () => {
       const idLink = page.locator('.cell-id > a').first()
-      const idCell = idLink.locator('.id-cell')
+      const idLabel = idLink.locator('.id-label')
 
-      await expect(idCell.locator('.id-cell__prefix')).toHaveText('ID')
-      await expect(idCell).toHaveCSS('background-color', 'rgb(245, 245, 245)')
+      await expect(idLabel.locator('.id-label__prefix')).toHaveText('ID')
+      await expect(idLabel).toHaveCSS('background-color', 'rgb(245, 245, 245)')
       await expect(idLink).toHaveCSS('text-decoration-line', 'none')
 
-      await idCell.hover()
+      await idLabel.hover()
 
-      await expect(idCell).toHaveCSS('background-color', 'rgb(230, 230, 230)')
+      await expect(idLabel).toHaveCSS('background-color', 'rgb(230, 230, 230)')
       await expect(idLink).toHaveCSS('text-decoration-line', 'none')
     })
 
@@ -554,7 +554,7 @@ describe('List View', () => {
     })
 
     test('should reset filter value when a different field is selected', async () => {
-      const id = await page.locator('.cell-id .id-cell__value').first().innerText()
+      const id = await page.locator('.cell-id .id-label__value').first().innerText()
 
       const { whereBuilder } = await addListFilter({
         page,
