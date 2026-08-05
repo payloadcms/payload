@@ -715,6 +715,25 @@ describe('Collections - Uploads', () => {
 
         await payload.delete({ collection: mediaSlug, id: mediaDoc.id })
       })
+
+      it('should handle HEAD request for media file returning identical status and content-type', async () => {
+        const filePath = path.resolve(dirname, './image.png')
+        const file = await getFileByPath(filePath)
+        file.name = 'head-test.png'
+
+        const mediaDoc = (await payload.create({
+          collection: mediaSlug,
+          data: {},
+          file,
+        })) as unknown as Media
+
+        const response = await restClient.HEAD(`/${mediaSlug}/file/${mediaDoc.filename}`)
+
+        expect(response.status).toBe(200)
+        expect(response.headers.get('content-type')).toContain('image/png')
+
+        await payload.delete({ collection: mediaSlug, id: mediaDoc.id })
+      })
     })
   })
 
