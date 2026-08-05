@@ -45,7 +45,6 @@ import {
   columnToCodeConverter,
   convertPathToJSONTraversal,
   countDistinct,
-  createRequireDrizzleKit,
   createJSONQuery,
   defaultDrizzleSnapshot,
   deleteWhere,
@@ -54,6 +53,7 @@ import {
   init,
   insert,
 } from '@payloadcms/drizzle/sqlite'
+import { createRequireDrizzleKit } from '@payloadcms/drizzle/sqlite/create-require-drizzle-kit'
 import { like, notLike } from 'drizzle-orm'
 import {
   createDatabaseAdapter,
@@ -71,11 +71,21 @@ const filename = fileURLToPath(import.meta.url)
 
 const requireDrizzleKit = createRequireDrizzleKit({
   load: async () => {
-    const drizzleKitModule = await dynamicImport<{ requireDrizzleKit: RequireDrizzleKit }>(
-      '@payloadcms/drizzle/sqlite',
-    )
+    const {
+      generateSQLiteDrizzleJson: generateDrizzleJson,
+      generateSQLiteMigration: generateMigration,
+      pushSQLiteSchema: pushSchema,
+    } = await dynamicImport<{
+      generateSQLiteDrizzleJson: ReturnType<RequireDrizzleKit>['generateDrizzleJson']
+      generateSQLiteMigration: ReturnType<RequireDrizzleKit>['generateMigration']
+      pushSQLiteSchema: ReturnType<RequireDrizzleKit>['pushSchema']
+    }>('drizzle-kit/api', { from: import.meta.url })
 
-    return drizzleKitModule.requireDrizzleKit()
+    return {
+      generateDrizzleJson,
+      generateMigration,
+      pushSchema,
+    }
   },
 })
 

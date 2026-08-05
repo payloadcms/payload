@@ -49,6 +49,56 @@ describe('createRequireDrizzleKit', () => {
     expect(loadCount).toBe(1)
   })
 
+  it('should share an in-flight load across concurrent schema tooling operations', async () => {
+    let loadCount = 0
+    let resolveLoad: ((value: typeof drizzleKit) => void) | undefined
+    const requireDrizzleKit = createRequireDrizzleKit({
+      load: () => {
+        loadCount++
+        return new Promise((resolve) => {
+          resolveLoad = resolve
+        })
+      },
+    })
+    const facade = requireDrizzleKit()
+
+    const snapshotPromise = facade.generateDrizzleJson({ posts: true })
+    const migrationPromise = facade.generateMigration({} as never, {} as never)
+
+    expect(loadCount).toBe(1)
+
+    resolveLoad?.(drizzleKit)
+    await Promise.all([snapshotPromise, migrationPromise])
+
+    expect(loadCount).toBe(1)
+  })
+
+  it('should retry loading Drizzle Kit after a failed load', async () => {
+    let loadCount = 0
+    const requireDrizzleKit = createRequireDrizzleKit({
+      load: async () => {
+        loadCount++
+
+        if (loadCount === 1) {
+          throw new Error('temporary load failure')
+        }
+
+        return drizzleKit
+      },
+    })
+    const facade = requireDrizzleKit()
+
+    await expect(facade.generateDrizzleJson({ posts: true })).rejects.toThrow(
+      'temporary load failure',
+    )
+    await expect(facade.generateDrizzleJson({ posts: true })).resolves.toEqual({
+      args: { posts: true },
+      version: '7',
+    })
+
+    expect(loadCount).toBe(2)
+  })
+
   it('should return results from the loaded Drizzle Kit', async () => {
     const requireDrizzleKit = createRequireDrizzleKit({ load: async () => drizzleKit })
     const facade = requireDrizzleKit()

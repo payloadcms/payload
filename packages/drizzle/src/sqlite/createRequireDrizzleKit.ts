@@ -9,8 +9,17 @@ export const createRequireDrizzleKit = ({
 }): RequireDrizzleKit => {
   let drizzleKitPromise: Promise<DrizzleKit> | undefined
 
+  const loadDrizzleKit = () => {
+    const promise = load().catch((error: unknown) => {
+      drizzleKitPromise = undefined
+      throw error
+    })
+    drizzleKitPromise = promise
+    return promise
+  }
+
   const getDrizzleKit = () => {
-    drizzleKitPromise ??= load()
+    drizzleKitPromise ??= loadDrizzleKit()
     return drizzleKitPromise
   }
 
