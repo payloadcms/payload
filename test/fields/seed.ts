@@ -56,8 +56,11 @@ import {
   usersSlug,
 } from './slugs.js'
 
+const getFieldsDir = () =>
+  path.resolve(process.env.ROOT_DIR ?? path.resolve(process.cwd(), 'test'), 'fields')
+
 export const seed = async (_payload: Payload) => {
-  const fieldsDir = path.resolve(process.env.ROOT_DIR ?? process.cwd(), 'fields')
+  const fieldsDir = getFieldsDir()
   const jpgPath = path.resolve(fieldsDir, './collections/Upload/payload.jpg')
   const jpg480x320Path = path.resolve(fieldsDir, './collections/Upload/payload480x320.jpg')
   const pngPath = path.resolve(fieldsDir, './uploads/payload.png')
@@ -409,6 +412,6 @@ export async function clearAndSeedEverything(_payload: Payload) {
     collectionSlugs,
     seedFunction: seed,
     snapshotKey: 'fieldsTest',
-    uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
+    uploadsDir: path.resolve(getFieldsDir(), './collections/Upload/uploads'),
   })
 }
