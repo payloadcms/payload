@@ -1434,6 +1434,13 @@ export type Config = {
    */
   plugins?: Plugin[]
   /**
+   * Previous `secret` values that should still be accepted for reads (verifying
+   * JWTs, matching API keys, decrypting stored values) during a bounded key
+   * rotation. New data is always written with the current `secret`. Retire these
+   * once `rotateSecret` has re-keyed existing data.
+   */
+  previousSecrets?: string[]
+  /**
    * Allow you to save and share filters, columns, and sort orders for your collections.
    * @see https://payloadcms.com/docs/query-presets/overview
    */

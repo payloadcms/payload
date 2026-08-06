@@ -13,6 +13,9 @@ import {
   namedSaveToJWTValue,
   partialDisableLocalStrategiesSlug,
   publicUsersSlug,
+  rotateSecretLoginSlug,
+  rotateSecretOldSecret,
+  rotateSecretSlug,
   saveToJWTKey,
   slug,
 } from './shared.js'
@@ -47,6 +50,8 @@ export default buildConfigWithDefaults({
     },
     user: 'users',
   },
+  // Kept in the keyring so rotation tests can read data seeded under the old secret.
+  previousSecrets: [rotateSecretOldSecret],
   collections: [
     {
       slug,
@@ -294,6 +299,32 @@ export default buildConfigWithDefaults({
       slug: publicUsersSlug,
       auth: {
         verify: true,
+      },
+      fields: [],
+      versions: false,
+    },
+    {
+      // Dedicated, isolated collection for rotateSecret (PAYLOAD_SECRET rotation) tests.
+      slug: rotateSecretSlug,
+      access: {
+        // Only the authenticated api-key user can read their own doc, so a 200
+        // response proves the API key authenticated after rotation.
+        read: ({ req: { user } }) =>
+          user?.collection === rotateSecretSlug ? { id: { equals: user.id } } : false,
+      },
+      auth: {
+        disableLocalStrategy: true,
+        useAPIKey: true,
+      },
+      fields: [],
+      versions: false,
+    },
+    {
+      // Collection with BOTH API keys and local (password) auth, to prove a
+      // rotation leaves password logins working on a collection it re-keys.
+      slug: rotateSecretLoginSlug,
+      auth: {
+        useAPIKey: true,
       },
       fields: [],
       versions: false,
