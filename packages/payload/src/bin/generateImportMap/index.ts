@@ -155,7 +155,9 @@ export async function writeImportMap({
     mapKeys.push(`  "${userPath}": ${identifier}`)
   }
 
-  const importMapOutputFile = `${imports.join('\n')}
+  const importMapOutputFile = `/* THIS FILE WAS GENERATED AUTOMATICALLY BY PAYLOAD. */
+/* DO NOT MODIFY IT BECAUSE IT COULD BE REWRITTEN AT ANY TIME. */
+${imports.join('\n')}
 
 /** @type import('payload').ImportMap */
 export const importMap = {
