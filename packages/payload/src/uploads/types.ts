@@ -19,7 +19,16 @@ export type FileSizes = {
   [size: string]: FileSize
 }
 
+export type CropRect = {
+  height: null | number
+  unit: '%' | 'px' | null
+  width: null | number
+  x: null | number
+  y: null | number
+}
+
 export type FileData = {
+  cropRect?: CropRect | null
   filename: string
   filesize: number
   focalX?: number
