@@ -2,9 +2,9 @@
 
 import type { NotFoundRouteProps } from '@tanstack/react-router'
 
-import { NotFoundClient } from '@payloadcms/ui'
+import { NotFoundClient, useRouteTransition } from '@payloadcms/ui'
 import { notFound, redirect, useLoaderData } from '@tanstack/react-router'
-import { Fragment, type ReactNode, useDeferredValue } from 'react'
+import { Fragment, type ReactNode, useDeferredValue, useEffect } from 'react'
 
 import { getAdminMeta } from '../utilities/meta.js'
 
@@ -38,6 +38,18 @@ function AdminPage() {
   // on code-split client references can reveal the router's null fallback.
   // Keep the current payload painted until the next one is renderable.
   const rscPayload = useDeferredValue(data?.rscPayload)
+  const { holdRouteTransition } = useRouteTransition()
+  const isRscPayloadDeferred = rscPayload !== data?.rscPayload
+
+  useEffect(() => {
+    if (!isRscPayloadDeferred) {
+      return
+    }
+
+    const releaseRouteTransition = holdRouteTransition()
+
+    return () => releaseRouteTransition()
+  }, [holdRouteTransition, isRscPayloadDeferred])
 
   return <Fragment>{rscPayload}</Fragment>
 }
