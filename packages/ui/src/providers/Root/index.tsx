@@ -7,7 +7,7 @@ import type {
   RouterAdapterComponent,
   SanitizedPermissions,
   ServerFunctionClient,
-  TypedUser,
+  User,
 } from 'payload'
 
 import { DndContext, pointerWithin } from '@dnd-kit/core'
@@ -29,6 +29,7 @@ import { AuthProvider } from '../Auth/index.js'
 import { ClientFunctionProvider } from '../ClientFunction/index.js'
 import { ConfigProvider } from '../Config/index.js'
 import { DocumentEventsProvider } from '../DocumentEvents/index.js'
+import { EmbedProvider } from '../Embed/index.js'
 import { HierarchyProvider } from '../Hierarchy/index.js'
 import { LocaleProvider } from '../Locale/index.js'
 import { PreferencesProvider } from '../Preferences/index.js'
@@ -44,6 +45,7 @@ type Props = {
   readonly children: React.ReactNode
   readonly config: ClientConfig
   readonly dateFNSKey: Language['dateFNSKey']
+  readonly embed?: boolean
   readonly fallbackLang: I18nOptions['fallbackLanguage']
   readonly highContrastMode: boolean
   readonly isNavOpen?: boolean
@@ -55,13 +57,14 @@ type Props = {
   readonly serverFunction: ServerFunctionClient
   readonly theme: Theme
   readonly translations: I18nClient['translations']
-  readonly user: null | TypedUser
+  readonly user: null | User
 }
 
 export const RootProvider: React.FC<Props> = ({
   children,
   config,
   dateFNSKey,
+  embed,
   fallbackLang,
   highContrastMode,
   isNavOpen,
@@ -79,9 +82,9 @@ export const RootProvider: React.FC<Props> = ({
 
   return (
     <ClickOutsideProvider>
-      <RouterAdapter>
-        <ServerFunctionsProvider serverFunction={serverFunction}>
-          <RouteTransitionProvider>
+      <RouteTransitionProvider>
+        <RouterAdapter>
+          <ServerFunctionsProvider serverFunction={serverFunction}>
             <RouteCache
               cachingEnabled={process.env.NEXT_PUBLIC_ENABLE_ROUTER_CACHE_REFRESH === 'true'}
             >
@@ -110,25 +113,27 @@ export const RootProvider: React.FC<Props> = ({
                               <PreferencesProvider>
                                 <HierarchyProvider>
                                   <ThemeProvider highContrastMode={highContrastMode} theme={theme}>
-                                    <LocaleProvider locale={locale}>
-                                      <StepNavProvider>
-                                        <LoadingOverlayProvider>
-                                          <DocumentEventsProvider>
-                                            <NavProvider initialIsOpen={isNavOpen}>
-                                              <UploadHandlersProvider>
-                                                <DndContext
-                                                  collisionDetection={pointerWithin}
-                                                  // Provide stable ID to fix hydration issues: https://github.com/clauderic/dnd-kit/issues/926
-                                                  id={dndContextID}
-                                                >
-                                                  {children}
-                                                </DndContext>
-                                              </UploadHandlersProvider>
-                                            </NavProvider>
-                                          </DocumentEventsProvider>
-                                        </LoadingOverlayProvider>
-                                      </StepNavProvider>
-                                    </LocaleProvider>
+                                    <EmbedProvider embed={embed}>
+                                      <LocaleProvider locale={locale}>
+                                        <StepNavProvider>
+                                          <LoadingOverlayProvider>
+                                            <DocumentEventsProvider>
+                                              <NavProvider initialIsOpen={isNavOpen}>
+                                                <UploadHandlersProvider>
+                                                  <DndContext
+                                                    collisionDetection={pointerWithin}
+                                                    // Provide stable ID to fix hydration issues: https://github.com/clauderic/dnd-kit/issues/926
+                                                    id={dndContextID}
+                                                  >
+                                                    {children}
+                                                  </DndContext>
+                                                </UploadHandlersProvider>
+                                              </NavProvider>
+                                            </DocumentEventsProvider>
+                                          </LoadingOverlayProvider>
+                                        </StepNavProvider>
+                                      </LocaleProvider>
+                                    </EmbedProvider>
                                   </ThemeProvider>
                                 </HierarchyProvider>
                               </PreferencesProvider>
@@ -143,9 +148,9 @@ export const RootProvider: React.FC<Props> = ({
                 </ClientFunctionProvider>
               </ConfigProvider>
             </RouteCache>
-          </RouteTransitionProvider>
-        </ServerFunctionsProvider>
-      </RouterAdapter>
+          </ServerFunctionsProvider>
+        </RouterAdapter>
+      </RouteTransitionProvider>
       <ToastContainer config={config} />
     </ClickOutsideProvider>
   )

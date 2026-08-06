@@ -13,6 +13,7 @@ import { Button } from '../../elements/Button/index.js'
 import { clipboardCopy, clipboardPaste } from '../../elements/ClipboardAction/clipboardUtilities.js'
 import { ClipboardAction } from '../../elements/ClipboardAction/index.js'
 import {
+  insertRowFromClipboard,
   mergeFormStateFromClipboard,
   reduceFormStateByPath,
 } from '../../elements/ClipboardAction/mergeFormStateFromClipboard.js'
@@ -293,6 +294,38 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
     [clientBlocks, getFields, path, replaceState, setModified, t],
   )
 
+  const pasteRowBelow = useCallback(
+    (rowIndex: number) => {
+      const pasteArgs = {
+        onPaste: (dataFromClipboard: ClipboardPasteData) => {
+          const formState = { ...getFields() }
+          const newState = insertRowFromClipboard({
+            dataFromClipboard,
+            formState,
+            path,
+            rowIndex: rowIndex + 1,
+          })
+          replaceState(newState)
+          setModified(true)
+
+          setTimeout(() => {
+            scrollToID(`${path?.split('.').join('-')}-row-${rowIndex + 1}`)
+          }, 0)
+        },
+        path,
+        schemaBlocks: clientBlocks,
+        t,
+      }
+
+      const clipboardResult = clipboardPaste(pasteArgs)
+
+      if (typeof clipboardResult === 'string') {
+        toast.error(clipboardResult)
+      }
+    },
+    [clientBlocks, getFields, path, replaceState, setModified, t],
+  )
+
   const pasteBlocks = useCallback(
     (dataFromClipboard: ClipboardPasteData) => {
       const formState = { ...getFields() }
@@ -311,9 +344,12 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
 
   const fieldErrorCount = errorPaths.length
   const fieldHasErrors = submitted && fieldErrorCount + (valid ? 0 : 1) > 0
+  const displayedErrorCount = fieldErrorCount > 0 ? fieldErrorCount : fieldHasErrors ? 1 : 0
 
   const showMinRows = rows.length < minRows || (required && rows.length === 0)
   const showRequired = readOnly && rows.length === 0
+  const shouldShowSummaryBanner = !valid && (showRequired || showMinRows)
+  const shouldShowFieldError = showError && !shouldShowSummaryBanner
 
   const styles = useMemo(() => mergeFieldStyles(field), [field])
 
@@ -381,7 +417,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
       id={`field-${path?.replace(/\./g, '__')}`}
       style={styles}
     >
-      {showError && (
+      {shouldShowFieldError && (
         <RenderCustomComponent
           CustomComponent={Error}
           Fallback={<FieldError path={path} showError={showError} />}
@@ -404,8 +440,8 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
                 }
               />
             </h3>
-            {fieldHasErrors && fieldErrorCount > 0 && (
-              <ErrorPill count={fieldErrorCount} i18n={i18n} withMessage />
+            {displayedErrorCount > 0 && (
+              <ErrorPill count={displayedErrorCount} i18n={i18n} withMessage />
             )}
           </div>
           <ul className={`${baseClass}__header-actions`}>
@@ -487,6 +523,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
                       moveRow={moveRow}
                       parentPath={path}
                       pasteRow={pasteRow}
+                      pasteRowBelow={pasteRowBelow}
                       path={rowPath}
                       permissions={permissions}
                       readOnly={readOnly || disabled}
@@ -525,16 +562,16 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
           )}
         </DraggableSortable>
       )}
-      {!hasMaxRows && (
+      {!hasMaxRows && !readOnly && (
         <Fragment>
           <DrawerToggler
             className={`${baseClass}__drawer-toggler`}
-            disabled={readOnly || disabled}
+            disabled={disabled}
             slug={drawerSlug}
           >
             <Button
               buttonStyle="ghost"
-              disabled={readOnly || disabled}
+              disabled={disabled}
               el="span"
               icon={<CirclePlusIcon />}
               iconPosition="left"

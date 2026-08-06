@@ -30,6 +30,7 @@ import { useThrottledEffect } from '../../hooks/useThrottledEffect.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
+import { useFormErrorHandler } from '../../providers/FormErrorHandler/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useOperation } from '../../providers/Operation/index.js'
 import { useRouter } from '../../providers/RouterAdapter/index.js'
@@ -95,6 +96,7 @@ export const Form: React.FC<FormProps> = (props) => {
   const { code: locale } = useLocale()
   const { i18n, t } = useTranslation()
   const { refreshCookie, user } = useAuth()
+  const onNonFieldError = useFormErrorHandler()
   const operation = useOperation()
   const { queueTask } = useQueue()
 
@@ -511,6 +513,10 @@ export const Form: React.FC<FormProps> = (props) => {
             })
 
             nonFieldErrors.forEach((err) => {
+              // Pass overridesFromArgs (not the computed overrides) so a retry re-evaluates any function overrides against current fields.
+              if (onNonFieldError?.(err, () => void submit({ overrides: overridesFromArgs }))) {
+                return
+              }
               errorToast(<FieldErrorsToast errorMessage={err.message || t('error:unknown')} />)
             })
 
@@ -551,6 +557,7 @@ export const Form: React.FC<FormProps> = (props) => {
       waitForAutocomplete,
       setModified,
       setSubmitted,
+      onNonFieldError,
     ],
   )
 
@@ -582,22 +589,12 @@ export const Form: React.FC<FormProps> = (props) => {
         const handler = getUploadHandler({ collectionSlug })
 
         if (typeof handler === 'function') {
-          let filename = file.name
-          const clientUploadContext = await handler({
-            docPrefix: typeof data?.prefix === 'string' ? data.prefix : undefined,
-            file,
-            updateFilename: (value) => {
-              filename = value
-            },
-          })
-
-          file = JSON.stringify({
-            clientUploadContext,
-            collectionSlug,
-            filename,
-            mimeType: file.type,
-            size: file.size,
-          })
+          file = JSON.stringify(
+            await handler({
+              docPrefix: typeof data?.prefix === 'string' ? data.prefix : undefined,
+              file,
+            }),
+          )
         }
       }
 

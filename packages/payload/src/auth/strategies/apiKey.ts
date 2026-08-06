@@ -1,7 +1,7 @@
 import crypto from 'crypto'
 
 import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
-import type { TypedUser } from '../../index.js'
+import type { User } from '../../index.js'
 import type { Where } from '../../types/index.js'
 import type { AuthStrategyFunction } from '../index.js'
 
@@ -52,7 +52,7 @@ export const APIKeyAuthentication =
           user!._strategy = 'api-key'
 
           return {
-            user: user as TypedUser,
+            user: user as User,
           }
         }
       } catch (ignore) {

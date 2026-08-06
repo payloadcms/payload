@@ -7,6 +7,7 @@ import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
+import type { TestFileServer } from '../__helpers/shared/startTestFileServer.js'
 import type { Config } from './payload-types.js'
 
 import {
@@ -19,6 +20,7 @@ import {
   closeAllToasts,
   ensureCompilationIsDone,
   exactText,
+  gotoAndWaitForForm,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
   waitForFormReady,
@@ -30,6 +32,7 @@ import { assertToastErrors } from '../__helpers/shared/assertToastErrors.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { RESTClient } from '../__helpers/shared/rest.js'
+import { startTestFileServer } from '../__helpers/shared/startTestFileServer.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import {
   adminThumbnailFunctionSlug,
@@ -67,7 +70,6 @@ import {
   withoutEnlargeSlug,
   withoutMetadataSlug,
 } from './shared.js'
-import { startMockCorsServer } from './startMockCorsServer.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -133,7 +135,6 @@ let mediaWithFieldsURL: AdminUrlUtil
 
 describe('Uploads', () => {
   let page: Page
-  let mockCorsServer: ReturnType<typeof startMockCorsServer> | undefined
 
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
@@ -236,12 +237,6 @@ describe('Uploads', () => {
     await client.login()
 
     await ensureCompilationIsDone({ page, serverURL })
-  })
-
-  afterAll(() => {
-    if (mockCorsServer) {
-      mockCorsServer.close()
-    }
   })
 
   test('should show upload filename in upload collection list', async () => {
@@ -372,6 +367,27 @@ describe('Uploads', () => {
     await page.locator('.copy-to-clipboard').click()
     const clipbaordContent = await page.evaluate(() => navigator.clipboard.readText())
     expect(clipbaordContent).toBe(mediaDoc?.url)
+  })
+
+  test('should show the link icon and "Copy link to file" tooltip on the copy link button', async () => {
+    const mediaDoc = (
+      await payload.find({
+        collection: mediaSlug,
+        depth: 0,
+        limit: 1,
+        pagination: false,
+      })
+    ).docs[0]
+
+    await page.goto(mediaURL.edit(mediaDoc!.id))
+
+    const copyLinkButton = page.locator('.file-toolbar .copy-to-clipboard')
+    await expect(copyLinkButton.locator('.icon--link')).toBeVisible()
+
+    await copyLinkButton.hover()
+    await expect(
+      page.locator('.tooltip--show', { hasText: exactText('Copy link to file') }),
+    ).toBeVisible()
   })
 
   test('should show side-by-side layout for upload collection document with file', async () => {
@@ -514,7 +530,7 @@ describe('Uploads', () => {
   })
 
   test('should create file upload', async () => {
-    await page.goto(mediaURL.create)
+    await gotoAndWaitForForm(page, mediaURL.create)
     await page.setInputFiles('input[type="file"]', path.resolve(dirname, './image.png'))
 
     const filename = page.locator('#field-filemanager-filename')
@@ -522,6 +538,17 @@ describe('Uploads', () => {
     await expect(filename).toHaveValue('image.png')
 
     await saveDocAndAssert(page)
+  })
+
+  test('should show a tooltip for the remove button on an unsaved selected file', async () => {
+    await gotoAndWaitForForm(page, mediaURL.create)
+    await page.setInputFiles('input[type="file"]', path.resolve(dirname, './image.png'))
+
+    const removeButton = page.locator('.file-manager__remove')
+    await expect(removeButton).toBeVisible()
+    await removeButton.hover()
+
+    await expect(page.locator('.tooltip--show', { hasText: exactText('Cancel') })).toBeVisible()
   })
 
   test('should remove remote URL button if pasteURL is false', async () => {
@@ -535,7 +562,7 @@ describe('Uploads', () => {
   })
 
   test('should properly create IOS file upload', async () => {
-    await page.goto(mediaURL.create)
+    await gotoAndWaitForForm(page, mediaURL.create)
 
     await page.setInputFiles('input[type="file"]', path.resolve(dirname, './ios-image.jpeg'))
 
@@ -547,7 +574,7 @@ describe('Uploads', () => {
   })
 
   test('should properly convert avif image to png', async () => {
-    await page.goto(mediaURL.create)
+    await gotoAndWaitForForm(page, mediaURL.create)
 
     await page.setInputFiles('input[type="file"]', path.resolve(dirname, './test-image-avif.avif'))
     const filename = page.locator('#field-filemanager-filename')
@@ -560,7 +587,7 @@ describe('Uploads', () => {
   })
 
   test('should show proper mimetype for glb file', async () => {
-    await page.goto(threeDimensionalURL.create)
+    await gotoAndWaitForForm(page, threeDimensionalURL.create)
 
     await page.setInputFiles('input[type="file"]', path.resolve(dirname, './duck.glb'))
     const filename = page.locator('#field-filemanager-filename')
@@ -573,7 +600,7 @@ describe('Uploads', () => {
   })
 
   test('should show proper mimetype for svg+xml file', async () => {
-    await page.goto(svgOnlyURL.create)
+    await gotoAndWaitForForm(page, svgOnlyURL.create)
 
     await page.setInputFiles('input[type="file"]', path.resolve(dirname, './svgWithXml.svg'))
     const filename = page.locator('#field-filemanager-filename')
@@ -590,7 +617,7 @@ describe('Uploads', () => {
   })
 
   test('should create animated file upload', async () => {
-    await page.goto(animatedTypeMediaURL.create)
+    await gotoAndWaitForForm(page, animatedTypeMediaURL.create)
 
     await page.setInputFiles('input[type="file"]', path.resolve(dirname, './animated.webp'))
     const animatedFilename = page.locator('#field-filemanager-filename')
@@ -599,7 +626,7 @@ describe('Uploads', () => {
 
     await saveDocAndAssert(page)
 
-    await page.goto(animatedTypeMediaURL.create)
+    await gotoAndWaitForForm(page, animatedTypeMediaURL.create)
 
     await page.setInputFiles('input[type="file"]', path.resolve(dirname, './non-animated.webp'))
     const nonAnimatedFileName = page.locator('#field-filemanager-filename')
@@ -610,7 +637,7 @@ describe('Uploads', () => {
   })
 
   test('should show proper file names for resized animated file', async () => {
-    await page.goto(animatedTypeMediaURL.create)
+    await gotoAndWaitForForm(page, animatedTypeMediaURL.create)
 
     await page.setInputFiles('input[type="file"]', path.resolve(dirname, './animated.webp'))
     const animatedFilename = page.locator('#field-filemanager-filename')
@@ -663,7 +690,7 @@ describe('Uploads', () => {
   })
 
   test('should resize and show tiff images', async () => {
-    await page.goto(mediaURL.create)
+    await gotoAndWaitForForm(page, mediaURL.create)
     await page.setInputFiles('input[type="file"]', path.resolve(dirname, './test-image.tiff'))
 
     await expect(page.locator('.file-manager__selected-preview .thumbnail svg')).toBeVisible()
@@ -693,7 +720,7 @@ describe('Uploads', () => {
   })
 
   test('should have custom file name for image size', async () => {
-    await page.goto(customFileNameURL.create)
+    await gotoAndWaitForForm(page, customFileNameURL.create)
     await page.setInputFiles('input[type="file"]', path.resolve(dirname, './image.png'))
 
     await expect(page.locator('.file-manager__selected-preview .thumbnail img')).toBeVisible()
@@ -744,7 +771,7 @@ describe('Uploads', () => {
   })
 
   test('should upload edge case media when an image size contains an undefined height', async () => {
-    await page.goto(mediaURL.create)
+    await gotoAndWaitForForm(page, mediaURL.create)
     await page.setInputFiles(
       'input[type="file"]',
       path.resolve(dirname, './test-image-1500x735.jpeg'),
@@ -828,7 +855,7 @@ describe('Uploads', () => {
   })
 
   test('should throw error when file is larger than the limit and abortOnLimit is true', async () => {
-    await page.goto(mediaURL.create)
+    await gotoAndWaitForForm(page, mediaURL.create)
     await page.setInputFiles('input[type="file"]', path.resolve(dirname, './2mb.jpg'))
     await expect(page.locator('#field-filemanager-filename')).toHaveValue('2mb.jpg')
 
@@ -904,6 +931,16 @@ describe('Uploads', () => {
   })
 
   test('should render adminThumbnail when using a custom thumbnail URL with additional queries', async () => {
+    // The collection's `adminThumbnail` config hardcodes a Next.js image-optimizer
+    // URL (`/_next/image?url=...&w=384&q=5`). That endpoint only exists on the
+    // Next.js adapter; TanStack Start has no `/_next/image` route, so the thumbnail
+    // 404s and never renders. The feature (custom thumbnailURL) is exercised by the
+    // other adminThumbnail tests; this one is Next-image-optimizer specific.
+    test.skip(
+      process.env.PAYLOAD_FRAMEWORK === 'tanstack-start',
+      'Asserts the Next.js image-optimizer URL (/_next/image), which TanStack Start does not provide.',
+    )
+
     await page.goto(adminThumbnailWithSearchQueriesURL.list)
 
     const genericUploadImage = page.locator('tr.row-1 .thumbnail img')
@@ -1003,7 +1040,7 @@ describe('Uploads', () => {
   })
 
   test('should detect correct mimeType', async () => {
-    await page.goto(mediaURL.create)
+    await gotoAndWaitForForm(page, mediaURL.create)
     await page.setInputFiles('input[type="file"]', path.resolve(dirname, './image.png'))
     await saveDocAndAssert(page)
 
@@ -1019,7 +1056,7 @@ describe('Uploads', () => {
   })
 
   test('should upload image with metadata', async () => {
-    await page.goto(withMetadataURL.create)
+    await gotoAndWaitForForm(page, withMetadataURL.create)
 
     await page.setInputFiles('input[type="file"]', path.join(dirname, 'test-image.jpg'))
     await saveDocAndAssert(page)
@@ -1040,7 +1077,7 @@ describe('Uploads', () => {
   })
 
   test('should upload image without metadata', async () => {
-    await page.goto(withoutMetadataURL.create)
+    await gotoAndWaitForForm(page, withoutMetadataURL.create)
 
     await page.setInputFiles('input[type="file"]', path.join(dirname, 'test-image.jpg'))
     await saveDocAndAssert(page)
@@ -1061,7 +1098,7 @@ describe('Uploads', () => {
   })
 
   test('should only upload image with metadata if jpeg mimetype', async () => {
-    await page.goto(withOnlyJPEGMetadataURL.create)
+    await gotoAndWaitForForm(page, withOnlyJPEGMetadataURL.create)
 
     await page.setInputFiles('input[type="file"]', path.join(dirname, 'test-image.jpg'))
     await saveDocAndAssert(page)
@@ -1081,7 +1118,7 @@ describe('Uploads', () => {
       .poll(() => acceptableFileSizesForJPEG.includes(jpegMediaDoc.sizes.sizeThree.filesize))
       .toBe(true)
 
-    await page.goto(withOnlyJPEGMetadataURL.create)
+    await gotoAndWaitForForm(page, withOnlyJPEGMetadataURL.create)
 
     await page.setInputFiles('input[type="file"]', path.join(dirname, 'animated.webp'))
     await saveDocAndAssert(page)
@@ -1112,7 +1149,7 @@ describe('Uploads', () => {
   })
 
   test('should show original image url on a single upload card for an upload with adminThumbnail defined', async () => {
-    await page.goto(uploadsOne.create)
+    await gotoAndWaitForForm(page, uploadsOne.create)
 
     const singleThumbnailButton = page.locator('#field-singleThumbnailUpload button', {
       hasText: exactText('Create New'),
@@ -1151,7 +1188,7 @@ describe('Uploads', () => {
   })
 
   test('should show original image url on a hasMany upload card for an upload with adminThumbnail defined', async () => {
-    await page.goto(uploadsOne.create)
+    await gotoAndWaitForForm(page, uploadsOne.create)
 
     const hasManyThumbnailButton = page.locator('#field-hasManyThumbnailUpload button', {
       hasText: exactText('Create New'),
@@ -1191,7 +1228,7 @@ describe('Uploads', () => {
   })
 
   test('should show preview button if image sizes are defined but crop and focal point are not', async () => {
-    await page.goto(imageSizesOnlyURL.create)
+    await gotoAndWaitForForm(page, imageSizesOnlyURL.create)
 
     const fileChooserPromise = page.waitForEvent('filechooser')
     await page.getByText('Select a file').click()
@@ -1213,7 +1250,7 @@ describe('Uploads', () => {
   describe('bulk uploads', () => {
     test('should bulk upload multiple files', async () => {
       // Navigate to the upload creation page
-      await page.goto(uploadsOne.create)
+      await gotoAndWaitForForm(page, uploadsOne.create)
 
       // Upload single file
       await page.setInputFiles(
@@ -1311,12 +1348,38 @@ describe('Uploads', () => {
       ).toBeVisible()
     })
 
+    test('should hide the drag and drop text based on the field container width, not the viewport', async () => {
+      await page.goto(uploadsOne.list)
+
+      const bulkUploadButton = page.locator('.list-header__title-actions button', {
+        hasText: 'Bulk Upload',
+      })
+      await bulkUploadButton.click()
+
+      await page
+        .locator('.dropzone input[type="file"]')
+        .setInputFiles(path.resolve(dirname, './image.png'))
+
+      await expect(page.locator('#field-hasManyUpload .upload__dropzoneContent')).toHaveCSS(
+        'flex-wrap',
+        'wrap',
+      )
+
+      await expect(page.locator('#field-hasManyUpload .upload__dragAndDropText')).toBeHidden()
+    })
+
+    test('should show the drag and drop text when a field has enough room outside the bulk upload drawer', async () => {
+      await gotoAndWaitForForm(page, relationURL.create)
+
+      await expect(page.locator('#field-hasManyImage .upload__dragAndDropText')).toBeVisible()
+    })
+
     test('should bulk upload non-image files without page errors', async () => {
       // Enable collection ONLY for this test
       collectErrorsFromPage()
 
       // Navigate to the upload creation page
-      await page.goto(uploadsOne.create)
+      await gotoAndWaitForForm(page, uploadsOne.create)
 
       // Upload single file
       await page.setInputFiles(
@@ -1359,7 +1422,7 @@ describe('Uploads', () => {
     })
 
     test('should apply field value to all bulk upload files after edit many', async () => {
-      await page.goto(uploadsOne.create)
+      await gotoAndWaitForForm(page, uploadsOne.create)
 
       // Upload single file
       await page.setInputFiles(
@@ -1418,7 +1481,7 @@ describe('Uploads', () => {
 
     test('should remove validation errors from bulk upload files after correction in edit many drawer', async () => {
       // Navigate to the upload creation page
-      await page.goto(uploadsOne.create)
+      await gotoAndWaitForForm(page, uploadsOne.create)
       await waitForFormReady(page)
 
       // Upload single file
@@ -1483,7 +1546,7 @@ describe('Uploads', () => {
 
     test('should show validation error when bulk uploading files and then soft removing one of the files', async () => {
       // Navigate to the upload creation page
-      await page.goto(uploadsOne.create)
+      await gotoAndWaitForForm(page, uploadsOne.create)
 
       // Upload single file
       await page.setInputFiles(
@@ -1637,7 +1700,7 @@ describe('Uploads', () => {
     })
 
     test('should reset state once all files are saved successfully from field bulk upload', async () => {
-      await page.goto(uploadsOne.create)
+      await gotoAndWaitForForm(page, uploadsOne.create)
       const fieldBulkUploadButton = page.locator('#field-hasManyThumbnailUpload button', {
         hasText: exactText('Create New'),
       })
@@ -1659,7 +1722,7 @@ describe('Uploads', () => {
     })
 
     test('should show error when bulk uploading files with missing filenames and allow retry after fixing', async () => {
-      await page.goto(uploadsOne.create)
+      await gotoAndWaitForForm(page, uploadsOne.create)
 
       await page.setInputFiles(
         '.file-manager input[type="file"]',
@@ -1718,7 +1781,9 @@ describe('Uploads', () => {
       // It should already be active (no need to navigate).
 
       // Should show "A file name is required" error message
-      await expect(bulkUploadModal.locator('.field-error')).toContainText('A file name is required')
+      await expect(page.locator('[id^="field-error-filename"]')).toContainText(
+        'A file name is required',
+      )
 
       // Filename field should be empty (as we cleared it)
       await expect(bulkUploadModal.locator('#field-filemanager-filename')).toHaveValue('')
@@ -1742,7 +1807,7 @@ describe('Uploads', () => {
     })
 
     test('should show correct error count when bulk uploading files with validation errors', async () => {
-      await page.goto(uploadsOne.create)
+      await gotoAndWaitForForm(page, uploadsOne.create)
 
       await page.setInputFiles(
         '.file-manager input[type="file"]',
@@ -1786,7 +1851,7 @@ describe('Uploads', () => {
     })
 
     test('should maintain correct error counts when cycling through forms after submit with errors', async () => {
-      await page.goto(uploadsOne.create)
+      await gotoAndWaitForForm(page, uploadsOne.create)
 
       await page.setInputFiles(
         '.file-manager input[type="file"]',
@@ -1874,7 +1939,7 @@ describe('Uploads', () => {
     })
 
     test('should show correct error count when bulk uploading files that exceed size limit', async () => {
-      await page.goto(uploadsOne.create)
+      await gotoAndWaitForForm(page, uploadsOne.create)
 
       await page.setInputFiles(
         '.file-manager input[type="file"]',
@@ -1915,9 +1980,13 @@ describe('Uploads', () => {
       const saveButton = bulkUploadModal.locator('.bulk-upload--actions-bar__saveButtons button')
       await saveButton.click()
 
-      // Should show mixed success/failure messages
+      // Should show mixed success/failure messages. The save processes each file
+      // (incl. uploading the 2MB file that hits the size limit) sequentially, which
+      // can take longer than the default expect timeout under slower adapters, so
+      // wait longer for the success toast to appear.
       await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
         'Successfully saved 2 files',
+        { timeout: POLL_TOPASS_TIMEOUT },
       )
       await expect(
         page.locator('.payload-toast-container .toast-error:has-text("Failed to save 1 files")'),
@@ -1982,19 +2051,26 @@ describe('Uploads', () => {
   })
 
   describe('remote url fetching', () => {
-    beforeAll(() => {
-      mockCorsServer = startMockCorsServer()
+    let testFileServer: TestFileServer | undefined
+
+    beforeAll(async () => {
+      testFileServer = await startTestFileServer({
+        contentType: 'image/jpeg',
+        data: readFileSync(path.resolve(dirname, 'test-image.jpg')),
+        hostname: 'localhost',
+        port: 4000,
+      })
     })
 
-    afterAll(() => {
-      if (mockCorsServer) {
-        mockCorsServer.close()
+    afterAll(async () => {
+      if (testFileServer) {
+        await testFileServer.close()
       }
     })
 
     test('should fetch remote URL server-side if pasteURL.allowList is defined', async () => {
       // Navigate to the upload creation page
-      await page.goto(uploadsOne.create)
+      await gotoAndWaitForForm(page, uploadsOne.create)
 
       // Open the paste-from-URL modal
       const pasteURLButton = page.locator('.file-manager__upload button', { hasText: 'Paste URL' })
@@ -2036,7 +2112,7 @@ describe('Uploads', () => {
 
     test('should fail to fetch remote URL server-side if the pasteURL.allowList domains do not match', async () => {
       // Navigate to the upload creation page
-      await page.goto(uploadsTwo.create)
+      await gotoAndWaitForForm(page, uploadsTwo.create)
 
       // Open the paste-from-URL modal
       const pasteURLButton = page.locator('.file-manager__upload button', { hasText: 'Paste URL' })
@@ -2077,7 +2153,7 @@ describe('Uploads', () => {
       }
       const createFocalCrop = async (page: Page, position: 'bottom-right' | 'top-left') => {
         const { dragX, dragY, focalX, focalY } = positions[position]
-        await page.goto(mediaURL.create)
+        await gotoAndWaitForForm(page, mediaURL.create)
 
         await page.setInputFiles('input[type="file"]', path.join(dirname, 'test-image.jpg'))
 
@@ -2129,7 +2205,7 @@ describe('Uploads', () => {
 
     test('should update image alignment based on focal point', async () => {
       const updateFocalPosition = async (page: Page) => {
-        await page.goto(focalOnlyURL.create)
+        await gotoAndWaitForForm(page, focalOnlyURL.create)
         await page.setInputFiles('input[type="file"]', path.join(dirname, 'horizontal-squares.jpg'))
         // The crop/focal editor opens from the file toolbar, which appears once the file is saved
         await saveDocAndAssert(page)
@@ -2159,7 +2235,7 @@ describe('Uploads', () => {
     })
 
     test('should resize image after crop if resizeOptions defined', async () => {
-      await page.goto(animatedTypeMediaURL.create)
+      await gotoAndWaitForForm(page, animatedTypeMediaURL.create)
 
       await page.setInputFiles('input[type="file"]', path.join(dirname, 'test-image.jpg'))
       // The crop editor opens from the file toolbar, which appears once the file is saved
@@ -2182,7 +2258,7 @@ describe('Uploads', () => {
     })
 
     test('should allow incrementing crop dimensions back to original maximum size', async () => {
-      await page.goto(mediaURL.create)
+      await gotoAndWaitForForm(page, mediaURL.create)
 
       await page.setInputFiles('input[type="file"]', path.join(dirname, 'test-image.jpg'))
       // The crop editor opens from the file toolbar, which appears once the file is saved
@@ -2266,7 +2342,7 @@ describe('Uploads', () => {
   })
 
   test('should skip applying resizeOptions after updating an image if resizeOptions.withoutEnlargement is true and the original image size is smaller than the dimensions defined in resizeOptions', async () => {
-    await page.goto(withoutEnlargementResizeOptionsURL.create)
+    await gotoAndWaitForForm(page, withoutEnlargementResizeOptionsURL.create)
 
     await page.setInputFiles('input[type="file"]', path.join(dirname, 'test-image.jpg'))
     await saveDocAndAssert(page)
@@ -2293,7 +2369,7 @@ describe('Uploads', () => {
     })
 
     test('should select an image within target range', async () => {
-      await page.goto(bestFitURL.create)
+      await gotoAndWaitForForm(page, bestFitURL.create)
       await page.locator('#field-withinRange button.upload__createNewToggler').click()
       await page.setInputFiles('input[type="file"]', path.join(dirname, 'test-image.jpg'))
       await page.locator('dialog button#action-save').click()
@@ -2305,7 +2381,7 @@ describe('Uploads', () => {
     })
 
     test('should select next smallest image outside of range but smaller than original', async () => {
-      await page.goto(bestFitURL.create)
+      await gotoAndWaitForForm(page, bestFitURL.create)
       await page.locator('#field-nextSmallestOutOfRange button.upload__createNewToggler').click()
       await page.setInputFiles('input[type="file"]', path.join(dirname, 'test-image.jpg'))
       await page.locator('dialog button#action-save').click()
@@ -2317,7 +2393,7 @@ describe('Uploads', () => {
     })
 
     test('should select original if smaller than next available size', async () => {
-      await page.goto(bestFitURL.create)
+      await gotoAndWaitForForm(page, bestFitURL.create)
       await page.locator('#field-original button.upload__createNewToggler').click()
       await page.setInputFiles('input[type="file"]', path.join(dirname, 'small.png'))
       await page.locator('dialog button#action-save').click()
@@ -2355,7 +2431,7 @@ describe('Uploads', () => {
   })
 
   test('should respect Sharp constructorOptions', async () => {
-    await page.goto(constructorOptionsURL.create)
+    await gotoAndWaitForForm(page, constructorOptionsURL.create)
 
     await page.setInputFiles('input[type="file"]', path.resolve(dirname, './animated.webp'))
 
@@ -2366,7 +2442,7 @@ describe('Uploads', () => {
   })
 
   test('should prevent invalid mimetype disguised as valid mimetype', async () => {
-    await page.goto(fileMimeTypeURL.create)
+    await gotoAndWaitForForm(page, fileMimeTypeURL.create)
     await page.setInputFiles('input[type="file"]', path.resolve(dirname, './image-as-pdf.pdf'))
 
     const filename = page.locator('#field-filemanager-filename')
@@ -2376,7 +2452,7 @@ describe('Uploads', () => {
   })
 
   test('should not rewrite file when updating collection fields', async () => {
-    await page.goto(mediaURL.create)
+    await gotoAndWaitForForm(page, mediaURL.create)
     await page.setInputFiles('input[type="file"]', path.resolve(dirname, './test-image.png'))
     await saveDocAndAssert(page)
     const imageID = page.url().split('/').pop()!
@@ -2396,7 +2472,7 @@ describe('Uploads', () => {
   test('should be able to replace the file even if the user doesnt have delete access', async () => {
     const docID = (await payload.find({ collection: mediaWithoutDeleteAccessSlug, limit: 1 }))
       .docs[0]?.id as string
-    await page.goto(mediaWithoutDeleteAccessURL.edit(docID))
+    await gotoAndWaitForForm(page, mediaWithoutDeleteAccessURL.edit(docID))
     // Replacing the file is available even without delete access
     await page.locator('.file-toolbar__filename-btn').click()
     const replaceButton = page.locator('.popup-button-list__button', { hasText: 'Replace file' })
@@ -2632,7 +2708,7 @@ describe('Uploads', () => {
   })
 
   test('should allow saving other fields after changing file', async () => {
-    await page.goto(uploadsTwo.create)
+    await gotoAndWaitForForm(page, uploadsTwo.create)
 
     // Upload initial file with required field
     await page.setInputFiles('input[type="file"]', path.resolve(dirname, './image.png'))
@@ -2654,6 +2730,45 @@ describe('Uploads', () => {
 
     const titleField = page.locator('#field-title')
     await expect(titleField).toHaveValue('updated title')
+  })
+
+  test('should show the file preview for the new file after saving a replaced file', async () => {
+    await gotoAndWaitForForm(page, uploadsTwo.create)
+
+    await page.setInputFiles('input[type="file"]', path.resolve(dirname, './image.png'))
+    await page.locator('#field-prefix').fill('initial')
+    await saveDocAndAssert(page)
+
+    await page.locator('.file-toolbar__filename-btn').click()
+    await page.locator('.popup-button-list__button', { hasText: 'Replace file' }).click()
+    await page.setInputFiles(
+      '.file-manager input[type="file"]',
+      path.resolve(dirname, './test-image.jpg'),
+    )
+    await saveDocAndAssert(page)
+
+    await expect(page.locator('.file-toolbar__filename-btn')).toBeVisible()
+    await expect(page.locator('.file-toolbar__filename-text')).toContainText('test-image')
+    await expect(page.locator('.file-manager .dropzone')).toBeHidden()
+  })
+
+  test('should allow cancelling a replace before selecting a new file', async () => {
+    await gotoAndWaitForForm(page, uploadsTwo.create)
+
+    await page.setInputFiles('input[type="file"]', path.resolve(dirname, './image.png'))
+    await page.locator('#field-prefix').fill('initial')
+    await saveDocAndAssert(page)
+
+    await page.locator('.file-toolbar__filename-btn').click()
+    await page.locator('.popup-button-list__button', { hasText: 'Replace file' }).click()
+
+    await expect(page.locator('.file-manager .dropzone')).toBeVisible()
+
+    await page.locator('.file-manager__remove').click()
+
+    await expect(page.locator('.file-toolbar__filename-btn')).toBeVisible()
+    await expect(page.locator('.file-toolbar__filename-text')).toContainText('image')
+    await expect(page.locator('.file-manager .dropzone')).toBeHidden()
   })
 
   test('should show data in drawer when editing relationship to upload collection with filesRequiredOnCreate: false', async () => {
@@ -2687,7 +2802,7 @@ describe('Uploads', () => {
   })
 
   test('should upload and serve file with # and % in filename', async () => {
-    await page.goto(mediaURL.create)
+    await gotoAndWaitForForm(page, mediaURL.create)
 
     const imageBuffer = readFileSync(path.resolve(dirname, './image.png'))
 

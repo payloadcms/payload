@@ -13,6 +13,7 @@ import { MoreIcon } from '../../icons/More/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Popup, PopupList } from '../Popup/index.js'
 import { clipboardCopy, clipboardPaste } from './clipboardUtilities.js'
+import { useCanPasteClipboard } from './useCanPasteClipboard.js'
 import './index.css'
 
 const baseClass = 'clipboard-action'
@@ -46,6 +47,12 @@ export const ClipboardAction: FC<Props> = ({
   ...rest
 }) => {
   const { t } = useTranslation()
+
+  const { canPaste, refresh } = useCanPasteClipboard(
+    rest.type === 'array'
+      ? { path, schemaFields: rest.fields }
+      : { path, schemaBlocks: rest.blocks },
+  )
 
   const classes = [`${baseClass}__popup`, className].filter(Boolean).join(' ')
 
@@ -98,6 +105,11 @@ export const ClipboardAction: FC<Props> = ({
       className={classes}
       disabled={disabled}
       horizontalAlign="right"
+      onToggleOpen={(active) => {
+        if (active) {
+          refresh()
+        }
+      }}
       render={({ close }) => (
         <PopupList.MenuItem>
           <PopupList.Button
@@ -113,7 +125,7 @@ export const ClipboardAction: FC<Props> = ({
           </PopupList.Button>
           <PopupList.Button
             className={pasteClassName}
-            disabled={!allowPaste}
+            disabled={!allowPaste || !canPaste}
             icon={<ClipboardIcon />}
             onClick={() => {
               void handlePaste()

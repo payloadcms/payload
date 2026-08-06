@@ -20,6 +20,7 @@ jobs:
   changes:
     runs-on: ubuntu-24.04
     permissions:
+      contents: read
       pull-requests: read
     outputs:
       needs_build: ${{ steps.filter.outputs.needs_build }}
@@ -127,8 +128,30 @@ jobs:
       - name: Lint TypeScript/JavaScript
         run: pnpm lint -- --quiet
 
-      - name: Lint SCSS
-        run: pnpm run lint:scss
+      - name: Lint CSS
+        env:
+          BASE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+          HEAD_SHA: ${{ github.sha }}
+        run: |
+          if [ -z "$BASE_SHA" ] || ! git cat-file -e "$BASE_SHA" 2>/dev/null; then
+            echo "No usable base commit found, linting all CSS files"
+            pnpm run lint:css
+            exit $?
+          fi
+
+          changed_css_files=()
+          while IFS= read -r file; do
+            changed_css_files+=("$file")
+          done < <(git diff --name-only --diff-filter=ACMR "$BASE_SHA...$HEAD_SHA" -- 'packages/ui/src/**/*.css' 'templates/**/*.css')
+
+          if [ ${#changed_css_files[@]} -eq 0 ]; then
+            echo "No changed CSS files, skipping stylelint"
+            exit 0
+          fi
+
+          echo "Linting changed CSS files:"
+          printf '  %s\n' "${changed_css_files[@]}"
+          pnpm exec stylelint "${changed_css_files[@]}"
 
   build:
     needs: changes
@@ -312,14 +335,18 @@ jobs:
   tests-e2e:
     runs-on: ubuntu-24.04
     needs: [e2e-matrix, e2e-prep]
-    name: E2E - ${{ matrix.suite }}${{ matrix.total-shards > 1 && format(' ({0}/{1})', matrix.shard, matrix.total-shards) || '' }}${{ matrix.cacheComponents && ' [cacheComponents]' || '' }}
+    name: E2E - ${{ matrix.suite }} [${{ matrix.framework }}]${{ matrix.total-shards > 1 && format(' ({0}/{1})', matrix.shard, matrix.total-shards) || '' }}${{ matrix.cacheComponents && ' [cacheComponents]' || '' }}
     timeout-minutes: 45
+    # TanStack Start suites are optional for now: their failures must not block the
+    # `all-green` gate. `matrix.optional` is true for tanstack-start entries (see e2e-matrix.ts).
+    continue-on-error: ${{ matrix.optional }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(needs.e2e-matrix.outputs.matrix) }}
     env:
       SUITE_NAME: ${{ matrix.suite }}
       PAYLOAD_CACHE_COMPONENTS: ${{ matrix.cacheComponents && 'true' || '' }}
+      PAYLOAD_FRAMEWORK: ${{ matrix.framework }}
     steps:
       - uses: actions/checkout@v5
 
@@ -382,8 +409,9 @@ jobs:
       - name: E2E Tests
         # E2E Test Execution Strategy:
         #
-        # The e2e.config.ts defines each test suite with: { file, shards, parallel? }
+        # The e2e.config.ts defines each test suite with: { file, framework?, shards, parallel? }
         # - shards: Number of CI runners to split this suite across
+        # - framework: Framework adapter used to boot the test app (default: next)
         # - parallel: Whether tests within the suite can run concurrently (default: false)
         #
         # Flags explained:
@@ -406,17 +434,18 @@ jobs:
         #   Suites with parallel=true (e.g. LexicalFullyFeatured) use the default 16 workers.
         #
         # Note: The e2e-prep job runs prepare-run-test-against-prod:ci once and uploads the result
-        # as an artifact. This job downloads that artifact, so we use test:e2e:prod:run which skips preparation.
-        run: PLAYWRIGHT_JSON_OUTPUT_NAME=results_${{ matrix.suite }}_${{ matrix.shard }}.json pnpm test:e2e:prod:run ${{ matrix.suite }} --shard=${{ matrix.shard }}/${{ matrix.total-shards }} --fully-parallel${{ matrix.parallel == false && ' --workers=1' || '' }}
+        # as an artifact. This job downloads that artifact, so we skip preparation. Each shard runs a
+        # real production server (next build / vite build, ~10s), booted per shard by runE2E.
+        run: PLAYWRIGHT_JSON_OUTPUT_NAME=results_${{ matrix.suite }}_${{ matrix.framework }}_${{ matrix.shard }}.json pnpm test:e2e:prod:server:run:noturbo ${{ matrix.suite }} --shard=${{ matrix.shard }}/${{ matrix.total-shards }} --fully-parallel${{ matrix.parallel == false && ' --workers=1' || '' }}
         env:
-          PLAYWRIGHT_JSON_OUTPUT_NAME: results_${{ matrix.suite }}_${{ matrix.shard }}.json
+          PLAYWRIGHT_JSON_OUTPUT_NAME: results_${{ matrix.suite }}_${{ matrix.framework }}_${{ matrix.shard }}.json
           NEXT_TELEMETRY_DISABLED: 1
           PAYLOAD_DATABASE: mongodb
 
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: always()
         with:
-          name: test-results-${{ matrix.suite }}_${{ matrix.shard }}${{ matrix.cacheComponents && '_cc' || '' }}
+          name: test-results-${{ matrix.suite }}_${{ matrix.framework }}_${{ matrix.shard }}${{ matrix.cacheComponents && '_cc' || '' }}
           path: test/test-results/
           if-no-files-found: ignore
           retention-days: 1
@@ -439,6 +468,9 @@ jobs:
       matrix:
         include:
           - template: blank
+            database: mongodb
+
+          - template: blank-tanstack
             database: mongodb
 
           - template: website

@@ -1,6 +1,4 @@
-import type { DeepRequired } from 'ts-essentials'
-
-import type { CollectionSlug, GlobalSlug, Payload, TypedUser } from '../index.js'
+import type { CollectionSlug, GlobalSlug, Payload, User } from '../index.js'
 import type { PayloadRequest, Where } from '../types/index.js'
 
 /**
@@ -118,30 +116,40 @@ export type SanitizedPermissions = {
   }
 }
 
-type BaseUser = {
-  collection: string
-  email?: string
-  id: number | string
-  sessions?: Array<UserSession>
-  username?: string
+/**
+ * Fields injected onto a user at authentication time. They are never stored in the database and
+ * never present on a plain document read (e.g. `payload.findByID`) - only on the authenticated
+ * user (`req.user`, login/auth/me results, auth strategies).
+ */
+export type AuthRuntimeFields = {
+  /**
+   * The session ID of the current request. May be present on request-authenticated users when
+   * sessions are enabled.
+   */
+  _sid?: string
+  /**
+   * The name of the auth strategy that authenticated the request (e.g. `local-jwt`).
+   */
+  _strategy?: string
 }
 
 /**
- * @deprecated Use `TypedUser` instead. This will be removed in 4.0.
+ * Note: AuthenticatedUser still carries the write-only `password` from `User` (always `undefined` at runtime).
+ * Stripping it cleanly isn't possible, because auth operations build the authenticated user
+ * from a read `User` doc, so a `never`-typed `password` would break those assignments
  */
-export type UntypedUser = {
-  [key: string]: any
-} & BaseUser
-
 /**
- * `collection` is not available one the client. It's only available on the server (req.user)
- * On the client, you can access the collection via config.admin.user. Config can be accessed using the useConfig() hook
+ * The signed-in user: the read user plus the runtime auth markers (`_strategy`, `_sid`). This is
+ * what `req.user`, `payload.auth()`, the `me` operation, auth strategies, and `useAuth().user`
+ * return.
  */
-export type ClientUser = {
-  [key: string]: any
-} & BaseUser
+export type AuthenticatedUser = AuthRuntimeFields & User
 
-export type UserSession = { createdAt: Date | string; expiresAt: Date | string; id: string }
+export type UserSession = {
+  createdAt?: Date | null | string
+  expiresAt: Date | string
+  id: string
+}
 type GenerateVerifyEmailHTML<TUser = any> = (args: {
   req: PayloadRequest
   token: string
@@ -182,12 +190,7 @@ export type AuthStrategyFunctionArgs = {
 
 export type AuthStrategyResult = {
   responseHeaders?: Headers
-  user:
-    | ({
-        _strategy?: string
-        collection?: string
-      } & TypedUser)
-    | null
+  user: AuthenticatedUser | null
 }
 
 export type AuthStrategyFunction = (
@@ -211,15 +214,17 @@ export type LoginWithUsernameOptions =
       requireUsername?: boolean
     }
 
+type AuthCookies = {
+  domain?: string
+  sameSite?: 'Lax' | 'None' | 'Strict' | boolean
+  secure?: boolean
+}
+
 export interface IncomingAuthType {
   /**
    * Set cookie options, including secure, sameSite, and domain. For advanced users.
    */
-  cookies?: {
-    domain?: string
-    sameSite?: 'Lax' | 'None' | 'Strict' | boolean
-    secure?: boolean
-  }
+  cookies?: AuthCookies
   /**
    * How many levels deep a user document should be populated when creating the JWT and binding the user to the req. Defaults to 0 and should only be modified if absolutely necessary, as this will affect performance.
    * @default 0
@@ -311,14 +316,32 @@ export type VerifyConfig = {
 }
 
 export interface Auth
-  extends Omit<DeepRequired<IncomingAuthType>, 'forgotPassword' | 'loginWithUsername' | 'verify'> {
-  forgotPassword?: {
-    expiration?: number
-    generateEmailHTML?: GenerateForgotPasswordEmailHTML
-    generateEmailSubject?: GenerateForgotPasswordEmailSubject
-  }
-  loginWithUsername: false | LoginWithUsernameOptions
-  verify?: boolean | VerifyConfig
+  extends Omit<
+      IncomingAuthType,
+      | 'cookies'
+      | 'forgotPassword'
+      | 'lockTime'
+      | 'loginWithUsername'
+      | 'maxLoginAttempts'
+      | 'strategies'
+      | 'tokenExpiration'
+      | 'useSessions'
+      | 'verify'
+    >,
+    Required<
+      Pick<
+        IncomingAuthType,
+        | 'forgotPassword'
+        | 'lockTime'
+        | 'maxLoginAttempts'
+        | 'strategies'
+        | 'tokenExpiration'
+        | 'useSessions'
+        | 'verify'
+      >
+    > {
+  cookies: Pick<AuthCookies, 'domain'> & Required<Pick<AuthCookies, 'sameSite' | 'secure'>>
+  loginWithUsername: false | Required<LoginWithUsernameOptions>
 }
 
 export function hasWhereAccessResult(result: boolean | Where): result is Where {

@@ -23,8 +23,6 @@
     font-size: var(--text-body-medium-font-size);
     font-weight: var(--text-body-medium-font-weight);
     line-height: var(--text-body-medium-line-height);
-    padding-block: var(--spacer-1);
-    padding-inline: var(--spacer-2);
     position: relative;
     user-select: none;
     cursor: pointer;

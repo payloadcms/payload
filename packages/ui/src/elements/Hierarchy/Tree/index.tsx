@@ -51,7 +51,7 @@ const HierarchyTreeInner: React.FC<HierarchyTreeProps> = ({
   selectedNodeId,
   useAsTitle: useAsTitleProp,
 }) => {
-  const { moveFocus } = useTreeFocus()
+  const { focusedId, moveFocus, setFocusedId } = useTreeFocus()
   const router = useRouter()
   const { i18n, t } = useTranslation()
   const { permissions } = useAuth()
@@ -231,17 +231,47 @@ const HierarchyTreeInner: React.FC<HierarchyTreeProps> = ({
     [onNodeClick],
   )
 
+  const rootFocusableIds = useMemo(
+    () => (rootNodes ? rootNodes.map((node) => `node-${String(node.id)}`) : []),
+    [rootNodes],
+  )
+
+  const firstRootFocusableId = rootFocusableIds[0]
+  const lastRootFocusableId = rootFocusableIds[rootFocusableIds.length - 1]
+
   const handleTreeKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
       if (e.key === 'ArrowDown') {
         e.preventDefault()
+
+        if (
+          focusedId &&
+          firstRootFocusableId &&
+          lastRootFocusableId &&
+          focusedId === lastRootFocusableId
+        ) {
+          setFocusedId(firstRootFocusableId)
+          return
+        }
+
         moveFocus('down')
       } else if (e.key === 'ArrowUp') {
         e.preventDefault()
+
+        if (
+          focusedId &&
+          firstRootFocusableId &&
+          lastRootFocusableId &&
+          focusedId === firstRootFocusableId
+        ) {
+          setFocusedId(lastRootFocusableId)
+          return
+        }
+
         moveFocus('up')
       }
     },
-    [moveFocus],
+    [firstRootFocusableId, focusedId, lastRootFocusableId, moveFocus, setFocusedId],
   )
 
   if (isLoading && !rootNodes) {

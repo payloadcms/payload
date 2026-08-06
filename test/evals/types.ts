@@ -2,9 +2,15 @@ import type { LanguageModel } from 'ai'
 import type { Payload } from 'payload'
 import type { ExpectStatic } from 'vitest'
 
+import type { AuditEvent } from '../__helpers/plugins/audit/index.js'
 import type { ParsedConfig } from './assertions/parseConfig.js'
 import type { EvalConfig } from './evalConfig.js'
-import type { RunnerKind, SkillInstallMode } from './runner/types.js'
+import type {
+  AgentBuiltinTool,
+  AgentWorkspaceFile,
+  RunnerKind,
+  SkillInstallMode,
+} from './runner/types.js'
 
 // Dataset
 export type EvalCategory =
@@ -16,6 +22,7 @@ export type EvalCategory =
   | 'fields'
   | 'graphql'
   | 'local-api'
+  | 'mcp'
   | 'negative'
   | 'plugins'
   | 'rest-api'
@@ -23,17 +30,24 @@ export type EvalCategory =
   | 'testing'
 
 export type EvalCase = {
+  /** Extra built-in tools available to the agent for this case. */
+  additionalAllowedTools?: AgentBuiltinTool[]
+  /** Boot the starter config before the agent runs. */
+  bootConfig?: boolean
   category: EvalCategory
   /**
    * Folder under `test/evals/fixtures/` that contains the `payload.config.ts`
    * for this case.
    *
    * Eval cases read it as the starter config the model edits. Runtime cases
-   * boot the generated config after TypeScript passes.
+   * boot the generated config after TypeScript passes. Multiple cases can
+   * share the same config; their input identifies them as separate tests.
    */
   configPath: string
   /** Task prompt given to the model. */
   input: string
+  /** Creates any data the case needs after Payload boots and before the agent runs. */
+  setup?: (args: { payload: Payload }) => Promise<void> | void
   /**
    * Checks the generated config after TypeScript passes.
    *
@@ -43,6 +57,8 @@ export type EvalCase = {
    * the LLM scorer should judge the result.
    */
   verify: (args: EvalVerifyContext) => EvalVerifyResult | Promise<EvalVerifyResult>
+  /** Files copied into the agent's temporary workspace before it starts. */
+  workspaceFiles?: AgentWorkspaceFile[]
 }
 
 export type EvalExpect = ExpectStatic
@@ -55,6 +71,8 @@ export type EvalScore = (
 export type EvalVerifyContext = {
   /** Source-level AST summary from the existing TypeScript parser. */
   ast: ParsedConfig
+  /** Events recorded while the agent was running. */
+  audit: AuditEvent[]
   /** Imported generated config, normalized for easy eval assertions. */
   config: EvalConfig
   expect: EvalExpect
@@ -71,6 +89,8 @@ export type EvalVerifyContext = {
   score: EvalScore
   /** Complete generated `payload.config.ts` source. */
   source: string
+  /** Structured events emitted by the agent runner. */
+  transcript: TranscriptEvent[]
 }
 
 export type EvalVerifyResult = ConfigChangeScorerResult | void
@@ -107,6 +127,8 @@ export type CodegenRunnerResult = {
   agentExitCode?: number
   /** For agent results: captured stderr from the CLI (fallback when stream-json parsing yields no events), truncated to ~10,000 characters. */
   agentLog?: string
+  /** Events recorded while the agent was running. */
+  audit?: AuditEvent[]
   confidence: number
   modifiedConfig: string
   /** For agent results: structured per-event transcript parsed from stream-json output. */
@@ -136,6 +158,8 @@ export type EvalResult = {
   answer: string
   /** Populated when one or more structural assertions fail */
   assertionErrors?: string[]
+  /** Events recorded while the agent was running. */
+  audit?: AuditEvent[]
   category: string
   /** Named by the scorer: the precise change made to the config */
   changeDescription?: string
@@ -151,17 +175,14 @@ export type EvalResult = {
   pass: boolean
   question: string
   reasoning: string
+  /** Previous run whose identical result was reused instead of executing this case. */
+  reusedFromRunId?: string
   /**
    * Identifies the eval invocation that produced this result (ISO timestamp set
-   * once per `pnpm test:eval` run). Lets the dashboard group results into
-   * discrete runs. Absent on entries cached before run-tracking existed.
+   * once per `pnpm test:eval` run). Lets the dashboard group results into runs.
    */
   runId?: string
-  /**
-   * Which runner produced this result. Surfaced in the dashboard. Required for
-   * all entries written by this branch; old cache entries may be missing it —
-   * read sites should default-coerce to `'llm'`.
-   */
+  /** Which runner produced this result. Surfaced in the dashboard. */
   runnerKind: RunnerKind
   /** True when `verify` booted the generated config through the lazy Payload API. */
   runtimeUsed?: boolean
@@ -182,6 +203,8 @@ export type EvalResult = {
 }
 export type RunCodegenDatasetOptions = {
   agentModel?: string
+  /** Expose the starter config's Payload MCP tools to the runner. */
+  exposeMcpTools?: boolean
   kind?: RunnerKind
   runnerModel?: LanguageModel
   scorerModel?: LanguageModel

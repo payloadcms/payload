@@ -10,7 +10,7 @@ import type {
 import crypto from 'crypto'
 import { jwtDecode } from 'jwt-decode'
 import path from 'path'
-import { getFieldsToSign } from 'payload'
+import { createLocalReq, Forbidden, getFieldsToSign, refreshOperation } from 'payload'
 import { email as emailValidation } from 'payload/shared'
 import { fileURLToPath } from 'url'
 import { v4 as uuid } from 'uuid'
@@ -86,6 +86,88 @@ describe('Auth', () => {
       expect(Array.isArray(roles)).toBeTruthy()
       expect(iat).toBeDefined()
       expect(exp).toBeDefined()
+    })
+
+    it('should not expose strategy on the GraphQL me result', async () => {
+      const result = await restClient
+        .GRAPHQL_POST({
+          body: JSON.stringify({
+            query: `query {
+              meUser {
+                strategy
+              }
+            }`,
+          }),
+          headers: {
+            Authorization: `JWT ${token}`,
+          },
+        })
+        .then((res) => res.json())
+
+      expect(result.errors[0].message).toContain('Cannot query field "strategy" on type "usersMe"')
+    })
+
+    it('should expose strategy on the GraphQL me user', async () => {
+      const result = await restClient
+        .GRAPHQL_POST({
+          body: JSON.stringify({
+            query: `query {
+              meUser {
+                user {
+                  _strategy
+                }
+              }
+            }`,
+          }),
+          headers: {
+            Authorization: `JWT ${token}`,
+          },
+        })
+        .then((res) => res.json())
+
+      expect(result.data.meUser.user._strategy).toBe('local-jwt')
+    })
+
+    it('should not expose strategy on the GraphQL refresh token result', async () => {
+      const result = await restClient
+        .GRAPHQL_POST({
+          body: JSON.stringify({
+            query: `mutation {
+              refreshTokenUser {
+                strategy
+              }
+            }`,
+          }),
+          headers: {
+            Authorization: `JWT ${token}`,
+          },
+        })
+        .then((res) => res.json())
+
+      expect(result.errors[0].message).toContain(
+        'Cannot query field "strategy" on type "usersRefreshedUser"',
+      )
+    })
+
+    it('should expose strategy on the GraphQL refresh token user', async () => {
+      const result = await restClient
+        .GRAPHQL_POST({
+          body: JSON.stringify({
+            query: `mutation {
+              refreshTokenUser {
+                user {
+                  _strategy
+                }
+              }
+            }`,
+          }),
+          headers: {
+            Authorization: `JWT ${token}`,
+          },
+        })
+        .then((res) => res.json())
+
+      expect(result.data.refreshTokenUser.user._strategy).toBe('local-jwt')
     })
   })
 
@@ -218,7 +300,7 @@ describe('Auth', () => {
         expect(result.password).toBeUndefined()
       })
 
-      it('should return a logged in user from /me', async () => {
+      it('should return strategy only on the /me user', async () => {
         const response = await restClient.GET(`/${slug}/me`, {
           headers: {
             Authorization: `JWT ${token}`,
@@ -227,10 +309,11 @@ describe('Auth', () => {
 
         const data = await response.json()
 
-        expect(data.strategy).toBeDefined()
+        expect(data).not.toHaveProperty('strategy')
         expect(typeof data.exp).toBe('number')
         expect(response.status).toBe(200)
         expect(data.user.email).toBeDefined()
+        expect(data.user._strategy).toBe('local-jwt')
       })
 
       it('should have fields saved to JWT', () => {
@@ -340,6 +423,20 @@ describe('Auth', () => {
 
         expect(response.status).toBe(200)
         expect(data.refreshedToken).toBeDefined()
+      })
+
+      it('should return strategy only on the /refresh-token user', async () => {
+        const response = await restClient.POST(`/${slug}/refresh-token`, {
+          headers: {
+            Authorization: `JWT ${token}`,
+          },
+        })
+
+        const data = await response.json()
+
+        expect(response.status).toBe(200)
+        expect(data).not.toHaveProperty('strategy')
+        expect(data.user._strategy).toBe('local-jwt')
       })
 
       it('should refresh a token and receive an up-to-date user', async () => {
@@ -647,14 +744,14 @@ describe('Auth', () => {
             body: JSON.stringify({ value: { data: 'admin-sensitive' } }),
             headers: { Authorization: `JWT ${token}` },
           })
-          createdIDs.push(((await adminPref.json()) as any).doc.id)
+          createdIDs.push((await adminPref.json()).doc.id)
 
           // Create and verify public user
           const userRes = await restClient.POST(`/${publicUsersSlug}`, {
             body: JSON.stringify({ email: 'crosscollection@test.com', password: 'test123!' }),
             headers: { Authorization: `JWT ${token}` },
           })
-          publicUserId = ((await userRes.json()) as any).doc.id
+          publicUserId = (await userRes.json()).doc.id
 
           const user = await payload.findByID({
             collection: publicUsersSlug,
@@ -667,14 +764,14 @@ describe('Auth', () => {
           const login = await restClient.POST(`/${publicUsersSlug}/login`, {
             body: JSON.stringify({ email: 'crosscollection@test.com', password: 'test123!' }),
           })
-          publicUserToken = ((await login.json()) as any).token
+          publicUserToken = (await login.json()).token
 
           // Public user creates preference
           const publicPref = await restClient.POST(`/payload-preferences/${publicKey}`, {
             body: JSON.stringify({ value: { data: 'public-data' } }),
             headers: { Authorization: `JWT ${publicUserToken}` },
           })
-          createdIDs.push(((await publicPref.json()) as any).doc.id)
+          createdIDs.push((await publicPref.json()).doc.id)
         })
 
         afterAll(async () => {
@@ -1082,6 +1179,12 @@ describe('Auth', () => {
 
       expect(response.status).toBe(403)
       expect(data.token).toBeUndefined()
+    })
+  })
+
+  describe('config defaults', () => {
+    it('should default auth.depth to 0 when the collection does not set it', () => {
+      expect(payload.collections[publicUsersSlug]?.config.auth.depth).toBe(0)
     })
   })
 
@@ -1791,6 +1894,40 @@ describe('Auth', () => {
       expect(new Date(matchedSession?.expiresAt as unknown as string).getTime()).toBeLessThan(
         new Date(matchedRefreshedSession?.expiresAt as unknown as string).getTime(),
       )
+    })
+
+    it('should reject a refresh when its session is revoked after authentication', async () => {
+      const authenticated = await payload.login({
+        collection: slug,
+        data: {
+          email: devUser.email,
+          password: devUser.password,
+        },
+      })
+      const { sid } = jwtDecode<{ sid: string }>(String(authenticated.token))
+
+      const logoutResponse = await restClient.POST(`/${slug}/logout`, {
+        headers: {
+          Authorization: `JWT ${authenticated.token}`,
+        },
+      })
+      const req = await createLocalReq(
+        {
+          user: {
+            ...authenticated.user,
+            _sid: sid,
+          },
+        },
+        payload,
+      )
+
+      expect(logoutResponse.status).toBe(200)
+      await expect(
+        refreshOperation({
+          collection: payload.collections[slug],
+          req,
+        }),
+      ).rejects.toBeInstanceOf(Forbidden)
     })
 
     it('should not authenticate a user who has a JWT but its session has been terminated', async () => {

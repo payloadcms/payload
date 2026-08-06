@@ -67,11 +67,36 @@
   display: flex;
   align-items: center;
   gap: var(--spacer-1);
+  width: 100%;
+  padding: 0 var(--spacer-1);
+  background-color: transparent;
+  border: 0;
+  cursor: pointer;
+  text-align: inherit;
+  border-radius: var(--popup-item-radius);
+  color: var(--popup-item-color, var(--color-text));
+}
+
+.user-menu__submenu-header-row:focus-visible {
+  outline: var(--accessibility-outline);
+  outline-offset: -1px;
+}
+
+.user-menu__submenu-header-row:hover {
+  outline: none;
+  background-color: var(--popup-item-bg-hover, var(--color-bg-transparent-hover));
+  color: var(--popup-item-color-hover, var(--color-text-onselected-strong));
+}
+
+.user-menu__submenu-back {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .user-menu__submenu-title {
   margin: 0;
-  color: var(--color-text);
+  color: inherit;
   font-family: var(--text-body-medium-font-family);
   font-size: var(--text-body-medium-font-size);
   font-weight: var(--text-body-medium-font-weight);

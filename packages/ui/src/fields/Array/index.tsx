@@ -17,6 +17,7 @@ import { Button } from '../../elements/Button/index.js'
 import { clipboardCopy, clipboardPaste } from '../../elements/ClipboardAction/clipboardUtilities.js'
 import { ClipboardAction } from '../../elements/ClipboardAction/index.js'
 import {
+  insertRowFromClipboard,
   mergeFormStateFromClipboard,
   reduceFormStateByPath,
 } from '../../elements/ClipboardAction/mergeFormStateFromClipboard.js'
@@ -252,9 +253,9 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
 
   const pasteRow = useCallback(
     (rowIndex: number) => {
-      const formState = { ...getFields() }
       const pasteArgs = {
         onPaste: (dataFromClipboard: ClipboardPasteData) => {
+          const formState = { ...getFields() }
           const newState = mergeFormStateFromClipboard({
             dataFromClipboard,
             formState,
@@ -276,6 +277,38 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
       }
     },
     [fields, getFields, path, replaceState, setModified, t],
+  )
+
+  const pasteRowBelow = useCallback(
+    (rowIndex: number) => {
+      const pasteArgs = {
+        onPaste: (dataFromClipboard: ClipboardPasteData) => {
+          const formState = { ...getFields() }
+          const newState = insertRowFromClipboard({
+            dataFromClipboard,
+            formState,
+            path,
+            rowIndex: rowIndex + 1,
+          })
+          replaceState(newState)
+          setModified(true)
+
+          setTimeout(() => {
+            scrollToID(`${scrollIdPrefix}-row-${rowIndex + 1}`)
+          }, 0)
+        },
+        path,
+        schemaFields: fields,
+        t,
+      }
+
+      const clipboardResult = clipboardPaste(pasteArgs)
+
+      if (typeof clipboardResult === 'string') {
+        toast.error(clipboardResult)
+      }
+    },
+    [fields, getFields, path, replaceState, scrollIdPrefix, setModified, t],
   )
 
   const pasteField = useCallback(
@@ -304,10 +337,13 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
   const hasMaxRows = maxRows && rows.length >= maxRows
 
   const fieldErrorCount = errorPaths.length
-  const fieldHasErrors = submitted && errorPaths.length > 0
+  const fieldHasErrors = submitted && (fieldErrorCount > 0 || !valid)
+  const displayedErrorCount = fieldErrorCount > 0 ? fieldErrorCount : fieldHasErrors ? 1 : 0
 
   const showRequired = (readOnly || disabled) && rows.length === 0
   const showMinRows = (rows.length && rows.length < minRows) || (required && rows.length === 0)
+  const shouldShowSummaryBanner = !valid && (showRequired || showMinRows)
+  const shouldShowFieldError = showError && !shouldShowSummaryBanner
 
   const styles = useMemo(() => mergeFieldStyles(field), [field])
 
@@ -347,7 +383,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
       id={`field-${path.replace(/\./g, '__')}`}
       style={styles}
     >
-      {showError && (
+      {shouldShowFieldError && (
         <RenderCustomComponent
           CustomComponent={Error}
           Fallback={<FieldError path={path} showError={showError} />}
@@ -370,8 +406,8 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
                 }
               />
             </h3>
-            {fieldHasErrors && fieldErrorCount > 0 && (
-              <ErrorPill count={fieldErrorCount} i18n={i18n} withMessage />
+            {displayedErrorCount > 0 && (
+              <ErrorPill count={displayedErrorCount} i18n={i18n} withMessage />
             )}
           </div>
           <ul className={`${baseClass}__header-actions`}>
@@ -443,6 +479,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
                     moveRow={moveRow}
                     parentPath={path}
                     pasteRow={pasteRow}
+                    pasteRowBelow={pasteRowBelow}
                     path={rowPath}
                     permissions={permissions}
                     readOnly={readOnly || disabled}

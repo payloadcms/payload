@@ -1,8 +1,7 @@
 import type { PostgresAdapter } from '@payloadcms/db-postgres'
-import type { DatabaseAdapterObj } from 'payload'
 
 import path from 'path'
-import { buildConfig } from 'payload'
+import { buildConfig, type DatabaseAdapterObj } from 'payload'
 import { fileURLToPath } from 'url'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))

@@ -18,6 +18,7 @@ import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2E
 import { BASE_PATH, customAdminRoutes } from '../../shared.js'
 import {
   arrayCollectionSlug,
+  customFieldsSlug,
   customViews1CollectionSlug,
   formatDocURLCollectionSlug,
   geoCollectionSlug,
@@ -85,6 +86,7 @@ describe('List View', () => {
   let user: any
   let virtualsUrl: AdminUrlUtil
   let noTimestampsUrl: AdminUrlUtil
+  let customFieldsUrl: AdminUrlUtil
 
   let serverURL: string
   let adminRoutes: ReturnType<typeof getRoutes>
@@ -112,6 +114,7 @@ describe('List View', () => {
     formatDocURLUrl = new AdminUrlUtil(serverURL, formatDocURLCollectionSlug)
     virtualsUrl = new AdminUrlUtil(serverURL, virtualsSlug)
     noTimestampsUrl = new AdminUrlUtil(serverURL, noTimestampsSlug)
+    customFieldsUrl = new AdminUrlUtil(serverURL, customFieldsSlug)
     const context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
@@ -171,6 +174,53 @@ describe('List View', () => {
   })
 
   describe('list view table', () => {
+    const fallbackDocumentIDs: (number | string)[] = []
+
+    test.afterEach(async () => {
+      for (const id of fallbackDocumentIDs) {
+        await payload.delete({
+          id,
+          collection: listViewSelectAPISlug,
+        })
+      }
+      fallbackDocumentIDs.length = 0
+    })
+
+    test('should render row select checkboxes with accessible names', async () => {
+      const rowCheckboxes = page.locator(`${tableRowLocator} .select-row__checkbox input`)
+
+      await expect(rowCheckboxes).toHaveCount(2)
+      await expect(page.getByRole('checkbox', { name: 'Select post1' })).toBeVisible()
+      await expect(page.getByRole('checkbox', { name: 'Select post2' })).toBeVisible()
+    })
+
+    test('should use the document ID in the accessible name when useAsTitle is not configured', async () => {
+      const doc = await payload.create({
+        collection: listViewSelectAPISlug,
+        data: {
+          title: 'Fallback test title',
+        },
+      })
+      fallbackDocumentIDs.push(doc.id)
+      const selectAPIUrl = new AdminUrlUtil(serverURL, listViewSelectAPISlug)
+
+      await page.goto(selectAPIUrl.list)
+      await expect(page.getByRole('checkbox', { name: `Select ${doc.id}` })).toBeVisible()
+    })
+
+    test('should use useAsTitle in the accessible name when its column is hidden', async () => {
+      await toggleColumn(page, {
+        columnLabel: 'Title',
+        columnName: 'title',
+        targetState: 'off',
+      })
+      await page.reload()
+
+      await expect(page.locator('#heading-title')).toBeHidden()
+      await expect(page.getByRole('checkbox', { name: 'Select post1' })).toBeVisible()
+      await expect(page.getByRole('checkbox', { name: 'Select post2' })).toBeVisible()
+    })
+
     test('should link second cell', async () => {
       const { id } = await createPost()
       await page.reload()
@@ -192,6 +242,11 @@ describe('List View', () => {
         'href',
         `${adminRoutes.routes?.admin}/collections/posts/${id}`,
       )
+    })
+
+    test('should render when a field has admin.components explicitly set to undefined', async () => {
+      await page.goto(customFieldsUrl.list)
+      await expect(page.locator('.collection-list--custom-fields')).toBeVisible()
     })
 
     test('should hide create new button when allowCreate is false', async () => {
@@ -374,7 +429,7 @@ describe('List View', () => {
       // ensure the ID column is active
       const idButton = getColumnSelectorItem({ container: columnContainer, label: 'ID' })
 
-      const id = (await page.locator('.cell-id').first().innerText()).replace('ID: ', '')
+      const id = await page.locator('.cell-id .id-label__value').first().innerText()
 
       const buttonClasses = await idButton.getAttribute('class')
 
@@ -397,10 +452,25 @@ describe('List View', () => {
 
       await expect(tableRows).toHaveCount(1)
       const firstId = page.locator(tableRowLocator).first().locator('.cell-id')
-      await expect(firstId).toHaveText(`ID: ${id}`)
+      await expect(firstId.locator('.id-label__prefix')).toHaveText('ID')
+      await expect(firstId.locator('.id-label__value')).toHaveText(id)
 
       await page.locator('.condition__actions-remove').click()
       await expect(page.locator(tableRowLocator)).toHaveCount(2)
+    })
+
+    test('should render the ID cell as a pill with a hover background instead of an underline', async () => {
+      const idLink = page.locator('.cell-id > a').first()
+      const idLabel = idLink.locator('.id-label')
+
+      await expect(idLabel.locator('.id-label__prefix')).toHaveText('ID')
+      await expect(idLabel).toHaveCSS('background-color', 'rgb(245, 245, 245)')
+      await expect(idLink).toHaveCSS('text-decoration-line', 'none')
+
+      await idLabel.hover()
+
+      await expect(idLabel).toHaveCSS('background-color', 'rgb(230, 230, 230)')
+      await expect(idLink).toHaveCSS('text-decoration-line', 'none')
     })
 
     test('should search for nested fields in field dropdown', async () => {
@@ -484,7 +554,7 @@ describe('List View', () => {
     })
 
     test('should reset filter value when a different field is selected', async () => {
-      const id = (await page.locator('.cell-id').first().innerText()).replace('ID: ', '')
+      const id = await page.locator('.cell-id .id-label__value').first().innerText()
 
       const { whereBuilder } = await addListFilter({
         page,
@@ -1504,6 +1574,12 @@ describe('List View', () => {
 
       await setPerPageLimit({ page, limit: 5 })
 
+      // Wait for the table to reflect the new limit before reading the first
+      // page's rows. `setPerPageLimit` only waits for the URL to update; the
+      // table re-renders asynchronously afterward (the server re-fetch lags the
+      // URL change on streaming adapters), so reading immediately can capture
+      // the pre-limit rows (all 6) and produce a false page-overlap.
+      await expect(page.locator(tableRowLocator)).toHaveCount(5)
       const firstPageIds = await page.locator('.cell-id').allInnerTexts()
       await goToNextPage(page)
       // Wait until only 1 row is visible

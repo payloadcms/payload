@@ -117,13 +117,16 @@ export const afterTenantDelete =
             id: user.id,
             collection: usersSlug,
             data: {
-              [usersTenantsArrayFieldName]: (user[usersTenantsArrayFieldName] || []).filter(
-                (row: Record<string, string>) => {
-                  if (row[usersTenantsArrayTenantFieldName]) {
-                    return row[usersTenantsArrayTenantFieldName] !== id
-                  }
-                },
-              ),
+              [usersTenantsArrayFieldName]: (
+                ((user as Record<string, unknown>)[usersTenantsArrayFieldName] as Record<
+                  string,
+                  string
+                >[]) || []
+              ).filter((row: Record<string, string>) => {
+                if (row[usersTenantsArrayTenantFieldName]) {
+                  return row[usersTenantsArrayTenantFieldName] !== id
+                }
+              }),
             },
             req,
           }),

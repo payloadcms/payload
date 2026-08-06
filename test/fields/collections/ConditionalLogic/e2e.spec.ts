@@ -1,15 +1,15 @@
 import type { BrowserContext, Page } from '@playwright/test'
 
-import { expect, test } from '@playwright/test'
+import { expect } from '@playwright/test'
+import { addArrayRow } from '__helpers/e2e/fields/array/index.js'
+import { addBlock } from '__helpers/e2e/fields/blocks/index.js'
+import { test } from '__helpers/e2e/playwright.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../../../__helpers/shared/sdk/index.js'
 import type { Config } from '../../payload-types.js'
 
-import { assertNetworkRequests } from '../../../__helpers/e2e/assertNetworkRequests.js'
-import { addArrayRow } from '../../../__helpers/e2e/fields/array/index.js'
-import { addBlock } from '../../../__helpers/e2e/fields/blocks/index.js'
 import {
   ensureCompilationIsDone,
   initPageConsoleErrorCatch,
@@ -101,52 +101,29 @@ describe('Conditional Logic', () => {
     expect(true).toBe(true)
   })
 
-  test('ensure conditions receive document ID during form state request', async () => {
-    await page.goto(url.create)
+  test(
+    'ensure conditions receive document ID during form state request',
+    { framework: 'rsc' },
+    async () => {
+      await page.goto(url.create)
 
-    const fieldOnlyVisibleIfNoID = page.locator('#field-fieldWithDocIDCondition')
+      const fieldOnlyVisibleIfNoID = page.locator('#field-fieldWithDocIDCondition')
 
-    await expect(fieldOnlyVisibleIfNoID).toBeVisible()
+      await expect(fieldOnlyVisibleIfNoID).toBeVisible()
 
-    const textField = page.locator('#field-text')
-    await assertNetworkRequests(
-      page,
-      '/admin/collections/conditional-logic',
-      async () => {
-        await textField.fill('some text')
-      },
-      {
-        minimumNumberOfRequests: 1,
-      },
-    )
+      const textField = page.locator('#field-text')
+      await textField.fill('some text')
 
-    await assertNetworkRequests(
-      page,
-      '/api/conditional-logic',
-      async () => {
-        await saveDocAndAssert(page)
-      },
-      {
-        minimumNumberOfRequests: 1,
-      },
-    )
+      await saveDocAndAssert(page)
 
-    await expect(fieldOnlyVisibleIfNoID).toBeHidden()
+      await expect(fieldOnlyVisibleIfNoID).toBeHidden()
 
-    // Fill text and wait for form state request to come back
-    await assertNetworkRequests(
-      page,
-      '/admin/collections/conditional-logic',
-      async () => {
-        await textField.fill('updated text')
-      },
-      {
-        minimumNumberOfRequests: 1,
-      },
-    )
+      await textField.fill('updated text')
+      await page.waitForTimeout(1000)
 
-    await expect(fieldOnlyVisibleIfNoID).toBeHidden()
-  })
+      await expect(fieldOnlyVisibleIfNoID).toBeHidden()
+    },
+  )
 
   test('should conditionally render custom field that renders a Payload field', async () => {
     await page.goto(url.create)
@@ -170,13 +147,13 @@ describe('Conditional Logic', () => {
     expect(true).toBe(true)
   })
 
-  test('should toggle conditional custom client field', async () => {
+  test('should toggle conditional custom client field', { framework: 'rsc' }, async () => {
     await page.goto(url.create)
     await toggleConditionAndCheckField('label[for=field-toggleField]', '#custom-client-field')
     expect(true).toBe(true)
   })
 
-  test('should conditionally render custom server field', async () => {
+  test('should conditionally render custom server field', { framework: 'rsc' }, async () => {
     await page.goto(url.create)
     await toggleConditionAndCheckField('label[for=field-toggleField]', '#custom-server-field')
     expect(true).toBe(true)

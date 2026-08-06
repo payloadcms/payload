@@ -27,10 +27,9 @@ export const getAfterChangeHook =
       if (files.length > 0) {
         const uploadResults = await Promise.all(
           files
-            .filter((file) => !file.clientUploadContext)
+            .filter((file) => !file.uploadReference)
             .map((file) =>
               adapter.handleUpload({
-                clientUploadContext: file.clientUploadContext,
                 collection,
                 data: doc,
                 file,

@@ -29,7 +29,9 @@ export class AutoLinkNode extends LinkNode {
     return null
   }
 
-  static override importJSON(serializedNode: SerializedAutoLinkNode): AutoLinkNode {
+  static override importJSON(
+    serializedNode: Record<string, unknown> & SerializedAutoLinkNode,
+  ): AutoLinkNode {
     const node = $createAutoLinkNode({}).updateFromJSON(serializedNode)
 
     /**

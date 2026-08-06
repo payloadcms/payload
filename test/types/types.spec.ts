@@ -1,18 +1,23 @@
 import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
+import type { useAuth } from '@payloadcms/ui'
 import type {
+  AuthenticatedUser,
   BulkOperationResult,
   CollectionSlug,
   CustomDocumentViewConfig,
   DefaultDocumentViewConfig,
   GeneratedTypes,
+  Job,
+  JobTaskStatus,
   JoinQuery,
-  JsonObject,
+  MeOperationResult,
   PaginatedDocs,
+  PayloadRequest,
   PayloadTypesShape,
   SelectType,
   TypedCollectionSelect,
-  TypeWithID,
   TypeWithVersion,
+  UntypedPayloadTypes,
   Where,
 } from 'payload'
 
@@ -33,7 +38,6 @@ import {
   type SerializedRelationshipNode,
   type SerializedTabNode,
   type SerializedTextNode,
-  type SerializedUploadNode,
   type TypedEditorState,
   type WithDefaultNodes,
 } from '@payloadcms/richtext-lexical'
@@ -45,6 +49,7 @@ import { describe, expect, test } from 'tstyche'
 import type {
   DraftPost,
   DraftPostInput,
+  FallbackUser,
   LexicalUploadFields_9521FA4A as GalleryUploadFields,
   SerializedAutoLinkNode as GenAutoLink,
   SerializedHeadingNode as GenHeading,
@@ -53,7 +58,7 @@ import type {
   SerializedListItemNode as GenLI,
   SerializedLinkNode as GenLink,
   SerializedListNode as GenList,
-  LexicalNodes_51F9F5BE as GenNodeUnion,
+  LexicalNodes_D5E7E2D8 as GenNodeUnion,
   SerializedParagraphNode as GenParagraph,
   SerializedQuoteNode as GenQuote,
   SerializedTabNode as GenTab,
@@ -77,6 +82,25 @@ import type {
 } from './payload-types.js'
 
 describe('Types testing', () => {
+  test('should fall back when generated types do not include jobs', () => {
+    expect<Job['id']>().type.toBe<number | string>()
+    expect<Job['processingToken']>().type.toBe<null | string | undefined>()
+    expect<Job['taskStatus']>().type.toBe<JobTaskStatus>()
+    expect<'payload-jobs'>().type.not.toBeAssignableTo<CollectionSlug>()
+  })
+
+  describe('authenticated user', () => {
+    test('should use AuthenticatedUser for request and me operation users', () => {
+      expect<PayloadRequest['user']>().type.toBe<AuthenticatedUser | null>()
+      expect<MeOperationResult['user']>().type.toBe<AuthenticatedUser | null | undefined>()
+    })
+
+    test('should not expose strategy on core or UI auth result types', () => {
+      expect<MeOperationResult>().type.not.toHaveProperty('strategy')
+      expect<ReturnType<typeof useAuth>>().type.not.toHaveProperty('strategy')
+    })
+  })
+
   test('payload.find', () => {
     expect(payload.find({ collection: 'users' })).type.toBe<Promise<PaginatedDocs<User>>>()
   })
@@ -194,6 +218,15 @@ describe('Types testing', () => {
       // The collection property should be directly on the User interface, not an intersection
       expect<User>().type.toHaveProperty('collection')
       expect<User['collection']>().type.toBe<'users'>()
+    })
+
+    test('generated User is assignable to the untyped fallback user type', () => {
+      // Payload uses this auth contract when generated types are unavailable, so every generated
+      // user must be readable through it.
+      type UntypedFallbackUser = UntypedPayloadTypes['user']
+
+      expect<User>().type.toBeAssignableTo<UntypedFallbackUser>()
+      expect<FallbackUser>().type.toBeAssignableTo<UntypedFallbackUser>()
     })
 
     test('payload operations return users with collection property', async () => {
@@ -1147,6 +1180,7 @@ describe('Types testing', () => {
       const _sdk = new PayloadSDK({ baseURL: '' })
       expect<Parameters<typeof _sdk.create>[0]['collection']>().type.toBe<
         | 'draft-posts'
+        | 'fallback-users'
         | 'gallery'
         | 'input-types'
         | 'media'
@@ -1161,11 +1195,23 @@ describe('Types testing', () => {
       >()
     })
 
+    test('should expose strategy only on SDK auth result users', async () => {
+      const _sdk = new PayloadSDK<LocalConfig>({ baseURL: '' })
+      const meResult = await _sdk.me({ collection: 'users' })
+      const refreshResult = await _sdk.refreshToken({ collection: 'users' })
+
+      expect(meResult).type.not.toHaveProperty('strategy')
+      expect(meResult.user).type.toHaveProperty('_strategy')
+      expect(refreshResult).type.not.toHaveProperty('strategy')
+      expect(refreshResult.user).type.toHaveProperty('_strategy')
+    })
+
     test('ensure SDK with explicit generic uses has correct collection types', () => {
       const _sdk = new PayloadSDK<LocalConfig>({ baseURL: '' })
       // ensure collection property of sdk.create has posts in the union type
       expect<Parameters<typeof _sdk.create>[0]['collection']>().type.toBe<
         | 'draft-posts'
+        | 'fallback-users'
         | 'gallery'
         | 'input-types'
         | 'media'
@@ -1383,9 +1429,10 @@ describe('Types testing', () => {
       expect<InputTypeInput>().type.not.toHaveProperty('updatedAt')
     })
 
-    test('_status is not part of write data', () => {
+    test('_status is part of write data for draft-enabled entities', () => {
       expect<DraftPost>().type.toHaveProperty('_status')
-      expect<DraftPostInput>().type.not.toHaveProperty('_status')
+      expect<DraftPostInput>().type.toHaveProperty('_status')
+      expect<DraftPostInput['_status']>().type.toBe<DraftPost['_status']>()
     })
 
     test('fields with a defaultValue are optional in write data', () => {

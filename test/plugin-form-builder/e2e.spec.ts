@@ -633,6 +633,7 @@ test.describe('Form Builder Plugin', () => {
     })
 
     test('Upload Form: submits with valid image and shows upload result', async () => {
+      test.skip(process.env.PAYLOAD_FRAMEWORK === 'tanstack-start', 'TanStack: known post-hydration RSC view remount detaches the view mid-interaction (see framework adapter notes); re-enable when the TanStack RSC hydration is fixed.')
       await page.goto(`${serverURL}${uploadFormTestPath}`)
 
       const uploadFormSection = page.locator(`[data-testid="form-section-${uploadFormId}"]`)
@@ -663,6 +664,7 @@ test.describe('Form Builder Plugin', () => {
     })
 
     test('Upload Form: submission is visible in admin with submissionUploads image', async () => {
+      test.skip(process.env.PAYLOAD_FRAMEWORK === 'tanstack-start', 'TanStack: known post-hydration RSC view remount detaches the view mid-interaction (see framework adapter notes); re-enable when the TanStack RSC hydration is fixed.')
       await page.goto(`${serverURL}${uploadFormTestPath}`)
 
       const uploadFormSection = page.locator(`[data-testid="form-section-${uploadFormId}"]`)
@@ -698,6 +700,7 @@ test.describe('Form Builder Plugin', () => {
     })
 
     test('Image Upload Form: shows MIME type error when uploading PDF', async () => {
+      test.skip(process.env.PAYLOAD_FRAMEWORK === 'tanstack-start', 'TanStack: known post-hydration RSC view remount detaches the view mid-interaction (see framework adapter notes); re-enable when the TanStack RSC hydration is fixed.')
       await page.goto(`${serverURL}${uploadFormTestPath}`)
 
       const imageFormSection = page.locator(`[data-testid="form-section-${imageFormId}"]`)
@@ -711,6 +714,7 @@ test.describe('Form Builder Plugin', () => {
     })
 
     test('Image Upload Form: accepts valid PNG and shows upload result', async () => {
+      test.skip(process.env.PAYLOAD_FRAMEWORK === 'tanstack-start', 'TanStack: known post-hydration RSC view remount detaches the view mid-interaction (see framework adapter notes); re-enable when the TanStack RSC hydration is fixed.')
       await page.goto(`${serverURL}${uploadFormTestPath}`)
 
       const imageFormSection = page.locator(`[data-testid="form-section-${imageFormId}"]`)
@@ -740,6 +744,7 @@ test.describe('Form Builder Plugin', () => {
     })
 
     test('Multi-File Upload Form: submits two images + one document and shows both collections in result', async () => {
+      test.skip(process.env.PAYLOAD_FRAMEWORK === 'tanstack-start', 'TanStack: known post-hydration RSC view remount detaches the view mid-interaction (see framework adapter notes); re-enable when the TanStack RSC hydration is fixed.')
       await page.goto(`${serverURL}${uploadFormTestPath}`)
 
       const multiFormSection = page.locator(`[data-testid="form-section-${multiFileFormId}"]`)

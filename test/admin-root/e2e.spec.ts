@@ -21,6 +21,16 @@ const dirname = path.dirname(filename)
 let context: BrowserContext
 
 test.describe('Admin Panel (Root)', () => {
+  // The tanstack-start adapter's file-based router currently mounts the admin
+  // under a fixed `/admin/*` route, so configs that move the admin to the
+  // site root (`admin: '/'`) cannot be served by `app-tanstack`. Skip the
+  // entire suite for tanstack-start until the router supports a configurable
+  // admin mount point.
+  test.skip(
+    process.env.PAYLOAD_FRAMEWORK === 'tanstack-start',
+    'tanstack-start does not yet support a custom admin route at the site root',
+  )
+
   let page: Page
   let url: AdminUrlUtil
 
@@ -131,6 +141,11 @@ test.describe('Admin Panel (Root)', () => {
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
     await expect(page.locator('#field-theme')).toBeHidden()
     await expect(page.locator('#field-theme-auto')).toBeHidden()
+  })
+
+  test('ignores the ?theme= param when config.admin.theme restricts the theme', async () => {
+    await page.goto(`${url.account}?theme=light`)
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
   })
 
   test('should mount custom root views', async () => {

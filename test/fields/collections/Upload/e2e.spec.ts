@@ -63,11 +63,19 @@ describe('Upload', () => {
   async function uploadImage() {
     await page.goto(url.create)
 
-    // create a jpg upload
-    await page
-      .locator('.file-manager input[type="file"]')
-      .setInputFiles(path.resolve(dirname, './collections/Upload/payload.jpg'))
-    await expect(page.locator('#field-filemanager-filename')).toHaveValue('payload.jpg')
+    // create a jpg upload. `setInputFiles` fires a one-shot native change event;
+    // if it lands before the upload field's React onChange is hydrated (the admin
+    // view is an async RSC/Flight payload that hydrates after the shell), the
+    // selection is dropped and the filename never appears. Unlike click/fill,
+    // setInputFiles does not auto-retry, so retry until it registers.
+    await expect(async () => {
+      await page
+        .locator('.file-manager input[type="file"]')
+        .setInputFiles(path.resolve(dirname, './collections/Upload/payload.jpg'))
+      await expect(page.locator('#field-filemanager-filename')).toHaveValue('payload.jpg', {
+        timeout: 2000,
+      })
+    }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
     await saveDocAndAssert(page)
   }
 

@@ -6,8 +6,8 @@ import { mcpEndpoint } from './endpoint/index.js'
 import { sanitizeMCPConfig } from './mcp/sanitizeMCPConfig.js'
 
 declare module 'payload' {
-  export interface PayloadRequest {
-    payloadAPI: 'GraphQL' | 'local' | 'MCP' | 'REST'
+  export interface PayloadRequestAPI {
+    MCP: true
   }
   interface RegisteredPlugins {
     /** After the plugin's `plugin` callback runs, `options` holds the sanitized config. */
@@ -22,8 +22,8 @@ export { defineCollectionTool, defineGlobalTool, definePrompt, defineTool } from
 export const mcpPlugin = definePlugin<MCPPluginConfig>({
   slug: '@payloadcms/plugin-mcp',
   order: 10,
-  plugin: ({ config, plugins, ...rawConfig }) => {
-    const pluginConfig = sanitizeMCPConfig({ config, pluginConfig: rawConfig })
+  plugin: ({ config, options, plugins }) => {
+    const pluginConfig = sanitizeMCPConfig({ config, pluginConfig: options })
 
     // Stash the sanitized config on plugin options so `getPluginConfig()` reads it.
     const registered = plugins['@payloadcms/plugin-mcp']

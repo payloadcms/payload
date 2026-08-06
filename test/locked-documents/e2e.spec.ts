@@ -173,6 +173,17 @@ describe('Locked Documents', () => {
       await expect(page.locator('.table .row-2 .locked svg.icon--lock')).toBeVisible()
     })
 
+    test('should show tooltip with editing user when hovering the lock icon on a document row', async () => {
+      await page.goto(postsUrl.list)
+
+      const lockIcon = page.locator('.table .row-2 .locked')
+      await lockIcon.hover()
+
+      await expect(
+        page.locator('.tooltip--show', { hasText: exactText(`${user2.email} is editing`) }),
+      ).toBeVisible()
+    })
+
     test('should not show lock icon on document row if unlocked', async () => {
       await page.goto(postsUrl.list)
 
@@ -1664,6 +1675,17 @@ describe('Locked Documents', () => {
       })
 
       test('should not show stale data modal when user types and immediately saves (race condition)', async () => {
+        // This test simulates the race by intercepting the form-state POST to the
+        // document edit URL — Next.js dispatches server functions as a POST to the
+        // current page URL. TanStack Start routes form-state through a
+        // `createServerFn` (POST to `/_serverFn/...`), so `page.route(editUrl)` and
+        // `waitForRequest(POST editUrl)` never match and the test times out. The
+        // race-condition guard itself is framework-agnostic shared UI logic.
+        test.skip(
+          process.env.PAYLOAD_FRAMEWORK === 'tanstack-start',
+          'Intercepts the Next.js server-action POST to the page URL; form-state uses a different transport on TanStack.',
+        )
+
         await page.goto(simpleUrl.edit(simpleDoc.id))
 
         const fieldA = page.locator('#field-fieldA')

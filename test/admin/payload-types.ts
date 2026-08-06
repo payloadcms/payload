@@ -60,53 +60,6 @@ export type SupportedTimezones =
   | 'Pacific/Noumea'
   | 'Pacific/Auckland'
   | 'Pacific/Fiji';
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_A6C43894".
- */
-export type LexicalNodes_A6C43894 =
-  | SerializedTextNode
-  | SerializedTabNode
-  | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_A6C43894>
-  | SerializedRelationshipNode<
-      | 'posts'
-      | 'users'
-      | 'hidden-collection'
-      | 'not-in-view-collection'
-      | 'collection-no-api-view'
-      | 'custom-document-controls'
-      | 'custom-views-one'
-      | 'custom-views-two'
-      | 'custom-collection-view'
-      | 'reorder-tabs'
-      | 'custom-fields'
-      | 'group-one-collection-ones'
-      | 'group-one-collection-twos'
-      | 'group-two-collection-ones'
-      | 'group-two-collection-twos'
-      | 'geo'
-      | 'array'
-      | 'disable-duplicate'
-      | 'disable-copy-to-locale'
-      | 'edit-menu-items'
-      | 'format-doc-url'
-      | 'base-list-filters'
-      | 'with300documents'
-      | 'with-list-drawer'
-      | 'placeholder'
-      | 'use-as-title-group-field'
-      | 'disable-bulk-edit'
-      | 'custom-list-drawer'
-      | 'list-view-select-api'
-      | 'virtuals'
-      | 'no-timestamps'
-      | 'localized'
-      | 'payload-kv'
-      | 'payload-locked-documents'
-      | 'payload-preferences'
-      | 'payload-migrations'
-    >;
 
 export interface Config {
   auth: {
@@ -148,6 +101,7 @@ export interface Config {
     virtuals: Virtual;
     'no-timestamps': NoTimestamp;
     localized: Localized;
+    'fully-featured': FullyFeatured;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -189,6 +143,7 @@ export interface Config {
     virtuals: VirtualsSelect<false> | VirtualsSelect<true>;
     'no-timestamps': NoTimestampsSelect<false> | NoTimestampsSelect<true>;
     localized: LocalizedSelect<false> | LocalizedSelect<true>;
+    'fully-featured': FullyFeaturedSelect<false> | FullyFeaturedSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -225,6 +180,8 @@ export interface Config {
   locale: 'es' | 'en';
   widgets: {
     collections: CollectionsWidget;
+    'collection-query': CollectionQueryWidget;
+    activity: ActivityWidget;
   };
   user: User;
   jobs: {
@@ -309,7 +266,11 @@ export interface Post {
   title?: string | null;
   description?: string | null;
   number?: number | null;
-  richText?: LexicalRichText<LexicalNodes_A6C43894> | null;
+  richText?:
+    | {
+        [k: string]: unknown;
+      }[]
+    | null;
   someTextField?: string | null;
   namedGroup?: {
     someTextField?: string | null;
@@ -460,6 +421,7 @@ export interface ReorderTab {
 export interface CustomField {
   id: string;
   customTextServerField?: string | null;
+  fieldWithUndefinedComponents?: string | null;
   customTextClientField?: string | null;
   /**
    * Static field description.
@@ -477,7 +439,14 @@ export interface CustomField {
         id?: string | null;
       }[]
     | null;
-  blocksFieldWithBeforeAfterInputs?: BlockFields[] | null;
+  blocksFieldWithBeforeAfterInputs?:
+    | {
+        textField?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'blockFields';
+      }[]
+    | null;
   text?: string | null;
   groupFieldWithBeforeAfterInputs?: {
     textOne?: string | null;
@@ -486,16 +455,6 @@ export interface CustomField {
   radioFieldWithBeforeAfterInputs?: ('one' | 'two' | 'three') | null;
   updatedAt: string;
   createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "BlockFields".
- */
-export interface BlockFields {
-  textField?: string | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'blockFields';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -731,6 +690,104 @@ export interface Localized {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "fully-featured".
+ */
+export interface FullyFeatured {
+  id: string;
+  title: string;
+  slug?: string | null;
+  content?:
+    | {
+        [k: string]: unknown;
+      }[]
+    | null;
+  /**
+   * Short summary for list views and SEO
+   */
+  excerpt?: string | null;
+  heroImage?: (string | null) | Upload;
+  layout?:
+    | (
+        | {
+            richText?:
+              | {
+                  [k: string]: unknown;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'richTextBlock';
+          }
+        | {
+            image: string | Upload;
+            caption?: string | null;
+            size?: ('small' | 'medium' | 'fullWidth') | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'imageBlock';
+          }
+        | {
+            heading: string;
+            description?: string | null;
+            links?:
+              | {
+                  label: string;
+                  url: string;
+                  style?: ('primary' | 'secondary' | 'outline') | null;
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'ctaBlock';
+          }
+        | {
+            cards?:
+              | {
+                  title: string;
+                  description?: string | null;
+                  image?: (string | null) | Upload;
+                  link?: {
+                    label?: string | null;
+                    url?: string | null;
+                  };
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'cardGridBlock';
+          }
+      )[]
+    | null;
+  tags?:
+    | {
+        tag: string;
+        id?: string | null;
+      }[]
+    | null;
+  relatedPosts?: (string | Post)[] | null;
+  category?: ('news' | 'blog' | 'tutorial' | 'case-study') | null;
+  /**
+   * Priority from 1 (lowest) to 10 (highest)
+   */
+  priority?: number | null;
+  seo?: {
+    metaTitle?: string | null;
+    metaDescription?: string | null;
+    ogImage?: (string | null) | Upload;
+    noIndex?: boolean | null;
+  };
+  status?: ('draft' | 'published' | 'archived') | null;
+  isFeatured?: boolean | null;
+  publishedDate?: string | null;
+  authors?: (string | User)[] | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -888,6 +945,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'localized';
         value: string | Localized;
+      } | null)
+    | ({
+        relationTo: 'fully-featured';
+        value: string | FullyFeatured;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1133,6 +1194,7 @@ export interface ReorderTabsSelect<T extends boolean = true> {
  */
 export interface CustomFieldsSelect<T extends boolean = true> {
   customTextServerField?: T;
+  fieldWithUndefinedComponents?: T;
   customTextClientField?: T;
   descriptionAsString?: T;
   descriptionAsFunction?: T;
@@ -1374,6 +1436,97 @@ export interface NoTimestampsSelect<T extends boolean = true> {
  */
 export interface LocalizedSelect<T extends boolean = true> {
   title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "fully-featured_select".
+ */
+export interface FullyFeaturedSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  content?: T;
+  excerpt?: T;
+  heroImage?: T;
+  layout?:
+    | T
+    | {
+        richTextBlock?:
+          | T
+          | {
+              richText?: T;
+              id?: T;
+              blockName?: T;
+            };
+        imageBlock?:
+          | T
+          | {
+              image?: T;
+              caption?: T;
+              size?: T;
+              id?: T;
+              blockName?: T;
+            };
+        ctaBlock?:
+          | T
+          | {
+              heading?: T;
+              description?: T;
+              links?:
+                | T
+                | {
+                    label?: T;
+                    url?: T;
+                    style?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        cardGridBlock?:
+          | T
+          | {
+              cards?:
+                | T
+                | {
+                    title?: T;
+                    description?: T;
+                    image?: T;
+                    link?:
+                      | T
+                      | {
+                          label?: T;
+                          url?: T;
+                        };
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+      };
+  tags?:
+    | T
+    | {
+        tag?: T;
+        id?: T;
+      };
+  relatedPosts?: T;
+  category?: T;
+  priority?: T;
+  seo?:
+    | T
+    | {
+        metaTitle?: T;
+        metaDescription?: T;
+        ogImage?: T;
+        noIndex?: T;
+      };
+  status?: T;
+  isFeatured?: T;
+  publishedDate?: T;
+  authors?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -1634,80 +1787,116 @@ export interface CollectionsWidget {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-query_widget".
+ */
+export interface CollectionQueryWidget {
+  data?: {
+    title?: string | null;
+    relatedCollection:
+      | 'uploads'
+      | 'uploads-two'
+      | 'posts'
+      | 'users'
+      | 'hidden-collection'
+      | 'not-in-view-collection'
+      | 'collection-no-api-view'
+      | 'custom-document-controls'
+      | 'custom-views-one'
+      | 'custom-views-two'
+      | 'custom-collection-view'
+      | 'reorder-tabs'
+      | 'custom-fields'
+      | 'group-one-collection-ones'
+      | 'group-one-collection-twos'
+      | 'group-two-collection-ones'
+      | 'group-two-collection-twos'
+      | 'geo'
+      | 'array'
+      | 'disable-duplicate'
+      | 'disable-copy-to-locale'
+      | 'edit-menu-items'
+      | 'format-doc-url'
+      | 'base-list-filters'
+      | 'with300documents'
+      | 'with-list-drawer'
+      | 'placeholder'
+      | 'use-as-title-group-field'
+      | 'disable-bulk-edit'
+      | 'custom-list-drawer'
+      | 'list-view-select-api'
+      | 'virtuals'
+      | 'no-timestamps'
+      | 'localized'
+      | 'fully-featured';
+    where?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    sortField?: string | null;
+    sortDirection?: ('asc' | 'desc') | null;
+    limit?: number | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "activity_widget".
+ */
+export interface ActivityWidget {
+  data?: {
+    excludedCollections?:
+      | (
+          | 'uploads'
+          | 'uploads-two'
+          | 'posts'
+          | 'users'
+          | 'hidden-collection'
+          | 'not-in-view-collection'
+          | 'collection-no-api-view'
+          | 'custom-document-controls'
+          | 'custom-views-one'
+          | 'custom-views-two'
+          | 'custom-collection-view'
+          | 'reorder-tabs'
+          | 'custom-fields'
+          | 'group-one-collection-ones'
+          | 'group-one-collection-twos'
+          | 'group-two-collection-ones'
+          | 'group-two-collection-twos'
+          | 'geo'
+          | 'array'
+          | 'disable-duplicate'
+          | 'disable-copy-to-locale'
+          | 'edit-menu-items'
+          | 'format-doc-url'
+          | 'base-list-filters'
+          | 'with300documents'
+          | 'with-list-drawer'
+          | 'placeholder'
+          | 'use-as-title-group-field'
+          | 'disable-bulk-edit'
+          | 'custom-list-drawer'
+          | 'list-view-select-api'
+          | 'virtuals'
+          | 'no-timestamps'
+          | 'localized'
+          | 'fully-featured'
+        )[]
+      | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "auth".
  */
 export interface Auth {
   [k: string]: unknown;
-}
-
-/** @internal Core Lexical types — see @payloadcms/richtext-lexical. */
-export type LexicalElementFormat = 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-export type LexicalElementDirection = ('ltr' | 'rtl') | null;
-
-export interface SerializedLexicalElementBase<TChildren> {
-  children: TChildren[];
-  direction: LexicalElementDirection;
-  format: LexicalElementFormat;
-  indent: number;
-  textFormat?: number;
-  textStyle?: string;
-  version: number;
-}
-
-export type LexicalTextMode = 'normal' | 'token' | 'segmented';
-
-export interface SerializedTextNode {
-  type: 'text';
-  detail: number;
-  format: number;
-  mode: LexicalTextMode;
-  style: string;
-  text: string;
-  version: number;
-}
-
-export interface SerializedTabNode {
-  type: 'tab';
-  detail: number;
-  format: number;
-  mode: LexicalTextMode;
-  style: string;
-  text: string;
-  version: number;
-}
-
-export interface SerializedLineBreakNode {
-  type: 'linebreak';
-  version: number;
-}
-
-export interface SerializedParagraphNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
-  type: 'paragraph';
-  textFormat: number;
-  textStyle: string;
-}
-
-export type SerializedRelationshipNode<TSlugs extends keyof Config['collections']> = {
-  type: 'relationship';
-  format: LexicalElementFormat;
-  version: number;
-} & {
-  [TSlug in TSlugs]: {
-    relationTo: TSlug;
-    value: Config['collections'][TSlug]['id'] | Config['collections'][TSlug];
-  };
-}[TSlugs];
-
-/** Shape of a Lexical `richText` field. */
-export interface LexicalRichText<TNode> {
-  root: {
-    children: TNode[];
-    direction: LexicalElementDirection;
-    format: LexicalElementFormat;
-    indent: number;
-    type: 'root';
-    version: number;
-  };
 }
 
 

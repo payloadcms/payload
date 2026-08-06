@@ -5,7 +5,7 @@ import type { ListViewClientProps } from 'payload'
 import { getTranslation } from '@payloadcms/translations'
 import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
-import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
+import React, { Fragment, useCallback, useEffect, useMemo } from 'react'
 
 import type { CollectionOption } from '../../elements/CreateDocumentButton/index.js'
 import type { StepNavItem } from '../../elements/StepNav/index.js'
@@ -243,20 +243,15 @@ export function HierarchyListView(props: ListViewClientProps) {
     return options
   }, [allowedCollections, getEntityConfig, hierarchyConfig?.relatedCollections, i18n])
 
-  // Get type filter from URL params (comma-separated list)
   const typeFilterFromURL = searchParams.get('typeFilter')
-  const typeFilterValues = typeFilterFromURL ? typeFilterFromURL.split(',') : null
-
-  // Track selected types (default: from URL or all selected)
-  const [selectedTypes, setSelectedTypes] = useState<string[]>(
-    () => typeFilterValues || typeOptions.map((opt) => opt.value),
+  const selectedTypes = useMemo(
+    () => (typeFilterFromURL ? typeFilterFromURL.split(',') : typeOptions.map((opt) => opt.value)),
+    [typeFilterFromURL, typeOptions],
   )
 
   // Update URL when type filter changes
   const handleTypeFilterChange = useCallback(
     (values: string[]) => {
-      setSelectedTypes(values)
-
       // Build new URL with updated typeFilter param
       const currentParams: Record<string, string> = {}
       searchParams.forEach((v, k) => {

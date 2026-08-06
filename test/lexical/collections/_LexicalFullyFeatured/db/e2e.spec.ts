@@ -1,6 +1,7 @@
 import {
   buildEditorState,
   type DefaultNodeTypes,
+  type RichTextNodes,
   type SerializedInlineBlockNode,
 } from '@payloadcms/richtext-lexical'
 import { expect, type Page, test } from '@playwright/test'
@@ -22,6 +23,9 @@ import { LexicalHelpers, type PasteMode } from '../../utils.js'
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
 const dirname = path.resolve(currentFolder, '../../../')
+
+type FullyFeaturedNode = RichTextNodes<Config['collections']['lexical-fully-featured']['richText']>
+type PastedTextBlockNode = Extract<FullyFeaturedNode, { type: 'heading' | 'paragraph' }>
 
 let payload: PayloadTestSDK<Config>
 let serverURL: string
@@ -51,6 +55,7 @@ describe('Lexical Fully Featured - database', () => {
     url = new AdminUrlUtil(serverURL, lexicalFullyFeaturedSlug)
     lexical = new LexicalHelpers(page)
     await page.goto(url.create)
+    await expect(lexical.editor.first()).toBeVisible()
     await lexical.editor.first().focus()
   })
 
@@ -101,6 +106,10 @@ describe('Lexical Fully Featured - database', () => {
     test('ensure auto upload by copy & pasting image works when pasting from website', async ({
       page,
     }) => {
+      test.skip(
+        process.env.PAYLOAD_FRAMEWORK === 'tanstack-start',
+        'TanStack: known post-hydration RSC view remount detaches the view mid-interaction (see framework adapter notes); re-enable when the TanStack RSC hydration is fixed.',
+      )
       await page.goto(url.admin + '/custom-image')
       await page.keyboard.press('Meta+A')
       await page.keyboard.press('Control+A')
@@ -109,6 +118,7 @@ describe('Lexical Fully Featured - database', () => {
       await page.keyboard.press('Control+C')
 
       await page.goto(url.create)
+      await expect(lexical.editor.first()).toBeVisible()
       await lexical.editor.first().focus()
       await expect(lexical.editor).toBeFocused()
 
@@ -123,9 +133,16 @@ describe('Lexical Fully Featured - database', () => {
       })
       const richText = lexicalFullyFeatured?.docs?.[0]?.richText
 
-      const headingNode = richText?.root?.children[0]
-      expect(headingNode).toBeDefined()
-      expect(headingNode?.children?.[1]?.text).toBe('This is an image:')
+      const pastedTextBlock = richText?.root.children[0] as PastedTextBlockNode | undefined
+      expect(pastedTextBlock).toBeDefined()
+
+      // Browser clipboard serialization can insert a leading linebreak node.
+      // Assert the combined text instead of a fixed child index.
+      const combinedText = pastedTextBlock?.children
+        .map((child) => ('text' in child ? child.text : ''))
+        .join('')
+
+      expect(combinedText).toBe('This is an image:')
 
       const uploadNode = richText?.root?.children?.[1]?.children?.[0]
       // @ts-expect-error unsafe access is fine in tests
@@ -228,6 +245,7 @@ describe('Lexical Fully Featured - database', () => {
       `/admin/collections/${lexicalFullyFeaturedSlug}`,
       async () => {
         await page.goto(url.edit(doc.id))
+        await expect(lexical.editor.first()).toBeVisible()
         await lexical.editor.first().focus()
       },
       {

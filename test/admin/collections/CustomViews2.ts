@@ -26,7 +26,6 @@ export const CustomViews2: CollectionConfig = {
       views: {
         edit: {
           api: {
-            // Override the default tab component for the default route
             tab: {
               Component: {
                 path: '/components/CustomTabComponent/index.js#CustomTabComponent',
@@ -36,7 +35,6 @@ export const CustomViews2: CollectionConfig = {
               },
             },
           },
-          // This will override one specific nested view within the `/edit/:id` route, i.e. `/edit/:id/versions`
           customViewWithParam: {
             Component: '/components/views/CustomTabWithParam/index.js#CustomTabWithParamView',
             tab: {
@@ -102,5 +100,5 @@ export const CustomViews2: CollectionConfig = {
       name: 'title',
       type: 'text',
     },
-  ]
+  ],
 }

@@ -1,5 +1,5 @@
 import type { I18n } from '@payloadcms/translations'
-import type { BasePayload, Config, LanguageOptions, TypedUser } from 'payload'
+import type { BasePayload, Config, LanguageOptions, User } from 'payload'
 
 import React from 'react'
 
@@ -22,7 +22,7 @@ export const Settings: React.FC<{
   readonly languageOptions: LanguageOptions
   readonly payload: BasePayload
   readonly theme: Config['admin']['theme']
-  readonly user?: TypedUser
+  readonly user?: User
 }> = (props) => {
   const { className, i18n, languageOptions, theme, user } = props
 

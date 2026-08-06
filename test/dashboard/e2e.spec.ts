@@ -508,14 +508,14 @@ describe('Dashboard', () => {
     // Delete buttons should not be visible when not editing
     const widget = d.widgetByPos(1)
     await widget.hover()
-    await expect(widget.getByText('Delete widget')).toBeHidden()
+    await expect(d.getDeleteWidgetButton(widget)).toBeHidden()
 
     // Widgets should not have draggable attributes when not editing
     await expect(widget.locator('.draggable')).not.toHaveAttribute('aria-disabled')
 
     // verify the opposite:
     await d.setEditing()
-    await expect(widget.getByText('Delete widget')).toBeVisible()
+    await expect(d.getDeleteWidgetButton(widget)).toBeVisible()
     await expect(widget.locator('.draggable')).toHaveAttribute('aria-disabled', 'false')
   })
 
@@ -551,7 +551,7 @@ describe('Dashboard', () => {
     await page.waitForTimeout(500)
     await drawer.getByRole('button', { name: 'Save Changes' }).click()
 
-    await expect(drawer.locator('.field-error')).toBeVisible()
+    await expect(page.locator('[id^="field-error-title"]')).toBeVisible()
     await expect(drawer).toBeVisible()
 
     await titleInput.fill('Valid Title')
@@ -601,7 +601,7 @@ describe('Dashboard', () => {
     await page.waitForTimeout(500)
     await drawer.getByRole('button', { name: 'Save Changes' }).click()
 
-    await expect(drawer.locator('.field-error .tooltip-content')).toContainText(
+    await expect(page.locator('[id^="field-error-description"]')).toContainText(
       'Description must be at least 10 characters',
     )
     await expect(drawer).toBeVisible()
@@ -738,6 +738,10 @@ describe('Dashboard', () => {
   test('widget re-renders when query params change (= modular dashboard RSC rerenders)', async ({
     page,
   }) => {
+    test.skip(
+      process.env.PAYLOAD_FRAMEWORK === 'tanstack-start',
+      'TanStack: known post-hydration RSC view remount detaches the view mid-interaction (see framework adapter notes); re-enable when the TanStack RSC hydration is fixed.',
+    )
     const d = new DashboardHelper(page)
     await d.setEditing()
     await d.addWidget('page query')

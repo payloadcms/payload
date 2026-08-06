@@ -62,16 +62,16 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_D543C5B5".
+ * via the `definition` "LexicalNodes_D4620076".
  */
-export type LexicalNodes_D543C5B5 =
+export type LexicalNodes_D4620076 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_D543C5B5>
+  | SerializedParagraphNode<LexicalNodes_D4620076>
   | SerializedHorizontalRuleNode
   | SerializedUploadNode<'media'>
-  | SerializedQuoteNode<LexicalNodes_D543C5B5>
+  | SerializedQuoteNode<LexicalNodes_D4620076>
   | SerializedRelationshipNode<
       | 'users'
       | 'pages'
@@ -81,6 +81,7 @@ export type LexicalNodes_D543C5B5 =
       | 'tenants'
       | 'categories'
       | 'collection-level-config'
+      | 'open-by-default'
       | 'static-url'
       | 'custom-live-preview'
       | 'conditional-url'
@@ -89,24 +90,24 @@ export type LexicalNodes_D543C5B5 =
       | 'payload-preferences'
       | 'payload-migrations'
     >
-  | SerializedAutoLinkNode<LexicalNodes_D543C5B5, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_D543C5B5, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_D543C5B5>
-  | SerializedListItemNode<LexicalNodes_D543C5B5>
-  | SerializedHeadingNode<LexicalNodes_D543C5B5>;
+  | SerializedAutoLinkNode<LexicalNodes_D4620076, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_D4620076, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_D4620076>
+  | SerializedListItemNode<LexicalNodes_D4620076>
+  | SerializedHeadingNode<LexicalNodes_D4620076>;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_EBA54163".
+ * via the `definition` "LexicalNodes_D773765D".
  */
-export type LexicalNodes_EBA54163 =
+export type LexicalNodes_D773765D =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_EBA54163>
+  | SerializedParagraphNode<LexicalNodes_D773765D>
   | SerializedBlockNode<MediaBlock_1EDC4A89>
   | SerializedHorizontalRuleNode
   | SerializedUploadNode<'media'>
-  | SerializedQuoteNode<LexicalNodes_EBA54163>
+  | SerializedQuoteNode<LexicalNodes_D773765D>
   | SerializedRelationshipNode<
       | 'users'
       | 'pages'
@@ -116,6 +117,7 @@ export type LexicalNodes_EBA54163 =
       | 'tenants'
       | 'categories'
       | 'collection-level-config'
+      | 'open-by-default'
       | 'static-url'
       | 'custom-live-preview'
       | 'conditional-url'
@@ -124,28 +126,28 @@ export type LexicalNodes_EBA54163 =
       | 'payload-preferences'
       | 'payload-migrations'
     >
-  | SerializedAutoLinkNode<LexicalNodes_EBA54163, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_EBA54163, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_EBA54163>
-  | SerializedListItemNode<LexicalNodes_EBA54163>
-  | SerializedHeadingNode<LexicalNodes_EBA54163>;
+  | SerializedAutoLinkNode<LexicalNodes_D773765D, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_D773765D, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_D773765D>
+  | SerializedListItemNode<LexicalNodes_D773765D>
+  | SerializedHeadingNode<LexicalNodes_D773765D>;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_660DF7D8".
+ * via the `definition` "LexicalNodes_6238834A".
  */
-export type LexicalNodes_660DF7D8 =
+export type LexicalNodes_6238834A =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_660DF7D8>
+  | SerializedParagraphNode<LexicalNodes_6238834A>
   | SerializedBlockNode<MyBlock>
-  | SerializedHeadingNode<LexicalNodes_660DF7D8>
+  | SerializedHeadingNode<LexicalNodes_6238834A>
   | SerializedUploadNode<'media', LexicalUploadFields_1AB4670B>
-  | SerializedQuoteNode<LexicalNodes_660DF7D8>
-  | SerializedListNode<LexicalNodes_660DF7D8>
-  | SerializedListItemNode<LexicalNodes_660DF7D8>
-  | SerializedAutoLinkNode<LexicalNodes_660DF7D8, LexicalLinkFields_0A7E9EC0>
-  | SerializedLinkNode<LexicalNodes_660DF7D8, LexicalLinkFields_0A7E9EC0>
+  | SerializedQuoteNode<LexicalNodes_6238834A>
+  | SerializedListNode<LexicalNodes_6238834A>
+  | SerializedListItemNode<LexicalNodes_6238834A>
+  | SerializedAutoLinkNode<LexicalNodes_6238834A, LexicalLinkFields_0A7E9EC0>
+  | SerializedLinkNode<LexicalNodes_6238834A, LexicalLinkFields_0A7E9EC0>
   | SerializedRelationshipNode<
       | 'users'
       | 'pages'
@@ -155,6 +157,7 @@ export type LexicalNodes_660DF7D8 =
       | 'tenants'
       | 'categories'
       | 'collection-level-config'
+      | 'open-by-default'
       | 'static-url'
       | 'custom-live-preview'
       | 'conditional-url'
@@ -181,6 +184,7 @@ export interface Config {
     categories: Category;
     media: Media;
     'collection-level-config': CollectionLevelConfig;
+    'open-by-default': OpenByDefault;
     'static-url': StaticUrl;
     'custom-live-preview': CustomLivePreview;
     'conditional-url': ConditionalUrl;
@@ -200,6 +204,7 @@ export interface Config {
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     'collection-level-config': CollectionLevelConfigSelect<false> | CollectionLevelConfigSelect<true>;
+    'open-by-default': OpenByDefaultSelect<false> | OpenByDefaultSelect<true>;
     'static-url': StaticUrlSelect<false> | StaticUrlSelect<true>;
     'custom-live-preview': CustomLivePreviewSelect<false> | CustomLivePreviewSelect<true>;
     'conditional-url': ConditionalUrlSelect<false> | ConditionalUrlSelect<true>;
@@ -223,6 +228,8 @@ export interface Config {
   locale: 'en' | 'es';
   widgets: {
     collections: CollectionsWidget;
+    'collection-query': CollectionQueryWidget;
+    activity: ActivityWidget;
   };
   user: User;
   jobs: {
@@ -317,7 +324,7 @@ export interface Page {
   title: string;
   hero: {
     type: 'none' | 'highImpact' | 'lowImpact';
-    richText?: LexicalRichText<LexicalNodes_D543C5B5> | null;
+    richText?: LexicalRichText<LexicalNodes_D4620076> | null;
     media?: (string | null) | Media;
   };
   layout?: (Cta | Content | MediaBlock | Archive)[] | null;
@@ -327,8 +334,8 @@ export interface Page {
   testNumber?: number | null;
   localizedTitle?: string | null;
   relationToLocalized?: (string | null) | Post;
-  richTextLexical?: LexicalRichText<LexicalNodes_EBA54163> | null;
-  richTextLexicalLocalized?: LexicalRichText<LexicalNodes_EBA54163> | null;
+  richTextLexical?: LexicalRichText<LexicalNodes_D773765D> | null;
+  richTextLexicalLocalized?: LexicalRichText<LexicalNodes_D773765D> | null;
   relationshipAsUpload?: (string | null) | Media;
   relationshipMonoHasOne?: (string | null) | Post;
   relationshipMonoHasMany?: (string | Post)[] | null;
@@ -345,7 +352,7 @@ export interface Page {
   arrayOfRelationships?:
     | {
         uploadInArray?: (string | null) | Media;
-        richTextInArray?: LexicalRichText<LexicalNodes_660DF7D8> | null;
+        richTextInArray?: LexicalRichText<LexicalNodes_6238834A> | null;
         relationshipInArrayMonoHasOne?: (string | null) | Post;
         relationshipInArrayMonoHasMany?: (string | Post)[] | null;
         relationshipInArrayPolyHasOne?: {
@@ -389,7 +396,7 @@ export interface Tenant {
  */
 export interface Cta {
   invertBackground?: boolean | null;
-  richText?: LexicalRichText<LexicalNodes_D543C5B5> | null;
+  richText?: LexicalRichText<LexicalNodes_D4620076> | null;
   links?:
     | {
         link: {
@@ -429,7 +436,7 @@ export interface Post {
   title: string;
   hero: {
     type: 'none' | 'highImpact' | 'lowImpact';
-    richText?: LexicalRichText<LexicalNodes_D543C5B5> | null;
+    richText?: LexicalRichText<LexicalNodes_D4620076> | null;
     media?: (string | null) | Media;
   };
   layout?: (Cta | Content | MediaBlock | Archive)[] | null;
@@ -453,7 +460,7 @@ export interface Content {
   columns?:
     | {
         size?: ('oneThird' | 'half' | 'twoThirds' | 'full') | null;
-        richText?: LexicalRichText<LexicalNodes_D543C5B5> | null;
+        richText?: LexicalRichText<LexicalNodes_D4620076> | null;
         enableLink?: boolean | null;
         link?: {
           type?: ('reference' | 'custom') | null;
@@ -486,7 +493,7 @@ export interface Content {
  * via the `definition` "Archive".
  */
 export interface Archive {
-  introContent?: LexicalRichText<LexicalNodes_D543C5B5> | null;
+  introContent?: LexicalRichText<LexicalNodes_D4620076> | null;
   populateBy?: ('collection' | 'selection') | null;
   relationTo?: 'posts' | null;
   categories?: (string | Category)[] | null;
@@ -537,7 +544,7 @@ export interface Ssr {
   title: string;
   hero: {
     type: 'none' | 'highImpact' | 'lowImpact';
-    richText?: LexicalRichText<LexicalNodes_D543C5B5> | null;
+    richText?: LexicalRichText<LexicalNodes_D4620076> | null;
     media?: (string | null) | Media;
   };
   layout?: (Cta | Content | MediaBlock | Archive)[] | null;
@@ -562,7 +569,7 @@ export interface SsrAutosave {
   title: string;
   hero: {
     type: 'none' | 'highImpact' | 'lowImpact';
-    richText?: LexicalRichText<LexicalNodes_D543C5B5> | null;
+    richText?: LexicalRichText<LexicalNodes_D4620076> | null;
     media?: (string | null) | Media;
   };
   layout?: (Cta | Content | MediaBlock | Archive)[] | null;
@@ -582,6 +589,18 @@ export interface SsrAutosave {
  * via the `definition` "collection-level-config".
  */
 export interface CollectionLevelConfig {
+  id: string;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Live Preview opens automatically on first visit via `openByDefault`.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "open-by-default".
+ */
+export interface OpenByDefault {
   id: string;
   title?: string | null;
   updatedAt: string;
@@ -608,7 +627,7 @@ export interface CustomLivePreview {
   title: string;
   hero: {
     type: 'none' | 'highImpact' | 'lowImpact';
-    richText?: LexicalRichText<LexicalNodes_D543C5B5> | null;
+    richText?: LexicalRichText<LexicalNodes_D4620076> | null;
     media?: (string | null) | Media;
   };
   layout?: (Cta | Content | MediaBlock | Archive)[] | null;
@@ -690,6 +709,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'collection-level-config';
         value: string | CollectionLevelConfig;
+      } | null)
+    | ({
+        relationTo: 'open-by-default';
+        value: string | OpenByDefault;
       } | null)
     | ({
         relationTo: 'static-url';
@@ -1245,6 +1268,15 @@ export interface CollectionLevelConfigSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "open-by-default_select".
+ */
+export interface OpenByDefaultSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "static-url_select".
  */
 export interface StaticUrlSelect<T extends boolean = true> {
@@ -1525,6 +1557,68 @@ export interface CollectionsWidget {
     [k: string]: unknown;
   };
   width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-query_widget".
+ */
+export interface CollectionQueryWidget {
+  data?: {
+    title?: string | null;
+    relatedCollection:
+      | 'users'
+      | 'pages'
+      | 'posts'
+      | 'ssr'
+      | 'ssr-autosave'
+      | 'tenants'
+      | 'categories'
+      | 'media'
+      | 'collection-level-config'
+      | 'open-by-default'
+      | 'static-url'
+      | 'custom-live-preview'
+      | 'conditional-url';
+    where?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    sortField?: string | null;
+    sortDirection?: ('asc' | 'desc') | null;
+    limit?: number | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "activity_widget".
+ */
+export interface ActivityWidget {
+  data?: {
+    excludedCollections?:
+      | (
+          | 'users'
+          | 'pages'
+          | 'posts'
+          | 'ssr'
+          | 'ssr-autosave'
+          | 'tenants'
+          | 'categories'
+          | 'media'
+          | 'collection-level-config'
+          | 'open-by-default'
+          | 'static-url'
+          | 'custom-live-preview'
+          | 'conditional-url'
+        )[]
+      | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
 /**
  * Multiple blocks resolve to the `MediaBlock` interface with different fields, so a content hash is appended to keep the generated types stable and unambiguous. Set a unique `interfaceName` on the block to choose the name yourself. See https://payloadcms.com/docs/typescript/generating-types#block-interface-name-collisions

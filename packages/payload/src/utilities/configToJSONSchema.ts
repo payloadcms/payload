@@ -560,6 +560,7 @@ export function fieldsToJSONSchema({
           case 'code':
           case 'date':
           case 'email':
+          case 'slug':
           case 'textarea': {
             fieldSchema = {
               ...baseFieldSchema,
@@ -997,10 +998,9 @@ export function entityToJSONSchema(
   }
 
   if (isInput) {
-    // Managed by Payload, not set by a client.
+    // Timestamps are managed by Payload. `_status` remains because create/update accept it.
     mutableFields = mutableFields.filter(
-      (field) =>
-        field.name !== 'createdAt' && field.name !== 'updatedAt' && field.name !== '_status',
+      (field) => field.name !== 'createdAt' && field.name !== 'updatedAt',
     )
   } else if ('timestamps' in entity && entity.timestamps !== false) {
     // mark timestamp fields required

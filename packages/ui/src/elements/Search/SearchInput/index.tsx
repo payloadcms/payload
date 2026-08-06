@@ -1,5 +1,7 @@
 'use client'
 
+import type { BrowserAutoComplete } from 'payload'
+
 import React, { useCallback } from 'react'
 
 import { SearchIcon } from '../../../icons/Search/index.js'
@@ -12,6 +14,7 @@ const baseClass = 'search-input'
 
 type SearchInputProps = {
   'aria-label'?: string
+  autoComplete?: BrowserAutoComplete
   className?: string
   disabled?: boolean
   id?: string
@@ -25,6 +28,7 @@ type SearchInputProps = {
 export const SearchInput: React.FC<SearchInputProps> = ({
   id,
   'aria-label': ariaLabel,
+  autoComplete,
   className,
   disabled,
   onChange,
@@ -49,6 +53,7 @@ export const SearchInput: React.FC<SearchInputProps> = ({
       <SearchIcon />
       <input
         aria-label={ariaLabel ?? placeholder}
+        autoComplete={autoComplete}
         className={`${baseClass}__input`}
         disabled={disabled}
         id={id}
