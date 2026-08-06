@@ -219,11 +219,12 @@ function isKnownPayloadExpression(expression: Expression, bindings: PayloadBindi
     return true
   }
 
-  if (
-    Node.isAsExpression(unwrapped) &&
-    isPayloadTypeNode(unwrapped.getTypeNode(), bindings.payloadTypeNames)
-  ) {
-    return true
+  if (Node.isAsExpression(unwrapped)) {
+    if (isPayloadTypeNode(unwrapped.getTypeNode(), bindings.payloadTypeNames)) {
+      return true
+    }
+
+    return isKnownPayloadExpression(unwrapped.getExpression(), bindings)
   }
 
   try {
