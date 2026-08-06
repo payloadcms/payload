@@ -13,30 +13,38 @@ export const settingsSlug = 'base-access-settings'
 export const tenantHeader = 'x-base-access-tenant'
 export const denyHeader = 'x-deny-base-access'
 
-const baseAccess: BaseAccess = ({ slug, operation, req }) => {
-  if (slug === postsSlug && operation === 'read') {
-    const tenant = req.headers.get(tenantHeader)
-
-    if (tenant) {
-      return {
-        tenant: {
-          equals: tenant,
-        },
+const baseAccess: BaseAccess = {
+  collections: {
+    create: ({ slug, req }) => {
+      if (req.headers.get(denyHeader) === 'true' && (slug === postsSlug || slug === 'users')) {
+        return false
       }
-    }
-  }
 
-  if (req.headers.get(denyHeader) === 'true') {
-    if (
-      (slug === postsSlug && operation === 'create') ||
-      (slug === settingsSlug && operation === 'update') ||
-      slug === 'users'
-    ) {
-      return false
-    }
-  }
+      return true
+    },
+    read: ({ slug, req }) => {
+      const tenant = req.headers.get(tenantHeader)
 
-  return true
+      if (slug === postsSlug && tenant) {
+        return {
+          tenant: {
+            equals: tenant,
+          },
+        }
+      }
+
+      return true
+    },
+  },
+  globals: {
+    update: ({ slug, req }) => {
+      if (req.headers.get(denyHeader) === 'true' && slug === settingsSlug) {
+        return false
+      }
+
+      return true
+    },
+  },
 }
 
 export default buildConfigWithDefaults({

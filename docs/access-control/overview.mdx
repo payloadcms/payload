@@ -57,29 +57,30 @@ standard Collection and Global Access Control operations:
 
 ```ts
 export default buildConfig({
-  baseAccess: ({ operation, req }) => {
-    if (operation === 'read' || operation === 'readVersions') {
-      return true
-    }
-
-    return req.user?.role === 'admin'
+  baseAccess: {
+    collections: {
+      create: ({ req }) => req.user?.role === 'admin',
+      delete: ({ req }) => req.user?.role === 'admin',
+      update: ({ req }) => req.user?.role === 'admin',
+    },
+    globals: {
+      update: ({ req }) => req.user?.role === 'admin',
+    },
   },
   // ...
 })
 ```
 
-Payload combines `baseAccess` with each Collection or Global Access Control
-function using `AND` semantics. Returning `false` denies the operation before
-the resource-specific function runs. For operations that support query
-constraints, returning one combines it with a resource-specific constraint
-using an `and` query. Collection `create` access only supports booleans, so
-returning a query constraint for that operation throws an error.
+The `collections` and `globals` properties use the same operation names and
+return types as normal Collection and Global Access Control. Each callback also
+receives the resource's `slug`.
 
-In addition to the standard Access Control arguments, `baseAccess` receives:
-
-- `entityType`: either `collection` or `global`
-- `operation`: the operation being performed
-- `slug`: the Collection or Global slug
+Payload combines each configured base function with the corresponding
+resource-specific function using `AND` semantics. Returning `false` denies the
+operation before the resource-specific function runs. For operations that
+support query constraints, returning one combines it with a resource-specific
+constraint using an `and` query. Collection `create` access only supports
+booleans, so returning a query constraint for that operation throws an error.
 
 `baseAccess` applies only to Collection and Global Access Control. It does not
 apply to an auth Collection's `access.admin` function, Field Access Control,

@@ -25,7 +25,11 @@ describe('baseAccess', () => {
     const globalAccess = vi.fn(() => globalConstraint)
     const config = {
       ...minimalConfig,
-      baseAccess,
+      baseAccess: {
+        globals: {
+          update: baseAccess,
+        },
+      },
     }
     const global: GlobalConfig = {
       slug: 'settings',
@@ -48,19 +52,52 @@ describe('baseAccess', () => {
     })
     expect(baseAccess).toHaveBeenCalledWith({
       data: undefined,
-      entityType: 'global',
       id: undefined,
       isReadingStaticFile: undefined,
-      operation: 'update',
       req,
       slug: 'settings',
     })
   })
 
+  it('should not apply collection base access to globals', async () => {
+    const collectionBaseAccess = vi.fn(() => false)
+    const globalAccess = vi.fn(() => true)
+    const config = {
+      ...minimalConfig,
+      baseAccess: {
+        collections: {
+          update: collectionBaseAccess,
+        },
+      },
+    }
+    const global: GlobalConfig = {
+      slug: 'settings',
+      access: {
+        update: globalAccess,
+      },
+      fields: [],
+    }
+    const req = {
+      payload: {
+        config,
+      },
+    } as any
+
+    const result = sanitizeGlobal(config, global)
+
+    expect(await result.access.update({ req })).toBe(true)
+    expect(globalAccess).toHaveBeenCalledOnce()
+    expect(collectionBaseAccess).not.toHaveBeenCalled()
+  })
+
   it('should not grant access when resource access uses the authenticated fallback', async () => {
     const config = {
       ...minimalConfig,
-      baseAccess: () => true,
+      baseAccess: {
+        globals: {
+          readVersions: () => true,
+        },
+      },
     }
     const global: GlobalConfig = {
       slug: 'settings',
@@ -102,11 +139,19 @@ describe('baseAccess', () => {
     }
     const deniedConfig = {
       ...minimalConfig,
-      baseAccess: () => false,
+      baseAccess: {
+        globals: {
+          read: () => false,
+        },
+      },
     }
     const allowedConfig = {
       ...minimalConfig,
-      baseAccess: () => true,
+      baseAccess: {
+        globals: {
+          read: () => true,
+        },
+      },
     }
 
     const firstResult = sanitizeGlobal(deniedConfig, global)

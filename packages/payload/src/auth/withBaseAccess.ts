@@ -1,37 +1,54 @@
-import type { Access, AccessArgs, AccessResult, BaseAccessArgs } from '../config/types.js'
-import type { AllOperations } from '../types/index.js'
+import type { CollectionAccess } from '../collections/config/types.js'
+import type { Access, AccessArgs, AccessResult } from '../config/types.js'
+import type { GlobalAccess } from '../globals/config/types.js'
 
-type Args = {
+type CommonArgs = {
   access?: Access
-  entityType: BaseAccessArgs['entityType']
-  operation: AllOperations
   slug: string
 }
 
+type Args = (
+  | {
+      entityType: 'collection'
+      operation: Exclude<keyof CollectionAccess, 'admin'>
+    }
+  | {
+      entityType: 'global'
+      operation: keyof GlobalAccess
+    }
+) &
+  CommonArgs
+
 const authenticatedAccess: Access = ({ req }) => Boolean(req.user)
 
-export const withBaseAccess = ({ slug, access, entityType, operation }: Args): Access => {
-  const resourceAccess = access ?? authenticatedAccess
+export const withBaseAccess = (options: Args): Access => {
+  const resourceAccess = options.access ?? authenticatedAccess
 
   return async (args: AccessArgs): Promise<AccessResult> => {
     const { baseAccess } = args.req.payload.config
+    const baseAccessFunction =
+      options.entityType === 'collection'
+        ? baseAccess?.collections?.[options.operation]
+        : baseAccess?.globals?.[options.operation]
 
-    if (!baseAccess) {
+    if (!baseAccessFunction) {
       return resourceAccess(args)
     }
 
-    const baseResult = await baseAccess({
+    const baseResult = await baseAccessFunction({
       ...args,
-      slug,
-      entityType,
-      operation,
+      slug: options.slug,
     })
 
     if (!baseResult) {
       return false
     }
 
-    if (entityType === 'collection' && operation === 'create' && typeof baseResult === 'object') {
+    if (
+      options.entityType === 'collection' &&
+      options.operation === 'create' &&
+      typeof baseResult === 'object'
+    ) {
       throw new Error('baseAccess must return a boolean for collection create operations.')
     }
 

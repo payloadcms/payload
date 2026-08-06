@@ -10,7 +10,11 @@ describe('createClientConfig', () => {
   it('should omit baseAccess from the client config', () => {
     const clientConfig = createClientConfig({
       config: {
-        baseAccess: () => true,
+        baseAccess: {
+          collections: {
+            read: () => true,
+          },
+        },
       } as SanitizedConfig,
       i18n: {} as I18nClient,
       importMap: {},
