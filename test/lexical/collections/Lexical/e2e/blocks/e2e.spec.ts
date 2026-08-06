@@ -252,10 +252,7 @@ describe('lexicalBlocks', () => {
     }
 
     test('ensure block fields with filter options have access to document-level data', async () => {
-      test.skip(
-        currentFramework === 'tanstack-start',
-        'Document-level filter options in Lexical blocks time out under TanStack Start',
-      )
+      test.slow()
 
       const {
         blockGroupTextField,
@@ -351,11 +348,6 @@ describe('lexicalBlocks', () => {
     })
 
     test('ensure block fields with filter options have access to block-level data', async () => {
-      test.skip(
-        currentFramework === 'tanstack-start',
-        'Block-level filter options in Lexical blocks fail with the block-references config under TanStack Start',
-      )
-
       const {
         blockGroupTextField,
         blockTextField,
@@ -510,11 +502,6 @@ describe('lexicalBlocks', () => {
     })
 
     test('ensure block fields with validations have access to block-level data', async () => {
-      test.skip(
-        currentFramework === 'tanstack-start',
-        'Block-level validation in Lexical blocks fails with the block-references config under TanStack Start',
-      )
-
       const { blockTextField } = await setupValidationTests()
 
       await blockTextField.fill('invalid')
@@ -1408,28 +1395,27 @@ describe('lexicalBlocks', () => {
     })
 
     test('ensure individual inline blocks in lexical editor within a block have initial state on initial load', async () => {
-      test.skip(
-        currentFramework === 'tanstack-start',
-        'Inline block type "inlineBlockInLexical" not found in config.blocksMap under TanStack Start',
-      )
       await page.goto(`${serverURL}/admin/collections/LexicalInBlock?limit=10`)
 
       // Wait for table to be fully loaded
       await expect(page.locator('tbody tr')).not.toHaveCount(0)
 
-      await assertNetworkRequests(
-        page,
-        currentFramework === 'tanstack-start' ? '/_serverFn/' : '/collections/LexicalInBlock/',
-        async () => {
-          await goToFirstCell(page, serverURL)
-          await waitForFormReady(page)
+      const assertInlineBlocks = async () => {
+        await goToFirstCell(page, serverURL)
+        await waitForFormReady(page)
 
-          await expect(
-            page.locator('.LexicalEditorTheme__inlineBlock:has-text("Inline Block In Lexical")'),
-          ).toHaveCount(20)
-        },
-        { allowedNumberOfRequests: 1 },
-      )
+        await expect(
+          page.locator('.LexicalEditorTheme__inlineBlock:has-text("Inline Block In Lexical")'),
+        ).toHaveCount(20)
+      }
+
+      if (currentFramework === 'tanstack-start') {
+        await assertInlineBlocks()
+      } else {
+        await assertNetworkRequests(page, '/collections/LexicalInBlock/', assertInlineBlocks, {
+          allowedNumberOfRequests: 1,
+        })
+      }
     })
 
     test('wheel input over one of several simultaneous fixed toolbars only scrolls that toolbar', async () => {
@@ -1630,10 +1616,6 @@ describe('lexicalBlocks', () => {
     })
 
     test('ensure inline blocks restore their state after undoing a removal', async () => {
-      test.skip(
-        currentFramework === 'tanstack-start',
-        'Inline blocks do not render under TanStack Start (inlineBlockInLexical not in config.blocksMap)',
-      )
       await page.goto(`${serverURL}/admin/collections/LexicalInBlock?limit=10`)
 
       // Wait for table to be fully loaded
@@ -1653,15 +1635,10 @@ describe('lexicalBlocks', () => {
       // Wait for shimmer effect to be hidden
       await expect(page.locator('.shimmer-effect')).toHaveCount(0)
 
-      const secondRow = page.locator('#blocks-row-2')
-      await expect(secondRow).toBeVisible()
+      const inlineBlocks = page.locator('#field-blocks .LexicalEditorTheme__inlineBlock__container')
+      await expect(inlineBlocks).not.toHaveCount(0)
 
-      // Get initial count and ensure it's stable
-      const inlineBlocks = secondRow.locator('.LexicalEditorTheme__inlineBlock__container')
       const inlineBlockCount = await inlineBlocks.count()
-      await expect(() => {
-        expect(inlineBlockCount).toBeGreaterThan(0)
-      }).toPass()
 
       const inlineBlockElement = inlineBlocks.first()
       // Clicking inline block opens drawer
@@ -1684,12 +1661,14 @@ describe('lexicalBlocks', () => {
       // Check both that this specific element is removed and the total count decreased
       await expect(inlineBlocks).toHaveCount(inlineBlockCount - 1)
 
-      const contentEditable = secondRow.locator('[contenteditable="true"]').first()
+      const contentEditable = inlineBlockElement.locator(
+        'xpath=ancestor::*[@contenteditable="true"][1]',
+      )
       // Use focus() instead of click() to avoid creating an extra selection undo entry
       await contentEditable.focus()
 
       // Undo the removal using keyboard shortcut
-      await page.keyboard.press('ControlOrMeta+Z')
+      await page.keyboard.press('Control+Z')
       await wait(500)
 
       // Wait for the block to be restored

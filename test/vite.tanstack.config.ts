@@ -2,6 +2,7 @@ import { withPayload } from '@payloadcms/tanstack-start'
 import { tanstackStart } from '@tanstack/react-start/plugin/vite'
 import viteReact from '@vitejs/plugin-react'
 import rsc from '@vitejs/plugin-rsc'
+import dotenv from 'dotenv'
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -20,6 +21,9 @@ import { fileURLToPath } from 'node:url'
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 const repoRoot = path.resolve(__dirname, '..')
+const emulatedCloudEnv = dotenv.parse(
+  fs.readFileSync(path.resolve(__dirname, 'plugin-cloud-storage/.env.emulated')),
+)
 
 const databaseAdapterPath = path.resolve(__dirname, 'databaseAdapter.js')
 if (!fs.existsSync(databaseAdapterPath)) {
@@ -72,6 +76,11 @@ export default withPayload(
     // Keep build output out of the app dirs (they ship as pure source); the
     // repo root already ignores `dist`.
     build: { outDir: path.resolve(repoRoot, 'dist/app-tanstack') },
+    define: {
+      'process.env.NEXT_PUBLIC_VERCEL_BLOB_API_URL': JSON.stringify(
+        emulatedCloudEnv.NEXT_PUBLIC_VERCEL_BLOB_API_URL,
+      ),
+    },
     resolve: {
       alias: { '@payload-suite-server-functions': suiteServerFunctionsPath },
     },
@@ -123,7 +132,8 @@ export default withPayload(
     // Payload's monorepo packages and Next.js test fixtures both use `.client.*` modules.
     // The server-only specifier protection remains enabled for other source files.
     clientDenialExcludeFiles: ['**/packages/*/src/**', '**/*.client.*'],
-    payloadConfigPath: path.resolve(__dirname, testSuite, 'config.ts'),
+    payloadConfigPath:
+      process.env.PAYLOAD_CONFIG_PATH ?? path.resolve(__dirname, testSuite, 'config.ts'),
     routesDirectory: 'app',
     srcDirectory,
   },

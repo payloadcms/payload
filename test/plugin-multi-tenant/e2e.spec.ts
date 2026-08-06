@@ -1277,10 +1277,6 @@ test.describe('Multi Tenant', () => {
     })
 
     test('should filter sidebar tree when switching tenants without page navigation', async () => {
-      test.skip(
-        process.env.PAYLOAD_FRAMEWORK === 'tanstack-start',
-        'TanStack: known post-hydration RSC view remount detaches the view mid-interaction (see framework adapter notes); re-enable when the TanStack RSC hydration is fixed.',
-      )
       // This test reproduces the user flow:
       // 1. Log in and go to folders
       // 2. Select Folders tab in sidebar
@@ -1298,7 +1294,6 @@ test.describe('Multi Tenant', () => {
 
       // Navigate to folders page
       await page.goto(foldersURL.list)
-      await page.waitForURL(foldersURL.list)
 
       // Click on Folders tab in sidebar to see the tree
       await openNav(page)

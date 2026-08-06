@@ -871,7 +871,9 @@ describe('General', () => {
       await expect(page.locator('h1#custom-view-title')).toContainText(customViewTitle)
     })
 
-    test('should render protected nested custom view', { framework: 'next' }, async () => {
+    test('should render protected nested custom view', async () => {
+      test.slow()
+
       await page.goto(
         formatAdminURL({
           adminRoute,
