@@ -13,6 +13,7 @@ describe('API', () => {
 
   it('fetches users', async () => {
     const users = await payload.find({
+      overrideAccess: true,
       collection: 'users',
     })
     expect(users).toBeDefined()

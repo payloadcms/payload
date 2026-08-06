@@ -22,6 +22,7 @@ export async function sendOrderAccessEmail({
 
   try {
     const { docs: orders } = await payload.find({
+      overrideAccess: true,
       collection: 'orders',
       where: {
         and: [{ id: { equals: orderID } }, { customerEmail: { equals: email } }],

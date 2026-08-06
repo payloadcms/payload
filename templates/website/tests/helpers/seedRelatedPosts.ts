@@ -33,6 +33,7 @@ export async function seedRelatedPosts(): Promise<void> {
   await deleteFixture({ payload })
 
   const category = await payload.create({
+    overrideAccess: true,
     collection: 'categories',
     data: {
       slug: relatedPostsFixture.categorySlug,
@@ -42,6 +43,7 @@ export async function seedRelatedPosts(): Promise<void> {
   })
 
   const image = await payload.create({
+    overrideAccess: true,
     collection: 'media',
     data: { alt: relatedPostsFixture.imageAlt },
     filePath: path.resolve(dirname, '../../src/endpoints/seed/image-post1.webp'),
@@ -49,6 +51,7 @@ export async function seedRelatedPosts(): Promise<void> {
   })
 
   const relatedPost = await payload.create({
+    overrideAccess: true,
     collection: 'posts',
     data: {
       _status: 'published',
@@ -62,6 +65,7 @@ export async function seedRelatedPosts(): Promise<void> {
   })
 
   await payload.create({
+    overrideAccess: true,
     collection: 'posts',
     data: {
       _status: 'published',
@@ -82,6 +86,7 @@ export async function cleanupRelatedPosts(): Promise<void> {
 
 async function deleteFixture({ payload }: { payload: Payload }): Promise<void> {
   await payload.delete({
+    overrideAccess: true,
     collection: 'posts',
     where: {
       slug: {
@@ -92,6 +97,7 @@ async function deleteFixture({ payload }: { payload: Payload }): Promise<void> {
   })
 
   await payload.delete({
+    overrideAccess: true,
     collection: 'categories',
     where: {
       slug: { equals: relatedPostsFixture.categorySlug },
@@ -100,6 +106,7 @@ async function deleteFixture({ payload }: { payload: Payload }): Promise<void> {
   })
 
   await payload.delete({
+    overrideAccess: true,
     collection: 'media',
     where: {
       alt: { equals: relatedPostsFixture.imageAlt },
