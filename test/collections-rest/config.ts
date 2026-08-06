@@ -354,6 +354,7 @@ export default buildConfigWithDefaults({
   ],
   onInit: async (payload) => {
     await payload.create({
+      overrideAccess: true,
       collection: 'users',
       data: {
         email: devUser.email,
@@ -362,12 +363,14 @@ export default buildConfigWithDefaults({
     })
 
     const rel1 = await payload.create({
+      overrideAccess: true,
       collection: relationSlug,
       data: {
         name: 'name',
       },
     })
     const rel2 = await payload.create({
+      overrideAccess: true,
       collection: relationSlug,
       data: {
         name: 'name2',
@@ -375,6 +378,7 @@ export default buildConfigWithDefaults({
     })
 
     await payload.create({
+      overrideAccess: true,
       collection: pointSlug,
       data: {
         point: [10, 20],
@@ -383,6 +387,7 @@ export default buildConfigWithDefaults({
 
     // Relation - hasMany
     await payload.create({
+      overrideAccess: true,
       collection: postsSlug,
       data: {
         relationHasManyField: rel1.id,
@@ -390,6 +395,7 @@ export default buildConfigWithDefaults({
       },
     })
     await payload.create({
+      overrideAccess: true,
       collection: postsSlug,
       data: {
         relationHasManyField: rel2.id,
@@ -399,6 +405,7 @@ export default buildConfigWithDefaults({
 
     // Relation - relationTo multi
     await payload.create({
+      overrideAccess: true,
       collection: postsSlug,
       data: {
         relationMultiRelationTo: {
@@ -411,6 +418,7 @@ export default buildConfigWithDefaults({
 
     // Relation - relationTo multi hasMany
     await payload.create({
+      overrideAccess: true,
       collection: postsSlug,
       data: {
         relationMultiRelationToHasMany: [
@@ -428,6 +436,7 @@ export default buildConfigWithDefaults({
     })
 
     await payload.create({
+      overrideAccess: true,
       collection: customIdSlug,
       data: {
         id: 'test',
@@ -436,6 +445,7 @@ export default buildConfigWithDefaults({
     })
 
     await payload.create({
+      overrideAccess: true,
       collection: customIdNumberSlug,
       data: {
         id: 123,

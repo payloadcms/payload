@@ -104,6 +104,7 @@ describe('Remove token from auth responses', () => {
 
   it('should not include token in response from /reset-password', async () => {
     const token = await payload.forgotPassword({
+      overrideAccess: true,
       collection: collectionSlug,
       data: { email: devUser.email },
       disableEmail: true,

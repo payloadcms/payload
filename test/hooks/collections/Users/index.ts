@@ -19,17 +19,34 @@ export const seedHooksUsers = async (payload: Payload) => {
   await payload.create({
     collection: hooksUsersSlug,
     data: devUser,
+    overrideAccess: true,
   })
   await payload.create({
     collection: hooksUsersSlug,
     data: regularUser,
+    overrideAccess: true,
   })
 }
 
 export const hooksUsersSlug = 'hooks-users'
+type AuthOperation = 'forgotPassword' | 'login' | 'unlock'
+const authOperationOverrideAccess: Partial<Record<AuthOperation, boolean | undefined>> = {}
+
+export const clearAuthOperationOverrideAccess = () => {
+  for (const operation of Object.keys(authOperationOverrideAccess)) {
+    delete authOperationOverrideAccess[operation as AuthOperation]
+  }
+}
+
+export const getAuthOperationOverrideAccess = (operation: AuthOperation) =>
+  authOperationOverrideAccess[operation]
+
 const Users: CollectionConfig = {
   slug: hooksUsersSlug,
   auth: true,
+  access: {
+    unlock: () => true,
+  },
   fields: [
     {
       name: 'roles',
@@ -51,6 +68,13 @@ const Users: CollectionConfig = {
     refresh: [refreshHook],
     afterLogin: [afterLoginHook],
     beforeLogin: [beforeLoginHook],
+    beforeOperation: [
+      ({ operation, overrideAccess }) => {
+        if (operation === 'forgotPassword' || operation === 'login' || operation === 'unlock') {
+          authOperationOverrideAccess[operation] = overrideAccess
+        }
+      },
+    ],
   },
   versions: false,
 }

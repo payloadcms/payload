@@ -4,6 +4,7 @@ import { devUser } from '../credentials.js'
 
 export const _seed = async (_payload: Payload) => {
   await _payload.create({
+    overrideAccess: true,
     collection: 'users',
     data: {
       email: devUser.email,

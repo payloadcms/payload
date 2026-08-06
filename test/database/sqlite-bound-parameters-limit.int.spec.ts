@@ -45,6 +45,7 @@ describe(
       // Should fail here because too the length exceeds the limit
       await expect(
         payload.find({
+          overrideAccess: true,
           collection: 'simple',
           pagination: false,
           where: { id: { in: IN } },
@@ -54,6 +55,7 @@ describe(
       // Should fail here because too the length exceeds the limit
       await expect(
         payload.find({
+          overrideAccess: true,
           collection: 'simple',
           pagination: false,
           where: { id: { not_in: IN } },
@@ -65,6 +67,7 @@ describe(
       // Should not fail because limitedBoundParameters: true
       await expect(
         payload.find({
+          overrideAccess: true,
           collection: 'simple',
           pagination: false,
           where: { id: { in: IN } },
@@ -74,6 +77,7 @@ describe(
       // Should not fail because limitedBoundParameters: true
       await expect(
         payload.find({
+          overrideAccess: true,
           collection: 'simple',
           pagination: false,
           where: { id: { not_in: IN } },
@@ -83,10 +87,13 @@ describe(
       // Verify that "in" still works properly
 
       const docs = await Promise.all(
-        Array.from({ length: 300 }, () => payload.create({ collection: 'simple', data: {} })),
+        Array.from({ length: 300 }, () =>
+          payload.create({ overrideAccess: true, collection: 'simple', data: {} }),
+        ),
       )
 
       const res = await payload.find({
+        overrideAccess: true,
         collection: 'simple',
         pagination: false,
         where: { id: { in: docs.map((e) => e.id) } },
@@ -102,6 +109,7 @@ describe(
       payload.db.limitedBoundParameters = true
 
       const simpleLocalizedDoc = await payload.create({
+        overrideAccess: true,
         collection: 'simple-localized',
         data: {
           text: 'Test',
@@ -110,6 +118,7 @@ describe(
       })
 
       const res = await payload.find({
+        overrideAccess: true,
         collection: 'simple-localized',
         pagination: false,
         where: {

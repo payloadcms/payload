@@ -38,12 +38,14 @@ describe('Search plugin before S3 - Issue #15431', () => {
 
   afterEach(async () => {
     await payload.delete({
+      overrideAccess: true,
       collection: mediaSlug,
       where: { id: { exists: true } },
     })
     // Only delete from search if the collection exists
     if (payload.collections['search']) {
       await payload.delete({
+        overrideAccess: true,
         collection: 'search',
         where: { id: { exists: true } },
       })
@@ -63,6 +65,7 @@ describe('Search plugin before S3 - Issue #15431', () => {
 
   it('should upload all image sizes to S3 when search plugin is listed before S3 plugin', async () => {
     const upload = await payload.create({
+      overrideAccess: true,
       collection: mediaSlug,
       data: {},
       filePath: path.resolve(dirname, '../uploads/image.png'),
@@ -80,12 +83,14 @@ describe('Search plugin before S3 - Issue #15431', () => {
 
   it('should create search document when uploading media', async () => {
     const upload = await payload.create({
+      overrideAccess: true,
       collection: mediaSlug,
       data: {},
       filePath: path.resolve(dirname, '../uploads/image.png'),
     })
 
     const { docs: searchDocs } = await payload.find({
+      overrideAccess: true,
       collection: 'search',
       where: {
         'doc.value': { equals: upload.id },

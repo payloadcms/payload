@@ -4,6 +4,7 @@ import React from 'react'
 
 export const Image: React.FC<AdminViewServerProps> = async ({ payload }) => {
   const images = await payload.find({
+    overrideAccess: true,
     collection: 'uploads',
     limit: 1,
   })

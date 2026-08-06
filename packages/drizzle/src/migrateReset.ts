@@ -52,6 +52,7 @@ export async function migrateReset(this: DrizzleAdapter): Promise<void> {
         await payload.delete({
           id: migration.id,
           collection: 'payload-migrations',
+          overrideAccess: true,
           req,
         })
       }
@@ -80,6 +81,7 @@ export async function migrateReset(this: DrizzleAdapter): Promise<void> {
     try {
       await payload.delete({
         collection: 'payload-migrations',
+        overrideAccess: true,
         where: {
           batch: {
             equals: -1,

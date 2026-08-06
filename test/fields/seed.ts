@@ -162,6 +162,7 @@ export const seed = async (_payload: Payload) => {
 
   // Create hasMany upload
   await _payload.create({
+    overrideAccess: true,
     collection: uploadsMulti,
     data: {
       media: [createdPNGDoc.id],
@@ -181,6 +182,7 @@ export const seed = async (_payload: Payload) => {
 
   // Create poly upload
   await _payload.create({
+    overrideAccess: true,
     collection: uploadsPoly,
     data: {
       media: { value: createdJPGDoc.id, relationTo: uploadsSlug },
@@ -374,6 +376,7 @@ export const seed = async (_payload: Payload) => {
   })
 
   await _payload.create({
+    overrideAccess: true,
     collection: uiSlug,
     data: {
       text: 'text',
@@ -383,6 +386,7 @@ export const seed = async (_payload: Payload) => {
 
   await Promise.all([
     _payload.create({
+      overrideAccess: true,
       collection: customIDSlug,
       data: {
         id: nonStandardID,
@@ -390,6 +394,7 @@ export const seed = async (_payload: Payload) => {
       depth: 0,
     }),
     _payload.create({
+      overrideAccess: true,
       collection: customTabIDSlug,
       data: {
         id: customTabID,
@@ -397,6 +402,7 @@ export const seed = async (_payload: Payload) => {
       depth: 0,
     }),
     _payload.create({
+      overrideAccess: true,
       collection: customRowIDSlug,
       data: {
         id: customRowID,

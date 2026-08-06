@@ -24,6 +24,7 @@ describe('Query Presets', () => {
 
     adminUser = await payload
       .login({
+        overrideAccess: true,
         collection: 'users',
         data: {
           email: devUser.email,
@@ -34,6 +35,7 @@ describe('Query Presets', () => {
 
     editorUser = await payload
       .login({
+        overrideAccess: true,
         collection: 'users',
         data: {
           email: regularUser.email,
@@ -44,6 +46,7 @@ describe('Query Presets', () => {
 
     publicUser = await payload
       .login({
+        overrideAccess: true,
         collection: 'users',
         data: {
           email: 'public@email.com',
@@ -77,6 +80,7 @@ describe('Query Presets', () => {
       }
 
       const { id } = await payload.create({
+        overrideAccess: true,
         collection: queryPresetsCollectionSlug,
         data: {
           title: 'Only Logged In Users',
@@ -117,6 +121,7 @@ describe('Query Presets', () => {
 
         // make sure the update didn't go through
         const preset = await payload.findByID({
+          overrideAccess: true,
           collection: queryPresetsCollectionSlug,
           depth: 0,
           id,
@@ -140,6 +145,7 @@ describe('Query Presets', () => {
 
         // make sure the delete didn't go through
         const preset = await payload.findByID({
+          overrideAccess: true,
           collection: queryPresetsCollectionSlug,
           depth: 0,
           id,
@@ -709,6 +715,7 @@ describe('Query Presets', () => {
     it('should respect boolean access control results', async () => {
       // create a preset with the read constraint set to "noone"
       const presetForNoone = await payload.create({
+        overrideAccess: true,
         collection: queryPresetsCollectionSlug,
         user: adminUser,
         data: {

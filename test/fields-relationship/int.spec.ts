@@ -42,6 +42,7 @@ describe('Relationship Fields', () => {
     const relatedDocName = 'Related Doc'
     beforeAll(async () => {
       const relatedDoc = await payload.create({
+        overrideAccess: true,
         collection: collection1Slug,
         data: {
           name: relatedDocName,
@@ -49,6 +50,7 @@ describe('Relationship Fields', () => {
       })
 
       const version1 = await payload.create({
+        overrideAccess: true,
         collection: versionedRelationshipFieldSlug,
         data: {
           title: 'Version 1 Title',
@@ -60,6 +62,7 @@ describe('Relationship Fields', () => {
       })
 
       const version2 = await payload.update({
+        overrideAccess: true,
         collection: versionedRelationshipFieldSlug,
         id: version1.id,
         data: {
@@ -68,6 +71,7 @@ describe('Relationship Fields', () => {
       })
 
       const versions = await payload.findVersions({
+        overrideAccess: true,
         collection: versionedRelationshipFieldSlug,
         where: {
           parent: {
@@ -91,6 +95,7 @@ describe('Relationship Fields', () => {
 
     it('should return the correct versioned relationship field via LocalAPI', async () => {
       const version2Data = await payload.findVersionByID({
+        overrideAccess: true,
         collection: versionedRelationshipFieldSlug,
         id: version2ID,
         locale: 'all',

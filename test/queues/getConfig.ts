@@ -58,6 +58,7 @@ export const getConfig: () => Partial<Config> = () => ({
         afterChange: [
           async ({ req, doc, context }) => {
             await req.payload.jobs.queue({
+              overrideAccess: true,
               workflow: context.useJSONWorkflow ? 'updatePostJSONWorkflow' : 'updatePost',
               input: {
                 post: doc.id,

@@ -49,13 +49,14 @@ describe('Sort', () => {
     })
 
     afterAll(async () => {
-      await payload.delete({ collection: 'posts', where: {} })
-      await payload.delete({ collection: 'default-sort', where: {} })
+      await payload.delete({ overrideAccess: true, collection: 'posts', where: {} })
+      await payload.delete({ overrideAccess: true, collection: 'default-sort', where: {} })
     })
 
     describe('Default sort', () => {
       it('should sort posts by default definition in collection', async () => {
         const posts = await payload.find({
+          overrideAccess: true,
           collection: 'default-sort', // 'number,-text'
         })
 
@@ -71,6 +72,7 @@ describe('Sort', () => {
     describe('Single sort field', () => {
       it('should sort posts by text field', async () => {
         const posts = await payload.find({
+          overrideAccess: true,
           collection: 'posts',
           sort: 'text',
         })
@@ -87,6 +89,7 @@ describe('Sort', () => {
 
       it('should sort posts by text field desc', async () => {
         const posts = await payload.find({
+          overrideAccess: true,
           collection: 'posts',
           sort: '-text',
         })
@@ -103,6 +106,7 @@ describe('Sort', () => {
 
       it('should sort posts by number field', async () => {
         const posts = await payload.find({
+          overrideAccess: true,
           collection: 'posts',
           sort: 'number',
         })
@@ -119,6 +123,7 @@ describe('Sort', () => {
 
       it('should sort posts by number field desc', async () => {
         const posts = await payload.find({
+          overrideAccess: true,
           collection: 'posts',
           sort: '-number',
         })
@@ -139,6 +144,7 @@ describe('Sort', () => {
       // As a result, every time you fetch, including fetching specific pages, the order of items may change and appear as duplicated to some users.
       it('should always be consistent when sorting', async () => {
         const posts = await payload.find({
+          overrideAccess: true,
           collection: nonUniqueSortSlug,
           sort: 'order',
         })
@@ -148,6 +154,7 @@ describe('Sort', () => {
         const dataFetches = await Promise.all(
           Array.from({ length: 3 }).map(() =>
             payload.find({
+              overrideAccess: true,
               collection: nonUniqueSortSlug,
               sort: 'order',
             }),
@@ -167,6 +174,7 @@ describe('Sort', () => {
 
       it('should always be consistent when sorting - with limited pages', async () => {
         const posts = await payload.find({
+          overrideAccess: true,
           collection: nonUniqueSortSlug,
           sort: 'order',
           limit: 5,
@@ -178,6 +186,7 @@ describe('Sort', () => {
         const dataFetches = await Promise.all(
           Array.from({ length: 3 }).map(() =>
             payload.find({
+              overrideAccess: true,
               collection: nonUniqueSortSlug,
               sort: 'order',
               limit: 5,
@@ -204,6 +213,7 @@ describe('Sort', () => {
         const dataFetches = await Promise.all(
           Array.from({ length: 3 }).map(() =>
             payload.find({
+              overrideAccess: true,
               collection: nonUniqueSortSlug,
               sort: 'order',
               page: 2,
@@ -227,6 +237,7 @@ describe('Sort', () => {
 
       it('should always be consistent without sort params in the query', async () => {
         const posts = await payload.find({
+          overrideAccess: true,
           collection: nonUniqueSortSlug,
         })
 
@@ -235,6 +246,7 @@ describe('Sort', () => {
         const dataFetches = await Promise.all(
           Array.from({ length: 3 }).map(() =>
             payload.find({
+              overrideAccess: true,
               collection: nonUniqueSortSlug,
             }),
           ),
@@ -253,6 +265,7 @@ describe('Sort', () => {
 
       it('should always be consistent without sort params in the query - with limited pages', async () => {
         const posts = await payload.find({
+          overrideAccess: true,
           collection: nonUniqueSortSlug,
           page: 2,
           limit: 4,
@@ -263,6 +276,7 @@ describe('Sort', () => {
         const dataFetches = await Promise.all(
           Array.from({ length: 3 }).map(() =>
             payload.find({
+              overrideAccess: true,
               collection: nonUniqueSortSlug,
               page: 2,
               limit: 4,
@@ -285,6 +299,7 @@ describe('Sort', () => {
     describe('Sort by multiple fields', () => {
       it('should sort posts by multiple fields', async () => {
         const posts = await payload.find({
+          overrideAccess: true,
           collection: 'posts',
           sort: ['number2', 'number'],
         })
@@ -301,6 +316,7 @@ describe('Sort', () => {
 
       it('should sort posts by multiple fields asc and desc', async () => {
         const posts = await payload.find({
+          overrideAccess: true,
           collection: 'posts',
           sort: ['number2', '-number'],
         })
@@ -317,6 +333,7 @@ describe('Sort', () => {
 
       it('should sort posts by multiple fields with group', async () => {
         const posts = await payload.find({
+          overrideAccess: true,
           collection: 'posts',
           sort: ['-group.number', '-number'],
         })
@@ -335,46 +352,54 @@ describe('Sort', () => {
     describe('Sort with drafts', () => {
       beforeAll(async () => {
         const testData1 = await payload.create({
+          overrideAccess: true,
           collection: 'drafts',
           data: { text: 'Post 1 draft', number: 10 },
           draft: true,
         })
         await payload.update({
+          overrideAccess: true,
           collection: 'drafts',
           id: testData1.id,
           data: { text: 'Post 1 draft updated', number: 20 },
           draft: true,
         })
         await payload.update({
+          overrideAccess: true,
           collection: 'drafts',
           id: testData1.id,
           data: { text: 'Post 1 draft updated', number: 30 },
           draft: true,
         })
         await payload.update({
+          overrideAccess: true,
           collection: 'drafts',
           id: testData1.id,
           data: { text: 'Post 1 published', number: 15 },
           draft: false,
         })
         const testData2 = await payload.create({
+          overrideAccess: true,
           collection: 'drafts',
           data: { text: 'Post 2 draft', number: 1 },
           draft: true,
         })
         await payload.update({
+          overrideAccess: true,
           collection: 'drafts',
           id: testData2.id,
           data: { text: 'Post 2 published', number: 2 },
           draft: false,
         })
         await payload.update({
+          overrideAccess: true,
           collection: 'drafts',
           id: testData2.id,
           data: { text: 'Post 2 newdraft', number: 100 },
           draft: true,
         })
         await payload.create({
+          overrideAccess: true,
           collection: 'drafts',
           data: { text: 'Post 3 draft', number: 3 },
           draft: true,
@@ -383,6 +408,7 @@ describe('Sort', () => {
 
       it('should sort latest without draft', async () => {
         const posts = await payload.find({
+          overrideAccess: true,
           collection: 'drafts',
           sort: 'number',
           draft: false,
@@ -397,6 +423,7 @@ describe('Sort', () => {
 
       it('should sort latest with draft', async () => {
         const posts = await payload.find({
+          overrideAccess: true,
           collection: 'drafts',
           sort: 'number',
           draft: true,
@@ -411,6 +438,7 @@ describe('Sort', () => {
 
       it('should sort versions', async () => {
         const posts = await payload.findVersions({
+          overrideAccess: true,
           collection: 'drafts',
           sort: 'version.number',
           draft: false,
@@ -432,22 +460,26 @@ describe('Sort', () => {
     describe('Localized sort', () => {
       beforeAll(async () => {
         const testData1 = await payload.create({
+          overrideAccess: true,
           collection: 'localized',
           data: { text: 'Post 1 english', number: 10 },
           locale: 'en',
         })
         await payload.update({
+          overrideAccess: true,
           collection: 'localized',
           id: testData1.id,
           data: { text: 'Post 1 norsk', number: 20 },
           locale: 'nb',
         })
         const testData2 = await payload.create({
+          overrideAccess: true,
           collection: 'localized',
           data: { text: 'Post 2 english', number: 25 },
           locale: 'en',
         })
         await payload.update({
+          overrideAccess: true,
           collection: 'localized',
           id: testData2.id,
           data: { text: 'Post 2 norsk', number: 5 },
@@ -457,6 +489,7 @@ describe('Sort', () => {
 
       it('should sort localized field', async () => {
         const englishPosts = await payload.find({
+          overrideAccess: true,
           collection: 'localized',
           sort: 'number',
           locale: 'en',
@@ -468,6 +501,7 @@ describe('Sort', () => {
         ])
 
         const norwegianPosts = await payload.find({
+          overrideAccess: true,
           collection: 'localized',
           sort: 'number',
           locale: 'nb',
@@ -487,18 +521,21 @@ describe('Sort', () => {
       let orderableDraft2: Draft
       beforeAll(async () => {
         orderable1 = await payload.create({
+          overrideAccess: true,
           collection: orderableSlug,
           data: {
             title: 'Orderable 1',
           },
         })
         orderable2 = await payload.create({
+          overrideAccess: true,
           collection: orderableSlug,
           data: {
             title: 'Orderable 2',
           },
         })
         orderableDraft1 = await payload.create({
+          overrideAccess: true,
           collection: draftsSlug,
           data: {
             text: 'Orderable 1',
@@ -506,6 +543,7 @@ describe('Sort', () => {
           },
         })
         orderableDraft2 = await payload.create({
+          overrideAccess: true,
           collection: draftsSlug,
           data: {
             text: 'Orderable 2',
@@ -516,6 +554,7 @@ describe('Sort', () => {
 
       it('should set order by default', async () => {
         const ordered = await payload.find({
+          overrideAccess: true,
           collection: orderableSlug,
           where: {
             title: {
@@ -548,6 +587,7 @@ describe('Sort', () => {
         expect(res.status).toStrictEqual(200)
 
         const ordered = await payload.find({
+          overrideAccess: true,
           collection: 'orderable',
           where: {
             title: {
@@ -578,6 +618,7 @@ describe('Sort', () => {
         expect(res.status).toStrictEqual(200)
 
         const ordered = await payload.find({
+          overrideAccess: true,
           collection: draftsSlug,
           draft: true,
           where: {
@@ -596,6 +637,7 @@ describe('Sort', () => {
 
       it('should not unpublish a published document with a newer draft when reordering', async () => {
         const publishedDoc = await payload.create({
+          overrideAccess: true,
           collection: draftsSlug,
           data: {
             text: 'Published with newer draft',
@@ -604,6 +646,7 @@ describe('Sort', () => {
         })
 
         const target = await payload.create({
+          overrideAccess: true,
           collection: draftsSlug,
           data: {
             text: 'Reorder target',
@@ -613,6 +656,7 @@ describe('Sort', () => {
 
         // Create a newer draft on top of the published version
         await payload.update({
+          overrideAccess: true,
           id: publishedDoc.id,
           collection: draftsSlug,
           data: {
@@ -622,6 +666,7 @@ describe('Sort', () => {
         })
 
         const beforeReorder = await payload.findByID({
+          overrideAccess: true,
           id: publishedDoc.id,
           collection: draftsSlug,
         })
@@ -644,6 +689,7 @@ describe('Sort', () => {
         expect(res.status).toStrictEqual(200)
 
         const afterReorder = await payload.findByID({
+          overrideAccess: true,
           id: publishedDoc.id,
           collection: draftsSlug,
         })
@@ -652,6 +698,7 @@ describe('Sort', () => {
         expect(afterReorder._status).toBe('published')
 
         const published = await payload.find({
+          overrideAccess: true,
           collection: draftsSlug,
           where: {
             id: {
@@ -665,11 +712,13 @@ describe('Sort', () => {
 
       it('should allow to duplicate with reordable', async () => {
         const doc = await payload.create({
+          overrideAccess: true,
           collection: 'orderable',
           data: { title: 'new document' },
         })
 
         const docDuplicated = await payload.create({
+          overrideAccess: true,
           duplicateFromID: doc.id,
           collection: 'orderable',
           data: {},
@@ -690,8 +739,13 @@ describe('Sort', () => {
           }),
         })
 
-        const docAfterReorder = await payload.findByID({ collection: 'orderable', id: doc.id })
+        const docAfterReorder = await payload.findByID({
+          overrideAccess: true,
+          collection: 'orderable',
+          id: doc.id,
+        })
         const docDuplicatedAfterReorder = await payload.findByID({
+          overrideAccess: true,
           collection: 'orderable',
           id: docDuplicated.id,
         })
@@ -704,6 +758,7 @@ describe('Sort', () => {
         const collection = orderableSlug
         // create seed docs with aa, aA, a0 (legacy base64 chars for backward compatibility)
         const aa = await payload.create({
+          overrideAccess: true,
           collection,
           data: {
             title: 'Base62 aa',
@@ -711,6 +766,7 @@ describe('Sort', () => {
           },
         })
         const aA = await payload.create({
+          overrideAccess: true,
           collection,
           data: {
             title: 'Base62 aA',
@@ -718,6 +774,7 @@ describe('Sort', () => {
           },
         })
         const a0 = await payload.create({
+          overrideAccess: true,
           collection,
           data: {
             title: 'Base62 a0',
@@ -726,6 +783,7 @@ describe('Sort', () => {
         })
 
         const orderableDoc = await payload.create({
+          overrideAccess: true,
           collection,
           data: {
             title: 'Base62 new',
@@ -748,6 +806,7 @@ describe('Sort', () => {
         expect(res.status).toStrictEqual(200)
 
         const { docs } = await payload.find({
+          overrideAccess: true,
           collection,
           sort: '-_order',
           where: {
@@ -775,6 +834,7 @@ describe('Sort', () => {
         const collection = orderableSlug
 
         const { docs: allDocs } = await payload.find({
+          overrideAccess: true,
           collection,
           sort: '_order',
           limit: 1,
@@ -783,6 +843,7 @@ describe('Sort', () => {
         const firstDoc = allDocs[0]!
 
         const newDoc = await payload.create({
+          overrideAccess: true,
           collection,
           data: { title: 'Move to first test' },
         })
@@ -802,7 +863,11 @@ describe('Sort', () => {
 
         expect(res.status).toStrictEqual(200)
 
-        const newDocAfter = await payload.findByID({ collection, id: newDoc.id })
+        const newDocAfter = await payload.findByID({
+          overrideAccess: true,
+          collection,
+          id: newDoc.id,
+        })
 
         expect(newDocAfter._order).toMatch(/^\d/)
         expect(parseInt(newDocAfter._order!, 36)).toBeLessThan(parseInt(firstDoc._order!, 36))
@@ -812,6 +877,7 @@ describe('Sort', () => {
         const collection = orderableSlug
 
         const { docs: initialDocs } = await payload.find({
+          overrideAccess: true,
           collection,
           sort: '_order',
           limit: 1,
@@ -820,11 +886,13 @@ describe('Sort', () => {
         const originalFirst = initialDocs[0]!
 
         const docA = await payload.create({
+          overrideAccess: true,
           collection,
           data: { title: 'Multi first A' },
         })
 
         const docB = await payload.create({
+          overrideAccess: true,
           collection,
           data: { title: 'Multi first B' },
         })
@@ -842,7 +910,7 @@ describe('Sort', () => {
           }),
         })
 
-        const docAAfter = await payload.findByID({ collection, id: docA.id })
+        const docAAfter = await payload.findByID({ overrideAccess: true, collection, id: docA.id })
         expect(docAAfter._order).toMatch(/^\d/)
 
         const res = await restClient.POST('/reorder', {
@@ -860,7 +928,7 @@ describe('Sort', () => {
 
         expect(res.status).toStrictEqual(200)
 
-        const docBAfter = await payload.findByID({ collection, id: docB.id })
+        const docBAfter = await payload.findByID({ overrideAccess: true, collection, id: docB.id })
 
         expect(docBAfter._order).toMatch(/^\d/)
         expect(parseInt(docBAfter._order!, 36)).toBeLessThan(parseInt(docAAfter._order!, 36))
@@ -870,6 +938,7 @@ describe('Sort', () => {
         const collection = orderableSlug
 
         const { docs: initialDocs } = await payload.find({
+          overrideAccess: true,
           collection,
           sort: '_order',
           limit: 2,
@@ -891,7 +960,11 @@ describe('Sort', () => {
           }),
         })
 
-        const firstDocMoved = await payload.findByID({ collection, id: firstDoc.id })
+        const firstDocMoved = await payload.findByID({
+          overrideAccess: true,
+          collection,
+          id: firstDoc.id,
+        })
         expect(parseInt(firstDocMoved._order!, 36)).toBeGreaterThan(parseInt(secondDoc._order!, 36))
 
         const res = await restClient.POST('/reorder', {
@@ -909,7 +982,11 @@ describe('Sort', () => {
 
         expect(res.status).toStrictEqual(200)
 
-        const firstDocBack = await payload.findByID({ collection, id: firstDoc.id })
+        const firstDocBack = await payload.findByID({
+          overrideAccess: true,
+          collection,
+          id: firstDoc.id,
+        })
         expect(parseInt(firstDocBack._order!, 36)).toBeLessThan(parseInt(secondDoc._order!, 36))
       })
     })
@@ -922,12 +999,14 @@ describe('Sort', () => {
 
       beforeAll(async () => {
         related = await payload.create({
+          overrideAccess: true,
           collection: orderableJoinSlug,
           data: {
             title: 'test',
           },
         })
         orderable1 = await payload.create({
+          overrideAccess: true,
           collection: orderableSlug,
           data: {
             title: 'test 1',
@@ -936,6 +1015,7 @@ describe('Sort', () => {
         })
 
         orderable2 = await payload.create({
+          overrideAccess: true,
           collection: orderableSlug,
           data: {
             title: 'test 2',
@@ -944,6 +1024,7 @@ describe('Sort', () => {
         })
 
         orderable3 = await payload.create({
+          overrideAccess: true,
           collection: orderableSlug,
           data: {
             title: 'test 3',
@@ -959,6 +1040,7 @@ describe('Sort', () => {
       it('should allow setting the order with the local API', async () => {
         // create two orderableJoinSlug docs
         orderable2 = await payload.update({
+          overrideAccess: true,
           collection: orderableSlug,
           id: orderable2.id,
           data: {
@@ -968,6 +1050,7 @@ describe('Sort', () => {
           },
         })
         const orderable4 = await payload.create({
+          overrideAccess: true,
           collection: orderableSlug,
           data: {
             title: 'test',
@@ -981,6 +1064,7 @@ describe('Sort', () => {
 
       it('should sort join docs in the correct', async () => {
         related = await payload.findByID({
+          overrideAccess: true,
           collection: orderableJoinSlug,
           id: related.id,
           depth: 1,
@@ -994,12 +1078,14 @@ describe('Sort', () => {
 
       it('should scope join reorder keys to the same parent relation', async () => {
         const scopedParent = await payload.create({
+          overrideAccess: true,
           collection: orderableJoinSlug,
           data: {
             title: 'scoped parent',
           },
         })
         const otherParent = await payload.create({
+          overrideAccess: true,
           collection: orderableJoinSlug,
           data: {
             title: 'other parent',
@@ -1007,6 +1093,7 @@ describe('Sort', () => {
         })
 
         const scopedTarget = await payload.create({
+          overrideAccess: true,
           collection: orderableSlug,
           data: {
             title: 'scoped target',
@@ -1016,6 +1103,7 @@ describe('Sort', () => {
         })
 
         const scopedNeighbor = await payload.create({
+          overrideAccess: true,
           collection: orderableSlug,
           data: {
             title: 'scoped neighbor',
@@ -1025,6 +1113,7 @@ describe('Sort', () => {
         })
 
         const scopedMovedDoc = await payload.create({
+          overrideAccess: true,
           collection: orderableSlug,
           data: {
             title: 'scoped moved',
@@ -1034,6 +1123,7 @@ describe('Sort', () => {
         })
 
         await payload.create({
+          overrideAccess: true,
           collection: orderableSlug,
           data: {
             title: 'other scope doc',
@@ -1062,6 +1152,7 @@ describe('Sort', () => {
         expect(reorderBody.orderValues?.[0]).toBe('a1')
 
         const scopedMovedDocAfter = await payload.findByID({
+          overrideAccess: true,
           collection: orderableSlug,
           id: scopedMovedDoc.id,
         })
@@ -1079,6 +1170,7 @@ describe('Sort', () => {
 
       it('should scope localized join reorder keys with request locale context', async () => {
         const enParent = await payload.create({
+          overrideAccess: true,
           collection: orderableJoinSlug,
           data: {
             title: 'localized parent en',
@@ -1086,6 +1178,7 @@ describe('Sort', () => {
         })
 
         const nbParent = await payload.create({
+          overrideAccess: true,
           collection: orderableJoinSlug,
           data: {
             title: 'localized parent nb',
@@ -1093,6 +1186,7 @@ describe('Sort', () => {
         })
 
         const otherNbParent = await payload.create({
+          overrideAccess: true,
           collection: orderableJoinSlug,
           data: {
             title: 'localized parent other nb',
@@ -1100,6 +1194,7 @@ describe('Sort', () => {
         })
 
         const localizedTarget = await payload.create({
+          overrideAccess: true,
           collection: orderableSlug,
           locale: 'en',
           data: {
@@ -1110,6 +1205,7 @@ describe('Sort', () => {
         })
 
         await payload.update({
+          overrideAccess: true,
           collection: orderableSlug,
           id: localizedTarget.id,
           locale: 'nb',
@@ -1119,6 +1215,7 @@ describe('Sort', () => {
         })
 
         const localizedNeighbor = await payload.create({
+          overrideAccess: true,
           collection: orderableSlug,
           locale: 'en',
           data: {
@@ -1129,6 +1226,7 @@ describe('Sort', () => {
         })
 
         await payload.update({
+          overrideAccess: true,
           collection: orderableSlug,
           id: localizedNeighbor.id,
           locale: 'nb',
@@ -1138,6 +1236,7 @@ describe('Sort', () => {
         })
 
         const localizedMovedDoc = await payload.create({
+          overrideAccess: true,
           collection: orderableSlug,
           locale: 'en',
           data: {
@@ -1148,6 +1247,7 @@ describe('Sort', () => {
         })
 
         await payload.update({
+          overrideAccess: true,
           collection: orderableSlug,
           id: localizedMovedDoc.id,
           locale: 'nb',
@@ -1158,6 +1258,7 @@ describe('Sort', () => {
 
         // This doc only pollutes the EN scope with `a1`.
         const localizedEnPollution = await payload.create({
+          overrideAccess: true,
           collection: orderableSlug,
           locale: 'en',
           data: {
@@ -1168,6 +1269,7 @@ describe('Sort', () => {
         })
 
         await payload.update({
+          overrideAccess: true,
           collection: orderableSlug,
           id: localizedEnPollution.id,
           data: {
@@ -1197,6 +1299,7 @@ describe('Sort', () => {
         expect(reorderWithoutLocaleBody.orderValues?.[0]).not.toBe('a1')
 
         await payload.update({
+          overrideAccess: true,
           collection: orderableSlug,
           id: localizedMovedDoc.id,
           data: {
@@ -1205,6 +1308,7 @@ describe('Sort', () => {
         })
 
         await payload.update({
+          overrideAccess: true,
           collection: orderableSlug,
           id: localizedMovedDoc.id,
           data: {
@@ -1233,6 +1337,7 @@ describe('Sort', () => {
         expect(reorderWithLocaleBody.orderValues?.[0]).toBe('a1')
 
         const localizedMovedDocAfter = await payload.findByID({
+          overrideAccess: true,
           collection: orderableSlug,
           id: localizedMovedDoc.id,
         })
@@ -1255,7 +1360,7 @@ describe('Sort', () => {
     })
 
     afterAll(async () => {
-      await payload.delete({ collection: 'posts', where: {} })
+      await payload.delete({ overrideAccess: true, collection: 'posts', where: {} })
     })
 
     describe('Single sort field', () => {
@@ -1397,6 +1502,6 @@ describe('Sort', () => {
 
 async function createData(collection: CollectionSlug, data: Record<string, any>[]) {
   for (const item of data) {
-    await payload.create({ collection, data: item })
+    await payload.create({ overrideAccess: true, collection, data: item })
   }
 }

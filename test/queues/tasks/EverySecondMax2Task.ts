@@ -54,6 +54,7 @@ export const EverySecondMax2Task: TaskConfig<'EverySecondMax2'> = {
     req.payload.logger.info(input.message)
 
     await req.payload.create({
+      overrideAccess: true,
       collection: 'simple',
       data: {
         title: input.message,

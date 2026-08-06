@@ -123,6 +123,7 @@ export default buildConfigWithDefaults({
   ],
   onInit: async (payload) => {
     const user = await payload.create({
+      overrideAccess: true,
       collection: 'users',
       data: {
         email: devUser.email,
@@ -131,20 +132,24 @@ export default buildConfigWithDefaults({
     })
 
     await payload.create({
+      overrideAccess: true,
       collection: 'posts',
       data: postDoc,
       user,
     })
 
     const tag = await payload.create({
+      overrideAccess: true,
       collection: 'itemTags',
       data: { name: 'tag1' },
     })
     const item = await payload.create({
+      overrideAccess: true,
       collection: 'items',
       data: { name: 'item1', itemTags: [tag.id] },
     })
     const shop = await payload.create({
+      overrideAccess: true,
       collection: 'shops',
       data: { name: 'shop1', items: [item.id] },
     })

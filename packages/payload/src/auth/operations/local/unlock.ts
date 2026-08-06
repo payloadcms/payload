@@ -14,7 +14,7 @@ export type Options<TSlug extends AuthCollectionSlug> = {
   collection: TSlug
   context?: RequestContext
   data: AuthOperationsFromCollectionSlug<TSlug>['unlock']
-  overrideAccess: boolean
+  overrideAccess?: boolean
   req?: Partial<PayloadRequest>
 }
 
@@ -22,7 +22,7 @@ export async function unlockLocal<TSlug extends AuthCollectionSlug>(
   payload: Payload,
   options: Options<TSlug>,
 ): Promise<boolean> {
-  const { collection: collectionSlug, data, overrideAccess = true } = options
+  const { collection: collectionSlug, data, overrideAccess = false } = options
 
   const collection = payload.collections[collectionSlug]
 

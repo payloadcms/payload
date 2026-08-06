@@ -37,6 +37,7 @@ export default buildConfigWithDefaults({
   globals: [],
   onInit: async (payload) => {
     await payload.create({
+      overrideAccess: true,
       collection: 'users',
       data: {
         email: devUser.email,
@@ -45,6 +46,7 @@ export default buildConfigWithDefaults({
     })
 
     await payload.delete({
+      overrideAccess: true,
       collection: 'posts',
       where: {},
     })
@@ -65,6 +67,7 @@ export default buildConfigWithDefaults({
 
     for (const file of mdxFiles) {
       await payload.create({
+        overrideAccess: true,
         collection: 'posts',
         depth: 0,
         context: {

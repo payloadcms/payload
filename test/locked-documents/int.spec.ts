@@ -35,6 +35,7 @@ describe('Locked documents', () => {
     ) as SanitizedCollectionConfig
 
     const loginResult = await payload.login({
+      overrideAccess: true,
       collection: 'users',
       data: {
         email: devUser.email,
@@ -45,6 +46,7 @@ describe('Locked documents', () => {
     user = loginResult.user
 
     user2 = await payload.create({
+      overrideAccess: true,
       collection: 'users',
       data: {
         email: 'test@payloadcms.com',
@@ -53,6 +55,7 @@ describe('Locked documents', () => {
     })
 
     post = await payload.create({
+      overrideAccess: true,
       collection: postsSlug,
       data: {
         text: 'some post',
@@ -60,6 +63,7 @@ describe('Locked documents', () => {
     })
 
     await payload.create({
+      overrideAccess: true,
       collection: pagesSlug,
       data: {
         text: 'some page',
@@ -67,6 +71,7 @@ describe('Locked documents', () => {
     })
 
     await payload.updateGlobal({
+      overrideAccess: true,
       slug: menuSlug,
       data: {
         globalText: 'global text',
@@ -84,6 +89,7 @@ describe('Locked documents', () => {
 
   it('should update unlocked document - collection', async () => {
     const updatedPost = await payload.update({
+      overrideAccess: true,
       collection: postsSlug,
       data: {
         text: 'updated post',
@@ -96,6 +102,7 @@ describe('Locked documents', () => {
 
   it('should update unlocked document - global', async () => {
     const updatedGlobalMenu = await payload.updateGlobal({
+      overrideAccess: true,
       slug: menuSlug,
       data: {
         globalText: 'updated global text',
@@ -107,6 +114,7 @@ describe('Locked documents', () => {
 
   it('should delete unlocked document - collection', async () => {
     const { docs } = await payload.find({
+      overrideAccess: true,
       collection: postsSlug,
       depth: 0,
     })
@@ -114,11 +122,13 @@ describe('Locked documents', () => {
     expect(docs).toHaveLength(2)
 
     await payload.delete({
+      overrideAccess: true,
       collection: postsSlug,
       id: post.id,
     })
 
     const { docs: deletedResults } = await payload.find({
+      overrideAccess: true,
       collection: postsSlug,
       depth: 0,
     })
@@ -128,6 +138,7 @@ describe('Locked documents', () => {
 
   it('should allow update of stale locked document - collection', async () => {
     const newPost2 = await payload.create({
+      overrideAccess: true,
       collection: postsSlug,
       data: {
         text: 'new post 2',
@@ -139,6 +150,7 @@ describe('Locked documents', () => {
 
     // Give locking ownership to another user
     const lockedDocInstance = await payload.create({
+      overrideAccess: true,
       collection: lockedDocumentCollection,
       data: {
         user: {
@@ -156,6 +168,7 @@ describe('Locked documents', () => {
     await wait(1100)
 
     const updateLockedDoc = await payload.update({
+      overrideAccess: true,
       collection: postsSlug,
       data: {
         text: 'updated post 2',
@@ -172,6 +185,7 @@ describe('Locked documents', () => {
     // Check to make sure the document does not exist in payload-locked-documents anymore
     try {
       await payload.findByID({
+        overrideAccess: true,
         collection: lockedDocumentCollection,
         id: lockedDocInstance.id,
       })
@@ -180,6 +194,7 @@ describe('Locked documents', () => {
     }
 
     const docsFromLocksCollection = await payload.find({
+      overrideAccess: true,
       collection: lockedDocumentCollection,
       where: {
         id: { equals: lockedDocInstance.id },
@@ -199,6 +214,7 @@ describe('Locked documents', () => {
     globalConfig.lockDocuments = { duration: 1 }
     // Give locking ownership to another user
     const lockedGlobalInstance = await payload.create({
+      overrideAccess: true,
       collection: lockedDocumentCollection,
       data: {
         user: {
@@ -213,6 +229,7 @@ describe('Locked documents', () => {
     await wait(1100)
 
     const updateGlobalLockedDoc = await payload.updateGlobal({
+      overrideAccess: true,
       data: {
         globalText: 'global text 2',
       },
@@ -228,6 +245,7 @@ describe('Locked documents', () => {
     // Check to make sure the document does not exist in payload-locked-documents anymore
     try {
       await payload.findByID({
+        overrideAccess: true,
         collection: lockedDocumentCollection,
         id: lockedGlobalInstance.id,
       })
@@ -236,6 +254,7 @@ describe('Locked documents', () => {
     }
 
     const docsFromLocksCollection = await payload.find({
+      overrideAccess: true,
       collection: lockedDocumentCollection,
       where: {
         id: { equals: lockedGlobalInstance.id },
@@ -249,6 +268,7 @@ describe('Locked documents', () => {
 
   it('should not allow update of locked document - collection', async () => {
     const newPost = await payload.create({
+      overrideAccess: true,
       collection: postsSlug,
       data: {
         text: 'some post',
@@ -257,6 +277,7 @@ describe('Locked documents', () => {
 
     // Give locking ownership to another user
     await payload.create({
+      overrideAccess: true,
       collection: lockedDocumentCollection,
       data: {
         document: {
@@ -273,6 +294,7 @@ describe('Locked documents', () => {
 
     try {
       await payload.update({
+        overrideAccess: true,
         collection: postsSlug,
         data: {
           text: 'updated post',
@@ -286,6 +308,7 @@ describe('Locked documents', () => {
     }
 
     const updatedPost = await payload.findByID({
+      overrideAccess: true,
       collection: postsSlug,
       id: newPost.id,
     })
@@ -297,6 +320,7 @@ describe('Locked documents', () => {
   it('should not allow update of locked document - global', async () => {
     // Give locking ownership to another user
     await payload.create({
+      overrideAccess: true,
       collection: lockedDocumentCollection,
       data: {
         document: undefined,
@@ -310,6 +334,7 @@ describe('Locked documents', () => {
 
     try {
       await payload.updateGlobal({
+        overrideAccess: true,
         data: {
           globalText: 'updated global text',
         },
@@ -322,6 +347,7 @@ describe('Locked documents', () => {
     }
 
     const updatedGlobalMenu = await payload.findGlobal({
+      overrideAccess: true,
       slug: menuSlug,
     })
 
@@ -332,6 +358,7 @@ describe('Locked documents', () => {
   // Try to delete locked document (collection)
   it('should not allow delete of locked document - collection', async () => {
     const newPost3 = await payload.create({
+      overrideAccess: true,
       collection: postsSlug,
       data: {
         text: 'new post 3',
@@ -340,6 +367,7 @@ describe('Locked documents', () => {
 
     // Give locking ownership to another user
     await payload.create({
+      overrideAccess: true,
       collection: lockedDocumentCollection,
       data: {
         document: {
@@ -356,6 +384,7 @@ describe('Locked documents', () => {
 
     try {
       await payload.delete({
+        overrideAccess: true,
         collection: postsSlug,
         id: newPost3.id,
         overrideLock: false, // necessary to trigger the lock check
@@ -366,6 +395,7 @@ describe('Locked documents', () => {
     }
 
     const findPostDocs = await payload.find({
+      overrideAccess: true,
       collection: postsSlug,
       where: {
         id: { equals: newPost3.id },
@@ -377,6 +407,7 @@ describe('Locked documents', () => {
 
   it('should allow delete of stale locked document - collection', async () => {
     const newPost4 = await payload.create({
+      overrideAccess: true,
       collection: postsSlug,
       data: {
         text: 'new post 4',
@@ -388,6 +419,7 @@ describe('Locked documents', () => {
 
     // Give locking ownership to another user
     const lockedDocInstance = await payload.create({
+      overrideAccess: true,
       collection: lockedDocumentCollection,
       data: {
         user: {
@@ -405,12 +437,14 @@ describe('Locked documents', () => {
     await wait(1100)
 
     await payload.delete({
+      overrideAccess: true,
       collection: postsSlug,
       id: newPost4.id,
       overrideLock: false,
     })
 
     const findPostDocs = await payload.find({
+      overrideAccess: true,
       collection: postsSlug,
       where: {
         id: { equals: newPost4.id },
@@ -422,6 +456,7 @@ describe('Locked documents', () => {
     // Check to make sure the document does not exist in payload-locked-documents anymore
     try {
       await payload.findByID({
+        overrideAccess: true,
         collection: lockedDocumentCollection,
         id: lockedDocInstance.id,
       })
@@ -430,6 +465,7 @@ describe('Locked documents', () => {
     }
 
     const docsFromLocksCollection = await payload.find({
+      overrideAccess: true,
       collection: lockedDocumentCollection,
       where: {
         id: { equals: lockedDocInstance.id },
@@ -441,6 +477,7 @@ describe('Locked documents', () => {
 
   it('should allow update of locked document w/ overrideLock flag - collection', async () => {
     const newPost5 = await payload.create({
+      overrideAccess: true,
       collection: postsSlug,
       data: {
         text: 'new post 5',
@@ -449,6 +486,7 @@ describe('Locked documents', () => {
 
     // Give locking ownership to another user
     const lockedDocInstance = await payload.create({
+      overrideAccess: true,
       collection: lockedDocumentCollection,
       data: {
         user: {
@@ -464,6 +502,7 @@ describe('Locked documents', () => {
     })
 
     const updateLockedDoc = await payload.update({
+      overrideAccess: true,
       collection: postsSlug,
       data: {
         text: 'updated post 5',
@@ -478,6 +517,7 @@ describe('Locked documents', () => {
     // Check to make sure the document does not exist in payload-locked-documents anymore
     try {
       await payload.findByID({
+        overrideAccess: true,
         collection: lockedDocumentCollection,
         id: lockedDocInstance.id,
       })
@@ -486,6 +526,7 @@ describe('Locked documents', () => {
     }
 
     const docsFromLocksCollection = await payload.find({
+      overrideAccess: true,
       collection: lockedDocumentCollection,
       where: {
         id: { equals: lockedDocInstance.id },
@@ -500,6 +541,7 @@ describe('Locked documents', () => {
   it('should allow update of locked document w/ overrideLock flag - global', async () => {
     // Give locking ownership to another user
     const lockedGlobalInstance = await payload.create({
+      overrideAccess: true,
       collection: lockedDocumentCollection,
       data: {
         globalSlug: menuSlug,
@@ -512,6 +554,7 @@ describe('Locked documents', () => {
     })
 
     const updateGlobalLockedDoc = await payload.updateGlobal({
+      overrideAccess: true,
       data: {
         globalText: 'updated global text 2',
       },
@@ -525,6 +568,7 @@ describe('Locked documents', () => {
     // Check to make sure the document does not exist in payload-locked-documents anymore
     try {
       await payload.findByID({
+        overrideAccess: true,
         collection: lockedDocumentCollection,
         id: lockedGlobalInstance.id,
       })
@@ -533,6 +577,7 @@ describe('Locked documents', () => {
     }
 
     const docsFromLocksCollection = await payload.find({
+      overrideAccess: true,
       collection: lockedDocumentCollection,
       where: {
         id: { equals: lockedGlobalInstance.id },
@@ -546,6 +591,7 @@ describe('Locked documents', () => {
 
   it('should allow delete of locked document w/ overrideLock flag - collection', async () => {
     const newPost6 = await payload.create({
+      overrideAccess: true,
       collection: postsSlug,
       data: {
         text: 'new post 6',
@@ -554,6 +600,7 @@ describe('Locked documents', () => {
 
     // Give locking ownership to another user
     const lockedDocInstance = await payload.create({
+      overrideAccess: true,
       collection: lockedDocumentCollection,
       data: {
         user: {
@@ -569,12 +616,14 @@ describe('Locked documents', () => {
     })
 
     await payload.delete({
+      overrideAccess: true,
       collection: postsSlug,
       id: newPost6.id,
       overrideLock: true,
     })
 
     const findPostDocs = await payload.find({
+      overrideAccess: true,
       collection: postsSlug,
       where: {
         id: { equals: newPost6.id },
@@ -586,6 +635,7 @@ describe('Locked documents', () => {
     // Check to make sure the document does not exist in payload-locked-documents anymore
     try {
       await payload.findByID({
+        overrideAccess: true,
         collection: lockedDocumentCollection,
         id: lockedDocInstance.id,
       })
@@ -594,6 +644,7 @@ describe('Locked documents', () => {
     }
 
     const docsFromLocksCollection = await payload.find({
+      overrideAccess: true,
       collection: lockedDocumentCollection,
       where: {
         id: { equals: lockedDocInstance.id },
@@ -605,6 +656,7 @@ describe('Locked documents', () => {
 
   it('should allow take over on locked doc (simulates take over modal from admin ui)', async () => {
     const newPost7 = await payload.create({
+      overrideAccess: true,
       collection: postsSlug,
       data: {
         text: 'new post 7',
@@ -612,6 +664,7 @@ describe('Locked documents', () => {
     })
 
     const lockedDocInstance = await payload.create({
+      overrideAccess: true,
       collection: lockedDocumentCollection,
       data: {
         user: {
@@ -628,6 +681,7 @@ describe('Locked documents', () => {
 
     // This is the take over action - changing the user to the current user
     await payload.update({
+      overrideAccess: true,
       collection: 'payload-locked-documents',
       data: {
         user: { relationTo: 'users', value: user?.id },
@@ -636,6 +690,7 @@ describe('Locked documents', () => {
     })
 
     const docsFromLocksCollection = await payload.find({
+      overrideAccess: true,
       collection: lockedDocumentCollection,
       where: {
         'user.value': { equals: user.id },

@@ -56,6 +56,7 @@ export async function migrateDown(this: DrizzleAdapter): Promise<void> {
         await payload.delete({
           id: migration.id,
           collection: 'payload-migrations',
+          overrideAccess: true,
           req,
         })
       }

@@ -21,6 +21,7 @@ payload.config.jobs.deleteJobOnComplete = false
 
 try {
   await payload.jobs.runByID({
+    overrideAccess: true,
     id: jobID,
     silent: true,
   })

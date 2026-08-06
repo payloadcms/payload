@@ -24,12 +24,14 @@ export const seed = async (_payload: Payload) => {
       async () => {
         const [category1, category2] = await Promise.all([
           _payload.create({
+            overrideAccess: true,
             collection: categoriesSlug,
             data: {
               title: 'Category 1',
             },
           }),
           _payload.create({
+            overrideAccess: true,
             collection: categoriesSlug,
             data: {
               title: 'Category 2',
@@ -41,6 +43,7 @@ export const seed = async (_payload: Payload) => {
         const pages = await Promise.all(
           Array.from({ length: 30 }).map(async (_, index) =>
             _payload.create({
+              overrideAccess: true,
               collection: pagesSlug,
               data: {
                 title: `Page ${index + 1}`,
@@ -52,6 +55,7 @@ export const seed = async (_payload: Payload) => {
         await Promise.all(
           Array.from({ length: 30 }).map(async (_, index) =>
             _payload.create({
+              overrideAccess: true,
               collection: postsSlug,
               data: {
                 category: index < 15 ? category1.id : category2.id,
@@ -63,6 +67,7 @@ export const seed = async (_payload: Payload) => {
         )
 
         await _payload.create({
+          overrideAccess: true,
           collection: 'posts',
           data: {
             category: category1.id,
@@ -71,6 +76,7 @@ export const seed = async (_payload: Payload) => {
         })
 
         await _payload.create({
+          overrideAccess: true,
           collection: 'posts',
           data: {
             category: category2.id,
@@ -80,6 +86,7 @@ export const seed = async (_payload: Payload) => {
 
         // Get the first post for polymorphic relationships
         const firstPost = await _payload.find({
+          overrideAccess: true,
           collection: postsSlug,
           limit: 1,
         })
@@ -88,6 +95,7 @@ export const seed = async (_payload: Payload) => {
         await Promise.all([
           // Document with PolyHasOneRelationship to category
           _payload.create({
+            overrideAccess: true,
             collection: relationshipsSlug,
             data: {
               PolyHasOneRelationship: {
@@ -100,6 +108,7 @@ export const seed = async (_payload: Payload) => {
 
           // Document with PolyHasOneRelationship to post
           _payload.create({
+            overrideAccess: true,
             collection: relationshipsSlug,
             data: {
               PolyHasOneRelationship: {
@@ -112,6 +121,7 @@ export const seed = async (_payload: Payload) => {
 
           // Document with PolyHasManyRelationship to both categories and posts
           _payload.create({
+            overrideAccess: true,
             collection: relationshipsSlug,
             data: {
               PolyHasManyRelationship: [
@@ -134,6 +144,7 @@ export const seed = async (_payload: Payload) => {
 
           // Document with MonoHasOneRelationship
           _payload.create({
+            overrideAccess: true,
             collection: relationshipsSlug,
             data: {
               MonoHasOneRelationship: category1.id,
@@ -143,6 +154,7 @@ export const seed = async (_payload: Payload) => {
 
           // Document with MonoHasManyRelationship
           _payload.create({
+            overrideAccess: true,
             collection: relationshipsSlug,
             data: {
               MonoHasManyRelationship: [category1.id, category2.id],
@@ -152,6 +164,7 @@ export const seed = async (_payload: Payload) => {
 
           // Documents with no relationships (for "No Value" testing)
           _payload.create({
+            overrideAccess: true,
             collection: relationshipsSlug,
             data: {
               title: 'No Relationships 1',
@@ -159,6 +172,7 @@ export const seed = async (_payload: Payload) => {
           }),
 
           _payload.create({
+            overrideAccess: true,
             collection: relationshipsSlug,
             data: {
               title: 'No Relationships 2',

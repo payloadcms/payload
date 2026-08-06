@@ -47,6 +47,7 @@ describe('@payloadcms/storage-s3', () => {
 
   it('can upload', async () => {
     const upload = await payload.create({
+      overrideAccess: true,
       collection: mediaSlug,
       data: {},
       filePath: path.resolve(dirname, '../uploads/image.png'),
@@ -65,6 +66,7 @@ describe('@payloadcms/storage-s3', () => {
 
   it('can upload with prefix', async () => {
     const upload = await payload.create({
+      overrideAccess: true,
       collection: mediaWithPrefixSlug,
       data: {},
       filePath: path.resolve(dirname, '../uploads/image.png'),
@@ -87,6 +89,7 @@ describe('@payloadcms/storage-s3', () => {
     // This collection uses a s3Storage plugin with enabled: false but alwaysInsertFields: true
     // The upload will use local storage, but the prefix field should still exist
     const upload = await payload.create({
+      overrideAccess: true,
       collection: mediaWithAlwaysInsertFieldsSlug,
       data: {
         prefix: 'test',
@@ -101,6 +104,7 @@ describe('@payloadcms/storage-s3', () => {
 
   it('can download with signed downloads', async () => {
     await payload.create({
+      overrideAccess: true,
       collection: mediaWithSignedDownloadsSlug,
       data: {},
       filePath: path.resolve(dirname, '../uploads/image.png'),
@@ -118,6 +122,7 @@ describe('@payloadcms/storage-s3', () => {
 
   it('should skip signed download', async () => {
     await payload.create({
+      overrideAccess: true,
       collection: mediaWithSignedDownloadsSlug,
       data: {},
       filePath: path.resolve(dirname, '../uploads/small.png'),
@@ -137,6 +142,7 @@ describe('@payloadcms/storage-s3', () => {
 
   it('should return 304 with empty body when the ETag matches', async () => {
     await payload.create({
+      overrideAccess: true,
       collection: mediaWithSignedDownloadsSlug,
       data: {},
       filePath: path.resolve(dirname, '../uploads/temp.png'),
@@ -168,6 +174,7 @@ describe('@payloadcms/storage-s3', () => {
   describe('disablePayloadAccessControl', () => {
     it('should return direct S3 URL with encoded filename when uploading file with spaces', async () => {
       const upload = await payload.create({
+        overrideAccess: true,
         collection: mediaWithDirectAccessSlug,
         data: {},
         filePath: path.resolve(dirname, '../uploads/image with spaces.png'),
@@ -208,6 +215,7 @@ describe('@payloadcms/storage-s3', () => {
 
     it('should store full S3 URLs in database for image sizes when disablePayloadAccessControl is true', async () => {
       const upload = await payload.create({
+        overrideAccess: true,
         collection: mediaWithDirectAccessSlug,
         data: {},
         filePath: path.resolve(dirname, '../uploads/image.png'),
@@ -234,11 +242,16 @@ describe('@payloadcms/storage-s3', () => {
       expect(dbDoc.sizes.thumbnail.url).toContain(getTestBucketName())
       expect(dbDoc.sizes.thumbnail.url).not.toMatch(/^\/api\//)
 
-      await payload.delete({ collection: mediaWithDirectAccessSlug, id: upload.id })
+      await payload.delete({
+        overrideAccess: true,
+        collection: mediaWithDirectAccessSlug,
+        id: upload.id,
+      })
     })
 
     it('should return direct S3 URL without encoding issues for normal filenames', async () => {
       const upload = await payload.create({
+        overrideAccess: true,
         collection: mediaWithDirectAccessSlug,
         data: {},
         filePath: path.resolve(dirname, '../uploads/image.png'),
@@ -286,14 +299,17 @@ describe('@payloadcms/storage-s3', () => {
       await clearTestBucket()
       // Clear database records before each test
       await payload.delete({
+        overrideAccess: true,
         collection: mediaWithPrefixSlug,
         where: {},
       })
       await payload.delete({
+        overrideAccess: true,
         collection: mediaSlug,
         where: {},
       })
       await payload.delete({
+        overrideAccess: true,
         collection: mediaWithAlwaysInsertFieldsSlug,
         where: {},
       })
@@ -304,12 +320,14 @@ describe('@payloadcms/storage-s3', () => {
 
       // Upload twice with same prefix
       const upload1 = await payload.create({
+        overrideAccess: true,
         collection: mediaWithPrefixSlug,
         data: {},
         filePath: imageFile,
       })
 
       const upload2 = await payload.create({
+        overrideAccess: true,
         collection: mediaWithPrefixSlug,
         data: {},
         filePath: imageFile,
@@ -326,12 +344,14 @@ describe('@payloadcms/storage-s3', () => {
 
       // Upload twice to collection without prefix
       const upload1 = await payload.create({
+        overrideAccess: true,
         collection: mediaSlug,
         data: {},
         filePath: imageFile,
       })
 
       const upload2 = await payload.create({
+        overrideAccess: true,
         collection: mediaSlug,
         data: {},
         filePath: imageFile,
@@ -350,6 +370,7 @@ describe('@payloadcms/storage-s3', () => {
 
       // Upload with default prefix from config ('test-prefix')
       const upload1 = await payload.create({
+        overrideAccess: true,
         collection: mediaWithPrefixSlug,
         data: {},
         filePath: imageFile,
@@ -357,6 +378,7 @@ describe('@payloadcms/storage-s3', () => {
 
       // Upload with different prefix
       const upload2 = await payload.create({
+        overrideAccess: true,
         collection: mediaWithPrefixSlug,
         data: {
           prefix: 'different-prefix',
@@ -375,6 +397,7 @@ describe('@payloadcms/storage-s3', () => {
 
       // Tenant A uploads logo.png
       const tenantAUpload = await payload.create({
+        overrideAccess: true,
         collection: mediaWithDynamicPrefixSlug,
         data: { tenant: 'a' },
         filePath: imageFile,
@@ -382,6 +405,7 @@ describe('@payloadcms/storage-s3', () => {
 
       // Tenant B uploads logo.png
       const tenantBUpload = await payload.create({
+        overrideAccess: true,
         collection: mediaWithDynamicPrefixSlug,
         data: { tenant: 'b' },
         filePath: imageFile,

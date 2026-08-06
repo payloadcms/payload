@@ -61,6 +61,7 @@ describe('Select', () => {
     describe('Include mode', () => {
       it('should select only id as default', async () => {
         const res = await payload.findByID({
+          overrideAccess: true,
           id: postId,
           collection: 'posts',
           depth: 0,
@@ -76,6 +77,7 @@ describe('Select', () => {
         const { id } = await createCustomID()
 
         const res = await payload.findByID({
+          overrideAccess: true,
           id,
           collection: 'custom-ids',
           depth: 0,
@@ -89,6 +91,7 @@ describe('Select', () => {
 
       it('should select only number', async () => {
         const res = await payload.findByID({
+          overrideAccess: true,
           id: postId,
           collection: 'posts',
           depth: 0,
@@ -107,6 +110,7 @@ describe('Select', () => {
         const { id, text } = await createCustomID()
 
         const res = await payload.findByID({
+          overrideAccess: true,
           id,
           collection: 'custom-ids',
           depth: 0,
@@ -123,6 +127,7 @@ describe('Select', () => {
 
       it('should select only select', async () => {
         const res = await payload.findByID({
+          overrideAccess: true,
           id: postId,
           collection: 'posts',
           depth: 0,
@@ -139,6 +144,7 @@ describe('Select', () => {
 
       it('should select only hasMany select', async () => {
         const res = await payload.findByID({
+          overrideAccess: true,
           id: postId,
           collection: 'posts',
           depth: 0,
@@ -155,6 +161,7 @@ describe('Select', () => {
 
       it('should select number and text', async () => {
         const res = await payload.findByID({
+          overrideAccess: true,
           id: postId,
           collection: 'posts',
           depth: 0,
@@ -173,6 +180,7 @@ describe('Select', () => {
 
       it('should select relationships', async () => {
         const res_1 = await payload.findByID({
+          overrideAccess: true,
           id: postId,
           collection: 'posts',
           depth: 0,
@@ -187,6 +195,7 @@ describe('Select', () => {
         })
 
         const res_2 = await payload.findByID({
+          overrideAccess: true,
           id: postId,
           collection: 'posts',
           depth: 0,
@@ -201,6 +210,7 @@ describe('Select', () => {
         })
 
         const res_3 = await payload.findByID({
+          overrideAccess: true,
           id: postId,
           collection: 'posts',
           depth: 0,
@@ -217,6 +227,7 @@ describe('Select', () => {
 
       it('should select all the fields inside of group', async () => {
         const res = await payload.findByID({
+          overrideAccess: true,
           id: postId,
           collection: 'posts',
           depth: 0,
@@ -233,6 +244,7 @@ describe('Select', () => {
 
       it('should select text field inside of group', async () => {
         const res = await payload.findByID({
+          overrideAccess: true,
           id: postId,
           collection: 'posts',
           depth: 0,
@@ -253,6 +265,7 @@ describe('Select', () => {
 
       it('should select all the fields inside of named tab', async () => {
         const res = await payload.findByID({
+          overrideAccess: true,
           id: postId,
           collection: 'posts',
           depth: 0,
@@ -269,6 +282,7 @@ describe('Select', () => {
 
       it('should select text field inside of named tab', async () => {
         const res = await payload.findByID({
+          overrideAccess: true,
           id: postId,
           collection: 'posts',
           depth: 0,
@@ -289,6 +303,7 @@ describe('Select', () => {
 
       it('should select text field inside of unnamed tab', async () => {
         const res = await payload.findByID({
+          overrideAccess: true,
           id: postId,
           collection: 'posts',
           depth: 0,
@@ -305,6 +320,7 @@ describe('Select', () => {
 
       it('should select id as default from array', async () => {
         const res = await payload.findByID({
+          overrideAccess: true,
           id: postId,
           collection: 'posts',
           depth: 0,
@@ -321,6 +337,7 @@ describe('Select', () => {
 
       it('should select all the fields inside of array', async () => {
         const res = await payload.findByID({
+          overrideAccess: true,
           id: postId,
           collection: 'posts',
           depth: 0,
@@ -337,6 +354,7 @@ describe('Select', () => {
 
       it('should select text field inside of array', async () => {
         const res = await payload.findByID({
+          overrideAccess: true,
           id: postId,
           collection: 'posts',
           depth: 0,
@@ -358,6 +376,7 @@ describe('Select', () => {
 
       it('should select base fields (id, blockType) inside of blocks', async () => {
         const res = await payload.findByID({
+          overrideAccess: true,
           id: postId,
           collection: 'posts',
           depth: 0,
@@ -374,6 +393,7 @@ describe('Select', () => {
 
       it('should select all the fields inside of blocks', async () => {
         const res = await payload.findByID({
+          overrideAccess: true,
           id: postId,
           collection: 'posts',
           depth: 0,
@@ -390,6 +410,7 @@ describe('Select', () => {
 
       it('should select all the fields inside of specific block', async () => {
         const res = await payload.findByID({
+          overrideAccess: true,
           id: postId,
           collection: 'posts',
           depth: 0,
@@ -415,6 +436,7 @@ describe('Select', () => {
 
       it('should select a specific field inside of specific block', async () => {
         const res = await payload.findByID({
+          overrideAccess: true,
           id: postId,
           collection: 'posts',
           depth: 0,
@@ -444,6 +466,7 @@ describe('Select', () => {
         }
 
         const res = await payload.findByID({
+          overrideAccess: true,
           id: pointId,
           collection: 'points',
           select: { point: true },
@@ -459,6 +482,7 @@ describe('Select', () => {
     describe('Exclude mode', () => {
       it('should exclude only text field', async () => {
         const res = await payload.findByID({
+          overrideAccess: true,
           id: postId,
           collection: 'posts',
           depth: 0,
@@ -478,6 +502,7 @@ describe('Select', () => {
         const { id, createdAt, updatedAt } = await createCustomID()
 
         const res = await payload.findByID({
+          overrideAccess: true,
           id,
           collection: 'custom-ids',
           depth: 0,
@@ -495,6 +520,7 @@ describe('Select', () => {
 
       it('should exclude number', async () => {
         const res = await payload.findByID({
+          overrideAccess: true,
           id: postId,
           collection: 'posts',
           depth: 0,
@@ -512,6 +538,7 @@ describe('Select', () => {
 
       it('should exclude select', async () => {
         const res = await payload.findByID({
+          overrideAccess: true,
           id: postId,
           collection: 'posts',
           depth: 0,
@@ -529,6 +556,7 @@ describe('Select', () => {
 
       it('should exclude hasMany select', async () => {
         const res = await payload.findByID({
+          overrideAccess: true,
           id: postId,
           collection: 'posts',
           depth: 0,
@@ -546,6 +574,7 @@ describe('Select', () => {
 
       it('should exclude number and text', async () => {
         const res = await payload.findByID({
+          overrideAccess: true,
           id: postId,
           collection: 'posts',
           depth: 0,
@@ -565,6 +594,7 @@ describe('Select', () => {
 
       it('should exclude relationships', async () => {
         const res = await payload.findByID({
+          overrideAccess: true,
           id: postId,
           collection: 'posts',
           depth: 0,
@@ -588,6 +618,7 @@ describe('Select', () => {
 
       it('should exclude group', async () => {
         const res = await payload.findByID({
+          overrideAccess: true,
           id: postId,
           collection: 'posts',
           depth: 0,
@@ -605,6 +636,7 @@ describe('Select', () => {
 
       it('should exclude text field inside of group', async () => {
         const res = await payload.findByID({
+          overrideAccess: true,
           id: postId,
           collection: 'posts',
           depth: 0,
@@ -624,6 +656,7 @@ describe('Select', () => {
 
       it('should exclude array', async () => {
         const res = await payload.findByID({
+          overrideAccess: true,
           id: postId,
           collection: 'posts',
           depth: 0,
@@ -641,6 +674,7 @@ describe('Select', () => {
 
       it('should exclude text field inside of array', async () => {
         const res = await payload.findByID({
+          overrideAccess: true,
           id: postId,
           collection: 'posts',
           depth: 0,
@@ -662,6 +696,7 @@ describe('Select', () => {
 
       it('should exclude blocks', async () => {
         const res = await payload.findByID({
+          overrideAccess: true,
           id: postId,
           collection: 'posts',
           depth: 0,
@@ -679,6 +714,7 @@ describe('Select', () => {
 
       it('should exclude all the fields inside of specific block while keeping base fields', async () => {
         const res = await payload.findByID({
+          overrideAccess: true,
           id: postId,
           collection: 'posts',
           depth: 0,
@@ -699,6 +735,7 @@ describe('Select', () => {
 
       it('should exclude a specific field inside of specific block', async () => {
         const res = await payload.findByID({
+          overrideAccess: true,
           id: postId,
           collection: 'posts',
           depth: 0,
@@ -727,6 +764,7 @@ describe('Select', () => {
           return
         }
         const res = await payload.findByID({
+          overrideAccess: true,
           id: pointId,
           collection: 'points',
           select: { point: false },
@@ -753,6 +791,7 @@ describe('Select', () => {
     describe('Include mode', () => {
       it('should select only id as default', async () => {
         const res = await payload.findByID({
+          overrideAccess: true,
           id: postId,
           collection: 'localized-posts',
           select: {},
@@ -765,6 +804,7 @@ describe('Select', () => {
 
       it('should select only number', async () => {
         const res = await payload.findByID({
+          overrideAccess: true,
           id: postId,
           collection: 'localized-posts',
           select: {
@@ -780,6 +820,7 @@ describe('Select', () => {
 
       it('should select only select', async () => {
         const res = await payload.findByID({
+          overrideAccess: true,
           id: postId,
           collection: 'localized-posts',
           select: {
@@ -795,6 +836,7 @@ describe('Select', () => {
 
       it('should select only hasMany select', async () => {
         const res = await payload.findByID({
+          overrideAccess: true,
           id: postId,
           collection: 'localized-posts',
           select: {
@@ -810,6 +852,7 @@ describe('Select', () => {
 
       it('should select number and text', async () => {
         const res = await payload.findByID({
+          overrideAccess: true,
           id: postId,
           collection: 'localized-posts',
           select: {
@@ -827,6 +870,7 @@ describe('Select', () => {
 
       it('should select all the fields inside of group', async () => {
         const res = await payload.findByID({
+          overrideAccess: true,
           id: postId,
           collection: 'localized-posts',
           select: {
@@ -842,6 +886,7 @@ describe('Select', () => {
 
       it('should select text field inside of group', async () => {
         const res = await payload.findByID({
+          overrideAccess: true,
           id: postId,
           collection: 'localized-posts',
           select: {
@@ -861,6 +906,7 @@ describe('Select', () => {
 
       it('should select localized text field inside of group', async () => {
         const res = await payload.findByID({
+          overrideAccess: true,
           id: postId,
           collection: 'localized-posts',
           select: {
@@ -880,6 +926,7 @@ describe('Select', () => {
 
       it('should select id as default from array', async () => {
         const res = await payload.findByID({
+          overrideAccess: true,
           id: postId,
           collection: 'localized-posts',
           select: {
@@ -895,6 +942,7 @@ describe('Select', () => {
 
       it('should select all the fields inside of array', async () => {
         const res = await payload.findByID({
+          overrideAccess: true,
           id: postId,
           collection: 'localized-posts',
           select: {
@@ -910,6 +958,7 @@ describe('Select', () => {
 
       it('should select text field inside of localized array', async () => {
         const res = await payload.findByID({
+          overrideAccess: true,
           id: postId,
           collection: 'localized-posts',
           select: {
@@ -930,6 +979,7 @@ describe('Select', () => {
 
       it('should select localized text field inside of array', async () => {
         const res = await payload.findByID({
+          overrideAccess: true,
           id: postId,
           collection: 'localized-posts',
           select: {
@@ -950,6 +1000,7 @@ describe('Select', () => {
 
       it('should select base fields (id, blockType) inside of blocks', async () => {
         const res = await payload.findByID({
+          overrideAccess: true,
           id: postId,
           collection: 'localized-posts',
           select: {
@@ -965,6 +1016,7 @@ describe('Select', () => {
 
       it('should select all the fields inside of blocks', async () => {
         const res = await payload.findByID({
+          overrideAccess: true,
           id: postId,
           collection: 'localized-posts',
           select: {
@@ -980,6 +1032,7 @@ describe('Select', () => {
 
       it('should select all the fields inside of specific block', async () => {
         const res = await payload.findByID({
+          overrideAccess: true,
           id: postId,
           collection: 'localized-posts',
           select: {
@@ -1004,6 +1057,7 @@ describe('Select', () => {
 
       it('should select a specific field inside of specific block', async () => {
         const res = await payload.findByID({
+          overrideAccess: true,
           id: postId,
           collection: 'localized-posts',
           select: {
@@ -1028,6 +1082,7 @@ describe('Select', () => {
 
       it('should select a specific localized field inside of specific block 1', async () => {
         const res = await payload.findByID({
+          overrideAccess: true,
           id: postId,
           collection: 'localized-posts',
           select: {
@@ -1052,6 +1107,7 @@ describe('Select', () => {
 
       it('should select a specific localized field inside of specific block 2', async () => {
         const res = await payload.findByID({
+          overrideAccess: true,
           id: postId,
           collection: 'localized-posts',
           select: {
@@ -1078,6 +1134,7 @@ describe('Select', () => {
     describe('Exclude mode', () => {
       it('should exclude only text field', async () => {
         const res = await payload.findByID({
+          overrideAccess: true,
           id: postId,
           collection: 'localized-posts',
           select: {
@@ -1094,6 +1151,7 @@ describe('Select', () => {
 
       it('should exclude number', async () => {
         const res = await payload.findByID({
+          overrideAccess: true,
           id: postId,
           collection: 'localized-posts',
           select: {
@@ -1110,6 +1168,7 @@ describe('Select', () => {
 
       it('should exclude select', async () => {
         const res = await payload.findByID({
+          overrideAccess: true,
           id: postId,
           collection: 'localized-posts',
           select: {
@@ -1126,6 +1185,7 @@ describe('Select', () => {
 
       it('should exclude hasMany select', async () => {
         const res = await payload.findByID({
+          overrideAccess: true,
           id: postId,
           collection: 'localized-posts',
           select: {
@@ -1142,6 +1202,7 @@ describe('Select', () => {
 
       it('should exclude number and text', async () => {
         const res = await payload.findByID({
+          overrideAccess: true,
           id: postId,
           collection: 'localized-posts',
           select: {
@@ -1160,6 +1221,7 @@ describe('Select', () => {
 
       it('should exclude group', async () => {
         const res = await payload.findByID({
+          overrideAccess: true,
           id: postId,
           collection: 'localized-posts',
           select: {
@@ -1176,6 +1238,7 @@ describe('Select', () => {
 
       it('should exclude text field inside of group', async () => {
         const res = await payload.findByID({
+          overrideAccess: true,
           id: postId,
           collection: 'localized-posts',
           select: {
@@ -1194,6 +1257,7 @@ describe('Select', () => {
 
       it('should exclude localized text field inside of group', async () => {
         const res = await payload.findByID({
+          overrideAccess: true,
           id: postId,
           collection: 'localized-posts',
           select: {
@@ -1212,6 +1276,7 @@ describe('Select', () => {
 
       it('should exclude array', async () => {
         const res = await payload.findByID({
+          overrideAccess: true,
           id: postId,
           collection: 'localized-posts',
           select: {
@@ -1228,6 +1293,7 @@ describe('Select', () => {
 
       it('should exclude text field inside of array', async () => {
         const res = await payload.findByID({
+          overrideAccess: true,
           id: postId,
           collection: 'localized-posts',
           select: {
@@ -1248,6 +1314,7 @@ describe('Select', () => {
 
       it('should exclude localized text field inside of array', async () => {
         const res = await payload.findByID({
+          overrideAccess: true,
           id: postId,
           collection: 'localized-posts',
           select: {
@@ -1268,6 +1335,7 @@ describe('Select', () => {
 
       it('should exclude blocks', async () => {
         const res = await payload.findByID({
+          overrideAccess: true,
           id: postId,
           collection: 'localized-posts',
           select: {
@@ -1284,6 +1352,7 @@ describe('Select', () => {
 
       it('should exclude all the fields inside of specific block while keeping base fields', async () => {
         const res = await payload.findByID({
+          overrideAccess: true,
           id: postId,
           collection: 'localized-posts',
           select: {
@@ -1303,6 +1372,7 @@ describe('Select', () => {
 
       it('should exclude a specific field inside of specific block', async () => {
         const res = await payload.findByID({
+          overrideAccess: true,
           id: postId,
           collection: 'localized-posts',
           select: {
@@ -1327,6 +1397,7 @@ describe('Select', () => {
 
       it('should exclude a specific localized field inside of specific block 1', async () => {
         const res = await payload.findByID({
+          overrideAccess: true,
           id: postId,
           collection: 'localized-posts',
           select: {
@@ -1351,6 +1422,7 @@ describe('Select', () => {
 
       it('should exclude a specific localized field inside of specific block 2', async () => {
         const res = await payload.findByID({
+          overrideAccess: true,
           id: postId,
           collection: 'localized-posts',
           select: {
@@ -1386,6 +1458,7 @@ describe('Select', () => {
 
     it('should select deply group.array.group.text', async () => {
       const res = await payload.findByID({
+        overrideAccess: true,
         id: postId,
         collection: 'deep-posts',
         select: { group: { array: { group: { text: true } } } },
@@ -1406,6 +1479,7 @@ describe('Select', () => {
 
     it('should select deply group.array.group.*', async () => {
       const res = await payload.findByID({
+        overrideAccess: true,
         id: postId,
         collection: 'deep-posts',
         select: { group: { array: { group: true } } },
@@ -1424,6 +1498,7 @@ describe('Select', () => {
 
     it('should select deply group.blocks.block.text', async () => {
       const res = await payload.findByID({
+        overrideAccess: true,
         id: postId,
         collection: 'deep-posts',
         select: { group: { blocks: { block: { text: true } } } },
@@ -1443,6 +1518,7 @@ describe('Select', () => {
 
     it('should select deply array.array.text', async () => {
       const res = await payload.findByID({
+        overrideAccess: true,
         id: postId,
         collection: 'deep-posts',
         select: { arrayTop: { arrayNested: { text: true } } },
@@ -1472,6 +1548,7 @@ describe('Select', () => {
 
     it('should select only id as default', async () => {
       const res = await payload.findByID({
+        overrideAccess: true,
         id: postId,
         collection: 'versioned-posts',
         draft: true,
@@ -1485,6 +1562,7 @@ describe('Select', () => {
 
     it('should select only number', async () => {
       const res = await payload.findByID({
+        overrideAccess: true,
         id: postId,
         collection: 'versioned-posts',
         draft: true,
@@ -1501,6 +1579,7 @@ describe('Select', () => {
 
     it('should exclude only number', async () => {
       const res = await payload.findByID({
+        overrideAccess: true,
         id: postId,
         collection: 'versioned-posts',
         draft: true,
@@ -1517,6 +1596,7 @@ describe('Select', () => {
 
     it('should select number and text', async () => {
       const res = await payload.findByID({
+        overrideAccess: true,
         id: postId,
         collection: 'versioned-posts',
         draft: true,
@@ -1535,6 +1615,7 @@ describe('Select', () => {
 
     it('payload.find should select number and text', async () => {
       const res = await payload.find({
+        overrideAccess: true,
         collection: 'versioned-posts',
         draft: true,
         select: {
@@ -1557,6 +1638,7 @@ describe('Select', () => {
 
     it('should select base id field inside of array', async () => {
       const res = await payload.find({
+        overrideAccess: true,
         collection: 'versioned-posts',
         draft: true,
         select: {
@@ -1577,6 +1659,7 @@ describe('Select', () => {
 
     it('should select base id field inside of blocks', async () => {
       const res = await payload.find({
+        overrideAccess: true,
         collection: 'versioned-posts',
         draft: true,
         select: {
@@ -1597,6 +1680,7 @@ describe('Select', () => {
 
     it('should select with payload.findVersions', async () => {
       const res = await payload.findVersions({
+        overrideAccess: true,
         collection: 'versioned-posts',
         limit: 1,
         select: {
@@ -1624,12 +1708,14 @@ describe('Select', () => {
 
     it('should return a latest version with findByID and draft: true', async () => {
       const doc = await payload.create({
+        overrideAccess: true,
         collection: 'versioned-posts',
         data: { _status: 'draft', text: 'draft-post' },
         draft: true,
       })
 
       const res = await payload.findByID({
+        overrideAccess: true,
         id: doc.id,
         collection: 'versioned-posts',
         draft: true,
@@ -1637,12 +1723,14 @@ describe('Select', () => {
       })
       expect(res.text).toBe('draft-post')
       await payload.update({
+        overrideAccess: true,
         id: doc.id,
         collection: 'versioned-posts',
         data: { _status: 'published', text: 'published' },
       })
 
       const res_2 = await payload.findByID({
+        overrideAccess: true,
         id: doc.id,
         collection: 'versioned-posts',
         draft: true,
@@ -1658,6 +1746,7 @@ describe('Select', () => {
     it('should create versions with complete data when updating with select', async () => {
       // First, update the post with select to only return the id field
       const updatedPost = await payload.update({
+        overrideAccess: true,
         id: postId,
         collection: 'versioned-posts',
         data: {
@@ -1674,6 +1763,7 @@ describe('Select', () => {
 
       // However, the created version should contain the complete document
       const versions = await payload.findVersions({
+        overrideAccess: true,
         collection: 'versioned-posts',
         limit: 1,
         sort: '-updatedAt',
@@ -1695,6 +1785,7 @@ describe('Select', () => {
     let globalPost: GlobalPost
     beforeAll(async () => {
       globalPost = await payload.updateGlobal({
+        overrideAccess: true,
         slug: 'global-post',
         data: {
           number: 2,
@@ -1705,6 +1796,7 @@ describe('Select', () => {
 
     it('should select with find', async () => {
       const res = await payload.findGlobal({
+        overrideAccess: true,
         slug: 'global-post',
         select: {
           text: true,
@@ -1719,6 +1811,7 @@ describe('Select', () => {
 
     it('should select with update', async () => {
       const res = await payload.updateGlobal({
+        overrideAccess: true,
         slug: 'global-post',
         data: {},
         select: {
@@ -1736,6 +1829,7 @@ describe('Select', () => {
   describe('Local API - operations', () => {
     it('should apply select with create', async () => {
       const res = await payload.create({
+        overrideAccess: true,
         collection: 'posts',
         data: {
           number: 123,
@@ -1756,6 +1850,7 @@ describe('Select', () => {
       const post = await createPost()
 
       const res = await payload.update({
+        overrideAccess: true,
         id: post.id,
         collection: 'posts',
         data: {},
@@ -1772,6 +1867,7 @@ describe('Select', () => {
       const post = await createPost()
 
       const res = await payload.update({
+        overrideAccess: true,
         collection: 'posts',
         data: {},
         select: { text: true },
@@ -1794,6 +1890,7 @@ describe('Select', () => {
       const post = await createPost()
 
       const res = await payload.delete({
+        overrideAccess: true,
         id: post.id,
         collection: 'posts',
         select: { text: true },
@@ -1809,6 +1906,7 @@ describe('Select', () => {
       const post = await createPost()
 
       const res = await payload.delete({
+        overrideAccess: true,
         collection: 'posts',
         select: { text: true },
         where: {
@@ -1830,6 +1928,7 @@ describe('Select', () => {
       const post = await createPost()
 
       const res = await payload.duplicate({
+        overrideAccess: true,
         id: post.id,
         collection: 'posts',
         select: { text: true },
@@ -2091,6 +2190,7 @@ describe('Select', () => {
     let expectedHomePageOverride: { additional: string; id: number | string }
     beforeAll(async () => {
       homePage = await payload.create({
+        overrideAccess: true,
         collection: 'pages',
         data: {
           slug: 'home',
@@ -2132,6 +2232,7 @@ describe('Select', () => {
       }
       expectedHomePageOverride = { id: homePage.id, additional: homePage.additional! }
       aboutPage = await payload.create({
+        overrideAccess: true,
         collection: 'pages',
         data: {
           slug: 'about',
@@ -2180,7 +2281,12 @@ describe('Select', () => {
     })
 
     it('local API - should populate with the defaultPopulate select shape', async () => {
-      const result = await payload.findByID({ id: aboutPage.id, collection: 'pages', depth: 1 })
+      const result = await payload.findByID({
+        overrideAccess: true,
+        id: aboutPage.id,
+        collection: 'pages',
+        depth: 1,
+      })
 
       const block = result.content![0]!
 
@@ -2291,10 +2397,15 @@ describe('Select', () => {
 
     it('graphQL - should return relationship fields when using select flag', async () => {
       // Create a related document first
-      const rel = await payload.create({ collection: 'rels', data: { text: 'graphql-rel-test' } })
+      const rel = await payload.create({
+        overrideAccess: true,
+        collection: 'rels',
+        data: { text: 'graphql-rel-test' },
+      })
 
       // Create a post with the relationship
       const testPost = await payload.create({
+        overrideAccess: true,
         collection: 'posts',
         data: {
           hasMany: [rel.id],
@@ -2348,16 +2459,21 @@ describe('Select', () => {
       expect(doc.hasMany[0].text).toBe('graphql-rel-test')
 
       // Cleanup
-      await payload.delete({ id: testPost.id, collection: 'posts' })
-      await payload.delete({ id: rel.id, collection: 'rels' })
+      await payload.delete({ overrideAccess: true, id: testPost.id, collection: 'posts' })
+      await payload.delete({ overrideAccess: true, id: rel.id, collection: 'rels' })
     })
 
     it('graphQL - should return polymorphic relationship fields when using select flag', async () => {
       // Create a related document
-      const rel = await payload.create({ collection: 'rels', data: { text: 'graphql-poly-test' } })
+      const rel = await payload.create({
+        overrideAccess: true,
+        collection: 'rels',
+        data: { text: 'graphql-poly-test' },
+      })
 
       // Create a post with polymorphic relationships
       const testPost = await payload.create({
+        overrideAccess: true,
         collection: 'posts',
         data: {
           hasManyPoly: [{ relationTo: 'rels', value: rel.id }],
@@ -2423,12 +2539,13 @@ describe('Select', () => {
       expect(doc.hasManyPoly[0].value.text).toBe('graphql-poly-test')
 
       // Cleanup
-      await payload.delete({ id: testPost.id, collection: 'posts' })
-      await payload.delete({ id: rel.id, collection: 'rels' })
+      await payload.delete({ overrideAccess: true, id: testPost.id, collection: 'posts' })
+      await payload.delete({ overrideAccess: true, id: rel.id, collection: 'rels' })
     })
 
     it('local API - should populate and override defaultSelect select shape from the populate arg', async () => {
       const result = await payload.findByID({
+        overrideAccess: true,
         id: aboutPage.id,
         collection: 'pages',
         depth: 1,
@@ -2442,6 +2559,7 @@ describe('Select', () => {
       const {
         docs: [resultFind],
       } = await payload.find({
+        overrideAccess: true,
         collection: 'pages',
         depth: 1,
         populate: {
@@ -2524,18 +2642,22 @@ describe('Select', () => {
 
     it('should apply populate on depth 2', async () => {
       const page_1 = await payload.create({
+        overrideAccess: true,
         collection: 'pages',
         data: { slug: 'page-1', blocks: [{ blockType: 'some' }], relatedPage: null },
       })
       const page_2 = await payload.create({
+        overrideAccess: true,
         collection: 'pages',
         data: { slug: 'page-2', relatedPage: page_1.id },
       })
       const page_3 = await payload.create({
+        overrideAccess: true,
         collection: 'pages',
         data: { slug: 'page-3', relatedPage: page_2.id },
       })
       const result = await payload.findByID({
+        overrideAccess: true,
         id: page_3.id,
         collection: 'pages',
         depth: 3,
@@ -2555,12 +2677,14 @@ describe('Select', () => {
 
   it('should auto-select field2 when caller selects field1 on collections', async () => {
     const { id } = await payload.create({
+      overrideAccess: true,
       collection: 'force-select',
       data: { field1: 'one', field2: 'two', text: 'control' },
     })
 
     // Caller selects `field1` → hook auto-selects `field2`.
     const augmented = await payload.findByID({
+      overrideAccess: true,
       id,
       collection: 'force-select',
       select: { field1: true },
@@ -2574,6 +2698,7 @@ describe('Select', () => {
 
     // Caller selects `text` (not field1) → hook returns args unchanged, `field2` excluded.
     const notAugmented = await payload.findByID({
+      overrideAccess: true,
       id,
       collection: 'force-select',
       select: { text: true },
@@ -2584,16 +2709,18 @@ describe('Select', () => {
       text: 'control',
     })
 
-    await payload.delete({ id, collection: 'force-select' })
+    await payload.delete({ overrideAccess: true, id, collection: 'force-select' })
   })
 
   it('should auto-select field2 when caller selects field1 on globals', async () => {
     const { id } = await payload.updateGlobal({
+      overrideAccess: true,
       slug: 'force-select-global',
       data: { field1: 'one', field2: 'two', text: 'control' },
     })
 
     const augmented = await payload.findGlobal({
+      overrideAccess: true,
       slug: 'force-select-global',
       select: { field1: true },
     })
@@ -2622,18 +2749,20 @@ describe('Select', () => {
 
     try {
       const created = await payload.create({
+        overrideAccess: true,
         collection: 'force-select',
         data: { field1: 'a', field2: 'b' },
         select: { field1: true },
       })
 
       await payload.findByID({
+        overrideAccess: true,
         id: created.id,
         collection: 'force-select',
         select: { field1: true },
       })
 
-      await payload.delete({ id: created.id, collection: 'force-select' })
+      await payload.delete({ overrideAccess: true, id: created.id, collection: 'force-select' })
 
       const operations = calls.map((c) => c.operation)
       expect(operations).toContain('create')
@@ -2648,8 +2777,13 @@ describe('Select', () => {
   })
 
   it('should properly return relationships when using select on block with depth 0', async () => {
-    const rel_1 = await payload.create({ collection: 'rels', data: { text: 'rel-1' } })
+    const rel_1 = await payload.create({
+      overrideAccess: true,
+      collection: 'rels',
+      data: { text: 'rel-1' },
+    })
     const doc = await payload.create({
+      overrideAccess: true,
       collection: 'relationships-blocks',
       data: {
         blocks: [
@@ -2662,6 +2796,7 @@ describe('Select', () => {
       },
     })
     const result = await payload.findByID({
+      overrideAccess: true,
       id: doc.id,
       collection: 'relationships-blocks',
       depth: 0,
@@ -2673,8 +2808,13 @@ describe('Select', () => {
   })
 
   it('should populate relationships when using select on block', async () => {
-    const rel_1 = await payload.create({ collection: 'rels', data: { text: 'rel-1' } })
+    const rel_1 = await payload.create({
+      overrideAccess: true,
+      collection: 'rels',
+      data: { text: 'rel-1' },
+    })
     const doc = await payload.create({
+      overrideAccess: true,
       collection: 'relationships-blocks',
       data: {
         blocks: [
@@ -2688,6 +2828,7 @@ describe('Select', () => {
     })
 
     const result = await payload.findByID({
+      overrideAccess: true,
       id: doc.id,
       collection: 'relationships-blocks',
       depth: 1,
@@ -2701,18 +2842,21 @@ describe('Select', () => {
 
 async function createPost() {
   const upload = await payload.create({
+    overrideAccess: true,
     collection: 'upload',
     data: {},
     filePath: path.resolve(dirname, 'image.jpg'),
   })
 
   const relation = await payload.create({
+    overrideAccess: true,
     collection: 'rels',
     data: {},
     depth: 0,
   })
 
   return payload.create({
+    overrideAccess: true,
     collection: 'posts',
     data: {
       array: [
@@ -2759,6 +2903,7 @@ async function createPost() {
 
 function createLocalizedPost() {
   return payload.create({
+    overrideAccess: true,
     collection: 'localized-posts',
     data: {
       array: [
@@ -2816,6 +2961,7 @@ function createLocalizedPost() {
 
 function createDeepPost() {
   return payload.create({
+    overrideAccess: true,
     collection: 'deep-posts',
     data: {
       arrayTop: [{ arrayNested: [{ number: 34, text: 'text2' }], text: 'text1' }],
@@ -2829,6 +2975,7 @@ function createDeepPost() {
 
 function createVersionedPost() {
   return payload.create({
+    overrideAccess: true,
     collection: 'versioned-posts',
     data: {
       array: [{ text: 'hello' }],
@@ -2840,11 +2987,19 @@ function createVersionedPost() {
 }
 
 function createPoint() {
-  return payload.create({ collection: 'points', data: { point: [10, 20], text: 'some' } })
+  return payload.create({
+    overrideAccess: true,
+    collection: 'points',
+    data: { point: [10, 20], text: 'some' },
+  })
 }
 
 let id = 1
 
 function createCustomID() {
-  return payload.create({ collection: 'custom-ids', data: { id: id++, text: randomUUID() } })
+  return payload.create({
+    overrideAccess: true,
+    collection: 'custom-ids',
+    data: { id: id++, text: randomUUID() },
+  })
 }

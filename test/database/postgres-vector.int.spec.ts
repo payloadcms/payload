@@ -79,6 +79,7 @@ describePostgres('postgres vector custom column', () => {
     const catEmbedding = [1.5, -0.4, 7.2, 19.6, 20.2]
 
     await payload.create({
+      overrideAccess: true,
       collection: 'posts',
       data: {
         embedding: [-5.2, 3.1, 0.2, 8.1, 3.5],
@@ -87,6 +88,7 @@ describePostgres('postgres vector custom column', () => {
     })
 
     await payload.create({
+      overrideAccess: true,
       collection: 'posts',
       data: {
         embedding: catEmbedding,
@@ -95,6 +97,7 @@ describePostgres('postgres vector custom column', () => {
     })
 
     await payload.create({
+      overrideAccess: true,
       collection: 'posts',
       data: {
         embedding: [-5.1, 2.9, 0.8, 7.9, 3.1],
@@ -103,6 +106,7 @@ describePostgres('postgres vector custom column', () => {
     })
 
     await payload.create({
+      overrideAccess: true,
       collection: 'posts',
       data: {
         embedding: [1.7, -0.3, 6.9, 19.1, 21.1],
@@ -201,6 +205,7 @@ describePostgres('postgres vector custom column', () => {
     const catEmbedding = '{1:1,3:2,5:3}/5'
 
     await payload.create({
+      overrideAccess: true,
       collection: 'posts',
       data: {
         embedding: '{2:1,4:2}/5',
@@ -209,6 +214,7 @@ describePostgres('postgres vector custom column', () => {
     })
 
     await payload.create({
+      overrideAccess: true,
       collection: 'posts',
       data: {
         embedding: catEmbedding,
@@ -217,6 +223,7 @@ describePostgres('postgres vector custom column', () => {
     })
 
     await payload.create({
+      overrideAccess: true,
       collection: 'posts',
       data: {
         embedding: '{2:4,4:6}/5',
@@ -225,6 +232,7 @@ describePostgres('postgres vector custom column', () => {
     })
 
     await payload.create({
+      overrideAccess: true,
       collection: 'posts',
       data: {
         embedding: '{1:1,3:2,5:2}/5',
@@ -313,6 +321,7 @@ describePostgres('postgres vector custom column', () => {
     const catEmbedding = '10101'
 
     await payload.create({
+      overrideAccess: true,
       collection: 'posts',
       data: {
         embedding: '01010',
@@ -321,6 +330,7 @@ describePostgres('postgres vector custom column', () => {
     })
 
     await payload.create({
+      overrideAccess: true,
       collection: 'posts',
       data: {
         embedding: '10101',
@@ -329,6 +339,7 @@ describePostgres('postgres vector custom column', () => {
     })
 
     await payload.create({
+      overrideAccess: true,
       collection: 'posts',
       data: {
         embedding: '11111',
@@ -337,6 +348,7 @@ describePostgres('postgres vector custom column', () => {
     })
 
     await payload.create({
+      overrideAccess: true,
       collection: 'posts',
       data: {
         embedding: '10100',

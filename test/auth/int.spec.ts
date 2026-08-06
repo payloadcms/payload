@@ -207,6 +207,7 @@ describe('Auth', () => {
       const originalArrayData = [{ info: 'original-value-1' }, { info: 'original-value-2' }]
 
       const testUser = await payload.create({
+        overrideAccess: true,
         collection: slug,
         data: {
           email: testEmail,
@@ -217,6 +218,7 @@ describe('Auth', () => {
       })
 
       const userBefore: any = await payload.findByID({
+        overrideAccess: true,
         id: testUser.id,
         collection: slug,
       })
@@ -253,6 +255,7 @@ describe('Auth', () => {
       }
 
       const userAfter: any = await payload.findByID({
+        overrideAccess: true,
         id: testUser.id,
         collection: slug,
       })
@@ -265,6 +268,7 @@ describe('Auth', () => {
 
       // Clean up
       await payload.delete({
+        overrideAccess: true,
         id: testUser.id,
         collection: slug,
       })
@@ -289,6 +293,7 @@ describe('Auth', () => {
 
       it('should allow a user to change password without returning password', async () => {
         const result = await payload.update({
+          overrideAccess: true,
           id: loggedInUser.id,
           collection: slug,
           data: {
@@ -391,6 +396,7 @@ describe('Auth', () => {
         const apiKey = '0123456789ABCDEFGH'
 
         const user = await payload.create({
+          overrideAccess: true,
           collection: slug,
           data: {
             apiKey,
@@ -443,6 +449,7 @@ describe('Auth', () => {
         expect(loggedInUser?.custom).toBe('Hello, world!')
 
         await payload.update({
+          overrideAccess: true,
           id: loggedInUser?.id || '',
           collection: slug,
           data: {
@@ -465,10 +472,12 @@ describe('Auth', () => {
       it('keeps apiKey encrypted in DB after refresh operation', async () => {
         const apiKey = '987e6543-e21b-12d3-a456-426614174999'
         const user = await payload.create({
+          overrideAccess: true,
           collection: slug,
           data: { apiKey, email: 'user@example.com', enableAPIKey: true, password: 'Password123' },
         })
         const { token } = await payload.login({
+          overrideAccess: true,
           collection: 'users',
           data: { email: 'user@example.com', password: 'Password123' },
         })
@@ -485,6 +494,7 @@ describe('Auth', () => {
 
       it('returns a user with decrypted apiKey after refresh', async () => {
         const { token } = await payload.login({
+          overrideAccess: true,
           collection: 'users',
           data: { email: 'user@example.com', password: 'Password123' },
         })
@@ -539,6 +549,7 @@ describe('Auth', () => {
         expect(response.status).toBe(201)
 
         const userResult = await payload.find({
+          overrideAccess: true,
           collection: publicUsersSlug,
           limit: 1,
           showHiddenFields: true,
@@ -561,6 +572,7 @@ describe('Auth', () => {
         expect(verificationResponse.status).toBe(200)
 
         const afterVerifyResult = await payload.find({
+          overrideAccess: true,
           collection: publicUsersSlug,
           limit: 1,
           showHiddenFields: true,
@@ -623,6 +635,7 @@ describe('Auth', () => {
           data = await response.json()
 
           const result = await payload.find({
+            overrideAccess: true,
             collection: 'payload-preferences',
             depth: 0,
             where: {
@@ -670,6 +683,7 @@ describe('Auth', () => {
           })
 
           const result = await payload.find({
+            overrideAccess: true,
             collection: 'payload-preferences',
             depth: 0,
             where: {
@@ -706,6 +720,7 @@ describe('Auth', () => {
           data = await response.json()
 
           const result = await payload.find({
+            overrideAccess: true,
             collection: 'payload-preferences',
             depth: 0,
             where: {
@@ -754,6 +769,7 @@ describe('Auth', () => {
           publicUserId = (await userRes.json()).doc.id
 
           const user = await payload.findByID({
+            overrideAccess: true,
             collection: publicUsersSlug,
             id: publicUserId,
             showHiddenFields: true,
@@ -777,11 +793,15 @@ describe('Auth', () => {
         afterAll(async () => {
           await Promise.all(
             createdIDs.map((id) =>
-              payload.delete({ collection: 'payload-preferences', id }).catch(() => {}),
+              payload
+                .delete({ overrideAccess: true, collection: 'payload-preferences', id })
+                .catch(() => {}),
             ),
           )
           if (publicUserId) {
-            await payload.delete({ collection: publicUsersSlug, id: publicUserId }).catch(() => {})
+            await payload
+              .delete({ overrideAccess: true, collection: publicUsersSlug, id: publicUserId })
+              .catch(() => {})
           }
         })
 
@@ -798,6 +818,7 @@ describe('Auth', () => {
 
         it('should not delete other collection preferences via REST', async () => {
           const before = await payload.find({
+            overrideAccess: true,
             collection: 'payload-preferences',
             where: { 'user.relationTo': { equals: 'users' } },
           })
@@ -808,6 +829,7 @@ describe('Auth', () => {
           })
 
           const after = await payload.find({
+            overrideAccess: true,
             collection: 'payload-preferences',
             where: { 'user.relationTo': { equals: 'users' } },
           })
@@ -817,12 +839,14 @@ describe('Auth', () => {
 
         it('should isolate preferences by user ID and collection', async () => {
           const publicPrefs = await payload.find({
+            overrideAccess: true,
             collection: 'payload-preferences',
             where: { 'user.relationTo': { equals: publicUsersSlug } },
           })
           expect(publicPrefs.docs).toHaveLength(1)
 
           const adminPrefs = await payload.find({
+            overrideAccess: true,
             collection: 'payload-preferences',
             where: { 'user.relationTo': { equals: 'users' } },
           })
@@ -901,6 +925,7 @@ describe('Auth', () => {
           expect(user3.errors[0].message).toBe(lockedMessage)
 
           const userResult = await payload.find({
+            overrideAccess: true,
             collection: slug,
             limit: 1,
             showHiddenFields: true,
@@ -942,6 +967,7 @@ describe('Auth', () => {
           )
 
           const userResult = await payload.find({
+            overrideAccess: true,
             collection: slug,
             limit: 1,
             showHiddenFields: true,
@@ -1027,6 +1053,7 @@ describe('Auth', () => {
           expect(loginAfterLimit.errors.length).toBeGreaterThan(0)
 
           const lockedUser = await payload.find({
+            overrideAccess: true,
             collection: slug,
             showHiddenFields: true,
             where: {
@@ -1049,6 +1076,7 @@ describe('Auth', () => {
           })
 
           const userAfterUpdate = await payload.findByID({
+            overrideAccess: true,
             collection: slug,
             id: lockedUser.docs[0]!.id,
             showHiddenFields: true,
@@ -1068,6 +1096,7 @@ describe('Auth', () => {
           })
 
           const userResult = await payload.find({
+            overrideAccess: true,
             collection: slug,
             limit: 1,
             showHiddenFields: true,
@@ -1100,6 +1129,7 @@ describe('Auth', () => {
 
     it('should allow reset password', async () => {
       const token = await payload.forgotPassword({
+        overrideAccess: true,
         collection: 'users',
         data: {
           email: devUser.email,
@@ -1123,6 +1153,7 @@ describe('Auth', () => {
 
     it('should enforce access control on the me route', async () => {
       const user = await payload.create({
+        overrideAccess: true,
         collection: slug,
         data: {
           adminOnlyField: 'admin secret',
@@ -1151,6 +1182,7 @@ describe('Auth', () => {
       expect(adminMe.user.adminOnlyField).toEqual('admin secret')
 
       await payload.update({
+        overrideAccess: true,
         id: user?.id || '',
         collection: slug,
         data: {
@@ -1192,6 +1224,7 @@ describe('Auth', () => {
     it('should allow create of a user with disableLocalStrategy', async () => {
       const email = 'test@example.com'
       const user = await payload.create({
+        overrideAccess: true,
         collection: partialDisableLocalStrategiesSlug,
         data: {
           email,
@@ -1223,6 +1256,7 @@ describe('Auth', () => {
 
     it('should prevent login of user with disableLocalStrategy.', async () => {
       await payload.create({
+        overrideAccess: true,
         collection: partialDisableLocalStrategiesSlug,
         data: {
           email: devUser.email,
@@ -1232,6 +1266,7 @@ describe('Auth', () => {
 
       await expect(
         payload.login({
+          overrideAccess: true,
           collection: partialDisableLocalStrategiesSlug,
           data: {
             email: devUser.email,
@@ -1254,11 +1289,13 @@ describe('Auth', () => {
 
     it('should allow to use password field', async () => {
       const doc = await payload.create({
+        overrideAccess: true,
         collection: 'disable-local-strategy-password',
         data: { password: '123' },
       })
       expect(doc.password).toBe('123')
       const updated = await payload.update({
+        overrideAccess: true,
         id: doc.id,
         collection: 'disable-local-strategy-password',
         data: { password: '1234' },
@@ -1270,6 +1307,7 @@ describe('Auth', () => {
   describe('API Key', () => {
     it('should authenticate via the correct API key user', async () => {
       const usersQuery = await payload.find({
+        overrideAccess: true,
         collection: apiKeysSlug,
       })
 
@@ -1296,6 +1334,7 @@ describe('Auth', () => {
 
     it('should allow authentication with an API key saved with sha1', async () => {
       const usersQuery = await payload.find({
+        overrideAccess: true,
         collection: apiKeysSlug,
       })
 
@@ -1328,6 +1367,7 @@ describe('Auth', () => {
     it('should not remove an API key from a user when updating other fields', async () => {
       const apiKey = uuid()
       const user = await payload.create({
+        overrideAccess: true,
         collection: apiKeysSlug,
         data: {
           apiKey,
@@ -1336,6 +1376,7 @@ describe('Auth', () => {
       })
 
       const updatedUser = await payload.update({
+        overrideAccess: true,
         id: user.id,
         collection: apiKeysSlug,
         data: {
@@ -1344,6 +1385,7 @@ describe('Auth', () => {
       })
 
       const userResult = await payload.find({
+        overrideAccess: true,
         collection: apiKeysSlug,
         where: {
           id: {
@@ -1359,6 +1401,7 @@ describe('Auth', () => {
     it('should disable api key after updating apiKey: null', async () => {
       const apiKey = uuid()
       const user = await payload.create({
+        overrideAccess: true,
         collection: apiKeysSlug,
         data: {
           apiKey,
@@ -1367,6 +1410,7 @@ describe('Auth', () => {
       })
 
       const updatedUser = await payload.update({
+        overrideAccess: true,
         id: user.id,
         collection: apiKeysSlug,
         data: {
@@ -1390,6 +1434,7 @@ describe('Auth', () => {
     it('should disable api key after updating with enableAPIKey:false', async () => {
       const apiKey = uuid()
       const user = await payload.create({
+        overrideAccess: true,
         collection: apiKeysSlug,
         data: {
           apiKey,
@@ -1398,6 +1443,7 @@ describe('Auth', () => {
       })
 
       const updatedUser = await payload.update({
+        overrideAccess: true,
         id: user.id,
         collection: apiKeysSlug,
         data: {
@@ -1422,6 +1468,7 @@ describe('Auth', () => {
   describe('Local API', () => {
     it('should login via the local API', async () => {
       const authenticated = await payload.login({
+        overrideAccess: true,
         collection: slug,
         data: {
           email: devUser.email,
@@ -1436,6 +1483,7 @@ describe('Auth', () => {
       const testEmail = `collection-test-${Date.now()}@example.com`
 
       const createdUser = await payload.create({
+        overrideAccess: true,
         collection: slug,
         data: {
           email: testEmail,
@@ -1447,6 +1495,7 @@ describe('Auth', () => {
       expect(createdUser.collection).toBe(slug)
 
       const foundUser = await payload.findByID({
+        overrideAccess: true,
         id: createdUser.id,
         collection: slug,
       })
@@ -1454,6 +1503,7 @@ describe('Auth', () => {
       expect(foundUser.collection).toBe(slug)
 
       const foundUsers = await payload.find({
+        overrideAccess: true,
         collection: slug,
         where: { id: { equals: createdUser.id } },
       })
@@ -1461,6 +1511,7 @@ describe('Auth', () => {
       expect(foundUsers.docs[0]?.collection).toBe(slug)
 
       const updatedUser = await payload.update({
+        overrideAccess: true,
         id: createdUser.id,
         collection: slug,
         data: { roles: ['admin'] },
@@ -1469,6 +1520,7 @@ describe('Auth', () => {
       expect(updatedUser.collection).toBe(slug)
 
       const deletedUser = await payload.delete({
+        overrideAccess: true,
         id: createdUser.id,
         collection: slug,
       })
@@ -1478,6 +1530,7 @@ describe('Auth', () => {
 
     it('should return collection property on api-keys auth collection', async () => {
       const createdApiKey = await payload.create({
+        overrideAccess: true,
         collection: apiKeysSlug,
         data: {
           enableAPIKey: true,
@@ -1487,6 +1540,7 @@ describe('Auth', () => {
       expect(createdApiKey.collection).toBe(apiKeysSlug)
 
       const foundApiKey = await payload.findByID({
+        overrideAccess: true,
         id: createdApiKey.id,
         collection: apiKeysSlug,
       })
@@ -1494,6 +1548,7 @@ describe('Auth', () => {
       expect(foundApiKey.collection).toBe(apiKeysSlug)
 
       const foundApiKeys = await payload.find({
+        overrideAccess: true,
         collection: apiKeysSlug,
         where: { id: { equals: createdApiKey.id } },
       })
@@ -1501,6 +1556,7 @@ describe('Auth', () => {
       expect(foundApiKeys.docs[0]?.collection).toBe(apiKeysSlug)
 
       const updatedApiKey = await payload.update({
+        overrideAccess: true,
         id: createdApiKey.id,
         collection: apiKeysSlug,
         data: { enableAPIKey: false },
@@ -1509,6 +1565,7 @@ describe('Auth', () => {
       expect(updatedApiKey.collection).toBe(apiKeysSlug)
 
       const deletedApiKey = await payload.delete({
+        overrideAccess: true,
         id: createdApiKey.id,
         collection: apiKeysSlug,
       })
@@ -1518,6 +1575,7 @@ describe('Auth', () => {
 
     it('should forget and reset password', async () => {
       const forgot = await payload.forgotPassword({
+        overrideAccess: true,
         collection: 'users',
         data: {
           email: 'dev@payloadcms.com',
@@ -1548,6 +1606,7 @@ describe('Auth', () => {
       try {
         // Call forgotPassword while the mocked Date.now() is active
         forgot = await payload.forgotPassword({
+          overrideAccess: true,
           collection: 'users',
           data: {
             email: 'dev@payloadcms.com',
@@ -1766,6 +1825,7 @@ describe('Auth', () => {
   describe('Sessions', () => {
     it('should set a session on a user', async () => {
       const authenticated = await payload.login({
+        overrideAccess: true,
         collection: slug,
         data: {
           email: devUser.email,
@@ -1799,6 +1859,7 @@ describe('Auth', () => {
 
     it('should log out a user and delete only the session being logged out', async () => {
       const authenticated = await payload.login({
+        overrideAccess: true,
         collection: slug,
         data: {
           email: devUser.email,
@@ -1807,6 +1868,7 @@ describe('Auth', () => {
       })
 
       const authenticated2 = await payload.login({
+        overrideAccess: true,
         collection: slug,
         data: {
           email: devUser.email,
@@ -1846,6 +1908,7 @@ describe('Auth', () => {
 
     it('should refresh an existing session', async () => {
       const authenticated = await payload.login({
+        overrideAccess: true,
         collection: slug,
         data: {
           email: devUser.email,
@@ -1898,6 +1961,7 @@ describe('Auth', () => {
 
     it('should reject a refresh when its session is revoked after authentication', async () => {
       const authenticated = await payload.login({
+        overrideAccess: true,
         collection: slug,
         data: {
           email: devUser.email,
@@ -1932,6 +1996,7 @@ describe('Auth', () => {
 
     it('should not authenticate a user who has a JWT but its session has been terminated', async () => {
       const authenticated = await payload.login({
+        overrideAccess: true,
         collection: slug,
         data: {
           email: devUser.email,
@@ -1970,6 +2035,7 @@ describe('Auth', () => {
 
     it('should clean up expired sessions when logging in', async () => {
       const userWithExpiredSession = await payload.create({
+        overrideAccess: true,
         collection: slug,
         data: {
           email: `${devUser.email}.au`,
@@ -1988,6 +2054,7 @@ describe('Auth', () => {
       expect(userWithExpiredSession.sessions).toHaveLength(1)
 
       await payload.login({
+        overrideAccess: true,
         collection: slug,
         data: {
           email: devUser.email,
@@ -2010,6 +2077,7 @@ describe('Auth', () => {
     it('should not update updatedAt when creating a session', async () => {
       // Create a user
       const testUser = await payload.create({
+        overrideAccess: true,
         collection: slug,
         data: {
           email: `test.updatedAt.${Date.now()}@example.com`,
@@ -2025,6 +2093,7 @@ describe('Auth', () => {
 
       // Login to create a session
       await payload.login({
+        overrideAccess: true,
         collection: slug,
         data: {
           email: testUser.email,
@@ -2051,6 +2120,7 @@ describe('Auth', () => {
     it('should not update updatedAt when logging out', async () => {
       // Create and login
       const testUser = await payload.create({
+        overrideAccess: true,
         collection: slug,
         data: {
           email: `test.logout.${Date.now()}@example.com`,
@@ -2060,6 +2130,7 @@ describe('Auth', () => {
       })
 
       const authenticated = await payload.login({
+        overrideAccess: true,
         collection: slug,
         data: {
           email: testUser.email,
@@ -2105,6 +2176,7 @@ describe('Auth', () => {
     it('should not update updatedAt when refreshing a session', async () => {
       // Create and login
       const testUser = await payload.create({
+        overrideAccess: true,
         collection: slug,
         data: {
           email: `test.refresh.${Date.now()}@example.com`,
@@ -2114,6 +2186,7 @@ describe('Auth', () => {
       })
 
       const authenticated = await payload.login({
+        overrideAccess: true,
         collection: slug,
         data: {
           email: testUser.email,

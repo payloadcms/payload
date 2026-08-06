@@ -57,6 +57,7 @@ describePostgres('Access Control - postgres logs', () => {
     describe('where query cache - same where queries', () => {
       it('should cache identical where queries across operations, without passing data (2 DB calls total)', async () => {
         const doc = await payload.create({
+          overrideAccess: true,
           collection: whereCacheSameSlug,
           data: {
             title: 'Test Document',
@@ -97,6 +98,7 @@ describePostgres('Access Control - postgres logs', () => {
 
       it('should cache identical where queries across operations, with passing data (1 DB call total)', async () => {
         const doc = await payload.create({
+          overrideAccess: true,
           collection: whereCacheSameSlug,
           data: {
             title: 'Test Document',
@@ -140,6 +142,7 @@ describePostgres('Access Control - postgres logs', () => {
     describe('where query cache - unique where queries', () => {
       it('should handle unique where queries per operation (1 DB call per operation)', async () => {
         const doc = await payload.create({
+          overrideAccess: true,
           collection: whereCacheUniqueSlug,
           data: {
             title: 'Test Document',
@@ -183,6 +186,7 @@ describePostgres('Access Control - postgres logs', () => {
 
       it('should handle unique where queries per operation (1 DB call per operation), no data fetch when passing data', async () => {
         const doc = await payload.create({
+          overrideAccess: true,
           collection: whereCacheUniqueSlug,
           data: {
             title: 'Test Document',
@@ -227,6 +231,7 @@ describePostgres('Access Control - postgres logs', () => {
 
       it('should return correct permissions with mixed results', async () => {
         const doc = await payload.create({
+          overrideAccess: true,
           collection: whereCacheUniqueSlug,
           data: {
             title: 'Test Document 2',
@@ -263,6 +268,7 @@ describePostgres('Access Control - postgres logs', () => {
 
       it('ensure no db calls when fetchData is false', async () => {
         const _doc = await payload.create({
+          overrideAccess: true,
           collection: whereCacheUniqueSlug,
           data: {
             title: 'Test Document',

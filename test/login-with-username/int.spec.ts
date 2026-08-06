@@ -25,6 +25,7 @@ describe('Login With Username Feature', () => {
     let errors = []
     try {
       await payload.create({
+        overrideAccess: true,
         collection: 'login-with-either',
         data: {
           email: null,
@@ -42,6 +43,7 @@ describe('Login With Username Feature', () => {
     const usernameToUse = 'exampleUser'
 
     const exampleUser = await payload.create({
+      overrideAccess: true,
       collection: 'login-with-either',
       data: {
         email: emailToUse,
@@ -53,6 +55,7 @@ describe('Login With Username Feature', () => {
     let errors = []
     try {
       await payload.update({
+        overrideAccess: true,
         collection: 'login-with-either',
         id: exampleUser.id,
         data: {
@@ -67,6 +70,7 @@ describe('Login With Username Feature', () => {
 
     errors = []
     await payload.update({
+      overrideAccess: true,
       collection: 'login-with-either',
       id: exampleUser.id,
       data: {
@@ -77,6 +81,7 @@ describe('Login With Username Feature', () => {
 
     try {
       await payload.update({
+        overrideAccess: true,
         collection: 'login-with-either',
         id: exampleUser.id,
         data: {
@@ -91,6 +96,7 @@ describe('Login With Username Feature', () => {
 
   it('should allow login with either username or email', async () => {
     await payload.create({
+      overrideAccess: true,
       collection: 'login-with-either',
       data: {
         email: devUser.email,
@@ -100,6 +106,7 @@ describe('Login With Username Feature', () => {
     })
 
     const loginWithEmail = await payload.login({
+      overrideAccess: true,
       collection: 'login-with-either',
       data: {
         email: devUser.email,
@@ -109,6 +116,7 @@ describe('Login With Username Feature', () => {
     expect(loginWithEmail).toHaveProperty('token')
 
     const loginWithUsername = await payload.login({
+      overrideAccess: true,
       collection: 'login-with-either',
       data: {
         username: 'dev',
@@ -121,6 +129,7 @@ describe('Login With Username Feature', () => {
   it('should allow mutliple creates with optional email and username', async () => {
     // create a user with just email
     await payload.create({
+      overrideAccess: true,
       collection: 'login-with-either',
       data: {
         email: 'email1@mail.com',
@@ -130,6 +139,7 @@ describe('Login With Username Feature', () => {
 
     // create second user with just email
     const emailUser2 = await payload.create({
+      overrideAccess: true,
       collection: 'login-with-either',
       data: {
         email: 'email2@mail.com',
@@ -140,6 +150,7 @@ describe('Login With Username Feature', () => {
 
     // create user with just username
     await payload.create({
+      overrideAccess: true,
       collection: 'login-with-either',
       data: {
         username: 'username1',
@@ -149,6 +160,7 @@ describe('Login With Username Feature', () => {
 
     // create second user with just username
     const usernameUser2 = await payload.create({
+      overrideAccess: true,
       collection: 'login-with-either',
       data: {
         username: 'username2',

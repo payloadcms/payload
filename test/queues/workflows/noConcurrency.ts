@@ -27,6 +27,7 @@ export const noConcurrencyWorkflow: WorkflowConfig<'noConcurrency'> = {
       task: async ({ req }) => {
         // Create a simple doc to track execution order
         await req.payload.create({
+          overrideAccess: true,
           collection: 'simple',
           data: {
             title: `started:${job.input.resourceId}:${job.id}`,
@@ -44,6 +45,7 @@ export const noConcurrencyWorkflow: WorkflowConfig<'noConcurrency'> = {
       task: async ({ req }) => {
         // Create another doc to mark completion
         await req.payload.create({
+          overrideAccess: true,
           collection: 'simple',
           data: {
             title: `completed:${job.input.resourceId}:${job.id}`,

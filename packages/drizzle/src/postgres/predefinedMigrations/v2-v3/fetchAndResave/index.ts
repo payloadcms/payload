@@ -40,6 +40,7 @@ export const fetchAndResave = async ({
       if (collectionConfig) {
         if (isVersions) {
           const doc = await payload.findVersionByID({
+            overrideAccess: true,
             id,
             collection: collectionSlug,
             depth: 0,
@@ -90,6 +91,7 @@ export const fetchAndResave = async ({
           }
         } else {
           const doc = await payload.findByID({
+            overrideAccess: true,
             id,
             collection: collectionSlug,
             depth: 0,
@@ -148,6 +150,7 @@ export const fetchAndResave = async ({
       if (globalConfig) {
         if (isVersions) {
           const { docs } = await payload.findGlobalVersions({
+            overrideAccess: true,
             slug: globalSlug,
             depth: 0,
             fallbackLocale: null,
@@ -196,6 +199,7 @@ export const fetchAndResave = async ({
           }
         } else {
           const doc = await payload.findGlobal({
+            overrideAccess: true,
             slug: globalSlug,
             depth: 0,
             fallbackLocale: null,

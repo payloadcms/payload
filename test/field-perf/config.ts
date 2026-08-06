@@ -72,6 +72,7 @@ export default buildConfigWithDefaults({
   ],
   onInit: async (payload) => {
     await payload.create({
+      overrideAccess: true,
       collection: 'users',
       data: {
         email: devUser.email,
@@ -80,6 +81,7 @@ export default buildConfigWithDefaults({
     })
 
     await payload.create({
+      overrideAccess: true,
       collection: 'blocks-collection',
       data: {
         layout: [...Array(100)].map((row, i) => ({

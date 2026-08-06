@@ -545,6 +545,7 @@ export default buildConfigWithDefaults({
   ],
   onInit: async (payload) => {
     await payload.create({
+      overrideAccess: true,
       collection: 'users',
       data: {
         email: devUser.email,
@@ -553,6 +554,7 @@ export default buildConfigWithDefaults({
     })
 
     const rel1 = await payload.create({
+      overrideAccess: true,
       collection: relationSlug,
       data: {
         name: 'name',
@@ -560,6 +562,7 @@ export default buildConfigWithDefaults({
     })
 
     const filteredRelation = await payload.create({
+      overrideAccess: true,
       collection: relationSlug,
       data: {
         name: 'filtered',
@@ -567,6 +570,7 @@ export default buildConfigWithDefaults({
     })
 
     const defaultAccessRelation = await payload.create({
+      overrideAccess: true,
       collection: defaultAccessRelSlug,
       data: {
         name: 'name',
@@ -574,6 +578,7 @@ export default buildConfigWithDefaults({
     })
 
     const chained3 = await payload.create({
+      overrideAccess: true,
       collection: chainedRelSlug,
       data: {
         name: 'chain3',
@@ -581,6 +586,7 @@ export default buildConfigWithDefaults({
     })
 
     const chained2 = await payload.create({
+      overrideAccess: true,
       collection: chainedRelSlug,
       data: {
         name: 'chain2',
@@ -589,6 +595,7 @@ export default buildConfigWithDefaults({
     })
 
     const chained = await payload.create({
+      overrideAccess: true,
       collection: chainedRelSlug,
       data: {
         name: 'chain1',
@@ -597,6 +604,7 @@ export default buildConfigWithDefaults({
     })
 
     await payload.update({
+      overrideAccess: true,
       collection: chainedRelSlug,
       id: chained3.id,
       data: {
@@ -606,6 +614,7 @@ export default buildConfigWithDefaults({
     })
 
     const customIdRelation = await payload.create({
+      overrideAccess: true,
       collection: customIdSlug,
       data: {
         id: 'custommmm',
@@ -614,6 +623,7 @@ export default buildConfigWithDefaults({
     })
 
     const customIdNumberRelation = await payload.create({
+      overrideAccess: true,
       collection: customIdNumberSlug,
       data: {
         id: 908234892340,
@@ -623,6 +633,7 @@ export default buildConfigWithDefaults({
 
     // Relationship
     await payload.create({
+      overrideAccess: true,
       collection: slug,
       data: {
         title: 'with relationship',
@@ -637,6 +648,7 @@ export default buildConfigWithDefaults({
     })
 
     const root = await payload.create({
+      overrideAccess: true,
       collection: 'tree',
       data: {
         text: 'root',
@@ -644,6 +656,7 @@ export default buildConfigWithDefaults({
     })
 
     await payload.create({
+      overrideAccess: true,
       collection: 'tree',
       data: {
         text: 'sub',

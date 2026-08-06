@@ -87,6 +87,7 @@ export const addOrderableFieldsAndHook = (
           collection: collection.slug,
           depth: 0,
           limit: 1,
+          overrideAccess: true,
           pagination: false,
           req,
           select: { [orderableFieldName]: true },
@@ -198,6 +199,7 @@ export const addOrderableEndpoint = (
         collection: collection.slug,
         depth: 0,
         limit: 0,
+        overrideAccess: true,
         req,
         select: { [orderableFieldName]: true },
         where: combineWhereConstraints([
@@ -221,6 +223,7 @@ export const addOrderableEndpoint = (
               // no data needed since the order hooks will handle this
             },
             depth: 0,
+            overrideAccess: true,
             req,
           })
           await commitTransaction(req)
@@ -266,6 +269,7 @@ export const addOrderableEndpoint = (
       collection: collection.slug,
       depth: 0,
       limit: 1,
+      overrideAccess: true,
       pagination: false,
       select: { [orderableFieldName]: true },
       sort: newKeyWillBe === 'greater' ? orderableFieldName : `-${orderableFieldName}`,
@@ -317,6 +321,7 @@ export const addOrderableEndpoint = (
         },
         depth: 0,
         draft,
+        overrideAccess: true,
         req,
       })
     }

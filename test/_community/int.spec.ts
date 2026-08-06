@@ -49,6 +49,7 @@ describe('_Community Tests', () => {
 
   it('local API example', async () => {
     const newPost = await payload.create({
+      overrideAccess: true,
       collection: postsSlug,
       data: {
         title: 'LOCAL API EXAMPLE',

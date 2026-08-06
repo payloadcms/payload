@@ -144,6 +144,7 @@ export const collectionsCodegenDataset: EvalCase[] = [
     verify: async ({ expect, payload }) => {
       const seededTitle = 'Seeded by runtime eval'
       const { docs } = await payload.find({
+        overrideAccess: true,
         collection: 'posts',
         where: { title: { equals: seededTitle } },
       })

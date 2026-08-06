@@ -12,6 +12,7 @@ export const retriesWorkflowLevelTestWorkflow: WorkflowConfig<'retriesWorkflowLe
   retries: 2, // Even though CreateSimple has 3 retries, this workflow only has 2. Thus, it will only retry once
   handler: async ({ job, tasks, req }) => {
     const updatedJob = await req.payload.update({
+      overrideAccess: true,
       collection: 'payload-jobs',
       data: {
         input: {

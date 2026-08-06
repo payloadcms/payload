@@ -73,6 +73,7 @@ describe('Localization', () => {
 
     beforeAll(async () => {
       post1 = await payload.create({
+        overrideAccess: true,
         collection,
         data: {
           title: englishTitle,
@@ -80,6 +81,7 @@ describe('Localization', () => {
       })
 
       postWithLocalizedData = await payload.create({
+        overrideAccess: true,
         collection,
         data: {
           title: englishTitle,
@@ -87,6 +89,7 @@ describe('Localization', () => {
       })
 
       await payload.update({
+        overrideAccess: true,
         id: postWithLocalizedData.id,
         collection,
         data: {
@@ -96,6 +99,7 @@ describe('Localization', () => {
       })
 
       await payload.updateGlobal({
+        overrideAccess: true,
         slug: global,
         data: {
           text: spanishTitle,
@@ -104,6 +108,7 @@ describe('Localization', () => {
       })
 
       await payload.updateGlobal({
+        overrideAccess: true,
         slug: global,
         data: {
           text: englishTitle,
@@ -115,6 +120,7 @@ describe('Localization', () => {
     describe('Localized text', () => {
       it('create english', async () => {
         const allDocs = await payload.find({
+          overrideAccess: true,
           collection,
           where: {
             title: { equals: post1.title },
@@ -125,6 +131,7 @@ describe('Localization', () => {
 
       it('add spanish translation', async () => {
         const updated = await payload.update({
+          overrideAccess: true,
           id: post1.id,
           collection,
           data: {
@@ -136,6 +143,7 @@ describe('Localization', () => {
         expect(updated.title).toEqual(spanishTitle)
 
         const localized: any = await payload.findByID({
+          overrideAccess: true,
           id: post1.id,
           collection,
           locale: 'all',
@@ -147,6 +155,7 @@ describe('Localization', () => {
 
       it('should fallback to english translation when empty', async () => {
         await payload.update({
+          overrideAccess: true,
           id: post1.id,
           collection,
           data: {
@@ -156,6 +165,7 @@ describe('Localization', () => {
         })
 
         const retrievedInSpanish = await payload.findByID({
+          overrideAccess: true,
           id: post1.id,
           collection,
           locale: spanishLocale,
@@ -164,6 +174,7 @@ describe('Localization', () => {
         expect(retrievedInSpanish.title).toEqual(englishTitle)
 
         const localizedFallback: any = await payload.findByID({
+          overrideAccess: true,
           id: post1.id,
           collection,
           locale: 'all',
@@ -175,6 +186,7 @@ describe('Localization', () => {
 
       it('should show correct fallback data for arrays', async () => {
         const localizedArrayPost = await payload.create({
+          overrideAccess: true,
           collection: arrayCollectionSlug,
           data: {
             items: [
@@ -186,6 +198,7 @@ describe('Localization', () => {
         })
 
         const resultAllLocales: any = await payload.findByID({
+          overrideAccess: true,
           id: localizedArrayPost.id,
           collection: arrayCollectionSlug,
           locale: 'all',
@@ -195,6 +208,7 @@ describe('Localization', () => {
         expect(resultAllLocales.items.es).toEqual(undefined)
 
         const resultSpanishLocale: any = await payload.findByID({
+          overrideAccess: true,
           id: localizedArrayPost.id,
           collection: arrayCollectionSlug,
           locale: spanishLocale,
@@ -205,6 +219,7 @@ describe('Localization', () => {
 
       it('should fallback to spanish translation when empty and locale-specific fallback is provided', async () => {
         const localizedFallback: any = await payload.findByID({
+          overrideAccess: true,
           id: postWithLocalizedData.id,
           collection,
           locale: portugueseLocale,
@@ -215,6 +230,7 @@ describe('Localization', () => {
 
       it('should respect fallback none', async () => {
         const localizedFallback: any = await payload.findByID({
+          overrideAccess: true,
           id: postWithLocalizedData.id,
           collection,
           locale: portugueseLocale,
@@ -239,18 +255,21 @@ describe('Localization', () => {
           }
 
           localizedDoc = await payload.create({
+            overrideAccess: true,
             collection: localizedPostsSlug,
             data: englishData,
             locale: englishLocale,
           })
 
           await payload.update({
+            overrideAccess: true,
             id: localizedDoc.id,
             collection: localizedPostsSlug,
             data: spanishData,
             locale: spanishLocale,
           })
           await payload.update({
+            overrideAccess: true,
             id: localizedDoc.id,
             collection: localizedPostsSlug,
             data: { localizedCheckbox: true },
@@ -260,6 +279,7 @@ describe('Localization', () => {
 
         it('should return localized fields using fallbackLocale specified in the requested locale config', async () => {
           const portugueseDoc = await payload.findByID({
+            overrideAccess: true,
             id: localizedDoc.id,
             collection: localizedPostsSlug,
             locale: portugueseLocale,
@@ -274,6 +294,7 @@ describe('Localization', () => {
         let localizedPost: LocalizedPost
         beforeEach(async () => {
           const { id } = await payload.create({
+            overrideAccess: true,
             collection,
             data: {
               title: englishTitle,
@@ -281,6 +302,7 @@ describe('Localization', () => {
           })
 
           localizedPost = await payload.update({
+            overrideAccess: true,
             id,
             collection,
             data: {
@@ -292,6 +314,7 @@ describe('Localization', () => {
 
         it('unspecified locale returns default', async () => {
           const localized = await payload.findByID({
+            overrideAccess: true,
             id: localizedPost.id,
             collection,
           })
@@ -301,6 +324,7 @@ describe('Localization', () => {
 
         it('specific locale - same as default', async () => {
           const localized = await payload.findByID({
+            overrideAccess: true,
             id: localizedPost.id,
             collection,
             locale: defaultLocale,
@@ -311,6 +335,7 @@ describe('Localization', () => {
 
         it('specific locale - not default', async () => {
           const localized = await payload.findByID({
+            overrideAccess: true,
             id: localizedPost.id,
             collection,
             locale: spanishLocale,
@@ -321,6 +346,7 @@ describe('Localization', () => {
 
         it('all locales', async () => {
           const localized: any = await payload.findByID({
+            overrideAccess: true,
             id: localizedPost.id,
             collection,
             locale: 'all',
@@ -360,6 +386,7 @@ describe('Localization', () => {
 
         it('by localized field value - default locale', async () => {
           const result = await payload.find({
+            overrideAccess: true,
             collection,
             where: {
               title: {
@@ -373,6 +400,7 @@ describe('Localization', () => {
 
         it('by localized field value - alternate locale', async () => {
           const result = await payload.find({
+            overrideAccess: true,
             collection,
             locale: spanishLocale,
             where: {
@@ -387,6 +415,7 @@ describe('Localization', () => {
 
         it('by localized field value - opposite locale???', async () => {
           const result = await payload.find({
+            overrideAccess: true,
             collection,
             locale: 'all',
             where: {
@@ -400,13 +429,26 @@ describe('Localization', () => {
         })
 
         it('by localized field value with sorting', async () => {
-          const doc_1 = await payload.create({ collection, data: { title: 'word_b' } })
-          const doc_2 = await payload.create({ collection, data: { title: 'word_a' } })
-          const doc_3 = await payload.create({ collection, data: { title: 'word_c' } })
+          const doc_1 = await payload.create({
+            overrideAccess: true,
+            collection,
+            data: { title: 'word_b' },
+          })
+          const doc_2 = await payload.create({
+            overrideAccess: true,
+            collection,
+            data: { title: 'word_a' },
+          })
+          const doc_3 = await payload.create({
+            overrideAccess: true,
+            collection,
+            data: { title: 'word_c' },
+          })
 
-          await payload.create({ collection, data: { title: 'others_c' } })
+          await payload.create({ overrideAccess: true, collection, data: { title: 'others_c' } })
 
           const { docs } = await payload.find({
+            overrideAccess: true,
             collection,
             sort: 'title',
             where: {
@@ -428,6 +470,7 @@ describe('Localization', () => {
             let localizedAccentPostTwo: LocalizedPost
             beforeEach(async () => {
               localizedAccentPostOne = await payload.create({
+                overrideAccess: true,
                 collection,
                 data: {
                   title: 'non accent post',
@@ -437,6 +480,7 @@ describe('Localization', () => {
               })
 
               localizedAccentPostTwo = await payload.create({
+                overrideAccess: true,
                 collection,
                 data: {
                   title: 'accent post',
@@ -446,6 +490,7 @@ describe('Localization', () => {
               })
 
               await payload.update({
+                overrideAccess: true,
                 id: localizedAccentPostOne.id,
                 collection,
                 data: {
@@ -456,6 +501,7 @@ describe('Localization', () => {
               })
 
               await payload.update({
+                overrideAccess: true,
                 id: localizedAccentPostTwo.id,
                 collection,
                 data: {
@@ -468,6 +514,7 @@ describe('Localization', () => {
 
             it('should sort alphabetically even with accented letters', async () => {
               const sortByDescriptionQuery = await payload.find({
+                overrideAccess: true,
                 collection,
                 sort: 'description',
                 where: {
@@ -488,6 +535,7 @@ describe('Localization', () => {
     describe('Localized date', () => {
       it('can create a localized date', async () => {
         const document = await payload.create({
+          overrideAccess: true,
           collection: localizedDateFieldsSlug,
           data: {
             localizedDate: new Date().toISOString(),
@@ -499,6 +547,7 @@ describe('Localization', () => {
 
       it('data is typed as string', async () => {
         const document = await payload.create({
+          overrideAccess: true,
           collection: localizedDateFieldsSlug,
           data: {
             localizedDate: new Date().toISOString(),
@@ -517,6 +566,7 @@ describe('Localization', () => {
       beforeAll(async () => {
         for (let i = 1; i <= expectedTotalDocs; i++) {
           const post = await payload.create({
+            overrideAccess: true,
             collection: localizedSortSlug,
             data: {
               date: new Date().toISOString(),
@@ -528,6 +578,7 @@ describe('Localization', () => {
           posts.push(post)
 
           await payload.update({
+            overrideAccess: true,
             id: post.id,
             collection: localizedSortSlug,
             data: {
@@ -541,9 +592,11 @@ describe('Localization', () => {
 
       it('should have correct totalDocs when unsorted', async () => {
         const simpleQuery = await payload.find({
+          overrideAccess: true,
           collection: localizedSortSlug,
         })
         const sortByIdQuery = await payload.find({
+          overrideAccess: true,
           collection: localizedSortSlug,
           sort: 'id',
         })
@@ -555,10 +608,12 @@ describe('Localization', () => {
       // https://github.com/payloadcms/payload/issues/4889
       it('should have correct totalDocs when sorted by localized fields', async () => {
         const sortByTitleQuery = await payload.find({
+          overrideAccess: true,
           collection: localizedSortSlug,
           sort: 'title',
         })
         const sortByDateQuery = await payload.find({
+          overrideAccess: true,
           collection: localizedSortSlug,
           sort: 'date',
         })
@@ -569,6 +624,7 @@ describe('Localization', () => {
 
       it('should return correct order when sorted by localized fields', async () => {
         const { docs: docsAsc } = await payload.find({
+          overrideAccess: true,
           collection: localizedSortSlug,
           sort: 'title',
         })
@@ -577,6 +633,7 @@ describe('Localization', () => {
         })
 
         const { docs: docsDesc } = await payload.find({
+          overrideAccess: true,
           collection: localizedSortSlug,
           sort: '-title',
         })
@@ -617,9 +674,14 @@ describe('Localization', () => {
 
         for (let i = 0; i < randomWords.length; i++) {
           const en = randomWords[i]
-          const post = await payload.create({ collection: 'localized-sort', data: { title: en } })
+          const post = await payload.create({
+            overrideAccess: true,
+            collection: 'localized-sort',
+            data: { title: en },
+          })
           const es = randomWordsSpanish[i]
           await payload.update({
+            overrideAccess: true,
             collection: 'localized-sort',
             data: { title: es },
             id: post.id,
@@ -635,6 +697,7 @@ describe('Localization', () => {
         const q = { id: { in: randomWordsPosts } }
 
         const { docs: randomWordsEnAsc } = await payload.find({
+          overrideAccess: true,
           collection: localizedSortSlug,
           sort: 'title',
           where: q,
@@ -644,6 +707,7 @@ describe('Localization', () => {
         })
 
         const { docs: randomWordsEnDesc } = await payload.find({
+          overrideAccess: true,
           collection: localizedSortSlug,
           sort: '-title',
           where: q,
@@ -659,6 +723,7 @@ describe('Localization', () => {
 
         // Fetch sorted words in Spanish (ascending)
         const { docs: randomWordsEsAsc } = await payload.find({
+          overrideAccess: true,
           collection: localizedSortSlug,
           sort: 'title',
           where: q,
@@ -671,6 +736,7 @@ describe('Localization', () => {
 
         // Fetch sorted words in Spanish (descending)
         const { docs: randomWordsEsDesc } = await payload.find({
+          overrideAccess: true,
           collection: localizedSortSlug,
           sort: '-title',
           where: q,
@@ -703,6 +769,7 @@ describe('Localization', () => {
         })
 
         withRelationship = await payload.create({
+          overrideAccess: true,
           collection: withLocalizedRelSlug,
           data: {
             localizedRelationHasManyField: [localizedRelation.id, localizedRelation2.id],
@@ -722,6 +789,7 @@ describe('Localization', () => {
       describe('regular relationship', () => {
         it('can query localized relationship', async () => {
           const result = await payload.find({
+            overrideAccess: true,
             collection: withLocalizedRelSlug,
             where: {
               'localizedRelationship.title': {
@@ -735,6 +803,7 @@ describe('Localization', () => {
 
         it('specific locale', async () => {
           const result = await payload.find({
+            overrideAccess: true,
             collection: withLocalizedRelSlug,
             locale: spanishLocale,
             where: {
@@ -749,6 +818,7 @@ describe('Localization', () => {
 
         it('all locales', async () => {
           const result = await payload.find({
+            overrideAccess: true,
             collection: withLocalizedRelSlug,
             locale: 'all',
             where: {
@@ -764,6 +834,7 @@ describe('Localization', () => {
         it('populates relationships with all locales', async () => {
           // the relationship fields themselves are localized on this collection
           const result: any = await payload.find({
+            overrideAccess: true,
             collection: relationshipLocalizedSlug,
             depth: 1,
             locale: 'all',
@@ -780,6 +851,7 @@ describe('Localization', () => {
       describe('relationship - hasMany', () => {
         it('default locale', async () => {
           const result = await payload.find({
+            overrideAccess: true,
             collection: withLocalizedRelSlug,
             where: {
               'localizedRelationHasManyField.title': {
@@ -792,6 +864,7 @@ describe('Localization', () => {
 
           // Second relationship
           const result2 = await payload.find({
+            overrideAccess: true,
             collection: withLocalizedRelSlug,
             where: {
               'localizedRelationHasManyField.title': {
@@ -805,6 +878,7 @@ describe('Localization', () => {
 
         it('specific locale', async () => {
           const result = await payload.find({
+            overrideAccess: true,
             collection: withLocalizedRelSlug,
             locale: spanishLocale,
             where: {
@@ -818,6 +892,7 @@ describe('Localization', () => {
 
           // Second relationship
           const result2 = await payload.find({
+            overrideAccess: true,
             collection: withLocalizedRelSlug,
             locale: spanishLocale,
             where: {
@@ -832,6 +907,7 @@ describe('Localization', () => {
 
         it('relationship population uses locale', async () => {
           const result = await payload.findByID({
+            overrideAccess: true,
             id: withRelationship.id,
             collection: withLocalizedRelSlug,
             depth: 1,
@@ -845,6 +921,7 @@ describe('Localization', () => {
         it('all locales', async () => {
           const queryRelation = (where: Where) => {
             return payload.find({
+              overrideAccess: true,
               collection: withLocalizedRelSlug,
               locale: 'all',
               where,
@@ -891,6 +968,7 @@ describe('Localization', () => {
       describe('relationTo multi', () => {
         it('by id', async () => {
           const result = await payload.find({
+            overrideAccess: true,
             collection: withLocalizedRelSlug,
             where: {
               'localizedRelationMultiRelationTo.value': {
@@ -903,6 +981,7 @@ describe('Localization', () => {
 
           // Second relationship
           const result2 = await payload.find({
+            overrideAccess: true,
             collection: withLocalizedRelSlug,
             locale: spanishLocale,
             where: {
@@ -919,6 +998,7 @@ describe('Localization', () => {
       describe('relationTo multi hasMany', () => {
         it('by id', async () => {
           const result = await payload.find({
+            overrideAccess: true,
             collection: withLocalizedRelSlug,
             where: {
               'localizedRelationMultiRelationToHasMany.value': {
@@ -931,6 +1011,7 @@ describe('Localization', () => {
 
           // First relationship - spanish locale
           const result2 = await payload.find({
+            overrideAccess: true,
             collection: withLocalizedRelSlug,
             locale: spanishLocale,
             where: {
@@ -944,6 +1025,7 @@ describe('Localization', () => {
 
           // Second relationship
           const result3 = await payload.find({
+            overrideAccess: true,
             collection: withLocalizedRelSlug,
             where: {
               'localizedRelationMultiRelationToHasMany.value': {
@@ -956,6 +1038,7 @@ describe('Localization', () => {
 
           // Second relationship - spanish locale
           const result4 = await payload.find({
+            overrideAccess: true,
             collection: withLocalizedRelSlug,
             where: {
               'localizedRelationMultiRelationToHasMany.value': {
@@ -972,12 +1055,14 @@ describe('Localization', () => {
     describe('Localized - arrays with nested localized fields', () => {
       it('should allow moving rows and retain existing row locale data', async () => {
         const globalArray: any = await payload.findGlobal({
+          overrideAccess: true,
           slug: 'global-array',
         })
 
         const reversedArrayRows = [...globalArray.array].reverse()
 
         const updatedGlobal = await payload.updateGlobal({
+          overrideAccess: true,
           slug: 'global-array',
           data: {
             array: reversedArrayRows,
@@ -993,6 +1078,7 @@ describe('Localization', () => {
     describe('Localized - required', () => {
       it('should update without passing all required fields', async () => {
         const newDoc = await payload.create({
+          overrideAccess: true,
           collection: withRequiredLocalizedFields,
           data: {
             nav: {
@@ -1008,6 +1094,7 @@ describe('Localization', () => {
         })
 
         await payload.update({
+          overrideAccess: true,
           id: newDoc.id,
           collection: withRequiredLocalizedFields,
           data: {
@@ -1025,6 +1112,7 @@ describe('Localization', () => {
         })
 
         const updatedDoc = await payload.update({
+          overrideAccess: true,
           id: newDoc.id,
           collection: withRequiredLocalizedFields,
           data: {
@@ -1035,6 +1123,7 @@ describe('Localization', () => {
         expect(updatedDoc.nav.layout[0].blockType).toStrictEqual('text')
 
         const spanishDoc = await payload.findByID({
+          overrideAccess: true,
           id: newDoc.id,
           collection: withRequiredLocalizedFields,
           locale: spanishLocale,
@@ -1148,6 +1237,7 @@ describe('Localization', () => {
         const updateResult = updateData.updateLocalizedPost
 
         const result = await payload.findByID({
+          overrideAccess: true,
           id: createResult.id,
           collection: localizedPostsSlug,
           locale: 'all',
@@ -1161,6 +1251,7 @@ describe('Localization', () => {
 
       it('should query multiple locales', async () => {
         const englishDoc = await payload.create({
+          overrideAccess: true,
           collection: localizedPostsSlug,
           data: {
             title: englishTitle,
@@ -1168,6 +1259,7 @@ describe('Localization', () => {
           locale: defaultLocale,
         })
         const spanishDoc = await payload.create({
+          overrideAccess: true,
           collection: localizedPostsSlug,
           data: {
             title: spanishTitle,
@@ -1207,6 +1299,7 @@ describe('Localization', () => {
 
       beforeAll(async () => {
         const englishDoc = await payload.create({
+          overrideAccess: true,
           collection: arrayCollectionSlug,
           data: {
             items: [
@@ -1222,6 +1315,7 @@ describe('Localization', () => {
 
       it('should use default locale as fallback', async () => {
         const spanishDoc = await payload.findByID({
+          overrideAccess: true,
           id: docID,
           collection: arrayCollectionSlug,
           locale: spanishLocale,
@@ -1232,6 +1326,7 @@ describe('Localization', () => {
 
       it('should use empty array as value', async () => {
         const updatedSpanishDoc = await payload.update({
+          overrideAccess: true,
           id: docID,
           collection: arrayCollectionSlug,
           data: {
@@ -1246,6 +1341,7 @@ describe('Localization', () => {
 
       it('should allow optional fallback data', async () => {
         const englishDoc = await payload.create({
+          overrideAccess: true,
           collection: arrayCollectionSlug,
           data: {
             items: [
@@ -1258,6 +1354,7 @@ describe('Localization', () => {
         })
 
         await payload.update({
+          overrideAccess: true,
           id: englishDoc.id,
           collection: arrayCollectionSlug,
           data: {
@@ -1267,6 +1364,7 @@ describe('Localization', () => {
         })
 
         const docWithoutFallback = await payload.findByID({
+          overrideAccess: true,
           id: englishDoc.id,
           collection: arrayCollectionSlug,
           locale: spanishLocale,
@@ -1288,6 +1386,7 @@ describe('Localization', () => {
 
       it('should use fallback value if setting null', async () => {
         await payload.update({
+          overrideAccess: true,
           id: docID,
           collection: arrayCollectionSlug,
           data: {
@@ -1297,6 +1396,7 @@ describe('Localization', () => {
         })
 
         const updatedSpanishDoc = await payload.update({
+          overrideAccess: true,
           id: docID,
           collection: arrayCollectionSlug,
           data: {
@@ -1313,6 +1413,7 @@ describe('Localization', () => {
     describe('Localized - Field Paths', () => {
       it('should allow querying by non-localized field names ending in a locale', async () => {
         await payload.update({
+          overrideAccess: true,
           id: post1.id,
           collection,
           data: {
@@ -1356,6 +1457,7 @@ describe('Localization', () => {
     describe('Nested To Array And Block', () => {
       it('should be equal to the created document', async () => {
         const { id, blocks } = await payload.create({
+          overrideAccess: true,
           collection: nestedToArrayAndBlockCollectionSlug,
           data: {
             blocks: [
@@ -1374,6 +1476,7 @@ describe('Localization', () => {
         })
 
         await payload.update({
+          overrideAccess: true,
           id,
           collection: nestedToArrayAndBlockCollectionSlug,
           data: {
@@ -1386,12 +1489,14 @@ describe('Localization', () => {
         })
 
         const docDefaultLocale = await payload.findByID({
+          overrideAccess: true,
           id,
           collection: nestedToArrayAndBlockCollectionSlug,
           locale: defaultLocale,
         })
 
         const docSpanishLocale = await payload.findByID({
+          overrideAccess: true,
           id,
           collection: nestedToArrayAndBlockCollectionSlug,
           locale: spanishLocale,
@@ -1410,6 +1515,7 @@ describe('Localization', () => {
     describe('Duplicate Collection', () => {
       it('should duplicate localized document', async () => {
         const localizedPost = await payload.create({
+          overrideAccess: true,
           collection: localizedPostsSlug,
           data: {
             localizedCheckbox: true,
@@ -1421,6 +1527,7 @@ describe('Localization', () => {
         const id = localizedPost.id.toString()
 
         await payload.update({
+          overrideAccess: true,
           id,
           collection: localizedPostsSlug,
           data: {
@@ -1431,12 +1538,14 @@ describe('Localization', () => {
         })
 
         const result = await payload.duplicate({
+          overrideAccess: true,
           id,
           collection: localizedPostsSlug,
           locale: defaultLocale,
         })
 
         const allLocales = await payload.findByID({
+          overrideAccess: true,
           id: result.id,
           collection: localizedPostsSlug,
           locale: 'all',
@@ -1464,6 +1573,7 @@ describe('Localization', () => {
         const englishText = 'english'
         const spanishText = 'spanish'
         const doc = await payload.create({
+          overrideAccess: true,
           collection: withRequiredLocalizedFields,
           data: {
             nav: {
@@ -1528,6 +1638,7 @@ describe('Localization', () => {
         })
 
         await payload.update({
+          overrideAccess: true,
           id: doc.id,
           collection: withRequiredLocalizedFields,
           data: {
@@ -1593,12 +1704,14 @@ describe('Localization', () => {
         })
 
         const result = await payload.duplicate({
+          overrideAccess: true,
           id: doc.id,
           collection: withRequiredLocalizedFields,
           locale: defaultLocale,
         })
 
         const allLocales = await payload.findByID({
+          overrideAccess: true,
           id: result.id,
           collection: withRequiredLocalizedFields,
           locale: 'all',
@@ -1621,6 +1734,7 @@ describe('Localization', () => {
 
       it('should retain non-localized fields when duplicating select locales', async () => {
         const post = await payload.create({
+          overrideAccess: true,
           collection,
           data: {
             title: englishTitle,
@@ -1629,6 +1743,7 @@ describe('Localization', () => {
         })
 
         await payload.update({
+          overrideAccess: true,
           id: post.id,
           collection,
           data: {
@@ -1638,12 +1753,14 @@ describe('Localization', () => {
         })
 
         const duplicated = await payload.duplicate({
+          overrideAccess: true,
           id: post.id,
           collection,
           selectedLocales: [spanishLocale],
         })
 
         const allLocales = await payload.findByID({
+          overrideAccess: true,
           id: duplicated.id,
           collection,
           locale: 'all',
@@ -1658,6 +1775,7 @@ describe('Localization', () => {
     describe('Localized group and tabs', () => {
       it('should properly create/update/read localized group field', async () => {
         const result = await payload.create({
+          overrideAccess: true,
           collection: groupSlug,
           data: {
             groupLocalized: {
@@ -1670,6 +1788,7 @@ describe('Localization', () => {
         expect(result.groupLocalized?.title).toBe('hello en')
 
         await payload.update({
+          overrideAccess: true,
           collection: groupSlug,
           locale: spanishLocale,
           id: result.id,
@@ -1681,11 +1800,13 @@ describe('Localization', () => {
         })
 
         const docEn = await payload.findByID({
+          overrideAccess: true,
           collection: groupSlug,
           locale: englishLocale,
           id: result.id,
         })
         const docEs = await payload.findByID({
+          overrideAccess: true,
           collection: groupSlug,
           locale: spanishLocale,
           id: result.id,
@@ -1697,6 +1818,7 @@ describe('Localization', () => {
 
       it('should properly create/update/read localized field inside of group', async () => {
         const result = await payload.create({
+          overrideAccess: true,
           collection: groupSlug,
           locale: englishLocale,
           data: {
@@ -1709,6 +1831,7 @@ describe('Localization', () => {
         expect(result.group.title).toBe('hello en')
 
         await payload.update({
+          overrideAccess: true,
           collection: groupSlug,
           locale: spanishLocale,
           id: result.id,
@@ -1720,11 +1843,13 @@ describe('Localization', () => {
         })
 
         const docEn = await payload.findByID({
+          overrideAccess: true,
           collection: groupSlug,
           locale: englishLocale,
           id: result.id,
         })
         const docEs = await payload.findByID({
+          overrideAccess: true,
           collection: groupSlug,
           locale: spanishLocale,
           id: result.id,
@@ -1736,6 +1861,7 @@ describe('Localization', () => {
 
       it('should properly create/update/read deep localized field inside of group', async () => {
         const result = await payload.create({
+          overrideAccess: true,
           collection: groupSlug,
           locale: englishLocale,
           data: {
@@ -1754,6 +1880,7 @@ describe('Localization', () => {
         expect(result.deep.array[0].title).toBe('hello en')
 
         await payload.update({
+          overrideAccess: true,
           collection: groupSlug,
           locale: spanishLocale,
           id: result.id,
@@ -1777,11 +1904,13 @@ describe('Localization', () => {
         })
 
         const docEn = await payload.findByID({
+          overrideAccess: true,
           collection: groupSlug,
           locale: englishLocale,
           id: result.id,
         })
         const docEs = await payload.findByID({
+          overrideAccess: true,
           collection: groupSlug,
           locale: spanishLocale,
           id: result.id,
@@ -1795,6 +1924,7 @@ describe('Localization', () => {
 
       it('should create/updated/read localized group with row field', async () => {
         const doc = await payload.create({
+          overrideAccess: true,
           collection: 'groups',
           data: {
             groupLocalizedRow: {
@@ -1807,6 +1937,7 @@ describe('Localization', () => {
         expect(doc.groupLocalizedRow.text).toBe('hello world')
 
         const docES = await payload.update({
+          overrideAccess: true,
           collection: 'groups',
           data: {
             groupLocalizedRow: {
@@ -1820,10 +1951,20 @@ describe('Localization', () => {
         expect(docES.groupLocalizedRow.text).toBe('hola world or something')
 
         // check if docES didnt break EN
-        const docEN = await payload.findByID({ collection: 'groups', id: doc.id, locale: 'en' })
+        const docEN = await payload.findByID({
+          overrideAccess: true,
+          collection: 'groups',
+          id: doc.id,
+          locale: 'en',
+        })
         expect(docEN.groupLocalizedRow.text).toBe('hello world')
 
-        const all = await payload.findByID({ collection: 'groups', id: doc.id, locale: 'all' })
+        const all = await payload.findByID({
+          overrideAccess: true,
+          collection: 'groups',
+          id: doc.id,
+          locale: 'all',
+        })
 
         expect(all.groupLocalizedRow.en.text).toBe('hello world')
         expect(all.groupLocalizedRow.es.text).toBe('hola world or something')
@@ -1831,6 +1972,7 @@ describe('Localization', () => {
 
       it('should not crash on empty localized tab', async () => {
         const result = await payload.create({
+          overrideAccess: true,
           collection: tabSlug,
           locale: englishLocale,
           data: {
@@ -1843,6 +1985,7 @@ describe('Localization', () => {
 
       it('should properly create/update/read array field inside localized tab field', async () => {
         const result = await payload.create({
+          overrideAccess: true,
           collection: tabSlug,
           locale: englishLocale,
           data: {
@@ -1855,6 +1998,7 @@ describe('Localization', () => {
         expect(result.tabLocalized?.title).toBe('hello en')
 
         await payload.update({
+          overrideAccess: true,
           collection: tabSlug,
           locale: spanishLocale,
           id: result.id,
@@ -1866,12 +2010,14 @@ describe('Localization', () => {
         })
 
         const docEn = await payload.findByID({
+          overrideAccess: true,
           collection: tabSlug,
           locale: englishLocale,
           id: result.id,
         })
 
         const docEs = await payload.findByID({
+          overrideAccess: true,
           collection: tabSlug,
           locale: spanishLocale,
           id: result.id,
@@ -1883,6 +2029,7 @@ describe('Localization', () => {
 
       it('should properly create/update/read localized tab field', async () => {
         const result = await payload.create({
+          overrideAccess: true,
           collection: tabSlug,
           locale: englishLocale,
           data: {
@@ -1899,6 +2046,7 @@ describe('Localization', () => {
         expect(result.tabLocalized.array[0].title).toBe('hello en')
 
         await payload.update({
+          overrideAccess: true,
           collection: tabSlug,
           locale: spanishLocale,
           id: result.id,
@@ -1910,12 +2058,14 @@ describe('Localization', () => {
         })
 
         const docEn = await payload.findByID({
+          overrideAccess: true,
           collection: tabSlug,
           locale: englishLocale,
           id: result.id,
         })
 
         const docEs = await payload.findByID({
+          overrideAccess: true,
           collection: tabSlug,
           locale: spanishLocale,
           id: result.id,
@@ -1927,6 +2077,7 @@ describe('Localization', () => {
 
       it('should properly create/update/read localized field inside of tab', async () => {
         const result = await payload.create({
+          overrideAccess: true,
           collection: tabSlug,
           locale: englishLocale,
           data: {
@@ -1939,6 +2090,7 @@ describe('Localization', () => {
         expect(result.tab.title).toBe('hello en')
 
         await payload.update({
+          overrideAccess: true,
           collection: tabSlug,
           locale: spanishLocale,
           id: result.id,
@@ -1950,11 +2102,13 @@ describe('Localization', () => {
         })
 
         const docEn = await payload.findByID({
+          overrideAccess: true,
           collection: tabSlug,
           locale: englishLocale,
           id: result.id,
         })
         const docEs = await payload.findByID({
+          overrideAccess: true,
           collection: tabSlug,
           locale: spanishLocale,
           id: result.id,
@@ -1966,6 +2120,7 @@ describe('Localization', () => {
 
       it('should properly create/update/read deep localized field inside of tab', async () => {
         const result = await payload.create({
+          overrideAccess: true,
           collection: tabSlug,
           locale: englishLocale,
           data: {
@@ -1984,6 +2139,7 @@ describe('Localization', () => {
         expect(result.deep.array[0].title).toBe('hello en')
 
         await payload.update({
+          overrideAccess: true,
           collection: tabSlug,
           locale: spanishLocale,
           id: result.id,
@@ -2007,11 +2163,13 @@ describe('Localization', () => {
         })
 
         const docEn = await payload.findByID({
+          overrideAccess: true,
           collection: tabSlug,
           locale: englishLocale,
           id: result.id,
         })
         const docEs = await payload.findByID({
+          overrideAccess: true,
           collection: tabSlug,
           locale: spanishLocale,
           id: result.id,
@@ -2025,6 +2183,7 @@ describe('Localization', () => {
 
       it('should properly isolate locales for a group inside a localized tab', async () => {
         const docEs = await payload.create({
+          overrideAccess: true,
           collection: tabSlug,
           locale: spanishLocale,
           data: {
@@ -2037,6 +2196,7 @@ describe('Localization', () => {
         })
 
         await payload.update({
+          overrideAccess: true,
           collection: tabSlug,
           locale: englishLocale,
           id: docEs.id,
@@ -2050,12 +2210,14 @@ describe('Localization', () => {
         })
 
         const readEn = await payload.findByID({
+          overrideAccess: true,
           collection: tabSlug,
           locale: englishLocale,
           id: docEs.id,
         })
 
         const readEs = await payload.findByID({
+          overrideAccess: true,
           collection: tabSlug,
           locale: spanishLocale,
           id: docEs.id,
@@ -2083,6 +2245,7 @@ describe('Localization', () => {
       let id
       it('should allow creating nested blocks per locale', async () => {
         const doc = await payload.create({
+          overrideAccess: true,
           collection: 'blocks-fields',
           data: {
             content: [
@@ -2114,11 +2277,13 @@ describe('Localization', () => {
         id = doc.id
 
         const retrievedInEN = await payload.findByID({
+          overrideAccess: true,
           collection: 'blocks-fields',
           id,
         })
 
         await payload.update({
+          overrideAccess: true,
           collection: 'blocks-fields',
           id,
           locale: 'es',
@@ -2150,6 +2315,7 @@ describe('Localization', () => {
         })
 
         const retrieved = await payload.findByID({
+          overrideAccess: true,
           collection: 'blocks-fields',
           id,
           locale: 'all',
@@ -2170,6 +2336,7 @@ describe('Localization', () => {
       it('should not duplicate block rows for blocks within localized array fields', async () => {
         const randomDoc = (
           await payload.find({
+            overrideAccess: true,
             collection: 'localized-posts',
             depth: 0,
           })
@@ -2177,6 +2344,7 @@ describe('Localization', () => {
 
         const randomDoc2 = (
           await payload.find({
+            overrideAccess: true,
             collection: 'localized-posts',
             depth: 0,
           })
@@ -2237,6 +2405,7 @@ describe('Localization', () => {
         ]
 
         const createdEnDoc = await payload.create({
+          overrideAccess: true,
           collection: 'nested-arrays',
           locale: 'en',
           depth: 0,
@@ -2250,6 +2419,7 @@ describe('Localization', () => {
         })
 
         const updatedEsDoc = await payload.update({
+          overrideAccess: true,
           collection: 'nested-arrays',
           id: createdEnDoc.id,
           depth: 0,
@@ -2279,6 +2449,7 @@ describe('Localization', () => {
 
         // pull enDoc again and make sure the update of esDoc did not mess with the data of enDoc
         const enDoc2 = await payload.findByID({
+          overrideAccess: true,
           id: createdEnDoc.id,
           collection: 'nested-arrays',
           locale: 'en',
@@ -2291,18 +2462,21 @@ describe('Localization', () => {
       it('should update localized relation within unLocalized array', async () => {
         const randomTextDoc = (
           await payload.find({
+            overrideAccess: true,
             collection: 'localized-posts',
             depth: 0,
           })
         ).docs[0]
         const randomTextDoc2 = (
           await payload.find({
+            overrideAccess: true,
             collection: 'localized-posts',
             depth: 0,
           })
         ).docs[1]
 
         const createdEnDoc = await payload.create({
+          overrideAccess: true,
           collection: 'nested-arrays',
           locale: 'en',
           depth: 0,
@@ -2316,6 +2490,7 @@ describe('Localization', () => {
         })
 
         const updatedEsDoc = await payload.update({
+          overrideAccess: true,
           collection: 'nested-arrays',
           id: createdEnDoc.id,
           depth: 0,
@@ -2338,6 +2513,7 @@ describe('Localization', () => {
 
         // pull enDoc again and make sure the update of esDoc did not mess with the data of enDoc
         const enDoc2 = await payload.findByID({
+          overrideAccess: true,
           id: createdEnDoc.id,
           collection: 'nested-arrays',
           locale: 'en',
@@ -2351,6 +2527,7 @@ describe('Localization', () => {
     describe('nested fields', () => {
       it('should update localized block', async () => {
         const doc = await payload.create({
+          overrideAccess: true,
           collection: 'blocks-fields',
           locale: 'en',
           data: {
@@ -2369,6 +2546,7 @@ describe('Localization', () => {
         })
 
         const updated = await payload.update({
+          overrideAccess: true,
           id: doc.id,
           collection: 'blocks-fields',
           data: {
@@ -2404,6 +2582,7 @@ describe('Localization', () => {
 
       it('update specific locale should not erease the others in blocks and arrays', async () => {
         const doc = await payload.create({
+          overrideAccess: true,
           collection: 'nested',
           locale: 'en',
           data: {
@@ -2428,6 +2607,7 @@ describe('Localization', () => {
         expect(doc.topLevelArray).toHaveLength(1)
 
         const findAllLocales = await payload.findByID({
+          overrideAccess: true,
           id: doc.id,
           collection: 'nested',
           locale: 'all',
@@ -2441,6 +2621,7 @@ describe('Localization', () => {
         })
 
         const updatedDoc = await payload.update({
+          overrideAccess: true,
           id: doc.id,
           collection: 'nested',
           locale: 'es',
@@ -2467,6 +2648,7 @@ describe('Localization', () => {
         expect(updatedDoc.topLevelArray?.[0]?.notLocalizedText).toBe('some-not-localized-text-es')
 
         const refreshedDoc = await payload.findByID({
+          overrideAccess: true,
           id: doc.id,
           collection: 'nested',
           locale: 'all',
@@ -2484,6 +2666,7 @@ describe('Localization', () => {
 
       it('update specific locale should not erease the others in simple fields', async () => {
         const doc = await payload.create({
+          overrideAccess: true,
           collection: 'localized-posts',
           locale: 'en',
           data: {
@@ -2497,6 +2680,7 @@ describe('Localization', () => {
         expect(doc.localizedDescription).toBe('some-localized-description')
 
         const findAllLocales = await payload.findByID({
+          overrideAccess: true,
           id: doc.id,
           collection: 'localized-posts',
           locale: 'all',
@@ -2510,6 +2694,7 @@ describe('Localization', () => {
         })
 
         const updatedDoc = await payload.update({
+          overrideAccess: true,
           id: doc.id,
           collection: 'localized-posts',
           locale: 'es',
@@ -2524,6 +2709,7 @@ describe('Localization', () => {
         expect(updatedDoc.localizedDescription).toBe('some-localized-description-es')
 
         const refreshedDoc = await payload.findByID({
+          overrideAccess: true,
           id: doc.id,
           collection: 'localized-posts',
           locale: 'all',
@@ -2541,18 +2727,21 @@ describe('Localization', () => {
       it('should allow for fields which could contain new tables within localized arrays to be stored', async () => {
         const randomDoc = (
           await payload.find({
+            overrideAccess: true,
             collection: 'localized-posts',
             depth: 0,
           })
         ).docs[0]
         const randomDoc2 = (
           await payload.find({
+            overrideAccess: true,
             collection: 'localized-posts',
             depth: 0,
           })
         ).docs[1]
 
         const newDoc = await payload.create({
+          overrideAccess: true,
           collection: 'nested-field-tables',
           data: {
             array: [
@@ -2581,6 +2770,7 @@ describe('Localization', () => {
         })
 
         await payload.update({
+          overrideAccess: true,
           collection: 'nested-field-tables',
           id: newDoc.id,
           locale: 'es',
@@ -2611,6 +2801,7 @@ describe('Localization', () => {
         })
 
         const retrieved = await payload.findByID({
+          overrideAccess: true,
           collection: 'nested-field-tables',
           id: newDoc.id,
           depth: 0,
@@ -2645,18 +2836,21 @@ describe('Localization', () => {
       it('should allow for relationship in new tables within blocks inside of localized blocks to be stored', async () => {
         const randomDoc = (
           await payload.find({
+            overrideAccess: true,
             collection: 'localized-posts',
             depth: 0,
           })
         ).docs[0]
         const randomDoc2 = (
           await payload.find({
+            overrideAccess: true,
             collection: 'localized-posts',
             depth: 0,
           })
         ).docs[1]
 
         const docEn = await payload.create({
+          overrideAccess: true,
           collection: 'nested-field-tables',
           depth: 0,
           data: {
@@ -2706,6 +2900,7 @@ describe('Localization', () => {
         expect(docEn.blocks[2].nestedBlocks[0].relation.value).toBe(randomDoc.id)
 
         const docEs = await payload.update({
+          overrideAccess: true,
           id: docEn.id,
           depth: 0,
           locale: 'es',
@@ -2757,6 +2952,7 @@ describe('Localization', () => {
         expect(docEs.blocks[2].nestedBlocks[0].relation.value).toBe(randomDoc2.id)
 
         const docAll = await payload.findByID({
+          overrideAccess: true,
           collection: 'nested-field-tables',
           id: docEn.id,
           locale: 'all',
@@ -2775,18 +2971,21 @@ describe('Localization', () => {
       it('should allow for relationship in new tables within arrays inside of localized blocks to be stored', async () => {
         const randomDoc = (
           await payload.find({
+            overrideAccess: true,
             collection: 'localized-posts',
             depth: 0,
           })
         ).docs[0]
         const randomDoc2 = (
           await payload.find({
+            overrideAccess: true,
             collection: 'localized-posts',
             depth: 0,
           })
         ).docs[1]
 
         const docEn = await payload.create({
+          overrideAccess: true,
           collection: 'nested-field-tables',
           depth: 0,
           data: {
@@ -2833,6 +3032,7 @@ describe('Localization', () => {
         expect(docEn.blocks[2].array[0].relation.value).toBe(randomDoc.id)
 
         const docEs = await payload.update({
+          overrideAccess: true,
           id: docEn.id,
           depth: 0,
           locale: 'es',
@@ -2881,6 +3081,7 @@ describe('Localization', () => {
         expect(docEs.blocks[2].array[0].relation.value).toBe(randomDoc2.id)
 
         const docAll = await payload.findByID({
+          overrideAccess: true,
           collection: 'nested-field-tables',
           id: docEn.id,
           locale: 'all',
@@ -2900,6 +3101,7 @@ describe('Localization', () => {
     describe('localized with unique', () => {
       it('localized with unique should work for each locale', async () => {
         await payload.create({
+          overrideAccess: true,
           collection: 'localized-posts',
           locale: 'ar',
           data: {
@@ -2908,6 +3110,7 @@ describe('Localization', () => {
         })
 
         await payload.create({
+          overrideAccess: true,
           collection: 'localized-posts',
           locale: 'en',
           data: {
@@ -2916,6 +3119,7 @@ describe('Localization', () => {
         })
 
         await payload.create({
+          overrideAccess: true,
           collection: 'localized-posts',
           locale: 'es',
           data: {
@@ -2925,6 +3129,7 @@ describe('Localization', () => {
 
         await expect(
           payload.create({
+            overrideAccess: true,
             collection: 'localized-posts',
             locale: 'en',
             data: {
@@ -2938,6 +3143,7 @@ describe('Localization', () => {
         const uniqueValue = `unique-path-test-${Date.now()}`
 
         await payload.create({
+          overrideAccess: true,
           collection: localizedPostsSlug,
           locale: 'en',
           data: {
@@ -2947,6 +3153,7 @@ describe('Localization', () => {
 
         try {
           await payload.create({
+            overrideAccess: true,
             collection: localizedPostsSlug,
             locale: 'en',
             data: {
@@ -2973,6 +3180,7 @@ describe('Localization', () => {
         const blockData = [{ blockType: 'text', text: 'test' }]
 
         await payload.create({
+          overrideAccess: true,
           collection: withRequiredLocalizedFields,
           locale: 'en',
           data: {
@@ -2986,6 +3194,7 @@ describe('Localization', () => {
 
         try {
           await payload.create({
+            overrideAccess: true,
             collection: withRequiredLocalizedFields,
             locale: 'en',
             data: {
@@ -3017,6 +3226,7 @@ describe('Localization', () => {
       beforeAll(async () => {
         user = (
           await payload.find({
+            overrideAccess: true,
             collection: 'users',
             where: {
               email: {
@@ -3031,6 +3241,7 @@ describe('Localization', () => {
 
       it('should copy to locale', async () => {
         const doc = await payload.create({
+          overrideAccess: true,
           collection: 'localized-posts',
           data: {
             title: 'Hello',
@@ -3063,6 +3274,7 @@ describe('Localization', () => {
         // because at the moment only int tests run in Postgres in CI,
         // and that's where the bug occurs.
         const doc = await payload.create({
+          overrideAccess: true,
           collection: 'blocks-fields',
           locale: 'en',
           data: {
@@ -3098,6 +3310,7 @@ describe('Localization', () => {
         // because at the moment only int tests run in Postgres in CI,
         // and that's where the bug occurs.
         const doc = await payload.create({
+          overrideAccess: true,
           collection: 'blocks-fields',
           locale: 'en',
           data: {
@@ -3124,6 +3337,7 @@ describe('Localization', () => {
 
       it('should copy localized nested to arrays', async () => {
         const doc = await payload.create({
+          overrideAccess: true,
           collection: 'nested',
           locale: 'en',
           data: {
@@ -3150,6 +3364,7 @@ describe('Localization', () => {
         expect(res.topLevelArray?.[0]?.notLocalizedText).toBe('some-not-localized-text')
 
         const refreshedDoc = await payload.findByID({
+          overrideAccess: true,
           id: doc.id,
           collection: 'nested',
         })
@@ -3162,6 +3377,7 @@ describe('Localization', () => {
 
       it('should copy localized arrays', async () => {
         const doc = await payload.create({
+          overrideAccess: true,
           collection: 'nested',
           locale: 'en',
           data: {
@@ -3186,6 +3402,7 @@ describe('Localization', () => {
         expect(res.topLevelArrayLocalized?.[0]?.text).toBe('some-text')
 
         const refreshedDoc = await payload.findByID({
+          overrideAccess: true,
           id: doc.id,
           collection: 'nested',
         })
@@ -3196,6 +3413,7 @@ describe('Localization', () => {
 
       it('should copy nested arrays through tabs within localized arrays', async () => {
         const doc = await payload.create({
+          overrideAccess: true,
           collection: arrayCollectionSlug,
           data: {
             items: [
@@ -3225,6 +3443,7 @@ describe('Localization', () => {
           expect(res.items?.[0]?.nestedItems?.[0]?.text).toBe('nested text')
         } finally {
           await payload.delete({
+            overrideAccess: true,
             id: doc.id,
             collection: arrayCollectionSlug,
           })
@@ -3238,6 +3457,7 @@ describe('Localization', () => {
 
         // Create a document with content in en locale
         const doc = await payload.create({
+          overrideAccess: true,
           collection: 'blocks-fields',
           locale: 'en',
           data: {
@@ -3259,6 +3479,7 @@ describe('Localization', () => {
 
         // Add content to Spanish locale separately
         await payload.update({
+          overrideAccess: true,
           collection: 'blocks-fields',
           id: doc.id,
           locale: 'es',
@@ -3275,6 +3496,7 @@ describe('Localization', () => {
 
         // Verify initial state - English data should exist
         const enDocBefore = await payload.findByID({
+          overrideAccess: true,
           id: doc.id,
           collection: 'blocks-fields',
           locale: 'en',
@@ -3297,6 +3519,7 @@ describe('Localization', () => {
 
         // CRITICAL: Verify English data is NOT lost after copy operation
         const enDocAfter = await payload.findByID({
+          overrideAccess: true,
           id: doc.id,
           collection: 'blocks-fields',
           locale: 'en',
@@ -3308,6 +3531,7 @@ describe('Localization', () => {
 
         // Verify Spanish locale received the copied data (as a draft)
         const esDocAfter = await payload.findByID({
+          overrideAccess: true,
           id: doc.id,
           collection: 'blocks-fields',
           locale: 'es',
@@ -3321,6 +3545,7 @@ describe('Localization', () => {
       it('should copy to locale without losing draft data when autosave is enabled', async () => {
         // Create a document with draft content
         const doc = await payload.create({
+          overrideAccess: true,
           collection: 'blocks-fields',
           locale: 'en',
           draft: true,
@@ -3337,6 +3562,7 @@ describe('Localization', () => {
 
         // Verify draft exists
         const draftBefore = await payload.findByID({
+          overrideAccess: true,
           id: doc.id,
           collection: 'blocks-fields',
           locale: 'en',
@@ -3358,6 +3584,7 @@ describe('Localization', () => {
 
         // Verify the source draft is not lost
         const draftAfter = await payload.findByID({
+          overrideAccess: true,
           id: doc.id,
           collection: 'blocks-fields',
           locale: 'en',
@@ -3371,6 +3598,7 @@ describe('Localization', () => {
       it('should not overwrite published content when source has both published and draft versions', async () => {
         // Create published doc in en
         const doc = await payload.create({
+          overrideAccess: true,
           collection: 'blocks-fields',
           locale: 'en',
           data: {
@@ -3380,6 +3608,7 @@ describe('Localization', () => {
 
         // Create draft with different content
         await payload.update({
+          overrideAccess: true,
           collection: 'blocks-fields',
           id: doc.id,
           locale: 'en',
@@ -3391,12 +3620,14 @@ describe('Localization', () => {
 
         // Verify both published and draft exist with different content
         const enPublishedBefore = await payload.findByID({
+          overrideAccess: true,
           id: doc.id,
           collection: 'blocks-fields',
           locale: 'en',
           draft: false,
         })
         const enDraftBefore = await payload.findByID({
+          overrideAccess: true,
           id: doc.id,
           collection: 'blocks-fields',
           locale: 'en',
@@ -3420,6 +3651,7 @@ describe('Localization', () => {
 
         // Verify published content in source locale is NOT overwritten
         const enPublishedAfter = await payload.findByID({
+          overrideAccess: true,
           id: doc.id,
           collection: 'blocks-fields',
           locale: 'en',
@@ -3435,6 +3667,7 @@ describe('Localization', () => {
         describe('Collections', () => {
           it('should allow fallback locale to be an array', async () => {
             const result = await payload.findByID({
+              overrideAccess: true,
               id: postWithLocalizedData.id,
               collection,
               locale: portugueseLocale,
@@ -3447,6 +3680,7 @@ describe('Localization', () => {
 
           it('should pass over fallback locales until it finds one that exists', async () => {
             const result = await payload.findByID({
+              overrideAccess: true,
               id: postWithLocalizedData.id,
               collection,
               locale: portugueseLocale,
@@ -3459,6 +3693,7 @@ describe('Localization', () => {
 
           it('should return undefined if no fallback locales exist', async () => {
             const result = await payload.findByID({
+              overrideAccess: true,
               id: postWithLocalizedData.id,
               collection,
               locale: portugueseLocale,
@@ -3473,6 +3708,7 @@ describe('Localization', () => {
         describe('Globals', () => {
           it('should allow fallback locale to be an array', async () => {
             const result = await payload.findGlobal({
+              overrideAccess: true,
               slug: global,
               locale: portugueseLocale,
               fallbackLocale: [spanishLocale, englishLocale],
@@ -3484,6 +3720,7 @@ describe('Localization', () => {
 
           it('should pass over fallback locales until it finds one that exists', async () => {
             const result = await payload.findGlobal({
+              overrideAccess: true,
               slug: global,
               locale: portugueseLocale,
               fallbackLocale: ['hu', spanishLocale],
@@ -3494,6 +3731,7 @@ describe('Localization', () => {
 
           it('should return undefined if no fallback locales exist', async () => {
             const result = await payload.findGlobal({
+              overrideAccess: true,
               slug: global,
               locale: portugueseLocale,
               fallbackLocale: ['hu', 'ar'],
@@ -3703,6 +3941,7 @@ describe('Localization', () => {
       }
 
       post1 = await payload.create({
+        overrideAccess: true,
         collection,
         data: {
           title: englishTitle,
@@ -3710,6 +3949,7 @@ describe('Localization', () => {
       })
 
       postWithLocalizedData = await payload.create({
+        overrideAccess: true,
         collection,
         data: {
           title: englishTitle,
@@ -3717,6 +3957,7 @@ describe('Localization', () => {
       })
 
       await payload.update({
+        overrideAccess: true,
         id: postWithLocalizedData.id,
         collection,
         data: {
@@ -3729,6 +3970,7 @@ describe('Localization', () => {
     describe('fallback locale', () => {
       it('create english', async () => {
         const allDocs = await payload.find({
+          overrideAccess: true,
           collection,
           where: {
             title: { equals: post1.title },
@@ -3739,6 +3981,7 @@ describe('Localization', () => {
 
       it('add spanish translation', async () => {
         const updated = await payload.update({
+          overrideAccess: true,
           id: post1.id,
           collection,
           data: {
@@ -3750,6 +3993,7 @@ describe('Localization', () => {
         expect(updated.title).toEqual(spanishTitle)
 
         const localized: any = await payload.findByID({
+          overrideAccess: true,
           id: post1.id,
           collection,
           locale: 'all',
@@ -3761,6 +4005,7 @@ describe('Localization', () => {
 
       it('should not fallback to english', async () => {
         const retrievedDoc = await payload.findByID({
+          overrideAccess: true,
           id: post1.id,
           collection,
           locale: portugueseLocale,
@@ -3771,6 +4016,7 @@ describe('Localization', () => {
 
       it('should fallback to english with explicit fallbackLocale', async () => {
         const fallbackDoc = await payload.findByID({
+          overrideAccess: true,
           id: post1.id,
           collection,
           locale: portugueseLocale,
@@ -3782,6 +4028,7 @@ describe('Localization', () => {
 
       it('should not fallback to spanish translation and no explicit fallback is provided', async () => {
         const localizedFallback: any = await payload.findByID({
+          overrideAccess: true,
           id: postWithLocalizedData.id,
           collection,
           locale: portugueseLocale,
@@ -3792,6 +4039,7 @@ describe('Localization', () => {
 
       it('should respect fallback none', async () => {
         const localizedFallback: any = await payload.findByID({
+          overrideAccess: true,
           id: postWithLocalizedData.id,
           collection,
           locale: portugueseLocale,
@@ -3803,6 +4051,7 @@ describe('Localization', () => {
 
       it('should respect fallback: false on relationship values', async () => {
         const originalPost = await payload.create({
+          overrideAccess: true,
           collection: allFieldsLocalizedSlug,
           data: {
             text: 'Post EN',
@@ -3811,6 +4060,7 @@ describe('Localization', () => {
         })
 
         await payload.update({
+          overrideAccess: true,
           collection: allFieldsLocalizedSlug,
           id: originalPost.id,
           data: {
@@ -3820,6 +4070,7 @@ describe('Localization', () => {
         })
 
         const spanishPostWithEnglishFallback = await payload.findByID({
+          overrideAccess: true,
           collection: allFieldsLocalizedSlug,
           id: originalPost.id,
           locale: 'es',
@@ -3829,6 +4080,7 @@ describe('Localization', () => {
         expect(spanishPostWithEnglishFallback.text).toBe('Post EN')
 
         const spanishPostWithNoFallback = await payload.findByID({
+          overrideAccess: true,
           collection: allFieldsLocalizedSlug,
           id: originalPost.id,
           locale: 'es',
@@ -3849,6 +4101,7 @@ describe('Localization', () => {
   describe('Localized data shape', () => {
     beforeEach(async () => {
       await payload.delete({
+        overrideAccess: true,
         collection: allFieldsLocalizedSlug,
         where: {
           id: {
@@ -3859,6 +4112,7 @@ describe('Localization', () => {
     })
     it('should only nest the top level localized field values under locale keys', async () => {
       const doc = await payload.create({
+        overrideAccess: true,
         collection: allFieldsLocalizedSlug,
         data: {
           t1: {
@@ -3897,6 +4151,7 @@ describe('Localization', () => {
       })
 
       const allLocalesDoc = await payload.findByID({
+        overrideAccess: true,
         collection: allFieldsLocalizedSlug,
         id: doc.id,
         locale: 'all',
@@ -3959,6 +4214,7 @@ describe('Localization', () => {
   describe('Localization like fields', () => {
     it('should not localize fields that merely resemble localization fields', async () => {
       const doc = await payload.create({
+        overrideAccess: true,
         collection: noLocalizedFieldsCollectionSlug,
         data: {
           text: 'title',
@@ -3971,6 +4227,7 @@ describe('Localization', () => {
       })
 
       const queriedDoc = await payload.find({
+        overrideAccess: true,
         collection: noLocalizedFieldsCollectionSlug,
         where: {
           'group.en.text': { equals: 'some text' },
@@ -3993,6 +4250,7 @@ describe('Localization', () => {
           }
 
           const doc = await payload.create({
+            overrideAccess: true,
             collection: allFieldsLocalizedSlug,
             data: {
               text: 'Localized Metadata EN',
@@ -4002,6 +4260,7 @@ describe('Localization', () => {
           })
 
           const esDoc = await payload.findByID({
+            overrideAccess: true,
             locale: spanishLocale,
             id: doc.id,
             collection: allFieldsLocalizedSlug,
@@ -4012,6 +4271,7 @@ describe('Localization', () => {
 
         it('should allow publishing of all locales upon creation', async () => {
           const doc = await payload.create({
+            overrideAccess: true,
             collection: allFieldsLocalizedSlug,
             data: {
               text: 'Localized Metadata EN',
@@ -4022,6 +4282,7 @@ describe('Localization', () => {
           })
 
           const esDoc = await payload.findByID({
+            overrideAccess: true,
             locale: spanishLocale,
             id: doc.id,
             collection: allFieldsLocalizedSlug,
@@ -4038,6 +4299,7 @@ describe('Localization', () => {
 
           // create english draft 1
           const doc = await payload.create({
+            overrideAccess: true,
             collection: allFieldsLocalizedSlug,
             data: {
               text: 'english draft 1',
@@ -4048,6 +4310,7 @@ describe('Localization', () => {
           })
           // update english published 1
           await payload.update({
+            overrideAccess: true,
             collection: allFieldsLocalizedSlug,
             id: doc.id,
             data: {
@@ -4059,6 +4322,7 @@ describe('Localization', () => {
 
           // create spanish draft 1
           await payload.update({
+            overrideAccess: true,
             collection: allFieldsLocalizedSlug,
             id: doc.id,
             data: {
@@ -4070,6 +4334,7 @@ describe('Localization', () => {
           })
           // update spanish published 1
           await payload.update({
+            overrideAccess: true,
             collection: allFieldsLocalizedSlug,
             id: doc.id,
             data: {
@@ -4080,6 +4345,7 @@ describe('Localization', () => {
           })
           // update spanish draft 2
           await payload.update({
+            overrideAccess: true,
             collection: allFieldsLocalizedSlug,
             id: doc.id,
             data: {
@@ -4091,6 +4357,7 @@ describe('Localization', () => {
           })
 
           const publishedDoc = await payload.findByID({
+            overrideAccess: true,
             collection: allFieldsLocalizedSlug,
             id: doc.id,
             locale: 'all',
@@ -4103,6 +4370,7 @@ describe('Localization', () => {
           expect(publishedDoc.text!.es).toBe('spanish published 1')
 
           const latestVersionDoc = await payload.findByID({
+            overrideAccess: true,
             collection: allFieldsLocalizedSlug,
             id: doc.id,
             draft: true,
@@ -4117,6 +4385,7 @@ describe('Localization', () => {
 
         it('should allow querying metadata per locale', async () => {
           const doc = await payload.create({
+            overrideAccess: true,
             collection: allFieldsLocalizedSlug,
             data: {
               text: 'Localized Metadata EN',
@@ -4125,6 +4394,7 @@ describe('Localization', () => {
             locale: defaultLocale,
           })
           await payload.update({
+            overrideAccess: true,
             collection: allFieldsLocalizedSlug,
             id: doc.id,
             data: {
@@ -4136,6 +4406,7 @@ describe('Localization', () => {
           })
 
           const esPublished = await payload.find({
+            overrideAccess: true,
             locale: spanishLocale,
             collection: allFieldsLocalizedSlug,
             where: {
@@ -4156,6 +4427,7 @@ describe('Localization', () => {
           expect(esPublished.totalDocs).toBe(0)
 
           const esDraft = await payload.find({
+            overrideAccess: true,
             locale: spanishLocale,
             collection: allFieldsLocalizedSlug,
             draft: true,
@@ -4179,6 +4451,7 @@ describe('Localization', () => {
           expect(esDraft.docs[0]!.text).toBe('Localized Metadata ES')
 
           const enPublished = await payload.find({
+            overrideAccess: true,
             locale: defaultLocale,
             collection: allFieldsLocalizedSlug,
             draft: true,
@@ -4205,6 +4478,7 @@ describe('Localization', () => {
       describe('on update', () => {
         it('should publish and unpublish single locales', async () => {
           const doc = await payload.create({
+            overrideAccess: true,
             collection: allFieldsLocalizedSlug,
             data: {
               text: 'en published',
@@ -4214,6 +4488,7 @@ describe('Localization', () => {
           })
 
           await payload.update({
+            overrideAccess: true,
             collection: allFieldsLocalizedSlug,
             id: doc.id,
             data: {
@@ -4225,6 +4500,7 @@ describe('Localization', () => {
           })
 
           await payload.update({
+            overrideAccess: true,
             collection: allFieldsLocalizedSlug,
             id: doc.id,
             data: {
@@ -4235,6 +4511,7 @@ describe('Localization', () => {
           })
 
           const mainDocument = await payload.findByID({
+            overrideAccess: true,
             locale: 'all',
             id: doc.id,
             collection: allFieldsLocalizedSlug,
@@ -4247,6 +4524,7 @@ describe('Localization', () => {
           expect(mainDocument.text!.en).toBe('en published')
 
           const latestVersion = await payload.findByID({
+            overrideAccess: true,
             locale: 'all',
             id: doc.id,
             collection: allFieldsLocalizedSlug,
@@ -4261,6 +4539,7 @@ describe('Localization', () => {
 
         it('should publish and unpublish all', async () => {
           const doc = await payload.create({
+            overrideAccess: true,
             collection: allFieldsLocalizedSlug,
             data: {
               text: 'en draft',
@@ -4270,6 +4549,7 @@ describe('Localization', () => {
           })
 
           await payload.update({
+            overrideAccess: true,
             collection: allFieldsLocalizedSlug,
             id: doc.id,
             data: {
@@ -4280,6 +4560,7 @@ describe('Localization', () => {
           })
 
           await payload.update({
+            overrideAccess: true,
             collection: allFieldsLocalizedSlug,
             id: doc.id,
             data: {
@@ -4291,6 +4572,7 @@ describe('Localization', () => {
           })
 
           const mainDocument = await payload.findByID({
+            overrideAccess: true,
             locale: 'all',
             id: doc.id,
             collection: allFieldsLocalizedSlug,
@@ -4303,6 +4585,7 @@ describe('Localization', () => {
           expect(mainDocument.text!.es).toBe('es draft')
 
           await payload.update({
+            overrideAccess: true,
             collection: allFieldsLocalizedSlug,
             id: doc.id,
             unpublishAllLocales: true,
@@ -4310,6 +4593,7 @@ describe('Localization', () => {
           })
 
           const unpublishedDocument = await payload.findByID({
+            overrideAccess: true,
             locale: 'all',
             id: doc.id,
             collection: allFieldsLocalizedSlug,
@@ -4330,6 +4614,7 @@ describe('Localization', () => {
 
           // create english draft 1
           await payload.updateGlobal({
+            overrideAccess: true,
             slug: globalWithDraftsSlug,
             data: {
               text: 'english draft 1',
@@ -4340,6 +4625,7 @@ describe('Localization', () => {
           })
           // update english published 1
           await payload.updateGlobal({
+            overrideAccess: true,
             slug: globalWithDraftsSlug,
             data: {
               text: 'english published 1',
@@ -4350,6 +4636,7 @@ describe('Localization', () => {
 
           // create spanish draft 1
           await payload.updateGlobal({
+            overrideAccess: true,
             slug: globalWithDraftsSlug,
             data: {
               text: 'spanish draft 1',
@@ -4360,6 +4647,7 @@ describe('Localization', () => {
           })
           // update spanish published 1
           await payload.updateGlobal({
+            overrideAccess: true,
             slug: globalWithDraftsSlug,
             data: {
               text: 'spanish published 1',
@@ -4369,6 +4657,7 @@ describe('Localization', () => {
           })
           // update spanish draft 2
           await payload.updateGlobal({
+            overrideAccess: true,
             slug: globalWithDraftsSlug,
             data: {
               text: 'spanish draft 2',
@@ -4379,6 +4668,7 @@ describe('Localization', () => {
           })
 
           const publishedDoc = await payload.findGlobal({
+            overrideAccess: true,
             slug: globalWithDraftsSlug,
             locale: 'all',
             draft: false,
@@ -4390,6 +4680,7 @@ describe('Localization', () => {
           expect(publishedDoc.text!.es).toBe('spanish published 1')
 
           const latestVersionDoc = await payload.findGlobal({
+            overrideAccess: true,
             slug: globalWithDraftsSlug,
             draft: true,
             locale: 'all',
@@ -4405,6 +4696,7 @@ describe('Localization', () => {
       describe('on update', () => {
         it('should publish and unpublish single locales', async () => {
           const doc = await payload.updateGlobal({
+            overrideAccess: true,
             slug: globalWithDraftsSlug,
             data: {
               text: 'en published',
@@ -4414,6 +4706,7 @@ describe('Localization', () => {
           })
 
           await payload.updateGlobal({
+            overrideAccess: true,
             slug: globalWithDraftsSlug,
             data: {
               text: 'en draft',
@@ -4424,6 +4717,7 @@ describe('Localization', () => {
           })
 
           await payload.updateGlobal({
+            overrideAccess: true,
             slug: globalWithDraftsSlug,
             data: {
               text: 'es published',
@@ -4433,6 +4727,7 @@ describe('Localization', () => {
           })
 
           const mainDocument = await payload.findGlobal({
+            overrideAccess: true,
             slug: globalWithDraftsSlug,
             locale: 'all',
             draft: false,
@@ -4444,6 +4739,7 @@ describe('Localization', () => {
           expect(mainDocument.text!.en).toBe('en published')
 
           const latestVersion = await payload.findGlobal({
+            overrideAccess: true,
             slug: globalWithDraftsSlug,
             locale: 'all',
             draft: true,
@@ -4457,6 +4753,7 @@ describe('Localization', () => {
 
         it('should publish and unpublish all', async () => {
           const doc = await payload.updateGlobal({
+            overrideAccess: true,
             slug: globalWithDraftsSlug,
             data: {
               text: 'en draft',
@@ -4466,6 +4763,7 @@ describe('Localization', () => {
           })
 
           await payload.updateGlobal({
+            overrideAccess: true,
             slug: globalWithDraftsSlug,
             data: {
               text: 'es draft',
@@ -4475,6 +4773,7 @@ describe('Localization', () => {
           })
 
           await payload.updateGlobal({
+            overrideAccess: true,
             slug: globalWithDraftsSlug,
             data: {
               text: 'en published',
@@ -4485,6 +4784,7 @@ describe('Localization', () => {
           })
 
           const mainDocument = await payload.findGlobal({
+            overrideAccess: true,
             slug: globalWithDraftsSlug,
             locale: 'all',
             draft: false,
@@ -4496,12 +4796,14 @@ describe('Localization', () => {
           expect(mainDocument.text!.es).toBe('es draft')
 
           await payload.updateGlobal({
+            overrideAccess: true,
             slug: globalWithDraftsSlug,
             unpublishAllLocales: true,
             data: {},
           })
 
           const unpublishedDocument = await payload.findGlobal({
+            overrideAccess: true,
             slug: globalWithDraftsSlug,
             locale: 'all',
             draft: false,
@@ -4518,6 +4820,7 @@ describe('Localization', () => {
 
       beforeAll(async () => {
         allFieldsPostWithLocalizedData = await payload.create({
+          overrideAccess: true,
           collection: allFieldsLocalizedSlug,
           data: {
             text: englishTitle,
@@ -4526,6 +4829,7 @@ describe('Localization', () => {
         })
 
         await payload.update({
+          overrideAccess: true,
           id: allFieldsPostWithLocalizedData.id,
           collection: allFieldsLocalizedSlug,
           data: {
@@ -4537,6 +4841,7 @@ describe('Localization', () => {
 
       it('should fallback to english translation when empty', async () => {
         await payload.update({
+          overrideAccess: true,
           id: allFieldsPostWithLocalizedData.id,
           collection: allFieldsLocalizedSlug,
           data: {
@@ -4546,6 +4851,7 @@ describe('Localization', () => {
         })
 
         const localizedFallback: any = await payload.findByID({
+          overrideAccess: true,
           id: allFieldsPostWithLocalizedData.id,
           collection: allFieldsLocalizedSlug,
           locale: 'all',
@@ -4555,6 +4861,7 @@ describe('Localization', () => {
         expect(localizedFallback.text.es).toEqual('')
 
         const retrievedInSpanish = await payload.findByID({
+          overrideAccess: true,
           id: allFieldsPostWithLocalizedData.id,
           collection: allFieldsLocalizedSlug,
           locale: spanishLocale,
@@ -4565,6 +4872,7 @@ describe('Localization', () => {
 
       it('should respect fallback none', async () => {
         const localizedFallback: any = await payload.findByID({
+          overrideAccess: true,
           id: allFieldsPostWithLocalizedData.id,
           collection: allFieldsLocalizedSlug,
           locale: portugueseLocale,
@@ -4579,6 +4887,7 @@ describe('Localization', () => {
   describe('localized queries', () => {
     it('should count versions with query on localized field', async () => {
       await payload.create({
+        overrideAccess: true,
         collection: localizedDraftsSlug,
         data: {
           title: 'Localized Drafts EN',
@@ -4587,6 +4896,7 @@ describe('Localization', () => {
       })
 
       const result2 = await payload.countVersions({
+        overrideAccess: true,
         collection: localizedDraftsSlug,
         where: {
           'version.title': {
@@ -4599,12 +4909,14 @@ describe('Localization', () => {
 
     it('should count global versions with query on localized field respecting locale', async () => {
       await payload.updateGlobal({
+        overrideAccess: true,
         slug: globalWithDraftsSlug,
         data: { text: 'global count en', _status: 'published' },
         locale: defaultLocale,
       })
 
       await payload.updateGlobal({
+        overrideAccess: true,
         slug: globalWithDraftsSlug,
         data: { text: 'global count es', _status: 'published' },
         locale: spanishLocale,
@@ -4613,12 +4925,14 @@ describe('Localization', () => {
       const englishWhere = { 'version.text': { equals: 'global count en' } }
 
       const inEnglish = await payload.countGlobalVersions({
+        overrideAccess: true,
         global: globalWithDraftsSlug,
         locale: defaultLocale,
         where: englishWhere,
       })
 
       const inSpanish = await payload.countGlobalVersions({
+        overrideAccess: true,
         global: globalWithDraftsSlug,
         locale: spanishLocale,
         where: englishWhere,
@@ -4637,6 +4951,7 @@ async function createLocalizedPost(data: {
   }
 }): Promise<LocalizedPost> {
   const localizedRelation: any = await payload.create({
+    overrideAccess: true,
     collection,
     data: {
       title: data.title.en,
@@ -4644,6 +4959,7 @@ async function createLocalizedPost(data: {
   })
 
   await payload.update({
+    overrideAccess: true,
     id: localizedRelation.id,
     collection,
     data: {

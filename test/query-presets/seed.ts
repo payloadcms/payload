@@ -104,6 +104,7 @@ export const seed = async (_payload: Payload) => {
     [
       () =>
         _payload.create({
+          overrideAccess: true,
           collection: usersSlug,
           data: {
             email: devCredentials.email,
@@ -114,6 +115,7 @@ export const seed = async (_payload: Payload) => {
         }),
       () =>
         _payload.create({
+          overrideAccess: true,
           collection: usersSlug,
           data: {
             email: regularCredentials.email,
@@ -124,6 +126,7 @@ export const seed = async (_payload: Payload) => {
         }),
       () =>
         _payload.create({
+          overrideAccess: true,
           collection: usersSlug,
           data: {
             email: 'public@email.com',
@@ -141,6 +144,7 @@ export const seed = async (_payload: Payload) => {
     [
       () =>
         _payload.create({
+          overrideAccess: true,
           collection: postsSlug,
           data: {
             text: 'Test Post 1',
@@ -148,6 +152,7 @@ export const seed = async (_payload: Payload) => {
         }),
       () =>
         _payload.create({
+          overrideAccess: true,
           collection: postsSlug,
           data: {
             text: 'Test Post 2',
@@ -161,6 +166,7 @@ export const seed = async (_payload: Payload) => {
     [
       () =>
         _payload.create({
+          overrideAccess: true,
           collection: pagesSlug,
           data: {
             text: 'example page',
@@ -192,6 +198,7 @@ export const seed = async (_payload: Payload) => {
         }),
       () =>
         _payload.create({
+          overrideAccess: true,
           collection: 'payload-query-presets',
           user: adminUser,
           data: {
@@ -206,6 +213,7 @@ export const seed = async (_payload: Payload) => {
         }),
       () =>
         _payload.create({
+          overrideAccess: true,
           collection: 'default-columns',
           data: {
             field1: 'field1',

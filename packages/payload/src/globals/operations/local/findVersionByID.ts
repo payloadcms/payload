@@ -46,8 +46,8 @@ export type Options<TSlug extends GlobalSlug> = {
   locale?: 'all' | TypedLocale
   /**
    * Skip access control.
-   * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the front-end.
-   * @default true
+   * Set to `true` to bypass Access Control for trusted server-side operations.
+   * @default false
    */
   overrideAccess?: boolean
   /**
@@ -70,7 +70,7 @@ export type Options<TSlug extends GlobalSlug> = {
    */
   slug: TSlug
   /**
-   * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
+   * Pass a user to use against access control checks. The user is ignored for access checks when `overrideAccess` is `true`.
    */
   user?: null | User
 } & Pick<FindOptions<string, SelectType>, 'select'>
@@ -84,7 +84,7 @@ export async function findGlobalVersionByIDLocal<TSlug extends GlobalSlug>(
     slug: globalSlug,
     depth,
     disableErrors = false,
-    overrideAccess = true,
+    overrideAccess = false,
     populate,
     select,
     showHiddenFields,

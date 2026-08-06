@@ -23,6 +23,7 @@ export default buildConfigWithDefaults({
   globals: [MenuGlobal],
   onInit: async (payload) => {
     await payload.create({
+      overrideAccess: true,
       collection: 'users',
       data: {
         email: devUser.email,
@@ -31,6 +32,7 @@ export default buildConfigWithDefaults({
     })
 
     await payload.create({
+      overrideAccess: true,
       collection: postsSlug,
       data: {
         text: 'example post',
@@ -47,6 +49,7 @@ export default buildConfigWithDefaults({
     const imageFile = await getFileByPath(imageFilePath)
 
     await payload.create({
+      overrideAccess: true,
       collection: 'media',
       data: {},
       file: imageFile,

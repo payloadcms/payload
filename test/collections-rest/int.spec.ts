@@ -137,6 +137,7 @@ describe('collections-rest', () => {
 
     it('can handle REST API requests with over 1mb of multipart/form-data', async () => {
       const doc = await payload.create({
+        overrideAccess: true,
         collection: largeDocumentsCollectionSlug,
         data: {},
       })
@@ -221,6 +222,7 @@ describe('collections-rest', () => {
         expect(docs.pop().description).toEqual(description)
 
         const { docs: resDocs } = await payload.find({
+          overrideAccess: true,
           limit: 10,
           collection: postsSlug,
           where: { id: { in: ids } },
@@ -248,6 +250,7 @@ describe('collections-rest', () => {
         expect(errors).toHaveLength(1)
 
         const { docs } = await payload.find({
+          overrideAccess: true,
           collection: postsSlug,
         })
 
@@ -278,6 +281,7 @@ describe('collections-rest', () => {
         expect(relationMultiRelationToResponse.status).toEqual(400)
 
         const { docs } = await payload.find({
+          overrideAccess: true,
           collection: postsSlug,
         })
 
@@ -287,6 +291,7 @@ describe('collections-rest', () => {
 
       it('should not bulk update with a read restricted field query', async () => {
         const { id } = await payload.create({
+          overrideAccess: true,
           collection: postsSlug,
           data: {
             restrictedField: 'restricted',
@@ -303,6 +308,7 @@ describe('collections-rest', () => {
         const result = await response.json()
 
         const doc = await payload.findByID({
+          overrideAccess: true,
           id,
           collection: postsSlug,
         })
@@ -318,6 +324,7 @@ describe('collections-rest', () => {
       it('should return formatted errors for bulk updates', async () => {
         const text = 'bulk-update-test-errors'
         const errorDoc = await payload.create({
+          overrideAccess: true,
           collection: errorOnHookSlug,
           data: {
             errorBeforeChange: true,
@@ -325,6 +332,7 @@ describe('collections-rest', () => {
           },
         })
         const successDoc = await payload.create({
+          overrideAccess: true,
           collection: errorOnHookSlug,
           data: {
             errorBeforeChange: false,
@@ -368,6 +376,7 @@ describe('collections-rest', () => {
 
       it('should return formatted errors for bulk deletes', async () => {
         await payload.create({
+          overrideAccess: true,
           collection: errorOnHookSlug,
           data: {
             errorAfterDelete: true,
@@ -375,6 +384,7 @@ describe('collections-rest', () => {
           },
         })
         await payload.create({
+          overrideAccess: true,
           collection: errorOnHookSlug,
           data: {
             errorAfterDelete: false,
@@ -628,6 +638,7 @@ describe('collections-rest', () => {
 
         it('should query LIKE by ID', async () => {
           const post = await payload.create({
+            overrideAccess: true,
             collection: postsSlug,
             data: {
               title: 'find me buddy',
@@ -853,6 +864,7 @@ describe('collections-rest', () => {
 
       it('not_in (relationships)', async () => {
         const relationship = await payload.create({
+          overrideAccess: true,
           collection: relationSlug,
           data: {},
         })
@@ -883,6 +895,7 @@ describe('collections-rest', () => {
 
       it('in (relationships)', async () => {
         const relationship = await payload.create({
+          overrideAccess: true,
           collection: relationSlug,
           data: {},
         })
@@ -1239,6 +1252,7 @@ describe('collections-rest', () => {
 
           try {
             const created = await payload.create({
+              overrideAccess: true,
               collection: pointSlug,
               data: { point: [queryLng, pointLat] },
             })
@@ -1263,7 +1277,7 @@ describe('collections-rest', () => {
             expect(result.docs.map((d: { id: number | string }) => d.id)).toContain(createdId)
           } finally {
             if (createdId !== undefined) {
-              await payload.delete({ collection: pointSlug, id: createdId })
+              await payload.delete({ overrideAccess: true, collection: pointSlug, id: createdId })
             }
           }
         })
@@ -1301,6 +1315,7 @@ describe('collections-rest', () => {
             setTimeout(() => {
               promises.push(
                 payload.create({
+                  overrideAccess: true,
                   collection: pointSlug,
                   data: {
                     // only randomize longitude to make distance comparison easy
@@ -1543,6 +1558,7 @@ describe('collections-rest', () => {
 
         beforeEach(async () => {
           relatedDoc = await payload.create({
+            overrideAccess: true,
             collection: relationSlug,
             data: {
               name: 'test',
@@ -1805,9 +1821,11 @@ describe('collections-rest', () => {
     it('findByID should throw NotFound if the doc was not found, if disableErrors: true then return null', async () => {
       const post = await createPost()
       const id = typeof post.id === 'string' ? randomUUID() : 999
-      await expect(payload.findByID({ collection: 'posts', id })).rejects.toBeInstanceOf(NotFound)
       await expect(
-        payload.findByID({ collection: 'posts', id, disableErrors: true }),
+        payload.findByID({ overrideAccess: true, collection: 'posts', id }),
+      ).rejects.toBeInstanceOf(NotFound)
+      await expect(
+        payload.findByID({ overrideAccess: true, collection: 'posts', id, disableErrors: true }),
       ).resolves.toBeNull()
     })
   })
@@ -1913,6 +1931,7 @@ describe('collections-rest', () => {
 
     await expect(
       payload.update({
+        overrideAccess: true,
         collection: 'disabled-bulk-edit-docs',
         where: {},
         data: {},
@@ -1933,12 +1952,14 @@ describe('collections-rest', () => {
     ).rejects.toBeInstanceOf(APIError)
 
     const doc = await payload.create({
+      overrideAccess: true,
       collection: 'disabled-bulk-delete-docs',
       data: { text: 'should be deletable by id' },
     })
 
     await expect(
       payload.delete({
+        overrideAccess: true,
         collection: 'disabled-bulk-delete-docs',
         id: doc.id,
       }),
@@ -1946,6 +1967,7 @@ describe('collections-rest', () => {
 
     await expect(
       payload.delete({
+        overrideAccess: true,
         collection: 'disabled-bulk-delete-docs',
         where: {},
       }),
@@ -1970,6 +1992,7 @@ async function createPosts(count: number) {
 
 async function clearDocs(): Promise<void> {
   await payload.delete({
+    overrideAccess: true,
     collection: postsSlug,
     where: { id: { exists: true } },
   })

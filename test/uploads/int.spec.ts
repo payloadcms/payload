@@ -116,7 +116,7 @@ describe('Collections - Uploads', () => {
         expect(doc.width).toBeDefined()
         expect(doc.sizes.tablet.filename).toBeDefined()
 
-        await payload.delete({ id: doc.id, collection: mediaSlug })
+        await payload.delete({ overrideAccess: true, id: doc.id, collection: mediaSlug })
       })
 
       /**
@@ -280,6 +280,7 @@ describe('Collections - Uploads', () => {
         file!.name = 'my test image.png'
 
         const mediaDoc = (await payload.create({
+          overrideAccess: true,
           collection: mediaSlug,
           data: {},
           file,
@@ -298,7 +299,7 @@ describe('Collections - Uploads', () => {
         expect(mediaDoc.sizes?.icon?.url).toContain('%20')
         expect(mediaDoc.sizes?.icon?.url).not.toContain(' ')
 
-        await payload.delete({ collection: mediaSlug, id: mediaDoc.id })
+        await payload.delete({ overrideAccess: true, collection: mediaSlug, id: mediaDoc.id })
       })
 
       it('creates from form data given an svg', async () => {
@@ -550,6 +551,7 @@ describe('Collections - Uploads', () => {
         file.name = 'renamed.png'
 
         const mediaDoc = (await payload.create({
+          overrideAccess: true,
           collection: mediaSlug,
           data: {},
           file,
@@ -582,6 +584,7 @@ describe('Collections - Uploads', () => {
         file.name = 'renamed.png'
 
         const mediaDoc = (await payload.create({
+          overrideAccess: true,
           collection: mediaSlug,
           data: {},
           file,
@@ -677,6 +680,7 @@ describe('Collections - Uploads', () => {
         file!.name = 'file #hash.png'
 
         const mediaDoc = await payload.create({
+          overrideAccess: true,
           collection: mediaSlug,
           data: {},
           file,
@@ -693,7 +697,7 @@ describe('Collections - Uploads', () => {
         expect(response.status).toBe(200)
         expect(response.headers.get('content-type')).toContain('image/png')
 
-        await payload.delete({ collection: mediaSlug, id: mediaDoc.id })
+        await payload.delete({ overrideAccess: true, collection: mediaSlug, id: mediaDoc.id })
       })
 
       it('should return the media document with the correct file type', async () => {
@@ -702,6 +706,7 @@ describe('Collections - Uploads', () => {
         file.name = 'renamed.png'
 
         const mediaDoc = (await payload.create({
+          overrideAccess: true,
           collection: mediaSlug,
           data: {},
           file,
@@ -713,7 +718,7 @@ describe('Collections - Uploads', () => {
 
         expect(response.headers.get('content-type')).toContain('image/png')
 
-        await payload.delete({ collection: mediaSlug, id: mediaDoc.id })
+        await payload.delete({ overrideAccess: true, collection: mediaSlug, id: mediaDoc.id })
       })
     })
   })
@@ -725,6 +730,7 @@ describe('Collections - Uploads', () => {
 
         const svgFilePath = path.resolve(dirname, './svgWithXml.svg')
         const doc = await payload.create({
+          overrideAccess: true,
           collection: svgOnlySlug as CollectionSlug,
           data: {},
           filePath: svgFilePath,
@@ -739,6 +745,7 @@ describe('Collections - Uploads', () => {
         const svgFilePath = path.resolve(dirname, './svgWithXml.svg')
         const fileBuffer = fs.readFileSync(svgFilePath)
         const doc = await payload.create({
+          overrideAccess: true,
           collection: anyImagesSlug as CollectionSlug,
           data: {},
           file: {
@@ -751,7 +758,11 @@ describe('Collections - Uploads', () => {
 
         expect(await fileExists(path.join(expectedPath, doc.filename))).toBe(true)
 
-        await payload.delete({ collection: anyImagesSlug as CollectionSlug, id: doc.id })
+        await payload.delete({
+          overrideAccess: true,
+          collection: anyImagesSlug as CollectionSlug,
+          id: doc.id,
+        })
       })
 
       it('should create documents for JPEG XL files, which sharp cannot decode', async () => {
@@ -762,6 +773,7 @@ describe('Collections - Uploads', () => {
         const jxlFilePath = path.resolve(dirname, './test-image.jxl')
         const fileBuffer = fs.readFileSync(jxlFilePath)
         const doc = await payload.create({
+          overrideAccess: true,
           collection: anyImagesSlug as CollectionSlug,
           data: {},
           file: {
@@ -777,7 +789,11 @@ describe('Collections - Uploads', () => {
         expect(doc.width).toEqual(800)
         expect(doc.height).toEqual(800)
 
-        await payload.delete({ collection: anyImagesSlug as CollectionSlug, id: doc.id })
+        await payload.delete({
+          overrideAccess: true,
+          collection: anyImagesSlug as CollectionSlug,
+          id: doc.id,
+        })
       })
 
       it('should upload svg files', async () => {
@@ -785,6 +801,7 @@ describe('Collections - Uploads', () => {
 
         const svgFilePath = path.resolve(dirname, './svgWithXml.svg')
         const doc = await payload.create({
+          overrideAccess: true,
           collection: anyImagesSlug as CollectionSlug,
           data: {},
           filePath: svgFilePath,
@@ -799,6 +816,7 @@ describe('Collections - Uploads', () => {
 
         // SVGs cannot be resized, so sizes.small should have null fields
         const doc = await payload.create({
+          overrideAccess: true,
           collection: adminThumbnailSizeSlug as CollectionSlug,
           data: {},
           file: {
@@ -815,6 +833,7 @@ describe('Collections - Uploads', () => {
 
         // Clean up
         await payload.delete({
+          overrideAccess: true,
           collection: adminThumbnailSizeSlug as CollectionSlug,
           id: doc.id,
         })
@@ -829,6 +848,7 @@ describe('Collections - Uploads', () => {
         file.name = 'temp.png'
 
         const mediaDoc = (await payload.create({
+          overrideAccess: true,
           collection: mediaSlug,
           data: {},
           file,
@@ -845,6 +865,7 @@ describe('Collections - Uploads', () => {
         newFile.name = 'temp-renamed.png'
 
         const updatedMediaDoc = (await payload.update({
+          overrideAccess: true,
           collection: mediaSlug,
           id: mediaDoc.id,
           file: newFile,
@@ -855,7 +876,11 @@ describe('Collections - Uploads', () => {
         expect(await fileExists(path.join(expectedPath, updatedMediaDoc.filename))).toBe(true)
         expect(await fileExists(path.join(expectedPath, mediaDoc.filename))).toBe(false)
 
-        await payload.delete({ collection: mediaSlug, id: updatedMediaDoc.id })
+        await payload.delete({
+          overrideAccess: true,
+          collection: mediaSlug,
+          id: updatedMediaDoc.id,
+        })
       })
 
       it('should remove existing media on re-upload - where query', async () => {
@@ -865,6 +890,7 @@ describe('Collections - Uploads', () => {
         file.name = 'temp.png'
 
         const mediaDoc = (await payload.create({
+          overrideAccess: true,
           collection: mediaSlug,
           data: {},
           file,
@@ -881,6 +907,7 @@ describe('Collections - Uploads', () => {
         newFile.name = 'temp-renamed-second.png'
 
         const updatedMediaDoc = (await payload.update({
+          overrideAccess: true,
           collection: mediaSlug,
           where: {
             id: { equals: mediaDoc.id },
@@ -896,7 +923,11 @@ describe('Collections - Uploads', () => {
         )
         expect(await fileExists(path.join(expectedPath, mediaDoc.filename))).toBe(false)
 
-        await payload.delete({ collection: mediaSlug, id: updatedMediaDoc.docs[0].id })
+        await payload.delete({
+          overrideAccess: true,
+          collection: mediaSlug,
+          id: updatedMediaDoc.docs[0].id,
+        })
       })
 
       it('should remove sizes that do not pertain to the new image - by ID', async () => {
@@ -905,12 +936,14 @@ describe('Collections - Uploads', () => {
         const small = await getFileByPath(path.resolve(dirname, './small.png'))
 
         const { id } = await payload.create({
+          overrideAccess: true,
           collection: mediaSlug,
           data: {},
           file,
         })
 
         const doc = (await payload.update({
+          overrideAccess: true,
           collection: mediaSlug,
           id,
           data: {},
@@ -927,12 +960,14 @@ describe('Collections - Uploads', () => {
         const small = await getFileByPath(path.resolve(dirname, './small.png'))
 
         const { id } = await payload.create({
+          overrideAccess: true,
           collection: mediaSlug,
           data: {},
           file,
         })
 
         const doc = (await payload.update({
+          overrideAccess: true,
           collection: mediaSlug,
           where: {
             id: { equals: id },
@@ -951,12 +986,14 @@ describe('Collections - Uploads', () => {
         file.name = 'renamed.png'
 
         const { id } = await payload.create({
+          overrideAccess: true,
           collection: mediaSlug,
           data: {},
           file,
         })
 
         const related = await payload.create({
+          overrideAccess: true,
           collection: relationSlug,
           data: {
             image: id,
@@ -964,6 +1001,7 @@ describe('Collections - Uploads', () => {
         })
 
         const doc = await payload.update({
+          overrideAccess: true,
           collection: relationSlug,
           id: related.id,
           data: {
@@ -980,12 +1018,14 @@ describe('Collections - Uploads', () => {
         file.name = 'renamed.png'
 
         const { id } = await payload.create({
+          overrideAccess: true,
           collection: mediaSlug,
           data: {},
           file,
         })
 
         const related = await payload.create({
+          overrideAccess: true,
           collection: relationSlug,
           data: {
             image: id,
@@ -993,6 +1033,7 @@ describe('Collections - Uploads', () => {
         })
 
         const doc = await payload.update({
+          overrideAccess: true,
           collection: relationSlug,
           where: {
             id: { equals: related.id },
@@ -1010,18 +1051,21 @@ describe('Collections - Uploads', () => {
         const file = await getFileByPath(filePath)
 
         const { id } = await payload.create({
+          overrideAccess: true,
           collection: mediaSlug,
           data: {},
           file,
         })
 
         const { id: id_2 } = await payload.create({
+          overrideAccess: true,
           collection: mediaSlug,
           data: {},
           file,
         })
 
         const res = await payload.create({
+          overrideAccess: true,
           collection: 'relation',
           depth: 0,
           data: {
@@ -1039,6 +1083,7 @@ describe('Collections - Uploads', () => {
         expect(res.blocks[0]?.relatedMedia).toEqual([id])
 
         const res_2 = await payload.update({
+          overrideAccess: true,
           collection: 'relation',
           id: res.id,
           depth: 0,
@@ -1068,6 +1113,7 @@ describe('Collections - Uploads', () => {
         const fetchSpy = vitest.spyOn(global, 'fetch')
 
         await payload.create({
+          overrideAccess: true,
           collection: skipSafeFetchMediaSlug,
           data: {
             filename: 'fat-head-nate.png',
@@ -1142,6 +1188,7 @@ describe('Collections - Uploads', () => {
         const fetchSpy = vitest.spyOn(global, 'fetch')
 
         await payload.create({
+          overrideAccess: true,
           collection: skipSafeFetchHeaderFilterSlug,
           data: {
             filename: 'fat-head-nate.png',
@@ -1209,6 +1256,7 @@ describe('Collections - Uploads', () => {
 
           await expect(
             payload.create({
+              overrideAccess: true,
               collection,
               data: {
                 filename: 'test.png',
@@ -1229,6 +1277,7 @@ describe('Collections - Uploads', () => {
           // Now ensure this throws if we pass the IP address directly, without the mock
           await expect(
             payload.create({
+              overrideAccess: true,
               collection,
               data: {
                 filename: 'test.png',
@@ -1246,6 +1295,7 @@ describe('Collections - Uploads', () => {
       it('should fetch when skipSafeFetch is set with a boolean', async () => {
         await expect(
           payload.create({
+            overrideAccess: true,
             collection: skipSafeFetchMediaSlug as CollectionSlug,
             data: {
               filename: 'test.png',
@@ -1264,6 +1314,7 @@ describe('Collections - Uploads', () => {
       it('should fetch when skipSafeFetch is set with an AllowList', async () => {
         await expect(
           payload.create({
+            overrideAccess: true,
             collection: skipAllowListSafeFetchMediaSlug as CollectionSlug,
             data: {
               filename: 'test.png',
@@ -1290,6 +1341,7 @@ describe('Collections - Uploads', () => {
       it('should not allow files with restricted file types', async () => {
         await expect(async () =>
           payload.create({
+            overrideAccess: true,
             collection: restrictFileTypesSlug as CollectionSlug,
             data: {},
             file,
@@ -1305,6 +1357,7 @@ describe('Collections - Uploads', () => {
       it('should allow files with restricted file types when allowRestrictedFileTypes is true', async () => {
         await expect(
           payload.create({
+            overrideAccess: true,
             collection: noRestrictFileTypesSlug as CollectionSlug,
             data: {},
             file,
@@ -1315,6 +1368,7 @@ describe('Collections - Uploads', () => {
       it('should allow files with restricted file types when mimeTypes are set', async () => {
         await expect(
           payload.create({
+            overrideAccess: true,
             collection: noRestrictFileMimeTypesSlug as CollectionSlug,
             data: {},
             file,
@@ -1475,6 +1529,7 @@ describe('Collections - Uploads', () => {
 
     it('should be able to set focal point through local API', async () => {
       const doc = await payload.create({
+        overrideAccess: true,
         collection: focalOnlySlug,
         data: {
           focalX: 5,
@@ -1487,6 +1542,7 @@ describe('Collections - Uploads', () => {
       expect(doc.focalY).toEqual(5)
 
       const updatedFocal = await payload.update({
+        overrideAccess: true,
         collection: focalOnlySlug,
         id: doc.id,
         data: {
@@ -1499,6 +1555,7 @@ describe('Collections - Uploads', () => {
       expect(updatedFocal.focalY).toEqual(10)
 
       const updateWithoutFocal = await payload.update({
+        overrideAccess: true,
         collection: focalOnlySlug,
         id: doc.id,
         data: {},
@@ -1508,11 +1565,12 @@ describe('Collections - Uploads', () => {
       expect(updateWithoutFocal.focalX).toEqual(10)
       expect(updateWithoutFocal.focalY).toEqual(10)
 
-      await payload.delete({ collection: focalOnlySlug, id: doc.id })
+      await payload.delete({ overrideAccess: true, collection: focalOnlySlug, id: doc.id })
     })
 
     it('should default focal point to 50, 50', async () => {
       const doc = await payload.create({
+        overrideAccess: true,
         collection: focalOnlySlug,
         data: {
           // No focal point
@@ -1524,6 +1582,7 @@ describe('Collections - Uploads', () => {
       expect(doc.focalY).toEqual(50)
 
       const updateWithoutFocal = await payload.update({
+        overrideAccess: true,
         collection: focalOnlySlug,
         id: doc.id,
         data: {},
@@ -1532,11 +1591,12 @@ describe('Collections - Uploads', () => {
       expect(updateWithoutFocal.focalX).toEqual(50)
       expect(updateWithoutFocal.focalY).toEqual(50)
 
-      await payload.delete({ collection: focalOnlySlug, id: doc.id })
+      await payload.delete({ overrideAccess: true, collection: focalOnlySlug, id: doc.id })
     })
 
     it('should set focal point even if no sizes defined', async () => {
       const doc = await payload.create({
+        overrideAccess: true,
         collection: focalNoSizesSlug, // config without sizes
         data: {
           // No focal point
@@ -1547,7 +1607,7 @@ describe('Collections - Uploads', () => {
       expect(doc.focalX).toEqual(50)
       expect(doc.focalY).toEqual(50)
 
-      await payload.delete({ collection: focalNoSizesSlug, id: doc.id })
+      await payload.delete({ overrideAccess: true, collection: focalNoSizesSlug, id: doc.id })
     })
   })
 
@@ -1556,6 +1616,7 @@ describe('Collections - Uploads', () => {
       const small = await getFileByPath(path.resolve(dirname, './small.png'))
 
       const result = await payload.create({
+        overrideAccess: true,
         collection: enlargeSlug,
         data: {},
         file: small,
@@ -1591,6 +1652,7 @@ describe('Collections - Uploads', () => {
       expect(sizes.accidentalSameSize.filename).toBe('small-320x80.png')
 
       await payload.delete({
+        overrideAccess: true,
         collection: enlargeSlug,
         id: result.id,
       })
@@ -1601,6 +1663,7 @@ describe('Collections - Uploads', () => {
       const small = await getFileByPath(path.resolve(dirname, './small.png'))
 
       const result = (await payload.create({
+        overrideAccess: true,
         collection: enlargeSlug,
         data: {},
         file: small,
@@ -1619,6 +1682,7 @@ describe('Collections - Uploads', () => {
       expect(sizes.widthLowerHeightLarger.mimeType).toBe('image/png')
       expect(sizes.widthLowerHeightLarger.filename).toBe('small-300x300.png')
       await payload.delete({
+        overrideAccess: true,
         collection: enlargeSlug,
         id: result.id,
       })
@@ -1628,6 +1692,7 @@ describe('Collections - Uploads', () => {
       const small = await getFileByPath(path.resolve(dirname, './small.png'))
 
       const result = await payload.create({
+        overrideAccess: true,
         collection: reduceSlug,
         data: {},
         file: small,
@@ -1662,13 +1727,14 @@ describe('Collections - Uploads', () => {
       expect(sizes.accidentalSameSize.mimeType).toBe('image/png')
       expect(sizes.accidentalSameSize.filename).toBe('small-320x80.png')
 
-      await payload.delete({ collection: reduceSlug, id: result.id })
+      await payload.delete({ overrideAccess: true, collection: reduceSlug, id: result.id })
     })
 
     it('should not enlarge image if `withoutEnlargement` is set to undefined and width or height is undefined when imageSizes are larger than the uploaded image', async () => {
       const small = await getFileByPath(path.resolve(dirname, './small.png'))
 
       const result = await payload.create({
+        overrideAccess: true,
         collection: enlargeSlug,
         data: {},
         file: small,
@@ -1688,6 +1754,7 @@ describe('Collections - Uploads', () => {
       })
 
       await payload.delete({
+        overrideAccess: true,
         collection: enlargeSlug,
         id: result.id,
       })
@@ -1697,6 +1764,7 @@ describe('Collections - Uploads', () => {
   describe('Required Files', () => {
     it('should allow file to be optional if filesRequiredOnCreate is false', async () => {
       const successfulCreate = await payload.create({
+        overrideAccess: true,
         collection: 'optional-file',
         data: {},
       })
@@ -1707,6 +1775,7 @@ describe('Collections - Uploads', () => {
     it('should throw an error if no file and filesRequiredOnCreate is true', async () => {
       await expect(async () =>
         payload.create({
+          overrideAccess: true,
           collection: 'required-file',
           data: {},
         }),
@@ -1720,6 +1789,7 @@ describe('Collections - Uploads', () => {
     it('should throw an error if no file and filesRequiredOnCreate is not defined', async () => {
       await expect(async () =>
         payload.create({
+          overrideAccess: true,
           collection: mediaSlug,
           data: {},
         }),
@@ -1739,6 +1809,7 @@ describe('Collections - Uploads', () => {
       file.name = 'file-to-duplicate.png'
 
       const mediaDoc = await payload.create({
+        overrideAccess: true,
         collection: 'media',
         data: {},
         file,
@@ -1747,6 +1818,7 @@ describe('Collections - Uploads', () => {
       expect(mediaDoc).toBeDefined()
 
       const duplicatedDoc = await payload.duplicate({
+        overrideAccess: true,
         collection: 'media',
         id: mediaDoc.id,
       })
@@ -1755,8 +1827,8 @@ describe('Collections - Uploads', () => {
 
       expect(await fileExists(path.join(expectedPath, duplicatedDoc.filename))).toBe(true)
 
-      await payload.delete({ collection: 'media', id: mediaDoc.id })
-      await payload.delete({ collection: 'media', id: duplicatedDoc.id })
+      await payload.delete({ overrideAccess: true, collection: 'media', id: mediaDoc.id })
+      await payload.delete({ overrideAccess: true, collection: 'media', id: duplicatedDoc.id })
     })
 
     it('should not leak req.file between sequential duplicate() calls on a shared req', async () => {
@@ -1769,12 +1841,14 @@ describe('Collections - Uploads', () => {
       file2.name = 'bravo-leak-test.png'
 
       const doc1 = await payload.create({
+        overrideAccess: true,
         collection: mediaSlug,
         data: {},
         file: file1,
       })
 
       const doc2 = await payload.create({
+        overrideAccess: true,
         collection: mediaSlug,
         data: {},
         file: file2,
@@ -1784,12 +1858,14 @@ describe('Collections - Uploads', () => {
       const req = {} as PayloadRequest
 
       const dup1 = await payload.duplicate({
+        overrideAccess: true,
         collection: mediaSlug,
         id: doc1.id,
         req,
       })
 
       const dup2 = await payload.duplicate({
+        overrideAccess: true,
         collection: mediaSlug,
         id: doc2.id,
         req,
@@ -1801,10 +1877,10 @@ describe('Collections - Uploads', () => {
       expect(dup2.filename).toContain('bravo-leak-test')
 
       // Clean up created docs
-      await payload.delete({ collection: mediaSlug, id: doc1.id })
-      await payload.delete({ collection: mediaSlug, id: doc2.id })
-      await payload.delete({ collection: mediaSlug, id: dup1.id })
-      await payload.delete({ collection: mediaSlug, id: dup2.id })
+      await payload.delete({ overrideAccess: true, collection: mediaSlug, id: doc1.id })
+      await payload.delete({ overrideAccess: true, collection: mediaSlug, id: doc2.id })
+      await payload.delete({ overrideAccess: true, collection: mediaSlug, id: dup1.id })
+      await payload.delete({ overrideAccess: true, collection: mediaSlug, id: dup2.id })
     })
   })
 
@@ -1822,6 +1898,7 @@ describe('Collections - Uploads', () => {
 
         // Create an upload
         const mediaDoc = (await payload.create({
+          overrideAccess: true,
           collection: mediaSlug,
           data: {},
           file,
@@ -1859,7 +1936,7 @@ describe('Collections - Uploads', () => {
         expect(dbDoc.sizes?.icon?.url).not.toContain('http://local-images:3000')
         expect(dbDoc.sizes?.icon?.url).toMatch(/^\/api\/media\/file\//)
 
-        await payload.delete({ collection: mediaSlug, id: mediaDoc.id })
+        await payload.delete({ overrideAccess: true, collection: mediaSlug, id: mediaDoc.id })
       } finally {
         // Restore original serverURL
         payload.config.serverURL = originalServerURL
@@ -1879,6 +1956,7 @@ describe('Collections - Uploads', () => {
 
         // Create an upload
         const mediaDoc = (await payload.create({
+          overrideAccess: true,
           collection: mediaSlug,
           data: {},
           file,
@@ -1888,6 +1966,7 @@ describe('Collections - Uploads', () => {
 
         // Duplicate the upload (this will pass full URLs from afterRead hooks)
         const duplicatedDoc = (await payload.duplicate({
+          overrideAccess: true,
           collection: mediaSlug,
           id: mediaDoc.id,
         })) as unknown as Media
@@ -1920,8 +1999,8 @@ describe('Collections - Uploads', () => {
         expect(dbDoc.sizes?.tablet?.url).not.toContain('http://local-images:3000')
         expect(dbDoc.sizes?.tablet?.url).toMatch(/^\/api\/media\/file\//)
 
-        await payload.delete({ collection: mediaSlug, id: mediaDoc.id })
-        await payload.delete({ collection: mediaSlug, id: duplicatedDoc.id })
+        await payload.delete({ overrideAccess: true, collection: mediaSlug, id: mediaDoc.id })
+        await payload.delete({ overrideAccess: true, collection: mediaSlug, id: duplicatedDoc.id })
       } finally {
         // Restore original serverURL
         payload.config.serverURL = originalServerURL
@@ -1941,6 +2020,7 @@ describe('Collections - Uploads', () => {
 
         // Create an upload
         const mediaDoc = (await payload.create({
+          overrideAccess: true,
           collection: mediaSlug,
           data: {},
           file,
@@ -1950,6 +2030,7 @@ describe('Collections - Uploads', () => {
 
         // Update the upload (changing focal point triggers a re-upload)
         const updatedDoc = (await payload.update({
+          overrideAccess: true,
           collection: mediaSlug,
           id: mediaDoc.id,
           data: {
@@ -1982,7 +2063,7 @@ describe('Collections - Uploads', () => {
         expect(dbDoc.sizes?.tablet?.url).not.toContain('http://local-images:3000')
         expect(dbDoc.sizes?.tablet?.url).toMatch(/^\/api\/media\/file\//)
 
-        await payload.delete({ collection: mediaSlug, id: mediaDoc.id })
+        await payload.delete({ overrideAccess: true, collection: mediaSlug, id: mediaDoc.id })
       } finally {
         // Restore original serverURL
         payload.config.serverURL = originalServerURL
@@ -2001,6 +2082,7 @@ describe('Collections - Uploads', () => {
       const file = await getFileByPath(filePath)
 
       uploadedDoc = (await payload.create({
+        overrideAccess: true,
         collection: mediaSlug,
         data: {},
         file,
@@ -2108,6 +2190,7 @@ describe('Collections - Uploads', () => {
       for (const id of docIDs) {
         try {
           await payload.delete({
+            overrideAccess: true,
             collection: noRestrictFileTypesSlug as CollectionSlug,
             id,
           })
@@ -2123,6 +2206,7 @@ describe('Collections - Uploads', () => {
       const file = await getFileByPath(filePath)
 
       xssPayloadDoc = (await payload.create({
+        overrideAccess: true,
         collection: noRestrictFileTypesSlug as CollectionSlug,
         data: {},
         file,
@@ -2149,6 +2233,7 @@ describe('Collections - Uploads', () => {
       const file = await getFileByPath(filePath)
 
       const safeDoc = (await payload.create({
+        overrideAccess: true,
         collection: svgOnlySlug as CollectionSlug,
         data: {},
         file,
@@ -2204,6 +2289,7 @@ describe('Collections - Uploads', () => {
       try {
         await expect(
           payload.create({
+            overrideAccess: true,
             collection: mediaSlug,
             data: {
               filename: 'malicious.jpg',
@@ -2237,6 +2323,7 @@ describe('Collections - Uploads', () => {
 
       try {
         const doc = await payload.create({
+          overrideAccess: true,
           collection: allowListMediaSlug,
           data: {
             filename: 'cdn-image.png',
@@ -2264,6 +2351,7 @@ describe('Collections - Uploads', () => {
       try {
         await expect(
           payload.create({
+            overrideAccess: true,
             collection: allowListMediaSlug,
             data: {
               filename: 'redirect-test.png',
@@ -2290,6 +2378,7 @@ describe('Collections - Uploads', () => {
       try {
         await expect(
           payload.create({
+            overrideAccess: true,
             collection: allowListMediaSlug,
             data: {
               filename: 'loop.png',
@@ -2383,7 +2472,7 @@ describe('Collections - Uploads', () => {
     afterEach(async () => {
       for (const id of docIDs) {
         try {
-          await payload.delete({ collection: prefixMediaSlug, id })
+          await payload.delete({ overrideAccess: true, collection: prefixMediaSlug, id })
         } catch {
           // noop — file may already have been deleted
         }
@@ -2396,6 +2485,7 @@ describe('Collections - Uploads', () => {
       const file = await getFileByPath(filePath)
 
       const doc = await payload.create({
+        overrideAccess: true,
         collection: prefixMediaSlug,
         data: { prefix: 'abc123' },
         file,
@@ -2415,6 +2505,7 @@ describe('Collections - Uploads', () => {
       const file = await getFileByPath(filePath)
 
       const doc = await payload.create({
+        overrideAccess: true,
         collection: prefixMediaSlug,
         data: { prefix: 'abc123' },
         file,
@@ -2434,6 +2525,7 @@ describe('Collections - Uploads', () => {
       const file = await getFileByPath(filePath)
 
       const doc = await payload.create({
+        overrideAccess: true,
         collection: prefixMediaSlug,
         data: {},
         file,
@@ -2451,6 +2543,7 @@ describe('Collections - Uploads', () => {
       const file = await getFileByPath(filePath)
 
       const doc = await payload.create({
+        overrideAccess: true,
         collection: prefixMediaSlug,
         data: {},
         file,

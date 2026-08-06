@@ -48,6 +48,7 @@ describe('trash', () => {
     })
 
     user = await payload.login({
+      overrideAccess: true,
       collection: usersSlug,
       data: {
         email: regularUser.email,
@@ -56,6 +57,7 @@ describe('trash', () => {
     })
 
     restrictedCollectionDoc = await payload.create({
+      overrideAccess: true,
       collection: restrictedCollectionSlug as CollectionSlug,
       data: {
         title: 'With Access Control one',
@@ -63,6 +65,7 @@ describe('trash', () => {
     })
 
     postsDocOne = await payload.create({
+      overrideAccess: true,
       collection: postsSlug,
       data: {
         title: 'Doc one',
@@ -70,6 +73,7 @@ describe('trash', () => {
     })
 
     postsDocTwo = await payload.create({
+      overrideAccess: true,
       collection: postsSlug,
       data: {
         title: 'Doc two',
@@ -80,6 +84,7 @@ describe('trash', () => {
 
   afterEach(async () => {
     await payload.delete({
+      overrideAccess: true,
       collection: postsSlug,
       trash: true,
       where: {
@@ -149,6 +154,7 @@ describe('trash', () => {
     beforeAll(async () => {
       // Login as admin user
       adminUser = await payload.login({
+        overrideAccess: true,
         collection: usersSlug,
         data: {
           email: devUser.email,
@@ -162,6 +168,7 @@ describe('trash', () => {
       for (const id of createdDocIds) {
         try {
           await payload.delete({
+            overrideAccess: true,
             collection: differentiatedTrashCollectionSlug as CollectionSlug,
             id,
             trash: true,
@@ -177,6 +184,7 @@ describe('trash', () => {
       it('should allow regular user to trash (soft-delete) a document', async () => {
         // Create a document as admin
         const doc = await payload.create({
+          overrideAccess: true,
           collection: differentiatedTrashCollectionSlug as CollectionSlug,
           data: { title: 'Regular user trash test' },
         })
@@ -200,6 +208,7 @@ describe('trash', () => {
       it('should allow admin to trash (soft-delete) a document', async () => {
         // Create a document
         const doc = await payload.create({
+          overrideAccess: true,
           collection: differentiatedTrashCollectionSlug as CollectionSlug,
           data: { title: 'Admin trash test' },
         })
@@ -225,6 +234,7 @@ describe('trash', () => {
       it('should NOT allow regular user to permanently delete a trashed document', async () => {
         // Create and trash a document
         const doc = await payload.create({
+          overrideAccess: true,
           collection: differentiatedTrashCollectionSlug as CollectionSlug,
           data: {
             title: 'Regular user perm delete test',
@@ -253,6 +263,7 @@ describe('trash', () => {
       it('should allow admin to permanently delete a trashed document', async () => {
         // Create and trash a document
         const doc = await payload.create({
+          overrideAccess: true,
           collection: differentiatedTrashCollectionSlug as CollectionSlug,
           data: {
             title: 'Admin perm delete test',
@@ -274,6 +285,7 @@ describe('trash', () => {
         // Verify document is gone
         await expect(
           payload.findByID({
+            overrideAccess: true,
             collection: differentiatedTrashCollectionSlug as CollectionSlug,
             id: doc.id,
             trash: true,
@@ -286,11 +298,13 @@ describe('trash', () => {
       it('should allow regular user to bulk trash documents', async () => {
         // Create multiple documents
         const doc1 = await payload.create({
+          overrideAccess: true,
           collection: differentiatedTrashCollectionSlug as CollectionSlug,
           data: { title: 'Bulk trash test 1' },
         })
 
         const doc2 = await payload.create({
+          overrideAccess: true,
           collection: differentiatedTrashCollectionSlug as CollectionSlug,
           data: { title: 'Bulk trash test 2' },
         })
@@ -319,6 +333,7 @@ describe('trash', () => {
       it('should NOT allow regular user to bulk permanently delete trashed documents', async () => {
         // Create multiple trashed documents
         const doc1 = await payload.create({
+          overrideAccess: true,
           collection: differentiatedTrashCollectionSlug as CollectionSlug,
           data: {
             title: 'Bulk perm delete test 1',
@@ -327,6 +342,7 @@ describe('trash', () => {
         })
 
         const doc2 = await payload.create({
+          overrideAccess: true,
           collection: differentiatedTrashCollectionSlug as CollectionSlug,
           data: {
             title: 'Bulk perm delete test 2',
@@ -357,6 +373,7 @@ describe('trash', () => {
 
         // Verify documents still exist
         const remaining = await payload.find({
+          overrideAccess: true,
           collection: differentiatedTrashCollectionSlug as CollectionSlug,
           trash: true,
           where: {
@@ -372,6 +389,7 @@ describe('trash', () => {
       it('should allow admin to bulk permanently delete trashed documents', async () => {
         // Create multiple trashed documents
         const doc1 = await payload.create({
+          overrideAccess: true,
           collection: differentiatedTrashCollectionSlug as CollectionSlug,
           data: {
             title: 'Admin bulk perm delete 1',
@@ -380,6 +398,7 @@ describe('trash', () => {
         })
 
         const doc2 = await payload.create({
+          overrideAccess: true,
           collection: differentiatedTrashCollectionSlug as CollectionSlug,
           data: {
             title: 'Admin bulk perm delete 2',
@@ -407,6 +426,7 @@ describe('trash', () => {
 
         // Verify documents are gone
         const remaining = await payload.find({
+          overrideAccess: true,
           collection: differentiatedTrashCollectionSlug as CollectionSlug,
           trash: true,
           where: {
@@ -425,6 +445,7 @@ describe('trash', () => {
     describe('find', () => {
       it('should return all docs including soft-deleted docs in find with trash: true', async () => {
         const allDocs = await payload.find({
+          overrideAccess: true,
           collection: postsSlug,
           trash: true,
         })
@@ -434,6 +455,7 @@ describe('trash', () => {
 
       it('should return only soft-deleted docs in find with trash: true', async () => {
         const trashedDocs = await payload.find({
+          overrideAccess: true,
           collection: postsSlug,
           where: {
             deletedAt: {
@@ -449,6 +471,7 @@ describe('trash', () => {
 
       it('should return only non-soft-deleted docs in find with trash: false', async () => {
         const normalDocs = await payload.find({
+          overrideAccess: true,
           collection: postsSlug,
           trash: false,
         })
@@ -459,6 +482,7 @@ describe('trash', () => {
 
       it('should find restored documents after setting deletedAt to null', async () => {
         await payload.update({
+          overrideAccess: true,
           collection: postsSlug,
           id: postsDocTwo.id,
           data: {
@@ -468,6 +492,7 @@ describe('trash', () => {
         })
 
         const result = await payload.find({
+          overrideAccess: true,
           collection: postsSlug,
           trash: false, // Normal query should return it now
         })
@@ -485,11 +510,13 @@ describe('trash', () => {
       it('should return all unique values for a field (excluding soft-deleted docs by default)', async () => {
         // Add a duplicate title
         await payload.create({
+          overrideAccess: true,
           collection: postsSlug,
           data: { title: 'Doc one' },
         })
 
         const result = await payload.findDistinct({
+          overrideAccess: true,
           collection: postsSlug,
           field: 'title',
         })
@@ -504,6 +531,7 @@ describe('trash', () => {
 
       it('should include soft-deleted docs when trash: true', async () => {
         const result = await payload.findDistinct({
+          overrideAccess: true,
           collection: postsSlug,
           field: 'title',
           trash: true,
@@ -517,6 +545,7 @@ describe('trash', () => {
 
       it('should return only distinct values from soft-deleted docs when where[deletedAt][exists]=true', async () => {
         const result = await payload.findDistinct({
+          overrideAccess: true,
           collection: postsSlug,
           field: 'title',
           trash: true,
@@ -531,6 +560,7 @@ describe('trash', () => {
 
       it('should respect where filters when retrieving distinct values', async () => {
         const result = await payload.findDistinct({
+          overrideAccess: true,
           collection: postsSlug,
           field: 'title',
           trash: true,
@@ -547,6 +577,7 @@ describe('trash', () => {
     describe('findByID operation', () => {
       it('should return a soft-deleted document when trash: true', async () => {
         const trashedPostDoc: Post = await payload.findByID({
+          overrideAccess: true,
           collection: postsSlug,
           id: postsDocTwo.id,
           trash: true,
@@ -561,6 +592,7 @@ describe('trash', () => {
       it('should throw NotFound error when trying to find a soft-deleted document w/o trash: true', async () => {
         await expect(
           payload.findByID({
+            overrideAccess: true,
             collection: postsSlug,
             id: postsDocTwo.id,
           }),
@@ -568,6 +600,7 @@ describe('trash', () => {
 
         await expect(
           payload.findByID({
+            overrideAccess: true,
             collection: postsSlug,
             id: postsDocTwo.id,
             trash: false,
@@ -579,6 +612,7 @@ describe('trash', () => {
     describe('findVersions operation', () => {
       beforeAll(async () => {
         await payload.update({
+          overrideAccess: true,
           collection: postsSlug,
           data: {
             title: 'Some updated title',
@@ -593,6 +627,7 @@ describe('trash', () => {
       })
       it('should return all versions including soft-deleted docs in findVersions with trash: true', async () => {
         const allVersions = await payload.findVersions({
+          overrideAccess: true,
           collection: postsSlug,
           trash: true,
         })
@@ -604,6 +639,7 @@ describe('trash', () => {
 
       it('should return only soft-deleted docs in findVersions with trash: true', async () => {
         const trashedVersions = await payload.findVersions({
+          overrideAccess: true,
           collection: postsSlug,
           where: {
             'version.deletedAt': {
@@ -619,6 +655,7 @@ describe('trash', () => {
 
       it('should return only non-soft-deleted docs in findVersions with trash: false', async () => {
         const normalVersions = await payload.findVersions({
+          overrideAccess: true,
           collection: postsSlug,
           trash: false,
         })
@@ -629,6 +666,7 @@ describe('trash', () => {
 
       it('should find versions where version.deletedAt is null after restore', async () => {
         await payload.update({
+          overrideAccess: true,
           collection: postsSlug,
           id: postsDocTwo.id,
           data: {
@@ -638,6 +676,7 @@ describe('trash', () => {
         })
 
         const versions = await payload.findVersions({
+          overrideAccess: true,
           collection: postsSlug,
           trash: true,
           where: {
@@ -654,6 +693,7 @@ describe('trash', () => {
     describe('findVersionByID operation', () => {
       beforeAll(async () => {
         await payload.update({
+          overrideAccess: true,
           collection: postsSlug,
           data: {
             title: 'Some updated title',
@@ -669,6 +709,7 @@ describe('trash', () => {
 
       it('should return a soft-deleted version document when trash: true', async () => {
         const trashedVersions = await payload.findVersions({
+          overrideAccess: true,
           collection: postsSlug,
           where: {
             'version.deletedAt': {
@@ -683,6 +724,7 @@ describe('trash', () => {
         const version = trashedVersions.docs[0]
 
         const trashedVersionDoc = await payload.findVersionByID({
+          overrideAccess: true,
           collection: postsSlug,
           id: version!.id,
           trash: true,
@@ -696,6 +738,7 @@ describe('trash', () => {
 
       it('should throw NotFound error when trying to find a soft-deleted version document w/o trash: true', async () => {
         const trashedVersions = await payload.findVersions({
+          overrideAccess: true,
           collection: postsSlug,
           where: {
             'version.deletedAt': {
@@ -711,6 +754,7 @@ describe('trash', () => {
 
         await expect(
           payload.findVersionByID({
+            overrideAccess: true,
             collection: postsSlug,
             id: version!.id,
           }),
@@ -718,6 +762,7 @@ describe('trash', () => {
 
         await expect(
           payload.findVersionByID({
+            overrideAccess: true,
             collection: postsSlug,
             id: version!.id,
             trash: false,
@@ -729,6 +774,7 @@ describe('trash', () => {
     describe('updateByID operation', () => {
       it('should update a single soft-deleted document when trash: true', async () => {
         const updatedPostDoc: Post = await payload.update({
+          overrideAccess: true,
           collection: postsSlug,
           id: postsDocTwo.id,
           data: {
@@ -747,6 +793,7 @@ describe('trash', () => {
       it('should throw NotFound error when trying to update a soft-deleted document w/o trash: true', async () => {
         await expect(
           payload.update({
+            overrideAccess: true,
             collection: postsSlug,
             id: postsDocTwo.id,
             data: {
@@ -757,6 +804,7 @@ describe('trash', () => {
 
         await expect(
           payload.update({
+            overrideAccess: true,
             collection: postsSlug,
             id: postsDocTwo.id,
             data: {
@@ -769,6 +817,7 @@ describe('trash', () => {
 
       it('should update a single normal document when trash: false', async () => {
         const updatedPostDoc: Post = await payload.update({
+          overrideAccess: true,
           collection: postsSlug,
           id: postsDocOne.id,
           data: {
@@ -784,6 +833,7 @@ describe('trash', () => {
 
       it('should restore a soft-deleted document by setting deletedAt to null', async () => {
         const restored = await payload.update({
+          overrideAccess: true,
           collection: postsSlug,
           id: postsDocTwo.id,
           data: {
@@ -796,6 +846,7 @@ describe('trash', () => {
 
         // Should now show up in trash: false queries
         const result = await payload.find({
+          overrideAccess: true,
           collection: postsSlug,
           trash: false,
         })
@@ -809,6 +860,7 @@ describe('trash', () => {
     describe('update operation', () => {
       it('should update only normal document when trash: false', async () => {
         const result = await payload.update({
+          overrideAccess: true,
           collection: postsSlug,
           data: {
             title: 'Updated Doc',
@@ -833,6 +885,7 @@ describe('trash', () => {
 
       it('should update all documents including soft-deleted documents when trash: true', async () => {
         const result = await payload.update({
+          overrideAccess: true,
           collection: postsSlug,
           data: {
             title: 'A New Updated Doc',
@@ -860,6 +913,7 @@ describe('trash', () => {
 
       it('should only update soft-deleted documents when trash: true and where[deletedAt][exists]=true', async () => {
         const docThree = await payload.create({
+          overrideAccess: true,
           collection: postsSlug,
           data: {
             title: 'Doc three',
@@ -868,6 +922,7 @@ describe('trash', () => {
         })
 
         const result = await payload.update({
+          overrideAccess: true,
           collection: postsSlug,
           data: {
             title: 'Updated Soft Deleted Doc',
@@ -889,6 +944,7 @@ describe('trash', () => {
 
         // Clean up
         await payload.delete({
+          overrideAccess: true,
           collection: postsSlug,
           id: docThree.id,
           trash: true,
@@ -899,6 +955,7 @@ describe('trash', () => {
     describe('delete operation', () => {
       it('should perma delete all docs including soft-deleted documents when trash: true', async () => {
         await payload.delete({
+          overrideAccess: true,
           collection: postsSlug,
           trash: true,
           where: {
@@ -909,6 +966,7 @@ describe('trash', () => {
         })
 
         const allDocs = await payload.find({
+          overrideAccess: true,
           collection: postsSlug,
           trash: true,
         })
@@ -918,6 +976,7 @@ describe('trash', () => {
 
       it('should only perma delete normal docs when trash: false', async () => {
         await payload.delete({
+          overrideAccess: true,
           collection: postsSlug,
           trash: false,
           where: {
@@ -928,6 +987,7 @@ describe('trash', () => {
         })
 
         const allDocs = await payload.find({
+          overrideAccess: true,
           collection: postsSlug,
           trash: true,
         })
@@ -941,6 +1001,7 @@ describe('trash', () => {
       it('should allow trashing documents with empty required fields (draft scenario)', async () => {
         // Create a draft document with empty required field
         const draftDoc = await payload.create({
+          overrideAccess: true,
           collection: postsSlug,
           data: {
             title: '', // Empty required field
@@ -954,6 +1015,7 @@ describe('trash', () => {
 
         // Should be able to trash the document even with empty required field
         const trashedDoc = await payload.update({
+          overrideAccess: true,
           collection: postsSlug,
           id: draftDoc.id,
           data: {
@@ -967,6 +1029,7 @@ describe('trash', () => {
 
         // Clean up
         await payload.delete({
+          overrideAccess: true,
           collection: postsSlug,
           id: draftDoc.id,
           trash: true,
@@ -976,6 +1039,7 @@ describe('trash', () => {
       it('should allow restoring trashed drafts with empty required fields as draft', async () => {
         // Create a draft document with empty required field
         const draftDoc = await payload.create({
+          overrideAccess: true,
           collection: postsSlug,
           data: {
             title: '', // Empty required field
@@ -986,6 +1050,7 @@ describe('trash', () => {
 
         // Trash it
         await payload.update({
+          overrideAccess: true,
           collection: postsSlug,
           id: draftDoc.id,
           data: {
@@ -995,6 +1060,7 @@ describe('trash', () => {
 
         // Should be able to restore as draft without validation errors
         const restoredDoc = await payload.update({
+          overrideAccess: true,
           collection: postsSlug,
           id: draftDoc.id,
           data: {
@@ -1010,6 +1076,7 @@ describe('trash', () => {
 
         // Clean up
         await payload.delete({
+          overrideAccess: true,
           collection: postsSlug,
           id: draftDoc.id,
           trash: true,
@@ -1019,6 +1086,7 @@ describe('trash', () => {
       it('should NOT allow restoring trashed drafts with empty required fields as published', async () => {
         // Create a draft document with empty required field
         const draftDoc = await payload.create({
+          overrideAccess: true,
           collection: postsSlug,
           data: {
             title: '', // Empty required field
@@ -1029,6 +1097,7 @@ describe('trash', () => {
 
         // Trash it
         await payload.update({
+          overrideAccess: true,
           collection: postsSlug,
           id: draftDoc.id,
           data: {
@@ -1039,6 +1108,7 @@ describe('trash', () => {
         // Should NOT be able to restore as published - should fail validation
         await expect(
           payload.update({
+            overrideAccess: true,
             collection: postsSlug,
             id: draftDoc.id,
             data: {
@@ -1051,6 +1121,7 @@ describe('trash', () => {
 
         // Clean up
         await payload.delete({
+          overrideAccess: true,
           collection: postsSlug,
           id: draftDoc.id,
           trash: true,
@@ -1062,6 +1133,7 @@ describe('trash', () => {
       it('should throw NotFound error when trying to delete a soft-deleted document w/o trash: true', async () => {
         await expect(
           payload.delete({
+            overrideAccess: true,
             collection: postsSlug,
             id: postsDocTwo.id,
           }),
@@ -1069,6 +1141,7 @@ describe('trash', () => {
 
         await expect(
           payload.delete({
+            overrideAccess: true,
             collection: postsSlug,
             id: postsDocTwo.id,
             trash: false,
@@ -1078,12 +1151,14 @@ describe('trash', () => {
 
       it('should delete a soft-deleted document when trash: true', async () => {
         await payload.delete({
+          overrideAccess: true,
           collection: postsSlug,
           id: postsDocTwo.id,
           trash: true,
         })
 
         const allDocs = await payload.find({
+          overrideAccess: true,
           collection: postsSlug,
           trash: true,
         })
@@ -1097,6 +1172,7 @@ describe('trash', () => {
       it('should throw error when restoring a version of a trashed document', async () => {
         // Create a version of postsDocTwo (which is soft-deleted)
         await payload.update({
+          overrideAccess: true,
           collection: postsSlug,
           id: postsDocTwo.id,
           data: { title: 'Updated Before Restore Attempt' },
@@ -1104,6 +1180,7 @@ describe('trash', () => {
         })
 
         const { docs: versions } = await payload.findVersions({
+          overrideAccess: true,
           collection: postsSlug,
           trash: true,
         })
@@ -1113,6 +1190,7 @@ describe('trash', () => {
 
         await expect(
           payload.restoreVersion({
+            overrideAccess: true,
             collection: postsSlug,
             id: version!.id,
           }),
@@ -1123,6 +1201,7 @@ describe('trash', () => {
     describe('count operation', () => {
       it('should return total count of non-soft-deleted documents by default (trash: false)', async () => {
         const result = await payload.count({
+          overrideAccess: true,
           collection: postsSlug,
         })
 
@@ -1131,6 +1210,7 @@ describe('trash', () => {
 
       it('should return total count of all documents including soft-deleted when trash: true', async () => {
         const result = await payload.count({
+          overrideAccess: true,
           collection: postsSlug,
           trash: true,
         })
@@ -1140,6 +1220,7 @@ describe('trash', () => {
 
       it('should return count of only soft-deleted documents when where[deletedAt][exists]=true', async () => {
         const result = await payload.count({
+          overrideAccess: true,
           collection: postsSlug,
           trash: true,
           where: { deletedAt: { exists: true } },
@@ -1154,6 +1235,7 @@ describe('trash', () => {
       const localizedFieldValueES = 'Localized Draft Content ES'
 
       const post = await payload.create({
+        overrideAccess: true,
         collection: postsSlug,
         data: {
           title: 'Draft with Localized Field',
@@ -1164,6 +1246,7 @@ describe('trash', () => {
       // Update en locale as draft - isSavingDraft = true skips updateOne on the main table,
       // storing localized data only in the versions table
       await payload.update({
+        overrideAccess: true,
         collection: postsSlug,
         id: post.id,
         locale: 'en',
@@ -1175,6 +1258,7 @@ describe('trash', () => {
       })
 
       await payload.update({
+        overrideAccess: true,
         collection: postsSlug,
         id: post.id,
         locale: 'es',
@@ -1188,6 +1272,7 @@ describe('trash', () => {
       // Bulk trash the document (simulates list view "Move to Trash")
       // This reads from the main table which has stale/empty localizedField
       const trashResult = await payload.update({
+        overrideAccess: true,
         collection: postsSlug,
         data: {
           deletedAt: new Date().toISOString(),
@@ -1204,6 +1289,7 @@ describe('trash', () => {
 
       // Fetch the latest draft version of the trashed document for each locale
       const trashedDocEN = await payload.findByID({
+        overrideAccess: true,
         collection: postsSlug,
         id: post.id,
         locale: 'en',
@@ -1212,6 +1298,7 @@ describe('trash', () => {
       })
 
       const trashedDocES = await payload.findByID({
+        overrideAccess: true,
         collection: postsSlug,
         id: post.id,
         locale: 'es',
@@ -1283,6 +1370,7 @@ describe('trash', () => {
     describe('find versions endpoint', () => {
       beforeAll(async () => {
         await payload.update({
+          overrideAccess: true,
           collection: postsSlug,
           data: {
             title: 'Some updated title',
@@ -1339,6 +1427,7 @@ describe('trash', () => {
     describe('findVersionByID endpoint', () => {
       beforeAll(async () => {
         await payload.update({
+          overrideAccess: true,
           collection: postsSlug,
           data: {
             title: 'Some updated title',
@@ -1470,6 +1559,7 @@ describe('trash', () => {
         const query = `?trash=true&where[deletedAt][exists]=true`
 
         const docThree = await payload.create({
+          overrideAccess: true,
           collection: postsSlug,
           data: {
             title: 'Doc three',
@@ -1494,6 +1584,7 @@ describe('trash', () => {
 
         // Clean up
         await payload.delete({
+          overrideAccess: true,
           collection: postsSlug,
           id: docThree.id,
           trash: true,
@@ -1556,6 +1647,7 @@ describe('trash', () => {
         expect(updateRes.status).toBe(200)
 
         const { docs: versions } = await payload.findVersions({
+          overrideAccess: true,
           collection: postsSlug,
           trash: true,
         })
@@ -1732,6 +1824,7 @@ describe('trash', () => {
     describe('find versions query', () => {
       beforeAll(async () => {
         await payload.update({
+          overrideAccess: true,
           collection: postsSlug,
           data: {
             title: 'Some updated title',
@@ -1878,6 +1971,7 @@ describe('trash', () => {
     describe('findVersionByID endpoint', () => {
       beforeAll(async () => {
         await payload.update({
+          overrideAccess: true,
           collection: postsSlug,
           data: {
             title: 'Some updated title',
@@ -2225,7 +2319,7 @@ describe('trash', () => {
 
     afterEach(async () => {
       for (const id of createdPageIDs) {
-        await payload.delete({ collection: pagesSlug, id })
+        await payload.delete({ overrideAccess: true, collection: pagesSlug, id })
       }
       createdPageIDs.length = 0
     })
@@ -2233,6 +2327,7 @@ describe('trash', () => {
     it('should not include trashed document IDs in hasMany relationship population', async () => {
       // postsDocOne is non-trashed, postsDocTwo is trashed
       const page = await payload.create({
+        overrideAccess: true,
         collection: pagesSlug,
         data: {
           title: 'Page with related posts',
@@ -2242,6 +2337,7 @@ describe('trash', () => {
       createdPageIDs.push(page.id)
 
       const result = await payload.findByID({
+        overrideAccess: true,
         collection: pagesSlug,
         id: page.id,
         depth: 1,
@@ -2256,6 +2352,7 @@ describe('trash', () => {
 
     it('should return null for a trashed document in a single relationship', async () => {
       const page = await payload.create({
+        overrideAccess: true,
         collection: pagesSlug,
         data: {
           title: 'Page with featured post',
@@ -2265,6 +2362,7 @@ describe('trash', () => {
       createdPageIDs.push(page.id)
 
       const result = await payload.findByID({
+        overrideAccess: true,
         collection: pagesSlug,
         id: page.id,
         depth: 1,
@@ -2275,6 +2373,7 @@ describe('trash', () => {
 
     it('should populate a non-trashed document in a single relationship', async () => {
       const page = await payload.create({
+        overrideAccess: true,
         collection: pagesSlug,
         data: {
           title: 'Page with featured post',
@@ -2284,6 +2383,7 @@ describe('trash', () => {
       createdPageIDs.push(page.id)
 
       const result = await payload.findByID({
+        overrideAccess: true,
         collection: pagesSlug,
         id: page.id,
         depth: 1,
@@ -2295,6 +2395,7 @@ describe('trash', () => {
     it('should include trashed documents in relationship when depth=0', async () => {
       // At depth=0, relationships are returned as IDs - but trashed IDs should still be filtered
       const page = await payload.create({
+        overrideAccess: true,
         collection: pagesSlug,
         data: {
           title: 'Page with related posts depth 0',
@@ -2304,6 +2405,7 @@ describe('trash', () => {
       createdPageIDs.push(page.id)
 
       const result = await payload.findByID({
+        overrideAccess: true,
         collection: pagesSlug,
         id: page.id,
         depth: 0,

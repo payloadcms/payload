@@ -28,6 +28,7 @@ const dirname = path.dirname(filename)
 
 export const seed: Config['onInit'] = async (payload) => {
   const existingUser = await payload.find({
+    overrideAccess: true,
     collection: 'users',
     where: {
       email: {
@@ -45,6 +46,7 @@ export const seed: Config['onInit'] = async (payload) => {
   removeFiles(path.normalize(uploadsDir))
 
   await payload.create({
+    overrideAccess: true,
     collection: 'users',
     data: {
       email: devUser.email,
@@ -53,16 +55,19 @@ export const seed: Config['onInit'] = async (payload) => {
   })
 
   const tenant1Doc = await payload.create({
+    overrideAccess: true,
     collection: tenantsSlug,
     data: tenant1,
   })
 
   await payload.create({
+    overrideAccess: true,
     collection: tenantsSlug,
     data: tenant2,
   })
 
   const media = await payload.create({
+    overrideAccess: true,
     collection: 'media',
     filePath: path.resolve(dirname, 'image-1.jpg'),
     data: {
@@ -74,6 +79,7 @@ export const seed: Config['onInit'] = async (payload) => {
   const tenantID = payload.db.defaultIDType === 'number' ? tenant1Doc.id : `"${tenant1Doc.id}"`
 
   const post1Doc = await payload.create({
+    overrideAccess: true,
     collection: postsSlug,
     data: JSON.parse(
       JSON.stringify(post1)
@@ -83,6 +89,7 @@ export const seed: Config['onInit'] = async (payload) => {
   })
 
   const post2Doc = await payload.create({
+    overrideAccess: true,
     collection: postsSlug,
     data: JSON.parse(
       JSON.stringify(post2)
@@ -92,6 +99,7 @@ export const seed: Config['onInit'] = async (payload) => {
   })
 
   const post3Doc = await payload.create({
+    overrideAccess: true,
     collection: postsSlug,
     data: JSON.parse(
       JSON.stringify(post3)
@@ -101,6 +109,7 @@ export const seed: Config['onInit'] = async (payload) => {
   })
 
   await payload.create({
+    overrideAccess: true,
     collection: postsSlug,
     data: JSON.parse(
       JSON.stringify(trashedPost)
@@ -110,6 +119,7 @@ export const seed: Config['onInit'] = async (payload) => {
   })
 
   const postsPageDoc = await payload.create({
+    overrideAccess: true,
     collection: pagesSlug,
     data: JSON.parse(JSON.stringify(postsPage).replace(/"\{\{IMAGE\}\}"/g, mediaID)),
   })
@@ -127,6 +137,7 @@ export const seed: Config['onInit'] = async (payload) => {
   }
 
   await payload.create({
+    overrideAccess: true,
     collection: pagesSlug,
     data: JSON.parse(
       JSON.stringify(home)
@@ -140,6 +151,7 @@ export const seed: Config['onInit'] = async (payload) => {
   })
 
   await payload.create({
+    overrideAccess: true,
     collection: customLivePreviewSlug,
     data: {
       ...JSON.parse(
@@ -157,6 +169,7 @@ export const seed: Config['onInit'] = async (payload) => {
   })
 
   await payload.create({
+    overrideAccess: true,
     collection: ssrPagesSlug,
     data: {
       ...JSON.parse(
@@ -174,6 +187,7 @@ export const seed: Config['onInit'] = async (payload) => {
   })
 
   await payload.create({
+    overrideAccess: true,
     collection: ssrAutosavePagesSlug,
     data: {
       ...JSON.parse(
@@ -191,6 +205,7 @@ export const seed: Config['onInit'] = async (payload) => {
   })
 
   await payload.updateGlobal({
+    overrideAccess: true,
     slug: 'header',
     data: JSON.parse(
       JSON.stringify(header)
@@ -202,6 +217,7 @@ export const seed: Config['onInit'] = async (payload) => {
   })
 
   await payload.updateGlobal({
+    overrideAccess: true,
     slug: 'footer',
     data: JSON.parse(JSON.stringify(footer)),
   })

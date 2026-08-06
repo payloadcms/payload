@@ -94,6 +94,7 @@ describe('Lexical', () => {
 
     createdArrayDocID = (
       await payload.find({
+        overrideAccess: true,
         collection: arrayFieldsSlug,
         depth: 0,
         where: {
@@ -106,6 +107,7 @@ describe('Lexical', () => {
 
     createdJPGDocID = (
       await payload.find({
+        overrideAccess: true,
         collection: uploadsSlug,
         depth: 0,
         where: {
@@ -118,6 +120,7 @@ describe('Lexical', () => {
 
     createdTextDocID = (
       await payload.find({
+        overrideAccess: true,
         collection: textFieldsSlug,
         depth: 0,
         where: {
@@ -130,6 +133,7 @@ describe('Lexical', () => {
 
     createdRichTextDocID = (
       await payload.find({
+        overrideAccess: true,
         collection: richTextFieldsSlug,
         depth: 0,
         where: {
@@ -145,6 +149,7 @@ describe('Lexical', () => {
     it('should allow querying on lexical content', async () => {
       const richTextDoc: RichTextField = (
         await payload.find({
+          overrideAccess: true,
           collection: richTextFieldsSlug,
           depth: 0,
           where: {
@@ -181,6 +186,7 @@ describe('Lexical', () => {
     it('should populate respect depth parameter and populate link node relationship', async () => {
       const richTextDoc: RichTextField = (
         await payload.find({
+          overrideAccess: true,
           collection: richTextFieldsSlug,
           depth: 1,
           where: {
@@ -221,6 +227,7 @@ describe('Lexical', () => {
     it('should populate relationship node', async () => {
       const richTextDoc: RichTextField = (
         await payload.find({
+          overrideAccess: true,
           collection: richTextFieldsSlug,
           depth: 1,
           where: {
@@ -267,6 +274,7 @@ describe('Lexical', () => {
 
   it('ensure link nodes convert to markdown', async () => {
     const newLexicalDoc = await payload.create({
+      overrideAccess: true,
       collection: lexicalFieldsSlug,
       depth: 0,
       data: {
@@ -324,6 +332,7 @@ describe('Lexical', () => {
   describe('upload markdown: Lexical → Markdown (export)', () => {
     it('exports upload node to markdown placeholder when unpopulated', async () => {
       const newLexicalDoc = await payload.create({
+        overrideAccess: true,
         collection: lexicalFieldsSlug,
         depth: 0,
         data: {
@@ -355,6 +364,7 @@ describe('Lexical', () => {
 
     it('exported markdown contains upload placeholder in seeded doc', async () => {
       const lexicalDoc = await payload.find({
+        overrideAccess: true,
         collection: lexicalFieldsSlug,
         depth: 0,
         where: { title: { equals: lexicalDocData.title } },
@@ -370,6 +380,7 @@ describe('Lexical', () => {
     it('should not populate relationships in blocks if depth is 0', async () => {
       const lexicalDoc: LexicalField = (
         await payload.find({
+          overrideAccess: true,
           collection: lexicalFieldsSlug,
           depth: 0,
           where: {
@@ -394,6 +405,7 @@ describe('Lexical', () => {
     it('should populate relationships in blocks with depth=1', async () => {
       const lexicalDoc: LexicalField = (
         await payload.find({
+          overrideAccess: true,
           collection: lexicalFieldsSlug,
           depth: 1,
           where: {
@@ -418,6 +430,7 @@ describe('Lexical', () => {
     it('should correctly populate polymorphic hasMany relationships in blocks with depth=0', async () => {
       const lexicalDoc: LexicalField = (
         await payload.find({
+          overrideAccess: true,
           collection: lexicalFieldsSlug,
           depth: 0,
           where: {
@@ -449,6 +462,7 @@ describe('Lexical', () => {
       // Related issue: https://github.com/payloadcms/payload/issues/4277
       const lexicalDoc: LexicalField = (
         await payload.find({
+          overrideAccess: true,
           collection: lexicalFieldsSlug,
           depth: 1,
           where: {
@@ -485,6 +499,7 @@ describe('Lexical', () => {
     it('should not populate relationship nodes inside of a sub-editor from a blocks node with 0 depth', async () => {
       const lexicalDoc: LexicalField = (
         await payload.find({
+          overrideAccess: true,
           collection: lexicalFieldsSlug,
           depth: 0,
           where: {
@@ -517,6 +532,7 @@ describe('Lexical', () => {
     it('should populate relationship nodes inside of a sub-editor from a blocks node with 1 depth', async () => {
       const lexicalDoc: LexicalField = (
         await payload.find({
+          overrideAccess: true,
           collection: lexicalFieldsSlug,
           depth: 1,
           where: {
@@ -564,6 +580,7 @@ describe('Lexical', () => {
     it('should populate relationship nodes inside of a sub-editor from a blocks node with depth 2', async () => {
       const lexicalDoc: LexicalField = (
         await payload.find({
+          overrideAccess: true,
           collection: lexicalFieldsSlug,
           depth: 2,
           where: {
@@ -610,6 +627,7 @@ describe('Lexical', () => {
   describe('Localization', () => {
     it('ensure localized lexical field is different across locales', async () => {
       const lexicalDocEN = await payload.find({
+        overrideAccess: true,
         collection: 'lexical-localized-fields',
         locale: 'en',
         where: {
@@ -624,6 +642,7 @@ describe('Lexical', () => {
       )
 
       const lexicalDocES = await payload.findByID({
+        overrideAccess: true,
         collection: 'lexical-localized-fields',
         locale: 'es',
         id: lexicalDocEN.docs[0].id,
@@ -636,6 +655,7 @@ describe('Lexical', () => {
 
     it('ensure localized text field within blocks field within unlocalized lexical field is different across locales', async () => {
       const lexicalDocEN = await payload.find({
+        overrideAccess: true,
         collection: 'lexical-localized-fields',
         locale: 'en',
         where: {
@@ -655,6 +675,7 @@ describe('Lexical', () => {
       ).toEqual('English text in block')
 
       const lexicalDocES = await payload.findByID({
+        overrideAccess: true,
         collection: 'lexical-localized-fields',
         locale: 'es',
         id: lexicalDocEN.docs[0].id,
@@ -673,6 +694,7 @@ describe('Lexical', () => {
   describe('Hooks', () => {
     it('ensure hook within number field within lexical block runs', async () => {
       const lexicalDocEN = await payload.create({
+        overrideAccess: true,
         collection: 'lexical-localized-fields',
         locale: 'en',
         data: {
@@ -691,6 +713,7 @@ describe('Lexical', () => {
 
       // update document with same data
       const lexicalDocENUpdated = await payload.update({
+        overrideAccess: true,
         collection: 'lexical-localized-fields',
         locale: 'en',
         id: lexicalDocEN.id,
@@ -712,6 +735,7 @@ describe('Lexical', () => {
       clearAutosaveHookLog()
 
       const doc = await payload.create({
+        overrideAccess: true,
         collection: 'lexical-autosave',
         data: {
           title: 'Autosave test document',
@@ -753,6 +777,7 @@ describe('Lexical', () => {
 
       // Simulate autosave by updating the document
       await payload.update({
+        overrideAccess: true,
         collection: 'lexical-autosave',
         id: doc.id,
         data: {

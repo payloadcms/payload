@@ -53,8 +53,8 @@ describePostgres('Select - with postgres logs', () => {
 
     // Clean up to safely mutate in each test
     afterEach(async () => {
-      await payload.delete({ id: postId, collection: 'posts' })
-      await payload.delete({ id: pointId, collection: 'points' })
+      await payload.delete({ overrideAccess: true, id: postId, collection: 'posts' })
+      await payload.delete({ overrideAccess: true, id: pointId, collection: 'points' })
     })
 
     it('ensure optimized db update is still used when using select', async () => {
@@ -87,6 +87,7 @@ describePostgres('Select - with postgres logs', () => {
     // This is possible as no `with` is returned by buildFindManyArgs for the blocks field, only if we have a select that does not select that blocks field.
     it('ensure simple update of complex collection uses optimized upsertRow with optimized returning() if only simple fields are selected', async () => {
       const page = await payload.create({
+        overrideAccess: true,
         collection: 'pages',
         data: {
           slug: 'test-page',
@@ -129,6 +130,7 @@ describePostgres('Select - with postgres logs', () => {
 
       // Do full find without select just to ensure that the update worked
       const fullPage: any = await payload.findByID({
+        overrideAccess: true,
         collection: 'pages',
         id: page.id,
       })
@@ -190,18 +192,21 @@ function removeEmptyAndUndefined(obj: any): any {
 }
 async function createPost() {
   const upload = await payload.create({
+    overrideAccess: true,
     collection: 'upload',
     data: {},
     filePath: path.resolve(dirname, 'image.jpg'),
   })
 
   const relation = await payload.create({
+    overrideAccess: true,
     depth: 0,
     collection: 'rels',
     data: {},
   })
 
   return payload.create({
+    overrideAccess: true,
     collection: 'posts',
     depth: 0,
     data: {
@@ -247,5 +252,9 @@ async function createPost() {
 }
 
 function createPoint() {
-  return payload.create({ collection: 'points', data: { text: 'some', point: [10, 20] } })
+  return payload.create({
+    overrideAccess: true,
+    collection: 'points',
+    data: { text: 'some', point: [10, 20] },
+  })
 }

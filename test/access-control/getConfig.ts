@@ -845,7 +845,7 @@ export const getConfig: () => Partial<Config> = () => ({
       slug: 'test',
       access: {
         read: async ({ req: { payload } }) => {
-          const access = await payload.findGlobal({ slug: 'settings' })
+          const access = await payload.findGlobal({ overrideAccess: true, slug: 'settings' })
           return Boolean(access.test)
         },
       },
@@ -897,6 +897,7 @@ export const getConfig: () => Partial<Config> = () => ({
   ],
   onInit: async (payload) => {
     await payload.create({
+      overrideAccess: true,
       collection: 'users',
       data: {
         email: devUser.email,
@@ -905,6 +906,7 @@ export const getConfig: () => Partial<Config> = () => ({
     })
 
     await payload.create({
+      overrideAccess: true,
       collection: 'users',
       data: {
         email: nonAdminEmail,
@@ -914,6 +916,7 @@ export const getConfig: () => Partial<Config> = () => ({
 
     // Regular user - can access admin panel but has limited delete permissions
     await payload.create({
+      overrideAccess: true,
       collection: 'users',
       data: {
         email: regularUserEmail,
@@ -923,6 +926,7 @@ export const getConfig: () => Partial<Config> = () => ({
     })
 
     await payload.create({
+      overrideAccess: true,
       collection: publicUsersSlug,
       data: {
         email: publicUserEmail,
@@ -931,6 +935,7 @@ export const getConfig: () => Partial<Config> = () => ({
     })
 
     await payload.create({
+      overrideAccess: true,
       collection: slug,
       data: {
         restrictedField: 'restricted',
@@ -938,6 +943,7 @@ export const getConfig: () => Partial<Config> = () => ({
     })
 
     await payload.create({
+      overrideAccess: true,
       collection: readOnlySlug,
       data: {
         name: 'read-only',
@@ -945,6 +951,7 @@ export const getConfig: () => Partial<Config> = () => ({
     })
 
     await payload.create({
+      overrideAccess: true,
       collection: blocksFieldAccessSlug,
       data: {
         title: 'Blocks Field Access Test Document',
@@ -993,6 +1000,7 @@ export const getConfig: () => Partial<Config> = () => ({
     })
 
     await payload.create({
+      overrideAccess: true,
       collection: restrictedVersionsSlug,
       data: {
         name: 'versioned',
@@ -1000,6 +1008,7 @@ export const getConfig: () => Partial<Config> = () => ({
     })
 
     await payload.create({
+      overrideAccess: true,
       collection: siblingDataSlug,
       data: {
         array: [
@@ -1016,6 +1025,7 @@ export const getConfig: () => Partial<Config> = () => ({
     })
 
     await payload.updateGlobal({
+      overrideAccess: true,
       slug: userRestrictedGlobalSlug,
       data: {
         name: 'dev@payloadcms.com',
@@ -1023,6 +1033,7 @@ export const getConfig: () => Partial<Config> = () => ({
     })
 
     await payload.create({
+      overrideAccess: true,
       collection: 'regression1',
       data: {
         richText4: buildEditorState<DefaultNodeTypes>({ text: 'Text1' }),
@@ -1062,6 +1073,7 @@ export const getConfig: () => Partial<Config> = () => ({
     })
 
     await payload.create({
+      overrideAccess: true,
       collection: 'regression2',
       data: {
         array: [
@@ -1081,6 +1093,7 @@ export const getConfig: () => Partial<Config> = () => ({
 
     // Seed trash access control collections
     await payload.create({
+      overrideAccess: true,
       collection: differentiatedTrashSlug,
       data: {
         title: 'Differentiated Doc 1',
@@ -1089,6 +1102,7 @@ export const getConfig: () => Partial<Config> = () => ({
     })
 
     await payload.create({
+      overrideAccess: true,
       collection: restrictedTrashSlug,
       data: {
         title: 'Restricted Doc 1',

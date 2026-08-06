@@ -16,6 +16,7 @@ export const subTaskFailsWorkflow: WorkflowConfig<'subTaskFails'> = {
         const { newSimple } = await inlineTask('create doc 1 - succeeds', {
           task: async ({ req }) => {
             const newSimple = await req.payload.create({
+              overrideAccess: true,
               collection: 'simple',
               req,
               data: {
@@ -24,6 +25,7 @@ export const subTaskFailsWorkflow: WorkflowConfig<'subTaskFails'> = {
             })
 
             const updatedJob = await req.payload.update({
+              overrideAccess: true,
               collection: 'payload-jobs',
               data: {
                 input: {
@@ -51,6 +53,7 @@ export const subTaskFailsWorkflow: WorkflowConfig<'subTaskFails'> = {
         await inlineTask('create doc 2 - fails', {
           task: async ({ req }) => {
             const updatedJob = await req.payload.update({
+              overrideAccess: true,
               collection: 'payload-jobs',
               data: {
                 input: {

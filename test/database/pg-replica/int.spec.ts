@@ -87,7 +87,11 @@ describeReplica('postgres read replicas', () => {
     it('should set lastWriteTimestamp after a create', async () => {
       adapter.lastWriteTimestamp = undefined
 
-      await payload.create({ collection: 'posts', data: { title: 'write-tracking' } })
+      await payload.create({
+        overrideAccess: true,
+        collection: 'posts',
+        data: { title: 'write-tracking' },
+      })
 
       expect(adapter.lastWriteTimestamp).toBeDefined()
       expect(typeof adapter.lastWriteTimestamp).toBe('number')
@@ -95,19 +99,32 @@ describeReplica('postgres read replicas', () => {
     })
 
     it('should set lastWriteTimestamp after an update', async () => {
-      const doc = await payload.create({ collection: 'posts', data: { title: 'before-update' } })
+      const doc = await payload.create({
+        overrideAccess: true,
+        collection: 'posts',
+        data: { title: 'before-update' },
+      })
       adapter.lastWriteTimestamp = undefined
 
-      await payload.update({ collection: 'posts', id: doc.id, data: { title: 'after-update' } })
+      await payload.update({
+        overrideAccess: true,
+        collection: 'posts',
+        id: doc.id,
+        data: { title: 'after-update' },
+      })
 
       expect(adapter.lastWriteTimestamp).toBeDefined()
     })
 
     it('should set lastWriteTimestamp after a delete', async () => {
-      const doc = await payload.create({ collection: 'posts', data: { title: 'to-delete' } })
+      const doc = await payload.create({
+        overrideAccess: true,
+        collection: 'posts',
+        data: { title: 'to-delete' },
+      })
       adapter.lastWriteTimestamp = undefined
 
-      await payload.delete({ collection: 'posts', id: doc.id })
+      await payload.delete({ overrideAccess: true, collection: 'posts', id: doc.id })
 
       expect(adapter.lastWriteTimestamp).toBeDefined()
     })
@@ -116,22 +133,40 @@ describeReplica('postgres read replicas', () => {
   describe('read-after-write consistency (default window)', () => {
     it('should find a document immediately after creating it', async () => {
       const doc = await payload.create({
+        overrideAccess: true,
         collection: 'posts',
         data: { title: 'find-after-create' },
       })
 
-      const found = await payload.findByID({ collection: 'posts', id: doc.id })
+      const found = await payload.findByID({
+        overrideAccess: true,
+        collection: 'posts',
+        id: doc.id,
+      })
 
       expect(found).toBeDefined()
       expect(found.title).toBe('find-after-create')
     })
 
     it('should find updated data immediately after updating', async () => {
-      const doc = await payload.create({ collection: 'posts', data: { title: 'original' } })
+      const doc = await payload.create({
+        overrideAccess: true,
+        collection: 'posts',
+        data: { title: 'original' },
+      })
 
-      await payload.update({ collection: 'posts', id: doc.id, data: { title: 'updated' } })
+      await payload.update({
+        overrideAccess: true,
+        collection: 'posts',
+        id: doc.id,
+        data: { title: 'updated' },
+      })
 
-      const found = await payload.findByID({ collection: 'posts', id: doc.id })
+      const found = await payload.findByID({
+        overrideAccess: true,
+        collection: 'posts',
+        id: doc.id,
+      })
 
       expect(found.title).toBe('updated')
     })
@@ -139,11 +174,12 @@ describeReplica('postgres read replicas', () => {
     it('should return correct count immediately after creating documents', async () => {
       const unique = `count-test-${Date.now()}`
 
-      await payload.create({ collection: 'posts', data: { title: unique } })
-      await payload.create({ collection: 'posts', data: { title: unique } })
-      await payload.create({ collection: 'posts', data: { title: unique } })
+      await payload.create({ overrideAccess: true, collection: 'posts', data: { title: unique } })
+      await payload.create({ overrideAccess: true, collection: 'posts', data: { title: unique } })
+      await payload.create({ overrideAccess: true, collection: 'posts', data: { title: unique } })
 
       const result = await payload.count({
+        overrideAccess: true,
         collection: 'posts',
         where: { title: { equals: unique } },
       })
@@ -152,11 +188,16 @@ describeReplica('postgres read replicas', () => {
     })
 
     it('should not find a document after deleting it', async () => {
-      const doc = await payload.create({ collection: 'posts', data: { title: 'delete-me' } })
+      const doc = await payload.create({
+        overrideAccess: true,
+        collection: 'posts',
+        data: { title: 'delete-me' },
+      })
 
-      await payload.delete({ collection: 'posts', id: doc.id })
+      await payload.delete({ overrideAccess: true, collection: 'posts', id: doc.id })
 
       const result = await payload.find({
+        overrideAccess: true,
         collection: 'posts',
         where: { id: { equals: doc.id } },
       })
@@ -171,7 +212,11 @@ describeReplica('postgres read replicas', () => {
       adapter.readReplicasAfterWriteInterval = 0
 
       // Create a doc — this sets lastWriteTimestamp
-      await payload.create({ collection: 'posts', data: { title: 'interval-zero' } })
+      await payload.create({
+        overrideAccess: true,
+        collection: 'posts',
+        data: { title: 'interval-zero' },
+      })
 
       // With interval=0, the window is effectively disabled:
       // Date.now() - lastWriteTimestamp >= 0 is NOT < 0
@@ -190,7 +235,11 @@ describeReplica('postgres read replicas', () => {
   describe('expired write window falls back to replica routing', () => {
     it('should route to replica when lastWriteTimestamp is old', async () => {
       // Create a doc so the table has data
-      const doc = await payload.create({ collection: 'posts', data: { title: 'old-write' } })
+      const doc = await payload.create({
+        overrideAccess: true,
+        collection: 'posts',
+        data: { title: 'old-write' },
+      })
 
       // Simulate an old write (outside the window)
       adapter.lastWriteTimestamp = Date.now() - 10_000
@@ -198,7 +247,11 @@ describeReplica('postgres read replicas', () => {
       // This read should go through adapter.drizzle (replica-wrapped).
       // With real replication in Docker, the replica should have caught up
       // by now, so the read still succeeds.
-      const found = await payload.findByID({ collection: 'posts', id: doc.id })
+      const found = await payload.findByID({
+        overrideAccess: true,
+        collection: 'posts',
+        id: doc.id,
+      })
 
       expect(found).toBeDefined()
       expect(found.title).toBe('old-write')
@@ -332,12 +385,14 @@ describeReplica('postgres read replicas', () => {
   describe('delete operations use primary for pre-delete read', () => {
     it('should delete a document and return the deleted data without errors', async () => {
       const doc = await payload.create({
+        overrideAccess: true,
         collection: 'posts',
         data: { title: 'to-delete-replica-test' },
       })
 
       // deleteOne reads the doc before deleting (now uses getPrimaryDb)
       const deleted = await payload.delete({
+        overrideAccess: true,
         collection: 'posts',
         id: doc.id,
       })

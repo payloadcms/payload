@@ -41,12 +41,14 @@ async function main() {
   // Step 1: Create test data
   console.log('📝 Creating test data...')
   const post = await payload.create({
+    overrideAccess: true,
     collection: 'testMigrationPosts',
     data: { title: 'Test Post' },
   })
   console.log(`   Created post: ${post.id}`)
 
   await payload.update({
+    overrideAccess: true,
     id: post.id,
     collection: 'testMigrationPosts',
     data: { _status: 'published', title: 'Published Post' },
