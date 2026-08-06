@@ -33,7 +33,6 @@ export const addSessionToUser = async ({
 }): Promise<{ sid?: string }> => {
   let sid: string | undefined
   if (collectionConfig.auth.useSessions) {
-    // Add session to user
     sid = uuid()
     const now = new Date()
     const tokenExpInMs = collectionConfig.auth.tokenExpiration * 1000
@@ -41,12 +40,20 @@ export const addSessionToUser = async ({
 
     const session = { id: sid, createdAt: now, expiresAt }
 
-    if (!user.sessions?.length) {
-      user.sessions = [session]
-    } else {
-      user.sessions = removeExpiredSessions(user.sessions)
-      user.sessions.push(session)
-    }
+    // Re-read the user's sessions from the DB inside the active transaction.
+    // The `user` passed in was read before the transaction started, so concurrent
+    // logins that race past the password check can each hold a stale snapshot of
+    // `user.sessions`. Without this re-read, whichever request commits last
+    // overwrites the other's session, leaving the first token referencing a sid
+    // that no longer exists in the DB — which causes /api/users/me to return 403.
+    const freshUser = await payload.db.findOne<TypedUser>({
+      collection: collectionConfig.slug,
+      req,
+      where: { id: { equals: user.id } },
+    })
+    const currentSessions: UserSession[] = (freshUser as TypedUser | null)?.sessions ?? []
+
+    user.sessions = [...removeExpiredSessions(currentSessions), session]
 
     await payload.db.updateOne({
       id: user.id,
