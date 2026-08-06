@@ -569,7 +569,10 @@ describe('Block fields', () => {
         .first()
       await rowPopupBtn.click()
       await expect(
-        page.locator('.popup__content div.popup-button-list__disabled:has-text("Paste Row")'),
+        page.locator('.popup__content div.popup-button-list__disabled:has-text("Replace Row")'),
+      ).toBeVisible()
+      await expect(
+        page.locator('.popup__content div.popup-button-list__disabled:has-text("Paste Below")'),
       ).toBeVisible()
     })
 
@@ -651,6 +654,31 @@ describe('Block fields', () => {
       })
 
       await expect(rowTextInput).toHaveValue(textVal)
+    })
+
+    test('should paste a copied row below the target row without replacing it', async () => {
+      await page.goto(url.create)
+      const field = page.locator('#field-blocks')
+
+      await copyPasteField({
+        page,
+        fieldName: 'blocks',
+        rowIndex: 1,
+      })
+
+      await copyPasteField({
+        page,
+        action: 'paste-below',
+        fieldName: 'blocks',
+        rowIndex: 0,
+      })
+
+      const rows = field.locator('> div.blocks-field__rows > div')
+      await expect(rows).toHaveCount(5)
+
+      await expect(field.locator('#field-blocks__0__text')).toHaveValue('first block')
+      await expect(field.locator('#field-blocks__1__number')).toHaveValue('342')
+      await expect(field.locator('#field-blocks__2__number')).toHaveValue('342')
     })
 
     test('should copy a block row and paste into a field with the same schema', async () => {
@@ -836,7 +864,7 @@ describe('Block fields', () => {
         .first()
       await rowPopupBtn.click()
       await expect(
-        page.locator('.popup__content div.popup-button-list__disabled:has-text("Paste Row")'),
+        page.locator('.popup__content div.popup-button-list__disabled:has-text("Replace Row")'),
       ).toBeVisible()
     })
 

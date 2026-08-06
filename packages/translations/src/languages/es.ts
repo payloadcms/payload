@@ -444,6 +444,7 @@ export const esTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Sobrescribir los datos existentes del campo',
     pageNotFound: 'Página no encontrada',
     password: 'Contraseña',
+    pasteBelow: 'Pegar abajo',
     pasteField: 'Pegar campo',
     pasteRow: 'Pegar fila',
     payloadSettings: 'Configuración de Payload',
@@ -459,6 +460,7 @@ export const esTranslations: DefaultTranslationsObject = {
     reloadDocument: 'Recargar documento',
     remove: 'Eliminar',
     rename: 'Renombrar',
+    replaceRow: 'Reemplazar fila',
     reset: 'Restablecer',
     resetPreferences: 'Restablecer preferencias',
     resetPreferencesDescription:

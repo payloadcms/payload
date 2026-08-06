@@ -443,6 +443,7 @@ export const myTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'ရှိပြီးသား အကွက်ဒေတာကို အစားထိုးပါ',
     pageNotFound: 'ရောက်ရှိနေသော စာမျက်နှာသည် မရှိပါ။',
     password: 'စကားဝှက်',
+    pasteBelow: 'အောက်တွင်ထည့်ပါ',
     pasteField: 'ကွက်လပ်ကိုတင်ပါ',
     pasteRow: 'တန်းကိုတင်ပါ',
     payloadSettings: 'ရွေးချယ်စရာများ',
@@ -458,6 +459,7 @@ export const myTranslations: DefaultTranslationsObject = {
     reloadDocument: 'စာရွက်စာတမ်း ပြန်လည်ဖွင့်ပါ',
     remove: 'ဖယ်ရှားမည်။',
     rename: 'အမည်ပြောင်း',
+    replaceRow: 'တန်းစီအစားထိုးရန်',
     reset: 'ပြန်လည်သတ်မှတ်ပါ',
     resetPreferences: 'ကြိုတင်သတ်မှတ်ချက်များ ပြန်လည်တပ်ဆင်မည်',
     resetPreferencesDescription:

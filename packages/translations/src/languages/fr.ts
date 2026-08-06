@@ -449,6 +449,7 @@ export const frTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Écraser les données existantes du champ',
     pageNotFound: 'Page non trouvée',
     password: 'Mot de passe',
+    pasteBelow: 'Coller ci-dessous',
     pasteField: 'Coller le champ',
     pasteRow: 'Coller la ligne',
     payloadSettings: 'Paramètres de Payload',
@@ -463,6 +464,7 @@ export const frTranslations: DefaultTranslationsObject = {
     reloadDocument: 'Recharger le document',
     remove: 'Retirer',
     rename: 'Renommer',
+    replaceRow: 'Remplacer la ligne',
     reset: 'Réinitialiser',
     resetPreferences: 'Réinitialiser les préférences',
     resetPreferencesDescription:

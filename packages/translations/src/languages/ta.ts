@@ -439,6 +439,7 @@ export const taTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'ஏற்கனவே உள்ள புலத் தரவை மேலெழுது',
     pageNotFound: 'பக்கம் கிடைக்கவில்லை',
     password: 'கடவுச்சொல்',
+    pasteBelow: 'கீழே ஒட்டு',
     pasteField: 'புலத்தை ஒட்டு',
     pasteRow: 'வரிசையை ஒட்டு',
     payloadSettings: 'Payload அமைப்புகள்',
@@ -453,6 +454,7 @@ export const taTranslations: DefaultTranslationsObject = {
     reloadDocument: 'ஆவணத்தை மீளாக்கு',
     remove: 'நீக்கு',
     rename: 'பெயர் மாற்று',
+    replaceRow: 'வரிசையை மாற்றவும்',
     reset: 'மீட்டமை',
     resetPreferences: 'அமைப்புகளை மீட்டமை',
     resetPreferencesDescription:

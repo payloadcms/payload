@@ -439,6 +439,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Վերագրել գոյություն ունեցող դաշտի տվյալները',
     pageNotFound: 'Էջը չի գտնվել',
     password: 'Գաղտնաբառ',
+    pasteBelow: 'Տեղադրեք ստորև',
     pasteField: 'Տեղադրել դաշտը',
     pasteRow: 'Տեղադրել տողը',
     payloadSettings: 'Payload-ի կարգավորումներ',
@@ -453,6 +454,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     reloadDocument: 'Թարմացնել փաստաթուղթը',
     remove: 'Հեռացնել',
     rename: 'Վերանվանել',
+    replaceRow: 'Տողը փոխարինել',
     reset: 'Վերակայել',
     resetPreferences: 'Վերակայել նախընտրությունները',
     resetPreferencesDescription:

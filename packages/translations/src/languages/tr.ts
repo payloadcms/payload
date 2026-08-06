@@ -443,6 +443,7 @@ export const trTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Mevcut alan verilerinin üzerine yazın',
     pageNotFound: 'Sayfa bulunamadı',
     password: 'Parola',
+    pasteBelow: 'Aşağıya Yapıştır',
     pasteField: 'Alanı yapıştır',
     pasteRow: 'Satırı yapıştır',
     payloadSettings: 'Ayarlar',
@@ -457,6 +458,7 @@ export const trTranslations: DefaultTranslationsObject = {
     reloadDocument: 'Dokümanı yeniden yükle',
     remove: 'Kaldır',
     rename: 'Yeniden adlandır',
+    replaceRow: 'Satırı Değiştir',
     reset: 'Sıfırla',
     resetPreferences: 'Tercihleri sıfırla',
     resetPreferencesDescription:

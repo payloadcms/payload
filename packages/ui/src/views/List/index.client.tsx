@@ -6,7 +6,6 @@ import { getTranslation } from '@payloadcms/translations'
 import { formatAdminURL, formatFilesize } from 'payload/shared'
 import React, { Fragment, useEffect, useRef, useState } from 'react'
 
-import { useBulkUpload } from '../../elements/BulkUpload/index.js'
 import { Button } from '../../elements/Button/index.js'
 import { ListControls } from '../../elements/ListControls/index.js'
 import { useListDrawerContext } from '../../elements/ListDrawer/Provider.js'
@@ -23,7 +22,6 @@ import { useControllableState } from '../../hooks/useControllableState.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { DocumentSelectionProvider } from '../../providers/DocumentSelection/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
-import { useRouter } from '../../providers/RouterAdapter/index.js'
 import { SelectionProvider } from '../../providers/Selection/index.js'
 import { TableColumnsProvider } from '../../providers/TableColumns/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -81,7 +79,6 @@ export function DefaultListView(props: ListViewClientProps) {
     },
     getEntityConfig,
   } = useConfig()
-  const router = useRouter()
 
   const { data, hasActiveFilters, isGroupingBy, query } = useListQuery()
 
@@ -98,7 +95,6 @@ export function DefaultListView(props: ListViewClientProps) {
   }, [query?.where])
 
   const { openModal } = useModal()
-  const { modalSlug: bulkUploadModalSlug, setCollectionSlug, setOnSuccess } = useBulkUpload()
 
   const collectionConfig = getEntityConfig({ collectionSlug })
 
@@ -132,12 +128,6 @@ export function DefaultListView(props: ListViewClientProps) {
       return data?.docs
     }
   }, [data?.docs, isUploadCollection])
-
-  const openBulkUpload = React.useCallback(() => {
-    setCollectionSlug(collectionSlug)
-    openModal(bulkUploadModalSlug)
-    setOnSuccess(() => router.refresh())
-  }, [router, collectionSlug, bulkUploadModalSlug, openModal, setCollectionSlug, setOnSuccess])
 
   useEffect(() => {
     if (!isInDrawer) {
@@ -224,7 +214,6 @@ export function DefaultListView(props: ListViewClientProps) {
               isBulkUploadEnabled={isBulkUploadEnabled && !upload.hideFileInputOnCreate}
               isTrashEnabled={isTrashEnabled}
               newDocumentURL={newDocumentURL}
-              openBulkUpload={openBulkUpload}
               smallBreak={smallBreak}
               viewType={viewType}
             />

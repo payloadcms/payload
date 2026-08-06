@@ -437,6 +437,7 @@ export const daTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Overskriv eksisterende feltdata',
     pageNotFound: 'Siden blev ikke fundet',
     password: 'Adgangskode',
+    pasteBelow: 'Indsæt nedenfor',
     pasteField: 'Indsæt felt',
     pasteRow: 'Indsæt række',
     payloadSettings: 'Payload-indstillinger',
@@ -451,6 +452,7 @@ export const daTranslations: DefaultTranslationsObject = {
     reloadDocument: 'Genindlæs dokument',
     remove: 'Fjern',
     rename: 'Omdøb',
+    replaceRow: 'Erstat række',
     reset: 'Nulstil',
     resetPreferences: 'Nulstil præferencer',
     resetPreferencesDescription:

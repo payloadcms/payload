@@ -438,6 +438,7 @@ export const enTranslations = {
     overwriteExistingData: 'Overwrite existing field data',
     pageNotFound: 'Page not found',
     password: 'Password',
+    pasteBelow: 'Paste Below',
     pasteField: 'Paste Field',
     pasteRow: 'Paste Row',
     payloadSettings: 'Payload Settings',
@@ -452,6 +453,7 @@ export const enTranslations = {
     reloadDocument: 'Reload document',
     remove: 'Remove',
     rename: 'Rename',
+    replaceRow: 'Replace Row',
     reset: 'Reset',
     resetPreferences: 'Reset Preferences',
     resetPreferencesDescription:

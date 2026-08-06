@@ -427,6 +427,7 @@ export const arTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'استبدل بيانات الحقل الموجودة',
     pageNotFound: 'الصّفحة غير موجودة',
     password: 'كلمة المرور',
+    pasteBelow: 'الصق أدناه',
     pasteField: 'لصق الحقل',
     pasteRow: 'لصق الصف',
     payloadSettings: 'الإعدادات',
@@ -441,6 +442,7 @@ export const arTranslations: DefaultTranslationsObject = {
     reloadDocument: 'أعد تحميل الوثيقة',
     remove: 'إزالة',
     rename: 'إعادة تسمية',
+    replaceRow: 'استبدال الصف',
     reset: 'إعادة تعيين',
     resetPreferences: 'إعادة تعيين التفضيلات',
     resetPreferencesDescription:

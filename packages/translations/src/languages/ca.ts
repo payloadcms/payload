@@ -441,6 +441,7 @@ export const caTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Sobreescriu les dades existents',
     pageNotFound: 'Pàgina no trobada',
     password: 'Contrasenya',
+    pasteBelow: 'Enganxeu a continuació',
     pasteField: 'Enganxar camp',
     pasteRow: 'Enganxar fila',
     payloadSettings: 'configuracio Payload',
@@ -456,6 +457,7 @@ export const caTranslations: DefaultTranslationsObject = {
     reloadDocument: 'Recarrega el document',
     remove: 'Elimina',
     rename: 'Canvia el nom',
+    replaceRow: 'Reemplaça fila',
     reset: 'Restableix',
     resetPreferences: 'Restablir les preferències',
     resetPreferencesDescription:
