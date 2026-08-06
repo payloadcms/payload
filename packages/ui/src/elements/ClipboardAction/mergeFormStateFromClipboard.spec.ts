@@ -597,6 +597,8 @@ describe('mergeFormStateFromClipboard', () => {
 
       const filtered = reduceFormStateByPath({ formState, path: 'children' })
 
+      // The field's own key carries `rows` and `value`, so it must survive the filter.
+      expect(filtered.children).toBeDefined()
       expect(filtered['children.0.id']).toBeDefined()
       expect(filtered.childrenOther).toBeUndefined()
       expect(filtered['childrenOther.0.id']).toBeUndefined()
@@ -646,7 +648,7 @@ describe('mergeFormStateFromClipboard', () => {
       })
 
       // Target row populated from the source row.
-      expect(result['children.5.title'].value).toEqual('Row 1 title')
+      expect(result['children.5.title']?.value).toEqual('Row 1 title')
 
       // No phantom out-of-bounds rows. These would correspond to `.10`/`.11`/`.12` being
       // rewritten through `String.replace('children.1', 'children.5')`.
@@ -694,6 +696,78 @@ describe('mergeFormStateFromClipboard', () => {
       expect(result.childrenOther).toBeDefined()
       expect(result['childrenOther.0.id']).toBeDefined()
       expect(result['childrenOther.0.title']?.value).toEqual('Unrelated field')
+    })
+  })
+
+  describe('exact path matches', () => {
+    // Blocks store the block type under the row key itself (`ctas.1`), with no trailing
+    // segment. Tightening the prefix check must keep matching that exact key, otherwise
+    // copy drops the block type and paste never restores it.
+    it('reduceFormStateByPath should keep the exact row key while filtering digit-prefix siblings', () => {
+      const formState: FormState = {
+        ctas: {
+          valid: true,
+          value: 13,
+          rows: Array.from({ length: 13 }, () => ({
+            blockType: 'callToAction',
+            isLoading: false,
+          })),
+        },
+        'ctas.1': { value: 'callToAction', valid: true },
+        'ctas.1.id': { value: 'id-1', valid: true },
+        'ctas.10': { value: 'callToAction', valid: true },
+        'ctas.10.id': { value: 'id-10', valid: true },
+        'ctas.11': { value: 'callToAction', valid: true },
+        'ctas.11.id': { value: 'id-11', valid: true },
+      }
+
+      const filtered = reduceFormStateByPath({ formState, path: 'ctas', rowIndex: 1 })
+
+      const filteredKeys = Object.keys(filtered).sort()
+      expect(filteredKeys).toEqual(['ctas.1', 'ctas.1.id'])
+      expect(filtered['ctas.1']?.value).toEqual('callToAction')
+    })
+
+    it('paste should copy the exact row key across to the target row', () => {
+      const sourceBlockID = new ObjectId().toHexString()
+      const targetBlockID = new ObjectId().toHexString()
+
+      const formState: FormState = {
+        ctas: {
+          valid: true,
+          value: 2,
+          initialValue: 2,
+          rows: [
+            { id: sourceBlockID, blockType: 'callToAction', isLoading: false },
+            { id: targetBlockID, blockType: 'content', isLoading: false },
+          ],
+        },
+        'ctas.1': { value: 'content', valid: true },
+        'ctas.1.id': { value: targetBlockID, valid: true },
+      }
+
+      const clipboardData: ClipboardPasteData = {
+        type: 'blocks',
+        path: 'ctas',
+        blocks: [],
+        rowIndex: 0,
+        data: {
+          'ctas.0': { value: 'callToAction', valid: true },
+          'ctas.0.id': { value: sourceBlockID, valid: true },
+          'ctas.0.label': { value: 'Source label', valid: true },
+        },
+      }
+
+      const result = mergeFormStateFromClipboard({
+        dataFromClipboard: clipboardData,
+        formState,
+        path: 'ctas',
+        rowIndex: 1,
+      })
+
+      // The block type lives at the exact row key, so pasting must overwrite it.
+      expect(result['ctas.1']?.value).toEqual('callToAction')
+      expect(result['ctas.1.label']?.value).toEqual('Source label')
     })
   })
 })
