@@ -114,6 +114,16 @@
     }
   }
 
+  [dir='rtl'] .fixed-toolbar__scroll {
+    mask: linear-gradient(
+      to left,
+      transparent,
+      black var(--fixed-toolbar-fade-start),
+      black calc(100% - var(--fixed-toolbar-fade-end)),
+      transparent
+    );
+  }
+
   .fixed-toolbar__group {
     display: flex;
     flex-wrap: nowrap;
