@@ -62,6 +62,27 @@ export const Categories: CollectionConfig = {
       maxDepth: 1,
     },
     {
+      name: 'defaultPost',
+      type: 'relationship',
+      filterOptions: ({ data }) => {
+        const joinedPostIDs = data.relatedPosts?.docs?.map(
+          (post: { id: number | string } | number | string) =>
+            typeof post === 'object' ? post.id : post,
+        )
+
+        if (!joinedPostIDs?.length) {
+          return false
+        }
+
+        return {
+          id: {
+            in: joinedPostIDs,
+          },
+        }
+      },
+      relationTo: postsSlug,
+    },
+    {
       name: 'noRowTypes',
       type: 'join',
       collection: postsSlug,
