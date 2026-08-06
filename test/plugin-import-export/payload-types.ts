@@ -63,15 +63,15 @@ export type SupportedTimezones =
   | 'UTC';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_0DD453D3".
+ * via the `definition` "LexicalNodes_BDA6866C".
  */
-export type LexicalNodes_0DD453D3 =
+export type LexicalNodes_BDA6866C =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_0DD453D3>
+  | SerializedParagraphNode<LexicalNodes_BDA6866C>
   | SerializedBlockNode<MyBlock>
-  | SerializedHeadingNode<LexicalNodes_0DD453D3>
+  | SerializedHeadingNode<LexicalNodes_BDA6866C>
   | SerializedUploadNode<'media', LexicalUploadFields_1AB4670B>
   | SerializedUploadNode<'exports'>
   | SerializedUploadNode<'posts-export'>
@@ -88,11 +88,11 @@ export type LexicalNodes_0DD453D3 =
   | SerializedUploadNode<'posts-with-hooks-import'>
   | SerializedUploadNode<'posts-with-field-hooks-import'>
   | SerializedUploadNode<'posts-with-column-map-import'>
-  | SerializedQuoteNode<LexicalNodes_0DD453D3>
-  | SerializedListNode<LexicalNodes_0DD453D3>
-  | SerializedListItemNode<LexicalNodes_0DD453D3>
-  | SerializedAutoLinkNode<LexicalNodes_0DD453D3, LexicalLinkFields_0A7E9EC0>
-  | SerializedLinkNode<LexicalNodes_0DD453D3, LexicalLinkFields_0A7E9EC0>
+  | SerializedQuoteNode<LexicalNodes_BDA6866C>
+  | SerializedListNode<LexicalNodes_BDA6866C>
+  | SerializedListItemNode<LexicalNodes_BDA6866C>
+  | SerializedAutoLinkNode<LexicalNodes_BDA6866C, LexicalLinkFields_0A7E9EC0>
+  | SerializedLinkNode<LexicalNodes_BDA6866C, LexicalLinkFields_0A7E9EC0>
   | SerializedRelationshipNode<
       | 'users'
       | 'pages'
@@ -105,6 +105,7 @@ export type LexicalNodes_0DD453D3 =
       | 'posts-with-hooks'
       | 'posts-with-field-hooks'
       | 'posts-with-column-map'
+      | 'posts-with-snake-case-fields'
       | 'custom-id-pages'
       | 'payload-kv'
       | 'payload-jobs'
@@ -130,6 +131,7 @@ export interface Config {
     'posts-with-hooks': PostsWithHook;
     'posts-with-field-hooks': PostsWithFieldHook;
     'posts-with-column-map': PostsWithColumnMap;
+    'posts-with-snake-case-fields': PostsWithSnakeCaseField;
     media: Media;
     'custom-id-pages': CustomIdPage;
     exports: Export;
@@ -166,6 +168,7 @@ export interface Config {
     'posts-with-hooks': PostsWithHooksSelect<false> | PostsWithHooksSelect<true>;
     'posts-with-field-hooks': PostsWithFieldHooksSelect<false> | PostsWithFieldHooksSelect<true>;
     'posts-with-column-map': PostsWithColumnMapSelect<false> | PostsWithColumnMapSelect<true>;
+    'posts-with-snake-case-fields': PostsWithSnakeCaseFieldsSelect<false> | PostsWithSnakeCaseFieldsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     'custom-id-pages': CustomIdPagesSelect<false> | CustomIdPagesSelect<true>;
     exports: ExportsSelect<false> | ExportsSelect<true>;
@@ -198,11 +201,17 @@ export interface Config {
     | null
     | ('en' | 'es' | 'de' | 'he')
     | ('en' | 'es' | 'de' | 'he')[];
-  globals: {};
-  globalsSelect: {};
+  globals: {
+    'payload-jobs-stats': PayloadJobsStat;
+  };
+  globalsSelect: {
+    'payload-jobs-stats': PayloadJobsStatsSelect<false> | PayloadJobsStatsSelect<true>;
+  };
   locale: 'en' | 'es' | 'de' | 'he';
   widgets: {
     collections: CollectionsWidget;
+    'collection-query': CollectionQueryWidget;
+    activity: ActivityWidget;
   };
   user: User;
   jobs: {
@@ -314,7 +323,7 @@ export interface Page {
     | number
     | boolean
     | null;
-  richTextField?: LexicalRichText<LexicalNodes_0DD453D3> | null;
+  richTextField?: LexicalRichText<LexicalNodes_BDA6866C> | null;
   relationship?: (string | null) | User;
   excerpt?: string | null;
   /**
@@ -382,7 +391,7 @@ export interface Hero {
  * via the `definition` "Content".
  */
 export interface Content {
-  richText?: LexicalRichText<LexicalNodes_0DD453D3> | null;
+  richText?: LexicalRichText<LexicalNodes_BDA6866C> | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'content';
@@ -395,7 +404,7 @@ export interface FaqSection {
   faqs?:
     | {
         question?: string | null;
-        answer?: LexicalRichText<LexicalNodes_0DD453D3> | null;
+        answer?: LexicalRichText<LexicalNodes_BDA6866C> | null;
         id?: string | null;
       }[]
     | null;
@@ -410,7 +419,7 @@ export interface FaqSection {
 export interface Post {
   id: string;
   title: string;
-  content?: LexicalRichText<LexicalNodes_0DD453D3> | null;
+  content?: LexicalRichText<LexicalNodes_BDA6866C> | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -441,7 +450,7 @@ export interface Media {
 export interface PostsExportsOnly {
   id: string;
   title: string;
-  content?: LexicalRichText<LexicalNodes_0DD453D3> | null;
+  content?: LexicalRichText<LexicalNodes_BDA6866C> | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -453,7 +462,7 @@ export interface PostsExportsOnly {
 export interface PostsImportsOnly {
   id: string;
   title: string;
-  content?: LexicalRichText<LexicalNodes_0DD453D3> | null;
+  content?: LexicalRichText<LexicalNodes_BDA6866C> | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -465,7 +474,7 @@ export interface PostsImportsOnly {
 export interface PostsNoJobsQueue {
   id: string;
   title: string;
-  content?: LexicalRichText<LexicalNodes_0DD453D3> | null;
+  content?: LexicalRichText<LexicalNodes_BDA6866C> | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -559,6 +568,27 @@ export interface PostsWithColumnMap {
   excerpt?: string | null;
   count?: number | null;
   sharedName?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts-with-snake-case-fields".
+ */
+export interface PostsWithSnakeCaseField {
+  id: string;
+  title?: string | null;
+  vat_number?: string | null;
+  billing_details?: {
+    vat_number?: string | null;
+  };
+  line_items?:
+    | {
+        item_code?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  localized_note?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1179,6 +1209,15 @@ export interface PayloadJob {
     | number
     | boolean
     | null;
+  meta?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   completedAt?: string | null;
   totalTried?: number | null;
   /**
@@ -1240,7 +1279,8 @@ export interface PayloadJob {
   taskSlug?: ('inline' | 'createCollectionExport' | 'createCollectionImport') | null;
   queue?: string | null;
   waitUntil?: string | null;
-  processing?: boolean | null;
+  processingUntil?: string | null;
+  processingToken?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1294,6 +1334,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'posts-with-column-map';
         value: string | PostsWithColumnMap;
+      } | null)
+    | ({
+        relationTo: 'posts-with-snake-case-fields';
+        value: string | PostsWithSnakeCaseField;
       } | null)
     | ({
         relationTo: 'media';
@@ -1601,6 +1645,28 @@ export interface PostsWithColumnMapSelect<T extends boolean = true> {
   excerpt?: T;
   count?: T;
   sharedName?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts-with-snake-case-fields_select".
+ */
+export interface PostsWithSnakeCaseFieldsSelect<T extends boolean = true> {
+  title?: T;
+  vat_number?: T;
+  billing_details?:
+    | T
+    | {
+        vat_number?: T;
+      };
+  line_items?:
+    | T
+    | {
+        item_code?: T;
+        id?: T;
+      };
+  localized_note?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2089,6 +2155,7 @@ export interface PayloadKvSelect<T extends boolean = true> {
 export interface PayloadJobsSelect<T extends boolean = true> {
   input?: T;
   taskStatus?: T;
+  meta?: T;
   completedAt?: T;
   totalTried?: T;
   hasError?: T;
@@ -2109,7 +2176,8 @@ export interface PayloadJobsSelect<T extends boolean = true> {
   taskSlug?: T;
   queue?: T;
   waitUntil?: T;
-  processing?: T;
+  processingUntil?: T;
+  processingToken?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2147,6 +2215,34 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-jobs-stats".
+ */
+export interface PayloadJobsStat {
+  id: string;
+  stats?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-jobs-stats_select".
+ */
+export interface PayloadJobsStatsSelect<T extends boolean = true> {
+  stats?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collections_widget".
  */
 export interface CollectionsWidget {
@@ -2154,6 +2250,102 @@ export interface CollectionsWidget {
     [k: string]: unknown;
   };
   width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-query_widget".
+ */
+export interface CollectionQueryWidget {
+  data?: {
+    title?: string | null;
+    relatedCollection:
+      | 'users'
+      | 'pages'
+      | 'posts'
+      | 'posts-exports-only'
+      | 'posts-imports-only'
+      | 'posts-no-jobs-queue'
+      | 'posts-with-limits'
+      | 'posts-with-s3'
+      | 'posts-with-hooks'
+      | 'posts-with-field-hooks'
+      | 'posts-with-column-map'
+      | 'posts-with-snake-case-fields'
+      | 'media'
+      | 'custom-id-pages'
+      | 'exports'
+      | 'posts-export'
+      | 'posts-no-jobs-queue-export'
+      | 'posts-with-s3-export'
+      | 'posts-with-limits-export'
+      | 'posts-with-hooks-export'
+      | 'posts-with-field-hooks-export'
+      | 'posts-with-column-map-export'
+      | 'imports'
+      | 'posts-import'
+      | 'posts-with-s3-import'
+      | 'posts-with-limits-import'
+      | 'posts-with-hooks-import'
+      | 'posts-with-field-hooks-import'
+      | 'posts-with-column-map-import'
+      | 'payload-jobs';
+    where?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    sortField?: string | null;
+    sortDirection?: ('asc' | 'desc') | null;
+    limit?: number | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "activity_widget".
+ */
+export interface ActivityWidget {
+  data?: {
+    excludedCollections?:
+      | (
+          | 'users'
+          | 'pages'
+          | 'posts'
+          | 'posts-exports-only'
+          | 'posts-imports-only'
+          | 'posts-no-jobs-queue'
+          | 'posts-with-limits'
+          | 'posts-with-s3'
+          | 'posts-with-hooks'
+          | 'posts-with-field-hooks'
+          | 'posts-with-column-map'
+          | 'posts-with-snake-case-fields'
+          | 'media'
+          | 'custom-id-pages'
+          | 'exports'
+          | 'posts-export'
+          | 'posts-no-jobs-queue-export'
+          | 'posts-with-s3-export'
+          | 'posts-with-limits-export'
+          | 'posts-with-hooks-export'
+          | 'posts-with-field-hooks-export'
+          | 'posts-with-column-map-export'
+          | 'imports'
+          | 'posts-import'
+          | 'posts-with-s3-import'
+          | 'posts-with-limits-import'
+          | 'posts-with-hooks-import'
+          | 'posts-with-field-hooks-import'
+          | 'posts-with-column-map-import'
+          | 'payload-jobs'
+        )[]
+      | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2176,6 +2368,7 @@ export interface TaskCreateCollectionExport {
       | 'posts-with-hooks'
       | 'posts-with-field-hooks'
       | 'posts-with-column-map'
+      | 'posts-with-snake-case-fields'
       | 'media'
       | 'custom-id-pages'
       | 'exports'
