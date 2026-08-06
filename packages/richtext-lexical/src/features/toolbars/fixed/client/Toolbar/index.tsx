@@ -18,6 +18,7 @@ import { useEditorConfigContext } from '../../../../../lexical/config/client/Edi
 import { ToolbarButton } from '../../../shared/ToolbarButton/index.js'
 import { ToolbarDropdown } from '../../../shared/ToolbarDropdown/index.js'
 import { useToolbarStates } from '../../../shared/useToolbarStates.js'
+import { useRedirectVerticalWheelToHorizontalScroll } from './horizontalWheelScroll.js'
 import './index.css'
 
 function ButtonGroupItem({
@@ -165,6 +166,8 @@ function FixedToolbar({
 
   const { y } = useScrollInfo()
 
+  useRedirectVerticalWheelToHorizontalScroll()
+
   const toolbarStates = useToolbarStates(editor, editorConfig?.features?.toolbarFixed?.groups)
 
   // Memoize the parent toolbar element
@@ -233,7 +236,7 @@ function FixedToolbar({
       ref={currentToolbarRef}
     >
       {isEditable && (
-        <React.Fragment>
+        <div className="fixed-toolbar__scroll">
           {editorConfig?.features &&
             editorConfig.features?.toolbarFixed?.groups.map((group, i) => {
               return (
@@ -248,7 +251,7 @@ function FixedToolbar({
                 />
               )
             })}
-        </React.Fragment>
+        </div>
       )}
     </div>
   )

@@ -1436,6 +1436,71 @@ describe('lexicalBlocks', () => {
         { allowedNumberOfRequests: 1 },
       )
     })
+
+    test('wheel input over one of several simultaneous fixed toolbars only scrolls that toolbar', async () => {
+      // Every fixed toolbar's wheel-to-horizontal-scroll behavior is handled by a single
+      // document-level listener shared across all instances (see horizontalWheelScroll.ts).
+      // This proves that shared listener resolves the correct toolbar per wheel event,
+      // rather than only ever affecting whichever toolbar happened to mount first.
+      await page.setViewportSize({ height: 2000, width: 375 })
+
+      const { richTextField } = await navigateToLexicalFields()
+
+      const outerToolbarScroll = page.locator('.fixed-toolbar__scroll').first()
+      const nestedBlock = richTextField.locator('.LexicalEditorTheme__block').nth(2) // third: "Block Node, with RichText Field, with Relationship Node"
+      const nestedToolbarScroll = nestedBlock.locator('.fixed-toolbar__scroll').first()
+
+      await expect(outerToolbarScroll).toBeVisible()
+      await expect(nestedToolbarScroll).toBeVisible()
+
+      const outerBox = (await outerToolbarScroll.boundingBox())!
+      const nestedBox = (await nestedToolbarScroll.boundingBox())!
+
+      await page.mouse.move(outerBox.x + outerBox.width / 2, outerBox.y + outerBox.height / 2)
+      await page.mouse.wheel(0, 200)
+
+      await expect(async () => {
+        expect(await outerToolbarScroll.evaluate((el) => el.scrollLeft)).toBeGreaterThan(0)
+        expect(await nestedToolbarScroll.evaluate((el) => el.scrollLeft)).toBe(0)
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+
+      const outerScrollLeftAfterFirstWheel = await outerToolbarScroll.evaluate(
+        (el) => el.scrollLeft,
+      )
+
+      await page.mouse.move(nestedBox.x + nestedBox.width / 2, nestedBox.y + nestedBox.height / 2)
+      await page.mouse.wheel(0, 150)
+
+      await expect(async () => {
+        expect(await nestedToolbarScroll.evaluate((el) => el.scrollLeft)).toBeGreaterThan(0)
+        expect(await outerToolbarScroll.evaluate((el) => el.scrollLeft)).toBe(
+          outerScrollLeftAfterFirstWheel,
+        )
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+    })
+
+    test('wheel input away from any fixed toolbar continues to scroll the page normally', async () => {
+      // The shared wheel listener (horizontalWheelScroll.ts) intercepts every wheel event
+      // on the page to find out whether it landed on a fixed toolbar - this confirms it
+      // correctly ignores events elsewhere instead of accidentally hijacking page scroll.
+      await page.setViewportSize({ height: 2000, width: 375 })
+
+      const { richTextField } = await navigateToLexicalFields()
+
+      const nestedBlock = richTextField.locator('.LexicalEditorTheme__block').nth(2)
+      await expect(nestedBlock.locator('.fixed-toolbar__scroll').first()).toBeVisible()
+
+      const initialScrollY = await page.evaluate(() => window.scrollY)
+
+      // Well above either toolbar's position, over ordinary page content
+      await page.mouse.move(200, 100)
+      await page.mouse.wheel(0, 300)
+
+      await expect(async () => {
+        const scrollY = await page.evaluate(() => window.scrollY)
+        expect(scrollY).toBeGreaterThan(initialScrollY)
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+    })
   })
 
   describe('inline blocks', () => {

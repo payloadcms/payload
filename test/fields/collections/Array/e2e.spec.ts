@@ -546,7 +546,10 @@ describe('Array', () => {
         .first()
       await rowPopupBtn.click()
       await expect(
-        page.locator('.popup__content div.popup-button-list__disabled:has-text("Paste Row")'),
+        page.locator('.popup__content div.popup-button-list__disabled:has-text("Replace Row")'),
+      ).toBeVisible()
+      await expect(
+        page.locator('.popup__content div.popup-button-list__disabled:has-text("Paste Below")'),
       ).toBeVisible()
     })
 
@@ -628,6 +631,31 @@ describe('Array', () => {
       })
 
       await expect(rowTextInput).toHaveValue(textVal)
+    })
+
+    test('should paste a copied row below the target row without replacing it', async () => {
+      await page.goto(url.create)
+      const arrayField = page.locator('#field-items')
+
+      await copyPasteField({
+        page,
+        fieldName: 'items',
+        rowIndex: 1,
+      })
+
+      await copyPasteField({
+        page,
+        action: 'paste-below',
+        fieldName: 'items',
+        rowIndex: 0,
+      })
+
+      const rows = arrayField.locator('> div.array-field__draggable-rows > div')
+      await expect(rows).toHaveCount(3)
+
+      await expect(arrayField.locator('#field-items__0__text')).toHaveValue('row one')
+      await expect(arrayField.locator('#field-items__1__text')).toHaveValue('row two')
+      await expect(arrayField.locator('#field-items__2__text')).toHaveValue('row two')
     })
 
     test('should copy an array row and paste into a field with the same schema', async () => {
@@ -822,7 +850,7 @@ describe('Array', () => {
         .first()
       await rowPopupBtn.click()
       await expect(
-        page.locator('.popup__content div.popup-button-list__disabled:has-text("Paste Row")'),
+        page.locator('.popup__content div.popup-button-list__disabled:has-text("Replace Row")'),
       ).toBeVisible()
     })
 
