@@ -70,6 +70,7 @@ export interface Config {
     users: User;
     pages: Page;
     posts: Post;
+    'localized-status-posts': LocalizedStatusPost;
     'custom-ids-1': CustomIds1;
     'custom-ids-2': CustomIds2;
     'filtered-locales': FilteredLocale;
@@ -84,6 +85,7 @@ export interface Config {
     users: UsersSelect<false> | UsersSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
+    'localized-status-posts': LocalizedStatusPostsSelect<false> | LocalizedStatusPostsSelect<true>;
     'custom-ids-1': CustomIds1Select<false> | CustomIds1Select<true>;
     'custom-ids-2': CustomIds2Select<false> | CustomIds2Select<true>;
     'filtered-locales': FilteredLocalesSelect<false> | FilteredLocalesSelect<true>;
@@ -100,6 +102,9 @@ export interface Config {
   globals: {};
   globalsSelect: {};
   locale: 'en' | 'es' | 'de';
+  widgets: {
+    collections: CollectionsWidget;
+  };
   user: User;
   jobs: {
     tasks: unknown;
@@ -177,6 +182,19 @@ export interface Post {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized-status-posts".
+ */
+export interface LocalizedStatusPost {
+  id: string;
+  title: string;
+  excerpt?: string | null;
+  slug?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "custom-ids-1".
  */
 export interface CustomIds1 {
@@ -233,6 +251,10 @@ export interface Search {
     | {
         relationTo: 'filtered-locales';
         value: string | FilteredLocale;
+      }
+    | {
+        relationTo: 'localized-status-posts';
+        value: string | LocalizedStatusPost;
       };
   id: string;
   excerpt?: string | null;
@@ -275,6 +297,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'posts';
         value: string | Post;
+      } | null)
+    | ({
+        relationTo: 'localized-status-posts';
+        value: string | LocalizedStatusPost;
       } | null)
     | ({
         relationTo: 'custom-ids-1';
@@ -382,6 +408,18 @@ export interface PostsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized-status-posts_select".
+ */
+export interface LocalizedStatusPostsSelect<T extends boolean = true> {
+  title?: T;
+  excerpt?: T;
+  slug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "custom-ids-1_select".
  */
 export interface CustomIds1Select<T extends boolean = true> {
@@ -461,6 +499,16 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collections_widget".
+ */
+export interface CollectionsWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
