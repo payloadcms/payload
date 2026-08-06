@@ -189,14 +189,6 @@ describe('lexicalBlocks', () => {
   })
 
   describe('block filterOptions', () => {
-    // Group sub-fields within newly created Lexical blocks don't render under TanStack Start.
-    // The block's Group heading appears but its children (relationship fields with filterOptions)
-    // are missing from the DOM. This is a known framework adapter limitation.
-    test.skip(
-      currentFramework === 'tanstack-start',
-      'Group sub-fields in Lexical blocks do not render under TanStack Start',
-    )
-
     async function setupFilterOptionsTests() {
       const { richTextField } = await navigateToLexicalFields()
 
@@ -260,6 +252,11 @@ describe('lexicalBlocks', () => {
     }
 
     test('ensure block fields with filter options have access to document-level data', async () => {
+      test.skip(
+        currentFramework === 'tanstack-start',
+        'Document-level filter options in Lexical blocks time out under TanStack Start',
+      )
+
       const {
         blockGroupTextField,
         blockTextField,
@@ -354,6 +351,11 @@ describe('lexicalBlocks', () => {
     })
 
     test('ensure block fields with filter options have access to block-level data', async () => {
+      test.skip(
+        currentFramework === 'tanstack-start',
+        'Block-level filter options in Lexical blocks fail with the block-references config under TanStack Start',
+      )
+
       const {
         blockGroupTextField,
         blockTextField,
@@ -391,14 +393,6 @@ describe('lexicalBlocks', () => {
   })
 
   describe('block validation data', () => {
-    // Group sub-fields within newly created Lexical blocks don't render under TanStack Start.
-    // The block's Group heading appears but its children (text fields with validate functions)
-    // are missing from the DOM. This is a known framework adapter limitation.
-    test.skip(
-      currentFramework === 'tanstack-start',
-      'Group sub-fields in Lexical blocks do not render under TanStack Start',
-    )
-
     async function setupValidationTests() {
       const { richTextField } = await navigateToLexicalFields()
 
@@ -516,6 +510,11 @@ describe('lexicalBlocks', () => {
     })
 
     test('ensure block fields with validations have access to block-level data', async () => {
+      test.skip(
+        currentFramework === 'tanstack-start',
+        'Block-level validation in Lexical blocks fails with the block-references config under TanStack Start',
+      )
+
       const { blockTextField } = await setupValidationTests()
 
       await blockTextField.fill('invalid')
@@ -871,10 +870,6 @@ describe('lexicalBlocks', () => {
 
     // Big test which tests a bunch of things: Creation of blocks via slash commands, creation of deeply nested sub-lexical-block fields via slash commands, properly populated deeply nested fields within those
     test('ensure creation of a lexical, lexical-field-block, which contains another lexical, lexical-and-upload-field-block, works and that the sub-upload field is properly populated', async () => {
-      test.skip(
-        currentFramework === 'tanstack-start',
-        'Typing in nested Lexical editors within blocks is dispatched to the parent editor under TanStack Start',
-      )
       const { richTextField } = await navigateToLexicalFields()
 
       const { newBlock: newRichTextBlock, slashMenuPopover } = await createBlock({

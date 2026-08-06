@@ -304,10 +304,6 @@ test.describe('Multi Tenant', () => {
 
   test.describe('Documents', () => {
     test('should set tenant upon entering document', async () => {
-      test.skip(
-        process.env.PAYLOAD_FRAMEWORK === 'tanstack-start',
-        'TanStack: known post-hydration RSC view remount detaches the view mid-interaction (see framework adapter notes); re-enable when the TanStack RSC hydration is fixed.',
-      )
       await loginClientSide({
         data: credentials.admin,
         page,
@@ -337,10 +333,6 @@ test.describe('Multi Tenant', () => {
     })
 
     test('should allow tenant switching cancellation', async () => {
-      test.skip(
-        process.env.PAYLOAD_FRAMEWORK === 'tanstack-start',
-        'TanStack: known post-hydration RSC view remount detaches the view mid-interaction (see framework adapter notes); re-enable when the TanStack RSC hydration is fixed.',
-      )
       await loginClientSide({
         data: credentials.admin,
         page,
@@ -401,10 +393,6 @@ test.describe('Multi Tenant', () => {
     })
 
     test('should allow tenant switching confirmation', async () => {
-      test.skip(
-        process.env.PAYLOAD_FRAMEWORK === 'tanstack-start',
-        'TanStack: known post-hydration RSC view remount detaches the view mid-interaction (see framework adapter notes); re-enable when the TanStack RSC hydration is fixed.',
-      )
       await loginClientSide({
         data: credentials.admin,
         page,
