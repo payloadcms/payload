@@ -226,7 +226,7 @@ export const createClientConfig = ({
 
       case 'blocks': {
         ;(clientConfig.blocks as ClientBlock[]) = createClientBlocks({
-          blocks: config.blocks!,
+          blocks: config.blocks,
           defaultIDType: config.db.defaultIDType,
           i18n,
           importMap,
