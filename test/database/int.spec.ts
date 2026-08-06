@@ -4548,6 +4548,52 @@ describe('database', () => {
     expect(res.arrayWithIDs?.[0]?.text).toBe('some text')
   })
 
+  it('should preserve omitted complex fields in a partial updateOne', async () => {
+    const post = await payload.create({
+      collection: 'posts',
+      data: {
+        arrayWithIDs: [{ text: 'array value' }],
+        blocks: [
+          {
+            blockType: 'block-third',
+          },
+        ],
+        blocksWithIDs: [
+          {
+            blockType: 'block-first',
+            text: 'block value',
+          },
+        ],
+        title: 'before partial update',
+      },
+    })
+
+    const result = (await payload.db.updateOne({
+      id: post.id,
+      collection: 'posts',
+      data: {
+        blocksWithIDs: [
+          {
+            id: post.blocksWithIDs?.[0]?.id,
+            blockType: 'block-first',
+            text: 'updated block value',
+          },
+        ],
+        title: 'after partial update',
+      },
+    })) as unknown as DataFromCollectionSlug<'posts'>
+
+    expect(result.title).toBe('after partial update')
+    expect(result.arrayWithIDs).toMatchObject([{ text: 'array value' }])
+    expect(result.blocks).toMatchObject([{ blockType: 'block-third' }])
+    expect(result.blocksWithIDs).toMatchObject([
+      {
+        blockType: 'block-first',
+        text: 'updated block value',
+      },
+    ])
+  })
+
   it('should use optimized updateMany', async () => {
     const post1 = await payload.create({
       collection: 'posts',

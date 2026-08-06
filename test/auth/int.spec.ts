@@ -1764,6 +1764,62 @@ describe('Auth', () => {
   })
 
   describe('Sessions', () => {
+    const expectSessionOperationToPreserveConcurrentUpdate = async ({
+      operation,
+      userID,
+    }: {
+      operation: () => Promise<unknown>
+      userID: number | string
+    }): Promise<void> => {
+      const concurrentValue = `concurrent-update-${Date.now()}`
+      const updateOne = payload.db.updateOne.bind(payload.db)
+      let concurrentUpdateInjected = false
+
+      const updateOneSpy = vitest
+        .spyOn(payload.db, 'updateOne')
+        .mockImplementation(async (args) => {
+          const isTargetSessionWrite =
+            !concurrentUpdateInjected &&
+            args.collection === slug &&
+            args.id === userID &&
+            args.returning === false &&
+            Array.isArray(args.data.sessions)
+
+          if (isTargetSessionWrite) {
+            concurrentUpdateInjected = true
+
+            await updateOne({
+              id: userID,
+              collection: slug,
+              data: {
+                custom: concurrentValue,
+              },
+              req: args.req,
+            })
+          }
+
+          return updateOne(args)
+        })
+
+      try {
+        await operation()
+      } finally {
+        updateOneSpy.mockRestore()
+      }
+
+      const updatedUser = await payload.findByID({
+        id: userID,
+        collection: slug,
+      })
+
+      expect(concurrentUpdateInjected).toBe(true)
+      expect(updatedUser).toMatchObject({
+        custom: concurrentValue,
+        loginMetadata: [{ info: 'preserve-session-metadata' }],
+        roles: ['user'],
+      })
+    }
+
     it('should set a session on a user', async () => {
       const authenticated = await payload.login({
         collection: slug,
@@ -1795,6 +1851,43 @@ describe('Auth', () => {
       expect(matchedSession).toBeDefined()
       expect(matchedSession?.createdAt).toBeDefined()
       expect(matchedSession?.expiresAt).toBeDefined()
+    })
+
+    it('should preserve concurrent field updates when logging in', async () => {
+      expect.hasAssertions()
+
+      const testUser = await payload.create({
+        collection: slug,
+        data: {
+          custom: 'before-login',
+          email: `session-login-${Date.now()}@example.com`,
+          loginMetadata: [{ info: 'preserve-session-metadata' }],
+          password: 'test123',
+          roles: ['user'],
+        },
+      })
+
+      try {
+        await expectSessionOperationToPreserveConcurrentUpdate({
+          operation: async () => {
+            const result = await payload.login({
+              collection: slug,
+              data: {
+                email: testUser.email,
+                password: 'test123',
+              },
+            })
+
+            expect(result.token).toBeTruthy()
+          },
+          userID: testUser.id,
+        })
+      } finally {
+        await payload.delete({
+          id: testUser.id,
+          collection: slug,
+        })
+      }
     })
 
     it('should log out a user and delete only the session being logged out', async () => {
@@ -1842,6 +1935,48 @@ describe('Auth', () => {
 
       const existingSession = remainingSessions.find(({ id }) => id === decoded2.sid)
       expect(existingSession?.id).toStrictEqual(decoded2.sid)
+    })
+
+    it('should preserve concurrent field updates when logging out', async () => {
+      expect.hasAssertions()
+
+      const testUser = await payload.create({
+        collection: slug,
+        data: {
+          custom: 'before-logout',
+          email: `session-logout-${Date.now()}@example.com`,
+          loginMetadata: [{ info: 'preserve-session-metadata' }],
+          password: 'test123',
+          roles: ['user'],
+        },
+      })
+      const authenticated = await payload.login({
+        collection: slug,
+        data: {
+          email: testUser.email,
+          password: 'test123',
+        },
+      })
+
+      try {
+        await expectSessionOperationToPreserveConcurrentUpdate({
+          operation: async () => {
+            const response = await restClient.POST(`/${slug}/logout`, {
+              headers: {
+                Authorization: `JWT ${authenticated.token}`,
+              },
+            })
+
+            expect(response.status).toBe(200)
+          },
+          userID: testUser.id,
+        })
+      } finally {
+        await payload.delete({
+          id: testUser.id,
+          collection: slug,
+        })
+      }
     })
 
     it('should refresh an existing session', async () => {
@@ -1894,6 +2029,48 @@ describe('Auth', () => {
       expect(new Date(matchedSession?.expiresAt as unknown as string).getTime()).toBeLessThan(
         new Date(matchedRefreshedSession?.expiresAt as unknown as string).getTime(),
       )
+    })
+
+    it('should preserve concurrent field updates when refreshing a session', async () => {
+      expect.hasAssertions()
+
+      const testUser = await payload.create({
+        collection: slug,
+        data: {
+          custom: 'before-refresh',
+          email: `session-refresh-${Date.now()}@example.com`,
+          loginMetadata: [{ info: 'preserve-session-metadata' }],
+          password: 'test123',
+          roles: ['user'],
+        },
+      })
+      const authenticated = await payload.login({
+        collection: slug,
+        data: {
+          email: testUser.email,
+          password: 'test123',
+        },
+      })
+
+      try {
+        await expectSessionOperationToPreserveConcurrentUpdate({
+          operation: async () => {
+            const response = await restClient.POST(`/${slug}/refresh-token`, {
+              headers: {
+                Authorization: `JWT ${authenticated.token}`,
+              },
+            })
+
+            expect(response.status).toBe(200)
+          },
+          userID: testUser.id,
+        })
+      } finally {
+        await payload.delete({
+          id: testUser.id,
+          collection: slug,
+        })
+      }
     })
 
     it('should reject a refresh when its session is revoked after authentication', async () => {

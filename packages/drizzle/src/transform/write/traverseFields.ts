@@ -138,6 +138,11 @@ export const traverseFields = ({
     fieldName = `${fieldPrefix || ''}${field.name}`
     fieldData = data[field.name]
 
+    // Undefined fields are omitted from partial updates. updatedAt is derived when it is absent.
+    if (fieldData === undefined && !(field.type === 'date' && fieldName === 'updatedAt')) {
+      return
+    }
+
     const isLocalized = fieldShouldBeLocalized({ field, parentIsLocalized })
 
     if (field.type === 'array') {
