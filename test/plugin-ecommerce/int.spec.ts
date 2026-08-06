@@ -32,6 +32,11 @@ async function createGuestCartWithItems(
   const cartId = createResponse.doc.id
   const cartSecret = createResponse.doc.secret
 
+  // The cart secret is the only thing authorising the guest calls below. When it is
+  // missing, every later request fails access control and reports "cart not found",
+  // which reads as an unrelated failure many tests further down.
+  expect(cartSecret, 'guest cart was created without a secret').toBeTruthy()
+
   // Add an item using the add-item endpoint
   await client
     .POST(`/carts/${cartId}/add-item`, {
@@ -313,6 +318,14 @@ describe('ecommerce', () => {
         limit: 1,
       })
       variantId = variants.docs[0]?.id as string
+
+      // `?.` leaves these undefined when the seed is incomplete, which the hook happily
+      // accepts and every dependent test then fails on for unrelated-looking reasons.
+      if (!productId || !variantId) {
+        throw new Error(
+          `ecommerce seed is incomplete: productId=${productId}, variantId=${variantId}`,
+        )
+      }
     })
 
     describe('add-item endpoint', () => {
@@ -330,6 +343,8 @@ describe('ecommerce', () => {
 
         const cartId = createResponse.doc.id
         const cartSecret = createResponse.doc.secret
+
+        expect(cartSecret, 'guest cart was created without a secret').toBeTruthy()
 
         // Add an item using the endpoint
         const addItemResponse = await restClient
@@ -371,6 +386,8 @@ describe('ecommerce', () => {
         const cartId = createResponse.doc.id
         const cartSecret = createResponse.doc.secret
 
+        expect(cartSecret, 'guest cart was created without a secret').toBeTruthy()
+
         const addItemResponse = await restClient
           .POST(`/carts/${cartId}/add-item`, {
             auth: false,
@@ -408,6 +425,8 @@ describe('ecommerce', () => {
 
         const cartId = createResponse.doc.id
         const cartSecret = createResponse.doc.secret
+
+        expect(cartSecret, 'guest cart was created without a secret').toBeTruthy()
 
         // Add item first time
         await restClient
@@ -469,6 +488,8 @@ describe('ecommerce', () => {
 
         const cartId = createResponse.doc.id
         const cartSecret = createResponse.doc.secret
+
+        expect(cartSecret, 'guest cart was created without a secret').toBeTruthy()
 
         const addItemResponse = await restClient
           .POST(`/carts/${cartId}/add-item`, {
@@ -611,6 +632,8 @@ describe('ecommerce', () => {
         const cartId = createResponse.doc.id
         const cartSecret = createResponse.doc.secret
 
+        expect(cartSecret, 'guest cart was created without a secret').toBeTruthy()
+
         // Add item with quantity 5
         await restClient
           .POST(`/carts/${cartId}/add-item`, {
@@ -695,6 +718,8 @@ describe('ecommerce', () => {
         const cartId = createResponse.doc.id
         const cartSecret = createResponse.doc.secret
 
+        expect(cartSecret, 'guest cart was created without a secret').toBeTruthy()
+
         // Add multiple items
         await restClient
           .POST(`/carts/${cartId}/add-item`, {
@@ -774,6 +799,14 @@ describe('ecommerce', () => {
         limit: 1,
       })
       variantId = variants.docs[0]?.id as string
+
+      // `?.` leaves these undefined when the seed is incomplete, which the hook happily
+      // accepts and every dependent test then fails on for unrelated-looking reasons.
+      if (!productId || !variantId) {
+        throw new Error(
+          `ecommerce seed is incomplete: productId=${productId}, variantId=${variantId}`,
+        )
+      }
     })
 
     it('should merge guest cart into user cart', async () => {
@@ -856,6 +889,8 @@ describe('ecommerce', () => {
 
       const guestCartId = createResponse.doc.id
       const cartSecret = createResponse.doc.secret
+
+      expect(cartSecret, 'guest cart was created without a secret').toBeTruthy()
 
       await restClient
         .POST(`/carts/${guestCartId}/add-item`, {
@@ -1061,6 +1096,12 @@ describe('ecommerce', () => {
         limit: 1,
       })
       productId = products.docs[0]?.id as string
+
+      // `?.` leaves this undefined when the seed is incomplete, which the hook happily
+      // accepts and every dependent test then fails on for unrelated-looking reasons.
+      if (!productId) {
+        throw new Error(`ecommerce seed is incomplete: productId=${productId}`)
+      }
     })
 
     it('should allow authenticated users to access their cart without secret', async () => {
@@ -1182,6 +1223,12 @@ describe('ecommerce', () => {
         limit: 1,
       })
       productId = products.docs[0]?.id as string
+
+      // `?.` leaves this undefined when the seed is incomplete, which the hook happily
+      // accepts and every dependent test then fails on for unrelated-looking reasons.
+      if (!productId) {
+        throw new Error(`ecommerce seed is incomplete: productId=${productId}`)
+      }
     })
 
     it('should allow transferring guest cart to user by updating customer field', async () => {
