@@ -7,6 +7,7 @@ import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { Collection1 } from './collections/Collection1/index.js'
 import { Collection2 } from './collections/Collection2/index.js'
 import { RelationshipFilterFalse } from './collections/FilterFalse/index.js'
+import { RelationshipFilterOptionsThrows } from './collections/FilterOptionsThrows/index.js'
 import { RelationshipFilterTrue } from './collections/FilterTrue/index.js'
 import { MixedMedia } from './collections/MixedMedia/index.js'
 import { Podcast } from './collections/Podcast/index.js'
@@ -29,6 +30,7 @@ export default buildConfigWithDefaults({
   collections: [
     Relationship,
     RelationshipFilterFalse,
+    RelationshipFilterOptionsThrows,
     RelationshipFilterTrue,
     Relation1,
     Relation2,

@@ -446,16 +446,23 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
           ReturnType<typeof validateBlocksFilterOptions>
         > | null = null
         if (field.filterOptions) {
-          filterOptionsValidationResult = await validateBlocksFilterOptions({
-            id,
-            data: fullData,
-            filterOptions: field.filterOptions,
-            req,
-            siblingData: data,
-            value: data[field.name],
-          })
+          try {
+            filterOptionsValidationResult = await validateBlocksFilterOptions({
+              id,
+              data: fullData,
+              filterOptions: field.filterOptions,
+              req,
+              siblingData: data,
+              value: data[field.name],
+            })
 
-          fieldState.blocksFilterOptions = filterOptionsValidationResult.allowedBlockSlugs
+            fieldState.blocksFilterOptions = filterOptionsValidationResult.allowedBlockSlugs
+          } catch (err) {
+            req.payload.logger.error({
+              err,
+              msg: `Failed to resolve filterOptions for field "${path}", falling back to unfiltered options`,
+            })
+          }
         }
 
         const { promises, rowMetadata } = blocksValue.reduce(
@@ -723,17 +730,24 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
           }
 
           if (typeof field.filterOptions === 'function') {
-            const query = await resolveFilterOptions(field.filterOptions, {
-              id,
-              blockData,
-              data: fullData,
-              relationTo: field.relationTo,
-              req,
-              siblingData: data,
-              user: req.user,
-            })
+            try {
+              const query = await resolveFilterOptions(field.filterOptions, {
+                id,
+                blockData,
+                data: fullData,
+                relationTo: field.relationTo,
+                req,
+                siblingData: data,
+                user: req.user,
+              })
 
-            fieldState.filterOptions = query
+              fieldState.filterOptions = query
+            } catch (err) {
+              req.payload.logger.error({
+                err,
+                msg: `Failed to resolve filterOptions for field "${path}", falling back to unfiltered options`,
+              })
+            }
           }
         }
 
@@ -796,12 +810,19 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
       case 'select': {
         if (typeof field.filterOptions === 'function') {
-          fieldState.selectFilterOptions = await field.filterOptions({
-            data: fullData,
-            options: field.options,
-            req,
-            siblingData: data,
-          })
+          try {
+            fieldState.selectFilterOptions = await field.filterOptions({
+              data: fullData,
+              options: field.options,
+              req,
+              siblingData: data,
+            })
+          } catch (err) {
+            req.payload.logger.error({
+              err,
+              msg: `Failed to resolve filterOptions for field "${path}", falling back to unfiltered options`,
+            })
+          }
         }
 
         if (data[field.name] !== undefined) {

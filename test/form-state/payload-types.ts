@@ -70,6 +70,7 @@ export interface Config {
     posts: Post;
     'autosave-posts': AutosavePost;
     conditions: Condition;
+    'filter-options-throws': FilterOptionsThrow;
     'payload-kv': PayloadKv;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
@@ -81,6 +82,7 @@ export interface Config {
     posts: PostsSelect<false> | PostsSelect<true>;
     'autosave-posts': AutosavePostsSelect<false> | AutosavePostsSelect<true>;
     conditions: ConditionsSelect<false> | ConditionsSelect<true>;
+    'filter-options-throws': FilterOptionsThrowsSelect<false> | FilterOptionsThrowsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -212,6 +214,29 @@ export interface Condition {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "filter-options-throws".
+ */
+export interface FilterOptionsThrow {
+  id: string;
+  title?: string | null;
+  selectWithThrowingFilterOptions?: ('allowed' | 'excluded') | null;
+  relationshipWithThrowingFilterOptions?: (string | null) | FilterOptionsThrow;
+  blocksWithThrowingFilterOptions?: TextBlock[] | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TextBlock".
+ */
+export interface TextBlock {
+  text?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'textBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -270,6 +295,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'conditions';
         value: string | Condition;
+      } | null)
+    | ({
+        relationTo: 'filter-options-throws';
+        value: string | FilterOptionsThrow;
       } | null)
     | ({
         relationTo: 'users';
@@ -396,6 +425,28 @@ export interface ConditionsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "filter-options-throws_select".
+ */
+export interface FilterOptionsThrowsSelect<T extends boolean = true> {
+  title?: T;
+  selectWithThrowingFilterOptions?: T;
+  relationshipWithThrowingFilterOptions?: T;
+  blocksWithThrowingFilterOptions?:
+    | T
+    | {
+        textBlock?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
@@ -473,7 +524,7 @@ export interface CollectionsWidget {
 export interface CollectionQueryWidget {
   data?: {
     title?: string | null;
-    relatedCollection: 'posts' | 'autosave-posts' | 'conditions' | 'users';
+    relatedCollection: 'posts' | 'autosave-posts' | 'conditions' | 'filter-options-throws' | 'users';
     where?:
       | {
           [k: string]: unknown;
@@ -495,7 +546,7 @@ export interface CollectionQueryWidget {
  */
 export interface ActivityWidget {
   data?: {
-    excludedCollections?: ('posts' | 'autosave-posts' | 'conditions' | 'users')[] | null;
+    excludedCollections?: ('posts' | 'autosave-posts' | 'conditions' | 'filter-options-throws' | 'users')[] | null;
   };
   width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }

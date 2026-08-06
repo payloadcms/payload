@@ -1,4 +1,4 @@
-import type { Field, PayloadRequest, ResolvedFilterOptions } from 'payload'
+import type { Field, Option, PayloadRequest, ResolvedFilterOptions } from 'payload'
 
 import {
   fieldAffectsData,
@@ -18,9 +18,11 @@ export const resolveAllFilterOptions = async ({
   fields: Field[]
   pathPrefix?: string
   req: PayloadRequest
-  result?: Map<string, ResolvedFilterOptions>
-}): Promise<Map<string, ResolvedFilterOptions>> => {
-  const resolvedFilterOptions = !result ? new Map<string, ResolvedFilterOptions>() : result
+  result?: Map<string, Option[] | ResolvedFilterOptions>
+}): Promise<Map<string, Option[] | ResolvedFilterOptions>> => {
+  const resolvedFilterOptions = !result
+    ? new Map<string, Option[] | ResolvedFilterOptions>()
+    : result
 
   await Promise.all(
     fields.map(async (field) => {
@@ -39,17 +41,42 @@ export const resolveAllFilterOptions = async ({
         'filterOptions' in field &&
         field.filterOptions
       ) {
-        const options = await resolveFilterOptions(field.filterOptions, {
-          id: undefined,
-          blockData: undefined,
-          data: {}, // use empty object to prevent breaking queries when accessing properties of `data`
-          relationTo: field.relationTo,
-          req,
-          siblingData: {}, // use empty object to prevent breaking queries when accessing properties of `siblingData`
-          user: req.user,
-        })
+        try {
+          const options = await resolveFilterOptions(field.filterOptions, {
+            id: undefined,
+            blockData: undefined,
+            data: {}, // use empty object to prevent breaking queries when accessing properties of `data`
+            relationTo: field.relationTo,
+            req,
+            siblingData: {}, // use empty object to prevent breaking queries when accessing properties of `siblingData`
+            user: req.user,
+          })
 
-        resolvedFilterOptions.set(fieldPath, options)
+          resolvedFilterOptions.set(fieldPath, options)
+        } catch (err) {
+          req.payload.logger.error({
+            err,
+            msg: `Failed to resolve filterOptions for field "${fieldPath}" in the list view filter panel, falling back to unfiltered options`,
+          })
+        }
+      }
+
+      if (field.type === 'select' && typeof field.filterOptions === 'function') {
+        try {
+          const options = await field.filterOptions({
+            data: {}, // use empty object to prevent breaking queries when accessing properties of `data`
+            options: field.options,
+            req,
+            siblingData: {}, // use empty object to prevent breaking queries when accessing properties of `siblingData`
+          })
+
+          resolvedFilterOptions.set(fieldPath, options)
+        } catch (err) {
+          req.payload.logger.error({
+            err,
+            msg: `Failed to resolve filterOptions for field "${fieldPath}" in the list view filter panel, falling back to unfiltered options`,
+          })
+        }
       }
 
       if (fieldHasSubFields(field)) {

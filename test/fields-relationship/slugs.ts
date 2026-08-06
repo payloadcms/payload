@@ -3,6 +3,7 @@ export const slug = 'fields-relationship'
 export const relationOneSlug = 'relation-one'
 export const relationTrueFilterOptionSlug = 'relation-filter-true'
 export const relationFalseFilterOptionSlug = 'relation-filter-false'
+export const relationFilterOptionsThrowsSlug = 'relation-filter-options-throws'
 export const relationTwoSlug = 'relation-two'
 export const relationRestrictedSlug = 'relation-restricted'
 export const relationWithTitleSlug = 'relation-with-title'
@@ -18,6 +19,7 @@ export const collectionSlugs = [
   relationOneSlug,
   relationTrueFilterOptionSlug,
   relationFalseFilterOptionSlug,
+  relationFilterOptionsThrowsSlug,
   relationTwoSlug,
   relationRestrictedSlug,
   relationWithTitleSlug,

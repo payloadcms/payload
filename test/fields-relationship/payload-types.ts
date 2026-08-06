@@ -69,6 +69,7 @@ export interface Config {
   collections: {
     'fields-relationship': FieldsRelationship;
     'relation-filter-false': RelationFilterFalse;
+    'relation-filter-options-throws': RelationFilterOptionsThrow;
     'relation-filter-true': RelationFilterTrue;
     'relation-one': RelationOne;
     'relation-two': RelationTwo;
@@ -91,6 +92,7 @@ export interface Config {
   collectionsSelect: {
     'fields-relationship': FieldsRelationshipSelect<false> | FieldsRelationshipSelect<true>;
     'relation-filter-false': RelationFilterFalseSelect<false> | RelationFilterFalseSelect<true>;
+    'relation-filter-options-throws': RelationFilterOptionsThrowsSelect<false> | RelationFilterOptionsThrowsSelect<true>;
     'relation-filter-true': RelationFilterTrueSelect<false> | RelationFilterTrueSelect<true>;
     'relation-one': RelationOneSelect<false> | RelationOneSelect<true>;
     'relation-two': RelationTwoSelect<false> | RelationTwoSelect<true>;
@@ -118,6 +120,8 @@ export interface Config {
   locale: 'en';
   widgets: {
     collections: CollectionsWidget;
+    'collection-query': CollectionQueryWidget;
+    activity: ActivityWidget;
   };
   user: User;
   jobs: {
@@ -287,6 +291,17 @@ export interface RelationFilterTrue {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relation-filter-options-throws".
+ */
+export interface RelationFilterOptionsThrow {
+  id: string;
+  name?: string | null;
+  relationshipWithThrowingFilterOptions?: (string | null) | RelationOne;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "relation-updated-externally".
  */
 export interface RelationUpdatedExternally {
@@ -445,6 +460,10 @@ export interface PayloadLockedDocument {
         value: string | RelationFilterFalse;
       } | null)
     | ({
+        relationTo: 'relation-filter-options-throws';
+        value: string | RelationFilterOptionsThrow;
+      } | null)
+    | ({
         relationTo: 'relation-filter-true';
         value: string | RelationFilterTrue;
       } | null)
@@ -572,6 +591,16 @@ export interface FieldsRelationshipSelect<T extends boolean = true> {
  */
 export interface RelationFilterFalseSelect<T extends boolean = true> {
   name?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relation-filter-options-throws_select".
+ */
+export interface RelationFilterOptionsThrowsSelect<T extends boolean = true> {
+  name?: T;
+  relationshipWithThrowingFilterOptions?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -766,6 +795,74 @@ export interface CollectionsWidget {
     [k: string]: unknown;
   };
   width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-query_widget".
+ */
+export interface CollectionQueryWidget {
+  data?: {
+    title?: string | null;
+    relatedCollection:
+      | 'fields-relationship'
+      | 'relation-filter-false'
+      | 'relation-filter-options-throws'
+      | 'relation-filter-true'
+      | 'relation-one'
+      | 'relation-two'
+      | 'relation-restricted'
+      | 'relation-with-title'
+      | 'relation-updated-externally'
+      | 'collection-1'
+      | 'collection-2'
+      | 'videos'
+      | 'podcasts'
+      | 'mixed-media'
+      | 'versioned-relationship-field'
+      | 'users';
+    where?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    sortField?: string | null;
+    sortDirection?: ('asc' | 'desc') | null;
+    limit?: number | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "activity_widget".
+ */
+export interface ActivityWidget {
+  data?: {
+    excludedCollections?:
+      | (
+          | 'fields-relationship'
+          | 'relation-filter-false'
+          | 'relation-filter-options-throws'
+          | 'relation-filter-true'
+          | 'relation-one'
+          | 'relation-two'
+          | 'relation-restricted'
+          | 'relation-with-title'
+          | 'relation-updated-externally'
+          | 'collection-1'
+          | 'collection-2'
+          | 'videos'
+          | 'podcasts'
+          | 'mixed-media'
+          | 'versioned-relationship-field'
+          | 'users'
+        )[]
+      | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
