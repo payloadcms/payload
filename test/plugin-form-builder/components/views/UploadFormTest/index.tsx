@@ -34,6 +34,7 @@ async function UploadFormTestViewAsync({
   })
 
   const { docs } = await payload.find({
+    overrideAccess: true,
     collection: 'forms',
     depth: 0,
     limit: 100,

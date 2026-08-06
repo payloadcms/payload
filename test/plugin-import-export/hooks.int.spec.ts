@@ -25,6 +25,7 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
   beforeAll(async () => {
     ;({ payload, restClient } = await initPayloadInt(dirname))
     const loginResult = await payload.login({
+      overrideAccess: true,
       collection: 'users',
       data: { email: devUser.email, password: devUser.password },
     })
@@ -40,7 +41,7 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
     resetHookSpies()
     for (const id of createdHookPostIDs) {
       await payload
-        .delete({ collection: postsWithHooksSlug, id })
+        .delete({ overrideAccess: true, collection: postsWithHooksSlug, id })
         .catch((err) => payload.logger.warn({ err, id, msg: 'hooks.int.spec cleanup failed' }))
     }
     createdHookPostIDs.length = 0
@@ -53,12 +54,14 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
   describe('export hooks', () => {
     it('should call export.hooks.before with correct args and apply its return value to CSV output', async () => {
       const post = await payload.create({
+        overrideAccess: true,
         collection: postsWithHooksSlug,
         data: { title: 'Hook Test', secret: 'top-secret', count: 1 },
       })
       createdHookPostIDs.push(post.id)
 
       let exportDoc = await payload.create({
+        overrideAccess: true,
         collection: 'posts-with-hooks-export',
         user,
         data: {
@@ -69,6 +72,7 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
       })
 
       exportDoc = await payload.findByID({
+        overrideAccess: true,
         collection: 'posts-with-hooks-export',
         id: exportDoc.id,
       })
@@ -96,12 +100,14 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
 
     it('should call export.hooks.after with correct args after write', async () => {
       const post = await payload.create({
+        overrideAccess: true,
         collection: postsWithHooksSlug,
         data: { title: 'After Hook Test', secret: 'hidden', count: 2 },
       })
       createdHookPostIDs.push(post.id)
 
       let exportDoc = await payload.create({
+        overrideAccess: true,
         collection: 'posts-with-hooks-export',
         user,
         data: {
@@ -112,6 +118,7 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
       })
 
       exportDoc = await payload.findByID({
+        overrideAccess: true,
         collection: 'posts-with-hooks-export',
         id: exportDoc.id,
       })
@@ -129,12 +136,14 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
 
     it('should call export.hooks.before for JSON exports with nested docs', async () => {
       const post = await payload.create({
+        overrideAccess: true,
         collection: postsWithHooksSlug,
         data: { title: 'JSON Hook Test', secret: 'json-secret', count: 3 },
       })
       createdHookPostIDs.push(post.id)
 
       let exportDoc = await payload.create({
+        overrideAccess: true,
         collection: 'posts-with-hooks-export',
         user,
         data: {
@@ -145,6 +154,7 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
       })
 
       exportDoc = await payload.findByID({
+        overrideAccess: true,
         collection: 'posts-with-hooks-export',
         id: exportDoc.id,
       })
@@ -164,6 +174,7 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
       const posts = await Promise.all(
         Array.from({ length: 5 }, (_, i) =>
           payload.create({
+            overrideAccess: true,
             collection: postsWithHooksSlug,
             data: { title: `Batch Post ${i}`, count: i },
           }),
@@ -173,6 +184,7 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
 
       // posts-with-hooks is configured with batchSize: 2 — 5 docs → 3 batches
       let exportDoc = await payload.create({
+        overrideAccess: true,
         collection: 'posts-with-hooks-export',
         user,
         data: {
@@ -182,6 +194,7 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
       })
 
       exportDoc = await payload.findByID({
+        overrideAccess: true,
         collection: 'posts-with-hooks-export',
         id: exportDoc.id,
       })
@@ -196,6 +209,7 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
 
     it('should call export.hooks.before via streaming download', async () => {
       const post = await payload.create({
+        overrideAccess: true,
         collection: postsWithHooksSlug,
         data: { title: 'Download Hook Test', secret: 'streamed-secret', count: 4 },
       })
@@ -235,6 +249,7 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
       }
 
       let importDoc = await payload.create({
+        overrideAccess: true,
         collection: 'posts-with-hooks-import',
         user,
         data: { collectionSlug: postsWithHooksSlug, importMode: 'create' },
@@ -242,6 +257,7 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
       })
 
       importDoc = await payload.findByID({
+        overrideAccess: true,
         collection: 'posts-with-hooks-import',
         id: importDoc.id,
       })
@@ -262,6 +278,7 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
 
       // before hook appends '_imported' to title — verify it landed in DB
       const importedDocs = await payload.find({
+        overrideAccess: true,
         collection: postsWithHooksSlug,
         where: { title: { equals: 'Original Title_imported' } },
       })
@@ -279,6 +296,7 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
       }
 
       let importDoc = await payload.create({
+        overrideAccess: true,
         collection: 'posts-with-hooks-import',
         user,
         data: { collectionSlug: postsWithHooksSlug, importMode: 'create' },
@@ -286,6 +304,7 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
       })
 
       importDoc = await payload.findByID({
+        overrideAccess: true,
         collection: 'posts-with-hooks-import',
         id: importDoc.id,
       })
@@ -301,6 +320,7 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
       expect(afterArgs.result.errors).toHaveLength(0)
 
       const imported = await payload.find({
+        overrideAccess: true,
         collection: postsWithHooksSlug,
         where: { title: { equals: 'After Hook Post_imported' } },
       })
@@ -317,6 +337,7 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
       }
 
       let importDoc = await payload.create({
+        overrideAccess: true,
         collection: 'posts-with-hooks-import',
         user,
         data: { collectionSlug: postsWithHooksSlug, importMode: 'create' },
@@ -324,6 +345,7 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
       })
 
       importDoc = await payload.findByID({
+        overrideAccess: true,
         collection: 'posts-with-hooks-import',
         id: importDoc.id,
       })
@@ -337,6 +359,7 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
       expect(afterArgs.originalData[0]).toMatchObject({ title: 'OriginalData Post', count: 42 })
 
       const imported = await payload.find({
+        overrideAccess: true,
         collection: postsWithHooksSlug,
         where: { title: { equals: 'OriginalData Post_imported' } },
       })
@@ -353,6 +376,7 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
       }
 
       let importDoc = await payload.create({
+        overrideAccess: true,
         collection: 'posts-with-hooks-import',
         user,
         data: { collectionSlug: postsWithHooksSlug, importMode: 'create', format: 'json' },
@@ -360,6 +384,7 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
       })
 
       importDoc = await payload.findByID({
+        overrideAccess: true,
         collection: 'posts-with-hooks-import',
         id: importDoc.id,
       })
@@ -369,6 +394,7 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
       expect(hookCalls.importBefore[0]!.format).toBe('json')
 
       const imported = await payload.find({
+        overrideAccess: true,
         collection: postsWithHooksSlug,
         where: { title: { equals: 'JSON Import Hook_imported' } },
       })
@@ -393,6 +419,7 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
       }
 
       let importDoc = await payload.create({
+        overrideAccess: true,
         collection: 'posts-with-hooks-import',
         user,
         data: { collectionSlug: postsWithHooksSlug, importMode: 'create', format: 'json' },
@@ -400,6 +427,7 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
       })
 
       importDoc = await payload.findByID({
+        overrideAccess: true,
         collection: 'posts-with-hooks-import',
         id: importDoc.id,
       })
@@ -421,6 +449,7 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
       expect(afterOriginalData.email).toBe('TEST@EXAMPLE.COM')
 
       const imported = await payload.find({
+        overrideAccess: true,
         collection: postsWithHooksSlug,
         where: { title: { equals: 'JSON Original Data Test_imported' } },
       })
@@ -439,6 +468,7 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
 
       // posts-with-hooks is configured with batchSize: 2 — 4 rows → 2 batches
       let importDoc = await payload.create({
+        overrideAccess: true,
         collection: 'posts-with-hooks-import',
         user,
         data: {
@@ -449,6 +479,7 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
       })
 
       importDoc = await payload.findByID({
+        overrideAccess: true,
         collection: 'posts-with-hooks-import',
         id: importDoc.id,
       })
@@ -460,6 +491,7 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
       expect(hookCalls.importBefore[0]!.totalBatches).toBe(2)
 
       const imported = await payload.find({
+        overrideAccess: true,
         collection: postsWithHooksSlug,
         where: { title: { contains: 'Batch Import' } },
         limit: 10,
@@ -473,19 +505,21 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
 
     afterEach(async () => {
       for (const id of createdIDs) {
-        await payload.delete({ collection: postsWithColumnMapSlug, id })
+        await payload.delete({ overrideAccess: true, collection: postsWithColumnMapSlug, id })
       }
       createdIDs.length = 0
     })
 
     it('should rename CSV columns via collection-level export.hooks.before', async () => {
       const post = await payload.create({
+        overrideAccess: true,
         collection: postsWithColumnMapSlug,
         data: { title: 'Rename Me', excerpt: 'Original excerpt', count: 42 },
       })
       createdIDs.push(post.id)
 
       let exportDoc = await payload.create({
+        overrideAccess: true,
         collection: 'posts-with-column-map-export',
         user,
         data: {
@@ -496,6 +530,7 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
       })
 
       exportDoc = await payload.findByID({
+        overrideAccess: true,
         collection: 'posts-with-column-map-export',
         id: exportDoc.id,
       })
@@ -514,12 +549,14 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
 
     it('should rename a single CSV column via field-level beforeExport mutation', async () => {
       const post = await payload.create({
+        overrideAccess: true,
         collection: postsWithColumnMapSlug,
         data: { title: 'Field Rename', excerpt: 'x', count: 1, sharedName: 'shared value' },
       })
       createdIDs.push(post.id)
 
       let exportDoc = await payload.create({
+        overrideAccess: true,
         collection: 'posts-with-column-map-export',
         user,
         data: {
@@ -530,6 +567,7 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
       })
 
       exportDoc = await payload.findByID({
+        overrideAccess: true,
         collection: 'posts-with-column-map-export',
         id: exportDoc.id,
       })
@@ -543,6 +581,7 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
 
     it('should reflect collection-level export.hooks.before in CSV export preview', async () => {
       const post = await payload.create({
+        overrideAccess: true,
         collection: postsWithColumnMapSlug,
         data: { title: 'Preview Rename', excerpt: 'preview excerpt', count: 11 },
       })
@@ -580,6 +619,7 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
 
     it('should reflect collection-level export.hooks.before in JSON export preview', async () => {
       const post = await payload.create({
+        overrideAccess: true,
         collection: postsWithColumnMapSlug,
         data: { title: 'JSON Preview Rename', excerpt: 'json preview', count: 22 },
       })
@@ -608,12 +648,14 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
 
     it('should rename JSON keys via collection-level export.hooks.before', async () => {
       const post = await payload.create({
+        overrideAccess: true,
         collection: postsWithColumnMapSlug,
         data: { title: 'JSON Rename', excerpt: 'json excerpt', count: 7 },
       })
       createdIDs.push(post.id)
 
       let exportDoc = await payload.create({
+        overrideAccess: true,
         collection: 'posts-with-column-map-export',
         user,
         data: {
@@ -624,6 +666,7 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
       })
 
       exportDoc = await payload.findByID({
+        overrideAccess: true,
         collection: 'posts-with-column-map-export',
         id: exportDoc.id,
       })
@@ -645,7 +688,7 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
     afterEach(async () => {
       for (const id of createdIDs) {
         await payload
-          .delete({ collection: postsWithColumnMapSlug, id })
+          .delete({ overrideAccess: true, collection: postsWithColumnMapSlug, id })
           .catch((err) => payload.logger.warn({ err, id, msg: 'column-map cleanup failed' }))
       }
       createdIDs.length = 0
@@ -664,6 +707,7 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
       }
 
       const importDoc = await payload.create({
+        overrideAccess: true,
         collection: 'posts-with-column-map-import',
         user,
         data: {
@@ -676,6 +720,7 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
       expect(importDoc.id).toBeDefined()
 
       const imported = await payload.find({
+        overrideAccess: true,
         collection: postsWithColumnMapSlug,
         sort: 'title',
         where: { title: { in: ['Imported A', 'Imported B'] } },
@@ -714,6 +759,7 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
       }
 
       await payload.create({
+        overrideAccess: true,
         collection: 'posts-with-column-map-import',
         user,
         data: {
@@ -724,6 +770,7 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
       })
 
       const imported = await payload.find({
+        overrideAccess: true,
         collection: postsWithColumnMapSlug,
         sort: 'title',
         where: { title: { in: ['JSON A', 'JSON B'] } },
@@ -811,6 +858,7 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
       }
 
       await payload.create({
+        overrideAccess: true,
         collection: 'posts-with-column-map-import',
         user,
         data: {
@@ -821,6 +869,7 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
       })
 
       const imported = await payload.find({
+        overrideAccess: true,
         collection: postsWithColumnMapSlug,
         where: { title: { equals: 'Dropped Test' } },
       })

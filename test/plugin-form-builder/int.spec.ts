@@ -74,6 +74,7 @@ describe('@payloadcms/plugin-form-builder', () => {
     }
 
     form = (await payload.create({
+      overrideAccess: true,
       collection: formsSlug,
       data: formConfig,
     })) as unknown as Form
@@ -85,12 +86,15 @@ describe('@payloadcms/plugin-form-builder', () => {
 
   describe('plugin collections', () => {
     it('adds forms collection', async () => {
-      const { docs: forms } = await payload.find({ collection: formsSlug })
+      const { docs: forms } = await payload.find({ overrideAccess: true, collection: formsSlug })
       expect(forms.length).toBeGreaterThan(0)
     })
 
     it('adds form submissions collection', async () => {
-      const { docs: formSubmissions } = await payload.find({ collection: formSubmissionsSlug })
+      const { docs: formSubmissions } = await payload.find({
+        overrideAccess: true,
+        collection: formSubmissionsSlug,
+      })
       expect(formSubmissions).toHaveLength(1)
     })
   })
@@ -140,6 +144,7 @@ describe('@payloadcms/plugin-form-builder', () => {
       }
 
       const testForm = await payload.create({
+        overrideAccess: true,
         collection: formsSlug,
         data: formConfig,
       })
@@ -188,6 +193,7 @@ describe('@payloadcms/plugin-form-builder', () => {
       }
 
       const testForm = await payload.create({
+        overrideAccess: true,
         collection: formsSlug,
         data: formConfig,
       })
@@ -199,6 +205,7 @@ describe('@payloadcms/plugin-form-builder', () => {
   describe('form submissions and validations', () => {
     it('can create a form submission', async () => {
       const formSubmission = await payload.create({
+        overrideAccess: true,
         collection: formSubmissionsSlug,
         data: {
           form: form.id,
@@ -222,6 +229,7 @@ describe('@payloadcms/plugin-form-builder', () => {
     it('does not create a form submission for a non-existing form', async () => {
       const req = async () =>
         payload.create({
+          overrideAccess: true,
           collection: formSubmissionsSlug,
           data: {
             form: '659c7c2f98ffb5d83df9dadb',
@@ -614,7 +622,7 @@ describe('@payloadcms/plugin-form-builder', () => {
     afterEach(async () => {
       for (const id of createdSubmissionIds) {
         try {
-          await payload.delete({ collection: formSubmissionsSlug, id })
+          await payload.delete({ overrideAccess: true, collection: formSubmissionsSlug, id })
         } catch {
           // ignore if already deleted
         }
@@ -623,7 +631,7 @@ describe('@payloadcms/plugin-form-builder', () => {
 
       for (const id of createdFormIds) {
         try {
-          await payload.delete({ collection: formsSlug, id })
+          await payload.delete({ overrideAccess: true, collection: formsSlug, id })
         } catch {
           // ignore if already deleted
         }
@@ -632,7 +640,7 @@ describe('@payloadcms/plugin-form-builder', () => {
 
       for (const id of createdMediaIds) {
         try {
-          await payload.delete({ collection: mediaSlug, id })
+          await payload.delete({ overrideAccess: true, collection: mediaSlug, id })
         } catch {
           // ignore if already deleted
         }
@@ -641,7 +649,7 @@ describe('@payloadcms/plugin-form-builder', () => {
 
       for (const id of createdDocumentIds) {
         try {
-          await payload.delete({ collection: documentsSlug, id })
+          await payload.delete({ overrideAccess: true, collection: documentsSlug, id })
         } catch {
           // ignore if already deleted
         }
@@ -684,6 +692,7 @@ describe('@payloadcms/plugin-form-builder', () => {
     describe('form creation with upload fields', () => {
       it('should create a form with a single upload field', async () => {
         const testForm = await payload.create({
+          overrideAccess: true,
           collection: formsSlug,
           data: {
             confirmationType: 'message',
@@ -711,6 +720,7 @@ describe('@payloadcms/plugin-form-builder', () => {
 
       it('should create a form with multiple upload fields', async () => {
         const testForm = await payload.create({
+          overrideAccess: true,
           collection: formsSlug,
           data: {
             confirmationType: 'message',
@@ -738,6 +748,7 @@ describe('@payloadcms/plugin-form-builder', () => {
 
       it('should create a form with mixed field types including upload', async () => {
         const testForm = await payload.create({
+          overrideAccess: true,
           collection: formsSlug,
           data: {
             confirmationType: 'message',
@@ -761,6 +772,7 @@ describe('@payloadcms/plugin-form-builder', () => {
     describe('required field validation', () => {
       it('should reject submission when required upload field is missing', async () => {
         const testForm = await payload.create({
+          overrideAccess: true,
           collection: formsSlug,
           data: {
             confirmationType: 'message',
@@ -782,6 +794,7 @@ describe('@payloadcms/plugin-form-builder', () => {
 
         await expect(
           payload.create({
+            overrideAccess: true,
             collection: formSubmissionsSlug,
             data: {
               form: testForm.id,
@@ -793,6 +806,7 @@ describe('@payloadcms/plugin-form-builder', () => {
 
       it('should reject submission when required upload field has empty string', async () => {
         const testForm = await payload.create({
+          overrideAccess: true,
           collection: formsSlug,
           data: {
             confirmationType: 'message',
@@ -814,6 +828,7 @@ describe('@payloadcms/plugin-form-builder', () => {
 
         await expect(
           payload.create({
+            overrideAccess: true,
             collection: formSubmissionsSlug,
             data: {
               form: testForm.id,
@@ -826,6 +841,7 @@ describe('@payloadcms/plugin-form-builder', () => {
       it('should accept submission when required upload field has valid file ID', async () => {
         // Create a test media document
         const mediaDoc = await payload.create({
+          overrideAccess: true,
           collection: mediaSlug,
           data: { alt: 'test' },
           filePath: testImagePath,
@@ -834,6 +850,7 @@ describe('@payloadcms/plugin-form-builder', () => {
         createdMediaIds.push(mediaDoc.id)
 
         const testForm = await payload.create({
+          overrideAccess: true,
           collection: formsSlug,
           data: {
             confirmationType: 'message',
@@ -853,6 +870,7 @@ describe('@payloadcms/plugin-form-builder', () => {
         createdFormIds.push(testForm.id)
 
         const submission = await payload.create({
+          overrideAccess: true,
           collection: formSubmissionsSlug,
           data: {
             form: testForm.id,
@@ -873,6 +891,7 @@ describe('@payloadcms/plugin-form-builder', () => {
     describe('optional field handling', () => {
       it('should accept submission when optional upload field is omitted', async () => {
         const testForm = await payload.create({
+          overrideAccess: true,
           collection: formsSlug,
           data: {
             confirmationType: 'message',
@@ -893,6 +912,7 @@ describe('@payloadcms/plugin-form-builder', () => {
         createdFormIds.push(testForm.id)
 
         const submission = await payload.create({
+          overrideAccess: true,
           collection: formSubmissionsSlug,
           data: {
             form: testForm.id,
@@ -907,6 +927,7 @@ describe('@payloadcms/plugin-form-builder', () => {
 
       it('should accept submission with only some upload fields filled', async () => {
         const mediaDoc = await payload.create({
+          overrideAccess: true,
           collection: mediaSlug,
           data: { alt: 'test' },
           filePath: testImagePath,
@@ -915,6 +936,7 @@ describe('@payloadcms/plugin-form-builder', () => {
         createdMediaIds.push(mediaDoc.id)
 
         const testForm = await payload.create({
+          overrideAccess: true,
           collection: formsSlug,
           data: {
             confirmationType: 'message',
@@ -946,6 +968,7 @@ describe('@payloadcms/plugin-form-builder', () => {
         createdFormIds.push(testForm.id)
 
         const submission = await payload.create({
+          overrideAccess: true,
           collection: formSubmissionsSlug,
           data: {
             form: testForm.id,
@@ -963,6 +986,7 @@ describe('@payloadcms/plugin-form-builder', () => {
       it('should reject file with disallowed mime type', async () => {
         // Create a PDF document in documents collection
         const pdfDoc = await payload.create({
+          overrideAccess: true,
           collection: documentsSlug,
           data: {},
           filePath: testPdfPath,
@@ -971,6 +995,7 @@ describe('@payloadcms/plugin-form-builder', () => {
         createdDocumentIds.push(pdfDoc.id)
 
         const testForm = await payload.create({
+          overrideAccess: true,
           collection: formsSlug,
           data: {
             confirmationType: 'message',
@@ -994,6 +1019,7 @@ describe('@payloadcms/plugin-form-builder', () => {
         // This should fail because we're referencing a file from the wrong collection
         await expect(
           payload.create({
+            overrideAccess: true,
             collection: formSubmissionsSlug,
             data: {
               form: testForm.id,
@@ -1005,6 +1031,7 @@ describe('@payloadcms/plugin-form-builder', () => {
 
       it('should accept file with allowed mime type', async () => {
         const mediaDoc = await payload.create({
+          overrideAccess: true,
           collection: mediaSlug,
           data: { alt: 'test' },
           filePath: testImagePath,
@@ -1013,6 +1040,7 @@ describe('@payloadcms/plugin-form-builder', () => {
         createdMediaIds.push(mediaDoc.id)
 
         const testForm = await payload.create({
+          overrideAccess: true,
           collection: formsSlug,
           data: {
             confirmationType: 'message',
@@ -1033,6 +1061,7 @@ describe('@payloadcms/plugin-form-builder', () => {
         createdFormIds.push(testForm.id)
 
         const submission = await payload.create({
+          overrideAccess: true,
           collection: formSubmissionsSlug,
           data: {
             form: testForm.id,
@@ -1049,6 +1078,7 @@ describe('@payloadcms/plugin-form-builder', () => {
     describe('file reference validation', () => {
       it('should reject non-existent file ID', async () => {
         const testForm = await payload.create({
+          overrideAccess: true,
           collection: formsSlug,
           data: {
             confirmationType: 'message',
@@ -1069,6 +1099,7 @@ describe('@payloadcms/plugin-form-builder', () => {
 
         await expect(
           payload.create({
+            overrideAccess: true,
             collection: formSubmissionsSlug,
             data: {
               form: testForm.id,
@@ -1082,6 +1113,7 @@ describe('@payloadcms/plugin-form-builder', () => {
     describe('other form data integrity', () => {
       it('should save all non-upload fields when upload succeeds', async () => {
         const mediaDoc = await payload.create({
+          overrideAccess: true,
           collection: mediaSlug,
           data: { alt: 'test' },
           filePath: testImagePath,
@@ -1090,6 +1122,7 @@ describe('@payloadcms/plugin-form-builder', () => {
         createdMediaIds.push(mediaDoc.id)
 
         const testForm = await payload.create({
+          overrideAccess: true,
           collection: formsSlug,
           data: {
             confirmationType: 'message',
@@ -1106,6 +1139,7 @@ describe('@payloadcms/plugin-form-builder', () => {
         createdFormIds.push(testForm.id)
 
         const submission = await payload.create({
+          overrideAccess: true,
           collection: formSubmissionsSlug,
           data: {
             form: testForm.id,
@@ -1135,6 +1169,7 @@ describe('@payloadcms/plugin-form-builder', () => {
 
       it('should handle form with no upload fields same as before', async () => {
         const testForm = await payload.create({
+          overrideAccess: true,
           collection: formsSlug,
           data: {
             confirmationType: 'message',
@@ -1147,6 +1182,7 @@ describe('@payloadcms/plugin-form-builder', () => {
         createdFormIds.push(testForm.id)
 
         const submission = await payload.create({
+          overrideAccess: true,
           collection: formSubmissionsSlug,
           data: {
             form: testForm.id,
@@ -1164,6 +1200,7 @@ describe('@payloadcms/plugin-form-builder', () => {
     describe('direct file upload via REST', () => {
       it('should upload file directly with form submission', async () => {
         const testForm = await payload.create({
+          overrideAccess: true,
           collection: formsSlug,
           data: {
             confirmationType: 'message',
@@ -1219,6 +1256,7 @@ describe('@payloadcms/plugin-form-builder', () => {
 
         // Verify the media document was created
         const mediaDoc = await payload.findByID({
+          overrideAccess: true,
           collection: mediaSlug,
           id: avatarMediaId,
         })
@@ -1230,6 +1268,7 @@ describe('@payloadcms/plugin-form-builder', () => {
 
       it('should reject direct upload when MIME type is not allowed', async () => {
         const testForm = await payload.create({
+          overrideAccess: true,
           collection: formsSlug,
           data: {
             confirmationType: 'message',
@@ -1274,6 +1313,7 @@ describe('@payloadcms/plugin-form-builder', () => {
 
       it('should create submission with mixed direct upload and other fields', async () => {
         const testForm = await payload.create({
+          overrideAccess: true,
           collection: formsSlug,
           data: {
             confirmationType: 'message',
@@ -1345,6 +1385,7 @@ describe('@payloadcms/plugin-form-builder', () => {
       it('should still accept pre-uploaded file IDs for backwards compatibility', async () => {
         // Pre-upload a file
         const mediaDoc = await payload.create({
+          overrideAccess: true,
           collection: mediaSlug,
           data: { alt: 'test' },
           filePath: testImagePath,
@@ -1353,6 +1394,7 @@ describe('@payloadcms/plugin-form-builder', () => {
         createdMediaIds.push(mediaDoc.id)
 
         const testForm = await payload.create({
+          overrideAccess: true,
           collection: formsSlug,
           data: {
             confirmationType: 'message',
@@ -1403,6 +1445,7 @@ describe('@payloadcms/plugin-form-builder', () => {
     describe('submissionUploads population', () => {
       it('should populate submissionUploads when direct file upload succeeds', async () => {
         const testForm = await payload.create({
+          overrideAccess: true,
           collection: formsSlug,
           data: {
             confirmationType: 'message',
@@ -1463,6 +1506,7 @@ describe('@payloadcms/plugin-form-builder', () => {
 
       it('should populate submissionUploads when pre-uploaded file ID is provided', async () => {
         const mediaDoc = await payload.create({
+          overrideAccess: true,
           collection: mediaSlug,
           data: { alt: 'pre-upload' },
           filePath: testImagePath,
@@ -1470,6 +1514,7 @@ describe('@payloadcms/plugin-form-builder', () => {
         createdMediaIds.push(mediaDoc.id)
 
         const testForm = await payload.create({
+          overrideAccess: true,
           collection: formsSlug,
           data: {
             confirmationType: 'message',
@@ -1512,6 +1557,7 @@ describe('@payloadcms/plugin-form-builder', () => {
 
       it('should not populate submissionUploads when form has no upload fields', async () => {
         const testForm = await payload.create({
+          overrideAccess: true,
           collection: formsSlug,
           data: {
             confirmationType: 'message',
@@ -1550,6 +1596,7 @@ describe('@payloadcms/plugin-form-builder', () => {
 
       it('should populate one submissionUploads entry per file for multiple direct uploads', async () => {
         const testForm = await payload.create({
+          overrideAccess: true,
           collection: formsSlug,
           data: {
             confirmationType: 'message',
@@ -1613,6 +1660,7 @@ describe('@payloadcms/plugin-form-builder', () => {
       it('should populate submissionUploads for hasMany + polymorphic (multi-file media + single document)', async () => {
         // Pre-upload two media files and one document
         const media1 = await payload.create({
+          overrideAccess: true,
           collection: mediaSlug,
           data: { alt: 'photo-1' },
           filePath: testImagePath,
@@ -1620,6 +1668,7 @@ describe('@payloadcms/plugin-form-builder', () => {
         createdMediaIds.push(media1.id)
 
         const media2 = await payload.create({
+          overrideAccess: true,
           collection: mediaSlug,
           data: { alt: 'photo-2' },
           filePath: testImagePath,
@@ -1627,6 +1676,7 @@ describe('@payloadcms/plugin-form-builder', () => {
         createdMediaIds.push(media2.id)
 
         const docFile = await payload.create({
+          overrideAccess: true,
           collection: documentsSlug,
           data: {},
           filePath: testPdfPath,
@@ -1634,6 +1684,7 @@ describe('@payloadcms/plugin-form-builder', () => {
         createdDocumentIds.push(docFile.id)
 
         const testForm = await payload.create({
+          overrideAccess: true,
           collection: formsSlug,
           data: {
             confirmationType: 'message',
@@ -1714,6 +1765,7 @@ describe('@payloadcms/plugin-form-builder', () => {
     describe('multiple guard', () => {
       it('should reject direct upload of multiple files when multiple is false', async () => {
         const testForm = await payload.create({
+          overrideAccess: true,
           collection: formsSlug,
           data: {
             confirmationType: 'message',
@@ -1769,11 +1821,13 @@ describe('@payloadcms/plugin-form-builder', () => {
 
       it('should reject comma-separated pre-uploaded IDs when multiple is false', async () => {
         const mediaDoc1 = await payload.create({
+          overrideAccess: true,
           collection: mediaSlug,
           data: { alt: 'first' },
           filePath: testImagePath,
         })
         const mediaDoc2 = await payload.create({
+          overrideAccess: true,
           collection: mediaSlug,
           data: { alt: 'second' },
           filePath: testImagePath,
@@ -1782,6 +1836,7 @@ describe('@payloadcms/plugin-form-builder', () => {
         createdMediaIds.push(mediaDoc1.id, mediaDoc2.id)
 
         const testForm = await payload.create({
+          overrideAccess: true,
           collection: formsSlug,
           data: {
             confirmationType: 'message',
@@ -1802,6 +1857,7 @@ describe('@payloadcms/plugin-form-builder', () => {
 
         await expect(
           payload.create({
+            overrideAccess: true,
             collection: formSubmissionsSlug,
             data: {
               form: testForm.id,
@@ -1818,6 +1874,7 @@ describe('@payloadcms/plugin-form-builder', () => {
         // To test the defence-in-depth guard in handleUploads, create a valid form and call
         // the hook directly with a formConfig that excludes the form's uploadCollection.
         const testForm = await payload.create({
+          overrideAccess: true,
           collection: formsSlug,
           data: {
             confirmationType: 'message',
@@ -1867,6 +1924,7 @@ describe('@payloadcms/plugin-form-builder', () => {
     describe('dangling doc cleanup', () => {
       it('should delete successfully created docs when a later file fails validation', async () => {
         const testForm = await payload.create({
+          overrideAccess: true,
           collection: formsSlug,
           data: {
             confirmationType: 'message',
@@ -1888,7 +1946,11 @@ describe('@payloadcms/plugin-form-builder', () => {
         createdFormIds.push(testForm.id)
 
         // Capture media count before the submission attempt
-        const mediaBefore = await payload.find({ collection: mediaSlug, limit: 0 })
+        const mediaBefore = await payload.find({
+          overrideAccess: true,
+          collection: mediaSlug,
+          limit: 0,
+        })
         const countBefore = mediaBefore.totalDocs
 
         const formData = new FormData()
@@ -1919,7 +1981,11 @@ describe('@payloadcms/plugin-form-builder', () => {
         expect(response.status).toBe(400)
 
         // The image doc created before the PDF validation failure should have been cleaned up
-        const mediaAfter = await payload.find({ collection: mediaSlug, limit: 0 })
+        const mediaAfter = await payload.find({
+          overrideAccess: true,
+          collection: mediaSlug,
+          limit: 0,
+        })
 
         expect(mediaAfter.totalDocs).toBe(countBefore)
       })

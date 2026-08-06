@@ -71,6 +71,7 @@ describe('@payloadcms/plugin-cloud-storage (composite prefixes)', () => {
         const docPrefix = 'user-123'
 
         const upload = await payload.create({
+          overrideAccess: true,
           collection: mediaWithCompositePrefixesSlug,
           data: {
             prefix: docPrefix,
@@ -95,6 +96,7 @@ describe('@payloadcms/plugin-cloud-storage (composite prefixes)', () => {
 
       it('can upload with composite prefixes (collection prefix only)', async () => {
         const upload = await payload.create({
+          overrideAccess: true,
           collection: mediaWithCompositePrefixesSlug,
           data: {},
           filePath: path.resolve(dirname, '../uploads/image.png'),

@@ -81,6 +81,7 @@ describe('@payloadcms/payload--cloud', () => {
         expect(doc.filesize).toBe(originalStats.size)
 
         await payload.delete({
+          overrideAccess: true,
           collection: 'documents',
           id: doc.id,
         })

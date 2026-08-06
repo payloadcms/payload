@@ -137,6 +137,7 @@ export const payloadCloudPlugin =
       if (process.env.PAYLOAD_CLOUD_JOBS_INSTANCE) {
         const retrievedGlobal = await payload.findGlobal({
           slug: 'payload-cloud-instance',
+          overrideAccess: true,
         })
 
         if (retrievedGlobal.instance === process.env.PAYLOAD_CLOUD_JOBS_INSTANCE) {
@@ -163,6 +164,7 @@ export const payloadCloudPlugin =
         data: {
           instance,
         },
+        overrideAccess: true,
       })
 
       if (!hasExistingAutorun) {

@@ -80,7 +80,10 @@ export const deleteDocumentsTool = defineCollectionTool({
       deleteOptions.where = where
     }
 
-    const result = await payload.delete(deleteOptions as Parameters<typeof payload.delete>[0])
+    const result = await payload.delete({
+      ...{ overrideAccess: true },
+      ...(deleteOptions as Parameters<typeof payload.delete>[0]),
+    })
 
     if (id) {
       return {

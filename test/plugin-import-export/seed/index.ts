@@ -20,6 +20,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
   payload.logger.info('Seeding data...')
   try {
     const user = await payload.create({
+      overrideAccess: true,
       collection: 'users',
       data: {
         email: devUser.email,
@@ -28,6 +29,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
       },
     })
     const restricted = await payload.create({
+      overrideAccess: true,
       collection: 'users',
       data: {
         email: regularUser.email,
@@ -40,6 +42,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
     // create an absurd amount of posts - we need to test large data exports
     for (let i = 0; i < 100; i++) {
       const post = await payload.create({
+        overrideAccess: true,
         collection: 'posts',
         data: {
           title: `Post ${i}`,
@@ -55,6 +58,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
     // create pages
     for (let i = 0; i < 195; i++) {
       await payload.create({
+        overrideAccess: true,
         collection: 'pages',
         data: {
           title: `Doc ${i}`,
@@ -64,6 +68,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
 
     for (let i = 0; i < 5; i++) {
       await payload.create({
+        overrideAccess: true,
         collection: 'pages',
         data: {
           title: `Title ${i}`,
@@ -75,6 +80,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
     }
     for (let i = 0; i < 5; i++) {
       const doc = await payload.create({
+        overrideAccess: true,
         collection: 'pages',
         data: {
           title: `Localized ${i}`,
@@ -83,6 +89,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
         locale: 'en',
       })
       await payload.update({
+        overrideAccess: true,
         collection: 'pages',
         id: doc.id,
         data: {
@@ -91,6 +98,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
         locale: 'es',
       })
       await payload.update({
+        overrideAccess: true,
         collection: 'pages',
         id: doc.id,
         data: {
@@ -103,6 +111,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
     // Seed Hebrew-only pages
     for (let i = 0; i < 5; i++) {
       await payload.create({
+        overrideAccess: true,
         collection: 'pages',
         data: {
           title: `Hebrew ${i}`,
@@ -113,6 +122,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
     }
     for (let i = 0; i < 5; i++) {
       await payload.create({
+        overrideAccess: true,
         collection: 'pages',
         data: {
           title: `Array ${i}`,
@@ -131,6 +141,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
     }
     for (let i = 0; i < 5; i++) {
       await payload.create({
+        overrideAccess: true,
         collection: 'pages',
         data: {
           title: `Array Subfield ${i}`,
@@ -150,6 +161,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
 
     for (let i = 0; i < 5; i++) {
       await payload.create({
+        overrideAccess: true,
         collection: 'pages',
         data: {
           author: user.id,
@@ -160,6 +172,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
 
     for (let i = 0; i < 5; i++) {
       await payload.create({
+        overrideAccess: true,
         collection: 'pages',
         data: {
           customRelationship: user.id,
@@ -170,6 +183,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
 
     for (let i = 0; i < 5; i++) {
       await payload.create({
+        overrideAccess: true,
         collection: 'pages',
         data: {
           title: `hasMany Number ${i}`,
@@ -180,6 +194,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
 
     for (let i = 0; i < 5; i++) {
       await payload.create({
+        overrideAccess: true,
         collection: 'pages',
         data: {
           title: `Blocks ${i}`,
@@ -200,6 +215,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
 
     for (let i = 0; i < 5; i++) {
       await payload.create({
+        overrideAccess: true,
         collection: 'pages',
         data: {
           title: `JSON ${i}`,
@@ -209,6 +225,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
 
     for (let i = 0; i < 5; i++) {
       await payload.create({
+        overrideAccess: true,
         collection: 'pages',
         data: {
           title: `Jobs ${i}`,
@@ -219,6 +236,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
     // Seed pages with checkbox field
     for (let i = 0; i < 3; i++) {
       await payload.create({
+        overrideAccess: true,
         collection: 'pages',
         data: {
           title: `Checkbox ${i}`,
@@ -231,6 +249,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
     for (let i = 0; i < 3; i++) {
       const options = ['option1', 'option2', 'option3'] as const
       await payload.create({
+        overrideAccess: true,
         collection: 'pages',
         data: {
           title: `Select ${i}`,
@@ -247,6 +266,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
         ['tagB', 'tagC', 'tagD'],
       ]
       await payload.create({
+        overrideAccess: true,
         collection: 'pages',
         data: {
           title: `SelectMany ${i}`,
@@ -259,6 +279,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
     for (let i = 0; i < 3; i++) {
       const radios = ['radio1', 'radio2', 'radio3'] as const
       await payload.create({
+        overrideAccess: true,
         collection: 'pages',
         data: {
           title: `Radio ${i}`,
@@ -270,6 +291,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
     // Seed pages with email field
     for (let i = 0; i < 3; i++) {
       await payload.create({
+        overrideAccess: true,
         collection: 'pages',
         data: {
           title: `Email ${i}`,
@@ -281,6 +303,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
     // Seed pages with textarea field
     for (let i = 0; i < 3; i++) {
       await payload.create({
+        overrideAccess: true,
         collection: 'pages',
         data: {
           title: `Textarea ${i}`,
@@ -292,6 +315,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
     // Seed pages with code field
     for (let i = 0; i < 3; i++) {
       await payload.create({
+        overrideAccess: true,
         collection: 'pages',
         data: {
           title: `Code ${i}`,
@@ -303,6 +327,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
     // Seed pages with point field
     for (let i = 0; i < 3; i++) {
       await payload.create({
+        overrideAccess: true,
         collection: 'pages',
         data: {
           title: `Point ${i}`,
@@ -314,6 +339,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
     // Seed pages with hasMany text field
     for (let i = 0; i < 3; i++) {
       await payload.create({
+        overrideAccess: true,
         collection: 'pages',
         data: {
           title: `TextMany ${i}`,
@@ -329,6 +355,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
     const mediaIds: (number | string)[] = []
     for (let i = 0; i < 3; i++) {
       const media = await payload.create({
+        overrideAccess: true,
         collection: mediaSlug,
         data: {
           alt: `Test Media ${i}`,
@@ -344,6 +371,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
     // Seed pages with upload field
     for (let i = 0; i < 3; i++) {
       await payload.create({
+        overrideAccess: true,
         collection: 'pages',
         data: {
           title: `Upload ${i}`,
@@ -356,6 +384,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
     if (posts[1]?.id) {
       for (let i = 0; i < 2; i++) {
         await payload.create({
+          overrideAccess: true,
           collection: 'pages',
           data: {
             title: `Monomorphic ${i}`,
@@ -369,6 +398,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
     if (posts[0]?.id && posts[1]?.id) {
       for (let i = 0; i < 5; i++) {
         await payload.create({
+          overrideAccess: true,
           collection: 'pages',
           data: {
             title: `Polymorphic ${i}`,
@@ -394,6 +424,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
     // Seed posts-exports-only collection
     for (let i = 0; i < 25; i++) {
       await payload.create({
+        overrideAccess: true,
         collection: postsExportsOnlySlug,
         data: {
           title: `Export Only Post ${i}`,
@@ -404,6 +435,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
     // Seed posts-imports-only collection
     for (let i = 0; i < 25; i++) {
       await payload.create({
+        overrideAccess: true,
         collection: postsImportsOnlySlug,
         data: {
           title: `Import Only Post ${i}`,
@@ -413,6 +445,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
 
     for (let i = 0; i < 25; i++) {
       await payload.create({
+        overrideAccess: true,
         collection: postsNoJobsQueueSlug,
         data: {
           title: `Post with no jobs queue active ${i}`,
@@ -422,6 +455,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
 
     for (let i = 0; i < 10; i++) {
       await payload.create({
+        overrideAccess: true,
         collection: 'posts-with-limits',
         data: {
           title: `Post with limit ${i}`,

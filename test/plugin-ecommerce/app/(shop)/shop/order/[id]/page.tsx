@@ -11,6 +11,7 @@ export const Page = async ({ params: paramsPromise }: { params: Promise<{ id: st
   const orderID = searchParams.id
 
   const order = await payload.findByID({
+    overrideAccess: true,
     collection: 'orders',
     id: orderID,
     depth: 2,

@@ -26,6 +26,7 @@ describe('@payloadcms/plugin-nested-docs', () => {
   describe('seed', () => {
     it('should populate two levels of breadcrumbs', async () => {
       const query = await payload.find({
+        overrideAccess: true,
         collection: 'pages',
         where: {
           slug: {
@@ -39,6 +40,7 @@ describe('@payloadcms/plugin-nested-docs', () => {
 
     it('should populate three levels of breadcrumbs', async () => {
       const query = await payload.find({
+        overrideAccess: true,
         collection: 'pages',
         where: {
           slug: {
@@ -58,6 +60,7 @@ describe('@payloadcms/plugin-nested-docs', () => {
     it('should update more than 10 (default limit) breadcrumbs', async () => {
       // create a parent doc
       const parentDoc = await payload.create({
+        overrideAccess: true,
         collection: 'pages',
         data: {
           title: '11 children',
@@ -68,6 +71,7 @@ describe('@payloadcms/plugin-nested-docs', () => {
       // create 11 children docs
       for (let i = 0; i < 11; i++) {
         await payload.create({
+          overrideAccess: true,
           collection: 'pages',
           data: {
             title: `Child ${i + 1}`,
@@ -79,6 +83,7 @@ describe('@payloadcms/plugin-nested-docs', () => {
       }
       // update parent doc
       await payload.update({
+        overrideAccess: true,
         collection: 'pages',
         id: parentDoc.id,
         data: {
@@ -90,6 +95,7 @@ describe('@payloadcms/plugin-nested-docs', () => {
 
       // read children docs
       const { docs } = await payload.find({
+        overrideAccess: true,
         collection: 'pages',
         limit: 0,
         where: {
@@ -113,6 +119,7 @@ describe('@payloadcms/plugin-nested-docs', () => {
 
     it('should return breadcrumbs as an array of objects', async () => {
       const parentDoc = await payload.create({
+        overrideAccess: true,
         collection: 'pages',
         data: {
           title: 'parent doc',
@@ -122,6 +129,7 @@ describe('@payloadcms/plugin-nested-docs', () => {
       })
 
       const childDoc = await payload.create({
+        overrideAccess: true,
         collection: 'pages',
         data: {
           title: 'child doc',
@@ -143,6 +151,7 @@ describe('@payloadcms/plugin-nested-docs', () => {
 
     it('should update child doc breadcrumb without affecting any other data', async () => {
       const parentDoc = await payload.create({
+        overrideAccess: true,
         collection: 'pages',
         data: {
           title: 'parent doc',
@@ -151,6 +160,7 @@ describe('@payloadcms/plugin-nested-docs', () => {
       })
 
       const childDoc = await payload.create({
+        overrideAccess: true,
         collection: 'pages',
         data: {
           title: 'child doc',
@@ -161,6 +171,7 @@ describe('@payloadcms/plugin-nested-docs', () => {
       })
 
       await payload.update({
+        overrideAccess: true,
         collection: 'pages',
         id: parentDoc.id,
         data: {
@@ -172,6 +183,7 @@ describe('@payloadcms/plugin-nested-docs', () => {
 
       const updatedChild = await payload
         .find({
+          overrideAccess: true,
           collection: 'pages',
           where: {
             id: {
@@ -199,7 +211,7 @@ describe('@payloadcms/plugin-nested-docs', () => {
     afterEach(async () => {
       // Clean up in reverse order (children before parents)
       for (const id of [...createdPageIDs].reverse()) {
-        await payload.delete({ collection: 'pages', id })
+        await payload.delete({ overrideAccess: true, collection: 'pages', id })
       }
       createdPageIDs.length = 0
     })
@@ -207,6 +219,7 @@ describe('@payloadcms/plugin-nested-docs', () => {
     it('should preserve published version of child when parent is saved and child has unpublished draft', async () => {
       // Step 1: Create parent page and publish it
       const parentDoc = await payload.create({
+        overrideAccess: true,
         collection: 'pages',
         data: {
           title: 'Version Parent',
@@ -218,6 +231,7 @@ describe('@payloadcms/plugin-nested-docs', () => {
 
       // Step 2: Create child page and publish it
       const childDoc = await payload.create({
+        overrideAccess: true,
         collection: 'pages',
         data: {
           title: 'Version Child',
@@ -230,6 +244,7 @@ describe('@payloadcms/plugin-nested-docs', () => {
 
       // Verify initial published state
       const initialPublished = await payload.findByID({
+        overrideAccess: true,
         id: childDoc.id,
         collection: 'pages',
         draft: false,
@@ -239,6 +254,7 @@ describe('@payloadcms/plugin-nested-docs', () => {
 
       // Step 3: Make unpublished changes to child (creates a draft version)
       await payload.update({
+        overrideAccess: true,
         id: childDoc.id,
         collection: 'pages',
         data: {
@@ -249,6 +265,7 @@ describe('@payloadcms/plugin-nested-docs', () => {
 
       // Step 4: Re-publish the parent (triggers resaveChildren)
       await payload.update({
+        overrideAccess: true,
         id: parentDoc.id,
         collection: 'pages',
         data: {
@@ -260,6 +277,7 @@ describe('@payloadcms/plugin-nested-docs', () => {
 
       // Step 5: Verify the child's published version is still accessible
       const publishedChild = await payload.findByID({
+        overrideAccess: true,
         id: childDoc.id,
         collection: 'pages',
         draft: false,
@@ -272,6 +290,7 @@ describe('@payloadcms/plugin-nested-docs', () => {
 
       // Step 6: Verify the draft version is also still accessible
       const draftChild = await payload.findByID({
+        overrideAccess: true,
         id: childDoc.id,
         collection: 'pages',
         draft: true,
@@ -283,6 +302,7 @@ describe('@payloadcms/plugin-nested-docs', () => {
 
     it('should update breadcrumbs for draft-only children when parent is saved', async () => {
       const parentDoc = await payload.create({
+        overrideAccess: true,
         collection: 'pages',
         data: {
           title: 'Draft Parent',
@@ -294,6 +314,7 @@ describe('@payloadcms/plugin-nested-docs', () => {
 
       // Create a child that is never published (draft-only)
       const draftChild = await payload.create({
+        overrideAccess: true,
         collection: 'pages',
         data: {
           title: 'Draft Only Child',
@@ -308,6 +329,7 @@ describe('@payloadcms/plugin-nested-docs', () => {
 
       // Update the parent
       await payload.update({
+        overrideAccess: true,
         id: parentDoc.id,
         collection: 'pages',
         data: {
@@ -319,6 +341,7 @@ describe('@payloadcms/plugin-nested-docs', () => {
 
       // Draft-only child should have updated breadcrumbs
       const updatedDraftChild = await payload.findByID({
+        overrideAccess: true,
         id: draftChild.id,
         collection: 'pages',
         draft: true,
@@ -330,6 +353,7 @@ describe('@payloadcms/plugin-nested-docs', () => {
 
     it('should update breadcrumbs for both published and draft versions when parent changes', async () => {
       const parent = await payload.create({
+        overrideAccess: true,
         collection: 'pages',
         data: {
           title: 'Breadcrumb Parent',
@@ -340,6 +364,7 @@ describe('@payloadcms/plugin-nested-docs', () => {
       createdPageIDs.push(parent.id)
 
       const child = await payload.create({
+        overrideAccess: true,
         collection: 'pages',
         data: {
           title: 'Breadcrumb Child',
@@ -352,6 +377,7 @@ describe('@payloadcms/plugin-nested-docs', () => {
 
       // Create draft edit on child
       await payload.update({
+        overrideAccess: true,
         id: child.id,
         collection: 'pages',
         data: {
@@ -362,6 +388,7 @@ describe('@payloadcms/plugin-nested-docs', () => {
 
       // Update parent slug
       await payload.update({
+        overrideAccess: true,
         id: parent.id,
         collection: 'pages',
         data: {
@@ -372,6 +399,7 @@ describe('@payloadcms/plugin-nested-docs', () => {
 
       // Published child has updated breadcrumbs and is accessible
       const published = await payload.findByID({
+        overrideAccess: true,
         id: child.id,
         collection: 'pages',
         draft: false,
@@ -382,6 +410,7 @@ describe('@payloadcms/plugin-nested-docs', () => {
 
       // Draft child also has updated breadcrumbs
       const draft = await payload.findByID({
+        overrideAccess: true,
         id: child.id,
         collection: 'pages',
         draft: true,
@@ -396,6 +425,7 @@ describe('@payloadcms/plugin-nested-docs', () => {
   describe('scheduled publish', () => {
     it('should allow scheduled publish on a collection with a nested-docs breadcrumbs field', async () => {
       const draft = await payload.create({
+        overrideAccess: true,
         collection: 'pages',
         data: {
           title: 'Scheduled Page',
@@ -409,6 +439,7 @@ describe('@payloadcms/plugin-nested-docs', () => {
       const currentDate = new Date()
 
       await payload.jobs.queue({
+        overrideAccess: true,
         input: {
           doc: {
             relationTo: 'pages',
@@ -426,9 +457,10 @@ describe('@payloadcms/plugin-nested-docs', () => {
 
       await wait(4000)
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       const retrieved = await payload.findByID({
+        overrideAccess: true,
         id: draft.id,
         collection: 'pages',
         draft: false,
@@ -436,7 +468,7 @@ describe('@payloadcms/plugin-nested-docs', () => {
 
       expect(retrieved._status).toBe('published')
 
-      await payload.delete({ collection: 'pages', id: draft.id })
+      await payload.delete({ overrideAccess: true, collection: 'pages', id: draft.id })
     })
   })
 
@@ -470,12 +502,14 @@ describe('@payloadcms/plugin-nested-docs', () => {
 
     it('should allow custom breadcrumb and parent slugs', async () => {
       const parent = await payload.create({
+        overrideAccess: true,
         collection: 'categories',
         data: {
           name: 'parent',
         },
       })
       const child = await payload.create({
+        overrideAccess: true,
         collection: 'categories',
         data: {
           name: 'child',
@@ -483,6 +517,7 @@ describe('@payloadcms/plugin-nested-docs', () => {
         },
       })
       const grandchild = await payload.create({
+        overrideAccess: true,
         collection: 'categories',
         data: {
           name: 'grandchild',

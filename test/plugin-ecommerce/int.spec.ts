@@ -63,6 +63,7 @@ describe('ecommerce', () => {
 
   it('should add a variants collection', async () => {
     const variants = await payload.find({
+      overrideAccess: true,
       collection: 'variants',
       depth: 0,
       limit: 1,
@@ -303,12 +304,14 @@ describe('ecommerce', () => {
     beforeAll(async () => {
       // Get an existing product and variant from seed data
       const products = await payload.find({
+        overrideAccess: true,
         collection: 'products',
         limit: 1,
       })
       productId = products.docs[0]?.id as string
 
       const variants = await payload.find({
+        overrideAccess: true,
         collection: 'variants',
         limit: 1,
       })
@@ -764,12 +767,14 @@ describe('ecommerce', () => {
 
     beforeAll(async () => {
       const products = await payload.find({
+        overrideAccess: true,
         collection: 'products',
         limit: 1,
       })
       productId = products.docs[0]?.id as string
 
       const variants = await payload.find({
+        overrideAccess: true,
         collection: 'variants',
         limit: 1,
       })
@@ -785,6 +790,7 @@ describe('ecommerce', () => {
 
       // Create a user and log in
       const testUser = await payload.create({
+        overrideAccess: true,
         collection: 'users',
         data: {
           email: `merge-test-${Date.now()}@test.com`,
@@ -870,6 +876,7 @@ describe('ecommerce', () => {
 
       // Create a user and log in
       const testUser = await payload.create({
+        overrideAccess: true,
         collection: 'users',
         data: {
           email: `merge-combine-${Date.now()}@test.com`,
@@ -934,6 +941,7 @@ describe('ecommerce', () => {
       )
 
       const testUser = await payload.create({
+        overrideAccess: true,
         collection: 'users',
         data: {
           email: `merge-delete-${Date.now()}@test.com`,
@@ -1014,6 +1022,7 @@ describe('ecommerce', () => {
       const { cartId: guestCartId } = await createGuestCartWithItems(restClient, productId)
 
       const testUser = await payload.create({
+        overrideAccess: true,
         collection: 'users',
         data: {
           email: `merge-invalid-${Date.now()}@test.com`,
@@ -1057,6 +1066,7 @@ describe('ecommerce', () => {
 
     beforeAll(async () => {
       const products = await payload.find({
+        overrideAccess: true,
         collection: 'products',
         limit: 1,
       })
@@ -1065,6 +1075,7 @@ describe('ecommerce', () => {
 
     it('should allow authenticated users to access their cart without secret', async () => {
       const testUser = await payload.create({
+        overrideAccess: true,
         collection: 'users',
         data: {
           email: `auth-cart-${Date.now()}@test.com`,
@@ -1101,6 +1112,7 @@ describe('ecommerce', () => {
 
     it('should allow authenticated users to add items without secret', async () => {
       const testUser = await payload.create({
+        overrideAccess: true,
         collection: 'users',
         data: {
           email: `auth-add-${Date.now()}@test.com`,
@@ -1143,6 +1155,7 @@ describe('ecommerce', () => {
 
     it('should not generate secret for authenticated user carts', async () => {
       const testUser = await payload.create({
+        overrideAccess: true,
         collection: 'users',
         data: {
           email: `auth-nosecret-${Date.now()}@test.com`,
@@ -1178,6 +1191,7 @@ describe('ecommerce', () => {
 
     beforeAll(async () => {
       const products = await payload.find({
+        overrideAccess: true,
         collection: 'products',
         limit: 1,
       })
@@ -1193,6 +1207,7 @@ describe('ecommerce', () => {
 
       // Create a user
       const testUser = await payload.create({
+        overrideAccess: true,
         collection: 'users',
         data: {
           email: `transfer-${Date.now()}@test.com`,

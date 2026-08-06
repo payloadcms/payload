@@ -20,6 +20,7 @@ describe('@payloadcms/plugin-redirects', () => {
     ;({ payload } = await initPayloadInt(dirname))
 
     page = await payload.create({
+      overrideAccess: true,
       collection: 'pages',
       data: {
         title: 'Test',
@@ -33,6 +34,7 @@ describe('@payloadcms/plugin-redirects', () => {
 
   it('should add a redirects collection', async () => {
     const redirect = await payload.find({
+      overrideAccess: true,
       collection: 'redirects',
       depth: 0,
       limit: 1,
@@ -43,6 +45,7 @@ describe('@payloadcms/plugin-redirects', () => {
 
   it('should add a redirect with to internal page', async () => {
     const redirect = await payload.create({
+      overrideAccess: true,
       collection: 'redirects',
       data: {
         from: '/test',
@@ -64,6 +67,7 @@ describe('@payloadcms/plugin-redirects', () => {
 
   it('should add a redirect with to custom url', async () => {
     const redirect = await payload.create({
+      overrideAccess: true,
       collection: 'redirects',
       data: {
         from: '/test2',

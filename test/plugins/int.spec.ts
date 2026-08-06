@@ -25,6 +25,7 @@ describe('Collections - Plugins', () => {
 
   it('created pages collection', async () => {
     const { id } = await payload.create({
+      overrideAccess: true,
       collection: pagesSlug,
       data: {
         title: 'Test Page',
