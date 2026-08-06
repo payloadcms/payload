@@ -78,18 +78,14 @@ test.describe('Form State', () => {
     await expect(page.locator('#field-title')).toBeDisabled()
   })
 
-  test(
-    'should render the create form ready to edit',
-    { framework: 'tanstack-start' },
-    async () => {
-      await page.goto(postsUrl.create)
-      // No client-init disabled phase: the RSC payload arrives with form state
-      // already initialized, so the field is immediately enabled and editable.
-      await expect(page.locator('#field-title')).toBeEnabled()
-      await page.locator('#field-title').fill(title)
-      await expect(page.locator('#field-title')).toHaveValue(title)
-    },
-  )
+  test('should render the create form ready to edit', { framework: 'tanstack-start' }, async () => {
+    await page.goto(postsUrl.create)
+    // No client-init disabled phase: the RSC payload arrives with form state
+    // already initialized, so the field is immediately enabled and editable.
+    await expect(page.locator('#field-title')).toBeEnabled()
+    await page.locator('#field-title').fill(title)
+    await expect(page.locator('#field-title')).toHaveValue(title)
+  })
 
   test('should disable fields while processing', async () => {
     const doc = await createPost()
@@ -522,6 +518,142 @@ test.describe('Form State', () => {
     await titleField.fill('Test Title 2')
     await waitForAutoSaveToRunAndComplete(page)
     await expect(computedTitleField).toHaveValue('Test Title 2')
+  })
+
+  test('autosave - should not overwrite a field with a stale response after switching to another field mid-flight', async () => {
+    const doc = await payload.create({
+      collection: autosavePostsSlug,
+      data: {
+        title: 'Initial Title',
+      },
+    })
+
+    await page.goto(autosavePostsUrl.edit(doc.id))
+    await waitForFormReady(page)
+
+    const titleField = page.locator('#field-title')
+    const subtitleField = page.locator('#field-subtitle')
+
+    let releaseFirstRequest: () => void
+    const firstRequestReleased = new Promise<void>((resolve) => {
+      releaseFirstRequest = resolve
+    })
+
+    let resolveFirstRequestHandled: () => void
+    const firstRequestHandled = new Promise<void>((resolve) => {
+      resolveFirstRequestHandled = resolve
+    })
+
+    let patchRequestCount = 0
+
+    const isAutosaveRequest = (url: URL) => url.pathname.endsWith(`/${autosavePostsSlug}/${doc.id}`)
+
+    await page.route(isAutosaveRequest, async (route) => {
+      if (route.request().method() !== 'PATCH') {
+        await route.continue()
+        return
+      }
+
+      patchRequestCount += 1
+
+      // Hold the first autosave request open, simulating a slow round-trip. This lets
+      // us keep editing the form (moving to a different field) while it is still in
+      // flight, and later resolve it with the stale, partially-typed value it was sent
+      // with. Autosave requests are queued and sent strictly one at a time, so a second
+      // request can only be dispatched (and land here) once the first one's response has
+      // already been merged into form state - at which point we hold it forever. This
+      // isolates the effect of the first (stale) response's merge from any subsequent,
+      // corrective autosave that would otherwise overwrite it with the fresher value and
+      // mask the bug.
+      if (patchRequestCount === 1) {
+        await firstRequestReleased
+        await route.continue()
+        // Signal that this route has already been continued, so the test knows it's
+        // safe to unroute without racing Playwright's own auto-continue-on-unroute.
+        resolveFirstRequestHandled()
+        return
+      }
+
+      await new Promise<void>(() => {
+        // Never resolves - intentionally holds all subsequent autosave requests forever.
+      })
+    })
+
+    // Type a partial value into the title field. Once the debounce elapses, this
+    // fires the first (held) autosave request with the incomplete text "Hel".
+    await titleField.fill('Hel')
+
+    await expect.poll(() => patchRequestCount).toBe(1)
+
+    // Finish typing in the title field, then immediately move to another field and
+    // keep typing - all while the first autosave request for "Hel" is still pending.
+    await titleField.pressSequentially('lo')
+    await subtitleField.fill('World')
+
+    // Now let the stale first request resolve. Before the fix, this reverted the
+    // title field back to "Hel" because switching to `subtitle` had already cleared
+    // `title`'s modified protection.
+    releaseFirstRequest()
+    await firstRequestHandled
+
+    // Wait for the second (corrective) autosave request to be dispatched and held.
+    // Since requests are processed strictly one at a time, reaching this point
+    // guarantees the first response has already been merged into form state.
+    await expect.poll(() => patchRequestCount).toBe(2)
+
+    await expect(titleField).toHaveValue('Hello')
+    await expect(subtitleField).toHaveValue('World')
+
+    await page.unroute(isAutosaveRequest)
+  })
+
+  test('autosave - should not remount an open relationship list drawer when an unmodified field is merged', async () => {
+    const relatedDoc = await payload.create({
+      collection: autosavePostsSlug,
+      data: {
+        title: 'Related Post',
+      },
+    })
+
+    const doc = await payload.create({
+      collection: autosavePostsSlug,
+      data: {
+        title: 'Initial Title',
+        // The relationship field must already hold a value for this to reproduce the bug: an
+        // empty/untouched value has nothing to get a new (but content-equal) reference on merge.
+        relatedPosts: [relatedDoc.id],
+      },
+    })
+
+    await page.goto(autosavePostsUrl.edit(doc.id))
+    await waitForFormReady(page)
+
+    // Open the relationship field's list drawer (appearance: 'drawer') and wait for it to load.
+    await page.locator('#field-relatedPosts').click()
+    const listDrawerContent = page.locator('.list-drawer .drawer__content')
+    await expect(listDrawerContent).toBeVisible()
+    await expect(listDrawerContent.locator('table tbody tr').first()).toBeVisible()
+
+    // Tag the currently-rendered drawer content so we can detect if it gets unmounted and
+    // replaced with a fresh element later - which is what a "remount" (the reported flicker)
+    // would look like, even if the drawer stays open and its content looks the same.
+    await listDrawerContent.evaluate((el) => {
+      el.setAttribute('data-test-remount-marker', 'still-here')
+    })
+
+    // Edit a field unrelated to the relationship field and let autosave run to completion.
+    // Before the fix, the relationship field's unmodified (but object/array-valued) value would
+    // get a brand new, content-identical reference on every accepted autosave merge, causing its
+    // list drawer to recompute its filter options and remount - even though nothing about the
+    // relationship field itself changed.
+    await page.locator('#field-title').fill('Updated Title')
+    await waitForAutoSaveToRunAndComplete(page)
+
+    await expect(listDrawerContent).toBeVisible()
+    await expect(listDrawerContent).toHaveAttribute('data-test-remount-marker', 'still-here')
+
+    await payload.delete({ collection: autosavePostsSlug, id: doc.id })
+    await payload.delete({ collection: autosavePostsSlug, id: relatedDoc.id })
   })
 
   test('array and block rows and maintain consistent row IDs across duplication', async () => {

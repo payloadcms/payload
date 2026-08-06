@@ -22,6 +22,13 @@ type Args = {
   acceptValues?: AcceptValues
   currentState?: FormState
   incomingState: FormState
+  /**
+   * The timestamp (from `Date.now()`) captured when the form state snapshot being merged was sent to the
+   * server. Fields that were locally modified _after_ this timestamp are never overwritten, even if
+   * `isModified` has since been cleared for them (e.g. because the user moved on to edit a different field
+   * while this request was still in flight).
+   */
+  requestSnapshotTakenAt?: number
 }
 
 /**
@@ -83,6 +90,7 @@ export const mergeServerFormState = ({
   acceptValues,
   currentState = {},
   incomingState,
+  requestSnapshotTakenAt,
 }: Args): FormState => {
   const newState = { ...currentState }
 
@@ -96,7 +104,17 @@ export const mergeServerFormState = ({
      * Otherwise:
      *   a. accept all values when explicitly requested, e.g. on submit
      *   b. only accept values for unmodified fields, e.g. on autosave
+     *
+     * For (b), `isModified` alone is not enough: it is cleared as soon as the user moves on to edit a
+     * _different_ field, even if this response corresponds to an older request sent before that field's
+     * latest local edit. To guard against that race, also confirm this field was not modified locally
+     * after this response's request was sent - otherwise this stale response would clobber the newer edit.
      */
+    const wasModifiedAfterThisRequestWasSent =
+      typeof requestSnapshotTakenAt === 'number' &&
+      typeof currentState[path]?.modifiedAt === 'number' &&
+      currentState[path].modifiedAt > requestSnapshotTakenAt
+
     let shouldAcceptValue =
       incomingField.addedByServer ||
       acceptValues === true ||
@@ -104,7 +122,8 @@ export const mergeServerFormState = ({
         acceptValues !== null &&
         // Note: Must be explicitly `false`, allow `null` or `undefined` to mean true
         acceptValues.overrideLocalChanges === false &&
-        !currentState[path]?.isModified)
+        !currentState[path]?.isModified &&
+        !wasModifiedAfterThisRequestWasSent)
 
     /**
      * For array row fields, verify the row IDs match at the given index before accepting
@@ -138,6 +157,31 @@ export const mergeServerFormState = ({
        */
       const { initialValue, value, ...rest } = incomingField
       sanitizedIncomingField = rest
+    } else if (
+      currentState[path] &&
+      dequal(currentState[path].value, incomingField.value) &&
+      dequal(currentState[path].initialValue, incomingField.initialValue)
+    ) {
+      /**
+       * The incoming value is content-identical to the current one, but the server always sends a freshly
+       * (de)serialized object/array - a new reference even when nothing changed. Preserve the existing
+       * reference instead of swapping in the equal-but-different one. Otherwise, consumers that memoize
+       * on this value's identity (e.g. a relationship/upload field's list drawer filter options) see it as
+       * "changed" on every autosave cycle and needlessly recompute or remount, even though the field itself
+       * was never touched.
+       *
+       * Only swap in the reference for keys that were actually present on the incoming field, so we don't
+       * introduce a `value`/`initialValue` key (set to `undefined`) where there wasn't one before.
+       */
+      sanitizedIncomingField = { ...incomingField }
+
+      if ('value' in incomingField) {
+        sanitizedIncomingField.value = currentState[path].value
+      }
+
+      if ('initialValue' in incomingField) {
+        sanitizedIncomingField.initialValue = currentState[path].initialValue
+      }
     }
 
     newState[path] = {

@@ -13,11 +13,24 @@ export const AutosavePostsCollection: CollectionConfig = {
       type: 'text',
     },
     {
+      name: 'subtitle',
+      type: 'text',
+    },
+    {
       name: 'computedTitle',
       type: 'text',
       hooks: {
         beforeChange: [({ data }) => data?.title],
       },
+    },
+    {
+      name: 'relatedPosts',
+      type: 'relationship',
+      admin: {
+        appearance: 'drawer',
+      },
+      hasMany: true,
+      relationTo: autosavePostsSlug,
     },
   ],
   versions: {
