@@ -3613,6 +3613,7 @@ describe('@payloadcms/plugin-mcp', () => {
 
       it('should find documents in field-types collection', async ({ mcp }) => {
         const created = await (payload as any).create({
+          overrideAccess: true,
           collection: 'field-types',
           data: { textField: 'Findable doc', numberField: 7 },
         })
@@ -3639,6 +3640,7 @@ describe('@payloadcms/plugin-mcp', () => {
     describe('Update', () => {
       it('should update document with group field', async ({ mcp }) => {
         const created = await (payload as any).create({
+          overrideAccess: true,
           collection: 'field-types',
           data: {
             textField: 'Group update test',
@@ -3679,6 +3681,7 @@ describe('@payloadcms/plugin-mcp', () => {
         mcp,
       }) => {
         const created = await (payload as any).create({
+          overrideAccess: true,
           collection: 'field-types',
           data: {
             numberField: 1,
@@ -3710,6 +3713,7 @@ describe('@payloadcms/plugin-mcp', () => {
         mcp,
       }) => {
         const created = await (payload as any).create({
+          overrideAccess: true,
           collection: 'field-types',
           data: {
             textField: 'Collapsible update test',
@@ -3741,6 +3745,7 @@ describe('@payloadcms/plugin-mcp', () => {
 
       it('should update document with array field', async ({ mcp }) => {
         const created = await (payload as any).create({
+          overrideAccess: true,
           collection: 'field-types',
           data: {
             textField: 'Array update test',
