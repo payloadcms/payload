@@ -22,16 +22,21 @@ import { pathToFileURL } from 'url'
 import type { Workspace } from './lib/getWorkspace.js'
 
 import { assertBumpPreconditions } from './lib/assertBumpPreconditions.js'
+import { isVersionPublished } from './lib/getPackageRegistryVersions.js'
 import { getWorkspace } from './lib/getWorkspace.js'
 import { pushWithRebaseRetry } from './lib/pushWithRebaseRetry.js'
 
 type ReleaseBumpDeps = {
   env: NodeJS.ProcessEnv
+  isPublished: (args: { name: string; version: string }) => Promise<boolean>
   log: (message: string) => void
   readBranch: () => string
   run: (cmd: string) => void
   workspace: Pick<Workspace, 'bumpVersion' | 'version'>
 }
+
+/** Bellwether package for the already-published guard; every release publishes it. */
+const GUARD_PACKAGE = 'payload'
 
 export const runReleaseBump = async ({
   bump,
@@ -44,7 +49,7 @@ export const runReleaseBump = async ({
   dryRun: boolean
   preid: string
 }): Promise<string> => {
-  const { env, log, readBranch, run, workspace } = deps
+  const { env, isPublished, log, readBranch, run, workspace } = deps
 
   const validated = {
     branch: readBranch(),
@@ -58,6 +63,18 @@ export const runReleaseBump = async ({
 
   const nextVersion = await workspace.bumpVersion(validated.bump, { preid: validated.preid })
   const tag = `v${nextVersion}`
+
+  // The version is computed from main's committed version alone, so a committed
+  // version trailing the registry (another flow published in between) yields a
+  // version that is already on npm. Publishing would then skip every package as
+  // already-published and still mint a tag and draft release, leaving a tag that
+  // claims artifacts it did not build. Fail closed before any git write; a
+  // registry error throws here for the same reason.
+  if (await isPublished({ name: GUARD_PACKAGE, version: nextVersion })) {
+    throw new Error(
+      `${GUARD_PACKAGE}@${nextVersion} is already published. main's committed version (${validated.version}) trails the registry — reseed it to the latest published version and re-dispatch.`,
+    )
+  }
 
   log(`\n  ${validated.version} => ${nextVersion}  (tag ${tag})\n`)
 
@@ -90,6 +107,7 @@ async function main(): Promise<void> {
     bump,
     deps: {
       env: process.env,
+      isPublished: isVersionPublished,
       log: console.log,
       readBranch: () => execSync('git rev-parse --abbrev-ref HEAD', { encoding: 'utf8' }).trim(),
       run,
