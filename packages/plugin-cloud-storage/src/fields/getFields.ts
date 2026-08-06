@@ -179,6 +179,37 @@ export const getFields = ({
     }
 
     fields.push(sizesField)
+
+    /**
+     * `thumbnailURL` is derived from the `adminThumbnail` image size by Payload core, which falls
+     * back to the `/api/<collection>/file/<filename>` route. Point it at the adapter instead so a
+     * cloud-stored upload never references Payload's own file route.
+     */
+    const { adminThumbnail } = collection.upload
+
+    if (adapter && typeof adminThumbnail === 'string') {
+      const adminThumbnailSize = collection.upload.imageSizes.find(
+        (size) => size.name === adminThumbnail,
+      )
+
+      if (adminThumbnailSize) {
+        fields.push({
+          name: 'thumbnailURL',
+          type: 'text',
+          hooks: {
+            afterRead: [
+              getAfterReadHook({
+                adapter,
+                collection,
+                disablePayloadAccessControl,
+                generateFileURL,
+                size: adminThumbnailSize,
+              }),
+            ],
+          },
+        } as TextField)
+      }
+    }
   }
 
   // If prefix is enabled or alwaysInsertFields is true, save it to db
