@@ -666,7 +666,10 @@ test.describe('Import Export Plugin', () => {
     })
 
     test('should import a CSV file successfully', async () => {
-      test.skip(process.env.PAYLOAD_FRAMEWORK === 'tanstack-start', 'TanStack: known post-hydration RSC view remount detaches the view mid-interaction (see framework adapter notes); re-enable when the TanStack RSC hydration is fixed.')
+      test.skip(
+        process.env.PAYLOAD_FRAMEWORK === 'tanstack-start',
+        'TanStack: known post-hydration RSC view remount detaches the view mid-interaction (see framework adapter notes); re-enable when the TanStack RSC hydration is fixed.',
+      )
       const csvContent =
         'title,excerpt\n"E2E Import Test 1","Test excerpt 1"\n"E2E Import Test 2","Test excerpt 2"'
       const csvPath = path.join(__dirname, 'uploads', 'e2e-test-import.csv')
@@ -704,7 +707,10 @@ test.describe('Import Export Plugin', () => {
     })
 
     test('should import a JSON file successfully', async () => {
-      test.skip(process.env.PAYLOAD_FRAMEWORK === 'tanstack-start', 'TanStack: known post-hydration RSC view remount detaches the view mid-interaction (see framework adapter notes); re-enable when the TanStack RSC hydration is fixed.')
+      test.skip(
+        process.env.PAYLOAD_FRAMEWORK === 'tanstack-start',
+        'TanStack: known post-hydration RSC view remount detaches the view mid-interaction (see framework adapter notes); re-enable when the TanStack RSC hydration is fixed.',
+      )
       const jsonContent = JSON.stringify([
         { excerpt: 'JSON excerpt 1', title: 'E2E JSON Import 1' },
         { excerpt: 'JSON excerpt 2', title: 'E2E JSON Import 2' },
@@ -824,9 +830,12 @@ test.describe('Import Export Plugin', () => {
       // one-shot native event with no auto-retry.
       await expect(async () => {
         await page.setInputFiles('input[type="file"]', csvPath)
-        await expect(page.locator('#field-filemanager-filename')).toHaveValue('e2e-update-test.csv', {
-          timeout: 2000,
-        })
+        await expect(page.locator('#field-filemanager-filename')).toHaveValue(
+          'e2e-update-test.csv',
+          {
+            timeout: 2000,
+          },
+        )
       }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
 
       const collectionField = page.locator('#field-collectionSlug')
@@ -858,7 +867,10 @@ test.describe('Import Export Plugin', () => {
     })
 
     test('should import documents as published by default', async () => {
-      test.skip(process.env.PAYLOAD_FRAMEWORK === 'tanstack-start', 'TanStack: known post-hydration RSC view remount detaches the view mid-interaction (see framework adapter notes); re-enable when the TanStack RSC hydration is fixed.')
+      test.skip(
+        process.env.PAYLOAD_FRAMEWORK === 'tanstack-start',
+        'TanStack: known post-hydration RSC view remount detaches the view mid-interaction (see framework adapter notes); re-enable when the TanStack RSC hydration is fixed.',
+      )
       const csvContent =
         'title,excerpt\n"E2E Published Status Test 1","Test excerpt 1"\n"E2E Published Status Test 2","Test excerpt 2"'
       const csvPath = path.join(__dirname, 'uploads', 'e2e-published-status-test.csv')
@@ -902,7 +914,10 @@ test.describe('Import Export Plugin', () => {
     })
 
     test('should respect explicit _status column values in CSV', async () => {
-      test.skip(process.env.PAYLOAD_FRAMEWORK === 'tanstack-start', 'TanStack: known post-hydration RSC view remount detaches the view mid-interaction (see framework adapter notes); re-enable when the TanStack RSC hydration is fixed.')
+      test.skip(
+        process.env.PAYLOAD_FRAMEWORK === 'tanstack-start',
+        'TanStack: known post-hydration RSC view remount detaches the view mid-interaction (see framework adapter notes); re-enable when the TanStack RSC hydration is fixed.',
+      )
       const csvContent =
         'title,excerpt,_status\n"E2E Explicit Draft Test","Draft excerpt","draft"\n"E2E Explicit Published Test","Published excerpt","published"'
       const csvPath = path.join(__dirname, 'uploads', 'e2e-explicit-status-test.csv')
@@ -1074,11 +1089,154 @@ test.describe('Import Export Plugin', () => {
         }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
       })
     })
+
+    test.describe('Relationship Preview', () => {
+      const relationshipBaseClass = 'import-preview-relationship'
+
+      // The preview renders the file as-is without populating relationships, so these
+      // IDs never need to exist — nothing here reaches the database.
+      const uploadPreviewFile = async ({
+        docs,
+        name,
+      }: {
+        docs: Record<string, unknown>[]
+        name: string
+      }) => {
+        await page.goto(importsURL.create)
+        await expect(page.locator('.collection-edit')).toBeVisible()
+
+        const collectionField = page.locator('#field-collectionSlug')
+        await collectionField.locator('.rs__control').click()
+        await getSelectMenu({ page }).locator('.rs__option:text-is("Pages")').click()
+
+        await page.locator('input[type="file"]').setInputFiles({
+          name,
+          buffer: Buffer.from(JSON.stringify(docs)),
+          mimeType: 'application/json',
+        })
+
+        await expect(async () => {
+          await expect(page.locator('.import-preview table')).toBeVisible()
+        }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+      }
+
+      /** The first row's cell under the given column heading. */
+      const getPreviewCell = async ({ heading }: { heading: string }) => {
+        const previewTable = page.locator('.import-preview table')
+        const headings = await previewTable.locator('thead th').allTextContents()
+        const columnIndex = headings.findIndex((text) => text.trim() === heading)
+
+        expect(columnIndex).toBeGreaterThan(-1)
+
+        return previewTable.locator('tbody tr').first().locator('td').nth(columnIndex)
+      }
+
+      test('should group polymorphic relationship values by collection', async () => {
+        await uploadPreviewFile({
+          docs: [
+            {
+              title: 'Polymorphic Preview',
+              hasManyPolymorphic: [
+                { relationTo: 'users', value: 'preview-user-1' },
+                { relationTo: 'posts', value: 'preview-post-1' },
+              ],
+            },
+          ],
+          name: 'polymorphic-preview.json',
+        })
+
+        const cell = await getPreviewCell({ heading: 'Has Many Polymorphic' })
+        const groups = cell.locator(`.${relationshipBaseClass}__group`)
+
+        await expect(groups).toHaveCount(2)
+        await expect(groups.nth(0).locator(`.${relationshipBaseClass}__collection`)).toHaveText(
+          'Users',
+        )
+        await expect(groups.nth(0).locator(`.${relationshipBaseClass}__values`)).toHaveText(
+          'preview-user-1',
+        )
+        await expect(groups.nth(1).locator(`.${relationshipBaseClass}__collection`)).toHaveText(
+          'Posts',
+        )
+        await expect(groups.nth(1).locator(`.${relationshipBaseClass}__values`)).toHaveText(
+          'preview-post-1',
+        )
+      })
+
+      test('should not label the collection for monomorphic relationship values', async () => {
+        await uploadPreviewFile({
+          docs: [
+            {
+              title: 'Monomorphic Preview',
+              hasManyMonomorphic: ['preview-post-1', 'preview-post-2'],
+            },
+          ],
+          name: 'monomorphic-preview.json',
+        })
+
+        const cell = await getPreviewCell({ heading: 'Has Many Monomorphic' })
+
+        // The column heading already names the only collection this field can target
+        await expect(cell.locator(`.${relationshipBaseClass}__collection`)).toHaveCount(0)
+        await expect(cell.locator(`.${relationshipBaseClass}__values`)).toHaveText(
+          'preview-post-1, preview-post-2',
+        )
+      })
+
+      test('should show the document title for populated relationship values', async () => {
+        await uploadPreviewFile({
+          docs: [
+            {
+              title: 'Populated Preview',
+              hasManyMonomorphic: [{ id: 'preview-post-1', title: 'Populated Post Title' }],
+            },
+          ],
+          name: 'populated-relationship-preview.json',
+        })
+
+        const cell = await getPreviewCell({ heading: 'Has Many Monomorphic' })
+
+        await expect(cell.locator(`.${relationshipBaseClass}__values`)).toHaveText(
+          'Populated Post Title',
+        )
+      })
+
+      test('should collapse relationship values past the third into a count', async () => {
+        await uploadPreviewFile({
+          docs: [
+            {
+              title: 'Overflow Preview',
+              hasManyMonomorphic: [
+                'preview-post-1',
+                'preview-post-2',
+                'preview-post-3',
+                'preview-post-4',
+                'preview-post-5',
+              ],
+            },
+          ],
+          name: 'overflow-relationship-preview.json',
+        })
+
+        const cell = await getPreviewCell({ heading: 'Has Many Monomorphic' })
+
+        await expect(cell.locator(`.${relationshipBaseClass}__values`)).toContainText(
+          'preview-post-1, preview-post-2, preview-post-3',
+        )
+        await expect(cell.locator(`.${relationshipBaseClass}__values`)).not.toContainText(
+          'preview-post-4',
+        )
+        await expect(cell.locator(`.${relationshipBaseClass}__more`)).toHaveText('and 2 more')
+      })
+    })
   })
 
   test.describe('S3 Storage', () => {
     test('should import CSV file stored in S3 via jobs queue', async () => {
-      test.skip(process.env.PAYLOAD_FRAMEWORK === 'tanstack-start', 'TanStack: known post-hydration RSC view remount detaches the view mid-interaction (see framework adapter notes); re-enable when the TanStack RSC hydration is fixed.')
+      test.skip(
+        process.env.PAYLOAD_FRAMEWORK === 'tanstack-start',
+        'TanStack: known post-hydration RSC view remount detaches the view mid-interaction (see framework adapter notes); re-enable when the TanStack RSC hydration is fixed.',
+      )
       const uniqueId = Date.now()
       const csvFilename = `s3-e2e-import-${uniqueId}.csv`
       const csvPath = path.join(__dirname, 'uploads', csvFilename)
@@ -1672,7 +1830,10 @@ test.describe('Import Export Plugin', () => {
     })
 
     test('should import a CSV with foreign column headers through the admin UI', async () => {
-      test.skip(process.env.PAYLOAD_FRAMEWORK === 'tanstack-start', 'TanStack: known post-hydration RSC view remount detaches the view mid-interaction (see framework adapter notes); re-enable when the TanStack RSC hydration is fixed.')
+      test.skip(
+        process.env.PAYLOAD_FRAMEWORK === 'tanstack-start',
+        'TanStack: known post-hydration RSC view remount detaches the view mid-interaction (see framework adapter notes); re-enable when the TanStack RSC hydration is fixed.',
+      )
       const csvContent =
         '"Post Title","Summary","View Count"\n' +
         '"E2E Foreign A","e2e summary a","11"\n' +
