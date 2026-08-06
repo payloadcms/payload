@@ -432,6 +432,7 @@ export const slTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Prepišite obstoječe podatke polja',
     pageNotFound: 'Stran ni najdena',
     password: 'Geslo',
+    pasteBelow: 'Prilepite spodaj',
     pasteField: 'Prilepi polje',
     pasteRow: 'Prilepi vrstico',
     payloadSettings: 'Nastavitve Payloada',
@@ -446,6 +447,7 @@ export const slTranslations: DefaultTranslationsObject = {
     reloadDocument: 'Osveži dokument',
     remove: 'Odstrani',
     rename: 'Preimenuj',
+    replaceRow: 'Zamenjaj vrstico',
     reset: 'Ponastavi',
     resetPreferences: 'Ponastavi nastavitve',
     resetPreferencesDescription: 'To bo ponastavilo vse vaše nastavitve na privzete vrednosti.',
@@ -568,6 +570,7 @@ export const slTranslations: DefaultTranslationsObject = {
     addFile: 'Dodaj datoteko',
     addFiles: 'Dodaj datoteke',
     bulkUpload: 'Množično nalaganje',
+    copyLinkToFile: 'Kopiraj povezavo do datoteke',
     crop: 'Obreži',
     cropToolDescription:
       'Povlecite kote izbranega območja, narišite novo območje ali prilagodite vrednosti spodaj.',

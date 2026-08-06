@@ -439,6 +439,7 @@ export const huTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Írja felül a meglévő mezőadatokat',
     pageNotFound: 'Az oldal nem található',
     password: 'Jelszó',
+    pasteBelow: 'Illessze be alább',
     pasteField: 'Mező beillesztése',
     pasteRow: 'Sor beillesztése',
     payloadSettings: 'Payload beállítások',
@@ -453,6 +454,7 @@ export const huTranslations: DefaultTranslationsObject = {
     reloadDocument: 'Dokumentum újratöltése',
     remove: 'Törlés',
     rename: 'Átnevez',
+    replaceRow: 'Sor cseréje',
     reset: 'Visszaállítás',
     resetPreferences: 'Beállítások visszaállítása',
     resetPreferencesDescription:
@@ -576,6 +578,7 @@ export const huTranslations: DefaultTranslationsObject = {
     addFile: 'Fájl hozzáadása',
     addFiles: 'Fájlok hozzáadása',
     bulkUpload: 'Tömeges feltöltés',
+    copyLinkToFile: 'Hivatkozás másolása a fájlhoz',
     crop: 'Termés',
     cropToolDescription:
       'Húzza a kijelölt terület sarkait, rajzoljon új területet, vagy igazítsa a lentebb található értékeket.',

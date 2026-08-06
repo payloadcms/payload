@@ -426,6 +426,7 @@ export const faTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'بازنویسی اطلاعات موجود در فیلدها',
     pageNotFound: 'صفحه پیدا نشد',
     password: 'رمز عبور',
+    pasteBelow: 'در زیر قرار دهید',
     pasteField: 'جای‌گذاری در فیلد',
     pasteRow: 'جای‌گذاری در ردیف',
     payloadSettings: 'تنظیمات Payload',
@@ -440,6 +441,7 @@ export const faTranslations: DefaultTranslationsObject = {
     reloadDocument: 'بارگذاری مجدد سند',
     remove: 'حذف',
     rename: 'تغییر نام',
+    replaceRow: 'جایگزینی سطر',
     reset: 'بازنشانی',
     resetPreferences: 'بازنشانی تنظیمات شخصی',
     resetPreferencesDescription: 'این کار تمام تنظیمات شخصی شما را به حالت پیش‌فرض برمی‌گرداند.',
@@ -562,6 +564,7 @@ export const faTranslations: DefaultTranslationsObject = {
     addFile: 'افزودن فایل',
     addFiles: 'افزودن فایل‌ها',
     bulkUpload: 'آپلود گروهی',
+    copyLinkToFile: 'کپی پیوند به فایل',
     crop: 'برش',
     cropToolDescription:
       'گوشه‌های ناحیه انتخاب شده را بکشید، یک ناحیه جدید رسم کنید یا مقادیر زیر را تنظیم نمایید.',

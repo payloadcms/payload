@@ -430,6 +430,7 @@ export const csTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Přepsat existující data pole',
     pageNotFound: 'Stránka nenalezena',
     password: 'Heslo',
+    pasteBelow: 'Vložit níže',
     pasteField: 'Vložit pole',
     pasteRow: 'Vložit řádek',
     payloadSettings: 'Payload nastavení',
@@ -444,6 +445,7 @@ export const csTranslations: DefaultTranslationsObject = {
     reloadDocument: 'Obnovit dokument',
     remove: 'Odstranit',
     rename: 'Přejmenovat',
+    replaceRow: 'Nahradit řádek',
     reset: 'Resetovat',
     resetPreferences: 'Obnovit nastavení',
     resetPreferencesDescription: 'Toto obnoví všechna vaše nastavení na výchozí hodnoty.',
@@ -566,6 +568,7 @@ export const csTranslations: DefaultTranslationsObject = {
     addFile: 'Přidat soubor',
     addFiles: 'Přidat soubory',
     bulkUpload: 'Hromadné nahrání',
+    copyLinkToFile: 'Zkopírovat odkaz na soubor',
     crop: 'Ořez',
     cropToolDescription:
       'Přetáhněte rohy vybrané oblasti, nakreslete novou oblast nebo upravte níže uvedené hodnoty.',

@@ -431,6 +431,7 @@ export const isTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Yfirskrifa skráð gögn í reit',
     pageNotFound: 'Síða fannst ekki',
     password: 'Lykilorð',
+    pasteBelow: 'Límdu hér að neðan',
     pasteField: 'Líma svæði',
     pasteRow: 'Líma röð',
     payloadSettings: 'Payload stillingar',
@@ -445,6 +446,7 @@ export const isTranslations: DefaultTranslationsObject = {
     reloadDocument: 'Endurhlaða skjal',
     remove: 'Fjarlægja',
     rename: 'Endurnefna',
+    replaceRow: 'Raðir skipt út',
     reset: 'Endurstilla',
     resetPreferences: 'Endurstilla þínar stillingar',
     resetPreferencesDescription:
@@ -568,6 +570,7 @@ export const isTranslations: DefaultTranslationsObject = {
     addFile: 'Bæta við skrá',
     addFiles: 'Bæta við skrám',
     bulkUpload: 'Magn upphal',
+    copyLinkToFile: 'Afrita hlekk á skrá',
     crop: 'Skera',
     cropToolDescription:
       'Dragðu horn valda svæðisins, teiknaðu nýtt svæði eða stilltu gildin hér að neðan.',

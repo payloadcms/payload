@@ -434,6 +434,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Prepiši postojeće podatke iz polja',
     pageNotFound: 'Stranica nije pronađena',
     password: 'Lozinka',
+    pasteBelow: 'Nalepite ispod',
     pasteField: 'Zalepi polje',
     pasteRow: 'Zalepi red',
     payloadSettings: 'Payload postavke',
@@ -448,6 +449,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     reloadDocument: 'Ponovo učitaj dokument',
     remove: 'Ukloni',
     rename: 'Preimenuj',
+    replaceRow: 'Zameni red',
     reset: 'Ponovo postavi',
     resetPreferences: 'Poništi podešavanja',
     resetPreferencesDescription:
@@ -570,6 +572,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     addFile: 'Dodaj datoteku',
     addFiles: 'Dodaj Datoteke',
     bulkUpload: 'Masovno otpremanje',
+    copyLinkToFile: 'Kopiraj link ka fajlu',
     crop: 'Isecite sliku',
     cropToolDescription:
       'Prevucite uglove izabranog područja, nacrtajte novo područje ili prilagodite vrednosti ispod.',

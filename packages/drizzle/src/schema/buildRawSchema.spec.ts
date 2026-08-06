@@ -54,7 +54,7 @@ const createAdapter = (config: SanitizedConfig): DrizzleAdapter =>
 
 describe('buildRawSchema', () => {
   it('should create suffixed block tables for different schemas with the same slug', async () => {
-    const config = await sanitizeConfig({
+    const config = sanitizeConfig({
       collections: [
         {
           slug: 'pages',
@@ -116,7 +116,7 @@ describe('buildRawSchema', () => {
   it('should not create duplicate suffixed block tables for identical reused blocks under localized ancestors', async () => {
     const layoutBlocks = [createContainerBlock('container'), createContainerBlock('container50')]
 
-    const config = await sanitizeConfig({
+    const config = sanitizeConfig({
       blocks: [headlineBlock],
       collections: [
         {
@@ -169,7 +169,7 @@ describe('buildRawSchema', () => {
     // Base table name (61 chars) is under the limit, but `${base}_locales` (69) overflows it.
     const longSlug = `localized_collection_${'x'.repeat(40)}`
 
-    const config = await sanitizeConfig({
+    const config = sanitizeConfig({
       collections: [
         {
           slug: longSlug,
@@ -201,7 +201,7 @@ describe('buildRawSchema', () => {
   })
 
   it('should not throw for a localized field whose _locales companion table fits within 63 chars', async () => {
-    const config = await sanitizeConfig({
+    const config = sanitizeConfig({
       collections: [
         {
           slug: 'short_localized',

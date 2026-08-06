@@ -434,6 +434,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Pārrakstīt esošos datus',
     pageNotFound: 'Lapa nav atrasta',
     password: 'Parole',
+    pasteBelow: 'Ielīmēt zemāk',
     pasteField: 'Ielīmēt lauku',
     pasteRow: 'Ielīmēt rindu',
     payloadSettings: 'Payload iestatījumi',
@@ -448,6 +449,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     reloadDocument: 'Pārlādēt dokumentu',
     remove: 'Noņemt',
     rename: 'Pārdēvēt',
+    replaceRow: 'Aizstāt rindu',
     reset: 'Atiestatīt',
     resetPreferences: 'Atiestatīt iestatījumus',
     resetPreferencesDescription: 'Tas atjaunos visus jūsu iestatījumus uz noklusētajiem.',
@@ -568,6 +570,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     addFile: 'Pievienot failu',
     addFiles: 'Pievienot failus',
     bulkUpload: 'Masveida augšupielāde',
+    copyLinkToFile: 'Kopēt saiti uz failu',
     crop: 'Apgriezt',
     cropToolDescription:
       'Velciet atlasītā apgabala stūrus, uzzīmējiet jaunu apgabalu vai pielāgojiet vērtības zemāk.',

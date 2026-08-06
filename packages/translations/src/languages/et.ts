@@ -431,6 +431,7 @@ export const etTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Kirjuta olemasolevad välja andmed üle',
     pageNotFound: 'Lehte ei leitud',
     password: 'Parool',
+    pasteBelow: 'Kleebi allpool',
     pasteField: 'Kleebi väli',
     pasteRow: 'Kleebi rida',
     payloadSettings: 'Payload seaded',
@@ -445,6 +446,7 @@ export const etTranslations: DefaultTranslationsObject = {
     reloadDocument: 'Laadige dokument uuesti',
     remove: 'Eemalda',
     rename: 'Nimeta ümber',
+    replaceRow: 'Asenda rida',
     reset: 'Lähtesta',
     resetPreferences: 'Lähtesta eelistused',
     resetPreferencesDescription: 'See lähtestab kõik teie eelistused vaikeväärtustele.',
@@ -566,6 +568,7 @@ export const etTranslations: DefaultTranslationsObject = {
     addFile: 'Lisa fail',
     addFiles: 'Lisa failid',
     bulkUpload: 'Massiüleslaadimine',
+    copyLinkToFile: 'Kopeeri faili link',
     crop: 'Kärbi',
     cropToolDescription:
       'Lohista valitud ala nurki, joonista uus ala või kohanda väärtusi allpool.',

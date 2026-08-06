@@ -440,6 +440,7 @@ export const roTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Suprascrieți datele existente din câmp',
     pageNotFound: 'Pagina nu a fost găsită',
     password: 'Parola',
+    pasteBelow: 'Lipiți mai jos',
     pasteField: 'Lipește câmpul',
     pasteRow: 'Lipește rândul',
     payloadSettings: 'Setări de Payload',
@@ -454,6 +455,7 @@ export const roTranslations: DefaultTranslationsObject = {
     reloadDocument: 'Reîncarcă documentul',
     remove: 'Eliminați',
     rename: 'Redenumire',
+    replaceRow: 'Înlocuire rând',
     reset: 'Resetare',
     resetPreferences: 'Resetare preferințe',
     resetPreferencesDescription: 'Aceasta va reseta toate preferințele tale la setările implicite.',
@@ -576,6 +578,7 @@ export const roTranslations: DefaultTranslationsObject = {
     addFile: 'Adaugă fișier',
     addFiles: 'Adăugați fișiere',
     bulkUpload: 'Încărcare în masă',
+    copyLinkToFile: 'Copiați linkul către fișier',
     crop: 'Cultură',
     cropToolDescription:
       'Trageți colțurile zonei selectate, desenați o nouă zonă sau ajustați valorile de mai jos.',

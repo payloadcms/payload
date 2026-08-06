@@ -432,6 +432,7 @@ export const skTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Prepísať existujúce pole dát',
     pageNotFound: 'Stránka nenájdená',
     password: 'Heslo',
+    pasteBelow: 'Vložte nižšie',
     pasteField: 'Prilepiť pole',
     pasteRow: 'Prilepiť riadok',
     payloadSettings: 'Nastavenia dátového záznamu',
@@ -446,6 +447,7 @@ export const skTranslations: DefaultTranslationsObject = {
     reloadDocument: 'Obnoviť dokument',
     remove: 'Odstrániť',
     rename: 'Premenovať',
+    replaceRow: 'Nahradiť riadok',
     reset: 'Resetovať',
     resetPreferences: 'Obnoviť nastavenia',
     resetPreferencesDescription: 'Týmto sa všetky vaše nastavenia vrátia na predvolené hodnoty.',
@@ -567,6 +569,7 @@ export const skTranslations: DefaultTranslationsObject = {
     addFile: 'Pridať súbor',
     addFiles: 'Pridať súbory',
     bulkUpload: 'Hromadné nahranie',
+    copyLinkToFile: 'Kopírovať odkaz na súbor',
     crop: 'Orezať',
     cropToolDescription:
       'Potiahnite rohy vybranej oblasti, nakreslite novú oblasť alebo upravte hodnoty nižšie.',

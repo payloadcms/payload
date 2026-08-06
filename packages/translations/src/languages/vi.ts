@@ -436,6 +436,7 @@ export const viTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Ghi đè dữ liệu trường hiện tại',
     pageNotFound: 'Không tìm thấy trang',
     password: 'Mật khẩu',
+    pasteBelow: 'Dán bên dưới',
     pasteField: 'Dán trường',
     pasteRow: 'Dán dòng',
     payloadSettings: 'Cài đặt',
@@ -450,6 +451,7 @@ export const viTranslations: DefaultTranslationsObject = {
     reloadDocument: 'Tải lại tài liệu',
     remove: 'Xóa',
     rename: 'Đổi tên',
+    replaceRow: 'Thay thế hàng',
     reset: 'Đặt lại',
     resetPreferences: 'Đặt lại tuỳ chỉnh cá nhân',
     resetPreferencesDescription: 'Điều này sẽ đặt lại tất cả các tuỳ chỉnh của bạn về mặc định.',
@@ -571,6 +573,7 @@ export const viTranslations: DefaultTranslationsObject = {
     addFile: 'Thêm tập tin',
     addFiles: 'Thêm tệp',
     bulkUpload: 'Tải lên số lượng lớn',
+    copyLinkToFile: 'Sao chép liên kết đến tệp',
     crop: 'Cắt xén',
     cropToolDescription:
       'Kéo các góc của khu vực đã chọn, vẽ một khu vực mới hoặc điều chỉnh các giá trị dưới đây.',

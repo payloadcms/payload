@@ -436,6 +436,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     overwriteExistingData: '既存のフィールドデータを上書きする',
     pageNotFound: 'ページが見つかりません',
     password: 'パスワード',
+    pasteBelow: '以下に貼り付けてください',
     pasteField: 'フィールドを貼り付け',
     pasteRow: '行を貼り付け',
     payloadSettings: 'Payload 設定',
@@ -450,6 +451,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     reloadDocument: 'ドキュメントを再読み込みする',
     remove: '削除',
     rename: '名前を変更する',
+    replaceRow: '行を置換',
     reset: 'リセット',
     resetPreferences: '設定をリセット',
     resetPreferencesDescription: 'これにより、すべての設定がデフォルト設定にリセットされます。',
@@ -570,6 +572,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     addFile: 'ファイルを追加',
     addFiles: 'ファイルを追加する',
     bulkUpload: '一括アップロード',
+    copyLinkToFile: 'ファイルへのリンクをコピー',
     crop: 'クロップ',
     cropToolDescription:
       '選択したエリアのコーナーをドラッグしたり、新たなエリアを描画したり、下記の値を調整してください。',

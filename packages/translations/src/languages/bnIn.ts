@@ -439,6 +439,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'বিদ্যমান ফিল্ড ডেটা ওভাররাইট করুন',
     pageNotFound: 'পৃষ্ঠা পাওয়া যায়নি',
     password: 'পাসওয়ার্ড',
+    pasteBelow: 'নিচে পেস্ট করুন',
     pasteField: 'ফিল্ড পেস্ট করুন',
     pasteRow: 'সারি পেস্ট করুন',
     payloadSettings: 'পেলোড সেটিংস',
@@ -454,6 +455,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
     reloadDocument: 'নথি পুনরায় লোড করুন',
     remove: 'অপসারণ করুন',
     rename: 'নাম পরিবর্তন করুন',
+    replaceRow: 'সারি প্রতিস্থাপন করুন',
     reset: 'রিসেট করুন',
     resetPreferences: 'পছন্দগুলি রিসেট করুন',
     resetPreferencesDescription: 'এটি আপনার সমস্ত পছন্দগুলি তাদের ডিফল্ট সেটিংসে রিসেট করবে।',
@@ -578,6 +580,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
     addFile: 'ফাইল যোগ করুন',
     addFiles: 'ফাইলগুলি যোগ করুন',
     bulkUpload: 'বাল্ক আপলোড',
+    copyLinkToFile: 'ফাইলের লিঙ্ক অনুলিপি করুন',
     crop: 'ক্রপ করুন',
     cropToolDescription:
       'নির্বাচিত অঞ্চলের কোণগুলি টানুন, একটি নতুন অঞ্চল আঁকুন বা নিচের মানগুলি সামঞ্জস্য করুন।',

@@ -436,6 +436,7 @@ export const idTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Timpa data isian yang ada',
     pageNotFound: 'Halaman tidak ditemukan',
     password: 'Kata Sandi',
+    pasteBelow: 'Tempelkan di bawah',
     pasteField: 'Tempel Isian',
     pasteRow: 'Tempel Baris',
     payloadSettings: 'Pengaturan Payload',
@@ -450,6 +451,7 @@ export const idTranslations: DefaultTranslationsObject = {
     reloadDocument: 'Muat ulang dokumen',
     remove: 'Hapus',
     rename: 'Ganti Nama',
+    replaceRow: 'Ganti Baris',
     reset: 'Atur Ulang',
     resetPreferences: 'Atur Ulang Preferensi',
     resetPreferencesDescription:
@@ -574,6 +576,7 @@ export const idTranslations: DefaultTranslationsObject = {
     addFile: 'Tambah file',
     addFiles: 'Tambah file',
     bulkUpload: 'Unggah Massal',
+    copyLinkToFile: 'Salin tautan ke file',
     crop: 'Pangkas',
     cropToolDescription:
       'Seret sudut area yang dipilih, gambar area baru atau sesuaikan nilai di bawah ini.',

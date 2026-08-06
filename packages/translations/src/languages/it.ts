@@ -438,6 +438,7 @@ export const itTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Sovrascrivi i dati del campo esistente',
     pageNotFound: 'Pagina non trovata',
     password: 'Password',
+    pasteBelow: 'Incolla qui sotto',
     pasteField: 'Incolla campo',
     pasteRow: 'Incolla riga',
     payloadSettings: 'Impostazioni di Payload',
@@ -453,6 +454,7 @@ export const itTranslations: DefaultTranslationsObject = {
     reloadDocument: 'Ricarica documento',
     remove: 'Rimuovi',
     rename: 'Rinomina',
+    replaceRow: 'Sostituisci riga',
     reset: 'Ripristina',
     resetPreferences: 'Ripristina le preferenze',
     resetPreferencesDescription:
@@ -576,6 +578,7 @@ export const itTranslations: DefaultTranslationsObject = {
     addFile: 'Aggiungi file',
     addFiles: 'Aggiungi File',
     bulkUpload: 'Caricamento in Blocco',
+    copyLinkToFile: 'Copia link al file',
     crop: 'Raccolto',
     cropToolDescription:
       "Trascina gli angoli dell'area selezionata, disegna una nuova area o regola i valori qui sotto.",

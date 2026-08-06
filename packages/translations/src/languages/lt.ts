@@ -437,6 +437,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Perrašyti esamus lauko duomenis',
     pageNotFound: 'Puslapis nerastas',
     password: 'Slaptažodis',
+    pasteBelow: 'Įklijuokite žemiau',
     pasteField: 'Įklijuoti lauką',
     pasteRow: 'Įklijuoti eilutę',
     payloadSettings: 'Payload nustatymai',
@@ -451,6 +452,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     reloadDocument: 'Perkrauti dokumentą',
     remove: 'Pašalinti',
     rename: 'Pervadinti',
+    replaceRow: 'Pakeisti eilutę',
     reset: 'Atstatyti',
     resetPreferences: 'Atstatyti nuostatas',
     resetPreferencesDescription: 'Tai atstatys visas jūsų nuostatas į numatytąsias reikšmes.',
@@ -572,6 +574,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     addFile: 'Pridėti failą',
     addFiles: 'Pridėti failus',
     bulkUpload: 'Masinis įkėlimas',
+    copyLinkToFile: 'Kopijuoti nuorodą į failą',
     crop: 'Pasėlis',
     cropToolDescription:
       'Temkite pasirinktos srities kampus, nubrėžkite naują sritį arba koreguokite žemiau esančias reikšmes.',

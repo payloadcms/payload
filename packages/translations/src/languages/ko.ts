@@ -431,6 +431,7 @@ export const koTranslations: DefaultTranslationsObject = {
     overwriteExistingData: '기존 필드 데이터 덮어쓰기',
     pageNotFound: '페이지를 찾을 수 없음',
     password: '비밀번호',
+    pasteBelow: '아래에 붙여넣기',
     pasteField: '필드 붙여넣기',
     pasteRow: '행 붙여넣기',
     payloadSettings: 'Payload 설정',
@@ -446,6 +447,7 @@ export const koTranslations: DefaultTranslationsObject = {
     reloadDocument: '문서 다시 불러오기',
     remove: '제거',
     rename: '이름 변경',
+    replaceRow: '행 교체',
     reset: '초기화',
     resetPreferences: '기본 설정으로 재설정',
     resetPreferencesDescription: '이렇게 하면 모든 기본 설정이 기본값으로 재설정됩니다.',
@@ -567,6 +569,7 @@ export const koTranslations: DefaultTranslationsObject = {
     addFile: '파일 추가',
     addFiles: '파일 추가',
     bulkUpload: '일괄 업로드',
+    copyLinkToFile: '파일에 대한 링크 복사',
     crop: '자르기',
     cropToolDescription:
       '선택한 영역의 모퉁이를 드래그하거나 새로운 영역을 그리거나 아래의 값을 조정하세요.',

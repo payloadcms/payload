@@ -436,6 +436,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Overskriv eksisterende feltdata',
     pageNotFound: 'Siden ble ikke funnet',
     password: 'Passord',
+    pasteBelow: 'Lim inn nedenfor',
     pasteField: 'Lim inn felt',
     pasteRow: 'Lim inn rad',
     payloadSettings: 'Payload-innstillinger',
@@ -450,6 +451,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     reloadDocument: 'Last inn dokument',
     remove: 'Fjern',
     rename: 'Endre navn',
+    replaceRow: 'Erstatt rad',
     reset: 'Tilbakestill',
     resetPreferences: 'Tilbakestill preferanser',
     resetPreferencesDescription:
@@ -573,6 +575,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     addFile: 'Legg til fil',
     addFiles: 'Legg til filer',
     bulkUpload: 'Bulk opplasting',
+    copyLinkToFile: 'Kopier lenke til fil',
     crop: 'Beskjær',
     cropToolDescription:
       'Dra hjørnene av det valgte området, tegn et nytt område eller juster verdiene nedenfor.',

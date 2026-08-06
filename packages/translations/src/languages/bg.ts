@@ -434,6 +434,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Презапишете съществуващите данни в полето',
     pageNotFound: 'Страницата не беше открита',
     password: 'Парола',
+    pasteBelow: 'Поставете по-долу',
     pasteField: 'Постави поле',
     pasteRow: 'Постави ред',
     payloadSettings: 'Настройки на Payload',
@@ -448,6 +449,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     reloadDocument: 'Презареди документ',
     remove: 'Премахни',
     rename: 'Преименувайте',
+    replaceRow: 'Заменете ред',
     reset: 'Нулиране',
     resetPreferences: 'Нулиране на предпочитанията',
     resetPreferencesDescription:
@@ -570,6 +572,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     addFile: 'Добавяне на файл',
     addFiles: 'Добави файлове',
     bulkUpload: 'Масово Качване',
+    copyLinkToFile: 'Копиране на връзка към файла',
     crop: 'Изрязване',
     cropToolDescription:
       'Плъзни ъглите на избраната област, избери нова област или коригирай стойностите по-долу.',
