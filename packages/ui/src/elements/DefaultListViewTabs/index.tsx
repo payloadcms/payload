@@ -44,9 +44,13 @@ export const DefaultListViewTabs: React.FC<DefaultListViewTabsProps> = ({
 
     // Save preference for list vs hierarchy (not trash)
     if (newViewType === 'list' || newViewType === 'hierarchy') {
-      await setPreference(`collection-${collectionConfig.slug}`, {
-        listViewType: newViewType,
-      })
+      await setPreference(
+        `collection-${collectionConfig.slug}`,
+        {
+          listViewType: newViewType,
+        },
+        true,
+      )
     }
 
     let path: `/${string}` = `/collections/${collectionConfig.slug}`
