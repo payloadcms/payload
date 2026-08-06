@@ -38,6 +38,7 @@ export default buildConfigWithDefaults({
   maxDepth: 10,
   onInit: async (payload) => {
     await payload.create({
+      overrideAccess: true,
       collection: 'users',
       data: {
         email: devUser.email,

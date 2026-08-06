@@ -41,6 +41,7 @@ export const handleDeleted: HandleDeleted = async (args) => {
       const payloadQuery = await payload.find({
         collection: collectionSlug,
         limit: 1,
+        overrideAccess: true,
         pagination: false,
         where: {
           stripeID: {
@@ -69,6 +70,7 @@ export const handleDeleted: HandleDeleted = async (args) => {
           payload.delete({
             id: foundDoc.id,
             collection: collectionSlug,
+            overrideAccess: true,
           })
 
           // NOTE: the `afterDelete` hook will trigger, which will attempt to delete the document from Stripe and safely error out

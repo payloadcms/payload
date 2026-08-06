@@ -6,6 +6,7 @@ import { foldersSlug, menuItemsSlug, menuSlug, tenantsSlug, usersSlug } from '..
 export const seed = async (payload: Payload) => {
   // create tenants
   const blueDogTenant = await payload.create({
+    overrideAccess: true,
     collection: tenantsSlug,
     data: {
       name: 'Blue Dog',
@@ -13,6 +14,7 @@ export const seed = async (payload: Payload) => {
     },
   })
   const steelCatTenant = await payload.create({
+    overrideAccess: true,
     collection: tenantsSlug,
     data: {
       name: 'Steel Cat',
@@ -20,6 +22,7 @@ export const seed = async (payload: Payload) => {
     },
   })
   const anchorBarTenant = await payload.create({
+    overrideAccess: true,
     collection: tenantsSlug,
     data: {
       name: 'Anchor Bar',
@@ -28,6 +31,7 @@ export const seed = async (payload: Payload) => {
     },
   })
   const publicTenant = await payload.create({
+    overrideAccess: true,
     collection: tenantsSlug,
     data: {
       name: 'Public Tenant',
@@ -38,6 +42,7 @@ export const seed = async (payload: Payload) => {
 
   // Create folders for Blue Dog
   const blueDogDocumentsFolder = await payload.create({
+    overrideAccess: true,
     collection: foldersSlug,
     data: {
       name: 'Blue Dog Documents',
@@ -45,6 +50,7 @@ export const seed = async (payload: Payload) => {
     },
   })
   const blueDogArchivesFolder = await payload.create({
+    overrideAccess: true,
     collection: foldersSlug,
     data: {
       name: 'Blue Dog Archives',
@@ -52,6 +58,7 @@ export const seed = async (payload: Payload) => {
     },
   })
   const blueDogRecipesFolder = await payload.create({
+    overrideAccess: true,
     collection: foldersSlug,
     data: {
       name: 'Blue Dog Recipes',
@@ -62,6 +69,7 @@ export const seed = async (payload: Payload) => {
 
   // Create folders for Steel Cat
   const steelCatDocumentsFolder = await payload.create({
+    overrideAccess: true,
     collection: foldersSlug,
     data: {
       name: 'Steel Cat Documents',
@@ -69,6 +77,7 @@ export const seed = async (payload: Payload) => {
     },
   })
   const steelCatArchivesFolder = await payload.create({
+    overrideAccess: true,
     collection: foldersSlug,
     data: {
       name: 'Steel Cat Archives',
@@ -78,6 +87,7 @@ export const seed = async (payload: Payload) => {
 
   // Create folders for Anchor Bar
   const anchorBarFilesFolder = await payload.create({
+    overrideAccess: true,
     collection: foldersSlug,
     data: {
       name: 'Anchor Bar Files',
@@ -87,6 +97,7 @@ export const seed = async (payload: Payload) => {
 
   // Create blue dog menu items (some in folders, some at root)
   await payload.create({
+    overrideAccess: true,
     collection: menuItemsSlug,
     data: {
       name: 'Chorizo Con Queso and Chips',
@@ -95,6 +106,7 @@ export const seed = async (payload: Payload) => {
     },
   })
   await payload.create({
+    overrideAccess: true,
     collection: menuItemsSlug,
     data: {
       name: 'Garlic Parmesan Tots',
@@ -103,6 +115,7 @@ export const seed = async (payload: Payload) => {
     },
   })
   await payload.create({
+    overrideAccess: true,
     collection: menuItemsSlug,
     data: {
       name: 'Spicy Mac',
@@ -112,6 +125,7 @@ export const seed = async (payload: Payload) => {
   })
   // Menu items at root (no folder)
   await payload.create({
+    overrideAccess: true,
     collection: menuItemsSlug,
     data: {
       name: 'Veggie Wrap',
@@ -119,6 +133,7 @@ export const seed = async (payload: Payload) => {
     },
   })
   await payload.create({
+    overrideAccess: true,
     collection: menuItemsSlug,
     data: {
       name: 'House Salad',
@@ -126,6 +141,7 @@ export const seed = async (payload: Payload) => {
     },
   })
   await payload.create({
+    overrideAccess: true,
     collection: menuItemsSlug,
     data: {
       name: 'Draft Beer',
@@ -134,6 +150,7 @@ export const seed = async (payload: Payload) => {
   })
 
   await payload.create({
+    overrideAccess: true,
     collection: 'relationships',
     data: {
       title: 'Owned by blue dog',
@@ -142,6 +159,7 @@ export const seed = async (payload: Payload) => {
   })
 
   await payload.create({
+    overrideAccess: true,
     collection: 'relationships',
     data: {
       title: 'Owned by steelcat',
@@ -150,6 +168,7 @@ export const seed = async (payload: Payload) => {
   })
 
   await payload.create({
+    overrideAccess: true,
     collection: 'relationships',
     data: {
       title: 'Owned by bar with no ac',
@@ -158,6 +177,7 @@ export const seed = async (payload: Payload) => {
   })
 
   await payload.create({
+    overrideAccess: true,
     collection: 'relationships',
     data: {
       title: 'Owned by public tenant',
@@ -167,6 +187,7 @@ export const seed = async (payload: Payload) => {
 
   // Create steel cat menu items (in folders)
   await payload.create({
+    overrideAccess: true,
     collection: menuItemsSlug,
     data: {
       name: 'Pretzel Bites',
@@ -175,6 +196,7 @@ export const seed = async (payload: Payload) => {
     },
   })
   await payload.create({
+    overrideAccess: true,
     collection: menuItemsSlug,
     data: {
       name: 'Buffalo Chicken Dip',
@@ -183,6 +205,7 @@ export const seed = async (payload: Payload) => {
     },
   })
   await payload.create({
+    overrideAccess: true,
     collection: menuItemsSlug,
     data: {
       name: 'Pulled Pork Nachos',
@@ -193,6 +216,7 @@ export const seed = async (payload: Payload) => {
 
   // Create anchor bar menu items (in folders)
   await payload.create({
+    overrideAccess: true,
     collection: menuItemsSlug,
     data: {
       name: 'Peanuts',
@@ -203,6 +227,7 @@ export const seed = async (payload: Payload) => {
     locale: 'en',
   })
   await payload.create({
+    overrideAccess: true,
     collection: menuItemsSlug,
     data: {
       name: 'Pretzels',
@@ -213,6 +238,7 @@ export const seed = async (payload: Payload) => {
     locale: 'en',
   })
   await payload.create({
+    overrideAccess: true,
     collection: menuItemsSlug,
     data: {
       name: 'Popcorn',
@@ -225,6 +251,7 @@ export const seed = async (payload: Payload) => {
 
   // Public tenant menu items
   await payload.create({
+    overrideAccess: true,
     collection: menuItemsSlug,
     data: {
       name: 'Free Pizza',
@@ -232,6 +259,7 @@ export const seed = async (payload: Payload) => {
     },
   })
   await payload.create({
+    overrideAccess: true,
     collection: menuItemsSlug,
     data: {
       name: 'Free Dogs',
@@ -241,6 +269,7 @@ export const seed = async (payload: Payload) => {
 
   // create users
   await payload.create({
+    overrideAccess: true,
     collection: usersSlug,
     data: {
       ...credentials.admin,
@@ -249,6 +278,7 @@ export const seed = async (payload: Payload) => {
   })
 
   await payload.create({
+    overrideAccess: true,
     collection: usersSlug,
     data: {
       ...credentials.blueDog,
@@ -262,6 +292,7 @@ export const seed = async (payload: Payload) => {
   })
 
   await payload.create({
+    overrideAccess: true,
     collection: usersSlug,
     data: {
       ...credentials.owner,
@@ -279,6 +310,7 @@ export const seed = async (payload: Payload) => {
 
   // create menus
   await payload.create({
+    overrideAccess: true,
     collection: menuSlug,
     data: {
       description: 'This collection behaves like globals, 1 document per tenant. No list view.',
@@ -287,6 +319,7 @@ export const seed = async (payload: Payload) => {
     },
   })
   await payload.create({
+    overrideAccess: true,
     collection: menuSlug,
     data: {
       description: 'This collection behaves like globals, 1 document per tenant. No list view.',
@@ -296,6 +329,7 @@ export const seed = async (payload: Payload) => {
   })
 
   await payload.create({
+    overrideAccess: true,
     collection: usersSlug,
     data: {
       ...credentials.steelCat,
@@ -310,6 +344,7 @@ export const seed = async (payload: Payload) => {
 
   // User with mixed tenant roles: admin for Steel Cat, member for Blue Dog
   await payload.create({
+    overrideAccess: true,
     collection: usersSlug,
     data: {
       ...credentials.memberUser,
@@ -333,6 +368,7 @@ export const seed = async (payload: Payload) => {
 
   // Create a user with no tenant associations
   await payload.create({
+    overrideAccess: true,
     collection: usersSlug,
     data: {
       ...credentials.noTenant,

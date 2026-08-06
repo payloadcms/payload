@@ -47,6 +47,7 @@ async function verifyUploads({
   uploadId: number | string
 }) {
   const uploadData = (await payload.findByID({
+    overrideAccess: true,
     id: uploadId,
     collection: collectionSlug,
   })) as unknown as { filename: string; sizes: Record<string, { filename: string }> }
@@ -305,6 +306,7 @@ describe('@payloadcms/plugin-cloud-storage', () => {
 
         it('can upload', async () => {
           const upload = await payload.create({
+            overrideAccess: true,
             collection: mediaSlug,
             data: {},
             filePath: path.resolve(dirname, '../uploads/image.png'),
@@ -325,6 +327,7 @@ describe('@payloadcms/plugin-cloud-storage', () => {
 
         it('can upload with prefix', async () => {
           const upload = await payload.create({
+            overrideAccess: true,
             collection: mediaWithPrefixSlug,
             data: {},
             filePath: path.resolve(dirname, '../uploads/image.png'),
@@ -355,6 +358,7 @@ describe('@payloadcms/plugin-cloud-storage', () => {
           // Try to upload a JSON file to a collection that only accepts PNG
           await expect(
             payload.create({
+              overrideAccess: true,
               collection: restrictedMediaSlug,
               data: {},
               filePath: path.resolve(dirname, './test.json'),
@@ -371,6 +375,7 @@ describe('@payloadcms/plugin-cloud-storage', () => {
         it('should upload to S3 when mimeType validation passes', async () => {
           // Upload a valid PNG file
           const upload = await payload.create({
+            overrideAccess: true,
             collection: restrictedMediaSlug,
             data: {},
             filePath: path.resolve(dirname, './image.png'),
@@ -396,12 +401,14 @@ describe('@payloadcms/plugin-cloud-storage', () => {
 
         it('should store correct URLs for sized images', async () => {
           const upload = await payload.create({
+            overrideAccess: true,
             collection: mediaSlug,
             data: {},
             filePath: path.resolve(dirname, '../uploads/image.png'),
           })
 
           const apiResponse = await payload.findByID({
+            overrideAccess: true,
             id: upload.id,
             collection: mediaSlug,
           })
@@ -442,6 +449,7 @@ describe('@payloadcms/plugin-cloud-storage', () => {
 
         it('should handle collections without imageSizes correctly', async () => {
           const upload = await payload.create({
+            overrideAccess: true,
             collection: mediaWithPrefixSlug,
             data: {},
             filePath: path.resolve(dirname, '../uploads/image.png'),
@@ -474,6 +482,7 @@ describe('@payloadcms/plugin-cloud-storage', () => {
           // This test verifies that custom generateFileURL is used in beforeChange hook
           // when disablePayloadAccessControl: true, preventing "undefined" from appearing in URLs
           const upload = await payload.create({
+            overrideAccess: true,
             collection: mediaWithCustomURLSlug,
             data: {},
             filePath: path.resolve(dirname, '../uploads/image.png'),
@@ -502,6 +511,7 @@ describe('@payloadcms/plugin-cloud-storage', () => {
 
           // Verify the API response also returns the custom URL
           const apiResponse = await payload.findByID({
+            overrideAccess: true,
             id: upload.id,
             collection: mediaWithCustomURLSlug,
           })
@@ -512,6 +522,7 @@ describe('@payloadcms/plugin-cloud-storage', () => {
 
         it('should use custom generateFileURL even without disablePayloadAccessControl', async () => {
           const upload = await payload.create({
+            overrideAccess: true,
             collection: mediaWithGenerateFileURLSlug,
             data: {},
             filePath: path.resolve(dirname, '../uploads/image.png'),
@@ -538,6 +549,7 @@ describe('@payloadcms/plugin-cloud-storage', () => {
           expect(dbRecord.url).toMatch(/^https:\/\//)
 
           const apiResponse = await payload.findByID({
+            overrideAccess: true,
             id: upload.id,
             collection: mediaWithGenerateFileURLSlug,
           })
@@ -554,7 +566,7 @@ describe('@payloadcms/plugin-cloud-storage', () => {
       afterEach(async () => {
         for (const id of createdIDs) {
           try {
-            await payload.delete({ id, collection: testMetadataSlug })
+            await payload.delete({ overrideAccess: true, id, collection: testMetadataSlug })
           } catch (e) {
             // Ignore
           }
@@ -564,6 +576,7 @@ describe('@payloadcms/plugin-cloud-storage', () => {
 
       it('should automatically persist metadata returned by custom adapters', async () => {
         const upload = await payload.create({
+          overrideAccess: true,
           collection: testMetadataSlug,
           data: {
             testNote: 'Testing automatic metadata persistence',
@@ -652,6 +665,7 @@ describe('@payloadcms/plugin-cloud-storage', () => {
 
       it('should persist metadata on update operations', async () => {
         const upload = await payload.create({
+          overrideAccess: true,
           collection: testMetadataSlug,
           data: {
             testNote: 'Testing update metadata persistence',
@@ -665,6 +679,7 @@ describe('@payloadcms/plugin-cloud-storage', () => {
         const initialTimestamp = upload.uploadTimestamp
 
         const updatedUpload = await payload.update({
+          overrideAccess: true,
           id: upload.id,
           collection: testMetadataSlug,
           data: {
@@ -707,7 +722,11 @@ describe('@payloadcms/plugin-cloud-storage', () => {
       afterEach(async () => {
         for (const id of createdIDs) {
           try {
-            await payload.delete({ id, collection: mediaWithThrowingHookSlug })
+            await payload.delete({
+              overrideAccess: true,
+              id,
+              collection: mediaWithThrowingHookSlug,
+            })
           } catch (_) {
             // Ignore
           }
@@ -718,6 +737,7 @@ describe('@payloadcms/plugin-cloud-storage', () => {
       it('should surface user afterChange errors that throw during the plugin internal update on create', async () => {
         await expect(
           payload.create({
+            overrideAccess: true,
             collection: mediaWithThrowingHookSlug,
             data: { shouldThrow: true },
             filePath: path.resolve(dirname, '../uploads/image.png'),
@@ -735,6 +755,7 @@ describe('@payloadcms/plugin-cloud-storage', () => {
         })
 
         const initial = await payload.create({
+          overrideAccess: true,
           collection: mediaWithThrowingHookSlug,
           data: { shouldThrow: false },
           file: buildFile('initial.png'),
@@ -750,6 +771,7 @@ describe('@payloadcms/plugin-cloud-storage', () => {
 
         await expect(
           payload.update({
+            overrideAccess: true,
             id: initial.id,
             collection: mediaWithThrowingHookSlug,
             data: { shouldThrow: true },
@@ -770,7 +792,7 @@ describe('@payloadcms/plugin-cloud-storage', () => {
       afterEach(async () => {
         for (const id of createdIDs) {
           try {
-            await payload.delete({ id, collection: mediaWithOverwriteSlug })
+            await payload.delete({ overrideAccess: true, id, collection: mediaWithOverwriteSlug })
           } catch (_) {
             // Ignore
           }
@@ -788,6 +810,7 @@ describe('@payloadcms/plugin-cloud-storage', () => {
         })
 
         const initial = (await payload.create({
+          overrideAccess: true,
           collection: mediaWithOverwriteSlug,
           data: {},
           file: buildFile('overwrite.png'),
@@ -814,6 +837,7 @@ describe('@payloadcms/plugin-cloud-storage', () => {
         }
 
         const updated = (await payload.update({
+          overrideAccess: true,
           id: initial.id,
           collection: mediaWithOverwriteSlug,
           data: {},

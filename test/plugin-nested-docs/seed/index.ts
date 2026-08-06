@@ -5,6 +5,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
 
   try {
     await payload.create({
+      overrideAccess: true,
       collection: 'users',
       data: {
         email: 'demo@payloadcms.com',
@@ -13,6 +14,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
     })
 
     const { id: parentID } = await payload.create({
+      overrideAccess: true,
       collection: 'pages',
       data: {
         slug: 'parent-page',
@@ -22,6 +24,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
     })
 
     const { id: childID } = await payload.create({
+      overrideAccess: true,
       collection: 'pages',
       data: {
         parent: parentID,
@@ -32,6 +35,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
     })
 
     await payload.create({
+      overrideAccess: true,
       collection: 'pages',
       data: {
         parent: childID,
@@ -42,6 +46,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
     })
 
     await payload.create({
+      overrideAccess: true,
       collection: 'pages',
       data: {
         slug: 'sister-page',

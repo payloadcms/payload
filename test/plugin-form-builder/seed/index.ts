@@ -8,6 +8,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
 
   try {
     await payload.create({
+      overrideAccess: true,
       collection: 'users',
       data: {
         email: 'demo@payloadcms.com',
@@ -17,6 +18,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
     })
 
     await payload.create({
+      overrideAccess: true,
       collection: pagesSlug,
       data: {
         slug: 'home',
@@ -26,6 +28,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
     })
 
     const { id: formID } = await payload.create({
+      overrideAccess: true,
       collection: formsSlug,
       data: {
         confirmationType: 'message',
@@ -79,6 +82,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
     })
 
     const { id: dateFormID } = await payload.create({
+      overrideAccess: true,
       collection: formsSlug,
       data: {
         confirmationType: 'message',
@@ -138,6 +142,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
     })
 
     await payload.create({
+      overrideAccess: true,
       collection: formSubmissionsSlug,
       data: {
         form: formID,
@@ -155,6 +160,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
     })
 
     await payload.create({
+      overrideAccess: true,
       collection: pagesSlug,
       data: {
         slug: 'contact',
@@ -165,6 +171,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
 
     // Create a form with upload field for e2e testing
     await payload.create({
+      overrideAccess: true,
       collection: formsSlug,
       data: {
         confirmationType: 'message',
@@ -220,6 +227,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
 
     // Create a form with optional upload and MIME type restrictions
     await payload.create({
+      overrideAccess: true,
       collection: formsSlug,
       data: {
         confirmationType: 'message',
@@ -276,6 +284,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
     // Create a form with multiple-file upload field (media) + single upload field (documents)
     // Used to test hasMany + polymorphic submissionUploads coverage
     await payload.create({
+      overrideAccess: true,
       collection: formsSlug,
       data: {
         confirmationType: 'message',
