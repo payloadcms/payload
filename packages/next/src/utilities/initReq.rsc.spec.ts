@@ -5,7 +5,7 @@ import { createRequire } from 'node:module'
 import type React from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { initReq } from './initReq.js'
+import { initReq } from '@payloadcms/next/server'
 
 const { counters, payloadInitReq } = vi.hoisted(() => ({
   counters: {

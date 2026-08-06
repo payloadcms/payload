@@ -10,10 +10,22 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { initReq } from './initReq.js'
 
-const { getAccessResults, getPayload, initI18n } = vi.hoisted(() => ({
-  getAccessResults: vi.fn(),
-  getPayload: vi.fn(),
-  initI18n: vi.fn(),
+const { findPreference, getAccessResults, getPayload, initI18n, updatePreference } = vi.hoisted(
+  () => ({
+    findPreference: vi.fn(),
+    getAccessResults: vi.fn(),
+    getPayload: vi.fn(),
+    initI18n: vi.fn(),
+    updatePreference: vi.fn(),
+  }),
+)
+
+vi.mock('../preferences/operations/findOne.js', () => ({
+  findOne: findPreference,
+}))
+
+vi.mock('../preferences/operations/update.js', () => ({
+  update: updatePreference,
 }))
 
 vi.mock('../index.js', () => ({
@@ -43,6 +55,17 @@ const config = {
   },
   localization: false,
   serverURL: 'https://configured.example.com',
+} as SanitizedConfig
+
+const localizedConfig = {
+  ...config,
+  localization: {
+    defaultLocale: 'en',
+    locales: [
+      { code: 'en', label: 'English' },
+      { code: 'es', label: 'Spanish' },
+    ],
+  },
 } as SanitizedConfig
 
 const importMap = {} as ImportMap
@@ -116,9 +139,11 @@ const createReusingCache = (): InitReqCache => {
 describe('initReq', () => {
   beforeEach(() => {
     authenticate.mockClear()
+    findPreference.mockReset().mockResolvedValue(null)
     getAccessResults.mockReset().mockResolvedValue(permissions)
     getPayload.mockReset().mockResolvedValue(payload)
     initI18n.mockReset().mockResolvedValue(i18n)
+    updatePreference.mockReset()
   })
 
   it('should derive the URL and a nested query from requestURL', async () => {
@@ -140,6 +165,46 @@ describe('initReq', () => {
         },
       },
     })
+  })
+
+  it('should persist an authenticated request locale', async () => {
+    getPayload.mockResolvedValue({ ...payload, config: localizedConfig })
+
+    const result = await initReq({
+      configPromise: localizedConfig,
+      importMap,
+      requestURL: 'https://example.com/admin?locale=es',
+      serverAdapter,
+    })
+
+    expect(result.locale).toMatchObject({ code: 'es' })
+    expect(result.req.locale).toBe('es')
+    expect(updatePreference).toHaveBeenCalledWith(
+      expect.objectContaining({
+        key: 'locale',
+        value: 'es',
+      }),
+    )
+  })
+
+  it('should ignore a request locale for an anonymous request', async () => {
+    authenticate.mockResolvedValueOnce({
+      responseHeaders: new Headers(),
+      user: null,
+    })
+    getPayload.mockResolvedValue({ ...payload, config: localizedConfig })
+
+    const result = await initReq({
+      configPromise: localizedConfig,
+      importMap,
+      requestURL: 'https://example.com/admin?locale=es',
+      serverAdapter,
+    })
+
+    expect(result.locale).toMatchObject({ code: 'en' })
+    expect(result.req.locale).toBe('en')
+    expect(findPreference).not.toHaveBeenCalled()
+    expect(updatePreference).not.toHaveBeenCalled()
   })
 
   it('should prefer explicit request overrides over requestURL', async () => {
