@@ -18,6 +18,7 @@ const nextSuites: TestConfig[] = [
   { file: 'admin__e2e__general', shards: 3 },
   { file: 'admin__e2e__list-view', shards: 4 },
   { file: 'admin__e2e__document-view', shards: 3 },
+  { file: 'admin-routing', shards: 1 },
   { file: 'admin-bar', shards: 1 },
   { file: 'admin-root', shards: 1 },
   { file: 'auth', shards: 1 },
@@ -118,6 +119,7 @@ const nextSuites: TestConfig[] = [
  */
 const tanstackSuites: TestConfig[] = [
   { file: '_community', framework: 'tanstack-start', optional: false, shards: 1 },
+  { file: 'admin-routing', framework: 'tanstack-start', optional: false, shards: 1 },
 ]
 
 export default createE2EConfig([...nextSuites, ...tanstackSuites])

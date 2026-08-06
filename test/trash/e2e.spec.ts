@@ -630,6 +630,76 @@ describe('Trash', () => {
         await expect(page).toHaveURL(/\/admin\/collections\/posts\/trash/)
       })
 
+      test('Should collapse breadcrumbs into a popup menu when they do not fit the available width', async ({
+        page,
+      }) => {
+        await page.setViewportSize({ width: 400, height: 800 })
+        await page.goto(postsUrl.trashEdit(trashedPostDocOne.id))
+
+        const collapsedToggle = page.locator('.step-nav__collapsed-toggle')
+        await expect(collapsedToggle).toBeVisible()
+        await expect(collapsedToggle).toHaveAccessibleName('More options')
+
+        await expect(page.locator('.step-nav.app-header__step-nav .step-nav__first')).toBeVisible()
+        await expect(page.locator('.step-nav.app-header__step-nav .step-nav__last')).toContainText(
+          'Trashed Post',
+        )
+
+        await collapsedToggle.click()
+
+        const collapsedList = page.locator('.step-nav__collapsed-list')
+        const trashItem = collapsedList.locator('.popup-button-list__button', {
+          hasText: 'Trash',
+        })
+        await expect(trashItem).toBeVisible()
+
+        await trashItem.click()
+
+        await expect(page).toHaveURL(/\/admin\/collections\/posts\/trash/)
+      })
+
+      test('Should collapse breadcrumbs once web fonts finish loading, without a viewport resize', async ({
+        page,
+      }) => {
+        // Simulate a web font swap widening the breadcrumb text after the initial paint, by
+        // controlling exactly when document.fonts.ready resolves and inflating the hidden
+        // measurer's width at a moment of our choosing, independent of that resolution.
+        await page.addInitScript(() => {
+          const fontsReady = new Promise<void>((resolve) => {
+            // @ts-expect-error - test-only global
+            window.resolveFontsReady = resolve
+          })
+          Object.defineProperty(document.fonts, 'ready', {
+            configurable: true,
+            get: () => fontsReady,
+          })
+        })
+
+        await page.setViewportSize({ width: 900, height: 800 })
+        await page.goto(postsUrl.trashEdit(trashedPostDocOne.id))
+
+        const collapsedToggle = page.locator('.step-nav__collapsed-toggle')
+        await expect(collapsedToggle).toBeHidden()
+
+        // The document title loads asynchronously and, once it does, SetDocumentStepNav
+        // calls setStepNav again with the real title, changing the measurement effect's
+        // `stepNav` dependency and naturally re-triggering it. Wait for that to happen
+        // first, so it doesn't race with the font-load re-measure this test is targeting.
+        await expect(page.locator('.step-nav.app-header__step-nav .step-nav__last')).toContainText(
+          'Trashed Post',
+        )
+
+        await page.addStyleTag({ content: '.step-nav__measurer { padding-right: 5000px; }' })
+        await expect(collapsedToggle).toBeHidden()
+
+        await page.evaluate(() => {
+          // @ts-expect-error - test-only global
+          window.resolveFontsReady()
+        })
+
+        await expect(collapsedToggle).toBeVisible()
+      })
+
       test('Should not render dot menu popup', async ({ page }) => {
         await page.goto(postsUrl.trashEdit(trashedPostDocOne.id))
 
