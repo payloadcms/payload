@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/email-resend",
-  "version": "4.0.0-canary.14",
+  "version": "4.0.0-canary.24",
   "description": "Payload Resend Email Adapter",
   "homepage": "https://payloadcms.com",
   "repository": {

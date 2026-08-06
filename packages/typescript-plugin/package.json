@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/typescript-plugin",
-  "version": "4.0.0-canary.14",
+  "version": "4.0.0-canary.24",
   "description": "TypeScript Language Service Plugin for Payload CMS - validates PayloadComponent import paths and provides autocomplete",
   "homepage": "https://payloadcms.com",
   "repository": {

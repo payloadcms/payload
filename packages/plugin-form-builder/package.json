@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/plugin-form-builder",
-  "version": "4.0.0-canary.14",
+  "version": "4.0.0-canary.24",
   "description": "Form builder plugin for Payload CMS",
   "keywords": [
     "payload",

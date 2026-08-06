@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/codemod",
-  "version": "4.0.0-canary.14",
+  "version": "4.0.0-canary.24",
   "description": "Codemods for migrating Payload projects across versions.",
   "homepage": "https://payloadcms.com",
   "repository": {

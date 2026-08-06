@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/plugin-ecommerce",
-  "version": "4.0.0-canary.14",
+  "version": "4.0.0-canary.24",
   "description": "Ecommerce plugin for Payload",
   "keywords": [
     "payload",
