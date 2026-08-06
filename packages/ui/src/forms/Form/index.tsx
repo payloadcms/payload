@@ -459,15 +459,14 @@ export const Form: React.FC<FormProps> = (props) => {
           setProcessing(false)
           setSubmitted(true)
 
+          // The document was not persisted, so keep the form marked as modified
+          // to keep the save buttons enabled for retry.
+          setModified(true)
+
           // When there was an error submitting a draft,
           // set the form state to unsubmitted, to not trigger visible form validation on changes after the failed submit.
-          // Also keep the form as modified so the save button remains enabled for retry.
-          if (overridesFromArgs['_status'] === 'draft') {
-            setModified(true)
-
-            if (!validateDrafts) {
-              setSubmitted(false)
-            }
+          if (overridesFromArgs['_status'] === 'draft' && !validateDrafts) {
+            setSubmitted(false)
           }
 
           contextRef.current = { ...contextRef.current } // triggers rerender of all components that subscribe to form
