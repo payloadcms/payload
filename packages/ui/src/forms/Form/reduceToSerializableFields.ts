@@ -1,13 +1,25 @@
-import { type FormField, type FormState } from 'payload'
+import { type FormField, type FormState, type Row } from 'payload'
 
 type BlacklistedKeys = 'customComponents' | 'validate'
 const blacklistedKeys: BlacklistedKeys[] = ['validate', 'customComponents']
 
+const sanitizeRow = (incomingRow: Row): Row => {
+  const row = { ...incomingRow }
+
+  delete row.customComponents
+
+  return row
+}
+
 const sanitizeField = (incomingField: FormField): FormField => {
-  const field = { ...incomingField } // shallow copy, as we only need to remove top-level keys
+  const field = { ...incomingField }
 
   for (const key of blacklistedKeys) {
     delete field[key]
+  }
+
+  if (field.rows) {
+    field.rows = field.rows.map(sanitizeRow)
   }
 
   return field
