@@ -610,6 +610,7 @@ describe('Uploads', () => {
       await expect(page.locator('.payload-toast-container .toast-error')).toContainText(
         'No file found in clipboard.',
       )
+      await expect(page.locator('#upload-paste-url')).toBeHidden()
       await closeAllToasts(page)
     })
 

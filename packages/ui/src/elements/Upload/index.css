@@ -9,6 +9,8 @@
   .file-field__upload {
     display: flex;
     position: relative;
+    flex-wrap: wrap;
+    justify-content: space-between;
   }
 
   .file-field__file-selected {
@@ -17,7 +19,7 @@
 
   .file-field__thumbnail-wrap {
     position: relative;
-    width: 150px;
+    width: 50%;
 
     .thumbnail {
       position: relative;
@@ -32,16 +34,19 @@
     position: absolute;
     top: var(--spacer-2);
     right: var(--spacer-2);
-    margin: 0;
+    margin: var(--spacer-3);
     z-index: 1;
+    order: 2;
   }
 
   .file-field__file-adjustments {
-    padding: var(--spacer-3);
+    padding: var(--spacer-2);
     width: 100%;
     display: flex;
     flex-direction: column;
-    gap: var(--spacer-2);
+    gap: 0;
+    order: 3;
+    border-top: var(--stroke-width-medium) solid var(--color-bg-primary);
   }
 
   .file-field__upload-actions {
@@ -96,21 +101,28 @@
     text-transform: lowercase;
     align-self: center;
     color: var(--color-text-tertiary);
+    display: none;
   }
 
   .file-field--side-panel {
     position: relative;
     flex: 1 0 0;
     width: 100%;
-    min-height: max(500px, calc(100dvh - var(--doc-controls-height) - var(--app-header-height)));
+    min-height: 400px;
     margin-bottom: 0;
     border-radius: 0;
     background: var(--color-bg-secondary);
   }
 
+  .file-field__side-panel {
+    position: static;
+    height: auto;
+    min-height: 400px;
+  }
+
   .file-field__side-panel__content {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     flex: 1 1 0;
     min-height: 0;
     overflow: hidden;
@@ -125,6 +137,7 @@
     padding: var(--spacer-3) var(--spacer-4);
     gap: var(--spacer-3);
     overflow: hidden;
+    height: auto;
   }
 
   .file-field__side-panel__info {
@@ -197,59 +210,49 @@
     }
   }
 
-  @media (max-width: 1024px) {
+  @media (min-width: 1024px) {
     .file-field--side-panel {
-      min-height: 400px;
+      min-height: max(500px, calc(100dvh - var(--doc-controls-height) - var(--app-header-height)));
     }
 
     .file-field__side-panel {
-      position: static;
-      height: auto;
-      min-height: 400px;
+      min-height: auto;
     }
 
     .file-field__side-panel__content {
-      flex-direction: column;
-    }
-
-    .file-field__side-panel__preview {
-      height: auto;
+      flex-direction: row;
     }
   }
 
-  @media (max-width: 768px) {
+  @media (min-width: 768px) {
     .file-field__upload {
-      flex-wrap: wrap;
-      justify-content: space-between;
+      flex-wrap: nowrap;
+      justify-content: normal;
     }
 
     .file-field__remove {
-      margin: var(--spacer-3);
-      order: 2;
+      margin: 0;
+      order: 0;
     }
 
     .file-field__file-adjustments {
-      order: 3;
-      border-top: 2px solid var(--color-bg-primary);
-      padding: var(--spacer-2);
-      gap: 0;
+      order: 0;
+      border-top: none;
+      padding: var(--spacer-3);
+      gap: var(--spacer-2);
     }
 
     .file-field__thumbnail-wrap {
-      order: 1;
-      width: 50%;
-
-      .thumbnail {
-        width: 100%;
-      }
+      order: 0;
+      width: 150px;
     }
 
     .file-field__edit {
-      display: none;
+      /* display: revert; */
     }
 
     .file-field__dragAndDropText {
-      display: none;
+      display: block;
     }
   }
 }
