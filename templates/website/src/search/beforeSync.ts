@@ -32,6 +32,7 @@ export const beforeSyncWithSearch: BeforeSync = async ({ req, originalDoc, searc
       }
 
       const doc = await req.payload.findByID({
+        overrideAccess: true,
         collection: 'categories',
         id: category,
         disableErrors: true,
