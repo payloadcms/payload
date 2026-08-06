@@ -2,6 +2,7 @@ import type { PayloadRequest } from '../types/index.js'
 import type { File, FileData, UploadConfig } from './types.js'
 
 import { APIError } from '../errors/index.js'
+import { getRequestOrigin } from '../utilities/getRequestOrigin.js'
 import { isURLAllowed } from '../utilities/isURLAllowed.js'
 import { safeFetch } from './safeFetch.js'
 
@@ -13,35 +14,56 @@ type Args = {
 export const getExternalFile = async ({ data, req, uploadConfig }: Args): Promise<File> => {
   const { filename, url } = data
 
-  let trimAuthCookies = true
   if (typeof url === 'string') {
     let fileURL = url
+    let trustedServerURL = req.payload.config.serverURL
+
     if (!url.startsWith('http')) {
-      // URL points to the same server - we can send any cookies safely to our server.
-      trimAuthCookies = false
-      const baseUrl = req.headers.get('origin') || `${req.protocol}://${req.headers.get('host')}`
-      fileURL = `${baseUrl}${url}`
+      trustedServerURL ||= getRequestOrigin({ config: req.payload.config, req })
+      fileURL = new URL(url, trustedServerURL || req.origin).toString()
     }
 
-    let cookies = (req.headers.get('cookie') ?? '').split(';')
+    const trustedServerOrigin = trustedServerURL ? new URL(trustedServerURL).origin : null
 
-    if (trimAuthCookies) {
-      cookies = cookies.filter(
-        (cookie) => !cookie.trim().startsWith(req.payload.config.cookiePrefix),
-      )
-    }
-
-    const headers = uploadConfig.externalFileHeaderFilter
+    const customHeaders = uploadConfig.externalFileHeaderFilter
       ? uploadConfig.externalFileHeaderFilter(Object.fromEntries(new Headers(req.headers)))
-      : {
-          cookie: cookies.join(';'),
-        }
+      : undefined
 
     let res
     let redirectCount = 0
     const maxRedirects = 3
 
     while (redirectCount <= maxRedirects) {
+      const isSameServerURL = trustedServerOrigin === new URL(fileURL).origin
+      let headers = customHeaders
+
+      if (!headers) {
+        let cookies = (req.headers.get('cookie') ?? '').split(';')
+
+        if (!isSameServerURL) {
+          cookies = cookies.filter(
+            (cookie) => !cookie.trim().startsWith(req.payload.config.cookiePrefix),
+          )
+        }
+
+        headers = {
+          cookie: cookies.join(';'),
+        }
+
+        if (isSameServerURL) {
+          const origin = req.headers.get('origin')
+          const secFetchSite = req.headers.get('sec-fetch-site')
+
+          if (origin) {
+            headers.origin = origin
+          }
+
+          if (secFetchSite) {
+            headers['sec-fetch-site'] = secFetchSite
+          }
+        }
+      }
+
       const skipSafeFetch: boolean =
         uploadConfig.skipSafeFetch === true
           ? uploadConfig.skipSafeFetch
