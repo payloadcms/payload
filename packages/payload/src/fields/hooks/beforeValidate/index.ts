@@ -37,6 +37,10 @@ export const beforeValidate = async <T extends JsonObject>({
   overrideAccess,
   req,
 }: Args<T>): Promise<T> => {
+  if (operation === 'update') {
+    req.context.incomingFieldKeys = new Set(Object.keys(incomingData))
+  }
+
   await traverseFields({
     id,
     collection,

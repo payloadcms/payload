@@ -22,6 +22,25 @@ import { relationshipPopulationPromise } from './relationshipPopulationPromise.j
 import { traverseFields } from './traverseFields.js'
 import { virtualFieldPopulationPromise } from './virtualFieldPopulationPromise.js'
 
+const isEmptyStoredLocalizedEntry = (value: unknown): boolean => {
+  if (value === null || typeof value === 'undefined') {
+    return true
+  }
+
+  if (typeof value === 'object' && !Array.isArray(value)) {
+    const objectValue = value as Record<string, unknown>
+
+    return (
+      Object.keys(objectValue).length === 0 ||
+      Object.values(objectValue).every(
+        (entry) => entry === null || typeof entry === 'undefined' || entry === '',
+      )
+    )
+  }
+
+  return false
+}
+
 type Args = {
   /**
    * Data of the nearest parent block. If no parent block exists, this will be the `undefined`
@@ -157,6 +176,23 @@ export const promise = async ({
     parentIsLocalized: parentIsLocalized!,
   })
 
+  const storedLocalizedValue =
+    fieldAffectsDataResult &&
+    shouldLocalizeField &&
+    typeof siblingDoc[field.name!] === 'object' &&
+    siblingDoc[field.name!] !== null &&
+    !Array.isArray(siblingDoc[field.name!])
+      ? (siblingDoc[field.name!] as Record<string, unknown>)
+      : null
+
+  const localeExistsInStorage = Boolean(
+    storedLocalizedValue &&
+      locale &&
+      locale !== 'all' &&
+      Object.prototype.hasOwnProperty.call(storedLocalizedValue, locale) &&
+      !isEmptyStoredLocalizedEntry(storedLocalizedValue[locale]),
+  )
+
   const shouldHoistLocalizedValue: boolean = Boolean(
     flattenLocales &&
       fieldAffectsDataResult &&
@@ -220,7 +256,14 @@ export const promise = async ({
       // Fill groups with empty objects so fields with hooks within groups can populate
       // themselves virtually as necessary
       if (fieldAffectsDataResult && typeof siblingDoc[field.name] === 'undefined') {
-        siblingDoc[field.name] = {}
+        const shouldSkipEmptyGroupFill =
+          shouldLocalizeField &&
+          locale !== 'all' &&
+          (storedLocalizedValue === null || !localeExistsInStorage)
+
+        if (!shouldSkipEmptyGroupFill) {
+          siblingDoc[field.name] = {}
+        }
       }
 
       break
@@ -405,11 +448,19 @@ export const promise = async ({
 
     // Set defaultValue on the field for globals being returned without being first created
     // or collection documents created prior to having a default.
+    // For localized fields, only apply defaults for locales that exist in storage.
+    const canApplyLocalizedDefaultValue =
+      !shouldLocalizeField ||
+      locale === 'all' ||
+      storedLocalizedValue === null ||
+      localeExistsInStorage
+
     if (
       !removedFieldValue &&
       allowDefaultValue &&
       typeof siblingDoc[field.name!] === 'undefined' &&
-      typeof field.defaultValue !== 'undefined'
+      typeof field.defaultValue !== 'undefined' &&
+      canApplyLocalizedDefaultValue
     ) {
       siblingDoc[field.name!] = await getDefaultValue({
         defaultValue: field.defaultValue,
@@ -418,6 +469,27 @@ export const promise = async ({
         user: req.user,
         value: siblingDoc[field.name!],
       })
+    }
+
+    if (
+      locale === 'all' &&
+      storedLocalizedValue &&
+      fieldAffectsDataResult &&
+      shouldLocalizeField &&
+      typeof siblingDoc[field.name!] === 'object' &&
+      siblingDoc[field.name!] !== null &&
+      !Array.isArray(siblingDoc[field.name!])
+    ) {
+      const currentValue = siblingDoc[field.name!] as Record<string, unknown>
+
+      for (const localeKey of Object.keys(currentValue)) {
+        if (
+          !Object.prototype.hasOwnProperty.call(storedLocalizedValue, localeKey) ||
+          isEmptyStoredLocalizedEntry(storedLocalizedValue[localeKey])
+        ) {
+          delete currentValue[localeKey]
+        }
+      }
     }
 
     if (field.type === 'relationship' || field.type === 'upload' || field.type === 'join') {
