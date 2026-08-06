@@ -263,6 +263,7 @@ describeReplica('postgres read replicas', () => {
       // This exercises createVersion which previously lacked getPrimaryDb,
       // causing the read-back after insert to hit a stale replica
       const doc = await (payload as any).create({
+        overrideAccess: true,
         collection: 'posts',
         data: { title: 'versioned-doc', _status: 'draft' },
         draft: true,
@@ -272,6 +273,7 @@ describeReplica('postgres read replicas', () => {
       expect(doc.title).toBe('versioned-doc')
 
       const versions = await (payload as any).findVersions({
+        overrideAccess: true,
         collection: 'posts',
         where: { parent: { equals: doc.id } },
       })
@@ -281,6 +283,7 @@ describeReplica('postgres read replicas', () => {
 
     it('should update a draft and create a new version without errors', async () => {
       const doc = await (payload as any).create({
+        overrideAccess: true,
         collection: 'posts',
         data: { title: 'draft-original', _status: 'draft' },
         draft: true,
@@ -288,6 +291,7 @@ describeReplica('postgres read replicas', () => {
 
       // This triggers updateOne (has getPrimaryDb) + createVersion (now fixed)
       const updated = await (payload as any).update({
+        overrideAccess: true,
         collection: 'posts',
         id: doc.id,
         data: { title: 'draft-updated' },
@@ -297,6 +301,7 @@ describeReplica('postgres read replicas', () => {
       expect(updated.title).toBe('draft-updated')
 
       const versions = await (payload as any).findVersions({
+        overrideAccess: true,
         collection: 'posts',
         where: { parent: { equals: doc.id } },
       })
@@ -306,12 +311,14 @@ describeReplica('postgres read replicas', () => {
 
     it('should restore a version without errors', async () => {
       const doc = await (payload as any).create({
+        overrideAccess: true,
         collection: 'posts',
         data: { title: 'restore-v1', _status: 'draft' },
         draft: true,
       })
 
       await (payload as any).update({
+        overrideAccess: true,
         collection: 'posts',
         id: doc.id,
         data: { title: 'restore-v2' },
@@ -319,6 +326,7 @@ describeReplica('postgres read replicas', () => {
       })
 
       const versions = await (payload as any).findVersions({
+        overrideAccess: true,
         collection: 'posts',
         where: { parent: { equals: doc.id } },
         sort: '-updatedAt',
@@ -328,6 +336,7 @@ describeReplica('postgres read replicas', () => {
 
       // restoreVersion triggers updateVersion (now fixed)
       const restored = await (payload as any).restoreVersion({
+        overrideAccess: true,
         collection: 'posts',
         id: firstVersion.id,
       })
@@ -340,6 +349,7 @@ describeReplica('postgres read replicas', () => {
     it('should create and update a global without errors', async () => {
       // First update creates the global row (createGlobal, now fixed)
       const result = await (payload as any).updateGlobal({
+        overrideAccess: true,
         slug: 'settings',
         data: { siteTitle: 'My Site' },
       })
@@ -349,6 +359,7 @@ describeReplica('postgres read replicas', () => {
 
       // Second update uses updateGlobal path (also fixed)
       const updated = await (payload as any).updateGlobal({
+        overrideAccess: true,
         slug: 'settings',
         data: { siteTitle: 'Updated Site' },
       })
@@ -359,6 +370,7 @@ describeReplica('postgres read replicas', () => {
     it('should create and update a versioned global without errors', async () => {
       // This exercises createGlobalVersion (now fixed)
       const result = await (payload as any).updateGlobal({
+        overrideAccess: true,
         slug: 'nav',
         data: { label: 'Home' },
       })
@@ -367,6 +379,7 @@ describeReplica('postgres read replicas', () => {
       expect(result.label).toBe('Home')
 
       const versions = await (payload as any).findGlobalVersions({
+        overrideAccess: true,
         slug: 'nav',
       })
 
@@ -374,6 +387,7 @@ describeReplica('postgres read replicas', () => {
 
       // Update again to exercise updateGlobalVersion path
       const updated = await (payload as any).updateGlobal({
+        overrideAccess: true,
         slug: 'nav',
         data: { label: 'Updated Home' },
       })

@@ -71,6 +71,21 @@ await cms.find({ collection: 'posts' })
     )
   })
 
+  it('recognizes a known Payload value cast to another type', async () => {
+    const source = `import type { Payload } from 'payload'
+
+declare const payload: Payload
+
+await (payload as any).create({ collection: 'posts', data: { title: 'Post' } })
+`
+
+    const result = await runTransform({ source, transform: addOverrideAccessTrue })
+
+    expect(result).toContain(
+      "await (payload as any).create({ overrideAccess: true, collection: 'posts'",
+    )
+  })
+
   it('does not rewrite a resolved union that can be an unrelated client', async () => {
     const project = new Project({ useInMemoryFileSystem: true })
     project
