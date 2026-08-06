@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test'
+import type { Locator, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
@@ -7,7 +7,12 @@ import { fileURLToPath } from 'url'
 import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { Config, Organization } from './payload-types.js'
 
-import { ensureCompilationIsDone, initPageConsoleErrorCatch } from '../__helpers/e2e/helpers.js'
+import {
+  ensureCompilationIsDone,
+  initPageConsoleErrorCatch,
+  saveDocAndAssert,
+  selectTableRow,
+} from '../__helpers/e2e/helpers.js'
 import { openNav } from '../__helpers/e2e/toggleNav.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
@@ -297,6 +302,81 @@ test.describe('Hierarchy Sidebar', () => {
       // Switch back to Organizations - should still be expanded (independent state)
       await page.getByRole('tab', { name: 'Organizations' }).click()
       await expect(page.getByRole('tree').getByText('Engineering Division')).toBeVisible()
+    })
+  })
+
+  test.describe('List View Mutations', () => {
+    let departmentsURL: AdminUrlUtil
+
+    test.beforeAll(() => {
+      departmentsURL = new AdminUrlUtil(serverURL, 'departments')
+    })
+
+    /** Navigate to the departments list view and return its sidebar tree. */
+    const openDepartmentsTree = async (url: string): Promise<Locator> => {
+      await page.goto(url)
+      await openNav(page)
+      await page.getByRole('tab', { name: 'Departments' }).click()
+
+      const tree = page.getByRole('tree')
+      await expect(tree).toBeVisible()
+      return tree
+    }
+
+    test('should remove a document deleted from the list view from the sidebar tree', async () => {
+      const deptName = `Delete From List ${Date.now()}`
+
+      const dept = await payload.create({ collection: 'departments', data: { deptName } })
+      createdDeptIds.push(dept.id)
+
+      const tree = await openDepartmentsTree(departmentsURL.list)
+      await expect(tree.getByText(deptName)).toBeVisible()
+
+      await selectTableRow(page, deptName)
+      await page.locator('.delete-documents__toggle').click()
+      await page.locator('#confirm-delete-many-docs [data-dialog-action="confirm"]').click()
+
+      await expect(page.locator(`tbody tr:has-text("${deptName}")`)).toBeHidden()
+      await expect(tree.getByText(deptName)).toBeHidden()
+    })
+
+    test('should add a document created from the create view to the sidebar tree', async () => {
+      const deptName = `Create From List ${Date.now()}`
+
+      const tree = await openDepartmentsTree(departmentsURL.list)
+      await expect(tree.getByText(deptName)).toBeHidden()
+
+      await page.locator('.list-controls').getByRole('link', { name: 'Create New' }).click()
+      await page.locator('#field-deptName').fill(deptName)
+      await saveDocAndAssert(page)
+
+      await expect(tree.getByText(deptName)).toBeVisible()
+
+      const { docs } = await payload.find({
+        collection: 'departments',
+        where: { deptName: { equals: deptName } },
+      })
+      createdDeptIds.push(...docs.map(({ id }) => id))
+    })
+
+    test('should reflect a title renamed from the edit view in the sidebar tree', async () => {
+      const originalName = `Rename Me ${Date.now()}`
+      const renamedName = `${originalName} Renamed`
+
+      const dept = await payload.create({
+        collection: 'departments',
+        data: { deptName: originalName },
+      })
+      createdDeptIds.push(dept.id)
+
+      const tree = await openDepartmentsTree(departmentsURL.edit(dept.id))
+      await expect(tree.getByText(originalName, { exact: true })).toBeVisible()
+
+      await page.locator('#field-deptName').fill(renamedName)
+      await saveDocAndAssert(page)
+
+      await expect(tree.getByText(renamedName)).toBeVisible()
+      await expect(tree.getByText(originalName, { exact: true })).toBeHidden()
     })
   })
 

@@ -10,6 +10,7 @@ import { toast } from 'sonner'
 
 import { CheckboxInput } from '../../fields/Checkbox/Input.js'
 import { useConfig } from '../../providers/Config/index.js'
+import { useHierarchy } from '../../providers/Hierarchy/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
@@ -105,6 +106,7 @@ export function DeleteMany({
   const { code: locale } = useLocale()
   const { i18n } = useTranslation()
   const { openModal } = useModal()
+  const { refreshTree } = useHierarchy()
 
   const [deletePermanently, setDeletePermanently] = React.useState(false)
   const confirmManyDeleteDrawerSlug = `${modalPrefix ? `${modalPrefix}-` : ''}confirm-delete-many-docs`
@@ -235,6 +237,12 @@ export function DeleteMany({
             totalCount: json.totalDocs,
           }
 
+          // Hierarchy sidebar tabs render their tree from a server snapshot taken when they
+          // mounted, so a route refresh alone leaves the deleted nodes on screen.
+          if (collectionConfig.hierarchy && deletedDocs > 0) {
+            refreshTree(relationTo)
+          }
+
           if (deleteManyResponse.status > 400 && json?.errors.length === 0) {
             toast.error(t('error:unknown'))
             result[relationTo].errors = [t('error:unknown')]
@@ -268,6 +276,7 @@ export function DeleteMany({
     search,
     api,
     i18n,
+    refreshTree,
     viewType,
     where,
     t,

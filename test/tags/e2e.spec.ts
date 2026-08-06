@@ -7,7 +7,11 @@ import { fileURLToPath } from 'url'
 import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { Config, Tag } from './payload-types.js'
 
-import { ensureCompilationIsDone, initPageConsoleErrorCatch } from '../__helpers/e2e/helpers.js'
+import {
+  ensureCompilationIsDone,
+  initPageConsoleErrorCatch,
+  selectTableRow,
+} from '../__helpers/e2e/helpers.js'
 import { openNav } from '../__helpers/e2e/toggleNav.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
@@ -118,7 +122,8 @@ test.describe('Tags', () => {
 
   test.afterAll(async () => {
     for (const id of createdTagIds) {
-      await payload.delete({ id, collection: tagsSlug })
+      // Tags deleted through the UI during a test are already gone
+      await payload.delete({ id, collection: tagsSlug }).catch(() => {})
     }
   })
 
@@ -161,6 +166,23 @@ test.describe('Tags', () => {
       await createChildTag(childName)
 
       await expect(tree.getByText(childName)).toBeVisible()
+    })
+
+    test('should remove a tag deleted from the list view from the sidebar tree', async () => {
+      const tagName = `Delete From List ${Date.now()}`
+
+      const tag = await payload.create({ collection: tagsSlug, data: { name: tagName } })
+      createdTagIds.push(tag.id)
+
+      const tree = await openTagsTree()
+      await expect(tree.getByText(tagName)).toBeVisible()
+
+      await selectTableRow(page, tagName)
+      await page.locator('.delete-documents__toggle').click()
+      await page.locator('#confirm-delete-many-docs [data-dialog-action="confirm"]').click()
+
+      await expect(page.locator(`tbody tr:has-text("${tagName}")`)).toBeHidden()
+      await expect(tree.getByText(tagName)).toBeHidden()
     })
   })
 })
