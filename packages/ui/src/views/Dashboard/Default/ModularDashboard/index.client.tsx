@@ -5,12 +5,12 @@ import type { ClientWidget, WidgetWidth } from 'payload'
 
 import { DndContext, DragOverlay, useDraggable, useDroppable } from '@dnd-kit/core'
 import { snapCenterToCursor } from '@dnd-kit/modifiers'
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 
+import { Button } from '../../../../elements/Button/index.js'
 import { Popup } from '../../../../elements/Popup/index.js'
 import * as PopupList from '../../../../elements/Popup/PopupButtonList/index.js'
 import { ChevronIcon } from '../../../../icons/Chevron/index.js'
-import { XIcon } from '../../../../icons/X/index.js'
 import { useTranslation } from '../../../../providers/Translation/index.js'
 import { DashboardStepNav } from './DashboardStepNav.js'
 import { useDashboardLayout } from './useDashboardLayout.js'
@@ -86,7 +86,14 @@ export function ModularDashboardClient({
   } = useDashboardLayout(initialLayout)
 
   const [activeDragId, setActiveDragId] = useState<null | string>(null)
+  const [activeControlsWidgetID, setActiveControlsWidgetID] = useState<null | string>(null)
   const sensors = useDashboardSensors()
+
+  useEffect(() => {
+    if (!isEditing) {
+      setActiveControlsWidgetID(null)
+    }
+  }, [isEditing])
 
   return (
     <div>
@@ -160,10 +167,21 @@ export function ModularDashboardClient({
                 }}
                 width={widget.item.width}
               >
-                <div className={`widget-wrapper ${isEditing ? 'widget-wrapper--editing' : ''}`}>
+                <div
+                  className={[
+                    'widget-wrapper',
+                    isEditing ? 'widget-wrapper--editing' : '',
+                    activeControlsWidgetID === widget.item.id
+                      ? 'widget-wrapper--controls-active'
+                      : '',
+                  ]
+                    .filter(Boolean)
+                    .join(' ')}
+                >
                   <div aria-hidden={isEditing} className="widget-content" inert={isEditing}>
                     {widget.component}
                   </div>
+                  {isEditing && <div aria-hidden className="widget-wrapper__edit-overlay" />}
                   {isEditing && (
                     <div
                       className="widget-wrapper__controls"
@@ -180,18 +198,20 @@ export function ModularDashboardClient({
                         currentWidth={widget.item.width}
                         maxWidth={widget.item.maxWidth}
                         minWidth={widget.item.minWidth}
+                        onOpenChange={(isOpen) => {
+                          setActiveControlsWidgetID(isOpen ? widget.item.id : null)
+                        }}
                         onResize={(width) => resizeWidget(widget.item.id, width)}
                       />
-                      <button
+                      <Button
+                        aria-label={t('dashboard:deleteWidget', { id: widget.item.id })}
+                        buttonStyle="destructive"
                         className="widget-wrapper__delete-btn"
+                        icon="x"
+                        margin={false}
                         onClick={() => deleteWidget(widget.item.id)}
-                        type="button"
-                      >
-                        <span className="sr-only">
-                          {t('dashboard:deleteWidget', { id: widget.item.id })}
-                        </span>
-                        <XIcon />
-                      </button>
+                        round
+                      />
                     </div>
                   )}
                 </div>
@@ -247,11 +267,13 @@ function WidgetWidthDropdown({
   currentWidth,
   maxWidth,
   minWidth,
+  onOpenChange,
   onResize,
 }: {
   currentWidth: WidgetWidth
   maxWidth: WidgetWidth
   minWidth: WidgetWidth
+  onOpenChange: (isOpen: boolean) => void
   onResize: (width: WidgetWidth) => void
 }) {
   // Filter options based on minWidth and maxWidth
@@ -275,17 +297,8 @@ function WidgetWidthDropdown({
 
   return (
     <Popup
-      button={
-        <button
-          className="widget-wrapper__size-btn"
-          onPointerDown={(e) => e.stopPropagation()}
-          type="button"
-        >
-          <span className="widget-wrapper__size-btn-text">{currentWidth}</span>
-          <ChevronIcon className="widget-wrapper__size-btn-icon" />
-        </button>
-      }
-      buttonType="custom"
+      onToggleClose={() => onOpenChange(false)}
+      onToggleOpen={onOpenChange}
       render={({ close }) => (
         <PopupList.ButtonGroup>
           {validOptions.map((option) => {
@@ -307,6 +320,23 @@ function WidgetWidthDropdown({
             )
           })}
         </PopupList.ButtonGroup>
+      )}
+      renderButton={({ active: _active, onClick, onKeyDown, ...ariaProps }) => (
+        <Button
+          buttonStyle="secondary"
+          className="widget-wrapper__size-btn"
+          extraButtonProps={{
+            onKeyDown,
+            onPointerDown: (e) => e.stopPropagation(),
+            ...ariaProps,
+          }}
+          icon={<ChevronIcon className="widget-wrapper__size-btn-icon" size={16} />}
+          margin={false}
+          onClick={onClick}
+          selected={_active}
+        >
+          {currentWidth}
+        </Button>
       )}
       size="small"
       verticalAlign="bottom"
@@ -372,7 +402,7 @@ function DroppableItem({ id, position }: { id: string; position: 'after' | 'befo
         bottom: 0,
         borderRadius: '1000px',
         width: '4px',
-        backgroundColor: isOver ? 'var(--color-bg-success)' : 'transparent',
+        backgroundColor: isOver ? 'var(--color-bg-brand-secondary)' : 'transparent',
         marginBottom: '10px',
         marginTop: '10px',
         pointerEvents: 'none',
