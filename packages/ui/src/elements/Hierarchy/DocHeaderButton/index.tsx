@@ -1,5 +1,6 @@
 'use client'
 import { formatAdminURL } from 'payload/shared'
+import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 import type { SelectionWithPath } from '../Modal/types.js'
@@ -7,6 +8,7 @@ import type { SelectionWithPath } from '../Modal/types.js'
 import { useForm, useFormFields } from '../../../forms/Form/context.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useDocumentInfo } from '../../../providers/DocumentInfo/index.js'
+import { useLocale } from '../../../providers/Locale/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { Button } from '../../Button/index.js'
 import { useHierarchyModal } from '../Modal/useHierarchyModal.js'
@@ -35,6 +37,7 @@ export const HierarchyButtonClient: React.FC<HierarchyButtonClientProps> = ({
   const { config, getEntityConfig } = useConfig()
   const { collectionSlug: documentCollectionSlug } = useDocumentInfo()
   const { disabled: formDisabled, setModified } = useForm()
+  const { code: locale } = useLocale()
   const readOnly = readOnlyFromProps || formDisabled
   const dispatchField = useFormFields(([_, dispatch]) => dispatch)
 
@@ -69,10 +72,11 @@ export const HierarchyButtonClient: React.FC<HierarchyButtonClientProps> = ({
       if (currentId && (typeof currentId === 'string' || typeof currentId === 'number')) {
         setIsLoading(true)
         try {
+          const queryString = qs.stringify({ locale }, { addQueryPrefix: true })
           const response = await fetch(
             formatAdminURL({
               apiRoute: config.routes.api,
-              path: `/${hierarchyCollectionSlug}/${currentId}`,
+              path: `/${hierarchyCollectionSlug}/${currentId}${queryString}`,
               serverURL: config.serverURL,
             }),
             { credentials: 'include' },
@@ -98,7 +102,15 @@ export const HierarchyButtonClient: React.FC<HierarchyButtonClientProps> = ({
     }
 
     void fetchItemName()
-  }, [currentId, hierarchyCollectionSlug, config.routes.api, config.serverURL, useAsTitle, t])
+  }, [
+    currentId,
+    hierarchyCollectionSlug,
+    config.routes.api,
+    config.serverURL,
+    locale,
+    useAsTitle,
+    t,
+  ])
 
   const handleModalSave = useCallback(
     ({

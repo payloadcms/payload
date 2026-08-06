@@ -5,6 +5,7 @@ type FetchAncestorPathArgs = {
   api: string
   collectionSlug: string
   itemId: number | string
+  locale?: string
   parentFieldName: string
   serverURL: string
 }
@@ -20,6 +21,7 @@ export async function fetchAncestorPath({
   api,
   collectionSlug,
   itemId,
+  locale,
   parentFieldName,
   serverURL,
 }: FetchAncestorPathArgs): Promise<(number | string)[]> {
@@ -27,6 +29,7 @@ export async function fetchAncestorPath({
     {
       depth: MAX_HIERARCHY_DEPTH,
       limit: 1,
+      locale,
       select: { [parentFieldName]: true },
       where: { id: { equals: itemId } },
     },

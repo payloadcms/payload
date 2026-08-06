@@ -30,6 +30,7 @@ type BuildLocalizedPathsArgs = {
   /**
    * The localized title value object (e.g., { en: "Home", es: "Inicio", de: "Startseite" })
    */
+  titlePathSeparator: string
   titleValue: Record<string, string>
 }
 
@@ -80,7 +81,15 @@ type BuildLocalizedPathsResult = {
 export function buildLocalizedHierarchyPaths(
   args: BuildLocalizedPathsArgs,
 ): BuildLocalizedPathsResult {
-  const { parentSlugPath, parentTitlePath, req, slugify, slugValue, titleValue } = args
+  const {
+    parentSlugPath,
+    parentTitlePath,
+    req,
+    slugify,
+    slugValue,
+    titlePathSeparator,
+    titleValue,
+  } = args
 
   const slugPathsByLocale: Record<string, string> = {}
   const titlePathsByLocale: Record<string, string> = {}
@@ -115,7 +124,7 @@ export function buildLocalizedHierarchyPaths(
         ? `${parentSlugPath[loc]}/${slugSegment}`
         : slugSegment
       titlePathsByLocale[loc] = parentTitlePath
-        ? `${parentTitlePath[loc]}/${titleSegment}`
+        ? `${parentTitlePath[loc]}${titlePathSeparator}${titleSegment}`
         : titleSegment
     }
   }

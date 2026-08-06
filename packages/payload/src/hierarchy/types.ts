@@ -86,6 +86,13 @@ export type HierarchyConfig = {
    */
   parentFieldName: string
   /**
+   * Controls how `_h_slugPath` / `_h_titlePath` are materialized for this collection.
+   * - `virtual`: compute on read, avoid subtree rewrite cost
+   * - `stored`: persist and index path fields for stronger queryability
+   * @default 'virtual'
+   */
+  pathStrategy?: 'stored' | 'virtual'
+  /**
    * Name of the field to use for slug path generation.
    * When set, uses this field's value directly instead of slugifying the title.
    * Useful when you have a dedicated slug field (e.g., 'slug') separate from the title.
@@ -105,11 +112,34 @@ export type HierarchyConfig = {
    */
   slugPathFieldName?: string
   /**
+   * Name of the field to use for title path generation.
+   * Defaults to the collection's `admin.useAsTitle`.
+   */
+  titleField?: string
+  /**
    * Name of the virtual field that will contain the title-based breadcrumb path
    * @default HIERARCHY_TITLE_PATH_FIELD ('_h_titlePath')
    */
   titlePathFieldName?: string
+  /**
+   * Separator used when joining title path segments.
+   * This only affects `_h_titlePath`; `_h_slugPath` always uses `/`.
+   * @default ' / '
+   */
+  titlePathSeparator?: string
 }
+
+/**
+ * Configuration options for nested docs hierarchy preset.
+ * Applies page-tree defaults while keeping the underlying hierarchy API configurable.
+ */
+export type NestedDocsConfig = {
+  /**
+   * Nested docs always defaults to stored paths, but can be overridden for experimentation.
+   * Stored is the intended page-like behavior because `_h_slugPath` is queryable.
+   */
+  pathStrategy?: 'stored' | 'virtual'
+} & Omit<Partial<HierarchyConfig>, 'pathStrategy'>
 
 /**
  * Sanitized hierarchy configuration with all defaults applied
@@ -135,6 +165,7 @@ export type SanitizedHierarchyConfig = {
    */
   joinField?: HierarchyJoinFieldConfig
   parentFieldName: string
+  pathStrategy: 'stored' | 'virtual'
   /**
    * Auto-populated during validation - maps collection slug to field info
    */
@@ -145,7 +176,9 @@ export type SanitizedHierarchyConfig = {
   slugField?: string
   slugify: (text: string) => string
   slugPathFieldName: string
+  titleField?: string
   titlePathFieldName: string
+  titlePathSeparator: string
 }
 
 /**

@@ -97,6 +97,20 @@ describe('Hierarchy', () => {
       expect(rootPage._h_titlePath).toBe('Root Page')
     })
 
+    it('should slugify the title when no slug field is configured', async () => {
+      const organization = await payload.create({
+        collection: 'organizations',
+        context: { computeHierarchyPaths: true },
+        data: {
+          parent: null,
+          title: 'No Slug Field',
+        },
+      })
+
+      expect(organization._h_slugPath).toBe('no-slug-field')
+      expect(organization._h_titlePath).toBe('No Slug Field')
+    })
+
     it('should compute correct paths for nested documents', async () => {
       // Create root
       const rootPage = await payload.create({
@@ -118,7 +132,7 @@ describe('Hierarchy', () => {
       })
 
       expect(childPage._h_slugPath).toBe('root/child')
-      expect(childPage._h_titlePath).toBe('Root/Child')
+      expect(childPage._h_titlePath).toBe('Root / Child')
 
       // Create grandchild
       const grandchildPage = await payload.create({
@@ -131,7 +145,7 @@ describe('Hierarchy', () => {
       })
 
       expect(grandchildPage._h_slugPath).toBe('root/child/grandchild')
-      expect(grandchildPage._h_titlePath).toBe('Root/Child/Grandchild')
+      expect(grandchildPage._h_titlePath).toBe('Root / Child / Grandchild')
     })
 
     it('should compute updated paths when parent changes', async () => {
@@ -166,7 +180,7 @@ describe('Hierarchy', () => {
 
       // Check child path reflects new parent
       expect(updatedChild._h_slugPath).toBe('another-root/child')
-      expect(updatedChild._h_titlePath).toBe('Another Root/Child')
+      expect(updatedChild._h_titlePath).toBe('Another Root / Child')
 
       // Check grandchild path automatically reflects change (walks up parent chain)
       const updatedGrandchild = await payload.findByID({
@@ -176,7 +190,7 @@ describe('Hierarchy', () => {
       })
 
       expect(updatedGrandchild._h_slugPath).toBe('another-root/child/grandchild')
-      expect(updatedGrandchild._h_titlePath).toBe('Another Root/Child/Grandchild')
+      expect(updatedGrandchild._h_titlePath).toBe('Another Root / Child / Grandchild')
     })
 
     it('should compute updated paths when ancestor title changes', async () => {
@@ -206,7 +220,7 @@ describe('Hierarchy', () => {
       })
 
       expect(updatedChild._h_slugPath).toBe('updated-root/child')
-      expect(updatedChild._h_titlePath).toBe('Updated Root/Child')
+      expect(updatedChild._h_titlePath).toBe('Updated Root / Child')
     })
 
     it('should handle moving to root level', async () => {
@@ -430,7 +444,7 @@ describe('Hierarchy', () => {
       })
 
       expect(childDept._breadcrumbSlug).toBe('engineering/frontend')
-      expect(childDept._breadcrumbTitle).toBe('Engineering/Frontend')
+      expect(childDept._breadcrumbTitle).toBe('Engineering / Frontend')
     })
   })
 
@@ -454,7 +468,7 @@ describe('Hierarchy', () => {
           collection: 'organizations',
           context: { computeHierarchyPaths: true },
           data: {
-            parent: currentParent?.id || null,
+            parent: currentParent ? currentParent.id : null,
             title: `Level ${i}`,
           },
         })
@@ -713,9 +727,67 @@ describe('Hierarchy', () => {
       })
 
       expect(childWithAllLocales._h_titlePath).toEqual({
-        de: 'Kleidung/Hemden',
-        en: 'Clothing/Shirts',
-        es: 'Ropa/Camisas',
+        de: 'Kleidung / Hemden',
+        en: 'Clothing / Shirts',
+        es: 'Ropa / Camisas',
+      })
+    })
+
+    it('should generate localized virtual paths when hierarchy.titleField is localized', async () => {
+      const parent = await payload.create({
+        collection: 'localized-title-field-pages',
+        data: {
+          fallbackTitle: 'Fallback Parent',
+          localizedTitle: 'Parent',
+          parent: null,
+        },
+        locale: 'en',
+      })
+
+      await payload.update({
+        id: parent.id,
+        collection: 'localized-title-field-pages',
+        data: {
+          localizedTitle: 'Padre',
+        },
+        locale: 'es',
+      })
+
+      const child = await payload.create({
+        collection: 'localized-title-field-pages',
+        data: {
+          fallbackTitle: 'Fallback Child',
+          localizedTitle: 'Child',
+          parent: parent.id,
+        },
+        locale: 'en',
+      })
+
+      await payload.update({
+        id: child.id,
+        collection: 'localized-title-field-pages',
+        data: {
+          localizedTitle: 'Hijo',
+        },
+        locale: 'es',
+      })
+
+      const childWithAllLocales = await payload.findByID({
+        collection: 'localized-title-field-pages',
+        context: { computeHierarchyPaths: true },
+        id: child.id,
+        locale: 'all',
+      })
+
+      expect(childWithAllLocales._h_slugPath).toEqual({
+        de: 'parent/child',
+        en: 'parent/child',
+        es: 'padre/hijo',
+      })
+      expect(childWithAllLocales._h_titlePath).toEqual({
+        de: 'Parent / Child',
+        en: 'Parent / Child',
+        es: 'Padre / Hijo',
       })
     })
 
@@ -811,9 +883,9 @@ describe('Hierarchy', () => {
       })
 
       expect(updatedChild._h_titlePath).toEqual({
-        de: 'Bekleidung/Kleidung/Hemden',
-        en: 'Apparel/Clothing/Shirts',
-        es: 'Indumentaria/Ropa/Camisas',
+        de: 'Bekleidung / Kleidung / Hemden',
+        en: 'Apparel / Clothing / Shirts',
+        es: 'Indumentaria / Ropa / Camisas',
       })
     })
 
@@ -901,9 +973,9 @@ describe('Hierarchy', () => {
       })
 
       expect(updatedChild._h_titlePath).toEqual({
-        de: 'Bekleidung/Hemden',
-        en: 'Apparel/Shirts',
-        es: 'Indumentaria/Camisas',
+        de: 'Bekleidung / Hemden',
+        en: 'Apparel / Shirts',
+        es: 'Indumentaria / Camisas',
       })
     })
 
@@ -1143,9 +1215,9 @@ describe('Hierarchy', () => {
       })
 
       expect(draftChild._h_titlePath).toEqual({
-        de: 'Fahrplan/Zukunft/Pläne',
-        en: 'Roadmap/Future/Plans',
-        es: 'Hoja de Ruta/Futuro/Planes',
+        de: 'Fahrplan / Zukunft / Pläne',
+        en: 'Roadmap / Future / Plans',
+        es: 'Hoja de Ruta / Futuro / Planes',
       })
     })
   })
@@ -1217,7 +1289,7 @@ describe('Hierarchy', () => {
       // Verify all paths computed correctly
       for (const doc of results.docs) {
         expect(doc._h_slugPath).toContain('root/category/')
-        expect(doc._h_titlePath).toContain('Root/Category/')
+        expect(doc._h_titlePath).toContain('Root / Category / ')
       }
     })
 
@@ -1342,7 +1414,7 @@ describe('Hierarchy', () => {
 
       // Should use slug field values for path
       expect(childPage._h_slugPath).toBe('home/services')
-      expect(childPage._h_titlePath).toBe('Home Page/Our Services')
+      expect(childPage._h_titlePath).toBe('Home Page / Our Services')
     })
 
     it('should fall back to slugified title when slug field is empty', async () => {
@@ -1405,7 +1477,7 @@ describe('Hierarchy', () => {
 
       // Should have full paths (not flat paths)
       expect(result._h_slugPath).toBe('parent-org/child-org')
-      expect(result._h_titlePath).toBe('Parent Org/Child Org')
+      expect(result._h_titlePath).toBe('Parent Org / Child Org')
     })
 
     it('should not expose auto-added fields in response', async () => {
@@ -1508,7 +1580,7 @@ describe('Hierarchy', () => {
 
       // Should have full 3-level path
       expect(result._h_slugPath).toBe('level-1/level-2/level-3')
-      expect(result._h_titlePath).toBe('Level 1/Level 2/Level 3')
+      expect(result._h_titlePath).toBe('Level 1 / Level 2 / Level 3')
     })
   })
 })

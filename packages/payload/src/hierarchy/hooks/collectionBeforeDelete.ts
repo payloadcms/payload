@@ -13,7 +13,7 @@ type Args = {
   parentFieldName: string
 }
 
-export const hierarchyCollectionBeforeDelete =
+export const collectionBeforeDelete =
   ({ parentFieldName }: Args): CollectionBeforeDeleteHook =>
   async ({ id, collection, req }) => {
     req.context = req.context || {}

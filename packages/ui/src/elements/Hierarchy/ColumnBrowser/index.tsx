@@ -18,6 +18,7 @@ import type {
 import { useEffectEvent } from '../../../hooks/useEffectEvent.js'
 import { useAuth } from '../../../providers/Auth/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
+import { useLocale } from '../../../providers/Locale/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { isSuperset } from '../../../utilities/isSuperset.js'
 import { Spinner } from '../../Spinner/index.js'
@@ -42,6 +43,7 @@ export const HierarchyColumnBrowser = function HierarchyColumnBrowser({
   useAsTitle = 'id',
 }: { ref?: React.RefObject<HierarchyColumnBrowserRef | null> } & HierarchyColumnBrowserProps) {
   const { i18n } = useTranslation()
+  const { code: locale } = useLocale()
   const { permissions } = useAuth()
   const {
     config: {
@@ -131,7 +133,7 @@ export const HierarchyColumnBrowser = function HierarchyColumnBrowser({
       const whereWithBaseFilter = combineWhereConstraints([where, baseFilter])
 
       const queryString = qs.stringify(
-        { limit: treeLimit, page, sort: useAsTitle, where: whereWithBaseFilter },
+        { limit: treeLimit, locale, page, sort: useAsTitle, where: whereWithBaseFilter },
         { addQueryPrefix: true },
       )
 
@@ -184,6 +186,7 @@ export const HierarchyColumnBrowser = function HierarchyColumnBrowser({
       baseFilter,
       filterByCollection,
       hierarchyConfig,
+      locale,
       parentFieldName,
       serverURL,
       hierarchyCollectionSlug,

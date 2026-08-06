@@ -264,6 +264,8 @@ export const updateDocument = async <
     skipValidation:
       // only skip validation for drafts when draft validation is false
       (isSavingDraft && !hasDraftValidationEnabled(collectionConfig)) ||
+      // Skip validation for internal hierarchy path sync updates since they only write generated path fields
+      req.context.skipHierarchyStoredPathSync === true ||
       // Skip validation for trash operations since they're just metadata updates
       (collectionConfig.trash && (Boolean(data?.deletedAt) || isRestoringDraftFromTrash)) ||
       // Skip validation for unpublish operations — they only change _status, not document data
