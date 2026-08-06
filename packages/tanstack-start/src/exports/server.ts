@@ -6,6 +6,7 @@ export { getRequestI18n } from '../utilities/getRequestI18n.server.js'
 export { handleGraphQL } from '../utilities/graphqlHandler.server.js'
 export { handleAPIRoute } from '../utilities/handleAPIRoute.server.js'
 export { handleServerFunctions } from '../utilities/handleServerFunctions.js'
+export { initReq } from '../utilities/initReq.server.js'
 export {
   loadAdminPage,
   type LoadAdminPageArgs,

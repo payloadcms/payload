@@ -45,6 +45,11 @@
       "types": "./src/exports/routes.ts",
       "default": "./src/exports/routes.ts"
     },
+    "./server": {
+      "import": "./src/exports/server.ts",
+      "types": "./src/exports/server.ts",
+      "default": "./src/exports/server.ts"
+    },
     "./auth": {
       "import": "./src/exports/auth.ts",
       "types": "./src/exports/auth.ts",
@@ -156,6 +161,11 @@
         "import": "./dist/exports/routes.js",
         "types": "./dist/exports/routes.d.ts",
         "default": "./dist/exports/routes.js"
+      },
+      "./server": {
+        "import": "./dist/exports/server.js",
+        "types": "./dist/exports/server.d.ts",
+        "default": "./dist/exports/server.js"
       },
       "./auth": {
         "import": "./dist/exports/auth.js",

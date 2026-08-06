@@ -2,7 +2,7 @@ import type { ImportMap, SanitizedConfig } from 'payload'
 
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { initReq } from './initReq.js'
+import { initReq } from '@payloadcms/next/server'
 
 const { nextServerAdapter, payloadInitReq } = vi.hoisted(() => ({
   nextServerAdapter: {

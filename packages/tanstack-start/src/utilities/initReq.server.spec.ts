@@ -2,7 +2,7 @@ import type { ImportMap, SanitizedConfig, ServerAdapter } from 'payload'
 
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { initReq } from './initReq.server.js'
+import { initReq } from '@payloadcms/tanstack-start/server'
 
 const { getRequest, payloadInitReq, tanstackServerAdapter } = vi.hoisted(() => ({
   getRequest: vi.fn(),
