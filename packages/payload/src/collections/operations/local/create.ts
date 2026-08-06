@@ -77,8 +77,8 @@ type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType> = {
   locale?: TypedLocale
   /**
    * Skip access control.
-   * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the front-end.
-   * @default true
+   * Set to `true` to bypass Access Control for trusted server-side operations.
+   * @default false
    */
   overrideAccess?: boolean
   /**
@@ -106,7 +106,7 @@ type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType> = {
    */
   showHiddenFields?: boolean
   /**
-   * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
+   * Pass a user to use against access control checks. The user is ignored for access checks when `overrideAccess` is `true`.
    */
   user?: null | User
 } & Pick<FindOptions<TSlug, TSelect>, 'select'>
@@ -199,7 +199,7 @@ export async function createLocal<
     duplicateFromID,
     file,
     filePath,
-    overrideAccess = true,
+    overrideAccess = false,
     overwriteExistingFiles = false,
     populate,
     publishAllLocales,

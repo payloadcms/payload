@@ -9,6 +9,7 @@ export const seed = async (_payload: Payload) => {
     [
       () =>
         _payload.create({
+          overrideAccess: true,
           collection: 'users',
           data: {
             email: devUser.email,
@@ -19,6 +20,7 @@ export const seed = async (_payload: Payload) => {
         }),
       () =>
         _payload.create({
+          overrideAccess: true,
           collection: 'users',
           data: {
             email: regularUser.email,
@@ -29,6 +31,7 @@ export const seed = async (_payload: Payload) => {
         }),
       () =>
         _payload.create({
+          overrideAccess: true,
           collection: pagesSlug,
           data: {
             text: 'example page',
@@ -36,6 +39,7 @@ export const seed = async (_payload: Payload) => {
         }),
       () =>
         _payload.create({
+          overrideAccess: true,
           collection: postsSlug,
           data: {
             text: 'example post',
@@ -43,6 +47,7 @@ export const seed = async (_payload: Payload) => {
         }),
       () =>
         _payload.create({
+          overrideAccess: true,
           collection: simpleSlug,
           data: {
             fieldA: 'Initial value A',
@@ -51,6 +56,7 @@ export const seed = async (_payload: Payload) => {
         }),
       () =>
         _payload.create({
+          overrideAccess: true,
           collection: simpleWithVersionsSlug,
           data: {
             fieldA: 'Initial value A',

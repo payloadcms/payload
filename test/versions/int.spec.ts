@@ -57,6 +57,7 @@ describe('Versions', () => {
     ;({ payload, restClient } = await initPayloadInt(dirname))
 
     const newUser = await payload.create({
+      overrideAccess: true,
       collection: 'users',
       data: {
         email: devUser.email,
@@ -85,6 +86,7 @@ describe('Versions', () => {
 
   afterEach(async () => {
     await payload.delete({
+      overrideAccess: true,
       collection: 'payload-jobs',
       where: {},
     })
@@ -94,6 +96,7 @@ describe('Versions', () => {
     describe('Create', () => {
       it('should allow creating a draft with missing required field data', async () => {
         const draft = await payload.create({
+          overrideAccess: true,
           collection: autosaveCollectionSlug,
           data: {
             description: undefined,
@@ -110,6 +113,7 @@ describe('Versions', () => {
 
         // Create initial post
         const autosavePost = await payload.create({
+          overrideAccess: true,
           collection: autosaveCollectionSlug,
           data: {
             description: '345j23o4ifj34jf54g',
@@ -119,6 +123,7 @@ describe('Versions', () => {
 
         // Update to create a version
         await payload.update({
+          overrideAccess: true,
           id: autosavePost.id,
           collection: autosaveCollectionSlug,
           data: {
@@ -128,6 +133,7 @@ describe('Versions', () => {
 
         // Get versions
         const versions = await payload.findVersions({
+          overrideAccess: true,
           collection: autosaveCollectionSlug,
           where: {
             parent: {
@@ -137,6 +143,7 @@ describe('Versions', () => {
         })
 
         const updatedPost = await payload.findByID({
+          overrideAccess: true,
           id: autosavePost.id,
           collection: autosaveCollectionSlug,
         })
@@ -147,6 +154,7 @@ describe('Versions', () => {
 
       it('should allow saving multiple versions of models with unique fields', async () => {
         const autosavePost = await payload.create({
+          overrideAccess: true,
           collection: autosaveCollectionSlug,
           data: {
             description: 'description 1',
@@ -155,6 +163,7 @@ describe('Versions', () => {
         })
 
         await payload.update({
+          overrideAccess: true,
           id: autosavePost.id,
           collection: autosaveCollectionSlug,
           data: {
@@ -165,6 +174,7 @@ describe('Versions', () => {
         const finalDescription = 'final description'
 
         const secondUpdate = await payload.update({
+          overrideAccess: true,
           id: autosavePost.id,
           collection: autosaveCollectionSlug,
           data: {
@@ -178,6 +188,7 @@ describe('Versions', () => {
       it('should allow a version to be retrieved by ID', async () => {
         // Create a post and update it to generate a version
         const autosavePost = await payload.create({
+          overrideAccess: true,
           collection: autosaveCollectionSlug,
           data: {
             description: 'test description',
@@ -186,6 +197,7 @@ describe('Versions', () => {
         })
 
         await payload.update({
+          overrideAccess: true,
           id: autosavePost.id,
           collection: autosaveCollectionSlug,
           data: {
@@ -195,6 +207,7 @@ describe('Versions', () => {
 
         // Get the version ID
         const versions = await payload.findVersions({
+          overrideAccess: true,
           collection: autosaveCollectionSlug,
           where: {
             parent: {
@@ -207,6 +220,7 @@ describe('Versions', () => {
 
         // Retrieve version by ID
         const version = await payload.findVersionByID({
+          overrideAccess: true,
           id: versionID,
           collection: autosaveCollectionSlug,
         })
@@ -220,6 +234,7 @@ describe('Versions', () => {
 
         // Create initial post
         const autosavePost = await payload.create({
+          overrideAccess: true,
           collection: autosaveCollectionSlug,
           data: {
             description: 'test description',
@@ -228,6 +243,7 @@ describe('Versions', () => {
         })
 
         await payload.update({
+          overrideAccess: true,
           id: autosavePost.id,
           collection: autosaveCollectionSlug,
           data: {
@@ -236,6 +252,7 @@ describe('Versions', () => {
         })
 
         const updatedPostES = await payload.update({
+          overrideAccess: true,
           id: autosavePost.id,
           collection: autosaveCollectionSlug,
           data: {
@@ -249,6 +266,7 @@ describe('Versions', () => {
         const newEnglishTitle = 'New title in EN'
 
         await payload.update({
+          overrideAccess: true,
           id: autosavePost.id,
           collection: autosaveCollectionSlug,
           data: {
@@ -257,6 +275,7 @@ describe('Versions', () => {
         })
 
         const versions = await payload.findVersions({
+          overrideAccess: true,
           collection: autosaveCollectionSlug,
           locale: 'all',
           where: {
@@ -273,6 +292,7 @@ describe('Versions', () => {
       // https://github.com/payloadcms/payload/issues/4827
       it('should query drafts with relation', async () => {
         const draftPost = await payload.create({
+          overrideAccess: true,
           collection: draftCollectionSlug,
           data: {
             description: 'Description',
@@ -281,6 +301,7 @@ describe('Versions', () => {
         })
 
         await payload.create({
+          overrideAccess: true,
           collection: draftCollectionSlug,
           data: {
             description: 'Description',
@@ -297,8 +318,12 @@ describe('Versions', () => {
             },
           },
         }
-        const all = await payload.find(query)
-        const drafts = await payload.find({ ...query, draft: true })
+        const all = await payload.find({ ...{ overrideAccess: true }, ...query })
+        const drafts = await payload.find({
+          ...{ overrideAccess: true },
+          ...query,
+          draft: true,
+        })
 
         expect(all.docs).toHaveLength(1)
         expect(drafts.docs).toHaveLength(1)
@@ -306,6 +331,7 @@ describe('Versions', () => {
 
       it('should have different createdAt in a new version while the same version.createdAt', async () => {
         const doc = await payload.create({
+          overrideAccess: true,
           collection: autosaveCollectionSlug,
           data: { description: 'descr', title: 'title' },
         })
@@ -313,6 +339,7 @@ describe('Versions', () => {
         await wait(10)
 
         const upd = await payload.update({
+          overrideAccess: true,
           id: doc.id,
           collection: autosaveCollectionSlug,
           data: {},
@@ -323,6 +350,7 @@ describe('Versions', () => {
         const {
           docs: [latestVersionData],
         } = await payload.findVersions({
+          overrideAccess: true,
           collection: autosaveCollectionSlug,
           where: {
             and: [
@@ -344,6 +372,7 @@ describe('Versions', () => {
         expect(latestVersionData.version.createdAt).toBe(doc.createdAt)
 
         const fromNonVersionsTable = await payload.findByID({
+          overrideAccess: true,
           id: doc.id,
           collection: autosaveCollectionSlug,
           draft: false,
@@ -356,8 +385,9 @@ describe('Versions', () => {
       })
 
       it('should allow to create with a localized relationships inside a localized array and a block', async () => {
-        const post = await payload.create({ collection: 'posts', data: {} })
+        const post = await payload.create({ overrideAccess: true, collection: 'posts', data: {} })
         const res = await payload.create({
+          overrideAccess: true,
           collection: 'localized-posts',
           data: {
             blocks: [
@@ -378,6 +408,7 @@ describe('Versions', () => {
         const {
           docs: [resFromVersions],
         } = await payload.findVersions({
+          overrideAccess: true,
           collection: 'localized-posts',
           depth: 0,
           where: { parent: { equals: res.id } },
@@ -387,12 +418,14 @@ describe('Versions', () => {
 
       it('should not create new versions with autosave:true', async () => {
         const post = await payload.create({
+          overrideAccess: true,
           collection: 'autosave-posts',
           data: { _status: 'draft', description: 'description', title: 'post' },
           draft: true,
         })
 
         await payload.update({
+          overrideAccess: true,
           id: post.id,
           autosave: true,
           collection: 'autosave-posts',
@@ -402,6 +435,7 @@ describe('Versions', () => {
 
         const getVersionsCount = async () => {
           const { totalDocs: versionsCount } = await payload.countVersions({
+            overrideAccess: true,
             collection: 'autosave-posts',
             where: {
               parent: { equals: post.id },
@@ -415,6 +449,7 @@ describe('Versions', () => {
 
         // id
         await payload.update({
+          overrideAccess: true,
           id: post.id,
           autosave: true,
           collection: 'autosave-posts',
@@ -426,6 +461,7 @@ describe('Versions', () => {
 
         // where
         await payload.update({
+          overrideAccess: true,
           autosave: true,
           collection: 'autosave-posts',
           data: { title: 'post-updated-2' },
@@ -440,12 +476,14 @@ describe('Versions', () => {
         // should show the draft changes ("Changed" status). Previously, reload showed
         // "Published" status with the button disabled, even though draft content persisted.
         const published = await payload.create({
+          overrideAccess: true,
           collection: autosaveCollectionSlug,
           data: { _status: 'published', description: 'original', title: 'Published Post' },
         })
 
         // Autosave a change on the published document
         await payload.update({
+          overrideAccess: true,
           id: published.id,
           autosave: true,
           collection: autosaveCollectionSlug,
@@ -455,6 +493,7 @@ describe('Versions', () => {
 
         // Simulate page reload: read the latest draft version (what getLatestCollectionVersion does)
         const { docs: latestVersions } = await payload.findVersions({
+          overrideAccess: true,
           collection: autosaveCollectionSlug,
           limit: 1,
           sort: '-updatedAt',
@@ -472,12 +511,14 @@ describe('Versions', () => {
         // Bug: Auto Save when changing content kept adding a new version EVERY time
         // instead of updating the existing draft one.
         const published = await payload.create({
+          overrideAccess: true,
           collection: autosaveCollectionSlug,
           data: { _status: 'published', description: 'desc', title: 'Original' },
         })
 
         // First autosave creates a draft version
         await payload.update({
+          overrideAccess: true,
           id: published.id,
           autosave: true,
           collection: autosaveCollectionSlug,
@@ -486,12 +527,14 @@ describe('Versions', () => {
         })
 
         const countAfterFirst = await payload.countVersions({
+          overrideAccess: true,
           collection: autosaveCollectionSlug,
           where: { parent: { equals: published.id } },
         })
 
         // Second autosave should update the existing draft, NOT create a new one
         await payload.update({
+          overrideAccess: true,
           id: published.id,
           autosave: true,
           collection: autosaveCollectionSlug,
@@ -500,6 +543,7 @@ describe('Versions', () => {
         })
 
         const countAfterSecond = await payload.countVersions({
+          overrideAccess: true,
           collection: autosaveCollectionSlug,
           where: { parent: { equals: published.id } },
         })
@@ -508,6 +552,7 @@ describe('Versions', () => {
 
         // Third autosave — still same count
         await payload.update({
+          overrideAccess: true,
           id: published.id,
           autosave: true,
           collection: autosaveCollectionSlug,
@@ -516,6 +561,7 @@ describe('Versions', () => {
         })
 
         const countAfterThird = await payload.countVersions({
+          overrideAccess: true,
           collection: autosaveCollectionSlug,
           where: { parent: { equals: published.id } },
         })
@@ -524,6 +570,7 @@ describe('Versions', () => {
 
         // Verify the latest version has the most recent content
         const { docs } = await payload.findVersions({
+          overrideAccess: true,
           collection: autosaveCollectionSlug,
           limit: 1,
           sort: '-updatedAt',
@@ -538,12 +585,14 @@ describe('Versions', () => {
         const collectionConfig = payload.collections[autosaveCollectionSlug].config
 
         const post = await payload.create({
+          overrideAccess: true,
           collection,
           data: { description: 'description' },
           draft: true,
         })
 
         const docWithLocales = await payload.findByID({
+          overrideAccess: true,
           collection,
           id: post.id,
           locale: 'all',
@@ -565,6 +614,7 @@ describe('Versions', () => {
     describe('Duplicate', () => {
       it('should duplicate a versioned document as a draft', async () => {
         const originalDoc = await payload.create({
+          overrideAccess: true,
           collection: draftCollectionSlug,
           data: {
             description: 'Original description',
@@ -575,6 +625,7 @@ describe('Versions', () => {
         })
 
         const duplicatedDoc = await payload.create({
+          overrideAccess: true,
           duplicateFromID: originalDoc.id,
           collection: draftCollectionSlug,
           data: {
@@ -585,12 +636,21 @@ describe('Versions', () => {
 
         expect(duplicatedDoc._status).toBe('draft')
 
-        await payload.delete({ collection: draftCollectionSlug, id: originalDoc.id })
-        await payload.delete({ collection: draftCollectionSlug, id: duplicatedDoc.id })
+        await payload.delete({
+          overrideAccess: true,
+          collection: draftCollectionSlug,
+          id: originalDoc.id,
+        })
+        await payload.delete({
+          overrideAccess: true,
+          collection: draftCollectionSlug,
+          id: duplicatedDoc.id,
+        })
       })
 
       it('should duplicate a draft document with empty required fields via local API', async () => {
         const originalDoc = await payload.create({
+          overrideAccess: true,
           collection: draftCollectionSlug,
           data: {
             title: 'Draft with partial data',
@@ -601,6 +661,7 @@ describe('Versions', () => {
 
         // description is required but missing — duplicate should still succeed as a draft
         const duplicatedDoc = await payload.duplicate({
+          overrideAccess: true,
           id: originalDoc.id,
           collection: draftCollectionSlug,
           draft: true,
@@ -610,12 +671,21 @@ describe('Versions', () => {
         expect(duplicatedDoc.id).not.toEqual(originalDoc.id)
         expect(duplicatedDoc.title).toContain('Draft with partial data')
 
-        await payload.delete({ collection: draftCollectionSlug, id: originalDoc.id })
-        await payload.delete({ collection: draftCollectionSlug, id: duplicatedDoc.id })
+        await payload.delete({
+          overrideAccess: true,
+          collection: draftCollectionSlug,
+          id: originalDoc.id,
+        })
+        await payload.delete({
+          overrideAccess: true,
+          collection: draftCollectionSlug,
+          id: duplicatedDoc.id,
+        })
       })
 
       it('should duplicate a draft document with empty required fields via REST API without explicit draft param', async () => {
         const originalDoc = await payload.create({
+          overrideAccess: true,
           collection: draftCollectionSlug,
           data: {
             title: 'REST draft partial',
@@ -639,8 +709,12 @@ describe('Versions', () => {
         expect(doc._status).toBe('draft')
         expect(doc.id).not.toEqual(originalDoc.id)
 
-        await payload.delete({ collection: draftCollectionSlug, id: originalDoc.id })
-        await payload.delete({ collection: draftCollectionSlug, id: doc.id })
+        await payload.delete({
+          overrideAccess: true,
+          collection: draftCollectionSlug,
+          id: originalDoc.id,
+        })
+        await payload.delete({ overrideAccess: true, collection: draftCollectionSlug, id: doc.id })
       })
     })
 
@@ -685,10 +759,12 @@ describe('Versions', () => {
 
       it('should paginate versions', async () => {
         const versions = await payload.findVersions({
+          overrideAccess: true,
           collection: draftCollectionSlug,
           limit: 5,
         })
         const versionsPage2 = await payload.findVersions({
+          overrideAccess: true,
           collection: draftCollectionSlug,
           limit: 5,
           page: 2,
@@ -704,12 +780,14 @@ describe('Versions', () => {
 
       it('should query drafts with sort', async () => {
         const draftsAscending = await payload.find({
+          overrideAccess: true,
           collection: draftCollectionSlug,
           draft: true,
           sort: 'title',
         })
 
         const draftsDescending = await payload.find({
+          overrideAccess: true,
           collection: draftCollectionSlug,
           draft: true,
           sort: '-title',
@@ -724,6 +802,7 @@ describe('Versions', () => {
 
       it('should `findVersions` with sort', async () => {
         const draftsAscending = await payload.findVersions({
+          overrideAccess: true,
           collection: draftCollectionSlug,
           draft: true,
           limit: 100,
@@ -731,6 +810,7 @@ describe('Versions', () => {
         })
 
         const draftsDescending = await payload.findVersions({
+          overrideAccess: true,
           collection: draftCollectionSlug,
           draft: true,
           limit: 100,
@@ -746,14 +826,21 @@ describe('Versions', () => {
 
       it('should findVersions with limit: 0', async () => {
         const doc = await payload.create({
+          overrideAccess: true,
           collection: draftCollectionSlug,
           data: { description: 'a', title: 'test-doc' },
         })
 
         for (let i = 0; i < 100; i++) {
-          await payload.update({ collection: draftCollectionSlug, id: doc.id, data: {} })
+          await payload.update({
+            overrideAccess: true,
+            collection: draftCollectionSlug,
+            id: doc.id,
+            data: {},
+          })
         }
         const res = await payload.findVersions({
+          overrideAccess: true,
           collection: draftCollectionSlug,
           limit: 0,
           where: { parent: { equals: doc.id } },
@@ -772,6 +859,7 @@ describe('Versions', () => {
 
       it('should return `findVersions` in correct order', async () => {
         const somePost = await payload.create({
+          overrideAccess: true,
           collection: draftCollectionSlug,
           data: {
             description: 'description 1',
@@ -780,6 +868,7 @@ describe('Versions', () => {
         })
 
         const updatedPost = await payload.update({
+          overrideAccess: true,
           id: somePost.id,
           collection: draftCollectionSlug,
           data: {
@@ -788,6 +877,7 @@ describe('Versions', () => {
         })
 
         const versions = await payload.findVersions({
+          overrideAccess: true,
           collection: draftCollectionSlug,
           where: {
             parent: { equals: somePost.id },
@@ -801,6 +891,7 @@ describe('Versions', () => {
         const updated = 'updated'
 
         const versionedPost = await payload.create({
+          overrideAccess: true,
           collection: draftCollectionSlug,
           data: {
             description: 'version description',
@@ -810,6 +901,7 @@ describe('Versions', () => {
         })
 
         let updatedPost = await payload.update({
+          overrideAccess: true,
           id: versionedPost.id,
           collection: draftCollectionSlug,
           data: {
@@ -826,6 +918,7 @@ describe('Versions', () => {
         })
 
         updatedPost = await payload.update({
+          overrideAccess: true,
           id: versionedPost.id,
           collection: draftCollectionSlug,
           data: {
@@ -849,6 +942,7 @@ describe('Versions', () => {
 
         // Make sure it was updated correctly
         const draftFromUpdatedPost = await payload.findByID({
+          overrideAccess: true,
           id: versionedPost.id,
           collection: draftCollectionSlug,
           draft: true,
@@ -858,6 +952,7 @@ describe('Versions', () => {
         expect(draftFromUpdatedPost.blocksField?.[0]!.localized).toStrictEqual(updated)
 
         const versions = await payload.findVersions({
+          overrideAccess: true,
           collection: draftCollectionSlug,
           where: {
             parent: {
@@ -869,6 +964,7 @@ describe('Versions', () => {
         const versionToRestore = versions.docs[versions.docs.length - 1]
         // restore to previous version
         const restoredVersion = await payload.restoreVersion({
+          overrideAccess: true,
           id: versionToRestore!.id,
           collection: draftCollectionSlug,
         })
@@ -879,6 +975,7 @@ describe('Versions', () => {
         })
 
         const latestDraft = await payload.findByID({
+          overrideAccess: true,
           id: versionedPost.id,
           collection: draftCollectionSlug,
           draft: true,
@@ -895,12 +992,14 @@ describe('Versions', () => {
 
       it('should restore a version via REST when a relationship field with filterOptions is set', async () => {
         const target = await payload.create({
+          overrideAccess: true,
           collection: draftCollectionSlug,
           data: { description: 'target', title: 'filter-options target' },
           draft: true,
         })
 
         const doc = await payload.create({
+          overrideAccess: true,
           collection: draftCollectionSlug,
           data: {
             description: 'has relation',
@@ -911,6 +1010,7 @@ describe('Versions', () => {
         })
 
         await payload.update({
+          overrideAccess: true,
           id: doc.id,
           collection: draftCollectionSlug,
           data: {
@@ -921,6 +1021,7 @@ describe('Versions', () => {
         })
 
         const versions = await payload.findVersions({
+          overrideAccess: true,
           collection: draftCollectionSlug,
           where: { parent: { equals: doc.id } },
         })
@@ -938,6 +1039,7 @@ describe('Versions', () => {
         expect(body.errors).toBeUndefined()
 
         const restored = await payload.findByID({
+          overrideAccess: true,
           id: doc.id,
           collection: draftCollectionSlug,
           depth: 0,
@@ -945,13 +1047,18 @@ describe('Versions', () => {
         })
         expect(restored.relationWithFilterOptions).toStrictEqual([target.id])
 
-        await payload.delete({ id: doc.id, collection: draftCollectionSlug })
-        await payload.delete({ id: target.id, collection: draftCollectionSlug })
+        await payload.delete({ overrideAccess: true, id: doc.id, collection: draftCollectionSlug })
+        await payload.delete({
+          overrideAccess: true,
+          id: target.id,
+          collection: draftCollectionSlug,
+        })
       })
 
       it('should not copy current document fields into restored version', async () => {
         // Create doc with a block (only text set), leaving radio/select/localized unset
         const doc = await payload.create({
+          overrideAccess: true,
           collection: draftCollectionSlug,
           data: {
             blocksField: [
@@ -970,6 +1077,7 @@ describe('Versions', () => {
 
         // Update doc to set radio, select, and block localized field
         await payload.update({
+          overrideAccess: true,
           id: doc.id,
           collection: draftCollectionSlug,
           data: {
@@ -991,6 +1099,7 @@ describe('Versions', () => {
 
         // Find versions and restore the original (oldest) version
         const versions = await payload.findVersions({
+          overrideAccess: true,
           collection: draftCollectionSlug,
           where: { parent: { equals: doc.id } },
         })
@@ -998,11 +1107,13 @@ describe('Versions', () => {
         const originalVersion = versions.docs[versions.docs.length - 1]
 
         await payload.restoreVersion({
+          overrideAccess: true,
           id: originalVersion!.id,
           collection: draftCollectionSlug,
         })
 
         const restored = await payload.findByID({
+          overrideAccess: true,
           id: doc.id,
           collection: draftCollectionSlug,
           draft: true,
@@ -1021,6 +1132,7 @@ describe('Versions', () => {
     it('should restore published version with correct data', async () => {
       // create a post
       const originalPost = await payload.create({
+        overrideAccess: true,
         collection: draftCollectionSlug,
         data: {
           _status: 'published',
@@ -1031,6 +1143,7 @@ describe('Versions', () => {
 
       // update the post
       await payload.update({
+        overrideAccess: true,
         id: originalPost.id,
         collection: draftCollectionSlug,
         data: {
@@ -1042,6 +1155,7 @@ describe('Versions', () => {
 
       // get the version id of the original draft
       const versions = await payload.findVersions({
+        overrideAccess: true,
         collection: draftCollectionSlug,
         where: {
           parent: {
@@ -1053,12 +1167,14 @@ describe('Versions', () => {
       // restore the version
       const versionToRestore = versions.docs[versions.docs.length - 1]
       const restoredVersion = await payload.restoreVersion({
+        overrideAccess: true,
         id: versionToRestore!.id,
         collection: draftCollectionSlug,
       })
 
       // get the latest draft
       const latestDraft = await payload.findByID({
+        overrideAccess: true,
         id: originalPost.id,
         collection: draftCollectionSlug,
         draft: true,
@@ -1071,6 +1187,7 @@ describe('Versions', () => {
 
     it('should restore a published version when required localized fields are empty in a non-default locale', async () => {
       const originalPost = await payload.create({
+        overrideAccess: true,
         collection: draftCollectionSlug,
         data: {
           _status: 'published',
@@ -1080,6 +1197,7 @@ describe('Versions', () => {
       })
 
       await payload.update({
+        overrideAccess: true,
         id: originalPost.id,
         collection: draftCollectionSlug,
         data: {
@@ -1091,6 +1209,7 @@ describe('Versions', () => {
       })
 
       const versions = await payload.findVersions({
+        overrideAccess: true,
         collection: draftCollectionSlug,
         where: {
           parent: {
@@ -1102,6 +1221,7 @@ describe('Versions', () => {
       const oldestVersion = versions.docs[versions.docs.length - 1]
 
       const restoredVersion = await payload.restoreVersion({
+        overrideAccess: true,
         id: oldestVersion!.id,
         collection: draftCollectionSlug,
         fallbackLocale: false,
@@ -1113,19 +1233,27 @@ describe('Versions', () => {
 
     it('findVersions - pagination should work correctly', async () => {
       const post = await payload.create({
+        overrideAccess: true,
         collection: draftCollectionSlug,
         data: { description: 'a', title: 'title' },
       })
       for (let i = 0; i < 100; i++) {
-        await payload.update({ id: post.id, collection: draftCollectionSlug, data: {} })
+        await payload.update({
+          overrideAccess: true,
+          id: post.id,
+          collection: draftCollectionSlug,
+          data: {},
+        })
       }
       const res = await payload.findVersions({
+        overrideAccess: true,
         collection: draftCollectionSlug,
         where: { parent: { equals: post.id } },
       })
       expect(res.totalDocs).toBe(101)
       expect(res.docs).toHaveLength(10)
       const resPaginationFalse = await payload.findVersions({
+        overrideAccess: true,
         collection: draftCollectionSlug,
         pagination: false,
         where: { parent: { equals: post.id } },
@@ -1135,6 +1263,7 @@ describe('Versions', () => {
       expect(resPaginationFalse.totalDocs).toBe(101)
 
       const resPaginationFalseLimit0 = await payload.findVersions({
+        overrideAccess: true,
         collection: draftCollectionSlug,
         limit: 0,
         pagination: false,
@@ -1156,6 +1285,7 @@ describe('Versions', () => {
         const originalTitle = 'Here is a published post'
 
         const originalPublishedPost = await payload.create({
+          overrideAccess: true,
           collection: autosaveCollectionSlug,
           data: {
             _status: 'published',
@@ -1167,6 +1297,7 @@ describe('Versions', () => {
         const patchedTitle = 'Here is a draft post with a patched title'
 
         await payload.update({
+          overrideAccess: true,
           id: originalPublishedPost.id,
           collection: autosaveCollectionSlug,
           data: {
@@ -1181,6 +1312,7 @@ describe('Versions', () => {
 
         // second update to existing draft
         await payload.update({
+          overrideAccess: true,
           id: originalPublishedPost.id,
           collection: autosaveCollectionSlug,
           data: {
@@ -1192,11 +1324,13 @@ describe('Versions', () => {
         })
 
         const publishedPost = await payload.findByID({
+          overrideAccess: true,
           id: originalPublishedPost.id,
           collection: autosaveCollectionSlug,
         })
 
         const draftPost = await payload.findByID({
+          overrideAccess: true,
           id: originalPublishedPost.id,
           collection: autosaveCollectionSlug,
           draft: true,
@@ -1210,6 +1344,7 @@ describe('Versions', () => {
 
       it('should have correct updatedAt timestamps when saving drafts', async () => {
         const created = await payload.create({
+          overrideAccess: true,
           collection: draftCollectionSlug,
           data: {
             description: 'desc',
@@ -1221,6 +1356,7 @@ describe('Versions', () => {
         await wait(10)
 
         const updated = await payload.update({
+          overrideAccess: true,
           id: created.id,
           collection: draftCollectionSlug,
           data: {
@@ -1237,6 +1373,7 @@ describe('Versions', () => {
 
       it('should have correct updatedAt timestamps when saving drafts with autosave', async () => {
         const created = await payload.create({
+          overrideAccess: true,
           collection: draftCollectionSlug,
           data: {
             description: 'desc',
@@ -1248,6 +1385,7 @@ describe('Versions', () => {
         await wait(10)
 
         const updated = await payload.update({
+          overrideAccess: true,
           id: created.id,
           autosave: true,
           collection: draftCollectionSlug,
@@ -1266,6 +1404,7 @@ describe('Versions', () => {
       it('should update correct version at doc that has hasMany field when saving with autosave', async () => {
         const firstDocTag: AutosaveMultiSelectPost['tag'] = ['blog', 'essay']
         const doc = await payload.create({
+          overrideAccess: true,
           collection: autosaveWithMultiSelectCollectionSlug,
           data: {
             _status: 'published',
@@ -1275,6 +1414,7 @@ describe('Versions', () => {
           draft: false,
         })
         await payload.update({
+          overrideAccess: true,
           id: doc.id,
           autosave: true,
           collection: autosaveWithMultiSelectCollectionSlug,
@@ -1286,6 +1426,7 @@ describe('Versions', () => {
         })
 
         const doc2 = await payload.create({
+          overrideAccess: true,
           collection: autosaveWithMultiSelectCollectionSlug,
           data: {
             _status: 'published',
@@ -1296,6 +1437,7 @@ describe('Versions', () => {
         })
 
         await payload.update({
+          overrideAccess: true,
           id: doc2.id,
           autosave: true,
           collection: autosaveWithMultiSelectCollectionSlug,
@@ -1306,6 +1448,7 @@ describe('Versions', () => {
           draft: true,
         })
         await payload.update({
+          overrideAccess: true,
           id: doc2.id,
           autosave: true,
           collection: autosaveWithMultiSelectCollectionSlug,
@@ -1317,6 +1460,7 @@ describe('Versions', () => {
         })
 
         const lastDocVersion = await payload.findVersions({
+          overrideAccess: true,
           collection: autosaveWithMultiSelectCollectionSlug,
           limit: 1,
           where: {
@@ -1335,11 +1479,13 @@ describe('Versions', () => {
 
       it('should save draft with hasMany select nested two array levels deep', async () => {
         const doc = await payload.create({
+          overrideAccess: true,
           collection: nestedArraySelectCollectionSlug,
           data: {},
         })
 
         const updated = await payload.update({
+          overrideAccess: true,
           id: doc.id,
           collection: nestedArraySelectCollectionSlug,
           data: {
@@ -1359,6 +1505,7 @@ describe('Versions', () => {
       it('should validate when publishing with the draft arg', async () => {
         // no title (not valid for publishing)
         const doc = await payload.create({
+          overrideAccess: true,
           collection: draftCollectionSlug,
           data: {
             description: 'desc',
@@ -1368,6 +1515,7 @@ describe('Versions', () => {
 
         await expect(
           payload.update({
+            overrideAccess: true,
             id: doc.id,
             collection: draftCollectionSlug,
             data: { _status: 'published' },
@@ -1377,6 +1525,7 @@ describe('Versions', () => {
 
         // succeeds but returns zero docs updated, with an error
         const updateManyResult = await payload.update({
+          overrideAccess: true,
           collection: draftCollectionSlug,
           data: { _status: 'published' },
           draft: true,
@@ -1394,6 +1543,7 @@ describe('Versions', () => {
       it('should update with autosave: true', async () => {
         // Save a draft
         const { id } = await payload.create({
+          overrideAccess: true,
           collection: autosaveCollectionSlug,
           data: { _status: 'draft', description: 'some-description', title: 'my-title' },
           draft: true,
@@ -1401,6 +1551,7 @@ describe('Versions', () => {
 
         // Autosave the same draft, calls db.updateVersion
         const updated1 = await payload.update({
+          overrideAccess: true,
           id,
           autosave: true,
           collection: autosaveCollectionSlug,
@@ -1411,6 +1562,7 @@ describe('Versions', () => {
         })
 
         const versionsCount = await payload.countVersions({
+          overrideAccess: true,
           collection: autosaveCollectionSlug,
           where: {
             parent: {
@@ -1421,6 +1573,7 @@ describe('Versions', () => {
 
         // This should not create a new version
         const updated2 = await payload.update({
+          overrideAccess: true,
           id,
           autosave: true,
           collection: autosaveCollectionSlug,
@@ -1431,6 +1584,7 @@ describe('Versions', () => {
         })
 
         const versionsCountAfter = await payload.countVersions({
+          overrideAccess: true,
           collection: autosaveCollectionSlug,
           where: {
             parent: {
@@ -1463,6 +1617,7 @@ describe('Versions', () => {
 
       it('should update many using drafts', async () => {
         const doc = await payload.create({
+          overrideAccess: true,
           collection: draftCollectionSlug,
           data: {
             _status: 'published',
@@ -1472,6 +1627,7 @@ describe('Versions', () => {
         })
 
         await payload.update({
+          overrideAccess: true,
           id: doc.id,
           collection: draftCollectionSlug,
           data: {
@@ -1482,6 +1638,7 @@ describe('Versions', () => {
 
         // bulk publish
         const updated = await payload.update({
+          overrideAccess: true,
           collection: draftCollectionSlug,
           data: {
             _status: 'published',
@@ -1499,6 +1656,7 @@ describe('Versions', () => {
 
         // get the published doc
         const findResult = await payload.find({
+          overrideAccess: true,
           collection: draftCollectionSlug,
           where: {
             id: { equals: doc.id },
@@ -1517,6 +1675,7 @@ describe('Versions', () => {
     describe('Delete', () => {
       it('should delete drafts', async () => {
         const postToDelete = await payload.create({
+          overrideAccess: true,
           collection: autosaveCollectionSlug,
           data: {
             _status: 'draft',
@@ -1535,6 +1694,7 @@ describe('Versions', () => {
         })
 
         await payload.delete({
+          overrideAccess: true,
           collection: autosaveCollectionSlug,
           where: {
             id: { equals: postToDelete.id },
@@ -1570,6 +1730,7 @@ describe('Versions', () => {
 
       it('creates proper number of drafts', async () => {
         const originalDraft = await payload.create({
+          overrideAccess: true,
           collection: draftCollectionSlug,
           data: {
             _status: 'draft',
@@ -1580,6 +1741,7 @@ describe('Versions', () => {
         })
 
         await payload.update({
+          overrideAccess: true,
           id: originalDraft.id,
           collection: draftCollectionSlug,
           data: {
@@ -1591,6 +1753,7 @@ describe('Versions', () => {
         })
 
         await payload.update({
+          overrideAccess: true,
           id: originalDraft.id,
           collection: draftCollectionSlug,
           data: {
@@ -1602,6 +1765,7 @@ describe('Versions', () => {
         })
 
         const mostRecentDraft = await payload.findByID({
+          overrideAccess: true,
           id: originalDraft.id,
           collection: draftCollectionSlug,
           draft: true,
@@ -1610,6 +1774,7 @@ describe('Versions', () => {
         expect(mostRecentDraft.title).toStrictEqual('C')
 
         const versions = await payload.findVersions({
+          overrideAccess: true,
           collection: draftCollectionSlug,
           where: {
             parent: {
@@ -1632,6 +1797,7 @@ describe('Versions', () => {
 
       it('should not create a new version when unpublishing a collection document', async () => {
         const doc = await payload.create({
+          overrideAccess: true,
           collection: draftCollectionSlug,
           data: {
             _status: 'published',
@@ -1641,6 +1807,7 @@ describe('Versions', () => {
         })
 
         const initialVersions = await payload.findVersions({
+          overrideAccess: true,
           collection: draftCollectionSlug,
           where: { parent: { equals: doc.id } },
         })
@@ -1649,6 +1816,7 @@ describe('Versions', () => {
         expect(initialVersions.docs[0].version._status).toBe('published')
 
         const unpublished = await payload.update({
+          overrideAccess: true,
           id: doc.id,
           collection: draftCollectionSlug,
           data: { _status: 'draft' },
@@ -1658,6 +1826,7 @@ describe('Versions', () => {
         expect(unpublished._status).toBe('draft')
 
         const afterVersions = await payload.findVersions({
+          overrideAccess: true,
           collection: draftCollectionSlug,
           where: { parent: { equals: doc.id } },
         })
@@ -1668,23 +1837,27 @@ describe('Versions', () => {
 
       it('should not create a new version when unpublishing a global', async () => {
         await payload.updateGlobal({
+          overrideAccess: true,
           slug: draftGlobalSlug,
           data: { _status: 'published', title: 'unpublish global test' },
         })
 
         const initialVersions = await payload.findGlobalVersions({
+          overrideAccess: true,
           slug: draftGlobalSlug,
         })
 
         const initialCount = initialVersions.docs.length
 
         await payload.updateGlobal({
+          overrideAccess: true,
           slug: draftGlobalSlug,
           data: { _status: 'draft' },
           unpublishAllLocales: true,
         })
 
         const afterVersions = await payload.findGlobalVersions({
+          overrideAccess: true,
           slug: draftGlobalSlug,
         })
 
@@ -1696,6 +1869,7 @@ describe('Versions', () => {
 
       it('should update main table _status to draft when unpublishing', async () => {
         const doc = await payload.create({
+          overrideAccess: true,
           collection: draftCollectionSlug,
           data: {
             _status: 'published',
@@ -1705,6 +1879,7 @@ describe('Versions', () => {
         })
 
         await payload.update({
+          overrideAccess: true,
           id: doc.id,
           collection: draftCollectionSlug,
           data: { _status: 'draft' },
@@ -1712,6 +1887,7 @@ describe('Versions', () => {
         })
 
         const found = await payload.findByID({
+          overrideAccess: true,
           id: doc.id,
           collection: draftCollectionSlug,
           draft: false,
@@ -1722,6 +1898,7 @@ describe('Versions', () => {
 
       it('should unpublish a collection document with localized required fields from a non-default locale', async () => {
         const doc = await payload.create({
+          overrideAccess: true,
           collection: draftCollectionSlug,
           data: {
             _status: 'published',
@@ -1732,6 +1909,7 @@ describe('Versions', () => {
         })
 
         const unpublished = await payload.update({
+          overrideAccess: true,
           id: doc.id,
           collection: draftCollectionSlug,
           data: { _status: 'draft' },
@@ -1741,17 +1919,19 @@ describe('Versions', () => {
 
         expect(unpublished._status).toBe('draft')
 
-        await payload.delete({ collection: draftCollectionSlug, id: doc.id })
+        await payload.delete({ overrideAccess: true, collection: draftCollectionSlug, id: doc.id })
       })
 
       it('should unpublish a global with localized required fields from a non-default locale', async () => {
         await payload.updateGlobal({
+          overrideAccess: true,
           slug: draftGlobalSlug,
           data: { _status: 'published', title: 'unpublish global localized test' },
           locale: 'en',
         })
 
         const unpublished = await payload.updateGlobal({
+          overrideAccess: true,
           slug: draftGlobalSlug,
           data: { _status: 'draft' },
           fallbackLocale: false,
@@ -1777,6 +1957,7 @@ describe('Versions', () => {
         // This test validates that when draft: true is set, required fields become optional
         // TypeScript should not complain about missing 'description' field even though it's required
         const draft = await payload.create({
+          overrideAccess: true,
           collection: draftCollectionSlug,
           data: {
             title: 'Draft without description',
@@ -1796,6 +1977,7 @@ describe('Versions', () => {
         await expect(
           // @ts-expect-error - description is required when not creating a draft
           payload.create({
+            overrideAccess: true,
             collection: draftCollectionSlug,
             data: {
               title: 'Published without description',
@@ -1810,6 +1992,7 @@ describe('Versions', () => {
         await expect(
           // @ts-expect-error - description is required when draft option is not specified
           payload.create({
+            overrideAccess: true,
             collection: draftCollectionSlug,
             data: {
               title: 'Post without description',
@@ -1821,6 +2004,7 @@ describe('Versions', () => {
       it('should allow all fields to be optional with draft: true', async () => {
         // Test that even fields nested in groups can be omitted
         const draft = await payload.create({
+          overrideAccess: true,
           collection: draftCollectionSlug,
           data: {
             // Both title and description are required but omitted
@@ -1841,6 +2025,7 @@ describe('Versions', () => {
       it('retains correct versions', async () => {
         // doc1 - v1
         const doc1 = await payload.create({
+          overrideAccess: true,
           collection: versionCollectionSlug,
           data: {
             description: 'A',
@@ -1849,6 +2034,7 @@ describe('Versions', () => {
         })
         // v2
         await payload.update({
+          overrideAccess: true,
           id: doc1.id,
           collection: versionCollectionSlug,
           data: {
@@ -1858,6 +2044,7 @@ describe('Versions', () => {
         })
         // v3
         await payload.update({
+          overrideAccess: true,
           id: doc1.id,
           collection: versionCollectionSlug,
           data: {
@@ -1868,6 +2055,7 @@ describe('Versions', () => {
 
         // doc2 - v1
         const doc2 = await payload.create({
+          overrideAccess: true,
           collection: versionCollectionSlug,
           data: {
             description: 'D',
@@ -1876,6 +2064,7 @@ describe('Versions', () => {
         })
         // v2
         await payload.update({
+          overrideAccess: true,
           id: doc2.id,
           collection: versionCollectionSlug,
           data: {
@@ -1885,6 +2074,7 @@ describe('Versions', () => {
         })
         // v3
         await payload.update({
+          overrideAccess: true,
           id: doc2.id,
           collection: versionCollectionSlug,
           data: {
@@ -1894,6 +2084,7 @@ describe('Versions', () => {
         })
 
         const doc1Versions = await payload.findVersions({
+          overrideAccess: true,
           collection: versionCollectionSlug,
           sort: '-updatedAt',
           where: {
@@ -1904,6 +2095,7 @@ describe('Versions', () => {
         })
 
         const doc2Versions = await payload.findVersions({
+          overrideAccess: true,
           collection: versionCollectionSlug,
           sort: '-updatedAt',
           where: {
@@ -1924,6 +2116,7 @@ describe('Versions', () => {
         expect(doc2Versions.docs[1].version.title).toStrictEqual('E')
 
         const docs = await payload.find({
+          overrideAccess: true,
           collection: versionCollectionSlug,
         })
 
@@ -1940,6 +2133,7 @@ describe('Versions', () => {
     describe('Race conditions', () => {
       it('should keep latest true with parallel writes', async () => {
         const doc = await payload.create({
+          overrideAccess: true,
           collection: draftCollectionSlug,
           data: {
             description: 'A',
@@ -1955,6 +2149,7 @@ describe('Versions', () => {
             setTimeout(() => {
               payload
                 .update({
+                  overrideAccess: true,
                   id: doc.id,
                   collection: draftCollectionSlug,
                   data: {},
@@ -1969,6 +2164,7 @@ describe('Versions', () => {
         await Promise.all(promises)
 
         const { docs } = await payload.findVersions({
+          overrideAccess: true,
           collection: draftCollectionSlug,
           where: {
             and: [
@@ -1996,6 +2192,7 @@ describe('Versions', () => {
 
       it('should fall back to creating a new version when updateVersion fails due to a concurrent write', async () => {
         const doc = await payload.create({
+          overrideAccess: true,
           collection: autosaveCollectionSlug,
           data: { title: 'original', _status: 'draft' },
           draft: true,
@@ -2003,6 +2200,7 @@ describe('Versions', () => {
 
         // Establish an existing autosave version so updateLatestVersion has something to update
         await payload.update({
+          overrideAccess: true,
           id: doc.id,
           autosave: true,
           collection: autosaveCollectionSlug,
@@ -2016,6 +2214,7 @@ describe('Versions', () => {
 
         // Should not throw — updateLatestVersion catches the error and saveVersion falls back to createVersion
         const result = await payload.update({
+          overrideAccess: true,
           id: doc.id,
           autosave: true,
           collection: autosaveCollectionSlug,
@@ -2029,6 +2228,7 @@ describe('Versions', () => {
 
         // A new version was created as fallback instead of the in-place update
         const { totalDocs } = await payload.countVersions({
+          overrideAccess: true,
           collection: autosaveCollectionSlug,
           where: { parent: { equals: doc.id } },
         })
@@ -2045,6 +2245,7 @@ describe('Versions', () => {
 
       it('should propagate the error when createVersion also fails', async () => {
         const doc = await payload.create({
+          overrideAccess: true,
           collection: autosaveCollectionSlug,
           data: { title: 'original', _status: 'draft' },
           draft: true,
@@ -2059,6 +2260,7 @@ describe('Versions', () => {
 
         await expect(
           payload.update({
+            overrideAccess: true,
             id: doc.id,
             autosave: true,
             collection: autosaveCollectionSlug,
@@ -2103,6 +2305,7 @@ describe('Versions', () => {
       imageFile.name = 'original-published.jpg'
 
       const publishedDoc = await payload.create({
+        overrideAccess: true,
         collection: draftWithUploadCollectionSlug,
         data: {
           _status: 'published',
@@ -2119,6 +2322,7 @@ describe('Versions', () => {
       draftImageFile.name = 'new-draft-file.png'
 
       await payload.update({
+        overrideAccess: true,
         id: publishedDoc.id,
         collection: draftWithUploadCollectionSlug,
         data: {
@@ -2130,11 +2334,13 @@ describe('Versions', () => {
       })
 
       const mainDoc = await payload.findByID({
+        overrideAccess: true,
         id: publishedDoc.id,
         collection: draftWithUploadCollectionSlug,
       })
 
       const draftDoc = await payload.findByID({
+        overrideAccess: true,
         id: publishedDoc.id,
         collection: draftWithUploadCollectionSlug,
         draft: true,
@@ -2157,6 +2363,7 @@ describe('Versions', () => {
       imageFile.name = 'published-file-disk-check.jpg'
 
       const publishedDoc = await payload.create({
+        overrideAccess: true,
         collection: draftWithUploadCollectionSlug,
         data: {
           _status: 'published',
@@ -2176,6 +2383,7 @@ describe('Versions', () => {
       draftImageFile.name = 'replacement-draft-file.png'
 
       await payload.update({
+        overrideAccess: true,
         id: publishedDoc.id,
         collection: draftWithUploadCollectionSlug,
         data: {
@@ -2187,6 +2395,7 @@ describe('Versions', () => {
       })
 
       const draftDoc = await payload.findByID({
+        overrideAccess: true,
         id: publishedDoc.id,
         collection: draftWithUploadCollectionSlug,
         draft: true,
@@ -2203,6 +2412,7 @@ describe('Versions', () => {
       imageFile.name = 'publish-many-original.jpg'
 
       const publishedDoc = await payload.create({
+        overrideAccess: true,
         collection: draftWithUploadCollectionSlug,
         data: {
           _status: 'published',
@@ -2218,6 +2428,7 @@ describe('Versions', () => {
       draftImageFile.name = 'publish-many-draft.png'
 
       await payload.update({
+        overrideAccess: true,
         id: publishedDoc.id,
         collection: draftWithUploadCollectionSlug,
         data: {
@@ -2229,6 +2440,7 @@ describe('Versions', () => {
       })
 
       const draftDoc = await payload.findByID({
+        overrideAccess: true,
         id: publishedDoc.id,
         collection: draftWithUploadCollectionSlug,
         draft: true,
@@ -2237,6 +2449,7 @@ describe('Versions', () => {
       uploadedFilenames.push(draftDoc.filename)
 
       await payload.update({
+        overrideAccess: true,
         collection: draftWithUploadCollectionSlug,
         data: {
           _status: 'published',
@@ -2248,6 +2461,7 @@ describe('Versions', () => {
       })
 
       const republishedDoc = await payload.findByID({
+        overrideAccess: true,
         id: publishedDoc.id,
         collection: draftWithUploadCollectionSlug,
       })
@@ -2263,6 +2477,7 @@ describe('Versions', () => {
       imageFile.name = 'duplicate-source.jpg'
 
       const publishedDoc = await payload.create({
+        overrideAccess: true,
         collection: draftWithUploadCollectionSlug,
         data: {
           _status: 'published',
@@ -2275,6 +2490,7 @@ describe('Versions', () => {
       expect(publishedDoc._status).toBe('published')
 
       const duplicatedDoc = await payload.create({
+        overrideAccess: true,
         collection: draftWithUploadCollectionSlug,
         data: {
           alt: 'Duplicated draft',
@@ -2304,6 +2520,7 @@ describe('Versions', () => {
       imageFile.name = 'cloud-original-published.jpg'
 
       const publishedDoc = await payload.create({
+        overrideAccess: true,
         collection: draftWithUploadCloudStorageCollectionSlug,
         data: {
           _status: 'published',
@@ -2319,6 +2536,7 @@ describe('Versions', () => {
       draftImageFile.name = 'cloud-new-draft-file.png'
 
       await payload.update({
+        overrideAccess: true,
         id: publishedDoc.id,
         collection: draftWithUploadCloudStorageCollectionSlug,
         data: {
@@ -2330,11 +2548,13 @@ describe('Versions', () => {
       })
 
       const mainDoc = await payload.findByID({
+        overrideAccess: true,
         id: publishedDoc.id,
         collection: draftWithUploadCloudStorageCollectionSlug,
       })
 
       const draftDoc = await payload.findByID({
+        overrideAccess: true,
         id: publishedDoc.id,
         collection: draftWithUploadCloudStorageCollectionSlug,
         draft: true,
@@ -2355,6 +2575,7 @@ describe('Versions', () => {
       imageFile.name = 'cloud-delete-published.jpg'
 
       const publishedDoc = await payload.create({
+        overrideAccess: true,
         collection: draftWithUploadCloudStorageCollectionSlug,
         data: {
           _status: 'published',
@@ -2368,6 +2589,7 @@ describe('Versions', () => {
       draftImageFile.name = 'cloud-delete-draft.png'
 
       await payload.update({
+        overrideAccess: true,
         id: publishedDoc.id,
         collection: draftWithUploadCloudStorageCollectionSlug,
         data: {
@@ -2387,6 +2609,7 @@ describe('Versions', () => {
       imageFile.name = 'cloud-publish-original.jpg'
 
       const publishedDoc = await payload.create({
+        overrideAccess: true,
         collection: draftWithUploadCloudStorageCollectionSlug,
         data: {
           _status: 'published',
@@ -2400,6 +2623,7 @@ describe('Versions', () => {
       draftImageFile.name = 'cloud-publish-draft.png'
 
       await payload.update({
+        overrideAccess: true,
         id: publishedDoc.id,
         collection: draftWithUploadCloudStorageCollectionSlug,
         data: {
@@ -2411,12 +2635,14 @@ describe('Versions', () => {
       })
 
       const draftDoc = await payload.findByID({
+        overrideAccess: true,
         id: publishedDoc.id,
         collection: draftWithUploadCloudStorageCollectionSlug,
         draft: true,
       })
 
       const republishedDoc = await payload.update({
+        overrideAccess: true,
         id: publishedDoc.id,
         collection: draftWithUploadCloudStorageCollectionSlug,
         data: {
@@ -2436,6 +2662,7 @@ describe('Versions', () => {
       imageFile.name = 'cloud-normal-original.jpg'
 
       const publishedDoc = await payload.create({
+        overrideAccess: true,
         collection: draftWithUploadCloudStorageCollectionSlug,
         data: {
           _status: 'published',
@@ -2449,6 +2676,7 @@ describe('Versions', () => {
       newFile.name = 'cloud-normal-replacement.png'
 
       const updated = await payload.update({
+        overrideAccess: true,
         id: publishedDoc.id,
         collection: draftWithUploadCloudStorageCollectionSlug,
         data: {
@@ -2459,6 +2687,7 @@ describe('Versions', () => {
       })
 
       const mainDoc = await payload.findByID({
+        overrideAccess: true,
         id: publishedDoc.id,
         collection: draftWithUploadCloudStorageCollectionSlug,
       })
@@ -2477,6 +2706,7 @@ describe('Versions', () => {
 
     async function createPostWithVersions(args?: { title?: string }) {
       firstDraft = await payload.create({
+        overrideAccess: true,
         collection: draftCollectionSlug,
         data: {
           description: 'my description',
@@ -2487,6 +2717,7 @@ describe('Versions', () => {
 
       // This will be created in the `_draft-posts_versions` collection
       await payload.update({
+        overrideAccess: true,
         id: firstDraft.id,
         collection: draftCollectionSlug,
         data: {
@@ -2498,6 +2729,7 @@ describe('Versions', () => {
       // This will be created in the `_draft-posts_versions` collection
       // and will be the newest draft, able to be queried on
       await payload.update({
+        overrideAccess: true,
         id: firstDraft.id,
         collection: draftCollectionSlug,
         data: {
@@ -2520,6 +2752,7 @@ describe('Versions', () => {
 
     it('should allow querying a draft doc from main collection', async () => {
       const findResults = await payload.find({
+        overrideAccess: true,
         collection: draftCollectionSlug,
         where: {
           title: {
@@ -2533,6 +2766,7 @@ describe('Versions', () => {
 
     it('should return more than 10 `totalDocs`', async () => {
       const { id } = await payload.create({
+        overrideAccess: true,
         collection: draftCollectionSlug,
         data: {
           description: 'Description',
@@ -2543,6 +2777,7 @@ describe('Versions', () => {
       const createVersions = async (int: number = 1) => {
         for (let i = 0; i < int; i++) {
           await payload.update({
+            overrideAccess: true,
             id,
             collection: draftCollectionSlug,
             data: {
@@ -2555,6 +2790,7 @@ describe('Versions', () => {
       await createVersions(10)
 
       const findResults = await payload.findVersions({
+        overrideAccess: true,
         collection: draftCollectionSlug,
         where: {
           parent: {
@@ -2573,6 +2809,7 @@ describe('Versions', () => {
 
     it('should not be able to query an old draft version with draft=true', async () => {
       const draftFindResults = await payload.find({
+        overrideAccess: true,
         collection: draftCollectionSlug,
         draft: true,
         where: {
@@ -2587,6 +2824,7 @@ describe('Versions', () => {
 
     it('should be able to query the newest draft version with draft=true', async () => {
       const draftFindResults = await payload.find({
+        overrideAccess: true,
         collection: draftCollectionSlug,
         draft: true,
         where: {
@@ -2627,6 +2865,7 @@ describe('Versions', () => {
       }
 
       const publishedFindResults = await payload.find({
+        overrideAccess: true,
         collection: draftCollectionSlug,
         where: query,
       })
@@ -2635,6 +2874,7 @@ describe('Versions', () => {
       expect(publishedFindResults.docs.find(({ id }) => id === matchingDraft.id)).toBeDefined()
 
       const draftFindResults = await payload.find({
+        overrideAccess: true,
         collection: draftCollectionSlug,
         draft: true,
         where: query,
@@ -2646,6 +2886,7 @@ describe('Versions', () => {
 
     it("should not be able to query old drafts that don't match with draft=true", async () => {
       const draftFindResults = await payload.find({
+        overrideAccess: true,
         collection: draftCollectionSlug,
         draft: true,
         where: {
@@ -2661,6 +2902,7 @@ describe('Versions', () => {
     it('should be able to query by id with draft=true', async () => {
       await createPostWithVersions({ title: 'different document' })
       const allDocs = await payload.find({
+        overrideAccess: true,
         collection: draftCollectionSlug,
         draft: true,
       })
@@ -2668,6 +2910,7 @@ describe('Versions', () => {
       expect(allDocs.docs).toHaveLength(2)
 
       const byID = await payload.find({
+        overrideAccess: true,
         collection: draftCollectionSlug,
         draft: true,
         where: {
@@ -2683,6 +2926,7 @@ describe('Versions', () => {
     it('should be able to query by id AND any other field with draft=true', async () => {
       await createPostWithVersions({ title: 'title document 2' })
       const allDocs = await payload.find({
+        overrideAccess: true,
         collection: draftCollectionSlug,
         draft: true,
         where: {
@@ -2695,6 +2939,7 @@ describe('Versions', () => {
       expect(allDocs.docs).toHaveLength(2)
 
       const results = await payload.find({
+        overrideAccess: true,
         collection: draftCollectionSlug,
         draft: true,
         where: {
@@ -3019,6 +3264,7 @@ describe('Versions', () => {
     it('sholud query versions', async () => {
       // Create a post and update it to generate a version
       const autosavePost = await payload.create({
+        overrideAccess: true,
         collection: autosaveCollectionSlug,
         data: {
           description: 'test description',
@@ -3027,6 +3273,7 @@ describe('Versions', () => {
       })
 
       await payload.update({
+        overrideAccess: true,
         id: autosavePost.id,
         collection: autosaveCollectionSlug,
         data: {
@@ -3054,6 +3301,7 @@ describe('Versions', () => {
     it('should allow query by latest', async () => {
       async function createVersion({ title }: { title: string }) {
         return payload.create({
+          overrideAccess: true,
           collection: draftCollectionSlug,
           data: {
             description: 'Test Description',
@@ -3070,6 +3318,7 @@ describe('Versions', () => {
         id: number | string
       }) {
         return payload.update({
+          overrideAccess: true,
           id,
           collection: draftCollectionSlug,
           data,
@@ -3130,6 +3379,7 @@ describe('Versions', () => {
     beforeEach(async () => {
       const title2 = 'Here is an updated global title in EN'
       await payload.updateGlobal({
+        overrideAccess: true,
         slug: autoSaveGlobalSlug,
         data: {
           title: 'Test Global',
@@ -3137,6 +3387,7 @@ describe('Versions', () => {
       })
 
       await payload.updateGlobal({
+        overrideAccess: true,
         slug: autoSaveGlobalSlug,
         data: {
           title: title2,
@@ -3144,6 +3395,7 @@ describe('Versions', () => {
       })
 
       const versions = await payload.findGlobalVersions({
+        overrideAccess: true,
         slug: autoSaveGlobalSlug,
       })
 
@@ -3153,6 +3405,7 @@ describe('Versions', () => {
       it('should allow a new version to be created', async () => {
         const title2 = 'Here is an updated global title in EN'
         const updatedGlobal = await payload.findGlobal({
+          overrideAccess: true,
           slug: autoSaveGlobalSlug,
         })
         expect(updatedGlobal.title).toBe(title2)
@@ -3162,6 +3415,7 @@ describe('Versions', () => {
 
       it('ensure global can be published after saving draft', async () => {
         const draftVersion = await payload.updateGlobal({
+          overrideAccess: true,
           slug: 'max-versions',
           data: {
             _status: 'draft',
@@ -3173,6 +3427,7 @@ describe('Versions', () => {
         expect(draftVersion._status).toStrictEqual('draft')
 
         const publishedVersion = await payload.updateGlobal({
+          overrideAccess: true,
           slug: 'max-versions',
           data: {
             _status: 'published',
@@ -3186,6 +3441,7 @@ describe('Versions', () => {
 
       it('should have different createdAt in a new version while the same version.createdAt', async () => {
         const doc = await payload.updateGlobal({
+          overrideAccess: true,
           slug: autoSaveGlobalSlug,
           data: { title: 'asd' },
           publishAllLocales: true,
@@ -3194,6 +3450,7 @@ describe('Versions', () => {
         await wait(10)
 
         const upd = await payload.updateGlobal({
+          overrideAccess: true,
           slug: autoSaveGlobalSlug,
           data: { title: 'asd2' },
           publishAllLocales: true,
@@ -3204,6 +3461,7 @@ describe('Versions', () => {
         const {
           docs: [latestVersionData],
         } = await payload.findGlobalVersions({
+          overrideAccess: true,
           slug: autoSaveGlobalSlug,
           where: {
             latest: {
@@ -3218,6 +3476,7 @@ describe('Versions', () => {
         expect(latestVersionData.version.createdAt).toBe(doc.createdAt)
 
         const fromNonVersionsTable = await payload.findGlobal({
+          overrideAccess: true,
           slug: autoSaveGlobalSlug,
           draft: false,
         })
@@ -3233,17 +3492,31 @@ describe('Versions', () => {
       const getLatestVersion = () =>
         payload
           .findGlobalVersions({
+            overrideAccess: true,
             slug: 'max-versions',
             limit: 1,
             sort: '-createdAt',
           })
           .then((r) => r.docs[0])
 
-      await payload.updateGlobal({ slug: 'max-versions', data: { title: '1' } })
+      await payload.updateGlobal({
+        overrideAccess: true,
+        slug: 'max-versions',
+        data: { title: '1' },
+      })
       const version_1 = await getLatestVersion()
-      await payload.updateGlobal({ slug: 'max-versions', data: { title: '2' } })
-      await payload.updateGlobal({ slug: 'max-versions', data: { title: '3' } })
+      await payload.updateGlobal({
+        overrideAccess: true,
+        slug: 'max-versions',
+        data: { title: '2' },
+      })
+      await payload.updateGlobal({
+        overrideAccess: true,
+        slug: 'max-versions',
+        data: { title: '3' },
+      })
       const version_1_deleted = await payload.findGlobalVersionByID({
+        overrideAccess: true,
         id: version_1?.id as string,
         slug: 'max-versions',
         disableErrors: true,
@@ -3253,14 +3526,20 @@ describe('Versions', () => {
 
     it('findGlobalVersions - pagination should work correctly', async () => {
       for (let i = 0; i < 100; i++) {
-        await payload.updateGlobal({ slug: 'draft-unlimited-global', data: { title: 'title' } })
+        await payload.updateGlobal({
+          overrideAccess: true,
+          slug: 'draft-unlimited-global',
+          data: { title: 'title' },
+        })
       }
       const res = await payload.findGlobalVersions({
+        overrideAccess: true,
         slug: 'draft-unlimited-global',
       })
       expect(res.totalDocs).toBe(100)
       expect(res.docs).toHaveLength(10)
       const resPaginationFalse = await payload.findGlobalVersions({
+        overrideAccess: true,
         slug: 'draft-unlimited-global',
         pagination: false,
       })
@@ -3268,6 +3547,7 @@ describe('Versions', () => {
       expect(resPaginationFalse.totalDocs).toBe(100)
 
       const resPaginationFalseLimit0 = await payload.findGlobalVersions({
+        overrideAccess: true,
         slug: 'draft-unlimited-global',
         limit: 0,
         pagination: false,
@@ -3279,6 +3559,7 @@ describe('Versions', () => {
     describe('Read', () => {
       it('should allow a version to be retrieved by ID', async () => {
         const version = await payload.findGlobalVersionByID({
+          overrideAccess: true,
           id: globalVersionID,
           slug: autoSaveGlobalSlug,
         })
@@ -3289,10 +3570,15 @@ describe('Versions', () => {
       it('should findGlobalVersions with limit: 0', async () => {
         await payload.db.deleteVersions({ globalSlug: draftUnlimitedGlobalSlug, where: {} })
         for (let i = 0; i < 100; i++) {
-          await payload.updateGlobal({ slug: draftUnlimitedGlobalSlug, data: { title: 'global' } })
+          await payload.updateGlobal({
+            overrideAccess: true,
+            slug: draftUnlimitedGlobalSlug,
+            data: { title: 'global' },
+          })
         }
 
         const res = await payload.findGlobalVersions({
+          overrideAccess: true,
           slug: draftUnlimitedGlobalSlug,
           limit: 0,
         })
@@ -3307,6 +3593,7 @@ describe('Versions', () => {
         const spanishTitle = 'Title in ES'
 
         await payload.updateGlobal({
+          overrideAccess: true,
           slug: autoSaveGlobalSlug,
           data: {
             title: englishTitle,
@@ -3314,6 +3601,7 @@ describe('Versions', () => {
         })
 
         const updatedGlobalES = await payload.updateGlobal({
+          overrideAccess: true,
           slug: autoSaveGlobalSlug,
           data: {
             title: spanishTitle,
@@ -3326,6 +3614,7 @@ describe('Versions', () => {
         const newEnglishTitle = 'New title in EN'
 
         await payload.updateGlobal({
+          overrideAccess: true,
           slug: autoSaveGlobalSlug,
           data: {
             title: newEnglishTitle,
@@ -3333,6 +3622,7 @@ describe('Versions', () => {
         })
 
         const versions = await payload.findGlobalVersions({
+          overrideAccess: true,
           slug: autoSaveGlobalSlug,
           locale: 'all',
         })
@@ -3343,6 +3633,7 @@ describe('Versions', () => {
 
       it('should have correct updatedAt timestamps for globals when saving drafts', async () => {
         const created = await payload.updateGlobal({
+          overrideAccess: true,
           slug: draftGlobalSlug,
           data: {
             title: 'title',
@@ -3353,6 +3644,7 @@ describe('Versions', () => {
         await wait(10)
 
         const updated = await payload.updateGlobal({
+          overrideAccess: true,
           slug: draftGlobalSlug,
           data: {
             title: 'updated title',
@@ -3368,6 +3660,7 @@ describe('Versions', () => {
 
       it('should have correct updatedAt timestamps for globals when saving drafts with autosave', async () => {
         const created = await payload.updateGlobal({
+          overrideAccess: true,
           slug: draftGlobalSlug,
           data: {
             title: 'title',
@@ -3378,6 +3671,7 @@ describe('Versions', () => {
         await wait(10)
 
         const updated = await payload.updateGlobal({
+          overrideAccess: true,
           slug: draftGlobalSlug,
           data: {
             title: 'updated title',
@@ -3398,6 +3692,7 @@ describe('Versions', () => {
         const title2 = 'Another updated title in EN'
 
         const updatedGlobal = await payload.updateGlobal({
+          overrideAccess: true,
           slug: autoSaveGlobalSlug,
           data: {
             title: title2,
@@ -3409,16 +3704,19 @@ describe('Versions', () => {
 
         // Make sure it was updated correctly
         const foundUpdatedGlobal = await payload.findGlobal({
+          overrideAccess: true,
           slug: autoSaveGlobalSlug,
           draft: true,
         })
         expect(foundUpdatedGlobal.title).toBe(title2)
 
         const versions = await payload.findGlobalVersions({
+          overrideAccess: true,
           slug: autoSaveGlobalSlug,
         })
 
         const restore = await payload.restoreGlobalVersion({
+          overrideAccess: true,
           id: versions.docs[1]!.id,
           slug: autoSaveGlobalSlug,
         })
@@ -3426,6 +3724,7 @@ describe('Versions', () => {
         expect(restore.version.title).toBeDefined()
 
         const restoredGlobal = await payload.findGlobal({
+          overrideAccess: true,
           slug: autoSaveGlobalSlug,
           draft: true,
         })
@@ -3439,6 +3738,7 @@ describe('Versions', () => {
         const originalTitle = 'Here is a published global'
 
         await payload.updateGlobal({
+          overrideAccess: true,
           slug: autoSaveGlobalSlug,
           data: {
             _status: 'published',
@@ -3449,6 +3749,7 @@ describe('Versions', () => {
         })
 
         const publishedGlobal = await payload.findGlobal({
+          overrideAccess: true,
           slug: autoSaveGlobalSlug,
           draft: true,
         })
@@ -3456,6 +3757,7 @@ describe('Versions', () => {
         const updatedTitle2 = 'Here is a draft global with a patched title'
 
         await payload.updateGlobal({
+          overrideAccess: true,
           slug: autoSaveGlobalSlug,
           data: {
             _status: 'draft',
@@ -3466,6 +3768,7 @@ describe('Versions', () => {
         })
 
         await payload.updateGlobal({
+          overrideAccess: true,
           slug: autoSaveGlobalSlug,
           data: {
             _status: 'draft',
@@ -3476,6 +3779,7 @@ describe('Versions', () => {
         })
 
         const updatedGlobal = await payload.findGlobal({
+          overrideAccess: true,
           slug: autoSaveGlobalSlug,
           draft: true,
           locale: 'all',
@@ -3490,6 +3794,7 @@ describe('Versions', () => {
         const originalTitle = 'Here is a draft'
 
         await payload.updateGlobal({
+          overrideAccess: true,
           slug: autoSaveGlobalSlug,
           data: {
             _status: 'draft',
@@ -3501,6 +3806,7 @@ describe('Versions', () => {
         const updatedTitle2 = 'Now try to publish'
 
         const result = await payload.updateGlobal({
+          overrideAccess: true,
           slug: autoSaveGlobalSlug,
           data: {
             _status: 'published',
@@ -3646,6 +3952,7 @@ describe('Versions', () => {
   describe('Scheduled Publish', () => {
     it('should allow collection scheduled publish', async () => {
       const draft = await payload.create({
+        overrideAccess: true,
         collection: draftCollectionSlug,
         data: {
           description: 'hello',
@@ -3659,6 +3966,7 @@ describe('Versions', () => {
       const currentDate = new Date()
 
       await payload.jobs.queue({
+        overrideAccess: true,
         input: {
           doc: {
             relationTo: draftCollectionSlug,
@@ -3671,9 +3979,10 @@ describe('Versions', () => {
 
       await wait(4000)
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       const retrieved = await payload.findByID({
+        overrideAccess: true,
         id: draft.id,
         collection: draftCollectionSlug,
         draft: false,
@@ -3689,6 +3998,7 @@ describe('Versions', () => {
 
     it('should restrict scheduled publish based on user', async () => {
       const draft = await payload.create({
+        overrideAccess: true,
         collection: draftCollectionSlug,
         data: {
           description: 'hello',
@@ -3703,6 +4013,7 @@ describe('Versions', () => {
       const currentDate = new Date()
 
       await payload.jobs.queue({
+        overrideAccess: true,
         input: {
           doc: {
             relationTo: draftCollectionSlug,
@@ -3716,11 +4027,12 @@ describe('Versions', () => {
 
       await wait(4000)
 
-      const res = await payload.jobs.run()
+      const res = await payload.jobs.run({ overrideAccess: true })
 
       expect(res.jobStatus[Object.keys(res.jobStatus)[0]].status).toBe('error-reached-max-retries')
 
       const retrieved = await payload.findByID({
+        overrideAccess: true,
         id: draft.id,
         collection: draftCollectionSlug,
       })
@@ -3735,6 +4047,7 @@ describe('Versions', () => {
 
     it('should allow collection scheduled unpublish', async () => {
       const published = await payload.create({
+        overrideAccess: true,
         collection: draftCollectionSlug,
         data: {
           _status: 'published',
@@ -3748,6 +4061,7 @@ describe('Versions', () => {
       const currentDate = new Date()
 
       await payload.jobs.queue({
+        overrideAccess: true,
         input: {
           type: 'unpublish',
           doc: {
@@ -3761,9 +4075,10 @@ describe('Versions', () => {
 
       await wait(4000)
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       const retrieved = await payload.findByID({
+        overrideAccess: true,
         id: published.id,
         collection: draftCollectionSlug,
       })
@@ -3778,6 +4093,7 @@ describe('Versions', () => {
 
     it('should delete scheduled jobs after a document is deleted', async () => {
       const draft = await payload.create({
+        overrideAccess: true,
         collection: draftCollectionSlug,
         data: {
           description: 'hello',
@@ -3791,6 +4107,7 @@ describe('Versions', () => {
       const currentDate = new Date()
 
       await payload.jobs.queue({
+        overrideAccess: true,
         input: {
           type: 'publish',
           doc: {
@@ -3803,6 +4120,7 @@ describe('Versions', () => {
       })
 
       await payload.delete({
+        overrideAccess: true,
         collection: draftCollectionSlug,
         where: {
           id: { equals: draft.id },
@@ -3810,6 +4128,7 @@ describe('Versions', () => {
       })
 
       const { docs } = await payload.find({
+        overrideAccess: true,
         collection: 'payload-jobs',
         where: {
           'input.doc.value': {
@@ -3828,6 +4147,7 @@ describe('Versions', () => {
 
     it('should delete scheduled jobs after a document is deleted by ID', async () => {
       const draft = await payload.create({
+        overrideAccess: true,
         collection: draftCollectionSlug,
         data: {
           description: 'hello',
@@ -3841,6 +4161,7 @@ describe('Versions', () => {
       const currentDate = new Date()
 
       await payload.jobs.queue({
+        overrideAccess: true,
         input: {
           type: 'publish',
           doc: {
@@ -3853,11 +4174,13 @@ describe('Versions', () => {
       })
 
       await payload.delete({
+        overrideAccess: true,
         id: draft.id,
         collection: draftCollectionSlug,
       })
 
       const { docs } = await payload.find({
+        overrideAccess: true,
         collection: 'payload-jobs',
         where: {
           'input.doc.value': {
@@ -3876,6 +4199,7 @@ describe('Versions', () => {
 
     it('should allow global scheduled publish', async () => {
       const draft = await payload.updateGlobal({
+        overrideAccess: true,
         slug: draftGlobalSlug,
         data: {
           _status: 'draft',
@@ -3889,6 +4213,7 @@ describe('Versions', () => {
       const currentDate = new Date()
 
       await payload.jobs.queue({
+        overrideAccess: true,
         input: {
           global: draftGlobalSlug,
         },
@@ -3898,9 +4223,10 @@ describe('Versions', () => {
 
       await wait(4000)
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       const retrieved = await payload.findGlobal({
+        overrideAccess: true,
         slug: draftGlobalSlug,
       })
 
@@ -3910,6 +4236,7 @@ describe('Versions', () => {
 
     it('should allow global scheduled unpublish', async () => {
       const draft = await payload.updateGlobal({
+        overrideAccess: true,
         slug: draftGlobalSlug,
         data: {
           _status: 'published',
@@ -3922,6 +4249,7 @@ describe('Versions', () => {
       const currentDate = new Date()
 
       await payload.jobs.queue({
+        overrideAccess: true,
         input: {
           type: 'unpublish',
           global: draftGlobalSlug,
@@ -3932,9 +4260,10 @@ describe('Versions', () => {
 
       await wait(4000)
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       const retrieved = await payload.findGlobal({
+        overrideAccess: true,
         slug: draftGlobalSlug,
       })
 
@@ -3945,6 +4274,7 @@ describe('Versions', () => {
     it('should not return _status field when access control denies read', async () => {
       // Create a draft global
       const draft = await payload.updateGlobal({
+        overrideAccess: true,
         slug: draftGlobalSlug,
         data: {
           _status: 'draft',
@@ -3978,6 +4308,7 @@ describe('Versions', () => {
 
       beforeEach(async () => {
         draftDoc = await payload.create({
+          overrideAccess: true,
           collection: draftCollectionSlug,
           data: {
             _status: 'draft',
@@ -4015,6 +4346,7 @@ describe('Versions', () => {
         // fetch the job
         ;[event] = (
           await payload.find({
+            overrideAccess: true,
             collection: 'payload-jobs',
             where: {
               'input.doc.value': {
@@ -4047,6 +4379,7 @@ describe('Versions', () => {
         // fetch the job
         ;[event] = (
           await payload.find({
+            overrideAccess: true,
             collection: 'payload-jobs',
             where: {
               'input.doc.value': {
@@ -4066,6 +4399,7 @@ describe('Versions', () => {
         // fetch the job
         ;[event] = (
           await payload.find({
+            overrideAccess: true,
             collection: 'payload-jobs',
             where: {
               'input.doc.value': {
@@ -4100,6 +4434,7 @@ describe('Versions', () => {
       it('should save correct doc data when publishing individual locale', async () => {
         // save spanish draft
         const draft1 = await payload.create({
+          overrideAccess: true,
           collection: localizedCollectionSlug,
           data: {
             text: 'Spanish draft',
@@ -4110,6 +4445,7 @@ describe('Versions', () => {
 
         // save english draft
         await payload.update({
+          overrideAccess: true,
           id: draft1.id,
           collection: localizedCollectionSlug,
           data: {
@@ -4122,6 +4458,7 @@ describe('Versions', () => {
 
         // save german draft
         await payload.update({
+          overrideAccess: true,
           id: draft1.id,
           collection: localizedCollectionSlug,
           data: {
@@ -4133,6 +4470,7 @@ describe('Versions', () => {
 
         // publish only english
         await payload.update({
+          overrideAccess: true,
           id: draft1.id,
           collection: localizedCollectionSlug,
           data: {
@@ -4144,6 +4482,7 @@ describe('Versions', () => {
         })
 
         const docWithoutSpanishDraft = await payload.findByID({
+          overrideAccess: true,
           id: draft1.id,
           collection: localizedCollectionSlug,
           locale: 'all',
@@ -4158,6 +4497,7 @@ describe('Versions', () => {
         expect(docWithoutSpanishDraft.description.en).toStrictEqual('My English description')
 
         const docWithSpanishDraft1 = await payload.findByID({
+          overrideAccess: true,
           id: draft1.id,
           collection: localizedCollectionSlug,
           draft: true,
@@ -4171,6 +4511,7 @@ describe('Versions', () => {
         expect(docWithSpanishDraft1.description.en).toStrictEqual('My English description')
 
         await payload.update({
+          overrideAccess: true,
           id: draft1.id,
           collection: localizedCollectionSlug,
           data: {
@@ -4182,6 +4523,7 @@ describe('Versions', () => {
         })
 
         const docWithoutSpanishDraft2 = await payload.findByID({
+          overrideAccess: true,
           id: draft1.id,
           collection: localizedCollectionSlug,
           locale: 'all',
@@ -4196,6 +4538,7 @@ describe('Versions', () => {
         expect(docWithoutSpanishDraft2.description.en).toStrictEqual('My English description')
 
         await payload.update({
+          overrideAccess: true,
           id: draft1.id,
           collection: localizedCollectionSlug,
           data: {
@@ -4207,6 +4550,7 @@ describe('Versions', () => {
         })
 
         const docWithGermanDraft = await payload.findByID({
+          overrideAccess: true,
           id: draft1.id,
           collection: localizedCollectionSlug,
           draft: true,
@@ -4222,6 +4566,7 @@ describe('Versions', () => {
         expect(docWithGermanDraft.text.en).toStrictEqual('English published 2')
 
         await payload.update({
+          overrideAccess: true,
           id: draft1.id,
           collection: localizedCollectionSlug,
           data: {
@@ -4233,6 +4578,7 @@ describe('Versions', () => {
         })
 
         await payload.update({
+          overrideAccess: true,
           id: draft1.id,
           collection: localizedCollectionSlug,
           data: {
@@ -4244,6 +4590,7 @@ describe('Versions', () => {
         })
 
         const finalPublishedNoES = await payload.findByID({
+          overrideAccess: true,
           id: draft1.id,
           collection: localizedCollectionSlug,
           locale: 'all',
@@ -4255,6 +4602,7 @@ describe('Versions', () => {
         expect(finalPublishedNoES.text.es ?? null).toBeNull()
 
         const finalDraft = await payload.findByID({
+          overrideAccess: true,
           id: draft1.id,
           collection: localizedCollectionSlug,
           draft: true,
@@ -4266,6 +4614,7 @@ describe('Versions', () => {
         expect(finalDraft.text.es).toStrictEqual('Spanish draft')
 
         await payload.update({
+          overrideAccess: true,
           id: draft1.id,
           collection: localizedCollectionSlug,
           data: {
@@ -4274,6 +4623,7 @@ describe('Versions', () => {
         })
 
         const finalPublished = await payload.findByID({
+          overrideAccess: true,
           id: draft1.id,
           collection: localizedCollectionSlug,
           draft: true,
@@ -4287,6 +4637,7 @@ describe('Versions', () => {
 
       it('should not leak draft data', async () => {
         const draft = await payload.create({
+          overrideAccess: true,
           collection: localizedCollectionSlug,
           data: {
             text: 'Spanish draft',
@@ -4296,6 +4647,7 @@ describe('Versions', () => {
         })
 
         await payload.update({
+          overrideAccess: true,
           id: draft.id,
           collection: localizedCollectionSlug,
           data: {
@@ -4306,6 +4658,7 @@ describe('Versions', () => {
         })
 
         const publishedOnlyEN = await payload.findByID({
+          overrideAccess: true,
           id: draft.id,
           collection: localizedCollectionSlug,
           locale: 'all',
@@ -4317,6 +4670,7 @@ describe('Versions', () => {
 
       it('should merge draft data from other locales when publishing all', async () => {
         const draft = await payload.create({
+          overrideAccess: true,
           collection: localizedCollectionSlug,
           data: {
             text: 'Spanish draft',
@@ -4326,6 +4680,7 @@ describe('Versions', () => {
         })
 
         await payload.update({
+          overrideAccess: true,
           id: draft.id,
           collection: localizedCollectionSlug,
           data: {
@@ -4336,6 +4691,7 @@ describe('Versions', () => {
         })
 
         const publishedOnlyEN = await payload.findByID({
+          overrideAccess: true,
           id: draft.id,
           collection: localizedCollectionSlug,
           locale: 'all',
@@ -4345,6 +4701,7 @@ describe('Versions', () => {
         expect(publishedOnlyEN.text.en).toStrictEqual('English publish')
 
         const published2 = await payload.update({
+          overrideAccess: true,
           id: draft.id,
           collection: localizedCollectionSlug,
           data: {
@@ -4355,6 +4712,7 @@ describe('Versions', () => {
         })
 
         const publishedAll = await payload.findByID({
+          overrideAccess: true,
           id: published2.id,
           collection: localizedCollectionSlug,
           locale: 'all',
@@ -4366,6 +4724,7 @@ describe('Versions', () => {
 
       it('should publish non-default individual locale', async () => {
         const draft = await payload.create({
+          overrideAccess: true,
           collection: localizedCollectionSlug,
           data: {
             text: 'Spanish draft',
@@ -4375,6 +4734,7 @@ describe('Versions', () => {
         })
 
         const published = await payload.update({
+          overrideAccess: true,
           id: draft.id,
           collection: localizedCollectionSlug,
           data: {
@@ -4386,6 +4746,7 @@ describe('Versions', () => {
         })
 
         const publishedOnlyDE = await payload.findByID({
+          overrideAccess: true,
           id: published.id,
           collection: localizedCollectionSlug,
           locale: 'all',
@@ -4398,6 +4759,7 @@ describe('Versions', () => {
 
       it('should show correct data in latest version', async () => {
         const draft = await payload.create({
+          overrideAccess: true,
           collection: localizedCollectionSlug,
           data: {
             text: 'Spanish draft',
@@ -4407,6 +4769,7 @@ describe('Versions', () => {
         })
 
         const published = await payload.update({
+          overrideAccess: true,
           id: draft.id,
           collection: localizedCollectionSlug,
           data: {
@@ -4417,6 +4780,7 @@ describe('Versions', () => {
         })
 
         const publishedOnlyEN = await payload.findByID({
+          overrideAccess: true,
           id: published.id,
           collection: localizedCollectionSlug,
           locale: 'all',
@@ -4426,6 +4790,7 @@ describe('Versions', () => {
         expect(publishedOnlyEN.text.en).toStrictEqual('English publish')
 
         const allVersions = await payload.findVersions({
+          overrideAccess: true,
           collection: localizedCollectionSlug,
           locale: 'all',
         })
@@ -4440,6 +4805,7 @@ describe('Versions', () => {
       it('should preserve block metadata when publishing specific locale with blocks added after initial save', async () => {
         // Step 1: Create doc without blocks (simulates autosave before blocks are added)
         const draft = await payload.create({
+          overrideAccess: true,
           collection: localizedCollectionSlug,
           data: {
             text: 'English draft',
@@ -4450,6 +4816,7 @@ describe('Versions', () => {
 
         // Step 2: Update with blocks
         await payload.update({
+          overrideAccess: true,
           id: draft.id,
           collection: localizedCollectionSlug,
           data: {
@@ -4467,6 +4834,7 @@ describe('Versions', () => {
 
         // Step 3: Publish only English locale
         const published = await payload.update({
+          overrideAccess: true,
           id: draft.id,
           collection: localizedCollectionSlug,
           data: {
@@ -4490,6 +4858,7 @@ describe('Versions', () => {
 
         // Verify via findByID as well
         const found = await payload.findByID({
+          overrideAccess: true,
           id: draft.id,
           collection: localizedCollectionSlug,
         })
@@ -4511,6 +4880,7 @@ describe('Versions', () => {
       it('should save correct global data when publishing individual locale', async () => {
         // publish german
         await payload.updateGlobal({
+          overrideAccess: true,
           slug: global,
           data: {
             _status: 'published',
@@ -4521,6 +4891,7 @@ describe('Versions', () => {
 
         // save spanish draft
         await payload.updateGlobal({
+          overrideAccess: true,
           slug: global,
           data: {
             content: 'Spanish draft content',
@@ -4532,6 +4903,7 @@ describe('Versions', () => {
 
         // publish only english
         await payload.updateGlobal({
+          overrideAccess: true,
           slug: global,
           data: {
             _status: 'published',
@@ -4541,6 +4913,7 @@ describe('Versions', () => {
         })
 
         const globalData = await payload.findGlobal({
+          overrideAccess: true,
           slug: global,
           locale: 'all',
         })
@@ -4554,6 +4927,7 @@ describe('Versions', () => {
       it('should not leak draft data', async () => {
         // save spanish draft
         await payload.updateGlobal({
+          overrideAccess: true,
           slug: global,
           data: {
             title: 'Another spanish draft',
@@ -4564,6 +4938,7 @@ describe('Versions', () => {
 
         // publish only english
         await payload.updateGlobal({
+          overrideAccess: true,
           slug: global,
           data: {
             _status: 'published',
@@ -4574,6 +4949,7 @@ describe('Versions', () => {
         })
 
         const globalData = await payload.findGlobal({
+          overrideAccess: true,
           slug: global,
           locale: 'all',
         })
@@ -4586,6 +4962,7 @@ describe('Versions', () => {
       it('should merge draft data from other locales when publishing all', async () => {
         // save spanish draft
         await payload.updateGlobal({
+          overrideAccess: true,
           slug: global,
           data: {
             content: 'Spanish draft content',
@@ -4597,6 +4974,7 @@ describe('Versions', () => {
 
         // publish only english
         await payload.updateGlobal({
+          overrideAccess: true,
           slug: global,
           data: {
             _status: 'published',
@@ -4606,6 +4984,7 @@ describe('Versions', () => {
         })
 
         const publishedOnlyEN = await payload.findGlobal({
+          overrideAccess: true,
           slug: global,
           locale: 'all',
         })
@@ -4614,6 +4993,7 @@ describe('Versions', () => {
         expect(publishedOnlyEN.title.en).toStrictEqual('Eng published')
 
         await payload.updateGlobal({
+          overrideAccess: true,
           slug: global,
           data: {
             _status: 'published',
@@ -4622,6 +5002,7 @@ describe('Versions', () => {
         })
 
         const publishedAll = await payload.findGlobal({
+          overrideAccess: true,
           slug: global,
           locale: 'all',
         })
@@ -4633,6 +5014,7 @@ describe('Versions', () => {
       it('should publish non-default individual locale', async () => {
         // save spanish draft
         await payload.updateGlobal({
+          overrideAccess: true,
           slug: global,
           data: {
             content: 'Test span draft content',
@@ -4644,6 +5026,7 @@ describe('Versions', () => {
 
         // publish only german
         await payload.updateGlobal({
+          overrideAccess: true,
           slug: global,
           data: {
             _status: 'published',
@@ -4653,6 +5036,7 @@ describe('Versions', () => {
         })
 
         const globalData = await payload.findGlobal({
+          overrideAccess: true,
           slug: global,
           locale: 'all',
         })
@@ -4665,6 +5049,7 @@ describe('Versions', () => {
       it('should show correct data in latest version', async () => {
         // save spanish draft
         await payload.updateGlobal({
+          overrideAccess: true,
           slug: global,
           data: {
             content: 'New spanish draft content',
@@ -4676,6 +5061,7 @@ describe('Versions', () => {
 
         // publish only english
         await payload.updateGlobal({
+          overrideAccess: true,
           slug: global,
           data: {
             _status: 'published',
@@ -4685,6 +5071,7 @@ describe('Versions', () => {
         })
 
         const allVersions = await payload.findGlobalVersions({
+          overrideAccess: true,
           slug: global,
           locale: 'all',
           where: {

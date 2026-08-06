@@ -298,6 +298,7 @@ const SelectFields: CollectionConfig = {
       filterOptions: async ({ options, data, req }) => {
         // real async lookup, e.g. checking another collection to decide which options are allowed
         await req.payload.find({
+          overrideAccess: true,
           collection: selectFieldsSlug,
           limit: 0,
           req,

@@ -4,6 +4,7 @@ import { readRestrictedSlug } from './index.js'
 
 export const seedReadRestricted = async (payload: Payload): Promise<void> => {
   await payload.create({
+    overrideAccess: true,
     collection: readRestrictedSlug,
     data: {
       // Top-level fields
@@ -76,6 +77,7 @@ export const seedReadRestricted = async (payload: Payload): Promise<void> => {
   })
 
   await payload.create({
+    overrideAccess: true,
     collection: readRestrictedSlug,
     data: {
       restrictedTopLevel: 'Another hidden top level',
@@ -121,6 +123,7 @@ export const seedReadRestricted = async (payload: Payload): Promise<void> => {
   })
 
   await payload.create({
+    overrideAccess: true,
     collection: readRestrictedSlug,
     data: {
       restrictedTopLevel: 'Third hidden value',

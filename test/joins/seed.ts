@@ -21,6 +21,7 @@ const joinsDir = getTestSuiteDir({ fallbackDir: dirname, suitePath: 'joins' })
 
 export const seed = async (_payload: Payload) => {
   await _payload.create({
+    overrideAccess: true,
     collection: 'users',
     data: {
       email: devUser.email,
@@ -29,6 +30,7 @@ export const seed = async (_payload: Payload) => {
   })
 
   const category = await _payload.create({
+    overrideAccess: true,
     collection: categoriesSlug,
     data: {
       name: 'example',
@@ -37,6 +39,7 @@ export const seed = async (_payload: Payload) => {
   })
 
   await _payload.create({
+    overrideAccess: true,
     collection: hiddenPostsSlug,
     data: {
       category: category.id,
@@ -45,6 +48,7 @@ export const seed = async (_payload: Payload) => {
   })
 
   const post1 = await _payload.create({
+    overrideAccess: true,
     collection: postsSlug,
     data: {
       category: category.id,
@@ -57,6 +61,7 @@ export const seed = async (_payload: Payload) => {
   })
 
   const post2 = await _payload.create({
+    overrideAccess: true,
     collection: postsSlug,
     data: {
       category: category.id,
@@ -69,6 +74,7 @@ export const seed = async (_payload: Payload) => {
   })
 
   const post3 = await _payload.create({
+    overrideAccess: true,
     collection: postsSlug,
     data: {
       category: category.id,
@@ -81,6 +87,7 @@ export const seed = async (_payload: Payload) => {
   })
 
   await _payload.update({
+    overrideAccess: true,
     collection: postsSlug,
     id: post1.id,
     data: {
@@ -90,6 +97,7 @@ export const seed = async (_payload: Payload) => {
   })
 
   await _payload.update({
+    overrideAccess: true,
     collection: postsSlug,
     id: post2.id,
     data: {
@@ -99,6 +107,7 @@ export const seed = async (_payload: Payload) => {
   })
 
   await _payload.update({
+    overrideAccess: true,
     collection: postsSlug,
     id: post3.id,
     data: {
@@ -111,6 +120,7 @@ export const seed = async (_payload: Payload) => {
   const imageFilePath = path.resolve(joinsDir, 'image.png')
   const imageFile = await getFileByPath(imageFilePath)
   const { id: uploadedImage } = await _payload.create({
+    overrideAccess: true,
     collection: uploadsSlug,
     data: {},
     file: imageFile,
@@ -118,6 +128,7 @@ export const seed = async (_payload: Payload) => {
 
   // create a post that uses the upload
   await _payload.create({
+    overrideAccess: true,
     collection: postsSlug,
     data: {
       upload: uploadedImage,
@@ -125,12 +136,14 @@ export const seed = async (_payload: Payload) => {
   })
 
   const restrictedCategory = await _payload.create({
+    overrideAccess: true,
     collection: categoriesJoinRestrictedSlug,
     data: {
       name: 'categoryJoinRestricted',
     },
   })
   await _payload.create({
+    overrideAccess: true,
     collection: collectionRestrictedSlug,
     data: {
       title: 'should not allow read',
@@ -139,6 +152,7 @@ export const seed = async (_payload: Payload) => {
     },
   })
   await _payload.create({
+    overrideAccess: true,
     collection: collectionRestrictedSlug,
     data: {
       title: 'should allow read',
@@ -148,6 +162,7 @@ export const seed = async (_payload: Payload) => {
   })
 
   const root_folder = await _payload.create({
+    overrideAccess: true,
     collection: 'folders',
     data: {
       _h_folders: null,
@@ -156,61 +171,73 @@ export const seed = async (_payload: Payload) => {
   })
 
   const page_1 = await _payload.create({
+    overrideAccess: true,
     collection: 'example-pages',
     data: { title: 'page 1', name: 'Andrew', _h_folders: root_folder },
   })
 
   const post_1 = await _payload.create({
+    overrideAccess: true,
     collection: 'example-posts',
     data: { title: 'page 1', description: 'This is post 1', _h_folders: root_folder },
   })
 
   const page_2 = await _payload.create({
+    overrideAccess: true,
     collection: 'example-pages',
     data: { title: 'page 2', name: 'Sophia', _h_folders: root_folder },
   })
 
   const page_3 = await _payload.create({
+    overrideAccess: true,
     collection: 'example-pages',
     data: { title: 'page 3', name: 'Michael', _h_folders: root_folder },
   })
 
   const post_2 = await _payload.create({
+    overrideAccess: true,
     collection: 'example-posts',
     data: { title: 'post 2', description: 'This is post 2', _h_folders: root_folder },
   })
 
   const post_3 = await _payload.create({
+    overrideAccess: true,
     collection: 'example-posts',
     data: { title: 'post 3', description: 'This is post 3', _h_folders: root_folder },
   })
 
   const sub_folder_1 = await _payload.create({
+    overrideAccess: true,
     collection: 'folders',
     data: { _h_folders: root_folder, name: 'Sub Folder 1' },
   })
 
   const page_4 = await _payload.create({
+    overrideAccess: true,
     collection: 'example-pages',
     data: { title: 'page 4', name: 'Emma', _h_folders: sub_folder_1 },
   })
 
   const post_4 = await _payload.create({
+    overrideAccess: true,
     collection: 'example-posts',
     data: { title: 'post 4', description: 'This is post 4', _h_folders: sub_folder_1 },
   })
 
   const sub_folder_2 = await _payload.create({
+    overrideAccess: true,
     collection: 'folders',
     data: { _h_folders: root_folder, name: 'Sub Folder 2' },
   })
 
   const page_5 = await _payload.create({
+    overrideAccess: true,
     collection: 'example-pages',
     data: { title: 'page 5', name: 'Liam', _h_folders: sub_folder_2 },
   })
 
   const post_5 = await _payload.create({
+    overrideAccess: true,
     collection: 'example-posts',
     data: { title: 'post 5', description: 'This is post 5', _h_folders: sub_folder_2 },
   })

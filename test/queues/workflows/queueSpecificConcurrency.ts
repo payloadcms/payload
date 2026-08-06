@@ -28,6 +28,7 @@ export const queueSpecificConcurrencyWorkflow: WorkflowConfig<'queueSpecificConc
     await inlineTask('step1', {
       task: async ({ req }) => {
         await req.payload.create({
+          overrideAccess: true,
           collection: 'simple',
           data: {
             title: `started:${job.queue}:${job.input.resourceId}:${job.id}`,
@@ -43,6 +44,7 @@ export const queueSpecificConcurrencyWorkflow: WorkflowConfig<'queueSpecificConc
     await inlineTask('step2', {
       task: async ({ req }) => {
         await req.payload.create({
+          overrideAccess: true,
           collection: 'simple',
           data: {
             title: `completed:${job.queue}:${job.input.resourceId}:${job.id}`,

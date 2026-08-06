@@ -106,6 +106,7 @@ export const refreshOperation = async (incomingArgs: Arguments): Promise<Result>
       id: user.id,
       collection: collectionConfig.slug,
       depth: isGraphQL ? 0 : args.collection.config.auth.depth,
+      overrideAccess: true,
       req: args.req,
     })) as AuthenticatedUser
 

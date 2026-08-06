@@ -26,6 +26,7 @@ export const CreateSimpleRetries0Task: TaskConfig<'CreateSimpleRetries0'> = {
       throw new Error('Failed on purpose')
     }
     const newSimple = await req.payload.create({
+      overrideAccess: true,
       collection: 'simple',
       req,
       data: {

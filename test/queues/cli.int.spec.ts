@@ -28,6 +28,7 @@ describe('Queues - CLI', () => {
     })
 
     await payload.jobs.queue({
+      overrideAccess: true,
       workflow: 'inlineTaskTest',
       queue: 'autorunSecond',
       input: {
@@ -49,6 +50,7 @@ describe('Queues - CLI', () => {
     })
 
     const allSimples = await payload.find({
+      overrideAccess: true,
       collection: 'simple',
       limit: 100,
     })

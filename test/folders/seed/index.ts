@@ -11,6 +11,7 @@ async function createPost(
   { title, folder }: { folder?: string; title: string },
 ): Promise<Post> {
   return payload.create({
+    overrideAccess: true,
     collection: 'posts',
     data: {
       title,
@@ -24,6 +25,7 @@ async function createFolder(
   { name, folder }: { folder?: string; name: string },
 ): Promise<{ folder?: string; id: string; name: string }> {
   return payload.create({
+    overrideAccess: true,
     collection: folderSlug,
     data: {
       name,
@@ -34,6 +36,7 @@ async function createFolder(
 
 export const seed: NonNullable<Config['onInit']> = async (payload) => {
   await payload.create({
+    overrideAccess: true,
     collection: 'users',
     data: {
       email: devUser.email,

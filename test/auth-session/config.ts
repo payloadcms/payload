@@ -69,12 +69,14 @@ export default buildConfigWithDefaults(
     endpoints: authSessionTestEndpoints,
     onInit: async (payload) => {
       const existingUsers = await payload.find({
+        overrideAccess: true,
         collection: authSessionUsersSlug,
         limit: 1,
       })
 
       if (existingUsers.docs.length === 0) {
         await payload.create({
+          overrideAccess: true,
           collection: authSessionUsersSlug,
           data: {
             name: 'Session Test User',

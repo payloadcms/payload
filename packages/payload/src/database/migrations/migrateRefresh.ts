@@ -44,6 +44,7 @@ export async function migrateRefresh(this: BaseDatabaseAdapter) {
         })
         await payload.delete({
           collection: 'payload-migrations',
+          overrideAccess: true,
           req,
           where: {
             name: {
@@ -81,6 +82,7 @@ export async function migrateRefresh(this: BaseDatabaseAdapter) {
           name: migration.name,
           executed: true,
         },
+        overrideAccess: true,
         req,
       })
       await commitTransaction(req)

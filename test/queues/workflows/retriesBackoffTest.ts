@@ -11,6 +11,7 @@ export const retriesBackoffTestWorkflow: WorkflowConfig<'retriesBackoffTest'> = 
   ],
   handler: async ({ job, inlineTask, req }) => {
     const newJob = await req.payload.update({
+      overrideAccess: true,
       collection: 'payload-jobs',
       data: {
         input: {
@@ -29,6 +30,7 @@ export const retriesBackoffTestWorkflow: WorkflowConfig<'retriesBackoffTest'> = 
         const totalTried = job?.taskStatus?.inline?.['1']?.totalTried || 0
 
         const { id } = await req.payload.create({
+          overrideAccess: true,
           collection: 'simple',
           req,
           data: {
@@ -46,6 +48,7 @@ export const retriesBackoffTestWorkflow: WorkflowConfig<'retriesBackoffTest'> = 
         job.input.timeTried[totalTried] = new Date().toISOString()
 
         const updated = await req.payload.update({
+          overrideAccess: true,
           collection: 'payload-jobs',
           data: {
             input: job.input,
@@ -57,6 +60,7 @@ export const retriesBackoffTestWorkflow: WorkflowConfig<'retriesBackoffTest'> = 
         if (totalTried < 4) {
           // Cleanup the post
           await req.payload.delete({
+            overrideAccess: true,
             collection: 'simple',
             id,
             req,

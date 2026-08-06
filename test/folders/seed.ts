@@ -16,162 +16,189 @@ export const seed = async (payload: Payload): Promise<void> => {
 
   // Root: Documentation
   const documentation = await payload.create({
+    overrideAccess: true,
     collection: folderSlug,
     data: { name: 'Documentation', folderType: ['posts'] },
   })
 
   // Documentation > Getting Started
   const gettingStarted = await payload.create({
+    overrideAccess: true,
     collection: folderSlug,
     data: { name: 'Getting Started', folder: documentation.id, folderType: ['posts'] },
   })
 
   // Documentation > SDKs (container)
   const sdks = await payload.create({
+    overrideAccess: true,
     collection: folderSlug,
     data: { name: 'SDKs', folder: documentation.id, folderType: ['posts'] },
   })
 
   // Documentation > SDKs > JavaScript
   const sdkJs = await payload.create({
+    overrideAccess: true,
     collection: folderSlug,
     data: { name: 'JavaScript', folder: sdks.id, folderType: ['posts'] },
   })
 
   // Documentation > SDKs > iOS
   const sdkIos = await payload.create({
+    overrideAccess: true,
     collection: folderSlug,
     data: { name: 'iOS', folder: sdks.id, folderType: ['posts'] },
   })
 
   // Documentation > SDKs > Python
   await payload.create({
+    overrideAccess: true,
     collection: folderSlug,
     data: { name: 'Python', folder: sdks.id, folderType: ['posts'] },
   })
 
   // Documentation > SDKs > React Native
   await payload.create({
+    overrideAccess: true,
     collection: folderSlug,
     data: { name: 'React Native', folder: sdks.id, folderType: ['posts'] },
   })
 
   // Documentation > Features (container)
   const features = await payload.create({
+    overrideAccess: true,
     collection: folderSlug,
     data: { name: 'Features', folder: documentation.id, folderType: ['posts'] },
   })
 
   // Documentation > Features > Funnels
   const funnels = await payload.create({
+    overrideAccess: true,
     collection: folderSlug,
     data: { name: 'Funnels', folder: features.id, folderType: ['posts'] },
   })
 
   // Documentation > Features > Cohorts
   await payload.create({
+    overrideAccess: true,
     collection: folderSlug,
     data: { name: 'Cohorts', folder: features.id, folderType: ['posts'] },
   })
 
   // Documentation > Features > Retention
   const retention = await payload.create({
+    overrideAccess: true,
     collection: folderSlug,
     data: { name: 'Retention', folder: features.id, folderType: ['posts', 'media'] },
   })
 
   // Documentation > Features > Dashboards
   await payload.create({
+    overrideAccess: true,
     collection: folderSlug,
     data: { name: 'Dashboards', folder: features.id, folderType: ['posts', 'media'] },
   })
 
   // Root: Marketing
   const marketing = await payload.create({
+    overrideAccess: true,
     collection: folderSlug,
     data: { name: 'Marketing', folderType: ['posts', 'media'] },
   })
 
   // Marketing > Blog (container)
   const blog = await payload.create({
+    overrideAccess: true,
     collection: folderSlug,
     data: { name: 'Blog', folder: marketing.id, folderType: ['posts'] },
   })
 
   // Marketing > Blog > Product Updates
   const productUpdates = await payload.create({
+    overrideAccess: true,
     collection: folderSlug,
     data: { name: 'Product Updates', folder: blog.id, folderType: ['posts'] },
   })
 
   // Marketing > Blog > Engineering
   const engineering = await payload.create({
+    overrideAccess: true,
     collection: folderSlug,
     data: { name: 'Engineering', folder: blog.id, folderType: ['posts'] },
   })
 
   // Marketing > Blog > Customer Stories
   await payload.create({
+    overrideAccess: true,
     collection: folderSlug,
     data: { name: 'Customer Stories', folder: blog.id, folderType: ['posts'] },
   })
 
   // Marketing > Landing Pages
   await payload.create({
+    overrideAccess: true,
     collection: folderSlug,
     data: { name: 'Landing Pages', folder: marketing.id, folderType: ['posts', 'media'] },
   })
 
   // Marketing > Case Studies
   const caseStudies = await payload.create({
+    overrideAccess: true,
     collection: folderSlug,
     data: { name: 'Case Studies', folder: marketing.id, folderType: ['posts', 'media'] },
   })
 
   // Marketing > Brand Assets (media only)
   const brandAssets = await payload.create({
+    overrideAccess: true,
     collection: folderSlug,
     data: { name: 'Brand Assets', folder: marketing.id, folderType: ['media'] },
   })
 
   // Root: Product
   const product = await payload.create({
+    overrideAccess: true,
     collection: folderSlug,
     data: { name: 'Product', folderType: ['posts'] },
   })
 
   // Product > Changelog
   const changelog = await payload.create({
+    overrideAccess: true,
     collection: folderSlug,
     data: { name: 'Changelog', folder: product.id, folderType: ['posts'] },
   })
 
   // Product > Roadmap
   await payload.create({
+    overrideAccess: true,
     collection: folderSlug,
     data: { name: 'Roadmap', folder: product.id, folderType: ['posts'] },
   })
 
   // Root: Legal
   const legal = await payload.create({
+    overrideAccess: true,
     collection: folderSlug,
     data: { name: 'Legal', folderType: ['posts'] },
   })
 
   // Legal > Privacy
   const privacy = await payload.create({
+    overrideAccess: true,
     collection: folderSlug,
     data: { name: 'Privacy', folder: legal.id, folderType: ['posts'] },
   })
 
   // Legal > Terms
   const terms = await payload.create({
+    overrideAccess: true,
     collection: folderSlug,
     data: { name: 'Terms', folder: legal.id, folderType: ['posts'] },
   })
 
   // Root: Shared (no folderType restriction - for testing)
   const shared = await payload.create({
+    overrideAccess: true,
     collection: folderSlug,
     data: { name: 'Shared' },
   })
@@ -182,6 +209,7 @@ export const seed = async (payload: Payload): Promise<void> => {
 
   // Documentation (root)
   await payload.create({
+    overrideAccess: true,
     collection: postSlug,
     data: {
       folder: documentation.id,
@@ -191,6 +219,7 @@ export const seed = async (payload: Payload): Promise<void> => {
 
   // Getting Started docs
   await payload.create({
+    overrideAccess: true,
     collection: postSlug,
     data: {
       folder: gettingStarted.id,
@@ -199,6 +228,7 @@ export const seed = async (payload: Payload): Promise<void> => {
   })
 
   await payload.create({
+    overrideAccess: true,
     collection: postSlug,
     data: {
       folder: gettingStarted.id,
@@ -208,6 +238,7 @@ export const seed = async (payload: Payload): Promise<void> => {
 
   // SDKs (container)
   await payload.create({
+    overrideAccess: true,
     collection: postSlug,
     data: {
       folder: sdks.id,
@@ -217,6 +248,7 @@ export const seed = async (payload: Payload): Promise<void> => {
 
   // SDK docs
   await payload.create({
+    overrideAccess: true,
     collection: postSlug,
     data: {
       folder: sdkJs.id,
@@ -225,6 +257,7 @@ export const seed = async (payload: Payload): Promise<void> => {
   })
 
   await payload.create({
+    overrideAccess: true,
     collection: postSlug,
     data: {
       folder: sdkIos.id,
@@ -235,6 +268,7 @@ export const seed = async (payload: Payload): Promise<void> => {
   // Note: Python and React Native SDKs don't have stored refs, create inline
   const pythonSdk = (
     await payload.find({
+      overrideAccess: true,
       collection: folderSlug,
       limit: 1,
       where: { name: { equals: 'Python' } },
@@ -243,6 +277,7 @@ export const seed = async (payload: Payload): Promise<void> => {
 
   if (pythonSdk) {
     await payload.create({
+      overrideAccess: true,
       collection: postSlug,
       data: {
         folder: pythonSdk.id,
@@ -253,6 +288,7 @@ export const seed = async (payload: Payload): Promise<void> => {
 
   const reactNativeSdk = (
     await payload.find({
+      overrideAccess: true,
       collection: folderSlug,
       limit: 1,
       where: { name: { equals: 'React Native' } },
@@ -261,6 +297,7 @@ export const seed = async (payload: Payload): Promise<void> => {
 
   if (reactNativeSdk) {
     await payload.create({
+      overrideAccess: true,
       collection: postSlug,
       data: {
         folder: reactNativeSdk.id,
@@ -271,6 +308,7 @@ export const seed = async (payload: Payload): Promise<void> => {
 
   // Features (container)
   await payload.create({
+    overrideAccess: true,
     collection: postSlug,
     data: {
       folder: features.id,
@@ -280,6 +318,7 @@ export const seed = async (payload: Payload): Promise<void> => {
 
   // Feature sub-folders
   await payload.create({
+    overrideAccess: true,
     collection: postSlug,
     data: {
       folder: funnels.id,
@@ -290,6 +329,7 @@ export const seed = async (payload: Payload): Promise<void> => {
   // Cohorts folder
   const cohorts = (
     await payload.find({
+      overrideAccess: true,
       collection: folderSlug,
       limit: 1,
       where: { name: { equals: 'Cohorts' } },
@@ -298,6 +338,7 @@ export const seed = async (payload: Payload): Promise<void> => {
 
   if (cohorts) {
     await payload.create({
+      overrideAccess: true,
       collection: postSlug,
       data: {
         folder: cohorts.id,
@@ -307,6 +348,7 @@ export const seed = async (payload: Payload): Promise<void> => {
   }
 
   await payload.create({
+    overrideAccess: true,
     collection: postSlug,
     data: {
       folder: retention.id,
@@ -317,6 +359,7 @@ export const seed = async (payload: Payload): Promise<void> => {
   // Dashboards folder
   const dashboards = (
     await payload.find({
+      overrideAccess: true,
       collection: folderSlug,
       limit: 1,
       where: { name: { equals: 'Dashboards' } },
@@ -325,6 +368,7 @@ export const seed = async (payload: Payload): Promise<void> => {
 
   if (dashboards) {
     await payload.create({
+      overrideAccess: true,
       collection: postSlug,
       data: {
         folder: dashboards.id,
@@ -335,6 +379,7 @@ export const seed = async (payload: Payload): Promise<void> => {
 
   // Marketing (root)
   await payload.create({
+    overrideAccess: true,
     collection: postSlug,
     data: {
       folder: marketing.id,
@@ -344,6 +389,7 @@ export const seed = async (payload: Payload): Promise<void> => {
 
   // Blog (container)
   await payload.create({
+    overrideAccess: true,
     collection: postSlug,
     data: {
       folder: blog.id,
@@ -353,6 +399,7 @@ export const seed = async (payload: Payload): Promise<void> => {
 
   // Blog sub-folders
   await payload.create({
+    overrideAccess: true,
     collection: postSlug,
     data: {
       folder: productUpdates.id,
@@ -361,6 +408,7 @@ export const seed = async (payload: Payload): Promise<void> => {
   })
 
   await payload.create({
+    overrideAccess: true,
     collection: postSlug,
     data: {
       folder: engineering.id,
@@ -371,6 +419,7 @@ export const seed = async (payload: Payload): Promise<void> => {
   // Customer Stories folder
   const customerStories = (
     await payload.find({
+      overrideAccess: true,
       collection: folderSlug,
       limit: 1,
       where: { name: { equals: 'Customer Stories' } },
@@ -379,6 +428,7 @@ export const seed = async (payload: Payload): Promise<void> => {
 
   if (customerStories) {
     await payload.create({
+      overrideAccess: true,
       collection: postSlug,
       data: {
         folder: customerStories.id,
@@ -390,6 +440,7 @@ export const seed = async (payload: Payload): Promise<void> => {
   // Landing Pages folder
   const landingPages = (
     await payload.find({
+      overrideAccess: true,
       collection: folderSlug,
       limit: 1,
       where: { name: { equals: 'Landing Pages' } },
@@ -398,6 +449,7 @@ export const seed = async (payload: Payload): Promise<void> => {
 
   if (landingPages) {
     await payload.create({
+      overrideAccess: true,
       collection: postSlug,
       data: {
         folder: landingPages.id,
@@ -408,6 +460,7 @@ export const seed = async (payload: Payload): Promise<void> => {
 
   // Case Studies
   await payload.create({
+    overrideAccess: true,
     collection: postSlug,
     data: {
       folder: caseStudies.id,
@@ -420,6 +473,7 @@ export const seed = async (payload: Payload): Promise<void> => {
   const imageFile = await getFileByPath(imageFilePath)
 
   await payload.create({
+    overrideAccess: true,
     collection: 'media',
     data: {
       folder: brandAssets.id,
@@ -429,6 +483,7 @@ export const seed = async (payload: Payload): Promise<void> => {
 
   // Product (root)
   await payload.create({
+    overrideAccess: true,
     collection: postSlug,
     data: {
       folder: product.id,
@@ -438,6 +493,7 @@ export const seed = async (payload: Payload): Promise<void> => {
 
   // Changelog
   await payload.create({
+    overrideAccess: true,
     collection: postSlug,
     data: {
       folder: changelog.id,
@@ -448,6 +504,7 @@ export const seed = async (payload: Payload): Promise<void> => {
   // Roadmap folder
   const roadmap = (
     await payload.find({
+      overrideAccess: true,
       collection: folderSlug,
       limit: 1,
       where: { name: { equals: 'Roadmap' } },
@@ -456,6 +513,7 @@ export const seed = async (payload: Payload): Promise<void> => {
 
   if (roadmap) {
     await payload.create({
+      overrideAccess: true,
       collection: postSlug,
       data: {
         folder: roadmap.id,
@@ -466,6 +524,7 @@ export const seed = async (payload: Payload): Promise<void> => {
 
   // Legal (root)
   await payload.create({
+    overrideAccess: true,
     collection: postSlug,
     data: {
       folder: legal.id,
@@ -475,6 +534,7 @@ export const seed = async (payload: Payload): Promise<void> => {
 
   // Legal sub-folders
   await payload.create({
+    overrideAccess: true,
     collection: postSlug,
     data: {
       folder: privacy.id,
@@ -483,6 +543,7 @@ export const seed = async (payload: Payload): Promise<void> => {
   })
 
   await payload.create({
+    overrideAccess: true,
     collection: postSlug,
     data: {
       folder: terms.id,
@@ -492,6 +553,7 @@ export const seed = async (payload: Payload): Promise<void> => {
 
   // Shared (no folder restriction)
   await payload.create({
+    overrideAccess: true,
     collection: postSlug,
     data: {
       folder: shared.id,

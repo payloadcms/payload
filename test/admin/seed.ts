@@ -263,6 +263,7 @@ export const seed = async (_payload: Payload) => {
 
   // delete all with300Documents
   await _payload.delete({
+    overrideAccess: true,
     collection: with300DocumentsSlug,
     where: {},
   })
@@ -271,6 +272,7 @@ export const seed = async (_payload: Payload) => {
   const manyDocumentsPromises: Promise<unknown>[] = Array.from({ length: 300 }, (_, i) => {
     const index = (i + 1).toString().padStart(3, '0')
     return _payload.create({
+      overrideAccess: true,
       collection: with300DocumentsSlug,
       data: {
         id: index,

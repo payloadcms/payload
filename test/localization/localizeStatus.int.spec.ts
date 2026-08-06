@@ -94,12 +94,14 @@ describe('localizeStatus migration', () => {
 
         // Step 1: Create some test data
         const post1 = await payload.create({
+          overrideAccess: true,
           collection: 'testMigrationPosts',
           data: { title: 'Post 1' },
         })
 
         // Publish the post
         await payload.update({
+          overrideAccess: true,
           id: post1.id,
           collection: 'testMigrationPosts',
           data: { _status: 'published', title: 'Post 1 Updated' },
@@ -289,12 +291,14 @@ describe('localizeStatus migration', () => {
 
         // Create a complex version history
         const post = await payload.create({
+          overrideAccess: true,
           collection: 'testMigrationPosts',
           data: { title: 'Initial Draft' },
         })
 
         // Publish it
         await payload.update({
+          overrideAccess: true,
           id: post.id,
           collection: 'testMigrationPosts',
           data: { _status: 'published', title: 'Published Version' },
@@ -302,6 +306,7 @@ describe('localizeStatus migration', () => {
 
         // Make a draft change
         await payload.update({
+          overrideAccess: true,
           id: post.id,
           collection: 'testMigrationPosts',
           data: { _status: 'draft', title: 'Draft Changes' },
@@ -309,6 +314,7 @@ describe('localizeStatus migration', () => {
 
         // Publish again
         await payload.update({
+          overrideAccess: true,
           id: post.id,
           collection: 'testMigrationPosts',
           data: { _status: 'published', title: 'Re-published' },
@@ -547,6 +553,7 @@ describe('localizeStatus migration', () => {
       it('should skip migration for collections without versions enabled', async () => {
         // Create a document in the collection without versions
         const doc = await payload.create({
+          overrideAccess: true,
           collection: 'testNoVersions',
           data: { title: 'Test document' },
         })
@@ -659,11 +666,13 @@ describe('localizeStatus migration', () => {
         const drizzle = payload.db.drizzle
 
         const post1 = await payload.create({
+          overrideAccess: true,
           collection: 'testMigrationPosts',
           data: { title: 'Post 1' },
         })
 
         await payload.update({
+          overrideAccess: true,
           id: post1.id,
           collection: 'testMigrationPosts',
           data: { _status: 'published', title: 'Post 1 Updated' },
@@ -872,6 +881,7 @@ describe('localizeStatus migration', () => {
     describe('Scenario 4: Skip collections without versions', () => {
       it('should skip migration for collections without versions enabled', async () => {
         const doc = await payload.create({
+          overrideAccess: true,
           collection: 'testNoVersions',
           data: { title: 'Test document' },
         })
@@ -920,12 +930,14 @@ describe('localizeStatus migration', () => {
       it('should migrate version._status from string to per-locale object', async () => {
         // Step 1: Create a post with a version
         const post = await payload.create({
+          overrideAccess: true,
           collection: 'testMigrationPosts',
           data: { title: 'MongoDB Test Post' },
         })
 
         // Publish the post
         await payload.update({
+          overrideAccess: true,
           id: post.id,
           collection: 'testMigrationPosts',
           data: { _status: 'published', title: 'MongoDB Test Post Published' },

@@ -10,6 +10,7 @@ export const getLivePreviewDoc = createServerFn({ method: 'GET' })
 
     try {
       const { docs } = await payload.find({
+        overrideAccess: true,
         collection,
         depth: 2,
         draft: true,

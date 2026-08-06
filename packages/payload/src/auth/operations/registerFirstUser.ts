@@ -93,6 +93,7 @@ export const registerFirstUserOperation = async <TSlug extends AuthCollectionSlu
         data: {
           _verified: true,
         },
+        overrideAccess: true,
         req,
       })
     }
@@ -102,6 +103,7 @@ export const registerFirstUserOperation = async <TSlug extends AuthCollectionSlu
     // /////////////////////////////////////
 
     const { exp, token } = await payload.login({
+      ...{ overrideAccess: true },
       ...args,
       collection: slug,
       req,

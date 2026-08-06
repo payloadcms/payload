@@ -132,6 +132,7 @@ export const getConfig: () => Partial<Config> = () => ({
   cors: [`http://localhost:${process.env.PORT || 3000}`, 'http://localhost:3001'],
   onInit: async (payload) => {
     await payload.create({
+      overrideAccess: true,
       collection: 'users',
       data: {
         email: devUser.email,

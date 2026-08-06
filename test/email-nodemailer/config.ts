@@ -18,6 +18,7 @@ export default buildConfigWithDefaults({
   onInit: async (payload) => {
     if (process.env.SKIP_ON_INIT !== 'true') {
       await payload.create({
+        overrideAccess: true,
         collection: 'users',
         data: {
           email: devUser.email,

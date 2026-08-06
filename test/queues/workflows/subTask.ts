@@ -15,6 +15,7 @@ export const subTaskWorkflow: WorkflowConfig<'subTask'> = {
         const { newSimple } = await inlineTask('create doc 1', {
           task: async ({ req }) => {
             const newSimple = await req.payload.create({
+              overrideAccess: true,
               collection: 'simple',
               req,
               data: {
@@ -32,6 +33,7 @@ export const subTaskWorkflow: WorkflowConfig<'subTask'> = {
         const { newSimple2 } = await inlineTask('create doc 2', {
           task: async ({ req }) => {
             const newSimple2 = await req.payload.create({
+              overrideAccess: true,
               collection: 'simple',
               req,
               data: {

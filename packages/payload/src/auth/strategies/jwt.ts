@@ -82,6 +82,7 @@ async function autoLogin({
       collection: collection!.config.slug,
       depth: isGraphQL ? 0 : collection!.config.auth.depth,
       limit: 1,
+      overrideAccess: true,
       pagination: false,
       where,
     })
@@ -127,6 +128,7 @@ export const JWTAuthentication: AuthStrategyFunction = async ({
       id: decodedPayload.id,
       collection: decodedPayload.collection,
       depth: isGraphQL ? 0 : collection!.config.auth.depth,
+      overrideAccess: true,
     })) as AuthStrategyResult['user']
 
     if (user && (!collection!.config.auth.verify || user._verified)) {

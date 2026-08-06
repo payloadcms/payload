@@ -4,6 +4,7 @@ import { devUser, regularUser } from '../credentials.js'
 
 export const seed = async (payload: Payload) => {
   await payload.create({
+    overrideAccess: true,
     collection: 'users',
     depth: 0,
     select: {},
@@ -16,6 +17,7 @@ export const seed = async (payload: Payload) => {
   })
 
   await payload.create({
+    overrideAccess: true,
     collection: 'users',
     depth: 0,
     select: {},
@@ -28,6 +30,7 @@ export const seed = async (payload: Payload) => {
   })
 
   await payload.create({
+    overrideAccess: true,
     collection: 'pages',
     depth: 0,
     select: {},
@@ -37,6 +40,7 @@ export const seed = async (payload: Payload) => {
   })
 
   await payload.create({
+    overrideAccess: true,
     collection: 'posts',
     depth: 0,
     select: {},
@@ -47,6 +51,7 @@ export const seed = async (payload: Payload) => {
   })
 
   await payload.create({
+    overrideAccess: true,
     collection: 'posts',
     depth: 0,
     select: {},

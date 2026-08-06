@@ -58,12 +58,12 @@ export const getJobsLocalAPI = (payload: Payload) => ({
           input: TypedJobs['tasks'][TTaskOrWorkflowSlug]['input']
           meta?: Job['meta']
           /**
-           * If set to false, access control as defined in jobsConfig.access.queue will be run.
-           * By default, this is true and no access control will be run.
-           * If you set this to false and do not have jobsConfig.access.queue defined, the default access control will be
-           * run (which is a function that returns `true` if the user is logged in).
+           * If set to true, access control as defined in jobsConfig.access.queue will be skipped.
+           * By default, this is false and access control will run.
+           * If you do not have jobsConfig.access.queue defined, the default access control will be
+           * run (which allows users from the configured Admin user collection).
            *
-           * @default true
+           * @default false
            */
           overrideAccess?: boolean
           /**
@@ -82,12 +82,12 @@ export const getJobsLocalAPI = (payload: Payload) => ({
           input: TypedJobs['workflows'][TTaskOrWorkflowSlug]['input']
           meta?: Job['meta']
           /**
-           * If set to false, access control as defined in jobsConfig.access.queue will be run.
-           * By default, this is true and no access control will be run.
-           * If you set this to false and do not have jobsConfig.access.queue defined, the default access control will be
-           * run (which is a function that returns `true` if the user is logged in).
+           * If set to true, access control as defined in jobsConfig.access.queue will be skipped.
+           * By default, this is false and access control will run.
+           * If you do not have jobsConfig.access.queue defined, the default access control will be
+           * run (which allows users from the configured Admin user collection).
            *
-           * @default true
+           * @default false
            */
           overrideAccess?: boolean
           /**
@@ -109,12 +109,12 @@ export const getJobsLocalAPI = (payload: Payload) => ({
       ? Job<TTaskOrWorkflowSlug>
       : JobFromTask<TTaskOrWorkflowSlug>
   > => {
-    const overrideAccess = args?.overrideAccess !== false
+    const overrideAccess = args?.overrideAccess ?? false
     const req: PayloadRequest = args.req ?? (await createLocalReq({}, payload))
 
     if (!overrideAccess) {
       /**
-       * By default, jobsConfig.access.queue will be `defaultAccess` which is a function that returns `true` if the user is logged in.
+       * By default, jobsConfig.access.queue will be `defaultAccess`, which allows users from the configured Admin user collection.
        */
       const accessFn = payload.config.jobs?.access?.queue ?? (() => true)
       const hasAccess = await accessFn({ req })
@@ -234,12 +234,12 @@ export const getJobsLocalAPI = (payload: Payload) => ({
      */
     limit?: number
     /**
-     * If set to false, access control as defined in jobsConfig.access.run will be run.
-     * By default, this is true and no access control will be run.
-     * If you set this to false and do not have jobsConfig.access.run defined, the default access control will be
-     * run (which is a function that returns `true` if the user is logged in).
+     * If set to true, access control as defined in jobsConfig.access.run will be skipped.
+     * By default, this is false and access control will run.
+     * If you do not have jobsConfig.access.run defined, the default access control will be
+     * run (which allows users from the configured Admin user collection).
      *
-     * @default true
+     * @default false
      */
     overrideAccess?: boolean
     /**
@@ -276,7 +276,7 @@ export const getJobsLocalAPI = (payload: Payload) => ({
     return await runJobs({
       allQueues: args?.allQueues,
       limit: args?.limit,
-      overrideAccess: args?.overrideAccess !== false,
+      overrideAccess: args?.overrideAccess ?? false,
       processingOrder: args?.processingOrder,
       queue: args?.queue,
       req: newReq,
@@ -289,12 +289,12 @@ export const getJobsLocalAPI = (payload: Payload) => ({
   runByID: async (args: {
     id: number | string
     /**
-     * If set to false, access control as defined in jobsConfig.access.run will be run.
-     * By default, this is true and no access control will be run.
-     * If you set this to false and do not have jobsConfig.access.run defined, the default access control will be
-     * run (which is a function that returns `true` if the user is logged in).
+     * If set to true, access control as defined in jobsConfig.access.run will be skipped.
+     * By default, this is false and access control will run.
+     * If you do not have jobsConfig.access.run defined, the default access control will be
+     * run (which allows users from the configured Admin user collection).
      *
-     * @default true
+     * @default false
      */
     overrideAccess?: boolean
     req?: PayloadRequest
@@ -312,7 +312,7 @@ export const getJobsLocalAPI = (payload: Payload) => ({
 
     return await runJobs({
       id: args.id,
-      overrideAccess: args.overrideAccess !== false,
+      overrideAccess: args.overrideAccess ?? false,
       req: newReq,
       silent: args.silent,
     })
@@ -320,12 +320,12 @@ export const getJobsLocalAPI = (payload: Payload) => ({
 
   cancel: async (args: {
     /**
-     * If set to false, access control as defined in jobsConfig.access.cancel will be run.
-     * By default, this is true and no access control will be run.
-     * If you set this to false and do not have jobsConfig.access.cancel defined, the default access control will be
-     * run (which is a function that returns `true` if the user is logged in).
+     * If set to true, access control as defined in jobsConfig.access.cancel will be skipped.
+     * By default, this is false and access control will run.
+     * If you do not have jobsConfig.access.cancel defined, the default access control will be
+     * run (which allows users from the configured Admin user collection).
      *
-     * @default true
+     * @default false
      */
     overrideAccess?: boolean
     queue?: string
@@ -334,10 +334,10 @@ export const getJobsLocalAPI = (payload: Payload) => ({
   }): Promise<void> => {
     const req: PayloadRequest = args.req ?? (await createLocalReq({}, payload))
 
-    const overrideAccess = args.overrideAccess !== false
+    const overrideAccess = args.overrideAccess ?? false
     if (!overrideAccess) {
       /**
-       * By default, jobsConfig.access.cancel will be `defaultAccess` which is a function that returns `true` if the user is logged in.
+       * By default, jobsConfig.access.cancel will be `defaultAccess`, which allows users from the configured Admin user collection.
        */
       const accessFn = payload.config.jobs?.access?.cancel ?? (() => true)
       const hasAccess = await accessFn({ req })
@@ -387,22 +387,22 @@ export const getJobsLocalAPI = (payload: Payload) => ({
   cancelByID: async (args: {
     id: number | string
     /**
-     * If set to false, access control as defined in jobsConfig.access.cancel will be run.
-     * By default, this is true and no access control will be run.
-     * If you set this to false and do not have jobsConfig.access.cancel defined, the default access control will be
-     * run (which is a function that returns `true` if the user is logged in).
+     * If set to true, access control as defined in jobsConfig.access.cancel will be skipped.
+     * By default, this is false and access control will run.
+     * If you do not have jobsConfig.access.cancel defined, the default access control will be
+     * run (which allows users from the configured Admin user collection).
      *
-     * @default true
+     * @default false
      */
     overrideAccess?: boolean
     req?: PayloadRequest
   }): Promise<void> => {
     const req: PayloadRequest = args.req ?? (await createLocalReq({}, payload))
 
-    const overrideAccess = args.overrideAccess !== false
+    const overrideAccess = args.overrideAccess ?? false
     if (!overrideAccess) {
       /**
-       * By default, jobsConfig.access.cancel will be `defaultAccess` which is a function that returns `true` if the user is logged in.
+       * By default, jobsConfig.access.cancel will be `defaultAccess`, which allows users from the configured Admin user collection.
        */
       const accessFn = payload.config.jobs?.access?.cancel ?? (() => true)
       const hasAccess = await accessFn({ req })

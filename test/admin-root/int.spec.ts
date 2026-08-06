@@ -50,6 +50,7 @@ describe('Admin (Root) Tests', () => {
 
   it('local API example', async () => {
     const newPost = await payload.create({
+      overrideAccess: true,
       collection: postsSlug,
       data: {
         text: 'LOCAL API EXAMPLE',

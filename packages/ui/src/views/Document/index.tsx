@@ -361,6 +361,7 @@ export const renderDocument = async ({
       draft: true,
       fallbackLocale: false,
       locale: locale?.code,
+      overrideAccess: true,
       req,
       user,
     })

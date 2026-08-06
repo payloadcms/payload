@@ -4,6 +4,7 @@ import { devUser } from '../credentials.js'
 
 export const seed = async (payload: BasePayload) => {
   await payload.create({
+    overrideAccess: true,
     collection: 'users',
     data: {
       email: devUser.email,
@@ -16,6 +17,7 @@ export const seed = async (payload: BasePayload) => {
     // Create sample tickets
     for (let i = 1; i <= 35; i++) {
       await payload.create({
+        overrideAccess: true,
         collection: 'tickets',
         data: {
           description: `Sample ticket description for ticket ${i}`,
@@ -31,6 +33,7 @@ export const seed = async (payload: BasePayload) => {
     for (const month of months) {
       for (let i = 1; i <= Math.floor(Math.random() * 10) + 5; i++) {
         await payload.create({
+          overrideAccess: true,
           collection: 'revenue',
           data: {
             amount: Math.floor(Math.random() * 10000) + 1000,
@@ -98,6 +101,7 @@ export const seed = async (payload: BasePayload) => {
       }
 
       await payload.create({
+        overrideAccess: true,
         collection: 'events',
         data: {
           type: 'workshop',
@@ -116,6 +120,7 @@ export const seed = async (payload: BasePayload) => {
     const nestedDemoPriorities = [10, 30, 20, 5]
     for (const [index, priority] of nestedDemoPriorities.entries()) {
       await payload.create({
+        overrideAccess: true,
         collection: 'events',
         data: {
           type: 'workshop',
@@ -137,6 +142,7 @@ export const seed = async (payload: BasePayload) => {
       eventDate.setDate(currentDate.getDate() + Math.floor(Math.random() * 365) - 180) // Random date within ±6 months
 
       await payload.create({
+        overrideAccess: true,
         collection: 'events',
         data: {
           type: ['meeting', 'conference', 'workshop', 'webinar', 'other'][

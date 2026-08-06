@@ -74,12 +74,14 @@ describe('graphql', () => {
 
     it('should respect maxComplexity', async () => {
       const post = await payload.create({
+        overrideAccess: true,
         collection: 'posts',
         data: {
           title: 'example post',
         },
       })
       await payload.update({
+        overrideAccess: true,
         collection: 'posts',
         id: post.id,
         data: {
@@ -109,6 +111,7 @@ describe('graphql', () => {
 
     it('should sanitize hyphenated field names to snake case', async () => {
       const post = await payload.create({
+        overrideAccess: true,
         collection: 'posts',
         data: {
           title: 'example post',
@@ -132,7 +135,7 @@ describe('graphql', () => {
     })
 
     it('should not error because of non nullable fields', async () => {
-      await payload.delete({ collection: 'posts', where: {} })
+      await payload.delete({ overrideAccess: true, collection: 'posts', where: {} })
 
       // this is an array if any errors
       const res_1 = await restClient
@@ -154,6 +157,7 @@ query {
       expect(res_1.errors).toBeFalsy()
 
       await payload.create({
+        overrideAccess: true,
         collection: 'posts',
         data: { title: 'any-title' },
       })
@@ -178,6 +182,7 @@ query {
 
     it('should handle blocks with select: true', async () => {
       const createdPost = await payload.create({
+        overrideAccess: true,
         collection: 'posts',
         data: {
           title: 'Test Post with Blocks',
@@ -240,6 +245,7 @@ query {
       )
 
       await payload.delete({
+        overrideAccess: true,
         collection: 'posts',
         id: createdPost.id,
       })
@@ -247,6 +253,7 @@ query {
 
     it('should not error when querying a global with a deleted relationship in an array', async () => {
       const post1 = await payload.create({
+        overrideAccess: true,
         collection: 'posts',
         data: {
           title: 'Post 1',
@@ -254,6 +261,7 @@ query {
       })
 
       await payload.updateGlobal({
+        overrideAccess: true,
         slug: 'home',
         data: {
           topPosts: [
@@ -285,6 +293,7 @@ query {
       ])
 
       await payload.delete({
+        overrideAccess: true,
         collection: 'posts',
         id: post1.id,
       })

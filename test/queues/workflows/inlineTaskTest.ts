@@ -13,6 +13,7 @@ export const inlineTaskTestWorkflow: WorkflowConfig<'inlineTaskTest'> = {
     await inlineTask('1', {
       task: async ({ input, req }) => {
         const newSimple = await req.payload.create({
+          overrideAccess: true,
           collection: 'simple',
           req,
           data: {

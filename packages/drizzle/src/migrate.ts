@@ -40,6 +40,7 @@ export const migrate: DrizzleAdapter['migrate'] = async function migrate(
     ;({ docs: migrationsInDB } = await payload.find({
       collection: 'payload-migrations',
       limit: 0,
+      overrideAccess: true,
       sort: '-name',
     }))
 
@@ -104,6 +105,7 @@ async function runMigrationFile(payload: Payload, migration: Migration, batch: n
         name: migration.name,
         batch,
       },
+      overrideAccess: true,
       req,
     })
     await commitTransaction(req)

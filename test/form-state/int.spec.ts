@@ -57,6 +57,7 @@ describe('Form State', () => {
     const req = await createLocalReq({ user }, payload)
 
     const postData = await payload.create({
+      overrideAccess: true,
       collection: postsSlug,
       data: {
         title: 'Test Post',
@@ -113,6 +114,7 @@ describe('Form State', () => {
     const req = await createLocalReq({ user }, payload)
 
     const postData = await payload.create({
+      overrideAccess: true,
       collection: postsSlug,
       data: {
         title: 'Test Post',
@@ -241,6 +243,7 @@ describe('Form State', () => {
     const req = await createLocalReq({ user }, payload)
 
     const hiddenDoc = await payload.create({
+      overrideAccess: true,
       collection: conditionsSlug,
       data: {
         showField: false,
@@ -269,6 +272,7 @@ describe('Form State', () => {
     expect(stateHidden?.conditionalCustomField?.lastRenderedPath).toBeUndefined()
 
     const visibleDoc = await payload.create({
+      overrideAccess: true,
       collection: conditionsSlug,
       data: {
         showField: true,
@@ -295,14 +299,15 @@ describe('Form State', () => {
     expect(stateVisible?.conditionalCustomField).toHaveProperty('customComponents')
     expect(stateVisible?.conditionalCustomField?.customComponents?.Field).toBeDefined()
 
-    await payload.delete({ collection: conditionsSlug, id: hiddenDoc.id })
-    await payload.delete({ collection: conditionsSlug, id: visibleDoc.id })
+    await payload.delete({ overrideAccess: true, collection: conditionsSlug, id: hiddenDoc.id })
+    await payload.delete({ overrideAccess: true, collection: conditionsSlug, id: visibleDoc.id })
   })
 
   it('should preserve values of fields nested inside a row hidden by admin.condition', async () => {
     const req = await createLocalReq({ user }, payload)
 
     const hiddenDoc = await payload.create({
+      overrideAccess: true,
       collection: conditionsSlug,
       data: {
         showField: false,
@@ -333,13 +338,14 @@ describe('Form State', () => {
     // `withCondition` (rather than rendering an empty, visible row).
     expect(stateHidden?.['_index-2']?.passesCondition).toBe(false)
 
-    await payload.delete({ collection: conditionsSlug, id: hiddenDoc.id })
+    await payload.delete({ overrideAccess: true, collection: conditionsSlug, id: hiddenDoc.id })
   })
 
   it('should preserve values of fields nested inside a collapsible hidden by admin.condition', async () => {
     const req = await createLocalReq({ user }, payload)
 
     const hiddenDoc = await payload.create({
+      overrideAccess: true,
       collection: conditionsSlug,
       data: {
         showField: false,
@@ -367,13 +373,14 @@ describe('Form State', () => {
     // nested field's value must survive even though the collapsible is hidden.
     expect(stateHidden?.conditionalCollapsibleField?.value).toBe('collapsible db value')
 
-    await payload.delete({ collection: conditionsSlug, id: hiddenDoc.id })
+    await payload.delete({ overrideAccess: true, collection: conditionsSlug, id: hiddenDoc.id })
   })
 
   it('should render custom Field component when admin.condition flips from false to true via onChange', async () => {
     const req = await createLocalReq({ user }, payload)
 
     const doc = await payload.create({
+      overrideAccess: true,
       collection: conditionsSlug,
       data: {
         showField: false,
@@ -422,13 +429,14 @@ describe('Form State', () => {
     expect(flippedState?.conditionalCustomField).toHaveProperty('customComponents')
     expect(flippedState?.conditionalCustomField?.customComponents?.Field).toBeDefined()
 
-    await payload.delete({ collection: conditionsSlug, id: doc.id })
+    await payload.delete({ overrideAccess: true, collection: conditionsSlug, id: doc.id })
   })
 
   it('should add `addedByServer` flag to fields that originate on the server', async () => {
     const req = await createLocalReq({ user }, payload)
 
     const postData = await payload.create({
+      overrideAccess: true,
       collection: postsSlug,
       data: {
         title: 'Test Post',
@@ -1308,6 +1316,7 @@ describe('Form State', () => {
 
     // Create a document with an empty array
     const postData = await payload.create({
+      overrideAccess: true,
       collection: postsSlug,
       data: {
         title: 'Test Post',
@@ -1346,6 +1355,7 @@ describe('Form State', () => {
     const req = await createLocalReq({ user }, payload)
 
     const postData = await payload.create({
+      overrideAccess: true,
       collection: postsSlug,
       data: {
         title: 'Test Post',
@@ -1370,6 +1380,6 @@ describe('Form State', () => {
 
     expect(state.selectWithAsyncFilterOptions?.selectFilterOptions).toStrictEqual(['allowed'])
 
-    await payload.delete({ collection: postsSlug, id: postData.id })
+    await payload.delete({ overrideAccess: true, collection: postsSlug, id: postData.id })
   })
 })

@@ -86,6 +86,7 @@ describe('globals', () => {
   describe('local', () => {
     it('should save empty json objects', async () => {
       const createdJSON: any = await payload.updateGlobal({
+        overrideAccess: true,
         data: {
           json: {
             state: {},
@@ -102,6 +103,7 @@ describe('globals', () => {
         title: 'title',
       }
       const doc = await payload.updateGlobal({
+        overrideAccess: true,
         data,
         slug,
       })
@@ -114,10 +116,12 @@ describe('globals', () => {
         title,
       }
       await payload.updateGlobal({
+        overrideAccess: true,
         data,
         slug,
       })
       const doc = await payload.findGlobal({
+        overrideAccess: true,
         slug,
       })
 
@@ -144,6 +148,7 @@ describe('globals', () => {
       }
 
       await payload.updateGlobal({
+        overrideAccess: true,
         data: {
           array: localized.en.array,
         },
@@ -152,6 +157,7 @@ describe('globals', () => {
       })
 
       await payload.updateGlobal({
+        overrideAccess: true,
         data: {
           array: localized.es.array,
         },
@@ -160,11 +166,13 @@ describe('globals', () => {
       })
 
       const en = await payload.findGlobal({
+        overrideAccess: true,
         locale: englishLocale,
         slug: arraySlug,
       })
 
       const es = await payload.findGlobal({
+        overrideAccess: true,
         locale: spanishLocale,
         slug: arraySlug,
       })
@@ -192,6 +200,7 @@ describe('globals', () => {
       expect(Object.keys(emptyGlobal)).toHaveLength(0)
 
       await payload.updateGlobal({
+        overrideAccess: true,
         data: {
           enabled: true,
         },
@@ -208,6 +217,7 @@ describe('globals', () => {
 
     it('should get globals with defaultValues populated before first creation', async () => {
       const defaultValueGlobal = await payload.findGlobal({
+        overrideAccess: true,
         slug: defaultValueSlug,
       })
 
@@ -240,6 +250,7 @@ describe('globals', () => {
         title: 'updated graphql',
       }
       await payload.updateGlobal({
+        overrideAccess: true,
         data,
         slug,
       })

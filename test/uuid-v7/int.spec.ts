@@ -37,7 +37,7 @@ describeUuidV7('UUID v7 idType (postgres)', () => {
 
     for (const { collection, id } of [...createdStack].reverse()) {
       try {
-        await payload.delete({ collection, id })
+        await payload.delete({ overrideAccess: true, collection, id })
       } catch {
         // ignore: already deleted or FK race
       }
@@ -58,6 +58,7 @@ describeUuidV7('UUID v7 idType (postgres)', () => {
 
   it('should create a document with a valid UUID v7 default id', async () => {
     const doc = await payload.create({
+      overrideAccess: true,
       collection: 'posts',
       data: { title: 'uuid v7 post' },
     })
@@ -72,10 +73,12 @@ describeUuidV7('UUID v7 idType (postgres)', () => {
 
   it('should order ids lexicographically for consecutive creates', async () => {
     const first = await payload.create({
+      overrideAccess: true,
       collection: 'posts',
       data: { title: 'first' },
     })
     const second = await payload.create({
+      overrideAccess: true,
       collection: 'posts',
       data: { title: 'second' },
     })
@@ -88,6 +91,7 @@ describeUuidV7('UUID v7 idType (postgres)', () => {
 
   it('should findByID with generated id', async () => {
     const created = await payload.create({
+      overrideAccess: true,
       collection: 'posts',
       data: { title: 'find me' },
     })
@@ -95,6 +99,7 @@ describeUuidV7('UUID v7 idType (postgres)', () => {
     track('posts', String(created.id))
 
     const found = await payload.findByID({
+      overrideAccess: true,
       collection: 'posts',
       id: created.id,
     })
@@ -105,10 +110,12 @@ describeUuidV7('UUID v7 idType (postgres)', () => {
 
   it('should resolve relationship to category', async () => {
     const category = await payload.create({
+      overrideAccess: true,
       collection: 'categories',
       data: { name: 'Cat A' },
     })
     const article = await payload.create({
+      overrideAccess: true,
       collection: 'articles',
       data: {
         title: 'Article 1',
@@ -125,6 +132,7 @@ describeUuidV7('UUID v7 idType (postgres)', () => {
 
   it('should query by id equals', async () => {
     const created = await payload.create({
+      overrideAccess: true,
       collection: 'posts',
       data: { title: 'query by id' },
     })
@@ -132,6 +140,7 @@ describeUuidV7('UUID v7 idType (postgres)', () => {
     track('posts', String(created.id))
 
     const res = await payload.find({
+      overrideAccess: true,
       collection: 'posts',
       where: { id: { equals: created.id } },
     })

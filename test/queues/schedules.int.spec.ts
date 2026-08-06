@@ -81,6 +81,7 @@ describe('Queues - scheduling, without automatic scheduling handling', () => {
     })
 
     const allSimples = await payload.find({
+      overrideAccess: true,
       collection: 'simple',
       limit: 100,
     })
@@ -102,6 +103,7 @@ describe('Queues - scheduling, without automatic scheduling handling', () => {
     })
 
     const allSimples = await payload.find({
+      overrideAccess: true,
       collection: 'simple',
       limit: 100,
     })
@@ -123,6 +125,7 @@ describe('Queues - scheduling, without automatic scheduling handling', () => {
     })
 
     const allSimples = await payload.find({
+      overrideAccess: true,
       collection: 'simple',
       limit: 100,
     })
@@ -147,6 +150,7 @@ describe('Queues - scheduling, without automatic scheduling handling', () => {
     })
 
     const allSimples = await payload.find({
+      overrideAccess: true,
       collection: 'simple',
       limit: 100,
     })
@@ -170,6 +174,7 @@ describe('Queues - scheduling, without automatic scheduling handling', () => {
     })
 
     const allSimples = await payload.find({
+      overrideAccess: true,
       collection: 'simple',
       limit: 100,
     })
@@ -193,6 +198,7 @@ describe('Queues - scheduling, without automatic scheduling handling', () => {
     })
 
     const allSimples = await payload.find({
+      overrideAccess: true,
       collection: 'simple',
       limit: 100,
     })
@@ -214,6 +220,7 @@ describe('Queues - scheduling, without automatic scheduling handling', () => {
     })
 
     const allSimples = await payload.find({
+      overrideAccess: true,
       collection: 'simple',
       limit: 100,
     })
@@ -226,6 +233,7 @@ describe('Queues - scheduling, without automatic scheduling handling', () => {
     await withoutAutoRun(async () => {
       for (let i = 0; i < 2; i++) {
         await payload.jobs.queue({
+          overrideAccess: true,
           task: 'EverySecond',
           queue: 'autorunSecond',
           input: {
@@ -245,6 +253,7 @@ describe('Queues - scheduling, without automatic scheduling handling', () => {
     })
 
     const allSimples = await payload.find({
+      overrideAccess: true,
       collection: 'simple',
       limit: 100,
     })
@@ -258,6 +267,7 @@ describe('Queues - scheduling, without automatic scheduling handling', () => {
     await withoutAutoRun(async () => {
       for (let i = 0; i < 2; i++) {
         await payload.jobs.queue({
+          overrideAccess: true,
           task: 'EverySecondMax2',
           input: {
             message: 'This task runs every second - max 2 per second',
@@ -272,11 +282,13 @@ describe('Queues - scheduling, without automatic scheduling handling', () => {
     timeTravel(20) // Advance time to satisfy the waitUntil of newly scheduled jobs
 
     await payload.jobs.run({
+      overrideAccess: true,
       limit: 100,
       silent: true,
     })
 
     const allSimples = await payload.find({
+      overrideAccess: true,
       collection: 'simple',
       limit: 100,
     })
@@ -296,10 +308,12 @@ describe('Queues - scheduling, without automatic scheduling handling', () => {
 
     // default queue is not scheduled to autorun
     await payload.jobs.run({
+      overrideAccess: true,
       silent: true,
     })
 
     const allSimples = await payload.find({
+      overrideAccess: true,
       collection: 'simple',
       limit: 100,
     })
@@ -327,6 +341,7 @@ describe('Queues - scheduling, without automatic scheduling handling', () => {
     }
 
     const allSimples = await payload.find({
+      overrideAccess: true,
       collection: 'simple',
       limit: 100,
     })
@@ -351,11 +366,13 @@ describe('Queues - scheduling, without automatic scheduling handling', () => {
 
       // default queue is not scheduled to autorun => run manually
       await payload.jobs.run({
+        overrideAccess: true,
         silent: true,
       })
     }
 
     const allSimples = await payload.find({
+      overrideAccess: true,
       collection: 'simple',
       limit: 100,
       where: {
@@ -374,6 +391,7 @@ describe('Queues - scheduling, without automatic scheduling handling', () => {
     await new Promise((resolve) => setTimeout(resolve, 2000)) // Should not flake, as we are expecting nothing to happen
 
     const allSimples = await payload.find({
+      overrideAccess: true,
       collection: 'simple',
       limit: 100,
     })

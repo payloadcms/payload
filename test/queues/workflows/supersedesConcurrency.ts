@@ -31,6 +31,7 @@ export const supersedesConcurrencyWorkflow: WorkflowConfig<'supersedesConcurrenc
     await inlineTask('step1', {
       task: async ({ req }) => {
         await req.payload.create({
+          overrideAccess: true,
           collection: 'simple',
           data: {
             title: `started:${job.input.resourceId}:${job.id}`,
@@ -46,6 +47,7 @@ export const supersedesConcurrencyWorkflow: WorkflowConfig<'supersedesConcurrenc
     await inlineTask('step2', {
       task: async ({ req }) => {
         await req.payload.create({
+          overrideAccess: true,
           collection: 'simple',
           data: {
             title: `completed:${job.input.resourceId}:${job.id}`,

@@ -11,6 +11,7 @@ export const retriesRollbackTestWorkflow: WorkflowConfig<'retriesRollbackTest'> 
   ],
   handler: async ({ job, inlineTask, req }) => {
     await req.payload.update({
+      overrideAccess: true,
       collection: 'payload-jobs',
       data: {
         input: {
@@ -26,6 +27,7 @@ export const retriesRollbackTestWorkflow: WorkflowConfig<'retriesRollbackTest'> 
     await inlineTask('1', {
       task: async ({ req }) => {
         const newSimple = await req.payload.create({
+          overrideAccess: true,
           collection: 'simple',
           req,
           data: {
@@ -43,6 +45,7 @@ export const retriesRollbackTestWorkflow: WorkflowConfig<'retriesRollbackTest'> 
     await inlineTask('2', {
       task: async ({ req }) => {
         await req.payload.create({
+          overrideAccess: true,
           collection: 'simple',
           req,
           data: {

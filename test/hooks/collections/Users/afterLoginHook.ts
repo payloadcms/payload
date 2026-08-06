@@ -7,6 +7,7 @@ export const afterLoginHook: CollectionAfterLoginHook = async ({ req, user }) =>
     data: {
       afterLoginHook: true,
     },
+    overrideAccess: true,
     req,
   })
 }

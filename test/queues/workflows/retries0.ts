@@ -12,6 +12,7 @@ export const retries0Workflow: WorkflowConfig<'workflowRetries0'> = {
   retries: 0,
   handler: async ({ job, tasks, req }) => {
     const updatedJob = await req.payload.update({
+      overrideAccess: true,
       collection: 'payload-jobs',
       data: {
         input: {

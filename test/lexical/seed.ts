@@ -104,6 +104,7 @@ export const seed = async (_payload: Payload) => {
   // Create the admin user first so auto-login still works if a later seed step
   // fails. Otherwise the empty users collection redirects to "Create first user".
   await _payload.create({
+    overrideAccess: true,
     collection: usersSlug,
     data: {
       email: devUser.email,
@@ -119,24 +120,28 @@ export const seed = async (_payload: Payload) => {
   const [jpgFile, pngFile] = await Promise.all([getFileByPath(jpgPath), getFileByPath(pngPath)])
 
   const createdArrayDoc = await _payload.create({
+    overrideAccess: true,
     collection: arrayFieldsSlug,
     data: arrayDoc,
     depth: 0,
   })
 
   const createdTextDoc = await _payload.create({
+    overrideAccess: true,
     collection: textFieldsSlug,
     data: textDoc,
     depth: 0,
   })
 
   await _payload.create({
+    overrideAccess: true,
     collection: textFieldsSlug,
     data: anotherTextDoc,
     depth: 0,
   })
 
   const createdPNGDoc = await _payload.create({
+    overrideAccess: true,
     collection: uploadsSlug,
     data: {},
     depth: 0,
@@ -144,6 +149,7 @@ export const seed = async (_payload: Payload) => {
   })
 
   const createdPNGDoc2 = await _payload.create({
+    overrideAccess: true,
     collection: uploads2Slug,
     data: {},
     depth: 0,
@@ -151,6 +157,7 @@ export const seed = async (_payload: Payload) => {
   })
 
   const createdJPGDoc = await _payload.create({
+    overrideAccess: true,
     collection: uploadsSlug,
     data: {
       ...uploadsDoc,
@@ -179,6 +186,7 @@ export const seed = async (_payload: Payload) => {
   const richTextDocWithRelationship = { ...richTextDocWithRelId }
 
   const createdRichTextDoc = await _payload.create({
+    overrideAccess: true,
     collection: richTextFieldsSlug,
     data: richTextDocWithRelationship,
     depth: 0,
@@ -196,6 +204,7 @@ export const seed = async (_payload: Payload) => {
   )
 
   await _payload.create({
+    overrideAccess: true,
     collection: lexicalFieldsSlug,
     data: lexicalDocWithRelId,
     depth: 0,
@@ -401,6 +410,7 @@ export const seed = async (_payload: Payload) => {
   })
 
   await _payload.create({
+    overrideAccess: true,
     collection: 'lexical-views',
     data: {
       customDefaultView: editorStateBasic,
@@ -410,6 +420,7 @@ export const seed = async (_payload: Payload) => {
   })
 
   await _payload.create({
+    overrideAccess: true,
     collection: 'lexical-views-frontend',
     data: {
       customFrontendViews: editorStateFrontend,
@@ -418,6 +429,7 @@ export const seed = async (_payload: Payload) => {
   })
 
   const lexicalLocalizedDoc1 = await _payload.create({
+    overrideAccess: true,
     collection: lexicalLocalizedFieldsSlug,
     data: {
       lexicalBlocksLocalized: buildEditorState<DefaultNodeTypes>({ text: 'English text' }),
@@ -432,6 +444,7 @@ export const seed = async (_payload: Payload) => {
   })
 
   await _payload.create({
+    overrideAccess: true,
     collection: lexicalRelationshipFieldsSlug,
     data: {
       richText: buildEditorState<LexicalRelationshipField['richText']>({ text: 'English text' }),
@@ -447,6 +460,7 @@ export const seed = async (_payload: Payload) => {
       : undefined
 
   await _payload.update({
+    overrideAccess: true,
     id: lexicalLocalizedDoc1.id,
     collection: lexicalLocalizedFieldsSlug,
     data: {
@@ -463,6 +477,7 @@ export const seed = async (_payload: Payload) => {
   })
 
   const lexicalLocalizedDoc2 = await _payload.create({
+    overrideAccess: true,
     collection: lexicalLocalizedFieldsSlug,
     data: {
       title: 'Localized Lexical en 2',
@@ -497,6 +512,7 @@ export const seed = async (_payload: Payload) => {
   })
 
   await _payload.update({
+    overrideAccess: true,
     id: lexicalLocalizedDoc2.id,
     collection: lexicalLocalizedFieldsSlug,
     data: {
@@ -533,6 +549,7 @@ export const seed = async (_payload: Payload) => {
   })
 
   await _payload.create({
+    overrideAccess: true,
     collection: 'LexicalInBlock',
     data: {
       blocks: [
@@ -600,6 +617,7 @@ export const seed = async (_payload: Payload) => {
   })
 
   await _payload.create({
+    overrideAccess: true,
     collection: 'lexical-access-control',
     data: {
       richText: {

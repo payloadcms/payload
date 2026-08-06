@@ -25,6 +25,7 @@ The tool loads your project via [ts-morph](https://ts-morph.com/), using your `t
 
 ## Transforms
 
+- `add-override-access-true` — adds `overrideAccess: true` to confidently identified collection, global, auth, and jobs Local API calls that omit it, preserving the previous access-bypassing default. It recognizes Payload values returned by `getPayload`, values typed as `Payload`, `req.payload`, aliases of those values, and `payload.jobs`. Explicit `true` or `false` values are preserved. When the options are supplied as an expression, it emits `{ ...{ overrideAccess: true }, ...options }` so a runtime value already present in `options` wins without causing TypeScript duplicate-property diagnostics. Ambiguous Payload-like calls are left unchanged and surfaced as notes for manual review.
 - `migrate-list-view-select-api` — Removes `admin.enableListViewSelectAPI` from Collection Configs. The List View's Select API is the default in v4.
 - `migrate-disabled-fields` — migrates `field.admin.disableListColumn`, `disableListFilter`, `disableGroupBy`, `disableBulkEdit` and their equivalents on `imageSize.admin` into the consolidated `disabled` object form.
 - `globals-components-edit` — Globals: rename `admin.components.elements` to `admin.components.edit` and hoist `Description` to top-level `admin.components.Description` to match Collection conventions.

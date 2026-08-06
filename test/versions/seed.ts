@@ -34,12 +34,14 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
   const imageFile = await getFileByPath(imageFilePath)
 
   const { id: uploadedImage } = await _payload.create({
+    overrideAccess: true,
     collection: mediaCollectionSlug,
     data: {},
     file: imageFile,
   })
 
   const { id: uploadedImageMedia2 } = await _payload.create({
+    overrideAccess: true,
     collection: media2CollectionSlug,
     data: {},
     file: imageFile,
@@ -49,12 +51,14 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
   const imageFile2 = await getFileByPath(imageFilePath2)
 
   const { id: uploadedImage2 } = await _payload.create({
+    overrideAccess: true,
     collection: mediaCollectionSlug,
     data: {},
     file: imageFile2,
   })
 
   const { id: uploadedImage2Media2 } = await _payload.create({
+    overrideAccess: true,
     collection: media2CollectionSlug,
     data: {},
     file: imageFile2,
@@ -143,6 +147,7 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
   })
 
   await _payload.create({
+    overrideAccess: true,
     collection: autosaveWithDraftValidateSlug,
     data: {
       title: 'Initial seeded title',
@@ -150,6 +155,7 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
   })
 
   const { id: doc1ID } = await _payload.create({
+    overrideAccess: true,
     collection: 'text',
     data: {
       text: 'Document 1',
@@ -157,6 +163,7 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
   })
 
   const { id: doc2ID } = await _payload.create({
+    overrideAccess: true,
     collection: 'text',
     data: {
       text: 'Document 2',
@@ -164,6 +171,7 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
   })
 
   const diffDocDraft = await _payload.create({
+    overrideAccess: true,
     collection: diffCollectionSlug,
     locale: 'en',
     data: {
@@ -174,6 +182,7 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
   })
 
   await _payload.update({
+    overrideAccess: true,
     collection: diffCollectionSlug,
     locale: 'en',
     data: {
@@ -185,6 +194,7 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
   })
 
   await _payload.update({
+    overrideAccess: true,
     collection: diffCollectionSlug,
     locale: 'en',
     data: {
@@ -195,6 +205,7 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
     id: diffDocDraft.id,
   })
   await _payload.update({
+    overrideAccess: true,
     collection: diffCollectionSlug,
     locale: 'en',
     data: {
@@ -206,6 +217,7 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
   })
 
   const diffDoc = await _payload.update({
+    overrideAccess: true,
     collection: diffCollectionSlug,
     locale: 'en',
     id: diffDocDraft.id,
@@ -331,6 +343,7 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
   })
 
   const versions = await _payload.findVersions({
+    overrideAccess: true,
     collection: diffCollectionSlug,
     depth: 0,
     limit: 50,
@@ -353,6 +366,7 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
   }
 
   const updatedDiffDoc = await _payload.update({
+    overrideAccess: true,
     id: diffDoc.id,
     collection: diffCollectionSlug,
     locale: 'en',

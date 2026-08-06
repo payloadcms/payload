@@ -38,6 +38,7 @@ describePostgres('database - postgres logs', () => {
 
   it('ensure simple update uses optimized upsertRow with returning()', async () => {
     const doc = await payload.create({
+      overrideAccess: true,
       collection: 'simple',
       data: {
         text: 'Some title',
@@ -66,6 +67,7 @@ describePostgres('database - postgres logs', () => {
 
   it('ensure simple update of complex collection uses optimized upsertRow without returning()', async () => {
     const doc = await payload.create({
+      overrideAccess: true,
       collection: 'posts',
       data: {
         title: 'Some title',
@@ -94,6 +96,7 @@ describePostgres('database - postgres logs', () => {
 
   it('ensure deleteMany is done in single db query - no where query', async () => {
     await payload.create({
+      overrideAccess: true,
       collection: 'posts',
       data: {
         title: 'Some title',
@@ -101,6 +104,7 @@ describePostgres('database - postgres logs', () => {
       },
     })
     await payload.create({
+      overrideAccess: true,
       collection: 'posts',
       data: {
         title: 'Some title 2',
@@ -108,6 +112,7 @@ describePostgres('database - postgres logs', () => {
       },
     })
     await payload.create({
+      overrideAccess: true,
       collection: 'posts',
       data: {
         title: 'Some title 2',
@@ -126,6 +131,7 @@ describePostgres('database - postgres logs', () => {
     consoleCount.mockRestore()
 
     const allPosts = await payload.find({
+      overrideAccess: true,
       collection: 'posts',
     })
 
@@ -134,6 +140,7 @@ describePostgres('database - postgres logs', () => {
 
   it('ensure deleteMany is done in single db query while respecting where query', async () => {
     const doc1 = await payload.create({
+      overrideAccess: true,
       collection: 'posts',
       data: {
         title: 'Some title',
@@ -141,6 +148,7 @@ describePostgres('database - postgres logs', () => {
       },
     })
     await payload.create({
+      overrideAccess: true,
       collection: 'posts',
       data: {
         title: 'Some title 2',
@@ -148,6 +156,7 @@ describePostgres('database - postgres logs', () => {
       },
     })
     await payload.create({
+      overrideAccess: true,
       collection: 'posts',
       data: {
         title: 'Some title 2',
@@ -168,6 +177,7 @@ describePostgres('database - postgres logs', () => {
     consoleCount.mockRestore()
 
     const allPosts = await payload.find({
+      overrideAccess: true,
       collection: 'posts',
     })
 
@@ -177,6 +187,7 @@ describePostgres('database - postgres logs', () => {
 
   it('ensure array update using $push is done in single db call', async () => {
     const post = await payload.create({
+      overrideAccess: true,
       collection: 'posts',
       data: {
         arrayWithIDs: [

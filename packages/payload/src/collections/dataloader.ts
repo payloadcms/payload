@@ -173,7 +173,7 @@ export const getDataLoader = (req: PayloadRequest) => {
     if (cached) {
       return cached
     }
-    const request = req.payload.find(args)
+    const request = req.payload.find({ ...{ overrideAccess: true }, ...args })
     findQueries.set(key, request)
     return request
   }) as Payload['find']

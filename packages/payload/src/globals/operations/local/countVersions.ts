@@ -28,8 +28,8 @@ export type CountGlobalVersionsOptions<TSlug extends GlobalSlug> = {
   locale?: TypedLocale
   /**
    * Skip access control.
-   * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the front-end.
-   * @default true
+   * Set to `true` to bypass Access Control for trusted server-side operations.
+   * @default false
    */
   overrideAccess?: boolean
   /**
@@ -38,7 +38,7 @@ export type CountGlobalVersionsOptions<TSlug extends GlobalSlug> = {
    */
   req?: Partial<PayloadRequest>
   /**
-   * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
+   * Pass a user to use against access control checks. The user is ignored for access checks when `overrideAccess` is `true`.
    */
   user?: null | User
   /**
@@ -51,7 +51,7 @@ export async function countGlobalVersionsLocal<TSlug extends GlobalSlug>(
   payload: Payload,
   options: CountGlobalVersionsOptions<TSlug>,
 ): Promise<{ totalDocs: number }> {
-  const { disableErrors, global: globalSlug, overrideAccess = true, where } = options
+  const { disableErrors, global: globalSlug, overrideAccess = false, where } = options
 
   const global = payload.globals.config.find(({ slug }) => slug === globalSlug)
 

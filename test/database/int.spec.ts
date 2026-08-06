@@ -75,6 +75,7 @@ describe('database', () => {
     })
 
     const loginResult = await payload.login({
+      overrideAccess: true,
       collection: 'users',
       data: {
         email: devUser.email,
@@ -119,6 +120,7 @@ describe('database', () => {
 
     it('should create with generated ID text from hook', async () => {
       const doc = await payload.create({
+        overrideAccess: true,
         collection: 'custom-ids',
         data: {},
       })
@@ -128,6 +130,7 @@ describe('database', () => {
 
     it('should not create duplicate versions with custom id type', async () => {
       const doc = await payload.create({
+        overrideAccess: true,
         collection: 'custom-ids',
         data: {
           title: 'hey',
@@ -135,12 +138,14 @@ describe('database', () => {
       })
 
       await payload.update({
+        overrideAccess: true,
         id: doc.id,
         collection: 'custom-ids',
         data: {},
       })
 
       await payload.update({
+        overrideAccess: true,
         id: doc.id,
         collection: 'custom-ids',
         data: {},
@@ -171,6 +176,7 @@ describe('database', () => {
       const blockID = '6764de9af79a863575c5f58c'
 
       const doc = await payload.create({
+        overrideAccess: true,
         collection: postsSlug,
         data: {
           arrayWithIDs: [
@@ -197,6 +203,7 @@ describe('database', () => {
       const blockID = '6764dec58c68f337a758180c'
 
       const doc = await payload.create({
+        overrideAccess: true,
         collection: postsSlug,
         data: {
           arrayWithIDs: [
@@ -215,6 +222,7 @@ describe('database', () => {
       })
 
       const duplicate = await payload.duplicate({
+        overrideAccess: true,
         id: doc.id,
         collection: postsSlug,
       })
@@ -224,14 +232,24 @@ describe('database', () => {
     })
 
     it('should properly give the result with hasMany relationships with custom numeric IDs', async () => {
-      await payload.create({ collection: 'categories-custom-id', data: { id: 9999 } })
+      await payload.create({
+        overrideAccess: true,
+        collection: 'categories-custom-id',
+        data: { id: 9999 },
+      })
       const res = await payload.create({
+        overrideAccess: true,
         collection: 'posts',
         data: { categoriesCustomID: [9999], title: 'post' },
         depth: 0,
       })
       expect(res.categoriesCustomID[0]).toBe(9999)
-      const resFind = await payload.findByID({ id: res.id, collection: 'posts', depth: 0 })
+      const resFind = await payload.findByID({
+        overrideAccess: true,
+        id: res.id,
+        collection: 'posts',
+        depth: 0,
+      })
       expect(resFind.categoriesCustomID[0]).toBe(9999)
     })
 
@@ -252,6 +270,7 @@ describe('database', () => {
         for (const { collection, id } of [...createdRows].reverse()) {
           try {
             await payload.delete({
+              overrideAccess: true,
               collection: collection as
                 | typeof customIDsSlug
                 | typeof postsSlug
@@ -269,6 +288,7 @@ describe('database', () => {
 
       it('should generate valid UUID with version 7', async () => {
         const doc = await payload.create({
+          overrideAccess: true,
           collection: postsSlug,
           data: { title: 'uuidv7 test' },
         })
@@ -284,10 +304,12 @@ describe('database', () => {
 
       it('should generate chronologically ordered IDs', async () => {
         const doc1 = await payload.create({
+          overrideAccess: true,
           collection: postsSlug,
           data: { title: 'uuidv7 first' },
         })
         const doc2 = await payload.create({
+          overrideAccess: true,
           collection: postsSlug,
           data: { title: 'uuidv7 second' },
         })
@@ -300,6 +322,7 @@ describe('database', () => {
 
       it('should findByID with uuidv7', async () => {
         const created = await payload.create({
+          overrideAccess: true,
           collection: postsSlug,
           data: { title: 'uuidv7 findable' },
         })
@@ -307,6 +330,7 @@ describe('database', () => {
         track(postsSlug, created.id)
 
         const found = await payload.findByID({
+          overrideAccess: true,
           collection: postsSlug,
           id: created.id,
         })
@@ -317,6 +341,7 @@ describe('database', () => {
 
       it('should query with where clause on uuidv7 id', async () => {
         const created = await payload.create({
+          overrideAccess: true,
           collection: postsSlug,
           data: { title: 'uuidv7 queryable' },
         })
@@ -324,6 +349,7 @@ describe('database', () => {
         track(postsSlug, created.id)
 
         const result = await payload.find({
+          overrideAccess: true,
           collection: postsSlug,
           where: { id: { equals: created.id } },
         })
@@ -334,10 +360,12 @@ describe('database', () => {
 
       it('should handle relationships with uuidv7 IDs', async () => {
         const relA = await payload.create({
+          overrideAccess: true,
           collection: relationASlug,
           data: { title: 'uuidv7 rel A' },
         })
         const relB = await payload.create({
+          overrideAccess: true,
           collection: relationBSlug,
           data: {
             title: 'uuidv7 rel B',
@@ -349,6 +377,7 @@ describe('database', () => {
         track(relationASlug, relA.id)
 
         const found = await payload.findByID({
+          overrideAccess: true,
           collection: relationBSlug,
           id: relB.id,
           depth: 1,
@@ -359,6 +388,7 @@ describe('database', () => {
 
       it('should work with versions and uuidv7 adapter', async () => {
         const doc = await payload.create({
+          overrideAccess: true,
           collection: customIDsSlug,
           data: { title: 'v7 versioned' },
         })
@@ -366,12 +396,14 @@ describe('database', () => {
         track(customIDsSlug, doc.id)
 
         await payload.update({
+          overrideAccess: true,
           collection: customIDsSlug,
           id: doc.id,
           data: { title: 'v7 versioned updated' },
         })
 
         const versions = await payload.findVersions({
+          overrideAccess: true,
           collection: customIDsSlug,
           where: { parent: { equals: doc.id } },
         })
@@ -388,6 +420,7 @@ describe('database', () => {
   describe('timestamps', () => {
     it('should have createdAt and updatedAt timestamps to the millisecond', async () => {
       const result = await payload.create({
+        overrideAccess: true,
         collection: postsSlug,
         data: {
           title: 'hello',
@@ -408,6 +441,7 @@ describe('database', () => {
     it('should allow createdAt to be set in create', async () => {
       const createdAt = new Date('2021-01-01T00:00:00.000Z').toISOString()
       const result = await payload.create({
+        overrideAccess: true,
         collection: postsSlug,
         data: {
           createdAt,
@@ -416,6 +450,7 @@ describe('database', () => {
       })
 
       const doc = await payload.findByID({
+        overrideAccess: true,
         id: result.id,
         collection: postsSlug,
       })
@@ -433,6 +468,7 @@ describe('database', () => {
     it('should allow updatedAt to be set in create', async () => {
       const updatedAt = new Date('2022-01-01T00:00:00.000Z').toISOString()
       const result = await payload.create({
+        overrideAccess: true,
         collection: postsSlug,
         data: {
           title: 'hello',
@@ -450,6 +486,7 @@ describe('database', () => {
     })
     it('should allow createdAt to be set in update', async () => {
       const post = await payload.create({
+        overrideAccess: true,
         collection: postsSlug,
         data: {
           title: 'hello',
@@ -466,6 +503,7 @@ describe('database', () => {
       })
 
       const doc = await payload.findByID({
+        overrideAccess: true,
         id: result.id,
         collection: postsSlug,
       })
@@ -481,6 +519,7 @@ describe('database', () => {
 
     it('should allow updatedAt to be set in update', async () => {
       const post = await payload.create({
+        overrideAccess: true,
         collection: postsSlug,
         data: {
           title: 'hello',
@@ -497,6 +536,7 @@ describe('database', () => {
       })
 
       const doc = await payload.findByID({
+        overrideAccess: true,
         id: result.id,
         collection: postsSlug,
       })
@@ -512,6 +552,7 @@ describe('database', () => {
 
     it('ensure updatedAt is automatically set when using db.updateOne', async () => {
       const post = await payload.create({
+        overrideAccess: true,
         collection: postsSlug,
         data: {
           title: 'hello',
@@ -537,6 +578,7 @@ describe('database', () => {
 
     it('ensure updatedAt is not automatically set when using db.updateOne if it is explicitly set to `null`', async () => {
       const post = await payload.create({
+        overrideAccess: true,
         collection: postsSlug,
         data: {
           title: 'hello',
@@ -563,12 +605,14 @@ describe('database', () => {
 
     it('should allow createdAt to be set in updateVersion', async () => {
       const category = await payload.create({
+        overrideAccess: true,
         collection: 'categories',
         data: {
           title: 'hello',
         },
       })
       await payload.update({
+        overrideAccess: true,
         id: category.id,
         collection: 'categories',
         data: {
@@ -576,6 +620,7 @@ describe('database', () => {
         },
       })
       const versions = await payload.findVersions({
+        overrideAccess: true,
         collection: 'categories',
         depth: 0,
         sort: '-createdAt',
@@ -594,6 +639,7 @@ describe('database', () => {
       }
 
       const updatedVersions = await payload.findVersions({
+        overrideAccess: true,
         collection: 'categories',
         depth: 0,
         sort: '-createdAt',
@@ -616,12 +662,14 @@ describe('database', () => {
 
     it('should allow updatedAt to be set in updateVersion', async () => {
       const category = await payload.create({
+        overrideAccess: true,
         collection: 'categories',
         data: {
           title: 'hello',
         },
       })
       await payload.update({
+        overrideAccess: true,
         id: category.id,
         collection: 'categories',
         data: {
@@ -629,6 +677,7 @@ describe('database', () => {
         },
       })
       const versions = await payload.findVersions({
+        overrideAccess: true,
         collection: 'categories',
         depth: 0,
         sort: '-createdAt',
@@ -647,6 +696,7 @@ describe('database', () => {
       }
 
       const updatedVersions = await payload.findVersions({
+        overrideAccess: true,
         collection: 'categories',
         depth: 0,
         sort: '-updatedAt',
@@ -669,6 +719,7 @@ describe('database', () => {
 
     async function noTimestampsTestLocalAPI() {
       const createdDoc: any = await payload.create({
+        overrideAccess: true,
         collection: 'noTimeStamps',
         data: {
           title: 'hello',
@@ -678,6 +729,7 @@ describe('database', () => {
       expect(createdDoc.updatedAt).toBeUndefined()
 
       const updated: any = await payload.update({
+        overrideAccess: true,
         id: createdDoc.id,
         collection: 'noTimeStamps',
         data: {
@@ -689,6 +741,7 @@ describe('database', () => {
 
       const date = new Date('2021-01-01T00:00:00.000Z').toISOString()
       const createdDocWithTimestamps: any = await payload.create({
+        overrideAccess: true,
         collection: 'noTimeStamps',
         data: {
           createdAt: date,
@@ -700,6 +753,7 @@ describe('database', () => {
       expect(createdDocWithTimestamps.updatedAt).toBeUndefined()
 
       const updatedDocWithTimestamps: any = await payload.update({
+        overrideAccess: true,
         id: createdDocWithTimestamps.id,
         collection: 'noTimeStamps',
         data: {
@@ -796,6 +850,7 @@ describe('database', () => {
   describe('Data strictness', () => {
     it('should not save and leak password, confirm-password from Local API', async () => {
       const createdUser = await payload.create({
+        overrideAccess: true,
         collection: 'users',
         data: {
           password: 'some-password',
@@ -810,7 +865,11 @@ describe('database', () => {
       expect(keys).not.toContain('password')
       expect(keys).not.toContain('confirm-password')
 
-      const foundUser = await payload.findByID({ id: createdUser.id, collection: 'users' })
+      const foundUser = await payload.findByID({
+        overrideAccess: true,
+        id: createdUser.id,
+        collection: 'users',
+      })
 
       keys = Object.keys(foundUser)
 
@@ -846,6 +905,7 @@ describe('database', () => {
 
   it('should query hasMany select field with contains operator', async () => {
     const { id } = await payload.create({
+      overrideAccess: true,
       collection: 'select-has-many',
       data: {
         roles: ['admin'],
@@ -853,6 +913,7 @@ describe('database', () => {
     })
 
     const result = await payload.find({
+      overrideAccess: true,
       collection: 'select-has-many',
       where: {
         roles: {
@@ -864,11 +925,12 @@ describe('database', () => {
 
     expect(result.docs.some((doc) => doc.id === id)).toBe(true)
 
-    await payload.delete({ collection: 'select-has-many', id })
+    await payload.delete({ overrideAccess: true, collection: 'select-has-many', id })
   })
 
   it('ensure querying hasMany select field with contains operator does not do partial matching', async () => {
     const { id } = await payload.create({
+      overrideAccess: true,
       collection: 'select-has-many',
       data: {
         food: ['bananabread'],
@@ -876,6 +938,7 @@ describe('database', () => {
     })
 
     const result = await payload.find({
+      overrideAccess: true,
       collection: 'select-has-many',
       where: {
         food: {
@@ -885,7 +948,7 @@ describe('database', () => {
     })
     expect(result.docs).toHaveLength(0)
 
-    await payload.delete({ collection: 'select-has-many', id })
+    await payload.delete({ overrideAccess: true, collection: 'select-has-many', id })
   })
 
   describe('allow ID on create', () => {
@@ -909,7 +972,11 @@ describe('database', () => {
         id = 9999
       }
 
-      const post = await payload.create({ collection: 'posts', data: { id, title: 'created' } })
+      const post = await payload.create({
+        overrideAccess: true,
+        collection: 'posts',
+        data: { id, title: 'created' },
+      })
 
       expect(post.id).toBe(id)
     })
@@ -964,7 +1031,7 @@ describe('database', () => {
   })
 
   it('should find distinct field values of the collection', async () => {
-    await payload.delete({ collection: 'posts', where: {} })
+    await payload.delete({ overrideAccess: true, collection: 'posts', where: {} })
     const titles = [
       'title-1',
       'title-2',
@@ -980,11 +1047,12 @@ describe('database', () => {
     for (const { title } of titles) {
       const docsCount = Math.random() > 0.5 ? 3 : Math.random() > 0.5 ? 2 : 1
       for (let i = 0; i < docsCount; i++) {
-        await payload.create({ collection: 'posts', data: { title } })
+        await payload.create({ overrideAccess: true, collection: 'posts', data: { title } })
       }
     }
 
     const res = await payload.findDistinct({
+      overrideAccess: true,
       collection: 'posts',
       field: 'title',
     })
@@ -992,6 +1060,7 @@ describe('database', () => {
     expect(res.values).toStrictEqual(titles)
 
     const resLimit = await payload.findDistinct({
+      overrideAccess: true,
       collection: 'posts',
       field: 'title',
       limit: 3,
@@ -1004,6 +1073,7 @@ describe('database', () => {
     expect(resLimit.totalDocs).toBe(9)
 
     const resDesc = await payload.findDistinct({
+      overrideAccess: true,
       collection: 'posts',
       field: 'title',
       sort: '-title',
@@ -1012,6 +1082,7 @@ describe('database', () => {
     expect(resDesc.values).toStrictEqual(titles.toReversed())
 
     const resAscDefault = await payload.findDistinct({
+      overrideAccess: true,
       collection: 'posts',
       field: 'title',
     })
@@ -1020,7 +1091,7 @@ describe('database', () => {
   })
 
   it('should sort find on a different field with findDistinct', async () => {
-    await payload.delete({ collection: 'posts', where: {} })
+    await payload.delete({ overrideAccess: true, collection: 'posts', where: {} })
     const titles: {
       title: string
     }[] = [
@@ -1045,6 +1116,7 @@ describe('database', () => {
       const docsCount = Math.random() > 0.5 ? 3 : Math.random() > 0.5 ? 2 : 1
       for (let i = 0; i < docsCount; i++) {
         await payload.create({
+          overrideAccess: true,
           collection: 'posts',
           data: {
             number: numbers[titles.indexOf(entry)]! + Math.random(),
@@ -1055,12 +1127,14 @@ describe('database', () => {
     }
 
     const resDesc = await payload.findDistinct({
+      overrideAccess: true,
       collection: 'posts',
       field: 'title',
       sort: '-number',
     })
 
     const resAsc = await payload.findDistinct({
+      overrideAccess: true,
       collection: 'posts',
       field: 'title',
       sort: 'number',
@@ -1073,7 +1147,7 @@ describe('database', () => {
   })
 
   it('should populate distinct relationships when depth>0', async () => {
-    await payload.delete({ collection: 'posts', where: {} })
+    await payload.delete({ overrideAccess: true, collection: 'posts', where: {} })
 
     const categories = ['category-1', 'category-2', 'category-3', 'category-4'].map((title) => ({
       title,
@@ -1082,24 +1156,34 @@ describe('database', () => {
     const categoriesIDS: { category: string }[] = []
 
     for (const { title } of categories) {
-      const doc = await payload.create({ collection: 'categories', data: { title } })
+      const doc = await payload.create({
+        overrideAccess: true,
+        collection: 'categories',
+        data: { title },
+      })
       categoriesIDS.push({ category: doc.id })
     }
 
     for (const { category } of categoriesIDS) {
       const docsCount = Math.random() > 0.5 ? 3 : Math.random() > 0.5 ? 2 : 1
       for (let i = 0; i < docsCount; i++) {
-        await payload.create({ collection: 'posts', data: { category, title: randomUUID() } })
+        await payload.create({
+          overrideAccess: true,
+          collection: 'posts',
+          data: { category, title: randomUUID() },
+        })
       }
     }
 
     const resultDepth0 = await payload.findDistinct({
+      overrideAccess: true,
       collection: 'posts',
       field: 'category',
       sort: 'category.title',
     })
     expect(resultDepth0.values).toStrictEqual(categoriesIDS)
     const resultDepth1 = await payload.findDistinct({
+      overrideAccess: true,
       collection: 'posts',
       depth: 1,
       field: 'category',
@@ -1116,8 +1200,8 @@ describe('database', () => {
   })
 
   it('should populate distinct relationships of hasMany: true when depth>0', async () => {
-    await payload.delete({ collection: 'posts', where: {} })
-    await payload.delete({ collection: 'categories', where: {} })
+    await payload.delete({ overrideAccess: true, collection: 'posts', where: {} })
+    await payload.delete({ overrideAccess: true, collection: 'categories', where: {} })
 
     const categories = ['category-1', 'category-2', 'category-3', 'category-4'].map((title) => ({
       title,
@@ -1126,11 +1210,16 @@ describe('database', () => {
     const categoriesIDS: { categories: string }[] = []
 
     for (const { title } of categories) {
-      const doc = await payload.create({ collection: 'categories', data: { title } })
+      const doc = await payload.create({
+        overrideAccess: true,
+        collection: 'categories',
+        data: { title },
+      })
       categoriesIDS.push({ categories: doc.id })
     }
 
     await payload.create({
+      overrideAccess: true,
       collection: 'posts',
       data: {
         categories: [categoriesIDS[0]?.categories, categoriesIDS[1]?.categories],
@@ -1139,6 +1228,7 @@ describe('database', () => {
     })
 
     await payload.create({
+      overrideAccess: true,
       collection: 'posts',
       data: {
         categories: [
@@ -1151,6 +1241,7 @@ describe('database', () => {
     })
 
     await payload.create({
+      overrideAccess: true,
       collection: 'posts',
       data: {
         categories: [
@@ -1163,12 +1254,14 @@ describe('database', () => {
     })
 
     const resultDepth0 = await payload.findDistinct({
+      overrideAccess: true,
       collection: 'posts',
       field: 'categories',
       sort: 'categories.title',
     })
     expect(resultDepth0.values).toStrictEqual(categoriesIDS)
     const resultDepth1 = await payload.findDistinct({
+      overrideAccess: true,
       collection: 'posts',
       depth: 1,
       field: 'categories',
@@ -1189,6 +1282,7 @@ describe('database', () => {
     }
 
     const resultDepth1NoSort = await payload.findDistinct({
+      overrideAccess: true,
       collection: 'posts',
       depth: 1,
       field: 'categories',
@@ -1204,44 +1298,53 @@ describe('database', () => {
   })
 
   it('should populate distinct relationships of polymorphic when depth>0', async () => {
-    await payload.delete({ collection: 'posts', where: {} })
-    await payload.delete({ collection: 'categories', where: {} })
+    await payload.delete({ overrideAccess: true, collection: 'posts', where: {} })
+    await payload.delete({ overrideAccess: true, collection: 'categories', where: {} })
 
     const category_1 = await payload.create({
+      overrideAccess: true,
       collection: 'categories',
       data: { title: 'category_1' },
     })
     const category_2 = await payload.create({
+      overrideAccess: true,
       collection: 'categories',
       data: { title: 'category_2' },
     })
     const category_3 = await payload.create({
+      overrideAccess: true,
       collection: 'categories',
       data: { title: 'category_3' },
     })
 
     const post_1 = await payload.create({
+      overrideAccess: true,
       collection: 'posts',
       data: { categoryPoly: { relationTo: 'categories', value: category_1.id }, title: 'post_1' },
     })
     const post_2 = await payload.create({
+      overrideAccess: true,
       collection: 'posts',
       data: { categoryPoly: { relationTo: 'categories', value: category_1.id }, title: 'post_2' },
     })
     const post_3 = await payload.create({
+      overrideAccess: true,
       collection: 'posts',
       data: { categoryPoly: { relationTo: 'categories', value: category_2.id }, title: 'post_3' },
     })
     const post_4 = await payload.create({
+      overrideAccess: true,
       collection: 'posts',
       data: { categoryPoly: { relationTo: 'categories', value: category_3.id }, title: 'post_4' },
     })
     const post_5 = await payload.create({
+      overrideAccess: true,
       collection: 'posts',
       data: { categoryPoly: { relationTo: 'categories', value: category_3.id }, title: 'post_5' },
     })
 
     const result = await payload.findDistinct({
+      overrideAccess: true,
       collection: 'posts',
       depth: 0,
       field: 'categoryPoly',
@@ -1269,23 +1372,27 @@ describe('database', () => {
   })
 
   it('should populate distinct relationships of hasMany polymorphic when depth>0', async () => {
-    await payload.delete({ collection: 'posts', where: {} })
-    await payload.delete({ collection: 'categories', where: {} })
+    await payload.delete({ overrideAccess: true, collection: 'posts', where: {} })
+    await payload.delete({ overrideAccess: true, collection: 'categories', where: {} })
 
     const category_1 = await payload.create({
+      overrideAccess: true,
       collection: 'categories',
       data: { title: 'category_1' },
     })
     const category_2 = await payload.create({
+      overrideAccess: true,
       collection: 'categories',
       data: { title: 'category_2' },
     })
     const category_3 = await payload.create({
+      overrideAccess: true,
       collection: 'categories',
       data: { title: 'category_3' },
     })
 
     const post_1 = await payload.create({
+      overrideAccess: true,
       collection: 'posts',
       data: {
         categoryPolyMany: [{ relationTo: 'categories', value: category_1.id }],
@@ -1293,6 +1400,7 @@ describe('database', () => {
       },
     })
     const post_2 = await payload.create({
+      overrideAccess: true,
       collection: 'posts',
       data: {
         categoryPolyMany: [{ relationTo: 'categories', value: category_1.id }],
@@ -1300,6 +1408,7 @@ describe('database', () => {
       },
     })
     const post_3 = await payload.create({
+      overrideAccess: true,
       collection: 'posts',
       data: {
         categoryPolyMany: [{ relationTo: 'categories', value: category_2.id }],
@@ -1307,6 +1416,7 @@ describe('database', () => {
       },
     })
     const post_4 = await payload.create({
+      overrideAccess: true,
       collection: 'posts',
       data: {
         categoryPolyMany: [{ relationTo: 'categories', value: category_3.id }],
@@ -1314,6 +1424,7 @@ describe('database', () => {
       },
     })
     const post_5 = await payload.create({
+      overrideAccess: true,
       collection: 'posts',
       data: {
         categoryPolyMany: [{ relationTo: 'categories', value: category_3.id }],
@@ -1322,6 +1433,7 @@ describe('database', () => {
     })
 
     const post_6 = await payload.create({
+      overrideAccess: true,
       collection: 'posts',
       data: {
         categoryPolyMany: null,
@@ -1330,6 +1442,7 @@ describe('database', () => {
     })
 
     const result = await payload.findDistinct({
+      overrideAccess: true,
       collection: 'posts',
       depth: 0,
       field: 'categoryPolyMany',
@@ -1361,32 +1474,68 @@ describe('database', () => {
   })
 
   it('should find distinct values with field nested to a relationship', async () => {
-    await payload.delete({ collection: 'posts', where: {} })
-    await payload.delete({ collection: 'categories', where: {} })
+    await payload.delete({ overrideAccess: true, collection: 'posts', where: {} })
+    await payload.delete({ overrideAccess: true, collection: 'categories', where: {} })
 
     const category_1 = await payload.create({
+      overrideAccess: true,
       collection: 'categories',
       data: { title: 'category_1' },
     })
     const category_2 = await payload.create({
+      overrideAccess: true,
       collection: 'categories',
       data: { title: 'category_2' },
     })
     const category_3 = await payload.create({
+      overrideAccess: true,
       collection: 'categories',
       data: { title: 'category_3' },
     })
 
-    await payload.create({ collection: 'posts', data: { category: category_1, title: 'post' } })
-    await payload.create({ collection: 'posts', data: { category: category_2, title: 'post' } })
-    await payload.create({ collection: 'posts', data: { category: category_2, title: 'post' } })
-    await payload.create({ collection: 'posts', data: { category: category_2, title: 'post' } })
-    await payload.create({ collection: 'posts', data: { category: category_3, title: 'post' } })
-    await payload.create({ collection: 'posts', data: { category: category_3, title: 'post' } })
-    await payload.create({ collection: 'posts', data: { category: category_3, title: 'post' } })
-    await payload.create({ collection: 'posts', data: { category: category_3, title: 'post' } })
+    await payload.create({
+      overrideAccess: true,
+      collection: 'posts',
+      data: { category: category_1, title: 'post' },
+    })
+    await payload.create({
+      overrideAccess: true,
+      collection: 'posts',
+      data: { category: category_2, title: 'post' },
+    })
+    await payload.create({
+      overrideAccess: true,
+      collection: 'posts',
+      data: { category: category_2, title: 'post' },
+    })
+    await payload.create({
+      overrideAccess: true,
+      collection: 'posts',
+      data: { category: category_2, title: 'post' },
+    })
+    await payload.create({
+      overrideAccess: true,
+      collection: 'posts',
+      data: { category: category_3, title: 'post' },
+    })
+    await payload.create({
+      overrideAccess: true,
+      collection: 'posts',
+      data: { category: category_3, title: 'post' },
+    })
+    await payload.create({
+      overrideAccess: true,
+      collection: 'posts',
+      data: { category: category_3, title: 'post' },
+    })
+    await payload.create({
+      overrideAccess: true,
+      collection: 'posts',
+      data: { category: category_3, title: 'post' },
+    })
 
     const res = await payload.findDistinct({
+      overrideAccess: true,
       collection: 'posts',
       field: 'category.title',
     })
@@ -1405,32 +1554,68 @@ describe('database', () => {
   })
 
   it('should find distinct values with virtual field linked to a relationship', async () => {
-    await payload.delete({ collection: 'posts', where: {} })
-    await payload.delete({ collection: 'categories', where: {} })
+    await payload.delete({ overrideAccess: true, collection: 'posts', where: {} })
+    await payload.delete({ overrideAccess: true, collection: 'categories', where: {} })
 
     const category_1 = await payload.create({
+      overrideAccess: true,
       collection: 'categories',
       data: { title: 'category_1' },
     })
     const category_2 = await payload.create({
+      overrideAccess: true,
       collection: 'categories',
       data: { title: 'category_2' },
     })
     const category_3 = await payload.create({
+      overrideAccess: true,
       collection: 'categories',
       data: { title: 'category_3' },
     })
 
-    await payload.create({ collection: 'posts', data: { category: category_1, title: 'post' } })
-    await payload.create({ collection: 'posts', data: { category: category_2, title: 'post' } })
-    await payload.create({ collection: 'posts', data: { category: category_2, title: 'post' } })
-    await payload.create({ collection: 'posts', data: { category: category_2, title: 'post' } })
-    await payload.create({ collection: 'posts', data: { category: category_3, title: 'post' } })
-    await payload.create({ collection: 'posts', data: { category: category_3, title: 'post' } })
-    await payload.create({ collection: 'posts', data: { category: category_3, title: 'post' } })
-    await payload.create({ collection: 'posts', data: { category: category_3, title: 'post' } })
+    await payload.create({
+      overrideAccess: true,
+      collection: 'posts',
+      data: { category: category_1, title: 'post' },
+    })
+    await payload.create({
+      overrideAccess: true,
+      collection: 'posts',
+      data: { category: category_2, title: 'post' },
+    })
+    await payload.create({
+      overrideAccess: true,
+      collection: 'posts',
+      data: { category: category_2, title: 'post' },
+    })
+    await payload.create({
+      overrideAccess: true,
+      collection: 'posts',
+      data: { category: category_2, title: 'post' },
+    })
+    await payload.create({
+      overrideAccess: true,
+      collection: 'posts',
+      data: { category: category_3, title: 'post' },
+    })
+    await payload.create({
+      overrideAccess: true,
+      collection: 'posts',
+      data: { category: category_3, title: 'post' },
+    })
+    await payload.create({
+      overrideAccess: true,
+      collection: 'posts',
+      data: { category: category_3, title: 'post' },
+    })
+    await payload.create({
+      overrideAccess: true,
+      collection: 'posts',
+      data: { category: category_3, title: 'post' },
+    })
 
     const res = await payload.findDistinct({
+      overrideAccess: true,
       collection: 'posts',
       field: 'categoryTitle',
     })
@@ -1449,42 +1634,95 @@ describe('database', () => {
   })
 
   it('should find distinct values with field nested to a 2x relationship', async () => {
-    await payload.delete({ collection: 'posts', where: {} })
-    await payload.delete({ collection: 'categories', where: {} })
-    await payload.delete({ collection: 'simple', where: {} })
+    await payload.delete({ overrideAccess: true, collection: 'posts', where: {} })
+    await payload.delete({ overrideAccess: true, collection: 'categories', where: {} })
+    await payload.delete({ overrideAccess: true, collection: 'simple', where: {} })
 
-    const simple_1 = await payload.create({ collection: 'simple', data: { text: 'simple_1' } })
-    const simple_2 = await payload.create({ collection: 'simple', data: { text: 'simple_2' } })
-    const simple_3 = await payload.create({ collection: 'simple', data: { text: 'simple_3' } })
+    const simple_1 = await payload.create({
+      overrideAccess: true,
+      collection: 'simple',
+      data: { text: 'simple_1' },
+    })
+    const simple_2 = await payload.create({
+      overrideAccess: true,
+      collection: 'simple',
+      data: { text: 'simple_2' },
+    })
+    const simple_3 = await payload.create({
+      overrideAccess: true,
+      collection: 'simple',
+      data: { text: 'simple_3' },
+    })
 
     const category_1 = await payload.create({
+      overrideAccess: true,
       collection: 'categories',
       data: { simple: simple_1, title: 'category_1' },
     })
     const category_2 = await payload.create({
+      overrideAccess: true,
       collection: 'categories',
       data: { simple: simple_2, title: 'category_2' },
     })
     const category_3 = await payload.create({
+      overrideAccess: true,
       collection: 'categories',
       data: { simple: simple_3, title: 'category_3' },
     })
     const category_4 = await payload.create({
+      overrideAccess: true,
       collection: 'categories',
       data: { simple: simple_3, title: 'category_4' },
     })
 
-    await payload.create({ collection: 'posts', data: { category: category_1, title: 'post' } })
-    await payload.create({ collection: 'posts', data: { category: category_2, title: 'post' } })
-    await payload.create({ collection: 'posts', data: { category: category_2, title: 'post' } })
-    await payload.create({ collection: 'posts', data: { category: category_2, title: 'post' } })
-    await payload.create({ collection: 'posts', data: { category: category_3, title: 'post' } })
-    await payload.create({ collection: 'posts', data: { category: category_3, title: 'post' } })
-    await payload.create({ collection: 'posts', data: { category: category_3, title: 'post' } })
-    await payload.create({ collection: 'posts', data: { category: category_3, title: 'post' } })
-    await payload.create({ collection: 'posts', data: { category: category_4, title: 'post' } })
+    await payload.create({
+      overrideAccess: true,
+      collection: 'posts',
+      data: { category: category_1, title: 'post' },
+    })
+    await payload.create({
+      overrideAccess: true,
+      collection: 'posts',
+      data: { category: category_2, title: 'post' },
+    })
+    await payload.create({
+      overrideAccess: true,
+      collection: 'posts',
+      data: { category: category_2, title: 'post' },
+    })
+    await payload.create({
+      overrideAccess: true,
+      collection: 'posts',
+      data: { category: category_2, title: 'post' },
+    })
+    await payload.create({
+      overrideAccess: true,
+      collection: 'posts',
+      data: { category: category_3, title: 'post' },
+    })
+    await payload.create({
+      overrideAccess: true,
+      collection: 'posts',
+      data: { category: category_3, title: 'post' },
+    })
+    await payload.create({
+      overrideAccess: true,
+      collection: 'posts',
+      data: { category: category_3, title: 'post' },
+    })
+    await payload.create({
+      overrideAccess: true,
+      collection: 'posts',
+      data: { category: category_3, title: 'post' },
+    })
+    await payload.create({
+      overrideAccess: true,
+      collection: 'posts',
+      data: { category: category_4, title: 'post' },
+    })
 
     const res = await payload.findDistinct({
+      overrideAccess: true,
       collection: 'posts',
       field: 'category.simple.text',
     })
@@ -1503,42 +1741,95 @@ describe('database', () => {
   })
 
   it('should find distinct values with virtual field linked to a 2x relationship', async () => {
-    await payload.delete({ collection: 'posts', where: {} })
-    await payload.delete({ collection: 'categories', where: {} })
-    await payload.delete({ collection: 'simple', where: {} })
+    await payload.delete({ overrideAccess: true, collection: 'posts', where: {} })
+    await payload.delete({ overrideAccess: true, collection: 'categories', where: {} })
+    await payload.delete({ overrideAccess: true, collection: 'simple', where: {} })
 
-    const simple_1 = await payload.create({ collection: 'simple', data: { text: 'simple_1' } })
-    const simple_2 = await payload.create({ collection: 'simple', data: { text: 'simple_2' } })
-    const simple_3 = await payload.create({ collection: 'simple', data: { text: 'simple_3' } })
+    const simple_1 = await payload.create({
+      overrideAccess: true,
+      collection: 'simple',
+      data: { text: 'simple_1' },
+    })
+    const simple_2 = await payload.create({
+      overrideAccess: true,
+      collection: 'simple',
+      data: { text: 'simple_2' },
+    })
+    const simple_3 = await payload.create({
+      overrideAccess: true,
+      collection: 'simple',
+      data: { text: 'simple_3' },
+    })
 
     const category_1 = await payload.create({
+      overrideAccess: true,
       collection: 'categories',
       data: { simple: simple_1, title: 'category_1' },
     })
     const category_2 = await payload.create({
+      overrideAccess: true,
       collection: 'categories',
       data: { simple: simple_2, title: 'category_2' },
     })
     const category_3 = await payload.create({
+      overrideAccess: true,
       collection: 'categories',
       data: { simple: simple_3, title: 'category_3' },
     })
     const category_4 = await payload.create({
+      overrideAccess: true,
       collection: 'categories',
       data: { simple: simple_3, title: 'category_4' },
     })
 
-    await payload.create({ collection: 'posts', data: { category: category_1, title: 'post' } })
-    await payload.create({ collection: 'posts', data: { category: category_2, title: 'post' } })
-    await payload.create({ collection: 'posts', data: { category: category_2, title: 'post' } })
-    await payload.create({ collection: 'posts', data: { category: category_2, title: 'post' } })
-    await payload.create({ collection: 'posts', data: { category: category_3, title: 'post' } })
-    await payload.create({ collection: 'posts', data: { category: category_3, title: 'post' } })
-    await payload.create({ collection: 'posts', data: { category: category_3, title: 'post' } })
-    await payload.create({ collection: 'posts', data: { category: category_3, title: 'post' } })
-    await payload.create({ collection: 'posts', data: { category: category_4, title: 'post' } })
+    await payload.create({
+      overrideAccess: true,
+      collection: 'posts',
+      data: { category: category_1, title: 'post' },
+    })
+    await payload.create({
+      overrideAccess: true,
+      collection: 'posts',
+      data: { category: category_2, title: 'post' },
+    })
+    await payload.create({
+      overrideAccess: true,
+      collection: 'posts',
+      data: { category: category_2, title: 'post' },
+    })
+    await payload.create({
+      overrideAccess: true,
+      collection: 'posts',
+      data: { category: category_2, title: 'post' },
+    })
+    await payload.create({
+      overrideAccess: true,
+      collection: 'posts',
+      data: { category: category_3, title: 'post' },
+    })
+    await payload.create({
+      overrideAccess: true,
+      collection: 'posts',
+      data: { category: category_3, title: 'post' },
+    })
+    await payload.create({
+      overrideAccess: true,
+      collection: 'posts',
+      data: { category: category_3, title: 'post' },
+    })
+    await payload.create({
+      overrideAccess: true,
+      collection: 'posts',
+      data: { category: category_3, title: 'post' },
+    })
+    await payload.create({
+      overrideAccess: true,
+      collection: 'posts',
+      data: { category: category_4, title: 'post' },
+    })
 
     const res = await payload.findDistinct({
+      overrideAccess: true,
       collection: 'posts',
       field: 'categorySimpleText',
     })
@@ -1557,26 +1848,44 @@ describe('database', () => {
   })
 
   it('should find distinct values when the virtual field is linked to ID', async () => {
-    await payload.delete({ collection: 'posts', where: {} })
-    await payload.delete({ collection: 'categories', where: {} })
+    await payload.delete({ overrideAccess: true, collection: 'posts', where: {} })
+    await payload.delete({ overrideAccess: true, collection: 'categories', where: {} })
     const category = await payload.create({
+      overrideAccess: true,
       collection: 'categories',
       data: { title: 'category' },
     })
-    await payload.create({ collection: 'posts', data: { category, title: 'post' } })
-    const distinct = await payload.findDistinct({ collection: 'posts', field: 'categoryID' })
+    await payload.create({
+      overrideAccess: true,
+      collection: 'posts',
+      data: { category, title: 'post' },
+    })
+    const distinct = await payload.findDistinct({
+      overrideAccess: true,
+      collection: 'posts',
+      field: 'categoryID',
+    })
     expect(distinct.values).toStrictEqual([{ categoryID: category.id }])
   })
 
   it('should find distinct values by the explicit ID field path', async () => {
-    await payload.delete({ collection: 'posts', where: {} })
-    await payload.delete({ collection: 'categories', where: {} })
+    await payload.delete({ overrideAccess: true, collection: 'posts', where: {} })
+    await payload.delete({ overrideAccess: true, collection: 'categories', where: {} })
     const category = await payload.create({
+      overrideAccess: true,
       collection: 'categories',
       data: { title: 'category' },
     })
-    await payload.create({ collection: 'posts', data: { category, title: 'post' } })
-    const distinct = await payload.findDistinct({ collection: 'posts', field: 'category.id' })
+    await payload.create({
+      overrideAccess: true,
+      collection: 'posts',
+      data: { category, title: 'post' },
+    })
+    const distinct = await payload.findDistinct({
+      overrideAccess: true,
+      collection: 'posts',
+      field: 'category.id',
+    })
     expect(distinct.values).toStrictEqual([{ 'category.id': category.id }])
   })
 
@@ -1588,6 +1897,7 @@ describe('database', () => {
       // Create 15 unique categories
       const categoryPromises = Array.from({ length: 15 }).map(async (_, i) => {
         const cat = await payload.create({
+          overrideAccess: true,
           collection: 'categories',
           data: { title: `DistinctTest-Cat-${i + 1}-${Date.now()}` },
         })
@@ -1598,6 +1908,7 @@ describe('database', () => {
       // Create 15 posts, each with a unique category
       const postPromises = createdCategoryIds.map(async (categoryId, i) => {
         const post = await payload.create({
+          overrideAccess: true,
           collection: 'posts',
           data: {
             category: categoryId,
@@ -1612,11 +1923,13 @@ describe('database', () => {
     afterAll(async () => {
       // Clean up in order: posts first, then categories
       await Promise.all(
-        createdPostIds.map((id) => payload.delete({ id, collection: 'posts' }).catch(() => {})),
+        createdPostIds.map((id) =>
+          payload.delete({ overrideAccess: true, id, collection: 'posts' }).catch(() => {}),
+        ),
       )
       await Promise.all(
         createdCategoryIds.map((id) =>
-          payload.delete({ id, collection: 'categories' }).catch(() => {}),
+          payload.delete({ overrideAccess: true, id, collection: 'categories' }).catch(() => {}),
         ),
       )
     })
@@ -1624,6 +1937,7 @@ describe('database', () => {
     it('should paginate distinct results for relationship field paths', async () => {
       // Test findDistinct with pagination on category.title path
       const page1 = await payload.findDistinct({
+        overrideAccess: true,
         collection: 'posts',
         field: 'category.title',
         limit: 10,
@@ -1644,6 +1958,7 @@ describe('database', () => {
       expect(page1.values).toHaveLength(10)
 
       const page2 = await payload.findDistinct({
+        overrideAccess: true,
         collection: 'posts',
         field: 'category.title',
         limit: 10,
@@ -1682,6 +1997,7 @@ describe('database', () => {
     // produces TOTAL * ITEMS_PER_DOC rows — enough to expose the LIMIT-before-dedup bug.
     for (let i = 0; i < TOTAL; i++) {
       const doc = await payload.create({
+        overrideAccess: true,
         collection: postsSlug,
         data: {
           arrayWithIDs: Array.from({ length: ITEMS_PER_DOC }, (_, j) => ({
@@ -1695,6 +2011,7 @@ describe('database', () => {
     }
 
     const page1 = await payload.find({
+      overrideAccess: true,
       collection: postsSlug,
       limit: LIMIT,
       page: 1,
@@ -1703,6 +2020,7 @@ describe('database', () => {
     })
 
     const page2 = await payload.find({
+      overrideAccess: true,
       collection: postsSlug,
       limit: LIMIT,
       page: 2,
@@ -1739,6 +2057,7 @@ describe('database', () => {
     expect(page1MaxText <= page2MinText).toBe(true)
 
     await payload.delete({
+      overrideAccess: true,
       collection: postsSlug,
       where: { id: { in: createdIds } },
     })
@@ -1746,22 +2065,25 @@ describe('database', () => {
 
   describe('Compound Indexes', () => {
     beforeEach(async () => {
-      await payload.delete({ collection: 'compound-indexes', where: {} })
+      await payload.delete({ overrideAccess: true, collection: 'compound-indexes', where: {} })
     })
 
     it('top level: should throw a unique error', async () => {
       await payload.create({
+        overrideAccess: true,
         collection: 'compound-indexes',
         data: { one: '1', three: randomUUID(), two: '2' },
       })
 
       // does not fail
       await payload.create({
+        overrideAccess: true,
         collection: 'compound-indexes',
         data: { one: '1', three: randomUUID(), two: '3' },
       })
       // does not fail
       await payload.create({
+        overrideAccess: true,
         collection: 'compound-indexes',
         data: { one: '-1', three: randomUUID(), two: '2' },
       })
@@ -1769,6 +2091,7 @@ describe('database', () => {
       // fails
       await expect(
         payload.create({
+          overrideAccess: true,
           collection: 'compound-indexes',
           data: { one: '1', three: randomUUID(), two: '2' },
         }),
@@ -1777,6 +2100,7 @@ describe('database', () => {
 
     it('combine group and top level: should throw a unique error', async () => {
       await payload.create({
+        overrideAccess: true,
         collection: 'compound-indexes',
         data: {
           group: { four: '4' },
@@ -1787,11 +2111,13 @@ describe('database', () => {
 
       // does not fail
       await payload.create({
+        overrideAccess: true,
         collection: 'compound-indexes',
         data: { group: { four: '5' }, one: randomUUID(), three: '3' },
       })
       // does not fail
       await payload.create({
+        overrideAccess: true,
         collection: 'compound-indexes',
         data: { group: { four: '4' }, one: randomUUID(), three: '4' },
       })
@@ -1799,6 +2125,7 @@ describe('database', () => {
       // fails
       await expect(
         payload.create({
+          overrideAccess: true,
           collection: 'compound-indexes',
           data: { group: { four: '4' }, one: randomUUID(), three: '3' },
         }),
@@ -1842,6 +2169,7 @@ describe('database', () => {
     it('should run migrate', async () => {
       await payload.db.migrate()
       const { docs } = await payload.find({
+        overrideAccess: true,
         collection: 'payload-migrations',
       })
       const migration = docs[0]
@@ -1862,6 +2190,7 @@ describe('database', () => {
     it('should run migrate:fresh', async () => {
       await payload.db.migrateFresh({ forceAcceptWarning: true })
       const { docs } = await payload.find({
+        overrideAccess: true,
         collection: 'payload-migrations',
       })
       const migration = docs[0]
@@ -1884,7 +2213,10 @@ describe('database', () => {
       // migrate current to test
       await payload.db.migrate()
 
-      const { docs } = await payload.find({ collection: 'payload-migrations' })
+      const { docs } = await payload.find({
+        overrideAccess: true,
+        collection: 'payload-migrations',
+      })
       expect(docs.some((doc) => doc.name.includes('migration_to_down'))).toBeTruthy()
 
       let error
@@ -1895,13 +2227,14 @@ describe('database', () => {
       }
 
       const migrations = await payload.find({
+        overrideAccess: true,
         collection: 'payload-migrations',
       })
 
       expect(error).toBeUndefined()
       expect(migrations.docs.some((doc) => doc.name.includes('migration_to_down'))).toBeFalsy()
 
-      await payload.delete({ collection: 'payload-migrations', where: {} })
+      await payload.delete({ overrideAccess: true, collection: 'payload-migrations', where: {} })
     })
 
     // known drizzle issue: https://github.com/payloadcms/payload/issues/4597
@@ -1914,6 +2247,7 @@ describe('database', () => {
       }
 
       const migrations = await payload.find({
+        overrideAccess: true,
         collection: 'payload-migrations',
       })
 
@@ -1932,6 +2266,7 @@ describe('database', () => {
     }
 
     const migrations = await payload.find({
+      overrideAccess: true,
       collection: 'payload-migrations',
     })
 
@@ -2100,6 +2435,7 @@ describe('database', () => {
 
     it('should create and read doc with custom db names', async () => {
       const relationA = await payload.create({
+        overrideAccess: true,
         collection: 'relation-a',
         data: {
           title: 'hello',
@@ -2107,6 +2443,7 @@ describe('database', () => {
       })
 
       const { id } = await payload.create({
+        overrideAccess: true,
         collection: 'custom-schema',
         data: {
           array: [
@@ -2131,6 +2468,7 @@ describe('database', () => {
       })
 
       const doc = await payload.findByID({
+        overrideAccess: true,
         id,
         collection: 'custom-schema',
       })
@@ -2148,6 +2486,7 @@ describe('database', () => {
 
     it('arrays should work with both long field names and dbName', async () => {
       const { id } = await payload.create({
+        overrideAccess: true,
         collection: 'aliases',
         data: {
           thisIsALongFieldNameThatCanCauseAPostgresErrorEvenThoughWeSetAShorterDBName: [
@@ -2157,7 +2496,7 @@ describe('database', () => {
           ],
         },
       })
-      const res = await payload.findByID({ id, collection: 'aliases' })
+      const res = await payload.findByID({ overrideAccess: true, id, collection: 'aliases' })
       expect(
         res.thisIsALongFieldNameThatCanCauseAPostgresErrorEvenThoughWeSetAShorterDBName,
       ).toHaveLength(1)
@@ -2186,6 +2525,7 @@ describe('database', () => {
           await initTransaction(req)
 
           const first = await payload.create({
+            overrideAccess: true,
             collection,
             data: {
               title,
@@ -2195,6 +2535,7 @@ describe('database', () => {
 
           await expect(() =>
             payload.findByID({
+              overrideAccess: true,
               id: first.id,
               collection,
               // omitting req for isolation
@@ -2202,6 +2543,7 @@ describe('database', () => {
           ).rejects.toThrow('Not Found')
 
           const second = await payload.create({
+            overrideAccess: true,
             collection,
             data: {
               title,
@@ -2213,11 +2555,13 @@ describe('database', () => {
           expect(req.transactionID).toBeUndefined()
 
           const firstResult = await payload.findByID({
+            overrideAccess: true,
             id: first.id,
             collection,
             req,
           })
           const secondResult = await payload.findByID({
+            overrideAccess: true,
             id: second.id,
             collection,
             req,
@@ -2238,6 +2582,7 @@ describe('database', () => {
 
           const firstReq = payload
             .create({
+              overrideAccess: true,
               collection,
               data: {
                 title,
@@ -2250,6 +2595,7 @@ describe('database', () => {
 
           const secondReq = payload
             .create({
+              overrideAccess: true,
               collection,
               data: {
                 title,
@@ -2265,10 +2611,12 @@ describe('database', () => {
           expect(req.transactionID).toBeUndefined()
 
           const firstResult = await payload.findByID({
+            overrideAccess: true,
             id: first.id,
             collection,
           })
           const secondResult = await payload.findByID({
+            overrideAccess: true,
             id: second.id,
             collection,
           })
@@ -2286,6 +2634,7 @@ describe('database', () => {
           await initTransaction(req)
 
           const first = await payload.create({
+            overrideAccess: true,
             collection,
             data: {
               title,
@@ -2295,6 +2644,7 @@ describe('database', () => {
 
           try {
             await payload.create({
+              overrideAccess: true,
               collection,
               data: {
                 throwAfterChange: true,
@@ -2313,6 +2663,7 @@ describe('database', () => {
 
           await expect(() =>
             payload.findByID({
+              overrideAccess: true,
               id: first.id,
               collection,
               req,
@@ -2368,6 +2719,7 @@ describe('database', () => {
         let disabledTransactionPost
         beforeAll(async () => {
           disabledTransactionPost = await payload.create({
+            overrideAccess: true,
             collection,
             data: {
               title,
@@ -2381,6 +2733,7 @@ describe('database', () => {
         })
         it('should not use transaction calling update() with disableTransaction', async () => {
           const result = await payload.update({
+            overrideAccess: true,
             id: disabledTransactionPost.id,
             collection,
             data: {
@@ -2393,6 +2746,7 @@ describe('database', () => {
         })
         it('should not use transaction calling delete() with disableTransaction', async () => {
           const result = await payload.delete({
+            overrideAccess: true,
             id: disabledTransactionPost.id,
             collection,
             data: {
@@ -2411,6 +2765,7 @@ describe('database', () => {
     it('should support `limit` arg in bulk updates', async () => {
       for (let i = 0; i < 10; i++) {
         await payload.create({
+          overrideAccess: true,
           collection,
           data: {
             title: 'hello',
@@ -2419,6 +2774,7 @@ describe('database', () => {
       }
 
       const updateResult = await payload.update({
+        overrideAccess: true,
         collection,
         data: {
           title: 'world',
@@ -2430,6 +2786,7 @@ describe('database', () => {
       })
 
       const findResult = await payload.find({
+        overrideAccess: true,
         collection,
         where: {
           title: { exists: true },
@@ -2451,12 +2808,13 @@ describe('database', () => {
 
       try {
         const posts = await Promise.all([
-          payload.create({ collection, data: { title: 'test1' } }),
-          payload.create({ collection, data: { title: 'test2' } }),
-          payload.create({ collection, data: { title: 'test3' } }),
+          payload.create({ overrideAccess: true, collection, data: { title: 'test1' } }),
+          payload.create({ overrideAccess: true, collection, data: { title: 'test2' } }),
+          payload.create({ overrideAccess: true, collection, data: { title: 'test3' } }),
         ])
 
         const result = await payload.update({
+          overrideAccess: true,
           collection,
           data: { title: 'updated' },
           where: { id: { in: posts.map((p) => p.id) } },
@@ -2475,11 +2833,12 @@ describe('database', () => {
 
       try {
         const posts = await Promise.all([
-          payload.create({ collection, data: { title: 'toDelete1' } }),
-          payload.create({ collection, data: { title: 'toDelete2' } }),
+          payload.create({ overrideAccess: true, collection, data: { title: 'toDelete1' } }),
+          payload.create({ overrideAccess: true, collection, data: { title: 'toDelete2' } }),
         ])
 
         const result = await payload.delete({
+          overrideAccess: true,
           collection,
           where: { id: { in: posts.map((p) => p.id) } },
         })
@@ -2493,6 +2852,7 @@ describe('database', () => {
 
     it('should CRUD point field', async () => {
       const result = await payload.create({
+        overrideAccess: true,
         collection: 'default-values',
         data: {
           point: [5, 10],
@@ -2513,6 +2873,7 @@ describe('database', () => {
       })
 
       await payload.create({
+        overrideAccess: true,
         collection: postsSlug,
         data: {
           title: 'notupdated',
@@ -2522,6 +2883,7 @@ describe('database', () => {
       // Create 5 posts
       for (let i = 0; i < 5; i++) {
         await payload.create({
+          overrideAccess: true,
           collection: postsSlug,
           data: {
             title: `v1 ${i}`,
@@ -2547,6 +2909,7 @@ describe('database', () => {
 
       // Ensure all posts minus the one we don't want updated are updated
       const { docs } = await payload.find({
+        overrideAccess: true,
         collection: postsSlug,
         depth: 0,
         pagination: false,
@@ -2562,6 +2925,7 @@ describe('database', () => {
       expect(docs?.[4]?.title).toBe('updated')
 
       const { docs: notUpdatedDocs } = await payload.find({
+        overrideAccess: true,
         collection: postsSlug,
         depth: 0,
         pagination: false,
@@ -2589,6 +2953,7 @@ describe('database', () => {
       // Create 11 posts
       for (let i = 0; i < 11; i++) {
         await payload.create({
+          overrideAccess: true,
           collection: postsSlug,
           data: {
             title: 'not updated',
@@ -2615,6 +2980,7 @@ describe('database', () => {
 
       // Ensure all posts minus the one we don't want updated are updated
       const { docs } = await payload.find({
+        overrideAccess: true,
         collection: postsSlug,
         depth: 0,
         pagination: false,
@@ -2630,6 +2996,7 @@ describe('database', () => {
       expect(docs?.[4]?.title).toBe('updated')
 
       const { docs: notUpdatedDocs } = await payload.find({
+        overrideAccess: true,
         collection: postsSlug,
         depth: 0,
         pagination: false,
@@ -2663,6 +3030,7 @@ describe('database', () => {
       // create 11 documents numbered 0-10, but in random order
       for (const i of numbers) {
         await payload.create({
+          overrideAccess: true,
           collection: postsSlug,
           data: {
             number: i,
@@ -2694,6 +3062,7 @@ describe('database', () => {
 
       // Ensure all posts minus the one we don't want updated are updated
       const { docs } = await payload.find({
+        overrideAccess: true,
         collection: postsSlug,
         depth: 0,
         pagination: false,
@@ -2730,6 +3099,7 @@ describe('database', () => {
       // create 11 documents numbered 0-10, but in random order
       for (const i of numbers) {
         await payload.create({
+          overrideAccess: true,
           collection: postsSlug,
           data: {
             number: i,
@@ -2739,6 +3109,7 @@ describe('database', () => {
       }
 
       const result = await payload.update({
+        overrideAccess: true,
         collection: postsSlug,
         data: {
           title: 'updated',
@@ -2761,6 +3132,7 @@ describe('database', () => {
 
       // Ensure all posts minus the one we don't want updated are updated
       const { docs } = await payload.find({
+        overrideAccess: true,
         collection: postsSlug,
         depth: 0,
         pagination: false,
@@ -2797,6 +3169,7 @@ describe('database', () => {
       // create 11 documents numbered 0-10, but in random order
       for (const i of numbers) {
         await payload.create({
+          overrideAccess: true,
           collection: postsSlug,
           data: {
             number: i,
@@ -2828,6 +3201,7 @@ describe('database', () => {
 
       // Ensure all posts minus the one we don't want updated are updated
       const { docs } = await payload.find({
+        overrideAccess: true,
         collection: postsSlug,
         depth: 0,
         pagination: false,
@@ -2864,6 +3238,7 @@ describe('database', () => {
       // create 11 documents numbered 0-10, but in random order
       for (const i of numbers) {
         await payload.create({
+          overrideAccess: true,
           collection: postsSlug,
           data: {
             number: i,
@@ -2873,6 +3248,7 @@ describe('database', () => {
       }
 
       const result = await payload.update({
+        overrideAccess: true,
         collection: postsSlug,
         data: {
           title: 'updated',
@@ -2895,6 +3271,7 @@ describe('database', () => {
 
       // Ensure all posts minus the one we don't want updated are updated
       const { docs } = await payload.find({
+        overrideAccess: true,
         collection: postsSlug,
         depth: 0,
         pagination: false,
@@ -2926,6 +3303,7 @@ describe('database', () => {
       // Create 5 posts
       for (let i = 0; i < 5; i++) {
         await payload.create({
+          overrideAccess: true,
           collection: postsSlug,
           data: {
             title: 'not updated',
@@ -2952,6 +3330,7 @@ describe('database', () => {
 
       // Ensure all posts are updated. limit: 0 should mean unlimited
       const { docs } = await payload.find({
+        overrideAccess: true,
         collection: postsSlug,
         depth: 0,
         pagination: false,
@@ -2980,6 +3359,7 @@ describe('database', () => {
       // Create 5 posts
       for (let i = 0; i < 5; i++) {
         await payload.create({
+          overrideAccess: true,
           collection: postsSlug,
           data: {
             title: 'not updated',
@@ -3006,6 +3386,7 @@ describe('database', () => {
 
       // Ensure all posts are updated. limit: -1 should mean unlimited
       const { docs } = await payload.find({
+        overrideAccess: true,
         collection: postsSlug,
         depth: 0,
         pagination: false,
@@ -3088,6 +3469,7 @@ describe('database', () => {
 
       try {
         await payload.create({
+          overrideAccess: true,
           collection: postsSlug,
           data: {
             // @ts-expect-error
@@ -3104,6 +3486,7 @@ describe('database', () => {
     it('should return validation errors in response', async () => {
       try {
         await payload.create({
+          overrideAccess: true,
           collection: postsSlug,
           data: {
             D1: {
@@ -3131,6 +3514,7 @@ describe('database', () => {
     it('should return validation errors with proper field paths for unnamed fields', async () => {
       try {
         await payload.create({
+          overrideAccess: true,
           collection: errorOnUnnamedFieldsSlug,
           data: {
             groupWithinUnnamedTab: {
@@ -3349,6 +3733,7 @@ describe('database', () => {
       expect(payload.db.tables.places.extraColumn).toBeDefined()
 
       await payload.create({
+        overrideAccess: true,
         collection: 'places',
         data: {
           city: 'Berlin',
@@ -3408,6 +3793,7 @@ describe('database', () => {
       await payload.db.connect()
 
       await payload.create({
+        overrideAccess: true,
         collection: 'places',
         data: {
           city: 'A',
@@ -3417,6 +3803,7 @@ describe('database', () => {
 
       await expect(
         payload.create({
+          overrideAccess: true,
           collection: 'places',
           data: {
             city: 'C',
@@ -3427,6 +3814,7 @@ describe('database', () => {
 
       await expect(
         payload.create({
+          overrideAccess: true,
           collection: 'places',
           data: {
             city: 'A',
@@ -3437,6 +3825,7 @@ describe('database', () => {
 
       await expect(
         payload.create({
+          overrideAccess: true,
           collection: 'places',
           data: {
             city: 'A',
@@ -3450,11 +3839,13 @@ describe('database', () => {
   describe('virtual fields', () => {
     it('should not save a field with `virtual: true` to the db', async () => {
       const createRes = await payload.create({
+        overrideAccess: true,
         collection: 'fields-persistance',
         data: { array: [], text: 'asd', textHooked: 'asd' },
       })
 
       const resLocal = await payload.findByID({
+        overrideAccess: true,
         id: createRes.id,
         collection: 'fields-persistance',
       })
@@ -3474,6 +3865,7 @@ describe('database', () => {
 
     it('should not save a nested field to tabs/row/collapsible with virtual: true to the db', async () => {
       const res = await payload.create({
+        overrideAccess: true,
         collection: 'fields-persistance',
         data: {
           textWithinCollapsible: '1',
@@ -3489,6 +3881,7 @@ describe('database', () => {
 
     it('should not save a virtual field inside a block to the db', async () => {
       const created = await payload.create({
+        overrideAccess: true,
         collection: fieldsPersistanceSlug,
         data: {
           blockWithVirtual: [
@@ -3514,16 +3907,27 @@ describe('database', () => {
     })
 
     it('should allow virtual field with reference', async () => {
-      const post = await payload.create({ collection: 'posts', data: { title: 'my-title' } })
+      const post = await payload.create({
+        overrideAccess: true,
+        collection: 'posts',
+        data: { title: 'my-title' },
+      })
       const { id } = await payload.create({
+        overrideAccess: true,
         collection: 'virtual-relations',
         data: { post: post.id },
         depth: 0,
       })
 
-      const doc = await payload.findByID({ id, collection: 'virtual-relations', depth: 0 })
+      const doc = await payload.findByID({
+        overrideAccess: true,
+        id,
+        collection: 'virtual-relations',
+        depth: 0,
+      })
       expect(doc.postTitle).toBe('my-title')
       const draft = await payload.find({
+        overrideAccess: true,
         collection: 'virtual-relations',
         depth: 0,
         where: { id: { equals: id } },
@@ -3532,14 +3936,20 @@ describe('database', () => {
     })
 
     it('should not break when using select', async () => {
-      const post = await payload.create({ collection: 'posts', data: { title: 'my-title-10' } })
+      const post = await payload.create({
+        overrideAccess: true,
+        collection: 'posts',
+        data: { title: 'my-title-10' },
+      })
       const { id } = await payload.create({
+        overrideAccess: true,
         collection: 'virtual-relations',
         data: { post: post.id },
         depth: 0,
       })
 
       const doc = await payload.findByID({
+        overrideAccess: true,
         id,
         collection: 'virtual-relations',
         depth: 0,
@@ -3549,17 +3959,28 @@ describe('database', () => {
     })
 
     it('should respect hidden: true for virtual fields with reference', async () => {
-      const post = await payload.create({ collection: 'posts', data: { title: 'my-title-3' } })
+      const post = await payload.create({
+        overrideAccess: true,
+        collection: 'posts',
+        data: { title: 'my-title-3' },
+      })
       const { id } = await payload.create({
+        overrideAccess: true,
         collection: 'virtual-relations',
         data: { post: post.id },
         depth: 0,
       })
 
-      const doc = await payload.findByID({ id, collection: 'virtual-relations', depth: 0 })
+      const doc = await payload.findByID({
+        overrideAccess: true,
+        id,
+        collection: 'virtual-relations',
+        depth: 0,
+      })
       expect(doc.postTitleHidden).toBeUndefined()
 
       const doc_show = await payload.findByID({
+        overrideAccess: true,
         id,
         collection: 'virtual-relations',
         depth: 0,
@@ -3569,30 +3990,54 @@ describe('database', () => {
     })
 
     it('should allow virtual field as reference to ID', async () => {
-      const post = await payload.create({ collection: 'posts', data: { title: 'my-title' } })
+      const post = await payload.create({
+        overrideAccess: true,
+        collection: 'posts',
+        data: { title: 'my-title' },
+      })
       const { id } = await payload.create({
+        overrideAccess: true,
         collection: 'virtual-relations',
         data: { post: post.id },
         depth: 0,
       })
 
-      const docDepth2 = await payload.findByID({ id, collection: 'virtual-relations' })
+      const docDepth2 = await payload.findByID({
+        overrideAccess: true,
+        id,
+        collection: 'virtual-relations',
+      })
       expect(docDepth2.postID).toBe(post.id)
-      const docDepth0 = await payload.findByID({ id, collection: 'virtual-relations', depth: 0 })
+      const docDepth0 = await payload.findByID({
+        overrideAccess: true,
+        id,
+        collection: 'virtual-relations',
+        depth: 0,
+      })
       expect(docDepth0.postID).toBe(post.id)
     })
 
     it('should allow virtual field as reference to custom ID', async () => {
-      const customID = await payload.create({ collection: 'custom-ids', data: {} })
+      const customID = await payload.create({
+        overrideAccess: true,
+        collection: 'custom-ids',
+        data: {},
+      })
       const { id } = await payload.create({
+        overrideAccess: true,
         collection: 'virtual-relations',
         data: { customID: customID.id },
         depth: 0,
       })
 
-      const docDepth2 = await payload.findByID({ id, collection: 'virtual-relations' })
+      const docDepth2 = await payload.findByID({
+        overrideAccess: true,
+        id,
+        collection: 'virtual-relations',
+      })
       expect(docDepth2.customIDValue).toBe(customID.id)
       const docDepth0 = await payload.findByID({
+        overrideAccess: true,
         id,
         collection: 'virtual-relations',
         depth: 0,
@@ -3602,32 +4047,46 @@ describe('database', () => {
 
     it('should allow deep virtual field as reference to ID', async () => {
       const category = await payload.create({
+        overrideAccess: true,
         collection: 'categories',
         data: { title: 'category-3' },
       })
       const post = await payload.create({
+        overrideAccess: true,
         collection: 'posts',
         data: { category: category.id, title: 'my-title-3' },
       })
       const { id } = await payload.create({
+        overrideAccess: true,
         collection: 'virtual-relations',
         data: { post: post.id },
         depth: 0,
       })
 
-      const docDepth2 = await payload.findByID({ id, collection: 'virtual-relations' })
+      const docDepth2 = await payload.findByID({
+        overrideAccess: true,
+        id,
+        collection: 'virtual-relations',
+      })
       expect(docDepth2.postCategoryID).toBe(category.id)
-      const docDepth0 = await payload.findByID({ id, collection: 'virtual-relations', depth: 0 })
+      const docDepth0 = await payload.findByID({
+        overrideAccess: true,
+        id,
+        collection: 'virtual-relations',
+        depth: 0,
+      })
       expect(docDepth0.postCategoryID).toBe(category.id)
     })
 
     it('should allow virtual field with reference localized', async () => {
       const post = await payload.create({
+        overrideAccess: true,
         collection: 'posts',
         data: { localized: 'localized en', title: 'my-title' },
       })
 
       await payload.update({
+        overrideAccess: true,
         id: post.id,
         collection: 'posts',
         data: { localized: 'localized es' },
@@ -3635,36 +4094,59 @@ describe('database', () => {
       })
 
       const { id } = await payload.create({
+        overrideAccess: true,
         collection: 'virtual-relations',
         data: { post: post.id },
         depth: 0,
       })
 
-      let doc = await payload.findByID({ id, collection: 'virtual-relations', depth: 0 })
+      let doc = await payload.findByID({
+        overrideAccess: true,
+        id,
+        collection: 'virtual-relations',
+        depth: 0,
+      })
       expect(doc.postLocalized).toBe('localized en')
 
-      doc = await payload.findByID({ id, collection: 'virtual-relations', depth: 0, locale: 'es' })
+      doc = await payload.findByID({
+        overrideAccess: true,
+        id,
+        collection: 'virtual-relations',
+        depth: 0,
+        locale: 'es',
+      })
       expect(doc.postLocalized).toBe('localized es')
     })
 
     it('should allow to query by a virtual field with reference', async () => {
-      await payload.delete({ collection: 'posts', where: {} })
-      await payload.delete({ collection: 'virtual-relations', where: {} })
-      const post_1 = await payload.create({ collection: 'posts', data: { title: 'Dan' } })
-      const post_2 = await payload.create({ collection: 'posts', data: { title: 'Mr.Dan' } })
+      await payload.delete({ overrideAccess: true, collection: 'posts', where: {} })
+      await payload.delete({ overrideAccess: true, collection: 'virtual-relations', where: {} })
+      const post_1 = await payload.create({
+        overrideAccess: true,
+        collection: 'posts',
+        data: { title: 'Dan' },
+      })
+      const post_2 = await payload.create({
+        overrideAccess: true,
+        collection: 'posts',
+        data: { title: 'Mr.Dan' },
+      })
 
       const doc_1 = await payload.create({
+        overrideAccess: true,
         collection: 'virtual-relations',
         data: { post: post_1.id },
         depth: 0,
       })
       const doc_2 = await payload.create({
+        overrideAccess: true,
         collection: 'virtual-relations',
         data: { post: post_2.id },
         depth: 0,
       })
 
       const { docs: ascDocs } = await payload.find({
+        overrideAccess: true,
         collection: 'virtual-relations',
         depth: 0,
         sort: 'postTitle',
@@ -3675,6 +4157,7 @@ describe('database', () => {
       expect(ascDocs[1]?.id).toBe(doc_2.id)
 
       const { docs: descDocs } = await payload.find({
+        overrideAccess: true,
         collection: 'virtual-relations',
         depth: 0,
         sort: '-postTitle',
@@ -3687,29 +4170,42 @@ describe('database', () => {
 
     it('should allow virtual field 2x deep', async () => {
       const category = await payload.create({
+        overrideAccess: true,
         collection: 'categories',
         data: { title: '1-category' },
       })
       const post = await payload.create({
+        overrideAccess: true,
         collection: 'posts',
         data: { category: category.id, title: '1-post' },
       })
-      const doc = await payload.create({ collection: 'virtual-relations', data: { post: post.id } })
+      const doc = await payload.create({
+        overrideAccess: true,
+        collection: 'virtual-relations',
+        data: { post: post.id },
+      })
       expect(doc.postCategoryTitle).toBe('1-category')
     })
 
     it('should not break when using select 2x deep', async () => {
       const category = await payload.create({
+        overrideAccess: true,
         collection: 'categories',
         data: { title: '3-category' },
       })
       const post = await payload.create({
+        overrideAccess: true,
         collection: 'posts',
         data: { category: category.id, title: '3-post' },
       })
-      const doc = await payload.create({ collection: 'virtual-relations', data: { post: post.id } })
+      const doc = await payload.create({
+        overrideAccess: true,
+        collection: 'virtual-relations',
+        data: { post: post.id },
+      })
 
       const docWithSelect = await payload.findByID({
+        overrideAccess: true,
         id: doc.id,
         collection: 'virtual-relations',
         depth: 0,
@@ -3720,15 +4216,22 @@ describe('database', () => {
 
     it('should allow to query by virtual field 2x deep', async () => {
       const category = await payload.create({
+        overrideAccess: true,
         collection: 'categories',
         data: { title: '2-category' },
       })
       const post = await payload.create({
+        overrideAccess: true,
         collection: 'posts',
         data: { category: category.id, title: '2-post' },
       })
-      const doc = await payload.create({ collection: 'virtual-relations', data: { post: post.id } })
+      const doc = await payload.create({
+        overrideAccess: true,
+        collection: 'virtual-relations',
+        data: { post: post.id },
+      })
       const found = await payload.find({
+        overrideAccess: true,
         collection: 'virtual-relations',
         where: { postCategoryTitle: { equals: '2-category' } },
       })
@@ -3737,17 +4240,24 @@ describe('database', () => {
     })
 
     it('should allow to query by virtual field 2x deep with draft:true', async () => {
-      await payload.delete({ collection: 'virtual-relations', where: {} })
+      await payload.delete({ overrideAccess: true, collection: 'virtual-relations', where: {} })
       const category = await payload.create({
+        overrideAccess: true,
         collection: 'categories',
         data: { title: '3-category' },
       })
       const post = await payload.create({
+        overrideAccess: true,
         collection: 'posts',
         data: { category: category.id, title: '3-post' },
       })
-      const doc = await payload.create({ collection: 'virtual-relations', data: { post: post.id } })
+      const doc = await payload.create({
+        overrideAccess: true,
+        collection: 'virtual-relations',
+        data: { post: post.id },
+      })
       const found = await payload.find({
+        overrideAccess: true,
         collection: 'virtual-relations',
         draft: true,
         where: { postCategoryTitle: { equals: '3-category' } },
@@ -3757,8 +4267,13 @@ describe('database', () => {
     })
 
     it('should allow referenced virtual field in globals', async () => {
-      const post = await payload.create({ collection: 'posts', data: { title: 'post' } })
+      const post = await payload.create({
+        overrideAccess: true,
+        collection: 'posts',
+        data: { title: 'post' },
+      })
       const globalData = await payload.updateGlobal({
+        overrideAccess: true,
         slug: 'virtual-relation-global',
         data: { post: post.id },
         depth: 0,
@@ -3767,14 +4282,20 @@ describe('database', () => {
     })
 
     it('should allow referenced virtual field in collection update response', async () => {
-      const post = await payload.create({ collection: 'posts', data: { title: 'post-updated' } })
+      const post = await payload.create({
+        overrideAccess: true,
+        collection: 'posts',
+        data: { title: 'post-updated' },
+      })
       const doc = await payload.create({
+        overrideAccess: true,
         collection: 'virtual-relations',
         data: {},
         depth: 0,
       })
 
       const updated = await payload.update({
+        overrideAccess: true,
         collection: 'virtual-relations',
         id: doc.id,
         data: { post: post.id },
@@ -3785,34 +4306,41 @@ describe('database', () => {
     })
 
     it('should allow to sort by a virtual field with a reference to an ID', async () => {
-      await payload.delete({ collection: 'virtual-relations', where: {} })
+      await payload.delete({ overrideAccess: true, collection: 'virtual-relations', where: {} })
       const category_1 = await payload.create({
+        overrideAccess: true,
         collection: 'categories-custom-id',
         data: { id: 1 },
       })
       const category_2 = await payload.create({
+        overrideAccess: true,
         collection: 'categories-custom-id',
         data: { id: 2 },
       })
       const post_1 = await payload.create({
+        overrideAccess: true,
         collection: 'posts',
         data: { categoryCustomID: category_1.id, title: 'p-1' },
       })
       const post_2 = await payload.create({
+        overrideAccess: true,
         collection: 'posts',
         data: { categoryCustomID: category_2.id, title: 'p-2' },
       })
       const virtual_1 = await payload.create({
+        overrideAccess: true,
         collection: 'virtual-relations',
         data: { post: post_1.id },
       })
       const virtual_2 = await payload.create({
+        overrideAccess: true,
         collection: 'virtual-relations',
         data: { post: post_2.id },
       })
 
       const res = (
         await payload.find({
+          overrideAccess: true,
           collection: 'virtual-relations',
           sort: 'postCategoryCustomID',
         })
@@ -3822,6 +4350,7 @@ describe('database', () => {
 
       const res2 = (
         await payload.find({
+          overrideAccess: true,
           collection: 'virtual-relations',
           sort: '-postCategoryCustomID',
         })
@@ -3837,20 +4366,31 @@ describe('database', () => {
       const { docs: existingUsers } = await payload.find({
         collection: 'users',
         limit: 1,
+        overrideAccess: true,
         where: { email: { equals: devUser.email } },
       })
       if (existingUsers.length === 0) {
-        await payload.create({ collection: 'users', data: devUser })
+        await payload.create({ collection: 'users', data: devUser, overrideAccess: true })
       }
       await restClient.login({ slug: 'users', credentials: devUser })
 
-      const post_1 = await payload.create({ collection: 'posts', data: { title: 'A' } })
-      const post_2 = await payload.create({ collection: 'posts', data: { title: 'B' } })
+      const post_1 = await payload.create({
+        overrideAccess: true,
+        collection: 'posts',
+        data: { title: 'A' },
+      })
+      const post_2 = await payload.create({
+        overrideAccess: true,
+        collection: 'posts',
+        data: { title: 'B' },
+      })
       const doc_1 = await payload.create({
+        overrideAccess: true,
         collection: 'virtual-relations',
         data: { post: post_1 },
       })
       const doc_2 = await payload.create({
+        overrideAccess: true,
         collection: 'virtual-relations',
         data: { post: post_2 },
       })
@@ -3874,6 +4414,7 @@ describe('database', () => {
         .then((res) => res.json())
 
       const { docs: localDesc } = await payload.find({
+        overrideAccess: true,
         collection: 'virtual-relations',
         sort: '-postTitle',
         where: { id: { in: [doc_1.id, doc_2.id] } },
@@ -3903,6 +4444,7 @@ describe('database', () => {
         .then((res) => res.json())
 
       const { docs: localAsc } = await payload.find({
+        overrideAccess: true,
         collection: 'virtual-relations',
         sort: 'postTitle',
         where: { id: { in: [doc_1.id, doc_2.id] } },
@@ -3915,12 +4457,14 @@ describe('database', () => {
     })
 
     it('should allow to sort by a virtual field without error', async () => {
-      await payload.delete({ collection: fieldsPersistanceSlug, where: {} })
+      await payload.delete({ overrideAccess: true, collection: fieldsPersistanceSlug, where: {} })
       await payload.create({
+        overrideAccess: true,
         collection: fieldsPersistanceSlug,
         data: {},
       })
       const { docs } = await payload.find({
+        overrideAccess: true,
         collection: fieldsPersistanceSlug,
         sort: '-textHooked',
       })
@@ -3936,14 +4480,23 @@ describe('database', () => {
     })
 
     it('should the value populate with hasMany: true relationship field', async () => {
-      await payload.delete({ collection: 'categories', where: {} })
-      await payload.delete({ collection: 'posts', where: {} })
-      await payload.delete({ collection: 'virtual-relations', where: {} })
+      await payload.delete({ overrideAccess: true, collection: 'categories', where: {} })
+      await payload.delete({ overrideAccess: true, collection: 'posts', where: {} })
+      await payload.delete({ overrideAccess: true, collection: 'virtual-relations', where: {} })
 
-      const post1 = await payload.create({ collection: 'posts', data: { title: 'post 1' } })
-      const post2 = await payload.create({ collection: 'posts', data: { title: 'post 2' } })
+      const post1 = await payload.create({
+        overrideAccess: true,
+        collection: 'posts',
+        data: { title: 'post 1' },
+      })
+      const post2 = await payload.create({
+        overrideAccess: true,
+        collection: 'posts',
+        data: { title: 'post 2' },
+      })
 
       const res = await payload.create({
+        overrideAccess: true,
         collection: 'virtual-relations',
         data: { posts: [post1.id, post2.id] },
         depth: 0,
@@ -3952,24 +4505,28 @@ describe('database', () => {
     })
 
     it('should the value populate with nested hasMany: true relationship field', async () => {
-      await payload.delete({ collection: 'categories', where: {} })
-      await payload.delete({ collection: 'posts', where: {} })
-      await payload.delete({ collection: 'virtual-relations', where: {} })
+      await payload.delete({ overrideAccess: true, collection: 'categories', where: {} })
+      await payload.delete({ overrideAccess: true, collection: 'posts', where: {} })
+      await payload.delete({ overrideAccess: true, collection: 'virtual-relations', where: {} })
 
       const category_1 = await payload.create({
+        overrideAccess: true,
         collection: 'categories',
         data: { title: 'category 1' },
       })
       const category_2 = await payload.create({
+        overrideAccess: true,
         collection: 'categories',
         data: { title: 'category 2' },
       })
       const post1 = await payload.create({
+        overrideAccess: true,
         collection: 'posts',
         data: { categories: [category_1.id, category_2.id], title: 'post 1' },
       })
 
       const res = await payload.create({
+        overrideAccess: true,
         collection: 'virtual-relations',
         data: { post: post1.id },
         depth: 0,
@@ -3979,16 +4536,19 @@ describe('database', () => {
 
     it('should not error when using a virtual linked field in access control of a join target collection', async () => {
       const tenant = await payload.create({
+        overrideAccess: true,
         collection: 'virtual-linked-tenants',
         data: { slug: 'my-tenant' },
       })
 
       const project = await payload.create({
+        overrideAccess: true,
         collection: 'virtual-linked-projects',
         data: {},
       })
 
       await payload.create({
+        overrideAccess: true,
         collection: 'virtual-linked-roles',
         data: { project: project.id, tenant: tenant.id },
       })
@@ -4005,6 +4565,7 @@ describe('database', () => {
 
   it('should convert numbers to text', async () => {
     const result = await payload.create({
+      overrideAccess: true,
       collection: postsSlug,
       data: {
         title: 'testing',
@@ -4018,6 +4579,7 @@ describe('database', () => {
 
   it('should convert strings to numbers in hasMany number fields', async () => {
     const result = await payload.create({
+      overrideAccess: true,
       collection: postsSlug,
       data: {
         title: 'testing-numbers-hasMany',
@@ -4033,6 +4595,7 @@ describe('database', () => {
     const testDate = new Date('2024-01-15T10:30:00.000Z')
 
     const result = await payload.create({
+      overrideAccess: true,
       collection: postsSlug,
       data: {
         title: 'testing-date-field',
@@ -4046,6 +4609,7 @@ describe('database', () => {
 
     // Reading back should also return ISO string
     const retrieved = await payload.findByID({
+      overrideAccess: true,
       collection: postsSlug,
       id: result.id,
     })
@@ -4076,6 +4640,7 @@ describe('database', () => {
   it('should not allow to query by a field with `virtual: true`', async () => {
     await expect(
       payload.find({
+        overrideAccess: true,
         collection: 'fields-persistance',
         where: { text: { equals: 'asd' } },
       }),
@@ -4090,6 +4655,7 @@ describe('database', () => {
 
     try {
       invalidDoc = await payload.create({
+        overrideAccess: true,
         collection: 'relation-b',
         data: { relationship: invalidId, title: 'invalid' },
       })
@@ -4101,6 +4667,7 @@ describe('database', () => {
     expect(invalidDoc).toBeUndefined()
 
     const relationBDocs = await payload.find({
+      overrideAccess: true,
       collection: 'relation-b',
     })
 
@@ -4214,9 +4781,17 @@ describe('database', () => {
   })
 
   it('should enforce unique ids on db level even after delete', async () => {
-    const { id } = await payload.create({ collection: postsSlug, data: { title: 'ASD' } })
-    await payload.delete({ id, collection: postsSlug })
-    const { id: id_2 } = await payload.create({ collection: postsSlug, data: { title: 'ASD' } })
+    const { id } = await payload.create({
+      overrideAccess: true,
+      collection: postsSlug,
+      data: { title: 'ASD' },
+    })
+    await payload.delete({ overrideAccess: true, id, collection: postsSlug })
+    const { id: id_2 } = await payload.create({
+      overrideAccess: true,
+      collection: postsSlug,
+      data: { title: 'ASD' },
+    })
     expect(id_2).not.toBe(id)
   })
 
@@ -4248,6 +4823,7 @@ describe('database', () => {
   it('payload.updateGlobal should have globalType, updatedAt, createdAt fields', async () => {
     const timestamp = Date.now()
     let result = (await payload.updateGlobal({
+      overrideAccess: true,
       slug: 'global-3',
       data: { text: 'this is global-3' },
     })) as { globalType: string } & Global2
@@ -4260,6 +4836,7 @@ describe('database', () => {
     const createdAt = new Date(result.createdAt as string).getTime()
 
     result = (await payload.updateGlobal({
+      overrideAccess: true,
       slug: 'global-3',
       data: { text: 'this is global-3 but updated' },
     })) as { globalType: string } & Global2
@@ -4273,6 +4850,7 @@ describe('database', () => {
   it('should group where conditions with AND', async () => {
     // create 2 docs
     await payload.create({
+      overrideAccess: true,
       collection: postsSlug,
       data: {
         title: 'post 1',
@@ -4280,6 +4858,7 @@ describe('database', () => {
     })
 
     const doc2 = await payload.create({
+      overrideAccess: true,
       collection: postsSlug,
       data: {
         title: 'post 2',
@@ -4287,6 +4866,7 @@ describe('database', () => {
     })
 
     const query1 = await payload.find({
+      overrideAccess: true,
       collection: postsSlug,
       where: {
         id: {
@@ -4298,6 +4878,7 @@ describe('database', () => {
     })
 
     const query2 = await payload.find({
+      overrideAccess: true,
       collection: postsSlug,
       where: {
         id: {
@@ -4309,6 +4890,7 @@ describe('database', () => {
     })
 
     const query3 = await payload.find({
+      overrideAccess: true,
       collection: postsSlug,
       where: {
         and: [
@@ -4355,6 +4937,7 @@ describe('database', () => {
     })
 
     let payloadRes: any = await payload.findByID({
+      overrideAccess: true,
       id: res!.insertedId.toHexString(),
       collection: postsSlug,
     })
@@ -4370,6 +4953,7 @@ describe('database', () => {
     payload.db.allowAdditionalKeys = true
 
     payloadRes = await payload.findByID({
+      overrideAccess: true,
       id: res!.insertedId.toHexString(),
       collection: postsSlug,
     })
@@ -4382,7 +4966,11 @@ describe('database', () => {
   })
 
   it('should not crash when the version field is not selected', async () => {
-    const customID = await payload.create({ collection: 'custom-ids', data: {} })
+    const customID = await payload.create({
+      overrideAccess: true,
+      collection: 'custom-ids',
+      data: {},
+    })
     const res = await payload.db.queryDrafts({
       collection: 'custom-ids',
       select: { parent: true },
@@ -4394,26 +4982,30 @@ describe('database', () => {
 
   it('deep nested arrays', async () => {
     await payload.updateGlobal({
+      overrideAccess: true,
       slug: 'header',
       data: { itemsLvl1: [{ itemsLvl2: [{ itemsLvl3: [{ itemsLvl4: [{ label: 'label' }] }] }] }] },
     })
 
-    const header = await payload.findGlobal({ slug: 'header' })
+    const header = await payload.findGlobal({ overrideAccess: true, slug: 'header' })
 
     expect(header.itemsLvl1[0]?.itemsLvl2[0]?.itemsLvl3[0]?.itemsLvl4[0]?.label).toBe('label')
   })
 
   it('should count with a query that contains subqueries', async () => {
     const category = await payload.create({
+      overrideAccess: true,
       collection: 'categories',
       data: { title: 'new-category' },
     })
     const post = await payload.create({
+      overrideAccess: true,
       collection: 'posts',
       data: { category: category.id, title: 'new-post' },
     })
 
     const result_1 = await payload.count({
+      overrideAccess: true,
       collection: 'posts',
       where: {
         'category.title': {
@@ -4425,6 +5017,7 @@ describe('database', () => {
     expect(result_1.totalDocs).toBe(1)
 
     const result_2 = await payload.count({
+      overrideAccess: true,
       collection: 'posts',
       where: {
         'category.title': {
@@ -4438,6 +5031,7 @@ describe('database', () => {
 
   it('can have localized and non localized blocks', async () => {
     const res = await payload.create({
+      overrideAccess: true,
       collection: 'blocks-docs',
       data: {
         testBlocks: [{ blockType: 'cta', text: 'text' }],
@@ -4450,25 +5044,30 @@ describe('database', () => {
   })
 
   it('should support in with null', async () => {
-    await payload.delete({ collection: 'posts', where: {} })
+    await payload.delete({ overrideAccess: true, collection: 'posts', where: {} })
     const post_1 = await payload.create({
+      overrideAccess: true,
       collection: 'posts',
       data: { text: 'text-1', title: 'a' },
     })
     const post_2 = await payload.create({
+      overrideAccess: true,
       collection: 'posts',
       data: { text: 'text-2', title: 'a' },
     })
     const post_3 = await payload.create({
+      overrideAccess: true,
       collection: 'posts',
       data: { text: 'text-3', title: 'a' },
     })
     const post_null = await payload.create({
+      overrideAccess: true,
       collection: 'posts',
       data: { text: null, title: 'a' },
     })
 
     const { docs } = await payload.find({
+      overrideAccess: true,
       collection: 'posts',
       where: { text: { in: ['text-1', 'text-3', null] } },
     })
@@ -4480,6 +5079,7 @@ describe('database', () => {
 
   it('should throw specific unique contraint errors', async () => {
     await payload.create({
+      overrideAccess: true,
       collection: 'unique-fields',
       data: {
         slugField: 'unique-text',
@@ -4488,6 +5088,7 @@ describe('database', () => {
 
     try {
       await payload.create({
+        overrideAccess: true,
         collection: 'unique-fields',
         data: {
           slugField: 'unique-text',
@@ -4502,6 +5103,7 @@ describe('database', () => {
 
   it('should throw unique constraint errors in optimized update path', async () => {
     await payload.create({
+      overrideAccess: true,
       collection: 'unique-fields',
       data: {
         slugField: 'optimized-unique-1',
@@ -4509,6 +5111,7 @@ describe('database', () => {
     })
 
     const doc2 = await payload.create({
+      overrideAccess: true,
       collection: 'unique-fields',
       data: {
         slugField: 'optimized-unique-2',
@@ -4519,6 +5122,7 @@ describe('database', () => {
     // because it's a simple field update with an existing ID
     try {
       await payload.update({
+        overrideAccess: true,
         collection: 'unique-fields',
         id: doc2.id,
         data: {
@@ -4534,6 +5138,7 @@ describe('database', () => {
 
   it('should use optimized updateOne', async () => {
     const post = await payload.create({
+      overrideAccess: true,
       collection: 'posts',
       data: {
         arrayWithIDs: [{ text: 'some text' }],
@@ -4563,6 +5168,7 @@ describe('database', () => {
 
   it('should use optimized updateMany', async () => {
     const post1 = await payload.create({
+      overrideAccess: true,
       collection: 'posts',
       data: {
         arrayWithIDs: [{ text: 'some text' }],
@@ -4573,6 +5179,7 @@ describe('database', () => {
       },
     })
     const post2 = await payload.create({
+      overrideAccess: true,
       collection: 'posts',
       data: {
         arrayWithIDs: [{ text: 'some text' }],
@@ -4636,10 +5243,12 @@ describe('database', () => {
 
   it('should allow to query like by ID with draft: true', async () => {
     const category = await payload.create({
+      overrideAccess: true,
       collection: 'categories',
       data: { title: 'category123' },
     })
     const res = await payload.find({
+      overrideAccess: true,
       collection: 'categories',
       draft: true,
       where: { id: { like: typeof category.id === 'number' ? `${category.id}` : category.id } },
@@ -4649,7 +5258,11 @@ describe('database', () => {
   })
 
   it('should allow incremental number update', async () => {
-    const post = await payload.create({ collection: 'posts', data: { number: 1, title: 'post' } })
+    const post = await payload.create({
+      overrideAccess: true,
+      collection: 'posts',
+      data: { number: 1, title: 'post' },
+    })
 
     const res = (await payload.db.updateOne({
       collection: 'posts',
@@ -4679,6 +5292,7 @@ describe('database', () => {
   describe('array $push', () => {
     it('should allow atomic array updates and $inc', async () => {
       const post = await payload.create({
+        overrideAccess: true,
         collection: 'posts',
         data: {
           arrayWithIDs: [
@@ -4715,6 +5329,7 @@ describe('database', () => {
 
     it('should allow atomic array updates using $push with single value, unlocalized', async () => {
       const post = await payload.create({
+        overrideAccess: true,
         collection: 'posts',
         data: {
           arrayWithIDs: [
@@ -4745,6 +5360,7 @@ describe('database', () => {
     })
     it('should allow atomic array updates using $push with single value, localized field within array', async () => {
       const post = await payload.create({
+        overrideAccess: true,
         collection: 'posts',
         data: {
           arrayWithIDs: [
@@ -4790,6 +5406,7 @@ describe('database', () => {
 
     it('should allow atomic array updates using $push with single value, localized array', async () => {
       const post = await payload.create({
+        overrideAccess: true,
         collection: 'posts',
         data: {
           arrayWithIDsLocalized: [
@@ -4834,6 +5451,7 @@ describe('database', () => {
 
     it('should allow atomic array updates using $push with multiple values, unlocalized', async () => {
       const post = await payload.create({
+        overrideAccess: true,
         collection: 'posts',
         data: {
           arrayWithIDs: [
@@ -4872,6 +5490,7 @@ describe('database', () => {
 
     it('should allow atomic array updates using $push with multiple values, localized field within array', async () => {
       const post = await payload.create({
+        overrideAccess: true,
         collection: 'posts',
         data: {
           arrayWithIDs: [
@@ -4933,6 +5552,7 @@ describe('database', () => {
 
     it('should allow atomic array updates using $push with multiple values, localized array', async () => {
       const post = await payload.create({
+        overrideAccess: true,
         collection: 'posts',
         data: {
           arrayWithIDsLocalized: [
@@ -4987,16 +5607,19 @@ describe('database', () => {
     it('should allow appending relationships using $push with single value', async () => {
       // First create some category documents
       const cat1 = await payload.create({
+        overrideAccess: true,
         collection: 'categories',
         data: { title: 'Category 1' },
       })
       const cat2 = await payload.create({
+        overrideAccess: true,
         collection: 'categories',
         data: { title: 'Category 2' },
       })
 
       // Create a post with initial relationship
       const post = await payload.create({
+        overrideAccess: true,
         collection: 'posts',
         data: {
           categories: [cat1.id],
@@ -5029,20 +5652,24 @@ describe('database', () => {
     it('should allow appending relationships using $push with array', async () => {
       // Create category documents
       const cat1 = await payload.create({
+        overrideAccess: true,
         collection: 'categories',
         data: { title: 'Category 1' },
       })
       const cat2 = await payload.create({
+        overrideAccess: true,
         collection: 'categories',
         data: { title: 'Category 2' },
       })
       const cat3 = await payload.create({
+        overrideAccess: true,
         collection: 'categories',
         data: { title: 'Category 3' },
       })
 
       // Create post with initial relationship
       const post = await payload.create({
+        overrideAccess: true,
         collection: 'posts',
         data: {
           categories: [cat1.id],
@@ -5072,16 +5699,19 @@ describe('database', () => {
     it('should prevent duplicates when using $push', async () => {
       // Create category documents
       const cat1 = await payload.create({
+        overrideAccess: true,
         collection: 'categories',
         data: { title: 'Category 1' },
       })
       const cat2 = await payload.create({
+        overrideAccess: true,
         collection: 'categories',
         data: { title: 'Category 2' },
       })
 
       // Create post with initial relationships
       const post = await payload.create({
+        overrideAccess: true,
         collection: 'posts',
         data: {
           categories: [cat1.id, cat2.id],
@@ -5110,16 +5740,19 @@ describe('database', () => {
     it('should work with updateMany for bulk append operations', async () => {
       // Create category documents
       const cat1 = await payload.create({
+        overrideAccess: true,
         collection: 'categories',
         data: { title: 'Category 1' },
       })
       const cat2 = await payload.create({
+        overrideAccess: true,
         collection: 'categories',
         data: { title: 'Category 2' },
       })
 
       // Create multiple posts with initial relationships
       const post1 = await payload.create({
+        overrideAccess: true,
         collection: 'posts',
         data: {
           categories: [cat1.id],
@@ -5127,6 +5760,7 @@ describe('database', () => {
         },
       })
       const post2 = await payload.create({
+        overrideAccess: true,
         collection: 'posts',
         data: {
           categories: [cat1.id],
@@ -5159,16 +5793,19 @@ describe('database', () => {
     it('should append polymorphic relationships using $push', async () => {
       // Create a category and simple document for the polymorphic relationship
       const category = await payload.create({
+        overrideAccess: true,
         collection: 'categories',
         data: { title: 'Test Category' },
       })
       const simple = await payload.create({
+        overrideAccess: true,
         collection: 'simple',
         data: { text: 'Test Simple' },
       })
 
       // Create post with initial polymorphic relationship
       const post = await payload.create({
+        overrideAccess: true,
         collection: 'posts',
         data: {
           polymorphicRelations: [
@@ -5218,12 +5855,14 @@ describe('database', () => {
     it('should prevent duplicates in polymorphic relationships with $push', async () => {
       // Create a category
       const category = await payload.create({
+        overrideAccess: true,
         collection: 'categories',
         data: { title: 'Test Category' },
       })
 
       // Create post with polymorphic relationship
       const post = await payload.create({
+        overrideAccess: true,
         collection: 'posts',
         data: {
           polymorphicRelations: [
@@ -5263,16 +5902,19 @@ describe('database', () => {
     it('should handle localized polymorphic relationships with $push', async () => {
       // Create documents for testing
       const category1 = await payload.create({
+        overrideAccess: true,
         collection: 'categories',
         data: { title: 'Category 1' },
       })
       const category2 = await payload.create({
+        overrideAccess: true,
         collection: 'categories',
         data: { title: 'Category 2' },
       })
 
       // Create post with localized polymorphic relationships
       const post = await payload.create({
+        overrideAccess: true,
         collection: 'posts',
         data: {
           localizedPolymorphicRelations: [
@@ -5319,17 +5961,20 @@ describe('database', () => {
     it('should handle nested localized polymorphic relationships with $push', async () => {
       // Create documents for the polymorphic relationship
       const category1 = await payload.create({
+        overrideAccess: true,
         collection: 'categories',
         data: { title: 'Category 1' },
       })
 
       const category2 = await payload.create({
+        overrideAccess: true,
         collection: 'categories',
         data: { title: 'Category 2' },
       })
 
       // Create a post with nested localized polymorphic relationship
       const post = await payload.create({
+        overrideAccess: true,
         collection: 'posts',
         data: {
           testNestedGroup: {
@@ -5365,6 +6010,7 @@ describe('database', () => {
 
       // Verify the operation worked
       const result = await payload.findByID({
+        overrideAccess: true,
         id: post.id,
         collection: 'posts',
         depth: 0,
@@ -5387,16 +6033,19 @@ describe('database', () => {
     it('should allow removing relationships using $remove with single value', async () => {
       // Create category documents
       const cat1 = await payload.create({
+        overrideAccess: true,
         collection: 'categories',
         data: { title: 'Category 1' },
       })
       const cat2 = await payload.create({
+        overrideAccess: true,
         collection: 'categories',
         data: { title: 'Category 2' },
       })
 
       // Create post with relationships
       const post = await payload.create({
+        overrideAccess: true,
         collection: 'posts',
         data: {
           categories: [cat1.id, cat2.id],
@@ -5424,20 +6073,24 @@ describe('database', () => {
     it('should allow removing relationships using $remove with array', async () => {
       // Create category documents
       const cat1 = await payload.create({
+        overrideAccess: true,
         collection: 'categories',
         data: { title: 'Category 1' },
       })
       const cat2 = await payload.create({
+        overrideAccess: true,
         collection: 'categories',
         data: { title: 'Category 2' },
       })
       const cat3 = await payload.create({
+        overrideAccess: true,
         collection: 'categories',
         data: { title: 'Category 3' },
       })
 
       // Create post with relationships
       const post = await payload.create({
+        overrideAccess: true,
         collection: 'posts',
         data: {
           categories: [cat1.id, cat2.id, cat3.id],
@@ -5465,20 +6118,24 @@ describe('database', () => {
     it('should work with updateMany for bulk remove operations', async () => {
       // Create category documents
       const cat1 = await payload.create({
+        overrideAccess: true,
         collection: 'categories',
         data: { title: 'Category 1' },
       })
       const cat2 = await payload.create({
+        overrideAccess: true,
         collection: 'categories',
         data: { title: 'Category 2' },
       })
       const cat3 = await payload.create({
+        overrideAccess: true,
         collection: 'categories',
         data: { title: 'Category 3' },
       })
 
       // Create multiple posts with relationships
       const post1 = await payload.create({
+        overrideAccess: true,
         collection: 'posts',
         data: {
           categories: [cat1.id, cat2.id, cat3.id],
@@ -5486,6 +6143,7 @@ describe('database', () => {
         },
       })
       const post2 = await payload.create({
+        overrideAccess: true,
         collection: 'posts',
         data: {
           categories: [cat1.id, cat2.id, cat3.id],
@@ -5519,16 +6177,19 @@ describe('database', () => {
     it('should remove polymorphic relationships using $remove', async () => {
       // Create documents
       const category1 = await payload.create({
+        overrideAccess: true,
         collection: 'categories',
         data: { title: 'Test Category 1' },
       })
       const category2 = await payload.create({
+        overrideAccess: true,
         collection: 'categories',
         data: { title: 'Test Category 2' },
       })
 
       // Create post with multiple polymorphic relationships
       const post = await payload.create({
+        overrideAccess: true,
         collection: 'posts',
         data: {
           polymorphicRelations: [
@@ -5574,20 +6235,24 @@ describe('database', () => {
     it('should remove multiple polymorphic relationships using $remove', async () => {
       // Create documents
       const category1 = await payload.create({
+        overrideAccess: true,
         collection: 'categories',
         data: { title: 'Test Category 1' },
       })
       const category2 = await payload.create({
+        overrideAccess: true,
         collection: 'categories',
         data: { title: 'Test Category 2' },
       })
       const simple = await payload.create({
+        overrideAccess: true,
         collection: 'simple',
         data: { text: 'Test Simple' },
       })
 
       // Create post with multiple polymorphic relationships
       const post = await payload.create({
+        overrideAccess: true,
         collection: 'posts',
         data: {
           polymorphicRelations: [
@@ -5626,20 +6291,24 @@ describe('database', () => {
     it('should handle localized polymorphic relationships with $remove', async () => {
       // Create documents for testing
       const category1 = await payload.create({
+        overrideAccess: true,
         collection: 'categories',
         data: { title: 'Category 1' },
       })
       const category2 = await payload.create({
+        overrideAccess: true,
         collection: 'categories',
         data: { title: 'Category 2' },
       })
       const category3 = await payload.create({
+        overrideAccess: true,
         collection: 'categories',
         data: { title: 'Category 3' },
       })
 
       // Create post with multiple localized polymorphic relationships
       const post = await payload.create({
+        overrideAccess: true,
         collection: 'posts',
         data: {
           localizedPolymorphicRelations: [
@@ -5687,22 +6356,26 @@ describe('database', () => {
     it('should handle nested localized polymorphic relationships with $remove', async () => {
       // Create documents for the polymorphic relationship
       const category1 = await payload.create({
+        overrideAccess: true,
         collection: 'categories',
         data: { title: 'Category 1' },
       })
 
       const category2 = await payload.create({
+        overrideAccess: true,
         collection: 'categories',
         data: { title: 'Category 2' },
       })
 
       const simple1 = await payload.create({
+        overrideAccess: true,
         collection: 'simple',
         data: { text: 'Simple 1' },
       })
 
       // Create a post with multiple items in nested localized polymorphic relationship
       const post = await payload.create({
+        overrideAccess: true,
         collection: 'posts',
         data: {
           testNestedGroup: {
@@ -5744,6 +6417,7 @@ describe('database', () => {
 
       // Verify the operation worked
       const result = await payload.findByID({
+        overrideAccess: true,
         id: post.id,
         collection: 'posts',
         depth: 0,
@@ -5760,6 +6434,7 @@ describe('database', () => {
 
   it('should support x3 nesting blocks', async () => {
     const res = await payload.create({
+      overrideAccess: true,
       collection: 'posts',
       data: {
         blocks: [
@@ -5818,6 +6493,7 @@ describe('database', () => {
     })
 
     const doc = await payload.findByID({
+      overrideAccess: true,
       id: res?.insertedId?.toHexString() as string,
       collection: 'blocks-docs',
       locale: 'en',
@@ -5841,6 +6517,7 @@ describe('database', () => {
     expect(payload.db.tables.blocks_docs.testBlocks).toBeDefined()
     expect(payload.db.tables.blocks_docs_locales.testBlocksLocalized).toBeDefined()
     const res = await payload.create({
+      overrideAccess: true,
       collection: 'blocks-docs',
       data: {
         testBlocks: [{ blockType: 'cta', text: 'text' }],
@@ -5850,6 +6527,7 @@ describe('database', () => {
     expect(res.testBlocks[0]?.text).toBe('text')
     expect(res.testBlocksLocalized[0]?.text).toBe('text-localized')
     const res_es = await payload.update({
+      overrideAccess: true,
       id: res.id,
       collection: 'blocks-docs',
       data: {
@@ -5861,6 +6539,7 @@ describe('database', () => {
     expect(res_es.testBlocks[0]?.text).toBe('text_updated')
     expect(res_es.testBlocksLocalized[0]?.text).toBe('text-localized-es')
     const res_all = await payload.findByID({
+      overrideAccess: true,
       id: res.id,
       collection: 'blocks-docs',
       locale: 'all',
@@ -5899,28 +6578,32 @@ describe('database', () => {
     { db: 'mongo' },
     async () => {
       // Clear any existing documents
-      await payload.delete({ collection: 'simple', where: {} })
+      await payload.delete({ overrideAccess: true, collection: 'simple', where: {} })
 
       const expectedUnsortedItems = ['Євген', 'Віктор', 'Роман']
       const expectedSortedItems = ['Віктор', 'Євген', 'Роман']
 
       const simple_1 = await payload.create({
+        overrideAccess: true,
         collection: 'simple',
         locale: 'uk',
         data: { text: 'Роман' },
       })
       const simple_2 = await payload.create({
+        overrideAccess: true,
         collection: 'simple',
         locale: 'uk',
         data: { text: 'Віктор' },
       })
       const simple_3 = await payload.create({
+        overrideAccess: true,
         collection: 'simple',
         locale: 'uk',
         data: { text: 'Євген' },
       })
 
       const results = await payload.find({
+        overrideAccess: true,
         collection: 'simple',
         locale: 'uk',
         sort: 'text',
@@ -5933,6 +6616,7 @@ describe('database', () => {
       payload.db.collation = { strength: 1 }
 
       const resultsWithCollation = await payload.find({
+        overrideAccess: true,
         collection: 'simple',
         locale: 'uk',
         sort: 'text',
@@ -5951,12 +6635,13 @@ describe('database', () => {
     { db: 'mongo' },
     async () => {
       // Clear any existing documents
-      await payload.delete({ collection: 'categories', where: {} })
+      await payload.delete({ overrideAccess: true, collection: 'categories', where: {} })
 
       // Create 15 draft documents
       const createdIds: (number | string)[] = []
       for (let i = 0; i < 15; i++) {
         const doc = await payload.create({
+          overrideAccess: true,
           collection: 'categories',
           data: { name: `Category ${i}` },
           draft: true,
@@ -5969,6 +6654,7 @@ describe('database', () => {
 
       // Query drafts WITHOUT sort - this is the scenario that breaks
       const resultsNoSort = await payload.find({
+        overrideAccess: true,
         collection: 'categories',
         limit: 10,
         draft: true,
@@ -5990,7 +6676,7 @@ describe('database', () => {
 
       // Clean up
       for (const id of createdIds) {
-        await payload.delete({ collection: 'categories', id })
+        await payload.delete({ overrideAccess: true, collection: 'categories', id })
       }
 
       // Reset collation
