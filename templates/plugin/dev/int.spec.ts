@@ -34,6 +34,7 @@ describe('Plugin integration tests', () => {
 
   test('can create post with custom text field added by plugin', async () => {
     const post = await payload.create({
+      overrideAccess: true,
       collection: 'posts',
       data: {
         addedByPlugin: 'added by plugin',
@@ -45,7 +46,7 @@ describe('Plugin integration tests', () => {
   test('plugin creates and seeds plugin-collection', async () => {
     expect(payload.collections['plugin-collection']).toBeDefined()
 
-    const { docs } = await payload.find({ collection: 'plugin-collection' })
+    const { docs } = await payload.find({ overrideAccess: true, collection: 'plugin-collection' })
 
     expect(docs).toHaveLength(1)
   })

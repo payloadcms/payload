@@ -47,6 +47,7 @@ export const seed = async ({
   await Promise.all(
     globals.map((global) =>
       payload.updateGlobal({
+        overrideAccess: true,
         slug: global,
         data: {
           navItems: [],
@@ -72,6 +73,7 @@ export const seed = async ({
   payload.logger.info(`— Seeding demo author and user...`)
 
   await payload.delete({
+    overrideAccess: true,
     collection: 'users',
     depth: 0,
     where: {
@@ -100,6 +102,7 @@ export const seed = async ({
 
   const [demoAuthor, image1Doc, image2Doc, image3Doc, imageHomeDoc] = await Promise.all([
     payload.create({
+      overrideAccess: true,
       collection: 'users',
       data: {
         name: 'Demo Author',
@@ -108,27 +111,32 @@ export const seed = async ({
       },
     }),
     payload.create({
+      overrideAccess: true,
       collection: 'media',
       data: image1,
       file: image1Buffer,
     }),
     payload.create({
+      overrideAccess: true,
       collection: 'media',
       data: image2,
       file: image2Buffer,
     }),
     payload.create({
+      overrideAccess: true,
       collection: 'media',
       data: image2,
       file: image3Buffer,
     }),
     payload.create({
+      overrideAccess: true,
       collection: 'media',
       data: imageHero1,
       file: hero1Buffer,
     }),
     categories.map((category) =>
       payload.create({
+        overrideAccess: true,
         collection: 'categories',
         data: {
           title: category,
@@ -143,6 +151,7 @@ export const seed = async ({
   // Do not create posts with `Promise.all` because we want the posts to be created in order
   // This way we can sort them by `createdAt` or `publishedAt` and they will be in the expected order
   const post1Doc = await payload.create({
+    overrideAccess: true,
     collection: 'posts',
     depth: 0,
     context: {
@@ -152,6 +161,7 @@ export const seed = async ({
   })
 
   const post2Doc = await payload.create({
+    overrideAccess: true,
     collection: 'posts',
     depth: 0,
     context: {
@@ -161,6 +171,7 @@ export const seed = async ({
   })
 
   const post3Doc = await payload.create({
+    overrideAccess: true,
     collection: 'posts',
     depth: 0,
     context: {
@@ -171,6 +182,7 @@ export const seed = async ({
 
   // update each post with related posts
   await payload.update({
+    overrideAccess: true,
     id: post1Doc.id,
     collection: 'posts',
     data: {
@@ -178,6 +190,7 @@ export const seed = async ({
     },
   })
   await payload.update({
+    overrideAccess: true,
     id: post2Doc.id,
     collection: 'posts',
     data: {
@@ -185,6 +198,7 @@ export const seed = async ({
     },
   })
   await payload.update({
+    overrideAccess: true,
     id: post3Doc.id,
     collection: 'posts',
     data: {
@@ -195,6 +209,7 @@ export const seed = async ({
   payload.logger.info(`— Seeding contact form...`)
 
   const contactForm = await payload.create({
+    overrideAccess: true,
     collection: 'forms',
     depth: 0,
     data: contactFormData,
@@ -204,11 +219,13 @@ export const seed = async ({
 
   const [_, contactPage] = await Promise.all([
     payload.create({
+      overrideAccess: true,
       collection: 'pages',
       depth: 0,
       data: home({ heroImage: imageHomeDoc, metaImage: image2Doc }),
     }),
     payload.create({
+      overrideAccess: true,
       collection: 'pages',
       depth: 0,
       data: contactPageData({ contactForm: contactForm }),
@@ -219,6 +236,7 @@ export const seed = async ({
 
   await Promise.all([
     payload.updateGlobal({
+      overrideAccess: true,
       slug: 'header',
       data: {
         navItems: [
@@ -243,6 +261,7 @@ export const seed = async ({
       },
     }),
     payload.updateGlobal({
+      overrideAccess: true,
       slug: 'footer',
       data: {
         navItems: [

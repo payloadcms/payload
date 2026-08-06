@@ -91,6 +91,7 @@ export const myPlugin =
       }
 
       const { totalDocs } = await payload.count({
+        overrideAccess: true,
         collection: 'plugin-collection',
         where: {
           id: {
@@ -101,6 +102,7 @@ export const myPlugin =
 
       if (totalDocs === 0) {
         await payload.create({
+          overrideAccess: true,
           collection: 'plugin-collection',
           data: {
             id: 'seeded-by-plugin',
