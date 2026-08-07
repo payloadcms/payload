@@ -431,6 +431,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Перезаписати існуючі дані поля',
     pageNotFound: 'Сторінка не знайдена',
     password: 'Пароль',
+    pasteBelow: 'Вставити нижче',
     pasteField: 'Вставити поле',
     pasteRow: 'Вставити рядок',
     payloadSettings: 'Налаштування Payload',
@@ -445,6 +446,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     reloadDocument: 'Перезавантажити документ',
     remove: 'Видалити',
     rename: 'Перейменувати',
+    replaceRow: 'Замінити рядок',
     reset: 'Скидання',
     resetPreferences: 'Скинути налаштування',
     resetPreferencesDescription: 'Це скине всі ваші налаштування до значень за замовчуванням.',
@@ -475,6 +477,8 @@ export const ukTranslations: DefaultTranslationsObject = {
     sorryNotFound: 'Вибачте, немає нічого, що відповідало б Вашому запиту.',
     sort: 'Сортувати',
     sortByLabelDirection: 'Сортувати за {{label}} {{direction}}',
+    sortByOrderToReorder:
+      'Щоб змінити порядок рядків, спочатку потрібно відсортувати їх за стовпцем "Order".',
     stayOnThisPage: 'Залишитись на цій сторінці',
     submissionSuccessful: 'Успішно відправлено.',
     submit: 'Відправити',
@@ -564,6 +568,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     addFile: 'Додати файл',
     addFiles: 'Додати файли',
     bulkUpload: 'Масове завантаження',
+    copyLinkToFile: 'Скопіювати посилання на файл',
     crop: 'Обрізати',
     cropToolDescription:
       'Перетягніть кути обраної області, намалюйте нову область або скоригуйте значення нижче.',

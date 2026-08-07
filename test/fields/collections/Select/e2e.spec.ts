@@ -11,18 +11,15 @@ import type { Config } from '../../payload-types.js'
 import { checkFocusIndicators } from '../../../__helpers/e2e/checkFocusIndicators.js'
 import { clickColumnSelectorItem, openListColumns } from '../../../__helpers/e2e/columns/index.js'
 import { addListFilter } from '../../../__helpers/e2e/filters/addListFilter.js'
-import {
-  ensureCompilationIsDone,
-  initPageConsoleErrorCatch,
-  saveDocAndAssert,
-  waitForFormReady,
-} from '../../../__helpers/e2e/helpers.js'
+import { saveDocAndAssert, waitForFormReady } from '../../../__helpers/e2e/helpers.js'
 import { runAxeScan } from '../../../__helpers/e2e/runAxeScan.js'
 import { getSelectMenu } from '../../../__helpers/e2e/selectInput.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { RESTClient } from '../../../__helpers/shared/rest.js'
+import { ensureCompilationIsDone } from '../../../__setup/e2e/ensureCompilationIsDone.js'
+import { initPage } from '../../../__setup/e2e/initPage.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { selectFieldsSlug } from '../../slugs.js'
 
@@ -50,10 +47,7 @@ describe('Select', () => {
     url = new AdminUrlUtil(serverURL, selectFieldsSlug)
 
     const context = await browser.newContext()
-    page = await context.newPage()
-    initPageConsoleErrorCatch(page)
-
-    await ensureCompilationIsDone({ page, serverURL })
+    ;({ page } = await initPage({ context, serverURL }))
   })
 
   beforeEach(async () => {
@@ -84,7 +78,7 @@ describe('Select', () => {
     await expect(field.locator('.rs__value-container')).toContainText('One')
   })
 
-  test('should show custom JSX option label in edit', { framework: 'next' }, async () => {
+  test('should show custom JSX option label in edit', async () => {
     await page.goto(url.create)
 
     const svgLocator = page.locator('#field-selectWithJsxLabelOption svg#payload-logo')
@@ -92,7 +86,7 @@ describe('Select', () => {
     await expect(svgLocator).toBeVisible()
   })
 
-  test('should show custom JSX option label in list', { framework: 'next' }, async () => {
+  test('should show custom JSX option label in list', async () => {
     await page.goto(url.list)
 
     const { columnContainer } = await openListColumns(page)
@@ -240,10 +234,10 @@ describe('Select', () => {
       await page.locator('#field-select').waitFor()
 
       const scanResults = await runAxeScan({
+        exclude: ['.field-description'], // known issue - reported elsewhere @todo: remove this once fixed - see report https://github.com/payloadcms/payload/discussions/14489
+        include: ['.collection-edit__main'],
         page,
         testInfo,
-        include: ['.collection-edit__main'],
-        exclude: ['.field-description'], // known issue - reported elsewhere @todo: remove this once fixed - see report https://github.com/payloadcms/payload/discussions/14489
       })
 
       expect(scanResults.violations.length).toBe(0)
@@ -257,10 +251,10 @@ describe('Select', () => {
       await page.locator('#field-select').waitFor()
 
       const scanResults = await runAxeScan({
+        exclude: ['.field-description'], // known issue - reported elsewhere @todo: remove this once fixed - see report https://github.com/payloadcms/payload/discussions/14489
+        include: ['.collection-edit__main'],
         page,
         testInfo,
-        include: ['.collection-edit__main'],
-        exclude: ['.field-description'], // known issue - reported elsewhere @todo: remove this once fixed - see report https://github.com/payloadcms/payload/discussions/14489
       })
 
       expect(scanResults.violations.length).toBe(0)
@@ -272,8 +266,8 @@ describe('Select', () => {
 
       const scanResults = await checkFocusIndicators({
         page,
-        testInfo,
         selector: '.collection-edit__main',
+        testInfo,
       })
 
       expect(scanResults.totalFocusableElements).toBeGreaterThan(0)

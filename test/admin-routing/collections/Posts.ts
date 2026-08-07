@@ -1,0 +1,21 @@
+import type { CollectionConfig } from 'payload'
+
+export const postsSlug = 'posts'
+
+export const Posts: CollectionConfig = {
+  slug: postsSlug,
+  admin: {
+    useAsTitle: 'title',
+  },
+  fields: [
+    {
+      name: 'title',
+      type: 'text',
+      admin: {
+        components: {
+          Field: '/components/TitleField.js#TitleField',
+        },
+      },
+    },
+  ],
+}
