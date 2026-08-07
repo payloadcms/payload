@@ -3,7 +3,7 @@ import type { FormState } from 'payload'
 import ObjectIdImport from 'bson-objectid'
 import { describe, expect, it } from 'vitest'
 
-import { mergeFormStateFromClipboard } from './mergeFormStateFromClipboard.js'
+import { mergeFormStateFromClipboard, reduceFormStateByPath } from './mergeFormStateFromClipboard.js'
 import type { ClipboardPasteData } from './types.js'
 
 const ObjectId = (
@@ -548,5 +548,82 @@ describe('mergeFormStateFromClipboard', () => {
       // Check that other fields were preserved
       expect(result['disableSort.0.text'].value).toEqual('row one')
     })
+  })
+})
+
+describe('reduceFormStateByPath', () => {
+  it('should strip lastRenderedPath from fields and rows so pasted content re-renders', () => {
+    const formState: FormState = {
+      layout: {
+        valid: true,
+        value: 1,
+        initialValue: 1,
+        rows: [
+          {
+            id: 'row-1',
+            blockType: 'content',
+            isLoading: false,
+            lastRenderedPath: 'layout.0',
+          },
+        ],
+      },
+      'layout.0.id': {
+        value: 'row-1',
+        valid: true,
+      },
+      'layout.0.richText': {
+        value: 'test content',
+        valid: true,
+        lastRenderedPath: 'layout.0.richText',
+      },
+    }
+
+    const result = reduceFormStateByPath({
+      formState,
+      path: 'layout',
+    })
+
+    // lastRenderedPath must not survive the copy, otherwise pasting back onto the
+    // same path makes the server skip re-rendering and the block body renders blank
+    expect(result.layout.rows![0].lastRenderedPath).toBeUndefined()
+    expect(result['layout.0.richText'].lastRenderedPath).toBeUndefined()
+
+    // The rest of the state is preserved
+    expect(result.layout.rows![0].id).toEqual('row-1')
+    expect(result.layout.rows![0].blockType).toEqual('content')
+    expect(result['layout.0.richText'].value).toEqual('test content')
+    expect(result['layout.0.id'].value).toEqual('row-1')
+  })
+
+  it('should strip lastRenderedPath when copying a single row', () => {
+    const formState: FormState = {
+      'layout.0.nested': {
+        valid: true,
+        value: 1,
+        rows: [
+          {
+            id: 'nested-row-1',
+            isLoading: false,
+            lastRenderedPath: 'layout.0.nested.0',
+          },
+        ],
+      },
+      'layout.0.richText': {
+        value: 'row content',
+        valid: true,
+        lastRenderedPath: 'layout.0.richText',
+      },
+    }
+
+    const result = reduceFormStateByPath({
+      formState,
+      path: 'layout',
+      rowIndex: 0,
+    })
+
+    expect(result['layout.0.richText'].lastRenderedPath).toBeUndefined()
+    expect(result['layout.0.nested'].rows![0].lastRenderedPath).toBeUndefined()
+    expect(result['layout.0.richText'].value).toEqual('row content')
+    expect(result['layout.0.nested'].rows![0].id).toEqual('nested-row-1')
   })
 })
