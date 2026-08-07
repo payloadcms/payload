@@ -497,4 +497,75 @@ describe('@payloadcms/plugin-nested-docs', () => {
       expect(grandchild.categorization[2].label).toStrictEqual('grandchild')
     })
   })
+
+  describe('error propagation', () => {
+    const createPage = async (data: Record<string, unknown>) =>
+      payload.create({
+        collection: 'pages',
+        data: { _status: 'published', ...data } as Page,
+      })
+
+    it('should surface a validation error raised two levels down the cascade', async () => {
+      const grandparent = await createPage({ title: 'Cascade A', slug: 'cascade-a' })
+      const parent = await createPage({
+        title: 'Cascade B',
+        slug: 'cascade-b',
+        parent: grandparent.id,
+      })
+      await createPage({
+        title: 'Cascade C',
+        slug: 'cascade-c',
+        breaksOnResave: true,
+        parent: parent.id,
+      })
+
+      // Updating A re-saves B, and B's own resaveChildren re-saves C. C's
+      // ValidationError is converted to an APIError one level down, so A's
+      // catch no longer recognises it and lets it go — while the failed update
+      // has already killed the transaction the three of them share.
+      await expect(
+        payload.update({
+          id: grandparent.id,
+          collection: 'pages',
+          context: { simulate: { staleReference: true } },
+          data: { title: 'Cascade A Updated', _status: 'published' },
+        }),
+      ).rejects.toThrow()
+
+      // What the caller was told and what the database holds now agree.
+      const stored = await payload.findByID({
+        id: grandparent.id,
+        collection: 'pages',
+        draft: false,
+      })
+
+      expect(stored.title).toBe('Cascade A')
+    })
+
+    it('should surface a non-validation error raised during a child re-save', async () => {
+      const parent = await createPage({ title: 'Infra A', slug: 'infra-a' })
+      await createPage({
+        title: 'Infra B',
+        slug: 'infra-b',
+        breaksOnResave: true,
+        parent: parent.id,
+      })
+
+      // This one needs no cascade depth at all: the catch only ever rethrows
+      // ValidationErrors, so a database error during the child re-save is
+      // swallowed on the first level.
+      await expect(
+        payload.update({
+          id: parent.id,
+          collection: 'pages',
+          context: { simulate: { infraFailure: true } },
+          data: { title: 'Infra A Updated', _status: 'published' },
+        }),
+      ).rejects.toThrow()
+
+      const stored = await payload.findByID({ id: parent.id, collection: 'pages', draft: false })
+
+      expect(stored.title).toBe('Infra A')
+    })
+  })
 })
