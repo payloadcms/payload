@@ -414,6 +414,9 @@ export async function clearAndSeedEverything(_payload: Payload) {
     collectionSlugs,
     seedFunction: seed,
     snapshotKey: 'fieldsTest',
-    uploadsDir: path.resolve(getFieldsDir(), './collections/Upload/uploads'),
+    uploadsDir: path.resolve(
+      getTestSuiteDir({ fallbackDir: dirname, suitePath: 'fields' }),
+      './collections/Upload/uploads',
+    ),
   })
 }
