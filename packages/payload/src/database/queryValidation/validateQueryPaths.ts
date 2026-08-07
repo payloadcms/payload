@@ -50,7 +50,7 @@ export async function validateQueryPaths({
     for (const path in where) {
       const constraint = where[path]
 
-      if ((path === 'and' || path === 'or') && Array.isArray(constraint)) {
+      if (['and', 'or'].includes(path.toLowerCase()) && Array.isArray(constraint)) {
         for (const item of constraint) {
           if (collectionConfig) {
             promises.push(
@@ -80,6 +80,8 @@ export async function validateQueryPaths({
             )
           }
         }
+      } else if (Array.isArray(constraint)) {
+        errors.push({ path })
       } else if (!Array.isArray(constraint)) {
         for (const operator in constraint) {
           const val = constraint[operator as keyof typeof constraint]
