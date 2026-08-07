@@ -25,6 +25,7 @@ jobs:
     outputs:
       needs_build: ${{ steps.filter.outputs.needs_build }}
       needs_tests: ${{ steps.filter.outputs.needs_tests }}
+      needs_visual: ${{ steps.filter.outputs.needs_visual }}
       templates: ${{ steps.filter.outputs.templates }}
       build_approvals: ${{ steps.filter.outputs.build_approvals }}
     steps:
@@ -55,6 +56,44 @@ jobs:
               - 'package.json'
             templates:
               - 'templates/**'
+            # Gates the visual-regression job: only run it when a PR could plausibly change
+            # rendered UI, or when it touches the visual-testing machinery itself (specs,
+            # baselines, the screenshot helper, or the Playwright config that governs the
+            # comparison). Source styles in this repo are .scss (see admin panel component
+            # structure conventions), so that's included alongside .css/.tsx/.jsx. Also covers
+            # image/icon assets and the fixture config/collections the current `@visual` test
+            # renders, since seeded content or a swapped icon can change a screenshot without
+            # touching a .tsx/.css file. This is a coverage tradeoff, not a guarantee: a plain
+            # `packages/**/*.ts` change (e.g. logic in a non-JSX helper a component imports) can
+            # still alter rendered output while being skipped here — deliberately, since
+            # `packages/**` is almost entirely `.ts`/`.tsx` and including plain `.ts` would make
+            # this gate fire on nearly every PR, defeating its purpose.
+            needs_visual:
+              - '.github/workflows/main.yml'
+              - 'packages/**/*.css'
+              - 'packages/**/*.scss'
+              - 'packages/**/*.tsx'
+              - 'packages/**/*.jsx'
+              - 'packages/**/*.svg'
+              - 'test/**/*.css'
+              - 'test/**/*.scss'
+              - 'test/**/*.tsx'
+              - 'test/**/*.jsx'
+              - 'test/**/e2e.spec.ts'
+              - 'test/**/__snapshots__/**'
+              - 'test/__helpers/e2e/expectScreenshot.ts'
+              - 'test/playwright.config.ts'
+              - 'test/buildConfigWithDefaults.ts'
+              # `test/admin/e2e/visual/e2e.spec.ts` renders the posts list view with the full admin
+              # sidebar nav, which test/admin/config.ts assembles from every collection/global here
+              # (labels, grouping, visibility) — plain .ts, so not caught by the *.tsx/*.scss
+              # patterns above. Scoped to config-defining files rather than all of `test/admin/**`
+              # (100+ files spanning unrelated e2e suites) for the same reason `packages/**/*.ts`
+              # is excluded above: a blanket match would fire on nearly every admin-suite PR.
+              - 'test/admin/config.ts'
+              - 'test/admin/slugs.ts'
+              - 'test/admin/collections/**'
+              - 'test/admin/globals/**'
             build_approvals:
               - '.github/workflows/main.yml'
               # Any dependency-graph change (packages/* or the blank workspace member) lands in
@@ -173,6 +212,17 @@ jobs:
         with:
           path: ./*
           key: ${{ github.sha }}
+
+      # Narrower than "Cache build" above: just the compiled, platform-independent package
+      # output, with no `node_modules`. The `visual-regression` job restores this directly onto
+      # the runner (not inside its Docker container's own install) to skip re-running `build:all`
+      # without reintroducing the native-module ABI mismatch that job's own install step exists to
+      # avoid — see the comment on that job for why it can't reuse the `Cache build` entry above.
+      - name: Cache dist output
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: packages/*/dist
+          key: dist-${{ github.sha }}
 
   tests-unit:
     runs-on: ubuntu-24.04
@@ -436,7 +486,12 @@ jobs:
         # Note: The e2e-prep job runs prepare-run-test-against-prod:ci once and uploads the result
         # as an artifact. This job downloads that artifact, so we skip preparation. Each shard runs a
         # real production server (next build / vite build, ~10s), booted per shard by runE2E.
-        run: PLAYWRIGHT_JSON_OUTPUT_NAME=results_${{ matrix.suite }}_${{ matrix.framework }}_${{ matrix.shard }}.json pnpm test:e2e:prod:server:run:noturbo ${{ matrix.suite }} --shard=${{ matrix.shard }}/${{ matrix.total-shards }} --fully-parallel${{ matrix.parallel == false && ' --workers=1' || '' }}
+        #
+        # --grep-invert="@visual": screenshot comparisons are handled exclusively by the dedicated
+        # `visual-regression` job (gated on `needs_visual`), never by this unconditional matrix —
+        # otherwise a `@visual` test would also run here on every PR that touches test/packages
+        # code, including under the tanstack-start framework it was never baselined against.
+        run: PLAYWRIGHT_JSON_OUTPUT_NAME=results_${{ matrix.suite }}_${{ matrix.framework }}_${{ matrix.shard }}.json pnpm test:e2e:prod:server:run:noturbo ${{ matrix.suite }} --shard=${{ matrix.shard }}/${{ matrix.total-shards }} --fully-parallel --grep-invert="@visual"${{ matrix.parallel == false && ' --workers=1' || '' }}
         env:
           PLAYWRIGHT_JSON_OUTPUT_NAME: results_${{ matrix.suite }}_${{ matrix.framework }}_${{ matrix.shard }}.json
           NEXT_TELEMETRY_DISABLED: 1
@@ -456,6 +511,88 @@ jobs:
       #     report-file: results_${{ matrix.suite }}.json
       #     report-tag: ${{ matrix.suite }}
       #     job-summary: true
+
+  # Runs `@visual`-tagged e2e tests (screenshot comparisons against committed baselines).
+  # Gated on `needs_visual` so it only runs when a PR could plausibly change rendered UI.
+  # Reports pass/fail only — if this job fails, reproduce and inspect the diff locally with
+  # `pnpm test:visual` rather than relying on a CI-posted comment.
+  #
+  # Baselines are committed as PNGs next to their spec file (see `snapshotPathTemplate` in
+  # test/playwright.config.ts) and must be generated on this same OS/browser combination —
+  # never on a bare macOS/Windows host. Use `pnpm test:visual:update`
+  # locally to accept an intentional change.
+  #
+  # The comparison itself runs inside the same pinned `mcr.microsoft.com/playwright:vX-noble`
+  # image `pnpm test:visual` uses locally, rather than directly on this bare
+  # `ubuntu-24.04` runner. Both are nominally "Ubuntu 24.04", but the runner image isn't
+  # guaranteed to carry the same font/freetype packages as the pinned Playwright image — and this
+  # feature's entire premise (a baseline generated once is valid everywhere it's compared) depends
+  # on CI comparing against that exact environment, not just an OS version that happens to match.
+  # Installs fresh inside the container each run, and only ever reuses the `dist-${{ github.sha }}`
+  # cache below — never the `build`/`e2e-prep` `node_modules`, which were produced on the bare
+  # runner and would mix runner-compiled native modules (sharp, etc.) with the container's own
+  # Node/glibc — the same host/container ABI mismatch `pnpm test:visual` avoids locally
+  # via isolated volumes. `packages/*/dist` itself is plain compiled JS with no native bindings,
+  # so restoring just that (skipping `build:all` when it's already there) is safe.
+  visual-regression:
+    name: Visual Regression
+    runs-on: ubuntu-24.04
+    needs: changes
+    if: needs.changes.outputs.needs_visual == 'true'
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Start services
+        uses: ./.github/actions/start-services
+        with:
+          database: mongodb
+
+      - name: Resolve pinned Playwright version
+        id: playwright-version
+        run: echo "version=$(node -p "require('./package.json').devDependencies['@playwright/test']")" >> "$GITHUB_OUTPUT"
+
+      # Best-effort: the `build` job only runs when `needs_build` is also true, so this misses on
+      # any PR where `needs_visual` fired without it (e.g. a fixture/screenshot-only change). The
+      # container command below builds fresh on a miss.
+      - name: Restore dist output from build job
+        uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: packages/*/dist
+          key: dist-${{ github.sha }}
+
+      - name: Run visual regression tests
+        id: visual
+        continue-on-error: true
+        # PLAYWRIGHT_VERSION is read from package.json, which on a `pull_request` checkout is
+        # fork-controlled content — passed via env and referenced as "$PLAYWRIGHT_VERSION" so it's
+        # shell *data*, never spliced as raw text into the script the way a `${{ }}` reference
+        # inside `run:` would be.
+        env:
+          PLAYWRIGHT_VERSION: ${{ steps.playwright-version.outputs.version }}
+        run: |
+          docker run --rm \
+            --network host \
+            --ipc=host \
+            -v "$PWD":/repo \
+            -w /repo \
+            -e PAYLOAD_DATABASE=mongodb \
+            -e NEXT_TELEMETRY_DISABLED=1 \
+            "mcr.microsoft.com/playwright:v${PLAYWRIGHT_VERSION}-noble" \
+            bash -lc "
+              apt-get update -qq && apt-get install -y -qq build-essential python3 > /dev/null &&
+              npm install -g pnpm@\$(grep '^pnpm ' .tool-versions | awk '{print \$2}') &&
+              pnpm install --frozen-lockfile &&
+              ( [ -d packages/payload/dist ] || pnpm run build:all ) &&
+              pnpm prepare-run-test-against-prod:ci &&
+              bash .github/scripts/run-visual-suites.sh -- --fully-parallel
+            "
+
+      - name: Fail if visual regressions were found
+        if: steps.visual.outcome == 'failure'
+        run: exit 1
 
   # Build listed templates with packed local packages and then runs their int and e2e tests
   build-and-test-templates:
@@ -739,6 +876,7 @@ jobs:
         tests-types,
         tests-type-generation,
         tests-content-api,
+        visual-regression,
       ]
 
     steps:

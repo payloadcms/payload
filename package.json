@@ -135,6 +135,9 @@
     "test:int:summary": "pnpm runts ./test/runTestsWithSummary.ts",
     "test:types": "tstyche",
     "test:unit": "vitest run --project unit",
+    "test:visual": "bash ./test/scripts/run-visual-docker.sh",
+    "test:visual:preview": "bash ./test/scripts/preview-visual-diff.sh",
+    "test:visual:update": "pnpm test:visual -- --update-snapshots",
     "translateNewKeys": "pnpm --filter @tools/scripts run generateTranslations:core"
   },
   "devDependencies": {

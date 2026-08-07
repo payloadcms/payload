@@ -32,12 +32,21 @@ const {
   bail,
   'fully-parallel': fullyParallel,
   grep,
+  'grep-invert': grepInvert,
   headed,
   part,
   shard,
+  'update-snapshots': updateSnapshots,
   workers,
 } = minimist(process.argv.slice(2), { alias: { g: 'grep' } })
 const suiteName = args[0]
+
+// `@visual` screenshot comparisons only run against a real production build (see
+// `expectScreenshot`) and are opted into explicitly, via `--grep @visual`, by the dedicated
+// visual-regression CI job and `pnpm test:visual`. Exclude them by default so the
+// plain dev-server run (`pnpm test:e2e` / `pnpm test`) doesn't hit `expectScreenshot`'s
+// production-build check.
+const effectiveGrepInvert = grepInvert ?? (grep === '@visual' ? undefined : '@visual')
 
 // Run all
 if (!suiteName) {
@@ -86,6 +95,8 @@ if (!suiteName) {
       undefined,
       undefined,
       headed,
+      updateSnapshots,
+      effectiveGrepInvert,
     )
   }
 } else {
@@ -129,6 +140,8 @@ if (!suiteName) {
     workers,
     grep,
     headed,
+    updateSnapshots,
+    effectiveGrepInvert,
   )
 }
 
@@ -151,6 +164,8 @@ async function executePlaywright(
   workersArg?: number,
   grepArg?: string,
   headedArg?: boolean,
+  updateSnapshotsArg?: boolean,
+  grepInvertArg?: string,
 ) {
   const paths = Array.isArray(suitePaths) ? suitePaths : [suitePaths]
   console.log(`Executing ${paths.join(', ')}...`)
@@ -207,9 +222,11 @@ async function executePlaywright(
   const fullyParallelFlag = fullyParallelArg ? ' --fully-parallel' : ''
   const workersFlag = workersArg !== undefined ? ` --workers=${workersArg}` : ''
   const grepFlag = grepArg ? ` --grep="${grepArg}"` : ''
+  const grepInvertFlag = grepInvertArg ? ` --grep-invert="${grepInvertArg}"` : ''
   const headedFlag = headedArg ? ' --headed' : ''
+  const updateSnapshotsFlag = updateSnapshotsArg ? ' --update-snapshots' : ''
   const cmd = slash(
-    `${playwrightBin} test ${paths.join(' ')} -c ${playwrightCfg}${shardFlag}${fullyParallelFlag}${workersFlag}${grepFlag}${headedFlag}`,
+    `${playwrightBin} test ${paths.join(' ')} -c ${playwrightCfg}${shardFlag}${fullyParallelFlag}${workersFlag}${grepFlag}${grepInvertFlag}${headedFlag}${updateSnapshotsFlag}`,
   )
   console.log('\n', cmd)
   const { code, stdout } = shelljs.exec(cmd, {

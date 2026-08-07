@@ -223,6 +223,30 @@ test/<feature-name>/
 
 Generate types for a test directory: `pnpm run dev:generate-types <directory_name>`
 
+### Visual Regression Testing
+
+Screenshot comparisons live alongside normal e2e tests and are opt-in via the `@visual` tag:
+
+```ts
+import { expectScreenshot } from '../__helpers/e2e/expectScreenshot.js'
+
+test('renders the posts list view', { tag: '@visual' }, async () => {
+  await page.goto(url.list)
+  await expectScreenshot({ page, name: 'posts-list-view.png' })
+})
+```
+
+- Baselines are committed PNGs next to their spec file (`__snapshots__/<spec-file>/<name>.png`).
+- **Baselines must be generated/updated inside the pinned Playwright Docker image**, never on a
+  bare host — font rendering differs enough between operating systems to fail the comparison on
+  CI even when nothing visually changed. Use `pnpm test:visual:update`.
+- On a PR, CI only runs `@visual` tests when the diff could plausibly change rendered UI — e.g.
+  `.css`/`.scss`/`.tsx`/`.jsx`/`.svg` files, any `e2e.spec.ts`/`__snapshots__/**`, or fixture
+  config the current `@visual` tests render (see `needs_visual` in `.github/workflows/main.yml`
+  for the full path list).
+- If the `visual-regression` CI job fails, reproduce and inspect the diff locally with
+  `pnpm test:visual` — there is no CI-posted comment.
+
 ## Linting & Formatting
 
 - `pnpm run lint` - Run linter across all packages
