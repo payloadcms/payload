@@ -38,7 +38,6 @@ export const initContextState: Context = {
   getDataByPath: () => undefined,
   getField: (): FormField => undefined,
   getFields: (): FormState => ({}),
-  getNextSequence: () => 0,
   getSiblingData,
   initializing: undefined,
   isValid: true,

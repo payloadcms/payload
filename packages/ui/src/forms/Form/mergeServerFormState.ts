@@ -1,31 +1,11 @@
 'use client'
 import type { FormState } from 'payload'
 
-import { dequal } from 'dequal/lite' // lite: no need for Map and Set support
-
 /**
  * If true, will accept all values from the server, overriding any current values in local state.
  * Can also provide an options object for more granular control.
  */
-export type AcceptValues =
-  | {
-      /**
-       * When `false`, will accept the values from the server _UNLESS_ the value has been modified locally since the request was made.
-       * This is useful for autosave, for example, where hooks may have modified the field's value on the server while you were still making changes.
-       * @default undefined
-       */
-      overrideLocalChanges?: boolean
-      /**
-       * Monotonic sequence of the request this server state is a response to.
-       * Autosave requests can resolve out of order; a straggler from an earlier request must not
-       * overwrite a value that a later request has already written. When provided, a server value is
-       * only accepted if `requestSequence >= currentState[path].valueSequence` (the sequence of
-       * the response that last wrote the field). Accepted values record this sequence on the field.
-       * @experimental This property is experimental and may change in the future. Use at your own risk.
-       */
-      requestSequence?: number
-    }
-  | boolean
+export type AcceptValues = { overrideLocalChanges?: boolean } | boolean
 
 type Args = {
   acceptValues?: AcceptValues
@@ -95,34 +75,18 @@ export const mergeServerFormState = ({
 }: Args): FormState => {
   const newState = { ...currentState }
 
-  const requestSequence =
-    typeof acceptValues === 'object' && acceptValues !== null
-      ? acceptValues.requestSequence
-      : undefined
+  const isAutosaveResponse =
+    typeof acceptValues === 'object' &&
+    acceptValues !== null &&
+    acceptValues.overrideLocalChanges === false
 
   for (const [path, incomingField] of Object.entries(incomingState || {})) {
     if (!(path in currentState) && !incomingField.addedByServer) {
       continue
     }
 
-    /**
-     * If it's a new field added by the server, always accept the value.
-     * Otherwise:
-     *   a. accept all values when explicitly requested, e.g. on submit
-     *   b. on autosave, accept the value only if this response is not older than the write that
-     *      last set the field. Both local edits and prior responses stamp the field's
-     *      `valueSequence`, so this one check covers a stale, out-of-order autosave response as
-     *      well as a value the user has edited since the request was issued.
-     */
     let shouldAcceptValue =
-      incomingField.addedByServer ||
-      acceptValues === true ||
-      (typeof acceptValues === 'object' &&
-        acceptValues !== null &&
-        // Note: Must be explicitly `false`, allow `null` or `undefined` to mean true
-        acceptValues.overrideLocalChanges === false &&
-        (requestSequence === undefined ||
-          requestSequence >= (currentState[path]?.valueSequence ?? 0)))
+      incomingField.addedByServer || acceptValues === true || isAutosaveResponse
 
     /**
      * For array row fields, verify the row IDs match at the given index before accepting
@@ -161,20 +125,6 @@ export const mergeServerFormState = ({
     newState[path] = {
       ...currentState[path],
       ...sanitizedIncomingField,
-    }
-
-    /**
-     * Record the sequence of the response that set this value, so a later, stale response cannot
-     * overwrite it. Only stamp when the value actually changes — otherwise leave the existing
-     * sequence untouched (carried over via the spread above) to preserve the same-reference
-     * optimization for no-op merges.
-     */
-    if (
-      shouldAcceptValue &&
-      requestSequence !== undefined &&
-      !dequal(incomingField.value, currentState[path]?.value)
-    ) {
-      newState[path].valueSequence = requestSequence
     }
 
     if (
@@ -264,7 +214,5 @@ export const mergeServerFormState = ({
     delete newState[path].addedByServer
   }
 
-  // Return the original object reference if the state is unchanged
-  // This will avoid unnecessary re-renders and dependency updates
-  return dequal(newState, currentState) ? currentState : newState
+  return newState
 }

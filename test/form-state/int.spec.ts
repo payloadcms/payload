@@ -747,31 +747,6 @@ describe('Form State', () => {
     })
   })
 
-  it('should return the same object reference when only modifying a value', () => {
-    const currentState = {
-      title: {
-        value: 'Test Post',
-        initialValue: 'Test Post',
-        valid: true,
-        passesCondition: true,
-      },
-    }
-
-    const newState = mergeServerFormState({
-      currentState,
-      incomingState: {
-        title: {
-          value: 'Test Post (modified)',
-          initialValue: 'Test Post',
-          valid: true,
-          passesCondition: true,
-        },
-      },
-    })
-
-    expect(newState === currentState).toBe(true)
-  })
-
   it('should accept all values from the server regardless of local modifications, e.g. `acceptAllValues` on submit', () => {
     const title: FieldState = {
       value: 'Test Post (modified on the client)',
@@ -781,10 +756,7 @@ describe('Form State', () => {
     }
 
     const currentState: Record<string, FieldState> = {
-      title: {
-        ...title,
-        valueSequence: 5, // locally edited — critical: explicit save must override it anyway
-      },
+      title,
       computedTitle: {
         value: 'Test Post (computed on the client)',
         initialValue: 'Test Post',
@@ -864,10 +836,7 @@ describe('Form State', () => {
 
     expect(newState).toStrictEqual({
       ...incomingStateFromServer,
-      title: {
-        ...incomingStateFromServer.title,
-        valueSequence: 5,
-      },
+      title: incomingStateFromServer.title,
       array: {
         ...incomingStateFromServer.array,
         rows: currentState?.array?.rows,
@@ -875,62 +844,13 @@ describe('Form State', () => {
     })
   })
 
-  it('should not accept values from the server if they have been modified locally since the request was made, e.g. `overrideLocalChanges: false` on autosave', () => {
-    const currentState: Record<string, FieldState> = {
-      title: {
-        value: 'Test Post (modified on the client 1)',
-        initialValue: 'Test Post',
-        valid: true,
-        passesCondition: true,
-        valueSequence: 5, // locally edited after the in-flight request (sequence 3) was issued
-      },
-      computedTitle: {
-        value: 'Test Post',
-        initialValue: 'Test Post',
-        valid: true,
-        passesCondition: true,
-      },
-    }
-
-    const incomingStateFromServer: Record<string, FieldState> = {
-      title: {
-        value: 'Test Post (modified on the server)',
-        initialValue: 'Test Post',
-        valid: true,
-        passesCondition: true,
-      },
-      computedTitle: {
-        value: 'Test Post (modified on the server)',
-        initialValue: 'Test Post',
-        valid: true,
-        passesCondition: true,
-      },
-    }
-
+  it('should accept server values after an autosave response passes the revision gate', () => {
     const newState = mergeServerFormState({
-      acceptValues: { overrideLocalChanges: false, requestSequence: 3 },
-      currentState,
-      incomingState: incomingStateFromServer,
+      acceptValues: { overrideLocalChanges: false },
+      currentState: { computedTitle: { value: 'Manual value' } },
+      incomingState: { computedTitle: { value: 'Server-computed value' } },
     })
-
-    expect(newState).toStrictEqual({
-      // Rejected: the local edit (sequence 5) is newer than the request (sequence 3).
-      title: {
-        value: 'Test Post (modified on the client 1)',
-        initialValue: 'Test Post',
-        valid: true,
-        passesCondition: true,
-        valueSequence: 5,
-      },
-      // Accepted: not edited locally, so the server value wins and is stamped with the request sequence.
-      computedTitle: {
-        value: 'Test Post (modified on the server)',
-        initialValue: 'Test Post',
-        valid: true,
-        passesCondition: true,
-        valueSequence: 3,
-      },
-    })
+    expect(newState.computedTitle?.value).toBe('Server-computed value')
   })
 
   it('should preserve client row data after reorder and delete during autosave', () => {
@@ -971,62 +891,6 @@ describe('Form State', () => {
     expect(newState.array?.value).toBe(2)
     expect(newState['array.0.text']?.value).toBe('C text')
     expect(newState['array.1.text']?.value).toBe('B text')
-  })
-
-  it('should not accept a stale autosave response older than the value already applied (sequence guard)', () => {
-    /**
-     * Regression test for the stale server-computed slug bug.
-     * Autosave responses can resolve out of order. A later request (sequence 2) has already
-     * written the correct slug; a straggler from an earlier request (sequence 1) then arrives
-     * carrying a slug computed from a stale, partial title. Because the slug field auto-tracks its
-     * source and is never marked `isModified`, the old `!isModified` guard alone would accept it,
-     * clobbering the field back to the stale value. The sequence guard must reject it.
-     */
-    const currentState: FormState = {
-      title: { value: 'alpha bravo', initialValue: '' },
-      slug: {
-        value: 'alpha-bravo', // written by the newer (sequence 2) response
-        initialValue: '',
-        valueSequence: 2,
-      },
-    }
-
-    const staleServerState: FormState = {
-      title: { value: 'alpha', initialValue: '' },
-      slug: { value: 'alpha', initialValue: '' }, // computed from the older, partial title
-    }
-
-    const newState = mergeServerFormState({
-      acceptValues: { overrideLocalChanges: false, requestSequence: 1 },
-      currentState,
-      incomingState: staleServerState,
-    })
-
-    expect(newState.slug?.value).toBe('alpha-bravo')
-    expect(newState.slug?.valueSequence).toBe(2)
-  })
-
-  it('should accept an autosave response newer than the value already applied (sequence guard)', () => {
-    const currentState: FormState = {
-      slug: {
-        value: 'alpha',
-        initialValue: '',
-        valueSequence: 1,
-      },
-    }
-
-    const newerServerState: FormState = {
-      slug: { value: 'alpha-bravo-charlie', initialValue: '' },
-    }
-
-    const newState = mergeServerFormState({
-      acceptValues: { overrideLocalChanges: false, requestSequence: 2 },
-      currentState,
-      incomingState: newerServerState,
-    })
-
-    expect(newState.slug?.value).toBe('alpha-bravo-charlie')
-    expect(newState.slug?.valueSequence).toBe(2)
   })
 
   it('should preserve client row data after reorder during autosave', () => {

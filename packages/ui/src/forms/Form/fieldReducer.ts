@@ -407,9 +407,6 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
               'valid',
               'validate',
               'value',
-              // A local edit stamps `valueSequence`, marking this field's value as newer than any
-              // in-flight server response. See `mergeServerFormState`.
-              'valueSequence',
             ].includes(key)
           ) {
             return {
