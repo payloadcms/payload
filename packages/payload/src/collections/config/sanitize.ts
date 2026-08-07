@@ -11,6 +11,7 @@ import type {
 
 import { authCollectionEndpoints } from '../../auth/endpoints/index.js'
 import { getBaseAuthFields } from '../../auth/getAuthFields.js'
+import { withBaseAccess } from '../../auth/withBaseAccess.js'
 import { TimestampsRequired } from '../../errors/TimestampsRequired.js'
 import { sanitizeFields } from '../../fields/config/sanitize.js'
 import { fieldAffectsData } from '../../fields/config/types.js'
@@ -335,6 +336,24 @@ export const sanitizeCollection = (
 
   if (collection?.admin?.pagination?.limits?.length) {
     sanitized.admin!.pagination!.limits = collection.admin.pagination.limits
+  }
+
+  for (const operation of ['create', 'delete', 'read', 'unlock', 'update'] as const) {
+    sanitized.access![operation] = withBaseAccess({
+      slug: sanitized.slug,
+      access: sanitized.access?.[operation],
+      entityType: 'collection',
+      operation,
+    })
+  }
+
+  if (sanitized.versions) {
+    sanitized.access!.readVersions = withBaseAccess({
+      slug: sanitized.slug,
+      access: sanitized.access?.readVersions,
+      entityType: 'collection',
+      operation: 'readVersions',
+    })
   }
 
   validateUseAsTitle(sanitized)

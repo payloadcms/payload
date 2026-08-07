@@ -40,13 +40,19 @@ import type {
 } from '../bin/generateImportMap/index.js'
 import type {
   Collection,
+  CollectionAccess,
   CollectionConfig,
   SanitizedCollectionConfig,
 } from '../collections/config/types.js'
 import type { DatabaseAdapterResult } from '../database/types.js'
 import type { EmailAdapter, SendEmailOptions } from '../email/types.js'
 import type { ErrorName } from '../errors/types.js'
-import type { GlobalConfig, Globals, SanitizedGlobalConfig } from '../globals/config/types.js'
+import type {
+  GlobalAccess,
+  GlobalConfig,
+  Globals,
+  SanitizedGlobalConfig,
+} from '../globals/config/types.js'
 import type {
   Block,
   ClientField,
@@ -381,7 +387,7 @@ export type InitOptions = {
  */
 export type AccessResult = boolean | Where
 
-export type AccessArgs<TData = any> = {
+export type AccessArgs<TData = any, TAdditionalArgs extends object = object> = {
   /**
    * The relevant resource that is being accessed.
    *
@@ -394,7 +400,7 @@ export type AccessArgs<TData = any> = {
   isReadingStaticFile?: boolean
   /** The original request that requires an access check */
   req: PayloadRequest
-}
+} & TAdditionalArgs
 
 /**
  * Access function runs on the server
@@ -402,7 +408,19 @@ export type AccessArgs<TData = any> = {
  *
  * @see https://payloadcms.com/docs/access-control/overview
  */
-export type Access<TData = any> = (args: AccessArgs<TData>) => AccessResult | Promise<AccessResult>
+export type Access<TData = any, TAdditionalArgs extends object = object> = (
+  args: AccessArgs<TData, TAdditionalArgs>,
+) => AccessResult | Promise<AccessResult>
+
+export type BaseAccessArgs = {
+  /** The slug of the resource being accessed. */
+  slug: string
+}
+
+export type BaseAccess = {
+  collections?: Omit<CollectionAccess<any, BaseAccessArgs>, 'admin'>
+  globals?: GlobalAccess<any, BaseAccessArgs>
+}
 
 /** Web Request/Response model, but the req has more payload specific properties added to it. */
 export type PayloadHandler = (req: PayloadRequest) => Promise<Response> | Response
@@ -1229,6 +1247,12 @@ export type Config = {
      */
     jwtOrder: ('Bearer' | 'cookie' | 'JWT')[]
   }
+  /**
+   * Define Collection and Global access constraints that are combined with resource Access Control using AND semantics.
+   *
+   * This does not apply to an auth Collection's `access.admin` function.
+   */
+  baseAccess?: BaseAccess
   /** Custom Payload bin scripts can be injected via the config. */
   bin?: BinScriptConfig[]
   blocks?: Block[]
@@ -1682,6 +1706,7 @@ export type SanitizedConfig = {
     dashboard: Required<NonNullable<NonNullable<Config['admin']>['dashboard']>>
     timezones: SanitizedTimezoneConfig
   } & DeepRequired<Omit<NonNullable<Config['admin']>, 'dashboard'>>
+  baseAccess?: BaseAccess
   blocks?: FlattenedBlock[]
   collections: SanitizedCollectionConfig[]
   /** Default richtext editor to use for richText fields */
@@ -1709,6 +1734,7 @@ export type SanitizedConfig = {
   // the result type is different
   DeepRequired<Config>,
   | 'admin'
+  | 'baseAccess'
   | 'blocks'
   | 'collections'
   | 'editor'
