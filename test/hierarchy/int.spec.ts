@@ -1137,7 +1137,7 @@ describe('Hierarchy', () => {
       })
 
       expect(draftChild._h_slugPath).toEqual({
-        de: 'fahrplan/zukunft/plne', // Note: Default slugify removes umlauts
+        de: 'fahrplan/zukunft/pläne', // Default slugify preserves Unicode letters
         en: 'roadmap/future/plans',
         es: 'hoja-de-ruta/futuro/planes',
       })
