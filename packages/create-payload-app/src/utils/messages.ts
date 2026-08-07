@@ -38,11 +38,7 @@ export function helpMessage(): void {
 
         {dim Available templates: ${formatTemplates(validTemplates)}}
 
-      -a     {underline agent_name}             Set coding agent (claude, codex, cursor)
-
-        {dim Installs the Payload skill for the selected agent}
-
-      --no-agent                    Skip agent skill installation
+      --no-agent                    Skip writing AGENTS.md and CLAUDE.md
       --use-npm                     Use npm to install dependencies
       --use-yarn                    Use yarn to install dependencies
       --use-pnpm                    Use pnpm to install dependencies

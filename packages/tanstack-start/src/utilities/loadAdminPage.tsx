@@ -1,3 +1,4 @@
+import type { RenderableServerComponent } from '@tanstack/react-start/rsc'
 import type { ImportMap, MetaConfig, SanitizedConfig } from 'payload'
 
 import { getViewportContent } from '@payloadcms/ui/shared'
@@ -16,8 +17,10 @@ export type LoadAdminPageArgs = {
   splat?: string
 }
 
+type RSCPayload = RenderableServerComponent<React.ReactElement>
+
 export type LoadAdminPageResult =
-  | { _notFound: true; routeKey?: string; rscPayload?: React.ReactNode }
+  | { _notFound: true; routeKey?: string; rscPayload?: RSCPayload }
   | { _redirect: string }
   | {
       metadata: AdminPageMetadata
@@ -33,7 +36,7 @@ export type LoadAdminPageResult =
        * so search-only changes (e.g. list-view filtering) reconcile in place.
        */
       routeKey: string
-      rscPayload: React.ReactNode
+      rscPayload: RSCPayload
     }
 
 const resolveTitle = (title: MetaConfig['title']): string | undefined => {
