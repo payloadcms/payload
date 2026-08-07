@@ -49,6 +49,10 @@ const PENDING_SUCCESS_TOAST_KEY = 'payload-pending-success-toast'
 export type OnSaveContext = {
   getDocPermissions?: boolean
   incrementVersionCount?: boolean
+  /**
+   * Set to `true` when the save was triggered by autosave rather than an explicit user action.
+   */
+  isAutosave?: boolean
 }
 
 // This component receives props only on _pages_

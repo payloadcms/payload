@@ -488,6 +488,48 @@ describe('Versions', () => {
       await expect(drawer.locator('.id-label')).toBeVisible()
     })
 
+    test('collection - autosave - should not close the drawer stack when autosave runs within the list drawer', async () => {
+      const { id: postID } = await payload.create({
+        collection: postCollectionSlug,
+        data: {
+          description: 'post description',
+          title: 'post title',
+        },
+      })
+
+      await page.goto(postURL.edit(postID))
+
+      // opening the menu of a `drawer` appearance relationship field opens the list drawer
+      await page.locator('#field-relationToAutosavesWithDrawer .rs__control').click()
+
+      const listDrawer = page.locator('[id^=list-drawer_1_]')
+      await expect(listDrawer).toBeVisible()
+
+      await openDocDrawer(page, 'button.list-header__create-new-button.doc-drawer__toggler')
+
+      const docDrawer = page.locator('[id^=doc-drawer_autosave-posts_1_]')
+      await expect(docDrawer).toBeVisible()
+
+      await docDrawer.locator('#field-title').fill('drawer stack title')
+      await docDrawer.locator('#field-description').fill('drawer stack description')
+
+      await waitForAutoSaveToRunAndComplete(docDrawer)
+
+      // both drawers should remain open after autosave runs
+      await expect(docDrawer).toBeVisible()
+      await expect(listDrawer).toBeVisible()
+
+      // an explicit save should select the document and close both drawers
+      await saveDocAndAssert(page, '[id^=doc-drawer_autosave-posts_1_] button#action-save')
+
+      await expect(docDrawer).toBeHidden()
+      await expect(listDrawer).toBeHidden()
+
+      await expect(
+        page.locator('#field-relationToAutosavesWithDrawer .relationship--single-value__text'),
+      ).toHaveText('drawer stack title')
+    })
+
     test('collection - autosave - should redirect from create to edit URL after first save', async () => {
       await page.goto(autosaveURL.list)
       await page.locator('#create-new-doc').click()
