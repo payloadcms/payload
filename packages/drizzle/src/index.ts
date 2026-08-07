@@ -19,6 +19,7 @@ export { findVersions } from './findVersions.js'
 export { migrate } from './migrate.js'
 export { migrateDown } from './migrateDown.js'
 export { migrateFresh } from './migrateFresh.js'
+export { migrateHasChanges } from './migrateHasChanges.js'
 export { migrateRefresh } from './migrateRefresh.js'
 export { migrateReset } from './migrateReset.js'
 export { migrateStatus } from './migrateStatus.js'
@@ -79,6 +80,7 @@ export { updateOne } from './updateOne.js'
 export { updateVersion } from './updateVersion.js'
 export { upsert } from './upsert.js'
 export { upsertRow } from './upsertRow/index.js'
+export { acceptDrizzlePrompts } from './utilities/acceptDrizzlePrompts.js'
 export {
   buildDynamicPredefinedBlocksToJsonMigration,
   createBlocksToJsonMigrator,

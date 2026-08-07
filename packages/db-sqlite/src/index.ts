@@ -27,6 +27,7 @@ import {
   migrate,
   migrateDown,
   migrateFresh,
+  migrateHasChanges,
   migrateRefresh,
   migrateReset,
   migrateStatus,
@@ -130,6 +131,7 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
       beforeSchemaInit: args.beforeSchemaInit ?? [],
       blocksAsJSON: args.blocksAsJSON ?? false,
       busyTimeout: args.busyTimeout ?? 0,
+      migrateHasChanges,
       // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       client: undefined,
       clientConfig: args.client,
