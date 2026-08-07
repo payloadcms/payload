@@ -16,7 +16,6 @@ import { getNextAppDetails, initNext } from './lib/init-next.js'
 import { manageEnvFiles } from './lib/manage-env-files.js'
 import { parseProjectName } from './lib/parse-project-name.js'
 import { parseTemplate } from './lib/parse-template.js'
-import { selectAgent } from './lib/select-agent.js'
 import { selectDb } from './lib/select-db.js'
 import { getValidTemplates, validateTemplate } from './lib/templates.js'
 import { updatePayloadInProject } from './lib/update-payload-in-project.js'
@@ -75,7 +74,6 @@ export class Main {
         '--dry-run': Boolean,
 
         // Aliases
-        '-a': '--agent',
         '-d': '--db',
         '-e': '--example',
         '-h': '--help',
@@ -244,10 +242,7 @@ export class Main {
           process.exit(1)
         }
 
-        const agentType = await selectAgent({ cliArgs: this.args })
-
         await createProject({
-          agentType,
           cliArgs: this.args,
           example,
           packageManager,
@@ -271,9 +266,7 @@ export class Main {
 
         switch (template.type) {
           case 'plugin': {
-            const agentType = await selectAgent({ cliArgs: this.args })
             await createProject({
-              agentType,
               cliArgs: this.args,
               packageManager,
               projectDir,
@@ -284,10 +277,7 @@ export class Main {
           }
           case 'starter': {
             const dbDetails = await selectDb(this.args, projectName, template)
-            const agentType = await selectAgent({ cliArgs: this.args })
-
             await createProject({
-              agentType,
               cliArgs: this.args,
               dbDetails,
               packageManager,

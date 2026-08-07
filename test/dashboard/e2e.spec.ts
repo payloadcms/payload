@@ -510,14 +510,14 @@ describe('Dashboard', () => {
     // Delete buttons should not be visible when not editing
     const widget = d.widgetByPos(1)
     await widget.hover()
-    await expect(widget.getByText('Delete widget')).toBeHidden()
+    await expect(d.getDeleteWidgetButton(widget)).toBeHidden()
 
     // Widgets should not have draggable attributes when not editing
     await expect(widget.locator('.draggable')).not.toHaveAttribute('aria-disabled')
 
     // verify the opposite:
     await d.setEditing()
-    await expect(widget.getByText('Delete widget')).toBeVisible()
+    await expect(d.getDeleteWidgetButton(widget)).toBeVisible()
     await expect(widget.locator('.draggable')).toHaveAttribute('aria-disabled', 'false')
   })
 
