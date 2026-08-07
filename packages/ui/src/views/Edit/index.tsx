@@ -26,6 +26,7 @@ import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentEvents } from '../../providers/DocumentEvents/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
+import { useHierarchy } from '../../providers/Hierarchy/index.js'
 import { useLivePreviewContext, usePreviewURL } from '../../providers/LivePreview/context.js'
 import { OperationProvider } from '../../providers/Operation/index.js'
 import { useRouteCache } from '../../providers/RouteCache/index.js'
@@ -141,6 +142,7 @@ export function DefaultEditView({
   const router = useRouter()
   const params = useSearchParams()
   const { reportUpdate } = useDocumentEvents()
+  const { refreshTree } = useHierarchy()
   const { resetUploadEdits } = useUploadEdits()
   const { getFormState } = useServerFunctions()
   const { startRouteTransition } = useRouteTransition()
@@ -297,6 +299,31 @@ export function DefaultEditView({
     user?.id,
   ])
 
+  /**
+   * Hierarchy sidebar tabs render their tree from a server snapshot taken when they mounted, so
+   * a route refresh alone leaves the tree showing pre-save data — a missing node after a create,
+   * a stale label after a rename.
+   *
+   * Drawer saves are excluded because whatever opened the drawer owns refreshing the tree (e.g.
+   * the sidebar tree's own create drawer), and reloading the tab from here would unmount a
+   * drawer that is still open. Autosaved updates are excluded because they fire on an interval
+   * while the user types, which would remount the tree on every tick.
+   */
+  const refreshHierarchyTree = useCallback(
+    ({ operation }: { operation: 'create' | 'update' }) => {
+      if (!collectionSlug || !collectionConfig?.hierarchy || isInDrawer) {
+        return
+      }
+
+      if (operation === 'update' && autosaveEnabled) {
+        return
+      }
+
+      refreshTree(collectionSlug)
+    },
+    [autosaveEnabled, collectionConfig?.hierarchy, collectionSlug, isInDrawer, refreshTree],
+  )
+
   const onSave: FormOnSuccess<any, OnSaveContext> = useCallback(
     async (json, ctx) => {
       const { context, formState } = ctx || {}
@@ -414,6 +441,8 @@ export function DefaultEditView({
           updatedAt,
         })
 
+        refreshHierarchyTree({ operation: 'update' })
+
         abortOnSaveRef.current = null
 
         return state
@@ -426,6 +455,8 @@ export function DefaultEditView({
           operation: 'create',
           updatedAt,
         })
+
+        refreshHierarchyTree({ operation: 'create' })
       }
     },
     [
@@ -459,6 +490,7 @@ export function DefaultEditView({
       upload,
       isLockingEnabled,
       reportUpdate,
+      refreshHierarchyTree,
       drawerSlug,
       entitySlug,
       setDocumentIsLocked,

@@ -15,6 +15,7 @@ import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentEvents } from '../../providers/DocumentEvents/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useDocumentTitle } from '../../providers/DocumentTitle/index.js'
+import { useHierarchy } from '../../providers/Hierarchy/index.js'
 import { useRouter } from '../../providers/RouterAdapter/index.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -65,6 +66,7 @@ export const DeleteDocument: React.FC<Props> = (props) => {
   const { startRouteTransition } = useRouteTransition()
   const { openModal } = useModal()
   const { reportUpdate } = useDocumentEvents()
+  const { refreshTree } = useHierarchy()
 
   const modalSlug = `delete-${id}`
 
@@ -124,6 +126,12 @@ export const DeleteDocument: React.FC<Props> = (props) => {
           updatedAt: new Date().toISOString(),
         }
 
+        // Hierarchy sidebar tabs render their tree from a server snapshot taken when they
+        // mounted, so a route refresh alone leaves the deleted node on screen.
+        if (collectionConfig.hierarchy) {
+          refreshTree(collectionSlug)
+        }
+
         if (redirectAfterDelete) {
           // Navigating away tears this surface down, so just notify other surfaces.
           reportUpdate(deleteEvent)
@@ -172,6 +180,7 @@ export const DeleteDocument: React.FC<Props> = (props) => {
     collectionConfig,
     startRouteTransition,
     reportUpdate,
+    refreshTree,
   ])
 
   if (id) {
