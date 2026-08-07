@@ -465,6 +465,32 @@ describe('Array', () => {
     await expect(page.locator(`#field-collapsedArray__0__text`)).toBeVisible()
   })
 
+  test(
+    'should render conditional fields inside a single group when an initially-collapsed array row is expanded for the first time',
+    async () => {
+      await page.goto(url.create)
+
+      const row = page.locator('#collapsedGroupWithCondition-row-0')
+      await expect(row).toBeVisible()
+
+      const toggler = row.locator('button.collapsible__toggle')
+      await expect(toggler).toHaveClass(/collapsible__toggle--collapsed/)
+
+      await toggleBlockOrArrayRow({
+        fieldName: 'collapsedGroupWithCondition',
+        page,
+        rowIndex: 0,
+        targetState: 'open',
+      })
+
+      // The conditional text field, nested inside the array row's single group field,
+      // must render immediately on the first expand rather than only after a second toggle
+      await expect(
+        page.locator('#field-collapsedGroupWithCondition__0__group__text'),
+      ).toBeVisible()
+    },
+  )
+
   describe('sortable arrays', () => {
     test('should have disabled admin sorting', async () => {
       await loadCreatePage()
