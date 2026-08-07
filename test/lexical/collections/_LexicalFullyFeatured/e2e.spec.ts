@@ -52,7 +52,9 @@ describe('Lexical Fully Featured', () => {
     await expect(lexical.decorator).toHaveCount(2)
     await lexical.slashCommand('upload')
     await lexical.drawer.locator('.list-drawer__header').getByText('Create New').click()
-    await lexical.drawer.getByText('Paste URL').click()
+    await lexical.page.context().grantPermissions(['clipboard-read', 'clipboard-write'])
+    await lexical.page.evaluate(() => navigator.clipboard.writeText(''))
+    await lexical.drawer.locator('.file-manager__pasteFromClipboard').click()
     await lexical.page
       .locator('#upload-paste-url #field-url')
       .fill(
@@ -68,7 +70,9 @@ describe('Lexical Fully Featured', () => {
   test('ensure upload node can be aligned', async ({ page }) => {
     await lexical.slashCommand('upload')
     await lexical.drawer.locator('.list-drawer__header').getByText('Create New').click()
-    await lexical.drawer.getByText('Paste URL').click()
+    await lexical.page.context().grantPermissions(['clipboard-read', 'clipboard-write'])
+    await lexical.page.evaluate(() => navigator.clipboard.writeText(''))
+    await lexical.drawer.locator('.file-manager__pasteFromClipboard').click()
     const url =
       'https://raw.githubusercontent.com/payloadcms/website/refs/heads/main/public/images/universal-truth.jpg'
     await lexical.page.locator('#upload-paste-url #field-url').fill(url)
