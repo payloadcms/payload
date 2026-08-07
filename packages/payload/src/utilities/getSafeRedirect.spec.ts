@@ -40,6 +40,27 @@ describe('getSafeRedirect', () => {
     expect(getSafeRedirect({ redirectTo: input, fallbackTo: fallback })).toBe(fallback)
   })
 
+  it.each([
+    'redirect=%2F%09%2Fexample.invalid',
+    'redirect=%2F%0D%2Fexample.invalid',
+    'redirect=%2F%0A%2Fexample.invalid',
+  ])('should use the fallback when a path contains a control character: %s', (query) => {
+    const redirectTo = new URLSearchParams(query).get('redirect')
+
+    expect(redirectTo).not.toBeNull()
+    expect(getSafeRedirect({ redirectTo: redirectTo!, fallbackTo: fallback })).toBe(fallback)
+  })
+
+  it.each([
+    '/%2509/example.invalid',
+    '/%250D/example.invalid',
+    '/%250A/example.invalid',
+    '/%255Cexample.invalid',
+    '/%252fexample.invalid',
+  ])('should use the fallback for ambiguous encoded path prefixes: %s', (input) => {
+    expect(getSafeRedirect({ redirectTo: input, fallbackTo: fallback })).toBe(fallback)
+  })
+
   // Input with extra spaces should still be properly handled
   it('should trim whitespace before evaluating', () => {
     // A valid path with surrounding spaces should still be accepted
@@ -53,8 +74,53 @@ describe('getSafeRedirect', () => {
     )
   })
 
-  // If decoding the input fails (e.g., invalid percent encoding), it should not crash
-  it('should return fallback on invalid encoding', () => {
+  it('should return fallback when the input is not a path or URL', () => {
     expect(getSafeRedirect({ redirectTo: '%E0%A4%A', fallbackTo: fallback })).toBe(fallback)
   })
+
+  it('should preserve an accepted local redirect', () => {
+    const redirectTo = '/dashboard?tab=overview#details'
+
+    expect(getSafeRedirect({ redirectTo, fallbackTo: fallback })).toBe(redirectTo)
+  })
+
+  it('should preserve a parsed redirect target without re-decoding its query values', () => {
+    const redirectTo = new URLSearchParams(
+      'redirect=%2Foauth%2Fcallback%3Fcode%3DA%252FB%26state%3Dopaque%253D%23done',
+    ).get('redirect')
+
+    expect(redirectTo).toBe('/oauth/callback?code=A%2FB&state=opaque%3D#done')
+    expect(getSafeRedirect({ redirectTo: redirectTo!, fallbackTo: fallback })).toBe(
+      '/oauth/callback?code=A%2FB&state=opaque%3D#done',
+    )
+  })
+
+  it.each([
+    [
+      'https://example.invalid/path?code=A%252FB#done',
+      'https://example.invalid/path?code=A%252FB#done',
+    ],
+    ['http://example.invalid/dashboard', 'http://example.invalid/dashboard'],
+  ])('should preserve an HTTP absolute redirect when enabled: %s', (input, expected) => {
+    expect(
+      getSafeRedirect({
+        allowAbsoluteUrls: true,
+        redirectTo: input,
+        fallbackTo: fallback,
+      }),
+    ).toBe(expected)
+  })
+
+  it.each([
+    ['https://example.invalid/path', false],
+    ['mailto:user@example.invalid', true],
+    ['//example.invalid/path', true],
+  ])(
+    'should use the fallback without an explicitly enabled HTTP(S) URL: %s',
+    (input, allowAbsoluteUrls) => {
+      expect(getSafeRedirect({ allowAbsoluteUrls, redirectTo: input, fallbackTo: fallback })).toBe(
+        fallback,
+      )
+    },
+  )
 })

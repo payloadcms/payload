@@ -11,17 +11,30 @@ export const getSafeRedirect = ({
     return fallbackTo
   }
 
-  // Normalize and decode the path
-  let redirectPath: string
+  const redirectPath = redirectTo.trim()
+
+  // Reject raw control characters
+  const hasControlCharacters = [...redirectPath].some((character) => {
+    const code = character.charCodeAt(0)
+    return code <= 31 || code === 127
+  })
+  // Reject ambiguous (possibly nested) percent-encoded path prefixes
+  const hasAmbiguousPathPrefix = /^\/%(?:25)*(?:09|0a|0d|2f|5c)/i.test(redirectPath)
+
+  let parsedRedirect: URL
   try {
-    redirectPath = decodeURIComponent(redirectTo.trim())
+    parsedRedirect = new URL(redirectPath, 'http://localhost')
   } catch {
-    return fallbackTo // invalid encoding
+    return fallbackTo
   }
 
   const isSafeRedirect =
+    !hasControlCharacters &&
+    !hasAmbiguousPathPrefix &&
     // Must start with a single forward slash (e.g., "/admin")
     redirectPath.startsWith('/') &&
+    // Must resolve to the same origin after URL parser normalization
+    parsedRedirect.origin === 'http://localhost' &&
     // Prevent protocol-relative URLs (e.g., "//example.com")
     !redirectPath.startsWith('//') &&
     // Prevent encoded slashes that could resolve to protocol-relative
@@ -37,8 +50,10 @@ export const getSafeRedirect = ({
 
   const isAbsoluteSafeRedirect =
     allowAbsoluteUrls &&
+    !hasControlCharacters &&
     // Must be a valid absolute URL with http or https
-    /^https?:\/\/\S+$/i.test(redirectPath)
+    /^https?:\/\/\S+$/i.test(redirectPath) &&
+    (parsedRedirect.protocol === 'http:' || parsedRedirect.protocol === 'https:')
 
   return isSafeRedirect || isAbsoluteSafeRedirect ? redirectPath : fallbackTo
 }
