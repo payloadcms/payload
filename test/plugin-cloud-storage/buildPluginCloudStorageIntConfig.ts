@@ -221,6 +221,7 @@ export function buildPluginCloudStorageIntConfig({
     }*/
 
       await payload.create({
+        overrideAccess: true,
         collection: 'users',
         data: {
           email: devUser.email,

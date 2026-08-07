@@ -151,6 +151,7 @@ export const baseConfig: Partial<Config> = {
       const tenant = getTenantFromCookie(req.headers, 'text')
       if (tenant) {
         const fullTenant = await req.payload.findByID({
+          overrideAccess: true,
           collection: 'tenants',
           id: tenant,
         })

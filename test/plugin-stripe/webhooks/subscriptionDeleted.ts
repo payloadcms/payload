@@ -26,6 +26,7 @@ export const subscriptionDeleted = async (args) => {
     )
 
     const customerReq: any = await payload.find({
+      overrideAccess: true,
       collection: 'customers',
       depth: 0,
       where: {
@@ -49,6 +50,7 @@ export const subscriptionDeleted = async (args) => {
 
       try {
         await payload.update({
+          overrideAccess: true,
           id: foundCustomer.id,
           collection: 'customers',
           data: {

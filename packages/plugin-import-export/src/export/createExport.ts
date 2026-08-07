@@ -308,6 +308,7 @@ export const createExport = async (args: CreateExportArgs) => {
         }
 
         const result = await payload.find({
+          ...{ overrideAccess: true },
           ...findArgs,
           page: currentBatchPage,
           limit: Math.min(batchSize, remaining),

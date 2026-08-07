@@ -36,6 +36,7 @@ describe('@payloadcms/plugin-search', () => {
 
   beforeEach(async () => {
     await payload.delete({
+      overrideAccess: true,
       collection: 'search',
       depth: 0,
       where: {
@@ -46,6 +47,7 @@ describe('@payloadcms/plugin-search', () => {
     })
     await Promise.all([
       payload.delete({
+        overrideAccess: true,
         collection: postsSlug,
         depth: 0,
         where: {
@@ -55,6 +57,7 @@ describe('@payloadcms/plugin-search', () => {
         },
       }),
       payload.delete({
+        overrideAccess: true,
         collection: pagesSlug,
         depth: 0,
         where: {
@@ -72,6 +75,7 @@ describe('@payloadcms/plugin-search', () => {
 
   it('should add a search collection', async () => {
     const search = await payload.find({
+      overrideAccess: true,
       collection: 'search',
       depth: 0,
       limit: 1,
@@ -82,6 +86,7 @@ describe('@payloadcms/plugin-search', () => {
 
   it('should sync published pages to the search collection', async () => {
     const pageToSync = await payload.create({
+      overrideAccess: true,
       collection: 'pages',
       data: {
         _status: 'published',
@@ -91,6 +96,7 @@ describe('@payloadcms/plugin-search', () => {
     })
 
     const { docs: results } = await payload.find({
+      overrideAccess: true,
       collection: 'search',
       depth: 0,
       where: {
@@ -108,6 +114,7 @@ describe('@payloadcms/plugin-search', () => {
 
   it('should not sync drafts pages to the search collection', async () => {
     const draftPage = await payload.create({
+      overrideAccess: true,
       collection: 'pages',
       data: {
         _status: 'draft',
@@ -121,6 +128,7 @@ describe('@payloadcms/plugin-search', () => {
     await wait(200)
 
     const { docs: results } = await payload.find({
+      overrideAccess: true,
       collection: 'search',
       depth: 0,
       where: {
@@ -135,6 +143,7 @@ describe('@payloadcms/plugin-search', () => {
 
   it('should not delete a search doc if a published item has a new draft but remains published', async () => {
     const publishedPage = await payload.create({
+      overrideAccess: true,
       collection: 'pages',
       data: {
         _status: 'published',
@@ -147,6 +156,7 @@ describe('@payloadcms/plugin-search', () => {
     await wait(200)
 
     const { docs: results } = await payload.find({
+      overrideAccess: true,
       collection: 'search',
       depth: 0,
       where: {
@@ -160,6 +170,7 @@ describe('@payloadcms/plugin-search', () => {
 
     // Create a new draft
     await payload.update({
+      overrideAccess: true,
       collection: 'pages',
       id: publishedPage.id,
       draft: true,
@@ -171,6 +182,7 @@ describe('@payloadcms/plugin-search', () => {
 
     // This should remain with the published content
     const { docs: updatedResults } = await payload.find({
+      overrideAccess: true,
       collection: 'search',
       depth: 0,
       where: {
@@ -183,6 +195,7 @@ describe('@payloadcms/plugin-search', () => {
     expect(updatedResults).toHaveLength(1)
 
     await payload.update({
+      overrideAccess: true,
       collection: 'pages',
       id: publishedPage.id,
       data: {
@@ -193,6 +206,7 @@ describe('@payloadcms/plugin-search', () => {
 
     // Should now be deleted given we've unpublished the page
     const { docs: deletedResults } = await payload.find({
+      overrideAccess: true,
       collection: 'search',
       depth: 0,
       where: {
@@ -207,6 +221,7 @@ describe('@payloadcms/plugin-search', () => {
 
   it('should sync changes made to an existing search document', async () => {
     const pageToReceiveUpdates = await payload.create({
+      overrideAccess: true,
       collection: 'pages',
       data: {
         _status: 'published',
@@ -216,6 +231,7 @@ describe('@payloadcms/plugin-search', () => {
     })
 
     const { docs: results } = await payload.find({
+      overrideAccess: true,
       collection: 'search',
       depth: 0,
       where: {
@@ -231,6 +247,7 @@ describe('@payloadcms/plugin-search', () => {
     expect(results[0].excerpt).toBe('This is a test page')
 
     await payload.update({
+      overrideAccess: true,
       id: pageToReceiveUpdates.id,
       collection: 'pages',
       data: {
@@ -245,6 +262,7 @@ describe('@payloadcms/plugin-search', () => {
 
     // Do not add `limit` to this query, this way we can test if multiple documents were created
     const { docs: updatedResults } = await payload.find({
+      overrideAccess: true,
       collection: 'search',
       depth: 0,
       where: {
@@ -262,6 +280,7 @@ describe('@payloadcms/plugin-search', () => {
 
   it('should clear the search document when the original document is deleted', async () => {
     const page = await payload.create({
+      overrideAccess: true,
       collection: 'pages',
       data: {
         _status: 'published',
@@ -275,6 +294,7 @@ describe('@payloadcms/plugin-search', () => {
     await wait(200)
 
     const { docs: results } = await payload.find({
+      overrideAccess: true,
       collection: 'search',
       depth: 0,
       where: {
@@ -288,6 +308,7 @@ describe('@payloadcms/plugin-search', () => {
     expect(results[0].doc.value).toBe(page.id)
 
     await payload.delete({
+      overrideAccess: true,
       id: page.id,
       collection: 'pages',
     })
@@ -297,6 +318,7 @@ describe('@payloadcms/plugin-search', () => {
     await wait(200)
 
     const { docs: deletedResults } = await payload.find({
+      overrideAccess: true,
       collection: 'search',
       depth: 0,
       where: {
@@ -311,11 +333,13 @@ describe('@payloadcms/plugin-search', () => {
 
   it('should clear the proper search document when having the same doc.value but different doc.relationTo', async () => {
     const custom_id_1 = await payload.create({
+      overrideAccess: true,
       collection: 'custom-ids-1',
       data: { id: 'custom_id' },
     })
 
     await payload.create({
+      overrideAccess: true,
       collection: 'custom-ids-2',
       data: { id: 'custom_id' },
     })
@@ -325,6 +349,7 @@ describe('@payloadcms/plugin-search', () => {
     const {
       docs: [docBefore],
     } = await payload.find({
+      overrideAccess: true,
       collection: 'search',
       where: { 'doc.value': { equals: 'custom_id' } },
       limit: 1,
@@ -333,13 +358,14 @@ describe('@payloadcms/plugin-search', () => {
 
     expect(docBefore.doc.relationTo).toBe('custom-ids-1')
 
-    await payload.delete({ collection: 'custom-ids-1', id: custom_id_1.id })
+    await payload.delete({ overrideAccess: true, collection: 'custom-ids-1', id: custom_id_1.id })
 
     await wait(200)
 
     const {
       docs: [docAfter],
     } = await payload.find({
+      overrideAccess: true,
       collection: 'search',
       where: { 'doc.value': { equals: 'custom_id' } },
       limit: 1,
@@ -351,6 +377,7 @@ describe('@payloadcms/plugin-search', () => {
 
   it('should sync localized data', async () => {
     const createdDoc = await payload.create({
+      overrideAccess: true,
       collection: 'posts',
       data: {
         _status: 'published',
@@ -361,6 +388,7 @@ describe('@payloadcms/plugin-search', () => {
     })
 
     await payload.update({
+      overrideAccess: true,
       collection: 'posts',
       id: createdDoc.id,
       data: {
@@ -372,6 +400,7 @@ describe('@payloadcms/plugin-search', () => {
     })
 
     const syncedSearchData = await payload.find({
+      overrideAccess: true,
       collection: 'search',
       locale: 'es',
       where: {
@@ -395,6 +424,7 @@ describe('@payloadcms/plugin-search', () => {
     }
 
     await payload.create({
+      overrideAccess: true,
       collection: 'users',
       data: testCreds,
     })
@@ -450,6 +480,7 @@ describe('@payloadcms/plugin-search', () => {
 
   it('should delete existing search indexes before reindexing', async () => {
     await payload.create({
+      overrideAccess: true,
       collection: postsSlug,
       data: {
         title: 'post_1',
@@ -460,6 +491,7 @@ describe('@payloadcms/plugin-search', () => {
     await wait(200)
 
     await payload.create({
+      overrideAccess: true,
       collection: postsSlug,
       data: {
         title: 'post_2',
@@ -467,7 +499,7 @@ describe('@payloadcms/plugin-search', () => {
       },
     })
 
-    const { docs } = await payload.find({ collection: 'search' })
+    const { docs } = await payload.find({ overrideAccess: true, collection: 'search' })
 
     await wait(200)
 
@@ -482,6 +514,7 @@ describe('@payloadcms/plugin-search', () => {
     await wait(200)
 
     const { docs: results } = await payload.find({
+      overrideAccess: true,
       collection: 'search',
       depth: 0,
       where: {
@@ -499,6 +532,7 @@ describe('@payloadcms/plugin-search', () => {
   it('should reindex whole collections', async () => {
     await Promise.all([
       payload.create({
+        overrideAccess: true,
         collection: pagesSlug,
         data: {
           title: 'Test page title',
@@ -506,6 +540,7 @@ describe('@payloadcms/plugin-search', () => {
         },
       }),
       payload.create({
+        overrideAccess: true,
         collection: postsSlug,
         data: {
           title: 'Test page title',
@@ -517,6 +552,7 @@ describe('@payloadcms/plugin-search', () => {
     await wait(200)
 
     const { totalDocs: totalBeforeReindex } = await payload.count({
+      overrideAccess: true,
       collection: 'search',
     })
 
@@ -532,6 +568,7 @@ describe('@payloadcms/plugin-search', () => {
     expect(endpointRes.status).toBe(200)
 
     const { totalDocs: totalAfterReindex } = await payload.count({
+      overrideAccess: true,
       collection: 'search',
     })
 
@@ -541,14 +578,17 @@ describe('@payloadcms/plugin-search', () => {
   it('should report correct aggregate counts when reindexing multiple collections', async () => {
     await Promise.all([
       payload.create({
+        overrideAccess: true,
         collection: postsSlug,
         data: { title: 'Post one', _status: 'published' },
       }),
       payload.create({
+        overrideAccess: true,
         collection: postsSlug,
         data: { title: 'Post two', _status: 'published' },
       }),
       payload.create({
+        overrideAccess: true,
         collection: pagesSlug,
         data: { title: 'Page one', _status: 'published' },
       }),
@@ -572,18 +612,21 @@ describe('@payloadcms/plugin-search', () => {
   it('should index locale-specific data for all locales when reindexing multiple collections', async () => {
     // Create a post with distinct slugs per locale — these are mapped into the search doc via beforeSync
     const { id: postId } = await payload.create({
+      overrideAccess: true,
       collection: postsSlug,
       data: { title: 'Locale test post', _status: 'published', slug: 'post-slug-en' },
       locale: 'en',
     })
 
     await payload.update({
+      overrideAccess: true,
       collection: postsSlug,
       id: postId,
       data: { slug: 'post-slug-es' },
       locale: 'es',
     })
     await payload.update({
+      overrideAccess: true,
       collection: postsSlug,
       id: postId,
       data: { slug: 'post-slug-de' },
@@ -592,6 +635,7 @@ describe('@payloadcms/plugin-search', () => {
 
     // Create a page so both collections are reindexed together, exercising the multi-collection path
     await payload.create({
+      overrideAccess: true,
       collection: pagesSlug,
       data: { title: 'Locale test page', _status: 'published' },
     })
@@ -604,6 +648,7 @@ describe('@payloadcms/plugin-search', () => {
     expect(endpointRes.status).toBe(200)
 
     const { docs: searchDocs } = await payload.find({
+      overrideAccess: true,
       collection: 'search',
       depth: 0,
       where: {
@@ -616,9 +661,24 @@ describe('@payloadcms/plugin-search', () => {
     const searchDocId = searchDocs[0]!.id
 
     const [enDoc, esDoc, deDoc] = await Promise.all([
-      payload.findByID({ collection: 'search', id: searchDocId, locale: 'en' }),
-      payload.findByID({ collection: 'search', id: searchDocId, locale: 'es' }),
-      payload.findByID({ collection: 'search', id: searchDocId, locale: 'de' }),
+      payload.findByID({
+        overrideAccess: true,
+        collection: 'search',
+        id: searchDocId,
+        locale: 'en',
+      }),
+      payload.findByID({
+        overrideAccess: true,
+        collection: 'search',
+        id: searchDocId,
+        locale: 'es',
+      }),
+      payload.findByID({
+        overrideAccess: true,
+        collection: 'search',
+        id: searchDocId,
+        locale: 'de',
+      }),
     ])
 
     // With localization fallback: true, a missing locale update would silently fall back to 'en'
@@ -631,6 +691,7 @@ describe('@payloadcms/plugin-search', () => {
   it('should exclude drafts from reindexing by default', async () => {
     await Promise.all([
       payload.create({
+        overrideAccess: true,
         collection: pagesSlug,
         data: {
           title: 'Test page published',
@@ -638,6 +699,7 @@ describe('@payloadcms/plugin-search', () => {
         },
       }),
       payload.create({
+        overrideAccess: true,
         collection: pagesSlug,
         data: {
           title: 'Test page draft',
@@ -649,6 +711,7 @@ describe('@payloadcms/plugin-search', () => {
     await wait(200)
 
     const { totalDocs: totalBeforeReindex } = await payload.count({
+      overrideAccess: true,
       collection: 'search',
     })
 
@@ -666,6 +729,7 @@ describe('@payloadcms/plugin-search', () => {
     expect(endpointRes.status).toBe(200)
 
     const { totalDocs: totalAfterReindex } = await payload.count({
+      overrideAccess: true,
       collection: 'search',
     })
 
@@ -682,6 +746,7 @@ describe('@payloadcms/plugin-search', () => {
 
   it('should reindex all configured locales', async () => {
     const post = await payload.create({
+      overrideAccess: true,
       collection: postsSlug,
       locale: 'en',
       data: {
@@ -691,6 +756,7 @@ describe('@payloadcms/plugin-search', () => {
       },
     })
     await payload.update({
+      overrideAccess: true,
       collection: postsSlug,
       id: post.id,
       locale: 'es',
@@ -700,6 +766,7 @@ describe('@payloadcms/plugin-search', () => {
       },
     })
     await payload.update({
+      overrideAccess: true,
       collection: postsSlug,
       id: post.id,
       locale: 'de',
@@ -712,6 +779,7 @@ describe('@payloadcms/plugin-search', () => {
     const {
       docs: [postBeforeReindex],
     } = await payload.find({
+      overrideAccess: true,
       collection: 'search',
       locale: 'all',
       where: {
@@ -743,6 +811,7 @@ describe('@payloadcms/plugin-search', () => {
     const {
       docs: [postAfterReindex],
     } = await payload.find({
+      overrideAccess: true,
       collection: 'search',
       locale: 'all',
       where: {
@@ -765,6 +834,7 @@ describe('@payloadcms/plugin-search', () => {
   it('should sync trashed documents correctly with search plugin', async () => {
     // Create a published post
     const publishedPost = await payload.create({
+      overrideAccess: true,
       collection: postsSlug,
       data: {
         title: 'Post to be trashed',
@@ -778,6 +848,7 @@ describe('@payloadcms/plugin-search', () => {
 
     // Verify the search document was created
     const { docs: initialSearchResults } = await payload.find({
+      overrideAccess: true,
       collection: 'search',
       depth: 0,
       where: {
@@ -792,6 +863,7 @@ describe('@payloadcms/plugin-search', () => {
 
     // Soft delete the post (move to trash)
     await payload.update({
+      overrideAccess: true,
       collection: postsSlug,
       id: publishedPost.id,
       data: {
@@ -805,6 +877,7 @@ describe('@payloadcms/plugin-search', () => {
     // Verify the search document still exists but is properly synced
     // The search document should remain and be updated correctly
     const { docs: trashedSearchResults } = await payload.find({
+      overrideAccess: true,
       collection: 'search',
       depth: 0,
       where: {
@@ -819,6 +892,7 @@ describe('@payloadcms/plugin-search', () => {
 
     // Clean up by permanently deleting the trashed post
     await payload.delete({
+      overrideAccess: true,
       collection: postsSlug,
       id: publishedPost.id,
       trash: true, // permanently delete
@@ -832,6 +906,7 @@ describe('@payloadcms/plugin-search', () => {
 
       // Create a doc with syncEnglishOnly enabled
       const enDoc = await payload.create({
+        overrideAccess: true,
         collection: 'filtered-locales',
         data: {
           title: 'Filtered Doc',
@@ -842,6 +917,7 @@ describe('@payloadcms/plugin-search', () => {
 
       // Query for ALL search docs with locale: 'all' to see total count
       const { docs: allSearchDocs } = await payload.find({
+        overrideAccess: true,
         collection: 'search',
         locale: 'all',
         where: {
@@ -857,6 +933,7 @@ describe('@payloadcms/plugin-search', () => {
 
       // Verify the search doc exists for English locale
       const { docs } = await payload.find({
+        overrideAccess: true,
         collection: 'search',
         locale: 'all',
         where: {
@@ -877,6 +954,7 @@ describe('@payloadcms/plugin-search', () => {
 
       // Clean up
       await payload.delete({
+        overrideAccess: true,
         collection: 'filtered-locales',
         id: enDoc.id,
       })
@@ -888,6 +966,7 @@ describe('@payloadcms/plugin-search', () => {
 
       // Create a post
       const post = await payload.create({
+        overrideAccess: true,
         collection: postsSlug,
         data: {
           _status: 'published',
@@ -898,6 +977,7 @@ describe('@payloadcms/plugin-search', () => {
 
       // Update the post in Spanish locale
       await payload.update({
+        overrideAccess: true,
         collection: postsSlug,
         id: post.id,
         locale: 'es',
@@ -909,6 +989,7 @@ describe('@payloadcms/plugin-search', () => {
 
       // Update the post in German locale
       await payload.update({
+        overrideAccess: true,
         collection: postsSlug,
         id: post.id,
         locale: 'de',
@@ -920,6 +1001,7 @@ describe('@payloadcms/plugin-search', () => {
 
       // Query for search doc with locale: 'all'
       const { docs: allSearchDocs } = await payload.find({
+        overrideAccess: true,
         collection: 'search',
         locale: 'all',
         where: {
@@ -939,6 +1021,7 @@ describe('@payloadcms/plugin-search', () => {
 
       // Clean up
       await payload.delete({
+        overrideAccess: true,
         collection: postsSlug,
         id: post.id,
       })
@@ -949,6 +1032,7 @@ describe('@payloadcms/plugin-search', () => {
 
       // Create a doc with syncEnglishOnly disabled
       const doc = await payload.create({
+        overrideAccess: true,
         collection: 'filtered-locales',
         data: {
           title: 'Unfiltered Doc',
@@ -959,6 +1043,7 @@ describe('@payloadcms/plugin-search', () => {
 
       // Verify search doc exists for English
       const { docs: enSearchDocs } = await payload.find({
+        overrideAccess: true,
         collection: 'search',
         locale: 'en',
         where: {
@@ -971,6 +1056,7 @@ describe('@payloadcms/plugin-search', () => {
 
       // Verify search doc exists for Spanish
       const { docs: esSearchDocs } = await payload.find({
+        overrideAccess: true,
         collection: 'search',
         locale: 'es',
         where: {
@@ -983,6 +1069,7 @@ describe('@payloadcms/plugin-search', () => {
 
       // Verify search doc exists for German
       const { docs: deSearchDocs } = await payload.find({
+        overrideAccess: true,
         collection: 'search',
         locale: 'de',
         where: {
@@ -995,6 +1082,7 @@ describe('@payloadcms/plugin-search', () => {
 
       // Clean up
       await payload.delete({
+        overrideAccess: true,
         collection: 'filtered-locales',
         id: doc.id,
       })

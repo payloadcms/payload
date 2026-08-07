@@ -18,12 +18,14 @@ export const seed = async (payload: Payload): Promise<boolean> => {
     const file = await getFileByPath(filePath)
 
     const mediaDoc = await payload.create({
+      overrideAccess: true,
       collection: mediaSlug,
       data: {},
       file,
     })
 
     await payload.create({
+      overrideAccess: true,
       collection: 'pages',
       data: {
         slug: 'test-page',

@@ -82,7 +82,7 @@ export const findGlobalTool = defineGlobalTool({
       findOptions.populate = populate as PopulateType
     }
 
-    const result = await payload.findGlobal(findOptions)
+    const result = await payload.findGlobal({ ...{ overrideAccess: true }, ...findOptions })
 
     return {
       content: [

@@ -47,6 +47,7 @@ export async function getFilePrefix({
     depth: 0,
     draft: true,
     limit: 1,
+    overrideAccess: true,
     pagination: false,
     where: {
       or: [

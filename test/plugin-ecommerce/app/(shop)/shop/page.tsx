@@ -12,6 +12,7 @@ export const Page = async () => {
   })
 
   const products = await payload.find({
+    overrideAccess: true,
     collection: 'products',
     depth: 2,
     limit: 10,

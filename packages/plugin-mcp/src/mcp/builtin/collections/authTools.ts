@@ -87,13 +87,14 @@ export const forgotPasswordCollectionTool = defineCollectionTool({
       .default(false),
     email: emailSchema,
   }),
-}).handler(async ({ collectionSlug, input, req }) => {
+}).handler(async ({ authorizedMCP, collectionSlug, input, req }) => {
   const logger = getLogger({ payload: req.payload })
   try {
     const result = await req.payload.forgotPassword({
       collection: collectionSlug,
       data: { email: input.email },
       disableEmail: input.disableEmail,
+      overrideAccess: authorizedMCP.overrideAccess,
     })
     return {
       content: [
@@ -137,13 +138,14 @@ export const loginCollectionTool = defineCollectionTool({
       .optional()
       .default(false),
   }),
-}).handler(async ({ collectionSlug, input, req }) => {
+}).handler(async ({ authorizedMCP, collectionSlug, input, req }) => {
   const logger = getLogger({ payload: req.payload })
   try {
     const result = await req.payload.login({
       collection: collectionSlug,
       data: { email: input.email, password: input.password },
       depth: input.depth,
+      overrideAccess: authorizedMCP.overrideAccess,
       showHiddenFields: input.showHiddenFields,
     })
     return {
@@ -175,13 +177,13 @@ export const resetPasswordCollectionTool = defineCollectionTool({
     password: z.string().describe('The new password for the user'),
     token: z.string().describe('The password reset token sent to the user email'),
   }),
-}).handler(async ({ collectionSlug, input, req }) => {
+}).handler(async ({ authorizedMCP, collectionSlug, input, req }) => {
   const logger = getLogger({ payload: req.payload })
   try {
     const result = await req.payload.resetPassword({
       collection: collectionSlug,
       data: { password: input.password, token: input.token },
-      overrideAccess: true,
+      overrideAccess: authorizedMCP.overrideAccess,
     })
     return {
       content: [
@@ -209,13 +211,13 @@ export const unlockCollectionTool = defineCollectionTool({
   },
   description: 'Unlocks a user account that has been locked due to failed login attempts.',
   input: z.object({ email: emailSchema }),
-}).handler(async ({ collectionSlug, input, req }) => {
+}).handler(async ({ authorizedMCP, collectionSlug, input, req }) => {
   const logger = getLogger({ payload: req.payload })
   try {
     const result = await req.payload.unlock({
       collection: collectionSlug,
       data: { email: input.email },
-      overrideAccess: true,
+      overrideAccess: authorizedMCP.overrideAccess,
     })
     return {
       content: [

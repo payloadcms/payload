@@ -6,6 +6,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
 
   try {
     await payload.create({
+      overrideAccess: true,
       collection: 'users',
       data: {
         email: 'demo@payloadcms.com',

@@ -72,6 +72,7 @@ export const createImport = async ({
     user = (await req.payload.findByID({
       id: userID,
       collection: userCollection,
+      overrideAccess: true,
       req,
     })) as User
   }

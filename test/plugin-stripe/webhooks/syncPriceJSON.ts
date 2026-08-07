@@ -16,6 +16,7 @@ export const syncPriceJSON = async (args) => {
     payload.logger.info(`- Looking up existing Payload product with Stripe ID: ${eventID}...`)
 
     const productQuery = await payload.find({
+      overrideAccess: true,
       collection: 'products',
       where: {
         stripeID: {
@@ -39,6 +40,7 @@ export const syncPriceJSON = async (args) => {
     const stripePrice = await stripe.prices.retrieve(default_price)
 
     await payload.update({
+      overrideAccess: true,
       id: payloadProductID,
       collection: 'products',
       data: {
