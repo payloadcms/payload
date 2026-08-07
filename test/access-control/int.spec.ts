@@ -832,6 +832,58 @@ describe('Access Control', () => {
       await payload.delete({ collection: inheritedReadVersionsSlug, where: {} })
     })
 
+    it('should omit the parent field from findVersionByID when it is not selected', async () => {
+      await payload.delete({ collection: inheritedReadVersionsSlug, where: {} })
+
+      const { id: allowedID } = await payload.create({
+        collection: inheritedReadVersionsSlug,
+        data: { secret: 'allowed' },
+      })
+      setInheritedReadVersionsAllowedID(allowedID)
+
+      const { docs } = await payload.findVersions({
+        collection: inheritedReadVersionsSlug,
+        overrideAccess: true,
+      })
+
+      const res = await payload.findVersionByID({
+        id: docs[0].id,
+        collection: inheritedReadVersionsSlug,
+        overrideAccess: false,
+        select: { secret: true },
+      })
+
+      expect(res.parent).toBeUndefined()
+
+      await payload.delete({ collection: inheritedReadVersionsSlug, where: {} })
+    })
+
+    it('should include the parent field on findVersionByID when it is selected', async () => {
+      await payload.delete({ collection: inheritedReadVersionsSlug, where: {} })
+
+      const { id: allowedID } = await payload.create({
+        collection: inheritedReadVersionsSlug,
+        data: { secret: 'allowed' },
+      })
+      setInheritedReadVersionsAllowedID(allowedID)
+
+      const { docs } = await payload.findVersions({
+        collection: inheritedReadVersionsSlug,
+        overrideAccess: true,
+      })
+
+      const res = await payload.findVersionByID({
+        id: docs[0].id,
+        collection: inheritedReadVersionsSlug,
+        overrideAccess: false,
+        select: { parent: true, secret: true },
+      })
+
+      expect(res.parent).toBe(allowedID)
+
+      await payload.delete({ collection: inheritedReadVersionsSlug, where: {} })
+    })
+
     it('should inherit global read access for version operations', async () => {
       await payload.updateGlobal({
         slug: inheritedReadVersionsGlobalSlug,
