@@ -3,8 +3,10 @@ import type { Payload } from 'payload'
 import { buildEditorState } from '@payloadcms/richtext-lexical'
 import path from 'path'
 import { getFileByPath } from 'payload'
+import { fileURLToPath } from 'url'
 
 import { seedDB } from '../__helpers/shared/clearAndSeed/seed.js'
+import { getTestSuiteDir } from '../__helpers/shared/getTestSuiteDir.js'
 import { devUser } from '../credentials.js'
 import { arrayDoc } from './collections/Array/shared.js'
 import { blocksDoc } from './collections/Blocks/shared.js'
@@ -56,11 +58,11 @@ import {
   usersSlug,
 } from './slugs.js'
 
-const getFieldsDir = () =>
-  path.resolve(process.env.ROOT_DIR ?? path.resolve(process.cwd(), 'test'), 'fields')
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 
 export const seed = async (_payload: Payload) => {
-  const fieldsDir = getFieldsDir()
+  const fieldsDir = getTestSuiteDir({ fallbackDir: dirname, suitePath: 'fields' })
   const jpgPath = path.resolve(fieldsDir, './collections/Upload/payload.jpg')
   const jpg480x320Path = path.resolve(fieldsDir, './collections/Upload/payload480x320.jpg')
   const pngPath = path.resolve(fieldsDir, './uploads/payload.png')
