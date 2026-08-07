@@ -72,8 +72,10 @@ export const logoutOperation = async (incomingArgs: Arguments): Promise<boolean>
       if (allSessions) {
         userWithSessions.sessions = []
       } else {
+        // Get the current session ID from the user object (set by JWT strategy from token)
+        const currentSessionId = user._sid
         const sessionsAfterLogout = (userWithSessions?.sessions || []).filter(
-          (s) => s.id !== req?.user?._sid,
+          (s) => s.id !== currentSessionId,
         )
 
         userWithSessions.sessions = sessionsAfterLogout
