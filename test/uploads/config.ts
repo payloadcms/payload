@@ -61,9 +61,10 @@ import {
 } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
-const dirname = process.env.ROOT_DIR
-  ? path.resolve(process.env.ROOT_DIR, 'uploads')
-  : path.dirname(filename)
+const dirname =
+  process.env.PAYLOAD_FRAMEWORK === 'tanstack-start' && process.env.ROOT_DIR
+    ? path.resolve(process.env.ROOT_DIR, 'uploads')
+    : path.dirname(filename)
 
 export default buildConfigWithDefaults({
   admin: {

@@ -3,6 +3,7 @@ import type { Payload } from 'payload'
 import { buildEditorState } from '@payloadcms/richtext-lexical'
 import path from 'path'
 import { getFileByPath } from 'payload'
+import { fileURLToPath } from 'url'
 
 import { seedDB } from '../__helpers/shared/clearAndSeed/seed.js'
 import { devUser } from '../credentials.js'
@@ -56,8 +57,13 @@ import {
   usersSlug,
 } from './slugs.js'
 
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
+
 const getFieldsDir = () =>
-  path.resolve(process.env.ROOT_DIR ?? path.resolve(process.cwd(), 'test'), 'fields')
+  process.env.PAYLOAD_FRAMEWORK === 'tanstack-start' && process.env.ROOT_DIR
+    ? path.resolve(process.env.ROOT_DIR, 'fields')
+    : dirname
 
 export const seed = async (_payload: Payload) => {
   const fieldsDir = getFieldsDir()

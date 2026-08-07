@@ -97,7 +97,10 @@ import { uploadsDoc } from './collections/Upload/shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
-const lexicalDir = process.env.ROOT_DIR ? path.resolve(process.env.ROOT_DIR, 'lexical') : dirname
+const lexicalDir =
+  process.env.PAYLOAD_FRAMEWORK === 'tanstack-start' && process.env.ROOT_DIR
+    ? path.resolve(process.env.ROOT_DIR, 'lexical')
+    : dirname
 
 export const seed = async (_payload: Payload) => {
   // Create the admin user first so auto-login still works if a later seed step

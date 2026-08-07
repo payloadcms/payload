@@ -2,6 +2,7 @@ import type { Payload } from 'payload'
 
 import path from 'path'
 import { getFileByPath } from 'payload'
+import { fileURLToPath } from 'url'
 
 import { devUser } from '../credentials.js'
 import {
@@ -12,6 +13,9 @@ import {
   postsSlug,
   uploadsSlug,
 } from './shared.js'
+
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 
 export const seed = async (_payload: Payload) => {
   await _payload.create({
@@ -102,10 +106,11 @@ export const seed = async (_payload: Payload) => {
   })
 
   // create an upload with image.png
-  const imageFilePath = path.resolve(
-    process.env.ROOT_DIR ?? path.resolve(process.cwd(), 'test'),
-    'joins/image.png',
-  )
+  const joinsDir =
+    process.env.PAYLOAD_FRAMEWORK === 'tanstack-start' && process.env.ROOT_DIR
+      ? path.resolve(process.env.ROOT_DIR, 'joins')
+      : dirname
+  const imageFilePath = path.resolve(joinsDir, 'image.png')
   const imageFile = await getFileByPath(imageFilePath)
   const { id: uploadedImage } = await _payload.create({
     collection: uploadsSlug,

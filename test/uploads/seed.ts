@@ -22,7 +22,10 @@ import {
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
-const seedDir = process.env.ROOT_DIR ? path.resolve(process.env.ROOT_DIR, 'uploads') : dirname
+const seedDir =
+  process.env.PAYLOAD_FRAMEWORK === 'tanstack-start' && process.env.ROOT_DIR
+    ? path.resolve(process.env.ROOT_DIR, 'uploads')
+    : dirname
 
 export const seed = async (payload: Payload) => {
   await payload.create({
