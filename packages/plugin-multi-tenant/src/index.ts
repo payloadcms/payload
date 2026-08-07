@@ -89,6 +89,11 @@ export const multiTenantPlugin = definePlugin<MultiTenantPluginConfig>({
       adminUsersCollection.fields.push(
         tenantsArrayField({
           ...(pluginConfig?.tenantsArrayField || {}),
+          arrayFieldAccess: {
+            create: ({ req }) => Boolean(req.user && userHasAccessToAllTenants(req.user)),
+            update: ({ req }) => Boolean(req.user && userHasAccessToAllTenants(req.user)),
+            ...(pluginConfig?.tenantsArrayField?.arrayFieldAccess || {}),
+          },
           tenantsArrayFieldName,
           tenantsArrayTenantFieldName,
           tenantsCollectionSlug,

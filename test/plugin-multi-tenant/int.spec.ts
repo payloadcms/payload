@@ -246,6 +246,162 @@ describe('@payloadcms/plugin-multi-tenant', () => {
     })
   })
 
+  describe('tenant membership updates', () => {
+    it('should only allow global users to update tenant memberships', async () => {
+      const tenantA = await payload.create({
+        collection: tenantsSlug,
+        data: { name: 'Membership Tenant A', domain: 'membership-a.test' },
+      })
+      const tenantB = await payload.create({
+        collection: tenantsSlug,
+        data: { name: 'Membership Tenant B', domain: 'membership-b.test' },
+      })
+      const user = await payload.create({
+        collection: usersSlug,
+        data: {
+          email: 'membership-user@test.com',
+          password: 'test',
+          roles: ['user'],
+          tenants: [{ tenant: tenantA.id }],
+        },
+      })
+      const admin = await payload.create({
+        collection: usersSlug,
+        data: {
+          email: 'membership-admin@test.com',
+          password: 'test',
+          roles: ['admin'],
+        },
+      })
+      const tenantBDoc = await payload.create({
+        collection: relationshipsSlug,
+        data: { tenant: tenantB.id, title: 'Tenant B membership document' },
+      })
+
+      const selfUpdatedUser = await payload.update({
+        id: user.id,
+        collection: usersSlug,
+        data: {
+          tenants: [{ tenant: tenantA.id }, { tenant: tenantB.id }],
+        },
+        overrideAccess: false,
+        user,
+      })
+
+      expect(selfUpdatedUser.tenants).toHaveLength(1)
+      const unauthorizedResult = await payload.find({
+        collection: relationshipsSlug,
+        overrideAccess: false,
+        user: selfUpdatedUser,
+        where: { id: { equals: tenantBDoc.id } },
+      })
+      expect(unauthorizedResult.docs).toHaveLength(0)
+
+      const adminUpdatedUser = await payload.update({
+        id: user.id,
+        collection: usersSlug,
+        data: {
+          tenants: [{ tenant: tenantA.id }, { tenant: tenantB.id }],
+        },
+        overrideAccess: false,
+        user: admin,
+      })
+
+      expect(adminUpdatedUser.tenants).toHaveLength(2)
+    })
+
+    it('should only allow global users to set tenant memberships when creating users', async () => {
+      const tenantA = await payload.create({
+        collection: tenantsSlug,
+        data: { name: 'Create Membership Tenant A', domain: 'create-membership-a.test' },
+      })
+      const tenantB = await payload.create({
+        collection: tenantsSlug,
+        data: { name: 'Create Membership Tenant B', domain: 'create-membership-b.test' },
+      })
+      const tenantAUser = await payload.create({
+        collection: usersSlug,
+        data: {
+          email: 'create-membership-user@test.com',
+          password: 'test',
+          roles: ['user'],
+          tenants: [{ tenant: tenantA.id }],
+        },
+      })
+      const admin = await payload.create({
+        collection: usersSlug,
+        data: {
+          email: 'create-membership-admin@test.com',
+          password: 'test',
+          roles: ['admin'],
+        },
+      })
+      const tenantBDoc = await payload.create({
+        collection: relationshipsSlug,
+        data: { tenant: tenantB.id, title: 'Tenant B create membership document' },
+      })
+
+      const userCreatedByTenantMember = await payload.create({
+        collection: usersSlug,
+        data: {
+          email: 'created-by-tenant-member@test.com',
+          password: 'test',
+          roles: ['user'],
+          tenants: [{ tenant: tenantB.id }],
+        },
+        overrideAccess: false,
+        user: tenantAUser,
+      })
+      const tenantMemberLogin = await payload.login({
+        collection: usersSlug,
+        data: {
+          email: 'created-by-tenant-member@test.com',
+          password: 'test',
+        },
+      })
+
+      expect(tenantMemberLogin.user).toBeDefined()
+      await expect(
+        payload.find({
+          collection: relationshipsSlug,
+          overrideAccess: false,
+          user: tenantMemberLogin.user!,
+          where: { id: { equals: tenantBDoc.id } },
+        }),
+      ).rejects.toThrow('You are not allowed to perform this action.')
+      expect(userCreatedByTenantMember.tenants ?? []).toHaveLength(0)
+
+      const userCreatedByAdmin = await payload.create({
+        collection: usersSlug,
+        data: {
+          email: 'created-by-membership-admin@test.com',
+          password: 'test',
+          roles: ['user'],
+          tenants: [{ tenant: tenantB.id }],
+        },
+        overrideAccess: false,
+        user: admin,
+      })
+      const adminCreatedLogin = await payload.login({
+        collection: usersSlug,
+        data: {
+          email: 'created-by-membership-admin@test.com',
+          password: 'test',
+        },
+      })
+
+      expect(userCreatedByAdmin.tenants).toHaveLength(1)
+      expect(adminCreatedLogin.user).toBeDefined()
+      const authorizedResult = await payload.find({
+        collection: relationshipsSlug,
+        overrideAccess: false,
+        user: adminCreatedLogin.user!,
+        where: { id: { equals: tenantBDoc.id } },
+      })
+      expect(authorizedResult.docs).toHaveLength(1)
+    })
+  })
+
   describe('access control with user object passed directly', () => {
     it('should enforce tenant access when user object is fetched from database', async () => {
       // Create two tenants
