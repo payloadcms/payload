@@ -269,25 +269,40 @@ describe('Access Control', () => {
         expect(retrievedDoc.restrictedField).toBeUndefined()
       })
 
-      it('should error when querying field without read access', async () => {
-        const { id } = await createDoc({ restrictedField: 'restricted' })
+      it.each(['AND', 'OR', 'AnD', 'oR'])(
+        'validates field read access inside case-insensitive %s conditions',
+        async (logicalOperator) => {
+          const { id } = await createDoc({ restrictedField: 'example' })
 
+          await expect(
+            payload.find({
+              collection: slug,
+              overrideAccess: false,
+              where: {
+                [logicalOperator]: [
+                  {
+                    id: { equals: id },
+                  },
+                  {
+                    restrictedField: {
+                      equals: 'example',
+                    },
+                  },
+                ],
+              },
+            }),
+          ).rejects.toThrow('The following path cannot be queried: restrictedField')
+        },
+      )
+
+      it('rejects array-valued field conditions', async () => {
         await expect(
           payload.find({
             collection: slug,
             overrideAccess: false,
             where: {
-              and: [
-                {
-                  id: { equals: id },
-                },
-                {
-                  restrictedField: {
-                    equals: 'restricted',
-                  },
-                },
-              ],
-            },
+              restrictedField: [{ equals: 'example' }],
+            } as any,
           }),
         ).rejects.toThrow('The following path cannot be queried: restrictedField')
       })
