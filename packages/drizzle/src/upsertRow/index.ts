@@ -150,6 +150,17 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
           }
         }
 
+        // Fields such as `point` are resolved via raw SQL expressions (e.g. ST_AsGeoJSON)
+        // rather than plain columns, and are tracked in `findManyArgs.extras`. Without
+        // merging them in here, `.returning()` would either omit them or fall back to
+        // returning every column (including the raw, unconverted value) once selectedFields
+        // is non-empty but missing these keys.
+        if (findManyArgs.extras) {
+          for (const [name, extra] of Object.entries(findManyArgs.extras)) {
+            selectedFields[name] = extra
+          }
+        }
+
         const docs = await drizzle
           .update(adapter.tables[tableName])
           .set(row)
