@@ -9,6 +9,7 @@ export const updatePostStep1: TaskHandler<'UpdatePost'> = async ({ req, input })
   }
 
   await req.payload.update({
+    overrideAccess: true,
     collection: 'posts',
     id: postID,
     req,
@@ -33,6 +34,7 @@ export const updatePostStep2: TaskHandler<'UpdatePostStep2'> = async ({ req, inp
   }
 
   await req.payload.update({
+    overrideAccess: true,
     collection: 'posts',
     id: postID,
     req,

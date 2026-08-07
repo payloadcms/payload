@@ -17,6 +17,7 @@ export const HooksConfig: Promise<SanitizedConfig> = buildConfigWithDefaults({
   collections: [FieldPaths],
   onInit: async (payload) => {
     await payload.create({
+      overrideAccess: true,
       collection: 'users',
       data: {
         email: devUser.email,

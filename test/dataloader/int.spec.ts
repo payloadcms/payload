@@ -24,6 +24,7 @@ describe('dataloader', () => {
     ;({ payload, restClient } = await initPayloadInt(dirname))
 
     const loginResult = await payload.login({
+      overrideAccess: true,
       collection: 'users',
       data: {
         email: devUser.email,
@@ -107,6 +108,7 @@ describe('dataloader', () => {
 
     it('should avoid infinite loops', async () => {
       const relationA = await payload.create({
+        overrideAccess: true,
         collection: 'relation-a',
         data: {
           richText: buildDefaultEditorState({ text: 'relation a' }),
@@ -114,6 +116,7 @@ describe('dataloader', () => {
       })
 
       const relationB = await payload.create({
+        overrideAccess: true,
         collection: 'relation-b',
         data: {
           relationship: relationA.id,
@@ -125,6 +128,7 @@ describe('dataloader', () => {
       expect(relationB.id).toBeDefined()
 
       await payload.update({
+        overrideAccess: true,
         id: relationA.id,
         collection: 'relation-a',
         data: {
@@ -145,6 +149,7 @@ describe('dataloader', () => {
       })
 
       const relationANoDepth = await payload.findByID({
+        overrideAccess: true,
         id: relationA.id,
         collection: 'relation-a',
         depth: 0,
@@ -153,6 +158,7 @@ describe('dataloader', () => {
       expect(relationANoDepth.relationship).toStrictEqual(relationB.id)
 
       const relationAWithDepth = await payload.findByID({
+        overrideAccess: true,
         id: relationA.id,
         collection: 'relation-a',
         depth: 4,

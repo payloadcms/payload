@@ -196,6 +196,7 @@ export const baseConfig: Partial<Config> = {
 
     // Seed users
     const devUserDoc = await payload.create({
+      overrideAccess: true,
       collection: 'users',
       data: {
         email: devUser.email,
@@ -205,6 +206,7 @@ export const baseConfig: Partial<Config> = {
     })
 
     await payload.create({
+      overrideAccess: true,
       collection: 'users',
       data: {
         email: 'user@payloadcms.com',
@@ -214,6 +216,7 @@ export const baseConfig: Partial<Config> = {
     })
 
     await payload.create({
+      overrideAccess: true,
       collection: 'users',
       data: {
         email: 'dev2@payloadcms.com',
@@ -230,6 +233,7 @@ export const baseConfig: Partial<Config> = {
 
     for (const author of authors) {
       await payload.create({
+        overrideAccess: true,
         collection: 'users',
         data: author,
       })
@@ -250,15 +254,20 @@ export const baseConfig: Partial<Config> = {
     const createdPosts: { id: number | string }[] = []
     for (const post of posts) {
       const created = await payload.create({
+        overrideAccess: true,
         collection: textFieldsSlug,
         data: post,
       })
       createdPosts.push(created)
     }
 
-    const richTextCount = await payload.count({ collection: richTextFieldsSlug })
+    const richTextCount = await payload.count({
+      overrideAccess: true,
+      collection: richTextFieldsSlug,
+    })
     if (richTextCount.totalDocs === 0) {
       const uploadDoc = await payload.create({
+        overrideAccess: true,
         collection: uploadsSlug,
         data: { alt: 'Farming image' },
         file: imageFile,
@@ -268,6 +277,7 @@ export const baseConfig: Partial<Config> = {
         payload.db.defaultIDType === 'number' ? uploadDoc.id : `"${uploadDoc.id}"`
 
       const devUserDoc = await payload.find({
+        overrideAccess: true,
         collection: 'users',
         limit: 1,
         where: { email: { equals: devUser.email } },
@@ -283,6 +293,7 @@ export const baseConfig: Partial<Config> = {
       const richTextContent = getRichTextContent(formattedUploadID, formattedUserID)
 
       await payload.create({
+        overrideAccess: true,
         collection: richTextFieldsSlug,
         data: {
           code: codeContent,
@@ -297,6 +308,7 @@ export const baseConfig: Partial<Config> = {
 
     // Seed relationship-fields to test join field
     const createdRelationship = await payload.create({
+      overrideAccess: true,
       collection: relationshipFieldsSlug,
       data: {
         authorRequired: devUserDoc.id,
@@ -304,6 +316,7 @@ export const baseConfig: Partial<Config> = {
       },
     })
     await payload.create({
+      overrideAccess: true,
       collection: relationshipFieldsSlug,
       data: {
         authorRequired: devUserDoc.id,
@@ -313,12 +326,14 @@ export const baseConfig: Partial<Config> = {
 
     // Seed blocks collection
     await payload.create({
+      overrideAccess: true,
       collection: blocksFieldsSlug,
       data: blocksSeedData,
     })
 
     // Seed join fields collection
     const joinCategory = await payload.create({
+      overrideAccess: true,
       collection: joinFieldsSlug,
       data: {
         name: 'Example Category',
@@ -328,6 +343,7 @@ export const baseConfig: Partial<Config> = {
     // Create 15 posts to test join field pagination (defaultLimit: 3)
     for (let i = 1; i <= 15; i++) {
       await payload.create({
+        overrideAccess: true,
         collection: joinPostsSlug,
         data: {
           _status: i % 2 === 0 ? 'published' : 'draft',
@@ -339,41 +355,49 @@ export const baseConfig: Partial<Config> = {
 
     // Seed tags hierarchy for testing hierarchy field
     const techTag = await payload.create({
+      overrideAccess: true,
       collection: tagsSlug,
       data: { name: 'Technology' },
     })
 
     const frontendTag = await payload.create({
+      overrideAccess: true,
       collection: tagsSlug,
       data: { name: 'Frontend', parent: techTag.id },
     })
 
     await payload.create({
+      overrideAccess: true,
       collection: tagsSlug,
       data: { name: 'React', parent: frontendTag.id },
     })
 
     await payload.create({
+      overrideAccess: true,
       collection: tagsSlug,
       data: { name: 'Vue', parent: frontendTag.id },
     })
 
     const backendTag = await payload.create({
+      overrideAccess: true,
       collection: tagsSlug,
       data: { name: 'Backend', parent: techTag.id },
     })
 
     await payload.create({
+      overrideAccess: true,
       collection: tagsSlug,
       data: { name: 'Node.js', parent: backendTag.id },
     })
 
     await payload.create({
+      overrideAccess: true,
       collection: tagsSlug,
       data: { name: 'Python', parent: backendTag.id },
     })
 
     await payload.create({
+      overrideAccess: true,
       collection: tagsSlug,
       data: { name: 'Design' },
     })
@@ -402,6 +426,7 @@ export const baseConfig: Partial<Config> = {
 
     for (const tagName of additionalTags) {
       await payload.create({
+        overrideAccess: true,
         collection: tagsSlug,
         data: { name: tagName },
       })
@@ -410,6 +435,7 @@ export const baseConfig: Partial<Config> = {
     // Seed tag-items collection with 30 untagged items for hierarchy pagination testing
     for (let i = 1; i <= 30; i++) {
       await payload.create({
+        overrideAccess: true,
         collection: tagItemsSlug,
         data: {
           description: `Description for tag item ${i}`,
@@ -420,28 +446,33 @@ export const baseConfig: Partial<Config> = {
 
     // Seed folders for hierarchy testing
     const rootFolder = await payload.create({
+      overrideAccess: true,
       collection: foldersSlug,
       data: { name: 'Root Folder' },
     })
 
     await payload.create({
+      overrideAccess: true,
       collection: foldersSlug,
       data: { name: 'Subfolder A', parent: rootFolder.id },
     })
 
     await payload.create({
+      overrideAccess: true,
       collection: foldersSlug,
       data: { name: 'Subfolder B', parent: rootFolder.id },
     })
 
     // Seed nested child folders under a single parent to test nested LoadMoreRow pagination
     const nestedParentFolder = await payload.create({
+      overrideAccess: true,
       collection: foldersSlug,
       data: { name: 'Nested Parent Folder', parent: rootFolder.id },
     })
 
     for (let i = 1; i <= 10; i++) {
       await payload.create({
+        overrideAccess: true,
         collection: foldersSlug,
         data: { name: `Nested Child ${i}`, parent: nestedParentFolder.id },
       })
@@ -449,12 +480,14 @@ export const baseConfig: Partial<Config> = {
 
     // Seed a third level: Nested Parent Folder > Branch Folder > Leaf Child N
     const branchFolder = await payload.create({
+      overrideAccess: true,
       collection: foldersSlug,
       data: { name: 'Branch Folder', parent: nestedParentFolder.id },
     })
 
     for (let i = 1; i <= 10; i++) {
       await payload.create({
+        overrideAccess: true,
         collection: foldersSlug,
         data: { name: `Leaf Child ${i}`, parent: branchFolder.id },
       })
@@ -463,6 +496,7 @@ export const baseConfig: Partial<Config> = {
     // Seed folder-items collection with 30 items (no folder assigned) for hierarchy pagination testing
     for (let i = 1; i <= 30; i++) {
       await payload.create({
+        overrideAccess: true,
         collection: folderItemsSlug,
         data: {
           title: `Folder Item ${i}`,
@@ -477,6 +511,7 @@ export const baseConfig: Partial<Config> = {
     for (let i = 1; i <= 300; i++) {
       const index = i.toString().padStart(3, '0')
       await payload.create({
+        overrideAccess: true,
         collection: 'search-bar-test',
         data: {
           category: categories[i % categories.length],
@@ -499,6 +534,7 @@ export const baseConfig: Partial<Config> = {
 
     for (const item of orderableItems) {
       await payload.create({
+        overrideAccess: true,
         collection: orderableSlug,
         data: item,
       })
@@ -512,6 +548,7 @@ export const baseConfig: Partial<Config> = {
     }
 
     await payload.create({
+      overrideAccess: true,
       collection: 'payload-query-presets',
       data: {
         access: presetAccessEveryone,
@@ -525,6 +562,7 @@ export const baseConfig: Partial<Config> = {
     })
 
     await payload.create({
+      overrideAccess: true,
       collection: 'payload-query-presets',
       data: {
         access: presetAccessEveryone,
@@ -538,6 +576,7 @@ export const baseConfig: Partial<Config> = {
     })
 
     await payload.create({
+      overrideAccess: true,
       collection: 'payload-query-presets',
       data: {
         access: presetAccessEveryone,
@@ -552,6 +591,7 @@ export const baseConfig: Partial<Config> = {
 
     // Seed draft-versions collection with many versions for pagination testing
     const { id: draftVersionsDocID } = await payload.create({
+      overrideAccess: true,
       collection: draftVersionsSlug,
       data: {
         content: 'Initial content',
@@ -562,6 +602,7 @@ export const baseConfig: Partial<Config> = {
 
     for (let i = 0; i < 20; i++) {
       await payload.update({
+        overrideAccess: true,
         id: draftVersionsDocID,
         collection: draftVersionsSlug,
         data: {
@@ -573,6 +614,7 @@ export const baseConfig: Partial<Config> = {
 
     // Seed talks showcase collection
     const existingUpload = await payload.find({
+      overrideAccess: true,
       collection: uploadsSlug,
       limit: 1,
     })
@@ -610,6 +652,7 @@ export const baseConfig: Partial<Config> = {
     })
 
     const reactTalk = await payload.create({
+      overrideAccess: true,
       collection: talksSlug,
       data: {
         slug: 'server-components-in-production',
@@ -692,6 +735,7 @@ export const baseConfig: Partial<Config> = {
     })
 
     const aiTalk = await payload.create({
+      overrideAccess: true,
       collection: talksSlug,
       data: {
         slug: 'llm-agents-without-the-hype',
@@ -734,6 +778,7 @@ export const baseConfig: Partial<Config> = {
     })
 
     await payload.create({
+      overrideAccess: true,
       collection: talksSlug,
       data: {
         slug: 'designing-indexes-for-search',
@@ -768,6 +813,7 @@ export const baseConfig: Partial<Config> = {
     for (let i = drawerSeeds.length - 1; i >= 0; i--) {
       const seed = drawerSeeds[i]!
       const created = await payload.create({
+        overrideAccess: true,
         collection: drawersSlug,
         data: {
           blocks: [

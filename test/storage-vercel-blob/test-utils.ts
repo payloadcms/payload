@@ -23,6 +23,7 @@ export async function verifyUploads({
   uploadId: number | string
 }): Promise<void> {
   const uploadData = (await payload.findByID({
+    overrideAccess: true,
     collection: collectionSlug as CollectionSlug,
     id: uploadId,
   })) as unknown as { filename: string; sizes: Record<string, { filename: string }> }

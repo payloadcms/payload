@@ -17,6 +17,7 @@ export default buildConfigWithDefaults({
   collections: [Posts],
   onInit: async (payload) => {
     const { totalDocs } = await payload.count({
+      overrideAccess: true,
       collection: 'users',
     })
 
@@ -25,6 +26,7 @@ export default buildConfigWithDefaults({
     }
 
     await payload.create({
+      overrideAccess: true,
       collection: 'users',
       data: {
         email: devUser.email,

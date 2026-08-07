@@ -26,12 +26,12 @@ describe('field access collection context', () => {
 
   afterEach(async () => {
     for (const id of parentIDs) {
-      await payload.delete({ id, collection: parentsSlug })
+      await payload.delete({ overrideAccess: true, id, collection: parentsSlug })
     }
     parentIDs.length = 0
 
     for (const id of childIDs) {
-      await payload.delete({ id, collection: childrenSlug })
+      await payload.delete({ overrideAccess: true, id, collection: childrenSlug })
     }
     childIDs.length = 0
 
@@ -84,6 +84,7 @@ describe('field access collection context', () => {
 
   it('should pass collectionSlug to local read field access callbacks', async () => {
     const doc = await payload.create({
+      overrideAccess: true,
       collection: parentsSlug,
       data: {
         accessReadProbe: 'local read',
@@ -110,6 +111,7 @@ describe('field access collection context', () => {
 
   it('should pass collectionSlug to REST read field access callbacks', async () => {
     const doc = await payload.create({
+      overrideAccess: true,
       collection: parentsSlug,
       data: {
         accessReadProbe: 'rest read',
@@ -133,6 +135,7 @@ describe('field access collection context', () => {
 
   it('should pass collectionSlug to GraphQL read field access callbacks', async () => {
     const doc = await payload.create({
+      overrideAccess: true,
       collection: parentsSlug,
       data: {
         accessReadProbe: 'graphql read',
@@ -167,6 +170,7 @@ describe('field access collection context', () => {
 
   it('should pass child collectionSlug when reading populated relationship children', async () => {
     const child = await payload.create({
+      overrideAccess: true,
       collection: childrenSlug,
       data: {
         childReadProbe: 'relationship child read',
@@ -176,6 +180,7 @@ describe('field access collection context', () => {
     childIDs.push(child.id)
 
     const parent = await payload.create({
+      overrideAccess: true,
       collection: parentsSlug,
       data: {
         child: child.id,
@@ -204,6 +209,7 @@ describe('field access collection context', () => {
 
   it('should pass collectionSlug to update field access callbacks', async () => {
     const doc = await payload.create({
+      overrideAccess: true,
       collection: parentsSlug,
       data: {
         title: 'update parent',
@@ -232,6 +238,7 @@ describe('field access collection context', () => {
 
   it('should pass collectionSlug to findDistinct field access callbacks', async () => {
     const firstDoc = await payload.create({
+      overrideAccess: true,
       collection: parentsSlug,
       data: {
         distinctProbe: 'one',
@@ -241,6 +248,7 @@ describe('field access collection context', () => {
     parentIDs.push(firstDoc.id)
 
     const secondDoc = await payload.create({
+      overrideAccess: true,
       collection: parentsSlug,
       data: {
         distinctProbe: 'two',
@@ -286,6 +294,7 @@ describe('field access collection context', () => {
 
   it('should leave collectionSlug undefined and set globalSlug for global field access callbacks', async () => {
     await payload.updateGlobal({
+      overrideAccess: true,
       slug: globalSlug,
       data: {
         globalReadProbe: 'global read',
@@ -318,6 +327,7 @@ describe('field access collection context', () => {
 
   it('should pass child collectionSlug when reading a populated relationship child from a global', async () => {
     const child = await payload.create({
+      overrideAccess: true,
       collection: childrenSlug,
       data: {
         childReadProbe: 'global relationship child',
@@ -327,6 +337,7 @@ describe('field access collection context', () => {
     childIDs.push(child.id)
 
     await payload.updateGlobal({
+      overrideAccess: true,
       slug: globalSlug,
       data: {
         globalChild: child.id,

@@ -5,6 +5,7 @@ import { postsSlug } from './shared.js'
 
 export const seed = async (payload: Payload) => {
   await payload.create({
+    overrideAccess: true,
     collection: 'users',
     data: {
       email: devUser.email,
@@ -13,6 +14,7 @@ export const seed = async (payload: Payload) => {
   })
 
   await payload.create({
+    overrideAccess: true,
     collection: postsSlug,
     data: {
       title: 'example post',

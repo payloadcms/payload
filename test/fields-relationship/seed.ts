@@ -155,6 +155,7 @@ export const seed = async (_payload: Payload) => {
 
   for (let i = 0; i < 2; i++) {
     await _payload.create({
+      overrideAccess: true,
       collection: videoCollectionSlug,
       data: {
         id: i,
@@ -163,6 +164,7 @@ export const seed = async (_payload: Payload) => {
     })
 
     await _payload.create({
+      overrideAccess: true,
       collection: podcastCollectionSlug,
       data: {
         id: i,

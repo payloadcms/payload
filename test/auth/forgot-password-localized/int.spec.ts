@@ -37,6 +37,7 @@ describe('Forgot password operation with localized fields', () => {
 
     // @ts-expect-error - Localized field is not in the general Payload type, but it is in mocked collection in this case.
     await payload?.update({
+      overrideAccess: true,
       collection: collectionSlug,
       id: user.id as string,
       locale: 'pl',
@@ -53,6 +54,7 @@ describe('Forgot password operation with localized fields', () => {
   it('should successfully process forgotPassword operation with localized fields', async () => {
     // Attempt to trigger forgotPassword operation
     const token = await payload?.forgotPassword({
+      overrideAccess: true,
       collection: collectionSlug,
       data: { email: devUser.email },
       disableEmail: true,
@@ -68,6 +70,7 @@ describe('Forgot password operation with localized fields', () => {
     // We expect this not to throw an error
     await expect(
       payload?.forgotPassword({
+        overrideAccess: true,
         collection: collectionSlug,
         data: { email: devUser.email },
         disableEmail: true,

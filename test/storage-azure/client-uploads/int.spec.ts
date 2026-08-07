@@ -98,11 +98,12 @@ describe('@payloadcms/storage-azure clientUploads', () => {
 
     expect(blobKey).toBe('duplicate-target-1.png')
 
-    await payload.delete({ id: seedDoc.id, collection: mediaSlug })
+    await payload.delete({ overrideAccess: true, id: seedDoc.id, collection: mediaSlug })
   })
 
   it('preserves a user-defined prefix.defaultValue across the plugin', async () => {
     const upload = await payload.create({
+      overrideAccess: true,
       collection: mediaWithDocPrefixSlug,
       data: {},
       filePath: path.resolve(dirname, '../../uploads/image.png'),

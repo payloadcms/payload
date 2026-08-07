@@ -7,6 +7,7 @@ import { apiKeysSlug } from './shared.js'
 
 export const seed: Config['onInit'] = async (payload) => {
   await payload.create({
+    overrideAccess: true,
     collection: 'users',
     data: {
       custom: 'Hello, world!',
@@ -17,6 +18,7 @@ export const seed: Config['onInit'] = async (payload) => {
   })
 
   await payload.create({
+    overrideAccess: true,
     collection: apiKeysSlug,
     data: {
       apiKey: uuid(),
@@ -25,6 +27,7 @@ export const seed: Config['onInit'] = async (payload) => {
   })
 
   await payload.create({
+    overrideAccess: true,
     collection: apiKeysSlug,
     data: {
       apiKey: uuid(),

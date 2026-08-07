@@ -11,6 +11,7 @@ export const noRetriesSetWorkflow: WorkflowConfig<'workflowNoRetriesSet'> = {
   ],
   handler: async ({ job, tasks, req }) => {
     const updatedJob = await req.payload.update({
+      overrideAccess: true,
       collection: 'payload-jobs',
       data: {
         input: {

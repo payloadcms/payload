@@ -95,6 +95,7 @@ describe('Queues - scheduling, with automatic scheduling handling', () => {
     await new Promise((resolve) => setTimeout(resolve, 3500)) // 3 seconds + 0.5 seconds to ensure the last job has been completed
 
     const allSimples = await payload.find({
+      overrideAccess: true,
       collection: 'simple',
       limit: 100,
     })

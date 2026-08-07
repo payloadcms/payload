@@ -37,6 +37,7 @@ describePostgres('queues - postgres logs', () => {
   it('ensure running jobs uses minimal db calls', async () => {
     await withoutAutoRun(async () => {
       await payload.jobs.queue({
+        overrideAccess: true,
         task: 'DoNothingTask',
         input: {
           message: 'test',
@@ -46,7 +47,7 @@ describePostgres('queues - postgres logs', () => {
       // Count every console log (= db call)
       const consoleCount = vitest.spyOn(console, 'log').mockImplementation(() => {})
 
-      const res = await payload.jobs.run({})
+      const res = await payload.jobs.run({ overrideAccess: true })
 
       expect(res).toEqual({
         jobStatus: { '1': { status: 'success' } },

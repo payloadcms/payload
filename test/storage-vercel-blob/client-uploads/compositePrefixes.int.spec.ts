@@ -40,6 +40,7 @@ describe('@payloadcms/storage-vercel-blob clientUploads (composite prefixes)', (
   afterEach(async () => {
     for (const id of createdDocIDs) {
       await payload.delete({
+        overrideAccess: true,
         id,
         collection: mediaWithCompositePrefixesSlug,
       })

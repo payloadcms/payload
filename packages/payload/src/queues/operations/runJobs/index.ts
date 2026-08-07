@@ -104,7 +104,7 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
 
   if (!overrideAccess) {
     /**
-     * By default, jobsConfig.access.run will be `defaultAccess` which is a function that returns `true` if the user is logged in.
+     * By default, jobsConfig.access.run will be `defaultAccess`, which allows users from the configured Admin user collection.
      */
     const accessFn = jobsConfig?.access?.run ?? (() => true)
     const hasAccess = await accessFn({ req })

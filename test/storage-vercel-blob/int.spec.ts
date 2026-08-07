@@ -40,16 +40,21 @@ describe('@payloadcms/storage-vercel-blob', () => {
   afterEach(async () => {
     await clearTestBlobs()
     await Promise.all([
-      payload.delete({ collection: mediaSlug, where: {} }),
-      payload.delete({ collection: mediaWithPrefixSlug, where: {} }),
-      payload.delete({ collection: mediaWithAlwaysInsertFieldsSlug, where: {} }),
-      payload.delete({ collection: mediaWithDirectAccessSlug, where: {} }),
-      payload.delete({ collection: mediaWithDynamicPrefixSlug, where: {} }),
+      payload.delete({ overrideAccess: true, collection: mediaSlug, where: {} }),
+      payload.delete({ overrideAccess: true, collection: mediaWithPrefixSlug, where: {} }),
+      payload.delete({
+        overrideAccess: true,
+        collection: mediaWithAlwaysInsertFieldsSlug,
+        where: {},
+      }),
+      payload.delete({ overrideAccess: true, collection: mediaWithDirectAccessSlug, where: {} }),
+      payload.delete({ overrideAccess: true, collection: mediaWithDynamicPrefixSlug, where: {} }),
     ])
   })
 
   it('can upload', async () => {
     const upload = await payload.create({
+      overrideAccess: true,
       collection: mediaSlug,
       data: {},
       filePath: path.resolve(dirname, '../uploads/image.png'),
@@ -68,6 +73,7 @@ describe('@payloadcms/storage-vercel-blob', () => {
 
   it('can upload with prefix', async () => {
     const upload = await payload.create({
+      overrideAccess: true,
       collection: mediaWithPrefixSlug,
       data: {},
       filePath: path.resolve(dirname, '../uploads/image.png'),
@@ -89,6 +95,7 @@ describe('@payloadcms/storage-vercel-blob', () => {
 
   it('has prefix field with alwaysInsertFields even when plugin is disabled', async () => {
     const upload = await payload.create({
+      overrideAccess: true,
       collection: mediaWithAlwaysInsertFieldsSlug,
       data: {
         prefix: 'test',
@@ -107,6 +114,7 @@ describe('@payloadcms/storage-vercel-blob', () => {
 
   it('should serve file through static handler with correct headers', async () => {
     await payload.create({
+      overrideAccess: true,
       collection: mediaSlug,
       data: {},
       filePath: path.resolve(dirname, '../uploads/image.png'),
@@ -122,6 +130,7 @@ describe('@payloadcms/storage-vercel-blob', () => {
 
   it('should return 304 when ETag matches', async () => {
     await payload.create({
+      overrideAccess: true,
       collection: mediaSlug,
       data: {},
       filePath: path.resolve(dirname, '../uploads/image.png'),
@@ -142,6 +151,7 @@ describe('@payloadcms/storage-vercel-blob', () => {
   describe('disablePayloadAccessControl', () => {
     it('should return direct blob URL when uploading', async () => {
       const upload = await payload.create({
+        overrideAccess: true,
         collection: mediaWithDirectAccessSlug,
         data: {},
         filePath: path.resolve(dirname, '../uploads/image.png'),
@@ -159,6 +169,7 @@ describe('@payloadcms/storage-vercel-blob', () => {
 
     it('should store full blob URLs for image sizes in database', async () => {
       const upload = await payload.create({
+        overrideAccess: true,
         collection: mediaWithDirectAccessSlug,
         data: {},
         filePath: path.resolve(dirname, '../uploads/image.png'),
@@ -178,6 +189,7 @@ describe('@payloadcms/storage-vercel-blob', () => {
 
     it('should return direct blob URL with encoded filename for file with spaces', async () => {
       const upload = await payload.create({
+        overrideAccess: true,
         collection: mediaWithDirectAccessSlug,
         data: {},
         filePath: path.resolve(dirname, '../uploads/image with spaces.png'),
@@ -196,21 +208,27 @@ describe('@payloadcms/storage-vercel-blob', () => {
   describe('prefix collision detection', () => {
     beforeEach(async () => {
       await clearTestBlobs()
-      await payload.delete({ collection: mediaWithPrefixSlug, where: {} })
-      await payload.delete({ collection: mediaSlug, where: {} })
-      await payload.delete({ collection: mediaWithAlwaysInsertFieldsSlug, where: {} })
+      await payload.delete({ overrideAccess: true, collection: mediaWithPrefixSlug, where: {} })
+      await payload.delete({ overrideAccess: true, collection: mediaSlug, where: {} })
+      await payload.delete({
+        overrideAccess: true,
+        collection: mediaWithAlwaysInsertFieldsSlug,
+        where: {},
+      })
     })
 
     it('detects collision within same prefix', async () => {
       const imageFile = path.resolve(dirname, '../uploads/image.png')
 
       const upload1 = await payload.create({
+        overrideAccess: true,
         collection: mediaWithPrefixSlug,
         data: {},
         filePath: imageFile,
       })
 
       const upload2 = await payload.create({
+        overrideAccess: true,
         collection: mediaWithPrefixSlug,
         data: {},
         filePath: imageFile,
@@ -226,12 +244,14 @@ describe('@payloadcms/storage-vercel-blob', () => {
       const imageFile = path.resolve(dirname, '../uploads/image.png')
 
       const upload1 = await payload.create({
+        overrideAccess: true,
         collection: mediaSlug,
         data: {},
         filePath: imageFile,
       })
 
       const upload2 = await payload.create({
+        overrideAccess: true,
         collection: mediaSlug,
         data: {},
         filePath: imageFile,
@@ -249,12 +269,14 @@ describe('@payloadcms/storage-vercel-blob', () => {
       const imageFile = path.resolve(dirname, '../uploads/image.png')
 
       const upload1 = await payload.create({
+        overrideAccess: true,
         collection: mediaWithPrefixSlug,
         data: {},
         filePath: imageFile,
       })
 
       const upload2 = await payload.create({
+        overrideAccess: true,
         collection: mediaWithPrefixSlug,
         data: { prefix: 'different-prefix' },
         filePath: imageFile,
@@ -270,12 +292,14 @@ describe('@payloadcms/storage-vercel-blob', () => {
       const imageFile = path.resolve(dirname, '../uploads/image.png')
 
       const tenantAUpload = await payload.create({
+        overrideAccess: true,
         collection: mediaWithDynamicPrefixSlug,
         data: { tenant: 'a' },
         filePath: imageFile,
       })
 
       const tenantBUpload = await payload.create({
+        overrideAccess: true,
         collection: mediaWithDynamicPrefixSlug,
         data: { tenant: 'b' },
         filePath: imageFile,

@@ -48,8 +48,8 @@ type BaseOptions<TSlug extends CollectionSlug> = {
   locale?: 'all' | TypedLocale
   /**
    * Skip access control.
-   * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the front-end.
-   * @default true
+   * Set to `true` to bypass Access Control for trusted server-side operations.
+   * @default false
    */
   overrideAccess?: boolean
   /**
@@ -92,7 +92,7 @@ type BaseOptions<TSlug extends CollectionSlug> = {
    */
   trash?: boolean
   /**
-   * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
+   * Pass a user to use against access control checks. The user is ignored for access checks when `overrideAccess` is `true`.
    */
   user?: null | User
   /**
@@ -112,7 +112,7 @@ export async function findVersionsLocal<TSlug extends CollectionSlug>(
     collection: collectionSlug,
     depth,
     limit,
-    overrideAccess = true,
+    overrideAccess = false,
     page,
     pagination = true,
     populate,

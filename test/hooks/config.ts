@@ -69,6 +69,7 @@ export const HooksConfig: Promise<SanitizedConfig> = buildConfigWithDefaults({
   onInit: async (payload) => {
     await seedHooksUsers(payload)
     await payload.create({
+      overrideAccess: true,
       collection: hooksSlug,
       data: {
         fieldBeforeValidate: false,

@@ -27,7 +27,11 @@ import {
 } from './collections/NestedAfterReadHooks/index.js'
 import { relationsSlug } from './collections/Relations/index.js'
 import { transformSlug } from './collections/Transform/index.js'
-import { hooksUsersSlug } from './collections/Users/index.js'
+import {
+  clearAuthOperationOverrideAccess,
+  getAuthOperationOverrideAccess,
+  hooksUsersSlug,
+} from './collections/Users/index.js'
 import { HooksConfig } from './config.js'
 import { dataHooksGlobalSlug } from './globals/Data/index.js'
 import { afterReadSlug, beforeValidateSlug, overrideAccessSlug } from './shared.js'
@@ -51,6 +55,7 @@ describe('Hooks', () => {
       it('should create and not throw an error', async () => {
         // the collection has hooks that will cause an error if transform actions is not handled properly
         const doc = await payload.create({
+          overrideAccess: true,
           collection: transformSlug,
           data: {
             localizedTransform: [2, 8],
@@ -79,6 +84,7 @@ describe('Hooks', () => {
     }
     beforeEach(async () => {
       doc = await payload.create({
+        overrideAccess: true,
         collection: hooksSlug,
         data,
       })
@@ -99,6 +105,7 @@ describe('Hooks', () => {
 
     it('should execute hooks in correct order on update', async () => {
       doc = await payload.update({
+        overrideAccess: true,
         id: doc.id,
         collection: hooksSlug,
         data,
@@ -118,6 +125,7 @@ describe('Hooks', () => {
 
     it('should execute hooks in correct order on find', async () => {
       doc = await payload.findByID({
+        overrideAccess: true,
         id: doc.id,
         collection: hooksSlug,
       })
@@ -129,6 +137,7 @@ describe('Hooks', () => {
 
     it('should save data generated with afterRead hooks in nested field structures', async () => {
       const document = await payload.create({
+        overrideAccess: true,
         collection: nestedAfterReadHooksSlug,
         data: {
           group: {
@@ -144,6 +153,7 @@ describe('Hooks', () => {
 
     it('should populate related docs within nested field structures', async () => {
       const relation = await payload.create({
+        overrideAccess: true,
         collection: relationsSlug,
         data: {
           title: 'Hello',
@@ -151,6 +161,7 @@ describe('Hooks', () => {
       })
 
       const document = await payload.create({
+        overrideAccess: true,
         collection: nestedAfterReadHooksSlug,
         data: {
           group: {
@@ -168,6 +179,7 @@ describe('Hooks', () => {
       })
 
       const retrievedDoc = await payload.findByID({
+        overrideAccess: true,
         id: document.id,
         collection: nestedAfterReadHooksSlug,
       })
@@ -178,6 +190,7 @@ describe('Hooks', () => {
 
     it('should pass result from previous hook into next hook with findByID', async () => {
       const document = await payload.create({
+        overrideAccess: true,
         collection: chainingHooksSlug,
         data: {
           text: 'ok',
@@ -185,6 +198,7 @@ describe('Hooks', () => {
       })
 
       const retrievedDoc = await payload.findByID({
+        overrideAccess: true,
         id: document.id,
         collection: chainingHooksSlug,
       })
@@ -194,6 +208,7 @@ describe('Hooks', () => {
 
     it('should pass result from previous hook into next hook with find', async () => {
       const document = await payload.create({
+        overrideAccess: true,
         collection: chainingHooksSlug,
         data: {
           text: 'ok',
@@ -201,6 +216,7 @@ describe('Hooks', () => {
       })
 
       const { docs: retrievedDocs } = await payload.find({
+        overrideAccess: true,
         collection: chainingHooksSlug,
       })
 
@@ -210,12 +226,14 @@ describe('Hooks', () => {
     it('should execute collection afterOperation hook', async () => {
       const [doc1, doc2] = await Promise.all([
         await payload.create({
+          overrideAccess: true,
           collection: afterOperationSlug,
           data: {
             title: 'Title',
           },
         }),
         await payload.create({
+          overrideAccess: true,
           collection: afterOperationSlug,
           data: {
             title: 'Title',
@@ -227,6 +245,7 @@ describe('Hooks', () => {
       expect(doc2.title === 'Title created').toBeTruthy()
 
       const findResult = await payload.find({
+        overrideAccess: true,
         collection: afterOperationSlug,
       })
 
@@ -236,6 +255,7 @@ describe('Hooks', () => {
 
       const [updatedDoc1, updatedDoc2] = await Promise.all([
         await payload.update({
+          overrideAccess: true,
           id: doc1.id,
           collection: afterOperationSlug,
           data: {
@@ -243,6 +263,7 @@ describe('Hooks', () => {
           },
         }),
         await payload.update({
+          overrideAccess: true,
           id: doc2.id,
           collection: afterOperationSlug,
           data: {
@@ -255,6 +276,7 @@ describe('Hooks', () => {
       expect(updatedDoc2.title === 'Title updated').toBeTruthy()
 
       const findResult2 = await payload.find({
+        overrideAccess: true,
         collection: afterOperationSlug,
       })
 
@@ -265,6 +287,7 @@ describe('Hooks', () => {
 
     it('should pass context from beforeChange to afterChange', async () => {
       const document = await payload.create({
+        overrideAccess: true,
         collection: contextHooksSlug,
         data: {
           value: 'wrongvalue',
@@ -272,6 +295,7 @@ describe('Hooks', () => {
       })
 
       const retrievedDoc = await payload.findByID({
+        overrideAccess: true,
         id: document.id,
         collection: contextHooksSlug,
       })
@@ -281,6 +305,7 @@ describe('Hooks', () => {
 
     it('should pass context from local API to hooks', async () => {
       const document = await payload.create({
+        overrideAccess: true,
         collection: contextHooksSlug,
         context: {
           secretValue: 'data from Local API',
@@ -291,6 +316,7 @@ describe('Hooks', () => {
       })
 
       const retrievedDoc = await payload.findByID({
+        overrideAccess: true,
         id: document.id,
         collection: contextHooksSlug,
       })
@@ -300,12 +326,14 @@ describe('Hooks', () => {
 
     it('should pass context from Local API to global hooks', async () => {
       const globalDocument = await payload.findGlobal({
+        overrideAccess: true,
         slug: dataHooksGlobalSlug,
       })
 
       expect(globalDocument.field_globalAndField).not.toEqual('data from Local API context')
 
       const globalDocumentWithContext = await payload.findGlobal({
+        overrideAccess: true,
         slug: dataHooksGlobalSlug,
         context: {
           field_beforeChange_GlobalAndField_override: 'data from Local API context',
@@ -328,6 +356,7 @@ describe('Hooks', () => {
         .then((res) => res.json())
 
       const retrievedDoc = await payload.findByID({
+        overrideAccess: true,
         collection: contextHooksSlug,
         id: doc.id,
       })
@@ -338,6 +367,7 @@ describe('Hooks', () => {
     it('should populate previousValue in nested afterChange hooks', async () => {
       // this collection will throw an error if previousValue is not defined in nested afterChange hook
       const nestedAfterChangeDoc = await payload.create({
+        overrideAccess: true,
         collection: nestedAfterChangeHooksSlug,
         data: {
           text: 'initial',
@@ -352,6 +382,7 @@ describe('Hooks', () => {
       })
 
       const updatedDoc = await payload.update({
+        overrideAccess: true,
         collection: 'nested-after-change-hooks',
         id: nestedAfterChangeDoc.id,
         data: {
@@ -371,6 +402,7 @@ describe('Hooks', () => {
 
     it('should populate previousValue in Lexical nested afterChange hooks', async () => {
       const relationID = await payload.create({
+        overrideAccess: true,
         collection: 'relations',
         data: {
           title: 'Relation for nested afterChange',
@@ -379,6 +411,7 @@ describe('Hooks', () => {
 
       // this collection will throw an error if previousValue is not defined in nested afterChange hook
       const nestedAfterChangeDoc = await payload.create({
+        overrideAccess: true,
         collection: nestedAfterChangeHooksSlug,
         data: {
           text: 'initial',
@@ -465,6 +498,7 @@ describe('Hooks', () => {
 
       await expect(
         payload.update({
+          overrideAccess: true,
           collection: 'nested-after-change-hooks',
           id: nestedAfterChangeDoc.id,
           data: {
@@ -489,9 +523,11 @@ describe('Hooks', () => {
           password: devUser.password,
           roles: ['admin'],
         },
+        overrideAccess: true,
       })
 
       const { token } = await payload.login({
+        overrideAccess: true,
         collection: hooksUsersSlug,
         data: {
           email: hookUser.email,
@@ -502,8 +538,48 @@ describe('Hooks', () => {
       hookUserToken = token
     })
 
+    beforeEach(() => {
+      clearAuthOperationOverrideAccess()
+    })
+
+    it('should default overrideAccess to false for login', async () => {
+      await payload.login({
+        collection: hooksUsersSlug,
+        data: {
+          email: devUser.email,
+          password: devUser.password,
+        },
+      })
+
+      expect(getAuthOperationOverrideAccess('login')).toBe(false)
+    })
+
+    it('should default overrideAccess to false for forgot password', async () => {
+      await payload.forgotPassword({
+        collection: hooksUsersSlug,
+        data: {
+          email: devUser.email,
+        },
+        disableEmail: true,
+      })
+
+      expect(getAuthOperationOverrideAccess('forgotPassword')).toBe(false)
+    })
+
+    it('should default overrideAccess to false for unlock', async () => {
+      await payload.unlock({
+        collection: hooksUsersSlug,
+        data: {
+          email: devUser.email,
+        },
+      })
+
+      expect(getAuthOperationOverrideAccess('unlock')).toBe(false)
+    })
+
     it('should call afterLogin hook', async () => {
       const { user } = await payload.login({
+        overrideAccess: true,
         collection: hooksUsersSlug,
         data: {
           email: devUser.email,
@@ -512,6 +588,7 @@ describe('Hooks', () => {
       })
 
       const result = await payload.findByID({
+        overrideAccess: true,
         id: user.id,
         collection: hooksUsersSlug,
       })
@@ -530,11 +607,13 @@ describe('Hooks', () => {
           roles: ['admin'],
           afterLoginHook: false,
         },
+        overrideAccess: true,
       })
 
       expect(resetUser.afterLoginHook).toStrictEqual(false)
 
       const token = await payload.forgotPassword({
+        overrideAccess: true,
         collection: hooksUsersSlug,
         data: {
           email: resetUser.email,
@@ -555,6 +634,7 @@ describe('Hooks', () => {
       expect(user.afterLoginHook).toStrictEqual(true)
 
       const result = await payload.findByID({
+        overrideAccess: true,
         id: user.id,
         collection: hooksUsersSlug,
       })
@@ -565,6 +645,7 @@ describe('Hooks', () => {
     it('deny user login', async () => {
       await expect(() =>
         payload.login({
+          overrideAccess: true,
           collection: hooksUsersSlug,
           data: { email: regularUser.email, password: regularUser.password },
         }),
@@ -605,6 +686,7 @@ describe('Hooks', () => {
       )
 
       const doc = await payload.create({
+        overrideAccess: true,
         collection: dataHooksSlug,
         data: {},
       })
@@ -631,6 +713,7 @@ describe('Hooks', () => {
 
       // BeforeRead is only run for find operations
       const foundDoc = await payload.findByID({
+        overrideAccess: true,
         id: doc.id,
         collection: dataHooksSlug,
       })
@@ -651,6 +734,7 @@ describe('Hooks', () => {
       )
 
       const doc = await payload.create({
+        overrideAccess: true,
         collection: dataHooksSlug,
         data: {},
       })
@@ -667,6 +751,7 @@ describe('Hooks', () => {
       )
 
       const doc = await payload.updateGlobal({
+        overrideAccess: true,
         slug: dataHooksGlobalSlug,
         data: {},
       })
@@ -677,6 +762,7 @@ describe('Hooks', () => {
 
       // beforeRead is only run for findOne operations
       const foundDoc = await payload.findGlobal({
+        overrideAccess: true,
         slug: dataHooksGlobalSlug,
       })
 
@@ -698,6 +784,7 @@ describe('Hooks', () => {
       )
 
       const doc = await payload.updateGlobal({
+        overrideAccess: true,
         slug: dataHooksGlobalSlug,
         data: {},
       })
@@ -720,6 +807,7 @@ describe('Hooks', () => {
   describe('beforeValidate', () => {
     it('should have correct arguments', async () => {
       const doc = await payload.create({
+        overrideAccess: true,
         collection: beforeValidateSlug,
         data: {
           selection: 'b',
@@ -727,6 +815,7 @@ describe('Hooks', () => {
       })
 
       const updateResult = await payload.update({
+        overrideAccess: true,
         id: doc.id,
         collection: beforeValidateSlug,
         data: {
@@ -748,6 +837,7 @@ describe('Hooks', () => {
 
     it('should pass correct operation arg on create', async () => {
       await payload.create({
+        overrideAccess: true,
         collection: beforeOperationSlug,
         data: {},
       })
@@ -757,11 +847,13 @@ describe('Hooks', () => {
 
     it('should pass correct operation arg on update', async () => {
       const doc = await payload.create({
+        overrideAccess: true,
         collection: beforeOperationSlug,
         data: {},
       })
 
       await payload.update({
+        overrideAccess: true,
         id: doc.id,
         collection: beforeOperationSlug,
         data: {},
@@ -772,11 +864,13 @@ describe('Hooks', () => {
 
     it('should pass correct operation arg on updateByID', async () => {
       const doc = await payload.create({
+        overrideAccess: true,
         collection: beforeOperationSlug,
         data: {},
       })
 
       await payload.update({
+        overrideAccess: true,
         id: doc.id,
         collection: beforeOperationSlug,
         data: {},
@@ -787,11 +881,13 @@ describe('Hooks', () => {
 
     it('should pass correct operation arg on read (findByID)', async () => {
       const doc = await payload.create({
+        overrideAccess: true,
         collection: beforeOperationSlug,
         data: {},
       })
 
       await payload.findByID({
+        overrideAccess: true,
         id: doc.id,
         collection: beforeOperationSlug,
       })
@@ -801,6 +897,7 @@ describe('Hooks', () => {
 
     it('should pass correct operation arg on read (find)', async () => {
       await payload.create({
+        overrideAccess: true,
         collection: beforeOperationSlug,
         data: {},
       })
@@ -808,6 +905,7 @@ describe('Hooks', () => {
       clearLastOperation()
 
       await payload.find({
+        overrideAccess: true,
         collection: beforeOperationSlug,
       })
 
@@ -816,19 +914,23 @@ describe('Hooks', () => {
 
     it('should pass correct operation arg on readDistinct (findDistinct)', async () => {
       await payload.create({
+        overrideAccess: true,
         collection: beforeOperationSlug,
         data: { category: 'test1' },
       })
       await payload.create({
+        overrideAccess: true,
         collection: beforeOperationSlug,
         data: { category: 'test2' },
       })
       await payload.create({
+        overrideAccess: true,
         collection: beforeOperationSlug,
         data: { category: 'test1' },
       })
 
       await payload.findDistinct({
+        overrideAccess: true,
         collection: beforeOperationSlug,
         field: 'category',
       })
@@ -838,11 +940,13 @@ describe('Hooks', () => {
 
     it('should pass correct operation arg on delete', async () => {
       const doc = await payload.create({
+        overrideAccess: true,
         collection: beforeOperationSlug,
         data: {},
       })
 
       await payload.delete({
+        overrideAccess: true,
         id: doc.id,
         collection: beforeOperationSlug,
       })
@@ -852,11 +956,13 @@ describe('Hooks', () => {
 
     it('should pass correct operation arg on deleteByID', async () => {
       const doc = await payload.create({
+        overrideAccess: true,
         collection: beforeOperationSlug,
         data: {},
       })
 
       await payload.delete({
+        overrideAccess: true,
         id: doc.id,
         collection: beforeOperationSlug,
       })
@@ -866,11 +972,13 @@ describe('Hooks', () => {
 
     it('should pass correct operation arg on count', async () => {
       await payload.create({
+        overrideAccess: true,
         collection: beforeOperationSlug,
         data: {},
       })
 
       await payload.count({
+        overrideAccess: true,
         collection: beforeOperationSlug,
       })
 
@@ -879,11 +987,13 @@ describe('Hooks', () => {
 
     it('should pass correct operation arg on countVersions', async () => {
       const doc = await payload.create({
+        overrideAccess: true,
         collection: beforeOperationSlug,
         data: {},
       })
 
       await payload.countVersions({
+        overrideAccess: true,
         collection: beforeOperationSlug,
         where: {
           parent: {
@@ -897,11 +1007,13 @@ describe('Hooks', () => {
 
     it('should pass correct operation arg on findVersions', async () => {
       const doc = await payload.create({
+        overrideAccess: true,
         collection: beforeOperationSlug,
         data: {},
       })
 
       await payload.findVersions({
+        overrideAccess: true,
         collection: beforeOperationSlug,
         where: {
           parent: {
@@ -915,18 +1027,21 @@ describe('Hooks', () => {
 
     it('should pass correct operation arg on findVersionByID', async () => {
       const doc = await payload.create({
+        overrideAccess: true,
         collection: beforeOperationSlug,
         data: { category: 'v1' },
       })
 
       // Update to create a version
       await payload.update({
+        overrideAccess: true,
         id: doc.id,
         collection: beforeOperationSlug,
         data: { category: 'v2' },
       })
 
       const versions = await payload.findVersions({
+        overrideAccess: true,
         collection: beforeOperationSlug,
         where: {
           parent: {
@@ -938,6 +1053,7 @@ describe('Hooks', () => {
       expect(versions.docs.length).toBeGreaterThan(0)
 
       await payload.findVersionByID({
+        overrideAccess: true,
         collection: beforeOperationSlug,
         id: versions.docs[0]!.id,
       })
@@ -947,18 +1063,21 @@ describe('Hooks', () => {
 
     it('should pass correct operation arg on restoreVersion', async () => {
       const doc = await payload.create({
+        overrideAccess: true,
         collection: beforeOperationSlug,
         data: { category: 'v1' },
       })
 
       // Update to create a version
       await payload.update({
+        overrideAccess: true,
         id: doc.id,
         collection: beforeOperationSlug,
         data: { category: 'v2' },
       })
 
       const versions = await payload.findVersions({
+        overrideAccess: true,
         collection: beforeOperationSlug,
         where: {
           parent: {
@@ -970,6 +1089,7 @@ describe('Hooks', () => {
       expect(versions.docs.length).toBeGreaterThan(0)
 
       await payload.restoreVersion({
+        overrideAccess: true,
         collection: beforeOperationSlug,
         id: versions.docs[0]!.id,
       })
@@ -981,6 +1101,7 @@ describe('Hooks', () => {
   describe('afterRead', () => {
     it('should return same for find and findByID', async () => {
       const createdDoc = await payload.create({
+        overrideAccess: true,
         collection: afterReadSlug,
         data: {
           title: 'test',
@@ -988,11 +1109,13 @@ describe('Hooks', () => {
       })
 
       const docFromFind = await payload.findByID({
+        overrideAccess: true,
         collection: afterReadSlug,
         id: createdDoc.id,
       })
 
       const { docs } = await payload.find({
+        overrideAccess: true,
         collection: afterReadSlug,
         where: {
           id: {
@@ -1014,7 +1137,7 @@ describe('Hooks', () => {
 
     afterEach(async () => {
       for (const id of createdIDs) {
-        await payload.delete({ collection: overrideAccessSlug, id })
+        await payload.delete({ overrideAccess: true, collection: overrideAccessSlug, id })
       }
       createdIDs.length = 0
     })
@@ -1115,8 +1238,9 @@ describe('Hooks', () => {
       expect(result.afterReadOverrideAccess).toBe(false)
     })
 
-    it('should default to true when overrideAccess is not specified in Local API', async () => {
+    it('should default to false when overrideAccess is not specified in Local API', async () => {
       const doc = await payload.create({
+        overrideAccess: true,
         collection: overrideAccessSlug,
         data: { title: 'Test Default' },
       })
@@ -1130,8 +1254,16 @@ describe('Hooks', () => {
 
       expect(result.beforeReadCalled).toBe(true)
       expect(result.afterReadCalled).toBe(true)
-      expect(result.beforeReadOverrideAccess).toBe(true)
-      expect(result.afterReadOverrideAccess).toBe(true)
+      expect(result.beforeReadOverrideAccess).toBe(false)
+      expect(result.afterReadOverrideAccess).toBe(false)
+    })
+
+    it('should default to false for global Local API operations', async () => {
+      const result = await payload.findGlobal({
+        slug: dataHooksGlobalSlug,
+      })
+
+      expect(result.afterReadOverrideAccess).toBe(false)
     })
   })
 })

@@ -22,6 +22,7 @@ export const getDoc = async <T>(args: {
 
   try {
     const { docs } = await payload.find({
+      overrideAccess: true,
       collection,
       depth,
       where,

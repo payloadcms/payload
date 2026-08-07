@@ -6,6 +6,7 @@ export const getDocs = async <T>(collection: CollectionSlug): Promise<T[]> => {
 
   try {
     const { docs } = await payload.find({
+      overrideAccess: true,
       collection,
       depth: 0,
       limit: 100,

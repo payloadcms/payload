@@ -557,6 +557,7 @@ export default buildConfigWithDefaults({
     const collection = localizedPostsSlug
 
     await payload.create({
+      overrideAccess: true,
       collection,
       data: {
         title: englishTitle,
@@ -564,6 +565,7 @@ export default buildConfigWithDefaults({
     })
 
     const localizedPost = await payload.create({
+      overrideAccess: true,
       collection,
       data: {
         title: englishTitle,
@@ -571,6 +573,7 @@ export default buildConfigWithDefaults({
     })
 
     await payload.create({
+      overrideAccess: true,
       collection: localizedDateFieldsSlug,
       data: {
         localizedDate: new Date().toISOString(),
@@ -579,6 +582,7 @@ export default buildConfigWithDefaults({
     })
 
     await payload.create({
+      overrideAccess: true,
       collection: 'users',
       data: {
         email: devUser.email,
@@ -588,6 +592,7 @@ export default buildConfigWithDefaults({
     })
 
     await payload.update({
+      overrideAccess: true,
       id: localizedPost.id,
       collection,
       data: {
@@ -597,6 +602,7 @@ export default buildConfigWithDefaults({
     })
 
     const localizedRelation = await payload.create({
+      overrideAccess: true,
       collection,
       data: {
         title: relationEnglishTitle,
@@ -604,6 +610,7 @@ export default buildConfigWithDefaults({
     })
 
     await payload.update({
+      overrideAccess: true,
       id: localizedPost.id,
       collection,
       data: {
@@ -613,12 +620,14 @@ export default buildConfigWithDefaults({
     })
 
     const localizedRelation2 = await payload.create({
+      overrideAccess: true,
       collection,
       data: {
         title: relationEnglishTitle2,
       },
     })
     await payload.update({
+      overrideAccess: true,
       id: localizedPost.id,
       collection,
       data: {
@@ -628,6 +637,7 @@ export default buildConfigWithDefaults({
     })
 
     await payload.create({
+      overrideAccess: true,
       collection: withLocalizedRelSlug,
       data: {
         localizedRelationHasManyField: [localizedRelation.id, localizedRelation2.id],
@@ -640,6 +650,7 @@ export default buildConfigWithDefaults({
       },
     })
     const relationshipLocalized = await payload.create({
+      overrideAccess: true,
       collection: relationshipLocalizedSlug,
       data: {
         arrayField: [
@@ -659,6 +670,7 @@ export default buildConfigWithDefaults({
     })
 
     await payload.update({
+      overrideAccess: true,
       collection: relationshipLocalizedSlug,
       id: relationshipLocalized.id,
       data: {
@@ -668,6 +680,7 @@ export default buildConfigWithDefaults({
     })
 
     const globalArray = await payload.updateGlobal({
+      overrideAccess: true,
       data: {
         array: [
           {
@@ -682,6 +695,7 @@ export default buildConfigWithDefaults({
     })
 
     await payload.updateGlobal({
+      overrideAccess: true,
       data: {
         array: globalArray.array.map((row, i) => ({
           ...row,

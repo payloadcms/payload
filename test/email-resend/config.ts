@@ -24,6 +24,7 @@ export default buildConfigWithDefaults({
   }),
   onInit: async (payload) => {
     await payload.create({
+      overrideAccess: true,
       collection: 'users',
       data: {
         email: devUser.email,

@@ -64,6 +64,7 @@ describe('@payloadcms/storage-azure streamingUploads', () => {
 
   it('can upload', async () => {
     const upload = await payload.create({
+      overrideAccess: true,
       collection: mediaSlug,
       data: {},
       filePath: path.resolve(dirname, '../uploads/image.png'),
@@ -76,6 +77,7 @@ describe('@payloadcms/storage-azure streamingUploads', () => {
 
   it('can upload with prefix', async () => {
     const upload = await payload.create({
+      overrideAccess: true,
       collection: mediaWithPrefixSlug,
       data: {},
       filePath: path.resolve(dirname, '../uploads/image.png'),
@@ -113,6 +115,7 @@ describe('@payloadcms/storage-azure streamingUploads', () => {
     uploadId: number | string
   }) {
     const uploadData = (await payload.findByID({
+      overrideAccess: true,
       collection: collectionSlug,
       id: uploadId,
     })) as unknown as { filename: string; sizes: Record<string, { filename: string }> }

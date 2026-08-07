@@ -4,6 +4,7 @@ import { devUser } from '../../credentials.js'
 
 export const seed: Config['onInit'] = async (payload) => {
   await payload.create({
+    overrideAccess: true,
     collection: 'users',
     data: {
       email: devUser.email,
@@ -13,6 +14,7 @@ export const seed: Config['onInit'] = async (payload) => {
 
   // Seed some sample posts
   await payload.create({
+    overrideAccess: true,
     collection: 'posts',
     data: {
       content: 'This is the content of the first post.',
@@ -21,6 +23,7 @@ export const seed: Config['onInit'] = async (payload) => {
   })
 
   await payload.create({
+    overrideAccess: true,
     collection: 'posts',
     data: {
       content: 'This is the content of the second post.',
@@ -29,6 +32,7 @@ export const seed: Config['onInit'] = async (payload) => {
   })
 
   await payload.create({
+    overrideAccess: true,
     collection: 'posts',
     data: {
       content: 'This is the content of the third post.',

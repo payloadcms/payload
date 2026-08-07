@@ -77,6 +77,7 @@ describe('Collections - Live Preview', () => {
     }
 
     tenant = await payload.create({
+      overrideAccess: true,
       collection: tenantsSlug,
       data: {
         title: 'Tenant 1',
@@ -90,6 +91,7 @@ describe('Collections - Live Preview', () => {
     file.name = 'image-1.jpg'
 
     media = await payload.create({
+      overrideAccess: true,
       collection: 'media',
       data: {
         alt: 'Image 1',
@@ -98,6 +100,7 @@ describe('Collections - Live Preview', () => {
     })
 
     testPost = await payload.create({
+      overrideAccess: true,
       collection: postsSlug,
       data: {
         slug: 'post-1',
@@ -155,6 +158,7 @@ describe('Collections - Live Preview', () => {
     })
 
     const page = await payload.create({
+      overrideAccess: true,
       collection: pagesSlug,
       depth: 0,
       data: {
@@ -775,6 +779,7 @@ describe('Collections - Live Preview', () => {
 
     // Update the test post
     const updatedTestPost = await payload.update({
+      overrideAccess: true,
       collection: postsSlug,
       id: testPost.id,
       data: {
@@ -810,6 +815,7 @@ describe('Collections - Live Preview', () => {
 
   it('— relationships - populates localized relationships', async () => {
     const post = await payload.create({
+      overrideAccess: true,
       collection: postsSlug,
       data: {
         title: 'Test Post',
@@ -824,6 +830,7 @@ describe('Collections - Live Preview', () => {
     })
 
     await payload.update({
+      overrideAccess: true,
       id: post.id,
       locale: 'en',
       collection: postsSlug,
@@ -833,6 +840,7 @@ describe('Collections - Live Preview', () => {
     })
 
     const page = await payload.create({
+      overrideAccess: true,
       collection: pagesSlug,
       data: {
         title: 'Test Page',

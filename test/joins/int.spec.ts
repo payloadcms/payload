@@ -53,6 +53,7 @@ describe('Joins Field', () => {
     user = data.user
 
     category = await payload.create({
+      overrideAccess: true,
       collection: categoriesSlug,
       data: {
         name: 'paginate example',
@@ -61,6 +62,7 @@ describe('Joins Field', () => {
     })
 
     otherCategory = await payload.create({
+      overrideAccess: true,
       collection: categoriesSlug,
       data: {
         name: 'otherCategory',
@@ -73,6 +75,7 @@ describe('Joins Field', () => {
     const imageFile = await getFileByPath(imageFilePath)
 
     const { id: uploadedImage } = await payload.create({
+      overrideAccess: true,
       collection: uploadsSlug,
       data: {},
       file: imageFile,
@@ -129,6 +132,7 @@ describe('Joins Field', () => {
 
   it('should populate joins using findByID', async () => {
     const categoryWithPosts = await payload.findByID({
+      overrideAccess: true,
       id: category.id,
       joins: {
         'group.relatedPosts': {
@@ -146,6 +150,7 @@ describe('Joins Field', () => {
 
   it('should not populate joins if not selected', async () => {
     const categoryWithPosts = await payload.findByID({
+      overrideAccess: true,
       id: category.id,
       joins: {
         'group.relatedPosts': {
@@ -161,6 +166,7 @@ describe('Joins Field', () => {
 
   it('should populate joins if selected', async () => {
     const categoryWithPosts = await payload.findByID({
+      overrideAccess: true,
       id: category.id,
       joins: {
         'group.relatedPosts': {
@@ -188,6 +194,7 @@ describe('Joins Field', () => {
 
   it('should count joins', async () => {
     let categoryWithPosts = await payload.findByID({
+      overrideAccess: true,
       id: category.id,
       joins: {
         'group.relatedPosts': {
@@ -202,6 +209,7 @@ describe('Joins Field', () => {
 
     // With limit 1
     categoryWithPosts = await payload.findByID({
+      overrideAccess: true,
       id: category.id,
       joins: {
         'group.relatedPosts': {
@@ -218,6 +226,7 @@ describe('Joins Field', () => {
 
   it('should count hasMany relationship joins', async () => {
     const res = await payload.findByID({
+      overrideAccess: true,
       id: category.id,
       collection: categoriesSlug,
       joins: {
@@ -230,6 +239,7 @@ describe('Joins Field', () => {
 
   it('should populate relationships in joins', async () => {
     const { docs } = await payload.find({
+      overrideAccess: true,
       limit: 1,
       collection: postsSlug,
       depth: 2,
@@ -242,6 +252,7 @@ describe('Joins Field', () => {
 
   it('should populate relationships in joins with camelCase names', async () => {
     const { docs } = await payload.find({
+      overrideAccess: true,
       limit: 1,
       collection: postsSlug,
     })
@@ -253,6 +264,7 @@ describe('Joins Field', () => {
 
   it('should populate joins with array relationships', async () => {
     const categoryWithPosts = await payload.findByID({
+      overrideAccess: true,
       id: category.id,
       collection: categoriesSlug,
     })
@@ -263,6 +275,7 @@ describe('Joins Field', () => {
 
   it('should populate joins with array hasMany relationships', async () => {
     const categoryWithPosts = await payload.findByID({
+      overrideAccess: true,
       id: category.id,
       collection: categoriesSlug,
     })
@@ -273,6 +286,7 @@ describe('Joins Field', () => {
 
   it('should populate joins with localized array relationships', async () => {
     const categoryWithPosts = await payload.findByID({
+      overrideAccess: true,
       id: category.id,
       collection: categoriesSlug,
     })
@@ -283,6 +297,7 @@ describe('Joins Field', () => {
 
   it('should populate joins with blocks relationships', async () => {
     const categoryWithPosts = await payload.findByID({
+      overrideAccess: true,
       id: category.id,
       collection: categoriesSlug,
     })
@@ -292,6 +307,7 @@ describe('Joins Field', () => {
 
   it('should populate uploads in joins', async () => {
     const { docs } = await payload.find({
+      overrideAccess: true,
       limit: 1,
       collection: postsSlug,
     })
@@ -302,6 +318,7 @@ describe('Joins Field', () => {
 
   it('should join on polymorphic relationships', async () => {
     const categoryWithPosts = await payload.findByID({
+      overrideAccess: true,
       collection: categoriesSlug,
       id: category.id,
     })
@@ -313,6 +330,7 @@ describe('Joins Field', () => {
 
   it('should not throw a path validation error when querying joins with polymorphic relationships', async () => {
     const folderDoc = await payload.create({
+      overrideAccess: true,
       collection: 'folders',
       data: {
         name: 'sharedFolder',
@@ -320,6 +338,7 @@ describe('Joins Field', () => {
     })
 
     await payload.create({
+      overrideAccess: true,
       collection: 'folderPoly1',
       data: {
         folderPoly1Title: 'Poly 1 title',
@@ -329,6 +348,7 @@ describe('Joins Field', () => {
     })
 
     await payload.create({
+      overrideAccess: true,
       collection: 'folderPoly2',
       data: {
         folderPoly2Title: 'Poly 2 Title',
@@ -338,6 +358,7 @@ describe('Joins Field', () => {
     })
 
     const result = await payload.find({
+      overrideAccess: true,
       collection: 'folders',
       joins: {
         children: {
@@ -371,6 +392,7 @@ describe('Joins Field', () => {
 
   it('should allow join where query on hasMany select fields', async () => {
     const folderDoc = await payload.create({
+      overrideAccess: true,
       collection: 'folders',
       data: {
         name: 'scopedFolder',
@@ -379,6 +401,7 @@ describe('Joins Field', () => {
     })
 
     await payload.create({
+      overrideAccess: true,
       collection: 'folders',
       data: {
         name: 'childFolder',
@@ -388,6 +411,7 @@ describe('Joins Field', () => {
     })
 
     const findFolder = await payload.find({
+      overrideAccess: true,
       collection: 'folders',
       where: {
         id: {
@@ -420,8 +444,9 @@ describe('Joins Field', () => {
   })
 
   it('should query where with exists for hasMany select fields', async () => {
-    await payload.delete({ collection: 'folders', where: {} })
+    await payload.delete({ overrideAccess: true, collection: 'folders', where: {} })
     const folderDoc = await payload.create({
+      overrideAccess: true,
       collection: 'folders',
       data: {
         name: 'scopedFolder',
@@ -430,6 +455,7 @@ describe('Joins Field', () => {
     })
 
     await payload.create({
+      overrideAccess: true,
       collection: 'folders',
       data: {
         name: 'childFolder',
@@ -439,6 +465,7 @@ describe('Joins Field', () => {
     })
 
     const findFolder = await payload.find({
+      overrideAccess: true,
       collection: 'folders',
       where: {
         id: {
@@ -481,6 +508,7 @@ describe('Joins Field', () => {
 
   it('should filter joins using where query', async () => {
     const categoryWithPosts = await payload.findByID({
+      overrideAccess: true,
       id: category.id,
       joins: {
         relatedPosts: {
@@ -501,6 +529,7 @@ describe('Joins Field', () => {
 
   it('should apply defaultSort when no sort is specified in join query', async () => {
     const categoryWithPosts = await payload.findByID({
+      overrideAccess: true,
       id: category.id,
       collection: categoriesSlug,
     })
@@ -512,6 +541,7 @@ describe('Joins Field', () => {
 
   it('should override defaultSort when sort is specified in join query', async () => {
     const categoryWithPosts = await payload.findByID({
+      overrideAccess: true,
       id: category.id,
       collection: categoriesSlug,
       joins: {
@@ -527,6 +557,7 @@ describe('Joins Field', () => {
 
   it('should populate joins using find', async () => {
     const result = await payload.find({
+      overrideAccess: true,
       collection: categoriesSlug,
       where: {
         id: { equals: category.id },
@@ -542,12 +573,14 @@ describe('Joins Field', () => {
 
   it('should populate joins using find with hasMany relationships', async () => {
     const result = await payload.find({
+      overrideAccess: true,
       collection: categoriesSlug,
       where: {
         id: { equals: category.id },
       },
     })
     const otherResult = await payload.find({
+      overrideAccess: true,
       collection: categoriesSlug,
       where: {
         id: { equals: otherCategory.id },
@@ -591,12 +624,14 @@ describe('Joins Field', () => {
     )
 
     const resultEn = await payload.find({
+      overrideAccess: true,
       collection: categoriesSlug,
       where: {
         id: { equals: category.id },
       },
     })
     const otherResultEn = await payload.find({
+      overrideAccess: true,
       collection: categoriesSlug,
       where: {
         id: { equals: otherCategory.id },
@@ -614,6 +649,7 @@ describe('Joins Field', () => {
     expect(otherCategoryWithPostsEn.hasManyPostsLocalized.docs[0].title).toBe('test 14')
 
     const resultEs = await payload.find({
+      overrideAccess: true,
       collection: categoriesSlug,
       locale: 'es',
       where: {
@@ -621,6 +657,7 @@ describe('Joins Field', () => {
       },
     })
     const otherResultEs = await payload.find({
+      overrideAccess: true,
       collection: categoriesSlug,
       locale: 'es',
       where: {
@@ -639,6 +676,7 @@ describe('Joins Field', () => {
 
     // clean up
     await payload.delete({
+      overrideAccess: true,
       collection: postsSlug,
       where: {
         id: {
@@ -650,6 +688,7 @@ describe('Joins Field', () => {
 
   it('should not error when deleting documents with joins', async () => {
     const category = await payload.create({
+      overrideAccess: true,
       collection: categoriesSlug,
       data: {
         name: 'category with post',
@@ -661,6 +700,7 @@ describe('Joins Field', () => {
     })
 
     const result = await payload.delete({
+      overrideAccess: true,
       collection: categoriesSlug,
       // id: category.id,
       where: {
@@ -675,6 +715,7 @@ describe('Joins Field', () => {
     let categoryWithFilteredPost
     beforeAll(async () => {
       categoryWithFilteredPost = await payload.create({
+        overrideAccess: true,
         collection: categoriesSlug,
         data: {
           name: 'category with filtered post',
@@ -694,6 +735,7 @@ describe('Joins Field', () => {
       })
 
       categoryWithFilteredPost = await payload.findByID({
+        overrideAccess: true,
         id: categoryWithFilteredPost.id,
         collection: categoriesSlug,
       })
@@ -705,6 +747,7 @@ describe('Joins Field', () => {
 
     it('should filter joins using where from field config and the requested filter', async () => {
       categoryWithFilteredPost = await payload.findByID({
+        overrideAccess: true,
         id: categoryWithFilteredPost.id,
         collection: categoriesSlug,
         joins: {
@@ -725,6 +768,7 @@ describe('Joins Field', () => {
 
     beforeAll(async () => {
       localizedCategory = await payload.create({
+        overrideAccess: true,
         collection: 'localized-categories',
         locale: 'en',
         data: {
@@ -732,6 +776,7 @@ describe('Joins Field', () => {
         },
       })
       const post1 = await payload.create({
+        overrideAccess: true,
         collection: 'localized-posts',
         locale: 'en',
         data: {
@@ -740,6 +785,7 @@ describe('Joins Field', () => {
         },
       })
       await payload.update({
+        overrideAccess: true,
         collection: 'localized-posts',
         id: post1.id,
         locale: 'es',
@@ -749,6 +795,7 @@ describe('Joins Field', () => {
         },
       })
       await payload.create({
+        overrideAccess: true,
         collection: 'localized-posts',
         locale: 'en',
         data: {
@@ -760,11 +807,13 @@ describe('Joins Field', () => {
 
     it('should populate joins using findByID with localization on the relationship', async () => {
       const enCategory = await payload.findByID({
+        overrideAccess: true,
         id: localizedCategory.id,
         collection: 'localized-categories',
         locale: 'en',
       })
       const esCategory = await payload.findByID({
+        overrideAccess: true,
         id: localizedCategory.id,
         collection: 'localized-categories',
         locale: 'es',
@@ -776,45 +825,69 @@ describe('Joins Field', () => {
 
   describe('Joins with versions', () => {
     afterEach(async () => {
-      await payload.delete({ collection: 'versions', where: {} })
-      await payload.delete({ collection: 'categories-versions', where: {} })
+      await payload.delete({ overrideAccess: true, collection: 'versions', where: {} })
+      await payload.delete({ overrideAccess: true, collection: 'categories-versions', where: {} })
     })
 
     it('should populate joins when versions on both sides draft false', async () => {
-      const category = await payload.create({ collection: 'categories-versions', data: {} })
-
-      const version = await payload.create({
-        collection: 'versions',
-        data: { title: 'version', categoryVersion: category.id },
+      const category = await payload.create({
+        overrideAccess: true,
+        collection: 'categories-versions',
+        data: {},
       })
 
-      const res = await payload.find({ collection: 'categories-versions', draft: false })
-
-      expect(res.docs[0].relatedVersions.docs[0].id).toBe(version.id)
-    })
-
-    it('should populate joins with hasMany relationships when versions on both sides draft false', async () => {
-      const category = await payload.create({ collection: 'categories-versions', data: {} })
-
       const version = await payload.create({
-        collection: 'versions',
-        data: { title: 'version', categoryVersions: [category.id] },
-      })
-
-      const res = await payload.find({ collection: 'categories-versions', draft: false })
-
-      expect(res.docs[0].relatedVersionsMany.docs[0].id).toBe(version.id)
-    })
-
-    it('should populate joins with hasMany relationships when versions on both sides draft true payload.db.queryDrafts', async () => {
-      const category = await payload.create({ collection: 'categories-versions', data: {} })
-
-      const version = await payload.create({
+        overrideAccess: true,
         collection: 'versions',
         data: { title: 'version', categoryVersion: category.id },
       })
 
       const res = await payload.find({
+        overrideAccess: true,
+        collection: 'categories-versions',
+        draft: false,
+      })
+
+      expect(res.docs[0].relatedVersions.docs[0].id).toBe(version.id)
+    })
+
+    it('should populate joins with hasMany relationships when versions on both sides draft false', async () => {
+      const category = await payload.create({
+        overrideAccess: true,
+        collection: 'categories-versions',
+        data: {},
+      })
+
+      const version = await payload.create({
+        overrideAccess: true,
+        collection: 'versions',
+        data: { title: 'version', categoryVersions: [category.id] },
+      })
+
+      const res = await payload.find({
+        overrideAccess: true,
+        collection: 'categories-versions',
+        draft: false,
+      })
+
+      expect(res.docs[0].relatedVersionsMany.docs[0].id).toBe(version.id)
+    })
+
+    it('should populate joins with hasMany relationships when versions on both sides draft true payload.db.queryDrafts', async () => {
+      const category = await payload.create({
+        overrideAccess: true,
+        collection: 'categories-versions',
+        data: {},
+      })
+
+      const version = await payload.create({
+        overrideAccess: true,
+        collection: 'versions',
+        data: { title: 'version', categoryVersion: category.id },
+      })
+
+      const res = await payload.find({
+        overrideAccess: true,
         collection: 'categories-versions',
         draft: true,
       })
@@ -824,18 +897,21 @@ describe('Joins Field', () => {
 
     it('should populate joins with hasMany when on both sides documents are in draft', async () => {
       const category = await payload.create({
+        overrideAccess: true,
         collection: 'categories-versions',
         data: { _status: 'draft' },
         draft: true,
       })
 
       const version = await payload.create({
+        overrideAccess: true,
         collection: 'versions',
         data: { title: 'original-title', _status: 'draft', categoryVersion: category.id },
         draft: true,
       })
 
       await payload.update({
+        overrideAccess: true,
         collection: 'versions',
         id: version.id,
         data: { title: 'updated-title' },
@@ -843,6 +919,7 @@ describe('Joins Field', () => {
       })
 
       const res = await payload.find({
+        overrideAccess: true,
         collection: 'categories-versions',
         draft: true,
       })
@@ -852,14 +929,20 @@ describe('Joins Field', () => {
     })
 
     it('should populate joins when versions on both sides draft true payload.db.queryDrafts', async () => {
-      const category = await payload.create({ collection: 'categories-versions', data: {} })
+      const category = await payload.create({
+        overrideAccess: true,
+        collection: 'categories-versions',
+        data: {},
+      })
 
       const version = await payload.create({
+        overrideAccess: true,
         collection: 'versions',
         data: { categoryVersions: [category.id], title: 'version' },
       })
 
       const res = await payload.find({
+        overrideAccess: true,
         collection: 'categories-versions',
         draft: true,
       })
@@ -972,6 +1055,7 @@ describe('Joins Field', () => {
 
     it('should respect access control of join field configured `where` queries', async () => {
       const restrictedCategory = await payload.create({
+        overrideAccess: true,
         collection: restrictedCategoriesSlug,
         data: {
           name: 'restricted category',
@@ -1277,18 +1361,21 @@ describe('Joins Field', () => {
 
     it('should populate joins with hasMany when on both sides documents are in draft', async () => {
       const category = await payload.create({
+        overrideAccess: true,
         collection: 'categories-versions',
         data: { _status: 'draft' },
         draft: true,
       })
 
       const version = await payload.create({
+        overrideAccess: true,
         collection: 'versions',
         data: { _status: 'draft', title: 'original-title', categoryVersion: category.id },
         draft: true,
       })
 
       await payload.update({
+        overrideAccess: true,
         collection: 'versions',
         draft: true,
         id: version.id,
@@ -1455,7 +1542,11 @@ describe('Joins Field', () => {
   })
 
   it('should work id.in command delimited querying with joins', async () => {
-    const allCategories = await payload.find({ collection: categoriesSlug, pagination: false })
+    const allCategories = await payload.find({
+      overrideAccess: true,
+      collection: categoriesSlug,
+      pagination: false,
+    })
 
     const allCategoriesByIds = await restClient
       .GET(`/categories`, {
@@ -1475,14 +1566,16 @@ describe('Joins Field', () => {
   it('should join with singular collection name', async () => {
     const {
       docs: [category],
-    } = await payload.find({ collection: categoriesSlug, limit: 1, depth: 0 })
+    } = await payload.find({ overrideAccess: true, collection: categoriesSlug, limit: 1, depth: 0 })
 
     const singular = await payload.create({
+      overrideAccess: true,
       collection: 'singular',
       data: { category: category.id },
     })
 
     const categoryWithJoins = await payload.findByID({
+      overrideAccess: true,
       collection: categoriesSlug,
       id: category.id,
     })
@@ -1494,6 +1587,7 @@ describe('Joins Field', () => {
     const {
       docs: [res],
     } = await payload.find({
+      overrideAccess: true,
       collection: categoriesSlug,
       where: {
         id: { equals: category.id },
@@ -1539,16 +1633,22 @@ describe('Joins Field', () => {
 
   it('should have correct totalDocs', async () => {
     for (let i = 0; i < 50; i++) {
-      await payload.create({ collection: categoriesSlug, data: { name: 'totalDocs' } })
+      await payload.create({
+        overrideAccess: true,
+        collection: categoriesSlug,
+        data: { name: 'totalDocs' },
+      })
     }
 
     const count = await payload.count({
+      overrideAccess: true,
       collection: categoriesSlug,
       where: { name: { equals: 'totalDocs' } },
     })
     expect(count.totalDocs).toBe(50)
 
     const find = await payload.find({
+      overrideAccess: true,
       collection: categoriesSlug,
       limit: 5,
       where: { name: { equals: 'totalDocs' } },
@@ -1556,33 +1656,55 @@ describe('Joins Field', () => {
     expect(find.totalDocs).toBe(50)
     expect(find.docs).toHaveLength(5)
 
-    await payload.delete({ collection: categoriesSlug, where: { name: { equals: 'totalDocs' } } })
+    await payload.delete({
+      overrideAccess: true,
+      collection: categoriesSlug,
+      where: { name: { equals: 'totalDocs' } },
+    })
   })
 
   it('should self join', async () => {
-    const doc_1 = await payload.create({ collection: 'self-joins', data: {} })
-    const doc_2 = await payload.create({ collection: 'self-joins', data: { rel: doc_1 }, depth: 0 })
+    const doc_1 = await payload.create({ overrideAccess: true, collection: 'self-joins', data: {} })
+    const doc_2 = await payload.create({
+      overrideAccess: true,
+      collection: 'self-joins',
+      data: { rel: doc_1 },
+      depth: 0,
+    })
 
-    const data = await payload.findByID({ collection: 'self-joins', id: doc_1.id, depth: 1 })
+    const data = await payload.findByID({
+      overrideAccess: true,
+      collection: 'self-joins',
+      id: doc_1.id,
+      depth: 1,
+    })
 
     expect((data.joins.docs[0] as TypeWithID).id).toBe(doc_2.id)
   })
 
   it('should populate joins on depth 2', async () => {
-    const depthJoin_2 = await payload.create({ collection: 'depth-joins-2', data: {}, depth: 0 })
+    const depthJoin_2 = await payload.create({
+      overrideAccess: true,
+      collection: 'depth-joins-2',
+      data: {},
+      depth: 0,
+    })
     const depthJoin_1 = await payload.create({
+      overrideAccess: true,
       collection: 'depth-joins-1',
       data: { rel: depthJoin_2 },
       depth: 0,
     })
 
     const depthJoin_3 = await payload.create({
+      overrideAccess: true,
       collection: 'depth-joins-3',
       data: { rel: depthJoin_1 },
       depth: 0,
     })
 
     const data = await payload.findByID({
+      overrideAccess: true,
       collection: 'depth-joins-2',
       id: depthJoin_2.id,
       depth: 2,
@@ -1600,12 +1722,14 @@ describe('Joins Field', () => {
   describe('Array of collection', () => {
     it('should join across multiple collections', async () => {
       let parent = await payload.create({
+        overrideAccess: true,
         collection: 'multiple-collections-parents',
         depth: 0,
         data: {},
       })
 
       const child_1 = await payload.create({
+        overrideAccess: true,
         collection: 'multiple-collections-1',
         depth: 0,
         data: {
@@ -1615,6 +1739,7 @@ describe('Joins Field', () => {
       })
 
       const child_2 = await payload.create({
+        overrideAccess: true,
         collection: 'multiple-collections-2',
         depth: 0,
         data: {
@@ -1624,6 +1749,7 @@ describe('Joins Field', () => {
       })
 
       parent = await payload.findByID({
+        overrideAccess: true,
         collection: 'multiple-collections-parents',
         id: parent.id,
         depth: 0,
@@ -1635,6 +1761,7 @@ describe('Joins Field', () => {
       expect(parent.children.docs[1]?.relationTo).toBe('multiple-collections-1')
 
       parent = await payload.findByID({
+        overrideAccess: true,
         collection: 'multiple-collections-parents',
         id: parent.id,
         depth: 1,
@@ -1647,6 +1774,7 @@ describe('Joins Field', () => {
 
       // Pagination across collections
       parent = await payload.findByID({
+        overrideAccess: true,
         collection: 'multiple-collections-parents',
         id: parent.id,
         depth: 1,
@@ -1662,6 +1790,7 @@ describe('Joins Field', () => {
       expect(parent.children?.hasNextPage).toBe(true)
 
       parent = await payload.findByID({
+        overrideAccess: true,
         collection: 'multiple-collections-parents',
         id: parent.id,
         depth: 1,
@@ -1678,6 +1807,7 @@ describe('Joins Field', () => {
 
       // Sorting across collections
       parent = await payload.findByID({
+        overrideAccess: true,
         collection: 'multiple-collections-parents',
         id: parent.id,
         depth: 1,
@@ -1692,6 +1822,7 @@ describe('Joins Field', () => {
       expect(parent.children.docs[1]?.value.title).toBe('doc-2')
 
       parent = await payload.findByID({
+        overrideAccess: true,
         collection: 'multiple-collections-parents',
         id: parent.id,
         depth: 1,
@@ -1707,6 +1838,7 @@ describe('Joins Field', () => {
 
       // WHERE across collections
       parent = await payload.findByID({
+        overrideAccess: true,
         collection: 'multiple-collections-parents',
         id: parent.id,
         depth: 1,
@@ -1726,6 +1858,7 @@ describe('Joins Field', () => {
 
       // WHERE by relationTo (join for specific collectionSlug)
       parent = await payload.findByID({
+        overrideAccess: true,
         collection: 'multiple-collections-parents',
         id: parent.id,
         depth: 1,
@@ -1762,6 +1895,7 @@ describe('Joins Field', () => {
 
       // counting
       parent = await payload.findByID({
+        overrideAccess: true,
         collection: 'multiple-collections-parents',
         id: parent.id,
         depth: 1,
@@ -1776,6 +1910,7 @@ describe('Joins Field', () => {
 
       // counting filtered
       parent = await payload.findByID({
+        overrideAccess: true,
         collection: 'multiple-collections-parents',
         id: parent.id,
         depth: 1,
@@ -1796,12 +1931,18 @@ describe('Joins Field', () => {
   })
 
   it('should support where querying by a top level join field', async () => {
-    const category = await payload.create({ collection: 'categories', data: {} })
+    const category = await payload.create({
+      overrideAccess: true,
+      collection: 'categories',
+      data: {},
+    })
     await payload.create({
+      overrideAccess: true,
       collection: 'posts',
       data: { category: category.id, title: 'my-title' },
     })
     const found = await payload.find({
+      overrideAccess: true,
       collection: 'categories',
       where: { 'relatedPosts.title': { equals: 'my-title' } },
     })
@@ -1811,8 +1952,13 @@ describe('Joins Field', () => {
   })
 
   it('should support where querying by a join field as ID', async () => {
-    const category = await payload.create({ collection: 'categories', data: {} })
+    const category = await payload.create({
+      overrideAccess: true,
+      collection: 'categories',
+      data: {},
+    })
     const post = await payload.create({
+      overrideAccess: true,
       collection: 'posts',
       data: { category: category.id, title: 'my-title' },
     })
@@ -1836,13 +1982,19 @@ describe('Joins Field', () => {
   })
 
   it('should support where querying by a join field with hasMany relationship', async () => {
-    const category = await payload.create({ collection: 'categories', data: {} })
+    const category = await payload.create({
+      overrideAccess: true,
+      collection: 'categories',
+      data: {},
+    })
     await payload.create({
+      overrideAccess: true,
       collection: 'posts',
       data: { categories: [category.id], title: 'my-title' },
     })
 
     const found = await payload.find({
+      overrideAccess: true,
       collection: 'categories',
       where: { 'hasManyPosts.title': { equals: 'my-title' } },
     })
@@ -1851,12 +2003,18 @@ describe('Joins Field', () => {
   })
 
   it('should support where querying by a join field with relationship nested to a group', async () => {
-    const category = await payload.create({ collection: 'categories', data: {} })
+    const category = await payload.create({
+      overrideAccess: true,
+      collection: 'categories',
+      data: {},
+    })
     await payload.create({
+      overrideAccess: true,
       collection: 'posts',
       data: { group: { category: category.id }, title: 'my-category-title' },
     })
     const found = await payload.find({
+      overrideAccess: true,
       collection: 'categories',
       where: { 'group.relatedPosts.title': { equals: 'my-category-title' } },
     })
@@ -1866,12 +2024,18 @@ describe('Joins Field', () => {
   })
 
   it('should support where querying by a join field with relationship nested to an array', async () => {
-    const category = await payload.create({ collection: 'categories', data: {} })
+    const category = await payload.create({
+      overrideAccess: true,
+      collection: 'categories',
+      data: {},
+    })
     const post = await payload.create({
+      overrideAccess: true,
       collection: 'posts',
       data: { array: [{ category: category.id }], title: 'array-join-where-test' },
     })
     const found = await payload.find({
+      overrideAccess: true,
       collection: 'categories',
       where: { 'arrayPosts.title': { equals: 'array-join-where-test' } },
     })
@@ -1879,18 +2043,24 @@ describe('Joins Field', () => {
     expect(found.docs).toHaveLength(1)
     expect(found.docs[0].id).toBe(category.id)
 
-    await payload.delete({ collection: 'posts', id: post.id })
-    await payload.delete({ collection: 'categories', id: category.id })
+    await payload.delete({ overrideAccess: true, collection: 'posts', id: post.id })
+    await payload.delete({ overrideAccess: true, collection: 'categories', id: category.id })
   })
 
   it('should support where querying by a join field multiple times', async () => {
-    const category = await payload.create({ collection: 'categories', data: {} })
+    const category = await payload.create({
+      overrideAccess: true,
+      collection: 'categories',
+      data: {},
+    })
     await payload.create({
+      overrideAccess: true,
       collection: 'posts',
       data: { group: { category: category.id }, isFiltered: true, title: 'my-category-title' },
     })
 
     const found = await payload.find({
+      overrideAccess: true,
       collection: 'categories',
       where: {
         and: [
@@ -1912,13 +2082,19 @@ describe('Joins Field', () => {
   })
 
   it('should support where querying by a join field with hasMany relationship multiple times', async () => {
-    const category = await payload.create({ collection: 'categories', data: {} })
+    const category = await payload.create({
+      overrideAccess: true,
+      collection: 'categories',
+      data: {},
+    })
     await payload.create({
+      overrideAccess: true,
       collection: 'posts',
       data: { categories: [category.id], title: 'my-title', isFiltered: true },
     })
 
     const found = await payload.find({
+      overrideAccess: true,
       collection: 'categories',
       where: {
         and: [
@@ -2103,6 +2279,7 @@ describe('Joins Field', () => {
       // The Local API goes through the same validateQueryPaths pipeline.
       await expect(
         payload.find({
+          overrideAccess: true,
           collection: postsSlug,
           limit: 1,
           where: { title: { $raw: 'true' } } as any,
@@ -2171,6 +2348,7 @@ describe('Joins Field', () => {
 
 async function createPost(overrides?: Partial<Post>, locale?: Config['locale']) {
   return payload.create({
+    overrideAccess: true,
     collection: postsSlug,
     locale,
     data: {

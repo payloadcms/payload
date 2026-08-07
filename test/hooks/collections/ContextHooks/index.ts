@@ -48,6 +48,7 @@ const ContextHooks: CollectionConfig = {
           return
         }
         await req.payload.update({
+          overrideAccess: true,
           collection: contextHooksSlug,
           id: doc.id,
           data: {

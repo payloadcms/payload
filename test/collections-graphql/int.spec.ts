@@ -113,10 +113,26 @@ describe('collections-graphql', () => {
     })
 
     it('should sort by multiple fields', async () => {
-      const doc1 = await payload.create({ collection: 'sort', data: { title: 'a', number: 1 } })
-      const doc2 = await payload.create({ collection: 'sort', data: { title: 'b', number: 1 } })
-      const doc3 = await payload.create({ collection: 'sort', data: { title: 'a', number: 2 } })
-      const doc4 = await payload.create({ collection: 'sort', data: { title: 'b', number: 3 } })
+      const doc1 = await payload.create({
+        overrideAccess: true,
+        collection: 'sort',
+        data: { title: 'a', number: 1 },
+      })
+      const doc2 = await payload.create({
+        overrideAccess: true,
+        collection: 'sort',
+        data: { title: 'b', number: 1 },
+      })
+      const doc3 = await payload.create({
+        overrideAccess: true,
+        collection: 'sort',
+        data: { title: 'a', number: 2 },
+      })
+      const doc4 = await payload.create({
+        overrideAccess: true,
+        collection: 'sort',
+        data: { title: 'b', number: 3 },
+      })
 
       const query = `query {
         Sorts(sort: "title, number") {
@@ -200,6 +216,7 @@ describe('collections-graphql', () => {
       const firstTitle = 'first title'
       const secondTitle = 'second title'
       const first = await payload.create({
+        overrideAccess: true,
         collection: errorOnHookSlug,
         data: {
           errorBeforeChange: true,
@@ -207,6 +224,7 @@ describe('collections-graphql', () => {
         },
       })
       const second = await payload.create({
+        overrideAccess: true,
         collection: errorOnHookSlug,
         data: {
           errorBeforeChange: true,
@@ -241,14 +259,17 @@ describe('collections-graphql', () => {
         .then((res) => res.json())
 
       const createdResult = await payload.findByID({
+        overrideAccess: true,
         id: data.createPost.id,
         collection: slug,
       })
       const updateFirstResult = await payload.findByID({
+        overrideAccess: true,
         id: first.id,
         collection: errorOnHookSlug,
       })
       const updateSecondResult = await payload.findByID({
+        overrideAccess: true,
         id: second.id,
         collection: errorOnHookSlug,
       })
@@ -680,6 +701,7 @@ describe('collections-graphql', () => {
             // randomize the creation timestamp
             await wait(Math.random())
             await payload.create({
+              overrideAccess: true,
               collection: pointSlug,
               data: {
                 // only randomize longitude to make distance comparison easy
@@ -937,6 +959,7 @@ describe('collections-graphql', () => {
 
       it('should query a document with a deleted relationship', async () => {
         const relation = await payload.create({
+          overrideAccess: true,
           collection: relationSlug,
           data: {
             name: 'test',
@@ -944,6 +967,7 @@ describe('collections-graphql', () => {
         })
 
         await payload.create({
+          overrideAccess: true,
           collection: slug,
           data: {
             relationField: relation.id,
@@ -952,6 +976,7 @@ describe('collections-graphql', () => {
         })
 
         await payload.delete({
+          overrideAccess: true,
           id: relation.id,
           collection: relationSlug,
         })
@@ -979,6 +1004,7 @@ describe('collections-graphql', () => {
 
       it('should query a document with a deleted relationship hasMany', async () => {
         const relation = await payload.create({
+          overrideAccess: true,
           collection: relationSlug,
           data: {
             name: 'test',
@@ -986,6 +1012,7 @@ describe('collections-graphql', () => {
         })
 
         await payload.create({
+          overrideAccess: true,
           collection: slug,
           data: {
             relationHasManyField: [relation.id],
@@ -994,6 +1021,7 @@ describe('collections-graphql', () => {
         })
 
         await payload.delete({
+          overrideAccess: true,
           id: relation.id,
           collection: relationSlug,
         })
@@ -1021,6 +1049,7 @@ describe('collections-graphql', () => {
 
       it('should query relationships with locale', async () => {
         const newDoc = await payload.create({
+          overrideAccess: true,
           collection: 'cyclical-relationship',
           data: {
             title: {
@@ -1032,6 +1061,7 @@ describe('collections-graphql', () => {
         })
 
         await payload.update({
+          overrideAccess: true,
           id: newDoc.id,
           collection: 'cyclical-relationship',
           data: {
@@ -1059,17 +1089,20 @@ describe('collections-graphql', () => {
 
       it('should still query hasMany relationships when some document was deleted', async () => {
         const relation_1_draft = await payload.create({
+          overrideAccess: true,
           collection: 'relation',
           data: { _status: 'draft', name: 'relation_1_draft' },
           draft: true,
         })
 
         const relation_2 = await payload.create({
+          overrideAccess: true,
           collection: 'relation',
           data: { name: 'relation_2', _status: 'published' },
         })
 
         await payload.create({
+          overrideAccess: true,
           collection: 'posts',
           draft: true,
           data: {
@@ -1079,7 +1112,11 @@ describe('collections-graphql', () => {
           },
         })
 
-        await payload.delete({ collection: 'relation', id: relation_1_draft.id })
+        await payload.delete({
+          overrideAccess: true,
+          collection: 'relation',
+          id: relation_1_draft.id,
+        })
 
         const query = `query {
           Posts(draft:true,where: { title: { equals: "post with relations in draft" }}) {
@@ -1107,16 +1144,19 @@ describe('collections-graphql', () => {
 
       it('should still query hasMany relationships when user doesnt have access to some document', async () => {
         const relation_1_draft = await payload.create({
+          overrideAccess: true,
           collection: 'relation',
           data: { name: 'restricted' },
         })
 
         const relation_2 = await payload.create({
+          overrideAccess: true,
           collection: 'relation',
           data: { name: 'relation_2' },
         })
 
         await payload.create({
+          overrideAccess: true,
           collection: 'posts',
           draft: true,
           data: {
@@ -1158,6 +1198,7 @@ describe('collections-graphql', () => {
 
     // publish doc
     const newDoc = await payload.create({
+      overrideAccess: true,
       collection: 'cyclical-relationship',
       data: {
         title: publishValue,
@@ -1167,6 +1208,7 @@ describe('collections-graphql', () => {
 
     // create cyclical relationship
     await payload.update({
+      overrideAccess: true,
       id: newDoc.id,
       collection: 'cyclical-relationship',
       data: {
@@ -1176,6 +1218,7 @@ describe('collections-graphql', () => {
 
     // save new version
     await payload.update({
+      overrideAccess: true,
       id: newDoc.id,
       collection: 'cyclical-relationship',
       data: {
@@ -1229,6 +1272,7 @@ describe('collections-graphql', () => {
     const file = await getFileByPath(path.resolve(dirname, '../uploads/test-image.jpg'))
 
     const mediaDoc = await payload.create({
+      overrideAccess: true,
       collection: 'media',
       data: {
         title: 'example',
@@ -1238,6 +1282,7 @@ describe('collections-graphql', () => {
 
     // doc with upload relation
     const newDoc = await payload.create({
+      overrideAccess: true,
       collection: 'cyclical-relationship',
       data: {
         media: mediaDoc.id,
@@ -1380,6 +1425,7 @@ describe('collections-graphql', () => {
 
 async function createPost(overrides?: Partial<Post>) {
   const doc = await payload.create({
+    overrideAccess: true,
     collection: slug,
     data: { title: 'title', ...overrides },
   })

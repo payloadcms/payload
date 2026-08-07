@@ -16,6 +16,7 @@ export const inlineTaskTestDelayedWorkflow: WorkflowConfig<'inlineTaskTestDelaye
         await new Promise((resolve) => setTimeout(resolve, 100))
 
         const newSimple = await req.payload.create({
+          overrideAccess: true,
           collection: 'simple',
           req,
           data: {

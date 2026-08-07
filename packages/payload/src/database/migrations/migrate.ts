@@ -44,6 +44,7 @@ export const migrate: BaseDatabaseAdapter['migrate'] = async function migrate(
           name: migration.name,
           batch: newBatch,
         },
+        overrideAccess: true,
         req,
       })
       await commitTransaction(req)

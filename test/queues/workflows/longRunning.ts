@@ -28,6 +28,7 @@ export const longRunningWorkflow: WorkflowConfig<'longRunning'> = {
 
     if (job.input.postTitle) {
       await req.payload.create({
+        overrideAccess: true,
         collection: 'posts',
         data: {
           title: job.input.postTitle,

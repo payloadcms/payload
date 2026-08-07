@@ -13,6 +13,7 @@ export const strategyName = 'test-local'
 
 const customAuthenticationStrategy: AuthStrategyFunction = async ({ headers, payload }) => {
   const usersQuery = await payload.find({
+    overrideAccess: true,
     collection: usersSlug,
     where: {
       code: {

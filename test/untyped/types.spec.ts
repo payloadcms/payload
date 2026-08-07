@@ -37,6 +37,7 @@ describe('Untyped Payload types', () => {
   test('should preserve untyped collection operations', () => {
     expect(
       payload.create({
+        overrideAccess: true,
         collection: 'custom-collection',
         data: {
           title: 'Example',

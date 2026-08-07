@@ -2,6 +2,7 @@ import type { TaskHandler } from 'payload'
 
 export const externalTaskHandler: TaskHandler<'ExternalTask'> = async ({ input, req }) => {
   const newSimple = await req.payload.create({
+    overrideAccess: true,
     collection: 'simple',
     req,
     data: {

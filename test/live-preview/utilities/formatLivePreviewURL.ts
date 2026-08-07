@@ -13,6 +13,7 @@ export const formatLivePreviewURL: LivePreviewConfig['url'] = async ({
     try {
       const fullTenant = await req.payload
         .find({
+          overrideAccess: true,
           collection: 'tenants',
           where: {
             id: {

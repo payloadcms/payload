@@ -27,6 +27,7 @@ export default buildConfigWithDefaults({
   collections: [Media, MediaWithPrefix, MediaContainer, Users],
   onInit: async (payload) => {
     await payload.create({
+      overrideAccess: true,
       collection: 'users',
       data: {
         email: devUser.email,

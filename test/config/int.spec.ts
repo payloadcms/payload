@@ -60,11 +60,14 @@ describe('Config', () => {
       // Use payload2 instance before creating payload3 instance, as we share the same db connection => each instance
       // creation will reset the db schema.
       const result2: any = await payload2.create({
-        collection: 'payload2',
-        data: {
-          title2: 'Payload 2',
-        },
-      } as any)
+        ...{ overrideAccess: true },
+        ...({
+          collection: 'payload2',
+          data: {
+            title2: 'Payload 2',
+          },
+        } as any),
+      })
 
       expect(result2.title2).toBe('Payload 2')
 
@@ -83,11 +86,14 @@ describe('Config', () => {
 
       // If payload was still incorrectly cached, this would fail, as the old payload config would still be used
       const result3: any = await payload3.create({
-        collection: 'payload3',
-        data: {
-          title3: 'Payload 3',
-        },
-      } as any)
+        ...{ overrideAccess: true },
+        ...({
+          collection: 'payload3',
+          data: {
+            title3: 'Payload 3',
+          },
+        } as any),
+      })
 
       expect(result3.title3).toBe('Payload 3')
 

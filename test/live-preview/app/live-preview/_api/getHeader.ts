@@ -8,6 +8,7 @@ export async function getHeader(): Promise<Header> {
 
   try {
     const header = await payload.findGlobal({
+      overrideAccess: true,
       slug: 'header',
     })
 

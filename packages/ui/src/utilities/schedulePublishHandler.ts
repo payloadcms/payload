@@ -28,6 +28,7 @@ export const schedulePublishHandler: ServerFunction<SchedulePublishHandlerArgs> 
     if (deleteID) {
       await payload.delete({
         collection: 'payload-jobs',
+        overrideAccess: true,
         req,
         where: { id: { equals: deleteID } },
       })
@@ -42,6 +43,7 @@ export const schedulePublishHandler: ServerFunction<SchedulePublishHandlerArgs> 
         timezone,
         user: user.id,
       },
+      overrideAccess: true,
       task: 'schedulePublish',
       waitUntil: date,
     })

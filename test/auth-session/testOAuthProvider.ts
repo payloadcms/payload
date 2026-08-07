@@ -167,6 +167,7 @@ export const authenticateTestOAuthSession: AuthStrategyFunction = async ({
   }
 
   const user = await payload.findByID({
+    overrideAccess: true,
     id: lookup.session.userID,
     collection: authSessionUsersSlug,
   })
@@ -271,6 +272,7 @@ const resetTestOAuthSession: Endpoint = {
 const loginTestOAuthSession: Endpoint = {
   handler: async (req) => {
     const result = await req.payload.find({
+      overrideAccess: true,
       collection: authSessionUsersSlug,
       limit: 1,
     })

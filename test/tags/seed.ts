@@ -12,94 +12,112 @@ const dirname = path.dirname(filename)
 export const seed = async (payload: Payload): Promise<void> => {
   // Seasons
   const seasons = await payload.create({
+    overrideAccess: true,
     collection: tagsSlug as any,
     data: { name: 'Seasons', description: 'Seasonal recipes' } as any,
   })
 
   const spring = await payload.create({
+    overrideAccess: true,
     collection: tagsSlug as any,
     data: { name: 'Spring', [`_h_${tagsSlug}`]: seasons.id } as any,
   })
 
   const summer = await payload.create({
+    overrideAccess: true,
     collection: tagsSlug as any,
     data: { name: 'Summer', [`_h_${tagsSlug}`]: seasons.id } as any,
   })
 
   const fall = await payload.create({
+    overrideAccess: true,
     collection: tagsSlug as any,
     data: { name: 'Fall', [`_h_${tagsSlug}`]: seasons.id } as any,
   })
 
   const winter = await payload.create({
+    overrideAccess: true,
     collection: tagsSlug as any,
     data: { name: 'Winter', [`_h_${tagsSlug}`]: seasons.id } as any,
   })
 
   // Cuisines
   const cuisines = await payload.create({
+    overrideAccess: true,
     collection: tagsSlug as any,
     data: { name: 'Cuisines', description: 'World cuisines' } as any,
   })
 
   const italian = await payload.create({
+    overrideAccess: true,
     collection: tagsSlug as any,
     data: { name: 'Italian', [`_h_${tagsSlug}`]: cuisines.id } as any,
   })
 
   const mexican = await payload.create({
+    overrideAccess: true,
     collection: tagsSlug as any,
     data: { name: 'Mexican', [`_h_${tagsSlug}`]: cuisines.id } as any,
   })
 
   const asian = await payload.create({
+    overrideAccess: true,
     collection: tagsSlug as any,
     data: { name: 'Asian', [`_h_${tagsSlug}`]: cuisines.id } as any,
   })
 
   const american = await payload.create({
+    overrideAccess: true,
     collection: tagsSlug as any,
     data: { name: 'American', [`_h_${tagsSlug}`]: cuisines.id } as any,
   })
 
   // Meal Type
   const mealType = await payload.create({
+    overrideAccess: true,
     collection: tagsSlug as any,
     data: { name: 'Meal Type', description: 'Type of meal' } as any,
   })
 
   const breakfast = await payload.create({
+    overrideAccess: true,
     collection: tagsSlug as any,
     data: { name: 'Breakfast', [`_h_${tagsSlug}`]: mealType.id } as any,
   })
 
   const lunch = await payload.create({
+    overrideAccess: true,
     collection: tagsSlug as any,
     data: { name: 'Lunch', [`_h_${tagsSlug}`]: mealType.id } as any,
   })
 
   const dinner = await payload.create({
+    overrideAccess: true,
     collection: tagsSlug as any,
     data: { name: 'Dinner', [`_h_${tagsSlug}`]: mealType.id } as any,
   })
 
   const dessert = await payload.create({
+    overrideAccess: true,
     collection: tagsSlug as any,
     data: { name: 'Dessert', [`_h_${tagsSlug}`]: mealType.id } as any,
   })
 
   // Years
   const years = await payload.create({
+    overrideAccess: true,
     collection: tagsSlug as any,
     data: { name: 'Years', description: 'Recipe archive by year' } as any,
   })
 
   const year2023 = await payload.create({
+    overrideAccess: true,
     collection: tagsSlug as any,
     data: { name: '2023', [`_h_${tagsSlug}`]: years.id } as any,
   })
 
   const year2024 = await payload.create({
+    overrideAccess: true,
     collection: tagsSlug as any,
     data: { name: '2024', [`_h_${tagsSlug}`]: years.id } as any,
   })
@@ -110,6 +128,7 @@ export const seed = async (payload: Payload): Promise<void> => {
 
   // Blog posts (recipes)
   await payload.create({
+    overrideAccess: true,
     collection: postsSlug as any,
     data: {
       [`_h_${tagsSlug}`]: [italian.id, dinner.id, fall.id, year2024.id],
@@ -120,6 +139,7 @@ export const seed = async (payload: Payload): Promise<void> => {
   })
 
   await payload.create({
+    overrideAccess: true,
     collection: postsSlug as any,
     data: {
       [`_h_${tagsSlug}`]: [mexican.id, dinner.id, summer.id, year2024.id],
@@ -130,6 +150,7 @@ export const seed = async (payload: Payload): Promise<void> => {
   })
 
   await payload.create({
+    overrideAccess: true,
     collection: postsSlug as any,
     data: {
       [`_h_${tagsSlug}`]: [asian.id, lunch.id, spring.id, year2024.id],
@@ -140,6 +161,7 @@ export const seed = async (payload: Payload): Promise<void> => {
   })
 
   await payload.create({
+    overrideAccess: true,
     collection: postsSlug as any,
     data: {
       [`_h_${tagsSlug}`]: [american.id, breakfast.id, winter.id, year2023.id],
@@ -150,6 +172,7 @@ export const seed = async (payload: Payload): Promise<void> => {
   })
 
   await payload.create({
+    overrideAccess: true,
     collection: postsSlug as any,
     data: {
       [`_h_${tagsSlug}`]: [italian.id, dessert.id, summer.id, year2023.id],
@@ -160,6 +183,7 @@ export const seed = async (payload: Payload): Promise<void> => {
   })
 
   await payload.create({
+    overrideAccess: true,
     collection: postsSlug as any,
     data: {
       [`_h_${tagsSlug}`]: [american.id, dinner.id, fall.id, year2024.id],
@@ -170,6 +194,7 @@ export const seed = async (payload: Payload): Promise<void> => {
   })
 
   await payload.create({
+    overrideAccess: true,
     collection: postsSlug as any,
     data: {
       [`_h_${tagsSlug}`]: [asian.id, dinner.id, winter.id, year2024.id],
@@ -180,6 +205,7 @@ export const seed = async (payload: Payload): Promise<void> => {
   })
 
   await payload.create({
+    overrideAccess: true,
     collection: postsSlug as any,
     data: {
       [`_h_${tagsSlug}`]: [mexican.id, breakfast.id, spring.id, year2023.id],
@@ -191,6 +217,7 @@ export const seed = async (payload: Payload): Promise<void> => {
 
   // Pages (guides and about)
   await payload.create({
+    overrideAccess: true,
     collection: pagesSlug as any,
     data: {
       [`_h_${tagsSlug}`]: [italian.id],
@@ -201,6 +228,7 @@ export const seed = async (payload: Payload): Promise<void> => {
   })
 
   await payload.create({
+    overrideAccess: true,
     collection: pagesSlug as any,
     data: {
       [`_h_${tagsSlug}`]: [summer.id],
@@ -211,6 +239,7 @@ export const seed = async (payload: Payload): Promise<void> => {
   })
 
   await payload.create({
+    overrideAccess: true,
     collection: pagesSlug as any,
     data: {
       [`_h_${tagsSlug}`]: [breakfast.id],
@@ -222,36 +251,42 @@ export const seed = async (payload: Payload): Promise<void> => {
 
   // Media items (food photos)
   await payload.create({
+    overrideAccess: true,
     collection: mediaSlug as any,
     data: { [`_h_${tagsSlug}`]: [italian.id, dinner.id] } as any,
     file: { ...imageFile, name: 'mushroom-risotto.png' } as any,
   })
 
   await payload.create({
+    overrideAccess: true,
     collection: mediaSlug as any,
     data: { [`_h_${tagsSlug}`]: [mexican.id, summer.id] } as any,
     file: { ...imageFile, name: 'carne-asada-tacos.png' } as any,
   })
 
   await payload.create({
+    overrideAccess: true,
     collection: mediaSlug as any,
     data: { [`_h_${tagsSlug}`]: [asian.id, lunch.id] } as any,
     file: { ...imageFile, name: 'tuna-poke-bowl.png' } as any,
   })
 
   await payload.create({
+    overrideAccess: true,
     collection: mediaSlug as any,
     data: { [`_h_${tagsSlug}`]: [american.id, breakfast.id] } as any,
     file: { ...imageFile, name: 'buttermilk-pancakes.png' } as any,
   })
 
   await payload.create({
+    overrideAccess: true,
     collection: mediaSlug as any,
     data: { [`_h_${tagsSlug}`]: [dessert.id, italian.id] } as any,
     file: { ...imageFile, name: 'tiramisu.png' } as any,
   })
 
   await payload.create({
+    overrideAccess: true,
     collection: mediaSlug as any,
     data: { [`_h_${tagsSlug}`]: [asian.id, winter.id] } as any,
     file: { ...imageFile, name: 'tonkotsu-ramen.png' } as any,

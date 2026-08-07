@@ -22,8 +22,9 @@ export const DataHooksGlobal: GlobalConfig = {
       },
     ],
     afterRead: [
-      ({ context, global, doc }) => {
+      ({ context, global, doc, overrideAccess }) => {
         context['global_afterRead_global'] = JSON.stringify(global)
+        doc.afterReadOverrideAccess = overrideAccess
 
         // Needs to be done for both afterRead (for findOne test) and afterChange (for update test)
         for (const contextKey in context) {
@@ -94,6 +95,10 @@ export const DataHooksGlobal: GlobalConfig = {
     {
       name: 'global_afterRead_global',
       type: 'text',
+    },
+    {
+      name: 'afterReadOverrideAccess',
+      type: 'checkbox',
     },
   ],
   versions: false,

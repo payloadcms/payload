@@ -3,13 +3,14 @@ import type { Payload } from 'payload'
 import { tagsSlug, uploadsSlug, versionsDiffSlug } from '../slugs.js'
 
 export async function seedVersionsDiff(payload: Payload) {
-  const tagDocs = await payload.find({ collection: tagsSlug, limit: 3 })
+  const tagDocs = await payload.find({ overrideAccess: true, collection: tagsSlug, limit: 3 })
   const tagIds = tagDocs.docs.map((d) => d.id)
 
-  const uploadDocs = await payload.find({ collection: uploadsSlug, limit: 2 })
+  const uploadDocs = await payload.find({ overrideAccess: true, collection: uploadsSlug, limit: 2 })
   const uploadIds = uploadDocs.docs.map((d) => d.id)
 
   const versionsDiffDoc = await payload.create({
+    overrideAccess: true,
     collection: versionsDiffSlug,
     data: {
       _status: 'published',
@@ -42,6 +43,7 @@ export async function seedVersionsDiff(payload: Payload) {
   })
 
   await payload.update({
+    overrideAccess: true,
     id: versionsDiffDoc.id,
     collection: versionsDiffSlug,
     data: {
