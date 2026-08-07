@@ -60,9 +60,11 @@ import {
   mediaWithoutCacheTagsSlug,
   mediaWithoutDeleteAccessSlug,
   noFilesRequiredSlug,
+  pdfOnlySlug,
   relationPreviewSlug,
   relationSlug,
   relationToNoFilesRequiredSlug,
+  restrictedMimeTypesSlug,
   svgOnlySlug,
   threeDimensionalSlug,
   withMetadataSlug,
@@ -87,7 +89,7 @@ const adminThumbnailFunctionSrcPattern = new RegExp(
     '$',
 )
 
-const { afterAll, beforeAll, beforeEach, describe } = test
+const { afterAll, afterEach, beforeAll, beforeEach, describe } = test
 
 let payload: PayloadTestSDK<Config>
 let client: RESTClient
@@ -132,6 +134,8 @@ let adminUploadFilePreviewSingleURL: AdminUrlUtil
 let adminUploadFilePreviewMapURL: AdminUrlUtil
 let filePreviewURL: AdminUrlUtil
 let mediaWithFieldsURL: AdminUrlUtil
+let pdfOnlyURL: AdminUrlUtil
+let restrictedMimeTypesURL: AdminUrlUtil
 
 describe('Uploads', () => {
   let page: Page
@@ -180,6 +184,8 @@ describe('Uploads', () => {
     adminUploadFilePreviewMapURL = new AdminUrlUtil(serverURL, adminUploadFilePreviewMapSlug)
     filePreviewURL = new AdminUrlUtil(serverURL, filePreviewSlug)
     mediaWithFieldsURL = new AdminUrlUtil(serverURL, mediaWithFieldsSlug)
+    pdfOnlyURL = new AdminUrlUtil(serverURL, pdfOnlySlug)
+    restrictedMimeTypesURL = new AdminUrlUtil(serverURL, restrictedMimeTypesSlug)
 
     const context = await browser.newContext()
     await context.grantPermissions(['clipboard-read', 'clipboard-write'])
@@ -546,14 +552,161 @@ describe('Uploads', () => {
     await expect(page.locator('.tooltip--show', { hasText: exactText('Cancel') })).toBeVisible()
   })
 
-  test('should remove remote URL button if pasteURL is false', async () => {
+  test('should not fetch a URL found on the clipboard if pasteURL is false', async () => {
     // pasteURL option is set to false in the media collection
-    await page.goto(mediaURL.create)
+    await gotoAndWaitForForm(page, mediaURL.create)
 
-    const pasteURLButton = page.locator('.file-manager__upload button', {
-      hasText: 'Paste URL',
+    await page.evaluate(async () => {
+      await navigator.clipboard.writeText('https://example.com/image.png')
     })
-    await expect(pasteURLButton).toBeHidden()
+
+    await page.locator('.file-manager__pasteFromClipboard').click()
+
+    await expect(page.locator('.payload-toast-container .toast-error')).toContainText(
+      'No file found in clipboard.',
+    )
+    await expect(page.locator('#upload-paste-url')).toBeHidden()
+    await closeAllToasts(page)
+  })
+
+  describe('paste from clipboard', () => {
+    afterEach(async () => {
+      // Restore clipboard permissions in case a test revoked them, since later tests in this
+      // file share the same browser context and assume clipboard-read/write is granted.
+      await page.context().grantPermissions(['clipboard-read', 'clipboard-write'])
+    })
+
+    test('should paste an image file from the clipboard', async () => {
+      await gotoAndWaitForForm(page, mediaURL.create)
+
+      const imageBytes = Array.from(readFileSync(path.resolve(dirname, './image.png')))
+
+      await page.evaluate(async (bytes) => {
+        const blob = new Blob([new Uint8Array(bytes)], { type: 'image/png' })
+        await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })])
+      }, imageBytes)
+
+      await page.locator('.file-manager__pasteFromClipboard').click()
+
+      await expect(page.locator('#field-filemanager-filename')).toHaveValue('clipboard-1.png')
+
+      await saveDocAndAssert(page)
+    })
+
+    test('should show an error when the clipboard has no file', async () => {
+      await gotoAndWaitForForm(page, mediaURL.create)
+
+      await page.evaluate(async () => {
+        await navigator.clipboard.writeText('no files here')
+      })
+
+      await page.locator('.file-manager__pasteFromClipboard').click()
+
+      await expect(page.locator('.payload-toast-container .toast-error')).toContainText(
+        'No file found in clipboard.',
+      )
+      await expect(page.locator('#upload-paste-url')).toBeHidden()
+      await closeAllToasts(page)
+    })
+
+    test('should show an error when clipboard access is blocked', async () => {
+      await gotoAndWaitForForm(page, mediaURL.create)
+
+      await page.context().clearPermissions()
+
+      await page.locator('.file-manager__pasteFromClipboard').click()
+
+      await expect(page.locator('.payload-toast-container .toast-error')).toContainText(
+        'Unable to read from clipboard.',
+      )
+      await closeAllToasts(page)
+    })
+
+    test('should show an invalid file type error when the clipboard file does not match the accepted mime types', async () => {
+      await gotoAndWaitForForm(page, pdfOnlyURL.create)
+
+      const imageBytes = Array.from(readFileSync(path.resolve(dirname, './image.png')))
+
+      await page.evaluate(async (bytes) => {
+        const blob = new Blob([new Uint8Array(bytes)], { type: 'image/png' })
+        await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })])
+      }, imageBytes)
+
+      await page.locator('.file-manager__pasteFromClipboard').click()
+
+      await expect(page.locator('.payload-toast-container .toast-error')).toContainText(
+        'Invalid file type',
+      )
+      await expect(page.locator('#field-filemanager-filename')).toBeHidden()
+      await closeAllToasts(page)
+    })
+
+    test('should open the paste-from-URL modal when the clipboard text is not a valid link', async () => {
+      // pdfOnlyURL has no pasteURL config, matching the common case of pasteURL left enabled
+      await gotoAndWaitForForm(page, pdfOnlyURL.create)
+
+      await page.evaluate(async () => {
+        await navigator.clipboard.writeText('this is not a valid link')
+      })
+
+      await page.locator('.file-manager__pasteFromClipboard').click()
+
+      await expect(page.locator('#upload-paste-url')).toBeVisible()
+    })
+
+    test('should open the paste-from-URL modal with the URL prefilled when a valid link cannot be fetched directly', async () => {
+      // A page URL (not a direct file link) is a valid URL that will fail to fetch as a file
+      await gotoAndWaitForForm(page, pdfOnlyURL.create)
+
+      const pageURL =
+        'https://unsplash.com/photos/upside-down-illuminated-chicago-sign-with-blurry-golden-reflections-rKlC6BNaJsY'
+      await page.evaluate(async (url) => {
+        await navigator.clipboard.writeText(url)
+      }, pageURL)
+
+      await page.locator('.file-manager__pasteFromClipboard').click()
+
+      await expect(page.locator('#upload-paste-url')).toBeVisible({ timeout: POLL_TOPASS_TIMEOUT })
+      await expect(page.locator('#upload-paste-url #field-url')).toHaveValue(pageURL)
+    })
+
+    test('should reject a fetched URL whose content does not match the accepted mime types', async () => {
+      // restrictedMimeTypesURL only accepts image/png and has no pasteURL config (client-side
+      // fetch only). A same-origin URL like the current admin page fetches successfully but
+      // returns HTML, which must be rejected rather than silently accepted as the uploaded file.
+      await gotoAndWaitForForm(page, restrictedMimeTypesURL.create)
+
+      const sameOriginPageUrl = page.url()
+      await page.evaluate(async (url) => {
+        await navigator.clipboard.writeText(url)
+      }, sameOriginPageUrl)
+
+      await page.locator('.file-manager__pasteFromClipboard').click()
+
+      await expect(page.locator('.payload-toast-container .toast-error')).toContainText(
+        'Invalid file type',
+      )
+      await expect(page.locator('#field-filemanager-filename')).toBeHidden()
+      await closeAllToasts(page)
+    })
+
+    test('should auto-fetch a real external image URL on a collection without mime type restrictions', async () => {
+      await gotoAndWaitForForm(page, animatedTypeMediaURL.create)
+
+      const imageURL =
+        'https://images.unsplash.com/photo-1785462099343-c854ad06f84c?q=80&w=798&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
+      await page.evaluate(async (url) => {
+        await navigator.clipboard.writeText(url)
+      }, imageURL)
+
+      await page.locator('.file-manager__pasteFromClipboard').click()
+
+      await expect(page.locator('#field-filemanager-filename')).toHaveValue(
+        'photo-1785462099343-c854ad06f84c',
+        { timeout: POLL_TOPASS_TIMEOUT },
+      )
+      await expect(page.locator('#upload-paste-url')).toBeHidden()
+    })
   })
 
   test('should properly create IOS file upload', async () => {
@@ -2063,18 +2216,15 @@ describe('Uploads', () => {
       }
     })
 
-    test('should fetch remote URL server-side if pasteURL.allowList is defined', async () => {
+    test('should auto-fetch a URL detected on the clipboard server-side if pasteURL.allowList is defined', async () => {
       // Navigate to the upload creation page
       await gotoAndWaitForForm(page, uploadsOne.create)
 
-      // Open the paste-from-URL modal
-      const pasteURLButton = page.locator('.file-manager__upload button', { hasText: 'Paste URL' })
-      await pasteURLButton.click()
-
-      // Input the remote URL
+      // Put the remote URL on the clipboard instead of opening the paste-from-URL modal
       const remoteImage = 'http://localhost:4000/mock-cors-image'
-      const inputField = page.locator('#upload-paste-url #field-url')
-      await inputField.fill(remoteImage)
+      await page.evaluate(async (url) => {
+        await navigator.clipboard.writeText(url)
+      }, remoteImage)
 
       // Intercept the server-side fetch to the paste-url endpoint
       const encodedImageURL = encodeURIComponent(remoteImage)
@@ -2084,14 +2234,15 @@ describe('Uploads', () => {
         { timeout: POLL_TOPASS_TIMEOUT },
       )
 
-      // Click the "Add file" button
-      const addFileButton = page.locator('#upload-paste-url button', { hasText: 'Add file' })
-      await addFileButton.click()
+      // The clipboard-paste button detects the URL and fetches it directly, without opening the modal
+      await page.locator('.file-manager__pasteFromClipboard').click()
 
       // Wait for the server-side fetch to complete
       const serverSideFetch = await serverSideFetchPromise
       // Assert that the server-side fetch completed successfully
       await serverSideFetch.text()
+
+      await expect(page.locator('#upload-paste-url')).toBeHidden()
 
       // Wait for the filename field to be updated
       const filenameInput = page.locator('#field-filemanager-filename')
@@ -2105,13 +2256,18 @@ describe('Uploads', () => {
       await expect(imageDetails).toHaveAttribute('src', /mock-cors-image/, { timeout: 500 })
     })
 
-    test('should fail to fetch remote URL server-side if the pasteURL.allowList domains do not match', async () => {
+    test('should open the paste-from-URL modal when the clipboard has no file or URL, then fail server-side if the pasteURL.allowList domains do not match', async () => {
       // Navigate to the upload creation page
       await gotoAndWaitForForm(page, uploadsTwo.create)
 
-      // Open the paste-from-URL modal
-      const pasteURLButton = page.locator('.file-manager__upload button', { hasText: 'Paste URL' })
-      await pasteURLButton.click()
+      // Clear the clipboard so the paste button has nothing to auto-detect
+      await page.evaluate(async () => {
+        await navigator.clipboard.writeText('')
+      })
+
+      // The clipboard-paste button falls back to opening the paste-from-URL modal
+      await page.locator('.file-manager__pasteFromClipboard').click()
+      await expect(page.locator('#upload-paste-url')).toBeVisible()
 
       // Input the remote URL
       const remoteImage = 'http://localhost:4000/mock-cors-image'
@@ -2126,6 +2282,30 @@ describe('Uploads', () => {
       await expect(page.locator('.payload-toast-container .toast-error')).toContainText(
         'The provided URL is not allowed.',
       )
+    })
+
+    test('should open the paste-from-URL modal with the URL prefilled when the auto-fetch fails', async () => {
+      // pdfOnlyURL has no pasteURL.allowList configured, so only a client-side fetch is attempted
+      await gotoAndWaitForForm(page, pdfOnlyURL.create)
+
+      // The mock CORS server responds without an Access-Control-Allow-Origin header, so the
+      // client-side fetch is blocked and there is no server-side fallback to try.
+      const remoteImage = 'http://localhost:4000/mock-cors-image'
+      await page.evaluate(async (url) => {
+        await navigator.clipboard.writeText(url)
+      }, remoteImage)
+
+      await page.locator('.file-manager__pasteFromClipboard').click()
+
+      await expect(page.locator('.payload-toast-container .toast-error')).toContainText(
+        'Failed to fetch the file.',
+      )
+
+      // The failed auto-fetch falls back to the modal so the user can retry or correct the URL
+      await expect(page.locator('#upload-paste-url')).toBeVisible()
+      await expect(page.locator('#upload-paste-url #field-url')).toHaveValue(remoteImage)
+
+      await closeAllToasts(page)
     })
   })
 

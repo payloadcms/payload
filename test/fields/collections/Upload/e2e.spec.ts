@@ -43,6 +43,7 @@ describe('Upload', () => {
     url = new AdminUrlUtil(serverURL, uploadsSlug)
 
     const context = await browser.newContext()
+    await context.grantPermissions(['clipboard-read', 'clipboard-write'])
     ;({ page } = await initPage({ context, serverURL }))
   })
   beforeEach(async () => {
@@ -81,10 +82,34 @@ describe('Upload', () => {
   test('should upload files from remote URL', async () => {
     await page.goto(url.create)
 
-    const pasteURLButton = page.locator('.file-manager__upload button', {
-      hasText: 'Paste URL',
+    const remoteImage =
+      'https://raw.githubusercontent.com/payloadcms/website/refs/heads/main/public/images/og-image.jpg'
+
+    // Putting the URL on the clipboard lets the paste button detect and fetch it directly
+    await page.evaluate(async (remoteUrl) => {
+      await navigator.clipboard.writeText(remoteUrl)
+    }, remoteImage)
+
+    await page.locator('.file-manager__pasteFromClipboard').click()
+
+    await expect(page.locator('#field-filemanager-filename')).toHaveValue('og-image.jpg')
+
+    await saveDocAndAssert(page)
+
+    await expect(page.locator('.file-preview__thumbnail img')).toHaveAttribute(
+      'src',
+      /\/api\/uploads\/file\/og-image(-\d+)?\.jpg(\?.*)?$/,
+    )
+  })
+
+  test('should open the paste-from-URL modal when the clipboard has no file or URL', async () => {
+    await page.goto(url.create)
+
+    await page.evaluate(async () => {
+      await navigator.clipboard.writeText('')
     })
-    await pasteURLButton.click()
+
+    await page.locator('.file-manager__pasteFromClipboard').click()
 
     const remoteImage =
       'https://raw.githubusercontent.com/payloadcms/website/refs/heads/main/public/images/og-image.jpg'
@@ -101,40 +126,30 @@ describe('Upload', () => {
 
     await expect(page.locator('.file-preview__thumbnail img')).toHaveAttribute(
       'src',
-      /\/api\/uploads\/file\/og-image\.jpg(\?.*)?$/,
+      /\/api\/uploads\/file\/og-image(-\d+)?\.jpg(\?.*)?$/,
     )
   })
 
   test('should disable save button during upload progress from remote URL', async () => {
     await page.goto(url.create)
 
-    const pasteURLButton = page.locator('.file-manager__upload button', {
-      hasText: 'Paste URL',
-    })
-    await pasteURLButton.click()
-
     const remoteImage =
       'https://raw.githubusercontent.com/payloadcms/website/refs/heads/main/public/images/og-image.jpg'
 
-    const inputField = page.locator('#upload-paste-url #field-url')
-    await inputField.fill(remoteImage)
+    await page.evaluate(async (remoteUrl) => {
+      await navigator.clipboard.writeText(remoteUrl)
+    }, remoteImage)
 
     // Intercept the upload request
-    await page.route(
-      'https://raw.githubusercontent.com/payloadcms/website/refs/heads/main/public/images/og-image.jpg',
-      (route) => setTimeout(() => route.continue(), 2000), // Artificial 2-second delay
-    )
+    await page.route(remoteImage, (route) => setTimeout(() => route.continue(), 2000)) // Artificial 2-second delay
 
-    const addFileButton = page.locator('#upload-paste-url button', { hasText: 'Add file' })
-    await addFileButton.click()
+    await page.locator('.file-manager__pasteFromClipboard').click()
 
     const submitButton = page.locator('.form-submit .btn')
     await expect(submitButton).toBeDisabled()
 
     // Wait for the upload to complete
-    await page.waitForResponse(
-      'https://raw.githubusercontent.com/payloadcms/website/refs/heads/main/public/images/og-image.jpg',
-    )
+    await page.waitForResponse(remoteImage)
 
     // Assert the submit button is re-enabled after upload
     await expect(submitButton).toBeEnabled()
