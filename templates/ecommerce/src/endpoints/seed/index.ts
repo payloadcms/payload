@@ -91,6 +91,7 @@ export const seed = async ({
   await Promise.all(
     globals.map((global) =>
       payload.updateGlobal({
+        overrideAccess: true,
         slug: global,
         data: {
           navItems: [],
@@ -113,6 +114,7 @@ export const seed = async ({
   payload.logger.info(`— Seeding customer and customer data...`)
 
   await payload.delete({
+    overrideAccess: true,
     collection: 'users',
     depth: 0,
     where: {
@@ -151,6 +153,7 @@ export const seed = async ({
     hatsCategory,
   ] = await Promise.all([
     payload.create({
+      overrideAccess: true,
       collection: 'users',
       data: {
         name: 'Customer',
@@ -160,27 +163,32 @@ export const seed = async ({
       },
     }),
     payload.create({
+      overrideAccess: true,
       collection: 'media',
       data: imageHatData,
       file: imageHatBuffer,
     }),
     payload.create({
+      overrideAccess: true,
       collection: 'media',
       data: imageTshirtBlackData,
       file: imageTshirtBlackBuffer,
     }),
     payload.create({
+      overrideAccess: true,
       collection: 'media',
       data: imageTshirtWhiteData,
       file: imageTshirtWhiteBuffer,
     }),
     payload.create({
+      overrideAccess: true,
       collection: 'media',
       data: imageHero1Data,
       file: heroBuffer,
     }),
     ...categories.map((category) =>
       payload.create({
+        overrideAccess: true,
         collection: 'categories',
         data: {
           title: category,
@@ -193,6 +201,7 @@ export const seed = async ({
   payload.logger.info(`— Seeding variant types and options...`)
 
   const sizeVariantType = await payload.create({
+    overrideAccess: true,
     collection: 'variantTypes',
     data: {
       name: 'size',
@@ -204,6 +213,7 @@ export const seed = async ({
 
   for (const option of sizeVariantOptions) {
     const result = await payload.create({
+      overrideAccess: true,
       collection: 'variantOptions',
       data: {
         ...option,
@@ -216,6 +226,7 @@ export const seed = async ({
   const [small, medium, large, xlarge] = sizeVariantOptionsResults
 
   const colorVariantType = await payload.create({
+    overrideAccess: true,
     collection: 'variantTypes',
     data: {
       name: 'color',
@@ -226,6 +237,7 @@ export const seed = async ({
   const [black, white] = await Promise.all(
     colorVariantOptions.map((option) => {
       return payload.create({
+        overrideAccess: true,
         collection: 'variantOptions',
         data: {
           ...option,
@@ -238,6 +250,7 @@ export const seed = async ({
   payload.logger.info(`— Seeding products...`)
 
   const productHat = await payload.create({
+    overrideAccess: true,
     collection: 'products',
     depth: 0,
     data: productHatData({
@@ -250,6 +263,7 @@ export const seed = async ({
   })
 
   const productTshirt = await payload.create({
+    overrideAccess: true,
     collection: 'products',
     depth: 0,
     data: productTshirtData({
@@ -279,6 +293,7 @@ export const seed = async ({
   ] = await Promise.all(
     [small, medium, large, xlarge].map((variantOption) =>
       payload.create({
+        overrideAccess: true,
         collection: 'variants',
         depth: 0,
         data: productTshirtVariant({
@@ -292,6 +307,7 @@ export const seed = async ({
   await Promise.all(
     [small, medium, large, xlarge].map((variantOption) =>
       payload.create({
+        overrideAccess: true,
         collection: 'variants',
         depth: 0,
         data: productTshirtVariant({
@@ -306,6 +322,7 @@ export const seed = async ({
   payload.logger.info(`— Seeding contact form...`)
 
   const contactForm = await payload.create({
+    overrideAccess: true,
     collection: 'forms',
     depth: 0,
     data: contactFormData(),
@@ -315,6 +332,7 @@ export const seed = async ({
 
   const [_, contactPage] = await Promise.all([
     payload.create({
+      overrideAccess: true,
       collection: 'pages',
       depth: 0,
       data: homePageData({
@@ -323,6 +341,7 @@ export const seed = async ({
       }),
     }),
     payload.create({
+      overrideAccess: true,
       collection: 'pages',
       depth: 0,
       data: contactPageData({
@@ -334,6 +353,7 @@ export const seed = async ({
   payload.logger.info(`— Seeding addresses...`)
 
   const customerUSAddress = await payload.create({
+    overrideAccess: true,
     collection: 'addresses',
     depth: 0,
     data: {
@@ -343,6 +363,7 @@ export const seed = async ({
   })
 
   const customerUKAddress = await payload.create({
+    overrideAccess: true,
     collection: 'addresses',
     depth: 0,
     data: {
@@ -354,6 +375,7 @@ export const seed = async ({
   payload.logger.info(`— Seeding transactions...`)
 
   const pendingTransaction = await payload.create({
+    overrideAccess: true,
     collection: 'transactions',
     data: {
       currency: 'USD',
@@ -369,6 +391,7 @@ export const seed = async ({
   })
 
   const succeededTransaction = await payload.create({
+    overrideAccess: true,
     collection: 'transactions',
     data: {
       currency: 'USD',
@@ -393,6 +416,7 @@ export const seed = async ({
 
   // This cart is open as it's created now
   const openCart = await payload.create({
+    overrideAccess: true,
     collection: 'carts',
     data: {
       customer: customer.id,
@@ -411,6 +435,7 @@ export const seed = async ({
 
   // Cart is abandoned because it was created long in the past
   const abandonedCart = await payload.create({
+    overrideAccess: true,
     collection: 'carts',
     data: {
       currency: 'USD',
@@ -426,6 +451,7 @@ export const seed = async ({
 
   // Cart is purchased because it has a purchasedAt date
   const completedCart = await payload.create({
+    overrideAccess: true,
     collection: 'carts',
     data: {
       customer: customer.id,
@@ -456,6 +482,7 @@ export const seed = async ({
   payload.logger.info(`— Seeding orders...`)
 
   const orderInCompleted = await payload.create({
+    overrideAccess: true,
     collection: 'orders',
     data: {
       amount: 7499,
@@ -480,6 +507,7 @@ export const seed = async ({
   })
 
   const orderInProcessing = await payload.create({
+    overrideAccess: true,
     collection: 'orders',
     data: {
       amount: 7499,
@@ -507,6 +535,7 @@ export const seed = async ({
 
   await Promise.all([
     payload.updateGlobal({
+      overrideAccess: true,
       slug: 'header',
       data: {
         navItems: [
@@ -535,6 +564,7 @@ export const seed = async ({
       },
     }),
     payload.updateGlobal({
+      overrideAccess: true,
       slug: 'footer',
       data: {
         navItems: [
