@@ -8,7 +8,6 @@ import rsc from '@vitejs/plugin-rsc'
 import path from 'node:path'
 import { createLogger, mergeConfig } from 'vite'
 
-import { resolveCjsDependencies } from './config/autoExternalCjs.js'
 import {
   buildExternalPackages,
   payloadNoExternalPatterns,
@@ -74,6 +73,12 @@ export type WithPayloadOptions = {
   adminRouteId?: string
   /** Extra globs exempted from the `.client.*` SSR denial (beyond the default node_modules exemption). */
   clientDenialExcludeFiles?: string[]
+  /**
+   * Packages added to `ssr.external` on dev serve only (the build bundles them).
+   * List CommonJS deps that 500 with `__cjs_module_runner_transform` — the RSC
+   * plugin's CJS-to-ESM rewrite breaks on their circular `require`s.
+   */
+  devServerExternalPackages?: string[]
   /** Path to the user's `payload.config.ts` (required) */
   payloadConfigPath: string
   /** TanStack router routes directory relative to `srcDirectory`. Defaults to `'app'` */
@@ -142,6 +147,7 @@ export function withPayload(
     additionalIgnoreImporters = [],
     adminRouteId,
     clientDenialExcludeFiles = [],
+    devServerExternalPackages = [],
     payloadConfigPath,
     routesDirectory = 'app',
     silenceDependencyWarnings = true,
@@ -167,21 +173,12 @@ export function withPayload(
     // externalizes the package boundaries (`buildExternalPackages`) and drops
     // `pluralize` so it bundles — leaving it in `ssr.external` here would win over
     // `noExternal` and re-emit the bare specifier.
-    // Dev serve also externalizes the app's own CJS-only dependencies; the build
+    // Dev serve also honors `devServerExternalPackages`, the app's own CJS
+    // dependencies that break under the RSC plugin's CJS-to-ESM rewrite; the build
     // needs none of it, since Rollup bundles CJS correctly.
     const ssrExternal = isBuild
       ? buildExternalPackages
-      : [
-          ...ssrExternalPackages,
-          ...resolveCjsDependencies({
-            exclude: [
-              ...ssrExternalPackages,
-              ...optimizeDepsIncludeDefaults,
-              ...optimizeDepsExcludeDefaults,
-            ],
-            root: process.cwd(),
-          }),
-        ]
+      : [...ssrExternalPackages, ...devServerExternalPackages]
 
     const base: UserConfig = {
       build: {
