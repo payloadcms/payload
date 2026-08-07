@@ -16,13 +16,7 @@ import {
   closeGroupBy,
   openGroupBy,
 } from '../__helpers/e2e/groupBy/index.js'
-import {
-  ensureCompilationIsDone,
-  exactText,
-  initPageConsoleErrorCatch,
-  saveDocAndAssert,
-  selectTableRow,
-} from '../__helpers/e2e/helpers.js'
+import { exactText, saveDocAndAssert, selectTableRow } from '../__helpers/e2e/helpers.js'
 import { navigateToListView } from '../__helpers/e2e/navigateToListView.js'
 import { deletePreferences } from '../__helpers/e2e/preferences.js'
 import { getSelectMenu } from '../__helpers/e2e/selectInput.js'
@@ -30,6 +24,8 @@ import { openNav } from '../__helpers/e2e/toggleNav.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { ensureCompilationIsDone } from '../__setup/e2e/ensureCompilationIsDone.js'
+import { initPage } from '../__setup/e2e/initPage.js'
 import { devUser } from '../credentials.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import {
@@ -61,9 +57,7 @@ test.describe('Group By', () => {
     noGroupableUrl = new AdminUrlUtil(serverURL, noGroupableSlug)
 
     const context = await browser.newContext()
-    page = await context.newPage()
-    initPageConsoleErrorCatch(page)
-    await ensureCompilationIsDone({ page, serverURL })
+    ;({ page } = await initPage({ context, serverURL }))
 
     user = await payload.login({
       collection: 'users',

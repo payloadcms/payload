@@ -1,5 +1,7 @@
 'use client'
 
+import type { NotFoundRouteProps } from '@tanstack/react-router'
+
 import { NotFoundClient, useRouteTransition } from '@payloadcms/ui'
 import { notFound, redirect, useLoaderData } from '@tanstack/react-router'
 import { Fragment, type ReactNode, useDeferredValue, useEffect } from 'react'
@@ -52,12 +54,15 @@ function AdminPage() {
   return <Fragment>{rscPayload}</Fragment>
 }
 
-function AdminNotFound(props: { data?: { routeKey?: string; rscPayload?: ReactNode } }) {
-  const rscPayload = props?.data?.rscPayload
+type AdminNotFoundData = { routeKey?: string; rscPayload?: ReactNode }
+
+function AdminNotFound({ data }: NotFoundRouteProps) {
+  // TanStack exposes not-found data as unknown; this route only receives the shape thrown below.
+  const { routeKey, rscPayload } = (data ?? {}) as AdminNotFoundData
   if (!rscPayload) {
     return <NotFoundClient />
   }
-  return <Fragment key={props?.data?.routeKey}>{rscPayload}</Fragment>
+  return <Fragment key={routeKey}>{rscPayload}</Fragment>
 }
 
 const adminRouteOptions = ({
@@ -98,7 +103,7 @@ const adminRouteOptions = ({
       }
       return data
     },
-    staleReloadMode: 'blocking',
+    staleReloadMode: 'blocking' as const,
   },
   // Surface query params in `loaderDeps` so `?locale=es` re-runs the loader.
   loaderDeps: ({ search }: { search: Record<string, unknown> }) => ({
