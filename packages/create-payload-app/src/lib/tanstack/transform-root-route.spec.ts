@@ -90,7 +90,21 @@ function RootComponent() {
     </AuthProvider>
   )
 }
+`
+}
 
+function getRouterOnlyDocumentRoot(returnExpression: string) {
+  return `import { Outlet, createRootRoute } from '@tanstack/react-router'
+
+import '../styles.css'
+
+export const Route = createRootRoute({
+  component: RootComponent,
+})
+
+function RootComponent() {
+  return (${returnExpression})
+}
 `
 }
 
@@ -181,6 +195,25 @@ describe('transformTanStackRootRoute', () => {
     expect(result.content).toContain('notFoundComponent: NotFound')
     expect(result.content).toContain('<main data-layout="custom">')
   })
+
+  it.each([
+    [
+      'direct',
+      `<html lang="fr"><head><title>My Router App</title></head><body><Outlet /></body></html>`,
+    ],
+    ['fragment-wrapped', `<><html lang="fr"><head /><body><Outlet /></body></html></>`],
+    ['conditional', `isReady ? <html lang="fr"><head /><body><Outlet /></body></html> : null`],
+  ])(
+    'should reject a Router-only root whose %s route component renders the document shell',
+    (_shape, returnExpression) => {
+      const content = getRouterOnlyDocumentRoot(returnExpression)
+
+      expect(transformTanStackRootRoute({ content, kind: 'router-only' })).toEqual({
+        reason: 'The Router-only route component cannot render the document shell.',
+        success: false,
+      })
+    },
+  )
 
   it('should reuse aliased HeadContent and Scripts imports from split declarations', () => {
     const result = expectSuccessfulTransform(

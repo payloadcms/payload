@@ -131,14 +131,28 @@ export function transformTanStackViteConfig({
     return failure('Framework and React plugin calls must be adjacent and ordered.')
   }
 
+  const frameworkCall = frameworkCalls[0]!.element
+  const reactCall = reactCalls[0]!.element
+  if (
+    !Node.isCallExpression(frameworkCall) ||
+    !Node.isCallExpression(reactCall) ||
+    frameworkCall.getArguments().length > 1 ||
+    reactCall.getArguments().length > 1
+  ) {
+    return failure('Framework and React plugin calls must receive at most one argument.')
+  }
+
   const destinationValidation = validateDestinationBindings({ sourceFile })
   if (!destinationValidation.success) {
     return destinationValidation
   }
 
   replacePluginCalls({
+    frameworkCall,
     frameworkIndex,
     pluginsArray,
+    preserveFrameworkOptions: appDetails.kind === 'start',
+    reactCall,
     reactIndex,
     reactPluginName,
   })
@@ -404,6 +418,29 @@ function isExactPluginCall({
   expectedArgument: string
 }): boolean {
   return call.getArguments().length === 1 && call.getArguments()[0]?.getText() === expectedArgument
+}
+
+function isMergedPluginCall({
+  call,
+  expectedArgument,
+}: {
+  call: CallExpression
+  expectedArgument: string
+}): boolean {
+  if (isExactPluginCall({ call, expectedArgument })) {
+    return true
+  }
+
+  const argument = call.getArguments()[0]
+  if (call.getArguments().length !== 1 || !Node.isObjectLiteralExpression(argument)) {
+    return false
+  }
+
+  const firstProperty = argument.getProperties()[0]
+  return (
+    Node.isSpreadAssignment(firstProperty) &&
+    firstProperty.getExpression().getText() === expectedArgument
+  )
 }
 
 function isImportBinding({
@@ -707,11 +744,11 @@ function isCompatiblePayloadConfig({
     frameworkCalls.length !== 1 ||
     reactCalls.length !== 1 ||
     !isExactPluginCall({ call: rscCalls[0]!, expectedArgument: 'pluginOptions.rsc' }) ||
-    !isExactPluginCall({
+    !isMergedPluginCall({
       call: frameworkCalls[0]!,
       expectedArgument: 'pluginOptions.tanstackStart',
     }) ||
-    !isExactPluginCall({ call: reactCalls[0]!, expectedArgument: 'pluginOptions.react' })
+    !isMergedPluginCall({ call: reactCalls[0]!, expectedArgument: 'pluginOptions.react' })
   ) {
     return false
   }
@@ -766,13 +803,19 @@ function removeNamedImport({
 }
 
 function replacePluginCalls({
+  frameworkCall,
   frameworkIndex,
   pluginsArray,
+  preserveFrameworkOptions,
+  reactCall,
   reactIndex,
   reactPluginName,
 }: {
+  frameworkCall: CallExpression
   frameworkIndex: number
   pluginsArray: ArrayLiteralExpression
+  preserveFrameworkOptions: boolean
+  reactCall: CallExpression
   reactIndex: number
   reactPluginName: string
 }) {
@@ -786,9 +829,43 @@ function replacePluginCalls({
     insertionIndex,
     0,
     'rsc(pluginOptions.rsc)',
-    'tanstackStart(pluginOptions.tanstackStart)',
-    `${reactPluginName}(pluginOptions.react)`,
+    getPluginCallWithMergedOptions({
+      call: frameworkCall,
+      localName: 'tanstackStart',
+      pluginOptions: 'pluginOptions.tanstackStart',
+      shouldPreserveOptions: preserveFrameworkOptions,
+    }),
+    getPluginCallWithMergedOptions({
+      call: reactCall,
+      localName: reactPluginName,
+      pluginOptions: 'pluginOptions.react',
+      shouldPreserveOptions: true,
+    }),
   )
 
   pluginsArray.replaceWithText(`[${retainedPlugins.join(', ')}]`)
+}
+
+function getPluginCallWithMergedOptions({
+  call,
+  localName,
+  pluginOptions,
+  shouldPreserveOptions,
+}: {
+  call: CallExpression
+  localName: string
+  pluginOptions: string
+  shouldPreserveOptions: boolean
+}): string {
+  const existingOptions = shouldPreserveOptions ? call.getArguments()[0] : undefined
+  if (!existingOptions) {
+    return `${localName}(${pluginOptions})`
+  }
+
+  if (Node.isObjectLiteralExpression(existingOptions)) {
+    const properties = existingOptions.getText().slice(1, -1).trim()
+    return `${localName}({ ...${pluginOptions}${properties ? `, ${properties}` : ''} })`
+  }
+
+  return `${localName}({ ...${pluginOptions}, ...(${existingOptions.getText()}) })`
 }

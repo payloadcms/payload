@@ -166,15 +166,15 @@ export default defineConfig({
     )
   })
 
-  it('should replace existing custom TanStack and React options with Payload plugin options', () => {
+  it('should preserve existing custom TanStack and React plugin options', () => {
     const content = `import { tanstackStart } from '@tanstack/react-start/plugin/vite'
 import viteReact from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 
 export default defineConfig({
   plugins: [
-    tanstackStart({ router: { quoteStyle: 'double' } }),
-    viteReact({ babel: { plugins: ['compiler'] } }),
+    tanstackStart({ target: 'node-server' }),
+    viteReact({ babel: { plugins: ['babel-plugin-react-compiler'] } }),
   ],
 })
 `
@@ -183,10 +183,19 @@ export default defineConfig({
       transformTanStackViteConfig({ appDetails: getAppDetails('start'), content }),
     )
 
-    expect(result.content).not.toContain("quoteStyle: 'double'")
-    expect(result.content).not.toContain("plugins: ['compiler']")
-    expect(result.content).toContain('tanstackStart(pluginOptions.tanstackStart)')
-    expect(result.content).toContain('viteReact(pluginOptions.react)')
+    expect(result.content).toContain(
+      "tanstackStart({ ...pluginOptions.tanstackStart, target: 'node-server' })",
+    )
+    expect(result.content).toContain(
+      "viteReact({ ...pluginOptions.react, babel: { plugins: ['babel-plugin-react-compiler'] } })",
+    )
+
+    expect(
+      transformTanStackViteConfig({
+        appDetails: getAppDetails('start'),
+        content: result.content,
+      }),
+    ).toEqual({ content: result.content, modified: false, success: true })
   })
 
   it('should preserve an existing __dirname declaration without adding fileURLToPath', () => {

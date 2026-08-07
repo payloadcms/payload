@@ -1,6 +1,9 @@
 import type {
   ArrayLiteralExpression,
+  ArrowFunction,
+  Expression,
   FunctionDeclaration,
+  FunctionExpression,
   ImportDeclaration,
   JsxSelfClosingElement,
   Node as MorphNode,
@@ -25,6 +28,7 @@ type LocalBinding =
   | { kind: 'other' | 'variable' }
 
 type NamedImport = { declaration: ImportDeclaration; localName: string }
+type RouteComponentFunction = ArrowFunction | FunctionDeclaration | FunctionExpression
 
 const PAYLOAD_CLIENT_MODULE = '@payloadcms/tanstack-start/client'
 const ROUTER_MODULE = '@tanstack/react-router'
@@ -181,6 +185,87 @@ function getFunction({
     .filter((declaration) => declaration.getName() === functionName)
 
   return functions.length === 1 ? functions[0] : undefined
+}
+
+function getRouteComponentFunction({
+  component,
+  sourceFile,
+}: {
+  component: Expression
+  sourceFile: SourceFile
+}): RouteComponentFunction | undefined {
+  if (Node.isArrowFunction(component) || Node.isFunctionExpression(component)) {
+    return component
+  }
+
+  if (!Node.isIdentifier(component)) {
+    return undefined
+  }
+
+  const functions: RouteComponentFunction[] = sourceFile
+    .getFunctions()
+    .filter((declaration) => declaration.getName() === component.getText())
+  const variableFunctions = sourceFile
+    .getVariableDeclarations()
+    .filter((declaration) => declaration.getName() === component.getText())
+    .map((declaration) => declaration.getInitializer())
+    .filter(
+      (initializer): initializer is ArrowFunction | FunctionExpression =>
+        Node.isArrowFunction(initializer) || Node.isFunctionExpression(initializer),
+    )
+
+  functions.push(...variableFunctions)
+
+  return functions.length === 1 ? functions[0] : undefined
+}
+
+function isDocumentShellExpression(expression: Expression | undefined): boolean {
+  if (!expression) {
+    return false
+  }
+
+  const openingElements = expression.getDescendantsOfKind(SyntaxKind.JsxOpeningElement)
+  const selfClosingElements = expression.getDescendantsOfKind(SyntaxKind.JsxSelfClosingElement)
+
+  return [...openingElements, ...selfClosingElements].some(
+    (element) => element.getTagNameNode().getText() === 'html',
+  )
+}
+
+function routeComponentRendersDocumentShell({
+  component,
+  sourceFile,
+}: {
+  component: Expression
+  sourceFile: SourceFile
+}): boolean {
+  const componentFunction = getRouteComponentFunction({ component, sourceFile })
+  if (!componentFunction) {
+    return false
+  }
+
+  const body = componentFunction.getBody()
+  if (!body) {
+    return false
+  }
+
+  if (Node.isExpression(body) && isDocumentShellExpression(body)) {
+    return true
+  }
+
+  return body
+    .getDescendantsOfKind(SyntaxKind.ReturnStatement)
+    .filter((returnStatement) => {
+      const containingFunction = returnStatement.getFirstAncestor(
+        (ancestor) =>
+          Node.isArrowFunction(ancestor) ||
+          Node.isFunctionDeclaration(ancestor) ||
+          Node.isFunctionExpression(ancestor),
+      )
+
+      return containingFunction?.getStart() === componentFunction.getStart()
+    })
+    .some((returnStatement) => isDocumentShellExpression(returnStatement.getExpression()))
 }
 
 function getHeadContentNode({
@@ -625,8 +710,22 @@ function transformRouterOnlyRoot({
   const componentProperties = rootObject
     .getProperties()
     .filter((property) => getPropertyName(property) === 'component')
-  if (componentProperties.length !== 1) {
+  const componentProperty = componentProperties[0]
+  if (
+    componentProperties.length !== 1 ||
+    !Node.isPropertyAssignment(componentProperty) ||
+    !componentProperty.getInitializer()
+  ) {
     return failure('The Router-only root must contain exactly one component option.')
+  }
+
+  if (
+    routeComponentRendersDocumentShell({
+      component: componentProperty.getInitializer()!,
+      sourceFile,
+    })
+  ) {
+    return failure('The Router-only route component cannot render the document shell.')
   }
 
   stylesheetImport.setDefaultImport('appCss')
