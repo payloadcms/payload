@@ -28,6 +28,10 @@ export default buildConfigWithDefaults({
     dashboard: {
       defaultLayout: ({ req: { user } }) => {
         const baseWidgets: WidgetInstance[] = [
+          {
+            widgetSlug: 'collections',
+            width: 'full',
+          },
           ...Array.from(
             { length: 4 },
             (_value, index): WidgetInstance<'count'> => ({

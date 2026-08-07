@@ -2,13 +2,12 @@
 import { describe, expectTypeOf, it } from 'vitest'
 
 import type {
-  CollectionQueryWidget,
+  CollectionsWidget,
   Config,
   ConfigurableWidget,
   CountWidget,
   PageQueryWidget,
   PrivateWidget,
-  RecentlyViewedWidget,
   RevenueWidget,
   Ticket,
 } from './payload-types.js'
@@ -16,8 +15,7 @@ import type {
 describe('Dashboard Widget Types', () => {
   it('should add all widgets to Config', () => {
     expectTypeOf<Config['widgets']>().toEqualTypeOf<{
-      activity: RecentlyViewedWidget
-      'collection-query': CollectionQueryWidget
+      collections: CollectionsWidget
       configurable: ConfigurableWidget
       count: CountWidget
       'page-query': PageQueryWidget
@@ -30,6 +28,7 @@ describe('Dashboard Widget Types', () => {
     expectTypeOf<CountWidget>().toHaveProperty('data')
     expectTypeOf<CountWidget>().toHaveProperty('width')
     expectTypeOf<CountWidget['width']>().toEqualTypeOf<'medium' | 'small' | 'x-small'>()
+    expectTypeOf<CollectionsWidget['width']>().toEqualTypeOf<'full'>()
   })
 
   it('should mark widget data fields as required or optional', () => {
