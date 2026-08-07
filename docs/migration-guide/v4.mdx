@@ -22,6 +22,29 @@ The codemod is idempotent and safe to run on a partially-migrated project.
 
 ## Breaking Changes
 
+### Default query depth reduced to `1`
+
+Queries that omit `depth` now populate one relationship level instead of two. This reduces database work and response size by default.
+
+If your application relies on two populated levels, prefer specifying `depth: 2` only on the queries that need it:
+
+```ts
+const posts = await payload.find({
+  collection: 'posts',
+  depth: 2,
+})
+```
+
+To preserve the Payload 3.x behavior application-wide, set `defaultDepth: 2`:
+
+```diff
+export default buildConfig({
++ defaultDepth: 2,
+})
+```
+
+One place inherits `defaultDepth` without naming it: when localization is enabled, `@payloadcms/plugin-search` refetches the document without an explicit depth before handing `originalDoc` to your `beforeSync` hook. Read only first-level relationships there, or refetch yourself with the depth you need.
+
 ### Versions are now enabled by default for all collections and globals
 
 Collections and globals now have `versions: true` by default (`maxPerDoc`/`max: 100`, drafts disabled). In previous versions you had to opt in; you now opt out.
@@ -185,6 +208,43 @@ Several types and utilities that were re-exported from `@payloadcms/ui` and `@pa
 
 Run `npx @payloadcms/codemod --transform migrate-aliased-exports` to migrate automatically. Renamed types are imported using an `as` alias (e.g. `import type { CollectionPreferences as ListPreferences } from 'payload'`) so existing usages keep compiling — drop the alias and rename usages manually if you want to fully commit to the new name.
 
+### `DefaultValue` function variant is now typed to allow returning a `Promise` ([#17522](https://github.com/payloadcms/payload/pull/17522))
+
+The exported `DefaultValue` type's function variant previously declared a synchronous-only return type (`SerializableValue`), even though Payload has always awaited the result of a `defaultValue` function at runtime. The type now correctly reflects this and allows `Promise<SerializableValue> | SerializableValue`.
+
+**What changes:**
+
+- Field-level `defaultValue` functions can now be typed as `async` without a TypeScript error. This was always safe at runtime — only the type was too strict.
+- If you import `DefaultValue` to type your own function or variable and then call it synchronously assuming the result is never a `Promise`, you'll need to update that code to handle the `Promise` branch.
+
+```diff
+import type { DefaultValue } from 'payload'
+
+- const resolveDefault = (fn: DefaultValue, args: Args) => {
+-   const value = fn(args)
+-   return value.toString()
+- }
++ const resolveDefault = async (fn: DefaultValue, args: Args) => {
++   const value = await fn(args)
++   return value.toString()
++ }
+```
+
+If you only use `DefaultValue` to type a `defaultValue` property passed into a Collection, Global, or Field config, no changes are needed.
+
+### Sanitized collection and auth config types now match runtime defaults
+
+`SanitizedCollectionConfig` and its auth type no longer use `DeepRequired`. This reduces TypeScript checker work and makes optionality match runtime defaults.
+
+Properties Payload does not default, such as `access.readVersions`, `auth.cookies.domain`, `auth.useAPIKey`, and `auth.depth`, now require undefined handling:
+
+```ts
+if (collection.access.readVersions) await collection.access.readVersions(args)
+const useAPIKey = collection.auth.useAPIKey ?? false
+```
+
+Properties sanitization does fill, including standard access functions, hook arrays, cookie defaults, and normalized auth options, are now required. Use `CollectionConfig` or `IncomingAuthType` for input and `SanitizedCollectionConfig` after sanitization.
+
 ### User types consolidated into `User` and `AuthenticatedUser`
 
 Payload's user types have been consolidated so each one has a clear job. This completes a cleanup already planned in 3.x: `UntypedUser` was deprecated for removal in 4.0, and `TypedUser` was marked to be renamed to `User` in 4.0.
@@ -209,6 +269,7 @@ The `collection` property remains available on authenticated users and in client
 - `ClientUser` is removed — replace it with `AuthenticatedUser` for `useAuth().user`, `me` responses, and other client auth APIs.
 - `User` and `AuthenticatedUser` no longer have a `{ [key: string]: any }` index signature. Custom auth-collection fields require generated types or an explicit augmented type or cast.
 - `req.user` and `payload.auth().user` are now typed as `AuthenticatedUser`, so `_strategy` and `_sid` type-check.
+- The deprecated top-level `strategy` field is removed from `me` and `refresh` responses (REST, GraphQL, and the SDK). Read `user._strategy` instead.
 - `@payloadcms/plugin-ecommerce`'s `ClientUserWithCart` is removed — replace it with `UserWithCart`.
 - `MeOperationResult.user` and `refreshCookieAsync()` can be `null`, matching their existing runtime behavior. `refreshCookieAsync()` also preserves the custom user type passed to `useAuth<T>()`.
 - Collection `admin.hidden` callbacks now receive `PayloadRequest['user']`, including `null` when there is no authenticated user.
@@ -398,7 +459,7 @@ If you authored a custom rich-text adapter that returned an `i18n` object, move 
 ```diff
 // my-richtext-adapter/index.ts
 export const myRichTextAdapter = (): RichTextAdapterProvider => {
-  return async ({ config }) => {
+  return ({ config }) => {
     const myTranslations = { en: { myKey: 'My translation' } }
 
 -   return {
@@ -412,6 +473,39 @@ export const myRichTextAdapter = (): RichTextAdapterProvider => {
   }
 }
 ```
+
+### Config and rich-text sanitization are now synchronous
+
+Config and field sanitizers now return their result directly instead of returning a promise. This affects projects that call `sanitizeConfig`, `sanitizeField`, or `sanitizeFields` from `payload` directly:
+
+```diff
+- const sanitizedConfig = await sanitizeConfig(config)
++ const sanitizedConfig = sanitizeConfig(config)
+```
+
+The same change applies to `sanitizeServerEditorConfig` and the methods on `editorConfigFactory` from `@payloadcms/richtext-lexical`. Remove `await`, and replace any `.then()` or `.catch()` usage with a direct call and `try`/`catch`.
+
+The optional `richTextSanitizationPromises` argument on the field sanitizers has been renamed to `richTextSanitizers`. Its callbacks are now synchronous:
+
+```diff
+- richTextSanitizationPromises: Array<(config: SanitizedConfig) => Promise<void>>
++ richTextSanitizers: Array<(config: SanitizedConfig) => void>
+```
+
+Custom rich-text adapter providers and Lexical server feature callbacks must also return their value synchronously:
+
+```diff
+export const MyFeature = createServerFeature({
+  key: 'my-feature',
+-  feature: async () => ({
++  feature: () => ({
+    ClientFeature: '@my-package/client#MyFeature',
+    sanitizedServerFeatureProps: null,
+  }),
+})
+```
+
+If an affected adapter or feature performs asynchronous work, move that work to an asynchronous plugin before config sanitization or to a runtime hook. Projects that only use `buildConfig(...)` and `lexicalEditor(...)` normally are not affected; `buildConfig` remains asynchronous.
 
 ### `transactionIDPromise` removed from `PayloadRequest`
 
@@ -588,9 +682,9 @@ The deprecated `isHTMLElement` utility has been removed from `@payloadcms/richte
 
 `lexical`'s built-in `isHTMLElement` is the canonical implementation and narrows against the node's owning-document `HTMLElement`, so it is also safe across iframes and other realms.
 
-### Lexical: vendored `@lexical/markdown` fork removed and lexical upgraded to `0.45.0`
+### Lexical: vendored `@lexical/markdown` fork removed and lexical upgraded to `0.48.0`
 
-`@payloadcms/richtext-lexical` no longer ships a vendored copy of `@lexical/markdown`. The package is now a direct dependency, every `@lexical/*` package was upgraded from `0.41.0` to `0.45.0`, and `@payloadcms/richtext-lexical/lexical/markdown` is a pure passthrough of `@lexical/markdown`.
+`@payloadcms/richtext-lexical` no longer ships a vendored copy of `@lexical/markdown`. The package is now a direct dependency, every `@lexical/*` package was upgraded from `0.41.0` to `0.48.0`, and `@payloadcms/richtext-lexical/lexical/markdown` is a pure passthrough of `@lexical/markdown`.
 
 Most projects use markdown through the editor or through `convertMarkdownToLexical` / `convertLexicalToMarkdown` and need no changes. You are only affected if you import from `@payloadcms/richtext-lexical/lexical/markdown` directly.
 
@@ -612,9 +706,25 @@ Most projects use markdown through the editor or through `convertMarkdownToLexic
 
 If you keep calling `$convertFromMarkdownString` directly, pass `editorConfig.features.markdownTransformers` as the second argument. Enable `payload/no-conflicting-lexical-markdown-imports` (included in `@payloadcms/eslint-config`) to catch imports and calls that rely on these mismatching defaults.
 
-**Whitespace-only markdown table cells now import as an empty paragraph** instead of a text node of padding spaces. This comes from the lexical `0.45` upgrade, not Payload's own code. No action is required unless you assert on those padding spaces in stored content.
+**Whitespace-only markdown table cells now import as an empty paragraph** instead of a text node of padding spaces. This comes from the lexical upgrade, not Payload's own code. No action is required unless you assert on those padding spaces in stored content.
 
-If you import lexical APIs directly through `@payloadcms/richtext-lexical/lexical/*`, also review the [lexical breaking changes](https://github.com/facebook/lexical/releases) between `0.41.0` and `0.45.0`. None of them require action for typical Payload usage.
+If you import lexical APIs directly through `@payloadcms/richtext-lexical/lexical/*`, also review the [lexical breaking changes](https://github.com/facebook/lexical/releases) between `0.41.0` and `0.48.0`. None of them require action for typical Payload usage.
+
+### Lexical: `EXPERIMENTAL_TableFeature` renamed to `TableFeature`
+
+The table feature is no longer experimental, so it drops its prefix.
+
+```diff
+- import { EXPERIMENTAL_TableFeature } from '@payloadcms/richtext-lexical'
++ import { TableFeature } from '@payloadcms/richtext-lexical'
+
+  editor: lexicalEditor({
+-   features: ({ rootFeatures }) => [...rootFeatures, EXPERIMENTAL_TableFeature()],
++   features: ({ rootFeatures }) => [...rootFeatures, TableFeature()],
+  })
+```
+
+Stored content is unaffected.
 
 ### Field `typescriptSchema` renamed to `jsonSchema`
 
@@ -855,11 +965,77 @@ If you relied on either option, remove it from your `jobs` config. If you depend
 
 The `jobsCollectionOverrides` warning that detected extra hooks and prompted users to set `runHooks` has also been removed.
 
+### Jobs: `BaseJob` has been removed
+
+The deprecated `BaseJob` type is no longer exported. Use `Job` everywhere you previously used `BaseJob`.
+
+```diff
+- import type { BaseJob } from 'payload'
++ import type { Job } from 'payload'
+
+- function processJob(job: BaseJob) {
++ function processJob(job: Job) {
+    // ...
+  }
+```
+
+`Job` now handles its own fallback. When the generated `payload-jobs` collection type exists, `Job` uses it. Otherwise, it uses the default job document from `UntypedPayloadTypes`. Consumers no longer need to choose between a generated job type and a separate fallback type.
+
+The `false` fallback used by job and workflow generics has also been removed. Omit the generic when you want the default `object` input type.
+
+```diff
+- const processJob = (job: Job<false>) => {
++ const processJob = (job: Job) => {
+    // ...
+  }
+
+- const workflow: WorkflowConfig<false> = {
++ const workflow: WorkflowConfig = {
+    slug: 'my-workflow',
+    // ...
+  }
+```
+
+Generated workflow slugs and explicit input objects continue to work as before. For example, `Job<'my-workflow'>` uses the generated workflow input, while `Job<{ message: string }>` uses the provided input type.
+
+### Jobs: stats and metadata are enabled by default
+
+When jobs are enabled, Payload now always adds the `payload-jobs-stats` global and the `meta` field on the `payload-jobs` collection. Previously, these were only added when a task or workflow used a schedule.
+
+Existing projects that use sqlite/postgres and jobs may need a database migration.
+
+### Jobs: concurrency controls and parent task logging are always enabled
+
+Concurrency controls add the indexed `concurrencyKey` field to the `payload-jobs` collection. Parent task logging adds parent information to nested task logs. Task log input is also now required and is stored as an empty object when a task has no input.
+
+The `jobs.enableConcurrencyControl` and `jobs.addParentToTaskLog` options have been removed. Existing SQL projects that use jobs should generate a database migration for these schema changes.
+
+### Jobs: task and workflow types have been renamed
+
+The `TaskType` and `WorkflowTypes` exports have been renamed to `TaskSlug` and `WorkflowSlug`.
+
+```diff
+- import type { TaskType, WorkflowTypes } from 'payload'
++ import type { TaskSlug, WorkflowSlug } from 'payload'
+```
+
+The deprecated `RunningJob` and `RunningJobSimple` types have also been removed. Use `Job` instead.
+
+JSON workflow steps without a `task` must now provide an `inlineTask` handler. This removes a type escape that previously allowed an incomplete step even though it could not run.
+
 ### Jobs: custom database adapters must implement `updateJobs`
 
 Payload now uses a unique `processingToken` when claiming jobs so multiple workers cannot run the same job. This adds an internal, nullable `processingToken` field to the `payload-jobs` collection. Existing SQL databases need a migration that adds this column. MongoDB does not require a migration.
 
 The default `updateJobs` implementation has been removed because it could not safely claim jobs across multiple workers. If you maintain a custom database adapter, you must now provide `updateJobs`. It must only claim jobs that still match the provided `where` condition and, when a `processingToken` is provided, return only the jobs claimed with that token. The official Payload database adapters already implement this behavior.
+
+### Jobs: crashed workers are recovered with processing leases
+
+The permanent `processing` flag on `payload-jobs` has been replaced by a renewable `processingUntil` lease. If a worker exits, a later jobs runner call can claim the job after its lease expires. Worker crashes do not consume the job's handler retry configuration.
+
+Worker updates use a 30-second safety buffer by default, so an update only starts when enough lease time remains for it to finish before another claim. Configure the lease with `jobs.processingLease.duration` and `jobs.processingLease.safetyBuffer`.
+
+Existing SQL databases need a migration that replaces `processing` with the nullable, indexed `processingUntil` column. MongoDB does not require a migration.
 
 ### Jobs: the `state` field on task return values has been removed ([#16416](https://github.com/payloadcms/payload/pull/16416))
 
@@ -1410,3 +1586,36 @@ Because the `payload-mcp-api-keys` collection config was removed, run your norma
 By default, MCP items require an authenticated user. Built-in collection and global tools also include Payload permission checks in their default `access` callbacks. If you provide an `access` callback for a built-in tool, it replaces the default callback.
 
 **Dependencies.** The plugin now builds on `@modelcontextprotocol/server` instead of `@modelcontextprotocol/sdk` + `mcp-handler`, and moved to `zod` v4. If your custom tools import `zod` directly, make sure it resolves to v4.
+
+### `@payloadcms/ui/scss` export removed and legacy `--theme-*` tokens retired
+
+The Admin UI styles were migrated from SCSS to plain CSS. The `@payloadcms/ui/scss` package export and its SCSS source files have been removed, and the legacy `--theme-*` CSS variables were retired in favor of semantic `--color-*` tokens and the raw `--ramp-*` color palette.
+
+**Stylesheet imports.** SCSS partials and mixins are gone. All design tokens are now global CSS variables on `:root`, so custom stylesheets no longer need to import anything to consume them — remove any `@import '~@payloadcms/ui/scss';` line. If you referenced the package export directly, use the CSS export instead:
+
+```diff
+- @import '~@payloadcms/ui/scss';
+```
+
+```diff
+- @payloadcms/ui/scss
++ @payloadcms/ui/css
+
+- @payloadcms/ui/scss/app.scss
++ @payloadcms/ui/css/app.css
+```
+
+**Token renames.** The `--theme-*` variables were replaced by semantic `--color-*` tokens. Update any custom CSS that referenced them:
+
+```diff
+  .my-component {
+-   background-color: var(--theme-bg);
+-   color: var(--theme-text);
++   background-color: var(--color-bg);
++   color: var(--color-text);
+  }
+```
+
+The `--theme-elevation-*` scale was removed. Use the semantic `--color-*` tokens (e.g. `--color-bg`, `--color-text`, `--color-border`, `--color-icon`) or the raw `--ramp-*` palette instead. See [Customizing CSS](../admin/customizing-css) for the full list of available tokens.
+
+Any custom component `.scss` files you authored should be renamed to `.css` and updated to plain CSS syntax — Payload no longer ships a SCSS toolchain.

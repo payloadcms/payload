@@ -1,6 +1,6 @@
 # Evals
 
-Codegen evaluation suite for the Payload CMS skill (`tools/claude-plugin/skills/payload/`).
+Codegen evaluation suite for the Payload CMS skill (`packages/payload/skills/payload/`).
 
 ## Variants
 

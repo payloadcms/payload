@@ -1,8 +1,6 @@
 import { withPayloadRoot } from '@payloadcms/tanstack-start/client'
 import { createRootRoute, HeadContent, Scripts } from '@tanstack/react-router'
 
-import { HydrationMarker } from '../components/HydrationMarker/index.js'
-
 export const Route = createRootRoute({
   head: () => ({
     links: [
@@ -35,7 +33,6 @@ function MarketingRoot({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         {children}
-        <HydrationMarker />
         <Scripts />
       </body>
     </html>

@@ -17,6 +17,7 @@ import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { deepCopyObjectSimple } from '../../utilities/deepCopyObject.js'
 import { hasDraftValidationEnabled } from '../../utilities/getVersionsConfig.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
+import { isolateObjectProperty } from '../../utilities/isolateObjectProperty.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
@@ -183,10 +184,9 @@ export const restoreVersionOperation = async <
 
     req.context.isRestoringVersion = true
 
-    const reqWithValidationLocale = Object.assign(Object.create(req), req, {
-      fallbackLocale: null,
-      locale: validationLocale,
-    })
+    const reqWithValidationLocale = isolateObjectProperty(req, ['fallbackLocale', 'locale'])
+    reqWithValidationLocale.fallbackLocale = null
+    reqWithValidationLocale.locale = validationLocale
 
     let data = await beforeValidate({
       id: parentDocID,

@@ -438,6 +438,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Перезаписать существующие данные поля',
     pageNotFound: 'Страница не найдена',
     password: 'Пароль',
+    pasteBelow: 'Вставьте ниже',
     pasteField: 'Вставить поле',
     pasteRow: 'Вставить строку',
     payloadSettings: 'Настройки Payload',
@@ -452,6 +453,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     reloadDocument: 'Перезагрузить документ',
     remove: 'Удалить',
     rename: 'Переименовать',
+    replaceRow: 'Заменить строку',
     reset: 'Сброс',
     resetPreferences: 'Сбросить настройки',
     resetPreferencesDescription: 'Это сбросит все ваши настройки до значений по умолчанию.',
@@ -482,6 +484,8 @@ export const ruTranslations: DefaultTranslationsObject = {
     sorryNotFound: 'К сожалению, ничего подходящего под ваш запрос нет.',
     sort: 'Сортировать',
     sortByLabelDirection: 'Сортировать по {{label}} {{direction}}',
+    sortByOrderToReorder:
+      'Чтобы изменить порядок строк, сначала отсортируйте их по столбцу «Порядок».',
     stayOnThisPage: 'Остаться на этой странице',
     submissionSuccessful: 'Успешно отправлено.',
     submit: 'Отправить',
@@ -573,6 +577,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     addFile: 'Добавить файл',
     addFiles: 'Добавить файлы',
     bulkUpload: 'Массовая загрузка',
+    copyLinkToFile: 'Скопировать ссылку на файл',
     crop: 'Обрезать',
     cropToolDescription:
       'Перетащите углы выбранной области, нарисуйте новую область или отрегулируйте значения ниже.',

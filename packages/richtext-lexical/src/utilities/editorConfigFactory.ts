@@ -15,10 +15,10 @@ import { sanitizeServerFeatures } from '../lexical/config/server/sanitize.js'
 import { getDefaultSanitizedEditorConfig } from './getDefaultSanitizedEditorConfig.js'
 
 export const editorConfigFactory = {
-  default: async (args: {
+  default: (args: {
     config: SanitizedConfig
     parentIsLocalized?: boolean
-  }): Promise<SanitizedServerEditorConfig> => {
+  }): SanitizedServerEditorConfig => {
     return getDefaultSanitizedEditorConfig({
       config: args.config,
       parentIsLocalized: args.parentIsLocalized ?? false,
@@ -32,14 +32,14 @@ export const editorConfigFactory = {
    * This is the least efficient way to get the editor config, and not recommended. It is recommended to extract the `features` arg
    * into a separate variable and use `fromFeatures` instead.
    */
-  fromEditor: async (args: {
+  fromEditor: (args: {
     config: SanitizedConfig
     editor: LexicalRichTextAdapterProvider
     isRoot?: boolean
     lexical?: LexicalEditorConfig
     parentIsLocalized?: boolean
-  }): Promise<SanitizedServerEditorConfig> => {
-    const lexicalAdapter: LexicalRichTextAdapter = await args.editor({
+  }): SanitizedServerEditorConfig => {
+    const lexicalAdapter: LexicalRichTextAdapter = args.editor({
       config: args.config,
       isRoot: args.isRoot ?? false,
       parentIsLocalized: args.parentIsLocalized ?? false,
@@ -51,14 +51,14 @@ export const editorConfigFactory = {
   /**
    * Create a new editor config - behaves just like instantiating a new `lexicalEditor`
    */
-  fromFeatures: async (args: {
+  fromFeatures: (args: {
     config: SanitizedConfig
     features?: FeaturesInput
     isRoot?: boolean
     lexical?: LexicalEditorConfig
     parentIsLocalized?: boolean
-  }): Promise<SanitizedServerEditorConfig> => {
-    return (await featuresInputToEditorConfig(args)).sanitizedConfig
+  }): SanitizedServerEditorConfig => {
+    return featuresInputToEditorConfig(args).sanitizedConfig
   },
   fromField: (args: { field: RichTextField }): SanitizedServerEditorConfig => {
     const lexicalAdapter: LexicalRichTextAdapter = args.field.editor as LexicalRichTextAdapter
@@ -66,37 +66,37 @@ export const editorConfigFactory = {
     const sanitizedServerEditorConfig: SanitizedServerEditorConfig = lexicalAdapter.editorConfig
     return sanitizedServerEditorConfig
   },
-  fromUnsanitizedField: async (args: {
+  fromUnsanitizedField: (args: {
     config: SanitizedConfig
     field: RichTextField
     isRoot?: boolean
     parentIsLocalized?: boolean
-  }): Promise<SanitizedServerEditorConfig> => {
+  }): SanitizedServerEditorConfig => {
     const lexicalAdapterProvider: RichTextAdapterProvider = args.field
       .editor as RichTextAdapterProvider
 
-    const lexicalAdapter: LexicalRichTextAdapter = (await lexicalAdapterProvider({
+    const lexicalAdapter: LexicalRichTextAdapter = lexicalAdapterProvider({
       config: args.config,
       isRoot: args.isRoot ?? false,
       parentIsLocalized: args.parentIsLocalized ?? false,
-    })) as LexicalRichTextAdapter
+    }) as LexicalRichTextAdapter
 
     const sanitizedServerEditorConfig: SanitizedServerEditorConfig = lexicalAdapter.editorConfig
     return sanitizedServerEditorConfig
   },
 }
 
-export const featuresInputToEditorConfig = async (args: {
+export const featuresInputToEditorConfig = (args: {
   config: SanitizedConfig
   features?: FeaturesInput
   isRoot?: boolean
   lexical?: LexicalEditorConfig
   parentIsLocalized?: boolean
-}): Promise<{
+}): {
   features: FeatureProviderServer<unknown, unknown, unknown>[]
   resolvedFeatureMap: ResolvedServerFeatureMap
   sanitizedConfig: SanitizedServerEditorConfig
-}> => {
+} => {
   let features: FeatureProviderServer<unknown, unknown, unknown>[] = []
   if (args.features && typeof args.features === 'function') {
     const rootEditor = args.config.editor
@@ -118,7 +118,7 @@ export const featuresInputToEditorConfig = async (args: {
 
   const lexical = args.lexical ?? defaultEditorConfig.lexical
 
-  const resolvedFeatureMap = await loadFeatures({
+  const resolvedFeatureMap = loadFeatures({
     config: args.config,
     isRoot: args.isRoot ?? false,
     parentIsLocalized: args.parentIsLocalized ?? false,

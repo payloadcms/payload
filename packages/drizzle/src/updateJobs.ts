@@ -1,7 +1,7 @@
 import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 import type { UpdateJobs, Where } from 'payload'
 
-import { and, eq, inArray } from 'drizzle-orm'
+import { and, inArray, isNull, lte, or } from 'drizzle-orm'
 import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from './types.js'
@@ -15,10 +15,10 @@ import { getTransaction } from './utilities/getTransaction.js'
 import { markWrite } from './utilities/readAfterWrite.js'
 
 const isInitialJobClaim = (data: Record<string, unknown>): boolean =>
-  data.processing === true &&
   typeof data.processingToken === 'string' &&
+  typeof data.processingUntil === 'string' &&
   Object.keys(data).every(
-    (field) => field === 'processing' || field === 'processingToken' || field === 'updatedAt',
+    (field) => field === 'processingToken' || field === 'processingUntil' || field === 'updatedAt',
   )
 
 export const updateJobs: UpdateJobs = async function updateMany(
@@ -81,8 +81,12 @@ export const updateJobs: UpdateJobs = async function updateMany(
   const db = getPrimaryDb(this, await getTransaction(this, req))
 
   if (isInitialJobClaim(data)) {
+    // Atomically claim jobs so multiple workers cannot pick up the same job.
+    // We don't need FOR UPDATE SKIP LOCKED here because of the compare-and-swap-style update using processingUntil and processingToken.
+    // The first update makes the where clause fail for other workers, so they cannot claim the same job.
     const _db = db as LibSQLDatabase
     const table = this.tables[tableName]
+    const now = new Date().toISOString()
     const { row } = transformForWrite({
       adapter: this,
       data,
@@ -99,7 +103,12 @@ export const updateJobs: UpdateJobs = async function updateMany(
     const claimedRows = await _db
       .update(table)
       .set(row)
-      .where(and(inArray(table.id, jobIDs), eq(table.processing, false)))
+      .where(
+        and(
+          inArray(table.id, jobIDs),
+          or(isNull(table.processingUntil), lte(table.processingUntil, now)),
+        ),
+      )
       .returning({ id: table.id })
 
     if (claimedRows.length) {

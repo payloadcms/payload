@@ -1171,7 +1171,7 @@ export type SelectField = {
     options: Option[]
     req: PayloadRequest
     siblingData: Data
-  }) => Option[]
+  }) => Option[] | Promise<Option[]>
   hasMany?: boolean
   /**
    * Customize generated GraphQL and Typescript schema names.
@@ -2121,7 +2121,7 @@ export function fieldShouldBeLocalized({
   field: ClientField | ClientTab | Field | Tab
   parentIsLocalized: boolean
 }): boolean {
-  return 'localized' in field && field.localized! && !parentIsLocalized
+  return Boolean('localized' in field && field.localized && !parentIsLocalized)
 }
 
 export function fieldIsVirtual(field: Field | Tab): boolean {

@@ -9,20 +9,16 @@ import type { Config } from './payload-types.js'
 
 import { addArrayRow, removeArrayRow } from '../__helpers/e2e/fields/array/index.js'
 import { addBlock } from '../__helpers/e2e/fields/blocks/index.js'
-import {
-  ensureCompilationIsDone,
-  getRoutes,
-  initPageConsoleErrorCatch,
-  saveDocAndAssert,
-  waitForFormReady,
-} from '../__helpers/e2e/helpers.js'
+import { getRoutes, saveDocAndAssert, waitForFormReady } from '../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { ensureCompilationIsDone } from '../__setup/e2e/ensureCompilationIsDone.js'
+import { initPage } from '../__setup/e2e/initPage.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { collectionSlugs } from './shared.js'
 
-const { beforeAll, describe, beforeEach } = test
+const { beforeAll, beforeEach, describe } = test
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -55,19 +51,15 @@ describe('Field Error States', () => {
       routes: { admin: adminRouteFromConfig },
     } = getRoutes({})
     adminRoute = adminRouteFromConfig
-
-    await ensureCompilationIsDone({ browser, serverURL })
   })
 
   beforeEach(async ({ page }) => {
-    initPageConsoleErrorCatch(page)
+    await initPage({ page, serverURL })
 
     await reInitializeDB({
       serverURL,
       snapshotKey: 'fielderrorstates',
     })
-
-    await ensureCompilationIsDone({ page, serverURL })
   })
 
   test('Remove row should remove error states from parent fields', async ({ page }) => {
@@ -335,7 +327,7 @@ describe('Field Error States', () => {
       await expect(
         page.locator('#field-arrayWithMinRows .banner.banner--type-danger'),
       ).toBeVisible()
-      await expect(page.locator('#field-arrayWithMinRows .field-error')).toHaveCount(0)
+      await expect(page.locator('.field-error')).toHaveCount(0)
     })
 
     test('blocks error pill should show for minRows errors before child edits', async ({
@@ -346,9 +338,9 @@ describe('Field Error States', () => {
       await prefillBaseRequiredFields(page)
 
       await addBlock({
-        page,
         blockToSelect: 'Min Rows Block',
         fieldName: 'blocksWithMinRows',
+        page,
       })
       await saveDocAndAssert(page, '#action-save', 'error')
 
@@ -360,7 +352,7 @@ describe('Field Error States', () => {
       await expect(
         page.locator('#field-blocksWithMinRows .banner.banner--type-danger'),
       ).toBeVisible()
-      await expect(page.locator('#field-blocksWithMinRows .field-error')).toHaveCount(0)
+      await expect(page.locator('.field-error')).toHaveCount(0)
     })
   })
 

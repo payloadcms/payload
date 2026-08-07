@@ -5,16 +5,16 @@ import type {
   SerializedBlockNode,
   SerializedInlineBlockNode,
 } from '../features/blocks/server/schema.js'
-import type {
-  SerializedTableCellNode,
-  SerializedTableNode,
-  SerializedTableRowNode,
-} from '../features/experimental_table/server/schema.js'
 import type { SerializedHeadingNode } from '../features/heading/server/schema.js'
 import type { SerializedHorizontalRuleNode } from '../features/horizontalRule/server/schema.js'
 import type { SerializedAutoLinkNode, SerializedLinkNode } from '../features/link/server/schema.js'
 import type { SerializedListItemNode, SerializedListNode } from '../features/lists/shared/schema.js'
 import type { SerializedRelationshipNode } from '../features/relationship/server/schema.js'
+import type {
+  SerializedTableCellNode,
+  SerializedTableNode,
+  SerializedTableRowNode,
+} from '../features/table/server/schema.js'
 import type { SerializedUploadNode } from '../features/upload/server/schema.js'
 
 // The declarations below must stay byte-for-byte aligned with the TS source
