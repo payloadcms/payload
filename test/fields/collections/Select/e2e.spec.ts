@@ -10,8 +10,10 @@ import type { Config } from '../../payload-types.js'
 
 import { checkFocusIndicators } from '../../../__helpers/e2e/checkFocusIndicators.js'
 import { clickColumnSelectorItem, openListColumns } from '../../../__helpers/e2e/columns/index.js'
+import { addListFilter } from '../../../__helpers/e2e/filters/addListFilter.js'
 import { saveDocAndAssert, waitForFormReady } from '../../../__helpers/e2e/helpers.js'
 import { runAxeScan } from '../../../__helpers/e2e/runAxeScan.js'
+import { getSelectMenu } from '../../../__helpers/e2e/selectInput.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
@@ -130,6 +132,26 @@ describe('Select', () => {
     await field.click({ delay: 100 })
     await expect(options.locator('text=Value One')).toBeHidden()
     await expect(options.locator('text=Value Two')).toBeVisible()
+  })
+
+  test('should resolve an async, DB-backed `filterOptions` for the list view filter value options', async () => {
+    await page.goto(url.list)
+
+    const { condition } = await addListFilter({
+      fieldLabel: 'Select with async filtered options',
+      operatorLabel: 'equals',
+      page,
+    })
+
+    await condition.locator('.condition__value input').click()
+
+    // react-select portals its menu to the document body, so options must be queried page-wide
+    const valueOptions = getSelectMenu({ page }).locator('.rs__option')
+
+    await expect(valueOptions).toHaveCount(3)
+    await expect(valueOptions.locator('text=Value One')).toBeVisible()
+    await expect(valueOptions.locator('text=Value Two')).toBeVisible()
+    await expect(valueOptions.locator('text=Value Three')).toBeVisible()
   })
 
   test('should retain search when reducing options', async () => {

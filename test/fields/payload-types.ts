@@ -993,6 +993,7 @@ export interface CheckboxField {
   id: string;
   checkbox: boolean;
   checkboxNotRequired?: boolean | null;
+  checkboxRequiresTrue?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1274,7 +1275,7 @@ export interface EmailField {
  */
 export interface RadioField {
   id: string;
-  radio?: ('one' | 'two' | 'three') | null;
+  radio: 'one' | 'two' | 'three';
   radioWithJsxLabelOption?: ('one' | 'two' | 'three') | null;
   updatedAt: string;
   createdAt: string;
@@ -2871,6 +2872,7 @@ export interface LocalizedTabsBlockSelect<T extends boolean = true> {
 export interface CheckboxFieldsSelect<T extends boolean = true> {
   checkbox?: T;
   checkboxNotRequired?: T;
+  checkboxRequiresTrue?: T;
   updatedAt?: T;
   createdAt?: T;
 }

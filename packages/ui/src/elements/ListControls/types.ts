@@ -1,5 +1,6 @@
 import type {
   ClientCollectionConfig,
+  Option,
   QueryPreset,
   ResolvedFilterOptions,
   SanitizedCollectionPermission,
@@ -35,5 +36,5 @@ export type ListControlsProps = {
   readonly queryPreset?: QueryPreset
   readonly queryPresetPermissions?: SanitizedCollectionPermission
   readonly renderedFilters?: Map<string, React.ReactNode>
-  readonly resolvedFilterOptions?: Map<string, ResolvedFilterOptions>
+  readonly resolvedFilterOptions?: Map<string, Option[] | ResolvedFilterOptions>
 }

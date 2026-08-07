@@ -1,4 +1,4 @@
-import type { Field, PayloadRequest, ResolvedFilterOptions } from 'payload'
+import type { Field, Option, PayloadRequest, ResolvedFilterOptions } from 'payload'
 
 import {
   fieldAffectsData,
@@ -18,9 +18,11 @@ export const resolveAllFilterOptions = async ({
   fields: Field[]
   pathPrefix?: string
   req: PayloadRequest
-  result?: Map<string, ResolvedFilterOptions>
-}): Promise<Map<string, ResolvedFilterOptions>> => {
-  const resolvedFilterOptions = !result ? new Map<string, ResolvedFilterOptions>() : result
+  result?: Map<string, Option[] | ResolvedFilterOptions>
+}): Promise<Map<string, Option[] | ResolvedFilterOptions>> => {
+  const resolvedFilterOptions = !result
+    ? new Map<string, Option[] | ResolvedFilterOptions>()
+    : result
 
   await Promise.all(
     fields.map(async (field) => {
@@ -47,6 +49,17 @@ export const resolveAllFilterOptions = async ({
           req,
           siblingData: {}, // use empty object to prevent breaking queries when accessing properties of `siblingData`
           user: req.user,
+        })
+
+        resolvedFilterOptions.set(fieldPath, options)
+      }
+
+      if (field.type === 'select' && typeof field.filterOptions === 'function') {
+        const options = await field.filterOptions({
+          data: {}, // use empty object to prevent breaking queries when accessing properties of `data`
+          options: field.options,
+          req,
+          siblingData: {}, // use empty object to prevent breaking queries when accessing properties of `siblingData`
         })
 
         resolvedFilterOptions.set(fieldPath, options)

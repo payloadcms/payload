@@ -19,7 +19,7 @@ import { Text } from '../Text/index.js'
 type Props = {
   booleanSelect: boolean
   disabled: boolean
-  filterOptions?: ResolvedFilterOptions
+  filterOptions?: Option[] | ResolvedFilterOptions
   internalField: ReducedField
   onChange: React.Dispatch<React.SetStateAction<string>>
   operator: Operator
@@ -51,6 +51,8 @@ export const DefaultFilter: React.FC<Props> = ({
     )
   }
 
+  const whereFilterOptions = Array.isArray(filterOptions) ? {} : (filterOptions ?? {})
+
   switch (internalField?.field?.type) {
     case 'date': {
       return (
@@ -81,7 +83,7 @@ export const DefaultFilter: React.FC<Props> = ({
         <RelationshipFilter
           disabled={disabled}
           field={internalField.field}
-          filterOptions={filterOptions ?? {}}
+          filterOptions={whereFilterOptions}
           onChange={onChange}
           operator={operator}
           value={value}
@@ -94,7 +96,7 @@ export const DefaultFilter: React.FC<Props> = ({
         <RelationshipFilter
           disabled={disabled}
           field={internalField.field}
-          filterOptions={filterOptions ?? {}}
+          filterOptions={whereFilterOptions}
           onChange={onChange}
           operator={operator}
           value={value}

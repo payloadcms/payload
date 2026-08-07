@@ -15,7 +15,7 @@ export type Props = {
   readonly andIndex: number
   readonly disableRemoveButton: boolean
   readonly fieldPath: string
-  readonly filterOptions?: ResolvedFilterOptions
+  readonly filterOptions?: PayloadOption[] | ResolvedFilterOptions
   readonly isFirstCondition: boolean
   readonly join: 'and' | 'or'
   readonly operator: Operator
@@ -86,7 +86,7 @@ export const Condition: React.FC<Props> = (props) => {
       { label: t('general:false'), value: 'false' },
     ]
   } else if (reducedField?.field && 'options' in reducedField.field) {
-    valueOptions = reducedField.field.options
+    valueOptions = Array.isArray(filterOptions) ? filterOptions : reducedField.field.options
   }
 
   const updateValue = useEffectEvent(async (debouncedValue: Value) => {
