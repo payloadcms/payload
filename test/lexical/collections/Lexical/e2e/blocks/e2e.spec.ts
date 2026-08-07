@@ -21,8 +21,6 @@ import type { Config, LexicalField, Upload } from '../../../../payload-types.js'
 
 import { assertNetworkRequests } from '../../../../../__helpers/e2e/assertNetworkRequests.js'
 import {
-  ensureCompilationIsDone,
-  initPageConsoleErrorCatch,
   saveDocAndAssert,
   waitForFormReady,
   waitForLexicalReady,
@@ -34,6 +32,7 @@ import { assertToastErrors } from '../../../../../__helpers/shared/assertToastEr
 import { reInitializeDB } from '../../../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../../../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { RESTClient } from '../../../../../__helpers/shared/rest.js'
+import { initPage } from '../../../../../__setup/e2e/initPage.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../../../playwright.config.js'
 import { lexicalFieldsSlug, lexicalNestedBlocksSlug } from '../../../../slugs.js'
 import { lexicalDocData } from '../../data.js'
@@ -64,11 +63,7 @@ describe('lexicalBlocks', () => {
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
 
     context = await browser.newContext()
-    page = await context.newPage()
-
-    initPageConsoleErrorCatch(page)
-
-    await ensureCompilationIsDone({ page, serverURL })
+    ;({ page } = await initPage({ context, serverURL }))
   })
   beforeEach(async () => {
     // await throttleTest({
@@ -96,7 +91,6 @@ describe('lexicalBlocks', () => {
       const { richTextField } = await navigateToLexicalFields()
 
       const { newBlock: newRSCBlock } = await createBlock({
-        richTextField,
         name: 'Block R S C',
         async afterLastParagraphClick() {
           await page.keyboard.press('1')
@@ -105,6 +99,7 @@ describe('lexicalBlocks', () => {
 
           await page.keyboard.press('Enter')
         },
+        richTextField,
       })
 
       await expect(newRSCBlock.locator('.collapsible__content')).toHaveText('Data:')
@@ -186,22 +181,14 @@ describe('lexicalBlocks', () => {
     const { richTextField } = await navigateToLexicalFields()
 
     const { newBlock } = await createBlock({
-      richTextField,
       name: 'No Block Name',
+      richTextField,
     })
 
     await expect(newBlock.locator('#blockName')).toHaveCount(0)
   })
 
   describe('block filterOptions', () => {
-    // Group sub-fields within newly created Lexical blocks don't render under TanStack Start.
-    // The block's Group heading appears but its children (relationship fields with filterOptions)
-    // are missing from the DOM. This is a known framework adapter limitation.
-    test.skip(
-      currentFramework === 'tanstack-start',
-      'Group sub-fields in Lexical blocks do not render under TanStack Start',
-    )
-
     async function setupFilterOptionsTests() {
       const { richTextField } = await navigateToLexicalFields()
 
@@ -214,8 +201,8 @@ describe('lexicalBlocks', () => {
       })
 
       const { newBlock } = await createBlock({
-        richTextField,
         name: 'Filter Options Block',
+        richTextField,
       })
 
       await saveDocAndAssert(page)
@@ -256,15 +243,17 @@ describe('lexicalBlocks', () => {
       return {
         blockGroupTextField,
         blockTextField,
-        dependsOnDocData,
         dependsOnBlockData,
+        dependsOnDocData,
         dependsOnSiblingData,
-        topLevelDocTextField,
         newBlock: reloadedBlock,
+        topLevelDocTextField,
       }
     }
 
     test('ensure block fields with filter options have access to document-level data', async () => {
+      test.slow()
+
       const {
         blockGroupTextField,
         blockTextField,
@@ -396,14 +385,6 @@ describe('lexicalBlocks', () => {
   })
 
   describe('block validation data', () => {
-    // Group sub-fields within newly created Lexical blocks don't render under TanStack Start.
-    // The block's Group heading appears but its children (text fields with validate functions)
-    // are missing from the DOM. This is a known framework adapter limitation.
-    test.skip(
-      currentFramework === 'tanstack-start',
-      'Group sub-fields in Lexical blocks do not render under TanStack Start',
-    )
-
     async function setupValidationTests() {
       const { richTextField } = await navigateToLexicalFields()
 
@@ -416,8 +397,8 @@ describe('lexicalBlocks', () => {
       })
 
       const { newBlock } = await createBlock({
-        richTextField,
         name: 'Validation Block',
+        richTextField,
       })
 
       await saveDocAndAssert(page)
@@ -459,11 +440,11 @@ describe('lexicalBlocks', () => {
       return {
         blockGroupTextField,
         blockTextField,
+        dependsOnBlockData,
         dependsOnDocData,
         dependsOnSiblingData,
-        dependsOnBlockData,
-        topLevelDocTextField,
         newBlock: reloadedBlock,
+        topLevelDocTextField,
       }
     }
 
@@ -475,8 +456,8 @@ describe('lexicalBlocks', () => {
       await saveDocAndAssert(page, '#action-save', 'error', { disableDismissAllToasts: true })
 
       await assertToastErrors({
-        page,
         errors: ['Lexical With Blocks', 'Lexical With Blocks → Group → Text Depends On Doc Data'],
+        page,
       })
 
       await expect(page.locator('.payload-toast-container .payload-toast-item')).toBeHidden()
@@ -500,11 +481,11 @@ describe('lexicalBlocks', () => {
 
       await saveDocAndAssert(page, '#action-save', 'error', { disableDismissAllToasts: true })
       await assertToastErrors({
-        page,
         errors: [
           'Lexical With Blocks',
           'Lexical With Blocks → Group → Text Depends On Sibling Data',
         ],
+        page,
       })
       await expect(page.locator('.payload-toast-container .payload-toast-item')).toBeHidden()
 
@@ -527,8 +508,8 @@ describe('lexicalBlocks', () => {
 
       await saveDocAndAssert(page, '#action-save', 'error', { disableDismissAllToasts: true })
       await assertToastErrors({
-        page,
         errors: ['Lexical With Blocks', 'Lexical With Blocks → Group → Text Depends On Block Data'],
+        page,
       })
       await expect(page.locator('.payload-toast-container .payload-toast-item')).toBeHidden()
 
@@ -549,8 +530,8 @@ describe('lexicalBlocks', () => {
     const { richTextField } = await navigateToLexicalFields()
 
     const { newBlock } = await createBlock({
-      richTextField,
       name: 'Async Hooks Block',
+      richTextField,
     })
 
     await newBlock.locator('#field-test1').fill('text1')
@@ -783,6 +764,7 @@ describe('lexicalBlocks', () => {
       // scroll slash menu down
       await popoverHeading2Button.hover()
       await page.mouse.wheel(0, 250)
+      await popoverHeading2Button.scrollIntoViewIfNeeded()
 
       await expect(async () => {
         // Make sure that, even though it's "visible", it's not actually covered by something else due to z-index issues
@@ -875,15 +857,11 @@ describe('lexicalBlocks', () => {
 
     // Big test which tests a bunch of things: Creation of blocks via slash commands, creation of deeply nested sub-lexical-block fields via slash commands, properly populated deeply nested fields within those
     test('ensure creation of a lexical, lexical-field-block, which contains another lexical, lexical-and-upload-field-block, works and that the sub-upload field is properly populated', async () => {
-      test.skip(
-        currentFramework === 'tanstack-start',
-        'Typing in nested Lexical editors within blocks is dispatched to the parent editor under TanStack Start',
-      )
       const { richTextField } = await navigateToLexicalFields()
 
       const { newBlock: newRichTextBlock, slashMenuPopover } = await createBlock({
-        richTextField,
         name: 'Rich Text',
+        richTextField,
       })
 
       // Ensure that sub-editor is empty and wait for it to be fully initialized
@@ -1417,28 +1395,27 @@ describe('lexicalBlocks', () => {
     })
 
     test('ensure individual inline blocks in lexical editor within a block have initial state on initial load', async () => {
-      test.skip(
-        currentFramework === 'tanstack-start',
-        'Inline block type "inlineBlockInLexical" not found in config.blocksMap under TanStack Start',
-      )
       await page.goto(`${serverURL}/admin/collections/LexicalInBlock?limit=10`)
 
       // Wait for table to be fully loaded
       await expect(page.locator('tbody tr')).not.toHaveCount(0)
 
-      await assertNetworkRequests(
-        page,
-        currentFramework === 'tanstack-start' ? '/_serverFn/' : '/collections/LexicalInBlock/',
-        async () => {
-          await goToFirstCell(page, serverURL)
-          await waitForFormReady(page)
+      const assertInlineBlocks = async () => {
+        await goToFirstCell(page, serverURL)
+        await waitForFormReady(page)
 
-          await expect(
-            page.locator('.LexicalEditorTheme__inlineBlock:has-text("Inline Block In Lexical")'),
-          ).toHaveCount(20)
-        },
-        { allowedNumberOfRequests: 1 },
-      )
+        await expect(
+          page.locator('.LexicalEditorTheme__inlineBlock:has-text("Inline Block In Lexical")'),
+        ).toHaveCount(20)
+      }
+
+      if (currentFramework === 'tanstack-start') {
+        await assertInlineBlocks()
+      } else {
+        await assertNetworkRequests(page, '/collections/LexicalInBlock/', assertInlineBlocks, {
+          allowedNumberOfRequests: 1,
+        })
+      }
     })
 
     test('wheel input over one of several simultaneous fixed toolbars only scrolls that toolbar', async () => {
@@ -1639,10 +1616,6 @@ describe('lexicalBlocks', () => {
     })
 
     test('ensure inline blocks restore their state after undoing a removal', async () => {
-      test.skip(
-        currentFramework === 'tanstack-start',
-        'Inline blocks do not render under TanStack Start (inlineBlockInLexical not in config.blocksMap)',
-      )
       await page.goto(`${serverURL}/admin/collections/LexicalInBlock?limit=10`)
 
       // Wait for table to be fully loaded
@@ -1662,15 +1635,10 @@ describe('lexicalBlocks', () => {
       // Wait for shimmer effect to be hidden
       await expect(page.locator('.shimmer-effect')).toHaveCount(0)
 
-      const secondRow = page.locator('#blocks-row-2')
-      await expect(secondRow).toBeVisible()
+      const inlineBlocks = page.locator('#field-blocks .LexicalEditorTheme__inlineBlock__container')
+      await expect(inlineBlocks).not.toHaveCount(0)
 
-      // Get initial count and ensure it's stable
-      const inlineBlocks = secondRow.locator('.LexicalEditorTheme__inlineBlock__container')
       const inlineBlockCount = await inlineBlocks.count()
-      await expect(() => {
-        expect(inlineBlockCount).toBeGreaterThan(0)
-      }).toPass()
 
       const inlineBlockElement = inlineBlocks.first()
       // Clicking inline block opens drawer
@@ -1693,12 +1661,14 @@ describe('lexicalBlocks', () => {
       // Check both that this specific element is removed and the total count decreased
       await expect(inlineBlocks).toHaveCount(inlineBlockCount - 1)
 
-      const contentEditable = secondRow.locator('[contenteditable="true"]').first()
+      const contentEditable = inlineBlockElement.locator(
+        'xpath=ancestor::*[@contenteditable="true"][1]',
+      )
       // Use focus() instead of click() to avoid creating an extra selection undo entry
       await contentEditable.focus()
 
       // Undo the removal using keyboard shortcut
-      await page.keyboard.press('ControlOrMeta+Z')
+      await page.keyboard.press('Control+Z')
       await wait(500)
 
       // Wait for the block to be restored
@@ -1833,9 +1803,9 @@ async function createInlineBlock({
 }
 
 async function createBlock({
-  richTextField,
   name,
   afterLastParagraphClick,
+  richTextField,
 }: {
   afterLastParagraphClick?: (args: { lastParagraph: Locator }) => Promise<void> | void
   name: string

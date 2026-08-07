@@ -10,9 +10,7 @@ import type { Config } from './payload-types.js'
 import { reorderColumns } from '../__helpers/e2e/columns/index.js'
 import {
   changeLocale,
-  ensureCompilationIsDone,
   exactText,
-  initPageConsoleErrorCatch,
   saveDocAndAssert,
   // throttleTest,
 } from '../__helpers/e2e/helpers.js'
@@ -22,6 +20,7 @@ import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { RESTClient } from '../__helpers/shared/rest.js'
+import { initPage } from '../__setup/e2e/initPage.js'
 import { EXPECT_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import {
   categoriesJoinRestrictedSlug,
@@ -67,9 +66,7 @@ describe('Join Field', () => {
     versionsURL = new AdminUrlUtil(serverURL, versionsSlug)
 
     const context = await browser.newContext()
-    page = await context.newPage()
-    initPageConsoleErrorCatch(page)
-    await ensureCompilationIsDone({ page, serverURL })
+    ;({ page } = await initPage({ context, serverURL }))
 
     //await throttleTest({ context, delay: 'Slow 4G', page })
   })
@@ -102,7 +99,7 @@ describe('Join Field', () => {
 
     ;({ id: categoryID } = docs[0])
 
-    const folder = await payload.find({ collection: 'folders', sort: 'createdAt', depth: 0 })
+    const folder = await payload.find({ collection: 'folders', depth: 0, sort: 'createdAt' })
     rootParentID = folder.docs[0]!.id
   })
 
@@ -144,24 +141,24 @@ describe('Join Field', () => {
     await payload.create({
       collection: postsSlug,
       data: {
+        category: category.id,
         title: 'a',
-        category: category.id,
       },
     })
 
     await payload.create({
       collection: postsSlug,
       data: {
+        category: category.id,
         title: 'b',
-        category: category.id,
       },
     })
 
     await payload.create({
       collection: postsSlug,
       data: {
-        title: 'z',
         category: category.id,
+        title: 'z',
       },
     })
 
@@ -306,9 +303,9 @@ describe('Join Field', () => {
     await expect(link).toBeHidden()
 
     await reorderColumns(page, {
-      togglerSelector: '#field-relatedPosts .columns-button__button',
       fromColumn: 'Category',
       toColumn: 'Title',
+      togglerSelector: '#field-relatedPosts .columns-button__button',
     })
 
     const newActionColumn = joinField.locator('tbody tr td:nth-child(2)').first()
@@ -319,9 +316,9 @@ describe('Join Field', () => {
 
     // put columns back in original order for the next test
     await reorderColumns(page, {
-      togglerSelector: '#field-relatedPosts .columns-button__button',
       fromColumn: 'Title',
       toColumn: 'Category',
+      togglerSelector: '#field-relatedPosts .columns-button__button',
     })
   })
 
@@ -351,9 +348,9 @@ describe('Join Field', () => {
     const innerText = await thead.innerText()
 
     // expect the order of columns to be 'ID', 'Created At', 'Title'
-    // eslint-disable-next-line payload/no-flaky-assertions
+
     expect(innerText.indexOf('ID')).toBeLessThan(innerText.indexOf('Created At'))
-    // eslint-disable-next-line payload/no-flaky-assertions
+
     expect(innerText.indexOf('Created At')).toBeLessThan(innerText.indexOf('Title'))
   })
 
@@ -526,8 +523,8 @@ describe('Join Field', () => {
     await payload.create({
       collection: postsSlug,
       data: {
-        title,
         category: categoryID as string,
+        title,
       },
     })
 
@@ -643,8 +640,8 @@ describe('Join Field', () => {
     await payload.create({
       collection: versionsSlug,
       data: {
-        title: 'Test Post',
         categoryVersion: categoryVersionsDoc.id,
+        title: 'Test Post',
       },
     })
 
@@ -916,8 +913,8 @@ describe('Join Field', () => {
     const versionDoc = await payload.create({
       collection: versionsSlug,
       data: {
-        title: 'Version 1',
         categoryVersion: categoryVersionsDoc.id,
+        title: 'Version 1',
       },
     })
 

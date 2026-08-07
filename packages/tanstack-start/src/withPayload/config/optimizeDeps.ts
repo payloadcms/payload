@@ -28,6 +28,9 @@ export const optimizeDepsExcludeDefaults: string[] = [
   // server-only APIs (e.g. `BlobSASPermissions`), which crashes the dev
   // server with a `MISSING_EXPORT` error before any test runs.
   '@azure/storage-blob',
+  // Preserve RSC client boundaries on storage admin upload handlers.
+  '@payloadcms/storage-azure',
+  '@payloadcms/storage-vercel-blob',
   '@aws-sdk/client-s3',
   '@aws-sdk/s3-request-presigner',
   '@google-cloud/storage',
@@ -122,4 +125,6 @@ export const optimizeDepsIncludeDefaults: string[] = [
   'payload > ipaddr.js',
   'payload > range-parser',
   'payload > sanitize-filename',
+  // `@azure/storage-blob` is excluded, so pre-bundle its CommonJS browser dependency explicitly.
+  '@azure/storage-blob > events',
 ]

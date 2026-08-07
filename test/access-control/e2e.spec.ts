@@ -14,18 +14,14 @@ import { login } from '../__helpers/e2e/auth/login.js'
 import { getColumnSelectorItem, openListColumns } from '../__helpers/e2e/columns/index.js'
 import { openListFilters } from '../__helpers/e2e/filters/index.js'
 import { openGroupBy } from '../__helpers/e2e/groupBy/index.js'
-import {
-  ensureCompilationIsDone,
-  exactText,
-  initPageConsoleErrorCatch,
-  saveDocAndAssert,
-} from '../__helpers/e2e/helpers.js'
+import { exactText, saveDocAndAssert } from '../__helpers/e2e/helpers.js'
 import { openDocControls } from '../__helpers/e2e/openDocControls.js'
 import { getSelectMenu } from '../__helpers/e2e/selectInput.js'
 import { closeNav, openNav } from '../__helpers/e2e/toggleNav.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { RESTClient } from '../__helpers/shared/rest.js'
+import { initPage } from '../__setup/e2e/initPage.js'
 import { devUser } from '../credentials.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { readRestrictedSlug } from './collections/ReadRestricted/index.js'
@@ -64,7 +60,7 @@ const dirname = path.dirname(filename)
  * Repeat all above for globals
  */
 
-const { beforeAll, beforeEach, describe, afterEach, afterAll } = test
+const { afterAll, afterEach, beforeAll, beforeEach, describe } = test
 
 let payload: PayloadTestSDK<Config>
 describe('Access Control', () => {
@@ -110,10 +106,7 @@ describe('Access Control', () => {
     restrictedTrashUrl = new AdminUrlUtil(serverURL, restrictedTrashSlug)
 
     context = await browser.newContext()
-    page = await context.newPage()
-    initPageConsoleErrorCatch(page)
-
-    await ensureCompilationIsDone({ noAutoLogin: true, page, serverURL })
+    ;({ page } = await initPage({ context, noAutoLogin: true, serverURL }))
 
     await login({ page, serverURL })
   })
@@ -901,11 +894,11 @@ describe('Access Control', () => {
     beforeAll(async () => {
       const existing = await payload.find({
         collection: authSlug,
-        where: { email: { equals: 'test@payloadcms.com' } },
         limit: 1,
+        where: { email: { equals: 'test@payloadcms.com' } },
       })
       for (const doc of existing.docs) {
-        await payload.delete({ collection: authSlug, id: doc.id })
+        await payload.delete({ id: doc.id, collection: authSlug })
       }
 
       existingDoc = await payload.create({
@@ -919,7 +912,7 @@ describe('Access Control', () => {
 
     afterAll(async () => {
       if (existingDoc?.id) {
-        await payload.delete({ collection: authSlug, id: existingDoc.id })
+        await payload.delete({ id: existingDoc.id, collection: authSlug })
       }
     })
     test('should show email as readonly when user does not have update permission', async () => {
@@ -1845,8 +1838,8 @@ describe('Access Control', () => {
       afterEach(async () => {
         for (const id of createdDocIds) {
           await payload.delete({
-            collection: differentiatedTrashSlug,
             id,
+            collection: differentiatedTrashSlug,
             trash: true,
           })
         }
@@ -1868,7 +1861,7 @@ describe('Access Control', () => {
         test('should show delete button in doc controls dropdown', async () => {
           const doc = await payload.create({
             collection: differentiatedTrashSlug,
-            data: { title: 'Test Doc', _status: 'published' },
+            data: { _status: 'published', title: 'Test Doc' },
           })
           createdDocIds.push(doc.id)
 
@@ -1884,7 +1877,7 @@ describe('Access Control', () => {
         test('should show delete forever checkbox in delete modal', async () => {
           const doc = await payload.create({
             collection: differentiatedTrashSlug,
-            data: { title: 'Test Doc', _status: 'published' },
+            data: { _status: 'published', title: 'Test Doc' },
           })
           createdDocIds.push(doc.id)
 
@@ -1901,7 +1894,7 @@ describe('Access Control', () => {
         test('should allow permanently deleting a doc', async () => {
           const doc = await payload.create({
             collection: differentiatedTrashSlug,
-            data: { title: 'Test Doc For Perma Delete', _status: 'published' },
+            data: { _status: 'published', title: 'Test Doc For Perma Delete' },
           })
           // Don't add to createdDocIds since we're permanently deleting it
 
@@ -1925,9 +1918,9 @@ describe('Access Control', () => {
           const doc = await payload.create({
             collection: differentiatedTrashSlug,
             data: {
-              title: 'Admin Trashed Doc View Test',
               _status: 'published',
               deletedAt: new Date().toISOString(),
+              title: 'Admin Trashed Doc View Test',
             },
           })
           // Don't add to createdDocIds since we're permanently deleting it
@@ -1961,12 +1954,12 @@ describe('Access Control', () => {
       describe('as regular user', () => {
         beforeAll(async () => {
           await login({
-            page,
-            serverURL,
             data: {
               email: regularUserEmail,
               password: 'test',
             },
+            page,
+            serverURL,
           })
         })
 
@@ -1978,7 +1971,7 @@ describe('Access Control', () => {
         test('should show delete button in doc controls dropdown', async () => {
           const doc = await payload.create({
             collection: differentiatedTrashSlug,
-            data: { title: 'Test Doc', _status: 'published' },
+            data: { _status: 'published', title: 'Test Doc' },
           })
           createdDocIds.push(doc.id)
 
@@ -1994,7 +1987,7 @@ describe('Access Control', () => {
         test('should hide delete forever checkbox in delete modal since user cannot permanently delete', async () => {
           const doc = await payload.create({
             collection: differentiatedTrashSlug,
-            data: { title: 'Test Doc', _status: 'published' },
+            data: { _status: 'published', title: 'Test Doc' },
           })
           createdDocIds.push(doc.id)
 
@@ -2013,7 +2006,7 @@ describe('Access Control', () => {
         test('should allow trashing a doc', async () => {
           const doc = await payload.create({
             collection: differentiatedTrashSlug,
-            data: { title: 'Test Doc For Trash', _status: 'published' },
+            data: { _status: 'published', title: 'Test Doc For Trash' },
           })
           createdDocIds.push(doc.id)
 
@@ -2036,9 +2029,9 @@ describe('Access Control', () => {
           const doc = await payload.create({
             collection: differentiatedTrashSlug,
             data: {
-              title: 'Trashed Doc View Test',
               _status: 'published',
               deletedAt: new Date().toISOString(),
+              title: 'Trashed Doc View Test',
             },
           })
           createdDocIds.push(doc.id)
@@ -2076,8 +2069,8 @@ describe('Access Control', () => {
       afterEach(async () => {
         for (const id of createdDocIds) {
           await payload.delete({
-            collection: restrictedTrashSlug,
             id,
+            collection: restrictedTrashSlug,
             trash: true,
           })
         }
@@ -2092,7 +2085,7 @@ describe('Access Control', () => {
         test('should show delete button in doc controls dropdown', async () => {
           const doc = await payload.create({
             collection: restrictedTrashSlug,
-            data: { title: 'Test Doc', _status: 'published' },
+            data: { _status: 'published', title: 'Test Doc' },
           })
           createdDocIds.push(doc.id)
 
@@ -2108,7 +2101,7 @@ describe('Access Control', () => {
         test('should show delete forever checkbox in delete modal', async () => {
           const doc = await payload.create({
             collection: restrictedTrashSlug,
-            data: { title: 'Test Doc', _status: 'published' },
+            data: { _status: 'published', title: 'Test Doc' },
           })
           createdDocIds.push(doc.id)
 
@@ -2125,7 +2118,7 @@ describe('Access Control', () => {
         test('should allow trashing a doc', async () => {
           const doc = await payload.create({
             collection: restrictedTrashSlug,
-            data: { title: 'Test Doc For Trash', _status: 'published' },
+            data: { _status: 'published', title: 'Test Doc For Trash' },
           })
           createdDocIds.push(doc.id)
 
@@ -2146,7 +2139,7 @@ describe('Access Control', () => {
         test('should allow permanently deleting a doc', async () => {
           const doc = await payload.create({
             collection: restrictedTrashSlug,
-            data: { title: 'Test Doc For Perma Delete', _status: 'published' },
+            data: { _status: 'published', title: 'Test Doc For Perma Delete' },
           })
           // Don't add to createdDocIds since we're permanently deleting it
 
@@ -2169,12 +2162,12 @@ describe('Access Control', () => {
       describe('as regular user', () => {
         beforeAll(async () => {
           await login({
-            page,
-            serverURL,
             data: {
               email: regularUserEmail,
               password: 'test',
             },
+            page,
+            serverURL,
           })
         })
 
@@ -2186,7 +2179,7 @@ describe('Access Control', () => {
         test('should not show doc controls popup when user has no delete access', async () => {
           const doc = await payload.create({
             collection: restrictedTrashSlug,
-            data: { title: 'Test Doc', _status: 'published' },
+            data: { _status: 'published', title: 'Test Doc' },
           })
           createdDocIds.push(doc.id)
 
@@ -2209,8 +2202,8 @@ describe('Access Control', () => {
         afterEach(async () => {
           for (const id of createdDocIds) {
             await payload.delete({
-              collection: differentiatedTrashSlug,
               id,
+              collection: differentiatedTrashSlug,
               trash: true,
             })
           }
@@ -2225,7 +2218,7 @@ describe('Access Control', () => {
           test('should show delete button when selecting docs in list view', async () => {
             const doc = await payload.create({
               collection: differentiatedTrashSlug,
-              data: { title: 'Bulk Test Doc 1', _status: 'published' },
+              data: { _status: 'published', title: 'Bulk Test Doc 1' },
             })
             createdDocIds.push(doc.id)
 
@@ -2252,12 +2245,12 @@ describe('Access Control', () => {
         describe('as regular user', () => {
           beforeAll(async () => {
             await login({
-              page,
-              serverURL,
               data: {
                 email: regularUserEmail,
                 password: 'test',
               },
+              page,
+              serverURL,
             })
           })
 
@@ -2268,7 +2261,7 @@ describe('Access Control', () => {
           test('should show delete button when selecting docs in list view (user can trash)', async () => {
             const doc = await payload.create({
               collection: differentiatedTrashSlug,
-              data: { title: 'Bulk Test Doc Regular User', _status: 'published' },
+              data: { _status: 'published', title: 'Bulk Test Doc Regular User' },
             })
             createdDocIds.push(doc.id)
 
@@ -2294,7 +2287,7 @@ describe('Access Control', () => {
           test('should hide delete permanently checkbox in bulk delete modal', async () => {
             const doc = await payload.create({
               collection: differentiatedTrashSlug,
-              data: { title: 'Bulk Test Doc Regular User 2', _status: 'published' },
+              data: { _status: 'published', title: 'Bulk Test Doc Regular User 2' },
             })
             createdDocIds.push(doc.id)
 
@@ -2328,8 +2321,8 @@ describe('Access Control', () => {
         afterEach(async () => {
           for (const id of createdDocIds) {
             await payload.delete({
-              collection: restrictedTrashSlug,
               id,
+              collection: restrictedTrashSlug,
               trash: true,
             })
           }
@@ -2344,7 +2337,7 @@ describe('Access Control', () => {
           test('should show delete button when selecting docs in list view', async () => {
             const doc = await payload.create({
               collection: restrictedTrashSlug,
-              data: { title: 'Restricted Bulk Test Doc', _status: 'published' },
+              data: { _status: 'published', title: 'Restricted Bulk Test Doc' },
             })
             createdDocIds.push(doc.id)
 
@@ -2371,12 +2364,12 @@ describe('Access Control', () => {
         describe('as regular user', () => {
           beforeAll(async () => {
             await login({
-              page,
-              serverURL,
               data: {
                 email: regularUserEmail,
                 password: 'test',
               },
+              page,
+              serverURL,
             })
           })
 
@@ -2387,7 +2380,7 @@ describe('Access Control', () => {
           test('should not show delete button when selecting docs in list view (user cannot trash or delete)', async () => {
             const doc = await payload.create({
               collection: restrictedTrashSlug,
-              data: { title: 'Restricted Bulk Test Doc Regular User', _status: 'published' },
+              data: { _status: 'published', title: 'Restricted Bulk Test Doc Regular User' },
             })
             createdDocIds.push(doc.id)
 
@@ -2421,8 +2414,8 @@ describe('Access Control', () => {
           for (const id of createdDocIds) {
             try {
               await payload.delete({
-                collection: differentiatedTrashSlug,
                 id,
+                collection: differentiatedTrashSlug,
                 trash: true,
               })
             } catch (_e) {
@@ -2442,9 +2435,9 @@ describe('Access Control', () => {
             const doc = await payload.create({
               collection: differentiatedTrashSlug,
               data: {
-                title: 'Trash View Bulk Test Admin',
                 _status: 'published',
                 deletedAt: new Date().toISOString(),
+                title: 'Trash View Bulk Test Admin',
               },
             })
             createdDocIds.push(doc.id)
@@ -2472,12 +2465,12 @@ describe('Access Control', () => {
         describe('as regular user', () => {
           beforeAll(async () => {
             await login({
-              page,
-              serverURL,
               data: {
                 email: regularUserEmail,
                 password: 'test',
               },
+              page,
+              serverURL,
             })
           })
 
@@ -2490,9 +2483,9 @@ describe('Access Control', () => {
             const doc = await payload.create({
               collection: differentiatedTrashSlug,
               data: {
-                title: 'Trash View Bulk Test Regular',
                 _status: 'published',
                 deletedAt: new Date().toISOString(),
+                title: 'Trash View Bulk Test Regular',
               },
             })
             createdDocIds.push(doc.id)
