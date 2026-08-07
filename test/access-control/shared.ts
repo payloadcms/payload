@@ -21,6 +21,8 @@ export const docLevelAccessSlug = 'doc-level-access'
 export const hiddenFieldsSlug = 'hidden-fields'
 export const hiddenAccessSlug = 'hidden-access'
 export const hiddenAccessCountSlug = 'hidden-access-count'
+export const inheritedReadVersionsSlug = 'inherited-read-versions'
+export const inheritedReadVersionsGlobalSlug = 'inherited-read-versions-global'
 export const disabledSlug = 'disabled'
 
 export const nonAdminEmail = 'no-admin-access@payloadcms.com'

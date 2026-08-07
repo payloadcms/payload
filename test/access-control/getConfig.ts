@@ -30,6 +30,8 @@ import {
   hiddenAccessCountSlug,
   hiddenAccessSlug,
   hiddenFieldsSlug,
+  inheritedReadVersionsGlobalSlug,
+  inheritedReadVersionsSlug,
   nonAdminEmail,
   publicUserEmail,
   publicUsersSlug,
@@ -68,6 +70,12 @@ const PublicReadabilityAccess: FieldAccess = ({ req: { user }, siblingData }) =>
 }
 
 export const requestHeaders = new Headers({ authorization: 'Bearer testBearerToken' })
+let inheritedReadVersionsAllowedID: number | string | undefined
+
+export const setInheritedReadVersionsAllowedID = (id: number | string | undefined): void => {
+  inheritedReadVersionsAllowedID = id
+}
+
 const UseRequestHeadersAccess: FieldAccess = ({ req: { headers } }) => {
   return !!headers && headers.get('authorization') === requestHeaders.get('authorization')
 }
@@ -642,6 +650,26 @@ export const getConfig: () => Partial<Config> = () => ({
         },
       ],
     },
+    {
+      slug: inheritedReadVersionsSlug,
+      access: {
+        read: ({ id }) =>
+          id
+            ? id === inheritedReadVersionsAllowedID
+            : {
+                secret: {
+                  equals: 'allowed',
+                },
+              },
+      },
+      fields: [
+        {
+          name: 'secret',
+          type: 'text',
+        },
+      ],
+      versions: true,
+    },
     BlocksFieldAccess,
     Disabled,
     RichText,
@@ -823,6 +851,26 @@ export const getConfig: () => Partial<Config> = () => ({
     },
   ],
   globals: [
+    {
+      slug: inheritedReadVersionsGlobalSlug,
+      access: {
+        read: ({ id }) =>
+          id
+            ? false
+            : {
+                visible: {
+                  equals: true,
+                },
+              },
+      },
+      fields: [
+        {
+          name: 'visible',
+          type: 'checkbox',
+        },
+      ],
+      versions: true,
+    },
     {
       slug: 'settings',
       admin: {

@@ -1,24 +1,25 @@
 import type { Where } from '../../types/index.js'
 
-export const appendVersionToQueryKey = (query: Where = {}): Where => {
+const appendVersionToQueryKeyWithIDPath = (query: Where, idPath?: string): Where => {
   return Object.entries(query).reduce((res, [key, val]) => {
     if (['AND', 'and', 'OR', 'or'].includes(key) && Array.isArray(val)) {
       return {
         ...res,
-        [key.toLowerCase()]: val.map((subQuery) => appendVersionToQueryKey(subQuery)),
-      }
-    }
-
-    if (key !== 'id') {
-      return {
-        ...res,
-        [`version.${key}`]: val,
+        [key.toLowerCase()]: val.map((subQuery) =>
+          appendVersionToQueryKeyWithIDPath(subQuery, idPath),
+        ),
       }
     }
 
     return {
       ...res,
-      parent: val,
+      [key === 'id' && idPath ? idPath : `version.${key}`]: val,
     }
   }, {})
 }
+
+export const appendGlobalVersionToQueryKey = (query: Where = {}): Where =>
+  appendVersionToQueryKeyWithIDPath(query)
+
+export const appendVersionToQueryKey = (query: Where = {}): Where =>
+  appendVersionToQueryKeyWithIDPath(query, 'parent')

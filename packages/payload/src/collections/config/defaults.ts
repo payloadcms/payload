@@ -2,6 +2,9 @@ import type { Auth, IncomingAuthType, LoginWithUsernameOptions } from '../../aut
 import type { CollectionConfig, SanitizedCollectionConfig } from './types.js'
 
 import { defaultAccess } from '../../auth/defaultAccess.js'
+import { hasWhereAccessResult } from '../../auth/types.js'
+import { appendVersionToQueryKey } from '../../versions/drafts/appendVersionToQueryKey.js'
+import { markInheritedReadVersionsAccess } from '../../versions/isInheritedReadVersionsAccess.js'
 
 /**
  * @deprecated - remove in 4.0. This is error-prone, as mutating this object will affect any objects that use the defaults as a base.
@@ -57,12 +60,20 @@ export const defaults: Partial<CollectionConfig> = {
 
 export const addDefaultsToCollectionConfig = (collection: CollectionConfig): CollectionConfig => {
   const access = collection.access
+  const read = access?.read ?? defaultAccess
 
   collection.access = {
     ...access,
     create: access?.create ?? defaultAccess,
     delete: access?.delete ?? defaultAccess,
-    read: access?.read ?? defaultAccess,
+    read,
+    readVersions:
+      access?.readVersions ??
+      markInheritedReadVersionsAccess(async (args) => {
+        const result = await read(args)
+
+        return hasWhereAccessResult(result) ? appendVersionToQueryKey(result) : result
+      }),
     unlock: access?.unlock ?? defaultAccess,
     update: access?.update ?? defaultAccess,
   } satisfies SanitizedCollectionConfig['access']
