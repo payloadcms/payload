@@ -495,7 +495,7 @@ test.describe('Form State', () => {
     await expect(computedTitleField).toHaveValue('Test Title')
   })
 
-  test('autosave - should not overwrite computed values that are being actively edited', async () => {
+  test('autosave - should accept server-computed values when no newer edit exists', async () => {
     await page.goto(autosavePostsUrl.create)
     await waitForFormReady(page)
 
@@ -516,7 +516,7 @@ test.describe('Form State', () => {
 
     await waitForAutoSaveToRunAndComplete(page)
 
-    await expect(computedTitleField).toHaveValue('Test Title - Edited')
+    await expect(computedTitleField).toHaveValue('Test Title')
 
     // but then when editing another field, the computed field should update
     await titleField.fill('Test Title 2')

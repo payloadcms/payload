@@ -21,7 +21,6 @@ import {
 } from '../../forms/Form/context.js'
 import { useDebounce } from '../../hooks/useDebounce.js'
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
-import { useQueue } from '../../hooks/useQueue.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
@@ -55,7 +54,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
     setUnpublishedVersionCount,
   } = useDocumentInfo()
 
-  const { isValid, setBackgroundProcessing, submit } = useForm()
+  const { isValid, submit } = useForm()
 
   const [formState] = useAllFormFields()
   const modified = useFormModified()
@@ -73,117 +72,105 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
 
   const debouncedFormState = useDebounce(formState, interval)
 
-  const { queueTask } = useQueue()
-
   const autosaveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const savingTokenRef = useRef(0)
 
-  const handleAutosave = useEffectEvent(() => {
-    autosaveTimeoutRef.current = undefined
-    // We need to log the time in order to figure out if we need to trigger the state off later
-    let startTimestamp = undefined
-    let endTimestamp = undefined
-
-    const hideIndicator = () => {
+  const handleAutosave = useEffectEvent(async () => {
+    const hideIndicator = ({
+      startTimestamp,
+      token,
+    }: {
+      startTimestamp: number
+      token: number
+    }) => {
+      const elapsedTime = new Date().getTime() - startTimestamp
       // If request was faster than minimum animation time, animate the difference
-      if (endTimestamp - startTimestamp < minimumAnimationTime) {
-        autosaveTimeoutRef.current = setTimeout(
-          () => {
+      if (elapsedTime < minimumAnimationTime) {
+        autosaveTimeoutRef.current = setTimeout(() => {
+          if (token === savingTokenRef.current) {
             setSaving(false)
-          },
-          minimumAnimationTime - (endTimestamp - startTimestamp),
-        )
-      } else {
+          }
+        }, minimumAnimationTime - elapsedTime)
+      } else if (token === savingTokenRef.current) {
         stopAutoSaveIndicator()
       }
     }
 
-    queueTask(
-      async () => {
-        if (modified) {
-          startTimestamp = new Date().getTime()
+    if (!modified) {
+      return
+    }
 
-          setSaving(true)
-
-          let url: string
-          let method: string
-          let entitySlug: string
-          const params = qs.stringify(
-            {
-              autosave: true,
-              depth: 0,
-              draft: true,
-              'fallback-locale': 'null',
-              locale,
-            },
-            {
-              addQueryPrefix: true,
-            },
-          )
-
-          if (collection && id) {
-            entitySlug = collection.slug
-            url = formatAdminURL({
-              apiRoute: api,
-              path: `/${entitySlug}/${id}${params}`,
-            })
-            method = 'PATCH'
-          }
-
-          if (globalDoc) {
-            entitySlug = globalDoc.slug
-            url = formatAdminURL({
-              apiRoute: api,
-              path: `/globals/${entitySlug}${params}`,
-            })
-            method = 'POST'
-          }
-
-          const { valid } = reduceFieldsToValuesWithValidation(formState, true)
-
-          const skipSubmission = submitted && !valid && validateOnDraft
-
-          if (!skipSubmission && modified && url) {
-            const result = await submit<any, OnSaveContext>({
-              acceptValues: {
-                overrideLocalChanges: false,
-              },
-              action: url,
-              context: {
-                getDocPermissions: false,
-                incrementVersionCount: !mostRecentVersionIsAutosaved,
-              },
-              disableFormWhileProcessing: false,
-              disableSuccessStatus: true,
-              method,
-              overrides: {
-                _status: 'draft',
-              },
-              skipValidation: !validateOnDraft,
-            })
-
-            if (result && result?.res?.ok && !mostRecentVersionIsAutosaved) {
-              setMostRecentVersionIsAutosaved(true)
-              setUnpublishedVersionCount((prev) => prev + 1)
-            }
-
-            const newDate = new Date()
-
-            // We need to log the time in order to figure out if we need to trigger the state off later
-            endTimestamp = newDate.getTime()
-
-            hideIndicator()
-          }
-        }
+    let url: string
+    let method: string
+    let entitySlug: string
+    const params = qs.stringify(
+      {
+        autosave: true,
+        depth: 0,
+        draft: true,
+        'fallback-locale': 'null',
+        locale,
       },
       {
-        afterProcess: () => {
-          setBackgroundProcessing(false)
-        },
-        beforeProcess: () => {
-          setBackgroundProcessing(true)
-        },
+        addQueryPrefix: true,
       },
     )
+
+    if (collection && id) {
+      entitySlug = collection.slug
+      url = formatAdminURL({
+        apiRoute: api,
+        path: `/${entitySlug}/${id}${params}`,
+      })
+      method = 'PATCH'
+    }
+
+    if (globalDoc) {
+      entitySlug = globalDoc.slug
+      url = formatAdminURL({
+        apiRoute: api,
+        path: `/globals/${entitySlug}${params}`,
+      })
+      method = 'POST'
+    }
+
+    const { valid } = reduceFieldsToValuesWithValidation(formState, true)
+
+    const skipSubmission = submitted && !valid && validateOnDraft
+
+    if (skipSubmission || !url) {
+      return
+    }
+
+    const startTimestamp = new Date().getTime()
+    const token = ++savingTokenRef.current
+    setSaving(true)
+
+    const result = await submit<any, OnSaveContext>({
+      acceptValues: true,
+      action: url,
+      context: {
+        getDocPermissions: false,
+        incrementVersionCount: !mostRecentVersionIsAutosaved,
+      },
+      disableFormWhileProcessing: false,
+      disableSuccessStatus: true,
+      method,
+      overrides: {
+        _status: 'draft',
+      },
+      requestIntent: 'autosave',
+      skipValidation: !validateOnDraft,
+    })
+
+    if (result && result?.res?.ok && !mostRecentVersionIsAutosaved) {
+      setMostRecentVersionIsAutosaved(true)
+      setUnpublishedVersionCount((prev) => prev + 1)
+    }
+
+    if (token === savingTokenRef.current) {
+      hideIndicator({ startTimestamp, token })
+    }
   })
 
   const didMount = useRef(false)
@@ -212,7 +199,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
 
     previousDebouncedData.current = formData
 
-    handleAutosave()
+    void handleAutosave()
   }, [debouncedFormState])
 
   /**

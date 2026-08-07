@@ -243,6 +243,7 @@ export const Form: React.FC<FormProps> = (props) => {
         disableSuccessStatus: disableSuccessStatusFromArgs,
         method: methodToUse = method,
         overrides: overridesFromArgs = {},
+        requestIntent,
         skipValidation,
       } = options || ({} as SubmitOptions)
 
@@ -279,6 +280,10 @@ export const Form: React.FC<FormProps> = (props) => {
       if (disableFormWhileProcessing) {
         setProcessing(true)
         setDisabled(true)
+      }
+
+      if (requestIntent === 'autosave') {
+        setBackgroundProcessing(true)
       }
 
       try {
@@ -510,6 +515,10 @@ export const Form: React.FC<FormProps> = (props) => {
         setSubmitted(true)
         errorToast(err.message)
       } finally {
+        if (requestIntent === 'autosave') {
+          setBackgroundProcessing(false)
+        }
+
         setProcessing(false)
         setDisabled(false)
       }
@@ -527,6 +536,7 @@ export const Form: React.FC<FormProps> = (props) => {
       onSuccess,
       redirect,
       router,
+      setBackgroundProcessing,
       t,
       i18n,
       validateDrafts,
