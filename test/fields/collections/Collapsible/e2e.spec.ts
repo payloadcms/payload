@@ -61,6 +61,20 @@ describe('Collapsibles', () => {
     await ensureCompilationIsDone({ page, serverURL })
   })
 
+  test('should force render nested fields outside the observer root margin', async () => {
+    await page.goto(url.create)
+
+    const offscreenCollapsible = page.locator('#field-collapsible-_index-5')
+    await expect(offscreenCollapsible).toBeAttached()
+
+    const viewportHeight = await page.evaluate(() => window.innerHeight)
+
+    await expect
+      .poll(() => offscreenCollapsible.evaluate((element) => element.getBoundingClientRect().top))
+      .toBeGreaterThan(viewportHeight + 1000)
+    await expect(page.locator('#field-forceRenderedText')).toBeAttached()
+  })
+
   test('should render collapsible as collapsed if initCollapsed is true', async () => {
     await page.goto(url.create)
     const collapsedCollapsible = page.locator(
