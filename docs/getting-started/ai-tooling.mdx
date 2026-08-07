@@ -1,0 +1,72 @@
+---
+title: AI Tooling
+label: AI Tooling
+order: 40
+desc: Payload ships an agent skill with the payload package so AI coding assistants have accurate, version-matched guidance for your project.
+keywords: documentation, getting started, guide, ai, agent, skill, claude, cursor, codex, Content Management System, cms, headless, javascript, node, react, nextjs
+---
+
+Payload publishes an agent skill inside the `payload` package. Because it ships with the
+package, the guidance your AI assistant reads always matches the version of Payload you
+have installed.
+
+The skill lives at `node_modules/payload/skills/payload/` once `payload` is installed.
+
+## What's included
+
+The skill's `SKILL.md` opens with a Quick Reference table mapping common tasks to the
+relevant reference file, so your assistant only opens the reference docs a given task
+needs rather than loading everything up front. Those reference docs cover:
+
+- **Collections**: auth, uploads, drafts, and live preview configurations
+- **Fields**: all field types including relationships, arrays, blocks, joins, and virtual fields
+- **Hooks**: `beforeChange`, `afterChange`, `beforeValidate`, and field hooks
+- **Access Control**: collection, field, and global patterns including RBAC and multi-tenant, plus advanced row-level security
+- **Queries**: Local API, REST, and GraphQL with complex operators
+- **Database Adapters**: MongoDB, Postgres, and SQLite configuration and transactions
+- **Endpoints**: custom collection and global API routes
+- **Plugin Development**: plugin architecture and package structure
+- **Advanced Features**: jobs queue, localization, and other advanced configuration
+
+## Setup
+
+New projects created with `create-payload-app` are configured automatically. Pass
+`--no-agent` to skip it.
+
+For an existing project, add `AGENTS.md` at the project root:
+
+```md
+# AI Agent
+
+For any Payload-related work, reference the skill at `node_modules/payload/skills/payload/SKILL.md`.
+```
+
+Claude Code reads `CLAUDE.md` rather than `AGENTS.md`. Add a `CLAUDE.md` that imports it,
+so both read the same instructions:
+
+```md
+@AGENTS.md
+```
+
+<Banner type="info">
+  `SKILL.md` costs roughly 8,000 tokens once your assistant opens it. The files
+  under `reference/` are only read on demand, so the full skill is not loaded
+  into context up front.
+</Banner>
+
+## Claude Code plugin
+
+Payload also publishes the skill as a Claude Code plugin. The plugin tracks the `main`
+branch rather than your installed version, so prefer it only when contributing to Payload
+itself or when you specifically want unreleased guidance.
+
+```bash
+/plugin marketplace add payloadcms/payload
+/plugin install payload@payload-marketplace
+```
+
+<Banner type="warning">
+  Use one channel per project. The plugin and the `node_modules` pointer both
+  provide a skill named `payload`. Enabling both puts two copies at different
+  versions in scope, and they can give conflicting guidance.
+</Banner>

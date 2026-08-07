@@ -3,8 +3,8 @@ import type { Config } from 'payload'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import { devUser } from '../../credentials.js'
 import { removeFiles } from '../../__helpers/shared/removeFiles.js'
+import { devUser } from '../../credentials.js'
 import {
   customLivePreviewSlug,
   pagesSlug,
@@ -25,6 +25,10 @@ import { tenant2 } from './tenant-2.js'
 import { trashedPost } from './trashed-post.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+const seedDir =
+  process.env.PAYLOAD_FRAMEWORK === 'tanstack-start' && process.env.ROOT_DIR
+    ? path.resolve(process.env.ROOT_DIR, 'live-preview/seed')
+    : dirname
 
 export const seed: Config['onInit'] = async (payload) => {
   const existingUser = await payload.find({
@@ -41,7 +45,7 @@ export const seed: Config['onInit'] = async (payload) => {
     return
   }
 
-  const uploadsDir = path.resolve(dirname, './media')
+  const uploadsDir = path.resolve(seedDir, './media')
   removeFiles(path.normalize(uploadsDir))
 
   await payload.create({
@@ -64,7 +68,7 @@ export const seed: Config['onInit'] = async (payload) => {
 
   const media = await payload.create({
     collection: 'media',
-    filePath: path.resolve(dirname, 'image-1.jpg'),
+    filePath: path.resolve(seedDir, 'image-1.jpg'),
     data: {
       alt: 'Image 1',
     },
