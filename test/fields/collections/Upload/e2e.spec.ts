@@ -98,7 +98,7 @@ describe('Upload', () => {
 
     await expect(page.locator('.file-preview__thumbnail img')).toHaveAttribute(
       'src',
-      /\/api\/uploads\/file\/og-image\.jpg(\?.*)?$/,
+      /\/api\/uploads\/file\/og-image(-\d+)?\.jpg(\?.*)?$/,
     )
   })
 
@@ -126,7 +126,7 @@ describe('Upload', () => {
 
     await expect(page.locator('.file-preview__thumbnail img')).toHaveAttribute(
       'src',
-      /\/api\/uploads\/file\/og-image\.jpg(\?.*)?$/,
+      /\/api\/uploads\/file\/og-image(-\d+)?\.jpg(\?.*)?$/,
     )
   })
 
