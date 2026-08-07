@@ -311,6 +311,11 @@ export const Form: React.FC<FormProps> = (props) => {
         await wait(100)
       }
 
+      // Captured now, before any further local edits can happen, so that the merge of this request's
+      // response can later detect whether a field was edited _after_ this point - and therefore is not
+      // yet reflected in the response we're about to receive.
+      const requestSnapshotTakenAt = Date.now()
+
       const data = reduceFieldsToValues(contextRef.current.fields, true)
 
       const serializableFormState = deepCopyObjectSimpleWithoutReactComponents(
@@ -442,6 +447,7 @@ export const Form: React.FC<FormProps> = (props) => {
                 type: 'MERGE_SERVER_STATE',
                 acceptValues,
                 prevStateRef: prevFormState,
+                requestSnapshotTakenAt,
                 serverState: newFormState,
               })
             }

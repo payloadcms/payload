@@ -192,7 +192,9 @@ export interface Number {
 export interface AutosavePost {
   id: string;
   title?: string | null;
+  subtitle?: string | null;
   computedTitle?: string | null;
+  relatedPosts?: (string | AutosavePost)[] | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -377,7 +379,9 @@ export interface PostsSelect<T extends boolean = true> {
  */
 export interface AutosavePostsSelect<T extends boolean = true> {
   title?: T;
+  subtitle?: T;
   computedTitle?: T;
+  relatedPosts?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
