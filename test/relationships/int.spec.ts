@@ -735,6 +735,58 @@ describe('Relationships', () => {
           expect(query.docs[0].text).toEqual('Tree 3')
           expect(query.docs[1].text).toEqual('Tree 4')
         })
+
+        it('should query using "equals: null" on a hasMany relationship field', async () => {
+          await payload.delete({ collection: 'directors', where: {} })
+          await payload.delete({ collection: 'movies', where: {} })
+
+          const movie = await payload.create({
+            collection: 'movies',
+            data: { name: 'Some Movie' },
+          })
+
+          await payload.create({
+            collection: 'directors',
+            data: {
+              name: 'Director With Movies',
+              movies: [movie.id],
+            },
+          })
+
+          const directorWithoutMovies = await payload.create({
+            collection: 'directors',
+            data: {
+              name: 'Director Without Movies',
+            },
+          })
+
+          // Test programmatic API with null
+          const programmaticResult = await payload.find({
+            collection: 'directors',
+            depth: 0,
+            where: {
+              movies: { equals: null },
+            },
+          })
+
+          expect(programmaticResult.totalDocs).toBe(1)
+          expect(programmaticResult.docs[0]?.id).toBe(directorWithoutMovies.id)
+
+          // Test REST API with ['null'] — the form the admin UI sends for "None"
+          const restResult = await restClient
+            .GET(`/directors`, {
+              query: {
+                where: {
+                  movies: { equals: ['null'] },
+                },
+                depth: 0,
+              },
+            })
+            .then((res) => res.json() as Promise<{ docs: Director[]; totalDocs: number }>)
+
+          expect(restResult.totalDocs).toBe(1)
+          expect(restResult.docs[0]?.id).toBe(directorWithoutMovies.id)
+        })
       })
 
       describe('sorting by relationships', () => {
