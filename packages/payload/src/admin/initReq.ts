@@ -38,6 +38,12 @@ export type InitReqArgs = {
   serverAdapter: ServerAdapter
 }
 
+/**
+ * Initializes the request state used by framework adapters to render the admin panel.
+ *
+ * @internal This integration point is intended for official Payload framework adapters.
+ * It may change without notice.
+ */
 export async function initReq({
   cache,
   canSetHeaders,
