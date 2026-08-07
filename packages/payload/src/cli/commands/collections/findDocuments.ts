@@ -1,8 +1,9 @@
-import { z } from 'zod'
+import * as z from 'zod/mini'
 
 import type { JoinQuery, Where } from '../../../index.js'
 
 import { defineCLICommand } from '../../defineCLICommand.js'
+import { strictObject } from '../../zod.js'
 import {
   collectionSlugSchema,
   defaultLimitSchema,
@@ -28,7 +29,6 @@ import {
 import { getReadOptions, printJSON } from '../data/utilities.js'
 
 export const createFindDocumentsCommand = defineCLICommand({
-  name: 'findDocuments',
   cli: {
     id: { flags: '--id <id>', parse: parseID },
     fallbackLocale: { flags: '--fallback-locale <locale|false>', parse: parseFallbackLocale },
@@ -69,8 +69,8 @@ export const createFindDocumentsCommand = defineCLICommand({
     printJSON(result)
   },
   helpGroup: 'Data commands',
-  input: z.strictObject({
-    id: idSchema.optional(),
+  input: strictObject({
+    id: z.optional(idSchema),
     slug: collectionSlugSchema,
     depth: depthSchema,
     draft: draftSchema,

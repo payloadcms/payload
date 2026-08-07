@@ -1,8 +1,9 @@
-import { z } from 'zod'
+import * as z from 'zod/mini'
 
 import type { PopulateType, SelectType } from '../../../index.js'
 
 import { defineCLICommand } from '../../defineCLICommand.js'
+import { strictObject } from '../../zod.js'
 import {
   collectionSlugSchema,
   dataSchema,
@@ -23,7 +24,6 @@ import {
 import { prepareCollectionData, printJSON } from '../data/utilities.js'
 
 export const createDuplicateDocumentCommand = defineCLICommand({
-  name: 'duplicateDocument',
   cli: {
     id: { flags: '--id <id>', parse: parseID },
     data: { flags: '--data <json|@file>', parse: parseJSON },
@@ -54,10 +54,10 @@ export const createDuplicateDocumentCommand = defineCLICommand({
     printJSON(result)
   },
   helpGroup: 'Data commands',
-  input: z.strictObject({
+  input: strictObject({
     id: idSchema,
     slug: collectionSlugSchema,
-    data: dataSchema.optional(),
+    data: z.optional(dataSchema),
     depth: depthSchema,
     draft: writeDraftSchema,
     fallbackLocale: fallbackLocaleSchema,

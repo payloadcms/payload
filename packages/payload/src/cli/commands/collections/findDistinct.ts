@@ -1,8 +1,7 @@
-import { z } from 'zod'
-
 import type { PopulateType, Where } from '../../../index.js'
 
 import { defineCLICommand } from '../../defineCLICommand.js'
+import { strictObject } from '../../zod.js'
 import {
   collectionSlugSchema,
   depthSchema,
@@ -21,7 +20,6 @@ import {
 import { printJSON } from '../data/utilities.js'
 
 export const createFindDistinctCommand = defineCLICommand({
-  name: 'findDistinct',
   cli: {
     populate: { flags: '--populate <json|@file>', parse: parseJSON },
     sort: { flags: '--sort <field>', parse: parseSort },
@@ -48,7 +46,7 @@ export const createFindDistinctCommand = defineCLICommand({
     printJSON(result)
   },
   helpGroup: 'Data commands',
-  input: z.strictObject({
+  input: strictObject({
     slug: collectionSlugSchema,
     depth: depthSchema,
     field: fieldSchema,

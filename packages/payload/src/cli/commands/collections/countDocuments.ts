@@ -1,8 +1,7 @@
-import { z } from 'zod'
-
 import type { Where } from '../../../index.js'
 
 import { defineCLICommand } from '../../defineCLICommand.js'
+import { strictObject } from '../../zod.js'
 import {
   collectionSlugSchema,
   localeSchema,
@@ -13,7 +12,6 @@ import {
 import { printJSON } from '../data/utilities.js'
 
 export const createCountDocumentsCommand = defineCLICommand({
-  name: 'countDocuments',
   cli: {
     where: { flags: '--where <json|@file>', parse: parseJSON },
   },
@@ -31,7 +29,7 @@ export const createCountDocumentsCommand = defineCLICommand({
     printJSON(result)
   },
   helpGroup: 'Data commands',
-  input: z.strictObject({
+  input: strictObject({
     slug: collectionSlugSchema,
     locale: localeSchema,
     trash: trashSchema,

@@ -35,14 +35,17 @@ const makePayload = (methods: Record<string, unknown> = {}): Payload =>
 
 const runDataCommand = async ({
   args,
+  commandName,
   createCommand,
   payload,
 }: {
   args: string[]
+  commandName: string
   createCommand: CLICommand
   payload: Payload
 }): Promise<void> => {
   const cliArgs = {
+    configDir: process.cwd(),
     getConfig: vi.fn(),
     getPayload: vi.fn().mockResolvedValue(payload),
     run: vi.fn<CLIArgs['run']>(async ({ handler }) => {
@@ -54,7 +57,7 @@ const runDataCommand = async ({
     }),
   } satisfies CLIArgs
   const command = createCommand
-    .command(cliArgs)
+    .command({ cliArgs, name: commandName })
     .exitOverride()
     .configureOutput({
       writeErr: () => undefined,
@@ -77,8 +80,14 @@ describe('Payload data CLI', () => {
 
   it('should register MCP-style commands with Commander', () => {
     const args = {} as CLIArgs
-    const createDocuments = createCreateDocumentsCommand.command(args)
-    const getCollectionSchema = createGetCollectionSchemaCommand.command(args)
+    const createDocuments = createCreateDocumentsCommand.command({
+      cliArgs: args,
+      name: 'createDocuments',
+    })
+    const getCollectionSchema = createGetCollectionSchemaCommand.command({
+      cliArgs: args,
+      name: 'getCollectionSchema',
+    })
 
     expect(createDocuments.name()).toBe('createDocuments')
     expect(getCollectionSchema.name()).toBe('getCollectionSchema')
@@ -91,6 +100,7 @@ describe('Payload data CLI', () => {
 
     await runDataCommand({
       args: ['--slug', 'posts', '--where', '{"status":{"equals":"published"}}'],
+      commandName: 'countDocuments',
       createCommand: createCountDocumentsCommand,
       payload,
     })
@@ -117,6 +127,7 @@ describe('Payload data CLI', () => {
 
     await runDataCommand({
       args: ['--slug', 'posts', '--where', `@${wherePath}`],
+      commandName: 'countDocuments',
       createCommand: createCountDocumentsCommand,
       payload,
     })
@@ -134,6 +145,7 @@ describe('Payload data CLI', () => {
 
     await runDataCommand({
       args: ['--input', '{"slug":"posts","where":{"status":{"equals":"draft"}}}'],
+      commandName: 'countDocuments',
       createCommand: createCountDocumentsCommand,
       payload,
     })
@@ -150,10 +162,11 @@ describe('Payload data CLI', () => {
     await expect(
       runDataCommand({
         args: ['--input', '{"slug":"posts","collection":"pages"}'],
+        commandName: 'countDocuments',
         createCommand: createCountDocumentsCommand,
         payload,
       }),
-    ).rejects.toThrow('Unrecognized key: "collection"')
+    ).rejects.toThrow('Invalid command input')
   })
 
   it('should create multiple documents and convert schema-friendly point values', async () => {
@@ -165,11 +178,12 @@ describe('Payload data CLI', () => {
       args: [
         '--slug',
         'posts',
-        '--data',
-        '{"title":"one","location":{"longitude":1,"latitude":2}}',
-        '--data',
-        '{"title":"two"}',
+        '--documents',
+        '{"data":{"title":"one","location":{"longitude":1,"latitude":2}},"file":"./one.png"}',
+        '--documents',
+        '{"data":{"title":"two"}}',
       ],
+      commandName: 'createDocuments',
       createCommand: createCreateDocumentsCommand,
       payload,
     })
@@ -178,7 +192,12 @@ describe('Payload data CLI', () => {
     expect(create.mock.calls[0]![0]).toMatchObject({
       collection: 'posts',
       data: { location: [1, 2], title: 'one' },
+      filePath: path.resolve(process.cwd(), 'one.png'),
       overrideAccess: true,
+    })
+    expect(create.mock.calls[1]![0]).toMatchObject({
+      data: { title: 'two' },
+      filePath: undefined,
     })
   })
 
@@ -189,6 +208,7 @@ describe('Payload data CLI', () => {
 
     await runDataCommand({
       args: ['--slug', 'posts', '--id', '1', '--data', '{}', '--file', './logo.png'],
+      commandName: 'updateDocument',
       createCommand: createUpdateDocumentCommand,
       payload,
     })
@@ -208,6 +228,7 @@ describe('Payload data CLI', () => {
     await expect(
       runDataCommand({
         args: ['--slug', 'posts'],
+        commandName: 'deleteDocuments',
         createCommand: createDeleteDocumentsCommand,
         payload,
       }),
@@ -222,6 +243,7 @@ describe('Payload data CLI', () => {
 
     await runDataCommand({
       args: ['--slug', 'posts', '--draft', '--trash'],
+      commandName: 'findDocuments',
       createCommand: createFindDocumentsCommand,
       payload,
     })
@@ -243,11 +265,13 @@ describe('Payload data CLI', () => {
 
     await runDataCommand({
       args: ['--slug', 'posts', '--no-pagination'],
+      commandName: 'findDocuments',
       createCommand: createFindDocumentsCommand,
       payload,
     })
     await runDataCommand({
       args: ['--slug', 'posts', '--id', '1', '--data', '{}', '--no-override-lock'],
+      commandName: 'updateDocument',
       createCommand: createUpdateDocumentCommand,
       payload,
     })
@@ -262,36 +286,19 @@ describe('Payload data CLI', () => {
     await expect(
       runDataCommand({
         args: ['--slug', 'posts', '--unknown'],
+        commandName: 'countDocuments',
         createCommand: createCountDocumentsCommand,
         payload,
       }),
     ).rejects.toThrow("unknown option '--unknown'")
   })
 
-  it('should validate repeated files against document data', async () => {
-    const payload = makePayload({ create: vi.fn() })
-
-    await expect(
-      runDataCommand({
-        args: [
-          '--slug',
-          'posts',
-          '--data',
-          '{"title":"one"}',
-          '--data',
-          '{"title":"two"}',
-          '--file',
-          './one.png',
-        ],
-        createCommand: createCreateDocumentsCommand,
-        payload,
-      }),
-    ).rejects.toThrow('Pass one --file for each document')
-  })
-
   it('should generate command help from input schemas', () => {
     const program = new Command().name('payload')
-    const command = createFindDocumentsCommand.command({} as CLIArgs)
+    const command = createFindDocumentsCommand.command({
+      cliArgs: {} as CLIArgs,
+      name: 'findDocuments',
+    })
 
     program.addCommand(command)
 

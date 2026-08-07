@@ -1,9 +1,10 @@
 import path from 'node:path'
-import { z } from 'zod'
+import * as z from 'zod/mini'
 
 import type { Payload, PopulateType, SelectType, Where } from '../../../index.js'
 
 import { defineCLICommand } from '../../defineCLICommand.js'
+import { strictObject } from '../../zod.js'
 import {
   collectionSlugSchema,
   dataSchema,
@@ -31,9 +32,9 @@ import {
 } from '../data/input.js'
 import { prepareCollectionData, printJSON, requireIDOrWhere } from '../data/utilities.js'
 
-const input = z
-  .strictObject({
-    id: idSchema.optional(),
+const input = strictObject(
+  {
+    id: z.optional(idSchema),
     slug: collectionSlugSchema,
     data: dataSchema,
     depth: depthSchema,
@@ -52,11 +53,11 @@ const input = z
     trash: trashSchema,
     unpublishAllLocales: unpublishAllLocalesSchema,
     where: whereSchema,
-  })
-  .superRefine(requireIDOrWhere)
+  },
+  z.superRefine(requireIDOrWhere),
+)
 
 export const createUpdateDocumentCommand = defineCLICommand({
-  name: 'updateDocument',
   cli: {
     id: { flags: '--id <id>', parse: parseID },
     data: { flags: '--data <json|@file>', parse: parseJSON },

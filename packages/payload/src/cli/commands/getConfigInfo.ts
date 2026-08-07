@@ -1,10 +1,8 @@
-import { z } from 'zod'
-
 import { defineCLICommand } from '../defineCLICommand.js'
+import { strictObject } from '../zod.js'
 import { printJSON } from './data/utilities.js'
 
 export const createGetConfigInfoCommand = defineCLICommand({
-  name: 'getConfigInfo',
   description: 'Print local collection and global slugs.',
   handler: async ({ getPayload }) => {
     const payload = await getPayload()
@@ -15,5 +13,5 @@ export const createGetConfigInfoCommand = defineCLICommand({
     })
   },
   helpGroup: 'Data commands',
-  input: z.strictObject({}),
+  input: strictObject({}),
 })
