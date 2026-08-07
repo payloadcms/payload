@@ -439,6 +439,7 @@ export const myTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'ရှိပြီးသား အကွက်ဒေတာကို အစားထိုးပါ',
     pageNotFound: 'ရောက်ရှိနေသော စာမျက်နှာသည် မရှိပါ။',
     password: 'စကားဝှက်',
+    pasteBelow: 'အောက်တွင်ထည့်ပါ',
     pasteField: 'ကွက်လပ်ကိုတင်ပါ',
     pasteRow: 'တန်းကိုတင်ပါ',
     payloadSettings: 'ရွေးချယ်စရာများ',
@@ -454,6 +455,7 @@ export const myTranslations: DefaultTranslationsObject = {
     reloadDocument: 'စာရွက်စာတမ်း ပြန်လည်ဖွင့်ပါ',
     remove: 'ဖယ်ရှားမည်။',
     rename: 'အမည်ပြောင်း',
+    replaceRow: 'တန်းစီအစားထိုးရန်',
     reset: 'ပြန်လည်သတ်မှတ်ပါ',
     resetPreferences: 'ကြိုတင်သတ်မှတ်ချက်များ ပြန်လည်တပ်ဆင်မည်',
     resetPreferencesDescription:
@@ -485,6 +487,8 @@ export const myTranslations: DefaultTranslationsObject = {
     sorryNotFound: 'ဝမ်းနည်းပါသည်။ သင်ရှာနေတဲ့ဟာ ဒီမှာမရှိပါ။',
     sort: 'အစဉ်လိုက်',
     sortByLabelDirection: 'အစဉ်အလိုက် စီမံခန့်ခွဲထားသည် {{label}} {{direction}}',
+    sortByOrderToReorder:
+      'အတန်းတန်းများကို ပြန်စီရန်အတွက် မူရင်းအားဖြင့် "Order" column ကို အရင်ဆုံး စီတန်းရပါမည်။',
     stayOnThisPage: 'ဒီမှာပဲ ဆက်နေမည်။',
     submissionSuccessful: 'သိမ်းဆည်းမှု အောင်မြင်ပါသည်။',
     submit: 'သိမ်းဆည်းမည်။',
@@ -576,6 +580,7 @@ export const myTranslations: DefaultTranslationsObject = {
     addFile: 'ဖိုင်ထည့်ပါ',
     addFiles: 'ဖိုင်များ ထည့်ပါ',
     bulkUpload: 'အစုလိုက် အပ်လုဒ်',
+    copyLinkToFile: 'ဖိုင်အတွက်လင့်ခ်ကို ကူးယူပါ',
     crop: 'သုန်း',
     cropToolDescription:
       'ရွေးထားသည့်ဧရိယာတွင်မွေးလျှက်မှုများကိုဆွဲပြီး, အသစ်တည်ပြီးသို့မဟုတ်အောက်ပါတ',

@@ -435,6 +435,7 @@ export const taTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'ஏற்கனவே உள்ள புலத் தரவை மேலெழுது',
     pageNotFound: 'பக்கம் கிடைக்கவில்லை',
     password: 'கடவுச்சொல்',
+    pasteBelow: 'கீழே ஒட்டு',
     pasteField: 'புலத்தை ஒட்டு',
     pasteRow: 'வரிசையை ஒட்டு',
     payloadSettings: 'Payload அமைப்புகள்',
@@ -449,6 +450,7 @@ export const taTranslations: DefaultTranslationsObject = {
     reloadDocument: 'ஆவணத்தை மீளாக்கு',
     remove: 'நீக்கு',
     rename: 'பெயர் மாற்று',
+    replaceRow: 'வரிசையை மாற்றவும்',
     reset: 'மீட்டமை',
     resetPreferences: 'அமைப்புகளை மீட்டமை',
     resetPreferencesDescription:
@@ -480,6 +482,8 @@ export const taTranslations: DefaultTranslationsObject = {
     sorryNotFound: 'மன்னிக்கவும் — உங்கள் கோரிக்கைக்கு பொருந்த எதுவும் இல்லை.',
     sort: 'வரிசைப்படுத்து',
     sortByLabelDirection: '{{label}}-ஐ {{direction}} வரிசைப்படுத்து',
+    sortByOrderToReorder:
+      'வரிசைகளை மறுநிரல் செய்ய, முதலில் அவற்றை "Order" நெடுவரிசையின் அடிப்படையில் வரிசைப்படுத்த வேண்டும்.',
     stayOnThisPage: 'இந்தப் பக்கத்தில் இரு',
     submissionSuccessful: 'சமர்ப்பிப்பு வெற்றிகரமாக முடிந்தது.',
     submit: 'சமர்ப்பி',
@@ -570,6 +574,7 @@ export const taTranslations: DefaultTranslationsObject = {
     addFile: 'கோப்பை சேர்க்கவும்',
     addFiles: 'கோப்புகளை சேர்க்கவும்',
     bulkUpload: 'மொத்தமாக பதிவேற்றம்',
+    copyLinkToFile: 'கோப்புக்கான இணைப்பை நகலெடுக்கவும்',
     crop: 'வெட்டுக',
     cropToolDescription:
       'தேர்ந்த பகுதியின் மூலைகளை இழுத்து, புதிய பகுதியை வரையுங்கள் அல்லது கீழே உள்ள மதிப்புகளைச் சரிசெய்யவும்.',

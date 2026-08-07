@@ -445,6 +445,7 @@ export const deTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Vorhandene Eingaben überschreiben',
     pageNotFound: 'Seite nicht gefunden',
     password: 'Passwort',
+    pasteBelow: 'Unten einfügen',
     pasteField: 'Feld einfügen',
     pasteRow: 'Zeile einfügen',
     payloadSettings: 'Payload-Einstellungen',
@@ -459,6 +460,7 @@ export const deTranslations: DefaultTranslationsObject = {
     reloadDocument: 'Dokument neu laden',
     remove: 'Entfernen',
     rename: 'Umbenennen',
+    replaceRow: 'Zeile ersetzen',
     reset: 'Zurücksetzen',
     resetPreferences: 'Präferenzen zurücksetzen',
     resetPreferencesDescription: 'Alle Präferenzen werden auf die Standardwerte zurückgesetzt.',
@@ -490,6 +492,8 @@ export const deTranslations: DefaultTranslationsObject = {
       'Es tut uns leid, aber wir haben nichts gefunden, was deiner Anfrage entspricht.',
     sort: 'Sortieren',
     sortByLabelDirection: 'Sortieren nach {{label}} {{direction}}',
+    sortByOrderToReorder:
+      'Um die Zeilen neu anzuordnen, müssen Sie sie zunächst nach der Spalte „Reihenfolge“ sortieren.',
     stayOnThisPage: 'Auf dieser Seite bleiben',
     submissionSuccessful: 'Übermittlung erfolgreich.',
     submit: 'Senden',
@@ -581,6 +585,7 @@ export const deTranslations: DefaultTranslationsObject = {
     addFile: 'Datei hinzufügen',
     addFiles: 'Dateien hinzufügen',
     bulkUpload: 'Mehrere Dateien hochladen',
+    copyLinkToFile: 'Link zum Datei kopieren',
     crop: 'Zuschneiden',
     cropToolDescription:
       'Ziehe die Ecken des ausgewählten Bereichs, zeichne einen neuen Bereich oder passe die Werte unten an.',

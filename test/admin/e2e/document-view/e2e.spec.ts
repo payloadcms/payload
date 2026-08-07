@@ -8,14 +8,14 @@ import type { Config, Post } from '../../payload-types.js'
 import {
   checkBreadcrumb,
   checkPageTitle,
-  ensureCompilationIsDone,
   exactText,
-  initPageConsoleErrorCatch,
   saveDocAndAssert,
 } from '../../../__helpers/e2e/helpers.js'
 import { test } from '../../../__helpers/e2e/playwright.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
+import { ensureCompilationIsDone } from '../../../__setup/e2e/ensureCompilationIsDone.js'
+import { initPage } from '../../../__setup/e2e/initPage.js'
 import {
   BASE_PATH,
   customAdminRoutes,
@@ -103,10 +103,7 @@ describe('Document View', () => {
     localizedURL = new AdminUrlUtil(serverURL, localizedCollectionSlug)
 
     const context = await browser.newContext()
-    page = await context.newPage()
-    initPageConsoleErrorCatch(page)
-
-    await ensureCompilationIsDone({ customAdminRoutes, page, serverURL })
+    ;({ page } = await initPage({ context, customAdminRoutes, serverURL }))
   })
 
   beforeEach(async () => {
@@ -923,10 +920,10 @@ describe('Document View', () => {
       await page.goto(postsUrl.create)
       await page.locator('#field-title').fill('heros')
       await selectInput({
-        page,
+        filter: 'sean',
         multiSelect: false,
         option: 'sean',
-        filter: 'sean',
+        page,
         selectLocator: page.locator('#field-relationship'),
         selectType: 'relationship',
       })

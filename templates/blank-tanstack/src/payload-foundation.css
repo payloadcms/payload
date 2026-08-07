@@ -1,0 +1,10 @@
+@import '../node_modules/@payloadcms/ui/dist/css/preflight.css';
+@import '../node_modules/@payloadcms/ui/dist/css/colors.css';
+@import '../node_modules/@payloadcms/ui/dist/css/theme.css';
+@import '../node_modules/@payloadcms/ui/dist/css/design-tokens.css';
+@import '../node_modules/@payloadcms/ui/dist/css/typography.css';
+@import '../node_modules/@payloadcms/ui/dist/css/spacing.css';
+@import '../node_modules/@payloadcms/ui/dist/css/radius.css';
+@import '../node_modules/@payloadcms/ui/dist/css/elevations.css';
+@import '../node_modules/@payloadcms/ui/dist/css/forms.css';
+@import '../node_modules/@payloadcms/ui/dist/css/utilities.css';

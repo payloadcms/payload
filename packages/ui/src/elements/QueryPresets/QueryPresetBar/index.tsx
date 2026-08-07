@@ -335,7 +335,7 @@ export const QueryPresetBar: React.FC<{
                     )}
                     {queryPresetPermissions?.update && (
                       <PopupList.Button
-                        icon={<EditIcon size={16} />}
+                        icon={<EditIcon />}
                         id="edit-preset"
                         onClick={() => {
                           close()

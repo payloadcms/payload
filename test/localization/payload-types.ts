@@ -575,6 +575,12 @@ export interface ArrayField {
   items?:
     | {
         text?: string | null;
+        nestedItems?:
+          | {
+              text?: string | null;
+              id?: string | null;
+            }[]
+          | null;
         id?: string | null;
       }[]
     | null;
@@ -1438,6 +1444,12 @@ export interface ArrayFieldsSelect<T extends boolean = true> {
     | T
     | {
         text?: T;
+        nestedItems?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+            };
         id?: T;
       };
   updatedAt?: T;

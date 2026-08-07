@@ -436,6 +436,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Overskriv eksisterende feltdata',
     pageNotFound: 'Siden ble ikke funnet',
     password: 'Passord',
+    pasteBelow: 'Lim inn nedenfor',
     pasteField: 'Lim inn felt',
     pasteRow: 'Lim inn rad',
     payloadSettings: 'Payload-innstillinger',
@@ -450,6 +451,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     reloadDocument: 'Last inn dokument',
     remove: 'Fjern',
     rename: 'Endre navn',
+    replaceRow: 'Erstatt rad',
     reset: 'Tilbakestill',
     resetPreferences: 'Tilbakestill preferanser',
     resetPreferencesDescription:
@@ -482,6 +484,8 @@ export const nbTranslations: DefaultTranslationsObject = {
     sorryNotFound: 'Beklager, det er ingenting som samsvarer med forespørselen din.',
     sort: 'Sortér',
     sortByLabelDirection: 'Sorter etter {{label}} {{direction}}',
+    sortByOrderToReorder:
+      'For å endre rekkefølgen på radene må du først sortere dem etter "Order"-kolonnen.',
     stayOnThisPage: 'Bli på denne siden',
     submissionSuccessful: 'Innsending vellykket.',
     submit: 'Send inn',
@@ -571,6 +575,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     addFile: 'Legg til fil',
     addFiles: 'Legg til filer',
     bulkUpload: 'Bulk opplasting',
+    copyLinkToFile: 'Kopier lenke til fil',
     crop: 'Beskjær',
     cropToolDescription:
       'Dra hjørnene av det valgte området, tegn et nytt område eller juster verdiene nedenfor.',
