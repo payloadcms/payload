@@ -1,6 +1,7 @@
 import path from 'path'
 import { fileURLToPath } from 'url'
 
+import { getTestSuiteDir } from '../__helpers/shared/getTestSuiteDir.js'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { AdminThumbnailFunction } from './collections/AdminThumbnailFunction/index.js'
 import { AdminThumbnailSize } from './collections/AdminThumbnailSize/index.js'
@@ -61,9 +62,7 @@ import {
 } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
-const dirname = process.env.ROOT_DIR
-  ? path.resolve(process.env.ROOT_DIR, 'uploads')
-  : path.dirname(filename)
+const dirname = getTestSuiteDir({ fallbackDir: path.dirname(filename), suitePath: 'uploads' })
 
 export default buildConfigWithDefaults({
   admin: {

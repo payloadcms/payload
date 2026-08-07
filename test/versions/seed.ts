@@ -6,6 +6,7 @@ import { fileURLToPath } from 'url'
 import type { DraftPost } from './payload-types.js'
 
 import { executePromises } from '../__helpers/shared/executePromises.js'
+import { getTestSuiteDir } from '../__helpers/shared/getTestSuiteDir.js'
 import { devUser } from '../credentials.js'
 import { generateLexicalData } from './collections/Diff/generateLexicalData.js'
 import {
@@ -18,10 +19,7 @@ import {
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
-const seedDir =
-  process.env.PAYLOAD_FRAMEWORK === 'tanstack-start' && process.env.ROOT_DIR
-    ? path.resolve(process.env.ROOT_DIR, 'versions')
-    : dirname
+const seedDir = getTestSuiteDir({ fallbackDir: dirname, suitePath: 'versions' })
 
 export async function seed(_payload: Payload, parallel: boolean = false) {
   const blocksField: DraftPost['blocksField'] = [
