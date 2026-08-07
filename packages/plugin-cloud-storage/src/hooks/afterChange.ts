@@ -54,7 +54,17 @@ export const getAfterChangeHook =
           if (!req.context) {
             req.context = {}
           }
-          req.context.skipCloudStorage = true
+
+          // Hold onto the object the flag is set on. The nested update below runs
+          // `createLocalReq`, which reassigns `req.context` to a fresh copy — so
+          // clearing `req.context.skipCloudStorage` afterwards would clear it off
+          // that copy and leave it set on the original. When a caller reuses one
+          // `context` across several Local API creates (the seed-script pattern),
+          // `createLocalReq` hands that same object to `req.context`, and the
+          // leftover flag makes every later upload return early: the document is
+          // written but no bytes reach storage.
+          const contextWithFlag = req.context
+          contextWithFlag.skipCloudStorage = true
 
           // Clear to prevent re-processing
           req.file = undefined
@@ -70,7 +80,7 @@ export const getAfterChangeHook =
               req,
             })
           } finally {
-            delete req.context.skipCloudStorage
+            delete contextWithFlag.skipCloudStorage
           }
 
           docWithMetadata = { ...doc, ...uploadMetadata }
