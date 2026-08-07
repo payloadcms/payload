@@ -52,7 +52,7 @@ export default defineConfig({
           },
         },
         test: {
-          exclude: ['packages/next/**/*.rsc.spec.ts'],
+          exclude: ['**/*.rsc.spec.ts'],
           include: ['packages/**/*.spec.ts', 'tools/**/*.spec.ts'],
           name: 'unit',
           environment: 'node',

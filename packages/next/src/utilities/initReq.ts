@@ -13,7 +13,11 @@ const cache: InitReqCache = {
   getRequest: (factory, key) => reqCache.get(factory, key),
 }
 
-export const initReq = (args: Omit<InitReqArgs, 'cache' | 'serverAdapter'>) =>
+type NextInitReqArgs = {
+  key: string
+} & Omit<InitReqArgs, 'cache' | 'key' | 'serverAdapter'>
+
+export const initReq = (args: NextInitReqArgs) =>
   payloadInitReq({
     ...args,
     cache,
