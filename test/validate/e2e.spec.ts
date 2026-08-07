@@ -106,14 +106,14 @@ test.describe('Admin document validation', () => {
     const id = await createDraft({ spanishTitle: 'Título en español' })
 
     await openDraft(id)
-    await page.locator('#action-save').click()
+    await page.locator('#action-save-popup').click()
+    await page.locator('#publish-all-locales').click()
 
     await expect(page.locator('.validation-results').getByRole('alert')).toBeVisible()
     await expect(page.locator('.validation-results')).toContainText('German')
 
     await page.locator('.validation-results .drawer__header__close').click()
-    await page.locator('#action-save-popup').click()
-    await page.locator('#publish-locale').click()
+    await page.locator('#action-save').click()
 
     await expect(page.locator('.payload-toast-container')).toContainText('successfully')
     await expect(page.locator('.validation-results')).toHaveCount(0)
@@ -123,8 +123,7 @@ test.describe('Admin document validation', () => {
     const id = await createDraft({})
 
     await openDraft(id)
-    await page.locator('#action-save-popup').click()
-    await page.locator('#publish-locale').click()
+    await page.locator('#action-save').click()
 
     const result = page.locator('.validation-results')
     await expect(result.getByRole('alert')).toBeVisible()

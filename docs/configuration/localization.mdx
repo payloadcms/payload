@@ -231,6 +231,8 @@ Passing `locale: 'all'` together with `_status: 'published'` also publishes ever
 
 The same parameters are available on `payload.updateGlobal()` for globals, as well as on the REST and Local APIs.
 
+In the admin UI, the document controls' main Publish button always publishes only the currently active locale. A secondary "Publish all locales" button, next to the main one, calls `publishAllLocales` for every locale you have access to.
+
 ## Retrieving Localized Docs
 
 When retrieving documents, you can specify which locale you'd like to receive as well as which fallback locale should be

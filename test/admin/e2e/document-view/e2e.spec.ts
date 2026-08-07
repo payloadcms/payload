@@ -754,14 +754,14 @@ describe('Document View', () => {
   })
 
   describe('publish button', () => {
-    test('should show publish active locale button with defaultLocalePublishOption set to active', async () => {
+    test('should show publish active locale button by default when localized fields exist', async () => {
       await navigateToDoc(page, localizedURL)
       const publishButton = page.locator('#action-save')
       await expect(publishButton).toBeVisible()
       await expect(publishButton).toContainText('Publish in English')
     })
 
-    test('should not show publish active locale button with defaultLocalePublishOption set to active but no localized fields', async () => {
+    test('should not show publish active locale button when no localized fields exist', async () => {
       await navigateToDoc(page, postsUrl)
       const publishButton = page.locator('#action-save')
       await expect(publishButton).toBeVisible()

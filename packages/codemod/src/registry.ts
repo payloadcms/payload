@@ -19,6 +19,7 @@ import { migrateNextSubpathExports } from './transforms/migrate-next-subpath-exp
 import { migrateSlugField } from './transforms/migrate-slug-field/index.js'
 import { migrateStorageAdaptersToConfig } from './transforms/migrate-storage-adapters-to-config/index.js'
 import { migrateVersionsDefault } from './transforms/migrate-versions-default/index.js'
+import { removeDefaultLocalePublishOption } from './transforms/remove-default-locale-publish-option/index.js'
 import { removeGroupByTrue } from './transforms/remove-group-by-true/index.js'
 import { removeLocalizeStatusConfig } from './transforms/remove-localize-status-config/index.js'
 import { removePublishSpecificLocale } from './transforms/remove-publish-specific-locale/index.js'
@@ -49,6 +50,7 @@ export const transforms: Transform[] = [
   migrateVersionsDefault,
   removeGroupByTrue,
   removeLocalizeStatusConfig,
+  removeDefaultLocalePublishOption,
   removeVersionsTrue,
   removePublishSpecificLocale,
   renameTypescriptSchemaToJsonSchema,

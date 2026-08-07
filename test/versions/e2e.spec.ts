@@ -290,7 +290,7 @@ describe('Versions', () => {
       await waitForFormReady(page)
       await page.locator('#field-title').fill('v1')
       await page.locator('#field-description').fill('hello')
-      await saveDocAndAssert(page, '#publish-locale')
+      await saveDocAndAssert(page)
       await page.locator('#field-title').fill('v2')
       await saveDocAndAssert(page, '#action-save-draft')
       const savedDocURL = page.url()
@@ -311,10 +311,10 @@ describe('Versions', () => {
       await saveDocAndAssert(page, '#action-save-draft')
       await page.locator('#field-title').fill('v2')
       await page.locator('#field-description').fill('restore me as draft')
-      await saveDocAndAssert(page, '#publish-locale')
+      await saveDocAndAssert(page)
       await page.locator('#field-title').fill('v3')
       await page.locator('#field-description').fill('published')
-      await saveDocAndAssert(page, '#publish-locale')
+      await saveDocAndAssert(page)
 
       const savedDocURL = page.url()
       await page.goto(`${savedDocURL}/versions`)
@@ -608,7 +608,7 @@ describe('Versions', () => {
       // fill out doc in english
       await page.locator('#field-title').fill('title')
       await page.locator('#field-description').fill('initial description')
-      await saveDocAndAssert(page, '#publish-locale')
+      await saveDocAndAssert(page)
 
       const updatedAtWrapper = page.locator(
         '.doc-controls .doc-controls__content .doc-controls__value-wrap',
@@ -619,7 +619,7 @@ describe('Versions', () => {
       await wait(1000)
 
       await page.locator('#field-description').fill('changed description')
-      await saveDocAndAssert(page, '#publish-locale')
+      await saveDocAndAssert(page)
 
       await expect(async () => {
         const newTitle = updatedAtWrapper
@@ -687,14 +687,14 @@ describe('Versions', () => {
       // fill out doc in english
       await page.locator('#field-title').fill(englishTitle)
       await page.locator('#field-description').fill('unchanged description')
-      await saveDocAndAssert(page, '#publish-locale')
+      await saveDocAndAssert(page)
 
       // change locale to spanish
       await changeLocale(page, es)
 
       // fill out doc in spanish
       await page.locator('#field-title').fill(spanishTitle)
-      await saveDocAndAssert(page, '#publish-locale')
+      await saveDocAndAssert(page)
 
       // wait for the page to load with the new version
       await expect
@@ -723,14 +723,14 @@ describe('Versions', () => {
       await page.locator('#field-title').fill('first post title')
       await expect(page.locator('#field-description')).toBeEnabled()
       await page.locator('#field-description').fill('first post description')
-      await saveDocAndAssert(page, '#publish-locale')
+      await saveDocAndAssert(page)
       await page.goto(autosaveURL.create)
       await wait(500)
       await expect(page.locator('#field-title')).toBeEnabled()
       await page.locator('#field-title').fill('second post title')
       await expect(page.locator('#field-description')).toBeEnabled()
       await page.locator('#field-description').fill('second post description')
-      await saveDocAndAssert(page, '#publish-locale')
+      await saveDocAndAssert(page)
       await page.locator('#field-title').fill('updated second post title')
       await page.locator('#field-description').fill('updated second post description')
       await waitForAutoSaveToRunAndComplete(page)
@@ -1611,7 +1611,7 @@ describe('Versions', () => {
       await page.locator('#field-title').fill('scheduled publish')
       await page.locator('#field-description').fill('scheduled publish description')
 
-      await saveDocAndAssert(page, '#publish-locale')
+      await saveDocAndAssert(page)
 
       await page.locator('#field-title').fill('scheduled publish updated')
 
@@ -1700,12 +1700,19 @@ describe('Versions', () => {
 
     test('should show option to publish current locale', async () => {
       await page.goto(url.create)
+      const publishButton = page.locator('#action-save')
+
+      await expect(publishButton).toContainText('English')
+    })
+
+    test('should show option to publish all locales in dropdown', async () => {
+      await page.goto(url.create)
       const publishOptions = page.locator('.doc-controls__controls .popup')
       await publishOptions.click()
 
-      const publishLocaleContent = page.locator('.popup__content')
+      const publishAllLocalesContent = page.locator('.popup__content')
 
-      await expect(publishLocaleContent).toContainText('English')
+      await expect(publishAllLocalesContent).toContainText('Publish all locales')
     })
 
     test('should publish specific locale', async () => {
@@ -1724,23 +1731,7 @@ describe('Versions', () => {
 
       await changeLocale(page, 'en')
       await textField.fill('english published')
-
-      const publishOptions = page.locator('#action-save-popup')
-      await publishOptions.click()
-
-      const publishLocaleButton = page.locator('#publish-locale')
-      await expect(publishLocaleButton).toContainText('English')
-      await publishLocaleButton.click()
-
-      await wait(500)
-
-      await expect(async () => {
-        await expect(
-          page.locator('.payload-toast-item:has-text("Updated successfully.")'),
-        ).toBeVisible()
-      }).toPass({
-        timeout: POLL_TOPASS_TIMEOUT,
-      })
+      await saveDocAndAssert(page)
 
       const id = await page.locator('.id-label').getAttribute('title')
 
@@ -2219,12 +2210,19 @@ describe('Versions', () => {
 
     test('should show option to publish current locale', async () => {
       await page.goto(url.global(localizedGlobalSlug))
+      const publishButton = page.locator('#action-save')
+
+      await expect(publishButton).toContainText('English')
+    })
+
+    test('should show option to publish all locales in dropdown', async () => {
+      await page.goto(url.global(localizedGlobalSlug))
       const publishOptions = page.locator('.doc-controls__controls .popup')
       await publishOptions.click()
 
-      const publishLocaleContent = page.locator('.popup__content')
+      const publishAllLocalesContent = page.locator('.popup__content')
 
-      await expect(publishLocaleContent).toContainText('English')
+      await expect(publishAllLocalesContent).toContainText('Publish all locales')
     })
   })
 
