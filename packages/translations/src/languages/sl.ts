@@ -471,6 +471,7 @@ export const slTranslations: DefaultTranslationsObject = {
     selectAllRows: 'Izberi vse vrstice',
     selectedCount: '{{count}} {{label}} izbranih',
     selectLabel: 'Izberite {{label}}',
+    selectRow: undefined,
     selectValue: 'Izberi vrednost',
     settings: 'Nastavitve',
     showAllLabel: 'Pokaži vse {{label}}',

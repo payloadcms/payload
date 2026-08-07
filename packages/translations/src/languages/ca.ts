@@ -477,6 +477,7 @@ export const caTranslations: DefaultTranslationsObject = {
     selectAllRows: 'Selecciona totes les files',
     selectedCount: '{{count}} {{label}} seleccionats',
     selectLabel: 'Selecciona {{label}}',
+    selectRow: undefined,
     selectValue: 'Selecciona un valor',
     settings: 'Configuració',
     showAllLabel: 'Mostra totes {{label}}',

@@ -484,6 +484,7 @@ export const frTranslations: DefaultTranslationsObject = {
     selectAllRows: 'Sélectionnez toutes les lignes',
     selectedCount: '{{count}} {{label}} sélectionné',
     selectLabel: 'Sélectionnez {{label}}',
+    selectRow: undefined,
     selectValue: 'Sélectionnez une valeur',
     settings: 'Paramètres',
     showAllLabel: 'Afficher tous les {{label}}',

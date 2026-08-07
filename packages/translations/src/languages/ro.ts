@@ -479,6 +479,7 @@ export const roTranslations: DefaultTranslationsObject = {
     selectAllRows: 'Selectează toate rândurile',
     selectedCount: '{{count}} {{label}} selectate',
     selectLabel: 'Selectați {{label}}',
+    selectRow: undefined,
     selectValue: 'Selectați o valoare',
     settings: 'Setări',
     showAllLabel: 'Afișează toate {{eticheta}}',
