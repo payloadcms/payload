@@ -683,6 +683,44 @@ test.describe('Bulk Edit', () => {
     }
   })
 
+  test('should keep the list query params in the URL after a successful edit', async () => {
+    await deleteAllPosts()
+    await createPost({ title: 'Post 1' })
+
+    await page.goto(postsUrl.list)
+
+    // `ListQueryProvider` writes these through the History API rather than the
+    // router, so `useSearchParams()` never observes them. Waiting for `limit`
+    // makes that the explicit precondition instead of an incidental one.
+    await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('limit=')
+
+    await page.locator('input#select-all').check()
+    await page.locator('.list-selection__button[aria-label="Edit"]').click()
+
+    const editDrawer = page.locator('dialog#edit-posts')
+    await expect(editDrawer).toBeVisible()
+
+    const fieldSelectControl = editDrawer.locator('.field-select .rs__control')
+    await expect(fieldSelectControl).toBeVisible()
+    await fieldSelectControl.click()
+    await getSelectMenu({ page }).locator('.rs__option:has-text("Title")').first().click()
+
+    await editDrawer.locator('input#field-title').fill('test')
+
+    // Assert on the refresh request rather than the settled URL: the provider
+    // re-adds the params on the next render, so the address bar self-heals and
+    // would hide a refresh that went out bare.
+    const refreshRequest = page.waitForRequest(
+      (request) => request.url().includes('/collections/posts') && request.url().includes('_r='),
+    )
+
+    await editDrawer.locator('button[type="submit"]:has-text("Publish changes")').click()
+
+    await expect(page.locator('.payload-toast-container .toast-success')).toBeVisible()
+
+    expect((await refreshRequest).url()).toContain('limit=')
+  })
+
   test('should not delete nested un-named tab array data', async () => {
     const originalDoc = await payload.create({
       collection: tabsSlug,
