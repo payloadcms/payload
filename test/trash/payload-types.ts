@@ -132,6 +132,36 @@ export interface Page {
   title?: string | null;
   relatedPosts?: (string | Post)[] | null;
   featuredPost?: (string | null) | Post;
+  featuredItem?:
+    | ({
+        relationTo: 'posts';
+        value: string | Post;
+      } | null)
+    | ({
+        relationTo: 'pages';
+        value: string | Page;
+      } | null);
+  relatedItems?:
+    | (
+        | {
+            relationTo: 'posts';
+            value: string | Post;
+          }
+        | {
+            relationTo: 'pages';
+            value: string | Page;
+          }
+      )[]
+    | null;
+  localizedFeaturedItem?:
+    | ({
+        relationTo: 'posts';
+        value: string | Post;
+      } | null)
+    | ({
+        relationTo: 'pages';
+        value: string | Page;
+      } | null);
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -249,7 +279,7 @@ export interface PayloadLockedDocument {
   user: {
     relationTo: 'users';
     value: string | User;
-  };
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -262,7 +292,7 @@ export interface PayloadPreference {
   user: {
     relationTo: 'users';
     value: string | User;
-  };
+  } | null;
   key?: string | null;
   value?:
     | {
@@ -295,6 +325,9 @@ export interface PagesSelect<T extends boolean = true> {
   title?: T;
   relatedPosts?: T;
   featuredPost?: T;
+  featuredItem?: T;
+  relatedItems?: T;
+  localizedFeaturedItem?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
