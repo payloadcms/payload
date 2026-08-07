@@ -11,6 +11,7 @@ export const collectionAccessKeys: AllAccessKeys = [
   'delete',
   'readVersions',
   'unlock',
+  'validate',
 ] as const
 
 type Args = {

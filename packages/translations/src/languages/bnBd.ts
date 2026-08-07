@@ -614,6 +614,8 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     width: 'প্রস্থ',
   },
   validation: {
+    documentInvalid: 'নিম্নলিখিত সমস্যাগুলো সমাধান করুন।',
+    documentValid: 'সমস্ত নির্বাচিত Locale বৈধ।',
     emailAddress: 'একটি বৈধ ইমেইল ঠিকানা লিখুন।',
     enterNumber: 'একটি বৈধ সংখ্যা লিখুন।',
     fieldHasNo: 'এই ক্ষেত্রে কোনো {{label}} নেই',
@@ -630,6 +632,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     longitudeOutOfBounds: 'দ্রাগিমাংস অবশ্যই -১৮০ এবং ১৮০ এর মধ্যে হতে হবে।',
     notValidDate: '"{{value}}" একটি বৈধ তারিখ নয়।',
     required: 'এই ক্ষেত্রটি প্রয়োজনীয়।',
+    requiredLocale: 'প্রয়োজনীয়',
     requiresAtLeast: 'এই ক্ষেত্রটির জন্য কমপক্ষে {{count}} {{label}} প্রয়োজন।',
     requiresNoMoreThan: 'এই ক্ষেত্রটির জন্য {{count}} {{label}} এর বেশি প্রয়োজন নেই।',
     requiresTwoNumbers: 'এই ক্ষেত্রটির জন্য দুটি সংখ্যা প্রয়োজন।',
@@ -638,6 +641,8 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     trueOrFalse: 'এই ক্ষেত্রটি শুধুমাত্র সত্য বা মিথ্যা হতে পারে।',
     username:
       'একটি বৈধ ব্যবহারকারীর নাম লিখুন। এতে অক্ষর, সংখ্যা, হাইফেন, পিরিয়ড এবং আন্ডারস্কোর থাকতে পারে।',
+    validateAllLocales: 'সমস্ত Locale যাচাই করুন',
+    validationResults: 'বৈধতা ফলাফল',
     validUploadID: 'এই ক্ষেত্রটি একটি বৈধ আপলোড আইডি নয়।',
   },
   version: {

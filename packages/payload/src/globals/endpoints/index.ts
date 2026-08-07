@@ -7,12 +7,18 @@ import { findVersionByIDHandler } from './findVersionByID.js'
 import { findVersionsHandler } from './findVersions.js'
 import { restoreVersionHandler } from './restoreVersion.js'
 import { updateHandler } from './update.js'
+import { validateHandler } from './validate.js'
 
 export const defaultGlobalEndpoints: Endpoint[] = wrapInternalEndpoints([
   {
     handler: docAccessHandler,
     method: 'post',
     path: '/access',
+  },
+  {
+    handler: validateHandler,
+    method: 'post',
+    path: '/validate',
   },
   {
     handler: findOneHandler,

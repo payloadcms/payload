@@ -274,11 +274,6 @@ export const createClientConfig = ({
             clientConfig.localization.defaultLocale = config.localization.defaultLocale
           }
 
-          if (config.localization.defaultLocalePublishOption) {
-            clientConfig.localization.defaultLocalePublishOption =
-              config.localization.defaultLocalePublishOption
-          }
-
           if (config.localization.fallback) {
             clientConfig.localization.fallback = config.localization.fallback
           }
@@ -305,6 +300,8 @@ export const createClientConfig = ({
                 if (locale.label) {
                   clientLocale.label = locale.label
                 }
+
+                clientLocale.required = locale.required
 
                 if (locale.rtl) {
                   clientLocale.rtl = locale.rtl

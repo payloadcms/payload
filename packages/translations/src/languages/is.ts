@@ -604,6 +604,8 @@ export const isTranslations: DefaultTranslationsObject = {
     width: 'Breidd',
   },
   validation: {
+    documentInvalid: 'Lagaðu eftirfarandi vandamál.',
+    documentValid: 'Öll valin tungumál eru gild.',
     emailAddress: 'Vinsamlegast settu inn gilt netfang.',
     enterNumber: 'Vinsamlegast settu inn gilda tölu.',
     fieldHasNo: 'Þetta svæði hefur ekkert {{label}}',
@@ -621,6 +623,7 @@ export const isTranslations: DefaultTranslationsObject = {
     longitudeOutOfBounds: 'Lengdargráða verður að vera á bilinu -180 og 180.',
     notValidDate: '"{{value}}" er ekki gild dagsetning.',
     required: 'Þetta svæði er nauðsynlegt.',
+    requiredLocale: 'Nauðsynlegt',
     requiresAtLeast: 'Þetta svæði krefst að minnsta kosti {{count}} {{label}}.',
     requiresNoMoreThan: 'Þetta svæði krefst ekki meira en {{count}} {{label}}.',
     requiresTwoNumbers: 'Þetta svæði krefst tveggja talna.',
@@ -630,6 +633,8 @@ export const isTranslations: DefaultTranslationsObject = {
     trueOrFalse: 'Þetta svæði getur aðeins verið jafnt og satt eða ósatt.',
     username:
       'Vinsamlegast settu inn gilt notandanafn. Getur innihaldið bókstafi, tölur, bandstrik, punkta og undirstrik.',
+    validateAllLocales: 'Staðfestið öll tungumál',
+    validationResults: 'Staðfestingarniðurstöður',
     validUploadID: 'Þetta svæði er ekki gilt skráarupphleðslauðkenni.',
   },
   version: {

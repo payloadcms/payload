@@ -20,7 +20,7 @@ type Arguments = {
 export const docAccessOperation = async (args: Arguments): Promise<SanitizedGlobalPermission> => {
   const { data, globalConfig, req } = args
 
-  const globalOperations: AllOperations[] = ['read', 'update']
+  const globalOperations: AllOperations[] = ['read', 'update', 'validate']
 
   if (globalConfig.versions) {
     globalOperations.push('readVersions')

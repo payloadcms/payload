@@ -53,6 +53,10 @@ export const sanitizeGlobal = (
     global.access.update = defaultAccess
   }
 
+  if (!global.access.validate) {
+    global.access.validate = global.access.update
+  }
+
   if (!global.hooks.beforeValidate) {
     global.hooks.beforeValidate = []
   }

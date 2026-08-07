@@ -612,6 +612,8 @@ export const huTranslations: DefaultTranslationsObject = {
     width: 'Szélesség',
   },
   validation: {
+    documentInvalid: 'Javítsa ki a következő problémákat.',
+    documentValid: 'Az összes kiválasztott locale érvényes.',
     emailAddress: 'Kérjük, adjon meg egy érvényes e-mail címet.',
     enterNumber: 'Kérjük, adjon meg egy érvényes számot.',
     fieldHasNo: 'Ennek a mezőnek nincs {{label}}',
@@ -630,6 +632,7 @@ export const huTranslations: DefaultTranslationsObject = {
     longitudeOutOfBounds: 'A hosszúságnak -180 és 180 között kell lennie.',
     notValidDate: '" {{value}} " nem érvényes dátum.',
     required: 'Ez a mező kötelező.',
+    requiredLocale: 'Kötelező',
     requiresAtLeast: 'Ehhez a mezőhöz legalább {{count}} {{label}} szükséges.',
     requiresNoMoreThan: 'Ehhez a mezőhöz legfeljebb {{count}} {{label}} szükséges.',
     requiresTwoNumbers: 'Ehhez a mezőhöz két szám szükséges.',
@@ -639,6 +642,8 @@ export const huTranslations: DefaultTranslationsObject = {
     trueOrFalse: 'Ez a mező csak igaz vagy hamis lehet.',
     username:
       'Adjon meg egy érvényes felhasználónevet. Tartalmazhat betűket, számokat, kötőjeleket, pontokat és aláhúzásokat.',
+    validateAllLocales: 'Az összes Locale érvényesítése',
+    validationResults: 'Érvényesítési eredmények',
     validUploadID: 'Ez a mező nem érvényes feltöltési azonosító.',
   },
   version: {

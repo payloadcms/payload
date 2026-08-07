@@ -605,6 +605,8 @@ export const plTranslations: DefaultTranslationsObject = {
     width: 'Szerokość',
   },
   validation: {
+    documentInvalid: 'Proszę naprawić następujące problemy.',
+    documentValid: 'Wszystkie wybrane locale są prawidłowe.',
     emailAddress: 'Wprowadź poprawny adres email.',
     enterNumber: 'Wprowadź poprawny numer telefonu.',
     fieldHasNo: 'To pole nie posiada {{label}}',
@@ -621,6 +623,7 @@ export const plTranslations: DefaultTranslationsObject = {
     longitudeOutOfBounds: 'Długość geograficzna musi być pomiędzy -180 a 180.',
     notValidDate: '"{{value}}" nie jest prawidłową datą.',
     required: 'To pole jest wymagane.',
+    requiredLocale: 'Wymagane',
     requiresAtLeast: 'To pole wymaga co najmniej {{count}} {{label}}.',
     requiresNoMoreThan: 'To pole może posiadać co najmniej {{count}} {{label}}.',
     requiresTwoNumbers: 'To pole wymaga dwóch liczb.',
@@ -629,6 +632,8 @@ export const plTranslations: DefaultTranslationsObject = {
     trueOrFalse: "To pole może mieć wartość tylko 'true' lub 'false'.",
     username:
       'Proszę wprowadzić prawidłową nazwę użytkownika. Może zawierać litery, cyfry, myślniki, kropki i podkreślniki.',
+    validateAllLocales: 'Zatwierdź wszystkie locale',
+    validationResults: 'Wyniki walidacji',
     validUploadID: 'To pole nie jest prawidłowym identyfikatorem przesyłania.',
   },
   version: {

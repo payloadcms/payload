@@ -619,6 +619,8 @@ export const frTranslations: DefaultTranslationsObject = {
     width: 'Largeur',
   },
   validation: {
+    documentInvalid: 'Corrigez les problèmes suivants.',
+    documentValid: 'Toutes les langues sélectionnées sont valides.',
     emailAddress: 'S’il vous plaît, veuillez entrer une adresse e-mail valide.',
     enterNumber: 'S’il vous plait, veuillez entrer un nombre valide.',
     fieldHasNo: 'Ce champ n’a pas de {{label}}',
@@ -636,6 +638,7 @@ export const frTranslations: DefaultTranslationsObject = {
     longitudeOutOfBounds: 'La longitude doit être comprise entre -180 et 180.',
     notValidDate: '"{{value}}" n’est pas une date valide.',
     required: 'Ce champ est requis.',
+    requiredLocale: 'Obligatoire',
     requiresAtLeast: 'Ce champ doit avoir au moins {{count}} {{label}}.',
     requiresNoMoreThan: 'Ce champ ne doit pas avoir plus de {{count}} {{label}}.',
     requiresTwoNumbers: 'Ce champ doit avoir deux chiffres.',
@@ -645,6 +648,8 @@ export const frTranslations: DefaultTranslationsObject = {
     trueOrFalse: 'Ce champ ne peut être égal qu’à vrai ou faux.',
     username:
       "Veuillez entrer un nom d'utilisateur valide. Il peut contenir des lettres, des chiffres, des tirets, des points et des tirets bas.",
+    validateAllLocales: 'Valider toutes les langues',
+    validationResults: 'Résultats de la validation',
     validUploadID: 'Ce champ n’est pas un valide identifiant de fichier.',
   },
   version: {

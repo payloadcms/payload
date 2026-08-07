@@ -71,6 +71,8 @@ export type BeforeValidateHook = (args: {
   data?: any
   /** The global which this hook is being run on */
   global: SanitizedGlobalConfig
+  /** Hook operation being performed. */
+  operation: 'update' | 'validate'
   originalDoc?: any
   /**
    * Whether access control is being overridden for this operation
@@ -84,6 +86,8 @@ export type BeforeChangeHook = (args: {
   data: any
   /** The global which this hook is being run on */
   global: SanitizedGlobalConfig
+  /** Hook operation being performed. */
+  operation: 'update' | 'validate'
   originalDoc?: any
   /**
    * Whether access control is being overridden for this operation
@@ -98,6 +102,8 @@ export type AfterChangeHook = (args: {
   doc: any
   /** The global which this hook is being run on */
   global: SanitizedGlobalConfig
+  /** Hook operation being performed. */
+  operation: 'update'
   /**
    * Whether access control is being overridden for this operation
    */
@@ -195,6 +201,13 @@ export type GlobalConfig<TSlug extends GlobalSlug = any> = {
     read?: Access
     readVersions?: Access
     update?: Access
+    /**
+     * Controls on-demand validation for this global.
+     * Falls back to `update` access when omitted.
+     * The access function receives `req.operation === 'validate'`.
+     * @see https://payloadcms.com/docs/validation/overview#access-control-and-hooks
+     */
+    validate?: Access
   }
   admin?: GlobalAdminOptions
   /** Extension point to add your custom data. Server only. */

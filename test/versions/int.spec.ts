@@ -3187,16 +3187,22 @@ describe('Versions', () => {
       it('should have different createdAt in a new version while the same version.createdAt', async () => {
         const doc = await payload.updateGlobal({
           slug: autoSaveGlobalSlug,
-          data: { title: 'asd' },
-          publishAllLocales: true,
+          data: {
+            _status: 'published',
+            title: 'asd',
+          },
+          locale: 'en',
         })
 
         await wait(10)
 
         const upd = await payload.updateGlobal({
           slug: autoSaveGlobalSlug,
-          data: { title: 'asd2' },
-          publishAllLocales: true,
+          data: {
+            _status: 'published',
+            title: 'asd2',
+          },
+          locale: 'en',
         })
 
         expect(upd.createdAt).toBe(doc.createdAt)
@@ -3400,9 +3406,10 @@ describe('Versions', () => {
         const updatedGlobal = await payload.updateGlobal({
           slug: autoSaveGlobalSlug,
           data: {
+            _status: 'published',
             title: title2,
           },
-          publishAllLocales: true,
+          locale: 'en',
         })
 
         expect(updatedGlobal.title).toBe(title2)
@@ -3445,7 +3452,7 @@ describe('Versions', () => {
             description: 'kjnjyhbbdsfseankuhsjsfghb',
             title: originalTitle,
           },
-          publishAllLocales: true,
+          locale: 'en',
         })
 
         const publishedGlobal = await payload.findGlobal({
@@ -3664,6 +3671,7 @@ describe('Versions', () => {
             relationTo: draftCollectionSlug,
             value: draft.id,
           },
+          locale: 'en',
         },
         task: 'schedulePublish',
         waitUntil: new Date(currentDate.getTime() + 3000),
@@ -3708,6 +3716,7 @@ describe('Versions', () => {
             relationTo: draftCollectionSlug,
             value: draft.id,
           },
+          locale: 'en',
           user: user.id,
         },
         task: 'schedulePublish',
@@ -3891,6 +3900,7 @@ describe('Versions', () => {
       await payload.jobs.queue({
         input: {
           global: draftGlobalSlug,
+          locale: 'en',
         },
         task: 'schedulePublish',
         waitUntil: new Date(currentDate.getTime() + 3000),

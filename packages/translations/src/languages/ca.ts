@@ -610,6 +610,8 @@ export const caTranslations: DefaultTranslationsObject = {
     width: 'Amplada',
   },
   validation: {
+    documentInvalid: 'Solucioni els problemes següents.',
+    documentValid: 'Tots els idiomes seleccionats són vàlids.',
     emailAddress: 'Si us plau, introdueix una adreça de correu electrònic vàlida.',
     enterNumber: 'Si us plau, introdueix un número vàlid.',
     fieldHasNo: 'Aquest camp no té {{label}}',
@@ -627,6 +629,7 @@ export const caTranslations: DefaultTranslationsObject = {
     longitudeOutOfBounds: 'La longitud ha de ser entre -180 i 180.',
     notValidDate: '"{{value}}" no és una data vàlida.',
     required: 'Aquest camp és obligatori.',
+    requiredLocale: 'Obligatori',
     requiresAtLeast: 'Aquest camp requereix almenys {{count}} {{label}}.',
     requiresNoMoreThan: 'Aquest camp requereix com a màxim {{count}} {{label}}.',
     requiresTwoNumbers: 'Aquest camp requereix dos números.',
@@ -636,6 +639,8 @@ export const caTranslations: DefaultTranslationsObject = {
     trueOrFalse: 'Aquest camp només pot ser igual a true o false.',
     username:
       "Si us plau, introdueix un nom d'usuari vàlid. Pot contenir lletres, números, guions, punts i guions baixos.",
+    validateAllLocales: 'Valideu tots els idiomes',
+    validationResults: 'Resultats de la validació',
     validUploadID: 'Aquest camp no és un ID de càrrega vàlid.',
   },
   version: {

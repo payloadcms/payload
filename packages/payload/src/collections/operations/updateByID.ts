@@ -24,6 +24,7 @@ import { type CollectionSlug, deepCopyObjectSimple, type FindOptions } from '../
 import { generateFileData } from '../../uploads/generateFileData.js'
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
+import { assertNoValidationWrite } from '../../utilities/assertNoValidationWrite.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
@@ -61,6 +62,8 @@ export const updateByIDOperation = async <
   incomingArgs: Arguments<TSlug>,
 ): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
   let args = incomingArgs
+
+  assertNoValidationWrite(args.req)
 
   try {
     const shouldCommit = !args.disableTransaction && (await initTransaction(args.req))

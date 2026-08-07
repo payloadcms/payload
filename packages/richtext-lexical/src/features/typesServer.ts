@@ -165,7 +165,7 @@ export type AfterChangeNodeHookArgs<T extends SerializedLexicalNode> = {
 }
 export type BeforeValidateNodeHookArgs<T extends SerializedLexicalNode> = {
   /** A string relating to which operation the field type is currently executing within. Useful within beforeValidate, beforeChange, and afterChange hooks to differentiate between create and update operations. */
-  operation: 'create' | 'delete' | 'read' | 'update'
+  operation: 'create' | 'delete' | 'read' | 'update' | 'validate'
   /** The value of the node before any changes. Not available in afterRead hooks */
   originalNode: T
   overrideAccess: boolean
@@ -178,7 +178,7 @@ export type BeforeChangeNodeHookArgs<T extends SerializedLexicalNode> = {
   errors: ValidationFieldError[]
   mergeLocaleActions: (() => Promise<void> | void)[]
   /** A string relating to which operation the field type is currently executing within. Useful within beforeValidate, beforeChange, and afterChange hooks to differentiate between create and update operations. */
-  operation: 'create' | 'delete' | 'read' | 'update'
+  operation: 'create' | 'delete' | 'read' | 'update' | 'validate'
   /** The value of the node before any changes. Not available in afterRead hooks */
   originalNode: T
   /**

@@ -23,10 +23,13 @@ import { useElementHeightVariable } from '../../hooks/useElementHeightVariable.j
 import { MoreIcon } from '../../icons/More/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
+import { DocumentValidationProvider } from '../../providers/DocumentValidation/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useLivePreviewContext } from '../../providers/LivePreview/context.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { shouldShowValidateAllLocales } from '../../utilities/documentValidation.js'
 import { formatDate, formatTimeToNow } from '../../utilities/formatDocTitle/formatDateTitle.js'
+import { traverseForLocalizedFields } from '../../utilities/traverseForLocalizedFields.js'
 import { Autosave } from '../Autosave/index.js'
 import { Button } from '../Button/index.js'
 import { CopyLocaleData } from '../CopyLocaleData/index.js'
@@ -45,11 +48,12 @@ import { SaveDraftButton } from '../SaveDraftButton/index.js'
 import { SchedulePublishButton } from '../SchedulePublishButton/index.js'
 import { Status } from '../Status/index.js'
 import { UnpublishButton } from '../UnpublishButton/index.js'
+import { ValidateDocumentButton } from '../ValidateDocumentButton/index.js'
 import './index.css'
 
 const baseClass = 'doc-controls'
 
-export const DocumentControls: React.FC<{
+type DocumentControlsProps = {
   readonly apiURL: string
   readonly BeforeDocumentControls?: React.ReactNode
   readonly BeforeDocumentMeta?: React.ReactNode
@@ -92,7 +96,9 @@ export const DocumentControls: React.FC<{
    * - `drawerHeaderActions`: only the action buttons, rendered in the document drawer header.
    */
   readonly variant?: 'default' | 'drawerHeaderActions'
-}> = (props) => {
+}
+
+const DocumentControlsContent: React.FC<DocumentControlsProps> = (props) => {
   const {
     id,
     slug,
@@ -138,6 +144,7 @@ export const DocumentControls: React.FC<{
   const collectionConfig = getEntityConfig({ collectionSlug: slug })
 
   const globalConfig = getEntityConfig({ globalSlug: slug })
+  const entityConfig = collectionConfig || globalConfig
 
   const { isLivePreviewEnabled } = useLivePreviewContext()
 
@@ -226,6 +233,13 @@ export const DocumentControls: React.FC<{
   const showCopyToLocale = localization && !collectionConfig?.admin?.disableCopyToLocale
 
   const showLockedMetaIcon = user && readOnlyForIncomingUser
+  const showValidateAllLocales = shouldShowValidateAllLocales({
+    hasLocalization: Boolean(localization),
+    hasLocalizedFields: traverseForLocalizedFields(entityConfig?.fields ?? [], {
+      blocksMap: config.blocksMap,
+    }),
+    hasValidatePermission: Boolean(permissions?.validate),
+  })
 
   return (
     <div
@@ -313,6 +327,9 @@ export const DocumentControls: React.FC<{
               <SchedulePublishButton disabled={readOnlyForIncomingUser} />
             )}
           </div>
+          {showValidateAllLocales && !disableActions && !isTrashed && !readOnlyForIncomingUser && (
+            <ValidateDocumentButton />
+          )}
           {hasSavePermission && !isTrashed && !readOnlyForIncomingUser && (
             <Fragment>
               {collectionHasDraftsEnabled || globalHasDraftsEnabled ? (
@@ -459,3 +476,9 @@ export const DocumentControls: React.FC<{
     </div>
   )
 }
+
+export const DocumentControls: React.FC<DocumentControlsProps> = (props) => (
+  <DocumentValidationProvider>
+    <DocumentControlsContent {...props} />
+  </DocumentValidationProvider>
+)

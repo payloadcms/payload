@@ -577,6 +577,8 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     width: '寬度',
   },
   validation: {
+    documentInvalid: '請修正以下問題。',
+    documentValid: '所有已選擇的 Locale 均有效。',
     emailAddress: '請輸入有效的電子郵件地址。',
     enterNumber: '請輸入有效的數字。',
     fieldHasNo: '此欄位沒有 {{label}}',
@@ -593,6 +595,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     longitudeOutOfBounds: '經度必須介於 -180 和 180 之間。',
     notValidDate: '「{{value}}」不是有效的日期格式。',
     required: '此欄位為必填項目。',
+    requiredLocale: '必填',
     requiresAtLeast: '此欄位至少需要 {{count}} 個 {{label}}。',
     requiresNoMoreThan: '此欄位最多只能有 {{count}} 個 {{label}}。',
     requiresTwoNumbers: '此欄位需包含兩個數字。',
@@ -600,6 +603,8 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     timezoneRequired: '請選取一個時區。',
     trueOrFalse: '此欄位只能為 true 或 false。',
     username: '請輸入有效的使用者名稱。可包含英文字母、數字、連字號、句點與底線。',
+    validateAllLocales: '驗證所有語系',
+    validationResults: '驗證結果',
     validUploadID: '此欄位不是有效的上傳 ID。',
   },
   version: {

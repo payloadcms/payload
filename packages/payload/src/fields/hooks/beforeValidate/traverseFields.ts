@@ -22,7 +22,7 @@ type Args<T> = {
   fields: (Field | TabAsField)[]
   global: null | SanitizedGlobalConfig
   id?: number | string
-  operation: 'create' | 'update'
+  operation: 'create' | 'update' | 'validate'
   overrideAccess: boolean
   parentIndexPath: string
   /**

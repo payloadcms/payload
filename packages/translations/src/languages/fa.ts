@@ -597,6 +597,8 @@ export const faTranslations: DefaultTranslationsObject = {
     width: 'عرض',
   },
   validation: {
+    documentInvalid: 'مشکلات زیر را برطرف کنید.',
+    documentValid: 'همه زبان‌های انتخاب‌شده معتبر هستند.',
     emailAddress: 'لطفاً یک آدرس ایمیل معتبر وارد کنید.',
     enterNumber: 'لطفاً یک عدد معتبر وارد کنید.',
     fieldHasNo: 'این فیلد نباید حاوی هیچ {{label}} باشد.',
@@ -613,6 +615,7 @@ export const faTranslations: DefaultTranslationsObject = {
     longitudeOutOfBounds: 'عرض جغرافیایی باید بین -180 و 180 باشد.',
     notValidDate: '"{{value}}" یک تاریخ معتبر نیست.',
     required: 'این فیلد الزامی است.',
+    requiredLocale: 'الزامی',
     requiresAtLeast: 'این فیلد به حداقل {{count}} {{label}} نیاز دارد.',
     requiresNoMoreThan: 'این فیلد نمی‌تواند بیشتر از {{count}} {{label}} داشته باشد.',
     requiresTwoNumbers: 'این فیلد به دو عدد نیاز دارد.',
@@ -621,6 +624,8 @@ export const faTranslations: DefaultTranslationsObject = {
     trueOrFalse: 'مقدار این فیلد فقط می‌تواند "true" یا "false" باشد.',
     username:
       'لطفاً یک نام کاربری معتبر وارد کنید. فقط حروف، اعداد، نقطه، خط تیره و زیرخط مجاز هستند.',
+    validateAllLocales: 'اعتبارسنجی تمامی Localeها',
+    validationResults: 'نتایج اعتبارسنجی',
     validUploadID: 'شناسه آپلود معتبر نیست.',
   },
   version: {

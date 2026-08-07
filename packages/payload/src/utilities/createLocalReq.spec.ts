@@ -122,4 +122,32 @@ describe('createLocalReq - URL construction', () => {
     expect(result.url).toBe('http://localhost/api/test')
     expect(mockPayload.logger.error).not.toHaveBeenCalled()
   })
+
+  it('should preserve an explicit anonymous user override', async () => {
+    const authenticatedUser = {
+      collection: 'users',
+      id: 'authenticated-user',
+    } as never
+
+    const inherited = await createLocalReq(
+      {
+        req: {
+          user: authenticatedUser,
+        },
+      },
+      mockPayload,
+    )
+    const anonymous = await createLocalReq(
+      {
+        req: {
+          user: authenticatedUser,
+        },
+        user: null,
+      },
+      mockPayload,
+    )
+
+    expect(inherited.user).toBe(authenticatedUser)
+    expect(anonymous.user).toBeNull()
+  })
 })

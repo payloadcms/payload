@@ -53,6 +53,7 @@ export const filterFieldsByAccess = ({
         create: isOperationAllowed('create'),
         read: isOperationAllowed('read'),
         update: isOperationAllowed('update'),
+        validate: isOperationAllowed('validate'),
       }
 
       if (shouldExcludeField(allowedOperations)) {
@@ -119,5 +120,6 @@ export const filterFieldsByAccess = ({
     create: 'create' in permissions && permissions.create === true,
     read: permissions.read === true,
     update: permissions.update === true,
+    validate: permissions.validate === true,
   })
 }

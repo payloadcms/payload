@@ -583,6 +583,13 @@ export type Locale = {
    */
   label: Record<string, string> | string
   /**
+   * Require this locale to pass validation whenever any one locale is published.
+   * Publish-all operations validate every available locale regardless of this setting.
+   * @default false
+   * @see https://payloadcms.com/docs/validation/overview#publishing-and-required-locales
+   */
+  required?: boolean
+  /**
    * if true, defaults textAligmnent on text fields to RTL
    */
   rtl?: boolean
@@ -594,14 +601,6 @@ export type BaseLocalizationConfig = {
    * @example `"en"`
    */
   defaultLocale: string
-  /**
-   * Change the locale used by the default Publish button.
-   * If set to `all`, all locales will be published.
-   * If set to `active`, only the locale currently being edited will be published.
-   * The non-default option will be available via the secondary button.
-   * @default 'all'
-   */
-  defaultLocalePublishOption?: 'active' | 'all'
   /** Set to `true` to let missing values in localised fields fall back to the values in `defaultLocale`
    *
    * If false, then no requests will fallback unless a fallbackLocale is specified in the request.
@@ -642,6 +641,12 @@ export type LocalizationConfigWithLabels = Prettify<
   } & BaseLocalizationConfig
 >
 
+export type SanitizedLocale = Prettify<
+  {
+    required: boolean
+  } & Locale
+>
+
 export type SanitizedLocalizationConfig = Prettify<
   {
     /**
@@ -649,7 +654,8 @@ export type SanitizedLocalizationConfig = Prettify<
      * @example `["en", "es", "fr", "nl", "de", "jp"]`
      */
     localeCodes: string[]
-  } & LocalizationConfigWithLabels
+    locales: SanitizedLocale[]
+  } & Omit<LocalizationConfigWithLabels, 'locales'>
 >
 
 /**

@@ -602,6 +602,8 @@ export const ukTranslations: DefaultTranslationsObject = {
     width: 'Ширина',
   },
   validation: {
+    documentInvalid: 'Виправте наведені нижче проблеми.',
+    documentValid: 'Усі вибрані локалі є дійсними.',
     emailAddress: 'Будь ласка, введіть коректну адресу електронної пошти.',
     enterNumber: 'Будь ласка, введіть коректне число.',
     fieldHasNo: 'У цьому полі немає {{label}}',
@@ -618,6 +620,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     longitudeOutOfBounds: 'Довгота повинна бути в межах від -180 до 180.',
     notValidDate: '"{{value}}" - некоректна дата.',
     required: "Це поле є обов'язковим.",
+    requiredLocale: 'Обов’язково',
     requiresAtLeast: 'Це поле потребує не менше {{count}} {{label}}.',
     requiresNoMoreThan: 'Це поле потребує не більше {{count}} {{label}}.',
     requiresTwoNumbers: 'У цьому полі потрібно ввести два числа.',
@@ -626,6 +629,8 @@ export const ukTranslations: DefaultTranslationsObject = {
     trueOrFalse: 'Це поле може мати значення тільки true або false.',
     username:
       "Будь ласка, введіть коректне ім'я користувача. Може містити літери, цифри, дефіси, крапки та підкреслення.",
+    validateAllLocales: 'Перевірити всі Locale',
+    validationResults: 'Результати валідації',
     validUploadID: 'Це поле не є коректним ID завантаження.',
   },
   version: {

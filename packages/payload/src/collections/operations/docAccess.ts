@@ -6,7 +6,7 @@ import { getEntityPermissions } from '../../utilities/getEntityPermissions/getEn
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizePermissions } from '../../utilities/sanitizePermissions.js'
 
-const allOperations: AllOperations[] = ['create', 'read', 'update', 'delete']
+const allOperations: AllOperations[] = ['create', 'read', 'update', 'delete', 'validate']
 
 type Arguments = {
   collection: Collection

@@ -20,6 +20,7 @@ import { executeAccess } from '../../auth/executeAccess.js'
 import { sendVerificationEmail } from '../../auth/sendVerificationEmail.js'
 import { registerLocalStrategy } from '../../auth/strategies/local/register.js'
 import { getDuplicateDocumentData } from '../../duplicateDocument/index.js'
+import { ValidationError } from '../../errors/index.js'
 import { fillEmptyLocalizedSlugs } from '../../fields/baseFields/slug/fillEmptyLocalizedSlugs.js'
 import { afterChange } from '../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
@@ -29,6 +30,7 @@ import { saveVersion } from '../../index.js'
 import { generateFileData } from '../../uploads/generateFileData.js'
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles.js'
 import { uploadFiles } from '../../uploads/uploadFiles.js'
+import { assertNoValidationWrite } from '../../utilities/assertNoValidationWrite.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import {
   hasDraftsEnabled,
@@ -36,10 +38,13 @@ import {
   hasLocalizeStatusEnabled,
 } from '../../utilities/getVersionsConfig.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
+import { isPostHookPublishIntent } from '../../utilities/isPostHookPublishIntent.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import { resolvePublishLocales } from '../../utilities/resolvePublishLocales.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
+import { validateLocalWithDataLocale } from './local/validate.js'
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
 
@@ -68,6 +73,8 @@ export const createOperation = async <
   incomingArgs: Arguments<TSlug>,
 ): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
   let args = incomingArgs
+
+  assertNoValidationWrite(args.req)
 
   try {
     const shouldCommit = !args.disableTransaction && (await initTransaction(args.req))
@@ -117,10 +124,11 @@ export const createOperation = async <
 
     let { data } = args
 
-    // For creates there is no existing doc — always publish all locales when not a draft.
+    // Explicit publish-all intent wins; otherwise new non-drafts publish all applicable locales.
     const publishAllLocales =
-      !draft &&
-      (publishAllLocalesArg ?? (hasLocalizeStatusEnabled(collectionConfig) ? false : true))
+      publishAllLocalesArg === true ||
+      (!draft &&
+        (publishAllLocalesArg ?? (hasLocalizeStatusEnabled(collectionConfig) ? false : true)))
     const isSavingDraft = Boolean(draft && hasDraftsEnabled(collectionConfig) && !publishAllLocales)
 
     if (isSavingDraft) {
@@ -239,6 +247,44 @@ export const createOperation = async <
       req,
       skipValidation: isSavingDraft && !hasDraftValidationEnabled(collectionConfig),
     })
+
+    if (
+      hasDraftsEnabled(collectionConfig) &&
+      isPostHookPublishIntent({
+        locale: locale ?? (config.localization ? config.localization.defaultLocale : undefined),
+        publishAllLocales,
+        status: dataWithLocales._status,
+      })
+    ) {
+      const validationResult = await validateLocalWithDataLocale(payload, {
+        collection: collectionConfig.slug,
+        data: dataWithLocales,
+        locale: resolvePublishLocales({
+          locale: locale ?? null,
+          localization: config.localization,
+          publishAllLocales,
+        }),
+        overrideAccess: true,
+        req,
+        validationDataLocale:
+          locale && locale !== 'all'
+            ? locale
+            : config.localization
+              ? config.localization.defaultLocale
+              : undefined,
+      })
+
+      if (!validationResult.valid) {
+        throw new ValidationError(
+          {
+            collection: collectionConfig.slug,
+            errors: validationResult.errors,
+            req,
+          },
+          req.t,
+        )
+      }
+    }
 
     // When locale='all' or when beforeChange doesn't convert the string (e.g. no locale hook ran),
     // the localized _status remains a plain string. Expand it to a per-locale object so MongoDB

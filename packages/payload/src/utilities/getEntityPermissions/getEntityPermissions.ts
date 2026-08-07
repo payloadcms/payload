@@ -12,6 +12,7 @@ import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
 import type { BlockSlug, DefaultDocumentIDType } from '../../index.js'
 import type { AllOperations, JsonObject, PayloadRequest, Where } from '../../types/index.js'
 
+import { getAccessOperationRequest } from '../getAccessOperationRequest.js'
 import { entityDocExists } from './entityDocExists.js'
 import { populateFieldPermissions } from './populateFieldPermissions.js'
 
@@ -58,9 +59,10 @@ const topLevelCollectionPermissions = [
   'read',
   'readVersions',
   'update',
+  'validate',
   'unlock',
 ]
-const topLevelGlobalPermissions = ['read', 'readVersions', 'update']
+const topLevelGlobalPermissions = ['read', 'readVersions', 'update', 'validate']
 
 /**
  * Build up permissions object for an entity (collection or global).
@@ -162,7 +164,19 @@ export async function getEntityPermissions<TEntityType extends 'collection' | 'g
       if (typeof accessFunction === 'function') {
         accessResults.push({
           operation,
-          result: Promise.resolve(accessFunction({ id, data, req })) as Promise<boolean | Where>,
+          result: Promise.resolve(
+            accessFunction({
+              id,
+              data,
+              req:
+                _operation === 'readVersions' || _operation === 'unlock'
+                  ? req
+                  : getAccessOperationRequest({
+                      operation: _operation,
+                      req,
+                    }),
+            }),
+          ) as Promise<boolean | Where>,
         })
       } else {
         entityPermissions[operation] = {

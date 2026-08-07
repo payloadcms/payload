@@ -593,6 +593,8 @@ export const arTranslations: DefaultTranslationsObject = {
     width: 'العرض',
   },
   validation: {
+    documentInvalid: 'قم بإصلاح المشاكل التالية.',
+    documentValid: 'جميع اللغات المختارة صالحة.',
     emailAddress: 'يرجى إدخال عنوان بريد إلكتروني صحيح.',
     enterNumber: 'يرجى إدخال رقم صحيح.',
     fieldHasNo: 'هذا الحقل ليس لديه {{label}}',
@@ -609,6 +611,7 @@ export const arTranslations: DefaultTranslationsObject = {
     longitudeOutOfBounds: 'يجب أن تكون الخطوط الطولية بين -180 و 180.',
     notValidDate: '"{{value}}" ليس تاريخا صالحا.',
     required: 'هذا الحقل مطلوب.',
+    requiredLocale: 'مطلوب',
     requiresAtLeast: 'هذا الحقل يتطلب على الأقل {{count}} {{label}}.',
     requiresNoMoreThan: 'هذا الحقل يتطلب عدم تجاوز {{count}} {{label}}.',
     requiresTwoNumbers: 'هذا الحقل يتطلب رقمين.',
@@ -617,6 +620,8 @@ export const arTranslations: DefaultTranslationsObject = {
     trueOrFalse: 'يمكن أن يكون هذا الحقل مساويًا فقط للقيمتين صحيح أو خطأ.',
     username:
       'يرجى إدخال اسم مستخدم صالح. يمكن أن يحتوي على أحرف، أرقام، شرطات، فواصل وشرطات سفلية.',
+    validateAllLocales: 'تحقق من جميع اللغات',
+    validationResults: 'نتائج التحقق',
     validUploadID: 'هذا الحقل ليس معرّف تحميل صالح.',
   },
   version: {

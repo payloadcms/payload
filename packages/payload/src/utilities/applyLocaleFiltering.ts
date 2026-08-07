@@ -24,7 +24,10 @@ export async function applyLocaleFiltering({
       locales: config.localization.locales,
       req,
     })
-  ).map(({ toString, ...rest }) => rest)
+  ).map(({ toString, ...rest }) => ({
+    ...rest,
+    required: rest.required ?? false,
+  }))
 
   clientConfig.localization.localeCodes = filteredLocales.map(({ code }) => code)
   clientConfig.localization.locales = filteredLocales

@@ -17,11 +17,13 @@ import type {
 } from '../config/types.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
+import { ValidationError } from '../../errors/index.js'
 import { afterChange } from '../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { beforeChange } from '../../fields/hooks/beforeChange/index.js'
 import { beforeValidate } from '../../fields/hooks/beforeValidate/index.js'
 import { deepCopyObjectSimple } from '../../index.js'
+import { assertNoValidationWrite } from '../../utilities/assertNoValidationWrite.js'
 import { checkDocumentLockStatus } from '../../utilities/checkDocumentLockStatus.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { getSelectMode } from '../../utilities/getSelectMode.js'
@@ -31,12 +33,15 @@ import {
   hasLocalizeStatusEnabled,
 } from '../../utilities/getVersionsConfig.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
+import { isPostHookPublishIntent } from '../../utilities/isPostHookPublishIntent.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import { resolvePublishLocales } from '../../utilities/resolvePublishLocales.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { buildLocalizedPublishData } from '../../versions/buildSingleLocalePublishData.js'
 import { getLatestGlobalVersion } from '../../versions/getLatestGlobalVersion.js'
 import { saveVersion } from '../../versions/saveVersion.js'
+import { validateGlobalLocalWithDataLocale } from './local/validate.js'
 type Args<TSlug extends GlobalSlug> = {
   autosave?: boolean
   data: DeepPartial<Omit<DataFromGlobalSlug<TSlug>, 'id'>>
@@ -60,6 +65,8 @@ export const updateOperation = async <
 >(
   args: Args<TSlug>,
 ): Promise<TransformGlobalWithSelect<TSlug, TSelect>> => {
+  assertNoValidationWrite(args.req)
+
   const {
     slug,
     autosave,
@@ -102,9 +109,10 @@ export const updateOperation = async <
     let { data } = args
 
     const publishAllLocales =
-      !draftArg &&
-      (publishAllLocalesArg ??
-        (hasLocalizeStatusEnabled(globalConfig) && locale !== 'all' ? false : true))
+      publishAllLocalesArg === true ||
+      (!draftArg &&
+        (publishAllLocalesArg ??
+          (hasLocalizeStatusEnabled(globalConfig) && locale !== 'all' ? false : true)))
     const unpublishAllLocales =
       typeof unpublishAllLocalesArg === 'string'
         ? unpublishAllLocalesArg === 'true'
@@ -212,6 +220,7 @@ export const updateOperation = async <
             context: req.context,
             data,
             global: globalConfig,
+            operation: 'update',
             originalDoc,
             overrideAccess,
             req,
@@ -230,6 +239,7 @@ export const updateOperation = async <
             context: req.context,
             data,
             global: globalConfig,
+            operation: 'update',
             originalDoc,
             overrideAccess,
             req,
@@ -257,6 +267,48 @@ export const updateOperation = async <
     }
 
     let result: JsonObject = await beforeChange(beforeChangeArgs)
+
+    if (
+      hasDraftsEnabled(globalConfig) &&
+      isPostHookPublishIntent({
+        locale:
+          locale ??
+          (payload.config.localization ? payload.config.localization.defaultLocale : undefined),
+        publishAllLocales,
+        status: result._status,
+        unpublishAllLocales,
+      })
+    ) {
+      const validationResult = await validateGlobalLocalWithDataLocale(payload, {
+        slug: globalConfig.slug,
+        data: result,
+        draft: true,
+        locale: resolvePublishLocales({
+          locale: locale ?? null,
+          localization: payload.config.localization,
+          publishAllLocales,
+        }),
+        overrideAccess: true,
+        req,
+        validationDataLocale:
+          locale && locale !== 'all'
+            ? locale
+            : payload.config.localization
+              ? payload.config.localization.defaultLocale
+              : undefined,
+      })
+
+      if (!validationResult.valid) {
+        throw new ValidationError(
+          {
+            errors: validationResult.errors,
+            global: globalConfig.slug,
+            req,
+          },
+          req.t,
+        )
+      }
+    }
 
     if (
       config?.localization &&
@@ -478,6 +530,7 @@ export const updateOperation = async <
             data,
             doc: result,
             global: globalConfig,
+            operation: 'update',
             overrideAccess,
             previousDoc: originalDoc,
             req,
