@@ -15,6 +15,7 @@ import type {
 import { executeAccess } from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
+import { validateSortQuery } from '../../database/queryValidation/validateSortQuery.js'
 import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
 import { APIError } from '../../errors/index.js'
 import { type CollectionSlug, type FindOptions } from '../../index.js'
@@ -174,7 +175,14 @@ export const updateOperation = async <
 
     const sort = sanitizeSortQuery({
       fields: collection.config.flattenedFields,
-      sort: incomingSort,
+      sort: incomingSort || collectionConfig.defaultSort,
+    })
+
+    await validateSortQuery({
+      collectionConfig,
+      overrideAccess: overrideAccess!,
+      req,
+      sort,
     })
 
     let docs

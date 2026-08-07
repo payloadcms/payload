@@ -323,6 +323,77 @@ describe('Access Control', () => {
         ).rejects.toThrow('The following path cannot be queried: restrictedField')
       })
 
+      it('should reject constrained sort paths', async () => {
+        const requests = [
+          payload.find({
+            collection: slug,
+            overrideAccess: false,
+            sort: 'restrictedField',
+          }),
+          payload.find({
+            collection: 'relation-restricted',
+            overrideAccess: false,
+            sort: 'post.restrictedField',
+          }),
+          payload.find({
+            collection: 'relation-restricted',
+            overrideAccess: false,
+            sort: 'postLabel',
+          }),
+          payload.find({
+            collection: 'sort-default-restricted',
+            overrideAccess: false,
+          }),
+          payload.find({
+            collection: slug,
+            joins: {
+              relatedItems: {
+                sort: 'rank',
+              },
+            },
+            overrideAccess: false,
+          }),
+          payload.findDistinct({
+            collection: 'relation-restricted',
+            field: 'name',
+            overrideAccess: false,
+            sort: 'rank',
+          }),
+          payload.update({
+            collection: 'relation-restricted',
+            data: {
+              name: 'updated',
+            },
+            limit: 1,
+            overrideAccess: false,
+            sort: 'rank',
+            where: {},
+          }),
+          payload.find({
+            collection: 'fields-and-top-access',
+            draft: true,
+            overrideAccess: false,
+            sort: 'secret',
+          }),
+          payload.findVersions({
+            collection: 'fields-and-top-access',
+            overrideAccess: false,
+            sort: 'version.secret',
+          }),
+          payload.findGlobalVersions({
+            slug: 'settings',
+            overrideAccess: false,
+            sort: 'version.secret',
+          }),
+        ]
+
+        await Promise.all(
+          requests.map((request) =>
+            expect(request).rejects.toThrow('The following path cannot be queried'),
+          ),
+        )
+      })
+
       it('field without read access should not show when overrideAccess: true', async () => {
         const { id, restrictedField } = await createDoc({ restrictedField: 'restricted' })
 
