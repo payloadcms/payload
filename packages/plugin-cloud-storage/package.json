@@ -61,7 +61,8 @@
   "dependencies": {
     "@payloadcms/ui": "workspace:*",
     "find-node-modules": "^2.1.3",
-    "range-parser": "^1.2.1"
+    "range-parser": "^1.2.1",
+    "sanitize-filename": "1.6.4"
   },
   "devDependencies": {
     "@types/find-node-modules": "^2.1.2",
