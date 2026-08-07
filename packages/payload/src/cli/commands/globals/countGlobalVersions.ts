@@ -1,32 +1,32 @@
-import type { CLICommand } from '../../../config/types.js'
+import { z } from 'zod'
+
 import type { Where } from '../../../index.js'
 
-import { createDataCommand } from '../data/createDataCommand.js'
-import { globalSlugOption, localeOption, whereOption } from '../data/options.js'
+import { defineCLICommand } from '../../defineCLICommand.js'
+import { globalSlugSchema, localeSchema, parseJSON, whereSchema } from '../data/input.js'
 import { printJSON } from '../data/utilities.js'
 
-export const createCountGlobalVersionsCommand: CLICommand = (args) =>
-  createDataCommand({
-    args,
-    definition: {
-      name: 'countGlobalVersions',
-      description: 'Count versions of a local global.',
-      async handler({ options, payload }) {
-        const result = await payload.countGlobalVersions({
-          global: options.slug,
-          locale: options.locale,
-          overrideAccess: true,
-          where: options.where as undefined | Where,
-        })
+export const createCountGlobalVersionsCommand = defineCLICommand({
+  name: 'countGlobalVersions',
+  cli: {
+    where: { flags: '--where <json|@file>', parse: parseJSON },
+  },
+  description: 'Count versions of a local global.',
+  handler: async ({ args, getPayload }) => {
+    const payload = await getPayload()
+    const result = await payload.countGlobalVersions({
+      global: args.slug,
+      locale: args.locale,
+      overrideAccess: true,
+      where: args.where as undefined | Where,
+    })
 
-        printJSON(result)
-        return {}
-      },
-      options: {
-        slug: globalSlugOption,
-        locale: localeOption,
-        where: whereOption,
-      },
-      summary: 'Count global versions',
-    },
-  })
+    printJSON(result)
+  },
+  helpGroup: 'Data commands',
+  input: z.strictObject({
+    slug: globalSlugSchema,
+    locale: localeSchema,
+    where: whereSchema,
+  }),
+})

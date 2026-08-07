@@ -1,47 +1,64 @@
-import type { CLICommand } from '../../../config/types.js'
+import { z } from 'zod'
+
 import type { Where } from '../../../index.js'
 
-import { createDataCommand } from '../data/createDataCommand.js'
+import { defineCLICommand } from '../../defineCLICommand.js'
 import {
-  defaultLimitOption,
-  defaultPageOption,
-  globalSlugOption,
-  paginationOption,
-  readOptions,
-  sortOption,
-  whereOption,
-} from '../data/options.js'
+  defaultLimitSchema,
+  defaultPageSchema,
+  depthSchema,
+  fallbackLocaleSchema,
+  globalSlugSchema,
+  localeSchema,
+  paginationSchema,
+  parseFallbackLocale,
+  parseJSON,
+  parseSort,
+  populateSchema,
+  selectSchema,
+  showHiddenFieldsSchema,
+  sortSchema,
+  whereSchema,
+} from '../data/input.js'
 import { getReadOptions, printJSON } from '../data/utilities.js'
 
-export const createFindGlobalVersionsCommand: CLICommand = (args) =>
-  createDataCommand({
-    args,
-    definition: {
-      name: 'findGlobalVersions',
-      description: 'Find versions of a local global.',
-      async handler({ options, payload }) {
-        const result = await payload.findGlobalVersions({
-          slug: options.slug,
-          ...getReadOptions(options),
-          limit: options.limit,
-          page: options.page,
-          pagination: options.pagination,
-          sort: options.sort,
-          where: options.where as undefined | Where,
-        })
+export const createFindGlobalVersionsCommand = defineCLICommand({
+  name: 'findGlobalVersions',
+  cli: {
+    fallbackLocale: { flags: '--fallback-locale <locale|false>', parse: parseFallbackLocale },
+    populate: { flags: '--populate <json|@file>', parse: parseJSON },
+    select: { flags: '--select <json|@file>', parse: parseJSON },
+    sort: { flags: '--sort <field>', parse: parseSort },
+    where: { flags: '--where <json|@file>', parse: parseJSON },
+  },
+  description: 'Find versions of a local global.',
+  handler: async ({ args, getPayload }) => {
+    const payload = await getPayload()
+    const result = await payload.findGlobalVersions({
+      slug: args.slug,
+      ...getReadOptions(args),
+      limit: args.limit,
+      page: args.page,
+      pagination: args.pagination,
+      sort: args.sort,
+      where: args.where as undefined | Where,
+    })
 
-        printJSON(result)
-        return {}
-      },
-      options: {
-        ...readOptions,
-        slug: globalSlugOption,
-        limit: defaultLimitOption,
-        page: defaultPageOption,
-        pagination: paginationOption,
-        sort: sortOption,
-        where: whereOption,
-      },
-      summary: 'Find global versions',
-    },
-  })
+    printJSON(result)
+  },
+  helpGroup: 'Data commands',
+  input: z.strictObject({
+    slug: globalSlugSchema,
+    depth: depthSchema,
+    fallbackLocale: fallbackLocaleSchema,
+    limit: defaultLimitSchema,
+    locale: localeSchema,
+    page: defaultPageSchema,
+    pagination: paginationSchema,
+    populate: populateSchema,
+    select: selectSchema,
+    showHiddenFields: showHiddenFieldsSchema,
+    sort: sortSchema,
+    where: whereSchema,
+  }),
+})

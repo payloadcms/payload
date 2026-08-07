@@ -1,32 +1,32 @@
-import type { CLICommand } from '../../../config/types.js'
+import { z } from 'zod'
+
 import type { Where } from '../../../index.js'
 
-import { createDataCommand } from '../data/createDataCommand.js'
-import { collectionSlugOption, localeOption, whereOption } from '../data/options.js'
+import { defineCLICommand } from '../../defineCLICommand.js'
+import { collectionSlugSchema, localeSchema, parseJSON, whereSchema } from '../data/input.js'
 import { printJSON } from '../data/utilities.js'
 
-export const createCountVersionsCommand: CLICommand = (args) =>
-  createDataCommand({
-    args,
-    definition: {
-      name: 'countVersions',
-      description: 'Count document versions in a local collection.',
-      async handler({ options, payload }) {
-        const result = await payload.countVersions({
-          collection: options.slug,
-          locale: options.locale,
-          overrideAccess: true,
-          where: options.where as undefined | Where,
-        })
+export const createCountVersionsCommand = defineCLICommand({
+  name: 'countVersions',
+  cli: {
+    where: { flags: '--where <json|@file>', parse: parseJSON },
+  },
+  description: 'Count document versions in a local collection.',
+  handler: async ({ args, getPayload }) => {
+    const payload = await getPayload()
+    const result = await payload.countVersions({
+      collection: args.slug,
+      locale: args.locale,
+      overrideAccess: true,
+      where: args.where as undefined | Where,
+    })
 
-        printJSON(result)
-        return {}
-      },
-      options: {
-        slug: collectionSlugOption,
-        locale: localeOption,
-        where: whereOption,
-      },
-      summary: 'Count collection versions',
-    },
-  })
+    printJSON(result)
+  },
+  helpGroup: 'Data commands',
+  input: z.strictObject({
+    slug: collectionSlugSchema,
+    locale: localeSchema,
+    where: whereSchema,
+  }),
+})

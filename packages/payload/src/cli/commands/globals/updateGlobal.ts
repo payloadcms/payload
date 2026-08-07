@@ -1,64 +1,69 @@
-import type { CLICommand } from '../../../config/types.js'
+import { z } from 'zod'
+
 import type { PopulateType, SelectType } from '../../../index.js'
 
-import { createDataCommand } from '../data/createDataCommand.js'
+import { defineCLICommand } from '../../defineCLICommand.js'
 import {
-  depthOption,
-  fallbackLocaleOption,
-  falseByDefaultDraftOption,
-  globalSlugOption,
-  localeOption,
-  overrideLockOption,
-  populateOption,
-  publishAllLocalesOption,
-  requiredDataOption,
-  selectOption,
-  showHiddenFieldsOption,
-  unpublishAllLocalesOption,
-} from '../data/options.js'
+  dataSchema,
+  depthSchema,
+  fallbackLocaleSchema,
+  globalSlugSchema,
+  localeSchema,
+  overrideLockSchema,
+  parseFallbackLocale,
+  parseJSON,
+  populateSchema,
+  publishAllLocalesSchema,
+  selectSchema,
+  showHiddenFieldsSchema,
+  unpublishAllLocalesSchema,
+  writeDraftSchema,
+} from '../data/input.js'
 import { prepareGlobalData, printJSON } from '../data/utilities.js'
 
-export const createUpdateGlobalCommand: CLICommand = (args) =>
-  createDataCommand({
-    args,
-    definition: {
-      name: 'updateGlobal',
-      description: 'Update a local global.',
-      async handler({ options, payload }) {
-        const slug = options.slug
-        const result = await payload.updateGlobal({
-          slug,
-          data: prepareGlobalData({ slug, data: options.data, payload }),
-          depth: options.depth,
-          draft: options.draft,
-          fallbackLocale: options.fallbackLocale,
-          locale: options.locale,
-          overrideAccess: true,
-          overrideLock: options.overrideLock,
-          populate: options.populate as PopulateType | undefined,
-          publishAllLocales: options.publishAllLocales,
-          select: options.select as SelectType | undefined,
-          showHiddenFields: options.showHiddenFields,
-          unpublishAllLocales: options.unpublishAllLocales,
-        })
+export const createUpdateGlobalCommand = defineCLICommand({
+  name: 'updateGlobal',
+  cli: {
+    data: { flags: '--data <json|@file>', parse: parseJSON },
+    fallbackLocale: { flags: '--fallback-locale <locale|false>', parse: parseFallbackLocale },
+    populate: { flags: '--populate <json|@file>', parse: parseJSON },
+    select: { flags: '--select <json|@file>', parse: parseJSON },
+  },
+  description: 'Update a local global.',
+  handler: async ({ args, getPayload }) => {
+    const payload = await getPayload()
+    const slug = args.slug
+    const result = await payload.updateGlobal({
+      slug,
+      data: prepareGlobalData({ slug, data: args.data, payload }),
+      depth: args.depth,
+      draft: args.draft,
+      fallbackLocale: args.fallbackLocale,
+      locale: args.locale,
+      overrideAccess: true,
+      overrideLock: args.overrideLock,
+      populate: args.populate as PopulateType | undefined,
+      publishAllLocales: args.publishAllLocales,
+      select: args.select as SelectType | undefined,
+      showHiddenFields: args.showHiddenFields,
+      unpublishAllLocales: args.unpublishAllLocales,
+    })
 
-        printJSON(result)
-        return {}
-      },
-      options: {
-        slug: globalSlugOption,
-        data: requiredDataOption,
-        depth: depthOption,
-        draft: falseByDefaultDraftOption,
-        fallbackLocale: fallbackLocaleOption,
-        locale: localeOption,
-        overrideLock: overrideLockOption,
-        populate: populateOption,
-        publishAllLocales: publishAllLocalesOption,
-        select: selectOption,
-        showHiddenFields: showHiddenFieldsOption,
-        unpublishAllLocales: unpublishAllLocalesOption,
-      },
-      summary: 'Update a global',
-    },
-  })
+    printJSON(result)
+  },
+  helpGroup: 'Data commands',
+  input: z.strictObject({
+    slug: globalSlugSchema,
+    data: dataSchema,
+    depth: depthSchema,
+    draft: writeDraftSchema,
+    fallbackLocale: fallbackLocaleSchema,
+    locale: localeSchema,
+    overrideLock: overrideLockSchema,
+    populate: populateSchema,
+    publishAllLocales: publishAllLocalesSchema,
+    select: selectSchema,
+    showHiddenFields: showHiddenFieldsSchema,
+    unpublishAllLocales: unpublishAllLocalesSchema,
+  }),
+})

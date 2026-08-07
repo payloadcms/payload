@@ -1,40 +1,55 @@
-import type { CLICommand } from '../../../config/types.js'
+import { z } from 'zod'
 
-import { createDataCommand } from '../data/createDataCommand.js'
+import { defineCLICommand } from '../../defineCLICommand.js'
 import {
-  collectionSlugOption,
-  draftOption,
-  idOption,
-  readOptions,
-  trashOption,
-} from '../data/options.js'
+  collectionSlugSchema,
+  depthSchema,
+  draftSchema,
+  fallbackLocaleSchema,
+  idSchema,
+  localeSchema,
+  parseFallbackLocale,
+  parseID,
+  parseJSON,
+  populateSchema,
+  selectSchema,
+  showHiddenFieldsSchema,
+  trashSchema,
+} from '../data/input.js'
 import { getReadOptions, printJSON } from '../data/utilities.js'
 
-export const createFindVersionByIDCommand: CLICommand = (args) =>
-  createDataCommand({
-    args,
-    definition: {
-      name: 'findVersionByID',
-      description: 'Find one document version in a local collection by ID.',
-      async handler({ options, payload }) {
-        const result = await payload.findVersionByID({
-          id: String(options.id),
-          collection: options.slug,
-          ...getReadOptions(options),
-          draft: options.draft,
-          trash: options.trash,
-        })
+export const createFindVersionByIDCommand = defineCLICommand({
+  name: 'findVersionByID',
+  cli: {
+    id: { flags: '--id <id>', parse: parseID },
+    fallbackLocale: { flags: '--fallback-locale <locale|false>', parse: parseFallbackLocale },
+    populate: { flags: '--populate <json|@file>', parse: parseJSON },
+    select: { flags: '--select <json|@file>', parse: parseJSON },
+  },
+  description: 'Find one document version in a local collection by ID.',
+  handler: async ({ args, getPayload }) => {
+    const payload = await getPayload()
+    const result = await payload.findVersionByID({
+      id: String(args.id),
+      collection: args.slug,
+      ...getReadOptions(args),
+      draft: args.draft,
+      trash: args.trash,
+    })
 
-        printJSON(result)
-        return {}
-      },
-      options: {
-        ...readOptions,
-        id: idOption,
-        slug: collectionSlugOption,
-        draft: draftOption,
-        trash: trashOption,
-      },
-      summary: 'Find a collection version by ID',
-    },
-  })
+    printJSON(result)
+  },
+  helpGroup: 'Data commands',
+  input: z.strictObject({
+    id: idSchema,
+    slug: collectionSlugSchema,
+    depth: depthSchema,
+    draft: draftSchema,
+    fallbackLocale: fallbackLocaleSchema,
+    locale: localeSchema,
+    populate: populateSchema,
+    select: selectSchema,
+    showHiddenFields: showHiddenFieldsSchema,
+    trash: trashSchema,
+  }),
+})

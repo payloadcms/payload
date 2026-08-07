@@ -1,37 +1,52 @@
-import type { CLICommand } from '../../../config/types.js'
+import { z } from 'zod'
 
-import { createDataCommand } from '../data/createDataCommand.js'
+import { defineCLICommand } from '../../defineCLICommand.js'
 import {
-  collectionSlugOption,
-  falseByDefaultDraftOption,
-  idOption,
-  readOptions,
-} from '../data/options.js'
+  collectionSlugSchema,
+  depthSchema,
+  fallbackLocaleSchema,
+  idSchema,
+  localeSchema,
+  parseFallbackLocale,
+  parseID,
+  parseJSON,
+  populateSchema,
+  selectSchema,
+  showHiddenFieldsSchema,
+  writeDraftSchema,
+} from '../data/input.js'
 import { getReadOptions, printJSON } from '../data/utilities.js'
 
-export const createRestoreVersionCommand: CLICommand = (args) =>
-  createDataCommand({
-    args,
-    definition: {
-      name: 'restoreVersion',
-      description: 'Restore one document version in a local collection.',
-      async handler({ options, payload }) {
-        const result = await payload.restoreVersion({
-          id: String(options.id),
-          collection: options.slug,
-          ...getReadOptions(options),
-          draft: options.draft,
-        })
+export const createRestoreVersionCommand = defineCLICommand({
+  name: 'restoreVersion',
+  cli: {
+    id: { flags: '--id <id>', parse: parseID },
+    fallbackLocale: { flags: '--fallback-locale <locale|false>', parse: parseFallbackLocale },
+    populate: { flags: '--populate <json|@file>', parse: parseJSON },
+    select: { flags: '--select <json|@file>', parse: parseJSON },
+  },
+  description: 'Restore one document version in a local collection.',
+  handler: async ({ args, getPayload }) => {
+    const payload = await getPayload()
+    const result = await payload.restoreVersion({
+      id: String(args.id),
+      collection: args.slug,
+      ...getReadOptions(args),
+      draft: args.draft,
+    })
 
-        printJSON(result)
-        return {}
-      },
-      options: {
-        ...readOptions,
-        id: idOption,
-        slug: collectionSlugOption,
-        draft: falseByDefaultDraftOption,
-      },
-      summary: 'Restore a collection version',
-    },
-  })
+    printJSON(result)
+  },
+  helpGroup: 'Data commands',
+  input: z.strictObject({
+    id: idSchema,
+    slug: collectionSlugSchema,
+    depth: depthSchema,
+    draft: writeDraftSchema,
+    fallbackLocale: fallbackLocaleSchema,
+    locale: localeSchema,
+    populate: populateSchema,
+    select: selectSchema,
+    showHiddenFields: showHiddenFieldsSchema,
+  }),
+})
