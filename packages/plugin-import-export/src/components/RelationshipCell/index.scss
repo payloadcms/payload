@@ -1,0 +1,26 @@
+@layer payload-default {
+  .import-preview-relationship {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    &__group {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    &__collection {
+      font-size: var(--font-size-small);
+      font-weight: 600;
+      color: var(--theme-elevation-500);
+      white-space: nowrap;
+    }
+
+    &__more {
+      display: block;
+      font-size: var(--font-size-small);
+      color: var(--theme-elevation-500);
+    }
+  }
+}
