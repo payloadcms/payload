@@ -27,6 +27,7 @@ export type FormOnSuccess<T = unknown, C = Record<string, unknown>> = (
      * The form state that was sent with the request when retrieving the `json` arg.
      */
     formState?: FormState
+    isCurrent: () => boolean
   },
 ) => Promise<FormState | void> | void
 
@@ -105,6 +106,8 @@ export type SubmitOptions<C = Record<string, unknown>> = {
   disableSuccessStatus?: boolean
   method?: string
   overrides?: ((formState) => FormData) | Record<string, unknown>
+  /** @internal */
+  requestIntent?: 'autosave' | 'submit'
   /**
    * When true, will skip validation before submitting the form.
    * @default false

@@ -301,8 +301,6 @@ export function DefaultEditView({
     async (json, ctx) => {
       const { context, formState } = ctx || {}
 
-      const controller = handleAbortRef(abortOnSaveRef)
-
       const document = json?.doc || json?.result
 
       const updatedAt = document?.updatedAt || new Date().toISOString()
@@ -365,10 +363,28 @@ export function DefaultEditView({
         await getDocPermissions(json)
       }
 
+      reportUpdate({
+        id,
+        doc: document,
+        drawerSlug,
+        entitySlug,
+        operation: id || globalSlug ? 'update' : 'create',
+        updatedAt,
+      })
+
+      if (!ctx?.isCurrent()) {
+        return
+      }
+
       if (id || globalSlug) {
         const docPreferences = await getDocPreferences()
 
-        const { livePreviewURL, previewURL, state } = await getFormState({
+        if (!ctx?.isCurrent()) {
+          return
+        }
+
+        const controller = handleAbortRef(abortOnSaveRef)
+        const result = await getFormState({
           id,
           collectionSlug,
           data: document,
@@ -385,6 +401,14 @@ export function DefaultEditView({
           signal: controller.signal,
           skipValidation: true,
         })
+
+        abortOnSaveRef.current = null
+
+        if (!ctx?.isCurrent()) {
+          return
+        }
+
+        const { livePreviewURL, previewURL, state } = result
 
         // For upload collections, clear the file field from the returned state
         // to prevent the File object from persisting in form state after save
@@ -405,27 +429,7 @@ export function DefaultEditView({
           setPreviewURL(previewURL)
         }
 
-        reportUpdate({
-          id,
-          doc: document,
-          drawerSlug,
-          entitySlug,
-          operation: 'update',
-          updatedAt,
-        })
-
-        abortOnSaveRef.current = null
-
         return state
-      } else {
-        reportUpdate({
-          id,
-          doc: document,
-          drawerSlug,
-          entitySlug,
-          operation: 'create',
-          updatedAt,
-        })
       }
     },
     [
