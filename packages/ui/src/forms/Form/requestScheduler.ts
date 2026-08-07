@@ -43,9 +43,10 @@ export const createFormRequestScheduler = ({
     isActive = true
 
     const activeGeneration = generation
+    const dispatchedRevision = getRevision()
     const context: FormRequestContext = {
-      dispatchedRevision: getRevision(),
-      isCurrent: () => generation === activeGeneration,
+      dispatchedRevision,
+      isCurrent: () => generation === activeGeneration && getRevision() === dispatchedRevision,
     }
 
     const taskPromise = (async () => entry.run(context))()

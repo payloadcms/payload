@@ -59,6 +59,25 @@ describe('createFormRequestScheduler', () => {
     expect(revisions).toEqual([1, 2])
   })
 
+  it('invalidates an active context when the revision changes without scheduling work', async () => {
+    let revision = 1
+    const active = deferred()
+    const scheduler = createFormRequestScheduler({ getRevision: () => revision })
+    const running = scheduler.schedule({
+      intent: 'formState',
+      run: async ({ dispatchedRevision, isCurrent }) => {
+        expect(dispatchedRevision).toBe(1)
+        expect(isCurrent()).toBe(true)
+        await active.promise
+        expect(isCurrent()).toBe(false)
+      },
+    })
+
+    revision = 2
+    active.resolve()
+    await running
+  })
+
   it('uses submit, autosave, then form state precedence for pending work', async () => {
     const active = deferred()
     const calls: string[] = []
