@@ -26,4 +26,35 @@ describe('isEligibleRequest', () => {
 
     expect(isEligibleRequest(request)).toBe(false)
   })
+
+  it.each([
+    'multipart/form-data; boundary=----test-boundary',
+    'multipart/form-data;boundary=----test-boundary',
+    'multipart/form-data; boundary="quoted-boundary"',
+    'multipart/mixed; charset=utf-8; boundary=example',
+    'multipart/x^foo; boundary=abc',
+    'multipart/form-data; note="[a\\b]@c<>"; boundary=abc',
+  ])('should accept valid multipart content type %s', (contentType) => {
+    const request = new Request('http://localhost/api/upload', {
+      body: 'test',
+      headers: { 'content-type': contentType },
+      method: 'POST',
+    })
+
+    expect(isEligibleRequest(request)).toBe(true)
+  })
+
+  it('should reject invalid multipart content types promptly', () => {
+    const request = new Request('http://localhost/api/upload', {
+      body: 'test',
+      headers: {
+        'content-type': `multipart/form-data; boundary=${';'.repeat(23)}!`,
+      },
+      method: 'POST',
+    })
+    const start = performance.now()
+
+    expect(isEligibleRequest(request)).toBe(false)
+    expect(performance.now() - start).toBeLessThan(25)
+  }, 100)
 })
