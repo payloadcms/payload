@@ -133,8 +133,9 @@
     "test:int:postgres": "cross-env NODE_OPTIONS=\"--no-deprecation --no-experimental-strip-types\" NODE_NO_WARNINGS=1 PAYLOAD_DATABASE=postgres DISABLE_LOGGING=true vitest --project int",
     "test:int:sqlite": "cross-env NODE_OPTIONS=\"--no-deprecation --no-experimental-strip-types\" NODE_NO_WARNINGS=1 PAYLOAD_DATABASE=sqlite DISABLE_LOGGING=true vitest --project int",
     "test:int:summary": "pnpm runts ./test/runTestsWithSummary.ts",
+    "test:rsc": "cross-env NODE_OPTIONS=\"--conditions=react-server\" vitest run --project rsc",
     "test:types": "tstyche",
-    "test:unit": "vitest run --project unit",
+    "test:unit": "vitest run --project unit && pnpm test:rsc",
     "translateNewKeys": "pnpm --filter @tools/scripts run generateTranslations:core"
   },
   "devDependencies": {

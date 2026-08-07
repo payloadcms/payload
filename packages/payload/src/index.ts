@@ -125,6 +125,12 @@ import {
 } from './globals/operations/local/update.js'
 export type * from './admin/adapters/index.js'
 export type { FieldState } from './admin/forms/Form.js'
+export {
+  initReq,
+  type InitReqArgs,
+  type InitReqCache,
+  type InitReqPartialResult,
+} from './admin/initReq.js'
 export type * from './admin/types.js'
 export { EntityType } from './admin/views/dashboard.js'
 import type { SupportedLanguages } from '@payloadcms/translations'
