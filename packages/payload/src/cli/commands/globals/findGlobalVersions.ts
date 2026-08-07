@@ -1,8 +1,7 @@
-import { z } from 'zod'
-
 import type { Where } from '../../../index.js'
 
 import { defineCLICommand } from '../../defineCLICommand.js'
+import { strictObject } from '../../zod.js'
 import {
   defaultLimitSchema,
   defaultPageSchema,
@@ -23,7 +22,6 @@ import {
 import { getReadOptions, printJSON } from '../data/utilities.js'
 
 export const createFindGlobalVersionsCommand = defineCLICommand({
-  name: 'findGlobalVersions',
   cli: {
     fallbackLocale: { flags: '--fallback-locale <locale|false>', parse: parseFallbackLocale },
     populate: { flags: '--populate <json|@file>', parse: parseJSON },
@@ -47,7 +45,7 @@ export const createFindGlobalVersionsCommand = defineCLICommand({
     printJSON(result)
   },
   helpGroup: 'Data commands',
-  input: z.strictObject({
+  input: strictObject({
     slug: globalSlugSchema,
     depth: depthSchema,
     fallbackLocale: fallbackLocaleSchema,

@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import type { z } from 'zod'
+import type * as z from 'zod/mini'
 
 import type {
   CollectionSlug,

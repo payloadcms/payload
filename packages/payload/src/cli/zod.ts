@@ -3,8 +3,11 @@ import type { StandardJSONSchemaV1 } from '@standard-schema/spec'
 import * as z from 'zod/mini'
 
 /** Adds Standard JSON Schema conversion to a tree-shakable Zod Mini object schema. */
-export const strictObject = <TShape extends z.core.$ZodLooseShape>(shape: TShape) => {
-  const schema = z.strictObject(shape)
+export const strictObject = <TShape extends z.core.$ZodLooseShape>(
+  shape: TShape,
+  ...checks: z.core.$ZodCheck<z.output<z.ZodMiniObject<TShape, z.core.$strict>>>[]
+) => {
+  const schema = z.strictObject(shape).check(...checks)
 
   Object.assign(schema['~standard'], {
     jsonSchema: {

@@ -1,13 +1,11 @@
-import { z } from 'zod'
-
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { getCollectionInputSchema } from '../../../utilities/entityInputSchema/getEntityInputSchema.js'
 import { defineCLICommand } from '../../defineCLICommand.js'
+import { strictObject } from '../../zod.js'
 import { collectionSlugSchema } from '../data/input.js'
 import { printJSON } from '../data/utilities.js'
 
 export const createGetCollectionSchemaCommand = defineCLICommand({
-  name: 'getCollectionSchema',
   description: 'Print the writable JSON schema for a local collection.',
   handler: async ({ args, getPayload }) => {
     const payload = await getPayload()
@@ -35,7 +33,7 @@ export const createGetCollectionSchemaCommand = defineCLICommand({
     printJSON({ collectionSlug, schema, upload })
   },
   helpGroup: 'Data commands',
-  input: z.strictObject({
+  input: strictObject({
     slug: collectionSlugSchema,
   }),
 })

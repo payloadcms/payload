@@ -1,21 +1,20 @@
 import path from 'node:path'
-import { z } from 'zod'
+import * as z from 'zod/mini'
 
 import type { PopulateType, SelectType } from '../../../index.js'
 
 import { defineCLICommand } from '../../defineCLICommand.js'
+import { strictObject } from '../../zod.js'
 import {
   collectionSlugSchema,
+  dataSchema,
   depthSchema,
-  documentDataSchema,
   fallbackLocaleSchema,
-  filesSchema,
   localeSchema,
   overwriteExistingFilesSchema,
-  parseDocumentData,
+  parseDocuments,
   parseFallbackLocale,
   parseJSON,
-  parseRepeatedValue,
   populateSchema,
   publishAllLocalesSchema,
   selectSchema,
@@ -24,37 +23,10 @@ import {
 } from '../data/input.js'
 import { prepareCollectionData, printJSON } from '../data/utilities.js'
 
-const input = z
-  .strictObject({
-    slug: collectionSlugSchema,
-    data: documentDataSchema,
-    depth: depthSchema,
-    draft: writeDraftSchema,
-    fallbackLocale: fallbackLocaleSchema,
-    file: filesSchema,
-    locale: localeSchema,
-    overwriteExistingFiles: overwriteExistingFilesSchema,
-    populate: populateSchema,
-    publishAllLocales: publishAllLocalesSchema,
-    select: selectSchema,
-    showHiddenFields: showHiddenFieldsSchema,
-  })
-  .superRefine((args, context) => {
-    if (args.file?.length && args.file.length !== args.data.length) {
-      context.addIssue({
-        code: 'custom',
-        message: 'Pass one --file for each document when creating multiple documents.',
-        path: ['file'],
-      })
-    }
-  })
-
 export const createCreateDocumentsCommand = defineCLICommand({
-  name: 'createDocuments',
   cli: {
-    data: { flags: '--data <json|@file>', parse: parseDocumentData },
+    documents: { flags: '--documents <json|@file>', parse: parseDocuments },
     fallbackLocale: { flags: '--fallback-locale <locale|false>', parse: parseFallbackLocale },
-    file: { flags: '--file <path>', parse: parseRepeatedValue },
     populate: { flags: '--populate <json|@file>', parse: parseJSON },
     select: { flags: '--select <json|@file>', parse: parseJSON },
   },
@@ -65,9 +37,8 @@ export const createCreateDocumentsCommand = defineCLICommand({
     const docs: Array<{ doc: unknown; index: number }> = []
     const errors: Array<{ index: number; message: string }> = []
 
-    for (const [index, data] of args.data.entries()) {
+    for (const [index, { data, file }] of args.documents.entries()) {
       try {
-        const file = args.file?.[index]
         const doc = await payload.create({
           collection,
           data: prepareCollectionData({ collection, data, payload }),
@@ -98,5 +69,24 @@ export const createCreateDocumentsCommand = defineCLICommand({
     return errors.length > 0 ? 1 : undefined
   },
   helpGroup: 'Data commands',
-  input,
+  input: strictObject({
+    slug: collectionSlugSchema,
+    depth: depthSchema,
+    documents: z
+      .array(
+        z.object({
+          data: dataSchema,
+          file: z.optional(z.string()),
+        }),
+      )
+      .check(z.minLength(1), z.describe('Documents to create.')),
+    draft: writeDraftSchema,
+    fallbackLocale: fallbackLocaleSchema,
+    locale: localeSchema,
+    overwriteExistingFiles: overwriteExistingFilesSchema,
+    populate: populateSchema,
+    publishAllLocales: publishAllLocalesSchema,
+    select: selectSchema,
+    showHiddenFields: showHiddenFieldsSchema,
+  }),
 })

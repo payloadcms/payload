@@ -1,6 +1,5 @@
-import { z } from 'zod'
-
 import { defineCLICommand } from '../../defineCLICommand.js'
+import { strictObject } from '../../zod.js'
 import {
   collectionSlugSchema,
   depthSchema,
@@ -18,7 +17,6 @@ import {
 import { getReadOptions, printJSON } from '../data/utilities.js'
 
 export const createRestoreVersionCommand = defineCLICommand({
-  name: 'restoreVersion',
   cli: {
     id: { flags: '--id <id>', parse: parseID },
     fallbackLocale: { flags: '--fallback-locale <locale|false>', parse: parseFallbackLocale },
@@ -38,7 +36,7 @@ export const createRestoreVersionCommand = defineCLICommand({
     printJSON(result)
   },
   helpGroup: 'Data commands',
-  input: z.strictObject({
+  input: strictObject({
     id: idSchema,
     slug: collectionSlugSchema,
     depth: depthSchema,

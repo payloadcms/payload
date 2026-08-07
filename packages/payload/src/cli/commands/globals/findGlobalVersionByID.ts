@@ -1,6 +1,5 @@
-import { z } from 'zod'
-
 import { defineCLICommand } from '../../defineCLICommand.js'
+import { strictObject } from '../../zod.js'
 import {
   depthSchema,
   fallbackLocaleSchema,
@@ -17,7 +16,6 @@ import {
 import { getReadOptions, printJSON } from '../data/utilities.js'
 
 export const createFindGlobalVersionByIDCommand = defineCLICommand({
-  name: 'findGlobalVersionByID',
   cli: {
     id: { flags: '--id <id>', parse: parseID },
     fallbackLocale: { flags: '--fallback-locale <locale|false>', parse: parseFallbackLocale },
@@ -36,7 +34,7 @@ export const createFindGlobalVersionByIDCommand = defineCLICommand({
     printJSON(result)
   },
   helpGroup: 'Data commands',
-  input: z.strictObject({
+  input: strictObject({
     id: idSchema,
     slug: globalSlugSchema,
     depth: depthSchema,

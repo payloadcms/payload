@@ -53,6 +53,7 @@ describe('createProgram', () => {
 
     expect(config.cli && config.cli.commands).toMatchObject({
       build: 'payload/cli/builtin#createBuildCommand',
+      createDocuments: 'payload/cli/builtin#createCreateDocumentsCommand',
       info: 'payload/cli/builtin#createInfoCommand',
     })
   })

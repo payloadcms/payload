@@ -1,8 +1,7 @@
-import { z } from 'zod'
-
 import type { PopulateType, SelectType } from '../../../index.js'
 
 import { defineCLICommand } from '../../defineCLICommand.js'
+import { strictObject } from '../../zod.js'
 import {
   dataSchema,
   depthSchema,
@@ -22,7 +21,6 @@ import {
 import { prepareGlobalData, printJSON } from '../data/utilities.js'
 
 export const createUpdateGlobalCommand = defineCLICommand({
-  name: 'updateGlobal',
   cli: {
     data: { flags: '--data <json|@file>', parse: parseJSON },
     fallbackLocale: { flags: '--fallback-locale <locale|false>', parse: parseFallbackLocale },
@@ -52,7 +50,7 @@ export const createUpdateGlobalCommand = defineCLICommand({
     printJSON(result)
   },
   helpGroup: 'Data commands',
-  input: z.strictObject({
+  input: strictObject({
     slug: globalSlugSchema,
     data: dataSchema,
     depth: depthSchema,

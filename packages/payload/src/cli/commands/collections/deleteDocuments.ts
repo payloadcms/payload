@@ -1,8 +1,9 @@
-import { z } from 'zod'
+import * as z from 'zod/mini'
 
 import type { Payload, Where } from '../../../index.js'
 
 import { defineCLICommand } from '../../defineCLICommand.js'
+import { strictObject } from '../../zod.js'
 import {
   collectionSlugSchema,
   depthSchema,
@@ -16,19 +17,19 @@ import {
 } from '../data/input.js'
 import { printJSON, requireIDOrWhere } from '../data/utilities.js'
 
-const input = z
-  .strictObject({
-    id: idSchema.optional(),
+const input = strictObject(
+  {
+    id: z.optional(idSchema),
     slug: collectionSlugSchema,
     depth: depthSchema,
     fallbackLocale: fallbackLocaleSchema,
     locale: localeSchema,
     where: whereSchema,
-  })
-  .superRefine(requireIDOrWhere)
+  },
+  z.superRefine(requireIDOrWhere),
+)
 
 export const createDeleteDocumentsCommand = defineCLICommand({
-  name: 'deleteDocuments',
   cli: {
     id: { flags: '--id <id>', parse: parseID },
     fallbackLocale: { flags: '--fallback-locale <locale|false>', parse: parseFallbackLocale },
