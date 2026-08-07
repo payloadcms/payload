@@ -1,63 +1,70 @@
-import type { CLICommand } from '../../../config/types.js'
+import { z } from 'zod'
+
 import type { PopulateType, SelectType } from '../../../index.js'
 
-import { createDataCommand } from '../data/createDataCommand.js'
+import { defineCLICommand } from '../../defineCLICommand.js'
 import {
-  collectionSlugOption,
-  depthOption,
-  fallbackLocaleOption,
-  falseByDefaultDraftOption,
-  idOption,
-  localeOption,
-  optionalDataOption,
-  populateOption,
-  selectedLocalesOption,
-  selectOption,
-  showHiddenFieldsOption,
-} from '../data/options.js'
+  collectionSlugSchema,
+  dataSchema,
+  depthSchema,
+  fallbackLocaleSchema,
+  idSchema,
+  localeSchema,
+  parseFallbackLocale,
+  parseID,
+  parseJSON,
+  parseSelectedLocales,
+  populateSchema,
+  selectedLocalesSchema,
+  selectSchema,
+  showHiddenFieldsSchema,
+  writeDraftSchema,
+} from '../data/input.js'
 import { prepareCollectionData, printJSON } from '../data/utilities.js'
 
-export const createDuplicateDocumentCommand: CLICommand = (args) =>
-  createDataCommand({
-    args,
-    definition: {
-      name: 'duplicateDocument',
-      description: 'Duplicate a document in a local collection.',
-      async handler({ options, payload }) {
-        const collection = options.slug
-        const result = await payload.duplicate({
-          id: options.id,
-          collection,
-          data: options.data
-            ? prepareCollectionData({ collection, data: options.data, payload })
-            : undefined,
-          depth: options.depth,
-          draft: options.draft,
-          fallbackLocale: options.fallbackLocale,
-          locale: options.locale,
-          overrideAccess: true,
-          populate: options.populate as PopulateType | undefined,
-          select: options.select as SelectType | undefined,
-          selectedLocales: options.selectedLocales,
-          showHiddenFields: options.showHiddenFields,
-        })
+export const createDuplicateDocumentCommand = defineCLICommand({
+  name: 'duplicateDocument',
+  cli: {
+    id: { flags: '--id <id>', parse: parseID },
+    data: { flags: '--data <json|@file>', parse: parseJSON },
+    fallbackLocale: { flags: '--fallback-locale <locale|false>', parse: parseFallbackLocale },
+    populate: { flags: '--populate <json|@file>', parse: parseJSON },
+    select: { flags: '--select <json|@file>', parse: parseJSON },
+    selectedLocales: { flags: '--selected-locales <locale>', parse: parseSelectedLocales },
+  },
+  description: 'Duplicate a document in a local collection.',
+  handler: async ({ args, getPayload }) => {
+    const payload = await getPayload()
+    const collection = args.slug
+    const result = await payload.duplicate({
+      id: args.id,
+      collection,
+      data: args.data ? prepareCollectionData({ collection, data: args.data, payload }) : undefined,
+      depth: args.depth,
+      draft: args.draft,
+      fallbackLocale: args.fallbackLocale,
+      locale: args.locale,
+      overrideAccess: true,
+      populate: args.populate as PopulateType | undefined,
+      select: args.select as SelectType | undefined,
+      selectedLocales: args.selectedLocales,
+      showHiddenFields: args.showHiddenFields,
+    })
 
-        printJSON(result)
-        return {}
-      },
-      options: {
-        id: idOption,
-        slug: collectionSlugOption,
-        data: optionalDataOption,
-        depth: depthOption,
-        draft: falseByDefaultDraftOption,
-        fallbackLocale: fallbackLocaleOption,
-        locale: localeOption,
-        populate: populateOption,
-        select: selectOption,
-        selectedLocales: selectedLocalesOption,
-        showHiddenFields: showHiddenFieldsOption,
-      },
-      summary: 'Duplicate a collection document',
-    },
-  })
+    printJSON(result)
+  },
+  helpGroup: 'Data commands',
+  input: z.strictObject({
+    id: idSchema,
+    slug: collectionSlugSchema,
+    data: dataSchema.optional(),
+    depth: depthSchema,
+    draft: writeDraftSchema,
+    fallbackLocale: fallbackLocaleSchema,
+    locale: localeSchema,
+    populate: populateSchema,
+    select: selectSchema,
+    selectedLocales: selectedLocalesSchema,
+    showHiddenFields: showHiddenFieldsSchema,
+  }),
+})

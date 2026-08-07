@@ -1,86 +1,100 @@
-import type { CLICommand } from '../../../config/types.js'
+import path from 'node:path'
+import { z } from 'zod'
+
 import type { Payload, PopulateType, SelectType, Where } from '../../../index.js'
 
-import { createDataCommand } from '../data/createDataCommand.js'
+import { defineCLICommand } from '../../defineCLICommand.js'
 import {
-  collectionSlugOption,
-  depthOption,
-  fallbackLocaleOption,
-  falseByDefaultDraftOption,
-  fileOption,
-  localeOption,
-  optionalIDOption,
-  optionalLimitOption,
-  overrideLockOption,
-  overwriteExistingFilesOption,
-  populateOption,
-  publishAllLocalesOption,
-  requiredDataOption,
-  selectOption,
-  showHiddenFieldsOption,
-  sortOption,
-  trashOption,
-  unpublishAllLocalesOption,
-  whereOption,
-} from '../data/options.js'
+  collectionSlugSchema,
+  dataSchema,
+  depthSchema,
+  fallbackLocaleSchema,
+  fileSchema,
+  idSchema,
+  limitSchema,
+  localeSchema,
+  overrideLockSchema,
+  overwriteExistingFilesSchema,
+  parseFallbackLocale,
+  parseID,
+  parseJSON,
+  parseSort,
+  populateSchema,
+  publishAllLocalesSchema,
+  selectSchema,
+  showHiddenFieldsSchema,
+  sortSchema,
+  trashSchema,
+  unpublishAllLocalesSchema,
+  whereSchema,
+  writeDraftSchema,
+} from '../data/input.js'
 import { prepareCollectionData, printJSON, requireIDOrWhere } from '../data/utilities.js'
 
-export const createUpdateDocumentCommand: CLICommand = (args) =>
-  createDataCommand({
-    args,
-    definition: {
-      name: 'updateDocument',
-      description: 'Update documents in a local collection by ID or where query.',
-      async handler({ options, payload }) {
-        const collection = options.slug
-        const result = await payload.update({
-          id: options.id,
-          collection,
-          data: prepareCollectionData({ collection, data: options.data, payload }),
-          depth: options.depth,
-          draft: options.draft,
-          fallbackLocale: options.fallbackLocale,
-          filePath: options.file,
-          limit: options.limit,
-          locale: options.locale,
-          overrideAccess: true,
-          overrideLock: options.overrideLock,
-          overwriteExistingFiles: options.overwriteExistingFiles,
-          populate: options.populate as PopulateType | undefined,
-          publishAllLocales: options.publishAllLocales,
-          select: options.select as SelectType | undefined,
-          showHiddenFields: options.showHiddenFields,
-          sort: options.sort,
-          trash: options.trash,
-          unpublishAllLocales: options.unpublishAllLocales,
-          where: options.where as undefined | Where,
-        } as Parameters<Payload['update']>[0])
-
-        printJSON(result)
-        return {}
-      },
-      options: {
-        id: optionalIDOption,
-        slug: collectionSlugOption,
-        data: requiredDataOption,
-        depth: depthOption,
-        draft: falseByDefaultDraftOption,
-        fallbackLocale: fallbackLocaleOption,
-        file: fileOption,
-        limit: optionalLimitOption,
-        locale: localeOption,
-        overrideLock: overrideLockOption,
-        overwriteExistingFiles: overwriteExistingFilesOption,
-        populate: populateOption,
-        publishAllLocales: publishAllLocalesOption,
-        select: selectOption,
-        showHiddenFields: showHiddenFieldsOption,
-        sort: sortOption,
-        trash: trashOption,
-        unpublishAllLocales: unpublishAllLocalesOption,
-        where: whereOption,
-      },
-      summary: 'Update collection documents',
-      superRefine: requireIDOrWhere,
-    },
+const input = z
+  .strictObject({
+    id: idSchema.optional(),
+    slug: collectionSlugSchema,
+    data: dataSchema,
+    depth: depthSchema,
+    draft: writeDraftSchema,
+    fallbackLocale: fallbackLocaleSchema,
+    file: fileSchema,
+    limit: limitSchema,
+    locale: localeSchema,
+    overrideLock: overrideLockSchema,
+    overwriteExistingFiles: overwriteExistingFilesSchema,
+    populate: populateSchema,
+    publishAllLocales: publishAllLocalesSchema,
+    select: selectSchema,
+    showHiddenFields: showHiddenFieldsSchema,
+    sort: sortSchema,
+    trash: trashSchema,
+    unpublishAllLocales: unpublishAllLocalesSchema,
+    where: whereSchema,
   })
+  .superRefine(requireIDOrWhere)
+
+export const createUpdateDocumentCommand = defineCLICommand({
+  name: 'updateDocument',
+  cli: {
+    id: { flags: '--id <id>', parse: parseID },
+    data: { flags: '--data <json|@file>', parse: parseJSON },
+    fallbackLocale: { flags: '--fallback-locale <locale|false>', parse: parseFallbackLocale },
+    populate: { flags: '--populate <json|@file>', parse: parseJSON },
+    select: { flags: '--select <json|@file>', parse: parseJSON },
+    sort: { flags: '--sort <field>', parse: parseSort },
+    where: { flags: '--where <json|@file>', parse: parseJSON },
+  },
+  description: 'Update documents in a local collection by ID or where query.',
+  handler: async ({ args, getPayload }) => {
+    const payload = await getPayload()
+    const collection = args.slug
+    const result = await payload.update({
+      id: args.id,
+      collection,
+      data: prepareCollectionData({ collection, data: args.data, payload }),
+      depth: args.depth,
+      draft: args.draft,
+      fallbackLocale: args.fallbackLocale,
+      filePath: args.file ? path.resolve(process.cwd(), args.file) : undefined,
+      limit: args.limit,
+      locale: args.locale,
+      overrideAccess: true,
+      overrideLock: args.overrideLock,
+      overwriteExistingFiles: args.overwriteExistingFiles,
+      populate: args.populate as PopulateType | undefined,
+      publishAllLocales: args.publishAllLocales,
+      select: args.select as SelectType | undefined,
+      showHiddenFields: args.showHiddenFields,
+      sort: args.sort,
+      trash: args.trash,
+      unpublishAllLocales: args.unpublishAllLocales,
+      where: args.where as undefined | Where,
+    } as Parameters<Payload['update']>[0])
+
+    printJSON(result)
+  },
+  helpGroup: 'Data commands',
+  input,
+})

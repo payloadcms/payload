@@ -23,7 +23,7 @@ export const requireIDOrWhere = (
   if (options.id === undefined && !options.where) {
     context.addIssue({
       code: 'custom',
-      message: 'Either --id or --where must be provided.',
+      message: 'Either id or where must be provided.',
       path: ['id'],
     })
   }

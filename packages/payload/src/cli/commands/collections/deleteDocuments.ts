@@ -1,46 +1,54 @@
-import type { CLICommand } from '../../../config/types.js'
+import { z } from 'zod'
+
 import type { Payload, Where } from '../../../index.js'
 
-import { createDataCommand } from '../data/createDataCommand.js'
+import { defineCLICommand } from '../../defineCLICommand.js'
 import {
-  collectionSlugOption,
-  depthOption,
-  fallbackLocaleOption,
-  localeOption,
-  optionalIDOption,
-  whereOption,
-} from '../data/options.js'
+  collectionSlugSchema,
+  depthSchema,
+  fallbackLocaleSchema,
+  idSchema,
+  localeSchema,
+  parseFallbackLocale,
+  parseID,
+  parseJSON,
+  whereSchema,
+} from '../data/input.js'
 import { printJSON, requireIDOrWhere } from '../data/utilities.js'
 
-export const createDeleteDocumentsCommand: CLICommand = (args) =>
-  createDataCommand({
-    args,
-    definition: {
-      name: 'deleteDocuments',
-      description: 'Delete documents from a local collection by ID or where query.',
-      async handler({ options, payload }) {
-        const result = await payload.delete({
-          id: options.id,
-          collection: options.slug,
-          depth: options.depth,
-          fallbackLocale: options.fallbackLocale,
-          locale: options.locale,
-          overrideAccess: true,
-          where: options.where as undefined | Where,
-        } as Parameters<Payload['delete']>[0])
-
-        printJSON(result)
-        return {}
-      },
-      options: {
-        id: optionalIDOption,
-        slug: collectionSlugOption,
-        depth: depthOption,
-        fallbackLocale: fallbackLocaleOption,
-        locale: localeOption,
-        where: whereOption,
-      },
-      summary: 'Delete collection documents',
-      superRefine: requireIDOrWhere,
-    },
+const input = z
+  .strictObject({
+    id: idSchema.optional(),
+    slug: collectionSlugSchema,
+    depth: depthSchema,
+    fallbackLocale: fallbackLocaleSchema,
+    locale: localeSchema,
+    where: whereSchema,
   })
+  .superRefine(requireIDOrWhere)
+
+export const createDeleteDocumentsCommand = defineCLICommand({
+  name: 'deleteDocuments',
+  cli: {
+    id: { flags: '--id <id>', parse: parseID },
+    fallbackLocale: { flags: '--fallback-locale <locale|false>', parse: parseFallbackLocale },
+    where: { flags: '--where <json|@file>', parse: parseJSON },
+  },
+  description: 'Delete documents from a local collection by ID or where query.',
+  handler: async ({ args, getPayload }) => {
+    const payload = await getPayload()
+    const result = await payload.delete({
+      id: args.id,
+      collection: args.slug,
+      depth: args.depth,
+      fallbackLocale: args.fallbackLocale,
+      locale: args.locale,
+      overrideAccess: true,
+      where: args.where as undefined | Where,
+    } as Parameters<Payload['delete']>[0])
+
+    printJSON(result)
+  },
+  helpGroup: 'Data commands',
+  input,
+})

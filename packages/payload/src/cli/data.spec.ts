@@ -15,8 +15,6 @@ import { createFindDocumentsCommand } from './commands/collections/findDocuments
 import { createGetCollectionSchemaCommand } from './commands/collections/getCollectionSchema.js'
 import { createUpdateDocumentCommand } from './commands/collections/updateDocument.js'
 
-type DataCommand = CLICommand
-
 const makePayload = (methods: Record<string, unknown> = {}): Payload =>
   ({
     collections: {
@@ -41,7 +39,7 @@ const runDataCommand = async ({
   payload,
 }: {
   args: string[]
-  createCommand: DataCommand
+  createCommand: CLICommand
   payload: Payload
 }): Promise<void> => {
   const cliArgs = {
@@ -55,7 +53,8 @@ const runDataCommand = async ({
       }
     }),
   } satisfies CLIArgs
-  const command = createCommand(cliArgs)
+  const command = createCommand
+    .command(cliArgs)
     .exitOverride()
     .configureOutput({
       writeErr: () => undefined,
@@ -78,8 +77,8 @@ describe('Payload data CLI', () => {
 
   it('should register MCP-style commands with Commander', () => {
     const args = {} as CLIArgs
-    const createDocuments = createCreateDocumentsCommand(args)
-    const getCollectionSchema = createGetCollectionSchemaCommand(args)
+    const createDocuments = createCreateDocumentsCommand.command(args)
+    const getCollectionSchema = createGetCollectionSchemaCommand.command(args)
 
     expect(createDocuments.name()).toBe('createDocuments')
     expect(getCollectionSchema.name()).toBe('getCollectionSchema')
@@ -125,6 +124,36 @@ describe('Payload data CLI', () => {
     expect(count).toHaveBeenCalledWith(
       expect.objectContaining({ where: { title: { equals: 'from-file' } } }),
     )
+  })
+
+  it('should accept complete semantic input as JSON', async () => {
+    const count = vi.fn().mockResolvedValue({ totalDocs: 1 })
+    const payload = makePayload({ count })
+
+    vi.spyOn(console, 'log').mockImplementation(() => undefined)
+
+    await runDataCommand({
+      args: ['--input', '{"slug":"posts","where":{"status":{"equals":"draft"}}}'],
+      createCommand: createCountDocumentsCommand,
+      payload,
+    })
+
+    expect(count).toHaveBeenCalledWith(
+      expect.objectContaining({ where: { status: { equals: 'draft' } } }),
+    )
+  })
+
+  it('should reject unknown JSON input properties', async () => {
+    const payload = makePayload({ count: vi.fn() })
+
+    expect(createCountDocumentsCommand.schema).toMatchObject({ additionalProperties: false })
+    await expect(
+      runDataCommand({
+        args: ['--input', '{"slug":"posts","collection":"pages"}'],
+        createCommand: createCountDocumentsCommand,
+        payload,
+      }),
+    ).rejects.toThrow('Unrecognized key: "collection"')
   })
 
   it('should create multiple documents and convert schema-friendly point values', async () => {
@@ -182,7 +211,7 @@ describe('Payload data CLI', () => {
         createCommand: createDeleteDocumentsCommand,
         payload,
       }),
-    ).rejects.toThrow('Either --id or --where must be provided.')
+    ).rejects.toThrow('Either id or where must be provided.')
   })
 
   it('should parse boolean flags before Zod validation', async () => {
@@ -260,16 +289,16 @@ describe('Payload data CLI', () => {
     ).rejects.toThrow('Pass one --file for each document')
   })
 
-  it('should generate command help from option definitions', () => {
+  it('should generate command help from input schemas', () => {
     const program = new Command().name('payload')
-    const command = createFindDocumentsCommand({} as CLIArgs)
+    const command = createFindDocumentsCommand.command({} as CLIArgs)
 
     program.addCommand(command)
 
     const help = command.helpInformation()
 
     expect(help).toContain('Usage: payload findDocuments [options]')
-    expect(help).toContain('--slug <collection>')
+    expect(help).toContain('--slug <slug>')
     expect(help).toContain('--draft')
     expect(help).toContain('--limit <number>')
     expect(help).toContain('default: 10')
