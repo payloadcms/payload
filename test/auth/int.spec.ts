@@ -10,11 +10,11 @@ import type {
 import crypto from 'crypto'
 import { jwtDecode } from 'jwt-decode'
 import path from 'path'
-import { createLocalReq, Forbidden, getFieldsToSign, refreshOperation } from 'payload'
+import { createLocalReq, Forbidden, getFieldsToSign, refreshOperation, rotateSecret } from 'payload'
 import { email as emailValidation } from 'payload/shared'
 import { fileURLToPath } from 'url'
 import { v4 as uuid } from 'uuid'
-import { afterAll, beforeAll, beforeEach, describe, expect, it, vitest } from 'vitest'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vitest } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { ApiKey } from './payload-types.js'
@@ -26,6 +26,9 @@ import {
   namedSaveToJWTValue,
   partialDisableLocalStrategiesSlug,
   publicUsersSlug,
+  rotateSecretLoginSlug,
+  rotateSecretOldSecret,
+  rotateSecretSlug,
   saveToJWTKey,
   slug,
 } from './shared.js'
@@ -2154,6 +2157,424 @@ describe('Auth', () => {
 
       // updatedAt should not have changed
       expect(userAfterRefresh?.updatedAt).toEqual(updatedAtAfterLogin)
+    })
+  })
+
+  describe('rotateSecret - PAYLOAD_SECRET rotation', () => {
+    const OLD_SECRET = rotateSecretOldSecret
+    const createdIDs: Array<{ collection: string; id: number | string }> = []
+
+    const deriveKey = (secret: string) =>
+      crypto.createHash('sha256').update(secret).digest('hex').slice(0, 32)
+
+    const indexFor = (secret: string, rawApiKey: string) =>
+      crypto.createHmac('sha256', deriveKey(secret)).update(rawApiKey).digest('hex')
+
+    // Produces a pre-v1 aes-256-ctr ciphertext (the format used before the v1
+    // envelope), to exercise the legacy read/upgrade path.
+    const legacyCtrEncrypt = (value: string, secret: string) => {
+      const iv = crypto.randomBytes(16)
+      const cipher = crypto.createCipheriv('aes-256-ctr', deriveKey(secret), iv)
+      return iv.toString('hex') + cipher.update(value, 'utf8', 'hex') + cipher.final('hex')
+    }
+
+    // Writes old-secret-encrypted apiKey/apiKeyIndex directly at the DB layer,
+    // bypassing field hooks, to simulate data left over from before a rotation.
+    const seedOldSecretUser = async ({
+      collection = rotateSecretSlug,
+      data = {},
+      rawApiKey,
+    }: {
+      collection?: string
+      data?: Record<string, unknown>
+      rawApiKey: string
+    }) => {
+      const user = await payload.create({
+        collection,
+        data: { apiKey: rawApiKey, enableAPIKey: true, ...data },
+      })
+      createdIDs.push({ id: user.id, collection })
+
+      await payload.db.updateOne({
+        id: user.id,
+        collection,
+        data: {
+          apiKey: payload.encrypt(rawApiKey, { secret: OLD_SECRET }),
+          apiKeyIndex: indexFor(OLD_SECRET, rawApiKey),
+        },
+        returning: false,
+      })
+
+      return user
+    }
+
+    // Seeds a row whose apiKeyIndex matches neither the old nor the current
+    // secret, forcing rotateSecret to fail-closed.
+    const seedCorruptUser = async () => {
+      const rawApiKey = uuid()
+      const user = await payload.create({
+        collection: rotateSecretSlug,
+        data: { apiKey: rawApiKey, enableAPIKey: true },
+      })
+      createdIDs.push({ id: user.id, collection: rotateSecretSlug })
+
+      await payload.db.updateOne({
+        id: user.id,
+        collection: rotateSecretSlug,
+        data: {
+          apiKey: payload.encrypt(rawApiKey, { secret: OLD_SECRET }),
+          apiKeyIndex: 'this-index-matches-no-secret',
+        },
+        returning: false,
+      })
+
+      return user
+    }
+
+    afterEach(async () => {
+      const idsByCollection = new Map<string, Array<number | string>>()
+      for (const { id, collection } of createdIDs) {
+        idsByCollection.set(collection, [...(idsByCollection.get(collection) ?? []), id])
+      }
+      for (const [collection, ids] of idsByCollection) {
+        await payload.delete({ collection, where: { id: { in: ids } } })
+      }
+      createdIDs.length = 0
+    })
+
+    it('should re-key apiKey and apiKeyIndex from the old secret to the current secret', async () => {
+      const rawApiKey = uuid()
+      const user = await seedOldSecretUser({ rawApiKey })
+
+      const result = await rotateSecret({
+        collections: [rotateSecretSlug],
+        oldSecret: OLD_SECRET,
+        payload,
+      })
+
+      expect(result).toEqual({ migrated: 1, skipped: 0 })
+
+      const raw = await payload.db.findOne<any>({
+        collection: rotateSecretSlug,
+        where: { id: { equals: user.id } },
+      })
+
+      expect(payload.decrypt(raw.apiKey)).toBe(rawApiKey)
+      expect(raw.apiKeyIndex).toBe(indexFor(payload.config.secret, rawApiKey))
+    })
+
+    it('reencrypt should re-key a value to the active secret', () => {
+      const rawValue = 'super-sensitive-value'
+      const oldCiphertext = payload.encrypt(rawValue, { secret: OLD_SECRET })
+
+      const rekeyed = payload.reencrypt(oldCiphertext, { oldSecret: OLD_SECRET })
+
+      expect(payload.decrypt(rekeyed)).toBe(rawValue)
+
+      // The rekeyed value carries the active key id, not the previous secret's.
+      const oldKeyId = oldCiphertext.split(':')[1]
+      const newKeyId = rekeyed.split(':')[1]
+      expect(newKeyId).not.toBe(oldKeyId)
+      expect(newKeyId).toBe(payload.encryptionKeyring.active.keyId)
+    })
+
+    it('should authenticate an api key indexed under a previous secret, then re-key it', async () => {
+      const rawApiKey = uuid()
+      const user = await seedOldSecretUser({ rawApiKey })
+
+      const authHeaders = { Authorization: `${rotateSecretSlug} API-Key ${rawApiKey}` }
+
+      // The old secret is in the keyring (previousSecrets), so the key already
+      // authenticates via its old-secret index - zero downtime during rotation.
+      const before = await restClient.GET(`/${rotateSecretSlug}/${user.id}`, {
+        headers: authHeaders,
+      })
+      expect(before.status).toBe(200)
+
+      await rotateSecret({ collections: [rotateSecretSlug], oldSecret: OLD_SECRET, payload })
+
+      // Still authenticates, now via the current-secret index.
+      const after = await restClient.GET(`/${rotateSecretSlug}/${user.id}`, {
+        headers: authHeaders,
+      })
+      expect(after.status).toBe(200)
+
+      const raw = await payload.db.findOne<any>({
+        collection: rotateSecretSlug,
+        where: { id: { equals: user.id } },
+      })
+      expect(raw.apiKeyIndex).toBe(indexFor(payload.config.secret, rawApiKey))
+    })
+
+    it('should be idempotent and skip already-migrated rows on re-run', async () => {
+      const rawApiKey = uuid()
+      await seedOldSecretUser({ rawApiKey })
+
+      await rotateSecret({ collections: [rotateSecretSlug], oldSecret: OLD_SECRET, payload })
+      const rerun = await rotateSecret({
+        collections: [rotateSecretSlug],
+        oldSecret: OLD_SECRET,
+        payload,
+      })
+
+      expect(rerun).toEqual({ migrated: 0, skipped: 1 })
+    })
+
+    it('should keep earlier migrations after an abort and complete on a fixed re-run', async () => {
+      const rawApiKey = uuid()
+      // Created first, so its lower id is processed before the corrupt row.
+      const migratable = await seedOldSecretUser({ rawApiKey })
+      const corrupt = await seedCorruptUser()
+
+      await expect(
+        rotateSecret({ collections: [rotateSecretSlug], oldSecret: OLD_SECRET, payload }),
+      ).rejects.toThrow(/could not verify apiKey/)
+
+      // The row processed before the abort stays migrated to the current secret.
+      const raw = await payload.db.findOne<any>({
+        collection: rotateSecretSlug,
+        where: { id: { equals: migratable.id } },
+      })
+      expect(raw.apiKeyIndex).toBe(indexFor(payload.config.secret, rawApiKey))
+      expect(payload.decrypt(raw.apiKey)).toBe(rawApiKey)
+
+      // Remove the corrupt row; the re-run completes and skips the migrated row.
+      await payload.delete({ id: corrupt.id, collection: rotateSecretSlug })
+      const rerun = await rotateSecret({
+        collections: [rotateSecretSlug],
+        oldSecret: OLD_SECRET,
+        payload,
+      })
+      expect(rerun).toEqual({ migrated: 0, skipped: 1 })
+    })
+
+    it('should abort without writing when the old secret is wrong', async () => {
+      const rawApiKey = uuid()
+      const user = await seedOldSecretUser({ rawApiKey })
+
+      const before = await payload.db.findOne<any>({
+        collection: rotateSecretSlug,
+        where: { id: { equals: user.id } },
+      })
+
+      await expect(
+        rotateSecret({
+          collections: [rotateSecretSlug],
+          oldSecret: 'the-wrong-old-secret',
+          payload,
+        }),
+      ).rejects.toThrow(/could not verify apiKey/)
+
+      const after = await payload.db.findOne<any>({
+        collection: rotateSecretSlug,
+        where: { id: { equals: user.id } },
+      })
+
+      expect(after.apiKey).toBe(before.apiKey)
+      expect(after.apiKeyIndex).toBe(before.apiKeyIndex)
+    })
+
+    it('should not modify data during a dry run', async () => {
+      const rawApiKey = uuid()
+      const user = await seedOldSecretUser({ rawApiKey })
+
+      const result = await rotateSecret({
+        collections: [rotateSecretSlug],
+        dryRun: true,
+        oldSecret: OLD_SECRET,
+        payload,
+      })
+
+      expect(result).toEqual({ migrated: 1, skipped: 0 })
+
+      const raw = await payload.db.findOne<any>({
+        collection: rotateSecretSlug,
+        where: { id: { equals: user.id } },
+      })
+
+      // Both artifacts are still under the old secret - nothing was written.
+      expect(raw.apiKeyIndex).toBe(indexFor(OLD_SECRET, rawApiKey))
+      expect(payload.decrypt(raw.apiKey, { secret: OLD_SECRET })).toBe(rawApiKey)
+    })
+
+    it('should re-key and upgrade a legacy aes-256-ctr value to the v1 envelope', async () => {
+      const rawApiKey = uuid()
+      const user = await payload.create({
+        collection: rotateSecretSlug,
+        data: { apiKey: rawApiKey, enableAPIKey: true },
+      })
+      createdIDs.push({ id: user.id, collection: rotateSecretSlug })
+
+      // Seed the pre-v1 (aes-256-ctr) format under the old secret.
+      await payload.db.updateOne({
+        id: user.id,
+        collection: rotateSecretSlug,
+        data: {
+          apiKey: legacyCtrEncrypt(rawApiKey, OLD_SECRET),
+          apiKeyIndex: indexFor(OLD_SECRET, rawApiKey),
+        },
+        returning: false,
+      })
+
+      const result = await rotateSecret({
+        collections: [rotateSecretSlug],
+        oldSecret: OLD_SECRET,
+        payload,
+      })
+      expect(result).toEqual({ migrated: 1, skipped: 0 })
+
+      const raw = await payload.db.findOne<any>({
+        collection: rotateSecretSlug,
+        where: { id: { equals: user.id } },
+      })
+      // Upgraded to the v1 envelope and readable under the current secret.
+      expect(raw.apiKey.startsWith('v1:')).toBe(true)
+      expect(payload.decrypt(raw.apiKey)).toBe(rawApiKey)
+      expect(raw.apiKeyIndex).toBe(indexFor(payload.config.secret, rawApiKey))
+    })
+
+    it('should mask (not throw) an apiKey encrypted under a secret not in the keyring', async () => {
+      const rawApiKey = uuid()
+      const user = await payload.create({
+        collection: rotateSecretSlug,
+        data: { apiKey: rawApiKey, enableAPIKey: true },
+      })
+      createdIDs.push({ id: user.id, collection: rotateSecretSlug })
+
+      await payload.db.updateOne({
+        id: user.id,
+        collection: rotateSecretSlug,
+        data: { apiKey: payload.encrypt(rawApiKey, { secret: 'a-secret-not-in-the-keyring' }) },
+        returning: false,
+      })
+
+      // Reading through the Local API runs the afterRead decrypt hook, which must
+      // mask the undecryptable field rather than failing the whole document read.
+      const doc = await payload.findByID({ collection: rotateSecretSlug, id: user.id })
+      expect(doc.apiKey).toBeNull()
+    })
+
+    it('should leave password logins working on a rotated collection', async () => {
+      const rawApiKey = uuid()
+      const loginEmail = 'rotate-login@example.com'
+      const loginPassword = 'Password123'
+
+      await seedOldSecretUser({
+        collection: rotateSecretLoginSlug,
+        data: { email: loginEmail, password: loginPassword },
+        rawApiKey,
+      })
+
+      const result = await rotateSecret({
+        collections: [rotateSecretLoginSlug],
+        oldSecret: OLD_SECRET,
+        payload,
+      })
+      expect(result.migrated).toBe(1)
+
+      // Password login on the same collection still works after its api keys
+      // were re-keyed - the salt/hash never involved the secret.
+      const { token } = await payload.login({
+        collection: rotateSecretLoginSlug,
+        data: { email: loginEmail, password: loginPassword },
+      })
+      expect(token).toBeDefined()
+    })
+
+    it('should skip rows that have an apiKey ciphertext but no apiKeyIndex', async () => {
+      const rawApiKey = uuid()
+      const user = await seedOldSecretUser({ rawApiKey })
+
+      // Simulate a disabled API key: ciphertext present, index cleared.
+      await payload.db.updateOne({
+        id: user.id,
+        collection: rotateSecretSlug,
+        data: { apiKeyIndex: null },
+        returning: false,
+      })
+
+      const result = await rotateSecret({
+        collections: [rotateSecretSlug],
+        oldSecret: OLD_SECRET,
+        payload,
+      })
+
+      // Does not throw, and the index-less row is neither migrated nor skipped.
+      expect(result).toEqual({ migrated: 0, skipped: 0 })
+    })
+  })
+
+  describe('encryption envelope (v1) and keyring', () => {
+    const legacyCtrEncrypt = (value: string, secret: string) => {
+      const key = crypto.createHash('sha256').update(secret).digest('hex').slice(0, 32)
+      const iv = crypto.randomBytes(16)
+      const cipher = crypto.createCipheriv('aes-256-ctr', key, iv)
+      return iv.toString('hex') + cipher.update(value, 'utf8', 'hex') + cipher.final('hex')
+    }
+
+    it('should encrypt with the v1 aes-256-gcm envelope and round-trip', () => {
+      const encrypted = payload.encrypt('secret-value')
+
+      expect(encrypted.startsWith('v1:')).toBe(true)
+      expect(encrypted.split(':')[1]).toBe(payload.encryptionKeyring.active.keyId)
+      expect(payload.decrypt(encrypted)).toBe('secret-value')
+    })
+
+    it('should still decrypt legacy aes-256-ctr values', () => {
+      const legacy = legacyCtrEncrypt('legacy-value', payload.config.secret)
+
+      expect(legacy.startsWith('v1:')).toBe(false)
+      expect(payload.decrypt(legacy)).toBe('legacy-value')
+    })
+
+    it('should throw when a v1 value has been tampered with', () => {
+      const encrypted = payload.encrypt('tamper-me')
+      const lastChar = encrypted.slice(-1)
+      const tampered = encrypted.slice(0, -1) + (lastChar === 'a' ? 'b' : 'a')
+
+      expect(() => payload.decrypt(tampered)).toThrow()
+    })
+
+    it('should throw when no keyring secret matches the value key id', () => {
+      const encrypted = payload.encrypt('x', { secret: 'a-secret-not-in-the-keyring' })
+
+      expect(() => payload.decrypt(encrypted)).toThrow(/no secret in the keyring/)
+    })
+
+    // Hand-signs an HS256 JWT (jose verifies with the utf8 bytes of the derived
+    // key), re-using a real login's claims so session validation still passes.
+    const signHS256 = (claims: Record<string, unknown>, secret: string) => {
+      const key = crypto.createHash('sha256').update(secret).digest('hex').slice(0, 32)
+      const b64 = (obj: unknown) => Buffer.from(JSON.stringify(obj)).toString('base64url')
+      const data = `${b64({ alg: 'HS256', typ: 'JWT' })}.${b64(claims)}`
+      const signature = crypto.createHmac('sha256', key).update(data).digest('base64url')
+      return `${data}.${signature}`
+    }
+
+    it('should verify a JWT signed under a previous secret, and reject an unknown secret', async () => {
+      const { token, user } = await payload.login({ collection: slug, data: { email, password } })
+
+      const { exp: _exp, iat: _iat, ...claims } = jwtDecode<Record<string, unknown>>(token)
+      const nowInSeconds = Math.floor(Date.now() / 1000)
+      const freshClaims = { ...claims, exp: nowInSeconds + 3600, iat: nowInSeconds }
+
+      // Signed under a previousSecret (in the keyring) - still authenticates.
+      const underPrevious = await restClient
+        .GET('/users/me', {
+          headers: { Authorization: `JWT ${signHS256(freshClaims, rotateSecretOldSecret)}` },
+        })
+        .then((res) => res.json())
+      expect(underPrevious.user?.id).toBe(user?.id)
+
+      // Signed under a secret not in the keyring - rejected.
+      const underUnknown = await restClient
+        .GET('/users/me', {
+          headers: {
+            Authorization: `JWT ${signHS256(freshClaims, 'a-secret-not-in-the-keyring')}`,
+          },
+        })
+        .then((res) => res.json())
+      expect(underUnknown.user).toBeFalsy()
     })
   })
 })
