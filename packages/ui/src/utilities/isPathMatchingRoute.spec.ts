@@ -181,4 +181,26 @@ describe('isPathMatchingRoute', () => {
       ).toBe(false)
     })
   })
+
+  describe('paths that path-to-regexp cannot parse — regression for #15241', () => {
+    it('should not throw on a trailing bare colon', () => {
+      expect(() =>
+        isPathMatchingRoute({ currentRoute: '/admin/foo', path: '/foo/:' }),
+      ).not.toThrow()
+    })
+
+    it('should not throw on consecutive colons', () => {
+      expect(() =>
+        isPathMatchingRoute({ currentRoute: '/admin/foo', path: '/foo::bar' }),
+      ).not.toThrow()
+    })
+
+    it('should not match an unrelated route against an unparseable path', () => {
+      expect(isPathMatchingRoute({ currentRoute: '/dashboard', path: '/foo/:' })).toBe(false)
+    })
+
+    it('should fall back to literal equality for an unparseable path when exact', () => {
+      expect(isPathMatchingRoute({ currentRoute: '/foo/:', exact: true, path: '/foo/:' })).toBe(true)
+    })
+  })
 })
