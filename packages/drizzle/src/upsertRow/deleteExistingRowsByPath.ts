@@ -1,4 +1,4 @@
-import { and, eq, inArray } from 'drizzle-orm'
+import { and, eq, inArray, like } from 'drizzle-orm'
 
 import type { DrizzleAdapter, DrizzleTransaction } from '../types.js'
 
@@ -25,13 +25,22 @@ export const deleteExistingRowsByPath = async ({
 }: Args): Promise<void> => {
   const localizedPathsToDelete = new Set<string>()
   const pathsToDelete = new Set<string>()
+  const localizedPrefixPathsToDelete = new Set<string>()
+  const prefixPathsToDelete = new Set<string>()
   const table = adapter.tables[tableName]
 
   rows.forEach((row) => {
     const path = row[pathColumnName]
     const localeData = row[localeColumnName]
+    const prefix = row.prefix as boolean | undefined
     if (typeof path === 'string') {
-      if (typeof localeData === 'string') {
+      if (prefix) {
+        if (typeof localeData === 'string') {
+          localizedPrefixPathsToDelete.add(path)
+        } else {
+          prefixPathsToDelete.add(path)
+        }
+      } else if (typeof localeData === 'string') {
         localizedPathsToDelete.add(path)
       } else {
         pathsToDelete.add(path)
@@ -65,5 +74,35 @@ export const deleteExistingRowsByPath = async ({
       tableName,
       where: and(...whereConstraints),
     })
+  }
+
+  if (localizedPrefixPathsToDelete.size > 0) {
+    for (const prefix of localizedPrefixPathsToDelete) {
+      const whereConstraints = [
+        eq(table[parentColumnName], parentID),
+        like(table[pathColumnName], `${prefix}%`),
+      ]
+
+      await adapter.deleteWhere({
+        db,
+        tableName,
+        where: and(...whereConstraints),
+      })
+    }
+  }
+
+  if (prefixPathsToDelete.size > 0) {
+    for (const prefix of prefixPathsToDelete) {
+      const whereConstraints = [
+        eq(table[parentColumnName], parentID),
+        like(table[pathColumnName], `${prefix}%`),
+      ]
+
+      await adapter.deleteWhere({
+        db,
+        tableName,
+        where: and(...whereConstraints),
+      })
+    }
   }
 }
