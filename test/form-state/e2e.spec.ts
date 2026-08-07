@@ -524,6 +524,74 @@ test.describe('Form State', () => {
     await expect(computedTitleField).toHaveValue('Test Title 2')
   })
 
+  describe('stale autosave responses', () => {
+    let releaseRoutes = () => {}
+
+    afterEach(async () => {
+      releaseRoutes()
+      await page.unrouteAll({ behavior: 'ignoreErrors' })
+    })
+
+    test('autosave - should discard a stale response and reconcile the latest revision', async () => {
+      const doc = await payload.create({
+        collection: autosavePostsSlug,
+        data: { title: 'Initial revision' },
+      })
+      await page.goto(autosavePostsUrl.edit(doc.id))
+      await waitForFormReady(page)
+
+      const firstStarted = Promise.withResolvers<void>()
+      const releaseFirst = Promise.withResolvers<void>()
+      const secondStarted = Promise.withResolvers<void>()
+      const releaseSecond = Promise.withResolvers<void>()
+      let requestCount = 0
+
+      releaseRoutes = () => {
+        releaseFirst.resolve()
+        releaseSecond.resolve()
+      }
+
+      await page.route(`**/api/${autosavePostsSlug}/**`, async (route) => {
+        if (route.request().method() !== 'PATCH') {
+          return route.continue()
+        }
+        requestCount += 1
+        if (requestCount === 1) {
+          firstStarted.resolve()
+          await releaseFirst.promise
+        } else if (requestCount === 2) {
+          secondStarted.resolve()
+          await releaseSecond.promise
+        }
+        await route.continue()
+      })
+
+      const titleField = page.locator('#field-title')
+      const computedTitleField = page.locator('#field-computedTitle')
+
+      await titleField.fill('First revision')
+      await firstStarted.promise
+
+      await titleField.fill('Latest revision')
+      await computedTitleField.fill('Local edit after dispatch')
+
+      releaseFirst.resolve()
+      await secondStarted.promise
+
+      await expect(titleField).toHaveValue('Latest revision')
+      await expect(computedTitleField).toHaveValue('Local edit after dispatch')
+
+      releaseSecond.resolve()
+      await waitForAutoSaveToRunAndComplete(page)
+
+      await expect(titleField).toHaveValue('Latest revision')
+      await expect(computedTitleField).toHaveValue('Latest revision')
+      expect(requestCount).toBe(2)
+
+      await page.unrouteAll({ behavior: 'ignoreErrors' })
+    })
+  })
+
   test('array and block rows and maintain consistent row IDs across duplication', async () => {
     await page.goto(postsUrl.create)
     await waitForFormReady(page)
