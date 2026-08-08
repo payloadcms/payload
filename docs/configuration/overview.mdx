@@ -415,7 +415,7 @@ cli: {
 }
 ```
 
-Path references are loaded only when the CLI starts, keeping the command and its dependencies out of the Payload config's module graph. You can also import and pass a `CLICommand` directly when that isolation is not needed.
+Path references are loaded only when the CLI starts, keeping the command and its dependencies out of the Payload config's module graph. Relative paths are resolved from the directory containing `payload.config.ts`. You can also import and pass a `CLICommand` directly when that isolation is not needed.
 
 The same map controls Payload's built-in commands. Use an existing command name to replace it, or set it to `false` to disable it:
 
