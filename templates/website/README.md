@@ -217,8 +217,9 @@ This command will check for any migrations that have not yet been run and try to
 Alternatively, you can use [Docker](https://www.docker.com) to spin up this template locally. To do so, follow these steps:
 
 1. Follow [steps 1 and 2 from above](#development), the docker-compose file will automatically use the `.env` file in your project root
+1. Modify .env file as needed (IMPORTANT: DATABASE_URI should use 'mongo' instead of '127.0.0.1')
 1. Next run `docker-compose up`
-1. Follow [steps 4 and 5 from above](#development) to login and create your first admin user
+1. Follow [step 4 from above](#development) to login and then create your first admin user and [seed](#seed)
 
 That's it! The Docker instance will help you get up and running quickly while also standardizing the development environment across your teams.
 
