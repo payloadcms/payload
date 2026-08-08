@@ -454,6 +454,56 @@ pnpm payload seed --input -
 
 Use `payload help --json` to discover every command and its JSON Schema, or `payload help seed --json` to inspect one command.
 
+## Working with data from the CLI
+
+Payload includes local commands for inspecting the config and working with collections and globals. They use the Local API, load the current Payload config on every invocation, and set `overrideAccess: true`. Run them only from a trusted environment with access to the project.
+
+Start by discovering the available slugs and inspecting the input schema for a collection:
+
+```sh
+pnpm payload getConfigInfo
+pnpm payload getCollectionSchema --slug posts
+```
+
+You can then query and update data without starting the development server:
+
+```sh
+pnpm payload findDocuments \
+  --slug posts \
+  --where '{"status":{"equals":"published"}}'
+
+pnpm payload updateDocument \
+  --slug posts \
+  --id 1 \
+  --data '{"title":"Updated title"}'
+```
+
+`createDocuments` accepts one or more `documents`, keeping each document's data and optional upload file together:
+
+```sh
+pnpm payload createDocuments \
+  --slug media \
+  --documents '{"data":{"alt":"Company logo"},"file":"./images/logo.png"}'
+```
+
+Repeat `--documents` to create several documents, or pass the complete semantic input through `--input`:
+
+```json
+{
+  "slug": "posts",
+  "documents": [
+    { "data": { "title": "First post" } },
+    { "data": { "title": "Second post" } }
+  ]
+}
+```
+
+```sh
+pnpm payload createDocuments --input @create-posts.json
+```
+
+The built-in data commands cover collection queries, counts, distinct values, create, update, delete, duplicate, and version operations. Globals have matching schema, read, update, count-version, find-version, and restore-version commands. Use `payload help --json` to list them or `payload help <command> --json` to inspect the exact input accepted by one command.
+
 ## Running CLI commands on a schedule
 
 Every CLI command supports being run on a schedule using cron syntax. Pass the `--cron` flag followed by the cron expression:

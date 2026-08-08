@@ -1,10 +1,6 @@
-import type {
-  FlattenedBlock,
-  FlattenedField,
-  Operation,
-  SanitizedDocumentPermissions,
-  SanitizedFieldsPermissions,
-} from 'payload'
+import type { SanitizedDocumentPermissions, SanitizedFieldsPermissions } from '../../auth/types.js'
+import type { FlattenedBlock, FlattenedField } from '../../fields/config/types.js'
+import type { Operation } from '../../types/index.js'
 
 type FieldOperation = Exclude<Operation, 'delete'>
 type AllowedFieldOperations = Record<FieldOperation, boolean>

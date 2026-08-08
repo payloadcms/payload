@@ -17,11 +17,11 @@ type CLIFieldOverride =
   | 'argument'
   | {
       flags?: string
-      parse?: (value: string) => unknown
+      parse?: (value: string, previous: unknown) => unknown
       type?: 'option'
     }
   | {
-      parse?: (value: string) => unknown
+      parse?: (value: string, previous: unknown) => unknown
       position?: number
       syntax?: string
       type: 'argument'
@@ -157,6 +157,10 @@ export const defineCLICommand = <TInput extends CLIInputSchema>({
 
           if (parser) {
             option.argParser(parser)
+          }
+
+          if ('default' in property) {
+            option.default(property.default)
           }
 
           const choices = property.enum
