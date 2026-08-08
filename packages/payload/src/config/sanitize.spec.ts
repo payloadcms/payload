@@ -4,11 +4,19 @@ import { describe, expect, it } from 'vitest'
 
 import { sanitizeConfig } from './sanitize.js'
 
+const configDefaults: Config = {
+  db: {
+    defaultIDType: 'text',
+    // @ts-expect-error partial config
+    init: () => {},
+  },
+  secret: 'secret',
+}
+
 describe('sanitizeConfig', () => {
   it('should populate sanitized root config defaults for a minimal config', () => {
-    // @ts-expect-error partial config
     const config: Config = {
-      collections: [],
+      ...configDefaults,
     }
 
     const sanitizedConfig = sanitizeConfig(config)
@@ -65,10 +73,22 @@ describe('sanitizeConfig', () => {
     })
   })
 
-  it('should populate sanitized localization defaults with no locales', () => {
-    // @ts-expect-error partial config
+  it('should populate a nested default when the property is explicitly undefined', () => {
     const config: Config = {
-      collections: [],
+      ...configDefaults,
+      admin: {
+        avatar: undefined,
+      },
+    }
+
+    const sanitizedConfig = sanitizeConfig(config)
+
+    expect(sanitizedConfig.admin.avatar).toBe('gravatar')
+  })
+
+  it('should populate sanitized localization defaults with no locales', () => {
+    const config: Config = {
+      ...configDefaults,
       localization: {
         defaultLocale: 'en',
         locales: [],
