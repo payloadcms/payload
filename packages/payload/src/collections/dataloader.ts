@@ -88,6 +88,17 @@ const batchAndLoadDocs =
       }
     }
 
+    // Map each cache key to its index up front so the per-doc lookup below is O(1)
+    // instead of a full `keys.findIndex` scan. `keys` is fixed for this batch, so a
+    // single pass here turns the doc-placement loop from O(n²) into O(n) over the
+    // batch size. First occurrence wins, mirroring `findIndex`.
+    const keyToIndex = new Map<string, number>()
+    for (let i = 0; i < keys.length; i++) {
+      if (!keyToIndex.has(keys[i]!)) {
+        keyToIndex.set(keys[i]!, i)
+      }
+    }
+
     // Run find requests one after another, so as to not hang transactions
 
     for (const [batchKey, ids] of Object.entries(batchByFindArgs)) {
@@ -149,9 +160,9 @@ const batchAndLoadDocs =
           showHiddenFields,
           transactionID: req.transactionID!,
         })
-        const docsIndex = keys.findIndex((key) => key === docKey)
+        const docsIndex = keyToIndex.get(docKey)
 
-        if (docsIndex > -1) {
+        if (docsIndex !== undefined) {
           docs[docsIndex] = doc
         }
       }
