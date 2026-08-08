@@ -34,6 +34,11 @@
       "import": "./src/exports/sqlite.ts",
       "types": "./src/exports/sqlite.ts",
       "default": "./src/exports/sqlite.ts"
+    },
+    "./sqlite/create-require-drizzle-kit": {
+      "import": "./src/sqlite/createRequireDrizzleKit.ts",
+      "types": "./src/sqlite/createRequireDrizzleKit.ts",
+      "default": "./src/sqlite/createRequireDrizzleKit.ts"
     }
   },
   "main": "./src/index.ts",
@@ -85,6 +90,11 @@
         "import": "./dist/exports/sqlite.js",
         "types": "./dist/exports/sqlite.d.ts",
         "default": "./dist/exports/sqlite.js"
+      },
+      "./sqlite/create-require-drizzle-kit": {
+        "import": "./dist/sqlite/createRequireDrizzleKit.js",
+        "types": "./dist/sqlite/createRequireDrizzleKit.d.ts",
+        "default": "./dist/sqlite/createRequireDrizzleKit.js"
       }
     },
     "main": "./dist/index.js",
