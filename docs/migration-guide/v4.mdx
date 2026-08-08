@@ -22,6 +22,117 @@ The codemod is idempotent and safe to run on a partially-migrated project.
 
 ## Breaking Changes
 
+### Custom bin scripts replaced by native CLI commands
+
+The `config.bin` API has been removed. Custom commands are now registered through `config.cli.commands` and use the same schema-backed Commander API as Payload's built-in commands.
+
+In Payload 3.x, config entries connected a command name to a script path:
+
+```ts
+// payload.config.ts
+export default buildConfig({
+  bin: [
+    {
+      key: 'seed',
+      scriptPath: path.resolve(dirname, 'seed.ts'),
+    },
+  ],
+})
+```
+
+The imported module had to expose a specially named `script` function:
+
+```ts
+// seed.ts
+import type { SanitizedConfig } from 'payload'
+
+import payload from 'payload'
+
+export const script = async (config: SanitizedConfig) => {
+  await payload.init({ config })
+  // Seed the database...
+  process.exit(0)
+}
+```
+
+In Payload 4.0, define a real CLI command instead:
+
+```ts
+// seed.ts
+import { defineCLICommand, z } from 'payload/cli'
+
+export const seedCommand = defineCLICommand({
+  description: 'Seed the database.',
+  input: z.strictObject({
+    clear: z
+      .boolean()
+      .default(false)
+      .describe('Delete existing documents first.'),
+  }),
+  handler: async ({ args, getPayload }) => {
+    const payload = await getPayload()
+
+    if (args.clear) {
+      // Delete existing documents...
+    }
+
+    // Seed the database...
+    payload.logger.info('Successfully seeded!')
+  },
+})
+```
+
+Register the command export in your Payload config:
+
+```ts
+// payload.config.ts
+export default buildConfig({
+  cli: {
+    commands: {
+      seed: './seed.js#seedCommand',
+    },
+  },
+})
+```
+
+When migrating custom scripts:
+
+- Replace `bin` entries with entries in the `cli.commands` map. The map key becomes the command name.
+- Replace the exported `script(config)` function with a schema-backed command created by `defineCLICommand`.
+- Register commands by import path to keep them out of the Payload config's module graph. Paths use the existing `PayloadComponent` syntax, resolve relative to `payload.config.ts`, and support default or named exports. Direct `CLICommand` values are also accepted.
+- Define the handler's semantic input with a Standard Schema implementation such as Zod. Supported top-level properties become options automatically; use `cli` only to mark positional arguments, hide fields, or override unusual shell syntax.
+- Use the provided `getPayload()` function so Payload can shut down database connections after the command finishes.
+- Return an exit code from the handler when needed. Do not call `process.exit()` from the command.
+
+Payload adds built-in command import references to `cli.commands` while sanitizing the config, then applies project entries over those defaults. All built-ins are named exports from `payload/cli/builtin`, and Payload imports a referenced module only once even when it provides several commands. The sanitized map therefore contains the complete local CLI, and built-in and project commands use the same loader. Custom commands appear in `payload --help` and receive Standard Schema validation and Commander help generation. A command with the same map key as a built-in command replaces it, while `false` disables that command. Set `cli: false` to disable the entire Payload CLI. Commands also appear with a generated JSON Schema in `payload help --json`, and every command accepts the schema object directly through `--input <json|@file|->`. Command names are case-sensitive. Because custom commands must be registered before Commander parses input, the Payload config is now loaded before displaying root CLI help.
+
+See [Custom CLI commands](../configuration/overview#custom-cli-commands) for the complete API.
+
+### `migrateCLI` removed
+
+The undocumented `migrateCLI` export has been removed. It accepted an already-sanitized config, a minimist-shaped `parsedArgs` object, and a special `migrationDir` override. This duplicated migration command registration and kept the old argument format alive after the main CLI moved to Commander.
+
+If application code needs migration behavior rather than command-line parsing, call the database adapter directly through an initialized Payload instance:
+
+```ts
+await payload.db.migrate()
+```
+
+The adapter also exposes the corresponding `migrateDown`, `migrateFresh`, `migrateRefresh`, `migrateReset`, `migrateStatus`, and `createMigration` methods.
+
+If you need to execute the real CLI from JavaScript, use the existing generic `payload.bin()` method. It starts the same CLI process a user would run in a terminal and returns its exit code:
+
+```ts
+import payload from 'payload'
+
+const { code } = await payload.bin({
+  args: ['migrate:create', '--file', migrationPath],
+  cwd: projectDirectory,
+})
+```
+
+The spawned CLI discovers the Payload config from `cwd` or `PAYLOAD_CONFIG_PATH`. Configure a custom migration directory through your database adapter instead of passing it as a programmatic CLI override.
+
 ### Default query depth reduced to `1`
 
 Queries that omit `depth` now populate one relationship level instead of two. This reduces database work and response size by default.

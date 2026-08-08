@@ -1,9 +1,9 @@
 import fs from 'fs/promises'
 import process from 'node:process'
 
-import type { PayloadComponent, SanitizedConfig } from '../../config/types.js'
+import type { PayloadComponent, SanitizedConfig } from '../../../config/types.js'
 
-import { getLogger } from '../../utilities/logger.js'
+import { getLogger } from '../../../utilities/logger.js'
 import { iterateConfig } from './iterateConfig.js'
 import { addPayloadComponentToImportMap } from './utilities/addPayloadComponentToImportMap.js'
 import { getImportMapToBaseDirPath } from './utilities/getImportMapToBaseDirPath.js'

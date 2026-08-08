@@ -68,7 +68,7 @@ The following options are available:
 | Option                     | Description                                                                                                                                                                                    |
 | -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **`admin`**                | The configuration options for the Admin Panel, including Custom Components, Live Preview, etc. [More details](../admin/overview#admin-options).                                                |
-| **`bin`**                  | Register custom bin scripts for Payload to execute. [More Details](#custom-bin-scripts).                                                                                                       |
+| **`cli`**                  | Register custom Payload CLI commands. [More Details](#custom-cli-commands).                                                                                                                    |
 | **`editor`**               | The Rich Text Editor which will be used by `richText` fields. [More details](../rich-text/overview).                                                                                           |
 | **`db`** \*                | The Database Adapter which will be used by Payload. [More details](../database/overview).                                                                                                      |
 | **`serverURL`**            | A string used to define the absolute URL of your app. This includes the protocol, for example `https://example.com`. No paths allowed, only protocol, domain and (optionally) port.            |
@@ -131,13 +131,13 @@ export default buildConfig({
 
 The following options are available:
 
-| Option                 | Description                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`autoGenerate`**     | By default, Payload will auto-generate TypeScript interfaces for all collections and globals that your config defines. Opt out by setting `typescript.autoGenerate: false`. [More details](../typescript/overview).                                                                                                                                                                                                                                     |
-| **`generateInputTypes`** | Opt in (defaults to `false`) to also generate a write-shaped input type (e.g. `PostInput`) alongside each read type, by setting `typescript.generateInputTypes: true`. [More details](../typescript/generating-types#input-and-output-types).                                                                                                                                                                                                                  |
-| **`declare`**          | By default, Payload adds a `declare` block to your generated types, which makes sure that Payload uses your generated types for all Local API methods. Opt out by setting `typescript.declare: false`.                                                                                                                                                                                                                                                  |
-| **`outputFile`**       | Control the output path and filename of Payload's auto-generated types by defining the `typescript.outputFile` property to a full, absolute path.                                                                                                                                                                                                                                                                                                       |
-| **`strictDraftTypes`** | Enable strict type safety for draft mode. When enabled: (1) Query operations (`find`, `findByID`) with `draft: true` will type required fields as optional, since validation is skipped for drafts. (2) The `draft` property is forbidden for collections without drafts in create operations. (3) Create operations enforce proper data requirements via discriminated unions. Defaults to `false`. **This will become the default behavior in v4.0.** |
+| Option                   | Description                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`autoGenerate`**       | By default, Payload will auto-generate TypeScript interfaces for all collections and globals that your config defines. Opt out by setting `typescript.autoGenerate: false`. [More details](../typescript/overview).                                                                                                                                                                                                                                     |
+| **`generateInputTypes`** | Opt in (defaults to `false`) to also generate a write-shaped input type (e.g. `PostInput`) alongside each read type, by setting `typescript.generateInputTypes: true`. [More details](../typescript/generating-types#input-and-output-types).                                                                                                                                                                                                           |
+| **`declare`**            | By default, Payload adds a `declare` block to your generated types, which makes sure that Payload uses your generated types for all Local API methods. Opt out by setting `typescript.declare: false`.                                                                                                                                                                                                                                                  |
+| **`outputFile`**         | Control the output path and filename of Payload's auto-generated types by defining the `typescript.outputFile` property to a full, absolute path.                                                                                                                                                                                                                                                                                                       |
+| **`strictDraftTypes`**   | Enable strict type safety for draft mode. When enabled: (1) Query operations (`find`, `findByID`) with `draft: true` will type required fields as optional, since validation is skipped for drafts. (2) The `draft` property is forbidden for collections without drafts in create operations. (3) Create operations enforce proper data requirements via discriminated unions. Defaults to `false`. **This will become the default behavior in v4.0.** |
 
 ## Config Location
 
@@ -342,40 +342,99 @@ Set the `DISABLE_LOGGING` environment variable to `'true'` to suppress all log o
 DISABLE_LOGGING=true node server.js
 ```
 
-## Custom bin scripts
+## Custom CLI commands
 
-Using the `bin` configuration property, you can inject your own scripts to `npx payload`.
-Example for `pnpm payload seed`:
+Use the `cli.commands` map to add, replace, or disable commands in `npx payload`. The map key is the command name, and its value can be a command created with `defineCLICommand`, a [`PayloadComponent`](../custom-components/overview#component-paths) import reference, or `false` to disable that command.
 
-Step 1: create `seed.ts` file in the same folder with `payload.config.ts` with:
+Custom commands use the same schema-backed API and lifecycle as Payload's built-in commands. The input accepts any [Standard Schema](https://standardschema.dev/) implementation that can generate JSON Schema. Payload exports Zod as a convenient default.
+
+Every supported top-level schema property becomes a Commander option automatically. Payload infers its flag, parser, choices, default behavior, and help description from the schema. Use `cli` only for exceptions: set a field to `'argument'` to make it positional, `false` to expose it only through `--input`, or an object to override its flags, syntax, or parser.
+
+For example, create a `seed.ts` command next to `payload.config.ts`:
 
 ```ts
-import type { SanitizedConfig } from 'payload'
+import { defineCLICommand, z } from 'payload/cli'
 
-import payload from 'payload'
+export const seedCommand = defineCLICommand({
+  description: 'Seed the database.',
+  input: z.strictObject({
+    clear: z
+      .boolean()
+      .default(false)
+      .describe('Delete existing documents first.'),
+  }),
+  handler: async ({ args, getPayload }) => {
+    const payload = await getPayload()
 
-// Script must define a "script" function export that accepts the sanitized config
-export const script = async (config: SanitizedConfig) => {
-  await payload.init({ config })
-  await payload.create({
-    collection: 'pages',
-    data: { title: 'my title' },
-  })
-  payload.logger.info('Successfully seeded!')
-  process.exit(0)
+    if (args.clear) {
+      // Delete existing documents...
+    }
+
+    await payload.create({
+      collection: 'pages',
+      data: { title: 'My page' },
+    })
+
+    payload.logger.info('Successfully seeded!')
+  },
+})
+```
+
+For example, a positional input only needs this additional configuration:
+
+```ts
+cli: {
+  filePath: 'argument',
 }
 ```
 
-Step 2: add the `seed` script to `bin`:
+Then register its export in your Payload config:
 
 ```ts
 export default buildConfig({
-  bin: [
-    {
-      scriptPath: path.resolve(dirname, 'seed.ts'),
-      key: 'seed',
+  cli: {
+    commands: {
+      seed: './seed.js#seedCommand',
     },
-  ],
+  },
+})
+```
+
+Import references use the existing `PayloadComponent` syntax. A string without `#` loads the default export, while `#seedCommand` or the object form selects a named export:
+
+```ts
+cli: {
+  commands: {
+    seed: './seed.js',
+    cleanup: './cleanup.js#cleanupCommand',
+    importData: {
+      path: './data.js',
+      exportName: 'importDataCommand',
+    },
+  },
+}
+```
+
+Path references are loaded only when the CLI starts, keeping the command and its dependencies out of the Payload config's module graph. Relative paths are resolved from the directory containing `payload.config.ts`. You can also import and pass a `CLICommand` directly when that isolation is not needed.
+
+Payload adds its built-in command import references to this map when it sanitizes the config, then applies project commands over those defaults. The built-ins are named exports from `payload/cli/builtin`, so they share one module import. This means `payload.config.cli.commands` contains the complete local command map, and the CLI loads built-in and project commands in the same way. If multiple entries reference the same module, Payload imports that module once and reads each named export from it.
+
+Use an existing command name to replace it, or set it to `false` to disable it:
+
+```ts
+cli: {
+  commands: {
+    'generate:types': './generateTypes.js#generateTypesCommand',
+    info: false,
+  },
+}
+```
+
+Set `cli` itself to `false` to disable the entire Payload CLI:
+
+```ts
+export default buildConfig({
+  cli: false,
 })
 ```
 
@@ -385,12 +444,22 @@ Now you can run the command using:
 pnpm payload seed
 ```
 
-## Running bin scripts on a schedule
+Every schema-backed command also accepts its complete input as JSON. Inline JSON, `@file`, and stdin all run through the same schema validation and handler:
 
-Every bin script supports being run on a schedule using cron syntax. Simply pass the `--cron` flag followed by the cron expression when running the script. Example:
+```sh
+pnpm payload seed --input '{"clear":true}'
+pnpm payload seed --input @seed-input.json
+pnpm payload seed --input -
+```
+
+Use `payload help --json` to discover every command and its JSON Schema, or `payload help seed --json` to inspect one command.
+
+## Running CLI commands on a schedule
+
+Every CLI command supports being run on a schedule using cron syntax. Pass the `--cron` flag followed by the cron expression:
 
 ```sh
 pnpm payload run ./myScript.ts --cron "0 * * * *"
 ```
 
-This will use the `run` bin script to execute the specified script on the defined schedule.
+This executes the command on the defined schedule.

@@ -4,11 +4,13 @@ import { initI18n } from '@payloadcms/translations'
 import fs from 'fs/promises'
 import { compile } from 'json-schema-to-typescript'
 
-import type { SanitizedConfig } from '../config/types.js'
+import type { SanitizedConfig } from '../../config/types.js'
 
-import { addSelectGenericsToGeneratedTypes } from '../utilities/addSelectGenericsToGeneretedTypes.js'
-import { configToJSONSchema } from '../utilities/configToJSONSchema.js'
-import { getLogger } from '../utilities/logger.js'
+import { addSelectGenericsToGeneratedTypes } from '../../utilities/addSelectGenericsToGeneretedTypes.js'
+import { configToJSONSchema } from '../../utilities/configToJSONSchema.js'
+import { getLogger } from '../../utilities/logger.js'
+import { defineCLICommand } from '../defineCLICommand.js'
+import { strictObject } from '../zod.js'
 
 export async function generateTypes(
   config: SanitizedConfig,
@@ -94,3 +96,12 @@ export async function generateTypes(
     logger.info(`Types written to ${outputFile}`)
   }
 }
+
+export const createGenerateTypesCommand = defineCLICommand({
+  description: 'Generate TypeScript types from the Payload config.',
+  handler: async ({ getConfig }) => {
+    await generateTypes(await getConfig())
+  },
+  helpGroup: 'Core commands',
+  input: strictObject({}),
+})

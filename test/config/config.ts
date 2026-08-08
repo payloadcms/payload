@@ -11,6 +11,11 @@ export default buildConfigWithDefaults({
       baseDir: path.resolve(dirname),
     },
   },
+  cli: {
+    commands: {
+      'start-server': './customScript.ts',
+    },
+  },
   collections: [
     {
       slug: 'pages',
@@ -83,12 +88,6 @@ export default buildConfigWithDefaults({
       },
       method: 'get',
       path: '/config',
-    },
-  ],
-  bin: [
-    {
-      scriptPath: path.resolve(dirname, 'customScript.ts'),
-      key: 'start-server',
     },
   ],
   globals: [

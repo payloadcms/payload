@@ -1,7 +1,7 @@
-import type { SanitizedConfig } from '../../config/types.js'
-import type { AddToImportMap, Imports, InternalImportMap } from './index.js'
+import type { SanitizedConfig } from '../../../config/types.js'
+import type { AddToImportMap, Imports, InternalImportMap } from './generateImportMap.js'
 
-import { isUserMenuSettingsGroup } from '../../config/types.js'
+import { isUserMenuSettingsGroup } from '../../../config/types.js'
 import { iterateCollections } from './iterateCollections.js'
 import { genImportMapIterateFields } from './iterateFields.js'
 import { iterateGlobals } from './iterateGlobals.js'
