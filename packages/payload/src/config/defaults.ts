@@ -35,9 +35,11 @@ export const addDefaultsToConfig = (config: Config): Config => {
     },
   }
 
-  config.cli = {
-    commands: [],
-    ...config.cli,
+  if (config.cli !== false) {
+    config.cli = {
+      commands: {},
+      ...config.cli,
+    }
   }
   config.collections = config.collections ?? []
   config.cookiePrefix = config.cookiePrefix ?? 'payload'

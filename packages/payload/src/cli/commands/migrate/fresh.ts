@@ -5,7 +5,6 @@ import { strictObject } from '../../zod.js'
 import { initializeMigration } from './initialize.js'
 
 export const createMigrateFreshCommand = defineCLICommand({
-  name: 'migrate:fresh',
   description: 'Run all migrations from a clean database.',
   handler: async ({ args, getPayload }) => {
     const { adapter, payload } = await initializeMigration({ getPayload })

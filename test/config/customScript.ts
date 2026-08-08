@@ -4,7 +4,6 @@ import { defineCLICommand, z } from 'payload/cli'
 import { testFilePath } from './testFilePath.js'
 
 export const createStartServerCommand = defineCLICommand({
-  name: 'start-server',
   description: 'Write the current users to the CLI test file.',
   handler: async ({ getPayload }) => {
     const payload = await getPayload()
@@ -14,3 +13,5 @@ export const createStartServerCommand = defineCLICommand({
   },
   input: z.strictObject({}),
 })
+
+export default createStartServerCommand

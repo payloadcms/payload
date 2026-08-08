@@ -3,7 +3,6 @@ import { strictObject } from '../../zod.js'
 import { initializeMigration } from './initialize.js'
 
 export const createMigrateCommand = defineCLICommand({
-  name: 'migrate',
   description: 'Run pending migrations.',
   handler: async ({ getPayload }) => {
     const { adapter, payload } = await initializeMigration({ getPayload })

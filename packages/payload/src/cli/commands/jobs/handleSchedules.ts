@@ -4,7 +4,6 @@ import { defineCLICommand } from '../../defineCLICommand.js'
 import { strictObject } from '../../zod.js'
 
 export const createJobsHandleSchedulesCommand = defineCLICommand({
-  name: 'jobs:handle-schedules',
   description: 'Queue due scheduled jobs.',
   handler: async ({ args, getPayload }) => {
     const payload = await getPayload()

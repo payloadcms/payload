@@ -156,9 +156,15 @@ export type CLIArgs = {
 /** A schema-backed command created with `defineCLICommand`. */
 export type CLICommand = {
   /** Creates the Commander command with Payload's runtime CLI helpers. */
-  command: (args: CLIArgs) => Command
+  command: (args: { cliArgs: CLIArgs; name: string }) => Command
   readonly schema: Record<string, unknown>
 }
+
+/** A CLI command definition, import reference, or `false` to disable the command. */
+export type CLICommandEntry = CLICommand | PayloadComponent
+
+/** CLI commands keyed by their command-line name. */
+export type CLICommands = Record<string, CLICommandEntry>
 
 type Prettify<T> = {
   [K in keyof T]: T[K]
@@ -1253,10 +1259,13 @@ export type Config = {
    * @experimental This property is experimental and may change in future releases. Use at your own risk.
    */
   bodyParser?: Partial<BusboyConfig>
-  /** Add custom commands to the Payload CLI. */
-  cli?: {
-    commands?: CLICommand[]
-  }
+  /** Customize the Payload CLI, or set to `false` to disable it. */
+  cli?:
+    | false
+    | {
+        /** Add, replace, or disable commands by name. */
+        commands?: CLICommands
+      }
   /**
    * Manage the datamodel of your application
    *

@@ -4,7 +4,6 @@ import { defineCLICommand } from '../defineCLICommand.js'
 import { strictObject } from '../zod.js'
 
 export const createGenerateDBSchemaCommand = defineCLICommand({
-  name: 'generate:db-schema',
   description: 'Generate the database adapter schema.',
   handler: async ({ args, getPayload }) => {
     const payload = await getPayload({

@@ -13,7 +13,6 @@ type CommandDescription = {
 }
 
 export const createHelpCommand = defineCLICommand({
-  name: 'help',
   cli: {
     command: 'argument',
   },

@@ -43,12 +43,10 @@ type CLICommandDefinition<TInput extends CLIInputSchema> = {
   ) => number | Promise<number | void> | void
   helpGroup?: string
   input: TInput
-  name: string
 }
 
 /** Defines a CLI command from a semantic input schema and Commander configuration. */
 export const defineCLICommand = <TInput extends CLIInputSchema>({
-  name,
   aliases,
   allowUnknownOption = false,
   cli,
@@ -60,7 +58,7 @@ export const defineCLICommand = <TInput extends CLIInputSchema>({
   const schema = input['~standard'].jsonSchema.input({ target: 'draft-2020-12' })
 
   if (schema.type !== 'object') {
-    throw new Error(`CLI command '${name}' input schema must describe an object.`)
+    throw new Error('CLI command input schema must describe an object.')
   }
 
   const properties = (schema.properties ?? {}) as Record<string, Record<string, unknown>>
@@ -68,12 +66,12 @@ export const defineCLICommand = <TInput extends CLIInputSchema>({
 
   for (const field of Object.keys(overrides)) {
     if (!(field in properties)) {
-      throw new Error(`CLI command '${name}' configures unknown input '${field}'.`)
+      throw new Error(`CLI command configures unknown input '${field}'.`)
     }
   }
 
   return {
-    command: (cliArgs) => {
+    command: ({ cliArgs, name }) => {
       const command = new Command(name)
         .description(description)
         .aliases(aliases ?? [])
