@@ -132,6 +132,13 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
   const { getFormState } = useServerFunctions()
   const schemaFieldsPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_blocks.${blockType}.fields`
 
+  // Track the latest form state adopted by the Form so we can sync it back
+  // into `initialState` when the component is recycled (hide/show) or remounted.
+  // Without this, the Form re-initializes from the stale snapshot captured at
+  // block creation time, silently erasing values set since (e.g. upload fields).
+  // See: https://github.com/payloadcms/payload/issues/17232
+  const latestFormStateRef = useRef<FormState | undefined>(undefined)
+
   const [initialState, setInitialState] = React.useState<false | FormState | undefined>(() => {
     // Initial form state that was calculated server-side. May have stale values
     const cachedFormState = initialLexicalFormState?.[formData.id]?.formState
@@ -139,8 +146,13 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
       return false
     }
 
-    // Merge current formData values into the cached form state
-    // This ensures that when the component remounts (e.g., due to view changes), we don't lose user edits
+    // Merge current formData values into the cached form state.
+    // This ensures that when the component remounts (e.g., due to view changes), we don't lose user edits.
+    //
+    // The previous merge (from #14295) only iterated cachedFormState entries,
+    // so fields absent from the cache (because the cache was built before they
+    // were ever set) were silently dropped. We now also iterate formData to add
+    // any fields that are missing from the cache.
     const mergedState = Object.fromEntries(
       Object.entries(cachedFormState).map(([fieldName, fieldState]) => [
         fieldName,
@@ -153,6 +165,20 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
           : fieldState,
       ]),
     )
+
+    // Add fields from formData that are missing from the cached form state.
+    // This happens when a field had no value when the cache was built server-side
+    // but has since been set by the user (e.g. selecting an upload).
+    for (const [fieldName, fieldValue] of Object.entries(formData)) {
+      if (!(fieldName in mergedState) && fieldValue != null) {
+        mergedState[fieldName] = {
+          initialValue: fieldValue,
+          passesCondition: true,
+          valid: true,
+          value: fieldValue,
+        }
+      }
+    }
 
     // Manually add blockName, as it's not part of cachedFormState
     mergedState.blockName = {
@@ -177,6 +203,26 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
       hasMounted.current = true
     }
   }, [cacheBuster])
+
+  // Restore the latest adopted form state when the component is recycled
+  // (hide/show via Activity/Offscreen) or remounted. Without this, the Form
+  // re-initializes from the stale `initialState` snapshot captured at block
+  // creation time, silently erasing values set since (e.g. upload fields).
+  // See: https://github.com/payloadcms/payload/issues/17232
+  useEffect(() => {
+    // On mount: restore from ref if available (covers remount after hard unmount)
+    if (latestFormStateRef.current) {
+      setInitialState(latestFormStateRef.current)
+    }
+    // On cleanup (hide/unmount): sync the ref into state so that if the
+    // component is re-shown, the Form re-initializes from current values
+    // instead of the stale creation-time snapshot.
+    return () => {
+      if (latestFormStateRef.current) {
+        setInitialState(latestFormStateRef.current)
+      }
+    }
+  }, [])
 
   const [formUuid] = React.useState(() => uuid())
 
@@ -293,6 +339,7 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
         )
 
         setInitialState(state)
+        latestFormStateRef.current = state
         if (!CustomLabelFromProps) {
           setCustomLabel(state._components?.customComponents?.BlockLabel ?? undefined)
         }
@@ -347,6 +394,10 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
 
   const onChange = useCallback(
     async ({ formState: prevFormState, submit }: { formState: FormState; submit?: boolean }) => {
+      // Track the current form state before server round-trip, so it can be
+      // restored if the component is recycled while the request is in-flight.
+      latestFormStateRef.current = prevFormState
+
       abortAndIgnore(onChangeAbortControllerRef.current)
 
       const controller = new AbortController()
@@ -375,6 +426,10 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
       if (!newFormState) {
         return prevFormState
       }
+
+      // Track the latest adopted form state so it can be restored if the
+      // component is recycled (hide/show) or remounted.
+      latestFormStateRef.current = newFormState
 
       if (prevFormState.blockName) {
         newFormState.blockName = prevFormState.blockName
