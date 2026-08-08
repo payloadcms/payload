@@ -19,33 +19,14 @@ const generateImportMapMock = vi.fn(async () => {})
 const generateTypesMock = vi.fn(async () => {})
 
 vi.mock('node:child_process', () => ({ spawn: spawnMock }))
-vi.mock('./generateImportMap/index.js', () => ({ generateImportMap: generateImportMapMock }))
-vi.mock('./generateTypes.js', () => ({ generateTypes: generateTypesMock }))
+vi.mock('../../generateImportMap/index.js', () => ({ generateImportMap: generateImportMapMock }))
+vi.mock('../../generateTypes.js', () => ({ generateTypes: generateTypesMock }))
 
 // Imported after mocks are registered
-const {
-  build,
-  detectFramework,
-  getForwardedArgs,
-  resolveBuildCommand,
-  resolveNextBin,
-  resolveViteBin,
-} = await import('./build.js')
+const { build, detectFramework, resolveBuildCommand, resolveNextBin, resolveViteBin } =
+  await import('./build.js')
 
 const fakeConfig = {} as never
-
-describe('getForwardedArgs', () => {
-  it('returns args after the build token and strips --no-types', () => {
-    expect(getForwardedArgs(['build', '--turbopack', '--no-types', 'foo'])).toEqual([
-      '--turbopack',
-      'foo',
-    ])
-  })
-
-  it('returns empty array when only build is present', () => {
-    expect(getForwardedArgs(['build'])).toEqual([])
-  })
-})
 
 describe('resolveNextBin', () => {
   it('resolves next bin from the current project', () => {
@@ -214,7 +195,6 @@ describe('bin resolution walks the consumer project node_modules', () => {
 
 describe('build', () => {
   let exitMock: ReturnType<typeof vi.spyOn>
-  let originalArgv: string[]
   let originalFrameworkEnv: string | undefined
   let cwdSpy: ReturnType<typeof vi.spyOn> | undefined
   const buildTempDirs: string[] = []
@@ -223,8 +203,6 @@ describe('build', () => {
     spawnMock.mockClear()
     generateImportMapMock.mockClear()
     generateTypesMock.mockClear()
-    originalArgv = process.argv
-    process.argv = ['node', 'payload', 'build']
     exitMock = vi.spyOn(process, 'exit').mockImplementation((() => undefined) as never)
     originalFrameworkEnv = process.env.PAYLOAD_FRAMEWORK
     // Force next for the legacy tests so they don't depend on the repo-root
@@ -233,7 +211,6 @@ describe('build', () => {
   })
 
   afterEach(() => {
-    process.argv = originalArgv
     exitMock.mockRestore()
     if (originalFrameworkEnv === undefined) {
       delete process.env.PAYLOAD_FRAMEWORK
@@ -262,9 +239,7 @@ describe('build', () => {
   })
 
   it('skips type generation with --no-types', async () => {
-    process.argv = ['node', 'payload', 'build', '--no-types']
-
-    await build({ config: fakeConfig })
+    await build({ config: fakeConfig, skipTypes: true })
 
     expect(generateImportMapMock).toHaveBeenCalledTimes(1)
     expect(generateTypesMock).not.toHaveBeenCalled()
@@ -281,7 +256,6 @@ describe('build', () => {
   })
 
   it('spawns next build with forwarded args and propagates the child exit code', async () => {
-    process.argv = ['node', 'payload', 'build', '--turbopack']
     let exitCb: ((code: number | null) => void) | undefined
     spawnMock.mockReturnValueOnce({
       on(event: string, cb: (code: number | null) => void) {
@@ -292,7 +266,7 @@ describe('build', () => {
       },
     })
 
-    const buildPromise = build({ config: fakeConfig })
+    const buildPromise = build({ config: fakeConfig, forwardedArgs: ['--turbopack'] })
 
     // generation awaits before spawn; let those microtasks settle
     await vi.waitFor(() => expect(spawnMock).toHaveBeenCalledTimes(1))
@@ -342,7 +316,6 @@ describe('build', () => {
 
   it('spawns vite build for a detected tanstack project', async () => {
     delete process.env.PAYLOAD_FRAMEWORK
-    process.argv = ['node', 'payload', 'build', '--mode', 'staging']
     const tanstackDir = mkdtempSync(path.join(os.tmpdir(), 'payload-build-ts-'))
     buildTempDirs.push(tanstackDir)
     writeFileSync(
@@ -351,7 +324,7 @@ describe('build', () => {
     )
     cwdSpy = vi.spyOn(process, 'cwd').mockReturnValue(tanstackDir)
 
-    await build({ config: fakeConfig })
+    await build({ config: fakeConfig, forwardedArgs: ['--mode', 'staging'] })
 
     expect(spawnMock).toHaveBeenCalledTimes(1)
     const [, spawnArgs] = spawnMock.mock.calls[0]

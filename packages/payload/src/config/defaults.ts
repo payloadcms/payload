@@ -35,7 +35,10 @@ export const addDefaultsToConfig = (config: Config): Config => {
     },
   }
 
-  config.bin = config.bin ?? []
+  config.cli = {
+    commands: [],
+    ...config.cli,
+  }
   config.collections = config.collections ?? []
   config.cookiePrefix = config.cookiePrefix ?? 'payload'
   config.cors = config.cors ?? []

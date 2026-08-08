@@ -1,6 +1,7 @@
 import { McpServer, type ServerContext } from '@modelcontextprotocol/server'
 import { APIError, type PayloadRequest } from 'payload'
 import { z } from 'zod'
+import en from 'zod/v4/locales/en.js'
 
 import type {
   AuthorizedMCP,
@@ -15,6 +16,8 @@ import type {
 
 import { getLogger } from '../utils/getLogger.js'
 import { toStandardSchema } from '../utils/toStandardSchema.js'
+
+z.config(en())
 
 /**
  * Serving-entry-agnostic core: registers every authorized MCP item onto a fresh
