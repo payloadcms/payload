@@ -417,7 +417,9 @@ cli: {
 
 Path references are loaded only when the CLI starts, keeping the command and its dependencies out of the Payload config's module graph. Relative paths are resolved from the directory containing `payload.config.ts`. You can also import and pass a `CLICommand` directly when that isolation is not needed.
 
-The same map controls Payload's built-in commands. Use an existing command name to replace it, or set it to `false` to disable it:
+Payload adds its built-in command import references to this map when it sanitizes the config, then applies project commands over those defaults. The built-ins are named exports from `payload/cli/builtin`, so they share one module import. This means `payload.config.cli.commands` contains the complete local command map, and the CLI loads built-in and project commands in the same way. If multiple entries reference the same module, Payload imports that module once and reads each named export from it.
+
+Use an existing command name to replace it, or set it to `false` to disable it:
 
 ```ts
 cli: {

@@ -1410,7 +1410,7 @@ export type Config = {
   /** Customize the Payload CLI, or set to `false` to disable it. */
   cli?:
     | {
-        /** Add, replace, or disable commands by name. */
+        /** Add, replace, or disable commands by name. Built-in commands are added during sanitization. */
         commands?: CLICommands
       }
     | false

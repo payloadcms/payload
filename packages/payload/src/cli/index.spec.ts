@@ -5,6 +5,7 @@ import { describe, expect, it } from 'vitest'
 
 import type { CLIArgs, Config, SanitizedConfig } from '../config/types.js'
 
+import { addDefaultsToConfig } from '../config/defaults.js'
 import { defineCLICommand } from './defineCLICommand.js'
 import { createProgram } from './index.js'
 import { strictObject } from './zod.js'
@@ -12,13 +13,16 @@ import { strictObject } from './zod.js'
 const cliDirectory = path.dirname(fileURLToPath(import.meta.url))
 const testConfigDirectory = path.resolve(cliDirectory, '../../../../test/config')
 
-const createConfig = ({ cli }: { cli?: Config['cli'] } = {}): SanitizedConfig =>
-  ({
-    cli,
+const createConfig = ({ cli }: { cli?: Config['cli'] } = {}): SanitizedConfig => {
+  const config = addDefaultsToConfig({ cli } as Config)
+
+  return {
+    ...config,
     paths: {
       configDir: cliDirectory,
     },
-  }) as SanitizedConfig
+  } as SanitizedConfig
+}
 
 const createArgs = ({
   config,
@@ -44,6 +48,15 @@ const replacementCommand = defineCLICommand({
 })
 
 describe('createProgram', () => {
+  it('should add built-in command references from one module to the sanitized config', () => {
+    const config = createConfig()
+
+    expect(config.cli && config.cli.commands).toMatchObject({
+      build: 'payload/cli/builtin#createBuildCommand',
+      info: 'payload/cli/builtin#createInfoCommand',
+    })
+  })
+
   it('should register built-in commands by their map key', async () => {
     const program = await createProgram(createArgs({ config: createConfig() }))
 
