@@ -71,7 +71,7 @@ export const defineCLICommand = <TInput extends CLIInputSchema>({
   }
 
   return {
-    command: ({ cliArgs, name }) => {
+    command: ({ name, cliArgs }) => {
       const command = new Command(name)
         .description(description)
         .aliases(aliases ?? [])

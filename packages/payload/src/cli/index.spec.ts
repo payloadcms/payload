@@ -10,6 +10,7 @@ import { createProgram } from './index.js'
 import { strictObject } from './zod.js'
 
 const cliDirectory = path.dirname(fileURLToPath(import.meta.url))
+const testConfigDirectory = path.resolve(cliDirectory, '../../../../test/config')
 
 const createConfig = ({ cli }: { cli?: Config['cli'] } = {}): SanitizedConfig =>
   ({
@@ -19,7 +20,14 @@ const createConfig = ({ cli }: { cli?: Config['cli'] } = {}): SanitizedConfig =>
     },
   }) as SanitizedConfig
 
-const createArgs = (config: SanitizedConfig): CLIArgs => ({
+const createArgs = ({
+  config,
+  configDir = cliDirectory,
+}: {
+  config: SanitizedConfig
+  configDir?: string
+}): CLIArgs => ({
+  configDir,
   getConfig: async () => config,
   getPayload: async () => {
     throw new Error('Payload should not be initialized by these tests.')
@@ -37,22 +45,22 @@ const replacementCommand = defineCLICommand({
 
 describe('createProgram', () => {
   it('should register built-in commands by their map key', async () => {
-    const program = await createProgram(createArgs(createConfig()))
+    const program = await createProgram(createArgs({ config: createConfig() }))
 
     expect(program.commands.map((command) => command.name())).toContain('generate:types')
   })
 
   it('should replace a built-in command with a direct command definition', async () => {
     const program = await createProgram(
-      createArgs(
-        createConfig({
+      createArgs({
+        config: createConfig({
           cli: {
             commands: {
               info: replacementCommand,
             },
           },
         }),
-      ),
+      }),
     )
 
     expect(program.commands.find((command) => command.name() === 'info')?.description()).toBe(
@@ -62,15 +70,15 @@ describe('createProgram', () => {
 
   it('should disable an individual command with false', async () => {
     const program = await createProgram(
-      createArgs(
-        createConfig({
+      createArgs({
+        config: createConfig({
           cli: {
             commands: {
               info: false,
             },
           },
         }),
-      ),
+      }),
     )
 
     expect(program.commands.some((command) => command.name() === 'info')).toBe(false)
@@ -78,22 +86,22 @@ describe('createProgram', () => {
   })
 
   it('should disable all commands with cli false', async () => {
-    const program = await createProgram(createArgs(createConfig({ cli: false })))
+    const program = await createProgram(createArgs({ config: createConfig({ cli: false }) }))
 
     expect(program.commands).toHaveLength(0)
   })
 
   it('should load a named command export from a path', async () => {
     const program = await createProgram(
-      createArgs(
-        createConfig({
+      createArgs({
+        config: createConfig({
           cli: {
             commands: {
               environment: './commands/info.js#createInfoCommand',
             },
           },
         }),
-      ),
+      }),
     )
 
     expect(
@@ -103,8 +111,8 @@ describe('createProgram', () => {
 
   it('should load a named command export from an object reference', async () => {
     const program = await createProgram(
-      createArgs(
-        createConfig({
+      createArgs({
+        config: createConfig({
           cli: {
             commands: {
               environment: {
@@ -114,24 +122,41 @@ describe('createProgram', () => {
             },
           },
         }),
-      ),
+      }),
     )
 
     expect(program.commands.some((command) => command.name() === 'environment')).toBe(true)
   })
 
+  it('should load a default command export from a path', async () => {
+    const program = await createProgram(
+      createArgs({
+        config: createConfig({
+          cli: {
+            commands: {
+              'start-server': './customScript.js',
+            },
+          },
+        }),
+        configDir: testConfigDirectory,
+      }),
+    )
+
+    expect(program.commands.some((command) => command.name() === 'start-server')).toBe(true)
+  })
+
   it('should report a missing command export', async () => {
     await expect(
       createProgram(
-        createArgs(
-          createConfig({
+        createArgs({
+          config: createConfig({
             cli: {
               commands: {
                 missing: './commands/info.js#missingCommand',
               },
             },
           }),
-        ),
+        }),
       ),
     ).rejects.toThrow(/CLI command 'missing'.*does not export 'missingCommand'/)
   })
@@ -139,8 +164,8 @@ describe('createProgram', () => {
   it('should reject an export that is not a CLI command', async () => {
     await expect(
       createProgram(
-        createArgs(
-          createConfig({
+        createArgs({
+          config: createConfig({
             cli: {
               commands: {
                 invalid:
@@ -148,7 +173,7 @@ describe('createProgram', () => {
               },
             },
           }),
-        ),
+        }),
       ),
     ).rejects.toThrow(/CLI command 'invalid'.*was not created with defineCLICommand/)
   })
@@ -163,15 +188,15 @@ describe('createProgram', () => {
 
     await expect(
       createProgram(
-        createArgs(
-          createConfig({
+        createArgs({
+          config: createConfig({
             cli: {
               commands: {
                 custom: conflictingCommand,
               },
             },
           }),
-        ),
+        }),
       ),
     ).rejects.toThrow("CLI command 'custom' conflicts with 'info'")
   })
