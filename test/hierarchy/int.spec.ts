@@ -643,6 +643,54 @@ describe('Hierarchy', () => {
 
       expect(updatedChild._h_slugPath).toBe('tech/electronics/phones')
     })
+
+    it('should resolve ancestors against the request draft intent when the document itself has no draft', async () => {
+      // Parent is published as "About", then a draft-only rename to "About Us"
+      // that is never published.
+      const parent = await payload.create({
+        collection: 'organizations',
+        data: { _status: 'published', parent: null, title: 'About' },
+      })
+
+      await payload.update({
+        id: parent.id,
+        collection: 'organizations',
+        data: { title: 'About Us' },
+        draft: true,
+      })
+
+      // Child is published and has no pending draft of its own, so its
+      // `_status` stays 'published'.
+      const child = await payload.create({
+        collection: 'organizations',
+        data: { _status: 'published', parent: parent.id, title: 'Guide' },
+      })
+
+      // Reading the child in draft mode (e.g. live preview) should walk the
+      // parent chain using the draft view the request asked for, even though
+      // the child itself is published.
+      const draftChild = await payload.findByID({
+        id: child.id,
+        collection: 'organizations',
+        context: { computeHierarchyPaths: true },
+        draft: true,
+      })
+
+      expect(draftChild._status).toBe('published')
+      expect(draftChild._h_titlePath).toBe('About Us/Guide')
+      expect(draftChild._h_slugPath).toBe('about-us/guide')
+
+      // A published read still resolves against the published parent title.
+      const publishedChild = await payload.findByID({
+        id: child.id,
+        collection: 'organizations',
+        context: { computeHierarchyPaths: true },
+        draft: false,
+      })
+
+      expect(publishedChild._h_titlePath).toBe('About/Guide')
+      expect(publishedChild._h_slugPath).toBe('about/guide')
+    })
   })
 
   describe('Localization', () => {
