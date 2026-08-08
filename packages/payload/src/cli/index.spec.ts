@@ -134,7 +134,7 @@ describe('createProgram', () => {
         config: createConfig({
           cli: {
             commands: {
-              'start-server': './customScript.js',
+              'start-server': './customScript.ts',
             },
           },
         }),

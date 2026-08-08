@@ -103,7 +103,7 @@ When migrating custom scripts:
 
 - Replace `bin` entries with entries in the `cli.commands` map. The map key becomes the command name.
 - Replace the exported `script(config)` function with a schema-backed command created by `defineCLICommand`.
-- Register commands by import path to keep them out of the Payload config's module graph. Paths use the existing `PayloadComponent` syntax and support default or named exports. Direct `CLICommand` values are also accepted.
+- Register commands by import path to keep them out of the Payload config's module graph. Paths use the existing `PayloadComponent` syntax, resolve relative to `payload.config.ts`, and support default or named exports. Direct `CLICommand` values are also accepted.
 - Define the handler's semantic input with a Standard Schema implementation such as Zod. Supported top-level properties become options automatically; use `cli` only to mark positional arguments, hide fields, or override unusual shell syntax.
 - Use the provided `getPayload()` function so Payload can shut down database connections after the command finishes.
 - Return an exit code from the handler when needed. Do not call `process.exit()` from the command.

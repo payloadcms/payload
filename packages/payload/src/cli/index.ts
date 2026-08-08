@@ -4,11 +4,7 @@ import path from 'node:path'
 import { config as configureZod } from 'zod/mini'
 import en from 'zod/v4/locales/en.js'
 
-import type {
-  CLIArgs,
-  CLICommand,
-  CLICommandEntry,
-} from '../config/types.js'
+import type { CLIArgs, CLICommand, CLICommandEntry } from '../config/types.js'
 
 import { dynamicImport } from '../utilities/dynamicImport.js'
 import { createCLIArgs } from './args.js'
@@ -33,7 +29,7 @@ import { loadEnv } from './loadEnv.js'
 
 configureZod(en())
 
-const commands: Record<string, CLICommand> = {
+const builtInCommands: Record<string, CLICommand> = {
   build: createBuildCommand,
   'generate:db-schema': createGenerateDBSchemaCommand,
   'generate:importmap': createGenerateImportMapCommand,
@@ -62,7 +58,7 @@ export const createProgram = async (args: CLIArgs): Promise<Command> => {
     .option('--cron <expression>', 'Run the command on a cron schedule.')
   const config = await args.getConfig()
   const commandEntries =
-    config.cli === false ? {} : { ...commands, ...(config.cli?.commands ?? {}) }
+    config.cli === false ? {} : { ...builtInCommands, ...(config.cli?.commands ?? {}) }
   const registeredNames = new Map<string, string>()
 
   for (const [name, entry] of Object.entries(commandEntries)) {
