@@ -75,7 +75,11 @@ export function parseParams({
             where: condition,
           })
           if (builtConditions.length > 0) {
-            result = conditionOperator(...builtConditions)
+            // AND sibling top-level `and`/`or` groups together instead of
+            // overwriting, so a where with both an `and` and an `or` key at the
+            // same level keeps both clauses (a bare assignment dropped the first).
+            const builtCondition = conditionOperator(...builtConditions)
+            result = result ? and(result, builtCondition) : builtCondition
           }
         } else {
           // It's a path - and there can be multiple comparisons on a single path.
