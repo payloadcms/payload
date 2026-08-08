@@ -65,8 +65,7 @@ In Payload 4.0, define a real CLI command instead:
 // seed.ts
 import { defineCLICommand, z } from 'payload/cli'
 
-export const createSeedCommand = defineCLICommand({
-  name: 'seed',
+export const seedCommand = defineCLICommand({
   description: 'Seed the database.',
   input: z.strictObject({
     clear: z
@@ -87,28 +86,29 @@ export const createSeedCommand = defineCLICommand({
 })
 ```
 
-Import the command directly into your Payload config:
+Register the command export in your Payload config:
 
 ```ts
 // payload.config.ts
-import { createSeedCommand } from './seed.js'
-
 export default buildConfig({
   cli: {
-    commands: [createSeedCommand],
+    commands: {
+      seed: './seed.js#seedCommand',
+    },
   },
 })
 ```
 
 When migrating custom scripts:
 
-- Replace `bin` entries with `cli.commands`.
+- Replace `bin` entries with entries in the `cli.commands` map. The map key becomes the command name.
 - Replace the exported `script(config)` function with a schema-backed command created by `defineCLICommand`.
+- Register commands by import path to keep them out of the Payload config's module graph. Paths use the existing `PayloadComponent` syntax and support default or named exports. Direct `CLICommand` values are also accepted.
 - Define the handler's semantic input with a Standard Schema implementation such as Zod. Supported top-level properties become options automatically; use `cli` only to mark positional arguments, hide fields, or override unusual shell syntax.
 - Use the provided `getPayload()` function so Payload can shut down database connections after the command finishes.
 - Return an exit code from the handler when needed. Do not call `process.exit()` from the command.
 
-Custom commands now appear in `payload --help`, receive Standard Schema validation and Commander help generation, and cannot use the same name or alias as a built-in command. They also appear with a generated JSON Schema in `payload help --json`. Every command accepts the schema object directly through `--input <json|@file|->`. Command names are case-sensitive. Because custom commands must be registered before Commander parses input, the Payload config is now loaded before displaying root CLI help.
+Custom commands now appear in `payload --help` and receive Standard Schema validation and Commander help generation. A command with the same map key as a built-in command replaces it, while `false` disables that command. Set `cli: false` to disable the entire Payload CLI. Commands also appear with a generated JSON Schema in `payload help --json`, and every command accepts the schema object directly through `--input <json|@file|->`. Command names are case-sensitive. Because custom commands must be registered before Commander parses input, the Payload config is now loaded before displaying root CLI help.
 
 See [Custom CLI commands](../configuration/overview#custom-cli-commands) for the complete API.
 

@@ -6,7 +6,6 @@ import { defineCLICommand } from '../defineCLICommand.js'
 import { strictObject } from '../zod.js'
 
 export const createRunCommand = defineCLICommand({
-  name: 'run',
   allowUnknownOption: true,
   cli: {
     scriptArgs: { type: 'argument', position: 1 },

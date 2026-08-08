@@ -4,7 +4,6 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
-import { createStartServerCommand } from './customScript.js'
 
 export default buildConfigWithDefaults({
   admin: {
@@ -13,7 +12,9 @@ export default buildConfigWithDefaults({
     },
   },
   cli: {
-    commands: [createStartServerCommand],
+    commands: {
+      'start-server': './customScript.js',
+    },
   },
   collections: [
     {

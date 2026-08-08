@@ -26,5 +26,4 @@ export const createBuildCommand = defineCLICommand({
       ._default(z.boolean(), true)
       .check(z.describe('Generate Payload types before building.')),
   }),
-  name: 'build',
 })

@@ -38,9 +38,11 @@ export const addDefaultsToConfig = (config: Config): Config => {
     theme: admin?.theme ?? 'all',
   }
 
-  config.cli = {
-    commands: [],
-    ...config.cli,
+  if (config.cli !== false) {
+    config.cli = {
+      commands: {},
+      ...config.cli,
+    }
   }
   config.collections = config.collections ?? []
   config.cookiePrefix = config.cookiePrefix ?? 'payload'

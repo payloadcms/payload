@@ -3,7 +3,6 @@ import { strictObject } from '../../zod.js'
 import { initializeMigration } from './initialize.js'
 
 export const createMigrateResetCommand = defineCLICommand({
-  name: 'migrate:reset',
   description: 'Roll back all migrations.',
   handler: async ({ getPayload }) => {
     const { adapter, payload } = await initializeMigration({ getPayload })

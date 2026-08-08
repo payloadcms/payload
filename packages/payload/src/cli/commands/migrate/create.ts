@@ -5,7 +5,6 @@ import { strictObject } from '../../zod.js'
 import { initializeMigration } from './initialize.js'
 
 export const createMigrateCreateCommand = defineCLICommand({
-  name: 'migrate:create',
   cli: {
     migrationName: 'argument',
   },

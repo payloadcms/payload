@@ -3,7 +3,6 @@ import { strictObject } from '../../zod.js'
 import { initializeMigration } from './initialize.js'
 
 export const createMigrateRefreshCommand = defineCLICommand({
-  name: 'migrate:refresh',
   description: 'Roll back and re-run the latest migration batch.',
   handler: async ({ getPayload }) => {
     const { adapter, payload } = await initializeMigration({ getPayload })

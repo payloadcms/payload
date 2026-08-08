@@ -7,7 +7,6 @@ import { defineCLICommand } from '../defineCLICommand.js'
 import { strictObject } from '../zod.js'
 
 export const createInfoCommand = defineCLICommand({
-  name: 'info',
   description: 'Print environment and dependency information.',
   handler: async () => {
     const dependencies = await getDependencies(process.cwd(), [
