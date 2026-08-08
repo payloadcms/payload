@@ -1,5 +1,6 @@
 /* eslint-disable no-console */
 import { Cron } from 'croner'
+import path from 'node:path'
 import { pathToFileURL } from 'node:url'
 
 import type { CLIArgs, SanitizedConfig } from '../config/types.js'
@@ -24,10 +25,10 @@ export const createCLIArgs = (): CLIRuntime => {
   let activePayload: Payload | undefined
   let configPromise: Promise<SanitizedConfig> | undefined
   let isScheduled = false
+  const configPath = findConfig()
 
   const getConfig = (): Promise<SanitizedConfig> => {
     configPromise ??= (async () => {
-      const configPath = findConfig()
       const importedConfig = await import(pathToFileURL(configPath).toString())
       const config = importedConfig.default ? await importedConfig.default : importedConfig
 
@@ -38,6 +39,7 @@ export const createCLIArgs = (): CLIRuntime => {
   }
 
   const args: CLIRuntime = {
+    configDir: path.dirname(configPath),
     async destroy() {
       if (!activePayload) {
         return

@@ -142,6 +142,8 @@ export type ResolvedComponent<
 
 /** Utilities available to every Payload CLI command. */
 export type CLIArgs = {
+  /** Directory containing the Payload config, used to resolve relative command paths. */
+  configDir: string
   getConfig: () => Promise<SanitizedConfig>
   getPayload: (options?: Omit<InitOptions, 'config'>) => Promise<Payload>
   run: ({
@@ -1261,11 +1263,11 @@ export type Config = {
   bodyParser?: Partial<BusboyConfig>
   /** Customize the Payload CLI, or set to `false` to disable it. */
   cli?:
-    | false
     | {
         /** Add, replace, or disable commands by name. */
         commands?: CLICommands
       }
+    | false
   /**
    * Manage the datamodel of your application
    *

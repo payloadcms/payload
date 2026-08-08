@@ -14,4 +14,5 @@ export const createStartServerCommand = defineCLICommand({
   input: z.strictObject({}),
 })
 
+// eslint-disable-next-line no-restricted-exports
 export default createStartServerCommand

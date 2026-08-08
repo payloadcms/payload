@@ -8,7 +8,6 @@ import type {
   CLIArgs,
   CLICommand,
   CLICommandEntry,
-  SanitizedConfig,
 } from '../config/types.js'
 
 import { dynamicImport } from '../utilities/dynamicImport.js'
@@ -35,22 +34,22 @@ import { loadEnv } from './loadEnv.js'
 configureZod(en())
 
 const commands: Record<string, CLICommand> = {
-  info: createInfoCommand,
-  run: createRunCommand,
   build: createBuildCommand,
-  'generate:types': createGenerateTypesCommand,
-  'generate:importmap': createGenerateImportMapCommand,
   'generate:db-schema': createGenerateDBSchemaCommand,
-  'jobs:run': createJobsRunCommand,
-  'jobs:handle-schedules': createJobsHandleSchedulesCommand,
+  'generate:importmap': createGenerateImportMapCommand,
+  'generate:types': createGenerateTypesCommand,
   help: createHelpCommand,
+  info: createInfoCommand,
+  'jobs:handle-schedules': createJobsHandleSchedulesCommand,
+  'jobs:run': createJobsRunCommand,
   migrate: createMigrateCommand,
+  'migrate:create': createMigrateCreateCommand,
   'migrate:down': createMigrateDownCommand,
   'migrate:fresh': createMigrateFreshCommand,
   'migrate:refresh': createMigrateRefreshCommand,
   'migrate:reset': createMigrateResetCommand,
   'migrate:status': createMigrateStatusCommand,
-  'migrate:create': createMigrateCreateCommand,
+  run: createRunCommand,
 }
 
 export const createProgram = async (args: CLIArgs): Promise<Command> => {
@@ -71,8 +70,8 @@ export const createProgram = async (args: CLIArgs): Promise<Command> => {
       continue
     }
 
-    const cliCommand = await resolveCLICommand({ config, entry, name })
-    const command = cliCommand.command({ cliArgs: args, name })
+    const cliCommand = await resolveCLICommand({ name, configDir: args.configDir, entry })
+    const command = cliCommand.command({ name, cliArgs: args })
 
     for (const registeredName of [name, ...command.aliases()]) {
       const existingCommand = registeredNames.get(registeredName)
@@ -103,11 +102,11 @@ export const createProgram = async (args: CLIArgs): Promise<Command> => {
 }
 
 const resolveCLICommand = async ({
-  config,
-  entry,
   name,
+  configDir,
+  entry,
 }: {
-  config: SanitizedConfig
+  configDir: string
   entry: CLICommandEntry
   name: string
 }): Promise<CLICommand> => {
@@ -117,7 +116,7 @@ const resolveCLICommand = async ({
 
   const { exportName, path: commandPath } = parsePayloadComponent(entry)
   const importPath = commandPath.startsWith('.')
-    ? path.resolve(config.paths.configDir, commandPath)
+    ? path.resolve(configDir, commandPath)
     : commandPath
   const reference = `${commandPath}${exportName === 'default' ? '' : `#${exportName}`}`
   let commandModule: Record<string, unknown>
