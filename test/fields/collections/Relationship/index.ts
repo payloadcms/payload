@@ -98,6 +98,14 @@ const RelationshipFields: CollectionConfig = {
       type: 'relationship',
     },
     {
+      name: 'relationshipWithStringSortOptions',
+      relationTo: 'text-fields',
+      type: 'relationship',
+      admin: {
+        sortOptions: '-text',
+      },
+    },
+    {
       name: 'array',
       fields: [
         {
