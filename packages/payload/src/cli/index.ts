@@ -8,45 +8,10 @@ import type { CLIArgs, CLICommand, CLICommandEntry } from '../config/types.js'
 
 import { dynamicImport } from '../utilities/dynamicImport.js'
 import { createCLIArgs } from './args.js'
-import { createBuildCommand } from './commands/build/index.js'
-import { createGenerateDBSchemaCommand } from './commands/generateDBSchema.js'
-import { createGenerateImportMapCommand } from './commands/generateImportMap.js'
-import { createGenerateTypesCommand } from './commands/generateTypes.js'
-import { createHelpCommand } from './commands/help.js'
-import { createInfoCommand } from './commands/info.js'
-import { createJobsHandleSchedulesCommand } from './commands/jobs/handleSchedules.js'
-import { createJobsRunCommand } from './commands/jobs/run.js'
-import { createMigrateCreateCommand } from './commands/migrate/create.js'
-import { createMigrateDownCommand } from './commands/migrate/down.js'
-import { createMigrateFreshCommand } from './commands/migrate/fresh.js'
-import { createMigrateRefreshCommand } from './commands/migrate/refresh.js'
-import { createMigrateResetCommand } from './commands/migrate/reset.js'
-import { createMigrateCommand } from './commands/migrate/run.js'
-import { createMigrateStatusCommand } from './commands/migrate/status.js'
-import { createRunCommand } from './commands/run.js'
 import { parsePayloadComponent } from './generateImportMap/utilities/parsePayloadComponent.js'
 import { loadEnv } from './loadEnv.js'
 
 configureZod(en())
-
-const builtInCommands: Record<string, CLICommand> = {
-  build: createBuildCommand,
-  'generate:db-schema': createGenerateDBSchemaCommand,
-  'generate:importmap': createGenerateImportMapCommand,
-  'generate:types': createGenerateTypesCommand,
-  help: createHelpCommand,
-  info: createInfoCommand,
-  'jobs:handle-schedules': createJobsHandleSchedulesCommand,
-  'jobs:run': createJobsRunCommand,
-  migrate: createMigrateCommand,
-  'migrate:create': createMigrateCreateCommand,
-  'migrate:down': createMigrateDownCommand,
-  'migrate:fresh': createMigrateFreshCommand,
-  'migrate:refresh': createMigrateRefreshCommand,
-  'migrate:reset': createMigrateResetCommand,
-  'migrate:status': createMigrateStatusCommand,
-  run: createRunCommand,
-}
 
 export const createProgram = async (args: CLIArgs): Promise<Command> => {
   const program = new Command()
@@ -57,16 +22,24 @@ export const createProgram = async (args: CLIArgs): Promise<Command> => {
     .showSuggestionAfterError()
     .option('--cron <expression>', 'Run the command on a cron schedule.')
   const config = await args.getConfig()
-  const commandEntries =
-    config.cli === false ? {} : { ...builtInCommands, ...(config.cli?.commands ?? {}) }
+  const commandEntries = config.cli === false ? [] : Object.entries(config.cli.commands)
+  const moduleImports = new Map<string, Promise<Record<string, unknown>>>()
+  const resolvedCommands = await Promise.all(
+    commandEntries
+      .filter(([, entry]) => entry !== false)
+      .map(async ([name, entry]) => ({
+        name,
+        cliCommand: await resolveCLICommand({
+          name,
+          configDir: args.configDir,
+          entry,
+          moduleImports,
+        }),
+      })),
+  )
   const registeredNames = new Map<string, string>()
 
-  for (const [name, entry] of Object.entries(commandEntries)) {
-    if (entry === false) {
-      continue
-    }
-
-    const cliCommand = await resolveCLICommand({ name, configDir: args.configDir, entry })
+  for (const { name, cliCommand } of resolvedCommands) {
     const command = cliCommand.command({ name, cliArgs: args })
 
     for (const registeredName of [name, ...command.aliases()]) {
@@ -101,9 +74,11 @@ const resolveCLICommand = async ({
   name,
   configDir,
   entry,
+  moduleImports,
 }: {
   configDir: string
   entry: CLICommandEntry
+  moduleImports: Map<string, Promise<Record<string, unknown>>>
   name: string
 }): Promise<CLICommand> => {
   if (isCLICommand(entry)) {
@@ -118,7 +93,14 @@ const resolveCLICommand = async ({
   let commandModule: Record<string, unknown>
 
   try {
-    commandModule = await dynamicImport<Record<string, unknown>>(importPath)
+    let moduleImport = moduleImports.get(importPath)
+
+    if (!moduleImport) {
+      moduleImport = dynamicImport<Record<string, unknown>>(importPath)
+      moduleImports.set(importPath, moduleImport)
+    }
+
+    commandModule = await moduleImport
   } catch (error) {
     throw new Error(
       `Could not load CLI command '${name}' from '${reference}': ${error instanceof Error ? error.message : 'Unknown error'}`,

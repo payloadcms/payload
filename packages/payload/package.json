@@ -66,6 +66,11 @@
       "types": "./src/exports/cli.ts",
       "default": "./src/exports/cli.ts"
     },
+    "./cli/builtin": {
+      "import": "./src/exports/cliBuiltin.ts",
+      "types": "./src/exports/cliBuiltin.ts",
+      "default": "./src/exports/cliBuiltin.ts"
+    },
     "./node": {
       "import": "./src/exports/node.ts",
       "types": "./src/exports/node.ts",
@@ -204,6 +209,11 @@
         "import": "./dist/exports/cli.js",
         "types": "./dist/exports/cli.d.ts",
         "default": "./dist/exports/cli.js"
+      },
+      "./cli/builtin": {
+        "import": "./dist/exports/cliBuiltin.js",
+        "types": "./dist/exports/cliBuiltin.d.ts",
+        "default": "./dist/exports/cliBuiltin.js"
       },
       "./i18n/*": {
         "import": "./dist/exports/i18n/*.js",
