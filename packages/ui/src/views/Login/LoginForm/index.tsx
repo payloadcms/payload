@@ -37,8 +37,7 @@ export const LoginForm: React.FC<{
   } = config
 
   const collectionConfig = getEntityConfig({ collectionSlug: userSlug })
-  const { auth: authOptions } = collectionConfig
-  const loginWithUsername = authOptions.loginWithUsername
+  const loginWithUsername = collectionConfig?.auth?.loginWithUsername
   const { canLoginWithEmail, canLoginWithUsername } = getLoginOptions(loginWithUsername)
 
   const [loginType] = React.useState<LoginFieldProps['type']>(() => {
