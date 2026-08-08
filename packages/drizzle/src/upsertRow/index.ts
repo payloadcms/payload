@@ -24,6 +24,7 @@ import { deleteExistingArrayRows } from './deleteExistingArrayRows.js'
 import { deleteExistingRowsByPath } from './deleteExistingRowsByPath.js'
 import { handleUpsertError } from './handleUpsertError.js'
 import { insertArrays } from './insertArrays.js'
+import { isSqlReturningSafe } from './isSqlReturningSafe.js'
 import { shouldUseOptimizedUpsertRow } from './shouldUseOptimizedUpsertRow.js'
 
 /**
@@ -150,20 +151,24 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
           }
         }
 
-        const docs = await drizzle
-          .update(adapter.tables[tableName])
-          .set(row)
-          .where(eq(adapter.tables[tableName].id, id))
-          .returning(Object.keys(selectedFields).length ? selectedFields : undefined)
+        const useSqlReturning = isSqlReturningSafe({ adapter, fields, selectedFields })
 
-        return transform<T>({
-          adapter,
-          config: adapter.payload.config,
-          data: docs[0],
-          fields,
-          joinQuery: false,
-          tableName,
-        })
+        if (useSqlReturning) {
+          const docs = await drizzle
+            .update(adapter.tables[tableName])
+            .set(row)
+            .where(eq(adapter.tables[tableName].id, id))
+            .returning(Object.keys(selectedFields).length ? selectedFields : undefined)
+
+          return transform<T>({
+            adapter,
+            config: adapter.payload.config,
+            data: docs[0],
+            fields,
+            joinQuery: false,
+            tableName,
+          })
+        }
       }
 
       // DB Update that needs the result, potentially with joins => need to update first, then find. returning() does not work with joins.
