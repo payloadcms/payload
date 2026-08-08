@@ -182,7 +182,7 @@ describe('createProgram', () => {
             cli: {
               commands: {
                 invalid:
-                  './generateImportMap/utilities/parsePayloadComponent.js#parsePayloadComponent',
+                  './commands/generateImportMap/utilities/parsePayloadComponent.js#parsePayloadComponent',
               },
             },
           }),

@@ -1,6 +1,6 @@
 export { createBuildCommand } from '../cli/commands/build/index.js'
 export { createGenerateDBSchemaCommand } from '../cli/commands/generateDBSchema.js'
-export { createGenerateImportMapCommand } from '../cli/commands/generateImportMap.js'
+export { createGenerateImportMapCommand } from '../cli/commands/generateImportMap/index.js'
 export { createGenerateTypesCommand } from '../cli/commands/generateTypes.js'
 export { createHelpCommand } from '../cli/commands/help.js'
 export { createInfoCommand } from '../cli/commands/info.js'

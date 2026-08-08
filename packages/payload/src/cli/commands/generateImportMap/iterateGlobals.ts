@@ -1,7 +1,7 @@
-import type { AdminViewConfig } from '../../admin/views/index.js'
-import type { SanitizedConfig } from '../../config/types.js'
-import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
-import type { AddToImportMap, Imports, InternalImportMap } from './index.js'
+import type { AdminViewConfig } from '../../../admin/views/index.js'
+import type { SanitizedConfig } from '../../../config/types.js'
+import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
+import type { AddToImportMap, Imports, InternalImportMap } from './generateImportMap.js'
 
 import { genImportMapIterateFields } from './iterateFields.js'
 

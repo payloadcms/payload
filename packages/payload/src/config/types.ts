@@ -37,7 +37,7 @@ import type {
   ImportMap,
   Imports,
   InternalImportMap,
-} from '../cli/generateImportMap/index.js'
+} from '../cli/commands/generateImportMap/generateImportMap.js'
 import type {
   Collection,
   CollectionAccess,

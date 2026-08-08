@@ -1,6 +1,6 @@
 import type { AcceptedLanguages } from '@payloadcms/translations'
 
-import type { ImportMap } from '../../cli/generateImportMap/index.js'
+import type { ImportMap } from '../../cli/commands/generateImportMap/generateImportMap.js'
 import type { Locale, SanitizedConfig } from '../../config/types.js'
 import type { PaginatedDocs } from '../../database/types.js'
 import type { Slugify } from '../../fields/baseFields/slug/types.js'

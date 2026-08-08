@@ -1,8 +1,8 @@
 import crypto from 'crypto'
 import path from 'path'
 
-import type { PayloadComponent } from '../../../config/types.js'
-import type { Imports, InternalImportMap } from '../index.js'
+import type { PayloadComponent } from '../../../../config/types.js'
+import type { Imports, InternalImportMap } from '../generateImportMap.js'
 
 import { parsePayloadComponent } from './parsePayloadComponent.js'
 

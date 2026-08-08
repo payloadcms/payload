@@ -1,6 +1,6 @@
-import { defineCLICommand } from '../defineCLICommand.js'
-import { generateImportMap } from '../generateImportMap/index.js'
-import { strictObject } from '../zod.js'
+import { defineCLICommand } from '../../defineCLICommand.js'
+import { strictObject } from '../../zod.js'
+import { generateImportMap } from './generateImportMap.js'
 
 export const createGenerateImportMapCommand = defineCLICommand({
   description: 'Generate the admin import map.',

@@ -6,9 +6,12 @@ import path from 'node:path'
 
 import type { SanitizedConfig } from '../../../config/types.js'
 
-import { NEXT_PAYLOAD_ROUTE_GROUP, TANSTACK_PAYLOAD_DIR } from '../../frameworkConventions.js'
-import { generateImportMap } from '../../generateImportMap/index.js'
-import { generateTypes } from '../../generateTypes.js'
+import {
+  NEXT_PAYLOAD_ROUTE_GROUP,
+  TANSTACK_PAYLOAD_DIR,
+} from '../generateImportMap/frameworkConventions.js'
+import { generateImportMap } from '../generateImportMap/generateImportMap.js'
+import { generateTypes } from '../generateTypes.js'
 
 type Framework = 'next' | 'tanstack-start'
 
