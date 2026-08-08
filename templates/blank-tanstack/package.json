@@ -1,0 +1,68 @@
+{
+  "name": "blank-tanstack",
+  "version": "1.0.0",
+  "description": "A blank template to get started with Payload 3.0",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "build": "cross-env NODE_OPTIONS=\"--no-deprecation --max-old-space-size=8000\" payload build",
+    "dev": "cross-env NODE_OPTIONS=--no-deprecation vite dev",
+    "devsafe": "rm -rf dist && cross-env NODE_OPTIONS=--no-deprecation vite dev",
+    "generate:importmap": "cross-env NODE_OPTIONS=--no-deprecation payload generate:importmap",
+    "generate:types": "cross-env NODE_OPTIONS=--no-deprecation payload generate:types",
+    "lint": "cross-env NODE_OPTIONS=--no-deprecation eslint .",
+    "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
+    "start": "cross-env NODE_OPTIONS=--no-deprecation srvx --prod --dir=. --static=dist/client --entry=dist/server/server.js",
+    "test": "pnpm run test:int && pnpm run test:e2e",
+    "test:e2e": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" playwright test --config=playwright.config.ts",
+    "test:int": "cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.config.mts"
+  },
+  "dependencies": {
+    "@payloadcms/db-mongodb": "workspace:*",
+    "@payloadcms/graphql": "workspace:*",
+    "@payloadcms/plugin-mcp": "workspace:*",
+    "@payloadcms/richtext-lexical": "workspace:*",
+    "@payloadcms/tanstack-start": "workspace:*",
+    "@payloadcms/ui": "workspace:*",
+    "@tanstack/react-router": "^1.120.0",
+    "@tanstack/react-start": "^1.168.26",
+    "cross-env": "10.1.0",
+    "dotenv": "16.4.7",
+    "graphql": "^16.8.1",
+    "payload": "workspace:*",
+    "react": "19.2.6",
+    "react-dom": "19.2.6",
+    "sharp": "0.34.2",
+    "srvx": "0.11.21",
+    "vite": "8.1.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "9.39.2",
+    "@playwright/test": "1.59.1",
+    "@testing-library/react": "16.3.0",
+    "@types/node": "24.12.3",
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3",
+    "@vitejs/plugin-react": "6.0.3",
+    "@vitejs/plugin-rsc": "^0.5.21",
+    "eslint": "^9.16.0",
+    "jsdom": "28.0.0",
+    "prettier": "^3.4.2",
+    "tsx": "4.22.4",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.26.1",
+    "vite-tsconfig-paths": "6.0.5",
+    "vitest": "4.1.6"
+  },
+  "engines": {
+    "node": ">=24.15.0",
+    "pnpm": "^9 || ^10 || ^11"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "sharp",
+      "esbuild",
+      "unrs-resolver"
+    ]
+  }
+}

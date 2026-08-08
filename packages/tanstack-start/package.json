@@ -57,7 +57,7 @@
     "dist"
   ],
   "scripts": {
-    "build": "pnpm build:types && pnpm build:swc && pnpm build:copy-mjs",
+    "build": "pnpm build:types && pnpm test:types && pnpm build:swc && pnpm build:copy-mjs",
     "build:clean": "find . \\( -type d \\( -name build -o -name dist -o -name .cache \\) -o -type f -name tsconfig.tsbuildinfo \\) -exec rm -rf {} + && pnpm build",
     "build:copy-mjs": "node ./scripts/copyMjs.mjs",
     "build:debug": "pnpm build",
@@ -65,7 +65,8 @@
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf {dist,*.tsbuildinfo}",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "lint:fix": "eslint . --fix",
+    "test:types": "tsc --project test/tsconfig.json"
   },
   "dependencies": {
     "@payloadcms/translations": "workspace:*",

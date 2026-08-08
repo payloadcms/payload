@@ -60,6 +60,7 @@
     flex-grow: 0;
     gap: var(--spacer-1);
     width: 100%;
+    min-width: 0;
   }
 
   .app-header__controls-wrapper {
@@ -80,9 +81,6 @@
     border-radius: var(--button-radius);
     cursor: pointer;
     color: var(--color-icon);
-    transition:
-      background-color 0.15s ease,
-      border-color 0.15s ease;
 
     &:hover {
       background-color: var(--color-bg-transparent-hover);

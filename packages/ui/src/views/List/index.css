@@ -12,7 +12,7 @@
 
   .collection-list__sub-header {
     flex-basis: 100%;
-    padding-top: var(--spacer-3);
+    padding-top: var(--spacer-2-5);
   }
 
   .collection-list .table table {
@@ -33,6 +33,11 @@
     &:hover {
       text-decoration-color: var(--color-text);
     }
+  }
+
+  /* The ID cell renders its own pill with a hover background instead of an underline */
+  .collection-list .table table td.cell--linked > :is(a, button):has(.id-label) {
+    text-decoration-line: none;
   }
 
   .collection-list .table table [class^='cell']:not(.cell--linked) > p,

@@ -55,7 +55,3 @@ export const getPackageRegistryVersions = async (): Promise<void> => {
   console.log()
   console.log(results.sort().join('\n'))
 }
-
-if (import.meta.url === new URL(import.meta.url).href) {
-  await getPackageRegistryVersions()
-}

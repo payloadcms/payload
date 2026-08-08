@@ -113,7 +113,7 @@ export const PreviewComponent: React.FC<PreviewProps> = (props) => {
       </div>
       <div
         style={{
-          background: 'var(--theme-elevation-50)',
+          background: 'var(--color-bg-secondary)',
           borderRadius: '5px',
           boxShadow: '0px 0px 10px rgba(0, 0, 0, 0.1)',
           maxWidth: '600px',

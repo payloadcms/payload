@@ -18,10 +18,8 @@ import {
 import { openListFilters } from '../__helpers/e2e/filters/index.js'
 import {
   closeAllToasts,
-  ensureCompilationIsDone,
   exactText,
   gotoAndWaitForForm,
-  initPageConsoleErrorCatch,
   saveDocAndAssert,
   waitForFormReady,
 } from '../__helpers/e2e/helpers.js'
@@ -33,6 +31,8 @@ import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { RESTClient } from '../__helpers/shared/rest.js'
 import { startTestFileServer } from '../__helpers/shared/startTestFileServer.js'
+import { ensureCompilationIsDone } from '../__setup/e2e/ensureCompilationIsDone.js'
+import { initPage } from '../__setup/e2e/initPage.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import {
   adminThumbnailFunctionSlug,
@@ -183,17 +183,12 @@ describe('Uploads', () => {
 
     const context = await browser.newContext()
     await context.grantPermissions(['clipboard-read', 'clipboard-write'])
-    page = await context.newPage()
+    const initialized = await initPage({ context, ignoreCORS: true, serverURL })
 
-    const { collectErrors, consoleErrors, stopCollectingErrors } = initPageConsoleErrorCatch(page, {
-      ignoreCORS: true,
-    })
-
-    consoleErrorsFromPage = consoleErrors
-    collectErrorsFromPage = collectErrors
-    stopCollectingErrorsFromPage = stopCollectingErrors
-
-    await ensureCompilationIsDone({ page, serverURL })
+    page = initialized.page
+    consoleErrorsFromPage = initialized.consoleErrors
+    collectErrorsFromPage = initialized.collectErrors
+    stopCollectingErrorsFromPage = initialized.stopCollectingErrors
   })
 
   beforeEach(async () => {
@@ -369,6 +364,27 @@ describe('Uploads', () => {
     expect(clipbaordContent).toBe(mediaDoc?.url)
   })
 
+  test('should show the link icon and "Copy link to file" tooltip on the copy link button', async () => {
+    const mediaDoc = (
+      await payload.find({
+        collection: mediaSlug,
+        depth: 0,
+        limit: 1,
+        pagination: false,
+      })
+    ).docs[0]
+
+    await page.goto(mediaURL.edit(mediaDoc!.id))
+
+    const copyLinkButton = page.locator('.file-toolbar .copy-to-clipboard')
+    await expect(copyLinkButton.locator('.icon--link')).toBeVisible()
+
+    await copyLinkButton.hover()
+    await expect(
+      page.locator('.tooltip--show', { hasText: exactText('Copy link to file') }),
+    ).toBeVisible()
+  })
+
   test('should show side-by-side layout for upload collection document with file', async () => {
     const mediaDoc = (
       await payload.find({
@@ -517,6 +533,17 @@ describe('Uploads', () => {
     await expect(filename).toHaveValue('image.png')
 
     await saveDocAndAssert(page)
+  })
+
+  test('should show a tooltip for the remove button on an unsaved selected file', async () => {
+    await gotoAndWaitForForm(page, mediaURL.create)
+    await page.setInputFiles('input[type="file"]', path.resolve(dirname, './image.png'))
+
+    const removeButton = page.locator('.file-manager__remove')
+    await expect(removeButton).toBeVisible()
+    await removeButton.hover()
+
+    await expect(page.locator('.tooltip--show', { hasText: exactText('Cancel') })).toBeVisible()
   })
 
   test('should remove remote URL button if pasteURL is false', async () => {
@@ -1749,7 +1776,9 @@ describe('Uploads', () => {
       // It should already be active (no need to navigate).
 
       // Should show "A file name is required" error message
-      await expect(bulkUploadModal.locator('.field-error')).toContainText('A file name is required')
+      await expect(page.locator('[id^="field-error-filename"]')).toContainText(
+        'A file name is required',
+      )
 
       // Filename field should be empty (as we cleared it)
       await expect(bulkUploadModal.locator('#field-filemanager-filename')).toHaveValue('')
