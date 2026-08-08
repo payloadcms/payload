@@ -7,6 +7,7 @@ import type {
   TFunction,
 } from '@payloadcms/translations'
 import type { BusboyConfig } from 'busboy'
+import type { Command } from 'commander'
 import type GraphQL from 'graphql'
 import type { GraphQLFormattedError } from 'graphql'
 import type { JSONSchema4 } from 'json-schema'
@@ -36,7 +37,7 @@ import type {
   ImportMap,
   Imports,
   InternalImportMap,
-} from '../bin/generateImportMap/index.js'
+} from '../cli/generateImportMap/index.js'
 import type {
   Collection,
   CollectionAccess,
@@ -144,12 +145,25 @@ export type ResolvedComponent<
   serverProps?: TComponentServerProps
 }
 
-export type BinScriptConfig = {
-  key: string
-  scriptPath: string
+/** Utilities available to every Payload CLI command. */
+export type CLIArgs = {
+  getConfig: () => Promise<SanitizedConfig>
+  getPayload: (options?: Omit<InitOptions, 'config'>) => Promise<Payload>
+  run: ({
+    command,
+    handler,
+  }: {
+    command: Command
+    handler: () => Promise<number | void>
+  }) => Promise<void>
 }
 
-export type BinScript = (config: SanitizedConfig) => Promise<void> | void
+/** A schema-backed command created with `defineCLICommand`. */
+export type CLICommand = {
+  /** Creates the Commander command with Payload's runtime CLI helpers. */
+  command: (args: CLIArgs) => Command
+  readonly schema: Record<string, unknown>
+}
 
 type Prettify<T> = {
   [K in keyof T]: T[K]
@@ -1375,8 +1389,6 @@ export type Config = {
    * Define Collection and Global access constraints that are combined with document Access Control using AND semantics.
    */
   baseAccess?: BaseAccess
-  /** Custom Payload bin scripts can be injected via the config. */
-  bin?: BinScriptConfig[]
   blocks?: Block[]
   /**
    * Pass additional options to the parser used to process `multipart/form-data` requests.
@@ -1387,6 +1399,10 @@ export type Config = {
    * @experimental This property is experimental and may change in future releases. Use at your own risk.
    */
   bodyParser?: Partial<BusboyConfig>
+  /** Add custom commands to the Payload CLI. */
+  cli?: {
+    commands?: CLICommand[]
+  }
   /**
    * Manage the datamodel of your application
    *

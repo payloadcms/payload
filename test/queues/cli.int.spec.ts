@@ -3,7 +3,6 @@ import {
   _internal_jobSystemGlobals,
   _internal_resetJobSystemGlobals,
   getPayload,
-  migrateCLI,
   type SanitizedConfig,
 } from 'payload'
 import { wait } from 'payload/shared'
@@ -11,6 +10,7 @@ import { fileURLToPath } from 'url'
 import { beforeAll, describe, expect, it } from 'vitest'
 
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { runCLICommand } from '../__helpers/shared/runCLICommand.js'
 import { waitUntilAutorunIsDone } from './utilities.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -70,11 +70,9 @@ describe('Queues - CLI', () => {
   })
 
   it('can run migrate CLI without jobs attempting to run', async () => {
-    await migrateCLI({
+    await runCLICommand({
+      argv: ['migrate'],
       config,
-      parsedArgs: {
-        _: ['migrate'],
-      },
     })
 
     // Wait 3 seconds to let potential autorun crons trigger

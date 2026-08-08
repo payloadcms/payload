@@ -1,6 +1,6 @@
 import type { I18nClient, TFunction } from '@payloadcms/translations'
 
-import type { ImportMap } from '../../bin/generateImportMap/index.js'
+import type { ImportMap } from '../../cli/generateImportMap/index.js'
 import type {
   LivePreviewConfig,
   SanitizedConfig,

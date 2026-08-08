@@ -4,12 +4,16 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
+import { createStartServerCommand } from './customScript.js'
 
 export default buildConfigWithDefaults({
   admin: {
     importMap: {
       baseDir: path.resolve(dirname),
     },
+  },
+  cli: {
+    commands: [createStartServerCommand],
   },
   collections: [
     {
@@ -83,12 +87,6 @@ export default buildConfigWithDefaults({
       },
       method: 'get',
       path: '/config',
-    },
-  ],
-  bin: [
-    {
-      scriptPath: path.resolve(dirname, 'customScript.ts'),
-      key: 'start-server',
     },
   ],
   globals: [

@@ -4,11 +4,11 @@ import fs, { readFileSync } from 'node:fs'
 import { createRequire } from 'node:module'
 import path from 'node:path'
 
-import type { SanitizedConfig } from '../config/types.js'
+import type { SanitizedConfig } from '../../../config/types.js'
 
-import { NEXT_PAYLOAD_ROUTE_GROUP, TANSTACK_PAYLOAD_DIR } from './frameworkConventions.js'
-import { generateImportMap } from './generateImportMap/index.js'
-import { generateTypes } from './generateTypes.js'
+import { NEXT_PAYLOAD_ROUTE_GROUP, TANSTACK_PAYLOAD_DIR } from '../../frameworkConventions.js'
+import { generateImportMap } from '../../generateImportMap/index.js'
+import { generateTypes } from '../../generateTypes.js'
 
 type Framework = 'next' | 'tanstack-start'
 
@@ -32,9 +32,15 @@ const VITE_CONFIG_FILES = [
  * or exits 1 if pre-build generation or framework detection fails (never builds
  * against a stale map or the wrong bundler).
  */
-export async function build({ config }: { config: SanitizedConfig }): Promise<void> {
-  const skipTypes = process.argv.includes('--no-types')
-
+export async function build({
+  config,
+  forwardedArgs = [],
+  skipTypes = false,
+}: {
+  config: SanitizedConfig
+  forwardedArgs?: string[]
+  skipTypes?: boolean
+}): Promise<void> {
   try {
     await generateImportMap(config, { log: true })
     if (!skipTypes) {
@@ -50,7 +56,7 @@ export async function build({ config }: { config: SanitizedConfig }): Promise<vo
   let args: string[]
   try {
     const framework = detectFramework()
-    ;({ args, bin } = resolveBuildCommand({ forwardedArgs: getForwardedArgs(), framework }))
+    ;({ args, bin } = resolveBuildCommand({ forwardedArgs, framework }))
   } catch (err) {
     console.error(err instanceof Error ? err.message : err)
     return process.exit(1)
@@ -170,18 +176,6 @@ export function resolveBuildCommand({
 }): { args: string[]; bin: string } {
   const bin = framework === 'next' ? resolveNextBin(cwd) : resolveViteBin(cwd)
   return { args: ['build', ...forwardedArgs], bin }
-}
-
-/**
- * Forward the raw args that follow the `build` subcommand to the framework build
- * (`next build` / `vite build`), dropping payload-only flags. Uses raw argv (not
- * minimist) so flags like `--turbopack` (Next) or `--mode staging` (Vite) pass
- * through verbatim.
- */
-export function getForwardedArgs(argv: string[] = process.argv.slice(2)): string[] {
-  const buildIndex = argv.indexOf('build')
-  const rest = buildIndex === -1 ? argv : argv.slice(buildIndex + 1)
-  return rest.filter((arg) => arg !== '--no-types')
 }
 
 function isFramework(value: string): value is Framework {
