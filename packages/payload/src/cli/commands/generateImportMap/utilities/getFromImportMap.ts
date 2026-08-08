@@ -1,5 +1,5 @@
-import type { PayloadComponent } from '../../../config/types.js'
-import type { ImportMap } from '../index.js'
+import type { PayloadComponent } from '../../../../config/types.js'
+import type { ImportMap } from '../generateImportMap.js'
 
 import { parsePayloadComponent } from './parsePayloadComponent.js'
 

@@ -19,8 +19,10 @@ const generateImportMapMock = vi.fn(async () => {})
 const generateTypesMock = vi.fn(async () => {})
 
 vi.mock('node:child_process', () => ({ spawn: spawnMock }))
-vi.mock('../../generateImportMap/index.js', () => ({ generateImportMap: generateImportMapMock }))
-vi.mock('../../generateTypes.js', () => ({ generateTypes: generateTypesMock }))
+vi.mock('../generateImportMap/generateImportMap.js', () => ({
+  generateImportMap: generateImportMapMock,
+}))
+vi.mock('../generateTypes.js', () => ({ generateTypes: generateTypesMock }))
 
 // Imported after mocks are registered
 const { build, detectFramework, resolveBuildCommand, resolveNextBin, resolveViteBin } =

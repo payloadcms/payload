@@ -1,7 +1,7 @@
 import fs from 'fs/promises'
 import path from 'path'
 
-import { NEXT_PAYLOAD_ROUTE_GROUP, TANSTACK_PAYLOAD_DIR } from '../../frameworkConventions.js'
+import { NEXT_PAYLOAD_ROUTE_GROUP, TANSTACK_PAYLOAD_DIR } from '../frameworkConventions.js'
 
 async function pathOrFileExists(path: string): Promise<boolean> {
   try {

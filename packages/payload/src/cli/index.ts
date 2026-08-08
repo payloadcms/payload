@@ -8,7 +8,7 @@ import type { CLIArgs, CLICommand, CLICommandEntry } from '../config/types.js'
 
 import { dynamicImport } from '../utilities/dynamicImport.js'
 import { createCLIArgs } from './args.js'
-import { parsePayloadComponent } from './generateImportMap/utilities/parsePayloadComponent.js'
+import { parsePayloadComponent } from './commands/generateImportMap/utilities/parsePayloadComponent.js'
 import { loadEnv } from './loadEnv.js'
 
 configureZod(en())

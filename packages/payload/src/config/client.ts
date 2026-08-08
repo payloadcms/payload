@@ -1,7 +1,7 @@
 import type { I18nClient, TFunction } from '@payloadcms/translations'
 import type { DeepPartial } from 'ts-essentials'
 
-import type { ImportMap } from '../cli/generateImportMap/index.js'
+import type { ImportMap } from '../cli/commands/generateImportMap/generateImportMap.js'
 import type { ClientBlock } from '../fields/config/types.js'
 import type { BlockSlug, User } from '../index.js'
 import type {

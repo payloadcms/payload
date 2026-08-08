@@ -141,7 +141,10 @@ import { authLocal } from './auth/operations/local/auth.js'
 import { APIKeyAuthentication } from './auth/strategies/apiKey.js'
 import { JWTAuthentication } from './auth/strategies/jwt.js'
 import { checkPayloadDependencies } from './checkPayloadDependencies.js'
-import { generateImportMap, type ImportMap } from './cli/generateImportMap/index.js'
+import {
+  generateImportMap,
+  type ImportMap,
+} from './cli/commands/generateImportMap/generateImportMap.js'
 import {
   countVersionsLocal,
   type CountVersionsOptions,
@@ -1433,10 +1436,10 @@ export type {
   SanitizedPermissions,
   VerifyConfig,
 } from './auth/types.js'
-export { generateImportMap } from './cli/generateImportMap/index.js'
-export type { ImportMap } from './cli/generateImportMap/index.js'
+export { generateImportMap } from './cli/commands/generateImportMap/generateImportMap.js'
+export type { ImportMap } from './cli/commands/generateImportMap/generateImportMap.js'
 
-export { genImportMapIterateFields } from './cli/generateImportMap/iterateFields.js'
+export { genImportMapIterateFields } from './cli/commands/generateImportMap/iterateFields.js'
 export {
   type ClientCollectionConfig,
   createClientCollectionConfig,
