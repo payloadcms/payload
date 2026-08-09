@@ -15,6 +15,7 @@ import {
   migrateVersionsV1_V2,
 } from '@payloadcms/db-mongodb/migration-utils'
 import { randomUUID } from 'crypto'
+import { sql } from 'drizzle-orm'
 import * as drizzlePg from 'drizzle-orm/pg-core'
 import * as drizzleSqlite from 'drizzle-orm/sqlite-core'
 import fs from 'fs'
@@ -2336,6 +2337,52 @@ describe('database', () => {
           } finally {
             db.drizzle = originalDrizzle
           }
+        },
+      )
+
+      it(
+        'should surface commit failures to the caller instead of resolving (drizzle)',
+        { db: (adapter) => adapter.startsWith('postgres') || adapter === 'supabase' },
+        async () => {
+          const req = {
+            payload,
+            user,
+          } as unknown as PayloadRequest
+
+          await initTransaction(req)
+          const transactionID = req.transactionID as number | string
+          const session = (
+            payload.db as unknown as {
+              sessions: Record<
+                number | string,
+                { db: { execute: (query: unknown) => Promise<unknown> } }
+              >
+            }
+          ).sessions[transactionID]
+
+          const doc = await payload.create({ collection, data: { title }, req })
+
+          // A constraint checked only at COMMIT time makes the commit itself
+          // fail while the connection stays healthy. Created inside the
+          // transaction, so the failed commit also rolls the table away.
+          await session.db.execute(sql`
+            CREATE TABLE commit_failure_probe (
+              id integer PRIMARY KEY,
+              parent integer REFERENCES commit_failure_probe (id) DEFERRABLE INITIALLY DEFERRED
+            )
+          `)
+          await session.db.execute(sql`INSERT INTO commit_failure_probe (id, parent) VALUES (1, 2)`)
+
+          await expect(commitTransaction(req)).rejects.toThrow()
+          await killTransaction(req)
+
+          // The write must not be reported as persisted when the commit failed
+          await expect(() =>
+            payload.findByID({
+              id: doc.id,
+              collection,
+            }),
+          ).rejects.toThrow('Not Found')
         },
       )
 
