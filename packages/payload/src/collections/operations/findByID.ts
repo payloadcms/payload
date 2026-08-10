@@ -176,6 +176,12 @@ export const findByIDOperation = async <
       joins: req.payloadAPI === 'GraphQL' ? false : sanitizedJoins,
       locale: locale!,
       req: {
+        // `branch`, `context` and `payload` are needed so the adapter can apply
+        // the branch predicate and reuse this request's memoized change
+        // manifest. Without them the read silently resolves against main.
+        branch: req.branch,
+        context: req.context,
+        payload: req.payload,
         transactionID: req.transactionID,
       } as PayloadRequest,
       select: dbSelect,

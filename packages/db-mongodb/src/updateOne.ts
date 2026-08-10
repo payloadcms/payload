@@ -1,6 +1,8 @@
 import type { QueryOptions, UpdateQuery } from 'mongoose'
 import type { UpdateOne } from 'payload'
 
+import { resolveBranchRowID } from 'payload'
+
 import type { MongooseAdapter } from './index.js'
 
 import { buildQuery } from './queries/buildQuery.js'
@@ -14,6 +16,7 @@ export const updateOne: UpdateOne = async function updateOne(
   this: MongooseAdapter,
   {
     id,
+    branch,
     collection: collectionSlug,
     data,
     locale,
@@ -25,6 +28,11 @@ export const updateOne: UpdateOne = async function updateOne(
   },
 ) {
   const { collectionConfig, Model } = getCollection({ adapter: this, collectionSlug })
+
+  if (id !== undefined && id !== null) {
+    id = await resolveBranchRowID({ id, branch, collectionSlug, req })
+  }
+
   const where = id ? { id: { equals: id } } : whereArg
   const fields = collectionConfig.fields
 

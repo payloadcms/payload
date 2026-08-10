@@ -2,7 +2,7 @@ import type { Payload, SanitizedCollectionConfig } from 'payload'
 
 import path from 'path'
 import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import {
@@ -325,13 +325,198 @@ describe('Branching', () => {
     it.todo('should always resolve req.user from main, even on a branch')
   })
 
-  describe('Write path', () => {
-    it.todo('should copy-on-write a main document into a shadow row on first branch edit')
-    it.todo('should reuse the existing shadow row on subsequent branch edits')
-    it.todo(
-      'should write a tombstone rather than deleting when deleting a main document on a branch',
-    )
-    it.todo('should hard-delete when deleting a document that was created on the same branch')
+  describe('Write path — copy-on-write updates', () => {
+    let mainDocID: number | string
+    const cleanup: (number | string)[] = []
+
+    beforeAll(async () => {
+      const existing = await payload.find({
+        collection: branchesSlug,
+        pagination: false,
+        where: { slug: { equals: 'cow' } },
+      })
+
+      if (!existing.docs.length) {
+        await payload.create({ collection: branchesSlug, data: { name: 'COW', slug: 'cow' } })
+      }
+    })
+
+    beforeEach(async () => {
+      const doc = await payload.create({
+        collection: postsSlug,
+        data: { order: 1, title: 'original on main' },
+      })
+      mainDocID = doc.id
+      cleanup.push(doc.id)
+    })
+
+    afterEach(async () => {
+      const shadows = await payload.find({
+        branch: false,
+        collection: postsSlug,
+        pagination: false,
+        where: { _branch: { not_equals: 'main' } },
+      })
+
+      for (const shadow of shadows.docs) {
+        await payload.delete({ branch: false, collection: postsSlug, id: shadow.id })
+      }
+
+      for (const id of cleanup) {
+        await payload.delete({ branch: false, collection: postsSlug, id })
+      }
+      cleanup.length = 0
+
+      const changes = await payload.find({
+        collection: branchChangesSlug,
+        pagination: false,
+        where: { branch: { equals: 'cow' } },
+      })
+
+      for (const change of changes.docs) {
+        await payload.delete({ collection: branchChangesSlug, id: change.id })
+      }
+    })
+
+    it('should leave the main document untouched when updating on a branch', async () => {
+      await payload.update({
+        branch: 'cow',
+        collection: postsSlug,
+        data: { title: 'edited on branch' },
+        id: mainDocID,
+      })
+
+      const onMain = await payload.findByID({ collection: postsSlug, id: mainDocID })
+
+      expect(onMain.title).toBe('original on main')
+    })
+
+    it('should create exactly one shadow row on first branch edit', async () => {
+      await payload.update({
+        branch: 'cow',
+        collection: postsSlug,
+        data: { title: 'edited on branch' },
+        id: mainDocID,
+      })
+
+      const shadows = await payload.find({
+        branch: false,
+        collection: postsSlug,
+        pagination: false,
+        where: { _branch: { equals: 'cow' } },
+      })
+
+      expect(shadows.docs).toHaveLength(1)
+      expect(shadows.docs[0]).toMatchObject({ _branchOp: 'update', title: 'edited on branch' })
+      expect(String(shadows.docs[0]!._branchDocID)).toBe(String(mainDocID))
+    })
+
+    it('should reuse the existing shadow row on subsequent branch edits', async () => {
+      await payload.update({
+        branch: 'cow',
+        collection: postsSlug,
+        data: { title: 'first branch edit' },
+        id: mainDocID,
+      })
+      await payload.update({
+        branch: 'cow',
+        collection: postsSlug,
+        data: { title: 'second branch edit' },
+        id: mainDocID,
+      })
+
+      const shadows = await payload.find({
+        branch: false,
+        collection: postsSlug,
+        pagination: false,
+        where: { _branch: { equals: 'cow' } },
+      })
+
+      expect(shadows.docs).toHaveLength(1)
+      expect(shadows.docs[0]!.title).toBe('second branch edit')
+    })
+
+    it('should return branch content when reading the branch by canonical ID', async () => {
+      await payload.update({
+        branch: 'cow',
+        collection: postsSlug,
+        data: { title: 'edited on branch' },
+        id: mainDocID,
+      })
+
+      const onBranch = await payload.findByID({
+        branch: 'cow',
+        collection: postsSlug,
+        id: mainDocID,
+      })
+
+      expect(onBranch.title).toBe('edited on branch')
+      expect(String(onBranch.id)).toBe(String(mainDocID))
+    })
+
+    it('should not double-count a document edited on a branch', async () => {
+      await payload.update({
+        branch: 'cow',
+        collection: postsSlug,
+        data: { title: 'edited on branch' },
+        id: mainDocID,
+      })
+
+      const onBranch = await payload.find({
+        branch: 'cow',
+        collection: postsSlug,
+        pagination: false,
+      })
+      const onMain = await payload.find({ collection: postsSlug, pagination: false })
+
+      expect(onBranch.docs).toHaveLength(onMain.docs.length)
+      expect(onBranch.docs.filter((doc) => String(doc.id) === String(mainDocID))).toHaveLength(1)
+    })
+
+    it('should filter on a branch-modified field using the branch value', async () => {
+      await payload.update({
+        branch: 'cow',
+        collection: postsSlug,
+        data: { title: 'Halloween Sale' },
+        id: mainDocID,
+      })
+
+      const onBranch = await payload.find({
+        branch: 'cow',
+        collection: postsSlug,
+        pagination: false,
+        where: { title: { like: 'Halloween' } },
+      })
+      const onMain = await payload.find({
+        collection: postsSlug,
+        pagination: false,
+        where: { title: { like: 'Halloween' } },
+      })
+
+      expect(onBranch.docs).toHaveLength(1)
+      expect(onMain.docs).toHaveLength(0)
+    })
+
+    it('should record the update in the changeset registry', async () => {
+      await payload.update({
+        branch: 'cow',
+        collection: postsSlug,
+        data: { title: 'edited on branch' },
+        id: mainDocID,
+      })
+
+      const changes = await payload.find({
+        collection: branchChangesSlug,
+        pagination: false,
+        where: { branch: { equals: 'cow' } },
+      })
+
+      expect(changes.docs).toHaveLength(1)
+      expect(changes.docs[0]).toMatchObject({ collectionSlug: postsSlug, operation: 'update' })
+    })
+
+    it.todo('should tombstone rather than delete when deleting a main document on a branch')
+    it.todo('should hard-delete when deleting a document created on the same branch')
     it.todo('should allow the same unique value on two different branches')
   })
 

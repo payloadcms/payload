@@ -1439,10 +1439,16 @@ export type { ImportMap } from './bin/generateImportMap/index.js'
 export { genImportMapIterateFields } from './bin/generateImportMap/iterateFields.js'
 export { migrate as migrateCLI } from './bin/migrate.js'
 export { appendBranchFilter } from './branching/appendBranchFilter.js'
+export {
+  applyBranchIDProjection,
+  projectBranchIDs,
+  rewriteBranchIDs,
+} from './branching/branchIDs.js'
 
 export { loadBranchManifest, resetBranchState, resolveBranch } from './branching/resolveBranch.js'
 
 export { resolveBranchQuery } from './branching/resolveBranchQuery.js'
+export { resolveBranchRowID } from './branching/resolveBranchRowID.js'
 
 export type {
   BranchingConfig,

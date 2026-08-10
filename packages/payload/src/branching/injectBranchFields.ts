@@ -1,7 +1,7 @@
 import type { CollectionConfig } from '../collections/config/types.js'
 import type { Field } from '../fields/config/types.js'
 
-import { recordBranchCreate, stampBranchOnCreate } from './hooks.js'
+import { forkOnBranchUpdate, recordBranchCreate, stampBranchOnCreate } from './hooks.js'
 import {
   branchDocIDField,
   branchField,
@@ -102,6 +102,10 @@ export const injectBranchFields = (collection: CollectionConfig): CollectionConf
   collection.hooks = collection.hooks ?? {}
   collection.hooks.beforeChange = [...(collection.hooks.beforeChange ?? []), stampBranchOnCreate]
   collection.hooks.afterChange = [...(collection.hooks.afterChange ?? []), recordBranchCreate]
+  collection.hooks.beforeOperation = [
+    ...(collection.hooks.beforeOperation ?? []),
+    forkOnBranchUpdate,
+  ]
 
   return collection
 }

@@ -1,6 +1,7 @@
 import type { PayloadRequest, Where } from '../types/index.js'
 
 import { appendBranchFilter } from './appendBranchFilter.js'
+import { rewriteBranchIDs } from './branchIDs.js'
 import { loadBranchManifest, resolveBranch } from './resolveBranch.js'
 import { MAIN_BRANCH } from './types.js'
 
@@ -75,6 +76,10 @@ export const resolveBranchQuery = async ({
   const manifest = await loadBranchManifest(req as PayloadRequest)
   const shadowedIDs = collectionSlug ? (manifest.get(collectionSlug) ?? []) : []
 
+  // A shadow row's primary key is not the document's canonical ID, so any `id`
+  // constraint has to be redirected before the branch predicate is applied.
+  const rewritten = rewriteBranchIDs(where ?? {})
+
   if (shadowedIDs.length > branching.maxShadowedIDs) {
     req.payload.logger.warn(
       `Branch "${branch}" has shadowed ${shadowedIDs.length} documents in "${collectionSlug}", above maxShadowedIDs (${branching.maxShadowedIDs}). Read performance will degrade.`,
@@ -85,6 +90,6 @@ export const resolveBranchQuery = async ({
     branch,
     enabled: true,
     shadowedIDs,
-    where: where ?? {},
+    where: rewritten ?? {},
   })
 }

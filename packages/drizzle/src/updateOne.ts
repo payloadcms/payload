@@ -1,6 +1,7 @@
 import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 import type { UpdateOne } from 'payload'
 
+import { resolveBranchRowID } from 'payload'
 import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from './types.js'
@@ -15,6 +16,7 @@ export const updateOne: UpdateOne = async function updateOne(
   this: DrizzleAdapter,
   {
     id,
+    branch,
     collection: collectionSlug,
     data,
     joins: joinQuery,
@@ -28,7 +30,10 @@ export const updateOne: UpdateOne = async function updateOne(
 ) {
   const collection = this.payload.collections[collectionSlug].config
   const tableName = this.tableNameMap.get(toSnakeCase(collection.slug))
-  let idToUpdate = id
+  let idToUpdate =
+    id === undefined || id === null
+      ? id
+      : await resolveBranchRowID({ id, branch, collectionSlug, req })
 
   const db = getPrimaryDb(this, await getTransaction(this, req))
 

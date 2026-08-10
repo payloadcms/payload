@@ -46,7 +46,7 @@ describe('appendBranchFilter', () => {
           or: [
             { _branch: { equals: 'halloween' } },
             {
-              and: [{ _branch: { equals: 'main' } }, { _branchDocID: { not_in: [7, 9] } }],
+              and: [{ _branch: { equals: 'main' } }, { id: { not_in: [7, 9] } }],
             },
           ],
         },

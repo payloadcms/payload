@@ -1,5 +1,10 @@
-import type { CollectionAfterChangeHook, CollectionBeforeChangeHook } from '../index.js'
+import type {
+  CollectionAfterChangeHook,
+  CollectionBeforeChangeHook,
+  CollectionBeforeOperationHook,
+} from '../index.js'
 
+import { forkDocument } from './forkDocument.js'
 import { resolveBranch } from './resolveBranch.js'
 import { branchChangesCollectionSlug, branchField, branchOpField, MAIN_BRANCH } from './types.js'
 
@@ -59,4 +64,43 @@ export const recordBranchCreate: CollectionAfterChangeHook = async ({
   })
 
   return doc
+}
+
+/**
+ * Redirects a branch update onto the branch's own copy of the document,
+ * copy-on-writing that copy into existence the first time.
+ *
+ * Rewriting `args.id` rather than intercepting the write means the rest of the
+ * operation — field hooks, validation, version creation — runs unmodified
+ * against a real row.
+ */
+export const forkOnBranchUpdate: CollectionBeforeOperationHook = async ({
+  args,
+  collection,
+  operation,
+  req,
+}) => {
+  if (operation !== 'updateByID' && operation !== 'update') {
+    return args
+  }
+
+  const id = (args as { id?: number | string }).id
+
+  if (id === undefined || id === null) {
+    return args
+  }
+
+  const branch = resolveBranch(req)
+
+  if (branch === MAIN_BRANCH) {
+    return args
+  }
+
+  // Ensures the branch has its own copy, but leaves `args.id` as the canonical
+  // ID. Canonical IDs are the only identity the API exposes; the read path
+  // resolves them through the where-tree rewrite and the write path through
+  // `resolveBranchRowID`.
+  await forkDocument({ id, collectionSlug: collection.slug, req })
+
+  return args
 }

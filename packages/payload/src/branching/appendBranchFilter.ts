@@ -1,6 +1,6 @@
 import type { Where } from '../types/index.js'
 
-import { branchDocIDField, branchField, branchOpField, MAIN_BRANCH } from './types.js'
+import { branchField, branchOpField, MAIN_BRANCH } from './types.js'
 
 type Args = {
   /** The active branch slug, or `'main'`. */
@@ -48,12 +48,13 @@ export const appendBranchFilter = ({ branch, enabled, shadowedIDs, where }: Args
     return and(where, { [branchField]: { equals: MAIN_BRANCH } })
   }
 
+  // Excluded by their own `id`, not by `_branchDocID`. For a main row the
+  // canonical ID *is* its primary key — `_branchDocID` is null there, meaning
+  // "self", so comparing against it would never match and the shadowed main row
+  // would be returned alongside the branch's copy.
   const mainRows: Where = shadowedIDs.length
     ? {
-        and: [
-          { [branchField]: { equals: MAIN_BRANCH } },
-          { [branchDocIDField]: { not_in: shadowedIDs } },
-        ],
+        and: [{ [branchField]: { equals: MAIN_BRANCH } }, { id: { not_in: shadowedIDs } }],
       }
     : { [branchField]: { equals: MAIN_BRANCH } }
 

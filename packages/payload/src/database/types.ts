@@ -200,6 +200,11 @@ export type RollbackTransaction = (id: number | Promise<number | string> | strin
 export type CommitTransaction = (id: number | Promise<number | string> | string) => Promise<void>
 
 export type QueryDraftsArgs = {
+  /**
+   * Branch to scope this operation to. `false` bypasses branching entirely,
+   * for the merge engine and cross-branch reads.
+   */
+  branch?: false | string
   collection: CollectionSlug
   joins?: JoinQuery
   limit?: number
@@ -215,6 +220,11 @@ export type QueryDraftsArgs = {
 export type QueryDrafts = <T = TypeWithID>(args: QueryDraftsArgs) => Promise<PaginatedDocs<T>>
 
 export type FindOneArgs = {
+  /**
+   * Branch to scope this operation to. `false` bypasses branching entirely,
+   * for the merge engine and cross-branch reads.
+   */
+  branch?: false | string
   collection: CollectionSlug
   draftsEnabled?: boolean
   joins?: JoinQuery
@@ -227,6 +237,11 @@ export type FindOneArgs = {
 export type FindOne = <T extends TypeWithID>(args: FindOneArgs) => Promise<null | T>
 
 export type FindArgs = {
+  /**
+   * Branch to scope this operation to. `false` bypasses branching entirely,
+   * for the merge engine and cross-branch reads.
+   */
+  branch?: false | string
   collection: CollectionSlug
   draftsEnabled?: boolean
   joins?: JoinQuery
@@ -250,6 +265,11 @@ export type FindArgs = {
 export type Find = <T = TypeWithID>(args: FindArgs) => Promise<PaginatedDocs<T>>
 
 export type CountArgs = {
+  /**
+   * Branch to scope this operation to. `false` bypasses branching entirely,
+   * for the merge engine and cross-branch reads.
+   */
+  branch?: false | string
   collection: CollectionSlug
   locale?: string
   req?: Partial<PayloadRequest>
@@ -548,6 +568,10 @@ export type FindDistinct = (
 export type Create = (args: CreateArgs) => Promise<Document>
 
 export type UpdateOneArgs = {
+  /**
+   * Branch to scope this operation to. `false` bypasses branching entirely.
+   */
+  branch?: false | string
   collection: CollectionSlug
   data: Record<string, unknown>
   draft?: boolean
@@ -657,6 +681,10 @@ export type UpsertArgs = {
 export type Upsert = (args: UpsertArgs) => Promise<Document>
 
 export type DeleteOneArgs = {
+  /**
+   * Branch to scope this operation to. `false` bypasses branching entirely.
+   */
+  branch?: false | string
   collection: CollectionSlug
   joins?: JoinQuery
   req?: Partial<PayloadRequest>

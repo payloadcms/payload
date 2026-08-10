@@ -1,6 +1,15 @@
 # Content Branching for Payload — Design Proposal
 
-**Status:** Draft for review. Targets Payload 4.0. No implementation has started.
+**Status:** Design approved; implementation in progress on `feat/content-branching`.
+Targets Payload 4.0.
+
+**Implemented and verified (SQLite):** phase 0 spike, config surface and exclusions, schema injection
+and unique-index rewriting, branch resolution across the request, the change manifest, and the read
+predicate wired through `db-mongodb` and `drizzle`. Documents can be created on a branch and read back
+in isolation with correct pagination and counts.
+
+**Not yet implemented:** copy-on-write updates, tombstone deletes, drafts on branches, globals,
+branch-aware joins, the access preflight, merge, and UI. See §19 for phasing.
 
 ---
 
