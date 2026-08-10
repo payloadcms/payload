@@ -1,8 +1,6 @@
 import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 import type { SQLiteSelect, SQLiteSelectBase } from 'drizzle-orm/sqlite-core'
-
-import { and, asc, count, desc, eq, getTableName, or, sql } from 'drizzle-orm'
-import {
+import type {
   appendVersionToQueryKey,
   buildVersionCollectionFields,
   combineQueries,
@@ -10,10 +8,14 @@ import {
   getFieldByPath,
   getQueryDraftsSort,
   type JoinQuery,
+  PayloadRequest,
   type SelectMode,
   type SelectType,
   type Where,
 } from 'payload'
+
+import { and, asc, count, desc, eq, getTableName, or, sql } from 'drizzle-orm'
+import { getBranchPredicateSync } from 'payload'
 import { fieldIsVirtual, fieldShouldBeLocalized, hasDraftsEnabled } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
@@ -110,6 +112,7 @@ type TraverseFieldArgs = {
   locale?: string
   parentIsLocalized?: boolean
   path: string
+  req?: Partial<PayloadRequest>
   select?: SelectType
   selectAllOnCurrentLevel?: boolean
   selectMode?: SelectMode
@@ -139,6 +142,7 @@ export const traverseFields = ({
   locale,
   parentIsLocalized = false,
   path,
+  req,
   select,
   selectAllOnCurrentLevel = false,
   selectMode,
@@ -698,6 +702,17 @@ export const traverseFields = ({
             }
           }
 
+          // A join subquery must carry the same branch predicate as the
+          // top-level read, or a branch would see main's related documents.
+          const joinBranchPredicate = getBranchPredicateSync({
+            collectionSlug: field.collection,
+            req,
+          })
+
+          if (joinBranchPredicate) {
+            joinQueryWhere = { and: [joinQueryWhere, joinBranchPredicate] }
+          }
+
           if (useDrafts) {
             joinQueryWhere = combineQueries(appendVersionToQueryKey(joinQueryWhere), {
               latest: { equals: true },
@@ -747,6 +762,15 @@ export const traverseFields = ({
 
           if (useDrafts) {
             selectFields.parent = newAliasTable.parent
+          }
+
+          // Surface the canonical document ID rather than the shadow row's own
+          // primary key, so join results address documents the same way every
+          // other read does.
+          if (joinBranchPredicate && newAliasTable._branchDocID) {
+            selectFields.id = sql`COALESCE(${newAliasTable._branchDocID}, ${newAliasTable.id})`.as(
+              'id',
+            )
           }
 
           let query: SQLiteSelect = db

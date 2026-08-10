@@ -154,6 +154,7 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
     locale,
     projection,
     query: versionQuery,
+    req,
     versions: true,
   })
 

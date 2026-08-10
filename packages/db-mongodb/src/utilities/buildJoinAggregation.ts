@@ -7,8 +7,10 @@ import {
   type CollectionSlug,
   combineQueries,
   type FlattenedField,
+  getBranchPredicateSync,
   getQueryDraftsSort,
   type JoinQuery,
+  type PayloadRequest,
   type SanitizedCollectionConfig,
 } from 'payload'
 import { fieldShouldBeLocalized, hasDraftsEnabled } from 'payload/shared'
@@ -30,6 +32,7 @@ type BuildJoinAggregationArgs = {
   projection?: Record<string, true>
   // the where clause for the top collection
   query?: Record<string, unknown>
+  req?: Partial<PayloadRequest>
   /** whether the query is from drafts */
   versions?: boolean
 }
@@ -42,6 +45,7 @@ export const buildJoinAggregation = async ({
   joins,
   locale,
   projection,
+  req,
   versions,
 }: BuildJoinAggregationArgs): Promise<PipelineStage[] | undefined> => {
   if (!adapter.useJoinAggregations) {
@@ -322,20 +326,40 @@ export const buildJoinAggregation = async ({
       const sortProperty = Object.keys(sort)[0]!
       const sortDirection = sort[sortProperty] === 'asc' ? 1 : -1
 
+      // A join subquery must carry the same branch predicate as the top-level
+      // read, or a branch would see main's related documents.
+      const joinBranchPredicate = getBranchPredicateSync({
+        collectionSlug: collectionConfig.slug,
+        req,
+      })
+
+      const branchedWhereJoin = joinBranchPredicate
+        ? ({ and: [whereJoin, joinBranchPredicate] } as typeof whereJoin)
+        : whereJoin
+
       const $match = await JoinModel.buildQuery({
         locale,
         payload: adapter.payload,
         where: useDrafts
-          ? combineQueries(appendVersionToQueryKey(whereJoin), {
+          ? combineQueries(appendVersionToQueryKey(branchedWhereJoin), {
               latest: {
                 equals: true,
               },
             })
-          : whereJoin,
+          : branchedWhereJoin,
       })
 
       const pipeline: Exclude<PipelineStage, PipelineStage.Merge | PipelineStage.Out>[] = [
         { $match },
+        // Surface the canonical document ID rather than the shadow row's own
+        // primary key, so join results address documents the same way every
+        // other read does.
+        ...(joinBranchPredicate
+          ? ([{ $set: { _id: { $ifNull: ['$_branchDocID', '$_id'] } } }] as Exclude<
+              PipelineStage,
+              PipelineStage.Merge | PipelineStage.Out
+            >[])
+          : []),
         {
           $sort: { [sortProperty]: sortDirection },
         },

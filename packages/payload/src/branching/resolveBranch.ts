@@ -138,3 +138,16 @@ export const resetBranchState = (req: PayloadRequest): void => {
     delete context[stateKey]
   }
 }
+
+/**
+ * The manifest already loaded for this request, without loading it.
+ *
+ * For synchronous callers such as join query builders, which run after the
+ * top-level read has resolved the branch and populated the manifest.
+ */
+export const peekBranchManifest = (req: PayloadRequest): Map<string, (number | string)[]> => {
+  const context = req?.context as Record<string, unknown> | undefined
+  const state = context?.[stateKey] as BranchState | undefined
+
+  return state?.manifest ?? new Map()
+}

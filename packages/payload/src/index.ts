@@ -1463,7 +1463,7 @@ export { getBranchesLocalAPI, mergeBranch } from './branching/merge.js'
 export type { MergeableChange, MergeOptions, MergeResult, MergeWarning } from './branching/merge.js'
 
 export { loadBranchManifest, resetBranchState, resolveBranch } from './branching/resolveBranch.js'
-export { resolveBranchQuery } from './branching/resolveBranchQuery.js'
+export { getBranchPredicateSync, resolveBranchQuery } from './branching/resolveBranchQuery.js'
 export { resolveBranchRowID } from './branching/resolveBranchRowID.js'
 export { resolveBranchDelete } from './branching/tombstone.js'
 export type {

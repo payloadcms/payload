@@ -4,6 +4,7 @@ import {
   appendVersionToQueryKey,
   buildVersionCollectionFields,
   combineQueries,
+  getBranchPredicateSync,
   getQueryDraftsSort,
 } from 'payload'
 import { fieldShouldBeLocalized } from 'payload/shared'
@@ -27,6 +28,8 @@ export type ResolveJoinsArgs = {
   locale?: string
   /** Optional projection for the join query */
   projection?: Record<string, true>
+  /** Request, for resolving the active branch */
+  req?: Partial<PayloadRequest>
   /** Whether to resolve versions instead of published documents */
   versions?: boolean
 }
@@ -43,6 +46,7 @@ export async function resolveJoins({
   joins,
   locale,
   projection,
+  req,
   versions = false,
 }: ResolveJoinsArgs): Promise<void> {
   // Early return if no joins are specified or no documents to process
@@ -155,6 +159,17 @@ export async function resolveJoins({
       if (whereQuery === null) {
         return null
       }
+      // A join subquery must carry the same branch predicate as the top-level
+      // read, or a branch would see main's related documents.
+      const joinBranchPredicate = getBranchPredicateSync({
+        collectionSlug: joinCollectionSlug,
+        req,
+      })
+
+      if (joinBranchPredicate) {
+        whereQuery = { and: [whereQuery as Where, joinBranchPredicate] }
+      }
+
       whereQuery = useDrafts
         ? await JoinModel.buildQuery({
             locale,

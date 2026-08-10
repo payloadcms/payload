@@ -2,7 +2,7 @@ import type { PayloadRequest, Where } from '../types/index.js'
 
 import { appendBranchFilter } from './appendBranchFilter.js'
 import { rewriteBranchIDs } from './branchIDs.js'
-import { loadBranchManifest, resolveBranch } from './resolveBranch.js'
+import { loadBranchManifest, peekBranchManifest, resolveBranch } from './resolveBranch.js'
 import { MAIN_BRANCH } from './types.js'
 
 type Args = {
@@ -92,4 +92,48 @@ export const resolveBranchQuery = async ({
     shadowedIDs,
     where: rewritten ?? {},
   })
+}
+
+/**
+ * Synchronous branch predicate, for query builders that are not async.
+ *
+ * Reads the change manifest that `resolveBranchQuery` has already loaded and
+ * memoized on the request earlier in the same read. Returns `null` when
+ * branching is inactive for the entity, so callers can skip cleanly.
+ *
+ * Join subqueries need this: they are assembled inside synchronous query
+ * builders, but must carry the same branch predicate as the top-level read or
+ * a branch would see main's related documents.
+ */
+export const getBranchPredicateSync = ({
+  branch: branchOverride,
+  collectionSlug,
+  req,
+}: {
+  branch?: false | string
+  collectionSlug: string
+  req?: Partial<PayloadRequest>
+}): null | Where => {
+  if (branchOverride === false || !req?.payload) {
+    return null
+  }
+
+  if ((req.context as Record<string, unknown> | undefined)?._branchBypass) {
+    return null
+  }
+
+  const branching = req.payload.config?.branching
+
+  if (!branching?.enabled || !branching.branchableCollections.has(collectionSlug)) {
+    return null
+  }
+
+  const branch = branchOverride ?? resolveBranch(req as PayloadRequest)
+
+  const shadowedIDs =
+    branch === MAIN_BRANCH
+      ? []
+      : (peekBranchManifest(req as PayloadRequest).get(collectionSlug) ?? [])
+
+  return appendBranchFilter({ branch, enabled: true, shadowedIDs, where: {} })
 }

@@ -44,6 +44,7 @@ export const findOne: FindOne = async function findOne(
     locale,
     projection,
     query,
+    req,
   })
 
   const session = await getSession(this, req)

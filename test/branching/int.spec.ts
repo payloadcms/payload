@@ -9,6 +9,7 @@ import { hookSpy } from './hookSpy.js'
 import {
   branchChangesSlug,
   branchesSlug,
+  categoriesSlug,
   excludedSlug,
   headerGlobalSlug,
   homepageGlobalSlug,
@@ -862,8 +863,112 @@ describe('Branching', () => {
   })
 
   describe('Joins', () => {
-    it.todo('should include branch-created documents in a join field on that branch')
-    it.todo('should exclude branch-deleted documents from a join field on that branch')
+    let categoryID: number | string
+    let mainPostID: number | string
+    let branchPostID: number | string
+
+    beforeEach(async () => {
+      await payload.create({
+        collection: branchesSlug,
+        data: { name: 'Join work', slug: 'joinwork' },
+      })
+
+      const category = await payload.create({
+        collection: categoriesSlug,
+        data: { name: 'News' },
+      })
+      categoryID = category.id
+
+      const mainPost = await payload.create({
+        collection: postsSlug,
+        data: { category: categoryID, title: 'main post' },
+      })
+      mainPostID = mainPost.id
+
+      const branchPost = await payload.create({
+        branch: 'joinwork',
+        collection: postsSlug,
+        data: { category: categoryID, title: 'branch post' },
+      })
+      branchPostID = branchPost.id
+    })
+
+    afterEach(async () => {
+      for (const slug of [postsSlug, categoriesSlug]) {
+        const rows = await payload.find({ branch: false, collection: slug, pagination: false })
+
+        for (const row of rows.docs) {
+          await payload.delete({ branch: false, collection: slug, id: row.id })
+        }
+      }
+
+      for (const collection of [branchChangesSlug, branchesSlug]) {
+        const rows = await payload.find({
+          collection,
+          pagination: false,
+          where: { [collection === branchesSlug ? 'slug' : 'branch']: { equals: 'joinwork' } },
+        })
+
+        for (const row of rows.docs) {
+          await payload.delete({ collection, id: row.id })
+        }
+      }
+    })
+
+    it('should exclude branch-created documents from a join read on main', async () => {
+      const onMain = await payload.findByID({ collection: categoriesSlug, id: categoryID })
+      const ids = (onMain.posts?.docs ?? []).map((doc: any) => String(doc?.id ?? doc))
+
+      expect(ids).toContain(String(mainPostID))
+      expect(ids).not.toContain(String(branchPostID))
+    })
+
+    it('should include branch-created documents in a join read on that branch', async () => {
+      const onBranch = await payload.findByID({
+        branch: 'joinwork',
+        collection: categoriesSlug,
+        id: categoryID,
+      })
+      const ids = (onBranch.posts?.docs ?? []).map((doc: any) => String(doc?.id ?? doc))
+
+      expect(ids).toContain(String(mainPostID))
+      expect(ids).toContain(String(branchPostID))
+    })
+
+    it('should exclude branch-deleted documents from a join read on that branch', async () => {
+      await payload.delete({ branch: 'joinwork', collection: postsSlug, id: mainPostID })
+
+      const onBranch = await payload.findByID({
+        branch: 'joinwork',
+        collection: categoriesSlug,
+        id: categoryID,
+      })
+      const onMain = await payload.findByID({ collection: categoriesSlug, id: categoryID })
+
+      const branchIDs = (onBranch.posts?.docs ?? []).map((doc: any) => String(doc?.id ?? doc))
+      const mainIDs = (onMain.posts?.docs ?? []).map((doc: any) => String(doc?.id ?? doc))
+
+      expect(branchIDs).not.toContain(String(mainPostID))
+      expect(mainIDs).toContain(String(mainPostID))
+    })
+
+    it('should not surface a shadow row as a separate join entry', async () => {
+      await payload.update({
+        branch: 'joinwork',
+        collection: postsSlug,
+        data: { title: 'edited on branch' },
+        id: mainPostID,
+      })
+
+      const onBranch = await payload.findByID({
+        branch: 'joinwork',
+        collection: categoriesSlug,
+        id: categoryID,
+      })
+      const ids = (onBranch.posts?.docs ?? []).map((doc: any) => String(doc?.id ?? doc))
+
+      expect(ids.filter((id) => id === String(mainPostID))).toHaveLength(1)
+    })
   })
 
   describe('Access', () => {

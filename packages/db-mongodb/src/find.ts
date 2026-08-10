@@ -155,6 +155,7 @@ export const find: Find = async function find(
     locale,
     projection: paginationOptions.projection,
     query,
+    req,
   })
 
   if (aggregate || sortAggregation.length > 0) {

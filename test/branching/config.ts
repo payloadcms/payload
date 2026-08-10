@@ -42,7 +42,10 @@ export default buildConfigWithDefaults({
     },
     {
       slug: categoriesSlug,
-      fields: [{ name: 'name', type: 'text' }],
+      fields: [
+        { name: 'name', type: 'text' },
+        { name: 'posts', type: 'join', collection: postsSlug, on: 'category' },
+      ],
       versions: false,
     },
     {
