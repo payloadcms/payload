@@ -318,6 +318,10 @@ export type FindGlobalVersionsArgs = {
 } & BaseVersionArgs
 
 export type FindGlobalArgs = {
+  /**
+   * Branch to scope this operation to. `false` bypasses branching entirely.
+   */
+  branch?: false | string
   locale?: string
   req?: Partial<PayloadRequest>
   select?: SelectType
@@ -386,6 +390,10 @@ export type CreateGlobal = <T extends Record<string, unknown> = any>(
 ) => Promise<T>
 
 export type UpdateGlobalArgs<T extends Record<string, unknown> = any> = {
+  /**
+   * Branch to scope this operation to. `false` bypasses branching entirely.
+   */
+  branch?: false | string
   data: T
   /**
    * Additional database adapter specific options to pass to the query
@@ -454,6 +462,10 @@ export type CreateVersion = <T extends JsonObject = JsonObject>(
 
 export type CreateGlobalVersionArgs<T extends JsonObject = JsonObject> = {
   autosave: boolean
+  /**
+   * Branch to scope this operation to. `false` bypasses branching entirely.
+   */
+  branch?: false | string
   createdAt: string
   globalSlug: GlobalSlug
   publishedLocale?: string

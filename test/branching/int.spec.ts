@@ -9,6 +9,8 @@ import {
   branchChangesSlug,
   branchesSlug,
   excludedSlug,
+  headerGlobalSlug,
+  homepageGlobalSlug,
   numericIDSlug,
   pagesSlug,
   postsSlug,
@@ -730,9 +732,132 @@ describe('Branching', () => {
   })
 
   describe('Globals', () => {
-    it.todo('should leave main untouched when editing a global on a branch')
-    it.todo('should read through to main for a global never edited on the branch')
-    it.todo('should not clear main latest flag when saving a global draft on a branch')
+    beforeAll(async () => {
+      const existing = await payload.find({
+        collection: branchesSlug,
+        pagination: false,
+        where: { slug: { equals: 'globalwork' } },
+      })
+
+      if (!existing.docs.length) {
+        await payload.create({
+          collection: branchesSlug,
+          data: { name: 'Global work', slug: 'globalwork' },
+        })
+      }
+
+      await payload.updateGlobal({
+        data: { navLabel: 'main nav' },
+        slug: headerGlobalSlug,
+      })
+    })
+
+    it('should leave main untouched when editing a global on a branch', async () => {
+      await payload.updateGlobal({
+        branch: 'globalwork',
+        data: { navLabel: 'branch nav' },
+        slug: headerGlobalSlug,
+      })
+
+      const onMain = await payload.findGlobal({ slug: headerGlobalSlug })
+
+      expect(onMain.navLabel).toBe('main nav')
+    })
+
+    it('should return the branch version when reading the global on that branch', async () => {
+      await payload.updateGlobal({
+        branch: 'globalwork',
+        data: { navLabel: 'branch nav' },
+        slug: headerGlobalSlug,
+      })
+
+      const onBranch = await payload.findGlobal({
+        branch: 'globalwork',
+        slug: headerGlobalSlug,
+      })
+
+      expect(onBranch.navLabel).toBe('branch nav')
+    })
+
+    it('should read through to main for a global never edited on the branch', async () => {
+      const onOtherBranch = await payload.findGlobal({
+        branch: 'halloween',
+        slug: headerGlobalSlug,
+      })
+
+      expect(onOtherBranch.navLabel).toBe('main nav')
+    })
+
+    it('should keep two branches independent for the same global', async () => {
+      await payload.updateGlobal({
+        branch: 'globalwork',
+        data: { navLabel: 'globalwork nav' },
+        slug: headerGlobalSlug,
+      })
+      await payload.updateGlobal({
+        branch: 'q4',
+        data: { navLabel: 'q4 nav' },
+        slug: headerGlobalSlug,
+      })
+
+      const a = await payload.findGlobal({ branch: 'globalwork', slug: headerGlobalSlug })
+      const b = await payload.findGlobal({ branch: 'q4', slug: headerGlobalSlug })
+      const main = await payload.findGlobal({ slug: headerGlobalSlug })
+
+      expect(a.navLabel).toBe('globalwork nav')
+      expect(b.navLabel).toBe('q4 nav')
+      expect(main.navLabel).toBe('main nav')
+    })
+
+    /**
+     * The corruption case. Global versions have no `parent` to scope `latest`
+     * by, and the clearing statement in `createGlobalVersion` is unscoped — so
+     * without a branch-scoped fix, saving a draft of a global on a branch
+     * silently clears main's latest flag and main loses its draft.
+     */
+    it('should not clear main latest version flag when saving a global draft on a branch', async () => {
+      await payload.updateGlobal({
+        data: { _status: 'published', heroTitle: 'published on main' },
+        slug: homepageGlobalSlug,
+      })
+      await payload.updateGlobal({
+        data: { heroTitle: 'main draft' },
+        draft: true,
+        slug: homepageGlobalSlug,
+      })
+
+      await payload.updateGlobal({
+        branch: 'globalwork',
+        data: { heroTitle: 'branch draft' },
+        draft: true,
+        slug: homepageGlobalSlug,
+      })
+
+      const mainLatest = await payload.findGlobalVersions({
+        pagination: false,
+        slug: homepageGlobalSlug,
+        where: { and: [{ latest: { equals: true } }, { _branch: { equals: 'main' } }] },
+      })
+
+      expect(mainLatest.docs).toHaveLength(1)
+      expect(mainLatest.docs[0]!.version.heroTitle).toBe('main draft')
+    })
+
+    it('should hide a global draft saved on a branch from main', async () => {
+      await payload.updateGlobal({
+        branch: 'globalwork',
+        data: { heroTitle: 'branch draft only' },
+        draft: true,
+        slug: homepageGlobalSlug,
+      })
+
+      const mainDraft = await payload.findGlobal({
+        draft: true,
+        slug: homepageGlobalSlug,
+      })
+
+      expect(mainDraft.heroTitle).not.toBe('branch draft only')
+    })
   })
 
   describe('Joins', () => {

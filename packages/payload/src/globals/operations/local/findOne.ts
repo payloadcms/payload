@@ -27,6 +27,11 @@ type BaseFindOneOptions<TSlug extends GlobalSlug, TSelect extends SelectType> = 
    * shouldn't be necessarily part of the document, for example a `triggerBeforeChange` option which can be read by the BeforeChange hook
    * to determine if it should run or not.
    */
+  /**
+   * Read and write against a specific content branch instead of resolving one
+   * from the request. `false` bypasses branching entirely.
+   */
+  branch?: false | string
   context?: RequestContext
   /**
    * You may pass the document data directly which will skip the `db.findOne` database query.

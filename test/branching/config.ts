@@ -6,6 +6,8 @@ import { devUser } from '../credentials.js'
 import {
   categoriesSlug,
   excludedSlug,
+  headerGlobalSlug,
+  homepageGlobalSlug,
   mediaSlug,
   numericIDSlug,
   pagesSlug,
@@ -63,6 +65,18 @@ export default buildConfigWithDefaults({
       branching: false,
       fields: [{ name: 'title', type: 'text' }],
       versions: false,
+    },
+  ],
+  globals: [
+    {
+      slug: headerGlobalSlug,
+      fields: [{ name: 'navLabel', type: 'text' }],
+      versions: false,
+    },
+    {
+      slug: homepageGlobalSlug,
+      fields: [{ name: 'heroTitle', type: 'text' }],
+      versions: { drafts: true },
     },
   ],
   onInit: async (payload) => {

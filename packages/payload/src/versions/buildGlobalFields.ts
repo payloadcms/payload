@@ -10,6 +10,20 @@ export const buildVersionGlobalFields = <T extends boolean = false>(
   flatten?: T,
 ): true extends T ? FlattenedField[] : Field[] => {
   const fields: FlattenedField[] = [
+    // Unlike collection versions, global versions have no `parent` to scope
+    // `latest` by — every version of a global shares one stream. `_branch` is
+    // what keeps a branch's chain from clearing main's latest flag.
+    ...(config.branching?.branchableGlobals?.has(global.slug)
+      ? ([
+          {
+            name: '_branch',
+            type: 'text',
+            admin: { disabled: true },
+            defaultValue: 'main',
+            index: true,
+          },
+        ] as FlattenedField[])
+      : []),
     {
       name: 'version',
       type: 'group',

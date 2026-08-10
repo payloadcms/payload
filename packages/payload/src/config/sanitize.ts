@@ -4,6 +4,7 @@ import { en } from '@payloadcms/translations/languages/en'
 
 import type { RichTextSanitizer } from '../fields/config/sanitize.js'
 import type { OrderableJoinInfo } from '../fields/config/sanitizeJoinField.js'
+import type { GlobalConfig } from '../globals/config/types.js'
 import type {
   CollectionConfig,
   CollectionSlug,
@@ -25,7 +26,7 @@ import type {
 import { defaultUserCollection } from '../auth/defaultUser.js'
 import { authRootEndpoints } from '../auth/endpoints/index.js'
 import { getBranchChangesCollection, getBranchesCollection } from '../branching/collections.js'
-import { injectBranchFields } from '../branching/injectBranchFields.js'
+import { injectBranchFields, injectGlobalBranchFields } from '../branching/injectBranchFields.js'
 import { sanitizeBranchingConfig } from '../branching/sanitizeBranchingConfig.js'
 import { sanitizeCollection } from '../collections/config/sanitize.js'
 import { migrationsCollection } from '../database/migrations/migrationsCollection.js'
@@ -496,6 +497,10 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
     for (let i = 0; i < config.globals!.length; i++) {
       if (hasScheduledPublishEnabled(config.globals![i]!)) {
         schedulePublishGlobals.push(config.globals![i]!.slug)
+      }
+
+      if (branching.branchableGlobals.has(config.globals![i]!.slug)) {
+        injectGlobalBranchFields(config.globals![i] as unknown as GlobalConfig)
       }
 
       config.globals![i] = sanitizeGlobal(

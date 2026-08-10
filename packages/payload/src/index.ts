@@ -1445,8 +1445,16 @@ export {
   rewriteBranchIDs,
 } from './branching/branchIDs.js'
 
-export { loadBranchManifest, resetBranchState, resolveBranch } from './branching/resolveBranch.js'
+export {
+  branchGlobalNeedsBothRows,
+  pickBranchGlobal,
+  recordBranchGlobalChange,
+  resolveBranchGlobalQuery,
+  resolveBranchGlobalVersionQuery,
+  resolveBranchGlobalWrite,
+} from './branching/globals.js'
 
+export { loadBranchManifest, resetBranchState, resolveBranch } from './branching/resolveBranch.js'
 export { resolveBranchQuery } from './branching/resolveBranchQuery.js'
 export { resolveBranchRowID } from './branching/resolveBranchRowID.js'
 export { resolveBranchDelete } from './branching/tombstone.js'

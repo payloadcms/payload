@@ -1,5 +1,6 @@
 import type { CollectionConfig } from '../collections/config/types.js'
 import type { Field } from '../fields/config/types.js'
+import type { GlobalConfig } from '../globals/config/types.js'
 
 import { forkOnBranchUpdate, recordBranchCreate, stampBranchOnCreate } from './hooks.js'
 import {
@@ -108,4 +109,20 @@ export const injectBranchFields = (collection: CollectionConfig): CollectionConf
   ]
 
   return collection
+}
+
+/**
+ * Globals need only the discriminator.
+ *
+ * No `_branchDocID`, because a global's identity is its slug and is stable
+ * across branches — the whole canonical-ID translation problem does not arise.
+ * No `_branchOp`, because globals cannot be created or deleted through the API,
+ * so there are no tombstones.
+ */
+export const injectGlobalBranchFields = (global: GlobalConfig): GlobalConfig => {
+  if (!hasField(global.fields, branchField)) {
+    global.fields.push(buildBranchField())
+  }
+
+  return global
 }
