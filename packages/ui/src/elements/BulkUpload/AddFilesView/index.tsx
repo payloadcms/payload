@@ -42,7 +42,7 @@ export function AddFilesView({ acceptMimeTypes, modalSlug: modalSlug, onDrop }: 
         <div className={`${baseClass}__dropArea`}>
           <Dropzone multipleFiles onChange={onDrop}>
             <Button
-              buttonStyle="primary"
+              buttonStyle="secondary"
               iconPosition="left"
               onClick={() => {
                 if (inputRef.current) {
