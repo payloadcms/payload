@@ -1459,8 +1459,10 @@ export {
   resolveBranchGlobalWrite,
 } from './branching/globals.js'
 export { getBranchesLocalAPI, mergeBranch } from './branching/merge.js'
-
 export type { MergeableChange, MergeOptions, MergeResult, MergeWarning } from './branching/merge.js'
+export type { BlockedChange, EffectiveOperation } from './branching/preflight.js'
+
+export { resolveEffectiveOperations, runMergePreflight } from './branching/preflight.js'
 
 export { loadBranchManifest, resetBranchState, resolveBranch } from './branching/resolveBranch.js'
 export { getBranchPredicateSync, resolveBranchQuery } from './branching/resolveBranchQuery.js'

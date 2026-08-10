@@ -5,6 +5,7 @@ import { fileURLToPath } from 'url'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { devUser } from '../credentials.js'
 import { hookSpy } from './hookSpy.js'
 import {
   branchChangesSlug,
@@ -16,7 +17,9 @@ import {
   numericIDSlug,
   pagesSlug,
   postsSlug,
+  restrictedSlug,
   uniqueSlug,
+  whereAccessSlug,
 } from './shared.js'
 
 let payload: Payload
@@ -971,10 +974,179 @@ describe('Branching', () => {
     })
   })
 
-  describe('Access', () => {
-    it.todo('should allow publishing on a branch when it is denied on main')
-    it.todo('should block merge per-document when the merger lacks publish access')
-    it.todo('should return dryRun preflight without mutating anything')
+  describe('Merge access preflight', () => {
+    let editorID: number | string
+    let restrictedID: number | string
+    let allowedID: number | string
+    let deniedID: number | string
+
+    beforeEach(async () => {
+      await payload.create({
+        collection: branchesSlug,
+        data: { name: 'Access work', slug: 'accesswork' },
+      })
+
+      const editor = await payload.create({
+        collection: 'users',
+        data: { email: 'editor@example.com', password: 'test' },
+      })
+      editorID = editor.id
+
+      const restricted = await payload.create({
+        collection: restrictedSlug,
+        data: { title: 'restricted on main' },
+      })
+      restrictedID = restricted.id
+
+      const allowed = await payload.create({
+        collection: whereAccessSlug,
+        data: { mergeable: true, title: 'allowed on main' },
+      })
+      allowedID = allowed.id
+
+      const denied = await payload.create({
+        collection: whereAccessSlug,
+        data: { mergeable: false, title: 'denied on main' },
+      })
+      deniedID = denied.id
+
+      for (const [collection, id] of [
+        [restrictedSlug, restrictedID],
+        [whereAccessSlug, allowedID],
+        [whereAccessSlug, deniedID],
+      ] as const) {
+        await payload.update({
+          branch: 'accesswork',
+          collection,
+          data: { title: 'edited on branch' },
+          id,
+        })
+      }
+    })
+
+    afterEach(async () => {
+      for (const slug of [restrictedSlug, whereAccessSlug]) {
+        const rows = await payload.find({ branch: false, collection: slug, pagination: false })
+
+        for (const row of rows.docs) {
+          await payload.delete({ branch: false, collection: slug, id: row.id })
+        }
+      }
+
+      await payload.delete({ collection: 'users', id: editorID })
+
+      for (const collection of [branchChangesSlug, branchesSlug]) {
+        const rows = await payload.find({
+          collection,
+          pagination: false,
+          where: { [collection === branchesSlug ? 'slug' : 'branch']: { equals: 'accesswork' } },
+        })
+
+        for (const row of rows.docs) {
+          await payload.delete({ collection, id: row.id })
+        }
+      }
+    })
+
+    const asEditor = async () =>
+      (
+        await payload.find({
+          collection: 'users',
+          pagination: false,
+          where: { id: { equals: editorID } },
+        })
+      ).docs[0]
+
+    it('should block a document the merging user cannot update', async () => {
+      const result = await payload.branches.merge({
+        branch: 'accesswork',
+        dryRun: true,
+        overrideAccess: false,
+        user: (await asEditor()) as never,
+      })
+
+      const blocked = result.blocked.find((each) => String(each.docID) === String(restrictedID))
+
+      expect(blocked).toBeDefined()
+      expect(blocked!.operation).toBe('update')
+      expect(blocked!.reason).toBe('access')
+      expect(blocked!.collectionSlug).toBe(restrictedSlug)
+      expect(blocked!.message).toContain(restrictedSlug)
+    })
+
+    it('should allow the same document for a user who does have access', async () => {
+      const result = await payload.branches.merge({
+        branch: 'accesswork',
+        dryRun: true,
+        overrideAccess: false,
+        user: (
+          await payload.find({
+            collection: 'users',
+            pagination: false,
+            where: { email: { equals: devUser.email } },
+          })
+        ).docs[0] as never,
+      })
+
+      expect(result.blocked.map((each) => String(each.docID))).not.toContain(String(restrictedID))
+    })
+
+    it('should resolve Where-returning access per document', async () => {
+      const result = await payload.branches.merge({
+        branch: 'accesswork',
+        dryRun: true,
+        overrideAccess: false,
+        user: (await asEditor()) as never,
+      })
+
+      const blockedIDs = result.blocked.map((each) => String(each.docID))
+
+      expect(blockedIDs).toContain(String(deniedID))
+      expect(blockedIDs).not.toContain(String(allowedID))
+    })
+
+    it('should exclude blocked documents from mergeable rather than failing the whole merge', async () => {
+      const result = await payload.branches.merge({
+        branch: 'accesswork',
+        dryRun: true,
+        overrideAccess: false,
+        user: (await asEditor()) as never,
+      })
+
+      const mergeableIDs = result.mergeable.map((each) => String(each.docID))
+
+      expect(mergeableIDs).toContain(String(allowedID))
+      expect(mergeableIDs).not.toContain(String(restrictedID))
+      expect(result.canMerge).toBe(true)
+    })
+
+    it('should apply only the permitted changes and leave blocked ones on the branch', async () => {
+      await payload.branches.merge({
+        branch: 'accesswork',
+        overrideAccess: false,
+        user: (await asEditor()) as never,
+      })
+
+      const allowed = await payload.findByID({ collection: whereAccessSlug, id: allowedID })
+      const restricted = await payload.findByID({ collection: restrictedSlug, id: restrictedID })
+      const remaining = await payload.find({
+        collection: branchChangesSlug,
+        pagination: false,
+        where: { branch: { equals: 'accesswork' } },
+      })
+
+      expect(allowed.title).toBe('edited on branch')
+      expect(restricted.title).toBe('restricted on main')
+      expect(remaining.docs.length).toBeGreaterThan(0)
+    })
+
+    it('should not mutate anything on a dryRun even when everything is permitted', async () => {
+      await payload.branches.merge({ branch: 'accesswork', dryRun: true })
+
+      const restricted = await payload.findByID({ collection: restrictedSlug, id: restrictedID })
+
+      expect(restricted.title).toBe('restricted on main')
+    })
   })
 
   describe('Merge', () => {

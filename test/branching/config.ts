@@ -13,7 +13,9 @@ import {
   numericIDSlug,
   pagesSlug,
   postsSlug,
+  restrictedSlug,
   uniqueSlug,
+  whereAccessSlug,
 } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -65,6 +67,28 @@ export default buildConfigWithDefaults({
       fields: [
         { name: 'id', type: 'number', required: true },
         { name: 'title', type: 'text' },
+      ],
+      versions: false,
+    },
+    {
+      // Access depends on who is asking, so merge must evaluate it as the
+      // merging user rather than the branch author.
+      slug: restrictedSlug,
+      access: {
+        update: ({ req }) => req.user?.email === devUser.email,
+      },
+      fields: [{ name: 'title', type: 'text' }],
+      versions: false,
+    },
+    {
+      // Where-returning access, to exercise tier 2 of the preflight.
+      slug: whereAccessSlug,
+      access: {
+        update: () => ({ mergeable: { equals: true } }),
+      },
+      fields: [
+        { name: 'title', type: 'text' },
+        { name: 'mergeable', type: 'checkbox' },
       ],
       versions: false,
     },

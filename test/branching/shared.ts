@@ -20,3 +20,4 @@ export const homepageGlobalSlug = 'homepage'
 /** Core-owned branching collections */
 export const branchesSlug = 'payload-branches'
 export const branchChangesSlug = 'payload-branch-changes'
+export const whereAccessSlug = 'where-access-docs'

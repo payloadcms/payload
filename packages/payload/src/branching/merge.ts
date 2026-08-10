@@ -1,9 +1,11 @@
 import type { Payload, PayloadRequest } from '../types/index.js'
+import type { BlockedChange } from './preflight.js'
 import type { BranchOperation } from './types.js'
 
 import { updateByIDOperation } from '../collections/operations/updateByID.js'
 import { createLocalReq } from '../utilities/createLocalReq.js'
 import { killTransaction } from '../utilities/killTransaction.js'
+import { resolveEffectiveOperations, runMergePreflight } from './preflight.js'
 import {
   branchChangesCollectionSlug,
   branchDocIDField,
@@ -29,6 +31,8 @@ export type MergeWarning = {
 }
 
 export type MergeResult = {
+  /** Changes the merging user is not permitted to apply. */
+  blocked: BlockedChange[]
   /** True when at least one selected change can be applied. */
   canMerge: boolean
   mergeable: MergeableChange[]
@@ -42,7 +46,23 @@ export type MergeOptions = {
   changes?: (number | string)[]
   /** Report what would happen without writing anything. */
   dryRun?: boolean
+  /**
+   * Skip the per-document permission preflight, matching how every other Local
+   * API operation defaults to trusting server-side callers.
+   *
+   * HTTP callers must pass `false` together with `user`: the preflight is the
+   * enforcement boundary for branching, since branch writes are deliberately
+   * permissive on the assumption that nothing is real until merge.
+   *
+   * @default true
+   */
+  overrideAccess?: boolean
   req?: PayloadRequest
+  /**
+   * The user whose production permissions the merge is checked against.
+   * Defaults to `req.user`.
+   */
+  user?: NonNullable<PayloadRequest['user']>
 }
 
 const changeDocID = (change: Record<string, any>): number | string =>
@@ -61,11 +81,22 @@ const changeDocID = (change: Record<string, any>): number | string =>
  */
 export const mergeBranch = async (
   payload: Payload,
-  { branch, changes: selected, dryRun = false, req: incomingReq }: MergeOptions,
+  {
+    branch,
+    changes: selected,
+    dryRun = false,
+    overrideAccess = true,
+    req: incomingReq,
+    user,
+  }: MergeOptions,
 ): Promise<MergeResult> => {
   // `branch: false` throughout: merge addresses shadow rows by their real
   // primary key and writes to main, so it must not be branch-filtered itself.
-  const req = incomingReq ?? (await createLocalReq({ branch: false }, payload))
+  const req = incomingReq ?? (await createLocalReq({ branch: false, user }, payload))
+
+  if (user && !req.user) {
+    req.user = user
+  }
 
   const branchDocs = await payload.find({
     collection: branchesCollectionSlug,
@@ -97,7 +128,16 @@ export const mergeBranch = async (
     (change) => !selected || selected.map(String).includes(String(change.id)),
   )
 
-  const mergeable: MergeableChange[] = pending.map((change) => ({
+  const resolved = await resolveEffectiveOperations({ branch, changes: pending, payload, req })
+
+  // The enforcement boundary: a branch is a proposal, and this is where the
+  // merging user's production permissions are actually applied.
+  const blocked = overrideAccess ? [] : await runMergePreflight({ payload, pending: resolved, req })
+  const blockedChangeIDs = new Set(blocked.map((each) => String(each.changeID)))
+
+  const applicable = pending.filter((change) => !blockedChangeIDs.has(String(change.id)))
+
+  const mergeable: MergeableChange[] = applicable.map((change) => ({
     changeID: change.id,
     collectionSlug: change.collectionSlug as string,
     docID: changeDocID(change),
@@ -106,7 +146,7 @@ export const mergeBranch = async (
 
   const warnings: MergeWarning[] = []
 
-  for (const change of pending) {
+  for (const change of applicable) {
     if (change.operation === 'create' || !change.baseUpdatedAt) {
       continue
     }
@@ -135,6 +175,7 @@ export const mergeBranch = async (
   }
 
   const result: MergeResult = {
+    blocked,
     canMerge: mergeable.length > 0,
     mergeable,
     merged: [],
@@ -156,7 +197,7 @@ export const mergeBranch = async (
   }
 
   try {
-    for (const change of pending) {
+    for (const change of applicable) {
       await applyChange({ branch, change, payload, req })
       await payload.delete({
         id: change.id,
