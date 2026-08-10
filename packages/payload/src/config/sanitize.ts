@@ -4,7 +4,12 @@ import { en } from '@payloadcms/translations/languages/en'
 
 import type { RichTextSanitizer } from '../fields/config/sanitize.js'
 import type { OrderableJoinInfo } from '../fields/config/sanitizeJoinField.js'
-import type { CollectionSlug, GlobalSlug, SanitizedCollectionConfig } from '../index.js'
+import type {
+  CollectionConfig,
+  CollectionSlug,
+  GlobalSlug,
+  SanitizedCollectionConfig,
+} from '../index.js'
 import type { SanitizedJobsConfig } from '../queues/config/types/index.js'
 import type {
   Config,
@@ -19,6 +24,8 @@ import type {
 
 import { defaultUserCollection } from '../auth/defaultUser.js'
 import { authRootEndpoints } from '../auth/endpoints/index.js'
+import { injectBranchFields } from '../branching/injectBranchFields.js'
+import { sanitizeBranchingConfig } from '../branching/sanitizeBranchingConfig.js'
 import { sanitizeCollection } from '../collections/config/sanitize.js'
 import { migrationsCollection } from '../database/migrations/migrationsCollection.js'
 import { DuplicateCollection, InvalidConfiguration } from '../errors/index.js'
@@ -396,6 +403,12 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
   // Track orderable join fields during sanitization
   const orderableJoins: OrderableJoinInfo[] = []
 
+  // Must be resolved before the sanitizeCollection loop below, which performs
+  // `_branch` field injection and unique-index rewriting, and after the default
+  // user collection has been injected above so auth detection sees it.
+  const branching = sanitizeBranchingConfig(config as unknown as Config)
+  config.branching = branching
+
   for (let i = 0; i < config.collections!.length; i++) {
     if (collectionSlugs.has(config.collections![i]!.slug)) {
       throw new DuplicateCollection('slug', config.collections![i]!.slug)
@@ -415,6 +428,12 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
       if (!validRelationships.includes(queryPresetsCollectionSlug)) {
         validRelationships.push(queryPresetsCollectionSlug)
       }
+    }
+
+    if (branching.branchableCollections.has(config.collections![i]!.slug)) {
+      // Mutates the collection in place. Must run before sanitizeCollection
+      // below, which flattens fields and resolves compound indexes.
+      injectBranchFields(config.collections![i] as unknown as CollectionConfig)
     }
 
     config.collections![i] = sanitizeCollection(

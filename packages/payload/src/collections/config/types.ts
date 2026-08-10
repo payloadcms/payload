@@ -595,6 +595,19 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
    */
   auth?: boolean | IncomingAuthType
   /**
+   * Opt this collection into or out of content branching.
+   *
+   * Defaults to the root `branching` setting, except for built-in Payload
+   * collections and auth-enabled collections, which default to `false` and
+   * must opt in explicitly.
+   *
+   * Branching an auth collection is possible but carries a caveat: `req.user`
+   * always resolves from `main` regardless of the active branch, so a branched
+   * user document can be edited and reviewed but never grants access until it
+   * is merged.
+   */
+  branching?: boolean
+  /**
    * Configuration for bulk operations
    */
   /** Extension point to add your custom data. Server only. */

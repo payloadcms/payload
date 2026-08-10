@@ -198,6 +198,11 @@ export type GlobalConfig<TSlug extends GlobalSlug = any> = {
   }
   admin?: GlobalAdminOptions
   /** Extension point to add your custom data. Server only. */
+  /**
+   * Opt this global into or out of content branching. Defaults to the root
+   * `branching` setting.
+   */
+  branching?: boolean
   custom?: GlobalCustom
   /**
    * Customize the SQL table name
