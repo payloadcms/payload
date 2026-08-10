@@ -434,6 +434,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Prepišite postojeće podatke u polju',
     pageNotFound: 'Stranica nije pronađena',
     password: 'Lozinka',
+    pasteBelow: 'Zalijepite u nastavku',
     pasteField: 'Zalijepi polje',
     pasteRow: 'Zalijepi redak',
     payloadSettings: 'Payload postavke',
@@ -448,6 +449,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     reloadDocument: 'Ponovno učitaj dokument',
     remove: 'Ukloni',
     rename: 'Preimenuj',
+    replaceRow: 'Zamijeni redak',
     reset: 'Ponovno postavi',
     resetPreferences: 'Ponovno postavljanje postavki',
     resetPreferencesDescription: 'Ovo će vratiti sve vaše postavke na zadane vrijednosti.',
@@ -479,6 +481,8 @@ export const hrTranslations: DefaultTranslationsObject = {
     sorryNotFound: 'Nažalost, ne postoji ništa što odgovara vašem zahtjevu.',
     sort: 'Sortiraj',
     sortByLabelDirection: 'Sortiraj prema {{label}} {{direction}}',
+    sortByOrderToReorder:
+      'Da biste promijenili redoslijed redova, prvo ih morate sortirati prema stupcu "Order".',
     stayOnThisPage: 'Ostani na ovoj stranici',
     submissionSuccessful: 'Uspješno slanje',
     submit: 'Podnesi',
@@ -569,6 +573,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     addFile: 'Dodaj datoteku',
     addFiles: 'Dodaj datoteke',
     bulkUpload: 'Masovno dodavanje',
+    copyLinkToFile: 'Kopirajte poveznicu na datoteku',
     crop: 'Izreži',
     cropToolDescription:
       'Povucite kutove odabranog područja, nacrtajte novo područje ili prilagodite vrijednosti ispod.',

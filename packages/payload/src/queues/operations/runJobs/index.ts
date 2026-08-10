@@ -167,10 +167,9 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
     and.push({ id: { equals: id } })
   }
 
-  // Only enforce concurrency controls if the feature is enabled
-  if (jobsConfig.enableConcurrencyControl) {
-    // Find currently running jobs with concurrency keys to enforce exclusive concurrency
-    // Jobs with the same concurrencyKey should not run in parallel
+  if (jobsConfig.hasConcurrency) {
+    // Find currently running jobs with concurrency keys to enforce exclusive concurrency.
+    // Jobs with the same concurrencyKey should not run in parallel.
     const runningJobsWithConcurrency = await payload.db.find({
       collection: jobsCollectionSlug,
       limit: 0,
@@ -273,10 +272,9 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
     }
   }
 
-  // Only handle concurrency deduplication if the feature is enabled
-  if (jobsConfig.enableConcurrencyControl) {
-    // Handle the case where multiple jobs with the same concurrencyKey were picked up in the same batch
-    // We should only run one job per concurrencyKey, release the others back to pending
+  if (jobsConfig.hasConcurrency) {
+    // Handle the case where multiple jobs with the same concurrencyKey were picked up in the same batch.
+    // We should only run one job per concurrencyKey, releasing the others back to pending.
     const seenConcurrencyKeys = new Set<string>()
     const jobsToRun: Job[] = []
     const jobsToRelease: Job[] = []
@@ -320,12 +318,12 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
 
     // Use only the filtered jobs going forward
     jobs = jobsToRun
-  }
 
-  if (!jobs.length) {
-    return {
-      noJobsRemaining: false,
-      remainingJobsFromQueried: 0,
+    if (!jobs.length) {
+      return {
+        noJobsRemaining: false,
+        remainingJobsFromQueried: 0,
+      }
     }
   }
 
@@ -352,13 +350,10 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
 
   const runSingleJob = async (
     job: Job,
-  ): Promise<
-    | {
-        id: number | string
-        result: RunJobResult
-      }
-    | null
-  > => {
+  ): Promise<{
+    id: number | string
+    result: RunJobResult
+  } | null> => {
     if (!job.workflowSlug && !job.taskSlug) {
       throw new Error('Job must have either a workflowSlug or a taskSlug')
     }

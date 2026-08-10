@@ -436,6 +436,7 @@ export const svTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Skriv över befintlig fältdata',
     pageNotFound: 'Sidan hittas inte',
     password: 'Lösenord',
+    pasteBelow: 'Klistra in nedan',
     pasteField: 'Klistra in fält',
     pasteRow: 'Klistra in rad',
     payloadSettings: 'Systeminställningar',
@@ -450,6 +451,7 @@ export const svTranslations: DefaultTranslationsObject = {
     reloadDocument: 'Ladda om dokumentet',
     remove: 'Ta bort',
     rename: 'Byt namn',
+    replaceRow: 'Ersätt rad',
     reset: 'Återställ',
     resetPreferences: 'Återställ preferenser',
     resetPreferencesDescription:
@@ -482,6 +484,8 @@ export const svTranslations: DefaultTranslationsObject = {
     sorryNotFound: 'Tyvärr, det finns inget som motsvarar din begäran.',
     sort: 'Sortera',
     sortByLabelDirection: 'Sortera efter {{label}} {{direction}}',
+    sortByOrderToReorder:
+      'För att omordna raderna måste du först sortera dem efter kolumnen "Order".',
     stayOnThisPage: 'Stanna på denna sida',
     submissionSuccessful: 'Skickat',
     submit: 'Skicka',
@@ -572,6 +576,7 @@ export const svTranslations: DefaultTranslationsObject = {
     addFile: 'Lägg till fil',
     addFiles: 'Lägg till filer',
     bulkUpload: 'Massuppladdning',
+    copyLinkToFile: 'Kopiera länk till fil',
     crop: 'Beskär',
     cropToolDescription:
       'Dra i hörnen på det valda området, rita ett nytt område eller justera värdena nedan.',

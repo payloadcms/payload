@@ -441,6 +441,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'বিদ্যমান ফিল্ড ডেটা ওভাররাইট করুন',
     pageNotFound: 'পৃষ্ঠা পাওয়া যায়নি',
     password: 'পাসওয়ার্ড',
+    pasteBelow: 'নীচে পেস্ট করুন',
     pasteField: 'ফিল্ড পেস্ট করুন',
     pasteRow: 'সারি পেস্ট করুন',
     payloadSettings: 'পেলোড সেটিংস',
@@ -456,6 +457,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     reloadDocument: 'নথি পুনরায় লোড করুন',
     remove: 'অপসারণ করুন',
     rename: 'নাম পরিবর্তন করুন',
+    replaceRow: 'সারি প্রতিস্থাপন করুন',
     reset: 'রিসেট করুন',
     resetPreferences: 'পছন্দগুলি রিসেট করুন',
     resetPreferencesDescription: 'এটি আপনার সমস্ত পছন্দগুলি তাদের ডিফল্ট সেটিংসে রিসেট করবে।',
@@ -487,6 +489,8 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     sorryNotFound: 'দুঃখিত—আপনার অনুরোধের সাথে মিলে এমন কিছুই নেই।',
     sort: 'সাজান',
     sortByLabelDirection: '{{label}} দ্বারা {{direction}} সাজান',
+    sortByOrderToReorder:
+      'সারিগুলিকে পুনরায় সাজানোর জন্য আপনাকে প্রথমে "Order" কলাম অনুযায়ী সেগুলোকে ছাঁটাই করতে হবে।',
     stayOnThisPage: 'এই পৃষ্ঠায় থাকুন',
     submissionSuccessful: 'জমা সফল হয়েছে।',
     submit: 'জমা দিন',
@@ -579,6 +583,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     addFile: 'ফাইল যোগ করুন',
     addFiles: 'ফাইলগুলি যোগ করুন',
     bulkUpload: 'বাল্ক আপলোড',
+    copyLinkToFile: 'ফাইলের লিঙ্ক কপি করুন',
     crop: 'ক্রপ করুন',
     cropToolDescription:
       'নির্বাচিত অঞ্চলের কোণগুলি টানুন, একটি নতুন অঞ্চল আঁকুন বা নিচের মানগুলি সামঞ্জস্য করুন।',

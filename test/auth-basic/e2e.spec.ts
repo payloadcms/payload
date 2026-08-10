@@ -9,14 +9,12 @@ import { fileURLToPath } from 'url'
 import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { Config } from './payload-types.js'
 
-import {
-  ensureCompilationIsDone,
-  getRoutes,
-  initPageConsoleErrorCatch,
-} from '../__helpers/e2e/helpers.js'
+import { getRoutes } from '../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { ensureCompilationIsDone } from '../__setup/e2e/ensureCompilationIsDone.js'
+import { initPage } from '../__setup/e2e/initPage.js'
 import { devUser } from '../credentials.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 
@@ -64,6 +62,7 @@ const createFirstUser = async ({
   await page.locator('#field-email').fill(devUser.email)
   await page.locator('#field-password').fill(devUser.password)
   await page.locator('#field-confirm-password').fill(devUser.password)
+  await expect(page.locator('#field-error-password')).toBeHidden()
   await page.locator('.form-submit > button').click()
 
   await expect
@@ -82,26 +81,24 @@ describe('Auth (Basic)', () => {
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
     url = new AdminUrlUtil(serverURL, 'users')
 
-    const context = await browser.newContext()
-    page = await context.newPage()
-    initPageConsoleErrorCatch(page)
     const {
       routes: { admin },
     } = getRoutes({})
     adminRoute = admin
 
-    await ensureCompilationIsDone({
-      page,
-      serverURL,
-      readyURL: formatAdminURL({ path: '/**', serverURL, adminRoute }),
+    const context = await browser.newContext()
+    ;({ page } = await initPage({
+      context,
       noAutoLogin: true,
-    })
+      readyURL: formatAdminURL({ adminRoute, path: '/**', serverURL }),
+      serverURL,
+    }))
 
     // Undo onInit seeding, as we need to test this without having a user created, or testing create-first-user
     await reInitializeDB({
+      deleteOnly: true,
       serverURL,
       snapshotKey: 'auth-basic',
-      deleteOnly: true,
     })
 
     await payload.delete({
@@ -115,8 +112,8 @@ describe('Auth (Basic)', () => {
 
     await ensureCompilationIsDone({
       page,
+      readyURL: formatAdminURL({ adminRoute, path: '/create-first-user', serverURL }),
       serverURL,
-      readyURL: formatAdminURL({ path: '/create-first-user', serverURL, adminRoute }),
     })
   })
 

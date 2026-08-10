@@ -796,7 +796,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
       case 'select': {
         if (typeof field.filterOptions === 'function') {
-          fieldState.selectFilterOptions = field.filterOptions({
+          fieldState.selectFilterOptions = await field.filterOptions({
             data: fullData,
             options: field.options,
             req,

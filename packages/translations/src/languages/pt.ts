@@ -437,6 +437,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Sobrescrever dados de campo existentes',
     pageNotFound: 'Página não encontrada',
     password: 'Senha',
+    pasteBelow: 'Colar abaixo',
     pasteField: 'Colar campo',
     pasteRow: 'Colar linha',
     payloadSettings: 'Configurações do Payload',
@@ -451,6 +452,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     reloadDocument: 'Recarregar documento',
     remove: 'Remover',
     rename: 'Renomear',
+    replaceRow: 'Substituir Linha',
     reset: 'Redefinir',
     resetPreferences: 'Redefinir preferências',
     resetPreferencesDescription:
@@ -483,6 +485,8 @@ export const ptTranslations: DefaultTranslationsObject = {
     sorryNotFound: 'Desculpe—não há nada que corresponda à sua requisição.',
     sort: 'Ordenar',
     sortByLabelDirection: 'Ordenar por {{label}} {{direction}}',
+    sortByOrderToReorder:
+      'Para reordenar as linhas, é necessário primeiro classificá-las pela coluna "Ordem".',
     stayOnThisPage: 'Permanecer nessa página',
     submissionSuccessful: 'Envio bem-sucedido.',
     submit: 'Enviar',
@@ -573,6 +577,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     addFile: 'Adicionar arquivo',
     addFiles: 'Adicionar Arquivos',
     bulkUpload: 'Upload em Massa',
+    copyLinkToFile: 'Copiar link para o arquivo',
     crop: 'Cultura',
     cropToolDescription:
       'Arraste as bordas da área selecionada, desenhe uma nova área ou ajuste os valores abaixo.',

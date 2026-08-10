@@ -18,15 +18,6 @@ export const getDefaultJobsCollection: (jobsConfig: SanitizedConfig['jobs']) => 
   if (jobsConfig.workflows?.length) {
     jobsConfig.workflows.forEach((workflow) => {
       workflowSlugs.add(workflow.slug)
-
-      // Validate concurrency config requires enableConcurrencyControl flag
-      if (workflow.concurrency && !jobsConfig.enableConcurrencyControl) {
-        throw new Error(
-          `Workflow "${workflow.slug}" uses concurrency controls but "jobs.enableConcurrencyControl" is not enabled. ` +
-            `Set "jobs.enableConcurrencyControl: true" in your Payload config to use concurrency controls. ` +
-            `Note: This adds a new indexed field to the jobs collection schema and may require a database migration.`,
-        )
-      }
     })
   }
 
@@ -35,15 +26,6 @@ export const getDefaultJobsCollection: (jobsConfig: SanitizedConfig['jobs']) => 
       if (workflowSlugs.has(task.slug)) {
         throw new Error(
           `Task slug "${task.slug}" is already used by a workflow. No tasks are allowed to have the same slug as a workflow.`,
-        )
-      }
-
-      // Validate concurrency config requires enableConcurrencyControl flag
-      if (task.concurrency && !jobsConfig.enableConcurrencyControl) {
-        throw new Error(
-          `Task "${task.slug}" uses concurrency controls but "jobs.enableConcurrencyControl" is not enabled. ` +
-            `Set "jobs.enableConcurrencyControl: true" in your Payload config to use concurrency controls. ` +
-            `Note: This adds a new indexed field to the jobs collection schema and may require a database migration.`,
         )
       }
 
@@ -73,12 +55,10 @@ export const getDefaultJobsCollection: (jobsConfig: SanitizedConfig['jobs']) => 
       type: 'text',
       required: true,
     },
-    /**
-     * @todo make required in 4.0
-     */
     {
       name: 'input',
       type: 'json',
+      required: true,
     },
     {
       name: 'output',
@@ -98,10 +78,7 @@ export const getDefaultJobsCollection: (jobsConfig: SanitizedConfig['jobs']) => 
       },
       required: true,
     },
-  ]
-
-  if (jobsConfig.addParentToTaskLog) {
-    logFields.push({
+    {
       name: 'parent',
       type: 'group',
       fields: [
@@ -115,8 +92,8 @@ export const getDefaultJobsCollection: (jobsConfig: SanitizedConfig['jobs']) => 
           type: 'text',
         },
       ],
-    })
-  }
+    },
+  ]
 
   const jobsCollection: CollectionConfig = {
     slug: jobsCollectionSlug,
@@ -249,22 +226,17 @@ export const getDefaultJobsCollection: (jobsConfig: SanitizedConfig['jobs']) => 
           readOnly: true,
         },
       },
-      // Only add concurrencyKey field if concurrency control is enabled
-      ...(jobsConfig.enableConcurrencyControl
-        ? [
-            {
-              name: 'concurrencyKey',
-              type: 'text',
-              admin: {
-                description:
-                  'Used for concurrency control. Jobs with the same key are subject to exclusive/supersedes rules.',
-                position: 'sidebar',
-                readOnly: true,
-              },
-              index: true,
-            } as Field,
-          ]
-        : []),
+      {
+        name: 'concurrencyKey',
+        type: 'text',
+        admin: {
+          description:
+            'Used for concurrency control. Jobs with the same key are subject to exclusive/supersedes rules.',
+          position: 'sidebar',
+          readOnly: true,
+        },
+        index: true,
+      },
     ],
     hooks: {
       afterRead: [

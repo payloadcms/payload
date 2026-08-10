@@ -12,16 +12,12 @@ const __dirname = path.dirname(__filename)
 import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { Config } from './payload-types.js'
 
-import {
-  ensureCompilationIsDone,
-  initPageConsoleErrorCatch,
-  runJobsQueue,
-  saveDocAndAssert,
-} from '../__helpers/e2e/helpers.js'
+import { runJobsQueue, saveDocAndAssert } from '../__helpers/e2e/helpers.js'
 import { getSelectMenu } from '../__helpers/e2e/selectInput.js'
 import { setPerPageLimit } from '../__helpers/e2e/setPerPageLimit.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { initPage } from '../__setup/e2e/initPage.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { readCSV } from './helpers.js'
 import {
@@ -45,6 +41,7 @@ test.describe('Import Export Plugin', () => {
 
   test.beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
+    fs.mkdirSync(path.join(__dirname, 'uploads'), { recursive: true })
     const { payload: payloadFromInit, serverURL: url } = await initPayloadE2ENoConfig<Config>({
       dirname: __dirname,
     })
@@ -59,10 +56,7 @@ test.describe('Import Export Plugin', () => {
     payload = payloadFromInit
 
     const context = await browser.newContext()
-    page = await context.newPage()
-    initPageConsoleErrorCatch(page)
-
-    await ensureCompilationIsDone({ page, serverURL })
+    ;({ page } = await initPage({ context, serverURL }))
   })
 
   test.describe('Export', () => {
@@ -662,10 +656,6 @@ test.describe('Import Export Plugin', () => {
     })
 
     test('should import a CSV file successfully', async () => {
-      test.skip(
-        process.env.PAYLOAD_FRAMEWORK === 'tanstack-start',
-        'TanStack: known post-hydration RSC view remount detaches the view mid-interaction (see framework adapter notes); re-enable when the TanStack RSC hydration is fixed.',
-      )
       const csvContent =
         'title,excerpt\n"E2E Import Test 1","Test excerpt 1"\n"E2E Import Test 2","Test excerpt 2"'
       const csvPath = path.join(__dirname, 'uploads', 'e2e-test-import.csv')
@@ -703,10 +693,6 @@ test.describe('Import Export Plugin', () => {
     })
 
     test('should import a JSON file successfully', async () => {
-      test.skip(
-        process.env.PAYLOAD_FRAMEWORK === 'tanstack-start',
-        'TanStack: known post-hydration RSC view remount detaches the view mid-interaction (see framework adapter notes); re-enable when the TanStack RSC hydration is fixed.',
-      )
       const jsonContent = JSON.stringify([
         { excerpt: 'JSON excerpt 1', title: 'E2E JSON Import 1' },
         { excerpt: 'JSON excerpt 2', title: 'E2E JSON Import 2' },
@@ -863,10 +849,6 @@ test.describe('Import Export Plugin', () => {
     })
 
     test('should import documents as published by default', async () => {
-      test.skip(
-        process.env.PAYLOAD_FRAMEWORK === 'tanstack-start',
-        'TanStack: known post-hydration RSC view remount detaches the view mid-interaction (see framework adapter notes); re-enable when the TanStack RSC hydration is fixed.',
-      )
       const csvContent =
         'title,excerpt\n"E2E Published Status Test 1","Test excerpt 1"\n"E2E Published Status Test 2","Test excerpt 2"'
       const csvPath = path.join(__dirname, 'uploads', 'e2e-published-status-test.csv')
@@ -910,10 +892,6 @@ test.describe('Import Export Plugin', () => {
     })
 
     test('should respect explicit _status column values in CSV', async () => {
-      test.skip(
-        process.env.PAYLOAD_FRAMEWORK === 'tanstack-start',
-        'TanStack: known post-hydration RSC view remount detaches the view mid-interaction (see framework adapter notes); re-enable when the TanStack RSC hydration is fixed.',
-      )
       const csvContent =
         'title,excerpt,_status\n"E2E Explicit Draft Test","Draft excerpt","draft"\n"E2E Explicit Published Test","Published excerpt","published"'
       const csvPath = path.join(__dirname, 'uploads', 'e2e-explicit-status-test.csv')
@@ -1089,10 +1067,6 @@ test.describe('Import Export Plugin', () => {
 
   test.describe('S3 Storage', () => {
     test('should import CSV file stored in S3 via jobs queue', async () => {
-      test.skip(
-        process.env.PAYLOAD_FRAMEWORK === 'tanstack-start',
-        'TanStack: known post-hydration RSC view remount detaches the view mid-interaction (see framework adapter notes); re-enable when the TanStack RSC hydration is fixed.',
-      )
       const uniqueId = Date.now()
       const csvFilename = `s3-e2e-import-${uniqueId}.csv`
       const csvPath = path.join(__dirname, 'uploads', csvFilename)
@@ -1686,10 +1660,6 @@ test.describe('Import Export Plugin', () => {
     })
 
     test('should import a CSV with foreign column headers through the admin UI', async () => {
-      test.skip(
-        process.env.PAYLOAD_FRAMEWORK === 'tanstack-start',
-        'TanStack: known post-hydration RSC view remount detaches the view mid-interaction (see framework adapter notes); re-enable when the TanStack RSC hydration is fixed.',
-      )
       const csvContent =
         '"Post Title","Summary","View Count"\n' +
         '"E2E Foreign A","e2e summary a","11"\n' +
@@ -1763,8 +1733,11 @@ test.describe('Import Export Plugin', () => {
 
       expect(exports.docs).toHaveLength(1)
       const exportDoc = exports.docs[0]! as unknown as { filename: string; id: number | string }
-      const csvPath = path.join(__dirname, 'uploads', exportDoc.filename)
-      const rows = await readCSV(csvPath)
+      const response = await page.request.get(
+        `${serverURL}/api/posts-with-column-map-export/file/${encodeURIComponent(exportDoc.filename)}`,
+      )
+      expect(response.ok()).toBe(true)
+      const rows = await readCSV(await response.body())
 
       const matching = rows.find((row) => row['Post Title'] === 'E2E Export Rename')
       expect(matching).toBeDefined()

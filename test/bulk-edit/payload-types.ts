@@ -182,6 +182,61 @@ export interface TextBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tabs".
+ */
+export interface Tab {
+  id: string;
+  title?: string | null;
+  noLabelText?: string | null;
+  tabTab?: {
+    tabText?: string | null;
+    tabTabArray?:
+      | {
+          tabTabArrayText?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  noLabelGroup?: {
+    rowText?: string | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restricted-tabs".
+ */
+export interface RestrictedTab {
+  id: string;
+  title?: string | null;
+  noUpdate?: string | null;
+  namedTab?: {
+    namedTabText?: string | null;
+    namedTabNoUpdate?: string | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv".
+ */
+export interface PayloadKv {
+  id: string;
+  key: string;
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -439,6 +494,22 @@ export interface RestrictedTabsSelect<T extends boolean = true> {
     | T
     | {
         namedTabText?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restricted-tabs_select".
+ */
+export interface RestrictedTabsSelect<T extends boolean = true> {
+  title?: T;
+  noUpdate?: T;
+  namedTab?:
+    | T
+    | {
+        namedTabText?: T;
+        namedTabNoUpdate?: T;
       };
   updatedAt?: T;
   createdAt?: T;

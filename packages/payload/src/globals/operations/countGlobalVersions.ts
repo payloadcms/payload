@@ -77,6 +77,7 @@ export const countGlobalVersionsOperation = async <TSlug extends GlobalSlug>(
 
     const result = await payload.db.countGlobalVersions({
       global: global.slug,
+      locale: req?.locale || undefined,
       req,
       where: fullWhere,
     })

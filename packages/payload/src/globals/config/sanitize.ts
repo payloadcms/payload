@@ -1,4 +1,5 @@
-import type { Config, SanitizedConfig } from '../../config/types.js'
+import type { Config } from '../../config/types.js'
+import type { RichTextSanitizer } from '../../fields/config/sanitize.js'
 import type { SanitizedDrafts } from '../../versions/types.js'
 import type { GlobalConfig, SanitizedGlobalConfig } from './types.js'
 
@@ -16,16 +17,12 @@ import { traverseForLocalizedFields } from '../../utilities/traverseForLocalized
 import { baseVersionFields } from '../../versions/baseFields.js'
 import { versionDefaults } from '../../versions/defaults.js'
 import { defaultGlobalEndpoints } from '../endpoints/index.js'
-export const sanitizeGlobal = async (
+export const sanitizeGlobal = (
   config: Config,
   global: GlobalConfig,
-  /**
-   * If this property is set, RichText fields won't be sanitized immediately. Instead, they will be added to this array as promises
-   * so that you can sanitize them together, after the config has been sanitized.
-   */
-  richTextSanitizationPromises?: Array<(config: SanitizedConfig) => Promise<void>>,
+  richTextSanitizers?: RichTextSanitizer[],
   _validRelationships?: string[],
-): Promise<SanitizedGlobalConfig> => {
+): SanitizedGlobalConfig => {
   if (global._sanitized) {
     return global as SanitizedGlobalConfig
   }
@@ -120,12 +117,12 @@ export const sanitizeGlobal = async (
     )
   }
 
-  global.fields = await sanitizeFields({
+  global.fields = sanitizeFields({
     config,
     fields: global.fields,
     globalConfig: global,
     parentIsLocalized: false,
-    richTextSanitizationPromises,
+    richTextSanitizers,
     validRelationships,
   })
 

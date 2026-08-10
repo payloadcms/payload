@@ -440,6 +440,7 @@ export const trTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Mevcut alan verilerinin üzerine yazın',
     pageNotFound: 'Sayfa bulunamadı',
     password: 'Parola',
+    pasteBelow: 'Aşağıya Yapıştır',
     pasteField: 'Alanı yapıştır',
     pasteRow: 'Satırı yapıştır',
     payloadSettings: 'Ayarlar',
@@ -454,6 +455,7 @@ export const trTranslations: DefaultTranslationsObject = {
     reloadDocument: 'Dokümanı yeniden yükle',
     remove: 'Kaldır',
     rename: 'Yeniden adlandır',
+    replaceRow: 'Satırı Değiştir',
     reset: 'Sıfırla',
     resetPreferences: 'Tercihleri sıfırla',
     resetPreferencesDescription:
@@ -486,6 +488,8 @@ export const trTranslations: DefaultTranslationsObject = {
     sorryNotFound: 'Üzgünüz, isteğinizle eşleşen bir sonuç bulunamadı.',
     sort: 'Sırala',
     sortByLabelDirection: '{{label}} göre sırala {{direction}}',
+    sortByOrderToReorder:
+      'Satırları yeniden sıralamak için önce "Order" sütununa göre sıralama yapmalısınız.',
     stayOnThisPage: 'Bu sayfada kal',
     submissionSuccessful: 'Gönderme başarılı',
     submit: 'Gönder',
@@ -577,6 +581,7 @@ export const trTranslations: DefaultTranslationsObject = {
     addFile: 'Dosya ekle',
     addFiles: 'Dosya Ekle',
     bulkUpload: 'Toplu Yükleme',
+    copyLinkToFile: 'Dosyanın bağlantısını kopyala',
     crop: 'Mahsulat',
     cropToolDescription:
       'Seçilen alanın köşelerini sürükleyin, yeni bir alan çizin ya da aşağıdaki değerleri ayarlayın.',

@@ -439,6 +439,7 @@ export const itTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Sovrascrivi i dati del campo esistente',
     pageNotFound: 'Pagina non trovata',
     password: 'Password',
+    pasteBelow: 'Incolla qui sotto',
     pasteField: 'Incolla campo',
     pasteRow: 'Incolla riga',
     payloadSettings: 'Impostazioni di Payload',
@@ -454,6 +455,7 @@ export const itTranslations: DefaultTranslationsObject = {
     reloadDocument: 'Ricarica documento',
     remove: 'Rimuovi',
     rename: 'Rinomina',
+    replaceRow: 'Sostituisci riga',
     reset: 'Ripristina',
     resetPreferences: 'Ripristina le preferenze',
     resetPreferencesDescription:
@@ -486,6 +488,8 @@ export const itTranslations: DefaultTranslationsObject = {
     sorryNotFound: "Siamo spiacenti, non c'è nulla che corrisponda alla tua richiesta.",
     sort: 'Ordina',
     sortByLabelDirection: 'Ordina per {{label}} {{direction}}',
+    sortByOrderToReorder:
+      'Per riordinare le righe è necessario prima ordinarle in base alla colonna "Ordine".',
     stayOnThisPage: 'Rimani su questa pagina',
     submissionSuccessful: 'Invio riuscito.',
     submit: 'Invia',
@@ -576,6 +580,7 @@ export const itTranslations: DefaultTranslationsObject = {
     addFile: 'Aggiungi file',
     addFiles: 'Aggiungi File',
     bulkUpload: 'Caricamento in Blocco',
+    copyLinkToFile: 'Copia link al file',
     crop: 'Raccolto',
     cropToolDescription:
       "Trascina gli angoli dell'area selezionata, disegna una nuova area o regola i valori qui sotto.",

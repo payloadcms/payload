@@ -435,6 +435,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Prepišite postojeće podatke u polju',
     pageNotFound: 'Страница није пронађена',
     password: 'Лозинка',
+    pasteBelow: 'Nalepi ispod',
     pasteField: 'Залепи поље',
     pasteRow: 'Залепи ред',
     payloadSettings: 'Payload поставке',
@@ -449,6 +450,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     reloadDocument: 'Ponovo učitaj dokument',
     remove: 'Уклони',
     rename: 'Preimenujte',
+    replaceRow: 'Zameni red',
     reset: 'Поново постави',
     resetPreferences: 'Поништи подешавања',
     resetPreferencesDescription: 'Ово ће поништити сва ваша подешавања на подразумеване вредности.',
@@ -479,6 +481,8 @@ export const rsTranslations: DefaultTranslationsObject = {
     sorryNotFound: 'Нажалост, не постоји ништа што одговара вашем захтеву.',
     sort: 'Сортирај',
     sortByLabelDirection: 'Сортирај према {{label}} {{дирецтион}}',
+    sortByOrderToReorder:
+      'Da biste preuredili redove, prvo ih morate sortirati prema koloni „Redosled”.',
     stayOnThisPage: 'Остани на овој страници',
     submissionSuccessful: 'Успешно слање',
     submit: 'Потврди',
@@ -569,6 +573,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     addFile: 'Додај датотеку',
     addFiles: 'Dodaj datoteke',
     bulkUpload: 'Masovno otpremanje',
+    copyLinkToFile: 'Kopiraj vezu ka fajlu',
     crop: 'Исеците слику',
     cropToolDescription:
       'Превуците углове изабраног подручја, нацртајте ново подручје или прилагодите вредности испод.',

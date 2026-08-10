@@ -1,3 +1,4 @@
+import type { RenderableServerComponent } from '@tanstack/react-start/rsc'
 import type { ImportMap, MetaConfig, SanitizedConfig } from 'payload'
 
 import { getViewportContent } from '@payloadcms/ui/shared'
@@ -16,8 +17,10 @@ export type LoadAdminPageArgs = {
   splat?: string
 }
 
+type RSCPayload = RenderableServerComponent<React.ReactElement>
+
 export type LoadAdminPageResult =
-  | { _notFound: true; routeKey?: string; rscPayload?: React.ReactNode }
+  | { _notFound: true; routeKey?: string; rscPayload?: RSCPayload }
   | { _redirect: string }
   | {
       metadata: AdminPageMetadata
@@ -33,7 +36,7 @@ export type LoadAdminPageResult =
        * so search-only changes (e.g. list-view filtering) reconcile in place.
        */
       routeKey: string
-      rscPayload: React.ReactNode
+      rscPayload: RSCPayload
     }
 
 const resolveTitle = (title: MetaConfig['title']): string | undefined => {
@@ -187,16 +190,6 @@ export async function loadAdminPage({
     return result
   }
 
-  const notFound = (): never => {
-    nav.type = 'notFound'
-    throw new Error('not-found')
-  }
-  const redirect = (url: string): never => {
-    nav.type = 'redirect'
-    nav.url = url
-    throw new Error(`redirect:${url}`)
-  }
-
   // Build the 404 result the route loader re-throws as TanStack `notFound()`.
   //
   // Throwing `notFound()` is the only way to set the SSR document status to 404
@@ -238,11 +231,11 @@ export async function loadAdminPage({
       importMap,
       initReq: boundInitReq,
       key: splat ?? '',
-      notFound,
+      notFound: pageServerAdapter.notFound,
       // `segments` is intentionally `undefined` for the admin root (`/admin`),
       // matching Next's optional catch-all; `renderRoot` handles it at runtime.
       params: Promise.resolve({ segments }) as Parameters<typeof renderRoot>[0]['params'],
-      redirect,
+      redirect: pageServerAdapter.redirect,
       searchParams: Promise.resolve(searchParams),
     })
 

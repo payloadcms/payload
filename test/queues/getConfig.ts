@@ -115,7 +115,6 @@ export const getConfig: () => Partial<Config> = () => ({
     },
   },
   jobs: {
-    enableConcurrencyControl: true,
     autoRun: [
       {
         silent: true,

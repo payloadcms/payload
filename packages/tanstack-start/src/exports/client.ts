@@ -1,6 +1,5 @@
 'use client'
 
-export { TanStackComponentRenderer } from '../elements/RenderComponent/index.js'
 export { TanStackRouterAdapter } from '../elements/RouterAdapter/index.js'
 export {
   PayloadAdminShell,
@@ -14,7 +13,6 @@ export {
   payloadAdminSplatRoute,
 } from '../routes/adminRoutes.js'
 export { type LayoutLoad, payloadLayoutRoute } from '../routes/layoutRoute.js'
-export { viteDevReloadStrategy } from '../utilities/devReloadStrategy.js'
 export {
   createServerFunctionClient,
   stripUnserializable,
