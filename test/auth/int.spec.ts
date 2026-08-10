@@ -2178,9 +2178,10 @@ describe('Auth', () => {
       return iv.toString('hex') + cipher.update(value, 'utf8', 'hex') + cipher.final('hex')
     }
 
-    // Writes old-secret-encrypted apiKey/apiKeyIndex directly at the DB layer,
-    // bypassing field hooks, to simulate data left over from before a rotation.
-    const seedOldSecretUser = async ({
+    // Writes a v1-envelope apiKey/apiKeyIndex encrypted under the old secret
+    // directly at the DB layer, bypassing field hooks, to simulate data left
+    // over from before a rotation (already on the v1 envelope, previous key).
+    const seedPreRotationV1User = async ({
       collection = rotateSecretSlug,
       data = {},
       rawApiKey,
@@ -2244,7 +2245,7 @@ describe('Auth', () => {
 
     it('should re-key apiKey and apiKeyIndex from the old secret to the current secret', async () => {
       const rawApiKey = uuid()
-      const user = await seedOldSecretUser({ rawApiKey })
+      const user = await seedPreRotationV1User({ rawApiKey })
 
       const result = await rotateSecret({
         collections: [rotateSecretSlug],
@@ -2280,7 +2281,7 @@ describe('Auth', () => {
 
     it('should authenticate an api key indexed under a previous secret, then re-key it', async () => {
       const rawApiKey = uuid()
-      const user = await seedOldSecretUser({ rawApiKey })
+      const user = await seedPreRotationV1User({ rawApiKey })
 
       const authHeaders = { Authorization: `${rotateSecretSlug} API-Key ${rawApiKey}` }
 
@@ -2308,7 +2309,7 @@ describe('Auth', () => {
 
     it('should be idempotent and skip already-migrated rows on re-run', async () => {
       const rawApiKey = uuid()
-      await seedOldSecretUser({ rawApiKey })
+      await seedPreRotationV1User({ rawApiKey })
 
       await rotateSecret({ collections: [rotateSecretSlug], oldSecret: OLD_SECRET, payload })
       const rerun = await rotateSecret({
@@ -2323,7 +2324,7 @@ describe('Auth', () => {
     it('should keep earlier migrations after an abort and complete on a fixed re-run', async () => {
       const rawApiKey = uuid()
       // Created first, so its lower id is processed before the corrupt row.
-      const migratable = await seedOldSecretUser({ rawApiKey })
+      const migratable = await seedPreRotationV1User({ rawApiKey })
       const corrupt = await seedCorruptUser()
 
       await expect(
@@ -2350,7 +2351,7 @@ describe('Auth', () => {
 
     it('should abort without writing when the old secret is wrong', async () => {
       const rawApiKey = uuid()
-      const user = await seedOldSecretUser({ rawApiKey })
+      const user = await seedPreRotationV1User({ rawApiKey })
 
       const before = await payload.db.findOne<any>({
         collection: rotateSecretSlug,
@@ -2376,7 +2377,7 @@ describe('Auth', () => {
 
     it('should not modify data during a dry run', async () => {
       const rawApiKey = uuid()
-      const user = await seedOldSecretUser({ rawApiKey })
+      const user = await seedPreRotationV1User({ rawApiKey })
 
       const result = await rotateSecret({
         collections: [rotateSecretSlug],
@@ -2459,7 +2460,7 @@ describe('Auth', () => {
       const loginEmail = 'rotate-login@example.com'
       const loginPassword = 'Password123'
 
-      await seedOldSecretUser({
+      await seedPreRotationV1User({
         collection: rotateSecretLoginSlug,
         data: { email: loginEmail, password: loginPassword },
         rawApiKey,
@@ -2483,7 +2484,7 @@ describe('Auth', () => {
 
     it('should skip rows that have an apiKey ciphertext but no apiKeyIndex', async () => {
       const rawApiKey = uuid()
-      const user = await seedOldSecretUser({ rawApiKey })
+      const user = await seedPreRotationV1User({ rawApiKey })
 
       // Simulate a disabled API key: ciphertext present, index cleared.
       await payload.db.updateOne({
