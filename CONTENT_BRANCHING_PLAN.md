@@ -7,13 +7,12 @@ Targets Payload 4.0.
 exclusions; schema injection and unique-index rewriting; branch resolution across the request; the
 change manifest; the read predicate and canonical-ID translation wired through `db-mongodb` and
 `drizzle`; copy-on-write updates; tombstone deletes; drafts, versions and publishing per branch;
-globals.
+globals; merge with selective apply, `dryRun`, `main-moved` warnings, and branch lifecycle hooks.
 
-Collections and globals can both be created, edited, drafted, published and deleted on a branch in
-full isolation from main, with pagination, `totalDocs` and `count` computed by the database.
+The full loop works: branch, edit in isolation, review what changed, merge some or all of it back.
 
-**Not yet implemented:** `updateMany` / `deleteMany`, branch-aware joins, the access preflight, merge,
-and UI. See §19 for phasing.
+**Not yet implemented:** the per-document access preflight (§13.3), `updateMany` / `deleteMany`,
+branch-aware joins, dangling-reference warnings, and UI. See §19 for phasing.
 
 ---
 
