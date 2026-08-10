@@ -20,5 +20,5 @@ export {
   type PageNavIntent,
   tanstackServerAdapter,
 } from '../utilities/serverAdapter.server.js'
-export { toSerializable } from '../utilities/toSerializable.js'
+export { type SerializableRecord, toSerializable } from '../utilities/toSerializable.js'
 export { getRequestTheme } from '@payloadcms/ui/utilities/getRequestTheme'

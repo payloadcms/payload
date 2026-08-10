@@ -129,7 +129,29 @@ jobs:
         run: pnpm lint -- --quiet
 
       - name: Lint CSS
-        run: pnpm run lint:css
+        env:
+          BASE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+          HEAD_SHA: ${{ github.sha }}
+        run: |
+          if [ -z "$BASE_SHA" ] || ! git cat-file -e "$BASE_SHA" 2>/dev/null; then
+            echo "No usable base commit found, linting all CSS files"
+            pnpm run lint:css
+            exit $?
+          fi
+
+          changed_css_files=()
+          while IFS= read -r file; do
+            changed_css_files+=("$file")
+          done < <(git diff --name-only --diff-filter=ACMR "$BASE_SHA...$HEAD_SHA" -- 'packages/ui/src/**/*.css' 'templates/**/*.css')
+
+          if [ ${#changed_css_files[@]} -eq 0 ]; then
+            echo "No changed CSS files, skipping stylelint"
+            exit 0
+          fi
+
+          echo "Linting changed CSS files:"
+          printf '  %s\n' "${changed_css_files[@]}"
+          pnpm exec stylelint "${changed_css_files[@]}"
 
   build:
     needs: changes
