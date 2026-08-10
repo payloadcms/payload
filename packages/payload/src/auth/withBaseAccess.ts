@@ -24,7 +24,7 @@ type Args = (
 const authenticatedAccess: Access = ({ req }) => Boolean(req.user)
 
 export const withBaseAccess = (options: Args): Access => {
-  const resourceAccess = options.access ?? authenticatedAccess
+  const documentAccess = options.access ?? authenticatedAccess
 
   return async (args: AccessArgs): Promise<AccessResult> => {
     const accessArgs = {
@@ -38,7 +38,7 @@ export const withBaseAccess = (options: Args): Access => {
         : baseAccess?.globals?.[options.operation]
 
     if (!baseAccessFunction) {
-      return resourceAccess(accessArgs)
+      return documentAccess(accessArgs)
     }
 
     const baseResult = await baseAccessFunction(accessArgs)
@@ -55,22 +55,22 @@ export const withBaseAccess = (options: Args): Access => {
       throw new Error('baseAccess must return a boolean for collection create operations.')
     }
 
-    const resourceResult = await resourceAccess(accessArgs)
+    const documentResult = await documentAccess(accessArgs)
 
-    if (!resourceResult) {
+    if (!documentResult) {
       return false
     }
 
     if (baseResult === true) {
-      return resourceResult
+      return documentResult
     }
 
-    if (resourceResult === true) {
+    if (documentResult === true) {
       return baseResult
     }
 
     return {
-      and: [baseResult, resourceResult],
+      and: [baseResult, documentResult],
     }
   }
 }
@@ -82,7 +82,7 @@ export const withBaseAdminAccess = ({
   access?: AdminAccess
   slug: string
 }): AdminAccess => {
-  const resourceAccess =
+  const documentAccess =
     access ?? (({ req }) => Boolean(req.user && req.payload.config.admin.user === slug))
 
   return async (args) => {
@@ -93,7 +93,7 @@ export const withBaseAdminAccess = ({
     const baseAccessFunction = args.req.payload.config.baseAccess?.collections?.admin
 
     if (!baseAccessFunction) {
-      return resourceAccess(accessArgs)
+      return documentAccess(accessArgs)
     }
 
     const baseResult = await baseAccessFunction(accessArgs)
@@ -102,6 +102,6 @@ export const withBaseAdminAccess = ({
       return false
     }
 
-    return resourceAccess(accessArgs)
+    return documentAccess(accessArgs)
   }
 }

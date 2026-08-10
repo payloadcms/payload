@@ -374,6 +374,7 @@ export const renderRoot = async ({
           searchParams={searchParams}
           user={req.user}
           viewActions={viewActions}
+          viewKey={key}
           viewType={viewType}
           visibleEntities={{
             // The reason we are not passing in initPageResult.visibleEntities directly is due to a "Cannot assign to read only property of object '#<Object>" error introduced in React 19

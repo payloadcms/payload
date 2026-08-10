@@ -958,7 +958,7 @@ export class BasePayload {
       }
     }
 
-    this.blocks = this.config.blocks!.reduce(
+    this.blocks = this.config.blocks.reduce(
       (blocks, block) => {
         blocks[block.slug] = block
         return blocks
@@ -1135,7 +1135,7 @@ export const reload = async (
     {} as Record<string, any>,
   )
 
-  payload.blocks = config.blocks!.reduce(
+  payload.blocks = config.blocks.reduce(
     (blocks, block) => {
       blocks[block.slug] = block
       return blocks

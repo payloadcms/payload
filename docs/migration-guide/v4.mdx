@@ -24,7 +24,7 @@ The codemod is idempotent and safe to run on a partially-migrated project.
 
 ### Collection and Global Access Control callbacks receive `slug`
 
-Collection and Global Access Control callback arguments now include the resource's `slug`. This additive property is unlikely to affect most projects, but code that manually invokes access callbacks or `executeAccess` must now pass `slug`. Code that validates, enumerates, or compares the exact callback argument shape may also need updating.
+Collection and Global Access Control callback arguments now include the document's `slug`. This additive property is unlikely to affect most projects, but code that manually invokes access callbacks or `executeAccess` must now pass `slug`. Code that validates, enumerates, or compares the exact callback argument shape may also need updating.
 
 ### Default query depth reduced to `1`
 
@@ -248,6 +248,19 @@ const useAPIKey = collection.auth.useAPIKey ?? false
 ```
 
 Properties sanitization does fill, including standard access functions, hook arrays, cookie defaults, and normalized auth options, are now required. Use `CollectionConfig` or `IncomingAuthType` for input and `SanitizedCollectionConfig` after sanitization.
+
+### Sanitized root config types now match runtime defaults
+
+`SanitizedConfig` no longer uses `DeepRequired`. This reduces TypeScript checker work and preserves optionality for nested values Payload does not populate, such as `admin.autoLogin`, `graphQL.mutations`, `queryPresets`, and `typescript.postProcess`.
+
+Code that consumes these properties from `payload.config` may now need to handle `undefined`:
+
+```ts
+const autoLogin = payload.config.admin.autoLogin
+const presets = payload.config.queryPresets?.constraints
+```
+
+Properties filled during sanitization, including `auth.jwtOrder`, root routes, GraphQL defaults, TypeScript output settings, and admin dashboard defaults, remain required. `Config.auth.jwtOrder` is now optional for incoming configs because Payload supplies its documented default. The unused `SanitizedConfig.paths` property was also removed because it is not present at runtime.
 
 ### User types consolidated into `User` and `AuthenticatedUser`
 

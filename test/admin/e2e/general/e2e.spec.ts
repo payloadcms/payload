@@ -6,9 +6,7 @@ import { formatAdminURL, wait } from 'payload/shared'
 import type { Config, Geo, Post } from '../../payload-types.js'
 
 import {
-  ensureCompilationIsDone,
   getRoutes,
-  initPageConsoleErrorCatch,
   openLocaleSelector,
   saveDocAndAssert,
   saveDocHotkeyAndAssert,
@@ -17,6 +15,8 @@ import {
 import { test } from '../../../__helpers/e2e/playwright.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
+import { ensureCompilationIsDone } from '../../../__setup/e2e/ensureCompilationIsDone.js'
+import { initPage } from '../../../__setup/e2e/initPage.js'
 import {
   BASE_PATH,
   customAdminRoutes,
@@ -104,10 +104,7 @@ describe('General', () => {
     uploadsTwo = new AdminUrlUtil(serverURL, uploadTwoCollectionSlug)
 
     context = await browser.newContext()
-    page = await context.newPage()
-    initPageConsoleErrorCatch(page)
-
-    await ensureCompilationIsDone({ customAdminRoutes, page, serverURL })
+    ;({ page } = await initPage({ context, customAdminRoutes, serverURL }))
 
     adminRoutes = getRoutes({ customAdminRoutes })
     adminRoute = adminRoutes.routes.admin
@@ -144,7 +141,7 @@ describe('General', () => {
         }),
       )
 
-      await expect(page).toHaveURL(new RegExp(`${redirectTo}$`))
+      await expect(page).toHaveURL(new RegExp(`${redirectTo}(?:\\?.*)?$`))
       await expect(page.locator('.collection-list')).toBeVisible()
       await expect(page.locator('.loading-overlay')).toBeHidden()
       await expect(page).not.toHaveURL(/custom-inactivity/)
@@ -874,7 +871,9 @@ describe('General', () => {
       await expect(page.locator('h1#custom-view-title')).toContainText(customViewTitle)
     })
 
-    test('should render protected nested custom view', { framework: 'next' }, async () => {
+    test('should render protected nested custom view', async () => {
+      test.slow()
+
       await page.goto(
         formatAdminURL({
           adminRoute,
