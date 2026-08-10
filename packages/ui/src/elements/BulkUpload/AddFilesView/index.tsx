@@ -5,9 +5,9 @@ import { toast } from 'sonner'
 
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { getFilesFromClipboard } from '../../../utilities/getFilesFromClipboard.js'
-import { Button } from '../../Button/index.js'
 import { DialogHeader, DialogModal } from '../../Dialog/index.js'
 import { Dropzone } from '../../Dropzone/index.js'
+import { UploadDropzoneContent } from '../../UploadDropzoneContent/index.js'
 import './index.css'
 
 const baseClass = 'bulk-upload--add-files'
@@ -19,8 +19,6 @@ type Props = {
 }
 export function AddFilesView({ acceptMimeTypes, modalSlug: modalSlug, onDrop }: Props) {
   const { t } = useTranslation()
-
-  const inputRef = React.useRef<HTMLInputElement>(null)
 
   const handlePasteFromClipboard = React.useCallback(async () => {
     try {
@@ -41,45 +39,15 @@ export function AddFilesView({ acceptMimeTypes, modalSlug: modalSlug, onDrop }: 
       <div className={`${baseClass}__body`}>
         <div className={`${baseClass}__dropArea`}>
           <Dropzone multipleFiles onChange={onDrop}>
-            <Button
-              buttonStyle="secondary"
-              iconPosition="left"
-              onClick={() => {
-                if (inputRef.current) {
-                  inputRef.current.click()
-                }
-              }}
-              size="medium"
-            >
-              {t('upload:selectFile')}
-            </Button>
-            <span className={`${baseClass}__orText`}>{t('general:or')}</span>
-            <Button
-              buttonStyle="secondary"
-              className={`${baseClass}__pasteFromClipboard`}
-              icon="clipboard"
-              onClick={handlePasteFromClipboard}
-              size="medium"
-              tooltip={t('upload:pasteFromClipboard')}
-            />
-            <input
-              accept={acceptMimeTypes}
-              aria-hidden="true"
-              className={`${baseClass}__hidden-input`}
-              hidden
+            <UploadDropzoneContent
+              acceptMimeTypes={acceptMimeTypes}
+              className={`${baseClass}__dropzoneContent`}
               multiple
-              onChange={(e) => {
-                if (e.target.files && e.target.files.length > 0) {
-                  onDrop(e.target.files)
-                }
-              }}
-              ref={inputRef}
-              type="file"
+              onFilesSelected={onDrop}
+              onPasteFromClipboard={handlePasteFromClipboard}
+              pasteButtonClassName={`${baseClass}__pasteFromClipboard`}
+              pasteTooltip={t('upload:pasteFromClipboard')}
             />
-
-            <p className={`${baseClass}__dragAndDropText`}>
-              {t('general:or')} {t('upload:dragAndDrop')}
-            </p>
           </Dropzone>
         </div>
       </div>

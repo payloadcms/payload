@@ -30,20 +30,14 @@
     }
   }
 
-  .bulk-upload--add-files__dragAndDropText {
+  /* The modal is narrow enough that the drag-and-drop hint only earns its space once the
+     dialog has room to grow past its mobile width. */
+  .bulk-upload--add-files__dropzoneContent .upload-dropzone-content__drag-text {
     display: none;
-    margin: 0;
-    text-transform: lowercase;
-    align-self: center;
-  }
-
-  .bulk-upload--add-files__orText {
-    color: var(--color-text-tertiary);
-    text-transform: lowercase;
   }
 
   @media (min-width: 768px) {
-    .bulk-upload--add-files__dragAndDropText {
+    .bulk-upload--add-files__dropzoneContent .upload-dropzone-content__drag-text {
       display: block;
     }
   }

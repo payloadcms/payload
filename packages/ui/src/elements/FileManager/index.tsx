@@ -3,7 +3,7 @@ import type { SanitizedCollectionConfig, UploadEdits } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { formatFilesize, isImage } from 'payload/shared'
-import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react'
+import React, { Fragment, useCallback, useEffect, useState } from 'react'
 
 import { FieldError } from '../../fields/FieldError/index.js'
 import { fieldBaseClass } from '../../fields/shared/index.js'
@@ -25,6 +25,7 @@ import { editDrawerSlug, sizePreviewSlug } from '../Upload/index.js'
 import { UploadFromURLModal } from '../Upload/UploadFromURLModal/index.js'
 import { usePasteFromClipboard } from '../Upload/usePasteFromClipboard.js'
 import { useUploadFromUrl } from '../Upload/useUploadFromUrl.js'
+import { UploadDropzoneContent } from '../UploadDropzoneContent/index.js'
 import { AudioPreview } from './FilePreview/AudioPreview/index.js'
 import { FilePreview } from './FilePreview/index.js'
 import { PdfPreview } from './FilePreview/PdfPreview/index.js'
@@ -93,8 +94,6 @@ export const FileManager: React.FC<FileManagerProps> = ({
   const [removedFile, setRemovedFile] = useState(false)
   const [filename, setFilename] = useState<string>(value?.name || '')
   const [selectedSize, setSelectedSize] = useState<null | string>(null)
-
-  const inputRef = useRef<HTMLInputElement>(null)
 
   const acceptMimeTypes = uploadConfig.mimeTypes?.join(', ')
   const imageCacheTag = uploadConfig?.cacheTags && data?.updatedAt
@@ -361,43 +360,14 @@ export const FileManager: React.FC<FileManagerProps> = ({
               )}
               {!value && (
                 <Dropzone onChange={handleFileSelection}>
-                  <div className={`${baseClass}__dropzone-content`}>
-                    <div className={`${baseClass}__dropzone-buttons`}>
-                      <Button
-                        buttonStyle="secondary"
-                        onClick={() => inputRef.current?.click()}
-                        size="medium"
-                      >
-                        {t('upload:selectFile')}
-                      </Button>
-                      <input
-                        accept={acceptMimeTypes}
-                        aria-hidden="true"
-                        className={`${baseClass}__hidden-input`}
-                        hidden
-                        onChange={(e) => {
-                          if (e.target.files && e.target.files.length > 0) {
-                            handleFileSelection(e.target.files)
-                          }
-                        }}
-                        ref={inputRef}
-                        type="file"
-                      />
-                      <span className={`${baseClass}__or-text`}>{t('general:or')}</span>
-                      <Button
-                        buttonStyle="secondary"
-                        className={`${baseClass}__pasteFromClipboard`}
-                        icon="clipboard"
-                        onClick={handlePasteFromClipboard}
-                        size="medium"
-                        tooltip={t('upload:pasteURL')}
-                      />
-                      {UploadControls ?? null}
-                    </div>
-                    <p className={`${baseClass}__drag-text`}>
-                      {t('general:or')} {t('upload:dragAndDrop')}
-                    </p>
-                  </div>
+                  <UploadDropzoneContent
+                    acceptMimeTypes={acceptMimeTypes}
+                    extraControls={UploadControls}
+                    onFilesSelected={handleFileSelection}
+                    onPasteFromClipboard={handlePasteFromClipboard}
+                    pasteButtonClassName={`${baseClass}__pasteFromClipboard`}
+                    pasteTooltip={t('upload:pasteURL')}
+                  />
                 </Dropzone>
               )}
               {value && fileSrc && (
