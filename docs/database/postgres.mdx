@@ -64,25 +64,124 @@ export default buildConfig({
 
 ## Options
 
-| Option                           | Description                                                                                                                                                                                                             |
-| -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `pool` \*                        | [Pool connection options](https://orm.drizzle.team/docs/quick-postgresql/node-postgres) that will be passed to Drizzle and `node-postgres` or to `@vercel/postgres`                                                     |
-| `push`                           | Disable Drizzle's [`db push`](https://orm.drizzle.team/kit-docs/overview#prototyping-with-db-push) in development mode. By default, `push` is enabled for development mode only.                                        |
-| `migrationDir`                   | Customize the directory that migrations are stored.                                                                                                                                                                     |
-| `schemaName` (experimental)      | A string for the postgres schema to use, defaults to 'public'.                                                                                                                                                          |
-| `idType`                         | A string of 'serial', or 'uuid' that is used for the data type given to id columns.                                                                                                                                     |
-| `transactionOptions`             | A PgTransactionConfig object for transactions, or set to `false` to disable using transactions. [More details](https://orm.drizzle.team/docs/transactions)                                                              |
-| `disableCreateDatabase`          | Pass `true` to disable auto database creation if it doesn't exist. Defaults to `false`.                                                                                                                                 |
-| `localesSuffix`                  | A string appended to the end of table names for storing localized fields. Default is '\_locales'.                                                                                                                       |
-| `relationshipsSuffix`            | A string appended to the end of table names for storing relationships. Default is '\_rels'.                                                                                                                             |
-| `versionsSuffix`                 | A string appended to the end of table names for storing versions. Defaults to '\_v'.                                                                                                                                    |
-| `beforeSchemaInit`               | Drizzle schema hook. Runs before the schema is built. [More Details](#beforeschemainit)                                                                                                                                 |
-| `afterSchemaInit`                | Drizzle schema hook. Runs after the schema is built. [More Details](#afterschemainit)                                                                                                                                   |
-| `generateSchemaOutputFile`       | Override generated schema from `payload generate:db-schema` file path. Defaults to `{CWD}/src/payload-generated.schema.ts`                                                                                              |
-| `allowIDOnCreate`                | Set to `true` to use the `id` passed in data on the create API operations without using a custom ID field.                                                                                                              |
-| `readReplicas`                   | An array of DB read replicas connection strings, can be used to offload read-heavy traffic.                                                                                                                             |
-| `readReplicasAfterWriteInterval` | How long (ms) after a write to keep routing reads to the primary instead of a replica. Prevents stale reads caused by replication lag. Only relevant when `readReplicas` is set. Default `2000`. Set to `0` to disable. |
-| `blocksAsJSON`                   | Store blocks as a JSON column instead of using the relational structure which can improve performance with a large amount of blocks                                                                                     |
+| Option                           | Description                                                                                                                                                                                                                                                                                                                                               |
+| -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pool` \*                        | [Pool connection options](https://orm.drizzle.team/docs/quick-postgresql/node-postgres) that will be passed to Drizzle and `node-postgres` or to `@vercel/postgres`                                                                                                                                                                                       |
+| `push`                           | Disable Drizzle's [`db push`](https://orm.drizzle.team/kit-docs/overview#prototyping-with-db-push) in development mode. By default, `push` is enabled for development mode only.                                                                                                                                                                          |
+| `extensions`                     | An array of Postgres extension names to install (for example `['unaccent']`). Installing an extension only makes its functions available in the database - it does not, by itself, change how Payload builds queries. To use an extension's function in query generation, pair it with `query.operatorHandlers`. [More details](#custom-query-operators). |
+| `query.operatorHandlers`         | Customize how Payload's `contains`, `like`, and `not_like` query operators are built, for example to make text matching accent-insensitive. [More details](#custom-query-operators).                                                                                                                                                                      |
+| `migrationDir`                   | Customize the directory that migrations are stored.                                                                                                                                                                                                                                                                                                       |
+| `schemaName` (experimental)      | A string for the postgres schema to use, defaults to 'public'.                                                                                                                                                                                                                                                                                            |
+| `idType`                         | A string of 'serial', or 'uuid' that is used for the data type given to id columns.                                                                                                                                                                                                                                                                       |
+| `transactionOptions`             | A PgTransactionConfig object for transactions, or set to `false` to disable using transactions. [More details](https://orm.drizzle.team/docs/transactions)                                                                                                                                                                                                |
+| `disableCreateDatabase`          | Pass `true` to disable auto database creation if it doesn't exist. Defaults to `false`.                                                                                                                                                                                                                                                                   |
+| `localesSuffix`                  | A string appended to the end of table names for storing localized fields. Default is '\_locales'.                                                                                                                                                                                                                                                         |
+| `relationshipsSuffix`            | A string appended to the end of table names for storing relationships. Default is '\_rels'.                                                                                                                                                                                                                                                               |
+| `versionsSuffix`                 | A string appended to the end of table names for storing versions. Defaults to '\_v'.                                                                                                                                                                                                                                                                      |
+| `beforeSchemaInit`               | Drizzle schema hook. Runs before the schema is built. [More Details](#beforeschemainit)                                                                                                                                                                                                                                                                   |
+| `afterSchemaInit`                | Drizzle schema hook. Runs after the schema is built. [More Details](#afterschemainit)                                                                                                                                                                                                                                                                     |
+| `generateSchemaOutputFile`       | Override generated schema from `payload generate:db-schema` file path. Defaults to `{CWD}/src/payload-generated.schema.ts`                                                                                                                                                                                                                                |
+| `allowIDOnCreate`                | Set to `true` to use the `id` passed in data on the create API operations without using a custom ID field.                                                                                                                                                                                                                                                |
+| `readReplicas`                   | An array of DB read replicas connection strings, can be used to offload read-heavy traffic.                                                                                                                                                                                                                                                               |
+| `readReplicasAfterWriteInterval` | How long (ms) after a write to keep routing reads to the primary instead of a replica. Prevents stale reads caused by replication lag. Only relevant when `readReplicas` is set. Default `2000`. Set to `0` to disable.                                                                                                                                   |
+| `blocksAsJSON`                   | Store blocks as a JSON column instead of using the relational structure which can improve performance with a large amount of blocks                                                                                                                                                                                                                       |
+
+## Custom query operators
+
+Payload maps the `contains` and `like` query operators to Postgres's `ILIKE`, and `not_like` to `NOT ILIKE`. This is case-insensitive, but not accent-insensitive: `contains: 'acido'` does not match a stored value of `Ácido`.
+
+Installing a Postgres extension with `extensions` makes its functions available in the database, but does not by itself change how Payload builds queries - `extensions: ['unaccent']` alone does not make any query accent-insensitive. To use an installed extension's function while building a query, configure `query.operatorHandlers`.
+
+### `postgresUnaccent()`
+
+The `postgresUnaccent()` preset makes `contains`, `like`, and `not_like` accent-insensitive for `text` and `textarea` fields by wrapping both sides of the comparison in Postgres's `unaccent()` function. It requires the `unaccent` extension:
+
+```ts
+import { postgresAdapter, postgresUnaccent } from '@payloadcms/db-postgres'
+
+export default buildConfig({
+  db: postgresAdapter({
+    extensions: ['unaccent'],
+    pool: {
+      connectionString: process.env.DATABASE_URL,
+    },
+    query: {
+      operatorHandlers: [postgresUnaccent()],
+    },
+  }),
+})
+```
+
+Configuring `postgresUnaccent()` without `extensions: ['unaccent']` will fail at initialization with a clear error.
+
+The same import is available from `@payloadcms/db-vercel-postgres` for the Vercel Postgres adapter.
+
+A default or custom `id` field stored as a native `uuid` column is left unaffected, even though Payload reports its field type as `text`. A genuine custom `text` or `varchar` `id` field still receives accent-insensitive matching like any other text field. Relationship, upload, and `number` fields are never affected, regardless of the target collection's ID type.
+
+### Custom operand transform
+
+To use a different SQL function, provide your own operand-transform handler. Handler callbacks receive SQL as [Drizzle's tagged `sql` template](https://orm.drizzle.team/docs/sql), which keeps values parameterized:
+
+```ts
+import { postgresAdapter, sql } from '@payloadcms/db-postgres'
+
+postgresAdapter({
+  pool: {
+    connectionString: process.env.DATABASE_URL,
+  },
+  query: {
+    operatorHandlers: [
+      {
+        name: 'custom-text-normalization',
+        operators: ['contains', 'like', 'not_like'],
+        transformOperands: ({ column, value }) => ({
+          column: sql`custom_normalize(${column})`,
+          value: sql`custom_normalize(${value})`,
+        }),
+      },
+    ],
+  },
+})
+```
+
+### Custom operator replacement
+
+A handler can replace the comparison entirely instead of transforming its operands, for example to use a similarity function instead of pattern matching:
+
+```ts
+postgresAdapter({
+  pool: {
+    connectionString: process.env.DATABASE_URL,
+  },
+  query: {
+    operatorHandlers: [
+      {
+        name: 'custom-similarity-match',
+        operators: ['contains'],
+        build: ({ column, value }) =>
+          sql`similarity(${column}, ${value}) > 0.4`,
+      },
+    ],
+  },
+})
+```
+
+An operator replacement changes matching semantics only - it does not add relevance sorting or expose a new Payload query operator. Only one replacement handler may match a given resolved operator and field type; a conflicting configuration fails at initialization, naming both handlers and the operator.
+
+### Limitations
+
+- JSON, rich text, and `blocksAsJSON` queries do not go through `query.operatorHandlers` in the current release. A handler like `postgresUnaccent()` does not apply to those fields.
+- `hasMany` `contains` queries on `text` or `textarea` fields, localized text columns, and text stored in relational array/block tables are all supported.
+
+### Indexing
+
+Wrapping a column in a function, as `postgresUnaccent()` and custom operand transforms do, prevents a plain index on the original column from being used for that comparison. Unanchored `%term%` searches already need specialized indexing (such as a trigram index) at scale, independent of this feature. If you need an indexed accent-insensitive lookup, consider a functional index or an adapter-managed normalized column.
+
+Postgres's built-in `unaccent()` function is marked `STABLE`, not `IMMUTABLE`, so it cannot be used directly in a standard expression index. Building one requires wrapping `unaccent()` in your own `IMMUTABLE` function first.
+
+### Security
+
+Handlers run server-side SQL construction code. Always build SQL with Drizzle's tagged `sql` template, as shown above, so values stay parameterized. Never concatenate request data into `sql.raw`.
 
 ## Access to Drizzle
 
