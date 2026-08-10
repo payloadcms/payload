@@ -183,12 +183,20 @@ notifications), not the mechanism.
 
 The predicate needs "main rows this branch has _not_ shadowed". Three ways to express it:
 
-**(a) An array field on the main row (`_shadowedBy: string[]`) — rejected.** Works in Mongo, where
-`$nin` matches empty arrays. Unsafe on Drizzle: `hasMany` fields live in a side table queried through a
-join, and `packages/drizzle/src/queries/parseParams.ts:290-330` applies `not_in` as a `WHERE` over that
-join. A document shadowed on `[A, B]` produces two joined rows, and the `B` row satisfies
-`not_in: ['A']` — so the document leaks into an `A` read. Classic anti-join multiplicity. This is
-inferred from reading the query builder and should be confirmed with a failing test in phase 0.
+**(a) An array field on the main row (`_shadowedBy: string[]`) — rejected. Verified.** `hasMany` fields
+live in a side table queried through a join, and `packages/drizzle/src/queries/parseParams.ts:290-330`
+applies `not_in` as a `WHERE` over that join. The phase 0 spike
+(`test/branching/spike.int.spec.ts`) confirms **two** independent defects on SQLite, where the query
+`{ shadowedBy: { not_in: ['a'] } }` over three documents returned exactly the wrong one:
+
+1. **Multiplicity leak.** A document shadowed on `['a','b']` is returned, because the join emits one row
+   per value and the `'b'` row satisfies the constraint. Classic anti-join multiplicity — predicted.
+2. **Empty-array exclusion.** A document shadowed on _nothing_ is dropped, because it produces no joined
+   rows for the `WHERE` to match against. **Not predicted**, and the more damaging of the two: in a
+   branch read this would hide every untouched main document, i.e. almost the entire result set.
+
+Mongo's `$nin` behaves correctly on both counts, which is exactly why this would have survived a
+Mongo-only test run and surfaced later as a relational-adapter-only bug.
 
 **(b) A bounded `not_in` list — recommended.** `_branchDocID` is a single scalar column, so there is no
 join and no anti-join hazard. Because branches are small, the branch's **entire change manifest loads in
@@ -1286,15 +1294,20 @@ above. The three most recently settled:
 - **Discard warns rather than refuses** when a main document references the document being discarded,
   consistent with every other risk signal in the design (§16).
 
-What remains is not open questions but **unverified assumptions**, which phase 0 exists to settle before
-anything is built on them (§19). Three claims in this document are inferred from reading the codebase
-rather than from running code:
+### Phase 0 spike results
 
-1. The Drizzle anti-join hazard that rules out an array field for shadow tracking (§5a).
-2. That a compound `(field, _branch)` unique index with the `'main'` sentinel enforces main-side
-   uniqueness identically on Postgres, SQLite, and Mongo (§3, §9).
-3. That the unscoped `latest` clearing in `createGlobalVersion` really does clobber main's flag from a
-   branch (§8).
+The design rested on three claims inferred from reading the codebase. `test/branching/spike.int.spec.ts`
+now tests them. Status:
 
-Each is cheap to test and each can invalidate part of the design. Reviewers who know these subsystems
-well are the fastest path to confirming or killing them.
+| #   | Claim                                                                                                        | Status                                                                                                    |
+| --- | ------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------- |
+| 1   | `not_in` on a hasMany field is unusable for shadow tracking (§5a)                                            | **Confirmed, and worse than described** — two defects, not one; the empty-array exclusion was unpredicted |
+| 2   | A compound `(field, _branch)` unique index with the `'main'` sentinel enforces main-side uniqueness (§3, §9) | **Confirmed**                                                                                             |
+| 3   | `latest` on collection versions is scoped per parent, so shadow rows need no version changes (§7)            | **Confirmed**                                                                                             |
+| 4   | The unscoped `latest` clearing in `createGlobalVersion` clobbers main's flag from a branch (§8)              | **Not yet testable** — cannot be expressed until `_branch` exists; covered by test 27                     |
+
+**Adapter coverage caveat.** The spike currently runs green on SQLite only. Postgres and Mongo require
+Docker, which was unavailable in the environment where these were first run. Postgres shares the Drizzle
+query builder with SQLite, so claims 1 and 2 carry over by strong inference but are not verified; Mongo
+is expected to differ on claim 1 (`$nin` handles both cases correctly) and the spike asserts that
+branch explicitly. **Running the spike on all three adapters is a prerequisite for closing phase 0.**
