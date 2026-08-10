@@ -141,6 +141,7 @@ import { authLocal } from './auth/operations/local/auth.js'
 import { APIKeyAuthentication } from './auth/strategies/apiKey.js'
 import { JWTAuthentication } from './auth/strategies/jwt.js'
 import { generateImportMap, type ImportMap } from './bin/generateImportMap/index.js'
+import { getBranchesLocalAPI } from './branching/merge.js'
 import { checkPayloadDependencies } from './checkPayloadDependencies.js'
 import {
   countVersionsLocal,
@@ -495,9 +496,14 @@ export class BasePayload {
 
   blocks: Record<BlockSlug, FlattenedBlock> = {}
 
-  collections: Record<CollectionSlug, Collection> = {}
+  /**
+   * Content branching operations
+   */
+  branches = getBranchesLocalAPI(this)
 
+  collections: Record<CollectionSlug, Collection> = {}
   config!: SanitizedConfig
+
   /**
    * @description Performs count operation
    * @param options
@@ -541,8 +547,8 @@ export class BasePayload {
   ): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
     return createLocal<TSlug, TSelect>(this, options)
   }
-
   crons: Cron[] = []
+
   db!: DatabaseAdapter
 
   decrypt = decrypt
@@ -565,10 +571,10 @@ export class BasePayload {
     return duplicateLocal<TSlug, TSelect>(this, options)
   }
 
-  email!: InitializedEmailAdapter
-
   // TODO: re-implement or remove?
   // errorHandler: ErrorHandler
+
+  email!: InitializedEmailAdapter
 
   encrypt = encrypt
 
@@ -1444,7 +1450,6 @@ export {
   projectBranchIDs,
   rewriteBranchIDs,
 } from './branching/branchIDs.js'
-
 export {
   branchGlobalNeedsBothRows,
   pickBranchGlobal,
@@ -1453,6 +1458,9 @@ export {
   resolveBranchGlobalVersionQuery,
   resolveBranchGlobalWrite,
 } from './branching/globals.js'
+export { getBranchesLocalAPI, mergeBranch } from './branching/merge.js'
+
+export type { MergeableChange, MergeOptions, MergeResult, MergeWarning } from './branching/merge.js'
 
 export { loadBranchManifest, resetBranchState, resolveBranch } from './branching/resolveBranch.js'
 export { resolveBranchQuery } from './branching/resolveBranchQuery.js'

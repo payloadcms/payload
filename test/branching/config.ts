@@ -3,6 +3,7 @@ import path from 'path'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
+import { hookSpy } from './hookSpy.js'
 import {
   categoriesSlug,
   excludedSlug,
@@ -23,6 +24,10 @@ export default buildConfigWithDefaults({
   collections: [
     {
       slug: postsSlug,
+      hooks: {
+        afterChange: [(args) => hookSpy.afterChange?.(args)],
+        beforeChange: [(args) => hookSpy.beforeChange?.(args)],
+      },
       fields: [
         { name: 'title', type: 'text' },
         { name: 'order', type: 'number' },

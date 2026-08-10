@@ -5,6 +5,7 @@ import { fileURLToPath } from 'url'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { hookSpy } from './hookSpy.js'
 import {
   branchChangesSlug,
   branchesSlug,
@@ -872,10 +873,238 @@ describe('Branching', () => {
   })
 
   describe('Merge', () => {
-    it.todo('should apply only the selected changes and leave the rest on an open branch')
-    it.todo('should re-run before and after hooks on merge')
-    it.todo('should target main rather than the branch when writing')
-    it.todo('should preserve inbound relationship rows when merging a branch-created document')
-    it.todo('should warn on broken references when discarding a referenced branch-created document')
+    let mainDocID: number | string
+    let branchOnlyID: number | string
+    const cleanup: (number | string)[] = []
+
+    beforeEach(async () => {
+      await payload.create({
+        collection: branchesSlug,
+        data: { name: 'Merge me', slug: 'mergeme' },
+      })
+
+      const main = await payload.create({
+        collection: postsSlug,
+        data: { order: 1, title: 'original on main' },
+      })
+      mainDocID = main.id
+      cleanup.push(main.id)
+
+      const created = await payload.create({
+        branch: 'mergeme',
+        collection: postsSlug,
+        data: { order: 2, title: 'created on branch' },
+      })
+      branchOnlyID = created.id
+
+      await payload.update({
+        branch: 'mergeme',
+        collection: postsSlug,
+        data: { title: 'edited on branch' },
+        id: mainDocID,
+      })
+    })
+
+    afterEach(async () => {
+      const rows = await payload.find({
+        branch: false,
+        collection: postsSlug,
+        pagination: false,
+      })
+
+      for (const row of rows.docs) {
+        await payload.delete({ branch: false, collection: postsSlug, id: row.id })
+      }
+      cleanup.length = 0
+
+      for (const slug of ['mergeme']) {
+        const changes = await payload.find({
+          collection: branchChangesSlug,
+          pagination: false,
+          where: { branch: { equals: slug } },
+        })
+
+        for (const change of changes.docs) {
+          await payload.delete({ collection: branchChangesSlug, id: change.id })
+        }
+
+        const branches = await payload.find({
+          collection: branchesSlug,
+          pagination: false,
+          where: { slug: { equals: slug } },
+        })
+
+        for (const branchDoc of branches.docs) {
+          await payload.delete({ collection: branchesSlug, id: branchDoc.id })
+        }
+      }
+    })
+
+    it('should report pending changes without mutating anything on dryRun', async () => {
+      const result = await payload.branches.merge({ branch: 'mergeme', dryRun: true })
+
+      expect(result.mergeable).toHaveLength(2)
+
+      const onMain = await payload.findByID({ collection: postsSlug, id: mainDocID })
+
+      expect(onMain.title).toBe('original on main')
+    })
+
+    it('should apply a branch edit to main', async () => {
+      await payload.branches.merge({ branch: 'mergeme' })
+
+      const onMain = await payload.findByID({ collection: postsSlug, id: mainDocID })
+
+      expect(onMain.title).toBe('edited on branch')
+    })
+
+    it('should publish a branch-created document to main keeping its ID', async () => {
+      await payload.branches.merge({ branch: 'mergeme' })
+
+      const onMain = await payload.findByID({ collection: postsSlug, id: branchOnlyID })
+
+      expect(onMain.title).toBe('created on branch')
+      expect(String(onMain.id)).toBe(String(branchOnlyID))
+    })
+
+    it('should leave no shadow rows behind after merging', async () => {
+      await payload.branches.merge({ branch: 'mergeme' })
+
+      const shadows = await payload.find({
+        branch: false,
+        collection: postsSlug,
+        pagination: false,
+        where: { _branch: { not_equals: 'main' } },
+      })
+
+      expect(shadows.docs).toHaveLength(0)
+    })
+
+    it('should mark the branch merged and clear its changeset', async () => {
+      await payload.branches.merge({ branch: 'mergeme' })
+
+      const changes = await payload.find({
+        collection: branchChangesSlug,
+        pagination: false,
+        where: { branch: { equals: 'mergeme' } },
+      })
+      const branchDoc = await payload.find({
+        collection: branchesSlug,
+        pagination: false,
+        where: { slug: { equals: 'mergeme' } },
+      })
+
+      expect(changes.docs).toHaveLength(0)
+      expect(branchDoc.docs[0]!.status).toBe('merged')
+    })
+
+    it('should apply only the selected changes and leave the rest on an open branch', async () => {
+      const preflight = await payload.branches.merge({ branch: 'mergeme', dryRun: true })
+      const editChange = preflight.mergeable.find(
+        (change) => String(change.docID) === String(mainDocID),
+      )
+
+      await payload.branches.merge({ branch: 'mergeme', changes: [editChange!.changeID] })
+
+      const onMain = await payload.findByID({ collection: postsSlug, id: mainDocID })
+      const remaining = await payload.find({
+        collection: branchChangesSlug,
+        pagination: false,
+        where: { branch: { equals: 'mergeme' } },
+      })
+      const branchDoc = await payload.find({
+        collection: branchesSlug,
+        pagination: false,
+        where: { slug: { equals: 'mergeme' } },
+      })
+
+      expect(onMain.title).toBe('edited on branch')
+      expect(remaining.docs).toHaveLength(1)
+      expect(branchDoc.docs[0]!.status).toBe('open')
+    })
+
+    it('should apply a branch delete to main', async () => {
+      await payload.delete({ branch: 'mergeme', collection: postsSlug, id: mainDocID })
+      await payload.branches.merge({ branch: 'mergeme' })
+
+      const onMain = await payload.find({
+        collection: postsSlug,
+        pagination: false,
+        where: { id: { equals: mainDocID } },
+      })
+
+      expect(onMain.docs).toHaveLength(0)
+    })
+
+    it('should warn when main moved after the document was branched', async () => {
+      await payload.update({
+        collection: postsSlug,
+        data: { title: 'changed on main after fork' },
+        id: mainDocID,
+      })
+
+      const result = await payload.branches.merge({ branch: 'mergeme', dryRun: true })
+      const warning = result.warnings.find((each) => each.reason === 'main-moved')
+
+      expect(warning).toBeDefined()
+      expect(String(warning!.docID)).toBe(String(mainDocID))
+    })
+
+    it('should overwrite main even when main moved after the fork', async () => {
+      await payload.update({
+        collection: postsSlug,
+        data: { title: 'changed on main after fork' },
+        id: mainDocID,
+      })
+
+      await payload.branches.merge({ branch: 'mergeme' })
+
+      const onMain = await payload.findByID({ collection: postsSlug, id: mainDocID })
+
+      expect(onMain.title).toBe('edited on branch')
+    })
+
+    it('should fire afterChange hooks on merge with the right operation', async () => {
+      const calls: { operation: string; title: unknown }[] = []
+
+      hookSpy.afterChange = (args) => {
+        calls.push({ operation: args.operation, title: args.doc.title })
+      }
+
+      await payload.branches.merge({ branch: 'mergeme' })
+
+      hookSpy.afterChange = undefined
+
+      expect(calls.some((c) => c.operation === 'create' && c.title === 'created on branch')).toBe(
+        true,
+      )
+      expect(calls.some((c) => c.operation === 'update' && c.title === 'edited on branch')).toBe(
+        true,
+      )
+    })
+
+    it('should re-run beforeChange hooks on merge', async () => {
+      let ran = 0
+
+      hookSpy.beforeChange = () => {
+        ran += 1
+      }
+
+      await payload.branches.merge({ branch: 'mergeme' })
+
+      hookSpy.beforeChange = undefined
+
+      expect(ran).toBeGreaterThan(0)
+    })
+
+    it('should not leave a shadow row behind from the merge writes themselves', async () => {
+      await payload.branches.merge({ branch: 'mergeme' })
+
+      const all = await payload.find({ branch: false, collection: postsSlug, pagination: false })
+
+      for (const doc of all.docs) {
+        expect(doc._branch).toBe('main')
+      }
+    })
   })
 })

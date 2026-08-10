@@ -43,6 +43,13 @@ export type Arguments<TSlug extends CollectionSlug> = {
   disableVerificationEmail?: boolean
   draft?: boolean
   id: number | string
+  /**
+   * Hook `operation` label, for callers whose write is semantically a create
+   * even though the row already exists. Used by branch merge.
+   *
+   * @internal
+   */
+  operation?: 'create' | 'update'
   overrideAccess?: boolean
   overrideLock?: boolean
   overwriteExistingFiles?: boolean
@@ -133,7 +140,10 @@ export const updateByIDOperation = async <
 
     if (isTrashAttempt && !overrideAccess) {
       // Pass data so access function can check data.deletedAt to know it's a trash attempt
-      const deleteAccessResult = await executeAccess({ id, data, req }, collectionConfig.access.delete)
+      const deleteAccessResult = await executeAccess(
+        { id, data, req },
+        collectionConfig.access.delete,
+      )
       fullWhere = combineQueries(fullWhere, deleteAccessResult)
     }
 
@@ -211,6 +221,7 @@ export const updateByIDOperation = async <
       fallbackLocale: fallbackLocale!,
       filesToUpload,
       locale: locale!,
+      operation: args.operation,
       overrideAccess: overrideAccess!,
       overrideLock: overrideLock!,
       payload,

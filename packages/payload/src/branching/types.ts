@@ -35,6 +35,25 @@ export type BranchingConfig = {
    */
   exclude?: CollectionSlug[]
   /**
+   * Branch lifecycle hooks. Document hooks are unaffected — every one of them
+   * runs on merge, since merge is a genuine write to main.
+   */
+  hooks?: {
+    /** Fires after commit, so a failing webhook cannot undo a merge. */
+    afterMerge?: (args: {
+      branch: string
+      req: unknown
+      results: unknown[]
+    }) => Promise<void> | void
+    /** Throw to block a merge. */
+    beforeMerge?: (args: {
+      branch: string
+      changes: unknown[]
+      req: unknown
+      warnings: unknown[]
+    }) => Promise<void> | void
+  }
+  /**
    * Ceiling on the number of shadowed document IDs injected into a single read
    * predicate before falling back to a scalar strategy.
    *

@@ -110,6 +110,7 @@ export const sanitizeBranchingConfig = (config: Config): SanitizedBranchingConfi
     branchableCollections,
     branchableGlobals,
     enabled: true,
+    hooks: branching.hooks,
     maxShadowedIDs: branching.maxShadowedIDs ?? DEFAULT_MAX_SHADOWED_IDS,
   }
 }
