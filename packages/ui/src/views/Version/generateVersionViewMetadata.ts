@@ -49,8 +49,8 @@ export const generateVersionViewMetadata: GenerateEditViewMetadata = async ({
       ...(config.admin.meta || {}),
       description: t('version:viewingVersionGlobal', { entityLabel }),
       title: `${t('version:version')}${formattedCreatedAt ? ` - ${formattedCreatedAt}` : ''}${entityLabel}`,
-      ...((globalConfig?.admin?.meta || {})),
-      ...((globalConfig?.admin?.components?.views?.edit?.version?.meta || {})),
+      ...(globalConfig?.admin?.meta || {}),
+      ...(globalConfig?.admin?.components?.views?.edit?.version?.meta || {}),
     }
   }
 
