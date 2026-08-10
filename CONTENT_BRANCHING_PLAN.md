@@ -7,12 +7,17 @@ Targets Payload 4.0.
 exclusions; schema injection and unique-index rewriting; branch resolution across the request; the
 change manifest; the read predicate and canonical-ID translation wired through `db-mongodb` and
 `drizzle`; copy-on-write updates; tombstone deletes; drafts, versions and publishing per branch;
-globals; merge with selective apply, `dryRun`, `main-moved` warnings, and branch lifecycle hooks.
+globals; branch-aware joins; merge with selective apply, `dryRun`, `main-moved` warnings, and branch
+lifecycle hooks.
 
 The full loop works: branch, edit in isolation, review what changed, merge some or all of it back.
 
 **Not yet implemented:** the per-document access preflight (§13.3), `updateMany` / `deleteMany`,
-branch-aware joins, dangling-reference warnings, and UI. See §19 for phasing.
+dangling-reference warnings, and UI. See §19 for phasing.
+
+**Security note:** `merge()` currently runs with `overrideAccess: true` and performs no per-document
+permission checking. The preflight in §13.3 is the enforcement boundary the access design depends on,
+and should land before this is used anywhere real.
 
 ---
 
