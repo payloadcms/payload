@@ -45,12 +45,19 @@ describe('baseAccess', () => {
     } as any
 
     const result = sanitizeGlobal(config, global)
-    const accessResult = await result.access.update({ req })
+    const accessResult = await result.access.update({ req, slug: 'settings' })
 
     expect(accessResult).toEqual({
       and: [baseConstraint, globalConstraint],
     })
     expect(baseAccess).toHaveBeenCalledWith({
+      data: undefined,
+      id: undefined,
+      isReadingStaticFile: undefined,
+      req,
+      slug: 'settings',
+    })
+    expect(globalAccess).toHaveBeenCalledWith({
       data: undefined,
       id: undefined,
       isReadingStaticFile: undefined,
@@ -85,7 +92,7 @@ describe('baseAccess', () => {
 
     const result = sanitizeGlobal(config, global)
 
-    expect(await result.access.update({ req })).toBe(true)
+    expect(await result.access.update({ req, slug: 'settings' })).toBe(true)
     expect(globalAccess).toHaveBeenCalledOnce()
     expect(collectionBaseAccess).not.toHaveBeenCalled()
   })
@@ -113,6 +120,7 @@ describe('baseAccess', () => {
             config,
           },
         } as any,
+        slug: 'settings',
       }),
     ).toBe(false)
     expect(
@@ -125,6 +133,7 @@ describe('baseAccess', () => {
             id: 'user-1',
           },
         } as any,
+        slug: 'settings',
       }),
     ).toBe(true)
   })
@@ -162,6 +171,7 @@ describe('baseAccess', () => {
             config: deniedConfig,
           },
         } as any,
+        slug: 'settings',
       }),
     ).toBe(false)
 
@@ -173,6 +183,7 @@ describe('baseAccess', () => {
             config: allowedConfig,
           },
         } as any,
+        slug: 'settings',
       }),
     ).toBe(true)
   })

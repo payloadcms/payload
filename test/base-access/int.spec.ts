@@ -1,7 +1,7 @@
 import type { Payload } from 'payload'
 
 import path from 'path'
-import { createLocalReq, Forbidden } from 'payload'
+import { createLocalReq, Forbidden, getAccessResults } from 'payload'
 import { fileURLToPath } from 'url'
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
 
@@ -149,5 +149,29 @@ describe('baseAccess', () => {
         req,
       }),
     ).rejects.toThrow(Forbidden)
+  })
+
+  it('should enforce base admin access in access results', async () => {
+    const allowedReq = await createRequest({})
+    allowedReq.user = {
+      id: 'admin-user',
+      collection: 'users',
+      createdAt: new Date().toISOString(),
+      email: 'admin@example.com',
+      updatedAt: new Date().toISOString(),
+    }
+
+    const allowedPermissions = await getAccessResults({ req: allowedReq })
+
+    expect(allowedPermissions.canAccessAdmin).toBe(true)
+
+    const deniedReq = await createRequest({
+      [denyHeader]: 'true',
+    })
+    deniedReq.user = allowedReq.user
+
+    const deniedPermissions = await getAccessResults({ req: deniedReq })
+
+    expect(deniedPermissions.canAccessAdmin).toBeUndefined()
   })
 })

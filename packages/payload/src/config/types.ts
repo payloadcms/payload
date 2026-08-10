@@ -387,7 +387,7 @@ export type InitOptions = {
  */
 export type AccessResult = boolean | Where
 
-export type AccessArgs<TData = any, TAdditionalArgs extends object = object> = {
+export type AccessArgs<TData = any> = {
   /**
    * The relevant resource that is being accessed.
    *
@@ -400,7 +400,9 @@ export type AccessArgs<TData = any, TAdditionalArgs extends object = object> = {
   isReadingStaticFile?: boolean
   /** The original request that requires an access check */
   req: PayloadRequest
-} & TAdditionalArgs
+  /** The slug of the Collection or Global being accessed */
+  slug: string
+}
 
 /**
  * Access function runs on the server
@@ -408,18 +410,11 @@ export type AccessArgs<TData = any, TAdditionalArgs extends object = object> = {
  *
  * @see https://payloadcms.com/docs/access-control/overview
  */
-export type Access<TData = any, TAdditionalArgs extends object = object> = (
-  args: AccessArgs<TData, TAdditionalArgs>,
-) => AccessResult | Promise<AccessResult>
-
-export type BaseAccessArgs = {
-  /** The slug of the resource being accessed. */
-  slug: string
-}
+export type Access<TData = any> = (args: AccessArgs<TData>) => AccessResult | Promise<AccessResult>
 
 export type BaseAccess = {
-  collections?: Omit<CollectionAccess<any, BaseAccessArgs>, 'admin'>
-  globals?: GlobalAccess<any, BaseAccessArgs>
+  collections?: CollectionAccess
+  globals?: GlobalAccess
 }
 
 /** Web Request/Response model, but the req has more payload specific properties added to it. */
@@ -1249,8 +1244,6 @@ export type Config = {
   }
   /**
    * Define Collection and Global access constraints that are combined with resource Access Control using AND semantics.
-   *
-   * This does not apply to an auth Collection's `access.admin` function.
    */
   baseAccess?: BaseAccess
   /** Custom Payload bin scripts can be injected via the config. */

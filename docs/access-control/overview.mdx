@@ -59,7 +59,8 @@ standard Collection and Global Access Control operations:
 export default buildConfig({
   baseAccess: {
     collections: {
-      create: ({ req }) => req.user?.role === 'admin',
+      create: ({ req, slug }) =>
+        slug === 'public-posts' || req.user?.role === 'admin',
       delete: ({ req }) => req.user?.role === 'admin',
       update: ({ req }) => req.user?.role === 'admin',
     },
@@ -71,9 +72,9 @@ export default buildConfig({
 })
 ```
 
-The `collections` and `globals` properties use the same operation names and
-return types as normal Collection and Global Access Control. Each callback also
-receives the resource's `slug`.
+The `collections` and `globals` properties are typed as `CollectionAccess` and
+`GlobalAccess`. All Collection and Global Access Control callbacks, including
+normal resource access, receive the resource's `slug`.
 
 Payload combines each configured base function with the corresponding
 resource-specific function using `AND` semantics. Returning `false` denies the
@@ -81,11 +82,11 @@ operation before the resource-specific function runs. For operations that
 support query constraints, returning one combines it with a resource-specific
 constraint using an `and` query. Collection `create` access only supports
 booleans, so returning a query constraint for that operation throws an error.
+Collection `admin` access also only supports booleans.
 
 `baseAccess` applies only to Collection and Global Access Control. It does not
-apply to an auth Collection's `access.admin` function, Field Access Control,
-custom endpoints, direct database adapter calls, job access, or other APIs with
-dedicated access configuration.
+apply to Field Access Control, custom endpoints, direct database adapter calls,
+job access, or other APIs with dedicated access configuration.
 
 Like other Access Control, `baseAccess` is skipped when Local API operations use
 `overrideAccess: true`.

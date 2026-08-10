@@ -31,10 +31,10 @@ export type DataFromGlobalSlug<TSlug extends GlobalSlug> = TypedGlobal[TSlug]
 
 export type SelectFromGlobalSlug<TSlug extends GlobalSlug> = TypedGlobalSelect[TSlug]
 
-export type GlobalAccess<TData = any, TAdditionalArgs extends object = object> = {
-  read?: Access<TData, TAdditionalArgs>
-  readVersions?: Access<TData, TAdditionalArgs>
-  update?: Access<TData, TAdditionalArgs>
+export type GlobalAccess<TData = any> = {
+  read?: Access<TData>
+  readVersions?: Access<TData>
+  update?: Access<TData>
 }
 
 /**

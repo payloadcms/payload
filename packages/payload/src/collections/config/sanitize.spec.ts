@@ -2,6 +2,7 @@ import type { CollectionConfig } from './types.js'
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
+import { canAccessAdmin } from '../../utilities/canAccessAdmin.js'
 import { sanitizeCollection, warnOnInvalidCustomViews } from './sanitize.js'
 
 describe('baseAccess', () => {
@@ -41,12 +42,19 @@ describe('baseAccess', () => {
     } as any
 
     const result = sanitizeCollection(config, collection)
-    const accessResult = await result.access.read({ req })
+    const accessResult = await result.access.read({ req, slug: 'posts' })
 
     expect(accessResult).toEqual({
       and: [baseConstraint, collectionConstraint],
     })
     expect(baseAccess).toHaveBeenCalledWith({
+      data: undefined,
+      id: undefined,
+      isReadingStaticFile: undefined,
+      req,
+      slug: 'posts',
+    })
+    expect(collectionAccess).toHaveBeenCalledWith({
       data: undefined,
       id: undefined,
       isReadingStaticFile: undefined,
@@ -80,7 +88,7 @@ describe('baseAccess', () => {
     } as any
 
     const result = sanitizeCollection(config, collection)
-    const accessResult = await result.access.update({ req })
+    const accessResult = await result.access.update({ req, slug: 'posts' })
 
     expect(accessResult).toBe(false)
     expect(collectionAccess).not.toHaveBeenCalled()
@@ -113,7 +121,7 @@ describe('baseAccess', () => {
 
     const result = sanitizeCollection(config, collection)
 
-    expect(await result.access.update({ req })).toBe(true)
+    expect(await result.access.update({ req, slug: 'posts' })).toBe(true)
     expect(collectionUpdateAccess).toHaveBeenCalledOnce()
     expect(baseReadAccess).not.toHaveBeenCalled()
   })
@@ -144,7 +152,7 @@ describe('baseAccess', () => {
 
     const result = sanitizeCollection(config, collection)
 
-    expect(await result.access.read({ req })).toBe(false)
+    expect(await result.access.read({ req, slug: 'posts' })).toBe(false)
     expect(collectionAccess).not.toHaveBeenCalled()
   })
 
@@ -173,16 +181,16 @@ describe('baseAccess', () => {
 
     const result = sanitizeCollection(config, collection)
 
-    expect(await result.access.read({ req })).toBe(false)
+    expect(await result.access.read({ req, slug: 'posts' })).toBe(false)
   })
 
-  it('should not apply base access to auth collection admin access', async () => {
+  it('should combine base and collection admin access', async () => {
     const adminAccess = vi.fn(() => true)
-    const baseAccess = vi.fn(() => false)
+    const baseAccess = vi.fn(() => true)
     const config = {
       baseAccess: {
         collections: {
-          read: baseAccess,
+          admin: baseAccess,
         },
       },
       collections: [],
@@ -204,9 +212,86 @@ describe('baseAccess', () => {
 
     const result = sanitizeCollection(config, collection)
 
-    expect(await result.access.admin({ req })).toBe(true)
-    expect(adminAccess).toHaveBeenCalledOnce()
-    expect(baseAccess).not.toHaveBeenCalled()
+    expect(await result.access.admin({ req, slug: 'users' })).toBe(true)
+    expect(baseAccess).toHaveBeenCalledWith({ req, slug: 'users' })
+    expect(adminAccess).toHaveBeenCalledWith({ req, slug: 'users' })
+  })
+
+  it('should deny admin access before collection admin access runs', async () => {
+    const adminAccess = vi.fn(() => true)
+    const baseAccess = vi.fn(() => false)
+    const config = {
+      admin: {
+        user: 'users',
+      },
+      baseAccess: {
+        collections: {
+          admin: baseAccess,
+        },
+      },
+      collections: [],
+      globals: [],
+    } as any
+    const collection: CollectionConfig = {
+      slug: 'users',
+      access: {
+        admin: adminAccess,
+      },
+      auth: true,
+      fields: [],
+    }
+    const sanitizedCollection = sanitizeCollection(config, collection)
+    const req = {
+      payload: {
+        collections: {
+          users: {
+            config: sanitizedCollection,
+          },
+        },
+        config,
+      },
+      user: {
+        collection: 'users',
+        id: 'user-1',
+      },
+    } as any
+
+    await expect(canAccessAdmin({ req })).rejects.toThrow()
+    expect(baseAccess).toHaveBeenCalledWith({ req, slug: 'users' })
+    expect(adminAccess).not.toHaveBeenCalled()
+  })
+
+  it('should not grant admin access to a different auth collection', async () => {
+    const config = {
+      admin: {
+        user: 'users',
+      },
+      baseAccess: {
+        collections: {
+          admin: () => true,
+        },
+      },
+      collections: [],
+      globals: [],
+    } as any
+    const collection: CollectionConfig = {
+      slug: 'customers',
+      auth: true,
+      fields: [],
+    }
+    const req = {
+      payload: {
+        config,
+      },
+      user: {
+        collection: 'customers',
+        id: 'customer-1',
+      },
+    } as any
+
+    const result = sanitizeCollection(config, collection)
+
+    expect(await result.access.admin({ req, slug: 'customers' })).toBe(false)
   })
 
   it('should reject query constraints for collection create operations', async () => {
@@ -235,7 +320,7 @@ describe('baseAccess', () => {
 
     const result = sanitizeCollection(config, collection)
 
-    await expect(result.access.create({ req })).rejects.toThrow(
+    await expect(result.access.create({ req, slug: 'posts' })).rejects.toThrow(
       'baseAccess must return a boolean for collection create operations.',
     )
   })

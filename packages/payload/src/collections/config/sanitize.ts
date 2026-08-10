@@ -11,7 +11,7 @@ import type {
 
 import { authCollectionEndpoints } from '../../auth/endpoints/index.js'
 import { getBaseAuthFields } from '../../auth/getAuthFields.js'
-import { withBaseAccess } from '../../auth/withBaseAccess.js'
+import { withBaseAccess, withBaseAdminAccess } from '../../auth/withBaseAccess.js'
 import { TimestampsRequired } from '../../errors/TimestampsRequired.js'
 import { sanitizeFields } from '../../fields/config/sanitize.js'
 import { fieldAffectsData } from '../../fields/config/types.js'
@@ -346,6 +346,11 @@ export const sanitizeCollection = (
       operation,
     })
   }
+
+  sanitized.access!.admin = withBaseAdminAccess({
+    slug: sanitized.slug,
+    access: sanitized.access?.admin,
+  })
 
   if (sanitized.versions) {
     sanitized.access!.readVersions = withBaseAccess({

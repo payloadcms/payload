@@ -15,6 +15,13 @@ export const denyHeader = 'x-deny-base-access'
 
 const baseAccess: BaseAccess = {
   collections: {
+    admin: ({ slug, req }) => {
+      if (req.headers.get(denyHeader) === 'true' && slug === 'users') {
+        return false
+      }
+
+      return true
+    },
     create: ({ slug, req }) => {
       if (req.headers.get(denyHeader) === 'true' && (slug === postsSlug || slug === 'users')) {
         return false

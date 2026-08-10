@@ -29,13 +29,13 @@ export const getFileFromURLHandler: PayloadHandler = async (req) => {
 
   if (id) {
     // updating doc
-    const accessResult = await executeAccess({ req }, config.access.update)
+    const accessResult = await executeAccess({ slug: config.slug, req }, config.access.update)
     if (!accessResult) {
       throw new Forbidden(req.t)
     }
   } else {
     // creating doc
-    const accessResult = await executeAccess({ req }, config.access?.create)
+    const accessResult = await executeAccess({ slug: config.slug, req }, config.access?.create)
     if (!accessResult) {
       throw new Forbidden(req.t)
     }
