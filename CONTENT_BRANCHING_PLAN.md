@@ -7,17 +7,19 @@ Targets Payload 4.0.
 exclusions; schema injection and unique-index rewriting; branch resolution across the request; the
 change manifest; the read predicate and canonical-ID translation wired through `db-mongodb` and
 `drizzle`; copy-on-write updates; tombstone deletes; drafts, versions and publishing per branch;
-globals; branch-aware joins; merge with selective apply, `dryRun`, `main-moved` warnings, and branch
-lifecycle hooks.
+globals; branch-aware joins; merge with selective apply, `dryRun`, `main-moved` warnings and branch
+lifecycle hooks; the per-document access preflight.
 
-The full loop works: branch, edit in isolation, review what changed, merge some or all of it back.
+The full loop works: branch, edit in isolation, review what changed, merge some or all of it back
+under the merging user's own permissions.
 
-**Not yet implemented:** the per-document access preflight (§13.3), `updateMany` / `deleteMany`,
-dangling-reference warnings, and UI. See §19 for phasing.
+**Not yet implemented:** `updateMany` / `deleteMany`, dangling-reference warnings, a REST endpoint for
+merge, and UI. See §19 for phasing.
 
-**Security note:** `merge()` currently runs with `overrideAccess: true` and performs no per-document
-permission checking. The preflight in §13.3 is the enforcement boundary the access design depends on,
-and should land before this is used anywhere real.
+**Note on `overrideAccess`.** `merge()` defaults to `overrideAccess: true`, matching every other Local
+API operation, so server-side callers are trusted by default. The REST endpoint must pass
+`overrideAccess: false` together with the authenticated user — that is where the preflight becomes the
+enforcement boundary described in §13.3.
 
 ---
 
