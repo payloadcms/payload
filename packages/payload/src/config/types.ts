@@ -268,13 +268,6 @@ export type OGImageConfig = {
   width?: number | string
 }
 
-/**
- * @todo find a way to remove the deep clone here.
- * It can probably be removed after the `DeepRequired` from `GlobalConfig` to
- * `SanitizedGlobalConfig` is removed.
- */
-type DeepClone<T> = T extends object ? { [K in keyof T]: DeepClone<T[K]> } : T
-
 export type MetaConfig = {
   /**
    * When `static`, a pre-made image will be used for all pages.
@@ -288,7 +281,7 @@ export type MetaConfig = {
    * @example `" - Custom CMS"`
    */
   titleSuffix?: string
-} & DeepClone<Metadata>
+} & Metadata
 
 export type ServerOnlyLivePreviewProperties = keyof Pick<RootLivePreviewConfig, 'url'>
 
