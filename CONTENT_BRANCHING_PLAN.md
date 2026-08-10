@@ -121,7 +121,7 @@ A read on branch `B`:
     {
       or: [
         { _branch: { equals: B } },
-        { and: [{ _branch: { equals: 'main' } }, { _branchDocID: { not_in: shadowedIDs } }] },
+        { and: [{ _branch: { equals: 'main' } }, { id: { not_in: shadowedIDs } }] },
       ],
     },
     { _branchOp: { not_equals: 'delete' } },
@@ -207,18 +207,19 @@ applies `not_in` as a `WHERE` over that join. The phase 0 spike
 Mongo's `$nin` behaves correctly on both counts, which is exactly why this would have survived a
 Mongo-only test run and surfaced later as a relational-adapter-only bug.
 
-**(b) A bounded `not_in` list — recommended.** `_branchDocID` is a single scalar column, so there is no
-join and no anti-join hazard. Because branches are small, the branch's **entire change manifest loads in
+**(b) A bounded `not_in` list — recommended, and implemented.** The exclusion compares a main row's
+**own `id`**, not `_branchDocID`. This is a correction to an earlier version of this design, caught by
+test: a main row's `_branchDocID` is null (meaning "self"), so comparing against it never matched and a
+branch read returned _both_ copies of an edited document. For a main row the canonical ID simply is its
+primary key, and `id` is a plain scalar column — no join, no anti-join hazard, and no nulls. Because branches are small, the branch's **entire change manifest loads in
 one query** at the start of a request and is grouped by collection in memory and memoized on `req` —
 one query per request regardless of how many collections the request touches. A `maxShadowedIDs`
 ceiling (default ~2000) falls back to (c).
 
-This only works because `_branchDocID` is declared as a `relationship` field (§10). Main rows have
-`_branchDocID = null`, and in SQL `NULL NOT IN (...)` evaluates to `NULL` — false — which would exclude
-every main row and return an empty set. Payload's Drizzle builder special-cases `not_in` for
-relationship and upload fields (`parseParams.ts:315-329`), emitting `(col NOT IN (...) OR col IS NULL)`.
-The generic path does not. Mongo's `$nin` matches missing fields either way, so a mistake here fails
-**only** on relational adapters — pinned by test 15.
+`_branchDocID` is still declared as a `relationship` field (§10), but for identity typing rather than
+for this predicate: it has to inherit the collection's own ID type, which may be text, number, or a
+custom ID. Its null-safety under `not_in` is no longer load-bearing now that the exclusion runs against
+`id`.
 
 **(c) A delimited scalar column — scale-up path.** `_shadowedBy: ',halloween,q4,'` queried with
 `not_like`. Correct everywhere, unbounded branch size, not index-friendly. Build behind a flag if the

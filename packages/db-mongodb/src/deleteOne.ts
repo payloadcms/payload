@@ -1,6 +1,8 @@
 import type { QueryOptions } from 'mongoose'
 import type { DeleteOne } from 'payload'
 
+import { resolveBranchDelete } from 'payload'
+
 import type { MongooseAdapter } from './index.js'
 
 import { buildQuery } from './queries/buildQuery.js'
@@ -11,9 +13,19 @@ import { transform } from './utilities/transform.js'
 
 export const deleteOne: DeleteOne = async function deleteOne(
   this: MongooseAdapter,
-  { collection: collectionSlug, req, returning, select, where },
+  { branch, collection: collectionSlug, req, returning, select, where },
 ) {
   const { collectionConfig, Model } = getCollection({ adapter: this, collectionSlug })
+
+  const branchDelete = await resolveBranchDelete({ branch, collectionSlug, req, where })
+
+  if (branchDelete.tombstoned) {
+    return returning === false ? null : (branchDelete.doc as any)
+  }
+
+  if (branchDelete.deleteRowID !== undefined) {
+    where = { id: { equals: branchDelete.deleteRowID } }
+  }
 
   const query = await buildQuery({
     adapter: this,

@@ -515,8 +515,59 @@ describe('Branching', () => {
       expect(changes.docs[0]).toMatchObject({ collectionSlug: postsSlug, operation: 'update' })
     })
 
-    it.todo('should tombstone rather than delete when deleting a main document on a branch')
-    it.todo('should hard-delete when deleting a document created on the same branch')
+    it('should tombstone rather than delete when deleting a main document on a branch', async () => {
+      await payload.delete({ branch: 'cow', collection: postsSlug, id: mainDocID })
+
+      const stillOnMain = await payload.findByID({ collection: postsSlug, id: mainDocID })
+
+      expect(stillOnMain.title).toBe('original on main')
+    })
+
+    it('should hide a document deleted on a branch from that branch only', async () => {
+      await payload.delete({ branch: 'cow', collection: postsSlug, id: mainDocID })
+
+      const onBranch = await payload.find({
+        branch: 'cow',
+        collection: postsSlug,
+        pagination: false,
+      })
+      const onMain = await payload.find({ collection: postsSlug, pagination: false })
+
+      expect(onBranch.docs.map((doc) => String(doc.id))).not.toContain(String(mainDocID))
+      expect(onMain.docs.map((doc) => String(doc.id))).toContain(String(mainDocID))
+    })
+
+    it('should record the delete in the changeset registry', async () => {
+      await payload.delete({ branch: 'cow', collection: postsSlug, id: mainDocID })
+
+      const changes = await payload.find({
+        collection: branchChangesSlug,
+        pagination: false,
+        where: { branch: { equals: 'cow' } },
+      })
+
+      expect(changes.docs).toHaveLength(1)
+      expect(changes.docs[0]).toMatchObject({ operation: 'delete' })
+    })
+
+    it('should hard-delete a document created on the same branch', async () => {
+      const created = await payload.create({
+        branch: 'cow',
+        collection: postsSlug,
+        data: { title: 'created then deleted on branch' },
+      })
+
+      await payload.delete({ branch: 'cow', collection: postsSlug, id: created.id })
+
+      const rows = await payload.find({
+        branch: false,
+        collection: postsSlug,
+        pagination: false,
+        where: { id: { equals: created.id } },
+      })
+
+      expect(rows.docs).toHaveLength(0)
+    })
     it.todo('should allow the same unique value on two different branches')
   })
 

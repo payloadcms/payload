@@ -1449,6 +1449,7 @@ export { loadBranchManifest, resetBranchState, resolveBranch } from './branching
 
 export { resolveBranchQuery } from './branching/resolveBranchQuery.js'
 export { resolveBranchRowID } from './branching/resolveBranchRowID.js'
+export { resolveBranchDelete } from './branching/tombstone.js'
 
 export type {
   BranchingConfig,
