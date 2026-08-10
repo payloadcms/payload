@@ -2,13 +2,10 @@ import { expect, type Page } from '@playwright/test'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import {
-  ensureCompilationIsDone,
-  installTanStackHydrationGotoWait,
-} from '../__helpers/e2e/helpers.js'
 import { currentFramework, test } from '../__helpers/e2e/playwright.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { initPage } from '../__setup/e2e/initPage.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { postsSlug } from './collections/Posts.js'
 
@@ -27,10 +24,7 @@ describe('Admin routing', () => {
     postsURL = new AdminUrlUtil(serverURL, postsSlug)
 
     const context = await browser.newContext()
-    page = await context.newPage()
-
-    installTanStackHydrationGotoWait(page)
-    await ensureCompilationIsDone({ page, serverURL })
+    ;({ page } = await initPage({ context, serverURL }))
   })
 
   describe('Route transitions', () => {

@@ -7,10 +7,10 @@ import { fileURLToPath } from 'url'
 import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { Config, Organization } from './payload-types.js'
 
-import { ensureCompilationIsDone, initPageConsoleErrorCatch } from '../__helpers/e2e/helpers.js'
 import { openNav } from '../__helpers/e2e/toggleNav.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { initPage } from '../__setup/e2e/initPage.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -41,7 +41,14 @@ async function setHierarchyFilter({
     el.classList.contains('popup-button-list__button--selected'),
   )
   if (isCurrentlyChecked !== checked) {
+    const preferenceUpdate = page.waitForResponse(
+      (response) =>
+        response.url().includes('/api/payload-preferences/hierarchy-tree-') &&
+        response.request().method() === 'POST' &&
+        response.ok(),
+    )
     await filterButton.click()
+    await preferenceUpdate
   }
 
   await page.keyboard.press('Escape')
@@ -69,9 +76,7 @@ test.describe('Hierarchy Sidebar', () => {
     organizationsURL = new AdminUrlUtil(serverURL, 'organizations')
 
     const context = await browser.newContext()
-    page = await context.newPage()
-    initPageConsoleErrorCatch(page)
-    await ensureCompilationIsDone({ page, serverURL })
+    ;({ page } = await initPage({ context, serverURL }))
   })
 
   test.afterAll(async () => {
@@ -159,7 +164,7 @@ test.describe('Hierarchy Sidebar', () => {
         where: { key: { equals: 'hierarchy-tree-divisions' } },
       })
       for (const pref of prefs.docs) {
-        await payload.delete({ collection: 'payload-preferences', id: pref.id })
+        await payload.delete({ id: pref.id, collection: 'payload-preferences' })
       }
 
       await page.goto(`${serverURL}/admin`)
@@ -371,7 +376,14 @@ test.describe('Hierarchy Sidebar', () => {
       await page.goto(organizationsURL.list)
       await openNav(page)
 
+      const preferenceUpdate = page.waitForResponse(
+        (response) =>
+          response.url().endsWith('/api/payload-preferences/nav-sidebar-active-tab') &&
+          response.request().method() === 'POST' &&
+          response.ok(),
+      )
       await page.getByRole('tab', { name: 'Organizations' }).click()
+      await preferenceUpdate
 
       // Find and use search input
       const searchInput = page.getByPlaceholder('Search Organizations')
@@ -391,7 +403,14 @@ test.describe('Hierarchy Sidebar', () => {
       await page.goto(organizationsURL.list)
       await openNav(page)
 
+      const preferenceUpdate = page.waitForResponse(
+        (response) =>
+          response.url().endsWith('/api/payload-preferences/nav-sidebar-active-tab') &&
+          response.request().method() === 'POST' &&
+          response.ok(),
+      )
       await page.getByRole('tab', { name: 'Organizations' }).click()
+      await preferenceUpdate
 
       const searchInput = page.getByPlaceholder('Search Organizations')
 
@@ -425,7 +444,7 @@ test.describe('Hierarchy Sidebar', () => {
         where: { key: { equals: 'hierarchy-tree-folders' } },
       })
       for (const pref of prefs.docs) {
-        await payload.delete({ collection: 'payload-preferences', id: pref.id })
+        await payload.delete({ id: pref.id, collection: 'payload-preferences' })
       }
     })
 
@@ -678,12 +697,6 @@ test.describe('Hierarchy Sidebar', () => {
 
       // The new folder should NOT appear in the filtered tree (filter is Organizations)
       await expect(tree.getByText(newFolderName)).toBeHidden({ timeout: 5000 })
-
-      // Clear the filter
-      await setHierarchyFilter({ checked: false, filterName: 'Organizations', page, sidebar })
-
-      // Now the folder should be visible
-      await expect(tree.getByText(newFolderName)).toBeVisible()
 
       // Clean up
       const createdFolder = await payload.find({

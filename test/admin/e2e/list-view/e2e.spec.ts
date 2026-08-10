@@ -6,15 +6,11 @@ import * as qs from 'qs-esm'
 
 import type { Config, Geo, Post, Virtual } from '../../payload-types.js'
 
-import {
-  ensureCompilationIsDone,
-  exactText,
-  getRoutes,
-  initPageConsoleErrorCatch,
-  openColumnControls,
-} from '../../../__helpers/e2e/helpers.js'
+import { exactText, getRoutes, openColumnControls } from '../../../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
+import { ensureCompilationIsDone } from '../../../__setup/e2e/ensureCompilationIsDone.js'
+import { initPage } from '../../../__setup/e2e/initPage.js'
 import { BASE_PATH, customAdminRoutes } from '../../shared.js'
 import {
   arrayCollectionSlug,
@@ -116,10 +112,7 @@ describe('List View', () => {
     noTimestampsUrl = new AdminUrlUtil(serverURL, noTimestampsSlug)
     customFieldsUrl = new AdminUrlUtil(serverURL, customFieldsSlug)
     const context = await browser.newContext()
-    page = await context.newPage()
-    initPageConsoleErrorCatch(page)
-
-    await ensureCompilationIsDone({ customAdminRoutes, page, serverURL })
+    ;({ page } = await initPage({ context, customAdminRoutes, serverURL }))
 
     adminRoutes = getRoutes({ customAdminRoutes })
 
@@ -420,9 +413,9 @@ describe('List View', () => {
       await page.goto(postsUrl.list)
 
       await addListFilter({
-        page,
         fieldLabel: 'Relationship',
         operatorLabel: 'equals',
+        page,
         value: 'post1',
       })
 
@@ -465,9 +458,9 @@ describe('List View', () => {
       await expect(page.locator(tableRowLocator)).toHaveCount(2)
 
       await addListFilter({
-        page,
         fieldLabel: 'ID',
         operatorLabel: 'equals',
+        page,
         value: id,
       })
 
@@ -557,9 +550,9 @@ describe('List View', () => {
       await expect(page.locator(tableRowLocator)).toHaveCount(2)
 
       await addListFilter({
-        page,
         fieldLabel: 'Virtual Title From Post',
         operatorLabel: 'equals',
+        page,
         value: 'somePost',
       })
 
@@ -573,9 +566,9 @@ describe('List View', () => {
       await expect(page.locator(tableRowLocator)).toHaveCount(1)
 
       await addListFilter({
-        page,
         fieldLabel: 'Array > Text',
         operatorLabel: 'equals',
+        page,
         value: 'test',
       })
 
@@ -583,9 +576,9 @@ describe('List View', () => {
 
       await page.locator('.condition__actions .btn.condition__actions-remove').first().click()
       await addListFilter({
-        page,
         fieldLabel: 'Array > Text',
         operatorLabel: 'equals',
+        page,
         value: 'not-matching',
       })
 
@@ -596,9 +589,9 @@ describe('List View', () => {
       const id = await page.locator('.cell-id .id-label__value').first().innerText()
 
       const { whereBuilder } = await addListFilter({
-        page,
         fieldLabel: 'ID',
         operatorLabel: 'equals',
+        page,
         value: id,
       })
 
@@ -621,9 +614,9 @@ describe('List View', () => {
       await page.goto(postsUrl.list)
 
       const { whereBuilder } = await addListFilter({
-        page,
         fieldLabel: 'Relationship',
         operatorLabel: 'equals',
+        page,
         value: 'post1',
       })
 
@@ -642,9 +635,9 @@ describe('List View', () => {
       await page.goto(postsUrl.list)
 
       const { whereBuilder } = await addListFilter({
-        page,
         fieldLabel: 'Relationship',
         operatorLabel: 'equals',
+        page,
         value: 'post1',
       })
 
@@ -790,9 +783,9 @@ describe('List View', () => {
       await page.goto(`${postsUrl.list}?limit=5&page=2`)
 
       await addListFilter({
-        page,
         fieldLabel: 'Title',
         operatorLabel: 'equals',
+        page,
         value: 'test',
       })
 
@@ -804,9 +797,9 @@ describe('List View', () => {
       await page.goto(postsUrl.list)
 
       const { whereBuilder } = await addListFilter({
-        page,
         fieldLabel: 'Title',
         operatorLabel: 'equals',
+        page,
         value: 'Test',
       })
 
@@ -822,9 +815,9 @@ describe('List View', () => {
       await page.goto(postsUrl.list)
 
       const { whereBuilder } = await addListFilter({
-        page,
         fieldLabel: 'Title',
         operatorLabel: 'equals',
+        page,
       })
 
       const valueInput = whereBuilder.locator('.condition__value >> input')
@@ -846,9 +839,9 @@ describe('List View', () => {
       await expect(page.locator(tableRowLocator)).toHaveCount(2)
 
       const { whereBuilder } = await addListFilter({
-        page,
         fieldLabel: 'Title',
         operatorLabel: 'equals',
+        page,
         value: 'post1',
       })
 
@@ -871,9 +864,9 @@ describe('List View', () => {
       await page.goto(postsUrl.list)
 
       const { whereBuilder } = await addListFilter({
-        page,
         fieldLabel: 'Title',
         operatorLabel: 'equals',
+        page,
         value: 'Test 1',
       })
 
@@ -981,9 +974,9 @@ describe('List View', () => {
       await page.goto(with300DocumentsUrl.list)
 
       const { whereBuilder } = await addListFilter({
-        page,
         fieldLabel: 'Self Relation',
         operatorLabel: 'equals',
+        page,
       })
 
       const valueField = whereBuilder.locator('.condition__value')
@@ -1108,8 +1101,8 @@ describe('List View', () => {
         const doc = await payload.create({
           collection: listViewSelectAPISlug,
           data: {
-            title: 'This is a test title',
             description: 'This is a test description',
+            title: 'This is a test title',
           },
         })
 
@@ -1127,8 +1120,8 @@ describe('List View', () => {
               return Boolean(parsedResult[0].id && parsedResult[0].description)
             },
             {
-              timeout: 3000,
               intervals: [100, 250, 500, 1000],
+              timeout: 3000,
             },
           )
           .toBeTruthy()
@@ -1151,8 +1144,8 @@ describe('List View', () => {
               return Boolean(parsedResult[0].description === undefined && parsedResult[0].id)
             },
             {
-              timeout: 3000,
               intervals: [100, 250, 500, 1000],
+              timeout: 3000,
             },
           )
           .toBeTruthy()
@@ -1162,11 +1155,11 @@ describe('List View', () => {
         const doc = await payload.create({
           collection: listViewSelectAPISlug,
           data: {
-            title: 'This is a test title',
             description: 'This is a test description',
             group: {
               groupNameField: 'Select Nested Field',
             },
+            title: 'This is a test title',
           },
         })
 
@@ -1221,7 +1214,7 @@ describe('List View', () => {
       await page.reload()
 
       // The `columns` search params _should_ contain "-id"
-      await waitForColumnInURL({ page, columnName: 'id', state: 'off' })
+      await waitForColumnInURL({ columnName: 'id', page, state: 'off' })
 
       expect(true).toBe(true)
     })
@@ -1229,8 +1222,8 @@ describe('List View', () => {
     test('should not inject default columns into URL search params on load', async () => {
       // clear preferences first, ensure that they don't automatically populate in the URL on load
       await deletePreferences({
-        payload,
         key: `${postsCollectionSlug}.list`,
+        payload,
         user,
       })
 
@@ -1283,8 +1276,8 @@ describe('List View', () => {
 
     test('should render top-level field and group field with same name in separate columns', async () => {
       await createPost({
-        someTextField: 'top-level text field',
         namedGroup: { someTextField: 'nested group text field' },
+        someTextField: 'top-level text field',
       })
 
       await page.goto(postsUrl.list)
@@ -1403,11 +1396,11 @@ describe('List View', () => {
       })
 
       await toggleColumn(page, {
-        togglerSelector: '[id^=list-drawer_1_] .columns-button__button',
         columnContainerSelector: '.column-selector',
         columnLabel: 'ID',
-        targetState: 'off',
         expectURLChange: false,
+        targetState: 'off',
+        togglerSelector: '[id^=list-drawer_1_] .columns-button__button',
       })
 
       await closeListDrawer({ page })
@@ -1443,7 +1436,7 @@ describe('List View', () => {
 
     test('should reset default columns', async () => {
       await page.goto(postsUrl.list)
-      await toggleColumn(page, { columnLabel: 'ID', targetState: 'off', columnName: 'id' })
+      await toggleColumn(page, { columnLabel: 'ID', columnName: 'id', targetState: 'off' })
 
       // should not have the ID column #heading-id
       await expect(page.locator('#heading-id')).toBeHidden()
@@ -1539,7 +1532,7 @@ describe('List View', () => {
 
       await expect.poll(async () => await page.locator('.per-page button').isVisible()).toBe(true)
 
-      await expectPerPageLimits({ page, expectedLimits: [5, 10, 15] })
+      await expectPerPageLimits({ expectedLimits: [5, 10, 15], page })
     })
 
     test('should paginate', async () => {
@@ -1554,7 +1547,7 @@ describe('List View', () => {
       await wait(1000)
 
       // Set per-page limit to 5
-      await setPerPageLimit({ page, limit: 5 })
+      await setPerPageLimit({ limit: 5, page })
 
       await expect.poll(async () => await page.locator(tableRowLocator).count()).toBe(5)
       await expect(page.locator('.page-controls__page-info')).toHaveText('1-5 of 6')
@@ -1582,7 +1575,7 @@ describe('List View', () => {
       await wait(1000)
 
       // Set per-page limit to 5 first
-      await setPerPageLimit({ page, limit: 5 })
+      await setPerPageLimit({ limit: 5, page })
 
       const tableItems = page.locator(tableRowLocator)
       await expect.poll(async () => await tableItems.count()).toBe(5)
@@ -1591,14 +1584,14 @@ describe('List View', () => {
       await wait(500)
 
       // Now change to 15
-      await setPerPageLimit({ page, limit: 15 })
+      await setPerPageLimit({ limit: 15, page })
       await expect(tableItems).toHaveCount(15)
 
       await goToNextPage(page)
 
       await wait(500)
       await expect(tableItems).toHaveCount(1)
-      await expectPerPageLimits({ page, expectedLimits: [5, 10, 15] })
+      await expectPerPageLimits({ expectedLimits: [5, 10, 15], page })
       await expect(page.locator('.page-controls__page-info')).toHaveText('16-16 of 16')
     })
 
@@ -1611,7 +1604,7 @@ describe('List View', () => {
 
       await wait(1000)
 
-      await setPerPageLimit({ page, limit: 5 })
+      await setPerPageLimit({ limit: 5, page })
 
       // Wait for the table to reflect the new limit before reading the first
       // page's rows. `setPerPageLimit` only waits for the URL to update; the
@@ -1636,13 +1629,13 @@ describe('List View', () => {
 
       await mapAsync([...Array(20)], async (_, i) => {
         await payload.create({
-          disableTransaction: true,
           collection: listDrawerSlug,
           data: {
-            title: `List Drawer Item ${i + 1}`,
             description: `Description ${i + 1}`,
             number: i + 1,
+            title: `List Drawer Item ${i + 1}`,
           },
+          disableTransaction: true,
         })
       })
 
@@ -1666,7 +1659,7 @@ describe('List View', () => {
       await expect(page.locator('.list-drawer table tbody tr')).toHaveCount(10)
 
       // Change per-page to 5
-      await setPerPageLimit({ page, limit: 5, scope: listDrawer, waitForURL: false })
+      await setPerPageLimit({ limit: 5, page, scope: listDrawer, waitForURL: false })
 
       await expect(page.locator('.list-drawer table tbody tr')).toHaveCount(5)
 
@@ -1690,9 +1683,9 @@ describe('List View', () => {
       // delete all posts created by the seed
       await deleteAllPosts()
       await createPost({
-        number: 1,
         namedGroup: { someTextField: 'nested group text field' },
         namedTab: { nestedTextFieldInNamedTab: 'nested text in named tab' },
+        number: 1,
       })
       await createPost({ number: 2 })
     })
@@ -1785,7 +1778,7 @@ describe('List View', () => {
     test('should sort with existing filters', async () => {
       await page.goto(postsUrl.list)
 
-      await toggleColumn(page, { columnLabel: 'ID', targetState: 'off', columnName: 'id' })
+      await toggleColumn(page, { columnLabel: 'ID', columnName: 'id', targetState: 'off' })
 
       await page.locator('#heading-id').waitFor({ state: 'detached' })
       await page.locator('#heading-title button.sort-column__asc').click()
@@ -1828,7 +1821,7 @@ describe('List View', () => {
       await page.waitForURL(/sort=title/)
 
       // enable a column that is _not_ part of this collection's default columns
-      await toggleColumn(page, { columnLabel: 'Status', targetState: 'on', columnName: '_status' })
+      await toggleColumn(page, { columnLabel: 'Status', columnName: '_status', targetState: 'on' })
 
       await wait(500)
 
@@ -1845,15 +1838,15 @@ describe('List View', () => {
 
       await toggleColumn(page, {
         columnLabel: 'Wavelengths',
-        targetState: 'on',
         columnName: 'wavelengths',
+        targetState: 'on',
       })
       await wait(500)
 
       await toggleColumn(page, {
         columnLabel: 'Select Field',
-        targetState: 'on',
         columnName: 'selectField',
+        targetState: 'on',
       })
       await wait(500)
 
@@ -2051,12 +2044,12 @@ describe('List View', () => {
       // Create test documents
       await payload.create({
         collection: formatDocURLCollectionSlug,
-        data: { title: 'no-link', description: 'This should not be linkable' },
+        data: { description: 'This should not be linkable', title: 'no-link' },
       })
 
       const normalDoc = await payload.create({
         collection: formatDocURLCollectionSlug,
-        data: { title: 'normal', description: 'This should be linkable normally' },
+        data: { description: 'This should be linkable normally', title: 'normal' },
       })
 
       await page.goto(formatDocURLUrl.list)
@@ -2082,7 +2075,7 @@ describe('List View', () => {
     test('should use custom destination for documents with title "custom-link"', async () => {
       await payload.create({
         collection: formatDocURLCollectionSlug,
-        data: { title: 'custom-link', description: 'This should link to custom destination' },
+        data: { description: 'This should link to custom destination', title: 'custom-link' },
       })
 
       await page.goto(formatDocURLUrl.list)
@@ -2100,7 +2093,7 @@ describe('List View', () => {
       // This test verifies the user-based URL modification
       const adminDoc = await payload.create({
         collection: formatDocURLCollectionSlug,
-        data: { title: 'admin-test', description: 'This should have admin query param' },
+        data: { description: 'This should have admin query param', title: 'admin-test' },
       })
 
       await page.goto(formatDocURLUrl.list)
@@ -2123,13 +2116,13 @@ describe('List View', () => {
       // Create a document and then move it to trash
       const trashDoc = await payload.create({
         collection: formatDocURLCollectionSlug,
-        data: { title: 'trash-test', description: 'This should show trash URL' },
+        data: { description: 'This should show trash URL', title: 'trash-test' },
       })
 
       // Move the document to trash by setting deletedAt (not delete)
       await payload.update({
-        collection: formatDocURLCollectionSlug,
         id: trashDoc.id,
+        collection: formatDocURLCollectionSlug,
         data: {
           deletedAt: new Date().toISOString(),
         },
@@ -2157,9 +2150,9 @@ describe('List View', () => {
       const publishedDoc = await payload.create({
         collection: formatDocURLCollectionSlug,
         data: {
-          title: 'published-test',
-          description: 'This is a published document',
           _status: 'published',
+          description: 'This is a published document',
+          title: 'published-test',
         },
       })
 
@@ -2182,12 +2175,12 @@ describe('List View', () => {
     test('should disable linking in ListDrawer for documents with formatDocURL returning null', async () => {
       await payload.create({
         collection: formatDocURLCollectionSlug,
-        data: { title: 'no-link', description: 'This should not be linkable in drawer' },
+        data: { description: 'This should not be linkable in drawer', title: 'no-link' },
       })
 
       await payload.create({
         collection: formatDocURLCollectionSlug,
-        data: { title: 'linkable', description: 'This should be linkable in drawer' },
+        data: { description: 'This should be linkable in drawer', title: 'linkable' },
       })
 
       await page.goto(formatDocURLUrl.list)
@@ -2221,12 +2214,12 @@ describe('List View', () => {
 async function createPost(overrides?: Partial<Post>): Promise<Post> {
   return payload.create({
     collection: postsCollectionSlug,
-    disableTransaction: true,
     data: {
       description,
       title,
       ...overrides,
     },
+    disableTransaction: true,
   }) as unknown as Promise<Post>
 }
 
@@ -2237,42 +2230,42 @@ async function deleteAllPosts() {
 async function createGeo(overrides?: Partial<Geo>): Promise<Geo> {
   return payload.create({
     collection: geoCollectionSlug,
-    disableTransaction: true,
     data: {
       point: [4, -4],
       ...overrides,
     },
+    disableTransaction: true,
   }) as unknown as Promise<Geo>
 }
 
 async function createNoTimestampPost(overrides?: Partial<Post>): Promise<Post> {
   return payload.create({
     collection: noTimestampsSlug,
-    disableTransaction: true,
     data: {
       title,
       ...overrides,
     },
+    disableTransaction: true,
   }) as unknown as Promise<Post>
 }
 
 async function createArray() {
   return payload.create({
-    disableTransaction: true,
     collection: arrayCollectionSlug,
     data: {
       array: [{ text: 'test' }],
     },
+    disableTransaction: true,
   })
 }
 
 async function createVirtualDoc(overrides?: Partial<Virtual>): Promise<Virtual> {
   return payload.create({
     collection: virtualsSlug,
-    disableTransaction: true,
     data: {
       post: overrides?.post,
       ...overrides,
     },
+    disableTransaction: true,
   }) as unknown as Promise<Virtual>
 }

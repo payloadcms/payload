@@ -1,0 +1,5 @@
+{
+  "extends": "../tsconfig.tanstack.json",
+  "include": ["**/*.ts", "**/*.tsx"],
+  "exclude": ["node_modules"]
+}
