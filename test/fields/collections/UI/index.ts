@@ -38,6 +38,7 @@ const UIFields: CollectionConfig = {
       },
     },
   ],
+  versions: false,
 }
 
 export default UIFields

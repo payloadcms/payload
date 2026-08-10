@@ -11,11 +11,11 @@ import './index.css'
 
 const baseClass = 'id-label'
 
-export const IDLabel: React.FC<{ className?: string; id: string; prefix?: string }> = ({
-  id,
-  className,
-  prefix = 'ID',
-}) => {
+export const IDLabel: React.FC<{
+  className?: string
+  id: number | string
+  prefix?: string
+}> = ({ id, className, prefix = 'ID' }) => {
   const {
     config: {
       routes: { admin: adminRoute },
@@ -27,8 +27,12 @@ export const IDLabel: React.FC<{ className?: string; id: string; prefix?: string
 
   const sanitizedID = sanitizeID(id)
 
-  // Only render as link if we're in a nested drawer and have document context
-  const shouldRenderLink = drawerDepth > 1 && (collectionSlug || globalSlug)
+  // Only render as link if we're inside a drawer and have document context
+  const shouldRenderLink = drawerDepth > 0 && (collectionSlug || globalSlug)
+
+  const classes = [baseClass, shouldRenderLink && `${baseClass}--is-link`, className]
+    .filter(Boolean)
+    .join(' ')
 
   if (shouldRenderLink) {
     const docPath = formatAdminURL({
@@ -37,7 +41,7 @@ export const IDLabel: React.FC<{ className?: string; id: string; prefix?: string
     })
 
     return (
-      <div className={[baseClass, className].filter(Boolean).join(' ')} title={id}>
+      <div className={classes} title={String(id)}>
         <span className={`${baseClass}__prefix`}>{prefix}</span>
         <Link className={`${baseClass}__link`} href={docPath}>
           {sanitizedID}
@@ -47,7 +51,7 @@ export const IDLabel: React.FC<{ className?: string; id: string; prefix?: string
   }
 
   return (
-    <div className={[baseClass, className].filter(Boolean).join(' ')} title={id}>
+    <div className={classes} title={String(id)}>
       <span className={`${baseClass}__prefix`}>{prefix}</span>
       <span className={`${baseClass}__value`}>{sanitizedID}</span>
     </div>

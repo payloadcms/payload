@@ -5,11 +5,11 @@ import { fileURLToPath } from 'url'
 import type { PayloadTestSDK } from '../../../__helpers/shared/sdk/index.js'
 import type { Config } from '../../payload-types.js'
 
-import { ensureCompilationIsDone } from '../../../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
+import { ensureCompilationIsDone } from '../../../__setup/e2e/ensureCompilationIsDone.js'
 import { lexicalFullyFeaturedSlug } from '../../../lexical/slugs.js'
-import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
+import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { LexicalHelpers } from '../utils.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -34,12 +34,13 @@ describe('Lexical Fully Featured', () => {
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
 
-    await ensureCompilationIsDone({ serverURL, browser })
+    await ensureCompilationIsDone({ browser, serverURL })
   })
   beforeEach(async ({ page }) => {
     const url = new AdminUrlUtil(serverURL, lexicalFullyFeaturedSlug)
     lexical = new LexicalHelpers(page)
     await page.goto(url.create)
+    await expect(lexical.editor.first()).toBeVisible()
     await lexical.editor.first().focus()
   })
   test('prevent extra paragraph when inserting decorator blocks like blocks or upload node', async () => {
@@ -52,12 +53,12 @@ describe('Lexical Fully Featured', () => {
     await lexical.slashCommand('upload')
     await lexical.drawer.locator('.list-drawer__header').getByText('Create New').click()
     await lexical.drawer.getByText('Paste URL').click()
-    await lexical.drawer
-      .locator('.file-field__remote-file')
+    await lexical.page
+      .locator('#upload-paste-url #field-url')
       .fill(
         'https://raw.githubusercontent.com/payloadcms/website/refs/heads/main/public/images/universal-truth.jpg',
       )
-    await lexical.drawer.getByText('Add file').click()
+    await lexical.page.locator('#upload-paste-url button', { hasText: 'Add file' }).click()
     await lexical.save('drawer')
     await expect(lexical.decorator).toHaveCount(3)
     const paragraph = lexical.editor.locator('> p')
@@ -70,8 +71,8 @@ describe('Lexical Fully Featured', () => {
     await lexical.drawer.getByText('Paste URL').click()
     const url =
       'https://raw.githubusercontent.com/payloadcms/website/refs/heads/main/public/images/universal-truth.jpg'
-    await lexical.drawer.locator('.file-field__remote-file').fill(url)
-    await lexical.drawer.getByText('Add file').click()
+    await lexical.page.locator('#upload-paste-url #field-url').fill(url)
+    await lexical.page.locator('#upload-paste-url button', { hasText: 'Add file' }).click()
     await lexical.save('drawer')
     const img = lexical.editor.locator('img').first()
     await img.click()
@@ -108,16 +109,16 @@ describe('Lexical Fully Featured', () => {
     await page.keyboard.press('ControlOrMeta+A')
 
     await lexical.clickInlineToolbarButton({
-      dropdownKey: 'textState',
       buttonKey: 'bg-red',
+      dropdownKey: 'textState',
     })
 
     const colored = page.locator('span').filter({ hasText: 'Hello' })
     await expect(colored).toHaveCSS('background-color', 'oklch(0.704 0.191 22.216)')
     await expect(colored).toHaveAttribute('data-background-color', 'bg-red')
     await lexical.clickInlineToolbarButton({
-      dropdownKey: 'textState',
       buttonKey: 'clear-style',
+      dropdownKey: 'textState',
     })
 
     await expect(colored).toBeVisible()
@@ -151,6 +152,49 @@ describe('Lexical Fully Featured', () => {
 
     const someButton = dropdownItems!.locator(`[data-item-key="bg-red"]`)
     await expect(someButton).toHaveAttribute('aria-disabled', 'false')
+  })
+
+  test('fixed toolbar stays on a single row and scrolls horizontally on narrow viewports', async ({
+    page,
+  }) => {
+    const fixedToolbar = page.locator('.fixed-toolbar').first()
+    const fixedToolbarScroll = page.locator('.fixed-toolbar__scroll').first()
+    await expect(fixedToolbar).toBeVisible()
+
+    const wideHeight = (await fixedToolbar.boundingBox())!.height
+
+    await page.setViewportSize({ height: 667, width: 375 })
+
+    await expect(async () => {
+      const box = await fixedToolbar.boundingBox()
+      expect(box!.height).toBe(wideHeight)
+
+      const { clientWidth, scrollWidth } = await fixedToolbarScroll.evaluate((el) => ({
+        clientWidth: el.clientWidth,
+        scrollWidth: el.scrollWidth,
+      }))
+      expect(scrollWidth).toBeGreaterThan(clientWidth)
+    }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+  })
+
+  test('fixed toolbar scrolls horizontally in response to vertical mouse wheel input', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ height: 667, width: 375 })
+
+    const fixedToolbarScroll = page.locator('.fixed-toolbar__scroll').first()
+    await expect(fixedToolbarScroll).toBeVisible()
+
+    const box = (await fixedToolbarScroll.boundingBox())!
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+
+    const initialScrollLeft = await fixedToolbarScroll.evaluate((el) => el.scrollLeft)
+    await page.mouse.wheel(0, 200)
+
+    await expect(async () => {
+      const scrollLeft = await fixedToolbarScroll.evaluate((el) => el.scrollLeft)
+      expect(scrollLeft).toBeGreaterThan(initialScrollLeft)
+    }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
   })
 
   test('ensure opening relationship field with appearance: "drawer" inside rich text inline block does not close drawer', async ({
@@ -191,6 +235,63 @@ describe('Lexical Fully Featured', () => {
     await codeBlock.locator('.monaco-editor .view-line').first().click()
     await page.keyboard.type("import { APIError } from 'payload'")
     await expect(codeBlock.locator('.monaco-editor .view-overlays .squiggly-error')).toHaveCount(0)
+  })
+
+  test('ensure copy and paste works inside a code block and is not hijacked by the editor', async ({
+    context,
+    page,
+  }) => {
+    await context.grantPermissions(['clipboard-read', 'clipboard-write'])
+
+    await lexical.slashCommand('code')
+    const codeBlock = lexical.editor.locator('.LexicalEditorTheme__block-Code')
+    await expect(codeBlock.locator('.monaco-editor')).toBeVisible()
+
+    const firstLine = codeBlock.locator('.monaco-editor .view-line').first()
+    await firstLine.click()
+    await page.keyboard.type('foobar')
+
+    await page.keyboard.press('Home')
+    await page.keyboard.press('Shift+End')
+    await page.keyboard.press('ControlOrMeta+C')
+
+    // Wait until Monaco has written the selection to the clipboard.
+    // If the copy were hijacked by the parent Lexical editor, the clipboard would be empty.
+    await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toBe('foobar')
+
+    await page.keyboard.press('End')
+    await page.keyboard.press('ControlOrMeta+V')
+
+    await expect(firstLine).toHaveText('foobarfoobar')
+  })
+
+  test('ensure copy and paste works inside a JSON field block and is not hijacked by the editor', async ({
+    context,
+    page,
+  }) => {
+    await context.grantPermissions(['clipboard-read', 'clipboard-write'])
+
+    await lexical.slashCommand('jsonblock')
+    const jsonBlock = lexical.editor.locator('.LexicalEditorTheme__block-jsonBlock')
+    await expect(jsonBlock.locator('.monaco-editor')).toBeVisible()
+
+    const firstLine = jsonBlock.locator('.monaco-editor .view-line').first()
+    await firstLine.click()
+    await page.keyboard.type('123')
+
+    // Select just the line's text (not the trailing EOL) inside Monaco and copy.
+    await page.keyboard.press('Home')
+    await page.keyboard.press('Shift+End')
+    await page.keyboard.press('ControlOrMeta+C')
+
+    // Wait until Monaco has written the selection to the clipboard. If the copy
+    // were hijacked by the parent Lexical editor, the clipboard would be empty.
+    await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toBe('123')
+
+    await page.keyboard.press('End')
+    await page.keyboard.press('ControlOrMeta+V')
+
+    await expect(firstLine).toHaveText('123123')
   })
 
   test('ensure code block can be created using client-side markdown shortcuts', async ({
@@ -317,6 +418,7 @@ describe('Lexical Fully Featured, admin panel in RTL', () => {
     await options.locator('text=עברית').click()
     await expect(page.getByText('משתמשים').first()).toBeVisible()
     await page.goto(url.create)
+    await expect(lexical.editor.first()).toBeVisible()
     await lexical.editor.first().focus()
   })
   test('slash menu should be positioned correctly in RTL', async ({ page }) => {

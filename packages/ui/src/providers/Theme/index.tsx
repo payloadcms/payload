@@ -2,14 +2,16 @@
 import React, { createContext, use, useCallback, useEffect, useState } from 'react'
 
 import { useConfig } from '../Config/index.js'
+import { useSearchParams } from '../RouterAdapter/index.js'
+import { defaultTheme, type Theme } from './shared.js'
 
-export type Theme = 'dark' | 'light'
+export { defaultTheme, type Theme }
 
 export type ThemeContext = {
   autoMode: boolean
   highContrastMode: boolean
-  setHighContrastMode: (isHighContrast: boolean) => void
-  setTheme: (theme: 'auto' | Theme) => void
+  setHighContrastMode: (isHighContrast: boolean, options?: { scoped?: boolean }) => void
+  setTheme: (theme: 'auto' | Theme, options?: { scoped?: boolean }) => void
   theme: Theme
 }
 
@@ -21,7 +23,7 @@ const initialContext: ThemeContext = {
   theme: 'light',
 }
 
-const Context = createContext(initialContext)
+const Context = createContext<ThemeContext | undefined>(undefined)
 
 function setCookie(cname: string, cvalue: string, exdays: number) {
   const d = new Date()
@@ -71,77 +73,132 @@ const detectHighContrastMode = (cookieKey: string): boolean => {
   return isHighContrast
 }
 
-export const defaultTheme: Theme = 'light'
+const isValidThemeParam = (value: null | string): value is 'auto' | Theme =>
+  value === 'auto' || value === 'light' || value === 'dark'
 
+/**
+ * Provides theme context to its children.
+ *
+ * At the root (no parent ThemeProvider): reads/writes cookies, responds to
+ * OS preference, owns setTheme and setHighContrastMode.
+ *
+ * When nested inside another ThemeProvider (e.g. inside a Popup): acts as a
+ * scoped visual  the `theme` prop sets the local theme, but setThemeoverride
+ * and setHighContrastMode bubble up through each level to the root provider so
+ * mutations always affect the global user preference.
+ *
+ * The ThemeProvider also reads the `?theme=light|dark|auto` query parameter and
+ * persists it to the theme cookie using the same mechanism as manual theme selection.
+ */
 export const ThemeProvider: React.FC<{
   children?: React.ReactNode
   highContrastMode?: boolean
   theme?: Theme
-}> = ({ children, highContrastMode: initialHighContrastMode, theme: initialTheme }) => {
-  const { config } = useConfig()
+}> = ({ children, highContrastMode: initialHighContrastMode, theme: themeOverride }) => {
+  const outerContext = use(Context)
+  const isScoped = outerContext !== undefined
 
+  const { config } = useConfig()
   const preselectedTheme = config.admin.theme
   const themeCookieKey = `${config.cookiePrefix || 'payload'}-theme`
   const contrastCookieKey = `${config.cookiePrefix || 'payload'}-high-contrast-mode`
 
-  const [theme, setThemeState] = useState<Theme>(initialTheme || defaultTheme)
-  const [autoMode, setAutoMode] = useState<boolean>(true)
+  const themeParam = useSearchParams().get('theme')?.toLowerCase()
+
+  const [theme, setThemeState] = useState<Theme>(themeOverride ?? defaultTheme)
+  const [autoMode, setAutoMode] = useState<boolean>(!isScoped)
   const [highContrastMode, setHighContrastModeState] = useState<boolean>(
-    initialHighContrastMode ?? false,
+    isScoped ? (outerContext.highContrastMode ?? false) : (initialHighContrastMode ?? false),
   )
 
+  // Setters bubble up to the root provider by default. Pass { scoped: true }
+  // to update only the local (scoped) theme without affecting global state.
+  const setTheme = useCallback(
+    (themeToSet: 'auto' | Theme, options?: { scoped?: boolean }) => {
+      if (isScoped && !options?.scoped) {
+        outerContext.setTheme(themeToSet, options)
+        return
+      }
+      const resolvedTheme: Theme =
+        themeToSet === 'auto'
+          ? window.matchMedia?.('(prefers-color-scheme: dark)').matches
+            ? 'dark'
+            : 'light'
+          : themeToSet
+
+      setThemeState(resolvedTheme)
+      setAutoMode(themeToSet === 'auto')
+
+      if (!isScoped) {
+        setCookie(themeCookieKey, themeToSet, themeToSet === 'auto' ? -1 : 365)
+        document.documentElement.setAttribute('data-theme', resolvedTheme)
+      }
+    },
+    [isScoped, outerContext, themeCookieKey],
+  )
+
+  const setHighContrastMode = useCallback(
+    (isHighContrast: boolean, options?: { scoped?: boolean }) => {
+      if (isScoped && !options?.scoped) {
+        outerContext.setHighContrastMode(isHighContrast, options)
+        return
+      }
+      setHighContrastModeState(isHighContrast)
+      if (!isScoped) {
+        setCookie(contrastCookieKey, String(isHighContrast), 365)
+        if (isHighContrast) {
+          document.documentElement.setAttribute('data-enhanced-contrast', '')
+        } else {
+          document.documentElement.removeAttribute('data-enhanced-contrast')
+        }
+      }
+    },
+    [isScoped, outerContext, contrastCookieKey],
+  )
+
+  // Keep highContrastMode in sync with the outer provider when scoped.
   useEffect(() => {
-    if (preselectedTheme !== 'all') {
+    if (isScoped) {
+      setHighContrastModeState(outerContext.highContrastMode)
+    }
+  }, [isScoped, outerContext?.highContrastMode])
+
+  // Resolve the root theme: a valid `?theme` param wins (applied via setTheme so
+  // it persists to the theme cookie exactly like a manual selection; otherwise
+  // fall back to the cookie or OS preference.
+  useEffect(() => {
+    if (isScoped || preselectedTheme !== 'all') {
+      return
+    }
+    if (isValidThemeParam(themeParam)) {
+      setTheme(themeParam)
       return
     }
     const { isAutoMode, theme: detectedTheme } = detectTheme(themeCookieKey)
     setThemeState(detectedTheme)
     setAutoMode(isAutoMode)
-  }, [preselectedTheme, themeCookieKey])
+  }, [isScoped, preselectedTheme, themeCookieKey, themeParam, setTheme])
 
   useEffect(() => {
+    if (isScoped) {
+      return
+    }
     setHighContrastModeState(detectHighContrastMode(contrastCookieKey))
-  }, [contrastCookieKey])
-
-  const setTheme = useCallback(
-    (themeToSet: 'auto' | Theme) => {
-      if (themeToSet === 'light' || themeToSet === 'dark') {
-        setThemeState(themeToSet)
-        setAutoMode(false)
-        setCookie(themeCookieKey, themeToSet, 365)
-        document.documentElement.setAttribute('data-theme', themeToSet)
-      } else if (themeToSet === 'auto') {
-        setCookie(themeCookieKey, themeToSet, -1)
-        const themeFromOS =
-          window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
-            ? 'dark'
-            : 'light'
-        document.documentElement.setAttribute('data-theme', themeFromOS)
-        setAutoMode(true)
-        setThemeState(themeFromOS)
-      }
-    },
-    [themeCookieKey],
-  )
-
-  const setHighContrastMode = useCallback(
-    (isHighContrast: boolean) => {
-      setHighContrastModeState(isHighContrast)
-      setCookie(contrastCookieKey, String(isHighContrast), 365)
-      if (isHighContrast) {
-        document.documentElement.setAttribute('data-enhanced-contrast', '')
-      } else {
-        document.documentElement.removeAttribute('data-enhanced-contrast')
-      }
-    },
-    [contrastCookieKey],
-  )
+  }, [isScoped, contrastCookieKey])
 
   return (
-    <Context value={{ autoMode, highContrastMode, setHighContrastMode, setTheme, theme }}>
+    <Context
+      value={{
+        autoMode: isScoped ? outerContext.autoMode : autoMode,
+        highContrastMode,
+        setHighContrastMode,
+        setTheme,
+        theme: isScoped ? outerContext.theme : theme,
+      }}
+    >
       {children}
     </Context>
   )
 }
 
-export const useTheme = (): ThemeContext => use(Context)
+export const useTheme = (): ThemeContext => use(Context) ?? initialContext

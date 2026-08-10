@@ -1,6 +1,5 @@
 @layer payload-default {
   .table {
-    margin-bottom: var(--spacer-3);
     overflow: auto;
     max-width: 100%;
     isolation: isolate;
@@ -30,7 +29,7 @@
       height: calc(var(--spacer-4) * 2);
 
       &:first-child {
-        padding-inline-start: var(--spacer-2);
+        padding-inline-start: var(--gutter-h);
         padding-inline-end: var(--spacer-2);
       }
 
@@ -39,29 +38,62 @@
       }
     }
 
-    /* Linked cells: move padding to the anchor for full-cell clickability */
-    .cell--linked {
+    .drawer & th:first-child,
+    .drawer & td:first-child {
+      padding-inline-start: var(--spacer-3);
+    }
+
+    .drawer & th:last-child,
+    .drawer & td:last-child {
+      padding-inline-end: var(--spacer-3);
+    }
+
+    /* Linked cells: move padding to the anchor/button for full-cell clickability */
+    td.cell--linked {
       padding: 0;
 
-      > a {
-        display: flex;
-        align-items: center;
-        padding: var(--spacer-2) var(--spacer-2-5);
-        min-height: calc(var(--spacer-4) * 2);
+      &:first-child,
+      &:last-child {
+        padding: 0;
       }
 
-      &:first-child > a {
-        padding-inline-start: var(--spacer-2);
-        padding-inline-end: var(--spacer-2);
+      > :is(a, button) {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        padding: var(--spacer-2) var(--spacer-2-5);
+        min-height: calc(var(--spacer-4) * 2);
+        cursor: pointer;
       }
+
+      &:first-child > :is(a, button) {
+        padding-inline-start: var(--gutter-h);
+      }
+    }
+
+    .drawer & td.cell--linked:first-child > :is(a, button) {
+      padding-inline-start: var(--spacer-3);
     }
 
     #heading-_select,
     .cell-_select {
       width: var(--spacer-5);
       min-width: var(--spacer-5);
-      padding: var(--spacer-2);
+      padding-inline-end: var(--spacer-2);
+      padding-block: var(--spacer-2);
       text-align: center;
+    }
+
+    /* Size the locked-row lock icon to the checkbox's 16px box (keeping the column
+     * width stable) and center it like the checkbox; the larger icon overflows. */
+    .cell-_select .locked {
+      display: flex;
+      height: var(--spacer-3);
+      width: var(--spacer-3);
+
+      svg {
+        flex-shrink: 0;
+      }
     }
 
     #heading-_dragHandle {
@@ -77,6 +109,12 @@
       padding: var(--spacer-2) 0;
       text-align: center;
       vertical-align: middle;
+    }
+
+    .cell-_dragHandle > div {
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     tbody tr {
@@ -110,7 +148,10 @@
 
   /* Condensed appearance */
   .table--appearance-condensed {
+    border: var(--stroke-width-small) solid var(--color-border);
     border-radius: var(--radius-medium);
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar-color) transparent;
 
     table {
       border-collapse: collapse;
@@ -153,7 +194,7 @@
       height: var(--spacer-5);
       line-height: var(--text-body-medium-line-height);
       vertical-align: middle;
-      border-right: 1px solid var(--color-border);
+      border-right: var(--stroke-width-small) solid var(--color-border);
 
       &:last-child {
         border-right: none;
@@ -171,26 +212,38 @@
       }
     }
 
-    /* Linked cells: move padding to the anchor for full-cell clickability */
-    .cell--linked {
+    /* Linked cells: move padding to the anchor/button for full-cell clickability */
+    td.cell--linked {
       padding: 0;
 
-      > a {
+      &:first-child,
+      &:last-child {
+        padding: 0;
+      }
+
+      > :is(a, button, .drawer-link) {
+        display: flex;
+        align-items: center;
+        width: 100%;
         padding: 0 var(--spacer-2-5);
         min-height: var(--spacer-5);
       }
 
-      &:first-child > a {
+      > :is(a, button) {
+        cursor: pointer;
+      }
+
+      &:first-child > :is(a, button, .drawer-link) {
         padding-inline-start: var(--spacer-2-5);
       }
     }
 
     tbody td {
-      border-top: 1px solid var(--color-border);
+      border-top: var(--stroke-width-small) solid var(--color-border);
     }
 
     th {
-      border-bottom: 1px solid var(--color-border);
+      border-bottom: var(--stroke-width-small) solid var(--color-border);
     }
   }
 

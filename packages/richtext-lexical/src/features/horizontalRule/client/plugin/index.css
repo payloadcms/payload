@@ -19,7 +19,7 @@
     user-select: none;
     border-radius: var(--radius-small);
     box-shadow:
-      0px 0px 0px 1px var(--color-bg),
-      0px 0px 0px 2px var(--color-border-selected);
+      0 0 0 var(--stroke-width-small) var(--color-bg),
+      0 0 0 var(--stroke-width-medium) var(--color-border-selected);
   }
 }

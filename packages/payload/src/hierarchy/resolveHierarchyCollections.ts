@@ -296,7 +296,7 @@ function injectTypeField({
     admin: {
       components: {
         Field: {
-          path: '@payloadcms/next/rsc#HierarchyTypeFieldServer',
+          path: '@payloadcms/ui/rsc#HierarchyTypeFieldServer',
           serverProps: {
             collectionOptions,
             parentFieldName,

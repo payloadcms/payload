@@ -256,4 +256,5 @@ export const PostsWithFieldHooks: CollectionConfig = {
       ],
     },
   ],
+  versions: false,
 }

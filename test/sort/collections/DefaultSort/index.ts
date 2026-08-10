@@ -18,4 +18,5 @@ export const DefaultSortCollection: CollectionConfig = {
       type: 'number',
     },
   ],
+  versions: false,
 }

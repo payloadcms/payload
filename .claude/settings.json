@@ -24,7 +24,7 @@
     ]
   },
   "enableAllProjectMcpServers": true,
-  "enabledMcpjsonServers": ["playwright"],
+  "enabledMcpjsonServers": ["playwright", "payload"],
   "permissions": {
     "allow": [
       "Bash(gh issue view:*)",

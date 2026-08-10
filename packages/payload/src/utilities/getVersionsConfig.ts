@@ -22,7 +22,7 @@ export const hasLocalizeStatusEnabled = (config: EntityConfig): boolean => {
       typeof config.versions === 'object' &&
       config.versions.drafts &&
       typeof config.versions.drafts === 'object' &&
-      config.versions.drafts.localizeStatus,
+      (config.versions.drafts as SanitizedDrafts).localizeStatus,
   )
 }
 

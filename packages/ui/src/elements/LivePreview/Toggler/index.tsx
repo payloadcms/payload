@@ -23,7 +23,7 @@ export const LivePreviewToggler: React.FC = () => {
       aria-label={label}
       buttonStyle="ghost"
       className={[baseClass, isLivePreviewing && `${baseClass}--active`].filter(Boolean).join(' ')}
-      icon={<PreviewIcon active={isLivePreviewing} />}
+      icon={<PreviewIcon active={isLivePreviewing} size={24} />}
       id="live-preview-toggler"
       onClick={() => {
         setIsLivePreviewing(!isLivePreviewing)

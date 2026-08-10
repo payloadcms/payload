@@ -16,7 +16,7 @@ import type {
   NodeMapBlockValue,
   NodeMapInlineBlockValue,
   NodeMapValue,
-} from '../../types.js'
+} from '../../types/index.js'
 import type { SanitizedClientEditorConfig, SanitizedServerEditorConfig } from '../config/types.js'
 
 // Store view definitions for each editor and node type

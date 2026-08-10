@@ -1,11 +1,9 @@
+import type { Transformer } from '@lexical/markdown'
 import type { Klass, LexicalNode, LexicalNodeReplacement, SerializedEditorState } from 'lexical'
 
 import { createHeadlessEditor } from '@lexical/headless'
 
-import {
-  $convertFromMarkdownString,
-  type Transformer,
-} from '../../../../packages/@lexical/markdown/index.js'
+import { $convertFromMarkdownString } from '../../../../lexical/utils/markdown/convertFromMarkdownString.js'
 
 export function getMarkdownToLexical(
   allNodes: Array<Klass<LexicalNode> | LexicalNodeReplacement>,
@@ -18,7 +16,10 @@ export function getMarkdownToLexical(
 
     headlessEditor.update(
       () => {
-        $convertFromMarkdownString(markdown, allTransformers)
+        // shouldMergeAdjacentLines is true to preserve how Payload parses block
+        // content (multi-line tags, soft-wrapped lines). The exported
+        // $convertFromMarkdownString now defaults to false to match upstream.
+        $convertFromMarkdownString(markdown, allTransformers, undefined, false, true)
       },
       { discrete: true },
     )

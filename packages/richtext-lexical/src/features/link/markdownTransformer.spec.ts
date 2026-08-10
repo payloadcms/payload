@@ -2,17 +2,17 @@ import { createHeadlessEditor } from '@lexical/headless'
 import { $createParagraphNode, $createTextNode, $getRoot } from 'lexical'
 import { describe, expect, it } from 'vitest'
 
-import { $convertToMarkdownString } from '../../packages/@lexical/markdown/index.js'
+import { $convertToMarkdownString } from '@lexical/markdown'
 import { AutoLinkNode } from './nodes/AutoLinkNode.js'
 import { $createLinkNode, LinkNode } from './nodes/LinkNode.js'
-import type { SerializedLinkNode } from './nodes/types.js'
-import { LinkMarkdownTransformer, createLinkMarkdownTransformer } from './markdownTransformer.js'
+import type { SerializedLinkNode } from './server/schema.js'
+import { PAYLOAD_LINK, createPayloadLinkTransformer } from './markdownTransformer.js'
 
 function createEditor() {
   return createHeadlessEditor({ nodes: [LinkNode, AutoLinkNode] })
 }
 
-function toMarkdown(setupFn: () => void, transformer = LinkMarkdownTransformer): string {
+function toMarkdown(setupFn: () => void, transformer = PAYLOAD_LINK): string {
   const editor = createEditor()
   editor.update(setupFn, { discrete: true })
   let markdown = ''
@@ -22,7 +22,7 @@ function toMarkdown(setupFn: () => void, transformer = LinkMarkdownTransformer):
   return markdown
 }
 
-describe('createLinkMarkdownTransformer', () => {
+describe('createPayloadLinkTransformer', () => {
   describe('custom links', () => {
     it('should export a custom link with its url', () => {
       const markdown = toMarkdown(() => {
@@ -89,7 +89,7 @@ describe('createLinkMarkdownTransformer', () => {
     })
 
     it('should call internalDocToHref and use the returned url', () => {
-      const transformer = createLinkMarkdownTransformer({
+      const transformer = createPayloadLinkTransformer({
         internalDocToHref: ({ linkNode }) => {
           const value = linkNode.fields.doc?.value
           if (value && typeof value === 'object' && 'slug' in value) {
@@ -117,7 +117,7 @@ describe('createLinkMarkdownTransformer', () => {
     it('should pass the full serialized link node to internalDocToHref', () => {
       let capturedLinkNode: SerializedLinkNode | null = null
 
-      const transformer = createLinkMarkdownTransformer({
+      const transformer = createPayloadLinkTransformer({
         internalDocToHref: ({ linkNode }) => {
           capturedLinkNode = linkNode
           return '/captured'
@@ -144,8 +144,8 @@ describe('createLinkMarkdownTransformer', () => {
     })
   })
 
-  describe('LinkMarkdownTransformer (static export)', () => {
-    it('should behave identically to createLinkMarkdownTransformer() with no args', () => {
+  describe('PAYLOAD_LINK (static export)', () => {
+    it('should behave identically to createPayloadLinkTransformer() with no args', () => {
       const setup = () => {
         const link = $createLinkNode({
           fields: { linkType: 'custom', url: 'https://example.com', newTab: false, doc: null },
@@ -154,8 +154,8 @@ describe('createLinkMarkdownTransformer', () => {
         $getRoot().append($createParagraphNode().append(link))
       }
 
-      const fromStatic = toMarkdown(setup, LinkMarkdownTransformer)
-      const fromFactory = toMarkdown(setup, createLinkMarkdownTransformer())
+      const fromStatic = toMarkdown(setup, PAYLOAD_LINK)
+      const fromFactory = toMarkdown(setup, createPayloadLinkTransformer())
 
       expect(fromStatic).toBe(fromFactory)
       expect(fromStatic).toBe('[Example](https://example.com)')

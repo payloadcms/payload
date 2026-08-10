@@ -2,7 +2,7 @@ import type { Locator, Page } from '@playwright/test'
 
 import { expect } from '@playwright/test'
 
-import { getPillSelectorItem } from './clickPillSelectorItem.js'
+import { getColumnSelectorItem } from './clickPillSelectorItem.js'
 import { openListColumns } from './openListColumns.js'
 import { waitForColumnInURL } from './waitForColumnsInURL.js'
 
@@ -31,9 +31,12 @@ export const toggleColumn = async (
     columnContainerSelector,
   })
 
-  const column = getPillSelectorItem({ container: columnContainer, label: columnLabel })
+  const column = getColumnSelectorItem({ container: columnContainer, label: columnLabel })
 
-  const isActiveBeforeClick = await column.evaluate((el) => el.classList.contains('chip--selected'))
+  // New column selector uses --inactive class when column is hidden
+  const isActiveBeforeClick = await column.evaluate(
+    (el) => !el.classList.contains('column-selector__item--inactive'),
+  )
 
   const targetState =
     targetStateFromArgs !== undefined ? targetStateFromArgs : isActiveBeforeClick ? 'off' : 'on'
@@ -44,15 +47,16 @@ export const toggleColumn = async (
     (isActiveBeforeClick && targetState === 'off') || (!isActiveBeforeClick && targetState === 'on')
 
   if (requiresToggle) {
-    await column.locator('.chip__action').click()
+    // Click the switch inside the column item
+    await column.locator('.switch').click()
   }
 
   if (targetState === 'off') {
-    // no class
-    await expect(column).not.toHaveClass(/chip--selected/)
+    // Has --inactive class when off
+    await expect(column).toHaveClass(/column-selector__item--inactive/)
   } else {
-    // has class
-    await expect(column).toHaveClass(/chip--selected/)
+    // No --inactive class when on
+    await expect(column).not.toHaveClass(/column-selector__item--inactive/)
   }
 
   if (expectURLChange && columnName && requiresToggle) {

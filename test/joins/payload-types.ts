@@ -335,14 +335,7 @@ export interface Post {
         id?: string | null;
       }[]
     | null;
-  blocks?:
-    | {
-        category?: (string | null) | Category;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'block';
-      }[]
-    | null;
+  blocks?: Block[] | null;
   first?: {
     tabText?: string | null;
   };
@@ -569,6 +562,16 @@ export interface Singular {
   category?: (string | null) | Category;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Block".
+ */
+export interface Block {
+  category?: (string | null) | Category;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'block';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

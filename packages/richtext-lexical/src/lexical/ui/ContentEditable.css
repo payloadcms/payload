@@ -5,27 +5,29 @@
     position: relative;
     tab-size: 1;
     outline: 0;
-    padding-top: var(--spacer-2);
-    padding-bottom: var(--spacer-2);
-    padding-left: 0;
-    padding-right: 0;
+    padding: var(--spacer-3) var(--spacer-3);
+    /* Reserve space for the InsertParagraphAtEnd hover "+" affordance, which
+       overlaps this bottom padding; shrinking it would cover the last line. */
+    padding-bottom: var(--spacer-4);
 
     &:focus-visible {
       outline: none !important;
     }
-
-    & > * {
-      transition: transform 0.2s ease-in-out;
-    }
   }
 
-  .rich-text-lexical--show-gutter
-    > .rich-text-lexical__wrap
-    > .editor-container
-    > .editor-scroller
-    > .editor {
-    > .ContentEditable__root {
+  @media (min-width: 768px) {
+    .ContentEditable__root {
       padding: var(--spacer-4) var(--spacer-5);
+    }
+
+    .rich-text-lexical:not(.rich-text-lexical--show-gutter)
+      > .rich-text-lexical__wrap
+      > .rich-text-lexical__editor-content
+      > .editor-container
+      > .editor-scroller
+      > .editor
+      > .ContentEditable__root {
+      padding: var(--spacer-2) 0;
     }
   }
 
@@ -33,21 +35,23 @@
     .rich-text-lexical.rich-text-lexical--show-gutter {
       &.error:not(:hover) {
         > .rich-text-lexical__wrap
+          > .rich-text-lexical__editor-content
           > .editor-container
           > .editor-scroller
           > .editor
           > .ContentEditable__root::before {
-          border-left: 2px solid var(--color-border-danger);
+          border-inline-start: var(--stroke-width-medium) solid var(--color-border-danger);
         }
       }
 
       &.error:hover {
         > .rich-text-lexical__wrap
+          > .rich-text-lexical__editor-content
           > .editor-container
           > .editor-scroller
           > .editor
           > .ContentEditable__root::before {
-          border-left: 2px solid var(--color-border-danger);
+          border-inline-start: var(--stroke-width-medium) solid var(--color-border-danger);
         }
       }
     }
@@ -68,11 +72,12 @@
     .rich-text-lexical.rich-text-lexical--show-gutter {
       &.error {
         > .rich-text-lexical__wrap
+          > .rich-text-lexical__editor-content
           > .editor-container
           > .editor-scroller
           > .editor
           > .ContentEditable__root::before {
-          border-left: 2px solid var(--color-border-danger);
+          border-inline-start: var(--stroke-width-medium) solid var(--color-border-danger);
         }
       }
     }

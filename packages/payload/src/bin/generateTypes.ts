@@ -12,8 +12,8 @@ import { getLogger } from '../utilities/logger.js'
 
 export async function generateTypes(
   config: SanitizedConfig,
-  options?: { log: boolean },
-): Promise<void> {
+  options?: { log?: boolean; returnString?: boolean },
+): Promise<string | void> {
   const logger = getLogger('payload', 'sync')
   const outputFile = process.env.PAYLOAD_TS_OUTPUT_PATH || config.typescript.outputFile
 
@@ -29,7 +29,11 @@ export async function generateTypes(
 
   const i18n = await initI18n({ config: config.i18n, context: 'api', language })
 
-  const jsonSchema = configToJSONSchema(config, config.db.defaultIDType, i18n)
+  const { jsonSchema, typeStringDefinitions } = configToJSONSchema(
+    config,
+    config.db.defaultIDType,
+    i18n,
+  )
 
   const declare = `declare module 'payload' {\n  export interface GeneratedTypes extends Config {}\n}`
   const declareWithTSIgnoreError = `declare module 'payload' {\n  // @ts-ignore \n  export interface GeneratedTypes extends Config {}\n}`
@@ -50,6 +54,11 @@ export async function generateTypes(
 
   compiled = addSelectGenericsToGeneratedTypes({ compiledGeneratedTypes: compiled })
 
+  if (typeStringDefinitions.size > 0) {
+    const block = [...typeStringDefinitions].join('\n\n')
+    compiled = `${compiled.trimEnd()}\n\n${block}\n`
+  }
+
   if (config.typescript.postProcess?.length) {
     for (const fn of config.typescript.postProcess) {
       compiled = fn({ compiledTypes: compiled, config })
@@ -62,6 +71,11 @@ export async function generateTypes(
     } else {
       compiled += `\n\n${declare}`
     }
+  }
+
+  // Return the generated types instead of writing them to disk.
+  if (options?.returnString) {
+    return compiled
   }
 
   // Diff the compiled types against the existing types file

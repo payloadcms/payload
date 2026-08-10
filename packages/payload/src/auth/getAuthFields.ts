@@ -2,7 +2,7 @@ import type { Field, TextField } from '../fields/config/types.js'
 import type { IncomingAuthType } from './types.js'
 
 import { accountLockFields } from './baseFields/accountLock.js'
-import { apiKeyFields } from './baseFields/apiKey.js'
+import { createAPIKeyFields } from './baseFields/apiKey.js'
 import { baseAuthFields } from './baseFields/auth.js'
 import { emailFieldConfig } from './baseFields/email.js'
 import { sessionsFieldConfig } from './baseFields/sessions.js'
@@ -13,7 +13,7 @@ export const getBaseAuthFields = (authConfig: IncomingAuthType): Field[] => {
   const authFields: Field[] = []
 
   if (authConfig.useAPIKey) {
-    authFields.push(...apiKeyFields)
+    authFields.push(...createAPIKeyFields())
   }
 
   if (

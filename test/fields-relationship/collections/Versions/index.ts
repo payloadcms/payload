@@ -4,6 +4,9 @@ import { collection1Slug, versionedRelationshipFieldSlug } from '../../slugs.js'
 
 export const Versions: CollectionConfig = {
   slug: versionedRelationshipFieldSlug,
+  admin: {
+    useAsTitle: 'title',
+  },
   fields: [
     {
       name: 'title',
@@ -15,6 +18,11 @@ export const Versions: CollectionConfig = {
       type: 'relationship',
       relationTo: [collection1Slug],
       hasMany: true,
+    },
+    {
+      name: 'relatedVersionedDoc',
+      type: 'relationship',
+      relationTo: versionedRelationshipFieldSlug,
     },
   ],
   versions: {

@@ -6,7 +6,7 @@ import type {
   HTMLConvertersAsync,
   HTMLPopulateFn,
 } from '../../../features/converters/lexicalToHtml/async/types.js'
-import type { SerializedAutoLinkNode, SerializedLinkNode } from '../../../nodeTypes.js'
+import type { SerializedAutoLinkNode, SerializedLinkNode } from '../../../types/nodeTypes.js'
 
 export const LinkDiffHTMLConverterAsync: (args: {
   internalDocToHref?: (args: {

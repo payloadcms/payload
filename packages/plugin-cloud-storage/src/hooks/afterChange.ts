@@ -17,16 +17,19 @@ export const getAfterChangeHook =
       return doc
     }
 
+    const isDraftSave = (doc as { _status?: string })._status === 'draft'
+    const isDraftOverPublished =
+      isDraftSave && (previousDoc as { _status?: string } | undefined)?._status === 'published'
+
     try {
       const files = getIncomingFiles({ data: doc, req })
 
       if (files.length > 0) {
         const uploadResults = await Promise.all(
           files
-            .filter((file) => !file.clientUploadContext)
+            .filter((file) => !file.uploadReference)
             .map((file) =>
               adapter.handleUpload({
-                clientUploadContext: file.clientUploadContext,
                 collection,
                 data: doc,
                 file,
@@ -63,6 +66,7 @@ export const getAfterChangeHook =
               collection: collection.slug,
               data: uploadMetadata,
               depth: 0,
+              draft: isDraftSave,
               req,
             })
           } finally {
@@ -76,7 +80,7 @@ export const getAfterChangeHook =
         // persistence have succeeded. Deleting earlier would orphan the
         // record if a later step throws (e.g. a user-defined afterChange
         // hook on the same collection).
-        if (previousDoc && operation === 'update') {
+        if (previousDoc && operation === 'update' && !isDraftOverPublished) {
           let filesToDelete: string[] = []
 
           if (typeof previousDoc?.filename === 'string') {

@@ -3,6 +3,7 @@ import type DataLoader from 'dataloader'
 import type { OptionalKeys, RequiredKeys } from 'ts-essentials'
 import type { URL } from 'url'
 
+import type { ServerAdapter } from '../admin/adapters/server.js'
 import type {
   DataFromCollectionSlug,
   QueryDraftDataFromCollectionSlug,
@@ -11,6 +12,7 @@ import type {
 } from '../collections/config/types.js'
 import type payload from '../index.js'
 import type {
+  AuthenticatedUser,
   CollectionSlug,
   DataFromGlobalSlug,
   GlobalSlug,
@@ -20,12 +22,17 @@ import type {
   TypedCollectionSelect,
   TypedFallbackLocale,
   TypedLocale,
-  TypedUser,
 } from '../index.js'
 import type { File } from '../uploads/types.js'
 import type { Operator } from './constants.js'
 export type { TypeWithID } from '../collections/config/types.js'
 export type { Payload } from '../index.js'
+
+export interface PayloadRequestAPI {
+  GraphQL: true
+  local: true
+  REST: true
+}
 
 export type CustomPayloadRequestProperties = {
   context: RequestContext
@@ -47,7 +54,7 @@ export type CustomPayloadRequestProperties = {
   /**
    * The context in which the request is being made
    */
-  payloadAPI: 'GraphQL' | 'local' | 'REST'
+  payloadAPI: keyof PayloadRequestAPI
   /** Optimized document loader */
   payloadDataLoader: {
     /**
@@ -74,6 +81,15 @@ export type CustomPayloadRequestProperties = {
    * { collection: 'posts', id: '123' }
    */
   routeParams?: Record<string, unknown>
+  /**
+   * Framework abstraction for server-only navigation, cookies, and headers APIs.
+   * Populated by the framework adapter (e.g. `@payloadcms/next`). Plugins that
+   * have access to `req` should call methods here (`req.server.unauthorized()`,
+   * `req.server.redirect(...)`) instead of importing from `next/navigation` or
+   * `next/headers` directly. Optional because non-framework contexts (jobs,
+   * scripts, tests) construct requests without a server adapter.
+   */
+  server?: ServerAdapter
   /** Translate function - duplicate of i18n.t */
   t: TFunction
   /**
@@ -82,7 +98,7 @@ export type CustomPayloadRequestProperties = {
    */
   transactionID?: number | Promise<number | string> | string
   /** The signed-in user */
-  user: null | TypedUser
+  user: AuthenticatedUser | null
 } & Pick<
   URL,
   'hash' | 'host' | 'href' | 'origin' | 'pathname' | 'port' | 'protocol' | 'search' | 'searchParams'
@@ -104,10 +120,7 @@ type PayloadRequestData = {
   data?: JsonObject
   /** The file on the request, same rules apply as the `data` property */
   file?: {
-    /**
-     * Context of the file when it was uploaded via client side.
-     */
-    clientUploadContext?: unknown
+    uploadReference?: unknown
   } & File
   /** All files from multipart form data, keyed by field name */
   files?: Record<string, File | File[]>
@@ -151,7 +164,7 @@ export type DefaultValue =
       locale?: TypedLocale
       req: PayloadRequest
       user: PayloadRequest['user']
-    }) => SerializableValue)
+    }) => Promise<SerializableValue> | SerializableValue)
   | SerializableValue
 
 /**

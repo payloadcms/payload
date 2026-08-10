@@ -101,6 +101,7 @@ export interface Config {
     virtuals: Virtual;
     'no-timestamps': NoTimestamp;
     localized: Localized;
+    'fully-featured': FullyFeatured;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -142,6 +143,7 @@ export interface Config {
     virtuals: VirtualsSelect<false> | VirtualsSelect<true>;
     'no-timestamps': NoTimestampsSelect<false> | NoTimestampsSelect<true>;
     localized: LocalizedSelect<false> | LocalizedSelect<true>;
+    'fully-featured': FullyFeaturedSelect<false> | FullyFeaturedSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -178,6 +180,8 @@ export interface Config {
   locale: 'es' | 'en';
   widgets: {
     collections: CollectionsWidget;
+    'collection-query': CollectionQueryWidget;
+    activity: ActivityWidget;
   };
   user: User;
   jobs: {
@@ -262,21 +266,11 @@ export interface Post {
   title?: string | null;
   description?: string | null;
   number?: number | null;
-  richText?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
+  richText?:
+    | {
         [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
+      }[]
+    | null;
   someTextField?: string | null;
   namedGroup?: {
     someTextField?: string | null;
@@ -427,6 +421,7 @@ export interface ReorderTab {
 export interface CustomField {
   id: string;
   customTextServerField?: string | null;
+  fieldWithUndefinedComponents?: string | null;
   customTextClientField?: string | null;
   /**
    * Static field description.
@@ -695,6 +690,104 @@ export interface Localized {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "fully-featured".
+ */
+export interface FullyFeatured {
+  id: string;
+  title: string;
+  slug?: string | null;
+  content?:
+    | {
+        [k: string]: unknown;
+      }[]
+    | null;
+  /**
+   * Short summary for list views and SEO
+   */
+  excerpt?: string | null;
+  heroImage?: (string | null) | Upload;
+  layout?:
+    | (
+        | {
+            richText?:
+              | {
+                  [k: string]: unknown;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'richTextBlock';
+          }
+        | {
+            image: string | Upload;
+            caption?: string | null;
+            size?: ('small' | 'medium' | 'fullWidth') | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'imageBlock';
+          }
+        | {
+            heading: string;
+            description?: string | null;
+            links?:
+              | {
+                  label: string;
+                  url: string;
+                  style?: ('primary' | 'secondary' | 'outline') | null;
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'ctaBlock';
+          }
+        | {
+            cards?:
+              | {
+                  title: string;
+                  description?: string | null;
+                  image?: (string | null) | Upload;
+                  link?: {
+                    label?: string | null;
+                    url?: string | null;
+                  };
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'cardGridBlock';
+          }
+      )[]
+    | null;
+  tags?:
+    | {
+        tag: string;
+        id?: string | null;
+      }[]
+    | null;
+  relatedPosts?: (string | Post)[] | null;
+  category?: ('news' | 'blog' | 'tutorial' | 'case-study') | null;
+  /**
+   * Priority from 1 (lowest) to 10 (highest)
+   */
+  priority?: number | null;
+  seo?: {
+    metaTitle?: string | null;
+    metaDescription?: string | null;
+    ogImage?: (string | null) | Upload;
+    noIndex?: boolean | null;
+  };
+  status?: ('draft' | 'published' | 'archived') | null;
+  isFeatured?: boolean | null;
+  publishedDate?: string | null;
+  authors?: (string | User)[] | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -852,6 +945,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'localized';
         value: string | Localized;
+      } | null)
+    | ({
+        relationTo: 'fully-featured';
+        value: string | FullyFeatured;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1097,6 +1194,7 @@ export interface ReorderTabsSelect<T extends boolean = true> {
  */
 export interface CustomFieldsSelect<T extends boolean = true> {
   customTextServerField?: T;
+  fieldWithUndefinedComponents?: T;
   customTextClientField?: T;
   descriptionAsString?: T;
   descriptionAsFunction?: T;
@@ -1338,6 +1436,97 @@ export interface NoTimestampsSelect<T extends boolean = true> {
  */
 export interface LocalizedSelect<T extends boolean = true> {
   title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "fully-featured_select".
+ */
+export interface FullyFeaturedSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  content?: T;
+  excerpt?: T;
+  heroImage?: T;
+  layout?:
+    | T
+    | {
+        richTextBlock?:
+          | T
+          | {
+              richText?: T;
+              id?: T;
+              blockName?: T;
+            };
+        imageBlock?:
+          | T
+          | {
+              image?: T;
+              caption?: T;
+              size?: T;
+              id?: T;
+              blockName?: T;
+            };
+        ctaBlock?:
+          | T
+          | {
+              heading?: T;
+              description?: T;
+              links?:
+                | T
+                | {
+                    label?: T;
+                    url?: T;
+                    style?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        cardGridBlock?:
+          | T
+          | {
+              cards?:
+                | T
+                | {
+                    title?: T;
+                    description?: T;
+                    image?: T;
+                    link?:
+                      | T
+                      | {
+                          label?: T;
+                          url?: T;
+                        };
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+      };
+  tags?:
+    | T
+    | {
+        tag?: T;
+        id?: T;
+      };
+  relatedPosts?: T;
+  category?: T;
+  priority?: T;
+  seo?:
+    | T
+    | {
+        metaTitle?: T;
+        metaDescription?: T;
+        ogImage?: T;
+        noIndex?: T;
+      };
+  status?: T;
+  isFeatured?: T;
+  publishedDate?: T;
+  authors?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -1595,6 +1784,112 @@ export interface CollectionsWidget {
     [k: string]: unknown;
   };
   width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-query_widget".
+ */
+export interface CollectionQueryWidget {
+  data?: {
+    title?: string | null;
+    relatedCollection:
+      | 'uploads'
+      | 'uploads-two'
+      | 'posts'
+      | 'users'
+      | 'hidden-collection'
+      | 'not-in-view-collection'
+      | 'collection-no-api-view'
+      | 'custom-document-controls'
+      | 'custom-views-one'
+      | 'custom-views-two'
+      | 'custom-collection-view'
+      | 'reorder-tabs'
+      | 'custom-fields'
+      | 'group-one-collection-ones'
+      | 'group-one-collection-twos'
+      | 'group-two-collection-ones'
+      | 'group-two-collection-twos'
+      | 'geo'
+      | 'array'
+      | 'disable-duplicate'
+      | 'disable-copy-to-locale'
+      | 'edit-menu-items'
+      | 'format-doc-url'
+      | 'base-list-filters'
+      | 'with300documents'
+      | 'with-list-drawer'
+      | 'placeholder'
+      | 'use-as-title-group-field'
+      | 'disable-bulk-edit'
+      | 'custom-list-drawer'
+      | 'list-view-select-api'
+      | 'virtuals'
+      | 'no-timestamps'
+      | 'localized'
+      | 'fully-featured';
+    where?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    sortField?: string | null;
+    sortDirection?: ('asc' | 'desc') | null;
+    limit?: number | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "activity_widget".
+ */
+export interface ActivityWidget {
+  data?: {
+    excludedCollections?:
+      | (
+          | 'uploads'
+          | 'uploads-two'
+          | 'posts'
+          | 'users'
+          | 'hidden-collection'
+          | 'not-in-view-collection'
+          | 'collection-no-api-view'
+          | 'custom-document-controls'
+          | 'custom-views-one'
+          | 'custom-views-two'
+          | 'custom-collection-view'
+          | 'reorder-tabs'
+          | 'custom-fields'
+          | 'group-one-collection-ones'
+          | 'group-one-collection-twos'
+          | 'group-two-collection-ones'
+          | 'group-two-collection-twos'
+          | 'geo'
+          | 'array'
+          | 'disable-duplicate'
+          | 'disable-copy-to-locale'
+          | 'edit-menu-items'
+          | 'format-doc-url'
+          | 'base-list-filters'
+          | 'with300documents'
+          | 'with-list-drawer'
+          | 'placeholder'
+          | 'use-as-title-group-field'
+          | 'disable-bulk-edit'
+          | 'custom-list-drawer'
+          | 'list-view-select-api'
+          | 'virtuals'
+          | 'no-timestamps'
+          | 'localized'
+          | 'fully-featured'
+        )[]
+      | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

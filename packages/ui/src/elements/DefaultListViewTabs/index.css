@@ -1,0 +1,23 @@
+@layer payload-default {
+  .default-list-view-tabs {
+    display: flex;
+    gap: var(--spacer-2);
+  }
+
+  .default-list-view-tabs__button {
+    color: var(--color-text-secondary);
+  }
+
+  .default-list-view-tabs__button:hover {
+    color: var(--color-text);
+  }
+
+  .default-list-view-tabs__button--active {
+    color: var(--color-text);
+  }
+
+  .default-list-view-tabs__button--active:disabled {
+    color: var(--color-text);
+    cursor: default;
+  }
+}

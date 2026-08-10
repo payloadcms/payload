@@ -51,6 +51,7 @@ type Args = {
    * then the field schema map is not required.
    */
   fieldSchemaMap: FieldSchemaMap | undefined
+  globalSlug?: string
   id?: number | string
   /**
    * Validation, filterOptions and read access control will receive the `blockData`, which is the data of the nearest parent block. You can pass in
@@ -88,6 +89,7 @@ export const fieldSchemasToFormState = async ({
   documentData,
   fields,
   fieldSchemaMap,
+  globalSlug,
   initialBlockData,
   mockRSCs,
   operation,
@@ -145,6 +147,7 @@ export const fieldSchemasToFormState = async ({
       fields,
       fieldSchemaMap,
       fullData,
+      globalSlug,
       mockRSCs,
       operation,
       parentIndexPath: '',

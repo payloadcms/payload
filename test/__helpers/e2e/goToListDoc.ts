@@ -24,7 +24,7 @@ export async function goToListDoc({
   await page.goto(urlUtil.list)
 
   if (search) {
-    const searchInput = page.locator('.search-filter__input')
+    const searchInput = page.locator('#search-filter-input')
     await searchInput.fill(search)
     await page.waitForLoadState('networkidle')
   }

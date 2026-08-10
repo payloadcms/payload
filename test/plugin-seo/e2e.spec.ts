@@ -9,21 +9,19 @@ import { fileURLToPath } from 'url'
 import type { Config, Page as PayloadPage } from './payload-types.js'
 
 import { checkFocusIndicators } from '../__helpers/e2e/checkFocusIndicators.js'
-import {
-  ensureCompilationIsDone,
-  initPageConsoleErrorCatch,
-  switchTab,
-} from '../__helpers/e2e/helpers.js'
+import { switchTab, waitForFormReady } from '../__helpers/e2e/helpers.js'
 import { runAxeScan } from '../__helpers/e2e/runAxeScan.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { ensureCompilationIsDone } from '../__setup/e2e/ensureCompilationIsDone.js'
+import { initPage } from '../__setup/e2e/initPage.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { mediaSlug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-const { beforeAll, describe, beforeEach } = test
+const { beforeAll, beforeEach, describe } = test
 
 let url: AdminUrlUtil
 let page: Page
@@ -40,9 +38,7 @@ describe('SEO Plugin', () => {
     url = new AdminUrlUtil(serverURL, 'pages')
 
     const context = await browser.newContext()
-    page = await context.newPage()
-    initPageConsoleErrorCatch(page)
-    await ensureCompilationIsDone({ page, serverURL })
+    ;({ page } = await initPage({ context, serverURL }))
 
     const filePath = path.resolve(dirname, './image-1.jpg')
     const file = await getFileByPath(filePath)
@@ -84,6 +80,7 @@ describe('SEO Plugin', () => {
 
     test('Should auto-generate meta title when button is clicked in tabs', async () => {
       await page.goto(url.edit(id))
+      await waitForFormReady(page)
       const autoGenerateButtonClass = '.group-field__wrap .render-fields div:nth-of-type(1) button'
       const metaTitleClass = '#field-meta__title'
 
@@ -111,6 +108,7 @@ describe('SEO Plugin', () => {
 
     test('Indicator should be orangered and characters counted', async () => {
       await page.goto(url.edit(id))
+      await waitForFormReady(page)
       const autoGenerateButtonClass = '.group-field__wrap .render-fields div:nth-of-type(1) button'
 
       await switchTab(page, '.tabs-field__tab-button:has-text("SEO")')
@@ -132,6 +130,7 @@ describe('SEO Plugin', () => {
 
     test('Should generate a search result preview based on content', async () => {
       await page.goto(url.edit(id))
+      await waitForFormReady(page)
       const metaDescriptionClass = '#field-meta__description'
       const previewClass = '#field-meta > div > div.render-fields > div:nth-child(5)'
 
@@ -150,6 +149,7 @@ describe('SEO Plugin', () => {
   describe('i18n', () => {
     test('support for another language', async () => {
       await page.goto(url.edit(id))
+      await waitForFormReady(page)
       const autoGenerateButtonClass = '.group-field__wrap .render-fields div:nth-of-type(1) button'
       const seoTabSelector = '.tabs-field__tab-button:has-text("SEO")'
 
@@ -174,6 +174,7 @@ describe('SEO Plugin', () => {
 
       // Navigate back to the page
       await page.goto(url.edit(id))
+      await waitForFormReady(page)
 
       await switchTab(page, seoTabSelector)
 

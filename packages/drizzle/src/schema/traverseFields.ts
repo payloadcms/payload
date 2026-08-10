@@ -384,7 +384,7 @@ export const traverseFields = ({
 
         const disableNotNullFromHere = Boolean(field.admin?.condition) || disableNotNull
 
-        ;(field.blockReferences ?? field.blocks).forEach((_block) => {
+        field.blocks.forEach((_block) => {
           const block = typeof _block === 'string' ? adapter.payload.blocks[_block] : _block
 
           let blockTableName = createTableName({
@@ -396,14 +396,19 @@ export const traverseFields = ({
             versionsCustomName: versions,
           })
 
+          const isLocalizedBlockTable =
+            Boolean(isFieldLocalized && adapter.payload.config.localization) ||
+            withinLocalizedArrayOrBlock ||
+            forceLocalized
+
           if (typeof blocksTableNameMap[blockTableName] === 'undefined') {
             blocksTableNameMap[blockTableName] = 1
           } else if (
             !adapter.rawTables[blockTableName] ||
             !validateExistingBlockIsIdentical({
               block,
-              localized: field.localized,
-              rootTableName,
+              localized: isLocalizedBlockTable,
+              parentIsLocalized,
               table: adapter.rawTables[blockTableName],
               tableLocales: adapter.rawTables[`${blockTableName}${adapter.localesSuffix}`],
             })
@@ -465,12 +470,7 @@ export const traverseFields = ({
               },
             }
 
-            const isLocalized =
-              Boolean(isFieldLocalized && adapter.payload.config.localization) ||
-              withinLocalizedArrayOrBlock ||
-              forceLocalized
-
-            if (isLocalized) {
+            if (isLocalizedBlockTable) {
               baseColumns._locale = {
                 name: '_locale',
                 type: 'enum',
@@ -510,7 +510,7 @@ export const traverseFields = ({
               setColumnID,
               tableName: blockTableName,
               versions,
-              withinLocalizedArrayOrBlock: isLocalized,
+              withinLocalizedArrayOrBlock: isLocalizedBlockTable,
             })
 
             if (subHasLocalizedManyNumberField) {
@@ -622,6 +622,7 @@ export const traverseFields = ({
 
       case 'code':
       case 'email':
+      case 'slug':
       case 'textarea': {
         targetTable[fieldName] = withDefault(
           {

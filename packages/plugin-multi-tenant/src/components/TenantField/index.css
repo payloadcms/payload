@@ -1,0 +1,44 @@
+@layer payload-default {
+  .document-fields__sidebar-fields .render-fields .tenantField,
+  .document-fields__main .render-fields .tenantField {
+    width: calc(100% + var(--gutter-h) * 2);
+    margin-left: calc(-1 * var(--gutter-h));
+    border-bottom: var(--stroke-width-small) solid var(--color-border);
+    padding-top: var(--spacer-3);
+    padding-bottom: var(--spacer-4);
+  }
+
+  .document-fields__sidebar-fields .render-fields .tenantField__wrapper,
+  .document-fields__main .render-fields .tenantField__wrapper {
+    padding-left: var(--gutter-h);
+    padding-right: var(--gutter-h);
+  }
+
+  [dir='rtl'] .document-fields__sidebar-fields .render-fields .tenantField,
+  [dir='rtl'] .document-fields__main .render-fields .tenantField {
+    margin-left: 0;
+    margin-right: calc(-1 * var(--gutter-h));
+  }
+
+  .document-fields__sidebar-fields .render-fields .tenantField:not(:first-child),
+  .document-fields__main .render-fields .tenantField:not(:first-child) {
+    border-top: var(--stroke-width-small) solid var(--color-border);
+    margin-top: var(--spacer-4);
+  }
+
+  .document-fields__sidebar-fields .render-fields .tenantField:not(:last-child),
+  .document-fields__main .render-fields .tenantField:not(:last-child) {
+    margin-bottom: var(--spacing-field);
+  }
+
+  .document-fields__sidebar-fields .render-fields .tenantField:first-child,
+  .document-fields__main .render-fields .tenantField:first-child {
+    margin-top: calc(-1 * var(--spacer-4));
+    padding-top: var(--spacer-4);
+  }
+
+  .document-fields__sidebar-fields .render-fields .tenantField__debug-pill,
+  .document-fields__main .render-fields .tenantField__debug-pill {
+    margin-bottom: var(--spacer-2);
+  }
+}

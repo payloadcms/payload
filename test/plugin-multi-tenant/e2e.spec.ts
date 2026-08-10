@@ -11,23 +11,19 @@ import type { Config } from './payload-types.js'
 import { loginClientSide } from '../__helpers/e2e/auth/login.js'
 import { openRelationshipFieldDrawer } from '../__helpers/e2e/fields/relationship/openRelationshipFieldDrawer.js'
 import { goToListDoc } from '../__helpers/e2e/goToListDoc.js'
-import {
-  changeLocale,
-  ensureCompilationIsDone,
-  initPageConsoleErrorCatch,
-  saveDocAndAssert,
-  waitForFormReady,
-} from '../__helpers/e2e/helpers.js'
+import { changeLocale, saveDocAndAssert, waitForFormReady } from '../__helpers/e2e/helpers.js'
 import {
   clearSelectInput,
   getSelectInputOptions,
   getSelectInputValue,
+  getSelectMenu,
   selectInput,
 } from '../__helpers/e2e/selectInput.js'
 import { closeNav, openNav } from '../__helpers/e2e/toggleNav.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { initPage } from '../__setup/e2e/initPage.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { credentials } from './credentials.js'
 import {
@@ -72,10 +68,7 @@ test.describe('Multi Tenant', () => {
     autosaveGlobalURL = new AdminUrlUtil(serverURL, autosaveGlobalSlug)
 
     const context = await browser.newContext()
-    page = await context.newPage()
-    initPageConsoleErrorCatch(page)
-
-    await ensureCompilationIsDone({ page, serverURL })
+    ;({ page } = await initPage({ context, noAutoLogin: true, serverURL }))
   })
 
   test.beforeEach(async () => {
@@ -357,14 +350,39 @@ test.describe('Multi Tenant', () => {
         urlUtil: menuItemsURL,
       })
 
-      await selectDocumentTenant({
-        action: 'cancel',
+      await closeNav(page)
+      await openAssignTenantModal({ page, payload })
+      await selectInput({
+        multiSelect: false,
+        option: 'Steel Cat',
         page,
-        payload,
-        tenant: 'Steel Cat',
+        selectLocator: page.locator('.tenantField'),
       })
 
       await expect(page.locator('#action-save')).toBeDisabled()
+      await expect
+        .poll(async () => {
+          return await getSelectedTenantFilterName({ page, payload })
+        })
+        .toBe('Blue Dog')
+
+      const assignTenantModal = page.locator('#assign-tenant-field-modal')
+      await assignTenantModal.locator('button', { hasText: 'Cancel' }).click()
+      await expect(assignTenantModal).toBeHidden()
+
+      await expect(page.locator('#action-save')).toBeDisabled()
+
+      await closeNav(page)
+      await openAssignTenantModal({ page, payload })
+      await expect
+        .poll(async () =>
+          getSelectInputValue({
+            multiSelect: false,
+            selectLocator: page.locator('.tenantField'),
+            selectType: 'relationship',
+          }),
+        )
+        .toBe('Blue Dog')
 
       await page.goto(menuItemsURL.list)
       await expect
@@ -392,11 +410,32 @@ test.describe('Multi Tenant', () => {
         urlUtil: menuItemsURL,
       })
 
-      await selectDocumentTenant({
+      await closeNav(page)
+      await openAssignTenantModal({ page, payload })
+      await selectInput({
+        multiSelect: false,
+        option: 'Steel Cat',
         page,
-        payload,
-        tenant: 'Steel Cat',
+        selectLocator: page.locator('.tenantField'),
       })
+
+      await expect(page.locator('#action-save')).toBeDisabled()
+      await expect
+        .poll(async () => {
+          return await getSelectedTenantFilterName({ page, payload })
+        })
+        .toBe('Blue Dog')
+
+      const assignTenantModal = page.locator('#assign-tenant-field-modal')
+      await assignTenantModal.locator('button', { hasText: 'Confirm' }).click()
+      await expect(assignTenantModal).toBeHidden()
+
+      await expect(page.locator('#action-save')).toBeEnabled()
+      await expect
+        .poll(async () => {
+          return await getSelectedTenantFilterName({ page, payload })
+        })
+        .toBe('Steel Cat')
 
       await saveDocAndAssert(page)
     })
@@ -472,7 +511,7 @@ test.describe('Multi Tenant', () => {
       await expect(page.getByText('Blue Dog Menu')).toBeVisible()
       await expect(page.getByText('Steel Cat Menu')).toBeHidden()
       await expect(page.getByText('Anchor Bar Menu')).toBeHidden()
-      await expect(page.locator('.rs__menu')).toHaveCount(1)
+      await expect(getSelectMenu({ page })).toHaveCount(1)
     })
   })
 
@@ -506,13 +545,14 @@ test.describe('Multi Tenant', () => {
       await expect(perFileAssignModal).toBeHidden()
 
       // Open the bulk-upload "Edit all" drawer and pick the Site (tenant) field.
-      await page.locator('.edit-many-bulk-uploads__toggle').click()
+      await page.locator('.edit-many-bulk-uploads button').click()
       const editManyDrawer = page.locator('dialog#edit-media-bulk-uploads')
       await expect(editManyDrawer).toBeVisible()
 
       await selectInput({
         multiSelect: true,
         options: ['Site'],
+        page,
         selectLocator: editManyDrawer.locator('.edit-many-bulk-uploads__form .react-select'),
       })
 
@@ -525,6 +565,7 @@ test.describe('Multi Tenant', () => {
       await selectInput({
         multiSelect: false,
         option: 'Blue Dog',
+        page,
         selectLocator: inlineTenantField,
         selectType: 'relationship',
       })
@@ -591,7 +632,7 @@ test.describe('Multi Tenant', () => {
         ),
       ).toBeVisible()
 
-      await confirmationModal.locator('#confirm-action').click()
+      await confirmationModal.locator('[data-dialog-action="confirm"]').click()
       await expect(page.locator('#confirm-leave-without-saving')).toBeHidden()
       await page.goto(menuItemsURL.list)
       await expect
@@ -635,6 +676,18 @@ test.describe('Multi Tenant', () => {
 
   test.describe('Polymorphic Relationships', () => {
     test('should not duplicate tenant constraints in polymorphic relationship queries', async () => {
+      // This assertion inspects the Next.js server-action wire format: a POST to
+      // `/admin/collections/<slug>` whose JSON body is `[{ name: 'render-list', args }]`.
+      // The TanStack adapter dispatches `render-list` through a `createServerFn`
+      // (seroval-encoded POST to `/_serverFn/...`), so this interception never
+      // matches. The behaviour under test — that the tenant constraint isn't
+      // duplicated in the render-list query — is framework-agnostic plugin logic
+      // and is covered by the Next.js run.
+      test.skip(
+        process.env.PAYLOAD_FRAMEWORK === 'tanstack-start',
+        'Inspects the Next.js server-action wire format; render-list uses a different transport on TanStack. Query behaviour is covered by the Next.js run.',
+      )
+
       await loginClientSide({
         data: credentials.admin,
         page,
@@ -660,8 +713,8 @@ test.describe('Multi Tenant', () => {
               // Check if this is a render-list action
               if (Array.isArray(parsedPayload) && parsedPayload[0]?.name === 'render-list') {
                 renderListRequests.push({
-                  url: request.url(),
                   payload: parsedPayload,
+                  url: request.url(),
                 })
               }
             } catch (e) {
@@ -684,8 +737,8 @@ test.describe('Multi Tenant', () => {
       })
 
       await openRelationshipFieldDrawer({
-        page,
         fieldName: 'polymorphicRelationship',
+        page,
         selectRelation: 'Relationship', // select a tenant-enabled collection
       })
 
@@ -1128,18 +1181,18 @@ test.describe('Multi Tenant', () => {
       await checkbox.click()
 
       // Open the move drawer
-      const moveButton = page.locator('button', { hasText: 'Move' })
+      const moveButton = page.getByRole('button', { name: 'Move', exact: true })
       await expect(moveButton).toBeVisible()
       await moveButton.click()
 
       // The move drawer should be visible
-      const moveDrawer = page.locator('.drawer__content')
-      await expect(moveDrawer).toBeVisible()
+      const moveModal = page.locator('.hierarchy-modal__content')
+      await expect(moveModal).toBeVisible()
 
       // The miller columns should only show Blue Dog folders
-      await expect(moveDrawer.getByText('Blue Dog Documents')).toBeVisible()
-      await expect(moveDrawer.getByText('Steel Cat Documents')).toBeHidden()
-      await expect(moveDrawer.getByText('Anchor Bar Files')).toBeHidden()
+      await expect(moveModal.getByText('Blue Dog Documents')).toBeVisible()
+      await expect(moveModal.getByText('Steel Cat Documents')).toBeHidden()
+      await expect(moveModal.getByText('Anchor Bar Files')).toBeHidden()
     })
 
     test('should show all tenant folders when tenant selector is cleared', async () => {
@@ -1241,7 +1294,6 @@ test.describe('Multi Tenant', () => {
 
       // Navigate to folders page
       await page.goto(foldersURL.list)
-      await page.waitForURL(foldersURL.list)
 
       // Click on Folders tab in sidebar to see the tree
       await openNav(page)
@@ -1315,6 +1367,7 @@ test.describe('Multi Tenant', () => {
 async function getTenantOptions({ page }: { page: Page }): Promise<string[]> {
   await openNav(page)
   return await getSelectInputOptions({
+    page,
     selectLocator: page.locator('.tenant-selector'),
   })
 }
@@ -1337,7 +1390,12 @@ async function openAssignTenantModal({
   // Open the assign tenant modal
   const docControlsPopup = page.locator('.popup__content')
   const docControlsButton = page.locator('.doc-controls__popup .popup__trigger-wrap button')
-  await expect(docControlsButton).toBeVisible()
+
+  if (!(await docControlsButton.isVisible())) {
+    await expect(assignTenantModal).toBeVisible()
+    return
+  }
+
   await docControlsButton.click()
 
   const assignTenantButtonLocator = docControlsPopup.locator('button', { hasText: 'Assign Site' })
@@ -1363,6 +1421,7 @@ async function selectDocumentTenant({
   await selectInput({
     multiSelect: false,
     option: tenant,
+    page,
     selectLocator: page.locator('.tenantField'),
   })
 
@@ -1417,6 +1476,7 @@ async function setTenantFilter({
   await selectInput({
     multiSelect: false,
     option: tenant,
+    page,
     selectLocator: page.locator('.tenant-selector'),
   })
 }
@@ -1432,6 +1492,7 @@ async function switchGlobalDocTenant({
   await selectInput({
     multiSelect: false,
     option: tenant,
+    page,
     selectLocator: page.locator('.tenant-selector'),
   })
 }

@@ -31,6 +31,7 @@ describeReplica('postgres read replicas', () => {
           slug: 'users',
           auth: true,
           fields: [],
+          versions: false,
         },
         {
           slug: 'posts',
@@ -54,6 +55,7 @@ describeReplica('postgres read replicas', () => {
               type: 'text',
             },
           ],
+          versions: false,
         },
         {
           slug: 'nav',

@@ -2,7 +2,7 @@
 import { useControllableState } from '@payloadcms/ui'
 import React, { createContext, use, useMemo } from 'react'
 
-import type { LexicalEditorNodeMap, LexicalEditorViewMap } from '../types.js'
+import type { LexicalEditorNodeMap, LexicalEditorViewMap } from '../types/index.js'
 
 /**
  * Context for managing richtext editor view state and inheritance.

@@ -3,8 +3,9 @@ import type {
   Collection,
   DataFromCollectionSlug,
 } from '../../collections/config/types.js'
-import type { AuthCollectionSlug, TypedUser } from '../../index.js'
+import type { AuthCollectionSlug, AuthenticatedUser, User } from '../../index.js'
 import type { PayloadRequest, Where } from '../../types/index.js'
+import type { AuthRuntimeFields } from '../types.js'
 
 import { buildAfterOperation } from '../../collections/operations/utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from '../../collections/operations/utilities/buildBeforeOperation.js'
@@ -31,7 +32,7 @@ import { resetLoginAttempts } from '../strategies/local/resetLoginAttempts.js'
 export type LoginResult<TSlug extends AuthCollectionSlug> = {
   exp?: number
   token?: string
-  user?: DataFromCollectionSlug<TSlug>
+  user?: AuthRuntimeFields & DataFromCollectionSlug<TSlug>
 }
 
 export type Arguments<TSlug extends AuthCollectionSlug> = {
@@ -203,11 +204,11 @@ export const loginOperation = async <TSlug extends AuthCollectionSlug>(
     where: whereConstraint,
   })
 
-  let user = (await payload.db.findOne<TypedUser>({
+  let user = (await payload.db.findOne<User>({
     collection: collectionConfig.slug,
     req,
     where: whereConstraint,
-  })) as TypedUser
+  })) as AuthenticatedUser
 
   checkLoginPermission({
     loggingInWithUsername: Boolean(canLoginWithUsername && sanitizedUsername),
@@ -256,7 +257,7 @@ export const loginOperation = async <TSlug extends AuthCollectionSlug>(
      * get locked by parallel bad attempts in the meantime.
      */
     if (maxLoginAttemptsEnabled) {
-      const { lockUntil, loginAttempts } = (await payload.db.findOne<TypedUser>({
+      const { lockUntil, loginAttempts } = (await payload.db.findOne<User>({
         collection: collectionConfig.slug,
         req,
         select: {

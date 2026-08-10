@@ -8,7 +8,7 @@
     font-family: inherit;
     cursor: pointer;
     display: inline-flex;
-    border-radius: var(--radius-medium, 0.3125rem);
+    border-radius: var(--button-radius, 0.3125rem);
   }
 
   .popup-button--background {
@@ -19,7 +19,8 @@
     background: var(--color-bg-transparent-hover);
   }
 
-  .popup-button:active:not(.popup-button--disabled) {
+  .popup-button:active:not(.popup-button--disabled),
+  .popup-button--active:not(.popup-button--disabled) {
     background: var(--color-bg-transparent-pressed);
   }
 

@@ -1,6 +1,6 @@
 'use client'
 
-import { Button, toast } from '@payloadcms/ui'
+import { Button, FieldErrorsToast, toast } from '@payloadcms/ui'
 import React from 'react'
 
 import { Section, Variant } from '../shared.js'
@@ -53,6 +53,19 @@ export const ToastSection: React.FC<{ selectedComponent: string }> = ({ selected
         }}
       >
         Show Loading Toast
+      </Button>
+    </Variant>
+
+    <Variant label="Field Errors">
+      <Button
+        buttonStyle="secondary"
+        onClick={() =>
+          toast.error(
+            <FieldErrorsToast errorMessage="The following fields are invalid: title, description, author > name, related article, variant, title" />,
+          )
+        }
+      >
+        Show Field Errors
       </Button>
     </Variant>
   </Section>

@@ -46,6 +46,7 @@ export default buildConfigWithDefaults({
           name: 'posts',
         },
       ],
+      versions: false,
     },
     Posts,
     Categories,
@@ -73,6 +74,7 @@ export default buildConfigWithDefaults({
           relationTo: localizedCategoriesSlug,
         },
       ],
+      versions: false,
     },
     {
       slug: localizedCategoriesSlug,
@@ -92,6 +94,7 @@ export default buildConfigWithDefaults({
           localized: true,
         },
       ],
+      versions: false,
     },
     {
       slug: restrictedCategoriesSlug,
@@ -114,6 +117,7 @@ export default buildConfigWithDefaults({
           },
         },
       ],
+      versions: false,
     },
     {
       slug: categoriesJoinRestrictedSlug,
@@ -133,6 +137,7 @@ export default buildConfigWithDefaults({
           on: 'category',
         },
       ],
+      versions: false,
     },
     {
       slug: restrictedPostsSlug,
@@ -158,6 +163,7 @@ export default buildConfigWithDefaults({
           relationTo: restrictedCategoriesSlug,
         },
       ],
+      versions: false,
     },
     {
       slug: collectionRestrictedSlug,
@@ -183,6 +189,7 @@ export default buildConfigWithDefaults({
           relationTo: categoriesJoinRestrictedSlug,
         },
       ],
+      versions: false,
     },
     {
       slug: 'depth-joins-1',
@@ -200,6 +207,7 @@ export default buildConfigWithDefaults({
           maxDepth: 2,
         },
       ],
+      versions: false,
     },
     {
       slug: 'depth-joins-2',
@@ -212,6 +220,7 @@ export default buildConfigWithDefaults({
           maxDepth: 2,
         },
       ],
+      versions: false,
     },
     {
       slug: 'depth-joins-3',
@@ -222,6 +231,7 @@ export default buildConfigWithDefaults({
           relationTo: 'depth-joins-1',
         },
       ],
+      versions: false,
     },
     {
       slug: 'multiple-collections-parents',
@@ -237,6 +247,7 @@ export default buildConfigWithDefaults({
           },
         },
       ],
+      versions: false,
     },
     {
       slug: 'multiple-collections-1',
@@ -257,6 +268,7 @@ export default buildConfigWithDefaults({
           type: 'text',
         },
       ],
+      versions: false,
     },
     {
       slug: 'multiple-collections-2',
@@ -277,6 +289,7 @@ export default buildConfigWithDefaults({
           type: 'text',
         },
       ],
+      versions: false,
     },
     {
       slug: foldersSlug,
@@ -299,6 +312,7 @@ export default buildConfigWithDefaults({
           type: 'text',
         },
       ],
+      versions: false,
     },
     {
       slug: 'example-pages',
@@ -314,6 +328,7 @@ export default buildConfigWithDefaults({
           type: 'text',
         },
       ],
+      versions: false,
     },
     {
       slug: 'example-posts',
@@ -329,6 +344,7 @@ export default buildConfigWithDefaults({
           type: 'text',
         },
       ],
+      versions: false,
     },
     {
       slug: 'folderPoly1',
@@ -339,6 +355,7 @@ export default buildConfigWithDefaults({
         },
         createFolderField({ relationTo: foldersSlug }),
       ],
+      versions: false,
     },
     {
       slug: 'folderPoly2',
@@ -349,6 +366,7 @@ export default buildConfigWithDefaults({
         },
         createFolderField({ relationTo: foldersSlug }),
       ],
+      versions: false,
     },
   ],
   localization: {

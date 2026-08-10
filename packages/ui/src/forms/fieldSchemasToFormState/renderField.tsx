@@ -49,13 +49,7 @@ export const renderField: RenderFieldMethod = ({
   schemaPath,
   siblingData,
 }) => {
-  // Fields with beforeInput/afterInput need custom components created, so they require render
-  const hasBeforeOrAfterInput =
-    fieldConfig.admin?.components &&
-    ('beforeInput' in fieldConfig.admin.components || 'afterInput' in fieldConfig.admin.components)
-
-  const requiresRender =
-    renderAllFields || !lastRenderedPath || lastRenderedPath !== path || hasBeforeOrAfterInput
+  const requiresRender = renderAllFields || !lastRenderedPath || lastRenderedPath !== path
 
   if (!requiresRender && fieldConfig.type !== 'array' && fieldConfig.type !== 'blocks') {
     return
@@ -178,7 +172,7 @@ export const renderField: RenderFieldMethod = ({
 
         const blockConfig =
           req.payload.blocks[blockTypeToMatch] ??
-          ((fieldConfig.blockReferences ?? fieldConfig.blocks).find(
+          (fieldConfig.blocks.find(
             (block) => typeof block !== 'string' && block.slug === blockTypeToMatch,
           ) as FlattenedBlock | undefined)
 

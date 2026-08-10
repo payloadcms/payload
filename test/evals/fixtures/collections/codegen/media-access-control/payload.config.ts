@@ -9,6 +9,7 @@ export default buildConfig({
       slug: 'users',
       auth: true,
       fields: [],
+      versions: false,
     },
   ],
 })

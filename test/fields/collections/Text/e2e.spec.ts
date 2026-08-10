@@ -10,24 +10,20 @@ import type { GeneratedTypes } from '../../../__helpers/shared/sdk/types.js'
 import type { Config } from '../../payload-types.js'
 
 import {
-  getPillSelectorItem,
+  getColumnSelectorItem,
   openListColumns,
   toggleColumn,
 } from '../../../__helpers/e2e/columns/index.js'
 import { addListFilter } from '../../../__helpers/e2e/filters/index.js'
-import {
-  ensureCompilationIsDone,
-  exactText,
-  initPageConsoleErrorCatch,
-  saveDocAndAssert,
-  selectTableRow,
-} from '../../../__helpers/e2e/helpers.js'
+import { exactText, saveDocAndAssert, selectTableRow } from '../../../__helpers/e2e/helpers.js'
 import { upsertPreferences } from '../../../__helpers/e2e/preferences.js'
 import { runAxeScan } from '../../../__helpers/e2e/runAxeScan.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { RESTClient } from '../../../__helpers/shared/rest.js'
+import { ensureCompilationIsDone } from '../../../__setup/e2e/ensureCompilationIsDone.js'
+import { initPage } from '../../../__setup/e2e/initPage.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { textFieldsSlug } from '../../slugs.js'
 import { textDoc } from './shared.js'
@@ -56,10 +52,7 @@ describe('Text', () => {
     url = new AdminUrlUtil(serverURL, textFieldsSlug)
 
     const context = await browser.newContext()
-    page = await context.newPage()
-    initPageConsoleErrorCatch(page)
-
-    await ensureCompilationIsDone({ page, serverURL })
+    ;({ page } = await initPage({ context, serverURL }))
   })
   beforeEach(async () => {
     await reInitializeDB({
@@ -88,7 +81,7 @@ describe('Text', () => {
       const { columnContainer } = await openListColumns(page, {})
 
       await expect(
-        getPillSelectorItem({ container: columnContainer, label: 'Hidden Text Field' }),
+        getColumnSelectorItem({ container: columnContainer, label: 'Hidden Text Field' }),
       ).toBeHidden()
 
       await selectTableRow(page, 'Seeded text document')
@@ -112,7 +105,7 @@ describe('Text', () => {
       const { columnContainer } = await openListColumns(page, {})
 
       await expect(
-        getPillSelectorItem({ container: columnContainer, label: 'Disabled Text Field' }),
+        getColumnSelectorItem({ container: columnContainer, label: 'Disabled Text Field' }),
       ).toBeHidden()
 
       await selectTableRow(page, 'Seeded text document')
@@ -138,7 +131,7 @@ describe('Text', () => {
       const { columnContainer } = await openListColumns(page, {})
 
       await expect(
-        getPillSelectorItem({ container: columnContainer, label: 'Admin Hidden Text Field' }),
+        getColumnSelectorItem({ container: columnContainer, label: 'Admin Hidden Text Field' }),
       ).toBeVisible()
 
       await selectTableRow(page, 'Seeded text document')
@@ -166,9 +159,9 @@ describe('Text', () => {
 
   test('should respect admin.disableListColumn despite preferences', async () => {
     await upsertPreferences<Config, GeneratedTypes<any>>({
+      key: 'text-fields-list',
       payload,
       user: client.user,
-      key: 'text-fields-list',
       value: {
         columns: [
           {
@@ -182,7 +175,7 @@ describe('Text', () => {
     await page.goto(url.list)
     await openListColumns(page, {})
     await expect(
-      getPillSelectorItem({ container: page, label: 'Disable List Column Text' }),
+      getColumnSelectorItem({ container: page, label: 'Disable List Column Text' }),
     ).toBeHidden()
 
     await expect(page.locator('#heading-disableListColumnText')).toBeHidden()
@@ -194,9 +187,9 @@ describe('Text', () => {
     await page.waitForURL(new RegExp(`${url.list}.*\\?.*`))
 
     await toggleColumn(page, {
-      targetState: 'on',
       columnLabel: 'Text en',
       columnName: 'i18nText',
+      targetState: 'on',
     })
 
     const textCell = page.locator('.row-1 .cell-i18nText')
@@ -285,9 +278,9 @@ describe('Text', () => {
     await expect(page.locator('table >> tbody >> tr')).toHaveCount(2)
 
     await addListFilter({
-      page,
       fieldLabel: 'Text',
       operatorLabel: 'is in',
+      page,
       value: 'Another text document',
     })
 
@@ -300,9 +293,9 @@ describe('Text', () => {
     await expect(page.locator('table >> tbody >> tr')).toHaveCount(2)
 
     await addListFilter({
-      page,
       fieldLabel: 'Text',
       operatorLabel: 'is not in',
+      page,
       value: 'Another text document',
     })
 
@@ -315,9 +308,9 @@ describe('Text', () => {
     await expect(page.locator('table >> tbody >> tr')).toHaveCount(2)
 
     await addListFilter({
-      page,
       fieldLabel: 'Has Many',
       operatorLabel: 'is in',
+      page,
       value: 'one',
     })
 
@@ -330,9 +323,9 @@ describe('Text', () => {
     await expect(page.locator('table >> tbody >> tr')).toHaveCount(2)
 
     await addListFilter({
-      page,
       fieldLabel: 'Has Many',
       operatorLabel: 'is not in',
+      page,
       value: 'four',
     })
 
@@ -345,9 +338,9 @@ describe('Text', () => {
     await expect(page.locator('table >> tbody >> tr')).toHaveCount(2)
 
     await addListFilter({
-      page,
       fieldLabel: 'Has Many',
       operatorLabel: 'contains',
+      page,
       value: 'two',
     })
 
@@ -361,9 +354,9 @@ describe('Text', () => {
 
     // Add filter with first value
     const { condition } = await addListFilter({
-      page,
       fieldLabel: 'Has Many',
       operatorLabel: 'contains',
+      page,
       value: 'one',
     })
 
@@ -383,10 +376,10 @@ describe('Text', () => {
       await page.locator('#field-text').waitFor()
 
       const scanResults = await runAxeScan({
+        exclude: ['[id*="react-select-"]'], // ignore react-select elements here
+        include: ['.document-fields__main'],
         page,
         testInfo,
-        include: ['.document-fields__main'],
-        exclude: ['[id*="react-select-"]'], // ignore react-select elements here
       })
 
       expect(scanResults.violations.length).toBe(0)

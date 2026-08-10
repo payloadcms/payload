@@ -14,8 +14,9 @@ import type { Metadata } from 'next'
 import type { DestinationStream, Level, LoggerOptions } from 'pino'
 import type React from 'react'
 import type { default as sharp } from 'sharp'
-import type { DeepRequired } from 'ts-essentials'
 
+import type { ComponentRenderer } from '../admin/adapters/render.js'
+import type { ServerAdapter } from '../admin/adapters/server.js'
 import type { RichTextAdapterProvider } from '../admin/RichText.js'
 import type {
   CustomStatus,
@@ -58,8 +59,8 @@ import type {
   RegisteredPlugins,
   RequestContext,
   SelectField,
-  TypedUser,
   TypedWidget,
+  User,
   WidgetSlug,
 } from '../index.js'
 import type { QueryPreset, QueryPresetConstraints } from '../query-presets/types.js'
@@ -220,6 +221,13 @@ export type LivePreviewConfig = {
     width: number | string
   }[]
   /**
+   * When `true`, Live Preview opens automatically the first time a user views a document,
+   * before they have manually toggled it on. Once the user toggles Live Preview on or off,
+   * their stored preference takes precedence and this setting is ignored.
+   * @default false
+   */
+  openByDefault?: boolean
+  /**
    * The URL of the frontend application. This will be rendered within an `iframe` as its `src`.
    * Payload will send a `window.postMessage()` to this URL with the document data in real-time.
    * The frontend application is responsible for receiving the message and updating the UI accordingly.
@@ -262,8 +270,8 @@ export type OGImageConfig = {
 
 /**
  * @todo find a way to remove the deep clone here.
- * It can probably be removed after the `DeepRequired` from `Config` to `SanitizedConfig` is removed.
- * Same with `CollectionConfig` to `SanitizedCollectionConfig`.
+ * It can probably be removed after the `DeepRequired` from `GlobalConfig` to
+ * `SanitizedGlobalConfig` is removed.
  */
 type DeepClone<T> = T extends object ? { [K in keyof T]: DeepClone<T[K]> } : T
 
@@ -483,8 +491,22 @@ export type ServerProps = {
   readonly params?: Params
   readonly payload: Payload
   readonly permissions?: SanitizedPermissions
+  /**
+   * Adapter-injected component renderer. Server components can use this
+   * to render other import map components without importing a
+   * framework-specific renderer directly.
+   */
+  readonly renderComponent?: ComponentRenderer
   readonly searchParams?: Params
-  readonly user?: TypedUser
+  /**
+   * Framework-agnostic methods for server-side navigation, headers, cookies, and other server-only APIs.
+   * Plugins should call these methods instead of importing directly from `next/navigation`, `next/headers`, etc.
+   * These methods are populated by the given framework adapter, e.g. `@payloadcms/next`.
+   *
+   * Optional because non-framework contexts (jobs, scripts, tests) may not have an adapter attached.
+   */
+  readonly server: ServerAdapter
+  readonly user?: User
   readonly viewType?: ViewTypes
   readonly visibleEntities?: VisibleEntities
 }
@@ -495,6 +517,7 @@ export const serverProps: (keyof ServerProps)[] = [
   'locale',
   'params',
   'permissions',
+  'renderComponent',
   'searchParams',
   'permissions',
 ]
@@ -527,6 +550,21 @@ type SanitizedTimezoneConfig = {
 
 export type CustomComponent<TAdditionalProps extends object = Record<string, any>> =
   PayloadComponent<ServerProps & TAdditionalProps, TAdditionalProps>
+
+export type UserMenuSettingsGroup = {
+  group: LabelFunction | StaticLabel
+  items: CustomComponent[]
+}
+
+export type UserMenuSettingsItem = CustomComponent | UserMenuSettingsGroup
+
+export const isUserMenuSettingsGroup = (
+  userMenuSettingsItem: UserMenuSettingsItem,
+): userMenuSettingsItem is UserMenuSettingsGroup =>
+  typeof userMenuSettingsItem === 'object' &&
+  userMenuSettingsItem !== null &&
+  'items' in userMenuSettingsItem &&
+  Array.isArray(userMenuSettingsItem.items)
 
 export type Locale = {
   /**
@@ -610,7 +648,8 @@ export type SanitizedLocalizationConfig = Prettify<
      * @example `["en", "es", "fr", "nl", "de", "jp"]`
      */
     localeCodes: string[]
-  } & LocalizationConfigWithLabels
+  } & Omit<LocalizationConfigWithLabels, 'fallback'> &
+    Required<Pick<LocalizationConfigWithLabels, 'fallback'>>
 >
 
 /**
@@ -892,6 +931,421 @@ export type SidebarTab = {
   slug: string
 }
 
+type RootAdminConfig = {
+  /** Automatically log in as a user */
+  autoLogin?:
+    | {
+        /**
+         * The email address of the user to login as
+         */
+        email?: string
+        /** The password of the user to login as. This is only needed if `prefillOnly` is set to true */
+        password?: string
+        /**
+         * If set to true, the login credentials will be prefilled but the user will still need to click the login button.
+         *
+         * @default false
+         */
+        prefillOnly?: boolean
+        /** The username of the user to login as */
+        username?: string
+      }
+    | false
+  /**
+   * Automatically refresh user tokens for users logged into the dashboard
+   *
+   * @default false
+   */
+  autoRefresh?: boolean
+  /** Set account profile picture. Options: gravatar, default or a custom React component. */
+  avatar?:
+    | 'default'
+    | 'gravatar'
+    | {
+        Component: PayloadComponent
+      }
+
+  /**
+   * Add extra and/or replace built-in components with custom components
+   *
+   * @see https://payloadcms.com/docs/custom-components/overview
+   */
+  components?: {
+    /**
+     * Add custom components to the top right of the Admin Panel
+     */
+    actions?: CustomComponent[]
+    /**
+     * Add custom components after the collection overview
+     */
+    afterDashboard?: CustomComponent[]
+    /**
+     * Add custom components after the email/password field
+     */
+    afterLogin?: CustomComponent[]
+    /**
+     * Add custom components after the navigation section
+     */
+    afterNav?: CustomComponent[]
+    /**
+     * Add custom components after the navigation links
+     */
+    afterNavLinks?: CustomComponent[]
+    /**
+     * Add custom components before the collection overview
+     */
+    beforeDashboard?: CustomComponent[]
+    /**
+     * Add custom components before the email/password field
+     */
+    beforeLogin?: CustomComponent[]
+    /**
+     * Add custom components before the navigation section
+     */
+    beforeNav?: CustomComponent[]
+    /**
+     * Add custom components before the navigation links
+     */
+    beforeNavLinks?: CustomComponent[]
+    /** Replace graphical components */
+    graphics?: {
+      /** Replace the icon in the navigation */
+      Icon?: CustomComponent
+      /** Replace the logo on the login page */
+      Logo?: CustomComponent
+    }
+    /**
+     * Add custom header to top of page globally
+     */
+    header?: CustomComponent[]
+    /** Replace logout related components */
+    logout?: {
+      /** Replace the logout button  */
+      Button?: CustomComponent
+    }
+    /**
+     * Replace the navigation with a custom component
+     */
+    Nav?: CustomComponent
+    /**
+     * Wrap the admin dashboard in custom context providers
+     */
+    providers?: PayloadComponent<{ children?: React.ReactNode }, { children?: React.ReactNode }>[]
+    /**
+     * Add custom menu items to the navigation menu accessible via the gear icon.
+     * These components will be rendered in a popup menu above the logout button.
+     */
+    settingsMenu?: CustomComponent[]
+    /** Sidebar configuration */
+    sidebar?: {
+      /** Extensible tab system */
+      tabs?: SidebarTab[]
+    }
+    /**
+     * Add custom items to the user menu popup in the admin panel header.
+     * These components will be rendered in the Settings sub-popup of the user menu.
+     * When empty or absent, the Settings sub-trigger is not shown.
+     */
+    userMenuSettingsItems?: UserMenuSettingsItem[]
+    /**
+     * Replace or modify top-level admin routes, or add new ones:
+     * + `Account` - `/admin/account`
+     * + `Dashboard` - `/admin`
+     * + `:path` - `/admin/:path`
+     */
+    views?: {
+      /** Add custom admin views */
+      [key: string]: AdminViewConfig
+      /** Replace the account screen */
+      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
+      account?: AdminViewConfig
+      /** Replace the admin homepage */
+      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
+      dashboard?: AdminViewConfig
+    }
+  }
+  /** Extension point to add your custom data. Available in server and client. */
+  custom?: Record<string, any>
+  /**
+   * Customize the dashboard widgets
+   * @experimental This prop is subject to change in future releases.
+   */
+  dashboard?: DashboardConfig
+  /** Global date format that will be used for all dates in the Admin panel. Any valid date-fns format pattern can be used. */
+  dateFormat?: string
+  /**
+   * Each entry in this map generates an entry in the importMap.
+   */
+  dependencies?: AdminDependencies
+  /**
+   * @deprecated
+   * This option is deprecated and will be removed in v4.
+   * To disable the admin panel itself, delete your `/app/(payload)/admin` directory.
+   * To disable all REST API and GraphQL endpoints, delete your `/app/(payload)/api` directory.
+   * Note: If you've modified the default paths via `admin.routes`, delete those directories instead.
+   */
+  disable?: boolean
+  importMap?: {
+    /**
+     * Automatically generate component map during development
+     * @default true
+     */
+    autoGenerate?: boolean
+    /**
+     * The base directory for component paths starting with /.
+     * @default process.cwd()
+     **/
+    baseDir?: string
+    /**
+     * You can use generators to add custom components to the component import map.
+     * This allows you to import custom components in the admin panel.
+     */
+    generators?: ImportMapGenerators
+    /**
+     * If Payload cannot find the import map file location automatically,
+     * you can manually provide it here.
+     */
+    importMapFile?: string
+  }
+  /**
+   * Live Preview options.
+   *
+   * @see https://payloadcms.com/docs/live-preview/overview
+   */
+  livePreview?: RootLivePreviewConfig
+  /** Base meta data to use for the Admin Panel. Included properties are titleSuffix, ogImage, and favicon. */
+  meta?: MetaConfig
+  routes?: {
+    /** The route for the account page.
+     *
+     * @default '/account'
+     */
+    account?: `/${string}`
+    /** The route for the create first user page.
+     *
+     * @default '/create-first-user'
+     */
+    createFirstUser?: `/${string}`
+    /** The route for the forgot password page.
+     *
+     * @default '/forgot'
+     */
+    forgot?: `/${string}`
+    /** The route the user will be redirected to after being inactive for too long.
+     *
+     * @default '/logout-inactivity'
+     */
+    inactivity?: `/${string}`
+    /** The route for the login page.
+     *
+     * @default '/login'
+     */
+    login?: `/${string}`
+    /** The route for the logout page.
+     *
+     * @default '/logout'
+     */
+    logout?: `/${string}`
+    /** The route for the reset password page.
+     *
+     * @default '/reset'
+     */
+    reset?: `/${string}`
+    /** The route for the unauthorized page.
+     *
+     * @default '/unauthorized'
+     */
+    unauthorized?: `/${string}`
+  }
+  /**
+   * Suppresses React hydration mismatch warnings during the hydration of the root <html> tag.
+   * Useful in scenarios where the server-rendered HTML might intentionally differ from the client-rendered DOM.
+   * @default false
+   */
+  suppressHydrationWarning?: boolean
+  /**
+   * Restrict the Admin Panel theme to use only one of your choice
+   *
+   * @default 'all' // The theme can be configured by users
+   */
+  theme?: 'all' | 'dark' | 'light'
+  /**
+   * Configure timezone related settings for the admin panel.
+   */
+  timezones?: TimezonesConfig
+  /**
+   * Configure toast message behavior and appearance in the admin panel.
+   * Currently using [Sonner](https://sonner.emilkowal.ski) for toast notifications.
+   *
+   * @experimental This property is experimental and may change in future releases. Use at your own risk.
+   */
+  toast?: {
+    /**
+     * Time in milliseconds until the toast automatically closes.
+     * @default 4000
+     */
+    duration?: number
+    /**
+     * If `true`, will expand the message stack so that all messages are shown simultaneously without user interaction.
+     * Otherwise only the latest notification can be read until the user hovers the stack.
+     * @default false
+     */
+    expand?: boolean
+    /**
+     * The maximum number of toasts that can be visible on the screen at once.
+     * @default 5
+     */
+    limit?: number
+    /**
+     * The position of the toast on the screen.
+     * @default 'bottom-right'
+     */
+    position?:
+      | 'bottom-center'
+      | 'bottom-left'
+      | 'bottom-right'
+      | 'top-center'
+      | 'top-left'
+      | 'top-right'
+  }
+  /** The slug of a Collection that you want to be used to log in to the Admin dashboard. */
+  user?: string
+}
+
+type RootGraphQLConfig = {
+  disable?: boolean
+  /**
+   * Disable introspection queries in production.
+   *
+   * @default true
+   */
+  disableIntrospectionInProduction?: boolean
+  /**
+   * Disable the GraphQL Playground in production.
+   *
+   * @default true
+   */
+  disablePlaygroundInProduction?: boolean
+  maxComplexity?: number
+  /**
+   * Function that returns an object containing keys to custom GraphQL mutations
+   *
+   * @see https://payloadcms.com/docs/graphql/extending
+   */
+  mutations?: GraphQLExtension
+  /**
+   * Function that returns an object containing keys to custom GraphQL queries
+   *
+   * @see https://payloadcms.com/docs/graphql/extending
+   */
+  queries?: GraphQLExtension
+  /**
+   * Filepath to write the generated schema to
+   */
+  schemaOutputFile?: string
+  /**
+   * Function that returns an array of validation rules to apply to the GraphQL schema
+   *
+   * @see https://payloadcms.com/docs/graphql/overview#custom-validation-rules
+   */
+  validationRules?: (args: GraphQL.ExecutionArgs) => GraphQL.ValidationRule[]
+}
+
+type RootTypeScriptConfig = {
+  /**
+   * Automatically generate types during development
+   * @default true
+   */
+  autoGenerate?: boolean
+
+  /** Disable declare block in generated types file */
+  declare?:
+    | {
+        /**
+         * @internal internal use only to allow for multiple declarations within a monorepo and suppress the "Duplicate identifier GeneratedTypes" error
+         *
+         * Adds a @ts-ignore flag above the GeneratedTypes interface declaration
+         *
+         * @default false
+         */
+        ignoreTSError?: boolean
+      }
+    | false
+
+  /**
+   * Also generate a write-shaped input type (e.g. `PostInput`) next to each read type, describing
+   * what `create`/`update` accept: relationships and uploads as IDs only, `id` and `defaultValue`
+   * fields optional, and `createdAt`/`updatedAt`/virtual/join fields removed. These are
+   * exposed on `Config['collectionsInput']` and `Config['globalsInput']`. Set `true` to turn them on.
+   * Draft-enabled entities retain `_status` because it is a writable create/update field.
+   *
+   * @default false
+   *
+   * @remarks
+   * Off by default. The Local API's `create`/`update` still type their `data` against the read
+   * type, so these input types aren't used internally - they're here for you to opt into, e.g. to
+   * type a form payload, a seed script, or an API client. `@payloadcms/plugin-mcp` also uses the
+   * input schema, but it builds that itself at runtime, so MCP gets the accurate write schema
+   * whether or not this flag is on.
+   *
+   * @todo We'd like to turn this on by default (or have the Local API use the input type
+   * directly), but there's a catch. When you read a document with `depth > 0`, its relationships
+   * come back as full documents rather than IDs. A strict ID-only input type would reject that and
+   * break the common "read a doc, change a field, save it back" pattern. To enable it by default,
+   * the input type would first need to accept a relationship as either an ID or the full document
+   * (which is what Payload already does at runtime), while keeping `id`, `defaultValue`, and
+   * auto-managed fields optional. Until then it stays opt-in, so we don't put a type that's
+   * stricter than the runtime on the main write path.
+   */
+  generateInputTypes?: boolean
+
+  /** Filename to write the generated types to */
+  outputFile?: string
+
+  /**
+   * Post-process the generated TypeScript types string before writing to file.
+   * Useful for plugins that need to inject generic types that JSON Schema cannot express.
+   *
+   * Functions are applied in order after the built-in Select generics are added.
+   *
+   * @example
+   * ```ts
+   * postProcess: [
+   *   ({ compiledTypes, config }) => {
+   *     const genericType = `export type MyGeneric<T> = { value: T };`
+   *     return compiledTypes.replace(/(\/\*[\s\S]*?\*\/\n)/, `$1\n${genericType}\n`)
+   *   },
+   * ]
+   * ```
+   */
+  postProcess?: Array<(args: { compiledTypes: string; config: SanitizedConfig }) => string>
+
+  /**
+   * Allows you to modify the base JSON schema that is generated during generate:types. This JSON schema will be used
+   * to generate the TypeScript interfaces.
+   */
+  schema?: Array<
+    (args: {
+      collectionIDFieldTypes: {
+        [key: string]: 'number' | 'string'
+      }
+      config: SanitizedConfig
+      i18n: I18n
+      jsonSchema: JSONSchema4
+    }) => JSONSchema4
+  >
+
+  /**
+   * Enable strict type safety for draft operations. When enabled, the `draft` parameter is forbidden
+   * on collections without drafts, and query results with `draft: true` type required fields as optional.
+   * This prevents invalid draft usage at compile time and ensures type correctness across all Local API operations.
+   *
+   * @default false
+   * @todo Remove in v4. Strict draft types will become the default behavior.
+   */
+  strictDraftTypes?: boolean
+}
+
 /**
  * This is the central configuration
  *
@@ -899,280 +1353,7 @@ export type SidebarTab = {
  */
 export type Config = {
   /** Configure admin dashboard */
-  admin?: {
-    /** Automatically log in as a user */
-    autoLogin?:
-      | {
-          /**
-           * The email address of the user to login as
-           */
-          email?: string
-          /** The password of the user to login as. This is only needed if `prefillOnly` is set to true */
-          password?: string
-          /**
-           * If set to true, the login credentials will be prefilled but the user will still need to click the login button.
-           *
-           * @default false
-           */
-          prefillOnly?: boolean
-          /** The username of the user to login as */
-          username?: string
-        }
-      | false
-    /**
-     * Automatically refresh user tokens for users logged into the dashboard
-     *
-     * @default false
-     */
-    autoRefresh?: boolean
-    /** Set account profile picture. Options: gravatar, default or a custom React component. */
-    avatar?:
-      | 'default'
-      | 'gravatar'
-      | {
-          Component: PayloadComponent
-        }
-
-    /**
-     * Add extra and/or replace built-in components with custom components
-     *
-     * @see https://payloadcms.com/docs/custom-components/overview
-     */
-    components?: {
-      /**
-       * Add custom components to the top right of the Admin Panel
-       */
-      actions?: CustomComponent[]
-      /**
-       * Add custom components after the collection overview
-       */
-      afterDashboard?: CustomComponent[]
-      /**
-       * Add custom components after the email/password field
-       */
-      afterLogin?: CustomComponent[]
-      /**
-       * Add custom components after the navigation section
-       */
-      afterNav?: CustomComponent[]
-      /**
-       * Add custom components after the navigation links
-       */
-      afterNavLinks?: CustomComponent[]
-      /**
-       * Add custom components before the collection overview
-       */
-      beforeDashboard?: CustomComponent[]
-      /**
-       * Add custom components before the email/password field
-       */
-      beforeLogin?: CustomComponent[]
-      /**
-       * Add custom components before the navigation section
-       */
-      beforeNav?: CustomComponent[]
-      /**
-       * Add custom components before the navigation links
-       */
-      beforeNavLinks?: CustomComponent[]
-      /** Replace graphical components */
-      graphics?: {
-        /** Replace the icon in the navigation */
-        Icon?: CustomComponent
-        /** Replace the logo on the login page */
-        Logo?: CustomComponent
-      }
-      /**
-       * Add custom header to top of page globally
-       */
-      header?: CustomComponent[]
-      /** Replace logout related components */
-      logout?: {
-        /** Replace the logout button  */
-        Button?: CustomComponent
-      }
-      /**
-       * Replace the navigation with a custom component
-       */
-      Nav?: CustomComponent
-      /**
-       * Wrap the admin dashboard in custom context providers
-       */
-      providers?: PayloadComponent<{ children?: React.ReactNode }, { children?: React.ReactNode }>[]
-      /**
-       * Add custom menu items to the navigation menu accessible via the gear icon.
-       * These components will be rendered in a popup menu above the logout button.
-       */
-      settingsMenu?: CustomComponent[]
-      /** Sidebar configuration */
-      sidebar?: {
-        /** Extensible tab system */
-        tabs?: SidebarTab[]
-      }
-      /**
-       * Replace or modify top-level admin routes, or add new ones:
-       * + `Account` - `/admin/account`
-       * + `Dashboard` - `/admin`
-       * + `:path` - `/admin/:path`
-       */
-      views?: {
-        /** Add custom admin views */
-        [key: string]: AdminViewConfig
-        /** Replace the account screen */
-        // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-        account?: AdminViewConfig
-        /** Replace the admin homepage */
-        // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-        dashboard?: AdminViewConfig
-      }
-    }
-    /** Extension point to add your custom data. Available in server and client. */
-    custom?: Record<string, any>
-    /**
-     * Customize the dashboard widgets
-     * @experimental This prop is subject to change in future releases.
-     */
-    dashboard?: DashboardConfig
-    /** Global date format that will be used for all dates in the Admin panel. Any valid date-fns format pattern can be used. */
-    dateFormat?: string
-    /**
-     * Each entry in this map generates an entry in the importMap.
-     */
-    dependencies?: AdminDependencies
-    /**
-     * @deprecated
-     * This option is deprecated and will be removed in v4.
-     * To disable the admin panel itself, delete your `/app/(payload)/admin` directory.
-     * To disable all REST API and GraphQL endpoints, delete your `/app/(payload)/api` directory.
-     * Note: If you've modified the default paths via `admin.routes`, delete those directories instead.
-     */
-    disable?: boolean
-    importMap?: {
-      /**
-       * Automatically generate component map during development
-       * @default true
-       */
-      autoGenerate?: boolean
-      /**
-       * The base directory for component paths starting with /.
-       * @default process.cwd()
-       **/
-      baseDir?: string
-      /**
-       * You can use generators to add custom components to the component import map.
-       * This allows you to import custom components in the admin panel.
-       */
-      generators?: ImportMapGenerators
-      /**
-       * If Payload cannot find the import map file location automatically,
-       * you can manually provide it here.
-       */
-      importMapFile?: string
-    }
-    /**
-     * Live Preview options.
-     *
-     * @see https://payloadcms.com/docs/live-preview/overview
-     */
-    livePreview?: RootLivePreviewConfig
-    /** Base meta data to use for the Admin Panel. Included properties are titleSuffix, ogImage, and favicon. */
-    meta?: MetaConfig
-    routes?: {
-      /** The route for the account page.
-       *
-       * @default '/account'
-       */
-      account?: `/${string}`
-      /** The route for the create first user page.
-       *
-       * @default '/create-first-user'
-       */
-      createFirstUser?: `/${string}`
-      /** The route for the forgot password page.
-       *
-       * @default '/forgot'
-       */
-      forgot?: `/${string}`
-      /** The route the user will be redirected to after being inactive for too long.
-       *
-       * @default '/logout-inactivity'
-       */
-      inactivity?: `/${string}`
-      /** The route for the login page.
-       *
-       * @default '/login'
-       */
-      login?: `/${string}`
-      /** The route for the logout page.
-       *
-       * @default '/logout'
-       */
-      logout?: `/${string}`
-      /** The route for the reset password page.
-       *
-       * @default '/reset'
-       */
-      reset?: `/${string}`
-      /** The route for the unauthorized page.
-       *
-       * @default '/unauthorized'
-       */
-      unauthorized?: `/${string}`
-    }
-    /**
-     * Suppresses React hydration mismatch warnings during the hydration of the root <html> tag.
-     * Useful in scenarios where the server-rendered HTML might intentionally differ from the client-rendered DOM.
-     * @default false
-     */
-    suppressHydrationWarning?: boolean
-    /**
-     * Restrict the Admin Panel theme to use only one of your choice
-     *
-     * @default 'all' // The theme can be configured by users
-     */
-    theme?: 'all' | 'dark' | 'light'
-    /**
-     * Configure timezone related settings for the admin panel.
-     */
-    timezones?: TimezonesConfig
-    /**
-     * Configure toast message behavior and appearance in the admin panel.
-     * Currently using [Sonner](https://sonner.emilkowal.ski) for toast notifications.
-     *
-     * @experimental This property is experimental and may change in future releases. Use at your own risk.
-     */
-    toast?: {
-      /**
-       * Time in milliseconds until the toast automatically closes.
-       * @default 4000
-       */
-      duration?: number
-      /**
-       * If `true`, will expand the message stack so that all messages are shown simultaneously without user interaction.
-       * Otherwise only the latest notification can be read until the user hovers the stack.
-       * @default false
-       */
-      expand?: boolean
-      /**
-       * The maximum number of toasts that can be visible on the screen at once.
-       * @default 5
-       */
-      limit?: number
-      /**
-       * The position of the toast on the screen.
-       * @default 'bottom-right'
-       */
-      position?:
-        | 'bottom-center'
-        | 'bottom-left'
-        | 'bottom-right'
-        | 'top-center'
-        | 'top-left'
-        | 'top-right'
-    }
-    /** The slug of a Collection that you want to be used to log in to the Admin dashboard. */
-    user?: string
-  }
+  admin?: RootAdminConfig
 
   /**
    * Configure authentication-related Payload-wide settings.
@@ -1182,7 +1363,7 @@ export type Config = {
      * Define which JWT identification methods you'd like to support for Payload's local auth strategy, as well as the order that they're retrieved in.
      * Defaults to ['JWT', 'Bearer', 'cookie]
      */
-    jwtOrder: ('Bearer' | 'cookie' | 'JWT')[]
+    jwtOrder?: ('Bearer' | 'cookie' | 'JWT')[]
   }
   /** Custom Payload bin scripts can be injected via the config. */
   bin?: BinScriptConfig[]
@@ -1223,7 +1404,7 @@ export type Config = {
    *
    * @see https://payloadcms.com/docs/getting-started/concepts#depth
    *
-   * @default 2
+   * @default 1
    */
   defaultDepth?: number
   /**
@@ -1243,22 +1424,6 @@ export type Config = {
   /** Custom REST endpoints */
   endpoints?: Endpoint[]
   /**
-   * Experimental features may be unstable or change in future versions.
-   */
-  experimental?: {
-    /**
-     * Enable per-locale status for documents.
-     *
-     * Requires:
-     * - `localization` enabled
-     * - `versions.drafts` enabled
-     * - `versions.drafts.localizeStatus` set at collection or global level
-     *
-     * @experimental
-     */
-    localizeStatus?: boolean
-  }
-  /**
    * @see https://payloadcms.com/docs/configuration/globals#global-configs
    */
   globals?: GlobalConfig[]
@@ -1269,44 +1434,7 @@ export type Config = {
    *
    * @see https://payloadcms.com/docs/graphql/overview
    */
-  graphQL?: {
-    disable?: boolean
-    /**
-     * Disable introspection queries in production.
-     *
-     * @default true
-     */
-    disableIntrospectionInProduction?: boolean
-    /**
-     * Disable the GraphQL Playground in production.
-     *
-     * @default true
-     */
-    disablePlaygroundInProduction?: boolean
-    maxComplexity?: number
-    /**
-     * Function that returns an object containing keys to custom GraphQL mutations
-     *
-     * @see https://payloadcms.com/docs/graphql/extending
-     */
-    mutations?: GraphQLExtension
-    /**
-     * Function that returns an object containing keys to custom GraphQL queries
-     *
-     * @see https://payloadcms.com/docs/graphql/extending
-     */
-    queries?: GraphQLExtension
-    /**
-     * Filepath to write the generated schema to
-     */
-    schemaOutputFile?: string
-    /**
-     * Function that returns an array of validation rules to apply to the GraphQL schema
-     *
-     * @see https://payloadcms.com/docs/graphql/overview#custom-validation-rules
-     */
-    validationRules?: (args: GraphQL.ExecutionArgs) => GraphQL.ValidationRule[]
-  }
+  graphQL?: RootGraphQLConfig
   /**
    * Tap into Payload-wide hooks.
    *
@@ -1537,125 +1665,136 @@ export type Config = {
   /** Send anonymous telemetry data about general usage. */
   telemetry?: boolean
   /** Control how typescript interfaces are generated from your collections. */
-  typescript?: {
-    /**
-     * Automatically generate types during development
-     * @default true
-     */
-    autoGenerate?: boolean
-
-    /** Disable declare block in generated types file */
-    declare?:
-      | {
-          /**
-           * @internal internal use only to allow for multiple declarations within a monorepo and suppress the "Duplicate identifier GeneratedTypes" error
-           *
-           * Adds a @ts-ignore flag above the GeneratedTypes interface declaration
-           *
-           * @default false
-           */
-          ignoreTSError?: boolean
-        }
-      | false
-
-    /** Filename to write the generated types to */
-    outputFile?: string
-
-    /**
-     * Post-process the generated TypeScript types string before writing to file.
-     * Useful for plugins that need to inject generic types that JSON Schema cannot express.
-     *
-     * Functions are applied in order after the built-in Select generics are added.
-     *
-     * @example
-     * ```ts
-     * postProcess: [
-     *   ({ compiledTypes, config }) => {
-     *     const genericType = `export type MyGeneric<T> = { value: T };`
-     *     return compiledTypes.replace(/(\/\*[\s\S]*?\*\/\n)/, `$1\n${genericType}\n`)
-     *   },
-     * ]
-     * ```
-     */
-    postProcess?: Array<(args: { compiledTypes: string; config: SanitizedConfig }) => string>
-
-    /**
-     * Allows you to modify the base JSON schema that is generated during generate:types. This JSON schema will be used
-     * to generate the TypeScript interfaces.
-     */
-    schema?: Array<
-      (args: {
-        collectionIDFieldTypes: {
-          [key: string]: 'number' | 'string'
-        }
-        config: SanitizedConfig
-        i18n: I18n
-        jsonSchema: JSONSchema4
-      }) => JSONSchema4
-    >
-
-    /**
-     * Enable strict type safety for draft operations. When enabled, the `draft` parameter is forbidden
-     * on collections without drafts, and query results with `draft: true` type required fields as optional.
-     * This prevents invalid draft usage at compile time and ensures type correctness across all Local API operations.
-     *
-     * @default false
-     * @todo Remove in v4. Strict draft types will become the default behavior.
-     */
-    strictDraftTypes?: boolean
-  }
+  typescript?: RootTypeScriptConfig
   /**
    * Customize the handling of incoming file uploads for collections that have uploads enabled.
    */
   upload?: FetchAPIFileUploadOptions
 }
 
-/**
- * @todo remove the `DeepRequired` in v4.
- * We don't actually guarantee that all properties are set when sanitizing configs.
- */
-export type SanitizedConfig = {
-  admin: {
-    timezones: SanitizedTimezoneConfig
-  } & DeepRequired<Config['admin']>
-  blocks?: FlattenedBlock[]
+interface SanitizedAdminConfig
+  extends Omit<
+      RootAdminConfig,
+      | 'avatar'
+      | 'components'
+      | 'custom'
+      | 'dashboard'
+      | 'dateFormat'
+      | 'dependencies'
+      | 'importMap'
+      | 'meta'
+      | 'routes'
+      | 'theme'
+      | 'timezones'
+      | 'user'
+    >,
+    Required<
+      Pick<
+        RootAdminConfig,
+        'avatar' | 'components' | 'custom' | 'dateFormat' | 'dependencies' | 'theme' | 'user'
+      >
+    > {
+  dashboard: Required<DashboardConfig>
+  importMap: Omit<NonNullable<RootAdminConfig['importMap']>, 'baseDir'> &
+    Required<Pick<NonNullable<RootAdminConfig['importMap']>, 'baseDir'>>
+  meta: Omit<MetaConfig, 'defaultOGImageType' | 'robots' | 'titleSuffix'> &
+    Required<Pick<MetaConfig, 'defaultOGImageType' | 'robots' | 'titleSuffix'>>
+  routes: Required<NonNullable<RootAdminConfig['routes']>>
+  timezones: SanitizedTimezoneConfig
+}
+
+type SanitizedGraphQLConfig = Omit<
+  RootGraphQLConfig,
+  | 'disableIntrospectionInProduction'
+  | 'disablePlaygroundInProduction'
+  | 'maxComplexity'
+  | 'schemaOutputFile'
+> &
+  Required<
+    Pick<
+      RootGraphQLConfig,
+      | 'disableIntrospectionInProduction'
+      | 'disablePlaygroundInProduction'
+      | 'maxComplexity'
+      | 'schemaOutputFile'
+    >
+  >
+
+type SanitizedTypeScriptConfig = Omit<RootTypeScriptConfig, 'autoGenerate' | 'outputFile'> &
+  Required<Pick<RootTypeScriptConfig, 'autoGenerate' | 'outputFile'>>
+
+export interface SanitizedConfig
+  extends Omit<
+      Config,
+      | 'admin'
+      | 'auth'
+      | 'bin'
+      | 'blocks'
+      | 'collections'
+      | 'cookiePrefix'
+      | 'cors'
+      | 'csrf'
+      | 'custom'
+      | 'defaultDepth'
+      | 'defaultMaxTextLength'
+      | 'editor'
+      | 'endpoints'
+      | 'globals'
+      | 'graphQL'
+      | 'hooks'
+      | 'i18n'
+      | 'jobs'
+      | 'kv'
+      | 'localization'
+      | 'loggingLevels'
+      | 'maxDepth'
+      | 'routes'
+      | 'serverURL'
+      | 'storage'
+      | 'telemetry'
+      | 'typescript'
+      | 'upload'
+    >,
+    Required<
+      Pick<
+        Config,
+        | 'bin'
+        | 'cookiePrefix'
+        | 'cors'
+        | 'csrf'
+        | 'custom'
+        | 'defaultDepth'
+        | 'defaultMaxTextLength'
+        | 'endpoints'
+        | 'hooks'
+        | 'kv'
+        | 'loggingLevels'
+        | 'maxDepth'
+        | 'serverURL'
+        | 'storage'
+        | 'telemetry'
+      >
+    > {
+  admin: SanitizedAdminConfig
+  auth: Required<NonNullable<Config['auth']>>
+  blocks: FlattenedBlock[]
   collections: SanitizedCollectionConfig[]
   /** Default richtext editor to use for richText fields */
   editor?: RichTextAdapter<any, any, any>
-  endpoints: Endpoint[]
   globals: SanitizedGlobalConfig[]
+  graphQL: SanitizedGraphQLConfig
   i18n: Required<I18nOptions>
   jobs: SanitizedJobsConfig
   localization: false | SanitizedLocalizationConfig
-  paths: {
-    config: string
-    configDir: string
-    rawConfig: string
-  }
-  storage: StorageAdapter[]
+  routes: Required<NonNullable<Config['routes']>>
+  typescript: SanitizedTypeScriptConfig
   upload: {
     /**
      * Deduped list of adapters used in the project
      */
     adapters: string[]
   } & FetchAPIFileUploadOptions
-} & Omit<
-  // TODO: DeepRequired breaks certain, advanced TypeScript types / certain type information is lost. We should remove it when possible.
-  // E.g. in packages/ui/src/graphics/Account/index.tsx in getComponent, if avatar.Component is casted to what it's supposed to be,
-  // the result type is different
-  DeepRequired<Config>,
-  | 'admin'
-  | 'blocks'
-  | 'collections'
-  | 'editor'
-  | 'endpoint'
-  | 'globals'
-  | 'i18n'
-  | 'jobs'
-  | 'localization'
-  | 'storage'
-  | 'upload'
->
+}
 
 export type EditConfig = EditConfigWithoutRoot | EditConfigWithRoot
 
@@ -1772,7 +1911,7 @@ export type SharedEntityViews = {
    * ```
    */
   [key: string]:
-    | { actions?: CustomComponent[]; Component?: PayloadComponent }
+    | { actions?: CustomComponent[]; Component?: PayloadComponent; NoResults?: CustomComponent }
     | AdminViewConfig
     | EditConfig
     | undefined
@@ -1800,7 +1939,7 @@ export type SharedAdminComponents = {
   views?: SharedEntityViews
 }
 
-export type EntityDescriptionFunction = ({ t }: { t: TFunction }) => string
+export type EntityDescriptionFunction = ({ t }: { t: TFunction<ClientTranslationKeys> }) => string
 
 export type EntityDescription = EntityDescriptionFunction | Record<string, string> | string
 

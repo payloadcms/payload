@@ -62,7 +62,7 @@ Use [Block References](../fields/blocks#block-references) to share the same bloc
 
 For example, if you have a block that is used in multiple fields, you can define it once and reference it in each field.
 
-To do this, use the `blockReferences` option in your blocks field:
+To do this, pass the shared block slug to the `blocks` option in your blocks field:
 
 ```ts
 import { buildConfig } from 'payload'
@@ -88,8 +88,7 @@ const config = buildConfig({
           name: 'content',
           type: 'blocks',
           // highlight-start
-          blockReferences: ['TextBlock'],
-          blocks: [], // Required to be empty, for compatibility reasons
+          blocks: ['TextBlock'],
           // highlight-end
         },
       ],
@@ -101,8 +100,7 @@ const config = buildConfig({
           name: 'content',
           type: 'blocks',
           // highlight-start
-          blockReferences: ['TextBlock'],
-          blocks: [], // Required to be empty, for compatibility reasons
+          blocks: ['TextBlock'],
           // highlight-end
         },
       ],

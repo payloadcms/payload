@@ -1,7 +1,7 @@
 @layer payload-default {
   .field-description {
     display: flex;
-    color: var(--color-text-secondary);
+    color: var(--field-color-description);
   }
 
   .field-description--margin-bottom {

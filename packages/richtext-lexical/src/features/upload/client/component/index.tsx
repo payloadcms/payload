@@ -25,15 +25,15 @@ import { formatAdminURL, isImage } from 'payload/shared'
 import React, { useCallback, useEffect, useId, useReducer, useRef, useState } from 'react'
 
 import type { BaseClientFeatureProps } from '../../../typesClient.js'
-import type { UploadData } from '../../server/nodes/UploadNode.js'
+import type { UploadData } from '../../server/schema.js'
 import type { UploadFeaturePropsClient } from '../index.js'
-import type { UploadNode } from '../nodes/UploadNode.js'
 
 import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider.js'
 import { FieldsDrawer } from '../../../../utilities/fieldsDrawer/Drawer.js'
 import { useLexicalDocumentDrawer } from '../../../../utilities/fieldsDrawer/useLexicalDocumentDrawer.js'
 import { useLexicalDrawer } from '../../../../utilities/fieldsDrawer/useLexicalDrawer.js'
 import { INSERT_UPLOAD_WITH_DRAWER_COMMAND } from '../drawer/commands.js'
+import { $isUploadNode } from '../nodes/UploadNode.js'
 import './index.css'
 
 const initialParams = {
@@ -161,8 +161,8 @@ export const UploadComponent: React.FC<ElementProps> = (props) => {
     (_: FormState, data: JsonObject) => {
       // Update lexical node (with key nodeKey) with new data
       editor.update(() => {
-        const uploadNode: null | UploadNode = $getNodeByKey(nodeKey)
-        if (uploadNode) {
+        const uploadNode = $getNodeByKey(nodeKey)
+        if ($isUploadNode(uploadNode)) {
           const newData: UploadData = {
             ...uploadNode.getData(),
             fields: data,
@@ -216,7 +216,7 @@ export const UploadComponent: React.FC<ElementProps> = (props) => {
                   className={`${baseClass}__upload-drawer-toggler`}
                   disabled={!isEditable}
                   el="button"
-                  icon="edit"
+                  icon="write"
                   onClick={toggleDrawer}
                   round
                   size="medium"

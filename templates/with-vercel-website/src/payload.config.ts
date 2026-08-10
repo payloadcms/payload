@@ -86,15 +86,7 @@ export default buildConfig({
     Users,
   ],
   cors: [getServerSideURL()].filter(Boolean),
-  plugins: [
-    ...plugins,
-    vercelBlobStorage({
-      collections: {
-        media: true,
-      },
-      token: process.env.BLOB_READ_WRITE_TOKEN || '',
-    }),
-  ],
+  plugins: [...plugins],
   globals: [Header, Footer],
   secret: process.env.PAYLOAD_SECRET,
   sharp,
@@ -119,4 +111,12 @@ export default buildConfig({
     },
     tasks: [],
   },
+  storage: [
+    vercelBlobStorage({
+      collections: {
+        media: true,
+      },
+      token: process.env.BLOB_READ_WRITE_TOKEN || '',
+    }),
+  ],
 })

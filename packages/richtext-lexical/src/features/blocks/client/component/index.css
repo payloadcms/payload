@@ -9,7 +9,7 @@
     }
 
     .collapsible__header-wrap {
-      right: var(--spacer-4);
+      inset-inline-end: var(--spacer-4);
     }
   }
 
@@ -68,7 +68,7 @@
 
   .LexicalEditorTheme__block__header-action {
     cursor: pointer;
-    margin-left: var(--spacer-1);
+    margin-inline-start: var(--spacer-1);
 
     &:hover,
     &:focus-visible {

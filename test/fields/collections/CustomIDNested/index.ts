@@ -36,4 +36,5 @@ export const CustomIDNested: CollectionConfig = {
       type: 'text',
     },
   ],
+  versions: false,
 }

@@ -1,14 +1,13 @@
 import type { Payload } from '../../../index.js'
 
-import { sendEvent } from '../index.js'
+import { sendTelemetryEvent } from '../index.js'
 
 export type ServerInitEvent = {
   type: 'server-init'
 }
 
 export const serverInit = (payload: Payload): void => {
-  // eslint-disable-next-line @typescript-eslint/no-floating-promises
-  sendEvent({
+  void sendTelemetryEvent({
     event: {
       type: 'server-init',
     },

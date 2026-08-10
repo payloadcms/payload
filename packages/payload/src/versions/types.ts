@@ -39,15 +39,6 @@ export type IncomingDrafts = {
    */
   autosave?: Autosave | boolean
   /**
-   * Localizes the status field.
-   *
-   * Only effective if the experimental `experimental.localizeStatus` is enabled.
-   *
-   * @experimental
-   * @default false
-   */
-  localizeStatus?: boolean
-  /**
    * Allow for editors to schedule publish / unpublish events in the future.
    */
   schedulePublish?: boolean | SchedulePublish
@@ -66,12 +57,8 @@ export type SanitizedDrafts = {
    */
   autosave: Autosave | false
   /**
-   * Localizes the status field.
-   *
-   * Only effective if the experimental `experimental.localizeStatus` is enabled.
-   *
-   * @experimental
-   * @default false
+   * Automatically set to true when localization is configured and the collection/global
+   * has localized fields. Controls whether `_status` is stored per-locale.
    */
   localizeStatus?: boolean
   /**

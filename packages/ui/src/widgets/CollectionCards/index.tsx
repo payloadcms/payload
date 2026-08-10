@@ -5,9 +5,8 @@ import { EntityType, getAccessResults } from 'payload'
 import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
-import { Button } from '../../elements/Button/index.js'
-import { Card } from '../../elements/Card/index.js'
-import { Locked } from '../../elements/Locked/index.js'
+// eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports dir for proper client boundary
+import { Button, Card, Locked } from '../../exports/client/index.js'
 import { getGlobalData } from '../../utilities/getGlobalData.js'
 import { getNavGroups } from '../../utilities/getNavGroups.js'
 import { getVisibleEntities } from '../../utilities/getVisibleEntities.js'

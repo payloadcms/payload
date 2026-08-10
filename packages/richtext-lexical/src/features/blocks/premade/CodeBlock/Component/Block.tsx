@@ -80,6 +80,7 @@ export const CodeBlockBlockComponent: React.FC<Pick<AdditionalCodeComponentProps
       Actions={
         <div className={`${baseClass}__actions`}>
           <Combobox
+            aria-label={t('general:language')}
             button={
               <div
                 className={`${baseClass}__language-selector-button`}

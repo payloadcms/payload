@@ -3,7 +3,7 @@ import type { DeepPartial } from 'ts-essentials'
 
 import type { ImportMap } from '../bin/generateImportMap/index.js'
 import type { ClientBlock } from '../fields/config/types.js'
-import type { BlockSlug, TypedUser } from '../index.js'
+import type { BlockSlug, User } from '../index.js'
 import type {
   ClientWidget,
   RootLivePreviewConfig,
@@ -116,7 +116,7 @@ export type CreateClientConfigArgs = {
    * For example, allow `true` to generate a client config for the "create first user" page
    * where there is no user yet, but the config should still be complete.
    */
-  user: true | TypedUser
+  user: true | User
 }
 
 export const createUnauthenticatedClientConfig = ({
@@ -226,11 +226,11 @@ export const createClientConfig = ({
 
       case 'blocks': {
         ;(clientConfig.blocks as ClientBlock[]) = createClientBlocks({
-          blocks: config.blocks!,
+          blocks: config.blocks,
           defaultIDType: config.db.defaultIDType,
           i18n,
           importMap,
-        }).filter((block) => typeof block !== 'string') as ClientBlock[]
+        }).filter((block) => typeof block !== 'string')
 
         clientConfig.blocksMap = {}
         if (clientConfig.blocks?.length) {

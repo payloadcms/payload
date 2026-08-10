@@ -11,13 +11,13 @@ export const ComponentsNavLink: React.FC = () => {
   const isActive = pathname === '/admin/components'
 
   return (
-    <NavGroup label="UI">
+    <NavGroup label="Component Gallery">
       <SidebarRow
         as={Link}
         href="/admin/components"
         selected={isActive}
         tabIndex={navOpen ? 0 : -1}
-        title="Components"
+        title="UI"
       />
     </NavGroup>
   )

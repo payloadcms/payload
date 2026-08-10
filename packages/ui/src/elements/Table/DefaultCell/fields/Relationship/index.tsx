@@ -16,7 +16,6 @@ import { canUseDOM } from '../../../../../utilities/canUseDOM.js'
 import { formatDocTitle } from '../../../../../utilities/formatDocTitle/index.js'
 import { useListRelationships } from '../../../RelationshipProvider/index.js'
 import { FileCell } from '../File/index.js'
-import './index.scss'
 
 type Value = { relationTo: string; value: number | string }
 const baseClass = 'relationship-cell'

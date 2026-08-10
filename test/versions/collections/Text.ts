@@ -14,4 +14,5 @@ export const TextCollection: CollectionConfig = {
       required: true,
     },
   ],
+  versions: false,
 }

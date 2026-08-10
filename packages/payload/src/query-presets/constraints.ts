@@ -28,8 +28,9 @@ export const getConstraints = (config: Config): Field => ({
   name: 'access',
   type: 'group',
   admin: {
+    className: 'query-preset-access-group',
     components: {
-      Cell: '@payloadcms/next/client#QueryPresetsAccessCell',
+      Cell: '@payloadcms/ui#QueryPresetsAccessCell',
     },
     condition: (data) => Boolean(data?.isShared),
   },
@@ -47,9 +48,9 @@ export const getConstraints = (config: Config): Field => ({
             name: 'constraint',
             type: 'select',
             defaultValue: 'onlyMe',
-            filterOptions: (args) =>
+            filterOptions: async (args) =>
               typeof config?.queryPresets?.filterConstraints === 'function'
-                ? config.queryPresets.filterConstraints(args)
+                ? await config.queryPresets.filterConstraints(args)
                 : args.options,
             label: ({ i18n }) =>
               `Specify who can ${constraintOperation} this ${getTranslation(config.queryPresets?.labels?.singular || 'Preset', i18n)}`,
@@ -113,6 +114,6 @@ export const getConstraints = (config: Config): Field => ({
     ],
     label: () => toWords(constraintOperation),
   })),
-  label: 'Sharing settings',
+  label: false,
   validate: preventLockout,
 })

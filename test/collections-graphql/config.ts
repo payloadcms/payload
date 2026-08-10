@@ -32,6 +32,7 @@ const collectionWithName = (
         type: 'text',
       },
     ],
+    versions: false,
     ...extra,
   }
 }
@@ -55,6 +56,7 @@ export default buildConfigWithDefaults({
       access: openAccess,
       auth: true,
       fields: [],
+      versions: false,
     },
     {
       slug: pointSlug,
@@ -65,6 +67,7 @@ export default buildConfigWithDefaults({
           type: 'point',
         },
       ],
+      versions: false,
     },
     {
       slug,
@@ -265,6 +268,7 @@ export default buildConfigWithDefaults({
           type: 'text',
         },
       ],
+      versions: false,
     },
     collectionWithName(relationSlug, {
       access: {
@@ -304,6 +308,7 @@ export default buildConfigWithDefaults({
           },
         ],
       },
+      versions: false,
     },
     {
       slug: 'payload-api-test-ones',
@@ -319,6 +324,7 @@ export default buildConfigWithDefaults({
           },
         },
       ],
+      versions: false,
     },
     {
       slug: 'payload-api-test-twos',
@@ -339,6 +345,7 @@ export default buildConfigWithDefaults({
           relationTo: 'payload-api-test-ones',
         },
       ],
+      versions: false,
     },
     {
       slug: 'content-type',
@@ -354,6 +361,7 @@ export default buildConfigWithDefaults({
           },
         },
       ],
+      versions: false,
     },
     {
       slug: 'cyclical-relationship',
@@ -389,6 +397,7 @@ export default buildConfigWithDefaults({
         },
       ],
       upload: true,
+      versions: false,
     },
     {
       slug: 'sort',
@@ -402,6 +411,7 @@ export default buildConfigWithDefaults({
           type: 'number',
         },
       ],
+      versions: false,
     },
   ],
   graphQL: {

@@ -1,5 +1,7 @@
-import type { Config, SanitizedConfig } from '../../config/types.js'
+import type { Config } from '../../config/types.js'
+import type { RichTextSanitizer } from '../../fields/config/sanitize.js'
 import type { OrderableJoinInfo } from '../../fields/config/sanitizeJoinField.js'
+import type { SanitizedDrafts } from '../../versions/types.js'
 import type {
   CollectionConfig,
   SanitizedCollectionConfig,
@@ -19,16 +21,11 @@ import { uploadCollectionEndpoints } from '../../uploads/endpoints/index.js'
 import { getBaseUploadFields } from '../../uploads/getBaseFields.js'
 import { flattenAllFields } from '../../utilities/flattenAllFields.js'
 import { formatLabels } from '../../utilities/formatLabels.js'
-import { miniChalk } from '../../utilities/miniChalk.js'
 import { traverseForLocalizedFields } from '../../utilities/traverseForLocalizedFields.js'
 import { baseVersionFields } from '../../versions/baseFields.js'
 import { versionDefaults } from '../../versions/defaults.js'
 import { defaultCollectionEndpoints } from '../endpoints/index.js'
-import {
-  addDefaultsToAuthConfig,
-  addDefaultsToCollectionConfig,
-  addDefaultsToLoginWithUsernameConfig,
-} from './defaults.js'
+import { addDefaultsToAuthConfig, addDefaultsToCollectionConfig } from './defaults.js'
 import { sanitizeCompoundIndexes } from './sanitizeCompoundIndexes.js'
 import { validateUseAsTitle } from './useAsTitle.js'
 
@@ -61,20 +58,16 @@ export const warnOnInvalidCustomViews = (collection: CollectionConfig): void => 
   }
 }
 
-export const sanitizeCollection = async (
+export const sanitizeCollection = (
   config: Config,
   collection: CollectionConfig,
-  /**
-   * If this property is set, RichText fields won't be sanitized immediately. Instead, they will be added to this array as promises
-   * so that you can sanitize them together, after the config has been sanitized.
-   */
-  richTextSanitizationPromises?: Array<(config: SanitizedConfig) => Promise<void>>,
+  richTextSanitizers?: RichTextSanitizer[],
   _validRelationships?: string[],
   /**
    * Tracker for orderable join fields - populated during sanitization
    */
   orderableJoins?: OrderableJoinInfo[],
-): Promise<SanitizedCollectionConfig> => {
+): SanitizedCollectionConfig => {
   if (collection._sanitized) {
     return collection as SanitizedCollectionConfig
   }
@@ -143,7 +136,7 @@ export const sanitizeCollection = async (
 
   const polymorphicJoins: SanitizedJoin[] = []
 
-  sanitized.fields = await sanitizeFields({
+  sanitized.fields = sanitizeFields({
     collectionConfig: sanitized,
     config,
     fields: sanitized.fields,
@@ -152,7 +145,7 @@ export const sanitizeCollection = async (
     orderableJoins,
     parentIsLocalized: false,
     polymorphicJoins,
-    richTextSanitizationPromises,
+    richTextSanitizers,
     validRelationships,
   })
 
@@ -275,21 +268,10 @@ export const sanitizeCollection = async (
 
       const hasLocalizedFields = traverseForLocalizedFields(sanitized.fields)
 
-      if (config.localization) {
-        if (hasLocalizedFields && sanitized.versions.drafts.localizeStatus === undefined) {
-          sanitized.versions.drafts.localizeStatus = false
-        }
-      }
-
-      // TODO v4: remove this sanitization check, should not need to enable the experimental flag
-      if (sanitized.versions.drafts.localizeStatus && !config.experimental?.localizeStatus) {
-        sanitized.versions.drafts.localizeStatus = false
-        console.log(
-          miniChalk.yellowBold(
-            `Warning: "localizeStatus" for drafts is an experimental feature. To enable, set "experimental.localizeStatus" to true in your Payload config.`,
-          ),
-        )
-      }
+      // Auto-enable per-locale status when localization is configured and the collection has localized fields.
+      ;(sanitized.versions.drafts as SanitizedDrafts).localizeStatus = !!(
+        config.localization && hasLocalizedFields
+      )
 
       if (sanitized.versions.drafts.autosave === true) {
         sanitized.versions.drafts.autosave = {
@@ -304,7 +286,7 @@ export const sanitizeCollection = async (
       sanitized.fields = mergeBaseFields(
         sanitized.fields,
         baseVersionFields({
-          localized: sanitized.versions.drafts.localizeStatus ?? false,
+          localized: (sanitized.versions.drafts as SanitizedDrafts).localizeStatus ?? false,
         }),
       )
     }
@@ -343,24 +325,6 @@ export const sanitizeCollection = async (
 
     // disable duplicate for auth enabled collections by default
     sanitized.disableDuplicate = sanitized.disableDuplicate ?? true
-
-    if (sanitized.auth.loginWithUsername) {
-      if (sanitized.auth.loginWithUsername === true) {
-        sanitized.auth.loginWithUsername = addDefaultsToLoginWithUsernameConfig({})
-      } else {
-        const loginWithUsernameWithDefaults = addDefaultsToLoginWithUsernameConfig(
-          sanitized.auth.loginWithUsername,
-        )
-
-        // if allowEmailLogin is false, requireUsername must be true
-        if (loginWithUsernameWithDefaults.allowEmailLogin === false) {
-          loginWithUsernameWithDefaults.requireUsername = true
-        }
-        sanitized.auth.loginWithUsername = loginWithUsernameWithDefaults
-      }
-    } else {
-      sanitized.auth.loginWithUsername = false
-    }
 
     if (!collection?.admin?.useAsTitle) {
       sanitized.admin!.useAsTitle = sanitized.auth.loginWithUsername ? 'username' : 'email'

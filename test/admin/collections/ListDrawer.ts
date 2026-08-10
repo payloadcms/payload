@@ -6,11 +6,13 @@ export const ListDrawer: CollectionConfig = {
   slug: listDrawerSlug,
   admin: {
     components: {
-      beforeListTable: [
-        {
-          path: '/components/BeforeList/index.js#SelectPostsButton',
-        },
-      ],
+      ...{
+        beforeListTable: [
+          {
+            path: '/components/BeforeList/index.js#SelectPostsButton',
+          },
+        ],
+      },
     },
   },
   fields: [
@@ -27,4 +29,5 @@ export const ListDrawer: CollectionConfig = {
       type: 'number',
     },
   ],
+  versions: false,
 }

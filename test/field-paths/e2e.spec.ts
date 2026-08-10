@@ -7,14 +7,12 @@ import { fileURLToPath } from 'url'
 import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { Config } from './payload-types.js'
 
-import {
-  ensureCompilationIsDone,
-  initPageConsoleErrorCatch,
-  // throttleTest,
-} from '../__helpers/e2e/helpers.js'
+import {} from // throttleTest,
+'../__helpers/e2e/helpers.js'
 import { navigateToDiffVersionView } from '../__helpers/e2e/navigateToDiffVersionView.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { initPage } from '../__setup/e2e/initPage.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { fieldPathsSlug } from './shared.js'
 import { testDoc } from './testDoc.js'
@@ -36,9 +34,7 @@ test.describe('Field Paths', () => {
     fieldPathsUrl = new AdminUrlUtil(serverURL, fieldPathsSlug)
 
     context = await browser.newContext()
-    page = await context.newPage()
-    initPageConsoleErrorCatch(page)
-    await ensureCompilationIsDone({ page, serverURL })
+    ;({ page } = await initPage({ context, serverURL }))
   })
 
   test.beforeEach(async () => {

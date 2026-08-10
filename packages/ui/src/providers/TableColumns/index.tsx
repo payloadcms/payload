@@ -45,7 +45,15 @@ export const TableColumnsProvider: React.FC<TableColumnsProviderProps> = ({
 
   const toggleColumn = useCallback(
     async (column: string) => {
-      const newColumnState = (columnState || []).map((col) => {
+      const currentColumns = columnState || []
+      const columnIndex = currentColumns.findIndex((col) => col.accessor === column)
+
+      if (columnIndex === -1) {
+        return
+      }
+
+      // Toggle the column's active state in place, preserving its position
+      const newColumnState = currentColumns.map((col) => {
         if (col.accessor === column) {
           return { ...col, active: !col.active }
         }

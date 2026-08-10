@@ -18,6 +18,7 @@ export default buildConfig({
           type: 'richText',
         },
       ],
+      versions: false,
     },
   ],
 })

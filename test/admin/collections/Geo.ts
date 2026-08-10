@@ -27,4 +27,5 @@ export const Geo: CollectionConfig = {
       type: 'point',
     },
   ],
+  versions: false,
 }

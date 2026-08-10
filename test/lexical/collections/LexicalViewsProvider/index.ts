@@ -39,4 +39,5 @@ export const LexicalViewsProvider: CollectionConfig = {
     plural: 'Lexical Views Provider',
     singular: 'Lexical Views Provider',
   },
+  versions: false,
 }

@@ -13,6 +13,7 @@ import { Button } from '../../elements/Button/index.js'
 import { clipboardCopy, clipboardPaste } from '../../elements/ClipboardAction/clipboardUtilities.js'
 import { ClipboardAction } from '../../elements/ClipboardAction/index.js'
 import {
+  insertRowFromClipboard,
   mergeFormStateFromClipboard,
   reduceFormStateByPath,
 } from '../../elements/ClipboardAction/mergeFormStateFromClipboard.js'
@@ -45,7 +46,6 @@ import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import { fieldBaseClass } from '../shared/index.js'
 import { BlockRow } from './BlockRow.js'
 import { BlocksDrawer } from './BlocksDrawer/index.js'
-import { SectionTitle } from './SectionTitle/index.js'
 
 const baseClass = 'blocks-field'
 
@@ -58,7 +58,6 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
       name,
       type,
       admin: { className, description, isSortable = true } = {},
-      blockReferences,
       blocks,
       label,
       labels: labelsFromProps,
@@ -141,17 +140,12 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
   })
 
   const { clientBlocks, clientBlocksAfterFilter } = useMemo(() => {
-    let resolvedBlocks: ClientBlock[] = []
+    const resolvedBlocks: ClientBlock[] = []
 
-    if (!blockReferences) {
-      resolvedBlocks = blocks
-    } else {
-      for (const blockReference of blockReferences) {
-        const block =
-          typeof blockReference === 'string' ? config.blocksMap[blockReference] : blockReference
-        if (block) {
-          resolvedBlocks.push(block)
-        }
+    for (const blockOrSlug of blocks) {
+      const block = typeof blockOrSlug === 'string' ? config.blocksMap[blockOrSlug] : blockOrSlug
+      if (block) {
+        resolvedBlocks.push(block)
       }
     }
 
@@ -170,7 +164,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
       clientBlocks: resolvedBlocks,
       clientBlocksAfterFilter: resolvedBlocks,
     }
-  }, [blockReferences, blocks, blocksFilterOptions, config.blocksMap])
+  }, [blocks, blocksFilterOptions, config.blocksMap])
 
   const getBlockConfig = (blockType: string): ClientBlock | undefined =>
     config.blocksMap[blockType] ?? clientBlocks.find((block) => block.slug === blockType)
@@ -300,6 +294,38 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
     [clientBlocks, getFields, path, replaceState, setModified, t],
   )
 
+  const pasteRowBelow = useCallback(
+    (rowIndex: number) => {
+      const pasteArgs = {
+        onPaste: (dataFromClipboard: ClipboardPasteData) => {
+          const formState = { ...getFields() }
+          const newState = insertRowFromClipboard({
+            dataFromClipboard,
+            formState,
+            path,
+            rowIndex: rowIndex + 1,
+          })
+          replaceState(newState)
+          setModified(true)
+
+          setTimeout(() => {
+            scrollToID(`${path?.split('.').join('-')}-row-${rowIndex + 1}`)
+          }, 0)
+        },
+        path,
+        schemaBlocks: clientBlocks,
+        t,
+      }
+
+      const clipboardResult = clipboardPaste(pasteArgs)
+
+      if (typeof clipboardResult === 'string') {
+        toast.error(clipboardResult)
+      }
+    },
+    [clientBlocks, getFields, path, replaceState, setModified, t],
+  )
+
   const pasteBlocks = useCallback(
     (dataFromClipboard: ClipboardPasteData) => {
       const formState = { ...getFields() }
@@ -318,9 +344,12 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
 
   const fieldErrorCount = errorPaths.length
   const fieldHasErrors = submitted && fieldErrorCount + (valid ? 0 : 1) > 0
+  const displayedErrorCount = fieldErrorCount > 0 ? fieldErrorCount : fieldHasErrors ? 1 : 0
 
   const showMinRows = rows.length < minRows || (required && rows.length === 0)
   const showRequired = readOnly && rows.length === 0
+  const shouldShowSummaryBanner = !valid && (showRequired || showMinRows)
+  const shouldShowFieldError = showError && !shouldShowSummaryBanner
 
   const styles = useMemo(() => mergeFieldStyles(field), [field])
 
@@ -388,7 +417,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
       id={`field-${path?.replace(/\./g, '__')}`}
       style={styles}
     >
-      {showError && (
+      {shouldShowFieldError && (
         <RenderCustomComponent
           CustomComponent={Error}
           Fallback={<FieldError path={path} showError={showError} />}
@@ -411,8 +440,8 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
                 }
               />
             </h3>
-            {fieldHasErrors && fieldErrorCount > 0 && (
-              <ErrorPill count={fieldErrorCount} i18n={i18n} withMessage />
+            {displayedErrorCount > 0 && (
+              <ErrorPill count={displayedErrorCount} i18n={i18n} withMessage />
             )}
           </div>
           <ul className={`${baseClass}__header-actions`}>
@@ -494,6 +523,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
                       moveRow={moveRow}
                       parentPath={path}
                       pasteRow={pasteRow}
+                      pasteRowBelow={pasteRowBelow}
                       path={rowPath}
                       permissions={permissions}
                       readOnly={readOnly || disabled}
@@ -532,16 +562,16 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
           )}
         </DraggableSortable>
       )}
-      {!hasMaxRows && (
+      {!hasMaxRows && !readOnly && (
         <Fragment>
           <DrawerToggler
             className={`${baseClass}__drawer-toggler`}
-            disabled={readOnly || disabled}
+            disabled={disabled}
             slug={drawerSlug}
           >
             <Button
               buttonStyle="ghost"
-              disabled={readOnly || disabled}
+              disabled={disabled}
               el="span"
               icon={<CirclePlusIcon />}
               iconPosition="left"

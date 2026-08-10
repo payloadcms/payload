@@ -102,4 +102,5 @@ export const getPreferencesCollection = (config: Config): CollectionConfig => ({
     },
   ],
   lockDocuments: false,
+  versions: false,
 })

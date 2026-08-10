@@ -26,7 +26,7 @@
     letter-spacing: var(--text-body-medium-letter-spacing);
     width: 100%;
     border: var(--stroke-width-small) solid transparent;
-    border-radius: var(--radius-medium);
+    border-radius: var(--field-border-radius);
     background: var(--color-bg-secondary);
     color: var(--color-text);
     height: var(--spacer-4);

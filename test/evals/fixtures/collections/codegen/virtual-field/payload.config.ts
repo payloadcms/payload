@@ -7,6 +7,7 @@ const Users: CollectionConfig = {
   slug: 'users',
   fields: [],
   auth: true,
+  versions: false,
 }
 
 export default buildConfig({

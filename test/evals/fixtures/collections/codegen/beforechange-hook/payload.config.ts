@@ -21,6 +21,7 @@ export default buildConfig({
           },
         },
       ],
+      versions: false,
     },
   ],
 })

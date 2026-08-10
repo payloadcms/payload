@@ -7,15 +7,18 @@
  * Usage: node .github/workflows/e2e.config.ts
  */
 
+import type { TestConfig } from './utilities/e2e-matrix.ts'
+
 import { createE2EConfig } from './utilities/e2e-matrix.ts'
 
-export default createE2EConfig([
+const nextSuites: TestConfig[] = [
   { file: '_community', shards: 1 },
   { file: 'a11y', shards: 1 },
   { file: 'access-control', shards: 2 },
   { file: 'admin__e2e__general', shards: 3 },
   { file: 'admin__e2e__list-view', shards: 4 },
   { file: 'admin__e2e__document-view', shards: 3 },
+  { file: 'admin-routing', shards: 1 },
   { file: 'admin-bar', shards: 1 },
   { file: 'admin-root', shards: 1 },
   { file: 'auth', shards: 1 },
@@ -99,7 +102,16 @@ export default createE2EConfig([
   { file: 'queues', shards: 1 },
   { file: 'sort', shards: 1 },
   { file: 'server-url', shards: 1 },
+  { file: 'tags', shards: 1 },
   { file: 'trash', shards: 2 },
   { file: 'versions', shards: 3 },
   { file: 'uploads', shards: 3 },
-])
+]
+
+const tanstackSuites: TestConfig[] = nextSuites.map((suite) => ({
+  ...suite,
+  framework: 'tanstack-start',
+  optional: false,
+}))
+
+export default createE2EConfig([...nextSuites, ...tanstackSuites])

@@ -4,10 +4,10 @@
   }
 
   .field-type.select.error .rs__control {
-    border-color: var(--color-border-danger-strong);
+    border-color: var(--field-color-border-error);
 
     &:hover {
-      border-color: var(--color-border-danger-strong);
+      border-color: var(--field-color-border-error);
     }
   }
 }

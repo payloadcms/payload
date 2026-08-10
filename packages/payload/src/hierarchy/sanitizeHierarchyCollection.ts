@@ -103,6 +103,7 @@ export const sanitizeHierarchyCollection = (
     collectionConfig.hierarchy.slugify ?? ((text: string) => defaultSlugify(text) ?? '')
   const treeLimit = collectionConfig.hierarchy.admin?.treeLimit ?? DEFAULT_HIERARCHY_TREE_LIMIT
   const iconComponent = collectionConfig.hierarchy.admin?.components?.Icon
+  const smallIconComponent = collectionConfig.hierarchy.admin?.components?.SmallIcon
 
   const slugField = collectionConfig.hierarchy.slugField
 
@@ -143,6 +144,7 @@ export const sanitizeHierarchyCollection = (
     admin: {
       components: {
         Icon: iconComponent || '@payloadcms/ui#TagIcon',
+        SmallIcon: smallIconComponent || iconComponent || '@payloadcms/ui#TagIcon',
       },
       injectSidebarTab,
       treeLimit,

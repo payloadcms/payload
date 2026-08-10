@@ -33,4 +33,5 @@ export const MediaWithOverwrite: CollectionConfig = {
       type: 'text',
     },
   ],
+  versions: false,
 }

@@ -11,6 +11,7 @@ export default buildConfig({
         { name: 'title', type: 'text', required: true },
         { name: 'content', type: 'richText' },
       ],
+      versions: false,
     },
   ],
   plugins: [],

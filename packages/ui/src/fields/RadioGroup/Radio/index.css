@@ -20,7 +20,7 @@
   }
 
   .radio-input__styled-radio {
-    border: 1px solid var(--color-border-strong);
+    border: var(--stroke-width-small) solid var(--field-color-toggle-border);
     background-color: transparent;
     width: 1rem;
     height: 1rem;
@@ -37,7 +37,7 @@
       content: '';
       display: block;
       border-radius: var(--radius-full);
-      background-color: var(--color-border-strong);
+      background-color: var(--field-color-toggle-border);
       width: 0.5rem;
       height: 0.5rem;
       opacity: 0;
@@ -45,10 +45,10 @@
   }
 
   .radio-input__styled-radio--disabled {
-    border-color: var(--color-border-disabled);
+    border-color: var(--field-color-toggle-border-disabled);
 
     &::before {
-      background-color: var(--color-border-disabled);
+      background-color: var(--field-color-toggle-border-disabled);
     }
   }
 

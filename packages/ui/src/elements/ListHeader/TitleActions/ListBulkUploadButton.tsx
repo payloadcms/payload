@@ -2,11 +2,11 @@
 import type { CollectionSlug } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
-import { useRouter } from 'next/navigation.js'
 import React from 'react'
 
 import { useBulkUpload } from '../../../elements/BulkUpload/index.js'
 import { useHierarchy } from '../../../providers/Hierarchy/index.js'
+import { useRouter } from '../../../providers/RouterAdapter/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { Button } from '../../Button/index.js'
 
@@ -15,21 +15,14 @@ export function ListBulkUploadButton({
   hasCreatePermission,
   isBulkUploadEnabled,
   onBulkUploadSuccess,
-  openBulkUpload: openBulkUploadFromProps,
 }: {
   collectionSlug: CollectionSlug
   hasCreatePermission: boolean
   isBulkUploadEnabled: boolean
   onBulkUploadSuccess?: () => void
-  /**
-   * @deprecated This prop will be removed in the next major version.
-   *
-   * Prefer using `onBulkUploadSuccess`
-   */
-  openBulkUpload?: () => void
 }) {
   const {
-    drawerSlug: bulkUploadDrawerSlug,
+    modalSlug: bulkUploadModalSlug,
     setCollectionSlug,
     setOnSuccess,
     setParentID,
@@ -40,31 +33,26 @@ export function ListBulkUploadButton({
   const router = useRouter()
 
   const openBulkUpload = React.useCallback(() => {
-    if (typeof openBulkUploadFromProps === 'function') {
-      openBulkUploadFromProps()
-    } else {
-      setCollectionSlug(collectionSlug)
-      setParentID(parent?.id)
-      openModal(bulkUploadDrawerSlug)
-      setOnSuccess(() => {
-        if (typeof onBulkUploadSuccess === 'function') {
-          onBulkUploadSuccess()
-        } else {
-          router.refresh()
-        }
-      })
-    }
+    setCollectionSlug(collectionSlug)
+    setParentID(parent?.id)
+    openModal(bulkUploadModalSlug)
+    setOnSuccess(() => {
+      if (typeof onBulkUploadSuccess === 'function') {
+        onBulkUploadSuccess()
+      } else {
+        router.refresh()
+      }
+    })
   }, [
     router,
     collectionSlug,
-    bulkUploadDrawerSlug,
+    bulkUploadModalSlug,
     parent,
     openModal,
     setCollectionSlug,
     setParentID,
     setOnSuccess,
     onBulkUploadSuccess,
-    openBulkUploadFromProps,
   ])
 
   if (!hasCreatePermission || !isBulkUploadEnabled) {

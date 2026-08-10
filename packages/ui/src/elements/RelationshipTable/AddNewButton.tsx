@@ -87,7 +87,6 @@ export const AddNewButton = ({
             })}
           </PopupList.ButtonGroup>
         )}
-        size="medium"
       />
     </div>
   )

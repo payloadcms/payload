@@ -24,6 +24,11 @@ import type { BuildColumnStateArgs } from '../providers/TableColumns/buildColumn
 
 import { RenderServerComponent } from '../elements/RenderServerComponent/index.js'
 import {
+  TableSectionContent,
+  TableSectionHeader,
+  TableSectionRoot,
+} from '../elements/TableSection/index.js'
+import {
   GroupByHeader,
   GroupByPageControls,
   OrderableTable,
@@ -125,7 +130,7 @@ export const renderTable = ({
   let serverFields: Field[] = collectionConfig?.fields || []
   const isPolymorphic = collections
 
-  const isGroupingBy = Boolean(collectionConfig?.admin?.groupBy && query?.groupBy)
+  const isGroupingBy = Boolean(query?.groupBy)
 
   if (isPolymorphic) {
     clientFields = []
@@ -247,8 +252,12 @@ export const renderTable = ({
         hidden: true,
       },
       Heading: <SelectAll />,
-      renderedCells: (data?.docs || []).map((_, i) => (
-        <SelectRow key={i} rowData={data?.docs[i]} />
+      renderedCells: (data?.docs || []).map((row, i) => (
+        <SelectRow
+          key={i}
+          rowData={row}
+          selectRowLabel={getSelectRowLabel({ i18n, rowData: row, useAsTitle })}
+        />
       )),
     } as Column)
   }
@@ -258,27 +267,28 @@ export const renderTable = ({
       columnState,
       // key is required since Next.js 15.2.0 to prevent React key error
       Table: (
-        <div
+        <TableSectionRoot
           className={['table-wrap', groupByValue !== undefined && `table-wrap--group-by`]
             .filter(Boolean)
             .join(' ')}
+          data-group-id={groupByValue}
           key={key}
         >
           <SelectionProvider docs={data?.docs || []} totalDocs={data?.totalDocs || 0}>
-            <GroupByHeader
-              collectionConfig={clientCollectionConfig}
-              groupByFieldPath={groupByFieldPath}
-              groupByValue={groupByValue}
-              heading={heading}
-            />
-            <Table appearance={tableAppearance} columns={columnsToUse} data={data?.docs || []} />
-            <GroupByPageControls
-              collectionConfig={clientCollectionConfig}
-              data={data}
-              groupByValue={groupByValue}
-            />
+            <TableSectionHeader heading={heading}>
+              <GroupByHeader
+                collectionConfig={clientCollectionConfig}
+                groupByFieldPath={groupByFieldPath}
+                groupByValue={groupByValue}
+                heading={heading}
+              />
+              <GroupByPageControls data={data} groupByValue={groupByValue} />
+            </TableSectionHeader>
+            <TableSectionContent>
+              <Table appearance={tableAppearance} columns={columnsToUse} data={data?.docs || []} />
+            </TableSectionContent>
           </SelectionProvider>
-        </div>
+        </TableSectionRoot>
       ),
     }
   }
@@ -288,14 +298,16 @@ export const renderTable = ({
       columnState,
       // key is required since Next.js 15.2.0 to prevent React key error
       Table: (
-        <div className="table-wrap" key={key}>
+        <TableSectionRoot className="table-wrap" key={key}>
           {showHeading && heading && (
-            <div className="table-wrap__heading">
+            <TableSectionHeader>
               <h4>{heading}</h4>
-            </div>
+            </TableSectionHeader>
           )}
-          <Table appearance={tableAppearance} columns={columnsToUse} data={data?.docs || []} />
-        </div>
+          <TableSectionContent>
+            <Table appearance={tableAppearance} columns={columnsToUse} data={data?.docs || []} />
+          </TableSectionContent>
+        </TableSectionRoot>
       ),
     }
   }
@@ -318,14 +330,34 @@ export const renderTable = ({
     columnState,
     // key is required since Next.js 15.2.0 to prevent React key error
     Table: (
-      <div className="table-wrap" key={key}>
-        <OrderableTable
-          appearance={tableAppearance}
-          collection={clientCollectionConfig}
-          columns={columnsToUse}
-          data={data?.docs || []}
-        />
-      </div>
+      <TableSectionRoot className="table-wrap" key={key}>
+        <TableSectionContent>
+          <OrderableTable
+            appearance={tableAppearance}
+            collection={clientCollectionConfig}
+            columns={columnsToUse}
+            data={data?.docs || []}
+          />
+        </TableSectionContent>
+      </TableSectionRoot>
     ),
   }
+}
+
+const getSelectRowLabel = ({
+  i18n,
+  rowData,
+  useAsTitle,
+}: {
+  i18n: I18nClient
+  rowData: { id: number | string } & Record<string, unknown>
+  useAsTitle: CollectionConfig['admin']['useAsTitle']
+}) => {
+  const title = useAsTitle ? rowData[useAsTitle] : undefined
+  const label =
+    typeof title === 'number' || (typeof title === 'string' && title)
+      ? String(title)
+      : String(rowData.id)
+
+  return i18n.t('general:selectLabel', { label })
 }

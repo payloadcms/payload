@@ -18,7 +18,7 @@ export const SelectMany: React.FC<{
 
   return (
     <Button
-      buttonStyle="pill"
+      buttonStyle="primary"
       onClick={() => {
         if (typeof onClick === 'function') {
           onClick(selected)

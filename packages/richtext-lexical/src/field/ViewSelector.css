@@ -1,6 +1,6 @@
 .lexical-view-selector {
   display: inline-flex;
-  margin-left: var(--spacing-xs);
+  margin-inline-start: var(--spacing-xs);
   vertical-align: middle;
 }
 

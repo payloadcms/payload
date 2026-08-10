@@ -1,5 +1,3 @@
-import type { SerializedDecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode.js'
-import type { JsonObject } from 'payload'
 import type { JSX } from 'react'
 
 import { DecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode.js'
@@ -16,25 +14,7 @@ import {
   type NodeKey,
 } from 'lexical'
 
-import type { StronglyTypedLeafNode } from '../../../../nodeTypes.js'
-
-type BaseBlockFields<TBlockFields extends JsonObject = JsonObject> = {
-  /** Block form data */
-  blockName: string
-  blockType: string
-} & TBlockFields
-
-export type BlockFields<TBlockFields extends JsonObject = JsonObject> = {
-  id: string
-} & BaseBlockFields<TBlockFields>
-
-export type BlockFieldsOptionalID<TBlockFields extends JsonObject = JsonObject> = {
-  id?: string
-} & BaseBlockFields<TBlockFields>
-
-export type SerializedBlockNode<TBlockFields extends JsonObject = JsonObject> = {
-  fields: BlockFields<TBlockFields>
-} & StronglyTypedLeafNode<SerializedDecoratorBlockNode, 'block'>
+import type { BlockFields, BlockFieldsOptionalID, SerializedBlockNode } from '../schema.js'
 
 export class ServerBlockNode extends DecoratorBlockNode {
   __cacheBuster: number

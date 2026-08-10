@@ -1,4 +1,6 @@
-import type { Config, SanitizedConfig } from '../../config/types.js'
+import type { Config } from '../../config/types.js'
+import type { RichTextSanitizer } from '../../fields/config/sanitize.js'
+import type { SanitizedDrafts } from '../../versions/types.js'
 import type { GlobalConfig, SanitizedGlobalConfig } from './types.js'
 
 import { defaultAccess } from '../../auth/defaultAccess.js'
@@ -11,16 +13,12 @@ import { traverseForLocalizedFields } from '../../utilities/traverseForLocalized
 import { baseVersionFields } from '../../versions/baseFields.js'
 import { versionDefaults } from '../../versions/defaults.js'
 import { defaultGlobalEndpoints } from '../endpoints/index.js'
-export const sanitizeGlobal = async (
+export const sanitizeGlobal = (
   config: Config,
   global: GlobalConfig,
-  /**
-   * If this property is set, RichText fields won't be sanitized immediately. Instead, they will be added to this array as promises
-   * so that you can sanitize them together, after the config has been sanitized.
-   */
-  richTextSanitizationPromises?: Array<(config: SanitizedConfig) => Promise<void>>,
+  richTextSanitizers?: RichTextSanitizer[],
   _validRelationships?: string[],
-): Promise<SanitizedGlobalConfig> => {
+): SanitizedGlobalConfig => {
   if (global._sanitized) {
     return global as SanitizedGlobalConfig
   }
@@ -78,12 +76,12 @@ export const sanitizeGlobal = async (
   // Sanitize fields
   const validRelationships = _validRelationships ?? config.collections?.map((c) => c.slug) ?? []
 
-  global.fields = await sanitizeFields({
+  global.fields = sanitizeFields({
     config,
     fields: global.fields,
     globalConfig: global,
     parentIsLocalized: false,
-    richTextSanitizationPromises,
+    richTextSanitizers,
     validRelationships,
   })
 
@@ -96,6 +94,8 @@ export const sanitizeGlobal = async (
       global.endpoints.push(endpoint)
     }
   }
+
+  global.versions = global.versions ?? true
 
   if (global.versions) {
     if (global.versions === true) {
@@ -117,15 +117,10 @@ export const sanitizeGlobal = async (
 
       const hasLocalizedFields = traverseForLocalizedFields(global.fields)
 
-      if (config.localization && hasLocalizedFields) {
-        if (global.versions.drafts.localizeStatus === undefined) {
-          global.versions.drafts.localizeStatus = false
-        }
-      }
-
-      global.versions.drafts.localizeStatus = config.experimental?.localizeStatus
-        ? global.versions.drafts.localizeStatus
-        : false
+      // Auto-enable per-locale status when localization is configured and the global has localized fields.
+      ;(global.versions.drafts as SanitizedDrafts).localizeStatus = !!(
+        config.localization && hasLocalizedFields
+      )
 
       if (global.versions.drafts.autosave === true) {
         global.versions.drafts.autosave = {
@@ -140,7 +135,7 @@ export const sanitizeGlobal = async (
       global.fields = mergeBaseFields(
         global.fields,
         baseVersionFields({
-          localized: global.versions.drafts.localizeStatus ?? false,
+          localized: (global.versions.drafts as SanitizedDrafts).localizeStatus ?? false,
         }),
       )
     }

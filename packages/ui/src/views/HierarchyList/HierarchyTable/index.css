@@ -1,11 +1,4 @@
 @layer payload-default {
-  .hierarchy-tables {
-    margin-top: var(--spacer-5);
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacer-5);
-  }
-
   .hierarchy-tables__name-cell {
     display: flex;
     align-items: center;
@@ -23,7 +16,7 @@
     border: none;
     cursor: pointer;
     border-radius: var(--radius-small);
-    border: 1px solid transparent;
+    border: var(--stroke-width-small) solid transparent;
 
     &:hover,
     &:focus-visible {
@@ -116,18 +109,11 @@
 
   .hierarchy-tables__section-title {
     margin: 0;
-    font-weight: 500;
+    font-weight: var(--text-body-medium-strong-font-weight);
     color: var(--color-text);
   }
 
-  .hierarchy-tables__load-more-wrap {
-    padding: var(--spacer-2);
-    padding-left: var(--spacer-2-5);
-    padding-top: var(--spacer-1);
-  }
-
   .hierarchy-tables__group-label {
-    padding-bottom: var(--spacer-3);
     color: var(--color-text);
     letter-spacing: var(--text-body-large-letter-spacing);
     font-family: var(--text-body-large-strong-font-family);

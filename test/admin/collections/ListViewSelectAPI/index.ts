@@ -31,4 +31,5 @@ export const ListViewSelectAPI: CollectionConfig = {
       ],
     },
   ],
+  versions: false,
 }

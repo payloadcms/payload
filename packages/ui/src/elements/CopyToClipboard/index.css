@@ -5,7 +5,7 @@
     vertical-align: middle;
     border: 0;
     background: transparent;
-    border-radius: var(--radius-medium);
+    border-radius: var(--button-radius);
     color: var(--color-icon);
     outline: var(--stroke-width-medium) solid transparent;
     outline-offset: calc(var(--stroke-width-medium) * -1);

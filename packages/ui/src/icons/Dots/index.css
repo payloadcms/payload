@@ -6,13 +6,13 @@
     justify-content: center;
     flex-direction: column;
     gap: 2px;
-    background-color: var(--theme-elevation-150);
-    border-radius: var(--radius-medium);
-    height: calc(var(--base) * 1.2);
-    width: calc(var(--base) * 1.2);
+    background-color: var(--color-bg-secondary);
+    border-radius: var(--button-radius);
+    height: var(--spacer-4);
+    width: var(--spacer-4);
 
     &:hover {
-      background-color: var(--theme-elevation-250);
+      background-color: var(--color-bg-secondary-hover);
     }
 
     &.dots--no-background {

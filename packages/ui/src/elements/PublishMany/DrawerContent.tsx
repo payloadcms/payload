@@ -1,7 +1,6 @@
 import type { Where } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { useRouter, useSearchParams } from 'next/navigation.js'
 import { combineWhereConstraints, formatAdminURL, mergeListSearchAndWhere } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useCallback } from 'react'
@@ -12,18 +11,20 @@ import type { PublishManyProps } from './index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useRouteCache } from '../../providers/RouteCache/index.js'
+import { useRouter, useSearchParams } from '../../providers/RouterAdapter/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
 import { parseSearchParams } from '../../utilities/parseSearchParams.js'
 import { ConfirmationModal } from '../ConfirmationModal/index.js'
 
 type PublishManyDrawerContentProps = {
+  collection: PublishManyProps['collection']
   drawerSlug: string
   ids: (number | string)[]
   onSuccess?: () => void
   selectAll: boolean
   where?: Where
-} & PublishManyProps
+}
 
 export function PublishManyDrawerContent(props: PublishManyDrawerContentProps) {
   const {

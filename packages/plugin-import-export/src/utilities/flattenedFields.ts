@@ -35,6 +35,9 @@ export const registerFieldHooks = <TEntry>(
     if (field.type === 'blocks') {
       const base = parentPath ? `${parentPath}_${field.name}` : field.name
       for (const block of field.blocks ?? []) {
+        if (typeof block === 'string') {
+          continue
+        }
         registerFieldHooks(
           getBlockFlattenedFields(block),
           `${base}_${block.slug}`,

@@ -39,8 +39,10 @@ export const testEslintConfig = [
     settings: {
       vitest: {
         // See https://github.com/vitest-dev/eslint-plugin-vitest?tab=readme-ov-file#custom-fixtures
-        // This ensures that the eslint plugin recognizes the `it` wrapper function in our helpers/int/vitest.ts file.
-        vitestImports: [/helpers\/int\/vitest/],
+        // Ensures the eslint plugin recognizes our custom `it`/`test` wrappers:
+        // - `test/__helpers/int/vitest.ts` (db-aware wrapper)
+        // - any suite-local `helpers/**/*Fixtures.ts` re-exporting an `it` extended via `test.extend()`
+        vitestImports: [/helpers\/int\/vitest/, /helpers\/.*Fixtures/],
       },
     },
     rules: {

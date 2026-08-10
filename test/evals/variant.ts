@@ -10,7 +10,7 @@ type VariantInput = {
 }
 
 /**
- * Classifies a cached result into one of the four eval lanes.
+ * Classifies a run result into one of the four eval lanes.
  *
  * Returns `null` for entries that pre-date the variant taxonomy (no `modelId`
  * and not explicitly tagged `codegenNoSkill`) — they show up as "—" in the

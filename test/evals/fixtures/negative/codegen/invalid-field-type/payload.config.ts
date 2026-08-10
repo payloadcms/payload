@@ -8,6 +8,7 @@ export default buildConfig({
     {
       slug: 'posts',
       fields: [{ name: 'title', type: 'text' }],
+      versions: false,
     },
   ],
 })

@@ -41,6 +41,7 @@ export default buildConfigWithDefaults({
         { name: 'name', type: 'text', required: true },
         { name: 'folderSlug', type: 'text' },
       ],
+      versions: false,
     },
     Posts,
     Media,
@@ -55,6 +56,7 @@ export default buildConfigWithDefaults({
           type: 'text',
         },
       ],
+      versions: false,
     },
   ],
   onInit: async (payload) => {

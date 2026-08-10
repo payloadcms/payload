@@ -13,6 +13,7 @@ name: payload-monorepo
 #   --profile mongodb       - MongoDB + mongot only
 #   --profile mongodb-atlas - MongoDB Atlas Local only
 #   --profile storage       - LocalStack (S3), Azure Storage, fake GCS, Vercel Blob
+#   --profile redis         - Redis (kv-redis adapter)
 
 services:
   # ── PostgreSQL (PostGIS + pgvector) ──────────────────────────
@@ -83,7 +84,7 @@ services:
   # Connection: mongodb://payload:payload@localhost:27018/payload?authSource=admin&directConnection=true&replicaSet=rs0
   mongodb:
     profiles: [all, mongodb]
-    image: mongodb/mongodb-community-server:8.2-ubi9
+    image: ghcr.io/payloadcms/mongodb-community-server:8.2.9-ubi9
     container_name: mongodb-payload-test
     ports:
       - '27018:27017'
@@ -116,7 +117,7 @@ services:
   # mongot - MongoDB Community Search for $search and $vectorSearch
   mongot:
     profiles: [all, mongodb]
-    image: mongodb/mongodb-community-search:latest
+    image: ghcr.io/payloadcms/mongodb-community-search:1.67.1
     container_name: mongot-payload-test
     depends_on:
       mongodb:
@@ -145,7 +146,7 @@ services:
   # Connection: mongodb://localhost:27019/payload?directConnection=true&replicaSet=mongodb-atlas-local
   mongodb-atlas:
     profiles: [all, mongodb-atlas]
-    image: mongodb/mongodb-atlas-local:latest
+    image: ghcr.io/payloadcms/mongodb-atlas-local:8.2.4
     container_name: mongodb-atlas-payload-test
     hostname: mongodb-atlas-local
     ports:
@@ -167,7 +168,7 @@ services:
   # ── LocalStack (S3 emulator) ────────────────────────────────
   localstack:
     profiles: [all, storage]
-    image: localstack/localstack:4.14.0
+    image: ghcr.io/payloadcms/localstack:4.14.0
     container_name: localstack_demo
     ports:
       - '4563-4599:4563-4599'
@@ -184,7 +185,7 @@ services:
   # ── Azure Storage (Azurite emulator) ────────────────────────
   azure-storage:
     profiles: [all, storage]
-    image: mcr.microsoft.com/azure-storage/azurite:latest
+    image: ghcr.io/payloadcms/azurite:3.35.0
     platform: linux/amd64
     restart: always
     command: 'azurite --loose --blobHost 0.0.0.0 --tableHost 0.0.0.0 --queueHost 0.0.0.0 --skipApiVersionCheck'
@@ -198,7 +199,7 @@ services:
   # ── Google Cloud Storage (fake-gcs-server) ──────────────────
   google-cloud-storage:
     profiles: [all, storage]
-    image: fsouza/fake-gcs-server
+    image: ghcr.io/payloadcms/fake-gcs-server:1.54.0
     restart: always
     command:
       [
@@ -231,6 +232,22 @@ services:
       EMULATOR_BASE_URL: '${VERCEL_BLOB_EMULATOR_URL:-http://localhost:3100}'
     volumes:
       - vercel_blob_data:/data
+
+  # ── Redis (kv-redis adapter) ────────────────────────────────
+  # Connection: redis://localhost:6379
+  redis:
+    profiles: [all, redis]
+    image: ghcr.io/payloadcms/redis:7.4.9-alpine
+    container_name: redis-payload-test
+    ports:
+      - '6379:6379'
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 1s
+      timeout: 5s
+      retries: 30
+      start_period: 2s
+    restart: unless-stopped
 
 volumes:
   postgres_data:

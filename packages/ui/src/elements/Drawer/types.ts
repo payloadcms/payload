@@ -22,5 +22,7 @@ export type TogglerProps = {
   children: React.ReactNode
   className?: string
   disabled?: boolean
+  extraButtonProps?: Record<string, any>
   slug: string
+  tooltip?: string
 } & HTMLAttributes<HTMLButtonElement>

@@ -100,4 +100,5 @@ export const LexicalLocalizedFields: CollectionConfig = {
       }),
     },
   ],
+  versions: false,
 }

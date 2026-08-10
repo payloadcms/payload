@@ -23,6 +23,7 @@ export default buildConfigWithDefaults({
           type: 'text',
         },
       ],
+      versions: false,
     },
     MediaCollection,
   ],

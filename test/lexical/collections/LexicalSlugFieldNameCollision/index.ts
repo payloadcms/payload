@@ -20,4 +20,5 @@ export const LexicalSlugFieldNameCollision: CollectionConfig = {
       }),
     },
   ],
+  versions: false,
 }

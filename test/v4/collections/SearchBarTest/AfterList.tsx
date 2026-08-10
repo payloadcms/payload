@@ -9,6 +9,7 @@ export const AfterList: React.FC = () => {
         backgroundColor: 'var(--color-bg-elevated)',
         border: '1px solid var(--color-border)',
         borderRadius: 'var(--radius-medium)',
+        margin: 'var(--spacer-4)',
         minHeight: '800px',
         padding: '20px',
       }}

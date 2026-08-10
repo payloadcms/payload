@@ -75,6 +75,7 @@ const PasswordFields: CollectionConfig = {
       },
     },
   ],
+  versions: false,
 }
 
 export default PasswordFields

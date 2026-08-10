@@ -45,6 +45,7 @@ export type ListViewSlots = {
   BeforeListTable?: React.ReactNode
   Description?: React.ReactNode
   listMenuItems?: React.ReactNode[]
+  NoResults?: React.ReactNode
   Table: React.ReactNode | React.ReactNode[]
 }
 
@@ -81,9 +82,13 @@ export type ListViewClientProps = {
    */
   hierarchyData?: HierarchyViewData
   /**
-   * Resolved icon component for hierarchy collections
+   * Resolved full-size icon component for hierarchy collections (used in drawer subheader)
    */
   HierarchyIcon?: React.ReactNode
+  /**
+   * Resolved small icon component for hierarchy collections (used in table rows)
+   */
+  HierarchySmallIcon?: React.ReactNode
   /**
    * @deprecated
    */
@@ -106,6 +111,7 @@ export type ListViewSlotSharedClientProps = {
   hasDeletePermission?: boolean
   hasTrashPermission?: boolean
   newDocumentURL: string
+  viewType: ViewTypes
 }
 
 // BeforeList
@@ -117,6 +123,11 @@ export type BeforeListServerProps = BeforeListClientProps & BeforeListServerProp
 export type BeforeListTableClientProps = ListViewSlotSharedClientProps
 export type BeforeListTableServerPropsOnly = {} & ListViewServerPropsOnly
 export type BeforeListTableServerProps = BeforeListTableClientProps & BeforeListTableServerPropsOnly
+
+// NoResults
+export type NoResultsClientProps = ListViewSlotSharedClientProps
+export type NoResultsServerPropsOnly = {} & ListViewServerPropsOnly
+export type NoResultsServerProps = NoResultsClientProps & NoResultsServerPropsOnly
 
 // AfterList
 export type AfterListClientProps = ListViewSlotSharedClientProps

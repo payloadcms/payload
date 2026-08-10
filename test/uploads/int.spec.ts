@@ -1,5 +1,5 @@
 import type { AddressInfo } from 'net'
-import type { CollectionSlug, Payload, PayloadRequest } from 'payload'
+import type { CollectionSlug, Payload, PayloadRequest, UploadInstructions } from 'payload'
 
 import { randomUUID } from 'crypto'
 import fs from 'fs'
@@ -30,6 +30,7 @@ import {
   focalNoSizesSlug,
   focalOnlySlug,
   mediaSlug,
+  mediaWithoutWriteAccessSlug,
   noRestrictFileMimeTypesSlug,
   noRestrictFileTypesSlug,
   pdfOnlySlug,
@@ -66,6 +67,172 @@ describe('Collections - Uploads', () => {
 
   describe('REST API', () => {
     describe('create', () => {
+      it('creates from upload instructions', async () => {
+        const file = fs.readFileSync(path.join(dirname, './image.png'))
+        const instructionsResponse = await restClient.POST('/upload-instructions', {
+          body: JSON.stringify({
+            collectionSlug: mediaSlug,
+            filename: 'staged-image.png',
+            filesize: file.length,
+            mimeType: 'image/png',
+          }),
+        })
+        const instructions = await instructionsResponse.json<UploadInstructions>()
+
+        expect(instructionsResponse.status).toBe(200)
+        expect(instructions.type).toBe('http')
+        expect(instructions.file).toMatchObject({
+          filename: 'staged-image.png',
+          mimeType: 'image/png',
+          size: file.length,
+          uploadReference: { uploadId: expect.any(String) },
+        })
+
+        if (instructions.type !== 'http') {
+          throw new Error('Expected HTTP upload instructions')
+        }
+
+        const uploadPath = new URL(instructions.request.url, restClient.serverURL).pathname.replace(
+          payload.config.routes.api,
+          '',
+        ) as `/${string}`
+        const uploadResponse = await restClient.PUT(uploadPath, {
+          body: file,
+          headers: instructions.request.headers,
+        })
+
+        expect(uploadResponse.status).toBe(204)
+
+        const formData = new FormData()
+        formData.append('_payload', JSON.stringify({ alt: 'Staged image' }))
+        formData.append('file', JSON.stringify(instructions.file))
+
+        const createResponse = await restClient.POST(`/${mediaSlug}`, { body: formData })
+        const { doc } = await createResponse.json()
+
+        expect(createResponse.status).toBe(201)
+        expect(doc.alt).toBe('Staged image')
+        expect(doc.filename).toBe('staged-image.png')
+        expect(doc.width).toBeDefined()
+        expect(doc.sizes.tablet.filename).toBeDefined()
+
+        await payload.delete({ id: doc.id, collection: mediaSlug })
+      })
+
+      /**
+       * The request declares one more byte than it uploads. Payload rejects the partial file so it
+       * cannot be used when creating a document later.
+       */
+      it('rejects staged uploads smaller than the declared size', async () => {
+        const file = fs.readFileSync(path.join(dirname, './image.png'))
+        const instructions = await restClient
+          .POST('/upload-instructions', {
+            body: JSON.stringify({
+              collectionSlug: mediaSlug,
+              filename: 'incomplete.png',
+              filesize: file.length + 1,
+              mimeType: 'image/png',
+            }),
+          })
+          .then((response) => response.json<UploadInstructions>())
+
+        if (instructions.type !== 'http') {
+          throw new Error('Expected HTTP upload instructions')
+        }
+
+        const uploadPath = new URL(instructions.request.url, restClient.serverURL).pathname.replace(
+          payload.config.routes.api,
+          '',
+        ) as `/${string}`
+        const response = await restClient.PUT(uploadPath, {
+          body: file,
+          headers: { 'Content-Type': 'image/png' },
+        })
+
+        expect(response.status).toBe(400)
+      })
+
+      it('rejects restricted file metadata before creating staged instructions', async () => {
+        const response = await restClient.POST('/upload-instructions', {
+          body: JSON.stringify({
+            collectionSlug: mediaSlug,
+            filename: 'malware.exe',
+            filesize: 2,
+            mimeType: 'application/octet-stream',
+          }),
+        })
+
+        expect(response.status).toBe(400)
+      })
+
+      it('rejects staged file bytes that do not match the collection MIME types', async () => {
+        const executable = Buffer.alloc(64)
+        executable.write('MZ')
+
+        const instructions = await restClient
+          .POST('/upload-instructions', {
+            body: JSON.stringify({
+              collectionSlug: pdfOnlySlug,
+              filename: 'disguised.pdf',
+              filesize: executable.length,
+              mimeType: 'application/pdf',
+            }),
+          })
+          .then((response) => response.json<UploadInstructions>())
+
+        if (instructions.type !== 'http') {
+          throw new Error('Expected HTTP upload instructions')
+        }
+
+        const uploadPath = new URL(instructions.request.url, restClient.serverURL).pathname.replace(
+          payload.config.routes.api,
+          '',
+        ) as `/${string}`
+        const response = await restClient.PUT(uploadPath, {
+          body: executable,
+          headers: instructions.request.headers,
+        })
+
+        expect(response.status).toBe(400)
+      })
+
+      it('requires authentication before staging an upload', async () => {
+        const response = await restClient.POST('/upload-instructions', {
+          auth: false,
+          body: JSON.stringify({
+            collectionSlug: mediaSlug,
+            filename: 'unauthorized.png',
+            filesize: 1,
+            mimeType: 'image/png',
+          }),
+        })
+
+        expect(response.status).toBe(403)
+      })
+
+      it('requires create or update permission before staging an upload', async () => {
+        const response = await restClient.POST('/upload-instructions', {
+          body: JSON.stringify({
+            collectionSlug: mediaWithoutWriteAccessSlug,
+            filename: 'forbidden.png',
+            filesize: 1,
+            mimeType: 'image/png',
+          }),
+        })
+
+        expect(response.status).toBe(403)
+      })
+
+      it('rejects a file payload missing an upload reference with a 400', async () => {
+        const formData = new FormData()
+        formData.append('_payload', JSON.stringify({ alt: 'Missing reference' }))
+        formData.append('file', JSON.stringify({ filename: 'no-reference.png' }))
+
+        const response = await restClient.POST(`/${mediaSlug}`, { body: formData })
+
+        expect(response.status).toBe(400)
+      })
+
       it('creates from form data given a png', async () => {
         const formData = new FormData()
         const filePath = path.join(dirname, './image.png')
@@ -130,6 +297,8 @@ describe('Collections - Uploads', () => {
         expect(mediaDoc.sizes?.icon?.url).toBeDefined()
         expect(mediaDoc.sizes?.icon?.url).toContain('%20')
         expect(mediaDoc.sizes?.icon?.url).not.toContain(' ')
+
+        await payload.delete({ collection: mediaSlug, id: mediaDoc.id })
       })
 
       it('creates from form data given an svg', async () => {
@@ -523,6 +692,8 @@ describe('Collections - Uploads', () => {
 
         expect(response.status).toBe(200)
         expect(response.headers.get('content-type')).toContain('image/png')
+
+        await payload.delete({ collection: mediaSlug, id: mediaDoc.id })
       })
 
       it('should return the media document with the correct file type', async () => {
@@ -541,6 +712,8 @@ describe('Collections - Uploads', () => {
         expect(response.status).toBe(200)
 
         expect(response.headers.get('content-type')).toContain('image/png')
+
+        await payload.delete({ collection: mediaSlug, id: mediaDoc.id })
       })
     })
   })
@@ -577,6 +750,34 @@ describe('Collections - Uploads', () => {
         })
 
         expect(await fileExists(path.join(expectedPath, doc.filename))).toBe(true)
+
+        await payload.delete({ collection: anyImagesSlug as CollectionSlug, id: doc.id })
+      })
+
+      it('should create documents for JPEG XL files, which sharp cannot decode', async () => {
+        const expectedPath = path.join(dirname, './with-any-image-type')
+
+        // `canResizeImage` already excludes `image/jxl` from any resize or
+        // sharp decode attempt, so only the header needs to be readable
+        const jxlFilePath = path.resolve(dirname, './test-image.jxl')
+        const fileBuffer = fs.readFileSync(jxlFilePath)
+        const doc = await payload.create({
+          collection: anyImagesSlug as CollectionSlug,
+          data: {},
+          file: {
+            data: fileBuffer,
+            mimetype: 'image/jxl',
+            name: 'test-image.jxl',
+            size: fileBuffer.length,
+          },
+        })
+
+        expect(await fileExists(path.join(expectedPath, doc.filename))).toBe(true)
+        expect(doc.mimeType).toEqual('image/jxl')
+        expect(doc.width).toEqual(800)
+        expect(doc.height).toEqual(800)
+
+        await payload.delete({ collection: anyImagesSlug as CollectionSlug, id: doc.id })
       })
 
       it('should upload svg files', async () => {
@@ -653,6 +854,8 @@ describe('Collections - Uploads', () => {
         // Check that the replacement file was created and the old one was removed
         expect(await fileExists(path.join(expectedPath, updatedMediaDoc.filename))).toBe(true)
         expect(await fileExists(path.join(expectedPath, mediaDoc.filename))).toBe(false)
+
+        await payload.delete({ collection: mediaSlug, id: updatedMediaDoc.id })
       })
 
       it('should remove existing media on re-upload - where query', async () => {
@@ -692,6 +895,8 @@ describe('Collections - Uploads', () => {
           true,
         )
         expect(await fileExists(path.join(expectedPath, mediaDoc.filename))).toBe(false)
+
+        await payload.delete({ collection: mediaSlug, id: updatedMediaDoc.docs[0].id })
       })
 
       it('should remove sizes that do not pertain to the new image - by ID', async () => {
@@ -1302,6 +1507,8 @@ describe('Collections - Uploads', () => {
       // Expect focal point to be the same
       expect(updateWithoutFocal.focalX).toEqual(10)
       expect(updateWithoutFocal.focalY).toEqual(10)
+
+      await payload.delete({ collection: focalOnlySlug, id: doc.id })
     })
 
     it('should default focal point to 50, 50', async () => {
@@ -1324,6 +1531,8 @@ describe('Collections - Uploads', () => {
 
       expect(updateWithoutFocal.focalX).toEqual(50)
       expect(updateWithoutFocal.focalY).toEqual(50)
+
+      await payload.delete({ collection: focalOnlySlug, id: doc.id })
     })
 
     it('should set focal point even if no sizes defined', async () => {
@@ -1337,6 +1546,8 @@ describe('Collections - Uploads', () => {
 
       expect(doc.focalX).toEqual(50)
       expect(doc.focalY).toEqual(50)
+
+      await payload.delete({ collection: focalNoSizesSlug, id: doc.id })
     })
   })
 
@@ -1450,6 +1661,8 @@ describe('Collections - Uploads', () => {
 
       expect(sizes.accidentalSameSize.mimeType).toBe('image/png')
       expect(sizes.accidentalSameSize.filename).toBe('small-320x80.png')
+
+      await payload.delete({ collection: reduceSlug, id: result.id })
     })
 
     it('should not enlarge image if `withoutEnlargement` is set to undefined and width or height is undefined when imageSizes are larger than the uploaded image', async () => {
@@ -1541,6 +1754,9 @@ describe('Collections - Uploads', () => {
       const expectedPath = path.join(dirname, './media')
 
       expect(await fileExists(path.join(expectedPath, duplicatedDoc.filename))).toBe(true)
+
+      await payload.delete({ collection: 'media', id: mediaDoc.id })
+      await payload.delete({ collection: 'media', id: duplicatedDoc.id })
     })
 
     it('should not leak req.file between sequential duplicate() calls on a shared req', async () => {
@@ -1642,6 +1858,8 @@ describe('Collections - Uploads', () => {
         expect(dbDoc.sizes?.icon?.url).toBeDefined()
         expect(dbDoc.sizes?.icon?.url).not.toContain('http://local-images:3000')
         expect(dbDoc.sizes?.icon?.url).toMatch(/^\/api\/media\/file\//)
+
+        await payload.delete({ collection: mediaSlug, id: mediaDoc.id })
       } finally {
         // Restore original serverURL
         payload.config.serverURL = originalServerURL
@@ -1701,6 +1919,9 @@ describe('Collections - Uploads', () => {
         expect(dbDoc.sizes?.tablet?.url).toBeDefined()
         expect(dbDoc.sizes?.tablet?.url).not.toContain('http://local-images:3000')
         expect(dbDoc.sizes?.tablet?.url).toMatch(/^\/api\/media\/file\//)
+
+        await payload.delete({ collection: mediaSlug, id: mediaDoc.id })
+        await payload.delete({ collection: mediaSlug, id: duplicatedDoc.id })
       } finally {
         // Restore original serverURL
         payload.config.serverURL = originalServerURL
@@ -1760,6 +1981,8 @@ describe('Collections - Uploads', () => {
         expect(dbDoc.sizes?.tablet?.url).toBeDefined()
         expect(dbDoc.sizes?.tablet?.url).not.toContain('http://local-images:3000')
         expect(dbDoc.sizes?.tablet?.url).toMatch(/^\/api\/media\/file\//)
+
+        await payload.delete({ collection: mediaSlug, id: mediaDoc.id })
       } finally {
         // Restore original serverURL
         payload.config.serverURL = originalServerURL

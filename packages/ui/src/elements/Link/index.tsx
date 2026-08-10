@@ -1,14 +1,11 @@
 'use client'
-import NextLinkImport from 'next/link.js'
-import { useRouter } from 'next/navigation.js'
+import type { LinkAdapterProps } from 'payload'
+
 import React from 'react'
 
+import { PayloadLink, useRouter } from '../../providers/RouterAdapter/index.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
-import { formatUrl } from './formatUrl.js'
 
-const NextLink = 'default' in NextLinkImport ? NextLinkImport.default : NextLinkImport
-
-// Copied from  https://github.com/vercel/next.js/blob/canary/packages/next/src/client/link.tsx#L180-L191
 function isModifiedEvent(event: React.MouseEvent): boolean {
   const eventTarget = event.currentTarget as HTMLAnchorElement | SVGAElement
   const target = eventTarget.getAttribute('target')
@@ -17,7 +14,7 @@ function isModifiedEvent(event: React.MouseEvent): boolean {
     event.metaKey ||
     event.ctrlKey ||
     event.shiftKey ||
-    event.altKey || // triggers resource download
+    event.altKey ||
     (event.nativeEvent && event.nativeEvent.which === 2)
   )
 }
@@ -33,7 +30,7 @@ type Props = {
    * @default true
    */
   preventDefault?: boolean
-} & Parameters<typeof NextLink>[0]
+} & { ref?: React.Ref<HTMLAnchorElement> } & LinkAdapterProps
 
 export const Link: React.FC<Props> = ({
   children,
@@ -50,7 +47,7 @@ export const Link: React.FC<Props> = ({
   const { startRouteTransition } = useRouteTransition()
 
   return (
-    <NextLink
+    <PayloadLink
       href={href}
       onClick={(e) => {
         if (isModifiedEvent(e)) {
@@ -61,13 +58,11 @@ export const Link: React.FC<Props> = ({
           onClick(e)
         }
 
-        // We need a preventDefault here so that a clicked link doesn't trigger twice,
-        // once for default browser navigation and once for startRouteTransition
         if (preventDefault) {
           e.preventDefault()
         }
 
-        const url = typeof href === 'string' ? href : formatUrl(href)
+        const url = href
 
         if (forceReload) {
           window.location.href = url
@@ -82,13 +77,12 @@ export const Link: React.FC<Props> = ({
           }
         }
 
-        // Call startRouteTransition if available, otherwise navigate directly
         startRouteTransition(navigate)
       }}
       ref={ref}
       {...rest}
     >
       {children}
-    </NextLink>
+    </PayloadLink>
   )
 }

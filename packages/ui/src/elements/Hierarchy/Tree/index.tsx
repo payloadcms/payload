@@ -2,7 +2,6 @@
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
-import { useRouter } from 'next/navigation.js'
 import { DEFAULT_HIERARCHY_TREE_LIMIT } from 'payload/shared'
 import React, { useCallback, useId, useMemo, useRef, useState } from 'react'
 
@@ -12,6 +11,7 @@ import { PlusIcon } from '../../../icons/Plus/index.js'
 import { useAuth } from '../../../providers/Auth/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useHierarchy } from '../../../providers/Hierarchy/index.js'
+import { useRouter } from '../../../providers/RouterAdapter/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { Button } from '../../Button/index.js'
 import { CreateDocumentButton } from '../../CreateDocumentButton/index.js'
@@ -51,7 +51,7 @@ const HierarchyTreeInner: React.FC<HierarchyTreeProps> = ({
   selectedNodeId,
   useAsTitle: useAsTitleProp,
 }) => {
-  const { moveFocus } = useTreeFocus()
+  const { focusedId, moveFocus, setFocusedId } = useTreeFocus()
   const router = useRouter()
   const { i18n, t } = useTranslation()
   const { permissions } = useAuth()
@@ -231,17 +231,47 @@ const HierarchyTreeInner: React.FC<HierarchyTreeProps> = ({
     [onNodeClick],
   )
 
+  const rootFocusableIds = useMemo(
+    () => (rootNodes ? rootNodes.map((node) => `node-${String(node.id)}`) : []),
+    [rootNodes],
+  )
+
+  const firstRootFocusableId = rootFocusableIds[0]
+  const lastRootFocusableId = rootFocusableIds[rootFocusableIds.length - 1]
+
   const handleTreeKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
       if (e.key === 'ArrowDown') {
         e.preventDefault()
+
+        if (
+          focusedId &&
+          firstRootFocusableId &&
+          lastRootFocusableId &&
+          focusedId === lastRootFocusableId
+        ) {
+          setFocusedId(firstRootFocusableId)
+          return
+        }
+
         moveFocus('down')
       } else if (e.key === 'ArrowUp') {
         e.preventDefault()
+
+        if (
+          focusedId &&
+          firstRootFocusableId &&
+          lastRootFocusableId &&
+          focusedId === firstRootFocusableId
+        ) {
+          setFocusedId(lastRootFocusableId)
+          return
+        }
+
         moveFocus('up')
       }
     },
-    [moveFocus],
+    [firstRootFocusableId, focusedId, lastRootFocusableId, moveFocus, setFocusedId],
   )
 
   if (isLoading && !rootNodes) {

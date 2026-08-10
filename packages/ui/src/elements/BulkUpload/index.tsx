@@ -12,19 +12,20 @@ import { useConfig } from '../../providers/Config/index.js'
 import { EditDepthProvider } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { UploadControlsProvider } from '../../providers/UploadControls/index.js'
-import { Drawer, useDrawerDepth } from '../Drawer/index.js'
+import { useDrawerDepth } from '../Drawer/index.js'
 import { AddFilesView } from './AddFilesView/index.js'
 import { AddingFilesView } from './AddingFilesView/index.js'
 import { FormsManagerProvider, type InitialForms, useFormsManager } from './FormsManager/index.js'
+import './index.css'
 
-const drawerSlug = 'bulk-upload-drawer-slug'
+const baseModalSlug = 'bulk-upload-modal-slug'
 
 function DrawerContent() {
   const { addFiles, forms, isInitializing } = useFormsManager()
-  const { closeModal } = useModal()
-  const { collectionSlug, drawerSlug } = useBulkUpload()
+  const { collectionSlug, modalSlug } = useBulkUpload()
   const { getEntityConfig } = useConfig()
   const { t } = useTranslation()
+  const { openModal } = useModal()
 
   const uploadCollection = getEntityConfig({ collectionSlug })
   const uploadConfig = uploadCollection?.upload
@@ -46,9 +47,10 @@ function DrawerContent() {
         toast.error(t('error:invalidFileType'))
       } else {
         void addFiles(fileTransfer.files)
+        openModal(modalSlug)
       }
     },
-    [addFiles, t, uploadMimeTypes],
+    [addFiles, t, uploadMimeTypes, openModal, modalSlug],
   )
 
   if (!collectionSlug) {
@@ -59,22 +61,22 @@ function DrawerContent() {
     return (
       <AddFilesView
         acceptMimeTypes={uploadMimeTypes?.join(', ')}
-        onCancel={() => closeModal(drawerSlug)}
+        modalSlug={modalSlug}
         onDrop={onDrop}
       />
     )
-  } else {
-    return <AddingFilesView />
   }
+
+  return <AddingFilesView modalSlug={modalSlug} />
 }
 
 export type BulkUploadProps = {
   readonly children: React.ReactNode
 }
 
-export function BulkUploadDrawer() {
+export function BulkUploadModal() {
   const {
-    drawerSlug,
+    modalSlug,
     onCancel,
     setInitialFiles,
     setInitialForms,
@@ -92,8 +94,8 @@ export function BulkUploadDrawer() {
    * This is used to trigger onCancel when the drawer is closed (=> forms reset, as FormsManager is unmounted)
    */
   const onModalStateChanged = useEffectEvent((modalState) => {
-    const previousModalState = previousModalStateRef.current[drawerSlug]
-    const currentModalState = modalState[drawerSlug]
+    const previousModalState = previousModalStateRef.current[modalSlug]
+    const currentModalState = modalState[modalSlug]
 
     if (typeof currentModalState === 'undefined' && typeof previousModalState === 'undefined') {
       return
@@ -126,28 +128,32 @@ export function BulkUploadDrawer() {
     onModalStateChanged(modalState)
   }, [modalState])
 
+  // Only mount the providers (and reset forms on unmount) while the drawer is open,
+  // matching the previous behavior where the Drawer lazily rendered its children.
+  if (!modalState[modalSlug]?.isOpen) {
+    return null
+  }
+
   return (
-    <Drawer Header={null} slug={drawerSlug}>
-      <FormsManagerProvider>
-        <UploadControlsProvider>
-          <EditDepthProvider>
-            <DrawerContent />
-          </EditDepthProvider>
-        </UploadControlsProvider>
-      </FormsManagerProvider>
-    </Drawer>
+    <FormsManagerProvider>
+      <UploadControlsProvider>
+        <EditDepthProvider>
+          <DrawerContent />
+        </EditDepthProvider>
+      </UploadControlsProvider>
+    </FormsManagerProvider>
   )
 }
 
 export type BulkUploadContext = {
   collectionSlug: CollectionSlug
-  drawerSlug: string
   initialFiles: FileList
   /**
    * Like initialFiles, but allows manually providing initial form state or the form ID for each file
    */
   initialForms: InitialForms
   maxFiles: number
+  modalSlug: string
   onCancel: () => void
   onSuccess: (
     uploadedForms: Array<{
@@ -187,10 +193,10 @@ export type BulkUploadContext = {
 
 const Context = React.createContext<BulkUploadContext>({
   collectionSlug: '',
-  drawerSlug: '',
   initialFiles: undefined,
   initialForms: [],
   maxFiles: undefined,
+  modalSlug: '',
   onCancel: () => null,
   onSuccess: () => null,
   parentID: undefined,
@@ -208,10 +214,10 @@ const Context = React.createContext<BulkUploadContext>({
 })
 export function BulkUploadProvider({
   children,
-  drawerSlugPrefix,
+  modalSlugPrefix,
 }: {
   readonly children: React.ReactNode
-  readonly drawerSlugPrefix?: string
+  readonly modalSlugPrefix?: string
 }) {
   const [selectableCollections, setSelectableCollections] = React.useState<null | string[]>(null)
   const [collection, setCollection] = React.useState<string>()
@@ -223,7 +229,7 @@ export function BulkUploadProvider({
   const [maxFiles, setMaxFiles] = React.useState<number>(undefined)
   const [successfullyUploaded, setSuccessfullyUploaded] = React.useState<boolean>(false)
 
-  const drawerSlug = `${drawerSlugPrefix ? `${drawerSlugPrefix}-` : ''}${useBulkUploadDrawerSlug()}`
+  const modalSlug = `${modalSlugPrefix ? `${modalSlugPrefix}-` : ''}${useBulkUploadModalSlug()}`
 
   const setOnSuccess: BulkUploadContext['setOnSuccess'] = (onSuccess) => {
     setOnSuccessFunction(() => onSuccess)
@@ -236,10 +242,10 @@ export function BulkUploadProvider({
     <Context
       value={{
         collectionSlug: collection,
-        drawerSlug,
         initialFiles,
         initialForms,
         maxFiles,
+        modalSlug,
         onCancel: () => {
           if (typeof onCancelFunction === 'function') {
             onCancelFunction()
@@ -266,7 +272,7 @@ export function BulkUploadProvider({
     >
       <React.Fragment>
         {children}
-        <BulkUploadDrawer />
+        <BulkUploadModal />
       </React.Fragment>
     </Context>
   )
@@ -274,8 +280,8 @@ export function BulkUploadProvider({
 
 export const useBulkUpload = () => React.use(Context)
 
-export function useBulkUploadDrawerSlug() {
+export function useBulkUploadModalSlug() {
   const depth = useDrawerDepth()
 
-  return `${drawerSlug}-${depth || 1}`
+  return `${baseModalSlug}-${depth + 1}`
 }

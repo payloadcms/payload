@@ -52,16 +52,39 @@ export const getPillSelectorItem = ({
 }
 
 /**
- * Check if a pill selector item is selected (has chip--selected class)
+ * Get a locator for a column selector item (v4 design).
+ * The new column selector uses `.column-selector__item` with aria-label for the label text.
+ *
+ * @param params.container - The container (Page or Locator) to search within
+ * @param params.label - The exact text label of the column item
+ * @returns The locator for the column selector item
  */
-export const isPillSelectorItemSelected = async ({
+export const getColumnSelectorItem = ({
   container,
   label,
 }: {
   container: Locator | Page
   label: string
-}): Promise<boolean> => {
-  const pill = getPillSelectorItem({ container, label })
-  const classes = await pill.getAttribute('class')
-  return classes?.includes('chip--selected') ?? false
+}): Locator => {
+  return container.locator(`.column-selector__item[aria-label="${label}"]`)
+}
+
+/**
+ * Click on a column selector item (v4 design) to toggle its selection state.
+ *
+ * @param params.container - The container (Page or Locator) to search within
+ * @param params.label - The exact text label of the column item to click
+ * @returns The locator for the column item
+ */
+export const clickColumnSelectorItem = async ({
+  container,
+  label,
+}: {
+  container: Locator | Page
+  label: string
+}): Promise<Locator> => {
+  const item = getColumnSelectorItem({ container, label })
+  // Click the switch inside the item to toggle
+  await item.locator('.switch').click()
+  return item
 }

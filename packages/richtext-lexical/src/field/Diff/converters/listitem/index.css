@@ -1,7 +1,7 @@
 @layer payload-default {
   .lexical-diff {
     ul.list-check {
-      padding-left: 0;
+      padding-inline-start: 0;
     }
 
     .checkboxItem {
@@ -16,7 +16,7 @@
     .checkboxItem__icon {
       width: var(--spacer-3);
       height: var(--spacer-3);
-      margin-right: var(--spacer-2);
+      margin-inline-end: var(--spacer-2);
       border: var(--stroke-width-small) solid var(--color-text);
       border-radius: var(--radius-medium);
       display: flex;
@@ -24,12 +24,10 @@
       justify-content: center;
       pointer-events: none;
 
-      .icon--check {
-        height: var(--spacer-2-5);
-      }
-
       &[data-match-type='create'] {
-        border-color: var(--diff-create-pill-color);
+        background-color: var(--color-bg-brand-tertiary);
+        border-color: var(--color-border-brand-strong);
+        color: var(--color-text-brand);
       }
 
       &[data-match-type='delete'] {
@@ -37,8 +35,46 @@
       }
     }
 
+    /* Override HTMLDiff generic [data-match-type] styles - specificity must beat 0,4,1 from HTMLDiff */
+    .checkboxItem__icon.checkboxItem__icon[data-enable-match='true'][data-match-type='create'],
+    .checkboxItem__icon.checkboxItem__icon[data-enable-match='true'][data-match-type='delete'] {
+      border-radius: var(--radius-medium);
+      padding: 0;
+    }
+
+    .checkboxItem__icon.checkboxItem__icon[data-enable-match='true'][data-match-type='create'] {
+      background-color: var(--color-bg-brand-tertiary);
+      color: var(--color-text-brand);
+    }
+
+    .checkboxItem__icon.checkboxItem__icon[data-enable-match='true'][data-match-type='delete'] {
+      background-color: transparent;
+      color: var(--diff-delete-pill-color);
+    }
+
     .checkboxItem--nested {
-      margin-left: var(--spacer-4);
+      margin-inline-start: var(--spacer-4);
+    }
+
+    /* Match editor's hierarchical ordered list numbering (1, A, a, I, i) */
+    ol.list-number {
+      list-style-type: decimal;
+    }
+
+    ol.list-number ol.list-number {
+      list-style-type: upper-alpha;
+    }
+
+    ol.list-number ol.list-number ol.list-number {
+      list-style-type: lower-alpha;
+    }
+
+    ol.list-number ol.list-number ol.list-number ol.list-number {
+      list-style-type: upper-roman;
+    }
+
+    ol.list-number ol.list-number ol.list-number ol.list-number ol.list-number {
+      list-style-type: lower-roman;
     }
   }
 }

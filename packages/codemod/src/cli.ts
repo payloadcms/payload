@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import { existsSync } from 'node:fs'
+import { existsSync, writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { IndentationText, Project, QuoteKind } from 'ts-morph'
 
@@ -9,6 +9,7 @@ import type { Transform } from './types.js'
 import { parseFlags } from './cli.parseFlags.js'
 import { transforms as registry } from './registry.js'
 import { runTransforms } from './runner.js'
+import { loadPackageJsons, serializePackageJson } from './utils/packageJson.js'
 
 export async function main(argv: string[] = process.argv.slice(2)): Promise<void> {
   const flags = parseFlags(argv)
@@ -28,7 +29,12 @@ export async function main(argv: string[] = process.argv.slice(2)): Promise<void
   const project = loadProject(resolve(flags.path))
   const snapshot = snapshotProject(project)
 
+  const packageJsons = loadPackageJsons(resolve(flags.path))
+
   const { failed, results } = await runTransforms({
+    // Shares the same `data` reference, so transform mutations are visible
+    // below for change detection (do not clone here).
+    packageJsons: packageJsons.map(({ data, path }) => ({ data, path })),
     project,
     transforms: selected,
   })
@@ -37,17 +43,28 @@ export async function main(argv: string[] = process.argv.slice(2)): Promise<void
     .getSourceFiles()
     .filter((file) => snapshot.get(file.getFilePath()) !== file.getFullText())
 
+  const changedPackageJsons = packageJsons.filter(
+    (pkg) => serializePackageJson(pkg.data, pkg.originalText) !== pkg.originalText,
+  )
+
   if (flags.print) {
-    if (changed.length === 0) {
+    if (changed.length === 0 && changedPackageJsons.length === 0) {
       console.log('(no files changed)')
     } else {
       for (const file of changed) {
         console.log(`// ${file.getFilePath()}`)
         console.log(file.getFullText())
       }
+      for (const pkg of changedPackageJsons) {
+        console.log(`// ${pkg.path}`)
+        console.log(serializePackageJson(pkg.data, pkg.originalText))
+      }
     }
   } else if (!flags.dry) {
     await Promise.all(changed.map((file) => file.save()))
+    for (const pkg of changedPackageJsons) {
+      writeFileSync(pkg.path, serializePackageJson(pkg.data, pkg.originalText))
+    }
   }
 
   printSummary(results)

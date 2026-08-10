@@ -1,20 +1,14 @@
-import type {
-  SerializedHeadingNode as _SerializedHeadingNode,
-  HeadingTagType,
-} from '@lexical/rich-text'
-import type { SerializedLexicalNode } from 'lexical'
+import type { HeadingTagType } from '@lexical/rich-text'
 
 import { HeadingNode } from '@lexical/rich-text'
 
-import type { StronglyTypedElementNode } from '../../../nodeTypes.js'
-
 import { createServerFeature } from '../../../utilities/createServerFeature.js'
 import { createNode } from '../../typeUtilities.js'
-import { MarkdownTransformer } from '../markdownTransformer.js'
+import { PAYLOAD_HEADING } from '../markdownTransformer.js'
 import { i18n } from './i18n.js'
+import { createHeadingJSONSchema } from './schema.js'
 
-export type SerializedHeadingNode<T extends SerializedLexicalNode = SerializedLexicalNode> =
-  StronglyTypedElementNode<_SerializedHeadingNode, 'heading', T>
+export type { SerializedHeadingNode } from './schema.js'
 
 export type HeadingFeatureProps = {
   enabledHeadingSizes?: HeadingTagType[]
@@ -39,9 +33,10 @@ export const HeadingFeature = createServerFeature<
       clientFeatureProps: props,
       i18n,
       markdownTransformers:
-        enabledHeadingSizes.length > 0 ? [MarkdownTransformer(enabledHeadingSizes)] : [],
+        enabledHeadingSizes.length > 0 ? [PAYLOAD_HEADING(enabledHeadingSizes)] : [],
       nodes: [
         createNode({
+          jsonSchema: createHeadingJSONSchema(enabledHeadingSizes),
           node: HeadingNode,
         }),
       ],

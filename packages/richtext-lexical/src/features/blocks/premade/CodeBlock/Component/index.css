@@ -11,15 +11,15 @@
         pointer-events: none;
         background: linear-gradient(
           to bottom,
-          rgb(0 0 0 / 0%) 0%,
+          transparent 0%,
           var(--color-bg) 90%,
           var(--color-bg) 100%
         );
         position: absolute;
         height: 100px;
         top: 50px;
-        left: 0;
-        right: 0;
+        inset-inline-start: 0;
+        inset-inline-end: 0;
       }
 
       > div {
@@ -128,7 +128,7 @@
     color: var(--color-text-secondary);
     font-size: var(--text-body-medium-font-size);
     line-height: var(--text-body-medium-line-height);
-    padding-left: var(--spacer-1);
+    padding-inline-start: var(--spacer-1);
 
     & path {
       fill-opacity: 1;
@@ -167,5 +167,5 @@
 
 /* Add left padding to Monaco line numbers area */
 .payload-richtext-code-block .monaco-editor .margin {
-  padding-left: var(--spacer-2);
+  padding-inline-start: var(--spacer-2);
 }

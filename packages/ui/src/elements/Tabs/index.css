@@ -1,0 +1,100 @@
+@layer payload-default {
+  .tabs__tabs-wrap {
+    overflow-x: auto;
+    overflow-y: hidden;
+    margin-bottom: var(--spacer-2);
+    position: relative;
+    padding-bottom: 2px;
+  }
+
+  .tabs__tabs {
+    display: inline-flex;
+    min-width: 100%;
+    vertical-align: bottom;
+    position: relative;
+    z-index: 1;
+    box-shadow: inset 0px -1px var(--color-border);
+  }
+
+  .tabs__tab-button {
+    appearance: none;
+    background: none;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacer-1);
+    padding: var(--spacer-1) var(--spacer-2);
+    margin: 0;
+    margin-bottom: var(--spacer-2);
+    cursor: pointer;
+    position: relative;
+    white-space: nowrap;
+    flex-shrink: 0;
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--text-body-medium-font-size);
+    font-weight: var(--text-body-medium-font-weight);
+    line-height: var(--text-body-medium-line-height);
+    letter-spacing: var(--text-letter-spacing);
+    color: var(--color-text-secondary);
+  }
+
+  .tabs__tab-button:after {
+    content: '';
+    position: absolute;
+    left: var(--spacer-2);
+    right: var(--spacer-2);
+    bottom: calc(-1 * var(--spacer-2) - 1px);
+    height: 3px;
+    background: var(--color-icon-brand);
+    border-radius: var(--radius-full);
+    opacity: 0;
+    z-index: 1;
+  }
+
+  .tabs__tab-button:hover:after {
+    background: var(--color-bg-tertiary);
+    opacity: 1;
+  }
+
+  .tabs__tab-button:focus-visible {
+    outline-offset: -1px;
+  }
+
+  .tabs__tab-button--hidden {
+    display: none;
+  }
+
+  .tabs__tab-button--active {
+    font-weight: var(--text-body-medium-strong-font-weight);
+    color: var(--color-text);
+  }
+
+  .tabs__tab-button--active:after {
+    background: var(--color-icon-brand);
+    opacity: 1;
+  }
+
+  .tabs__tab-button--active:hover:after {
+    background: var(--color-icon-brand);
+  }
+
+  .tabs__tab-button--has-error {
+    color: var(--color-text-danger);
+  }
+
+  .tabs__tab-button--has-error:after {
+    background: var(--field-color-border-error);
+    opacity: 1;
+  }
+
+  .tabs__tab-button--has-error:hover:after {
+    background: var(--field-color-border-error);
+  }
+
+  @media (max-width: 768px) {
+    .tabs__tab-button {
+      padding-bottom: var(--spacer-2);
+    }
+  }
+}

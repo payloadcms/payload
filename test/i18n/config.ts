@@ -95,6 +95,7 @@ export default buildConfigWithDefaults({
             t('fields:addLabel2'),
         },
       ],
+      versions: false,
     },
   ],
   globals: [
@@ -105,6 +106,7 @@ export default buildConfigWithDefaults({
         es: 'ES Global',
       },
       fields: [{ name: 'text', type: 'text' }],
+      versions: false,
     },
   ],
   i18n: {

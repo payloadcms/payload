@@ -64,9 +64,6 @@ export default buildConfigWithDefaults({
       baseDir: path.resolve(dirname),
     },
   },
-  experimental: {
-    localizeStatus: true,
-  },
   collections: [
     RichTextCollection,
     BlocksCollection,
@@ -93,6 +90,7 @@ export default buildConfigWithDefaults({
         },
       ],
       slug: 'users',
+      versions: false,
     },
     {
       slug: localizedPostsSlug,
@@ -145,6 +143,7 @@ export default buildConfigWithDefaults({
           unique: true,
         },
       ],
+      versions: false,
     },
     NoLocalizedFieldsCollection,
     ArrayCollection,
@@ -273,6 +272,7 @@ export default buildConfigWithDefaults({
         },
       ],
       slug: withRequiredLocalizedFields,
+      versions: false,
     },
     {
       access: openAccess,
@@ -305,6 +305,7 @@ export default buildConfigWithDefaults({
         },
       ],
       slug: withLocalizedRelSlug,
+      versions: false,
     },
     {
       fields: [
@@ -350,6 +351,7 @@ export default buildConfigWithDefaults({
         },
       ],
       slug: relationshipLocalizedSlug,
+      versions: false,
     },
     {
       access: {
@@ -363,6 +365,7 @@ export default buildConfigWithDefaults({
         },
       ],
       slug: cannotCreateDefaultLocale,
+      versions: false,
     },
     {
       access: {
@@ -377,6 +380,7 @@ export default buildConfigWithDefaults({
         },
       ],
       slug: localeRestrictedSlug,
+      versions: false,
     },
     NestedToArrayAndBlock,
     Group,
@@ -397,6 +401,7 @@ export default buildConfigWithDefaults({
           localized: true,
         },
       ],
+      versions: false,
     },
     {
       slug: blocksWithLocalizedSameName,
@@ -428,6 +433,7 @@ export default buildConfigWithDefaults({
           ],
         },
       ],
+      versions: false,
     },
     LocalizedWithinLocalized,
     ArrayWithFallbackCollection,
@@ -448,6 +454,7 @@ export default buildConfigWithDefaults({
         },
       ],
       slug: 'global-array',
+      versions: false,
     },
     {
       fields: [
@@ -458,6 +465,7 @@ export default buildConfigWithDefaults({
         },
       ],
       slug: 'global-text',
+      versions: false,
     },
     {
       fields: [
@@ -469,9 +477,7 @@ export default buildConfigWithDefaults({
       ],
       slug: globalWithDraftsSlug,
       versions: {
-        drafts: {
-          localizeStatus: true,
-        },
+        drafts: {},
       },
     },
   ],
@@ -534,6 +540,20 @@ export default buildConfigWithDefaults({
     ],
   },
   onInit: async (payload) => {
+    // On a fresh database with autoIndex enabled, the first write to a collection (or its
+    // versions collection) kicks off async index builds. A subsequent seeding write can then
+    // race that catalog change and fail with a transient MongoDB "catalog changes" error.
+    // Awaiting Model.init() lets collection and index creation settle before the writes below.
+    // This is a no-op for non-Mongoose adapters, where these models are undefined.
+    const db = payload.db as any
+    if (db?.collections || db?.versions) {
+      await Promise.all([
+        ...payload.config.collections.map((coll) => db.collections?.[coll.slug]?.init?.()),
+        ...payload.config.collections.map((coll) => db.versions?.[coll.slug]?.init?.()),
+        db.globals?.init?.(),
+      ])
+    }
+
     const collection = localizedPostsSlug
 
     await payload.create({

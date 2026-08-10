@@ -51,4 +51,5 @@ export const OverrideAccessCollection: CollectionConfig = {
       },
     ],
   },
+  versions: false,
 }

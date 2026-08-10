@@ -3,7 +3,6 @@ import type { SanitizedCollectionConfig } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
-import { useRouter } from 'next/navigation.js'
 import { formatAdminURL } from 'payload/shared'
 import React, { Fragment, useCallback, useState } from 'react'
 import { toast } from 'sonner'
@@ -13,8 +12,10 @@ import type { DocumentDrawerContextType } from '../DocumentDrawer/Provider.js'
 import { CheckboxInput } from '../../fields/Checkbox/Input.js'
 import { useForm } from '../../forms/Form/context.js'
 import { useConfig } from '../../providers/Config/index.js'
+import { useDocumentEvents } from '../../providers/DocumentEvents/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useDocumentTitle } from '../../providers/DocumentTitle/index.js'
+import { useRouter } from '../../providers/RouterAdapter/index.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
@@ -22,7 +23,6 @@ import { shouldPermanentlyDelete } from '../../utilities/shouldPermanentlyDelete
 import { ConfirmationModal } from '../ConfirmationModal/index.js'
 import { PopupList } from '../Popup/index.js'
 import { Translation } from '../Translation/index.js'
-import './index.css'
 
 const baseClass = 'delete-document'
 
@@ -64,6 +64,7 @@ export const DeleteDocument: React.FC<Props> = (props) => {
   const { title } = useDocumentTitle()
   const { startRouteTransition } = useRouteTransition()
   const { openModal } = useModal()
+  const { reportUpdate } = useDocumentEvents()
 
   const modalSlug = `delete-${id}`
 
@@ -114,7 +115,19 @@ export const DeleteDocument: React.FC<Props> = (props) => {
           }) || json.message,
         )
 
+        // A trashed document also disappears from default queries, so both permanent
+        // deletes and trashing report as a `delete` event.
+        const deleteEvent = {
+          id,
+          entitySlug: collectionSlug,
+          operation: 'delete' as const,
+          updatedAt: new Date().toISOString(),
+        }
+
         if (redirectAfterDelete) {
+          // Navigating away tears this surface down, so just notify other surfaces.
+          reportUpdate(deleteEvent)
+
           return startRouteTransition(() =>
             router.push(formatAdminURL({ adminRoute, path: `/collections/${collectionSlug}` })),
           )
@@ -123,6 +136,8 @@ export const DeleteDocument: React.FC<Props> = (props) => {
         if (typeof onDelete === 'function') {
           await onDelete({ id, collectionConfig })
         }
+
+        reportUpdate(deleteEvent)
 
         return
       }
@@ -156,6 +171,7 @@ export const DeleteDocument: React.FC<Props> = (props) => {
     onDelete,
     collectionConfig,
     startRouteTransition,
+    reportUpdate,
   ])
 
   if (id) {
@@ -188,15 +204,13 @@ export const DeleteDocument: React.FC<Props> = (props) => {
                 }}
               />
               {collectionConfig.trash && hasTrashPermission && hasDeletePermission && (
-                <div className={`${baseClass}__checkbox`}>
-                  <CheckboxInput
-                    checked={deletePermanently}
-                    id="delete-forever"
-                    label={t('general:deletePermanently')}
-                    name="delete-forever"
-                    onToggle={(e) => setDeletePermanently(e.target.checked)}
-                  />
-                </div>
+                <CheckboxInput
+                  checked={deletePermanently}
+                  id="delete-forever"
+                  label={t('general:deletePermanently')}
+                  name="delete-forever"
+                  onToggle={(e) => setDeletePermanently(e.target.checked)}
+                />
               )}
             </Fragment>
           }

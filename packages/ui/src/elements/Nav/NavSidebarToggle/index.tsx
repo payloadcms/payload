@@ -1,0 +1,27 @@
+'use client'
+import React from 'react'
+
+import { SidebarToggle } from '../../SidebarToggle/index.js'
+import { useNav } from '../context.js'
+
+/**
+ * @internal
+ */
+export const NavSidebarToggle: React.FC<{
+  baseClass?: string
+}> = ({ baseClass }) => {
+  const { navOpen, setNavOpen } = useNav()
+
+  return (
+    <button
+      className={`${baseClass}__mobile-close`}
+      onClick={() => {
+        setNavOpen(false)
+      }}
+      tabIndex={!navOpen ? -1 : undefined}
+      type="button"
+    >
+      <SidebarToggle isActive />
+    </button>
+  )
+}

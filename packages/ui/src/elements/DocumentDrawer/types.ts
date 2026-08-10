@@ -39,8 +39,10 @@ export type DocumentTogglerProps = {
   readonly collectionSlug: string
   readonly disabled?: boolean
   readonly drawerSlug?: string
+  readonly extraButtonProps?: Record<string, any>
   readonly onClick?: () => void
   readonly operation: Operation
+  readonly tooltip?: string
 } & Readonly<HTMLAttributes<HTMLButtonElement>>
 
 export type UseDocumentDrawerContext = {

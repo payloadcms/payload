@@ -2,7 +2,15 @@
 
 import type React from 'react'
 
-import { createContext, use, useCallback, useEffect, useRef, useState } from 'react'
+import {
+  createContext,
+  use,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react'
 
 type FocusableItem = {
   id: string
@@ -122,6 +130,7 @@ export const useFocusableItem = ({
   const { focusedId, registerItem, setFocusedId, unregisterItem } = useTreeFocus()
   const isFocused = focusedId === id
   const isFirstItemEver = focusedId === null
+  const wasFocusedRef = useRef(false)
 
   useEffect(() => {
     registerItem({ id, type, ref })
@@ -129,6 +138,19 @@ export const useFocusableItem = ({
       unregisterItem(id)
     }
   }, [id, ref, type, registerItem, unregisterItem])
+
+  useLayoutEffect(() => {
+    if (
+      isFocused &&
+      !wasFocusedRef.current &&
+      ref.current &&
+      document.activeElement !== ref.current
+    ) {
+      ref.current.focus()
+    }
+
+    wasFocusedRef.current = isFocused
+  }, [isFocused, ref])
 
   const handleFocus = useCallback(() => {
     setFocusedId(id)

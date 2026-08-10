@@ -2,8 +2,6 @@
   .field-type.row {
     --row-gap: var(--spacer-3); /* 16px gap between row items */
 
-    margin-bottom: 0;
-
     .row__fields {
       --spacing-field: 0;
 
@@ -13,13 +11,10 @@
 
       > * {
         flex: 0 1 var(--field-width);
+        min-width: 0;
         display: flex;
         flex-direction: column;
         justify-content: flex-start;
-      }
-
-      &:has(> *:nth-child(1)) {
-        margin-bottom: var(--row-gap);
       }
 
       /* Negative margin technique: each item gets half the gap as margin-inline,

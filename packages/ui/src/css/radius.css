@@ -2,11 +2,9 @@
   :root {
     --radius-none: 0;
     --radius-small: 0.125rem;
+    --radius-chip: 0.1875rem;
     --radius-medium: 0.3125rem;
     --radius-large: 0.8125rem;
     --radius-full: 9999px;
-
-    --stroke-width-small: 1px;
-    --stroke-width-medium: 2px;
   }
 }

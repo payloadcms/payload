@@ -2,9 +2,10 @@ import type { Project } from 'ts-morph'
 
 import { IndentationText, NewLineKind, QuoteKind } from 'ts-morph'
 
-import type { Transform, TransformResult } from './types.js'
+import type { PackageJsonFile, Transform, TransformResult } from './types.js'
 
 export type RunTransformsArgs = {
+  packageJsons?: PackageJsonFile[]
   project: Project
   transforms: Transform[]
 }
@@ -20,6 +21,7 @@ export type RunTransformsResult = {
 }
 
 export async function runTransforms({
+  packageJsons = [],
   project,
   transforms,
 }: RunTransformsArgs): Promise<RunTransformsResult> {
@@ -35,7 +37,7 @@ export async function runTransforms({
 
   for (const transform of transforms) {
     try {
-      const result = await transform.apply({ project })
+      const result = await transform.apply({ packageJsons, project })
       results.push({ name: transform.name, ...result })
     } catch (err) {
       failed = true

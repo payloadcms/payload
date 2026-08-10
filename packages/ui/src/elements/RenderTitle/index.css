@@ -22,9 +22,23 @@
     letter-spacing: inherit;
   }
 
+  .render-title--placeholder {
+    color: var(--color-text-secondary);
+  }
+
   .render-title__id {
     vertical-align: middle;
     position: relative;
+  }
+
+  .render-title__link {
+    color: inherit;
+    text-decoration: none;
+
+    &:hover,
+    &:focus-visible {
+      text-decoration: underline;
+    }
   }
 
   @media (max-width: 768px) {

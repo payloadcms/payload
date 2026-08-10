@@ -48,21 +48,15 @@ export const BlocksFeatureClient = createClientFeature(
 
     const clientBlocks: ClientBlock[] = blocksFields
       .map((field) => {
-        return field.blockReferences
-          ? typeof field.blockReferences[0] === 'string'
-            ? config.blocksMap[field.blockReferences[0]]
-            : field.blockReferences[0]
-          : field.blocks[0]
+        const blockOrSlug = field.blocks[0]
+        return typeof blockOrSlug === 'string' ? config.blocksMap[blockOrSlug] : blockOrSlug
       })
       .filter((block) => block !== undefined)
 
     const clientInlineBlocks: ClientBlock[] = inlineBlocksFields
       .map((field) => {
-        return field.blockReferences
-          ? typeof field.blockReferences[0] === 'string'
-            ? config.blocksMap[field.blockReferences[0]]
-            : field.blockReferences[0]
-          : field.blocks[0]
+        const blockOrSlug = field.blocks[0]
+        return typeof blockOrSlug === 'string' ? config.blocksMap[blockOrSlug] : blockOrSlug
       })
       .filter((block) => block !== undefined)
 

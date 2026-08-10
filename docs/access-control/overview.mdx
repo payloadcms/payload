@@ -29,15 +29,17 @@ There are three main types of Access Control in Payload:
 
 ## Default Access Control
 
-Payload provides default Access Control so that your data is secured behind [Authentication](../authentication/overview) without additional configuration. To do this, Payload sets a default function that simply checks if a user is present on the request. You can override this default behavior by defining your own Access Control functions as needed.
+Payload provides default Access Control so that your data is secured behind [Authentication](../authentication/overview) without additional configuration. To do this, Payload sets a default function that checks that a user is present on the request _and_ that the user belongs to the collection used to access the [Admin Panel](../admin/overview#the-admin-user-collection) (`config.admin.user`). You can override this default behavior by defining your own Access Control functions as needed.
+
+This means that adding a second [Authentication](../authentication/overview)-enabled collection does not automatically grant its users access to everything. Users from collections other than `config.admin.user` are denied by default unless you provide your own Access Control functions.
 
 Here is the default Access Control that Payload provides:
 
 ```ts
-const defaultPayloadAccess = ({ req: { user } }) => {
-  // Return `true` if a user is found
-  // and `false` if it is undefined or null
-  return Boolean(user) // highlight-line
+const defaultPayloadAccess = ({ req: { payload, user } }) => {
+  // Return `true` only if a user is found
+  // and that user belongs to the admin user collection
+  return Boolean(user) && user.collection === payload.config.admin.user // highlight-line
 }
 ```
 

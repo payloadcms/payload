@@ -8,11 +8,8 @@ import {
 } from 'lexical'
 import React, { type JSX } from 'react'
 
-import type { ViewMapInlineBlockComponentProps } from '../../../../types.js'
-import type {
-  InlineBlockFields,
-  SerializedInlineBlockNode,
-} from '../../server/nodes/InlineBlocksNode.js'
+import type { ViewMapInlineBlockComponentProps } from '../../../../types/index.js'
+import type { InlineBlockFields, SerializedInlineBlockNode } from '../../server/schema.js'
 
 import { ServerInlineBlockNode } from '../../server/nodes/InlineBlocksNode.js'
 

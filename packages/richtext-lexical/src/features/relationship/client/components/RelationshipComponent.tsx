@@ -9,7 +9,7 @@ import { $getNodeByKey, $getSelection, $isNodeSelection, $isRangeSelection } fro
 import { formatAdminURL } from 'payload/shared'
 import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
 
-import type { RelationshipData } from '../../server/nodes/RelationshipNode.js'
+import type { RelationshipData } from '../../server/schema.js'
 
 import './index.css'
 import { useLexicalDocumentDrawer } from '../../../../utilities/fieldsDrawer/useLexicalDocumentDrawer.js'

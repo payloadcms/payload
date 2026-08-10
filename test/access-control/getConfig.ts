@@ -153,11 +153,13 @@ export const getConfig: () => Partial<Config> = () => ({
           options: ['admin', 'user'],
         },
       ],
+      versions: false,
     },
     {
       slug: publicUsersSlug,
       auth: true,
       fields: [],
+      versions: false,
     },
     {
       slug,
@@ -219,6 +221,7 @@ export const getConfig: () => Partial<Config> = () => ({
           label: 'Access',
         },
       ],
+      versions: false,
     },
     {
       slug: unrestrictedSlug,
@@ -254,6 +257,7 @@ export const getConfig: () => Partial<Config> = () => ({
           relationTo: createNotUpdateCollectionSlug,
         },
       ],
+      versions: false,
     },
     {
       slug: 'relation-restricted',
@@ -271,6 +275,7 @@ export const getConfig: () => Partial<Config> = () => ({
           relationTo: slug,
         },
       ],
+      versions: false,
     },
     {
       slug: fullyRestrictedSlug,
@@ -286,6 +291,7 @@ export const getConfig: () => Partial<Config> = () => ({
           type: 'text',
         },
       ],
+      versions: false,
     },
     {
       slug: readOnlySlug,
@@ -301,6 +307,7 @@ export const getConfig: () => Partial<Config> = () => ({
           type: 'text',
         },
       ],
+      versions: false,
     },
     {
       slug: userRestrictedCollectionSlug,
@@ -323,6 +330,7 @@ export const getConfig: () => Partial<Config> = () => ({
           type: 'text',
         },
       ],
+      versions: false,
     },
     {
       slug: createNotUpdateCollectionSlug,
@@ -341,6 +349,7 @@ export const getConfig: () => Partial<Config> = () => ({
           type: 'text',
         },
       ],
+      versions: false,
     },
     {
       slug: restrictedVersionsSlug,
@@ -438,6 +447,7 @@ export const getConfig: () => Partial<Config> = () => ({
           ],
         },
       ],
+      versions: false,
     },
     {
       slug: relyOnRequestHeadersSlug,
@@ -453,6 +463,7 @@ export const getConfig: () => Partial<Config> = () => ({
           type: 'text',
         },
       ],
+      versions: false,
     },
     {
       slug: docLevelAccessSlug,
@@ -496,6 +507,7 @@ export const getConfig: () => Partial<Config> = () => ({
         plural: 'Doc Level Access',
         singular: 'Doc Level Access',
       },
+      versions: false,
     },
     {
       slug: hiddenFieldsSlug,
@@ -547,6 +559,7 @@ export const getConfig: () => Partial<Config> = () => ({
           defaultValue: 'default value',
         },
       ],
+      versions: false,
     },
     {
       slug: hiddenAccessSlug,
@@ -575,6 +588,7 @@ export const getConfig: () => Partial<Config> = () => ({
           hidden: true,
         },
       ],
+      versions: false,
     },
     {
       slug: hiddenAccessCountSlug,
@@ -603,6 +617,7 @@ export const getConfig: () => Partial<Config> = () => ({
           hidden: true,
         },
       ],
+      versions: false,
     },
     {
       slug: 'fields-and-top-access',
@@ -658,6 +673,7 @@ export const getConfig: () => Partial<Config> = () => ({
           type: 'checkbox',
         },
       ],
+      versions: false,
     },
     // Collection for testing where query cache with SAME where queries
     {
@@ -696,6 +712,7 @@ export const getConfig: () => Partial<Config> = () => ({
           required: true,
         },
       ],
+      versions: false,
     },
 
     // Collection for testing where query cache with UNIQUE where queries
@@ -745,6 +762,7 @@ export const getConfig: () => Partial<Config> = () => ({
           required: true,
         },
       ],
+      versions: false,
     },
     // Collection for testing async parent permission inheritance
     {
@@ -801,6 +819,7 @@ export const getConfig: () => Partial<Config> = () => ({
           ],
         },
       ],
+      versions: false,
     },
   ],
   globals: [
@@ -820,6 +839,7 @@ export const getConfig: () => Partial<Config> = () => ({
           label: 'Allow access to test global',
         },
       ],
+      versions: false,
     },
     {
       slug: 'test',
@@ -830,6 +850,7 @@ export const getConfig: () => Partial<Config> = () => ({
         },
       },
       fields: [],
+      versions: false,
     },
     {
       slug: readOnlyGlobalSlug,
@@ -843,6 +864,7 @@ export const getConfig: () => Partial<Config> = () => ({
           type: 'text',
         },
       ],
+      versions: false,
     },
     {
       slug: userRestrictedGlobalSlug,
@@ -856,6 +878,7 @@ export const getConfig: () => Partial<Config> = () => ({
           type: 'text',
         },
       ],
+      versions: false,
     },
     {
       slug: readNotUpdateGlobalSlug,
@@ -869,6 +892,7 @@ export const getConfig: () => Partial<Config> = () => ({
           type: 'text',
         },
       ],
+      versions: false,
     },
   ],
   onInit: async (payload) => {

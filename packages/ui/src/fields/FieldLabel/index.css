@@ -10,7 +10,7 @@
 
   label.field-label:not(.unstyled) {
     display: flex;
-    color: var(--color-text);
+    color: var(--field-color-label);
     font-family: var(--text-body-medium-strong-font-family);
     font-weight: var(--text-body-medium-strong-font-weight);
     letter-spacing: var(--field-label-letter-spacing);
@@ -25,7 +25,7 @@
   }
 
   .field-label:not(.unstyled) .required {
-    color: var(--color-text-danger);
+    color: var(--field-color-label-required);
 
     html:not([dir='RTL']) & {
       margin-left: var(--spacer-1);

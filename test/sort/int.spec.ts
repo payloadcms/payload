@@ -594,6 +594,75 @@ describe('Sort', () => {
         )
       })
 
+      it('should not unpublish a published document with a newer draft when reordering', async () => {
+        const publishedDoc = await payload.create({
+          collection: draftsSlug,
+          data: {
+            text: 'Published with newer draft',
+            _status: 'published',
+          },
+        })
+
+        const target = await payload.create({
+          collection: draftsSlug,
+          data: {
+            text: 'Reorder target',
+            _status: 'published',
+          },
+        })
+
+        // Create a newer draft on top of the published version
+        await payload.update({
+          id: publishedDoc.id,
+          collection: draftsSlug,
+          data: {
+            text: 'Published with newer draft - edited',
+          },
+          draft: true,
+        })
+
+        const beforeReorder = await payload.findByID({
+          id: publishedDoc.id,
+          collection: draftsSlug,
+        })
+
+        expect(beforeReorder._status).toBe('published')
+
+        const res = await restClient.POST('/reorder', {
+          body: JSON.stringify({
+            collectionSlug: draftsSlug,
+            docsToMove: [publishedDoc.id],
+            newKeyWillBe: 'greater',
+            orderableFieldName: '_order',
+            target: {
+              id: target.id,
+              key: target._order,
+            },
+          }),
+        })
+
+        expect(res.status).toStrictEqual(200)
+
+        const afterReorder = await payload.findByID({
+          id: publishedDoc.id,
+          collection: draftsSlug,
+        })
+
+        // Reordering must not unpublish the document
+        expect(afterReorder._status).toBe('published')
+
+        const published = await payload.find({
+          collection: draftsSlug,
+          where: {
+            id: {
+              equals: publishedDoc.id,
+            },
+          },
+        })
+
+        expect(published.docs).toHaveLength(1)
+      })
+
       it('should allow to duplicate with reordable', async () => {
         const doc = await payload.create({
           collection: 'orderable',

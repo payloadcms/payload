@@ -9,6 +9,9 @@ const RadioFields: CollectionConfig = {
       name: 'contentType',
       type: 'radio',
       label: 'Content Type',
+      admin: {
+        description: 'Choose the type of content this entry represents.',
+      },
       options: [
         { label: 'Article', value: 'article' },
         { label: 'Video', value: 'video' },
@@ -20,6 +23,9 @@ const RadioFields: CollectionConfig = {
       type: 'radio',
       label: 'Content Type (Required)',
       required: true,
+      admin: {
+        description: 'Choose the type of content this required field represents.',
+      },
       options: [
         { label: 'Article', value: 'article' },
         { label: 'Video', value: 'video' },
@@ -33,6 +39,7 @@ const RadioFields: CollectionConfig = {
       defaultValue: 'video',
       admin: {
         disabled: true,
+        description: 'This disabled radio field still renders its description text.',
       },
       options: [
         { label: 'Article', value: 'article' },
@@ -47,6 +54,7 @@ const RadioFields: CollectionConfig = {
       defaultValue: 'podcast',
       admin: {
         readOnly: true,
+        description: 'This read-only radio field should keep consistent description spacing.',
       },
       options: [
         { label: 'Article', value: 'article' },
@@ -60,6 +68,7 @@ const RadioFields: CollectionConfig = {
       label: 'Content Type (Vertical)',
       admin: {
         layout: 'vertical',
+        description: 'Vertical radio options should match field description spacing.',
       },
       options: [
         { label: 'Article', value: 'article' },
@@ -74,6 +83,7 @@ const RadioFields: CollectionConfig = {
       required: true,
       admin: {
         layout: 'vertical',
+        description: 'Required vertical radio field with description text.',
       },
       options: [
         { label: 'Article', value: 'article' },
@@ -89,6 +99,7 @@ const RadioFields: CollectionConfig = {
       admin: {
         layout: 'vertical',
         disabled: true,
+        description: 'Disabled vertical radio field with description text.',
       },
       options: [
         { label: 'Article', value: 'article' },
@@ -104,6 +115,7 @@ const RadioFields: CollectionConfig = {
       admin: {
         layout: 'vertical',
         readOnly: true,
+        description: 'Read-only vertical radio field with description text.',
       },
       options: [
         { label: 'Article', value: 'article' },
@@ -112,6 +124,7 @@ const RadioFields: CollectionConfig = {
       ],
     },
   ],
+  versions: false,
 }
 
 export default RadioFields

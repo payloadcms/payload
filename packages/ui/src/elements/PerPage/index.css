@@ -3,6 +3,11 @@
     display: flex;
     align-items: center;
     gap: var(--spacer-2);
+
+    .btn {
+      min-height: var(--control-height);
+      height: unset;
+    }
   }
 
   .per-page__label {

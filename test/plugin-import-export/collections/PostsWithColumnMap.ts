@@ -40,4 +40,5 @@ export const PostsWithColumnMap: CollectionConfig = {
       },
     },
   ],
+  versions: false,
 }

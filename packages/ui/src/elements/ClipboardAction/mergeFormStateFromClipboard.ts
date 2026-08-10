@@ -1,8 +1,10 @@
-import type { FieldState, FormState } from 'payload'
+import type { FieldState, FormState, Row } from 'payload'
 
 import ObjectIdImport from 'bson-objectid'
 
 import type { ClipboardPasteData } from './types.js'
+
+import { flattenRows, separateRows } from '../../forms/Form/rows.js'
 
 const ObjectId = 'default' in ObjectIdImport ? ObjectIdImport.default : ObjectIdImport
 
@@ -197,4 +199,57 @@ export function mergeFormStateFromClipboard({
   }
 
   return formState
+}
+
+/**
+ * Inserts a new row at `rowIndex`, populated with clipboard data, without disturbing
+ * any existing rows. Existing rows at and after `rowIndex` are shifted down by one.
+ */
+export function insertRowFromClipboard({
+  dataFromClipboard: clipboardData,
+  formState,
+  path,
+  rowIndex,
+}: {
+  dataFromClipboard: ClipboardPasteData
+  formState: FormState
+  path: string
+  rowIndex: number
+}): FormState {
+  const { path: pathFromClipboard, rowIndex: rowIndexFromClipboard } = clipboardData
+
+  const sourceRowPath =
+    typeof rowIndexFromClipboard === 'number'
+      ? `${pathFromClipboard}.${rowIndexFromClipboard}`
+      : pathFromClipboard
+
+  const blockType = clipboardData.data[`${sourceRowPath}.blockType`]?.value as string | undefined
+
+  const newRowID = new ObjectId().toHexString()
+
+  const { remainingFields, rows } = separateRows(path, formState)
+
+  rows.splice(rowIndex, 0, {
+    id: { initialValue: newRowID, valid: true, value: newRowID },
+  })
+
+  const newRows = [...(formState[path].rows || [])]
+  const newRow: Row = { id: newRowID, isLoading: false }
+  if (blockType) {
+    newRow.blockType = blockType
+  }
+  newRows.splice(rowIndex, 0, newRow)
+
+  const formStateWithNewRow: FormState = {
+    ...remainingFields,
+    ...flattenRows(path, rows),
+    [path]: { ...formState[path], disableFormData: true, rows: newRows, value: rows.length },
+  }
+
+  return mergeFormStateFromClipboard({
+    dataFromClipboard: clipboardData,
+    formState: formStateWithNewRow,
+    path,
+    rowIndex,
+  })
 }

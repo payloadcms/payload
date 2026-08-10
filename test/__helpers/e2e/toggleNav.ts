@@ -26,7 +26,6 @@ export async function openNav(page: Page): Promise<{ nav: ReturnType<Page['locat
 
   // desktop uses .app-header__sidebar-toggle, mobile uses .nav-toggler
   await page.locator('.app-header__sidebar-toggle').click()
-  await expect(page.locator('.nav--nav-animate[inert], .nav--nav-hydrated[inert]')).toBeHidden()
   await expect(page.locator('.template-default.template-default--nav-open')).toBeVisible()
 
   return {

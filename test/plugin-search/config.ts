@@ -22,10 +22,12 @@ export default buildConfigWithDefaults({
     {
       slug: 'custom-ids-1',
       fields: [{ type: 'text', name: 'id' }],
+      versions: false,
     },
     {
       slug: 'custom-ids-2',
       fields: [{ type: 'text', name: 'id' }],
+      versions: false,
     },
     {
       slug: 'filtered-locales',
@@ -40,6 +42,7 @@ export default buildConfigWithDefaults({
           name: 'syncEnglishOnly',
         },
       ],
+      versions: false,
     },
   ],
   localization: {

@@ -104,6 +104,8 @@ type GetDocumentSlots = (args: {
 
 type RenderFieldClient = (args: RenderFieldServerFnArgs) => Promise<RenderFieldServerFnReturnType>
 
+type SwitchLanguageClient = (lang: string) => Promise<void>
+
 export type ServerFunctionsContextType = {
   _internal_renderField: RenderFieldClient
   copyDataFromLocale: CopyDataFromLocaleClient
@@ -114,6 +116,7 @@ export type ServerFunctionsContextType = {
   schedulePublish: SchedulePublishClient
   serverFunction: ServerFunctionClient
   slugify: SlugifyClient
+  switchLanguage: SwitchLanguageClient
 }
 
 export const ServerFunctionsContext = createContext<ServerFunctionsContextType | undefined>(
@@ -293,6 +296,16 @@ export const ServerFunctionsProvider: React.FC<{
     [serverFunction],
   )
 
+  const switchLanguage = useCallback<SwitchLanguageClient>(
+    async (lang) => {
+      await serverFunction({
+        name: 'switch-language',
+        args: { lang },
+      })
+    },
+    [serverFunction],
+  )
+
   return (
     <ServerFunctionsContext
       value={{
@@ -305,6 +318,7 @@ export const ServerFunctionsProvider: React.FC<{
         schedulePublish,
         serverFunction,
         slugify,
+        switchLanguage,
       }}
     >
       {children}

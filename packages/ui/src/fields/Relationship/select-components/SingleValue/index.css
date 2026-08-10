@@ -29,7 +29,7 @@
     justify-content: center;
     margin-left: var(--spacer-1);
     pointer-events: all;
-    border: 1px solid transparent;
+    border: var(--stroke-width-small) solid transparent;
     border-radius: var(--radius-small);
 
     &:focus-visible {

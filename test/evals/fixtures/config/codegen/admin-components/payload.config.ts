@@ -14,6 +14,7 @@ export default buildConfig({
           required: true,
         },
       ],
+      versions: false,
     },
   ],
   admin: {},

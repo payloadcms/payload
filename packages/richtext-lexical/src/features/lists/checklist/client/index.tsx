@@ -1,5 +1,6 @@
 'use client'
 import { $isListNode, INSERT_CHECK_LIST_COMMAND, ListItemNode, ListNode } from '@lexical/list'
+import { CHECK_LIST } from '@lexical/markdown'
 import { $isRangeSelection } from 'lexical'
 
 import type { ToolbarGroup } from '../../../toolbars/types.js'
@@ -11,7 +12,6 @@ import { toolbarTextDropdownGroupWithItems } from '../../../shared/toolbar/textD
 import { LexicalListPlugin } from '../../plugin/index.js'
 import { shouldRegisterListBaseNodes } from '../../shared/shouldRegisterListBaseNodes.js'
 import { slashMenuListGroupWithItems } from '../../shared/slashMenuListGroup.js'
-import { CHECK_LIST } from '../markdownTransformers.js'
 import { LexicalCheckListPlugin } from './plugin/index.js'
 
 const toolbarGroups: ToolbarGroup[] = [

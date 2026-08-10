@@ -8,10 +8,11 @@ type NoResultsProps = {
   Actions?: React.ReactNode[]
   description?: React.ReactNode
   title?: React.ReactNode
+  withMargin?: boolean
 }
-export function NoListResults({ Actions, description, title }: NoResultsProps) {
+export function NoListResults({ Actions, description, title, withMargin }: NoResultsProps) {
   return (
-    <div className={baseClass}>
+    <div className={`${baseClass}${withMargin ? ` ${baseClass}--with-margin` : ''}`}>
       {title ? <span className={`${baseClass}__title`}>{title}</span> : null}
       {description ? <p className={`${baseClass}__description`}>{description}</p> : null}
       {Actions && Actions.length > 0 && (
