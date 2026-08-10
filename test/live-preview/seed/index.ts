@@ -3,6 +3,7 @@ import type { Config } from 'payload'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
+import { getTestSuiteDir } from '../../__helpers/shared/getTestSuiteDir.js'
 import { removeFiles } from '../../__helpers/shared/removeFiles.js'
 import { devUser } from '../../credentials.js'
 import {
@@ -25,10 +26,7 @@ import { tenant2 } from './tenant-2.js'
 import { trashedPost } from './trashed-post.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
-const seedDir =
-  process.env.PAYLOAD_FRAMEWORK === 'tanstack-start' && process.env.ROOT_DIR
-    ? path.resolve(process.env.ROOT_DIR, 'live-preview/seed')
-    : dirname
+const seedDir = getTestSuiteDir({ fallbackDir: dirname, suitePath: 'live-preview/seed' })
 
 export const seed: Config['onInit'] = async (payload) => {
   const existingUser = await payload.find({
