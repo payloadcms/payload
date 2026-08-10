@@ -258,6 +258,20 @@ const presets = payload.config.queryPresets?.constraints
 
 Properties filled during sanitization, including `auth.jwtOrder`, root routes, GraphQL defaults, TypeScript output settings, and admin dashboard defaults, remain required. `Config.auth.jwtOrder` is now optional for incoming configs because Payload supplies its documented default. The unused `SanitizedConfig.paths` property was also removed because it is not present at runtime.
 
+### Sanitized global config types now match runtime defaults
+
+`SanitizedGlobalConfig` no longer uses `DeepRequired`. This reduces TypeScript checker work and preserves optionality for values global sanitization does not populate, such as `access.readVersions`, `admin.components`, `graphQL`, `lockDocuments`, and `typescript`.
+
+Code that consumes these properties may now need to handle `undefined`:
+
+```ts
+if (global.access.readVersions) await global.access.readVersions(args)
+const views = global.admin.components?.views
+const interfaceName = global.typescript?.interface
+```
+
+Properties filled during sanitization, including `_sanitized`, `admin`, `custom`, `label`, standard access functions, hook arrays, endpoints, and flattened fields, remain required. Use `GlobalConfig` for input and `SanitizedGlobalConfig` after sanitization.
+
 ### User types consolidated into `User` and `AuthenticatedUser`
 
 Payload's user types have been consolidated so each one has a clear job. This completes a cleanup already planned in 3.x: `UntypedUser` was deprecated for removal in 4.0, and `TypedUser` was marked to be renamed to `User` in 4.0.
