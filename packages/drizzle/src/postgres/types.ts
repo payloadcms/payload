@@ -25,7 +25,12 @@ import type { Payload, PayloadRequest } from 'payload'
 import type { ClientConfig, QueryResult } from 'pg'
 
 import type { extendDrizzleTable, Operators } from '../index.js'
-import type { BuildQueryJoinAliases, DrizzleAdapter, TransactionPg } from '../types.js'
+import type {
+  BuildQueryJoinAliases,
+  DrizzleAdapter,
+  DrizzleOperatorHandler,
+  TransactionPg,
+} from '../types.js'
 
 export type BaseExtraConfig = Record<
   string,
@@ -128,6 +133,18 @@ export type PostgresSchemaHook = (
   args: PostgresSchemaHookArgs,
 ) => PostgresSchema | Promise<PostgresSchema>
 
+export type PostgresOperatorHandler = {
+  /**
+   * Postgres extensions that must be present in the adapter's `extensions` option for this
+   * handler to be usable. Validated once during adapter initialization.
+   */
+  requiredExtensions?: string[]
+} & DrizzleOperatorHandler
+
+export type PostgresQueryConfig = {
+  operatorHandlers?: PostgresOperatorHandler[]
+}
+
 export type BasePostgresAdapter = {
   afterSchemaInit: PostgresSchemaHook[]
   beforeSchemaInit: PostgresSchemaHook[]
@@ -152,6 +169,7 @@ export type BasePostgresAdapter = {
   insert: Insert
   localesSuffix?: string
   logger: DrizzleConfig['logger']
+  operatorHandlers: PostgresOperatorHandler[]
   operators: Operators
   pgSchema: Schema
   poolOptions?: ClientConfig
@@ -188,6 +206,7 @@ export type PostgresDrizzleAdapter = Omit<
   | 'dropDatabase'
   | 'execute'
   | 'insert'
+  | 'operatorHandlers'
   | 'operators'
   | 'relations'
 >

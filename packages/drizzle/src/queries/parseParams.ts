@@ -8,12 +8,14 @@ import { validOperatorSet } from 'payload/shared'
 
 import type { DrizzleAdapter, GenericColumn } from '../types.js'
 import type { BuildQueryJoinAliases } from './buildQuery.js'
+import type { DrizzleResolvedOperator } from './operatorMap.js'
 
 import { escapeSQLValue } from '../utilities/escapeSQLValue.js'
 import { getNameFromDrizzleTable } from '../utilities/getNameFromDrizzleTable.js'
 import { isValidStringID } from '../utilities/isValidStringID.js'
 import { DistinctSymbol } from '../utilities/rawConstraint.js'
 import { buildAndOrConditions } from './buildAndOrConditions.js'
+import { buildOperatorConstraint } from './buildOperatorConstraint.js'
 import { getTableColumnFromPath } from './getTableColumnFromPath.js'
 import { sanitizeQueryValue } from './sanitizeQueryValue.js'
 
@@ -86,6 +88,7 @@ export function parseParams({
             for (let operator of Object.keys(pathOperators)) {
               if (validOperatorSet.has(operator as Operator)) {
                 const val = where[relationOrPath][operator]
+                const originalOperator = operator as Operator
 
                 const {
                   columnName,
@@ -236,9 +239,18 @@ export function parseParams({
                 if (operator === 'like') {
                   constraints.push(
                     and(
-                      ...val
-                        .split(' ')
-                        .map((word) => adapter.operators.like(table[columnName], `%${word}%`)),
+                      ...val.split(' ').map((word) =>
+                        buildOperatorConstraint({
+                          adapter,
+                          column: table[columnName],
+                          field,
+                          locale,
+                          originalOperator,
+                          path: relationOrPath,
+                          resolvedOperator: 'like',
+                          value: `%${word}%`,
+                        }),
+                      ),
                     ),
                   )
                   break
@@ -294,7 +306,16 @@ export function parseParams({
                   constraints.push(
                     wrapOperator(
                       ...queryColumns.map(({ rawColumn, value }) =>
-                        adapter.operators[queryOperator](rawColumn, value),
+                        buildOperatorConstraint({
+                          adapter,
+                          column: rawColumn,
+                          field,
+                          locale,
+                          originalOperator,
+                          path: relationOrPath,
+                          resolvedOperator: queryOperator as DrizzleResolvedOperator,
+                          value,
+                        }),
                       ),
                     ),
                   )
@@ -404,7 +425,16 @@ export function parseParams({
                   // Create OR conditions for each value in the array
                   orConditions.push(
                     ...queryValue.map((val) =>
-                      adapter.operators[queryOperator](resolvedColumn, val),
+                      buildOperatorConstraint({
+                        adapter,
+                        column: resolvedColumn,
+                        field,
+                        locale,
+                        originalOperator,
+                        path: relationOrPath,
+                        resolvedOperator: queryOperator as DrizzleResolvedOperator,
+                        value: val,
+                      }),
                     ),
                   )
                   // Set constraint to combine all OR conditions
@@ -415,10 +445,16 @@ export function parseParams({
                   break
                 }
 
-                let constraint = adapter.operators[queryOperator](
-                  resolvedColumn,
-                  resolvedQueryValue,
-                )
+                let constraint = buildOperatorConstraint({
+                  adapter,
+                  column: resolvedColumn,
+                  field,
+                  locale,
+                  originalOperator,
+                  path: relationOrPath,
+                  resolvedOperator: queryOperator as DrizzleResolvedOperator,
+                  value: resolvedQueryValue,
+                })
 
                 if (
                   adapter.limitedBoundParameters &&
