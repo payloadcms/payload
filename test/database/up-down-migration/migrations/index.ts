@@ -1,9 +1,9 @@
-import * as migration_20260328_094148 from './20260328_094148.js'
+import * as migration_20260810_162413 from './20260810_162413'
 
 export const migrations = [
   {
-    up: migration_20260328_094148.up,
-    down: migration_20260328_094148.down,
-    name: '20260328_094148',
+    up: migration_20260810_162413.up,
+    down: migration_20260810_162413.down,
+    name: '20260810_162413',
   },
 ]

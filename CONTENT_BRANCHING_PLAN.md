@@ -3,7 +3,7 @@
 **Status:** Design approved; implementation in progress on `feat/content-branching`.
 Targets Payload 4.0.
 
-**Implemented and verified (SQLite):** phase 0 spike; config surface and exclusions; schema injection
+**Implemented and verified on MongoDB, Postgres and SQLite:** phase 0 spike; config surface and exclusions; schema injection
 and unique-index rewriting; branch resolution across the request; the change manifest; the read
 predicate and canonical-ID translation wired through `db-mongodb` and `drizzle`; copy-on-write updates;
 tombstone deletes.
@@ -1310,14 +1310,24 @@ above. The three most recently settled:
 ### Phase 0 spike results
 
 The design rested on three claims inferred from reading the codebase. `test/branching/spike.int.spec.ts`
-now tests them. Status:
+tests them, and **phase 0 is closed** — the spike runs green on all three adapters.
 
-| #   | Claim                                                                                                        | Status                                                                                                    |
-| --- | ------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------- |
-| 1   | `not_in` on a hasMany field is unusable for shadow tracking (§5a)                                            | **Confirmed, and worse than described** — two defects, not one; the empty-array exclusion was unpredicted |
-| 2   | A compound `(field, _branch)` unique index with the `'main'` sentinel enforces main-side uniqueness (§3, §9) | **Confirmed**                                                                                             |
-| 3   | `latest` on collection versions is scoped per parent, so shadow rows need no version changes (§7)            | **Confirmed**                                                                                             |
-| 4   | The unscoped `latest` clearing in `createGlobalVersion` clobbers main's flag from a branch (§8)              | **Not yet testable** — cannot be expressed until `_branch` exists; covered by test 27                     |
+| #   | Claim                                                                                                        | Status                                                                                                                                                                                                                         |
+| --- | ------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 1   | `not_in` on a hasMany field is unusable for shadow tracking (§5a)                                            | **Confirmed on Postgres and SQLite, and worse than described** — two defects, not one; the empty-array exclusion was unpredicted. Mongo's `$nin` is correct on both counts, so a Mongo-only run would have missed it entirely. |
+| 2   | A compound `(field, _branch)` unique index with the `'main'` sentinel enforces main-side uniqueness (§3, §9) | **Confirmed on all three**                                                                                                                                                                                                     |
+| 3   | `latest` on collection versions is scoped per parent, so shadow rows need no version changes (§7)            | **Confirmed on all three**                                                                                                                                                                                                     |
+| 4   | The unscoped `latest` clearing in `createGlobalVersion` clobbers main's flag from a branch (§8)              | **Still not testable** — cannot be expressed until globals carry `_branch`; covered by test 27                                                                                                                                 |
+
+One prediction that did **not** hold: `_branchDocID` was expected to surface as an ObjectID on Mongo and
+break canonical-ID projection. It does not — IDs are normalised before the projection runs, so the same
+code path serves all three adapters.
+
+--- | ------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------- |
+| 1 | `not_in` on a hasMany field is unusable for shadow tracking (§5a) | **Confirmed, and worse than described** — two defects, not one; the empty-array exclusion was unpredicted |
+| 2 | A compound `(field, _branch)` unique index with the `'main'` sentinel enforces main-side uniqueness (§3, §9) | **Confirmed** |
+| 3 | `latest` on collection versions is scoped per parent, so shadow rows need no version changes (§7) | **Confirmed** |
+| 4 | The unscoped `latest` clearing in `createGlobalVersion` clobbers main's flag from a branch (§8) | **Not yet testable** — cannot be expressed until `_branch` exists; covered by test 27 |
 
 **Adapter coverage caveat.** The spike currently runs green on SQLite only. Postgres and Mongo require
 Docker, which was unavailable in the environment where these were first run. Postgres shares the Drizzle
