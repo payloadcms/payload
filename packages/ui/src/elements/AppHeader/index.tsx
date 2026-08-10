@@ -1,4 +1,6 @@
 'use client'
+import { useWindowInfo } from '@faceless-ui/window-info'
+import { PREFERENCE_KEYS } from 'payload/shared'
 import React, { useEffect, useRef, useState } from 'react'
 
 import type { UserMenuSettingsGroup } from '../UserMenu/SettingsMenu/index.js'
@@ -11,6 +13,7 @@ import { useActions } from '../../providers/Actions/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useEmbed } from '../../providers/Embed/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
+import { usePreferences } from '../../providers/Preferences/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Button } from '../Button/index.js'
 import { Localizer } from '../Localizer/index.js'
@@ -34,6 +37,12 @@ export function AppHeader({ CustomAvatar, CustomLogoutButton, settingsItemGroups
   const { Actions } = useActions()
 
   const { navOpen, setNavOpen } = useNav()
+
+  const {
+    breakpoints: { m: midBreak, s: smallBreak },
+  } = useWindowInfo()
+
+  const { setPreference } = usePreferences()
 
   const {
     config: { localization },
@@ -78,7 +87,14 @@ export function AppHeader({ CustomAvatar, CustomLogoutButton, settingsItemGroups
                 buttonStyle="ghost"
                 className={`${baseClass}__sidebar-toggle`}
                 icon={<SidebarIcon />}
-                onClick={() => setNavOpen(!navOpen)}
+                onClick={() => {
+                  setNavOpen(!navOpen)
+
+                  // only persist the preference on widths where the nav is a sidebar (not a modal)
+                  if (midBreak === false && smallBreak === false) {
+                    void setPreference(PREFERENCE_KEYS.NAV, { open: !navOpen }, true)
+                  }
+                }}
                 type="button"
               />
               <div className={`${baseClass}__step-nav-wrapper`}>
