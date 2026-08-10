@@ -3,16 +3,16 @@
 **Status:** Design approved; implementation in progress on `feat/content-branching`.
 Targets Payload 4.0.
 
-**Implemented and verified on MongoDB, Postgres and SQLite:** phase 0 spike; config surface and exclusions; schema injection
-and unique-index rewriting; branch resolution across the request; the change manifest; the read
-predicate and canonical-ID translation wired through `db-mongodb` and `drizzle`; copy-on-write updates;
-tombstone deletes.
+**Implemented and verified on MongoDB, Postgres and SQLite:** phase 0 spike; config surface and
+exclusions; schema injection and unique-index rewriting; branch resolution across the request; the
+change manifest; the read predicate and canonical-ID translation wired through `db-mongodb` and
+`drizzle`; copy-on-write updates; tombstone deletes; drafts, versions and publishing per branch.
 
-Documents can be created, edited and deleted on a branch in full isolation from main, with pagination,
-`totalDocs` and `count` computed by the database.
+Documents can be created, edited, drafted, published and deleted on a branch in full isolation from
+main, with pagination, `totalDocs` and `count` computed by the database.
 
-**Not yet implemented:** `updateMany` / `deleteMany`, drafts and publishing on branches, globals,
-branch-aware joins, the access preflight, merge, and UI. See §19 for phasing.
+**Not yet implemented:** `updateMany` / `deleteMany`, globals, branch-aware joins, the access
+preflight, merge, and UI. See §19 for phasing.
 
 ---
 
