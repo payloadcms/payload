@@ -19,6 +19,7 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { reduceFieldsToOptions } from '../../utilities/reduceFieldsToOptions.js'
 import { Button } from '../Button/index.js'
 import { Condition } from './Condition/index.js'
+import { isEmptyConditionValue, isNoOpConditionValueUpdate } from './conditionValue.js'
 import './index.css'
 import { fieldTypeConditions, getValidFieldOperators } from './field-types.js'
 
@@ -112,7 +113,7 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
       if (conditions.length === 0) {
         // Ignore empty value edits so a cleared row doesn't re-commit itself. Field and
         // operator picks carry empty values too, but must fall through to build the row.
-        if (type === 'value' && (value === undefined || value === null || value === '')) {
+        if (type === 'value' && isEmptyConditionValue(value)) {
           return
         }
 
@@ -137,6 +138,12 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
         // Skip if nothing changed
         const existingValue = existingCondition[String(field.fieldPath)]?.[validOperator]
         if (typeof existingValue !== 'undefined' && existingValue === value) {
+          return
+        }
+
+        if (
+          isNoOpConditionValueUpdate({ type, incomingValue: value, storedValue: existingValue })
+        ) {
           return
         }
 
