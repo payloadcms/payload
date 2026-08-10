@@ -87,6 +87,7 @@ export const getCreateCollectionImportTask = (
           mimetype: fileMimetype,
         },
         format: fileMimetype === 'text/csv' ? 'csv' : 'json',
+        importDoc,
         importMode: (importDoc.importMode as 'create' | 'update' | 'upsert') || 'create',
         matchField: importDoc.matchField as string | undefined,
         maxLimit,

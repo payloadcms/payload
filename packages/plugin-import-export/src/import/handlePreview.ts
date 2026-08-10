@@ -2,7 +2,7 @@ import type { PayloadRequest } from 'payload'
 
 import { addDataAndFileToRequest } from 'payload'
 
-import type { ImportPreviewResponse } from '../types.js'
+import type { ImportDoc, ImportPreviewResponse } from '../types.js'
 
 import {
   DEFAULT_PREVIEW_LIMIT,
@@ -108,6 +108,9 @@ export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
         batchNumber: 1,
         data: parsedData as unknown as Parameters<typeof importHooks.before>[0]['data'],
         format: format ?? 'csv',
+        // Preview runs against the open form, so nothing is saved — this carries every
+        // field the form submitted but has no `id`.
+        importDoc: (req.data ?? {}) as ImportDoc,
         originalData: originalDocs,
         req,
         totalBatches: 1,

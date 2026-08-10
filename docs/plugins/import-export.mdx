@@ -384,7 +384,56 @@ All hooks receive:
 | `req`          | `PayloadRequest`            | The full request object.                                             |
 | `totalBatches` | number                      | Total number of batches in this operation.                           |
 
-`ImportAfterHook` additionally receives `result: ImportResult` (per-batch counts and errors) instead of `data`/`originalData`.
+Export hooks also receive `exportDoc`, and import hooks also receive `importDoc`. `ImportAfterHook` additionally receives `result: ImportResult` (per-batch counts and errors) instead of `data`/`originalData`.
+
+### exportDoc and importDoc
+
+`exportDoc` and `importDoc` give hooks the document that triggered the run, including any fields you added to the imports/exports collection with `overrideCollection`. Use this to read a value an editor set on the import/export form and apply it to every row.
+
+```ts
+importExportPlugin({
+  collections: [
+    {
+      slug: 'posts',
+      export: {
+        // The exports collection has a `batchRef` text field added here
+        overrideCollection: ({ collection }) => {
+          collection.fields = [
+            ...collection.fields,
+            { name: 'batchRef', type: 'text' },
+          ]
+          return collection
+        },
+        hooks: {
+          // Stamp the editor's reference onto every exported row
+          before: ({ data, exportDoc }) => {
+            return data.map((row) => ({ ...row, batchRef: exportDoc.batchRef }))
+          },
+        },
+      },
+    },
+  ],
+})
+```
+
+Both are read once when the run starts and passed unchanged to every batch. They are a snapshot of the document at that moment, not live state — editing the document while a large import runs does not change what later batches receive.
+
+<Banner type="warning">
+  `id` is optional on both, so check for it before using it. Only exports run
+  through the jobs queue have a saved document. The synchronous export path runs
+  in `beforeOperation`, and the download and preview paths never save one, so on
+  those three `exportDoc` is the submitted form data — every field you added is
+  present, but `id`, `createdAt` and `updatedAt` are not. For `importDoc`, both
+  real import paths pass a saved document; only the preview endpoint does not.
+</Banner>
+
+<Banner type="warning">
+  On the paths without an `id`, this is the submitted request body — it has not been through field
+  validation or access control. Treat those values as untrusted input. Do not gate privileged
+  behaviour on a field read from `exportDoc`/`importDoc` unless you have confirmed the document is
+  saved (`if (exportDoc.id) { ... }`), because a caller can put any value on the body of a
+  download or preview request.
+</Banner>
 
 ### before hooks — modify data
 

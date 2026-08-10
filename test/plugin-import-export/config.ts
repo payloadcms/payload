@@ -1,3 +1,5 @@
+import type { CollectionConfig } from 'payload'
+
 import { importExportPlugin } from '@payloadcms/plugin-import-export'
 import { s3Storage } from '@payloadcms/storage-s3'
 import { en } from '@payloadcms/translations/languages/en'
@@ -24,6 +26,7 @@ import {
 } from './collections/PostsWithColumnMap.js'
 import { PostsWithFieldHooks } from './collections/PostsWithFieldHooks.js'
 import { PostsWithHooks } from './collections/PostsWithHooks.js'
+import { PostsWithHooksJobs } from './collections/PostsWithHooksJobs.js'
 import { PostsWithLimits } from './collections/PostsWithLimits.js'
 import { PostsWithS3 } from './collections/PostsWithS3.js'
 import { Users } from './collections/Users.js'
@@ -35,12 +38,23 @@ import {
 } from './hookSpies.js'
 import { seed } from './seed/index.js'
 import {
+  batchRefFieldName,
   customIdPagesSlug,
   postsWithColumnMapSlug,
   postsWithFieldHooksSlug,
+  postsWithHooksJobsSlug,
   postsWithHooksSlug,
   postsWithS3Slug,
 } from './shared.js'
+
+/**
+ * Adds the `batchRef` field to an import/export collection, standing in for a field a
+ * project adds via `overrideCollection` and an editor fills in on the form.
+ */
+const addBatchRefField = (collection: CollectionConfig): CollectionConfig => {
+  collection.fields = [...collection.fields, { name: batchRefFieldName, type: 'text' }]
+  return collection
+}
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -69,6 +83,7 @@ export default buildConfigWithDefaults({
     PostsWithLimits,
     PostsWithS3,
     PostsWithHooks,
+    PostsWithHooksJobs,
     PostsWithFieldHooks,
     PostsWithColumnMap,
     Media,
@@ -269,7 +284,7 @@ export default buildConfigWithDefaults({
             overrideCollection: ({ collection }) => {
               collection.slug = 'posts-with-hooks-export'
               collection.upload.staticDir = path.resolve(dirname, 'uploads')
-              return collection
+              return addBatchRefField(collection)
             },
           },
           import: {
@@ -282,7 +297,37 @@ export default buildConfigWithDefaults({
             overrideCollection: ({ collection }) => {
               collection.slug = 'posts-with-hooks-import'
               collection.upload.staticDir = path.resolve(dirname, 'uploads')
-              return collection
+              return addBatchRefField(collection)
+            },
+          },
+          versions: false,
+        },
+        {
+          // Same hooks as postsWithHooksSlug, but the jobs queue stays enabled so the
+          // import/export run through their task handlers.
+          slug: postsWithHooksJobsSlug,
+          export: {
+            batchSize: 2,
+            hooks: {
+              before: exportBeforeHook,
+              after: exportAfterHook,
+            },
+            overrideCollection: ({ collection }) => {
+              collection.slug = 'posts-with-hooks-jobs-export'
+              collection.upload.staticDir = path.resolve(dirname, 'uploads')
+              return addBatchRefField(collection)
+            },
+          },
+          import: {
+            batchSize: 2,
+            hooks: {
+              before: importBeforeHook,
+              after: importAfterHook,
+            },
+            overrideCollection: ({ collection }) => {
+              collection.slug = 'posts-with-hooks-jobs-import'
+              collection.upload.staticDir = path.resolve(dirname, 'uploads')
+              return addBatchRefField(collection)
             },
           },
           versions: false,

@@ -2,7 +2,7 @@ import type { PayloadRequest, User } from 'payload'
 
 import { isolateObjectProperty } from 'payload'
 
-import type { ImportAfterHook, ImportBeforeHook, ImportResult } from '../types.js'
+import type { ImportAfterHook, ImportBeforeHook, ImportDoc, ImportResult } from '../types.js'
 import type { ImportMode } from './createImport.js'
 
 import {
@@ -56,6 +56,15 @@ export interface ImportProcessOptions {
     after?: ImportAfterHook
     before?: ImportBeforeHook
   }
+  /**
+   * The import document that triggered this run — passed through to hook args.
+   *
+   * Read once by the caller before the run starts and passed unchanged to every batch,
+   * rather than re-read per batch. A long import can fire this hook hundreds of times, and
+   * the values hooks need are the ones set on the form when the import was triggered, so a
+   * snapshot is both cheaper and the correct semantics.
+   */
+  importDoc: ImportDoc
   importMode: ImportMode
   matchField?: string
   /** Raw parsed rows before unflattening — used as originalData in hooks */
@@ -616,6 +625,7 @@ export function createImportBatchProcessor(options: ImportBatchProcessorOptions 
       docs: documents,
       format = 'csv',
       hooks,
+      importDoc,
       importMode,
       matchField,
       originalDocs: originalDocs,
@@ -651,6 +661,7 @@ export function createImportBatchProcessor(options: ImportBatchProcessorOptions 
               batchNumber,
               data: currentBatch as Parameters<ImportBeforeHook>[0]['data'],
               format,
+              importDoc,
               originalData: originalBatch,
               req,
               totalBatches,
@@ -708,6 +719,7 @@ export function createImportBatchProcessor(options: ImportBatchProcessorOptions 
         await hooks.after({
           batchNumber,
           format,
+          importDoc,
           originalData: originalBatch,
           req,
           result: batchHookResult,

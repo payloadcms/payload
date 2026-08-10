@@ -2,6 +2,7 @@ import type {
   CollectionConfig,
   CollectionSlug,
   DataFromCollectionSlug,
+  JsonObject,
   PayloadRequest,
 } from 'payload'
 
@@ -40,6 +41,34 @@ export type ImportResult = {
 }
 
 /**
+ * The export document that triggered the run, including any fields added to the exports
+ * collection via `overrideCollection`.
+ *
+ * `id` is optional because only the jobs-queue path has a saved document when the hooks
+ * run. The synchronous path runs in `beforeOperation` (nothing is saved yet), and the
+ * download and preview paths never persist a document at all. On those three this is the
+ * submitted form data — every user-authored field is present, but `id`, `createdAt` and
+ * `updatedAt` are not.
+ *
+ * Read once at the start of the run and passed unchanged to every batch, so it is a
+ * snapshot taken when the export was triggered, not live state.
+ */
+export type ExportDoc = { id?: number | string } & JsonObject
+
+/**
+ * The import document that triggered the run, including any fields added to the imports
+ * collection via `overrideCollection`.
+ *
+ * `id` is optional because the preview endpoint runs the before hook against form data
+ * that has not been saved. Both real import paths — synchronous and jobs queue — always
+ * pass a saved document with an `id`.
+ *
+ * Read once at the start of the run and passed unchanged to every batch, so it is a
+ * snapshot taken when the import was triggered, not live state.
+ */
+export type ImportDoc = { id?: number | string } & JsonObject
+
+/**
  * Hook called before each export batch is written to file.
  * Receives the transformed batch data and the original DB documents.
  * Return the modified data array — it replaces `data` for the write step.
@@ -49,6 +78,8 @@ export type ExportBeforeHook<TSlug extends CollectionSlug = CollectionSlug> = (a
   batchNumber: number
   /** Transformed batch — flat rows for CSV, nested docs for JSON. Modify and return this. */
   data: Record<string, unknown>[]
+  /** The export document that triggered this run. See {@link ExportDoc} — `id` may be absent. */
+  exportDoc: ExportDoc
   /** Export format. Open-ended to support custom formats in the future. */
   format: 'csv' | 'json' | ({} & string)
   /**
@@ -74,6 +105,8 @@ export type ExportAfterHook = (args: {
   batchNumber: number
   /** The batch data that was written */
   data: Record<string, unknown>[]
+  /** The export document that triggered this run. See {@link ExportDoc} — `id` may be absent. */
+  exportDoc: ExportDoc
   /** Export format */
   format: 'csv' | 'json' | ({} & string)
   /** Raw DB documents before transformation */
@@ -100,6 +133,8 @@ export type ImportBeforeHook<TSlug extends CollectionSlug = CollectionSlug> = (a
   data: Partial<DataFromCollectionSlug<TSlug>>[]
   /** Import format. Open-ended to support custom formats in the future. */
   format: 'csv' | 'json' | ({} & string)
+  /** The import document that triggered this run. See {@link ImportDoc}. */
+  importDoc: ImportDoc
   /** Raw parsed file rows before unflattening. Read-only reference. */
   originalData: Record<string, unknown>[]
   req: PayloadRequest
@@ -116,6 +151,8 @@ export type ImportAfterHook = (args: {
   batchNumber: number
   /** Import format */
   format: 'csv' | 'json' | ({} & string)
+  /** The import document that triggered this run. See {@link ImportDoc}. */
+  importDoc: ImportDoc
   /**
    * Raw parsed file rows for this batch before unflattening and before-hook
    * transformation. For CSV this is the flat key/value row; for JSON this is

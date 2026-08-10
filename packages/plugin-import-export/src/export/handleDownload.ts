@@ -2,6 +2,8 @@ import type { PayloadRequest } from 'payload'
 
 import { APIError } from 'payload'
 
+import type { ExportDoc } from '../types.js'
+
 import { resolveLimit } from '../utilities/resolveLimit.js'
 import { createExport } from './createExport.js'
 
@@ -51,6 +53,9 @@ export const handleDownload = async (req: PayloadRequest, debug = false) => {
       ...body.data,
       debug,
       download: true,
+      // Downloads are streamed and never persisted, so there is no export document. The
+      // submitted form data carries every user-authored field but has no `id`.
+      exportDoc: body.data as ExportDoc,
       maxLimit,
       req,
       user: req.user,

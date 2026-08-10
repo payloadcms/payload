@@ -3,7 +3,7 @@ import type { PayloadRequest, Sort, Where } from 'payload'
 import { addDataAndFileToRequest } from 'payload'
 import { getObjectDotNotation } from 'payload/shared'
 
-import type { ExportBeforeHook, ExportPreviewResponse } from '../types.js'
+import type { ExportBeforeHook, ExportDoc, ExportPreviewResponse } from '../types.js'
 
 import {
   DEFAULT_PREVIEW_LIMIT,
@@ -27,6 +27,7 @@ const applyExportBeforeHook = async (
   originalDocs: unknown[],
   format: 'csv' | 'json' | ({} & string),
   req: PayloadRequest,
+  exportDoc: ExportDoc,
 ): Promise<Record<string, unknown>[]> => {
   if (!hook || data.length === 0) {
     return data
@@ -34,6 +35,7 @@ const applyExportBeforeHook = async (
   return hook({
     batchNumber: 1,
     data,
+    exportDoc,
     format,
     originalData: originalDocs as Record<string, unknown>[],
     req,
@@ -70,6 +72,10 @@ export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
   // Validate and clamp pagination values to safe bounds
   const previewLimit = Math.max(MIN_PREVIEW_LIMIT, Math.min(rawPreviewLimit, MAX_PREVIEW_LIMIT))
   const previewPage = Math.max(MIN_PREVIEW_PAGE, rawPreviewPage)
+
+  // Preview runs against the open form, so nothing is saved — this carries every field the
+  // form submitted, including any added via `overrideCollection`, but has no `id`.
+  const exportDoc = (req.data ?? {}) as ExportDoc
 
   const targetCollection = req.payload.collections[collectionSlug]
   if (!targetCollection) {
@@ -222,7 +228,14 @@ export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
       }),
     )
 
-    transformed = await applyExportBeforeHook(exportHooks?.before, transformed, docs, 'csv', req)
+    transformed = await applyExportBeforeHook(
+      exportHooks?.before,
+      transformed,
+      docs,
+      'csv',
+      req,
+      exportDoc,
+    )
 
     if (schemaColumns && transformed.length > 0) {
       const dataColumns: string[] = []
@@ -284,7 +297,14 @@ export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
       return output
     })
 
-    transformed = await applyExportBeforeHook(exportHooks?.before, transformed, docs, 'json', req)
+    transformed = await applyExportBeforeHook(
+      exportHooks?.before,
+      transformed,
+      docs,
+      'json',
+      req,
+      exportDoc,
+    )
   }
 
   const hasNextPage = previewPage < previewTotalPages

@@ -10,7 +10,16 @@ import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { devUser } from '../credentials.js'
 import { readCSV, readJSON } from './helpers.js'
 import { hookCalls, resetHookSpies } from './hookSpies.js'
-import { postsWithColumnMapSlug, postsWithHooksSlug } from './shared.js'
+import {
+  batchRefFieldName,
+  postsWithColumnMapSlug,
+  postsWithHooksExportSlug,
+  postsWithHooksImportSlug,
+  postsWithHooksJobsExportSlug,
+  postsWithHooksJobsImportSlug,
+  postsWithHooksJobsSlug,
+  postsWithHooksSlug,
+} from './shared.js'
 
 let payload: Payload
 let restClient: NextRESTClient
@@ -831,6 +840,344 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
       const doc = imported.docs[0]! as Record<string, unknown>
       expect(doc.title).toBe('Dropped Test')
       expect(doc['Ignored Column']).toBeUndefined()
+    })
+  })
+
+  // ─────────────────────────────────────────────
+  // importDoc / exportDoc hook args
+  // ─────────────────────────────────────────────
+
+  describe('importDoc / exportDoc hook args', () => {
+    const createdJobsPostIDs: (number | string)[] = []
+
+    afterEach(async () => {
+      for (const id of createdJobsPostIDs) {
+        await payload
+          .delete({ collection: postsWithHooksJobsSlug, id })
+          .catch((err) => payload.logger.warn({ err, id, msg: 'jobs hooks cleanup failed' }))
+      }
+      createdJobsPostIDs.length = 0
+    })
+
+    describe('import', () => {
+      it('should pass importDoc to the before hook on the synchronous path', async () => {
+        const csvContent = `title,count\n"Sync ImportDoc","1"`
+        const file = {
+          data: Buffer.from(csvContent),
+          mimetype: 'text/csv',
+          name: 'import-doc-sync.csv',
+          size: Buffer.from(csvContent).length,
+        }
+
+        const importDoc = await payload.create({
+          collection: postsWithHooksImportSlug,
+          user,
+          data: {
+            [batchRefFieldName]: 'SYNC-REF',
+            collectionSlug: postsWithHooksSlug,
+            importMode: 'create',
+          },
+          file,
+        })
+
+        expect(hookCalls.importBefore).toHaveLength(1)
+        const beforeArgs = hookCalls.importBefore[0]!
+
+        expect(beforeArgs.importDoc).toBeDefined()
+        expect(beforeArgs.importDoc.id).toBe(importDoc.id)
+        expect(beforeArgs.importDoc[batchRefFieldName]).toBe('SYNC-REF')
+
+        const imported = await payload.find({
+          collection: postsWithHooksSlug,
+          where: { title: { equals: 'Sync ImportDoc_imported' } },
+        })
+        imported.docs.forEach((d) => createdHookPostIDs.push(d.id))
+      })
+
+      it('should pass importDoc to the after hook on the synchronous path', async () => {
+        const csvContent = `title,count\n"Sync ImportDoc After","2"`
+        const file = {
+          data: Buffer.from(csvContent),
+          mimetype: 'text/csv',
+          name: 'import-doc-sync-after.csv',
+          size: Buffer.from(csvContent).length,
+        }
+
+        const importDoc = await payload.create({
+          collection: postsWithHooksImportSlug,
+          user,
+          data: {
+            [batchRefFieldName]: 'SYNC-AFTER-REF',
+            collectionSlug: postsWithHooksSlug,
+            importMode: 'create',
+          },
+          file,
+        })
+
+        expect(hookCalls.importAfter).toHaveLength(1)
+        const afterArgs = hookCalls.importAfter[0]!
+
+        expect(afterArgs.importDoc).toBeDefined()
+        expect(afterArgs.importDoc.id).toBe(importDoc.id)
+        expect(afterArgs.importDoc[batchRefFieldName]).toBe('SYNC-AFTER-REF')
+
+        const imported = await payload.find({
+          collection: postsWithHooksSlug,
+          where: { title: { equals: 'Sync ImportDoc After_imported' } },
+        })
+        imported.docs.forEach((d) => createdHookPostIDs.push(d.id))
+      })
+
+      it('should pass importDoc to the before hook when run through the jobs queue', async () => {
+        const csvContent = `title,count\n"Jobs ImportDoc","3"`
+        const file = {
+          data: Buffer.from(csvContent),
+          mimetype: 'text/csv',
+          name: 'import-doc-jobs.csv',
+          size: Buffer.from(csvContent).length,
+        }
+
+        const importDoc = await payload.create({
+          collection: postsWithHooksJobsImportSlug,
+          user,
+          data: {
+            [batchRefFieldName]: 'JOBS-REF',
+            collectionSlug: postsWithHooksJobsSlug,
+            importMode: 'create',
+          },
+          file,
+        })
+
+        await payload.jobs.run()
+
+        expect(hookCalls.importBefore).toHaveLength(1)
+        const beforeArgs = hookCalls.importBefore[0]!
+
+        expect(beforeArgs.importDoc).toBeDefined()
+        expect(beforeArgs.importDoc.id).toBe(importDoc.id)
+        expect(beforeArgs.importDoc[batchRefFieldName]).toBe('JOBS-REF')
+
+        const imported = await payload.find({
+          collection: postsWithHooksJobsSlug,
+          where: { title: { equals: 'Jobs ImportDoc_imported' } },
+        })
+        imported.docs.forEach((d) => createdJobsPostIDs.push(d.id))
+      })
+
+      it('should pass the same importDoc reference to every batch', async () => {
+        const csvContent =
+          `title,count\n` +
+          `"Batched One","1"\n` +
+          `"Batched Two","2"\n` +
+          `"Batched Three","3"\n` +
+          `"Batched Four","4"`
+        const file = {
+          data: Buffer.from(csvContent),
+          mimetype: 'text/csv',
+          name: 'import-doc-batches.csv',
+          size: Buffer.from(csvContent).length,
+        }
+
+        const importDoc = await payload.create({
+          collection: postsWithHooksImportSlug,
+          user,
+          data: {
+            [batchRefFieldName]: 'BATCH-REF',
+            collectionSlug: postsWithHooksSlug,
+            importMode: 'create',
+          },
+          file,
+        })
+
+        // batchSize is 2 for this collection, so 4 rows produce 2 batches
+        expect(hookCalls.importBefore.length).toBeGreaterThan(1)
+        hookCalls.importBefore.forEach((args) => {
+          expect(args.importDoc.id).toBe(importDoc.id)
+          expect(args.importDoc[batchRefFieldName]).toBe('BATCH-REF')
+        })
+
+        const imported = await payload.find({
+          collection: postsWithHooksSlug,
+          where: { title: { contains: 'Batched' } },
+        })
+        imported.docs.forEach((d) => createdHookPostIDs.push(d.id))
+      })
+    })
+
+    describe('export', () => {
+      it('should pass exportDoc with an id to the before hook when run through the jobs queue', async () => {
+        const post = await payload.create({
+          collection: postsWithHooksJobsSlug,
+          data: { title: 'Jobs ExportDoc', count: 1 },
+        })
+        createdJobsPostIDs.push(post.id)
+
+        const exportDoc = await payload.create({
+          collection: postsWithHooksJobsExportSlug,
+          user,
+          data: {
+            [batchRefFieldName]: 'JOBS-EXPORT-REF',
+            collectionSlug: postsWithHooksJobsSlug,
+            format: 'csv',
+            where: { id: { equals: post.id } },
+          },
+        })
+
+        await payload.jobs.run()
+
+        expect(hookCalls.exportBefore).toHaveLength(1)
+        const beforeArgs = hookCalls.exportBefore[0]!
+
+        expect(beforeArgs.exportDoc).toBeDefined()
+        expect(beforeArgs.exportDoc.id).toBe(exportDoc.id)
+        expect(beforeArgs.exportDoc[batchRefFieldName]).toBe('JOBS-EXPORT-REF')
+      })
+
+      it('should pass exportDoc to the after hook when run through the jobs queue', async () => {
+        const post = await payload.create({
+          collection: postsWithHooksJobsSlug,
+          data: { title: 'Jobs ExportDoc After', count: 2 },
+        })
+        createdJobsPostIDs.push(post.id)
+
+        const exportDoc = await payload.create({
+          collection: postsWithHooksJobsExportSlug,
+          user,
+          data: {
+            [batchRefFieldName]: 'JOBS-EXPORT-AFTER-REF',
+            collectionSlug: postsWithHooksJobsSlug,
+            format: 'csv',
+            where: { id: { equals: post.id } },
+          },
+        })
+
+        await payload.jobs.run()
+
+        expect(hookCalls.exportAfter).toHaveLength(1)
+        const afterArgs = hookCalls.exportAfter[0]!
+
+        expect(afterArgs.exportDoc).toBeDefined()
+        expect(afterArgs.exportDoc.id).toBe(exportDoc.id)
+        expect(afterArgs.exportDoc[batchRefFieldName]).toBe('JOBS-EXPORT-AFTER-REF')
+      })
+
+      it('should pass exportDoc carrying the submitted form values, without an id, on the synchronous path', async () => {
+        const post = await payload.create({
+          collection: postsWithHooksSlug,
+          data: { title: 'Sync ExportDoc', secret: 'sync-secret', count: 3 },
+        })
+        createdHookPostIDs.push(post.id)
+
+        await payload.create({
+          collection: postsWithHooksExportSlug,
+          user,
+          data: {
+            [batchRefFieldName]: 'SYNC-EXPORT-REF',
+            collectionSlug: postsWithHooksSlug,
+            format: 'csv',
+            where: { id: { equals: post.id } },
+          },
+        })
+
+        expect(hookCalls.exportBefore).toHaveLength(1)
+        const beforeArgs = hookCalls.exportBefore[0]!
+
+        expect(beforeArgs.exportDoc).toBeDefined()
+        expect(beforeArgs.exportDoc[batchRefFieldName]).toBe('SYNC-EXPORT-REF')
+        // The export runs in beforeOperation, so the document is not saved yet
+        expect(beforeArgs.exportDoc.id).toBeUndefined()
+      })
+
+      it('should pass exportDoc carrying the submitted form values, without an id, on the download path', async () => {
+        const post = await payload.create({
+          collection: postsWithHooksSlug,
+          data: { title: 'Download ExportDoc', secret: 'download-secret', count: 4 },
+        })
+        createdHookPostIDs.push(post.id)
+
+        const response = await restClient.POST(`/${postsWithHooksExportSlug}/download`, {
+          body: JSON.stringify({
+            data: {
+              [batchRefFieldName]: 'DOWNLOAD-REF',
+              collectionSlug: postsWithHooksSlug,
+              format: 'csv',
+              where: { id: { equals: post.id } },
+            },
+          }),
+          headers: { 'Content-Type': 'application/json' },
+        })
+
+        expect(response.status).toBe(200)
+        // Consume the stream so the hook has fired before asserting
+        await response.text()
+
+        expect(hookCalls.exportBefore).toHaveLength(1)
+        const beforeArgs = hookCalls.exportBefore[0]!
+
+        expect(beforeArgs.exportDoc).toBeDefined()
+        expect(beforeArgs.exportDoc[batchRefFieldName]).toBe('DOWNLOAD-REF')
+        // Nothing is ever persisted on the download path
+        expect(beforeArgs.exportDoc.id).toBeUndefined()
+      })
+    })
+
+    describe('preview', () => {
+      it('should pass exportDoc carrying the submitted form values, without an id, on the export preview path', async () => {
+        const post = await payload.create({
+          collection: postsWithHooksSlug,
+          data: { title: 'Preview ExportDoc', secret: 'preview-secret', count: 5 },
+        })
+        createdHookPostIDs.push(post.id)
+
+        const res = await restClient.POST(`/${postsWithHooksExportSlug}/export-preview`, {
+          body: JSON.stringify({
+            [batchRefFieldName]: 'EXPORT-PREVIEW-REF',
+            collectionSlug: postsWithHooksSlug,
+            format: 'csv',
+            previewLimit: 10,
+            previewPage: 1,
+            where: { id: { equals: post.id } },
+          }),
+          headers: { 'Content-Type': 'application/json' },
+        })
+
+        expect(res.status).toBe(200)
+
+        expect(hookCalls.exportBefore).toHaveLength(1)
+        const beforeArgs = hookCalls.exportBefore[0]!
+
+        expect(beforeArgs.exportDoc).toBeDefined()
+        expect(beforeArgs.exportDoc[batchRefFieldName]).toBe('EXPORT-PREVIEW-REF')
+        // Preview runs against the open form, so nothing is saved
+        expect(beforeArgs.exportDoc.id).toBeUndefined()
+      })
+
+      it('should pass importDoc carrying the submitted form values, without an id, on the import preview path', async () => {
+        const csv = `title,count\n"Preview ImportDoc","6"\n`
+        const fileData = Buffer.from(csv).toString('base64')
+
+        const res = await restClient.POST(`/${postsWithHooksImportSlug}/preview-data`, {
+          body: JSON.stringify({
+            [batchRefFieldName]: 'IMPORT-PREVIEW-REF',
+            collectionSlug: postsWithHooksSlug,
+            fileData,
+            format: 'csv',
+            previewLimit: 10,
+            previewPage: 1,
+          }),
+          headers: { 'Content-Type': 'application/json' },
+        })
+
+        expect(res.status).toBe(200)
+
+        expect(hookCalls.importBefore).toHaveLength(1)
+        const beforeArgs = hookCalls.importBefore[0]!
+
+        expect(beforeArgs.importDoc).toBeDefined()
+        expect(beforeArgs.importDoc[batchRefFieldName]).toBe('IMPORT-PREVIEW-REF')
+        // Preview runs against the open form, so nothing is saved
+        expect(beforeArgs.importDoc.id).toBeUndefined()
+      })
     })
   })
 })
