@@ -4,6 +4,7 @@ import path from 'path'
 import { getFileByPath } from 'payload'
 import { fileURLToPath } from 'url'
 
+import { getTestSuiteDir } from '../__helpers/shared/getTestSuiteDir.js'
 import { devUser } from '../credentials.js'
 import { AdminThumbnailSize } from './collections/AdminThumbnailSize/index.js'
 import {
@@ -22,7 +23,7 @@ import {
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
-const seedDir = process.env.ROOT_DIR ? path.resolve(process.env.ROOT_DIR, 'uploads') : dirname
+const seedDir = getTestSuiteDir({ fallbackDir: dirname, suitePath: 'uploads' })
 
 export const seed = async (payload: Payload) => {
   await payload.create({

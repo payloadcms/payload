@@ -245,6 +245,19 @@ const useAPIKey = collection.auth.useAPIKey ?? false
 
 Properties sanitization does fill, including standard access functions, hook arrays, cookie defaults, and normalized auth options, are now required. Use `CollectionConfig` or `IncomingAuthType` for input and `SanitizedCollectionConfig` after sanitization.
 
+### Sanitized root config types now match runtime defaults
+
+`SanitizedConfig` no longer uses `DeepRequired`. This reduces TypeScript checker work and preserves optionality for nested values Payload does not populate, such as `admin.autoLogin`, `graphQL.mutations`, `queryPresets`, and `typescript.postProcess`.
+
+Code that consumes these properties from `payload.config` may now need to handle `undefined`:
+
+```ts
+const autoLogin = payload.config.admin.autoLogin
+const presets = payload.config.queryPresets?.constraints
+```
+
+Properties filled during sanitization, including `auth.jwtOrder`, root routes, GraphQL defaults, TypeScript output settings, and admin dashboard defaults, remain required. `Config.auth.jwtOrder` is now optional for incoming configs because Payload supplies its documented default. The unused `SanitizedConfig.paths` property was also removed because it is not present at runtime.
+
 ### User types consolidated into `User` and `AuthenticatedUser`
 
 Payload's user types have been consolidated so each one has a clear job. This completes a cleanup already planned in 3.x: `UntypedUser` was deprecated for removal in 4.0, and `TypedUser` was marked to be renamed to `User` in 4.0.

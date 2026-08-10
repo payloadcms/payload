@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
-import { updatePackageJson } from './package-json'
+import { preparePackageJson, updatePackageJson } from './package-json'
 import * as fs from 'fs'
 import * as path from 'path'
 import * as os from 'os'
@@ -52,6 +52,87 @@ describe('updatePackageJson', () => {
 
     const updated = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'))
     expect(updated.dependencies.sharp).toBeUndefined()
+  })
+
+  it('should remove selected packages from dependencies and devDependencies', () => {
+    const pkgPath = path.join(tempDir, 'package.json')
+    const originalPkg = {
+      name: 'test-app',
+      scripts: {
+        dev: 'vite',
+      },
+      dependencies: {
+        '@tanstack/router-plugin': '^1.0.0',
+        payload: '^4.0.0',
+      },
+      devDependencies: {
+        '@tanstack/router-plugin': '^1.0.0',
+        typescript: '^6.0.0',
+      },
+    }
+    fs.writeFileSync(pkgPath, JSON.stringify(originalPkg, null, 2))
+
+    updatePackageJson(pkgPath, {
+      removeDependencies: ['@tanstack/router-plugin'],
+    })
+
+    const updated = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'))
+
+    expect(updated).toEqual({
+      name: 'test-app',
+      scripts: {
+        dev: 'vite',
+      },
+      dependencies: {
+        payload: '^4.0.0',
+      },
+      devDependencies: {
+        typescript: '^6.0.0',
+      },
+    })
+  })
+
+  it('should prepare exact package content without writing to disk', () => {
+    const pkgPath = path.join(tempDir, 'package.json')
+    const original = JSON.stringify(
+      {
+        dependencies: {
+          '@tanstack/router-plugin': '^1.0.0',
+          payload: '^4.0.0',
+        },
+        devDependencies: {
+          '@tanstack/router-plugin': '^1.0.0',
+          typescript: '^6.0.0',
+        },
+        name: 'router-app',
+      },
+      null,
+      2,
+    )
+    fs.writeFileSync(pkgPath, original)
+
+    const prepared = preparePackageJson({
+      filePath: pkgPath,
+      options: { removeDependencies: ['@tanstack/router-plugin'] },
+    })
+
+    expect(prepared).toEqual({
+      content: `${JSON.stringify(
+        {
+          dependencies: {
+            payload: '^4.0.0',
+          },
+          devDependencies: {
+            typescript: '^6.0.0',
+          },
+          name: 'router-app',
+        },
+        null,
+        2,
+      )}\n`,
+      filePath: pkgPath,
+    })
+    expect(fs.readFileSync(pkgPath, 'utf8')).toBe(original)
   })
 
   it('updates package name', () => {

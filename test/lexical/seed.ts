@@ -3,6 +3,7 @@ import type { Payload } from 'payload'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
+import { getTestSuiteDir } from '../__helpers/shared/getTestSuiteDir.js'
 import { lexicalDocData } from './collections/Lexical/data.js'
 import { generateLexicalLocalizedRichText } from './collections/LexicalLocalized/generateLexicalRichText.js'
 import { richTextDocData } from './collections/RichText/data.js'
@@ -97,7 +98,7 @@ import { uploadsDoc } from './collections/Upload/shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
-const lexicalDir = process.env.ROOT_DIR ? path.resolve(process.env.ROOT_DIR, 'lexical') : dirname
+const lexicalDir = getTestSuiteDir({ fallbackDir: dirname, suitePath: 'lexical' })
 
 export const seed = async (_payload: Payload) => {
   // Create the admin user first so auto-login still works if a later seed step
