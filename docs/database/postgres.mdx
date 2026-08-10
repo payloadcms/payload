@@ -146,7 +146,9 @@ postgresAdapter({
 
 ### Custom operator replacement
 
-A handler can replace the comparison entirely instead of transforming its operands, for example to use a similarity function instead of pattern matching:
+A handler can replace the comparison entirely instead of transforming its operands, for example to use a similarity function instead of pattern matching.
+
+For the `contains` and `like` operators, `value` arrives already wrapped in `%...%` for the default `ILIKE` pattern match. Strip the `%` before passing the term to a function that does not do pattern matching, such as `similarity()`:
 
 ```ts
 postgresAdapter({
@@ -158,8 +160,11 @@ postgresAdapter({
       {
         name: 'custom-similarity-match',
         operators: ['contains'],
-        build: ({ column, value }) =>
-          sql`similarity(${column}, ${value}) > 0.4`,
+        build: ({ column, value }) => {
+          const term = typeof value === 'string' ? value.slice(1, -1) : value
+
+          return sql`similarity(${column}, ${term}) > 0.4`
+        },
       },
     ],
   },

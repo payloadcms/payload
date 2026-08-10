@@ -167,6 +167,26 @@ const getAccentCollections = () => [
         ],
       },
       {
+        name: 'sections',
+        type: 'blocks' as const,
+        blocks: [
+          {
+            slug: 'textBlock',
+            fields: [
+              {
+                name: 'value',
+                type: 'text' as const,
+              },
+            ],
+          },
+        ],
+      },
+      {
+        name: 'tagsText',
+        type: 'text' as const,
+        hasMany: true,
+      },
+      {
         name: 'score',
         type: 'number' as const,
       },
@@ -305,7 +325,9 @@ describePostgres('postgres operator handlers - postgresUnaccent() behavior', () 
           related: seeded['Ácido'],
           score: 42,
           scores: [1, 2, 3],
+          sections: [{ blockType: 'textBlock', value: 'Ácido block text' }],
           tags: [{ value: 'Ácido tag' }],
+          tagsText: ['Ácido hasMany tag'],
         },
       })
 
@@ -402,6 +424,24 @@ describePostgres('postgres operator handlers - postgresUnaccent() behavior', () 
       const result = await payload.find({
         collection: 'accent-items',
         where: { 'tags.value': { contains: 'acido' } },
+      })
+
+      expect(result.docs.map((doc: any) => doc.id)).toEqual([richDoc.id])
+    })
+
+    it('matches relational blocks sub-field text content', async () => {
+      const result = await payload.find({
+        collection: 'accent-items',
+        where: { 'sections.value': { contains: 'acido' } },
+      })
+
+      expect(result.docs.map((doc: any) => doc.id)).toEqual([richDoc.id])
+    })
+
+    it('matches a hasMany text field value accent-insensitively', async () => {
+      const result = await payload.find({
+        collection: 'accent-items',
+        where: { tagsText: { contains: 'acido' } },
       })
 
       expect(result.docs.map((doc: any) => doc.id)).toEqual([richDoc.id])
@@ -540,6 +580,55 @@ describePostgres('postgres operator handlers - postgresUnaccent() behavior', () 
       where: { title: { contains: 'hello' } },
     })
 
+    expect(result.docs).toHaveLength(1)
+  })
+
+  it('passes a build handler a %-wrapped value for the contains operator', async () => {
+    let receivedValue: unknown
+
+    // The preceding test already pushed this exact schema for its own fresh Payload instance.
+    // pushDevSchema caches the last-pushed schema at module scope and would otherwise skip
+    // re-pushing it here, leaving this test querying tables that were dropped but never recreated.
+    process.env.PAYLOAD_FORCE_DRIZZLE_PUSH = 'true'
+
+    const payload = await initPayload(
+      buildConfig({
+        db: postgresAdapter({
+          pool: { connectionString },
+          query: {
+            operatorHandlers: [
+              {
+                name: 'capture-value',
+                operators: ['contains'],
+                build: ({ column, value }) => {
+                  receivedValue = value
+
+                  // The search term arrives wrapped in `%...%`; strip it before handing the
+                  // term to a non-pattern-matching comparison.
+                  const term = typeof value === 'string' ? value.slice(1, -1) : value
+
+                  return sql`${column} ilike ${`%${term}%`}`
+                },
+              },
+            ],
+          },
+        }),
+        collections: getAccentCollections(),
+        secret: 'secret',
+      }),
+    )
+    activePayloads.push(payload)
+
+    process.env.PAYLOAD_FORCE_DRIZZLE_PUSH = 'false'
+
+    await payload.create({ collection: 'accent-items', data: { title: 'hello world' } })
+
+    const result = await payload.find({
+      collection: 'accent-items',
+      where: { title: { contains: 'hello' } },
+    })
+
+    expect(receivedValue).toBe('%hello%')
     expect(result.docs).toHaveLength(1)
   })
 })
