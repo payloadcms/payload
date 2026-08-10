@@ -9,6 +9,7 @@ import type { Collection } from '../config/types.js'
 import { executeAccess } from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
+import { validateSortQuery } from '../../database/queryValidation/validateSortQuery.js'
 import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
 import { APIError } from '../../errors/APIError.js'
 import { Forbidden } from '../../errors/Forbidden.js'
@@ -136,6 +137,13 @@ export const findDistinctOperation = async (
         throw new Forbidden(req.t)
       }
     }
+
+    await validateSortQuery({
+      collectionConfig,
+      overrideAccess: overrideAccess!,
+      req,
+      sort: args.sort,
+    })
 
     if ('virtual' in fieldResult.field && fieldResult.field.virtual) {
       if (typeof fieldResult.field.virtual !== 'string') {
