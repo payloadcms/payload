@@ -85,6 +85,13 @@ export const myTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'ယခု လုပ်ဆောင်ချက်ကို သင်မတောင်းဆိုထားပါက ဤအီးမေးလ်ကို လျစ်လျူရှုထားခြင်းဖြင့် သင့်စကားဝှက်သည် ပြောင်းလဲမည်မဟုတ်ပါ။',
   },
+  branching: {
+    branch: 'Cawangan',
+    branches: 'Cawangan',
+    newBranch: 'Cawangan baharu…',
+    searchBranches: 'Cari cawangan',
+    selectBranch: 'Pilih cawangan',
+  },
   commandPalette: {
     actions: 'လုပ်ဆောင်ချက်များ',
     createNew: 'အသစ်တစ်ခု ဖန်တီးပါ',

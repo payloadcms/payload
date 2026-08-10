@@ -22,12 +22,18 @@ const getBranchingConfig = (req: PayloadRequest): SanitizedBranchingConfig | und
 /**
  * Resolves the active branch for a request.
  *
+ * The branch is an argument, exactly like `locale` and `depth`: it is whatever
+ * the caller passed, and `main` when they passed nothing. Nothing is read from
+ * storage here — no preference lookup, no cookie — so an unbranched request
+ * costs nothing beyond this function.
+ *
+ * Where the admin UI's persisted selection turns into that argument is the
+ * admin UI's business (`initReq`), the same division `locale` already uses.
+ *
  * Precedence, highest first:
  *   1. explicit Local API argument (`req.branch`, set by the caller)
  *   2. `branch` query param
- *   3. `X-Payload-Branch` header
- *   4. `payload-branch` cookie
- *   5. `main`
+ *   3. `main`
  */
 export const resolveBranch = (req: PayloadRequest): string => {
   const branching = getBranchingConfig(req)
@@ -43,26 +49,7 @@ export const resolveBranch = (req: PayloadRequest): string => {
     return existing.branch
   }
 
-  let branch: string = MAIN_BRANCH
-
-  if (typeof req.branch === 'string' && req.branch) {
-    branch = req.branch
-  } else if (typeof req.query?.branch === 'string' && req.query.branch) {
-    branch = req.query.branch
-  } else {
-    const header = req.headers?.get?.('x-payload-branch')
-
-    if (header) {
-      branch = header
-    } else {
-      const cookie = req.headers?.get?.('cookie')
-      const match = cookie?.match(/(?:^|;\s*)payload-branch=([^;]+)/)
-
-      if (match?.[1]) {
-        branch = decodeURIComponent(match[1])
-      }
-    }
-  }
+  const branch = resolveBranchFromRequest(req) ?? MAIN_BRANCH
 
   if (context) {
     context[stateKey] = { branch, manifest: new Map(), manifestLoaded: false } satisfies BranchState
@@ -71,6 +58,22 @@ export const resolveBranch = (req: PayloadRequest): string => {
   req.branch = branch
 
   return branch
+}
+
+/**
+ * The branch the caller asked for, whether through the Local API option or the
+ * `branch` query param — the same two ways `locale` is supplied.
+ */
+const resolveBranchFromRequest = (req: PayloadRequest): string | undefined => {
+  if (typeof req.branch === 'string' && req.branch) {
+    return req.branch
+  }
+
+  if (typeof req.query?.branch === 'string' && req.query.branch) {
+    return req.query.branch
+  }
+
+  return undefined
 }
 
 /**

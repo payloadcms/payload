@@ -11,7 +11,23 @@ import {
   MAIN_BRANCH,
 } from './types.js'
 
-const hidden = { admin: { disabled: { bulkEdit: true }, hidden: true } } as const
+/**
+ * These columns are branch bookkeeping, not content. They are `admin.hidden`,
+ * but hidden is not the same as read-only: the admin form round-trips every
+ * field it loaded, so an edit made on a branch would submit the `_branch` it
+ * was read with and stamp it back onto the shadow row — quietly moving that
+ * row onto `main` and duplicating the document in production.
+ *
+ * Denying field-level create/update makes them internally writable only.
+ * Field access is skipped under `overrideAccess: true`, which is exactly the
+ * exemption merge needs to flip `_branch` to `'main'` (§16), and the
+ * copy-on-write paths write through `payload.db` directly, below field access
+ * entirely.
+ */
+const internalOnly = {
+  access: { create: () => false, update: () => false },
+  admin: { disabled: { bulkEdit: true }, hidden: true },
+} as const
 
 /**
  * `_branch` — which branch a row belongs to. `'main'` is a non-null sentinel
@@ -22,7 +38,7 @@ const hidden = { admin: { disabled: { bulkEdit: true }, hidden: true } } as cons
 export const buildBranchField = (): Field => ({
   name: branchField,
   type: 'text',
-  ...hidden,
+  ...internalOnly,
   defaultValue: MAIN_BRANCH,
   index: true,
   required: true,
@@ -41,7 +57,7 @@ export const buildBranchField = (): Field => ({
 export const buildBranchDocIDField = (slug: string): Field => ({
   name: branchDocIDField,
   type: 'relationship',
-  ...hidden,
+  ...internalOnly,
   index: true,
   maxDepth: 0,
   relationTo: slug,
@@ -51,7 +67,7 @@ export const buildBranchDocIDField = (slug: string): Field => ({
 export const buildBranchOpField = (): Field => ({
   name: branchOpField,
   type: 'text',
-  ...hidden,
+  ...internalOnly,
   index: true,
 })
 
@@ -59,7 +75,7 @@ export const buildBranchOpField = (): Field => ({
 export const buildBranchParentField = (slug: string): Field => ({
   name: branchParentField,
   type: 'relationship',
-  ...hidden,
+  ...internalOnly,
   index: true,
   maxDepth: 0,
   relationTo: slug,

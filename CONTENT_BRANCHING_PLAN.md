@@ -13,8 +13,28 @@ lifecycle hooks; the per-document access preflight; a REST endpoint for merge.
 The full loop works: branch, edit in isolation, review what changed, merge some or all of it back
 under the merging user's own permissions.
 
-**Not yet implemented:** `updateMany` / `deleteMany`, dangling-reference warnings, and UI. See §19 for
-phasing.
+**Not yet implemented:** `updateMany` / `deleteMany`, dangling-reference warnings, and most of the UI.
+See §19 for phasing.
+
+**Phase 6 UI — started.** The branch switcher is in, as the first crumb of the breadcrumb trail: a
+searchable popup listing `main` plus every open branch the user can read, with a pinned "New branch…"
+action that routes to the standard create view for `payload-branches`. Creating a branch switches onto
+it. The selection is stored in the user's `branch` preference (§15) and threaded onto admin API calls
+as an explicit `branch` argument, the way `locale` is.
+
+Still to do, and known-broken:
+
+- **The branch selector is the only UI.** No branch list, no changed-documents view, no merge flow —
+  the rest of phase 6.
+- **Not all call sites are threaded.** Scheduled publish still targets `main` (§18 says branch
+  scheduling should be rejected outright, so today it silently schedules against production instead of
+  erroring). Auth, preferences, query presets and the storage-side upload fetches are deliberately
+  unthreaded, but that list was compiled by hand and is worth re-deriving.
+- **Stale-branch handling is provider-level only.** A preference naming an unreadable branch falls back
+  to `main` in the UI, but `resolveBranch` itself still does no validation, and an unreadable-but-
+  existing branch does not error as §15 requires.
+- **Unverified in the browser.** Everything above was checked through the REST API and the integration
+  suite; the click-through paths have not been exercised end to end, and bugs remain.
 
 **Where access is enforced.** `merge()` defaults to `overrideAccess: true`, matching every other Local
 API operation, so server-side callers are trusted by default. `POST /<branches>/:id/merge` passes
@@ -907,15 +927,28 @@ must not undo a merge.
 
 ## 15. Branch resolution across APIs
 
-Resolved once per request into `req.branch`, a first-class typed property alongside `req.locale`.
-Precedence, highest first:
+Resolved once per request into `req.branch`, a first-class typed property alongside `req.locale` — and
+resolved the same way `locale` is, which is the model this follows exactly (`getRequestLocale`):
 
 1. **Explicit operation argument** — `payload.find({ collection, branch: 'halloween' })`, typed on every
    Local API operation. Also the escape hatch for cross-branch reads.
 2. **`branch` query param** — parsed in `parseParams`, alongside `draft` and `trash`.
-3. **`X-Payload-Branch` header** — programmatic REST and GraphQL clients.
-4. **`payload-branch` cookie** — how the admin UI persists the switch, same as auth.
-5. **Default `main`.**
+3. **Default `main`.**
+
+**The branch is an argument, never ambient state.** No header, no cookie, and — importantly — **core
+reads nothing from storage to resolve it**. A request that passes no branch is on `main`, full stop, so
+an unbranched request pays nothing: no preference query, no lookup of any kind. This is the single
+biggest constraint on the design of branch resolution, because the alternative taxes every
+authenticated request in the system for a feature most of them aren't using.
+
+**Where the persisted selection lives.** The admin UI stores the editor's branch in the `branch` user
+preference (`PREFERENCE_KEYS.BRANCH`), so it follows them across browsers and machines. Turning that
+preference into the argument is the **admin UI's** job, not core's: `getRequestBranch` runs inside
+`packages/ui`'s `initReq`, exactly where and how `getRequestLocale` already resolves `locale` from its
+own preference. One query per admin page render, zero for everything else.
+
+This division is the whole point — core stays a pure argument-taking API, and the persistence lives in
+the layer that actually has a UI to persist for.
 
 GraphQL gets a `branch` argument on generated queries in
 `packages/graphql/src/schema/initCollections.ts`, next to the existing `draft` and `trash` args.
@@ -1181,7 +1214,7 @@ ID**, one with a **numeric/autoincrement ID**, and one **excluded** via `branchi
 | 7   | `count`, `findDistinct`, and `group-by` agree with `find`                                                                                            |
 | 8   | Relationship population resolves to the branch's version of the related document                                                                     |
 | 9   | Two concurrent branches don't see each other's changes                                                                                               |
-| 10  | Local API argument, query param, header, and cookie resolve identically                                                                              |
+| 10  | Local API argument, query param, and stored branch preference resolve identically                                                                    |
 | 11  | **Regression: `branching` off ⇒ no columns injected, no predicate appended, query shapes unchanged**                                                 |
 | 12  | A collection with `branching: false` is unaffected while others branch                                                                               |
 | 13  | Built-in collections are off by default but opt-in-able; `payload-branches` / `payload-branch-changes` reject opt-in with a config error             |

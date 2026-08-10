@@ -84,6 +84,13 @@ export const taTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'இதை நீங்கள் கோரவில்லை என்றால், இந்த மின்னஞ்சலை புறக்கணிக்கவும். உங்கள் கடவுச்சொல் மாறாது இருக்கும்.',
   },
+  branching: {
+    branch: 'கிளை',
+    branches: 'கிளைகள்',
+    newBranch: 'புதிய கிளை…',
+    searchBranches: 'கிளைகளைத் தேடு',
+    selectBranch: 'கிளையைத் தேர்ந்தெடு',
+  },
   commandPalette: {
     actions: 'செயல்கள்',
     createNew: 'புதியதை உருவாக்கவும்',

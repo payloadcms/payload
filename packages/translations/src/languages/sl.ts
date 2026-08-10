@@ -84,6 +84,13 @@ export const slTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Če tega niste zahtevali, prezrite to e-pošto in vaše geslo bo ostalo nespremenjeno.',
   },
+  branching: {
+    branch: 'Veja',
+    branches: 'Veje',
+    newBranch: 'Nova veja…',
+    searchBranches: 'Iskanje vej',
+    selectBranch: 'Izberi vejo',
+  },
   commandPalette: {
     actions: 'Dejanja',
     createNew: 'Ustvari novo',

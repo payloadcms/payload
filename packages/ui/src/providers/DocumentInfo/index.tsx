@@ -10,6 +10,7 @@ import type { DocumentInfoContext, DocumentInfoProps } from './types.js'
 import { useControllableState } from '../../hooks/useControllableState.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { requests } from '../../utilities/api.js'
+import { useBranchParam } from '../Branch/index.js'
 import { useConfig } from '../Config/index.js'
 import { DocumentTitleProvider } from '../DocumentTitle/index.js'
 import { useLocale, useLocaleLoading } from '../Locale/index.js'
@@ -132,6 +133,7 @@ const DocumentInfo: React.FC<
 
   const { getPreference, setPreference } = usePreferences()
   const { code: locale } = useLocale()
+  const branch = useBranchParam()
   const { localeIsLoading } = useLocaleLoading()
 
   const isInitializing = useMemo(
@@ -260,6 +262,7 @@ const DocumentInfo: React.FC<
   const getDocPermissions = useGetDocPermissions({
     id: id as string,
     api,
+    branch,
     collectionSlug,
     globalSlug,
     i18n,
@@ -335,6 +338,7 @@ const DocumentInfo: React.FC<
 
     return `${baseAPIPath}${docPath}${qs.stringify(
       {
+        branch,
         depth: 0,
         'fallback-locale': 'null',
         locale,
@@ -344,7 +348,7 @@ const DocumentInfo: React.FC<
         addQueryPrefix: true,
       },
     )}`
-  }, [baseAPIPath, locale, pluralType, id, slug, uploadEdits])
+  }, [baseAPIPath, branch, locale, pluralType, id, slug, uploadEdits])
 
   const value: DocumentInfoContext = {
     ...props,

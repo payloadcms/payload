@@ -5,6 +5,14 @@
 
 export const PREFERENCE_KEYS = {
   /**
+   * Stores the content branch the user is currently working on.
+   *
+   * A preference rather than a cookie so the selection follows the user across
+   * devices, and so it is the same store the rest of the admin UI state uses.
+   */
+  BRANCH: 'branch',
+
+  /**
    * Stores dashboard layout configuration
    */
   DASHBOARD_LAYOUT: 'dashboard-layout',

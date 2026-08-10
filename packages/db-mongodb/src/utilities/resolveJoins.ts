@@ -1,4 +1,4 @@
-import type { JoinQuery, SanitizedJoins, Where } from 'payload'
+import type { JoinQuery, PayloadRequest, SanitizedJoins, Where } from 'payload'
 
 import {
   appendVersionToQueryKey,

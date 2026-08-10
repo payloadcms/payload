@@ -9,6 +9,7 @@ import { formatAdminURL } from 'payload/shared'
 import React, { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
+import { useBranchParam } from '../../providers/Branch/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
@@ -42,6 +43,7 @@ export const OrderableTable: React.FC<Props> = ({
   const { config } = useConfig()
   const { data: listQueryData, orderableFieldName, query } = useListQuery()
   const { code: localeCode } = useLocale()
+  const branch = useBranchParam()
   const { t } = useTranslation()
   // Use the data from ListQueryProvider if available, otherwise use the props
   const serverData = listQueryData?.docs || initialData
@@ -132,7 +134,7 @@ export const OrderableTable: React.FC<Props> = ({
       const response = await fetch(
         formatAdminURL({
           apiRoute: config.routes.api,
-          path: `/reorder?locale=${localeCode}`,
+          path: `/reorder?locale=${localeCode}${branch ? `&branch=${encodeURIComponent(branch)}` : ''}`,
         }),
         {
           body: JSON.stringify(jsonBody),

@@ -4,6 +4,7 @@ import type React from 'react'
 import * as qs from 'qs-esm'
 import { useEffect, useRef, useState } from 'react'
 
+import { useBranchParam } from '../providers/Branch/index.js'
 import { useLocale } from '../providers/Locale/index.js'
 import { useTranslation } from '../providers/Translation/index.js'
 import { requests } from '../utilities/api.js'
@@ -35,10 +36,12 @@ export const usePayloadAPI: UsePayloadAPI = (url, options = {}) => {
   const [isLoading, setIsLoading] = useState(!initialData)
   const [isError, setIsError] = useState(false)
   const { code: locale } = useLocale()
+  const branch = useBranchParam()
   const hasInitialized = useRef(false)
 
   const search = qs.stringify(
     {
+      branch,
       locale,
       ...(typeof params === 'object' ? params : {}),
     },

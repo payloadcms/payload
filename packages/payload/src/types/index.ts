@@ -39,8 +39,8 @@ export type CustomPayloadRequestProperties = {
    * The active content branch, or `'main'`.
    *
    * Resolved once per request from, in order: an explicit Local API argument,
-   * the `branch` query param, the `X-Payload-Branch` header, the
-   * `payload-branch` cookie, then `'main'`.
+   * the `branch` query param, the user's stored `branch` preference, then
+   * `'main'` — the same shape as `locale`.
    *
    * Available inside access control functions, so a collection can allow on a
    * branch what it denies on main.

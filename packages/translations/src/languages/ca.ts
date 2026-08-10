@@ -85,6 +85,13 @@ export const caTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Si no has sol·licitat això, ignora aquest correu i la teva contrasenya romandrà inalterada.',
   },
+  branching: {
+    branch: 'Branca',
+    branches: 'Branques',
+    newBranch: 'Nova branca…',
+    searchBranches: 'Cerca branques',
+    selectBranch: 'Selecciona una branca',
+  },
   commandPalette: {
     actions: 'Accions',
     createNew: 'Crear nou',

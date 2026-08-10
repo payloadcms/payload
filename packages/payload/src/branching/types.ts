@@ -70,3 +70,14 @@ export type SanitizedBranchingConfig = {
   enabled: boolean
   maxShadowedIDs: number
 } & Omit<BranchingConfig, 'exclude'>
+
+/**
+ * The branching config as it reaches the browser: which entities branch, and
+ * nothing else. Access functions and merge hooks stay on the server, and the
+ * `Set`s become arrays so the config remains plain JSON.
+ */
+export type ClientBranchingConfig = {
+  branchableCollections: string[]
+  branchableGlobals: string[]
+  enabled: boolean
+}

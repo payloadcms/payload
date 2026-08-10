@@ -85,6 +85,13 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Ako niste zatražili promenu lozinke ignorišite ovu poruku i lozinka će ostati nepromenjena.',
   },
+  branching: {
+    branch: 'Granka',
+    branches: 'Granke',
+    newBranch: 'Nova granka…',
+    searchBranches: 'Pretraži granke',
+    selectBranch: 'Izaberi granku',
+  },
   commandPalette: {
     actions: 'Akcije',
     createNew: 'Kreiraj novo',

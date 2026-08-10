@@ -85,6 +85,13 @@ export const ukTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Якщо ви не сторювали цей запит, будь ласка, проігноруйте це повідомлення',
   },
+  branching: {
+    branch: 'Гілка',
+    branches: 'Гілки',
+    newBranch: 'Нова гілка…',
+    searchBranches: 'Пошук гілок',
+    selectBranch: 'Вибрати гілку',
+  },
   commandPalette: {
     actions: 'Дії',
     createNew: 'Створити новий',

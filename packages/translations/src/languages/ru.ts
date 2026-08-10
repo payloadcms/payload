@@ -86,6 +86,13 @@ export const ruTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Если вы не запрашивали этого, пожалуйста, проигнорируйте это письмо, и ваш пароль останется неизменным.',
   },
+  branching: {
+    branch: 'Ветка',
+    branches: 'Ветки',
+    newBranch: 'Новая ветка…',
+    searchBranches: 'Поиск веток',
+    selectBranch: 'Выбрать ветку',
+  },
   commandPalette: {
     actions: 'Действия',
     createNew: 'Создать новый',

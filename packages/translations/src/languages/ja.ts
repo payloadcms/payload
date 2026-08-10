@@ -85,6 +85,13 @@ export const jaTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'もし望まない場合は、このメールを無視してください。パスワードは変更されません。',
   },
+  branching: {
+    branch: 'ブランチ',
+    branches: 'ブランチ',
+    newBranch: '新しいブランチ…',
+    searchBranches: 'ブランチを検索',
+    selectBranch: 'ブランチを選択',
+  },
   commandPalette: {
     actions: 'アクション',
     createNew: '新規作成',

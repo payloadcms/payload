@@ -86,6 +86,13 @@ export const trTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Eğer bu işlemi siz gerçekleştirmediyseniz bu e-postayı görmezden gelebilirsiniz.',
   },
+  branching: {
+    branch: 'Dal',
+    branches: 'Dallar',
+    newBranch: 'Yeni dal…',
+    searchBranches: 'Dallarda ara',
+    selectBranch: 'Dal seç',
+  },
   commandPalette: {
     actions: 'Eylemler',
     createNew: 'Yeni Oluştur',

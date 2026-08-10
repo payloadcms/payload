@@ -11,11 +11,11 @@ import { SearchIcon } from '../../icons/Search/index.js'
 import { XIcon } from '../../icons/X/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { matchesSearchQuery } from '../../utilities/matchesSearchQuery.js'
 import { Button } from '../Button/index.js'
 import { DraggableSortable } from '../DraggableSortable/index.js'
 import { useDraggableSortable } from '../DraggableSortable/useDraggableSortable/index.js'
 import { Switch } from '../Switch/index.js'
-import { matchesColumnSearch } from './matchesColumnSearch.js'
 import './Popup.css'
 
 const baseClass = 'column-selector'
@@ -208,9 +208,7 @@ export const ColumnSelectionPopup: React.FC<ColumnSelectionPopupProps> = ({
 
     // Filter by search query
     const filtered = searchQuery
-      ? items.filter((item) =>
-          matchesColumnSearch({ labelText: item.labelText, query: searchQuery }),
-        )
+      ? items.filter((item) => matchesSearchQuery({ label: item.labelText, query: searchQuery }))
       : items
 
     return {

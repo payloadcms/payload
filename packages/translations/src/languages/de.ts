@@ -87,6 +87,13 @@ export const deTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Solltest du dies nicht angefordert haben, ignoriere diese E-Mail. Dein Passwort bleibt unverändert.',
   },
+  branching: {
+    branch: 'Branch',
+    branches: 'Branches',
+    newBranch: 'Neuer Branch…',
+    searchBranches: 'Branches durchsuchen',
+    selectBranch: 'Branch auswählen',
+  },
   commandPalette: {
     actions: 'Aktionen',
     createNew: 'Neu erstellen',

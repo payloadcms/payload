@@ -85,6 +85,13 @@ export const viTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Nếu bạn không phải là người yêu cầu thay đổi mật khẩu, xin hãy bỏ qua tin nhắn này và mật khẩu của bạn sẽ được giữ nguyên.',
   },
+  branching: {
+    branch: 'Nhánh',
+    branches: 'Nhánh',
+    newBranch: 'Nhánh mới…',
+    searchBranches: 'Tìm kiếm nhánh',
+    selectBranch: 'Chọn nhánh',
+  },
   commandPalette: {
     actions: 'Hành động',
     createNew: 'Tạo Mới',

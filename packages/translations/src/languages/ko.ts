@@ -84,6 +84,13 @@ export const koTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       '비밀번호 초기화를 요청하지 않았다면 이 이메일을 무시하시고 비밀번호를 변경하지 마세요.',
   },
+  branching: {
+    branch: '브랜치',
+    branches: '브랜치',
+    newBranch: '새 브랜치…',
+    searchBranches: '브랜치 검색',
+    selectBranch: '브랜치 선택',
+  },
   commandPalette: {
     actions: '작업',
     createNew: '새로 만들기',

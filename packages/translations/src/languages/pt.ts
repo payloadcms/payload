@@ -85,6 +85,13 @@ export const ptTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Se você não fez essa requisição, por favor ignore esse email e sua senha permanecerá igual.',
   },
+  branching: {
+    branch: 'Ramificação',
+    branches: 'Ramificações',
+    newBranch: 'Nova ramificação…',
+    searchBranches: 'Pesquisar ramificações',
+    selectBranch: 'Selecionar ramificação',
+  },
   commandPalette: {
     actions: 'Ações',
     createNew: 'Criar Novo',

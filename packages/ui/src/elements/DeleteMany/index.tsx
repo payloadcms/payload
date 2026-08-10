@@ -9,6 +9,7 @@ import React from 'react'
 import { toast } from 'sonner'
 
 import { CheckboxInput } from '../../fields/Checkbox/Input.js'
+import { useBranchParam } from '../../providers/Branch/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -103,6 +104,7 @@ export function DeleteMany({
   } = useConfig()
 
   const { code: locale } = useLocale()
+  const branch = useBranchParam()
   const { i18n } = useTranslation()
   const { openModal } = useModal()
 
@@ -155,6 +157,7 @@ export function DeleteMany({
           apiRoute: api,
           path: `/${relationTo}${qs.stringify(
             {
+              branch,
               limit: 0,
               locale,
               select: {},
@@ -258,6 +261,7 @@ export function DeleteMany({
       afterDelete(result)
     }
   }, [
+    branch,
     selections,
     afterDelete,
     collections,

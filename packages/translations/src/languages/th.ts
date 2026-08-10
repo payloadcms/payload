@@ -83,6 +83,13 @@ export const thTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'หากคุณไม่ได้ร้องขอให้มีการรีเซ็ตรหัสผ่าน คุณสามารถเพิกเฉยข้อความนี้ได้ โดยรหัสผ่านของคุณจะคงอยู่เช่นเดิม',
   },
+  branching: {
+    branch: 'สาขา',
+    branches: 'สาขา',
+    newBranch: 'สาขาใหม่…',
+    searchBranches: 'ค้นหาสาขา',
+    selectBranch: 'เลือกสาขา',
+  },
   commandPalette: {
     actions: 'การดำเนินการ',
     createNew: 'สร้างใหม่',

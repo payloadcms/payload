@@ -98,6 +98,7 @@ export type { BulkUploadProps } from '../../elements/BulkUpload/index.js'
 export { APIKeyInput } from '../../elements/APIKeyInput/index.js'
 export type { APIKeyInputProps } from '../../elements/APIKeyInput/index.js'
 export { Banner } from '../../elements/Banner/index.js'
+export { BranchSelector } from '../../elements/BranchSelector/index.js'
 export { Button } from '../../elements/Button/index.js'
 export { TabButton, Tabs, TabsList } from '../../elements/Tabs/index.js'
 export type { TabsProps, TabsTab } from '../../elements/Tabs/index.js'
@@ -436,6 +437,8 @@ export {
   RouteTransitionProvider,
   useRouteTransition,
 } from '../../providers/RouteTransition/index.js'
+export { BranchProvider, useBranch, useShowBranchSelector } from '../../providers/Branch/index.js'
+export type { BranchContext, BranchOption } from '../../providers/Branch/index.js'
 export { ConfigProvider, PageConfigProvider, useConfig } from '../../providers/Config/index.js'
 export { DocumentEventsProvider, useDocumentEvents } from '../../providers/DocumentEvents/index.js'
 export {

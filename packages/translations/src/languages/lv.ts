@@ -84,6 +84,13 @@ export const lvTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Ja neesat pieprasījis paroles atiestatīšanu, lūdzu, ignorējiet šo e-pastu, un parole paliks nemainīta.',
   },
+  branching: {
+    branch: 'Zars',
+    branches: 'Zari',
+    newBranch: 'Jauns zars…',
+    searchBranches: 'Meklēt zarus',
+    selectBranch: 'Izvēlēties zaru',
+  },
   commandPalette: {
     actions: 'Darbības',
     createNew: 'Izveidot jaunu',

@@ -8,6 +8,7 @@ import { toast } from 'sonner'
 
 import type { PublishManyProps } from './index.js'
 
+import { useBranchParam } from '../../providers/Branch/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useRouteCache } from '../../providers/RouteCache/index.js'
@@ -46,6 +47,7 @@ export function PublishManyDrawerContent(props: PublishManyDrawerContentProps) {
   } = useConfig()
 
   const { code: locale } = useLocale()
+  const branch = useBranchParam()
 
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -97,13 +99,14 @@ export function PublishManyDrawerContent(props: PublishManyDrawerContentProps) {
 
     return qs.stringify(
       {
+        branch,
         locale,
         select: {},
         where: combineWhereConstraints(whereConstraints),
       },
       { addQueryPrefix: true },
     )
-  }, [collection, searchParams, selectAll, ids, locale, where])
+  }, [branch, collection, searchParams, selectAll, ids, locale, where])
 
   const handlePublish = useCallback(async () => {
     const url = formatAdminURL({

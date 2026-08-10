@@ -17,6 +17,7 @@ import {
   parseCookies,
 } from 'payload'
 
+import { getRequestBranch } from './getRequestBranch.js'
 import { getRequestLocale } from './getRequestLocale.js'
 import { selectiveCache } from './selectiveCache.js'
 
@@ -108,6 +109,12 @@ export const initReq = async function ({
       })
 
       req.locale = locale?.code
+
+      // Assigned before anything reads data on this req — access results
+      // included — since `resolveBranch` memoizes the first answer it gives.
+      if (!req.branch) {
+        req.branch = await getRequestBranch({ req })
+      }
 
       const permissions = await getAccessResults({
         req,

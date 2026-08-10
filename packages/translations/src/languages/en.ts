@@ -85,6 +85,13 @@ export const enTranslations = {
     youDidNotRequestPassword:
       'If you did not request this, please ignore this email and your password will remain unchanged.',
   },
+  branching: {
+    branch: 'Branch',
+    branches: 'Branches',
+    newBranch: 'New branch…',
+    searchBranches: 'Search branches',
+    selectBranch: 'Select branch',
+  },
   commandPalette: {
     actions: 'Actions',
     createNew: 'Create New',

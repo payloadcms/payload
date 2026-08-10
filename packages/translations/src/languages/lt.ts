@@ -85,6 +85,13 @@ export const ltTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Jei to neprašėte, prašome ignoruoti šį el. laišką ir jūsų slaptažodis išliks nepakeistas.',
   },
+  branching: {
+    branch: 'Šaka',
+    branches: 'Šakos',
+    newBranch: 'Nauja šaka…',
+    searchBranches: 'Ieškoti šakų',
+    selectBranch: 'Pasirinkti šaką',
+  },
   commandPalette: {
     actions: 'Veiksmai',
     createNew: 'Sukurti naują',

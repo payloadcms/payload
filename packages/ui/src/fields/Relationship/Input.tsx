@@ -30,6 +30,7 @@ import { useDebouncedCallback } from '../../hooks/useDebouncedCallback.js'
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
 import { useQueue } from '../../hooks/useQueue.js'
 import { useAuth } from '../../providers/Auth/index.js'
+import { useBranchParam } from '../../providers/Branch/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentEvents } from '../../providers/DocumentEvents/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
@@ -88,6 +89,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
   const { i18n, t } = useTranslation()
   const { permissions } = useAuth()
   const { code: locale } = useLocale()
+  const branch = useBranchParam()
 
   const [currentlyOpenRelationship, setCurrentlyOpenRelationship] = useState<
     Parameters<ReactSelectAdapterProps['customProps']['onDocumentOpen']>[0]
@@ -252,6 +254,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
                 [key: string]: unknown
                 where: Where
               } = {
+                branch,
                 depth: 0,
                 draft: true,
                 limit: maxResultsPerRequest,
@@ -360,6 +363,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
       getEntityConfig,
       sortOptions,
       maxResultsPerRequest,
+      branch,
       locale,
       api,
       i18n,
@@ -435,6 +439,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
         const fieldToSelect = collection?.admin?.useAsTitle || 'id'
 
         const query = {
+          branch,
           depth: 0,
           draft: true,
           limit: idsToLoad.length,

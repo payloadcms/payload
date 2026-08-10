@@ -85,6 +85,13 @@ export const itTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       "Se non l'hai richiesto, ignora questa email e la tua password rimarrà invariata.",
   },
+  branching: {
+    branch: 'Ramo',
+    branches: 'Rami',
+    newBranch: 'Nuovo ramo…',
+    searchBranches: 'Cerca rami',
+    selectBranch: 'Seleziona ramo',
+  },
   commandPalette: {
     actions: 'Azioni',
     createNew: 'Crea Nuovo',

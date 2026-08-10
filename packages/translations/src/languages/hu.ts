@@ -87,6 +87,13 @@ export const huTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Ha nem Ön kérte ezt, kérjük, hagyja figyelmen kívül ezt az e-mailt, és jelszava változatlan marad.',
   },
+  branching: {
+    branch: 'Ág',
+    branches: 'Ágak',
+    newBranch: 'Új ág…',
+    searchBranches: 'Ágak keresése',
+    selectBranch: 'Ág kiválasztása',
+  },
   commandPalette: {
     actions: 'Műveletek',
     createNew: 'Új létrehozása',

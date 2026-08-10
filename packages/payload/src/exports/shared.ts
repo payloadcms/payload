@@ -14,7 +14,14 @@ export { getLoginOptions } from '../auth/getLoginOptions.js'
 export { addSessionToUser, removeExpiredSessions } from '../auth/sessions.js'
 
 export { getFromImportMap } from '../bin/generateImportMap/utilities/getFromImportMap.js'
+
 export { parsePayloadComponent } from '../bin/generateImportMap/utilities/parsePayloadComponent.js'
+export {
+  branchChangesCollectionSlug,
+  branchesCollectionSlug,
+  type ClientBranchingConfig,
+  MAIN_BRANCH,
+} from '../branching/types.js'
 export {
   type ClientCollectionConfig,
   createClientCollectionConfig,

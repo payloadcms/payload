@@ -84,6 +84,13 @@ export const svTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Om du inte begärde detta, ignorera detta e-postmeddelande och ditt lösenord kommer att förbli oförändrat.',
   },
+  branching: {
+    branch: 'Gren',
+    branches: 'Grenar',
+    newBranch: 'Ny gren…',
+    searchBranches: 'Sök grenar',
+    selectBranch: 'Välj gren',
+  },
   commandPalette: {
     actions: 'Åtgärder',
     createNew: 'Skapa ny',

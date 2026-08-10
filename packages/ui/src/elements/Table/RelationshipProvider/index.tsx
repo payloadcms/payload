@@ -6,6 +6,7 @@ import * as qs from 'qs-esm'
 import React, { createContext, use, useCallback, useEffect, useReducer, useRef } from 'react'
 
 import { useDebounce } from '../../../hooks/useDebounce.js'
+import { useBranchParam } from '../../../providers/Branch/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useLocale } from '../../../providers/Locale/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
@@ -47,6 +48,7 @@ export const RelationshipProvider: React.FC<{ readonly children?: React.ReactNod
 
   const { i18n } = useTranslation()
   const { code: locale } = useLocale()
+  const branch = useBranchParam()
   const prevLocale = useRef(locale)
 
   const loadRelationshipDocs = useCallback(
@@ -88,6 +90,10 @@ export const RelationshipProvider: React.FC<{ readonly children?: React.ReactNod
             params.append('locale', locale)
           }
 
+          if (branch) {
+            params.append('branch', branch)
+          }
+
           const idsToString = idsToLoad.map((id) => String(id))
           params.append('where[id][in]', idsToString.join(','))
 
@@ -116,7 +122,7 @@ export const RelationshipProvider: React.FC<{ readonly children?: React.ReactNod
         }
       })
     },
-    [debouncedDocuments, api, i18n, locale, collections],
+    [debouncedDocuments, api, branch, i18n, locale, collections],
   )
 
   useEffect(() => {

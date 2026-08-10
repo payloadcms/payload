@@ -339,7 +339,7 @@ describe('Branching', () => {
 
   describe('Branch resolution', () => {
     it.todo(
-      'should resolve the branch identically via Local API arg, query param, header and cookie',
+      'should resolve the branch identically via Local API arg, query param and stored preference',
     )
     it.todo('should error rather than fall back to main when the branch is unreadable')
     it.todo('should always resolve req.user from main, even on a branch')

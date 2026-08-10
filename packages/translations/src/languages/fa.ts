@@ -83,6 +83,13 @@ export const faTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'اگر شما درخواست بازنشانی رمز عبور نداده‌اید، این ایمیل را نادیده بگیرید. رمز عبور شما تغییری نخواهد کرد.',
   },
+  branching: {
+    branch: 'شاخه',
+    branches: 'شاخه‌ها',
+    newBranch: 'شاخه جدید…',
+    searchBranches: 'جستجوی شاخه‌ها',
+    selectBranch: 'انتخاب شاخه',
+  },
   commandPalette: {
     actions: 'اقدامات',
     createNew: 'ایجاد جدید',

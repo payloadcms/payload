@@ -85,6 +85,13 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'আপনি যদি এটি অনুরোধ না করে থাকেন, তাহলে এই ইমেইলটি উপেক্ষা করুন এবং আপনার পাসওয়ার্ড অপরিবর্তিত থাকবে।',
   },
+  branching: {
+    branch: 'ব্রাঞ্চ',
+    branches: 'ব্রাঞ্চসমূহ',
+    newBranch: 'নতুন ব্রাঞ্চ…',
+    searchBranches: 'ব্রাঞ্চ খুঁজুন',
+    selectBranch: 'ব্রাঞ্চ নির্বাচন করুন',
+  },
   commandPalette: {
     actions: 'কার্যক্রমসমূহ',
     createNew: 'নতুন তৈরি করুন',

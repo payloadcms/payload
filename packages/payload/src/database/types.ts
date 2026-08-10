@@ -290,6 +290,10 @@ export type CountGlobalVersionArgs = {
 export type CountGlobalVersions = (args: CountGlobalVersionArgs) => Promise<{ totalDocs: number }>
 
 type BaseVersionArgs = {
+  /**
+   * Branch to scope this operation to. `false` bypasses branching entirely.
+   */
+  branch?: false | string
   limit?: number
   locale?: string
   page?: number

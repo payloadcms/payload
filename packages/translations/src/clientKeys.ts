@@ -65,6 +65,12 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'authentication:verifyUser',
   'authentication:youAreInactive',
 
+  'branching:branch',
+  'branching:branches',
+  'branching:newBranch',
+  'branching:searchBranches',
+  'branching:selectBranch',
+
   'commandPalette:createNew',
   'commandPalette:hintClose',
   'commandPalette:hintCreate',

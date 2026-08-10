@@ -86,6 +86,13 @@ export const frTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Si vous ne l’avez pas demandé, veuillez ignorer cet e-mail et votre mot de passe restera inchangé.',
   },
+  branching: {
+    branch: 'Branche',
+    branches: 'Branches',
+    newBranch: 'Nouvelle branche…',
+    searchBranches: 'Rechercher des branches',
+    selectBranch: 'Sélectionner une branche',
+  },
   commandPalette: {
     actions: 'Actions',
     createNew: 'Créer un nouveau',

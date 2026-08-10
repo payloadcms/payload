@@ -85,6 +85,13 @@ export const hyTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Եթե Դուք չեք ուղարկել հարցումը, խնդրում ենք անտեսել այս էլ. նամակը, և Ձեր գաղտնաբառը կմնա անփոփոխ։',
   },
+  branching: {
+    branch: 'Ճյուղ',
+    branches: 'Ճյուղեր',
+    newBranch: 'Նոր ճյուղ…',
+    searchBranches: 'Փնտրել ճյուղեր',
+    selectBranch: 'Ընտրել ճյուղ',
+  },
   commandPalette: {
     actions: 'Գործողություններ',
     createNew: 'Ստեղծել Նոր',

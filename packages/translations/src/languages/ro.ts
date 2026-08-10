@@ -87,6 +87,13 @@ export const roTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Dacă nu ați solicitat acest lucru, vă rugăm să ignorați acest email și parola dvs. va rămâne neschimbată.',
   },
+  branching: {
+    branch: 'Ramură',
+    branches: 'Ramuri',
+    newBranch: 'Ramură nouă…',
+    searchBranches: 'Caută ramuri',
+    selectBranch: 'Selectează ramura',
+  },
   commandPalette: {
     actions: 'Acțiuni',
     createNew: 'Creează nou',

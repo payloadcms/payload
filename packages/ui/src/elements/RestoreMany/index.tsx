@@ -10,6 +10,7 @@ import { toast } from 'sonner'
 
 import { CheckboxInput } from '../../fields/Checkbox/Input.js'
 import { useAuth } from '../../providers/Auth/index.js'
+import { useBranchParam } from '../../providers/Branch/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useRouteCache } from '../../providers/RouteCache/index.js'
@@ -36,6 +37,7 @@ export const RestoreMany: React.FC<Props> = (props) => {
     config: { collections, routes, serverURL },
   } = useConfig()
   const { code: locale } = useLocale()
+  const branch = useBranchParam()
   const router = useRouter()
   const { clearRouteCache } = useRouteCache()
   const searchParams = useSearchParams()
@@ -85,6 +87,7 @@ export const RestoreMany: React.FC<Props> = (props) => {
       apiRoute: routes.api,
       path: `/${slug}${qs.stringify(
         {
+          branch,
           limit: 0,
           locale,
           select: {},

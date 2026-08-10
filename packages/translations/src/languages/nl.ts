@@ -86,6 +86,13 @@ export const nlTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Als u dit niet heeft aangevraagd, negeer dan deze e-mail en uw wachtwoord zal ongewijzigd blijven.',
   },
+  branching: {
+    branch: 'Branch',
+    branches: 'Branches',
+    newBranch: 'Nieuwe branch…',
+    searchBranches: 'Branches zoeken',
+    selectBranch: 'Branch selecteren',
+  },
   commandPalette: {
     actions: 'Acties',
     createNew: 'Nieuw aanmaken',

@@ -28,6 +28,7 @@ import type { UserMenuSettingsGroup } from '../../elements/UserMenu/SettingsMenu
 
 import { DefaultNav } from '../../elements/Nav/index.js'
 import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
+import { RenderBranchProvider } from '../../providers/Branch/index.server.js'
 
 const baseClass = 'template-default'
 
@@ -184,48 +185,50 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
   })
 
   return (
-    <EntityVisibilityProvider visibleEntities={visibleEntities}>
-      <CommandPalette />
-      <BulkUploadProvider modalSlugPrefix={collectionSlug}>
-        <ActionsProvider Actions={Actions} viewKey={viewKey}>
-          {RenderServerComponent({
-            clientProps,
-            Component: CustomHeader,
-            importMap: payload.importMap,
-            serverProps,
-          })}
-          <div style={{ position: 'relative' }}>
-            <Wrapper baseClass={baseClass} className={className}>
-              {NavComponent}
-              <div className={`${baseClass}__wrap`}>
-                <AppHeader
-                  CustomAvatar={
-                    avatar !== 'gravatar' && avatar !== 'default'
-                      ? RenderServerComponent({
-                          Component: avatar.Component,
-                          importMap: payload.importMap,
-                          serverProps,
-                        })
-                      : undefined
-                  }
-                  CustomLogoutButton={
-                    components?.logout?.Button
-                      ? RenderServerComponent({
-                          clientProps,
-                          Component: components.logout.Button,
-                          importMap: payload.importMap,
-                          serverProps,
-                        })
-                      : undefined
-                  }
-                  settingsItemGroups={settingsItemGroups}
-                />
-                {children}
-              </div>
-            </Wrapper>
-          </div>
-        </ActionsProvider>
-      </BulkUploadProvider>
-    </EntityVisibilityProvider>
+    <RenderBranchProvider req={req}>
+      <EntityVisibilityProvider visibleEntities={visibleEntities}>
+        <CommandPalette />
+        <BulkUploadProvider modalSlugPrefix={collectionSlug}>
+          <ActionsProvider Actions={Actions} viewKey={viewKey}>
+            {RenderServerComponent({
+              clientProps,
+              Component: CustomHeader,
+              importMap: payload.importMap,
+              serverProps,
+            })}
+            <div style={{ position: 'relative' }}>
+              <Wrapper baseClass={baseClass} className={className}>
+                {NavComponent}
+                <div className={`${baseClass}__wrap`}>
+                  <AppHeader
+                    CustomAvatar={
+                      avatar !== 'gravatar' && avatar !== 'default'
+                        ? RenderServerComponent({
+                            Component: avatar.Component,
+                            importMap: payload.importMap,
+                            serverProps,
+                          })
+                        : undefined
+                    }
+                    CustomLogoutButton={
+                      components?.logout?.Button
+                        ? RenderServerComponent({
+                            clientProps,
+                            Component: components.logout.Button,
+                            importMap: payload.importMap,
+                            serverProps,
+                          })
+                        : undefined
+                    }
+                    settingsItemGroups={settingsItemGroups}
+                  />
+                  {children}
+                </div>
+              </Wrapper>
+            </div>
+          </ActionsProvider>
+        </BulkUploadProvider>
+      </EntityVisibilityProvider>
+    </RenderBranchProvider>
   )
 }

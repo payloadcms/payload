@@ -32,6 +32,7 @@ import { FieldDescription } from '../../fields/FieldDescription/index.js'
 import { FieldError } from '../../fields/FieldError/index.js'
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
+import { useBranchParam } from '../../providers/Branch/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { normalizeRelationshipValue } from '../../utilities/normalizeRelationshipValue.js'
@@ -130,6 +131,7 @@ export function UploadInput(props: UploadInputProps) {
   } = useBulkUpload()
   const { permissions } = useAuth()
   const { code } = useLocale()
+  const branch = useBranchParam()
   const { i18n, t } = useTranslation()
 
   // This will be used by the bulk upload to allow you to select only collections you have create permissions for
@@ -264,6 +266,7 @@ export function UploadInput(props: UploadInputProps) {
       // 2. Fetch per collection
       const fetches = Object.entries(grouped).map(async ([collection, ids]) => {
         const query = {
+          branch,
           depth: 0,
           draft: true,
           limit: ids.length,
@@ -327,7 +330,7 @@ export function UploadInput(props: UploadInputProps) {
 
       return sortedDocs
     },
-    [api, code, i18n.language, t],
+    [branch, api, code, i18n.language, t],
   )
 
   const normalizeValue = useCallback(

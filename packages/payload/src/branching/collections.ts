@@ -3,6 +3,7 @@ import type { Config } from '../config/types.js'
 import type { SanitizedBranchingConfig } from './types.js'
 
 import { defaultAccess } from '../auth/defaultAccess.js'
+import { slugify } from '../utilities/slugify.js'
 import { wrapInternalEndpoints } from '../utilities/wrapInternalEndpoints.js'
 import { mergeBranchHandler } from './endpoints/merge.js'
 import { branchChangesCollectionSlug, branchesCollectionSlug, MAIN_BRANCH } from './types.js'
@@ -16,9 +17,17 @@ export const getBranchesCollection = (branching: SanitizedBranchingConfig): Coll
     update: defaultAccess,
   },
   admin: {
-    hidden: true,
+    defaultColumns: ['name', 'slug', 'status', 'updatedAt'],
     useAsTitle: 'name',
   },
+  labels: {
+    plural: ({ t }) => t('branching:branches'),
+    singular: ({ t }) => t('branching:branch'),
+  },
+  // Deleting a branch drops its shadow rows, and dropping a branch-created
+  // document cascade-deletes every inbound `_rels` row pointing at it — from
+  // main documents too. That is not something to offer behind a multi-select.
+  disableBulkDelete: true,
   fields: [
     {
       name: 'name',
@@ -29,8 +38,23 @@ export const getBranchesCollection = (branching: SanitizedBranchingConfig): Coll
       name: 'slug',
       type: 'text',
       admin: { readOnly: true },
+      hooks: {
+        // Derived rather than typed: `_branch` stores the slug, so it has to be
+        // URL-safe and immutable. Editors name the branch; the slug follows.
+        beforeValidate: [
+          ({ operation, originalDoc, previousValue, siblingData, value }) => {
+            if (operation === 'create') {
+              return slugify(value as string) || slugify(siblingData?.name as string)
+            }
+
+            // Immutable after create: `_branch` stores the slug rather than a
+            // foreign key, so renaming it would orphan every shadow row. The
+            // stored value wins over whatever the request supplied.
+            return (previousValue as string) ?? (originalDoc as { slug?: string })?.slug ?? value
+          },
+        ],
+      },
       index: true,
-      required: true,
       unique: true,
       validate: (value: unknown) =>
         value === MAIN_BRANCH ? `"${MAIN_BRANCH}" is a reserved branch name.` : true,
@@ -38,6 +62,7 @@ export const getBranchesCollection = (branching: SanitizedBranchingConfig): Coll
     {
       name: 'status',
       type: 'select',
+      admin: { readOnly: true },
       defaultValue: 'open',
       index: true,
       options: ['open', 'merging', 'merged', 'closed'],
@@ -45,6 +70,7 @@ export const getBranchesCollection = (branching: SanitizedBranchingConfig): Coll
     {
       name: 'mergedAt',
       type: 'date',
+      admin: { readOnly: true },
     },
   ],
   // Wrapped so the POST body is parsed onto `req.data`, as with every other

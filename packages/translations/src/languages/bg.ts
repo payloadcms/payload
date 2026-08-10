@@ -84,6 +84,13 @@ export const bgTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Ако не си заявил това, игнорирай този имейл и паролата ти ще остане непроменена.',
   },
+  branching: {
+    branch: 'Клон',
+    branches: 'Клонове',
+    newBranch: 'Нов клон…',
+    searchBranches: 'Търсене в клонове',
+    selectBranch: 'Изберете клон',
+  },
   commandPalette: {
     actions: 'Действия',
     createNew: 'Създаване на нов',

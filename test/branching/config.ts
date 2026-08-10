@@ -5,6 +5,7 @@ import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { hookSpy } from './hookSpy.js'
 import {
+  branchesSlug,
   categoriesSlug,
   excludedSlug,
   headerGlobalSlug,
@@ -116,6 +117,19 @@ export default buildConfigWithDefaults({
       collection: 'users',
       data: { email: devUser.email, password: devUser.password },
     })
+
+    // Seeded so the branch switcher in the admin panel has something to switch
+    // between as soon as `pnpm dev branching` comes up.
+    for (const branch of [
+      { name: 'Halloween Updates', slug: 'halloween-updates' },
+      { name: 'Q4 Campaign', slug: 'q4-campaign' },
+      { name: 'Pricing Refresh', slug: 'pricing-refresh' },
+    ]) {
+      await payload.create({
+        collection: branchesSlug,
+        data: { ...branch, status: 'open' },
+      })
+    }
   },
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),

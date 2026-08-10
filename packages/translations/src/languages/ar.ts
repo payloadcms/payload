@@ -85,6 +85,13 @@ export const arTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'إن لم تطلب هذا ، يرجى تجاهل هذا البريد الإلكتروني وستبقى كلمة مرورك ذاتها بدون تغيير.',
   },
+  branching: {
+    branch: 'فرع',
+    branches: 'الفروع',
+    newBranch: 'فرع جديد…',
+    searchBranches: 'البحث في الفروع',
+    selectBranch: 'اختر الفرع',
+  },
   commandPalette: {
     actions: 'الإجراءات',
     createNew: 'إنشاء جديد',

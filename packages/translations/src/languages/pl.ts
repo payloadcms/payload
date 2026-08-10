@@ -85,6 +85,13 @@ export const plTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Jeśli nie prosiłeś o zmianę hasła, zignoruj tę wiadomość, a Twoje hasło pozostanie niezmienione.',
   },
+  branching: {
+    branch: 'Gałąź',
+    branches: 'Gałęzie',
+    newBranch: 'Nowa gałąź…',
+    searchBranches: 'Szukaj gałęzi',
+    selectBranch: 'Wybierz gałąź',
+  },
   commandPalette: {
     actions: 'Działania',
     createNew: 'Utwórz nowy',

@@ -85,6 +85,13 @@ export const hrTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Ako niste zatražili ovo, molimo ignorirajte ovaj e-mail i Vaša će lozinka ostati nepromijenjena.',
   },
+  branching: {
+    branch: 'Grana',
+    branches: 'Grane',
+    newBranch: 'Nova grana…',
+    searchBranches: 'Pretraži grane',
+    selectBranch: 'Odaberi granu',
+  },
   commandPalette: {
     actions: 'Radnje',
     createNew: 'Kreiraj novo',

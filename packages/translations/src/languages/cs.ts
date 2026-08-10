@@ -84,6 +84,13 @@ export const csTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Pokud jste o to nepožádali, ignorujte prosím tento e-mail a vaše heslo zůstane nezměněno.',
   },
+  branching: {
+    branch: 'Větev',
+    branches: 'Větve',
+    newBranch: 'Nová větev…',
+    searchBranches: 'Hledat větve',
+    selectBranch: 'Vybrat větev',
+  },
   commandPalette: {
     actions: 'Akce',
     createNew: 'Vytvořit nový',

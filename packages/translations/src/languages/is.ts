@@ -86,6 +86,13 @@ export const isTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Ef þú baðst ekki um þetta, vinsamlegast hunsaðu þennan tölvupóst og lykilorðið þitt verður óbreytt.',
   },
+  branching: {
+    branch: 'Grein',
+    branches: 'Greinar',
+    newBranch: 'Ný grein…',
+    searchBranches: 'Leita í greinum',
+    selectBranch: 'Velja grein',
+  },
   commandPalette: {
     actions: 'Aðgerðir',
     createNew: 'Búa til nýtt',

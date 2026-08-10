@@ -83,6 +83,13 @@ export const daTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Hvis du ikke har anmodet om dette, skal du blot ignorere denne e-mail, og din adgangskode vil forblive uændret',
   },
+  branching: {
+    branch: 'Gren',
+    branches: 'Grene',
+    newBranch: 'Ny gren…',
+    searchBranches: 'Søg i grene',
+    selectBranch: 'Vælg gren',
+  },
   commandPalette: {
     actions: 'Handlinger',
     createNew: 'Opret ny',

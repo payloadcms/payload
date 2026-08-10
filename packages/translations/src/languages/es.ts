@@ -85,6 +85,13 @@ export const esTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Si no solicitaste esto, por favor ignora este correo y tu contraseña permanecerá sin cambios.',
   },
+  branching: {
+    branch: 'Rama',
+    branches: 'Ramas',
+    newBranch: 'Nueva rama…',
+    searchBranches: 'Buscar ramas',
+    selectBranch: 'Seleccionar rama',
+  },
   commandPalette: {
     actions: 'Acciones',
     createNew: 'Crear nuevo',

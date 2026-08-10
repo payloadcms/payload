@@ -84,6 +84,13 @@ export const azTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Əgər siz bunu tələb etməmisinizsə, lütfən, bu e-poçtu nəzərə almayın və şifrəniz dəyişilməz qalacaq.',
   },
+  branching: {
+    branch: 'Qol',
+    branches: 'Qollar',
+    newBranch: 'Yeni qol…',
+    searchBranches: 'Qollarda axtar',
+    selectBranch: 'Qol seçin',
+  },
   commandPalette: {
     actions: 'Əməliyyatlar',
     createNew: 'Yeni Yaradın',

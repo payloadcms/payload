@@ -85,6 +85,13 @@ export const idTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Jika Anda tidak meminta ini, harap abaikan email ini dan kata sandi Anda akan tetap tidak berubah.',
   },
+  branching: {
+    branch: 'Cabang',
+    branches: 'Cabang',
+    newBranch: 'Cabang baru…',
+    searchBranches: 'Cari cabang',
+    selectBranch: 'Pilih cabang',
+  },
   commandPalette: {
     actions: 'Tindakan',
     createNew: 'Buat Baru',

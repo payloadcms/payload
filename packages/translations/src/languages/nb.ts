@@ -84,6 +84,13 @@ export const nbTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Hvis du ikke har bedt om dette, kan du ignorere denne e-posten, og passordet ditt vil forbli uendret.',
   },
+  branching: {
+    branch: 'Gren',
+    branches: 'Grener',
+    newBranch: 'Ny gren…',
+    searchBranches: 'Søk i grener',
+    selectBranch: 'Velg gren',
+  },
   commandPalette: {
     actions: 'Handlinger',
     createNew: 'Opprett ny',

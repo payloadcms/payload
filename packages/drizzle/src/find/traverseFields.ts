@@ -21,7 +21,7 @@ import {
 import { fieldIsVirtual, fieldShouldBeLocalized, hasDraftsEnabled } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
-import type { BuildQueryJoinAliases, DrizzleAdapter } from '../types.js'
+import type { BuildQueryJoinAliases, DrizzleAdapter, GenericColumn } from '../types.js'
 import type { Result } from './buildFindManyArgs.js'
 
 import { buildQuery } from '../queries/buildQuery.js'
@@ -770,9 +770,12 @@ export const traverseFields = ({
           // primary key, so join results address documents the same way every
           // other read does.
           if (joinBranchPredicate && newAliasTable._branchDocID) {
+            // `selectFields` is typed as a column map, but Drizzle accepts an
+            // aliased expression in the same position — as the sibling
+            // `sql\`...\`.as()` assignments above already rely on.
             selectFields.id = sql`COALESCE(${newAliasTable._branchDocID}, ${newAliasTable.id})`.as(
               'id',
-            )
+            ) as unknown as GenericColumn
           }
 
           let query: SQLiteSelect = db

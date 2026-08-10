@@ -83,6 +83,13 @@ export const etTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Kui te seda ei taotlenud, ignoreerige seda e-kirja ja teie parool jääb muutmata.',
   },
+  branching: {
+    branch: 'Haru',
+    branches: 'Harud',
+    newBranch: 'Uus haru…',
+    searchBranches: 'Otsi harusid',
+    selectBranch: 'Vali haru',
+  },
   commandPalette: {
     actions: 'Tegevused',
     createNew: 'Loo uus',

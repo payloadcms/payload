@@ -85,6 +85,13 @@ export const skTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Ak ste o to nepožiadali, ignorujte prosím tento e-mail a vaše heslo zostane nezmenené.',
   },
+  branching: {
+    branch: 'Vetva',
+    branches: 'Vetvy',
+    newBranch: 'Nová vetva…',
+    searchBranches: 'Hľadať vetvy',
+    selectBranch: 'Vybrať vetvu',
+  },
   commandPalette: {
     actions: 'Akcie',
     createNew: 'Vytvoriť nové',

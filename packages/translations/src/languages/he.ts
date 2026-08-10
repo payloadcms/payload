@@ -82,6 +82,13 @@ export const heTranslations: DefaultTranslationsObject = {
       'קיבלת הודעה זו מכיוון שאתה (או מישהו אחר) ביקשת לאפס את הסיסמה של החשבון שלך. אנא לחץ על הקישור הבא או הדבק אותו בשורת הכתובת בדפדפן שלך כדי להשלים את התהליך:',
     youDidNotRequestPassword: 'אם לא ביקשת זאת, אנא התעלם מההודעה והסיסמה שלך תישאר ללא שינוי.',
   },
+  branching: {
+    branch: 'ענף',
+    branches: 'ענפים',
+    newBranch: 'ענף חדש…',
+    searchBranches: 'חיפוש ענפים',
+    selectBranch: 'בחר ענף',
+  },
   commandPalette: {
     actions: 'פעולות',
     createNew: 'צור חדש',
