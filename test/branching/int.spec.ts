@@ -4,6 +4,8 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
+import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
+
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { devUser } from '../credentials.js'
 import { hookSpy } from './hookSpy.js'
@@ -23,6 +25,8 @@ import {
 } from './shared.js'
 
 let payload: Payload
+let restClient: NextRESTClient
+let token: string
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -35,7 +39,15 @@ const collectionConfig = (slug: string): SanitizedCollectionConfig =>
 
 describe('Branching', () => {
   beforeAll(async () => {
-    ;({ payload } = await initPayloadInt(dirname))
+    ;({ payload, restClient } = await initPayloadInt(dirname))
+
+    const login = await restClient
+      .POST('/users/login', {
+        body: JSON.stringify({ email: devUser.email, password: devUser.password }),
+      })
+      .then((res) => res.json())
+
+    token = login.token
   })
 
   afterAll(async () => {
@@ -1382,6 +1394,151 @@ describe('Branching', () => {
       for (const doc of all.docs) {
         expect(doc._branch).toBe('main')
       }
+    })
+  })
+
+  describe('Merge REST endpoint', () => {
+    let branchID: number | string
+    let docID: number | string
+
+    beforeEach(async () => {
+      const branchDoc = await payload.create({
+        collection: branchesSlug,
+        data: { name: 'REST merge', slug: 'restmerge' },
+      })
+      branchID = branchDoc.id
+
+      const doc = await payload.create({
+        collection: postsSlug,
+        data: { title: 'original on main' },
+      })
+      docID = doc.id
+
+      await payload.update({
+        branch: 'restmerge',
+        collection: postsSlug,
+        data: { title: 'edited on branch' },
+        id: docID,
+      })
+    })
+
+    afterEach(async () => {
+      const rows = await payload.find({ branch: false, collection: postsSlug, pagination: false })
+
+      for (const row of rows.docs) {
+        await payload.delete({ branch: false, collection: postsSlug, id: row.id })
+      }
+
+      for (const collection of [branchChangesSlug, branchesSlug]) {
+        const found = await payload.find({
+          collection,
+          pagination: false,
+          where: { [collection === branchesSlug ? 'slug' : 'branch']: { equals: 'restmerge' } },
+        })
+
+        for (const row of found.docs) {
+          await payload.delete({ collection, id: row.id })
+        }
+      }
+    })
+
+    it('should reject an unauthenticated merge', async () => {
+      const res = await restClient.POST(`/${branchesSlug}/${branchID}/merge`, {
+        // NextRESTClient attaches its stored token unless auth is disabled.
+        auth: false,
+        body: JSON.stringify({}),
+      })
+
+      expect([401, 403]).toContain(res.status)
+
+      const onMain = await payload.findByID({ collection: postsSlug, id: docID })
+
+      expect(onMain.title).toBe('original on main')
+    })
+
+    it('should report the pending changes on a dryRun without mutating', async () => {
+      const res = await restClient.POST(`/${branchesSlug}/${branchID}/merge`, {
+        body: JSON.stringify({ dryRun: true }),
+        headers: { Authorization: `JWT ${token}` },
+      })
+      const data = await res.json()
+
+      expect(res.status).toBe(200)
+      expect(data.mergeable).toHaveLength(1)
+      expect(String(data.mergeable[0].docID)).toBe(String(docID))
+
+      const onMain = await payload.findByID({ collection: postsSlug, id: docID })
+
+      expect(onMain.title).toBe('original on main')
+    })
+
+    it('should apply the merge when authenticated', async () => {
+      const res = await restClient.POST(`/${branchesSlug}/${branchID}/merge`, {
+        body: JSON.stringify({}),
+        headers: { Authorization: `JWT ${token}` },
+      })
+      const data = await res.json()
+
+      expect(res.status).toBe(200)
+      expect(data.merged).toHaveLength(1)
+
+      const onMain = await payload.findByID({ collection: postsSlug, id: docID })
+
+      expect(onMain.title).toBe('edited on branch')
+    })
+
+    it('should enforce access as the requesting user rather than overriding it', async () => {
+      const editor = await payload.create({
+        collection: 'users',
+        data: { email: 'resteditor@example.com', password: 'test' },
+      })
+
+      const restricted = await payload.create({
+        collection: restrictedSlug,
+        data: { title: 'restricted on main' },
+      })
+
+      await payload.update({
+        branch: 'restmerge',
+        collection: restrictedSlug,
+        data: { title: 'edited on branch' },
+        id: restricted.id,
+      })
+
+      const login = await restClient
+        .POST('/users/login', {
+          body: JSON.stringify({ email: 'resteditor@example.com', password: 'test' }),
+        })
+        .then((res) => res.json())
+
+      const res = await restClient.POST(`/${branchesSlug}/${branchID}/merge`, {
+        body: JSON.stringify({ dryRun: true }),
+        headers: { Authorization: `JWT ${login.token}` },
+      })
+      const data = await res.json()
+
+      expect(data.blocked.map((each: any) => String(each.docID))).toContain(String(restricted.id))
+
+      const rows = await payload.find({
+        branch: false,
+        collection: restrictedSlug,
+        pagination: false,
+      })
+
+      for (const row of rows.docs) {
+        await payload.delete({ branch: false, collection: restrictedSlug, id: row.id })
+      }
+
+      await payload.delete({ collection: 'users', id: editor.id })
+    })
+
+    it('should return 404 for an unknown branch', async () => {
+      const res = await restClient.POST(`/${branchesSlug}/999999/merge`, {
+        body: JSON.stringify({}),
+        headers: { Authorization: `JWT ${token}` },
+      })
+
+      expect(res.status).toBe(404)
     })
   })
 })

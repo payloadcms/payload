@@ -3,6 +3,8 @@ import type { Config } from '../config/types.js'
 import type { SanitizedBranchingConfig } from './types.js'
 
 import { defaultAccess } from '../auth/defaultAccess.js'
+import { wrapInternalEndpoints } from '../utilities/wrapInternalEndpoints.js'
+import { mergeBranchHandler } from './endpoints/merge.js'
 import { branchChangesCollectionSlug, branchesCollectionSlug, MAIN_BRANCH } from './types.js'
 
 export const getBranchesCollection = (branching: SanitizedBranchingConfig): CollectionConfig => ({
@@ -45,6 +47,15 @@ export const getBranchesCollection = (branching: SanitizedBranchingConfig): Coll
       type: 'date',
     },
   ],
+  // Wrapped so the POST body is parsed onto `req.data`, as with every other
+  // built-in endpoint.
+  endpoints: wrapInternalEndpoints([
+    {
+      handler: mergeBranchHandler,
+      method: 'post',
+      path: '/:id/merge',
+    },
+  ]),
   // `slug` is immutable after creation: `_branch` stores the slug rather than
   // a foreign key, so renaming it would orphan every shadow row.
   lockDocuments: false,
