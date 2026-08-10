@@ -1,4 +1,8 @@
-import { buildVersionCollectionFields, type CreateVersion } from 'payload'
+import {
+  buildVersionCollectionFields,
+  type CreateVersion,
+  resolveBranchVersionParent,
+} from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
@@ -27,15 +31,25 @@ export const createVersion: CreateVersion = async function createVersion(
     versions: true,
   })
 
+  const branched = await resolveBranchVersionParent({
+    collectionSlug,
+    parent,
+    req,
+    versionData: versionData as Record<string, unknown>,
+  })
+
   const data = {
     autosave,
     createdAt,
     latest: true,
-    parent,
+    parent: branched.parent,
     publishedLocale,
     snapshot,
     updatedAt,
     version: versionData,
+    ...(branched.versionData._branch
+      ? { _branch: branched.versionData._branch, _branchParent: branched.versionData._branchParent }
+      : {}),
   }
   if (!data.createdAt) {
     data.createdAt = new Date().toISOString()
@@ -58,6 +72,9 @@ export const createVersion: CreateVersion = async function createVersion(
 
   let [doc] = await Model.create([data], options, req)
 
+  // No branch scoping needed here: a branch version's `parent` is the shadow
+  // row's own primary key, so main's chain and the branch's chain are already
+  // disjoint and `latest` clearing cannot cross between them.
   const parentQuery = {
     $or: [
       {

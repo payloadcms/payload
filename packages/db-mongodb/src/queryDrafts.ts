@@ -1,7 +1,13 @@
 import type { PaginateOptions, PipelineStage, QueryOptions } from 'mongoose'
 import type { QueryDrafts } from 'payload'
 
-import { buildVersionCollectionFields, combineQueries, flattenWhereToOperators } from 'payload'
+import {
+  buildVersionCollectionFields,
+  combineQueries,
+  flattenWhereToOperators,
+  projectBranchVersionParent,
+  resolveBranchVersionQuery,
+} from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
@@ -60,7 +66,13 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
     })
   }
 
-  const combinedWhere = combineQueries({ latest: { equals: true } }, where)
+  const branchedWhere = await resolveBranchVersionQuery({
+    collectionSlug,
+    req,
+    where,
+  })
+
+  const combinedWhere = combineQueries({ latest: { equals: true } }, branchedWhere ?? {})
 
   const versionQuery = await buildQuery({
     adapter: this,
@@ -184,7 +196,9 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
   })
 
   for (let i = 0; i < result.docs.length; i++) {
-    const id = result.docs[i].parent
+    // A branch version's `parent` is the shadow row's primary key, so the
+    // canonical document ID comes from `_branchParent` when present.
+    const id = projectBranchVersionParent(result.docs[i] as Record<string, unknown>)
     result.docs[i] = result.docs[i].version ?? {}
     result.docs[i].id = id
   }

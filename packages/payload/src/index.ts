@@ -1450,12 +1450,12 @@ export { loadBranchManifest, resetBranchState, resolveBranch } from './branching
 export { resolveBranchQuery } from './branching/resolveBranchQuery.js'
 export { resolveBranchRowID } from './branching/resolveBranchRowID.js'
 export { resolveBranchDelete } from './branching/tombstone.js'
-
 export type {
   BranchingConfig,
   BranchOperation,
   SanitizedBranchingConfig,
 } from './branching/types.js'
+
 export {
   branchChangesCollectionSlug,
   branchDocIDField,
@@ -1465,6 +1465,11 @@ export {
   branchParentField,
   MAIN_BRANCH,
 } from './branching/types.js'
+export {
+  projectBranchVersionParent,
+  resolveBranchVersionParent,
+  resolveBranchVersionQuery,
+} from './branching/versions.js'
 
 export {
   type ClientCollectionConfig,

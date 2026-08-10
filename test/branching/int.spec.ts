@@ -10,6 +10,7 @@ import {
   branchesSlug,
   excludedSlug,
   numericIDSlug,
+  pagesSlug,
   postsSlug,
   uniqueSlug,
 } from './shared.js'
@@ -571,10 +572,160 @@ describe('Branching', () => {
     it.todo('should allow the same unique value on two different branches')
   })
 
-  describe('Drafts', () => {
-    it.todo('should hide a draft saved on a branch from main find({ draft: true })')
-    it.todo('should not publish on main when publishing on a branch')
-    it.todo('should keep version history isolated per branch')
+  describe('Drafts and publishing on a branch', () => {
+    let pageID: number | string
+    const cleanup: (number | string)[] = []
+
+    beforeAll(async () => {
+      const existing = await payload.find({
+        collection: branchesSlug,
+        pagination: false,
+        where: { slug: { equals: 'draftwork' } },
+      })
+
+      if (!existing.docs.length) {
+        await payload.create({
+          collection: branchesSlug,
+          data: { name: 'Draft work', slug: 'draftwork' },
+        })
+      }
+    })
+
+    beforeEach(async () => {
+      const page = await payload.create({
+        collection: pagesSlug,
+        data: { _status: 'published', title: 'published on main' },
+      })
+      pageID = page.id
+      cleanup.push(page.id)
+    })
+
+    afterEach(async () => {
+      const shadows = await payload.find({
+        branch: false,
+        collection: pagesSlug,
+        pagination: false,
+        where: { _branch: { not_equals: 'main' } },
+      })
+
+      for (const shadow of shadows.docs) {
+        await payload.delete({ branch: false, collection: pagesSlug, id: shadow.id })
+      }
+
+      for (const id of cleanup) {
+        await payload.delete({ branch: false, collection: pagesSlug, id })
+      }
+      cleanup.length = 0
+
+      const changes = await payload.find({
+        collection: branchChangesSlug,
+        pagination: false,
+        where: { branch: { equals: 'draftwork' } },
+      })
+
+      for (const change of changes.docs) {
+        await payload.delete({ collection: branchChangesSlug, id: change.id })
+      }
+    })
+
+    it('should hide a draft saved on a branch from main', async () => {
+      await payload.update({
+        branch: 'draftwork',
+        collection: pagesSlug,
+        data: { title: 'draft on branch' },
+        draft: true,
+        id: pageID,
+      })
+
+      const mainDraft = await payload.findByID({
+        collection: pagesSlug,
+        draft: true,
+        id: pageID,
+      })
+
+      expect(mainDraft.title).toBe('published on main')
+    })
+
+    it('should return the branch draft when reading drafts on the branch', async () => {
+      await payload.update({
+        branch: 'draftwork',
+        collection: pagesSlug,
+        data: { title: 'draft on branch' },
+        draft: true,
+        id: pageID,
+      })
+
+      const branchDraft = await payload.findByID({
+        branch: 'draftwork',
+        collection: pagesSlug,
+        draft: true,
+        id: pageID,
+      })
+
+      expect(branchDraft.title).toBe('draft on branch')
+    })
+
+    it('should not publish on main when publishing on a branch', async () => {
+      await payload.update({
+        branch: 'draftwork',
+        collection: pagesSlug,
+        data: { _status: 'published', title: 'published on branch' },
+        id: pageID,
+      })
+
+      const onMain = await payload.findByID({ collection: pagesSlug, id: pageID })
+      const onBranch = await payload.findByID({
+        branch: 'draftwork',
+        collection: pagesSlug,
+        id: pageID,
+      })
+
+      expect(onMain.title).toBe('published on main')
+      expect(onBranch.title).toBe('published on branch')
+    })
+
+    it('should keep version history isolated per branch', async () => {
+      await payload.update({
+        branch: 'draftwork',
+        collection: pagesSlug,
+        data: { title: 'draft on branch' },
+        draft: true,
+        id: pageID,
+      })
+
+      const mainVersions = await payload.findVersions({
+        collection: pagesSlug,
+        pagination: false,
+        where: { parent: { equals: pageID } },
+      })
+
+      for (const version of mainVersions.docs) {
+        expect(version.version.title).not.toBe('draft on branch')
+      }
+    })
+
+    it('should list drafts on a branch without duplicating the main document', async () => {
+      await payload.update({
+        branch: 'draftwork',
+        collection: pagesSlug,
+        data: { title: 'draft on branch' },
+        draft: true,
+        id: pageID,
+      })
+
+      const onBranch = await payload.find({
+        branch: 'draftwork',
+        collection: pagesSlug,
+        draft: true,
+        pagination: false,
+      })
+
+      const matching = onBranch.docs.filter((doc) => String(doc.id) === String(pageID))
+
+      expect(matching).toHaveLength(1)
+      expect(matching[0]!.title).toBe('draft on branch')
+    })
+
     it.todo('should fork from main latest version, not the published row')
   })
 
