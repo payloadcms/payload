@@ -1,0 +1,256 @@
+---
+title: Payload CLI
+label: CLI
+order: 70
+desc: Run built-in Payload commands and add, replace, or disable commands for your project.
+keywords: cli, command line, commands
+---
+
+The Payload CLI lets you work with your project from a terminal. You can use it to generate types, run migrations, inspect your setup, run jobs, and more.
+
+The CLI loads the Payload Config from your project. Run commands from your project directory, or use [`PAYLOAD_CONFIG_PATH`](./overview#customizing-the-config-location) if your config is somewhere else.
+
+The examples on this page use pnpm, but you can also use `npx payload` or the equivalent command for your package manager.
+
+```sh
+pnpm payload --help
+```
+
+## Built-in commands
+
+Payload includes the following commands by default.
+
+### Core commands
+
+| Command                       | What it does                                                                          |
+| ----------------------------- | ------------------------------------------------------------------------------------- |
+| `build`                       | Generate the Admin Panel import map and TypeScript types, then run the project build. |
+| `generate:db-schema`          | Generate a database schema. Not every database adapter supports this command.         |
+| `generate:importmap`          | Generate the import map used by the Admin Panel.                                      |
+| `generate:types`              | Generate TypeScript types from your Payload Config.                                   |
+| `help [command]`              | Show help for all commands or for one command.                                        |
+| `info`                        | Print Node.js, package, operating system, memory, and CPU information.                |
+| `jobs:handle-schedules`       | Put jobs whose schedule is due into the queue.                                        |
+| `jobs:run`                    | Run jobs from the queue.                                                              |
+| `run <script-path> [args...]` | Run a local script in the Payload environment.                                        |
+
+### Migration commands
+
+| Command                 | What it does                                       |
+| ----------------------- | -------------------------------------------------- |
+| `migrate`               | Run all pending migrations.                        |
+| `migrate:create [name]` | Create a migration.                                |
+| `migrate:down`          | Roll back the latest migration batch.              |
+| `migrate:fresh`         | Clear the database and run all migrations again.   |
+| `migrate:refresh`       | Roll back completed migrations and run them again. |
+| `migrate:reset`         | Roll back all migrations.                          |
+| `migrate:status`        | Show which migrations have and have not run.       |
+
+Use `--help` to see the arguments and options for a command:
+
+```sh
+pnpm payload migrate:create --help
+pnpm payload jobs:run --help
+```
+
+## JSON help and input
+
+Payload can return help as JSON. This is useful for scripts and coding agents that need to know which commands exist and what input they accept.
+
+```sh
+# Describe every command
+pnpm payload help --json
+
+# Describe one command
+pnpm payload help migrate:create --json
+```
+
+For example, you would normally pass the migration name as an argument:
+
+```sh
+pnpm payload migrate:create add-authors
+```
+
+You can pass the same input as JSON with `--input`:
+
+```sh
+pnpm payload migrate:create --input '{"migrationName":"add-authors"}'
+```
+
+To read the input from a file, create `migration-input.json`:
+
+```json
+{
+  "migrationName": "add-authors"
+}
+```
+
+Then add `@` before the file path:
+
+```sh
+pnpm payload migrate:create --input @migration-input.json
+```
+
+To read the same JSON from stdin, pipe it into the command and use `-`:
+
+```sh
+echo '{"migrationName":"add-authors"}' | pnpm payload migrate:create --input -
+```
+
+The JSON is validated in the same way as normal command arguments and options. Do not combine `--input` with other command input.
+
+## Custom commands
+
+Use `defineCLICommand` to add your own command. Built-in and custom commands use the same API, help system, and input validation.
+
+### Define a command
+
+The following example adds a `seed` command. Its code lives in `seed.ts` next to `payload.config.ts`:
+
+```ts
+import { defineCLICommand, z } from 'payload/cli'
+
+export const seedCommand = defineCLICommand({
+  description: 'Seed the database.',
+  input: z.strictObject({
+    clear: z
+      .boolean()
+      .default(false)
+      .describe('Delete existing documents first.'),
+  }),
+  handler: async ({ args, getPayload }) => {
+    const payload = await getPayload()
+
+    if (args.clear) {
+      // Delete existing documents...
+    }
+
+    await payload.create({
+      collection: 'pages',
+      data: { title: 'My page' },
+    })
+
+    payload.logger.info('Successfully seeded!')
+  },
+})
+```
+
+The `input` schema defines the values the command accepts. Payload uses it to type `args`, validate input, and generate help. You can use any [Standard Schema](https://standardschema.dev/) library, but it must also support JSON Schema so Payload can generate JSON help. For the easiest setup, import Zod from `payload/cli` as shown above.
+
+Call `getPayload()` only when the command needs the Local API. Payload closes the instance when the command finishes.
+
+### Register the command
+
+Add the command to `cli.commands` in your Payload Config. The map key becomes the command name:
+
+```ts
+export default buildConfig({
+  cli: {
+    commands: {
+      seed: './seed.js#seedCommand',
+    },
+  },
+})
+```
+
+Command paths use the same format as other [`PayloadComponent`](../custom-components/overview#component-paths) paths. A path without `#` uses the default export. Add `#exportName` to use a named export, or use the object form:
+
+```ts
+cli: {
+  commands: {
+    seed: './seed.js',
+    cleanup: './cleanup.js#cleanupCommand',
+    importData: {
+      path: './data.js',
+      exportName: 'importDataCommand',
+    },
+  },
+}
+```
+
+You can also pass a command directly. This example defines a small command inside the Payload Config:
+
+```ts
+import { buildConfig } from 'payload'
+import { defineCLICommand, z } from 'payload/cli'
+
+export default buildConfig({
+  cli: {
+    commands: {
+      hello: defineCLICommand({
+        description: 'Print a greeting.',
+        input: z.strictObject({}),
+        handler: () => {
+          console.log('Hello!')
+        },
+      }),
+    },
+  },
+})
+```
+
+Both forms work, but import paths are recommended. A direct command and all of its imports are loaded with the Payload Config, even when you are not using the CLI. An import path is only loaded when the CLI starts, so command-only dependencies stay out of the Payload Config bundle. Relative paths start from the folder containing `payload.config.ts`.
+
+You can now run the `seed` command like any built-in command:
+
+```sh
+pnpm payload seed
+pnpm payload seed --clear
+pnpm payload seed --help
+```
+
+### Arguments and options
+
+By default, each field in `input` becomes a command option. Payload changes camelCase field names to kebab-case flags. For example, `migrationName` becomes `--migration-name`.
+
+Use `cli` when a field needs different command-line behavior. For example, this makes `filePath` a positional argument:
+
+```ts
+defineCLICommand({
+  input: z.strictObject({
+    filePath: z.string().describe('File to import.'),
+  }),
+  cli: {
+    filePath: 'argument',
+  },
+  // ...
+})
+```
+
+Set a field to `false` to accept it only through `--input`. For less common cases, you can use an object to change the flag, argument position, or parser.
+
+### Add, replace, or disable commands
+
+A new key in `cli.commands` adds a command. Using the name of a built-in command replaces it. Setting a command to `false` disables it:
+
+```ts
+export default buildConfig({
+  cli: {
+    commands: {
+      seed: './seed.js#seedCommand',
+      'generate:types': './generateTypes.js#generateTypesCommand',
+      info: false,
+    },
+  },
+})
+```
+
+After Payload loads the config, `config.cli.commands` shows the final list of built-in and custom commands.
+
+Set `cli` itself to `false` to disable the entire Payload CLI:
+
+```ts
+export default buildConfig({
+  cli: false,
+})
+```
+
+## Running commands on a schedule
+
+Use the global `--cron` option to run a command on a cron schedule:
+
+```sh
+pnpm payload jobs:run --cron "*/5 * * * *"
+```
+
+This example runs queued jobs every five minutes. The CLI process stays open while the schedule is active.
