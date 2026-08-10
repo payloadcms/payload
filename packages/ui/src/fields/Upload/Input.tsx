@@ -216,6 +216,13 @@ export function UploadInput(props: UploadInputProps) {
     (number | string)[] | null | number | string | ValueWithRelation | ValueWithRelation[]
   >(null)
 
+  /**
+   * Always holds the latest `value`. Used to detect when an in-flight
+   * populateDocs() call has been superseded by a newer value before it resolves.
+   */
+  const latestValueRef = React.useRef(value)
+  latestValueRef.current = value
+
   const canCreate = useMemo(() => {
     if (!allowCreate) {
       return false
@@ -617,7 +624,8 @@ export function UploadInput(props: UploadInputProps) {
         if (itemsToLoad.length > 0) {
           const loadedDocs = await populateDocs(itemsToLoad)
 
-          if (loadedDocs) {
+          // Skip applying this result if a newer value has superseded it while this request was in flight
+          if (loadedDocs && latestValueRef.current === value) {
             setPopulatedDocs(loadedDocs)
             loadedValueRef.current = value
           }
