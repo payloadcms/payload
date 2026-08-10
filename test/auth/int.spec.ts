@@ -28,6 +28,7 @@ import {
   publicUsersSlug,
   rotateSecretLoginSlug,
   rotateSecretOldSecret,
+  rotateSecretSecondarySlug,
   rotateSecretSlug,
   saveToJWTKey,
   slug,
@@ -2211,17 +2212,17 @@ describe('Auth', () => {
 
     // Seeds a row whose apiKeyIndex matches neither the old nor the current
     // secret, forcing rotateSecret to fail-closed.
-    const seedCorruptUser = async () => {
+    const seedCorruptUser = async (collection = rotateSecretSlug) => {
       const rawApiKey = uuid()
       const user = await payload.create({
-        collection: rotateSecretSlug,
+        collection,
         data: { apiKey: rawApiKey, enableAPIKey: true },
       })
-      createdIDs.push({ id: user.id, collection: rotateSecretSlug })
+      createdIDs.push({ id: user.id, collection })
 
       await payload.db.updateOne({
         id: user.id,
-        collection: rotateSecretSlug,
+        collection,
         data: {
           apiKey: payload.encrypt(rawApiKey, { secret: OLD_SECRET }),
           apiKeyIndex: 'this-index-matches-no-secret',
@@ -2323,15 +2324,22 @@ describe('Auth', () => {
 
     it('should keep earlier migrations after an abort and complete on a fixed re-run', async () => {
       const rawApiKey = uuid()
-      // Created first, so its lower id is processed before the corrupt row.
+      // The migratable row and the corrupt row live in different collections, and
+      // rotateSecret drains collections in the order passed. So the first
+      // collection is fully re-keyed before the second aborts - deterministic for
+      // any primary-key type (UUID ids don't order by creation like integers do).
       const migratable = await seedPreRotationV1User({ rawApiKey })
-      const corrupt = await seedCorruptUser()
+      const corrupt = await seedCorruptUser(rotateSecretSecondarySlug)
 
-      await expect(
-        rotateSecret({ collections: [rotateSecretSlug], oldSecret: OLD_SECRET, payload }),
-      ).rejects.toThrow(/could not verify apiKey/)
+      const rotateArgs = {
+        collections: [rotateSecretSlug, rotateSecretSecondarySlug],
+        oldSecret: OLD_SECRET,
+        payload,
+      }
 
-      // The row processed before the abort stays migrated to the current secret.
+      await expect(rotateSecret(rotateArgs)).rejects.toThrow(/could not verify apiKey/)
+
+      // The collection processed before the abort stays migrated to the current secret.
       const raw = await payload.db.findOne<any>({
         collection: rotateSecretSlug,
         where: { id: { equals: migratable.id } },
@@ -2340,12 +2348,8 @@ describe('Auth', () => {
       expect(payload.decrypt(raw.apiKey)).toBe(rawApiKey)
 
       // Remove the corrupt row; the re-run completes and skips the migrated row.
-      await payload.delete({ id: corrupt.id, collection: rotateSecretSlug })
-      const rerun = await rotateSecret({
-        collections: [rotateSecretSlug],
-        oldSecret: OLD_SECRET,
-        payload,
-      })
+      await payload.delete({ id: corrupt.id, collection: rotateSecretSecondarySlug })
+      const rerun = await rotateSecret(rotateArgs)
       expect(rerun).toEqual({ migrated: 0, skipped: 1 })
     })
 

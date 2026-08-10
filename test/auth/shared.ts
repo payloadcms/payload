@@ -8,6 +8,11 @@ export const rotateSecretSlug = 'rotate-secret'
 
 export const rotateSecretLoginSlug = 'rotate-secret-login'
 
+// A second api-key collection so rotation tests can control processing order via
+// collection order (rotateSecret drains collections in the order passed),
+// independent of primary-key type - integer ids order by creation, UUIDs do not.
+export const rotateSecretSecondarySlug = 'rotate-secret-secondary'
+
 // A previous PAYLOAD_SECRET kept in the keyring (config.previousSecrets) so
 // rotation tests can seed and read data encrypted under it.
 export const rotateSecretOldSecret = 'old-payload-secret-for-rotation-tests'

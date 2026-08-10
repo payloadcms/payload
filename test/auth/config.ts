@@ -15,6 +15,7 @@ import {
   publicUsersSlug,
   rotateSecretLoginSlug,
   rotateSecretOldSecret,
+  rotateSecretSecondarySlug,
   rotateSecretSlug,
   saveToJWTKey,
   slug,
@@ -312,6 +313,19 @@ export default buildConfigWithDefaults({
         read: ({ req: { user } }) =>
           user?.collection === rotateSecretSlug ? { id: { equals: user.id } } : false,
       },
+      auth: {
+        disableLocalStrategy: true,
+        useAPIKey: true,
+      },
+      fields: [],
+      versions: false,
+    },
+    {
+      // A second isolated api-key collection, so a rotation test can seed a
+      // corrupt row here and pass [rotateSecretSlug, rotateSecretSecondarySlug]
+      // to rotateSecret - guaranteeing the first collection is fully re-keyed
+      // before this one aborts, regardless of primary-key type.
+      slug: rotateSecretSecondarySlug,
       auth: {
         disableLocalStrategy: true,
         useAPIKey: true,
