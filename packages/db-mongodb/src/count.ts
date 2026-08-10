@@ -1,7 +1,7 @@
 import type { CountOptions } from 'mongodb'
 import type { Count } from 'payload'
 
-import { flattenWhereToOperators } from 'payload'
+import { flattenWhereToOperators, resolveBranchQuery } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
@@ -14,6 +14,8 @@ export const count: Count = async function count(
   { collection: collectionSlug, locale, req, where = {} },
 ) {
   const { collectionConfig, Model } = getCollection({ adapter: this, collectionSlug })
+
+  where = (await resolveBranchQuery({ collectionSlug, req, where })) ?? {}
 
   let hasNearConstraint = false
 

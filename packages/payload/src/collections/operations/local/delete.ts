@@ -23,15 +23,20 @@ import { deleteByIDOperation } from '../deleteByID.js'
 
 export type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType> = {
   /**
-   * the Collection slug to operate against.
-   */
-  collection: TSlug
-  /**
    * [Context](https://payloadcms.com/docs/hooks/context), which will then be passed to `context` and `req.context`,
    * which can be read by hooks. Useful if you want to pass additional information to the hooks which
    * shouldn't be necessarily part of the document, for example a `triggerBeforeChange` option which can be read by the BeforeChange hook
    * to determine if it should run or not.
    */
+  /**
+   * Read and write against a specific content branch instead of resolving one
+   * from the request. `false` bypasses branching entirely.
+   */
+  branch?: false | string
+  /**
+   * the Collection slug to operate against.
+   */
+  collection: TSlug
   context?: RequestContext
   /**
    * [Control auto-population](https://payloadcms.com/docs/queries/depth) of nested relationship and upload fields.

@@ -86,6 +86,11 @@ const attachFakeURLProperties = (req: Partial<PayloadRequest>, urlSuffix?: strin
 }
 
 export type CreateLocalReqOptions = {
+  /**
+   * Read and write against this branch instead of the request's own.
+   * `false` bypasses branching entirely.
+   */
+  branch?: false | string
   context?: RequestContext
   depth?: number
   fallbackLocale?: false | TypedLocale
@@ -99,6 +104,7 @@ type CreateLocalReq = (options: CreateLocalReqOptions, payload: Payload) => Prom
 
 export const createLocalReq: CreateLocalReq = async (
   {
+    branch,
     context,
     depth,
     fallbackLocale,
@@ -137,6 +143,15 @@ export const createLocalReq: CreateLocalReq = async (
   }
 
   req.context = getRequestContext(req, context)
+
+  if (branch !== undefined) {
+    // Set before anything resolves it, so this wins over header and cookie.
+    // `false` means "bypass branching", carried as an explicit sentinel rather
+    // than `undefined` so it survives resolution.
+    req.branch = branch === false ? undefined : branch
+    ;(req.context as Record<string, unknown>)._branchBypass = branch === false
+  }
+
   req.payloadAPI = req?.payloadAPI || 'local'
   req.payload = payload
   req.i18n = i18n

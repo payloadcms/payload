@@ -5,7 +5,14 @@ import { fileURLToPath } from 'url'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
-import { excludedSlug, numericIDSlug, postsSlug, uniqueSlug } from './shared.js'
+import {
+  branchChangesSlug,
+  branchesSlug,
+  excludedSlug,
+  numericIDSlug,
+  postsSlug,
+  uniqueSlug,
+} from './shared.js'
 
 let payload: Payload
 
@@ -136,19 +143,177 @@ describe('Branching', () => {
    * collections, `req.branch` resolution, the change manifest, the predicate
    * wired into the adapters, and copy-on-write writes.
    */
-  describe('Read path', () => {
-    it.todo('should hide a document created on a branch from main')
-    it.todo('should return a document created on a branch when reading that branch')
-    it.todo(
-      'should keep pagination correct — 25 on main + 5 on a branch, limit 10: main totalDocs 25/3 pages, branch 30/3 pages, no doc on two pages',
-    )
+  describe('Read path — documents created on a branch', () => {
+    const mainIDs: (number | string)[] = []
+    const branchIDs: (number | string)[] = []
+
+    beforeAll(async () => {
+      await payload.create({
+        collection: branchesSlug,
+        data: { name: 'Halloween', slug: 'halloween' },
+      })
+      await payload.create({
+        collection: branchesSlug,
+        data: { name: 'Q4 Launch', slug: 'q4' },
+      })
+
+      for (let i = 0; i < 25; i++) {
+        const doc = await payload.create({
+          collection: postsSlug,
+          data: { order: i, title: `main post ${i}` },
+        })
+        mainIDs.push(doc.id)
+      }
+
+      for (let i = 0; i < 5; i++) {
+        const doc = await payload.create({
+          branch: 'halloween',
+          collection: postsSlug,
+          data: { order: 100 + i, title: `halloween post ${i}` },
+        })
+        branchIDs.push(doc.id)
+      }
+    })
+
+    afterAll(async () => {
+      for (const id of [...mainIDs, ...branchIDs]) {
+        await payload.delete({ branch: false, collection: postsSlug, id })
+      }
+      mainIDs.length = 0
+      branchIDs.length = 0
+    })
+
+    it('should hide a document created on a branch from main', async () => {
+      const result = await payload.find({ collection: postsSlug, pagination: false })
+      const ids = result.docs.map((doc) => doc.id)
+
+      expect(ids).toHaveLength(25)
+      for (const branchID of branchIDs) {
+        expect(ids).not.toContain(branchID)
+      }
+    })
+
+    it('should return a document created on a branch when reading that branch', async () => {
+      const result = await payload.find({
+        branch: 'halloween',
+        collection: postsSlug,
+        pagination: false,
+      })
+      const ids = result.docs.map((doc) => doc.id)
+
+      expect(ids).toHaveLength(30)
+      for (const branchID of branchIDs) {
+        expect(ids).toContain(branchID)
+      }
+    })
+
+    it('should isolate two concurrent branches from each other', async () => {
+      const result = await payload.find({
+        branch: 'q4',
+        collection: postsSlug,
+        pagination: false,
+      })
+      const ids = result.docs.map((doc) => doc.id)
+
+      expect(ids).toHaveLength(25)
+      for (const branchID of branchIDs) {
+        expect(ids).not.toContain(branchID)
+      }
+    })
+
+    /**
+     * The load-bearing test for the whole design. If the branch predicate were
+     * applied after the query rather than inside it, totalDocs and page
+     * boundaries would both be wrong and no post-processing could fix them.
+     */
+    it('should keep pagination and totalDocs correct on main', async () => {
+      const page1 = await payload.find({ collection: postsSlug, limit: 10, page: 1 })
+
+      expect(page1.totalDocs).toBe(25)
+      expect(page1.totalPages).toBe(3)
+      expect(page1.docs).toHaveLength(10)
+    })
+
+    it('should keep pagination and totalDocs correct on a branch', async () => {
+      const page1 = await payload.find({
+        branch: 'halloween',
+        collection: postsSlug,
+        limit: 10,
+        page: 1,
+      })
+
+      expect(page1.totalDocs).toBe(30)
+      expect(page1.totalPages).toBe(3)
+      expect(page1.docs).toHaveLength(10)
+    })
+
+    it('should not return the same document on two pages of a branch read', async () => {
+      const seen = new Set<number | string>()
+
+      for (const page of [1, 2, 3]) {
+        const result = await payload.find({
+          branch: 'halloween',
+          collection: postsSlug,
+          limit: 10,
+          page,
+          sort: 'order',
+        })
+
+        for (const doc of result.docs) {
+          expect(seen.has(doc.id)).toBe(false)
+          seen.add(doc.id)
+        }
+      }
+
+      expect(seen.size).toBe(30)
+    })
+
+    it('should agree between count and find on a branch', async () => {
+      const counted = await payload.count({ branch: 'halloween', collection: postsSlug })
+      const found = await payload.find({
+        branch: 'halloween',
+        collection: postsSlug,
+        pagination: false,
+      })
+
+      expect(counted.totalDocs).toBe(found.docs.length)
+      expect(counted.totalDocs).toBe(30)
+    })
+
+    it('should record branch-created documents in the changeset registry', async () => {
+      const changes = await payload.find({
+        collection: branchChangesSlug,
+        pagination: false,
+        where: { branch: { equals: 'halloween' } },
+      })
+
+      expect(changes.docs).toHaveLength(5)
+      expect(changes.docs[0]).toMatchObject({
+        collectionSlug: postsSlug,
+        entityType: 'collection',
+        operation: 'create',
+      })
+    })
+
+    it('should leave a branching-disabled collection unaffected by branch context', async () => {
+      const doc = await payload.create({
+        branch: 'halloween',
+        collection: excludedSlug,
+        data: { title: 'excluded' },
+      })
+
+      const fromMain = await payload.find({ collection: excludedSlug, pagination: false })
+
+      expect(fromMain.docs.map((each) => each.id)).toContain(doc.id)
+
+      await payload.delete({ collection: excludedSlug, id: doc.id })
+    })
+
     it.todo('should hide a document deleted on a branch, leaving main and other branches intact')
     it.todo('should filter on a branch-modified field using the branch value')
     it.todo('should sort on a branch-modified field using the branch value')
     it.todo('should resolve findByID by canonical ID to branch content on a branch')
-    it.todo('should keep count, findDistinct and group-by in agreement with find')
     it.todo('should populate relationships to the branch version of the related document')
-    it.todo('should isolate two concurrent branches from each other')
     it.todo('should leave query shapes unchanged when branching is disabled')
   })
 

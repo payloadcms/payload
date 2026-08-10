@@ -1,6 +1,6 @@
 import type { AggregateOptions, QueryOptions } from 'mongoose'
 
-import { type FindOne } from 'payload'
+import { type FindOne, resolveBranchQuery } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
@@ -18,6 +18,8 @@ export const findOne: FindOne = async function findOne(
   { collection: collectionSlug, draftsEnabled, joins, locale, req, select, where = {} },
 ) {
   const { collectionConfig, Model } = getCollection({ adapter: this, collectionSlug })
+
+  where = (await resolveBranchQuery({ collectionSlug, req, where })) ?? {}
 
   const query = await buildQuery({
     adapter: this,

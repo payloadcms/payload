@@ -24,6 +24,7 @@ import type {
 
 import { defaultUserCollection } from '../auth/defaultUser.js'
 import { authRootEndpoints } from '../auth/endpoints/index.js'
+import { getBranchChangesCollection, getBranchesCollection } from '../branching/collections.js'
 import { injectBranchFields } from '../branching/injectBranchFields.js'
 import { sanitizeBranchingConfig } from '../branching/sanitizeBranchingConfig.js'
 import { sanitizeCollection } from '../collections/config/sanitize.js'
@@ -566,6 +567,27 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
     )
 
     ;(config.collections ??= []).push(sanitizedJobsCollection)
+  }
+
+  if (branching.enabled) {
+    // Registered after user collections are sanitized so the polymorphic `doc`
+    // relationship on the changeset registry can reference the resolved
+    // branchable set. Both are hard-excluded from branching themselves.
+    for (const branchCollection of [
+      getBranchesCollection(branching),
+      getBranchChangesCollection(config as unknown as Config),
+    ]) {
+      validRelationships.push(branchCollection.slug)
+
+      configWithDefaults.collections!.push(
+        sanitizeCollection(
+          config as unknown as Config,
+          branchCollection,
+          richTextSanitizers,
+          validRelationships,
+        ),
+      )
+    }
   }
 
   const lockedDocumentsCollection = getLockedDocumentsCollection(config as unknown as Config)

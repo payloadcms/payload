@@ -1,5 +1,6 @@
 import type { FindOneArgs, SanitizedCollectionConfig, TypeWithID } from 'payload'
 
+import { resolveBranchQuery } from 'payload'
 import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from './types.js'
@@ -13,6 +14,8 @@ export async function findOne<T extends TypeWithID>(
   const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config
 
   const tableName = this.tableNameMap.get(toSnakeCase(collectionConfig.slug))
+
+  const branchedWhere = await resolveBranchQuery({ collectionSlug: collection, req, where })
 
   const { docs } = await findMany({
     adapter: this,
@@ -28,7 +31,7 @@ export async function findOne<T extends TypeWithID>(
     select,
     sort: undefined,
     tableName,
-    where,
+    where: branchedWhere,
   })
 
   return docs?.[0] || null

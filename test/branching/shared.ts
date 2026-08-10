@@ -16,3 +16,7 @@ export const restrictedSlug = 'restricted-docs'
 
 export const headerGlobalSlug = 'header'
 export const homepageGlobalSlug = 'homepage'
+
+/** Core-owned branching collections */
+export const branchesSlug = 'payload-branches'
+export const branchChangesSlug = 'payload-branch-changes'

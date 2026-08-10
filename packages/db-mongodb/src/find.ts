@@ -1,7 +1,7 @@
 import type { PaginateOptions, PipelineStage } from 'mongoose'
 import type { Find } from 'payload'
 
-import { flattenWhereToOperators } from 'payload'
+import { flattenWhereToOperators, resolveBranchQuery } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
@@ -33,6 +33,8 @@ export const find: Find = async function find(
   },
 ) {
   const { collectionConfig, Model } = getCollection({ adapter: this, collectionSlug })
+
+  where = (await resolveBranchQuery({ collectionSlug, req, where })) ?? {}
 
   let hasNearConstraint = false
 
