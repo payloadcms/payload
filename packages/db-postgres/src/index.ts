@@ -54,6 +54,7 @@ import {
   init,
   insert,
   requireDrizzleKit,
+  validatePostgresOperatorHandlers,
 } from '@payloadcms/drizzle/postgres'
 import { pgEnum, pgSchema, pgTable } from 'drizzle-orm/pg-core'
 import { createDatabaseAdapter, defaultBeginTransaction, findMigrationDir } from 'payload'
@@ -96,6 +97,10 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       },
       {} as Record<string, boolean>,
     )
+
+    const operatorHandlers = args.query?.operatorHandlers ?? []
+
+    validatePostgresOperatorHandlers({ extensions, operatorHandlers })
 
     const sanitizeStatements = ({
       sqlExecute,
@@ -145,6 +150,7 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       initializing,
       localesSuffix: args.localesSuffix || '_locales',
       logger: args.logger,
+      operatorHandlers,
       operators: operatorMap,
       pg: args.pg || pgDependency,
       pgSchema: adapterSchema,
@@ -247,6 +253,11 @@ export type {
   GeneratedDatabaseSchema,
   PostgresAdapter,
 } from './types.js'
-export type { MigrateDownArgs, MigrateUpArgs } from '@payloadcms/drizzle/postgres'
-export { geometryColumn } from '@payloadcms/drizzle/postgres'
+export type {
+  MigrateDownArgs,
+  MigrateUpArgs,
+  PostgresOperatorHandler,
+  PostgresQueryConfig,
+} from '@payloadcms/drizzle/postgres'
+export { geometryColumn, postgresUnaccent } from '@payloadcms/drizzle/postgres'
 export { sql } from 'drizzle-orm'
