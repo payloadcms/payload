@@ -29,6 +29,7 @@ import {
   scheduledValidationEvents,
   validationAccessSourceGlobalSlug,
   validationCollectionSlug,
+  validationCustomButtonsCollectionSlug,
   validationDeniedCollectionSlug,
   validationDeniedGlobalSlug,
   validationDraftSourceGlobalSlug,
@@ -98,6 +99,11 @@ describe('validate Local API', () => {
       }),
       payload.delete({
         collection: validationCollectionSlug,
+        disableTransaction: true,
+        where: { id: { exists: true } },
+      }),
+      payload.delete({
+        collection: validationCustomButtonsCollectionSlug,
         disableTransaction: true,
         where: { id: { exists: true } },
       }),
@@ -2062,6 +2068,88 @@ describe('validate Local API', () => {
           user: null,
         },
       ])
+    })
+
+    it('should validate each requested locale independently when sibling localized fields are omitted', async () => {
+      const draft = await payload.create({
+        collection: validationCustomButtonsCollectionSlug,
+        data: {
+          _status: 'draft',
+          summary: 'Shared summary',
+          title: 'English title',
+        },
+        draft: true,
+        locale: 'en',
+      })
+      await payload.update({
+        id: draft.id,
+        collection: validationCustomButtonsCollectionSlug,
+        data: {
+          _status: 'draft',
+          title: 'Deutscher Titel',
+        },
+        draft: true,
+        locale: 'de',
+      })
+
+      // This collection uses the default access control, which requires an
+      // authenticated admin user, so the shared restClient needs a token here.
+      const adminEmail = 'validate-custom-buttons-admin@example.com'
+      await payload.create({
+        collection: 'users',
+        data: {
+          email: adminEmail,
+          password: devUser.password,
+        },
+      })
+      const { token } = await payload.login({
+        collection: 'users',
+        data: {
+          email: adminEmail,
+          password: devUser.password,
+        },
+      })
+      const authHeaders = { Authorization: `JWT ${token}` }
+
+      const activeLocaleResponse = await restClient.POST(
+        `/${validationCustomButtonsCollectionSlug}/${draft.id}/validate?locale=en`,
+        {
+          body: JSON.stringify({
+            summary: 'Shared summary',
+            title: 'English title',
+          }),
+          headers: authHeaders,
+        },
+      )
+
+      expect(activeLocaleResponse.status).toBe(200)
+      await expect(activeLocaleResponse.json()).resolves.toEqual({
+        errors: [],
+        valid: true,
+      })
+
+      const siblingLocalesResponse = await restClient.POST(
+        `/${validationCustomButtonsCollectionSlug}/${draft.id}/validate?locale=de&locale=es&locale=fr`,
+        {
+          body: JSON.stringify({
+            summary: 'Shared summary',
+          }),
+          headers: authHeaders,
+        },
+      )
+      const siblingResult = await siblingLocalesResponse.json()
+
+      expect(siblingLocalesResponse.status).toBe(200)
+      expect(siblingResult.valid).toBe(false)
+      expect(siblingResult.errors).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ locale: 'es', path: 'title' }),
+          expect.objectContaining({ locale: 'fr', path: 'title' }),
+        ]),
+      )
+      expect(siblingResult.errors).not.toEqual(
+        expect.arrayContaining([expect.objectContaining({ locale: 'de', path: 'title' })]),
+      )
     })
   })
 

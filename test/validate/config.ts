@@ -33,6 +33,7 @@ export const writeTargetsSlug = 'validation-write-targets'
 export const validationUploadsSlug = 'validation-uploads'
 export const validationPublishUploadsSlug = 'validation-publish-uploads'
 export const validationAdminCollectionSlug = 'validation-admin-items'
+export const validationCustomButtonsCollectionSlug = 'validation-custom-buttons-items'
 export const validationDeniedCollectionSlug = 'validation-denied-items'
 export const validationNonLocalizedCollectionSlug = 'validation-non-localized-items'
 export const validationUploadsDir = path.resolve(dirname, 'validation-uploads')
@@ -1185,6 +1186,38 @@ const validationAdminCollection: CollectionConfig = {
   },
 }
 
+const validationCustomButtonsCollection: CollectionConfig = {
+  slug: validationCustomButtonsCollectionSlug,
+  admin: {
+    components: {
+      edit: {
+        beforeDocumentControls: [
+          '/components/CustomValidateAllLocalesButton/index.js#CustomValidateAllLocalesButton',
+          '/components/CustomValidateOtherLocalesButtons/index.js#CustomValidateOtherLocalesButtons',
+        ],
+      },
+    },
+  },
+  fields: [
+    {
+      name: 'title',
+      type: 'text',
+      localized: true,
+      required: true,
+    },
+    {
+      name: 'summary',
+      type: 'text',
+      required: true,
+    },
+  ],
+  versions: {
+    drafts: {
+      validate: false,
+    },
+  },
+}
+
 const validationDeniedCollection: CollectionConfig = {
   slug: validationDeniedCollectionSlug,
   access: {
@@ -1231,6 +1264,7 @@ export default buildConfigWithDefaults({
     validationWhereCollection,
     publishCollection,
     validationAdminCollection,
+    validationCustomButtonsCollection,
     validationDeniedCollection,
     validationNonLocalizedCollection,
     {
