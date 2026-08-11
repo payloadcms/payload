@@ -3813,6 +3813,19 @@ describe('database', () => {
     })
 
     it('should allow to sort by a virtual field with a refence, Local / GraphQL', async () => {
+      // The `migrate:fresh` test earlier in this file drops the entire database, which removes
+      // the admin user backing the REST client's session. Re-authenticate so the GraphQL request
+      // below has a logged-in user for the field-level access checks the sort validation performs.
+      const { docs: existingUsers } = await payload.find({
+        collection: 'users',
+        limit: 1,
+        where: { email: { equals: devUser.email } },
+      })
+      if (existingUsers.length === 0) {
+        await payload.create({ collection: 'users', data: devUser })
+      }
+      await restClient.login({ slug: 'users', credentials: devUser })
+
       const post_1 = await payload.create({ collection: 'posts', data: { title: 'A' } })
       const post_2 = await payload.create({ collection: 'posts', data: { title: 'B' } })
       const doc_1 = await payload.create({
