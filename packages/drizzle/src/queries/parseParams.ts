@@ -1,7 +1,7 @@
 import type { SQL, Table } from 'drizzle-orm'
 import type { FlattenedField, Operator, Sort, Where } from 'payload'
 
-import { and, getTableName, isNotNull, isNull, ne, notInArray, or, sql } from 'drizzle-orm'
+import { and, getTableName, isNotNull, isNull, notInArray, or, sql } from 'drizzle-orm'
 import { PgUUID } from 'drizzle-orm/pg-core'
 import { APIError, QueryError } from 'payload'
 import { validOperatorSet } from 'payload/shared'
@@ -327,8 +327,16 @@ export function parseParams({
                   constraints.push(
                     or(
                       isNull(resolvedColumn),
-                      /* eslint-disable @typescript-eslint/no-explicit-any */
-                      ne<any>(resolvedColumn, queryValue),
+                      buildOperatorConstraint({
+                        adapter,
+                        column: resolvedColumn,
+                        field,
+                        locale,
+                        originalOperator,
+                        path: relationOrPath,
+                        resolvedOperator: 'not_equals',
+                        value: queryValue,
+                      }),
                     ),
                   )
                   break

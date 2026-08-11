@@ -667,4 +667,53 @@ describePostgres('postgres operator handlers - postgresUnaccent() behavior', () 
     expect(receivedValue).toBe('%hello%')
     expect(result.docs).toHaveLength(1)
   })
+
+  it('routes not_equals through a custom operator handler, while still matching null values on top of it', async () => {
+    // The preceding test already pushed this exact schema for its own fresh Payload instance.
+    // pushDevSchema caches the last-pushed schema at module scope and would otherwise skip
+    // re-pushing it here, leaving this test querying tables that were dropped but never recreated.
+    process.env.PAYLOAD_FORCE_DRIZZLE_PUSH = 'true'
+
+    const payload = await initPayload(
+      buildConfig({
+        db: postgresAdapter({
+          pool: { connectionString },
+          query: {
+            operatorHandlers: [
+              {
+                name: 'always-false-not-equals',
+                operators: ['not_equals'],
+                build: () => sql`false`,
+              },
+            ],
+          },
+        }),
+        collections: getAccentCollections(),
+        secret: 'secret',
+      }),
+    )
+    activePayloads.push(payload)
+
+    process.env.PAYLOAD_FORCE_DRIZZLE_PUSH = 'false'
+
+    const withTitle = await payload.create({
+      collection: 'accent-items',
+      data: { title: 'hello' },
+    })
+    const withoutTitle = await payload.create({ collection: 'accent-items', data: {} })
+
+    const result = await payload.find({
+      collection: 'accent-items',
+      where: { title: { not_equals: 'something-else' } },
+    })
+
+    const ids = result.docs.map((doc: any) => doc.id)
+
+    // The handler's build() always returns `false`, replacing the usual `ne()` comparison, so a
+    // document whose title genuinely differs from the query value is excluded here - proving the
+    // handler was actually consulted rather than bypassed.
+    expect(ids).not.toContain(withTitle.id)
+    // Payload's own null-inclusive `not_equals` semantics still apply on top of the handler.
+    expect(ids).toContain(withoutTitle.id)
+  })
 })

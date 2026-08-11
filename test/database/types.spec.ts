@@ -97,12 +97,23 @@ describe('postgres operator handlers - type tests', () => {
     type UnknownOperatorHandler = {
       name: string
       operators: ['not_a_real_operator']
-      transformOperands: (context: DrizzleOperatorHandlerContext) => {
-        column: unknown
-        value: unknown
-      }
+      transformOperands: (
+        context: DrizzleOperatorHandlerContext,
+      ) => Pick<DrizzleOperatorHandlerContext, 'column' | 'value'>
     }
 
     expect<DrizzleOperatorHandler>().type.not.toBeAssignableFrom<UnknownOperatorHandler>()
+  })
+
+  test("a handler's operators array accepts every resolved operator, including not_equals", () => {
+    type FullySupportedHandler = {
+      name: string
+      operators: ['contains', 'like', 'not_equals', 'not_like']
+      transformOperands: (
+        context: DrizzleOperatorHandlerContext,
+      ) => Pick<DrizzleOperatorHandlerContext, 'column' | 'value'>
+    }
+
+    expect<DrizzleOperatorHandler>().type.toBeAssignableFrom<FullySupportedHandler>()
   })
 })
