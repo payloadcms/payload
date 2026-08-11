@@ -1,5 +1,3 @@
-import { performance } from 'node:perf_hooks'
-
 import { describe, expect, it } from 'vitest'
 
 import { isEligibleRequest } from './isEligibleRequest.js'
@@ -46,19 +44,14 @@ describe('isEligibleRequest', () => {
     expect(isEligibleRequest(request)).toBe(true)
   })
 
-  it('should reject invalid multipart content types promptly', () => {
-    const contentType = `multipart/form-data; boundary=${';'.repeat(22)}!`
+  it('should reject invalid multipart content types without catastrophic backtracking', () => {
+    const contentType = `multipart/form-data; boundary=${';'.repeat(50)}!`
     const request = new Request('http://localhost/api/upload', {
       body: 'synthetic',
       headers: { 'content-type': contentType },
       method: 'POST',
     })
 
-    const start = performance.now()
-    const isEligible = isEligibleRequest(request)
-    const duration = performance.now() - start
-
-    expect(isEligible).toBe(false)
-    expect(duration).toBeLessThan(20)
-  })
+    expect(isEligibleRequest(request)).toBe(false)
+  }, 1000)
 })
