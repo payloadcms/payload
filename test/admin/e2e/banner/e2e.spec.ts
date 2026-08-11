@@ -12,6 +12,7 @@ import {
   getRoutes,
   initPageConsoleErrorCatch,
 } from '../../../__helpers/e2e/helpers.js'
+import { runAxeScan } from '../../../__helpers/e2e/runAxeScan.js'
 import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
@@ -31,9 +32,6 @@ type BannerType = (typeof bannerTypes)[number]
 
 /** Types that define their own colours. `info` inherits the base banner styles. */
 const styledBannerTypes = ['default', 'error', 'success', 'warning'] as const satisfies BannerType[]
-
-/** WCAG 2.1 minimum contrast ratio for normal-sized body text. */
-const MINIMUM_CONTRAST_RATIO = 4.5
 
 const themes = ['light', 'dark'] as const
 
@@ -61,43 +59,6 @@ describe('Banner', () => {
 
   const getBackgroundColor = async ({ type }: Pick<BannerTarget, 'type'>): Promise<string> =>
     getBanner({ type }).evaluate((el) => window.getComputedStyle(el).backgroundColor)
-
-  /**
-   * Returns the WCAG 2.1 contrast ratio between a banner's text and its background.
-   *
-   * The calculation runs in the browser so it reads the resolved colours, including
-   * any that a `:hover` or `:active` state applies. `getComputedStyle` reports colours
-   * as `rgb()` or `rgba()` strings, so each is reduced to its numeric channels, then
-   * converted to a relative luminance with the sRGB gamma curve. The ratio is
-   * `(lighter + 0.05) / (darker + 0.05)`, so the result reads the same whichever of
-   * the two colours is lighter.
-   *
-   * @returns A ratio from 1 (identical colours) to 21 (black against white).
-   */
-  const getContrastRatio = async ({ type, hasAction }: BannerTarget): Promise<number> =>
-    getBanner({ type, hasAction }).evaluate((el) => {
-      const toChannels = (color: string) =>
-        color
-          .match(/\d+(?:\.\d+)?/g)
-          .slice(0, 3)
-          .map(Number)
-
-      const relativeLuminance = (channels: number[]) =>
-        channels
-          .map((channel) => {
-            const ratio = channel / 255
-            return ratio <= 0.03928 ? ratio / 12.92 : Math.pow((ratio + 0.055) / 1.055, 2.4)
-          })
-          .reduce((total, value, index) => total + [0.2126, 0.7152, 0.0722][index] * value, 0)
-
-      const styles = window.getComputedStyle(el)
-      const foreground = relativeLuminance(toChannels(styles.color))
-      const background = relativeLuminance(toChannels(styles.backgroundColor))
-      const [lighter, darker] =
-        foreground > background ? [foreground, background] : [background, foreground]
-
-      return (lighter + 0.05) / (darker + 0.05)
-    })
 
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
@@ -179,43 +140,53 @@ describe('Banner', () => {
       .not.toBe(restBackground)
   })
 
-  for (const type of styledBannerTypes) {
-    test(`should keep the ${type} type readable at rest in both themes`, async () => {
-      for (const theme of themes) {
-        await setTheme({ theme })
+  for (const theme of themes) {
+    test(`should have no accessibility violations at rest in the ${theme} theme`, async () => {
+      await setTheme({ theme })
 
-        await expect
-          .poll(() => getContrastRatio({ type }), { message: `${type} at rest in ${theme}` })
-          .toBeGreaterThanOrEqual(MINIMUM_CONTRAST_RATIO)
-      }
+      const results = await runAxeScan({
+        include: ['#banner-showcase'],
+        page,
+        testInfo: test.info(),
+      })
+
+      expect(results.violations).toEqual([])
     })
 
-    test(`should keep the ${type} type readable on hover in both themes`, async () => {
-      for (const theme of themes) {
-        await setTheme({ theme })
+    // Axe reads the resolved styles of the current DOM, so hovering or pressing a
+    // banner first means the scan reports the colours of that state.
+    test(`should have no accessibility violations while a banner is hovered in the ${theme} theme`, async () => {
+      await setTheme({ theme })
+
+      for (const type of styledBannerTypes) {
         await getBanner({ type, hasAction: true }).hover()
 
-        await expect
-          .poll(() => getContrastRatio({ type, hasAction: true }), {
-            message: `${type} on hover in ${theme}`,
-          })
-          .toBeGreaterThanOrEqual(MINIMUM_CONTRAST_RATIO)
+        const results = await runAxeScan({
+          include: [`#banner-showcase-with-action .banner--type-${type}`],
+          page,
+          testInfo: test.info(),
+        })
+
+        expect(results.violations, `${type} hovered in ${theme}`).toEqual([])
       }
     })
 
-    test(`should keep the ${type} type readable while pressed in both themes`, async () => {
-      for (const theme of themes) {
-        await setTheme({ theme })
+    test(`should have no accessibility violations while a banner is pressed in the ${theme} theme`, async () => {
+      await setTheme({ theme })
+
+      for (const type of styledBannerTypes) {
         await getBanner({ type, hasAction: true }).hover()
         await page.mouse.down()
 
-        await expect
-          .poll(() => getContrastRatio({ type, hasAction: true }), {
-            message: `${type} while pressed in ${theme}`,
-          })
-          .toBeGreaterThanOrEqual(MINIMUM_CONTRAST_RATIO)
+        const results = await runAxeScan({
+          include: [`#banner-showcase-with-action .banner--type-${type}`],
+          page,
+          testInfo: test.info(),
+        })
 
         await page.mouse.up()
+
+        expect(results.violations, `${type} pressed in ${theme}`).toEqual([])
       }
     })
   }
