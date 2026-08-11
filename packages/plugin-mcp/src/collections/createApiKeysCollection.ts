@@ -55,6 +55,12 @@ export const createAPIKeysCollection = (
 
   const userCollection = pluginOptions.userCollection
 
+  const isAuthenticated = ({ req }: { req: PayloadRequest }): boolean =>
+    Boolean(req.user && req.user.collection === userCollection)
+
+  const restrictToOwnKeys = ({ req }: { req: PayloadRequest }): boolean | Where =>
+    req.user && req.user.collection === userCollection ? { user: { equals: req.user.id } } : false
+
   return {
     slug: 'payload-mcp-api-keys',
     access: {
@@ -92,7 +98,8 @@ export const createAPIKeysCollection = (
         admin: {
           description: 'The user that the API key is associated with.',
         },
-        defaultValue: ({ req }: { req: PayloadRequest }) => req?.user?.id,
+        defaultValue: ({ req }: { req: PayloadRequest }) =>
+          req.user && req.user.collection === userCollection ? req.user.id : undefined,
         relationTo: userCollection as CollectionSlug,
         required: true,
       },
@@ -390,10 +397,3 @@ export const createAPIKeysCollection = (
     },
   }
 }
-
-const isAuthenticated = ({ req }: { req: PayloadRequest }): boolean => Boolean(req.user)
-
-// Constrain reads and mutations to the caller's own keys. Returns a query constraint
-// for authenticated users and denies everyone else.
-const restrictToOwnKeys = ({ req }: { req: PayloadRequest }): boolean | Where =>
-  req.user ? { user: { equals: req.user.id } } : false
