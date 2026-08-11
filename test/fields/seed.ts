@@ -6,6 +6,7 @@ import { getFileByPath } from 'payload'
 import { fileURLToPath } from 'url'
 
 import { seedDB } from '../__helpers/shared/clearAndSeed/seed.js'
+import { getTestSuiteDir } from '../__helpers/shared/getTestSuiteDir.js'
 import { devUser } from '../credentials.js'
 import { arrayDoc } from './collections/Array/shared.js'
 import { blocksDoc } from './collections/Blocks/shared.js'
@@ -61,10 +62,11 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 export const seed = async (_payload: Payload) => {
-  const jpgPath = path.resolve(dirname, './collections/Upload/payload.jpg')
-  const jpg480x320Path = path.resolve(dirname, './collections/Upload/payload480x320.jpg')
-  const pngPath = path.resolve(dirname, './uploads/payload.png')
-  const png20x20Path = path.resolve(dirname, './collections/Upload/payload20x20.png')
+  const fieldsDir = getTestSuiteDir({ fallbackDir: dirname, suitePath: 'fields' })
+  const jpgPath = path.resolve(fieldsDir, './collections/Upload/payload.jpg')
+  const jpg480x320Path = path.resolve(fieldsDir, './collections/Upload/payload480x320.jpg')
+  const pngPath = path.resolve(fieldsDir, './uploads/payload.png')
+  const png20x20Path = path.resolve(fieldsDir, './collections/Upload/payload20x20.png')
 
   const [jpgFile, jpg480x320File, pngFile, png20x20File] = await Promise.all([
     getFileByPath(jpgPath),
@@ -412,6 +414,9 @@ export async function clearAndSeedEverything(_payload: Payload) {
     collectionSlugs,
     seedFunction: seed,
     snapshotKey: 'fieldsTest',
-    uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
+    uploadsDir: path.resolve(
+      getTestSuiteDir({ fallbackDir: dirname, suitePath: 'fields' }),
+      './collections/Upload/uploads',
+    ),
   })
 }

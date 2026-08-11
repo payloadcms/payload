@@ -5,7 +5,6 @@ import '@payloadcms/ui/css/app.css'
 // `(payload)/custom.css` so the shared "custom CSS" e2e passes on both adapters.
 import './custom.css'
 
-import { HydrationMarker } from '../components/HydrationMarker/index.js'
 import { getLayoutDataFn, serverFunctionHandler } from './_payload/server.functions.js'
 
 const { component: PayloadProviders, loader } = payloadLayoutRoute({
@@ -14,18 +13,6 @@ const { component: PayloadProviders, loader } = payloadLayoutRoute({
 })
 
 export const Route = createFileRoute('/_payload')({
-  component: PayloadLayout,
+  component: PayloadProviders,
   loader,
 })
-
-// `withPayloadRoot` swaps `__root`'s shell (and its `<HydrationMarker />`) for the
-// Payload admin document on `/admin` routes, so the marker must be re-mounted here
-// for the Playwright hydration-wait wrapper to fire on admin pages.
-function PayloadLayout() {
-  return (
-    <>
-      <PayloadProviders />
-      <HydrationMarker />
-    </>
-  )
-}

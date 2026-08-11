@@ -11,8 +11,6 @@ import type { PayloadTestSDK } from '../../../__helpers/shared/sdk/index.js'
 import type { Config } from '../../payload-types.js'
 
 import {
-  ensureCompilationIsDone,
-  initPageConsoleErrorCatch,
   saveDocAndAssert,
   // throttleTest,
 } from '../../../__helpers/e2e/helpers.js'
@@ -20,6 +18,8 @@ import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { RESTClient } from '../../../__helpers/shared/rest.js'
+import { ensureCompilationIsDone } from '../../../__setup/e2e/ensureCompilationIsDone.js'
+import { initPage } from '../../../__setup/e2e/initPage.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { conditionalLogicSlug } from '../../slugs.js'
 
@@ -62,10 +62,7 @@ describe('Conditional Logic', () => {
     url = new AdminUrlUtil(serverURL, conditionalLogicSlug)
 
     context = await browser.newContext()
-    page = await context.newPage()
-    initPageConsoleErrorCatch(page)
-
-    await ensureCompilationIsDone({ page, serverURL })
+    ;({ page } = await initPage({ context, serverURL }))
   })
 
   beforeEach(async () => {
@@ -298,9 +295,9 @@ describe('Conditional Logic', () => {
     await page.goto(url.create)
 
     await addBlock({
-      page,
-      fieldName: 'blocksWithRadioCondition',
       blockToSelect: 'Block With Radio Condition',
+      fieldName: 'blocksWithRadioCondition',
+      page,
     })
 
     // Conditional field should be hidden (defaultValue: 'hide')

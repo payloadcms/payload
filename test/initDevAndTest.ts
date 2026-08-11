@@ -23,7 +23,9 @@ export async function initDevAndTest(
 
   // A test suite that ships its own standalone TanStack app
   // (`test/<suite>/app-tanstack`) generates its importMap there; everyone else
-  // falls back to the shippable root app. Mirrors the per-suite app dir model.
+  // falls back to the base test app at `test/app-tanstack`. Mirrors the per-suite
+  // app dir model, and matches how `vite.tanstack.config.ts` resolves
+  // `srcDirectory`. The root `app-tanstack` shipped to user projects is never used.
   const tanstackSuiteAppDir = path.resolve(dirname, testSuiteArg, 'app-tanstack')
   const tanstackAppDir = fs.existsSync(tanstackSuiteAppDir)
     ? tanstackSuiteAppDir
