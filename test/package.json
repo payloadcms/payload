@@ -10,7 +10,8 @@
     "test": "pnpm -C \"../\" run test",
     "test:e2e": "pnpm -C \"../\" run test:e2e",
     "test:int": "pnpm -C \"../\" run test:int",
-    "typecheck": "pnpm turbo build --filter payload-test-suite && tsc --project tsconfig.typecheck.json"
+    "typecheck": "pnpm turbo build --filter payload-test-suite && tsc --project tsconfig.typecheck.json",
+    "typecheck:app-tanstack": "pnpm -C .. exec tsc --project test/app-tanstack/tsconfig.json && pnpm -C .. exec tsc --project test/admin-bar/app-tanstack/tsconfig.json && pnpm -C .. exec tsc --project test/live-preview/app-tanstack/tsconfig.json"
   },
   "lint-staged": {
     "**/package.json": "sort-package-json",
