@@ -92,12 +92,15 @@
       }
     }
 
+    // Warning sits one ramp step deeper than the other types. The -100 background is
+    // close enough to the error type's pink to be hard to tell apart, so -150 pushes
+    // the two further apart. The text moves with it to stay above 4.5:1.
     &--type-warning {
-      background: var(--theme-warning-100);
-      color: var(--theme-warning-600);
+      background: var(--theme-warning-150);
+      color: var(--theme-warning-650);
 
       svg {
-        @include color-svg(var(--theme-warning-600));
+        @include color-svg(var(--theme-warning-650));
       }
 
       &.banner--has-action {
@@ -111,7 +114,7 @@
         }
 
         &:hover {
-          background: var(--theme-warning-200);
+          background: var(--theme-warning-250);
         }
 
         &:active {

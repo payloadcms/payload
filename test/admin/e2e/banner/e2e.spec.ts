@@ -35,6 +35,12 @@ const styledBannerTypes = ['default', 'error', 'success', 'warning'] as const sa
 
 const themes = ['light', 'dark'] as const
 
+/**
+ * The token the warning type uses for its resting background. It sits one step
+ * deeper than the other types so the warning colour reads apart from the error one.
+ */
+const WARNING_BACKGROUND_TOKEN = '--theme-warning-150'
+
 type BannerTarget = {
   /** Selects the actionable showcase row, whose banners carry `banner--has-action`. */
   hasAction?: boolean
@@ -101,8 +107,8 @@ describe('Banner', () => {
 
     // The token resolves to a hex string, so paint it onto a probe element to
     // normalise it into the rgb() form that getComputedStyle reports.
-    const warningToken = await getBanner({ type: 'warning' }).evaluate((el) => {
-      const tokenValue = window.getComputedStyle(el).getPropertyValue('--theme-warning-100').trim()
+    const warningToken = await getBanner({ type: 'warning' }).evaluate((el, token) => {
+      const tokenValue = window.getComputedStyle(el).getPropertyValue(token).trim()
       const probe = document.createElement('div')
 
       probe.style.backgroundColor = tokenValue
@@ -113,7 +119,7 @@ describe('Banner', () => {
       probe.remove()
 
       return normalised
-    })
+    }, WARNING_BACKGROUND_TOKEN)
 
     expect(warningBackground).toBe(warningToken)
   })
