@@ -48,6 +48,7 @@ import { GlobalNotInView } from './globals/NotInView.js'
 import { Settings } from './globals/Settings.js'
 import { seed } from './seed.js'
 import {
+  bannerStylesViewPath,
   BASE_PATH,
   customAdminRoutes,
   customNestedViewPath,
@@ -96,7 +97,7 @@ export default buildConfigWithDefaults({
         // Account: CustomAccountView,
         BannerShowcase: {
           Component: '/components/views/BannerStyles/index.js#BannerStyles',
-          path: '/banner-styles',
+          path: bannerStylesViewPath,
         },
         ButtonShowcase: {
           Component: '/components/views/ButtonStyles/index.js#ButtonStyles',

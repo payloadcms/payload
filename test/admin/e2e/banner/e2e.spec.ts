@@ -16,7 +16,7 @@ import { runAxeScan } from '../../../__helpers/e2e/runAxeScan.js'
 import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
-import { BASE_PATH, customAdminRoutes } from '../../shared.js'
+import { bannerStylesViewPath, BASE_PATH, customAdminRoutes } from '../../shared.js'
 
 process.env.NEXT_BASE_PATH = BASE_PATH
 
@@ -86,7 +86,7 @@ describe('Banner', () => {
 
     await ensureCompilationIsDone({ customAdminRoutes, page, serverURL })
 
-    await page.goto(formatAdminURL({ adminRoute, path: '/banner-styles', serverURL }))
+    await page.goto(formatAdminURL({ adminRoute, path: bannerStylesViewPath, serverURL }))
   })
 
   test('should render a banner for every supported type', async () => {
