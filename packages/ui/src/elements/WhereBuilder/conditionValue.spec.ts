@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest'
 
-import { isEmptyConditionValue, isNoOpConditionValueUpdate } from './conditionValue.js'
+import {
+  getDisplayedConditionValue,
+  isEmptyConditionValue,
+  isNoOpConditionValueUpdate,
+} from './conditionValue.js'
 
 describe('isEmptyConditionValue', () => {
   it.each([
@@ -20,12 +24,27 @@ describe('isEmptyConditionValue', () => {
   })
 })
 
+describe('getDisplayedConditionValue', () => {
+  it.each([
+    ['undefined', undefined],
+    ['null', null],
+  ])('displays %s as no value', (_label, value) => {
+    expect(getDisplayedConditionValue(value)).toBeUndefined()
+  })
+
+  it.each([
+    ['zero', 0],
+    ['false', false],
+    ['an empty string', ''],
+    ['a string', 'option1'],
+  ])('displays %s as itself', (_label, value) => {
+    expect(getDisplayedConditionValue(value)).toBe(value)
+  })
+})
+
 describe('isNoOpConditionValueUpdate', () => {
   it('skips the empty value a row reports back for a stored empty string', () => {
-    // A row loaded from `?where[or][0][and][0][field][equals]=` holds `''`, but renders with
-    // its value coerced to `undefined`, so on mount it reports `undefined` back up. Committing
-    // that writes `{ equals: undefined }`, which `qs.stringify` omits — dropping the whole
-    // condition from the URL and losing the row.
+    // The row this covers comes from a URL such as `?where[or][0][and][0][field][equals]=`.
     expect(
       isNoOpConditionValueUpdate({ incomingValue: undefined, storedValue: '', type: 'value' }),
     ).toBe(true)

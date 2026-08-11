@@ -19,7 +19,11 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { reduceFieldsToOptions } from '../../utilities/reduceFieldsToOptions.js'
 import { Button } from '../Button/index.js'
 import { Condition } from './Condition/index.js'
-import { isEmptyConditionValue, isNoOpConditionValueUpdate } from './conditionValue.js'
+import {
+  getDisplayedConditionValue,
+  isEmptyConditionValue,
+  isNoOpConditionValueUpdate,
+} from './conditionValue.js'
 import './index.css'
 import { fieldTypeConditions, getValidFieldOperators } from './field-types.js'
 
@@ -111,8 +115,7 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
     ({ type, andIndex, field, operator: incomingOperator, orIndex, value }) => {
       // Virtual first row: conditions not yet committed, build from scratch
       if (conditions.length === 0) {
-        // Ignore empty value edits so a cleared row doesn't re-commit itself. Field and
-        // operator picks carry empty values too, but must fall through to build the row.
+        // Field and operator picks carry empty values too, but must fall through to build the row.
         if (type === 'value' && isEmptyConditionValue(value)) {
           return
         }
@@ -274,7 +277,7 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
                   const operator =
                     (Object.keys(condition?.[fieldPath] || {})?.[0] as Operator) || undefined
 
-                  const value = condition?.[fieldPath]?.[operator] || undefined
+                  const value = getDisplayedConditionValue(condition?.[fieldPath]?.[operator])
 
                   const isFirstCondition = orIndex === 0 && andIndex === 0
                   const join: 'and' | 'or' = andIndex === 0 ? 'or' : 'and'
