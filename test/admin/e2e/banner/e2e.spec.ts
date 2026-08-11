@@ -27,16 +27,65 @@ const dirname = path.resolve(currentFolder, '../../')
 
 const bannerTypes = ['default', 'error', 'info', 'success', 'warning'] as const
 
+type BannerType = (typeof bannerTypes)[number]
+
+/** Types that define their own colours. `info` inherits the base banner styles. */
+const styledBannerTypes = ['default', 'error', 'success', 'warning'] as const satisfies BannerType[]
+
+/** WCAG 2.1 minimum contrast ratio for normal-sized body text. */
+const MINIMUM_CONTRAST_RATIO = 4.5
+
+const themes = ['light', 'dark'] as const
+
 describe('Banner', () => {
   let page: Page
   let context: BrowserContext
   let serverURL: string
   let adminRoute: string
 
-  const getBackgroundColor = async (type: string): Promise<string> =>
-    page
-      .locator(`#banner-showcase .banner--type-${type}`)
-      .evaluate((el) => window.getComputedStyle(el).backgroundColor)
+  const setTheme = async ({ theme }: { theme: (typeof themes)[number] }): Promise<void> => {
+    await page.evaluate(
+      (nextTheme) => document.documentElement.setAttribute('data-theme', nextTheme),
+      theme,
+    )
+  }
+
+  const getBanner = ({ type, hasAction }: { hasAction?: boolean; type: BannerType }) =>
+    page.locator(`#banner-showcase${hasAction ? '-with-action' : ''} .banner--type-${type}`)
+
+  const getBackgroundColor = async ({ type }: { type: BannerType }): Promise<string> =>
+    getBanner({ type }).evaluate((el) => window.getComputedStyle(el).backgroundColor)
+
+  const getContrastRatio = async ({
+    type,
+    hasAction,
+  }: {
+    hasAction?: boolean
+    type: BannerType
+  }): Promise<number> =>
+    getBanner({ type, hasAction }).evaluate((el) => {
+      const toChannels = (color: string) =>
+        color
+          .match(/\d+(?:\.\d+)?/g)
+          .slice(0, 3)
+          .map(Number)
+
+      const relativeLuminance = (channels: number[]) =>
+        channels
+          .map((channel) => {
+            const ratio = channel / 255
+            return ratio <= 0.03928 ? ratio / 12.92 : Math.pow((ratio + 0.055) / 1.055, 2.4)
+          })
+          .reduce((total, value, index) => total + [0.2126, 0.7152, 0.0722][index] * value, 0)
+
+      const styles = window.getComputedStyle(el)
+      const foreground = relativeLuminance(toChannels(styles.color))
+      const background = relativeLuminance(toChannels(styles.backgroundColor))
+      const [lighter, darker] =
+        foreground > background ? [foreground, background] : [background, foreground]
+
+      return (lighter + 0.05) / (darker + 0.05)
+    })
 
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
@@ -68,44 +117,94 @@ describe('Banner', () => {
   })
 
   test('should give the warning type its own background color', async () => {
-    const warningBackground = await getBackgroundColor('warning')
-    const defaultBackground = await getBackgroundColor('default')
+    const warningBackground = await getBackgroundColor({ type: 'warning' })
+    const defaultBackground = await getBackgroundColor({ type: 'default' })
 
     expect(warningBackground).not.toBe(defaultBackground)
   })
 
   test('should style the warning type with the warning theme token', async () => {
-    const warningBackground = await getBackgroundColor('warning')
+    const warningBackground = await getBackgroundColor({ type: 'warning' })
 
     // The token resolves to a hex string, so paint it onto a probe element to
     // normalise it into the rgb() form that getComputedStyle reports.
-    const warningToken = await page
-      .locator('#banner-showcase .banner--type-warning')
-      .evaluate((el) => {
-        const tokenValue = window
-          .getComputedStyle(el)
-          .getPropertyValue('--theme-warning-100')
-          .trim()
-        const probe = document.createElement('div')
+    const warningToken = await getBanner({ type: 'warning' }).evaluate((el) => {
+      const tokenValue = window.getComputedStyle(el).getPropertyValue('--theme-warning-100').trim()
+      const probe = document.createElement('div')
 
-        probe.style.backgroundColor = tokenValue
-        document.body.appendChild(probe)
+      probe.style.backgroundColor = tokenValue
+      document.body.appendChild(probe)
 
-        const normalised = window.getComputedStyle(probe).backgroundColor
+      const normalised = window.getComputedStyle(probe).backgroundColor
 
-        probe.remove()
+      probe.remove()
 
-        return normalised
-      })
+      return normalised
+    })
 
     expect(warningBackground).toBe(warningToken)
   })
 
   test('should keep the warning type distinct from the other styled types', async () => {
-    const styledTypes = ['default', 'error', 'success', 'warning']
+    const backgrounds = await Promise.all(
+      styledBannerTypes.map((type) => getBackgroundColor({ type })),
+    )
 
-    const backgrounds = await Promise.all(styledTypes.map((type) => getBackgroundColor(type)))
-
-    expect(new Set(backgrounds).size).toBe(styledTypes.length)
+    expect(new Set(backgrounds).size).toBe(styledBannerTypes.length)
   })
+
+  test('should darken the warning background on hover when the banner has an action', async () => {
+    const warning = getBanner({ type: 'warning', hasAction: true })
+
+    const restBackground = await warning.evaluate(
+      (el) => window.getComputedStyle(el).backgroundColor,
+    )
+
+    await warning.hover()
+
+    await expect
+      .poll(() => warning.evaluate((el) => window.getComputedStyle(el).backgroundColor))
+      .not.toBe(restBackground)
+  })
+
+  for (const type of styledBannerTypes) {
+    test(`should keep the ${type} type readable at rest in both themes`, async () => {
+      for (const theme of themes) {
+        await setTheme({ theme })
+
+        await expect
+          .poll(() => getContrastRatio({ type }), { message: `${type} at rest in ${theme}` })
+          .toBeGreaterThanOrEqual(MINIMUM_CONTRAST_RATIO)
+      }
+    })
+
+    test(`should keep the ${type} type readable on hover in both themes`, async () => {
+      for (const theme of themes) {
+        await setTheme({ theme })
+        await getBanner({ type, hasAction: true }).hover()
+
+        await expect
+          .poll(() => getContrastRatio({ type, hasAction: true }), {
+            message: `${type} on hover in ${theme}`,
+          })
+          .toBeGreaterThanOrEqual(MINIMUM_CONTRAST_RATIO)
+      }
+    })
+
+    test(`should keep the ${type} type readable while pressed in both themes`, async () => {
+      for (const theme of themes) {
+        await setTheme({ theme })
+        await getBanner({ type, hasAction: true }).hover()
+        await page.mouse.down()
+
+        await expect
+          .poll(() => getContrastRatio({ type, hasAction: true }), {
+            message: `${type} while pressed in ${theme}`,
+          })
+          .toBeGreaterThanOrEqual(MINIMUM_CONTRAST_RATIO)
+
+        await page.mouse.up()
+      }
+    })
+  }
 })
