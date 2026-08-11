@@ -524,18 +524,13 @@ mcpPlugin({
 
 ## API Key Access to MCP
 
-Payload adds an API Key collection for managing MCP credentials and capabilities. A user who can
-create or update documents in this collection can choose the user associated with a key and the
-MCP capabilities enabled for it. Requests authenticated with that key then act as the associated
-user. Unless you add additional restrictions, this means a key manager can issue credentials that
-act as any user in the configured user collection.
+Payload adds an API Key collection for managing MCP credentials and capabilities. By default, a
+signed-in user from the configured user collection can create and manage only their own keys. The
+owner is assigned automatically and cannot be changed.
 
-For that reason, access should normally be limited to administrators who are trusted to issue
-credentials on behalf of other users. Payload does not define what an administrator is in your
-application, so access must be manually defined with `overrideApiKeyCollection`.
-
-To manage keys through the Admin Panel or APIs, use `overrideApiKeyCollection` to explicitly grant
-access to your application's administrators:
+Requests authenticated with a key act as its owner. To let administrators issue and manage keys
+for other users, override both the collection access and the `user` field access with
+`overrideApiKeyCollection`:
 
 ```ts
 import type { PayloadRequest } from 'payload'
@@ -549,22 +544,27 @@ const isAdmin = ({ req }: { req: PayloadRequest }) =>
   )
 
 mcpPlugin({
-  overrideApiKeyCollection: (collection) => ({
-    ...collection,
-    access: {
+  overrideApiKeyCollection: (collection) => {
+    collection.access = {
       create: isAdmin,
       delete: isAdmin,
       read: isAdmin,
       unlock: isAdmin,
       update: isAdmin,
-    },
-  }),
+    }
+    collection.fields = collection.fields.map((field) =>
+      'name' in field && field.name === 'user'
+        ? { ...field, access: { create: isAdmin, update: isAdmin } }
+        : field,
+    )
+    return collection
+  },
   // ... other options
 })
 ```
 
-Replace `isAdmin` with the role or permission check used by your application. Once access is
-configured, administrators can:
+Replace `isAdmin` with the permission check used by your application. Only grant this access to
+users trusted to issue credentials that act as another user. Once configured, administrators can:
 
 - Create user associated API keys for MCP clients
 - `Allow` or `disallow` endpoint traffic in real-time
