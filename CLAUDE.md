@@ -305,14 +305,15 @@ const queryString = qs.stringify({ limit, page, where }, { addQueryPrefix: true 
 const url = formatAdminURL({ apiRoute: api, path: `/${collectionSlug}${queryString}`, serverURL })
 ```
 
-**Building server functions, views, or endpoints:** Always use `overrideAccess: false` and pass the `user` to payload operations. Without these, the operation runs with access control disabled, which is a security vulnerability.
+**Building request-scoped server functions, views, or endpoints:** Pass the current `req` or `user` to Payload operations so access control runs for the authenticated user. Access control is enabled by default. Only use `overrideAccess: true` when intentionally performing a trusted internal operation that must bypass access control. Public operations may omit `req` and `user`, in which case access control runs for an anonymous user.
 
 Incorrect:
 
 ```typescript
-// INSECURE - runs with full access, bypassing all access control
+// INSECURE - explicitly bypasses access control for a request-scoped operation
 const docs = await payload.find({
   collection: 'posts',
+  overrideAccess: true,
 })
 ```
 
@@ -322,8 +323,16 @@ Correct:
 // SECURE - respects access control for the current user
 const docs = await payload.find({
   collection: 'posts',
-  overrideAccess: false,
-  user,
+  req,
+})
+```
+
+For trusted internal operations such as seeds, migrations, and background jobs, make the intentional bypass explicit:
+
+```typescript
+const docs = await payload.find({
+  collection: 'posts',
+  overrideAccess: true,
 })
 ```
 
