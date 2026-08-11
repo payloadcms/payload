@@ -1,4 +1,4 @@
-import type { CollectionConfig, CollectionSlug } from 'payload'
+import type { CollectionConfig, CollectionSlug, PayloadRequest, Where } from 'payload'
 
 import type { MCPPluginConfig } from '../types.js'
 
@@ -58,11 +58,14 @@ export const createAPIKeysCollection = (
   return {
     slug: 'payload-mcp-api-keys',
     access: {
-      create: () => false,
-      delete: () => false,
-      read: () => false,
-      unlock: () => false,
-      update: () => false,
+      // Fail-safe default: any authenticated user may manage only their OWN keys.
+      // Cross-user key issuance is disabled by default (see the `user` field below)
+      // and must be granted explicitly via `overrideApiKeyCollection`.
+      create: isAuthenticated,
+      delete: restrictToOwnKeys,
+      read: restrictToOwnKeys,
+      unlock: restrictToOwnKeys,
+      update: restrictToOwnKeys,
     },
     admin: {
       description:
@@ -78,9 +81,18 @@ export const createAPIKeysCollection = (
       {
         name: 'user',
         type: 'relationship',
+        access: {
+          // Bind new keys to the creating user and prevent re-binding on update.
+          // A key acts as its associated user, so allowing arbitrary assignment lets
+          // any key manager impersonate anyone. Grant these via `overrideApiKeyCollection`
+          // to let trusted administrators issue keys on behalf of other users.
+          create: () => false,
+          update: () => false,
+        },
         admin: {
           description: 'The user that the API key is associated with.',
         },
+        defaultValue: ({ req }: { req: PayloadRequest }) => req?.user?.id,
         relationTo: userCollection as CollectionSlug,
         required: true,
       },
@@ -378,3 +390,10 @@ export const createAPIKeysCollection = (
     },
   }
 }
+
+const isAuthenticated = ({ req }: { req: PayloadRequest }): boolean => Boolean(req.user)
+
+// Constrain reads and mutations to the caller's own keys. Returns a query constraint
+// for authenticated users and denies everyone else.
+const restrictToOwnKeys = ({ req }: { req: PayloadRequest }): boolean | Where =>
+  req.user ? { user: { equals: req.user.id } } : false
