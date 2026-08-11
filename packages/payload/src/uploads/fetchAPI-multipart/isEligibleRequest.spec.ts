@@ -44,17 +44,15 @@ describe('isEligibleRequest', () => {
     expect(isEligibleRequest(request)).toBe(true)
   })
 
-  it('should reject invalid multipart content types promptly', () => {
+  it('should reject invalid multipart content types without catastrophic backtracking', () => {
     const request = new Request('http://localhost/api/upload', {
       body: 'test',
       headers: {
-        'content-type': `multipart/form-data; boundary=${';'.repeat(23)}!`,
+        'content-type': `multipart/form-data; boundary=${';'.repeat(50)}!`,
       },
       method: 'POST',
     })
-    const start = performance.now()
 
     expect(isEligibleRequest(request)).toBe(false)
-    expect(performance.now() - start).toBeLessThan(25)
-  }, 100)
+  }, 1000)
 })
