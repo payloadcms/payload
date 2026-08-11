@@ -834,41 +834,6 @@ test.describe('Bulk Edit', () => {
 
     await bulkEditForm.locator('.field-select .rs__control').click()
 
-    await expect(
-      getSelectMenu({ page }).locator('.rs__option', { hasText: exactText('Named Tab Field') }),
-    ).toBeVisible()
-
-    await payload.delete({ collection: restrictedTabsSlug, id: doc.id })
-  })
-
-  test('should show clean labels for fields inside label-false groups and rows', async () => {
-    const doc = await payload.create({
-      collection: restrictedTabsSlug,
-      data: { title: 'Restricted Tabs Doc' },
-    })
-
-    await page.goto(restrictedTabsUrl.list)
-    await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('limit=')
-
-    await addListFilter({
-      page,
-      fieldLabel: 'ID',
-      operatorLabel: 'equals',
-      value: doc.id,
-    })
-
-    await page.locator('table tbody tr.row-1 input[type="checkbox"]').check()
-    await page
-      .locator('.list-selection__actions .btn', {
-        hasText: 'Edit',
-      })
-      .click()
-
-    const bulkEditForm = page.locator('form.edit-many__form')
-    await expect(bulkEditForm).toBeVisible()
-
-    await bulkEditForm.locator('.field-select .rs__control').click()
-
     const selectMenu = getSelectMenu({ page })
 
     await expect(
