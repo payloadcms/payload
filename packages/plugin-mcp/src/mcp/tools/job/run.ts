@@ -23,6 +23,8 @@ export const runJob = async (
     // Actually run the job using Payload's job queue
     const jobQueueOptions: Record<string, unknown> = {
       input,
+      overrideAccess: false,
+      req,
       task: jobSlug,
     }
 

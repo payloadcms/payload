@@ -973,7 +973,7 @@ export class BasePayload {
         }
 
         // 2. if api key enabled, push api key strategy into the array
-        if (collection.auth?.useAPIKey) {
+        if (collection.auth?.useAPIKey && collection.slug !== 'payload-mcp-api-keys') {
           authStrategies.push({
             name: `${collection.slug}-api-key`,
             authenticate: APIKeyAuthentication(collection),
