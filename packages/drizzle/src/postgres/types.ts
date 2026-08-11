@@ -135,8 +135,8 @@ export type PostgresSchemaHook = (
 
 export type PostgresOperatorHandler = {
   /**
-   * Postgres extensions that must be present in the adapter's `extensions` option for this
-   * handler to be usable. Validated once during adapter initialization.
+   * Postgres extensions that must be installed in the database for this handler to be usable.
+   * Checked once, against the database, when the adapter connects.
    */
   requiredExtensions?: string[]
 } & DrizzleOperatorHandler

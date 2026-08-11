@@ -40,6 +40,7 @@ import {
   updateOne,
   updateVersion,
   upsert,
+  validateOperatorHandlers,
 } from '@payloadcms/drizzle'
 import {
   columnToCodeConverter,
@@ -54,7 +55,6 @@ import {
   init,
   insert,
   requireDrizzleKit,
-  validatePostgresOperatorHandlers,
 } from '@payloadcms/drizzle/postgres'
 import { pgEnum, pgSchema, pgTable } from 'drizzle-orm/pg-core'
 import { createDatabaseAdapter, defaultBeginTransaction, findMigrationDir } from 'payload'
@@ -100,7 +100,7 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
 
     const operatorHandlers = args.query?.operatorHandlers ?? []
 
-    validatePostgresOperatorHandlers({ extensions, operatorHandlers })
+    validateOperatorHandlers(operatorHandlers)
 
     const sanitizeStatements = ({
       sqlExecute,

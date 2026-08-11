@@ -5,8 +5,8 @@ import type { PostgresOperatorHandler } from '../types.js'
 
 /**
  * Makes Postgres `contains`, `like`, and `not_like` text comparisons accent-insensitive by
- * wrapping both operands in `unaccent(...)`. Requires the `unaccent` extension to be listed in
- * the adapter's `extensions` option.
+ * wrapping both operands in `unaccent(...)`. Requires the `unaccent` extension to be installed in
+ * the database - list it in the adapter's `extensions` option to have Payload install it for you.
  *
  * Skips native `uuid` columns: a default or custom UUID/UUIDv7 `id` field is reported as a
  * `text`-type field by Payload even though it is stored as a `uuid` column, so `fieldTypes`

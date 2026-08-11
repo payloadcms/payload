@@ -4,6 +4,7 @@ import type { DatabaseAdapterObj, Payload, SanitizedConfig } from 'payload'
 import { postgresAdapter, postgresUnaccent, sql } from '@payloadcms/db-postgres'
 import { vercelPostgresAdapter } from '@payloadcms/db-vercel-postgres'
 import { BasePayload, buildConfig } from 'payload'
+import pg from 'pg'
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
 
 import { defaultPostgresUrl } from '../dbAdapters.js'
@@ -68,6 +69,41 @@ const runOperatorHandlerConfigSuite = (
       expect(thrown).toBeInstanceOf(Error)
       expect((thrown as Error).message).toContain('fake-unaccent')
       expect((thrown as Error).message).toContain('unaccent')
+    })
+
+    it('does not reject at initialization when a handler requires an extension that is installed in the database but absent from the adapter extensions option', async () => {
+      const pool = new pg.Pool({ connectionString })
+
+      // Bypasses the test suite's usual PAYLOAD_DROP_DATABASE reset: dropping the public schema
+      // would cascade-drop the extension created below, since it is not declared in the
+      // adapter's "extensions" option for Payload to recreate afterwards.
+      const previousDropDatabase = process.env.PAYLOAD_DROP_DATABASE
+      process.env.PAYLOAD_DROP_DATABASE = 'false'
+
+      await pool.query('CREATE EXTENSION IF NOT EXISTS "unaccent"')
+
+      try {
+        const config = await buildConfigWithOperatorHandlers([
+          {
+            name: 'fake-unaccent',
+            operators: ['contains'],
+            requiredExtensions: ['unaccent'],
+            transformOperands: ({ column, value }) => ({ column, value }),
+          },
+        ])
+
+        const payload = await new BasePayload().init({ config })
+
+        expect(
+          (payload.db as unknown as { operatorHandlers: { name: string }[] }).operatorHandlers,
+        ).toEqual([expect.objectContaining({ name: 'fake-unaccent' })])
+
+        await payload.destroy()
+      } finally {
+        process.env.PAYLOAD_DROP_DATABASE = previousDropDatabase
+        await pool.query('DROP EXTENSION IF EXISTS "unaccent"')
+        await pool.end()
+      }
     })
 
     it('rejects at initialization when two replacement handlers target the same operator, naming both handlers and the operator', async () => {

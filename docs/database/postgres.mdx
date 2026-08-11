@@ -112,7 +112,7 @@ export default buildConfig({
 })
 ```
 
-Configuring `postgresUnaccent()` without `extensions: ['unaccent']` will fail at initialization with a clear error.
+Configuring `postgresUnaccent()` without the `unaccent` extension installed in the database will fail at initialization with a clear error. Listing `extensions: ['unaccent']` is the easiest way to have Payload install it for you; an extension installed by hand also satisfies the check.
 
 The same import is available from `@payloadcms/db-vercel-postgres` for the Vercel Postgres adapter.
 
