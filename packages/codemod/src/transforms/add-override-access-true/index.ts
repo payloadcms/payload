@@ -1,4 +1,12 @@
-import type { CallExpression, Expression, Symbol as MorphSymbol, SourceFile, Type } from 'ts-morph'
+import type {
+  CallExpression,
+  Expression,
+  Symbol as MorphSymbol,
+  ObjectBindingPattern,
+  ObjectLiteralExpression,
+  SourceFile,
+  Type,
+} from 'ts-morph'
 
 import { Node, SyntaxKind } from 'ts-morph'
 
@@ -33,9 +41,10 @@ const PAYLOAD_TYPE_NAMES = new Set(['BasePayload', 'Payload'])
 
 type PayloadBindings = {
   apiMethodSymbols: Set<MorphSymbol>
-  getPayloadNames: Set<string>
-  identifiers: Set<string>
-  payloadTypeNames: Set<string>
+  getPayloadSymbols: Set<MorphSymbol>
+  jobsSymbols: Set<MorphSymbol>
+  payloadSymbols: Set<MorphSymbol>
+  payloadTypeSymbols: Set<MorphSymbol>
 }
 
 export const addOverrideAccessTrue: Transform = {
@@ -104,9 +113,10 @@ export const addOverrideAccessTrue: Transform = {
 function discoverPayloadBindings({ sourceFile }: { sourceFile: SourceFile }): PayloadBindings {
   const bindings: PayloadBindings = {
     apiMethodSymbols: new Set<MorphSymbol>(),
-    getPayloadNames: new Set<string>(),
-    identifiers: new Set<string>(),
-    payloadTypeNames: new Set<string>(),
+    getPayloadSymbols: new Set<MorphSymbol>(),
+    jobsSymbols: new Set<MorphSymbol>(),
+    payloadSymbols: new Set<MorphSymbol>(),
+    payloadTypeSymbols: new Set<MorphSymbol>(),
   }
 
   for (const declaration of sourceFile.getImportDeclarations()) {
@@ -116,37 +126,50 @@ function discoverPayloadBindings({ sourceFile }: { sourceFile: SourceFile }): Pa
 
     for (const specifier of declaration.getNamedImports()) {
       const importedName = specifier.getName()
-      const localName = specifier.getAliasNode()?.getText() ?? importedName
+      const localIdentifier = specifier.getAliasNode() ?? specifier.getNameNode()
+      const symbol = localIdentifier.getSymbol()
+
+      if (!symbol) {
+        continue
+      }
 
       if (importedName === 'getPayload') {
-        bindings.getPayloadNames.add(localName)
-      } else if (importedName === 'Payload') {
-        bindings.payloadTypeNames.add(localName)
+        bindings.getPayloadSymbols.add(symbol)
+      } else if (PAYLOAD_TYPE_NAMES.has(importedName)) {
+        bindings.payloadTypeSymbols.add(symbol)
       }
     }
   }
 
   for (const parameter of sourceFile.getDescendantsOfKind(SyntaxKind.Parameter)) {
-    if (
-      Node.isIdentifier(parameter.getNameNode()) &&
-      isPayloadTypeNode({
-        payloadTypeNames: bindings.payloadTypeNames,
-        typeNode: parameter.getTypeNode(),
-      })
-    ) {
-      bindings.identifiers.add(parameter.getName())
+    const nameNode = parameter.getNameNode()
+    if (!isPayloadDeclaration({ bindings, declaration: parameter })) {
+      continue
+    }
+
+    if (Node.isIdentifier(nameNode)) {
+      const symbol = nameNode.getSymbol()
+      if (symbol) {
+        bindings.payloadSymbols.add(symbol)
+      }
+    } else if (Node.isObjectBindingPattern(nameNode)) {
+      collectBindingPatternSymbols({ apiKind: 'payload', bindingPattern: nameNode, bindings })
     }
   }
 
   for (const declaration of sourceFile.getDescendantsOfKind(SyntaxKind.VariableDeclaration)) {
-    if (
-      Node.isIdentifier(declaration.getNameNode()) &&
-      isPayloadTypeNode({
-        payloadTypeNames: bindings.payloadTypeNames,
-        typeNode: declaration.getTypeNode(),
-      })
-    ) {
-      bindings.identifiers.add(declaration.getName())
+    const nameNode = declaration.getNameNode()
+    if (!isPayloadDeclaration({ bindings, declaration })) {
+      continue
+    }
+
+    if (Node.isIdentifier(nameNode)) {
+      const symbol = nameNode.getSymbol()
+      if (symbol) {
+        bindings.payloadSymbols.add(symbol)
+      }
+    } else if (Node.isObjectBindingPattern(nameNode)) {
+      collectBindingPatternSymbols({ apiKind: 'payload', bindingPattern: nameNode, bindings })
     }
   }
 
@@ -163,12 +186,26 @@ function discoverPayloadBindings({ sourceFile }: { sourceFile: SourceFile }): Pa
       }
 
       if (Node.isIdentifier(nameNode)) {
-        if (
-          !bindings.identifiers.has(nameNode.getText()) &&
-          isKnownPayloadExpression({ bindings, expression: initializer })
-        ) {
-          bindings.identifiers.add(nameNode.getText())
-          hasChanged = true
+        const symbol = nameNode.getSymbol()
+        if (!symbol) {
+          continue
+        }
+
+        if (isKnownPayloadExpression({ bindings, expression: initializer })) {
+          if (!bindings.payloadSymbols.has(symbol)) {
+            bindings.payloadSymbols.add(symbol)
+            hasChanged = true
+          }
+        } else if (isKnownJobsExpression({ bindings, expression: initializer })) {
+          if (!bindings.jobsSymbols.has(symbol)) {
+            bindings.jobsSymbols.add(symbol)
+            hasChanged = true
+          }
+        } else if (isKnownAPIMethodExpression({ bindings, expression: initializer })) {
+          if (!bindings.apiMethodSymbols.has(symbol)) {
+            bindings.apiMethodSymbols.add(symbol)
+            hasChanged = true
+          }
         }
         continue
       }
@@ -177,23 +214,71 @@ function discoverPayloadBindings({ sourceFile }: { sourceFile: SourceFile }): Pa
         continue
       }
 
-      const apiMethods = getDestructuredAPIMethods({ bindings, initializer })
-      if (!apiMethods) {
+      if (isKnownPayloadExpression({ bindings, expression: initializer })) {
+        hasChanged =
+          collectBindingPatternSymbols({
+            apiKind: 'payload',
+            bindingPattern: nameNode,
+            bindings,
+          }) || hasChanged
+      } else if (isKnownJobsExpression({ bindings, expression: initializer })) {
+        hasChanged =
+          collectBindingPatternSymbols({
+            apiKind: 'jobs',
+            bindingPattern: nameNode,
+            bindings,
+          }) || hasChanged
+      }
+    }
+
+    for (const assignment of sourceFile.getDescendantsOfKind(SyntaxKind.BinaryExpression)) {
+      if (assignment.getOperatorToken().getKind() !== SyntaxKind.EqualsToken) {
         continue
       }
 
-      for (const element of nameNode.getElements()) {
-        if (element.getDotDotDotToken()) {
+      const left = assignment.getLeft()
+      const right = assignment.getRight()
+
+      if (Node.isIdentifier(left)) {
+        const symbol = left.getSymbol()
+        if (!symbol) {
           continue
         }
 
-        const localName = element.getNameNode()
-        const methodName = element.getPropertyNameNode()?.getText() ?? localName.getText()
-        const symbol = Node.isIdentifier(localName) ? localName.getSymbol() : undefined
-
-        if (apiMethods.has(methodName) && symbol && !bindings.apiMethodSymbols.has(symbol)) {
+        if (
+          isKnownPayloadExpression({ bindings, expression: right }) &&
+          !bindings.payloadSymbols.has(symbol)
+        ) {
+          bindings.payloadSymbols.add(symbol)
+          hasChanged = true
+        } else if (
+          isKnownJobsExpression({ bindings, expression: right }) &&
+          !bindings.jobsSymbols.has(symbol)
+        ) {
+          bindings.jobsSymbols.add(symbol)
+          hasChanged = true
+        } else if (
+          isKnownAPIMethodExpression({ bindings, expression: right }) &&
+          !bindings.apiMethodSymbols.has(symbol)
+        ) {
           bindings.apiMethodSymbols.add(symbol)
           hasChanged = true
+        }
+      } else if (Node.isObjectLiteralExpression(left)) {
+        if (isKnownPayloadExpression({ bindings, expression: right })) {
+          hasChanged =
+            collectAssignmentPatternSymbols({
+              apiKind: 'payload',
+              bindings,
+              objectLiteral: left,
+            }) || hasChanged
+        } else if (isKnownJobsExpression({ bindings, expression: right })) {
+          hasChanged =
+            collectAssignmentPatternSymbols({
+              apiKind: 'jobs',
+              bindings,
+              objectLiteral: left,
+            }) || hasChanged
         }
       }
     }
@@ -202,32 +287,191 @@ function discoverPayloadBindings({ sourceFile }: { sourceFile: SourceFile }): Pa
   return bindings
 }
 
-function getDestructuredAPIMethods({
+function collectAssignmentPatternSymbols({
+  apiKind,
   bindings,
-  initializer,
+  objectLiteral,
 }: {
+  apiKind: 'jobs' | 'payload'
   bindings: PayloadBindings
-  initializer: Expression
-}): Set<string> | undefined {
-  if (isKnownPayloadExpression({ bindings, expression: initializer })) {
-    return LOCAL_API_METHODS
+  objectLiteral: ObjectLiteralExpression
+}): boolean {
+  const apiMethods = apiKind === 'payload' ? LOCAL_API_METHODS : JOBS_API_METHODS
+  let hasChanged = false
+
+  for (const property of objectLiteral.getProperties()) {
+    if (Node.isShorthandPropertyAssignment(property)) {
+      const methodName = property.getName()
+      const symbol = property.getValueSymbol()
+
+      if (apiMethods.has(methodName) && symbol && !bindings.apiMethodSymbols.has(symbol)) {
+        bindings.apiMethodSymbols.add(symbol)
+        hasChanged = true
+      } else if (
+        apiKind === 'payload' &&
+        methodName === 'jobs' &&
+        symbol &&
+        !bindings.jobsSymbols.has(symbol)
+      ) {
+        bindings.jobsSymbols.add(symbol)
+        hasChanged = true
+      }
+      continue
+    }
+
+    if (!Node.isPropertyAssignment(property)) {
+      continue
+    }
+
+    const methodName = property.getName()
+    const initializer = property.getInitializer()
+    if (!initializer) {
+      continue
+    }
+
+    if (apiKind === 'payload' && methodName === 'jobs') {
+      if (Node.isObjectLiteralExpression(initializer)) {
+        hasChanged =
+          collectAssignmentPatternSymbols({
+            apiKind: 'jobs',
+            bindings,
+            objectLiteral: initializer,
+          }) || hasChanged
+      } else if (Node.isIdentifier(initializer)) {
+        const symbol = initializer.getSymbol()
+        if (symbol && !bindings.jobsSymbols.has(symbol)) {
+          bindings.jobsSymbols.add(symbol)
+          hasChanged = true
+        }
+      }
+    } else if (apiMethods.has(methodName) && Node.isIdentifier(initializer)) {
+      const symbol = initializer.getSymbol()
+      if (symbol && !bindings.apiMethodSymbols.has(symbol)) {
+        bindings.apiMethodSymbols.add(symbol)
+        hasChanged = true
+      }
+    }
   }
 
-  const unwrapped = unwrapExpression({ expression: initializer })
-  if (
+  return hasChanged
+}
+
+function collectBindingPatternSymbols({
+  apiKind,
+  bindingPattern,
+  bindings,
+}: {
+  apiKind: 'jobs' | 'payload'
+  bindingPattern: ObjectBindingPattern
+  bindings: PayloadBindings
+}): boolean {
+  const apiMethods = apiKind === 'payload' ? LOCAL_API_METHODS : JOBS_API_METHODS
+  let hasChanged = false
+
+  for (const element of bindingPattern.getElements()) {
+    if (element.getDotDotDotToken()) {
+      continue
+    }
+
+    const localName = element.getNameNode()
+    const methodName = element.getPropertyNameNode()?.getText() ?? localName.getText()
+
+    if (apiKind === 'payload' && methodName === 'jobs') {
+      if (Node.isObjectBindingPattern(localName)) {
+        hasChanged =
+          collectBindingPatternSymbols({
+            apiKind: 'jobs',
+            bindingPattern: localName,
+            bindings,
+          }) || hasChanged
+      } else if (Node.isIdentifier(localName)) {
+        const symbol = localName.getSymbol()
+        if (symbol && !bindings.jobsSymbols.has(symbol)) {
+          bindings.jobsSymbols.add(symbol)
+          hasChanged = true
+        }
+      }
+    } else if (apiMethods.has(methodName) && Node.isIdentifier(localName)) {
+      const symbol = localName.getSymbol()
+      if (symbol && !bindings.apiMethodSymbols.has(symbol)) {
+        bindings.apiMethodSymbols.add(symbol)
+        hasChanged = true
+      }
+    }
+  }
+
+  return hasChanged
+}
+
+function isPayloadDeclaration({
+  bindings,
+  declaration,
+}: {
+  bindings: PayloadBindings
+  declaration: { getType: () => Type; getTypeNode: () => Node | undefined }
+}): boolean {
+  return (
+    isPayloadTypeNode({
+      payloadTypeSymbols: bindings.payloadTypeSymbols,
+      typeNode: declaration.getTypeNode(),
+    }) || isResolvedPayloadType({ type: declaration.getType() })
+  )
+}
+
+function isKnownAPIMethodExpression({
+  bindings,
+  expression,
+}: {
+  bindings: PayloadBindings
+  expression: Expression
+}): boolean {
+  const unwrapped = unwrapExpression({ expression })
+
+  if (Node.isIdentifier(unwrapped)) {
+    const symbol = unwrapped.getSymbol()
+    return Boolean(symbol && bindings.apiMethodSymbols.has(symbol))
+  }
+
+  if (!Node.isPropertyAccessExpression(unwrapped)) {
+    return false
+  }
+
+  const methodName = unwrapped.getName()
+  const receiver = unwrapped.getExpression()
+
+  return (
+    (LOCAL_API_METHODS.has(methodName) &&
+      isKnownPayloadExpression({ bindings, expression: receiver })) ||
+    (JOBS_API_METHODS.has(methodName) && isKnownJobsExpression({ bindings, expression: receiver }))
+  )
+}
+
+function isKnownJobsExpression({
+  bindings,
+  expression,
+}: {
+  bindings: PayloadBindings
+  expression: Expression
+}): boolean {
+  const unwrapped = unwrapExpression({ expression })
+
+  if (Node.isIdentifier(unwrapped)) {
+    const symbol = unwrapped.getSymbol()
+    return Boolean(symbol && bindings.jobsSymbols.has(symbol))
+  }
+
+  return (
     Node.isPropertyAccessExpression(unwrapped) &&
     unwrapped.getName() === 'jobs' &&
     isKnownPayloadExpression({ bindings, expression: unwrapped.getExpression() })
-  ) {
-    return JOBS_API_METHODS
-  }
+  )
 }
 
 function isPayloadTypeNode({
-  payloadTypeNames,
+  payloadTypeSymbols,
   typeNode,
 }: {
-  payloadTypeNames: Set<string>
+  payloadTypeSymbols: Set<MorphSymbol>
   typeNode: Node | undefined
 }): boolean {
   if (!typeNode) {
@@ -235,7 +479,8 @@ function isPayloadTypeNode({
   }
 
   if (Node.isTypeReference(typeNode)) {
-    return payloadTypeNames.has(typeNode.getTypeName().getText())
+    const symbol = typeNode.getTypeName().getSymbol()
+    return Boolean(symbol && payloadTypeSymbols.has(symbol))
   }
 
   if (Node.isUnionTypeNode(typeNode)) {
@@ -245,18 +490,18 @@ function isPayloadTypeNode({
 
     return (
       nonNullishTypes.length > 0 &&
-      nonNullishTypes.every((child) => isPayloadTypeNode({ payloadTypeNames, typeNode: child }))
+      nonNullishTypes.every((child) => isPayloadTypeNode({ payloadTypeSymbols, typeNode: child }))
     )
   }
 
   if (Node.isIntersectionTypeNode(typeNode)) {
     return typeNode
       .getTypeNodes()
-      .some((child) => isPayloadTypeNode({ payloadTypeNames, typeNode: child }))
+      .some((child) => isPayloadTypeNode({ payloadTypeSymbols, typeNode: child }))
   }
 
   if (Node.isParenthesizedTypeNode(typeNode)) {
-    return isPayloadTypeNode({ payloadTypeNames, typeNode: typeNode.getTypeNode() })
+    return isPayloadTypeNode({ payloadTypeSymbols, typeNode: typeNode.getTypeNode() })
   }
 
   return false
@@ -271,14 +516,20 @@ function isKnownPayloadExpression({
 }): boolean {
   const unwrapped = unwrapExpression({ expression })
 
-  if (Node.isIdentifier(unwrapped) && bindings.identifiers.has(unwrapped.getText())) {
-    return true
+  if (Node.isIdentifier(unwrapped)) {
+    const symbol = unwrapped.getSymbol()
+    if (symbol && bindings.payloadSymbols.has(symbol)) {
+      return true
+    }
   }
 
   if (Node.isCallExpression(unwrapped)) {
     const callee = unwrapped.getExpression()
-    if (Node.isIdentifier(callee) && bindings.getPayloadNames.has(callee.getText())) {
-      return true
+    if (Node.isIdentifier(callee)) {
+      const symbol = callee.getSymbol()
+      if (symbol && bindings.getPayloadSymbols.has(symbol)) {
+        return true
+      }
     }
   }
 
@@ -293,7 +544,7 @@ function isKnownPayloadExpression({
   if (Node.isAsExpression(unwrapped)) {
     if (
       isPayloadTypeNode({
-        payloadTypeNames: bindings.payloadTypeNames,
+        payloadTypeSymbols: bindings.payloadTypeSymbols,
         typeNode: unwrapped.getTypeNode(),
       })
     ) {
@@ -330,18 +581,24 @@ function isResolvedPayloadType({ type }: { type: Type }): boolean {
 
   const symbols = [type.getAliasSymbol(), type.getSymbol()].filter((symbol) => symbol !== undefined)
 
-  return symbols.some(
-    (symbol) =>
-      PAYLOAD_TYPE_NAMES.has(symbol.getName()) &&
-      symbol.getDeclarations().some((declaration) => {
-        const filePath = declaration.getSourceFile().getFilePath().replaceAll('\\', '/')
-        return (
-          filePath.includes('/node_modules/payload/') ||
-          filePath.includes('/packages/payload/src/') ||
-          filePath.includes('/packages/payload/dist/')
-        )
-      }),
-  )
+  if (
+    symbols.some(
+      (symbol) =>
+        PAYLOAD_TYPE_NAMES.has(symbol.getName()) &&
+        symbol.getDeclarations().some((declaration) => {
+          const filePath = declaration.getSourceFile().getFilePath().replaceAll('\\', '/')
+          return (
+            filePath.includes('/node_modules/payload/') ||
+            filePath.includes('/packages/payload/src/') ||
+            filePath.includes('/packages/payload/dist/')
+          )
+        }),
+    )
+  ) {
+    return true
+  }
+
+  return type.getBaseTypes().some((baseType) => isResolvedPayloadType({ type: baseType }))
 }
 
 function unwrapExpression({ expression }: { expression: Expression }): Expression {
@@ -401,10 +658,7 @@ function classifyCall({
     receiver.getName() === 'jobs'
   ) {
     const payloadReceiver = receiver.getExpression()
-    if (
-      isKnownPayloadExpression({ bindings, expression: payloadReceiver }) ||
-      (Node.isIdentifier(payloadReceiver) && payloadReceiver.getText() === 'payload')
-    ) {
+    if (isKnownJobsExpression({ bindings, expression: receiver })) {
       return 'confirmed'
     }
     return isPayloadLikeName({ expression: payloadReceiver }) ? 'ambiguous' : 'unrelated'

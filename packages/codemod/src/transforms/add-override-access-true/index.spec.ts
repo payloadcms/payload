@@ -28,13 +28,18 @@ describe('add-override-access-true', () => {
     expect(result).toBe(output)
   })
 
-  it('should recognize the distinctive payload.jobs API without a type annotation', async () => {
+  it('should leave structurally similar payload.jobs APIs unchanged and emit a note', async () => {
     const input = await fixture({ name: 'jobs.input.ts' })
-    const output = await fixture({ name: 'jobs.output.ts' })
+    const project = new Project({ useInMemoryFileSystem: true })
+    const sourceFile = project.createSourceFile('input.ts', input)
 
-    const result = await runTransform({ source: input, transform: addOverrideAccessTrue })
+    const result = await addOverrideAccessTrue.apply({ packageJsons: [], project })
 
-    expect(result).toBe(output)
+    expect(sourceFile.getFullText()).toBe(input)
+    expect(result.filesChanged).toEqual([])
+    expect(result.notes).toEqual([
+      expect.stringContaining('could not confirm that `payload.jobs.queue` is a Payload Local API'),
+    ])
   })
 
   it('should recognize a Payload value from its resolved BasePayload type', async () => {
@@ -298,5 +303,145 @@ await find({ collection: 'posts' })
     const result = await runTransform({ source, transform: addOverrideAccessTrue })
 
     expect(result).toContain("await find({ overrideAccess: true, collection: 'posts' })")
+  })
+
+  it('should not rewrite a shadowed identifier with an unrelated type', async () => {
+    const source = `import type { Payload } from 'payload'
+
+interface OtherClient {
+  find(options: { collection: string }): Promise<unknown>
+}
+
+async function usePayload(payload: Payload) {
+  await payload.find({ collection: 'posts' })
+}
+
+async function useOtherClient(payload: OtherClient) {
+  await payload.find({ collection: 'posts' })
+}
+`
+
+    const result = await runTransform({ source, transform: addOverrideAccessTrue })
+
+    expect(result).toContain(
+      "async function usePayload(payload: Payload) {\n  await payload.find({ overrideAccess: true, collection: 'posts' })",
+    )
+    expect(result).toContain(
+      "async function useOtherClient(payload: OtherClient) {\n  await payload.find({ collection: 'posts' })",
+    )
+  })
+
+  it('should not rewrite an unrelated jobs API named payload', async () => {
+    const source = `interface QueueClient {
+  jobs: {
+    queue(options: { topic: string }): Promise<unknown>
+  }
+}
+
+declare const payload: QueueClient
+
+await payload.jobs.queue({ topic: 'emails' })
+`
+
+    const result = await runTransform({ source, transform: addOverrideAccessTrue })
+
+    expect(result).toBe(source)
+  })
+
+  it('should rewrite Local API methods assigned to direct aliases', async () => {
+    const source = `import type { Payload } from 'payload'
+
+declare const payload: Payload
+const find = payload.find
+
+await find({ collection: 'posts' })
+`
+
+    const result = await runTransform({ source, transform: addOverrideAccessTrue })
+
+    expect(result).toContain("await find({ overrideAccess: true, collection: 'posts' })")
+  })
+
+  it('should rewrite Local API methods destructured from typed parameters', async () => {
+    const source = `import type { Payload } from 'payload'
+
+async function findPosts({ find }: Payload) {
+  await find({ collection: 'posts' })
+}
+`
+
+    const result = await runTransform({ source, transform: addOverrideAccessTrue })
+
+    expect(result).toContain("await find({ overrideAccess: true, collection: 'posts' })")
+  })
+
+  it('should rewrite Local API methods assigned through destructuring', async () => {
+    const source = `import type { Payload } from 'payload'
+
+declare const payload: Payload
+let find: Payload['find']
+
+;({ find } = payload)
+
+await find({ collection: 'posts' })
+`
+
+    const result = await runTransform({ source, transform: addOverrideAccessTrue })
+
+    expect(result).toContain("await find({ overrideAccess: true, collection: 'posts' })")
+  })
+
+  it('should rewrite jobs methods from nested Payload destructuring', async () => {
+    const source = `import type { Payload } from 'payload'
+
+declare const payload: Payload
+const { jobs: { queue } } = payload
+
+await queue({ input: {}, task: 'sendEmail' })
+`
+
+    const result = await runTransform({ source, transform: addOverrideAccessTrue })
+
+    expect(result).toContain("await queue({ overrideAccess: true, input: {}, task: 'sendEmail' })")
+  })
+
+  it('should recognize classes and interfaces derived from BasePayload', async () => {
+    const project = new Project({ useInMemoryFileSystem: true })
+    project
+      .getFileSystem()
+      .writeFileSync(
+        '/node_modules/payload/package.json',
+        JSON.stringify({ name: 'payload', types: 'index.d.ts' }),
+      )
+    project.createSourceFile(
+      '/node_modules/payload/index.d.ts',
+      `export declare class BasePayload {
+  find(options: { collection: string }): Promise<unknown>
+}
+`,
+    )
+    const sourceFile = project.createSourceFile(
+      '/project/input.ts',
+      `import { BasePayload } from 'payload'
+
+class CMS extends BasePayload {}
+interface CMSInterface extends BasePayload {}
+
+declare const classCMS: CMS
+declare const interfaceCMS: CMSInterface
+
+await classCMS.find({ collection: 'posts' })
+await interfaceCMS.find({ collection: 'posts' })
+`,
+    )
+
+    await addOverrideAccessTrue.apply({ packageJsons: [], project })
+
+    expect(sourceFile.getFullText()).toContain(
+      "await classCMS.find({ overrideAccess: true, collection: 'posts' })",
+    )
+    expect(sourceFile.getFullText()).toContain(
+      "await interfaceCMS.find({ overrideAccess: true, collection: 'posts' })",
+    )
   })
 })

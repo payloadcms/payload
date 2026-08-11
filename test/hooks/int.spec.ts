@@ -7,9 +7,9 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
-import { devUser, regularUser } from '../credentials.js'
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { isMongoose } from '../__helpers/shared/isMongoose.js'
+import { devUser, regularUser } from '../credentials.js'
 import { afterOperationSlug } from './collections/AfterOperation/index.js'
 import {
   beforeOperationSlug,
@@ -551,7 +551,7 @@ describe('Hooks', () => {
         },
       })
 
-      expect(getAuthOperationOverrideAccess('login')).toBe(false)
+      expect(getAuthOperationOverrideAccess({ operation: 'login' })).toBe(false)
     })
 
     it('should default overrideAccess to false for forgot password', async () => {
@@ -563,7 +563,7 @@ describe('Hooks', () => {
         disableEmail: true,
       })
 
-      expect(getAuthOperationOverrideAccess('forgotPassword')).toBe(false)
+      expect(getAuthOperationOverrideAccess({ operation: 'forgotPassword' })).toBe(false)
     })
 
     it('should default overrideAccess to false for unlock', async () => {
@@ -574,7 +574,7 @@ describe('Hooks', () => {
         },
       })
 
-      expect(getAuthOperationOverrideAccess('unlock')).toBe(false)
+      expect(getAuthOperationOverrideAccess({ operation: 'unlock' })).toBe(false)
     })
 
     it('should call afterLogin hook', async () => {

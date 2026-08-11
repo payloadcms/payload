@@ -36,9 +36,11 @@ export const clearAuthOperationOverrideAccess = () => {
   for (const operation of Object.keys(authOperationOverrideAccess)) {
     delete authOperationOverrideAccess[operation as AuthOperation]
   }
+
+  return authOperationOverrideAccess
 }
 
-export const getAuthOperationOverrideAccess = (operation: AuthOperation) =>
+export const getAuthOperationOverrideAccess = ({ operation }: { operation: AuthOperation }) =>
   authOperationOverrideAccess[operation]
 
 const Users: CollectionConfig = {
