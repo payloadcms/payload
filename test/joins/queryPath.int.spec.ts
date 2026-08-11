@@ -1,4 +1,4 @@
-// @ts-expect-error -- payload-types are not generated for this ad-hoc config
+// @ts-ignore
 import { type MongooseAdapter } from '@payloadcms/db-mongodb'
 import { buildConfig, getPayload } from 'payload'
 import { afterEach, expect, it, vi } from 'vitest'
@@ -51,6 +51,7 @@ describe(
 
       const category = await payload.create({
         collection: 'categories',
+        // @ts-expect-error not generated
         data: { title: 'a' },
       })
       createdIDs.push(category.id)
@@ -76,7 +77,7 @@ describe(
 
     it('should use Model.paginate when a select excludes every join field', async () => {
       const { adapter, payload } = await seedCategory()
-      const Model = adapter.collections.categories
+      const Model = adapter.collections.categories!
 
       const aggregateSpy = vi.spyOn(Model, 'aggregate')
       const paginateSpy = vi.spyOn(Model, 'paginate')
@@ -84,6 +85,7 @@ describe(
       await payload.find({
         collection: 'categories',
         limit: 20,
+        // @ts-expect-error not generated
         select: { title: true },
         where: { title: { equals: 'a' } },
       })
@@ -94,13 +96,14 @@ describe(
 
     it('should use Model.paginate when every join is disabled individually', async () => {
       const { adapter, payload } = await seedCategory()
-      const Model = adapter.collections.categories
+      const Model = adapter.collections.categories!
 
       const aggregateSpy = vi.spyOn(Model, 'aggregate')
       const paginateSpy = vi.spyOn(Model, 'paginate')
 
       await payload.find({
         collection: 'categories',
+        // @ts-expect-error not generated
         joins: { posts: false },
         limit: 20,
         where: { title: { equals: 'a' } },
@@ -112,7 +115,7 @@ describe(
 
     it('should use Model.findOne for findByID when a select excludes every join field', async () => {
       const { adapter, category, payload } = await seedCategory()
-      const Model = adapter.collections.categories
+      const Model = adapter.collections.categories!
 
       const aggregateSpy = vi.spyOn(Model, 'aggregate')
       const findOneSpy = vi.spyOn(Model, 'findOne')
@@ -120,6 +123,7 @@ describe(
       await payload.findByID({
         collection: 'categories',
         id: category.id,
+        // @ts-expect-error not generated
         select: { title: true },
       })
 
@@ -129,7 +133,7 @@ describe(
 
     it('should still use Model.aggregate when a join field is actually selected', async () => {
       const { adapter, payload } = await seedCategory()
-      const Model = adapter.collections.categories
+      const Model = adapter.collections.categories!
 
       const aggregateSpy = vi.spyOn(Model, 'aggregate')
       const paginateSpy = vi.spyOn(Model, 'paginate')
