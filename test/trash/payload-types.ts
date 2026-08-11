@@ -69,6 +69,7 @@ export interface Config {
   collections: {
     pages: Page;
     posts: Post;
+    registrations: Registration;
     'restricted-collection': RestrictedCollection;
     'differentiated-trash-collection': DifferentiatedTrashCollection;
     users: User;
@@ -81,6 +82,7 @@ export interface Config {
   collectionsSelect: {
     pages: PagesSelect<false> | PagesSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
+    registrations: RegistrationsSelect<false> | RegistrationsSelect<true>;
     'restricted-collection': RestrictedCollectionSelect<false> | RestrictedCollectionSelect<true>;
     'differentiated-trash-collection': DifferentiatedTrashCollectionSelect<false> | DifferentiatedTrashCollectionSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
@@ -98,6 +100,8 @@ export interface Config {
   locale: 'en' | 'es';
   widgets: {
     collections: CollectionsWidget;
+    'collection-query': CollectionQueryWidget;
+    activity: ActivityWidget;
   };
   user: User;
   jobs: {
@@ -148,6 +152,17 @@ export interface Post {
   createdAt: string;
   deletedAt?: string | null;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "registrations".
+ */
+export interface Registration {
+  id: string;
+  title?: string | null;
+  post: string | Post;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -234,6 +249,10 @@ export interface PayloadLockedDocument {
         value: string | Post;
       } | null)
     | ({
+        relationTo: 'registrations';
+        value: string | Registration;
+      } | null)
+    | ({
         relationTo: 'restricted-collection';
         value: string | RestrictedCollection;
       } | null)
@@ -310,6 +329,16 @@ export interface PostsSelect<T extends boolean = true> {
   createdAt?: T;
   deletedAt?: T;
   _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "registrations_select".
+ */
+export interface RegistrationsSelect<T extends boolean = true> {
+  title?: T;
+  post?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -407,6 +436,47 @@ export interface CollectionsWidget {
     [k: string]: unknown;
   };
   width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-query_widget".
+ */
+export interface CollectionQueryWidget {
+  data?: {
+    title?: string | null;
+    relatedCollection:
+      | 'pages'
+      | 'posts'
+      | 'registrations'
+      | 'restricted-collection'
+      | 'differentiated-trash-collection'
+      | 'users';
+    where?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    sortField?: string | null;
+    sortDirection?: ('asc' | 'desc') | null;
+    limit?: number | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "activity_widget".
+ */
+export interface ActivityWidget {
+  data?: {
+    excludedCollections?:
+      | ('pages' | 'posts' | 'registrations' | 'restricted-collection' | 'differentiated-trash-collection' | 'users')[]
+      | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
