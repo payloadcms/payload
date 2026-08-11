@@ -37,6 +37,12 @@ const MINIMUM_CONTRAST_RATIO = 4.5
 
 const themes = ['light', 'dark'] as const
 
+type BannerTarget = {
+  /** Selects the actionable showcase row, whose banners carry `banner--has-action`. */
+  hasAction?: boolean
+  type: BannerType
+}
+
 describe('Banner', () => {
   let page: Page
   let context: BrowserContext
@@ -50,19 +56,25 @@ describe('Banner', () => {
     )
   }
 
-  const getBanner = ({ type, hasAction }: { hasAction?: boolean; type: BannerType }) =>
+  const getBanner = ({ type, hasAction }: BannerTarget) =>
     page.locator(`#banner-showcase${hasAction ? '-with-action' : ''} .banner--type-${type}`)
 
-  const getBackgroundColor = async ({ type }: { type: BannerType }): Promise<string> =>
+  const getBackgroundColor = async ({ type }: Pick<BannerTarget, 'type'>): Promise<string> =>
     getBanner({ type }).evaluate((el) => window.getComputedStyle(el).backgroundColor)
 
-  const getContrastRatio = async ({
-    type,
-    hasAction,
-  }: {
-    hasAction?: boolean
-    type: BannerType
-  }): Promise<number> =>
+  /**
+   * Returns the WCAG 2.1 contrast ratio between a banner's text and its background.
+   *
+   * The calculation runs in the browser so it reads the resolved colours, including
+   * any that a `:hover` or `:active` state applies. `getComputedStyle` reports colours
+   * as `rgb()` or `rgba()` strings, so each is reduced to its numeric channels, then
+   * converted to a relative luminance with the sRGB gamma curve. The ratio is
+   * `(lighter + 0.05) / (darker + 0.05)`, so the result reads the same whichever of
+   * the two colours is lighter.
+   *
+   * @returns A ratio from 1 (identical colours) to 21 (black against white).
+   */
+  const getContrastRatio = async ({ type, hasAction }: BannerTarget): Promise<number> =>
     getBanner({ type, hasAction }).evaluate((el) => {
       const toChannels = (color: string) =>
         color
