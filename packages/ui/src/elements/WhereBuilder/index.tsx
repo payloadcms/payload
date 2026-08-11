@@ -116,7 +116,7 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
       // Virtual first row: conditions not yet committed, build from scratch
       if (conditions.length === 0) {
         // Field and operator picks carry empty values too, but must fall through to build the row.
-        if (type === 'value' && isEmptyConditionValue(value)) {
+        if (type === 'value' && isEmptyConditionValue({ value })) {
           return
         }
 
@@ -277,7 +277,9 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
                   const operator =
                     (Object.keys(condition?.[fieldPath] || {})?.[0] as Operator) || undefined
 
-                  const value = getDisplayedConditionValue(condition?.[fieldPath]?.[operator])
+                  const value = getDisplayedConditionValue({
+                    value: condition?.[fieldPath]?.[operator],
+                  })
 
                   const isFirstCondition = orIndex === 0 && andIndex === 0
                   const join: 'and' | 'or' = andIndex === 0 ? 'or' : 'and'

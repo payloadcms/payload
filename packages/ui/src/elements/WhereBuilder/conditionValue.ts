@@ -6,14 +6,15 @@ type UpdateType = Parameters<UpdateCondition>[0]['type']
  * A row that holds no value yet. Empty arrives as `''` from the URL, `null` from a cleared
  * select, or `undefined` from a row that was added but never filled in.
  */
-export const isEmptyConditionValue = (value: unknown): boolean =>
+export const isEmptyConditionValue = ({ value }: { value: unknown }): boolean =>
   value === undefined || value === null || value === ''
 
 /**
  * The value a row renders with. Only a missing value becomes `undefined`. `0` and `false` are
  * real filter values, so they must survive.
  */
-export const getDisplayedConditionValue = <T>(value: T): T | undefined => value ?? undefined
+export const getDisplayedConditionValue = <T>({ value }: { value: T }): T | undefined =>
+  value ?? undefined
 
 /**
  * Whether an edit leaves the row unchanged, and so must not be committed.
@@ -33,4 +34,6 @@ export const isNoOpConditionValueUpdate = ({
   storedValue: unknown
   type: UpdateType
 }): boolean =>
-  type === 'value' && isEmptyConditionValue(storedValue) && isEmptyConditionValue(incomingValue)
+  type === 'value' &&
+  isEmptyConditionValue({ value: storedValue }) &&
+  isEmptyConditionValue({ value: incomingValue })
