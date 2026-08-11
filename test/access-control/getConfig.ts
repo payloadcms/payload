@@ -173,6 +173,7 @@ export const getConfig: () => Partial<Config> = () => ({
             read: () => false,
             update: () => false,
           },
+          localized: true,
         },
         {
           name: 'group',
@@ -218,6 +219,13 @@ export const getConfig: () => Partial<Config> = () => ({
           ],
           label: 'Access',
         },
+        {
+          name: 'relatedItems',
+          type: 'join',
+          collection: 'relation-restricted',
+          defaultSort: 'createdAt',
+          on: 'post',
+        },
       ],
     },
     {
@@ -259,16 +267,30 @@ export const getConfig: () => Partial<Config> = () => ({
       slug: 'relation-restricted',
       access: {
         read: () => true,
+        update: () => true,
       },
+      defaultSort: 'post.restrictedField',
       fields: [
         {
           name: 'name',
           type: 'text',
         },
         {
+          name: 'rank',
+          type: 'number',
+          access: {
+            read: () => false,
+          },
+        },
+        {
           name: 'post',
           type: 'relationship',
           relationTo: slug,
+        },
+        {
+          name: 'postLabel',
+          type: 'text',
+          virtual: 'post.restrictedField',
         },
       ],
     },
@@ -871,6 +893,10 @@ export const getConfig: () => Partial<Config> = () => ({
       ],
     },
   ],
+  localization: {
+    defaultLocale: 'en',
+    locales: ['en', 'es'],
+  },
   onInit: async (payload) => {
     await payload.create({
       collection: 'users',

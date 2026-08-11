@@ -1,5 +1,5 @@
 import type { AcceptedLanguages } from '@payloadcms/translations'
-import type { CollectionConfig, Config } from 'payload'
+import type { CollectionConfig, Config, TypedUser } from 'payload'
 
 import chalk from 'chalk'
 import { hasAutosaveEnabled } from 'payload/shared'
@@ -91,6 +91,27 @@ export const multiTenantPlugin =
       adminUsersCollection.fields.push(
         tenantsArrayField({
           ...(pluginConfig?.tenantsArrayField || {}),
+          arrayFieldAccess: {
+            create: ({ req }) =>
+              Boolean(
+                req.user &&
+                  userHasAccessToAllTenants(
+                    req.user as ConfigType extends { user: unknown }
+                      ? ConfigType['user']
+                      : TypedUser,
+                  ),
+              ),
+            update: ({ req }) =>
+              Boolean(
+                req.user &&
+                  userHasAccessToAllTenants(
+                    req.user as ConfigType extends { user: unknown }
+                      ? ConfigType['user']
+                      : TypedUser,
+                  ),
+              ),
+            ...(pluginConfig?.tenantsArrayField?.arrayFieldAccess || {}),
+          },
           tenantsArrayFieldName,
           tenantsArrayTenantFieldName,
           tenantsCollectionSlug,
