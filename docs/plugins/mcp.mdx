@@ -121,6 +121,12 @@ export default config
 | `mcp.serverOptions.serverInfo.name`    | `string`            | The name of the MCP server (default: 'Payload MCP Server').                                    |
 | `mcp.serverOptions.serverInfo.version` | `string`            | The version of the MCP server (default: '1.0.0').                                              |
 
+<Banner type="warning">
+  The generated API Key collection denies Admin Panel, REST, and GraphQL access
+  by default. Access must be manually defined with `overrideApiKeyCollection`
+  before you are able to see the MCP API Keys collection in the admin panel.
+</Banner>
+
 ## How Access Control Works with MCP
 
 <Banner type="warning">
@@ -145,9 +151,9 @@ mcpPlugin({
 
 **Step 2 — Allow in the API Key**
 
-In your Payload admin panel, navigate to **MCP → API Keys**, create a new key, and
-toggle the individual capabilities on for each collection, global, tool, prompt, and
-resource you want that key to be able to use.
+After manually configuring access to the API Key collection as described below, navigate to
+**MCP → API Keys** in the Payload admin panel. Create a key and toggle the individual
+capabilities for each collection, global, tool, prompt, and resource you want that key to use.
 
 All MCP requests must include a valid API key as a Bearer token — requests without
 one are rejected immediately. Here is a complete example of an MCP `tools/list` request
@@ -518,13 +524,53 @@ mcpPlugin({
 
 ## API Key Access to MCP
 
-Payload adds an API key collection that allows admins to manage MCP capabilities. Admins can:
+Payload adds an API Key collection for managing MCP credentials and capabilities. A user who can
+create or update documents in this collection can choose the user associated with a key and the
+MCP capabilities enabled for it. Requests authenticated with that key then act as the associated
+user. Unless you add additional restrictions, this means a key manager can issue credentials that
+act as any user in the configured user collection.
+
+For that reason, access should normally be limited to administrators who are trusted to issue
+credentials on behalf of other users. Payload does not define what an administrator is in your
+application, so access must be manually defined with `overrideApiKeyCollection`.
+
+To manage keys through the Admin Panel or APIs, use `overrideApiKeyCollection` to explicitly grant
+access to your application's administrators:
+
+```ts
+import type { PayloadRequest } from 'payload'
+
+const isAdmin = ({ req }: { req: PayloadRequest }) =>
+  Boolean(
+    req.user &&
+      req.user.collection === 'users' &&
+      'role' in req.user &&
+      req.user.role === 'admin',
+  )
+
+mcpPlugin({
+  overrideApiKeyCollection: (collection) => ({
+    ...collection,
+    access: {
+      create: isAdmin,
+      delete: isAdmin,
+      read: isAdmin,
+      unlock: isAdmin,
+      update: isAdmin,
+    },
+  }),
+  // ... other options
+})
+```
+
+Replace `isAdmin` with the role or permission check used by your application. Once access is
+configured, administrators can:
 
 - Create user associated API keys for MCP clients
 - `Allow` or `disallow` endpoint traffic in real-time
 - `Allow` or `disallow` tools, resources, and prompts
 
-You can customize the API Key collection using the `overrideApiKeyCollection` option:
+The same callback can also customize the API Key collection:
 
 ```ts
 mcpPlugin({

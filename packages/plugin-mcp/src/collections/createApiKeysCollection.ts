@@ -57,6 +57,13 @@ export const createAPIKeysCollection = (
 
   return {
     slug: 'payload-mcp-api-keys',
+    access: {
+      create: () => false,
+      delete: () => false,
+      read: () => false,
+      unlock: () => false,
+      update: () => false,
+    },
     admin: {
       description:
         'API keys control which collections, resources, tools, and prompts MCP clients can access',
