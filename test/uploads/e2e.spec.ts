@@ -622,6 +622,37 @@ describe('Uploads', () => {
       await closeAllToasts(page)
     })
 
+    test('should open the paste-from-URL modal when clipboard access is blocked and pasteURL is enabled', async () => {
+      // pdfOnlyURL has no pasteURL config, matching the common case of pasteURL left enabled
+      await gotoAndWaitForForm(page, pdfOnlyURL.create)
+
+      await page.context().clearPermissions()
+
+      await page.locator('.file-manager__pasteFromClipboard').click()
+
+      await expect(page.locator('#upload-paste-url')).toBeVisible()
+    })
+
+    test('should show an error rather than open the paste-from-URL modal for an unexpected clipboard error', async () => {
+      // pdfOnlyURL has no pasteURL config, matching the common case of pasteURL left enabled.
+      // Only a permission-denied clipboard error should fall back to the paste-URL modal -
+      // any other failure (e.g. a browser quirk unrelated to permissions) should surface the
+      // same error it always has and must not open the modal.
+      await gotoAndWaitForForm(page, pdfOnlyURL.create)
+
+      await page.evaluate(() => {
+        navigator.clipboard.read = () => Promise.reject(new Error('Unexpected clipboard failure'))
+      })
+
+      await page.locator('.file-manager__pasteFromClipboard').click()
+
+      await expect(page.locator('.payload-toast-container .toast-error')).toContainText(
+        'Unable to read from clipboard.',
+      )
+      await expect(page.locator('#upload-paste-url')).toBeHidden()
+      await closeAllToasts(page)
+    })
+
     test('should show an invalid file type error when the clipboard file does not match the accepted mime types', async () => {
       await gotoAndWaitForForm(page, pdfOnlyURL.create)
 

@@ -34,43 +34,57 @@ export const usePasteFromClipboard = ({
     useUploadControls()
 
   return useCallback(async () => {
+    let result: Awaited<ReturnType<typeof getFileOrUrlFromClipboard>> = null
+    let isClipboardAccessDenied = false
+
     try {
-      const result = await getFileOrUrlFromClipboard()
-
-      if (result?.type === 'file') {
-        const [pastedFile] = result.files
-        if (
-          uploadConfig?.mimeTypes?.length &&
-          !validateMimeType(pastedFile.type, uploadConfig.mimeTypes)
-        ) {
-          toast.error(t('error:invalidFileType'))
-          return
-        }
-        handleFileSelection(result.files)
+      result = await getFileOrUrlFromClipboard()
+    } catch (err) {
+      // Permission denied is the one clipboard failure that should still let the user paste a
+      // URL manually when pasteURL is enabled - any other failure keeps the old error toast.
+      if (err instanceof DOMException && err.name === 'NotAllowedError') {
+        isClipboardAccessDenied = true
+      } else {
+        toast.error(t('error:unableToReadClipboard'))
         return
       }
-
-      if (uploadConfig?.pasteURL === false) {
-        toast.error(t('error:noFileFoundInClipboard'))
-        return
-      }
-
-      if (result?.type === 'url') {
-        setFileUrl(result.url)
-        const didFetchSucceed = await handleUrlSubmit(result.url)
-        if (!didFetchSucceed) {
-          openModal(pasteURLDrawerSlug)
-        }
-        return
-      }
-
-      openModal(pasteURLDrawerSlug)
-      setUploadControlFileUrl('')
-      setUploadControlFile(null)
-      setUploadControlFileName(null)
-    } catch (_err) {
-      toast.error(t('error:unableToReadClipboard'))
     }
+
+    if (result?.type === 'file') {
+      const [pastedFile] = result.files
+      if (
+        uploadConfig?.mimeTypes?.length &&
+        !validateMimeType(pastedFile.type, uploadConfig.mimeTypes)
+      ) {
+        toast.error(t('error:invalidFileType'))
+        return
+      }
+      handleFileSelection(result.files)
+      return
+    }
+
+    if (uploadConfig?.pasteURL === false) {
+      toast.error(
+        isClipboardAccessDenied
+          ? t('error:unableToReadClipboard')
+          : t('error:noFileFoundInClipboard'),
+      )
+      return
+    }
+
+    if (result?.type === 'url') {
+      setFileUrl(result.url)
+      const didFetchSucceed = await handleUrlSubmit(result.url)
+      if (!didFetchSucceed) {
+        openModal(pasteURLDrawerSlug)
+      }
+      return
+    }
+
+    openModal(pasteURLDrawerSlug)
+    setUploadControlFileUrl('')
+    setUploadControlFile(null)
+    setUploadControlFileName(null)
   }, [
     handleFileSelection,
     handleUrlSubmit,
