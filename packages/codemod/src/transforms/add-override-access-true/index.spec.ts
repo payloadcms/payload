@@ -8,36 +8,36 @@ import { runTransform } from '../../utils/test-helpers.js'
 import { addOverrideAccessTrue } from './index.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
-const fixture = (name: string) => readFile(join(here, name), 'utf8')
+const fixture = ({ name }: { name: string }) => readFile(join(here, name), 'utf8')
 
 describe('add-override-access-true', () => {
-  it('adds overrideAccess: true to recognized Payload Local API calls', async () => {
-    const input = await fixture('basic.input.ts')
-    const output = await fixture('basic.output.ts')
+  it('should add overrideAccess: true to recognized Payload Local API calls', async () => {
+    const input = await fixture({ name: 'basic.input.ts' })
+    const output = await fixture({ name: 'basic.output.ts' })
 
     const result = await runTransform({ source: input, transform: addOverrideAccessTrue })
 
     expect(result).toBe(output)
   })
 
-  it('is idempotent', async () => {
-    const output = await fixture('basic.output.ts')
+  it('should be idempotent', async () => {
+    const output = await fixture({ name: 'basic.output.ts' })
 
     const result = await runTransform({ source: output, transform: addOverrideAccessTrue })
 
     expect(result).toBe(output)
   })
 
-  it('recognizes the distinctive payload.jobs API without a type annotation', async () => {
-    const input = await fixture('jobs.input.ts')
-    const output = await fixture('jobs.output.ts')
+  it('should recognize the distinctive payload.jobs API without a type annotation', async () => {
+    const input = await fixture({ name: 'jobs.input.ts' })
+    const output = await fixture({ name: 'jobs.output.ts' })
 
     const result = await runTransform({ source: input, transform: addOverrideAccessTrue })
 
     expect(result).toBe(output)
   })
 
-  it('recognizes a Payload value from its resolved BasePayload type', async () => {
+  it('should recognize a Payload value from its resolved BasePayload type', async () => {
     const project = new Project({ useInMemoryFileSystem: true })
     project
       .getFileSystem()
@@ -71,7 +71,7 @@ await cms.find({ collection: 'posts' })
     )
   })
 
-  it('recognizes a known Payload value cast to another type', async () => {
+  it('should recognize a known Payload value cast to another type', async () => {
     const source = `import type { Payload } from 'payload'
 
 declare const payload: Payload
@@ -86,7 +86,7 @@ await (payload as any).create({ collection: 'posts', data: { title: 'Post' } })
     )
   })
 
-  it('does not rewrite a resolved union that can be an unrelated client', async () => {
+  it('should not rewrite a resolved union that can be an unrelated client', async () => {
     const project = new Project({ useInMemoryFileSystem: true })
     project
       .getFileSystem()
@@ -119,7 +119,7 @@ await client.find({ collection: 'posts' })
     expect(result.filesChanged).toEqual([])
   })
 
-  it('avoids duplicate property diagnostics when options require overrideAccess', async () => {
+  it('should avoid duplicate property diagnostics when options require overrideAccess', async () => {
     const project = new Project({
       compilerOptions: { strict: true },
       useInMemoryFileSystem: true,
@@ -151,7 +151,7 @@ payload.find({ ...options, collection: 'posts' })
     ).toEqual([])
   })
 
-  it('preserves explicit values inside asserted options objects', async () => {
+  it('should preserve explicit values inside asserted options objects', async () => {
     const source = `import type { Payload as PayloadInstance } from 'payload'
 
 type Options = { collection: string; overrideAccess?: boolean }
@@ -167,7 +167,7 @@ payload.find(({ collection: 'posts', overrideAccess: true } satisfies Options))
     expect(result).toBe(source)
   })
 
-  it('replaces an explicit undefined options argument instead of spreading it', async () => {
+  it('should replace an explicit undefined options argument instead of spreading it', async () => {
     const project = new Project({
       compilerOptions: { strict: true },
       useInMemoryFileSystem: true,
@@ -190,7 +190,7 @@ payload.jobs.run(undefined)
     ).toEqual([])
   })
 
-  it('leaves spread call arguments unchanged and emits a manual-review note', async () => {
+  it('should leave spread call arguments unchanged and emit a manual-review note', async () => {
     const source = `import type { Payload as PayloadInstance } from 'payload'
 
 declare const payload: PayloadInstance & { find(options: { collection: string }): void }
@@ -210,7 +210,7 @@ payload.find(...args)
     ])
   })
 
-  it('leaves side-effecting void options unchanged and emits a manual-review note', async () => {
+  it('should leave side-effecting void options unchanged and emit a manual-review note', async () => {
     const source = `import type { Payload as PayloadInstance } from 'payload'
 
 declare const payload: PayloadInstance & { find(options: unknown): void }
@@ -230,16 +230,16 @@ payload.find(void sideEffect())
     ])
   })
 
-  it('does not modify unrelated APIs with similarly named methods', async () => {
-    const input = await fixture('non-matching.input.ts')
+  it('should not modify unrelated APIs with similarly named methods', async () => {
+    const input = await fixture({ name: 'non-matching.input.ts' })
 
     const result = await runTransform({ source: input, transform: addOverrideAccessTrue })
 
     expect(result).toBe(input)
   })
 
-  it('leaves ambiguous Payload-like calls unchanged and emits a manual-review note', async () => {
-    const input = await fixture('ambiguous.input.ts')
+  it('should leave ambiguous Payload-like calls unchanged and emit a manual-review note', async () => {
+    const input = await fixture({ name: 'ambiguous.input.ts' })
     const project = new Project({ useInMemoryFileSystem: true })
     project.createSourceFile('input.ts', input)
 
@@ -251,5 +251,52 @@ payload.find(void sideEffect())
         'could not confirm that `payload.create` is a Payload Local API call',
       ),
     ])
+  })
+
+  it('should not rewrite database adapter methods resolved from the Payload package', async () => {
+    const project = new Project({ useInMemoryFileSystem: true })
+    project
+      .getFileSystem()
+      .writeFileSync(
+        '/node_modules/payload/package.json',
+        JSON.stringify({ name: 'payload', types: 'index.d.ts' }),
+      )
+    project.createSourceFile(
+      '/node_modules/payload/index.d.ts',
+      `export interface DatabaseAdapter {
+  find(options: { collection: string }): Promise<unknown>
+}
+
+export declare class BasePayload {
+  db: DatabaseAdapter
+}
+`,
+    )
+    const source = `import type { BasePayload } from 'payload'
+
+declare const payload: BasePayload
+
+await payload.db.find({ collection: 'posts' })
+`
+    const sourceFile = project.createSourceFile('/project/input.ts', source)
+
+    const result = await addOverrideAccessTrue.apply({ packageJsons: [], project })
+
+    expect(sourceFile.getFullText()).toBe(source)
+    expect(result.filesChanged).toEqual([])
+  })
+
+  it('should rewrite destructured Local API methods from known Payload values', async () => {
+    const source = `import type { Payload } from 'payload'
+
+declare const payload: Payload
+const { find } = payload
+
+await find({ collection: 'posts' })
+`
+
+    const result = await runTransform({ source, transform: addOverrideAccessTrue })
+
+    expect(result).toContain("await find({ overrideAccess: true, collection: 'posts' })")
   })
 })

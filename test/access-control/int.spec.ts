@@ -408,7 +408,7 @@ describe('Access Control', () => {
         )
       })
 
-      it('field without read access should show when overrideAccess: true', async () => {
+      it('should show field without read access when overrideAccess: true', async () => {
         const { id, restrictedField } = await createDoc({ restrictedField: 'restricted' })
 
         const retrievedDoc = await payload.findByID({ id, collection: slug, overrideAccess: true })
@@ -416,7 +416,7 @@ describe('Access Control', () => {
         expect(retrievedDoc.restrictedField).toStrictEqual(restrictedField)
       })
 
-      it('field without read access should not show by default', async () => {
+      it('should hide field without read access by default', async () => {
         const { id } = await createDoc({ restrictedField: 'restricted' })
 
         const retrievedDoc = await payload.findByID({ id, collection: slug })
@@ -1008,7 +1008,6 @@ describe('Access Control', () => {
       const doc = await payload.create({
         collection: unrestrictedSlug,
         data: { name: 'created by admin user' },
-        overrideAccess: false,
         user: adminUser as any,
       })
 
@@ -1020,7 +1019,6 @@ describe('Access Control', () => {
         payload.create({
           collection: unrestrictedSlug,
           data: { name: 'created by public user' },
-          overrideAccess: false,
           user: publicUser as any,
         }),
       ).rejects.toThrow(Forbidden)

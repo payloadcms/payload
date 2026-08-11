@@ -1,4 +1,4 @@
-import type { CallExpression, Expression, SourceFile, Type } from 'ts-morph'
+import type { CallExpression, Expression, Symbol as MorphSymbol, SourceFile, Type } from 'ts-morph'
 
 import { Node, SyntaxKind } from 'ts-morph'
 
@@ -29,8 +29,10 @@ const LOCAL_API_METHODS = new Set([
 ])
 
 const JOBS_API_METHODS = new Set(['cancel', 'cancelByID', 'queue', 'run', 'runByID'])
+const PAYLOAD_TYPE_NAMES = new Set(['BasePayload', 'Payload'])
 
 type PayloadBindings = {
+  apiMethodSymbols: Set<MorphSymbol>
   getPayloadNames: Set<string>
   identifiers: Set<string>
   payloadTypeNames: Set<string>
@@ -43,7 +45,7 @@ export const addOverrideAccessTrue: Transform = {
     const notes: string[] = []
 
     for (const sourceFile of project.getSourceFiles()) {
-      const bindings = discoverPayloadBindings(sourceFile)
+      const bindings = discoverPayloadBindings({ sourceFile })
       const calls = sourceFile.getDescendantsOfKind(SyntaxKind.CallExpression)
       const callsToChange: CallExpression[] = []
 
@@ -51,11 +53,11 @@ export const addOverrideAccessTrue: Transform = {
         const match = classifyCall({ bindings, call })
 
         if (match === 'confirmed') {
-          if (!hasOverrideAccess(call)) {
+          if (!hasOverrideAccess({ call })) {
             const firstArgument = call.getArguments()[0]
             const unwrappedArgument =
               firstArgument && Node.isExpression(firstArgument)
-                ? unwrapOptionsExpression(firstArgument)
+                ? unwrapOptionsExpression({ expression: firstArgument })
                 : undefined
 
             if (
@@ -76,7 +78,7 @@ export const addOverrideAccessTrue: Transform = {
               callsToChange.push(call)
             }
           }
-        } else if (match === 'ambiguous' && !hasOverrideAccess(call)) {
+        } else if (match === 'ambiguous' && !hasOverrideAccess({ call })) {
           const expression = call.getExpression()
           notes.push(
             `${sourceFile.getFilePath()}:${call.getStartLineNumber()}: could not confirm that \`${expression.getText()}\` is a Payload Local API call — add \`overrideAccess: true\` manually if it should preserve the previous access-bypassing behavior.`,
@@ -85,7 +87,7 @@ export const addOverrideAccessTrue: Transform = {
       }
 
       for (const call of callsToChange.sort((a, b) => b.getStart() - a.getStart())) {
-        addOverrideAccess(call)
+        addOverrideAccess({ call })
       }
 
       if (callsToChange.length > 0) {
@@ -99,8 +101,9 @@ export const addOverrideAccessTrue: Transform = {
     'Adds `overrideAccess: true` to confidently identified Payload Local API calls that omit it, preserving the previous default behavior after access enforcement became the default. Covers collection, global, auth, and jobs methods; preserves explicit values and reports ambiguous Payload-like calls for manual review.',
 }
 
-function discoverPayloadBindings(sourceFile: SourceFile): PayloadBindings {
+function discoverPayloadBindings({ sourceFile }: { sourceFile: SourceFile }): PayloadBindings {
   const bindings: PayloadBindings = {
+    apiMethodSymbols: new Set<MorphSymbol>(),
     getPayloadNames: new Set<string>(),
     identifiers: new Set<string>(),
     payloadTypeNames: new Set<string>(),
@@ -126,7 +129,10 @@ function discoverPayloadBindings(sourceFile: SourceFile): PayloadBindings {
   for (const parameter of sourceFile.getDescendantsOfKind(SyntaxKind.Parameter)) {
     if (
       Node.isIdentifier(parameter.getNameNode()) &&
-      isPayloadTypeNode(parameter.getTypeNode(), bindings.payloadTypeNames)
+      isPayloadTypeNode({
+        payloadTypeNames: bindings.payloadTypeNames,
+        typeNode: parameter.getTypeNode(),
+      })
     ) {
       bindings.identifiers.add(parameter.getName())
     }
@@ -135,30 +141,60 @@ function discoverPayloadBindings(sourceFile: SourceFile): PayloadBindings {
   for (const declaration of sourceFile.getDescendantsOfKind(SyntaxKind.VariableDeclaration)) {
     if (
       Node.isIdentifier(declaration.getNameNode()) &&
-      isPayloadTypeNode(declaration.getTypeNode(), bindings.payloadTypeNames)
+      isPayloadTypeNode({
+        payloadTypeNames: bindings.payloadTypeNames,
+        typeNode: declaration.getTypeNode(),
+      })
     ) {
       bindings.identifiers.add(declaration.getName())
     }
   }
 
-  let changed = true
-  while (changed) {
-    changed = false
+  let hasChanged = true
+  while (hasChanged) {
+    hasChanged = false
 
     for (const declaration of sourceFile.getDescendantsOfKind(SyntaxKind.VariableDeclaration)) {
       const nameNode = declaration.getNameNode()
       const initializer = declaration.getInitializer()
 
-      if (!initializer || !Node.isIdentifier(nameNode)) {
+      if (!initializer) {
         continue
       }
 
-      if (
-        !bindings.identifiers.has(nameNode.getText()) &&
-        isKnownPayloadExpression(initializer, bindings)
-      ) {
-        bindings.identifiers.add(nameNode.getText())
-        changed = true
+      if (Node.isIdentifier(nameNode)) {
+        if (
+          !bindings.identifiers.has(nameNode.getText()) &&
+          isKnownPayloadExpression({ bindings, expression: initializer })
+        ) {
+          bindings.identifiers.add(nameNode.getText())
+          hasChanged = true
+        }
+        continue
+      }
+
+      if (!Node.isObjectBindingPattern(nameNode)) {
+        continue
+      }
+
+      const apiMethods = getDestructuredAPIMethods({ bindings, initializer })
+      if (!apiMethods) {
+        continue
+      }
+
+      for (const element of nameNode.getElements()) {
+        if (element.getDotDotDotToken()) {
+          continue
+        }
+
+        const localName = element.getNameNode()
+        const methodName = element.getPropertyNameNode()?.getText() ?? localName.getText()
+        const symbol = Node.isIdentifier(localName) ? localName.getSymbol() : undefined
+
+        if (apiMethods.has(methodName) && symbol && !bindings.apiMethodSymbols.has(symbol)) {
+          bindings.apiMethodSymbols.add(symbol)
+          hasChanged = true
+        }
       }
     }
   }
@@ -166,7 +202,34 @@ function discoverPayloadBindings(sourceFile: SourceFile): PayloadBindings {
   return bindings
 }
 
-function isPayloadTypeNode(typeNode: Node | undefined, payloadTypeNames: Set<string>): boolean {
+function getDestructuredAPIMethods({
+  bindings,
+  initializer,
+}: {
+  bindings: PayloadBindings
+  initializer: Expression
+}): Set<string> | undefined {
+  if (isKnownPayloadExpression({ bindings, expression: initializer })) {
+    return LOCAL_API_METHODS
+  }
+
+  const unwrapped = unwrapExpression({ expression: initializer })
+  if (
+    Node.isPropertyAccessExpression(unwrapped) &&
+    unwrapped.getName() === 'jobs' &&
+    isKnownPayloadExpression({ bindings, expression: unwrapped.getExpression() })
+  ) {
+    return JOBS_API_METHODS
+  }
+}
+
+function isPayloadTypeNode({
+  payloadTypeNames,
+  typeNode,
+}: {
+  payloadTypeNames: Set<string>
+  typeNode: Node | undefined
+}): boolean {
   if (!typeNode) {
     return false
   }
@@ -182,23 +245,31 @@ function isPayloadTypeNode(typeNode: Node | undefined, payloadTypeNames: Set<str
 
     return (
       nonNullishTypes.length > 0 &&
-      nonNullishTypes.every((child) => isPayloadTypeNode(child, payloadTypeNames))
+      nonNullishTypes.every((child) => isPayloadTypeNode({ payloadTypeNames, typeNode: child }))
     )
   }
 
   if (Node.isIntersectionTypeNode(typeNode)) {
-    return typeNode.getTypeNodes().some((child) => isPayloadTypeNode(child, payloadTypeNames))
+    return typeNode
+      .getTypeNodes()
+      .some((child) => isPayloadTypeNode({ payloadTypeNames, typeNode: child }))
   }
 
   if (Node.isParenthesizedTypeNode(typeNode)) {
-    return isPayloadTypeNode(typeNode.getTypeNode(), payloadTypeNames)
+    return isPayloadTypeNode({ payloadTypeNames, typeNode: typeNode.getTypeNode() })
   }
 
   return false
 }
 
-function isKnownPayloadExpression(expression: Expression, bindings: PayloadBindings): boolean {
-  const unwrapped = unwrapExpression(expression)
+function isKnownPayloadExpression({
+  bindings,
+  expression,
+}: {
+  bindings: PayloadBindings
+  expression: Expression
+}): boolean {
+  const unwrapped = unwrapExpression({ expression })
 
   if (Node.isIdentifier(unwrapped) && bindings.identifiers.has(unwrapped.getText())) {
     return true
@@ -214,27 +285,32 @@ function isKnownPayloadExpression(expression: Expression, bindings: PayloadBindi
   if (
     Node.isPropertyAccessExpression(unwrapped) &&
     unwrapped.getName() === 'payload' &&
-    isRequestLikeExpression(unwrapped.getExpression())
+    isRequestLikeExpression({ expression: unwrapped.getExpression() })
   ) {
     return true
   }
 
   if (Node.isAsExpression(unwrapped)) {
-    if (isPayloadTypeNode(unwrapped.getTypeNode(), bindings.payloadTypeNames)) {
+    if (
+      isPayloadTypeNode({
+        payloadTypeNames: bindings.payloadTypeNames,
+        typeNode: unwrapped.getTypeNode(),
+      })
+    ) {
       return true
     }
 
-    return isKnownPayloadExpression(unwrapped.getExpression(), bindings)
+    return isKnownPayloadExpression({ bindings, expression: unwrapped.getExpression() })
   }
 
   try {
-    return isResolvedPayloadType(unwrapped.getType())
+    return isResolvedPayloadType({ type: unwrapped.getType() })
   } catch {
     return false
   }
 }
 
-function isResolvedPayloadType(type: Type): boolean {
+function isResolvedPayloadType({ type }: { type: Type }): boolean {
   if (type.isUnion()) {
     const nonNullishTypes = type
       .getUnionTypes()
@@ -242,29 +318,33 @@ function isResolvedPayloadType(type: Type): boolean {
 
     return (
       nonNullishTypes.length > 0 &&
-      nonNullishTypes.every((candidate) => isResolvedPayloadType(candidate))
+      nonNullishTypes.every((candidate) => isResolvedPayloadType({ type: candidate }))
     )
   }
 
   if (type.isIntersection()) {
-    return type.getIntersectionTypes().some((candidate) => isResolvedPayloadType(candidate))
+    return type
+      .getIntersectionTypes()
+      .some((candidate) => isResolvedPayloadType({ type: candidate }))
   }
 
   const symbols = [type.getAliasSymbol(), type.getSymbol()].filter((symbol) => symbol !== undefined)
 
-  return symbols.some((symbol) =>
-    symbol.getDeclarations().some((declaration) => {
-      const filePath = declaration.getSourceFile().getFilePath().replaceAll('\\', '/')
-      return (
-        filePath.includes('/node_modules/payload/') ||
-        filePath.includes('/packages/payload/src/') ||
-        filePath.includes('/packages/payload/dist/')
-      )
-    }),
+  return symbols.some(
+    (symbol) =>
+      PAYLOAD_TYPE_NAMES.has(symbol.getName()) &&
+      symbol.getDeclarations().some((declaration) => {
+        const filePath = declaration.getSourceFile().getFilePath().replaceAll('\\', '/')
+        return (
+          filePath.includes('/node_modules/payload/') ||
+          filePath.includes('/packages/payload/src/') ||
+          filePath.includes('/packages/payload/dist/')
+        )
+      }),
   )
 }
 
-function unwrapExpression(expression: Expression): Expression {
+function unwrapExpression({ expression }: { expression: Expression }): Expression {
   let current = expression
 
   while (
@@ -278,7 +358,7 @@ function unwrapExpression(expression: Expression): Expression {
   return current
 }
 
-function isRequestLikeExpression(expression: Expression): boolean {
+function isRequestLikeExpression({ expression }: { expression: Expression }): boolean {
   if (Node.isIdentifier(expression)) {
     return /^(?:req|request)$/i.test(expression.getText())
   }
@@ -296,6 +376,11 @@ function classifyCall({
   call: CallExpression
 }): 'ambiguous' | 'confirmed' | 'unrelated' {
   const callee = call.getExpression()
+  if (Node.isIdentifier(callee)) {
+    const symbol = callee.getSymbol()
+    return symbol && bindings.apiMethodSymbols.has(symbol) ? 'confirmed' : 'unrelated'
+  }
+
   if (!Node.isPropertyAccessExpression(callee)) {
     return 'unrelated'
   }
@@ -304,10 +389,10 @@ function classifyCall({
   const receiver = callee.getExpression()
 
   if (LOCAL_API_METHODS.has(methodName)) {
-    if (isKnownPayloadExpression(receiver, bindings)) {
+    if (isKnownPayloadExpression({ bindings, expression: receiver })) {
       return 'confirmed'
     }
-    return isPayloadLikeName(receiver) ? 'ambiguous' : 'unrelated'
+    return isPayloadLikeName({ expression: receiver }) ? 'ambiguous' : 'unrelated'
   }
 
   if (
@@ -317,18 +402,18 @@ function classifyCall({
   ) {
     const payloadReceiver = receiver.getExpression()
     if (
-      isKnownPayloadExpression(payloadReceiver, bindings) ||
+      isKnownPayloadExpression({ bindings, expression: payloadReceiver }) ||
       (Node.isIdentifier(payloadReceiver) && payloadReceiver.getText() === 'payload')
     ) {
       return 'confirmed'
     }
-    return isPayloadLikeName(payloadReceiver) ? 'ambiguous' : 'unrelated'
+    return isPayloadLikeName({ expression: payloadReceiver }) ? 'ambiguous' : 'unrelated'
   }
 
   return 'unrelated'
 }
 
-function isPayloadLikeName(expression: Expression): boolean {
+function isPayloadLikeName({ expression }: { expression: Expression }): boolean {
   if (Node.isIdentifier(expression)) {
     return /payload/i.test(expression.getText())
   }
@@ -336,13 +421,13 @@ function isPayloadLikeName(expression: Expression): boolean {
   return false
 }
 
-function hasOverrideAccess(call: CallExpression): boolean {
+function hasOverrideAccess({ call }: { call: CallExpression }): boolean {
   const firstArgument = call.getArguments()[0]
   if (!firstArgument || !Node.isExpression(firstArgument)) {
     return false
   }
 
-  const options = unwrapOptionsExpression(firstArgument)
+  const options = unwrapOptionsExpression({ expression: firstArgument })
   if (!Node.isObjectLiteralExpression(options)) {
     return false
   }
@@ -356,7 +441,7 @@ function hasOverrideAccess(call: CallExpression): boolean {
       return false
     }
 
-    const expression = unwrapOptionsExpression(property.getExpression())
+    const expression = unwrapOptionsExpression({ expression: property.getExpression() })
     return (
       Node.isObjectLiteralExpression(expression) &&
       Boolean(expression.getProperty('overrideAccess'))
@@ -364,7 +449,7 @@ function hasOverrideAccess(call: CallExpression): boolean {
   })
 }
 
-function unwrapOptionsExpression(expression: Expression): Expression {
+function unwrapOptionsExpression({ expression }: { expression: Expression }): Expression {
   let current = expression
 
   while (
@@ -379,16 +464,16 @@ function unwrapOptionsExpression(expression: Expression): Expression {
   return current
 }
 
-function addOverrideAccess(call: CallExpression): void {
+function addOverrideAccess({ call }: { call: CallExpression }): CallExpression {
   const firstArgument = call.getArguments()[0]
 
   if (!firstArgument) {
     call.addArgument('{ overrideAccess: true }')
-    return
+    return call
   }
 
   if (Node.isExpression(firstArgument)) {
-    const unwrappedArgument = unwrapOptionsExpression(firstArgument)
+    const unwrappedArgument = unwrapOptionsExpression({ expression: firstArgument })
     if (
       Node.isNullLiteral(unwrappedArgument) ||
       (Node.isVoidExpression(unwrappedArgument) &&
@@ -396,7 +481,7 @@ function addOverrideAccess(call: CallExpression): void {
       (Node.isIdentifier(unwrappedArgument) && unwrappedArgument.getText() === 'undefined')
     ) {
       firstArgument.replaceWithText('{ overrideAccess: true }')
-      return
+      return call
     }
   }
 
@@ -418,7 +503,7 @@ function addOverrideAccess(call: CallExpression): void {
           : '{ overrideAccess: true }',
       )
     }
-    return
+    return call
   }
 
   const expressionText = firstArgument.getText()
@@ -430,4 +515,6 @@ function addOverrideAccess(call: CallExpression): void {
       : `(${expressionText})`
 
   firstArgument.replaceWithText(`{ ...{ overrideAccess: true }, ...${spreadText} }`)
+
+  return call
 }
