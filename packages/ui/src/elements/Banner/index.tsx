@@ -17,7 +17,7 @@ export type Props = Readonly<{
   icon?: React.ReactNode
   onClick?: onClick
   to?: string
-  type?: 'default' | 'error' | 'info' | 'success'
+  type?: 'default' | 'error' | 'info' | 'success' | 'warning'
 }>
 
 export type RenderedTypeProps = {

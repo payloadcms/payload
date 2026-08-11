@@ -94,6 +94,14 @@ export default buildConfigWithDefaults({
       views: {
         // Dashboard: CustomDashboardView,
         // Account: CustomAccountView,
+        BannerShowcase: {
+          Component: '/components/views/BannerStyles/index.js#BannerStyles',
+          path: '/banner-styles',
+        },
+        ButtonShowcase: {
+          Component: '/components/views/ButtonStyles/index.js#ButtonStyles',
+          path: '/button-styles',
+        },
         collections: {
           Component: '/components/views/CustomView/index.js#CustomView',
           path: '/collections',
@@ -134,10 +142,6 @@ export default buildConfigWithDefaults({
           exact: true,
           path: publicCustomViewPath,
           strict: true,
-        },
-        ButtonShowcase: {
-          Component: '/components/views/ButtonStyles/index.js#ButtonStyles',
-          path: '/button-styles',
         },
       },
     },

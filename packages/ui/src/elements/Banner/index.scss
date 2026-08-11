@@ -26,7 +26,7 @@
     }
 
     &--type-default {
-      &.button--has-action {
+      &.banner--has-action {
         &:hover {
           background: var(--theme-elevation-900);
         }
@@ -45,7 +45,7 @@
         @include color-svg(var(--theme-error-600));
       }
 
-      &.button--has-action {
+      &.banner--has-action {
         &:hover {
           background: var(--theme-error-200);
         }
@@ -60,13 +60,32 @@
       background: var(--theme-success-100);
       color: var(--theme-success-600);
 
-      &.button--has-action {
+      &.banner--has-action {
         &:hover {
           background: var(--theme-success-200);
         }
 
         &:active {
           background: var(--theme-success-200);
+        }
+      }
+    }
+
+    &--type-warning {
+      background: var(--theme-warning-100);
+      color: var(--theme-warning-600);
+
+      svg {
+        @include color-svg(var(--theme-warning-600));
+      }
+
+      &.banner--has-action {
+        &:hover {
+          background: var(--theme-warning-200);
+        }
+
+        &:active {
+          background: var(--theme-warning-300);
         }
       }
     }
