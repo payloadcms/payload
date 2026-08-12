@@ -78,6 +78,9 @@ interface SuiteResult {
 
 const isContentAPIMode = process.env.PAYLOAD_DATABASE === 'content-api'
 const contentAPISuiteTimeout = 120000
+// Chatty suites can exceed Node's 1 MiB execSync default; truncated stdout has
+// no JSON report, so the suite is recorded as 0/<collected>.
+const vitestExecMaxBuffer = 64 * 1024 * 1024
 const vitestBinary = './node_modules/.bin/vitest'
 
 function getVitestEnv(options?: { unsetPayloadDatabase?: boolean }): NodeJS.ProcessEnv {
@@ -217,6 +220,7 @@ function getCollectedTestCount(suiteName: string): number {
         cwd: path.join(dirname, '..'),
         encoding: 'utf8',
         env: getVitestEnv({ unsetPayloadDatabase }),
+        maxBuffer: vitestExecMaxBuffer,
         stdio: ['pipe', 'pipe', 'pipe'],
         ...(isContentAPIMode ? { timeout: contentAPISuiteTimeout } : {}),
       })
@@ -371,6 +375,7 @@ function runTestSuite(suiteName: string): SuiteResult {
       cwd: path.join(dirname, '..'),
       encoding: 'utf8',
       env: getVitestEnv(),
+      maxBuffer: vitestExecMaxBuffer,
       stdio: ['pipe', 'pipe', 'pipe'],
       ...(isContentAPIMode ? { timeout: contentAPISuiteTimeout } : {}),
     })
