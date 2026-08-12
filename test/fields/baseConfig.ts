@@ -42,6 +42,7 @@ import UploadsMultiPoly from './collections/UploadMultiPoly/index.js'
 import UploadsPoly from './collections/UploadPoly/index.js'
 import UploadRestricted from './collections/UploadRestricted/index.js'
 import Uploads3 from './collections/Uploads3/index.js'
+import { SelectOptions } from './globals/SelectOptions.js'
 import { seed } from './seed.js'
 
 export const collections: CollectionConfig[] = [
@@ -159,6 +160,7 @@ export const baseConfig: Partial<Config> = {
       defaultTimezone: 'America/Monterrey',
     },
   },
+  globals: [SelectOptions],
   localization: {
     defaultLocale: 'en',
     fallback: true,

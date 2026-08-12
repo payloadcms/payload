@@ -47,6 +47,7 @@ import {
   radioFieldsSlug,
   relationshipFieldsSlug,
   selectFieldsSlug,
+  selectOptionsGlobalSlug,
   slugFieldsSlug,
   tabsFieldsSlug,
   textareaFieldsSlug,
@@ -252,6 +253,19 @@ export const seed = async (_payload: Payload) => {
   await _payload.create({
     collection: selectFieldsSlug,
     data: selectsDoc,
+    depth: 0,
+    overrideAccess: true,
+  })
+
+  await _payload.updateGlobal({
+    slug: selectOptionsGlobalSlug,
+    data: {
+      options: [
+        { label: 'Value One', value: 'one' },
+        { label: 'Value Two', value: 'two' },
+        { label: 'Value Three', value: 'three' },
+      ],
+    },
     depth: 0,
     overrideAccess: true,
   })
