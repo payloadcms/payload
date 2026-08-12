@@ -5,7 +5,12 @@ import chalk from 'chalk'
 import figures from 'figures'
 import path from 'path'
 
-import type { CliArgs } from './types.js'
+import type {
+  CliArgs,
+  NextAppDetails,
+  TanStackAppDetails,
+  TanStackDetectionResult,
+} from './types.js'
 
 import { configurePayloadConfig } from './lib/configure-payload-config.js'
 import { createProject } from './lib/create-project.js'
@@ -13,18 +18,24 @@ import { parseExample } from './lib/examples.js'
 import { generateSecret } from './lib/generate-secret.js'
 import { getPackageManager } from './lib/get-package-manager.js'
 import { getNextAppDetails, initNext } from './lib/init-next.js'
+import { initTanStack } from './lib/init-tanstack.js'
 import { manageEnvFiles } from './lib/manage-env-files.js'
 import { parseProjectName } from './lib/parse-project-name.js'
 import { parseTemplate } from './lib/parse-template.js'
 import { selectDb } from './lib/select-db.js'
+import { getTanStackAppDetails } from './lib/tanstack/detect.js'
 import { getValidTemplates, validateTemplate } from './lib/templates.js'
-import { updatePayloadInProject } from './lib/update-payload-in-project.js'
+import {
+  updatePayloadInNextProject,
+  updatePayloadInTanStackProject,
+} from './lib/update-payload-in-project.js'
 import { debug, error, info } from './utils/log.js'
 import {
   feedbackOutro,
   helpMessage,
   moveMessage,
   successfulNextInit,
+  successfulTanStackInit,
   successMessage,
 } from './utils/messages.js'
 import {
@@ -109,27 +120,35 @@ export class Main {
       p.intro(chalk.bgCyan(chalk.black(' create-payload-app ')))
       p.note("Welcome to Payload. Let's create a project!")
 
-      // Detect if inside Next.js project
+      const tanStackDetection = await getTanStackAppDetails({ projectDir: process.cwd() })
       const nextAppDetails = await getNextAppDetails(process.cwd())
-      const {
-        hasTopLevelLayout,
-        isPayloadInstalled,
-        isSupportedNextVersion,
-        nextAppDir,
-        nextConfigPath,
-        nextVersion,
-      } = nextAppDetails
+      const appFramework = resolveAppFramework({ nextAppDetails, tanStackDetection })
 
-      if (nextConfigPath && !isSupportedNextVersion) {
+      if (appFramework.kind === 'ambiguous') {
         p.log.warn(
-          `Next.js v${nextVersion} is unsupported. Next.js >= 15 is required to use Payload.`,
+          'Both Next.js and TanStack project markers were detected. Remove one framework before installing Payload.',
+        )
+        p.outro(feedbackOutro())
+        return
+      }
+
+      if (appFramework.kind === 'unsupported-tanstack') {
+        p.log.warn(appFramework.reason)
+        p.outro(feedbackOutro())
+        return
+      }
+
+      if (appFramework.kind === 'next' && !appFramework.appDetails.isSupportedNextVersion) {
+        p.log.warn(
+          `Next.js v${appFramework.appDetails.nextVersion} is unsupported. Next.js >= 15 is required to use Payload.`,
         )
         p.outro(feedbackOutro())
         process.exit(0)
       }
 
-      // Upgrade Payload in existing project
-      if (isPayloadInstalled && nextConfigPath) {
+      const hasPayload = appFramework.kind !== 'none' && appFramework.appDetails.isPayloadInstalled
+
+      if (hasPayload) {
         p.log.warn(`Payload installation detected in current project.`)
         const shouldUpdate = await p.confirm({
           initialValue: false,
@@ -137,10 +156,19 @@ export class Main {
         })
 
         if (!p.isCancel(shouldUpdate) && shouldUpdate) {
-          const { message, success: updateSuccess } = await updatePayloadInProject(
-            nextAppDetails,
-            this.args['--payload-version'] ?? DEFAULT_PAYLOAD_VERSION_TAG,
-          )
+          const versionOrTag = this.args['--payload-version'] ?? DEFAULT_PAYLOAD_VERSION_TAG
+          const updateResult =
+            appFramework.kind === 'next'
+              ? await updatePayloadInNextProject({
+                  appDetails: appFramework.appDetails,
+                  versionOrTag,
+                })
+              : await updatePayloadInTanStackProject({
+                  appDetails: appFramework.appDetails,
+                  versionOrTag,
+                })
+
+          const { message, success: updateSuccess } = updateResult
           if (updateSuccess) {
             info(message)
           } else {
@@ -149,21 +177,32 @@ export class Main {
         }
 
         p.outro(feedbackOutro())
-        process.exit(0)
+        return
       }
 
-      if (nextConfigPath) {
-        this.args['--name'] = slugify(path.basename(path.dirname(nextConfigPath)))
+      if (appFramework.kind === 'next') {
+        this.args['--name'] = slugify(
+          path.basename(path.dirname(appFramework.appDetails.nextConfigPath!)),
+        )
+      } else if (appFramework.kind === 'tanstack') {
+        this.args['--name'] = slugify(path.basename(appFramework.appDetails.projectDir))
       }
 
       const projectName = await parseProjectName(this.args)
-      const projectDir = nextConfigPath
-        ? path.dirname(nextConfigPath)
-        : path.resolve(process.cwd(), slugify(projectName))
+      let projectDir: string
+      if (appFramework.kind === 'next') {
+        projectDir = path.dirname(appFramework.appDetails.nextConfigPath!)
+      } else if (appFramework.kind === 'tanstack') {
+        projectDir = appFramework.appDetails.projectDir
+      } else {
+        projectDir = path.resolve(process.cwd(), slugify(projectName))
+      }
 
       const packageManager = await getPackageManager({ cliArgs: this.args, projectDir })
 
-      if (nextConfigPath) {
+      if (appFramework.kind === 'next') {
+        const { hasTopLevelLayout, nextAppDir } = appFramework.appDetails
+
         p.log.step(
           chalk.bold(`${chalk.bgBlack(` ${figures.triangleUp} Next.js `)} project detected!`),
         )
@@ -189,7 +228,7 @@ export class Main {
         const result = await initNext({
           ...this.args,
           dbType: dbDetails.type,
-          nextAppDetails,
+          nextAppDetails: appFramework.appDetails,
           packageManager,
           projectDir,
         })
@@ -216,6 +255,60 @@ export class Main {
 
         info('Payload project successfully initialized!')
         p.note(successfulNextInit(), chalk.bgGreen(chalk.black(' Documentation ')))
+        p.outro(feedbackOutro())
+        return
+      }
+
+      if (appFramework.kind === 'tanstack') {
+        const frameworkName =
+          appFramework.appDetails.kind === 'start' ? 'TanStack Start' : 'TanStack Router'
+        p.log.step(chalk.bold(`${chalk.bgBlack(` ${frameworkName} `)} project detected!`))
+
+        const proceed = await p.confirm({
+          initialValue: true,
+          message: chalk.bold(
+            appFramework.appDetails.kind === 'start'
+              ? 'Install Payload in this TanStack Start project?'
+              : 'Convert this project to TanStack Start and install Payload?',
+          ),
+        })
+        if (p.isCancel(proceed) || !proceed) {
+          p.outro(feedbackOutro())
+          process.exit(0)
+        }
+
+        const dbDetails = await selectDb(this.args, projectName)
+        const result = await initTanStack({
+          ...this.args,
+          appDetails: appFramework.appDetails,
+          dbType: dbDetails.type,
+          packageManager,
+          projectDir,
+        })
+
+        if (result.success === false) {
+          p.log.error(result.reason)
+          p.outro(feedbackOutro())
+          process.exit(1)
+        }
+
+        await configurePayloadConfig({
+          dbType: dbDetails.type,
+          projectDirOrConfigPath: {
+            payloadConfigPath: result.payloadConfigPath,
+          },
+        })
+
+        await manageEnvFiles({
+          cliArgs: this.args,
+          databaseType: dbDetails.type,
+          databaseUri: dbDetails.dbUri,
+          payloadSecret: generateSecret(),
+          projectDir,
+        })
+
+        info('Payload project successfully initialized!')
+        p.note(successfulTanStackInit(), chalk.bgGreen(chalk.black(' TanStack Start initialized ')))
         p.outro(feedbackOutro())
         return
       }
@@ -299,4 +392,37 @@ export class Main {
       error(err instanceof Error ? err.message : 'An error occurred')
     }
   }
+}
+
+type AppFramework =
+  | { appDetails: NextAppDetails; kind: 'next' }
+  | { appDetails: TanStackAppDetails; kind: 'tanstack' }
+  | { kind: 'ambiguous' }
+  | { kind: 'none' }
+  | { kind: 'unsupported-tanstack'; reason: string }
+
+export function resolveAppFramework({
+  nextAppDetails,
+  tanStackDetection,
+}: {
+  nextAppDetails: NextAppDetails
+  tanStackDetection: TanStackDetectionResult
+}): AppFramework {
+  if (nextAppDetails.nextConfigPath && tanStackDetection.detected) {
+    return { kind: 'ambiguous' }
+  }
+
+  if (nextAppDetails.nextConfigPath) {
+    return { appDetails: nextAppDetails, kind: 'next' }
+  }
+
+  if (!tanStackDetection.detected) {
+    return { kind: 'none' }
+  }
+
+  if (!tanStackDetection.compatible) {
+    return { kind: 'unsupported-tanstack', reason: tanStackDetection.reason }
+  }
+
+  return { appDetails: tanStackDetection.details, kind: 'tanstack' }
 }
