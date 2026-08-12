@@ -246,6 +246,7 @@ const resaveChildrenHook: CollectionAfterChangeHook = async ({ doc, req, operati
     // Resave child documents
     const children = await req.payload.find({
       collection: 'pages',
+      req,
       where: { parent: { equals: doc.id } },
     })
 
@@ -254,6 +255,7 @@ const resaveChildrenHook: CollectionAfterChangeHook = async ({ doc, req, operati
         collection: 'pages',
         id: child.id,
         data: child,
+        req,
       })
     }
   }
@@ -596,6 +598,7 @@ export const myPlugin =
       // Example: Seed data
       const { totalDocs } = await payload.count({
         collection: 'plugin-collection',
+        overrideAccess: true,
         where: { id: { equals: 'seeded-by-plugin' } },
       })
 
@@ -603,6 +606,7 @@ export const myPlugin =
         await payload.create({
           collection: 'plugin-collection',
           data: { id: 'seeded-by-plugin' },
+          overrideAccess: true,
         })
       }
     }
@@ -1365,13 +1369,17 @@ describe('Plugin integration tests', () => {
         title: 'Test',
         addedByPlugin: 'plugin value',
       },
+      overrideAccess: true,
     })
     expect(post.addedByPlugin).toBe('plugin value')
   })
 
   test('should create plugin collection', async () => {
     expect(payload.collections['plugin-collection']).toBeDefined()
-    const { docs } = await payload.find({ collection: 'plugin-collection' })
+    const { docs } = await payload.find({
+      collection: 'plugin-collection',
+      overrideAccess: true,
+    })
     expect(docs.length).toBeGreaterThan(0)
   })
 

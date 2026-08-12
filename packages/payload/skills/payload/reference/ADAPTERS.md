@@ -69,12 +69,14 @@ try {
   await payload.create({
     collection: 'orders',
     data: orderData,
+    overrideAccess: true, // Trusted internal transaction
     req: { transactionID },
   })
   await payload.update({
     collection: 'inventory',
     id: itemId,
     data: { stock: newStock },
+    overrideAccess: true,
     req: { transactionID },
   })
   await payload.db.commitTransaction(transactionID)
@@ -118,7 +120,7 @@ const brokenHook: CollectionAfterChangeHook = async ({ collection, doc, req }) =
   const children = await req.payload.find({
     collection: 'children',
     where: { parent: { equals: doc.id } },
-    // Missing req - separate transaction or no transaction
+    // Missing req - separate transaction and anonymous access
   })
 
   for (const child of children.docs) {

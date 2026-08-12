@@ -13,7 +13,7 @@ Payload is a Next.js native CMS with TypeScript-first architecture, providing ad
 | ------------------------ | -------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
 | Auto-generate slugs      | `{ type: 'slug', useAsSlug: 'title' }`                                     | [FIELDS.md#slug-field](reference/FIELDS.md#slug-field)                                                                           |
 | Restrict content by user | Access control with query                                                  | [ACCESS-CONTROL.md#row-level-security-with-complex-queries](reference/ACCESS-CONTROL.md#row-level-security-with-complex-queries) |
-| Local API user ops       | `user` + `overrideAccess: false`                                           | [QUERIES.md#access-control-in-local-api](reference/QUERIES.md#access-control-in-local-api)                                       |
+| Local API user ops       | Pass `user` or `req`; access runs by default                               | [QUERIES.md#access-control-in-local-api](reference/QUERIES.md#access-control-in-local-api)                                       |
 | Draft/publish workflow   | `versions: { drafts: true }`                                               | [COLLECTIONS.md#versioning--drafts](reference/COLLECTIONS.md#versioning--drafts)                                                 |
 | Computed fields          | `virtual: true` with **field-level** `hooks.afterRead` returning the value | [FIELDS.md#virtual-fields](reference/FIELDS.md#virtual-fields)                                                                   |
 | Document titles          | Stored top-level field in `admin.useAsTitle`                               | [COLLECTIONS.md#useastitle](reference/COLLECTIONS.md#useastitle)                                                                 |
@@ -227,7 +227,7 @@ export const ownPostsOnly: Access = ({ req }) => {
 ### Query Example
 
 ```ts
-// Local API
+// Public Local API query: access control runs as an anonymous user
 const posts = await payload.find({
   collection: 'posts',
   where: {
@@ -261,7 +261,7 @@ For all query operators and REST/GraphQL examples, see [QUERIES.md](reference/QU
 ### Getting Payload Instance
 
 ```ts
-// In API routes (Next.js)
+// In a public API route (Next.js), access control runs as an anonymous user
 import { getPayload } from 'payload'
 import config from '@payload-config'
 
@@ -275,7 +275,7 @@ export async function GET() {
   return Response.json(posts)
 }
 
-// In Server Components
+// In a public Server Component, access control runs as an anonymous user
 import { getPayload } from 'payload'
 import config from '@payload-config'
 
@@ -291,27 +291,27 @@ export default async function Page() {
 
 ### 1. Local API Access Control (CRITICAL)
 
-**By default, Local API operations bypass ALL access control**, even when passing a user.
+**Access control runs by default for Local API operations.** Pass the current `user` or `req`
+when acting on behalf of an authenticated user. Without either, access runs as an anonymous user.
 
 ```ts
-// ❌ SECURITY BUG: Passes user but ignores their permissions
-await payload.find({
-  collection: 'posts',
-  user: someUser, // Access control is BYPASSED!
-})
-
-// ✅ SECURE: Actually enforces the user's permissions
+// ✅ SECURE: The user's permissions are enforced by default
 await payload.find({
   collection: 'posts',
   user: someUser,
-  overrideAccess: false, // REQUIRED for access control
+})
+
+// ✅ TRUSTED: Explicitly bypass access control for an internal operation
+await payload.find({
+  collection: 'posts',
+  overrideAccess: true,
 })
 ```
 
 **When to use each:**
 
-- `overrideAccess: true` (default) - Server-side operations you trust (cron jobs, system tasks)
-- `overrideAccess: false` - When operating on behalf of a user (API routes, webhooks)
+- Omit `overrideAccess` - Enforce access for the supplied `user` or `req`, or for an anonymous user
+- `overrideAccess: true` - Trusted internal operations that intentionally bypass access control
 
 See [QUERIES.md#access-control-in-local-api](reference/QUERIES.md#access-control-in-local-api).
 
@@ -439,7 +439,7 @@ import type { Post, User } from '@/payload-types'
 
 ## Common Gotchas
 
-1. **Local API bypasses access control** unless you pass `overrideAccess: false`
+1. **Local API identity** — pass `user` or `req` for authenticated operations; omitting both runs as an anonymous user
 2. **Missing `req` in nested operations** breaks transaction atomicity
 3. **Hook loops** — operations in hooks can re-trigger the same hooks; use `req.context` flags
 4. **Field-level access** returns boolean only, no query constraints
@@ -466,7 +466,8 @@ import type { Post, User } from '@/payload-types'
 ### Security
 
 - Default to restrictive access, gradually add permissions
-- Use `overrideAccess: false` when passing `user` to Local API
+- Pass `user` or `req` for user-scoped Local API operations
+- Use `overrideAccess: true` only for trusted internal operations that intentionally bypass access
 - Field-level access only returns boolean (no query constraints)
 - Never trust client-provided data
 - Use `saveToJWT: true` for roles to avoid database lookups

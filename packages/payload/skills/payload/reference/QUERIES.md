@@ -61,6 +61,9 @@ const nestedQuery: Where = {
 
 ## Local API
 
+Access control runs for every Local API operation by default. The examples below do not pass a
+`user` or `req`, so they run with anonymous access.
+
 ```ts
 // Find documents
 const posts = await payload.find({
@@ -148,40 +151,35 @@ This is critical for MongoDB replica sets and Postgres. See [ADAPTERS.md#threadi
 
 ### Access Control in Local API
 
-**Important**: Local API bypasses access control by default (`overrideAccess: true`). When passing a `user` parameter, you must explicitly set `overrideAccess: false` to respect that user's permissions.
+**Important**: Access control runs by default for Local API operations (`overrideAccess: false`).
+Pass `user` or `req` when acting on behalf of an authenticated user. Without either, the operation
+runs as an anonymous user.
 
 ```ts
-// ❌ WRONG: User is passed but access control is bypassed
+// ✅ User-scoped operation: respects the user's permissions by default
 const posts = await payload.find({
   collection: 'posts',
   user: currentUser,
-  // Missing: overrideAccess: false
-  // Result: Operation runs with ADMIN privileges, ignoring user's permissions
 })
 
-// ✅ CORRECT: Respects user's access control permissions
-const posts = await payload.find({
+// ✅ Public operation: access control runs as an anonymous user
+const publicPosts = await payload.find({
   collection: 'posts',
-  user: currentUser,
-  overrideAccess: false, // Required to enforce access control
-  // Result: User only sees posts they have permission to read
 })
 
-// Administrative operation (intentionally bypass access control)
+// ✅ Trusted internal operation: intentionally bypasses access control
 const allPosts = await payload.find({
   collection: 'posts',
-  // No user parameter
-  // overrideAccess defaults to true
-  // Result: Returns all posts regardless of access control
+  overrideAccess: true,
 })
 ```
 
-**When to use `overrideAccess: false`:**
+**When to use the default access behavior:**
 
 - Performing operations on behalf of a user
 - Testing access control logic
 - API routes that should respect user permissions
-- Any operation where `user` parameter is provided
+- Public operations that should use anonymous access
 
 **When `overrideAccess: true` is appropriate:**
 

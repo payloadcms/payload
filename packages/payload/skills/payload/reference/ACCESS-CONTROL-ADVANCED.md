@@ -177,12 +177,17 @@ export const scheduledContentAccess: Access = ({ req: { user } }) => {
 
 ## Subscription-Based Access
 
+The examples below use privileged subscription lookups because the results are inputs to an access
+decision, not records returned to the caller. They still pass `req` to preserve request context.
+
 ### Active Subscription Required
 
 ```ts
 import type { Access } from 'payload'
 
-export const activeSubscriptionAccess: Access = async ({ req: { user } }) => {
+export const activeSubscriptionAccess: Access = async ({ req }) => {
+  const { user } = req
+
   if (!user) return false
   if (user.roles?.includes('admin')) return true
 
@@ -190,6 +195,8 @@ export const activeSubscriptionAccess: Access = async ({ req: { user } }) => {
     const subscription = await req.payload.findByID({
       collection: 'subscriptions',
       id: user.subscriptionId,
+      overrideAccess: true,
+      req,
     })
 
     return subscription?.status === 'active'
@@ -216,7 +223,9 @@ import type { Access } from 'payload'
 export const tierBasedAccess = (requiredTier: string): Access => {
   const tierHierarchy = ['free', 'basic', 'pro', 'enterprise']
 
-  return async ({ req: { user } }) => {
+  return async ({ req }) => {
+    const { user } = req
+
     if (!user) return false
     if (user.roles?.includes('admin')) return true
 
@@ -224,6 +233,8 @@ export const tierBasedAccess = (requiredTier: string): Access => {
       const subscription = await req.payload.findByID({
         collection: 'subscriptions',
         id: user.subscriptionId,
+        overrideAccess: true,
+        req,
       })
 
       if (subscription?.status !== 'active') return false
@@ -559,7 +570,6 @@ export const timedAsyncAccess: Access = async ({ req }) => {
 // In test/development
 const testAccess = await payload.find({
   collection: 'posts',
-  overrideAccess: false, // Enforce access control
   user: undefined, // Simulate no user
 })
 
@@ -574,10 +584,26 @@ console.log('Public access result:', testAccess.docs.length)
 
 ```ts
 // ❌ Slow: Multiple sequential async calls
-export const slowAccess: Access = async ({ req: { user } }) => {
-  const org = await req.payload.findByID({ collection: 'orgs', id: user.orgId })
-  const team = await req.payload.findByID({ collection: 'teams', id: user.teamId })
-  const subscription = await req.payload.findByID({ collection: 'subs', id: user.subId })
+export const slowAccess: Access = async ({ req }) => {
+  const { user } = req
+  const org = await req.payload.findByID({
+    collection: 'orgs',
+    id: user.orgId,
+    overrideAccess: true,
+    req,
+  })
+  const team = await req.payload.findByID({
+    collection: 'teams',
+    id: user.teamId,
+    overrideAccess: true,
+    req,
+  })
+  const subscription = await req.payload.findByID({
+    collection: 'subs',
+    id: user.subId,
+    overrideAccess: true,
+    req,
+  })
 
   return org.active && team.active && subscription.active
 }
@@ -658,7 +684,7 @@ const optimizedArrayField: ArrayField = {
 // ❌ N+1 Problem: Query per access check
 export const n1Access: Access = async ({ req, id }) => {
   // Runs for EACH document in list
-  const doc = await req.payload.findByID({ collection: 'docs', id })
+  const doc = await req.payload.findByID({ collection: 'docs', id, overrideAccess: true, req })
   return doc.isPublic
 }
 
@@ -696,7 +722,7 @@ Comprehensive security and implementation guidelines:
 12. **Rate Limit External Calls**: Protect against DoS on external validation services
 13. **Handle Errors Gracefully**: Access functions should return `false` on error, not throw
 14. **Use Environment Vars**: Store configuration (IPs, API keys) in env vars
-15. **Test Local API**: Remember to set `overrideAccess: false` when testing
+15. **Test Local API**: Pass the relevant `user` or `req` when testing authenticated access
 16. **Consider Performance**: Measure impact of async operations on login time
 17. **Version Control**: Track access control changes in git history
 18. **Principle of Least Privilege**: Grant minimum access required for functionality

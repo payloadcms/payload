@@ -315,6 +315,9 @@ const locationField: PointField = {
 
 ### Geospatial Queries
 
+These public query examples run with anonymous access. Pass `user` or `req` for authenticated
+queries.
+
 ```ts
 // Query by distance (sorted by nearest first)
 const nearbyLocations = await payload.find({

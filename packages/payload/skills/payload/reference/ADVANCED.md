@@ -17,7 +17,7 @@ const response = await fetch('/api/users/login', {
   }),
 })
 
-// Local API
+// Local API: login access runs as an anonymous user before authentication
 const result = await payload.login({
   collection: 'users',
   data: {
@@ -28,6 +28,8 @@ const result = await payload.login({
 ```
 
 ### Forgot Password
+
+Forgot-password access also runs as an anonymous user before authentication.
 
 ```ts
 await payload.forgotPassword({
@@ -122,6 +124,7 @@ await req.payload.jobs.queue({
     userEmail: 'user@example.com',
     userName: 'John',
   },
+  req,
   waitUntil: new Date('2024-12-31'), // Optional: schedule for future
 })
 ```
@@ -200,6 +203,7 @@ const featuredEndpoint: Endpoint = {
   handler: async (req) => {
     const posts = await req.payload.find({
       collection: 'posts',
+      req,
       where: { featured: { equals: true } },
     })
     return Response.json(posts)
@@ -358,7 +362,7 @@ const localizedField: TextField = {
   localized: true,
 }
 
-// Query with locale
+// Public query with locale; access control runs as an anonymous user
 const posts = await payload.find({
   collection: 'posts',
   locale: 'es',

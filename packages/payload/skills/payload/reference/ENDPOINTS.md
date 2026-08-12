@@ -68,6 +68,7 @@ export const getRelatedPosts = {
     // Find related posts
     const posts = await req.payload.find({
       collection: 'posts',
+      req,
       where: {
         category: {
           equals: id,
@@ -118,6 +119,7 @@ export const createEndpoint = {
     const result = await req.payload.create({
       collection: 'posts',
       data,
+      req,
     })
 
     return Response.json(result)
@@ -143,6 +145,7 @@ export const uploadEndpoint = {
       collection: 'media',
       data: req.data,
       file: req.file,
+      req,
     })
 
     return Response.json(result)
@@ -211,6 +214,7 @@ export const searchEndpoint = {
 
     const results = await req.payload.find({
       collection: 'posts',
+      req,
       where: {
         title: {
           contains: query,
@@ -273,6 +277,7 @@ export const endpoint = {
     const result = await req.payload.find({
       collection: 'posts',
       locale: req.locale,
+      req,
     })
 
     return Response.json(result)
@@ -327,6 +332,9 @@ export const externalUsersLogin = {
     // Find user with tenant constraint
     const userQuery = await req.payload.find({
       collection: 'users',
+      // Trusted credential lookup; return the same error whether it finds a user or not.
+      overrideAccess: true,
+      req,
       where: {
         and: [
           { email: { equals: email } },
@@ -345,6 +353,7 @@ export const externalUsersLogin = {
     const result = await req.payload.login({
       collection: 'users',
       data: { email, password },
+      req,
     })
 
     return Response.json(result, {
@@ -426,6 +435,7 @@ export const previewEndpoint = {
     // Preview data
     const results = await req.payload.find({
       collection,
+      req,
       where,
       limit,
       depth: 0,

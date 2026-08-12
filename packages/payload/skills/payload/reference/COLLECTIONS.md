@@ -242,12 +242,15 @@ export const Pages: CollectionConfig = {
 
 ### Draft API Usage
 
+Pass the current user so access control is applied to draft operations.
+
 ```ts
 // Create draft
 await payload.create({
   collection: 'posts',
   data: { title: 'Draft Post' },
   draft: true, // Saves as draft, skips required field validation
+  user: currentUser,
 })
 
 // Update as draft
@@ -256,6 +259,7 @@ await payload.update({
   id: '123',
   data: { title: 'Updated Draft' },
   draft: true,
+  user: currentUser,
 })
 
 // Read with drafts (returns newest draft if available)
@@ -263,6 +267,7 @@ const post = await payload.findByID({
   collection: 'posts',
   id: '123',
   draft: true, // Returns draft version if exists
+  user: currentUser,
 })
 
 // Query only published (REST API)

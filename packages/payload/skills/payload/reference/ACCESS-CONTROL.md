@@ -73,6 +73,9 @@ export const Posts: CollectionConfig = {
     delete: async ({ req, id }) => {
       const hasComments = await req.payload.count({
         collection: 'comments',
+        // Check all comments so hidden records cannot allow an unsafe deletion.
+        overrideAccess: true,
+        req,
         where: { post: { equals: id } },
       })
       return hasComments === 0
@@ -545,6 +548,9 @@ export const projectMemberAccess: Access = async ({ req, id }) => {
     collection: 'projects',
     id: id as string,
     depth: 0,
+    // Trusted lookup used only to make an access decision.
+    overrideAccess: true,
+    req,
   })
 
   return project.members?.includes(user.id)
@@ -556,6 +562,9 @@ export const preventDeleteWithDependencies: Access = async ({ req, id }) => {
 
   const dependencyCount = await payload.count({
     collection: 'related-items',
+    // Check every dependency, including records the current user cannot read.
+    overrideAccess: true,
+    req,
     where: {
       parent: { equals: id },
     },
@@ -651,24 +660,23 @@ access: {
 
 ## Important Notes
 
-1. **Local API Default**: Access control is **skipped by default** in Local API (`overrideAccess: true`). When passing a `user` parameter, you almost always want to set `overrideAccess: false` to respect that user's permissions:
+1. **Local API Default**: Access control runs by default in the Local API (`overrideAccess: false`). Pass `user` or `req` for authenticated operations. Without either, access runs as an anonymous user:
 
    ```ts
-   // ❌ WRONG: Passes user but bypasses access control (default behavior)
-   await payload.find({
-     collection: 'posts',
-     user: someUser, // User is ignored for access control!
-   })
-
-   // ✅ CORRECT: Respects the user's permissions
+   // ✅ Respects the user's permissions by default
    await payload.find({
      collection: 'posts',
      user: someUser,
-     overrideAccess: false, // Required to enforce access control
+   })
+
+   // ✅ Explicit bypass for a trusted internal operation
+   await payload.find({
+     collection: 'posts',
+     overrideAccess: true,
    })
    ```
 
-   **Why this matters**: If you pass `user` without `overrideAccess: false`, the operation runs with admin privileges regardless of the user's actual permissions. This is a common security mistake.
+   **Why this matters**: `overrideAccess: true` bypasses access control even when `user` or `req` is also present. Use it only when the operation is intentionally privileged.
 
 2. **Field Access Limitations**: Field-level access does NOT support query constraints - only boolean returns.
 
