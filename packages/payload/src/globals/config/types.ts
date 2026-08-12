@@ -191,12 +191,6 @@ export type GlobalAdminOptions = {
   preview?: GeneratePreviewURL
 }
 
-type GlobalAccess = {
-  read?: Access
-  readVersions?: Access
-  update?: Access
-}
-
 type GlobalHooks = {
   afterChange?: AfterChangeHook[]
   afterRead?: AfterReadHook[]
