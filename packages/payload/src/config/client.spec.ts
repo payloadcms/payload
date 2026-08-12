@@ -1,3 +1,5 @@
+import type { I18nClient } from '@payloadcms/translations'
+
 import type { SanitizedConfig } from './types.js'
 
 import { describe, expect, it } from 'vitest'
@@ -27,7 +29,7 @@ describe('createClientConfig', () => {
 
     const clientConfig = createClientConfig({
       config,
-      i18n: {} as never,
+      i18n: {} as I18nClient,
       importMap: {},
       user: true,
     })
@@ -36,5 +38,22 @@ describe('createClientConfig', () => {
       { code: 'en', required: false },
       { code: 'es', required: true },
     ])
+  })
+
+  it('should omit baseAccess from the client config', () => {
+    const clientConfig = createClientConfig({
+      config: {
+        baseAccess: {
+          collections: {
+            read: () => true,
+          },
+        },
+      } as SanitizedConfig,
+      i18n: {} as I18nClient,
+      importMap: {},
+      user: true,
+    })
+
+    expect(clientConfig).not.toHaveProperty('baseAccess')
   })
 })

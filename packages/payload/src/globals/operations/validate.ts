@@ -47,7 +47,7 @@ async function validateOperationWithScopedRequest<TSlug extends GlobalSlug>({
   req,
 }: Arguments<TSlug>): Promise<ValidationResult> {
   const accessResult = !overrideAccess
-    ? await executeAccess({ data: incomingData, req }, globalConfig.access.validate)
+    ? await executeAccess({ slug, data: incomingData, req }, globalConfig.access.validate)
     : true
   const storedGlobal = await resolveValidationGlobalSource({
     slug,

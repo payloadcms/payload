@@ -89,7 +89,10 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
     let accessResult!: AccessResult
 
     if (!overrideAccess) {
-      accessResult = await executeAccess({ disableErrors, req }, globalConfig.access.read)
+      accessResult = await executeAccess(
+        { slug: globalConfig.slug, disableErrors, req },
+        globalConfig.access.read,
+      )
     }
 
     if (accessResult === false) {

@@ -57,7 +57,10 @@ export const countOperation = async <TSlug extends CollectionSlug>(
     let accessResult: AccessResult
 
     if (!overrideAccess) {
-      accessResult = await executeAccess({ disableErrors, req: req! }, collectionConfig.access.read)
+      accessResult = await executeAccess(
+        { slug: collectionConfig.slug, disableErrors, req: req! },
+        collectionConfig.access.read,
+      )
 
       // If errors are disabled, and access returns false, return empty results
       if (accessResult === false) {

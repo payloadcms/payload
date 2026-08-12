@@ -533,21 +533,21 @@ export type CollectionAdminOptions = {
   useAsTitle?: string
 }
 
-type CollectionAccess = {
-  admin?: ({ req }: { req: PayloadRequest }) => boolean | Promise<boolean>
-  create?: Access
-  delete?: Access
-  read?: Access
-  readVersions?: Access
-  unlock?: Access
-  update?: Access
+export type CollectionAccess<TData = any> = {
+  admin?: ({ slug, req }: { req: PayloadRequest; slug: string }) => boolean | Promise<boolean>
+  create?: Access<TData>
+  delete?: Access<TData>
+  read?: Access<TData>
+  readVersions?: Access<TData>
+  unlock?: Access<TData>
+  update?: Access<TData>
   /**
    * Controls on-demand validation for this collection.
    * Falls back to `update` access when omitted.
    * The access function receives `req.operation === 'validate'`.
    * @see https://payloadcms.com/docs/validation/overview#access-control-and-hooks
    */
-  validate?: Access
+  validate?: Access<TData>
 }
 
 type CollectionHooks<TSlug extends CollectionSlug = any> = {

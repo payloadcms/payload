@@ -52,7 +52,10 @@ async function validateOperationWithScopedRequest<TSlug extends CollectionSlug>(
   const collectionConfig = collection.config
 
   const accessResult = !overrideAccess
-    ? await executeAccess({ id, data: incomingData, req }, collectionConfig.access.validate)
+    ? await executeAccess(
+        { id, slug: collectionConfig.slug, data: incomingData, req },
+        collectionConfig.access.validate,
+      )
     : true
   const hasWherePolicy = hasWhereAccessResult(accessResult)
 

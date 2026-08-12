@@ -241,6 +241,10 @@ const addDefaultDashboardWidgets = ({
       widgetSlug: 'collections',
       width: 'full',
     } satisfies WidgetInstance,
+    {
+      widgetSlug: 'activity',
+      width: 'small',
+    } satisfies WidgetInstance,
   ]
 }
 

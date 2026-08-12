@@ -15,6 +15,7 @@ const TEST_SUITES = [
   'admin-root',
   'array-update',
   'auth',
+  'base-access',
   'collections-graphql',
   'collections-rest',
   'config',
@@ -78,6 +79,9 @@ interface SuiteResult {
 
 const isContentAPIMode = process.env.PAYLOAD_DATABASE === 'content-api'
 const contentAPISuiteTimeout = 120000
+// Chatty suites can exceed Node's 1 MiB execSync default; truncated stdout has
+// no JSON report, so the suite is recorded as 0/<collected>.
+const vitestExecMaxBuffer = 64 * 1024 * 1024
 const vitestBinary = './node_modules/.bin/vitest'
 
 function getVitestEnv(options?: { unsetPayloadDatabase?: boolean }): NodeJS.ProcessEnv {
@@ -217,6 +221,7 @@ function getCollectedTestCount(suiteName: string): number {
         cwd: path.join(dirname, '..'),
         encoding: 'utf8',
         env: getVitestEnv({ unsetPayloadDatabase }),
+        maxBuffer: vitestExecMaxBuffer,
         stdio: ['pipe', 'pipe', 'pipe'],
         ...(isContentAPIMode ? { timeout: contentAPISuiteTimeout } : {}),
       })
@@ -336,7 +341,7 @@ function getExplicitSkippedTestCount(suiteName: string): number {
     }
 
     if (ts.isCallExpression(node) && ts.isPropertyAccessExpression(node.expression)) {
-      const { expression, name } = node.expression
+      const { name, expression } = node.expression
       if (
         ts.isIdentifier(expression) &&
         (expression.text === 'it' || expression.text === 'test') &&
@@ -357,10 +362,10 @@ function runTestSuite(suiteName: string): SuiteResult {
   const startTime = Date.now()
   const result: SuiteResult = {
     name: suiteName,
+    duration: 0,
+    failed: false,
     passed: 0,
     total: 0,
-    failed: false,
-    duration: 0,
   }
 
   try {
@@ -371,6 +376,7 @@ function runTestSuite(suiteName: string): SuiteResult {
       cwd: path.join(dirname, '..'),
       encoding: 'utf8',
       env: getVitestEnv(),
+      maxBuffer: vitestExecMaxBuffer,
       stdio: ['pipe', 'pipe', 'pipe'],
       ...(isContentAPIMode ? { timeout: contentAPISuiteTimeout } : {}),
     })

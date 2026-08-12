@@ -167,6 +167,7 @@ export async function getEntityPermissions<TEntityType extends 'collection' | 'g
           result: Promise.resolve(
             accessFunction({
               id,
+              slug: entity.slug,
               data,
               req:
                 _operation === 'readVersions' || _operation === 'unlock'

@@ -4,6 +4,7 @@ import type { SanitizedDrafts } from '../../versions/types.js'
 import type { GlobalConfig, SanitizedGlobalConfig } from './types.js'
 
 import { defaultAccess } from '../../auth/defaultAccess.js'
+import { withBaseAccess } from '../../auth/withBaseAccess.js'
 import { sanitizeFields } from '../../fields/config/sanitize.js'
 import { fieldAffectsData } from '../../fields/config/types.js'
 import { mergeBaseFields } from '../../fields/mergeBaseFields.js'
@@ -75,6 +76,10 @@ export const sanitizeGlobal = (
 
   if (!global.hooks.afterRead) {
     global.hooks.afterRead = []
+  }
+
+  if (!global.hooks.beforeOperation) {
+    global.hooks.beforeOperation = []
   }
 
   // Sanitize fields
@@ -185,6 +190,24 @@ export const sanitizeGlobal = (
         hidden: true,
       },
       label: ({ t }) => t('general:createdAt'),
+    })
+  }
+
+  for (const operation of ['read', 'update'] as const) {
+    global.access[operation] = withBaseAccess({
+      slug: global.slug,
+      access: global.access[operation],
+      entityType: 'global',
+      operation,
+    })
+  }
+
+  if (global.versions) {
+    global.access.readVersions = withBaseAccess({
+      slug: global.slug,
+      access: global.access.readVersions,
+      entityType: 'global',
+      operation: 'readVersions',
     })
   }
 
