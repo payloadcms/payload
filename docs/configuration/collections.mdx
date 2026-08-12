@@ -156,7 +156,7 @@ The following options are available:
 | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `group`                      | Text or localization object used to group Collection and Global links in the admin navigation. Set to `false` to hide the link from the navigation while keeping its routes accessible.                                      |
 | `hidden`                     | Set to true or a function, called with the current user, returning true to exclude this Collection from navigation and admin routing.                                                                                        |
-| `useAsTitle`                 | Specify a top-level field to use for a document title throughout the Admin Panel. If no field is defined, the ID of the document is used as the title.                                                                       |
+| `useAsTitle`                 | Specify a top-level field to use for a document title throughout the Admin Panel. If no field is defined, the ID of the document is used as the title. Computed virtual fields (`virtual: true`) cannot be used — only relationship-path virtual fields (e.g. `virtual: 'author.name'`) are supported.                                                                       |
 | `description`                | Text to display below the Collection label in the List View to give editors more information. Alternatively, you can use the `admin.components.Description` to render a React component. [More details](#custom-components). |
 | `defaultColumns`             | Array of field names that correspond to which columns to show by default in this Collection's List View.                                                                                                                     |
 | `disableCopyToLocale`        | Disables the "Copy to Locale" button while editing documents within this Collection. Only applicable when localization is enabled.                                                                                           |
@@ -173,10 +173,7 @@ The following options are available:
 | `baseFilter`                 | Defines a default base filter which will be applied to the List View (along with any other filters applied by the user) and internal links in Lexical Editor,                                                                |
 
 <Banner type="warning">
-  **Note:** If you set `useAsTitle` to a relationship or join field, it will use
-  only the ID of the related document(s) as the title. To display a specific
-  field (i.e. title) from the related document instead, create a virtual field
-  that extracts the desired data, and set `useAsTitle` to that virtual field.
+  **Using a relationship or join field as `useAsTitle`:** Payload will display only the ID of the related document. To show a specific field from the related document instead, define a relationship-path virtual field (e.g. `virtual: 'author.name'`) and point `useAsTitle` to that field. Note that this is the _only_ type of virtual field supported by `useAsTitle` — computed virtual fields (`virtual: true`) are not queryable and cannot be used.
 </Banner>
 
 ### Custom Components

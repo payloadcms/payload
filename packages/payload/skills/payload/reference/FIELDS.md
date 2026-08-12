@@ -420,6 +420,12 @@ const pathVirtualField: TextField = {
 }
 ```
 
+Do not set `admin.useAsTitle` to a computed field configured with
+`virtual: true`. Computed virtual fields are not queryable, and Payload rejects
+them as collection titles. Use a stored top-level field instead. The string-path
+form, such as `virtual: 'author.name'`, is queryable and can be used as
+`admin.useAsTitle` when the title must come from a related document.
+
 ## Conditional Fields
 
 ```ts

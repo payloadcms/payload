@@ -44,6 +44,38 @@ export const Posts: CollectionConfig = {
 > (`draft` / `published` / `changed`) that the admin UI and Draft Preview already
 > understand. Use it in `defaultColumns` and access control directly.
 
+## `useAsTitle`
+
+Set `admin.useAsTitle` to a stored top-level field. Do not use a computed field configured with `virtual: true`: it is not queryable, and
+Payload rejects it as `useAsTitle`.
+
+A relationship-path virtual field is supported when the title must come from a
+related document:
+
+```ts
+export const Articles: CollectionConfig = {
+  slug: 'articles',
+  admin: {
+    useAsTitle: 'authorName',
+  },
+  fields: [
+    {
+      name: 'author',
+      type: 'relationship',
+      relationTo: 'authors',
+    },
+    {
+      name: 'authorName',
+      type: 'text',
+      virtual: 'author.name',
+    },
+  ],
+}
+```
+
+This string-path form is queryable. It is different from a computed
+`virtual: true` field populated by an `afterRead` hook.
+
 ## Auth Collection
 
 ```ts

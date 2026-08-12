@@ -16,6 +16,7 @@ Payload is a Next.js native CMS with TypeScript-first architecture, providing ad
 | Local API user ops       | `user` + `overrideAccess: false`                                           | [QUERIES.md#access-control-in-local-api](reference/QUERIES.md#access-control-in-local-api)                                       |
 | Draft/publish workflow   | `versions: { drafts: true }`                                               | [COLLECTIONS.md#versioning--drafts](reference/COLLECTIONS.md#versioning--drafts)                                                 |
 | Computed fields          | `virtual: true` with **field-level** `hooks.afterRead` returning the value | [FIELDS.md#virtual-fields](reference/FIELDS.md#virtual-fields)                                                                   |
+| Document titles          | Stored top-level field in `admin.useAsTitle`                               | [COLLECTIONS.md#useastitle](reference/COLLECTIONS.md#useastitle)                                                                 |
 | Conditional fields       | `admin.condition`                                                          | [FIELDS.md#conditional-fields](reference/FIELDS.md#conditional-fields)                                                           |
 | Custom field validation  | `validate` function                                                        | [FIELDS.md#validation](reference/FIELDS.md#validation)                                                                           |
 | Filter relationship list | `filterOptions` on field                                                   | [FIELDS.md#relationship](reference/FIELDS.md#relationship)                                                                       |
@@ -98,6 +99,11 @@ Apply these defaults when modeling content unless there's a clear reason not to:
   author, publish date. Avoid it for long fields that need horizontal space to be
   usable (description, rich text content, long text). Those belong in the main
   document area.
+- **Use a stored top-level field for `admin.useAsTitle`.** Never set
+  `admin.useAsTitle` to a computed field configured with `virtual: true`; these
+  fields are not queryable and Payload rejects the configuration. A
+  relationship-path virtual such as `virtual: 'author.name'` is supported, but
+  use it only when the title must come from a related document.
 
 ### Basic Collection
 
@@ -443,6 +449,7 @@ import type { Post, User } from '@/payload-types'
 8. **MongoDB transactions** require replica set configuration
 9. **SQLite transactions** are disabled by default; enable with `transactionOptions: {}`
 10. **Point fields** are not supported in SQLite
+11. **Computed virtual titles** — fields configured with `virtual: true` cannot be used in `admin.useAsTitle`; use a stored top-level field
 
 ## Best Practices
 
@@ -451,6 +458,8 @@ import type { Post, User } from '@/payload-types'
 - Enable `versions: { drafts: true }` by default on content collections; rely on the
   auto-injected `_status` field rather than adding a custom `status` field
 - Use the native `slug` field type for slugs instead of hand-rolling a unique text field
+- Use a stored top-level field for `admin.useAsTitle`; never use a computed
+  `virtual: true` field as the title
 - Reserve `position: 'sidebar'` for short, at-a-glance fields (status, category,
   author, date); keep long fields (description, rich text) in the main area
 
