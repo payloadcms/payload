@@ -605,7 +605,6 @@ export const zhTranslations: DefaultTranslationsObject = {
     timezoneRequired: '需要选择一个时区。',
     trueOrFalse: '此项仅可选择"是"或"否"。',
     username: '请输入一个有效的用户名。可包含字母，数字，连字符，句点和下划线。',
-    validateAllLocales: '验证所有Locale',
     validationResults: '验证结果',
     validUploadID: '该字段不是有效的上传 ID。',
   },

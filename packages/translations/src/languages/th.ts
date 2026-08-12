@@ -621,7 +621,6 @@ export const thTranslations: DefaultTranslationsObject = {
     timezoneRequired: 'ต้องการเขตเวลา',
     trueOrFalse: 'เป็นได้แค่ "ใช่" หรือ "ไม่ใช่"',
     username: 'กรุณาใส่ชื่อผู้ใช้ที่ถูกต้อง สามารถมีตัวอักษร ตัวเลข ขีดกลาง จุด และขีดล่าง',
-    validateAllLocales: 'ตรวจสอบความถูกต้องของทุก Locale',
     validationResults: 'ผลการตรวจสอบความถูกต้อง',
     validUploadID: 'ไม่ใช่ ID ของการอัปโหลดที่ถูกต้อง',
   },

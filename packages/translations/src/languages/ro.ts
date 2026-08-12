@@ -643,7 +643,6 @@ export const roTranslations: DefaultTranslationsObject = {
     trueOrFalse: 'Acest câmp poate fi doar egal cu true sau false.',
     username:
       'Vă rugăm să introduceți un nume de utilizator valid. Poate conține litere, numere, cratime, puncte și sublinieri.',
-    validateAllLocales: 'Validați toate limbile',
     validationResults: 'Rezultatele validării',
     validUploadID: 'Acest câmp nu este un ID de încărcare valid.',
   },

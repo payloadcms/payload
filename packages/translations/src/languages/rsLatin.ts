@@ -633,7 +633,6 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     trueOrFalse: 'Ovo polje može biti samo tačno ili netačno',
     username:
       'Molimo unesite važeće korisničko ime. Može sadržavati slova, brojeve, crtice, tačke i donje crte.',
-    validateAllLocales: 'Potvrdite sve jezike',
     validationResults: 'Rezultati validacije',
     validUploadID: 'Ovo polje ne sadrži validan ID prenosa.',
   },

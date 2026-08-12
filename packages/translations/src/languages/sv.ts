@@ -635,7 +635,6 @@ export const svTranslations: DefaultTranslationsObject = {
     trueOrFalse: 'Detta fält kan bara vara lika med sant eller falskt.',
     username:
       'Var god ange ett giltigt användarnamn. Kan innehålla bokstäver, siffror, bindestreck, punkter och understreck.',
-    validateAllLocales: 'Validera alla språk',
     validationResults: 'Valideringsresultat',
     validUploadID: 'Det här fältet är inte ett giltigt uppladdnings-ID',
   },

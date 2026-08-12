@@ -634,7 +634,6 @@ export const viTranslations: DefaultTranslationsObject = {
     trueOrFalse: 'Trường này chỉ có thể chứa giá trị đúng hoặc sai.',
     username:
       'Vui lòng nhập một tên người dùng hợp lệ. Có thể chứa các chữ cái, số, dấu gạch ngang, dấu chấm và dấu gạch dưới.',
-    validateAllLocales: 'Xác thực tất cả các Locale',
     validationResults: 'Kết quả xác thực',
     validUploadID: "'Field này không chứa ID tải lên hợp lệ.'",
   },

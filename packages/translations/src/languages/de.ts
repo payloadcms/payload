@@ -647,7 +647,6 @@ export const deTranslations: DefaultTranslationsObject = {
     trueOrFalse: 'Dieses Feld kann nur wahr oder falsch sein.',
     username:
       'Bitte gib einen gültigen Benutzernamen ein. Dieser kann Buchstaben, Zahlen, Bindestriche, Punkte und Unterstriche enthalten.',
-    validateAllLocales: 'Alle Sprachen validieren',
     validationResults: 'Validierungsergebnisse',
     validUploadID: 'Dieses Feld enthält keine gültige Upload-ID.',
   },

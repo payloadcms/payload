@@ -613,7 +613,6 @@ export const heTranslations: DefaultTranslationsObject = {
     timezoneRequired: 'נדרשת אזור זמן.',
     trueOrFalse: 'שדה זה יכול להיות רק true או false.',
     username: 'אנא הזן שם משתמש חוקי. יכול להכיל אותיות, מספרים, מקפים, נקודות וקווים תחתונים.',
-    validateAllLocales: 'אמת את כל ה-Locales',
     validationResults: 'תוצאות האימות',
     validUploadID: 'שדה זה אינו מזהה העלאה תקני.',
   },

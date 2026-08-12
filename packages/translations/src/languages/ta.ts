@@ -637,7 +637,6 @@ export const taTranslations: DefaultTranslationsObject = {
     trueOrFalse: 'இந்த புலம் true அல்லது false ஆக மட்டுமே இருக்க வேண்டும்.',
     username:
       'சரியான பயனர் பெயரை உள்ளிடவும். எழுத்துக்கள், எண்கள், ஹைஃபன்கள், புள்ளிகள் மற்றும் அடிக்கோடுகள் இருக்கலாம்.',
-    validateAllLocales: 'எல்லா Locale-களையும் சரிபார்க்கவும்',
     validationResults: 'சரிபார்ப்பு முடிவுகள்',
     validUploadID: 'இந்த புலம் சரியான பதிவேற்ற ID அல்ல.',
   },

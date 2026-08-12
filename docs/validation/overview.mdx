@@ -235,10 +235,8 @@ Publishing uses its normal `create` or `update` access policy; the internal vali
 require separate `validate` access.
 
 The default Admin Publish controls run a preflight so editors can see locale-grouped errors before
-submission. The **Validate all locales** action uses current unsaved form data and is shown only for
-localized documents when the user has `validate` permission. If you replace the default Publish
-button, your custom UI owns any preflight feedback; the server-side publish validation remains
-authoritative.
+submission. If you replace the default Publish button, your custom UI owns any preflight feedback;
+the server-side publish validation remains authoritative.
 
 Scheduled publishes revalidate the latest stored target when the job runs. An invalid target
 cancels the publish job without retrying or changing publication state. Unpublishing does not
@@ -309,6 +307,6 @@ const beforeChange: CollectionBeforeChangeHook = async ({
 
 ## Current scope
 
-On-demand validation is available through the Local and REST APIs and as a localized document action
-in the Admin UI. It does not add a GraphQL validation operation, bulk Admin validation, or
-fallback-locale validation.
+On-demand validation is available through the Local and REST APIs, and powers the Admin UI's Publish
+preflight for localized documents. It does not add a standalone "validate all locales" Admin UI
+action, a GraphQL validation operation, bulk Admin validation, or fallback-locale validation.

@@ -629,7 +629,6 @@ export const koTranslations: DefaultTranslationsObject = {
     trueOrFalse: '이 입력란은 true 또는 false만 가능합니다.',
     username:
       '유효한 사용자 이름을 입력해 주세요. 글자, 숫자, 하이픈, 마침표, 및 밑줄을 사용할 수 있습니다.',
-    validateAllLocales: '모든 Locale을 검증하십시오.',
     validationResults: '검증 결과',
     validUploadID: '이 입력란은 유효한 업로드 ID가 아닙니다.',
   },

@@ -630,7 +630,6 @@ export const skTranslations: DefaultTranslationsObject = {
     trueOrFalse: 'Toto pole môže byť rovné iba true alebo false.',
     username:
       'Prosím, zadajte platné používateľské meno. Môže obsahovať písmená, čísla, pomlčky, bodky a podčiarknutia.',
-    validateAllLocales: 'Overte všetky jazyky',
     validationResults: 'Výsledky validácie',
     validUploadID: 'Toto pole nie je platné ID pre odoslanie.',
   },

@@ -638,7 +638,6 @@ export const ruTranslations: DefaultTranslationsObject = {
     trueOrFalse: 'Это поле может быть равно только true или false.',
     username:
       'Пожалуйста, введите действительное имя пользователя. Может содержать буквы, цифры, дефисы, точки и подчёркивания.',
-    validateAllLocales: 'Проверить все языковые настройки',
     validationResults: 'Результаты проверки',
     validUploadID: "'Это поле не является действительным ID загрузки.'",
   },

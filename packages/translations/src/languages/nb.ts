@@ -636,7 +636,6 @@ export const nbTranslations: DefaultTranslationsObject = {
     trueOrFalse: 'Dette feltet kan bare være likt true eller false.',
     username:
       'Vennligst oppgi et gyldig brukernavn. Kan inneholde bokstaver, nummer, bindestreker, punktum og understrek.',
-    validateAllLocales: 'Valider alle språk',
     validationResults: 'Valideringsresultater',
     validUploadID: 'Dette feltet er ikke en gyldig opplastings-ID.',
   },

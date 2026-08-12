@@ -633,7 +633,6 @@ export const isTranslations: DefaultTranslationsObject = {
     trueOrFalse: 'Þetta svæði getur aðeins verið jafnt og satt eða ósatt.',
     username:
       'Vinsamlegast settu inn gilt notandanafn. Getur innihaldið bókstafi, tölur, bandstrik, punkta og undirstrik.',
-    validateAllLocales: 'Staðfestið öll tungumál',
     validationResults: 'Staðfestingarniðurstöður',
     validUploadID: 'Þetta svæði er ekki gilt skráarupphleðslauðkenni.',
   },

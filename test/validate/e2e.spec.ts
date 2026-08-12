@@ -9,13 +9,7 @@ import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { RESTClient } from '../__helpers/shared/rest.js'
 import { initPage } from '../__setup/e2e/initPage.js'
-import {
-  publishGlobalSlug,
-  validationAdminCollectionSlug,
-  validationCustomButtonsCollectionSlug,
-  validationDeniedCollectionSlug,
-  validationNonLocalizedCollectionSlug,
-} from './config.js'
+import { validationAdminCollectionSlug, validationCustomButtonsCollectionSlug } from './config.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -50,51 +44,6 @@ test.describe('Admin document validation', () => {
       })
     }
     createdIDs.length = 0
-  })
-
-  test('should only show the action on localized documents with validation access', async () => {
-    await page.goto(validationURL.create)
-    await expect(page.locator('#action-validate-all-locales')).toBeVisible()
-
-    const nonLocalizedURL = new AdminUrlUtil(serverURL, validationNonLocalizedCollectionSlug)
-    await page.goto(nonLocalizedURL.create)
-    await expect(page.locator('#action-validate-all-locales')).toHaveCount(0)
-
-    const deniedURL = new AdminUrlUtil(serverURL, validationDeniedCollectionSlug)
-    await page.goto(deniedURL.create)
-    await expect(page.locator('#action-validate-all-locales')).toHaveCount(0)
-
-    await page.goto(validationURL.global(publishGlobalSlug))
-    await expect(page.locator('#action-validate-all-locales')).toBeVisible()
-  })
-
-  test('should show sibling-locale errors without discarding unsaved active-locale data', async () => {
-    const id = await createDraft({ spanishTitle: 'Título en español' })
-
-    await openDraft(id)
-    await page.locator('#field-title').fill('Unsaved English title')
-    await page.locator('#action-validate-all-locales').click()
-
-    const result = page.locator('.validation-results')
-    await expect(result.getByRole('alert')).toBeVisible()
-    await expect(result).toContainText('German')
-    await expect(result).toContainText('title')
-    await expect(page.locator('#field-title')).toHaveValue('Unsaved English title')
-  })
-
-  test('should announce a valid result accessibly', async () => {
-    const id = await createDraft({
-      frenchTitle: 'Titre français',
-      germanTitle: 'Deutscher Titel',
-      spanishTitle: 'Título en español',
-    })
-
-    await openDraft(id)
-    await page.locator('#action-validate-all-locales').click()
-
-    await expect(page.locator('.validation-results').getByRole('status')).toHaveText(
-      'All selected locales are valid.',
-    )
   })
 
   test('should block publish-all for an invalid optional locale but allow normal publish', async () => {

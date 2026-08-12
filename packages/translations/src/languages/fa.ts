@@ -624,7 +624,6 @@ export const faTranslations: DefaultTranslationsObject = {
     trueOrFalse: 'مقدار این فیلد فقط می‌تواند "true" یا "false" باشد.',
     username:
       'لطفاً یک نام کاربری معتبر وارد کنید. فقط حروف، اعداد، نقطه، خط تیره و زیرخط مجاز هستند.',
-    validateAllLocales: 'اعتبارسنجی تمامی Localeها',
     validationResults: 'نتایج اعتبارسنجی',
     validUploadID: 'شناسه آپلود معتبر نیست.',
   },

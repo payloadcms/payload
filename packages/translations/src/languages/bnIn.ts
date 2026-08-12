@@ -640,7 +640,6 @@ export const bnInTranslations: DefaultTranslationsObject = {
     trueOrFalse: 'এই ক্ষেত্রটি শুধুমাত্র সত্য বা মিথ্যা হতে পারে।',
     username:
       'একটি বৈধ ব্যবহারকারীর নাম লিখুন। এতে অক্ষর, সংখ্যা, হাইফেন, পিরিয়ড এবং আন্ডারস্কোর থাকতে পারে।',
-    validateAllLocales: 'সমস্ত Locale বৈধতা পরীক্ষা করুন',
     validationResults: 'বৈধতা ফলাফল',
     validUploadID: 'এই ক্ষেত্রটি একটি বৈধ আপলোড আইডি নয়।',
   },

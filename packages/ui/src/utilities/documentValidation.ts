@@ -49,18 +49,6 @@ export function getValidationEndpoint({
   })
 }
 
-export function shouldShowValidateAllLocales({
-  hasLocalization,
-  hasLocalizedFields,
-  hasValidatePermission,
-}: {
-  hasLocalization: boolean
-  hasLocalizedFields: boolean
-  hasValidatePermission: boolean
-}): boolean {
-  return hasLocalization && hasLocalizedFields && hasValidatePermission
-}
-
 export function getPublishValidationLocales({
   activeLocale,
   isPublishAll,

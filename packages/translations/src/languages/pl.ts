@@ -632,7 +632,6 @@ export const plTranslations: DefaultTranslationsObject = {
     trueOrFalse: "To pole może mieć wartość tylko 'true' lub 'false'.",
     username:
       'Proszę wprowadzić prawidłową nazwę użytkownika. Może zawierać litery, cyfry, myślniki, kropki i podkreślniki.',
-    validateAllLocales: 'Zatwierdź wszystkie locale',
     validationResults: 'Wyniki walidacji',
     validUploadID: 'To pole nie jest prawidłowym identyfikatorem przesyłania.',
   },

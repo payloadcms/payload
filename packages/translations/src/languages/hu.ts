@@ -642,7 +642,6 @@ export const huTranslations: DefaultTranslationsObject = {
     trueOrFalse: 'Ez a mező csak igaz vagy hamis lehet.',
     username:
       'Adjon meg egy érvényes felhasználónevet. Tartalmazhat betűket, számokat, kötőjeleket, pontokat és aláhúzásokat.',
-    validateAllLocales: 'Az összes Locale érvényesítése',
     validationResults: 'Érvényesítési eredmények',
     validUploadID: 'Ez a mező nem érvényes feltöltési azonosító.',
   },

@@ -639,7 +639,6 @@ export const azTranslations: DefaultTranslationsObject = {
     trueOrFalse: 'Bu sahə yalnız doğru və ya yanlış ola bilər.',
     username:
       'Zəhmət olmasa, etibarlı bir istifadəçi adı daxil edin. Hərflər, rəqəmlər, tire, nöqtə və alt xəttlər ola bilər.',
-    validateAllLocales: 'Bütün locale-ləri yoxlayın',
     validationResults: 'Doğrulama nəticələri',
     validUploadID: 'Bu sahə doğru yükləmə ID-si deyil.',
   },

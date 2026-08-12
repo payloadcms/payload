@@ -629,7 +629,6 @@ export const ukTranslations: DefaultTranslationsObject = {
     trueOrFalse: 'Це поле може мати значення тільки true або false.',
     username:
       "Будь ласка, введіть коректне ім'я користувача. Може містити літери, цифри, дефіси, крапки та підкреслення.",
-    validateAllLocales: 'Перевірити всі Locale',
     validationResults: 'Результати валідації',
     validUploadID: 'Це поле не є коректним ID завантаження.',
   },

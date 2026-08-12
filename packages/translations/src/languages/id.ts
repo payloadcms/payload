@@ -637,7 +637,6 @@ export const idTranslations: DefaultTranslationsObject = {
     trueOrFalse: 'Isian ini hanya bisa sama dengan benar atau salah.',
     username:
       'Harap masukkan nama pengguna yang valid. Dapat berisi huruf, angka, tanda hubung, titik, dan garis bawah.',
-    validateAllLocales: 'Validasi semua Locale',
     validationResults: 'Hasil validasi',
     validUploadID: 'Isian ini bukan ID unggahan yang valid.',
   },

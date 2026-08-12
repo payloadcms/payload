@@ -638,7 +638,6 @@ export const ltTranslations: DefaultTranslationsObject = {
     trueOrFalse: 'Šis laukas gali būti lygus tik „true“ ar „false“.',
     username:
       'Įveskite galiojantį vartotojo vardą. Galima naudoti raides, skaičius, brūkšnelius, taškus ir pabraukimus.',
-    validateAllLocales: 'Patvirtinti visas kalbas',
     validationResults: 'Patikros rezultatai',
     validUploadID: 'Šis laukas nėra tinkamas įkėlimo ID.',
   },

@@ -631,7 +631,6 @@ export const slTranslations: DefaultTranslationsObject = {
     trueOrFalse: 'To polje je lahko samo enako true ali false.',
     username:
       'Vnesite veljavno uporabniško ime. Lahko vsebuje črke, številke, vezaje, pike in podčrtaje.',
-    validateAllLocales: 'Potrdite vse jezike',
     validationResults: 'Rezultati validacije',
     validUploadID: 'To polje ni veljaven ID nalaganja.',
   },

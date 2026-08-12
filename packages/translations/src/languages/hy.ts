@@ -640,7 +640,6 @@ export const hyTranslations: DefaultTranslationsObject = {
     trueOrFalse: 'Այս դաշտի արժեքը կարող է միայն «ճիշտ» կամ «սխալ»։',
     username:
       'Խնդրում ենք մուտքագրել վավեր օգտանուն։ Կարող է պարունակել տառեր, թվեր, գծիկներ, կետեր և ընդգծում։',
-    validateAllLocales: 'Հաստատել բոլոր locale-ները',
     validationResults: 'Վավերացման արդյունքներ',
     validUploadID: 'Այս դաշտը վավեր վերբեռնման ID չի պարունակում։',
   },

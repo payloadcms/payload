@@ -620,7 +620,6 @@ export const arTranslations: DefaultTranslationsObject = {
     trueOrFalse: 'يمكن أن يكون هذا الحقل مساويًا فقط للقيمتين صحيح أو خطأ.',
     username:
       'يرجى إدخال اسم مستخدم صالح. يمكن أن يحتوي على أحرف، أرقام، شرطات، فواصل وشرطات سفلية.',
-    validateAllLocales: 'تحقق من جميع اللغات',
     validationResults: 'نتائج التحقق',
     validUploadID: 'هذا الحقل ليس معرّف تحميل صالح.',
   },

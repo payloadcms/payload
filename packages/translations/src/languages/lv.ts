@@ -631,7 +631,6 @@ export const lvTranslations: DefaultTranslationsObject = {
     trueOrFalse: 'Šis lauks var būt tikai "true" vai "false".',
     username:
       'Lūdzu, ievadiet derīgu lietotājvārdu. Drīkst saturēt burtus, ciparus, defises, punktus un pasvītras.',
-    validateAllLocales: 'Validēt visus lokālus',
     validationResults: 'Validācijas rezultāti',
     validUploadID: 'Šis lauks nav derīgs augšupielādes ID.',
   },

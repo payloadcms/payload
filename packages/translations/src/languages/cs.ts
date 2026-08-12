@@ -629,7 +629,6 @@ export const csTranslations: DefaultTranslationsObject = {
     trueOrFalse: 'Toto pole může být rovno pouze true nebo false.',
     username:
       'Prosím, zadejte platné uživatelské jméno. Může obsahovat písmena, čísla, pomlčky, tečky a podtržítka.',
-    validateAllLocales: 'Ověřit všechny jazyky',
     validationResults: 'Výsledky validace',
     validUploadID: 'Toto pole není platné ID pro odeslání.',
   },

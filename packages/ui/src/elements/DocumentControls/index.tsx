@@ -27,9 +27,7 @@ import { DocumentValidationProvider } from '../../providers/DocumentValidation/i
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useLivePreviewContext } from '../../providers/LivePreview/context.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { shouldShowValidateAllLocales } from '../../utilities/documentValidation.js'
 import { formatDate, formatTimeToNow } from '../../utilities/formatDocTitle/formatDateTitle.js'
-import { traverseForLocalizedFields } from '../../utilities/traverseForLocalizedFields.js'
 import { Autosave } from '../Autosave/index.js'
 import { Button } from '../Button/index.js'
 import { CopyLocaleData } from '../CopyLocaleData/index.js'
@@ -48,7 +46,6 @@ import { SaveDraftButton } from '../SaveDraftButton/index.js'
 import { SchedulePublishButton } from '../SchedulePublishButton/index.js'
 import { Status } from '../Status/index.js'
 import { UnpublishButton } from '../UnpublishButton/index.js'
-import { ValidateDocumentButton } from '../ValidateDocumentButton/index.js'
 import './index.css'
 
 const baseClass = 'doc-controls'
@@ -144,7 +141,6 @@ const DocumentControlsContent: React.FC<DocumentControlsProps> = (props) => {
   const collectionConfig = getEntityConfig({ collectionSlug: slug })
 
   const globalConfig = getEntityConfig({ globalSlug: slug })
-  const entityConfig = collectionConfig || globalConfig
 
   const { isLivePreviewEnabled } = useLivePreviewContext()
 
@@ -233,13 +229,6 @@ const DocumentControlsContent: React.FC<DocumentControlsProps> = (props) => {
   const showCopyToLocale = localization && !collectionConfig?.admin?.disableCopyToLocale
 
   const showLockedMetaIcon = user && readOnlyForIncomingUser
-  const showValidateAllLocales = shouldShowValidateAllLocales({
-    hasLocalization: Boolean(localization),
-    hasLocalizedFields: traverseForLocalizedFields(entityConfig?.fields ?? [], {
-      blocksMap: config.blocksMap,
-    }),
-    hasValidatePermission: Boolean(permissions?.validate),
-  })
 
   return (
     <div
@@ -327,9 +316,6 @@ const DocumentControlsContent: React.FC<DocumentControlsProps> = (props) => {
               <SchedulePublishButton disabled={readOnlyForIncomingUser} />
             )}
           </div>
-          {showValidateAllLocales && !disableActions && !isTrashed && !readOnlyForIncomingUser && (
-            <ValidateDocumentButton />
-          )}
           {hasSavePermission && !isTrashed && !readOnlyForIncomingUser && (
             <Fragment>
               {collectionHasDraftsEnabled || globalHasDraftsEnabled ? (

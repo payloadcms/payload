@@ -28,13 +28,11 @@ import { useLocale } from '../Locale/index.js'
 
 type DocumentValidationContext = {
   isValidating: boolean
-  validateAllLocales: () => Promise<boolean>
   validateBeforePublish: (args: { isPublishAll: boolean }) => Promise<boolean>
 }
 
 const Context = createContext<DocumentValidationContext>({
   isValidating: false,
-  validateAllLocales: () => Promise.resolve(true),
   validateBeforePublish: () => Promise.resolve(true),
 })
 
@@ -59,7 +57,6 @@ export const DocumentValidationProvider: React.FC<{ children: React.ReactNode }>
   const [isValidating, setIsValidating] = useState(false)
   const [result, setResult] = useState<null | ValidationResult>(null)
   const activeRequestRef = useRef<AbortController>(null)
-  const validResultTimeoutRef = useRef<ReturnType<typeof setTimeout>>(null)
   const drawerID = useId()
   const drawerSlug = useMemo(
     () => `document-validation-results-${drawerID.replaceAll(':', '')}`,
@@ -77,11 +74,6 @@ export const DocumentValidationProvider: React.FC<{ children: React.ReactNode }>
     activeRequestRef.current?.abort()
     activeRequestRef.current = null
 
-    if (validResultTimeoutRef.current) {
-      clearTimeout(validResultTimeoutRef.current)
-      validResultTimeoutRef.current = null
-    }
-
     setIsValidating(false)
     setResult(null)
     closeModal(drawerSlug)
@@ -94,10 +86,6 @@ export const DocumentValidationProvider: React.FC<{ children: React.ReactNode }>
   useEffect(() => {
     return () => {
       activeRequestRef.current?.abort()
-
-      if (validResultTimeoutRef.current) {
-        clearTimeout(validResultTimeoutRef.current)
-      }
     }
   }, [])
 
@@ -105,22 +93,15 @@ export const DocumentValidationProvider: React.FC<{ children: React.ReactNode }>
     async ({
       isPublishing,
       locales,
-      showValidResult,
     }: {
       isPublishing: boolean
       locales: string[]
-      showValidResult: boolean
     }): Promise<boolean> => {
       if (!localization || !hasLocalizedFields) {
         return true
       }
 
       activeRequestRef.current?.abort()
-
-      if (validResultTimeoutRef.current) {
-        clearTimeout(validResultTimeoutRef.current)
-        validResultTimeoutRef.current = null
-      }
 
       const abortController = new AbortController()
       activeRequestRef.current = abortController
@@ -150,16 +131,9 @@ export const DocumentValidationProvider: React.FC<{ children: React.ReactNode }>
           return false
         }
 
-        if (!validationResult.valid || showValidResult) {
+        if (!validationResult.valid) {
           setResult(validationResult)
           openModal(drawerSlug)
-        }
-
-        if (validationResult.valid && showValidResult) {
-          validResultTimeoutRef.current = setTimeout(() => {
-            setResult(null)
-            closeModal(drawerSlug)
-          }, 4000)
         }
 
         return validationResult.valid
@@ -201,22 +175,9 @@ export const DocumentValidationProvider: React.FC<{ children: React.ReactNode }>
       id,
       localization,
       openModal,
-      closeModal,
       drawerSlug,
     ],
   )
-
-  const validateAllLocales = useCallback(() => {
-    if (!localization) {
-      return Promise.resolve(true)
-    }
-
-    return runValidation({
-      isPublishing: false,
-      locales: localization.locales.map(({ code }) => code),
-      showValidResult: true,
-    })
-  }, [localization, runValidation])
 
   const validateBeforePublish = useCallback(
     ({ isPublishAll }: { isPublishAll: boolean }) => {
@@ -231,7 +192,6 @@ export const DocumentValidationProvider: React.FC<{ children: React.ReactNode }>
           isPublishAll,
           locales: localization.locales,
         }),
-        showValidResult: false,
       })
     },
     [activeLocale, localization, runValidation],
@@ -240,10 +200,9 @@ export const DocumentValidationProvider: React.FC<{ children: React.ReactNode }>
   const value = useMemo(
     () => ({
       isValidating,
-      validateAllLocales,
       validateBeforePublish,
     }),
-    [isValidating, validateAllLocales, validateBeforePublish],
+    [isValidating, validateBeforePublish],
   )
 
   return (

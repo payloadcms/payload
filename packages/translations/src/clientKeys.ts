@@ -536,7 +536,6 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'validation:trueOrFalse',
   'validation:timezoneRequired',
   'validation:username',
-  'validation:validateAllLocales',
   'validation:validationResults',
   'validation:validUploadID',
 

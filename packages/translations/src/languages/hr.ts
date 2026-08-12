@@ -632,7 +632,6 @@ export const hrTranslations: DefaultTranslationsObject = {
     trueOrFalse: 'Ovo polje može biti samo točno ili netočno',
     username:
       'Unesite važeće korisničko ime. Može sadržavati slova, brojeve, crtice, točke i donje crte.',
-    validateAllLocales: 'Potvrdite sve locale',
     validationResults: 'Rezultati validacije',
     validUploadID: 'Ovo polje nije valjani ID prijenosa.',
   },

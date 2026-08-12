@@ -641,7 +641,6 @@ export const itTranslations: DefaultTranslationsObject = {
     trueOrFalse: "Questo campo può essere solo uguale a 'true' o 'false'.",
     username:
       'Inserisci un nome utente valido. Può contenere lettere, numeri, trattini, punti e underscore.',
-    validateAllLocales: 'Convalida tutte le lingue',
     validationResults: 'Risultati della convalida',
     validUploadID: "'Questo campo non è un ID di Upload valido.'",
   },

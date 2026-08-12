@@ -639,7 +639,6 @@ export const caTranslations: DefaultTranslationsObject = {
     trueOrFalse: 'Aquest camp només pot ser igual a true o false.',
     username:
       "Si us plau, introdueix un nom d'usuari vàlid. Pot contenir lletres, números, guions, punts i guions baixos.",
-    validateAllLocales: 'Valideu tots els idiomes',
     validationResults: 'Resultats de la validació',
     validUploadID: 'Aquest camp no és un ID de càrrega vàlid.',
   },

@@ -636,7 +636,6 @@ export const ptTranslations: DefaultTranslationsObject = {
     trueOrFalse: 'Esse campo pode ser apenas verdadeiro (true) ou falso (false)',
     username:
       'Por favor, insira um nome de usuário válido. Pode conter letras, números, hifens, pontos e sublinhados.',
-    validateAllLocales: 'Validar todos os idiomas',
     validationResults: 'Resultados da validação',
     validUploadID: "'Esse campo não é um ID de upload válido.'",
   },

@@ -632,7 +632,6 @@ export const enTranslations = {
     trueOrFalse: 'This field can only be equal to true or false.',
     username:
       'Please enter a valid username. Can contain letters, numbers, hyphens, periods and underscores.',
-    validateAllLocales: 'Validate all locales',
     validationResults: 'Validation results',
     validUploadID: 'This field is not a valid upload ID.',
   },

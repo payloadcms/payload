@@ -640,7 +640,6 @@ export const esTranslations: DefaultTranslationsObject = {
     trueOrFalse: 'Este campo solo puede ser verdadero o falso.',
     username:
       'Por favor, introduce un nombre de usuario válido. Puede contener letras, números, guiones, puntos y guiones bajos.',
-    validateAllLocales: 'Validar todos los idiomas',
     validationResults: 'Resultados de validación',
     validUploadID: 'Este campo no es un ID de subida válido.',
   },

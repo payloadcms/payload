@@ -633,7 +633,6 @@ export const daTranslations: DefaultTranslationsObject = {
     trueOrFalse: 'Denne værdi kan kun være lig med sandt eller falsk.',
     username:
       'Indtast et brugernavn. Kan indeholde bogstaver, tal, bindestreger, punktum og underscores.',
-    validateAllLocales: 'Validér alle locales',
     validationResults: 'Valideringsresultater',
     validUploadID: 'Dette felt er ikke en gyldig upload-ID.',
   },

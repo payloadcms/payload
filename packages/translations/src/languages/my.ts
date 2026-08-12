@@ -644,7 +644,6 @@ export const myTranslations: DefaultTranslationsObject = {
     trueOrFalse: 'ဤအကွက်သည် တစ်ခုခုဖြစ်ရပါမည်။',
     username:
       'မှန်ကန်သော အသုံးပြုသူအမည် ထည့်သွင်းပါ။ အက္ခရာ၊ နံပါတ်၊ ဟိုင်ဖန်၊ အစက် နှင့် အောက်မျဉ်းတို့ ပါဝင်နိုင်ပါသည်။',
-    validateAllLocales: 'လူအပေါင်းတို့၏ဘာသာစကားများကိုအတည်ပြုပါ',
     validationResults: 'အတည်ပြုမှုရလဒ်များ',
     validUploadID: "'ဤအကွက်သည် မှန်ကန်သော အပ်လုဒ် ID မဟုတ်ပါ။'",
   },

@@ -641,7 +641,6 @@ export const nlTranslations: DefaultTranslationsObject = {
     trueOrFalse: 'Dit veld kan alleen waar of onwaar zijn.',
     username:
       'Voer een geldige gebruikersnaam in. Kan letters, cijfers, koppeltekens, punten en underscores bevatten.',
-    validateAllLocales: 'Valideer alle talen',
     validationResults: 'Validatieresultaten',
     validUploadID: 'Dit veld is geen geldige upload-ID.',
   },

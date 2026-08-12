@@ -603,7 +603,6 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     timezoneRequired: '請選取一個時區。',
     trueOrFalse: '此欄位只能為 true 或 false。',
     username: '請輸入有效的使用者名稱。可包含英文字母、數字、連字號、句點與底線。',
-    validateAllLocales: '驗證所有語系',
     validationResults: '驗證結果',
     validUploadID: '此欄位不是有效的上傳 ID。',
   },

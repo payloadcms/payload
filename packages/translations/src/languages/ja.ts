@@ -632,7 +632,6 @@ export const jaTranslations: DefaultTranslationsObject = {
     trueOrFalse: '"true" または "false" の値にする必要があります。',
     username:
       '有効なユーザー名を入力してください。文字、数字、ハイフン、ピリオド、アンダースコアを使用できます。',
-    validateAllLocales: 'すべてのLocaleを検証してください',
     validationResults: '検証結果',
     validUploadID: '有効なアップロードIDではありません。',
   },

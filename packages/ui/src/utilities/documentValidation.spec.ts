@@ -7,7 +7,6 @@ import {
   getValidationEndpoint,
   projectValidationDataForSiblingLocales,
   requestDocumentValidation,
-  shouldShowValidateAllLocales,
   validateDocumentLocales,
 } from './documentValidation.js'
 import { traverseForLocalizedFields } from './traverseForLocalizedFields.js'
@@ -43,30 +42,6 @@ describe('document validation', () => {
         globalSlug: 'settings',
       }),
     ).toBe('/api/globals/settings/validate')
-  })
-
-  it('should only show the action for localized entities with validation access', () => {
-    expect(
-      shouldShowValidateAllLocales({
-        hasLocalizedFields: true,
-        hasLocalization: true,
-        hasValidatePermission: true,
-      }),
-    ).toBe(true)
-    expect(
-      shouldShowValidateAllLocales({
-        hasLocalizedFields: false,
-        hasLocalization: true,
-        hasValidatePermission: true,
-      }),
-    ).toBe(false)
-    expect(
-      shouldShowValidateAllLocales({
-        hasLocalizedFields: true,
-        hasLocalization: true,
-        hasValidatePermission: false,
-      }),
-    ).toBe(false)
   })
 
   it('should detect localized fields inside referenced blocks', () => {

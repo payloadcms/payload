@@ -635,7 +635,6 @@ export const bgTranslations: DefaultTranslationsObject = {
     trueOrFalse: 'Това поле може да бъде само "true" или "false".',
     username:
       'Моля, въведете валидно потребителско име. Може да съдържа букви, цифри, тирета, точки и долни черти.',
-    validateAllLocales: 'Валидирайте всички езици',
     validationResults: 'Резултати от валидация',
     validUploadID: 'Това поле не е валиден идентификатор на качването.',
   },

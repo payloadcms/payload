@@ -640,7 +640,6 @@ export const trTranslations: DefaultTranslationsObject = {
     trueOrFalse: 'Bu alan yalnızca doğru ve yanlış olabilir.',
     username:
       'Lütfen geçerli bir kullanıcı adı girin. Harfler, numaralar, kısa çizgiler, noktalar ve alt çizgiler içerebilir.',
-    validateAllLocales: "Tüm Locale'leri doğrulayın",
     validationResults: 'Doğrulama sonuçları',
     validUploadID: "'Bu alan geçerli bir karşıya yükleme ID'sine sahip değil.'",
   },

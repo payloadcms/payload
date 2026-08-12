@@ -628,7 +628,6 @@ export const etTranslations: DefaultTranslationsObject = {
     trueOrFalse: 'See väli saab olla ainult tõene või väär.',
     username:
       'Palun sisesta kehtiv kasutajanimi. Võib sisaldada tähti, numbreid, sidekriipse, punkte ja alakriipse.',
-    validateAllLocales: 'Kinnita kõik keeled',
     validationResults: 'Valideerimistulemused',
     validUploadID: 'See väli ei ole kehtiv üleslaadimise ID.',
   },

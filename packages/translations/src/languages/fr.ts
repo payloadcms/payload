@@ -648,7 +648,6 @@ export const frTranslations: DefaultTranslationsObject = {
     trueOrFalse: 'Ce champ ne peut être égal qu’à vrai ou faux.',
     username:
       "Veuillez entrer un nom d'utilisateur valide. Il peut contenir des lettres, des chiffres, des tirets, des points et des tirets bas.",
-    validateAllLocales: 'Valider toutes les langues',
     validationResults: 'Résultats de la validation',
     validUploadID: 'Ce champ n’est pas un valide identifiant de fichier.',
   },
