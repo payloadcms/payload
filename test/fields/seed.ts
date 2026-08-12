@@ -261,9 +261,9 @@ export const seed = async (_payload: Payload) => {
     slug: selectOptionsGlobalSlug,
     data: {
       options: [
-        { label: 'Value One', value: 'one' },
-        { label: 'Value Two', value: 'two' },
-        { label: 'Value Three', value: 'three' },
+        { label: 'Global Value One', value: 'one' },
+        { label: 'Global Value Two', value: 'two' },
+        { label: 'Global Value Three', value: 'three' },
       ],
     },
     depth: 0,

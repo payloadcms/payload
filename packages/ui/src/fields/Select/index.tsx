@@ -76,6 +76,28 @@ const SelectFieldComponent: SelectFieldClientComponent = (props) => {
     validate: memoizedValidate,
   })
 
+  const optionsToRender = useMemo(() => {
+    if (!selectFilterOptions) {
+      return options
+    }
+
+    const labelsFromFilterOptions = new Map<string, OptionObject['label']>()
+
+    for (const filterOption of selectFilterOptions) {
+      if (typeof filterOption === 'object') {
+        labelsFromFilterOptions.set(filterOption.value, filterOption.label)
+      }
+    }
+
+    return options.map((option) => {
+      const labelFromFilterOptions = labelsFromFilterOptions.get(option.value)
+
+      return labelFromFilterOptions === undefined
+        ? option
+        : { ...option, label: labelFromFilterOptions }
+    })
+  }, [options, selectFilterOptions])
+
   const onChange: ReactSelectAdapterProps['onChange'] = useCallback(
     (selectedOption: OptionObject | OptionObject[]) => {
       if (!readOnly || disabled) {
@@ -126,7 +148,7 @@ const SelectFieldComponent: SelectFieldClientComponent = (props) => {
       localized={localized}
       name={name}
       onChange={onChange}
-      options={options}
+      options={optionsToRender}
       path={path}
       placeholder={placeholder}
       readOnly={readOnly || disabled}
