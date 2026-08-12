@@ -121,6 +121,7 @@ export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
       ? await executeAccess(
           {
             id: inheritsReadAccess ? prefetchedVersion?.parent : id,
+            slug: collectionConfig.slug,
             disableErrors,
             req,
           },

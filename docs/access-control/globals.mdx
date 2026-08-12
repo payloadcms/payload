@@ -83,9 +83,10 @@ const Header: GlobalConfig = {
 
 The following arguments are provided to the `read` function:
 
-| Option    | Description                                                                                                                   |
-| --------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| **`req`** | The [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object containing the currently authenticated `user`. |
+| Option     | Description                                                                                                                   |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| **`req`**  | The [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object containing the currently authenticated `user`. |
+| **`slug`** | The slug of the Global being accessed.                                                                                        |
 
 ### Update
 
@@ -114,6 +115,7 @@ The following arguments are provided to the `update` function:
 | ---------- | ----------------------------------------------------------------------------------------------------------------------------- |
 | **`req`**  | The [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object containing the currently authenticated `user`. |
 | **`data`** | The data passed to update the global with.                                                                                    |
+| **`slug`** | The slug of the Global being accessed.                                                                                        |
 
 ### Read Versions
 
@@ -146,6 +148,7 @@ export const GlobalWithVersionsAccess: GlobalConfig = {
 
 The following arguments are provided to the `readVersions` function:
 
-| Option    | Description                                                                                                                   |
-| --------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| **`req`** | The [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object containing the currently authenticated `user`. |
+| Option     | Description                                                                                                                   |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| **`req`**  | The [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object containing the currently authenticated `user`. |
+| **`slug`** | The slug of the Global being accessed.                                                                                        |

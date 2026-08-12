@@ -11,6 +11,7 @@ import type {
 
 import { authCollectionEndpoints } from '../../auth/endpoints/index.js'
 import { getBaseAuthFields } from '../../auth/getAuthFields.js'
+import { withBaseAccess, withBaseAdminAccess } from '../../auth/withBaseAccess.js'
 import { TimestampsRequired } from '../../errors/TimestampsRequired.js'
 import { sanitizeFields } from '../../fields/config/sanitize.js'
 import { fieldAffectsData } from '../../fields/config/types.js'
@@ -24,6 +25,10 @@ import { formatLabels } from '../../utilities/formatLabels.js'
 import { traverseForLocalizedFields } from '../../utilities/traverseForLocalizedFields.js'
 import { baseVersionFields } from '../../versions/baseFields.js'
 import { versionDefaults } from '../../versions/defaults.js'
+import {
+  isInheritedReadVersionsAccess,
+  markInheritedReadVersionsAccess,
+} from '../../versions/isInheritedReadVersionsAccess.js'
 import { defaultCollectionEndpoints } from '../endpoints/index.js'
 import { addDefaultsToAuthConfig, addDefaultsToCollectionConfig } from './defaults.js'
 import { sanitizeCompoundIndexes } from './sanitizeCompoundIndexes.js'
@@ -335,6 +340,34 @@ export const sanitizeCollection = (
 
   if (collection?.admin?.pagination?.limits?.length) {
     sanitized.admin!.pagination!.limits = collection.admin.pagination.limits
+  }
+
+  for (const operation of ['create', 'delete', 'read', 'unlock', 'update'] as const) {
+    sanitized.access![operation] = withBaseAccess({
+      slug: sanitized.slug,
+      access: sanitized.access?.[operation],
+      entityType: 'collection',
+      operation,
+    })
+  }
+
+  sanitized.access!.admin = withBaseAdminAccess({
+    slug: sanitized.slug,
+    access: sanitized.access?.admin,
+  })
+
+  if (sanitized.versions) {
+    const readVersions = sanitized.access!.readVersions
+    const readVersionsWithBaseAccess = withBaseAccess({
+      slug: sanitized.slug,
+      access: readVersions,
+      entityType: 'collection',
+      operation: 'readVersions',
+    })
+
+    sanitized.access!.readVersions = isInheritedReadVersionsAccess(readVersions)
+      ? markInheritedReadVersionsAccess(readVersionsWithBaseAccess)
+      : readVersionsWithBaseAccess
   }
 
   validateUseAsTitle(sanitized)

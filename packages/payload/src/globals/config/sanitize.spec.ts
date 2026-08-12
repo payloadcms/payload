@@ -1,7 +1,7 @@
 import type { GlobalConfig } from './types.js'
 import type { PayloadRequest } from '../../types/index.js'
 
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 
 import { sanitizeGlobal } from './sanitize.js'
 
@@ -10,7 +10,195 @@ const minimalConfig = {
   globals: [],
 } as any
 
-const req = {} as PayloadRequest
+const req = {
+  payload: {
+    config: minimalConfig,
+  },
+} as PayloadRequest
+
+describe('baseAccess', () => {
+  it('should combine base and global access constraints', async () => {
+    const baseConstraint = {
+      tenant: {
+        equals: 'tenant-1',
+      },
+    }
+    const globalConstraint = {
+      locale: {
+        equals: 'en',
+      },
+    }
+    const baseAccess = vi.fn(() => baseConstraint)
+    const globalAccess = vi.fn(() => globalConstraint)
+    const config = {
+      ...minimalConfig,
+      baseAccess: {
+        globals: {
+          update: baseAccess,
+        },
+      },
+    }
+    const global: GlobalConfig = {
+      slug: 'settings',
+      access: {
+        update: globalAccess,
+      },
+      fields: [],
+    }
+    const req = {
+      payload: {
+        config,
+      },
+    } as any
+
+    const result = sanitizeGlobal(config, global)
+    const accessResult = await result.access.update({ req, slug: 'settings' })
+
+    expect(accessResult).toEqual({
+      and: [baseConstraint, globalConstraint],
+    })
+    expect(baseAccess).toHaveBeenCalledWith({
+      data: undefined,
+      id: undefined,
+      isReadingStaticFile: undefined,
+      req,
+      slug: 'settings',
+    })
+    expect(globalAccess).toHaveBeenCalledWith({
+      data: undefined,
+      id: undefined,
+      isReadingStaticFile: undefined,
+      req,
+      slug: 'settings',
+    })
+  })
+
+  it('should not apply collection base access to globals', async () => {
+    const collectionBaseAccess = vi.fn(() => false)
+    const globalAccess = vi.fn(() => true)
+    const config = {
+      ...minimalConfig,
+      baseAccess: {
+        collections: {
+          update: collectionBaseAccess,
+        },
+      },
+    }
+    const global: GlobalConfig = {
+      slug: 'settings',
+      access: {
+        update: globalAccess,
+      },
+      fields: [],
+    }
+    const req = {
+      payload: {
+        config,
+      },
+    } as any
+
+    const result = sanitizeGlobal(config, global)
+
+    expect(await result.access.update({ req, slug: 'settings' })).toBe(true)
+    expect(globalAccess).toHaveBeenCalledOnce()
+    expect(collectionBaseAccess).not.toHaveBeenCalled()
+  })
+
+  it('should not grant access when resource access uses the authenticated fallback', async () => {
+    const config = {
+      ...minimalConfig,
+      admin: {
+        user: 'users',
+      },
+      baseAccess: {
+        globals: {
+          readVersions: () => true,
+        },
+      },
+    }
+    const global: GlobalConfig = {
+      slug: 'settings',
+      fields: [],
+    }
+
+    const result = sanitizeGlobal(config, global)
+
+    expect(
+      await result.access.readVersions?.({
+        req: {
+          payload: {
+            config,
+          },
+        } as any,
+        slug: 'settings',
+      }),
+    ).toBe(false)
+    expect(
+      await result.access.readVersions?.({
+        req: {
+          payload: {
+            config,
+          },
+          user: {
+            collection: 'users',
+            id: 'user-1',
+          },
+        } as any,
+        slug: 'settings',
+      }),
+    ).toBe(true)
+  })
+
+  it('should resolve base access from the current request for reused resources', async () => {
+    const global: GlobalConfig = {
+      slug: 'settings',
+      access: {
+        read: () => true,
+      },
+      fields: [],
+    }
+    const deniedConfig = {
+      ...minimalConfig,
+      baseAccess: {
+        globals: {
+          read: () => false,
+        },
+      },
+    }
+    const allowedConfig = {
+      ...minimalConfig,
+      baseAccess: {
+        globals: {
+          read: () => true,
+        },
+      },
+    }
+
+    const firstResult = sanitizeGlobal(deniedConfig, global)
+    expect(
+      await firstResult.access.read({
+        req: {
+          payload: {
+            config: deniedConfig,
+          },
+        } as any,
+        slug: 'settings',
+      }),
+    ).toBe(false)
+
+    const reusedResult = sanitizeGlobal(allowedConfig, global)
+    expect(
+      await reusedResult.access.read({
+        req: {
+          payload: {
+            config: allowedConfig,
+          },
+        } as any,
+        slug: 'settings',
+      }),
+    ).toBe(true)
+  })
+})
 
 describe('sanitizeGlobal', () => {
   it('should populate sanitized global defaults for a minimal config', () => {
@@ -25,7 +213,6 @@ describe('sanitizeGlobal', () => {
       _sanitized: true,
       access: {
         read: expect.any(Function),
-        readVersions: expect.any(Function),
         update: expect.any(Function),
       },
       admin: {},
@@ -44,6 +231,8 @@ describe('sanitizeGlobal', () => {
       label: 'Header',
       slug: 'header',
     })
+    // Versions default to enabled, so `readVersions` is wrapped to apply base access.
+    expect(result.access.readVersions).toEqual(expect.any(Function))
     expect(result.admin.components).toBeUndefined()
     expect(result.graphQL).toBeUndefined()
     expect(result.lockDocuments).toBeUndefined()
@@ -67,6 +256,7 @@ describe('sanitizeGlobal', () => {
     expect(result.access.read).toEqual(expect.any(Function))
     expect(result.hooks.beforeOperation).toEqual([])
   })
+
   it('should default versions to true when not specified', () => {
     const global: GlobalConfig = {
       slug: 'header',
@@ -103,15 +293,14 @@ describe('sanitizeGlobal', () => {
     expect((result.versions as any).drafts).toBeTruthy()
   })
 
-  it('should preserve an explicit readVersions access function', () => {
-    const readVersions = () => true
+  it('should use an explicit readVersions access function instead of read access', async () => {
     const result = sanitizeGlobal(minimalConfig, {
       slug: 'header',
       fields: [],
-      access: { read: () => false, readVersions },
+      access: { read: () => false, readVersions: () => true },
     })
 
-    expect(result.access.readVersions).toBe(readVersions)
+    await expect(result.access.readVersions({ req })).resolves.toBe(true)
   })
 
   it.each([true, false])(
