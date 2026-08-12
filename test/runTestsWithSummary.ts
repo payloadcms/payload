@@ -70,6 +70,8 @@ const TEST_SUITES = [
 ]
 
 interface SuiteResult {
+  /** Captured output for a suite that produced no parseable test report. */
+  diagnostic?: string
   duration: number
   failed: boolean
   name: string
@@ -83,6 +85,8 @@ const contentAPISuiteTimeout = 120000
 // no JSON report, so the suite is recorded as 0/<collected>.
 const vitestExecMaxBuffer = 64 * 1024 * 1024
 const vitestBinary = './node_modules/.bin/vitest'
+const diagnosticMaxLines = 40
+const diagnosticMaxChars = 4000
 
 function getVitestEnv(options?: { unsetPayloadDatabase?: boolean }): NodeJS.ProcessEnv {
   const env = {
@@ -185,6 +189,32 @@ function parseTestResults(output: string): { passed: number; total: number } {
   } catch (e) {
     return { passed: 0, total: 0 }
   }
+}
+
+/**
+ * A suite that reports 0 passing usually died before the JSON reporter flushed,
+ * so the counts alone say nothing about why. Keep the tail of what it printed so
+ * the summary can surface an actionable error instead of a bare `0/<total>`.
+ */
+function extractDiagnostic(output: string): string | undefined {
+  const trimmed = output.trim()
+  if (!trimmed) {
+    return undefined
+  }
+
+  // Drop the JSON report if one was emitted; the interesting output precedes it.
+  const reportIndex = trimmed.lastIndexOf('{"numTotalTestSuites"')
+  const withoutReport = (reportIndex === -1 ? trimmed : trimmed.slice(0, reportIndex)).trim()
+  if (!withoutReport) {
+    return undefined
+  }
+
+  const lines = withoutReport.split('\n').slice(-diagnosticMaxLines)
+  const diagnostic = lines.join('\n')
+
+  return diagnostic.length > diagnosticMaxChars
+    ? `...\n${diagnostic.slice(-diagnosticMaxChars)}`
+    : diagnostic
 }
 
 function parseCollectedTests(output: string): number {
@@ -392,6 +422,10 @@ function runTestSuite(suiteName: string): SuiteResult {
     if (result.total === 0) {
       result.total = getStaticTestCount(suiteName)
     }
+
+    if (result.passed === 0) {
+      result.diagnostic = extractDiagnostic(output)
+    }
   } catch (error: unknown) {
     // Try to parse failure output from both stdout and stderr
     let errorOutput = ''
@@ -423,6 +457,10 @@ function runTestSuite(suiteName: string): SuiteResult {
     }
     if (result.total === 0) {
       result.total = getStaticTestCount(suiteName)
+    }
+
+    if (result.passed === 0) {
+      result.diagnostic = extractDiagnostic(errorOutput)
     }
   }
 
@@ -520,6 +558,24 @@ function main() {
       const icon = r.passed === 0 ? '❌' : '⚠️'
       console.log(`   ${icon} ${r.name} (${r.passed}/${r.total})`)
     })
+
+    const suitesWithoutReport = results.filter((r) => r.passed === 0 && r.diagnostic)
+
+    if (suitesWithoutReport.length > 0) {
+      console.log('\n' + '='.repeat(80))
+      console.log('🔎 Suites that produced no test report')
+      console.log(
+        'These reported 0 passing because no JSON report was parsed, not because every test failed.',
+      )
+      console.log('='.repeat(80))
+
+      for (const r of suitesWithoutReport) {
+        console.log(`\n--- ${r.name} (${r.passed}/${r.total}) ---`)
+        console.log(r.diagnostic)
+      }
+      console.log()
+    }
+
     process.exit(1)
   } else {
     console.log('✅ All test suites passed!')
