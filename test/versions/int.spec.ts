@@ -90,6 +90,95 @@ describe('Versions', () => {
     })
   })
 
+  /**
+   * A restore writes a brand-new version row, whose `createdAt` records when the
+   * row was created (the restore time) — not the age of the document being
+   * restored. Regression guard: the restore paths used to copy the restored
+   * entity's own `createdAt` onto the new row.
+   */
+  describe('Restore - version row createdAt', () => {
+    it('should stamp a restored collection version row at the restore time, not the source doc createdAt', async () => {
+      const doc = await payload.create({
+        collection: draftCollectionSlug,
+        data: { description: 'v1', title: `restore-createdat-${Date.now()}` },
+      })
+
+      await wait(10)
+
+      await payload.update({
+        collection: draftCollectionSlug,
+        data: { description: 'v2' },
+        id: doc.id,
+      })
+
+      const { docs: earlierVersions } = await payload.findVersions({
+        collection: draftCollectionSlug,
+        sort: 'createdAt',
+        where: { parent: { equals: doc.id } },
+      })
+      const versionToRestore = earlierVersions[0]!
+
+      await wait(10)
+
+      await payload.restoreVersion({
+        collection: draftCollectionSlug,
+        id: versionToRestore.id,
+      })
+
+      const {
+        docs: [restoreRow],
+      } = await payload.findVersions({
+        collection: draftCollectionSlug,
+        where: {
+          and: [{ latest: { equals: true } }, { parent: { equals: doc.id } }],
+        },
+      })
+
+      // Row createdAt is the restore-time `now` (equal to its own updatedAt), and strictly newer than the snapshot, which preserves the document's createdAt.
+      expect(restoreRow!.createdAt).toBe(restoreRow!.updatedAt)
+      expect(new Date(restoreRow!.createdAt) > new Date(restoreRow!.version.createdAt)).toBe(true)
+      expect(restoreRow!.version.createdAt).toBe(doc.createdAt)
+    })
+
+    it('should stamp a restored global version row at the restore time, not the source global createdAt', async () => {
+      await payload.updateGlobal({
+        slug: draftGlobalSlug,
+        data: { title: 'restore createdat global v1' },
+      })
+
+      await wait(10)
+
+      await payload.updateGlobal({
+        slug: draftGlobalSlug,
+        data: { title: 'restore createdat global v2' },
+      })
+
+      const { docs: earlierVersions } = await payload.findGlobalVersions({
+        slug: draftGlobalSlug,
+        sort: 'createdAt',
+      })
+      const versionToRestore = earlierVersions[0]!
+
+      await wait(10)
+
+      await payload.restoreGlobalVersion({
+        id: versionToRestore.id,
+        slug: draftGlobalSlug,
+      })
+
+      const {
+        docs: [restoreRow],
+      } = await payload.findGlobalVersions({
+        limit: 1,
+        slug: draftGlobalSlug,
+        sort: '-updatedAt',
+      })
+
+      // Restore row createdAt is stamped now — newer than the snapshot (the global's original createdAt).
+      expect(new Date(restoreRow!.createdAt) > new Date(restoreRow!.version.createdAt)).toBe(true)
+    })
+  })
+
   describe('Collections - Local', () => {
     describe('Create', () => {
       it('should allow creating a draft with missing required field data', async () => {
