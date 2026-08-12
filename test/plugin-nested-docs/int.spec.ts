@@ -1,6 +1,14 @@
-import type { ArrayField, Payload, RelationshipField } from 'payload'
+import type {
+  ArrayField,
+  FilterOptions,
+  FilterOptionsProps,
+  Payload,
+  RelationshipField,
+  Where,
+} from 'payload'
 
 import path from 'path'
+import { createLocalReq } from 'payload'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
@@ -442,8 +450,18 @@ describe('@payloadcms/plugin-nested-docs', () => {
 
   describe('overrides', () => {
     let collection
+    const createdCategoryIDs: (number | string)[] = []
+
     beforeAll(() => {
       collection = payload.config.collections.find(({ slug }) => slug === 'categories')
+    })
+
+    afterEach(async () => {
+      // Clean up in reverse order (children before parents)
+      for (const id of [...createdCategoryIDs].reverse()) {
+        await payload.delete({ collection: 'categories', id })
+      }
+      createdCategoryIDs.length = 0
     })
 
     it('should allow overriding breadcrumbs field', () => {
@@ -466,6 +484,62 @@ describe('@payloadcms/plugin-nested-docs', () => {
       ) as RelationshipField
 
       expect(parentField.admin.description).toStrictEqual('custom')
+    })
+
+    it('should not offer a document its own descendants as a parent', async () => {
+      const root = await payload.create({
+        collection: 'categories',
+        data: {
+          name: 'filter-root',
+        },
+      })
+      createdCategoryIDs.push(root.id)
+
+      const child = await payload.create({
+        collection: 'categories',
+        data: {
+          name: 'filter-child',
+          owner: root.id,
+        },
+      })
+      createdCategoryIDs.push(child.id)
+
+      const grandchild = await payload.create({
+        collection: 'categories',
+        data: {
+          name: 'filter-grandchild',
+          owner: child.id,
+        },
+      })
+      createdCategoryIDs.push(grandchild.id)
+
+      // Sanity check - descendants carry the root in their breadcrumbs
+      expect(child.categorization?.[0]?.doc).toStrictEqual(root.id)
+      expect(grandchild.categorization?.[0]?.doc).toStrictEqual(root.id)
+
+      const ownerField = collection.fields.find(
+        (field) => field.type === 'relationship' && field.name === 'owner',
+      ) as RelationshipField
+
+      const req = await createLocalReq({}, payload)
+
+      const where = (await (ownerField.filterOptions as Exclude<FilterOptions, null | Where>)({
+        id: root.id,
+        relationTo: 'categories',
+        req,
+      } as FilterOptionsProps)) as Where
+
+      const { docs } = await payload.find({
+        collection: 'categories',
+        limit: 0,
+        where,
+      })
+
+      const returnedIDs = docs.map((doc) => doc.id)
+
+      expect(returnedIDs).not.toContain(root.id)
+      expect(returnedIDs).not.toContain(child.id)
+      expect(returnedIDs).not.toContain(grandchild.id)
     })
 
     it('should allow custom breadcrumb and parent slugs', async () => {
