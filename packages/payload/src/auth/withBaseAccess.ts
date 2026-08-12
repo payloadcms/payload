@@ -102,6 +102,10 @@ export const withBaseAdminAccess = ({
       return false
     }
 
+    if (typeof baseResult === 'object') {
+      throw new Error('baseAccess must return a boolean for collection admin operations.')
+    }
+
     return documentAccess(accessArgs)
   }
 }

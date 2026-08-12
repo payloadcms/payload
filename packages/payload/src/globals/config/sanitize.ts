@@ -74,6 +74,10 @@ export const sanitizeGlobal = (
     global.hooks.afterRead = []
   }
 
+  if (!global.hooks.beforeOperation) {
+    global.hooks.beforeOperation = []
+  }
+
   // Sanitize fields
   const validRelationships = _validRelationships ?? config.collections?.map((c) => c.slug) ?? []
 

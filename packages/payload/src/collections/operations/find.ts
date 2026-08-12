@@ -18,6 +18,7 @@ import type {
 import { executeAccess } from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
+import { validateSortQuery } from '../../database/queryValidation/validateSortQuery.js'
 import { sanitizeJoinQuery } from '../../database/sanitizeJoinQuery.js'
 import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
@@ -166,7 +167,14 @@ export const findOperation = async <
 
     const sort = sanitizeSortQuery({
       fields: collection.config.flattenedFields,
-      sort: incomingSort,
+      sort: incomingSort || collectionConfig.defaultSort,
+    })
+
+    await validateSortQuery({
+      collectionConfig,
+      overrideAccess: overrideAccess!,
+      req,
+      sort,
     })
 
     const sanitizedJoins = await sanitizeJoinQuery({

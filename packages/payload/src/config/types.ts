@@ -274,13 +274,6 @@ export type OGImageConfig = {
   width?: number | string
 }
 
-/**
- * @todo find a way to remove the deep clone here.
- * It can probably be removed after the `DeepRequired` from `GlobalConfig` to
- * `SanitizedGlobalConfig` is removed.
- */
-type DeepClone<T> = T extends object ? { [K in keyof T]: DeepClone<T[K]> } : T
-
 export type MetaConfig = {
   /**
    * When `static`, a pre-made image will be used for all pages.
@@ -294,7 +287,7 @@ export type MetaConfig = {
    * @example `" - Custom CMS"`
    */
   titleSuffix?: string
-} & DeepClone<Metadata>
+} & Metadata
 
 export type ServerOnlyLivePreviewProperties = keyof Pick<RootLivePreviewConfig, 'url'>
 
@@ -1549,6 +1542,13 @@ export type Config = {
    * @see https://payloadcms.com/docs/plugins/overview
    */
   plugins?: Plugin[]
+  /**
+   * Previous `secret` values that should still be accepted for reads (verifying
+   * JWTs, matching API keys, decrypting stored values) during a bounded key
+   * rotation. New data is always written with the current `secret`. Retire these
+   * once `rotateSecret` has re-keyed existing data.
+   */
+  previousSecrets?: string[]
   /**
    * Allow you to save and share filters, columns, and sort orders for your collections.
    * @see https://payloadcms.com/docs/query-presets/overview

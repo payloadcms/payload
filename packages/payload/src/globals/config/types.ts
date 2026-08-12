@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { GraphQLNonNull, GraphQLObjectType } from 'graphql'
-import type { DeepRequired, IsAny } from 'ts-essentials'
+import type { IsAny } from 'ts-essentials'
 
 import type {
   Access,
@@ -191,6 +191,21 @@ export type GlobalAdminOptions = {
   preview?: GeneratePreviewURL
 }
 
+type GlobalAccess = {
+  read?: Access
+  readVersions?: Access
+  update?: Access
+}
+
+type GlobalHooks = {
+  afterChange?: AfterChangeHook[]
+  afterRead?: AfterReadHook[]
+  beforeChange?: BeforeChangeHook[]
+  beforeOperation?: BeforeOperationHook[]
+  beforeRead?: BeforeReadHook[]
+  beforeValidate?: BeforeValidateHook[]
+}
+
 export type GlobalConfig<TSlug extends GlobalSlug = any> = {
   /**
    * Do not set this property manually. This is set to true during sanitization, to avoid
@@ -214,14 +229,7 @@ export type GlobalConfig<TSlug extends GlobalSlug = any> = {
         name?: string
       }
     | false
-  hooks?: {
-    afterChange?: AfterChangeHook[]
-    afterRead?: AfterReadHook[]
-    beforeChange?: BeforeChangeHook[]
-    beforeOperation?: BeforeOperationHook[]
-    beforeRead?: BeforeReadHook[]
-    beforeValidate?: BeforeValidateHook[]
-  }
+  hooks?: GlobalHooks
   label?: LabelFunction | StaticLabel
   /**
    * Enables / Disables the ability to lock documents while editing
@@ -253,14 +261,28 @@ export type GlobalConfig<TSlug extends GlobalSlug = any> = {
 >
 
 export interface SanitizedGlobalConfig
-  extends Omit<DeepRequired<GlobalConfig>, 'endpoints' | 'fields' | 'slug' | 'versions'> {
+  extends Omit<
+      GlobalConfig,
+      | '_sanitized'
+      | 'access'
+      | 'admin'
+      | 'custom'
+      | 'endpoints'
+      | 'hooks'
+      | 'label'
+      | 'slug'
+      | 'versions'
+    >,
+    Required<Pick<GlobalConfig, 'admin' | 'custom' | 'label'>> {
+  _sanitized: true
+  access: Pick<GlobalAccess, 'readVersions'> & Required<Pick<GlobalAccess, 'read' | 'update'>>
   endpoints: Endpoint[] | false
-  fields: Field[]
   /**
    * Fields in the database schema structure
    * Rows / collapsible / tabs w/o name `fields` merged to top, UIs are excluded
    */
   flattenedFields: FlattenedField[]
+  hooks: Required<GlobalHooks>
   slug: GlobalSlug
   versions?: SanitizedGlobalVersions
 }

@@ -294,6 +294,38 @@ describe('baseAccess', () => {
     expect(await result.access.admin({ req, slug: 'customers' })).toBe(false)
   })
 
+  it('should reject query constraints for collection admin operations', async () => {
+    const config = {
+      baseAccess: {
+        collections: {
+          admin: () => ({
+            role: {
+              equals: 'admin',
+            },
+          }),
+        },
+      },
+      collections: [],
+      globals: [],
+    } as any
+    const collection: CollectionConfig = {
+      slug: 'users',
+      auth: true,
+      fields: [],
+    }
+    const req = {
+      payload: {
+        config,
+      },
+    } as any
+
+    const result = sanitizeCollection(config, collection)
+
+    await expect(result.access.admin({ req, slug: 'users' })).rejects.toThrow(
+      'baseAccess must return a boolean for collection admin operations.',
+    )
+  })
+
   it('should reject query constraints for collection create operations', async () => {
     const config = {
       baseAccess: {
