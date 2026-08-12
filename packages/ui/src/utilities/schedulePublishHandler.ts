@@ -29,7 +29,9 @@ export const schedulePublishHandler: ServerFunction<SchedulePublishHandlerArgs> 
       await payload.delete({
         collection: 'payload-jobs',
         req,
-        where: { id: { equals: deleteID } },
+        where: {
+          and: [{ id: { equals: deleteID } }, { taskSlug: { equals: 'schedulePublish' } }],
+        },
       })
     }
 

@@ -4082,6 +4082,30 @@ describe('Versions', () => {
           payload,
         })
       })
+
+      it('should not delete a job that is not a scheduled publish', async () => {
+        const req = await createLocalReq({ user }, payload)
+        const unrelatedJob = await payload.db.create({
+          collection: 'payload-jobs',
+          data: {
+            input: {},
+            taskSlug: 'inline',
+          },
+        })
+
+        await schedulePublishHandler({
+          deleteID: unrelatedJob.id,
+          req,
+          user,
+        })
+
+        const result = await payload.findByID({
+          collection: 'payload-jobs',
+          id: unrelatedJob.id,
+        })
+
+        expect(result.id).toBe(unrelatedJob.id)
+      })
     })
   })
 
