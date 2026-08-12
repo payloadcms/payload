@@ -1022,6 +1022,47 @@ describe('Access Control', () => {
         }),
       ).resolves.toBeNull()
     })
+
+    it('should evaluate inherited global read version permissions against versions', async () => {
+      const req = await createLocalReq({}, payload)
+
+      await payload.db.deleteVersions({
+        globalSlug: inheritedReadVersionsGlobalSlug,
+        req,
+        where: {},
+      })
+
+      try {
+        await payload.updateGlobal({
+          slug: inheritedReadVersionsGlobalSlug,
+          data: { visible: false },
+        })
+
+        const permissions = await getEntityPermissions({
+          id: undefined,
+          blockReferencesPermissions: {},
+          entity: payload.globals.config.find(
+            ({ slug }) => slug === inheritedReadVersionsGlobalSlug,
+          )!,
+          entityType: 'global',
+          fetchData: true,
+          operations: ['readVersions'],
+          req,
+        })
+
+        expect(permissions.readVersions?.permission).toBe(false)
+      } finally {
+        await payload.updateGlobal({
+          slug: inheritedReadVersionsGlobalSlug,
+          data: { visible: true },
+        })
+        await payload.db.deleteVersions({
+          globalSlug: inheritedReadVersionsGlobalSlug,
+          req,
+          where: {},
+        })
+      }
+    })
   })
 
   describe('Auth - Local API', () => {

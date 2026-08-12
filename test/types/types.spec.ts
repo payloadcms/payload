@@ -1,6 +1,7 @@
 import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
 import type { useAuth } from '@payloadcms/ui'
 import type {
+  Access,
   AuthenticatedUser,
   BulkOperationResult,
   CollectionSlug,
@@ -14,6 +15,8 @@ import type {
   PaginatedDocs,
   PayloadRequest,
   PayloadTypesShape,
+  SanitizedCollectionConfig,
+  SanitizedGlobalConfig,
   SelectType,
   TypedCollectionSelect,
   TypeWithVersion,
@@ -82,6 +85,14 @@ import type {
 } from './payload-types.js'
 
 describe('Types testing', () => {
+  test('sanitized collection readVersions access is required', () => {
+    expect<SanitizedCollectionConfig['access']['readVersions']>().type.toBe<Access>()
+  })
+
+  test('sanitized global readVersions access is required', () => {
+    expect<SanitizedGlobalConfig['access']['readVersions']>().type.toBe<Access>()
+  })
+
   test('should fall back when generated types do not include jobs', () => {
     expect<Job['id']>().type.toBe<number | string>()
     expect<Job['processingToken']>().type.toBe<null | string | undefined>()

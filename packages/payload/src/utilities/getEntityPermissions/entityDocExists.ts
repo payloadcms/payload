@@ -27,6 +27,17 @@ export async function entityDocExists({
   where: Where
 }): Promise<boolean> {
   if (entityType === 'global') {
+    if (operation === 'readVersions') {
+      const count = await req.payload.db.countGlobalVersions({
+        global: slug,
+        locale,
+        req,
+        where,
+      })
+
+      return count.totalDocs > 0
+    }
+
     const global = await req.payload.db.findGlobal({
       slug,
       locale,
