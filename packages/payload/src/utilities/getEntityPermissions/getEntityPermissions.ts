@@ -12,7 +12,6 @@ import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
 import type { BlockSlug, DefaultDocumentIDType } from '../../index.js'
 import type { AllOperations, JsonObject, PayloadRequest, Where } from '../../types/index.js'
 
-import { logError } from '../logError.js'
 import { entityDocExists } from './entityDocExists.js'
 import { populateFieldPermissions } from './populateFieldPermissions.js'
 
@@ -163,14 +162,9 @@ export async function getEntityPermissions<TEntityType extends 'collection' | 'g
       if (typeof accessFunction === 'function') {
         accessResults.push({
           operation,
-          result: Promise.resolve(accessFunction({ id, slug: entity.slug, data, req })).catch(
-            (error) => {
-              // Fail closed for this operation only so one misconfigured access callback
-              // cannot break permission checks for the rest of the request.
-              logError({ err: error, payload: req.payload })
-              return false
-            },
-          ) as Promise<boolean | Where>,
+          result: Promise.resolve(accessFunction({ id, slug: entity.slug, data, req })) as Promise<
+            boolean | Where
+          >,
         })
       } else {
         entityPermissions[operation] = {
