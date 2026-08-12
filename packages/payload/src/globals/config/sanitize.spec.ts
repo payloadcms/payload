@@ -220,7 +220,8 @@ describe('sanitizeGlobal', () => {
       label: 'Header',
       slug: 'header',
     })
-    expect(result.access.readVersions).toBeUndefined()
+    // Versions default to enabled, so `readVersions` is wrapped to apply base access.
+    expect(result.access.readVersions).toEqual(expect.any(Function))
     expect(result.admin.components).toBeUndefined()
     expect(result.graphQL).toBeUndefined()
     expect(result.lockDocuments).toBeUndefined()
