@@ -55,7 +55,7 @@ export const countVersionsOperation = async <TSlug extends CollectionSlug>(
 
     if (!overrideAccess) {
       accessResult = await executeAccess(
-        { disableErrors, req: req! },
+        { slug: collectionConfig.slug, disableErrors, req: req! },
         collectionConfig.access.readVersions,
       )
 
