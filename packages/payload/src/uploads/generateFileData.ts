@@ -187,11 +187,11 @@ export const generateFileData = async <T>({
     let fileBuffer!: { data: Buffer; info: OutputInfo }
     let ext
     let mime: string
+    // Exclude tempFilePath from adjustments since it can depend only on resize/format/trim
+    // config, not on whether the bytes live on disk or in memory.
     const fileHasAdjustments =
       fileSupportsResize &&
-      Boolean(
-        resizeOptions || formatOptions || trimOptions || constructorOptions || file.tempFilePath,
-      )
+      Boolean(resizeOptions || formatOptions || trimOptions || constructorOptions)
 
     const sharpOptions: SharpOptions = { ...constructorOptions }
 
