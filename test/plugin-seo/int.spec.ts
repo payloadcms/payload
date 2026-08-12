@@ -29,12 +29,14 @@ describe('@payloadcms/plugin-seo', () => {
     const file = await getFileByPath(filePath)
 
     mediaDoc = await payload.create({
+      overrideAccess: true,
       collection: mediaSlug,
       data: {},
       file,
     })
 
     page = await payload.create({
+      overrideAccess: true,
       collection: 'pages',
       data: {
         title: 'Test page',
@@ -48,6 +50,7 @@ describe('@payloadcms/plugin-seo', () => {
     })
 
     mediaDoc2 = await payload.create({
+      overrideAccess: true,
       collection: mediaSlug,
       data: {},
       file,
@@ -63,6 +66,7 @@ describe('@payloadcms/plugin-seo', () => {
     // Update it to mediaDoc2 and we expect to see different previousValue and value in the hook
     const context: { identicalCount?: number } = {}
     await payload.update({
+      overrideAccess: true,
       collection: 'pages',
       id: page.id,
       data: {
@@ -81,6 +85,7 @@ describe('@payloadcms/plugin-seo', () => {
 
   it('should add meta title', async () => {
     const pageWithTitle = await payload.update({
+      overrideAccess: true,
       collection: 'pages',
       id: page.id,
       data: {
@@ -98,6 +103,7 @@ describe('@payloadcms/plugin-seo', () => {
 
   it('should add meta description', async () => {
     const pageWithDescription = await payload.update({
+      overrideAccess: true,
       collection: 'pages',
       id: page.id,
       data: {
@@ -115,6 +121,7 @@ describe('@payloadcms/plugin-seo', () => {
 
   it('should add meta image', async () => {
     const pageWithImage = await payload.update({
+      overrideAccess: true,
       collection: 'pages',
       id: page.id,
       data: {
@@ -132,6 +139,7 @@ describe('@payloadcms/plugin-seo', () => {
 
   it('should add custom meta field', async () => {
     const pageWithCustomField = await payload.update({
+      overrideAccess: true,
       collection: 'pages',
       id: page.id,
       data: {
@@ -149,6 +157,7 @@ describe('@payloadcms/plugin-seo', () => {
 
   it('should localize meta fields', async () => {
     const pageWithLocalizedMeta = await payload.update({
+      overrideAccess: true,
       collection: 'pages',
       id: page.id,
       data: {
@@ -169,6 +178,7 @@ describe('@payloadcms/plugin-seo', () => {
 
     // query the page in the default locale
     const pageInDefaultLocale = await payload.findByID({
+      overrideAccess: true,
       collection: 'pages',
       id: page.id,
       depth: 0,

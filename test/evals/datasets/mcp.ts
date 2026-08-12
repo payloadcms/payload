@@ -39,6 +39,7 @@ export const mcpDataset: EvalCase[] = [
       'Upload the local file "checklist.jpg" to the media library and use "Local checklist icon" as its alt text.',
     verify: async ({ audit, expect, payload, transcript }) => {
       const { docs } = await payload.find({
+        overrideAccess: true,
         collection: 'media',
         where: { alt: { equals: 'Local checklist icon' } },
       })
@@ -99,6 +100,7 @@ export const mcpDataset: EvalCase[] = [
       'Add this checklist icon to the media library and use "Checklist icon" as its alt text: https://raw.githubusercontent.com/payloadcms/payload/main/test/uploads/image.jpg',
     verify: async ({ audit, expect, payload, transcript }) => {
       const { docs } = await payload.find({
+        overrideAccess: true,
         collection: 'media',
         where: { alt: { equals: 'Checklist icon' } },
       })
@@ -133,6 +135,7 @@ export const mcpDataset: EvalCase[] = [
       const originalFile = await readFile(path.join(uploadsFixtureDirectory, 'image.png'))
 
       await payload.create({
+        overrideAccess: true,
         collection: 'media',
         data: { alt: 'Outdated checklist icon' },
         file: {
@@ -144,7 +147,7 @@ export const mcpDataset: EvalCase[] = [
       })
     },
     verify: async ({ audit, expect, payload, transcript }) => {
-      const { docs } = await payload.find({ collection: 'media' })
+      const { docs } = await payload.find({ overrideAccess: true, collection: 'media' })
       const media = docs[0]
 
       expect(docs).toHaveLength(1)
@@ -174,6 +177,7 @@ export const mcpDataset: EvalCase[] = [
     input: 'Create a post titled "Created by Payload MCP eval".',
     verify: async ({ audit, expect, payload, transcript }) => {
       const { docs } = await payload.find({
+        overrideAccess: true,
         collection: 'posts',
         where: { title: { equals: 'Created by Payload MCP eval' } },
       })
@@ -197,6 +201,7 @@ export const mcpDataset: EvalCase[] = [
       'Create two posts in one request: one titled "First bulk MCP post" and one titled "Second bulk MCP post".',
     verify: async ({ audit, expect, payload, transcript }) => {
       const { docs } = await payload.find({
+        overrideAccess: true,
         collection: 'posts',
         sort: 'title',
         where: {
@@ -236,12 +241,14 @@ export const mcpDataset: EvalCase[] = [
     input: 'Rename the post "MCP Update Target" to "Updated by Payload MCP eval".',
     setup: async ({ payload }) => {
       await payload.create({
+        overrideAccess: true,
         collection: 'posts',
         data: { title: 'MCP Update Target' },
       })
     },
     verify: async ({ audit, expect, payload, transcript }) => {
       const { docs } = await payload.find({
+        overrideAccess: true,
         collection: 'posts',
       })
 
@@ -264,15 +271,17 @@ export const mcpDataset: EvalCase[] = [
     input: 'Delete the post titled "MCP Delete Target".',
     setup: async ({ payload }) => {
       for (const title of ['MCP Delete Target', 'MCP Keep', 'MCP Update Target']) {
-        await payload.create({ collection: 'posts', data: { title } })
+        await payload.create({ overrideAccess: true, collection: 'posts', data: { title } })
       }
     },
     verify: async ({ audit, expect, payload, transcript }) => {
       const deletedPosts = await payload.find({
+        overrideAccess: true,
         collection: 'posts',
         where: { title: { equals: 'MCP Delete Target' } },
       })
       const remainingPosts = await payload.find({
+        overrideAccess: true,
         collection: 'posts',
       })
 
@@ -297,7 +306,10 @@ export const mcpDataset: EvalCase[] = [
     configPath: 'mcp/shared',
     input: 'Change the site tagline to "Updated through Payload MCP".',
     verify: async ({ audit, expect, payload, transcript }) => {
-      const settings = (await payload.findGlobal({ slug: 'site-settings' })) as {
+      const settings = (await payload.findGlobal({
+        overrideAccess: true,
+        slug: 'site-settings',
+      })) as {
         tagline?: unknown
       }
 
@@ -323,16 +335,19 @@ export const mcpDataset: EvalCase[] = [
     input: 'Create a post titled "Relationship created by Payload MCP eval" by Ada Lovelace.',
     setup: async ({ payload }) => {
       await payload.create({
+        overrideAccess: true,
         collection: 'authors',
         data: { name: 'Ada Lovelace' },
       })
     },
     verify: async ({ audit, expect, payload, transcript }) => {
       const { docs: authors } = await payload.find({
+        overrideAccess: true,
         collection: 'authors',
         where: { name: { equals: 'Ada Lovelace' } },
       })
       const { docs: posts } = await payload.find({
+        overrideAccess: true,
         collection: 'posts',
         depth: 0,
         where: { title: { equals: 'Relationship created by Payload MCP eval' } },
@@ -365,6 +380,7 @@ export const mcpDataset: EvalCase[] = [
       'Create a post titled "Lexical content created by Payload MCP eval" with an H2 heading "Release notes", a paragraph saying "Payload MCP is ready." with only "Payload MCP" in bold, and a bulleted list containing "Create content" and "Manage schemas".',
     verify: async ({ audit, expect, payload, transcript }) => {
       const { docs } = await payload.find({
+        overrideAccess: true,
         collection: 'posts',
         where: { title: { equals: 'Lexical content created by Payload MCP eval' } },
       })
@@ -414,6 +430,7 @@ export const mcpDataset: EvalCase[] = [
       'The published article "MCP Draft Update Target" needs a correction, but it is not ready to go live. Change its title to "MCP Draft Update Saved" and save it as a draft without changing the published article.',
     setup: async ({ payload }) => {
       await payload.create({
+        overrideAccess: true,
         collection: 'articles',
         data: { _status: 'published', title: 'MCP Draft Update Target' },
         locale: 'en',
@@ -421,6 +438,7 @@ export const mcpDataset: EvalCase[] = [
     },
     verify: async ({ audit, expect, payload, transcript }) => {
       const { docs: draftArticles } = await payload.find({
+        overrideAccess: true,
         collection: 'articles',
         draft: true,
         locale: 'en',
@@ -430,6 +448,7 @@ export const mcpDataset: EvalCase[] = [
 
       const draftArticle = draftArticles[0]
       const publishedArticle = await payload.findByID({
+        overrideAccess: true,
         id: draftArticle!.id,
         collection: 'articles',
         draft: false,
@@ -458,6 +477,7 @@ export const mcpDataset: EvalCase[] = [
       'Fix the title of the article "MCP Published Update Target" to "MCP Published Update Saved" and publish the corrected version now.',
     setup: async ({ payload }) => {
       await payload.create({
+        overrideAccess: true,
         collection: 'articles',
         data: { _status: 'published', title: 'MCP Published Update Target' },
         locale: 'en',
@@ -465,6 +485,7 @@ export const mcpDataset: EvalCase[] = [
     },
     verify: async ({ audit, expect, payload, transcript }) => {
       const { docs: publishedArticles } = await payload.find({
+        overrideAccess: true,
         collection: 'articles',
         draft: false,
         locale: 'en',
@@ -493,6 +514,7 @@ export const mcpDataset: EvalCase[] = [
       'Take the published article "MCP Unpublish Target" offline, but keep the article and its version history so it can still be edited as a draft. Do not delete it.',
     setup: async ({ payload }) => {
       await payload.create({
+        overrideAccess: true,
         collection: 'articles',
         data: { _status: 'published', title: 'MCP Unpublish Target' },
         locale: 'en',
@@ -500,6 +522,7 @@ export const mcpDataset: EvalCase[] = [
     },
     verify: async ({ audit, expect, payload, transcript }) => {
       const { docs: unpublishedArticles } = await payload.find({
+        overrideAccess: true,
         collection: 'articles',
         draft: false,
         locale: 'en',
@@ -527,12 +550,14 @@ export const mcpDataset: EvalCase[] = [
       'Show me the currently published article titled "MCP Published Read Target". Ignore its newer unpublished draft.',
     setup: async ({ payload }) => {
       const article = await payload.create({
+        overrideAccess: true,
         collection: 'articles',
         data: { _status: 'published', title: 'MCP Published Read Target' },
         locale: 'en',
       })
 
       await payload.update({
+        overrideAccess: true,
         id: article.id,
         collection: 'articles',
         data: { title: 'MCP Draft Must Not Be Read' },
@@ -542,6 +567,7 @@ export const mcpDataset: EvalCase[] = [
     },
     verify: async ({ audit, expect, payload, transcript }) => {
       const { docs: publishedArticles } = await payload.find({
+        overrideAccess: true,
         collection: 'articles',
         draft: false,
         locale: 'en',
@@ -551,6 +577,7 @@ export const mcpDataset: EvalCase[] = [
 
       const publishedArticle = publishedArticles[0]
       const draftArticle = await payload.findByID({
+        overrideAccess: true,
         id: publishedArticle!.id,
         collection: 'articles',
         draft: true,
@@ -584,12 +611,14 @@ export const mcpDataset: EvalCase[] = [
       'Show me the latest draft of the article currently published as "MCP Draft Read Published Title".',
     setup: async ({ payload }) => {
       const article = await payload.create({
+        overrideAccess: true,
         collection: 'articles',
         data: { _status: 'published', title: 'MCP Draft Read Published Title' },
         locale: 'en',
       })
 
       await payload.update({
+        overrideAccess: true,
         id: article.id,
         collection: 'articles',
         data: { title: 'MCP Draft Read Latest Title' },
@@ -599,6 +628,7 @@ export const mcpDataset: EvalCase[] = [
     },
     verify: async ({ audit, expect, payload, transcript }) => {
       const { docs: draftArticles } = await payload.find({
+        overrideAccess: true,
         collection: 'articles',
         draft: true,
         locale: 'en',
@@ -632,12 +662,14 @@ export const mcpDataset: EvalCase[] = [
       'For the article "MCP English Publish Target", change the English title to "MCP English Published Title" and publish only English. Leave the Spanish published title and Spanish draft unchanged.',
     setup: async ({ payload }) => {
       const article = await payload.create({
+        overrideAccess: true,
         collection: 'articles',
         data: { _status: 'published', title: 'MCP English Publish Target' },
         locale: 'en',
       })
 
       await payload.update({
+        overrideAccess: true,
         id: article.id,
         collection: 'articles',
         data: { _status: 'published', title: 'MCP Spanish Published Title' },
@@ -646,6 +678,7 @@ export const mcpDataset: EvalCase[] = [
         publishAllLocales: false,
       })
       await payload.update({
+        overrideAccess: true,
         id: article.id,
         collection: 'articles',
         data: { title: 'MCP Spanish Draft Title' },
@@ -655,6 +688,7 @@ export const mcpDataset: EvalCase[] = [
     },
     verify: async ({ audit, expect, payload, transcript }) => {
       const { docs: publishedEnglishArticles } = await payload.find({
+        overrideAccess: true,
         collection: 'articles',
         draft: false,
         locale: 'en',
@@ -664,12 +698,14 @@ export const mcpDataset: EvalCase[] = [
 
       const publishedEnglish = publishedEnglishArticles[0]
       const publishedSpanish = await payload.findByID({
+        overrideAccess: true,
         id: publishedEnglish!.id,
         collection: 'articles',
         draft: false,
         locale: 'es',
       })
       const draftSpanish = await payload.findByID({
+        overrideAccess: true,
         id: publishedEnglish!.id,
         collection: 'articles',
         draft: true,
@@ -700,6 +736,7 @@ export const mcpDataset: EvalCase[] = [
       'Create a new article titled "MCP Newly Created Draft" as a draft. Leave it unpublished.',
     verify: async ({ audit, expect, payload, transcript }) => {
       const { docs } = await payload.find({
+        overrideAccess: true,
         collection: 'articles',
         draft: true,
         locale: 'en',
@@ -726,6 +763,7 @@ export const mcpDataset: EvalCase[] = [
     input: 'Create and publish a new article titled "MCP Newly Created Published".',
     verify: async ({ audit, expect, payload, transcript }) => {
       const { docs } = await payload.find({
+        overrideAccess: true,
         collection: 'articles',
         draft: false,
         locale: 'en',

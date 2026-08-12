@@ -23,6 +23,7 @@ export const subscriptionCreatedOrUpdated = async (args) => {
     payload.logger.info(`- Looking up existing Payload product with Stripe ID: ${plan.product}...`)
 
     const productQuery = await payload.find({
+      overrideAccess: true,
       collection: 'products',
       depth: 0,
       where: {
@@ -50,6 +51,7 @@ export const subscriptionCreatedOrUpdated = async (args) => {
     )
 
     const customerReq: any = await payload.find({
+      overrideAccess: true,
       collection: 'customers',
       depth: 0,
       where: {
@@ -89,6 +91,7 @@ export const subscriptionCreatedOrUpdated = async (args) => {
 
       try {
         await payload.update({
+          overrideAccess: true,
           id: foundCustomer.id,
           collection: 'customers',
           data: {

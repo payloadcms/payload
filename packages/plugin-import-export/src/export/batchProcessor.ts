@@ -161,6 +161,7 @@ export function createExportBatchProcessor(options: ExportBatchProcessorOptions 
       }
 
       const result = await req.payload.find({
+        ...{ overrideAccess: true },
         ...findArgs,
         limit: Math.min(batchSize, remaining),
         page: currentPage,
@@ -268,6 +269,7 @@ export function createExportBatchProcessor(options: ExportBatchProcessorOptions 
       }
 
       const result = await req.payload.find({
+        ...{ overrideAccess: true },
         ...findArgs,
         limit: Math.min(batchSize, remaining),
         page: currentPage,
@@ -352,6 +354,7 @@ export function createExportBatchProcessor(options: ExportBatchProcessorOptions 
       }
 
       const result = await req.payload.find({
+        ...{ overrideAccess: true },
         ...findArgs,
         limit: Math.min(batchSize, remaining),
         page: currentPage,

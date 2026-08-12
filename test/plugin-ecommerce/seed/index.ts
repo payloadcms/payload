@@ -18,6 +18,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
 
   try {
     const customer = await payload.create({
+      overrideAccess: true,
       collection: 'users',
       data: {
         email: 'customer@payloadcms.com',
@@ -27,6 +28,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
     })
 
     const sizeVariantType = await payload.create({
+      overrideAccess: true,
       collection: 'variantTypes',
       data: {
         name: 'size',
@@ -37,6 +39,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
     const [small, medium, large, xlarge] = await Promise.all(
       sizeVariantOptions.map((option) => {
         return payload.create({
+          overrideAccess: true,
           collection: 'variantOptions',
           data: {
             ...option,
@@ -47,6 +50,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
     )
 
     const colorVariantType = await payload.create({
+      overrideAccess: true,
       collection: 'variantTypes',
       data: {
         name: 'color',
@@ -57,6 +61,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
     const [black, white] = await Promise.all(
       colorVariantOptions.map((option) => {
         return payload.create({
+          overrideAccess: true,
           collection: 'variantOptions',
           data: {
             ...option,
@@ -67,6 +72,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
     )
 
     const hoodieProduct = await payload.create({
+      overrideAccess: true,
       collection: 'products',
       data: {
         name: 'Hoodie',
@@ -76,6 +82,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
     })
 
     const hoodieSmallWhite = await payload.create({
+      overrideAccess: true,
       collection: 'variants',
       data: {
         product: hoodieProduct.id,
@@ -87,6 +94,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
     })
 
     const hoodieMediumWhite = await payload.create({
+      overrideAccess: true,
       collection: 'variants',
       data: {
         product: hoodieProduct.id,
@@ -98,6 +106,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
     })
 
     const hatProduct = await payload.create({
+      overrideAccess: true,
       collection: 'products',
       data: {
         name: 'Hat',
@@ -109,6 +118,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
     })
 
     const pendingPaymentRecord = await payload.create({
+      overrideAccess: true,
       collection: 'transactions',
       data: {
         currency: 'USD',
@@ -123,6 +133,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
     })
 
     const succeededPaymentRecord = await payload.create({
+      overrideAccess: true,
       collection: 'transactions',
       data: {
         currency: 'USD',

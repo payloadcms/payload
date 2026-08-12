@@ -94,7 +94,7 @@ export const updateGlobalTool = defineGlobalTool({
       updateOptions.select = select as SelectType
     }
 
-    const result = await payload.updateGlobal(updateOptions)
+    const result = await payload.updateGlobal({ ...{ overrideAccess: true }, ...updateOptions })
 
     return {
       content: [

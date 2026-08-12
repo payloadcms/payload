@@ -178,6 +178,7 @@ export const confirmOrderHandler: ConfirmOrderHandler =
           id: paymentResponse.transactionID,
           collection: transactionsSlug,
           depth: 0,
+          overrideAccess: true,
           select: {
             id: true,
             items: true,

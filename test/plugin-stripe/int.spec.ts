@@ -22,6 +22,7 @@ describe('Stripe Plugin', () => {
 
   it('should create products', async () => {
     const product = await payload.create({
+      overrideAccess: true,
       collection: 'products',
       data: {
         name: 'Test Product',

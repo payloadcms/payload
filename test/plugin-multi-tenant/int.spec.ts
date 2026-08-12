@@ -47,6 +47,7 @@ describe('@payloadcms/plugin-multi-tenant', () => {
   describe('tenants', () => {
     it('should create a tenant', async () => {
       const tenant1 = await payload.create({
+        overrideAccess: true,
         collection: tenantsSlug,
         data: {
           name: 'tenant1',
@@ -65,6 +66,7 @@ describe('@payloadcms/plugin-multi-tenant', () => {
 
       beforeEach(async () => {
         anchorBarRelationships = await payload.find({
+          overrideAccess: true,
           collection: 'relationships',
           where: {
             'tenant.name': {
@@ -74,6 +76,7 @@ describe('@payloadcms/plugin-multi-tenant', () => {
         })
 
         blueDogRelationships = await payload.find({
+          overrideAccess: true,
           collection: 'relationships',
           where: {
             'tenant.name': {
@@ -91,6 +94,7 @@ describe('@payloadcms/plugin-multi-tenant', () => {
 
       it('ensure relationship document with relationship within same tenant can be created', async () => {
         const newRelationship = await payload.create({
+          overrideAccess: true,
           collection: 'relationships',
           data: {
             title: 'Relationship to Anchor Bar',
@@ -110,6 +114,7 @@ describe('@payloadcms/plugin-multi-tenant', () => {
       it('ensure relationship document with relationship to different tenant cannot be created if tenant header passed', async () => {
         await expect(
           payload.create({
+            overrideAccess: true,
             collection: 'relationships',
             data: {
               title: 'Relationship to Blue Dog',
@@ -128,6 +133,7 @@ describe('@payloadcms/plugin-multi-tenant', () => {
         // Should filter based on data.tenant instead of tenant cookie
         await expect(
           payload.create({
+            overrideAccess: true,
             collection: 'relationships',
             data: {
               title: 'Relationship to Blue Dog',
@@ -146,6 +152,7 @@ describe('@payloadcms/plugin-multi-tenant', () => {
     it('should return Forbidden error (not 500) for user with no tenants', async () => {
       // Create a user with no tenant memberships
       const noTenantUser = await payload.create({
+        overrideAccess: true,
         collection: usersSlug,
         data: {
           email: 'no-tenants@test.com',
@@ -156,10 +163,12 @@ describe('@payloadcms/plugin-multi-tenant', () => {
 
       // Create a tenant and document for testing
       const tenant = await payload.create({
+        overrideAccess: true,
         collection: tenantsSlug,
         data: { name: 'Test Tenant', domain: 'test-tenant.test' },
       })
       const doc = await payload.create({
+        overrideAccess: true,
         collection: relationshipsSlug,
         data: { tenant: tenant.id, title: 'Test Doc' },
       })
@@ -176,14 +185,15 @@ describe('@payloadcms/plugin-multi-tenant', () => {
       ).rejects.toThrow('You are not allowed to perform this action.')
 
       // Cleanup
-      await payload.delete({ id: doc.id, collection: relationshipsSlug })
-      await payload.delete({ id: tenant.id, collection: tenantsSlug })
-      await payload.delete({ id: noTenantUser.id, collection: usersSlug })
+      await payload.delete({ overrideAccess: true, id: doc.id, collection: relationshipsSlug })
+      await payload.delete({ overrideAccess: true, id: tenant.id, collection: tenantsSlug })
+      await payload.delete({ overrideAccess: true, id: noTenantUser.id, collection: usersSlug })
     })
 
     it('should allow user with no tenants to access their own user document', async () => {
       // Create a user with no tenant memberships
       const noTenantUser = await payload.create({
+        overrideAccess: true,
         collection: usersSlug,
         data: {
           email: 'no-tenants-self@test.com',
@@ -204,12 +214,13 @@ describe('@payloadcms/plugin-multi-tenant', () => {
       expect(result.docs[0]?.id).toBe(noTenantUser.id)
 
       // Cleanup
-      await payload.delete({ id: noTenantUser.id, collection: usersSlug })
+      await payload.delete({ overrideAccess: true, id: noTenantUser.id, collection: usersSlug })
     })
 
     it('should allow admin with empty tenants array to access all documents', async () => {
       // Create an admin user with empty tenants array
       const adminUser = await payload.create({
+        overrideAccess: true,
         collection: usersSlug,
         data: {
           email: 'admin-empty-tenants@test.com',
@@ -221,10 +232,12 @@ describe('@payloadcms/plugin-multi-tenant', () => {
 
       // Create a tenant and document
       const tenant = await payload.create({
+        overrideAccess: true,
         collection: tenantsSlug,
         data: { name: 'Admin Test Tenant', domain: 'admin-test.test' },
       })
       const doc = await payload.create({
+        overrideAccess: true,
         collection: relationshipsSlug,
         data: { tenant: tenant.id, title: 'Admin Test Doc' },
       })
@@ -240,9 +253,9 @@ describe('@payloadcms/plugin-multi-tenant', () => {
       expect(result.docs).toHaveLength(1)
 
       // Cleanup
-      await payload.delete({ id: doc.id, collection: relationshipsSlug })
-      await payload.delete({ id: tenant.id, collection: tenantsSlug })
-      await payload.delete({ id: adminUser.id, collection: usersSlug })
+      await payload.delete({ overrideAccess: true, id: doc.id, collection: relationshipsSlug })
+      await payload.delete({ overrideAccess: true, id: tenant.id, collection: tenantsSlug })
+      await payload.delete({ overrideAccess: true, id: adminUser.id, collection: usersSlug })
     })
   })
 
@@ -250,16 +263,19 @@ describe('@payloadcms/plugin-multi-tenant', () => {
     it('should enforce tenant access when user object is fetched from database', async () => {
       // Create two tenants
       const tenantA = await payload.create({
+        overrideAccess: true,
         collection: tenantsSlug,
         data: { name: 'Tenant A', domain: 'tenant-a.test' },
       })
       const tenantB = await payload.create({
+        overrideAccess: true,
         collection: tenantsSlug,
         data: { name: 'Tenant B', domain: 'tenant-b.test' },
       })
 
       // Create a user assigned ONLY to Tenant A
       const user = await payload.create({
+        overrideAccess: true,
         collection: usersSlug,
         data: {
           email: 'user-tenant-a@test.com',
@@ -270,6 +286,7 @@ describe('@payloadcms/plugin-multi-tenant', () => {
 
       // Create a document in Tenant B (user should NOT have access)
       const doc = await payload.create({
+        overrideAccess: true,
         collection: relationshipsSlug,
         data: { tenant: tenantB.id, title: 'Tenant B Doc' },
       })
@@ -277,6 +294,7 @@ describe('@payloadcms/plugin-multi-tenant', () => {
       // Fetch user from database - this returns a user WITHOUT .collection property
       // Bug: when user.collection is undefined, tenant access check is bypassed
       const fetchedUser = await payload.findByID({
+        overrideAccess: true,
         id: user.id,
         collection: usersSlug,
       })
@@ -292,30 +310,37 @@ describe('@payloadcms/plugin-multi-tenant', () => {
       expect(result.docs).toHaveLength(0)
 
       // Cleanup
-      await payload.delete({ id: doc.id, collection: relationshipsSlug })
-      await payload.delete({ id: user.id, collection: usersSlug })
-      await payload.delete({ id: tenantA.id, collection: tenantsSlug })
-      await payload.delete({ id: tenantB.id, collection: tenantsSlug })
+      await payload.delete({ overrideAccess: true, id: doc.id, collection: relationshipsSlug })
+      await payload.delete({ overrideAccess: true, id: user.id, collection: usersSlug })
+      await payload.delete({ overrideAccess: true, id: tenantA.id, collection: tenantsSlug })
+      await payload.delete({ overrideAccess: true, id: tenantB.id, collection: tenantsSlug })
     })
   })
 
   describe('tenant cleanup on delete', () => {
     it('should delete a tenant that has a global collection document without hanging', async () => {
       const tenant = await payload.create({
+        overrideAccess: true,
         collection: tenantsSlug,
         data: { name: 'Cleanup Tenant', domain: 'cleanup-tenant.test' },
       })
 
       await payload.create({
+        overrideAccess: true,
         collection: menuSlug,
         data: { tenant: tenant.id, title: 'Cleanup Menu' },
       })
 
-      const deletedTenant = await payload.delete({ id: tenant.id, collection: tenantsSlug })
+      const deletedTenant = await payload.delete({
+        overrideAccess: true,
+        id: tenant.id,
+        collection: tenantsSlug,
+      })
 
       expect(deletedTenant.id).toBe(tenant.id)
 
       const remainingTenants = await payload.find({
+        overrideAccess: true,
         collection: tenantsSlug,
         where: { id: { equals: tenant.id } },
       })
@@ -327,16 +352,19 @@ describe('@payloadcms/plugin-multi-tenant', () => {
   describe('hasMany tenant field filtering', () => {
     it('should not double-wrap tenant arrays in filterOptions', async () => {
       const tenant1 = await payload.create({
+        overrideAccess: true,
         collection: tenantsSlug,
         data: { name: 'Tenant 1', domain: 'tenant1.test' },
       })
       const tenant2 = await payload.create({
+        overrideAccess: true,
         collection: tenantsSlug,
         data: { name: 'Tenant 2', domain: 'tenant2.test' },
       })
 
       // Create a post with multiple tenants (hasMany: true)
       const post = await payload.create({
+        overrideAccess: true,
         collection: multiTenantPostsSlug,
         data: {
           title: 'Multi-tenant post',
@@ -361,9 +389,9 @@ describe('@payloadcms/plugin-multi-tenant', () => {
       expect(Array.isArray(filter.tenant.in[1])).toBe(false)
 
       // Cleanup
-      await payload.delete({ id: post.id, collection: multiTenantPostsSlug })
-      await payload.delete({ id: tenant1.id, collection: tenantsSlug })
-      await payload.delete({ id: tenant2.id, collection: tenantsSlug })
+      await payload.delete({ overrideAccess: true, id: post.id, collection: multiTenantPostsSlug })
+      await payload.delete({ overrideAccess: true, id: tenant1.id, collection: tenantsSlug })
+      await payload.delete({ overrideAccess: true, id: tenant2.id, collection: tenantsSlug })
     })
   })
 })

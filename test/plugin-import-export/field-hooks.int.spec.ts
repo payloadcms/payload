@@ -22,6 +22,7 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
   beforeAll(async () => {
     ;({ payload, restClient } = await initPayloadInt(dirname))
     const loginResult = await payload.login({
+      overrideAccess: true,
       collection: 'users',
       data: { email: devUser.email, password: devUser.password },
     })
@@ -35,12 +36,17 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
 
   afterEach(async () => {
     const existing = await payload.find({
+      overrideAccess: true,
       collection: postsWithFieldHooksSlug,
       limit: 1000,
       pagination: false,
     })
     for (const doc of existing.docs) {
-      await payload.delete({ collection: postsWithFieldHooksSlug, id: doc.id })
+      await payload.delete({
+        overrideAccess: true,
+        collection: postsWithFieldHooksSlug,
+        id: doc.id,
+      })
     }
   })
 
@@ -51,11 +57,13 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
   describe('field-level export hooks', () => {
     it('should transform CSV output using field-level export hook', async () => {
       const post = await payload.create({
+        overrideAccess: true,
         collection: postsWithFieldHooksSlug,
         data: { customExport: 'raw value', title: 'Field Export Test' },
       })
 
       let exportDoc = await payload.create({
+        overrideAccess: true,
         collection: 'posts-with-field-hooks-export',
         data: {
           collectionSlug: postsWithFieldHooksSlug,
@@ -66,6 +74,7 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
       })
 
       exportDoc = await payload.findByID({
+        overrideAccess: true,
         id: exportDoc.id,
         collection: 'posts-with-field-hooks-export',
       })
@@ -79,11 +88,13 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
 
     it('should receive format: csv during CSV export', async () => {
       const post = await payload.create({
+        overrideAccess: true,
         collection: postsWithFieldHooksSlug,
         data: { customExport: 'test', title: 'Format CSV Test' },
       })
 
       let exportDoc = await payload.create({
+        overrideAccess: true,
         collection: 'posts-with-field-hooks-export',
         data: {
           collectionSlug: postsWithFieldHooksSlug,
@@ -94,6 +105,7 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
       })
 
       exportDoc = await payload.findByID({
+        overrideAccess: true,
         id: exportDoc.id,
         collection: 'posts-with-field-hooks-export',
       })
@@ -107,11 +119,13 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
 
     it('should receive format: json during JSON export', async () => {
       const post = await payload.create({
+        overrideAccess: true,
         collection: postsWithFieldHooksSlug,
         data: { customExport: 'test', title: 'Format JSON Test' },
       })
 
       let exportDoc = await payload.create({
+        overrideAccess: true,
         collection: 'posts-with-field-hooks-export',
         data: {
           collectionSlug: postsWithFieldHooksSlug,
@@ -122,6 +136,7 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
       })
 
       exportDoc = await payload.findByID({
+        overrideAccess: true,
         id: exportDoc.id,
         collection: 'posts-with-field-hooks-export',
       })
@@ -135,6 +150,7 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
 
     it('should transform deeply nested fields (group > named tab > field)', async () => {
       const post = await payload.create({
+        overrideAccess: true,
         collection: postsWithFieldHooksSlug,
         data: {
           group: { namedTab: { deepField: 'deep value' } },
@@ -143,6 +159,7 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
       })
 
       let exportDoc = await payload.create({
+        overrideAccess: true,
         collection: 'posts-with-field-hooks-export',
         data: {
           collectionSlug: postsWithFieldHooksSlug,
@@ -153,6 +170,7 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
       })
 
       exportDoc = await payload.findByID({
+        overrideAccess: true,
         id: exportDoc.id,
         collection: 'posts-with-field-hooks-export',
       })
@@ -166,6 +184,7 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
 
     it('should transform deeply nested fields in CSV preview (group > named tab > field)', async () => {
       const post = await payload.create({
+        overrideAccess: true,
         collection: postsWithFieldHooksSlug,
         data: {
           group: { namedTab: { deepField: 'preview deep value' } },
@@ -208,6 +227,7 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
       }
 
       let importDoc = await payload.create({
+        overrideAccess: true,
         collection: 'posts-with-field-hooks-import',
         data: { collectionSlug: postsWithFieldHooksSlug, importMode: 'create' },
         file,
@@ -215,6 +235,7 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
       })
 
       importDoc = await payload.findByID({
+        overrideAccess: true,
         id: importDoc.id,
         collection: 'posts-with-field-hooks-import',
       })
@@ -223,6 +244,7 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
 
       // Import hook appends '_imported_csv' to the value
       const imported = await payload.find({
+        overrideAccess: true,
         collection: postsWithFieldHooksSlug,
         where: { customImport: { equals: 'original_value_imported_csv' } },
       })
@@ -241,6 +263,7 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
       }
 
       let importDoc = await payload.create({
+        overrideAccess: true,
         collection: 'posts-with-field-hooks-import',
         data: {
           collectionSlug: postsWithFieldHooksSlug,
@@ -252,6 +275,7 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
       })
 
       importDoc = await payload.findByID({
+        overrideAccess: true,
         id: importDoc.id,
         collection: 'posts-with-field-hooks-import',
       })
@@ -260,6 +284,7 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
 
       // Import hook appends '_imported_json' to the value
       const imported = await payload.find({
+        overrideAccess: true,
         collection: postsWithFieldHooksSlug,
         where: { customImport: { equals: 'json_value_imported_json' } },
       })
@@ -274,6 +299,7 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
   describe('synthetic import hooks should not clobber existing data with empty cells', () => {
     it('should preserve existing number value when CSV update row has a blank count cell', async () => {
       const existing = await payload.create({
+        overrideAccess: true,
         collection: postsWithFieldHooksSlug,
         data: { count: 5, title: 'Empty Cell Update Number Test' },
       })
@@ -287,6 +313,7 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
       }
 
       let importDoc = await payload.create({
+        overrideAccess: true,
         collection: 'posts-with-field-hooks-import',
         data: {
           collectionSlug: postsWithFieldHooksSlug,
@@ -298,6 +325,7 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
       })
 
       importDoc = await payload.findByID({
+        overrideAccess: true,
         id: importDoc.id,
         collection: 'posts-with-field-hooks-import',
       })
@@ -305,6 +333,7 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
       expect(importDoc.status).toBe('completed')
 
       const after = await payload.findByID({
+        overrideAccess: true,
         id: existing.id,
         collection: postsWithFieldHooksSlug,
       })
@@ -324,11 +353,13 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
       // The field-level hook transforms the value first, then collection-level
       // hook can see the already-transformed data.
       const post = await payload.create({
+        overrideAccess: true,
         collection: postsWithFieldHooksSlug,
         data: { customExport: 'raw', title: 'Order Test' },
       })
 
       let exportDoc = await payload.create({
+        overrideAccess: true,
         collection: 'posts-with-field-hooks-export',
         data: {
           collectionSlug: postsWithFieldHooksSlug,
@@ -339,6 +370,7 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
       })
 
       exportDoc = await payload.findByID({
+        overrideAccess: true,
         id: exportDoc.id,
         collection: 'posts-with-field-hooks-export',
       })
@@ -359,11 +391,13 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
   describe('reusable field configs', () => {
     it('should apply field-level hooks from a shared field definition', async () => {
       const post = await payload.create({
+        overrideAccess: true,
         collection: postsWithFieldHooksSlug,
         data: { email: 'USER@EXAMPLE.COM', title: 'Reusable Field Test' },
       })
 
       let exportDoc = await payload.create({
+        overrideAccess: true,
         collection: 'posts-with-field-hooks-export',
         data: {
           collectionSlug: postsWithFieldHooksSlug,
@@ -374,6 +408,7 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
       })
 
       exportDoc = await payload.findByID({
+        overrideAccess: true,
         id: exportDoc.id,
         collection: 'posts-with-field-hooks-export',
       })
@@ -394,11 +429,13 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
     it('should use default flattening when export hook returns undefined', async () => {
       // A field without any hooks should flatten normally (default behavior)
       const post = await payload.create({
+        overrideAccess: true,
         collection: postsWithFieldHooksSlug,
         data: { secret: 'plain-text', title: 'Default Behavior Test' },
       })
 
       let exportDoc = await payload.create({
+        overrideAccess: true,
         collection: 'posts-with-field-hooks-export',
         data: {
           collectionSlug: postsWithFieldHooksSlug,
@@ -409,6 +446,7 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
       })
 
       exportDoc = await payload.findByID({
+        overrideAccess: true,
         id: exportDoc.id,
         collection: 'posts-with-field-hooks-export',
       })
@@ -428,6 +466,7 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
   describe('field-level hooks inside arrays', () => {
     it('should run field-level export hook on array item sub-fields (CSV)', async () => {
       const post = await payload.create({
+        overrideAccess: true,
         collection: postsWithFieldHooksSlug,
         data: {
           items: [{ note: 'first' }, { note: 'second' }],
@@ -436,6 +475,7 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
       })
 
       let exportDoc = await payload.create({
+        overrideAccess: true,
         collection: 'posts-with-field-hooks-export',
         data: {
           collectionSlug: postsWithFieldHooksSlug,
@@ -446,6 +486,7 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
       })
 
       exportDoc = await payload.findByID({
+        overrideAccess: true,
         id: exportDoc.id,
         collection: 'posts-with-field-hooks-export',
       })
@@ -459,6 +500,7 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
 
     it('should run field-level export hook on array item sub-fields (JSON)', async () => {
       const post = await payload.create({
+        overrideAccess: true,
         collection: postsWithFieldHooksSlug,
         data: {
           items: [{ note: 'alpha' }, { note: 'beta' }],
@@ -467,6 +509,7 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
       })
 
       let exportDoc = await payload.create({
+        overrideAccess: true,
         collection: 'posts-with-field-hooks-export',
         data: {
           collectionSlug: postsWithFieldHooksSlug,
@@ -477,6 +520,7 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
       })
 
       exportDoc = await payload.findByID({
+        overrideAccess: true,
         id: exportDoc.id,
         collection: 'posts-with-field-hooks-export',
       })
@@ -498,6 +542,7 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
       }
 
       let importDoc = await payload.create({
+        overrideAccess: true,
         collection: 'posts-with-field-hooks-import',
         data: { collectionSlug: postsWithFieldHooksSlug, importMode: 'create' },
         file,
@@ -505,6 +550,7 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
       })
 
       importDoc = await payload.findByID({
+        overrideAccess: true,
         id: importDoc.id,
         collection: 'posts-with-field-hooks-import',
       })
@@ -512,6 +558,7 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
       expect(importDoc.status).toBe('completed')
 
       const imported = await payload.find({
+        overrideAccess: true,
         collection: postsWithFieldHooksSlug,
         where: { title: { equals: 'Array Import CSV' } },
       })
@@ -532,6 +579,7 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
       }
 
       let importDoc = await payload.create({
+        overrideAccess: true,
         collection: 'posts-with-field-hooks-import',
         data: {
           collectionSlug: postsWithFieldHooksSlug,
@@ -543,6 +591,7 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
       })
 
       importDoc = await payload.findByID({
+        overrideAccess: true,
         id: importDoc.id,
         collection: 'posts-with-field-hooks-import',
       })
@@ -550,6 +599,7 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
       expect(importDoc.status).toBe('completed')
 
       const imported = await payload.find({
+        overrideAccess: true,
         collection: postsWithFieldHooksSlug,
         where: { title: { equals: 'Array Import JSON' } },
       })
@@ -562,6 +612,7 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
   describe('field-level hooks inside blocks', () => {
     it('should run field-level export hook on block sub-fields (CSV)', async () => {
       const post = await payload.create({
+        overrideAccess: true,
         collection: postsWithFieldHooksSlug,
         data: {
           content: [
@@ -573,6 +624,7 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
       })
 
       let exportDoc = await payload.create({
+        overrideAccess: true,
         collection: 'posts-with-field-hooks-export',
         data: {
           collectionSlug: postsWithFieldHooksSlug,
@@ -583,6 +635,7 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
       })
 
       exportDoc = await payload.findByID({
+        overrideAccess: true,
         id: exportDoc.id,
         collection: 'posts-with-field-hooks-export',
       })
@@ -596,6 +649,7 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
 
     it('should run field-level export hook on block sub-fields (JSON)', async () => {
       const post = await payload.create({
+        overrideAccess: true,
         collection: postsWithFieldHooksSlug,
         data: {
           content: [{ blockType: 'textBlock', body: 'foo' }],
@@ -604,6 +658,7 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
       })
 
       let exportDoc = await payload.create({
+        overrideAccess: true,
         collection: 'posts-with-field-hooks-export',
         data: {
           collectionSlug: postsWithFieldHooksSlug,
@@ -614,6 +669,7 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
       })
 
       exportDoc = await payload.findByID({
+        overrideAccess: true,
         id: exportDoc.id,
         collection: 'posts-with-field-hooks-export',
       })
@@ -634,6 +690,7 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
       }
 
       let importDoc = await payload.create({
+        overrideAccess: true,
         collection: 'posts-with-field-hooks-import',
         data: { collectionSlug: postsWithFieldHooksSlug, importMode: 'create' },
         file,
@@ -641,6 +698,7 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
       })
 
       importDoc = await payload.findByID({
+        overrideAccess: true,
         id: importDoc.id,
         collection: 'posts-with-field-hooks-import',
       })
@@ -648,6 +706,7 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
       expect(importDoc.status).toBe('completed')
 
       const imported = await payload.find({
+        overrideAccess: true,
         collection: postsWithFieldHooksSlug,
         where: { title: { equals: 'Blocks Import CSV' } },
       })
@@ -670,6 +729,7 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
       }
 
       let importDoc = await payload.create({
+        overrideAccess: true,
         collection: 'posts-with-field-hooks-import',
         data: {
           collectionSlug: postsWithFieldHooksSlug,
@@ -681,6 +741,7 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
       })
 
       importDoc = await payload.findByID({
+        overrideAccess: true,
         id: importDoc.id,
         collection: 'posts-with-field-hooks-import',
       })
@@ -688,6 +749,7 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
       expect(importDoc.status).toBe('completed')
 
       const imported = await payload.find({
+        overrideAccess: true,
         collection: postsWithFieldHooksSlug,
         where: { title: { equals: 'Blocks Import JSON' } },
       })
@@ -720,6 +782,7 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
       }
 
       let importDoc = await payload.create({
+        overrideAccess: true,
         collection: 'posts-with-field-hooks-import',
         data: {
           collectionSlug: postsWithFieldHooksSlug,
@@ -731,6 +794,7 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
       })
 
       importDoc = await payload.findByID({
+        overrideAccess: true,
         id: importDoc.id,
         collection: 'posts-with-field-hooks-import',
       })
@@ -738,6 +802,7 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
       expect(importDoc.status).toBe('completed')
 
       const imported = await payload.find({
+        overrideAccess: true,
         collection: postsWithFieldHooksSlug,
         where: { title: { equals: 'Sibling Echo Test' } },
       })
@@ -767,6 +832,7 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
       }
 
       let importDoc = await payload.create({
+        overrideAccess: true,
         collection: 'posts-with-field-hooks-import',
         data: { collectionSlug: postsWithFieldHooksSlug, importMode: 'create' },
         file,
@@ -774,6 +840,7 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
       })
 
       importDoc = await payload.findByID({
+        overrideAccess: true,
         id: importDoc.id,
         collection: 'posts-with-field-hooks-import',
       })
@@ -781,6 +848,7 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
       expect(importDoc.status).toBe('completed')
 
       const imported = await payload.find({
+        overrideAccess: true,
         collection: postsWithFieldHooksSlug,
         sort: 'title',
         where: { title: { in: ['Crash Row 1', 'Crash Row 2', 'Crash Row 3'] } },
@@ -807,6 +875,7 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
       }
 
       let importDoc = await payload.create({
+        overrideAccess: true,
         collection: 'posts-with-field-hooks-import',
         data: {
           collectionSlug: postsWithFieldHooksSlug,
@@ -818,6 +887,7 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
       })
 
       importDoc = await payload.findByID({
+        overrideAccess: true,
         id: importDoc.id,
         collection: 'posts-with-field-hooks-import',
       })
@@ -825,6 +895,7 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
       expect(importDoc.status).toBe('completed')
 
       const imported = await payload.find({
+        overrideAccess: true,
         collection: postsWithFieldHooksSlug,
         sort: 'title',
         where: { title: { in: ['JSON Crash 1', 'JSON Crash 2', 'JSON Crash 3'] } },
@@ -840,20 +911,24 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
     it('should isolate a thrown beforeExport hook to its doc during CSV export', async () => {
       const docs = await Promise.all([
         payload.create({
+          overrideAccess: true,
           collection: postsWithFieldHooksSlug,
           data: { mayCrash: 'safe-a', title: 'Export Crash A' },
         }),
         payload.create({
+          overrideAccess: true,
           collection: postsWithFieldHooksSlug,
           data: { mayCrash: 'CRASH', title: 'Export Crash B' },
         }),
         payload.create({
+          overrideAccess: true,
           collection: postsWithFieldHooksSlug,
           data: { mayCrash: 'safe-c', title: 'Export Crash C' },
         }),
       ])
 
       let exportDoc = await payload.create({
+        overrideAccess: true,
         collection: 'posts-with-field-hooks-export',
         data: {
           collectionSlug: postsWithFieldHooksSlug,
@@ -864,6 +939,7 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
       })
 
       exportDoc = await payload.findByID({
+        overrideAccess: true,
         id: exportDoc.id,
         collection: 'posts-with-field-hooks-export',
       })
@@ -881,20 +957,24 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
     it('should isolate a thrown beforeExport hook to its doc during JSON export', async () => {
       const docs = await Promise.all([
         payload.create({
+          overrideAccess: true,
           collection: postsWithFieldHooksSlug,
           data: { mayCrash: 'json-safe-a', title: 'JSON Export Crash A' },
         }),
         payload.create({
+          overrideAccess: true,
           collection: postsWithFieldHooksSlug,
           data: { mayCrash: 'CRASH', title: 'JSON Export Crash B' },
         }),
         payload.create({
+          overrideAccess: true,
           collection: postsWithFieldHooksSlug,
           data: { mayCrash: 'json-safe-c', title: 'JSON Export Crash C' },
         }),
       ])
 
       let exportDoc = await payload.create({
+        overrideAccess: true,
         collection: 'posts-with-field-hooks-export',
         data: {
           collectionSlug: postsWithFieldHooksSlug,
@@ -905,6 +985,7 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
       })
 
       exportDoc = await payload.findByID({
+        overrideAccess: true,
         id: exportDoc.id,
         collection: 'posts-with-field-hooks-export',
       })
@@ -932,11 +1013,13 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
   describe('field-level hooks under unnamed presentational wrappers', () => {
     it('should fire export hook on a field nested in a row wrapper (CSV)', async () => {
       const post = await payload.create({
+        overrideAccess: true,
         collection: postsWithFieldHooksSlug,
         data: { rowField: 'inside-row', title: 'Row Wrapper Export' },
       })
 
       let exportDoc = await payload.create({
+        overrideAccess: true,
         collection: 'posts-with-field-hooks-export',
         data: {
           collectionSlug: postsWithFieldHooksSlug,
@@ -947,6 +1030,7 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
       })
 
       exportDoc = await payload.findByID({
+        overrideAccess: true,
         id: exportDoc.id,
         collection: 'posts-with-field-hooks-export',
       })
@@ -967,6 +1051,7 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
       }
 
       let importDoc = await payload.create({
+        overrideAccess: true,
         collection: 'posts-with-field-hooks-import',
         data: { collectionSlug: postsWithFieldHooksSlug, importMode: 'create' },
         file,
@@ -974,6 +1059,7 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
       })
 
       importDoc = await payload.findByID({
+        overrideAccess: true,
         id: importDoc.id,
         collection: 'posts-with-field-hooks-import',
       })
@@ -981,6 +1067,7 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
       expect(importDoc.status).toBe('completed')
 
       const imported = await payload.find({
+        overrideAccess: true,
         collection: postsWithFieldHooksSlug,
         where: { title: { equals: 'Row Wrapper Import' } },
       })
@@ -990,11 +1077,13 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
 
     it('should fire export hook on a field nested in a collapsible wrapper (CSV)', async () => {
       const post = await payload.create({
+        overrideAccess: true,
         collection: postsWithFieldHooksSlug,
         data: { collapsibleField: 'inside-collapsible', title: 'Collapsible Wrapper Export' },
       })
 
       let exportDoc = await payload.create({
+        overrideAccess: true,
         collection: 'posts-with-field-hooks-export',
         data: {
           collectionSlug: postsWithFieldHooksSlug,
@@ -1005,6 +1094,7 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
       })
 
       exportDoc = await payload.findByID({
+        overrideAccess: true,
         id: exportDoc.id,
         collection: 'posts-with-field-hooks-export',
       })
@@ -1025,6 +1115,7 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
       }
 
       let importDoc = await payload.create({
+        overrideAccess: true,
         collection: 'posts-with-field-hooks-import',
         data: { collectionSlug: postsWithFieldHooksSlug, importMode: 'create' },
         file,
@@ -1032,6 +1123,7 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
       })
 
       importDoc = await payload.findByID({
+        overrideAccess: true,
         id: importDoc.id,
         collection: 'posts-with-field-hooks-import',
       })
@@ -1039,6 +1131,7 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
       expect(importDoc.status).toBe('completed')
 
       const imported = await payload.find({
+        overrideAccess: true,
         collection: postsWithFieldHooksSlug,
         where: { title: { equals: 'Collapsible Wrapper Import' } },
       })
@@ -1062,6 +1155,7 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
       }
 
       let importDoc = await payload.create({
+        overrideAccess: true,
         collection: 'posts-with-field-hooks-import',
         data: {
           collectionSlug: postsWithFieldHooksSlug,
@@ -1073,6 +1167,7 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
       })
 
       importDoc = await payload.findByID({
+        overrideAccess: true,
         id: importDoc.id,
         collection: 'posts-with-field-hooks-import',
       })
@@ -1080,6 +1175,7 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
       expect(importDoc.status).toBe('completed')
 
       const imported = await payload.find({
+        overrideAccess: true,
         collection: postsWithFieldHooksSlug,
         where: { title: { equals: 'Top Doc Access' } },
       })
