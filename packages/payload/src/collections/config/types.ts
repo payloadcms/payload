@@ -40,9 +40,11 @@ import type {
   SanitizedHierarchyConfig,
 } from '../../hierarchy/types.js'
 import type {
+  AllowedDepth,
   CollectionAdminCustom,
   CollectionCustom,
   CollectionSlug,
+  DefaultDepth,
   GeneratedTypes,
   JsonObject,
   RequestContext,
@@ -52,6 +54,7 @@ import type {
   TypedLocale,
 } from '../../index.js'
 import type {
+  ApplyDepthInternal,
   PayloadRequest,
   SelectIncludeType,
   SelectType,
@@ -865,8 +868,12 @@ export type Collection = {
   }
 }
 
-export type BulkOperationResult<TSlug extends CollectionSlug, TSelect extends SelectType> = {
-  docs: TransformCollectionWithSelect<TSlug, TSelect>[]
+export type BulkOperationResult<
+  TSlug extends CollectionSlug,
+  TSelect extends SelectType = SelectType,
+  TDepth extends AllowedDepth = DefaultDepth,
+> = {
+  docs: ApplyDepthInternal<TransformCollectionWithSelect<TSlug, TSelect>[], TDepth>
   errors: {
     id: DataFromCollectionSlug<TSlug>['id']
     isPublic: boolean

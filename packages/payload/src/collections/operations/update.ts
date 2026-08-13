@@ -3,6 +3,12 @@ import type { DeepPartial } from 'ts-essentials'
 import { status as httpStatus } from 'http-status'
 
 import type { AccessResult } from '../../config/types.js'
+import type {
+  AllowedDepth,
+  type CollectionSlug,
+  DefaultDepth,
+  type FindOptions,
+} from '../../index.js'
 import type { PayloadRequest, PopulateType, SelectType, Sort, Where } from '../../types/index.js'
 import type {
   BulkOperationResult,
@@ -18,7 +24,6 @@ import { validateQueryPaths } from '../../database/queryValidation/validateQuery
 import { validateSortQuery } from '../../database/queryValidation/validateSortQuery.js'
 import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
 import { APIError } from '../../errors/index.js'
-import { type CollectionSlug, type FindOptions } from '../../index.js'
 import { generateFileData } from '../../uploads/generateFileData.js'
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
@@ -68,9 +73,10 @@ export type Arguments<TSlug extends CollectionSlug> = {
 export const updateOperation = async <
   TSlug extends CollectionSlug,
   TSelect extends SelectFromCollectionSlug<TSlug>,
+  TDepth extends AllowedDepth = DefaultDepth,
 >(
   incomingArgs: Arguments<TSlug>,
-): Promise<BulkOperationResult<TSlug, TSelect>> => {
+): Promise<BulkOperationResult<TSlug, TSelect, TDepth>> => {
   let args = incomingArgs
 
   if (args.collection.config.disableBulkEdit && !args.overrideAccess) {
@@ -361,8 +367,7 @@ export const updateOperation = async <
       await commitTransaction(req)
     }
 
-    // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-    return result
+    return result as BulkOperationResult<TSlug, TSelect, TDepth>
   } catch (error: unknown) {
     await killTransaction(args.req)
     throw error
