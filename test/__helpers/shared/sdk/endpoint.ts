@@ -12,7 +12,12 @@ export const handler: PayloadHandler = async (req) => {
 
   if (data?.operation && typeof payload[operation] === 'function') {
     try {
+      // This test-only endpoint is a trusted admin harness used to seed and inspect fixtures.
+      // Preserve its previous privileged behavior unless a test explicitly supplies
+      // `overrideAccess`, while still forwarding the authenticated user for hooks and context.
+      const shouldOverrideAccess = operation !== 'sendEmail'
       const result = await payload[operation]({
+        ...(shouldOverrideAccess ? { overrideAccess: true } : {}),
         ...(typeof data.args === 'object' ? data.args : {}),
         user,
       })

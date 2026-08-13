@@ -6880,6 +6880,7 @@ describe('@payloadcms/plugin-import-export', () => {
 
     it('rejects an invalid preview field path and keeps collection access unchanged', async () => {
       const post = await payload.create({
+        overrideAccess: true,
         collection: 'posts-imports-only',
         data: {
           title: 'Preview field validation',
@@ -6903,6 +6904,7 @@ describe('@payloadcms/plugin-import-export', () => {
           body: JSON.stringify({ title: 'Updated preview field validation' }),
         })
         const unchangedPost = await payload.findByID({
+          overrideAccess: true,
           collection: 'posts-imports-only',
           id: post.id,
         })
@@ -6914,6 +6916,7 @@ describe('@payloadcms/plugin-import-export', () => {
       } finally {
         delete (Object.prototype as Record<string, unknown>).overrideAccess
         await payload.delete({
+          overrideAccess: true,
           collection: 'posts-imports-only',
           id: post.id,
         })

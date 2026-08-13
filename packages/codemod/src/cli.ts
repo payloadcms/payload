@@ -26,7 +26,10 @@ export async function main(argv: string[] = process.argv.slice(2)): Promise<void
     return
   }
 
-  const project = loadProject(resolve(flags.path))
+  const project = loadProject({
+    path: resolve(flags.path),
+    shouldLoadAllSourceFiles: selected.some((transform) => transform.shouldLoadAllSourceFiles),
+  })
   const snapshot = snapshotProject(project)
 
   const packageJsons = loadPackageJsons(resolve(flags.path))
@@ -91,24 +94,36 @@ function printList(): void {
   }
 }
 
-function loadProject(path: string): Project {
+export function loadProject({
+  path,
+  shouldLoadAllSourceFiles = false,
+}: {
+  path: string
+  shouldLoadAllSourceFiles?: boolean
+}): Project {
   const manipulationSettings = {
     indentationText: IndentationText.TwoSpaces,
     quoteKind: QuoteKind.Single,
     useTrailingCommas: true,
   }
   const tsconfigPath = resolve(path, 'tsconfig.json')
-  if (existsSync(tsconfigPath)) {
-    return new Project({ manipulationSettings, tsConfigFilePath: tsconfigPath })
+  const hasTsconfig = existsSync(tsconfigPath)
+  const project = hasTsconfig
+    ? new Project({ manipulationSettings, tsConfigFilePath: tsconfigPath })
+    : new Project({ manipulationSettings })
+
+  if (!hasTsconfig || shouldLoadAllSourceFiles) {
+    project.compilerOptions.set({ allowJs: true })
+    project.addSourceFilesAtPaths([
+      `${path}/**/*.{ts,tsx,js,jsx}`,
+      '!**/node_modules/**',
+      '!**/dist/**',
+      '!**/.next/**',
+      '!**/build/**',
+      '!**/coverage/**',
+    ])
   }
-  const project = new Project({ manipulationSettings })
-  project.addSourceFilesAtPaths([
-    `${path}/**/*.{ts,tsx,js,jsx}`,
-    '!**/node_modules/**',
-    '!**/dist/**',
-    '!**/.next/**',
-    '!**/build/**',
-  ])
+
   return project
 }
 

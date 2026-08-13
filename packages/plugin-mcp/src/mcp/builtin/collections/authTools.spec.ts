@@ -38,7 +38,7 @@ const cases = [
 
 describe('auth collection tools', () => {
   it.each([false, true])(
-    'passes authorizedMCP.overrideAccess=%s to Local API calls',
+    'should pass authorizedMCP.overrideAccess=%s to Local API calls',
     async (overrideAccess) => {
       for (const { input, method, tool } of cases) {
         const localAPICall = vi.fn().mockResolvedValue({})

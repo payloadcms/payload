@@ -278,9 +278,14 @@ describePostgres('postgres operator handlers - postgresUnaccent() behavior', () 
     )
     activePayloads.push(payload)
 
-    await payload.create({ collection: 'accent-items', data: { title: 'Ácido' } })
+    await payload.create({
+      overrideAccess: true,
+      collection: 'accent-items',
+      data: { title: 'Ácido' },
+    })
 
     const result = await payload.find({
+      overrideAccess: true,
       collection: 'accent-items',
       where: { title: { contains: 'acido' } },
     })
@@ -342,6 +347,7 @@ describePostgres('postgres operator handlers - postgresUnaccent() behavior', () 
 
       for (const word of words) {
         const doc = await payload.create({
+          overrideAccess: true,
           collection: 'accent-items',
           data: { title: word },
         })
@@ -349,11 +355,13 @@ describePostgres('postgres operator handlers - postgresUnaccent() behavior', () 
       }
 
       await payload.create({
+        overrideAccess: true,
         collection: 'accent-items',
         data: { title: 'Apple' },
       })
 
       richDoc = await payload.create({
+        overrideAccess: true,
         collection: 'accent-items',
         data: {
           title: 'Ácido Apple',
@@ -368,6 +376,7 @@ describePostgres('postgres operator handlers - postgresUnaccent() behavior', () 
       })
 
       await payload.update({
+        overrideAccess: true,
         collection: 'accent-items',
         id: richDoc.id,
         data: { localizedTitle: 'Ácido' },
@@ -375,6 +384,7 @@ describePostgres('postgres operator handlers - postgresUnaccent() behavior', () 
       })
 
       await payload.update({
+        overrideAccess: true,
         collection: 'accent-items',
         id: richDoc.id,
         data: { localizedTitle: 'Acido' },
@@ -388,6 +398,7 @@ describePostgres('postgres operator handlers - postgresUnaccent() behavior', () 
 
     it('makes contains match accent-insensitively', async () => {
       const result = await payload.find({
+        overrideAccess: true,
         collection: 'accent-items',
         where: { title: { contains: 'acido' } },
       })
@@ -399,6 +410,7 @@ describePostgres('postgres operator handlers - postgresUnaccent() behavior', () 
 
     it('makes like match accent-insensitively', async () => {
       const result = await payload.find({
+        overrideAccess: true,
         collection: 'accent-items',
         where: { title: { like: 'nino' } },
       })
@@ -408,6 +420,7 @@ describePostgres('postgres operator handlers - postgresUnaccent() behavior', () 
 
     it('makes not_like exclude the accented match while including the others', async () => {
       const result = await payload.find({
+        overrideAccess: true,
         collection: 'accent-items',
         where: { title: { not_like: 'nino' } },
       })
@@ -419,6 +432,7 @@ describePostgres('postgres operator handlers - postgresUnaccent() behavior', () 
 
     it('remains case-insensitive together with accent normalization', async () => {
       const result = await payload.find({
+        overrideAccess: true,
         collection: 'accent-items',
         where: { title: { contains: 'ACIDO' } },
       })
@@ -430,6 +444,7 @@ describePostgres('postgres operator handlers - postgresUnaccent() behavior', () 
 
     it('transforms every word of a multi-word like query', async () => {
       const result = await payload.find({
+        overrideAccess: true,
         collection: 'accent-items',
         where: { title: { like: 'acido apple' } },
       })
@@ -439,6 +454,7 @@ describePostgres('postgres operator handlers - postgresUnaccent() behavior', () 
 
     it('matches localized text content for the requested locale', async () => {
       const result = await payload.find({
+        overrideAccess: true,
         collection: 'accent-items',
         locale: 'es',
         where: { localizedTitle: { contains: 'acido' } },
@@ -449,6 +465,7 @@ describePostgres('postgres operator handlers - postgresUnaccent() behavior', () 
 
     it('matches nested group text content', async () => {
       const result = await payload.find({
+        overrideAccess: true,
         collection: 'accent-items',
         where: { 'group.note': { contains: 'acido' } },
       })
@@ -458,6 +475,7 @@ describePostgres('postgres operator handlers - postgresUnaccent() behavior', () 
 
     it('matches relational array sub-field text content', async () => {
       const result = await payload.find({
+        overrideAccess: true,
         collection: 'accent-items',
         where: { 'tags.value': { contains: 'acido' } },
       })
@@ -467,6 +485,7 @@ describePostgres('postgres operator handlers - postgresUnaccent() behavior', () 
 
     it('matches relational blocks sub-field text content', async () => {
       const result = await payload.find({
+        overrideAccess: true,
         collection: 'accent-items',
         where: { 'sections.value': { contains: 'acido' } },
       })
@@ -476,6 +495,7 @@ describePostgres('postgres operator handlers - postgresUnaccent() behavior', () 
 
     it('matches a hasMany text field value accent-insensitively', async () => {
       const result = await payload.find({
+        overrideAccess: true,
         collection: 'accent-items',
         where: { tagsText: { contains: 'acido' } },
       })
@@ -485,12 +505,14 @@ describePostgres('postgres operator handlers - postgresUnaccent() behavior', () 
 
     it('leaves numeric and null comparisons unchanged', async () => {
       const equalsResult = await payload.find({
+        overrideAccess: true,
         collection: 'accent-items',
         where: { score: { equals: 42 } },
       })
       expect(equalsResult.docs.map((doc: any) => doc.id)).toEqual([richDoc.id])
 
       const existsResult = await payload.find({
+        overrideAccess: true,
         collection: 'accent-items',
         where: { score: { exists: false } },
       })
@@ -506,6 +528,7 @@ describePostgres('postgres operator handlers - postgresUnaccent() behavior', () 
       let thrown: unknown
       try {
         await payload.find({
+          overrideAccess: true,
           collection: 'accent-items',
           where: { scores: { contains: 2 } },
         })
@@ -519,6 +542,7 @@ describePostgres('postgres operator handlers - postgresUnaccent() behavior', () 
 
     it('leaves relationship field queries unaffected', async () => {
       const result = await payload.find({
+        overrideAccess: true,
         collection: 'accent-items',
         where: { related: { equals: seeded['Ácido'] } },
       })
@@ -528,11 +552,13 @@ describePostgres('postgres operator handlers - postgresUnaccent() behavior', () 
 
     it('matches a genuine custom text-type id field accent-insensitively', async () => {
       await payload.create({
+        overrideAccess: true,
         collection: 'accent-custom-id-items',
         data: { id: 'acido-slug-ácido', title: 'Ácido slug' },
       })
 
       const result = await payload.find({
+        overrideAccess: true,
         collection: 'accent-custom-id-items',
         where: { id: { contains: 'acido-slug-acido' } },
       })
@@ -558,7 +584,11 @@ describePostgres('postgres operator handlers - postgresUnaccent() behavior', () 
       )
       activePayloads.push(payload)
 
-      const doc = await payload.create({ collection: 'accent-items', data: { title: 'Ácido' } })
+      const doc = await payload.create({
+        overrideAccess: true,
+        collection: 'accent-items',
+        data: { title: 'Ácido' },
+      })
 
       // Postgres cannot ILIKE a native `uuid` column at all - a pre-existing limitation
       // unrelated to this feature. The PgUUID guard means a `contains` query against the id
@@ -567,6 +597,7 @@ describePostgres('postgres operator handlers - postgresUnaccent() behavior', () 
       let thrown: unknown
       try {
         await payload.find({
+          overrideAccess: true,
           collection: 'accent-items',
           where: { id: { contains: String(doc.id).slice(0, 8) } },
         })
@@ -578,6 +609,7 @@ describePostgres('postgres operator handlers - postgresUnaccent() behavior', () 
       expect(String((thrown as Error).message)).not.toContain('unaccent')
 
       const exactMatch = await payload.find({
+        overrideAccess: true,
         collection: 'accent-items',
         where: { id: { equals: doc.id } },
       })
@@ -609,9 +641,14 @@ describePostgres('postgres operator handlers - postgresUnaccent() behavior', () 
     )
     activePayloads.push(payload)
 
-    await payload.create({ collection: 'accent-items', data: { title: 'HELLO' } })
+    await payload.create({
+      overrideAccess: true,
+      collection: 'accent-items',
+      data: { title: 'HELLO' },
+    })
 
     const result = await payload.find({
+      overrideAccess: true,
       collection: 'accent-items',
       where: { title: { contains: 'hello' } },
     })
@@ -657,9 +694,14 @@ describePostgres('postgres operator handlers - postgresUnaccent() behavior', () 
 
     process.env.PAYLOAD_FORCE_DRIZZLE_PUSH = 'false'
 
-    await payload.create({ collection: 'accent-items', data: { title: 'hello world' } })
+    await payload.create({
+      overrideAccess: true,
+      collection: 'accent-items',
+      data: { title: 'hello world' },
+    })
 
     const result = await payload.find({
+      overrideAccess: true,
       collection: 'accent-items',
       where: { title: { contains: 'hello' } },
     })
@@ -697,12 +739,18 @@ describePostgres('postgres operator handlers - postgresUnaccent() behavior', () 
     process.env.PAYLOAD_FORCE_DRIZZLE_PUSH = 'false'
 
     const withTitle = await payload.create({
+      overrideAccess: true,
       collection: 'accent-items',
       data: { title: 'hello' },
     })
-    const withoutTitle = await payload.create({ collection: 'accent-items', data: {} })
+    const withoutTitle = await payload.create({
+      overrideAccess: true,
+      collection: 'accent-items',
+      data: {},
+    })
 
     const result = await payload.find({
+      overrideAccess: true,
       collection: 'accent-items',
       where: { title: { not_equals: 'something-else' } },
     })

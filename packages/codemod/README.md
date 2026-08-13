@@ -21,7 +21,7 @@ With no arguments, runs every registered transform against the current directory
 
 ## How it works
 
-The tool loads your project via [ts-morph](https://ts-morph.com/), using your `tsconfig.json` when present, otherwise globbing `**/*.{ts,tsx,js,jsx}` (excluding `node_modules`, `dist`, `.next`, `build`). Each registered transform is applied in order against the shared project; changes are saved at the end unless `--dry` or `--print` is passed.
+The tool loads your project via [ts-morph](https://ts-morph.com/), using your `tsconfig.json` when present. Transforms that need to inspect files outside that config can request the broader `**/*.{ts,tsx,js,jsx}` source set (excluding `node_modules`, `dist`, `.next`, `build`, and `coverage`). Each registered transform is applied in order against the shared project; changes are saved at the end unless `--dry` or `--print` is passed.
 
 ## Transforms
 

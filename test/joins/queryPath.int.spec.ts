@@ -50,6 +50,7 @@ describe(
       const payload = await getPayloadInstance()
 
       const category = await payload.create({
+        overrideAccess: true,
         collection: 'categories',
         // @ts-expect-error not generated
         data: { title: 'a' },
@@ -69,7 +70,7 @@ describe(
       const payload = await getPayloadInstance()
 
       for (const id of createdIDs) {
-        await payload.delete({ collection: 'categories', id })
+        await payload.delete({ overrideAccess: true, collection: 'categories', id })
       }
 
       createdIDs.length = 0
@@ -83,6 +84,7 @@ describe(
       const paginateSpy = vi.spyOn(Model, 'paginate')
 
       await payload.find({
+        overrideAccess: true,
         collection: 'categories',
         limit: 20,
         // @ts-expect-error not generated
@@ -102,6 +104,7 @@ describe(
       const paginateSpy = vi.spyOn(Model, 'paginate')
 
       await payload.find({
+        overrideAccess: true,
         collection: 'categories',
         // @ts-expect-error not generated
         joins: { posts: false },
@@ -121,6 +124,7 @@ describe(
       const findOneSpy = vi.spyOn(Model, 'findOne')
 
       await payload.findByID({
+        overrideAccess: true,
         collection: 'categories',
         id: category.id,
         // @ts-expect-error not generated
@@ -139,6 +143,7 @@ describe(
       const paginateSpy = vi.spyOn(Model, 'paginate')
 
       await payload.find({
+        overrideAccess: true,
         collection: 'categories',
         limit: 20,
         where: { title: { equals: 'a' } },

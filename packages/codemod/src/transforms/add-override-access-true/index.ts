@@ -47,6 +47,11 @@ type PayloadBindings = {
   payloadTypeSymbols: Set<MorphSymbol>
 }
 
+type PayloadBindingsMutation = {
+  bindings: PayloadBindings
+  hasChanged: boolean
+}
+
 export const addOverrideAccessTrue: Transform = {
   name: 'add-override-access-true',
   apply: ({ project }) => {
@@ -108,10 +113,11 @@ export const addOverrideAccessTrue: Transform = {
   },
   description:
     'Adds `overrideAccess: true` to confidently identified Payload Local API calls that omit it, preserving the previous default behavior after access enforcement became the default. Covers collection, global, auth, and jobs methods; preserves explicit values and reports ambiguous Payload-like calls for manual review.',
+  shouldLoadAllSourceFiles: true,
 }
 
 function discoverPayloadBindings({ sourceFile }: { sourceFile: SourceFile }): PayloadBindings {
-  const bindings: PayloadBindings = {
+  let bindings: PayloadBindings = {
     apiMethodSymbols: new Set<MorphSymbol>(),
     getPayloadSymbols: new Set<MorphSymbol>(),
     jobsSymbols: new Set<MorphSymbol>(),
@@ -153,7 +159,11 @@ function discoverPayloadBindings({ sourceFile }: { sourceFile: SourceFile }): Pa
         bindings.payloadSymbols.add(symbol)
       }
     } else if (Node.isObjectBindingPattern(nameNode)) {
-      collectBindingPatternSymbols({ apiKind: 'payload', bindingPattern: nameNode, bindings })
+      bindings = collectBindingPatternSymbols({
+        apiKind: 'payload',
+        bindingPattern: nameNode,
+        bindings,
+      }).bindings
     }
   }
 
@@ -169,7 +179,11 @@ function discoverPayloadBindings({ sourceFile }: { sourceFile: SourceFile }): Pa
         bindings.payloadSymbols.add(symbol)
       }
     } else if (Node.isObjectBindingPattern(nameNode)) {
-      collectBindingPatternSymbols({ apiKind: 'payload', bindingPattern: nameNode, bindings })
+      bindings = collectBindingPatternSymbols({
+        apiKind: 'payload',
+        bindingPattern: nameNode,
+        bindings,
+      }).bindings
     }
   }
 
@@ -215,19 +229,21 @@ function discoverPayloadBindings({ sourceFile }: { sourceFile: SourceFile }): Pa
       }
 
       if (isKnownPayloadExpression({ bindings, expression: initializer })) {
-        hasChanged =
-          collectBindingPatternSymbols({
-            apiKind: 'payload',
-            bindingPattern: nameNode,
-            bindings,
-          }) || hasChanged
+        const result = collectBindingPatternSymbols({
+          apiKind: 'payload',
+          bindingPattern: nameNode,
+          bindings,
+        })
+        bindings = result.bindings
+        hasChanged = result.hasChanged || hasChanged
       } else if (isKnownJobsExpression({ bindings, expression: initializer })) {
-        hasChanged =
-          collectBindingPatternSymbols({
-            apiKind: 'jobs',
-            bindingPattern: nameNode,
-            bindings,
-          }) || hasChanged
+        const result = collectBindingPatternSymbols({
+          apiKind: 'jobs',
+          bindingPattern: nameNode,
+          bindings,
+        })
+        bindings = result.bindings
+        hasChanged = result.hasChanged || hasChanged
       }
     }
 
@@ -266,19 +282,21 @@ function discoverPayloadBindings({ sourceFile }: { sourceFile: SourceFile }): Pa
         }
       } else if (Node.isObjectLiteralExpression(left)) {
         if (isKnownPayloadExpression({ bindings, expression: right })) {
-          hasChanged =
-            collectAssignmentPatternSymbols({
-              apiKind: 'payload',
-              bindings,
-              objectLiteral: left,
-            }) || hasChanged
+          const result = collectAssignmentPatternSymbols({
+            apiKind: 'payload',
+            bindings,
+            objectLiteral: left,
+          })
+          bindings = result.bindings
+          hasChanged = result.hasChanged || hasChanged
         } else if (isKnownJobsExpression({ bindings, expression: right })) {
-          hasChanged =
-            collectAssignmentPatternSymbols({
-              apiKind: 'jobs',
-              bindings,
-              objectLiteral: left,
-            }) || hasChanged
+          const result = collectAssignmentPatternSymbols({
+            apiKind: 'jobs',
+            bindings,
+            objectLiteral: left,
+          })
+          bindings = result.bindings
+          hasChanged = result.hasChanged || hasChanged
         }
       }
     }
@@ -295,7 +313,7 @@ function collectAssignmentPatternSymbols({
   apiKind: 'jobs' | 'payload'
   bindings: PayloadBindings
   objectLiteral: ObjectLiteralExpression
-}): boolean {
+}): PayloadBindingsMutation {
   const apiMethods = apiKind === 'payload' ? LOCAL_API_METHODS : JOBS_API_METHODS
   let hasChanged = false
 
@@ -331,12 +349,13 @@ function collectAssignmentPatternSymbols({
 
     if (apiKind === 'payload' && methodName === 'jobs') {
       if (Node.isObjectLiteralExpression(initializer)) {
-        hasChanged =
-          collectAssignmentPatternSymbols({
-            apiKind: 'jobs',
-            bindings,
-            objectLiteral: initializer,
-          }) || hasChanged
+        const result = collectAssignmentPatternSymbols({
+          apiKind: 'jobs',
+          bindings,
+          objectLiteral: initializer,
+        })
+        bindings = result.bindings
+        hasChanged = result.hasChanged || hasChanged
       } else if (Node.isIdentifier(initializer)) {
         const symbol = initializer.getSymbol()
         if (symbol && !bindings.jobsSymbols.has(symbol)) {
@@ -353,7 +372,7 @@ function collectAssignmentPatternSymbols({
     }
   }
 
-  return hasChanged
+  return { bindings, hasChanged }
 }
 
 function collectBindingPatternSymbols({
@@ -364,7 +383,7 @@ function collectBindingPatternSymbols({
   apiKind: 'jobs' | 'payload'
   bindingPattern: ObjectBindingPattern
   bindings: PayloadBindings
-}): boolean {
+}): PayloadBindingsMutation {
   const apiMethods = apiKind === 'payload' ? LOCAL_API_METHODS : JOBS_API_METHODS
   let hasChanged = false
 
@@ -378,12 +397,13 @@ function collectBindingPatternSymbols({
 
     if (apiKind === 'payload' && methodName === 'jobs') {
       if (Node.isObjectBindingPattern(localName)) {
-        hasChanged =
-          collectBindingPatternSymbols({
-            apiKind: 'jobs',
-            bindingPattern: localName,
-            bindings,
-          }) || hasChanged
+        const result = collectBindingPatternSymbols({
+          apiKind: 'jobs',
+          bindingPattern: localName,
+          bindings,
+        })
+        bindings = result.bindings
+        hasChanged = result.hasChanged || hasChanged
       } else if (Node.isIdentifier(localName)) {
         const symbol = localName.getSymbol()
         if (symbol && !bindings.jobsSymbols.has(symbol)) {
@@ -400,7 +420,7 @@ function collectBindingPatternSymbols({
     }
   }
 
-  return hasChanged
+  return { bindings, hasChanged }
 }
 
 function isPayloadDeclaration({

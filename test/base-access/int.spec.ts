@@ -32,6 +32,7 @@ describe('baseAccess', () => {
   afterEach(async () => {
     for (const id of createdPostIDs) {
       await payload.delete({
+        overrideAccess: true,
         id,
         collection: postsSlug,
       })
@@ -62,6 +63,7 @@ describe('baseAccess', () => {
       },
     ]) {
       const doc = await payload.create({
+        overrideAccess: true,
         collection: postsSlug,
         data,
       })
@@ -100,6 +102,7 @@ describe('baseAccess', () => {
     ).rejects.toThrow(Forbidden)
 
     const doc = await payload.create({
+      overrideAccess: true,
       collection: postsSlug,
       data,
       req,

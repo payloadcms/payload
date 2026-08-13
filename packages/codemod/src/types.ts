@@ -22,4 +22,5 @@ export type Transform = {
   apply: (ctx: TransformContext) => Promise<TransformResult> | TransformResult
   description: string
   name: string
+  shouldLoadAllSourceFiles?: boolean
 }

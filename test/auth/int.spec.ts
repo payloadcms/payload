@@ -2265,6 +2265,7 @@ describe('Auth', () => {
       rawApiKey: string
     }) => {
       const user = await payload.create({
+        overrideAccess: true,
         collection,
         data: { apiKey: rawApiKey, enableAPIKey: true, ...data },
       })
@@ -2288,6 +2289,7 @@ describe('Auth', () => {
     const seedCorruptUser = async (collection = rotateSecretSlug) => {
       const rawApiKey = uuid()
       const user = await payload.create({
+        overrideAccess: true,
         collection,
         data: { apiKey: rawApiKey, enableAPIKey: true },
       })
@@ -2312,7 +2314,7 @@ describe('Auth', () => {
         idsByCollection.set(collection, [...(idsByCollection.get(collection) ?? []), id])
       }
       for (const [collection, ids] of idsByCollection) {
-        await payload.delete({ collection, where: { id: { in: ids } } })
+        await payload.delete({ overrideAccess: true, collection, where: { id: { in: ids } } })
       }
       createdIDs.length = 0
     })
@@ -2421,7 +2423,11 @@ describe('Auth', () => {
       expect(payload.decrypt(raw.apiKey)).toBe(rawApiKey)
 
       // Remove the corrupt row; the re-run completes and skips the migrated row.
-      await payload.delete({ id: corrupt.id, collection: rotateSecretSecondarySlug })
+      await payload.delete({
+        overrideAccess: true,
+        id: corrupt.id,
+        collection: rotateSecretSecondarySlug,
+      })
       const rerun = await rotateSecret(rotateArgs)
       expect(rerun).toEqual({ migrated: 0, skipped: 1 })
     })
@@ -2478,6 +2484,7 @@ describe('Auth', () => {
     it('should re-key and upgrade a legacy aes-256-ctr value to the v1 envelope', async () => {
       const rawApiKey = uuid()
       const user = await payload.create({
+        overrideAccess: true,
         collection: rotateSecretSlug,
         data: { apiKey: rawApiKey, enableAPIKey: true },
       })
@@ -2514,6 +2521,7 @@ describe('Auth', () => {
     it('should mask (not throw) an apiKey encrypted under a secret not in the keyring', async () => {
       const rawApiKey = uuid()
       const user = await payload.create({
+        overrideAccess: true,
         collection: rotateSecretSlug,
         data: { apiKey: rawApiKey, enableAPIKey: true },
       })
@@ -2528,7 +2536,11 @@ describe('Auth', () => {
 
       // Reading through the Local API runs the afterRead decrypt hook, which must
       // mask the undecryptable field rather than failing the whole document read.
-      const doc = await payload.findByID({ collection: rotateSecretSlug, id: user.id })
+      const doc = await payload.findByID({
+        overrideAccess: true,
+        collection: rotateSecretSlug,
+        id: user.id,
+      })
       expect(doc.apiKey).toBeNull()
     })
 
@@ -2553,6 +2565,7 @@ describe('Auth', () => {
       // Password login on the same collection still works after its api keys
       // were re-keyed - the salt/hash never involved the secret.
       const { token } = await payload.login({
+        overrideAccess: true,
         collection: rotateSecretLoginSlug,
         data: { email: loginEmail, password: loginPassword },
       })
@@ -2630,7 +2643,11 @@ describe('Auth', () => {
     }
 
     it('should verify a JWT signed under a previous secret, and reject an unknown secret', async () => {
-      const { token, user } = await payload.login({ collection: slug, data: { email, password } })
+      const { token, user } = await payload.login({
+        overrideAccess: true,
+        collection: slug,
+        data: { email, password },
+      })
 
       const { exp: _exp, iat: _iat, ...claims } = jwtDecode<Record<string, unknown>>(token)
       const nowInSeconds = Math.floor(Date.now() / 1000)
