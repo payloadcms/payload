@@ -2,7 +2,7 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "main": ".open-next/worker.js",
   "name": "my-app",
-  "compatibility_date": "2025-08-15",
+  "compatibility_date": "2025-09-15", // >= 2025-09-01 enables node:fs — payload uploads import fs/promises at module top level
   "compatibility_flags": [
     // Enable Node.js API
     // see https://developers.cloudflare.com/workers/configuration/compatibility-flags/#nodejs-compatibility-flag

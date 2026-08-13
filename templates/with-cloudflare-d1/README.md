@@ -108,6 +108,10 @@ Cloudflare Workers runs in an [isolated environment that cannot access private I
 
 GraphQL queries and mutations fail on Workers with `Unexpected input type`. The root cause is the vendored `graphql-query-complexity` validation rule crashing under workerd (the previously referenced workerd#5175 is closed and unrelated). Tracked in [payloadcms/payload#17771](https://github.com/payloadcms/payload/issues/17771) — a working workaround (a custom GraphQL route that omits the complexity rule) is documented there. The REST API is unaffected.
 
+### Uploads / node:fs
+
+Payload's uploads code imports `node:fs/promises` at module top level. The template's `compatibility_date` must be >= 2025-09-01 so workerd enables the native `node:fs` module — below that date, uploads fail at module load (or hit unenv's "not implemented" `fs.mkdir`).
+
 ### Worker size limits
 
 We currently recommend deploying this template to the Paid Workers plan due to bundle [size limits](https://developers.cloudflare.com/workers/platform/limits/#worker-size) of 3mb. We're actively trying to reduce our bundle footprint over time to better meet this metric.
