@@ -106,7 +106,7 @@ Cloudflare Workers runs in an [isolated environment that cannot access private I
 
 ### GraphQL
 
-We are currently waiting on some issues with GraphQL to be [fixed upstream in Workers](https://github.com/cloudflare/workerd/issues/5175) so full support for GraphQL is not currently guaranteed when deployed.
+GraphQL queries and mutations fail on Workers with `Unexpected input type`. The root cause is the vendored `graphql-query-complexity` validation rule crashing under workerd (the previously referenced workerd#5175 is closed and unrelated). Tracked in [payloadcms/payload#17771](https://github.com/payloadcms/payload/issues/17771) — a working workaround (a custom GraphQL route that omits the complexity rule) is documented there. The REST API is unaffected.
 
 ### Worker size limits
 
