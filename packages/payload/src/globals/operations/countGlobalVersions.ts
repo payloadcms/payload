@@ -53,7 +53,10 @@ export const countGlobalVersionsOperation = async <TSlug extends GlobalSlug>(
     let accessResult: AccessResult
 
     if (!overrideAccess) {
-      accessResult = await executeAccess({ disableErrors, req }, global.access.readVersions)
+      accessResult = await executeAccess(
+        { slug: global.slug, disableErrors, req },
+        global.access.readVersions,
+      )
 
       // If errors are disabled, and access returns false, return empty results
       if (accessResult === false) {

@@ -39,13 +39,19 @@ import type {
 } from '../bin/generateImportMap/index.js'
 import type {
   Collection,
+  CollectionAccess,
   CollectionConfig,
   SanitizedCollectionConfig,
 } from '../collections/config/types.js'
 import type { DatabaseAdapterResult } from '../database/types.js'
 import type { EmailAdapter, SendEmailOptions } from '../email/types.js'
 import type { ErrorName } from '../errors/types.js'
-import type { GlobalConfig, Globals, SanitizedGlobalConfig } from '../globals/config/types.js'
+import type {
+  GlobalAccess,
+  GlobalConfig,
+  Globals,
+  SanitizedGlobalConfig,
+} from '../globals/config/types.js'
 import type {
   Block,
   ClientField,
@@ -386,6 +392,8 @@ export type AccessArgs<TData = any> = {
   isReadingStaticFile?: boolean
   /** The original request that requires an access check */
   req: PayloadRequest
+  /** The slug of the Collection or Global document being accessed */
+  slug: string
 }
 
 /**
@@ -395,6 +403,11 @@ export type AccessArgs<TData = any> = {
  * @see https://payloadcms.com/docs/access-control/overview
  */
 export type Access<TData = any> = (args: AccessArgs<TData>) => AccessResult | Promise<AccessResult>
+
+export type BaseAccess = {
+  collections?: CollectionAccess
+  globals?: GlobalAccess
+}
 
 /** Web Request/Response model, but the req has more payload specific properties added to it. */
 export type PayloadHandler = (req: PayloadRequest) => Promise<Response> | Response
@@ -1358,6 +1371,10 @@ export type Config = {
      */
     jwtOrder?: ('Bearer' | 'cookie' | 'JWT')[]
   }
+  /**
+   * Define Collection and Global access constraints that are combined with document Access Control using AND semantics.
+   */
+  baseAccess?: BaseAccess
   /** Custom Payload bin scripts can be injected via the config. */
   bin?: BinScriptConfig[]
   blocks?: Block[]

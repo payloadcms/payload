@@ -179,6 +179,7 @@ export const addOrderableEndpoint = (
           // Currently only one doc can be moved at a time. We should review this if we want to allow
           // multiple docs to be moved at once in the future.
           id: docsToMove[0],
+          slug: collection.slug,
           data: {},
           req,
         },
