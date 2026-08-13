@@ -10,12 +10,13 @@ import type { FieldAffectingData, FlattenedField, Option } from '../fields/confi
 import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 
 import { MissingEditorProp } from '../errors/MissingEditorProp.js'
-import { fieldAffectsData, fieldIsVirtual } from '../fields/config/types.js'
+import { fieldAffectsData, fieldIsVirtual, fieldShouldBeLocalized } from '../fields/config/types.js'
 import { generateJobsJSONSchemas } from '../queues/config/generateJobsJSONSchemas.js'
 import { flattenAllFields } from './flattenAllFields.js'
 import { formatNames, toWords } from './formatLabels.js'
 import { getCollectionIDFieldTypes } from './getCollectionIDFieldTypes.js'
 import { optionsAreEqual } from './optionsAreEqual.js'
+import { traverseForLocalizedFields } from './traverseForLocalizedFields.js'
 
 /** Read (`output`) vs write (`input`) shape: `input` is what `create`/`update` accept. */
 export type SchemaVariant = 'input' | 'output'
@@ -55,11 +56,20 @@ function buildOptionEnums(options: Option[]): string[] {
 
 function generateEntitySchemas(
   entities: (SanitizedCollectionConfig | SanitizedGlobalConfig)[],
+  {
+    entityDefinitions,
+    localized = false,
+  }: { entityDefinitions: { [k: string]: JSONSchema4 }; localized?: boolean },
 ): JSONSchema4 {
   const properties = [...entities].reduce(
     (acc, { slug }) => {
-      acc[slug] = {
-        $ref: `#/$defs/${slug}`,
+      const definition = `${slug}${localized ? '_localized' : ''}`
+
+      // Localized definitions only exist for entities that actually have localized fields.
+      if (definition in entityDefinitions) {
+        acc[slug] = {
+          $ref: `#/$defs/${definition}`,
+        }
       }
 
       return acc
@@ -403,6 +413,13 @@ export type FieldsToJSONSchemaArgs = {
   /** Allows you to define new top-level interfaces that can be re-used in the output schema. */
   interfaceNameDefinitions: Map<string, JSONSchema4>
   /**
+   * Emit the `locale: 'all'` shape, where every localized field becomes an object keyed by
+   * locale code.
+   */
+  localizedSchema?: boolean
+  /** Whether an ancestor field is localized, which makes descendants localized too. */
+  parentIsLocalized?: boolean
+  /**
    * Allows you to append raw TS source to `payload-types.ts`. Identical
    * strings de-dupe naturally, so the same helper written from many fields
    * ends up emitted once.
@@ -418,6 +435,8 @@ export function fieldsToJSONSchema({
   forceInlineBlocks,
   i18n,
   interfaceNameDefinitions,
+  localizedSchema = false,
+  parentIsLocalized = false,
   typeStringDefinitions,
   variant = 'output',
 }: FieldsToJSONSchemaArgs): {
@@ -459,6 +478,8 @@ export function fieldsToJSONSchema({
         // `isOptionalOnInput` controls the `?`: on input, defaulted fields can be omitted.
         const isOptionalOnInput = variant === 'input' && hasDefaultValue
 
+        const localized = fieldShouldBeLocalized({ field, parentIsLocalized })
+
         const fieldDescription = entityOrFieldToJsDocs({ entity: field, i18n })
         const baseFieldSchema: JSONSchema4 = {}
         if (fieldDescription) {
@@ -482,6 +503,8 @@ export function fieldsToJSONSchema({
                   forceInlineBlocks,
                   i18n,
                   interfaceNameDefinitions,
+                  localizedSchema,
+                  parentIsLocalized: localized,
                   typeStringDefinitions,
                   variant,
                 }),
@@ -523,6 +546,8 @@ export function fieldsToJSONSchema({
                         forceInlineBlocks,
                         i18n,
                         interfaceNameDefinitions,
+                        localizedSchema,
+                        parentIsLocalized: localized,
                         typeStringDefinitions,
                         variant,
                       })
@@ -582,6 +607,8 @@ export function fieldsToJSONSchema({
                   forceInlineBlocks,
                   i18n,
                   interfaceNameDefinitions,
+                  localizedSchema,
+                  parentIsLocalized: localized,
                   typeStringDefinitions,
                   variant,
                 }),
@@ -902,6 +929,8 @@ export function fieldsToJSONSchema({
                 forceInlineBlocks,
                 i18n,
                 interfaceNameDefinitions,
+                localizedSchema,
+                parentIsLocalized: localized,
                 typeStringDefinitions,
                 variant,
               }),
@@ -932,6 +961,22 @@ export function fieldsToJSONSchema({
 
           default: {
             break
+          }
+        }
+
+        // `locale: 'all'` returns every locale of a localized field, so key the field schema by
+        // locale code. Nested fields are already handled by `parentIsLocalized`.
+        if (localizedSchema && config?.localization && localized) {
+          fieldSchema = {
+            type: 'object',
+            additionalProperties: false,
+            properties: config.localization.localeCodes.reduce(
+              (acc, locale) => {
+                acc[locale] = fieldSchema!
+                return acc
+              },
+              {} as NonNullable<JSONSchema4['properties']>,
+            ),
           }
         }
 
@@ -966,6 +1011,7 @@ export function entityToJSONSchema(
   i18n?: I18n,
   forceInlineBlocks?: boolean,
   variant: SchemaVariant = 'output',
+  localizedSchema: boolean = false,
 ): JSONSchema4 {
   if (!collectionIDFieldTypes) {
     collectionIDFieldTypes = getCollectionIDFieldTypes({ config, defaultIDType })
@@ -1037,6 +1083,7 @@ export function entityToJSONSchema(
     forceInlineBlocks,
     i18n,
     interfaceNameDefinitions,
+    localizedSchema,
     typeStringDefinitions,
     variant,
   })
@@ -1059,7 +1106,7 @@ export function entityToJSONSchema(
   const jsonSchema: JSONSchema4 = {
     type: 'object',
     additionalProperties: false,
-    title,
+    title: localizedSchema ? `${title}_localized` : title,
     ...fieldsSchema,
   }
 
@@ -1549,6 +1596,21 @@ export function configToJSONSchema(
         interfaceNameDefinitions,
       })
 
+      if (config.localization && traverseForLocalizedFields(entity.fields)) {
+        acc[`${entity.slug}_localized`] = entityToJSONSchema(
+          config,
+          entity,
+          interfaceNameDefinitions,
+          defaultIDType!,
+          typeStringDefinitions,
+          collectionIDFieldTypes,
+          i18n,
+          forceInlineBlocks,
+          'output',
+          true,
+        )
+      }
+
       if (type === 'global') {
         select.properties!.globalType = {
           type: 'boolean',
@@ -1649,12 +1711,24 @@ export function configToJSONSchema(
     properties: {
       auth: generateAuthOperationSchemas(config.collections),
       blocks: blocksDefinition,
-      collections: generateEntitySchemas(config.collections || []),
+      collections: generateEntitySchemas(config.collections || [], { entityDefinitions }),
       collectionsJoins: generateCollectionJoinsSchemas(config.collections || []),
+      ...(config.localization && {
+        collectionsLocalized: generateEntitySchemas(config.collections || [], {
+          entityDefinitions,
+          localized: true,
+        }),
+      }),
       collectionsSelect: generateEntitySelectSchemas(config.collections || []),
       db: generateDbEntitySchema(config),
+      globals: generateEntitySchemas(config.globals || [], { entityDefinitions }),
+      ...(config.localization && {
+        globalsLocalized: generateEntitySchemas(config.globals || [], {
+          entityDefinitions,
+          localized: true,
+        }),
+      }),
       fallbackLocale: generateFallbackLocaleEntitySchemas(config.localization),
-      globals: generateEntitySchemas(config.globals || []),
       globalsSelect: generateEntitySelectSchemas(config.globals || []),
       locale: generateLocaleEntitySchemas(config.localization),
       widgets: widgetSchemas.schema,
@@ -1690,6 +1764,7 @@ export function configToJSONSchema(
       'jobs',
       'blocks',
       'widgets',
+      ...(config.localization ? ['collectionsLocalized', 'globalsLocalized'] : []),
     ],
     title: 'Config',
   }

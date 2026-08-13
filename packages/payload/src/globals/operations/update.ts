@@ -1,13 +1,13 @@
 import type { DeepPartial } from 'ts-essentials'
 
 import type { FindOptions } from '../../collections/operations/local/find.js'
-import type { GlobalSlug, JsonObject } from '../../index.js'
+import type { GlobalSlug, JsonObject, LocaleValue, TypedLocale } from '../../index.js'
 import type {
   Operation,
   PayloadRequest,
   PopulateType,
   SelectType,
-  TransformGlobalWithSelect,
+  TransformGlobal,
   Where,
 } from '../../types/index.js'
 import type {
@@ -34,12 +34,14 @@ import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
+import { unwrapLocalizedDoc } from '../../utilities/unwrapLocalizedDoc.js'
 import { buildLocalizedPublishData } from '../../versions/buildSingleLocalePublishData.js'
 import { getLatestGlobalVersion } from '../../versions/getLatestGlobalVersion.js'
 import { saveVersion } from '../../versions/saveVersion.js'
-type Args<TSlug extends GlobalSlug> = {
+
+type Args<TSlug extends GlobalSlug, TLocale extends LocaleValue = TypedLocale> = {
   autosave?: boolean
-  data: DeepPartial<Omit<DataFromGlobalSlug<TSlug>, 'id'>>
+  data: DeepPartial<Omit<DataFromGlobalSlug<TSlug, TLocale>, 'id'>>
   depth?: number
   disableTransaction?: boolean
   draft?: boolean
@@ -57,9 +59,10 @@ type Args<TSlug extends GlobalSlug> = {
 export const updateOperation = async <
   TSlug extends GlobalSlug,
   TSelect extends SelectFromGlobalSlug<TSlug>,
+  TLocale extends LocaleValue = TypedLocale,
 >(
   args: Args<TSlug>,
-): Promise<TransformGlobalWithSelect<TSlug, TSelect>> => {
+): Promise<TransformGlobal<TSlug, TSelect, TLocale>> => {
   const {
     slug,
     autosave,
@@ -191,16 +194,50 @@ export const updateOperation = async <
     // beforeValidate - Fields
     // /////////////////////////////////////
 
-    data = await beforeValidate({
-      collection: null,
-      context: req.context,
-      data,
-      doc: originalDoc,
-      global: globalConfig,
-      operation: 'update',
-      overrideAccess: overrideAccess!,
-      req,
-    })
+    let localeAllDataByLocale: null | Record<string, any> = null
+
+    if (payload.config.localization && locale === 'all') {
+      localeAllDataByLocale = {}
+      for (const locale of payload.config.localization.localeCodes) {
+        localeAllDataByLocale[locale] = unwrapLocalizedDoc({
+          config: payload.config,
+          doc: data,
+          fields: globalConfig.flattenedFields,
+          locale,
+        })
+      }
+    }
+
+    if (localeAllDataByLocale) {
+      for (const locale of Object.keys(localeAllDataByLocale)) {
+        localeAllDataByLocale[locale] = await beforeValidate({
+          collection: null,
+          context: req.context,
+          data: localeAllDataByLocale[locale],
+          doc: unwrapLocalizedDoc({
+            config: payload.config,
+            doc: originalDoc,
+            fields: globalConfig.flattenedFields,
+            locale,
+          }),
+          global: globalConfig,
+          operation: 'update',
+          overrideAccess: overrideAccess!,
+          req,
+        })
+      }
+    } else {
+      data = await beforeValidate({
+        collection: null,
+        context: req.context,
+        data,
+        doc: originalDoc,
+        global: globalConfig,
+        operation: 'update',
+        overrideAccess: overrideAccess!,
+        req,
+      })
+    }
 
     // /////////////////////////////////////
     // beforeValidate - Global
@@ -257,7 +294,34 @@ export const updateOperation = async <
         unpublishAllLocales,
     }
 
-    let result: JsonObject = await beforeChange(beforeChangeArgs)
+    let result: JsonObject
+
+    if (localeAllDataByLocale) {
+      // With `locale: 'all'`, run the field hooks once per locale against that locale's view of
+      // the original document, threading the accumulated result through each pass.
+      let localeAllResult: JsonObject | null = null
+
+      for (const locale of Object.keys(localeAllDataByLocale)) {
+        req.locale = locale
+
+        localeAllResult = await beforeChange({
+          ...beforeChangeArgs,
+          data: localeAllDataByLocale[locale],
+          doc: unwrapLocalizedDoc({
+            config: payload.config,
+            doc: originalDoc,
+            fields: globalConfig.flattenedFields,
+            locale,
+          }),
+          docWithLocales: localeAllResult ?? globalJSON,
+        })
+      }
+
+      req.locale = 'all'
+      result = localeAllResult!
+    } else {
+      result = await beforeChange(beforeChangeArgs)
+    }
 
     if (
       config?.localization &&
@@ -494,7 +558,7 @@ export const updateOperation = async <
       await commitTransaction(req)
     }
 
-    return result as TransformGlobalWithSelect<TSlug, TSelect>
+    return result as TransformGlobal<TSlug, TSelect, TLocale>
   } catch (error: unknown) {
     await killTransaction(req)
     throw error

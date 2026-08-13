@@ -37,6 +37,7 @@ import {
   hasDraftValidationEnabled,
   hasLocalizeStatusEnabled,
 } from '../../../utilities/getVersionsConfig.js'
+import { unwrapLocalizedDoc } from '../../../utilities/unwrapLocalizedDoc.js'
 import { buildLocalizedPublishData } from '../../../versions/buildSingleLocalePublishData.js'
 export type SharedUpdateDocumentArgs<TSlug extends CollectionSlug> = {
   autosave: boolean
@@ -186,21 +187,55 @@ export const updateDocument = async <
     })
   }
 
+  let localesAllDataByLocale: null | Record<string, JsonObject> = null
+
+  if (config.localization && locale === 'all') {
+    localesAllDataByLocale = {}
+    for (const locale of config.localization.localeCodes) {
+      localesAllDataByLocale[locale] = unwrapLocalizedDoc({
+        config,
+        doc: data,
+        fields: collectionConfig.flattenedFields,
+        locale,
+      })
+    }
+  }
+
   // /////////////////////////////////////
   // beforeValidate - Fields
   // /////////////////////////////////////
-
-  data = await beforeValidate<DeepPartial<DataFromCollectionSlug<TSlug>>>({
-    id,
-    collection: collectionConfig,
-    context: req.context,
-    data,
-    doc: originalDoc,
-    global: null,
-    operation: 'update',
-    overrideAccess,
-    req,
-  })
+  if (localesAllDataByLocale) {
+    for (const locale of Object.keys(localesAllDataByLocale)) {
+      localesAllDataByLocale[locale] = await beforeValidate({
+        id,
+        collection: collectionConfig,
+        context: req.context,
+        data: localesAllDataByLocale[locale],
+        doc: unwrapLocalizedDoc({
+          config,
+          doc: originalDoc,
+          fields: collectionConfig.flattenedFields,
+          locale,
+        }),
+        global: null,
+        operation: 'update',
+        overrideAccess,
+        req,
+      })
+    }
+  } else {
+    data = await beforeValidate<DeepPartial<DataFromCollectionSlug<TSlug>>>({
+      id,
+      collection: collectionConfig,
+      context: req.context,
+      data,
+      doc: originalDoc,
+      global: null,
+      operation: 'update',
+      overrideAccess,
+      req,
+    })
+  }
 
   // /////////////////////////////////////
   // beforeValidate - Collection
@@ -274,7 +309,34 @@ export const updateDocument = async <
   // Handle Localized Data Merging
   // /////////////////////////////////////
 
-  let result: JsonObject = await beforeChange(beforeChangeArgs)
+  let result: JsonObject
+
+  if (localesAllDataByLocale) {
+    // With `locale: 'all'`, run the field hooks once per locale against that locale's view of the
+    // original document, threading the accumulated result through each pass.
+    let localeAllResult: JsonObject | null = null
+
+    for (const locale of Object.keys(localesAllDataByLocale)) {
+      req.locale = locale
+
+      localeAllResult = await beforeChange({
+        ...beforeChangeArgs,
+        data: localesAllDataByLocale[locale],
+        doc: unwrapLocalizedDoc({
+          config,
+          doc: originalDoc,
+          fields: collectionConfig.flattenedFields,
+          locale,
+        }),
+        docWithLocales: localeAllResult ?? docWithLocales,
+      })
+    }
+
+    req.locale = 'all'
+    result = localeAllResult!
+  } else {
+    result = await beforeChange(beforeChangeArgs)
+  }
 
   if (
     config.localization &&

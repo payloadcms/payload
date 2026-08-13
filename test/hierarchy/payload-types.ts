@@ -82,6 +82,9 @@ export interface Config {
     'payload-migrations': PayloadMigration;
   };
   collectionsJoins: {};
+  collectionsLocalized: {
+    products: ProductLocalized;
+  };
   collectionsSelect: {
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     departments: DepartmentsSelect<false> | DepartmentsSelect<true>;
@@ -100,12 +103,15 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
-  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es' | 'de') | ('en' | 'es' | 'de')[];
   globals: {};
+  globalsLocalized: {};
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es' | 'de') | ('en' | 'es' | 'de')[];
   globalsSelect: {};
   locale: 'en' | 'es' | 'de';
   widgets: {
     collections: CollectionsWidget;
+    'collection-query': CollectionQueryWidget;
+    activity: ActivityWidget;
   };
   user: User;
   jobs: {
@@ -372,6 +378,34 @@ export interface PayloadMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "products_localized".
+ */
+export interface ProductLocalized {
+  id: string;
+  parent?: (string | null) | Product;
+  name: {
+    en?: string;
+    es?: string;
+    de?: string;
+  };
+  description?: {
+    en?: string | null;
+    es?: string | null;
+    de?: string | null;
+  };
+  parentFolder?: (string | null) | Folder;
+  updatedAt: string;
+  createdAt: string;
+  _status?: {
+    en?: ('draft' | 'published') | null;
+    es?: ('draft' | 'published') | null;
+    de?: ('draft' | 'published') | null;
+  };
+  _h_slugPath?: string | null;
+  _h_titlePath?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "categories_select".
  */
 export interface CategoriesSelect<T extends boolean = true> {
@@ -545,6 +579,60 @@ export interface CollectionsWidget {
     [k: string]: unknown;
   };
   width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-query_widget".
+ */
+export interface CollectionQueryWidget {
+  data?: {
+    title?: string | null;
+    relatedCollection:
+      | 'categories'
+      | 'departments'
+      | 'divisions'
+      | 'folders'
+      | 'organizations'
+      | 'pages'
+      | 'products'
+      | 'regions'
+      | 'users';
+    where?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    sortField?: string | null;
+    sortDirection?: ('asc' | 'desc') | null;
+    limit?: number | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "activity_widget".
+ */
+export interface ActivityWidget {
+  data?: {
+    excludedCollections?:
+      | (
+          | 'categories'
+          | 'departments'
+          | 'divisions'
+          | 'folders'
+          | 'organizations'
+          | 'pages'
+          | 'products'
+          | 'regions'
+          | 'users'
+        )[]
+      | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

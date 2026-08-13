@@ -86,6 +86,9 @@ export interface Config {
     'payload-migrations': PayloadMigration;
   };
   collectionsJoins: {};
+  collectionsLocalized: {
+    'cyclical-relationship': CyclicalRelationshipLocalized;
+  };
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     point: PointSelect<false> | PointSelect<true>;
@@ -108,12 +111,15 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
-  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es') | ('en' | 'es')[];
   globals: {};
+  globalsLocalized: {};
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es') | ('en' | 'es')[];
   globalsSelect: {};
   locale: 'en' | 'es';
   widgets: {
     collections: CollectionsWidget;
+    'collection-query': CollectionQueryWidget;
+    activity: ActivityWidget;
   };
   user: User;
   jobs: {
@@ -471,6 +477,25 @@ export interface PayloadMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "cyclical-relationship_localized".
+ */
+export interface CyclicalRelationshipLocalized {
+  id: string;
+  title?: {
+    en?: string | null;
+    es?: string | null;
+  };
+  relationToSelf?: (string | null) | CyclicalRelationship;
+  media?: (string | null) | Media;
+  updatedAt: string;
+  createdAt: string;
+  _status?: {
+    en?: ('draft' | 'published') | null;
+    es?: ('draft' | 'published') | null;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
@@ -707,6 +732,68 @@ export interface CollectionsWidget {
     [k: string]: unknown;
   };
   width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-query_widget".
+ */
+export interface CollectionQueryWidget {
+  data?: {
+    title?: string | null;
+    relatedCollection:
+      | 'users'
+      | 'point'
+      | 'posts'
+      | 'custom-ids'
+      | 'relation'
+      | 'dummy'
+      | 'error-on-hooks'
+      | 'payload-api-test-ones'
+      | 'payload-api-test-twos'
+      | 'content-type'
+      | 'cyclical-relationship'
+      | 'media'
+      | 'sort';
+    where?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    sortField?: string | null;
+    sortDirection?: ('asc' | 'desc') | null;
+    limit?: number | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "activity_widget".
+ */
+export interface ActivityWidget {
+  data?: {
+    excludedCollections?:
+      | (
+          | 'users'
+          | 'point'
+          | 'posts'
+          | 'custom-ids'
+          | 'relation'
+          | 'dummy'
+          | 'error-on-hooks'
+          | 'payload-api-test-ones'
+          | 'payload-api-test-twos'
+          | 'content-type'
+          | 'cyclical-relationship'
+          | 'media'
+          | 'sort'
+        )[]
+      | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

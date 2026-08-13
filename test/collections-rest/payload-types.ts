@@ -106,12 +106,14 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
-  fallbackLocale: null;
   globals: {};
+  fallbackLocale: null;
   globalsSelect: {};
   locale: null;
   widgets: {
     collections: CollectionsWidget;
+    'collection-query': CollectionQueryWidget;
+    activity: ActivityWidget;
   };
   user: User;
   jobs: {
@@ -631,6 +633,66 @@ export interface CollectionsWidget {
     [k: string]: unknown;
   };
   width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-query_widget".
+ */
+export interface CollectionQueryWidget {
+  data?: {
+    title?: string | null;
+    relatedCollection:
+      | 'posts'
+      | 'point'
+      | 'relation'
+      | 'dummy'
+      | 'custom-id'
+      | 'custom-id-number'
+      | 'error-on-hooks'
+      | 'endpoints'
+      | 'disabled-bulk-edit-docs'
+      | 'disabled-bulk-delete-docs'
+      | 'large-documents'
+      | 'users';
+    where?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    sortField?: string | null;
+    sortDirection?: ('asc' | 'desc') | null;
+    limit?: number | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "activity_widget".
+ */
+export interface ActivityWidget {
+  data?: {
+    excludedCollections?:
+      | (
+          | 'posts'
+          | 'point'
+          | 'relation'
+          | 'dummy'
+          | 'custom-id'
+          | 'custom-id-number'
+          | 'error-on-hooks'
+          | 'endpoints'
+          | 'disabled-bulk-edit-docs'
+          | 'disabled-bulk-delete-docs'
+          | 'large-documents'
+          | 'users'
+        )[]
+      | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

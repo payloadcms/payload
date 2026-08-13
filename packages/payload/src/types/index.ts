@@ -6,16 +6,19 @@ import type { URL } from 'url'
 import type { ServerAdapter } from '../admin/adapters/server.js'
 import type {
   DataFromCollectionSlug,
+  LocalizedDataFromCollectionSlug,
   QueryDraftDataFromCollectionSlug,
   TypeWithID,
   TypeWithTimestamps,
 } from '../collections/config/types.js'
+import type { LocalizedDataFromGlobalSlug } from '../globals/config/types.js'
 import type payload from '../index.js'
 import type {
   AuthenticatedUser,
   CollectionSlug,
   DataFromGlobalSlug,
   GlobalSlug,
+  LocaleValue,
   Payload,
   RequestContext,
   TypedCollectionJoins,
@@ -322,12 +325,34 @@ export type DraftTransformCollectionWithSelect<
   ? TransformDataWithSelect<QueryDraftDataFromCollectionSlug<TSlug>, TSelect>
   : QueryDraftDataFromCollectionSlug<TSlug>
 
+/**
+ * `TransformCollectionWithSelect`, but aware of `locale: 'all'` - which swaps the document type
+ * for its localized counterpart, where every localized field is keyed by locale.
+ */
+export type TransformCollection<
+  TSlug extends CollectionSlug,
+  TSelect extends SelectType,
+  TLocale extends LocaleValue = TypedLocale,
+  Data = TLocale extends 'all'
+    ? LocalizedDataFromCollectionSlug<TSlug>
+    : DataFromCollectionSlug<TSlug>,
+  // @ts-expect-error Data is always an object here, but TS cannot see that through the default
+> = TSelect extends SelectType ? TransformDataWithSelect<Data, TSelect> : Data
+
 export type TransformGlobalWithSelect<
   TSlug extends GlobalSlug,
   TSelect extends SelectType,
 > = TSelect extends SelectType
   ? TransformDataWithSelect<DataFromGlobalSlug<TSlug>, TSelect>
   : DataFromGlobalSlug<TSlug>
+
+export type TransformGlobal<
+  TSlug extends GlobalSlug,
+  TSelect extends SelectType,
+  TLocale extends LocaleValue = TypedLocale,
+  Data = TLocale extends 'all' ? LocalizedDataFromGlobalSlug<TSlug> : DataFromGlobalSlug<TSlug>,
+  // @ts-expect-error
+> = TSelect extends SelectType ? TransformDataWithSelect<Data, TSelect> : Data
 
 export type PopulateType = Partial<TypedCollectionSelect>
 

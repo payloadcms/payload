@@ -80,6 +80,11 @@ export interface Config {
     'payload-migrations': PayloadMigration;
   };
   collectionsJoins: {};
+  collectionsLocalized: {
+    posts: PostLocalized;
+    'filtered-locales': FilteredLocaleLocalized;
+    search: SearchLocalized;
+  };
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
@@ -96,12 +101,15 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
-  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es' | 'de') | ('en' | 'es' | 'de')[];
   globals: {};
+  globalsLocalized: {};
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es' | 'de') | ('en' | 'es' | 'de')[];
   globalsSelect: {};
   locale: 'en' | 'es' | 'de';
   widgets: {
     collections: CollectionsWidget;
+    'collection-query': CollectionQueryWidget;
+    activity: ActivityWidget;
   };
   user: User;
   jobs: {
@@ -339,6 +347,87 @@ export interface PayloadMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts_localized".
+ */
+export interface PostLocalized {
+  id: string;
+  title: string;
+  excerpt?: string | null;
+  slug?: {
+    en?: string | null;
+    es?: string | null;
+    de?: string | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+  deletedAt?: string | null;
+  _status?: {
+    en?: ('draft' | 'published') | null;
+    es?: ('draft' | 'published') | null;
+    de?: ('draft' | 'published') | null;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "filtered-locales_localized".
+ */
+export interface FilteredLocaleLocalized {
+  id: string;
+  title?: {
+    en?: string | null;
+    es?: string | null;
+    de?: string | null;
+  };
+  syncEnglishOnly?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This is a collection of automatically created search results. These results are used by the global site search and will be updated automatically as documents in the CMS are created or updated.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "search_localized".
+ */
+export interface SearchLocalized {
+  title?: {
+    en?: string | null;
+    es?: string | null;
+    de?: string | null;
+  };
+  priority?: number | null;
+  doc:
+    | {
+        relationTo: 'pages';
+        value: string | Page;
+      }
+    | {
+        relationTo: 'posts';
+        value: string | Post;
+      }
+    | {
+        relationTo: 'custom-ids-1';
+        value: string | CustomIds1;
+      }
+    | {
+        relationTo: 'custom-ids-2';
+        value: string | CustomIds2;
+      }
+    | {
+        relationTo: 'filtered-locales';
+        value: string | FilteredLocale;
+      };
+  id: string;
+  excerpt?: string | null;
+  slug?: {
+    en?: string | null;
+    es?: string | null;
+    de?: string | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
@@ -474,6 +563,41 @@ export interface CollectionsWidget {
     [k: string]: unknown;
   };
   width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-query_widget".
+ */
+export interface CollectionQueryWidget {
+  data?: {
+    title?: string | null;
+    relatedCollection: 'users' | 'pages' | 'posts' | 'custom-ids-1' | 'custom-ids-2' | 'filtered-locales' | 'search';
+    where?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    sortField?: string | null;
+    sortDirection?: ('asc' | 'desc') | null;
+    limit?: number | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "activity_widget".
+ */
+export interface ActivityWidget {
+  data?: {
+    excludedCollections?:
+      | ('users' | 'pages' | 'posts' | 'custom-ids-1' | 'custom-ids-2' | 'filtered-locales' | 'search')[]
+      | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

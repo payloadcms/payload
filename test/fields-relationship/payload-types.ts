@@ -88,6 +88,7 @@ export interface Config {
     'payload-migrations': PayloadMigration;
   };
   collectionsJoins: {};
+  collectionsLocalized: {};
   collectionsSelect: {
     'fields-relationship': FieldsRelationshipSelect<false> | FieldsRelationshipSelect<true>;
     'relation-filter-false': RelationFilterFalseSelect<false> | RelationFilterFalseSelect<true>;
@@ -112,12 +113,15 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
-  fallbackLocale: ('false' | 'none' | 'null') | false | null | 'en' | 'en'[];
   globals: {};
+  globalsLocalized: {};
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | 'en' | 'en'[];
   globalsSelect: {};
   locale: 'en';
   widgets: {
     collections: CollectionsWidget;
+    'collection-query': CollectionQueryWidget;
+    activity: ActivityWidget;
   };
   user: User;
   jobs: {
@@ -766,6 +770,72 @@ export interface CollectionsWidget {
     [k: string]: unknown;
   };
   width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-query_widget".
+ */
+export interface CollectionQueryWidget {
+  data?: {
+    title?: string | null;
+    relatedCollection:
+      | 'fields-relationship'
+      | 'relation-filter-false'
+      | 'relation-filter-true'
+      | 'relation-one'
+      | 'relation-two'
+      | 'relation-restricted'
+      | 'relation-with-title'
+      | 'relation-updated-externally'
+      | 'collection-1'
+      | 'collection-2'
+      | 'videos'
+      | 'podcasts'
+      | 'mixed-media'
+      | 'versioned-relationship-field'
+      | 'users';
+    where?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    sortField?: string | null;
+    sortDirection?: ('asc' | 'desc') | null;
+    limit?: number | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "activity_widget".
+ */
+export interface ActivityWidget {
+  data?: {
+    excludedCollections?:
+      | (
+          | 'fields-relationship'
+          | 'relation-filter-false'
+          | 'relation-filter-true'
+          | 'relation-one'
+          | 'relation-two'
+          | 'relation-restricted'
+          | 'relation-with-title'
+          | 'relation-updated-externally'
+          | 'collection-1'
+          | 'collection-2'
+          | 'videos'
+          | 'podcasts'
+          | 'mixed-media'
+          | 'versioned-relationship-field'
+          | 'users'
+        )[]
+      | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

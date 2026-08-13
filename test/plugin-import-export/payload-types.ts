@@ -154,6 +154,9 @@ export interface Config {
     'payload-migrations': PayloadMigration;
   };
   collectionsJoins: {};
+  collectionsLocalized: {
+    pages: PageLocalized;
+  };
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
@@ -192,17 +195,24 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
+  globals: {
+    'payload-jobs-stats': PayloadJobsStat;
+  };
+  globalsLocalized: {};
   fallbackLocale:
     | ('false' | 'none' | 'null')
     | false
     | null
     | ('en' | 'es' | 'de' | 'he')
     | ('en' | 'es' | 'de' | 'he')[];
-  globals: {};
-  globalsSelect: {};
+  globalsSelect: {
+    'payload-jobs-stats': PayloadJobsStatsSelect<false> | PayloadJobsStatsSelect<true>;
+  };
   locale: 'en' | 'es' | 'de' | 'he';
   widgets: {
     collections: CollectionsWidget;
+    'collection-query': CollectionQueryWidget;
+    activity: ActivityWidget;
   };
   user: User;
   jobs: {
@@ -1179,6 +1189,15 @@ export interface PayloadJob {
     | number
     | boolean
     | null;
+  meta?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   completedAt?: string | null;
   totalTried?: number | null;
   /**
@@ -1206,7 +1225,7 @@ export interface PayloadJob {
         completedAt: string;
         taskSlug: 'inline' | 'createCollectionExport' | 'createCollectionImport';
         taskID: string;
-        input?:
+        input:
           | {
               [k: string]: unknown;
             }
@@ -1234,13 +1253,22 @@ export interface PayloadJob {
           | number
           | boolean
           | null;
+        parent?: {
+          taskSlug?: ('inline' | 'createCollectionExport' | 'createCollectionImport') | null;
+          taskID?: string | null;
+        };
         id?: string | null;
       }[]
     | null;
   taskSlug?: ('inline' | 'createCollectionExport' | 'createCollectionImport') | null;
   queue?: string | null;
   waitUntil?: string | null;
-  processing?: boolean | null;
+  processingUntil?: string | null;
+  processingToken?: string | null;
+  /**
+   * Used for concurrency control. Jobs with the same key are subject to exclusive/supersedes rules.
+   */
+  concurrencyKey?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1344,6 +1372,121 @@ export interface PayloadMigration {
   batch?: number | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages_localized".
+ */
+export interface PageLocalized {
+  id: string;
+  title: string;
+  localized?: {
+    en?: string | null;
+    es?: string | null;
+    de?: string | null;
+    he?: string | null;
+  };
+  custom?: string | null;
+  customRelationship?: (string | null) | User;
+  customRelNameEmail?: (string | null) | User;
+  customRelIdName?: (string | null) | User;
+  group?: {
+    value?: string | null;
+    ignore?: string | null;
+    array?:
+      | {
+          field1?: string | null;
+          field2?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+    custom?: string | null;
+  };
+  tabToCSV?: string | null;
+  namedTab?: {
+    /**
+     * Field inside a named tab
+     */
+    tabToCSV?: string | null;
+  };
+  array?:
+    | {
+        field1?: string | null;
+        field2?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  blocks?: (Hero | Content | FaqSection)[] | null;
+  author?: (string | null) | User;
+  virtualRelationship?: string | null;
+  virtual?: string | null;
+  hasManyNumber?: number[] | null;
+  jsonField?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  richTextField?: LexicalRichText<LexicalNodes_0DD453D3> | null;
+  relationship?: (string | null) | User;
+  excerpt?: string | null;
+  /**
+   * Date field for testing export/import timezone handling
+   */
+  date?: string | null;
+  /**
+   * Date field for testing export/import timezone handling
+   */
+  dateWithTimezone?: string | null;
+  dateWithTimezone_tz?: SupportedTimezones;
+  hasOnePolymorphic?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'posts';
+        value: string | Post;
+      } | null);
+  hasManyPolymorphic?:
+    | (
+        | {
+            relationTo: 'users';
+            value: string | User;
+          }
+        | {
+            relationTo: 'posts';
+            value: string | Post;
+          }
+      )[]
+    | null;
+  hasManyMonomorphic?: (string | Post)[] | null;
+  textFieldInCollapsible?: string | null;
+  checkbox?: boolean | null;
+  select?: ('option1' | 'option2' | 'option3') | null;
+  selectHasMany?: ('tagA' | 'tagB' | 'tagC' | 'tagD')[] | null;
+  radio?: ('radio1' | 'radio2' | 'radio3') | null;
+  email?: string | null;
+  textarea?: string | null;
+  code?: string | null;
+  /**
+   * @minItems 2
+   * @maxItems 2
+   */
+  point?: [number, number] | null;
+  textHasMany?: string[] | null;
+  upload?: (string | null) | Media;
+  updatedAt: string;
+  createdAt: string;
+  _status?: {
+    en?: ('draft' | 'published') | null;
+    es?: ('draft' | 'published') | null;
+    de?: ('draft' | 'published') | null;
+    he?: ('draft' | 'published') | null;
+  };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2089,6 +2232,7 @@ export interface PayloadKvSelect<T extends boolean = true> {
 export interface PayloadJobsSelect<T extends boolean = true> {
   input?: T;
   taskStatus?: T;
+  meta?: T;
   completedAt?: T;
   totalTried?: T;
   hasError?: T;
@@ -2104,12 +2248,20 @@ export interface PayloadJobsSelect<T extends boolean = true> {
         output?: T;
         state?: T;
         error?: T;
+        parent?:
+          | T
+          | {
+              taskSlug?: T;
+              taskID?: T;
+            };
         id?: T;
       };
   taskSlug?: T;
   queue?: T;
   waitUntil?: T;
-  processing?: T;
+  processingUntil?: T;
+  processingToken?: T;
+  concurrencyKey?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2147,6 +2299,34 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-jobs-stats".
+ */
+export interface PayloadJobsStat {
+  id: string;
+  stats?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-jobs-stats_select".
+ */
+export interface PayloadJobsStatsSelect<T extends boolean = true> {
+  stats?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collections_widget".
  */
 export interface CollectionsWidget {
@@ -2154,6 +2334,100 @@ export interface CollectionsWidget {
     [k: string]: unknown;
   };
   width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-query_widget".
+ */
+export interface CollectionQueryWidget {
+  data?: {
+    title?: string | null;
+    relatedCollection:
+      | 'users'
+      | 'pages'
+      | 'posts'
+      | 'posts-exports-only'
+      | 'posts-imports-only'
+      | 'posts-no-jobs-queue'
+      | 'posts-with-limits'
+      | 'posts-with-s3'
+      | 'posts-with-hooks'
+      | 'posts-with-field-hooks'
+      | 'posts-with-column-map'
+      | 'media'
+      | 'custom-id-pages'
+      | 'exports'
+      | 'posts-export'
+      | 'posts-no-jobs-queue-export'
+      | 'posts-with-s3-export'
+      | 'posts-with-limits-export'
+      | 'posts-with-hooks-export'
+      | 'posts-with-field-hooks-export'
+      | 'posts-with-column-map-export'
+      | 'imports'
+      | 'posts-import'
+      | 'posts-with-s3-import'
+      | 'posts-with-limits-import'
+      | 'posts-with-hooks-import'
+      | 'posts-with-field-hooks-import'
+      | 'posts-with-column-map-import'
+      | 'payload-jobs';
+    where?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    sortField?: string | null;
+    sortDirection?: ('asc' | 'desc') | null;
+    limit?: number | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "activity_widget".
+ */
+export interface ActivityWidget {
+  data?: {
+    excludedCollections?:
+      | (
+          | 'users'
+          | 'pages'
+          | 'posts'
+          | 'posts-exports-only'
+          | 'posts-imports-only'
+          | 'posts-no-jobs-queue'
+          | 'posts-with-limits'
+          | 'posts-with-s3'
+          | 'posts-with-hooks'
+          | 'posts-with-field-hooks'
+          | 'posts-with-column-map'
+          | 'media'
+          | 'custom-id-pages'
+          | 'exports'
+          | 'posts-export'
+          | 'posts-no-jobs-queue-export'
+          | 'posts-with-s3-export'
+          | 'posts-with-limits-export'
+          | 'posts-with-hooks-export'
+          | 'posts-with-field-hooks-export'
+          | 'posts-with-column-map-export'
+          | 'imports'
+          | 'posts-import'
+          | 'posts-with-s3-import'
+          | 'posts-with-limits-import'
+          | 'posts-with-hooks-import'
+          | 'posts-with-field-hooks-import'
+          | 'posts-with-column-map-import'
+          | 'payload-jobs'
+        )[]
+      | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

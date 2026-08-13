@@ -194,6 +194,10 @@ export interface Config {
     'payload-migrations': PayloadMigration;
   };
   collectionsJoins: {};
+  collectionsLocalized: {
+    pages: PageLocalized;
+    posts: PostLocalized;
+  };
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
@@ -216,11 +220,12 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
-  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es') | ('en' | 'es')[];
   globals: {
     header: Header;
     footer: Footer;
   };
+  globalsLocalized: {};
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es') | ('en' | 'es')[];
   globalsSelect: {
     header: HeaderSelect<false> | HeaderSelect<true>;
     footer: FooterSelect<false> | FooterSelect<true>;
@@ -767,6 +772,109 @@ export interface PayloadMigration {
   batch?: number | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This collections does not use drafts or autosave. Changes are sent to the iframe window in real-time to use for fully client-side rendering.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages_localized".
+ */
+export interface PageLocalized {
+  id: string;
+  slug: string;
+  tenant?: (string | null) | Tenant;
+  title: string;
+  hero: {
+    type: 'none' | 'highImpact' | 'lowImpact';
+    richText?: LexicalRichText<LexicalNodes_D4620076> | null;
+    media?: (string | null) | Media;
+  };
+  layout?: (Cta | Content | MediaBlock | Archive)[] | null;
+  /**
+   * A number field for visual comparison with toolbar size inputs
+   */
+  testNumber?: number | null;
+  localizedTitle?: {
+    en?: string | null;
+    es?: string | null;
+  };
+  relationToLocalized?: (string | null) | Post;
+  richTextLexical?: LexicalRichText<LexicalNodes_D773765D> | null;
+  richTextLexicalLocalized?: {
+    en?: LexicalRichText<LexicalNodes_D773765D> | null;
+    es?: LexicalRichText<LexicalNodes_D773765D> | null;
+  };
+  relationshipAsUpload?: (string | null) | Media;
+  relationshipMonoHasOne?: (string | null) | Post;
+  relationshipMonoHasMany?: (string | Post)[] | null;
+  relationshipPolyHasOne?: {
+    relationTo: 'posts';
+    value: string | Post;
+  } | null;
+  relationshipPolyHasMany?:
+    | {
+        relationTo: 'posts';
+        value: string | Post;
+      }[]
+    | null;
+  arrayOfRelationships?:
+    | {
+        uploadInArray?: (string | null) | Media;
+        richTextInArray?: LexicalRichText<LexicalNodes_6238834A> | null;
+        relationshipInArrayMonoHasOne?: (string | null) | Post;
+        relationshipInArrayMonoHasMany?: (string | Post)[] | null;
+        relationshipInArrayPolyHasOne?: {
+          relationTo: 'posts';
+          value: string | Post;
+        } | null;
+        relationshipInArrayPolyHasMany?:
+          | {
+              relationTo: 'posts';
+              value: string | Post;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  tab?: {
+    relationshipInTab?: (string | null) | Post;
+  };
+  meta?: {
+    title?: string | null;
+    description?: string | null;
+    image?: (string | null) | Media;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts_localized".
+ */
+export interface PostLocalized {
+  id: string;
+  slug: string;
+  tenant?: (string | null) | Tenant;
+  title: string;
+  hero: {
+    type: 'none' | 'highImpact' | 'lowImpact';
+    richText?: LexicalRichText<LexicalNodes_D4620076> | null;
+    media?: (string | null) | Media;
+  };
+  layout?: (Cta | Content | MediaBlock | Archive)[] | null;
+  relatedPosts?: (string | Post)[] | null;
+  localizedTitle?: {
+    en?: string | null;
+    es?: string | null;
+  };
+  meta?: {
+    title?: string | null;
+    description?: string | null;
+    image?: (string | null) | Media;
+  };
+  updatedAt: string;
+  createdAt: string;
+  deletedAt?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

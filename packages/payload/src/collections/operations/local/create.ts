@@ -2,7 +2,7 @@ import type {
   PayloadRequest,
   PopulateType,
   SelectType,
-  TransformCollectionWithSelect,
+  TransformCollection,
 } from '../../../types/index.js'
 import type { File } from '../../../uploads/types.js'
 import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
@@ -20,6 +20,7 @@ import {
   deepCopyObjectSimple,
   type FindOptions,
   type GeneratedTypes,
+  type LocaleValue,
   type Payload,
   type RequestContext,
   type TypedLocale,
@@ -29,7 +30,11 @@ import { getFileByPath } from '../../../uploads/getFileByPath.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { createOperation } from '../create.js'
 
-type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType> = {
+type BaseOptions<
+  TSlug extends CollectionSlug,
+  TSelect extends SelectType,
+  TLocale extends LocaleValue = TypedLocale,
+> = {
   /**
    * the Collection slug to operate against.
    */
@@ -74,7 +79,7 @@ type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType> = {
   /**
    * Specify [locale](https://payloadcms.com/docs/configuration/localization) for any returned documents.
    */
-  locale?: TypedLocale
+  locale?: 'all' | TLocale
   /**
    * Skip access control.
    * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the front-end.
@@ -114,32 +119,33 @@ type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType> = {
 export type Options<
   TSlug extends CollectionSlug,
   TSelect extends SelectType,
+  TLocale extends LocaleValue = TypedLocale,
 > = GeneratedTypes extends { strictDraftTypes: true }
   ? CollectionsWithoutDrafts extends TSlug
     ? {
         /**
          * The data for the document to create.
          */
-        data: DataFromCollectionSlug<TSlug>
+        data: RequiredDataFromCollectionSlug<TSlug, TLocale>
         /**
          * Create a **draft** document. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
          */
         draft?: boolean
-      } & BaseOptions<TSlug, TSelect>
+      } & BaseOptions<TSlug, TSelect, TLocale>
     : TSlug extends CollectionsWithoutDrafts
       ? {
-          data: RequiredDataFromCollectionSlug<TSlug>
+          data: RequiredDataFromCollectionSlug<TSlug, TLocale>
           /**
            * The `draft` property is not allowed because this collection does not have `versions.drafts` enabled.
            */
           draft?: never
-        } & BaseOptions<TSlug, TSelect>
+        } & BaseOptions<TSlug, TSelect, TLocale>
       : (
           | {
               /**
                * The data for the document to create.
                */
-              data: RequiredDataFromCollectionSlug<TSlug>
+              data: RequiredDataFromCollectionSlug<TSlug, TLocale>
               /**
                * Create a **draft** document. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
                * Omit this property or set to `false` to create a published document.
@@ -158,18 +164,18 @@ export type Options<
               draft: true
             }
         ) &
-          BaseOptions<TSlug, TSelect>
+          BaseOptions<TSlug, TSelect, TLocale>
   :
       | ({
           /**
            * The data for the document to create.
            */
-          data: RequiredDataFromCollectionSlug<TSlug>
+          data: RequiredDataFromCollectionSlug<TSlug, TLocale>
           /**
            * Create a **draft** document. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
            */
           draft?: false
-        } & BaseOptions<TSlug, TSelect>)
+        } & BaseOptions<TSlug, TSelect, TLocale>)
       | ({
           /**
            * The data for the document to create.
@@ -180,15 +186,16 @@ export type Options<
            * Create a **draft** document. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
            */
           draft: true
-        } & BaseOptions<TSlug, TSelect>)
+        } & BaseOptions<TSlug, TSelect, TLocale>)
 
 export async function createLocal<
   TSlug extends CollectionSlug,
   TSelect extends SelectFromCollectionSlug<TSlug>,
+  TLocale extends LocaleValue = TypedLocale,
 >(
   payload: Payload,
-  options: Options<TSlug, TSelect>,
-): Promise<TransformCollectionWithSelect<TSlug, TSelect>> {
+  options: Options<TSlug, TSelect, TLocale>,
+): Promise<TransformCollection<TSlug, TSelect, TLocale>> {
   const {
     collection: collectionSlug,
     data,
@@ -219,6 +226,7 @@ export async function createLocal<
 
   req.file = file ?? (await getFileByPath(filePath!))
 
+  // @ts-expect-error
   return createOperation<TSlug, TSelect>({
     collection,
     data: deepCopyObjectSimple(data), // Ensure mutation of data in create operation hooks doesn't affect the original data

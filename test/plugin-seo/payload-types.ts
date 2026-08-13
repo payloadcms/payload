@@ -90,7 +90,6 @@ export type LexicalNodes_7F394E14 =
 export interface Config {
   auth: {
     users: UserAuthOperations;
-    'payload-mcp-api-keys': PayloadMcpApiKeyAuthOperations;
   };
   blocks: {};
   collections: {
@@ -104,6 +103,10 @@ export interface Config {
     'payload-migrations': PayloadMigration;
   };
   collectionsJoins: {};
+  collectionsLocalized: {
+    pages: PageLocalized;
+    pagesWithImportedFields: PagesWithImportedFieldLocalized;
+  };
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
@@ -117,38 +120,23 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
-  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es' | 'de') | ('en' | 'es' | 'de')[];
   globals: {};
+  globalsLocalized: {};
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es' | 'de') | ('en' | 'es' | 'de')[];
   globalsSelect: {};
   locale: 'en' | 'es' | 'de';
   widgets: {
     collections: CollectionsWidget;
+    'collection-query': CollectionQueryWidget;
+    activity: ActivityWidget;
   };
-  user: User | PayloadMcpApiKey;
+  user: User;
   jobs: {
     tasks: unknown;
     workflows: unknown;
   };
 }
 export interface UserAuthOperations {
-  forgotPassword: {
-    email: string;
-    password: string;
-  };
-  login: {
-    email: string;
-    password: string;
-  };
-  registerFirstUser: {
-    email: string;
-    password: string;
-  };
-  unlock: {
-    email: string;
-    password: string;
-  };
-}
-export interface PayloadMcpApiKeyAuthOperations {
   forgotPassword: {
     email: string;
     password: string;
@@ -260,49 +248,6 @@ export interface PagesWithImportedField {
   _status?: ('draft' | 'published') | null;
 }
 /**
- * API keys control which collections, resources, tools, and prompts MCP clients can access
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-mcp-api-keys".
- */
-export interface PayloadMcpApiKey {
-  id: string;
-  /**
-   * The user that the API key is associated with.
-   */
-  user: string | User;
-  /**
-   * A useful label for the API key.
-   */
-  label?: string | null;
-  /**
-   * The purpose of the API key.
-   */
-  description?: string | null;
-  /**
-   * When checked, this key bypasses Payload access control on every operation it performs. Leave unchecked unless you have a specific reason.
-   */
-  overrideAccess?: boolean | null;
-  /**
-   * Access for this API key — uncheck to revoke individual tools.
-   */
-  access?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  updatedAt: string;
-  createdAt: string;
-  enableAPIKey?: boolean | null;
-  apiKey?: string | null;
-  apiKeyIndex?: string | null;
-  collection: 'payload-mcp-api-keys';
-}
-/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
@@ -343,15 +288,10 @@ export interface PayloadLockedDocument {
         value: string | PagesWithImportedField;
       } | null);
   globalSlug?: string | null;
-  user:
-    | {
-        relationTo: 'users';
-        value: string | User;
-      }
-    | {
-        relationTo: 'payload-mcp-api-keys';
-        value: string | PayloadMcpApiKey;
-      };
+  user: {
+    relationTo: 'users';
+    value: string | User;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -361,15 +301,10 @@ export interface PayloadLockedDocument {
  */
 export interface PayloadPreference {
   id: string;
-  user:
-    | {
-        relationTo: 'users';
-        value: string | User;
-      }
-    | {
-        relationTo: 'payload-mcp-api-keys';
-        value: string | PayloadMcpApiKey;
-      };
+  user: {
+    relationTo: 'users';
+    value: string | User;
+  };
   key?: string | null;
   value?:
     | {
@@ -393,6 +328,98 @@ export interface PayloadMigration {
   batch?: number | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages_localized".
+ */
+export interface PageLocalized {
+  id: string;
+  title: string;
+  excerpt?: string | null;
+  slug: string;
+  featuredMedia?: (string | null) | Media;
+  meta: {
+    title: {
+      en?: string;
+      es?: string;
+      de?: string;
+    };
+    description?: {
+      en?: string | null;
+      es?: string | null;
+      de?: string | null;
+    };
+    image?: {
+      /**
+       * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+       */
+      en?: (string | null) | Media;
+      /**
+       * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+       */
+      es?: (string | null) | Media;
+      /**
+       * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+       */
+      de?: (string | null) | Media;
+    };
+    ogTitle?: string | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+  _status?: {
+    en?: ('draft' | 'published') | null;
+    es?: ('draft' | 'published') | null;
+    de?: ('draft' | 'published') | null;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pagesWithImportedFields_localized".
+ */
+export interface PagesWithImportedFieldLocalized {
+  id: string;
+  title: string;
+  excerpt?: string | null;
+  slug: string;
+  metaAndSEO: {
+    title: {
+      en?: string;
+      es?: string;
+      de?: string;
+    };
+    innerMeta?: {
+      description?: {
+        en?: string | null;
+        es?: string | null;
+        de?: string | null;
+      };
+    };
+    innerMedia?: {
+      image?: {
+        /**
+         * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+         */
+        en?: (string | null) | Media;
+        /**
+         * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+         */
+        es?: (string | null) | Media;
+        /**
+         * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+         */
+        de?: (string | null) | Media;
+      };
+    };
+  };
+  updatedAt: string;
+  createdAt: string;
+  _status?: {
+    en?: ('draft' | 'published') | null;
+    es?: ('draft' | 'published') | null;
+    de?: ('draft' | 'published') | null;
+  };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -532,6 +559,39 @@ export interface CollectionsWidget {
     [k: string]: unknown;
   };
   width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-query_widget".
+ */
+export interface CollectionQueryWidget {
+  data?: {
+    title?: string | null;
+    relatedCollection: 'users' | 'pages' | 'media' | 'pagesWithImportedFields';
+    where?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    sortField?: string | null;
+    sortDirection?: ('asc' | 'desc') | null;
+    limit?: number | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "activity_widget".
+ */
+export interface ActivityWidget {
+  data?: {
+    excludedCollections?: ('users' | 'pages' | 'media' | 'pagesWithImportedFields')[] | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

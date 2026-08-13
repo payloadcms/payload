@@ -76,6 +76,9 @@ export interface Config {
     'payload-migrations': PayloadMigration;
   };
   collectionsJoins: {};
+  collectionsLocalized: {
+    complex: ComplexLocalized;
+  };
   collectionsSelect: {
     arrays: ArraysSelect<false> | ArraysSelect<true>;
     complex: ComplexSelect<false> | ComplexSelect<true>;
@@ -88,12 +91,15 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
-  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es') | ('en' | 'es')[];
   globals: {};
+  globalsLocalized: {};
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es') | ('en' | 'es')[];
   globalsSelect: {};
   locale: 'en' | 'es';
   widgets: {
     collections: CollectionsWidget;
+    'collection-query': CollectionQueryWidget;
+    activity: ActivityWidget;
   };
   user: User;
   jobs: {
@@ -295,6 +301,56 @@ export interface PayloadMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "complex_localized".
+ */
+export interface ComplexLocalized {
+  id: string;
+  localizedArray?: {
+    en?:
+      | {
+          text?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+    es?:
+      | {
+          text?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  group?: {
+    groupArray?:
+      | {
+          text?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  localizedGroup?: {
+    en?: {
+      localizedGroupArray?:
+        | {
+            text?: string | null;
+            id?: string | null;
+          }[]
+        | null;
+    };
+    es?: {
+      localizedGroupArray?:
+        | {
+            text?: string | null;
+            id?: string | null;
+          }[]
+        | null;
+    };
+  };
+  blocks?: Content[] | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "arrays_select".
  */
 export interface ArraysSelect<T extends boolean = true> {
@@ -437,6 +493,39 @@ export interface CollectionsWidget {
     [k: string]: unknown;
   };
   width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-query_widget".
+ */
+export interface CollectionQueryWidget {
+  data?: {
+    title?: string | null;
+    relatedCollection: 'arrays' | 'complex' | 'users';
+    where?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    sortField?: string | null;
+    sortDirection?: ('asc' | 'desc') | null;
+    limit?: number | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "activity_widget".
+ */
+export interface ActivityWidget {
+  data?: {
+    excludedCollections?: ('arrays' | 'complex' | 'users')[] | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
