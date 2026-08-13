@@ -360,10 +360,10 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
       await deleteExistingRowsByPath({
         adapter,
         db,
-        localeColumnName: 'locale',
         parentColumnName: 'parent',
         parentID: insertedRow.id,
         pathColumnName: 'path',
+        pathPrefixes: rowToInsert.pathPrefixesToDelete,
         rows: [...relationsToInsert, ...generalRelationshipDeletes],
         tableName: relationshipsTableName,
       })
@@ -567,10 +567,10 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
       await deleteExistingRowsByPath({
         adapter,
         db,
-        localeColumnName: 'locale',
         parentColumnName: 'parent',
         parentID: insertedRow.id,
         pathColumnName: 'path',
+        pathPrefixes: rowToInsert.pathPrefixesToDelete,
         rows: [...textsToInsert, ...rowToInsert.textsToDelete],
         tableName: textsTableName,
       })
@@ -594,10 +594,10 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
       await deleteExistingRowsByPath({
         adapter,
         db,
-        localeColumnName: 'locale',
         parentColumnName: 'parent',
         parentID: insertedRow.id,
         pathColumnName: 'path',
+        pathPrefixes: rowToInsert.pathPrefixesToDelete,
         rows: [...numbersToInsert, ...rowToInsert.numbersToDelete],
         tableName: numbersTableName,
       })

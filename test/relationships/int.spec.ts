@@ -1,9 +1,11 @@
+import type { PostgresAdapter } from '@payloadcms/db-postgres'
 import type { Payload, PayloadRequest } from 'payload'
 
 import { randomBytes, randomUUID } from 'crypto'
+import { eq } from 'drizzle-orm'
 import path from 'path'
 import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type {
@@ -40,7 +42,11 @@ const dirname = path.dirname(filename)
 
 type EasierChained = { id: string; relation: EasierChained }
 
-const mongoIt = mongooseList.includes(process.env.PAYLOAD_DATABASE || '') ? it : it.skip
+const isMongoose = mongooseList.includes(process.env.PAYLOAD_DATABASE || '')
+
+const mongoIt = isMongoose ? it : it.skip
+
+const drizzleDescribe = isMongoose ? describe.skip : describe
 
 describe('Relationships', () => {
   beforeAll(async () => {
@@ -2149,6 +2155,153 @@ describe('Relationships', () => {
       expect(inResult_3.docs.some((each) => each.id === relToPage.id)).toBeTruthy()
     })
   })
+
+  drizzleDescribe('orphaned relationship rows', () => {
+    let directorOne: Director
+    let directorTwo: Director
+
+    const twoBlocks = () => [
+      { blockType: 'some' as const, directors: [directorOne.id] },
+      { blockType: 'some' as const, directors: [directorTwo.id] },
+    ]
+
+    beforeEach(async () => {
+      directorOne = await payload.create({
+        collection: 'directors',
+        data: { name: 'Director One' },
+      })
+      directorTwo = await payload.create({
+        collection: 'directors',
+        data: { name: 'Director Two' },
+      })
+    })
+
+    afterEach(async () => {
+      await payload.delete({ collection: 'blocks', where: { id: { exists: true } } })
+      await payload.delete({ collection: 'movies', where: { id: { exists: true } } })
+      await payload.delete({ collection: 'directors', where: { id: { exists: true } } })
+    })
+
+    it('should delete relationship rows of blocks removed from the end of the list', async () => {
+      const doc = await payload.create({
+        collection: 'blocks',
+        data: { blocks: twoBlocks() },
+      })
+
+      expect(await findRelationshipPaths({ parentID: doc.id, tableName: 'blocks_rels' })).toEqual([
+        'blocks.0.directors',
+        'blocks.1.directors',
+      ])
+
+      await payload.update({
+        id: doc.id,
+        collection: 'blocks',
+        data: { blocks: [{ blockType: 'some', directors: [directorOne.id] }] },
+      })
+
+      expect(await findRelationshipPaths({ parentID: doc.id, tableName: 'blocks_rels' })).toEqual([
+        'blocks.0.directors',
+      ])
+    })
+
+    it('should delete relationship rows of blocks removed through db.updateOne', async () => {
+      const doc = await payload.create({
+        collection: 'blocks',
+        data: { blocks: twoBlocks() },
+      })
+
+      // Read the raw, locale-keyed document so that it can be written straight back through the
+      // adapter - the same write path `payload.update` reaches after hooks and validation.
+      const rawDoc = await payload.db.findOne({
+        collection: 'blocks',
+        where: { id: { equals: doc.id } },
+      })
+
+      await payload.db.updateOne({
+        id: doc.id,
+        collection: 'blocks',
+        data: { blocks: [rawDoc.blocks[0]] },
+      })
+
+      expect(await findRelationshipPaths({ parentID: doc.id, tableName: 'blocks_rels' })).toEqual([
+        'blocks.0.directors',
+      ])
+    })
+
+    it('should delete relationship rows of all blocks when the list is emptied', async () => {
+      const doc = await payload.create({
+        collection: 'blocks',
+        data: { blocks: twoBlocks() },
+      })
+
+      await payload.update({ id: doc.id, collection: 'blocks', data: { blocks: [] } })
+
+      expect(await findRelationshipPaths({ parentID: doc.id, tableName: 'blocks_rels' })).toEqual(
+        [],
+      )
+    })
+
+    it('should delete relationship rows of array rows removed from the end of the list', async () => {
+      const movie = await payload.create({
+        collection: 'movies',
+        data: {
+          name: 'movie',
+          array: [
+            {
+              director: [directorOne.id],
+              polymorphic: { relationTo: 'directors', value: directorOne.id },
+            },
+            {
+              director: [directorTwo.id],
+              polymorphic: { relationTo: 'directors', value: directorTwo.id },
+            },
+          ],
+        },
+      })
+
+      expect(await findRelationshipPaths({ parentID: movie.id, tableName: 'movies_rels' })).toEqual(
+        ['array.0.director', 'array.0.polymorphic', 'array.1.director', 'array.1.polymorphic'],
+      )
+
+      await payload.update({
+        id: movie.id,
+        collection: 'movies',
+        data: {
+          array: [
+            {
+              director: [directorOne.id],
+              polymorphic: { relationTo: 'directors', value: directorOne.id },
+            },
+          ],
+        },
+      })
+
+      expect(await findRelationshipPaths({ parentID: movie.id, tableName: 'movies_rels' })).toEqual(
+        ['array.0.director', 'array.0.polymorphic'],
+      )
+    })
+
+    it('should keep relationship rows that live outside of the shortened field', async () => {
+      const movie = await payload.create({
+        collection: 'movies',
+        data: {
+          name: 'movie',
+          array: [{ director: [directorOne.id] }, { director: [directorTwo.id] }],
+          directors: [directorOne.id, directorTwo.id],
+        },
+      })
+
+      await payload.update({
+        id: movie.id,
+        collection: 'movies',
+        data: { array: [{ director: [directorOne.id] }] },
+      })
+
+      expect(await findRelationshipPaths({ parentID: movie.id, tableName: 'movies_rels' })).toEqual(
+        ['array.0.director', 'directors', 'directors'],
+      )
+    })
+  })
 })
 
 async function createPost(overrides?: Partial<Post>) {
@@ -2160,4 +2313,26 @@ async function clearDocs(): Promise<void> {
     collection: slug,
     where: { id: { exists: true } },
   })
+}
+
+/**
+ * Reads the `path` column of every row a drizzle `_rels` table holds for the given parent
+ * document, so that rows left behind by a shortened array / blocks field are visible.
+ */
+async function findRelationshipPaths({
+  parentID,
+  tableName,
+}: {
+  parentID: number | string
+  tableName: string
+}): Promise<string[]> {
+  const adapter = payload.db as unknown as PostgresAdapter
+  const table = adapter.tables[tableName]
+
+  const rows = await adapter.drizzle
+    .select({ path: table.path })
+    .from(table)
+    .where(eq(table.parent, parentID))
+
+  return rows.map(({ path }) => path).sort()
 }

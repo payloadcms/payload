@@ -275,6 +275,7 @@ export interface Movie {
   name?: string | null;
   select?: ('a' | 'b' | 'c')[] | null;
   director?: (string | null) | Director;
+  directors?: (string | Director)[] | null;
   array?:
     | {
         director?: (string | Director)[] | null;
@@ -782,6 +783,7 @@ export interface MoviesSelect<T extends boolean = true> {
   name?: T;
   select?: T;
   director?: T;
+  directors?: T;
   array?:
     | T
     | {

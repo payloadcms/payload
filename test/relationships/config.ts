@@ -249,6 +249,12 @@ export default buildConfigWithDefaults({
           relationTo: 'directors',
         },
         {
+          name: 'directors',
+          type: 'relationship',
+          relationTo: 'directors',
+          hasMany: true,
+        },
+        {
           type: 'array',
           name: 'array',
           fields: [

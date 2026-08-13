@@ -1,14 +1,19 @@
-import { and, eq, inArray } from 'drizzle-orm'
+import { and, eq, inArray, like, or } from 'drizzle-orm'
 
 import type { DrizzleAdapter, DrizzleTransaction } from '../types.js'
 
 type Args = {
   adapter: DrizzleAdapter
   db: DrizzleAdapter['drizzle'] | DrizzleTransaction
-  localeColumnName?: string
   parentColumnName?: string
   parentID: unknown
   pathColumnName?: string
+  /**
+   * Prefixes of paths to delete in full, ex: `myBlocks.` deletes `myBlocks.0.myRelationship`
+   * as well as `myBlocks.1.myRelationship`. Used for array / blocks fields that are being
+   * replaced in full, whose rows would otherwise survive at indexes the field no longer has.
+   */
+  pathPrefixes?: Iterable<string>
   rows: Record<string, unknown>[]
   tableName: string
 }
@@ -16,54 +21,48 @@ type Args = {
 export const deleteExistingRowsByPath = async ({
   adapter,
   db,
-  localeColumnName = '_locale',
   parentColumnName = '_parentID',
   parentID,
   pathColumnName = '_path',
+  pathPrefixes = [],
   rows,
   tableName,
 }: Args): Promise<void> => {
-  const localizedPathsToDelete = new Set<string>()
-  const pathsToDelete = new Set<string>()
   const table = adapter.tables[tableName]
+
+  // The `_rels` / `_texts` / `_numbers` tables only exist when the collection declares a field
+  // that writes to them.
+  if (!table) {
+    return
+  }
+
+  const pathsToDelete = new Set<string>()
 
   rows.forEach((row) => {
     const path = row[pathColumnName]
-    const localeData = row[localeColumnName]
+
     if (typeof path === 'string') {
-      if (typeof localeData === 'string') {
-        localizedPathsToDelete.add(path)
-      } else {
-        pathsToDelete.add(path)
-      }
+      pathsToDelete.add(path)
     }
   })
 
-  if (localizedPathsToDelete.size > 0) {
-    const whereConstraints = [eq(table[parentColumnName], parentID)]
-
-    if (pathColumnName) {
-      whereConstraints.push(inArray(table[pathColumnName], Array.from(localizedPathsToDelete)))
-    }
-
-    await adapter.deleteWhere({
-      db,
-      tableName,
-      where: and(...whereConstraints),
-    })
-  }
+  const pathConstraints = []
 
   if (pathsToDelete.size > 0) {
-    const whereConstraints = [eq(table[parentColumnName], parentID)]
-
-    if (pathColumnName) {
-      whereConstraints.push(inArray(table[pathColumnName], Array.from(pathsToDelete)))
-    }
-
-    await adapter.deleteWhere({
-      db,
-      tableName,
-      where: and(...whereConstraints),
-    })
+    pathConstraints.push(inArray(table[pathColumnName], Array.from(pathsToDelete)))
   }
+
+  for (const prefix of pathPrefixes) {
+    pathConstraints.push(like(table[pathColumnName], `${prefix}%`))
+  }
+
+  if (pathConstraints.length === 0) {
+    return
+  }
+
+  await adapter.deleteWhere({
+    db,
+    tableName,
+    where: and(eq(table[parentColumnName], parentID), or(...pathConstraints)),
+  })
 }
