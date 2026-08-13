@@ -267,7 +267,10 @@ export const sanitizeCollection = (
         }
       }
 
-      const hasLocalizedFields = traverseForLocalizedFields(sanitized.fields)
+      const hasLocalizedFields = traverseForLocalizedFields({
+        blocks: config.blocks,
+        fields: sanitized.fields,
+      })
 
       // Auto-enable per-locale status when localization is configured and the collection has localized fields.
       ;(sanitized.versions.drafts as SanitizedDrafts).localizeStatus = !!(

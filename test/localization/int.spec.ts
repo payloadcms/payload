@@ -29,6 +29,7 @@ import { noLocalizedFieldsCollectionSlug } from './collections/NoLocalizedFields
 import { tabSlug } from './collections/Tab/index.js'
 import {
   allFieldsLocalizedSlug,
+  blocksReferenceLocalizedSlug,
   defaultLocale,
   defaultLocale as englishLocale,
   englishTitle,
@@ -39,6 +40,7 @@ import {
   localizedPostsSlug,
   localizedSortSlug,
   portugueseLocale,
+  referencedBlockSlug,
   relationEnglishTitle,
   relationEnglishTitle2,
   relationshipLocalizedSlug,
@@ -4824,6 +4826,57 @@ describe('Localization', () => {
       })
     })
   })
+  describe('localized fields inside a referenced block', () => {
+    it('should enable localizeStatus when the only localized field is in a referenced block', () => {
+      const collection = payload.collections[blocksReferenceLocalizedSlug]
+
+      expect(collection.config.versions.drafts).toMatchObject({ localizeStatus: true })
+    })
+
+    it('should read and write every locale of a referenced block field with locale: all', async () => {
+      const doc = await payload.create({
+        collection: blocksReferenceLocalizedSlug,
+        data: {
+          layout: [
+            {
+              blockType: referencedBlockSlug,
+              title: 'EN title',
+            },
+          ],
+        },
+        locale: defaultLocale,
+      })
+
+      // The row `id` has to be threaded through, otherwise the update replaces the row instead of
+      // translating the existing one - `layout` itself is not localized, only `title` inside it is.
+      await payload.update({
+        id: doc.id,
+        collection: blocksReferenceLocalizedSlug,
+        data: {
+          layout: [
+            {
+              id: doc.layout![0]!.id,
+              blockType: referencedBlockSlug,
+              title: 'ES title',
+            },
+          ],
+        },
+        locale: spanishLocale,
+      })
+
+      const allLocales = await payload.findByID({
+        id: doc.id,
+        collection: blocksReferenceLocalizedSlug,
+        locale: 'all',
+      })
+
+      expect(allLocales.layout![0]!.title).toStrictEqual({
+        en: 'EN title',
+        es: 'ES title',
+      })
+    })
+  })
+
   describe('localized queries', () => {
     it('should count versions with query on localized field', async () => {
       await payload.create({

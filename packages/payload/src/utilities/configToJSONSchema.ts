@@ -1596,7 +1596,10 @@ export function configToJSONSchema(
         interfaceNameDefinitions,
       })
 
-      if (config.localization && traverseForLocalizedFields(entity.fields)) {
+      if (
+        config.localization &&
+        traverseForLocalizedFields({ blocks: config.blocks, fields: entity.fields })
+      ) {
         acc[`${entity.slug}_localized`] = entityToJSONSchema(
           config,
           entity,

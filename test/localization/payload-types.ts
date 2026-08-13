@@ -62,13 +62,13 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_3DC54BD0".
+ * via the `definition` "LexicalNodes_DCF72AA4".
  */
-export type LexicalNodes_3DC54BD0 =
+export type LexicalNodes_DCF72AA4 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_3DC54BD0>
+  | SerializedParagraphNode<LexicalNodes_DCF72AA4>
   | SerializedHorizontalRuleNode
   | {
       type: 'upload';
@@ -78,7 +78,7 @@ export type LexicalNodes_3DC54BD0 =
       version: number;
       [k: string]: unknown;
     }
-  | SerializedQuoteNode<LexicalNodes_3DC54BD0>
+  | SerializedQuoteNode<LexicalNodes_DCF72AA4>
   | SerializedRelationshipNode<
       | 'richText'
       | 'blocks-fields'
@@ -103,22 +103,25 @@ export type LexicalNodes_3DC54BD0 =
       | 'blocks-same-name'
       | 'localized-within-localized'
       | 'array-with-fallback-fields'
+      | 'blocks-reference-localized'
       | 'payload-kv'
       | 'payload-locked-documents'
       | 'payload-preferences'
       | 'payload-migrations'
     >
-  | SerializedAutoLinkNode<LexicalNodes_3DC54BD0, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_3DC54BD0, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_3DC54BD0>
-  | SerializedListItemNode<LexicalNodes_3DC54BD0>
-  | SerializedHeadingNode<LexicalNodes_3DC54BD0>;
+  | SerializedAutoLinkNode<LexicalNodes_DCF72AA4, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_DCF72AA4, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_DCF72AA4>
+  | SerializedListItemNode<LexicalNodes_DCF72AA4>
+  | SerializedHeadingNode<LexicalNodes_DCF72AA4>;
 
 export interface Config {
   auth: {
     users: UserAuthOperations;
   };
-  blocks: {};
+  blocks: {
+    'referenced-localized-block': ReferencedLocalizedBlock;
+  };
   collections: {
     richText: RichText;
     'blocks-fields': BlocksField;
@@ -143,6 +146,7 @@ export interface Config {
     'blocks-same-name': BlocksSameName;
     'localized-within-localized': LocalizedWithinLocalized;
     'array-with-fallback-fields': ArrayWithFallbackField;
+    'blocks-reference-localized': BlocksReferenceLocalized;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -169,6 +173,7 @@ export interface Config {
     'blocks-same-name': BlocksSameNameLocalized;
     'localized-within-localized': LocalizedWithinLocalizedLocalized;
     'array-with-fallback-fields': ArrayWithFallbackFieldLocalized;
+    'blocks-reference-localized': BlocksReferenceLocalizedLocalized;
   };
   collectionsSelect: {
     richText: RichTextSelect<false> | RichTextSelect<true>;
@@ -194,6 +199,7 @@ export interface Config {
     'blocks-same-name': BlocksSameNameSelect<false> | BlocksSameNameSelect<true>;
     'localized-within-localized': LocalizedWithinLocalizedSelect<false> | LocalizedWithinLocalizedSelect<true>;
     'array-with-fallback-fields': ArrayWithFallbackFieldsSelect<false> | ArrayWithFallbackFieldsSelect<true>;
+    'blocks-reference-localized': BlocksReferenceLocalizedSelect<false> | BlocksReferenceLocalizedSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -255,11 +261,21 @@ export interface UserAuthOperations {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ReferencedLocalizedBlock".
+ */
+export interface ReferencedLocalizedBlock {
+  title?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'referenced-localized-block';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "richText".
  */
 export interface RichText {
   id: string;
-  lexical?: LexicalRichText<LexicalNodes_3DC54BD0> | null;
+  lexical?: LexicalRichText<LexicalNodes_DCF72AA4> | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -977,6 +993,17 @@ export interface ArrayWithFallbackField {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "blocks-reference-localized".
+ */
+export interface BlocksReferenceLocalized {
+  id: string;
+  layout?: ReferencedLocalizedBlock[] | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -1090,6 +1117,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'array-with-fallback-fields';
         value: string | ArrayWithFallbackField;
+      } | null)
+    | ({
+        relationTo: 'blocks-reference-localized';
+        value: string | BlocksReferenceLocalized;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1140,12 +1171,12 @@ export interface PayloadMigration {
 export interface RichTextLocalized {
   id: string;
   lexical?: {
-    xx?: LexicalRichText<LexicalNodes_3DC54BD0> | null;
-    en?: LexicalRichText<LexicalNodes_3DC54BD0> | null;
-    es?: LexicalRichText<LexicalNodes_3DC54BD0> | null;
-    pt?: LexicalRichText<LexicalNodes_3DC54BD0> | null;
-    ar?: LexicalRichText<LexicalNodes_3DC54BD0> | null;
-    hu?: LexicalRichText<LexicalNodes_3DC54BD0> | null;
+    xx?: LexicalRichText<LexicalNodes_DCF72AA4> | null;
+    en?: LexicalRichText<LexicalNodes_DCF72AA4> | null;
+    es?: LexicalRichText<LexicalNodes_DCF72AA4> | null;
+    pt?: LexicalRichText<LexicalNodes_DCF72AA4> | null;
+    ar?: LexicalRichText<LexicalNodes_DCF72AA4> | null;
+    hu?: LexicalRichText<LexicalNodes_DCF72AA4> | null;
   };
   updatedAt: string;
   createdAt: string;
@@ -3025,6 +3056,43 @@ export interface ArrayWithFallbackFieldLocalized {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "blocks-reference-localized_localized".
+ */
+export interface BlocksReferenceLocalizedLocalized {
+  id: string;
+  layout?: ReferencedLocalizedBlock_576493C2[] | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: {
+    xx?: ('draft' | 'published') | null;
+    en?: ('draft' | 'published') | null;
+    es?: ('draft' | 'published') | null;
+    pt?: ('draft' | 'published') | null;
+    ar?: ('draft' | 'published') | null;
+    hu?: ('draft' | 'published') | null;
+  };
+}
+/**
+ * Multiple blocks resolve to the `ReferencedLocalizedBlock` interface with different fields, so a content hash is appended to keep the generated types stable and unambiguous. Set a unique `interfaceName` on the block to choose the name yourself. See https://payloadcms.com/docs/typescript/generating-types#block-interface-name-collisions
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ReferencedLocalizedBlock_576493C2".
+ */
+export interface ReferencedLocalizedBlock_576493C2 {
+  title?: {
+    xx?: string | null;
+    en?: string | null;
+    es?: string | null;
+    pt?: string | null;
+    ar?: string | null;
+    hu?: string | null;
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'referenced-localized-block';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "richText_select".
  */
 export interface RichTextSelect<T extends boolean = true> {
@@ -3715,6 +3783,16 @@ export interface ArrayWithFallbackFieldsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "blocks-reference-localized_select".
+ */
+export interface BlocksReferenceLocalizedSelect<T extends boolean = true> {
+  layout?: T | {};
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
@@ -3929,7 +4007,8 @@ export interface CollectionQueryWidget {
       | 'localized-sort'
       | 'blocks-same-name'
       | 'localized-within-localized'
-      | 'array-with-fallback-fields';
+      | 'array-with-fallback-fields'
+      | 'blocks-reference-localized';
     where?:
       | {
           [k: string]: unknown;
@@ -3976,6 +4055,7 @@ export interface ActivityWidget {
           | 'blocks-same-name'
           | 'localized-within-localized'
           | 'array-with-fallback-fields'
+          | 'blocks-reference-localized'
         )[]
       | null;
   };
