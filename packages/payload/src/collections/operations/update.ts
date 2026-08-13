@@ -3,12 +3,7 @@ import type { DeepPartial } from 'ts-essentials'
 import { status as httpStatus } from 'http-status'
 
 import type { AccessResult } from '../../config/types.js'
-import type {
-  AllowedDepth,
-  type CollectionSlug,
-  DefaultDepth,
-  type FindOptions,
-} from '../../index.js'
+import type { AllowedDepth, CollectionSlug, DefaultDepth, FindOptions } from '../../index.js'
 import type { PayloadRequest, PopulateType, SelectType, Sort, Where } from '../../types/index.js'
 import type {
   BulkOperationResult,
