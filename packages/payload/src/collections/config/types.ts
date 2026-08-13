@@ -873,7 +873,7 @@ export type BulkOperationResult<
   TSelect extends SelectType = SelectType,
   TDepth extends AllowedDepth = DefaultDepth,
 > = {
-  docs: ApplyDepthInternal<TransformCollectionWithSelect<TSlug, TSelect>[], TDepth>
+  docs: ApplyDepthInternal<TransformCollectionWithSelect<TSlug, TSelect>, TDepth>[]
   errors: {
     id: DataFromCollectionSlug<TSlug>['id']
     isPublic: boolean

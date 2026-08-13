@@ -29,6 +29,40 @@ export default buildConfigWithDefaults({
       ],
     },
     {
+      slug: 'media',
+      fields: [],
+      upload: true,
+    },
+    {
+      // A `json` field is generated as a union of primitives, objects and arrays, which must not be
+      // mistaken for a relationship - see `HasCollectionType`.
+      slug: 'passthrough',
+      fields: [
+        {
+          name: 'json',
+          type: 'json',
+        },
+        {
+          name: 'upload',
+          type: 'upload',
+          relationTo: 'media',
+        },
+        {
+          name: 'unnamedGroup',
+          type: 'group',
+          fields: [
+            {
+              name: 'insideUnnamedGroup',
+              type: 'relationship',
+              relationTo: 'posts',
+              required: true,
+            },
+          ],
+          label: 'Unnamed Group',
+        },
+      ],
+    },
+    {
       slug: 'relationships',
       fields: [
         {

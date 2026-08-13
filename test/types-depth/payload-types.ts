@@ -68,6 +68,8 @@ export interface Config {
   blocks: {};
   collections: {
     posts: Post;
+    media: Media;
+    passthrough: Passthrough;
     relationships: Relationship;
     'relationships-to-joins': RelationshipsToJoin;
     joins: Join;
@@ -85,6 +87,8 @@ export interface Config {
   };
   collectionsSelect: {
     posts: PostsSelect<false> | PostsSelect<true>;
+    media: MediaSelect<false> | MediaSelect<true>;
+    passthrough: PassthroughSelect<false> | PassthroughSelect<true>;
     relationships: RelationshipsSelect<false> | RelationshipsSelect<true>;
     'relationships-to-joins': RelationshipsToJoinsSelect<false> | RelationshipsToJoinsSelect<true>;
     joins: JoinsSelect<false> | JoinsSelect<true>;
@@ -154,6 +158,48 @@ export interface Post {
   updatedAt: string;
   createdAt: string;
   __collection?: 'posts';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media".
+ */
+export interface Media {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+  __collection?: 'media';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "passthrough".
+ */
+export interface Passthrough {
+  id: string;
+  json?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  upload?: (string | null) | Media;
+  unnamedGroup: {
+    insideUnnamedGroup: string | Post;
+  };
+  updatedAt: string;
+  createdAt: string;
+  __collection?: 'passthrough';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -332,6 +378,14 @@ export interface PayloadLockedDocument {
         value: string | Post;
       } | null)
     | ({
+        relationTo: 'media';
+        value: string | Media;
+      } | null)
+    | ({
+        relationTo: 'passthrough';
+        value: string | Passthrough;
+      } | null)
+    | ({
         relationTo: 'relationships';
         value: string | Relationship;
       } | null)
@@ -402,6 +456,38 @@ export interface PayloadMigration {
  */
 export interface PostsSelect<T extends boolean = true> {
   text?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media_select".
+ */
+export interface MediaSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "passthrough_select".
+ */
+export interface PassthroughSelect<T extends boolean = true> {
+  json?: T;
+  upload?: T;
+  unnamedGroup?:
+    | T
+    | {
+        insideUnnamedGroup?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -577,7 +663,15 @@ export interface CollectionsWidget {
 export interface CollectionQueryWidget {
   data?: {
     title?: string | null;
-    relatedCollection: 'posts' | 'relationships' | 'relationships-to-joins' | 'joins' | 'relationships-deep' | 'users';
+    relatedCollection:
+      | 'posts'
+      | 'media'
+      | 'passthrough'
+      | 'relationships'
+      | 'relationships-to-joins'
+      | 'joins'
+      | 'relationships-deep'
+      | 'users';
     where?:
       | {
           [k: string]: unknown;
@@ -600,7 +694,16 @@ export interface CollectionQueryWidget {
 export interface ActivityWidget {
   data?: {
     excludedCollections?:
-      | ('posts' | 'relationships' | 'relationships-to-joins' | 'joins' | 'relationships-deep' | 'users')[]
+      | (
+          | 'posts'
+          | 'media'
+          | 'passthrough'
+          | 'relationships'
+          | 'relationships-to-joins'
+          | 'joins'
+          | 'relationships-deep'
+          | 'users'
+        )[]
       | null;
   };
   width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';

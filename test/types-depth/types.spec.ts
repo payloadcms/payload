@@ -1,11 +1,22 @@
-import type { AllowedDepth, ApplyDepth, DecrementDepth, DefaultDepth, PaginatedDocs } from 'payload'
+import type {
+  AllowedDepth,
+  ApplyDepth,
+  BulkOperationResult,
+  DecrementDepth,
+  DefaultDepth,
+  PaginatedDocs,
+  SelectType,
+  TypeWithVersion,
+} from 'payload'
 
 import payload from 'payload'
 import { describe, expect, test } from 'tstyche'
 
 import type {
   Join,
+  Media,
   Menu,
+  Passthrough,
   Post,
   Relationship,
   RelationshipsDeep,
@@ -274,6 +285,28 @@ describe('typescript.typeSafeDepth', () => {
     expect(getType<ApplyDepth<Join, 2>>()).type.toBe<JoinDepth2>()
   })
 
+  interface PassthroughDepth0 extends Passthrough {
+    unnamedGroup: {
+      insideUnnamedGroup: string
+    }
+    upload?: null | string
+  }
+
+  test('ApplyDepth leaves a json field alone and still resolves upload fields', () => {
+    expect(getType<ApplyDepth<Passthrough, 0>>()).type.toBe<PassthroughDepth0>()
+  })
+
+  interface PassthroughDepth1 extends Passthrough {
+    unnamedGroup: {
+      insideUnnamedGroup: Post
+    }
+    upload?: Media | null
+  }
+
+  test('ApplyDepth resolves upload fields with depth 1', () => {
+    expect(getType<ApplyDepth<Passthrough, 1>>()).type.toBe<PassthroughDepth1>()
+  })
+
   test('payload.find respects default depth', () => {
     expect(payload.find({ collection: 'relationships' })).type.toBe<
       Promise<PaginatedDocs<ApplyDepth<Relationship, 0>>>
@@ -312,5 +345,23 @@ describe('typescript.typeSafeDepth', () => {
 
   test('payload.findGlobal respects depth', () => {
     expect(payload.findGlobal({ slug: 'menu', depth: 1 })).type.toBe<Promise<ApplyDepth<Menu, 1>>>()
+  })
+
+  test('payload.update by where respects depth', () => {
+    expect(
+      payload.update({ collection: 'relationships', data: {}, depth: 2, where: {} }),
+    ).type.toBe<Promise<BulkOperationResult<'relationships', SelectType, 2>>>()
+  })
+
+  test('bulk operation docs are an array of depth-aware documents', () => {
+    expect(getType<BulkOperationResult<'relationships', SelectType, 2>['docs']>()).type.toBe<
+      ApplyDepth<Relationship, 2>[]
+    >()
+  })
+
+  test('payload.findVersionByID respects depth', () => {
+    expect(payload.findVersionByID({ id: '', collection: 'relationships', depth: 2 })).type.toBe<
+      Promise<TypeWithVersion<ApplyDepth<Relationship, 2>>>
+    >()
   })
 })

@@ -346,13 +346,23 @@ type ExcludeID<T> = Exclude<T, number | string>
 
 type ExcludeObject<T> = Exclude<T, object>
 
+type IsNever<T> = [T] extends [never] ? true : false
+
 /**
- * A relationship / upload field is generated as `ID | Doc`, and `keyof (ID | Doc)` collapses to
- * `never` because a primitive and a document share no keys. Every generated document interface
- * carries the `__collection` marker when `typescript.typeSafeDepth` is enabled, so `never extends
- * '__collection'` is what distinguishes "this key points at another document" from a plain field.
+ * A relationship / upload field is generated as `ID | Doc`, where `Doc` carries the `__collection`
+ * marker that `typescript.typeSafeDepth` adds to every generated document interface. Both halves
+ * have to be there: without the ID half this would also match a plain nested document, and without
+ * the marker it would match any union of a primitive and an object - a `json` field, for example,
+ * whose object and array members would then get stripped as if they were populated relationships.
  */
-type HasCollectionType<T> = keyof NonNullable<T> extends '__collection' ? true : false
+type HasCollectionType<T> =
+  IsNever<ExcludeID<NonNullable<T>>> extends true
+    ? false
+    : IsNever<ExcludeObject<NonNullable<T>>> extends true
+      ? false
+      : '__collection' extends keyof ExcludeID<NonNullable<T>>
+        ? true
+        : false
 
 type IsPolymorphicRelationship<T> = T extends { relationTo: string; value: unknown }
   ? '__collection' extends keyof ExcludeID<T['value']>
