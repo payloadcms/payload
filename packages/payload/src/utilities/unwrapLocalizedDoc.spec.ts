@@ -1,5 +1,10 @@
-import { flattenAllFields, SanitizedConfig } from '..'
+import type { SanitizedConfig } from '../config/types.js'
+
+import { describe, expect, it } from 'vitest'
+
+import { flattenAllFields } from './flattenAllFields.js'
 import { unwrapLocalizedDoc } from './unwrapLocalizedDoc.js'
+
 const config = {} as SanitizedConfig
 
 const fields = flattenAllFields({
