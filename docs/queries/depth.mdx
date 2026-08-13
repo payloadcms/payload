@@ -136,3 +136,20 @@ const category = post.category
 
 You may notice that `post.category` is typed as `Category | string` (or `Category | number` with number IDs) which isn't quite right since we passed `depth: 1`.
 With `typescript.typeSafeDepth: true` this type will be resolved as just `Category` and in case of `depth: 0` - `string`.
+
+This applies to relationship, upload, polymorphic relationship and [join](../fields/join) fields, at any
+nesting - inside groups, tabs, arrays and blocks - and to every Local API method that accepts `depth`.
+When `depth` is omitted, the type follows [`defaultDepth`](../configuration/overview).
+
+The option is opt-in because it changes the result type of every Local API call, which is likely to
+surface type errors in existing code. It requires re-running `payload generate:types`: enabling it adds
+a `depth` entry to the generated `Config` and an internal `__collection` marker to each generated
+document interface, which is how the types tell a relationship apart from a plain field.
+
+### Limitations
+
+- `depth` has to be a literal for the type to be computed, so a value of type `number` is rejected.
+  Cast a dynamic depth with `as AllowedDepth`, e.g. `depth: Number(searchParams.depth) as AllowedDepth`.
+- Depths above [`maxDepth`](../configuration/overview) are a type error, since the server clamps them.
+- A field-level [`maxDepth`](#max-depth), `populate` and `joins: false` are not reflected
+  in the result type - a field capped by its own `maxDepth` is still typed as populated.

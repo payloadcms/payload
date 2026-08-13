@@ -48,6 +48,18 @@ describe('typescript.typeSafeDepth', () => {
     expect(payload.find).type.not.toBeCallableWith({ collection: 'relationships', depth: 6 })
   })
 
+  test('rejects a widened `number` depth, which has to be cast to AllowedDepth', () => {
+    expect(payload.find).type.not.toBeCallableWith({
+      collection: 'relationships',
+      depth: getType<number>(),
+    })
+
+    expect(payload.find).type.toBeCallableWith({
+      collection: 'relationships',
+      depth: getType<number>() as AllowedDepth,
+    })
+  })
+
   interface RelationshipDepth0 extends Relationship {
     many: string[]
     manyOptional?: null | string[]
