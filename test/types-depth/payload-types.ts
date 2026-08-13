@@ -71,6 +71,7 @@ export interface Config {
     media: Media;
     passthrough: Passthrough;
     relationships: Relationship;
+    categories: Category;
     'relationships-to-joins': RelationshipsToJoin;
     joins: Join;
     'relationships-deep': RelationshipsDeep;
@@ -90,6 +91,7 @@ export interface Config {
     media: MediaSelect<false> | MediaSelect<true>;
     passthrough: PassthroughSelect<false> | PassthroughSelect<true>;
     relationships: RelationshipsSelect<false> | RelationshipsSelect<true>;
+    categories: CategoriesSelect<false> | CategoriesSelect<true>;
     'relationships-to-joins': RelationshipsToJoinsSelect<false> | RelationshipsToJoinsSelect<true>;
     joins: JoinsSelect<false> | JoinsSelect<true>;
     'relationships-deep': RelationshipsDeepSelect<false> | RelationshipsDeepSelect<true>;
@@ -114,6 +116,24 @@ export interface Config {
     collections: CollectionsWidget;
     'collection-query': CollectionQueryWidget;
     activity: ActivityWidget;
+  };
+  collectionsInput: {
+    posts: PostInput;
+    media: MediaInput;
+    passthrough: PassthroughInput;
+    relationships: RelationshipInput;
+    categories: CategoryInput;
+    'relationships-to-joins': RelationshipsToJoinInput;
+    joins: JoinInput;
+    'relationships-deep': RelationshipsDeepInput;
+    'payload-kv': PayloadKvInput;
+    users: UserInput;
+    'payload-locked-documents': PayloadLockedDocumentInput;
+    'payload-preferences': PayloadPreferenceInput;
+    'payload-migrations': PayloadMigrationInput;
+  };
+  globalsInput: {
+    menu: MenuInput;
   };
   user: User;
   jobs: {
@@ -283,6 +303,17 @@ export interface User {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories".
+ */
+export interface Category {
+  id: string;
+  parent?: (string | null) | Category;
+  updatedAt: string;
+  createdAt: string;
+  __collection?: 'categories';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "relationships-to-joins".
  */
 export interface RelationshipsToJoin {
@@ -388,6 +419,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'relationships';
         value: string | Relationship;
+      } | null)
+    | ({
+        relationTo: 'categories';
+        value: string | Category;
       } | null)
     | ({
         relationTo: 'relationships-to-joins';
@@ -504,6 +539,15 @@ export interface RelationshipsSelect<T extends boolean = true> {
   onePolyOptional?: T;
   manyPoly?: T;
   manyPolyOptional?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories_select".
+ */
+export interface CategoriesSelect<T extends boolean = true> {
+  parent?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -668,6 +712,7 @@ export interface CollectionQueryWidget {
       | 'media'
       | 'passthrough'
       | 'relationships'
+      | 'categories'
       | 'relationships-to-joins'
       | 'joins'
       | 'relationships-deep'
@@ -699,6 +744,7 @@ export interface ActivityWidget {
           | 'media'
           | 'passthrough'
           | 'relationships'
+          | 'categories'
           | 'relationships-to-joins'
           | 'joins'
           | 'relationships-deep'
@@ -707,6 +753,288 @@ export interface ActivityWidget {
       | null;
   };
   width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts_input".
+ */
+export interface PostInput {
+  id?: string;
+  text?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media_input".
+ */
+export interface MediaInput {
+  id?: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "passthrough_input".
+ */
+export interface PassthroughInput {
+  id?: string;
+  json?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  upload?: string | null;
+  unnamedGroup: {
+    insideUnnamedGroup: string;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relationships_input".
+ */
+export interface RelationshipInput {
+  id?: string;
+  one: string;
+  oneOptional?: string | null;
+  many: string[];
+  manyOptional?: string[] | null;
+  onePoly:
+    | {
+        relationTo: 'posts';
+        value: string;
+      }
+    | {
+        relationTo: 'users';
+        value: string;
+      };
+  onePolyOptional?:
+    | ({
+        relationTo: 'posts';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string;
+      } | null);
+  manyPoly: (
+    | {
+        relationTo: 'posts';
+        value: string;
+      }
+    | {
+        relationTo: 'users';
+        value: string;
+      }
+  )[];
+  manyPolyOptional?:
+    | (
+        | {
+            relationTo: 'posts';
+            value: string;
+          }
+        | {
+            relationTo: 'users';
+            value: string;
+          }
+      )[]
+    | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories_input".
+ */
+export interface CategoryInput {
+  id?: string;
+  parent?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relationships-to-joins_input".
+ */
+export interface RelationshipsToJoinInput {
+  id?: string;
+  join: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "joins_input".
+ */
+export interface JoinInput {
+  id?: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relationships-deep_input".
+ */
+export interface RelationshipsDeepInput {
+  id?: string;
+  depthTwoOne: string;
+  group?: {
+    blocks?: (FirstInput | SecondInput)[] | null;
+    array?:
+      | {
+          one: string;
+          many: string[];
+          id?: string | null;
+        }[]
+      | null;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FirstInput".
+ */
+export interface FirstInput {
+  oneFirst: string;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'first';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "SecondInput".
+ */
+export interface SecondInput {
+  oneSecond: string;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'second';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_input".
+ */
+export interface PayloadKvInput {
+  id?: string;
+  key: string;
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users_input".
+ */
+export interface UserInput {
+  id?: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-locked-documents_input".
+ */
+export interface PayloadLockedDocumentInput {
+  id?: string;
+  document?:
+    | ({
+        relationTo: 'posts';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'media';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'passthrough';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'relationships';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'categories';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'relationships-to-joins';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'joins';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'relationships-deep';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string;
+      } | null);
+  globalSlug?: string | null;
+  user: {
+    relationTo: 'users';
+    value: string;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-preferences_input".
+ */
+export interface PayloadPreferenceInput {
+  id?: string;
+  user: {
+    relationTo: 'users';
+    value: string;
+  };
+  key?: string | null;
+  value?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-migrations_input".
+ */
+export interface PayloadMigrationInput {
+  id?: string;
+  name?: string | null;
+  batch?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "menu_input".
+ */
+export interface MenuInput {
+  id?: string;
+  relatedPost: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

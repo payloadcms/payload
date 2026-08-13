@@ -424,6 +424,12 @@ type ApplyDepthOnObject<T, Depth extends AllowedDepth> = T extends object
 export type ApplyDepth<T extends object, Depth extends AllowedDepth> = ApplyDepthOnObject<T, Depth>
 
 /**
+ * `ApplyDepth` for a single field value rather than a whole document. Used by operations that
+ * return one field, such as `findDistinct`.
+ */
+export type ApplyDepthToField<T, Depth extends AllowedDepth> = ApplyDepthProcessKey<T, Depth>
+
+/**
  * Use this type to support both, `typescript.typeSafeDepth` enabled and disabled.
  * This is not needed to use in an actual project, since you either have it enabled or disabled, use `ApplyDepth` directly.
  * Having this wrapper is preferred over doing this check directly in `ApplyDepth` to:
@@ -434,3 +440,10 @@ export type ApplyDepthInternal<
   T extends object,
   Depth extends AllowedDepth,
 > = number extends AllowedDepth ? T : ApplyDepth<T, Depth>
+
+/**
+ * `ApplyDepthInternal` for a single field value. See {@link ApplyDepthToField}.
+ */
+export type ApplyDepthToFieldInternal<T, Depth extends AllowedDepth> = number extends AllowedDepth
+  ? T
+  : ApplyDepthToField<T, Depth>

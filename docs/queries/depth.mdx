@@ -150,6 +150,7 @@ document interface, which is how the types tell a relationship apart from a plai
 
 - `depth` has to be a literal for the type to be computed, so a value of type `number` is rejected.
   Cast a dynamic depth with `as AllowedDepth`, e.g. `depth: Number(searchParams.depth) as AllowedDepth`.
-- Depths above [`maxDepth`](../configuration/overview) are a type error, since the server clamps them.
+- Depths above [`maxDepth`](#max-depth) are a type error, since the server clamps them. A
+  `defaultDepth` above `maxDepth` is clamped in the types too, to match what the server returns.
 - A field-level [`maxDepth`](#max-depth), `populate` and `joins: false` are not reflected
   in the result type - a field capped by its own `maxDepth` is still typed as populated.

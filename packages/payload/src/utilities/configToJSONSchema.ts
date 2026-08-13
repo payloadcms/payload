@@ -1069,7 +1069,9 @@ export function entityToJSONSchema(
     jsonSchema.description = entityDescription
   }
 
-  if (config.typescript?.typeSafeDepth) {
+  // Read-only marker that lets `ApplyDepth` recognise a populated relationship. Input types
+  // describe what `create`/`update` accept, so it has no place there.
+  if (config.typescript?.typeSafeDepth && !isInput) {
     jsonSchema.properties!.__collection = {
       type: 'string',
       enum: [entity.slug],
@@ -1742,7 +1744,11 @@ export function configToJSONSchema(
         },
         default: {
           type: 'number',
-          enum: [config.defaultDepth],
+          // `afterRead` clamps an incoming depth to `maxDepth`, and `defaultDepth` is not validated
+          // against it, so mirror the clamp here. Emitting an out-of-range default would leave
+          // `DecrementDepth` indexing past the end of the tuple and silently type every relationship
+          // as unpopulated.
+          enum: [Math.min(config.defaultDepth, config.maxDepth)],
         },
       },
       required: ['allowed', 'default', 'decremented'],

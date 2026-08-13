@@ -4,6 +4,7 @@ import type {
   BulkOperationResult,
   DecrementDepth,
   DefaultDepth,
+  PaginatedDistinctDocs,
   PaginatedDocs,
   SelectType,
   TypeWithVersion,
@@ -13,6 +14,7 @@ import payload from 'payload'
 import { describe, expect, test } from 'tstyche'
 
 import type {
+  Category,
   Join,
   Media,
   Menu,
@@ -368,6 +370,28 @@ describe('typescript.typeSafeDepth', () => {
   test('bulk operation docs are an array of depth-aware documents', () => {
     expect(getType<BulkOperationResult<'relationships', SelectType, 2>['docs']>()).type.toBe<
       ApplyDepth<Relationship, 2>[]
+    >()
+  })
+
+  test('a self-referencing relationship terminates at the requested depth', () => {
+    expect(getType<ApplyDepth<Category, 0>['parent']>()).type.toBe<null | string | undefined>()
+
+    expect(getType<ApplyDepth<Category, 2>['parent']>()).type.toBe<
+      ApplyDepth<Category, 1> | null | undefined
+    >()
+
+    expect(
+      getType<NonNullable<NonNullable<ApplyDepth<Category, 2>['parent']>['parent']>['parent']>(),
+    ).type.toBe<null | string | undefined>()
+  })
+
+  test('payload.findDistinct respects depth on a relationship field', () => {
+    expect(payload.findDistinct({ collection: 'categories', depth: 0, field: 'parent' })).type.toBe<
+      Promise<PaginatedDistinctDocs<Record<'parent', null | string | undefined>>>
+    >()
+
+    expect(payload.findDistinct({ collection: 'categories', depth: 1, field: 'parent' })).type.toBe<
+      Promise<PaginatedDistinctDocs<Record<'parent', ApplyDepth<Category, 0> | null | undefined>>>
     >()
   })
 

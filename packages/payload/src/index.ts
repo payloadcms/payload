@@ -47,6 +47,7 @@ import type { InitializedEmailAdapter } from './email/types.js'
 import type { DataFromGlobalSlug, Globals, SelectFromGlobalSlug } from './globals/config/types.js'
 import type {
   ApplyDepthInternal,
+  ApplyDepthToFieldInternal,
   ApplyDisableErrors,
   DraftTransformCollectionWithSelect,
   JsonObject,
@@ -670,9 +671,14 @@ export class BasePayload {
   findDistinct = async <
     TSlug extends CollectionSlug,
     TField extends keyof DataFromCollectionSlug<TSlug> & string,
+    TDepth extends AllowedDepth = DefaultDepth,
   >(
-    options: FindDistinctOptions<TSlug, TField>,
-  ): Promise<PaginatedDistinctDocs<Record<TField, DataFromCollectionSlug<TSlug>[TField]>>> => {
+    options: FindDistinctOptions<TSlug, TField, TDepth>,
+  ): Promise<
+    PaginatedDistinctDocs<
+      Record<TField, ApplyDepthToFieldInternal<DataFromCollectionSlug<TSlug>[TField], TDepth>>
+    >
+  > => {
     return findDistinctLocal(this, options)
   }
 

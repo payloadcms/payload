@@ -116,6 +116,17 @@ export default buildConfigWithDefaults({
       ],
     },
     {
+      // Self-referencing relationship, the shape a `hierarchy` parent field generates.
+      slug: 'categories',
+      fields: [
+        {
+          name: 'parent',
+          type: 'relationship',
+          relationTo: 'categories',
+        },
+      ],
+    },
+    {
       slug: 'relationships-to-joins',
       fields: [
         {
@@ -219,6 +230,7 @@ export default buildConfigWithDefaults({
   ],
   maxDepth: 5,
   typescript: {
+    generateInputTypes: true,
     outputFile: path.resolve(dirname, 'payload-types.ts'),
     typeSafeDepth: true,
   },
