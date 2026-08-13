@@ -53,8 +53,9 @@ const migrateModelWithBatching = async ({
       transform({ adapter: db, data: doc, fields, operation: 'write', parentIsLocalized })
     }
 
+    // Writing through the driver collection skips Mongoose timestamps entirely,
+    // which is what we want here - timestamps are added by the write transform above
     await Model.collection.bulkWrite(
-      // @ts-expect-error bulkWrite has a weird type, insertOne, updateMany etc are required here as well.
       docs.map((doc) => ({
         updateOne: {
           filter: { _id: doc._id },
@@ -63,10 +64,7 @@ const migrateModelWithBatching = async ({
           },
         },
       })),
-      {
-        session, // Timestamps are manually added by the write transform
-        timestamps: false,
-      },
+      { session },
     )
 
     skip += batchSize
@@ -168,7 +166,7 @@ export async function migrateRelationshipsV2_V3({
     if (hasRelationshipOrUploadField(global)) {
       payload.logger.info(`Migrating global "${global.slug}"`)
 
-      const doc = await GlobalsModel.findOne<Record<string, unknown>>(
+      const doc = (await GlobalsModel.findOne(
         {
           globalType: {
             $eq: global.slug,
@@ -176,7 +174,7 @@ export async function migrateRelationshipsV2_V3({
         },
         {},
         { lean: true, session },
-      )
+      )) as null | Record<string, unknown>
 
       // in case if the global doesn't exist in the database yet  (not saved)
       if (doc) {

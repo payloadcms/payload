@@ -4,8 +4,22 @@ import type { CheckboxField, Field, FieldHook, TextField } from '../../fields/co
 
 const encryptKey: FieldHook = ({ req, value }) =>
   value ? req.payload.encrypt(value as string) : null
-const decryptKey: FieldHook = ({ req, value }) =>
-  value ? req.payload.decrypt(value as string) : undefined
+const decryptKey: FieldHook = ({ req, value }) => {
+  if (!value) {
+    return undefined
+  }
+  try {
+    return req.payload.decrypt(value as string)
+  } catch {
+    // The value was encrypted under a secret no longer in the keyring (e.g. a
+    // previousSecret was removed before rotateSecret re-keyed this row). Mask the
+    // field (return null, since an undefined afterRead result is treated as "no
+    // change" and would leak the ciphertext) rather than failing the whole
+    // document read; API key auth is unaffected (it matches the apiKeyIndex), and
+    // running rotateSecret restores the displayed value.
+    return null
+  }
+}
 
 type APIKeyCheckboxFieldOverride = Omit<Partial<CheckboxField>, 'name' | 'type'>
 type APIKeyTextFieldOverride = Omit<
