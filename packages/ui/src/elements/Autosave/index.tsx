@@ -44,6 +44,7 @@ export type Props = {
 export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc }) => {
   const {
     config: {
+      localization,
       routes: { api },
     },
   } = useConfig()
@@ -112,7 +113,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
               autosave: true,
               depth: 0,
               draft: true,
-              'fallback-locale': 'null',
+              ...(localization ? { 'fallback-locale': 'null' } : {}),
               locale,
             },
             {

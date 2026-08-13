@@ -20,6 +20,7 @@ const baseClass = 'save-draft'
 export function SaveDraftButton(props: SaveDraftButtonClientProps) {
   const {
     config: {
+      localization,
       routes: { api },
     },
   } = useConfig()
@@ -42,7 +43,7 @@ export function SaveDraftButton(props: SaveDraftButtonClientProps) {
       return
     }
 
-    const search = `?locale=${locale}&depth=0&fallback-locale=null&draft=true`
+    const search = `?locale=${locale}&depth=0${localization ? '&fallback-locale=null' : ''}&draft=true`
     let action
     let method = 'POST'
 

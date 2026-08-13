@@ -92,7 +92,7 @@ export function PublishButton({
       {
         depth: 0,
         draft: true,
-        'fallback-locale': 'null',
+        'fallback-locale': localization ? 'null' : undefined,
         locale: localeCode,
       },
       { addQueryPrefix: true },
