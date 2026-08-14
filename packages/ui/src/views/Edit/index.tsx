@@ -497,6 +497,7 @@ export function DefaultEditView({
         !hasCheckedForStaleDataRef.current &&
         originalUpdatedAtRef.current &&
         operation === 'update' &&
+        !isTrashed &&
         !autosaveEnabled
 
       if (checkForStaleData) {
