@@ -319,7 +319,7 @@ describe('email-resend', () => {
       mockFetch(errorResponse, { status: 403 })
 
       await expect(() => adapter().sendEmail({ from, subject, text, to })).rejects.toThrow(
-        `Error sending email: ${errorResponse.statusCode} ${errorResponse.name} - ${errorResponse.message}`,
+        `Error sending email: ${errorResponse.name} - ${errorResponse.message}`,
       )
     })
 
@@ -327,15 +327,15 @@ describe('email-resend', () => {
       mockFetch('Origin is disallowed', { status: 403, statusText: 'Forbidden' })
 
       await expect(() => adapter().sendEmail({ from, subject, text, to })).rejects.toThrow(
-        /Error sending email: 403.*Origin is disallowed/s,
+        /Error sending email.*Origin is disallowed/s,
       )
     })
 
-    it('should throw with the status code when the error body is empty', async () => {
+    it('should throw when the error body is empty', async () => {
       mockFetch('', { status: 500, statusText: 'Internal Server Error' })
 
       await expect(() => adapter().sendEmail({ from, subject, text, to })).rejects.toThrow(
-        /Error sending email: 500/,
+        /Error sending email/,
       )
     })
 

@@ -75,10 +75,10 @@ export const resendAdapter = (args: ResendAdapterArgs): ResendAdapter => {
 
       const errorData = data && 'statusCode' in data ? data : undefined
       const statusCode = errorData?.statusCode || res.status || 500
-      let formattedError = `Error sending email: ${statusCode}`
+      let formattedError = 'Error sending email'
 
       if (errorData?.name && errorData?.message) {
-        formattedError += ` ${errorData.name} - ${errorData.message}`
+        formattedError += `: ${errorData.name} - ${errorData.message}`
       } else if (rawBody) {
         // No structured error shape — include the raw body so the underlying
         // reason (e.g. "Origin is disallowed") reaches the caller.
