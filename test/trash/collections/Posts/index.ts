@@ -19,6 +19,35 @@ export const Posts: CollectionConfig = {
       type: 'text',
       localized: true,
     },
+    {
+      name: 'showConditionalRichText',
+      type: 'text',
+    },
+    {
+      name: 'richText',
+      type: 'richText',
+    },
+    {
+      type: 'tabs',
+      tabs: [
+        {
+          label: 'Tab',
+          fields: [
+            {
+              name: 'richTextInTab',
+              type: 'richText',
+            },
+            {
+              name: 'conditionalRichTextInTab',
+              type: 'richText',
+              admin: {
+                condition: ({ showConditionalRichText }) => showConditionalRichText === 'show',
+              },
+            },
+          ],
+        },
+      ],
+    },
   ],
   versions: {
     drafts: true,

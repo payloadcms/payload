@@ -620,6 +620,55 @@ describe('Trash', () => {
         await expect(page.locator('.trash-banner')).toBeVisible()
       })
 
+      test('should render rich text fields inside tabs as read-only', async ({ page }) => {
+        const trashedPostWithConditionalRichText = await createTrashedPostDoc({
+          showConditionalRichText: 'show',
+          title: 'Trashed Post With Conditional Rich Text',
+        })
+
+        await page.goto(postsUrl.trashEdit(trashedPostWithConditionalRichText.id))
+
+        const richTextRoot = page.locator(
+          '.rich-text-lexical[data-field-path="richText"] .ContentEditable__root',
+        )
+        const richTextInTabRoot = page.locator(
+          '.rich-text-lexical[data-field-path="richTextInTab"] .ContentEditable__root',
+        )
+        const conditionalRichTextInTabRoot = page.locator(
+          '.rich-text-lexical[data-field-path="conditionalRichTextInTab"] .ContentEditable__root',
+        )
+
+        await expect(conditionalRichTextInTabRoot).toHaveAttribute('contenteditable', 'false')
+        await expect(richTextInTabRoot).toHaveAttribute('contenteditable', 'false')
+        await expect(richTextRoot).toHaveAttribute('contenteditable', 'false')
+        await conditionalRichTextInTabRoot.click()
+        await page.keyboard.type('should not be entered')
+        await expect(conditionalRichTextInTabRoot).not.toContainText('should not be entered')
+      })
+
+      test('should keep server-rendered rich text fields read-only after form state updates', async ({
+        page,
+      }) => {
+        await page.goto(postsUrl.trashEdit(trashedPostDocOne.id))
+
+        const trigger = page.locator('#field-showConditionalRichText')
+        const conditionalRichTextRoot = page.locator(
+          '.rich-text-lexical[data-field-path="conditionalRichTextInTab"] .ContentEditable__root',
+        )
+
+        await expect(conditionalRichTextRoot).toHaveCount(0)
+        // Force a form-state update to verify fields added by the server remain read-only.
+        await trigger.evaluate((element: HTMLInputElement) => {
+          element.disabled = false
+        })
+        await trigger.fill('show')
+
+        await expect(conditionalRichTextRoot).toHaveAttribute('contenteditable', 'false')
+        await conditionalRichTextRoot.click()
+        await page.keyboard.type('should not be entered')
+        await expect(conditionalRichTextRoot).not.toContainText('should not be entered')
+      })
+
       test('Should navigate back to the trash view using the `trash` breadcrumb', async ({
         page,
       }) => {
