@@ -19,6 +19,28 @@ With no arguments, runs every registered transform against the current directory
 - `--dry` — analyze only; write nothing.
 - `--print` — print transformed sources to stdout instead of writing.
 
+## `upgrade` command
+
+`npx @payloadcms/codemod upgrade [path]` performs the mechanical v3 -> v4 slice:
+
+1. Resolves the current Payload canary from the npm registry (override with `--tag <dist-tag>`).
+2. Rewrites `package.json`: pins `payload` + every `@payloadcms/*` to that exact version in
+   lockstep, removes dependency overrides pinning them, converts their carets to exact, and writes
+   the TypeScript / `@types/node` / `engines.node` floors.
+3. Installs with your detected package manager.
+4. Runs every registered transform against the now-v4 tree.
+5. Prints a report and points you at the bundled runbook for the rest.
+
+It does NOT upgrade Next.js. Payload v4 requires Next 16; run Next's own recommended agent
+workflow (linked from the bundled runbook) to bump Next and migrate the code together. The report
+prints the required Next target.
+
+### `upgrade` flags
+
+- `--tag <dist-tag>` — dist-tag to resolve Payload versions from (default `canary`).
+- `--dry` — preview the `package.json` changes and planned steps; write and install nothing.
+- `--force` — skip the dirty-git-tree warning.
+
 ## How it works
 
 The tool loads your project via [ts-morph](https://ts-morph.com/), using your `tsconfig.json` when present, otherwise globbing `**/*.{ts,tsx,js,jsx}` (excluding `node_modules`, `dist`, `.next`, `build`). Each registered transform is applied in order against the shared project; changes are saved at the end unless `--dry` or `--print` is passed.
