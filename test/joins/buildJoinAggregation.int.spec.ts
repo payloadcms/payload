@@ -124,7 +124,7 @@ describe(
 
       expect(aggregation).toBeInstanceOf(Array)
 
-      const lookups = getLookups(aggregation!)
+      const lookups = getLookups(aggregation)
 
       expect(lookups).toHaveLength(2)
 
@@ -157,7 +157,7 @@ describe(
 
       expect(aggregation).toBeInstanceOf(Array)
 
-      const lookups = getLookups(aggregation!)
+      const lookups = getLookups(aggregation)
       expect(lookups).toHaveLength(1)
 
       expect(lookups[0]!.as).toBe('posts.docs')
@@ -184,7 +184,7 @@ describe(
 
       expect(aggregation).toBeInstanceOf(Array)
 
-      const lookups = getLookups(aggregation!)
+      const lookups = getLookups(aggregation)
       expect(lookups).toHaveLength(1)
 
       expect(lookups[0]!.as).toBe('postsMany.docs')
@@ -226,7 +226,7 @@ describe(
 
       expect(aggregation).toBeInstanceOf(Array)
 
-      const lookups = getLookups(aggregation!)
+      const lookups = getLookups(aggregation)
 
       expect(lookups).toHaveLength(2)
 
@@ -268,7 +268,7 @@ describe(
 
       expect(aggregation).toBeInstanceOf(Array)
 
-      const lookups = getLookups(aggregation!)
+      const lookups = getLookups(aggregation)
       expect(lookups).toHaveLength(1)
 
       expect(lookups[0]!.as).toBe('version.posts.docs')
@@ -304,7 +304,7 @@ describe(
 
       expect(aggregation).toBeInstanceOf(Array)
 
-      const lookups = getLookups(aggregation!)
+      const lookups = getLookups(aggregation)
       expect(lookups).toHaveLength(1)
 
       expect(lookups[0]!.as).toBe('version.postsMany.docs')

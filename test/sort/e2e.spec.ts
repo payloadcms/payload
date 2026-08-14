@@ -8,16 +8,12 @@ import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { Config } from './payload-types.js'
 
 import { goToListDoc } from '../__helpers/e2e/goToListDoc.js'
-import {
-  ensureCompilationIsDone,
-  initPageConsoleErrorCatch,
-  // throttleTest
-} from '../__helpers/e2e/helpers.js'
 import { scrollEntirePage } from '../__helpers/e2e/scrollEntirePage.js'
 import { attemptKeyboardReorder, moveRow } from '../__helpers/e2e/sort/moveRow.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { RESTClient } from '../__helpers/shared/rest.js'
+import { initPage } from '../__setup/e2e/initPage.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { orderableSlug } from './collections/Orderable/index.js'
 import { orderableJoinSlug } from './collections/OrderableJoin/index.js'
@@ -39,22 +35,17 @@ describe('Sort functionality', () => {
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
 
     context = await browser.newContext()
-    page = await context.newPage()
-
-    initPageConsoleErrorCatch(page)
+    ;({ page } = await initPage({ context, serverURL }))
 
     // Wait for the server to be ready before the node-side REST login: on the
     // slower TanStack prod cold-start, `client.login()` (a direct fetch, no retry)
     // can hit the server before it accepts connections → `TypeError: fetch failed`.
-    await ensureCompilationIsDone({ page, serverURL })
 
     client = new RESTClient({ defaultSlug: 'users', serverURL })
     await client.login()
   })
 
   test.beforeEach(async () => {
-    // await throttleTest({ page, context, delay: 'Fast 4G' })
-
     // The prod server may still be cold-starting in CI, so the first requests can
     // be refused (`fetch failed`). Poll the seed endpoint until it responds 200.
     await expect
@@ -76,12 +67,11 @@ describe('Sort functionality', () => {
   // eslint-disable-next-line playwright/expect-expect
   test('Orderable collection', async () => {
     const url = new AdminUrlUtil(serverURL, orderableSlug)
-    await page.goto(url.list)
-
     const joinFieldResolvePromise = page.waitForResponse(
       (response) => response.url().includes('/api/orderable-join') && response.status() === 200,
     )
 
+    await page.goto(url.list)
     await joinFieldResolvePromise
     await page.goto(`${url.list}?sort=-_order`)
 
@@ -112,11 +102,38 @@ describe('Sort functionality', () => {
 
     await assertRows(['A', 'C', 'D', 'B'])
 
-    // Note: Clicking the sort button again should not change the order
-    // In previous versions we allowed ascending and descending order.
+    // Clicking the sort button again should toggle to descending order
+    await page.locator('button.sort-header').nth(0).click()
+    await page.waitForURL(/sort=-_order/, { timeout: 2000 })
+    await assertRows(['B', 'D', 'C', 'A'])
+
+    await moveRow(page, {
+      fromIndex: 0,
+      toIndex: 2,
+    })
+
+    await assertRows(['D', 'C', 'B', 'A'])
+
+    // Move to top
+    await moveRow(page, {
+      fromIndex: 2,
+      toIndex: 0,
+    })
+
+    await assertRows(['B', 'D', 'C', 'A'])
+
+    // Move to bottom
+    await moveRow(page, {
+      fromIndex: 0,
+      toIndex: 3,
+    })
+
+    await assertRows(['D', 'C', 'A', 'B'])
+
+    // Clicking the sort button again should toggle back to ascending order
     await page.locator('button.sort-header').nth(0).click()
     await page.waitForURL(/sort=_order/, { timeout: 2000 })
-    await assertRows(['A', 'C', 'D', 'B'])
+    await assertRows(['B', 'A', 'C', 'D'])
 
     await page.getByLabel('Sort by Title Ascending').click()
     await page.waitForURL(/sort=title/, { timeout: 2000 })
@@ -146,8 +163,8 @@ describe('Sort functionality', () => {
     // the soft navigation's URL only updates after the RSC payload arrives, which
     // can stall past the test timeout on a cold CI server.
     await goToListDoc({
-      page,
       cellClass: '.cell-title',
+      page,
       textToMatch: 'Join A',
       urlUtil: url,
     })
@@ -163,8 +180,8 @@ describe('Sort functionality', () => {
     // Move to middle
     await moveRow(page, {
       fromIndex: 1,
-      toIndex: 2,
       scope: page.locator('#field-orderableJoinField1'),
+      toIndex: 2,
     })
 
     await assertRows(['A', 'C', 'B', 'D'], {
@@ -178,8 +195,8 @@ describe('Sort functionality', () => {
     // Move to end
     await moveRow(page, {
       fromIndex: 0,
-      toIndex: 3,
       scope: page.locator('#field-orderableJoinField2'),
+      toIndex: 3,
     })
 
     await assertRows(['B', 'C', 'D', 'A'], {

@@ -242,7 +242,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
     const scrollX = useFixed ? 0 : window.scrollX
 
     // Gap between the popup and the trigger/viewport edges (in pixels)
-    const offset = 10
+    const offset = 8
     // Additional gap used in side mode so the child popup has breathing room from its parent
     const sideOffset = 4
 

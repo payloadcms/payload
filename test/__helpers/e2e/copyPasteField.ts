@@ -11,7 +11,7 @@ export async function copyPasteField({
   page,
   action = 'copy',
 }: {
-  action?: 'copy' | 'paste'
+  action?: 'copy' | 'paste' | 'paste-below'
   fieldName: string
   page: Page
   rowIndex?: number

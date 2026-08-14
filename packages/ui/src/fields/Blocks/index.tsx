@@ -13,6 +13,7 @@ import { Button } from '../../elements/Button/index.js'
 import { clipboardCopy, clipboardPaste } from '../../elements/ClipboardAction/clipboardUtilities.js'
 import { ClipboardAction } from '../../elements/ClipboardAction/index.js'
 import {
+  insertRowFromClipboard,
   mergeFormStateFromClipboard,
   reduceFormStateByPath,
 } from '../../elements/ClipboardAction/mergeFormStateFromClipboard.js'
@@ -293,6 +294,38 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
     [clientBlocks, getFields, path, replaceState, setModified, t],
   )
 
+  const pasteRowBelow = useCallback(
+    (rowIndex: number) => {
+      const pasteArgs = {
+        onPaste: (dataFromClipboard: ClipboardPasteData) => {
+          const formState = { ...getFields() }
+          const newState = insertRowFromClipboard({
+            dataFromClipboard,
+            formState,
+            path,
+            rowIndex: rowIndex + 1,
+          })
+          replaceState(newState)
+          setModified(true)
+
+          setTimeout(() => {
+            scrollToID(`${path?.split('.').join('-')}-row-${rowIndex + 1}`)
+          }, 0)
+        },
+        path,
+        schemaBlocks: clientBlocks,
+        t,
+      }
+
+      const clipboardResult = clipboardPaste(pasteArgs)
+
+      if (typeof clipboardResult === 'string') {
+        toast.error(clipboardResult)
+      }
+    },
+    [clientBlocks, getFields, path, replaceState, setModified, t],
+  )
+
   const pasteBlocks = useCallback(
     (dataFromClipboard: ClipboardPasteData) => {
       const formState = { ...getFields() }
@@ -490,6 +523,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
                       moveRow={moveRow}
                       parentPath={path}
                       pasteRow={pasteRow}
+                      pasteRowBelow={pasteRowBelow}
                       path={rowPath}
                       permissions={permissions}
                       readOnly={readOnly || disabled}
