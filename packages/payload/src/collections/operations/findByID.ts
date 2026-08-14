@@ -111,7 +111,10 @@ export const findByIDOperation = async <
   // /////////////////////////////////////
 
   const accessResult = !overrideAccess
-    ? await executeAccess({ id, disableErrors, req }, collectionConfig.access.read)
+    ? await executeAccess(
+        { id, slug: collectionConfig.slug, disableErrors, req },
+        collectionConfig.access.read,
+      )
     : true
 
   // If errors are disabled, and access returns false, return null

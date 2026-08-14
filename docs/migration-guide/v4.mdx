@@ -22,6 +22,10 @@ The codemod is idempotent and safe to run on a partially-migrated project.
 
 ## Breaking Changes
 
+### Collection and Global Access Control callbacks receive `slug`
+
+Collection and Global Access Control callback arguments now include the document's `slug`. This additive property is unlikely to affect most projects, but code that manually invokes access callbacks or `executeAccess` must now pass `slug`. Code that validates, enumerates, or compares the exact callback argument shape may also need updating.
+
 ### Default query depth reduced to `1`
 
 Queries that omit `depth` now populate one relationship level instead of two. This reduces database work and response size by default.

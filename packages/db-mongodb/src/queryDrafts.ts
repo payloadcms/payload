@@ -145,7 +145,7 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
     versions: true,
   })
 
-  if (aggregate || sortAggregation.length > 0) {
+  if (aggregate.length > 0 || sortAggregation.length > 0) {
     result = await aggregatePaginate({
       adapter: this,
       collation: paginationOptions.collation,
