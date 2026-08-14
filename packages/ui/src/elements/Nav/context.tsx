@@ -79,17 +79,17 @@ export const NavProvider: React.FC<{
     }
   }, [pathname])
 
-  // on open and close, lock the body scroll
-  // do not do this on desktop, the sidebar is not a modal
-  useEffect(() => {
-    if (navRef.current) {
-      if (navOpen && midBreak) {
-        navRef.current.style.overscrollBehavior = 'contain'
-      } else {
-        navRef.current.style.overscrollBehavior = 'auto'
-      }
-    }
-  }, [navOpen, midBreak])
+  // // on open and close, lock the body scroll
+  // // do not do this on desktop, the sidebar is not a modal
+  // useEffect(() => {
+  //   if (navRef.current) {
+  //     if (navOpen && midBreak) {
+  //       navRef.current.style.overscrollBehavior = 'contain'
+  //     } else {
+  //       navRef.current.style.overscrollBehavior = 'auto'
+  //     }
+  //   }
+  // }, [navOpen, midBreak])
 
   // on smaller screens where the nav is a modal
   // close the nav when the user resizes down to mobile

@@ -3,6 +3,8 @@
     position: sticky;
     top: 0;
     left: 0;
+    display: flex;
+    flex-direction: column;
     flex-shrink: 0;
     height: 100vh;
     width: var(--nav-width);
@@ -28,7 +30,8 @@
   }
 
   .nav__scroll {
-    height: 100%;
+    flex: 1 1 auto;
+    min-height: 0;
     display: flex;
     flex-direction: column;
     padding: 0;
@@ -78,10 +81,8 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+    flex-shrink: 0;
     width: 100%;
-    position: sticky;
-    top: 0;
-    z-index: 1;
     padding: var(--spacer-2-5) var(--spacer-2) var(--spacer-2-5) var(--spacer-3);
     background-color: var(--color-bg);
     border-bottom: var(--stroke-width-small) solid var(--color-border);

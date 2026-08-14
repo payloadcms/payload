@@ -208,9 +208,9 @@ export const DefaultNav: React.FC<NavProps> = async (props) => {
   ]
 
   return (
-    <NavWrapper baseClass={baseClass}>
-      {RenderedBeforeNav}
-      <nav className={`${baseClass}__wrap`}>
+    <NavWrapper
+      baseClass={baseClass}
+      header={
         <div className={`${baseClass}__header`}>
           <UserMenu
             CustomAvatar={CustomAvatar}
@@ -219,6 +219,10 @@ export const DefaultNav: React.FC<NavProps> = async (props) => {
           />
           <NavSidebarToggle baseClass={baseClass} />
         </div>
+      }
+    >
+      {RenderedBeforeNav}
+      <nav className={`${baseClass}__wrap`}>
         <SidebarTabs
           documentSubViewType={documentSubViewType}
           i18n={i18n}
