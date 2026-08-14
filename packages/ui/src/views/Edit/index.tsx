@@ -515,6 +515,10 @@ export function DefaultEditView({
         globalSlug,
         operation,
         originalUpdatedAt: checkForStaleData ? originalUpdatedAtRef.current : undefined,
+        // Server-rendered fields (e.g. rich text) take their read-only state from form state,
+        // not from the `readOnly` prop threaded through `RenderFields`. Without this, any field
+        // re-rendered by this request would come back editable on a trashed or locked document.
+        readOnly: isTrashed || isReadOnlyForIncomingUser,
         renderAllFields: false,
         returnLockStatus: isLockingEnabled,
         schemaPath: schemaPathSegments.join('.'),
@@ -562,6 +566,8 @@ export function DefaultEditView({
       schemaPathSegments,
       handleDocumentLocking,
       autosaveEnabled,
+      isTrashed,
+      isReadOnlyForIncomingUser,
     ],
   )
 
