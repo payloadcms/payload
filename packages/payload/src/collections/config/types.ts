@@ -531,14 +531,14 @@ export type CollectionAdminOptions = {
   useAsTitle?: string
 }
 
-type CollectionAccess = {
-  admin?: ({ req }: { req: PayloadRequest }) => boolean | Promise<boolean>
-  create?: Access
-  delete?: Access
-  read?: Access
-  readVersions?: Access
-  unlock?: Access
-  update?: Access
+export type CollectionAccess<TData = any> = {
+  admin?: ({ slug, req }: { req: PayloadRequest; slug: string }) => boolean | Promise<boolean>
+  create?: Access<TData>
+  delete?: Access<TData>
+  read?: Access<TData>
+  readVersions?: Access<TData>
+  unlock?: Access<TData>
+  update?: Access<TData>
 }
 
 type CollectionHooks<TSlug extends CollectionSlug = any> = {

@@ -383,6 +383,29 @@ describe('List View', () => {
 
       await expect(page.locator('#search-filter-input')).toHaveValue('')
     })
+
+    test('should search by title containing accented characters', async () => {
+      await createPost({ title: 'Café' })
+
+      await page.locator('#search-filter-input').fill('Café')
+      await expect(page.locator(tableRowLocator)).toHaveCount(1)
+    })
+
+    test('should remain accent-sensitive when the search term omits the accent', async () => {
+      await createPost({ title: 'Café' })
+
+      await page.locator('#search-filter-input').fill('Cafe')
+      await expect(page.locator(tableRowLocator)).toHaveCount(0)
+    })
+
+    test('should prefill search input from a query param containing accented characters', async () => {
+      await createPost({ title: 'Café' })
+
+      await page.goto(`${postsUrl.list}?search=${encodeURIComponent('Café')}`)
+
+      await expect(page.locator('#search-filter-input')).toHaveValue('Café')
+      await expect(page.locator(tableRowLocator)).toHaveCount(1)
+    })
   })
 
   describe('filters', () => {
@@ -450,6 +473,22 @@ describe('List View', () => {
 
       await page.locator('.condition__actions-remove').click()
       await expect(page.locator(tableRowLocator)).toHaveCount(2)
+    })
+
+    test('should filter rows using contains with accented characters', async () => {
+      await createPost({ title: 'Café' })
+      await createPost({ title: 'Cafe' })
+
+      await addListFilter({
+        page,
+        fieldLabel: 'Title',
+        operatorLabel: 'contains',
+        value: 'Café',
+      })
+
+      await expect(page.locator(tableRowLocator)).toHaveCount(1)
+
+      await page.locator('.condition__actions-remove').click()
     })
 
     test('should render the ID cell as a pill with a hover background instead of an underline', async () => {

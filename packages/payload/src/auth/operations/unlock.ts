@@ -74,7 +74,10 @@ export const unlockOperation = async <TSlug extends AuthCollectionSlug>(
     // /////////////////////////////////////
 
     if (!overrideAccess) {
-      const accessResult = await executeAccess({ req }, collectionConfig.access.unlock)
+      const accessResult = await executeAccess(
+        { slug: collectionConfig.slug, req },
+        collectionConfig.access.unlock,
+      )
 
       if (accessResult && typeof accessResult === 'object') {
         whereConstraint = accessResult

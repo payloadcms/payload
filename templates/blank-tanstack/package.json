@@ -1,7 +1,7 @@
 {
   "name": "blank-tanstack",
   "version": "1.0.0",
-  "description": "A blank template to get started with Payload 3.0",
+  "description": "A blank template to get started with Payload",
   "license": "MIT",
   "type": "module",
   "scripts": {
