@@ -47,8 +47,9 @@ export type ImportResult = {
  * `id` is optional because only the jobs-queue path has a saved document when the hooks
  * run. The synchronous path runs in `beforeOperation` (nothing is saved yet), and the
  * download and preview paths never persist a document at all. On those three this is the
- * submitted form data — every user-authored field is present, but `id`, `createdAt` and
- * `updatedAt` are not.
+ * submitted form data, with `id`, `createdAt` and `updatedAt` dropped — so an `id` always
+ * means the document is saved, and the values under it went through validation and access
+ * control. Without one, treat the fields as untrusted request input.
  *
  * Read once at the start of the run and passed unchanged to every batch, so it is a
  * snapshot taken when the export was triggered, not live state.
@@ -60,8 +61,10 @@ export type ExportDoc = { id?: number | string } & JsonObject
  * collection via `overrideCollection`.
  *
  * `id` is optional because the preview endpoint runs the before hook against form data
- * that has not been saved. Both real import paths — synchronous and jobs queue — always
- * pass a saved document with an `id`.
+ * that has not been saved, with `id`, `createdAt` and `updatedAt` dropped. Both real import
+ * paths — synchronous and jobs queue — always pass a saved document with an `id`, so an `id`
+ * means the values went through validation and access control. Without one, treat the fields
+ * as untrusted request input.
  *
  * Read once at the start of the run and passed unchanged to every batch, so it is a
  * snapshot taken when the import was triggered, not live state.

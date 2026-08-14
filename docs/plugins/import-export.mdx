@@ -388,7 +388,7 @@ Export hooks also receive `exportDoc`, and import hooks also receive `importDoc`
 
 ### exportDoc and importDoc
 
-`exportDoc` and `importDoc` give hooks the document that triggered the run, including any fields you added to the imports/exports collection with `overrideCollection`. Use this to read a value an editor set on the import/export form and apply it to every row.
+`exportDoc` and `importDoc` give hooks the document that triggered the run, including any fields you added to the imports/exports collection with `overrideCollection`. Use this to read a value an editor set on the import/export form and apply it to every row. The admin preview updates as the editor types, so a field read this way is reflected in the preview table too.
 
 ```ts
 importExportPlugin({
@@ -419,20 +419,21 @@ importExportPlugin({
 Both are read once when the run starts and passed unchanged to every batch. They are a snapshot of the document at that moment, not live state — editing the document while a large import runs does not change what later batches receive.
 
 <Banner type="warning">
-  `id` is optional on both, so check for it before using it. Only exports run
-  through the jobs queue have a saved document. The synchronous export path runs
-  in `beforeOperation`, and the download and preview paths never save one, so on
-  those three `exportDoc` is the submitted form data — every field you added is
-  present, but `id`, `createdAt` and `updatedAt` are not. For `importDoc`, both
-  real import paths pass a saved document; only the preview endpoint does not.
+  `id` is optional on both, so check for it before using it. An `id` means the
+  document is saved. Exports run through the jobs queue have one; the
+  synchronous export path runs in `beforeOperation`, and the download and export
+  preview paths never save a document, so on those three `exportDoc` is the
+  submitted form data with no `id`, `createdAt` or `updatedAt`. For `importDoc`,
+  both real import paths pass a saved document; only the preview endpoint does
+  not.
 </Banner>
 
 <Banner type="warning">
-  On the paths without an `id`, this is the submitted request body — it has not been through field
-  validation or access control. Treat those values as untrusted input. Do not gate privileged
-  behaviour on a field read from `exportDoc`/`importDoc` unless you have confirmed the document is
-  saved (`if (exportDoc.id) { ... }`), because a caller can put any value on the body of a
-  download or preview request.
+  On the paths without an `id`, this is the submitted request body — it has not been through
+  field validation or access control, so treat those values as untrusted input. The plugin drops
+  `id`, `createdAt` and `updatedAt` from the body, so a caller cannot make an unsaved run look
+  saved, but every other field is whatever was sent. Gate privileged behaviour on
+  `if (exportDoc.id) { ... }`.
 </Banner>
 
 ### before hooks — modify data

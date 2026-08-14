@@ -8,6 +8,7 @@ import type {
 import type { ExportConfig, ImportExportPluginConfig, Limit } from '../types.js'
 import type { Export } from './createExport.js'
 
+import { getSubmittedFormValues } from '../utilities/getSubmittedFormValues.js'
 import { resolveLimit } from '../utilities/resolveLimit.js'
 import { createExport } from './createExport.js'
 import { getFields } from './getFields.js'
@@ -126,8 +127,9 @@ export const getExportCollection = ({
       exportCollection: collectionConfig.slug,
       // This runs in beforeOperation, so the export document does not exist yet. The
       // submitted form data carries every user-authored field, including any added via
-      // `overrideCollection`, but has no `id`.
-      exportDoc: exportData,
+      // `overrideCollection`. `getSubmittedFormValues` drops `id` — a collection with custom
+      // IDs would otherwise carry one here for a document that is not saved yet.
+      exportDoc: getSubmittedFormValues({ formData: exportData }),
       maxLimit,
       req,
       userCollection: user?.collection,

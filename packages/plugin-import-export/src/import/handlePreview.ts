@@ -12,6 +12,7 @@ import {
 } from '../constants.js'
 import { applyFieldHooks } from '../utilities/applyFieldHooks.js'
 import { getImportFieldFunctions } from '../utilities/getImportFieldFunctions.js'
+import { getSubmittedFormValues } from '../utilities/getSubmittedFormValues.js'
 import { parseCSV } from '../utilities/parseCSV.js'
 import { parseJSON } from '../utilities/parseJSON.js'
 import { removeDisabledFields } from '../utilities/removeDisabledFields.js'
@@ -108,9 +109,13 @@ export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
         batchNumber: 1,
         data: parsedData as unknown as Parameters<typeof importHooks.before>[0]['data'],
         format: format ?? 'csv',
-        // Preview runs against the open form, so nothing is saved — this carries every
-        // field the form submitted but has no `id`.
-        importDoc: (req.data ?? {}) as ImportDoc,
+        // Preview runs against the open form, so nothing is saved — this carries every field
+        // the form submitted, including any added via `overrideCollection`.
+        // `getSubmittedFormValues` drops `id`, so a hook can rely on an absent `id` meaning
+        // "not saved".
+        importDoc: getSubmittedFormValues({
+          formData: (req.data ?? {}) as Record<string, unknown>,
+        }) as ImportDoc,
         originalData: originalDocs,
         req,
         totalBatches: 1,

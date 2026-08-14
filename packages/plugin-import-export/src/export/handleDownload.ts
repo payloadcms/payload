@@ -4,6 +4,7 @@ import { APIError } from 'payload'
 
 import type { ExportDoc } from '../types.js'
 
+import { getSubmittedFormValues } from '../utilities/getSubmittedFormValues.js'
 import { resolveLimit } from '../utilities/resolveLimit.js'
 import { createExport } from './createExport.js'
 
@@ -54,8 +55,11 @@ export const handleDownload = async (req: PayloadRequest, debug = false) => {
       debug,
       download: true,
       // Downloads are streamed and never persisted, so there is no export document. The
-      // submitted form data carries every user-authored field but has no `id`.
-      exportDoc: body.data as ExportDoc,
+      // submitted form data carries every user-authored field; `getSubmittedFormValues` drops
+      // `id`, so a hook can rely on an absent `id` meaning "not saved".
+      exportDoc: getSubmittedFormValues({
+        formData: body.data as Record<string, unknown>,
+      }) as ExportDoc,
       maxLimit,
       req,
       user: req.user,

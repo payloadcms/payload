@@ -42,22 +42,35 @@ import {
   customIdPagesSlug,
   postsWithColumnMapSlug,
   postsWithFieldHooksSlug,
+  postsWithHooksExportSlug,
+  postsWithHooksImportSlug,
+  postsWithHooksJobsExportSlug,
+  postsWithHooksJobsImportSlug,
   postsWithHooksJobsSlug,
   postsWithHooksSlug,
   postsWithS3Slug,
 } from './shared.js'
 
-/**
- * Adds the `batchRef` field to an import/export collection, standing in for a field a
- * project adds via `overrideCollection` and an editor fills in on the form.
- */
-const addBatchRefField = (collection: CollectionConfig): CollectionConfig => {
-  collection.fields = [...collection.fields, { name: batchRefFieldName, type: 'text' }]
-  return collection
-}
-
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+
+/**
+ * Renames an import/export collection and adds a `batchRef` field to it, standing in for a
+ * field a project adds via `overrideCollection` and an editor fills in on the form.
+ */
+const withBatchRefField = ({
+  slug,
+  collection,
+}: {
+  collection: CollectionConfig
+  slug: string
+}): CollectionConfig => {
+  collection.slug = slug
+  collection.upload.staticDir = path.resolve(dirname, 'uploads')
+  collection.fields = [...collection.fields, { name: batchRefFieldName, type: 'text' }]
+
+  return collection
+}
 
 // Load config to work with emulated services
 dotenv.config({
@@ -89,23 +102,13 @@ export default buildConfigWithDefaults({
     Media,
     CustomIdPages,
   ],
-  localization: {
-    defaultLocale: 'en',
-    fallback: true,
-    locales: [
-      { code: 'en', label: 'English' },
-      { code: 'es', label: 'Spanish' },
-      { code: 'de', label: 'German' },
-      { code: 'he', label: 'Hebrew', rtl: true },
-    ],
-  },
   i18n: {
+    fallbackLanguage: 'en',
     supportedLanguages: {
       en,
       es,
       he,
     },
-    fallbackLanguage: 'en',
   },
   jobs: {
     jobsCollectionOverrides: ({ defaultJobsCollection }) => {
@@ -117,13 +120,22 @@ export default buildConfigWithDefaults({
       return defaultJobsCollection
     },
   },
+  localization: {
+    defaultLocale: 'en',
+    fallback: true,
+    locales: [
+      { code: 'en', label: 'English' },
+      { code: 'es', label: 'Spanish' },
+      { code: 'de', label: 'German' },
+      { code: 'he', label: 'Hebrew', rtl: true },
+    ],
+  },
   onInit: async (payload) => {
     await createTestBucket()
     await seed(payload)
   },
   plugins: [
     importExportPlugin({
-      debug: true,
       collections: [
         {
           slug: 'pages',
@@ -175,10 +187,10 @@ export default buildConfigWithDefaults({
         },
         {
           slug: 'posts-exports-only',
-          import: false,
           export: {
             format: 'csv',
           },
+          import: false,
           versions: false,
         },
         {
@@ -192,13 +204,10 @@ export default buildConfigWithDefaults({
         },
         {
           slug: 'posts-no-jobs-queue',
-          import: {
-            disableJobsQueue: true,
-          },
           export: {
             disableJobsQueue: true,
-            format: 'csv',
             disableSave: true,
+            format: 'csv',
             overrideCollection: ({ collection }) => {
               collection.slug = 'posts-no-jobs-queue-export'
               if (collection.admin) {
@@ -207,6 +216,9 @@ export default buildConfigWithDefaults({
               collection.upload.staticDir = path.resolve(dirname, 'uploads')
               return collection
             },
+          },
+          import: {
+            disableJobsQueue: true,
           },
           versions: false,
         },
@@ -278,27 +290,21 @@ export default buildConfigWithDefaults({
             batchSize: 2,
             disableJobsQueue: true,
             hooks: {
-              before: exportBeforeHook,
               after: exportAfterHook,
+              before: exportBeforeHook,
             },
-            overrideCollection: ({ collection }) => {
-              collection.slug = 'posts-with-hooks-export'
-              collection.upload.staticDir = path.resolve(dirname, 'uploads')
-              return addBatchRefField(collection)
-            },
+            overrideCollection: ({ collection }) =>
+              withBatchRefField({ slug: postsWithHooksExportSlug, collection }),
           },
           import: {
             batchSize: 2,
             disableJobsQueue: true,
             hooks: {
-              before: importBeforeHook,
               after: importAfterHook,
+              before: importBeforeHook,
             },
-            overrideCollection: ({ collection }) => {
-              collection.slug = 'posts-with-hooks-import'
-              collection.upload.staticDir = path.resolve(dirname, 'uploads')
-              return addBatchRefField(collection)
-            },
+            overrideCollection: ({ collection }) =>
+              withBatchRefField({ slug: postsWithHooksImportSlug, collection }),
           },
           versions: false,
         },
@@ -309,26 +315,20 @@ export default buildConfigWithDefaults({
           export: {
             batchSize: 2,
             hooks: {
-              before: exportBeforeHook,
               after: exportAfterHook,
+              before: exportBeforeHook,
             },
-            overrideCollection: ({ collection }) => {
-              collection.slug = 'posts-with-hooks-jobs-export'
-              collection.upload.staticDir = path.resolve(dirname, 'uploads')
-              return addBatchRefField(collection)
-            },
+            overrideCollection: ({ collection }) =>
+              withBatchRefField({ slug: postsWithHooksJobsExportSlug, collection }),
           },
           import: {
             batchSize: 2,
             hooks: {
-              before: importBeforeHook,
               after: importAfterHook,
+              before: importBeforeHook,
             },
-            overrideCollection: ({ collection }) => {
-              collection.slug = 'posts-with-hooks-jobs-import'
-              collection.upload.staticDir = path.resolve(dirname, 'uploads')
-              return addBatchRefField(collection)
-            },
+            overrideCollection: ({ collection }) =>
+              withBatchRefField({ slug: postsWithHooksJobsImportSlug, collection }),
           },
           versions: false,
         },
@@ -398,15 +398,16 @@ export default buildConfigWithDefaults({
           versions: false,
         },
       ],
+      debug: true,
     }),
   ],
   storage: [
     s3Storage({
-      collections: {
-        'posts-with-s3-import': true,
-        'posts-with-s3-export': true,
-      },
       bucket: process.env.S3_BUCKET!,
+      collections: {
+        'posts-with-s3-export': true,
+        'posts-with-s3-import': true,
+      },
       config: {
         credentials: {
           accessKeyId: process.env.S3_ACCESS_KEY_ID!,

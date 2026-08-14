@@ -21,6 +21,7 @@ import { initPage } from '../__setup/e2e/initPage.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { readCSV } from './helpers.js'
 import {
+  batchRefFieldName,
   postsWithColumnMapSlug,
   postsWithHooksSlug,
   postsWithS3ExportSlug,
@@ -34,6 +35,7 @@ test.describe('Import Export Plugin', () => {
   let importsURL: AdminUrlUtil
   let postsURL: AdminUrlUtil
   let customIdPagesURL: AdminUrlUtil
+  let postsWithHooksURL: AdminUrlUtil
   let s3ExportsURL: AdminUrlUtil
   let s3ImportsURL: AdminUrlUtil
   let payload: PayloadTestSDK<Config>
@@ -50,6 +52,7 @@ test.describe('Import Export Plugin', () => {
     importsURL = new AdminUrlUtil(serverURL, 'imports')
     postsURL = new AdminUrlUtil(serverURL, 'posts')
     customIdPagesURL = new AdminUrlUtil(serverURL, 'custom-id-pages')
+    postsWithHooksURL = new AdminUrlUtil(serverURL, postsWithHooksSlug)
     s3ExportsURL = new AdminUrlUtil(serverURL, postsWithS3ExportSlug)
     s3ImportsURL = new AdminUrlUtil(serverURL, postsWithS3ImportSlug)
 
@@ -1882,6 +1885,117 @@ test.describe('Import Export Plugin', () => {
 
       // import.hooks.before appends '_imported' to the title
       expect(body.docs[0].title).toBe('Hook Preview Import JSON_imported')
+    })
+  })
+
+  // These two must drive the browser rather than post to the preview endpoints directly. The
+  // endpoints already forward whatever they are given, so the thing under test is the request
+  // body the preview components build — a test that builds its own body cannot catch a
+  // component that omits a field.
+  test.describe('Hooks — custom fields on the preview forms', () => {
+    const createdPostIDs: (number | string)[] = []
+    const tempFiles: string[] = []
+
+    test.beforeAll(async () => {
+      const doc = await payload.create({
+        collection: postsWithHooksSlug,
+        data: { count: 1, secret: 'custom-field-secret', title: 'Custom Field Preview Post' },
+      })
+
+      createdPostIDs.push(doc.id)
+    })
+
+    test.afterAll(async () => {
+      for (const filePath of tempFiles) {
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath)
+        }
+      }
+      tempFiles.length = 0
+
+      for (const id of createdPostIDs) {
+        await payload.delete({ id, collection: postsWithHooksSlug }).catch(() => null)
+      }
+      createdPostIDs.length = 0
+    })
+
+    test('should send a custom export field to the preview endpoint for the before hook to read', async () => {
+      await page.goto(postsWithHooksURL.list)
+      await expect(page.locator('.collection-list')).toBeVisible()
+
+      const listMenuButton = page.locator('#list-menu')
+      await expect(listMenuButton).toBeVisible()
+      await listMenuButton.click()
+
+      const createExportButton = page.locator('.popup__scroll-container button', {
+        hasText: 'Export',
+      })
+      await expect(createExportButton).toBeVisible()
+      await createExportButton.click()
+
+      const previewTable = page.locator('.export-preview table')
+
+      await expect(async () => {
+        await expect(previewTable).toBeVisible()
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+
+      const batchRefHeader = previewTable.locator('thead th').filter({ hasText: batchRefFieldName })
+
+      // export.hooks.before only adds the column once it can read the value from exportDoc
+      await expect(batchRefHeader).toHaveCount(0)
+
+      await page.locator(`#field-${batchRefFieldName}`).fill('E2E-EXPORT-REF')
+
+      await expect(async () => {
+        await expect(batchRefHeader).toHaveCount(1)
+        await expect(previewTable).toContainText('E2E-EXPORT-REF')
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+    })
+
+    test('should send a custom import field to the preview endpoint for the before hook to read', async () => {
+      const csvContent = 'title,count\n"Custom Field Preview Import","1"'
+      const csvPath = path.join(__dirname, 'uploads', 'e2e-import-doc-custom-field.csv')
+
+      fs.writeFileSync(csvPath, csvContent)
+      tempFiles.push(csvPath)
+
+      await page.goto(postsWithHooksURL.list)
+      await expect(page.locator('.collection-list')).toBeVisible()
+
+      const listMenuButton = page.locator('#list-menu')
+      await expect(listMenuButton).toBeVisible()
+      await listMenuButton.click()
+
+      const createImportButton = page.locator('.popup__scroll-container button', {
+        hasText: 'Import',
+      })
+      await expect(createImportButton).toBeVisible()
+      await createImportButton.click()
+
+      // See the note on the update-mode import test: setInputFiles fires a one-shot native
+      // change event, so retry until the upload field's React onChange is hydrated.
+      await expect(async () => {
+        await page.setInputFiles('input[type="file"]', csvPath)
+        await expect(page.locator('#field-filemanager-filename')).toHaveValue(
+          'e2e-import-doc-custom-field.csv',
+          { timeout: 2000 },
+        )
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+
+      const previewTable = page.locator('.import-preview table')
+
+      await expect(async () => {
+        await expect(previewTable).toContainText('Custom Field Preview Import_imported')
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+
+      await page.locator(`#field-${batchRefFieldName}`).fill('E2E-IMPORT-REF')
+
+      // import.hooks.before appends the reference it reads from importDoc to every title
+      await expect(async () => {
+        await expect(previewTable).toContainText(
+          'Custom Field Preview Import_imported_E2E-IMPORT-REF',
+        )
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
     })
   })
 })
