@@ -1141,7 +1141,7 @@ test.describe('Import Export Plugin', () => {
         )
       })
 
-      test('should not label the collection for monomorphic relationship values', async () => {
+      test('should preserve plain rendering for monomorphic relationship values', async () => {
         await uploadPreviewFile({
           docs: [
             {
@@ -1154,11 +1154,8 @@ test.describe('Import Export Plugin', () => {
 
         const cell = await getPreviewCell({ heading: 'Has Many Monomorphic' })
 
-        // The column heading already names the only collection this field can target
-        await expect(cell.locator(`.${relationshipBaseClass}__collection`)).toHaveCount(0)
-        await expect(cell.locator(`.${relationshipBaseClass}__values`)).toHaveText(
-          'preview-post-1, preview-post-2',
-        )
+        await expect(cell.locator(`.${relationshipBaseClass}`)).toHaveCount(0)
+        await expect(cell).toHaveText('preview-post-1, preview-post-2')
       })
 
       test('should show the document title for populated relationship values', async () => {
@@ -1174,12 +1171,11 @@ test.describe('Import Export Plugin', () => {
 
         const cell = await getPreviewCell({ heading: 'Has Many Monomorphic' })
 
-        await expect(cell.locator(`.${relationshipBaseClass}__values`)).toHaveText(
-          'Populated Post Title',
-        )
+        await expect(cell.locator(`.${relationshipBaseClass}`)).toHaveCount(0)
+        await expect(cell).toHaveText('Populated Post Title')
       })
 
-      test('should collapse relationship values past the third into a count', async () => {
+      test('should not cap monomorphic relationship values', async () => {
         await uploadPreviewFile({
           docs: [
             {
@@ -1198,13 +1194,10 @@ test.describe('Import Export Plugin', () => {
 
         const cell = await getPreviewCell({ heading: 'Has Many Monomorphic' })
 
-        await expect(cell.locator(`.${relationshipBaseClass}__values`)).toContainText(
-          'preview-post-1, preview-post-2, preview-post-3',
+        await expect(cell.locator(`.${relationshipBaseClass}`)).toHaveCount(0)
+        await expect(cell).toHaveText(
+          'preview-post-1, preview-post-2, preview-post-3, preview-post-4, preview-post-5',
         )
-        await expect(cell.locator(`.${relationshipBaseClass}__values`)).not.toContainText(
-          'preview-post-4',
-        )
-        await expect(cell.locator(`.${relationshipBaseClass}__more`)).toHaveText('and 2 more')
       })
     })
   })

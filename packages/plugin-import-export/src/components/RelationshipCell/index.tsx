@@ -30,7 +30,7 @@ export const RelationshipCell: React.FC<Props> = ({ relationTo, value }) => {
   })
 
   // The column heading already names a monomorphic field, whose collection never varies.
-  const showCollectionLabels = Array.isArray(relationTo)
+  const shouldShowCollectionLabels = Array.isArray(relationTo)
 
   if (!groups.length) {
     return null
@@ -41,7 +41,7 @@ export const RelationshipCell: React.FC<Props> = ({ relationTo, value }) => {
       {groups.map(({ label, options, remaining }, index) => (
         <div className={`${baseClass}__group`} key={label || index}>
           {/* A `label` element would be unassociated here — the cell holds no control */}
-          {showCollectionLabels && label && (
+          {shouldShowCollectionLabels && label && (
             <span className={`${baseClass}__collection`}>{label}</span>
           )}
           <div className={`${baseClass}__values`}>

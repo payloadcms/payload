@@ -14,6 +14,7 @@ import {
   useFormFields,
   useTranslation,
 } from '@payloadcms/ui'
+import { formatDocTitle } from '@payloadcms/ui/shared'
 import { fieldAffectsData, getObjectDotNotation } from 'payload/shared'
 import React, { useState, useTransition } from 'react'
 
@@ -247,7 +248,12 @@ export const ImportPreview: React.FC = () => {
                   }
 
                   // Format based on field type
-                  if (field.type === 'relationship' || field.type === 'upload') {
+                  const shouldRenderGroupedRelationship =
+                    format === 'json' &&
+                    field.type === 'relationship' &&
+                    Array.isArray(field.relationTo)
+
+                  if (shouldRenderGroupedRelationship) {
                     return (
                       <RelationshipCell
                         key={`${fieldPath}-${rowIndex}`}
@@ -255,6 +261,58 @@ export const ImportPreview: React.FC = () => {
                         value={value}
                       />
                     )
+                  } else if (field.type === 'relationship' || field.type === 'upload') {
+                    if (typeof value === 'object' && !Array.isArray(value)) {
+                      const relationTo = Array.isArray(field.relationTo)
+                        ? (value as any).relationTo
+                        : field.relationTo
+
+                      const relatedConfig = config.collections.find((c) => c.slug === relationTo)
+                      if (relatedConfig && relatedConfig.admin?.useAsTitle) {
+                        const titleValue = (value as any)[relatedConfig.admin.useAsTitle]
+                        if (titleValue) {
+                          return formatDocTitle({
+                            collectionConfig: relatedConfig,
+                            data: value as any,
+                            dateFormat: config.admin.dateFormat,
+                            i18n,
+                          })
+                        }
+                      }
+
+                      const id = (value as any).id || value
+                      return `${getTranslation(relatedConfig?.labels?.singular || relationTo, i18n)}: ${id}`
+                    } else if (Array.isArray(value)) {
+                      return value
+                        .map((item) => {
+                          if (typeof item === 'object') {
+                            const relationTo = Array.isArray(field.relationTo)
+                              ? item.relationTo
+                              : field.relationTo
+                            const relatedConfig = config.collections.find(
+                              (c) => c.slug === relationTo,
+                            )
+
+                            if (relatedConfig && relatedConfig.admin?.useAsTitle) {
+                              const titleValue = item[relatedConfig.admin.useAsTitle]
+                              if (titleValue) {
+                                return formatDocTitle({
+                                  collectionConfig: relatedConfig,
+                                  data: item,
+                                  dateFormat: config.admin.dateFormat,
+                                  i18n,
+                                })
+                              }
+                            }
+
+                            return item.id || item
+                          }
+                          return item
+                        })
+                        .join(', ')
+                    }
+
+                    return String(value)
                   } else if (field.type === 'date') {
                     // Display date as string to avoid wrong locale/timezone conversion
                     return String(value)
