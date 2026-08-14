@@ -14,6 +14,8 @@ const bypassed = (branch: false | string | undefined, req?: Partial<PayloadReque
   !req?.payload ||
   Boolean((req.context as Record<string, unknown> | undefined)?._branchBypass)
 
+const recordedGlobalsKey = '_branchRecordedGlobals'
+
 const activeBranch = ({ branch, globalSlug, req }: BaseArgs): null | string => {
   if (bypassed(branch, req)) {
     return null
@@ -91,6 +93,21 @@ export const recordBranchGlobalChange = async ({
   globalSlug,
   req,
 }: { branch: string } & BaseArgs): Promise<void> => {
+  // Every write to a branched global asks whether it is already registered. The answer
+  // cannot change within a request except by this function, so it is remembered — which
+  // matters for a request that writes several globals, or one global repeatedly.
+  const context = req!.context as Record<string, unknown> | undefined
+  const recorded = (context?.[recordedGlobalsKey] as Set<string> | undefined) ?? new Set<string>()
+  const key = `${branch}:${globalSlug}`
+
+  if (context && !context[recordedGlobalsKey]) {
+    context[recordedGlobalsKey] = recorded
+  }
+
+  if (recorded.has(key)) {
+    return
+  }
+
   const existing = await req!.payload!.find({
     collection: branchChangesCollectionSlug,
     limit: 1,
@@ -103,6 +120,8 @@ export const recordBranchGlobalChange = async ({
   })
 
   if (existing.docs.length) {
+    recorded.add(key)
+
     return
   }
 
@@ -117,6 +136,8 @@ export const recordBranchGlobalChange = async ({
     overrideAccess: true,
     req: req as PayloadRequest,
   })
+
+  recorded.add(key)
 }
 
 /**

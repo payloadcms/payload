@@ -1,83 +1,47 @@
-import type { Payload, PayloadRequest, Where } from '../types/index.js'
-import type { BranchOperation } from './types.js'
+import type { Payload, PayloadRequest } from '../types/index.js'
+import type { EffectiveOperation, ResolvedChange } from './effectiveOperations.js'
 
 import { executeAccess } from '../auth/executeAccess.js'
-import { branchDocIDField, branchField, MAIN_BRANCH } from './types.js'
+import { operationsForChange } from './effectiveOperations.js'
+import { branchField, MAIN_BRANCH } from './types.js'
 
-/**
- * What a change will actually do to `main` when merged, which is not always the
- * same as what it did on the branch. Editing a published document on a branch
- * is a `publish` against main, and needs publish permission rather than plain
- * update permission.
- */
-export type EffectiveOperation = 'create' | 'delete' | 'publish' | 'update'
+export type { EffectiveOperation }
 
 export type BlockedChange = {
   changeID: number | string
-  collectionSlug: string
-  docID: number | string
+  /** Absent for a global. */
+  collectionSlug?: string
+  /** Absent for a global. */
+  docID?: number | string
   docTitle: string
+  globalSlug?: string
   message: string
   operation: EffectiveOperation
   reason: 'access'
 }
 
-type PendingChange = {
-  change: Record<string, any>
+/** One `(collection, operation)` pair to check, and the change that needs it. */
+type PendingOperation = {
   collectionSlug: string
-  docID: number | string
   operation: EffectiveOperation
-  shadow: null | Record<string, unknown>
+  resolved: ResolvedChange
 }
 
 /**
- * Resolves what each change will do to main, reading the shadow row so drafts
- * and publishes can be told apart.
+ * Flattens resolved changes into the operations each one performs.
+ *
+ * A change can require two permissions — a branch holding a published state and
+ * a newer draft publishes *and* updates — and §7 blocks such a change as a whole
+ * rather than letting a user who can update but not publish get the draft half.
  */
-export const resolveEffectiveOperations = async ({
-  branch,
-  changes,
-  payload,
-  req,
-}: {
-  branch: string
-  changes: Record<string, any>[]
-  payload: Payload
-  req: PayloadRequest
-}): Promise<PendingChange[]> => {
-  const resolved: PendingChange[] = []
-
-  for (const change of changes) {
-    const collectionSlug = change.collectionSlug as string
-    const docID = change.doc?.value ?? change.doc
-
-    const shadow = (await payload.db.findOne({
-      branch: false,
-      collection: collectionSlug,
-      req,
-      where: {
-        and: [
-          { [branchField]: { equals: branch } },
-          { or: [{ id: { equals: docID } }, { [branchDocIDField]: { equals: docID } }] },
-        ],
-      },
-    })) as null | Record<string, unknown>
-
-    let operation: EffectiveOperation
-
-    if (change.operation === 'delete') {
-      operation = 'delete'
-    } else if (change.operation === 'create') {
-      operation = 'create'
-    } else {
-      operation = shadow?._status === 'published' ? 'publish' : 'update'
-    }
-
-    resolved.push({ change, collectionSlug, docID, operation, shadow })
-  }
-
-  return resolved
-}
+const toPendingOperations = (pending: ResolvedChange[]): PendingOperation[] =>
+  pending.flatMap((resolved) =>
+    operationsForChange(resolved).map((operation) => ({
+      collectionSlug: resolved.collectionSlug,
+      operation,
+      resolved,
+    })),
+  )
 
 /**
  * Checks the merging user's production permission for every change.
@@ -97,14 +61,14 @@ export const runMergePreflight = async ({
   req,
 }: {
   payload: Payload
-  pending: PendingChange[]
+  pending: ResolvedChange[]
   req: PayloadRequest
 }): Promise<BlockedChange[]> => {
   const blocked: BlockedChange[] = []
 
-  const groups = new Map<string, PendingChange[]>()
+  const groups = new Map<string, PendingOperation[]>()
 
-  for (const item of pending) {
+  for (const item of toPendingOperations(pending)) {
     const key = `${item.collectionSlug}::${item.operation}`
     const existing = groups.get(key)
 
@@ -143,13 +107,15 @@ export const runMergePreflight = async ({
       continue
     }
 
-    const deny = (item: PendingChange) =>
+    const deny = ({ resolved }: PendingOperation) =>
       blocked.push({
-        changeID: item.change.id,
+        changeID: resolved.change.id,
         collectionSlug,
-        docID: item.docID,
-        docTitle: String(item.shadow?.[collectionConfig.admin?.useAsTitle ?? 'id'] ?? item.docID),
-        message: `You don't have permission to ${operation} "${collectionSlug}" document ${item.docID}.`,
+        docID: resolved.docID,
+        docTitle: String(
+          resolved.shadow?.[collectionConfig.admin?.useAsTitle ?? 'id'] ?? resolved.docID,
+        ),
+        message: `You don't have permission to ${operation} "${collectionSlug}" document ${resolved.docID}.`,
         operation,
         reason: 'access',
       })
@@ -171,7 +137,7 @@ export const runMergePreflight = async ({
         and: [
           result,
           { [branchField]: { equals: MAIN_BRANCH } },
-          { id: { in: items.map((item) => item.docID) } },
+          { id: { in: items.map((item) => item.resolved.docID) } },
         ],
       },
     })
@@ -179,9 +145,65 @@ export const runMergePreflight = async ({
     const permittedIDs = new Set(permitted.docs.map((doc) => String(doc.id)))
 
     for (const item of items) {
-      if (!permittedIDs.has(String(item.docID))) {
+      if (!permittedIDs.has(String(item.resolved.docID))) {
         deny(item)
       }
+    }
+  }
+
+  return blocked
+}
+
+/**
+ * The same enforcement boundary for globals.
+ *
+ * Simpler than the collection preflight by the nature of the thing: there is one document
+ * per global, so there are no groups to form and no second-tier query to run — the
+ * global's own `update` access function, evaluated once as the merging user.
+ *
+ * A `Where`-returning access function is treated as permitting the merge. On a collection
+ * a `Where` narrows *which* documents may be written, which is exactly what tier 2
+ * resolves with a query; on a global there is nothing for it to narrow, and refusing on
+ * that basis would block a merge that the same user could perform by hand on main.
+ */
+export const runGlobalMergePreflight = async ({
+  payload,
+  pending,
+  req,
+}: {
+  payload: Payload
+  pending: Record<string, any>[]
+  req: PayloadRequest
+}): Promise<BlockedChange[]> => {
+  const blocked: BlockedChange[] = []
+
+  for (const change of pending) {
+    const globalSlug = change.globalSlug as string
+    const globalConfig = payload.globals?.config?.find((each) => each.slug === globalSlug)
+
+    if (!globalConfig) {
+      continue
+    }
+
+    const access = globalConfig.access?.update
+
+    if (!access) {
+      continue
+    }
+
+    const result = await access({ data: undefined, req })
+
+    if (result === false) {
+      const label = typeof globalConfig.label === 'string' ? globalConfig.label : globalConfig.slug
+
+      blocked.push({
+        changeID: change.id as number | string,
+        docTitle: label,
+        globalSlug,
+        message: `You do not have permission to update ${label}.`,
+        operation: 'update',
+        reason: 'access',
+      })
     }
   }
 

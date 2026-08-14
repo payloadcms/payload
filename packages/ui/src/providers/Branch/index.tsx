@@ -10,6 +10,15 @@ import { useRouter } from '../RouterAdapter/index.js'
 import { useRouteTransition } from '../RouteTransition/index.js'
 
 export type BranchOption = {
+  /** Absent for `main`, which is a sentinel rather than a document. */
+  id?: number | string
+  /**
+   * Merged with nothing pending since — still a usable workspace, but worth
+   * distinguishing from a branch with work on it.
+   */
+  isMerged?: boolean
+  /** A merge is queued for this branch — worth knowing before switching onto it. */
+  isScheduled?: boolean
   name: string
   slug: string
 }
@@ -50,7 +59,7 @@ export type BranchProviderProps = {
 /**
  * Holds the active branch for the admin UI.
  *
- * The selection lives in the user's `branch` preference and nowhere else, so it
+ * The selection lives in the user's `admin` preference and nowhere else, so it
  * follows them between browsers and machines. The server resolves it during
  * request initialization, which is why switching is a preference write followed
  * by a refresh rather than any client-side state that has to be kept in sync.
@@ -87,11 +96,12 @@ export const BranchProvider: React.FC<BranchProviderProps> = ({
 
       setActiveBranchState(slug)
 
-      // Awaited before refreshing: the server re-reads the preference to
-      // resolve the branch, so refreshing first would race the write and
-      // re-render against the branch we just left.
+      // Merged, not replaced: the `admin` preference also carries nav state, and
+      // a plain write would drop it. Awaited before refreshing, because the
+      // server re-reads this preference to resolve the branch — refreshing first
+      // would race the write and re-render against the branch we just left.
       void (async () => {
-        await setPreference(PREFERENCE_KEYS.BRANCH, slug)
+        await setPreference(PREFERENCE_KEYS.ADMIN, { branch: slug }, true)
 
         if (refresh) {
           startRouteTransition(() => {
@@ -130,7 +140,7 @@ export const BranchProvider: React.FC<BranchProviderProps> = ({
   // the next request starts clean on main instead of resurrecting it.
   useEffect(() => {
     if (staleBranch) {
-      void setPreference(PREFERENCE_KEYS.BRANCH, MAIN_BRANCH)
+      void setPreference(PREFERENCE_KEYS.ADMIN, { branch: MAIN_BRANCH }, true)
     }
   }, [setPreference, staleBranch])
 
@@ -170,9 +180,6 @@ export const useBranchParam = (): string | undefined => {
  * Shown whenever branching is enabled, even with no branches yet: the switcher
  * hosts the "new branch" action, so hiding it until a branch exists would leave
  * a project with no way to create its first one.
- *
- * Shared with the breadcrumb trail, which needs to know whether to draw the
- * separator that precedes the switcher.
  */
 export const useShowBranchSelector = (): boolean => {
   const { isEnabled } = useBranch()

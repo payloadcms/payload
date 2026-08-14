@@ -1,7 +1,7 @@
 import type { GraphQLResolveInfo } from 'graphql'
 import type { Collection, PaginatedDocs, Where } from 'payload'
 
-import { findOperation, isolateObjectProperty } from 'payload'
+import { findOperation, isolateObjectProperty, resetBranchState } from 'payload'
 
 import type { Context } from '../types.js'
 
@@ -10,6 +10,7 @@ import { buildSelectForCollectionMany } from '../../utilities/select.js'
 export type Resolver = (
   _: unknown,
   args: {
+    branch?: string
     data: Record<string, unknown>
     draft: boolean
     fallbackLocale?: string
@@ -30,6 +31,8 @@ export type Resolver = (
 export function findResolver(collection: Collection): Resolver {
   return async function resolver(_, args, context, info) {
     const req = (context.req = isolateObjectProperty(context.req, [
+      'branch',
+      'context',
       'locale',
       'fallbackLocale',
       'transactionID',
@@ -38,6 +41,15 @@ export function findResolver(collection: Collection): Resolver {
 
     req.locale = args.locale || req.locale
     req.fallbackLocale = args.fallbackLocale || req.fallbackLocale
+
+    // Same shape as `locale`: an argument on the field, resolved onto the request the
+    // operation reads. Branch state is memoized per request, so a field that names its own
+    // branch gets its own copy of that state rather than the previous field's.
+    if (args.branch && args.branch !== req.branch) {
+      req.branch = args.branch
+      req.context = { ...req.context }
+      resetBranchState(req)
+    }
     req.query = req.query || {}
 
     const draft: boolean =

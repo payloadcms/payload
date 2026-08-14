@@ -7,6 +7,7 @@ import {
   flattenWhereToOperators,
   projectBranchVersionParent,
   resolveBranchVersionQuery,
+  withBranchVersionSelect,
 } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
@@ -84,7 +85,7 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
   const projection = buildProjectionFromSelect({
     adapter: this,
     fields,
-    select,
+    select: withBranchVersionSelect({ collectionSlug, req, select }),
   })
 
   const session = await getSession(this, req)

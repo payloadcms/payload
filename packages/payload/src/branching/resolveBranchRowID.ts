@@ -1,6 +1,6 @@
 import type { PayloadRequest } from '../types/index.js'
 
-import { resolveBranch } from './resolveBranch.js'
+import { peekBranchRowID, rememberBranchRowID, resolveBranch } from './resolveBranch.js'
 import { branchDocIDField, branchField, MAIN_BRANCH } from './types.js'
 
 type Args = {
@@ -48,6 +48,14 @@ export const resolveBranchRowID = async ({
     return id
   }
 
+  // The fork that ran moments earlier already resolved this, and a write resolves it again
+  // on the way to the database.
+  const remembered = peekBranchRowID({ collectionSlug, docID: id, req })
+
+  if (remembered !== undefined) {
+    return remembered
+  }
+
   const shadow = await req.payload.db.findOne({
     branch: false,
     collection: collectionSlug,
@@ -57,5 +65,11 @@ export const resolveBranchRowID = async ({
     },
   })
 
-  return (shadow?.id as number | string) ?? id
+  const rowID = (shadow?.id as number | string) ?? id
+
+  if (shadow) {
+    rememberBranchRowID({ collectionSlug, docID: id, req, rowID })
+  }
+
+  return rowID
 }

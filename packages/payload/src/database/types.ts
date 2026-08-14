@@ -46,19 +46,28 @@ export interface BaseDatabaseAdapter {
   create: Create
 
   createGlobal: CreateGlobal
-
   createGlobalVersion: CreateGlobalVersion
+
   /**
    * Output a migration file
    */
   createMigration: CreateMigration
-
   createVersion: CreateVersion
 
   /**
    * Specify if the ID is a text or number field by default within this database adapter.
    */
   defaultIDType: 'number' | 'text'
+
+  /**
+   * Removes a branch's copy of a global, so the branch reads through to `main` again.
+   *
+   * Optional because it exists only for branching: globals are singletons, so no other
+   * part of Payload ever deletes one. Storage differs too much to do this generically —
+   * Mongo keeps every global in one discriminated collection, Drizzle gives each its own
+   * table — which is the same reason the branch-aware upsert lives in the adapters.
+   */
+  deleteBranchGlobal?: DeleteBranchGlobal
 
   deleteMany: DeleteMany
 
@@ -553,7 +562,19 @@ export type CreateArgs = {
   select?: SelectType
 }
 
+export type DeleteBranchGlobalArgs = {
+  branch: string
+  globalSlug: string
+  req?: Partial<PayloadRequest>
+}
+
+export type DeleteBranchGlobal = (args: DeleteBranchGlobalArgs) => Promise<void>
+
 export type FindDistinctArgs = {
+  /**
+   * Branch to scope this operation to. `false` bypasses branching entirely.
+   */
+  branch?: false | string
   collection: CollectionSlug
   field: string
   limit?: number

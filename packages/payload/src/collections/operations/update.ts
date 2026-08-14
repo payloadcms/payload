@@ -13,6 +13,9 @@ import type {
 } from '../config/types.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
+import { forkDocument } from '../../branching/forkDocument.js'
+import { resolveBranch } from '../../branching/resolveBranch.js'
+import { MAIN_BRANCH } from '../../branching/types.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
 import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
@@ -177,31 +180,31 @@ export const updateOperation = async <
       sort: incomingSort,
     })
 
-    let docs
+    const runQuery = async () => {
+      if (hasDraftsEnabled(collectionConfig) && (shouldSaveDraft || isTrashAttempt)) {
+        const versionsWhere = appendVersionToQueryKey(fullWhere)
 
-    if (hasDraftsEnabled(collectionConfig) && (shouldSaveDraft || isTrashAttempt)) {
-      const versionsWhere = appendVersionToQueryKey(fullWhere)
+        await validateQueryPaths({
+          collectionConfig: collection.config,
+          overrideAccess: overrideAccess!,
+          req,
+          versionFields: buildVersionCollectionFields(payload.config, collection.config, true),
+          where: appendVersionToQueryKey(where),
+        })
 
-      await validateQueryPaths({
-        collectionConfig: collection.config,
-        overrideAccess: overrideAccess!,
-        req,
-        versionFields: buildVersionCollectionFields(payload.config, collection.config, true),
-        where: appendVersionToQueryKey(where),
-      })
+        const query = await payload.db.queryDrafts<DataFromCollectionSlug<TSlug>>({
+          collection: collectionConfig.slug,
+          limit,
+          locale: locale!,
+          pagination: false,
+          req,
+          sort: getQueryDraftsSort({ collectionConfig, sort }),
+          where: versionsWhere,
+        })
 
-      const query = await payload.db.queryDrafts<DataFromCollectionSlug<TSlug>>({
-        collection: collectionConfig.slug,
-        limit,
-        locale: locale!,
-        pagination: false,
-        req,
-        sort: getQueryDraftsSort({ collectionConfig, sort }),
-        where: versionsWhere,
-      })
+        return query.docs
+      }
 
-      docs = query.docs
-    } else {
       const query = await payload.db.find({
         collection: collectionConfig.slug,
         limit,
@@ -212,7 +215,30 @@ export const updateOperation = async <
         where: fullWhere,
       })
 
-      docs = query.docs
+      return query.docs
+    }
+
+    let docs = await runQuery()
+
+    // /////////////////////////////////////
+    // Copy-on-write onto the branch
+    // /////////////////////////////////////
+
+    // The single-document path forks in a `beforeOperation` hook, which needs an `id` and
+    // so returns early for a bulk update — leaving every matched document to be written
+    // straight to main. The IDs only exist after the query above, so the fork belongs
+    // here.
+    //
+    // Re-queried afterwards, and that is the load-bearing half: the write builds on the
+    // document it read, so carrying main's row onto the branch's new copy stamps
+    // `_branch: 'main'` onto that copy and it then surfaces on main as a duplicate. The
+    // second read returns the branch's own rows, which is what the write must extend.
+    if (resolveBranch(req) !== MAIN_BRANCH) {
+      for (const doc of docs) {
+        await forkDocument({ id: doc.id, collectionSlug: collection.config.slug, req })
+      }
+
+      docs = await runQuery()
     }
 
     // /////////////////////////////////////

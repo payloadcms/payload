@@ -1,6 +1,6 @@
 import type { Find, SanitizedCollectionConfig } from 'payload'
 
-import { applyBranchIDProjection, resolveBranchQuery } from 'payload'
+import { applyBranchIDProjection, resolveBranchQuery, withBranchIDSelect } from 'payload'
 import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from './types.js'
@@ -47,7 +47,7 @@ export const find: Find = async function find(
     page,
     pagination,
     req,
-    select,
+    select: withBranchIDSelect({ branch, collectionSlug: collectionConfig.slug, req, select }),
     sort,
     tableName,
     where: branchedWhere,

@@ -19,6 +19,7 @@ export { parsePayloadComponent } from '../bin/generateImportMap/utilities/parseP
 export {
   branchChangesCollectionSlug,
   branchesCollectionSlug,
+  branchMergesCollectionSlug,
   type ClientBranchingConfig,
   MAIN_BRANCH,
 } from '../branching/types.js'

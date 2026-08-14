@@ -5,15 +5,20 @@ import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { hookSpy } from './hookSpy.js'
 import {
+  autosaveSlug,
   branchesSlug,
   categoriesSlug,
   excludedSlug,
   headerGlobalSlug,
   homepageGlobalSlug,
+  localizedSlug,
+  maxVersionsSlug,
   mediaSlug,
+  nestedSlug,
   numericIDSlug,
   pagesSlug,
   postsSlug,
+  publicSlug,
   restrictedSlug,
   uniqueSlug,
   whereAccessSlug,
@@ -27,19 +32,21 @@ export default buildConfigWithDefaults({
   collections: [
     {
       slug: postsSlug,
-      hooks: {
-        afterChange: [(args) => hookSpy.afterChange?.(args)],
-        beforeChange: [(args) => hookSpy.beforeChange?.(args)],
-      },
+      admin: { useAsTitle: 'title' },
       fields: [
         { name: 'title', type: 'text' },
         { name: 'order', type: 'number' },
         { name: 'category', type: 'relationship', relationTo: categoriesSlug },
       ],
+      hooks: {
+        afterChange: [(args) => hookSpy.afterChange?.(args)],
+        beforeChange: [(args) => hookSpy.beforeChange?.(args)],
+      },
       versions: false,
     },
     {
       slug: pagesSlug,
+      admin: { useAsTitle: 'title' },
       fields: [{ name: 'title', type: 'text' }],
       versions: { drafts: true },
     },
@@ -94,6 +101,67 @@ export default buildConfigWithDefaults({
       versions: false,
     },
     {
+      // The canonical public-site rule. A branch's copy of a published document
+      // satisfies it too, which is what the branch gate exists to stop.
+      slug: publicSlug,
+      access: { read: () => ({ _status: { equals: 'published' } }) },
+      admin: { useAsTitle: 'title' },
+      fields: [{ name: 'title', type: 'text' }],
+      versions: { drafts: true },
+    },
+    {
+      // Two versions kept, so pruning happens on the third save. Pruning on a branch
+      // must never reach main's chain.
+      slug: maxVersionsSlug,
+      admin: { useAsTitle: 'title' },
+      fields: [{ name: 'title', type: 'text' }],
+      versions: { drafts: true, maxPerDoc: 2 },
+    },
+    {
+      // Autosave is the path into `updateLatestVersion`, which rewrites a version row
+      // in place rather than appending one.
+      slug: autosaveSlug,
+      admin: { useAsTitle: 'title' },
+      fields: [{ name: 'title', type: 'text' }],
+      versions: { drafts: { autosave: { interval: 0 } } },
+    },
+    {
+      // Localized fields fork per locale, and `_status` localization is what reaches the
+      // version writes that were not branch-aware.
+      slug: localizedSlug,
+      admin: { useAsTitle: 'title' },
+      fields: [
+        { name: 'title', type: 'text', localized: true },
+        { name: 'shared', type: 'text' },
+      ],
+      versions: { drafts: true },
+    },
+    {
+      // Arrays and blocks live in their own tables under Drizzle, so a fork has to copy
+      // child rows and re-parent them — a path no flat-field test can reach.
+      slug: nestedSlug,
+      admin: { useAsTitle: 'title' },
+      fields: [
+        { name: 'title', type: 'text' },
+        {
+          name: 'items',
+          type: 'array',
+          fields: [{ name: 'label', type: 'text' }],
+        },
+        {
+          name: 'layout',
+          type: 'blocks',
+          blocks: [
+            {
+              slug: 'hero',
+              fields: [{ name: 'heading', type: 'text' }],
+            },
+          ],
+        },
+      ],
+      versions: false,
+    },
+    {
       slug: excludedSlug,
       branching: false,
       fields: [{ name: 'title', type: 'text' }],
@@ -112,6 +180,11 @@ export default buildConfigWithDefaults({
       versions: { drafts: true },
     },
   ],
+  localization: {
+    defaultLocale: 'en',
+    fallback: true,
+    locales: ['en', 'es'],
+  },
   onInit: async (payload) => {
     await payload.create({
       collection: 'users',

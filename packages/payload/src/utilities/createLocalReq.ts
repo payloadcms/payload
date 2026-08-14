@@ -1,9 +1,12 @@
 import type { Payload, RequestContext, TypedLocale, User } from '../index.js'
 import type { PayloadRequest } from '../types/index.js'
 
+import { peekResolvedBranch, resetBranchState } from '../branching/resolveBranch.js'
+import { MAIN_BRANCH } from '../branching/types.js'
 import { getDataLoader } from '../collections/dataloader.js'
 import { getLocalI18n } from '../translations/getLocalI18n.js'
 import { sanitizeFallbackLocale } from '../utilities/sanitizeFallbackLocale.js'
+import { isolateObjectProperty } from './isolateObjectProperty.js'
 
 function getRequestContext(
   req: Partial<PayloadRequest> = { context: null } as unknown as PayloadRequest,
@@ -145,6 +148,30 @@ export const createLocalReq: CreateLocalReq = async (
   req.context = getRequestContext(req, context)
 
   if (branch !== undefined) {
+    // An explicit branch wins over whatever the request was doing — the same contract
+    // `locale` has. When the request has *already* resolved a different branch, saying so
+    // is not enough: branch state (the change manifest, the resolved slug) is memoized on
+    // the request, and a later read would keep answering for the branch that got there
+    // first. So the operation runs on an isolated request instead, which leaves the
+    // caller's own request untouched.
+    //
+    // Isolated rather than reset in place because the caller still owns their request: a
+    // diff view reading one document on two branches, or a merge writing to main from
+    // inside a branch-scoped HTTP request, must not have its request rewritten underneath
+    // it.
+    const target = branch === false ? MAIN_BRANCH : branch
+    // What the request is already doing, whether it has read anything yet or not: a branch
+    // it resolved, or one set on it and not yet used. A request that has committed to
+    // neither is simply pointed at the branch — the same thing `locale` does.
+    const current =
+      peekResolvedBranch(req) ?? (typeof req.branch === 'string' ? req.branch : undefined)
+
+    if (current !== undefined && current !== target) {
+      req = isolateObjectProperty(req, ['branch', 'context'])
+      req.context = { ...req.context }
+      resetBranchState(req as PayloadRequest)
+    }
+
     // Set before anything resolves it, so this wins over header and cookie.
     // `false` means "bypass branching", carried as an explicit sentinel rather
     // than `undefined` so it survives resolution.

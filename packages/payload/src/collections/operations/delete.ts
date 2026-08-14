@@ -11,6 +11,7 @@ import type {
 } from '../config/types.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
+import { willBranchAbsorbDelete } from '../../branching/tombstone.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
 import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
@@ -184,13 +185,23 @@ export const deleteOperation = async <
           }
         }
 
-        await deleteAssociatedFiles({
-          collectionConfig,
-          config,
+        // See `deleteByID`: on a branch these cascades would reach main's data,
+        // because the delete becomes a tombstone and main keeps its row.
+        const absorbedByBranch = willBranchAbsorbDelete({
+          collectionSlug: collectionConfig.slug,
           doc,
-          overrideDelete: true,
           req,
         })
+
+        if (!absorbedByBranch) {
+          await deleteAssociatedFiles({
+            collectionConfig,
+            config,
+            doc,
+            overrideDelete: true,
+            req,
+          })
+        }
 
         // /////////////////////////////////////
         // Delete versions
@@ -208,7 +219,7 @@ export const deleteOperation = async <
         // /////////////////////////////////////
         // Delete scheduled posts
         // /////////////////////////////////////
-        if (hasScheduledPublishEnabled(collectionConfig)) {
+        if (hasScheduledPublishEnabled(collectionConfig) && !absorbedByBranch) {
           await deleteScheduledPublishJobs({
             id,
             slug: collectionConfig.slug,

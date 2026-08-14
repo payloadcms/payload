@@ -1,7 +1,7 @@
 import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 import type { UpdateOne } from 'payload'
 
-import { resolveBranchRowID } from 'payload'
+import { applyBranchIDProjection, resolveBranchRowID, withBranchIDSelect } from 'payload'
 import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from './types.js'
@@ -92,13 +92,22 @@ export const updateOne: UpdateOne = async function updateOne(
     joinQuery,
     operation: 'update',
     req,
-    select,
+    select: withBranchIDSelect({ branch, collectionSlug, req, select }),
     tableName,
   })
 
   if (returning === false) {
     return null
   }
+
+  // The row written on a branch is the shadow row, so the document it returns
+  // carries that row's primary key rather than the document's canonical ID.
+  applyBranchIDProjection({
+    branch,
+    collectionSlug,
+    docs: [result as Record<string, unknown>],
+    req,
+  })
 
   return result
 }

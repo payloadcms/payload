@@ -5,10 +5,8 @@ import React, { Fragment, useEffect, useRef, useState } from 'react'
 
 import type { StepNavItem } from './types.js'
 
-import { useShowBranchSelector } from '../../providers/Branch/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { BranchSelector } from '../BranchSelector/index.js'
 import { Button } from '../Button/index.js'
 import { Popup, PopupList } from '../Popup/index.js'
 import { StepNavProvider, useStepNav } from './context.js'
@@ -26,8 +24,6 @@ const StepNav: React.FC<{
   const { i18n } = useTranslation()
 
   const { stepNav } = useStepNav()
-
-  const showBranchSelector = useShowBranchSelector()
 
   const {
     config: {
@@ -130,15 +126,6 @@ const StepNav: React.FC<{
 
   const separator = <span className={`${baseClass}__separator`}>/</span>
 
-  // The branch switcher opens the trail: everything after it — the dashboard
-  // crumb included — is scoped to the branch it names.
-  const branchSelector = showBranchSelector ? (
-    <Fragment>
-      <BranchSelector className={`${baseClass}__branch-selector`} />
-      {separator}
-    </Fragment>
-  ) : null
-
   const renderTrail = () =>
     stepNavItems.map((item, i) => {
       const isLast = stepNavItems.length === i + 1
@@ -146,7 +133,6 @@ const StepNav: React.FC<{
 
       return (
         <Fragment key={i}>
-          {isFirst ? branchSelector : null}
           {renderItem(item, { isFirst, isLast })}
           {!isLast && separator}
         </Fragment>
@@ -162,7 +148,6 @@ const StepNav: React.FC<{
       <nav className={[baseClass, className].filter(Boolean).join(' ')} ref={navRef}>
         {shouldCollapse ? (
           <Fragment>
-            {branchSelector}
             {renderItem(stepNavItems[0], { isFirst: true, isLast: false })}
             {separator}
             <Popup

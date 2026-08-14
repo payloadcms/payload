@@ -5,12 +5,16 @@
 
 export const PREFERENCE_KEYS = {
   /**
-   * Stores the content branch the user is currently working on.
+   * Stores state global to the admin panel, as opposed to state scoped to a
+   * collection or a document: the active content branch, navigation group
+   * collapse/expand state, and nav open/closed state.
    *
-   * A preference rather than a cookie so the selection follows the user across
-   * devices, and so it is the same store the rest of the admin UI state uses.
+   * Deliberately one key rather than one per concern. An admin render needs all
+   * of it, so a single key resolves the lot in a single query — see
+   * `getAdminPreferences` in `@payloadcms/ui`. New globally-scoped admin state
+   * belongs here rather than in a key of its own.
    */
-  BRANCH: 'branch',
+  ADMIN: 'admin',
 
   /**
    * Stores dashboard layout configuration
@@ -21,11 +25,6 @@ export const PREFERENCE_KEYS = {
    * Stores hierarchy tree expand/collapse state per collection
    */
   HIERARCHY_TREE: 'hierarchy-tree',
-
-  /**
-   * Stores navigation group collapse/expand state and nav open/closed state
-   */
-  NAV: 'nav',
 
   /**
    * Stores active sidebar tab selection

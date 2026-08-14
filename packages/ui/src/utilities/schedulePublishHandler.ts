@@ -1,4 +1,5 @@
 import { canAccessAdmin, type SchedulePublishTaskInput, type ServerFunction } from 'payload'
+import { MAIN_BRANCH } from 'payload/shared'
 
 export type SchedulePublishHandlerArgs = {
   date?: Date
@@ -23,6 +24,16 @@ export const schedulePublishHandler: ServerFunction<SchedulePublishHandlerArgs> 
   const { i18n, payload, user } = req
 
   await canAccessAdmin({ req })
+
+  // Scheduled publish operates on main (§18): the job runs later, with no branch
+  // on its request, so a job queued from a branch would publish main's copy of the
+  // document at the appointed time. Refused rather than silently retargeted —
+  // the UI hides the affordance, so reaching this means bypassing it.
+  if (req.branch && req.branch !== MAIN_BRANCH) {
+    return {
+      error: 'Scheduled publish is not available on a branch. Switch to main to schedule.',
+    }
+  }
 
   try {
     if (deleteID) {

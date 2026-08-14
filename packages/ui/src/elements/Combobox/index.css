@@ -82,6 +82,14 @@
     display: flex;
   }
 
+  .combobox__header {
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    padding-block: var(--spacer-2);
+    border-bottom: var(--stroke-width-small) solid var(--color-border);
+  }
+
   .combobox__footer {
     display: flex;
     flex-direction: column;

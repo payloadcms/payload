@@ -11,6 +11,7 @@ import { branchChangesCollectionSlug, branchesCollectionSlug } from './types.js'
  */
 export const corePayloadCollectionSlugs = [
   'payload-jobs',
+  'payload-kv',
   'payload-locked-documents',
   'payload-migrations',
   'payload-preferences',
@@ -59,6 +60,18 @@ export const sanitizeBranchingConfig = (config: Config): SanitizedBranchingConfi
 
   const explicitlyExcluded = new Set<string>(branching.exclude ?? [])
   const offByDefault = new Set<string>(corePayloadCollectionSlugs)
+
+  // The KV collection's slug is configurable, so the literal above only covers
+  // the default. Branching it is meaningless — it is a key-value store, not
+  // content — and actively harmful: its `key` is unique, so the rewrite turns
+  // that into a branch-scoped compound index, and `ensureIndexes` then refuses to
+  // reconcile it against a database that already has the unique one. That fails
+  // at connect time, which takes the whole instance down rather than degrading.
+  const kvCollectionSlug = config.kv?.kvCollection?.slug
+
+  if (kvCollectionSlug) {
+    offByDefault.add(kvCollectionSlug)
+  }
 
   for (const collection of config.collections ?? []) {
     // Detection is by the `auth` flag, never by slug: the auth collection can

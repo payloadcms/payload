@@ -62,15 +62,15 @@ describe('Branching — phase 0 spike', () => {
     beforeAll(async () => {
       const abDoc = await payload.create({
         collection: antiJoinProbeSlug,
-        data: { title: 'shadowed on a and b', shadowedBy: ['a', 'b'] },
+        data: { shadowedBy: ['a', 'b'], title: 'shadowed on a and b' },
       })
       const aDoc = await payload.create({
         collection: antiJoinProbeSlug,
-        data: { title: 'shadowed on a only', shadowedBy: ['a'] },
+        data: { shadowedBy: ['a'], title: 'shadowed on a only' },
       })
       const noneDoc = await payload.create({
         collection: antiJoinProbeSlug,
-        data: { title: 'not shadowed', shadowedBy: [] },
+        data: { shadowedBy: [], title: 'not shadowed' },
       })
 
       shadowedOnAB = abDoc.id
@@ -80,8 +80,8 @@ describe('Branching — phase 0 spike', () => {
 
       const result = await payload.find({
         collection: antiJoinProbeSlug,
-        where: { shadowedBy: { not_in: ['a'] } },
         pagination: false,
+        where: { shadowedBy: { not_in: ['a'] } },
       })
 
       returnedIDs = result.docs.map((doc) => doc.id)
@@ -89,7 +89,7 @@ describe('Branching — phase 0 spike', () => {
 
     afterAll(async () => {
       for (const id of createdIDs) {
-        await payload.delete({ collection: antiJoinProbeSlug, id })
+        await payload.delete({ id, collection: antiJoinProbeSlug })
       }
       createdIDs.length = 0
     })
@@ -123,7 +123,7 @@ describe('Branching — phase 0 spike', () => {
 
     afterAll(async () => {
       for (const id of createdIDs) {
-        await payload.delete({ collection: sentinelProbeSlug, id })
+        await payload.delete({ id, collection: sentinelProbeSlug })
       }
       createdIDs.length = 0
     })
@@ -168,7 +168,7 @@ describe('Branching — phase 0 spike', () => {
 
     afterAll(async () => {
       for (const id of createdIDs) {
-        await payload.delete({ collection: latestProbeSlug, id })
+        await payload.delete({ id, collection: latestProbeSlug })
       }
       createdIDs.length = 0
     })
@@ -191,22 +191,22 @@ describe('Branching — phase 0 spike', () => {
       // Save a second version of `first` only. If `latest` were global rather
       // than per-parent, this would clear `second`'s latest flag too.
       await payload.update({
-        collection: latestProbeSlug,
         id: first.id,
+        collection: latestProbeSlug,
         data: { title: 'first v2' },
         draft: true,
       })
 
       const latestForFirst = await payload.findVersions({
         collection: latestProbeSlug,
-        where: { and: [{ parent: { equals: first.id } }, { latest: { equals: true } }] },
         pagination: false,
+        where: { and: [{ parent: { equals: first.id } }, { latest: { equals: true } }] },
       })
 
       const latestForSecond = await payload.findVersions({
         collection: latestProbeSlug,
-        where: { and: [{ parent: { equals: second.id } }, { latest: { equals: true } }] },
         pagination: false,
+        where: { and: [{ parent: { equals: second.id } }, { latest: { equals: true } }] },
       })
 
       // Exactly one latest per parent, and both parents still have one. This

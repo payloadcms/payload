@@ -3,21 +3,31 @@
     flex-shrink: 0;
   }
 
-  .step-nav .branch-selector .btn {
+  /* The chevron lives inside the label rather than in the button's own icon
+     slot, which is taken by the branch icon, so close the end padding by hand. */
+  .branch-selector__trigger.btn--size-medium {
     padding-inline-end: var(--spacer-1);
+  }
+
+  .branch-selector__trigger .btn__label {
+    min-width: 0;
+    overflow: hidden;
   }
 
   .branch-selector__trigger-label {
     display: flex;
     align-items: center;
     gap: var(--spacer-1);
-    max-width: calc(var(--spacer-6) * 3);
+    min-width: 0;
+    /* Matches `.step-nav__item`: a branch name gets the same room as a crumb
+       before it starts costing the trail beside it. */
+    max-width: calc(var(--spacer-6) * 4);
+  }
 
-    > span {
-      text-overflow: ellipsis;
-      overflow: hidden;
-      white-space: nowrap;
-    }
+  .branch-selector__trigger-name {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
   }
 
   .branch-selector__popup .combobox__entry {
@@ -56,24 +66,103 @@
     white-space: nowrap;
   }
 
-  .branch-selector__option-name,
-  .branch-selector__option-slug {
+  .branch-selector__option-name {
     text-overflow: ellipsis;
     overflow: hidden;
   }
 
-  .branch-selector__option-slug {
-    color: var(--color-text-secondary);
+  /* The branch you are on, pinned above the list of the ones you are not. */
+  .branch-selector__current {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacer-3);
+    padding-inline: var(--spacer-3);
+    padding-block: var(--spacer-1);
   }
 
-  .branch-selector__create {
-    text-decoration: none;
+  .branch-selector__current-name {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-family: var(--text-body-medium-strong-font-family);
+    font-weight: var(--text-body-medium-strong-font-weight);
     color: var(--color-text);
   }
 
-  .branch-selector__create .branch-selector__option-labels {
+  /* On a branch the name is the way into its manage view. The icon is the standing
+     affordance, so the underline is held back for hover — a permanently underlined
+     name reads as decoration on what is otherwise the row's heading. */
+  .branch-selector__current-link {
+    display: inline-flex;
     align-items: center;
     gap: var(--spacer-1);
+    min-width: 0;
+    text-decoration: none;
+
+    &:hover {
+      color: var(--color-text-brand);
+    }
+
+    &:hover .branch-selector__current-text {
+      text-decoration: underline;
+    }
+  }
+
+  .branch-selector__current-text {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .branch-selector__current-icon {
+    flex-shrink: 0;
+    color: var(--color-icon);
+  }
+
+  .branch-selector__current-link:hover .branch-selector__current-icon {
+    color: var(--color-text-brand);
+  }
+
+  /* Reads as a state to notice rather than a footnote, so it takes the same green
+     the banner on the branch page does. */
+  .branch-selector__option-scheduled {
+    flex-shrink: 0;
+    font-family: var(--text-body-small-font-family);
+    font-size: var(--text-body-small-font-size);
+    color: var(--color-text-success);
+  }
+
+  /* Muted and small: it qualifies the name rather than competing with it. */
+  .branch-selector__option-merged {
+    flex-shrink: 0;
+    font-family: var(--text-body-small-font-family);
+    font-size: var(--text-body-small-font-size);
+    color: var(--color-text-secondary);
+  }
+
+  /* Shared by the pinned footer rows, which are a link and a button rather than
+     combobox entries and so arrive with their own user-agent styling. */
+  .branch-selector__action {
+    background: none;
+    border: none;
+    font: inherit;
+    text-align: start;
+    text-decoration: none;
+    color: var(--color-text);
+    cursor: pointer;
+  }
+
+  .branch-selector__action .branch-selector__option-labels {
+    align-items: center;
+    gap: var(--spacer-1);
+  }
+
+  .branch-selector__footer-divider {
+    height: var(--stroke-width-small);
+    margin-block: var(--spacer-2);
+    background: var(--color-border);
   }
 
   .branch-selector__option--active .branch-selector__option-name {

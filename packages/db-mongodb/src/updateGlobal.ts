@@ -74,12 +74,18 @@ export const updateGlobal: UpdateGlobal = async function updateGlobal(
     await recordBranchGlobalChange({ branch: writeBranch, globalSlug, req })
   }
 
+  // `_branch` is forced rather than taken from `data`. The incoming document is a
+  // round-trip of a read, and `_branch` is stripped from reads — so the field's
+  // `main` default silently refills it, and writing that back would flip the
+  // branch's row onto main and leave two rows claiming to be production.
+  const writeData = writeBranch ? { ...(data as object), _branch: writeBranch } : data
+
   if (returning === false) {
-    await Model.updateOne(filter, data, baseOptions)
+    await Model.updateOne(filter, writeData, baseOptions)
     return null
   }
 
-  const result: any = await Model.findOneAndUpdate(filter, data, findOptions)
+  const result: any = await Model.findOneAndUpdate(filter, writeData, findOptions)
 
   transform({ adapter: this, data: result, fields, globalSlug, operation: 'read' })
 

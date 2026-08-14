@@ -1,7 +1,12 @@
 import type { asc, desc, SQL } from 'drizzle-orm'
 
 import { max, sql } from 'drizzle-orm'
-import { type FindDistinct, getFieldByPath, type SanitizedCollectionConfig } from 'payload'
+import {
+  type FindDistinct,
+  getFieldByPath,
+  resolveBranchQuery,
+  type SanitizedCollectionConfig,
+} from 'payload'
 import toSnakeCase from 'to-snake-case'
 
 import type { BuildQueryJoinAliases, DrizzleAdapter, GenericColumn } from './types.js'
@@ -38,6 +43,14 @@ export const findDistinct: FindDistinct = async function (this: DrizzleAdapter, 
   const offset = args.limit ? (page - 1) * args.limit : undefined
   const tableName = this.tableNameMap.get(toSnakeCase(collectionConfig.slug))
 
+  // Same predicate a list read gets: distinct values describe the visible documents.
+  const branchScopedWhere = await resolveBranchQuery({
+    branch: args.branch,
+    collectionSlug: args.collection,
+    req: args.req,
+    where: args.where,
+  })
+
   const { joins, orderBy, selectFields, where } = buildQuery({
     adapter: this,
     fields: collectionConfig.flattenedFields,
@@ -46,7 +59,7 @@ export const findDistinct: FindDistinct = async function (this: DrizzleAdapter, 
     tableName,
     where: {
       and: [
-        args.where ?? {},
+        branchScopedWhere ?? {},
         {
           [args.field]: {
             equals: DistinctSymbol,

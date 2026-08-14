@@ -12,6 +12,7 @@ import { TextInput } from '../../fields/Text/Input.js'
 import { Form } from '../../forms/Form/index.js'
 import { MinimizeMaximizeIcon } from '../../icons/MinimizeMaximize/index.js'
 import { NewTabIcon } from '../../icons/NewTab/index.js'
+import { useBranchParam } from '../../providers/Branch/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
@@ -29,6 +30,7 @@ export const APIViewClient: React.FC = () => {
   const searchParams = useSearchParams()
   const { i18n, t } = useTranslation()
   const { code } = useLocale()
+  const branch = useBranchParam()
 
   const {
     config: {
@@ -90,12 +92,20 @@ export const APIViewClient: React.FC = () => {
 
   const trashParam = typeof initialData?.deletedAt === 'string'
 
-  const params = new URLSearchParams({
+  const searchParamsRecord: Record<string, string> = {
     depth,
     draft: String(draft),
     locale,
     trash: trashParam ? 'true' : 'false',
-  }).toString()
+  }
+
+  // The view inspects the document being edited, which on a branch is the branch's
+  // copy. Without this it shows main's, contradicting every other view.
+  if (branch) {
+    searchParamsRecord.branch = branch
+  }
+
+  const params = new URLSearchParams(searchParamsRecord).toString()
 
   const fetchURL = formatAdminURL({
     apiRoute,

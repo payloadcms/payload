@@ -5,6 +5,7 @@ import {
   combineQueries,
   projectBranchVersionParent,
   resolveBranchVersionQuery,
+  withBranchVersionSelect,
 } from 'payload'
 import toSnakeCase from 'to-snake-case'
 
@@ -40,7 +41,7 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
     page,
     pagination,
     req,
-    select,
+    select: withBranchVersionSelect({ collectionSlug: collection, req, select }),
     sort,
     tableName,
     versions: true,

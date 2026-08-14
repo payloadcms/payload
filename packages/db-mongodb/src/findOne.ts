@@ -1,6 +1,11 @@
 import type { AggregateOptions, QueryOptions } from 'mongoose'
 
-import { applyBranchIDProjection, type FindOne, resolveBranchQuery } from 'payload'
+import {
+  applyBranchIDProjection,
+  type FindOne,
+  resolveBranchQuery,
+  withBranchIDSelect,
+} from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
@@ -32,7 +37,7 @@ export const findOne: FindOne = async function findOne(
   const projection = buildProjectionFromSelect({
     adapter: this,
     fields: collectionConfig.flattenedFields,
-    select,
+    select: withBranchIDSelect({ branch, collectionSlug, req, select }),
   })
 
   const aggregate = await buildJoinAggregation({

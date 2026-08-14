@@ -1,7 +1,12 @@
 import type { PaginateOptions, PipelineStage } from 'mongoose'
 import type { Find } from 'payload'
 
-import { applyBranchIDProjection, flattenWhereToOperators, resolveBranchQuery } from 'payload'
+import {
+  applyBranchIDProjection,
+  flattenWhereToOperators,
+  resolveBranchQuery,
+  withBranchIDSelect,
+} from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
@@ -84,11 +89,13 @@ export const find: Find = async function find(
     useEstimatedCount,
   }
 
-  if (select) {
+  const selectWithBranchID = withBranchIDSelect({ branch, collectionSlug, req, select })
+
+  if (selectWithBranchID) {
     paginationOptions.projection = buildProjectionFromSelect({
       adapter: this,
       fields: collectionConfig.flattenedFields,
-      select,
+      select: selectWithBranchID,
     })
   }
 

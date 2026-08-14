@@ -11,7 +11,7 @@ import type {
 } from 'payload'
 
 import { isolateObjectProperty, logError } from 'payload'
-import { formatAdminURL, hasAutosaveEnabled, hasDraftsEnabled } from 'payload/shared'
+import { formatAdminURL, hasAutosaveEnabled, hasDraftsEnabled, MAIN_BRANCH } from 'payload/shared'
 import React from 'react'
 
 import { DocumentHeader } from '../../elements/DocumentHeader/index.js'
@@ -226,6 +226,7 @@ export const renderDocument = async ({
   ] = await Promise.all([
     getVersions({
       id: idFromArgs,
+      branch: req?.branch,
       collectionConfig,
       doc,
       docPermissions,
@@ -295,6 +296,13 @@ export const renderDocument = async ({
 
   if (locale?.code) {
     formattedParams.append('locale', locale.code)
+  }
+
+  // The API view shows this URL as the request it made, so it has to name the
+  // branch the rest of the view is scoped to — otherwise it displays, and fetches,
+  // main's copy of the document being edited.
+  if (req.branch && req.branch !== MAIN_BRANCH) {
+    formattedParams.append('branch', req.branch)
   }
 
   const apiQueryParams = `?${formattedParams.toString()}`
@@ -490,7 +498,9 @@ export const renderDocument = async ({
   }
 }
 
-export async function DocumentView(props: AdminViewServerProps) {
+export async function DocumentView(
+  props: { overrideEntityVisibility?: boolean } & AdminViewServerProps,
+) {
   try {
     const { Document: RenderedDocument } = await renderDocument(props)
     return RenderedDocument

@@ -49,6 +49,7 @@ audit_output.json
 # Ignore test directory media folder/files
 /media
 test/media
+test/branching/media
 app-tanstack/media
 *payloadtests.db
 *payloadtests.db-journal

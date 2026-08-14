@@ -1,10 +1,12 @@
 'use client'
 import { useModal } from '@faceless-ui/modal'
 import { formatAdminURL } from 'payload/shared'
+import * as qs from 'qs-esm'
 import React, { useCallback } from 'react'
 import { toast } from 'sonner'
 
 import { useForm } from '../../forms/Form/context.js'
+import { useBranchParam } from '../../providers/Branch/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
@@ -40,6 +42,7 @@ export const Status: React.FC = () => {
 
   const { reset: resetForm } = useForm()
   const { code: locale } = useLocale()
+  const branch = useBranchParam()
   const { i18n, t } = useTranslation()
 
   const revertModalSlug = `confirm-revert-${id}`
@@ -64,10 +67,17 @@ export const Status: React.FC = () => {
     let url
     let method
 
+    // Both the read and the write are scoped to the active branch: reverting is
+    // "discard this branch's unpublished changes", not a write to main.
+    const search = qs.stringify(
+      { branch, depth: 0, 'fallback-locale': 'null', locale },
+      { addQueryPrefix: true },
+    )
+
     if (collectionSlug) {
       url = formatAdminURL({
         apiRoute: api,
-        path: `/${collectionSlug}/${id}?locale=${locale}&fallback-locale=null&depth=0`,
+        path: `/${collectionSlug}/${id}${search}`,
       })
       method = 'patch'
     }
@@ -75,7 +85,7 @@ export const Status: React.FC = () => {
     if (globalSlug) {
       url = formatAdminURL({
         apiRoute: api,
-        path: `/globals/${globalSlug}?locale=${locale}&fallback-locale=null&depth=0`,
+        path: `/globals/${globalSlug}${search}`,
       })
       method = 'post'
     }
@@ -133,6 +143,7 @@ export const Status: React.FC = () => {
     }
   }, [
     api,
+    branch,
     collectionSlug,
     globalSlug,
     id,

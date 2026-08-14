@@ -4,6 +4,7 @@ import type {
   CollectionBeforeOperationHook,
 } from '../index.js'
 
+import { assertBranchWritable } from './assertBranchWritable.js'
 import { forkDocument } from './forkDocument.js'
 import { resolveBranch } from './resolveBranch.js'
 import { branchChangesCollectionSlug, branchField, branchOpField, MAIN_BRANCH } from './types.js'
@@ -50,6 +51,8 @@ export const recordBranchCreate: CollectionAfterChangeHook = async ({
     return doc
   }
 
+  await assertBranchWritable({ branch, req })
+
   await req.payload.create({
     collection: branchChangesCollectionSlug,
     data: {
@@ -95,6 +98,8 @@ export const forkOnBranchUpdate: CollectionBeforeOperationHook = async ({
   if (branch === MAIN_BRANCH) {
     return args
   }
+
+  await assertBranchWritable({ branch, req })
 
   // Ensures the branch has its own copy, but leaves `args.id` as the canonical
   // ID. Canonical IDs are the only identity the API exposes; the read path

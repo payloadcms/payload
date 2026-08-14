@@ -208,6 +208,23 @@ export type {
 } from '../../elements/Nav/SidebarTabs/index.client.js'
 export { TabError } from '../../elements/Nav/SidebarTabs/TabError/index.js'
 export { ShouldRenderTabs } from '../../elements/DocumentHeader/Tabs/ShouldRenderTabs.js'
+export { BranchChangesPill } from '../../elements/DocumentHeader/Tabs/tabs/BranchChangesPill/index.js'
+export { BranchStatusCell } from '../../elements/Table/DefaultCell/fields/BranchStatus/index.js'
+export { ChangeSummary, type SummarizableChange } from '../../elements/ChangeSummary/index.js'
+export { type BranchChange, ChangedDocuments } from '../../views/Branch/ChangedDocuments/index.js'
+export { BranchChanges } from '../../views/Branch/BranchChanges/index.js'
+export { DiscardChangesButton } from '../../views/Branch/DiscardChangesButton/index.js'
+export { type MergeEvent, MergeLedger } from '../../views/Branch/MergeLedger/index.js'
+export { type ScheduledMerge, ScheduledMerges } from '../../views/Branch/ScheduledMerges/index.js'
+export { BranchManageView } from '../../views/Branch/Manage/index.js'
+export { MergeChangesButton } from '../../views/Branch/MergeChangesButton/index.js'
+export { MergeBranchModal } from '../../elements/MergeBranch/index.js'
+export {
+  MergeBranchStoreProvider,
+  type MergeTarget,
+  useMergeBranch,
+} from '../../elements/MergeBranch/context.js'
+export { MergeBranchProvider } from '../../elements/MergeBranch/provider.js'
 export { DocumentTabLink } from '../../elements/DocumentHeader/Tabs/Tab/TabLink.js'
 export { VersionsPill } from '../../elements/DocumentHeader/Tabs/tabs/VersionsPill/index.js'
 export { Wrapper as DefaultTemplateWrapper } from '../../templates/Default/Wrapper/index.js'
@@ -546,6 +563,7 @@ export { Select as VersionFieldDiffSelect } from '../../views/Version/RenderFiel
 export { Tabs as VersionFieldDiffTabs } from '../../views/Version/RenderFieldsToDiff/fields/Tabs/index.js'
 export { Text as VersionFieldDiffText } from '../../views/Version/RenderFieldsToDiff/fields/Text/index.js'
 export { AutosaveCell as VersionsAutosaveCell } from '../../views/Versions/cells/AutosaveCell/index.js'
+export { BranchCell as VersionsBranchCell } from '../../views/Versions/cells/Branch/index.js'
 export { CreatedAtCell as VersionsCreatedAtCell } from '../../views/Versions/cells/CreatedAt/index.js'
 export { IDCell as VersionsIDCell } from '../../views/Versions/cells/ID/index.js'
 export { VersionDrawerCreatedAtCell } from '../../views/Versions/cells/VersionDrawerCreatedAtCell/index.js'

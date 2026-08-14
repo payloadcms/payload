@@ -25,9 +25,14 @@ import type {
 
 import { defaultUserCollection } from '../auth/defaultUser.js'
 import { authRootEndpoints } from '../auth/endpoints/index.js'
-import { getBranchChangesCollection, getBranchesCollection } from '../branching/collections.js'
+import {
+  getBranchChangesCollection,
+  getBranchesCollection,
+  getBranchMergesCollection,
+} from '../branching/collections.js'
 import { injectBranchFields, injectGlobalBranchFields } from '../branching/injectBranchFields.js'
 import { sanitizeBranchingConfig } from '../branching/sanitizeBranchingConfig.js'
+import { getScheduleMergeTask } from '../branching/schedule/job.js'
 import { sanitizeCollection } from '../collections/config/sanitize.js'
 import { migrationsCollection } from '../database/migrations/migrationsCollection.js'
 import { DuplicateCollection, InvalidConfiguration } from '../errors/index.js'
@@ -525,6 +530,14 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
     )
   }
 
+  // Registered whenever branching is on, so a branch can always be scheduled. Like
+  // scheduled publish, it only ever fires if the jobs queue is actually running.
+  if (branching.enabled) {
+    ;((config.jobs ??= {} as SanitizedJobsConfig).tasks ??= []).push(
+      getScheduleMergeTask({ adminUserSlug: config.admin!.user }),
+    )
+  }
+
   ;(config.jobs ??= {} as SanitizedJobsConfig).enabled = Boolean(
     (Array.isArray(configWithDefaults.jobs?.tasks) && configWithDefaults.jobs?.tasks?.length) ||
       (Array.isArray(configWithDefaults.jobs?.workflows) &&
@@ -581,6 +594,7 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
     for (const branchCollection of [
       getBranchesCollection(branching),
       getBranchChangesCollection(config as unknown as Config),
+      getBranchMergesCollection(),
     ]) {
       validRelationships.push(branchCollection.slug)
 

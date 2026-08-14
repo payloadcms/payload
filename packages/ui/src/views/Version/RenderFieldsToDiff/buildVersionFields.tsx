@@ -86,6 +86,15 @@ export const buildVersionFields = ({
       continue
     }
 
+    // A `hidden` field is stripped from API responses entirely, so a diff for it
+    // can only ever compare nothing against nothing. Rendering it produces a
+    // labelled, permanently empty row. Note this is `field.hidden`, not
+    // `admin.hidden` — the latter only hides a field from the edit form and its
+    // value is still real, so it remains diffable.
+    if ('hidden' in field && field.hidden) {
+      continue
+    }
+
     const { indexPath, path, schemaPath } = getFieldPaths({
       field,
       index: fieldIndex,

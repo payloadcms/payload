@@ -1445,11 +1445,27 @@ export type { ImportMap } from './bin/generateImportMap/index.js'
 export { genImportMapIterateFields } from './bin/generateImportMap/iterateFields.js'
 export { migrate as migrateCLI } from './bin/migrate.js'
 export { appendBranchFilter } from './branching/appendBranchFilter.js'
+export { assertBranchReadable } from './branching/assertBranchReadable.js'
 export {
   applyBranchIDProjection,
   projectBranchIDs,
   rewriteBranchIDs,
+  rewriteBranchVersionParents,
 } from './branching/branchIDs.js'
+export {
+  isBranchProjectionActive,
+  withBranchIDSelect,
+  withBranchVersionSelect,
+} from './branching/branchSelect.js'
+export type { DiscardedChange, DiscardOptions, DiscardResult } from './branching/discard.js'
+export { discardBranchChanges } from './branching/discard.js'
+export type {
+  EffectiveOperation,
+  EffectiveWrite,
+  ResolvedChange,
+} from './branching/effectiveOperations.js'
+export { operationsForChange, resolveEffectiveOperations } from './branching/effectiveOperations.js'
+export type { MergeStreamEvent } from './branching/endpoints/merge.js'
 export {
   branchGlobalNeedsBothRows,
   pickBranchGlobal,
@@ -1459,15 +1475,27 @@ export {
   resolveBranchGlobalWrite,
 } from './branching/globals.js'
 export { getBranchesLocalAPI, mergeBranch } from './branching/merge.js'
-export type { MergeableChange, MergeOptions, MergeResult, MergeWarning } from './branching/merge.js'
-export type { BlockedChange, EffectiveOperation } from './branching/preflight.js'
+export type {
+  MergeableChange,
+  MergeOptions,
+  MergeProgress,
+  MergeResult,
+  MergeWarning,
+} from './branching/merge.js'
 
-export { resolveEffectiveOperations, runMergePreflight } from './branching/preflight.js'
+export type { BlockedChange } from './branching/preflight.js'
+export { runMergePreflight } from './branching/preflight.js'
 
-export { loadBranchManifest, resetBranchState, resolveBranch } from './branching/resolveBranch.js'
+export {
+  isolateBranchState,
+  loadBranchDeletions,
+  loadBranchManifest,
+  resetBranchState,
+  resolveBranch,
+} from './branching/resolveBranch.js'
 export { getBranchPredicateSync, resolveBranchQuery } from './branching/resolveBranchQuery.js'
 export { resolveBranchRowID } from './branching/resolveBranchRowID.js'
-export { resolveBranchDelete } from './branching/tombstone.js'
+export { resolveBranchDelete, willBranchAbsorbDelete } from './branching/tombstone.js'
 export type {
   BranchingConfig,
   BranchOperation,
@@ -1485,6 +1513,9 @@ export {
 } from './branching/types.js'
 export {
   projectBranchVersionParent,
+  projectBranchVersionParents,
+  resolveBranchOwnVersions,
+  resolveBranchVersionHistoryQuery,
   resolveBranchVersionParent,
   resolveBranchVersionQuery,
 } from './branching/versions.js'
@@ -1612,6 +1643,8 @@ export type {
   CreateVersionArgs,
   DatabaseAdapterResult as DatabaseAdapterObj,
   DBIdentifierName,
+  DeleteBranchGlobal,
+  DeleteBranchGlobalArgs,
   DeleteMany,
   DeleteManyArgs,
   DeleteOne,
@@ -1935,6 +1968,7 @@ export * from './kv/adapters/InMemoryKVAdapter.js'
 export * from './kv/index.js'
 
 export type {
+  AdminPreferences,
   CollapsedPreferences,
   CollectionPreferences,
   /**

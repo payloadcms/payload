@@ -1,6 +1,6 @@
 import type { FindOneArgs, SanitizedCollectionConfig, TypeWithID } from 'payload'
 
-import { applyBranchIDProjection, resolveBranchQuery } from 'payload'
+import { applyBranchIDProjection, resolveBranchQuery, withBranchIDSelect } from 'payload'
 import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from './types.js'
@@ -28,7 +28,7 @@ export async function findOne<T extends TypeWithID>(
     page: 1,
     pagination: false,
     req,
-    select,
+    select: withBranchIDSelect({ branch, collectionSlug: collection, req, select }),
     sort: undefined,
     tableName,
     where: branchedWhere,

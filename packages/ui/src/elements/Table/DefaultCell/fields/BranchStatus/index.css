@@ -1,0 +1,34 @@
+@layer payload-default {
+  /* Sized by its label. The base `.status-cell` is `inline-flex`, which is
+     shrink-to-fit on its own — but as a flex item in a column-direction parent it
+     stretches to the full cell width instead, and `justify-content: center` then
+     floats the label in the middle of the column. */
+  .branch-status-cell {
+    align-self: flex-start;
+    width: fit-content;
+  }
+
+  /* Open is the working state, and reads like `draft` does: neutral, in progress. */
+  .branch-status-cell--open {
+    background: var(--color-bg-tertiary);
+    color: var(--color-text);
+  }
+
+  /* Merged is the terminal, landed-in-production state, which is what `published`
+     means for a document — so it takes the same brand treatment. */
+  .branch-status-cell--merged {
+    background: var(--color-bg-selected);
+    color: var(--color-text-brand);
+  }
+
+  /* In flight. Warning rather than brand: it is a state to notice, not a result. */
+  .branch-status-cell--merging {
+    background: var(--color-bg-warning-tertiary);
+    color: var(--color-text-warning);
+  }
+
+  .branch-status-cell--closed {
+    background: var(--color-bg-tertiary);
+    color: var(--color-text-secondary);
+  }
+}

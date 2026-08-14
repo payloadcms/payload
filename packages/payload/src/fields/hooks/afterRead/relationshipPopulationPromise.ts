@@ -2,6 +2,7 @@ import type { TypedFallbackLocale } from '../../../index.js'
 import type { PayloadRequest, PopulateType } from '../../../types/index.js'
 import type { JoinField, RelationshipField, UploadField } from '../../config/types.js'
 
+import { resolveBranch } from '../../../branching/resolveBranch.js'
 import { createDataloaderCacheKey } from '../../../collections/dataloader.js'
 import { fieldHasMaxDepth, fieldShouldBeLocalized, fieldSupportsMany } from '../../config/types.js'
 
@@ -76,6 +77,7 @@ const populate = async ({
     if (shouldPopulate) {
       relationshipValue = await req.payloadDataLoader.load(
         createDataloaderCacheKey({
+          branch: resolveBranch(req),
           collectionSlug: relatedCollection.config.slug,
           currentDepth: currentDepth + 1,
           depth,

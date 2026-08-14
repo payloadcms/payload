@@ -33,10 +33,22 @@ export type ComboboxProps = {
    * For actions that belong to the list as a whole, such as "create new".
    */
   footer?: (args: { close: () => void }) => React.ReactNode
+  /**
+   * Pinned above the search, outside the scroll area and unaffected by it. For
+   * the one entry the list is about, such as the item already selected.
+   */
+  header?: (args: { close: () => void }) => React.ReactNode
   /** Minimum number of entries required to show search */
   minEntriesForSearch?: number
   onSelect?: (entry: ComboboxEntry) => void
   searchPlaceholder?: string
+  /**
+   * Whether to say so when a search matches nothing.
+   *
+   * Off for a list that is empty to begin with: there is no search to have failed,
+   * so the message describes something that did not happen.
+   */
+  showEmptyMessage?: boolean
 } & Omit<PopupProps, 'children' | 'render'>
 
 /**
@@ -50,11 +62,13 @@ export const Combobox: React.FC<ComboboxProps> = (props) => {
     'aria-label': ariaLabel,
     entries,
     footer,
+    header,
     minEntriesForSearch = 8,
     onSelect,
     onToggleClose,
     onToggleOpen,
     searchPlaceholder = 'Search...',
+    showEmptyMessage = true,
     ...popupProps
   } = props
 
@@ -125,6 +139,7 @@ export const Combobox: React.FC<ComboboxProps> = (props) => {
               : undefined
           }
         >
+          {header && <div className={`${baseClass}__header`}>{header({ close })}</div>}
           {showSearch && (
             <div className={`${baseClass}__search`}>
               <div className={`${baseClass}__search-bar`}>
@@ -174,7 +189,9 @@ export const Combobox: React.FC<ComboboxProps> = (props) => {
               </div>
             </PopupList.ButtonGroup>
           ) : (
-            <div className={`${baseClass}__no-results`}>{t('general:noMatchesFound')}</div>
+            showEmptyMessage && (
+              <div className={`${baseClass}__no-results`}>{t('general:noMatchesFound')}</div>
+            )
           )}
           {footer && <div className={`${baseClass}__footer`}>{footer({ close })}</div>}
         </div>

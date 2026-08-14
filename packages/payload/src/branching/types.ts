@@ -12,6 +12,16 @@ export const MAIN_BRANCH = 'main'
 
 export const branchesCollectionSlug = 'payload-branches'
 export const branchChangesCollectionSlug = 'payload-branch-changes'
+/**
+ * One row per merge event, append-only.
+ *
+ * Merging consumes the change rows it applies and drops the shadow rows behind
+ * them, so without this a merged branch has no record of what it did. It is a
+ * separate collection rather than a flag on `payload-branch-changes` because a
+ * branch can be merged more than once (§16) — a change row belongs to exactly one
+ * merge, so the event, not the change, is what needs its own identity.
+ */
+export const branchMergesCollectionSlug = 'payload-branch-merges'
 
 /** Field injected onto every branch-enabled collection and its version collection. */
 export const branchField = '_branch'

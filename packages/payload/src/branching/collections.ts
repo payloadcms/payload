@@ -1,12 +1,19 @@
 import type { CollectionConfig } from '../collections/config/types.js'
 import type { Config } from '../config/types.js'
+import type { CollectionAfterChangeHook, PayloadRequest } from '../index.js'
 import type { SanitizedBranchingConfig } from './types.js'
 
 import { defaultAccess } from '../auth/defaultAccess.js'
-import { slugify } from '../utilities/slugify.js'
 import { wrapInternalEndpoints } from '../utilities/wrapInternalEndpoints.js'
+import { discardBranchHandler } from './endpoints/discard.js'
 import { mergeBranchHandler } from './endpoints/merge.js'
-import { branchChangesCollectionSlug, branchesCollectionSlug, MAIN_BRANCH } from './types.js'
+import { loadBranchRow, setBranchRow } from './resolveBranch.js'
+import {
+  branchChangesCollectionSlug,
+  branchesCollectionSlug,
+  branchMergesCollectionSlug,
+  MAIN_BRANCH,
+} from './types.js'
 
 export const getBranchesCollection = (branching: SanitizedBranchingConfig): CollectionConfig => ({
   slug: branchesCollectionSlug,
@@ -18,6 +25,9 @@ export const getBranchesCollection = (branching: SanitizedBranchingConfig): Coll
   },
   admin: {
     defaultColumns: ['name', 'slug', 'status', 'updatedAt'],
+    // Reached only through the branch switcher in the app header, never from the
+    // nav or the dashboard: branches are a scope control, not a content type.
+    hidden: true,
     useAsTitle: 'name',
   },
   labels: {
@@ -35,42 +45,68 @@ export const getBranchesCollection = (branching: SanitizedBranchingConfig): Coll
       required: true,
     },
     {
-      name: 'slug',
+      name: 'description',
       type: 'text',
+    },
+    {
+      // Payload's own slug field: it derives from `name`, slugifies, dedupes
+      // against existing branches, and defaults to `required`, `unique` and
+      // `index`. Read-only because editors name a branch; the slug follows.
+      name: 'slug',
+      type: 'slug',
       admin: { readOnly: true },
       hooks: {
-        // Derived rather than typed: `_branch` stores the slug, so it has to be
-        // URL-safe and immutable. Editors name the branch; the slug follows.
-        beforeValidate: [
-          ({ operation, originalDoc, previousValue, siblingData, value }) => {
-            if (operation === 'create') {
-              return slugify(value as string) || slugify(siblingData?.name as string)
-            }
-
-            // Immutable after create: `_branch` stores the slug rather than a
-            // foreign key, so renaming it would orphan every shadow row. The
-            // stored value wins over whatever the request supplied.
-            return (previousValue as string) ?? (originalDoc as { slug?: string })?.slug ?? value
-          },
+        // Sanitization appends custom hooks after the generator, so this has the
+        // last word. Immutable after create: `_branch` stores the slug rather than
+        // a foreign key, so renaming it would orphan every shadow row — and the
+        // generator lets an explicit value from the client win, which is exactly
+        // what must not happen here.
+        beforeChange: [
+          ({ operation, originalDoc, value }) =>
+            operation === 'create' ? value : ((originalDoc as { slug?: string })?.slug ?? value),
         ],
       },
-      index: true,
-      unique: true,
+      useAsSlug: 'name',
+      // Permits empty deliberately: the generator populates the slug in
+      // `beforeChange`, which runs after validation.
       validate: (value: unknown) =>
         value === MAIN_BRANCH ? `"${MAIN_BRANCH}" is a reserved branch name.` : true,
     },
     {
       name: 'status',
       type: 'select',
-      admin: { readOnly: true },
+      admin: {
+        // Rendered as a status pill rather than a raw lowercase value: a branch's
+        // status answers the same question a document's draft/published status
+        // does, and the list view already has a visual language for that.
+        components: { Cell: '@payloadcms/ui#BranchStatusCell' },
+        readOnly: true,
+      },
       defaultValue: 'open',
       index: true,
-      options: ['open', 'merging', 'merged', 'closed'],
+      options: [
+        { label: ({ t }) => t('branching:status_open'), value: 'open' },
+        { label: ({ t }) => t('branching:status_merging'), value: 'merging' },
+        { label: ({ t }) => t('branching:status_merged'), value: 'merged' },
+        { label: ({ t }) => t('branching:status_closed'), value: 'closed' },
+      ],
     },
     {
       name: 'mergedAt',
       type: 'date',
       admin: { readOnly: true },
+    },
+    {
+      // `"12/230"` while a scheduled merge is running, null otherwise.
+      //
+      // Lives here rather than on the job because it describes the branch, and
+      // because whoever wants it is looking at the branch. Written by the task at
+      // roughly twenty points regardless of branch size: an interactive merge streams
+      // its progress to the client that asked for it, so this exists only for the
+      // scheduled case, where nobody is holding a connection.
+      name: 'mergeProgress',
+      type: 'text',
+      admin: { hidden: true, readOnly: true },
     },
   ],
   // Wrapped so the POST body is parsed onto `req.data`, as with every other
@@ -81,10 +117,20 @@ export const getBranchesCollection = (branching: SanitizedBranchingConfig): Coll
       method: 'post',
       path: '/:id/merge',
     },
+    {
+      handler: discardBranchHandler,
+      method: 'post',
+      path: '/:id/discard',
+    },
   ]),
   // `slug` is immutable after creation: `_branch` stores the slug rather than
   // a foreign key, so renaming it would orphan every shadow row.
   lockDocuments: false,
+  // Payload 4 enables versions by default, and a branch record is bookkeeping —
+  // a name, a description, a status. Its history is noise, and leaving the default
+  // in place costs every install an extra table. Matches every other core
+  // collection.
+  versions: false,
 })
 
 export const getBranchChangesCollection = (config: Config): CollectionConfig => {
@@ -155,7 +201,121 @@ export const getBranchChangesCollection = (config: Config): CollectionConfig => 
         type: 'text',
       },
     ],
+    hooks: {
+      // A branch marked `merged` had nothing pending. Recording a new change means
+      // it does again, so the label goes back to what is true. Without this, work
+      // resumed on a merged branch would be invisible: `merged` branches are
+      // filtered out of the switcher, so the branch would hold pending changes
+      // nobody could navigate to.
+      afterChange: [reopenBranchOnChange],
+    },
     indexes: [{ fields: ['branch', 'collectionSlug'], unique: false }],
     lockDocuments: false,
+    // Registry rows are derived state; versioning them is meaningless.
+    versions: false,
   }
+}
+
+/**
+ * The merge ledger: what each merge event applied, and when.
+ *
+ * Append-only and read by nobody in the write path, which is the point — it costs
+ * the read predicate nothing, unlike retaining consumed change rows and filtering
+ * them out of the manifest query on every request.
+ */
+export const getBranchMergesCollection = (): CollectionConfig => ({
+  slug: branchMergesCollectionSlug,
+  access: {
+    create: defaultAccess,
+    // Append-only: a ledger that can be edited is not a ledger. Deletion is
+    // permitted so that deleting a branch can take its history with it.
+    delete: defaultAccess,
+    read: defaultAccess,
+    update: () => false,
+  },
+  admin: {
+    hidden: true,
+  },
+  fields: [
+    {
+      name: 'branch',
+      type: 'text',
+      index: true,
+      required: true,
+    },
+    {
+      name: 'mergedAt',
+      type: 'date',
+      required: true,
+    },
+    // Stored rather than related: the ledger has to keep reading correctly after
+    // the user is deleted, and after they are renamed.
+    {
+      name: 'mergedByID',
+      type: 'text',
+    },
+    {
+      name: 'mergedByLabel',
+      type: 'text',
+    },
+    {
+      // Snapshotted per change, for the same reason. A document merged under one
+      // title and renamed afterwards was merged under the title it had.
+      name: 'changes',
+      type: 'array',
+      fields: [
+        { name: 'collectionSlug', type: 'text' },
+        { name: 'docID', type: 'text' },
+        { name: 'docTitle', type: 'text' },
+        /** Set instead of `collectionSlug`/`docID` when the merged change was a global. */
+        { name: 'globalSlug', type: 'text' },
+        { name: 'operation', type: 'text' },
+        // Both sides of the change, captured either side of the write.
+        //
+        // Without these the archive can only list what was merged: the branch's copy
+        // is dropped by the merge and main then holds the merged values on the only
+        // row that exists, so there is no second state left to diff against. Storing
+        // them is the price of a history that can still answer "what changed?" —
+        // taken *after* the write for `after`, so hook-derived fields are included
+        // and the diff shows what main really received.
+        { name: 'before', type: 'json' },
+        { name: 'after', type: 'json' },
+      ],
+    },
+  ],
+  indexes: [{ fields: ['branch', 'mergedAt'], unique: false }],
+  lockDocuments: false,
+  versions: false,
+})
+
+/** Returns a `merged` branch to `open` as soon as it has a pending change again. */
+const reopenBranchOnChange: CollectionAfterChangeHook = async ({ doc, operation, req }) => {
+  if (operation !== 'create') {
+    return doc
+  }
+
+  const branch = (doc as { branch?: string }).branch
+
+  if (!branch) {
+    return doc
+  }
+
+  // The same row `assertBranchWritable` just read, rather than a query of its own: this
+  // hook fires on every first touch of a document, and the answer is almost always "not
+  // merged, nothing to do".
+  const row = await loadBranchRow({ branch, req })
+
+  if (row?.status === 'merged') {
+    const reopened = await req.payload.update({
+      id: row.id as number | string,
+      collection: branchesCollectionSlug,
+      data: { mergedAt: null, status: 'open' },
+      overrideAccess: true,
+      req,
+    })
+
+    setBranchRow({ branch, req, row: reopened as Record<string, unknown> })
+  }
+
+  return doc
 }
