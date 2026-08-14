@@ -87,7 +87,7 @@ describe('hasMany polymorphic CSV columns', () => {
 })
 
 describe('dangling references in JSON exports', () => {
-  it('should keep an orphaned hasMany entry as null so the array stays index-aligned with CSV', () => {
+  it('should drop an orphaned hasMany entry', () => {
     const fields: FlattenedField[] = [
       {
         name: 'rel',
@@ -108,10 +108,10 @@ describe('dangling references in JSON exports', () => {
       req: mockReq,
     })
 
-    expect(result).toEqual({ rel: [null, 'p1'] })
+    expect(result).toEqual({ rel: ['p1'] })
   })
 
-  it('should keep an orphaned hasMany polymorphic entry as null at its source index', () => {
+  it('should drop an orphaned hasMany polymorphic entry', () => {
     const fields: FlattenedField[] = [
       {
         name: 'rel',
@@ -137,7 +137,7 @@ describe('dangling references in JSON exports', () => {
     })
 
     expect(result).toEqual({
-      rel: [null, { relationTo: 'posts', value: 'p1' }],
+      rel: [{ relationTo: 'posts', value: 'p1' }],
     })
   })
 
