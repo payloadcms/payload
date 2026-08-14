@@ -13,8 +13,15 @@ export type RewriteSummary = {
 
 const DEP_FIELDS = ['dependencies', 'devDependencies'] as const
 
-const isPayloadPackage = (name: string): boolean =>
+export const isPayloadPackage = (name: string): boolean =>
   name === 'payload' || name.startsWith('@payloadcms/')
+
+/**
+ * The `@payloadcms/eslint-*` packages are versioned independently of the core
+ * payload packages, so they are tracked on `latest` rather than lockstep-pinned.
+ */
+export const isPayloadEslintPackage = (name: string): boolean =>
+  name.startsWith('@payloadcms/eslint')
 
 /**
  * Mutate `data` in place for a v4 upgrade: exact-pin payload packages, drop
@@ -37,6 +44,10 @@ function pinPayloadPackages(data: Record<string, unknown>, version: string): str
       continue
     }
     for (const name of Object.keys(deps)) {
+      if (isPayloadEslintPackage(name)) {
+        deps[name] = 'latest'
+        continue
+      }
       if (isPayloadPackage(name)) {
         deps[name] = version
         pinned.push(name)

@@ -14,7 +14,7 @@ import { loadProject } from '../utils/project.js'
 import { detectPackageManager } from './detectPackageManager.js'
 import { renderReport } from './report.js'
 import { resolveVersions } from './resolveVersions.js'
-import { rewritePackageJson } from './rewritePackageJson.js'
+import { isPayloadEslintPackage, rewritePackageJson } from './rewritePackageJson.js'
 import { runInstall } from './runInstall.js'
 import { RUNBOOK_RELATIVE_PATH } from './types.js'
 
@@ -168,6 +168,11 @@ function verifyResolution(
   const deps = { ...asRecord(data.dependencies), ...asRecord(data.devDependencies) }
   for (const name of Object.keys(deps)) {
     if (name !== 'payload' && !name.startsWith('@payloadcms/')) {
+      continue
+    }
+    // eslint packages are versioned independently, so they are not part of the
+    // lockstep-pinned set and cannot be verified against the payload version.
+    if (isPayloadEslintPackage(name)) {
       continue
     }
     const installed = readInstalledVersion(projectPath, name)
