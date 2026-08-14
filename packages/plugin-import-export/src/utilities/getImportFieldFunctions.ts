@@ -35,11 +35,14 @@ const registerImportHandler = (
   }
 
   if (field.type === 'relationship' || field.type === 'upload') {
-    if (field.hasMany !== true) {
-      if (!Array.isArray(field.relationTo)) {
-        registerBeforeImport(({ value }) => value)
-      }
-    } else if (!Array.isArray(field.relationTo)) {
+    if (field.hasMany === true) {
+      registerBeforeImport(({ format, value }) =>
+        format === 'json' && Array.isArray(value) ? value.filter((entry) => entry !== null) : value,
+      )
+      return
+    }
+
+    if (!Array.isArray(field.relationTo)) {
       registerBeforeImport(({ value }) => value)
     }
     return
