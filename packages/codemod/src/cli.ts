@@ -1,7 +1,8 @@
+import type { Project } from 'ts-morph'
+
 /* eslint-disable no-console */
-import { existsSync, writeFileSync } from 'node:fs'
+import { writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
-import { IndentationText, Project, QuoteKind } from 'ts-morph'
 
 import type { TransformRunResult } from './runner.js'
 import type { Transform } from './types.js'
@@ -9,10 +10,23 @@ import type { Transform } from './types.js'
 import { parseFlags } from './cli.parseFlags.js'
 import { transforms as registry } from './registry.js'
 import { runTransforms } from './runner.js'
+import { runUpgrade } from './upgrade/index.js'
 import { loadPackageJsons, serializePackageJson } from './utils/packageJson.js'
+import { loadProject } from './utils/project.js'
 
 export async function main(argv: string[] = process.argv.slice(2)): Promise<void> {
   const flags = parseFlags(argv)
+
+  if (flags.command === 'upgrade') {
+    const { failed } = await runUpgrade({
+      flags: { dry: flags.dry, force: flags.force, tag: flags.tag ?? 'canary' },
+      path: flags.path,
+    })
+    if (failed) {
+      process.exitCode = 1
+    }
+    return
+  }
 
   if (flags.list) {
     printList()
@@ -89,27 +103,6 @@ function printList(): void {
   for (const t of registry) {
     console.log(`${t.name}  ${t.description}`)
   }
-}
-
-function loadProject(path: string): Project {
-  const manipulationSettings = {
-    indentationText: IndentationText.TwoSpaces,
-    quoteKind: QuoteKind.Single,
-    useTrailingCommas: true,
-  }
-  const tsconfigPath = resolve(path, 'tsconfig.json')
-  if (existsSync(tsconfigPath)) {
-    return new Project({ manipulationSettings, tsConfigFilePath: tsconfigPath })
-  }
-  const project = new Project({ manipulationSettings })
-  project.addSourceFilesAtPaths([
-    `${path}/**/*.{ts,tsx,js,jsx}`,
-    '!**/node_modules/**',
-    '!**/dist/**',
-    '!**/.next/**',
-    '!**/build/**',
-  ])
-  return project
 }
 
 function snapshotProject(project: Project): Map<string, string> {
