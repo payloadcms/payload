@@ -56,6 +56,37 @@ const SlugField: CollectionConfig = {
       required: false,
     },
     {
+      name: 'group',
+      type: 'group',
+      fields: [
+        {
+          name: 'nestedTitle',
+          type: 'text',
+        },
+        {
+          name: 'nestedSlug',
+          type: 'slug',
+          useAsSlug: 'nestedTitle',
+        },
+      ],
+    },
+    {
+      name: 'items',
+      type: 'array',
+      fields: [
+        {
+          name: 'itemTitle',
+          type: 'text',
+        },
+        {
+          name: 'itemSlug',
+          type: 'slug',
+          slugify: ({ valueToSlugify }) => valueToSlugify?.toUpperCase(),
+          useAsSlug: 'itemTitle',
+        },
+      ],
+    },
+    {
       type: 'text',
       name: 'test',
       admin: {

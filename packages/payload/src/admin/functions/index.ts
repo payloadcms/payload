@@ -15,6 +15,7 @@ import type {
 import type { PayloadRequest, Sort, Where } from '../../types/index.js'
 import type { ColumnsFromURL } from '../../utilities/transformColumnPreferences.js'
 import type { ComponentRenderer } from '../adapters/render.js'
+import type { ClientComponentProps } from '../forms/Field.js'
 
 export type InitReqResult = {
   cookies: Map<string, string>
@@ -144,5 +145,14 @@ export type SlugifyServerFunctionArgs = {
    * Active admin locale, so a localized slug's fallback is deduped within the right locale.
    */
   locale?: Locale['code']
+  /**
+   * Data path of the slug field, e.g. `slug` or `myArray.0.slug`. Tells the handler whether the slug
+   * sits at the root of the document, which is what uniqueness is scoped to.
+   */
   path?: FieldPaths['path']
+  /**
+   * Schema path of the slug field, used to look its config up — and with it, any custom `slugify`.
+   * A data path cannot address the schema, since row indexes have no equivalent there.
+   */
+  schemaPath?: ClientComponentProps['schemaPath']
 } & Omit<Parameters<Slugify>[0], 'req'>

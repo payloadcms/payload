@@ -2,7 +2,6 @@ import type { Slugify } from 'payload/shared'
 
 import {
   executeAccess,
-  getFieldByPath,
   getSlugFallbackValue,
   getUniqueFieldValue,
   hasDraftsEnabled,
@@ -11,6 +10,8 @@ import {
   UnauthorizedError,
 } from 'payload'
 import { slugify as defaultSlugify } from 'payload/shared'
+
+import { getSchemaMap } from './getSchemaMap.js'
 
 /**
  * This server function is directly related to the {@link https://payloadcms.com/docs/fields/slug | Slug Field}.
@@ -27,44 +28,52 @@ export const slugifyHandler: ServerFunction<
   SlugifyServerFunctionArgs,
   Promise<ReturnType<Slugify>>
 > = async (args) => {
-  const { id, collectionSlug, data, globalSlug, locale, path, req, valueToSlugify } = args
+  const {
+    id,
+    collectionSlug,
+    data,
+    globalSlug,
+    locale,
+    path,
+    req,
+    schemaPath,
+    siblingData,
+    valueToSlugify,
+  } = args
 
   if (!req.user) {
     throw new UnauthorizedError()
   }
 
-  const docConfig = collectionSlug
-    ? req.payload.collections[collectionSlug]?.config
-    : globalSlug
-      ? req.payload.config.globals.find((g) => g.slug === globalSlug)
-      : null
-
-  if (!docConfig) {
-    throw new Error()
-  }
-
-  const { field } = getFieldByPath({
+  const field = getSchemaMap({
+    collectionSlug,
     config: req.payload.config,
-    fields: docConfig.flattenedFields,
-    path,
-  })
+    globalSlug,
+    i18n: req.i18n,
+  }).get(schemaPath ?? '')
 
   const customSlugify = (
-    typeof field?.custom?.slugify === 'function' ? field.custom.slugify : undefined
+    field && 'custom' in field && typeof field.custom?.slugify === 'function'
+      ? field.custom.slugify
+      : undefined
   ) as Slugify
 
   const slugify = (valueToSlugify: unknown) =>
     customSlugify
-      ? customSlugify({ data, req, valueToSlugify })
+      ? customSlugify({ data, req, siblingData, valueToSlugify })
       : defaultSlugify(valueToSlugify as string)
 
   const result = await slugify(valueToSlugify)
 
   const collectionConfig = collectionSlug ? req.payload.collections[collectionSlug]?.config : null
 
+  const slugField = field && 'type' in field && field.type === 'slug' ? field : undefined
+
   // Uniqueness dedupe only applies to a collection's slug field. Globals have no collection to
   // dedupe against, so their result is returned as-is.
-  if (!collectionConfig || !field || field.type !== 'slug' || !('name' in field)) {
+  const isTopLevelField = !path?.includes('.')
+
+  if (!collectionConfig || !isTopLevelField || !slugField) {
     return result
   }
 
@@ -83,7 +92,7 @@ export const slugifyHandler: ServerFunction<
   // A localized slug is unique per-locale, so scope the probe to the current locale — otherwise it
   // dedupes against the default locale and can hand back a colliding value. The client passes the
   // active admin locale; fall back to the request's own locale.
-  const localeToScope = field.localized ? (locale ?? req.locale ?? undefined) : undefined
+  const localeToScope = slugField.localized ? (locale ?? req.locale ?? undefined) : undefined
 
   // The current doc is excluded so a regenerate can reuse its own value rather than bump past it.
   const excludeId = typeof id === 'string' || typeof id === 'number' ? id : undefined
@@ -95,7 +104,7 @@ export const slugifyHandler: ServerFunction<
       id: excludeId,
       collection: collectionConfig.slug,
       draftsEnabled: hasDraftsEnabled(collectionConfig),
-      field: field.name,
+      field: slugField.name,
       locale: localeToScope,
       req,
       value: result,
@@ -105,7 +114,7 @@ export const slugifyHandler: ServerFunction<
   return getSlugFallbackValue({
     id: excludeId,
     collection: collectionConfig,
-    field: field.name,
+    field: slugField.name,
     locale: localeToScope,
     req,
     slugify,

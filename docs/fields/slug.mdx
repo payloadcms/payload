@@ -35,10 +35,10 @@ export const ExampleCollection: CollectionConfig = {
 
 The Slug Field defaults `required`, `unique`, and `index` to `true`, and renders in the `sidebar`. In addition to the standard [field options](./overview#field-options), it exposes:
 
-| Option      | Description                                                                                                                         |
-| ----------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| `useAsSlug` | Optional. The name of the top-level field to generate the slug from (e.g. `'title'`). This field must exist in the same collection. |
-| `slugify`   | Optional. Override the default slugify function. [More details](#custom-slugify-function).                                          |
+| Option      | Description                                                                                                                                        |
+| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `useAsSlug` | Optional. The name of the field to generate the slug from (e.g. `'title'`). It must be a sibling of the slug field. [More details](#nested-slugs). |
+| `slugify`   | Optional. Override the default slugify function. [More details](#custom-slugify-function).                                                         |
 
 Because `slug` is a standard named field, customize it with the usual field properties directly — `label`, `localized`, `required`, `unique` (set `false` to drop the unique index, e.g. for a per-tenant compound index), `index`, `defaultValue`, and `admin` (including `admin.position`).
 
@@ -52,6 +52,29 @@ The slug is static: it fills once while empty and is preserved thereafter, so ed
 - Generated values are deduped against existing documents so two never claim the same slug.
 
 Because the slug is guaranteed to exist on create, [autosave-enabled](../versions/autosave) documents get a stable slug on the initial draft — before a title is typed — which live preview needs to load the document by its slug.
+
+### Nested Slugs
+
+A Slug Field can live inside a Group, Array, Block, or Tab. `useAsSlug` names a sibling of the slug, so each array row or block generates from its own source field:
+
+```ts
+{
+  name: 'sections',
+  type: 'array',
+  fields: [
+    { name: 'heading', type: 'text' },
+    { name: 'slug', type: 'slug', useAsSlug: 'heading' }, // highlight-line
+  ],
+}
+```
+
+Uniqueness is a document-level concept, so a nested slug behaves differently from a root-level one:
+
+- `unique` and `required` default to `false` rather than `true`.
+- Generated values are not deduped against other documents — two rows, in the same document or in different ones, may hold the same slug.
+- There is no `<singular>-<N>` fallback. A row with no source value keeps an empty slug until one is provided.
+
+To generate from a field that is not a sibling — the document title, for instance — use a [custom slugify function](#custom-slugify-function), which receives the full document `data`.
 
 ### Localization
 
@@ -88,8 +111,9 @@ export const MyCollection: CollectionConfig = {
 
 The following args are provided to the custom `slugify` function:
 
-| Argument         | Type             | Description                                      |
-| ---------------- | ---------------- | ------------------------------------------------ |
-| `valueToSlugify` | `string`         | The value of the field specified in `useAsSlug`. |
-| `data`           | `object`         | The full document data being saved.              |
-| `req`            | `PayloadRequest` | The Payload request object.                      |
+| Argument         | Type             | Description                                                                                                                       |
+| ---------------- | ---------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `valueToSlugify` | `string`         | The value of the field specified in `useAsSlug`.                                                                                  |
+| `data`           | `object`         | The full document data being saved.                                                                                               |
+| `siblingData`    | `object`         | The data adjacent to the slug — the group, array row or block it lives in. Same as `data` for a slug at the root of the document. |
+| `req`            | `PayloadRequest` | The Payload request object.                                                                                                       |

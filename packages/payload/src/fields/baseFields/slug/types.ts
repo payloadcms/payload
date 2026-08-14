@@ -2,9 +2,10 @@ import type { TextFieldClientProps } from '../../../admin/types.js'
 import type { TypeWithID } from '../../../collections/config/types.js'
 import type { PayloadRequest } from '../../../types/index.js'
 
-export type Slugify<T extends TypeWithID = any> = (args: {
+export type Slugify<T extends TypeWithID = any, TSiblingData = any> = (args: {
   data: T
   req: PayloadRequest
+  siblingData: TSiblingData
   valueToSlugify?: any
 }) => Promise<string | undefined> | string | undefined
 

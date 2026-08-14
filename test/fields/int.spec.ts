@@ -838,6 +838,84 @@ describe('Fields', () => {
         expect(afterPublish.slug).toBe('draft-one')
       })
     })
+
+    describe('nested', () => {
+      it('should generate a slug from a sibling field within a group', async () => {
+        const doc = await payload.create({
+          collection: 'slug-fields',
+          data: {
+            group: { nestedTitle: 'Nested Group Title' },
+            title: 'Nested slug within a group',
+          },
+        })
+        created.push(doc.id)
+
+        expect(doc.group?.nestedSlug).toBe('nested-group-title')
+      })
+
+      it('should generate a slug for each array row from its own sibling field', async () => {
+        const doc = await payload.create({
+          collection: 'slug-fields',
+          data: {
+            items: [{ itemTitle: 'First Item' }, { itemTitle: 'Second Item' }],
+            title: 'Nested slug within an array',
+          },
+        })
+        created.push(doc.id)
+
+        expect(doc.items?.[0]?.itemSlug).toBe('FIRST ITEM')
+        expect(doc.items?.[1]?.itemSlug).toBe('SECOND ITEM')
+      })
+
+      it('should let two documents share the same nested slug', async () => {
+        const first = await payload.create({
+          collection: 'slug-fields',
+          data: {
+            group: { nestedTitle: 'Shared Title' },
+            title: 'First shared nested slug',
+          },
+        })
+        created.push(first.id)
+
+        const second = await payload.create({
+          collection: 'slug-fields',
+          data: {
+            group: { nestedTitle: 'Shared Title' },
+            title: 'Second shared nested slug',
+          },
+        })
+        created.push(second.id)
+
+        expect(first.group?.nestedSlug).toBe('shared-title')
+        expect(second.group?.nestedSlug).toBe('shared-title')
+      })
+
+      it('should leave a nested slug empty when it has no source value', async () => {
+        const doc = await payload.create({
+          collection: 'slug-fields',
+          data: {
+            items: [{ itemTitle: '' }],
+            title: 'Nested slug without a source',
+          },
+        })
+        created.push(doc.id)
+
+        expect(doc.items?.[0]?.itemSlug).toBeFalsy()
+      })
+
+      it('should keep a user-provided nested slug', async () => {
+        const doc = await payload.create({
+          collection: 'slug-fields',
+          data: {
+            group: { nestedSlug: 'custom-nested-slug', nestedTitle: 'Nested Group Title' },
+            title: 'Custom nested slug',
+          },
+        })
+        created.push(doc.id)
+
+        expect(doc.group?.nestedSlug).toBe('custom-nested-slug')
+      })
+    })
   })
 
   describe('text', () => {
