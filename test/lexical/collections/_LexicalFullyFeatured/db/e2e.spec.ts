@@ -1,6 +1,7 @@
 import {
   buildEditorState,
   type DefaultNodeTypes,
+  type RichTextNodes,
   type SerializedInlineBlockNode,
 } from '@payloadcms/richtext-lexical'
 import { expect, type Page, test } from '@playwright/test'
@@ -11,10 +12,11 @@ import type { PayloadTestSDK } from '../../../../__helpers/shared/sdk/index.js'
 import type { Config, InlineBlockWithSelect } from '../../../payload-types.js'
 
 import { assertNetworkRequests } from '../../../../__helpers/e2e/assertNetworkRequests.js'
-import { ensureCompilationIsDone, saveDocAndAssert } from '../../../../__helpers/e2e/helpers.js'
+import { saveDocAndAssert } from '../../../../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../../../../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../../../../__helpers/shared/initPayloadE2ENoConfig.js'
+import { ensureCompilationIsDone } from '../../../../__setup/e2e/ensureCompilationIsDone.js'
 import { TEST_TIMEOUT_LONG } from '../../../../playwright.config.js'
 import { lexicalFullyFeaturedSlug } from '../../../slugs.js'
 import { LexicalHelpers, type PasteMode } from '../../utils.js'
@@ -22,6 +24,9 @@ import { LexicalHelpers, type PasteMode } from '../../utils.js'
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
 const dirname = path.resolve(currentFolder, '../../../')
+
+type FullyFeaturedNode = RichTextNodes<Config['collections']['lexical-fully-featured']['richText']>
+type PastedTextBlockNode = Extract<FullyFeaturedNode, { type: 'heading' | 'paragraph' }>
 
 let payload: PayloadTestSDK<Config>
 let serverURL: string
@@ -102,10 +107,8 @@ describe('Lexical Fully Featured - database', () => {
     test('ensure auto upload by copy & pasting image works when pasting from website', async ({
       page,
     }) => {
-      test.skip(
-        process.env.PAYLOAD_FRAMEWORK === 'tanstack-start',
-        'TanStack: known post-hydration RSC view remount detaches the view mid-interaction (see framework adapter notes); re-enable when the TanStack RSC hydration is fixed.',
-      )
+      test.slow()
+
       await page.goto(url.admin + '/custom-image')
       await page.keyboard.press('Meta+A')
       await page.keyboard.press('Control+A')
@@ -129,9 +132,16 @@ describe('Lexical Fully Featured - database', () => {
       })
       const richText = lexicalFullyFeatured?.docs?.[0]?.richText
 
-      const headingNode = richText?.root?.children[0]
-      expect(headingNode).toBeDefined()
-      expect(headingNode?.children?.[1]?.text).toBe('This is an image:')
+      const pastedTextBlock = richText?.root.children[0] as PastedTextBlockNode | undefined
+      expect(pastedTextBlock).toBeDefined()
+
+      // Browser clipboard serialization can insert a leading linebreak node.
+      // Assert the combined text instead of a fixed child index.
+      const combinedText = pastedTextBlock?.children
+        .map((child) => ('text' in child ? child.text : ''))
+        .join('')
+
+      expect(combinedText).toBe('This is an image:')
 
       const uploadNode = richText?.root?.children?.[1]?.children?.[0]
       // @ts-expect-error unsafe access is fine in tests
@@ -154,8 +164,8 @@ describe('Lexical Fully Featured - database', () => {
           await lexical.editor.locator('#field-someText').first().fill('Testing 123')
         },
         {
-          minimumNumberOfRequests: 2,
           allowedNumberOfRequests: 3,
+          minimumNumberOfRequests: 2,
         },
       )
 
@@ -175,8 +185,8 @@ describe('Lexical Fully Featured - database', () => {
           await lexical.editor.locator('#field-someText').first().fill('Updated text')
         },
         {
-          minimumNumberOfRequests: 2,
           allowedNumberOfRequests: 2,
+          minimumNumberOfRequests: 2,
         },
       )
       await expect(lexical.editor.locator('#field-someText')).toHaveValue('Updated text')
@@ -199,27 +209,27 @@ describe('Lexical Fully Featured - database', () => {
           nodes: [
             {
               type: 'inlineBlock',
-              version: 1,
               fields: {
-                blockType: 'inlineBlockWithSelect',
                 id: '1',
+                blockType: 'inlineBlockWithSelect',
               },
+              version: 1,
             },
             {
               type: 'inlineBlock',
-              version: 1,
               fields: {
-                blockType: 'inlineBlockWithSelect',
                 id: '2',
+                blockType: 'inlineBlockWithSelect',
               },
+              version: 1,
             },
             {
               type: 'inlineBlock',
-              version: 1,
               fields: {
-                blockType: 'inlineBlockWithSelect',
                 id: '3',
+                blockType: 'inlineBlockWithSelect',
               },
+              version: 1,
             },
           ],
         }),
@@ -238,8 +248,8 @@ describe('Lexical Fully Featured - database', () => {
         await lexical.editor.first().focus()
       },
       {
-        minimumNumberOfRequests: 0,
         allowedNumberOfRequests: 0,
+        minimumNumberOfRequests: 0,
         requestFilter: (request) => {
           // Ensure it's a form state request
           if (request.method() === 'POST') {
@@ -273,8 +283,8 @@ describe('Lexical Fully Featured - database', () => {
         await blockNameInput.fill('Testing 123')
       },
       {
-        minimumNumberOfRequests: 2,
         allowedNumberOfRequests: 3,
+        minimumNumberOfRequests: 2,
       },
     )
 
@@ -294,8 +304,8 @@ describe('Lexical Fully Featured - database', () => {
         await blockNameInput.fill('Updated blockname')
       },
       {
-        minimumNumberOfRequests: 2,
         allowedNumberOfRequests: 2,
+        minimumNumberOfRequests: 2,
       },
     )
     await expect(blockNameInput).toHaveValue('Updated blockname')

@@ -19,12 +19,12 @@ import { getJoinScopeContext } from './utils/getJoinScopeContext.js'
 import { getJoinScopeWhereFromDocData } from './utils/getJoinScopeWhereFromDocData.js'
 import { resolvePendingTargetKey } from './utils/resolvePendingTargetKey.js'
 
-export const addOrderableFieldsAndHook = async (
+export const addOrderableFieldsAndHook = (
   collection: CollectionConfig,
   config: Config,
   orderableFieldNames: string[],
   joinFieldPathsByCollection?: Map<string, Map<string, string>>,
-) => {
+): void => {
   // 1. Add fields
   for (const orderableFieldName of orderableFieldNames) {
     const orderField: TextField = {
@@ -46,7 +46,7 @@ export const addOrderableFieldsAndHook = async (
     }
 
     // Sanitize the field using the standard sanitization logic
-    await sanitizeField({
+    sanitizeField({
       collectionConfig: collection,
       config,
       existingFieldNames: new Set(),
@@ -178,6 +178,7 @@ export const addOrderableEndpoint = (
           // Currently only one doc can be moved at a time. We should review this if we want to allow
           // multiple docs to be moved at once in the future.
           id: docsToMove[0],
+          slug: collection.slug,
           data: {},
           req,
         },

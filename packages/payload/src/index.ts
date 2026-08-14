@@ -5,10 +5,8 @@ import type { Logger } from 'pino'
 import type { NonNever } from 'ts-essentials'
 
 import { spawn } from 'child_process'
-import crypto from 'crypto'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
-import WebSocket from 'ws'
 
 import type { DevReloadStrategy } from './admin/adapters/devReload.js'
 import type { AuthArgs } from './auth/operations/auth.js'
@@ -24,6 +22,7 @@ import type {
   TypeWithID,
 } from './collections/config/types.js'
 
+import { getRegisteredDevReloadStrategy } from './admin/adapters/devReload.js'
 import {
   forgotPasswordLocal,
   type Options as ForgotPasswordOptions,
@@ -38,7 +37,10 @@ import {
   verifyEmailLocal,
   type Options as VerifyEmailOptions,
 } from './auth/operations/local/verifyEmail.js'
-export type * from './admin/adapters/index.js'
+export {
+  getRegisteredDevReloadStrategy,
+  registerDevReloadStrategy,
+} from './admin/adapters/devReload.js'
 import type { InitOptions, SanitizedConfig } from './config/types.js'
 import type { BaseDatabaseAdapter, PaginatedDistinctDocs, PaginatedDocs } from './database/types.js'
 import type { InitializedEmailAdapter } from './email/types.js'
@@ -120,24 +122,21 @@ import {
   updateGlobalLocal,
   type Options as UpdateGlobalOptions,
 } from './globals/operations/local/update.js'
+export type * from './admin/adapters/index.js'
 export type { FieldState } from './admin/forms/Form.js'
 export type * from './admin/types.js'
 export { EntityType } from './admin/views/dashboard.js'
-/**
- * Export of all base fields that could potentially be
- * useful as users wish to extend built-in fields with custom logic
- */
-export { accountLockFields as baseAccountLockFields } from './auth/baseFields/accountLock.js'
 import type { SupportedLanguages } from '@payloadcms/translations'
 
 import { Cron } from 'croner'
 
+import type { EncryptionKeyring } from './auth/crypto.js'
 import type { ClientConfig } from './config/client.js'
 import type { KVAdapter } from './kv/index.js'
 import type { JobLog, JobTaskStatus } from './queues/config/types/workflowTypes.js'
 import type { TypeWithVersion } from './versions/types.js'
 
-import { decrypt, encrypt } from './auth/crypto.js'
+import { buildEncryptionKeyring, decrypt, encrypt, reencrypt } from './auth/crypto.js'
 import { authLocal } from './auth/operations/local/auth.js'
 import { APIKeyAuthentication } from './auth/strategies/apiKey.js'
 import { JWTAuthentication } from './auth/strategies/jwt.js'
@@ -154,24 +153,29 @@ import { _internal_jobSystemGlobals } from './queues/utilities/getCurrentDate.js
 import { formatAdminURL } from './utilities/formatAdminURL.js'
 import { isNextBuild } from './utilities/isNextBuild.js'
 import { getLogger } from './utilities/logger.js'
+import { defaultNextJsDevReloadStrategy } from './utilities/nextJsDevReloadStrategy.js'
 import { serverInit as serverInitTelemetry } from './utilities/telemetry/events/serverInit.js'
 import { traverseFields } from './utilities/traverseFields.js'
 
+/**
+ * Export of all base fields that could potentially be
+ * useful as users wish to extend built-in fields with custom logic
+ */
+export { accountLockFields as baseAccountLockFields } from './auth/baseFields/accountLock.js'
 export { createAPIKeyFields } from './auth/baseFields/apiKey.js'
 export { baseAuthFields } from './auth/baseFields/auth.js'
 export { emailFieldConfig as baseEmailField } from './auth/baseFields/email.js'
 export { sessionsFieldConfig as baseSessionsField } from './auth/baseFields/sessions.js'
 export { usernameFieldConfig as baseUsernameField } from './auth/baseFields/username.js'
 export { verificationFields as baseVerificationFields } from './auth/baseFields/verification.js'
-export { defaultUserCollection } from './auth/defaultUser.js'
 
+export { defaultUserCollection } from './auth/defaultUser.js'
 export { executeAccess } from './auth/executeAccess.js'
 export { executeAuthStrategies } from './auth/executeAuthStrategies.js'
 export { extractAccessFromPermission } from './auth/extractAccessFromPermission.js'
 export { getAccessResults } from './auth/getAccessResults.js'
 export { getFieldsToSign } from './auth/getFieldsToSign.js'
 export { getLoginOptions } from './auth/getLoginOptions.js'
-export * from './auth/index.js'
 
 /**
  * Shape constraint for PayloadTypes.
@@ -568,6 +572,8 @@ export class BasePayload {
 
   encrypt = encrypt
 
+  encryptionKeyring!: EncryptionKeyring
+
   extensions!: (args: {
     args: OperationArgs<any>
     req: graphQLRequest<unknown, unknown>
@@ -714,6 +720,8 @@ export class BasePayload {
   ): Promise<LoginResult<TSlug>> => {
     return loginLocal<TSlug>(this, options)
   }
+
+  reencrypt = reencrypt
 
   resetPassword = async <TSlug extends CollectionSlug>(
     options: ResetPasswordOptions<TSlug>,
@@ -915,7 +923,11 @@ export class BasePayload {
       throw new Error('Error: missing secret key. A secret key is needed to secure Payload.')
     }
 
-    this.secret = crypto.createHash('sha256').update(this.config.secret).digest('hex').slice(0, 32)
+    this.encryptionKeyring = buildEncryptionKeyring([
+      this.config.secret,
+      ...(this.config.previousSecrets ?? []),
+    ])
+    this.secret = this.encryptionKeyring.active.legacyKey
 
     this.globals = {
       config: this.config.globals,
@@ -954,7 +966,7 @@ export class BasePayload {
       }
     }
 
-    this.blocks = this.config.blocks!.reduce(
+    this.blocks = this.config.blocks.reduce(
       (blocks, block) => {
         blocks[block.slug] = block
         return blocks
@@ -1131,7 +1143,7 @@ export const reload = async (
     {} as Record<string, any>,
   )
 
-  payload.blocks = config.blocks!.reduce(
+  payload.blocks = config.blocks.reduce(
     (blocks, block) => {
       blocks[block.slug] = block
       return blocks
@@ -1182,19 +1194,83 @@ export const reload = async (
   ;(global as any)._payload_doNotCacheClientSchemaMap = true
 }
 
-let _cached: Map<
-  string,
-  {
-    devReloadCleanup: (() => void) | null
-    initializedCrons: boolean
-    payload: null | Payload
-    promise: null | Promise<Payload>
-    reload: boolean | Promise<void>
-  }
-> = (global as any)._payload
+type CachedPayload = {
+  devReloadCleanup: (() => void) | null
+  devReloadStrategy: DevReloadStrategy | null
+  initializedCrons: boolean
+  payload: null | Payload
+  promise: null | Promise<Payload>
+  reload: boolean | Promise<void>
+}
+
+let _cached: Map<string, CachedPayload> = (global as any)._payload
 
 if (!_cached) {
   _cached = (global as any)._payload = new Map()
+}
+
+/**
+ * Memoized so the strategy has a stable identity across `getPayload` calls -
+ * {@link connectDevReload} reconnects whenever the strategy in effect changes.
+ */
+let memoizedNextJsDevReloadStrategy: DevReloadStrategy | null | undefined
+
+/**
+ * Subscribes the cached instance to the dev reload strategy currently in effect,
+ * reconnecting if that strategy has been replaced since the last call.
+ *
+ * Reconnecting matters for adapters whose server runtime is itself hot-reloadable:
+ * Vite discards and re-evaluates the module that called `registerDevReloadStrategy`,
+ * orphaning its subscription, while the cached instance lives on the Node global
+ * and survives. Connecting only once would leave the instance permanently deaf to
+ * further config changes.
+ */
+function connectDevReload({
+  cached,
+  strategyFromOptions,
+}: {
+  cached: CachedPayload
+  strategyFromOptions: DevReloadStrategy | undefined
+}): void {
+  if (
+    process.env.NODE_ENV === 'production' ||
+    process.env.NODE_ENV === 'test' ||
+    process.env.DISABLE_PAYLOAD_HMR === 'true'
+  ) {
+    return
+  }
+
+  if (memoizedNextJsDevReloadStrategy === undefined) {
+    memoizedNextJsDevReloadStrategy = defaultNextJsDevReloadStrategy()
+  }
+
+  const strategy =
+    strategyFromOptions ?? getRegisteredDevReloadStrategy() ?? memoizedNextJsDevReloadStrategy
+
+  if (!strategy || strategy === cached.devReloadStrategy) {
+    return
+  }
+
+  cached.devReloadStrategy = strategy
+
+  try {
+    cached.devReloadCleanup?.()
+  } catch (_) {
+    // swallow cleanup errors from the strategy being replaced
+  }
+
+  cached.devReloadCleanup = null
+
+  try {
+    cached.devReloadCleanup = strategy.connect(() => {
+      if (cached.reload instanceof Promise) {
+        return
+      }
+      cached.reload = true
+    })
+  } catch (_) {
+    // swallow connection errors
+  }
 }
 
 /**
@@ -1205,59 +1281,16 @@ if (!_cached) {
  * when calling getPayload multiple times or from multiple locations.
  * - adds HMR support and reloads the payload instance when the config changes.
  */
-/**
- * Default HMR reload strategy using Next.js webpack-hmr WebSocket.
- * Used as fallback when no custom devReloadStrategy is provided.
- */
-function defaultNextJsDevReloadStrategy(): DevReloadStrategy | null {
-  try {
-    const port = process.env.PORT || '3000'
-    const hasHTTPS =
-      process.env.USE_HTTPS === 'true' || process.argv.includes('--experimental-https')
-    const protocol = hasHTTPS ? 'wss' : 'ws'
-
-    const hmrPath = '/_next/webpack-hmr'
-    const prefix = process.env.__NEXT_ASSET_PREFIX ?? ''
-
-    const url =
-      process.env.PAYLOAD_HMR_URL_OVERRIDE ?? `${protocol}://localhost:${port}${prefix}${hmrPath}`
-
-    return {
-      connect(onReload) {
-        const ws = new WebSocket(url)
-
-        ws.onmessage = (event) => {
-          if (typeof event.data === 'string') {
-            const data = JSON.parse(event.data)
-            if (
-              data.type === 'serverComponentChanges' ||
-              data.action === 'serverComponentChanges'
-            ) {
-              onReload()
-            }
-          }
-        }
-
-        ws.onerror = () => {
-          // swallow any websocket connection error
-        }
-
-        return () => {
-          ws.close()
-        }
-      },
-    }
-  } catch (_) {
-    return null
-  }
-}
-
 export const getPayload = async (
   options: {
     /**
-     * Custom dev reload strategy. If provided, replaces the default
-     * Next.js HMR WebSocket listener. The strategy's `connect` function
-     * receives a callback to trigger config reload.
+     * Custom dev reload strategy. If provided, takes precedence over any strategy
+     * passed to `registerDevReloadStrategy` and over the default Next.js HMR
+     * WebSocket listener. The strategy's `connect` function receives a callback to
+     * trigger config reload.
+     *
+     * Pass a stable reference: a strategy is reconnected whenever its identity
+     * changes, so a new object literal on every call reconnects on every call.
      */
     devReloadStrategy?: DevReloadStrategy
     /**
@@ -1279,6 +1312,7 @@ export const getPayload = async (
   if (!cached) {
     cached = {
       devReloadCleanup: null,
+      devReloadStrategy: null,
       initializedCrons: Boolean(options.cron),
       payload: null,
       promise: null,
@@ -1296,6 +1330,8 @@ export const getPayload = async (
   }
 
   if (cached.payload) {
+    connectDevReload({ cached, strategyFromOptions: options.devReloadStrategy })
+
     if (options.cron && !cached.initializedCrons) {
       // getPayload called with crons enabled, but existing cached version does not have crons initialized. => Initialize crons in existing cached version
       cached.initializedCrons = true
@@ -1344,27 +1380,7 @@ export const getPayload = async (
 
     cached.payload = await cached.promise
 
-    if (
-      !cached.devReloadCleanup &&
-      process.env.NODE_ENV !== 'production' &&
-      process.env.NODE_ENV !== 'test' &&
-      process.env.DISABLE_PAYLOAD_HMR !== 'true'
-    ) {
-      const strategy = options.devReloadStrategy ?? defaultNextJsDevReloadStrategy()
-
-      if (strategy) {
-        try {
-          cached.devReloadCleanup = strategy.connect(() => {
-            if (cached.reload instanceof Promise) {
-              return
-            }
-            cached.reload = true
-          })
-        } catch (_) {
-          // swallow connection errors
-        }
-      }
-    }
+    connectDevReload({ cached, strategyFromOptions: options.devReloadStrategy })
   } catch (e) {
     cached.promise = null
     // add identifier to error object, so that our error logger in routeError.ts does not attempt to re-initialize getPayload
@@ -1388,6 +1404,7 @@ interface RequestContext {
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface DatabaseAdapter extends BaseDatabaseAdapter {}
 export type { Payload, RequestContext }
+export * from './auth/index.js'
 export { jwtSign } from './auth/jwt.js'
 export { accessOperation } from './auth/operations/access.js'
 export { forgotPasswordOperation } from './auth/operations/forgotPassword.js'
@@ -1403,6 +1420,8 @@ export { registerFirstUserOperation } from './auth/operations/registerFirstUser.
 export { resetPasswordOperation } from './auth/operations/resetPassword.js'
 export { unlockOperation } from './auth/operations/unlock.js'
 export { verifyEmailOperation } from './auth/operations/verifyEmail.js'
+export { rotateSecret } from './auth/rotateSecret.js'
+export type { RotateSecretArgs, RotateSecretResult } from './auth/rotateSecret.js'
 export { JWTAuthentication } from './auth/strategies/jwt.js'
 export { incrementLoginAttempts } from './auth/strategies/local/incrementLoginAttempts.js'
 export { resetLoginAttempts } from './auth/strategies/local/resetLoginAttempts.js'
@@ -1461,6 +1480,7 @@ export type {
   BeforeValidateHook as CollectionBeforeValidateHook,
   BulkOperationResult,
   Collection,
+  CollectionAccess,
   CollectionAdminOptions,
   CollectionConfig,
   DataFromCollectionSlug,
@@ -1839,6 +1859,7 @@ export type {
   BeforeReadHook as GlobalBeforeReadHook,
   BeforeValidateHook as GlobalBeforeValidateHook,
   DataFromGlobalSlug,
+  GlobalAccess,
   GlobalAdminOptions,
   GlobalConfig,
   SanitizedGlobalConfig,

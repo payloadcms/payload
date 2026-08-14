@@ -43,5 +43,5 @@ export async function initPayloadInt<TInitializePayload extends boolean | undefi
   const restClient = new NextRESTClient(payload.config)
   console.log('initPayloadInt done')
   const sdk = getSDK(payload.config)
-  return { config: payload.config, sdk, payload, restClient } as any
+  return { config: payload.config, payload, restClient, sdk } as any
 }

@@ -5,11 +5,11 @@ import { fileURLToPath } from 'url'
 import type { PayloadTestSDK } from '../../../__helpers/shared/sdk/index.js'
 import type { Config } from '../../payload-types.js'
 
-import { ensureCompilationIsDone } from '../../../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
+import { ensureCompilationIsDone } from '../../../__setup/e2e/ensureCompilationIsDone.js'
 import { lexicalFullyFeaturedSlug } from '../../../lexical/slugs.js'
-import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
+import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { LexicalHelpers } from '../utils.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -52,7 +52,9 @@ describe('Lexical Fully Featured', () => {
     await expect(lexical.decorator).toHaveCount(2)
     await lexical.slashCommand('upload')
     await lexical.drawer.locator('.list-drawer__header').getByText('Create New').click()
-    await lexical.drawer.getByText('Paste URL').click()
+    await lexical.page.context().grantPermissions(['clipboard-read', 'clipboard-write'])
+    await lexical.page.evaluate(() => navigator.clipboard.writeText(''))
+    await lexical.drawer.locator('.file-manager__pasteFromClipboard').click()
     await lexical.page
       .locator('#upload-paste-url #field-url')
       .fill(
@@ -68,7 +70,9 @@ describe('Lexical Fully Featured', () => {
   test('ensure upload node can be aligned', async ({ page }) => {
     await lexical.slashCommand('upload')
     await lexical.drawer.locator('.list-drawer__header').getByText('Create New').click()
-    await lexical.drawer.getByText('Paste URL').click()
+    await lexical.page.context().grantPermissions(['clipboard-read', 'clipboard-write'])
+    await lexical.page.evaluate(() => navigator.clipboard.writeText(''))
+    await lexical.drawer.locator('.file-manager__pasteFromClipboard').click()
     const url =
       'https://raw.githubusercontent.com/payloadcms/website/refs/heads/main/public/images/universal-truth.jpg'
     await lexical.page.locator('#upload-paste-url #field-url').fill(url)
@@ -152,6 +156,49 @@ describe('Lexical Fully Featured', () => {
 
     const someButton = dropdownItems!.locator(`[data-item-key="bg-red"]`)
     await expect(someButton).toHaveAttribute('aria-disabled', 'false')
+  })
+
+  test('fixed toolbar stays on a single row and scrolls horizontally on narrow viewports', async ({
+    page,
+  }) => {
+    const fixedToolbar = page.locator('.fixed-toolbar').first()
+    const fixedToolbarScroll = page.locator('.fixed-toolbar__scroll').first()
+    await expect(fixedToolbar).toBeVisible()
+
+    const wideHeight = (await fixedToolbar.boundingBox())!.height
+
+    await page.setViewportSize({ height: 667, width: 375 })
+
+    await expect(async () => {
+      const box = await fixedToolbar.boundingBox()
+      expect(box!.height).toBe(wideHeight)
+
+      const { clientWidth, scrollWidth } = await fixedToolbarScroll.evaluate((el) => ({
+        clientWidth: el.clientWidth,
+        scrollWidth: el.scrollWidth,
+      }))
+      expect(scrollWidth).toBeGreaterThan(clientWidth)
+    }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+  })
+
+  test('fixed toolbar scrolls horizontally in response to vertical mouse wheel input', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ height: 667, width: 375 })
+
+    const fixedToolbarScroll = page.locator('.fixed-toolbar__scroll').first()
+    await expect(fixedToolbarScroll).toBeVisible()
+
+    const box = (await fixedToolbarScroll.boundingBox())!
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+
+    const initialScrollLeft = await fixedToolbarScroll.evaluate((el) => el.scrollLeft)
+    await page.mouse.wheel(0, 200)
+
+    await expect(async () => {
+      const scrollLeft = await fixedToolbarScroll.evaluate((el) => el.scrollLeft)
+      expect(scrollLeft).toBeGreaterThan(initialScrollLeft)
+    }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
   })
 
   test('ensure opening relationship field with appearance: "drawer" inside rich text inline block does not close drawer', async ({

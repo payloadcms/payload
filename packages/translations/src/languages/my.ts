@@ -147,6 +147,7 @@ export const myTranslations: DefaultTranslationsObject = {
     emailOrPasswordIncorrect: 'ထည့်သွင်းထားသော အီးမေးလ် သို့မဟုတ် စကားဝှက်သည် မမှန်ပါ။',
     failedToResetLayout: 'စီစဉ်မှုကို ပြန်လည်သတ်မှတ်ရန် မအောင်မြင်ပါ။',
     failedToSaveLayout: 'စီစဉ်မှုကို သိမ်းဆည်းရန် မအောင်မြင်ပါ။',
+    fileFetchFailed: 'ဖိုင်တင်ယူမှု မအောင်မြင်ပါ။',
     followingFieldsInvalid_one: 'ထည့်သွင်းထားသော အချက်အလက်သည် မမှန်ကန်ပါ။',
     followingFieldsInvalid_other: 'ထည့်သွင်းထားသော အချက်အလက်များသည် မမှန်ကန်ပါ။',
     incorrectCollection: 'မှားယွင်းသော စုစည်းမှု',
@@ -164,6 +165,7 @@ export const myTranslations: DefaultTranslationsObject = {
     missingIDOfDocument: 'ပြင်ဆင်ရန် ဖိုင် ID ပျောက်နေပါသည်။',
     missingIDOfVersion: 'ပျောက်ဆုံး ဗားရှင်း ID',
     missingRequiredData: 'လိုအပ်သောဒေတာ ပျောက်ဆုံးနေပါသည်။',
+    noFileFoundInClipboard: 'Clipboard တွင်ဖိုင်မတွေ့နိုင်ပါ။',
     noFilesUploaded: 'ဖိုင်များကို အပ်လုဒ်လုပ်ထားခြင်းမရှိပါ။',
     noMatchedField: '"{{label}}" အတွက် ကိုက်ညီသောအပိုင်းကို ရှာမတွေ့ပါ။',
     notAllowedToAccessPage: 'ဤစာမျက်နှာကို ဝင်ရောက်ခွင့်မပြုပါ။',
@@ -179,6 +181,7 @@ export const myTranslations: DefaultTranslationsObject = {
     tokenNotProvided: 'Token မပေးထားပါ။',
     unableToCopy: 'ကူးရန်မဖြစ်နိုင်ပါ။',
     unableToDeleteCount: '{{total}} {{label}} မှ {{count}} ကို ဖျက်၍မရပါ။',
+    unableToReadClipboard: 'ကလစ်ဘုတ်မှ ဖတ်၍ မရနိုင်ပါ။',
     unableToReindexCollection:
       '{{collection}} စုစည်းမှုကို ပြန်လည်အညွှန်းပြုလုပ်ခြင်း အမှားရှိနေသည်။ လုပ်ဆောင်မှုကို ဖျက်သိမ်းခဲ့သည်။',
     unableToUpdateCount: '{{total}} {{label}} မှ {{count}} ကို အပ်ဒိတ်လုပ်၍မရပါ။',
@@ -188,6 +191,7 @@ export const myTranslations: DefaultTranslationsObject = {
     unPublishingDocument: 'ဖိုင်ကို ပြန်လည့် သိမ်းဆည်းခြင်းမှာ ပြဿနာရှိနေသည်။',
     unspecific: 'Error တက်နေပါသည်။',
     unverifiedEmail: 'ထည့်သွင်းမည်မဆိုမီ သင့်အီးမေးလ်ကို အတည်ပြုပါ။',
+    urlNotAllowed: 'ပေးထားသော URL သည် ခွင့်ပြုထားခြင်း မရှိပါ။',
     userEmailAlreadyRegistered: 'ပေးထားသော အီးမေးလ်ဖြင့် အသုံးပြုသူ တစ်ဦး ရှိပြီးဖြစ်သည်။',
     userLocked:
       'အကောင့်ထဲကို ဝင်ရန် အရမ်းအရမ်းကို ကြိုးပမ်းနေသောကြောင့် အကောင့်အား လော့ခ်ချလိုက်ပါသည်။',
@@ -439,6 +443,7 @@ export const myTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'ရှိပြီးသား အကွက်ဒေတာကို အစားထိုးပါ',
     pageNotFound: 'ရောက်ရှိနေသော စာမျက်နှာသည် မရှိပါ။',
     password: 'စကားဝှက်',
+    pasteBelow: 'အောက်တွင်ထည့်ပါ',
     pasteField: 'ကွက်လပ်ကိုတင်ပါ',
     pasteRow: 'တန်းကိုတင်ပါ',
     payloadSettings: 'ရွေးချယ်စရာများ',
@@ -454,6 +459,7 @@ export const myTranslations: DefaultTranslationsObject = {
     reloadDocument: 'စာရွက်စာတမ်း ပြန်လည်ဖွင့်ပါ',
     remove: 'ဖယ်ရှားမည်။',
     rename: 'အမည်ပြောင်း',
+    replaceRow: 'တန်းစီအစားထိုးရန်',
     reset: 'ပြန်လည်သတ်မှတ်ပါ',
     resetPreferences: 'ကြိုတင်သတ်မှတ်ချက်များ ပြန်လည်တပ်ဆင်မည်',
     resetPreferencesDescription:
@@ -485,6 +491,8 @@ export const myTranslations: DefaultTranslationsObject = {
     sorryNotFound: 'ဝမ်းနည်းပါသည်။ သင်ရှာနေတဲ့ဟာ ဒီမှာမရှိပါ။',
     sort: 'အစဉ်လိုက်',
     sortByLabelDirection: 'အစဉ်အလိုက် စီမံခန့်ခွဲထားသည် {{label}} {{direction}}',
+    sortByOrderToReorder:
+      'အတန်းတန်းများကို ပြန်စီရန်အတွက် မူရင်းအားဖြင့် "Order" column ကို အရင်ဆုံး စီတန်းရပါမည်။',
     stayOnThisPage: 'ဒီမှာပဲ ဆက်နေမည်။',
     submissionSuccessful: 'သိမ်းဆည်းမှု အောင်မြင်ပါသည်။',
     submit: 'သိမ်းဆည်းမည်။',
@@ -576,6 +584,7 @@ export const myTranslations: DefaultTranslationsObject = {
     addFile: 'ဖိုင်ထည့်ပါ',
     addFiles: 'ဖိုင်များ ထည့်ပါ',
     bulkUpload: 'အစုလိုက် အပ်လုဒ်',
+    copyLinkToFile: 'ဖိုင်အတွက်လင့်ခ်ကို ကူးယူပါ',
     crop: 'သုန်း',
     cropToolDescription:
       'ရွေးထားသည့်ဧရိယာတွင်မွေးလျှက်မှုများကိုဆွဲပြီး, အသစ်တည်ပြီးသို့မဟုတ်အောက်ပါတ',
@@ -596,6 +605,7 @@ export const myTranslations: DefaultTranslationsObject = {
     linkToFile: 'ဖိုင်သို့ ချိတ်ဆက်မှု',
     moreInfo: 'အချက်အလက်',
     noFile: 'ဖိုင် မရှိပါ',
+    pasteFromClipboard: 'ကလစ်ဘုတ်မှ ကူးထည့်ပါ',
     pasteURL: 'URL ကို ကူးထည့်ပါ',
     previewSizes: 'အစမ်းကြည့်အရွယ်အစားများ',
     renameFile: 'ဖိုင်အမည်ပြောင်းရန်',

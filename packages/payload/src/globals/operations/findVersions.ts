@@ -7,6 +7,7 @@ import type { SanitizedGlobalConfig } from '../config/types.js'
 import { executeAccess } from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
+import { validateSortQuery } from '../../database/queryValidation/validateSortQuery.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
@@ -55,7 +56,7 @@ export const findVersionsOperation = async <T extends TypeWithVersion<T>>(
     // /////////////////////////////////////
 
     const accessResults = !overrideAccess
-      ? await executeAccess({ req }, globalConfig.access.readVersions)
+      ? await executeAccess({ slug: globalConfig.slug, req }, globalConfig.access.readVersions)
       : true
 
     await validateQueryPaths({
@@ -64,6 +65,14 @@ export const findVersionsOperation = async <T extends TypeWithVersion<T>>(
       req,
       versionFields,
       where: where!,
+    })
+
+    await validateSortQuery({
+      globalConfig,
+      overrideAccess: overrideAccess!,
+      req,
+      sort,
+      versionFields,
     })
 
     const fullWhere = combineQueries(where!, accessResults)

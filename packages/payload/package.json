@@ -88,7 +88,8 @@
   },
   "files": [
     "dist",
-    "bin.js"
+    "bin.js",
+    "skills"
   ],
   "scripts": {
     "build": "rimraf .dist && rimraf tsconfig.tsbuildinfo && pnpm copyfiles && pnpm build:types && pnpm build:swc && pnpm bundle:types && echo skipping esbuild",
@@ -105,7 +106,7 @@
     "pretest": "pnpm build"
   },
   "dependencies": {
-    "@next/env": "16.2.7",
+    "@next/env": "16.3.0",
     "@payloadcms/translations": "workspace:*",
     "@types/busboy": "1.5.4",
     "ajv": "8.20.0",
@@ -121,7 +122,7 @@
     "file-type": "22.0.1",
     "get-tsconfig": "4.14.0",
     "http-status": "2.1.0",
-    "image-size": "2.0.2",
+    "image-dimensions": "2.5.1",
     "ipaddr.js": "2.3.0",
     "jose": "6.2.3",
     "json-schema-to-typescript": "15.0.3",
