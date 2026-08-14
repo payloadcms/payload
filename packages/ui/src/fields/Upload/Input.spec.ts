@@ -63,20 +63,34 @@ afterEach(() => {
 })
 
 describe('UploadInput populateDocs race', () => {
-  it('does not let a stale populateDocs() result overwrite a newer value', async () => {
+  it('aborts an in-flight populateDocs() request when value changes', async () => {
     let oldRequest: ReturnType<typeof createDeferred<Response>> | undefined
     let newRequest: ReturnType<typeof createDeferred<Response>> | undefined
 
     const fetchMock = fetch as unknown as ReturnType<typeof vi.fn>
-    fetchMock.mockImplementation((_url: string, options: { body: string }) => {
-      const deferred = createDeferred<Response>()
-      if (options.body.includes('old-id')) {
-        oldRequest = deferred
-      } else {
-        newRequest = deferred
-      }
-      return deferred.promise
-    })
+    fetchMock.mockImplementation(
+      (_url: string, options: { body: string; signal?: AbortSignal }) => {
+        const deferred = createDeferred<Response>()
+
+        if (options.signal) {
+          if (options.signal.aborted) {
+            return Promise.reject(new DOMException('The operation was aborted.', 'AbortError'))
+          }
+
+          options.signal.addEventListener('abort', () => {
+            deferred.reject(new DOMException('The operation was aborted.', 'AbortError'))
+          })
+        }
+
+        if (options.body.includes('old-id')) {
+          oldRequest = deferred
+        } else {
+          newRequest = deferred
+        }
+
+        return deferred.promise
+      },
+    )
 
     const { container, rerender } = renderUploadInput({ value: ['old-id'] })
 
@@ -92,18 +106,11 @@ describe('UploadInput populateDocs race', () => {
       await Promise.resolve()
     })
     expect(newRequest).toBeDefined()
+    await expect(oldRequest!.promise).rejects.toMatchObject({ name: 'AbortError' })
 
-    // The newer request resolves first and is applied.
+    // The newer request resolves and is applied.
     await act(async () => {
       newRequest!.resolve(jsonResponse([{ id: 'new-id', filename: 'new.jpg' }]))
-      await Promise.resolve()
-      await Promise.resolve()
-    })
-    expect(container.querySelector('[data-testid="has-many"]')?.textContent).toContain('new-id')
-
-    // The stale (older) request resolves after — it must not overwrite the newer state.
-    await act(async () => {
-      oldRequest!.resolve(jsonResponse([{ id: 'old-id', filename: 'old.jpg' }]))
       await Promise.resolve()
       await Promise.resolve()
     })
@@ -116,15 +123,29 @@ describe('UploadInput populateDocs race', () => {
     let newRequest: ReturnType<typeof createDeferred<Response>> | undefined
 
     const fetchMock = fetch as unknown as ReturnType<typeof vi.fn>
-    fetchMock.mockImplementation((_url: string, options: { body: string }) => {
-      const deferred = createDeferred<Response>()
-      if (options.body.includes('old-id')) {
-        oldRequest = deferred
-      } else {
-        newRequest = deferred
-      }
-      return deferred.promise
-    })
+    fetchMock.mockImplementation(
+      (_url: string, options: { body: string; signal?: AbortSignal }) => {
+        const deferred = createDeferred<Response>()
+
+        if (options.signal) {
+          if (options.signal.aborted) {
+            return Promise.reject(new DOMException('The operation was aborted.', 'AbortError'))
+          }
+
+          options.signal.addEventListener('abort', () => {
+            deferred.reject(new DOMException('The operation was aborted.', 'AbortError'))
+          })
+        }
+
+        if (options.body.includes('old-id')) {
+          oldRequest = deferred
+        } else {
+          newRequest = deferred
+        }
+
+        return deferred.promise
+      },
+    )
 
     const { container, rerender } = renderUploadInput({ value: ['old-id'] })
 
@@ -198,16 +219,19 @@ function jsonResponse(docs: unknown[]): Response {
 
 function createDeferred<Value>(): {
   promise: Promise<Value>
+  reject: (reason?: unknown) => void
   resolve: (value: Value | PromiseLike<Value>) => void
 } {
   let resolve: ((value: Value | PromiseLike<Value>) => void) | undefined
-  const promise = new Promise<Value>((resolvePromise) => {
+  let reject: ((reason?: unknown) => void) | undefined
+  const promise = new Promise<Value>((resolvePromise, rejectPromise) => {
     resolve = resolvePromise
+    reject = rejectPromise
   })
 
-  if (!resolve) {
+  if (!resolve || !reject) {
     throw new Error('Expected deferred promise resolver.')
   }
 
-  return { promise, resolve }
+  return { promise, reject, resolve }
 }

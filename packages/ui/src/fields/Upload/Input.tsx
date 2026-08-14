@@ -34,6 +34,7 @@ import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { abortAndIgnore } from '../../utilities/abortAndIgnore.js'
 import { normalizeRelationshipValue } from '../../utilities/normalizeRelationshipValue.js'
 import { fieldBaseClass } from '../shared/index.js'
 import { UploadComponentHasMany } from './HasMany/index.js'
@@ -209,20 +210,6 @@ export function UploadInput(props: UploadInputProps) {
     collectionSlug: activeRelationTo,
   })
 
-  /**
-   * Track the last loaded value to prevent unnecessary reloads
-   */
-  const loadedValueRef = React.useRef<
-    (number | string)[] | null | number | string | ValueWithRelation | ValueWithRelation[]
-  >(null)
-
-  /**
-   * Always holds the latest `value`. Used to detect when an in-flight
-   * populateDocs() call has been superseded by a newer value before it resolves.
-   */
-  const latestValueRef = React.useRef(value)
-  latestValueRef.current = value
-
   const canCreate = useMemo(() => {
     if (!allowCreate) {
       return false
@@ -247,7 +234,12 @@ export function UploadInput(props: UploadInputProps) {
   )
 
   const populateDocs = React.useCallback(
-    async (items: ValueWithRelation[]): Promise<ValueAsDataWithRelation[]> => {
+    async (
+      items: ValueWithRelation[],
+      options?: {
+        signal?: AbortSignal
+      },
+    ): Promise<ValueAsDataWithRelation[]> => {
       if (!items?.length) {
         return []
       }
@@ -299,6 +291,7 @@ export function UploadInput(props: UploadInputProps) {
               'X-Payload-HTTP-Method-Override': 'GET',
             },
             method: 'POST',
+            signal: options?.signal,
           },
         )
         let docs: any[] = []
@@ -566,6 +559,8 @@ export function UploadInput(props: UploadInputProps) {
   )
 
   useEffect(() => {
+    const abortController = new AbortController()
+
     async function loadInitialDocs() {
       if (value) {
         let itemsToLoad: ValueWithRelation[] = []
@@ -622,25 +617,28 @@ export function UploadInput(props: UploadInputProps) {
         }
 
         if (itemsToLoad.length > 0) {
-          const loadedDocs = await populateDocs(itemsToLoad)
+          try {
+            const loadedDocs = await populateDocs(itemsToLoad, {
+              signal: abortController.signal,
+            })
 
-          // Skip applying this result if a newer value has superseded it while this request was in flight
-          if (loadedDocs && latestValueRef.current === value) {
-            setPopulatedDocs(loadedDocs)
-            loadedValueRef.current = value
+            if (loadedDocs && !abortController.signal.aborted) {
+              setPopulatedDocs(loadedDocs)
+            }
+          } catch (_err) {
+            // Ignore aborted requests from superseded values / unmount
           }
         }
       } else {
         // Clear populated docs when value is cleared
         setPopulatedDocs([])
-        loadedValueRef.current = null
       }
     }
 
-    // Only load if value has changed from what we last loaded
-    const valueChanged = loadedValueRef.current !== value
-    if (valueChanged) {
-      void loadInitialDocs()
+    void loadInitialDocs()
+
+    return () => {
+      abortAndIgnore(abortController)
     }
   }, [populateDocs, value, relationTo])
 
