@@ -6,11 +6,9 @@ Finish PR #17512 so JSON exports containing dangling `hasMany` relationships can
 
 ## Export and import behavior
 
-JSON export will continue preserving unresolved `hasMany` entries as `null`. This retains the source array positions and matches the index-pinning behavior already used by CSV exports.
+JSON export will remove unresolved entries while building `hasMany` relationship arrays. This applies to monomorphic arrays of IDs and polymorphic arrays of `{ relationTo, value }` pairs. A field-level `null` remains valid for a dangling single relationship.
 
-Before JSON relationship data reaches Payload validation, the import field hook will remove bare `null` entries from every `hasMany` relationship or upload array. Both monomorphic arrays of IDs and polymorphic arrays of `{ relationTo, value }` pairs use this normalization. Single relationships remain unchanged: a dangling single relationship may still be represented by a field-level `null`, which Payload already accepts.
-
-This division keeps export fidelity without asking Payload to persist a relationship to a deleted document. CSV import continues using its existing unflattening behavior.
+The importer remains unchanged. Bare `null` entries inside relationship arrays fail Payload validation, so the exporter must not emit them. CSV export continues pinning surviving values to their source column indexes; the existing unflattening behavior absorbs those gaps and produces the same compact array on import.
 
 ## Import preview behavior
 
@@ -34,8 +32,6 @@ The relationship roundtrip suite will track every page title, post ID, import ID
 
 Tests will be added before implementation and observed failing for the expected reasons. Coverage will include:
 
-- unit tests showing JSON import hooks remove bare `null` entries from monomorphic and polymorphic `hasMany` relationships;
-- an integration roundtrip containing a deleted relationship target;
+- unit tests showing JSON export drops unresolved monomorphic and polymorphic `hasMany` entries;
 - preview tests proving grouping remains available for JSON polymorphic values while other preview paths retain their prior behavior;
 - the existing plugin unit tests, integration suite, lint, and package type build.
-
