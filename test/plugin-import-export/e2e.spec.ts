@@ -146,6 +146,7 @@ test.describe('Import Export Plugin', () => {
 
       // Open export from list menu
       const listMenuButton = page.locator('#list-menu')
+
       await expect(listMenuButton).toBeVisible()
       await listMenuButton.click()
 
@@ -1907,14 +1908,12 @@ test.describe('Import Export Plugin', () => {
 
     test.afterAll(async () => {
       for (const filePath of tempFiles) {
-        if (fs.existsSync(filePath)) {
-          fs.unlinkSync(filePath)
-        }
+        fs.rmSync(filePath, { force: true })
       }
       tempFiles.length = 0
 
       for (const id of createdPostIDs) {
-        await payload.delete({ id, collection: postsWithHooksSlug }).catch(() => null)
+        await payload.delete({ id, collection: postsWithHooksSlug })
       }
       createdPostIDs.length = 0
     })
@@ -1963,6 +1962,7 @@ test.describe('Import Export Plugin', () => {
       await expect(page.locator('.collection-list')).toBeVisible()
 
       const listMenuButton = page.locator('#list-menu')
+
       await expect(listMenuButton).toBeVisible()
       await listMenuButton.click()
 

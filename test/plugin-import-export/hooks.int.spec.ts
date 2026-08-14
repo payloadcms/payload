@@ -2,7 +2,7 @@ import type { AuthenticatedUser, Payload, Where } from 'payload'
 
 import path from 'path'
 import { fileURLToPath } from 'url'
-import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
@@ -851,29 +851,48 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
     const createdJobsPostIDs: (number | string)[] = []
     const createdImportExportDocs: { collection: string; id: number | string }[] = []
 
+    const findJobIDs = async () => {
+      const { docs } = await payload.find({
+        collection: 'payload-jobs',
+        limit: 0,
+        pagination: false,
+      })
+
+      return docs.map((doc) => doc.id)
+    }
+
+    /**
+     * The job records present before a test ran. Only the ones a test adds on top of these get
+     * deleted, so cleanup never reaches beyond what the test created.
+     */
+    let preexistingJobIDs = new Set<number | string>()
+
+    beforeEach(async () => {
+      preexistingJobIDs = new Set(await findJobIDs())
+    })
+
     /**
      * Deleting an import or export document removes the file it owns, so the uploaded CSVs and
-     * the generated export files need no separate cleanup.
+     * the generated export files need no separate cleanup. Failures are not caught — a delete
+     * that does not succeed means the test tracked the wrong thing, which is worth failing on.
      */
     afterEach(async () => {
       for (const { id, collection } of createdImportExportDocs) {
-        await payload
-          .delete({ id, collection })
-          .catch((err) => payload.logger.warn({ id, err, msg: 'import/export doc cleanup failed' }))
+        await payload.delete({ id, collection })
       }
       createdImportExportDocs.length = 0
 
       for (const id of createdJobsPostIDs) {
-        await payload
-          .delete({ id, collection: postsWithHooksJobsSlug })
-          .catch((err) => payload.logger.warn({ id, err, msg: 'jobs hooks cleanup failed' }))
+        await payload.delete({ id, collection: postsWithHooksJobsSlug })
       }
       createdJobsPostIDs.length = 0
 
       // The queued paths leave a completed job record behind
-      await payload
-        .delete({ collection: 'payload-jobs', where: { id: { exists: true } } })
-        .catch((err) => payload.logger.warn({ err, msg: 'jobs queue cleanup failed' }))
+      const jobIDsToDelete = (await findJobIDs()).filter((id) => !preexistingJobIDs.has(id))
+
+      for (const id of jobIDsToDelete) {
+        await payload.delete({ id, collection: 'payload-jobs' })
+      }
     })
 
     const buildCSVFile = ({ name, rows }: { name: string; rows: string[] }) => {
@@ -936,6 +955,57 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
       createdImportExportDocs.push({ id: doc.id, collection: exportCollection })
 
       return doc
+    }
+
+    /** Creates a post to export and tracks it for the shared afterEach. */
+    const createTargetPost = async ({
+      collection,
+      data,
+    }: {
+      collection: string
+      data: Record<string, unknown>
+    }) => {
+      const post = await payload.create({ collection, data })
+
+      const trackedIDs =
+        collection === postsWithHooksJobsSlug ? createdJobsPostIDs : createdHookPostIDs
+
+      trackedIDs.push(post.id)
+
+      return post
+    }
+
+    /**
+     * Posts to the download endpoint and drains the stream, so the hooks have fired by the time
+     * it returns.
+     */
+    const requestDownload = async ({
+      id,
+      batchRef,
+      postID,
+    }: {
+      batchRef: string
+      /** Set only to check that a submitted id cannot pass for a saved document. */
+      id?: string
+      postID: number | string
+    }) => {
+      const response = await restClient.POST(`/${postsWithHooksExportSlug}/download`, {
+        body: JSON.stringify({
+          data: {
+            ...(id ? { id } : {}),
+            [batchRefFieldName]: batchRef,
+            collectionSlug: postsWithHooksSlug,
+            format: 'csv',
+            where: { id: { equals: postID } },
+          },
+        }),
+        headers: { 'Content-Type': 'application/json' },
+      })
+
+      expect(response.status).toBe(200)
+      await response.text()
+
+      return response
     }
 
     /** Track the posts an import created so the shared afterEach can remove them. */
@@ -1089,12 +1159,10 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
 
     describe('export', () => {
       it('should pass exportDoc with an id to the before hook when run through the jobs queue', async () => {
-        const post = await payload.create({
+        const post = await createTargetPost({
           collection: postsWithHooksJobsSlug,
           data: { count: 1, title: 'Jobs ExportDoc' },
         })
-
-        createdJobsPostIDs.push(post.id)
 
         const exportDoc = await createExportDoc({
           batchRef: 'JOBS-EXPORT-REF',
@@ -1114,12 +1182,10 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
       })
 
       it('should pass exportDoc to the after hook when run through the jobs queue', async () => {
-        const post = await payload.create({
+        const post = await createTargetPost({
           collection: postsWithHooksJobsSlug,
           data: { count: 2, title: 'Jobs ExportDoc After' },
         })
-
-        createdJobsPostIDs.push(post.id)
 
         const exportDoc = await createExportDoc({
           batchRef: 'JOBS-EXPORT-AFTER-REF',
@@ -1139,12 +1205,10 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
       })
 
       it('should pass exportDoc carrying the submitted form values, without an id, to the before hook on the synchronous path', async () => {
-        const post = await payload.create({
+        const post = await createTargetPost({
           collection: postsWithHooksSlug,
           data: { count: 3, secret: 'sync-secret', title: 'Sync ExportDoc' },
         })
-
-        createdHookPostIDs.push(post.id)
 
         await createExportDoc({
           batchRef: 'SYNC-EXPORT-REF',
@@ -1163,12 +1227,10 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
       })
 
       it('should pass exportDoc carrying the submitted form values, without an id, to the after hook on the synchronous path', async () => {
-        const post = await payload.create({
+        const post = await createTargetPost({
           collection: postsWithHooksSlug,
           data: { count: 4, secret: 'sync-after-secret', title: 'Sync ExportDoc After' },
         })
-
-        createdHookPostIDs.push(post.id)
 
         await createExportDoc({
           batchRef: 'SYNC-EXPORT-AFTER-REF',
@@ -1189,12 +1251,10 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
         const titles = ['Batched Export One', 'Batched Export Two', 'Batched Export Three']
 
         for (const title of titles) {
-          const post = await payload.create({
+          await createTargetPost({
             collection: postsWithHooksSlug,
             data: { count: 1, secret: 'batched-secret', title },
           })
-
-          createdHookPostIDs.push(post.id)
         }
 
         await createExportDoc({
@@ -1213,12 +1273,10 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
       })
 
       it('should let the before hook apply an exportDoc value to the rows it writes', async () => {
-        const post = await payload.create({
+        const post = await createTargetPost({
           collection: postsWithHooksSlug,
           data: { count: 5, secret: 'applied-secret', title: 'Applied ExportDoc' },
         })
-
-        createdHookPostIDs.push(post.id)
 
         const exportDoc = await createExportDoc({
           batchRef: 'APPLIED-EXPORT-REF',
@@ -1238,66 +1296,50 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
         expect(rows[0]![batchRefFieldName]).toBe('APPLIED-EXPORT-REF')
       })
 
-      it('should pass exportDoc carrying the submitted form values, without an id, on the download path', async () => {
-        const post = await payload.create({
+      it('should pass exportDoc carrying the submitted form values, without an id, to the before hook on the download path', async () => {
+        const post = await createTargetPost({
           collection: postsWithHooksSlug,
           data: { count: 6, secret: 'download-secret', title: 'Download ExportDoc' },
         })
 
-        createdHookPostIDs.push(post.id)
-
-        const response = await restClient.POST(`/${postsWithHooksExportSlug}/download`, {
-          body: JSON.stringify({
-            data: {
-              [batchRefFieldName]: 'DOWNLOAD-REF',
-              collectionSlug: postsWithHooksSlug,
-              format: 'csv',
-              where: { id: { equals: post.id } },
-            },
-          }),
-          headers: { 'Content-Type': 'application/json' },
-        })
-
-        expect(response.status).toBe(200)
-        // Consume the stream so the hooks have fired before asserting
-        await response.text()
+        await requestDownload({ batchRef: 'DOWNLOAD-REF', postID: post.id })
 
         expect(hookCalls.exportBefore).toHaveLength(1)
-        expect(hookCalls.exportAfter).toHaveLength(1)
 
         const beforeArgs = hookCalls.exportBefore[0]!
-        const afterArgs = hookCalls.exportAfter[0]!
 
         expect(beforeArgs.exportDoc[batchRefFieldName]).toBe('DOWNLOAD-REF')
-        expect(afterArgs.exportDoc[batchRefFieldName]).toBe('DOWNLOAD-REF')
         // Nothing is ever persisted on the download path
         expect(beforeArgs.exportDoc.id).toBeUndefined()
+      })
+
+      it('should pass exportDoc carrying the submitted form values, without an id, to the after hook on the download path', async () => {
+        const post = await createTargetPost({
+          collection: postsWithHooksSlug,
+          data: { count: 6, secret: 'download-after-secret', title: 'Download ExportDoc After' },
+        })
+
+        await requestDownload({ batchRef: 'DOWNLOAD-AFTER-REF', postID: post.id })
+
+        expect(hookCalls.exportAfter).toHaveLength(1)
+
+        const afterArgs = hookCalls.exportAfter[0]!
+
+        expect(afterArgs.exportDoc[batchRefFieldName]).toBe('DOWNLOAD-AFTER-REF')
         expect(afterArgs.exportDoc.id).toBeUndefined()
       })
 
       it('should not let a submitted id make the download path look like a saved document', async () => {
-        const post = await payload.create({
+        const post = await createTargetPost({
           collection: postsWithHooksSlug,
           data: { count: 7, secret: 'spoofed-secret', title: 'Spoofed ExportDoc' },
         })
 
-        createdHookPostIDs.push(post.id)
-
-        const response = await restClient.POST(`/${postsWithHooksExportSlug}/download`, {
-          body: JSON.stringify({
-            data: {
-              id: 'not-a-real-export-id',
-              [batchRefFieldName]: 'SPOOFED-REF',
-              collectionSlug: postsWithHooksSlug,
-              format: 'csv',
-              where: { id: { equals: post.id } },
-            },
-          }),
-          headers: { 'Content-Type': 'application/json' },
+        await requestDownload({
+          id: 'not-a-real-export-id',
+          batchRef: 'SPOOFED-REF',
+          postID: post.id,
         })
-
-        expect(response.status).toBe(200)
-        await response.text()
 
         expect(hookCalls.exportBefore).toHaveLength(1)
         expect(hookCalls.exportBefore[0]!.exportDoc.id).toBeUndefined()

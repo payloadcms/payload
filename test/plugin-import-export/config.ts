@@ -55,10 +55,11 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 /**
- * Renames an import/export collection and adds a `batchRef` field to it, standing in for a
- * field a project adds via `overrideCollection` and an editor fills in on the form.
+ * Applies the three overrides every hook-test import/export collection needs: a distinct slug,
+ * uploads pointed at this suite's directory, and a `batchRef` field standing in for a field a
+ * project adds via `overrideCollection` and an editor fills in on the form.
  */
-const withBatchRefField = ({
+const withTestCollectionOverrides = ({
   slug,
   collection,
 }: {
@@ -294,7 +295,7 @@ export default buildConfigWithDefaults({
               before: exportBeforeHook,
             },
             overrideCollection: ({ collection }) =>
-              withBatchRefField({ slug: postsWithHooksExportSlug, collection }),
+              withTestCollectionOverrides({ slug: postsWithHooksExportSlug, collection }),
           },
           import: {
             batchSize: 2,
@@ -304,7 +305,7 @@ export default buildConfigWithDefaults({
               before: importBeforeHook,
             },
             overrideCollection: ({ collection }) =>
-              withBatchRefField({ slug: postsWithHooksImportSlug, collection }),
+              withTestCollectionOverrides({ slug: postsWithHooksImportSlug, collection }),
           },
           versions: false,
         },
@@ -319,7 +320,7 @@ export default buildConfigWithDefaults({
               before: exportBeforeHook,
             },
             overrideCollection: ({ collection }) =>
-              withBatchRefField({ slug: postsWithHooksJobsExportSlug, collection }),
+              withTestCollectionOverrides({ slug: postsWithHooksJobsExportSlug, collection }),
           },
           import: {
             batchSize: 2,
@@ -328,7 +329,7 @@ export default buildConfigWithDefaults({
               before: importBeforeHook,
             },
             overrideCollection: ({ collection }) =>
-              withBatchRefField({ slug: postsWithHooksJobsImportSlug, collection }),
+              withTestCollectionOverrides({ slug: postsWithHooksJobsImportSlug, collection }),
           },
           versions: false,
         },

@@ -1,10 +1,10 @@
 /**
- * Keys the server owns rather than the editor. The paths that have no saved document hand
+ * Form keys the server assigns rather than the editor. The paths that have no saved document hand
  * their request body to the collection-level hooks as `exportDoc`/`importDoc`, where an `id`
  * means "this document is saved". Dropping these keys on both sides of the request keeps that
  * rule true even when a caller puts them on the body by hand.
  */
-const generatedKeys = new Set(['createdAt', 'id', 'updatedAt'])
+const serverOwnedFormKeys = new Set(['createdAt', 'id', 'updatedAt'])
 
 /**
  * Returns the editor-authored values of an import/export form.
@@ -21,7 +21,7 @@ export const getSubmittedFormValues = ({
   formData: Record<string, unknown>
   omit?: string[]
 }): Record<string, unknown> => {
-  const omitKeys = new Set([...generatedKeys, ...omit])
+  const omitKeys = new Set([...omit, ...serverOwnedFormKeys])
 
   return Object.fromEntries(Object.entries(formData).filter(([key]) => !omitKeys.has(key)))
 }
@@ -40,7 +40,7 @@ export const getFormStateSignature = ({
   fields: Record<string, { value?: unknown } | undefined>
   omit?: string[]
 }): string => {
-  const omitKeys = new Set([...generatedKeys, ...omit])
+  const omitKeys = new Set([...omit, ...serverOwnedFormKeys])
 
   return JSON.stringify(
     Object.entries(fields)
