@@ -11,11 +11,17 @@ import { parseFlags } from './cli.parseFlags.js'
 import { transforms as registry } from './registry.js'
 import { runTransforms } from './runner.js'
 import { runUpgrade } from './upgrade/index.js'
+import { renderUpgradePrompt } from './upgrade/prompt.js'
 import { loadPackageJsons, serializePackageJson } from './utils/packageJson.js'
 import { loadProject } from './utils/project.js'
 
 export async function main(argv: string[] = process.argv.slice(2)): Promise<void> {
   const flags = parseFlags(argv)
+
+  if (flags.command === 'upgrade' && flags.emitPrompt) {
+    console.log(renderUpgradePrompt({ path: flags.path, tag: flags.tag }))
+    return
+  }
 
   if (flags.command === 'upgrade') {
     const { failed } = await runUpgrade({
