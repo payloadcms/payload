@@ -55,19 +55,37 @@ export const resendAdapter = (args: ResendAdapterArgs): ResendAdapter => {
         method: 'POST',
       })
 
-      const data = (await res.json()) as ResendResponse
+      // Read the body as text first so a non-JSON response (e.g. an edge/CDN
+      // "Origin is disallowed" page, an empty body, or an HTML error page) does
+      // not surface as an opaque JSON parse error and hide the real failure.
+      const rawBody = await res.text()
 
-      if ('id' in data) {
-        return data
-      } else {
-        const statusCode = data.statusCode || res.status
-        let formattedError = `Error sending email: ${statusCode}`
-        if (data.name && data.message) {
-          formattedError += ` ${data.name} - ${data.message}`
+      let data: ResendResponse | undefined
+      if (rawBody) {
+        try {
+          data = JSON.parse(rawBody) as ResendResponse
+        } catch {
+          // Body was not JSON — fall through to the error handling below.
         }
-
-        throw new APIError(formattedError, statusCode)
       }
+
+      if (res.ok && data && 'id' in data) {
+        return data
+      }
+
+      const errorData = data && 'statusCode' in data ? data : undefined
+      const statusCode = errorData?.statusCode || res.status || 500
+      let formattedError = 'Error sending email'
+
+      if (errorData?.name && errorData?.message) {
+        formattedError += `: ${errorData.name} - ${errorData.message}`
+      } else if (rawBody) {
+        // No structured error shape — include the raw body so the underlying
+        // reason (e.g. "Origin is disallowed") reaches the caller.
+        formattedError += ` - ${rawBody}`
+      }
+
+      throw new APIError(formattedError, statusCode)
     },
   })
 
