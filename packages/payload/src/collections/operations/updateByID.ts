@@ -119,7 +119,10 @@ export const updateByIDOperation = async <
     // /////////////////////////////////////
 
     const accessResults = !overrideAccess
-      ? await executeAccess({ id, data, req }, collectionConfig.access.update)
+      ? await executeAccess(
+          { id, slug: collectionConfig.slug, data, req },
+          collectionConfig.access.update,
+        )
       : true
     const hasWherePolicy = hasWhereAccessResult(accessResults)
 
@@ -141,7 +144,7 @@ export const updateByIDOperation = async <
     if (isTrashAttempt && !overrideAccess) {
       // Pass data so access function can check data.deletedAt to know it's a trash attempt
       const deleteAccessResult = await executeAccess(
-        { id, data, req },
+        { id, slug: collectionConfig.slug, data, req },
         collectionConfig.access.delete,
       )
       fullWhere = combineQueries(fullWhere, deleteAccessResult)

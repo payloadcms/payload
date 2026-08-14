@@ -70,7 +70,7 @@ export const createVersion: CreateVersion = async function createVersion(
     timestamps: false,
   }
 
-  let [doc] = await Model.create([data], options, req)
+  let [doc] = await Model.create([data], options)
 
   // No branch scoping needed here: a branch version's `parent` is the shadow
   // row's own primary key, so main's chain and the branch's chain are already

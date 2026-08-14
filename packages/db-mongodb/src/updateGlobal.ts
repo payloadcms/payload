@@ -57,7 +57,9 @@ export const updateGlobal: UpdateGlobal = async function updateGlobal(
       ).lean()
       const { _id, __v, ...mainData } = (mainDoc ?? {}) as Record<string, unknown>
 
-      await Model.create([{ ...mainData, ...data, _branch: writeBranch }], baseOptions, req)
+      // Two arguments, as every other create in this adapter does since Mongoose 9 — the
+      // session travels in the options, and a third argument selects a different overload.
+      await Model.create([{ ...mainData, ...data, _branch: writeBranch }] as never, baseOptions)
       await recordBranchGlobalChange({ branch: writeBranch, globalSlug, req })
 
       if (returning === false) {

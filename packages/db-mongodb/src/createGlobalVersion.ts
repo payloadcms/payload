@@ -56,7 +56,7 @@ export const createGlobalVersion: CreateGlobalVersion = async function createGlo
     timestamps: false,
   }
 
-  let [doc] = await Model.create([data], options, req)
+  let [doc] = await Model.create([data], options)
 
   // Scoped by `_branch`. Unlike collection versions, global versions have no
   // `parent` to separate streams by — every version of a global shares one — so

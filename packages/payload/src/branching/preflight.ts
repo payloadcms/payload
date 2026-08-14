@@ -101,7 +101,10 @@ export const runMergePreflight = async ({
 
     // Denials are collected and reported per document rather than thrown, so a
     // single unpermitted change does not abort the whole merge.
-    const result = await executeAccess({ data, disableErrors: true, req }, accessFn)
+    const result = await executeAccess(
+      { slug: collectionSlug, data, disableErrors: true, req },
+      accessFn,
+    )
 
     if (result === true) {
       continue
@@ -191,7 +194,7 @@ export const runGlobalMergePreflight = async ({
       continue
     }
 
-    const result = await access({ data: undefined, req })
+    const result = await access({ slug: globalSlug, data: undefined, req })
 
     if (result === false) {
       const label = typeof globalConfig.label === 'string' ? globalConfig.label : globalConfig.slug

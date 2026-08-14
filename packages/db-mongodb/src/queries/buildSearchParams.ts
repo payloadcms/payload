@@ -1,4 +1,4 @@
-import type { FilterQuery } from 'mongoose'
+import type { QueryFilter } from 'mongoose'
 import type { FlattenedField, Operator, PathToQuery, Payload } from 'payload'
 
 import { Types } from 'mongoose'
@@ -241,7 +241,7 @@ export async function buildSearchParam({
           continue
         }
 
-        const subQuery = relationshipQuery.value as FilterQuery<any>
+        const subQuery = relationshipQuery.value as QueryFilter<any>
         const result = await SubModel.find(subQuery, subQueryOptions)
 
         const $in = result.map((doc) => doc._id)

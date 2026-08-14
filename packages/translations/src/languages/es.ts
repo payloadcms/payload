@@ -225,6 +225,7 @@ export const esTranslations: DefaultTranslationsObject = {
     emailOrPasswordIncorrect: 'El correo o la contraseña son incorrectos.',
     failedToResetLayout: 'Error al restablecer la disposición.',
     failedToSaveLayout: 'Error al guardar la disposición.',
+    fileFetchFailed: 'No se pudo obtener el archivo.',
     followingFieldsInvalid_one: 'El siguiente campo es inválido:',
     followingFieldsInvalid_other: 'Los siguientes campos son inválidos:',
     incorrectCollection: 'Colección Incorrecta',
@@ -242,6 +243,7 @@ export const esTranslations: DefaultTranslationsObject = {
     missingIDOfDocument: 'Falta el ID del documento a actualizar.',
     missingIDOfVersion: 'Falta el ID de la versión.',
     missingRequiredData: 'Falta información obligatoria.',
+    noFileFoundInClipboard: 'No se encontró ningún archivo en el portapapeles.',
     noFilesUploaded: 'No se subieron archivos.',
     noMatchedField: 'No se encontró un campo para "{{label}}"',
     notAllowedToAccessPage: 'No tienes permiso para acceder a esta página.',
@@ -257,6 +259,7 @@ export const esTranslations: DefaultTranslationsObject = {
     tokenNotProvided: 'Token no proporcionado.',
     unableToCopy: 'No se puede copiar.',
     unableToDeleteCount: 'No se pudo eliminar {{count}} de {{total}} {{label}}.',
+    unableToReadClipboard: 'No se puede leer del portapapeles.',
     unableToReindexCollection:
       'Error al reindexar la colección {{collection}}. Operación abortada.',
     unableToUpdateCount: 'No se puede actualizar {{count}} de {{total}} {{label}}.',
@@ -266,6 +269,7 @@ export const esTranslations: DefaultTranslationsObject = {
     unPublishingDocument: 'Ocurrió un error al despublicar este documento.',
     unspecific: 'Ocurrió un error.',
     unverifiedEmail: 'Por favor, verifica tu correo electrónico antes de iniciar sesión.',
+    urlNotAllowed: 'La URL proporcionada no está permitida.',
     userEmailAlreadyRegistered:
       'Ya existe un usuario registrado con el correo electrónico proporcionado.',
     userLocked:
@@ -678,6 +682,7 @@ export const esTranslations: DefaultTranslationsObject = {
     linkToFile: 'Enlace al archivo',
     moreInfo: 'Más info',
     noFile: 'Ningún archivo',
+    pasteFromClipboard: 'Pegar desde el portapapeles',
     pasteURL: 'Pegar URL',
     previewSizes: 'Tamaños de Vista Previa',
     renameFile: 'Renombrar archivo',

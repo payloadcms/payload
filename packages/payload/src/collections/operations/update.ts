@@ -18,6 +18,7 @@ import { resolveBranch } from '../../branching/resolveBranch.js'
 import { MAIN_BRANCH } from '../../branching/types.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
+import { validateSortQuery } from '../../database/queryValidation/validateSortQuery.js'
 import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
 import { APIError } from '../../errors/index.js'
 import { type CollectionSlug, type FindOptions } from '../../index.js'
@@ -133,7 +134,10 @@ export const updateOperation = async <
 
     let accessResult: AccessResult
     if (!overrideAccess) {
-      accessResult = await executeAccess({ req }, collectionConfig.access.update)
+      accessResult = await executeAccess(
+        { slug: collectionConfig.slug, req },
+        collectionConfig.access.update,
+      )
     }
 
     await validateQueryPaths({
@@ -160,7 +164,7 @@ export const updateOperation = async <
     if (isTrashAttempt && !overrideAccess) {
       // Pass data so access function can check data.deletedAt to know it's a trash attempt
       const deleteAccessResult = await executeAccess(
-        { data: bulkUpdateData, req },
+        { slug: collectionConfig.slug, data: bulkUpdateData, req },
         collectionConfig.access.delete,
       )
       fullWhere = combineQueries(fullWhere, deleteAccessResult)
@@ -177,7 +181,14 @@ export const updateOperation = async <
 
     const sort = sanitizeSortQuery({
       fields: collection.config.flattenedFields,
-      sort: incomingSort,
+      sort: incomingSort || collectionConfig.defaultSort,
+    })
+
+    await validateSortQuery({
+      collectionConfig,
+      overrideAccess: overrideAccess!,
+      req,
+      sort,
     })
 
     const runQuery = async () => {

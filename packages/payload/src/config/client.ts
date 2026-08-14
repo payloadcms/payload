@@ -21,6 +21,7 @@ import { type ClientGlobalConfig, createClientGlobalConfigs } from '../globals/c
 
 export type ServerOnlyRootProperties = keyof Pick<
   SanitizedConfig,
+  | 'baseAccess'
   | 'bin'
   | 'cors'
   | 'csrf'
@@ -85,6 +86,7 @@ export type UnauthenticatedClientConfig = {
 export const serverOnlyAdminConfigProperties: readonly Partial<ServerOnlyRootAdminProperties>[] = []
 
 export const serverOnlyConfigProperties: readonly Partial<ServerOnlyRootProperties>[] = [
+  'baseAccess',
   'endpoints',
   'db',
   'editor',

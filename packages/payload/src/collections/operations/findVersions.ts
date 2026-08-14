@@ -8,6 +8,7 @@ import type { FindOptions } from './local/find.js'
 import { executeAccess } from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
+import { validateSortQuery } from '../../database/queryValidation/validateSortQuery.js'
 import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
@@ -74,7 +75,10 @@ export const findVersionsOperation = async <TData extends TypeWithVersion<TData>
     let accessResults!: AccessResult
 
     if (!overrideAccess) {
-      accessResults = await executeAccess({ req }, collectionConfig.access.readVersions)
+      accessResults = await executeAccess(
+        { slug: collectionConfig.slug, req },
+        collectionConfig.access.readVersions,
+      )
     }
 
     const versionFields = buildVersionCollectionFields(payload.config, collectionConfig, true)
@@ -85,6 +89,14 @@ export const findVersionsOperation = async <TData extends TypeWithVersion<TData>
       req,
       versionFields,
       where: where!,
+    })
+
+    await validateSortQuery({
+      collectionConfig,
+      overrideAccess: overrideAccess!,
+      req,
+      sort,
+      versionFields,
     })
 
     let fullWhere = combineQueries(where!, accessResults)

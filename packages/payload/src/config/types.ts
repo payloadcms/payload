@@ -40,13 +40,19 @@ import type {
 import type { BranchingConfig, SanitizedBranchingConfig } from '../branching/types.js'
 import type {
   Collection,
+  CollectionAccess,
   CollectionConfig,
   SanitizedCollectionConfig,
 } from '../collections/config/types.js'
 import type { DatabaseAdapterResult } from '../database/types.js'
 import type { EmailAdapter, SendEmailOptions } from '../email/types.js'
 import type { ErrorName } from '../errors/types.js'
-import type { GlobalConfig, Globals, SanitizedGlobalConfig } from '../globals/config/types.js'
+import type {
+  GlobalAccess,
+  GlobalConfig,
+  Globals,
+  SanitizedGlobalConfig,
+} from '../globals/config/types.js'
 import type {
   Block,
   ClientField,
@@ -269,13 +275,6 @@ export type OGImageConfig = {
   width?: number | string
 }
 
-/**
- * @todo find a way to remove the deep clone here.
- * It can probably be removed after the `DeepRequired` from `GlobalConfig` to
- * `SanitizedGlobalConfig` is removed.
- */
-type DeepClone<T> = T extends object ? { [K in keyof T]: DeepClone<T[K]> } : T
-
 export type MetaConfig = {
   /**
    * When `static`, a pre-made image will be used for all pages.
@@ -289,7 +288,7 @@ export type MetaConfig = {
    * @example `" - Custom CMS"`
    */
   titleSuffix?: string
-} & DeepClone<Metadata>
+} & Metadata
 
 export type ServerOnlyLivePreviewProperties = keyof Pick<RootLivePreviewConfig, 'url'>
 
@@ -394,6 +393,8 @@ export type AccessArgs<TData = any> = {
   isReadingStaticFile?: boolean
   /** The original request that requires an access check */
   req: PayloadRequest
+  /** The slug of the Collection or Global document being accessed */
+  slug: string
 }
 
 /**
@@ -403,6 +404,11 @@ export type AccessArgs<TData = any> = {
  * @see https://payloadcms.com/docs/access-control/overview
  */
 export type Access<TData = any> = (args: AccessArgs<TData>) => AccessResult | Promise<AccessResult>
+
+export type BaseAccess = {
+  collections?: CollectionAccess
+  globals?: GlobalAccess
+}
 
 /** Web Request/Response model, but the req has more payload specific properties added to it. */
 export type PayloadHandler = (req: PayloadRequest) => Promise<Response> | Response
@@ -1366,6 +1372,10 @@ export type Config = {
      */
     jwtOrder?: ('Bearer' | 'cookie' | 'JWT')[]
   }
+  /**
+   * Define Collection and Global access constraints that are combined with document Access Control using AND semantics.
+   */
+  baseAccess?: BaseAccess
   /** Custom Payload bin scripts can be injected via the config. */
   bin?: BinScriptConfig[]
   blocks?: Block[]
@@ -1550,6 +1560,13 @@ export type Config = {
    * @see https://payloadcms.com/docs/plugins/overview
    */
   plugins?: Plugin[]
+  /**
+   * Previous `secret` values that should still be accepted for reads (verifying
+   * JWTs, matching API keys, decrypting stored values) during a bounded key
+   * rotation. New data is always written with the current `secret`. Retire these
+   * once `rotateSecret` has re-keyed existing data.
+   */
+  previousSecrets?: string[]
   /**
    * Allow you to save and share filters, columns, and sort orders for your collections.
    * @see https://payloadcms.com/docs/query-presets/overview

@@ -26,7 +26,10 @@ describe('sanitizeConfig', () => {
       components: {},
       custom: {},
       dashboard: {
-        defaultLayout: [{ widgetSlug: 'collections', width: 'full' }],
+        defaultLayout: [
+          { widgetSlug: 'collections', width: 'full' },
+          { widgetSlug: 'activity', width: 'small' },
+        ],
         widgets: expect.any(Array),
       },
       dateFormat: 'MMMM do yyyy, h:mm a',
