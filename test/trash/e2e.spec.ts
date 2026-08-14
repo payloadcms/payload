@@ -650,9 +650,6 @@ describe('Trash', () => {
       }) => {
         await page.goto(postsUrl.trashEdit(trashedPostDocOne.id))
 
-        // Rich text takes its read-only state from form state rather than from the `readOnly`
-        // prop threaded through `RenderFields`, so fields nested inside a `tabs` field regressed
-        // to being editable while every other field on the document stayed disabled.
         for (const fieldPath of ['richText', 'richTextInTab']) {
           const editor = page.locator(
             `[data-field-path="${fieldPath}"] .ContentEditable__root[data-lexical-editor="true"]`,
