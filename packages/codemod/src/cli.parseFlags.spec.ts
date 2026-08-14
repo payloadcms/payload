@@ -5,10 +5,13 @@ import { parseFlags } from './cli.parseFlags.js'
 describe('parseFlags', () => {
   it('defaults path to cwd when no positional arg is given', () => {
     expect(parseFlags([])).toEqual({
+      command: undefined,
       dry: false,
+      force: false,
       list: false,
       path: process.cwd(),
       print: false,
+      tag: undefined,
       transform: undefined,
     })
   })
@@ -37,5 +40,30 @@ describe('parseFlags', () => {
 
   it('treats --dry-run as an alias for --dry', () => {
     expect(parseFlags(['--dry-run']).dry).toBe(true)
+  })
+
+  it('parses the upgrade subcommand with default path', () => {
+    expect(parseFlags(['upgrade'])).toMatchObject({
+      command: 'upgrade',
+      path: process.cwd(),
+    })
+  })
+
+  it('parses upgrade with path, tag, force, and dry', () => {
+    expect(parseFlags(['upgrade', './app', '--tag', 'latest', '--force', '--dry'])).toMatchObject({
+      command: 'upgrade',
+      dry: true,
+      force: true,
+      path: './app',
+      tag: 'latest',
+    })
+  })
+
+  it('leaves command undefined for a bare path invocation', () => {
+    expect(parseFlags(['./src', '--dry'])).toMatchObject({
+      command: undefined,
+      dry: true,
+      path: './src',
+    })
   })
 })
