@@ -1,34 +1,45 @@
 @layer payload-default {
   .nav-group {
-    width: calc(100% + var(--spacer-2-5) * 2);
-    margin-inline-start: calc(-1 * var(--spacer-2-5));
-    padding-inline: var(--spacer-2-5);
-
-    & + .nav-group {
-      margin-block-start: var(--spacer-2);
-      border-top: var(--stroke-width-small) solid var(--color-border);
-      padding-top: var(--spacer-2-5);
-    }
+    width: 100%;
+    padding: var(--spacer-2) 0;
+    border-top: var(--stroke-width-small) solid var(--color-border);
   }
 
   .nav-group__toggle {
     cursor: pointer;
-    color: var(--color-text);
+    color: var(--color-text-secondary);
     background: transparent;
     border: 0;
-    width: calc(100% + var(--spacer-2));
     text-align: left;
     display: flex;
+    width: 100%;
     align-items: center;
     position: relative;
-    padding: var(--spacer-1) var(--spacer-4) var(--spacer-1) var(--spacer-1);
-    width: 100%;
-    margin-bottom: var(--spacer-2);
+    isolation: isolate;
+    padding-block: var(--spacer-2);
+    padding-inline: var(--spacer-3);
     font-family: var(--text-body-medium-strong-font-family);
     font-size: var(--text-body-medium-strong-font-size);
     font-weight: var(--text-body-medium-strong-font-weight);
     line-height: var(--text-body-medium-strong-line-height);
-    border-radius: var(--button-radius);
+
+    &::before {
+      content: '';
+      position: absolute;
+      inset-block: var(--spacer-1);
+      inset-inline: var(--spacer-2);
+      border-radius: var(--button-radius);
+      z-index: -1;
+    }
+
+    &:focus-visible {
+      outline: none;
+
+      &::before {
+        outline: var(--accessibility-outline);
+        outline-offset: var(--accessibility-outline-offset);
+      }
+    }
 
     &:hover,
     &:focus-visible {
@@ -46,7 +57,7 @@
 
   .nav-group__indicator {
     position: absolute;
-    inset-inline-start: 0;
+    inset-inline-start: var(--spacer-2);
     transform: translate(-50%, 0%);
     display: flex;
     align-items: center;
@@ -55,7 +66,6 @@
     width: var(--spacer-3);
     height: var(--spacer-3);
     color: var(--color-icon-tertiary);
-    left: calc(-1 * var(--spacer-1));
     opacity: 0;
   }
 
