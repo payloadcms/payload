@@ -22,9 +22,16 @@ Never report a task complete because the edit looks right — confirm it. A sile
 
 ## 0. Preconditions
 - Work on a clean git tree or a fresh branch.
-- Use Node >=24.15 (the exact engines floor is printed by the command in step 1).
+- Use Node >=24.15 (the exact engines floor is printed by the command in step 2).
 
-## 1. Payload mechanical slice
+## 1. Pre-upgrade migrations (do these on v3, before touching versions)
+Some migrations need the v3 tooling that v4 deletes, so they MUST run before the upgrade:
+- Slate richtext is removed in v4. Migrate Slate -> Lexical while still on v3; the migration path
+  is gone once the packages are pinned to v4.
+
+Do not proceed to step 2 until these are complete and committed.
+
+## 2. Payload mechanical slice
 Run:
 
     ${upgradeCommand}
@@ -34,37 +41,38 @@ floors, installs, and runs the AST transforms. Read its report:
 - It prints the resolved payload version, the required Next target, and the path to the
   bundled runbook and migration guide. Use those paths below.
 - The unmet \`@payloadcms/next\` peer against Next 15 is EXPECTED at this point. Do NOT downgrade
-  payload to satisfy it — step 2 resolves it by upgrading Next.
+  payload to satisfy it — step 3 resolves it by upgrading Next.
 - Do not hand-edit the versions it pinned.
 
-## 2. Next.js 16 (delegate to Next's workflow)
+## 3. Next.js 16 (delegate to Next's workflow)
 Payload v4 requires Next 16. The command above did not touch Next. Run Next's own recommended
 agent workflow, which bumps Next + React and migrates the code as one unit:
 <https://nextjs.org/docs/app/guides/upgrading/version-16#use-an-ai-agent-recommended>
 
 In short: run \`npx @next/codemod@canary upgrade latest\`, then
 \`npx @next/codemod@canary next-async-request-api .\`, and follow Next's AGENTS.md workflow for
-the rest. Keep the result within the Next target range printed in step 1's report. Reinstall
+the rest. Keep the result within the Next target range printed in step 2's report. Reinstall
 afterward so the \`@payloadcms/next\` peer resolves.
 
-## 3. Regenerate generated files
+## 4. Regenerate generated files
 \`payload generate:types && payload generate:importmap\`. Never hand-edit \`payload-types.ts\` or
 \`importMap.js\` — regenerate them.
 
-## 4. Judgment work
-Open the bundled migration guide (\`v4.mdx\`, path printed in step 1) and the bundled runbook
-(\`runbook/payload-v4-upgrade.md\`). Work the manual items they list — Slate -> Lexical
-premigration, jobs DB migrations, SCSS -> CSS and \`--theme-*\` -> \`--color-*\` token renames,
-strict cron parsing, and anything flagged in the per-transform notes. Consult the guide for
-each; do not guess from memory.
+## 5. Fix-forward judgment work (against the now-v4 tree)
+These depend on the v4 APIs and types existing, so they follow the upgrade. Open the bundled
+migration guide (\`v4.mdx\`, path printed in step 2) and the bundled runbook
+(\`runbook/payload-v4-upgrade.md\`) and work the items they list — SCSS -> CSS and \`--theme-*\` ->
+\`--color-*\` token renames, Lexical union type-narrowing, jobs DB migrations, strict cron parsing,
+and anything flagged in the per-transform notes. Consult the guide for each; do not guess from
+memory.
 
-## 5. Verify
+## 6. Verify
 - \`tsc --noEmit\` (delete \`tsconfig.tsbuildinfo\` first; set \`checkJs: true\` so \`importMap.js\` is covered).
 - Run integration and e2e tests separately.
 - Build.
 - Confirm native modules (e.g. \`sharp\`) still load.
 
-## 6. Report
+## 7. Report
 Distinguish verified, cannot-confirm, and broken. Do not call the upgrade complete while any
 gate fails or any generated file is stale.
 `
