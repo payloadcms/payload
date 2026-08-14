@@ -24,6 +24,15 @@ export const Posts: CollectionConfig = {
       type: 'text',
     },
     {
+      name: 'triggerFormStateUpdate',
+      type: 'ui',
+      admin: {
+        components: {
+          Field: '/components/TriggerFormStateUpdate/index.tsx#TriggerFormStateUpdate',
+        },
+      },
+    },
+    {
       name: 'richText',
       type: 'richText',
     },

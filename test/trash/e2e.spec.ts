@@ -651,17 +651,12 @@ describe('Trash', () => {
       }) => {
         await page.goto(postsUrl.trashEdit(trashedPostDocOne.id))
 
-        const trigger = page.locator('#field-showConditionalRichText')
         const conditionalRichTextRoot = page.locator(
           '.rich-text-lexical[data-field-path="conditionalRichTextInTab"] .ContentEditable__root',
         )
 
         await expect(conditionalRichTextRoot).toHaveCount(0)
-        // Force a form-state update to verify fields added by the server remain read-only.
-        await trigger.evaluate((element: HTMLInputElement) => {
-          element.disabled = false
-        })
-        await trigger.fill('show')
+        await page.locator('#trigger-form-state-update').click()
 
         await expect(conditionalRichTextRoot).toHaveAttribute('contenteditable', 'false')
         await conditionalRichTextRoot.click()
