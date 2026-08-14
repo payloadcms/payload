@@ -33,6 +33,7 @@
     flex-direction: column;
     padding: 0;
     overflow-y: auto;
+    overscroll-behavior: contain;
 
     &::-webkit-scrollbar {
       display: none;
