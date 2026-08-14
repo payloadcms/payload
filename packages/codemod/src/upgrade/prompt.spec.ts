@@ -21,15 +21,26 @@ describe('renderUpgradePrompt', () => {
     expect(out).not.toContain('--tag')
   })
 
-  it('orders the steps: payload slice before Next before verify', () => {
+  it('orders the steps: pre-upgrade before payload slice before Next before verify', () => {
     const out = renderUpgradePrompt({ path: '.' })
-    const payloadStep = out.indexOf('## 1. Payload mechanical slice')
-    const nextStep = out.indexOf('## 2. Next.js 16')
-    const verifyStep = out.indexOf('## 5. Verify')
+    const preUpgradeStep = out.indexOf('## 1. Pre-upgrade migrations')
+    const payloadStep = out.indexOf('## 2. Payload mechanical slice')
+    const nextStep = out.indexOf('## 3. Next.js 16')
+    const verifyStep = out.indexOf('## 6. Verify')
 
-    expect(payloadStep).toBeGreaterThan(-1)
+    expect(preUpgradeStep).toBeGreaterThan(-1)
+    expect(preUpgradeStep).toBeLessThan(payloadStep)
     expect(payloadStep).toBeLessThan(nextStep)
     expect(nextStep).toBeLessThan(verifyStep)
+  })
+
+  it('places Slate -> Lexical in the pre-upgrade gate, not the post-upgrade work', () => {
+    const out = renderUpgradePrompt({ path: '.' })
+    const slate = out.indexOf('Slate -> Lexical')
+    const mechanicalSlice = out.indexOf('## 2. Payload mechanical slice')
+
+    expect(slate).toBeGreaterThan(-1)
+    expect(slate).toBeLessThan(mechanicalSlice)
   })
 
   it('delegates Next.js to Next own codemods rather than restating them', () => {
