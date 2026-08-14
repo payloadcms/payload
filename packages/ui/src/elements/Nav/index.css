@@ -77,9 +77,17 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+    width: 100%;
+    position: sticky;
+    top: 0;
+    z-index: 1;
     padding: var(--spacer-2-5) var(--spacer-2) var(--spacer-2-5) var(--spacer-3);
     background-color: var(--color-bg);
     border-bottom: var(--stroke-width-small) solid var(--color-border);
+
+    .nav__mobile-close {
+      display: flex;
+    }
   }
 
   .nav__link {
