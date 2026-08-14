@@ -8,6 +8,7 @@ export type VersionReportRow = {
 }
 
 export type ReportModel = {
+  floorsWritten: string[]
   nextTarget: null | string
   overridesRemoved: string[]
   runbookPath: string
@@ -35,6 +36,10 @@ export function renderReport(model: ReportModel): string {
     lines.push(`Overrides removed: ${model.overridesRemoved.join(', ')}`, '')
   }
 
+  if (model.floorsWritten.length > 0) {
+    lines.push(`Floors written: ${model.floorsWritten.join(', ')}`, '')
+  }
+
   lines.push('Transforms')
   for (const r of model.transforms) {
     if (r.error) {
@@ -49,9 +54,7 @@ export function renderReport(model: ReportModel): string {
   lines.push('')
 
   lines.push('Next.js: not upgraded by this command')
-  lines.push(
-    `  Target Next version: ${model.nextTarget ?? '(see @payloadcms/next peer range)'} (>=16.2.6 <17).`,
-  )
+  lines.push(`  Target Next version: ${model.nextTarget ?? '(see @payloadcms/next peer range)'}`)
   lines.push(
     '  The unmet @payloadcms/next peer is expected until you upgrade Next — that is the immediate next step.',
   )
