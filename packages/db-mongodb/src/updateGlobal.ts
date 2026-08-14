@@ -30,12 +30,13 @@ export const updateGlobal: UpdateGlobal = async function updateGlobal(
   const findOptions: QueryOptions = {
     ...baseOptions,
     lean: true,
-    new: true,
+    // Mongoose 9 deprecated `new`, and the warning it logs fails any e2e test that saves.
     projection: buildProjectionFromSelect({
       adapter: this,
       fields: globalConfig.flattenedFields,
       select,
     }),
+    returnDocument: 'after',
   }
 
   const writeBranch = resolveBranchGlobalWrite({ branch, globalSlug, req })
