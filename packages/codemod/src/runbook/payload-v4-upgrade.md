@@ -9,6 +9,14 @@ the migration guide (`docs/migration-guide/v4.mdx`, also bundled at `dist/runboo
 Report each item as verified / cannot-confirm / broken. Do not call the upgrade complete while
 any gate fails or any generated file is stale.
 
+## 0. Before upgrading (do on v3)
+
+Some migrations need v3 tooling that v4 removes, so they must run BEFORE `payload-codemod upgrade`,
+while the v3 packages are still installed:
+
+- Slate richtext is deleted in v4. Migrate Slate -> Lexical on v3; the migration path is gone once
+  packages are pinned to v4.
+
 ## 1. Next.js 16
 
 Payload v4 requires Next 16. The command did not touch Next. Run Next's own recommended agent
@@ -31,7 +39,6 @@ blocks generation, set dummy env values and re-run.
 
 - SCSS is gone: move `@payloadcms/ui/scss` to `@payloadcms/ui/css`; rename `--theme-*` -> `--color-*`.
 - Sweep agent/editor instruction files (`AGENTS.md`, `CLAUDE.md`, `.cursor/rules/*`) for APIs v4 removed.
-- Slate richtext is deleted — migrate Slate -> Lexical on v3 before upgrading.
 - Cron parsing is strict now: `/10 * * * *` -> `*/10 * * * *`.
 - Jobs: run DB migrations for the new lease/stats fields.
 - Review per-transform notes printed in the upgrade report for spots needing manual review.
