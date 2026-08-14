@@ -137,6 +137,7 @@ export async function runUpgrade(
 
   // 7. REPORT
   const model: ReportModel = {
+    floorsWritten: summary.floorsWritten,
     nextTarget: resolved.nextTarget,
     overridesRemoved: summary.overridesRemoved,
     runbookPath: resolve(dirname(fileURLToPath(import.meta.url)), '..', RUNBOOK_RELATIVE_PATH),

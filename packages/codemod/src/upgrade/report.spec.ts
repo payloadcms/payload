@@ -5,6 +5,7 @@ import { renderReport } from './report.js'
 describe('renderReport', () => {
   it('renders versions, overrides, transforms, next line, and runbook pointer', () => {
     const out = renderReport({
+      floorsWritten: ['typescript', '@types/node', 'engines.node'],
       nextTarget: '16.9.3',
       overridesRemoved: ['pnpm.overrides.payload'],
       runbookPath: '/x/dist/runbook/payload-v4-upgrade.md',
@@ -23,10 +24,13 @@ describe('renderReport', () => {
     expect(out).toContain('review X')
     expect(out).toContain('16.9.3')
     expect(out).toContain('payload-v4-upgrade.md')
+    expect(out).toContain('Floors written')
+    expect(out).toContain('typescript')
   })
 
   it('flags a resolution mismatch as not confirmed v4', () => {
     const out = renderReport({
+      floorsWritten: [],
       nextTarget: null,
       overridesRemoved: [],
       runbookPath: '/x/runbook.md',
@@ -36,10 +40,12 @@ describe('renderReport', () => {
 
     expect(out).toContain('MISMATCH')
     expect(out).toContain('NOT confirmed v4')
+    expect(out).not.toContain('Floors written')
   })
 
   it('renders a failed transform with [FAIL] and its error message', () => {
     const out = renderReport({
+      floorsWritten: [],
       nextTarget: null,
       overridesRemoved: [],
       runbookPath: '/x/runbook.md',
