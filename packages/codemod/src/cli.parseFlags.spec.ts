@@ -7,6 +7,7 @@ describe('parseFlags', () => {
     expect(parseFlags([])).toEqual({
       command: undefined,
       dry: false,
+      emitPrompt: false,
       force: false,
       list: false,
       path: process.cwd(),
@@ -56,6 +57,31 @@ describe('parseFlags', () => {
       force: true,
       path: './app',
       tag: 'latest',
+    })
+  })
+
+  it('parses `upgrade prompt` with default path', () => {
+    expect(parseFlags(['upgrade', 'prompt'])).toMatchObject({
+      command: 'upgrade',
+      emitPrompt: true,
+      path: process.cwd(),
+    })
+  })
+
+  it('parses `upgrade prompt <path>` with tag', () => {
+    expect(parseFlags(['upgrade', 'prompt', './app', '--tag', 'latest'])).toMatchObject({
+      command: 'upgrade',
+      emitPrompt: true,
+      path: './app',
+      tag: 'latest',
+    })
+  })
+
+  it('leaves emitPrompt false for a plain upgrade run', () => {
+    expect(parseFlags(['upgrade', './app'])).toMatchObject({
+      command: 'upgrade',
+      emitPrompt: false,
+      path: './app',
     })
   })
 

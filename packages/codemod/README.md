@@ -26,7 +26,8 @@ With no arguments, runs every registered transform against the current directory
 1. Resolves the current Payload canary from the npm registry (override with `--tag <dist-tag>`).
 2. Rewrites `package.json`: pins `payload` + every `@payloadcms/*` to that exact version in
    lockstep, removes dependency overrides pinning them, converts their carets to exact, and writes
-   the TypeScript / `@types/node` / `engines.node` floors.
+   the TypeScript / `@types/node` / `engines.node` floors. The `@payloadcms/eslint-*` packages are
+   versioned independently, so they are set to `latest` rather than lockstep-pinned.
 3. Installs with your detected package manager.
 4. Runs every registered transform against the now-v4 tree.
 5. Prints a report and points you at the bundled runbook for the rest.
@@ -40,6 +41,17 @@ prints the required Next target.
 - `--tag <dist-tag>` — dist-tag to resolve Payload versions from (default `canary`).
 - `--dry` — preview the `package.json` changes and planned steps; write and install nothing.
 - `--force` — skip the dirty-git-tree warning.
+
+### `upgrade prompt`
+
+`npx @payloadcms/codemod upgrade prompt [path]` prints an orchestration prompt for a coding agent
+to run the full v3 -> v4 upgrade, Next.js 16 included. It is offline and stateless: it writes
+nothing and makes no network calls. Pipe it to your agent, or `--tag` propagates into the embedded
+`upgrade` command it tells the agent to run.
+
+The prompt sequences the upgrade (mechanical slice via this command, then Next.js via Next's own
+codemods and agent workflow, then regeneration, judgment work, and verification) and points at the
+bundled runbook and migration guide for detail rather than restating them.
 
 ## How it works
 
