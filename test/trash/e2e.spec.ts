@@ -708,6 +708,25 @@ describe('Trash', () => {
         await expect(statusBlock).toContainText('Previously Published')
       })
 
+      test('Should render rich text fields as read-only, including inside tabs', async ({
+        page,
+      }) => {
+        await page.goto(postsUrl.trashEdit(trashedPostDocOne.id))
+
+        // Rich text takes its read-only state from form state rather than from the `readOnly`
+        // prop threaded through `RenderFields`, so fields nested inside a `tabs` field regressed
+        // to being editable while every other field on the document stayed disabled.
+        for (const fieldPath of ['richText', 'richTextInTab']) {
+          const editor = page.locator(
+            `[data-field-path="${fieldPath}"] .ContentEditable__root[data-lexical-editor="true"]`,
+          )
+
+          await expect(editor).toBeVisible()
+          await expect(editor).toHaveAttribute('contenteditable', 'false')
+          await expect(editor).toHaveAttribute('aria-readonly', 'true')
+        }
+      })
+
       test('Should render Permanently Delete and Restore buttons in doc controls', async ({
         page,
       }) => {
