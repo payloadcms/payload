@@ -16,19 +16,15 @@ import {
   toggleColumn,
 } from '../../../__helpers/e2e/columns/index.js'
 import { addListFilter } from '../../../__helpers/e2e/filters/index.js'
-import {
-  ensureCompilationIsDone,
-  exactText,
-  initPageConsoleErrorCatch,
-  saveDocAndAssert,
-  selectTableRow,
-} from '../../../__helpers/e2e/helpers.js'
+import { exactText, saveDocAndAssert, selectTableRow } from '../../../__helpers/e2e/helpers.js'
 import { upsertPreferences } from '../../../__helpers/e2e/preferences.js'
 import { runAxeScan } from '../../../__helpers/e2e/runAxeScan.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { RESTClient } from '../../../__helpers/shared/rest.js'
+import { ensureCompilationIsDone } from '../../../__setup/e2e/ensureCompilationIsDone.js'
+import { initPage } from '../../../__setup/e2e/initPage.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { textareaFieldsSlug } from '../../slugs.js'
 import { textareaDoc } from './shared.js'
@@ -57,10 +53,7 @@ describe('Textarea', () => {
     url = new AdminUrlUtil(serverURL, textareaFieldsSlug)
 
     const context = await browser.newContext()
-    page = await context.newPage()
-    initPageConsoleErrorCatch(page)
-
-    await ensureCompilationIsDone({ page, serverURL })
+    ;({ page } = await initPage({ context, serverURL }))
   })
   beforeEach(async () => {
     await reInitializeDB({
@@ -162,9 +155,9 @@ describe('Textarea', () => {
 
   test('should respect admin.disableListColumn despite preferences', async () => {
     await upsertPreferences<Config, GeneratedTypes<any>>({
+      key: 'text-fields-list',
       payload,
       user: client.user,
-      key: 'text-fields-list',
       value: {
         columns: [
           {
@@ -190,9 +183,9 @@ describe('Textarea', () => {
     await page.waitForURL(new RegExp(`${url.list}.*\\?.*`))
 
     await toggleColumn(page, {
-      targetState: 'on',
       columnLabel: 'Text en',
       columnName: 'i18nText',
+      targetState: 'on',
     })
 
     const textCell = page.locator('.row-1 .cell-i18nText')
@@ -223,10 +216,10 @@ describe('Textarea', () => {
       await page.locator('#field-text').waitFor()
 
       const scanResults = await runAxeScan({
+        exclude: ['.field-description'], // known issue - reported elsewhere @todo: remove this once fixed - see report https://github.com/payloadcms/payload/discussions/14489
+        include: ['.document-fields__main'],
         page,
         testInfo,
-        include: ['.document-fields__main'],
-        exclude: ['.field-description'], // known issue - reported elsewhere @todo: remove this once fixed - see report https://github.com/payloadcms/payload/discussions/14489
       })
 
       expect(scanResults.violations.length).toBe(0)
@@ -238,8 +231,8 @@ describe('Textarea', () => {
 
       const scanResults = await checkFocusIndicators({
         page,
-        testInfo,
         selector: '.document-fields__main',
+        testInfo,
       })
 
       expect(scanResults.totalFocusableElements).toBeGreaterThan(0)

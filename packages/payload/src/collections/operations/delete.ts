@@ -100,7 +100,10 @@ export const deleteOperation = async <
     let accessResult: AccessResult
 
     if (!overrideAccess) {
-      accessResult = await executeAccess({ req }, collectionConfig.access.delete)
+      accessResult = await executeAccess(
+        { slug: collectionConfig.slug, req },
+        collectionConfig.access.delete,
+      )
     }
 
     await validateQueryPaths({

@@ -8,15 +8,12 @@ import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { Config, Post } from './payload-types.js'
 
 import { addListFilter } from '../__helpers/e2e/filters/index.js'
-import {
-  changeLocale,
-  closeAllToasts,
-  ensureCompilationIsDone,
-  initPageConsoleErrorCatch,
-} from '../__helpers/e2e/helpers.js'
+import { changeLocale, closeAllToasts } from '../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { ensureCompilationIsDone } from '../__setup/e2e/ensureCompilationIsDone.js'
+import { initPage } from '../__setup/e2e/initPage.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { pagesSlug } from './collections/Pages/index.js'
 import { postsSlug } from './collections/Posts/index.js'
@@ -45,11 +42,9 @@ describe('Trash', () => {
     postsUrl = new AdminUrlUtil(serverURL, postsSlug)
     pagesUrl = new AdminUrlUtil(serverURL, pagesSlug)
     usersUrl = new AdminUrlUtil(serverURL, usersSlug)
-
-    await ensureCompilationIsDone({ browser, serverURL })
   })
 
-  beforeEach(async ({ page, context }) => {
+  beforeEach(async ({ context, page }) => {
     await reInitializeDB({
       serverURL,
       snapshotKey: 'trash',
@@ -57,16 +52,16 @@ describe('Trash', () => {
     pagesDocOneID = (
       await payload.find({
         collection: 'pages',
-        limit: 1,
         depth: 0,
+        limit: 1,
         pagination: false,
       })
     ).docs[0]!.id
     postsDocOneID = (
       await payload.find({
         collection: 'posts',
-        limit: 1,
         depth: 0,
+        limit: 1,
         pagination: false,
         where: {
           title: {
@@ -78,8 +73,8 @@ describe('Trash', () => {
     postsDocTwoID = (
       await payload.find({
         collection: 'posts',
-        limit: 1,
         depth: 0,
+        limit: 1,
         pagination: false,
         where: {
           title: {
@@ -88,10 +83,8 @@ describe('Trash', () => {
         },
       })
     ).docs[0]!.id
-    initPageConsoleErrorCatch(page)
+    await initPage({ page, serverURL })
     //await throttleTest({ page, context, delay: 'Slow 4G' })
-
-    await ensureCompilationIsDone({ page, serverURL })
   })
 
   describe('Collection view', () => {
@@ -311,8 +304,8 @@ describe('Trash', () => {
         await expect(page.locator('.list-selection__button[aria-label="Delete"]')).toBeVisible()
 
         await payload.delete({
-          collection: postsSlug,
           id: trashedDoc.id,
+          collection: postsSlug,
           trash: true,
         })
       })
@@ -576,9 +569,9 @@ describe('Trash', () => {
         await page.goto(postsUrl.trash)
 
         await addListFilter({
-          page,
           fieldLabel: 'Title',
           operatorLabel: 'is like',
+          page,
           value: 'Test',
         })
 
@@ -588,8 +581,8 @@ describe('Trash', () => {
         // Cleanup: permanently delete the created docs
         await mapAsync(createdDocs, async (doc) => {
           await payload.delete({
-            collection: postsSlug,
             id: doc.id,
+            collection: postsSlug,
             trash: true, // Force permanent delete
           })
         })
@@ -713,6 +706,22 @@ describe('Trash', () => {
         const statusBlock = page.locator('.doc-controls__status')
         await expect(statusBlock).toBeVisible()
         await expect(statusBlock).toContainText('Previously Published')
+      })
+
+      test('Should render rich text fields as read-only, including inside tabs', async ({
+        page,
+      }) => {
+        await page.goto(postsUrl.trashEdit(trashedPostDocOne.id))
+
+        for (const fieldPath of ['richText', 'richTextInTab']) {
+          const editor = page.locator(
+            `[data-field-path="${fieldPath}"] .ContentEditable__root[data-lexical-editor="true"]`,
+          )
+
+          await expect(editor).toBeVisible()
+          await expect(editor).toHaveAttribute('contenteditable', 'false')
+          await expect(editor).toHaveAttribute('aria-readonly', 'true')
+        }
       })
 
       test('Should render Permanently Delete and Restore buttons in doc controls', async ({
@@ -839,8 +848,8 @@ describe('Trash', () => {
         page,
       }) => {
         const incomingTrashedDoc = await createPostDoc({
-          title: 'Post 1',
           _status: 'published',
+          title: 'Post 1',
         })
 
         await page.goto(postsUrl.list)
@@ -881,8 +890,8 @@ describe('Trash', () => {
         )
 
         await payload.delete({
-          collection: postsSlug,
           id: incomingTrashedDoc.id,
+          collection: postsSlug,
           trash: true,
         })
       })
@@ -891,8 +900,8 @@ describe('Trash', () => {
         page,
       }) => {
         const incomingTrashedDoc = await createPostDoc({
-          title: 'Post 1',
           _status: 'published',
+          title: 'Post 1',
         })
 
         await page.goto(postsUrl.list)
@@ -938,8 +947,8 @@ describe('Trash', () => {
         )
 
         await payload.delete({
-          collection: postsSlug,
           id: incomingTrashedDoc.id,
+          collection: postsSlug,
           trash: true,
         })
       })
@@ -948,8 +957,8 @@ describe('Trash', () => {
         page,
       }) => {
         const incomingTrashedDoc = await createPostDoc({
-          title: 'Post 1',
           _status: 'published',
+          title: 'Post 1',
         })
 
         await page.goto(postsUrl.list)
@@ -997,16 +1006,16 @@ describe('Trash', () => {
           .toMatch(/\w+ \d{1,2}(st|nd|rd|th) \d{4}, \d{1,2}:\d{2} [AP]M/)
 
         await payload.delete({
-          collection: postsSlug,
           id: incomingTrashedDoc.id,
+          collection: postsSlug,
           trash: true,
         })
       })
 
       test('Should allow viewing of the API tab view from trash edit view', async ({ page }) => {
         const incomingTrashedDoc = await createPostDoc({
-          title: 'Post 1',
           _status: 'published',
+          title: 'Post 1',
         })
 
         await page.goto(postsUrl.list)
@@ -1046,8 +1055,8 @@ describe('Trash', () => {
         )
 
         await payload.delete({
-          collection: postsSlug,
           id: incomingTrashedDoc.id,
+          collection: postsSlug,
           trash: true,
         })
       })
@@ -1056,8 +1065,8 @@ describe('Trash', () => {
         page,
       }) => {
         const incomingTrashedDoc = await createPostDoc({
-          title: 'Post 1',
           _status: 'published',
+          title: 'Post 1',
         })
 
         await page.goto(postsUrl.list)
@@ -1102,8 +1111,8 @@ describe('Trash', () => {
         )
 
         await payload.delete({
-          collection: postsSlug,
           id: incomingTrashedDoc.id,
+          collection: postsSlug,
           trash: true,
         })
       })
@@ -1114,11 +1123,11 @@ describe('Trash', () => {
       // Ensure Dev user exists and store its ID
       const { docs } = await payload.find({
         collection: usersSlug,
-        limit: 1,
-        where: { name: { equals: 'Dev' } },
-        trash: true,
         depth: 0,
+        limit: 1,
         pagination: false,
+        trash: true,
+        where: { name: { equals: 'Dev' } },
       })
       if (docs.length === 0) {
         throw new Error('Dev user not found! Ensure test seed data includes a Dev user.')
@@ -1129,18 +1138,18 @@ describe('Trash', () => {
     async function ensureDevUserTrashed() {
       const { docs } = await payload.find({
         collection: usersSlug,
+        limit: 1,
+        trash: true,
         where: {
           and: [{ name: { equals: 'Dev' } }, { deletedAt: { exists: true } }],
         },
-        limit: 1,
-        trash: true,
       })
 
       if (docs.length === 0) {
         // Trash the user if it's not already trashed
         await payload.update({
-          collection: usersSlug,
           id: devUserID,
+          collection: usersSlug,
           data: { deletedAt: new Date().toISOString() },
         })
       }
@@ -1253,31 +1262,31 @@ describe('Trash', () => {
     const draftPost = await payload.create({
       collection: postsSlug,
       data: {
+        _status: 'draft',
         title: 'Draft with Localized Field',
-        _status: 'draft',
       },
     })
 
     await payload.update({
-      collection: postsSlug,
       id: draftPost.id,
-      locale: 'en',
+      collection: postsSlug,
       data: {
+        _status: 'draft',
         localizedField: localizedFieldValueEN,
-        _status: 'draft',
       },
       draft: true,
+      locale: 'en',
     })
 
     await payload.update({
-      collection: postsSlug,
       id: draftPost.id,
-      locale: 'es',
+      collection: postsSlug,
       data: {
-        localizedField: localizedFieldValueES,
         _status: 'draft',
+        localizedField: localizedFieldValueES,
       },
       draft: true,
+      locale: 'es',
     })
 
     await page.goto(postsUrl.edit(draftPost.id))
@@ -1316,34 +1325,34 @@ describe('Trash', () => {
     const draftPost = await payload.create({
       collection: postsSlug,
       data: {
-        title: 'Draft with Localized Field',
         _status: 'draft',
+        title: 'Draft with Localized Field',
       },
     })
 
     // Update en locale as draft - isSavingDraft = true skips updateOne on the main table,
     // storing localized data only in the versions table
     await payload.update({
-      collection: postsSlug,
       id: draftPost.id,
-      locale: 'en',
+      collection: postsSlug,
       data: {
-        localizedField: localizedFieldValueEN,
         _status: 'draft',
+        localizedField: localizedFieldValueEN,
       },
       draft: true,
+      locale: 'en',
     })
 
     // Update es locale as draft
     await payload.update({
-      collection: postsSlug,
       id: draftPost.id,
-      locale: 'es',
+      collection: postsSlug,
       data: {
-        localizedField: localizedFieldValueES,
         _status: 'draft',
+        localizedField: localizedFieldValueES,
       },
       draft: true,
+      locale: 'es',
     })
 
     await page.goto(postsUrl.list)
