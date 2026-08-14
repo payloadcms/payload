@@ -2,6 +2,8 @@ import { fileURLToPath } from 'node:url'
 import path from 'path'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+const framework = process.env.PAYLOAD_FRAMEWORK === 'tanstack-start' ? 'tanstack' : 'next'
+const frameworkExport = framework === 'tanstack' ? 'TanStack' : 'Next'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { seed } from './seed.js'
@@ -11,6 +13,10 @@ import {
   namedSaveToJWTValue,
   partialDisableLocalStrategiesSlug,
   publicUsersSlug,
+  rotateSecretLoginSlug,
+  rotateSecretOldSecret,
+  rotateSecretSecondarySlug,
+  rotateSecretSlug,
   saveToJWTKey,
   slug,
 } from './shared.js'
@@ -34,6 +40,10 @@ export default buildConfigWithDefaults({
           path: '/create-first-user',
           exact: true,
         },
+        serverFunctions: {
+          Component: `./server-functions/view/${framework}.js#${frameworkExport}ServerFunctionsView`,
+          path: '/server-functions',
+        },
       },
     },
     importMap: {
@@ -41,6 +51,8 @@ export default buildConfigWithDefaults({
     },
     user: 'users',
   },
+  // Kept in the keyring so rotation tests can read data seeded under the old secret.
+  previousSecrets: [rotateSecretOldSecret],
   collections: [
     {
       slug,
@@ -288,6 +300,45 @@ export default buildConfigWithDefaults({
       slug: publicUsersSlug,
       auth: {
         verify: true,
+      },
+      fields: [],
+      versions: false,
+    },
+    {
+      // Dedicated, isolated collection for rotateSecret (PAYLOAD_SECRET rotation) tests.
+      slug: rotateSecretSlug,
+      access: {
+        // Only the authenticated api-key user can read their own doc, so a 200
+        // response proves the API key authenticated after rotation.
+        read: ({ req: { user } }) =>
+          user?.collection === rotateSecretSlug ? { id: { equals: user.id } } : false,
+      },
+      auth: {
+        disableLocalStrategy: true,
+        useAPIKey: true,
+      },
+      fields: [],
+      versions: false,
+    },
+    {
+      // A second isolated api-key collection, so a rotation test can seed a
+      // corrupt row here and pass [rotateSecretSlug, rotateSecretSecondarySlug]
+      // to rotateSecret - guaranteeing the first collection is fully re-keyed
+      // before this one aborts, regardless of primary-key type.
+      slug: rotateSecretSecondarySlug,
+      auth: {
+        disableLocalStrategy: true,
+        useAPIKey: true,
+      },
+      fields: [],
+      versions: false,
+    },
+    {
+      // Collection with BOTH API keys and local (password) auth, to prove a
+      // rotation leaves password logins working on a collection it re-keys.
+      slug: rotateSecretLoginSlug,
+      auth: {
+        useAPIKey: true,
       },
       fields: [],
       versions: false,

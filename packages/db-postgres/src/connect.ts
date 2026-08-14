@@ -2,6 +2,7 @@ import type { DrizzleAdapter } from '@payloadcms/drizzle'
 import type { Connect, Migration } from 'payload'
 
 import { pushDevSchema } from '@payloadcms/drizzle'
+import { assertOperatorHandlerExtensionsInstalled } from '@payloadcms/drizzle/postgres'
 import { drizzle } from 'drizzle-orm/node-postgres'
 import { withReplicas } from 'drizzle-orm/pg-core'
 
@@ -113,6 +114,11 @@ export const connect: Connect = async function connect(
   }
 
   await this.createExtensions()
+
+  await assertOperatorHandlerExtensionsInstalled({
+    drizzle: this.drizzle,
+    operatorHandlers: this.operatorHandlers,
+  })
 
   // Only push schema if not in production
   if (

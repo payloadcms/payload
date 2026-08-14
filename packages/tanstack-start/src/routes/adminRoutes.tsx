@@ -1,8 +1,10 @@
 'use client'
 
-import { NotFoundClient } from '@payloadcms/ui'
+import type { NotFoundRouteProps } from '@tanstack/react-router'
+
+import { NotFoundClient, useRouteTransition } from '@payloadcms/ui'
 import { notFound, redirect, useLoaderData } from '@tanstack/react-router'
-import { Fragment, type ReactNode } from 'react'
+import { Fragment, type ReactNode, useDeferredValue, useEffect } from 'react'
 
 import { getAdminMeta } from '../utilities/meta.js'
 
@@ -31,15 +33,36 @@ function AdminPage() {
   // Note: React key intentionally omitted here so the persistent template (nav, header) doesn't remount and flash on navigation.
   // The per-route view key is attached server-side to the view subtree instead, via `renderRoot`'s `key` in `loadAdminPage`.
   const data = useLoaderData({ strict: false })
-  return <Fragment>{data?.rscPayload}</Fragment>
+
+  // Route state comes from an external store, so a new RSC payload that suspends
+  // on code-split client references can reveal the router's null fallback.
+  // Keep the current payload painted until the next one is renderable.
+  const rscPayload = useDeferredValue(data?.rscPayload)
+  const { holdRouteTransition } = useRouteTransition()
+  const isRscPayloadDeferred = rscPayload !== data?.rscPayload
+
+  useEffect(() => {
+    if (!isRscPayloadDeferred) {
+      return
+    }
+
+    const releaseRouteTransition = holdRouteTransition()
+
+    return () => releaseRouteTransition()
+  }, [holdRouteTransition, isRscPayloadDeferred])
+
+  return <Fragment>{rscPayload}</Fragment>
 }
 
-function AdminNotFound(props: { data?: { routeKey?: string; rscPayload?: ReactNode } }) {
-  const rscPayload = props?.data?.rscPayload
+type AdminNotFoundData = { routeKey?: string; rscPayload?: ReactNode }
+
+function AdminNotFound({ data }: NotFoundRouteProps) {
+  // TanStack exposes not-found data as unknown; this route only receives the shape thrown below.
+  const { routeKey, rscPayload } = (data ?? {}) as AdminNotFoundData
   if (!rscPayload) {
     return <NotFoundClient />
   }
-  return <Fragment key={props?.data?.routeKey}>{rscPayload}</Fragment>
+  return <Fragment key={routeKey}>{rscPayload}</Fragment>
 }
 
 const adminRouteOptions = ({
@@ -59,6 +82,9 @@ const adminRouteOptions = ({
 }) => ({
   component: AdminPage,
   head: ({ loaderData }: { loaderData?: any }) => getAdminMeta(loaderData?.metadata),
+  // Both admin routes must use the same boundary type so index ↔ splat
+  // navigation preserves the existing admin subtree.
+  notFoundComponent: AdminNotFound,
   // `staleReloadMode: 'blocking'` (a property of the loader *object*, not a
   // sibling route option — router-core only reads it off a non-function loader)
   // makes stale-match revalidation await the fresh loader before committing,
@@ -77,7 +103,7 @@ const adminRouteOptions = ({
       }
       return data
     },
-    staleReloadMode: 'blocking',
+    staleReloadMode: 'blocking' as const,
   },
   // Surface query params in `loaderDeps` so `?locale=es` re-runs the loader.
   loaderDeps: ({ search }: { search: Record<string, unknown> }) => ({
@@ -93,19 +119,16 @@ const adminRouteOptions = ({
  * client view.
  */
 export function payloadAdminSplatRoute({ load }: { load: AdminLoad }) {
-  return {
-    ...adminRouteOptions({
-      forwardNotFoundPayload: true,
-      load,
-      resolveSplat: (params) => params._splat ?? '',
-    }),
-    notFoundComponent: AdminNotFound,
-  }
+  return adminRouteOptions({
+    forwardNotFoundPayload: true,
+    load,
+    resolveSplat: (params) => params._splat ?? '',
+  })
 }
 
 /**
- * Route options for the admin index route (`/_payload/admin/`). Same loader as the
- * splat route but throws a bare `notFound()` (no rscPayload) on miss.
+ * Route options for the admin index route (`/_payload/admin/`). Not-found
+ * results omit the RSC payload and fall back to `NotFoundClient`.
  */
 export function payloadAdminIndexRoute({ load }: { load: AdminLoad }) {
   return adminRouteOptions({

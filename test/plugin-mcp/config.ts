@@ -184,7 +184,6 @@ export default buildConfigWithDefaults({
             version: '1.0.0',
           },
         },
-        verboseLogs: true,
       },
       tools: {
         hiddenTool: defineTool({

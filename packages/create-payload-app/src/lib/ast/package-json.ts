@@ -7,8 +7,10 @@ import { getDbPackageName, getStoragePackageName } from './adapter-config.js'
 import { ALL_DATABASE_ADAPTERS, ALL_STORAGE_ADAPTERS } from './types.js'
 
 type PackageJsonTransformOptions = {
+  addDependencies?: Record<string, string>
   databaseAdapter?: DatabaseAdapter
   packageName?: string
+  removeDependencies?: string[]
   removeSharp?: boolean
   storageAdapter?: StorageAdapter
 }
@@ -26,16 +28,26 @@ type PackageJsonStructure = {
 export function updatePackageJson(filePath: string, options: PackageJsonTransformOptions): void {
   debug(`[AST] Updating package.json: ${filePath}`)
 
-  // Phase 1: Detection
-  const pkg = parsePackageJson(filePath)
-
-  // Phase 2: Transformation
-  const transformed = transformPackageJson(pkg, options)
-
-  // Phase 3: Modification
-  writePackageJson(filePath, transformed)
+  const prepared = preparePackageJson({ filePath, options })
+  fs.writeFileSync(prepared.filePath, prepared.content)
 
   debug('[AST] ✓ package.json updated successfully')
+}
+
+export function preparePackageJson({
+  filePath,
+  options,
+}: {
+  filePath: string
+  options: PackageJsonTransformOptions
+}): { content: string; filePath: string } {
+  const pkg = parsePackageJson(filePath)
+  const transformed = transformPackageJson(pkg, options)
+
+  return {
+    content: `${JSON.stringify(transformed, null, 2)}\n`,
+    filePath,
+  }
 }
 
 // Helper functions
@@ -124,6 +136,26 @@ function transformPackageJson(
     }
   }
 
+  if (options.addDependencies) {
+    transformed.dependencies = {
+      ...transformed.dependencies,
+      ...options.addDependencies,
+    }
+  }
+
+  if (options.removeDependencies) {
+    for (const dependencyGroup of ['dependencies', 'devDependencies'] as const) {
+      if (!transformed[dependencyGroup]) {
+        continue
+      }
+
+      transformed[dependencyGroup] = { ...transformed[dependencyGroup] }
+      for (const packageName of options.removeDependencies) {
+        delete transformed[dependencyGroup][packageName]
+      }
+    }
+  }
+
   // Update package name
   if (options.packageName) {
     debug(`[AST] Updated package name to: ${options.packageName}`)
@@ -131,8 +163,4 @@ function transformPackageJson(
   }
 
   return transformed
-}
-
-function writePackageJson(filePath: string, pkg: PackageJsonStructure): void {
-  fs.writeFileSync(filePath, JSON.stringify(pkg, null, 2) + '\n')
 }

@@ -4,6 +4,7 @@ import path from 'path'
 import { getFileByPath } from 'payload'
 import { fileURLToPath } from 'url'
 
+import { getTestSuiteDir } from '../__helpers/shared/getTestSuiteDir.js'
 import { devUser } from '../credentials.js'
 import { AdminThumbnailSize } from './collections/AdminThumbnailSize/index.js'
 import {
@@ -22,6 +23,7 @@ import {
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+const seedDir = getTestSuiteDir({ fallbackDir: dirname, suitePath: 'uploads' })
 
 export const seed = async (payload: Payload) => {
   await payload.create({
@@ -33,7 +35,7 @@ export const seed = async (payload: Payload) => {
   })
 
   // Create image
-  const imageFilePath = path.resolve(dirname, './image.png')
+  const imageFilePath = path.resolve(seedDir, './image.png')
   const imageFile = await getFileByPath(imageFilePath)
 
   const { id: uploadedImage } = await payload.create({
@@ -62,7 +64,7 @@ export const seed = async (payload: Payload) => {
   })
 
   // Create animated type images
-  const animatedImageFilePath = path.resolve(dirname, './animated.webp')
+  const animatedImageFilePath = path.resolve(seedDir, './animated.webp')
   const animatedImageFile = await getFileByPath(animatedImageFilePath)
 
   await payload.create({
@@ -80,7 +82,7 @@ export const seed = async (payload: Payload) => {
     file: animatedImageFile,
   })
 
-  const nonAnimatedImageFilePath = path.resolve(dirname, './non-animated.webp')
+  const nonAnimatedImageFilePath = path.resolve(seedDir, './non-animated.webp')
   const nonAnimatedImageFile = await getFileByPath(nonAnimatedImageFilePath)
 
   await payload.create({
@@ -99,7 +101,7 @@ export const seed = async (payload: Payload) => {
   })
 
   // Create audio
-  const audioFilePath = path.resolve(dirname, './audio.mp3')
+  const audioFilePath = path.resolve(seedDir, './audio.mp3')
   const audioFile = await getFileByPath(audioFilePath)
 
   const file = await payload.create({
@@ -211,7 +213,7 @@ export const seed = async (payload: Payload) => {
   }
 
   // Seed filePreview single collection — one image and one audio doc
-  const pdfFilePath = path.resolve(dirname, './test-pdf.pdf')
+  const pdfFilePath = path.resolve(seedDir, './test-pdf.pdf')
   const pdfFile = await getFileByPath(pdfFilePath)
 
   // PDF and video in the media collection (which has no custom filePreview) so the file manager's
@@ -223,7 +225,7 @@ export const seed = async (payload: Payload) => {
     file: pdfFile,
   })
 
-  const videoFilePath = path.resolve(dirname, './christmas-mariachi-in-guadalajara.mp4')
+  const videoFilePath = path.resolve(seedDir, './christmas-mariachi-in-guadalajara.mp4')
   const videoFile = await getFileByPath(videoFilePath)
 
   await payload.create({
@@ -236,7 +238,7 @@ export const seed = async (payload: Payload) => {
   // content derived from the filename. The local API used here bypasses the 2 MB HTTP upload limit.
   // Filenames are prefixed because this collection shares its staticDir with the media collection.
   const horizontalSquaresFile = await getFileByPath(
-    path.resolve(dirname, './horizontal-squares.jpg'),
+    path.resolve(seedDir, './horizontal-squares.jpg'),
   )
 
   const mediaWithFieldsDocs: Array<{

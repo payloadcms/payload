@@ -1,7 +1,7 @@
 {
   "name": "payload-marketplace",
   "version": "0.0.1",
-  "description": "Development marketplace for Payload",
+  "description": "Claude Code plugins for Payload",
   "owner": {
     "name": "Payload",
     "email": "info@payloadcms.com"
@@ -9,13 +9,18 @@
   "plugins": [
     {
       "name": "payload",
+      "source": "./packages/payload",
+      "strict": false,
       "description": "Payload Development plugin - covers collections, fields, hooks, access control, plugins, and database adapters.",
-      "version": "0.0.1",
-      "source": "./tools/claude-plugin",
       "author": {
         "name": "Payload",
-        "email": "info@payloadcms.com"
-      }
+        "email": "info@payloadcms.com",
+        "url": "https://payloadcms.com"
+      },
+      "homepage": "https://payloadcms.com",
+      "repository": "https://github.com/payloadcms/payload",
+      "license": "MIT",
+      "keywords": ["payload", "cms", "payload-cms", "nextjs", "typescript", "headless-cms"]
     }
   ]
 }
