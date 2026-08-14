@@ -21,6 +21,8 @@ const baseInput = () => ({
     react: '19.0.0',
   },
   devDependencies: {
+    '@payloadcms/eslint-config': '^3.0.0',
+    '@payloadcms/eslint-plugin': '^3.0.0',
     '@types/node': '22.9.0',
     typescript: '5.7.3',
   },
@@ -44,6 +46,8 @@ describe('rewritePackageJson', () => {
         react: '19.0.0', // untouched
       },
       devDependencies: {
+        '@payloadcms/eslint-config': 'latest', // versioned independently
+        '@payloadcms/eslint-plugin': 'latest', // versioned independently
         '@types/node': '24.12.3',
         typescript: '6.0.3',
       },
@@ -55,6 +59,8 @@ describe('rewritePackageJson', () => {
       ['pnpm.overrides.payload', 'resolutions.@payloadcms/ui'].sort(),
     )
     expect(summary.pinnedPayload).toContain('payload')
+    // eslint packages are not lockstep-pinned
+    expect(summary.pinnedPayload).not.toContain('@payloadcms/eslint-config')
   })
 
   it('adds floors to devDependencies when absent', () => {
