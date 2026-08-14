@@ -1,0 +1,101 @@
+@layer payload-default {
+  /*
+   * Single-row card: the folder icon leads, the title fills the remaining width and truncates.
+   *
+   * State rings keep a CONSTANT 1px border and draw the second accent stroke as an inset outline,
+   * matching DocumentCard. Widening the border instead would grow the card's auto height by 2px on
+   * selection (border-box sizing does not absorb a border when no explicit height is set), which
+   * would grow the whole grid row and shift everything below it. Focus is left to the inner link's
+   * standard app-wide :focus-visible ring, so it stays distinguishable from the selected state.
+   */
+  .hierarchy-folder-card {
+    display: flex;
+    align-items: stretch;
+    min-width: 0;
+    background: var(--color-bg);
+    border: var(--stroke-width-small) solid var(--color-border);
+    border-radius: var(--radius-medium);
+    outline: var(--stroke-width-small) solid transparent;
+    outline-offset: calc(var(--stroke-width-small) * -1);
+  }
+
+  .hierarchy-folder-card:not(.hierarchy-folder-card--selected):hover {
+    border-color: var(--color-border-strong);
+  }
+
+  .hierarchy-folder-card--selected {
+    border-color: var(--color-border-selected);
+    outline-color: var(--color-border-selected);
+  }
+
+  .hierarchy-folder-card--selected:hover {
+    border-color: var(--color-border-selected-strong);
+    outline-color: var(--color-border-selected-strong);
+  }
+
+  .hierarchy-folder-card__link {
+    display: flex;
+    flex: 1 1 auto;
+    align-items: center;
+    gap: var(--spacer-2);
+    min-width: 0;
+    padding-block: var(--spacer-2);
+    padding-inline: var(--spacer-2-5);
+    border-radius: var(--radius-medium);
+    color: var(--color-text);
+    text-decoration: none;
+    cursor: pointer;
+
+    &:hover {
+      color: var(--color-text);
+      text-decoration: none;
+    }
+  }
+
+  /* Trailing slot (checkbox or lock indicator) supplies its own end padding. */
+  .hierarchy-folder-card--has-corner-slot .hierarchy-folder-card__link {
+    padding-inline-end: var(--spacer-2);
+  }
+
+  .hierarchy-folder-card__icon {
+    display: flex;
+    flex-shrink: 0;
+    color: var(--color-icon);
+
+    svg {
+      width: var(--spacer-4);
+      height: var(--spacer-4);
+    }
+  }
+
+  .hierarchy-folder-card__title {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--text-body-medium-font-size);
+    font-weight: var(--text-body-medium-font-weight);
+    line-height: var(--text-body-medium-line-height);
+    letter-spacing: var(--text-body-medium-letter-spacing);
+  }
+
+  .hierarchy-folder-card__chevron {
+    display: flex;
+    flex-shrink: 0;
+
+    svg {
+      width: var(--spacer-2-5);
+      height: var(--spacer-2-5);
+      color: var(--color-icon-tertiary);
+    }
+  }
+
+  .hierarchy-folder-card__checkbox {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    padding-inline-end: var(--spacer-2-5);
+  }
+}

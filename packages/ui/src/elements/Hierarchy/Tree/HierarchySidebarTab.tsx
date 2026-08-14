@@ -19,7 +19,6 @@ import { HierarchyTree } from './index.js'
 export const HierarchySidebarTab: React.FC<
   {
     baseFilter?: Record<string, unknown>
-    collectionSpecificOptions?: { label: string; value: string }[]
     hierarchyCollectionSlug: string
     icon?: React.ReactNode
     initialData?: HierarchyInitialData | null
@@ -33,9 +32,8 @@ export const HierarchySidebarTab: React.FC<
   } & SidebarTabClientProps
 > = ({
   baseFilter,
-  collectionSpecificOptions,
   hierarchyCollectionSlug,
-  icon,
+  icon: _icon,
   initialData,
   initialExpandedNodes,
   initialSelectedFilters,
@@ -54,10 +52,7 @@ export const HierarchySidebarTab: React.FC<
     },
   } = useConfig()
   const [isSearchActive, setIsSearchActive] = useState(false)
-  const [selectedFilters, setSelectedFiltersLocal] = useState<string[]>(
-    initialSelectedFilters ?? [],
-  )
-  const { setSelectedFilters: setSelectedFiltersContext, treeRefreshKeys } = useHierarchy()
+  const { treeRefreshKeys } = useHierarchy()
   const sidebarTabs = useSidebarTabs()
 
   const resolvedParentFieldName = parentFieldName ?? 'parent'
@@ -101,14 +96,6 @@ export const HierarchySidebarTab: React.FC<
 
   const baseFilterKey = baseFilter ? JSON.stringify(baseFilter) : ''
 
-  const handleFilterChange = useCallback(
-    (filters: string[]) => {
-      setSelectedFiltersLocal(filters)
-      setSelectedFiltersContext(filters)
-    },
-    [setSelectedFiltersContext],
-  )
-
   const handleNavigateToParent = useCallback(
     ({ id }: { id: number | string }) => {
       const url = formatAdminURL({
@@ -137,19 +124,19 @@ export const HierarchySidebarTab: React.FC<
       <div className="hierarchy-sidebar-tab">
         <HierarchySearch
           collectionSlug={hierarchyCollectionSlug}
-          collectionSpecificOptions={collectionSpecificOptions}
           isActive={isSearchActive}
           onActiveChange={setIsSearchActive}
-          onFilterChange={handleFilterChange}
           onSelect={handleNavigateToParent}
-          selectedFilters={selectedFilters}
+          parentId={selectedNodeId ?? null}
         />
         {!isSearchActive && (
           <HierarchyTree
             baseFilter={baseFilter}
             collectionSlug={hierarchyCollectionSlug}
-            filterByCollections={selectedFilters.length > 0 ? selectedFilters : undefined}
-            icon={icon}
+            filterByCollections={
+              initialSelectedFilters?.length ? initialSelectedFilters : undefined
+            }
+            icon={_icon}
             initialData={initialData}
             initialExpandedNodes={initialExpandedNodes}
             key={`${hierarchyCollectionSlug}-${baseFilterKey}`}

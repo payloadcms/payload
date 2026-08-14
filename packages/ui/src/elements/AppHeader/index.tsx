@@ -1,8 +1,6 @@
 'use client'
 import React, { useEffect, useRef, useState } from 'react'
 
-import type { UserMenuSettingsGroup } from '../UserMenu/SettingsMenu/index.js'
-
 import { useElementHeightVariable } from '../../hooks/useElementHeightVariable.js'
 import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { LanguageIcon } from '../../icons/Language/index.js'
@@ -16,17 +14,11 @@ import { Button } from '../Button/index.js'
 import { Localizer } from '../Localizer/index.js'
 import { useNav } from '../Nav/context.js'
 import { StepNav } from '../StepNav/index.js'
-import { UserMenu } from '../UserMenu/index.js'
 import './index.css'
 
 const baseClass = 'app-header'
 
-type Props = {
-  CustomAvatar?: React.ReactNode
-  CustomLogoutButton?: React.ReactNode
-  settingsItemGroups?: UserMenuSettingsGroup[]
-}
-export function AppHeader({ CustomAvatar, CustomLogoutButton, settingsItemGroups }: Props) {
+export function AppHeader() {
   const { t } = useTranslation()
   const locale = useLocale()
   const { isEmbedded } = useEmbed()
@@ -125,13 +117,6 @@ export function AppHeader({ CustomAvatar, CustomLogoutButton, settingsItemGroups
               />
             )}
           </div>
-          {!isEmbedded && (
-            <UserMenu
-              CustomAvatar={CustomAvatar}
-              CustomLogoutButton={CustomLogoutButton}
-              settingsItemGroups={settingsItemGroups}
-            />
-          )}
         </div>
       </div>
     </header>

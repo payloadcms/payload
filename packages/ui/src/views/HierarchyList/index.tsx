@@ -5,10 +5,11 @@ import type { ListViewClientProps } from 'payload'
 import { getTranslation } from '@payloadcms/translations'
 import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
-import React, { Fragment, useCallback, useEffect, useMemo } from 'react'
+import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
 
 import type { CollectionOption } from '../../elements/CreateDocumentButton/index.js'
 import type { StepNavItem } from '../../elements/StepNav/index.js'
+import type { HierarchyViewMode } from './ViewModeToggle/index.js'
 
 import { CreateDocumentButton } from '../../elements/CreateDocumentButton/index.js'
 import { ListControlsBar } from '../../elements/ListControlsBar/index.js'
@@ -20,6 +21,7 @@ import { ViewDescription } from '../../elements/ViewDescription/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { DocumentSelectionProvider } from '../../providers/DocumentSelection/index.js'
 import { useHierarchy } from '../../providers/Hierarchy/index.js'
+import { usePreferences } from '../../providers/Preferences/index.js'
 import { useRouteCache } from '../../providers/RouteCache/index.js'
 import { useRouter, useSearchParams } from '../../providers/RouterAdapter/index.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
@@ -27,6 +29,7 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { HierarchyListHeader } from './HierarchyListHeader/index.js'
 import { HierarchyTable } from './HierarchyTable/index.js'
 import { TypeFilter } from './TypeFilter/index.js'
+import { ViewModeToggle } from './ViewModeToggle/index.js'
 import './index.css'
 
 const baseClass = 'hierarchy-list'
@@ -42,6 +45,7 @@ export function HierarchyListView(props: ListViewClientProps) {
     hierarchyData,
     HierarchyIcon,
     HierarchySmallIcon,
+    listPreferences,
     viewType,
   } = props
 
@@ -78,6 +82,30 @@ export function HierarchyListView(props: ListViewClientProps) {
   const { setStepNav } = useStepNav()
   const { parent, refreshTree } = useHierarchy()
   const { clearRouteCache } = useRouteCache()
+  const { setPreference } = usePreferences()
+
+  const [viewMode, setViewMode] = useState<HierarchyViewMode>(
+    listPreferences?.hierarchyViewMode ?? 'table',
+  )
+
+  const handleViewModeChange = useCallback(
+    (nextViewMode: HierarchyViewMode) => {
+      setViewMode(nextViewMode)
+
+      // merge: true, otherwise this write clobbers sibling list preferences
+      // stored on the same key (columns, sort, limit, preset, groupBy).
+      // A failed write only costs the persisted choice, so it must not surface as an
+      // unhandled rejection.
+      void setPreference(
+        `collection-${collectionSlug}`,
+        { hierarchyViewMode: nextViewMode },
+        true,
+      ).catch(() => {
+        // Intentionally ignored: the view still switched, only persistence failed.
+      })
+    },
+    [collectionSlug, setPreference],
+  )
 
   // Callback for when a new document is created
   const handleSave = useCallback(() => {
@@ -298,16 +326,25 @@ export function HierarchyListView(props: ListViewClientProps) {
       }))
   }, [hierarchyData?.relatedDocumentsByCollection, selectedTypes])
 
-  const collectionData = hierarchyData
-    ? {
-        [collectionSlug]: { docs: hierarchyData.childrenData.docs },
-        ...Object.fromEntries(
-          Object.entries(hierarchyData.relatedDocumentsByCollection || {}).map(
-            ([slug, related]) => [slug, { docs: related.result.docs }],
-          ),
-        ),
-      }
-    : {}
+  // Memoized on the underlying docs: DocumentSelectionProvider resets every selection whenever
+  // this reference changes, so an unmemoized literal would clear the user's selection on any
+  // re-render of this component (e.g. toggling the view mode) rather than only on navigation.
+  const collectionData = useMemo(
+    () =>
+      hierarchyData
+        ? {
+            [collectionSlug]: { docs: hierarchyData.childrenData.docs },
+            ...Object.fromEntries(
+              Object.entries(hierarchyData.relatedDocumentsByCollection || {}).map(
+                ([slug, related]) => [slug, { docs: related.result.docs }],
+              ),
+            ),
+          }
+        : {},
+    // hierarchyData is a server prop: stable across client re-renders, new only on
+    // navigation/search — which is precisely when clearing the selection is intended.
+    [collectionSlug, hierarchyData],
+  )
 
   return (
     <Fragment>
@@ -364,6 +401,7 @@ export function HierarchyListView(props: ListViewClientProps) {
                   selectedValues={selectedTypes}
                 />
               </div>
+              <ViewModeToggle onChange={handleViewModeChange} viewMode={viewMode} />
               {hasCreatePermission && collections.length > 0 && (
                 <CreateDocumentButton
                   buttonStyle="primary"
@@ -392,6 +430,7 @@ export function HierarchyListView(props: ListViewClientProps) {
               relatedGroups={filteredRelatedGroups}
               search={searchFromURL}
               useAsTitle={collectionConfig?.admin?.useAsTitle || 'id'}
+              viewMode={viewMode}
             />
           </div>
         </DocumentSelectionProvider>

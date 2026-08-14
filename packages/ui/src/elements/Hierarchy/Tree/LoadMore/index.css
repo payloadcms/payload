@@ -2,9 +2,9 @@
 
 .tree__load-more.load-more-row {
   padding-top: 0;
-  padding-left: calc(
-    (var(--tree-depth, 0) * var(--tree-indent)) + (var(--spacer-1) * var(--tree-depth)) +
-      var(--spacer-2-5) - 2px
+  padding-inline-start: calc(
+    (var(--tree-depth, 0) * var(--tree-indent)) + var(--spacer-3) + var(--tree-chevron-width) +
+      var(--tree-chevron-spacing)
   );
   height: var(--tree-node-content-height);
   position: relative;

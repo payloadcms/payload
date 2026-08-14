@@ -1,0 +1,5 @@
+@layer payload-default {
+  .icon--collapse-layers {
+    flex-shrink: 0;
+  }
+}

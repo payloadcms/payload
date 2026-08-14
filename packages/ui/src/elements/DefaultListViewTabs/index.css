@@ -5,6 +5,7 @@
   }
 
   .default-list-view-tabs__button {
+    flex: none;
     color: var(--color-text-secondary);
   }
 

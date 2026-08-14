@@ -1,15 +1,13 @@
 import type { CollectionConfig } from 'payload'
 
+import { getHierarchyFieldName } from 'payload'
+
 import { tagsSlug } from '../../slugs.js'
 
 const Tags: CollectionConfig = {
   slug: tagsSlug,
   admin: {
     useAsTitle: 'name',
-  },
-  labels: {
-    plural: 'Tags',
-    singular: 'Tag',
   },
   fields: [
     {
@@ -22,11 +20,25 @@ const Tags: CollectionConfig = {
       type: 'textarea',
     },
   ],
-  tags: {
+  hierarchy: {
     admin: {
-      treeLimit: 4,
+      components: {
+        Icon: {
+          clientProps: { color: 'muted' },
+          path: '@payloadcms/ui#TagIcon',
+        },
+      },
+      treeLimit: 100,
     },
+    allowHasMany: true,
     collectionSpecific: { fieldName: 'allowedCollections' },
+    // Keep the default field name so tag membership fields on related
+    // collections are not renamed away from `_h_tags`
+    parentFieldName: getHierarchyFieldName(tagsSlug),
+  },
+  labels: {
+    plural: 'Tags',
+    singular: 'Tag',
   },
   versions: false,
 }

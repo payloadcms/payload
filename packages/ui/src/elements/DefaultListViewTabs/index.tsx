@@ -32,6 +32,11 @@ export const DefaultListViewTabs: React.FC<DefaultListViewTabsProps> = ({
   const router = useRouter()
   const isTrashEnabled = collectionConfig.trash
   const isHierarchyEnabled = Boolean(collectionConfig.hierarchy)
+  const hierarchyConfig =
+    isHierarchyEnabled && typeof collectionConfig.hierarchy === 'object'
+      ? collectionConfig.hierarchy
+      : undefined
+  const hierarchyIcon = hierarchyConfig?.admin?.icon
 
   if (!isTrashEnabled && !isHierarchyEnabled) {
     return null
@@ -43,10 +48,16 @@ export const DefaultListViewTabs: React.FC<DefaultListViewTabsProps> = ({
     }
 
     // Save preference for list vs hierarchy (not trash)
+    // merge: true, otherwise this write replaces the entire preference value for
+    // the key, discarding the user's saved columns/sort/limit/preset/groupBy.
     if (newViewType === 'list' || newViewType === 'hierarchy') {
-      await setPreference(`collection-${collectionConfig.slug}`, {
-        listViewType: newViewType,
-      })
+      await setPreference(
+        `collection-${collectionConfig.slug}`,
+        {
+          listViewType: newViewType,
+        },
+        true,
+      )
     }
 
     let path: `/${string}` = `/collections/${collectionConfig.slug}`
@@ -80,6 +91,7 @@ export const DefaultListViewTabs: React.FC<DefaultListViewTabsProps> = ({
           .join(' ')}
         disabled={viewType === 'list'}
         el="button"
+        icon={hierarchyIcon}
         id={allButtonId}
         onClick={() => handleViewChange('list')}
       >

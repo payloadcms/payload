@@ -38,6 +38,8 @@ export type CollectionPreferences = {
   columns?: ColumnPreference[]
   editViewType?: 'default' | 'live-preview'
   groupBy?: string
+  /** Controls whether the hierarchy list view renders documents as a table or a grid of cards */
+  hierarchyViewMode?: 'grid' | 'table'
   limit?: number
   listViewType?: 'hierarchy' | 'list'
   preset?: DefaultDocumentIDType

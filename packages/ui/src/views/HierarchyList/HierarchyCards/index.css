@@ -1,0 +1,36 @@
+@layer payload-default {
+  .hierarchy-card-grid {
+    --hierarchy-card-min-width: 240px;
+
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(var(--hierarchy-card-min-width), 1fr));
+    gap: var(--spacer-3);
+    /*
+     * Matches the horizontal gutter the tables get from their own cells, so cards line up with
+     * the section heading above them instead of sitting flush against the panel edge.
+     */
+    padding-inline: var(--gutter-h);
+    padding-block: var(--spacer-2);
+    margin: 0;
+    list-style: none;
+  }
+
+  /*
+   * Folder cards are single-row and much shorter than document cards, so they
+   * tolerate a denser grid than the thumbnail-bearing document cards.
+   */
+  .hierarchy-card-grid--folders {
+    gap: var(--spacer-2);
+  }
+
+  /* Lets each card stretch to fill its grid cell rather than collapsing to content height. */
+  .hierarchy-card-grid__item {
+    display: flex;
+    min-width: 0;
+  }
+
+  .hierarchy-card-grid__item > * {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+}

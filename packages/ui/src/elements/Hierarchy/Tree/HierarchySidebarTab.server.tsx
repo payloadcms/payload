@@ -1,6 +1,5 @@
 import type { SidebarTabServerProps, Where } from 'payload'
 
-import { getTranslation } from '@payloadcms/translations'
 import { DEFAULT_HIERARCHY_TREE_LIMIT, getInitialTreeData } from 'payload'
 import { PREFERENCE_KEYS } from 'payload/shared'
 import React from 'react'
@@ -16,7 +15,6 @@ export type HierarchySidebarTabServerProps = {
 
 export const HierarchySidebarTabServer: React.FC<HierarchySidebarTabServerProps> = async ({
   hierarchyCollectionSlug,
-  i18n,
   payload,
   req,
   searchParams,
@@ -34,7 +32,6 @@ export const HierarchySidebarTabServer: React.FC<HierarchySidebarTabServerProps>
   let treeLimit: number | undefined
   let typeFieldName: string | undefined
   let useAsTitle: string | undefined
-  let collectionSpecificOptions: { label: string; value: string }[] = []
   let baseFilter: null | Where = null
 
   // Get collection config and render icon (outside try block - doesn't need async)
@@ -47,13 +44,12 @@ export const HierarchySidebarTabServer: React.FC<HierarchySidebarTabServerProps>
   const IconComponent = hierarchyConfig?.admin?.components?.SmallIcon
   const icon = IconComponent ? (
     RenderServerComponent({
-      clientProps: { size: 16 },
       Component: IconComponent,
       importMap: payload.importMap,
       key: `hierarchy-sidebar-icon-${hierarchyCollectionSlug}`,
     })
   ) : (
-    <TagIcon size={16} />
+    <TagIcon />
   )
 
   try {
@@ -98,21 +94,6 @@ export const HierarchySidebarTabServer: React.FC<HierarchySidebarTabServerProps>
         ? hierarchyConfig.collectionSpecific.fieldName
         : undefined
     useAsTitle = collectionConfig?.admin?.useAsTitle
-
-    // STEP 2.5: Build collection-specific options from related collections
-    if (hierarchyConfig.collectionSpecific && hierarchyConfig?.relatedCollections) {
-      collectionSpecificOptions = Object.keys(hierarchyConfig.relatedCollections)
-        .map((slug) => {
-          const relatedConfig = payload.collections[slug]?.config
-          const label = relatedConfig?.labels?.plural ?? slug
-
-          return {
-            label: getTranslation(label, i18n),
-            value: slug,
-          }
-        })
-        .sort((a, b) => a.label.localeCompare(b.label))
-    }
 
     // Track the immediate parent of the selected node (for ensuring siblings are loaded)
     let selectedNodeParentId: null | number | string = null
@@ -192,7 +173,6 @@ export const HierarchySidebarTabServer: React.FC<HierarchySidebarTabServerProps>
   return (
     <HierarchySidebarTab
       baseFilter={baseFilter}
-      collectionSpecificOptions={collectionSpecificOptions}
       hierarchyCollectionSlug={hierarchyCollectionSlug}
       icon={icon}
       initialData={initialData}

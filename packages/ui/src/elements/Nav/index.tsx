@@ -4,13 +4,20 @@ import { EntityType } from 'payload'
 import React from 'react'
 
 import type { EntityToGroup } from '../../utilities/groupNavItems.js'
+import type { UserMenuSettingsGroup } from '../UserMenu/SettingsMenu/index.js'
 
 /* eslint-disable payload/no-imports-from-exports-dir -- Server component must reference exports dir for proper client boundary */
-import { DefaultNavClient, NavWrapper, SettingsMenuButton } from '../../exports/client/index.js'
+import {
+  DefaultNavClient,
+  NavWrapper,
+  SettingsMenuButton,
+  UserMenu,
+} from '../../exports/client/index.js'
 /* eslint-enable payload/no-imports-from-exports-dir */
 import { AlignJustifiedIcon } from '../../icons/AlignJustified/index.js'
 import { groupNavItems } from '../../utilities/groupNavItems.js'
 import { RenderServerComponent } from '../RenderServerComponent/index.js'
+import { NavSidebarToggle } from './NavSidebarToggle/index.js'
 import { SidebarTabs } from './SidebarTabs/index.js'
 import './index.css'
 
@@ -19,11 +26,16 @@ const baseClass = 'nav'
 import { getNavPrefs } from './getNavPrefs.js'
 
 export type NavProps = {
+  CustomAvatar?: React.ReactNode
+  CustomLogoutButton?: React.ReactNode
   req?: PayloadRequest
+  settingsItemGroups?: UserMenuSettingsGroup[]
 } & ServerProps
 
 export const DefaultNav: React.FC<NavProps> = async (props) => {
   const {
+    CustomAvatar,
+    CustomLogoutButton,
     documentSubViewType,
     i18n,
     locale,
@@ -32,6 +44,7 @@ export const DefaultNav: React.FC<NavProps> = async (props) => {
     permissions,
     req,
     searchParams,
+    settingsItemGroups,
     user,
     viewType,
     visibleEntities,
@@ -198,6 +211,14 @@ export const DefaultNav: React.FC<NavProps> = async (props) => {
     <NavWrapper baseClass={baseClass}>
       {RenderedBeforeNav}
       <nav className={`${baseClass}__wrap`}>
+        <div className={`${baseClass}__header`}>
+          <UserMenu
+            CustomAvatar={CustomAvatar}
+            CustomLogoutButton={CustomLogoutButton}
+            settingsItemGroups={settingsItemGroups}
+          />
+          <NavSidebarToggle baseClass={baseClass} />
+        </div>
         <SidebarTabs
           documentSubViewType={documentSubViewType}
           i18n={i18n}

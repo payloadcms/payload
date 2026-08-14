@@ -1,0 +1,234 @@
+@layer payload-default {
+  .hierarchy-document-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    background: var(--color-bg);
+    border: var(--stroke-width-small) solid var(--color-border);
+    border-radius: var(--radius-large);
+    overflow: hidden;
+    /*
+     * The selected state reads as a 2px accent edge (1px border + 1px inset ring). Drawing the
+     * second stroke as an inset outline keeps the card the same size in every state, so selecting
+     * a card never reflows the grid.
+     */
+    outline: var(--stroke-width-small) solid transparent;
+    outline-offset: calc(var(--stroke-width-small) * -1);
+  }
+
+  /*
+   * :not(--selected) so the grey hover border cannot win over the accent border on a selected
+   * card - both rules live in the same layer and file, and the hover selector would otherwise
+   * have the higher specificity.
+   */
+  .hierarchy-document-card:not(.hierarchy-document-card--selected):hover {
+    border-color: var(--color-border-strong);
+  }
+
+  .hierarchy-document-card--selected {
+    border-color: var(--color-border-selected);
+    outline-color: var(--color-border-selected);
+  }
+
+  .hierarchy-document-card--selected:hover {
+    border-color: var(--color-border-selected-strong);
+    outline-color: var(--color-border-selected-strong);
+  }
+
+  /* Thumbnail */
+
+  .hierarchy-document-card__thumbnail-wrap {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    background: var(--color-bg-secondary);
+  }
+
+  .hierarchy-document-card__thumbnail {
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Type badge, overlaid on the thumbnail */
+
+  .hierarchy-document-card__type {
+    position: absolute;
+    inset-block-start: var(--spacer-2);
+    inset-inline-start: var(--spacer-2);
+    display: inline-flex;
+    align-items: center;
+    /* Leaves room for the selection checkbox in the opposite corner */
+    max-width: calc(100% - var(--spacer-6));
+    padding-inline: var(--spacer-1);
+    padding-block: calc(var(--spacer-1) / 2);
+    border-radius: var(--radius-small);
+    background: var(--color-bg-inverse);
+    color: var(--color-text-oninverse);
+    font-family: var(--text-body-small-strong-font-family);
+    font-size: var(--text-body-small-strong-font-size);
+    font-weight: var(--text-body-small-strong-font-weight);
+    line-height: var(--text-body-small-strong-line-height);
+    letter-spacing: var(--text-body-small-strong-letter-spacing);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Thumbnail-less cards have nothing to overlay, so the badge joins the text flow */
+  .hierarchy-document-card__type--inline {
+    position: static;
+    align-self: flex-start;
+    max-width: 100%;
+  }
+
+  /* Content */
+
+  .hierarchy-document-card__content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-1-5);
+    padding: var(--spacer-2-5);
+    min-width: 0;
+  }
+
+  .hierarchy-document-card--has-thumbnail .hierarchy-document-card__content {
+    border-block-start: var(--stroke-width-small) solid var(--color-border);
+  }
+
+  .hierarchy-document-card__link {
+    display: block;
+    min-width: 0;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  /* Stretches the title link across the card so the whole surface navigates */
+  .hierarchy-document-card__link::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+  }
+
+  /*
+   * The stretched overlay above is intentionally hit-testable, but left alone it also swallows
+   * hover on the title - suppressing the truncated-title tooltip, because a native `title`
+   * tooltip only resolves against ancestors of the hit element and the attribute sits on this
+   * span. Lifting just the title restores it; the title still navigates because it lives inside
+   * the anchor. The metadata rows are deliberately NOT lifted, so the whole card stays navigable.
+   */
+  .hierarchy-document-card__title {
+    position: relative;
+    z-index: 2;
+  }
+
+  /*
+   * Custom property rows may contain their own controls, so they alone are lifted above the
+   * overlay. Clicks here will not navigate.
+   */
+  .hierarchy-document-card__extra {
+    position: relative;
+    z-index: 2;
+  }
+
+  .hierarchy-document-card__title {
+    display: block;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    color: var(--color-text);
+    font-family: var(--text-body-medium-strong-font-family);
+    font-size: var(--text-body-medium-strong-font-size);
+    font-weight: var(--text-body-medium-strong-font-weight);
+    line-height: var(--text-body-medium-strong-line-height);
+    letter-spacing: var(--text-body-medium-strong-letter-spacing);
+  }
+
+  /*
+   * Without a thumbnail the corner slot sits over the first line of content, so reserve room for
+   * it. Gated on the slot existing at all (checkbox OR lock indicator) rather than on
+   * selectability - a locked card is not selectable but still renders the slot.
+   */
+  .hierarchy-document-card--no-thumbnail.hierarchy-document-card--has-corner-slot
+    .hierarchy-document-card__link,
+  .hierarchy-document-card--no-thumbnail.hierarchy-document-card--has-corner-slot
+    .hierarchy-document-card__type--inline {
+    padding-inline-end: var(--spacer-5);
+  }
+
+  /* Properties */
+
+  .hierarchy-document-card__properties {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-1);
+  }
+
+  .hierarchy-document-card__property {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacer-2);
+    min-width: 0;
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--text-body-medium-font-size);
+    font-weight: var(--text-body-medium-font-weight);
+    line-height: var(--text-body-medium-line-height);
+    letter-spacing: var(--text-body-medium-letter-spacing);
+  }
+
+  .hierarchy-document-card__property-label {
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+  }
+
+  .hierarchy-document-card__property-value {
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    color: var(--color-text);
+  }
+
+  /* Status pill - mirrors the token pairs used by the table status cell */
+
+  .hierarchy-document-card__status {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding-inline: var(--spacer-1);
+    border-radius: var(--radius-medium);
+    white-space: nowrap;
+  }
+
+  .hierarchy-document-card__status--published {
+    background: var(--color-bg-selected);
+    color: var(--color-text-brand);
+  }
+
+  .hierarchy-document-card__status--draft {
+    background: var(--color-bg-tertiary);
+    color: var(--color-text);
+  }
+
+  .hierarchy-document-card__status--changed {
+    background: var(--color-bg-warning-tertiary);
+    color: var(--color-text-warning);
+  }
+
+  .hierarchy-document-card__status--previously-published {
+    background: var(--color-bg-tertiary);
+    color: var(--color-text);
+  }
+
+  /* Selection */
+
+  .hierarchy-document-card__checkbox {
+    position: absolute;
+    inset-block-start: var(--spacer-2);
+    inset-inline-end: var(--spacer-2);
+    /* Above both the stretched link and the raised text, so selecting never navigates */
+    z-index: 3;
+  }
+}

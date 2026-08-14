@@ -7,10 +7,9 @@ export type SearchResult = {
 
 export type HierarchySearchProps = {
   collectionSlug: string
-  collectionSpecificOptions?: { label: string; value: string }[]
   isActive: boolean
   onActiveChange: (isActive: boolean) => void
-  onFilterChange?: (values: string[]) => void
   onSelect: ({ id }: { id: number | string }) => void
-  selectedFilters?: string[]
+  /** Document new items are created under. `null` creates at the root level. */
+  parentId: null | number | string
 }

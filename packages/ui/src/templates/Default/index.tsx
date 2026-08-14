@@ -180,7 +180,26 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
     Component: CustomNav,
     Fallback: DefaultNav,
     importMap: payload.importMap,
-    serverProps,
+    serverProps: {
+      ...serverProps,
+      CustomAvatar:
+        avatar !== 'gravatar' && avatar !== 'default'
+          ? RenderServerComponent({
+              Component: avatar.Component,
+              importMap: payload.importMap,
+              serverProps,
+            })
+          : undefined,
+      CustomLogoutButton: components?.logout?.Button
+        ? RenderServerComponent({
+            clientProps,
+            Component: components.logout.Button,
+            importMap: payload.importMap,
+            serverProps,
+          })
+        : undefined,
+      settingsItemGroups,
+    },
   })
 
   return (
@@ -198,28 +217,7 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
             <Wrapper baseClass={baseClass} className={className}>
               {NavComponent}
               <div className={`${baseClass}__wrap`}>
-                <AppHeader
-                  CustomAvatar={
-                    avatar !== 'gravatar' && avatar !== 'default'
-                      ? RenderServerComponent({
-                          Component: avatar.Component,
-                          importMap: payload.importMap,
-                          serverProps,
-                        })
-                      : undefined
-                  }
-                  CustomLogoutButton={
-                    components?.logout?.Button
-                      ? RenderServerComponent({
-                          clientProps,
-                          Component: components.logout.Button,
-                          importMap: payload.importMap,
-                          serverProps,
-                        })
-                      : undefined
-                  }
-                  settingsItemGroups={settingsItemGroups}
-                />
+                <AppHeader />
                 {children}
               </div>
             </Wrapper>

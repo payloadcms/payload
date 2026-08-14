@@ -2,49 +2,66 @@
 
 @layer payload-default {
   .tree-node {
-    border-radius: var(--button-radius);
-
-    .tree-node {
-      margin-left: 0;
-      margin-right: 0;
-    }
-
     &:focus-visible {
       outline: none;
     }
   }
 
-  .tree-node:focus-visible > .tree-node__content-wrapper > .tree-node__content {
+  .tree-node:focus-visible > .tree-node__content-wrapper > .tree-node__content::before {
     outline: var(--accessibility-outline);
     outline-offset: var(--accessibility-outline-offset);
   }
 
-  .tree-node__content-wrapper {
-    margin-left: calc(
-      (var(--tree-depth, 0) * var(--tree-indent)) + (var(--spacer-1) * var(--tree-depth))
-    );
-    margin-bottom: var(--tree-row-gap);
-  }
-
   .tree-node__content {
+    position: relative;
+    isolation: isolate;
     display: flex;
     align-items: center;
+    height: var(--spacer-5);
+    font-family: var(--text-body-medium-font-family);
     font-size: var(--tree-font-size);
+    font-weight: var(--text-body-medium-font-weight);
     line-height: var(--tree-node-content-height);
+    cursor: pointer;
+    user-select: none;
+
+    &::before {
+      content: '';
+      position: absolute;
+      inset-block: var(--spacer-1);
+      inset-inline: var(--spacer-2);
+      border-radius: var(--button-radius);
+      z-index: -1;
+    }
+
+    &:hover::before {
+      background: var(--color-bg-secondary);
+    }
+  }
+
+  .tree-node__content--selected {
+    font-weight: var(--text-body-medium-strong-font-weight);
+
+    &::before {
+      background: var(--color-bg-selected);
+    }
   }
 
   .tree-node__toggle {
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: calc((var(--tree-depth, 0) * var(--tree-indent)) + var(--spacer-3));
+    z-index: 1;
+    width: var(--tree-chevron-width);
     background: none;
     border: none;
-    padding-block: var(--spacer-1);
-    padding-inline-start: var(--spacer-1);
+    padding: 0;
     margin: 0;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: default;
     color: var(--color-icon-tertiary);
-    flex-shrink: 0;
     border-radius: var(--button-radius);
 
     &:hover {
@@ -53,35 +70,35 @@
   }
 
   .tree-node__node-trigger {
+    position: absolute;
+    inset: 0;
     border: none;
     background: none;
     margin: 0;
-    padding: 0;
     color: inherit;
     font: inherit;
-    min-width: 0;
-    flex: 1;
-    display: flex;
-    align-items: center;
-    gap: var(--spacer-1);
     text-align: left;
     cursor: pointer;
-    padding-block: var(--spacer-1);
-    padding-inline-end: var(--spacer-1);
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    padding-block: 0;
+    padding-inline: calc(
+        (var(--tree-depth, 0) * var(--tree-indent)) + var(--spacer-3) + var(--tree-chevron-width) +
+          var(--tree-chevron-spacing)
+      )
+      var(--spacer-3);
   }
 
   .tree-node__title {
     padding-left: 0;
-    margin-left: var(--spacer-1);
   }
 
   .tree-node__loading {
-    margin-left: auto;
+    position: relative;
+    z-index: 1;
+    margin-inline: auto var(--spacer-3);
     display: inline-flex;
     align-items: center;
-  }
-
-  .tree-node__children {
-    /* Children are rendered with depth variable set */
   }
 }

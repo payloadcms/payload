@@ -24,6 +24,7 @@ import { useConfig } from '../../../providers/Config/index.js'
 import { useDocumentSelection } from '../../../providers/DocumentSelection/index.js'
 import { useRouteCache } from '../../../providers/RouteCache/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
+import { HierarchyCardGrid } from '../HierarchyCards/index.js'
 import { ChildNameCell } from './ChildNameCell.js'
 import { DateCell } from './DateCell.js'
 import { RelatedNameCell } from './RelatedNameCell.js'
@@ -61,6 +62,8 @@ export type HierarchyTableProps = {
   relatedGroups: RelatedGroup[]
   search?: string
   useAsTitle: string
+  /** Renders each group as a grid of cards instead of a table. Defaults to 'table'. */
+  viewMode?: 'grid' | 'table'
 }
 
 export function HierarchyTable({
@@ -77,6 +80,7 @@ export function HierarchyTable({
   relatedGroups,
   search,
   useAsTitle,
+  viewMode = 'table',
 }: HierarchyTableProps) {
   const { i18n, t } = useTranslation()
   const { clearRouteCache } = useRouteCache()
@@ -518,36 +522,49 @@ export function HierarchyTable({
 
   return (
     <div className={baseClass}>
-      {allGroups.map((group) => (
-        <TableSection key={group.slug}>
-          <TableSection.Header heading={group.label}>
-            <SimplePagination data={group.paginationData} onChange={group.onPageChange} />
-          </TableSection.Header>
-          <TableSection.Content>
-            <SlotTable
-              collectionSlug={group.slug}
-              columns={columns}
-              data={group.docs}
-              enableCheckbox={true}
-              enableDragHandle={false}
-              enableHeader={true}
-              enableSelectAll={true}
-              getRowLockedUser={getRowLockedUser}
-              mergeCheckboxHeader={false}
-              onCheckboxChange={group.onCheckboxChange}
-              onSelectAllChange={group.onSelectAllChange}
-              parentId={parentId}
-              selectedIds={
-                new Set(
-                  group.docs
-                    .filter((row) => isSelected({ id: row.id, collectionSlug: group.slug }))
-                    .map((row) => row.id),
-                )
-              }
-            />
-          </TableSection.Content>
-        </TableSection>
-      ))}
+      {allGroups.map((group) => {
+        const selectedIds = new Set(
+          group.docs
+            .filter((row) => isSelected({ id: row.id, collectionSlug: group.slug }))
+            .map((row) => row.id),
+        )
+
+        return (
+          <TableSection key={group.slug}>
+            <TableSection.Header heading={group.label}>
+              <SimplePagination data={group.paginationData} onChange={group.onPageChange} />
+            </TableSection.Header>
+            <TableSection.Content>
+              {viewMode === 'grid' ? (
+                <HierarchyCardGrid
+                  ariaLabel={group.label}
+                  getRowLockedUser={getRowLockedUser}
+                  isHierarchyGroup={group.isChildren}
+                  onSelectionChange={group.onCheckboxChange}
+                  rows={group.docs}
+                  selectedIds={selectedIds}
+                />
+              ) : (
+                <SlotTable
+                  collectionSlug={group.slug}
+                  columns={columns}
+                  data={group.docs}
+                  enableCheckbox={true}
+                  enableDragHandle={false}
+                  enableHeader={true}
+                  enableSelectAll={true}
+                  getRowLockedUser={getRowLockedUser}
+                  mergeCheckboxHeader={false}
+                  onCheckboxChange={group.onCheckboxChange}
+                  onSelectAllChange={group.onSelectAllChange}
+                  parentId={parentId}
+                  selectedIds={selectedIds}
+                />
+              )}
+            </TableSection.Content>
+          </TableSection>
+        )
+      })}
     </div>
   )
 }

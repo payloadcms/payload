@@ -1,0 +1,9 @@
+@layer payload-default {
+  .hierarchy-create-new {
+    flex-shrink: 0;
+
+    &:hover:not(.btn--selected) {
+      background: var(--color-bg-tertiary);
+    }
+  }
+}

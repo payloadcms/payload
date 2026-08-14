@@ -5,13 +5,10 @@ import React, { useCallback, useState } from 'react'
 
 import type { HierarchySearchProps } from './types.js'
 
-import { CheckIcon } from '../../../icons/Check/index.js'
-import { FilterIcon } from '../../../icons/Filter/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
-import { Button } from '../../Button/index.js'
-import { Popup, PopupList } from '../../Popup/index.js'
 import { SearchInput } from '../../Search/SearchInput/index.js'
+import { HierarchyCreateNewButton } from '../CreateNewButton/index.js'
 import { HierarchySearchResults } from './HierarchySearchResults.js'
 import { useHierarchySearch } from './useHierarchySearch.js'
 import './index.css'
@@ -20,12 +17,10 @@ const baseClass = 'hierarchy-search'
 
 export const HierarchySearch: React.FC<HierarchySearchProps> = ({
   collectionSlug,
-  collectionSpecificOptions,
   isActive,
   onActiveChange,
-  onFilterChange,
   onSelect,
-  selectedFilters,
+  parentId,
 }) => {
   const { i18n, t } = useTranslation()
   const { getEntityConfig } = useConfig()
@@ -80,16 +75,6 @@ export const HierarchySearch: React.FC<HierarchySearchProps> = ({
     [onSelect, handleClear],
   )
 
-  const handleFilterChange = useCallback(
-    ({ selectedValues }: { selectedValues: string[] }) => {
-      onFilterChange?.(selectedValues)
-    },
-    [onFilterChange],
-  )
-
-  const hasFilters = collectionSpecificOptions && collectionSpecificOptions.length > 0
-  const hasActiveFilters = selectedFilters && selectedFilters.length > 0
-
   return (
     <div className={baseClass}>
       <div className={`${baseClass}__controls`}>
@@ -100,48 +85,7 @@ export const HierarchySearch: React.FC<HierarchySearchProps> = ({
           placeholder={t('hierarchy:searchLabel', { label: collectionLabel })}
           value={inputValue}
         />
-        {hasFilters && (
-          <Popup
-            buttonClassName={`${baseClass}__filter`}
-            caret={false}
-            horizontalAlign="right"
-            render={() => (
-              <PopupList.RadioGroup>
-                {collectionSpecificOptions.map(({ label, value }) => {
-                  const isActive = selectedFilters?.includes(value)
-                  return (
-                    <PopupList.Button
-                      active={isActive}
-                      icon={isActive ? <CheckIcon size={16} /> : undefined}
-                      key={value}
-                      onClick={() => {
-                        const newSelectedValues = isActive
-                          ? selectedFilters.filter((v) => v !== value)
-                          : [...selectedFilters, value]
-                        handleFilterChange({ selectedValues: newSelectedValues })
-                      }}
-                    >
-                      {label}
-                    </PopupList.Button>
-                  )
-                })}
-              </PopupList.RadioGroup>
-            )}
-            renderButton={({ active, onClick, onKeyDown }) => (
-              <Button
-                aria-label={t('general:filter')}
-                buttonStyle="secondary"
-                className={`${baseClass}__filter`}
-                extraButtonProps={{ onKeyDown }}
-                icon={<FilterIcon hasBadgeCutout={hasActiveFilters} size={16} />}
-                onClick={onClick}
-                round
-                selected={active}
-              />
-            )}
-            verticalAlign="bottom"
-          />
-        )}
+        <HierarchyCreateNewButton collectionSlug={collectionSlug} parentId={parentId} />
       </div>
       {isActive && (
         <HierarchySearchResults

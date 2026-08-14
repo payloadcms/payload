@@ -14,11 +14,23 @@ export const Folders: CollectionConfig = {
       required: true,
     },
   ],
-  folders: {
+  hierarchy: {
     admin: {
-      treeLimit: 4,
+      components: {
+        Icon: {
+          clientProps: { color: 'muted' },
+          path: '@payloadcms/ui#FolderIcon',
+        },
+      },
+      treeLimit: 100,
+      useHeaderButton: true,
     },
+    allowHasMany: false,
     parentFieldName: 'parent',
+  },
+  labels: {
+    plural: 'Folders',
+    singular: 'Folder',
   },
   versions: false,
 }

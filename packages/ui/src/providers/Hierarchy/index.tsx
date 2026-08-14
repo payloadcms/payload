@@ -200,6 +200,22 @@ export const HierarchyProvider: React.FC<HierarchyProviderProps> = ({ children }
     [savePreferencesDebounced],
   )
 
+  const collapseAllForCollection = useCallback(
+    (slug: string) => {
+      setExpandedNodesByCollection((prev) => {
+        // Always produce a new Map, even when the collection's set is already empty. The tree
+        // may still be rendering server-provided nodes that only this state change can clear.
+        const newMap = new Map(prev)
+        const newExpanded = new Set<number | string>()
+
+        newMap.set(slug, newExpanded)
+        savePreferencesDebounced(slug, { expanded: newExpanded })
+        return newMap
+      })
+    },
+    [savePreferencesDebounced],
+  )
+
   const toggleNode = useCallback(
     (id: number | string) => {
       if (!collectionSlug) {
@@ -400,6 +416,7 @@ export const HierarchyProvider: React.FC<HierarchyProviderProps> = ({ children }
   const value: HierarchyContextValue = {
     allowedCollections,
     baseFilter,
+    collapseAllForCollection,
     collectionSlug,
     expandedNodes,
     getExpandedNodesForCollection,

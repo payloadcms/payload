@@ -39,7 +39,6 @@ export const TreeNode = ({
   depth = 0,
   expandedNodes,
   filterByCollections,
-  icon,
   limit = DEFAULT_TREE_LIMIT,
   node,
   onSelect,
@@ -164,12 +163,7 @@ export const TreeNode = ({
     >
       <div className={`${baseClass}__content-wrapper`}>
         <div
-          className={[
-            `${baseClass}__content`,
-            'sidebar-row',
-            selected && `${baseClass}__content--selected`,
-            selected && 'sidebar-row--selected',
-          ]
+          className={[`${baseClass}__content`, selected && `${baseClass}__content--selected`]
             .filter(Boolean)
             .join(' ')}
         >
@@ -198,7 +192,6 @@ export const TreeNode = ({
             title={node.title}
             type="button"
           >
-            {Boolean(icon) && <span className="sidebar-row__icon">{icon}</span>}
             <span className={`${baseClass}__title sidebar-row__title`}>{node.title}</span>
           </button>
           {isLoading && expanded && (
@@ -225,7 +218,6 @@ export const TreeNode = ({
                   depth={depth + 1}
                   expandedNodes={expandedNodes}
                   filterByCollections={filterByCollections}
-                  icon={icon}
                   key={String(childId)}
                   limit={limit}
                   node={{

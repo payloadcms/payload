@@ -40,6 +40,8 @@ export type HierarchyHydrateData = {
 export type HierarchyContextValue = {
   allowedCollections: AllowedCollection[] | null
   baseFilter: null | Where
+  /** Collapse every expanded node for a specific collection (persists to preferences) */
+  collapseAllForCollection: (collectionSlug: string) => void
   collectionSlug: null | string
   expandedNodes: Set<number | string>
   /** Get expanded nodes for a specific collection (use this in tabs to avoid cross-tab state conflicts) */

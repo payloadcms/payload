@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
-import { type CollectionConfig, type Config } from 'payload'
+import { type CollectionConfig, type Config, getHierarchyFieldName } from 'payload'
 
 import { resetDB } from '../__helpers/shared/clearAndSeed/reset.js'
 import { devUser } from '../credentials.js'
@@ -88,6 +88,9 @@ import {
   listsContent,
   tableContent,
 } from './seed/richTextData.js'
+
+// Tags rely on the default hierarchy parent field name (`_h_tags`)
+const tagParentFieldName = getHierarchyFieldName(tagsSlug)
 
 const withGroup = (collection: CollectionConfig, group: string): CollectionConfig => ({
   ...collection,
@@ -345,32 +348,32 @@ export const baseConfig: Partial<Config> = {
 
     const frontendTag = await payload.create({
       collection: tagsSlug,
-      data: { name: 'Frontend', parent: techTag.id },
+      data: { name: 'Frontend', [tagParentFieldName]: techTag.id },
     })
 
     await payload.create({
       collection: tagsSlug,
-      data: { name: 'React', parent: frontendTag.id },
+      data: { name: 'React', [tagParentFieldName]: frontendTag.id },
     })
 
     await payload.create({
       collection: tagsSlug,
-      data: { name: 'Vue', parent: frontendTag.id },
+      data: { name: 'Vue', [tagParentFieldName]: frontendTag.id },
     })
 
     const backendTag = await payload.create({
       collection: tagsSlug,
-      data: { name: 'Backend', parent: techTag.id },
+      data: { name: 'Backend', [tagParentFieldName]: techTag.id },
     })
 
     await payload.create({
       collection: tagsSlug,
-      data: { name: 'Node.js', parent: backendTag.id },
+      data: { name: 'Node.js', [tagParentFieldName]: backendTag.id },
     })
 
     await payload.create({
       collection: tagsSlug,
-      data: { name: 'Python', parent: backendTag.id },
+      data: { name: 'Python', [tagParentFieldName]: backendTag.id },
     })
 
     await payload.create({

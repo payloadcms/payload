@@ -1,14 +1,12 @@
 'use client'
 
-import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import { DEFAULT_HIERARCHY_TREE_LIMIT } from 'payload/shared'
-import React, { useCallback, useId, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useId, useMemo, useRef } from 'react'
 
 import type { CachedChildren, HierarchyTreeProps, TreeDocument } from './types.js'
 
-import { PlusIcon } from '../../../icons/Plus/index.js'
-import { useAuth } from '../../../providers/Auth/index.js'
+import { CollapseLayersIcon } from '../../../icons/CollapseLayers/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useHierarchy } from '../../../providers/Hierarchy/index.js'
 import { useRouter } from '../../../providers/RouterAdapter/index.js'
@@ -16,7 +14,6 @@ import { useTranslation } from '../../../providers/Translation/index.js'
 import { Button } from '../../Button/index.js'
 import { CreateDocumentButton } from '../../CreateDocumentButton/index.js'
 import { DelayedSpinner } from '../../DelayedSpinner/index.js'
-import { DocumentDrawer } from '../../DocumentDrawer/index.js'
 import { LoadMore } from './LoadMore/index.js'
 import { TreeFocusProvider, useTreeFocus } from './TreeFocusContext.js'
 import { TreeNode } from './TreeNode/index.js'
@@ -54,13 +51,11 @@ const HierarchyTreeInner: React.FC<HierarchyTreeProps> = ({
   const { focusedId, moveFocus, setFocusedId } = useTreeFocus()
   const router = useRouter()
   const { i18n, t } = useTranslation()
-  const { permissions } = useAuth()
   const { getEntityConfig } = useConfig()
-  const { closeModal, openModal } = useModal()
   const createDrawerSlug = `tree-create-${useId()}`
-  const [isCreateDrawerOpen, setIsCreateDrawerOpen] = useState(false)
 
   const {
+    collapseAllForCollection,
     getExpandedNodesForCollection,
     getTreeDataForCollection,
     toggleNodeForCollection,
@@ -75,7 +70,6 @@ const HierarchyTreeInner: React.FC<HierarchyTreeProps> = ({
   const parentFieldName = hierarchyConfig?.parentFieldName
   const treeLimit = hierarchyConfig?.admin?.treeLimit ?? DEFAULT_HIERARCHY_TREE_LIMIT
   const useAsTitle = useAsTitleProp ?? collectionConfig.admin?.useAsTitle
-  const canCreate = Boolean(permissions?.collections?.[collectionSlug]?.create)
 
   const allPossibleTypeValues = useMemo(
     () =>
@@ -145,6 +139,13 @@ const HierarchyTreeInner: React.FC<HierarchyTreeProps> = ({
       toggleNodeForCollection,
     ],
   )
+
+  const handleCollapseAll = useCallback(() => {
+    // Mark context as seeded so the expandedNodes memo trusts the now-empty context
+    // rather than falling back to the server-provided initial nodes.
+    contextSeededRef.current = true
+    collapseAllForCollection(collectionSlug)
+  }, [collapseAllForCollection, collectionSlug])
 
   // Pre-populate cache with initialData synchronously before first render
   const childrenCache = useRef<Map<string, CachedChildren>>(new Map())
@@ -334,40 +335,22 @@ const HierarchyTreeInner: React.FC<HierarchyTreeProps> = ({
           role="treeitem"
           tabIndex={0}
         >
+          {Boolean(icon) && <span className="sidebar-row__icon">{icon}</span>}
           <span className="sidebar-row__title">
-            {t('general:all')}{' '}
             {getTranslation(getEntityConfig({ collectionSlug })?.labels?.plural, i18n)}
           </span>
         </div>
-        {canCreate && (
-          <>
-            <Button
-              aria-label={t('general:createNew')}
-              buttonStyle="ghost"
-              className={`${baseClass}__create-button`}
-              margin={false}
-              onClick={() => {
-                setIsCreateDrawerOpen(true)
-                openModal(createDrawerSlug)
-              }}
-            >
-              <PlusIcon size={24} />
-            </Button>
-            {isCreateDrawerOpen && (
-              <DocumentDrawer
-                collectionSlug={collectionSlug}
-                drawerSlug={createDrawerSlug}
-                initialData={parentFieldName ? { [parentFieldName]: null } : undefined}
-                onSave={async () => {
-                  closeModal(createDrawerSlug)
-                  setIsCreateDrawerOpen(false)
-                  await refresh()
-                  router.refresh()
-                }}
-                redirectAfterCreate={false}
-              />
-            )}
-          </>
+        {expandedNodes.size > 0 && (
+          <Button
+            aria-label={t('fields:collapseAll')}
+            buttonStyle="ghost"
+            className={`${baseClass}__collapse-all-button`}
+            margin={false}
+            onClick={handleCollapseAll}
+            tooltip={t('fields:collapseAll')}
+          >
+            <CollapseLayersIcon />
+          </Button>
         )}
       </div>
       {rootNodes.map((node) => {
@@ -384,7 +367,6 @@ const HierarchyTreeInner: React.FC<HierarchyTreeProps> = ({
             depth={0}
             expandedNodes={expandedNodes}
             filterByCollections={filterByCollections}
-            icon={icon}
             key={nodeIdStr}
             limit={treeLimit}
             node={{ id: nodeId, hasChildren: true, title: nodeTitle }}
