@@ -7,7 +7,6 @@ export const Posts: CollectionConfig = {
   admin: {
     useAsTitle: 'title',
   },
-  trash: true,
   fields: [
     {
       name: 'title',
@@ -19,7 +18,37 @@ export const Posts: CollectionConfig = {
       type: 'text',
       localized: true,
     },
+    {
+      name: 'showConditionalRichText',
+      type: 'text',
+    },
+    {
+      name: 'richText',
+      type: 'richText',
+    },
+    {
+      type: 'tabs',
+      tabs: [
+        {
+          fields: [
+            {
+              name: 'richTextInTab',
+              type: 'richText',
+            },
+            {
+              name: 'conditionalRichTextInTab',
+              type: 'richText',
+              admin: {
+                condition: ({ showConditionalRichText }) => showConditionalRichText === 'show',
+              },
+            },
+          ],
+          label: 'Tab',
+        },
+      ],
+    },
   ],
+  trash: true,
   versions: {
     drafts: true,
   },
