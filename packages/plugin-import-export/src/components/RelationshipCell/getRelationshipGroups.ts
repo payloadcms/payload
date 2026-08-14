@@ -99,8 +99,10 @@ const resolveEntry = ({
   entry,
   relationTo,
 }: { entry: unknown } & Pick<Args, 'relationTo'>): { slug?: string; target: unknown } => {
-  if (isPolymorphicRelationship({ value: entry })) {
-    return { slug: entry.relationTo, target: entry.value }
+  const entryArgs = { value: entry }
+
+  if (isPolymorphicRelationship(entryArgs)) {
+    return { slug: entryArgs.value.relationTo, target: entryArgs.value.value }
   }
 
   return { slug: Array.isArray(relationTo) ? undefined : relationTo, target: entry }
@@ -120,7 +122,8 @@ const getOptionLabel = ({
   i18n,
   target,
 }: GetOptionLabelArgs): string => {
-  const doc = isRecord({ value: target }) ? target : undefined
+  const targetArgs = { value: target }
+  const doc = isRecord(targetArgs) ? targetArgs.value : undefined
   const id = doc ? doc.id : target
 
   // Fall back to JSON for anything that did not resolve to a usable ID. Interpolating an
@@ -144,12 +147,12 @@ const getOptionLabel = ({
   })
 }
 
-const isRecord = ({ value }: { value: unknown }): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value)
+type ValueArgs = { value: unknown }
 
-const isPolymorphicRelationship = ({
-  value,
-}: {
-  value: unknown
-}): value is { relationTo: string; value: unknown } =>
-  isRecord({ value }) && typeof value.relationTo === 'string' && 'value' in value
+const isRecord = (args: ValueArgs): args is { value: Record<string, unknown> } =>
+  typeof args.value === 'object' && args.value !== null && !Array.isArray(args.value)
+
+const isPolymorphicRelationship = (
+  args: ValueArgs,
+): args is { value: { relationTo: string; value: unknown } } =>
+  isRecord(args) && typeof args.value.relationTo === 'string' && 'value' in args.value
