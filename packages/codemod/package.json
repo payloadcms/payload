@@ -29,7 +29,8 @@
     "README.md"
   ],
   "scripts": {
-    "build": "pnpm typecheck && pnpm build:swc",
+    "build": "pnpm typecheck && pnpm build:swc && pnpm build:copy-docs",
+    "build:copy-docs": "node scripts/copy-migration-guide.mjs",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "clean": "rimraf -g {dist,*.tsbuildinfo}",
     "lint": "eslint .",
