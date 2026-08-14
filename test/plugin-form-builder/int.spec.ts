@@ -303,6 +303,76 @@ describe('@payloadcms/plugin-form-builder', () => {
       })
 
       describe('lexical serializer', () => {
+        it('serializes automatically detected links', async () => {
+          const url = 'https://example.com'
+          const serializedEmail = await serializeLexical({
+            root: {
+              type: 'root',
+              children: [
+                {
+                  type: 'paragraph',
+                  children: [
+                    {
+                      type: 'text',
+                      detail: 0,
+                      format: 0,
+                      mode: 'normal',
+                      style: '',
+                      text: 'This person used ',
+                      version: 1,
+                    },
+                    {
+                      type: 'autolink',
+                      children: [
+                        {
+                          type: 'text',
+                          detail: 0,
+                          format: 0,
+                          mode: 'normal',
+                          style: '',
+                          text: url,
+                          version: 1,
+                        },
+                      ],
+                      direction: 'ltr',
+                      fields: {
+                        linkType: 'custom',
+                        newTab: false,
+                        url,
+                      },
+                      format: '',
+                      indent: 0,
+                      version: 2,
+                    },
+                    {
+                      type: 'text',
+                      detail: 0,
+                      format: 0,
+                      mode: 'normal',
+                      style: '',
+                      text: ' to sign in',
+                      version: 1,
+                    },
+                  ],
+                  direction: 'ltr',
+                  format: '',
+                  indent: 0,
+                  version: 1,
+                },
+              ],
+              direction: 'ltr',
+              format: '',
+              indent: 0,
+              version: 1,
+            },
+          })
+
+          expect(serializedEmail).toBe(
+            `<p>This person used <a href="${url}">${url}</a> to sign in</p>`,
+          )
+          expect(serializedEmail).not.toContain('unknown node')
+        })
+
         it('specific field names', async () => {
           const mockName = 'Test Submission'
           const mockEmail = 'dev@payloadcms.com'
