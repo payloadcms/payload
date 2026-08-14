@@ -4699,21 +4699,118 @@ describe('@payloadcms/plugin-import-export', () => {
     })
 
     describe('relationship roundtrips', () => {
+      const createdExportIDs: (number | string)[] = []
+      const createdImportIDs: (number | string)[] = []
+      const createdPageTitles: string[] = []
       const createdPostIDs: (number | string)[] = []
 
       afterEach(async () => {
+        for (const id of createdImportIDs) {
+          await payload.delete({
+            collection: 'imports',
+            id,
+          })
+        }
+        createdImportIDs.length = 0
+
+        for (const id of createdExportIDs) {
+          await payload.delete({
+            collection: 'exports',
+            id,
+          })
+        }
+        createdExportIDs.length = 0
+
+        for (const title of createdPageTitles) {
+          await payload.delete({
+            collection: 'pages',
+            where: {
+              title: { equals: title },
+            },
+          })
+        }
+        createdPageTitles.length = 0
+
         for (const id of createdPostIDs) {
-          try {
-            await payload.delete({
-              collection: 'posts',
-              id,
-            })
-          } catch {
-            // Ignore cleanup errors
-          }
+          await payload.delete({
+            collection: 'posts',
+            id,
+          })
         }
         createdPostIDs.length = 0
       })
+
+      const exportRelationshipFixture = async ({
+        fields,
+        format,
+        pageID,
+      }: {
+        fields: (
+          | 'hasManyMonomorphic'
+          | 'hasManyPolymorphic'
+          | 'hasOnePolymorphic'
+          | 'id'
+          | 'title'
+        )[]
+        format: 'csv' | 'json'
+        pageID: number | string
+      }) => {
+        const exportDoc = await payload.create({
+          collection: 'exports',
+          user,
+          data: {
+            collectionSlug: 'pages',
+            fields,
+            format,
+            where: {
+              id: { equals: pageID },
+            },
+          },
+        })
+        createdExportIDs.push(exportDoc.id)
+
+        await payload.jobs.run()
+
+        const completedExport = await payload.findByID({
+          collection: 'exports',
+          id: exportDoc.id,
+        })
+
+        return path.join(dirname, './uploads', completedExport.filename as string)
+      }
+
+      const importRelationshipFixture = async ({
+        filePath,
+        format,
+        name,
+      }: {
+        filePath: string
+        format: 'csv' | 'json'
+        name: string
+      }) => {
+        const importDoc = await payload.create({
+          collection: 'imports',
+          user,
+          data: {
+            collectionSlug: 'pages',
+            importMode: 'create',
+          },
+          file: {
+            data: fs.readFileSync(filePath),
+            mimetype: format === 'csv' ? 'text/csv' : 'application/json',
+            name,
+            size: fs.statSync(filePath).size,
+          },
+        })
+        createdImportIDs.push(importDoc.id)
+
+        await payload.jobs.run()
+
+        return payload.findByID({
+          collection: 'imports',
+          id: importDoc.id,
+        })
+      }
 
       it('should roundtrip a hasMany monomorphic relationship through CSV export/import', async () => {
         const post1 = await payload.create({
@@ -4739,28 +4836,13 @@ describe('@payloadcms/plugin-import-export', () => {
             _status: 'published',
           },
         })
+        createdPageTitles.push(testPage.title)
 
-        const exportDoc = await payload.create({
-          collection: 'exports',
-          user,
-          data: {
-            collectionSlug: 'pages',
-            fields: ['id', 'title', 'hasManyMonomorphic'],
-            format: 'csv',
-            where: {
-              id: { equals: testPage.id },
-            },
-          },
+        const csvPath = await exportRelationshipFixture({
+          fields: ['id', 'title', 'hasManyMonomorphic'],
+          format: 'csv',
+          pageID: testPage.id,
         })
-
-        await payload.jobs.run()
-
-        const exportedDoc = await payload.findByID({
-          collection: 'exports',
-          id: exportDoc.id,
-        })
-
-        const csvPath = path.join(dirname, './uploads', exportedDoc.filename as string)
         const exportedRows = await readCSV(csvPath)
 
         // CSV keeps each relationship flattened into indexed sibling columns
@@ -4778,26 +4860,10 @@ describe('@payloadcms/plugin-import-export', () => {
           id: testPage.id,
         })
 
-        let importDoc = await payload.create({
-          collection: 'imports',
-          user,
-          data: {
-            collectionSlug: 'pages',
-            importMode: 'create',
-          },
-          file: {
-            data: fs.readFileSync(csvPath),
-            mimetype: 'text/csv',
-            name: 'hasmany-monomorphic-roundtrip.csv',
-            size: fs.statSync(csvPath).size,
-          },
-        })
-
-        await payload.jobs.run()
-
-        importDoc = await payload.findByID({
-          collection: 'imports',
-          id: importDoc.id,
+        const importDoc = await importRelationshipFixture({
+          filePath: csvPath,
+          format: 'csv',
+          name: 'hasmany-monomorphic-roundtrip.csv',
         })
 
         const importedPages = await payload.find({
@@ -4841,28 +4907,13 @@ describe('@payloadcms/plugin-import-export', () => {
             _status: 'published',
           },
         })
+        createdPageTitles.push(testPage.title)
 
-        const exportDoc = await payload.create({
-          collection: 'exports',
-          user,
-          data: {
-            collectionSlug: 'pages',
-            fields: ['id', 'title', 'hasManyMonomorphic'],
-            format: 'json',
-            where: {
-              id: { equals: testPage.id },
-            },
-          },
+        const jsonPath = await exportRelationshipFixture({
+          fields: ['id', 'title', 'hasManyMonomorphic'],
+          format: 'json',
+          pageID: testPage.id,
         })
-
-        await payload.jobs.run()
-
-        const exportedDoc = await payload.findByID({
-          collection: 'exports',
-          id: exportDoc.id,
-        })
-
-        const jsonPath = path.join(dirname, './uploads', exportedDoc.filename as string)
         const exportedDocs = await readJSON(jsonPath)
 
         // JSON holds the relationship natively — an array of IDs, with no flattened siblings
@@ -4879,26 +4930,10 @@ describe('@payloadcms/plugin-import-export', () => {
           id: testPage.id,
         })
 
-        let importDoc = await payload.create({
-          collection: 'imports',
-          user,
-          data: {
-            collectionSlug: 'pages',
-            importMode: 'create',
-          },
-          file: {
-            data: fs.readFileSync(jsonPath),
-            mimetype: 'application/json',
-            name: 'hasmany-json-roundtrip.json',
-            size: fs.statSync(jsonPath).size,
-          },
-        })
-
-        await payload.jobs.run()
-
-        importDoc = await payload.findByID({
-          collection: 'imports',
-          id: importDoc.id,
+        const importDoc = await importRelationshipFixture({
+          filePath: jsonPath,
+          format: 'json',
+          name: 'hasmany-json-roundtrip.json',
         })
 
         const importedPages = await payload.find({
@@ -4938,28 +4973,13 @@ describe('@payloadcms/plugin-import-export', () => {
             _status: 'published',
           },
         })
+        createdPageTitles.push(testPage.title)
 
-        const exportDoc = await payload.create({
-          collection: 'exports',
-          user,
-          data: {
-            collectionSlug: 'pages',
-            fields: ['id', 'title', 'hasOnePolymorphic'],
-            format: 'json',
-            where: {
-              id: { equals: testPage.id },
-            },
-          },
+        const jsonPath = await exportRelationshipFixture({
+          fields: ['id', 'title', 'hasOnePolymorphic'],
+          format: 'json',
+          pageID: testPage.id,
         })
-
-        await payload.jobs.run()
-
-        const exportedDoc = await payload.findByID({
-          collection: 'exports',
-          id: exportDoc.id,
-        })
-
-        const jsonPath = path.join(dirname, './uploads', exportedDoc.filename as string)
         const exportedDocs = await readJSON(jsonPath)
 
         // The `relationTo`/`value` pair survives intact rather than splitting into siblings
@@ -4976,26 +4996,10 @@ describe('@payloadcms/plugin-import-export', () => {
           id: testPage.id,
         })
 
-        let importDoc = await payload.create({
-          collection: 'imports',
-          user,
-          data: {
-            collectionSlug: 'pages',
-            importMode: 'create',
-          },
-          file: {
-            data: fs.readFileSync(jsonPath),
-            mimetype: 'application/json',
-            name: 'hasone-polymorphic-json-roundtrip.json',
-            size: fs.statSync(jsonPath).size,
-          },
-        })
-
-        await payload.jobs.run()
-
-        importDoc = await payload.findByID({
-          collection: 'imports',
-          id: importDoc.id,
+        const importDoc = await importRelationshipFixture({
+          filePath: jsonPath,
+          format: 'json',
+          name: 'hasone-polymorphic-json-roundtrip.json',
         })
 
         const importedPages = await payload.find({
@@ -5041,28 +5045,13 @@ describe('@payloadcms/plugin-import-export', () => {
             _status: 'published',
           },
         })
+        createdPageTitles.push(testPage.title)
 
-        const exportDoc = await payload.create({
-          collection: 'exports',
-          user,
-          data: {
-            collectionSlug: 'pages',
-            fields: ['id', 'title', 'hasManyPolymorphic'],
-            format: 'json',
-            where: {
-              id: { equals: testPage.id },
-            },
-          },
+        const jsonPath = await exportRelationshipFixture({
+          fields: ['id', 'title', 'hasManyPolymorphic'],
+          format: 'json',
+          pageID: testPage.id,
         })
-
-        await payload.jobs.run()
-
-        const exportedDoc = await payload.findByID({
-          collection: 'exports',
-          id: exportDoc.id,
-        })
-
-        const jsonPath = path.join(dirname, './uploads', exportedDoc.filename as string)
         const exportedDocs = await readJSON(jsonPath)
 
         // Each entry keeps its own `relationTo`, so a mixed list stays unambiguous
@@ -5082,26 +5071,10 @@ describe('@payloadcms/plugin-import-export', () => {
           id: testPage.id,
         })
 
-        let importDoc = await payload.create({
-          collection: 'imports',
-          user,
-          data: {
-            collectionSlug: 'pages',
-            importMode: 'create',
-          },
-          file: {
-            data: fs.readFileSync(jsonPath),
-            mimetype: 'application/json',
-            name: 'hasmany-polymorphic-json-roundtrip.json',
-            size: fs.statSync(jsonPath).size,
-          },
-        })
-
-        await payload.jobs.run()
-
-        importDoc = await payload.findByID({
-          collection: 'imports',
-          id: importDoc.id,
+        const importDoc = await importRelationshipFixture({
+          filePath: jsonPath,
+          format: 'json',
+          name: 'hasmany-polymorphic-json-roundtrip.json',
         })
 
         const importedPages = await payload.find({
