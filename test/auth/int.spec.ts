@@ -2582,4 +2582,51 @@ describe('Auth', () => {
       expect(underUnknown.user).toBeFalsy()
     })
   })
+
+  describe('Default access (auth collection)', () => {
+    const createdUserIDs: (number | string)[] = []
+
+    afterEach(async () => {
+      for (const id of createdUserIDs) {
+        await payload.delete({ collection: slug, id, overrideAccess: true }).catch(() => {})
+      }
+      createdUserIDs.length = 0
+    })
+
+    it('denies updating another user by default', async () => {
+      const userA = await payload.create({
+        collection: slug,
+        data: { email: `a-${uuid()}@test.com`, password: 'test1234', roles: ['user'] },
+        overrideAccess: true,
+      })
+      const userB = await payload.create({
+        collection: slug,
+        data: { email: `b-${uuid()}@test.com`, password: 'test1234', roles: ['user'] },
+        overrideAccess: true,
+      })
+      createdUserIDs.push(userA.id, userB.id)
+
+      const req = await createLocalReq({ user: userA }, payload)
+
+      const result = await payload
+        .update({
+          collection: slug,
+          id: userB.id,
+          data: { custom: 'should not persist' },
+          overrideAccess: false,
+          req,
+        })
+        .catch((err) => err)
+
+      expect(result).toBeInstanceOf(Error)
+      expect(['NotFound', 'Forbidden']).toContain((result as Error).name)
+
+      const stillUserB = await payload.findByID({
+        collection: slug,
+        id: userB.id,
+        overrideAccess: true,
+      })
+      expect(stillUserB.custom).not.toBe('should not persist')
+    })
+  })
 })
