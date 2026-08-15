@@ -2779,5 +2779,59 @@ describe('Auth', () => {
         overrideAccess: true,
       })
     })
+
+    it('denies unlock to anonymous callers by default', async () => {
+      const user = await payload.create({
+        collection: slug,
+        data: { email: `unlock-a-${uuid()}@test.com`, password: 'test1234', roles: ['user'] },
+        overrideAccess: true,
+      })
+      createdUserIDs.push(user.id)
+
+      const req = await createLocalReq({}, payload)
+      req.user = undefined
+      expect(req.user).toBeUndefined()
+
+      const result = await payload
+        .unlock({
+          collection: slug,
+          data: { email: user.email },
+          overrideAccess: false,
+          req,
+        })
+        .catch((err) => err)
+
+      expect(result).toBeInstanceOf(Error)
+      expect((result as Error).name).toBe('Forbidden')
+    })
+
+    it('denies unlocking another user by default', async () => {
+      const caller = await payload.create({
+        collection: slug,
+        data: { email: `unlock-c-${uuid()}@test.com`, password: 'test1234', roles: ['user'] },
+        overrideAccess: true,
+      })
+      const target = await payload.create({
+        collection: slug,
+        data: { email: `unlock-t-${uuid()}@test.com`, password: 'test1234', roles: ['user'] },
+        overrideAccess: true,
+      })
+      createdUserIDs.push(caller.id, target.id)
+
+      const req = await createLocalReq({ user: caller }, payload)
+
+      const result = await payload
+        .unlock({
+          collection: slug,
+          data: { email: target.email },
+          overrideAccess: false,
+          req,
+        })
+        .catch((err) => err)
+
+      // The where-constraint (id === caller.id) mismatches target.email, so no user is found and unlock throws Forbidden.
+      expect(result).toBeInstanceOf(Error)
+      expect((result as Error).name).toBe('Forbidden')
+    })
   })
 })
