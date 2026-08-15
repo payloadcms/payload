@@ -23,6 +23,7 @@ import IndexedFields from './collections/Indexed/index.js'
 import JSONFields from './collections/JSON/index.js'
 import NumberFields from './collections/Number/index.js'
 import PointFields from './collections/Point/index.js'
+import PointFieldsOptimized from './collections/PointOptimized/index.js'
 import RadioFields from './collections/Radio/index.js'
 import RelationshipFields from './collections/Relationship/index.js'
 import RowFields from './collections/Row/index.js'
@@ -79,6 +80,7 @@ export const collections: CollectionConfig[] = [
   JSONFields,
   NumberFields,
   PointFields,
+  PointFieldsOptimized,
   RelationshipFields,
   SelectFields,
   SlugField,
