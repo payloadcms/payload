@@ -23,6 +23,8 @@ export const hiddenAccessSlug = 'hidden-access'
 export const hiddenAccessCountSlug = 'hidden-access-count'
 export const inheritedReadVersionsSlug = 'inherited-read-versions'
 export const inheritedReadVersionsGlobalSlug = 'inherited-read-versions-global'
+export const inheritedReadVersionsVirtualSlug = 'inherited-read-versions-virtual'
+export const inheritedReadVersionsVirtualRelatedSlug = 'inherited-read-versions-virtual-related'
 export const disabledSlug = 'disabled'
 
 export const nonAdminEmail = 'no-admin-access@payloadcms.com'

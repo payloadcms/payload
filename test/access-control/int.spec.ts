@@ -28,6 +28,8 @@ import {
   hooksSlug,
   inheritedReadVersionsGlobalSlug,
   inheritedReadVersionsSlug,
+  inheritedReadVersionsVirtualRelatedSlug,
+  inheritedReadVersionsVirtualSlug,
   publicUserEmail,
   publicUsersSlug,
   relyOnRequestHeadersSlug,
@@ -1062,6 +1064,37 @@ describe('Access Control', () => {
           where: {},
         })
       }
+    })
+
+    it('should resolve virtual-field constraints from inherited read access on findVersionByID', async () => {
+      await payload.delete({ collection: inheritedReadVersionsVirtualSlug, where: {} })
+      await payload.delete({ collection: inheritedReadVersionsVirtualRelatedSlug, where: {} })
+
+      const { id: relatedID } = await payload.create({
+        collection: inheritedReadVersionsVirtualRelatedSlug,
+        data: { label: 'allowed' },
+      })
+      const parent = await payload.create({
+        collection: inheritedReadVersionsVirtualSlug,
+        data: { related: relatedID },
+      })
+
+      const versions = await payload.findVersions({
+        collection: inheritedReadVersionsVirtualSlug,
+        overrideAccess: true,
+      })
+      const version = versions.docs.find(({ parent: parentID }) => parentID === parent.id)!
+
+      await expect(
+        payload.findVersionByID({
+          id: version.id,
+          collection: inheritedReadVersionsVirtualSlug,
+          overrideAccess: false,
+        }),
+      ).resolves.toMatchObject({ parent: parent.id })
+
+      await payload.delete({ collection: inheritedReadVersionsVirtualSlug, where: {} })
+      await payload.delete({ collection: inheritedReadVersionsVirtualRelatedSlug, where: {} })
     })
   })
 
