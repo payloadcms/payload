@@ -59,7 +59,7 @@ export const defaults: Partial<CollectionConfig> = {
 export const addDefaultsToCollectionConfig = (collection: CollectionConfig): CollectionConfig => {
   const access = collection.access
 
-  const authDefault = collection.auth ? defaultAuthAccess(collection.slug) : defaultAccess
+  const authDefault = collection.auth ? defaultAuthAccess : defaultAccess
 
   collection.access = {
     ...access,

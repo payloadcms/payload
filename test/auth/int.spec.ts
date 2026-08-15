@@ -2709,7 +2709,10 @@ describe('Auth', () => {
       expect(userA.id).toBe(collidingId)
       expect(docB.id).toBe(collidingId)
 
+      userA.collection = collisionAuthASlug
+
       const req = await createLocalReq({ user: userA }, payload)
+      expect(req.user?.collection).toBe(collisionAuthASlug)
 
       const result = await payload
         .update({
