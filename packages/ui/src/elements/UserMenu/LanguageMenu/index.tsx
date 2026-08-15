@@ -67,7 +67,7 @@ export const LanguageMenu: React.FC<{
       renderButton={({ active, onClick, onKeyDown, ...aria }) => (
         <button
           {...aria}
-          className="popup-button-list__button popup-button-list__button--submenu-trigger"
+          className="popup-button-list__button popup-button-list__button--submenu-trigger popup-button-list__button--submenu-trigger-language"
           onClick={onClick}
           onKeyDown={onKeyDown}
           onMouseEnter={open}
@@ -87,7 +87,11 @@ export const LanguageMenu: React.FC<{
       size="large"
       theme="dark"
     >
-      <div onMouseEnter={keepOpen} ref={contentRef as React.Ref<HTMLDivElement>}>
+      <div
+        className="popup-button-list__submenu-content-language"
+        onMouseEnter={keepOpen}
+        ref={contentRef as React.Ref<HTMLDivElement>}
+      >
         <LanguageMenuContent />
       </div>
     </Popup>

@@ -66,7 +66,7 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({ groups, onMobileOpen
       renderButton={({ active, onClick, onKeyDown, ...aria }) => (
         <button
           {...aria}
-          className="popup-button-list__button popup-button-list__button--submenu-trigger"
+          className="popup-button-list__button popup-button-list__button--submenu-trigger popup-button-list__button--submenu-trigger-settings"
           onClick={onClick}
           onKeyDown={onKeyDown}
           onMouseEnter={open}
@@ -86,7 +86,11 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({ groups, onMobileOpen
       size="large"
       theme="dark"
     >
-      <div onMouseEnter={keepOpen} ref={contentRef as React.Ref<HTMLDivElement>}>
+      <div
+        className="popup-button-list__submenu-content-settings"
+        onMouseEnter={keepOpen}
+        ref={contentRef as React.Ref<HTMLDivElement>}
+      >
         <SettingsMenuContent groups={groups} />
       </div>
     </Popup>

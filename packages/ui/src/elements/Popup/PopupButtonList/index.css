@@ -166,6 +166,23 @@
     color: var(--color-text-onbrand);
   }
 
+  /*
+   * The submenu content panel is portaled to document.body, so it isn't a DOM descendant of
+   * its trigger button - a plain descendant selector can't reach it. `:has()` lets us query
+   * from a shared ancestor (body) instead, reflecting real-time :hover state directly rather
+   * than an approximated JS-tracked one, so the trigger only highlights while an item inside
+   * its own submenu is actually being hovered.
+   */
+  body:has(.popup-button-list__submenu-content-theme:hover)
+    .popup-button-list__button--submenu-trigger-theme,
+  body:has(.popup-button-list__submenu-content-language:hover)
+    .popup-button-list__button--submenu-trigger-language,
+  body:has(.popup-button-list__submenu-content-settings:hover)
+    .popup-button-list__button--submenu-trigger-settings {
+    background-color: var(--color-bg-secondary);
+    color: var(--color-text);
+  }
+
   .popup-button-list__button--submenu-trigger:hover .popup-button-list__chevron,
   .popup-button-list__button--submenu-trigger[aria-expanded='true'] .popup-button-list__chevron {
     opacity: 1;

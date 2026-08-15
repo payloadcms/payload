@@ -73,7 +73,7 @@ export const ThemeMenu: React.FC<{
       renderButton={({ active, onClick, onKeyDown, ...aria }) => (
         <button
           {...aria}
-          className="popup-button-list__button popup-button-list__button--submenu-trigger"
+          className="popup-button-list__button popup-button-list__button--submenu-trigger popup-button-list__button--submenu-trigger-theme"
           onClick={onClick}
           onKeyDown={onKeyDown}
           onMouseEnter={open}
@@ -93,7 +93,11 @@ export const ThemeMenu: React.FC<{
       size="large"
       theme="dark"
     >
-      <div onMouseEnter={keepOpen} ref={contentRef as React.Ref<HTMLDivElement>}>
+      <div
+        className="popup-button-list__submenu-content-theme"
+        onMouseEnter={keepOpen}
+        ref={contentRef as React.Ref<HTMLDivElement>}
+      >
         <ThemeMenuContent />
       </div>
     </Popup>
