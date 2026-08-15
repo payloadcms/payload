@@ -12,7 +12,8 @@
     display: flex;
     flex-direction: column;
     background-color: var(--color-bg);
-
+    min-height: 0;
+    overflow: hidden;
   }
 
   @media (max-width: 768px) {

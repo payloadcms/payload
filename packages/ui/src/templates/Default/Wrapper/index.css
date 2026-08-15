@@ -1,9 +1,10 @@
 @layer payload-default {
   .template-default {
-    min-height: 100vh;
+    height: 100vh;
     display: grid;
     position: relative;
     isolation: isolate;
+    overflow: hidden;
   }
 
   @media (min-width: 1441px) {
