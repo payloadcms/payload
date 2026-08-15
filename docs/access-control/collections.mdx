@@ -163,6 +163,14 @@ The following arguments are provided to the `read` function:
 
 Returns a boolean which allows/denies access to the `update` request.
 
+<Banner type="info">
+  **Default behavior on auth-enabled collections:** if you do not provide an
+  `access.update` function, the default constrains updates to `{ id: { equals:
+  req.user.id } }` — a user can only update their own record, and only if their
+  `req.user.collection` matches this collection's slug. To allow admins to
+  update other users, provide an explicit `access.update`.
+</Banner>
+
 To add update Access Control to a Collection, use the `update` property in the [Collection Config](../configuration/collections):
 
 ```ts
@@ -222,6 +230,13 @@ The following arguments are provided to the `update` function:
 ### Delete
 
 Similarly to the Update function, returns a boolean or a [query constraint](/docs/queries/overview) to limit which documents can be deleted by which users.
+
+<Banner type="info">
+  **Default behavior on auth-enabled collections:** the default `access.delete`
+  constrains deletes to `{ id: { equals: req.user.id } }` (self only,
+  same-collection). To allow admins to delete other users, provide an explicit
+  `access.delete`.
+</Banner>
 
 To add delete Access Control to a Collection, use the `delete` property in the [Collection Config](../configuration/collections):
 
@@ -313,6 +328,13 @@ The following arguments are provided to the `admin` function:
 ### Unlock
 
 Determines which users can [unlock](/docs/authentication/operations#unlock) other users who may be blocked from authenticating successfully due to [failing too many login attempts](/docs/authentication/overview#config-options).
+
+<Banner type="info">
+  **Default behavior on auth-enabled collections:** the default `access.unlock`
+  returns `false` for anonymous callers and constrains authenticated callers to
+  their own record. This effectively disables the built-in unlock endpoint until
+  you provide an explicit `access.unlock` allowing admin-initiated unlocks.
+</Banner>
 
 To add Unlock Access Control to a Collection, use the `unlock` property in the [Collection Config](../configuration/collections):
 
