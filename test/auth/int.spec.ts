@@ -2628,5 +2628,26 @@ describe('Auth', () => {
       })
       expect(stillUserB.custom).not.toBe('should not persist')
     })
+
+    it('allows a user to update their own record by default', async () => {
+      const user = await payload.create({
+        collection: slug,
+        data: { email: `self-${uuid()}@test.com`, password: 'test1234', roles: ['user'] },
+        overrideAccess: true,
+      })
+      createdUserIDs.push(user.id)
+
+      const req = await createLocalReq({ user }, payload)
+
+      const updated = await payload.update({
+        collection: slug,
+        id: user.id,
+        data: { custom: 'self-updated' },
+        overrideAccess: false,
+        req,
+      })
+
+      expect(updated.custom).toBe('self-updated')
+    })
   })
 })
