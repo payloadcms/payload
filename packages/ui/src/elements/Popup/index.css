@@ -14,6 +14,12 @@
     display: contents;
   }
 
+  .popup__scrim {
+    position: fixed;
+    inset: 0;
+    z-index: calc(var(--z-popup) - 1);
+  }
+
   .popup__hidden-content {
     position: absolute;
     top: -9999px;

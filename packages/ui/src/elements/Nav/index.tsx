@@ -216,6 +216,7 @@ export const DefaultNav: React.FC<NavProps> = async (props) => {
             CustomAvatar={CustomAvatar}
             CustomLogoutButton={CustomLogoutButton}
             settingsItemGroups={settingsItemGroups}
+            showTitle
           />
           <NavSidebarToggle baseClass={baseClass} />
         </div>

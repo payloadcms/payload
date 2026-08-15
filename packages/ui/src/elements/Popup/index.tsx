@@ -109,6 +109,16 @@ export type PopupProps = {
   }) => React.ReactNode
   showOnHover?: boolean
   /**
+   * Renders a full-viewport, click-capturing layer beneath the popup content while it is open.
+   * This blocks interaction with the rest of the page until the popup is dismissed, instead of
+   * allowing a click to both close the popup and activate whatever was underneath it.
+   *
+   * Has no effect on nested (child) popups — only the outermost popup in a stack renders it.
+   *
+   * @default false
+   */
+  showScrim?: boolean
+  /**
    * By default, the scrollbar is hidden. If you want to show it, set this to true.
    * In both cases, the container is still scrollable.
    *
@@ -170,6 +180,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
     render,
     renderButton,
     showOnHover = false,
+    showScrim = false,
     showScrollbar = false,
     side,
     size = 'fit-content',
@@ -245,6 +256,10 @@ export const Popup: React.FC<PopupProps> = (props) => {
     const offset = 8
     // Additional gap used in side mode so the child popup has breathing room from its parent
     const sideOffset = 4
+    // `.popup__scroll-container` has this much padding above its first item, so aligning the
+    // popup's top edge with the trigger's top edge would leave the first item sitting this many
+    // pixels lower than the trigger row. Subtract it so the content - not the container - aligns.
+    const contentTopInset = 8
 
     let top: number
     let left: number
@@ -258,8 +273,8 @@ export const Popup: React.FC<PopupProps> = (props) => {
       // viewport space.
       // /////////////////////////////////////
 
-      // Top: align with trigger top, clamped to viewport
-      top = triggerRect.top + scrollY
+      // Top: align the popup's first item with the trigger top, clamped to viewport
+      top = triggerRect.top + scrollY - contentTopInset
       const maxTop = scrollY + window.innerHeight - popupRect.height - offset
       top = Math.max(scrollY + offset, Math.min(top, maxTop))
 
@@ -604,6 +619,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
           // that closes the popup due to the click outside handler.
           createPortal(
             <PopupContext value={{ popupRef }}>
+              {active && showScrim && !parentPopup && <div className={`${baseClass}__scrim`} />}
               <div
                 className={
                   active

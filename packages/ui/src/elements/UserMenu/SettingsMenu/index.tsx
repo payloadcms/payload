@@ -6,6 +6,7 @@ import { GearIcon } from '../../../icons/Gear/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { MenuSeparator } from '../../MenuSeparator/index.js'
 import { Popup, PopupList } from '../../Popup/index.js'
+import { useHoverSubmenu } from '../useHoverSubmenu.js'
 
 export type UserMenuSettingsGroup = {
   group?: string
@@ -33,6 +34,7 @@ export const SettingsMenuContent: React.FC<{ groups: UserMenuSettingsGroup[] }> 
 
 export const SettingsMenu: React.FC<SettingsMenuProps> = ({ groups, onMobileOpen }) => {
   const { t } = useTranslation()
+  const { close, contentRef, isOpen, keepOpen, open, triggerRef } = useHoverSubmenu('settings')
 
   if (onMobileOpen) {
     return (
@@ -42,7 +44,7 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({ groups, onMobileOpen
         onClick={onMobileOpen}
         type="button"
       >
-        <span className="popup-button-list__submenu-icon">
+        <span className="popup-button-list__icon">
           <GearIcon size={24} />
         </span>
         <span className="popup-button-list__label">{t('general:settings')}</span>
@@ -55,21 +57,23 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({ groups, onMobileOpen
 
   return (
     <Popup
+      forceOpen={isOpen}
+      onToggleOpen={(nextOpen) => {
+        if (!nextOpen) {
+          close()
+        }
+      }}
       renderButton={({ active, onClick, onKeyDown, ...aria }) => (
         <button
           {...aria}
-          className={[
-            'popup-button-list__button',
-            'popup-button-list__button--submenu-trigger',
-            active && 'popup-button-list__button--selected',
-          ]
-            .filter(Boolean)
-            .join(' ')}
+          className="popup-button-list__button popup-button-list__button--submenu-trigger"
           onClick={onClick}
           onKeyDown={onKeyDown}
+          onMouseEnter={open}
+          ref={triggerRef as React.Ref<HTMLButtonElement>}
           type="button"
         >
-          <span className="popup-button-list__submenu-icon">
+          <span className="popup-button-list__icon">
             <GearIcon size={24} />
           </span>
           <span className="popup-button-list__label">{t('general:settings')}</span>
@@ -82,7 +86,9 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({ groups, onMobileOpen
       size="large"
       theme="dark"
     >
-      <SettingsMenuContent groups={groups} />
+      <div onMouseEnter={keepOpen} ref={contentRef as React.Ref<HTMLDivElement>}>
+        <SettingsMenuContent groups={groups} />
+      </div>
     </Popup>
   )
 }

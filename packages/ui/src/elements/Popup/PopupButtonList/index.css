@@ -93,10 +93,6 @@
     flex-shrink: 0;
   }
 
-  .popup-button-list__submenu-icon {
-    flex-shrink: 0;
-  }
-
   /* RadioGroup - selected items show only the checkmark, no background fill */
   .popup-button-list--with-icons .popup-button-list__button--selected {
     background-color: transparent;
@@ -148,27 +144,30 @@
     padding: 0 0 0 var(--spacer-1);
   }
 
-  /* Submenu trigger buttons: icon on left, label in middle, chevron pushed right */
-  .popup-button-list__button--submenu-trigger {
-    align-items: center;
-  }
-
-  .popup-button-list__submenu-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding-inline-start: var(--spacer-1);
+  /*
+   * Submenu trigger buttons: rendered inside a PopupList.MenuItem wrapper so their
+   * icon/label spacing (via --with-actions --large) matches other menu items (e.g. Log Out)
+   * exactly. The label grows to push the chevron flush against the trigger's trailing edge.
+   */
+  .popup-button-list__button--submenu-trigger .popup-button-list__label {
+    flex: 1;
   }
 
   .popup-button-list__chevron {
     display: flex;
     align-items: center;
-    margin-left: auto;
     opacity: 0.5;
+    flex-shrink: 0;
+  }
+
+  .popup-button-list__button--submenu-trigger:hover,
+  .popup-button-list__button--submenu-trigger[aria-expanded='true'] {
+    background-color: var(--color-bg-brand);
+    color: var(--color-text-onbrand);
   }
 
   .popup-button-list__button--submenu-trigger:hover .popup-button-list__chevron,
-  .popup-button-list__button--selected .popup-button-list__chevron {
+  .popup-button-list__button--submenu-trigger[aria-expanded='true'] .popup-button-list__chevron {
     opacity: 1;
   }
 }

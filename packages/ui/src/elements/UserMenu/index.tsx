@@ -6,6 +6,7 @@ import React, { useEffect, useState } from 'react'
 import type { UserMenuSettingsGroup } from './SettingsMenu/index.js'
 
 import { Account } from '../../graphics/Account/index.js'
+import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { LogOutIcon } from '../../icons/LogOut/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
@@ -13,11 +14,12 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { MenuSeparator } from '../MenuSeparator/index.js'
 import { Popup, PopupList } from '../Popup/index.js'
 import { RenderCustomComponent } from '../RenderCustomComponent/index.js'
+import { HoverSubmenuGroupProvider } from './HoverSubmenuGroup.js'
 import { LanguageMenu, LanguageMenuContent } from './LanguageMenu/index.js'
 import { SettingsMenu, SettingsMenuContent } from './SettingsMenu/index.js'
 import { SubMenuHeader } from './SubMenuHeader/index.js'
-import { ThemeMenu, ThemeMenuContent } from './ThemeMenu/index.js'
 import './index.css'
+import { ThemeMenu, ThemeMenuContent } from './ThemeMenu/index.js'
 
 const baseClass = 'user-menu'
 
@@ -25,12 +27,14 @@ type UserMenuProps = {
   CustomAvatar?: React.ReactNode
   CustomLogoutButton?: React.ReactNode
   settingsItemGroups?: UserMenuSettingsGroup[]
+  showTitle?: boolean
 }
 
 export const UserMenu: React.FC<UserMenuProps> = ({
   CustomAvatar,
   CustomLogoutButton,
   settingsItemGroups = [],
+  showTitle = false,
 }) => {
   const { user } = useAuth()
   const { languageOptions, t } = useTranslation()
@@ -54,6 +58,11 @@ export const UserMenu: React.FC<UserMenuProps> = ({
   const [activeMobileSubmenu, setActiveMobileSubmenu] = useState<
     'language' | 'settings' | 'theme' | null
   >(null)
+
+  // Bumped whenever the account menu closes, so submenu triggers (Theme/Language/Settings)
+  // remount and reset their own open/hover state - otherwise a submenu left open via hover
+  // stays mounted and open even after the parent menu itself has closed.
+  const [menuInstanceKey, setMenuInstanceKey] = useState(0)
 
   useEffect(() => {
     if (!isMobile) {
@@ -81,19 +90,32 @@ export const UserMenu: React.FC<UserMenuProps> = ({
       caret={false}
       className={baseClass}
       horizontalAlign="right"
-      onToggleClose={() => setActiveMobileSubmenu(null)}
+      onToggleClose={() => {
+        setActiveMobileSubmenu(null)
+        setMenuInstanceKey((key) => key + 1)
+      }}
       renderButton={({ active, ...ariaProps }) => (
         <button
           {...ariaProps}
           aria-label={t('authentication:account')}
-          className={[`${baseClass}__trigger`, active && `${baseClass}__trigger--active`]
+          className={[
+            `${baseClass}__trigger`,
+            active && `${baseClass}__trigger--active`,
+            showTitle && `${baseClass}__trigger--with-title`,
+          ]
             .filter(Boolean)
             .join(' ')}
           type="button"
         >
-          <RenderCustomComponent CustomComponent={CustomAvatar} Fallback={<Account />} />
+          <div className={`${baseClass}__trigger-content`}>
+            {showTitle && (titleString || identifier) && (
+              <p className={`${baseClass}__trigger-label`}>{titleString || identifier}</p>
+            )}
+            <ChevronIcon direction="down" size={16} />
+          </div>
         </button>
       )}
+      showScrim
       size="large"
       theme="dark"
       verticalAlign="bottom"
@@ -143,36 +165,45 @@ export const UserMenu: React.FC<UserMenuProps> = ({
             </div>
           </a>
 
-          {/* Preferences group: Theme + Language */}
-          {showPreferencesGroup && (
-            <PopupList.ButtonGroup>
-              {showThemeMenu && (
-                <ThemeMenu
-                  onMobileOpen={isMobile ? () => setActiveMobileSubmenu('theme') : undefined}
-                />
-              )}
-              {hasMultipleLanguages && (
-                <LanguageMenu
-                  onMobileOpen={isMobile ? () => setActiveMobileSubmenu('language') : undefined}
-                />
-              )}
-            </PopupList.ButtonGroup>
-          )}
+          <HoverSubmenuGroupProvider>
+            {/* Preferences group: Theme + Language */}
+            {showPreferencesGroup && (
+              <>
+                {showThemeMenu && (
+                  <PopupList.MenuItem>
+                    <ThemeMenu
+                      key={menuInstanceKey}
+                      onMobileOpen={isMobile ? () => setActiveMobileSubmenu('theme') : undefined}
+                    />
+                  </PopupList.MenuItem>
+                )}
+                {hasMultipleLanguages && (
+                  <PopupList.MenuItem>
+                    <LanguageMenu
+                      key={menuInstanceKey}
+                      onMobileOpen={isMobile ? () => setActiveMobileSubmenu('language') : undefined}
+                    />
+                  </PopupList.MenuItem>
+                )}
+              </>
+            )}
 
-          <MenuSeparator />
+            <MenuSeparator />
 
-          {/* Settings group */}
-          {hasSettingsItems && (
-            <>
-              <PopupList.ButtonGroup>
-                <SettingsMenu
-                  groups={settingsItemGroups}
-                  onMobileOpen={isMobile ? () => setActiveMobileSubmenu('settings') : undefined}
-                />
-              </PopupList.ButtonGroup>
-              <MenuSeparator />
-            </>
-          )}
+            {/* Settings group */}
+            {hasSettingsItems && (
+              <>
+                <PopupList.MenuItem>
+                  <SettingsMenu
+                    groups={settingsItemGroups}
+                    key={menuInstanceKey}
+                    onMobileOpen={isMobile ? () => setActiveMobileSubmenu('settings') : undefined}
+                  />
+                </PopupList.MenuItem>
+                <MenuSeparator />
+              </>
+            )}
+          </HoverSubmenuGroupProvider>
 
           {/* Account actions */}
           <PopupList.MenuItem>
