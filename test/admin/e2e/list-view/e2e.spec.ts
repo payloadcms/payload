@@ -1175,6 +1175,27 @@ describe('List View', () => {
       await expect(page.locator('table > thead > tr > th:nth-child(2)')).toHaveText('Number')
     })
 
+    test('should retain column visibility after reload and navigating to the next page', async () => {
+      await deleteAllPosts()
+
+      await mapAsync([...Array(6)], async () => {
+        await createPost()
+      })
+
+      await page.goto(postsUrl.list)
+      await setPerPageLimit({ page, limit: 5 })
+
+      await toggleColumn(page, { columnLabel: 'ID', columnName: 'id', targetState: 'off' })
+
+      await page.reload()
+
+      await expect(page.locator('#heading-id')).toBeHidden()
+
+      await goToNextPage(page)
+
+      await expect(page.locator('#heading-id')).toBeHidden()
+    })
+
     test('should inject preferred columns into URL search params on load', async () => {
       await toggleColumn(page, { columnLabel: 'ID', columnName: 'id', targetState: 'off' })
 
