@@ -1,7 +1,7 @@
 'use client'
 import { useWindowInfo } from '@faceless-ui/window-info'
 import { PREFERENCE_KEYS } from 'payload/shared'
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect } from 'react'
 
 import { usePreferences } from '../../providers/Preferences/index.js'
 import { usePathname } from '../../providers/RouterAdapter/index.js'
@@ -9,7 +9,6 @@ import { usePathname } from '../../providers/RouterAdapter/index.js'
 type NavContextType = {
   hydrated: boolean
   navOpen: boolean
-  navRef: React.RefObject<HTMLDivElement | null>
   setNavOpen: (value: boolean) => void
 }
 
@@ -19,7 +18,6 @@ type NavContextType = {
 export const NavContext = React.createContext<NavContextType>({
   hydrated: false,
   navOpen: true,
-  navRef: null,
   setNavOpen: () => {},
 })
 
@@ -49,7 +47,6 @@ export const NavProvider: React.FC<{
   const pathname = usePathname()
 
   const { getPreference } = usePreferences()
-  const navRef = useRef(null)
 
   // initialize the nav to be closed
   // this is because getting the preference is async
@@ -79,18 +76,6 @@ export const NavProvider: React.FC<{
     }
   }, [pathname])
 
-  // on open and close, lock the body scroll
-  // do not do this on desktop, the sidebar is not a modal
-  useEffect(() => {
-    if (navRef.current) {
-      if (navOpen && midBreak) {
-        navRef.current.style.overscrollBehavior = 'contain'
-      } else {
-        navRef.current.style.overscrollBehavior = 'auto'
-      }
-    }
-  }, [navOpen, midBreak])
-
   // on smaller screens where the nav is a modal
   // close the nav when the user resizes down to mobile
   // the sidebar is a modal on mobile
@@ -101,14 +86,5 @@ export const NavProvider: React.FC<{
     setHydrated(true)
   }, [largeBreak, midBreak, smallBreak])
 
-  // when the component unmounts, clear all body scroll locks
-  useEffect(() => {
-    return () => {
-      if (navRef.current) {
-        navRef.current.style.overscrollBehavior = 'auto'
-      }
-    }
-  }, [])
-
-  return <NavContext value={{ hydrated, navOpen, navRef, setNavOpen }}>{children}</NavContext>
+  return <NavContext value={{ hydrated, navOpen, setNavOpen }}>{children}</NavContext>
 }
