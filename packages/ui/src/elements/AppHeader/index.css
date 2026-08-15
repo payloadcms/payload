@@ -125,6 +125,10 @@
     margin-right: var(--spacer-3);
   }
 
+  .app-header--nav-open .app-header__sidebar-toggle {
+    display: none;
+  }
+
   @media (max-width: 1440px) {
     .app-header__actions {
       max-width: 500px;
