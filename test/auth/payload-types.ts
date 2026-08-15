@@ -62,15 +62,15 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_087E2F44".
+ * via the `definition` "LexicalNodes_064459F7".
  */
-export type LexicalNodes_087E2F44 =
+export type LexicalNodes_064459F7 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_087E2F44>
+  | SerializedParagraphNode<LexicalNodes_064459F7>
   | SerializedBlockNode<MyBlock>
-  | SerializedHeadingNode<LexicalNodes_087E2F44>
+  | SerializedHeadingNode<LexicalNodes_064459F7>
   | {
       type: 'upload';
       /**
@@ -79,11 +79,11 @@ export type LexicalNodes_087E2F44 =
       version: number;
       [k: string]: unknown;
     }
-  | SerializedQuoteNode<LexicalNodes_087E2F44>
-  | SerializedListNode<LexicalNodes_087E2F44>
-  | SerializedListItemNode<LexicalNodes_087E2F44>
-  | SerializedAutoLinkNode<LexicalNodes_087E2F44, LexicalLinkFields_0A7E9EC0>
-  | SerializedLinkNode<LexicalNodes_087E2F44, LexicalLinkFields_0A7E9EC0>
+  | SerializedQuoteNode<LexicalNodes_064459F7>
+  | SerializedListNode<LexicalNodes_064459F7>
+  | SerializedListItemNode<LexicalNodes_064459F7>
+  | SerializedAutoLinkNode<LexicalNodes_064459F7, LexicalLinkFields_0A7E9EC0>
+  | SerializedLinkNode<LexicalNodes_064459F7, LexicalLinkFields_0A7E9EC0>
   | SerializedRelationshipNode<
       | 'users'
       | 'partial-disable-local-strategies'
@@ -91,6 +91,8 @@ export type LexicalNodes_087E2F44 =
       | 'api-keys'
       | 'public-users'
       | 'open-update-auth'
+      | 'collision-auth-a'
+      | 'collision-auth-b'
       | 'rotate-secret'
       | 'rotate-secret-secondary'
       | 'rotate-secret-login'
@@ -110,6 +112,8 @@ export interface Config {
     'api-keys': ApiKeyAuthOperations;
     'public-users': PublicUserAuthOperations;
     'open-update-auth': OpenUpdateAuthAuthOperations;
+    'collision-auth-a': CollisionAuthAAuthOperations;
+    'collision-auth-b': CollisionAuthBAuthOperations;
     'rotate-secret': RotateSecretAuthOperations;
     'rotate-secret-secondary': RotateSecretSecondaryAuthOperations;
     'rotate-secret-login': RotateSecretLoginAuthOperations;
@@ -123,6 +127,8 @@ export interface Config {
     'api-keys': ApiKey;
     'public-users': PublicUser;
     'open-update-auth': OpenUpdateAuth;
+    'collision-auth-a': CollisionAuthA;
+    'collision-auth-b': CollisionAuthB;
     'rotate-secret': RotateSecret;
     'rotate-secret-secondary': RotateSecretSecondary;
     'rotate-secret-login': RotateSecretLogin;
@@ -141,6 +147,8 @@ export interface Config {
     'api-keys': ApiKeysSelect<false> | ApiKeysSelect<true>;
     'public-users': PublicUsersSelect<false> | PublicUsersSelect<true>;
     'open-update-auth': OpenUpdateAuthSelect<false> | OpenUpdateAuthSelect<true>;
+    'collision-auth-a': CollisionAuthASelect<false> | CollisionAuthASelect<true>;
+    'collision-auth-b': CollisionAuthBSelect<false> | CollisionAuthBSelect<true>;
     'rotate-secret': RotateSecretSelect<false> | RotateSecretSelect<true>;
     'rotate-secret-secondary': RotateSecretSecondarySelect<false> | RotateSecretSecondarySelect<true>;
     'rotate-secret-login': RotateSecretLoginSelect<false> | RotateSecretLoginSelect<true>;
@@ -170,6 +178,8 @@ export interface Config {
     | ApiKey
     | PublicUser
     | OpenUpdateAuth
+    | CollisionAuthA
+    | CollisionAuthB
     | RotateSecret
     | RotateSecretSecondary
     | RotateSecretLogin
@@ -287,6 +297,42 @@ export interface OpenUpdateAuthAuthOperations {
     password: string;
   };
 }
+export interface CollisionAuthAAuthOperations {
+  forgotPassword: {
+    email: string;
+    password: string;
+  };
+  login: {
+    email: string;
+    password: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
+    email: string;
+    password: string;
+  };
+}
+export interface CollisionAuthBAuthOperations {
+  forgotPassword: {
+    email: string;
+    password: string;
+  };
+  login: {
+    email: string;
+    password: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
+    email: string;
+    password: string;
+  };
+}
 export interface RotateSecretAuthOperations {
   forgotPassword: {
     email: string;
@@ -374,7 +420,7 @@ export interface User {
       }[]
     | null;
   namedSaveToJWT?: string | null;
-  richText?: LexicalRichText<LexicalNodes_087E2F44> | null;
+  richText?: LexicalRichText<LexicalNodes_064459F7> | null;
   group?: {
     liftedSaveToJWT?: string | null;
   };
@@ -519,6 +565,58 @@ export interface OpenUpdateAuth {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collision-auth-a".
+ */
+export interface CollisionAuthA {
+  id: number;
+  label?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+  collection: 'collision-auth-a';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collision-auth-b".
+ */
+export interface CollisionAuthB {
+  id: number;
+  label?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+  collection: 'collision-auth-b';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "rotate-secret".
  */
 export interface RotateSecret {
@@ -644,6 +742,14 @@ export interface PayloadLockedDocument {
         value: string | OpenUpdateAuth;
       } | null)
     | ({
+        relationTo: 'collision-auth-a';
+        value: number | CollisionAuthA;
+      } | null)
+    | ({
+        relationTo: 'collision-auth-b';
+        value: number | CollisionAuthB;
+      } | null)
+    | ({
         relationTo: 'rotate-secret';
         value: string | RotateSecret;
       } | null)
@@ -688,6 +794,14 @@ export interface PayloadLockedDocument {
     | {
         relationTo: 'open-update-auth';
         value: string | OpenUpdateAuth;
+      }
+    | {
+        relationTo: 'collision-auth-a';
+        value: number | CollisionAuthA;
+      }
+    | {
+        relationTo: 'collision-auth-b';
+        value: number | CollisionAuthB;
       }
     | {
         relationTo: 'rotate-secret';
@@ -738,6 +852,14 @@ export interface PayloadPreference {
     | {
         relationTo: 'open-update-auth';
         value: string | OpenUpdateAuth;
+      }
+    | {
+        relationTo: 'collision-auth-a';
+        value: number | CollisionAuthA;
+      }
+    | {
+        relationTo: 'collision-auth-b';
+        value: number | CollisionAuthB;
       }
     | {
         relationTo: 'rotate-secret';
@@ -931,6 +1053,54 @@ export interface OpenUpdateAuthSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collision-auth-a_select".
+ */
+export interface CollisionAuthASelect<T extends boolean = true> {
+  id?: T;
+  label?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collision-auth-b_select".
+ */
+export interface CollisionAuthBSelect<T extends boolean = true> {
+  id?: T;
+  label?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "rotate-secret_select".
  */
 export interface RotateSecretSelect<T extends boolean = true> {
@@ -1061,6 +1231,8 @@ export interface CollectionQueryWidget {
       | 'api-keys'
       | 'public-users'
       | 'open-update-auth'
+      | 'collision-auth-a'
+      | 'collision-auth-b'
       | 'rotate-secret'
       | 'rotate-secret-secondary'
       | 'rotate-secret-login'
@@ -1095,6 +1267,8 @@ export interface ActivityWidget {
           | 'api-keys'
           | 'public-users'
           | 'open-update-auth'
+          | 'collision-auth-a'
+          | 'collision-auth-b'
           | 'rotate-secret'
           | 'rotate-secret-secondary'
           | 'rotate-secret-login'

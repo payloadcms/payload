@@ -23,6 +23,8 @@ import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { devUser } from '../credentials.js'
 import {
   apiKeysSlug,
+  collisionAuthASlug,
+  collisionAuthBSlug,
   namedSaveToJWTValue,
   openUpdateAuthSlug,
   partialDisableLocalStrategiesSlug,
@@ -2677,6 +2679,68 @@ describe('Auth', () => {
 
       await payload.delete({ collection: openUpdateAuthSlug, id: userA.id, overrideAccess: true })
       await payload.delete({ collection: openUpdateAuthSlug, id: userB.id, overrideAccess: true })
+    })
+
+    it('denies cross-collection updates even when ids collide', async () => {
+      const collidingId = 424242
+
+      const userA = await payload.create({
+        collection: collisionAuthASlug,
+        data: {
+          id: collidingId,
+          email: `ca-${uuid()}@test.com`,
+          password: 'test1234',
+          label: 'A original',
+        },
+        overrideAccess: true,
+      })
+
+      const docB = await payload.create({
+        collection: collisionAuthBSlug,
+        data: {
+          id: collidingId,
+          email: `cb-${uuid()}@test.com`,
+          password: 'test1234',
+          label: 'B original',
+        },
+        overrideAccess: true,
+      })
+
+      expect(userA.id).toBe(collidingId)
+      expect(docB.id).toBe(collidingId)
+
+      const req = await createLocalReq({ user: userA }, payload)
+
+      const result = await payload
+        .update({
+          collection: collisionAuthBSlug,
+          id: collidingId,
+          data: { label: 'B HIJACKED' },
+          overrideAccess: false,
+          req,
+        })
+        .catch((err) => err)
+
+      expect(result).toBeInstanceOf(Error)
+      expect((result as Error).name).toBe('Forbidden')
+
+      const stillDocB = await payload.findByID({
+        collection: collisionAuthBSlug,
+        id: collidingId,
+        overrideAccess: true,
+      })
+      expect(stillDocB.label).toBe('B original')
+
+      await payload.delete({
+        collection: collisionAuthASlug,
+        id: collidingId,
+        overrideAccess: true,
+      })
+      await payload.delete({
+        collection: collisionAuthBSlug,
+        id: collidingId,
+        overrideAccess: true,
+      })
     })
   })
 })

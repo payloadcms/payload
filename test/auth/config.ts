@@ -10,6 +10,8 @@ import { seed } from './seed.js'
 import {
   apiKeysSlug,
   BASE_PATH,
+  collisionAuthASlug,
+  collisionAuthBSlug,
   namedSaveToJWTValue,
   openUpdateAuthSlug,
   partialDisableLocalStrategiesSlug,
@@ -312,6 +314,24 @@ export default buildConfigWithDefaults({
       },
       auth: true,
       fields: [{ name: 'note', type: 'text' }],
+      versions: false,
+    },
+    {
+      slug: collisionAuthASlug,
+      auth: true,
+      fields: [
+        { name: 'id', type: 'number' },
+        { name: 'label', type: 'text' },
+      ],
+      versions: false,
+    },
+    {
+      slug: collisionAuthBSlug,
+      auth: true,
+      fields: [
+        { name: 'id', type: 'number' },
+        { name: 'label', type: 'text' },
+      ],
       versions: false,
     },
     {

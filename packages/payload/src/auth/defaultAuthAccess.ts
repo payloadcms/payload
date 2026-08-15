@@ -1,8 +1,10 @@
 import type { Access } from '../config/types.js'
 
-export const defaultAuthAccess: Access = ({ req: { user } }) => {
-  if (!user) {
-    return false
+export const defaultAuthAccess =
+  (collectionSlug: string): Access =>
+  ({ req: { user } }) => {
+    if (!user || user.collection !== collectionSlug) {
+      return false
+    }
+    return { id: { equals: user.id } }
   }
-  return { id: { equals: user.id } }
-}
