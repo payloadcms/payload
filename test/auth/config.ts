@@ -12,6 +12,7 @@ import {
   BASE_PATH,
   collisionAuthASlug,
   collisionAuthBSlug,
+  defaultAccessFixtureSlug,
   namedSaveToJWTValue,
   openUpdateAuthSlug,
   partialDisableLocalStrategiesSlug,
@@ -332,6 +333,11 @@ export default buildConfigWithDefaults({
         { name: 'id', type: 'number' },
         { name: 'label', type: 'text' },
       ],
+      versions: false,
+    },
+    {
+      slug: defaultAccessFixtureSlug,
+      fields: [{ name: 'title', type: 'text' }],
       versions: false,
     },
     {

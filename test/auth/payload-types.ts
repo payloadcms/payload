@@ -62,15 +62,15 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_064459F7".
+ * via the `definition` "LexicalNodes_7849057D".
  */
-export type LexicalNodes_064459F7 =
+export type LexicalNodes_7849057D =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_064459F7>
+  | SerializedParagraphNode<LexicalNodes_7849057D>
   | SerializedBlockNode<MyBlock>
-  | SerializedHeadingNode<LexicalNodes_064459F7>
+  | SerializedHeadingNode<LexicalNodes_7849057D>
   | {
       type: 'upload';
       /**
@@ -79,11 +79,11 @@ export type LexicalNodes_064459F7 =
       version: number;
       [k: string]: unknown;
     }
-  | SerializedQuoteNode<LexicalNodes_064459F7>
-  | SerializedListNode<LexicalNodes_064459F7>
-  | SerializedListItemNode<LexicalNodes_064459F7>
-  | SerializedAutoLinkNode<LexicalNodes_064459F7, LexicalLinkFields_0A7E9EC0>
-  | SerializedLinkNode<LexicalNodes_064459F7, LexicalLinkFields_0A7E9EC0>
+  | SerializedQuoteNode<LexicalNodes_7849057D>
+  | SerializedListNode<LexicalNodes_7849057D>
+  | SerializedListItemNode<LexicalNodes_7849057D>
+  | SerializedAutoLinkNode<LexicalNodes_7849057D, LexicalLinkFields_0A7E9EC0>
+  | SerializedLinkNode<LexicalNodes_7849057D, LexicalLinkFields_0A7E9EC0>
   | SerializedRelationshipNode<
       | 'users'
       | 'partial-disable-local-strategies'
@@ -93,6 +93,7 @@ export type LexicalNodes_064459F7 =
       | 'open-update-auth'
       | 'collision-auth-a'
       | 'collision-auth-b'
+      | 'default-access-fixture'
       | 'rotate-secret'
       | 'rotate-secret-secondary'
       | 'rotate-secret-login'
@@ -129,6 +130,7 @@ export interface Config {
     'open-update-auth': OpenUpdateAuth;
     'collision-auth-a': CollisionAuthA;
     'collision-auth-b': CollisionAuthB;
+    'default-access-fixture': DefaultAccessFixture;
     'rotate-secret': RotateSecret;
     'rotate-secret-secondary': RotateSecretSecondary;
     'rotate-secret-login': RotateSecretLogin;
@@ -149,6 +151,7 @@ export interface Config {
     'open-update-auth': OpenUpdateAuthSelect<false> | OpenUpdateAuthSelect<true>;
     'collision-auth-a': CollisionAuthASelect<false> | CollisionAuthASelect<true>;
     'collision-auth-b': CollisionAuthBSelect<false> | CollisionAuthBSelect<true>;
+    'default-access-fixture': DefaultAccessFixtureSelect<false> | DefaultAccessFixtureSelect<true>;
     'rotate-secret': RotateSecretSelect<false> | RotateSecretSelect<true>;
     'rotate-secret-secondary': RotateSecretSecondarySelect<false> | RotateSecretSecondarySelect<true>;
     'rotate-secret-login': RotateSecretLoginSelect<false> | RotateSecretLoginSelect<true>;
@@ -420,7 +423,7 @@ export interface User {
       }[]
     | null;
   namedSaveToJWT?: string | null;
-  richText?: LexicalRichText<LexicalNodes_064459F7> | null;
+  richText?: LexicalRichText<LexicalNodes_7849057D> | null;
   group?: {
     liftedSaveToJWT?: string | null;
   };
@@ -617,6 +620,16 @@ export interface CollisionAuthB {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "default-access-fixture".
+ */
+export interface DefaultAccessFixture {
+  id: string;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "rotate-secret".
  */
 export interface RotateSecret {
@@ -748,6 +761,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'collision-auth-b';
         value: number | CollisionAuthB;
+      } | null)
+    | ({
+        relationTo: 'default-access-fixture';
+        value: string | DefaultAccessFixture;
       } | null)
     | ({
         relationTo: 'rotate-secret';
@@ -1101,6 +1118,15 @@ export interface CollisionAuthBSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "default-access-fixture_select".
+ */
+export interface DefaultAccessFixtureSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "rotate-secret_select".
  */
 export interface RotateSecretSelect<T extends boolean = true> {
@@ -1233,6 +1259,7 @@ export interface CollectionQueryWidget {
       | 'open-update-auth'
       | 'collision-auth-a'
       | 'collision-auth-b'
+      | 'default-access-fixture'
       | 'rotate-secret'
       | 'rotate-secret-secondary'
       | 'rotate-secret-login'
@@ -1269,6 +1296,7 @@ export interface ActivityWidget {
           | 'open-update-auth'
           | 'collision-auth-a'
           | 'collision-auth-b'
+          | 'default-access-fixture'
           | 'rotate-secret'
           | 'rotate-secret-secondary'
           | 'rotate-secret-login'

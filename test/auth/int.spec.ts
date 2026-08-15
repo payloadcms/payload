@@ -25,6 +25,7 @@ import {
   apiKeysSlug,
   collisionAuthASlug,
   collisionAuthBSlug,
+  defaultAccessFixtureSlug,
   namedSaveToJWTValue,
   openUpdateAuthSlug,
   partialDisableLocalStrategiesSlug,
@@ -2742,6 +2743,39 @@ describe('Auth', () => {
       await payload.delete({
         collection: collisionAuthBSlug,
         id: collidingId,
+        overrideAccess: true,
+      })
+    })
+
+    it('does not apply the auth default to non-auth collections', async () => {
+      const authUser = await payload.create({
+        collection: slug,
+        data: { email: `nonauth-${uuid()}@test.com`, password: 'test1234', roles: ['user'] },
+        overrideAccess: true,
+      })
+      createdUserIDs.push(authUser.id)
+
+      const doc = await payload.create({
+        collection: defaultAccessFixtureSlug,
+        data: { title: 'original' },
+        overrideAccess: true,
+      })
+
+      const req = await createLocalReq({ user: authUser }, payload)
+
+      const updated = await payload.update({
+        collection: defaultAccessFixtureSlug,
+        id: doc.id,
+        data: { title: 'edited by another user' },
+        overrideAccess: false,
+        req,
+      })
+
+      expect(updated.title).toBe('edited by another user')
+
+      await payload.delete({
+        collection: defaultAccessFixtureSlug,
+        id: doc.id,
         overrideAccess: true,
       })
     })

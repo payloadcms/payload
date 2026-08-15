@@ -8,6 +8,8 @@ export const collisionAuthASlug = 'collision-auth-a'
 
 export const collisionAuthBSlug = 'collision-auth-b'
 
+export const defaultAccessFixtureSlug = 'default-access-fixture'
+
 export const apiKeysSlug = 'api-keys'
 
 export const rotateSecretSlug = 'rotate-secret'
