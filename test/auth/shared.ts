@@ -2,6 +2,8 @@ export const slug = 'users'
 
 export const publicUsersSlug = 'public-users'
 
+export const openUpdateAuthSlug = 'open-update-auth'
+
 export const apiKeysSlug = 'api-keys'
 
 export const rotateSecretSlug = 'rotate-secret'

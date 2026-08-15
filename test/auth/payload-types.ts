@@ -62,15 +62,15 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_BCC912DC".
+ * via the `definition` "LexicalNodes_087E2F44".
  */
-export type LexicalNodes_BCC912DC =
+export type LexicalNodes_087E2F44 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_BCC912DC>
+  | SerializedParagraphNode<LexicalNodes_087E2F44>
   | SerializedBlockNode<MyBlock>
-  | SerializedHeadingNode<LexicalNodes_BCC912DC>
+  | SerializedHeadingNode<LexicalNodes_087E2F44>
   | {
       type: 'upload';
       /**
@@ -79,17 +79,21 @@ export type LexicalNodes_BCC912DC =
       version: number;
       [k: string]: unknown;
     }
-  | SerializedQuoteNode<LexicalNodes_BCC912DC>
-  | SerializedListNode<LexicalNodes_BCC912DC>
-  | SerializedListItemNode<LexicalNodes_BCC912DC>
-  | SerializedAutoLinkNode<LexicalNodes_BCC912DC, LexicalLinkFields_0A7E9EC0>
-  | SerializedLinkNode<LexicalNodes_BCC912DC, LexicalLinkFields_0A7E9EC0>
+  | SerializedQuoteNode<LexicalNodes_087E2F44>
+  | SerializedListNode<LexicalNodes_087E2F44>
+  | SerializedListItemNode<LexicalNodes_087E2F44>
+  | SerializedAutoLinkNode<LexicalNodes_087E2F44, LexicalLinkFields_0A7E9EC0>
+  | SerializedLinkNode<LexicalNodes_087E2F44, LexicalLinkFields_0A7E9EC0>
   | SerializedRelationshipNode<
       | 'users'
       | 'partial-disable-local-strategies'
       | 'disable-local-strategy-password'
       | 'api-keys'
       | 'public-users'
+      | 'open-update-auth'
+      | 'rotate-secret'
+      | 'rotate-secret-secondary'
+      | 'rotate-secret-login'
       | 'relationsCollection'
       | 'api-keys-with-field-read-access'
       | 'payload-kv'
@@ -105,6 +109,10 @@ export interface Config {
     'disable-local-strategy-password': DisableLocalStrategyPasswordAuthOperations;
     'api-keys': ApiKeyAuthOperations;
     'public-users': PublicUserAuthOperations;
+    'open-update-auth': OpenUpdateAuthAuthOperations;
+    'rotate-secret': RotateSecretAuthOperations;
+    'rotate-secret-secondary': RotateSecretSecondaryAuthOperations;
+    'rotate-secret-login': RotateSecretLoginAuthOperations;
     'api-keys-with-field-read-access': ApiKeysWithFieldReadAccessAuthOperations;
   };
   blocks: {};
@@ -114,6 +122,10 @@ export interface Config {
     'disable-local-strategy-password': DisableLocalStrategyPassword;
     'api-keys': ApiKey;
     'public-users': PublicUser;
+    'open-update-auth': OpenUpdateAuth;
+    'rotate-secret': RotateSecret;
+    'rotate-secret-secondary': RotateSecretSecondary;
+    'rotate-secret-login': RotateSecretLogin;
     relationsCollection: RelationsCollection;
     'api-keys-with-field-read-access': ApiKeysWithFieldReadAccess;
     'payload-kv': PayloadKv;
@@ -128,6 +140,10 @@ export interface Config {
     'disable-local-strategy-password': DisableLocalStrategyPasswordSelect<false> | DisableLocalStrategyPasswordSelect<true>;
     'api-keys': ApiKeysSelect<false> | ApiKeysSelect<true>;
     'public-users': PublicUsersSelect<false> | PublicUsersSelect<true>;
+    'open-update-auth': OpenUpdateAuthSelect<false> | OpenUpdateAuthSelect<true>;
+    'rotate-secret': RotateSecretSelect<false> | RotateSecretSelect<true>;
+    'rotate-secret-secondary': RotateSecretSecondarySelect<false> | RotateSecretSecondarySelect<true>;
+    'rotate-secret-login': RotateSecretLoginSelect<false> | RotateSecretLoginSelect<true>;
     relationsCollection: RelationsCollectionSelect<false> | RelationsCollectionSelect<true>;
     'api-keys-with-field-read-access': ApiKeysWithFieldReadAccessSelect<false> | ApiKeysWithFieldReadAccessSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
@@ -153,6 +169,10 @@ export interface Config {
     | DisableLocalStrategyPassword
     | ApiKey
     | PublicUser
+    | OpenUpdateAuth
+    | RotateSecret
+    | RotateSecretSecondary
+    | RotateSecretLogin
     | ApiKeysWithFieldReadAccess;
   jobs: {
     tasks: unknown;
@@ -249,6 +269,78 @@ export interface PublicUserAuthOperations {
     password: string;
   };
 }
+export interface OpenUpdateAuthAuthOperations {
+  forgotPassword: {
+    email: string;
+    password: string;
+  };
+  login: {
+    email: string;
+    password: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
+    email: string;
+    password: string;
+  };
+}
+export interface RotateSecretAuthOperations {
+  forgotPassword: {
+    email: string;
+    password: string;
+  };
+  login: {
+    email: string;
+    password: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
+    email: string;
+    password: string;
+  };
+}
+export interface RotateSecretSecondaryAuthOperations {
+  forgotPassword: {
+    email: string;
+    password: string;
+  };
+  login: {
+    email: string;
+    password: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
+    email: string;
+    password: string;
+  };
+}
+export interface RotateSecretLoginAuthOperations {
+  forgotPassword: {
+    email: string;
+    password: string;
+  };
+  login: {
+    email: string;
+    password: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
+    email: string;
+    password: string;
+  };
+}
 export interface ApiKeysWithFieldReadAccessAuthOperations {
   forgotPassword: {
     email: string;
@@ -282,7 +374,7 @@ export interface User {
       }[]
     | null;
   namedSaveToJWT?: string | null;
-  richText?: LexicalRichText<LexicalNodes_BCC912DC> | null;
+  richText?: LexicalRichText<LexicalNodes_087E2F44> | null;
   group?: {
     liftedSaveToJWT?: string | null;
   };
@@ -401,6 +493,86 @@ export interface PublicUser {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "open-update-auth".
+ */
+export interface OpenUpdateAuth {
+  id: string;
+  note?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+  collection: 'open-update-auth';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "rotate-secret".
+ */
+export interface RotateSecret {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  enableAPIKey?: boolean | null;
+  apiKey?: string | null;
+  apiKeyIndex?: string | null;
+  collection: 'rotate-secret';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "rotate-secret-secondary".
+ */
+export interface RotateSecretSecondary {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  enableAPIKey?: boolean | null;
+  apiKey?: string | null;
+  apiKeyIndex?: string | null;
+  collection: 'rotate-secret-secondary';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "rotate-secret-login".
+ */
+export interface RotateSecretLogin {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  enableAPIKey?: boolean | null;
+  apiKey?: string | null;
+  apiKeyIndex?: string | null;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+  collection: 'rotate-secret-login';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "relationsCollection".
  */
 export interface RelationsCollection {
@@ -468,6 +640,22 @@ export interface PayloadLockedDocument {
         value: string | PublicUser;
       } | null)
     | ({
+        relationTo: 'open-update-auth';
+        value: string | OpenUpdateAuth;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret';
+        value: string | RotateSecret;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret-secondary';
+        value: string | RotateSecretSecondary;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret-login';
+        value: string | RotateSecretLogin;
+      } | null)
+    | ({
         relationTo: 'relationsCollection';
         value: string | RelationsCollection;
       } | null)
@@ -496,6 +684,22 @@ export interface PayloadLockedDocument {
     | {
         relationTo: 'public-users';
         value: string | PublicUser;
+      }
+    | {
+        relationTo: 'open-update-auth';
+        value: string | OpenUpdateAuth;
+      }
+    | {
+        relationTo: 'rotate-secret';
+        value: string | RotateSecret;
+      }
+    | {
+        relationTo: 'rotate-secret-secondary';
+        value: string | RotateSecretSecondary;
+      }
+    | {
+        relationTo: 'rotate-secret-login';
+        value: string | RotateSecretLogin;
       }
     | {
         relationTo: 'api-keys-with-field-read-access';
@@ -530,6 +734,22 @@ export interface PayloadPreference {
     | {
         relationTo: 'public-users';
         value: string | PublicUser;
+      }
+    | {
+        relationTo: 'open-update-auth';
+        value: string | OpenUpdateAuth;
+      }
+    | {
+        relationTo: 'rotate-secret';
+        value: string | RotateSecret;
+      }
+    | {
+        relationTo: 'rotate-secret-secondary';
+        value: string | RotateSecretSecondary;
+      }
+    | {
+        relationTo: 'rotate-secret-login';
+        value: string | RotateSecretLogin;
       }
     | {
         relationTo: 'api-keys-with-field-read-access';
@@ -688,6 +908,76 @@ export interface PublicUsersSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "open-update-auth_select".
+ */
+export interface OpenUpdateAuthSelect<T extends boolean = true> {
+  note?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "rotate-secret_select".
+ */
+export interface RotateSecretSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  enableAPIKey?: T;
+  apiKey?: T;
+  apiKeyIndex?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "rotate-secret-secondary_select".
+ */
+export interface RotateSecretSecondarySelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  enableAPIKey?: T;
+  apiKey?: T;
+  apiKeyIndex?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "rotate-secret-login_select".
+ */
+export interface RotateSecretLoginSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  enableAPIKey?: T;
+  apiKey?: T;
+  apiKeyIndex?: T;
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "relationsCollection_select".
  */
 export interface RelationsCollectionSelect<T extends boolean = true> {
@@ -770,6 +1060,10 @@ export interface CollectionQueryWidget {
       | 'disable-local-strategy-password'
       | 'api-keys'
       | 'public-users'
+      | 'open-update-auth'
+      | 'rotate-secret'
+      | 'rotate-secret-secondary'
+      | 'rotate-secret-login'
       | 'relationsCollection'
       | 'api-keys-with-field-read-access';
     where?:
@@ -800,6 +1094,10 @@ export interface ActivityWidget {
           | 'disable-local-strategy-password'
           | 'api-keys'
           | 'public-users'
+          | 'open-update-auth'
+          | 'rotate-secret'
+          | 'rotate-secret-secondary'
+          | 'rotate-secret-login'
           | 'relationsCollection'
           | 'api-keys-with-field-read-access'
         )[]

@@ -24,6 +24,7 @@ import { devUser } from '../credentials.js'
 import {
   apiKeysSlug,
   namedSaveToJWTValue,
+  openUpdateAuthSlug,
   partialDisableLocalStrategiesSlug,
   publicUsersSlug,
   rotateSecretLoginSlug,
@@ -2648,6 +2649,34 @@ describe('Auth', () => {
       })
 
       expect(updated.custom).toBe('self-updated')
+    })
+
+    it('respects a user-provided access.update over the auth default', async () => {
+      const userA = await payload.create({
+        collection: openUpdateAuthSlug,
+        data: { email: `oa-${uuid()}@test.com`, password: 'test1234' },
+        overrideAccess: true,
+      })
+      const userB = await payload.create({
+        collection: openUpdateAuthSlug,
+        data: { email: `ob-${uuid()}@test.com`, password: 'test1234' },
+        overrideAccess: true,
+      })
+
+      const req = await createLocalReq({ user: userA }, payload)
+
+      const updated = await payload.update({
+        collection: openUpdateAuthSlug,
+        id: userB.id,
+        data: { note: 'overridden default lets this through' },
+        overrideAccess: false,
+        req,
+      })
+
+      expect(updated.note).toBe('overridden default lets this through')
+
+      await payload.delete({ collection: openUpdateAuthSlug, id: userA.id, overrideAccess: true })
+      await payload.delete({ collection: openUpdateAuthSlug, id: userB.id, overrideAccess: true })
     })
   })
 })

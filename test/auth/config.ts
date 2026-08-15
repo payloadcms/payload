@@ -11,6 +11,7 @@ import {
   apiKeysSlug,
   BASE_PATH,
   namedSaveToJWTValue,
+  openUpdateAuthSlug,
   partialDisableLocalStrategiesSlug,
   publicUsersSlug,
   rotateSecretLoginSlug,
@@ -302,6 +303,15 @@ export default buildConfigWithDefaults({
         verify: true,
       },
       fields: [],
+      versions: false,
+    },
+    {
+      slug: openUpdateAuthSlug,
+      access: {
+        update: () => true,
+      },
+      auth: true,
+      fields: [{ name: 'note', type: 'text' }],
       versions: false,
     },
     {
