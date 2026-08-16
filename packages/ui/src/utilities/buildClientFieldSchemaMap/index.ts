@@ -8,6 +8,8 @@ import type {
   TextFieldClient,
 } from 'payload'
 
+import { isLocalStrategyEnabled } from 'payload'
+
 import { traverseFields } from './traverseFields.js'
 
 const baseAuthFields: ClientField[] = [
@@ -47,7 +49,7 @@ export const buildClientFieldSchemaMap = (args: {
     if (matchedCollection) {
       let fieldsToSet = matchedCollection?.fields || []
 
-      if (matchedCollection.auth && !matchedCollection.auth.disableLocalStrategy) {
+      if (matchedCollection.auth && isLocalStrategyEnabled(matchedCollection.auth.localStrategy)) {
         ;(baseAuthFields[0] as TextFieldClient).label = i18n.t('general:password')
         ;(baseAuthFields[1] as TextFieldClient).label = i18n.t('authentication:confirmPassword')
         // Place these fields _last_ to ensure they do not disrupt field paths in the field schema map

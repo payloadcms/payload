@@ -8,6 +8,7 @@ import type { GlobalConfig } from '../../globals/config/types.js'
 import type { OrderableJoinInfo } from './sanitizeJoinField.js'
 import type { Field } from './types.js'
 
+import { isLocalStrategyEnabled } from '../../auth/localStrategy.js'
 import {
   DuplicateFieldName,
   InvalidConfiguration,
@@ -189,7 +190,7 @@ export const sanitizeField = ({
       collectionConfig &&
       collectionConfig.auth &&
       typeof collectionConfig.auth === 'object' &&
-      !collectionConfig.auth.disableLocalStrategy
+      isLocalStrategyEnabled(collectionConfig.auth.localStrategy)
     ) {
       if (reservedBaseAuthFieldNames.includes(field.name)) {
         throw new ReservedFieldName(field, field.name)

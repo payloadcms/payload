@@ -4,6 +4,7 @@ import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
 import type { PayloadRequest, WhereField } from '../../types/index.js'
 import type { EntityPolicies, PathToQuery } from './types.js'
 
+import { isLocalStrategyEnabled } from '../../auth/localStrategy.js'
 import { fieldAffectsData } from '../../fields/config/types.js'
 import { SAFE_FIELD_PATH_REGEX } from '../../types/constants.js'
 import { getEntityPermissions } from '../../utilities/getEntityPermissions/getEntityPermissions.js'
@@ -139,7 +140,7 @@ export async function validateSearchParam({
           if (
             ['hash', 'salt'].includes(incomingPath) &&
             collectionConfig!.auth &&
-            !collectionConfig!.auth?.disableLocalStrategy
+            isLocalStrategyEnabled(collectionConfig!.auth?.localStrategy)
           ) {
             errors.push({ path: incomingPath })
           }

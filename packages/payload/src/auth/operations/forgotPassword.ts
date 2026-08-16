@@ -19,6 +19,7 @@ import { getRequestOrigin } from '../../utilities/getRequestOrigin.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { getLoginOptions } from '../getLoginOptions.js'
+import { isLocalStrategyEnabled } from '../localStrategy.js'
 
 export type Arguments<TSlug extends AuthCollectionSlug> = {
   collection: Collection
@@ -50,7 +51,7 @@ export const forgotPasswordOperation = async <TSlug extends AuthCollectionSlug>(
 
   let args = incomingArgs
 
-  if (incomingArgs.collection.config.auth.disableLocalStrategy) {
+  if (!isLocalStrategyEnabled(incomingArgs.collection.config.auth.localStrategy)) {
     throw new Forbidden(incomingArgs.req.t)
   }
   if (!sanitizedEmail && !sanitizedUsername) {

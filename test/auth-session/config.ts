@@ -27,7 +27,7 @@ const authSessionUsers: CollectionConfig = {
     useAsTitle: 'name',
   },
   auth: {
-    disableLocalStrategy: true,
+    localStrategy: false,
     removeTokenFromResponses: true,
     strategies: [
       {

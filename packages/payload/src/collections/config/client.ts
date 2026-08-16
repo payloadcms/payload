@@ -205,8 +205,8 @@ export const createClientCollectionConfig = ({
           clientCollection.auth.depth = collection.auth.depth
         }
 
-        if (collection.auth.disableLocalStrategy) {
-          clientCollection.auth.disableLocalStrategy = collection.auth.disableLocalStrategy
+        if (collection.auth.localStrategy !== undefined) {
+          clientCollection.auth.localStrategy = collection.auth.localStrategy
         }
 
         if (collection.auth.lockTime !== undefined) {

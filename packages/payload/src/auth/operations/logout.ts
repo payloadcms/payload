@@ -8,6 +8,7 @@ import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.j
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import { shouldIncludeAuthFields } from '../localStrategy.js'
 
 export type Arguments = {
   allSessions?: boolean
@@ -45,7 +46,10 @@ export const logoutOperation = async (incomingArgs: Arguments): Promise<boolean>
       }
     }
 
-    if (collectionConfig.auth.disableLocalStrategy !== true && collectionConfig.auth.useSessions) {
+    if (
+      shouldIncludeAuthFields(collectionConfig.auth.localStrategy) &&
+      collectionConfig.auth.useSessions
+    ) {
       const where = appendNonTrashedFilter({
         enableTrash: Boolean(collectionConfig.trash),
         trash: false,

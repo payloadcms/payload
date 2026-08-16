@@ -2,6 +2,7 @@
 
 import type { DocumentViewClientProps, User } from 'payload'
 
+import { isLocalStrategyEnabled } from 'payload'
 import { formatAdminURL, hasAutosaveEnabled } from 'payload/shared'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
@@ -202,11 +203,7 @@ export function DefaultEditView({
   const schemaPathSegments = useMemo(() => [entitySlug], [entitySlug])
 
   const [validateBeforeSubmit, setValidateBeforeSubmit] = useState(() => {
-    if (operation === 'create' && auth && !auth.disableLocalStrategy) {
-      return true
-    }
-
-    return false
+    return operation === 'create' && auth && isLocalStrategyEnabled(auth.localStrategy)
   })
 
   const nextHrefRef = React.useRef<null | string>(null)
@@ -672,8 +669,8 @@ export function DefaultEditView({
     <Auth
       className={`${baseClass}__auth`}
       collectionSlug={collectionConfig.slug}
-      disableLocalStrategy={collectionConfig.auth?.disableLocalStrategy}
       email={data?.email}
+      localStrategy={collectionConfig.auth?.localStrategy}
       loginWithUsername={auth?.loginWithUsername}
       operation={operation}
       readOnly={!hasSavePermission}

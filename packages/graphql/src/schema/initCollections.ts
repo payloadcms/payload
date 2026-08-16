@@ -13,7 +13,14 @@ import {
   GraphQLObjectType,
   GraphQLString,
 } from 'graphql'
-import { buildVersionCollectionFields, flattenTopLevelFields, formatNames, toWords } from 'payload'
+import {
+  buildVersionCollectionFields,
+  flattenTopLevelFields,
+  formatNames,
+  hasOptionalPassword,
+  isLocalStrategyEnabled,
+  toWords,
+} from 'payload'
 import { fieldAffectsData, getLoginOptions } from 'payload/shared'
 
 import type { ObjectTypeConfig } from './buildObjectType.js'
@@ -135,18 +142,14 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
 
     if (
       collectionConfig.auth &&
-      (!collectionConfig.auth.disableLocalStrategy ||
-        (typeof collectionConfig.auth.disableLocalStrategy === 'object' &&
-          collectionConfig.auth.disableLocalStrategy.optionalPassword))
+      (isLocalStrategyEnabled(collectionConfig.auth.localStrategy) ||
+        hasOptionalPassword(collectionConfig.auth.localStrategy))
     ) {
       mutationInputFields.push({
         name: 'password',
         type: 'text',
         label: 'Password',
-        required: !(
-          typeof collectionConfig.auth.disableLocalStrategy === 'object' &&
-          collectionConfig.auth.disableLocalStrategy.optionalPassword
-        ),
+        required: !hasOptionalPassword(collectionConfig.auth.localStrategy),
       })
     }
 
@@ -418,7 +421,7 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
 
     if (collectionConfig.auth) {
       const authFields: Field[] =
-        collectionConfig.auth.disableLocalStrategy ||
+        !isLocalStrategyEnabled(collectionConfig.auth.localStrategy) ||
         (collectionConfig.auth.loginWithUsername &&
           !collectionConfig.auth.loginWithUsername.allowEmailLogin &&
           !collectionConfig.auth.loginWithUsername.requireEmail)
@@ -505,7 +508,7 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
           resolve: logout(collection),
         }
 
-        if (!collectionConfig.auth.disableLocalStrategy) {
+        if (isLocalStrategyEnabled(collectionConfig.auth.localStrategy)) {
           const authArgs = {}
 
           const { canLoginWithEmail, canLoginWithUsername } = getLoginOptions(

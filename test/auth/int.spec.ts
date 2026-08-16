@@ -1192,8 +1192,8 @@ describe('Auth', () => {
     })
   })
 
-  describe('disableLocalStrategy', () => {
-    it('should allow create of a user with disableLocalStrategy', async () => {
+  describe('localStrategy disabled', () => {
+    it('should allow create of a user with localStrategy disabled', async () => {
       const email = 'test@example.com'
       const user = await payload.create({
         collection: partialDisableLocalStrategiesSlug,
@@ -1205,7 +1205,7 @@ describe('Auth', () => {
       expect(user.email).toStrictEqual(email)
     })
 
-    it('should retain fields when auth.disableLocalStrategy.enableFields is true', () => {
+    it('should retain fields when auth.localStrategy.disableFields is false', () => {
       const authFields = payload.collections[partialDisableLocalStrategiesSlug].config.fields
 
         .filter((field) => 'name' in field && field.name)
@@ -1225,7 +1225,7 @@ describe('Auth', () => {
       ])
     })
 
-    it('should prevent login of user with disableLocalStrategy.', async () => {
+    it('should prevent login of user with localStrategy disabled.', async () => {
       await payload.create({
         collection: partialDisableLocalStrategiesSlug,
         data: {

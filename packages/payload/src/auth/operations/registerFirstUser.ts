@@ -13,6 +13,7 @@ import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { ensureUsernameOrEmail } from '../ensureUsernameOrEmail.js'
+import { isLocalStrategyEnabled } from '../localStrategy.js'
 
 export type Arguments<TSlug extends AuthCollectionSlug> = {
   collection: Collection
@@ -43,7 +44,7 @@ export const registerFirstUserOperation = async <TSlug extends AuthCollectionSlu
     req: { payload },
   } = args
 
-  if (config.auth.disableLocalStrategy) {
+  if (!isLocalStrategyEnabled(config.auth.localStrategy)) {
     throw new Forbidden(req.t)
   }
 
