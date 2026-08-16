@@ -1,6 +1,7 @@
 'use client'
 
-import type { TypeWithID, Where } from 'payload'
+import type { Where } from 'payload'
+import type { TypeWithID } from 'payload/shared'
 
 import { DEFAULT_HIERARCHY_TREE_LIMIT, formatAdminURL, PREFERENCE_KEYS } from 'payload/shared'
 import * as qs from 'qs-esm'

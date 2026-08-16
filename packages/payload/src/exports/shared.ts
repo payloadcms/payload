@@ -24,6 +24,7 @@ export {
   type ServerOnlyUploadProperties,
 } from '../collections/config/client.js'
 export { defaults as collectionDefaults } from '../collections/config/defaults.js'
+export type { TypeWithID } from '../collections/config/types.js'
 
 export {
   type ClientConfig,

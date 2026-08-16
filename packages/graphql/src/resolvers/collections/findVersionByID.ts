@@ -1,5 +1,6 @@
 import type { GraphQLResolveInfo } from 'graphql'
-import type { Collection, TypeWithID, TypeWithVersion } from 'payload'
+import type { Collection, TypeWithVersion } from 'payload'
+import type { TypeWithID } from 'payload/shared'
 
 import { findVersionByIDOperation, isolateObjectProperty } from 'payload'
 
@@ -22,8 +23,12 @@ export type Resolver<T extends TypeWithID = any> = (
 
 export function findVersionByIDResolver(collection: Collection): Resolver {
   return async function resolver(_, args, context, info) {
-    const req = context.req = isolateObjectProperty(context.req, ['locale', 'fallbackLocale', 'transactionID'])
-    const select = context.select = args.select ? buildSelectForCollection(info) : undefined
+    const req = (context.req = isolateObjectProperty(context.req, [
+      'locale',
+      'fallbackLocale',
+      'transactionID',
+    ]))
+    const select = (context.select = args.select ? buildSelectForCollection(info) : undefined)
 
     req.locale = args.locale || req.locale
     req.fallbackLocale = args.fallbackLocale || req.fallbackLocale

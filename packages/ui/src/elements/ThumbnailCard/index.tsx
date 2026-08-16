@@ -1,5 +1,6 @@
 'use client'
-import type { ClientCollectionConfig, TypeWithID } from 'payload'
+import type { ClientCollectionConfig } from 'payload'
+import type { TypeWithID } from 'payload/shared'
 
 import React from 'react'
 

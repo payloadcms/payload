@@ -1,6 +1,6 @@
 'use client'
 
-import type { TypeWithID } from 'payload'
+import type { TypeWithID } from 'payload/shared'
 
 import { getTranslation } from '@payloadcms/translations'
 import { formatFilesize } from 'payload/shared'

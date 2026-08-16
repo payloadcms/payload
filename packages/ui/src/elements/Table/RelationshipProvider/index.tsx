@@ -1,5 +1,6 @@
 'use client'
-import type { SelectType, TypeWithID } from 'payload'
+import type { SelectType } from 'payload'
+import type { TypeWithID } from 'payload/shared'
 
 import { appendUploadSelectFields, formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'

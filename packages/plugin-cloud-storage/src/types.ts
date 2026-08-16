@@ -5,11 +5,11 @@ import type {
   ImageSize,
   PayloadHandler,
   PayloadRequest,
-  TypeWithID,
   UploadCollectionSlug,
   UploadInstructionsAccess,
   UploadInstructionsCapability,
 } from 'payload'
+import type { TypeWithID } from 'payload/shared'
 
 export interface File {
   buffer: Buffer

@@ -1,10 +1,5 @@
-import type {
-  FileData,
-  PayloadRequest,
-  TypeWithID,
-  UploadField,
-  UploadFieldDiffServerComponent,
-} from 'payload'
+import type { FileData, PayloadRequest, UploadField, UploadFieldDiffServerComponent } from 'payload'
+import type { TypeWithID } from 'payload/shared'
 
 import { getTranslation, type I18nClient } from '@payloadcms/translations'
 import React from 'react'

@@ -1,4 +1,5 @@
-import type { FindArgs, FlattenedField, TypeWithID } from 'payload'
+import type { FindArgs, FlattenedField } from 'payload'
+import type { TypeWithID } from 'payload/shared'
 
 import { asc, desc, inArray, max, min } from 'drizzle-orm'
 

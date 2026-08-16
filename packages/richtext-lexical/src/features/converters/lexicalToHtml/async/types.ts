@@ -1,5 +1,6 @@
 import type { SerializedLexicalNode } from 'lexical'
-import type { SelectType, TypeWithID } from 'payload'
+import type { SelectType } from 'payload'
+import type { TypeWithID } from 'payload/shared'
 
 import type {
   DefaultNodeTypes,

@@ -1,4 +1,5 @@
-import type { CollectionBeforeChangeHook, CollectionConfig, FileData, TypeWithID } from 'payload'
+import type { CollectionBeforeChangeHook, CollectionConfig, FileData } from 'payload'
+import type { TypeWithID } from 'payload/shared'
 import type stream from 'stream'
 
 import { Upload } from '@aws-sdk/lib-storage'

@@ -1,4 +1,5 @@
-import type { PaginatedDocs, TypeWithID, Where } from 'payload'
+import type { PaginatedDocs, Where } from 'payload'
+import type { TypeWithID } from 'payload/shared'
 
 export type HierarchyDocument = {
   [key: string]: unknown

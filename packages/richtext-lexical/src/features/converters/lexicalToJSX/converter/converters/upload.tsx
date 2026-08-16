@@ -1,4 +1,5 @@
-import type { FileData, FileSize, TypeWithID } from 'payload'
+import type { FileData, FileSize } from 'payload'
+import type { TypeWithID } from 'payload/shared'
 
 import type { SerializedUploadNode } from '../../../../../types/nodeTypes.js'
 import type { UploadDataImproved } from '../../../../upload/server/schema.js'

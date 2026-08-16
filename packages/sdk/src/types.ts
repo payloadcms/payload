@@ -8,9 +8,9 @@ import type {
   Sort,
   TransformDataWithSelect,
   TypedCollectionSelect,
-  TypeWithID,
   Where,
 } from 'payload'
+import type { TypeWithID } from 'payload/shared'
 
 // Simple property access - PayloadTypesShape guarantees these properties exist
 export type DataFromCollectionSlug<

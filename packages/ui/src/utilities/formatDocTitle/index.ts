@@ -1,10 +1,6 @@
 import type { I18n } from '@payloadcms/translations'
-import type {
-  ClientCollectionConfig,
-  ClientGlobalConfig,
-  SanitizedConfig,
-  TypeWithID,
-} from 'payload'
+import type { ClientCollectionConfig, ClientGlobalConfig, SanitizedConfig } from 'payload'
+import type { TypeWithID } from 'payload/shared'
 
 import { getTranslation } from '@payloadcms/translations'
 
