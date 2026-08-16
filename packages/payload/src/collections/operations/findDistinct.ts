@@ -49,7 +49,7 @@ export const findDistinctOperation = async (
     args = await buildBeforeOperation({
       args,
       collection: args.collection.config,
-      operation: 'readDistinct',
+      operation: 'findDistinct',
       overrideAccess: args.overrideAccess!,
     })
 

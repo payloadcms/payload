@@ -72,7 +72,7 @@ export const updateByIDOperation = async <
     args = await buildBeforeOperation({
       args,
       collection: args.collection.config,
-      operation: 'update',
+      operation: 'updateByID',
       overrideAccess: args.overrideAccess!,
     })
 

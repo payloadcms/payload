@@ -72,7 +72,7 @@ export const findByIDOperation = async <
     args = await buildBeforeOperation({
       args,
       collection: args.collection.config,
-      operation: 'read',
+      operation: 'findByID',
       overrideAccess: args.overrideAccess!,
     })
 
