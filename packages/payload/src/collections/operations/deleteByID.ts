@@ -55,7 +55,7 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
     args = await buildBeforeOperation({
       args,
       collection: args.collection.config,
-      operation: 'delete',
+      operation: 'deleteByID',
       overrideAccess: args.overrideAccess!,
     })
 
