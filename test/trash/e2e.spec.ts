@@ -626,7 +626,11 @@ describe('Trash', () => {
       test('Should collapse breadcrumbs into a popup menu when they do not fit the available width', async ({
         page,
       }) => {
-        await page.setViewportSize({ width: 400, height: 800 })
+        // 320px (not 400px) puts the breadcrumbs unambiguously past the available
+        // width. At 400px the expanded breadcrumbs measure within ~1px of the
+        // available space, making the collapse decision a coin-flip in slower CI
+        // environments (e.g. tanstack-start).
+        await page.setViewportSize({ width: 320, height: 800 })
         await page.goto(postsUrl.trashEdit(trashedPostDocOne.id))
 
         const collapsedToggle = page.locator('.step-nav__collapsed-toggle')
