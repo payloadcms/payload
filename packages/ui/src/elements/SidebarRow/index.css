@@ -29,7 +29,7 @@
     text-decoration: none;
     color: inherit;
 
-    &:hover {
+    &:hover:not(.sidebar-row--selected) {
       background: var(--color-bg-secondary);
       text-decoration: none;
     }
@@ -38,10 +38,6 @@
   .sidebar-row--selected {
     font-weight: var(--text-body-medium-strong-font-weight);
     background: var(--color-bg-selected);
-
-    &:hover {
-      background: var(--color-bg-selected);
-    }
   }
 
   .sidebar-row__icon {

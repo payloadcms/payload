@@ -34,7 +34,7 @@
       z-index: -1;
     }
 
-    &:hover::before {
+    &:hover:not(.tree-node__content--selected)::before {
       background: var(--color-bg-secondary);
     }
   }
