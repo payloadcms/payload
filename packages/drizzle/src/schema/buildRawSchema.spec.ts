@@ -1,9 +1,10 @@
 import type { Block, Config, SanitizedConfig } from 'payload'
 import { sanitizeConfig } from 'payload'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 
 import { setColumnID } from '../postgres/schema/setColumnID.js'
 import type { DrizzleAdapter } from '../types.js'
+import { checkTruncatedIdentifiers } from '../utilities/checkTruncatedIdentifiers.js'
 import { buildRawSchema } from './buildRawSchema.js'
 
 const headlineBlock: Block = {
@@ -27,7 +28,10 @@ const createContainerBlock = (slug: string): Block => ({
   ],
 })
 
-const createAdapter = (config: SanitizedConfig): DrizzleAdapter =>
+const createAdapter = (
+  config: SanitizedConfig,
+  warn: (...args: any[]) => void = () => {},
+): DrizzleAdapter =>
   ({
     blocksAsJSON: false,
     fieldConstraints: {},
@@ -45,6 +49,7 @@ const createAdapter = (config: SanitizedConfig): DrizzleAdapter =>
         ]),
       ),
       config,
+      logger: { warn },
     },
     rawRelations: {},
     rawTables: {},
@@ -165,7 +170,7 @@ describe('buildRawSchema', () => {
     expect(adapter.rawTables.posts_blocks_headline_2_locales).toBeUndefined()
   })
 
-  it('should throw when a localized field pushes the _locales companion table past 63 chars', async () => {
+  it('should warn when a localized field pushes the _locales companion table past 63 chars', async () => {
     // Base table name (61 chars) is under the limit, but `${base}_locales` (69) overflows it.
     const longSlug = `localized_collection_${'x'.repeat(40)}`
 
@@ -190,17 +195,19 @@ describe('buildRawSchema', () => {
       },
     } as Config)
 
-    const adapter = createAdapter(config)
+    const warn = vi.fn()
+    const adapter = createAdapter(config, warn)
 
-    expect(() =>
-      buildRawSchema({
-        adapter,
-        setColumnID,
-      }),
-    ).toThrow('Exceeded max identifier length')
+    buildRawSchema({ adapter, setColumnID })
+
+    expect(adapter.rawTables[`${longSlug}_locales`]).toBeDefined()
+
+    expect(() => checkTruncatedIdentifiers({ adapter, logWarnings: true })).not.toThrow()
+    expect(warn).toHaveBeenCalledTimes(1)
+    expect(warn.mock.calls[0][0]).toContain(`${longSlug}_locales`)
   })
 
-  it('should not throw for a localized field whose _locales companion table fits within 63 chars', async () => {
+  it('should not warn when the _locales companion table fits within 63 chars', async () => {
     const config = sanitizeConfig({
       collections: [
         {
@@ -222,13 +229,55 @@ describe('buildRawSchema', () => {
       },
     } as Config)
 
-    const adapter = createAdapter(config)
+    const warn = vi.fn()
+    const adapter = createAdapter(config, warn)
 
-    buildRawSchema({
-      adapter,
-      setColumnID,
-    })
+    buildRawSchema({ adapter, setColumnID })
 
     expect(adapter.rawTables.short_localized_locales).toBeDefined()
+
+    checkTruncatedIdentifiers({ adapter, logWarnings: true })
+
+    expect(warn).not.toHaveBeenCalled()
+  })
+
+  it('should warn about raw inline sub-table index and foreign key names that exceed 63 chars', async () => {
+    // Array sub-tables assign structural index/FK names inline (not via buildIndexName/
+    // buildForeignKeyName), so a long-but-valid array table name still overflows them.
+    const arrayFieldName = 'a'.repeat(58)
+
+    const config = sanitizeConfig({
+      collections: [
+        {
+          slug: 'p',
+          fields: [
+            {
+              name: arrayFieldName,
+              type: 'array',
+              fields: [{ name: 'title', type: 'text' }],
+            },
+          ],
+          timestamps: false,
+          versions: false,
+        },
+      ],
+    } as Config)
+
+    const warn = vi.fn()
+    const adapter = createAdapter(config, warn)
+
+    buildRawSchema({ adapter, setColumnID })
+
+    const arrayTable = `p_${arrayFieldName}`
+
+    checkTruncatedIdentifiers({ adapter, logWarnings: true })
+
+    expect(arrayTable.length).toBeLessThanOrEqual(63)
+    expect(warn).toHaveBeenCalledTimes(1)
+
+    const message: string = warn.mock.calls[0][0]
+
+    expect(message).toContain(`${arrayTable}_order_idx`)
+    expect(message).toContain(`${arrayTable}_parent_id_fk`)
   })
 })
