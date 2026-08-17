@@ -9,6 +9,7 @@ import {
   ensureCompilationIsDone,
   initPageConsoleErrorCatch,
 } from '../../../__helpers/e2e/helpers.js'
+import { visual } from '../../../__helpers/e2e/visual.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
@@ -34,10 +35,7 @@ test.describe('Visual', () => {
     await ensureCompilationIsDone({ page, serverURL })
   })
 
-  // Moved here from test/_community/e2e.spec.ts so this exercises the admin suite's own
-  // production build/nav/branding — the community config is intentionally minimal and doesn't
-  // exercise the full admin sidebar.
-  test('renders the posts list view', { tag: '@visual' }, async () => {
+  visual('renders the posts list view', async () => {
     await page.goto(url.list)
 
     const textCell = page.locator('.row-1 .cell-title')
@@ -46,11 +44,7 @@ test.describe('Visual', () => {
     await expectScreenshot({ name: 'posts-list-view.png', page })
   })
 
-  // The dashboard status badge rendered by the `DashboardStatus` custom component
-  // (`test/admin/components/DashboardStatus`), wired up via `admin.components.afterDashboard` in
-  // this suite's config. Screenshotting just the badge (not the whole dashboard) keeps the
-  // comparison small and deterministic.
-  test('renders the dashboard status badge', { tag: '@visual' }, async () => {
+  visual('renders the dashboard status badge', async () => {
     await page.goto(url.admin)
 
     const badge = page.locator('.dashboard-status__badge')

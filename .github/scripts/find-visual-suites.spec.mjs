@@ -64,6 +64,17 @@ describe('findVisualSuites', () => {
     expect(findVisualSuites(testDir)).toEqual([])
   })
 
+  it('returns the suite folder for a spec file using the visual() helper instead of a literal @visual tag', () => {
+    const suiteDir = path.join(testDir, '_community')
+    mkdirSync(suiteDir, { recursive: true })
+    writeFileSync(
+      path.join(suiteDir, 'e2e.spec.ts'),
+      `import { visual } from '../__helpers/e2e/visual.js'\n\nvisual('renders', async () => {})`,
+    )
+
+    expect(findVisualSuites(testDir)).toEqual(['_community'])
+  })
+
   it('deduplicates and sorts suites with multiple @visual spec files', () => {
     const suiteA = path.join(testDir, 'fields')
     const suiteB = path.join(testDir, '_community')
