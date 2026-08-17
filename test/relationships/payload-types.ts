@@ -99,6 +99,12 @@ export interface Config {
       relation: 'relations';
     };
   };
+  collectionsLocalized: {
+    postsLocalized: PostsLocalizedLocalized;
+    directors: DirectorLocalized;
+    'polymorphic-relationships': PolymorphicRelationshipLocalized;
+    blocks: BlockLocalized;
+  };
   collectionsSelect: {
     posts: PostsSelect<false> | PostsSelect<true>;
     postsLocalized: PostsLocalizedSelect<false> | PostsLocalizedSelect<true>;
@@ -130,12 +136,15 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
-  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'de') | ('en' | 'de')[];
   globals: {};
+  globalsLocalized: {};
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'de') | ('en' | 'de')[];
   globalsSelect: {};
   locale: 'en' | 'de';
   widgets: {
     collections: CollectionsWidget;
+    'collection-query': CollectionQueryWidget;
+    activity: ActivityWidget;
   };
   user: User;
   jobs: {
@@ -677,6 +686,106 @@ export interface PayloadMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "postsLocalized_localized".
+ */
+export interface PostsLocalizedLocalized {
+  id: string;
+  title?: string | null;
+  relationField?: {
+    en?: (string | null) | Relation;
+    de?: (string | null) | Relation;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "directors_localized".
+ */
+export interface DirectorLocalized {
+  id: string;
+  name?: string | null;
+  localized?: {
+    en?: string | null;
+    de?: string | null;
+  };
+  movies?: (string | Movie)[] | null;
+  movie?: (string | null) | Movie;
+  directors?: (string | Director)[] | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "polymorphic-relationships_localized".
+ */
+export interface PolymorphicRelationshipLocalized {
+  id: string;
+  polymorphic?: {
+    relationTo: 'movies';
+    value: string | Movie;
+  } | null;
+  polymorphicLocalized?: {
+    en?: {
+      relationTo: 'movies';
+      value: string | Movie;
+    } | null;
+    de?: {
+      relationTo: 'movies';
+      value: string | Movie;
+    } | null;
+  };
+  polymorphicMany?:
+    | {
+        relationTo: 'movies';
+        value: string | Movie;
+      }[]
+    | null;
+  polymorphicManyLocalized?: {
+    en?:
+      | {
+          relationTo: 'movies';
+          value: string | Movie;
+        }[]
+      | null;
+    de?:
+      | {
+          relationTo: 'movies';
+          value: string | Movie;
+        }[]
+      | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "blocks_localized".
+ */
+export interface BlockLocalized {
+  id: string;
+  blocks?: Some_107B8679[] | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Multiple blocks resolve to the `Some` interface with different fields, so a content hash is appended to keep the generated types stable and unambiguous. Set a unique `interfaceName` on the block to choose the name yourself. See https://payloadcms.com/docs/typescript/generating-types#block-interface-name-collisions
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Some_107B8679".
+ */
+export interface Some_107B8679 {
+  director?: (string | null) | Director;
+  directors?: {
+    en?: (string | Director)[] | null;
+    de?: (string | Director)[] | null;
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'some';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "posts_select".
  */
 export interface PostsSelect<T extends boolean = true> {
@@ -1020,6 +1129,86 @@ export interface CollectionsWidget {
     [k: string]: unknown;
   };
   width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-query_widget".
+ */
+export interface CollectionQueryWidget {
+  data?: {
+    title?: string | null;
+    relatedCollection:
+      | 'posts'
+      | 'postsLocalized'
+      | 'relation'
+      | 'strict-access'
+      | 'chained'
+      | 'custom-id'
+      | 'custom-id-number'
+      | 'screenings'
+      | 'movies'
+      | 'directors'
+      | 'movieReviews'
+      | 'polymorphic-relationships'
+      | 'tree'
+      | 'pages'
+      | 'rels-to-pages'
+      | 'rels-to-pages-and-custom-text-ids'
+      | 'object-writes'
+      | 'deep-nested'
+      | 'relations'
+      | 'items'
+      | 'blocks'
+      | 'users';
+    where?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    sortField?: string | null;
+    sortDirection?: ('asc' | 'desc') | null;
+    limit?: number | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "activity_widget".
+ */
+export interface ActivityWidget {
+  data?: {
+    excludedCollections?:
+      | (
+          | 'posts'
+          | 'postsLocalized'
+          | 'relation'
+          | 'strict-access'
+          | 'chained'
+          | 'custom-id'
+          | 'custom-id-number'
+          | 'screenings'
+          | 'movies'
+          | 'directors'
+          | 'movieReviews'
+          | 'polymorphic-relationships'
+          | 'tree'
+          | 'pages'
+          | 'rels-to-pages'
+          | 'rels-to-pages-and-custom-text-ids'
+          | 'object-writes'
+          | 'deep-nested'
+          | 'relations'
+          | 'items'
+          | 'blocks'
+          | 'users'
+        )[]
+      | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

@@ -213,6 +213,10 @@ export interface Config {
     'payload-migrations': PayloadMigration;
   };
   collectionsJoins: {};
+  collectionsLocalized: {
+    localized: LocalizedLocalized;
+    'fully-featured': FullyFeaturedLocalized;
+  };
   collectionsSelect: {
     uploads: UploadsSelect<false> | UploadsSelect<true>;
     'uploads-two': UploadsTwoSelect<false> | UploadsTwoSelect<true>;
@@ -257,7 +261,6 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
-  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('es' | 'en') | ('es' | 'en')[];
   globals: {
     'hidden-global': HiddenGlobal;
     'not-in-view-global': NotInViewGlobal;
@@ -270,6 +273,8 @@ export interface Config {
     'group-globals-two': GroupGlobalsTwo;
     settings: Setting;
   };
+  globalsLocalized: {};
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('es' | 'en') | ('es' | 'en')[];
   globalsSelect: {
     'hidden-global': HiddenGlobalSelect<false> | HiddenGlobalSelect<true>;
     'not-in-view-global': NotInViewGlobalSelect<false> | NotInViewGlobalSelect<true>;
@@ -1100,6 +1105,147 @@ export interface PayloadMigration {
   batch?: number | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized_localized".
+ */
+export interface LocalizedLocalized {
+  id: string;
+  title?: {
+    es?: string | null;
+    en?: string | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+  _status?: {
+    es?: ('draft' | 'published') | null;
+    en?: ('draft' | 'published') | null;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "fully-featured_localized".
+ */
+export interface FullyFeaturedLocalized {
+  id: string;
+  title: {
+    es?: string;
+    en?: string;
+  };
+  slug?: string | null;
+  content?: {
+    es?: LexicalRichText<LexicalNodes_6CCD2587> | null;
+    en?: LexicalRichText<LexicalNodes_6CCD2587> | null;
+  };
+  excerpt?: {
+    /**
+     * Short summary for list views and SEO
+     */
+    es?: string | null;
+    /**
+     * Short summary for list views and SEO
+     */
+    en?: string | null;
+  };
+  heroImage?: (string | null) | Upload;
+  layout?: {
+    es?: (RichTextBlock | ImageBlock | CtaBlock_C84AF8C0 | CardGridBlock_38F482F6)[] | null;
+    en?: (RichTextBlock | ImageBlock | CtaBlock_C84AF8C0 | CardGridBlock_38F482F6)[] | null;
+  };
+  tags?:
+    | {
+        tag: string;
+        id?: string | null;
+      }[]
+    | null;
+  relatedPosts?: (string | Post)[] | null;
+  category?: {
+    es?: ('news' | 'blog' | 'tutorial' | 'case-study') | null;
+    en?: ('news' | 'blog' | 'tutorial' | 'case-study') | null;
+  };
+  /**
+   * Priority from 1 (lowest) to 10 (highest)
+   */
+  priority?: number | null;
+  seo?: {
+    metaTitle?: {
+      es?: string | null;
+      en?: string | null;
+    };
+    metaDescription?: {
+      es?: string | null;
+      en?: string | null;
+    };
+    ogImage?: (string | null) | Upload;
+    noIndex?: boolean | null;
+  };
+  status?: ('draft' | 'published' | 'archived') | null;
+  isFeatured?: boolean | null;
+  publishedDate?: string | null;
+  authors?: (string | User)[] | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: {
+    es?: ('draft' | 'published') | null;
+    en?: ('draft' | 'published') | null;
+  };
+}
+/**
+ * Multiple blocks resolve to the `CtaBlock` interface with different fields, so a content hash is appended to keep the generated types stable and unambiguous. Set a unique `interfaceName` on the block to choose the name yourself. See https://payloadcms.com/docs/typescript/generating-types#block-interface-name-collisions
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "CtaBlock_C84AF8C0".
+ */
+export interface CtaBlock_C84AF8C0 {
+  heading: string;
+  description?: string | null;
+  links?:
+    | {
+        label: {
+          es?: string;
+          en?: string;
+        };
+        url: string;
+        style?: ('primary' | 'secondary' | 'outline') | null;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'ctaBlock';
+}
+/**
+ * Multiple blocks resolve to the `CardGridBlock` interface with different fields, so a content hash is appended to keep the generated types stable and unambiguous. Set a unique `interfaceName` on the block to choose the name yourself. See https://payloadcms.com/docs/typescript/generating-types#block-interface-name-collisions
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "CardGridBlock_38F482F6".
+ */
+export interface CardGridBlock_38F482F6 {
+  cards?:
+    | {
+        title: {
+          es?: string;
+          en?: string;
+        };
+        description?: {
+          es?: string | null;
+          en?: string | null;
+        };
+        image?: (string | null) | Upload;
+        link?: {
+          label?: {
+            es?: string | null;
+            en?: string | null;
+          };
+          url?: string | null;
+        };
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'cardGridBlock';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

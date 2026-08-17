@@ -2,6 +2,7 @@ import type { PaginatedDocs } from '../../../database/types.js'
 import type {
   CollectionSlug,
   JoinQuery,
+  LocaleValue,
   Payload,
   PayloadTypes,
   RequestContext,
@@ -15,7 +16,7 @@ import type {
   PopulateType,
   SelectType,
   Sort,
-  TransformCollectionWithSelect,
+  TransformCollection,
   Where,
 } from '../../../types/index.js'
 import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
@@ -25,7 +26,11 @@ import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { findOperation } from '../find.js'
 
-type BaseFindOptions<TSlug extends CollectionSlug, TSelect extends SelectType> = {
+type BaseFindOptions<
+  TSlug extends CollectionSlug,
+  TSelect extends SelectType,
+  TLocale extends LocaleValue = TypedLocale,
+> = {
   /**
    * the Collection slug to operate against.
    */
@@ -72,7 +77,7 @@ type BaseFindOptions<TSlug extends CollectionSlug, TSelect extends SelectType> =
   /**
    * Specify [locale](https://payloadcms.com/docs/configuration/localization) for any returned documents.
    */
-  locale?: 'all' | TypedLocale
+  locale?: 'all' | TLocale
   /**
    * Skip access control.
    * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the front-end.
@@ -175,32 +180,34 @@ type BaseFindOptions<TSlug extends CollectionSlug, TSelect extends SelectType> =
   where?: Where
 }
 
-export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> = BaseFindOptions<
-  TSlug,
-  TSelect
-> &
-  DraftFlagFromCollectionSlug<TSlug>
+export type Options<
+  TSlug extends CollectionSlug,
+  TSelect extends SelectType,
+  TLocale extends LocaleValue = TypedLocale,
+> = BaseFindOptions<TSlug, TSelect, TLocale> & DraftFlagFromCollectionSlug<TSlug>
 
 // Backward compatibility export
-export type FindOptions<TSlug extends CollectionSlug, TSelect extends SelectType> = Options<
-  TSlug,
-  TSelect
->
+export type FindOptions<
+  TSlug extends CollectionSlug,
+  TSelect extends SelectType,
+  TLocale extends LocaleValue = TypedLocale,
+> = Options<TSlug, TSelect, TLocale>
 
 export async function findLocal<
   TSlug extends CollectionSlug,
   TSelect extends SelectFromCollectionSlug<TSlug>,
   TDraft extends boolean = false,
+  TLocale extends LocaleValue = TypedLocale,
 >(
   payload: Payload,
-  options: { draft?: TDraft } & FindOptions<TSlug, TSelect>,
+  options: { draft?: TDraft } & FindOptions<TSlug, TSelect, TLocale>,
 ): Promise<
   PaginatedDocs<
     TDraft extends true
       ? PayloadTypes extends { strictDraftTypes: true }
         ? DraftTransformCollectionWithSelect<TSlug, TSelect>
-        : TransformCollectionWithSelect<TSlug, TSelect>
-      : TransformCollectionWithSelect<TSlug, TSelect>
+        : TransformCollection<TSlug, TSelect, TLocale>
+      : TransformCollection<TSlug, TSelect, TLocale>
   >
 > {
   const {
@@ -231,6 +238,7 @@ export async function findLocal<
     )
   }
 
+  // @ts-expect-error
   return findOperation<TSlug, TSelect>({
     collection,
     currentDepth,

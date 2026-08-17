@@ -40,6 +40,7 @@ import { killTransaction } from '../../utilities/killTransaction.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
+import { unwrapLocalizedDoc } from '../../utilities/unwrapLocalizedDoc.js'
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
 
@@ -175,20 +176,48 @@ export const createOperation = async <
 
     data = newFileData
 
+    let localeAllDataByLocale: null | Record<string, any> = null
+    if (config.localization && args.req.locale === 'all') {
+      localeAllDataByLocale = {}
+      for (const locale of config.localization.localeCodes) {
+        localeAllDataByLocale[locale] = unwrapLocalizedDoc({
+          config,
+          doc: data,
+          fields: collectionConfig.flattenedFields,
+          locale,
+        })
+      }
+    }
+
     // /////////////////////////////////////
     // beforeValidate - Fields
     // /////////////////////////////////////
 
-    data = await beforeValidate({
-      collection: collectionConfig,
-      context: req.context,
-      data,
-      doc: duplicatedFromDoc,
-      global: null,
-      operation: 'create',
-      overrideAccess: overrideAccess!,
-      req,
-    })
+    if (localeAllDataByLocale) {
+      for (const locale of Object.keys(localeAllDataByLocale)) {
+        localeAllDataByLocale[locale] = await beforeValidate({
+          collection: collectionConfig,
+          context: req.context,
+          data: localeAllDataByLocale[locale],
+          doc: duplicatedFromDoc,
+          global: null,
+          operation: 'create',
+          overrideAccess: overrideAccess!,
+          req,
+        })
+      }
+    } else {
+      data = await beforeValidate({
+        collection: collectionConfig,
+        context: req.context,
+        data,
+        doc: duplicatedFromDoc,
+        global: null,
+        operation: 'create',
+        overrideAccess: overrideAccess!,
+        req,
+      })
+    }
 
     // /////////////////////////////////////
     // beforeValidate - Collections
@@ -230,18 +259,46 @@ export const createOperation = async <
     // beforeChange - Fields
     // /////////////////////////////////////
 
-    const dataWithLocales = await beforeChange<JsonObject>({
-      collection: collectionConfig,
-      context: req.context,
-      data,
-      doc: duplicatedFromDoc,
-      docWithLocales: duplicatedFromDocWithLocales,
-      global: null,
-      operation: 'create',
-      overrideAccess,
-      req,
-      skipValidation: isSavingDraft && !hasDraftValidationEnabled(collectionConfig),
-    })
+    let dataWithLocales: JsonObject
+
+    if (localeAllDataByLocale) {
+      // With `locale: 'all'`, run the field hooks once per locale, threading the accumulated
+      // document through so each pass builds on the previous locale's result.
+      let localeAllDataWithLocales: JsonObject | null = null
+
+      for (const locale of Object.keys(localeAllDataByLocale)) {
+        req.locale = locale
+
+        localeAllDataWithLocales = await beforeChange<JsonObject>({
+          collection: collectionConfig,
+          context: req.context,
+          data: localeAllDataByLocale[locale],
+          doc: duplicatedFromDoc,
+          docWithLocales: localeAllDataWithLocales ?? duplicatedFromDocWithLocales,
+          global: null,
+          operation: 'create',
+          overrideAccess,
+          req,
+          skipValidation: isSavingDraft && !hasDraftValidationEnabled(collectionConfig),
+        })
+      }
+
+      req.locale = 'all'
+      dataWithLocales = localeAllDataWithLocales!
+    } else {
+      dataWithLocales = await beforeChange<JsonObject>({
+        collection: collectionConfig,
+        context: req.context,
+        data,
+        doc: duplicatedFromDoc,
+        docWithLocales: duplicatedFromDocWithLocales,
+        global: null,
+        operation: 'create',
+        overrideAccess,
+        req,
+        skipValidation: isSavingDraft && !hasDraftValidationEnabled(collectionConfig),
+      })
+    }
 
     // When locale='all' or when beforeChange doesn't convert the string (e.g. no locale hook ran),
     // the localized _status remains a plain string. Expand it to a per-locale object so MongoDB

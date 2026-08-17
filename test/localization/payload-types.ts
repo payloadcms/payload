@@ -62,13 +62,13 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_3DC54BD0".
+ * via the `definition` "LexicalNodes_DCF72AA4".
  */
-export type LexicalNodes_3DC54BD0 =
+export type LexicalNodes_DCF72AA4 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_3DC54BD0>
+  | SerializedParagraphNode<LexicalNodes_DCF72AA4>
   | SerializedHorizontalRuleNode
   | {
       type: 'upload';
@@ -78,7 +78,7 @@ export type LexicalNodes_3DC54BD0 =
       version: number;
       [k: string]: unknown;
     }
-  | SerializedQuoteNode<LexicalNodes_3DC54BD0>
+  | SerializedQuoteNode<LexicalNodes_DCF72AA4>
   | SerializedRelationshipNode<
       | 'richText'
       | 'blocks-fields'
@@ -103,22 +103,25 @@ export type LexicalNodes_3DC54BD0 =
       | 'blocks-same-name'
       | 'localized-within-localized'
       | 'array-with-fallback-fields'
+      | 'blocks-reference-localized'
       | 'payload-kv'
       | 'payload-locked-documents'
       | 'payload-preferences'
       | 'payload-migrations'
     >
-  | SerializedAutoLinkNode<LexicalNodes_3DC54BD0, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_3DC54BD0, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_3DC54BD0>
-  | SerializedListItemNode<LexicalNodes_3DC54BD0>
-  | SerializedHeadingNode<LexicalNodes_3DC54BD0>;
+  | SerializedAutoLinkNode<LexicalNodes_DCF72AA4, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_DCF72AA4, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_DCF72AA4>
+  | SerializedListItemNode<LexicalNodes_DCF72AA4>
+  | SerializedHeadingNode<LexicalNodes_DCF72AA4>;
 
 export interface Config {
   auth: {
     users: UserAuthOperations;
   };
-  blocks: {};
+  blocks: {
+    'referenced-localized-block': ReferencedLocalizedBlock;
+  };
   collections: {
     richText: RichText;
     'blocks-fields': BlocksField;
@@ -143,12 +146,35 @@ export interface Config {
     'blocks-same-name': BlocksSameName;
     'localized-within-localized': LocalizedWithinLocalized;
     'array-with-fallback-fields': ArrayWithFallbackField;
+    'blocks-reference-localized': BlocksReferenceLocalized;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
   collectionsJoins: {};
+  collectionsLocalized: {
+    richText: RichTextLocalized;
+    'blocks-fields': BlocksFieldLocalized;
+    'nested-arrays': NestedArrayLocalized;
+    'nested-field-tables': NestedFieldTableLocalized;
+    'localized-drafts': LocalizedDraftLocalized;
+    'localized-date-fields': LocalizedDateFieldLocalized;
+    'all-fields-localized': AllFieldsLocalizedLocalized;
+    'localized-posts': LocalizedPostLocalized;
+    'array-fields': ArrayFieldLocalized;
+    'localized-required': LocalizedRequiredLocalized;
+    'relationship-localized': RelationshipLocalizedLocalized;
+    'locale-restricted': LocaleRestrictedLocalized;
+    nested: NestedLocalized;
+    groups: GroupLocalized;
+    tabs: TabLocalized;
+    'localized-sort': LocalizedSortLocalized;
+    'blocks-same-name': BlocksSameNameLocalized;
+    'localized-within-localized': LocalizedWithinLocalizedLocalized;
+    'array-with-fallback-fields': ArrayWithFallbackFieldLocalized;
+    'blocks-reference-localized': BlocksReferenceLocalizedLocalized;
+  };
   collectionsSelect: {
     richText: RichTextSelect<false> | RichTextSelect<true>;
     'blocks-fields': BlocksFieldsSelect<false> | BlocksFieldsSelect<true>;
@@ -173,6 +199,7 @@ export interface Config {
     'blocks-same-name': BlocksSameNameSelect<false> | BlocksSameNameSelect<true>;
     'localized-within-localized': LocalizedWithinLocalizedSelect<false> | LocalizedWithinLocalizedSelect<true>;
     'array-with-fallback-fields': ArrayWithFallbackFieldsSelect<false> | ArrayWithFallbackFieldsSelect<true>;
+    'blocks-reference-localized': BlocksReferenceLocalizedSelect<false> | BlocksReferenceLocalizedSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -181,17 +208,22 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
+  globals: {
+    'global-array': GlobalArray;
+    'global-text': GlobalText;
+    'global-drafts': GlobalDraft;
+  };
+  globalsLocalized: {
+    'global-array': GlobalArrayLocalized;
+    'global-text': GlobalTextLocalized;
+    'global-drafts': GlobalDraftLocalized;
+  };
   fallbackLocale:
     | ('false' | 'none' | 'null')
     | false
     | null
     | ('xx' | 'en' | 'es' | 'pt' | 'ar' | 'hu')
     | ('xx' | 'en' | 'es' | 'pt' | 'ar' | 'hu')[];
-  globals: {
-    'global-array': GlobalArray;
-    'global-text': GlobalText;
-    'global-drafts': GlobalDraft;
-  };
   globalsSelect: {
     'global-array': GlobalArraySelect<false> | GlobalArraySelect<true>;
     'global-text': GlobalTextSelect<false> | GlobalTextSelect<true>;
@@ -200,6 +232,8 @@ export interface Config {
   locale: 'xx' | 'en' | 'es' | 'pt' | 'ar' | 'hu';
   widgets: {
     collections: CollectionsWidget;
+    'collection-query': CollectionQueryWidget;
+    activity: ActivityWidget;
   };
   user: User;
   jobs: {
@@ -227,11 +261,21 @@ export interface UserAuthOperations {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ReferencedLocalizedBlock".
+ */
+export interface ReferencedLocalizedBlock {
+  title?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'referenced-localized-block';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "richText".
  */
 export interface RichText {
   id: string;
-  lexical?: LexicalRichText<LexicalNodes_3DC54BD0> | null;
+  lexical?: LexicalRichText<LexicalNodes_DCF72AA4> | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -949,6 +993,17 @@ export interface ArrayWithFallbackField {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "blocks-reference-localized".
+ */
+export interface BlocksReferenceLocalized {
+  id: string;
+  layout?: ReferencedLocalizedBlock[] | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -1062,6 +1117,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'array-with-fallback-fields';
         value: string | ArrayWithFallbackField;
+      } | null)
+    | ({
+        relationTo: 'blocks-reference-localized';
+        value: string | BlocksReferenceLocalized;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1104,6 +1163,1933 @@ export interface PayloadMigration {
   batch?: number | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "richText_localized".
+ */
+export interface RichTextLocalized {
+  id: string;
+  lexical?: {
+    xx?: LexicalRichText<LexicalNodes_DCF72AA4> | null;
+    en?: LexicalRichText<LexicalNodes_DCF72AA4> | null;
+    es?: LexicalRichText<LexicalNodes_DCF72AA4> | null;
+    pt?: LexicalRichText<LexicalNodes_DCF72AA4> | null;
+    ar?: LexicalRichText<LexicalNodes_DCF72AA4> | null;
+    hu?: LexicalRichText<LexicalNodes_DCF72AA4> | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "blocks-fields_localized".
+ */
+export interface BlocksFieldLocalized {
+  id: string;
+  title?: {
+    xx?: string | null;
+    en?: string | null;
+    es?: string | null;
+    pt?: string | null;
+    ar?: string | null;
+    hu?: string | null;
+  };
+  tabContent?: {
+    xx?: BlockInsideTab[] | null;
+    en?: BlockInsideTab[] | null;
+    es?: BlockInsideTab[] | null;
+    pt?: BlockInsideTab[] | null;
+    ar?: BlockInsideTab[] | null;
+    hu?: BlockInsideTab[] | null;
+  };
+  content?: {
+    xx?: BlockInsideBlock[] | null;
+    en?: BlockInsideBlock[] | null;
+    es?: BlockInsideBlock[] | null;
+    pt?: BlockInsideBlock[] | null;
+    ar?: BlockInsideBlock[] | null;
+    hu?: BlockInsideBlock[] | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+  _status?: {
+    xx?: ('draft' | 'published') | null;
+    en?: ('draft' | 'published') | null;
+    es?: ('draft' | 'published') | null;
+    pt?: ('draft' | 'published') | null;
+    ar?: ('draft' | 'published') | null;
+    hu?: ('draft' | 'published') | null;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "nested-arrays_localized".
+ */
+export interface NestedArrayLocalized {
+  id: string;
+  arrayWithBlocks?: {
+    xx?:
+      | {
+          blocksWithinArray?: SomeBlock[] | null;
+          id?: string | null;
+        }[]
+      | null;
+    en?:
+      | {
+          blocksWithinArray?: SomeBlock[] | null;
+          id?: string | null;
+        }[]
+      | null;
+    es?:
+      | {
+          blocksWithinArray?: SomeBlock[] | null;
+          id?: string | null;
+        }[]
+      | null;
+    pt?:
+      | {
+          blocksWithinArray?: SomeBlock[] | null;
+          id?: string | null;
+        }[]
+      | null;
+    ar?:
+      | {
+          blocksWithinArray?: SomeBlock[] | null;
+          id?: string | null;
+        }[]
+      | null;
+    hu?:
+      | {
+          blocksWithinArray?: SomeBlock[] | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  arrayWithLocalizedRelation?:
+    | {
+        localizedRelation?: {
+          xx?: (string | null) | LocalizedPost;
+          en?: (string | null) | LocalizedPost;
+          es?: (string | null) | LocalizedPost;
+          pt?: (string | null) | LocalizedPost;
+          ar?: (string | null) | LocalizedPost;
+          hu?: (string | null) | LocalizedPost;
+        };
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: {
+    xx?: ('draft' | 'published') | null;
+    en?: ('draft' | 'published') | null;
+    es?: ('draft' | 'published') | null;
+    pt?: ('draft' | 'published') | null;
+    ar?: ('draft' | 'published') | null;
+    hu?: ('draft' | 'published') | null;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "nested-field-tables_localized".
+ */
+export interface NestedFieldTableLocalized {
+  id: string;
+  array?: {
+    xx?:
+      | {
+          relation?: {
+            relationTo: 'localized-posts';
+            value: string | LocalizedPost;
+          } | null;
+          hasManyRelation?: (string | LocalizedPost)[] | null;
+          hasManyPolyRelation?:
+            | {
+                relationTo: 'localized-posts';
+                value: string | LocalizedPost;
+              }[]
+            | null;
+          select?: ('one' | 'two' | 'three')[] | null;
+          number?: number[] | null;
+          text?: string[] | null;
+          id?: string | null;
+        }[]
+      | null;
+    en?:
+      | {
+          relation?: {
+            relationTo: 'localized-posts';
+            value: string | LocalizedPost;
+          } | null;
+          hasManyRelation?: (string | LocalizedPost)[] | null;
+          hasManyPolyRelation?:
+            | {
+                relationTo: 'localized-posts';
+                value: string | LocalizedPost;
+              }[]
+            | null;
+          select?: ('one' | 'two' | 'three')[] | null;
+          number?: number[] | null;
+          text?: string[] | null;
+          id?: string | null;
+        }[]
+      | null;
+    es?:
+      | {
+          relation?: {
+            relationTo: 'localized-posts';
+            value: string | LocalizedPost;
+          } | null;
+          hasManyRelation?: (string | LocalizedPost)[] | null;
+          hasManyPolyRelation?:
+            | {
+                relationTo: 'localized-posts';
+                value: string | LocalizedPost;
+              }[]
+            | null;
+          select?: ('one' | 'two' | 'three')[] | null;
+          number?: number[] | null;
+          text?: string[] | null;
+          id?: string | null;
+        }[]
+      | null;
+    pt?:
+      | {
+          relation?: {
+            relationTo: 'localized-posts';
+            value: string | LocalizedPost;
+          } | null;
+          hasManyRelation?: (string | LocalizedPost)[] | null;
+          hasManyPolyRelation?:
+            | {
+                relationTo: 'localized-posts';
+                value: string | LocalizedPost;
+              }[]
+            | null;
+          select?: ('one' | 'two' | 'three')[] | null;
+          number?: number[] | null;
+          text?: string[] | null;
+          id?: string | null;
+        }[]
+      | null;
+    ar?:
+      | {
+          relation?: {
+            relationTo: 'localized-posts';
+            value: string | LocalizedPost;
+          } | null;
+          hasManyRelation?: (string | LocalizedPost)[] | null;
+          hasManyPolyRelation?:
+            | {
+                relationTo: 'localized-posts';
+                value: string | LocalizedPost;
+              }[]
+            | null;
+          select?: ('one' | 'two' | 'three')[] | null;
+          number?: number[] | null;
+          text?: string[] | null;
+          id?: string | null;
+        }[]
+      | null;
+    hu?:
+      | {
+          relation?: {
+            relationTo: 'localized-posts';
+            value: string | LocalizedPost;
+          } | null;
+          hasManyRelation?: (string | LocalizedPost)[] | null;
+          hasManyPolyRelation?:
+            | {
+                relationTo: 'localized-posts';
+                value: string | LocalizedPost;
+              }[]
+            | null;
+          select?: ('one' | 'two' | 'three')[] | null;
+          number?: number[] | null;
+          text?: string[] | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  blocks?: {
+    xx?: Block[] | null;
+    en?: Block[] | null;
+    es?: Block[] | null;
+    pt?: Block[] | null;
+    ar?: Block[] | null;
+    hu?: Block[] | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized-drafts_localized".
+ */
+export interface LocalizedDraftLocalized {
+  id: string;
+  title?: {
+    xx?: string | null;
+    en?: string | null;
+    es?: string | null;
+    pt?: string | null;
+    ar?: string | null;
+    hu?: string | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+  _status?: {
+    xx?: ('draft' | 'published') | null;
+    en?: ('draft' | 'published') | null;
+    es?: ('draft' | 'published') | null;
+    pt?: ('draft' | 'published') | null;
+    ar?: ('draft' | 'published') | null;
+    hu?: ('draft' | 'published') | null;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized-date-fields_localized".
+ */
+export interface LocalizedDateFieldLocalized {
+  id: string;
+  localizedDate?: {
+    xx?: string | null;
+    en?: string | null;
+    es?: string | null;
+    pt?: string | null;
+    ar?: string | null;
+    hu?: string | null;
+  };
+  date?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: {
+    xx?: ('draft' | 'published') | null;
+    en?: ('draft' | 'published') | null;
+    es?: ('draft' | 'published') | null;
+    pt?: ('draft' | 'published') | null;
+    ar?: ('draft' | 'published') | null;
+    hu?: ('draft' | 'published') | null;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "all-fields-localized_localized".
+ */
+export interface AllFieldsLocalizedLocalized {
+  id: string;
+  text?: {
+    xx?: string | null;
+    en?: string | null;
+    es?: string | null;
+    pt?: string | null;
+    ar?: string | null;
+    hu?: string | null;
+  };
+  textarea?: {
+    xx?: string | null;
+    en?: string | null;
+    es?: string | null;
+    pt?: string | null;
+    ar?: string | null;
+    hu?: string | null;
+  };
+  number?: {
+    xx?: number | null;
+    en?: number | null;
+    es?: number | null;
+    pt?: number | null;
+    ar?: number | null;
+    hu?: number | null;
+  };
+  email?: {
+    xx?: string | null;
+    en?: string | null;
+    es?: string | null;
+    pt?: string | null;
+    ar?: string | null;
+    hu?: string | null;
+  };
+  code?: {
+    xx?: string | null;
+    en?: string | null;
+    es?: string | null;
+    pt?: string | null;
+    ar?: string | null;
+    hu?: string | null;
+  };
+  json?: {
+    xx?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    en?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    es?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    pt?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    ar?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    hu?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+  };
+  select?: {
+    xx?: ('option1' | 'option2' | 'option3') | null;
+    en?: ('option1' | 'option2' | 'option3') | null;
+    es?: ('option1' | 'option2' | 'option3') | null;
+    pt?: ('option1' | 'option2' | 'option3') | null;
+    ar?: ('option1' | 'option2' | 'option3') | null;
+    hu?: ('option1' | 'option2' | 'option3') | null;
+  };
+  radio?: {
+    xx?: ('radio1' | 'radio2') | null;
+    en?: ('radio1' | 'radio2') | null;
+    es?: ('radio1' | 'radio2') | null;
+    pt?: ('radio1' | 'radio2') | null;
+    ar?: ('radio1' | 'radio2') | null;
+    hu?: ('radio1' | 'radio2') | null;
+  };
+  checkbox?: {
+    xx?: boolean | null;
+    en?: boolean | null;
+    es?: boolean | null;
+    pt?: boolean | null;
+    ar?: boolean | null;
+    hu?: boolean | null;
+  };
+  date?: {
+    xx?: string | null;
+    en?: string | null;
+    es?: string | null;
+    pt?: string | null;
+    ar?: string | null;
+    hu?: string | null;
+  };
+  localizedGroup?: {
+    xx?: {
+      title?: string | null;
+      description?: string | null;
+    };
+    en?: {
+      title?: string | null;
+      description?: string | null;
+    };
+    es?: {
+      title?: string | null;
+      description?: string | null;
+    };
+    pt?: {
+      title?: string | null;
+      description?: string | null;
+    };
+    ar?: {
+      title?: string | null;
+      description?: string | null;
+    };
+    hu?: {
+      title?: string | null;
+      description?: string | null;
+    };
+  };
+  nonLocalizedGroup?: {
+    localizedText?: {
+      xx?: string | null;
+      en?: string | null;
+      es?: string | null;
+      pt?: string | null;
+      ar?: string | null;
+      hu?: string | null;
+    };
+    nonLocalizedText?: string | null;
+  };
+  localizedArray?: {
+    xx?:
+      | {
+          item?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+    en?:
+      | {
+          item?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+    es?:
+      | {
+          item?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+    pt?:
+      | {
+          item?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+    ar?:
+      | {
+          item?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+    hu?:
+      | {
+          item?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  nonLocalizedArray?:
+    | {
+        localizedItem?: {
+          xx?: string | null;
+          en?: string | null;
+          es?: string | null;
+          pt?: string | null;
+          ar?: string | null;
+          hu?: string | null;
+        };
+        id?: string | null;
+      }[]
+    | null;
+  localizedBlocks?: {
+    xx?: (LocalizedTextBlock | NestedBlock)[] | null;
+    en?: (LocalizedTextBlock | NestedBlock)[] | null;
+    es?: (LocalizedTextBlock | NestedBlock)[] | null;
+    pt?: (LocalizedTextBlock | NestedBlock)[] | null;
+    ar?: (LocalizedTextBlock | NestedBlock)[] | null;
+    hu?: (LocalizedTextBlock | NestedBlock)[] | null;
+  };
+  localizedTab?: {
+    xx?: {
+      tabText?: string | null;
+    };
+    en?: {
+      tabText?: string | null;
+    };
+    es?: {
+      tabText?: string | null;
+    };
+    pt?: {
+      tabText?: string | null;
+    };
+    ar?: {
+      tabText?: string | null;
+    };
+    hu?: {
+      tabText?: string | null;
+    };
+  };
+  nonLocalizedTab?: {
+    localizedInNonLocalizedTab?: {
+      xx?: string | null;
+      en?: string | null;
+      es?: string | null;
+      pt?: string | null;
+      ar?: string | null;
+      hu?: string | null;
+    };
+  };
+  unnamedTabLocalizedText?: {
+    xx?: string | null;
+    en?: string | null;
+    es?: string | null;
+    pt?: string | null;
+    ar?: string | null;
+    hu?: string | null;
+  };
+  t1?: {
+    xx?: {
+      t2?: {
+        text?: {
+          xx?: string | null;
+          en?: string | null;
+          es?: string | null;
+          pt?: string | null;
+          ar?: string | null;
+          hu?: string | null;
+        };
+      };
+    };
+    en?: {
+      t2?: {
+        text?: {
+          xx?: string | null;
+          en?: string | null;
+          es?: string | null;
+          pt?: string | null;
+          ar?: string | null;
+          hu?: string | null;
+        };
+      };
+    };
+    es?: {
+      t2?: {
+        text?: {
+          xx?: string | null;
+          en?: string | null;
+          es?: string | null;
+          pt?: string | null;
+          ar?: string | null;
+          hu?: string | null;
+        };
+      };
+    };
+    pt?: {
+      t2?: {
+        text?: {
+          xx?: string | null;
+          en?: string | null;
+          es?: string | null;
+          pt?: string | null;
+          ar?: string | null;
+          hu?: string | null;
+        };
+      };
+    };
+    ar?: {
+      t2?: {
+        text?: {
+          xx?: string | null;
+          en?: string | null;
+          es?: string | null;
+          pt?: string | null;
+          ar?: string | null;
+          hu?: string | null;
+        };
+      };
+    };
+    hu?: {
+      t2?: {
+        text?: {
+          xx?: string | null;
+          en?: string | null;
+          es?: string | null;
+          pt?: string | null;
+          ar?: string | null;
+          hu?: string | null;
+        };
+      };
+    };
+  };
+  g1?: {
+    xx?: {
+      g2?: {
+        g2a1?: {
+          xx?:
+            | {
+                text?: string | null;
+                id?: string | null;
+              }[]
+            | null;
+          en?:
+            | {
+                text?: string | null;
+                id?: string | null;
+              }[]
+            | null;
+          es?:
+            | {
+                text?: string | null;
+                id?: string | null;
+              }[]
+            | null;
+          pt?:
+            | {
+                text?: string | null;
+                id?: string | null;
+              }[]
+            | null;
+          ar?:
+            | {
+                text?: string | null;
+                id?: string | null;
+              }[]
+            | null;
+          hu?:
+            | {
+                text?: string | null;
+                id?: string | null;
+              }[]
+            | null;
+        };
+      };
+    };
+    en?: {
+      g2?: {
+        g2a1?: {
+          xx?:
+            | {
+                text?: string | null;
+                id?: string | null;
+              }[]
+            | null;
+          en?:
+            | {
+                text?: string | null;
+                id?: string | null;
+              }[]
+            | null;
+          es?:
+            | {
+                text?: string | null;
+                id?: string | null;
+              }[]
+            | null;
+          pt?:
+            | {
+                text?: string | null;
+                id?: string | null;
+              }[]
+            | null;
+          ar?:
+            | {
+                text?: string | null;
+                id?: string | null;
+              }[]
+            | null;
+          hu?:
+            | {
+                text?: string | null;
+                id?: string | null;
+              }[]
+            | null;
+        };
+      };
+    };
+    es?: {
+      g2?: {
+        g2a1?: {
+          xx?:
+            | {
+                text?: string | null;
+                id?: string | null;
+              }[]
+            | null;
+          en?:
+            | {
+                text?: string | null;
+                id?: string | null;
+              }[]
+            | null;
+          es?:
+            | {
+                text?: string | null;
+                id?: string | null;
+              }[]
+            | null;
+          pt?:
+            | {
+                text?: string | null;
+                id?: string | null;
+              }[]
+            | null;
+          ar?:
+            | {
+                text?: string | null;
+                id?: string | null;
+              }[]
+            | null;
+          hu?:
+            | {
+                text?: string | null;
+                id?: string | null;
+              }[]
+            | null;
+        };
+      };
+    };
+    pt?: {
+      g2?: {
+        g2a1?: {
+          xx?:
+            | {
+                text?: string | null;
+                id?: string | null;
+              }[]
+            | null;
+          en?:
+            | {
+                text?: string | null;
+                id?: string | null;
+              }[]
+            | null;
+          es?:
+            | {
+                text?: string | null;
+                id?: string | null;
+              }[]
+            | null;
+          pt?:
+            | {
+                text?: string | null;
+                id?: string | null;
+              }[]
+            | null;
+          ar?:
+            | {
+                text?: string | null;
+                id?: string | null;
+              }[]
+            | null;
+          hu?:
+            | {
+                text?: string | null;
+                id?: string | null;
+              }[]
+            | null;
+        };
+      };
+    };
+    ar?: {
+      g2?: {
+        g2a1?: {
+          xx?:
+            | {
+                text?: string | null;
+                id?: string | null;
+              }[]
+            | null;
+          en?:
+            | {
+                text?: string | null;
+                id?: string | null;
+              }[]
+            | null;
+          es?:
+            | {
+                text?: string | null;
+                id?: string | null;
+              }[]
+            | null;
+          pt?:
+            | {
+                text?: string | null;
+                id?: string | null;
+              }[]
+            | null;
+          ar?:
+            | {
+                text?: string | null;
+                id?: string | null;
+              }[]
+            | null;
+          hu?:
+            | {
+                text?: string | null;
+                id?: string | null;
+              }[]
+            | null;
+        };
+      };
+    };
+    hu?: {
+      g2?: {
+        g2a1?: {
+          xx?:
+            | {
+                text?: string | null;
+                id?: string | null;
+              }[]
+            | null;
+          en?:
+            | {
+                text?: string | null;
+                id?: string | null;
+              }[]
+            | null;
+          es?:
+            | {
+                text?: string | null;
+                id?: string | null;
+              }[]
+            | null;
+          pt?:
+            | {
+                text?: string | null;
+                id?: string | null;
+              }[]
+            | null;
+          ar?:
+            | {
+                text?: string | null;
+                id?: string | null;
+              }[]
+            | null;
+          hu?:
+            | {
+                text?: string | null;
+                id?: string | null;
+              }[]
+            | null;
+        };
+      };
+    };
+  };
+  selfRelation?: (string | null) | AllFieldsLocalized;
+  updatedAt: string;
+  createdAt: string;
+  _status?: {
+    xx?: ('draft' | 'published') | null;
+    en?: ('draft' | 'published') | null;
+    es?: ('draft' | 'published') | null;
+    pt?: ('draft' | 'published') | null;
+    ar?: ('draft' | 'published') | null;
+    hu?: ('draft' | 'published') | null;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized-posts_localized".
+ */
+export interface LocalizedPostLocalized {
+  id: string;
+  title?: {
+    xx?: string | null;
+    en?: string | null;
+    es?: string | null;
+    pt?: string | null;
+    ar?: string | null;
+    hu?: string | null;
+  };
+  description?: string | null;
+  localizedDescription?: {
+    xx?: string | null;
+    en?: string | null;
+    es?: string | null;
+    pt?: string | null;
+    ar?: string | null;
+    hu?: string | null;
+  };
+  localizedCheckbox?: {
+    xx?: boolean | null;
+    en?: boolean | null;
+    es?: boolean | null;
+    pt?: boolean | null;
+    ar?: boolean | null;
+    hu?: boolean | null;
+  };
+  children?: (string | LocalizedPost)[] | null;
+  group?: {
+    children?: string | null;
+  };
+  unique?: {
+    xx?: string | null;
+    en?: string | null;
+    es?: string | null;
+    pt?: string | null;
+    ar?: string | null;
+    hu?: string | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "array-fields_localized".
+ */
+export interface ArrayFieldLocalized {
+  id: string;
+  items?: {
+    xx?:
+      | {
+          text?: string | null;
+          nestedItems?:
+            | {
+                text?: string | null;
+                id?: string | null;
+              }[]
+            | null;
+          id?: string | null;
+        }[]
+      | null;
+    en?:
+      | {
+          text?: string | null;
+          nestedItems?:
+            | {
+                text?: string | null;
+                id?: string | null;
+              }[]
+            | null;
+          id?: string | null;
+        }[]
+      | null;
+    es?:
+      | {
+          text?: string | null;
+          nestedItems?:
+            | {
+                text?: string | null;
+                id?: string | null;
+              }[]
+            | null;
+          id?: string | null;
+        }[]
+      | null;
+    pt?:
+      | {
+          text?: string | null;
+          nestedItems?:
+            | {
+                text?: string | null;
+                id?: string | null;
+              }[]
+            | null;
+          id?: string | null;
+        }[]
+      | null;
+    ar?:
+      | {
+          text?: string | null;
+          nestedItems?:
+            | {
+                text?: string | null;
+                id?: string | null;
+              }[]
+            | null;
+          id?: string | null;
+        }[]
+      | null;
+    hu?:
+      | {
+          text?: string | null;
+          nestedItems?:
+            | {
+                text?: string | null;
+                id?: string | null;
+              }[]
+            | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized-required_localized".
+ */
+export interface LocalizedRequiredLocalized {
+  id: string;
+  title: {
+    xx?: string;
+    en?: string;
+    es?: string;
+    pt?: string;
+    ar?: string;
+    hu?: string;
+  };
+  seoTitle?: {
+    xx?: string | null;
+    en?: string | null;
+    es?: string | null;
+    pt?: string | null;
+    ar?: string | null;
+    hu?: string | null;
+  };
+  nav: {
+    layout: {
+      xx?: (Text | Number)[];
+      en?: (Text | Number)[];
+      es?: (Text | Number)[];
+      pt?: (Text | Number)[];
+      ar?: (Text | Number)[];
+      hu?: (Text | Number)[];
+    };
+  };
+  myTab?: {
+    text?: string | null;
+    group?: {
+      xx?: {
+        nestedArray2?:
+          | {
+              nestedText?: string | null;
+              id?: string | null;
+            }[]
+          | null;
+        nestedText?: string | null;
+      };
+      en?: {
+        nestedArray2?:
+          | {
+              nestedText?: string | null;
+              id?: string | null;
+            }[]
+          | null;
+        nestedText?: string | null;
+      };
+      es?: {
+        nestedArray2?:
+          | {
+              nestedText?: string | null;
+              id?: string | null;
+            }[]
+          | null;
+        nestedText?: string | null;
+      };
+      pt?: {
+        nestedArray2?:
+          | {
+              nestedText?: string | null;
+              id?: string | null;
+            }[]
+          | null;
+        nestedText?: string | null;
+      };
+      ar?: {
+        nestedArray2?:
+          | {
+              nestedText?: string | null;
+              id?: string | null;
+            }[]
+          | null;
+        nestedText?: string | null;
+      };
+      hu?: {
+        nestedArray2?:
+          | {
+              nestedText?: string | null;
+              id?: string | null;
+            }[]
+          | null;
+        nestedText?: string | null;
+      };
+    };
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relationship-localized_localized".
+ */
+export interface RelationshipLocalizedLocalized {
+  id: string;
+  relationship?: {
+    xx?: (string | null) | LocalizedPost;
+    en?: (string | null) | LocalizedPost;
+    es?: (string | null) | LocalizedPost;
+    pt?: (string | null) | LocalizedPost;
+    ar?: (string | null) | LocalizedPost;
+    hu?: (string | null) | LocalizedPost;
+  };
+  relationshipHasMany?: {
+    xx?: (string | LocalizedPost)[] | null;
+    en?: (string | LocalizedPost)[] | null;
+    es?: (string | LocalizedPost)[] | null;
+    pt?: (string | LocalizedPost)[] | null;
+    ar?: (string | LocalizedPost)[] | null;
+    hu?: (string | LocalizedPost)[] | null;
+  };
+  relationMultiRelationTo?: {
+    xx?:
+      | ({
+          relationTo: 'localized-posts';
+          value: string | LocalizedPost;
+        } | null)
+      | ({
+          relationTo: 'cannot-create-default-locale';
+          value: string | CannotCreateDefaultLocale;
+        } | null);
+    en?:
+      | ({
+          relationTo: 'localized-posts';
+          value: string | LocalizedPost;
+        } | null)
+      | ({
+          relationTo: 'cannot-create-default-locale';
+          value: string | CannotCreateDefaultLocale;
+        } | null);
+    es?:
+      | ({
+          relationTo: 'localized-posts';
+          value: string | LocalizedPost;
+        } | null)
+      | ({
+          relationTo: 'cannot-create-default-locale';
+          value: string | CannotCreateDefaultLocale;
+        } | null);
+    pt?:
+      | ({
+          relationTo: 'localized-posts';
+          value: string | LocalizedPost;
+        } | null)
+      | ({
+          relationTo: 'cannot-create-default-locale';
+          value: string | CannotCreateDefaultLocale;
+        } | null);
+    ar?:
+      | ({
+          relationTo: 'localized-posts';
+          value: string | LocalizedPost;
+        } | null)
+      | ({
+          relationTo: 'cannot-create-default-locale';
+          value: string | CannotCreateDefaultLocale;
+        } | null);
+    hu?:
+      | ({
+          relationTo: 'localized-posts';
+          value: string | LocalizedPost;
+        } | null)
+      | ({
+          relationTo: 'cannot-create-default-locale';
+          value: string | CannotCreateDefaultLocale;
+        } | null);
+  };
+  relationMultiRelationToHasMany?: {
+    xx?:
+      | (
+          | {
+              relationTo: 'localized-posts';
+              value: string | LocalizedPost;
+            }
+          | {
+              relationTo: 'cannot-create-default-locale';
+              value: string | CannotCreateDefaultLocale;
+            }
+        )[]
+      | null;
+    en?:
+      | (
+          | {
+              relationTo: 'localized-posts';
+              value: string | LocalizedPost;
+            }
+          | {
+              relationTo: 'cannot-create-default-locale';
+              value: string | CannotCreateDefaultLocale;
+            }
+        )[]
+      | null;
+    es?:
+      | (
+          | {
+              relationTo: 'localized-posts';
+              value: string | LocalizedPost;
+            }
+          | {
+              relationTo: 'cannot-create-default-locale';
+              value: string | CannotCreateDefaultLocale;
+            }
+        )[]
+      | null;
+    pt?:
+      | (
+          | {
+              relationTo: 'localized-posts';
+              value: string | LocalizedPost;
+            }
+          | {
+              relationTo: 'cannot-create-default-locale';
+              value: string | CannotCreateDefaultLocale;
+            }
+        )[]
+      | null;
+    ar?:
+      | (
+          | {
+              relationTo: 'localized-posts';
+              value: string | LocalizedPost;
+            }
+          | {
+              relationTo: 'cannot-create-default-locale';
+              value: string | CannotCreateDefaultLocale;
+            }
+        )[]
+      | null;
+    hu?:
+      | (
+          | {
+              relationTo: 'localized-posts';
+              value: string | LocalizedPost;
+            }
+          | {
+              relationTo: 'cannot-create-default-locale';
+              value: string | CannotCreateDefaultLocale;
+            }
+        )[]
+      | null;
+  };
+  arrayField?: {
+    xx?:
+      | {
+          nestedRelation?: (string | null) | LocalizedPost;
+          id?: string | null;
+        }[]
+      | null;
+    en?:
+      | {
+          nestedRelation?: (string | null) | LocalizedPost;
+          id?: string | null;
+        }[]
+      | null;
+    es?:
+      | {
+          nestedRelation?: (string | null) | LocalizedPost;
+          id?: string | null;
+        }[]
+      | null;
+    pt?:
+      | {
+          nestedRelation?: (string | null) | LocalizedPost;
+          id?: string | null;
+        }[]
+      | null;
+    ar?:
+      | {
+          nestedRelation?: (string | null) | LocalizedPost;
+          id?: string | null;
+        }[]
+      | null;
+    hu?:
+      | {
+          nestedRelation?: (string | null) | LocalizedPost;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "locale-restricted_localized".
+ */
+export interface LocaleRestrictedLocalized {
+  id: string;
+  title?: {
+    xx?: string | null;
+    en?: string | null;
+    es?: string | null;
+    pt?: string | null;
+    ar?: string | null;
+    hu?: string | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "nested_localized".
+ */
+export interface NestedLocalized {
+  id: string;
+  blocks?: Block_6275BFE4[] | null;
+  topLevelArray?:
+    | {
+        localizedText?: {
+          xx?: string | null;
+          en?: string | null;
+          es?: string | null;
+          pt?: string | null;
+          ar?: string | null;
+          hu?: string | null;
+        };
+        notLocalizedText?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  topLevelArrayLocalized?: {
+    xx?:
+      | {
+          text?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+    en?:
+      | {
+          text?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+    es?:
+      | {
+          text?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+    pt?:
+      | {
+          text?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+    ar?:
+      | {
+          text?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+    hu?:
+      | {
+          text?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Multiple blocks resolve to the `Block` interface with different fields, so a content hash is appended to keep the generated types stable and unambiguous. Set a unique `interfaceName` on the block to choose the name yourself. See https://payloadcms.com/docs/typescript/generating-types#block-interface-name-collisions
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Block_6275BFE4".
+ */
+export interface Block_6275BFE4 {
+  someText?: {
+    xx?: string | null;
+    en?: string | null;
+    es?: string | null;
+    pt?: string | null;
+    ar?: string | null;
+    hu?: string | null;
+  };
+  array?:
+    | {
+        text?: {
+          xx?: string | null;
+          en?: string | null;
+          es?: string | null;
+          pt?: string | null;
+          ar?: string | null;
+          hu?: string | null;
+        };
+        textNotLocalized?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'block';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "groups_localized".
+ */
+export interface GroupLocalized {
+  id: string;
+  groupLocalizedRow?: {
+    xx?: {
+      text?: string | null;
+    };
+    en?: {
+      text?: string | null;
+    };
+    es?: {
+      text?: string | null;
+    };
+    pt?: {
+      text?: string | null;
+    };
+    ar?: {
+      text?: string | null;
+    };
+    hu?: {
+      text?: string | null;
+    };
+  };
+  groupLocalized?: {
+    xx?: {
+      title?: string | null;
+    };
+    en?: {
+      title?: string | null;
+    };
+    es?: {
+      title?: string | null;
+    };
+    pt?: {
+      title?: string | null;
+    };
+    ar?: {
+      title?: string | null;
+    };
+    hu?: {
+      title?: string | null;
+    };
+  };
+  group?: {
+    title?: {
+      xx?: string | null;
+      en?: string | null;
+      es?: string | null;
+      pt?: string | null;
+      ar?: string | null;
+      hu?: string | null;
+    };
+  };
+  deep?: {
+    array?:
+      | {
+          title?: {
+            xx?: string | null;
+            en?: string | null;
+            es?: string | null;
+            pt?: string | null;
+            ar?: string | null;
+            hu?: string | null;
+          };
+          id?: string | null;
+        }[]
+      | null;
+    blocks?: First_CD304A47[] | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Multiple blocks resolve to the `First` interface with different fields, so a content hash is appended to keep the generated types stable and unambiguous. Set a unique `interfaceName` on the block to choose the name yourself. See https://payloadcms.com/docs/typescript/generating-types#block-interface-name-collisions
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "First_CD304A47".
+ */
+export interface First_CD304A47 {
+  title?: {
+    xx?: string | null;
+    en?: string | null;
+    es?: string | null;
+    pt?: string | null;
+    ar?: string | null;
+    hu?: string | null;
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'first';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tabs_localized".
+ */
+export interface TabLocalized {
+  id: string;
+  tabLocalized?: {
+    xx?: {
+      title?: string | null;
+      array?:
+        | {
+            title?: string | null;
+            id?: string | null;
+          }[]
+        | null;
+      group?: {
+        heading?: string | null;
+      };
+    };
+    en?: {
+      title?: string | null;
+      array?:
+        | {
+            title?: string | null;
+            id?: string | null;
+          }[]
+        | null;
+      group?: {
+        heading?: string | null;
+      };
+    };
+    es?: {
+      title?: string | null;
+      array?:
+        | {
+            title?: string | null;
+            id?: string | null;
+          }[]
+        | null;
+      group?: {
+        heading?: string | null;
+      };
+    };
+    pt?: {
+      title?: string | null;
+      array?:
+        | {
+            title?: string | null;
+            id?: string | null;
+          }[]
+        | null;
+      group?: {
+        heading?: string | null;
+      };
+    };
+    ar?: {
+      title?: string | null;
+      array?:
+        | {
+            title?: string | null;
+            id?: string | null;
+          }[]
+        | null;
+      group?: {
+        heading?: string | null;
+      };
+    };
+    hu?: {
+      title?: string | null;
+      array?:
+        | {
+            title?: string | null;
+            id?: string | null;
+          }[]
+        | null;
+      group?: {
+        heading?: string | null;
+      };
+    };
+  };
+  tab?: {
+    title?: {
+      xx?: string | null;
+      en?: string | null;
+      es?: string | null;
+      pt?: string | null;
+      ar?: string | null;
+      hu?: string | null;
+    };
+  };
+  deep?: {
+    array?:
+      | {
+          title?: {
+            xx?: string | null;
+            en?: string | null;
+            es?: string | null;
+            pt?: string | null;
+            ar?: string | null;
+            hu?: string | null;
+          };
+          id?: string | null;
+        }[]
+      | null;
+    blocks?: First_CD304A47[] | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized-sort_localized".
+ */
+export interface LocalizedSortLocalized {
+  id: string;
+  title?: {
+    xx?: string | null;
+    en?: string | null;
+    es?: string | null;
+    pt?: string | null;
+    ar?: string | null;
+    hu?: string | null;
+  };
+  date?: {
+    xx?: string | null;
+    en?: string | null;
+    es?: string | null;
+    pt?: string | null;
+    ar?: string | null;
+    hu?: string | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "blocks-same-name_localized".
+ */
+export interface BlocksSameNameLocalized {
+  id: string;
+  blocks?: (BlockFirst_6559E4D0 | BlockSecond_0F0DA2DE)[] | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Multiple blocks resolve to the `Block_first` interface with different fields, so a content hash is appended to keep the generated types stable and unambiguous. Set a unique `interfaceName` on the block to choose the name yourself. See https://payloadcms.com/docs/typescript/generating-types#block-interface-name-collisions
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Block_first_6559E4D0".
+ */
+export interface BlockFirst_6559E4D0 {
+  title?: {
+    xx?: string | null;
+    en?: string | null;
+    es?: string | null;
+    pt?: string | null;
+    ar?: string | null;
+    hu?: string | null;
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'block_first';
+}
+/**
+ * Multiple blocks resolve to the `Block_second` interface with different fields, so a content hash is appended to keep the generated types stable and unambiguous. Set a unique `interfaceName` on the block to choose the name yourself. See https://payloadcms.com/docs/typescript/generating-types#block-interface-name-collisions
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Block_second_0F0DA2DE".
+ */
+export interface BlockSecond_0F0DA2DE {
+  title?: {
+    xx?: string | null;
+    en?: string | null;
+    es?: string | null;
+    pt?: string | null;
+    ar?: string | null;
+    hu?: string | null;
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'block_second';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized-within-localized_localized".
+ */
+export interface LocalizedWithinLocalizedLocalized {
+  id: string;
+  myTab?: {
+    xx?: {
+      shouldNotBeLocalized?: string | null;
+    };
+    en?: {
+      shouldNotBeLocalized?: string | null;
+    };
+    es?: {
+      shouldNotBeLocalized?: string | null;
+    };
+    pt?: {
+      shouldNotBeLocalized?: string | null;
+    };
+    ar?: {
+      shouldNotBeLocalized?: string | null;
+    };
+    hu?: {
+      shouldNotBeLocalized?: string | null;
+    };
+  };
+  myArray?: {
+    xx?:
+      | {
+          shouldNotBeLocalized?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+    en?:
+      | {
+          shouldNotBeLocalized?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+    es?:
+      | {
+          shouldNotBeLocalized?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+    pt?:
+      | {
+          shouldNotBeLocalized?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+    ar?:
+      | {
+          shouldNotBeLocalized?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+    hu?:
+      | {
+          shouldNotBeLocalized?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  myBlocks?: {
+    xx?: MyBlock[] | null;
+    en?: MyBlock[] | null;
+    es?: MyBlock[] | null;
+    pt?: MyBlock[] | null;
+    ar?: MyBlock[] | null;
+    hu?: MyBlock[] | null;
+  };
+  myGroup?: {
+    xx?: {
+      shouldNotBeLocalized?: string | null;
+    };
+    en?: {
+      shouldNotBeLocalized?: string | null;
+    };
+    es?: {
+      shouldNotBeLocalized?: string | null;
+    };
+    pt?: {
+      shouldNotBeLocalized?: string | null;
+    };
+    ar?: {
+      shouldNotBeLocalized?: string | null;
+    };
+    hu?: {
+      shouldNotBeLocalized?: string | null;
+    };
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "array-with-fallback-fields_localized".
+ */
+export interface ArrayWithFallbackFieldLocalized {
+  id: string;
+  items: {
+    xx?: {
+      text?: string | null;
+      id?: string | null;
+    }[];
+    en?: {
+      text?: string | null;
+      id?: string | null;
+    }[];
+    es?: {
+      text?: string | null;
+      id?: string | null;
+    }[];
+    pt?: {
+      text?: string | null;
+      id?: string | null;
+    }[];
+    ar?: {
+      text?: string | null;
+      id?: string | null;
+    }[];
+    hu?: {
+      text?: string | null;
+      id?: string | null;
+    }[];
+  };
+  itemsReadOnly?: {
+    xx?:
+      | {
+          text: string;
+          id?: string | null;
+        }[]
+      | null;
+    en?:
+      | {
+          text: string;
+          id?: string | null;
+        }[]
+      | null;
+    es?:
+      | {
+          text: string;
+          id?: string | null;
+        }[]
+      | null;
+    pt?:
+      | {
+          text: string;
+          id?: string | null;
+        }[]
+      | null;
+    ar?:
+      | {
+          text: string;
+          id?: string | null;
+        }[]
+      | null;
+    hu?:
+      | {
+          text: string;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "blocks-reference-localized_localized".
+ */
+export interface BlocksReferenceLocalizedLocalized {
+  id: string;
+  layout?: ReferencedLocalizedBlock_576493C2[] | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: {
+    xx?: ('draft' | 'published') | null;
+    en?: ('draft' | 'published') | null;
+    es?: ('draft' | 'published') | null;
+    pt?: ('draft' | 'published') | null;
+    ar?: ('draft' | 'published') | null;
+    hu?: ('draft' | 'published') | null;
+  };
+}
+/**
+ * Multiple blocks resolve to the `ReferencedLocalizedBlock` interface with different fields, so a content hash is appended to keep the generated types stable and unambiguous. Set a unique `interfaceName` on the block to choose the name yourself. See https://payloadcms.com/docs/typescript/generating-types#block-interface-name-collisions
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ReferencedLocalizedBlock_576493C2".
+ */
+export interface ReferencedLocalizedBlock_576493C2 {
+  title?: {
+    xx?: string | null;
+    en?: string | null;
+    es?: string | null;
+    pt?: string | null;
+    ar?: string | null;
+    hu?: string | null;
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'referenced-localized-block';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1797,6 +3783,16 @@ export interface ArrayWithFallbackFieldsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "blocks-reference-localized_select".
+ */
+export interface BlocksReferenceLocalizedSelect<T extends boolean = true> {
+  layout?: T | {};
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
@@ -1873,6 +3869,70 @@ export interface GlobalDraft {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "global-array_localized".
+ */
+export interface GlobalArrayLocalized {
+  id: string;
+  array?:
+    | {
+        text?: {
+          xx?: string | null;
+          en?: string | null;
+          es?: string | null;
+          pt?: string | null;
+          ar?: string | null;
+          hu?: string | null;
+        };
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "global-text_localized".
+ */
+export interface GlobalTextLocalized {
+  id: string;
+  text?: {
+    xx?: string | null;
+    en?: string | null;
+    es?: string | null;
+    pt?: string | null;
+    ar?: string | null;
+    hu?: string | null;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "global-drafts_localized".
+ */
+export interface GlobalDraftLocalized {
+  id: string;
+  text?: {
+    xx?: string | null;
+    en?: string | null;
+    es?: string | null;
+    pt?: string | null;
+    ar?: string | null;
+    hu?: string | null;
+  };
+  _status?: {
+    xx?: ('draft' | 'published') | null;
+    en?: ('draft' | 'published') | null;
+    es?: ('draft' | 'published') | null;
+    pt?: ('draft' | 'published') | null;
+    ar?: ('draft' | 'published') | null;
+    hu?: ('draft' | 'published') | null;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "global-array_select".
  */
 export interface GlobalArraySelect<T extends boolean = true> {
@@ -1916,6 +3976,90 @@ export interface CollectionsWidget {
     [k: string]: unknown;
   };
   width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-query_widget".
+ */
+export interface CollectionQueryWidget {
+  data?: {
+    title?: string | null;
+    relatedCollection:
+      | 'richText'
+      | 'blocks-fields'
+      | 'nested-arrays'
+      | 'nested-field-tables'
+      | 'localized-drafts'
+      | 'localized-date-fields'
+      | 'all-fields-localized'
+      | 'users'
+      | 'localized-posts'
+      | 'no-localized-fields'
+      | 'array-fields'
+      | 'localized-required'
+      | 'with-localized-relationship'
+      | 'relationship-localized'
+      | 'cannot-create-default-locale'
+      | 'locale-restricted'
+      | 'nested'
+      | 'groups'
+      | 'tabs'
+      | 'localized-sort'
+      | 'blocks-same-name'
+      | 'localized-within-localized'
+      | 'array-with-fallback-fields'
+      | 'blocks-reference-localized';
+    where?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    sortField?: string | null;
+    sortDirection?: ('asc' | 'desc') | null;
+    limit?: number | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "activity_widget".
+ */
+export interface ActivityWidget {
+  data?: {
+    excludedCollections?:
+      | (
+          | 'richText'
+          | 'blocks-fields'
+          | 'nested-arrays'
+          | 'nested-field-tables'
+          | 'localized-drafts'
+          | 'localized-date-fields'
+          | 'all-fields-localized'
+          | 'users'
+          | 'localized-posts'
+          | 'no-localized-fields'
+          | 'array-fields'
+          | 'localized-required'
+          | 'with-localized-relationship'
+          | 'relationship-localized'
+          | 'cannot-create-default-locale'
+          | 'locale-restricted'
+          | 'nested'
+          | 'groups'
+          | 'tabs'
+          | 'localized-sort'
+          | 'blocks-same-name'
+          | 'localized-within-localized'
+          | 'array-with-fallback-fields'
+          | 'blocks-reference-localized'
+        )[]
+      | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

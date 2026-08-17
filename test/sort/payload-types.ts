@@ -88,6 +88,11 @@ export interface Config {
       'group.orderableJoinField': 'orderable';
     };
   };
+  collectionsLocalized: {
+    localized: LocalizedLocalized;
+    orderable: OrderableLocalized;
+    'orderable-join': OrderableJoinLocalized;
+  };
   collectionsSelect: {
     posts: PostsSelect<false> | PostsSelect<true>;
     drafts: DraftsSelect<false> | DraftsSelect<true>;
@@ -105,12 +110,15 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
-  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'nb') | ('en' | 'nb')[];
   globals: {};
+  globalsLocalized: {};
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'nb') | ('en' | 'nb')[];
   globalsSelect: {};
   locale: 'en' | 'nb';
   widgets: {
     collections: CollectionsWidget;
+    'collection-query': CollectionQueryWidget;
+    activity: ActivityWidget;
   };
   user: User;
   jobs: {
@@ -376,6 +384,109 @@ export interface PayloadMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized_localized".
+ */
+export interface LocalizedLocalized {
+  id: string;
+  text?: {
+    en?: string | null;
+    nb?: string | null;
+  };
+  number?: {
+    en?: number | null;
+    nb?: number | null;
+  };
+  number2?: number | null;
+  group?: {
+    text?: string | null;
+    number?: {
+      en?: number | null;
+      nb?: number | null;
+    };
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "orderable_localized".
+ */
+export interface OrderableLocalized {
+  id: string;
+  _orderable_group_orderableJoinField_order?: string | null;
+  _orderable_orderableJoinField2_order?: string | null;
+  _orderable_orderableJoinField1_order?: string | null;
+  _order?: string | null;
+  title?: string | null;
+  orderableField?: {
+    en?: (string | null) | OrderableJoin;
+    nb?: (string | null) | OrderableJoin;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "orderable-join_localized".
+ */
+export interface OrderableJoinLocalized {
+  id: string;
+  title?: string | null;
+  orderableJoinField1?: {
+    en?: {
+      docs?: (string | Orderable)[];
+      hasNextPage?: boolean;
+      totalDocs?: number;
+    };
+    nb?: {
+      docs?: (string | Orderable)[];
+      hasNextPage?: boolean;
+      totalDocs?: number;
+    };
+  };
+  orderableJoinField2?: {
+    en?: {
+      docs?: (string | Orderable)[];
+      hasNextPage?: boolean;
+      totalDocs?: number;
+    };
+    nb?: {
+      docs?: (string | Orderable)[];
+      hasNextPage?: boolean;
+      totalDocs?: number;
+    };
+  };
+  nonOrderableJoinField?: {
+    en?: {
+      docs?: (string | Orderable)[];
+      hasNextPage?: boolean;
+      totalDocs?: number;
+    };
+    nb?: {
+      docs?: (string | Orderable)[];
+      hasNextPage?: boolean;
+      totalDocs?: number;
+    };
+  };
+  group?: {
+    orderableJoinField?: {
+      en?: {
+        docs?: (string | Orderable)[];
+        hasNextPage?: boolean;
+        totalDocs?: number;
+      };
+      nb?: {
+        docs?: (string | Orderable)[];
+        hasNextPage?: boolean;
+        totalDocs?: number;
+      };
+    };
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "posts_select".
  */
 export interface PostsSelect<T extends boolean = true> {
@@ -543,6 +654,58 @@ export interface CollectionsWidget {
     [k: string]: unknown;
   };
   width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-query_widget".
+ */
+export interface CollectionQueryWidget {
+  data?: {
+    title?: string | null;
+    relatedCollection:
+      | 'posts'
+      | 'drafts'
+      | 'default-sort'
+      | 'non-unique-sort'
+      | 'localized'
+      | 'orderable'
+      | 'orderable-join'
+      | 'users';
+    where?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    sortField?: string | null;
+    sortDirection?: ('asc' | 'desc') | null;
+    limit?: number | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "activity_widget".
+ */
+export interface ActivityWidget {
+  data?: {
+    excludedCollections?:
+      | (
+          | 'posts'
+          | 'drafts'
+          | 'default-sort'
+          | 'non-unique-sort'
+          | 'localized'
+          | 'orderable'
+          | 'orderable-join'
+          | 'users'
+        )[]
+      | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

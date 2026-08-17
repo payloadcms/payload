@@ -77,6 +77,7 @@ export interface Config {
     'payload-migrations': PayloadMigration;
   };
   collectionsJoins: {};
+  collectionsLocalized: {};
   collectionsSelect: {
     tickets: TicketsSelect<false> | TicketsSelect<true>;
     revenue: RevenueSelect<false> | RevenueSelect<true>;
@@ -90,8 +91,9 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
-  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es') | ('en' | 'es')[];
   globals: {};
+  globalsLocalized: {};
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es') | ('en' | 'es')[];
   globalsSelect: {};
   locale: 'en' | 'es';
   widgets: {
@@ -102,7 +104,7 @@ export interface Config {
     configurable: ConfigurableWidget;
     collections: CollectionsWidget;
     'collection-query': CollectionQueryWidget;
-    activity: RecentlyViewedWidget;
+    activity: ActivityWidget;
   };
   user: User;
   jobs: {
@@ -467,7 +469,7 @@ export interface CollectionsWidget {
 export interface CollectionQueryWidget {
   data?: {
     title?: string | null;
-    relatedCollection: 'tickets' | 'revenue' | 'events' | 'payload-kv';
+    relatedCollection: 'tickets' | 'revenue' | 'events' | 'users';
     where?:
       | {
           [k: string]: unknown;
@@ -487,9 +489,9 @@ export interface CollectionQueryWidget {
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "activity_widget".
  */
-export interface RecentlyViewedWidget {
+export interface ActivityWidget {
   data?: {
-    excludedCollections?: ('tickets' | 'revenue' | 'events' | 'payload-kv')[] | null;
+    excludedCollections?: ('tickets' | 'revenue' | 'events' | 'users')[] | null;
   };
   width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }

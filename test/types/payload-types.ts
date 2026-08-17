@@ -75,20 +75,21 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_D5E7E2D8".
+ * via the `definition` "LexicalNodes_CF6BDE6C".
  */
-export type LexicalNodes_D5E7E2D8 =
+export type LexicalNodes_CF6BDE6C =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_D5E7E2D8>
+  | SerializedParagraphNode<LexicalNodes_CF6BDE6C>
   | SerializedUploadNode<'media', LexicalUploadFields_7C90EEAC>
   | SerializedUploadNode<'gallery', LexicalUploadFields_9521FA4A>
   | SerializedHorizontalRuleNode
-  | SerializedQuoteNode<LexicalNodes_D5E7E2D8>
+  | SerializedQuoteNode<LexicalNodes_CF6BDE6C>
   | SerializedRelationshipNode<
       | 'posts'
       | 'pages'
+      | 'pages-localized'
       | 'pages-categories'
       | 'draft-posts'
       | 'fallback-users'
@@ -99,27 +100,28 @@ export type LexicalNodes_D5E7E2D8 =
       | 'payload-preferences'
       | 'payload-migrations'
     >
-  | SerializedAutoLinkNode<LexicalNodes_D5E7E2D8, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_D5E7E2D8, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_D5E7E2D8>
-  | SerializedListItemNode<LexicalNodes_D5E7E2D8>
-  | SerializedHeadingNode<LexicalNodes_D5E7E2D8>;
+  | SerializedAutoLinkNode<LexicalNodes_CF6BDE6C, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_CF6BDE6C, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_CF6BDE6C>
+  | SerializedListItemNode<LexicalNodes_CF6BDE6C>
+  | SerializedHeadingNode<LexicalNodes_CF6BDE6C>;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_FB3BECC7_Input".
+ * via the `definition` "LexicalNodes_5994709A_Input".
  */
-export type LexicalNodes_FB3BECC7_Input =
+export type LexicalNodes_5994709A_Input =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_FB3BECC7_Input>
+  | SerializedParagraphNode<LexicalNodes_5994709A_Input>
   | SerializedUploadNodeInput<'media', LexicalUploadFields_7C90EEAC>
   | SerializedUploadNodeInput<'gallery', LexicalUploadFields_9521FA4A>
   | SerializedHorizontalRuleNode
-  | SerializedQuoteNode<LexicalNodes_FB3BECC7_Input>
+  | SerializedQuoteNode<LexicalNodes_5994709A_Input>
   | SerializedRelationshipNodeInput<
       | 'posts'
       | 'pages'
+      | 'pages-localized'
       | 'pages-categories'
       | 'draft-posts'
       | 'fallback-users'
@@ -130,24 +132,25 @@ export type LexicalNodes_FB3BECC7_Input =
       | 'payload-preferences'
       | 'payload-migrations'
     >
-  | SerializedAutoLinkNode<LexicalNodes_FB3BECC7_Input, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_FB3BECC7_Input, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_FB3BECC7_Input>
-  | SerializedListItemNode<LexicalNodes_FB3BECC7_Input>
-  | SerializedHeadingNode<LexicalNodes_FB3BECC7_Input>;
+  | SerializedAutoLinkNode<LexicalNodes_5994709A_Input, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_5994709A_Input, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_5994709A_Input>
+  | SerializedListItemNode<LexicalNodes_5994709A_Input>
+  | SerializedHeadingNode<LexicalNodes_5994709A_Input>;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_040C7D3E".
+ * via the `definition` "LexicalNodes_BBDD5837".
  */
-export type LexicalNodes_040C7D3E =
+export type LexicalNodes_BBDD5837 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_040C7D3E>
+  | SerializedParagraphNode<LexicalNodes_BBDD5837>
   | SerializedBlockNode<Cta>
   | SerializedRelationshipNode<
       | 'posts'
       | 'pages'
+      | 'pages-localized'
       | 'pages-categories'
       | 'draft-posts'
       | 'fallback-users'
@@ -161,25 +164,26 @@ export type LexicalNodes_040C7D3E =
   | SerializedHorizontalRuleNode
   | SerializedUploadNode<'media'>
   | SerializedUploadNode<'gallery'>
-  | SerializedQuoteNode<LexicalNodes_040C7D3E>
-  | SerializedAutoLinkNode<LexicalNodes_040C7D3E, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_040C7D3E, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_040C7D3E>
-  | SerializedListItemNode<LexicalNodes_040C7D3E>
-  | SerializedHeadingNode<LexicalNodes_040C7D3E>;
+  | SerializedQuoteNode<LexicalNodes_BBDD5837>
+  | SerializedAutoLinkNode<LexicalNodes_BBDD5837, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_BBDD5837, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_BBDD5837>
+  | SerializedListItemNode<LexicalNodes_BBDD5837>
+  | SerializedHeadingNode<LexicalNodes_BBDD5837>;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_BE82CF4C_Input".
+ * via the `definition` "LexicalNodes_569386B9_Input".
  */
-export type LexicalNodes_BE82CF4C_Input =
+export type LexicalNodes_569386B9_Input =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_BE82CF4C_Input>
+  | SerializedParagraphNode<LexicalNodes_569386B9_Input>
   | SerializedBlockNode<CtaInput>
   | SerializedRelationshipNodeInput<
       | 'posts'
       | 'pages'
+      | 'pages-localized'
       | 'pages-categories'
       | 'draft-posts'
       | 'fallback-users'
@@ -193,12 +197,12 @@ export type LexicalNodes_BE82CF4C_Input =
   | SerializedHorizontalRuleNode
   | SerializedUploadNodeInput<'media'>
   | SerializedUploadNodeInput<'gallery'>
-  | SerializedQuoteNode<LexicalNodes_BE82CF4C_Input>
-  | SerializedAutoLinkNode<LexicalNodes_BE82CF4C_Input, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_BE82CF4C_Input, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_BE82CF4C_Input>
-  | SerializedListItemNode<LexicalNodes_BE82CF4C_Input>
-  | SerializedHeadingNode<LexicalNodes_BE82CF4C_Input>;
+  | SerializedQuoteNode<LexicalNodes_569386B9_Input>
+  | SerializedAutoLinkNode<LexicalNodes_569386B9_Input, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_569386B9_Input, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_569386B9_Input>
+  | SerializedListItemNode<LexicalNodes_569386B9_Input>
+  | SerializedHeadingNode<LexicalNodes_569386B9_Input>;
 
 export interface Config {
   auth: {
@@ -209,6 +213,7 @@ export interface Config {
   collections: {
     posts: Post;
     pages: Page;
+    'pages-localized': PagesLocalized;
     'pages-categories': PagesCategory;
     'draft-posts': DraftPost;
     media: Media;
@@ -226,9 +231,13 @@ export interface Config {
       relatedPages: 'pages';
     };
   };
+  collectionsLocalized: {
+    'pages-localized': PagesLocalizedLocalized;
+  };
   collectionsSelect: {
     posts: PostsSelect<false> | PostsSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
+    'pages-localized': PagesLocalizedSelect<false> | PagesLocalizedSelect<true>;
     'pages-categories': PagesCategoriesSelect<false> | PagesCategoriesSelect<true>;
     'draft-posts': DraftPostsSelect<false> | DraftPostsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
@@ -244,22 +253,26 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
-  fallbackLocale: null;
   globals: {
     menu: Menu;
     settings: Setting;
   };
+  globalsLocalized: {};
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es') | ('en' | 'es')[];
   globalsSelect: {
     menu: MenuSelect<false> | MenuSelect<true>;
     settings: SettingsSelect<false> | SettingsSelect<true>;
   };
-  locale: null;
+  locale: 'en' | 'es';
   widgets: {
     collections: CollectionsWidget;
+    'collection-query': CollectionQueryWidget;
+    activity: ActivityWidget;
   };
   collectionsInput: {
     posts: PostInput;
     pages: PageInput;
+    'pages-localized': PagesLocalizedInput;
     'pages-categories': PagesCategoryInput;
     'draft-posts': DraftPostInput;
     media: MediaInput;
@@ -338,7 +351,7 @@ export interface UserAuthOperations {
 export interface Post {
   id: string;
   text?: string | null;
-  richText: LexicalRichText<LexicalNodes_D5E7E2D8>;
+  richText: LexicalRichText<LexicalNodes_CF6BDE6C>;
   title?: string | null;
   selectField: MySelectOptions;
   insideUnnamedGroup?: string | null;
@@ -377,6 +390,24 @@ export interface PagesCategory {
     hasNextPage?: boolean;
     totalDocs?: number;
   };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages-localized".
+ */
+export interface PagesLocalized {
+  id: string;
+  title?: string | null;
+  number?: number | null;
+  textNonLocalized?: string | null;
+  array?:
+    | {
+        title?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -479,7 +510,7 @@ export interface InputType {
         value: string | PagesCategory;
       } | null);
   image?: (string | null) | Media;
-  richText?: LexicalRichText<LexicalNodes_040C7D3E> | null;
+  richText?: LexicalRichText<LexicalNodes_BBDD5837> | null;
   computedTitle?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -540,6 +571,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'pages';
         value: string | Page;
+      } | null)
+    | ({
+        relationTo: 'pages-localized';
+        value: string | PagesLocalized;
       } | null)
     | ({
         relationTo: 'pages-categories';
@@ -623,6 +658,33 @@ export interface PayloadMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages-localized_localized".
+ */
+export interface PagesLocalizedLocalized {
+  id: string;
+  title?: {
+    en?: string | null;
+    es?: string | null;
+  };
+  number?: {
+    en?: number | null;
+    es?: number | null;
+  };
+  textNonLocalized?: string | null;
+  array?:
+    | {
+        title?: {
+          en?: string | null;
+          es?: string | null;
+        };
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "posts_select".
  */
 export interface PostsSelect<T extends boolean = true> {
@@ -648,6 +710,23 @@ export interface PostsSelect<T extends boolean = true> {
 export interface PagesSelect<T extends boolean = true> {
   title?: T;
   category?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages-localized_select".
+ */
+export interface PagesLocalizedSelect<T extends boolean = true> {
+  title?: T;
+  number?: T;
+  textNonLocalized?: T;
+  array?:
+    | T
+    | {
+        title?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -820,7 +899,7 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
 export interface Menu {
   id: string;
   text?: string | null;
-  richText?: LexicalRichText<LexicalNodes_D5E7E2D8> | null;
+  richText?: LexicalRichText<LexicalNodes_CF6BDE6C> | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -869,12 +948,68 @@ export interface CollectionsWidget {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-query_widget".
+ */
+export interface CollectionQueryWidget {
+  data?: {
+    title?: string | null;
+    relatedCollection:
+      | 'posts'
+      | 'pages'
+      | 'pages-localized'
+      | 'pages-categories'
+      | 'draft-posts'
+      | 'media'
+      | 'gallery'
+      | 'fallback-users'
+      | 'input-types'
+      | 'users';
+    where?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    sortField?: string | null;
+    sortDirection?: ('asc' | 'desc') | null;
+    limit?: number | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "activity_widget".
+ */
+export interface ActivityWidget {
+  data?: {
+    excludedCollections?:
+      | (
+          | 'posts'
+          | 'pages'
+          | 'pages-localized'
+          | 'pages-categories'
+          | 'draft-posts'
+          | 'media'
+          | 'gallery'
+          | 'fallback-users'
+          | 'input-types'
+          | 'users'
+        )[]
+      | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "posts_input".
  */
 export interface PostInput {
   id?: string;
   text?: string | null;
-  richText: LexicalRichText<LexicalNodes_FB3BECC7_Input>;
+  richText: LexicalRichText<LexicalNodes_5994709A_Input>;
   title?: string | null;
   selectField: MySelectOptions;
   insideUnnamedGroup?: string | null;
@@ -892,6 +1027,22 @@ export interface PageInput {
   id?: string;
   title?: string | null;
   category?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages-localized_input".
+ */
+export interface PagesLocalizedInput {
+  id?: string;
+  title?: string | null;
+  number?: number | null;
+  textNonLocalized?: string | null;
+  array?:
+    | {
+        title?: string | null;
+        id?: string | null;
+      }[]
+    | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -993,7 +1144,7 @@ export interface InputTypeInput {
         value: string;
       } | null);
   image?: string | null;
-  richText?: LexicalRichText<LexicalNodes_BE82CF4C_Input> | null;
+  richText?: LexicalRichText<LexicalNodes_569386B9_Input> | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1047,6 +1198,10 @@ export interface PayloadLockedDocumentInput {
       } | null)
     | ({
         relationTo: 'pages';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'pages-localized';
         value: string;
       } | null)
     | ({
@@ -1130,7 +1285,7 @@ export interface PayloadMigrationInput {
 export interface MenuInput {
   id?: string;
   text?: string | null;
-  richText?: LexicalRichText<LexicalNodes_FB3BECC7_Input> | null;
+  richText?: LexicalRichText<LexicalNodes_5994709A_Input> | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

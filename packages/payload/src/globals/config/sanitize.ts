@@ -120,7 +120,10 @@ export const sanitizeGlobal = (
         }
       }
 
-      const hasLocalizedFields = traverseForLocalizedFields(global.fields)
+      const hasLocalizedFields = traverseForLocalizedFields({
+        blocks: config.blocks,
+        fields: global.fields,
+      })
 
       // Auto-enable per-locale status when localization is configured and the global has localized fields.
       ;(global.versions.drafts as SanitizedDrafts).localizeStatus = !!(

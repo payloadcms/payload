@@ -58,7 +58,7 @@ import type {
   SerializedListItemNode as GenLI,
   SerializedLinkNode as GenLink,
   SerializedListNode as GenList,
-  LexicalNodes_D5E7E2D8 as GenNodeUnion,
+  LexicalNodes_CF6BDE6C as GenNodeUnion,
   SerializedParagraphNode as GenParagraph,
   SerializedQuoteNode as GenQuote,
   SerializedTabNode as GenTab,
@@ -74,6 +74,7 @@ import type {
   Page,
   PagesCategory,
   PagesCategoryInput,
+  PagesLocalizedLocalized,
   Post,
   PostInput,
   SupportedTimezones,
@@ -103,6 +104,12 @@ describe('Types testing', () => {
 
   test('payload.find', () => {
     expect(payload.find({ collection: 'users' })).type.toBe<Promise<PaginatedDocs<User>>>()
+  })
+
+  test('payload.find with locale all', () => {
+    expect(payload.find({ collection: 'pages-localized', locale: 'all' })).type.toBe<
+      Promise<PaginatedDocs<PagesLocalizedLocalized>>
+    >()
   })
 
   test('payload.findByID', () => {
@@ -252,6 +259,26 @@ describe('Types testing', () => {
 
     test('has global generated options interface based on radio field', () => {
       expect<Post['radioField']>().type.toBe<MyRadioOptions>()
+    })
+
+    test('has collectionsLocalized property because 1 collection is localized', () => {
+      expect<LocalConfig>().type.toHaveProperty('collectionsLocalized')
+    })
+
+    test('has only pages-localized property in collectionsLocalized', () => {
+      expect<keyof LocalConfig['collectionsLocalized']>().type.toBe<'pages-localized'>()
+    })
+
+    test('the localized version is properly generated', () => {
+      expect({
+        createdAt: 'date',
+        id: '1',
+        title: {
+          en: 'title en',
+          es: 'title es',
+        },
+        updatedAt: 'date',
+      }).type.toBeAssignableTo<PagesLocalizedLocalized>()
     })
 
     test('resolves external schema file references', () => {
@@ -1186,6 +1213,7 @@ describe('Types testing', () => {
         | 'media'
         | 'pages'
         | 'pages-categories'
+        | 'pages-localized'
         | 'payload-kv'
         | 'payload-locked-documents'
         | 'payload-migrations'
@@ -1217,6 +1245,7 @@ describe('Types testing', () => {
         | 'media'
         | 'pages'
         | 'pages-categories'
+        | 'pages-localized'
         | 'payload-kv'
         | 'payload-locked-documents'
         | 'payload-migrations'

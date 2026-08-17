@@ -100,6 +100,9 @@ export interface Config {
     'payload-migrations': PayloadMigration;
   };
   collectionsJoins: {};
+  collectionsLocalized: {
+    forms: FormLocalized;
+  };
   collectionsSelect: {
     pages: PagesSelect<false> | PagesSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
@@ -115,12 +118,15 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
-  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es' | 'de') | ('en' | 'es' | 'de')[];
   globals: {};
+  globalsLocalized: {};
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es' | 'de') | ('en' | 'es' | 'de')[];
   globalsSelect: {};
   locale: 'en' | 'es' | 'de';
   widgets: {
     collections: CollectionsWidget;
+    'collection-query': CollectionQueryWidget;
+    activity: ActivityWidget;
   };
   user: User;
   jobs: {
@@ -183,9 +189,6 @@ export interface Form {
       )[]
     | null;
   submitButtonLabel?: string | null;
-  /**
-   * Choose whether to display an on-page message or redirect to a different page after they submit the form.
-   */
   confirmationType?: ('message' | 'redirect') | null;
   confirmationMessage?: LexicalRichText<LexicalNodes_0568D85A>;
   redirect?: {
@@ -196,9 +199,6 @@ export interface Form {
     } | null;
     url?: string | null;
   };
-  /**
-   * Send custom emails when the form submits. Use comma separated lists to send the same email to multiple recipients. To reference a value from this form, wrap that field's name with double curly brackets, i.e. {{firstName}}. You can use a wildcard {{*}} to output all data and {{*:table}} to format it as an HTML table in the email.
-   */
   emails?:
     | {
         emailTo?: string | null;
@@ -207,9 +207,6 @@ export interface Form {
         replyTo?: string | null;
         emailFrom?: string | null;
         subject: string;
-        /**
-         * Enter the message that should be sent in this email.
-         */
         message?: LexicalRichText<LexicalNodes_0568D85A> | null;
         id?: string | null;
       }[]
@@ -377,13 +374,7 @@ export interface Textarea {
 export interface Upload {
   name: string;
   label?: string | null;
-  /**
-   * Select which upload collection to store files in
-   */
   uploadCollection: 'media' | 'documents';
-  /**
-   * Restrict allowed file types (e.g., image/*, application/pdf). Leave empty to allow all types.
-   */
   mimeTypes?:
     | {
         mimeType: string;
@@ -391,9 +382,6 @@ export interface Upload {
       }[]
     | null;
   width?: number | null;
-  /**
-   * Maximum file size in bytes. Leave empty for no limit.
-   */
   maxFileSize?: number | null;
   required?: boolean | null;
   multiple?: boolean | null;
@@ -525,9 +513,6 @@ export interface FormSubmission {
   payment?: {
     field?: string | null;
     status?: string | null;
-    /**
-     * Amount in cents
-     */
     amount?: number | null;
     paymentProcessor?: string | null;
     creditCard?: {
@@ -630,6 +615,353 @@ export interface PayloadMigration {
   batch?: number | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "forms_localized".
+ */
+export interface FormLocalized {
+  id: string;
+  title: string;
+  fields?:
+    | (
+        | Checkbox_93516849
+        | Country_CFB581A7
+        | Email_A30321AC
+        | Message_90F7AF0D
+        | Number_121A6FC3
+        | Payment_69C8B318
+        | Select_42C59560
+        | State_97941653
+        | Text_1520F4CD
+        | Textarea_F4A39613
+        | Upload_22461436
+        | Color
+        | Date_05564D41
+      )[]
+    | null;
+  submitButtonLabel?: {
+    en?: string | null;
+    es?: string | null;
+    de?: string | null;
+  };
+  confirmationType?: ('message' | 'redirect') | null;
+  confirmationMessage?: {
+    en?: LexicalRichText<LexicalNodes_0568D85A>;
+    es?: LexicalRichText<LexicalNodes_0568D85A>;
+    de?: LexicalRichText<LexicalNodes_0568D85A>;
+  };
+  redirect?: {
+    type?: ('reference' | 'custom') | null;
+    reference?: {
+      relationTo: 'pages';
+      value: string | Page;
+    } | null;
+    url?: string | null;
+  };
+  emails?:
+    | {
+        emailTo?: string | null;
+        cc?: string | null;
+        bcc?: string | null;
+        replyTo?: string | null;
+        emailFrom?: string | null;
+        subject: {
+          en?: string;
+          es?: string;
+          de?: string;
+        };
+        message?: {
+          en?: LexicalRichText<LexicalNodes_0568D85A> | null;
+          es?: LexicalRichText<LexicalNodes_0568D85A> | null;
+          de?: LexicalRichText<LexicalNodes_0568D85A> | null;
+        };
+        id?: string | null;
+      }[]
+    | null;
+  custom?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Multiple blocks resolve to the `Checkbox` interface with different fields, so a content hash is appended to keep the generated types stable and unambiguous. Set a unique `interfaceName` on the block to choose the name yourself. See https://payloadcms.com/docs/typescript/generating-types#block-interface-name-collisions
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Checkbox_93516849".
+ */
+export interface Checkbox_93516849 {
+  name: string;
+  label?: {
+    en?: string | null;
+    es?: string | null;
+    de?: string | null;
+  };
+  width?: number | null;
+  required?: boolean | null;
+  defaultValue?: boolean | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'checkbox';
+}
+/**
+ * Multiple blocks resolve to the `Country` interface with different fields, so a content hash is appended to keep the generated types stable and unambiguous. Set a unique `interfaceName` on the block to choose the name yourself. See https://payloadcms.com/docs/typescript/generating-types#block-interface-name-collisions
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Country_CFB581A7".
+ */
+export interface Country_CFB581A7 {
+  name: string;
+  label?: {
+    en?: string | null;
+    es?: string | null;
+    de?: string | null;
+  };
+  width?: number | null;
+  required?: boolean | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'country';
+}
+/**
+ * Multiple blocks resolve to the `Email` interface with different fields, so a content hash is appended to keep the generated types stable and unambiguous. Set a unique `interfaceName` on the block to choose the name yourself. See https://payloadcms.com/docs/typescript/generating-types#block-interface-name-collisions
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Email_A30321AC".
+ */
+export interface Email_A30321AC {
+  name: string;
+  label?: {
+    en?: string | null;
+    es?: string | null;
+    de?: string | null;
+  };
+  width?: number | null;
+  required?: boolean | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'email';
+}
+/**
+ * Multiple blocks resolve to the `Message` interface with different fields, so a content hash is appended to keep the generated types stable and unambiguous. Set a unique `interfaceName` on the block to choose the name yourself. See https://payloadcms.com/docs/typescript/generating-types#block-interface-name-collisions
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Message_90F7AF0D".
+ */
+export interface Message_90F7AF0D {
+  message?: {
+    en?: LexicalRichText<LexicalNodes_0568D85A> | null;
+    es?: LexicalRichText<LexicalNodes_0568D85A> | null;
+    de?: LexicalRichText<LexicalNodes_0568D85A> | null;
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'message';
+}
+/**
+ * Multiple blocks resolve to the `Number` interface with different fields, so a content hash is appended to keep the generated types stable and unambiguous. Set a unique `interfaceName` on the block to choose the name yourself. See https://payloadcms.com/docs/typescript/generating-types#block-interface-name-collisions
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Number_121A6FC3".
+ */
+export interface Number_121A6FC3 {
+  name: string;
+  label?: {
+    en?: string | null;
+    es?: string | null;
+    de?: string | null;
+  };
+  width?: number | null;
+  defaultValue?: number | null;
+  required?: boolean | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'number';
+}
+/**
+ * Multiple blocks resolve to the `Payment` interface with different fields, so a content hash is appended to keep the generated types stable and unambiguous. Set a unique `interfaceName` on the block to choose the name yourself. See https://payloadcms.com/docs/typescript/generating-types#block-interface-name-collisions
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Payment_69C8B318".
+ */
+export interface Payment_69C8B318 {
+  name: string;
+  label?: {
+    en?: string | null;
+    es?: string | null;
+    de?: string | null;
+  };
+  width?: number | null;
+  basePrice?: number | null;
+  priceConditions?:
+    | {
+        fieldToUse?: string | null;
+        condition?: ('hasValue' | 'equals' | 'notEquals') | null;
+        valueForCondition?: string | null;
+        operator?: ('add' | 'subtract' | 'multiply' | 'divide') | null;
+        valueType?: ('static' | 'valueOfField') | null;
+        valueForOperator?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  required?: boolean | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'payment';
+}
+/**
+ * Multiple blocks resolve to the `Select` interface with different fields, so a content hash is appended to keep the generated types stable and unambiguous. Set a unique `interfaceName` on the block to choose the name yourself. See https://payloadcms.com/docs/typescript/generating-types#block-interface-name-collisions
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Select_42C59560".
+ */
+export interface Select_42C59560 {
+  name: string;
+  label?: {
+    en?: string | null;
+    es?: string | null;
+    de?: string | null;
+  };
+  width?: number | null;
+  defaultValue?: {
+    en?: string | null;
+    es?: string | null;
+    de?: string | null;
+  };
+  placeholder?: string | null;
+  options?:
+    | {
+        label: {
+          en?: string;
+          es?: string;
+          de?: string;
+        };
+        value: string;
+        id?: string | null;
+      }[]
+    | null;
+  required?: boolean | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'select';
+}
+/**
+ * Multiple blocks resolve to the `State` interface with different fields, so a content hash is appended to keep the generated types stable and unambiguous. Set a unique `interfaceName` on the block to choose the name yourself. See https://payloadcms.com/docs/typescript/generating-types#block-interface-name-collisions
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "State_97941653".
+ */
+export interface State_97941653 {
+  name: string;
+  label?: {
+    en?: string | null;
+    es?: string | null;
+    de?: string | null;
+  };
+  width?: number | null;
+  required?: boolean | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'state';
+}
+/**
+ * Multiple blocks resolve to the `Text` interface with different fields, so a content hash is appended to keep the generated types stable and unambiguous. Set a unique `interfaceName` on the block to choose the name yourself. See https://payloadcms.com/docs/typescript/generating-types#block-interface-name-collisions
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Text_1520F4CD".
+ */
+export interface Text_1520F4CD {
+  name: string;
+  label?: {
+    en?: string | null;
+    es?: string | null;
+    de?: string | null;
+  };
+  width?: number | null;
+  defaultValue?: {
+    en?: string | null;
+    es?: string | null;
+    de?: string | null;
+  };
+  required?: boolean | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'text';
+}
+/**
+ * Multiple blocks resolve to the `Textarea` interface with different fields, so a content hash is appended to keep the generated types stable and unambiguous. Set a unique `interfaceName` on the block to choose the name yourself. See https://payloadcms.com/docs/typescript/generating-types#block-interface-name-collisions
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Textarea_F4A39613".
+ */
+export interface Textarea_F4A39613 {
+  name: string;
+  label?: {
+    en?: string | null;
+    es?: string | null;
+    de?: string | null;
+  };
+  width?: number | null;
+  defaultValue?: {
+    en?: string | null;
+    es?: string | null;
+    de?: string | null;
+  };
+  required?: boolean | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'textarea';
+}
+/**
+ * Multiple blocks resolve to the `Upload` interface with different fields, so a content hash is appended to keep the generated types stable and unambiguous. Set a unique `interfaceName` on the block to choose the name yourself. See https://payloadcms.com/docs/typescript/generating-types#block-interface-name-collisions
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Upload_22461436".
+ */
+export interface Upload_22461436 {
+  name: string;
+  label?: {
+    en?: string | null;
+    es?: string | null;
+    de?: string | null;
+  };
+  uploadCollection: 'media' | 'documents';
+  mimeTypes?:
+    | {
+        mimeType: string;
+        id?: string | null;
+      }[]
+    | null;
+  width?: number | null;
+  maxFileSize?: number | null;
+  required?: boolean | null;
+  multiple?: boolean | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'upload';
+}
+/**
+ * Multiple blocks resolve to the `Date` interface with different fields, so a content hash is appended to keep the generated types stable and unambiguous. Set a unique `interfaceName` on the block to choose the name yourself. See https://payloadcms.com/docs/typescript/generating-types#block-interface-name-collisions
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Date_05564D41".
+ */
+export interface Date_05564D41 {
+  name: string;
+  label?: {
+    en?: string | null;
+    es?: string | null;
+    de?: string | null;
+  };
+  width?: number | null;
+  required?: boolean | null;
+  /**
+   * This is a date field
+   */
+  defaultValue?: string | null;
+  defaultValue_tz?: SupportedTimezones;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'date';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -985,6 +1317,39 @@ export interface CollectionsWidget {
     [k: string]: unknown;
   };
   width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-query_widget".
+ */
+export interface CollectionQueryWidget {
+  data?: {
+    title?: string | null;
+    relatedCollection: 'pages' | 'users' | 'media' | 'documents' | 'forms' | 'form-submissions';
+    where?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    sortField?: string | null;
+    sortDirection?: ('asc' | 'desc') | null;
+    limit?: number | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "activity_widget".
+ */
+export interface ActivityWidget {
+  data?: {
+    excludedCollections?: ('pages' | 'users' | 'media' | 'documents' | 'forms' | 'form-submissions')[] | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

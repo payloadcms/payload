@@ -45,17 +45,20 @@ import type {
   CollectionSlug,
   GeneratedTypes,
   JsonObject,
+  LocaleValue,
   RequestContext,
   TypedAuthOperations,
   TypedCollection,
   TypedCollectionSelect,
   TypedLocale,
+  TypedLocalizedCollection,
 } from '../../index.js'
 import type {
   PayloadRequest,
   SelectIncludeType,
   SelectType,
   Sort,
+  TransformCollection,
   TransformCollectionWithSelect,
   Where,
   WithSelectFn,
@@ -81,6 +84,11 @@ export type DataFromCollectionSlug<TSlug extends CollectionSlug> =
  */
 export type IDTypeForCollectionSlug<TSlug extends CollectionSlug> =
   DataFromCollectionSlug<TSlug>['id']
+
+export type LocalizedDataFromCollectionSlug<TSlug extends CollectionSlug> =
+  TSlug extends keyof TypedLocalizedCollection
+    ? TypedLocalizedCollection[TSlug]
+    : DataFromCollectionSlug<TSlug>
 
 export type SelectFromCollectionSlug<TSlug extends CollectionSlug> = TypedCollectionSelect[TSlug]
 
@@ -127,8 +135,12 @@ export type RequiredDataFromCollection<TData extends JsonObject> = MarkOptional<
   'collection' | 'createdAt' | 'deletedAt' | 'id' | 'updatedAt'
 >
 
-export type RequiredDataFromCollectionSlug<TSlug extends CollectionSlug> =
-  RequiredDataFromCollection<DataFromCollectionSlug<TSlug>>
+export type RequiredDataFromCollectionSlug<
+  TSlug extends CollectionSlug,
+  TLocale extends LocaleValue = TypedLocale,
+> = RequiredDataFromCollection<
+  TLocale extends 'all' ? LocalizedDataFromCollectionSlug<TSlug> : DataFromCollectionSlug<TSlug>
+>
 
 /**
  * Helper type for draft data INPUT (e.g., create operations) - makes all fields optional except system fields
@@ -865,8 +877,12 @@ export type Collection = {
   }
 }
 
-export type BulkOperationResult<TSlug extends CollectionSlug, TSelect extends SelectType> = {
-  docs: TransformCollectionWithSelect<TSlug, TSelect>[]
+export type BulkOperationResult<
+  TSlug extends CollectionSlug,
+  TSelect extends SelectType,
+  TLocale extends LocaleValue = TypedLocale,
+> = {
+  docs: TransformCollection<TSlug, TSelect, TLocale>[]
   errors: {
     id: DataFromCollectionSlug<TSlug>['id']
     isPublic: boolean

@@ -1,6 +1,7 @@
 import type { FindOptions } from '../../../collections/operations/local/find.js'
 import type {
   GlobalSlug,
+  LocaleValue,
   Payload,
   RequestContext,
   TypedFallbackLocale,
@@ -11,7 +12,7 @@ import type {
   PayloadRequest,
   PopulateType,
   SelectType,
-  TransformGlobalWithSelect,
+  TransformGlobal,
 } from '../../../types/index.js'
 import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
 import type { DraftFlagFromGlobalSlug, SelectFromGlobalSlug } from '../../config/types.js'
@@ -97,10 +98,11 @@ export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> = Base
 export async function findOneGlobalLocal<
   TSlug extends GlobalSlug,
   TSelect extends SelectFromGlobalSlug<TSlug>,
+  TLocale extends LocaleValue = TypedLocale,
 >(
   payload: Payload,
   options: Options<TSlug, TSelect>,
-): Promise<TransformGlobalWithSelect<TSlug, TSelect>> {
+): Promise<TransformGlobal<TSlug, TSelect, TLocale>> {
   const {
     slug: globalSlug,
     data,

@@ -23,6 +23,7 @@ import { NoLocalizedFieldsCollection } from './collections/NoLocalizedFields/ind
 import { RichTextCollection } from './collections/RichText/index.js'
 import { Tab } from './collections/Tab/index.js'
 import {
+  blocksReferenceLocalizedSlug,
   blocksWithLocalizedSameName,
   cannotCreateDefaultLocale,
   defaultLocale,
@@ -34,6 +35,7 @@ import {
   localizedPostsSlug,
   localizedSortSlug,
   portugueseLocale,
+  referencedBlockSlug,
   relationEnglishTitle,
   relationEnglishTitle2,
   relationshipLocalizedSlug,
@@ -64,6 +66,18 @@ export default buildConfigWithDefaults({
       baseDir: path.resolve(dirname),
     },
   },
+  blocks: [
+    {
+      slug: referencedBlockSlug,
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+          localized: true,
+        },
+      ],
+    },
+  ],
   collections: [
     RichTextCollection,
     BlocksCollection,
@@ -437,6 +451,18 @@ export default buildConfigWithDefaults({
     },
     LocalizedWithinLocalized,
     ArrayWithFallbackCollection,
+    {
+      // The only localized field lives inside a block *reference*, not an inline block.
+      slug: blocksReferenceLocalizedSlug,
+      fields: [
+        {
+          name: 'layout',
+          type: 'blocks',
+          blocks: [referencedBlockSlug],
+        },
+      ],
+      versions: { drafts: true },
+    },
   ],
   globals: [
     {

@@ -62,15 +62,15 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_104D6ABA".
+ * via the `definition` "LexicalNodes_2129C05D".
  */
-export type LexicalNodes_104D6ABA =
+export type LexicalNodes_2129C05D =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_104D6ABA>
+  | SerializedParagraphNode<LexicalNodes_2129C05D>
   | SerializedBlockNode<MyBlock>
-  | SerializedHeadingNode<LexicalNodes_104D6ABA>
+  | SerializedHeadingNode<LexicalNodes_2129C05D>
   | SerializedUploadNode<'gif-resize'>
   | SerializedUploadNode<'filename-compound-index'>
   | SerializedUploadNode<'no-image-sizes'>
@@ -124,14 +124,15 @@ export type LexicalNodes_104D6ABA =
   | SerializedUploadNode<'file-mime-type'>
   | SerializedUploadNode<'svg-only'>
   | SerializedUploadNode<'media-without-delete-access'>
+  | SerializedUploadNode<'media-without-write-access'>
   | SerializedUploadNode<'media-with-image-size-admin-props'>
   | SerializedUploadNode<'prefix-media'>
   | SerializedUploadNode<'media-with-fields'>
-  | SerializedQuoteNode<LexicalNodes_104D6ABA>
-  | SerializedListNode<LexicalNodes_104D6ABA>
-  | SerializedListItemNode<LexicalNodes_104D6ABA>
-  | SerializedAutoLinkNode<LexicalNodes_104D6ABA, LexicalLinkFields_0A7E9EC0>
-  | SerializedLinkNode<LexicalNodes_104D6ABA, LexicalLinkFields_0A7E9EC0>
+  | SerializedQuoteNode<LexicalNodes_2129C05D>
+  | SerializedListNode<LexicalNodes_2129C05D>
+  | SerializedListItemNode<LexicalNodes_2129C05D>
+  | SerializedAutoLinkNode<LexicalNodes_2129C05D, LexicalLinkFields_0A7E9EC0>
+  | SerializedLinkNode<LexicalNodes_2129C05D, LexicalLinkFields_0A7E9EC0>
   | SerializedRelationshipNode<
       | 'relation'
       | 'audio'
@@ -215,6 +216,7 @@ export interface Config {
     'file-mime-type': FileMimeType;
     'svg-only': SvgOnly;
     'media-without-delete-access': MediaWithoutDeleteAccess;
+    'media-without-write-access': MediaWithoutWriteAccess;
     'media-with-image-size-admin-props': MediaWithImageSizeAdminProp;
     'prefix-media': PrefixMedia;
     'media-with-fields': MediaWithField;
@@ -225,6 +227,10 @@ export interface Config {
     'payload-migrations': PayloadMigration;
   };
   collectionsJoins: {};
+  collectionsLocalized: {
+    relation: RelationLocalized;
+    media: MediaLocalized;
+  };
   collectionsSelect: {
     relation: RelationSelect<false> | RelationSelect<true>;
     audio: AudioSelect<false> | AudioSelect<true>;
@@ -288,6 +294,7 @@ export interface Config {
     'file-mime-type': FileMimeTypeSelect<false> | FileMimeTypeSelect<true>;
     'svg-only': SvgOnlySelect<false> | SvgOnlySelect<true>;
     'media-without-delete-access': MediaWithoutDeleteAccessSelect<false> | MediaWithoutDeleteAccessSelect<true>;
+    'media-without-write-access': MediaWithoutWriteAccessSelect<false> | MediaWithoutWriteAccessSelect<true>;
     'media-with-image-size-admin-props': MediaWithImageSizeAdminPropsSelect<false> | MediaWithImageSizeAdminPropsSelect<true>;
     'prefix-media': PrefixMediaSelect<false> | PrefixMediaSelect<true>;
     'media-with-fields': MediaWithFieldsSelect<false> | MediaWithFieldsSelect<true>;
@@ -300,8 +307,9 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
-  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es' | 'fr') | ('en' | 'es' | 'fr')[];
   globals: {};
+  globalsLocalized: {};
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es' | 'fr') | ('en' | 'es' | 'fr')[];
   globalsSelect: {};
   locale: 'en' | 'es' | 'fr';
   widgets: {
@@ -559,7 +567,7 @@ export interface Uploads1 {
   singleUpload?: (string | null) | Uploads2;
   hasManyThumbnailUpload?: (string | AdminThumbnailSize)[] | null;
   singleThumbnailUpload?: (string | null) | AdminThumbnailSize;
-  richText?: LexicalRichText<LexicalNodes_104D6ABA> | null;
+  richText?: LexicalRichText<LexicalNodes_2129C05D> | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1933,6 +1941,24 @@ export interface MediaWithoutDeleteAccess {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-without-write-access".
+ */
+export interface MediaWithoutWriteAccess {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media-with-image-size-admin-props".
  */
 export interface MediaWithImageSizeAdminProp {
@@ -2537,6 +2563,10 @@ export interface PayloadLockedDocument {
         value: string | MediaWithoutDeleteAccess;
       } | null)
     | ({
+        relationTo: 'media-without-write-access';
+        value: string | MediaWithoutWriteAccess;
+      } | null)
+    | ({
         relationTo: 'media-with-image-size-admin-props';
         value: string | MediaWithImageSizeAdminProp;
       } | null)
@@ -2593,6 +2623,212 @@ export interface PayloadMigration {
   batch?: number | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relation_localized".
+ */
+export interface RelationLocalized {
+  id: string;
+  image?: (string | null) | Media;
+  versionedImage?: (string | null) | Version;
+  hideFileInputOnCreate?: (string | null) | HideFileInputOnCreate;
+  hasManyImage?: (string | Media)[] | null;
+  polymorphicUploads?:
+    | (
+        | {
+            relationTo: 'uploads-1';
+            value: string | Uploads1;
+          }
+        | {
+            relationTo: 'uploads-2';
+            value: string | Uploads2;
+          }
+      )[]
+    | null;
+  blocks?: LocalizedMediaBlock_5EEC6869[] | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: {
+    en?: ('draft' | 'published') | null;
+    es?: ('draft' | 'published') | null;
+    fr?: ('draft' | 'published') | null;
+  };
+}
+/**
+ * Multiple blocks resolve to the `LocalizedMediaBlock` interface with different fields, so a content hash is appended to keep the generated types stable and unambiguous. Set a unique `interfaceName` on the block to choose the name yourself. See https://payloadcms.com/docs/typescript/generating-types#block-interface-name-collisions
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LocalizedMediaBlock_5EEC6869".
+ */
+export interface LocalizedMediaBlock_5EEC6869 {
+  media: {
+    en?: string | Media;
+    es?: string | Media;
+    fr?: string | Media;
+  };
+  relatedMedia?: {
+    en?: (string | Media)[] | null;
+    es?: (string | Media)[] | null;
+    fr?: (string | Media)[] | null;
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'localizedMediaBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media_localized".
+ */
+export interface MediaLocalized {
+  id: string;
+  alt?: string | null;
+  localized?: {
+    en?: string | null;
+    es?: string | null;
+    fr?: string | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+  sizes?: {
+    maintainedAspectRatio?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    differentFormatFromMainImage?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    maintainedImageSize?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    maintainedImageSizeWithNewFormat?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    accidentalSameSize?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    tablet?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    mobile?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    icon?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    focalTest?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    focalTest2?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    focalTest3?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    focalTest4?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    focalTest5?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    focalTest6?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    focalTest7?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    undefinedHeight?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -4257,6 +4493,23 @@ export interface MediaWithoutDeleteAccessSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-without-write-access_select".
+ */
+export interface MediaWithoutWriteAccessSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media-with-image-size-admin-props_select".
  */
 export interface MediaWithImageSizeAdminPropsSelect<T extends boolean = true> {
@@ -4766,6 +5019,7 @@ export interface CollectionQueryWidget {
       | 'file-mime-type'
       | 'svg-only'
       | 'media-without-delete-access'
+      | 'media-without-write-access'
       | 'media-with-image-size-admin-props'
       | 'prefix-media'
       | 'media-with-fields'
@@ -4855,6 +5109,7 @@ export interface ActivityWidget {
           | 'file-mime-type'
           | 'svg-only'
           | 'media-without-delete-access'
+          | 'media-without-write-access'
           | 'media-with-image-size-admin-props'
           | 'prefix-media'
           | 'media-with-fields'

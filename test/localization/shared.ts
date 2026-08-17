@@ -27,3 +27,6 @@ export const arrayWithFallbackCollectionSlug = 'array-with-fallback-fields'
 export const localeRestrictedSlug = 'locale-restricted'
 
 export const globalWithDraftsSlug = 'global-drafts'
+
+export const referencedBlockSlug = 'referenced-localized-block'
+export const blocksReferenceLocalizedSlug = 'blocks-reference-localized'
