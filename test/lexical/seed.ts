@@ -3,6 +3,7 @@ import type { Payload } from 'payload'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
+import { getTestSuiteDir } from '../__helpers/shared/getTestSuiteDir.js'
 import { lexicalDocData } from './collections/Lexical/data.js'
 import { generateLexicalLocalizedRichText } from './collections/LexicalLocalized/generateLexicalRichText.js'
 import { richTextDocData } from './collections/RichText/data.js'
@@ -97,6 +98,7 @@ import { uploadsDoc } from './collections/Upload/shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+const lexicalDir = getTestSuiteDir({ fallbackDir: dirname, suitePath: 'lexical' })
 
 export const seed = async (_payload: Payload) => {
   // Create the admin user first so auto-login still works if a later seed step
@@ -110,8 +112,8 @@ export const seed = async (_payload: Payload) => {
     depth: 0,
   })
 
-  const jpgPath = path.resolve(dirname, './collections/Upload/payload.jpg')
-  const pngPath = path.resolve(dirname, './uploads/payload.png')
+  const jpgPath = path.resolve(lexicalDir, './collections/Upload/payload.jpg')
+  const pngPath = path.resolve(lexicalDir, './uploads/payload.png')
 
   // Get both files in parallel
   const [jpgFile, pngFile] = await Promise.all([getFileByPath(jpgPath), getFileByPath(pngPath)])
@@ -716,6 +718,6 @@ export async function clearAndSeedEverything(_payload: Payload) {
     collectionSlugs,
     seedFunction: seed,
     snapshotKey: 'lexicalTest',
-    uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
+    uploadsDir: path.resolve(lexicalDir, './collections/Upload/uploads'),
   })
 }

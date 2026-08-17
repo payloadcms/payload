@@ -42,6 +42,7 @@ export type DefaultTemplateProps = {
   globalSlug?: string
   req?: PayloadRequest
   viewActions?: CustomComponent[]
+  viewKey?: string
   viewType?: ViewTypes
   visibleEntities: VisibleEntities
 } & Omit<ServerProps, 'server'>
@@ -62,6 +63,7 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
   searchParams,
   user,
   viewActions,
+  viewKey,
   viewType,
   visibleEntities,
 }) => {
@@ -187,7 +189,7 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
     <EntityVisibilityProvider visibleEntities={visibleEntities}>
       <CommandPalette />
       <BulkUploadProvider modalSlugPrefix={collectionSlug}>
-        <ActionsProvider Actions={Actions}>
+        <ActionsProvider Actions={Actions} viewKey={viewKey}>
           {RenderServerComponent({
             clientProps,
             Component: CustomHeader,

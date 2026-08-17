@@ -8,17 +8,14 @@ import type { PayloadTestSDK } from '../../../__helpers/shared/sdk/index.js'
 import type { Config } from '../../payload-types.js'
 
 import { checkFocusIndicators } from '../../../__helpers/e2e/checkFocusIndicators.js'
-import {
-  changeLocale,
-  ensureCompilationIsDone,
-  initPageConsoleErrorCatch,
-  saveDocAndAssert,
-} from '../../../__helpers/e2e/helpers.js'
+import { changeLocale, saveDocAndAssert } from '../../../__helpers/e2e/helpers.js'
 import { runAxeScan } from '../../../__helpers/e2e/runAxeScan.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { RESTClient } from '../../../__helpers/shared/rest.js'
+import { ensureCompilationIsDone } from '../../../__setup/e2e/ensureCompilationIsDone.js'
+import { initPage } from '../../../__setup/e2e/initPage.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { slugFieldsSlug } from '../../slugs.js'
 
@@ -60,10 +57,7 @@ describe('SlugField', () => {
     url = new AdminUrlUtil(serverURL, slugFieldsSlug)
 
     const context = await browser.newContext()
-    page = await context.newPage()
-    initPageConsoleErrorCatch(page)
-
-    await ensureCompilationIsDone({ page, serverURL })
+    ;({ page } = await initPage({ context, serverURL }))
   })
 
   beforeEach(async () => {
@@ -206,10 +200,10 @@ describe('SlugField', () => {
       await page.locator('#field-title').waitFor()
 
       const scanResults = await runAxeScan({
+        exclude: ['.field-description'], // known issue - reported elsewhere @todo: remove this once fixed - see report https://github.com/payloadcms/payload/discussions/14489
+        include: ['.collection-edit__main'],
         page,
         testInfo,
-        include: ['.collection-edit__main'],
-        exclude: ['.field-description'], // known issue - reported elsewhere @todo: remove this once fixed - see report https://github.com/payloadcms/payload/discussions/14489
       })
 
       expect(scanResults.violations.length).toBe(0)
@@ -221,8 +215,8 @@ describe('SlugField', () => {
 
       const scanResults = await checkFocusIndicators({
         page,
-        testInfo,
         selector: '.collection-edit__main',
+        testInfo,
       })
 
       expect(scanResults.totalFocusableElements).toBeGreaterThan(0)

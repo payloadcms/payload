@@ -10,7 +10,8 @@
     "test": "pnpm -C \"../\" run test",
     "test:e2e": "pnpm -C \"../\" run test:e2e",
     "test:int": "pnpm -C \"../\" run test:int",
-    "typecheck": "pnpm turbo build --filter payload-test-suite && tsc --project tsconfig.typecheck.json"
+    "typecheck": "pnpm turbo build --filter payload-test-suite && tsc --project tsconfig.typecheck.json",
+    "typecheck:app-tanstack": "pnpm -C .. exec tsc --project test/app-tanstack/tsconfig.json && pnpm -C .. exec tsc --project test/admin-bar/app-tanstack/tsconfig.json && pnpm -C .. exec tsc --project test/live-preview/app-tanstack/tsconfig.json"
   },
   "lint-staged": {
     "**/package.json": "sort-package-json",
@@ -34,7 +35,7 @@
     "@miniflare/shared": "2.14.4",
     "@modelcontextprotocol/client": "2.0.0",
     "@modelcontextprotocol/server": "2.0.0",
-    "@next/env": "16.2.7",
+    "@next/env": "16.3.0",
     "@opennextjs/cloudflare": "1.16.1",
     "@payloadcms/admin-bar": "workspace:*",
     "@payloadcms/db-d1-sqlite": "workspace:*",
@@ -104,8 +105,8 @@
     "file-type": "22.0.1",
     "http-status": "2.1.0",
     "jwt-decode": "4.0.0",
-    "mongoose": "8.22.1",
-    "next": "16.2.7",
+    "mongoose": "9.9.2",
+    "next": "16.3.0",
     "nodemailer": "^8.0.5",
     "object-to-formdata": "4.5.1",
     "payload": "workspace:*",
