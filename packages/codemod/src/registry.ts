@@ -16,6 +16,7 @@ import { migrateImportExportHooks } from './transforms/migrate-import-export-hoo
 import { migrateListViewSelectAPI } from './transforms/migrate-list-view-select-api/index.js'
 import { migrateNextGenerateViewportExport } from './transforms/migrate-next-generate-viewport-export/index.js'
 import { migrateNextSubpathExports } from './transforms/migrate-next-subpath-exports/index.js'
+import { migrateSharpToTransformer } from './transforms/migrate-sharp-to-transformer/index.js'
 import { migrateSlugField } from './transforms/migrate-slug-field/index.js'
 import { migrateStorageAdaptersToConfig } from './transforms/migrate-storage-adapters-to-config/index.js'
 import { migrateVersionsDefault } from './transforms/migrate-versions-default/index.js'
@@ -38,6 +39,7 @@ export const transforms: Transform[] = [
   migrateBlockReferencesToBlocks,
   migrateBuildScript,
   migrateDocumentTitleContext,
+  migrateSharpToTransformer,
   migrateStorageAdaptersToConfig,
   migrateAzureChunkLargeFiles,
   renameStorageAdaptersToStorage,

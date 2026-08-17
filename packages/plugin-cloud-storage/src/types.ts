@@ -51,12 +51,26 @@ export type GenerateURL = (args: {
   prefix?: string
 }) => Promise<string> | string
 
+/**
+ * Kept in sync with `payload`'s `FileHandlerOperation` (`packages/payload/src/uploads/types.ts`).
+ * Distinguishes an ordinary public file request (`read`) from Payload's internal
+ * retrieval of a stored file's bytes for a dynamic transformation (`transform`).
+ * Defaults to `read` when omitted.
+ */
+export type FileHandlerOperation = 'read' | 'transform'
+
 export type StaticHandler = (
   req: PayloadRequest,
   args: {
     doc?: TypeWithID
     headers?: Headers
-    params: { collection: string; filename: string; prefix?: string; uploadReference?: unknown }
+    params: {
+      collection: string
+      filename: string
+      operation?: FileHandlerOperation
+      prefix?: string
+      uploadReference?: unknown
+    }
   },
 ) => Promise<Response> | Response
 

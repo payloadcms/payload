@@ -1,3 +1,6 @@
+import type { SharpCollectionConfig } from '@payloadcms/transformer-sharp'
+
+import { sharpTransformer } from '@payloadcms/transformer-sharp'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -63,6 +66,578 @@ import {
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = getTestSuiteDir({ fallbackDir: path.dirname(filename), suitePath: 'uploads' })
+
+const sharpCollections: Record<string, SharpCollectionConfig> = {
+  'gif-resize': {
+    formatOptions: {
+      format: 'gif',
+    },
+    imageSizes: [
+      {
+        name: 'small',
+        formatOptions: { format: 'gif', options: { quality: 90 } },
+        height: 100,
+        width: 100,
+      },
+      {
+        name: 'large',
+        formatOptions: { format: 'gif', options: { quality: 90 } },
+        height: 1000,
+        width: 1000,
+      },
+    ],
+    resizeOptions: {
+      height: 200,
+      position: 'center',
+      width: 200,
+    },
+  },
+  'filename-compound-index': {
+    imageSizes: [
+      {
+        name: 'small',
+        formatOptions: { format: 'gif', options: { quality: 90 } },
+        height: 100,
+        width: 100,
+      },
+      {
+        name: 'large',
+        formatOptions: { format: 'gif', options: { quality: 90 } },
+        height: 1000,
+        width: 1000,
+      },
+    ],
+  },
+  'no-image-sizes': {
+    resizeOptions: {
+      height: 200,
+      position: 'center',
+      width: 200,
+    },
+  },
+  'object-fit': {
+    imageSizes: [
+      {
+        name: 'fitContain',
+        fit: 'contain',
+        height: 300,
+        width: 400,
+      },
+      {
+        name: 'fitInside',
+        fit: 'inside',
+        height: 400,
+        width: 300,
+      },
+      {
+        name: 'fitCover',
+        fit: 'cover',
+        height: 300,
+        width: 900,
+      },
+      {
+        name: 'fitOutside',
+        fit: 'outside',
+        height: 200,
+        width: 900,
+      },
+    ],
+  },
+  'with-meta-data': {
+    imageSizes: [
+      {
+        name: 'sizeOne',
+        height: 300,
+        width: 400,
+      },
+    ],
+    withMetadata: true,
+  },
+  'without-meta-data': {
+    imageSizes: [
+      {
+        name: 'sizeTwo',
+        height: 400,
+        width: 300,
+      },
+    ],
+    withMetadata: false,
+  },
+  'with-only-jpeg-meta-data': {
+    imageSizes: [
+      {
+        name: 'sizeThree',
+        height: 400,
+        width: 300,
+        withoutEnlargement: false,
+      },
+    ],
+    // eslint-disable-next-line @typescript-eslint/require-await
+    withMetadata: async ({ metadata }) => {
+      if (metadata.format === 'jpeg') {
+        return true
+      }
+      return false
+    },
+  },
+  'crop-only': {
+    focalPoint: false,
+    imageSizes: [
+      {
+        name: 'focalTest',
+        height: 300,
+        width: 400,
+      },
+      {
+        name: 'focalTest2',
+        height: 300,
+        width: 600,
+      },
+      {
+        name: 'focalTest3',
+        height: 300,
+        width: 900,
+      },
+    ],
+  },
+  'focal-only': {
+    crop: false,
+    imageSizes: [
+      {
+        name: 'focalTest',
+        height: 300,
+        width: 400,
+      },
+      {
+        name: 'focalTest2',
+        height: 300,
+        width: 600,
+      },
+      {
+        name: 'focalTest3',
+        height: 300,
+        width: 900,
+      },
+    ],
+  },
+  [imageSizesOnlySlug]: {
+    crop: false,
+    focalPoint: false,
+    imageSizes: [
+      {
+        name: 'sizeOne',
+        height: 300,
+        width: 400,
+      },
+      {
+        name: 'sizeTwo',
+        height: 400,
+        width: 300,
+      },
+    ],
+  },
+  [focalNoSizesSlug]: {
+    crop: false,
+    focalPoint: true,
+  },
+  [mediaSlug]: {
+    formatOptions: {
+      format: 'png',
+      options: { quality: 90 },
+    },
+    imageSizes: [
+      {
+        name: 'maintainedAspectRatio',
+        crop: 'center',
+        formatOptions: { format: 'png', options: { quality: 90 } },
+        height: undefined,
+        position: 'center',
+        width: 1024,
+      },
+      {
+        name: 'differentFormatFromMainImage',
+        formatOptions: { format: 'jpg', options: { quality: 90 } },
+        height: undefined,
+        width: 200,
+      },
+      {
+        name: 'maintainedImageSize',
+        height: undefined,
+        width: undefined,
+      },
+      {
+        name: 'maintainedImageSizeWithNewFormat',
+        formatOptions: { format: 'jpg', options: { quality: 90 } },
+        height: undefined,
+        width: undefined,
+      },
+      {
+        name: 'accidentalSameSize',
+        height: 80,
+        position: 'top',
+        width: 320,
+      },
+      {
+        name: 'tablet',
+        height: 480,
+        width: 640,
+      },
+      {
+        name: 'mobile',
+        crop: 'left top',
+        height: 240,
+        width: 320,
+      },
+      {
+        name: 'icon',
+        height: 16,
+        width: 16,
+      },
+      {
+        name: 'focalTest',
+        height: 300,
+        width: 400,
+      },
+      {
+        name: 'focalTest2',
+        height: 300,
+        width: 600,
+      },
+      {
+        name: 'focalTest3',
+        height: 300,
+        width: 900,
+      },
+      {
+        name: 'focalTest4',
+        height: 400,
+        width: 300,
+      },
+      {
+        name: 'focalTest5',
+        height: 600,
+        width: 300,
+      },
+      {
+        name: 'focalTest6',
+        height: 800,
+        width: 300,
+      },
+      {
+        name: 'focalTest7',
+        height: 300,
+        width: 300,
+      },
+      {
+        name: 'undefinedHeight',
+        width: 300,
+      },
+    ],
+  },
+  [animatedTypeMedia]: {
+    resizeOptions: {
+      position: 'center',
+      width: 200,
+      height: 200,
+    },
+    imageSizes: [
+      {
+        name: 'squareSmall',
+        width: 480,
+        height: 480,
+        position: 'centre',
+        withoutEnlargement: false,
+      },
+      {
+        name: 'undefinedHeight',
+        width: 300,
+        height: undefined,
+      },
+      {
+        name: 'undefinedWidth',
+        width: undefined,
+        height: 300,
+      },
+      {
+        name: 'undefinedAll',
+        width: undefined,
+        height: undefined,
+      },
+    ],
+  },
+  [enlargeSlug]: {
+    imageSizes: [
+      {
+        name: 'accidentalSameSize',
+        height: 80,
+        width: 320,
+        withoutEnlargement: false,
+      },
+      {
+        name: 'sameSizeWithNewFormat',
+        formatOptions: { format: 'jpg', options: { quality: 90 } },
+        height: 80,
+        width: 320,
+        withoutEnlargement: false,
+      },
+      {
+        name: 'resizedLarger',
+        height: 480,
+        width: 640,
+        withoutEnlargement: false,
+      },
+      {
+        name: 'resizedSmaller',
+        height: 50,
+        width: 180,
+      },
+      {
+        name: 'widthLowerHeightLarger',
+        fit: 'contain',
+        height: 300,
+        width: 300,
+      },
+      {
+        name: 'undefinedHeightWithoutEnlargement',
+        width: 4000,
+        height: undefined,
+        withoutEnlargement: undefined,
+      },
+    ],
+  },
+  [withoutEnlargeSlug]: {
+    resizeOptions: {
+      width: 1000,
+      height: undefined,
+      fit: 'inside',
+      withoutEnlargement: true,
+    },
+  },
+  [reduceSlug]: {
+    imageSizes: [
+      {
+        name: 'accidentalSameSize',
+        height: 80,
+        width: 320,
+        withoutEnlargement: false,
+      },
+      {
+        name: 'sameSizeWithNewFormat',
+        formatOptions: { format: 'jpg', options: { quality: 90 } },
+        height: 80,
+        width: 320,
+        withoutReduction: true,
+      },
+      {
+        name: 'resizedLarger',
+        height: 480,
+        width: 640,
+      },
+      {
+        name: 'resizedSmaller',
+        height: 50,
+        width: 180,
+        withoutReduction: true,
+      },
+    ],
+  },
+  'media-trim': {
+    imageSizes: [
+      {
+        name: 'trimNumber',
+        height: undefined,
+        trimOptions: 0,
+        width: 1024,
+      },
+      {
+        name: 'trimString',
+        height: undefined,
+        trimOptions: 0,
+        width: 1024,
+      },
+      {
+        name: 'trimOptions',
+        height: undefined,
+        trimOptions: {
+          background: '#000000',
+          threshold: 50,
+        },
+        width: 1024,
+      },
+    ],
+    trimOptions: 0,
+  },
+  [customFileNameMediaSlug]: {
+    imageSizes: [
+      {
+        name: 'custom',
+        height: 500,
+        width: 500,
+        generateImageName: ({ extension, height, width, sizeName }) =>
+          `${sizeName}-${width}x${height}.${extension}`,
+      },
+    ],
+  },
+  [constructorOptionsSlug]: {
+    constructorOptions: {
+      limitInputPixels: 100, // set lower than the collection upload fileSize limit default to test
+    },
+  },
+  [mediaWithImageSizeAdminPropsSlug]: {
+    imageSizes: [
+      {
+        name: 'one',
+        height: 200,
+        width: 200,
+        admin: {
+          disabled: { column: true, filter: true },
+        },
+      },
+      {
+        name: 'two',
+        height: 300,
+        width: 300,
+        admin: {
+          disabled: { column: true },
+        },
+      },
+      {
+        name: 'three',
+        height: 400,
+        width: 400,
+        admin: {
+          disabled: { filter: true },
+        },
+      },
+      {
+        name: 'four',
+        height: 400,
+        width: 300,
+      },
+    ],
+  },
+  [mediaWithFieldsSlug]: {
+    crop: true,
+    imageSizes: [
+      {
+        name: 'thumbnail',
+        width: 300,
+        height: 300,
+        crop: 'centre',
+      },
+      {
+        name: 'card',
+        width: 768,
+        height: 512,
+      },
+      {
+        name: 'hero',
+        width: 1920,
+        height: 1080,
+      },
+      {
+        name: 'carousel1',
+        height: 100,
+        width: 100,
+      },
+      {
+        name: 'carousel2',
+        height: 100,
+        width: 150,
+      },
+      {
+        name: 'carousel3',
+        height: 150,
+        width: 100,
+      },
+      {
+        name: 'carousel4',
+        height: 120,
+        width: 200,
+      },
+      {
+        name: 'carousel5',
+        height: 200,
+        width: 120,
+      },
+      {
+        name: 'carousel6',
+        height: 250,
+        width: 250,
+      },
+      {
+        name: 'carousel7',
+        height: 180,
+        width: 320,
+      },
+      {
+        name: 'carousel8',
+        height: 320,
+        width: 180,
+      },
+      {
+        name: 'carousel9',
+        height: 300,
+        width: 400,
+      },
+      {
+        name: 'carousel10',
+        height: 400,
+        width: 300,
+      },
+      {
+        name: 'carousel11',
+        height: 200,
+        width: 500,
+      },
+      {
+        name: 'carousel12',
+        height: 500,
+        width: 200,
+      },
+      {
+        name: 'carousel13',
+        height: 360,
+        width: 640,
+      },
+      {
+        name: 'carousel14',
+        height: 640,
+        width: 360,
+      },
+      {
+        name: 'carousel15',
+        height: 128,
+        width: 128,
+      },
+      {
+        name: 'carousel16',
+        height: 96,
+        width: 96,
+      },
+      {
+        name: 'carousel17',
+        height: 64,
+        width: 64,
+      },
+      {
+        name: 'carousel18',
+        height: 450,
+        width: 800,
+      },
+      {
+        name: 'carousel19',
+        height: 800,
+        width: 450,
+      },
+      {
+        name: 'carousel20',
+        height: 1000,
+        width: 1000,
+      },
+    ],
+  },
+}
 
 export default buildConfigWithDefaults({
   admin: {
@@ -164,29 +739,7 @@ export default buildConfigWithDefaults({
       slug: 'gif-resize',
       fields: [],
       upload: {
-        formatOptions: {
-          format: 'gif',
-        },
-        imageSizes: [
-          {
-            name: 'small',
-            formatOptions: { format: 'gif', options: { quality: 90 } },
-            height: 100,
-            width: 100,
-          },
-          {
-            name: 'large',
-            formatOptions: { format: 'gif', options: { quality: 90 } },
-            height: 1000,
-            width: 1000,
-          },
-        ],
         mimeTypes: ['image/gif'],
-        resizeOptions: {
-          height: 200,
-          position: 'center',
-          width: 200,
-        },
         staticDir: path.resolve(dirname, './media-gif'),
       },
       versions: false,
@@ -204,20 +757,6 @@ export default buildConfigWithDefaults({
       ],
       upload: {
         filenameCompoundIndex: ['filename', 'alt'],
-        imageSizes: [
-          {
-            name: 'small',
-            formatOptions: { format: 'gif', options: { quality: 90 } },
-            height: 100,
-            width: 100,
-          },
-          {
-            name: 'large',
-            formatOptions: { format: 'gif', options: { quality: 90 } },
-            height: 1000,
-            width: 1000,
-          },
-        ],
         mimeTypes: ['image/*'],
         staticDir: path.resolve(dirname, './media'),
       },
@@ -228,11 +767,6 @@ export default buildConfigWithDefaults({
       fields: [],
       upload: {
         mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
-        resizeOptions: {
-          height: 200,
-          position: 'center',
-          width: 200,
-        },
         staticDir: path.resolve(dirname, './no-image-sizes'),
       },
       versions: false,
@@ -241,32 +775,6 @@ export default buildConfigWithDefaults({
       slug: 'object-fit',
       fields: [],
       upload: {
-        imageSizes: [
-          {
-            name: 'fitContain',
-            fit: 'contain',
-            height: 300,
-            width: 400,
-          },
-          {
-            name: 'fitInside',
-            fit: 'inside',
-            height: 400,
-            width: 300,
-          },
-          {
-            name: 'fitCover',
-            fit: 'cover',
-            height: 300,
-            width: 900,
-          },
-          {
-            name: 'fitOutside',
-            fit: 'outside',
-            height: 200,
-            width: 900,
-          },
-        ],
         mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
         staticDir: path.resolve(dirname, './object-fit'),
       },
@@ -276,16 +784,8 @@ export default buildConfigWithDefaults({
       slug: 'with-meta-data',
       fields: [],
       upload: {
-        imageSizes: [
-          {
-            name: 'sizeOne',
-            height: 300,
-            width: 400,
-          },
-        ],
         mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
         staticDir: path.resolve(dirname, './with-meta-data'),
-        withMetadata: true,
       },
       versions: false,
     },
@@ -293,16 +793,8 @@ export default buildConfigWithDefaults({
       slug: 'without-meta-data',
       fields: [],
       upload: {
-        imageSizes: [
-          {
-            name: 'sizeTwo',
-            height: 400,
-            width: 300,
-          },
-        ],
         mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
         staticDir: path.resolve(dirname, './without-meta-data'),
-        withMetadata: false,
       },
       versions: false,
     },
@@ -310,22 +802,7 @@ export default buildConfigWithDefaults({
       slug: 'with-only-jpeg-meta-data',
       fields: [],
       upload: {
-        imageSizes: [
-          {
-            name: 'sizeThree',
-            height: 400,
-            width: 300,
-            withoutEnlargement: false,
-          },
-        ],
         staticDir: path.resolve(dirname, './with-only-jpeg-meta-data'),
-        // eslint-disable-next-line @typescript-eslint/require-await
-        withMetadata: async ({ metadata }) => {
-          if (metadata.format === 'jpeg') {
-            return true
-          }
-          return false
-        },
       },
       versions: false,
     },
@@ -333,24 +810,6 @@ export default buildConfigWithDefaults({
       slug: 'crop-only',
       fields: [],
       upload: {
-        focalPoint: false,
-        imageSizes: [
-          {
-            name: 'focalTest',
-            height: 300,
-            width: 400,
-          },
-          {
-            name: 'focalTest2',
-            height: 300,
-            width: 600,
-          },
-          {
-            name: 'focalTest3',
-            height: 300,
-            width: 900,
-          },
-        ],
         mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
         staticDir: path.resolve(dirname, './crop-only'),
       },
@@ -360,24 +819,6 @@ export default buildConfigWithDefaults({
       slug: 'focal-only',
       fields: [],
       upload: {
-        crop: false,
-        imageSizes: [
-          {
-            name: 'focalTest',
-            height: 300,
-            width: 400,
-          },
-          {
-            name: 'focalTest2',
-            height: 300,
-            width: 600,
-          },
-          {
-            name: 'focalTest3',
-            height: 300,
-            width: 900,
-          },
-        ],
         mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
         staticDir: path.resolve(dirname, './focal-only'),
       },
@@ -388,20 +829,6 @@ export default buildConfigWithDefaults({
       fields: [],
       upload: {
         staticDir: path.resolve(dirname, './image-sizes-only'),
-        crop: false,
-        focalPoint: false,
-        imageSizes: [
-          {
-            name: 'sizeOne',
-            height: 300,
-            width: 400,
-          },
-          {
-            name: 'sizeTwo',
-            height: 400,
-            width: 300,
-          },
-        ],
       },
       versions: false,
     },
@@ -409,8 +836,6 @@ export default buildConfigWithDefaults({
       slug: focalNoSizesSlug,
       fields: [],
       upload: {
-        crop: false,
-        focalPoint: true,
         mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
         staticDir: path.resolve(dirname, './focal-no-sizes'),
       },
@@ -431,100 +856,6 @@ export default buildConfigWithDefaults({
       ],
       upload: {
         staticDir: path.resolve(dirname, './media'),
-        // crop: false,
-        // focalPoint: false,
-        formatOptions: {
-          format: 'png',
-          options: { quality: 90 },
-        },
-        imageSizes: [
-          {
-            name: 'maintainedAspectRatio',
-            crop: 'center',
-            formatOptions: { format: 'png', options: { quality: 90 } },
-            height: undefined,
-            position: 'center',
-            width: 1024,
-          },
-          {
-            name: 'differentFormatFromMainImage',
-            formatOptions: { format: 'jpg', options: { quality: 90 } },
-            height: undefined,
-            width: 200,
-          },
-          {
-            name: 'maintainedImageSize',
-            height: undefined,
-            width: undefined,
-          },
-          {
-            name: 'maintainedImageSizeWithNewFormat',
-            formatOptions: { format: 'jpg', options: { quality: 90 } },
-            height: undefined,
-            width: undefined,
-          },
-          {
-            name: 'accidentalSameSize',
-            height: 80,
-            position: 'top',
-            width: 320,
-          },
-          {
-            name: 'tablet',
-            height: 480,
-            width: 640,
-          },
-          {
-            name: 'mobile',
-            crop: 'left top',
-            height: 240,
-            width: 320,
-          },
-          {
-            name: 'icon',
-            height: 16,
-            width: 16,
-          },
-          {
-            name: 'focalTest',
-            height: 300,
-            width: 400,
-          },
-          {
-            name: 'focalTest2',
-            height: 300,
-            width: 600,
-          },
-          {
-            name: 'focalTest3',
-            height: 300,
-            width: 900,
-          },
-          {
-            name: 'focalTest4',
-            height: 400,
-            width: 300,
-          },
-          {
-            name: 'focalTest5',
-            height: 600,
-            width: 300,
-          },
-          {
-            name: 'focalTest6',
-            height: 800,
-            width: 300,
-          },
-          {
-            name: 'focalTest7',
-            height: 300,
-            width: 300,
-          },
-          {
-            name: 'undefinedHeight',
-            width: 300,
-          },
-        ],
         pasteURL: false,
       },
       versions: false,
@@ -629,35 +960,6 @@ export default buildConfigWithDefaults({
       fields: [],
       upload: {
         staticDir: path.resolve(dirname, './media'),
-        resizeOptions: {
-          position: 'center',
-          width: 200,
-          height: 200,
-        },
-        imageSizes: [
-          {
-            name: 'squareSmall',
-            width: 480,
-            height: 480,
-            position: 'centre',
-            withoutEnlargement: false,
-          },
-          {
-            name: 'undefinedHeight',
-            width: 300,
-            height: undefined,
-          },
-          {
-            name: 'undefinedWidth',
-            width: undefined,
-            height: 300,
-          },
-          {
-            name: 'undefinedAll',
-            width: undefined,
-            height: undefined,
-          },
-        ],
       },
       versions: false,
     },
@@ -665,44 +967,6 @@ export default buildConfigWithDefaults({
       slug: enlargeSlug,
       fields: [],
       upload: {
-        imageSizes: [
-          {
-            name: 'accidentalSameSize',
-            height: 80,
-            width: 320,
-            withoutEnlargement: false,
-          },
-          {
-            name: 'sameSizeWithNewFormat',
-            formatOptions: { format: 'jpg', options: { quality: 90 } },
-            height: 80,
-            width: 320,
-            withoutEnlargement: false,
-          },
-          {
-            name: 'resizedLarger',
-            height: 480,
-            width: 640,
-            withoutEnlargement: false,
-          },
-          {
-            name: 'resizedSmaller',
-            height: 50,
-            width: 180,
-          },
-          {
-            name: 'widthLowerHeightLarger',
-            fit: 'contain',
-            height: 300,
-            width: 300,
-          },
-          {
-            name: 'undefinedHeightWithoutEnlargement',
-            width: 4000,
-            height: undefined,
-            withoutEnlargement: undefined,
-          },
-        ],
         mimeTypes: [
           'image/png',
           'image/jpg',
@@ -719,12 +983,6 @@ export default buildConfigWithDefaults({
       slug: withoutEnlargeSlug,
       fields: [],
       upload: {
-        resizeOptions: {
-          width: 1000,
-          height: undefined,
-          fit: 'inside',
-          withoutEnlargement: true,
-        },
         staticDir: path.resolve(dirname, './media/without-enlarge'),
       },
       versions: false,
@@ -733,32 +991,6 @@ export default buildConfigWithDefaults({
       slug: reduceSlug,
       fields: [],
       upload: {
-        imageSizes: [
-          {
-            name: 'accidentalSameSize',
-            height: 80,
-            width: 320,
-            withoutEnlargement: false,
-          },
-          {
-            name: 'sameSizeWithNewFormat',
-            formatOptions: { format: 'jpg', options: { quality: 90 } },
-            height: 80,
-            width: 320,
-            withoutReduction: true,
-          },
-          {
-            name: 'resizedLarger',
-            height: 480,
-            width: 640,
-          },
-          {
-            name: 'resizedSmaller',
-            height: 50,
-            width: 180,
-            withoutReduction: true,
-          },
-        ],
         mimeTypes: [
           'image/png',
           'image/jpg',
@@ -775,32 +1007,8 @@ export default buildConfigWithDefaults({
       slug: 'media-trim',
       fields: [],
       upload: {
-        imageSizes: [
-          {
-            name: 'trimNumber',
-            height: undefined,
-            trimOptions: 0,
-            width: 1024,
-          },
-          {
-            name: 'trimString',
-            height: undefined,
-            trimOptions: 0,
-            width: 1024,
-          },
-          {
-            name: 'trimOptions',
-            height: undefined,
-            trimOptions: {
-              background: '#000000',
-              threshold: 50,
-            },
-            width: 1024,
-          },
-        ],
         mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
         staticDir: path.resolve(dirname, './media-trim'),
-        trimOptions: 0,
       },
       versions: false,
     },
@@ -808,15 +1016,6 @@ export default buildConfigWithDefaults({
       slug: customFileNameMediaSlug,
       fields: [],
       upload: {
-        imageSizes: [
-          {
-            name: 'custom',
-            height: 500,
-            width: 500,
-            generateImageName: ({ extension, height, width, sizeName }) =>
-              `${sizeName}-${width}x${height}.${extension}`,
-          },
-        ],
         mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
         staticDir: path.resolve(dirname, `./${customFileNameMediaSlug}`),
       },
@@ -1061,9 +1260,6 @@ export default buildConfigWithDefaults({
       slug: constructorOptionsSlug,
       fields: [],
       upload: {
-        constructorOptions: {
-          limitInputPixels: 100, // set lower than the collection upload fileSize limit default to test
-        },
         staticDir: path.resolve(dirname, './media'),
       },
       versions: false,
@@ -1107,37 +1303,6 @@ export default buildConfigWithDefaults({
       fields: [],
       upload: {
         staticDir: path.resolve(dirname, './media'),
-        imageSizes: [
-          {
-            name: 'one',
-            height: 200,
-            width: 200,
-            admin: {
-              disabled: { column: true, filter: true },
-            },
-          },
-          {
-            name: 'two',
-            height: 300,
-            width: 300,
-            admin: {
-              disabled: { column: true },
-            },
-          },
-          {
-            name: 'three',
-            height: 400,
-            width: 400,
-            admin: {
-              disabled: { filter: true },
-            },
-          },
-          {
-            name: 'four',
-            height: 400,
-            width: 300,
-          },
-        ],
       },
       versions: false,
     },
@@ -1312,125 +1477,6 @@ export default buildConfigWithDefaults({
         },
       ],
       upload: {
-        crop: true,
-        imageSizes: [
-          {
-            name: 'thumbnail',
-            width: 300,
-            height: 300,
-            crop: 'centre',
-          },
-          {
-            name: 'card',
-            width: 768,
-            height: 512,
-          },
-          {
-            name: 'hero',
-            width: 1920,
-            height: 1080,
-          },
-          {
-            name: 'carousel1',
-            height: 100,
-            width: 100,
-          },
-          {
-            name: 'carousel2',
-            height: 100,
-            width: 150,
-          },
-          {
-            name: 'carousel3',
-            height: 150,
-            width: 100,
-          },
-          {
-            name: 'carousel4',
-            height: 120,
-            width: 200,
-          },
-          {
-            name: 'carousel5',
-            height: 200,
-            width: 120,
-          },
-          {
-            name: 'carousel6',
-            height: 250,
-            width: 250,
-          },
-          {
-            name: 'carousel7',
-            height: 180,
-            width: 320,
-          },
-          {
-            name: 'carousel8',
-            height: 320,
-            width: 180,
-          },
-          {
-            name: 'carousel9',
-            height: 300,
-            width: 400,
-          },
-          {
-            name: 'carousel10',
-            height: 400,
-            width: 300,
-          },
-          {
-            name: 'carousel11',
-            height: 200,
-            width: 500,
-          },
-          {
-            name: 'carousel12',
-            height: 500,
-            width: 200,
-          },
-          {
-            name: 'carousel13',
-            height: 360,
-            width: 640,
-          },
-          {
-            name: 'carousel14',
-            height: 640,
-            width: 360,
-          },
-          {
-            name: 'carousel15',
-            height: 128,
-            width: 128,
-          },
-          {
-            name: 'carousel16',
-            height: 96,
-            width: 96,
-          },
-          {
-            name: 'carousel17',
-            height: 64,
-            width: 64,
-          },
-          {
-            name: 'carousel18',
-            height: 450,
-            width: 800,
-          },
-          {
-            name: 'carousel19',
-            height: 800,
-            width: 450,
-          },
-          {
-            name: 'carousel20',
-            height: 1000,
-            width: 1000,
-          },
-        ],
         staticDir: path.resolve(dirname, './media'),
       },
     },
@@ -1447,6 +1493,7 @@ export default buildConfigWithDefaults({
     limits: {
       fileSize: 2_000_000, // 2MB
     },
+    transformers: [sharpTransformer({ collections: sharpCollections })],
   },
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),

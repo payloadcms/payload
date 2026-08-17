@@ -615,12 +615,13 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
   }
 
   if (!config.upload) {
-    config.upload = { adapters: [] }
+    config.upload = { adapters: [], transformers: [] }
   }
 
   config.upload.adapters = Array.from(
     new Set(config.collections!.map((c) => c.upload?.adapter).filter(Boolean) as string[]),
   )
+  config.upload.transformers = config.upload.transformers ?? []
 
   // Pass through the email config as is so adapters don't break
   if (incomingConfig.email) {

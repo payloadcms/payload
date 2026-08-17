@@ -1,5 +1,6 @@
 import type { Config, SanitizedConfig } from './types.js'
 
+import { validateTransformers } from '../uploads/transformers/validateTransformers.js'
 import { sanitizeConfig } from './sanitize.js'
 
 /**
@@ -13,6 +14,20 @@ export async function buildConfig(config: Config): Promise<SanitizedConfig> {
 
     for (const plugin of sorted) {
       config = await plugin(config)
+    }
+  }
+
+  if (Array.isArray(config.upload?.transformers) && config.upload.transformers.length > 0) {
+    validateTransformers({ transformers: config.upload.transformers })
+
+    for (const transformer of config.upload.transformers) {
+      if (typeof transformer.init === 'function') {
+        config = await transformer.init(config)
+      }
+    }
+
+    if (Array.isArray(config.upload?.transformers) && config.upload.transformers.length > 0) {
+      validateTransformers({ transformers: config.upload.transformers })
     }
   }
 

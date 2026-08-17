@@ -1052,9 +1052,6 @@ importers:
       rollup-plugin-dts:
         specifier: 6.2.3
         version: 6.2.3(@typescript/typescript6@6.0.2)(rollup@4.59.0)
-      sharp:
-        specifier: 0.32.6
-        version: 0.32.6
 
   packages/payload-cloud:
     dependencies:
@@ -1695,6 +1692,22 @@ importers:
       vite:
         specifier: '>=8.0.0'
         version: 8.1.0(@types/node@24.12.3)(esbuild@0.28.1)(jiti@2.7.0)(sass-embedded@1.100.0)(sass@1.100.0)(terser@5.48.0)(tsx@4.22.4)(yaml@2.9.0)
+
+  packages/transformer-sharp:
+    dependencies:
+      file-type:
+        specifier: 22.0.1
+        version: 22.0.1
+      sanitize-filename:
+        specifier: 1.6.4
+        version: 1.6.4
+      sharp:
+        specifier: 0.32.6
+        version: 0.32.6
+    devDependencies:
+      payload:
+        specifier: workspace:*
+        version: link:../payload
 
   packages/translations:
     dependencies:
@@ -2490,7 +2503,7 @@ importers:
         version: link:../packages/eslint-plugin
       '@payloadcms/figma':
         specifier: latest
-        version: 0.0.1-alpha.74(@payloadcms/plugin-cloud-storage@packages+plugin-cloud-storage)(@payloadcms/richtext-lexical@packages+richtext-lexical)(payload@packages+payload)
+        version: 0.1.0-alpha.2(@payloadcms/plugin-cloud-storage@packages+plugin-cloud-storage)(@payloadcms/richtext-lexical@packages+richtext-lexical)(payload@packages+payload)
       '@payloadcms/graphql':
         specifier: workspace:*
         version: link:../packages/graphql
@@ -2569,6 +2582,9 @@ importers:
       '@payloadcms/tanstack-start':
         specifier: workspace:*
         version: link:../packages/tanstack-start
+      '@payloadcms/transformer-sharp':
+        specifier: workspace:*
+        version: link:../packages/transformer-sharp
       '@payloadcms/translations':
         specifier: workspace:*
         version: link:../packages/translations
@@ -6815,13 +6831,13 @@ packages:
     resolution: {integrity: sha512-tmmZ3lQxAe/k/+rNnXQRawJ4NjxO2hqiOLTHvWchtGZULp4RyFeh6aU4XdOYBFe2KE1oShQTv4AblOs2iOrNnQ==}
     engines: {node: '>= 10.0.0'}
 
-  '@payloadcms/figma@0.0.1-alpha.74':
-    resolution: {integrity: sha512-USR22NnmYTbxA673Uk8Ca9EbrXAnjP+aLiVNQ39N68t6nicLJvRdNMdppEz+SBDS9ICTRjQH3sWioSEp6xhfCg==}
+  '@payloadcms/figma@0.1.0-alpha.2':
+    resolution: {integrity: sha512-VrY0sjlUfCVlrabZHGnkHhK/DXp2fTC0dK5LorvbbmQlgYE3qiLpmI2ZdY6lu/9HpG88tO442NcDI6deaSh4lg==}
     hasBin: true
     peerDependencies:
-      '@payloadcms/plugin-cloud-storage': ^3.0.0
-      '@payloadcms/richtext-lexical': ^3.0.0
-      payload: ^3.0.0
+      '@payloadcms/plugin-cloud-storage': '>=4.0.0-canary.20 <4.0.0-internal'
+      '@payloadcms/richtext-lexical': '>=4.0.0-canary.20 <4.0.0-internal'
+      payload: '>=4.0.0-canary.20 <4.0.0-internal'
     peerDependenciesMeta:
       '@payloadcms/plugin-cloud-storage':
         optional: true
@@ -20180,7 +20196,7 @@ snapshots:
       '@parcel/watcher-win32-x64': 2.5.6
     optional: true
 
-  '@payloadcms/figma@0.0.1-alpha.74(@payloadcms/plugin-cloud-storage@packages+plugin-cloud-storage)(@payloadcms/richtext-lexical@packages+richtext-lexical)(payload@packages+payload)':
+  '@payloadcms/figma@0.1.0-alpha.2(@payloadcms/plugin-cloud-storage@packages+plugin-cloud-storage)(@payloadcms/richtext-lexical@packages+richtext-lexical)(payload@packages+payload)':
     dependencies:
       '@clack/prompts': 0.11.0
       '@figma/rest-api-spec': 0.34.0

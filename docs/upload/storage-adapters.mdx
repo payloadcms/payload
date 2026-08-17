@@ -451,6 +451,8 @@ export interface GeneratedAdapter {
 
 When providing upload instructions, set `uploadInstructions.useInAdmin` to `true` when the Admin panel should use them instead of attaching the whole file to the document request. This is useful for direct-to-storage uploads and for flows such as chunked uploads that still pass through Payload.
 
+If any [file transformer](./transformers) is configured, `staticHandler` receives an additional `params.operation`, either `'read'` (an ordinary file request; the default when omitted, for backward compatibility) or `'transform'` (Payload is reading the file's bytes on behalf of a transformer). For `'transform'`, return the full object body rather than a redirect to a signed/public URL, and skip `Range` handling, conditional/ETag short-circuiting, and `modifyResponseHeaders` — Payload applies headers once, on the final response, after every transformer has run. The five first-party adapters already implement this; a custom adapter only needs to branch on `operation` if it currently redirects to an external URL for `'read'`.
+
 ```ts
 import { buildConfig } from 'payload'
 import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'

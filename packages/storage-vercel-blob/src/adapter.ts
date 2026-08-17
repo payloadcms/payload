@@ -135,7 +135,7 @@ export function createVercelBlobAdapter({
 
     staticHandler: (
       req,
-      { headers, params: { filename, prefix: prefixQueryParam, uploadReference } },
+      { headers, params: { filename, operation, prefix: prefixQueryParam, uploadReference } },
     ) =>
       getFile({
         baseUrl,
@@ -144,6 +144,7 @@ export function createVercelBlobAdapter({
         collectionPrefix: prefix,
         filename,
         incomingHeaders: headers,
+        operation,
         prefixQueryParam,
         req,
         token,

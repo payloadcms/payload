@@ -8,6 +8,16 @@ export { getFileFromUploadInstructions } from '../uploads/getFileFromUploadInstr
 export { getRangeRequestInfo } from '../uploads/getRangeRequestInfo.js'
 export { getSafeFileName } from '../uploads/getSafeFilename.js'
 export { parseRangeHeader } from '../uploads/parseRangeHeader.js'
+export {
+  getUploadTransformerInternal,
+  uploadTransformerInternal,
+} from '../uploads/transformers/uploadTransformerBridge.js'
+export type {
+  PreparedUploadTransformation,
+  TransformerWithInternalBridge,
+  UploadTransformerInternal,
+  UploadTransformTask,
+} from '../uploads/transformers/uploadTransformerBridge.js'
 export { getEntityPermissions } from '../utilities/getEntityPermissions/getEntityPermissions.js'
 export { isURLAllowed } from '../utilities/isURLAllowed.js'
 export { sanitizePermissions } from '../utilities/sanitizePermissions.js'

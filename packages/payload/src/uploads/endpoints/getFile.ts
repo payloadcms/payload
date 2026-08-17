@@ -5,15 +5,19 @@ import fsPromises from 'fs/promises'
 import { status as httpStatus } from 'http-status'
 import path from 'path'
 
+import type { Collection, TypeWithID } from '../../collections/config/types.js'
 import type { PayloadHandler } from '../../config/types.js'
+import type { PayloadRequest } from '../../types/index.js'
+import type { FileHandlerOperation } from '../types.js'
 
 import { APIError } from '../../errors/APIError.js'
-import { checkFileAccess } from '../../uploads/checkFileAccess.js'
-import { streamFile } from '../../uploads/fetchAPI-stream-file/index.js'
-import { getFileTypeFallback } from '../../uploads/getFileTypeFallback.js'
-import { parseRangeHeader } from '../../uploads/parseRangeHeader.js'
 import { getRequestCollection } from '../../utilities/getRequestEntity.js'
 import { headersWithCors } from '../../utilities/headersWithCors.js'
+import { checkFileAccess } from '../checkFileAccess.js'
+import { streamFile } from '../fetchAPI-stream-file/index.js'
+import { getFileTypeFallback } from '../getFileTypeFallback.js'
+import { parseRangeHeader } from '../parseRangeHeader.js'
+import { handleDynamicFileRequest } from '../transformers/handleDynamicFileRequest.js'
 
 export const getFileHandler: PayloadHandler = async (req) => {
   const collection = getRequestCollection(req)
@@ -28,6 +32,10 @@ export const getFileHandler: PayloadHandler = async (req) => {
     )
   }
 
+  if (req.payload.config.upload.transformers.length > 0) {
+    return handleDynamicFileRequest({ collection, filename, prefix, req })
+  }
+
   const accessResult = (await checkFileAccess({
     collection,
     filename,
@@ -39,17 +47,44 @@ export const getFileHandler: PayloadHandler = async (req) => {
     return accessResult
   }
 
-  if (collection.config.upload.handlers?.length) {
+  return retrieveFileResponse({ collection, doc: accessResult, filename, prefix, req })
+}
+
+/**
+ * Runs the collection's custom `handlers`, falling back to a local-filesystem read.
+ * Shared by the ordinary `read` endpoint and, with `operation: 'transform'`,
+ * by `getSourceFileResponse` — Payload's internal source retrieval for a dynamic
+ * transformation. `transform` ignores the incoming `Range` header and never
+ * calls `modifyResponseHeaders` or CORS header wrapping, since those apply exactly
+ * once, later, to the transformer pipeline's final outward response.
+ */
+export async function retrieveFileResponse({
+  collection,
+  doc,
+  filename,
+  operation = 'read',
+  prefix,
+  req,
+}: {
+  collection: Collection
+  doc?: TypeWithID
+  filename: string
+  operation?: FileHandlerOperation
+  prefix?: string
+  req: PayloadRequest
+}): Promise<Response> {
+  if (collection.config.upload && collection.config.upload.handlers?.length) {
     let customResponse: null | Response | void = null
     const headers = new Headers()
 
     for (const handler of collection.config.upload.handlers) {
       customResponse = await handler(req, {
-        doc: accessResult,
+        doc: doc!,
         headers,
         params: {
           collection: collection.config.slug,
           filename,
+          operation,
           prefix,
         },
       })
@@ -113,8 +148,11 @@ export const getFileHandler: PayloadHandler = async (req) => {
     mimeType = 'image/svg+xml'
   }
 
-  // Parse Range header for byte range requests
-  const rangeHeader = req.headers.get('range')
+  const isTransformSource = operation === 'transform'
+
+  // The client's Range header must never leak into an internal source retrieval —
+  // Sharp (and any other transformer) needs the complete original bytes to decode.
+  const rangeHeader = isTransformSource ? null : req.headers.get('range')
   const rangeResult = parseRangeHeader({
     fileSize: stats.size,
     rangeHeader,
@@ -159,6 +197,10 @@ export const getFileHandler: PayloadHandler = async (req) => {
     headers.set('Content-Length', String(stats.size))
     data = streamFile({ filePath })
     status = httpStatus.OK
+  }
+
+  if (isTransformSource) {
+    return new Response(data, { headers, status })
   }
 
   headers = collection.config.upload?.modifyResponseHeaders

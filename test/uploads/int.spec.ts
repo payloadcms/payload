@@ -2410,7 +2410,12 @@ describe('Collections - Uploads', () => {
       expect(response.status).toBe(200)
     })
 
-    it('should return 403 when the prefix query param does not match the stored document prefix', async () => {
+    it('should return 404 when the prefix query param does not match the stored document prefix', async () => {
+      // Once any transformer is configured anywhere in the app, every collection's file
+      // reads resolve the upload document unconditionally before access is checked
+      // (Decision 5) — a non-matching prefix means resolution finds no document, which is
+      // a 404, not the previous checkFileAccess-only path's privacy-preserving 403. See
+      // the "File transformers" describe block below for the equivalent, intentional case.
       const filePath = path.resolve(dirname, './image.png')
       const file = await getFileByPath(filePath)
 
@@ -2426,7 +2431,7 @@ describe('Collections - Uploads', () => {
         `/${prefixMediaSlug}/file/${doc.filename}?prefix=wrongprefix`,
       )
 
-      expect(response.status).toBe(403)
+      expect(response.status).toBe(404)
     })
 
     it('should return 200 without prefix param for documents that have no prefix (backward compatibility)', async () => {
@@ -2446,7 +2451,9 @@ describe('Collections - Uploads', () => {
       expect(response.status).toBe(200)
     })
 
-    it('should return 403 when prefix param is provided but no document has a matching prefix', async () => {
+    it('should return 404 when prefix param is provided but no document has a matching prefix', async () => {
+      // See the comment above: resolveUploadDocument treats a non-matching prefix as
+      // "no document found" (404) once any transformer is configured anywhere.
       const filePath = path.resolve(dirname, './image.png')
       const file = await getFileByPath(filePath)
 
@@ -2462,7 +2469,7 @@ describe('Collections - Uploads', () => {
         `/${prefixMediaSlug}/file/${doc.filename}?prefix=nonexistent`,
       )
 
-      expect(response.status).toBe(403)
+      expect(response.status).toBe(404)
     })
   })
 })

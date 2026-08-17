@@ -1365,6 +1365,62 @@ azureStorage({
 
 Run `npx @payloadcms/codemod --transform migrate-azure-chunk-large-files` to remove the flag automatically (it collapses `clientUploads: { chunkLargeFiles: true }` to `clientUploads: true` and keeps any other `clientUploads` options).
 
+### Sharp moved out of core into `@payloadcms/transformer-sharp`
+
+Image resizing is no longer built into `payload` itself. It now ships as an official [file transformer](../upload/transformers), `@payloadcms/transformer-sharp`, that you register under `upload.transformers`.
+
+This affects three things:
+
+1. The top-level `sharp` config property has been removed. Passing a Sharp instance now happens through `sharpTransformer({ sharp })` instead.
+2. Per-collection Sharp options — `constructorOptions`, `formatOptions`, `resizeOptions`, `trimOptions`, and `withMetadata` — have been removed from `CollectionConfig['upload']`. They're now authored through `sharpTransformer({ collections })`.
+3. `sharp` is no longer a dependency of `payload` at all (previously a `devDependency`, not a runtime `dependency`). Install `@payloadcms/transformer-sharp` explicitly.
+
+```sh
+pnpm add @payloadcms/transformer-sharp
+```
+
+```diff
++ import { sharpTransformer } from '@payloadcms/transformer-sharp'
+  import { buildConfig } from 'payload'
+
+  export default buildConfig({
+    collections: [
+      {
+        slug: 'media',
+        upload: {
+-         resizeOptions: { width: 2048, height: 2048 },
+-         imageSizes: [{ name: 'thumbnail', width: 400, height: 300 }],
+        },
+      },
+    ],
+-   sharp,
+    upload: {
++     transformers: [
++       sharpTransformer({
++         sharp,
++         collections: {
++           media: {
++             resizeOptions: { width: 2048, height: 2048 },
++             imageSizes: [{ name: 'thumbnail', width: 400, height: 300 }],
++           },
++         },
++       }),
++     ],
+    },
+  })
+```
+
+Run `npx @payloadcms/codemod --transform migrate-sharp-to-transformer` to migrate automatically. The codemod moves a top-level `sharp` dependency and inline collection Sharp options into `sharpTransformer({ collections })`, appends to an existing `upload.transformers` array if you already have one, and leaves anything it can't safely rewrite in place with a note — for example, a `collections` array built by a function call, or a collection defined outside the `buildConfig` call. Review those manually.
+
+`imageSizes`, `crop`, and `focalPoint` are still readable at `collection.upload.imageSizes`/`.crop`/`.focalPoint` — `sharpTransformer` writes a projection of what you configure back onto the sanitized collection at startup, so the Admin Panel, generated types, and the stored `sizes` shape on your documents are unchanged. This write-back is why `crop`/`focalPoint`/`imageSizes` are not in the list of removed options above — only the Sharp-specific processing options moved.
+
+If you inject a custom Sharp build or version, pass it the same way:
+
+```diff
+- buildConfig({ sharp: myCustomSharp })
++ sharpTransformer({ sharp: myCustomSharp })
+```
+
 ### `FileSizeImproved` removed — use `FileSize` ([#16593](https://github.com/payloadcms/payload/pull/16593))
 
 `FileSizeImproved` has been merged into `FileSize`. The `url`, `width`, `height`, `filesize`, `mimeType`, and `filename` properties now accept `null` directly on `FileSize`, matching what the database stores for sizes that were not generated.

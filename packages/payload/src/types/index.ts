@@ -38,6 +38,12 @@ export type CustomPayloadRequestProperties = {
   context: RequestContext
   /** The locale that should be used for a field when it is not translated to the requested locale */
   fallbackLocale?: TypedFallbackLocale
+  /**
+   * Set by Payload only while running a collection's `read` access function for a
+   * dynamic file transformation request. Restored to its prior value immediately
+   * after that access check completes; never set for ordinary reads.
+   */
+  fileTransform?: true
   i18n: I18n
   /**
    * The requested locale if specified

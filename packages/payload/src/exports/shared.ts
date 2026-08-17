@@ -105,6 +105,7 @@ export { PREFERENCE_KEYS } from '../preferences/keys.js'
 
 export { validOperators, validOperatorSet } from '../types/constants.js'
 export { formatFilesize } from '../uploads/formatFilesize.js'
+export { generatePayloadFileURL } from '../uploads/generatePayloadFileURL.js'
 export { isImage } from '../uploads/isImage.js'
 export { matchMimeType } from '../uploads/matchMimeType.js'
 export { appendDateTimezoneSelectFields } from '../utilities/appendDateTimezoneSelectFields.js'
