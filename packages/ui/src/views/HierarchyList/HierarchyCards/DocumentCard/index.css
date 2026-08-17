@@ -30,11 +30,6 @@
     outline-color: var(--color-border-selected);
   }
 
-  .hierarchy-document-card--selected:hover {
-    border-color: var(--color-border-selected-strong);
-    outline-color: var(--color-border-selected-strong);
-  }
-
   /* Thumbnail */
 
   .hierarchy-document-card__thumbnail-wrap {
@@ -54,22 +49,23 @@
 
   .hierarchy-document-card__type {
     position: absolute;
-    inset-block-start: var(--spacer-2);
-    inset-inline-start: var(--spacer-2);
+    inset-block-start: var(--spacer-2-5);
+    inset-inline-start: var(--spacer-2-5);
     display: inline-flex;
     align-items: center;
-    /* Leaves room for the selection checkbox in the opposite corner */
+    /* Leaves room for the lock indicator in the opposite corner */
     max-width: calc(100% - var(--spacer-6));
     padding-inline: var(--spacer-1);
-    padding-block: calc(var(--spacer-1) / 2);
-    border-radius: var(--radius-small);
-    background: var(--color-bg-inverse);
-    color: var(--color-text-oninverse);
-    font-family: var(--text-body-small-strong-font-family);
-    font-size: var(--text-body-small-strong-font-size);
-    font-weight: var(--text-body-small-strong-font-weight);
-    line-height: var(--text-body-small-strong-line-height);
-    letter-spacing: var(--text-body-small-strong-letter-spacing);
+    padding-block: var(--spacer-0);
+    border-radius: var(--radius-medium);
+    background: var(--color-bg);
+    color: black;
+    border: var(--stroke-width-small) solid var(--color-border);
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--text-body-medium-font-size);
+    font-weight: var(--text-body-medium-font-weight);
+    line-height: var(--text-body-medium-line-height);
+    letter-spacing: var(--text-body-medium-letter-spacing);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -80,6 +76,9 @@
     position: static;
     align-self: flex-start;
     max-width: 100%;
+    background: var(--color-bg);
+    color: black;
+    border: var(--stroke-width-small) solid var(--color-border);
   }
 
   /* Content */
@@ -87,8 +86,9 @@
   .hierarchy-document-card__content {
     display: flex;
     flex-direction: column;
-    gap: var(--spacer-1-5);
-    padding: var(--spacer-2-5);
+    gap: var(--spacer-1);
+    padding-inline: var(--spacer-3);
+    padding-block: var(--spacer-2-5);
     min-width: 0;
   }
 
@@ -147,8 +147,7 @@
 
   /*
    * Without a thumbnail the corner slot sits over the first line of content, so reserve room for
-   * it. Gated on the slot existing at all (checkbox OR lock indicator) rather than on
-   * selectability - a locked card is not selectable but still renders the slot.
+   * it.
    */
   .hierarchy-document-card--no-thumbnail.hierarchy-document-card--has-corner-slot
     .hierarchy-document-card__link,
@@ -168,14 +167,14 @@
   .hierarchy-document-card__property {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: var(--spacer-2);
+    gap: var(--spacer-0-5, 2px);
     min-width: 0;
     font-family: var(--text-body-medium-font-family);
     font-size: var(--text-body-medium-font-size);
     font-weight: var(--text-body-medium-font-weight);
     line-height: var(--text-body-medium-line-height);
     letter-spacing: var(--text-body-medium-letter-spacing);
+    color: var(--color-text-secondary);
   }
 
   .hierarchy-document-card__property-label {
@@ -188,7 +187,7 @@
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
-    color: var(--color-text);
+    color: var(--color-text-secondary);
   }
 
   /* Status pill - mirrors the token pairs used by the table status cell */
@@ -198,8 +197,14 @@
     align-items: center;
     justify-content: center;
     padding-inline: var(--spacer-1);
+    padding-block: var(--spacer-0);
     border-radius: var(--radius-medium);
     white-space: nowrap;
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--text-body-medium-font-size);
+    font-weight: var(--text-body-medium-font-weight);
+    line-height: var(--text-body-medium-line-height);
+    letter-spacing: var(--text-body-medium-letter-spacing);
   }
 
   .hierarchy-document-card__status--published {
@@ -222,9 +227,9 @@
     color: var(--color-text);
   }
 
-  /* Selection */
+  /* Lock indicator */
 
-  .hierarchy-document-card__checkbox {
+  .hierarchy-document-card__corner-slot {
     position: absolute;
     inset-block-start: var(--spacer-2);
     inset-inline-end: var(--spacer-2);

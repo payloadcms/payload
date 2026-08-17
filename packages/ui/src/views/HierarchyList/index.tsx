@@ -9,7 +9,7 @@ import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'reac
 
 import type { CollectionOption } from '../../elements/CreateDocumentButton/index.js'
 import type { StepNavItem } from '../../elements/StepNav/index.js'
-import type { HierarchyViewMode } from './ViewModeToggle/index.js'
+import type { DocumentViewMode } from '../../elements/ViewModeToggle/index.js'
 
 import { CreateDocumentButton } from '../../elements/CreateDocumentButton/index.js'
 import { ListControlsBar } from '../../elements/ListControlsBar/index.js'
@@ -18,6 +18,7 @@ import { RenderCustomComponent } from '../../elements/RenderCustomComponent/inde
 import { ListSearchFilter } from '../../elements/Search/ListSearchFilter/index.js'
 import { useStepNav } from '../../elements/StepNav/index.js'
 import { ViewDescription } from '../../elements/ViewDescription/index.js'
+import { ViewModeToggle } from '../../elements/ViewModeToggle/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { DocumentSelectionProvider } from '../../providers/DocumentSelection/index.js'
 import { useHierarchy } from '../../providers/Hierarchy/index.js'
@@ -29,7 +30,6 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { HierarchyListHeader } from './HierarchyListHeader/index.js'
 import { HierarchyTable } from './HierarchyTable/index.js'
 import { TypeFilter } from './TypeFilter/index.js'
-import { ViewModeToggle } from './ViewModeToggle/index.js'
 import './index.css'
 
 const baseClass = 'hierarchy-list'
@@ -84,12 +84,12 @@ export function HierarchyListView(props: ListViewClientProps) {
   const { clearRouteCache } = useRouteCache()
   const { setPreference } = usePreferences()
 
-  const [viewMode, setViewMode] = useState<HierarchyViewMode>(
-    listPreferences?.hierarchyViewMode ?? 'table',
+  const [viewMode, setViewMode] = useState<DocumentViewMode>(
+    listPreferences?.documentViewMode ?? 'table',
   )
 
   const handleViewModeChange = useCallback(
-    (nextViewMode: HierarchyViewMode) => {
+    (nextViewMode: DocumentViewMode) => {
       setViewMode(nextViewMode)
 
       // merge: true, otherwise this write clobbers sibling list preferences
@@ -98,7 +98,7 @@ export function HierarchyListView(props: ListViewClientProps) {
       // unhandled rejection.
       void setPreference(
         `collection-${collectionSlug}`,
-        { hierarchyViewMode: nextViewMode },
+        { documentViewMode: nextViewMode },
         true,
       ).catch(() => {
         // Intentionally ignored: the view still switched, only persistence failed.

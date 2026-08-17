@@ -36,4 +36,8 @@ export type ListControlsProps = {
   readonly queryPresetPermissions?: SanitizedCollectionPermission
   readonly renderedFilters?: Map<string, React.ReactNode>
   readonly resolvedFilterOptions?: Map<string, ResolvedFilterOptions>
+  /**
+   * Renders a table/grid segmented control before the "Create new" button, e.g. `ViewModeToggle`.
+   */
+  readonly viewModeToggle?: React.ReactNode
 }

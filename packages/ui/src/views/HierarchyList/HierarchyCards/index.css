@@ -1,9 +1,14 @@
 @layer payload-default {
   .hierarchy-card-grid {
-    --hierarchy-card-min-width: 240px;
-
+    /* Containing block for the drag-selection marquee. */
+    position: relative;
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(var(--hierarchy-card-min-width), 1fr));
+    /*
+     * The column count (2/4/5/8, snapping to ~200px cards) is computed from the grid's measured
+     * width via ResizeObserver and applied as an inline style - see `useColumnCount` in
+     * index.tsx. This is the pre-JS/SSR fallback.
+     */
+    grid-template-columns: repeat(2, 1fr);
     gap: var(--spacer-3);
     /*
      * Matches the horizontal gutter the tables get from their own cells, so cards line up with
@@ -13,6 +18,16 @@
     padding-block: var(--spacer-2);
     margin: 0;
     list-style: none;
+  }
+
+  /*
+   * Claims the container's leftover height so click-away and drag selection work over the empty
+   * space below the cards, not just the gaps between them. `align-content` has to be pinned to the
+   * start because a grid's default would otherwise stretch the auto-sized rows into that space.
+   */
+  .hierarchy-card-grid--fill-height {
+    flex-grow: 1;
+    align-content: start;
   }
 
   /*
@@ -27,10 +42,28 @@
   .hierarchy-card-grid__item {
     display: flex;
     min-width: 0;
+    /*
+     * A card is selected on click and opened on double click, so text selection would only ever be
+     * an accidental by-product of either gesture.
+     */
+    user-select: none;
   }
 
   .hierarchy-card-grid__item > * {
     flex: 1 1 auto;
     min-width: 0;
+  }
+
+  /*
+   * Drag-selection marquee: an accent hairline over a translucent accent fill, mirroring the
+   * file-browser treatment. Absolutely positioned, so it stays out of the grid's flow, and inert
+   * so it never intercepts the pointer mid-drag.
+   */
+  .hierarchy-card-grid__marquee {
+    position: absolute;
+    z-index: 1;
+    border: var(--stroke-width-small) solid var(--color-border-selected);
+    background: color-mix(in srgb, var(--color-border-selected) 20%, transparent);
+    pointer-events: none;
   }
 }

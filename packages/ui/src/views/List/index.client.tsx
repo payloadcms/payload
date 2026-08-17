@@ -6,6 +6,9 @@ import { getTranslation } from '@payloadcms/translations'
 import { formatAdminURL, formatFilesize } from 'payload/shared'
 import React, { Fragment, useEffect, useRef, useState } from 'react'
 
+import type { DocumentViewMode } from '../../elements/ViewModeToggle/index.js'
+import type { TableRow } from '../HierarchyList/HierarchyTable/types.js'
+
 import { Button } from '../../elements/Button/index.js'
 import { ListControls } from '../../elements/ListControls/index.js'
 import { useListDrawerContext } from '../../elements/ListDrawer/Provider.js'
@@ -18,21 +21,69 @@ import { SelectMany } from '../../elements/SelectMany/index.js'
 import { useStepNav } from '../../elements/StepNav/index.js'
 import { RelationshipProvider } from '../../elements/Table/RelationshipProvider/index.js'
 import { ViewDescription } from '../../elements/ViewDescription/index.js'
+import { ViewModeToggle } from '../../elements/ViewModeToggle/index.js'
 import { useControllableState } from '../../hooks/useControllableState.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { DocumentSelectionProvider } from '../../providers/DocumentSelection/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
-import { SelectionProvider } from '../../providers/Selection/index.js'
+import { usePreferences } from '../../providers/Preferences/index.js'
+import { SelectionProvider, useSelection } from '../../providers/Selection/index.js'
 import { TableColumnsProvider } from '../../providers/TableColumns/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useWindowInfo } from '../../providers/WindowInfo/index.js'
 import { ListSelection } from '../../views/List/ListSelection/index.js'
 import { DocumentListSelection } from '../HierarchyList/DocumentListSelection/index.js'
+import { HierarchyCardGrid } from '../HierarchyList/HierarchyCards/index.js'
 import { HierarchyTable } from '../HierarchyList/HierarchyTable/index.js'
 import { CollectionListHeader } from './ListHeader/index.js'
 import './index.css'
 
 const baseClass = 'collection-list'
+
+type ListGridOrTableProps = {
+  readonly collectionLabel: string
+  readonly collectionSlug: string
+  readonly docs: Record<string, unknown>[]
+  readonly Table: React.ReactNode
+  readonly viewMode: DocumentViewMode
+}
+
+/**
+ * Renders the flat list's documents as a card grid or the default table, reusing the same
+ * selection state so bulk actions stay consistent between view modes.
+ */
+function ListGridOrTable({
+  collectionLabel,
+  collectionSlug,
+  docs,
+  Table,
+  viewMode,
+}: ListGridOrTableProps) {
+  const { selected, setSelection } = useSelection()
+
+  if (viewMode !== 'grid') {
+    return <RelationshipProvider>{Table}</RelationshipProvider>
+  }
+
+  const rows: TableRow[] = docs.map((doc) => ({
+    ...doc,
+    _collectionLabel: collectionLabel,
+    _collectionSlug: collectionSlug,
+  })) as TableRow[]
+
+  const selectedIds = new Set(rows.filter((row) => selected.get(row.id)).map((row) => row.id))
+
+  return (
+    <HierarchyCardGrid
+      fillHeight
+      getRowLockedUser={(row) => (row._isLocked ? row._userEditing : undefined)}
+      isHierarchyGroup={false}
+      onSelectionChange={(row) => setSelection(row.id)}
+      rows={rows}
+      selectedIds={selectedIds}
+    />
+  )
+}
 
 export function DefaultListView(props: ListViewClientProps) {
   const {
@@ -53,6 +104,7 @@ export function DefaultListView(props: ListViewClientProps) {
     hasTrashPermission,
     hierarchyData,
     listMenuItems,
+    listPreferences,
     newDocumentURL,
     NoResults,
     queryPreset,
@@ -95,6 +147,30 @@ export function DefaultListView(props: ListViewClientProps) {
   }, [query?.where])
 
   const { openModal } = useModal()
+  const { setPreference } = usePreferences()
+
+  const [viewMode, setViewMode] = useState<DocumentViewMode>(
+    listPreferences?.documentViewMode ?? 'table',
+  )
+
+  const handleViewModeChange = React.useCallback(
+    (nextViewMode: DocumentViewMode) => {
+      setViewMode(nextViewMode)
+
+      // merge: true, otherwise this write clobbers sibling list preferences
+      // stored on the same key (columns, sort, limit, preset, groupBy).
+      // A failed write only costs the persisted choice, so it must not surface as an
+      // unhandled rejection.
+      void setPreference(
+        `collection-${collectionSlug}`,
+        { documentViewMode: nextViewMode },
+        true,
+      ).catch(() => {
+        // Intentionally ignored: the view still switched, only persistence failed.
+      })
+    },
+    [collectionSlug, setPreference],
+  )
 
   const collectionConfig = getEntityConfig({ collectionSlug })
 
@@ -239,6 +315,9 @@ export function DefaultListView(props: ListViewClientProps) {
               queryPresetPermissions={queryPresetPermissions}
               renderedFilters={renderedFilters}
               resolvedFilterOptions={resolvedFilterOptions}
+              viewModeToggle={
+                <ViewModeToggle onChange={handleViewModeChange} viewMode={viewMode} />
+              }
             />
             {isWhereOpen && (
               <ListWhereBuilder
@@ -278,6 +357,7 @@ export function DefaultListView(props: ListViewClientProps) {
                     }),
                   )}
                   useAsTitle={collectionConfig?.admin?.useAsTitle || 'id'}
+                  viewMode={viewMode}
                 />
                 <DocumentListSelection
                   disableBulkDelete={disableBulkDelete}
@@ -285,7 +365,13 @@ export function DefaultListView(props: ListViewClientProps) {
                 />
               </DocumentSelectionProvider>
             ) : docs?.length > 0 ? (
-              <RelationshipProvider>{Table}</RelationshipProvider>
+              <ListGridOrTable
+                collectionLabel={collectionLabel}
+                collectionSlug={collectionSlug}
+                docs={docs}
+                Table={Table}
+                viewMode={viewMode}
+              />
             ) : null}
             {/* HierarchyTable handles its own empty state, skip for hierarchy views */}
             {docs?.length === 0 &&

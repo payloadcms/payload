@@ -1,4 +1,25 @@
 @layer payload-default {
+  /*
+   * The sections stack in a column that claims the view's leftover height, and the last section
+   * absorbs it, so a full-height card grid inside it has empty space to be clicked or dragged over.
+   * Scoped to this view rather than TableSection itself, which other views lay out differently.
+   */
+  .hierarchy-tables {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+  }
+
+  .hierarchy-tables > .table-section:last-child {
+    flex-grow: 1;
+  }
+
+  .hierarchy-tables > .table-section:last-child > .table-section__content {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+  }
+
   .hierarchy-tables__name-cell {
     display: flex;
     align-items: center;

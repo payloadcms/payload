@@ -8,7 +8,6 @@ import React, { useMemo } from 'react'
 import { Link } from '../../../../elements/Link/index.js'
 import { Locked } from '../../../../elements/Locked/index.js'
 import { Thumbnail } from '../../../../elements/Thumbnail/index.js'
-import { CheckboxInput } from '../../../../fields/Checkbox/Input.js'
 import { useConfig } from '../../../../providers/Config/index.js'
 import { useTranslation } from '../../../../providers/Translation/index.js'
 import { formatRelativeDate } from '../../../../utilities/formatRelativeDate.js'
@@ -41,10 +40,10 @@ export type DocumentCardProps = {
   href: string
   isSelected?: boolean
   /**
-   * The user currently editing this document. When set, a lock indicator replaces the checkbox.
+   * The user currently editing this document. When set, a lock indicator is shown and the card
+   * cannot be selected.
    */
   lockedUser?: User
-  onSelectionChange?: () => void
   showType?: boolean
   typeLabel?: string
   updatedAt?: string
@@ -57,7 +56,6 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
   href,
   isSelected = false,
   lockedUser,
-  onSelectionChange,
   showType = false,
   typeLabel,
   updatedAt,
@@ -73,7 +71,6 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
 
   const title = getDocTitle({ doc, titleField: collectionConfig?.admin?.useAsTitle || 'id' })
   const status = getDocStatus({ doc })
-  const isSelectable = typeof onSelectionChange === 'function'
   const hasTypePill = showType && Boolean(typeLabel)
 
   // Creating the formatter is expensive, so build one per language rather than one per render.
@@ -87,18 +84,13 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
     [relativeTimeFormat, updatedAt],
   )
 
-  const handleToggle = () => {
-    onSelectionChange?.()
-  }
-
   return (
     <div
       className={[
         baseClass,
         hasThumbnail ? `${baseClass}--has-thumbnail` : `${baseClass}--no-thumbnail`,
-        // The corner slot holds either the checkbox or the lock indicator, and content below it
-        // must reserve space for whichever is present.
-        (isSelectable || lockedUser) && `${baseClass}--has-corner-slot`,
+        // The corner slot holds the lock indicator, and content below it must reserve space for it.
+        lockedUser && `${baseClass}--has-corner-slot`,
         isSelected && `${baseClass}--selected`,
       ]
         .filter(Boolean)
@@ -157,27 +149,17 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
         </div>
       </div>
 
-      {lockedUser ? (
-        <div className={`${baseClass}__checkbox`}>
+      {lockedUser && (
+        <div className={`${baseClass}__corner-slot`}>
           <Locked user={lockedUser} />
         </div>
-      ) : (
-        isSelectable && (
-          <CheckboxInput
-            aria-label={`Select ${title}`}
-            checked={isSelected}
-            className={`${baseClass}__checkbox`}
-            onToggle={handleToggle}
-            variant="muted"
-          />
-        )
       )}
 
       {/*
-        Without a checkbox there is no other non-visual signal that the card is selected. Suppressed
-        when locked, so this never contradicts the lock indicator's own announcement.
+        The accent border is the only visual signal that the card is selected. Suppressed when
+        locked, so this never contradicts the lock indicator's own announcement.
       */}
-      {isSelected && !isSelectable && !lockedUser && <span className="sr-only">Selected</span>}
+      {isSelected && !lockedUser && <span className="sr-only">Selected</span>}
     </div>
   )
 }

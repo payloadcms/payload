@@ -522,12 +522,16 @@ export function HierarchyTable({
 
   return (
     <div className={baseClass}>
-      {allGroups.map((group) => {
+      {allGroups.map((group, groupIndex) => {
         const selectedIds = new Set(
           group.docs
             .filter((row) => isSelected({ id: row.id, collectionSlug: group.slug }))
             .map((row) => row.id),
         )
+
+        // Only the final group can claim the leftover height below the sections; growing an
+        // earlier one would push the groups after it off-screen.
+        const isLastGroup = groupIndex === allGroups.length - 1
 
         return (
           <TableSection key={group.slug}>
@@ -538,6 +542,7 @@ export function HierarchyTable({
               {viewMode === 'grid' ? (
                 <HierarchyCardGrid
                   ariaLabel={group.label}
+                  fillHeight={isLastGroup}
                   getRowLockedUser={getRowLockedUser}
                   isHierarchyGroup={group.isChildren}
                   onSelectionChange={group.onCheckboxChange}

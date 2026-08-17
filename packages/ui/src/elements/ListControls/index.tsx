@@ -43,6 +43,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
     queryPresetPermissions,
     renderedFilters,
     resolvedFilterOptions,
+    viewModeToggle,
   } = props
 
   const isControlled = typeof onWhereToggle === 'function'
@@ -136,6 +137,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
               {t('general:sort')}
             </Button>
           )}
+          {viewModeToggle}
           {hasCreatePermission && newDocumentURL && (
             <Button
               buttonStyle="primary"

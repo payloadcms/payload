@@ -52,7 +52,7 @@
     }
   }
 
-  /* Trailing slot (checkbox or lock indicator) supplies its own end padding. */
+  /* Trailing slot (lock indicator) supplies its own end padding. */
   .hierarchy-folder-card--has-corner-slot .hierarchy-folder-card__link {
     padding-inline-end: var(--spacer-2);
   }
@@ -92,7 +92,7 @@
     }
   }
 
-  .hierarchy-folder-card__checkbox {
+  .hierarchy-folder-card__corner-slot {
     display: flex;
     flex-shrink: 0;
     align-items: center;
