@@ -3,6 +3,7 @@ export type FormRequestIntent = 'autosave' | 'formState' | 'submit'
 export type FormRequestContext = {
   dispatchedRevision: number
   isCurrent: () => boolean
+  isGenerationCurrent: () => boolean
 }
 
 export type FormRequestTask<T> = {
@@ -44,9 +45,11 @@ export const createFormRequestScheduler = ({
 
     const activeGeneration = generation
     const dispatchedRevision = getRevision()
+    const isGenerationCurrent = () => generation === activeGeneration
     const context: FormRequestContext = {
       dispatchedRevision,
-      isCurrent: () => generation === activeGeneration && getRevision() === dispatchedRevision,
+      isCurrent: () => isGenerationCurrent() && getRevision() === dispatchedRevision,
+      isGenerationCurrent,
     }
 
     const taskPromise = (async () => entry.run(context))()
@@ -78,8 +81,6 @@ export const createFormRequestScheduler = ({
   }
 
   const schedule = <T>(task: FormRequestTask<T>): Promise<FormRequestResult<T>> => {
-    generation += 1
-
     let resolve!: (result: FormRequestResult<T>) => void
     let reject!: (reason: unknown) => void
     const result = new Promise<FormRequestResult<T>>((resolvePromise, rejectPromise) => {

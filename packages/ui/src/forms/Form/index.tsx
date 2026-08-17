@@ -105,6 +105,8 @@ export const Form: React.FC<FormProps> = (props) => {
   const { config } = useConfig()
 
   const [disabled, setDisabled] = useState(disabledFromProps || false)
+  const disabledFromPropsRef = useRef(Boolean(disabledFromProps))
+  disabledFromPropsRef.current = Boolean(disabledFromProps)
   const [isMounted, setIsMounted] = useState(false)
 
   const [submitted, setSubmitted] = useState(false)
@@ -127,6 +129,12 @@ export const Form: React.FC<FormProps> = (props) => {
   const setBackgroundProcessing = useCallback((backgroundProcessing: boolean) => {
     _setBackgroundProcessing(backgroundProcessing)
   }, [])
+
+  const restoreRequestState = useCallback(() => {
+    setBackgroundProcessing(false)
+    setProcessing(false)
+    setDisabled(disabledFromPropsRef.current)
+  }, [setBackgroundProcessing])
 
   const [modified, _setModified] = useState(false)
   const formRevisionRef = useRef(0)
@@ -251,6 +259,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
       // create new toast promise which will resolve manually later
       let errorToast, successToast
+      let promiseToastID: number | string | undefined
 
       const promise = new Promise((resolve, reject) => {
         successToast = resolve
@@ -266,7 +275,7 @@ export const Form: React.FC<FormProps> = (props) => {
         successToast = (data) => toast.success(data)
         errorToast = (data) => toast.error(data)
       } else {
-        toast.promise(promise, {
+        const promiseToast = toast.promise(promise, {
           error: (data) => {
             return data as string
           },
@@ -275,6 +284,11 @@ export const Form: React.FC<FormProps> = (props) => {
             return data as string
           },
         })
+        const promiseToastValue = promiseToast.valueOf()
+
+        if (typeof promiseToastValue === 'number' || typeof promiseToastValue === 'string') {
+          promiseToastID = promiseToastValue
+        }
       }
 
       if (disableFormWhileProcessing) {
@@ -399,7 +413,10 @@ export const Form: React.FC<FormProps> = (props) => {
         }
 
         if (typeof handleResponse === 'function') {
-          handleResponse(res, successToast, errorToast)
+          if (requestContext.isCurrent()) {
+            handleResponse(res, successToast, errorToast)
+          }
+
           return
         }
 
@@ -414,21 +431,27 @@ export const Form: React.FC<FormProps> = (props) => {
         }
 
         if (res.status < 400) {
+          let newFormState: FormState | void
+
           if (typeof onSuccess === 'function') {
-            const newFormState = await onSuccess(json, {
+            newFormState = await onSuccess(json, {
               context,
               formState: serializableFormState,
               isCurrent: requestContext.isCurrent,
             })
+          }
 
-            if (newFormState && requestContext.isCurrent()) {
-              dispatchFields({
-                type: 'MERGE_SERVER_STATE',
-                acceptValues,
-                prevStateRef: prevFormState,
-                serverState: newFormState,
-              })
-            }
+          if (!requestContext.isCurrent()) {
+            return { res }
+          }
+
+          if (newFormState) {
+            dispatchFields({
+              type: 'MERGE_SERVER_STATE',
+              acceptValues,
+              prevStateRef: prevFormState,
+              serverState: newFormState,
+            })
           }
 
           setSubmitted(false)
@@ -439,6 +462,10 @@ export const Form: React.FC<FormProps> = (props) => {
             successToast(json.message || t('general:submissionSuccessful'))
           }
         } else {
+          if (!requestContext.isCurrent()) {
+            return { res }
+          }
+
           setSubmitted(true)
 
           // When there was an error submitting a draft,
@@ -511,16 +538,24 @@ export const Form: React.FC<FormProps> = (props) => {
           res,
         }
       } catch (err) {
-        console.error('Error submitting form', err) // eslint-disable-line no-console
-        setSubmitted(true)
-        errorToast(err.message)
+        if (requestContext.isCurrent()) {
+          console.error('Error submitting form', err) // eslint-disable-line no-console
+          setSubmitted(true)
+          errorToast(err.message)
+        }
       } finally {
-        if (requestIntent === 'autosave') {
-          setBackgroundProcessing(false)
+        if (!requestContext.isCurrent() && promiseToastID !== undefined) {
+          toast.dismiss(promiseToastID)
         }
 
-        setProcessing(false)
-        setDisabled(false)
+        if (requestContext.isGenerationCurrent()) {
+          if (requestIntent === 'autosave') {
+            setBackgroundProcessing(false)
+          }
+
+          setProcessing(false)
+          setDisabled(disabledFromPropsRef.current)
+        }
       }
     },
     [
@@ -634,6 +669,7 @@ export const Form: React.FC<FormProps> = (props) => {
       const resetSequence = ++resetSequenceRef.current
       requestScheduler.reset()
       formRevisionRef.current = 0
+      restoreRequestState()
 
       const dispatchedRevision = formRevisionRef.current
       const controller = handleAbortRef(abortResetFormRef)
@@ -674,6 +710,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
       requestScheduler.reset()
       formRevisionRef.current = 0
+      restoreRequestState()
       contextRef.current = { ...initContextState } as FormContextType
       _setModified(false)
       dispatchFields({ type: 'REPLACE_STATE', state: newState })
@@ -691,6 +728,7 @@ export const Form: React.FC<FormProps> = (props) => {
       getDocPreferences,
       locale,
       requestScheduler,
+      restoreRequestState,
     ],
   )
 
@@ -699,11 +737,12 @@ export const Form: React.FC<FormProps> = (props) => {
       resetSequenceRef.current += 1
       requestScheduler.reset()
       formRevisionRef.current = 0
+      restoreRequestState()
       contextRef.current = { ...initContextState } as FormContextType
       _setModified(false)
       dispatchFields({ type: 'REPLACE_STATE', state })
     },
-    [dispatchFields, requestScheduler],
+    [dispatchFields, requestScheduler, restoreRequestState],
   )
 
   const addFieldRow: FormContextType['addFieldRow'] = useCallback(
@@ -830,6 +869,7 @@ export const Form: React.FC<FormProps> = (props) => {
       resetSequenceRef.current += 1
       requestScheduler.reset()
       formRevisionRef.current = 0
+      restoreRequestState()
       contextRef.current = { ...initContextState } as FormContextType
       _setModified(false)
       dispatchFields({
@@ -839,13 +879,21 @@ export const Form: React.FC<FormProps> = (props) => {
         state: initialState,
       })
     }
-  }, [initialState, dispatchFields, requestScheduler])
+  }, [initialState, dispatchFields, requestScheduler, restoreRequestState])
 
   useEffect(() => {
     resetSequenceRef.current += 1
     requestScheduler.reset()
     formRevisionRef.current = 0
-  }, [requestScheduler, uuid])
+    restoreRequestState()
+  }, [requestScheduler, restoreRequestState, uuid])
+
+  useEffect(() => {
+    return () => {
+      resetSequenceRef.current += 1
+      requestScheduler.reset()
+    }
+  }, [requestScheduler])
 
   useThrottledEffect(
     () => {

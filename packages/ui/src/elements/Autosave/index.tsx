@@ -73,6 +73,8 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
   const debouncedFormState = useDebounce(formState, interval)
 
   const autosaveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const outstandingSubmitCountRef = useRef(0)
+  const savingStartTimestampRef = useRef(0)
   const savingTokenRef = useRef(0)
 
   const handleAutosave = useEffectEvent(async () => {
@@ -143,33 +145,42 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
     }
 
     const startTimestamp = new Date().getTime()
-    const token = ++savingTokenRef.current
+    savingTokenRef.current += 1
+    outstandingSubmitCountRef.current += 1
+    savingStartTimestampRef.current = startTimestamp
     setSaving(true)
 
-    const result = await submit<any, OnSaveContext>({
-      acceptValues: true,
-      action: url,
-      context: {
-        getDocPermissions: false,
-        incrementVersionCount: !mostRecentVersionIsAutosaved,
-      },
-      disableFormWhileProcessing: false,
-      disableSuccessStatus: true,
-      method,
-      overrides: {
-        _status: 'draft',
-      },
-      requestIntent: 'autosave',
-      skipValidation: !validateOnDraft,
-    })
+    try {
+      const result = await submit<any, OnSaveContext>({
+        acceptValues: true,
+        action: url,
+        context: {
+          getDocPermissions: false,
+          incrementVersionCount: !mostRecentVersionIsAutosaved,
+        },
+        disableFormWhileProcessing: false,
+        disableSuccessStatus: true,
+        method,
+        overrides: {
+          _status: 'draft',
+        },
+        requestIntent: 'autosave',
+        skipValidation: !validateOnDraft,
+      })
 
-    if (result && result?.res?.ok && !mostRecentVersionIsAutosaved) {
-      setMostRecentVersionIsAutosaved(true)
-      setUnpublishedVersionCount((prev) => prev + 1)
-    }
+      if (result && result?.res?.ok && !mostRecentVersionIsAutosaved) {
+        setMostRecentVersionIsAutosaved(true)
+        setUnpublishedVersionCount((prev) => prev + 1)
+      }
+    } finally {
+      outstandingSubmitCountRef.current -= 1
 
-    if (token === savingTokenRef.current) {
-      hideIndicator({ startTimestamp, token })
+      if (outstandingSubmitCountRef.current === 0) {
+        hideIndicator({
+          startTimestamp: savingStartTimestampRef.current,
+          token: savingTokenRef.current,
+        })
+      }
     }
   })
 

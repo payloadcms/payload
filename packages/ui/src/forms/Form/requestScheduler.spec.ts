@@ -59,17 +59,49 @@ describe('createFormRequestScheduler', () => {
     expect(revisions).toEqual([1, 2])
   })
 
+  it('keeps the active context current when work is queued at the same revision', async () => {
+    const active = deferred()
+    let isCurrent: (() => boolean) | undefined
+    let isGenerationCurrent: (() => boolean) | undefined
+    const scheduler = createFormRequestScheduler({ getRevision: () => 0 })
+    const running = scheduler.schedule({
+      intent: 'formState',
+      run: async (context) => {
+        isCurrent = context.isCurrent
+        isGenerationCurrent = context.isGenerationCurrent
+        await active.promise
+      },
+    })
+    const pending = scheduler.schedule({
+      intent: 'submit',
+      run: async () => undefined,
+    })
+    const superseded = scheduler.schedule({
+      intent: 'formState',
+      run: async () => undefined,
+    })
+
+    await expect(superseded).resolves.toEqual({ status: 'superseded' })
+    expect(isCurrent?.()).toBe(true)
+    expect(isGenerationCurrent?.()).toBe(true)
+    active.resolve()
+    await running
+    await pending
+  })
+
   it('invalidates an active context when the revision changes without scheduling work', async () => {
     let revision = 1
     const active = deferred()
     const scheduler = createFormRequestScheduler({ getRevision: () => revision })
     const running = scheduler.schedule({
       intent: 'formState',
-      run: async ({ dispatchedRevision, isCurrent }) => {
+      run: async ({ dispatchedRevision, isCurrent, isGenerationCurrent }) => {
         expect(dispatchedRevision).toBe(1)
         expect(isCurrent()).toBe(true)
+        expect(isGenerationCurrent()).toBe(true)
         await active.promise
         expect(isCurrent()).toBe(false)
+        expect(isGenerationCurrent()).toBe(true)
       },
     })
 
@@ -162,11 +194,13 @@ describe('createFormRequestScheduler', () => {
   it('supersedes pending work on reset and invalidates the active context', async () => {
     const active = deferred()
     let isCurrent: (() => boolean) | undefined
+    let isGenerationCurrent: (() => boolean) | undefined
     const scheduler = createFormRequestScheduler({ getRevision: () => 0 })
     const running = scheduler.schedule({
       intent: 'formState',
       run: async (context) => {
         isCurrent = context.isCurrent
+        isGenerationCurrent = context.isGenerationCurrent
         await active.promise
       },
     })
@@ -179,6 +213,7 @@ describe('createFormRequestScheduler', () => {
 
     await expect(pending).resolves.toEqual({ status: 'superseded' })
     expect(isCurrent?.()).toBe(false)
+    expect(isGenerationCurrent?.()).toBe(false)
     active.resolve()
     await running
   })

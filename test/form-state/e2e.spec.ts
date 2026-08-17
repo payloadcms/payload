@@ -34,6 +34,11 @@ import { TEST_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { autosavePostsSlug } from './collections/Autosave/index.js'
 import { postsSlug } from './collections/Posts/index.js'
 
+type StaleErrorTestWindow = {
+  staleErrorToastObserver?: MutationObserver
+  staleErrorToastSeen?: boolean
+} & typeof window
+
 const { afterEach, beforeEach, describe } = test
 
 const filename = fileURLToPath(import.meta.url)
@@ -78,18 +83,14 @@ test.describe('Form State', () => {
     await expect(page.locator('#field-title')).toBeDisabled()
   })
 
-  test(
-    'should render the create form ready to edit',
-    { framework: 'tanstack-start' },
-    async () => {
-      await page.goto(postsUrl.create)
-      // No client-init disabled phase: the RSC payload arrives with form state
-      // already initialized, so the field is immediately enabled and editable.
-      await expect(page.locator('#field-title')).toBeEnabled()
-      await page.locator('#field-title').fill(title)
-      await expect(page.locator('#field-title')).toHaveValue(title)
-    },
-  )
+  test('should render the create form ready to edit', { framework: 'tanstack-start' }, async () => {
+    await page.goto(postsUrl.create)
+    // No client-init disabled phase: the RSC payload arrives with form state
+    // already initialized, so the field is immediately enabled and editable.
+    await expect(page.locator('#field-title')).toBeEnabled()
+    await page.locator('#field-title').fill(title)
+    await expect(page.locator('#field-title')).toHaveValue(title)
+  })
 
   test('should disable fields while processing', async () => {
     const doc = await createPost()
@@ -589,6 +590,88 @@ test.describe('Form State', () => {
       expect(requestCount).toBe(2)
 
       await page.unrouteAll({ behavior: 'ignoreErrors' })
+    })
+
+    test('autosave - should ignore error UI from a stale response', async () => {
+      const doc = await payload.create({
+        collection: autosavePostsSlug,
+        data: { title: 'Initial revision' },
+      })
+      await page.goto(autosavePostsUrl.edit(doc.id))
+      await waitForFormReady(page)
+
+      const firstStarted = Promise.withResolvers<void>()
+      const releaseFirst = Promise.withResolvers<void>()
+      const secondStarted = Promise.withResolvers<void>()
+      const releaseSecond = Promise.withResolvers<void>()
+      let requestCount = 0
+
+      releaseRoutes = () => {
+        releaseFirst.resolve()
+        releaseSecond.resolve()
+      }
+
+      await page.route(`**/api/${autosavePostsSlug}/**`, async (route) => {
+        if (route.request().method() !== 'PATCH') {
+          return route.continue()
+        }
+
+        requestCount += 1
+
+        if (requestCount === 1) {
+          firstStarted.resolve()
+          await releaseFirst.promise
+          return route.fulfill({
+            body: JSON.stringify({ message: 'Stale autosave failure' }),
+            contentType: 'application/json',
+            status: 400,
+          })
+        }
+
+        secondStarted.resolve()
+        await releaseSecond.promise
+        await route.continue()
+      })
+
+      const titleField = page.locator('#field-title')
+
+      await titleField.fill('First revision')
+      await firstStarted.promise
+      await titleField.fill('Latest revision')
+
+      await page.evaluate(() => {
+        const testWindow = window as StaleErrorTestWindow
+        testWindow.staleErrorToastSeen = false
+        testWindow.staleErrorToastObserver = new MutationObserver(() => {
+          if (document.body.textContent?.includes('Stale autosave failure')) {
+            testWindow.staleErrorToastSeen = true
+          }
+        })
+        testWindow.staleErrorToastObserver.observe(document.body, {
+          characterData: true,
+          childList: true,
+          subtree: true,
+        })
+      })
+
+      releaseFirst.resolve()
+      await secondStarted.promise
+
+      await expect
+        .poll(() => page.evaluate(() => (window as StaleErrorTestWindow).staleErrorToastSeen))
+        .toBe(false)
+      await expect(titleField).toHaveValue('Latest revision')
+
+      releaseSecond.resolve()
+      await waitForAutoSaveToRunAndComplete(page)
+
+      await expect
+        .poll(() => page.evaluate(() => (window as StaleErrorTestWindow).staleErrorToastSeen))
+        .toBe(false)
+      await page.evaluate(() =>
+        (window as StaleErrorTestWindow).staleErrorToastObserver?.disconnect(),
+      )
+      await expect.poll(() => requestCount).toBe(2)
     })
   })
 
