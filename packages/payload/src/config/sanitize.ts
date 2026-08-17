@@ -136,7 +136,7 @@ const addDefaultDashboardWidgets = ({
       type: 'json',
       admin: {
         components: {
-          Field: '@payloadcms/ui#QueryPresetsWhereField',
+          Field: '@payloadcms/ui/internal#QueryPresetsWhereField',
         },
       },
       label: ({ t }) => t('general:filters'),
@@ -146,7 +146,7 @@ const addDefaultDashboardWidgets = ({
       type: 'text',
       admin: {
         components: {
-          Field: '@payloadcms/ui#CollectionQuerySortField',
+          Field: '@payloadcms/ui/internal#CollectionQuerySortField',
         },
       },
       label: ({ t }) => t('dashboard:widgetSortFieldLabel'),
@@ -185,7 +185,7 @@ const addDefaultDashboardWidgets = ({
         components: {
           // Presents an inclusion filter (all collections checked by default) while persisting the
           // inverse as an exclusion list, so collections added later stay visible by default.
-          Field: '@payloadcms/ui#RecentlyViewedCollectionsField',
+          Field: '@payloadcms/ui/internal#RecentlyViewedCollectionsField',
         },
       },
       hasMany: true,

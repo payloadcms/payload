@@ -26,6 +26,26 @@
       "types": "./src/exports/client/index.ts",
       "default": "./src/exports/client/index.ts"
     },
+    "./internal": {
+      "import": "./src/exports/client/internal.ts",
+      "types": "./src/exports/client/internal.ts",
+      "default": "./src/exports/client/internal.ts"
+    },
+    "./internal/rsc": {
+      "import": "./src/exports/rsc/internal.ts",
+      "types": "./src/exports/rsc/internal.ts",
+      "default": "./src/exports/rsc/internal.ts"
+    },
+    "./internal/server": {
+      "import": "./src/exports/internal-server.ts",
+      "types": "./src/exports/internal-server.ts",
+      "default": "./src/exports/internal-server.ts"
+    },
+    "./internal/shared": {
+      "import": "./src/exports/shared/internal.ts",
+      "types": "./src/exports/shared/internal.ts",
+      "default": "./src/exports/shared/internal.ts"
+    },
     "./shared": {
       "import": "./src/exports/shared/index.ts",
       "types": "./src/exports/shared/index.ts",
@@ -146,6 +166,51 @@
       "types": "./src/elements/*/index.tsx",
       "default": "./src/elements/*/index.tsx"
     },
+    "./elements/AppHeader": null,
+    "./elements/CommandPalette": null,
+    "./elements/Combobox": null,
+    "./elements/CopyLocaleData": null,
+    "./elements/DeleteMany": null,
+    "./elements/DocumentControls": null,
+    "./elements/DocumentFields": null,
+    "./elements/DocumentHeader/DocumentHeaderRoot": null,
+    "./elements/DocumentHeader/Tabs/*": null,
+    "./elements/DocumentLocked": null,
+    "./elements/DocumentStaleData": null,
+    "./elements/DocumentTakeOver": null,
+    "./elements/EditMany": null,
+    "./elements/GenerateConfirmation": null,
+    "./elements/Hierarchy/DocHeaderButton": null,
+    "./elements/Hierarchy/HydrateProvider": null,
+    "./elements/ListControls": null,
+    "./elements/ListControlsBar": null,
+    "./elements/Nav/*": null,
+    "./elements/PageControls": null,
+    "./elements/PublishMany": null,
+    "./elements/QueryPresets/*": null,
+    "./elements/SortHeader": null,
+    "./elements/SortRow": null,
+    "./elements/Table/DefaultCell": null,
+    "./elements/Table/DefaultCell/fields/Date": null,
+    "./elements/UnpublishMany": null,
+    "./views/Account/ResetPreferences": null,
+    "./views/Account/Settings/LanguageSelector": null,
+    "./views/Account/ToggleHighContrast": null,
+    "./views/Account/ToggleTheme": null,
+    "./views/Dashboard/Default/ModularDashboard": null,
+    "./views/Edit": null,
+    "./views/Edit/SetDocumentStepNav": null,
+    "./views/Edit/SetDocumentTitle": null,
+    "./views/ForgotPassword/ForgotPasswordForm": null,
+    "./views/HierarchyList": null,
+    "./views/List/GroupByHeader": null,
+    "./views/List/ListHeader": null,
+    "./views/List/ListSelection": null,
+    "./views/Login/LoginForm": null,
+    "./views/ResetPassword/ResetPasswordForm": null,
+    "./views/Version/Default": null,
+    "./views/Version/RenderFieldsToDiff/*": null,
+    "./views/Versions/cells/*": null,
     "./elements/RenderServerComponent": {
       "import": "./src/elements/RenderServerComponent/index.tsx",
       "types": "./src/elements/RenderServerComponent/index.tsx",
@@ -322,16 +387,8 @@
       "types": "./src/elements/Nav/getNavPrefs.ts",
       "default": "./src/elements/Nav/getNavPrefs.ts"
     },
-    "./elements/DocumentHeader/Tabs/Tab/TabLink": {
-      "import": "./src/elements/DocumentHeader/Tabs/Tab/TabLink.tsx",
-      "types": "./src/elements/DocumentHeader/Tabs/Tab/TabLink.tsx",
-      "default": "./src/elements/DocumentHeader/Tabs/Tab/TabLink.tsx"
-    },
-    "./elements/DocumentHeader/Tabs/ShouldRenderTabs": {
-      "import": "./src/elements/DocumentHeader/Tabs/ShouldRenderTabs.tsx",
-      "types": "./src/elements/DocumentHeader/Tabs/ShouldRenderTabs.tsx",
-      "default": "./src/elements/DocumentHeader/Tabs/ShouldRenderTabs.tsx"
-    },
+    "./elements/DocumentHeader/Tabs/Tab/TabLink": null,
+    "./elements/DocumentHeader/Tabs/ShouldRenderTabs": null,
     "./widgets/CollectionCards/index.client": {
       "import": "./src/widgets/CollectionCards/index.client.tsx",
       "types": "./src/widgets/CollectionCards/index.client.tsx",
@@ -424,6 +481,26 @@
         "types": "./dist/exports/client/index.d.ts",
         "default": "./dist/exports/client/index.js"
       },
+      "./internal": {
+        "import": "./dist/exports/client/internal.js",
+        "types": "./dist/exports/client/internal.d.ts",
+        "default": "./dist/exports/client/internal.js"
+      },
+      "./internal/rsc": {
+        "import": "./dist/exports/rsc/internal.js",
+        "types": "./dist/exports/rsc/internal.d.ts",
+        "default": "./dist/exports/rsc/internal.js"
+      },
+      "./internal/server": {
+        "import": "./dist/exports/internal-server.js",
+        "types": "./dist/exports/internal-server.d.ts",
+        "default": "./dist/exports/internal-server.js"
+      },
+      "./internal/shared": {
+        "import": "./dist/exports/shared/internal.js",
+        "types": "./dist/exports/shared/internal.d.ts",
+        "default": "./dist/exports/shared/internal.js"
+      },
       "./shared": {
         "import": "./dist/exports/shared/index.js",
         "types": "./dist/exports/shared/index.d.ts",
@@ -460,6 +537,51 @@
         "types": "./dist/elements/*/index.d.ts",
         "default": "./dist/elements/*/index.js"
       },
+      "./elements/AppHeader": null,
+      "./elements/CommandPalette": null,
+      "./elements/Combobox": null,
+      "./elements/CopyLocaleData": null,
+      "./elements/DeleteMany": null,
+      "./elements/DocumentControls": null,
+      "./elements/DocumentFields": null,
+      "./elements/DocumentHeader/DocumentHeaderRoot": null,
+      "./elements/DocumentHeader/Tabs/*": null,
+      "./elements/DocumentLocked": null,
+      "./elements/DocumentStaleData": null,
+      "./elements/DocumentTakeOver": null,
+      "./elements/EditMany": null,
+      "./elements/GenerateConfirmation": null,
+      "./elements/Hierarchy/DocHeaderButton": null,
+      "./elements/Hierarchy/HydrateProvider": null,
+      "./elements/ListControls": null,
+      "./elements/ListControlsBar": null,
+      "./elements/Nav/*": null,
+      "./elements/PageControls": null,
+      "./elements/PublishMany": null,
+      "./elements/QueryPresets/*": null,
+      "./elements/SortHeader": null,
+      "./elements/SortRow": null,
+      "./elements/Table/DefaultCell": null,
+      "./elements/Table/DefaultCell/fields/Date": null,
+      "./elements/UnpublishMany": null,
+      "./views/Account/ResetPreferences": null,
+      "./views/Account/Settings/LanguageSelector": null,
+      "./views/Account/ToggleHighContrast": null,
+      "./views/Account/ToggleTheme": null,
+      "./views/Dashboard/Default/ModularDashboard": null,
+      "./views/Edit": null,
+      "./views/Edit/SetDocumentStepNav": null,
+      "./views/Edit/SetDocumentTitle": null,
+      "./views/ForgotPassword/ForgotPasswordForm": null,
+      "./views/HierarchyList": null,
+      "./views/List/GroupByHeader": null,
+      "./views/List/ListHeader": null,
+      "./views/List/ListSelection": null,
+      "./views/Login/LoginForm": null,
+      "./views/ResetPassword/ResetPasswordForm": null,
+      "./views/Version/Default": null,
+      "./views/Version/RenderFieldsToDiff/*": null,
+      "./views/Versions/cells/*": null,
       "./fields/*": {
         "import": "./dist/fields/*/index.js",
         "types": "./dist/fields/*/index.d.ts",
@@ -635,16 +757,8 @@
         "types": "./dist/elements/Nav/getNavPrefs.d.ts",
         "default": "./dist/elements/Nav/getNavPrefs.js"
       },
-      "./elements/DocumentHeader/Tabs/Tab/TabLink": {
-        "import": "./dist/elements/DocumentHeader/Tabs/Tab/TabLink.js",
-        "types": "./dist/elements/DocumentHeader/Tabs/Tab/TabLink.d.ts",
-        "default": "./dist/elements/DocumentHeader/Tabs/Tab/TabLink.js"
-      },
-      "./elements/DocumentHeader/Tabs/ShouldRenderTabs": {
-        "import": "./dist/elements/DocumentHeader/Tabs/ShouldRenderTabs.js",
-        "types": "./dist/elements/DocumentHeader/Tabs/ShouldRenderTabs.d.ts",
-        "default": "./dist/elements/DocumentHeader/Tabs/ShouldRenderTabs.js"
-      },
+      "./elements/DocumentHeader/Tabs/Tab/TabLink": null,
+      "./elements/DocumentHeader/Tabs/ShouldRenderTabs": null,
       "./widgets/CollectionCards/index.client": {
         "import": "./dist/widgets/CollectionCards/index.client.js",
         "types": "./dist/widgets/CollectionCards/index.client.d.ts",

@@ -22,7 +22,7 @@ export const injectHierarchyButton = ({
   collection.admin.components.edit = collection.admin.components.edit || {}
 
   const hierarchyComponent = {
-    path: '@payloadcms/ui/rsc#HierarchyButton',
+    path: '@payloadcms/ui/internal/rsc#HierarchyButton',
     serverProps: {
       fieldName,
       hierarchyCollectionSlug,
@@ -31,7 +31,7 @@ export const injectHierarchyButton = ({
   }
 
   const existingComponents = collection.admin.components.edit.BeforeDocumentMeta || []
-  const componentPath = '@payloadcms/ui/rsc#HierarchyButton'
+  const componentPath = '@payloadcms/ui/internal/rsc#HierarchyButton'
 
   const alreadyInjected = existingComponents.some((c) => {
     if (typeof c === 'string') {

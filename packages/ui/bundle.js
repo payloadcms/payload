@@ -123,7 +123,7 @@ async function build() {
 
   // Bundle `client.ts`
   const resultClient = await esbuild.build({
-    entryPoints: ['dist/exports/client/index.js'],
+    entryPoints: ['dist/exports/client/index.js', 'dist/exports/client/internal.js'],
     bundle: true,
     platform: 'browser',
     format: 'esm',
@@ -192,7 +192,7 @@ function require(m) {
   console.log('client.ts bundled successfully')
 
   const resultShared = await esbuild.build({
-    entryPoints: ['dist/exports/shared/index.js'],
+    entryPoints: ['dist/exports/shared/index.js', 'dist/exports/shared/internal.js'],
     bundle: true,
     platform: 'node',
     format: 'esm',

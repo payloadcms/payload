@@ -1,5 +1,5 @@
 'use client'
-import type { ComboboxEntry } from '@payloadcms/ui'
+import type { ComboboxEntry } from '@payloadcms/ui/internal'
 import type {} from 'payload'
 
 import './index.css'
@@ -7,7 +7,6 @@ import './index.css'
 import { useLexicalEditable } from '@lexical/react/useLexicalEditable'
 import {
   ChevronIcon,
-  Combobox,
   CopyToClipboard,
   PopupList,
   RenderFields,
@@ -15,6 +14,7 @@ import {
   useFormFields,
   useTranslation,
 } from '@payloadcms/ui'
+import { Combobox } from '@payloadcms/ui/internal'
 import React from 'react'
 
 import type { AdditionalCodeComponentProps } from './Code.js'

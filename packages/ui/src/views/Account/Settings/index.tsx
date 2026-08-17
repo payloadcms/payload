@@ -4,13 +4,13 @@ import type { BasePayload, Config, LanguageOptions, User } from 'payload'
 import React from 'react'
 
 /* eslint-disable payload/no-imports-from-exports-dir -- Server component must reference exports/client bundle for proper client boundary in prod builds */
+import { FieldLabel } from '../../../exports/client/index.js'
 import {
-  FieldLabel,
   AccountLanguageSelector as LanguageSelector,
   AccountResetPreferences as ResetPreferences,
   AccountToggleHighContrast as ToggleHighContrast,
   AccountToggleTheme as ToggleTheme,
-} from '../../../exports/client/index.js'
+} from '../../../exports/client/internal.js'
 /* eslint-enable payload/no-imports-from-exports-dir */
 import './index.css'
 

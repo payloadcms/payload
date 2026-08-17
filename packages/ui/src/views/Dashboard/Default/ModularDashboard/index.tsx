@@ -8,7 +8,7 @@ import type { WidgetInstanceClient } from './index.client.js'
 
 import { RenderServerComponent } from '../../../../elements/RenderServerComponent/index.js'
 // eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports/client bundle for proper client boundary in prod builds
-import { ModularDashboardClient } from '../../../../exports/client/index.js'
+import { ModularDashboardClient } from '../../../../exports/client/internal.js'
 import { getItemsFromConfig } from './utils/getItemsFromConfig.js'
 import { getItemsFromPreferences } from './utils/getItemsFromPreferences.js'
 import { extractLocaleData } from './utils/localeUtils.js'

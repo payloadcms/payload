@@ -19,7 +19,6 @@ export { findLocaleFromCode } from '../../utilities/findLocaleFromCode.js'
 export { formatDate } from '../../utilities/formatDocTitle/formatDateTitle.js'
 export { formatDocTitle } from '../../utilities/formatDocTitle/index.js'
 export { getGlobalData } from '../../utilities/getGlobalData.js'
-export { getNavGroups } from '../../utilities/getNavGroups.js'
 export { getVisibleEntities } from '../../utilities/getVisibleEntities.js'
 export {
   type EntityToGroup,

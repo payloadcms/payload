@@ -17,12 +17,14 @@ import React from 'react'
 /* eslint-disable payload/no-imports-from-exports-dir -- Server component must reference exports dir for proper client boundary */
 import {
   ActionsProvider,
-  AppHeader,
   BulkUploadProvider,
-  CommandPalette,
   EntityVisibilityProvider,
-  DefaultTemplateWrapper as Wrapper,
 } from '../../exports/client/index.js'
+import {
+  AppHeader,
+  CommandPalette,
+  DefaultTemplateWrapper as Wrapper,
+} from '../../exports/client/internal.js'
 /* eslint-enable payload/no-imports-from-exports-dir */
 import type { UserMenuSettingsGroup } from '../../elements/UserMenu/SettingsMenu/index.js'
 

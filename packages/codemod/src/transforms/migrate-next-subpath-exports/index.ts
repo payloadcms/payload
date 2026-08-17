@@ -14,6 +14,20 @@ const SUBPATH_TO_TARGET: Record<string, string> = {
   '@payloadcms/next/templates': '@payloadcms/ui/rsc',
 }
 
+const INTERNAL_CLIENT_EXPORTS = new Set([
+  'DefaultNavClient',
+  'NavSidebarToggle',
+  'NavWrapper',
+  'QueryPresetsAccessCell',
+  'QueryPresetsColumnField',
+  'QueryPresetsColumnsCell',
+  'QueryPresetsGroupByCell',
+  'QueryPresetsGroupByField',
+  'QueryPresetsHeading',
+  'QueryPresetsWhereCell',
+  'QueryPresetsWhereField',
+])
+
 // `<package>` or `<package>#<exportName>` — the export identifier follows
 // JavaScript identifier rules so we reject anything with whitespace or
 // punctuation that would indicate it's actually prose containing the path.
@@ -25,7 +39,11 @@ function mapComponentPath(value: string): string | undefined {
     return undefined
   }
   const subpath = `@payloadcms/next/${match[1]}`
-  const target = SUBPATH_TO_TARGET[subpath]
+  const exportName = match[2]?.slice(1)
+  const target =
+    subpath === '@payloadcms/next/client' && exportName && INTERNAL_CLIENT_EXPORTS.has(exportName)
+      ? '@payloadcms/ui/internal'
+      : SUBPATH_TO_TARGET[subpath]
   if (!target) {
     return undefined
   }
@@ -41,9 +59,35 @@ export const migrateNextSubpathExports: Transform = {
       let mutated = false
 
       for (const importDecl of file.getImportDeclarations()) {
-        const target = SUBPATH_TO_TARGET[importDecl.getModuleSpecifierValue()]
+        const source = importDecl.getModuleSpecifierValue()
+        const target = SUBPATH_TO_TARGET[source]
         if (target) {
-          importDecl.setModuleSpecifier(target)
+          if (source === '@payloadcms/next/client') {
+            const internalImports = importDecl
+              .getNamedImports()
+              .filter((specifier) => INTERNAL_CLIENT_EXPORTS.has(specifier.getName()))
+
+            if (internalImports.length > 0) {
+              const internalImportDeclaration = file.addImportDeclaration({
+                moduleSpecifier: '@payloadcms/ui/internal',
+                namedImports: internalImports.map((specifier) => specifier.getStructure()),
+              })
+              internalImportDeclaration.replaceWithText(
+                internalImportDeclaration.getText().replace(/;$/, ''),
+              )
+              internalImports.forEach((specifier) => specifier.remove())
+            }
+          }
+
+          if (
+            importDecl.getNamedImports().length === 0 &&
+            !importDecl.getDefaultImport() &&
+            !importDecl.getNamespaceImport()
+          ) {
+            importDecl.remove()
+          } else {
+            importDecl.setModuleSpecifier(target)
+          }
           mutated = true
         }
       }
@@ -53,7 +97,35 @@ export const migrateNextSubpathExports: Transform = {
         if (specifier) {
           const target = SUBPATH_TO_TARGET[specifier]
           if (target) {
-            exportDecl.setModuleSpecifier(target)
+            if (specifier === '@payloadcms/next/client') {
+              const internalExports = exportDecl
+                .getNamedExports()
+                .filter((namedExport) => INTERNAL_CLIENT_EXPORTS.has(namedExport.getName()))
+
+              if (internalExports.length > 0) {
+                const hasPublicExports =
+                  exportDecl.getNamedExports().length > internalExports.length ||
+                  exportDecl.isNamespaceExport()
+
+                const internalExportDeclaration = file.addExportDeclaration({
+                  moduleSpecifier: '@payloadcms/ui/internal',
+                  namedExports: internalExports.map((namedExport) => namedExport.getStructure()),
+                })
+                internalExportDeclaration.replaceWithText(
+                  internalExportDeclaration.getText().replace(/;$/, ''),
+                )
+
+                if (hasPublicExports) {
+                  internalExports.forEach((namedExport) => namedExport.remove())
+                } else {
+                  exportDecl.remove()
+                }
+              }
+            }
+
+            if (!exportDecl.wasForgotten()) {
+              exportDecl.setModuleSpecifier(target)
+            }
             mutated = true
           }
         }
@@ -82,7 +154,7 @@ export const migrateNextSubpathExports: Transform = {
     return { filesChanged: [...filesChanged] }
   },
   description:
-    'Rewrites imports, re-exports, and string-literal component paths from the removed `@payloadcms/next/client`, `@payloadcms/next/rsc`, and `@payloadcms/next/templates` subpaths to their canonical `@payloadcms/ui` or `@payloadcms/ui/rsc` sources. After running, regenerate the import map with `payload generate:importmap`.',
+    'Rewrites imports, re-exports, and string-literal component paths from the removed `@payloadcms/next/client`, `@payloadcms/next/rsc`, and `@payloadcms/next/templates` subpaths to their canonical public or internal `@payloadcms/ui` sources. After running, regenerate the import map with `payload generate:importmap`.',
 }
 
 /**

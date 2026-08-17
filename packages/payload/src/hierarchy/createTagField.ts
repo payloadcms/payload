@@ -55,7 +55,7 @@ export function createTagField(options: CreateTagFieldOptions): RelationshipFiel
       position: 'sidebar',
       ...restAdminOverrides,
       components: {
-        Field: '@payloadcms/ui/rsc#HierarchyField',
+        Field: '@payloadcms/ui/internal/rsc#HierarchyField',
         ...componentOverrides,
       },
     },

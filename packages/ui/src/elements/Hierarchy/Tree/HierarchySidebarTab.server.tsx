@@ -6,7 +6,7 @@ import { PREFERENCE_KEYS } from 'payload/shared'
 import React from 'react'
 
 // eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports dir for proper client boundary
-import { HierarchySidebarTab } from '../../../exports/client/index.js'
+import { HierarchySidebarTab } from '../../../exports/client/internal.js'
 import { TagIcon } from '../../../icons/Tag/index.js'
 import { RenderServerComponent } from '../../RenderServerComponent/index.js'
 

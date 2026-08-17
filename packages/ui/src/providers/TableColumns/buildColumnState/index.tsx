@@ -32,7 +32,7 @@ import { RenderServerComponent } from '../../../elements/RenderServerComponent/i
 import {
   SortColumn,
   // eslint-disable-next-line payload/no-imports-from-exports-dir -- MUST reference the exports dir: https://github.com/payloadcms/payload/issues/12002#issuecomment-2791493587
-} from '../../../exports/client/index.js'
+} from '../../../exports/client/internal.js'
 import { filterFieldsWithPermissions } from './filterFieldsWithPermissions.js'
 import { isColumnActive } from './isColumnActive.js'
 import { renderCell } from './renderCell.js'

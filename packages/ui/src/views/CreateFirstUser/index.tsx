@@ -7,7 +7,7 @@ import type {
 import React from 'react'
 
 // eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports/client bundle for proper client boundary in prod builds
-import { CreateFirstUserClient } from '../../exports/client/index.js'
+import { CreateFirstUserClient } from '../../exports/client/internal.js'
 import { buildFormState } from '../../utilities/buildFormState.js'
 import { getDocPreferences } from '../../utilities/getDocPreferences.js'
 import { getDocumentData } from '../../utilities/getDocumentData.js'

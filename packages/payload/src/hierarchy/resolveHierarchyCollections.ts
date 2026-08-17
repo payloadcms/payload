@@ -435,7 +435,7 @@ function injectSidebarTab({
           clientProps: {
             hierarchyCollectionSlug: hierarchyCollection.slug,
           },
-          path: '@payloadcms/ui/rsc#HierarchySidebarTabServer',
+          path: '@payloadcms/ui/internal/rsc#HierarchySidebarTabServer',
         },
         Icon,
       },

@@ -16,7 +16,7 @@ import { getClientConfig } from '../../utilities/getClientConfig.js'
 import { getClientSchemaMap } from '../../utilities/getClientSchemaMap.js'
 import { getSchemaMap } from '../../utilities/getSchemaMap.js'
 // eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports/client bundle for proper client boundary in prod builds
-import { DefaultVersionView, VersionPillLabel } from '../../exports/client/index.js'
+import { DefaultVersionView, VersionPillLabel } from '../../exports/client/internal.js'
 import { fetchLatestVersion, fetchVersion, fetchVersions } from '../Versions/fetchVersions.js'
 import { getVersionLabel } from '../Versions/VersionPillLabel/getVersionLabel.js'
 import { RenderDiff } from './RenderFieldsToDiff/index.js'

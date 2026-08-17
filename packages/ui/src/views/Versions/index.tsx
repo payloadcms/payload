@@ -4,12 +4,12 @@ import { formatAdminURL, hasDraftsEnabled, isNumber } from 'payload/shared'
 import React from 'react'
 
 /* eslint-disable payload/no-imports-from-exports-dir -- Server component must reference exports/client bundle for proper client boundary in prod builds */
+import { ListQueryProvider } from '../../exports/client/index.js'
 import {
-  ListQueryProvider,
   SetDocumentStepNav,
   VersionDrawerCreatedAtCell,
   VersionsViewClient,
-} from '../../exports/client/index.js'
+} from '../../exports/client/internal.js'
 /* eslint-enable payload/no-imports-from-exports-dir */
 import { buildVersionColumns } from './buildColumns.js'
 import { fetchLatestVersion, fetchVersions } from './fetchVersions.js'

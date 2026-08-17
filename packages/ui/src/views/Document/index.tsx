@@ -20,9 +20,9 @@ import { RenderServerComponent } from '../../elements/RenderServerComponent/inde
 import {
   DocumentInfoProvider,
   EditDepthProvider,
-  HydrateAuthProvider,
   LivePreviewProvider,
 } from '../../exports/client/index.js'
+import { HydrateAuthProvider } from '../../exports/client/internal.js'
 /* eslint-enable payload/no-imports-from-exports-dir */
 import { buildFormState } from '../../utilities/buildFormState.js'
 import { getDocPreferences } from '../../utilities/getDocPreferences.js'

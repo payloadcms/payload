@@ -2,9 +2,6 @@ export { DocumentHeader } from '../../elements/DocumentHeader/index.js'
 export { FieldDiffContainer } from '../../elements/FieldDiffContainer/index.js'
 export { FieldDiffLabel } from '../../elements/FieldDiffLabel/index.js'
 export { FormHeader } from '../../elements/FormHeader/index.js'
-export { HierarchyButton } from '../../elements/Hierarchy/DocHeaderButton/index.server.js'
-export { HierarchyField } from '../../elements/Hierarchy/Field/index.server.js'
-export { HierarchySidebarTabServer } from '../../elements/Hierarchy/Tree/HierarchySidebarTab.server.js'
 export { HierarchyTypeFieldServer } from '../../elements/HierarchyTypeField/index.server.js'
 export {
   escapeDiffHTML,

@@ -4,4 +4,4 @@
  */
 
 /** @internal */
-export { filterMCPItems, getAuthorizedMCP } from '../endpoint/access.js'
+export { getNavGroups } from '../../utilities/getNavGroups.js'
