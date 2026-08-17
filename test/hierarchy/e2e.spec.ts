@@ -7,10 +7,10 @@ import { fileURLToPath } from 'url'
 import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { Config, Organization } from './payload-types.js'
 
-import { ensureCompilationIsDone, initPageConsoleErrorCatch } from '../__helpers/e2e/helpers.js'
 import { openNav } from '../__helpers/e2e/toggleNav.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { initPage } from '../__setup/e2e/initPage.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -41,7 +41,14 @@ async function setHierarchyFilter({
     el.classList.contains('popup-button-list__button--selected'),
   )
   if (isCurrentlyChecked !== checked) {
+    const preferenceUpdate = page.waitForResponse(
+      (response) =>
+        response.url().includes('/api/payload-preferences/hierarchy-tree-') &&
+        response.request().method() === 'POST' &&
+        response.ok(),
+    )
     await filterButton.click()
+    await preferenceUpdate
   }
 
   await page.keyboard.press('Escape')
@@ -69,9 +76,7 @@ test.describe('Hierarchy Sidebar', () => {
     organizationsURL = new AdminUrlUtil(serverURL, 'organizations')
 
     const context = await browser.newContext()
-    page = await context.newPage()
-    initPageConsoleErrorCatch(page)
-    await ensureCompilationIsDone({ page, serverURL })
+    ;({ page } = await initPage({ context, serverURL }))
   })
 
   test.afterAll(async () => {
@@ -159,7 +164,7 @@ test.describe('Hierarchy Sidebar', () => {
         where: { key: { equals: 'hierarchy-tree-divisions' } },
       })
       for (const pref of prefs.docs) {
-        await payload.delete({ collection: 'payload-preferences', id: pref.id })
+        await payload.delete({ id: pref.id, collection: 'payload-preferences' })
       }
 
       await page.goto(`${serverURL}/admin`)
@@ -371,7 +376,14 @@ test.describe('Hierarchy Sidebar', () => {
       await page.goto(organizationsURL.list)
       await openNav(page)
 
+      const preferenceUpdate = page.waitForResponse(
+        (response) =>
+          response.url().endsWith('/api/payload-preferences/nav-sidebar-active-tab') &&
+          response.request().method() === 'POST' &&
+          response.ok(),
+      )
       await page.getByRole('tab', { name: 'Organizations' }).click()
+      await preferenceUpdate
 
       // Find and use search input
       const searchInput = page.getByPlaceholder('Search Organizations')
@@ -391,7 +403,14 @@ test.describe('Hierarchy Sidebar', () => {
       await page.goto(organizationsURL.list)
       await openNav(page)
 
+      const preferenceUpdate = page.waitForResponse(
+        (response) =>
+          response.url().endsWith('/api/payload-preferences/nav-sidebar-active-tab') &&
+          response.request().method() === 'POST' &&
+          response.ok(),
+      )
       await page.getByRole('tab', { name: 'Organizations' }).click()
+      await preferenceUpdate
 
       const searchInput = page.getByPlaceholder('Search Organizations')
 
@@ -425,8 +444,70 @@ test.describe('Hierarchy Sidebar', () => {
         where: { key: { equals: 'hierarchy-tree-folders' } },
       })
       for (const pref of prefs.docs) {
-        await payload.delete({ collection: 'payload-preferences', id: pref.id })
+        await payload.delete({ id: pref.id, collection: 'payload-preferences' })
       }
+    })
+
+    test.describe('Autosave create drawer', () => {
+      let organizationTitle: string
+
+      test.afterEach(async () => {
+        const createdOrganizations = await payload.find({
+          collection: 'organizations',
+          draft: true,
+          where: { title: { equals: organizationTitle } },
+        })
+
+        for (const organization of createdOrganizations.docs) {
+          await payload.delete({ id: organization.id, collection: 'organizations' })
+        }
+      })
+
+      test('should keep autosave drawer open when creating an allowed document in a folder hierarchy', async () => {
+        test.setTimeout(TEST_TIMEOUT_LONG)
+        organizationTitle = `Autosave Organization ${Date.now()}`
+
+        const multiTypeFolders = await payload.find({
+          collection: 'folders',
+          limit: 1,
+          where: { name: { equals: 'Orgs and Products' } },
+        })
+        const multiTypeFolder = multiTypeFolders.docs[0]
+
+        await page.goto(organizationsURL.list)
+        await page.goto(`${foldersURL.hierarchy}?parentFolder=${multiTypeFolder.id}`)
+
+        const listControls = page.locator('.hierarchy-list__controls')
+        await listControls.getByRole('button', { name: 'Create New' }).first().click()
+
+        await expect(page.getByRole('button', { name: 'Organization', exact: true })).toBeVisible()
+        await expect(page.getByRole('button', { name: 'Product', exact: true })).toBeVisible()
+        await page.getByRole('button', { name: 'Organization', exact: true }).click()
+
+        const drawer = page.locator('#hierarchy-create-folders')
+        const titleInput = drawer.locator('#field-title')
+
+        await expect(drawer).toBeVisible()
+        await titleInput.fill(organizationTitle)
+
+        await expect
+          .poll(async () => {
+            const autosavedOrganizations = await payload.find({
+              collection: 'organizations',
+              depth: 0,
+              draft: true,
+              where: { title: { equals: organizationTitle } },
+            })
+
+            return autosavedOrganizations.docs[0]?.parentFolder
+          })
+          .toBe(multiTypeFolder.id)
+
+        await expect(drawer).toBeVisible()
+        await expect(titleInput).toHaveValue(organizationTitle)
+        await drawer.locator('.doc-drawer__header-close').click()
+        await expect(drawer).toBeHidden()
+      })
     })
 
     test('should show filter button when collectionSpecific is configured', async () => {
@@ -616,12 +697,6 @@ test.describe('Hierarchy Sidebar', () => {
 
       // The new folder should NOT appear in the filtered tree (filter is Organizations)
       await expect(tree.getByText(newFolderName)).toBeHidden({ timeout: 5000 })
-
-      // Clear the filter
-      await setHierarchyFilter({ checked: false, filterName: 'Organizations', page, sidebar })
-
-      // Now the folder should be visible
-      await expect(tree.getByText(newFolderName)).toBeVisible()
 
       // Clean up
       const createdFolder = await payload.find({

@@ -19,17 +19,12 @@ import {
   removeArrayRow,
 } from '../__helpers/e2e/fields/array/index.js'
 import { addBlock } from '../__helpers/e2e/fields/blocks/index.js'
-import {
-  ensureCompilationIsDone,
-  initPageConsoleErrorCatch,
-  saveDocAndAssert,
-  throttleTest,
-  waitForFormReady,
-} from '../__helpers/e2e/helpers.js'
+import { saveDocAndAssert, throttleTest, waitForFormReady } from '../__helpers/e2e/helpers.js'
 import { currentFramework, test } from '../__helpers/e2e/playwright.js'
 import { waitForAutoSaveToRunAndComplete } from '../__helpers/e2e/waitForAutoSaveToRunAndComplete.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { initPage } from '../__setup/e2e/initPage.js'
 import { TEST_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { autosavePostsSlug } from './collections/Autosave/index.js'
 import { postsSlug } from './collections/Posts/index.js'
@@ -61,9 +56,7 @@ test.describe('Form State', () => {
     autosavePostsUrl = new AdminUrlUtil(serverURL, autosavePostsSlug)
 
     context = await browser.newContext()
-    page = await context.newPage()
-    initPageConsoleErrorCatch(page)
-    await ensureCompilationIsDone({ page, serverURL })
+    ;({ page } = await initPage({ context, serverURL }))
   })
 
   test.beforeEach(async () => {
@@ -520,8 +513,14 @@ test.describe('Form State', () => {
     await expect(computedTitleField).toHaveValue('Test Title')
 
     // but then when editing another field, the computed field should update
+    const autosaveResponse = page.waitForResponse(
+      (response) =>
+        response.request().method() === 'PATCH' &&
+        response.url().includes(`/api/${autosavePostsSlug}/`) &&
+        response.ok(),
+    )
     await titleField.fill('Test Title 2')
-    await waitForAutoSaveToRunAndComplete(page)
+    await autosaveResponse
     await expect(computedTitleField).toHaveValue('Test Title 2')
   })
 

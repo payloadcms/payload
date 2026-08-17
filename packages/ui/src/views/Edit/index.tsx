@@ -503,6 +503,7 @@ export function DefaultEditView({
         !hasCheckedForStaleDataRef.current &&
         originalUpdatedAtRef.current &&
         operation === 'update' &&
+        !isTrashed &&
         !autosaveEnabled
 
       if (checkForStaleData) {
@@ -521,6 +522,7 @@ export function DefaultEditView({
         globalSlug,
         operation,
         originalUpdatedAt: checkForStaleData ? originalUpdatedAtRef.current : undefined,
+        readOnly: isTrashed || isReadOnlyForIncomingUser,
         renderAllFields: false,
         returnLockStatus: isLockingEnabled,
         schemaPath: schemaPathSegments.join('.'),
@@ -568,6 +570,8 @@ export function DefaultEditView({
       schemaPathSegments,
       handleDocumentLocking,
       autosaveEnabled,
+      isTrashed,
+      isReadOnlyForIncomingUser,
     ],
   )
 

@@ -148,6 +148,7 @@ export const trTranslations: DefaultTranslationsObject = {
     emailOrPasswordIncorrect: 'Girilen e-posta veya parola hatalı',
     failedToResetLayout: 'Yerleşimi sıfırlama başarısız oldu.',
     failedToSaveLayout: 'Düzeni kaydetme başarısız oldu.',
+    fileFetchFailed: 'Dosya alınamadı.',
     followingFieldsInvalid_one: 'Lütfen geçersiz alanı düzeltin:',
     followingFieldsInvalid_other: 'Lütfen geçersiz alanları düzeltin:',
     incorrectCollection: 'Hatalı koleksiyon',
@@ -165,6 +166,7 @@ export const trTranslations: DefaultTranslationsObject = {
     missingIDOfDocument: "Güncellenecek döküman ID'si eksik.",
     missingIDOfVersion: "Versiyon ID'si geçersiz.",
     missingRequiredData: 'Gerekli veri eksik.',
+    noFileFoundInClipboard: 'Panoda dosya bulunamadı.',
     noFilesUploaded: 'Yüklenen dosya yok',
     noMatchedField: '"{{label}}" ile eşleşen alan bulunamadı.',
     notAllowedToAccessPage: 'Bu sayfaya erişim izniniz yok.',
@@ -180,6 +182,7 @@ export const trTranslations: DefaultTranslationsObject = {
     tokenNotProvided: 'Jeton sağlanmadı.',
     unableToCopy: 'Kopyalanamıyor.',
     unableToDeleteCount: '{{total}} {{label}} içinden {{count}} silinemiyor.',
+    unableToReadClipboard: "Pano'dan okuma yapılamıyor.",
     unableToReindexCollection:
       '{{collection}} koleksiyonunun yeniden indekslenmesinde hata oluştu. İşlem durduruldu.',
     unableToUpdateCount: '{{total}} {{label}} içinden {{count}} güncellenemiyor.',
@@ -189,6 +192,7 @@ export const trTranslations: DefaultTranslationsObject = {
     unPublishingDocument: 'Geçerli döküman yayından kaldırılırken bir sorun oluştu.',
     unspecific: 'Bir hata oluştu.',
     unverifiedEmail: 'Giriş yapmadan önce e-posta adresinizi doğrulayın.',
+    urlNotAllowed: "Sağlanan URL'e izin verilmemektedir.",
     userEmailAlreadyRegistered: 'Verilen e-posta ile zaten kayıtlı bir kullanıcı var.',
     userLocked:
       'Hesabınız hatalı giriş denemeleri yüzünden geçici olarak kilitlendi. Lütfen daha sonra tekrar deneyin.',
@@ -439,6 +443,7 @@ export const trTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Mevcut alan verilerinin üzerine yazın',
     pageNotFound: 'Sayfa bulunamadı',
     password: 'Parola',
+    pasteBelow: 'Aşağıya Yapıştır',
     pasteField: 'Alanı yapıştır',
     pasteRow: 'Satırı yapıştır',
     payloadSettings: 'Ayarlar',
@@ -453,6 +458,7 @@ export const trTranslations: DefaultTranslationsObject = {
     reloadDocument: 'Dokümanı yeniden yükle',
     remove: 'Kaldır',
     rename: 'Yeniden adlandır',
+    replaceRow: 'Satırı Değiştir',
     reset: 'Sıfırla',
     resetPreferences: 'Tercihleri sıfırla',
     resetPreferencesDescription:
@@ -485,6 +491,8 @@ export const trTranslations: DefaultTranslationsObject = {
     sorryNotFound: 'Üzgünüz, isteğinizle eşleşen bir sonuç bulunamadı.',
     sort: 'Sırala',
     sortByLabelDirection: '{{label}} göre sırala {{direction}}',
+    sortByOrderToReorder:
+      'Satırları yeniden sıralamak için önce "Order" sütununa göre sıralama yapmalısınız.',
     stayOnThisPage: 'Bu sayfada kal',
     submissionSuccessful: 'Gönderme başarılı',
     submit: 'Gönder',
@@ -575,6 +583,7 @@ export const trTranslations: DefaultTranslationsObject = {
     addFile: 'Dosya ekle',
     addFiles: 'Dosya Ekle',
     bulkUpload: 'Toplu Yükleme',
+    copyLinkToFile: 'Dosyanın bağlantısını kopyala',
     crop: 'Mahsulat',
     cropToolDescription:
       'Seçilen alanın köşelerini sürükleyin, yeni bir alan çizin ya da aşağıdaki değerleri ayarlayın.',
@@ -595,6 +604,7 @@ export const trTranslations: DefaultTranslationsObject = {
     linkToFile: 'Dosyaya bağlantı',
     moreInfo: 'Daha fazla bilgi',
     noFile: 'Dosya yok',
+    pasteFromClipboard: 'Panodan yapıştır',
     pasteURL: 'URL yapıştır',
     previewSizes: 'Önizleme Boyutları',
     renameFile: 'Dosyayı yeniden adlandır',

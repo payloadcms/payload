@@ -26,10 +26,10 @@ describe('withPayload', () => {
     }
   })
 
-  it('should position devIndicators at the bottom right by default', () => {
+  it('should position devIndicators at the bottom left by default', () => {
     const result = withPayload({})
 
-    expect(result.devIndicators).toEqual({ position: 'bottom-right' })
+    expect(result.devIndicators).toEqual({ position: 'bottom-left' })
   })
 
   it('should use user-provided devIndicators when specified', () => {

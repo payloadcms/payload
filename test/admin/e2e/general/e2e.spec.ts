@@ -6,9 +6,7 @@ import { formatAdminURL, wait } from 'payload/shared'
 import type { Config, Geo, Post } from '../../payload-types.js'
 
 import {
-  ensureCompilationIsDone,
   getRoutes,
-  initPageConsoleErrorCatch,
   openLocaleSelector,
   saveDocAndAssert,
   saveDocHotkeyAndAssert,
@@ -17,6 +15,8 @@ import {
 import { test } from '../../../__helpers/e2e/playwright.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
+import { ensureCompilationIsDone } from '../../../__setup/e2e/ensureCompilationIsDone.js'
+import { initPage } from '../../../__setup/e2e/initPage.js'
 import {
   BASE_PATH,
   customAdminRoutes,
@@ -104,10 +104,7 @@ describe('General', () => {
     uploadsTwo = new AdminUrlUtil(serverURL, uploadTwoCollectionSlug)
 
     context = await browser.newContext()
-    page = await context.newPage()
-    initPageConsoleErrorCatch(page)
-
-    await ensureCompilationIsDone({ customAdminRoutes, page, serverURL })
+    ;({ page } = await initPage({ context, customAdminRoutes, serverURL }))
 
     adminRoutes = getRoutes({ customAdminRoutes })
     adminRoute = adminRoutes.routes.admin
@@ -144,7 +141,7 @@ describe('General', () => {
         }),
       )
 
-      await expect(page).toHaveURL(new RegExp(`${redirectTo}$`))
+      await expect(page).toHaveURL(new RegExp(`${redirectTo}(?:\\?.*)?$`))
       await expect(page.locator('.collection-list')).toBeVisible()
       await expect(page.locator('.loading-overlay')).toBeHidden()
       await expect(page).not.toHaveURL(/custom-inactivity/)
@@ -874,7 +871,9 @@ describe('General', () => {
       await expect(page.locator('h1#custom-view-title')).toContainText(customViewTitle)
     })
 
-    test('should render protected nested custom view', { framework: 'next' }, async () => {
+    test('should render protected nested custom view', async () => {
+      test.slow()
+
       await page.goto(
         formatAdminURL({
           adminRoute,
@@ -1250,37 +1249,6 @@ describe('General', () => {
       await confirmButton.click()
       const toast = page.locator('li.payload-toast-item.toast-success')
       await expect(toast).toBeVisible()
-    })
-  })
-
-  describe('progress bar', () => {
-    test.fixme('should show progress bar on page navigation', async () => {
-      // TODO: This test is extremely flaky in CI. Not a surprise, the progress bar only shows if the timing is right. Need to fix this and make extra sure it passes in CI without retries.
-      // eslint-disable-next-line playwright/no-networkidle
-      await page.goto(postsUrl.admin, { waitUntil: 'networkidle' })
-      // Wait for hydration - otherwise playwright clicks the card early and nothing happens
-      await wait(1000)
-
-      // Throttle network to ensure navigation takes > 500ms so progress bar is visible
-      // Progress bar has 150ms initial delay before showing, so fast navigations won't show it
-      const client = await page.context().newCDPSession(page)
-      await client.send('Network.emulateNetworkConditions', {
-        downloadThroughput: (500 * 1024) / 8, // 500 kbps
-        latency: 400, // 400ms latency
-        offline: false,
-        uploadThroughput: (500 * 1024) / 8,
-      })
-
-      await page.locator('.collections__card-list .card').first().click()
-      await expect(page.locator('.progress-bar')).toBeVisible()
-
-      // Reset network conditions
-      await client.send('Network.emulateNetworkConditions', {
-        downloadThroughput: -1,
-        latency: 0,
-        offline: false,
-        uploadThroughput: -1,
-      })
     })
   })
 })

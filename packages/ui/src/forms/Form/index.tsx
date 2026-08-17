@@ -30,6 +30,7 @@ import { useThrottledEffect } from '../../hooks/useThrottledEffect.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
+import { useFormErrorHandler } from '../../providers/FormErrorHandler/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useOperation } from '../../providers/Operation/index.js'
 import { useRouter } from '../../providers/RouterAdapter/index.js'
@@ -96,6 +97,7 @@ export const Form: React.FC<FormProps> = (props) => {
   const { code: locale } = useLocale()
   const { i18n, t } = useTranslation()
   const { refreshCookie, user } = useAuth()
+  const onNonFieldError = useFormErrorHandler()
   const operation = useOperation()
 
   const { getFormState } = useServerFunctions()
@@ -522,6 +524,10 @@ export const Form: React.FC<FormProps> = (props) => {
             })
 
             nonFieldErrors.forEach((err) => {
+              // Pass overridesFromArgs (not the computed overrides) so a retry re-evaluates any function overrides against current fields.
+              if (onNonFieldError?.(err, () => void submit({ overrides: overridesFromArgs }))) {
+                return
+              }
               errorToast(<FieldErrorsToast errorMessage={err.message || t('error:unknown')} />)
             })
 
@@ -578,6 +584,7 @@ export const Form: React.FC<FormProps> = (props) => {
       waitForAutocomplete,
       setSubmitted,
       validateForm,
+      onNonFieldError,
     ],
   )
 

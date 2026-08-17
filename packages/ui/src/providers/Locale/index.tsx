@@ -9,6 +9,7 @@ import { findLocaleFromCode } from '../../utilities/findLocaleFromCode.js'
 import { useAuth } from '../Auth/index.js'
 import { useConfig } from '../Config/index.js'
 import { useSearchParams } from '../RouterAdapter/index.js'
+import { useRouteTransition } from '../RouteTransition/index.js'
 
 const LocaleContext = createContext({} as Locale)
 
@@ -46,6 +47,7 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode; locale?: Loc
   } = useConfig()
 
   const { user } = useAuth()
+  const { isTransitioning } = useRouteTransition()
 
   const defaultLocale = localization ? localization.defaultLocale : 'en'
 
@@ -70,18 +72,12 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode; locale?: Loc
   const prevLocale = useRef<Locale>(locale)
 
   useEffect(() => {
-    /**
-     * We need to set `isLoading` back to false once the locale is detected to be different
-     * This happens when the user clicks an anchor link which appends the `?locale=` query param
-     * This triggers a client-side navigation, which re-renders the page with the new locale
-     * In Next.js, local state is persisted during this type of navigation because components are not unmounted
-     */
-    if (locale.code !== prevLocale.current.code) {
+    // Keep fields disabled until the new locale's document state finishes loading.
+    if (locale.code !== prevLocale.current.code && !isTransitioning) {
       setLocaleIsLoading(false)
+      prevLocale.current = locale
     }
-
-    prevLocale.current = locale
-  }, [locale])
+  }, [isTransitioning, locale])
 
   const fetchURL = formatAdminURL({
     apiRoute,

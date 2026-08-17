@@ -1,7 +1,7 @@
 {
   "name": "with-vercel-postgres",
   "version": "1.0.0",
-  "description": "A blank template to get started with Payload 3.0",
+  "description": "A blank template to get started with Payload",
   "license": "MIT",
   "type": "module",
   "scripts": {
@@ -26,7 +26,7 @@
     "@payloadcms/ui": "3.82.1",
     "cross-env": "10.1.0",
     "graphql": "^16.8.1",
-    "next": "16.2.7",
+    "next": "16.3.0",
     "payload": "3.82.1",
     "react": "19.2.6",
     "react-dom": "19.2.6"
@@ -39,7 +39,7 @@
     "@types/react-dom": "19.2.3",
     "@vitejs/plugin-react": "4.5.2",
     "eslint": "^9.16.0",
-    "eslint-config-next": "16.2.7",
+    "eslint-config-next": "16.3.0",
     "jsdom": "28.0.0",
     "prettier": "^3.4.2",
     "tsx": "4.22.4",

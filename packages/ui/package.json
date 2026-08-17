@@ -17,7 +17,6 @@
     }
   ],
   "sideEffects": [
-    "*.scss",
     "*.css"
   ],
   "type": "module",
@@ -36,10 +35,6 @@
       "import": "./src/exports/layouts.ts",
       "types": "./src/exports/layouts.ts",
       "default": "./src/exports/layouts.ts"
-    },
-    "./scss": {
-      "import": "./src/scss/styles.scss",
-      "default": "./src/scss/styles.scss"
     },
     "./icons/*": {
       "import": "./src/icons/*/index.tsx",
@@ -236,6 +231,11 @@
       "types": "./src/utilities/getLanguageDir.ts",
       "default": "./src/utilities/getLanguageDir.ts"
     },
+    "./utilities/getRequestEmbed": {
+      "import": "./src/utilities/getRequestEmbed.ts",
+      "types": "./src/utilities/getRequestEmbed.ts",
+      "default": "./src/utilities/getRequestEmbed.ts"
+    },
     "./utilities/getRequestTheme": {
       "import": "./src/utilities/getRequestTheme.ts",
       "types": "./src/utilities/getRequestTheme.ts",
@@ -286,7 +286,7 @@
       "types": "./src/forms/fieldSchemasToFormState/renderField.tsx",
       "default": "./src/forms/fieldSchemasToFormState/renderField.tsx"
     },
-    "./scss/app.scss": "./src/scss/app.scss",
+    "./css/app.css": "./src/css/app.css",
     "./assets": {
       "import": "./src/assets/index.ts",
       "types": "./src/assets/index.ts",
@@ -438,16 +438,12 @@
         "import": "./dist/styles.css",
         "default": "./dist/styles.css"
       },
-      "./scss": {
-        "import": "./dist/scss/styles.scss",
-        "default": "./dist/scss/styles.scss"
-      },
+      "./css/app.css": "./dist/css/app.css",
       "./rsc": {
         "import": "./dist/exports/rsc/index.js",
         "types": "./dist/exports/rsc/index.d.ts",
         "default": "./dist/exports/rsc/index.js"
       },
-      "./scss/app.scss": "./dist/scss/app.scss",
       "./styles.css": "./dist/styles.css",
       "./assets": {
         "import": "./dist/assets/index.js",
