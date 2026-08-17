@@ -37,9 +37,9 @@
       "default": "./src/exports/rsc/internal.ts"
     },
     "./internal/server": {
-      "import": "./src/exports/internal-server.ts",
-      "types": "./src/exports/internal-server.ts",
-      "default": "./src/exports/internal-server.ts"
+      "import": "./src/exports/server/internal.ts",
+      "types": "./src/exports/server/internal.ts",
+      "default": "./src/exports/server/internal.ts"
     },
     "./internal/shared": {
       "import": "./src/exports/shared/internal.ts",
@@ -358,9 +358,9 @@
       "default": "./src/assets/index.ts"
     },
     "./server": {
-      "import": "./src/exports/server.ts",
-      "types": "./src/exports/server.ts",
-      "default": "./src/exports/server.ts"
+      "import": "./src/exports/server/index.ts",
+      "types": "./src/exports/server/index.ts",
+      "default": "./src/exports/server/index.ts"
     },
     "./views/Dashboard/Default/ModularDashboard/renderWidget/renderWidgetServerFn": {
       "import": "./src/views/Dashboard/Default/ModularDashboard/renderWidget/renderWidgetServerFn.ts",
@@ -492,9 +492,9 @@
         "default": "./dist/exports/rsc/internal.js"
       },
       "./internal/server": {
-        "import": "./dist/exports/internal-server.js",
-        "types": "./dist/exports/internal-server.d.ts",
-        "default": "./dist/exports/internal-server.js"
+        "import": "./dist/exports/server/internal.js",
+        "types": "./dist/exports/server/internal.d.ts",
+        "default": "./dist/exports/server/internal.js"
       },
       "./internal/shared": {
         "import": "./dist/exports/shared/internal.js",
@@ -728,9 +728,9 @@
         "default": "./dist/utilities/*.js"
       },
       "./server": {
-        "import": "./dist/exports/server.js",
-        "types": "./dist/exports/server.d.ts",
-        "default": "./dist/exports/server.js"
+        "import": "./dist/exports/server/index.js",
+        "types": "./dist/exports/server/index.d.ts",
+        "default": "./dist/exports/server/index.js"
       },
       "./views/Dashboard/Default/ModularDashboard/renderWidget/renderWidgetServerFn": {
         "import": "./dist/views/Dashboard/Default/ModularDashboard/renderWidget/renderWidgetServerFn.js",
