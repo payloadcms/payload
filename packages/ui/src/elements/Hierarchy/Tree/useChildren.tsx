@@ -173,7 +173,17 @@ export const useChildren = ({
               )
             : allDocs
 
-        const newChildren = pageToFetch === 1 ? newDocs : [...(currentChildren || []), ...newDocs]
+        let newChildren: TreeDocument[]
+        if (pageToFetch === 1) {
+          newChildren = newDocs
+        } else {
+          // Dedupe against already-loaded children: page-number math can drift from the
+          // actual loaded count (e.g. after a cache merge), causing an overlapping page
+          // to be re-fetched here.
+          const existingIds = new Set((currentChildren || []).map((doc) => doc.id))
+          const dedupedNewDocs = newDocs.filter((doc) => !existingIds.has(doc.id))
+          newChildren = [...(currentChildren || []), ...dedupedNewDocs]
+        }
 
         setChildren(newChildren)
         setTotalDocs(data.totalDocs || 0)

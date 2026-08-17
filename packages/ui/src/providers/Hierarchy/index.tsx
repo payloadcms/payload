@@ -132,13 +132,26 @@ export const HierarchyProvider: React.FC<HierarchyProviderProps> = ({ children }
           const existingDocIds = new Set(existingEntry.docs.map((doc) => doc.id))
           const newDocs = treeData.docs.filter((doc) => !existingDocIds.has(doc.id))
 
+          // Reconcile loadedCount/totalDocs against the deduped merge rather than
+          // blindly overwriting: a shallower fetch (e.g. fewer pages walked) must not
+          // regress loadedCount below what's already accumulated in docs, or downstream
+          // page-number math in Tree will refetch and duplicate an already-shown page.
+          const mergedLoadedParents = { ...existingEntry.loadedParents }
+          for (const [parentKey, meta] of Object.entries(treeData.loadedParents)) {
+            const existingMeta = existingEntry.loadedParents[parentKey]
+            const loadedCount = Math.max(existingMeta?.loadedCount ?? 0, meta.loadedCount ?? 0)
+            const totalDocs = Math.max(existingMeta?.totalDocs ?? 0, meta.totalDocs ?? 0)
+            mergedLoadedParents[parentKey] = {
+              hasMore: loadedCount < totalDocs,
+              loadedCount,
+              totalDocs,
+            }
+          }
+
           newCache.set(slug, {
             baseFilter: existingEntry.baseFilter,
             docs: [...existingEntry.docs, ...newDocs],
-            loadedParents: {
-              ...existingEntry.loadedParents,
-              ...treeData.loadedParents,
-            },
+            loadedParents: mergedLoadedParents,
           })
         }
 
@@ -348,6 +361,7 @@ export const HierarchyProvider: React.FC<HierarchyProviderProps> = ({ children }
                 ...existingEntry.loadedParents,
                 [parentKey]: {
                   hasMore: data.hasNextPage || false,
+                  loadedCount: currentChildren.length + uniqueNewDocs.length,
                   totalDocs: data.totalDocs || 0,
                 },
               },
