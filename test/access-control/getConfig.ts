@@ -73,9 +73,14 @@ const PublicReadabilityAccess: FieldAccess = ({ req: { user }, siblingData }) =>
 
 export const requestHeaders = new Headers({ authorization: 'Bearer testBearerToken' })
 let inheritedReadVersionsAllowedID: number | string | undefined
+let inheritedReadVersionsAllowedVersionID: number | string | undefined
 
 export const setInheritedReadVersionsAllowedID = (id: number | string | undefined): void => {
   inheritedReadVersionsAllowedID = id
+}
+
+export const setInheritedReadVersionsAllowedVersionID = (id: number | string | undefined): void => {
+  inheritedReadVersionsAllowedVersionID = id
 }
 
 const UseRequestHeadersAccess: FieldAccess = ({ req: { headers } }) => {
@@ -105,6 +110,14 @@ export const getConfig: () => Partial<Config> = () => ({
     },
     importMap: {
       baseDir: path.resolve(dirname),
+    },
+  },
+  baseAccess: {
+    collections: {
+      readVersions: ({ id, slug }) =>
+        slug !== inheritedReadVersionsSlug || inheritedReadVersionsAllowedVersionID === undefined
+          ? true
+          : id === inheritedReadVersionsAllowedVersionID,
     },
   },
   blocks: [

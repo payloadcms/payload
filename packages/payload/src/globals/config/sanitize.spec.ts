@@ -73,6 +73,42 @@ describe('baseAccess', () => {
     })
   })
 
+  it('should inherit the effective read constraint for readVersions', async () => {
+    const config = {
+      ...minimalConfig,
+      baseAccess: {
+        globals: {
+          read: () => ({
+            tenant: {
+              equals: 'tenant-1',
+            },
+          }),
+        },
+      },
+    }
+    const global: GlobalConfig = {
+      slug: 'settings',
+      access: {
+        read: () => true,
+      },
+      fields: [],
+      versions: true,
+    }
+    const req = {
+      payload: {
+        config,
+      },
+    } as any
+
+    const result = sanitizeGlobal(config, global)
+
+    await expect(result.access.readVersions({ req, slug: 'settings' })).resolves.toEqual({
+      'version.tenant': {
+        equals: 'tenant-1',
+      },
+    })
+  })
+
   it('should not apply collection base access to globals', async () => {
     const collectionBaseAccess = vi.fn(() => false)
     const globalAccess = vi.fn(() => true)

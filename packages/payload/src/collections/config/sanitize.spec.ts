@@ -80,6 +80,43 @@ describe('baseAccess', () => {
     })
   })
 
+  it('should inherit the effective read constraint for readVersions', async () => {
+    const config = {
+      baseAccess: {
+        collections: {
+          read: () => ({
+            tenant: {
+              equals: 'tenant-1',
+            },
+          }),
+        },
+      },
+      collections: [],
+      globals: [],
+    } as any
+    const collection: CollectionConfig = {
+      slug: 'posts',
+      access: {
+        read: () => true,
+      },
+      fields: [],
+      versions: true,
+    }
+    const req = {
+      payload: {
+        config,
+      },
+    } as any
+
+    const result = sanitizeCollection(config, collection)
+
+    await expect(result.access.readVersions({ req, slug: 'posts' })).resolves.toEqual({
+      'version.tenant': {
+        equals: 'tenant-1',
+      },
+    })
+  })
+
   it('should not run collection access when base access denies the operation', async () => {
     const collectionAccess = vi.fn(() => true)
     const config = {

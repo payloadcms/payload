@@ -17,7 +17,11 @@ import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { FullyRestricted, Post } from './payload-types.js'
 
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
-import { requestHeaders, setInheritedReadVersionsAllowedID } from './getConfig.js'
+import {
+  requestHeaders,
+  setInheritedReadVersionsAllowedID,
+  setInheritedReadVersionsAllowedVersionID,
+} from './getConfig.js'
 import {
   asyncParentSlug,
   firstArrayText,
@@ -54,6 +58,7 @@ describe('Access Control', () => {
 
   beforeEach(async () => {
     setInheritedReadVersionsAllowedID(undefined)
+    setInheritedReadVersionsAllowedVersionID(undefined)
 
     post1 = await payload.create({
       collection: slug,
@@ -879,6 +884,54 @@ describe('Access Control', () => {
       await expect(
         payload.findVersionByID({
           id: deniedVersion.id,
+          collection: inheritedReadVersionsSlug,
+          disableErrors: true,
+          overrideAccess: false,
+        }),
+      ).resolves.toBeNull()
+
+      await payload.delete({ collection: inheritedReadVersionsSlug, where: {} })
+    })
+
+    it('should pass the version id to base readVersions access for findVersionByID', async () => {
+      await payload.delete({ collection: inheritedReadVersionsSlug, where: {} })
+
+      const { id: allowedParentID } = await payload.create({
+        collection: inheritedReadVersionsSlug,
+        data: { secret: 'allowed' },
+      })
+      await payload.update({
+        id: allowedParentID,
+        collection: inheritedReadVersionsSlug,
+        data: { secret: 'allowed' },
+      })
+
+      const { docs } = await payload.findVersions({
+        collection: inheritedReadVersionsSlug,
+        overrideAccess: true,
+        where: {
+          parent: {
+            equals: allowedParentID,
+          },
+        },
+      })
+      const [allowedVersion, deniedVersion] = docs
+
+      setInheritedReadVersionsAllowedID(allowedParentID)
+      setInheritedReadVersionsAllowedVersionID(allowedVersion!.id)
+
+      await expect(
+        payload.findVersionByID({
+          id: allowedVersion!.id,
+          collection: inheritedReadVersionsSlug,
+          disableErrors: true,
+          overrideAccess: false,
+        }),
+      ).resolves.toMatchObject({ id: allowedVersion!.id, parent: allowedParentID })
+
+      await expect(
+        payload.findVersionByID({
+          id: deniedVersion!.id,
           collection: inheritedReadVersionsSlug,
           disableErrors: true,
           overrideAccess: false,
