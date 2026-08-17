@@ -2,6 +2,7 @@ import type { DefaultDocumentIDType, Payload } from 'payload'
 
 import { cache } from 'react'
 
+/** @internal */
 export const getPreferences = cache(
   async <T>(
     key: string,

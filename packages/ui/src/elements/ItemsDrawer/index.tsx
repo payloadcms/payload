@@ -99,6 +99,7 @@ const getItemDisplayLabel = (item: DrawerItem, i18n: I18nClient): string => {
   return toWords(item.slug)
 }
 
+/** @internal */
 export const ItemsDrawer: React.FC<ItemsDrawerProps> = (props) => {
   const { addRowIndex, drawerSlug, items, labels, onItemClick, searchPlaceholder, title } = props
 

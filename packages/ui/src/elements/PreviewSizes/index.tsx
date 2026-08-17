@@ -84,6 +84,7 @@ export type PreviewSizesProps = {
   uploadConfig: SanitizedCollectionConfig['upload']
 }
 
+/** @internal */
 export const PreviewSizes: React.FC<PreviewSizesProps> = ({ doc, imageCacheTag, uploadConfig }) => {
   const { imageSizes } = uploadConfig
   const { sizes } = doc

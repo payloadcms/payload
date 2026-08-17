@@ -211,7 +211,7 @@ const addDefaultDashboardWidgets = ({
   })
   dashboard.widgets.push({
     slug: 'collection-query',
-    Component: '@payloadcms/ui/rsc#CollectionQueryWidget',
+    Component: '@payloadcms/ui/internal/rsc#CollectionQueryWidget',
     fields: sanitizeFields({
       config: config as unknown as Config,
       existingFieldNames: new Set(),
@@ -224,7 +224,7 @@ const addDefaultDashboardWidgets = ({
   })
   dashboard.widgets.push({
     slug: 'activity',
-    Component: '@payloadcms/ui/rsc#RecentlyViewedWidget',
+    Component: '@payloadcms/ui/internal/rsc#RecentlyViewedWidget',
     fields: sanitizeFields({
       config: config as unknown as Config,
       existingFieldNames: new Set(),

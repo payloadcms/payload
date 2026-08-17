@@ -2,13 +2,8 @@
 import type { FormState } from 'payload'
 
 import { useLexicalEditable } from '@lexical/react/useLexicalEditable'
-import {
-  Form,
-  RenderFields,
-  useDocumentForm,
-  useDocumentInfo,
-  useServerFunctions,
-} from '@payloadcms/ui'
+import { Form, useDocumentForm, useDocumentInfo, useServerFunctions } from '@payloadcms/ui'
+import { RenderFields } from '@payloadcms/ui/internal'
 import { abortAndIgnore } from '@payloadcms/ui/shared'
 import { deepCopyObjectSimpleWithoutReactComponents } from 'payload/shared'
 import React, { useCallback, useEffect, useRef, useState } from 'react'

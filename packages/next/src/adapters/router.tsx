@@ -2,7 +2,7 @@
 import type { RouterAdapterContextValue } from '@payloadcms/ui'
 import type { LinkAdapterProps } from 'payload'
 
-import { RouterAdapterContext } from '@payloadcms/ui'
+import { RouterAdapterContext } from '@payloadcms/ui/internal'
 import NextLinkImport from 'next/link.js'
 import {
   useParams as useNextParams,

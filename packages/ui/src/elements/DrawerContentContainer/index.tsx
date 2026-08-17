@@ -8,6 +8,7 @@ type Props = {
   readonly children: React.ReactNode
   readonly className?: string
 }
+/** @internal */
 export function DrawerContentContainer({ children, className }: Props) {
   return <div className={[baseClass, className].filter(Boolean).join(' ')}>{children}</div>
 }

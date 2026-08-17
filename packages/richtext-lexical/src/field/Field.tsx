@@ -3,18 +3,17 @@ import type { EditorState, SerializedEditorState } from 'lexical'
 import type { FallbackProps } from 'react-error-boundary'
 
 import {
-  BulkUploadProvider,
   FieldDescription,
   FieldError,
   FieldLabel,
   isFieldRTL,
-  RenderCustomComponent,
   useConfig,
   useEditDepth,
   useEffectEvent,
   useField,
   useLocale,
 } from '@payloadcms/ui'
+import { BulkUploadProvider, RenderCustomComponent } from '@payloadcms/ui/internal'
 import { mergeFieldStyles } from '@payloadcms/ui/shared'
 import { dequal } from 'dequal/lite'
 import { type Validate } from 'payload'

@@ -11,6 +11,7 @@ import { fieldAffectsData, flattenTopLevelFields } from 'payload/shared'
 import { filterFieldsWithPermissions } from '../providers/TableColumns/buildColumnState/filterFieldsWithPermissions.js'
 import { getInitialColumns } from '../providers/TableColumns/getInitialColumns.js'
 
+/** @internal */
 export const getColumns = ({
   clientConfig,
   collectionConfig,

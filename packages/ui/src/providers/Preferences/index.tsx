@@ -31,6 +31,7 @@ const requestOptions = (value, language) => ({
   },
 })
 
+/** @internal */
 export const PreferencesProvider: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   const contextRef = useRef({} as PreferencesContext)
   const preferencesRef = useRef({})

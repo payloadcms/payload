@@ -58,6 +58,7 @@ const computeSelectAllStatus = ({
   return SelectAllStatus.Some
 }
 
+/** @internal */
 export const DocumentSelectionProvider: React.FC<DocumentSelectionProviderProps> = ({
   children,
   collectionData,

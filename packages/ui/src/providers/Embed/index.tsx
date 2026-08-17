@@ -52,6 +52,8 @@ const resolveEmbedParam = (embedParam: null | string, fallback: boolean): boolea
 
 /**
  * @experimental This component is experimental and may change or be removed in future releases. Use at your own risk.
+ *
+ * @internal
  */
 export const EmbedProvider: React.FC<{
   children?: React.ReactNode

@@ -1,5 +1,6 @@
 import type { ClientField, Field } from 'payload'
 
+/** @internal */
 export const traverseForLocalizedFields = (fields: ClientField[] | Field[]): boolean => {
   for (const field of fields) {
     if ('localized' in field && field.localized) {

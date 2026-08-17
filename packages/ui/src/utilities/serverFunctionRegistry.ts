@@ -27,6 +27,8 @@ import { switchLanguageHandler } from './switchLanguageHandler.js'
  * Start adapter passes a `transformResult` (`serializeForRsc`) to
  * `createServerFunctionHandler` that converts elements into
  * `renderServerComponent` handles.
+ *
+ * @internal
  */
 export const sharedServerFunctions: Record<string, ServerFunction<any, any>> = {
   'copy-data-from-locale': copyDataFromLocaleHandler,

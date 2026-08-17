@@ -12,6 +12,7 @@ if (!cachedClientConfigs) {
   cachedClientConfigs = global._payload_clientConfigs = {} as CachedClientConfigs
 }
 
+/** @internal */
 export const getClientConfig = cache(
   ({ config, i18n, importMap, user }: CreateClientConfigArgs): ClientConfig => {
     const currentLanguage = i18n.language

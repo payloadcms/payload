@@ -8,6 +8,7 @@ type BackToDashboardProps = {
   serverURL?: string
 }
 
+/** @internal */
 export const handleBackToDashboard = ({ adminRoute, router, serverURL }: BackToDashboardProps) => {
   const redirectRoute = formatAdminURL({
     adminRoute,

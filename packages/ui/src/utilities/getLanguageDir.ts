@@ -1,5 +1,6 @@
 import { rtlLanguages } from '@payloadcms/translations'
 
+/** @internal */
 export type Direction = 'ltr' | 'rtl'
 
 /**
@@ -8,6 +9,8 @@ export type Direction = 'ltr' | 'rtl'
  * stylesheet scopes its layout rules under (e.g. the document sidebar divider).
  * Single source of truth shared across framework adapters so the SSR'd `dir`
  * never diverges from what the CSS expects.
+ *
+ * @internal
  */
 export const getLanguageDir = ({ languageCode }: { languageCode: string }): Direction =>
   (rtlLanguages as readonly string[]).includes(languageCode) ? 'rtl' : 'ltr'

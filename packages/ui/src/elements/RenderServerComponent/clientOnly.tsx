@@ -9,6 +9,8 @@ import { removeUndefined } from '../../utilities/removeUndefined.js'
  * Client-only component renderer for non-RSC frameworks.
  * All components are treated as client components - serverProps are never passed.
  * Use this when the framework doesn't support React Server Components.
+ *
+ * @internal
  */
 export const RenderClientComponent: ComponentRenderer = ({
   clientProps = {},

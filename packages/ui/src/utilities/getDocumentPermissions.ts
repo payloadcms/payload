@@ -12,6 +12,7 @@ import { hasDraftsEnabled } from 'payload/shared'
 import { hasSavePermission as getHasSavePermission } from './hasSavePermission.js'
 import { isEditing as getIsEditing } from './isEditing.js'
 
+/** @internal */
 export const getDocumentPermissions = async (args: {
   collectionConfig?: SanitizedCollectionConfig
   data: Data

@@ -11,6 +11,7 @@ import { getTranslation } from '@payloadcms/translations'
 
 import { formatMetadata } from '../../utilities/formatMetadata.js'
 
+/** @internal */
 export type GenerateEditViewMetadata = (args: {
   collectionConfig?: null | SanitizedCollectionConfig
   config: SanitizedConfig
@@ -24,6 +25,8 @@ export type GenerateEditViewMetadata = (args: {
 
 /**
  * @todo Remove the `MetaConfig` type assertions. They are currently required because of how the `Metadata` type from `next` consumes the `URL` type.
+ *
+ * @internal
  */
 export const generateAPIViewMetadata: GenerateEditViewMetadata = async ({
   collectionConfig,

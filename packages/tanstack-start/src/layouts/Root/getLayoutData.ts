@@ -10,11 +10,8 @@ import type {
   User,
 } from 'payload'
 
-import { getNavPrefs } from '@payloadcms/ui/elements/Nav/getNavPrefs'
-import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
-import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
-import { getRequestEmbed } from '@payloadcms/ui/utilities/getRequestEmbed'
-import { getRequestTheme } from '@payloadcms/ui/utilities/getRequestTheme'
+import { getNavPrefs, RenderServerComponent } from '@payloadcms/ui/internal/rsc'
+import { getClientConfig, getRequestEmbed, getRequestTheme } from '@payloadcms/ui/internal/server'
 import { Outlet } from '@tanstack/react-router'
 import { applyLocaleFiltering } from 'payload/shared'
 import { createElement } from 'react'

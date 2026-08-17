@@ -64,6 +64,8 @@ export const getPreferences = cache(
  * @param req - The PayloadRequest object
  * @param key - The key of the preferences to update
  * @param value - The new value to merge with the existing preferences
+ *
+ * @internal
  */
 export const upsertPreferences = async <T extends Record<string, unknown> | string>({
   customMerge,

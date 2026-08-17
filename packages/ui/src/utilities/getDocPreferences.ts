@@ -10,6 +10,7 @@ type Args = {
   user: User
 }
 
+/** @internal */
 export const getDocPreferences = async ({
   id,
   collectionSlug,

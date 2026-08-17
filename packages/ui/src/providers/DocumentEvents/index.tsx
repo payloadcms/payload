@@ -11,6 +11,7 @@ const Context = createContext<{
   reportUpdate: () => null,
 })
 
+/** @internal */
 export const DocumentEventsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [mostRecentUpdate, reportUpdate] = useState<DocumentEvent>(null)
 

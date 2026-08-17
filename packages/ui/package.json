@@ -51,120 +51,48 @@
       "types": "./src/exports/shared/index.ts",
       "default": "./src/exports/shared/index.ts"
     },
-    "./layouts": {
-      "import": "./src/exports/layouts.ts",
-      "types": "./src/exports/layouts.ts",
-      "default": "./src/exports/layouts.ts"
-    },
     "./icons/*": {
       "import": "./src/icons/*/index.tsx",
       "types": "./src/icons/*/index.tsx",
       "default": "./src/icons/*/index.tsx"
     },
-    "./utilities/formatMetadata": {
-      "import": "./src/utilities/formatMetadata.ts",
-      "types": "./src/utilities/formatMetadata.ts",
-      "default": "./src/utilities/formatMetadata.ts"
+    "./utilities/formatMetadata": null,
+    "./views/API/generateAPIViewMetadata": null,
+    "./views/CollectionTrash/generateCollectionTrashMetadata": null,
+    "./views/Document/generateEditViewMetadata": null,
+    "./views/List/generateListViewMetadata": null,
+    "./views/Root/generateCustomViewMetadata": null,
+    "./views/Version/generateVersionViewMetadata": null,
+    "./views/Versions/generateVersionsViewMetadata": null,
+    "./views/Dashboard/serverFunctions": null,
+    "./views/Document/handleServerFunction": null,
+    "./views/Document/renderDocumentSlots": null,
+    "./views/List/handleServerFunction": null,
+    "./views/Versions/fetchVersions": null,
+    "./views/NotFound/page": null,
+    "./views/Root/getCustomViewByRoute": null,
+    "./views/Root/adminViews": null,
+    "./views/Root/generatePageMetadata": null,
+    "./views/Document/getMetaBySegment": null,
+    "./elements/Banner": {
+      "import": "./src/elements/Banner/index.tsx",
+      "types": "./src/elements/Banner/index.tsx",
+      "default": "./src/elements/Banner/index.tsx"
     },
-    "./views/API/generateAPIViewMetadata": {
-      "import": "./src/views/API/generateAPIViewMetadata.ts",
-      "types": "./src/views/API/generateAPIViewMetadata.ts",
-      "default": "./src/views/API/generateAPIViewMetadata.ts"
+    "./elements/Button": {
+      "import": "./src/elements/Button/index.tsx",
+      "types": "./src/elements/Button/index.tsx",
+      "default": "./src/elements/Button/index.tsx"
     },
-    "./views/CollectionTrash/generateCollectionTrashMetadata": {
-      "import": "./src/views/CollectionTrash/generateCollectionTrashMetadata.ts",
-      "types": "./src/views/CollectionTrash/generateCollectionTrashMetadata.ts",
-      "default": "./src/views/CollectionTrash/generateCollectionTrashMetadata.ts"
+    "./elements/Collapsible": {
+      "import": "./src/elements/Collapsible/index.tsx",
+      "types": "./src/elements/Collapsible/index.tsx",
+      "default": "./src/elements/Collapsible/index.tsx"
     },
-    "./views/Document/generateEditViewMetadata": {
-      "import": "./src/views/Document/generateEditViewMetadata.ts",
-      "types": "./src/views/Document/generateEditViewMetadata.ts",
-      "default": "./src/views/Document/generateEditViewMetadata.ts"
-    },
-    "./views/List/generateListViewMetadata": {
-      "import": "./src/views/List/generateListViewMetadata.ts",
-      "types": "./src/views/List/generateListViewMetadata.ts",
-      "default": "./src/views/List/generateListViewMetadata.ts"
-    },
-    "./views/Root/generateCustomViewMetadata": {
-      "import": "./src/views/Root/generateCustomViewMetadata.ts",
-      "types": "./src/views/Root/generateCustomViewMetadata.ts",
-      "default": "./src/views/Root/generateCustomViewMetadata.ts"
-    },
-    "./views/Version/generateVersionViewMetadata": {
-      "import": "./src/views/Version/generateVersionViewMetadata.ts",
-      "types": "./src/views/Version/generateVersionViewMetadata.ts",
-      "default": "./src/views/Version/generateVersionViewMetadata.ts"
-    },
-    "./views/Versions/generateVersionsViewMetadata": {
-      "import": "./src/views/Versions/generateVersionsViewMetadata.ts",
-      "types": "./src/views/Versions/generateVersionsViewMetadata.ts",
-      "default": "./src/views/Versions/generateVersionsViewMetadata.ts"
-    },
-    "./views/Dashboard/serverFunctions": {
-      "import": "./src/views/Dashboard/serverFunctions.ts",
-      "types": "./src/views/Dashboard/serverFunctions.ts",
-      "default": "./src/views/Dashboard/serverFunctions.ts"
-    },
-    "./views/Document/handleServerFunction": {
-      "import": "./src/views/Document/handleServerFunction.tsx",
-      "types": "./src/views/Document/handleServerFunction.tsx",
-      "default": "./src/views/Document/handleServerFunction.tsx"
-    },
-    "./views/Document/renderDocumentSlots": {
-      "import": "./src/views/Document/renderDocumentSlots.tsx",
-      "types": "./src/views/Document/renderDocumentSlots.tsx",
-      "default": "./src/views/Document/renderDocumentSlots.tsx"
-    },
-    "./views/List/handleServerFunction": {
-      "import": "./src/views/List/handleServerFunction.tsx",
-      "types": "./src/views/List/handleServerFunction.tsx",
-      "default": "./src/views/List/handleServerFunction.tsx"
-    },
-    "./views/Versions/fetchVersions": {
-      "import": "./src/views/Versions/fetchVersions.ts",
-      "types": "./src/views/Versions/fetchVersions.ts",
-      "default": "./src/views/Versions/fetchVersions.ts"
-    },
-    "./views/NotFound/page": {
-      "import": "./src/views/NotFound/page.tsx",
-      "types": "./src/views/NotFound/page.tsx",
-      "default": "./src/views/NotFound/page.tsx"
-    },
-    "./views/Root/getCustomViewByRoute": {
-      "import": "./src/views/Root/getCustomViewByRoute.ts",
-      "types": "./src/views/Root/getCustomViewByRoute.ts",
-      "default": "./src/views/Root/getCustomViewByRoute.ts"
-    },
-    "./views/Root/adminViews": {
-      "import": "./src/views/Root/adminViews.tsx",
-      "types": "./src/views/Root/adminViews.tsx",
-      "default": "./src/views/Root/adminViews.tsx"
-    },
-    "./views/Root/generatePageMetadata": {
-      "import": "./src/views/Root/generatePageMetadata.ts",
-      "types": "./src/views/Root/generatePageMetadata.ts",
-      "default": "./src/views/Root/generatePageMetadata.ts"
-    },
-    "./views/Document/getMetaBySegment": {
-      "import": "./src/views/Document/getMetaBySegment.ts",
-      "types": "./src/views/Document/getMetaBySegment.ts",
-      "default": "./src/views/Document/getMetaBySegment.ts"
-    },
-    "./views/*/metadata": {
-      "import": "./src/views/*/metadata.ts",
-      "types": "./src/views/*/metadata.ts",
-      "default": "./src/views/*/metadata.ts"
-    },
-    "./views/*": {
-      "import": "./src/views/*/index.tsx",
-      "types": "./src/views/*/index.tsx",
-      "default": "./src/views/*/index.tsx"
-    },
-    "./elements/*": {
-      "import": "./src/elements/*/index.tsx",
-      "types": "./src/elements/*/index.tsx",
-      "default": "./src/elements/*/index.tsx"
+    "./elements/Table/DefaultCell/fields/Status": {
+      "import": "./src/elements/Table/DefaultCell/fields/Status/index.tsx",
+      "types": "./src/elements/Table/DefaultCell/fields/Status/index.tsx",
+      "default": "./src/elements/Table/DefaultCell/fields/Status/index.tsx"
     },
     "./elements/AppHeader": null,
     "./elements/BulkUpload": null,
@@ -218,146 +146,38 @@
     "./views/Version/Default": null,
     "./views/Version/RenderFieldsToDiff/*": null,
     "./views/Versions/cells/*": null,
-    "./elements/RenderServerComponent": {
-      "import": "./src/elements/RenderServerComponent/index.tsx",
-      "types": "./src/elements/RenderServerComponent/index.tsx",
-      "default": "./src/elements/RenderServerComponent/index.tsx"
-    },
+    "./elements/RenderServerComponent": null,
     "./rsc": {
       "import": "./src/exports/rsc/index.ts",
       "types": "./src/exports/rsc/index.ts",
       "default": "./src/exports/rsc/index.ts"
     },
-    "./utilities/getDocumentPermissions": {
-      "import": "./src/utilities/getDocumentPermissions.ts",
-      "types": "./src/utilities/getDocumentPermissions.ts",
-      "default": "./src/utilities/getDocumentPermissions.ts"
-    },
-    "./utilities/getIsLocked": {
-      "import": "./src/utilities/getIsLocked.ts",
-      "types": "./src/utilities/getIsLocked.ts",
-      "default": "./src/utilities/getIsLocked.ts"
-    },
-    "./utilities/getVersions": {
-      "import": "./src/utilities/getVersions.ts",
-      "types": "./src/utilities/getVersions.ts",
-      "default": "./src/utilities/getVersions.ts"
-    },
-    "./utilities/getDocPreferences": {
-      "import": "./src/utilities/getDocPreferences.ts",
-      "types": "./src/utilities/getDocPreferences.ts",
-      "default": "./src/utilities/getDocPreferences.ts"
-    },
-    "./utilities/getDocumentData": {
-      "import": "./src/utilities/getDocumentData.ts",
-      "types": "./src/utilities/getDocumentData.ts",
-      "default": "./src/utilities/getDocumentData.ts"
-    },
-    "./utilities/buildFormState": {
-      "import": "./src/utilities/buildFormState.ts",
-      "types": "./src/utilities/buildFormState.ts",
-      "default": "./src/utilities/buildFormState.ts"
-    },
-    "./utilities/buildTableState": {
-      "import": "./src/utilities/buildTableState.ts",
-      "types": "./src/utilities/buildTableState.ts",
-      "default": "./src/utilities/buildTableState.ts"
-    },
-    "./utilities/getClientSchemaMap": {
-      "import": "./src/utilities/getClientSchemaMap.ts",
-      "types": "./src/utilities/getClientSchemaMap.ts",
-      "default": "./src/utilities/getClientSchemaMap.ts"
-    },
-    "./utilities/getSchemaMap": {
-      "import": "./src/utilities/getSchemaMap.ts",
-      "types": "./src/utilities/getSchemaMap.ts",
-      "default": "./src/utilities/getSchemaMap.ts"
-    },
-    "./utilities/handleServerFunctions": {
-      "import": "./src/utilities/handleServerFunctions.ts",
-      "types": "./src/utilities/handleServerFunctions.ts",
-      "default": "./src/utilities/handleServerFunctions.ts"
-    },
-    "./utilities/schedulePublishHandler": {
-      "import": "./src/utilities/schedulePublishHandler.ts",
-      "types": "./src/utilities/schedulePublishHandler.ts",
-      "default": "./src/utilities/schedulePublishHandler.ts"
-    },
-    "./utilities/slugify": {
-      "import": "./src/utilities/slugify.ts",
-      "types": "./src/utilities/slugify.ts",
-      "default": "./src/utilities/slugify.ts"
-    },
-    "./utilities/getHierarchyAncestry": {
-      "import": "./src/utilities/getHierarchyAncestry.ts",
-      "types": "./src/utilities/getHierarchyAncestry.ts",
-      "default": "./src/utilities/getHierarchyAncestry.ts"
-    },
-    "./utilities/getClientConfig": {
-      "import": "./src/utilities/getClientConfig.ts",
-      "types": "./src/utilities/getClientConfig.ts",
-      "default": "./src/utilities/getClientConfig.ts"
-    },
-    "./utilities/getLanguageDir": {
-      "import": "./src/utilities/getLanguageDir.ts",
-      "types": "./src/utilities/getLanguageDir.ts",
-      "default": "./src/utilities/getLanguageDir.ts"
-    },
-    "./utilities/getRequestEmbed": {
-      "import": "./src/utilities/getRequestEmbed.ts",
-      "types": "./src/utilities/getRequestEmbed.ts",
-      "default": "./src/utilities/getRequestEmbed.ts"
-    },
-    "./utilities/getRequestTheme": {
-      "import": "./src/utilities/getRequestTheme.ts",
-      "types": "./src/utilities/getRequestTheme.ts",
-      "default": "./src/utilities/getRequestTheme.ts"
-    },
-    "./utilities/getRouteWithoutAdmin": {
-      "import": "./src/utilities/getRouteWithoutAdmin.ts",
-      "types": "./src/utilities/getRouteWithoutAdmin.ts",
-      "default": "./src/utilities/getRouteWithoutAdmin.ts"
-    },
-    "./utilities/isCustomAdminView": {
-      "import": "./src/utilities/isCustomAdminView.ts",
-      "types": "./src/utilities/isCustomAdminView.ts",
-      "default": "./src/utilities/isCustomAdminView.ts"
-    },
-    "./utilities/isPublicAdminRoute": {
-      "import": "./src/utilities/isPublicAdminRoute.ts",
-      "types": "./src/utilities/isPublicAdminRoute.ts",
-      "default": "./src/utilities/isPublicAdminRoute.ts"
-    },
-    "./utilities/handleAuthRedirect": {
-      "import": "./src/utilities/handleAuthRedirect.ts",
-      "types": "./src/utilities/handleAuthRedirect.ts",
-      "default": "./src/utilities/handleAuthRedirect.ts"
-    },
-    "./utilities/getPreferences": {
-      "import": "./src/utilities/getPreferences.ts",
-      "types": "./src/utilities/getPreferences.ts",
-      "default": "./src/utilities/getPreferences.ts"
-    },
-    "./utilities/initReq": {
-      "import": "./src/utilities/initReq.ts",
-      "types": "./src/utilities/initReq.ts",
-      "default": "./src/utilities/initReq.ts"
-    },
-    "./utilities/buildFieldSchemaMap/traverseFields": {
-      "import": "./src/utilities/buildFieldSchemaMap/traverseFields.ts",
-      "types": "./src/utilities/buildFieldSchemaMap/traverseFields.ts",
-      "default": "./src/utilities/buildFieldSchemaMap/traverseFields.ts"
-    },
-    "./forms/fieldSchemasToFormState": {
-      "import": "./src/forms/fieldSchemasToFormState/index.tsx",
-      "types": "./src/forms/fieldSchemasToFormState/index.tsx",
-      "default": "./src/forms/fieldSchemasToFormState/index.tsx"
-    },
-    "./forms/renderField": {
-      "import": "./src/forms/fieldSchemasToFormState/renderField.tsx",
-      "types": "./src/forms/fieldSchemasToFormState/renderField.tsx",
-      "default": "./src/forms/fieldSchemasToFormState/renderField.tsx"
-    },
+    "./utilities/getDocumentPermissions": null,
+    "./utilities/getIsLocked": null,
+    "./utilities/getVersions": null,
+    "./utilities/getDocPreferences": null,
+    "./utilities/getDocumentData": null,
+    "./utilities/buildFormState": null,
+    "./utilities/buildTableState": null,
+    "./utilities/getClientSchemaMap": null,
+    "./utilities/getSchemaMap": null,
+    "./utilities/handleServerFunctions": null,
+    "./utilities/schedulePublishHandler": null,
+    "./utilities/slugify": null,
+    "./utilities/getHierarchyAncestry": null,
+    "./utilities/getClientConfig": null,
+    "./utilities/getLanguageDir": null,
+    "./utilities/getRequestEmbed": null,
+    "./utilities/getRequestTheme": null,
+    "./utilities/getRouteWithoutAdmin": null,
+    "./utilities/isCustomAdminView": null,
+    "./utilities/isPublicAdminRoute": null,
+    "./utilities/handleAuthRedirect": null,
+    "./utilities/getPreferences": null,
+    "./utilities/initReq": null,
+    "./utilities/buildFieldSchemaMap/traverseFields": null,
+    "./forms/fieldSchemasToFormState": null,
+    "./forms/renderField": null,
     "./css/app.css": "./src/css/app.css",
     "./assets": {
       "import": "./src/assets/index.ts",
@@ -369,43 +189,21 @@
       "types": "./src/exports/server/index.ts",
       "default": "./src/exports/server/index.ts"
     },
-    "./views/Dashboard/Default/ModularDashboard/renderWidget/renderWidgetServerFn": {
-      "import": "./src/views/Dashboard/Default/ModularDashboard/renderWidget/renderWidgetServerFn.ts",
-      "types": "./src/views/Dashboard/Default/ModularDashboard/renderWidget/renderWidgetServerFn.ts",
-      "default": "./src/views/Dashboard/Default/ModularDashboard/renderWidget/renderWidgetServerFn.ts"
-    },
-    "./views/Dashboard/Default/ModularDashboard/renderWidget/getDefaultLayoutServerFn": {
-      "import": "./src/views/Dashboard/Default/ModularDashboard/renderWidget/getDefaultLayoutServerFn.ts",
-      "types": "./src/views/Dashboard/Default/ModularDashboard/renderWidget/getDefaultLayoutServerFn.ts",
-      "default": "./src/views/Dashboard/Default/ModularDashboard/renderWidget/getDefaultLayoutServerFn.ts"
-    },
-    "./elements/Nav/SidebarTabs/renderTabServerFn": {
-      "import": "./src/elements/Nav/SidebarTabs/renderTabServerFn.ts",
-      "types": "./src/elements/Nav/SidebarTabs/renderTabServerFn.ts",
-      "default": "./src/elements/Nav/SidebarTabs/renderTabServerFn.ts"
-    },
-    "./elements/RenderServerComponent/clientOnly": {
-      "import": "./src/elements/RenderServerComponent/clientOnly.tsx",
-      "types": "./src/elements/RenderServerComponent/clientOnly.tsx",
-      "default": "./src/elements/RenderServerComponent/clientOnly.tsx"
-    },
-    "./elements/Nav/getNavPrefs": {
-      "import": "./src/elements/Nav/getNavPrefs.ts",
-      "types": "./src/elements/Nav/getNavPrefs.ts",
-      "default": "./src/elements/Nav/getNavPrefs.ts"
-    },
+    "./views/Dashboard/Default/ModularDashboard/renderWidget/renderWidgetServerFn": null,
+    "./views/Dashboard/Default/ModularDashboard/renderWidget/getDefaultLayoutServerFn": null,
+    "./elements/Nav/SidebarTabs/renderTabServerFn": null,
+    "./elements/RenderServerComponent/clientOnly": null,
+    "./elements/Nav/getNavPrefs": null,
     "./elements/DocumentHeader/Tabs/Tab/TabLink": null,
     "./elements/DocumentHeader/Tabs/ShouldRenderTabs": null,
-    "./widgets/CollectionCards/index.client": {
-      "import": "./src/widgets/CollectionCards/index.client.tsx",
-      "types": "./src/widgets/CollectionCards/index.client.tsx",
-      "default": "./src/widgets/CollectionCards/index.client.tsx"
-    },
-    "./utilities/serverFunctionRegistry": {
-      "import": "./src/utilities/serverFunctionRegistry.ts",
-      "types": "./src/utilities/serverFunctionRegistry.ts",
-      "default": "./src/utilities/serverFunctionRegistry.ts"
-    }
+    "./widgets/CollectionCards/index.client": null,
+    "./utilities/serverFunctionRegistry": null,
+    "./hooks/useUseAsTitle": null,
+    "./fields/Blocks/BlocksDrawer": null,
+    "./fields/Blocks/BlockSelector": null,
+    "./fields/Blocks/SectionTitle": null,
+    "./fields/Hidden": null,
+    "./fields/Null": null
   },
   "main": "./src/exports/client/index.ts",
   "types": "./src/exports/client/index.ts",
@@ -513,11 +311,6 @@
         "types": "./dist/exports/shared/index.d.ts",
         "default": "./dist/exports/shared/index.js"
       },
-      "./layouts": {
-        "import": "./dist/exports/layouts.js",
-        "types": "./dist/exports/layouts.d.ts",
-        "default": "./dist/exports/layouts.js"
-      },
       "./css": {
         "import": "./dist/styles.css",
         "default": "./dist/styles.css"
@@ -534,15 +327,26 @@
         "types": "./dist/assets/index.d.ts",
         "default": "./dist/assets/index.js"
       },
-      "./elements/RenderServerComponent": {
-        "import": "./dist/elements/RenderServerComponent/index.js",
-        "types": "./dist/elements/RenderServerComponent/index.d.ts",
-        "default": "./dist/elements/RenderServerComponent/index.js"
+      "./elements/RenderServerComponent": null,
+      "./elements/Banner": {
+        "import": "./dist/elements/Banner/index.js",
+        "types": "./dist/elements/Banner/index.d.ts",
+        "default": "./dist/elements/Banner/index.js"
       },
-      "./elements/*": {
-        "import": "./dist/elements/*/index.js",
-        "types": "./dist/elements/*/index.d.ts",
-        "default": "./dist/elements/*/index.js"
+      "./elements/Button": {
+        "import": "./dist/elements/Button/index.js",
+        "types": "./dist/elements/Button/index.d.ts",
+        "default": "./dist/elements/Button/index.js"
+      },
+      "./elements/Collapsible": {
+        "import": "./dist/elements/Collapsible/index.js",
+        "types": "./dist/elements/Collapsible/index.d.ts",
+        "default": "./dist/elements/Collapsible/index.js"
+      },
+      "./elements/Table/DefaultCell/fields/Status": {
+        "import": "./dist/elements/Table/DefaultCell/fields/Status/index.js",
+        "types": "./dist/elements/Table/DefaultCell/fields/Status/index.d.ts",
+        "default": "./dist/elements/Table/DefaultCell/fields/Status/index.js"
       },
       "./elements/AppHeader": null,
       "./elements/BulkUpload": null,
@@ -601,26 +405,8 @@
         "types": "./dist/fields/*/index.d.ts",
         "default": "./dist/fields/*/index.js"
       },
-      "./forms/fieldSchemasToFormState": {
-        "import": "./dist/forms/fieldSchemasToFormState/index.js",
-        "types": "./dist/forms/fieldSchemasToFormState/index.d.ts",
-        "default": "./dist/forms/fieldSchemasToFormState/index.js"
-      },
-      "./forms/renderField": {
-        "import": "./dist/forms/fieldSchemasToFormState/renderField.js",
-        "types": "./dist/forms/fieldSchemasToFormState/renderField.d.ts",
-        "default": "./dist/forms/fieldSchemasToFormState/renderField.js"
-      },
-      "./forms/*": {
-        "import": "./dist/forms/*/index.js",
-        "types": "./dist/forms/*/index.d.ts",
-        "default": "./dist/forms/*/index.js"
-      },
-      "./graphics/*": {
-        "import": "./dist/graphics/*/index.js",
-        "types": "./dist/graphics/*/index.d.ts",
-        "default": "./dist/graphics/*/index.js"
-      },
+      "./forms/fieldSchemasToFormState": null,
+      "./forms/renderField": null,
       "./hooks/*": {
         "import": "./dist/hooks/*.js",
         "types": "./dist/hooks/*.d.ts",
@@ -631,158 +417,44 @@
         "types": "./dist/icons/*/index.d.ts",
         "default": "./dist/icons/*/index.js"
       },
-      "./utilities/formatMetadata": {
-        "import": "./dist/utilities/formatMetadata.js",
-        "types": "./dist/utilities/formatMetadata.d.ts",
-        "default": "./dist/utilities/formatMetadata.js"
-      },
-      "./views/API/generateAPIViewMetadata": {
-        "import": "./dist/views/API/generateAPIViewMetadata.js",
-        "types": "./dist/views/API/generateAPIViewMetadata.d.ts",
-        "default": "./dist/views/API/generateAPIViewMetadata.js"
-      },
-      "./views/CollectionTrash/generateCollectionTrashMetadata": {
-        "import": "./dist/views/CollectionTrash/generateCollectionTrashMetadata.js",
-        "types": "./dist/views/CollectionTrash/generateCollectionTrashMetadata.d.ts",
-        "default": "./dist/views/CollectionTrash/generateCollectionTrashMetadata.js"
-      },
-      "./views/Document/generateEditViewMetadata": {
-        "import": "./dist/views/Document/generateEditViewMetadata.js",
-        "types": "./dist/views/Document/generateEditViewMetadata.d.ts",
-        "default": "./dist/views/Document/generateEditViewMetadata.js"
-      },
-      "./views/List/generateListViewMetadata": {
-        "import": "./dist/views/List/generateListViewMetadata.js",
-        "types": "./dist/views/List/generateListViewMetadata.d.ts",
-        "default": "./dist/views/List/generateListViewMetadata.js"
-      },
-      "./views/Root/generateCustomViewMetadata": {
-        "import": "./dist/views/Root/generateCustomViewMetadata.js",
-        "types": "./dist/views/Root/generateCustomViewMetadata.d.ts",
-        "default": "./dist/views/Root/generateCustomViewMetadata.js"
-      },
-      "./views/Version/generateVersionViewMetadata": {
-        "import": "./dist/views/Version/generateVersionViewMetadata.js",
-        "types": "./dist/views/Version/generateVersionViewMetadata.d.ts",
-        "default": "./dist/views/Version/generateVersionViewMetadata.js"
-      },
-      "./views/Versions/generateVersionsViewMetadata": {
-        "import": "./dist/views/Versions/generateVersionsViewMetadata.js",
-        "types": "./dist/views/Versions/generateVersionsViewMetadata.d.ts",
-        "default": "./dist/views/Versions/generateVersionsViewMetadata.js"
-      },
-      "./views/Dashboard/serverFunctions": {
-        "import": "./dist/views/Dashboard/serverFunctions.js",
-        "types": "./dist/views/Dashboard/serverFunctions.d.ts",
-        "default": "./dist/views/Dashboard/serverFunctions.js"
-      },
-      "./views/Document/handleServerFunction": {
-        "import": "./dist/views/Document/handleServerFunction.js",
-        "types": "./dist/views/Document/handleServerFunction.d.ts",
-        "default": "./dist/views/Document/handleServerFunction.js"
-      },
-      "./views/Document/renderDocumentSlots": {
-        "import": "./dist/views/Document/renderDocumentSlots.js",
-        "types": "./dist/views/Document/renderDocumentSlots.d.ts",
-        "default": "./dist/views/Document/renderDocumentSlots.js"
-      },
-      "./views/List/handleServerFunction": {
-        "import": "./dist/views/List/handleServerFunction.js",
-        "types": "./dist/views/List/handleServerFunction.d.ts",
-        "default": "./dist/views/List/handleServerFunction.js"
-      },
-      "./views/Versions/fetchVersions": {
-        "import": "./dist/views/Versions/fetchVersions.js",
-        "types": "./dist/views/Versions/fetchVersions.d.ts",
-        "default": "./dist/views/Versions/fetchVersions.js"
-      },
-      "./views/NotFound/page": {
-        "import": "./dist/views/NotFound/page.js",
-        "types": "./dist/views/NotFound/page.d.ts",
-        "default": "./dist/views/NotFound/page.js"
-      },
-      "./views/Root/getCustomViewByRoute": {
-        "import": "./dist/views/Root/getCustomViewByRoute.js",
-        "types": "./dist/views/Root/getCustomViewByRoute.d.ts",
-        "default": "./dist/views/Root/getCustomViewByRoute.js"
-      },
-      "./views/Root/adminViews": {
-        "import": "./dist/views/Root/adminViews.js",
-        "types": "./dist/views/Root/adminViews.d.ts",
-        "default": "./dist/views/Root/adminViews.js"
-      },
-      "./views/Root/generatePageMetadata": {
-        "import": "./dist/views/Root/generatePageMetadata.js",
-        "types": "./dist/views/Root/generatePageMetadata.d.ts",
-        "default": "./dist/views/Root/generatePageMetadata.js"
-      },
-      "./views/Document/getMetaBySegment": {
-        "import": "./dist/views/Document/getMetaBySegment.js",
-        "types": "./dist/views/Document/getMetaBySegment.d.ts",
-        "default": "./dist/views/Document/getMetaBySegment.js"
-      },
-      "./views/*/metadata": {
-        "import": "./dist/views/*/metadata.js",
-        "types": "./dist/views/*/metadata.d.ts",
-        "default": "./dist/views/*/metadata.js"
-      },
-      "./views/*": {
-        "import": "./dist/views/*/index.js",
-        "types": "./dist/views/*/index.d.ts",
-        "default": "./dist/views/*/index.js"
-      },
-      "./providers/*": {
-        "import": "./dist/providers/*/index.js",
-        "types": "./dist/providers/*/index.d.ts",
-        "default": "./dist/providers/*/index.js"
-      },
-      "./utilities/*": {
-        "import": "./dist/utilities/*.js",
-        "types": "./dist/utilities/*.d.ts",
-        "default": "./dist/utilities/*.js"
-      },
+      "./utilities/formatMetadata": null,
+      "./views/API/generateAPIViewMetadata": null,
+      "./views/CollectionTrash/generateCollectionTrashMetadata": null,
+      "./views/Document/generateEditViewMetadata": null,
+      "./views/List/generateListViewMetadata": null,
+      "./views/Root/generateCustomViewMetadata": null,
+      "./views/Version/generateVersionViewMetadata": null,
+      "./views/Versions/generateVersionsViewMetadata": null,
+      "./views/Dashboard/serverFunctions": null,
+      "./views/Document/handleServerFunction": null,
+      "./views/Document/renderDocumentSlots": null,
+      "./views/List/handleServerFunction": null,
+      "./views/Versions/fetchVersions": null,
+      "./views/NotFound/page": null,
+      "./views/Root/getCustomViewByRoute": null,
+      "./views/Root/adminViews": null,
+      "./views/Root/generatePageMetadata": null,
+      "./views/Document/getMetaBySegment": null,
       "./server": {
         "import": "./dist/exports/server/index.js",
         "types": "./dist/exports/server/index.d.ts",
         "default": "./dist/exports/server/index.js"
       },
-      "./views/Dashboard/Default/ModularDashboard/renderWidget/renderWidgetServerFn": {
-        "import": "./dist/views/Dashboard/Default/ModularDashboard/renderWidget/renderWidgetServerFn.js",
-        "types": "./dist/views/Dashboard/Default/ModularDashboard/renderWidget/renderWidgetServerFn.d.ts",
-        "default": "./dist/views/Dashboard/Default/ModularDashboard/renderWidget/renderWidgetServerFn.js"
-      },
-      "./views/Dashboard/Default/ModularDashboard/renderWidget/getDefaultLayoutServerFn": {
-        "import": "./dist/views/Dashboard/Default/ModularDashboard/renderWidget/getDefaultLayoutServerFn.js",
-        "types": "./dist/views/Dashboard/Default/ModularDashboard/renderWidget/getDefaultLayoutServerFn.d.ts",
-        "default": "./dist/views/Dashboard/Default/ModularDashboard/renderWidget/getDefaultLayoutServerFn.js"
-      },
-      "./elements/Nav/SidebarTabs/renderTabServerFn": {
-        "import": "./dist/elements/Nav/SidebarTabs/renderTabServerFn.js",
-        "types": "./dist/elements/Nav/SidebarTabs/renderTabServerFn.d.ts",
-        "default": "./dist/elements/Nav/SidebarTabs/renderTabServerFn.js"
-      },
-      "./elements/RenderServerComponent/clientOnly": {
-        "import": "./dist/elements/RenderServerComponent/clientOnly.js",
-        "types": "./dist/elements/RenderServerComponent/clientOnly.d.ts",
-        "default": "./dist/elements/RenderServerComponent/clientOnly.js"
-      },
-      "./elements/Nav/getNavPrefs": {
-        "import": "./dist/elements/Nav/getNavPrefs.js",
-        "types": "./dist/elements/Nav/getNavPrefs.d.ts",
-        "default": "./dist/elements/Nav/getNavPrefs.js"
-      },
+      "./views/Dashboard/Default/ModularDashboard/renderWidget/renderWidgetServerFn": null,
+      "./views/Dashboard/Default/ModularDashboard/renderWidget/getDefaultLayoutServerFn": null,
+      "./elements/Nav/SidebarTabs/renderTabServerFn": null,
+      "./elements/RenderServerComponent/clientOnly": null,
+      "./elements/Nav/getNavPrefs": null,
       "./elements/DocumentHeader/Tabs/Tab/TabLink": null,
       "./elements/DocumentHeader/Tabs/ShouldRenderTabs": null,
-      "./widgets/CollectionCards/index.client": {
-        "import": "./dist/widgets/CollectionCards/index.client.js",
-        "types": "./dist/widgets/CollectionCards/index.client.d.ts",
-        "default": "./dist/widgets/CollectionCards/index.client.js"
-      },
-      "./utilities/serverFunctionRegistry": {
-        "import": "./dist/utilities/serverFunctionRegistry.js",
-        "types": "./dist/utilities/serverFunctionRegistry.d.ts",
-        "default": "./dist/utilities/serverFunctionRegistry.js"
-      }
+      "./widgets/CollectionCards/index.client": null,
+      "./utilities/serverFunctionRegistry": null,
+      "./hooks/useUseAsTitle": null,
+      "./fields/Blocks/BlocksDrawer": null,
+      "./fields/Blocks/BlockSelector": null,
+      "./fields/Blocks/SectionTitle": null,
+      "./fields/Hidden": null,
+      "./fields/Null": null
     },
     "main": "./dist/exports/client/index.js",
     "types": "./dist/exports/client/index.d.ts"

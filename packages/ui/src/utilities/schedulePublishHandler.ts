@@ -1,5 +1,6 @@
 import { canAccessAdmin, type SchedulePublishTaskInput, type ServerFunction } from 'payload'
 
+/** @internal */
 export type SchedulePublishHandlerArgs = {
   date?: Date
   /**
@@ -10,6 +11,7 @@ export type SchedulePublishHandlerArgs = {
   timezone?: string
 } & Pick<SchedulePublishTaskInput, 'doc' | 'global' | 'type'>
 
+/** @internal */
 export const schedulePublishHandler: ServerFunction<SchedulePublishHandlerArgs> = async ({
   type,
   date,

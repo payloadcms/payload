@@ -4,6 +4,7 @@ import { useSelection } from '../../providers/Selection/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Button } from '../Button/index.js'
 
+/** @internal */
 export const SelectMany: React.FC<{
   onClick?: (ids: ReturnType<typeof useSelection>['selected']) => void
 }> = (props) => {

@@ -11,6 +11,7 @@ if (!cachedSchemaMap) {
   cachedSchemaMap = global._payload_schemaMap = null
 }
 
+/** @internal */
 export const getSchemaMap = cache(
   (args: {
     collectionSlug?: string

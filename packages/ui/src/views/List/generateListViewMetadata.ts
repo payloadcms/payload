@@ -4,6 +4,7 @@ import { getTranslation } from '@payloadcms/translations'
 
 import { formatMetadata } from '../../utilities/formatMetadata.js'
 
+/** @internal */
 export const generateListViewMetadata = async (
   args: {
     collectionConfig: SanitizedCollectionConfig

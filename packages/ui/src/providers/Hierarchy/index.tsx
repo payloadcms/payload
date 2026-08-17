@@ -22,6 +22,7 @@ import { useRouter } from '../RouterAdapter/index.js'
 
 const HierarchyContext = createContext<HierarchyContextValue | undefined>(undefined)
 
+/** @internal */
 export const HierarchyProvider: React.FC<HierarchyProviderProps> = ({ children }) => {
   const { setPreference } = usePreferences()
   const router = useRouter()

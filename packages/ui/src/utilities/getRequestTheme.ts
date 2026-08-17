@@ -10,6 +10,7 @@ type GetRequestThemeArgs = {
 
 const acceptedThemes: Theme[] = ['dark', 'light']
 
+/** @internal */
 export const getRequestTheme = ({ config, cookies, headers }: GetRequestThemeArgs): Theme => {
   if (config.admin.theme !== 'all' && acceptedThemes.includes(config.admin.theme)) {
     return config.admin.theme

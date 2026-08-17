@@ -4,7 +4,7 @@ import type { BlockComponentContextType } from '@payloadcms/richtext-lexical/rea
 
 import { useLexicalEditable } from '@payloadcms/richtext-lexical/lexical/react/useLexicalEditable'
 import { RichText } from '@payloadcms/richtext-lexical/react'
-import { RenderFields } from '@payloadcms/ui'
+import { RenderFields } from '@payloadcms/ui/internal'
 import React from 'react'
 
 /**

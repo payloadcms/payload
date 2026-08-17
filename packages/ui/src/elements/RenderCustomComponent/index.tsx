@@ -13,6 +13,8 @@ type Args = {
  * @param {React.ReactNode} [args.CustomComponent] - Optional custom component to render.
  * @param {React.ReactNode} args.Fallback - Fallback component to render if CustomComponent is undefined.
  * @returns {React.ReactNode} Rendered component.
+ *
+ * @internal
  */
 export function RenderCustomComponent({ CustomComponent, Fallback }: Args): React.ReactNode {
   return CustomComponent !== undefined ? CustomComponent : Fallback

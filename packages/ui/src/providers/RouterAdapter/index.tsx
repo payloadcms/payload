@@ -16,6 +16,8 @@ export type RouterAdapterContextValue = {
  * provider component that calls framework-specific hooks (e.g. next/navigation)
  * and passes the values here. This avoids calling dynamic hooks from props,
  * which would violate React compiler rules.
+ *
+ * @internal
  */
 export const RouterAdapterContext = createContext<null | RouterAdapterContextValue>(null)
 

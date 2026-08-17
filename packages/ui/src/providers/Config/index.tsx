@@ -41,6 +41,7 @@ export type ClientConfigContext = {
 
 const RootConfigContext = createContext<ClientConfigContext | undefined>(undefined)
 
+/** @internal */
 export const ConfigProvider: React.FC<{
   readonly children: React.ReactNode
   readonly config: ClientConfig
@@ -101,6 +102,8 @@ export const useConfig = (): ClientConfigContext => use(RootConfigContext)
  * simply reuse the context from the layout to avoid unnecessary re-renders.
  *
  * @experimental This component is experimental and may change or be removed in future releases. Use at your own risk.
+ *
+ * @internal
  */
 export const PageConfigProvider: React.FC<{
   readonly children: React.ReactNode

@@ -27,11 +27,12 @@ import React, { Fragment } from 'react'
 
 import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
 /* eslint-disable payload/no-imports-from-exports-dir -- Server component must reference exports/client bundle for proper client boundary in prod builds */
-import { DefaultListView, ListQueryProvider } from '../../exports/client/index.js'
+import { DefaultListView } from '../../exports/client/index.js'
 import {
   HierarchyListView,
   HydrateAuthProvider,
   HydrateHierarchyProvider,
+  ListQueryProvider,
 } from '../../exports/client/internal.js'
 /* eslint-enable payload/no-imports-from-exports-dir */
 import { getColumns } from '../../utilities/getColumns.js'

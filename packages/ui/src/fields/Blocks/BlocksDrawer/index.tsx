@@ -17,6 +17,7 @@ export type Props = {
   readonly labels: Labels
 }
 
+/** @internal */
 export const BlocksDrawer: React.FC<Props> = (props) => {
   const { addRow, addRowIndex, blocks, drawerSlug, labels } = props
 

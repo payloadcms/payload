@@ -8,10 +8,8 @@ import { getTranslation } from '@payloadcms/translations'
 import {
   Button,
   Drawer,
-  EditDepthProvider,
   Form,
   formatDrawerSlug,
-  RenderFields,
   ShimmerEffect,
   useConfig,
   useDocumentForm,
@@ -20,6 +18,7 @@ import {
   useServerFunctions,
   useTranslation,
 } from '@payloadcms/ui'
+import { EditDepthProvider, RenderFields } from '@payloadcms/ui/internal'
 import { abortAndIgnore } from '@payloadcms/ui/shared'
 import { $getNodeByKey, SKIP_DOM_SELECTION_TAG } from 'lexical'
 

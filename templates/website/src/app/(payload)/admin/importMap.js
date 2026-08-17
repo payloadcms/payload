@@ -1,4 +1,4 @@
-import { NullField as NullField_3817bf644402e67bfe6577f60ef982de } from '@payloadcms/ui'
+import { NullField as NullField_ebcb63aec7f138decbcaba406ab9dc47 } from '@payloadcms/ui/internal'
 import { HierarchyButton as HierarchyButton_7786a4d8c912b805da596d072de13b94 } from '@payloadcms/ui/internal/rsc'
 import { RscEntryLexicalCell as RscEntryLexicalCell_44fe37237e0ebf4470c9990d8cb7b07e } from '@payloadcms/richtext-lexical/rsc'
 import { RscEntryLexicalField as RscEntryLexicalField_44fe37237e0ebf4470c9990d8cb7b07e } from '@payloadcms/richtext-lexical/rsc'
@@ -27,15 +27,15 @@ import { default as default_8a7ab0eb7ab5c511aba12e68480bfe5e } from '@/component
 import { FolderIcon as FolderIcon_3817bf644402e67bfe6577f60ef982de } from '@payloadcms/ui'
 import { HierarchySidebarTabServer as HierarchySidebarTabServer_7786a4d8c912b805da596d072de13b94 } from '@payloadcms/ui/internal/rsc'
 import { CollectionCards as CollectionCards_ab83ff7e88da8d3530831f296ec4756a } from '@payloadcms/ui/rsc'
-import { CollectionQueryWidget as CollectionQueryWidget_ab83ff7e88da8d3530831f296ec4756a } from '@payloadcms/ui/rsc'
+import { CollectionQueryWidget as CollectionQueryWidget_7786a4d8c912b805da596d072de13b94 } from '@payloadcms/ui/internal/rsc'
 import { QueryPresetsWhereField as QueryPresetsWhereField_ebcb63aec7f138decbcaba406ab9dc47 } from '@payloadcms/ui/internal'
 import { CollectionQuerySortField as CollectionQuerySortField_ebcb63aec7f138decbcaba406ab9dc47 } from '@payloadcms/ui/internal'
-import { RecentlyViewedWidget as RecentlyViewedWidget_ab83ff7e88da8d3530831f296ec4756a } from '@payloadcms/ui/rsc'
+import { RecentlyViewedWidget as RecentlyViewedWidget_7786a4d8c912b805da596d072de13b94 } from '@payloadcms/ui/internal/rsc'
 import { RecentlyViewedCollectionsField as RecentlyViewedCollectionsField_ebcb63aec7f138decbcaba406ab9dc47 } from '@payloadcms/ui/internal'
 
 /** @type import('payload').ImportMap */
 export const importMap = {
-  '@payloadcms/ui#NullField': NullField_3817bf644402e67bfe6577f60ef982de,
+  '@payloadcms/ui/internal#NullField': NullField_ebcb63aec7f138decbcaba406ab9dc47,
   '@payloadcms/ui/internal/rsc#HierarchyButton': HierarchyButton_7786a4d8c912b805da596d072de13b94,
   '@payloadcms/richtext-lexical/rsc#RscEntryLexicalCell':
     RscEntryLexicalCell_44fe37237e0ebf4470c9990d8cb7b07e,
@@ -83,13 +83,14 @@ export const importMap = {
   '@payloadcms/ui/internal/rsc#HierarchySidebarTabServer':
     HierarchySidebarTabServer_7786a4d8c912b805da596d072de13b94,
   '@payloadcms/ui/rsc#CollectionCards': CollectionCards_ab83ff7e88da8d3530831f296ec4756a,
-  '@payloadcms/ui/rsc#CollectionQueryWidget':
-    CollectionQueryWidget_ab83ff7e88da8d3530831f296ec4756a,
+  '@payloadcms/ui/internal/rsc#CollectionQueryWidget':
+    CollectionQueryWidget_7786a4d8c912b805da596d072de13b94,
   '@payloadcms/ui/internal#QueryPresetsWhereField':
     QueryPresetsWhereField_ebcb63aec7f138decbcaba406ab9dc47,
   '@payloadcms/ui/internal#CollectionQuerySortField':
     CollectionQuerySortField_ebcb63aec7f138decbcaba406ab9dc47,
-  '@payloadcms/ui/rsc#RecentlyViewedWidget': RecentlyViewedWidget_ab83ff7e88da8d3530831f296ec4756a,
+  '@payloadcms/ui/internal/rsc#RecentlyViewedWidget':
+    RecentlyViewedWidget_7786a4d8c912b805da596d072de13b94,
   '@payloadcms/ui/internal#RecentlyViewedCollectionsField':
     RecentlyViewedCollectionsField_ebcb63aec7f138decbcaba406ab9dc47,
 }

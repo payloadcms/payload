@@ -394,6 +394,7 @@ const DocumentInfo: React.FC<
   )
 }
 
+/** @internal */
 export const DocumentInfoProvider: React.FC<
   {
     readonly children: React.ReactNode

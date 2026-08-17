@@ -70,6 +70,7 @@ function DrawerContent() {
   return <AddingFilesView modalSlug={modalSlug} />
 }
 
+/** @internal */
 export type BulkUploadProps = {
   readonly children: React.ReactNode
 }
@@ -213,6 +214,7 @@ const Context = React.createContext<BulkUploadContext>({
   setSuccessfullyUploaded: () => false,
   successfullyUploaded: false,
 })
+/** @internal */
 export function BulkUploadProvider({
   children,
   modalSlugPrefix,
@@ -281,6 +283,7 @@ export function BulkUploadProvider({
 
 export const useBulkUpload = () => React.use(Context)
 
+/** @internal */
 export function useBulkUploadModalSlug() {
   const depth = useDrawerDepth()
 

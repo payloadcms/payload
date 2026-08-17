@@ -7,6 +7,8 @@ import * as qs from 'qs-esm'
  * This function can be used to parse that object into a more usable format.
  * @param {URLSearchParams} searchParams - The URLSearchParams object to parse.
  * @returns {qs.ParsedQs} - The parsed query string object.
+ *
+ * @internal
  */
 export function parseSearchParams(searchParams: URLSearchParams): qs.ParsedQs {
   const search = searchParams.toString()

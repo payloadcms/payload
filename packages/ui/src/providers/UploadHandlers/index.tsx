@@ -17,6 +17,7 @@ export type UploadHandlersContext = {
 
 const Context = React.createContext<null | UploadHandlersContext>(null)
 
+/** @internal */
 export const UploadHandlersProvider = ({ children }) => {
   const { config, getEntityConfig } = useConfig()
   const uploadInstructionsURL = formatAdminURL({

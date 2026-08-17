@@ -32,6 +32,8 @@ const LogoutInactivityView: React.FC<AdminViewServerProps> = (props) => (
  * server component with a `MetaConfig`-returning metadata generator. Framework
  * adapters re-export this registry and cast `MetaConfig` → their framework's
  * metadata type at the boundary.
+ *
+ * @internal
  */
 export const defaultAdminViews: AdminViewAdapter<AdminViewServerProps, MetaConfig> = {
   account: { Component: AccountView, generateMetadata: generateAccountMetadata },

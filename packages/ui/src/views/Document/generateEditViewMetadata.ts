@@ -8,6 +8,8 @@ import { formatMetadata } from '../../utilities/formatMetadata.js'
 
 /**
  * @todo Remove the type assertion. This is currently required because of how the `Metadata` type from `next` consumes the `URL` type.
+ *
+ * @internal
  */
 export const generateEditViewMetadata: GenerateEditViewMetadata = async ({
   collectionConfig,

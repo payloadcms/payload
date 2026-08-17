@@ -5,6 +5,7 @@ import { getTranslation } from '@payloadcms/translations'
 
 import { formatMetadata } from '../../utilities/formatMetadata.js'
 
+/** @internal */
 export const generateCollectionTrashMetadata = async (args: {
   collectionConfig: SanitizedCollectionConfig
   config: SanitizedConfig

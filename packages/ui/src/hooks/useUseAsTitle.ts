@@ -5,6 +5,7 @@ import { flattenTopLevelFields } from 'payload/shared'
 
 import { useTranslation } from '../providers/Translation/index.js'
 
+/** @internal */
 export const useUseTitleField = (collection: ClientCollectionConfig): ClientField => {
   const {
     admin: { useAsTitle },

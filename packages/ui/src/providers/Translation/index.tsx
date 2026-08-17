@@ -56,6 +56,7 @@ type Props = {
   translations: I18nClient['translations']
 }
 
+/** @internal */
 export const TranslationProvider: React.FC<Props> = ({
   children,
   dateFNSKey,

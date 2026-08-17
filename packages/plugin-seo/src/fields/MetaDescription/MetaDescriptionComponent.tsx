@@ -14,7 +14,7 @@ import {
   useLocale,
   useTranslation,
 } from '@payloadcms/ui'
-import { reduceToSerializableFields } from '@payloadcms/ui/shared'
+import { reduceToSerializableFields } from '@payloadcms/ui/internal/shared'
 import { formatAdminURL } from 'payload/shared'
 import React, { useCallback } from 'react'
 

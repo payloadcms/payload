@@ -31,6 +31,7 @@ type EnrichedItem = {
 
 const displayLimit = 10
 
+/** @internal */
 export async function RecentlyViewedWidget({
   req,
   widgetData,

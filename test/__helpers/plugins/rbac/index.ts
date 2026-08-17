@@ -15,7 +15,7 @@ import type {
   TabAsField,
 } from 'payload'
 
-import { traverseFields } from '@payloadcms/ui/utilities/buildFieldSchemaMap/traverseFields'
+import { traverseFields } from '@payloadcms/ui/internal/server'
 import { defaultUserCollection, definePlugin, flattenAllFields, getLocalI18n } from 'payload'
 import { fieldAffectsData } from 'payload/shared'
 

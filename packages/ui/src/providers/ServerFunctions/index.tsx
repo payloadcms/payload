@@ -119,6 +119,7 @@ export type ServerFunctionsContextType = {
   switchLanguage: SwitchLanguageClient
 }
 
+/** @internal */
 export const ServerFunctionsContext = createContext<ServerFunctionsContextType | undefined>(
   undefined,
 )
@@ -131,6 +132,7 @@ export const useServerFunctions = () => {
   return context
 }
 
+/** @internal */
 export const ServerFunctionsProvider: React.FC<{
   children: React.ReactNode
   serverFunction: ServerFunctionClient

@@ -1,15 +1,18 @@
 import type { Payload, PayloadRequest } from 'payload'
 
+/** @internal */
 export type HierarchyAncestryItem = {
   id: number | string
   path: Array<{ id: number | string; title: string }>
   title: string
 }
 
+/** @internal */
 export type HierarchyAncestryResult = {
   items: HierarchyAncestryItem[]
 }
 
+/** @internal */
 export type GetHierarchyAncestryArgs = {
   hierarchySlug: string
   ids: (number | string)[]
@@ -20,6 +23,8 @@ export type GetHierarchyAncestryArgs = {
 /**
  * Returns full ancestry paths for hierarchy items.
  * Each item includes its own title and the path from root to self.
+ *
+ * @internal
  */
 export async function getHierarchyAncestry({
   hierarchySlug,

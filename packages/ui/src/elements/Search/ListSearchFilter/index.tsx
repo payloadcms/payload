@@ -13,6 +13,7 @@ type ListSearchFilterProps = {
   searchQueryParam?: string
 }
 
+/** @internal */
 export function ListSearchFilter({
   className,
   disabled,

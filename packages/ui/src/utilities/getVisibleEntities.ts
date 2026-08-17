@@ -13,6 +13,7 @@ function isHidden(hidden: Hidden | undefined, user: unknown): boolean {
   return !!hidden
 }
 
+/** @internal */
 export function getVisibleEntities({ req }: { req: PayloadRequest }): VisibleEntities {
   return {
     collections: req.payload.config.collections

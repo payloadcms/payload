@@ -24,6 +24,7 @@ export type NonFieldError = {
  */
 export type FormErrorHandler = (err: NonFieldError, retry: () => void) => boolean
 
+/** @internal */
 export const FormErrorHandlerContext = createContext<FormErrorHandler | undefined>(undefined)
 
 export const useFormErrorHandler = (): FormErrorHandler | undefined => use(FormErrorHandlerContext)

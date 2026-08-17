@@ -2,7 +2,7 @@ import type { MongooseAdapter } from '@payloadcms/db-mongodb'
 import type { IndexDirection, IndexOptions } from 'mongoose'
 import type { Payload, ValidationError } from 'payload'
 
-import { slugifyHandler } from '@payloadcms/ui/utilities/slugify'
+import { slugifyHandler } from '@payloadcms/ui/internal/server'
 import path from 'path'
 import { createLocalReq, reload } from 'payload'
 import { fileURLToPath } from 'url'

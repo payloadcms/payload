@@ -19,7 +19,7 @@ import React from 'react'
 
 import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
 // eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports/client bundle for proper client boundary in prod builds
-import { PageConfigProvider } from '../../exports/client/index.js'
+import { PageConfigProvider } from '../../exports/client/internal.js'
 import { DefaultTemplate } from '../../templates/Default/index.js'
 import { MinimalTemplate } from '../../templates/Minimal/index.js'
 import { getClientConfig } from '../../utilities/getClientConfig.js'
@@ -39,6 +39,7 @@ type InitReqFn = (args: {
   overrides?: Parameters<typeof createLocalReq>[0]
 }) => Promise<InitReqResult>
 
+/** @internal */
 export type RenderRootArgs = {
   adminViews: AdminViewAdapter
   config: Promise<SanitizedConfig>
@@ -63,6 +64,7 @@ export type RenderRootArgs = {
   searchParams: Promise<{ [key: string]: string | string[] }>
 }
 
+/** @internal */
 export const renderRoot = async ({
   adminViews,
   config: configPromise,

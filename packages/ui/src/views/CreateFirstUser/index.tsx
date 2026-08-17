@@ -15,6 +15,7 @@ import './index.css'
 
 const baseClass = 'create-first-user'
 
+/** @internal */
 export async function CreateFirstUserView({ initPageResult }: AdminViewServerProps) {
   const {
     locale,

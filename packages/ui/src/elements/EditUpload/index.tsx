@@ -43,6 +43,7 @@ const defaultCrop: UploadEdits['crop'] = {
   y: 0,
 }
 
+/** @internal */
 export const EditUpload: React.FC<EditUploadProps> = ({
   fileName,
   fileSrc,

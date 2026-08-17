@@ -1,7 +1,7 @@
 'use client'
 import type { Theme } from '@payloadcms/ui'
 
-import { getLanguageDir } from '@payloadcms/ui/utilities/getLanguageDir'
+import { getLanguageDir } from '@payloadcms/ui/internal/server'
 import { HeadContent, Scripts, useRouterState } from '@tanstack/react-router'
 import React from 'react'
 

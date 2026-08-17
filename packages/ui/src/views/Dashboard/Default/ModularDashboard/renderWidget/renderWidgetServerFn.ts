@@ -5,6 +5,7 @@ import React from 'react'
 import { RenderServerComponent } from '../../../../../elements/RenderServerComponent/index.js'
 import { extractLocaleData } from '../utils/localeUtils.js'
 
+/** @internal */
 export type RenderWidgetServerFnArgs = {
   /**
    * Instance-specific data for this widget
@@ -16,6 +17,7 @@ export type RenderWidgetServerFnArgs = {
   widgetSlug: string
 }
 
+/** @internal */
 export type RenderWidgetServerFnReturnType = {
   component: React.ReactNode
 }
@@ -23,6 +25,8 @@ export type RenderWidgetServerFnReturnType = {
 /**
  * Server function to render a widget on-demand.
  * Similar to render-field but specifically for dashboard widgets.
+ *
+ * @internal
  */
 export const renderWidgetHandler: ServerFunction<
   RenderWidgetServerFnArgs,

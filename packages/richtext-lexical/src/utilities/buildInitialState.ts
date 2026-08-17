@@ -11,7 +11,7 @@ import type {
   SanitizedFieldPermissions,
 } from 'payload'
 
-import { fieldSchemasToFormState } from '@payloadcms/ui/forms/fieldSchemasToFormState'
+import { fieldSchemasToFormState } from '@payloadcms/ui/internal/server'
 
 import type { SerializedBlockNode } from '../types/nodeTypes.js'
 

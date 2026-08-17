@@ -1,6 +1,6 @@
 import type { JsonObject, Payload } from 'payload'
 
-import { schedulePublishHandler } from '@payloadcms/ui/utilities/schedulePublishHandler'
+import { schedulePublishHandler } from '@payloadcms/ui/internal/server'
 import fs from 'fs'
 import path from 'path'
 import { createLocalReq, getFileByPath, saveVersion, ValidationError } from 'payload'

@@ -21,6 +21,7 @@ const baseClass = 'condition-value-relationship'
 
 const maxResultsPerRequest = 10
 
+/** @internal */
 export const RelationshipFilter: React.FC<Props> = (props) => {
   const {
     disabled,

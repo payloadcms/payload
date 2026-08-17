@@ -20,12 +20,14 @@ import { handleLivePreview } from './handleLivePreview.js'
 import { handlePreview } from './handlePreview.js'
 import { handleStaleDataCheck } from './handleStaleDataCheck.js'
 
+/** @internal */
 export type LockedState = {
   isLocked: boolean
   lastEditedAt: string
   user?: number | string | User
 }
 
+/** @internal */
 export type StaleDataState = {
   currentUpdatedAt: string
   isStale: boolean
@@ -55,8 +57,10 @@ type BuildFormStateErrorResult = {
   | ErrorResult
 )
 
+/** @internal */
 export type BuildFormStateResult = BuildFormStateErrorResult | BuildFormStateSuccessResult
 
+/** @internal */
 export const buildFormStateHandler: ServerFunction<
   BuildFormStateArgs,
   Promise<BuildFormStateResult>
@@ -85,6 +89,7 @@ export const buildFormStateHandler: ServerFunction<
   }
 }
 
+/** @internal */
 export const buildFormState = async (
   args: BuildFormStateArgs,
 ): Promise<BuildFormStateSuccessResult> => {

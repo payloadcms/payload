@@ -22,6 +22,7 @@ export interface HandleTakeOverParams {
   user: AuthenticatedUser | number | string
 }
 
+/** @internal */
 export const handleTakeOver = async ({
   id,
   clearRouteCache,

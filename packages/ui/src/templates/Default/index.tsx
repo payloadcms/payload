@@ -17,12 +17,10 @@ import React from 'react'
 /* eslint-disable payload/no-imports-from-exports-dir -- Server component must reference exports dir for proper client boundary */
 import {
   ActionsProvider,
-  BulkUploadProvider,
-  EntityVisibilityProvider,
-} from '../../exports/client/index.js'
-import {
   AppHeader,
+  BulkUploadProvider,
   CommandPalette,
+  EntityVisibilityProvider,
   DefaultTemplateWrapper as Wrapper,
 } from '../../exports/client/internal.js'
 /* eslint-enable payload/no-imports-from-exports-dir */

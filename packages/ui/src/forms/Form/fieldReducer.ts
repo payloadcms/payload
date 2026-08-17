@@ -14,6 +14,8 @@ const ObjectId = 'default' in ObjectIdImport ? ObjectIdImport.default : ObjectId
 
 /**
  * Reducer which modifies the form field state (all the current data of the fields in the form). When called using dispatch, it will return a new state object.
+ *
+ * @internal
  */
 export function fieldReducer(state: FormState, action: FieldAction): FormState {
   switch (action.type) {
