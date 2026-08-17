@@ -10,7 +10,6 @@ import { combineQueries } from '../../database/combineQueries.js'
 import { APIError, Forbidden, NotFound } from '../../errors/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
-import { getSelectMode } from '../../utilities/getSelectMode.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { buildVersionCollectionFields } from '../../versions/buildCollectionFields.js'
@@ -20,6 +19,7 @@ import {
 } from '../../versions/isInheritedReadVersionsAccess.js'
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
+import { prefetchVersionForInheritedReadAccess } from './utilities/prefetchVersionForInheritedReadAccess.js'
 
 export type Arguments = {
   collection: Collection
@@ -33,64 +33,6 @@ export type Arguments = {
   showHiddenFields?: boolean
   trash?: boolean
 } & Pick<FindOptions<string, SelectType>, 'select'>
-
-const prefetchVersionForInheritedReadAccess = async <TData extends TypeWithID>({
-  id,
-  collectionConfig,
-  locale,
-  req,
-  select,
-  trash,
-}: {
-  collectionConfig: Collection['config']
-  id: number | string
-  locale: string
-  req: PayloadRequest
-  select?: SelectType
-  trash: boolean
-}): Promise<{
-  parentID?: TypeWithVersion<TData>['parent']
-  version?: TypeWithVersion<TData>
-}> => {
-  const selectMode = select ? getSelectMode(select) : undefined
-  const shouldOmitParent = Boolean(
-    select && ((selectMode === 'include' && select.parent !== true) || select.parent === false),
-  )
-  let prefetchSelect = select
-
-  if (select && selectMode === 'include') {
-    prefetchSelect = { ...select, parent: true }
-  } else if (select?.parent === false) {
-    prefetchSelect = { ...select }
-    delete prefetchSelect.parent
-  }
-
-  const { docs } = await req.payload.db.findVersions<TData>({
-    collection: collectionConfig.slug,
-    limit: 1,
-    locale,
-    pagination: false,
-    req,
-    select: prefetchSelect,
-    where: appendNonTrashedFilter({
-      deletedAtPath: 'version.deletedAt',
-      enableTrash: collectionConfig.trash,
-      trash,
-      where: { id: { equals: id } },
-    }),
-  })
-  const version = docs[0]
-  const parentID = version?.parent
-
-  if (version && shouldOmitParent) {
-    const versionWithoutParent = { ...version }
-    delete (versionWithoutParent as Partial<TypeWithVersion<TData>>).parent
-
-    return { parentID, version: versionWithoutParent }
-  }
-
-  return { parentID, version }
-}
 
 export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
   args: Arguments,
