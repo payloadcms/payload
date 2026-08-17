@@ -6,6 +6,7 @@ import type { SanitizedGlobalConfig } from '../config/types.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
+import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
 import { Forbidden, NotFound } from '../../errors/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { deepCopyObjectSimple } from '../../utilities/deepCopyObject.js'
@@ -60,8 +61,9 @@ export const findVersionByIDOperation = async <T extends TypeWithVersion<T> = an
 
   const hasWhereAccess = typeof accessResults === 'object'
 
+  const versionFields = buildVersionGlobalFields(payload.config, globalConfig, true)
   const select = sanitizeSelect({
-    fields: buildVersionGlobalFields(payload.config, globalConfig, true),
+    fields: versionFields,
     select: resolveSelect({
       config: globalConfig.select,
       operation: 'read',
@@ -71,13 +73,17 @@ export const findVersionByIDOperation = async <T extends TypeWithVersion<T> = an
     versions: true,
   })
 
+  const where = combineQueries({ id: { equals: id } }, accessResults)
+
+  sanitizeWhereQuery({ fields: versionFields, payload, where })
+
   const findGlobalVersionsArgs: FindGlobalVersionsArgs = {
     global: globalConfig.slug,
     limit: 1,
     locale: locale!,
     req,
     select,
-    where: combineQueries({ id: { equals: id } }, accessResults),
+    where,
   }
 
   // /////////////////////////////////////

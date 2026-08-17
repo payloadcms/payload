@@ -7,6 +7,7 @@ import type { Collection, TypeWithID } from '../config/types.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
+import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
 import { APIError, Forbidden, NotFound } from '../../errors/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
@@ -68,8 +69,9 @@ export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
   })
 
   const where = { id: { equals: id } }
+  const versionFields = buildVersionCollectionFields(payload.config, collectionConfig, true)
   const select = sanitizeSelect({
-    fields: buildVersionCollectionFields(payload.config, collectionConfig, true),
+    fields: versionFields,
     select: resolveSelect({
       config: collectionConfig.select,
       operation: 'read',
@@ -128,6 +130,8 @@ export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
     trash,
     where: fullWhere,
   })
+
+  sanitizeWhereQuery({ fields: versionFields, payload, where: fullWhere })
 
   // /////////////////////////////////////
   // Find by ID
