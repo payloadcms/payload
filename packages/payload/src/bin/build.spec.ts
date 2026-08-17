@@ -4,13 +4,15 @@ import path from 'node:path'
 
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest'
 
-// Default fake child auto-fires `exit(0)` synchronously so ordering/generation
-// tests resolve. Specific tests override via `mockReturnValueOnce` to drive the
-// exit/error handlers manually.
-const spawnMock = vi.fn(() => ({
-  on(event: string, cb: (arg?: never) => void) {
-    if (event === 'exit') {
-      cb(0 as never)
+// Default fake child auto-fires `close(0)` so ordering/generation tests resolve.
+// Specific tests override via `mockReturnValueOnce` to drive close/error manually.
+const spawnMock = vi.fn((_command: string, _args: string[], _options: object) => ({
+  on() {
+    return this
+  },
+  once(event: string, cb: (code?: number | null, signal?: NodeJS.Signals | null) => void) {
+    if (event === 'close') {
+      cb(0, null)
     }
     return this
   },
@@ -282,11 +284,14 @@ describe('build', () => {
 
   it('spawns next build with forwarded args and propagates the child exit code', async () => {
     process.argv = ['node', 'payload', 'build', '--turbopack']
-    let exitCb: ((code: number | null) => void) | undefined
+    let closeCb: ((code: number | null, signal: NodeJS.Signals | null) => void) | undefined
     spawnMock.mockReturnValueOnce({
-      on(event: string, cb: (code: number | null) => void) {
-        if (event === 'exit') {
-          exitCb = cb
+      on() {
+        return this
+      },
+      once(event: string, cb: (code: number | null, signal: NodeJS.Signals | null) => void) {
+        if (event === 'close') {
+          closeCb = cb
         }
         return this
       },
@@ -303,17 +308,44 @@ describe('build', () => {
     expect(opts).toEqual({ stdio: 'inherit' })
 
     // Simulate the child exiting with a non-zero code
-    exitCb?.(2)
+    closeCb?.(2, null)
     await buildPromise
     expect(exitMock).toHaveBeenCalledWith(2)
   })
 
-  it('does not exit until the spawned child exits, then propagates its code', async () => {
-    let exitCb: ((code: number | null) => void) | undefined
+  it('exits non-zero when the child is terminated by a signal (code null)', async () => {
+    let closeCb: ((code: number | null, signal: NodeJS.Signals | null) => void) | undefined
     spawnMock.mockReturnValueOnce({
-      on(event: string, cb: (code: number | null) => void) {
-        if (event === 'exit') {
-          exitCb = cb
+      on() {
+        return this
+      },
+      once(event: string, cb: (code: number | null, signal: NodeJS.Signals | null) => void) {
+        if (event === 'close') {
+          closeCb = cb
+        }
+        return this
+      },
+    })
+
+    const buildPromise = build({ config: fakeConfig })
+    await vi.waitFor(() => expect(closeCb).toBeDefined())
+
+    // A signal kill (e.g. OOM SIGKILL) reports code null; must not become success.
+    closeCb?.(null, 'SIGKILL')
+    await buildPromise
+    expect(exitMock).toHaveBeenCalledWith(1)
+    expect(exitMock).not.toHaveBeenCalledWith(0)
+  })
+
+  it('does not exit until the spawned child exits, then propagates its code', async () => {
+    let closeCb: ((code: number | null, signal: NodeJS.Signals | null) => void) | undefined
+    spawnMock.mockReturnValueOnce({
+      on() {
+        return this
+      },
+      once(event: string, cb: (code: number | null, signal: NodeJS.Signals | null) => void) {
+        if (event === 'close') {
+          closeCb = cb
         }
         return this
       },
@@ -326,7 +358,7 @@ describe('build', () => {
 
     // Wait for generation to settle and the child to be spawned. build() must
     // still be pending because the child has not exited yet.
-    await vi.waitFor(() => expect(exitCb).toBeDefined())
+    await vi.waitFor(() => expect(closeCb).toBeDefined())
     // Flush all pending microtasks; the OLD (buggy) build() resolved here
     // without awaiting the child, so this assertion catches the race.
     await new Promise((r) => setTimeout(r, 0))
@@ -334,7 +366,7 @@ describe('build', () => {
     expect(exitMock).not.toHaveBeenCalled()
 
     // Child exits non-zero -> build() must exit with that exact code
-    exitCb?.(3)
+    closeCb?.(3, null)
     await buildPromise
     expect(resolved).toBe(true)
     expect(exitMock).toHaveBeenCalledWith(3)

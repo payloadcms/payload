@@ -223,6 +223,12 @@ export const getConfig: () => Partial<Config> = () => ({
           ],
           label: 'Access',
         },
+        {
+          name: 'relatedItems',
+          type: 'join',
+          collection: 'relation-restricted',
+          on: 'post',
+        },
       ],
       versions: false,
     },
@@ -266,6 +272,7 @@ export const getConfig: () => Partial<Config> = () => ({
       slug: 'relation-restricted',
       access: {
         read: () => true,
+        update: () => true,
       },
       fields: [
         {
@@ -273,12 +280,40 @@ export const getConfig: () => Partial<Config> = () => ({
           type: 'text',
         },
         {
+          name: 'rank',
+          type: 'number',
+          access: {
+            read: () => false,
+          },
+        },
+        {
           name: 'post',
           type: 'relationship',
           relationTo: slug,
         },
+        {
+          name: 'postLabel',
+          type: 'text',
+          virtual: 'post.restrictedField',
+        },
       ],
       versions: false,
+    },
+    {
+      slug: 'sort-default-restricted',
+      access: {
+        read: () => true,
+      },
+      defaultSort: 'rank',
+      fields: [
+        {
+          name: 'rank',
+          type: 'number',
+          access: {
+            read: () => false,
+          },
+        },
+      ],
     },
     {
       slug: fullyRestrictedSlug,
@@ -828,6 +863,9 @@ export const getConfig: () => Partial<Config> = () => ({
   globals: [
     {
       slug: 'settings',
+      access: {
+        readVersions: () => true,
+      },
       admin: {
         components: {
           edit: {
@@ -841,8 +879,15 @@ export const getConfig: () => Partial<Config> = () => ({
           type: 'checkbox',
           label: 'Allow access to test global',
         },
+        {
+          name: 'secret',
+          type: 'text',
+          access: {
+            read: () => false,
+          },
+        },
       ],
-      versions: false,
+      versions: true,
     },
     {
       slug: 'test',

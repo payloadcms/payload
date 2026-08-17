@@ -40,6 +40,16 @@ describe('Hierarchy', () => {
       expect(titlePathField.virtual).toBe(true)
     })
 
+    it('should hide virtual path fields from the admin panel', () => {
+      const organizationsCollection = payload.collections.organizations.config
+
+      const slugPathField = organizationsCollection.fields.find((f) => f.name === '_h_slugPath')
+      const titlePathField = organizationsCollection.fields.find((f) => f.name === '_h_titlePath')
+
+      expect(slugPathField.admin.hidden).toBe(true)
+      expect(titlePathField.admin.hidden).toBe(true)
+    })
+
     it('should have sanitized hierarchy config', () => {
       const organizationsCollection = payload.collections.organizations.config
 

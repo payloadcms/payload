@@ -32,6 +32,12 @@ export type DataFromGlobalSlug<TSlug extends GlobalSlug> = TypedGlobal[TSlug]
 
 export type SelectFromGlobalSlug<TSlug extends GlobalSlug> = TypedGlobalSelect[TSlug]
 
+export type GlobalAccess<TData = any> = {
+  read?: Access<TData>
+  readVersions?: Access<TData>
+  update?: Access<TData>
+}
+
 /**
  * Global slugs that do not have drafts enabled.
  * Detects globals without drafts by checking for the absence of the `_status` field.
@@ -184,12 +190,6 @@ export type GlobalAdminOptions = {
    * Function to generate custom preview URL
    */
   preview?: GeneratePreviewURL
-}
-
-type GlobalAccess = {
-  read?: Access
-  readVersions?: Access
-  update?: Access
 }
 
 type GlobalHooks = {
