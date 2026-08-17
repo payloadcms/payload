@@ -69,6 +69,7 @@ export interface Config {
   collections: {
     media: Media;
     'media-with-prefix': MediaWithPrefix;
+    'media-with-static-dir': MediaWithStaticDir;
     'media-container': MediaContainer;
     users: User;
     'payload-kv': PayloadKv;
@@ -80,6 +81,7 @@ export interface Config {
   collectionsSelect: {
     media: MediaSelect<false> | MediaSelect<true>;
     'media-with-prefix': MediaWithPrefixSelect<false> | MediaWithPrefixSelect<true>;
+    'media-with-static-dir': MediaWithStaticDirSelect<false> | MediaWithStaticDirSelect<true>;
     'media-container': MediaContainerSelect<false> | MediaContainerSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
@@ -96,6 +98,8 @@ export interface Config {
   locale: null;
   widgets: {
     collections: CollectionsWidget;
+    'collection-query': CollectionQueryWidget;
+    activity: ActivityWidget;
   };
   user: User;
   jobs: {
@@ -179,6 +183,24 @@ export interface MediaWithPrefix {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-with-static-dir".
+ */
+export interface MediaWithStaticDir {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media-container".
  */
 export interface MediaContainer {
@@ -243,6 +265,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'media-with-prefix';
         value: string | MediaWithPrefix;
+      } | null)
+    | ({
+        relationTo: 'media-with-static-dir';
+        value: string | MediaWithStaticDir;
       } | null)
     | ({
         relationTo: 'media-container';
@@ -356,6 +382,23 @@ export interface MediaWithPrefixSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-with-static-dir_select".
+ */
+export interface MediaWithStaticDirSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media-container_select".
  */
 export interface MediaContainerSelect<T extends boolean = true> {
@@ -434,6 +477,41 @@ export interface CollectionsWidget {
     [k: string]: unknown;
   };
   width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-query_widget".
+ */
+export interface CollectionQueryWidget {
+  data?: {
+    title?: string | null;
+    relatedCollection: 'media' | 'media-with-prefix' | 'media-with-static-dir' | 'media-container' | 'users';
+    where?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    sortField?: string | null;
+    sortDirection?: ('asc' | 'desc') | null;
+    limit?: number | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "activity_widget".
+ */
+export interface ActivityWidget {
+  data?: {
+    excludedCollections?:
+      | ('media' | 'media-with-prefix' | 'media-with-static-dir' | 'media-container' | 'users')[]
+      | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

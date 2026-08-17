@@ -8,8 +8,9 @@ import { devUser } from '../../credentials.js'
 import { Media } from '../collections/Media.js'
 import { MediaWithPrefix } from '../collections/MediaWithPrefix.js'
 import { Users } from '../collections/Users.js'
-import { mediaSlug, mediaWithPrefixSlug, prefix } from '../shared.js'
+import { mediaSlug, mediaWithPrefixSlug, mediaWithStaticDirSlug, prefix } from '../shared.js'
 import { MediaContainer } from './collections/MediaContainer.js'
+import { MediaWithStaticDir } from './collections/MediaWithStaticDir.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -24,7 +25,7 @@ export default buildConfigWithDefaults({
       baseDir: path.resolve(dirname, '..'),
     },
   },
-  collections: [Media, MediaWithPrefix, MediaContainer, Users],
+  collections: [Media, MediaWithPrefix, MediaWithStaticDir, MediaContainer, Users],
   onInit: async (payload) => {
     await payload.create({
       collection: 'users',
@@ -44,6 +45,7 @@ export default buildConfigWithDefaults({
         [mediaWithPrefixSlug]: {
           prefix,
         },
+        [mediaWithStaticDirSlug]: true,
       },
       token: process.env.BLOB_READ_WRITE_TOKEN,
     }),

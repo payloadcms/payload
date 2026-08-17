@@ -271,7 +271,9 @@ export const generateFileData = async <T>({
         desiredFilename: fsSafeName,
         prefix,
         req,
-        staticPath: staticPath!,
+        // Collections without local storage keep their files in an adapter, so a
+        // file sitting in `staticDir` says nothing about which names are taken.
+        staticPath: disableLocalStorage ? undefined : staticPath!,
       })
     }
 
