@@ -13,19 +13,13 @@ import React, { useDeferredValue, useEffect, useRef, useState } from 'react'
 
 import type { OnSaveContext } from '../../views/Edit/index.js'
 
-import {
-  useAllFormFields,
-  useForm,
-  useFormModified,
-  useFormSubmitted,
-} from '../../forms/Form/context.js'
+import { useAllFormFields, useForm, useFormModified } from '../../forms/Form/context.js'
 import { useDebounce } from '../../hooks/useDebounce.js'
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { reduceFieldsToValuesWithValidation } from '../../utilities/reduceFieldsToValuesWithValidation.js'
 import { LeaveWithoutSaving } from '../LeaveWithoutSaving/index.js'
 import './index.css'
 
@@ -58,7 +52,6 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
 
   const [formState] = useAllFormFields()
   const modified = useFormModified()
-  const submitted = useFormSubmitted()
 
   const { code: locale } = useLocale()
   const { t } = useTranslation()
@@ -136,11 +129,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
       method = 'POST'
     }
 
-    const { valid } = reduceFieldsToValuesWithValidation(formState, true)
-
-    const skipSubmission = submitted && !valid && validateOnDraft
-
-    if (skipSubmission || !url) {
+    if (!url) {
       return
     }
 

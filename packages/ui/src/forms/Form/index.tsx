@@ -262,6 +262,7 @@ export const Form: React.FC<FormProps> = (props) => {
       // create new toast promise which will resolve manually later
       let errorToast, successToast
       let promiseToastID: number | string | undefined
+      let preservePromiseToast = false
 
       const promise = new Promise((resolve, reject) => {
         successToast = resolve
@@ -416,6 +417,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
         if (typeof handleResponse === 'function') {
           if (requestContext.isCurrent()) {
+            preservePromiseToast = true
             handleResponse(res, successToast, errorToast)
           }
 
@@ -433,6 +435,11 @@ export const Form: React.FC<FormProps> = (props) => {
         }
 
         if (res.status < 400) {
+          if (!requestContext.isCurrent()) {
+            return { res }
+          }
+
+          preservePromiseToast = true
           let newFormState: FormState | void
 
           if (typeof onSuccess === 'function') {
@@ -443,23 +450,23 @@ export const Form: React.FC<FormProps> = (props) => {
             })
           }
 
-          if (!requestContext.isCurrent()) {
-            return { res }
-          }
+          if (requestContext.isCurrent()) {
+            if (newFormState) {
+              dispatchFields({
+                type: 'MERGE_SERVER_STATE',
+                acceptValues,
+                prevStateRef: prevFormState,
+                serverState: newFormState,
+              })
+            }
 
-          if (newFormState) {
-            dispatchFields({
-              type: 'MERGE_SERVER_STATE',
-              acceptValues,
-              prevStateRef: prevFormState,
-              serverState: newFormState,
-            })
+            setSubmitted(false)
           }
-
-          setSubmitted(false)
 
           if (redirect) {
-            startRouteTransition(() => router.push(redirect))
+            if (requestContext.isCurrent()) {
+              startRouteTransition(() => router.push(redirect))
+            }
           } else if (!disableToast) {
             successToast(json.message || t('general:submissionSuccessful'))
           }
@@ -468,6 +475,7 @@ export const Form: React.FC<FormProps> = (props) => {
             return { res }
           }
 
+          preservePromiseToast = true
           setSubmitted(true)
 
           // When there was an error submitting a draft,
@@ -544,13 +552,20 @@ export const Form: React.FC<FormProps> = (props) => {
           res,
         }
       } catch (err) {
-        if (requestContext.isCurrent()) {
+        const isCurrent = requestContext.isCurrent()
+
+        if (preservePromiseToast || isCurrent) {
+          preservePromiseToast = true
           console.error('Error submitting form', err) // eslint-disable-line no-console
-          setSubmitted(true)
+
+          if (isCurrent) {
+            setSubmitted(true)
+          }
+
           errorToast(err.message)
         }
       } finally {
-        if (!requestContext.isCurrent() && promiseToastID !== undefined) {
+        if (!preservePromiseToast && !requestContext.isCurrent() && promiseToastID !== undefined) {
           toast.dismiss(promiseToastID)
         }
 
