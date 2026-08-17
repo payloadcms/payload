@@ -672,6 +672,48 @@ test.describe('Form State', () => {
       )
       await expect.poll(() => requestCount).toBe(2)
     })
+
+    test('autosave - should preserve non-dirty local field updates made in flight', async () => {
+      const doc = await payload.create({
+        collection: autosavePostsSlug,
+        data: {
+          programmaticValue: 'Initial programmatic value',
+          title: 'Initial revision',
+        },
+      })
+      await page.goto(autosavePostsUrl.edit(doc.id))
+      await waitForFormReady(page)
+
+      const firstStarted = Promise.withResolvers<void>()
+      const releaseFirst = Promise.withResolvers<void>()
+      let requestCount = 0
+
+      releaseRoutes = () => releaseFirst.resolve()
+
+      await page.route(`**/api/${autosavePostsSlug}/**`, async (route) => {
+        if (route.request().method() !== 'PATCH') {
+          return route.continue()
+        }
+
+        requestCount += 1
+
+        if (requestCount === 1) {
+          firstStarted.resolve()
+          await releaseFirst.promise
+        }
+
+        await route.continue()
+      })
+
+      await page.locator('#field-title').fill('First revision')
+      await firstStarted.promise
+      await page.locator('#set-programmatic-value').click()
+      releaseFirst.resolve()
+
+      await expect.poll(() => requestCount).toBe(2)
+      await waitForAutoSaveToRunAndComplete(page)
+      await expect(page.locator('#field-programmaticValue')).toHaveValue('Updated programmatically')
+    })
   })
 
   test('array and block rows and maintain consistent row IDs across duplication', async () => {
