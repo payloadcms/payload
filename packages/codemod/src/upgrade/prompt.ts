@@ -1,19 +1,13 @@
-type RenderUpgradePromptArgs = {
-  path: string
-  tag?: string
-}
-
 /**
  * Render the overarching agent prompt for a full Payload v3 -> v4 upgrade,
  * Next.js 16 included. The prompt is a thin orchestrator: it sequences the
  * gates, runs this package's `upgrade` command for the deterministic slice,
  * delegates Next.js to Next's own agent workflow, and points at the migration
- * guide for the judgment work rather than restating any of it. Pure — the
- * caller prints it.
+ * guide for the judgment work rather than restating any of it. The text is
+ * static and project-agnostic — the agent runs it from the project root. Pure:
+ * the caller prints it.
  */
-export function renderUpgradePrompt({ path, tag }: RenderUpgradePromptArgs): string {
-  const upgradeCommand = `npx @payloadcms/codemod upgrade ${path}${tag ? ` --tag ${tag}` : ''}`
-
+export function renderUpgradePrompt(): string {
   return `You are upgrading this project from Payload v3 to v4, Next.js 16 included.
 
 Ground rule: resolution over intent. A step is done only when it installs, builds, and boots.
@@ -32,10 +26,11 @@ Some migrations need the v3 tooling that v4 deletes, so they MUST run before the
 Do not proceed to step 2 until these are complete and committed.
 
 ## 2. Payload mechanical slice
-Run:
+Run this from the project root:
 
-    ${upgradeCommand}
+    npx @payloadcms/codemod upgrade .
 
+Add \`--tag <dist-tag>\` to resolve Payload from a non-default dist-tag (default is \`canary\`).
 This pins the Payload packages to v4, removes conflicting overrides, writes the toolchain
 floors, installs, and runs the AST transforms. Read its report:
 - It prints the resolved payload version, the required Next target, and the path to the

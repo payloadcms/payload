@@ -19,7 +19,7 @@ export async function main(argv: string[] = process.argv.slice(2)): Promise<void
   const flags = parseFlags(argv)
 
   if (flags.command === 'upgrade' && flags.emitPrompt) {
-    console.log(renderUpgradePrompt({ path: flags.path, tag: flags.tag }))
+    console.log(renderUpgradePrompt())
     return
   }
 

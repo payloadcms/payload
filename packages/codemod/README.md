@@ -44,10 +44,10 @@ prints the required Next target.
 
 ### `upgrade prompt`
 
-`npx @payloadcms/codemod upgrade prompt [path]` prints an orchestration prompt for a coding agent
-to run the full v3 -> v4 upgrade, Next.js 16 included. It is offline and stateless: it writes
-nothing and makes no network calls. Pipe it to your agent, or `--tag` propagates into the embedded
-`upgrade` command it tells the agent to run.
+`npx @payloadcms/codemod upgrade prompt` prints an orchestration prompt for a coding agent to run
+the full v3 -> v4 upgrade, Next.js 16 included. It is offline and stateless: it writes nothing and
+makes no network calls. The text is project-agnostic, so pipe it to your agent and run it from the
+project root.
 
 The prompt sequences the upgrade (mechanical slice via this command, then Next.js via Next's own
 codemods and agent workflow, then regeneration, judgment work, and verification) and points at the
