@@ -65,8 +65,15 @@ export async function build({ config }: { config: SanitizedConfig }): Promise<vo
       console.error(err)
       resolve(1)
     })
-    child.on('exit', (code) => {
-      resolve(code ?? 0)
+    // A signal kill (e.g. SIGKILL from an OOM) reports `code === null`; treat any
+    // missing code as failure so an abnormal termination never reports success.
+    child.once('close', (code, signal) => {
+      if (signal) {
+        console.error(`Build terminated by signal ${signal}`)
+        resolve(1)
+        return
+      }
+      resolve(code ?? 1)
     })
   })
 
