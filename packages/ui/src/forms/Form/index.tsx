@@ -41,6 +41,7 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { useUploadHandlers } from '../../providers/UploadHandlers/index.js'
 import { abortAndIgnore, handleAbortRef } from '../../utilities/abortAndIgnore.js'
 import { requests } from '../../utilities/api.js'
+import { changesFormData } from './changesFormData.js'
 import {
   BackgroundProcessingContext,
   DocumentFormContext,
@@ -59,42 +60,6 @@ import { initContextState } from './initContextState.js'
 import { createFormRequestScheduler } from './requestScheduler.js'
 
 const baseClass = 'form'
-
-const changesFormData = (action: FieldAction, currentState: FormState): boolean => {
-  if (action.type === 'UPDATE') {
-    const currentField = currentState[action.path]
-
-    return (
-      ('disableFormData' in action && action.disableFormData !== currentField?.disableFormData) ||
-      ('rows' in action && !dequal(action.rows, currentField?.rows)) ||
-      ('value' in action && !dequal(action.value, currentField?.value))
-    )
-  }
-
-  if (action.type === 'MODIFY_CONDITION') {
-    return action.result !== currentState[action.path]?.passesCondition
-  }
-
-  if (action.type === 'REMOVE') {
-    return action.path in currentState
-  }
-
-  if (action.type === 'REPLACE_STATE') {
-    return !dequal(
-      reduceFieldsToValues(action.state, true),
-      reduceFieldsToValues(currentState, true),
-    )
-  }
-
-  if (action.type === 'UPDATE_MANY') {
-    return !dequal(
-      reduceFieldsToValues({ ...currentState, ...action.formState }, true),
-      reduceFieldsToValues(currentState, true),
-    )
-  }
-
-  return ['ADD_ROW', 'DUPLICATE_ROW', 'MOVE_ROW', 'REMOVE_ROW', 'REPLACE_ROW'].includes(action.type)
-}
 
 export const Form: React.FC<FormProps> = (props) => {
   const { id, collectionSlug, docConfig, docPermissions, getDocPreferences, globalSlug } =
@@ -194,13 +159,17 @@ export const Form: React.FC<FormProps> = (props) => {
   const resetSequenceRef = useRef(0)
   const isFirstRenderRef = useRef(true)
 
-  const [formState, dispatchFieldsInternal] = useReducer(fieldReducer, {}, () => initialState)
+  const [formState, dispatchFieldsWithoutRevision] = useReducer(
+    fieldReducer,
+    {},
+    () => initialState,
+  )
   const dispatchFields = useCallback<React.Dispatch<FieldAction>>((action) => {
     if (changesFormData(action, contextRef.current.fields)) {
       formRevisionRef.current += 1
     }
 
-    dispatchFieldsInternal(action)
+    dispatchFieldsWithoutRevision(action)
   }, [])
 
   contextRef.current.fields = formState
@@ -275,7 +244,7 @@ export const Form: React.FC<FormProps> = (props) => {
       }
 
       if (!dequal(contextRef.current.fields, validatedFieldState)) {
-        dispatchFieldsInternal({ type: 'REPLACE_STATE', state: validatedFieldState })
+        dispatchFieldsWithoutRevision({ type: 'REPLACE_STATE', state: validatedFieldState })
       }
 
       setIsValid(isValid)
@@ -385,7 +354,10 @@ export const Form: React.FC<FormProps> = (props) => {
 
           if (!isValid) {
             setSubmitted(true)
-            return dispatchFieldsInternal({ type: 'REPLACE_STATE', state: revalidatedFormState })
+            return dispatchFieldsWithoutRevision({
+              type: 'REPLACE_STATE',
+              state: revalidatedFormState,
+            })
           }
         }
 
@@ -494,7 +466,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
           if (requestContext.isCurrent()) {
             if (newFormState) {
-              dispatchFieldsInternal({
+              dispatchFieldsWithoutRevision({
                 type: 'MERGE_SERVER_STATE',
                 acceptValues,
                 prevStateRef: prevFormState,
@@ -568,7 +540,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
             setIsValid(false)
 
-            dispatchFieldsInternal({
+            dispatchFieldsWithoutRevision({
               type: 'ADD_SERVER_ERRORS',
               errors: fieldErrors,
             })
@@ -776,7 +748,7 @@ export const Form: React.FC<FormProps> = (props) => {
       restoreRequestState()
       contextRef.current = { ...initContextState } as FormContextType
       _setModified(false)
-      dispatchFieldsInternal({ type: 'REPLACE_STATE', state: newState })
+      dispatchFieldsWithoutRevision({ type: 'REPLACE_STATE', state: newState })
 
       clearResetController()
     },
@@ -802,7 +774,7 @@ export const Form: React.FC<FormProps> = (props) => {
       restoreRequestState()
       contextRef.current = { ...initContextState } as FormContextType
       _setModified(false)
-      dispatchFieldsInternal({ type: 'REPLACE_STATE', state })
+      dispatchFieldsWithoutRevision({ type: 'REPLACE_STATE', state })
     },
     [requestScheduler, restoreRequestState],
   )
@@ -934,7 +906,7 @@ export const Form: React.FC<FormProps> = (props) => {
       restoreRequestState()
       contextRef.current = { ...initContextState } as FormContextType
       _setModified(false)
-      dispatchFieldsInternal({
+      dispatchFieldsWithoutRevision({
         type: 'REPLACE_STATE',
         optimize: false,
         sanitize: true,
@@ -993,7 +965,7 @@ export const Form: React.FC<FormProps> = (props) => {
           }
 
           if (serverState && requestContext.isCurrent()) {
-            dispatchFieldsInternal({
+            dispatchFieldsWithoutRevision({
               type: 'MERGE_SERVER_STATE',
               prevStateRef: prevFormState,
               serverState,
