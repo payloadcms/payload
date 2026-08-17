@@ -49,13 +49,9 @@ export const sanitizeGlobal = (
   }
 
   const read = global.access.read ?? defaultAccess
+  const configuredReadVersions = global.access.readVersions
 
   global.access.read = read
-  global.access.readVersions ??= async (args) => {
-    const result = await read({ ...args, id: undefined })
-
-    return hasWhereAccessResult(result) ? appendGlobalVersionToQueryKey(result) : result
-  }
 
   if (!global.access.update) {
     global.access.update = defaultAccess
@@ -205,13 +201,24 @@ export const sanitizeGlobal = (
     })
   }
 
+  const effectiveRead = global.access.read
+  const readVersions =
+    configuredReadVersions ??
+    (async (args) => {
+      const result = await effectiveRead({ ...args, id: undefined })
+
+      return hasWhereAccessResult(result) ? appendGlobalVersionToQueryKey(result) : result
+    })
+
   if (global.versions) {
     global.access.readVersions = withBaseAccess({
       slug: global.slug,
-      access: global.access.readVersions,
+      access: readVersions,
       entityType: 'global',
       operation: 'readVersions',
     })
+  } else {
+    global.access.readVersions = readVersions
   }
 
   ;(global as SanitizedGlobalConfig).flattenedFields = flattenAllFields({ fields: global.fields })

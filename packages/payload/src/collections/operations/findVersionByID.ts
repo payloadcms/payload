@@ -15,7 +15,10 @@ import { killTransaction } from '../../utilities/killTransaction.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { buildVersionCollectionFields } from '../../versions/buildCollectionFields.js'
-import { isInheritedReadVersionsAccess } from '../../versions/isInheritedReadVersionsAccess.js'
+import {
+  isInheritedReadVersionsAccess,
+  withInheritedReadVersionsParentID,
+} from '../../versions/isInheritedReadVersionsAccess.js'
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
 
@@ -31,6 +34,64 @@ export type Arguments = {
   showHiddenFields?: boolean
   trash?: boolean
 } & Pick<FindOptions<string, SelectType>, 'select'>
+
+const prefetchVersionForInheritedReadAccess = async <TData extends TypeWithID>({
+  id,
+  collectionConfig,
+  locale,
+  req,
+  select,
+  trash,
+}: {
+  collectionConfig: Collection['config']
+  id: number | string
+  locale: string
+  req: PayloadRequest
+  select?: SelectType
+  trash: boolean
+}): Promise<{
+  parentID?: TypeWithVersion<TData>['parent']
+  version?: TypeWithVersion<TData>
+}> => {
+  const selectMode = select ? getSelectMode(select) : undefined
+  const shouldOmitParent = Boolean(
+    select && ((selectMode === 'include' && select.parent !== true) || select.parent === false),
+  )
+  let prefetchSelect = select
+
+  if (select && selectMode === 'include') {
+    prefetchSelect = { ...select, parent: true }
+  } else if (select?.parent === false) {
+    prefetchSelect = { ...select }
+    delete prefetchSelect.parent
+  }
+
+  const { docs } = await req.payload.db.findVersions<TData>({
+    collection: collectionConfig.slug,
+    limit: 1,
+    locale,
+    pagination: false,
+    req,
+    select: prefetchSelect,
+    where: appendNonTrashedFilter({
+      deletedAtPath: 'version.deletedAt',
+      enableTrash: collectionConfig.trash,
+      trash,
+      where: { id: { equals: id } },
+    }),
+  })
+  const version = docs[0]
+  const parentID = version?.parent
+
+  if (version && shouldOmitParent) {
+    const versionWithoutParent = { ...version }
+    delete (versionWithoutParent as Partial<TypeWithVersion<TData>>).parent
+
+    return { parentID, version: versionWithoutParent }
+  }
+
+  return { parentID, version }
+}
 
 export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
   args: Arguments,
@@ -80,38 +141,16 @@ export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
 
     const inheritsReadAccess = isInheritedReadVersionsAccess(collectionConfig.access.readVersions)
     const shouldPrefetchVersion = !overrideAccess && inheritsReadAccess
-    const selectMode = select ? getSelectMode(select) : undefined
-    const shouldOmitParent = Boolean(
-      select && ((selectMode === 'include' && select.parent !== true) || select.parent === false),
-    )
-    let prefetchSelect = select
-
-    if (select && selectMode === 'include') {
-      prefetchSelect = { ...select, parent: true }
-    } else if (select?.parent === false) {
-      prefetchSelect = { ...select }
-      delete prefetchSelect.parent
-    }
-    let prefetchedVersion: TypeWithVersion<TData> | undefined
-
-    if (shouldPrefetchVersion) {
-      const { docs } = await payload.db.findVersions<TData>({
-        collection: collectionConfig.slug,
-        limit: 1,
-        locale: locale!,
-        pagination: false,
-        req,
-        select: prefetchSelect,
-        where: appendNonTrashedFilter({
-          deletedAtPath: 'version.deletedAt',
-          enableTrash: collectionConfig.trash,
+    const prefetched = shouldPrefetchVersion
+      ? await prefetchVersionForInheritedReadAccess<TData>({
+          id,
+          collectionConfig,
+          locale: locale!,
+          req,
+          select,
           trash,
-          where,
-        }),
-      })
-
-      prefetchedVersion = docs[0]
-    }
+        })
+      : undefined
 
     // /////////////////////////////////////
     // Access
@@ -120,12 +159,17 @@ export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
     const accessResults = !overrideAccess
       ? await executeAccess(
           {
-            id: inheritsReadAccess ? prefetchedVersion?.parent : id,
+            id,
             slug: collectionConfig.slug,
             disableErrors,
             req,
           },
-          collectionConfig.access.readVersions,
+          inheritsReadAccess
+            ? (accessArgs) =>
+                collectionConfig.access.readVersions(
+                  withInheritedReadVersionsParentID(accessArgs, prefetched?.parentID),
+                )
+            : collectionConfig.access.readVersions,
         )
       : true
 
@@ -149,7 +193,7 @@ export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
     // Find by ID
     // /////////////////////////////////////
 
-    let result = prefetchedVersion!
+    let result = prefetched?.version as TypeWithVersion<TData>
 
     if (!shouldPrefetchVersion || hasWhereAccess) {
       const versionsQuery = await payload.db.findVersions<TData>({
@@ -163,9 +207,6 @@ export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
       })
 
       result = versionsQuery.docs[0]!
-    } else if (result && shouldOmitParent) {
-      result = { ...result }
-      delete (result as Partial<TypeWithVersion<TData>>).parent
     }
 
     if (!result) {

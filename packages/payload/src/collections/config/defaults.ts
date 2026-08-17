@@ -1,10 +1,21 @@
 import type { Auth, IncomingAuthType, LoginWithUsernameOptions } from '../../auth/types.js'
+import type { Access } from '../../config/types.js'
 import type { CollectionConfig, SanitizedCollectionConfig } from './types.js'
 
 import { defaultAccess } from '../../auth/defaultAccess.js'
 import { hasWhereAccessResult } from '../../auth/types.js'
 import { appendVersionToQueryKey } from '../../versions/drafts/appendVersionToQueryKey.js'
-import { markInheritedReadVersionsAccess } from '../../versions/isInheritedReadVersionsAccess.js'
+import {
+  markInheritedReadVersionsAccess,
+  resolveInheritedReadVersionsAccessArgs,
+} from '../../versions/isInheritedReadVersionsAccess.js'
+
+export const createInheritedReadVersionsAccess = (read: Access): Access =>
+  markInheritedReadVersionsAccess(async (args) => {
+    const result = await read(resolveInheritedReadVersionsAccessArgs(args))
+
+    return hasWhereAccessResult(result) ? appendVersionToQueryKey(result) : result
+  })
 
 /**
  * @deprecated - remove in 4.0. This is error-prone, as mutating this object will affect any objects that use the defaults as a base.
@@ -67,13 +78,7 @@ export const addDefaultsToCollectionConfig = (collection: CollectionConfig): Col
     create: access?.create ?? defaultAccess,
     delete: access?.delete ?? defaultAccess,
     read,
-    readVersions:
-      access?.readVersions ??
-      markInheritedReadVersionsAccess(async (args) => {
-        const result = await read(args)
-
-        return hasWhereAccessResult(result) ? appendVersionToQueryKey(result) : result
-      }),
+    readVersions: access?.readVersions ?? createInheritedReadVersionsAccess(read),
     unlock: access?.unlock ?? defaultAccess,
     update: access?.update ?? defaultAccess,
   } satisfies SanitizedCollectionConfig['access']

@@ -30,7 +30,11 @@ import {
   markInheritedReadVersionsAccess,
 } from '../../versions/isInheritedReadVersionsAccess.js'
 import { defaultCollectionEndpoints } from '../endpoints/index.js'
-import { addDefaultsToAuthConfig, addDefaultsToCollectionConfig } from './defaults.js'
+import {
+  addDefaultsToAuthConfig,
+  addDefaultsToCollectionConfig,
+  createInheritedReadVersionsAccess,
+} from './defaults.js'
 import { sanitizeCompoundIndexes } from './sanitizeCompoundIndexes.js'
 import { validateUseAsTitle } from './useAsTitle.js'
 
@@ -357,7 +361,10 @@ export const sanitizeCollection = (
   })
 
   if (sanitized.versions) {
-    const readVersions = sanitized.access!.readVersions
+    const inheritsReadAccess = isInheritedReadVersionsAccess(sanitized.access!.readVersions)
+    const readVersions = inheritsReadAccess
+      ? createInheritedReadVersionsAccess(sanitized.access!.read!)
+      : sanitized.access!.readVersions
     const readVersionsWithBaseAccess = withBaseAccess({
       slug: sanitized.slug,
       access: readVersions,
@@ -365,7 +372,7 @@ export const sanitizeCollection = (
       operation: 'readVersions',
     })
 
-    sanitized.access!.readVersions = isInheritedReadVersionsAccess(readVersions)
+    sanitized.access!.readVersions = inheritsReadAccess
       ? markInheritedReadVersionsAccess(readVersionsWithBaseAccess)
       : readVersionsWithBaseAccess
   }
