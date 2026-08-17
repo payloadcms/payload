@@ -13,6 +13,7 @@ import { devUser, regularUser } from '../credentials.js'
 import { differentiatedTrashCollectionSlug } from './collections/DifferentiatedTrashCollection/index.js'
 import { pagesSlug } from './collections/Pages/index.js'
 import { postsSlug } from './collections/Posts/index.js'
+import { registrationsSlug } from './collections/Registrations/index.js'
 import { restrictedCollectionSlug } from './collections/RestrictedCollection/index.js'
 import { usersSlug } from './collections/Users/index.js'
 
@@ -2314,6 +2315,66 @@ describe('trash', () => {
       const relatedPosts = result.relatedPosts as (number | string)[]
       expect(Array.isArray(relatedPosts)).toBe(true)
       expect(relatedPosts).toHaveLength(2)
+    })
+  })
+
+  describe('Writes referencing a trashed document', () => {
+    const createdRegistrationIDs: (number | string)[] = []
+
+    afterEach(async () => {
+      for (const id of createdRegistrationIDs) {
+        await payload.delete({ id, collection: registrationsSlug })
+      }
+      createdRegistrationIDs.length = 0
+    })
+
+    // The `registrations` afterChange hook reads the related post and swallows the
+    // resulting NotFound. That swallowed read must not roll back the create.
+    it('should persist a document whose required relationship points at a trashed document', async () => {
+      const registration = await payload.create({
+        collection: registrationsSlug,
+        data: {
+          post: postsDocTwo.id,
+          title: 'Registration for a trashed post',
+        },
+      })
+      createdRegistrationIDs.push(registration.id)
+
+      const result = await payload.find({
+        collection: registrationsSlug,
+        where: {
+          id: {
+            equals: registration.id,
+          },
+        },
+      })
+
+      expect(result.totalDocs).toBe(1)
+    })
+
+    it('should persist a document created over REST whose relationship points at a trashed document', async () => {
+      const response = await restClient.POST(`/${registrationsSlug}`, {
+        body: JSON.stringify({
+          post: postsDocTwo.id,
+          title: 'REST registration for a trashed post',
+        }),
+      })
+
+      const { doc } = await response.json()
+
+      expect(response.status).toBe(201)
+      createdRegistrationIDs.push(doc.id)
+
+      const result = await payload.find({
+        collection: registrationsSlug,
+        where: {
+          id: {
+            equals: doc.id,
+          },
+        },
+      })
+
+      expect(result.totalDocs).toBe(1)
     })
   })
 })
