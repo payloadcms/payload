@@ -16,6 +16,7 @@ import { getFieldsForRowComparison } from '../../utilities/getFieldsForRowCompar
 
 const baseClass = 'iterable-diff'
 
+/** @internal */
 export const Iterable: React.FC<FieldDiffClientProps> = ({
   baseVersionField,
   comparisonValue: valueFrom,

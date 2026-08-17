@@ -74,6 +74,7 @@ export type BulkUploadProps = {
   readonly children: React.ReactNode
 }
 
+/** @internal */
 export function BulkUploadModal() {
   const {
     modalSlug,

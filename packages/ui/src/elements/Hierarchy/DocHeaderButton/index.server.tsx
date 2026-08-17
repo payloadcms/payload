@@ -14,6 +14,7 @@ export type HierarchyButtonServerProps = {
   payload: Payload
 }
 
+/** @internal */
 export const HierarchyButton: React.FC<HierarchyButtonServerProps> = ({
   fieldName,
   hasMany,

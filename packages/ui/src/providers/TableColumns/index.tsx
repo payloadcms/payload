@@ -11,6 +11,7 @@ import { TableColumnContext } from './context.js'
 
 export { useTableColumns } from './context.js'
 
+/** @internal */
 export const TableColumnsProvider: React.FC<TableColumnsProviderProps> = ({
   children,
   collectionSlug,

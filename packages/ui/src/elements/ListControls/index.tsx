@@ -24,6 +24,8 @@ const baseClass = 'list-controls'
  * The ListControls component is used to render the controls (search, filter, where)
  * for a collection's list view. You can find those directly above the table which lists
  * the collection's documents.
+ *
+ * @internal
  */
 export const ListControls: React.FC<ListControlsProps> = (props) => {
   const {

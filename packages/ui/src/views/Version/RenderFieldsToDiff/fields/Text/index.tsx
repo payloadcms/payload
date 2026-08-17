@@ -47,6 +47,7 @@ function formatValue(value: unknown): {
   }
 }
 
+/** @internal */
 export const Text: TextFieldDiffClientComponent = ({
   comparisonValue: valueFrom,
   field,

@@ -25,6 +25,7 @@ import './index.css'
 const baseClass = 'copy-locale-data'
 
 const drawerSlug = 'copy-locale'
+/** @internal */
 export const CopyLocaleData: React.FC = () => {
   const {
     config: {

@@ -26,6 +26,7 @@ import { abortAndIgnore, handleAbortRef } from '../../utilities/abortAndIgnore.j
 
 const baseClass = 'create-first-user__form'
 
+/** @internal */
 export const CreateFirstUserClient: React.FC<{
   docPermissions: SanitizedDocumentPermissions
   docPreferences: DocumentPreferences

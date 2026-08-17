@@ -27,6 +27,7 @@ const renderStatus = (label: React.ReactNode, name: string) => {
   return <span className={`status-cell status-cell--${modifier}`}>{label}</span>
 }
 
+/** @internal */
 export const VersionPillLabel: React.FC<{
   currentlyPublishedVersion?: TypeWithVersion<any>
   disableDate?: boolean

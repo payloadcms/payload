@@ -16,6 +16,7 @@ import { getColumns } from '../../../../utilities/getColumns.js'
 import { ColumnSelectionButton } from '../../../ColumnSelection/index.js'
 import '../fields.css'
 
+/** @internal */
 export const QueryPresetsColumnField: JSONFieldClientComponent = ({
   field: { label, required },
 }) => {

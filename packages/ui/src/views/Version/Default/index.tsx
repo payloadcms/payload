@@ -23,6 +23,7 @@ import { SetStepNav } from './SetStepNav.js'
 
 const baseClass = 'view-version'
 
+/** @internal */
 export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
   canUpdate,
   modifiedOnly: modifiedOnlyProp,

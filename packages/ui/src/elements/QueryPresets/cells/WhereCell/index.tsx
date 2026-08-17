@@ -32,6 +32,7 @@ const transformWhereToNaturalLanguage = (where: Where): string => {
   return ''
 }
 
+/** @internal */
 export const QueryPresetsWhereCell: React.FC<DefaultCellComponentProps> = ({ cellData }) => {
   return <div>{cellData ? transformWhereToNaturalLanguage(cellData) : 'No where query'}</div>
 }

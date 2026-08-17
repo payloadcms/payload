@@ -85,6 +85,7 @@ export type BlockComponentProps<TFormData extends Record<string, unknown> = Bloc
   readonly nodeKey: string
 }
 
+/** @internal */
 export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
   const {
     cacheBuster,

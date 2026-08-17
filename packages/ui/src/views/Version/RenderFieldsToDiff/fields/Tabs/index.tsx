@@ -18,6 +18,7 @@ import { RenderVersionFieldsToDiff } from '../../RenderVersionFieldsToDiff.js'
 
 const baseClass = 'tabs-diff'
 
+/** @internal */
 export const Tabs: TabsFieldDiffClientComponent = (props) => {
   const { baseVersionField, comparisonValue: valueFrom, field, versionValue: valueTo } = props
   const { selectedLocales } = useSelectedLocales()

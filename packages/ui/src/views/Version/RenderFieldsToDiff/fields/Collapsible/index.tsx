@@ -11,6 +11,7 @@ import { RenderVersionFieldsToDiff } from '../../RenderVersionFieldsToDiff.js'
 
 const baseClass = 'collapsible-diff'
 
+/** @internal */
 export const Collapsible: CollapsibleFieldDiffClientComponent = ({
   baseVersionField,
   comparisonValue: valueFrom,

@@ -30,6 +30,7 @@ const isUploadInstructionsRequest = (upload: unknown): upload is UploadInstructi
   'mimeType' in upload &&
   typeof upload.mimeType === 'string'
 
+/** @internal */
 export const getUploadInstructions = async ({
   overrideAccess = false,
   req,

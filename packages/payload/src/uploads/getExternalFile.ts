@@ -10,6 +10,7 @@ type Args = {
   req: PayloadRequest
   uploadConfig: UploadConfig
 }
+/** @internal */
 export const getExternalFile = async ({ data, req, uploadConfig }: Args): Promise<File> => {
   const { filename, url } = data
 

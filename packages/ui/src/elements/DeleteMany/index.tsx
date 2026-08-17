@@ -81,6 +81,8 @@ export type DeleteManyProps = {
  * Handles polymorphic document delete operations.
  *
  * If you are deleting monomorphic documents, shape your `selections` to match the polymorphic structure.
+ *
+ * @internal
  */
 export function DeleteMany({
   afterDelete,

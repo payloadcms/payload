@@ -18,6 +18,7 @@ export type GlobalLockData = {
   slug: string
 }
 
+/** @internal */
 export type CollectionCardsData = {
   adminRoute: string
   globalData: GlobalLockData[]
@@ -26,6 +27,7 @@ export type CollectionCardsData = {
   userId: number | string
 }
 
+/** @internal */
 export async function getCollectionCardsData(req: PayloadRequest): Promise<CollectionCardsData> {
   const { payload, user } = req
   const { admin: adminRoute } = payload.config.routes

@@ -28,6 +28,7 @@ type Args = {
   readonly schemaPathSegments: string[]
 }
 
+/** @internal */
 export const DocumentFields: React.FC<Args> = ({
   AfterFields,
   BeforeFields,

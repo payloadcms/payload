@@ -14,6 +14,7 @@ import { useModal } from '../Modal/index.js'
 
 const modalSlug = 'document-stale-data'
 
+/** @internal */
 export const DocumentStaleData: React.FC<{
   isActive: boolean
   onReload: () => Promise<void> | void

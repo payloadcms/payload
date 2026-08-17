@@ -6,6 +6,7 @@ import React from 'react'
 import { useTranslation } from '../../../../providers/Translation/index.js'
 import './index.css'
 
+/** @internal */
 export const QueryPresetsHeading: React.FC<{ i18nKey?: ClientTranslationKeys }> = ({
   i18nKey = 'general:presets',
 }) => {

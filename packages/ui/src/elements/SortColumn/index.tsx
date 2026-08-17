@@ -19,6 +19,7 @@ export type SortColumnProps = {
 
 const baseClass = 'sort-column'
 
+/** @internal */
 export const SortColumn: React.FC<SortColumnProps> = (props) => {
   const { name, appearance, disable = false, Label, label } = props
   const { handleSortChange, query } = useListQuery()

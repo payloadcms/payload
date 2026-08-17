@@ -29,6 +29,7 @@ export type EditManyProps = {
   readonly where?: Where
 }
 
+/** @internal */
 export const EditMany: React.FC<EditManyProps> = ({
   collection,
   count,

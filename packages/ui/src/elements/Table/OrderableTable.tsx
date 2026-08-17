@@ -32,6 +32,7 @@ export type Props = {
   readonly heading?: React.ReactNode
 }
 
+/** @internal */
 export const OrderableTable: React.FC<Props> = ({
   appearance = 'default',
   BeforeTable,

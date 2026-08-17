@@ -14,6 +14,7 @@ import { RenderVersionFieldsToDiff } from '../../RenderVersionFieldsToDiff.js'
 
 const baseClass = 'group-diff'
 
+/** @internal */
 export const Group: GroupFieldDiffClientComponent = ({
   baseVersionField,
   comparisonValue: valueFrom,

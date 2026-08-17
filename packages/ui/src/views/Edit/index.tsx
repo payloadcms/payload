@@ -54,6 +54,7 @@ export type OnSaveContext = {
 // This component receives props only on _pages_
 // When rendered within a drawer, props are empty
 // This is solely to support custom edit views which get server-rendered
+/** @internal */
 export function DefaultEditView({
   BeforeDocumentControls,
   BeforeDocumentMeta,

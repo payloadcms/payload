@@ -63,6 +63,7 @@ const getTranslatedOptions = (options: Option | Option[], i18n: I18nClient): str
   return typeof translatedLabel === 'string' ? translatedLabel : options.value
 }
 
+/** @internal */
 export const Select: SelectFieldDiffClientComponent = ({
   comparisonValue: valueFrom,
   diffMethod,

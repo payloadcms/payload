@@ -62,6 +62,8 @@ type Args = {
  *   req,
  *   staticPath: '/uploads/media',
  * })
+ *
+ * @internal
  */
 export async function getSafeFileName({
   collectionSlug,

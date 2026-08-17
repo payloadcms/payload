@@ -16,6 +16,7 @@ import './index.css'
 
 const baseClass = 'date-diff'
 
+/** @internal */
 export const DateDiffComponent: DateFieldDiffClientComponent = ({
   comparisonValue: valueFrom,
   field,

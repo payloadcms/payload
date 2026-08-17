@@ -7,6 +7,7 @@ import { RenderVersionFieldsToDiff } from '../../RenderVersionFieldsToDiff.js'
 
 const baseClass = 'row-diff'
 
+/** @internal */
 export const Row: RowFieldDiffClientComponent = ({ baseVersionField }) => {
   return (
     <div className={baseClass}>

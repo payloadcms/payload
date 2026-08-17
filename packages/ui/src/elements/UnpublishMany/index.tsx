@@ -22,6 +22,7 @@ export type UnpublishManyProps = {
   where?: Where
 }
 
+/** @internal */
 export const UnpublishMany: React.FC<UnpublishManyProps> = (props) => {
   const {
     collection,

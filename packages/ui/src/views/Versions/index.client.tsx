@@ -10,6 +10,7 @@ import { useListQuery } from '../../providers/ListQuery/index.js'
 import { useSearchParams } from '../../providers/RouterAdapter/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 
+/** @internal */
 export const VersionsViewClient: React.FC<{
   readonly baseClass: string
   readonly columns: Column[]

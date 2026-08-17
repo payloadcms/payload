@@ -14,6 +14,7 @@ export type HierarchySidebarTabServerProps = {
   hierarchyCollectionSlug: string
 } & SidebarTabServerProps
 
+/** @internal */
 export const HierarchySidebarTabServer: React.FC<HierarchySidebarTabServerProps> = async ({
   hierarchyCollectionSlug,
   i18n,

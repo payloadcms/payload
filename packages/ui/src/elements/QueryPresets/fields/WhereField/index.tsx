@@ -9,6 +9,7 @@ import { useConfig } from '../../../../providers/Config/index.js'
 import { WhereBuilder } from '../../../WhereBuilder/index.js'
 import '../fields.css'
 
+/** @internal */
 export const QueryPresetsWhereField: JSONFieldClientComponent = ({
   field: { label, required },
 }) => {

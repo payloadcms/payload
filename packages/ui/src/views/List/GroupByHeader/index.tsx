@@ -4,6 +4,7 @@ import React from 'react'
 
 import { ListSelection } from '../ListSelection/index.js'
 
+/** @internal */
 export const GroupByHeader: React.FC<{
   collectionConfig?: ClientCollectionConfig
   groupByFieldPath: string

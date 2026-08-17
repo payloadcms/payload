@@ -14,6 +14,7 @@ import { useRouteTransition } from '../../../../providers/RouteTransition/index.
 import { useTranslation } from '../../../../providers/Translation/index.js'
 import { formatDate } from '../../../../utilities/formatDocTitle/formatDateTitle.js'
 
+/** @internal */
 export const VersionDrawerCreatedAtCell: React.FC<CreatedAtCellProps> = ({
   rowData: { id, updatedAt } = {},
 }) => {

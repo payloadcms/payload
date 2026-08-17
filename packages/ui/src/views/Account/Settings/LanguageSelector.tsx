@@ -9,6 +9,7 @@ import type { Option as ReactSelectOption } from '../../../elements/ReactSelect/
 import { ReactSelect } from '../../../elements/ReactSelect/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 
+/** @internal */
 export const LanguageSelector: React.FC<{
   languageOptions: LanguageOptions
 }> = (props) => {

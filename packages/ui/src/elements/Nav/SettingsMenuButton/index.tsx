@@ -8,10 +8,12 @@ import './index.css'
 
 const baseClass = 'settings-menu-button'
 
+/** @internal */
 export type SettingsMenuButtonProps = {
   settingsMenu?: React.ReactNode[]
 }
 
+/** @internal */
 export const SettingsMenuButton: React.FC<SettingsMenuButtonProps> = ({ settingsMenu }) => {
   const { t } = useTranslation()
 
