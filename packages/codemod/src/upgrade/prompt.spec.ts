@@ -3,26 +3,20 @@ import { describe, expect, it } from 'vitest'
 import { renderUpgradePrompt } from './prompt.js'
 
 describe('renderUpgradePrompt', () => {
-  it('embeds the upgrade command with the given path', () => {
-    const out = renderUpgradePrompt({ path: './app' })
+  it('emits a project-agnostic upgrade command', () => {
+    const out = renderUpgradePrompt()
 
-    expect(out).toContain('npx @payloadcms/codemod upgrade ./app')
+    expect(out).toContain('npx @payloadcms/codemod upgrade .')
   })
 
-  it('propagates the tag into the embedded command', () => {
-    const out = renderUpgradePrompt({ path: './app', tag: 'latest' })
+  it('documents --tag as an inline option rather than baking a value', () => {
+    const out = renderUpgradePrompt()
 
-    expect(out).toContain('npx @payloadcms/codemod upgrade ./app --tag latest')
-  })
-
-  it('omits the tag flag when no tag is given', () => {
-    const out = renderUpgradePrompt({ path: '.' })
-
-    expect(out).not.toContain('--tag')
+    expect(out).toContain('--tag <dist-tag>')
   })
 
   it('orders the steps: pre-upgrade before payload slice before Next before verify', () => {
-    const out = renderUpgradePrompt({ path: '.' })
+    const out = renderUpgradePrompt()
     const preUpgradeStep = out.indexOf('## 1. Pre-upgrade migrations')
     const payloadStep = out.indexOf('## 2. Payload mechanical slice')
     const nextStep = out.indexOf('## 3. Next.js 16')
@@ -35,7 +29,7 @@ describe('renderUpgradePrompt', () => {
   })
 
   it('places Slate -> Lexical in the pre-upgrade gate, not the post-upgrade work', () => {
-    const out = renderUpgradePrompt({ path: '.' })
+    const out = renderUpgradePrompt()
     const slate = out.indexOf('Slate -> Lexical')
     const mechanicalSlice = out.indexOf('## 2. Payload mechanical slice')
 
@@ -44,28 +38,28 @@ describe('renderUpgradePrompt', () => {
   })
 
   it('delegates Next.js to Next own codemods rather than restating them', () => {
-    const out = renderUpgradePrompt({ path: '.' })
+    const out = renderUpgradePrompt()
 
     expect(out).toContain('@next/codemod@canary upgrade latest')
     expect(out).toContain('next-async-request-api')
   })
 
   it('encodes the expected-unmet-peer invariant', () => {
-    const out = renderUpgradePrompt({ path: '.' })
+    const out = renderUpgradePrompt()
 
     expect(out).toContain('EXPECTED')
     expect(out).toMatch(/do not downgrade\s+payload/i)
   })
 
   it('points at the migration guide and runbook without duplicating them', () => {
-    const out = renderUpgradePrompt({ path: '.' })
+    const out = renderUpgradePrompt()
 
     expect(out).toContain('v4.mdx')
     expect(out).toContain('runbook/payload-v4-upgrade.md')
   })
 
   it('contains no figma references', () => {
-    const out = renderUpgradePrompt({ path: '.' })
+    const out = renderUpgradePrompt()
 
     expect(out.toLowerCase()).not.toContain('figma')
   })
