@@ -93,31 +93,30 @@ export type CollectionsWithoutDrafts = {
 }[CollectionSlug]
 
 /**
- * Conditionally allows or forbids the `draft` property based on collection configuration.
- * When `strictDraftTypes` is enabled, the `draft` property is forbidden on collections without drafts.
+ * Allows or forbids the `draft` property based on collection configuration.
+ * The `draft` property is forbidden on collections without drafts.
+ *
+ * The conditional lives inside the object so the return shape is always `{ draft?: X }`.
+ * That keeps `Pick<FindOptions, 'select'>` and other indexed accesses stable when
+ * `FindOptions` is composed via intersection with this helper.
+ *
+ * The `CollectionSlug extends TSlug` check catches the wide/generic case where TSlug is the
+ * full slug union (internal calls) and returns `boolean` so those calls don't get locked
+ * out. A narrowed TSlug distributes through the second branch and gets `never` when it
+ * lacks drafts.
  */
-export type DraftFlagFromCollectionSlug<TSlug extends CollectionSlug> = GeneratedTypes extends {
-  strictDraftTypes: true
+export type DraftFlagFromCollectionSlug<TSlug extends CollectionSlug> = {
+  /**
+   * Whether the document(s) should be queried from the versions table/collection or not. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
+   *
+   * Typed as `never` when the collection has no drafts, so passing `draft` fails at compile time.
+   */
+  draft?: CollectionSlug extends TSlug
+    ? boolean
+    : [TSlug] extends [CollectionsWithoutDrafts]
+      ? never
+      : boolean
 }
-  ? TSlug extends CollectionsWithoutDrafts
-    ? {
-        /**
-         * The `draft` property is not allowed because this collection does not have `versions.drafts` enabled.
-         */
-        draft?: never
-      }
-    : {
-        /**
-         * Whether the document(s) should be queried from the versions table/collection or not. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
-         */
-        draft?: boolean
-      }
-  : {
-      /**
-       * Whether the document(s) should be queried from the versions table/collection or not. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
-       */
-      draft?: boolean
-    }
 
 export type AuthOperationsFromCollectionSlug<TSlug extends CollectionSlug> =
   TypedAuthOperations[TSlug]
