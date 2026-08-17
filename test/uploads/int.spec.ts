@@ -1605,13 +1605,22 @@ describe('Collections - Uploads', () => {
       )
 
     it('should add the crop rectangle field only when cropping is enabled', () => {
-      const hasCropRectField = (collectionSlug: CollectionSlug) =>
-        payload.collections[collectionSlug].config.fields.some(
+      const getCropRectField = (collectionSlug: CollectionSlug) =>
+        payload.collections[collectionSlug].config.fields.find(
           (field) => 'name' in field && field.name === 'cropRect',
         )
 
-      expect(hasCropRectField(mediaSlug)).toBe(true)
-      expect(hasCropRectField(focalOnlySlug)).toBe(false)
+      expect(getCropRectField(mediaSlug)).toMatchObject({
+        type: 'group',
+        fields: expect.arrayContaining([
+          expect.objectContaining({
+            name: 'unit',
+            type: 'select',
+            options: ['%', 'px'],
+          }),
+        ]),
+      })
+      expect(getCropRectField(focalOnlySlug)).toBeUndefined()
     })
 
     it('should persist an applied crop and clear it when the file is replaced', async () => {
