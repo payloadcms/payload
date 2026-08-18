@@ -1,4 +1,5 @@
-import { createServerFunctionHandler, initReq } from '@payloadcms/ui/internal/server'
+import { createServerFunctionHandler } from '@payloadcms/ui/internal/rsc'
+import { initReq } from '@payloadcms/ui/internal/server'
 
 import { nextServerAdapter } from './server.js'
 

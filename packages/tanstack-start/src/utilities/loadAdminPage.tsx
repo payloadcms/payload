@@ -155,8 +155,9 @@ export async function loadAdminPage({
   search,
   splat,
 }: LoadAdminPageArgs): Promise<LoadAdminPageResult> {
-  const { defaultAdminViews, renderRoot } = await import('@payloadcms/ui/internal/rsc')
-  const { generatePageMetadata } = await import('@payloadcms/ui/internal/server')
+  const { defaultAdminViews, generatePageMetadata, renderRoot } = await import(
+    '@payloadcms/ui/internal/rsc'
+  )
 
   const splatSegments = splat ? splat.split('/').filter(Boolean) : []
   // Match Next's optional-catch-all behavior: the admin root (`/admin`) has no

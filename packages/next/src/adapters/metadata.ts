@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import type { SanitizedConfig } from 'payload'
 
-import { generatePageMetadata as generateMetadata } from '@payloadcms/ui/internal/server'
+import { generatePageMetadata as generateMetadata } from '@payloadcms/ui/internal/rsc'
 
 import { getNextRequestI18n } from '../utilities/getNextRequestI18n.js'
 import { adminViews } from './views.js'
