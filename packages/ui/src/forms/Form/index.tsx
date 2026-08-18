@@ -93,7 +93,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const documentForm = useDocumentForm()
 
-  const { code: locale } = useLocale()
+  const locale = useLocale()?.code
   const { i18n, t } = useTranslation()
   const { refreshCookie, user } = useAuth()
   const onNonFieldError = useFormErrorHandler()

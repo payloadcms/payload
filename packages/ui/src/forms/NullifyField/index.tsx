@@ -25,7 +25,7 @@ export const NullifyLocaleField: React.FC<NullifyLocaleFieldProps> = ({
   path,
   readOnly = false,
 }) => {
-  const { code: currentLocale } = useLocale()
+  const currentLocale = useLocale()?.code
   const {
     config: { localization },
   } = useConfig()

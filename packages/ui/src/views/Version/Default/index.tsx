@@ -38,7 +38,7 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
   versionToStatus,
 }) => {
   const { config, getEntityConfig } = useConfig()
-  const { code } = useLocale()
+  const code = useLocale()?.code
   const { i18n, t } = useTranslation()
 
   const [locales, setLocales] = useState<SelectablePill[]>([])

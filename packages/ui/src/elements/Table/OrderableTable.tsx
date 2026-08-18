@@ -41,7 +41,7 @@ export const OrderableTable: React.FC<Props> = ({
 }) => {
   const { config } = useConfig()
   const { data: listQueryData, orderableFieldName, query } = useListQuery()
-  const { code: localeCode } = useLocale()
+  const localeCode = useLocale()?.code
   const { t } = useTranslation()
   // Use the data from ListQueryProvider if available, otherwise use the props
   const serverData = listQueryData?.docs || initialData

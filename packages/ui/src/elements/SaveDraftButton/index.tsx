@@ -28,7 +28,7 @@ export function SaveDraftButton(props: SaveDraftButtonClientProps) {
     useDocumentInfo()
 
   const modified = useFormModified()
-  const { code: locale } = useLocale()
+  const locale = useLocale()?.code
   const ref = useRef<HTMLButtonElement>(null)
   const editDepth = useEditDepth()
   const { t } = useTranslation()

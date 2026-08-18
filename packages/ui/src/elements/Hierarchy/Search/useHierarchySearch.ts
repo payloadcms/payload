@@ -47,7 +47,7 @@ export const useHierarchySearch = ({
       serverURL,
     },
   } = useConfig()
-  const { code: locale } = useLocale()
+  const locale = useLocale()?.code
 
   const fetchResults = useCallback(
     async ({

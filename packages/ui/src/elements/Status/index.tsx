@@ -39,7 +39,7 @@ export const Status: React.FC = () => {
   } = useConfig()
 
   const { reset: resetForm } = useForm()
-  const { code: locale } = useLocale()
+  const locale = useLocale()?.code
   const { i18n, t } = useTranslation()
 
   const revertModalSlug = `confirm-revert-${id}`
