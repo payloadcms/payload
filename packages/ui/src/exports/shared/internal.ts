@@ -10,6 +10,7 @@ export { filterFields } from '../../providers/TableColumns/buildColumnState/filt
 export { getInitialColumns } from '../../providers/TableColumns/getInitialColumns.js'
 export { formatDocTitle } from '../../utilities/formatDocTitle/index.js'
 export { getGlobalData } from '../../utilities/getGlobalData.js'
+export { type Direction, getLanguageDir } from '../../utilities/getLanguageDir.js'
 export { getNavGroups } from '../../utilities/getNavGroups.js'
 export { handleBackToDashboard } from '../../utilities/handleBackToDashboard.js'
 export { handleGoBack } from '../../utilities/handleGoBack.js'

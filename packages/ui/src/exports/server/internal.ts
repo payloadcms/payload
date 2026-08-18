@@ -19,7 +19,6 @@ export {
   type HierarchyAncestryResult,
 } from '../../utilities/getHierarchyAncestry.js'
 export { getIsLocked } from '../../utilities/getIsLocked.js'
-export { type Direction, getLanguageDir } from '../../utilities/getLanguageDir.js'
 export { getPreferences } from '../../utilities/getPreferences.js'
 export { getRequestEmbed } from '../../utilities/getRequestEmbed.js'
 export { getRequestTheme } from '../../utilities/getRequestTheme.js'
