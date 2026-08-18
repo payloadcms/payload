@@ -14,6 +14,7 @@ import { escapeSQLValue } from '../utilities/escapeSQLValue.js'
 import { getNameFromDrizzleTable } from '../utilities/getNameFromDrizzleTable.js'
 import { isValidStringID } from '../utilities/isValidStringID.js'
 import { DistinctSymbol } from '../utilities/rawConstraint.js'
+import { UnmatchableValue } from '../utilities/unmatchableValue.js'
 import { buildAndOrConditions } from './buildAndOrConditions.js'
 import { buildOperatorConstraint } from './buildOperatorConstraint.js'
 import { getTableColumnFromPath } from './getTableColumnFromPath.js'
@@ -275,6 +276,15 @@ export function parseParams({
                   operator: queryOperator,
                   value: queryValue,
                 } = sanitizedQueryValue
+
+                // An operand that cannot be cast to the column's type can never equal a row, so
+                // the clause matches nothing - and everything for the one negated operator that
+                // reaches here. Previously such a value arrived as null and was read as a null
+                // check, which on a nullable column answered a different question entirely.
+                if (queryValue === UnmatchableValue) {
+                  constraints.push(queryOperator === 'not_equals' ? sql`true` : sql`false`)
+                  break
+                }
 
                 // Handle polymorphic relationships by value
                 if (queryColumns) {
