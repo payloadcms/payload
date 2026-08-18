@@ -2222,6 +2222,7 @@ describe('List View', () => {
       })
 
       await page.goto(formatDocURLUrl.list)
+      await expect(page).toHaveURL(/depth=1&limit=10/)
 
       const selectButton = page.locator('button:has-text("Select format doc")')
       await selectButton.waitFor({ state: 'visible' })
