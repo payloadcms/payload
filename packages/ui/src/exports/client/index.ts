@@ -20,15 +20,13 @@ export { useResize } from '../../hooks/useResize.js'
 export { useThrottledEffect } from '../../hooks/useThrottledEffect.js'
 export { useEffectEvent } from '../../hooks/useEffectEvent.js'
 export { FieldPathContext, useFieldPath } from '../../forms/RenderFields/context.js'
-export { createQueue, useQueue } from '../../hooks/useQueue.js'
+export { useQueue } from '../../hooks/useQueue.js'
 export type {
-  Queue,
   QueueContext,
   QueuedTaskOptions,
-  QueueOptions,
   QueueResult,
   QueueTask,
-  QueueTaskFunction,
+  UseQueueOptions,
   UseQueueResult,
 } from '../../hooks/useQueue.js'
 

@@ -10,10 +10,9 @@ import {
   reduceFieldsToValues,
   wait,
 } from 'payload/shared'
-import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
-import type { FormRequestContext } from './requestScheduler.js'
 import type {
   CreateFormData,
   FieldAction,
@@ -27,6 +26,7 @@ import type {
 import { FieldErrorsToast } from '../../elements/Toasts/fieldErrors.js'
 import { useDebouncedEffect } from '../../hooks/useDebouncedEffect.js'
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
+import { type QueueContext, useQueue } from '../../hooks/useQueue.js'
 import { useThrottledEffect } from '../../hooks/useThrottledEffect.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
@@ -57,9 +57,13 @@ import {
 import { errorMessages } from './errorMessages.js'
 import { fieldReducer } from './fieldReducer.js'
 import { initContextState } from './initContextState.js'
-import { createFormRequestScheduler } from './requestScheduler.js'
 
 const baseClass = 'form'
+const requestPriority = {
+  autosave: 1,
+  formState: 0,
+  submit: 2,
+} as const
 
 export const Form: React.FC<FormProps> = (props) => {
   const { id, collectionSlug, docConfig, docPermissions, getDocPreferences, globalSlug } =
@@ -142,9 +146,8 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const [modified, _setModified] = useState(false)
   const formRevisionRef = useRef(0)
-  const [requestScheduler] = useState(() =>
-    createFormRequestScheduler({ getRevision: () => formRevisionRef.current }),
-  )
+  const requestQueueOptions = useMemo(() => ({ getVersion: () => formRevisionRef.current }), [])
+  const { reset: resetRequestQueue, schedule: scheduleRequest } = useQueue(requestQueueOptions)
 
   const setModified = useCallback((modified: boolean) => {
     if (modified) {
@@ -255,7 +258,7 @@ export const Form: React.FC<FormProps> = (props) => {
   )
 
   const executeSubmit = useCallback(
-    async (options: SubmitOptions | undefined, requestContext: FormRequestContext) => {
+    async (options: SubmitOptions | undefined, requestContext: QueueContext) => {
       const {
         acceptValues = true,
         action: actionArg = action,
@@ -624,14 +627,14 @@ export const Form: React.FC<FormProps> = (props) => {
         return
       }
 
-      const result = await requestScheduler.schedule({
-        intent: options?.requestIntent ?? 'submit',
+      const result = await scheduleRequest({
+        priority: requestPriority[options?.requestIntent ?? 'submit'],
         run: (requestContext) => executeSubmit(options, requestContext),
       })
 
       return result.status === 'completed' ? result.value : undefined
     },
-    [disabled, executeSubmit, requestScheduler],
+    [disabled, executeSubmit, scheduleRequest],
   )
 
   const getFields = useCallback(() => contextRef.current.fields, [])
@@ -702,7 +705,7 @@ export const Form: React.FC<FormProps> = (props) => {
   const reset = useCallback(
     async (data: unknown) => {
       const resetSequence = ++resetSequenceRef.current
-      requestScheduler.reset()
+      resetRequestQueue()
       formRevisionRef.current = 0
       restoreRequestState()
 
@@ -743,7 +746,7 @@ export const Form: React.FC<FormProps> = (props) => {
         return
       }
 
-      requestScheduler.reset()
+      resetRequestQueue()
       formRevisionRef.current = 0
       restoreRequestState()
       contextRef.current = { ...initContextState } as FormContextType
@@ -761,7 +764,7 @@ export const Form: React.FC<FormProps> = (props) => {
       docPermissions,
       getDocPreferences,
       locale,
-      requestScheduler,
+      resetRequestQueue,
       restoreRequestState,
     ],
   )
@@ -769,14 +772,14 @@ export const Form: React.FC<FormProps> = (props) => {
   const replaceState = useCallback(
     (state: FormState) => {
       resetSequenceRef.current += 1
-      requestScheduler.reset()
+      resetRequestQueue()
       formRevisionRef.current = 0
       restoreRequestState()
       contextRef.current = { ...initContextState } as FormContextType
       _setModified(false)
       dispatchFieldsWithoutRevision({ type: 'REPLACE_STATE', state })
     },
-    [requestScheduler, restoreRequestState],
+    [resetRequestQueue, restoreRequestState],
   )
 
   const addFieldRow: FormContextType['addFieldRow'] = useCallback(
@@ -901,7 +904,7 @@ export const Form: React.FC<FormProps> = (props) => {
   useEffect(() => {
     if (initialState) {
       resetSequenceRef.current += 1
-      requestScheduler.reset()
+      resetRequestQueue()
       formRevisionRef.current = 0
       restoreRequestState()
       contextRef.current = { ...initContextState } as FormContextType
@@ -913,21 +916,21 @@ export const Form: React.FC<FormProps> = (props) => {
         state: initialState,
       })
     }
-  }, [initialState, requestScheduler, restoreRequestState])
+  }, [initialState, resetRequestQueue, restoreRequestState])
 
   useEffect(() => {
     resetSequenceRef.current += 1
-    requestScheduler.reset()
+    resetRequestQueue()
     formRevisionRef.current = 0
     restoreRequestState()
-  }, [requestScheduler, restoreRequestState, uuid])
+  }, [resetRequestQueue, restoreRequestState, uuid])
 
   useEffect(() => {
     return () => {
       resetSequenceRef.current += 1
-      requestScheduler.reset()
+      resetRequestQueue()
     }
-  }, [requestScheduler])
+  }, [resetRequestQueue])
 
   useThrottledEffect(
     () => {
@@ -949,33 +952,31 @@ export const Form: React.FC<FormProps> = (props) => {
   const classes = [className, baseClass].filter(Boolean).join(' ')
 
   const executeOnChange = useEffectEvent((submitted: boolean) => {
-    void requestScheduler
-      .schedule({
-        intent: 'formState',
-        run: async (requestContext) => {
-          const requestFormState = deepCopyObjectSimpleWithoutReactComponents(
-            contextRef.current.fields,
-            { excludeFiles: true },
-          )
-          let serverState: FormState | undefined
+    void scheduleRequest({
+      priority: requestPriority.formState,
+      run: async (requestContext) => {
+        const requestFormState = deepCopyObjectSimpleWithoutReactComponents(
+          contextRef.current.fields,
+          { excludeFiles: true },
+        )
+        let serverState: FormState | undefined
 
-          for (const onChangeFn of onChange ?? []) {
-            // Edit view default onChange is in packages/ui/src/views/Edit/index.tsx. This onChange usually sends a form state request
-            serverState = await onChangeFn({ formState: requestFormState, submitted })
-          }
+        for (const onChangeFn of onChange ?? []) {
+          // Edit view default onChange is in packages/ui/src/views/Edit/index.tsx. This onChange usually sends a form state request
+          serverState = await onChangeFn({ formState: requestFormState, submitted })
+        }
 
-          if (serverState && requestContext.isCurrent()) {
-            dispatchFieldsWithoutRevision({
-              type: 'MERGE_SERVER_STATE',
-              prevStateRef: prevFormState,
-              serverState,
-            })
-          }
-        },
-      })
-      .catch((err) => {
-        console.error('Error in queued function:', err) // eslint-disable-line no-console
-      })
+        if (serverState && requestContext.isCurrent()) {
+          dispatchFieldsWithoutRevision({
+            type: 'MERGE_SERVER_STATE',
+            prevStateRef: prevFormState,
+            serverState,
+          })
+        }
+      },
+    }).catch((err) => {
+      console.error('Error in queued function:', err) // eslint-disable-line no-console
+    })
   })
 
   useDebouncedEffect(
