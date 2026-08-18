@@ -10,7 +10,7 @@ export const pasteURLDrawerSlug = 'upload-paste-url'
 
 type Props = {
   readonly fileUrl: string
-  readonly handleUrlSubmit: () => Promise<void>
+  readonly handleUrlSubmit: () => Promise<boolean>
   readonly isValidUrl: boolean
   readonly setFileUrl: (url: string) => void
 }

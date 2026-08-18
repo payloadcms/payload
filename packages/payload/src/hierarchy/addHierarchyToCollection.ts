@@ -30,8 +30,8 @@ export const addHierarchyToCollection = ({
       name: slugPathFieldName,
       type: 'text',
       admin: {
+        hidden: true,
         readOnly: true,
-        // hidden: true,
       },
       index: true,
       label: 'Slug Path',
@@ -41,8 +41,8 @@ export const addHierarchyToCollection = ({
       name: titlePathFieldName,
       type: 'text',
       admin: {
+        hidden: true,
         readOnly: true,
-        // hidden: true,
       },
       index: true,
       label: 'Title Path',

@@ -136,6 +136,10 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'error:restoringTitle',
   'error:failedToSaveLayout',
   'error:failedToResetLayout',
+  'error:fileFetchFailed',
+  'error:noFileFoundInClipboard',
+  'error:unableToReadClipboard',
+  'error:urlNotAllowed',
 
   'fields:addLabel',
   'fields:addLink',
@@ -494,6 +498,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'upload:height',
   'upload:fromURL',
   'upload:linkToFile',
+  'upload:pasteFromClipboard',
   'upload:pasteURL',
   'upload:renameFile',
   'upload:replaceFile',
