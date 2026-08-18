@@ -41,6 +41,7 @@ jobs:
               - '.github/workflows/main.yml'
               - '.github/actions/start-services/**'
               - '.github/actions/setup/**'
+              - '.github/actions/setup-playwright/**'
               - 'packages/**'
               - 'test/**'
               - 'pnpm-lock.yaml'
@@ -383,28 +384,8 @@ jobs:
         with:
           database: mongodb
 
-      - name: Store Playwright's Version
-        run: |
-          # `exit` after the first match: v11's `pnpm ls` lists the dep across every workspace
-          # project, and a multi-line value would break the GITHUB_ENV write.
-          PLAYWRIGHT_VERSION=$(pnpm ls @playwright/test --depth=0 | awk '/@playwright\/test/ {print $2; exit}')
-          echo "Playwright's Version: $PLAYWRIGHT_VERSION"
-          echo "PLAYWRIGHT_VERSION=$PLAYWRIGHT_VERSION" >> $GITHUB_ENV
-
-      - name: Cache Playwright Browsers for Playwright's Version
-        id: cache-playwright-browsers
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-browsers-${{ env.PLAYWRIGHT_VERSION }}
-
-      - name: Setup Playwright - Browsers and Dependencies
-        if: steps.cache-playwright-browsers.outputs.cache-hit != 'true'
-        run: pnpm exec playwright install --with-deps chromium --no-shell
-
-      - name: Setup Playwright - Dependencies-only
-        if: steps.cache-playwright-browsers.outputs.cache-hit == 'true'
-        run: pnpm exec playwright install-deps chromium
+      - name: Setup Playwright
+        uses: ./.github/actions/setup-playwright
 
       - name: E2E Tests
         # E2E Test Execution Strategy:
@@ -515,28 +496,8 @@ jobs:
           NODE_OPTIONS: --max-old-space-size=8096
           DB_CONNECTION: ${{ steps.db.outputs.POSTGRES_URL || steps.db.outputs.MONGODB_URL }}
 
-      - name: Store Playwright's Version
-        run: |
-          # `exit` after the first match: v11's `pnpm ls` lists the dep across every workspace
-          # project, and a multi-line value would break the GITHUB_ENV write.
-          PLAYWRIGHT_VERSION=$(pnpm ls @playwright/test --depth=0 | awk '/@playwright\/test/ {print $2; exit}')
-          echo "Playwright's Version: $PLAYWRIGHT_VERSION"
-          echo "PLAYWRIGHT_VERSION=$PLAYWRIGHT_VERSION" >> $GITHUB_ENV
-
-      - name: Cache Playwright Browsers for Playwright's Version
-        id: cache-playwright-browsers
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-browsers-${{ env.PLAYWRIGHT_VERSION }}
-
-      - name: Setup Playwright - Browsers and Dependencies
-        if: steps.cache-playwright-browsers.outputs.cache-hit != 'true'
-        run: pnpm exec playwright install --with-deps chromium
-
-      - name: Setup Playwright - Dependencies-only
-        if: steps.cache-playwright-browsers.outputs.cache-hit == 'true'
-        run: pnpm exec playwright install-deps chromium
+      - name: Setup Playwright
+        uses: ./.github/actions/setup-playwright
 
       - name: Runs Template Int Tests
         run: pnpm --filter ${{ matrix.template }} run test:int
