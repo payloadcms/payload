@@ -1,5 +1,7 @@
 import type { CollectionConfig, Document, PayloadRequest } from 'payload'
 
+import { APIError } from 'payload'
+
 import type { NestedDocsPluginConfig } from '../types.js'
 
 export const getParents = async (
@@ -14,6 +16,15 @@ export const getParents = async (
   let retrievedParent: null | Record<string, unknown> = null
 
   if (parent) {
+    const parentID = typeof parent === 'object' ? (parent as Record<string, unknown>).id : parent
+
+    // Detect circular parent references to prevent infinite recursion
+    if (docs.some((d) => d.id === parentID)) {
+      throw new APIError(
+        'Circular parent reference detected. A document cannot be its own ancestor.',
+      )
+    }
+
     // If not auto-populated, and we have an ID
     if (typeof parent === 'string' || typeof parent === 'number') {
       retrievedParent = await req.payload.findByID({
