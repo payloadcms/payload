@@ -113,6 +113,135 @@ describe('Fields', () => {
       expect(doc.slug).toBe('hello-world')
     })
 
+    it('should generate a non-ASCII slug from a non-Latin source', async () => {
+      const doc = await payload.create({
+        collection: 'slug-fields',
+        data: { title: '正念餅乾' },
+      })
+      created.push(doc.id)
+      expect(doc.slug).toBe('正念餅乾')
+
+      const accented = await payload.create({
+        collection: 'slug-fields',
+        data: { title: 'Café Pläne' },
+      })
+      created.push(accented.id)
+      expect(accented.slug).toBe('café-pläne')
+    })
+
+    it('should dedupe generated non-ASCII slugs with a numeric suffix', async () => {
+      const first = await payload.create({
+        collection: 'slug-fields',
+        data: { title: '你好世界' },
+      })
+      created.push(first.id)
+      expect(first.slug).toBe('你好世界')
+
+      const second = await payload.create({
+        collection: 'slug-fields',
+        data: { title: '你好世界' },
+      })
+      created.push(second.id)
+      expect(second.slug).toBe('你好世界-1')
+    })
+
+    it('should reject an explicit non-ASCII slug that collides', async () => {
+      const first = await payload.create({
+        collection: 'slug-fields',
+        data: { title: 'First', slug: '你好世界' },
+      })
+      created.push(first.id)
+      expect(first.slug).toBe('你好世界')
+
+      await expect(
+        payload.create({
+          collection: 'slug-fields',
+          data: { title: 'Second', slug: '你好世界' },
+        }),
+      ).rejects.toThrow()
+    })
+
+    it('should preserve a stored slug when an update sends a value that slugifies to nothing', async () => {
+      // A stored legacy slug like `-` re-sent by autosave slugifies to `''` under the new
+      // transform; the hook must fall through to preserving the stored value, not empty it.
+      const doc = await payload.create({
+        collection: 'slug-fields',
+        data: { title: 'Stable Title' },
+      })
+      created.push(doc.id)
+      expect(doc.slug).toBe('stable-title')
+
+      const updated = await payload.update({
+        collection: 'slug-fields',
+        id: doc.id,
+        data: { slug: '!!!' },
+      })
+      expect(updated.slug).toBe('stable-title')
+    })
+
+    it('should preserve a legacy slug that the new transform empties, and not regenerate it on clear', async () => {
+      // Pre-4.0, a pure-Cyrillic title stored `-`. That value has no letter or number,
+      // so it now slugifies to `''`. Seed it through the db to bypass the hook, since
+      // the hook itself can no longer produce it.
+      const doc = await payload.create({
+        collection: 'slug-fields',
+        data: { title: 'Legacy' },
+      })
+      created.push(doc.id)
+      await payload.db.updateOne({
+        id: doc.id,
+        collection: 'slug-fields',
+        data: { slug: '-' },
+      })
+
+      // Autosave resends the stored slug on every tick; it must survive.
+      const resent = await payload.update({
+        collection: 'slug-fields',
+        id: doc.id,
+        data: { slug: '-' },
+      })
+      expect(resent.slug).toBe('-')
+
+      // Clearing the field does not regenerate it — an empty submission is ignored
+      // and the stored value wins. Documented in the v4 migration guide.
+      const cleared = await payload.update({
+        collection: 'slug-fields',
+        id: doc.id,
+        data: { slug: '' },
+      })
+      expect(cleared.slug).toBe('-')
+    })
+
+    it('should reject rather than dedupe when a re-normalized slug collides', async () => {
+      // `a--b` re-normalizes to `a-b` on the next save. Only generated values are
+      // deduped, so an explicit value that lands on an existing slug must throw.
+      const target = await payload.create({
+        collection: 'slug-fields',
+        data: { title: 'Target', slug: 'a-b' },
+      })
+      created.push(target.id)
+      expect(target.slug).toBe('a-b')
+
+      const legacy = await payload.create({
+        collection: 'slug-fields',
+        data: { title: 'Legacy Dashes' },
+      })
+      created.push(legacy.id)
+      await payload.db.updateOne({
+        id: legacy.id,
+        collection: 'slug-fields',
+        data: { slug: 'a--b' },
+      })
+
+      await expect(
+        payload.update({
+          collection: 'slug-fields',
+          id: legacy.id,
+          data: { slug: 'a--b' },
+        }),
+      ).rejects.toThrow()
+    })
+
     it('should freeze a diverged slug on update', async () => {
       const doc = await payload.create({
         collection: 'slug-fields',

@@ -49,6 +49,36 @@ export default buildConfig({
 
 One place inherits `defaultDepth` without naming it: when localization is enabled, `@payloadcms/plugin-search` refetches the document without an explicit depth before handing `originalDoc` to your `beforeSync` hook. Read only first-level relationships there, or refetch yourself with the depth you need.
 
+### Default `slugify` is now Unicode-preserving
+
+The default slug transform (used by the `slug` field, hierarchy path computation, and exported from `payload/shared`) previously deleted every non-ASCII character, so non-Latin titles produced empty slugs and fell back to `posts-1`-style values, and accented titles were mangled (`Café Pläne` → `caf-plne`). It now preserves Unicode letters and numbers from any script:
+
+| title        | 3.x slug             | 4.0 slug     |
+| ------------ | -------------------- | ------------ |
+| `你好世界`   | `posts-1` (fallback) | `你好世界`   |
+| `Привет мир` | `-`                  | `привет-мир` |
+| `Café Pläne` | `caf-plne`           | `café-pläne` |
+
+Input is NFKC-normalized (full-width `ＡＢＣ１２３` folds to `abc123`, with some lossy folds such as `½` → `12`, `⅒` → `110`, and `№` → `no`). Every character Unicode classifies as a dash — including the minus sign `−`, which was previously deleted and silently joined the words on either side — becomes a hyphen, as does all whitespace. Invisible characters are removed: zero-width joiners, bidi controls, and variation selectors. Removing variation selectors means glyph variants of the same character share one slug (`辻` with and without `U+E0100`); use the `slugify` override if you need that distinction. Lowercasing is invariant, not locale-aware, so Turkish `I` becomes `i` rather than `ı`. To keep ASCII-only slugs via transliteration, use the [`slugify` field option](../fields/slug#custom-slugify-function).
+
+Most ASCII titles are unaffected — `Hello World` is still `hello-world`, and underscores are still kept, so `foo_bar` is still `foo_bar`. These cases change:
+
+| input     | 3.x     | 4.0             |
+| --------- | ------- | --------------- |
+| `a  b`    | `a--b`  | `a-b`           |
+| `a--b`    | `a--b`  | `a-b`           |
+| `-abc-`   | `-abc-` | `abc`           |
+| `a-`      | `a-`    | `a`             |
+| `a<tab>b` | `ab`    | `a-b`           |
+| `___`     | `___`   | `''` (fallback) |
+| `-`       | `-`     | `''` (fallback) |
+
+Consecutive hyphens collapse, leading and trailing hyphens are trimmed, and whitespace that used to be deleted — tabs, non-breaking spaces — now separates words. A slug containing no letter or number at all is treated as empty, and the numeric fallback applies instead.
+
+Existing stored slugs are not rewritten by upgrading. They are re-normalized the next time a document is saved with its slug in the payload, which autosave does on every tick. A stored `a--b` therefore becomes `a-b`. If the re-normalized value collides with another document's slug, the save fails with a validation error rather than deduplicating — only slugs Payload generates from the source field get a numeric suffix, and a value submitted in the slug field must be unique as-is. With autosave enabled this repeats on every tick until an editor sets a new slug by hand.
+
+Legacy slugs with no letter or number, such as `-` or `___`, are preserved rather than emptied: a submitted value that normalizes to nothing is ignored and the stored slug wins. Clearing the field does not regenerate it either — an empty submission is ignored the same way. To replace one of these, click Generate to derive a slug from the source field, or type a replacement directly.
+
 ### Versions are now enabled by default for all collections and globals
 
 Collections and globals now have `versions: true` by default (`maxPerDoc`/`max: 100`, drafts disabled). In previous versions you had to opt in; you now opt out.
