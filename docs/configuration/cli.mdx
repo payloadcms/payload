@@ -108,15 +108,14 @@ Use `defineCLICommand` to add your own command. Built-in and custom commands use
 The following example adds a `seed` command. Its code lives in `seed.ts` next to `payload.config.ts`:
 
 ```ts
-import { defineCLICommand, z } from 'payload/cli'
+import { defineCLICommand, strictObject, z } from 'payload/cli'
 
 export const seedCommand = defineCLICommand({
   description: 'Seed the database.',
-  input: z.strictObject({
+  input: strictObject({
     clear: z
-      .boolean()
-      .default(false)
-      .describe('Delete existing documents first.'),
+      ._default(z.boolean(), false)
+      .check(z.describe('Delete existing documents first.')),
   }),
   handler: async ({ args, getPayload }) => {
     const payload = await getPayload()
@@ -135,7 +134,21 @@ export const seedCommand = defineCLICommand({
 })
 ```
 
-The `input` schema defines the values the command accepts. Payload uses it to type `args`, validate input, and generate help. You can use any [Standard Schema](https://standardschema.dev/) library, but it must also support JSON Schema so Payload can generate JSON help. For the easiest setup, import Zod from `payload/cli` as shown above.
+The `input` schema defines the values the command accepts. Payload uses it to type `args`, validate input, and generate help.
+
+The `z` export from `payload/cli` is Zod Mini. Payload already uses Zod Mini for its built-in commands, so this export adds no extra schema code to the CLI bundle. Use the exported `strictObject` helper for the root input schema so Payload can also generate JSON help.
+
+Payload does not export regular Zod because its larger API would increase the bundle size. If you prefer regular Zod's chaining API, add `zod` to your own project and import it directly:
+
+```sh
+pnpm add zod
+```
+
+```ts
+import { z } from 'zod'
+```
+
+You can also use another schema library. Its schema must support both [Standard Schema](https://standardschema.dev/) validation and Standard JSON Schema output.
 
 Call `getPayload()` only when the command needs the Local API. Payload closes the instance when the command finishes.
 
@@ -172,14 +185,14 @@ You can also pass a command directly. This example defines a small command insid
 
 ```ts
 import { buildConfig } from 'payload'
-import { defineCLICommand, z } from 'payload/cli'
+import { defineCLICommand, strictObject } from 'payload/cli'
 
 export default buildConfig({
   cli: {
     commands: {
       hello: defineCLICommand({
         description: 'Print a greeting.',
-        input: z.strictObject({}),
+        input: strictObject({}),
         handler: () => {
           console.log('Hello!')
         },
@@ -207,8 +220,8 @@ Use `cli` when a field needs different command-line behavior. For example, this 
 
 ```ts
 defineCLICommand({
-  input: z.strictObject({
-    filePath: z.string().describe('File to import.'),
+  input: strictObject({
+    filePath: z.string().check(z.describe('File to import.')),
   }),
   cli: {
     filePath: 'argument',

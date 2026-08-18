@@ -1772,8 +1772,8 @@ export interface SanitizedConfig
       Config,
       | 'admin'
       | 'auth'
-      | 'bin'
       | 'blocks'
+      | 'cli'
       | 'collections'
       | 'cookiePrefix'
       | 'cors'
@@ -1802,7 +1802,6 @@ export interface SanitizedConfig
     Required<
       Pick<
         Config,
-        | 'bin'
         | 'cookiePrefix'
         | 'cors'
         | 'csrf'
@@ -1822,6 +1821,11 @@ export interface SanitizedConfig
   admin: SanitizedAdminConfig
   auth: Required<NonNullable<Config['auth']>>
   blocks: FlattenedBlock[]
+  cli:
+    | {
+        commands: CLICommands
+      }
+    | false
   collections: SanitizedCollectionConfig[]
   /** Default richtext editor to use for richText fields */
   editor?: RichTextAdapter<any, any, any>
