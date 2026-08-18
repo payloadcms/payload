@@ -397,10 +397,12 @@ export const Form: React.FC<FormProps> = (props) => {
         let res
 
         if (typeof actionArg === 'string') {
+          const isFormData = formData instanceof FormData
           res = await requests[methodToUse.toLowerCase()](actionArg, {
             body: formData,
             headers: {
               'Accept-Language': i18n.language,
+              ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
             },
           })
         } else if (typeof action === 'function') {
@@ -613,6 +615,13 @@ export const Form: React.FC<FormProps> = (props) => {
 
       if (docConfig && 'upload' in docConfig && docConfig.upload && file) {
         dataToSerialize.file = file
+      }
+
+      // If no file is being uploaded, send the JSON body directly as application/json
+      // instead of wrapping it in multipart/form-data, which triggers false positives
+      // in WAF configurations (e.g., Cloudflare Enterprise)
+      if (!('file' in dataToSerialize)) {
+        return dataToSerialize._payload as string
       }
 
       // nullAsUndefineds is important to allow uploads and relationship fields to clear themselves
