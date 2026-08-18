@@ -8,6 +8,7 @@ import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
 import type { Page } from './payload-types.js'
 
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { regionsSlug } from './shared.js'
 
 let payload: Payload
 
@@ -496,5 +497,124 @@ describe('@payloadcms/plugin-nested-docs', () => {
       expect(grandchild.categorization[1].label).toStrictEqual('child')
       expect(grandchild.categorization[2].label).toStrictEqual('grandchild')
     })
+  })
+
+  describe('circular parent relationships', () => {
+    const createdCategoryIDs: (number | string)[] = []
+    const createdRegionIDs: (number | string)[] = []
+
+    afterEach(async () => {
+      // Break every parent link first so deleting a document never traverses a circular hierarchy
+      for (const id of [...createdCategoryIDs, ...createdRegionIDs]) {
+        const collection = createdCategoryIDs.includes(id) ? 'categories' : regionsSlug
+        const doc = await payload.findByID({ id, collection, depth: 0 })
+
+        await payload.db.updateOne({
+          id,
+          collection,
+          data: { ...doc, [collection === 'categories' ? 'owner' : 'parent']: null },
+        })
+      }
+
+      for (const id of createdCategoryIDs) {
+        await payload.delete({ id, collection: 'categories' })
+      }
+
+      for (const id of createdRegionIDs) {
+        await payload.delete({ id, collection: regionsSlug })
+      }
+
+      createdCategoryIDs.length = 0
+      createdRegionIDs.length = 0
+    })
+
+    // Writes a parent straight to the database, bypassing hooks and validation, the way a
+    // migration, a seed script or a direct adapter write would
+    const setParentWithoutHooks = async ({
+      id,
+      parentID,
+    }: {
+      id: number | string
+      parentID: number | string
+    }) => {
+      const doc = await payload.findByID({ id, collection: 'categories', depth: 0 })
+
+      await payload.db.updateOne({
+        id,
+        collection: 'categories',
+        data: { ...doc, owner: parentID },
+      })
+    }
+
+    it('should reject a parent that is a descendant of the document', async () => {
+      const parent = await payload.create({ collection: 'categories', data: { name: 'ancestor' } })
+      const child = await payload.create({
+        collection: 'categories',
+        data: { name: 'descendant', owner: parent.id },
+      })
+
+      createdCategoryIDs.push(parent.id, child.id)
+
+      await expect(
+        payload.update({
+          id: parent.id,
+          collection: 'categories',
+          data: { owner: child.id },
+        }),
+      ).rejects.toThrow('The following field is invalid: Owner')
+    })
+
+    it('should stop breadcrumb traversal when a cycle exists in the database', async () => {
+      const first = await payload.create({ collection: 'categories', data: { name: 'first' } })
+      const second = await payload.create({
+        collection: 'categories',
+        data: { name: 'second', owner: first.id },
+      })
+
+      createdCategoryIDs.push(first.id, second.id)
+
+      await setParentWithoutHooks({ id: first.id, parentID: second.id })
+
+      const child = await payload.create({
+        collection: 'categories',
+        data: { name: 'child of cycle', owner: second.id },
+      })
+
+      createdCategoryIDs.push(child.id)
+
+      expect(child.categorization).toHaveLength(3)
+      expect(child.categorization[0].doc).toStrictEqual(first.id)
+      expect(child.categorization[1].doc).toStrictEqual(second.id)
+      expect(child.categorization[2].label).toStrictEqual('child of cycle')
+    }, 30000)
+
+    it('should not loop when a parent field overrides the plugin filterOptions', async () => {
+      const first = await payload.create({ collection: regionsSlug, data: { name: 'north' } })
+      const second = await payload.create({
+        collection: regionsSlug,
+        data: { name: 'south', parent: first.id },
+      })
+
+      createdRegionIDs.push(first.id, second.id)
+
+      // Allowed because the collection replaced the plugin's cycle-detecting filterOptions
+      const updated = await payload.update({
+        id: first.id,
+        collection: regionsSlug,
+        data: { parent: second.id },
+        depth: 0,
+      })
+
+      expect(updated.parent).toStrictEqual(second.id)
+      expect(updated.breadcrumbs).toHaveLength(2)
+      expect(updated.breadcrumbs[0].doc).toStrictEqual(second.id)
+      expect(updated.breadcrumbs[1].doc).toStrictEqual(first.id)
+
+      const child = await payload.findByID({ id: second.id, collection: regionsSlug, depth: 0 })
+
+      expect(child.breadcrumbs).toHaveLength(2)
+      expect(child.breadcrumbs[0].doc).toStrictEqual(first.id)
+      expect(child.breadcrumbs[1].doc).toStrictEqual(second.id)
+    }, 30000)
   })
 })
