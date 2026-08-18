@@ -2,7 +2,7 @@
 import type React from 'react'
 
 import * as qs from 'qs-esm'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { useLocale } from '../providers/Locale/index.js'
 import { useTranslation } from '../providers/Translation/index.js'
@@ -35,7 +35,6 @@ export const usePayloadAPI: UsePayloadAPI = (url, options = {}) => {
   const [isLoading, setIsLoading] = useState(!initialData)
   const [isError, setIsError] = useState(false)
   const { code: locale } = useLocale()
-  const hasInitialized = useRef(false)
 
   const search = qs.stringify(
     {
@@ -47,13 +46,7 @@ export const usePayloadAPI: UsePayloadAPI = (url, options = {}) => {
     },
   )
 
-  // If `initialData`, no need to make a request
   useEffect(() => {
-    if (initialData && !hasInitialized.current) {
-      hasInitialized.current = true
-      return
-    }
-
     const abortController = new AbortController()
 
     const fetchData = async () => {
@@ -98,11 +91,11 @@ export const usePayloadAPI: UsePayloadAPI = (url, options = {}) => {
         // swallow error
       }
     }
-  }, [url, locale, search, i18n.language, initialData])
+  }, [url, locale, search, i18n.language])
 
   // If `initialData` changes, reset the state
   useEffect(() => {
-    if (initialData && hasInitialized.current) {
+    if (initialData) {
       setData(initialData)
     }
   }, [initialData])
