@@ -188,22 +188,27 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
         {
           name: 'x',
           type: 'number',
+          label: 'X',
         },
         {
           name: 'y',
           type: 'number',
+          label: 'Y',
         },
         {
           name: 'width',
           type: 'number',
+          label: ({ t }) => t('upload:width'),
         },
         {
           name: 'height',
           type: 'number',
+          label: ({ t }) => t('upload:height'),
         },
         {
           name: 'unit',
           type: 'select',
+          label: 'Unit',
           options: ['%', 'px'],
         },
       ],
@@ -224,6 +229,7 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
           },
         ],
       },
+      label: ({ t }) => t('upload:crop'),
     })
   }
 
