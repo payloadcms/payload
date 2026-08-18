@@ -83,18 +83,20 @@ export const createSchemaGenerator = ({
     const enumFn = this.schemaName ? `db_schema.enum` : enumImport
 
     const enumsList: string[] = []
-    const addEnum = (name: string, options: string[]) => {
+    const addEnum = (name: string, options: string[], dbName: string = name) => {
       if (enumsList.some((each) => each === name)) {
         return
       }
       enumsList.push(name)
       enumDeclarations.push(
-        `export const ${name} = ${enumFn}('${name}', [${options.map((option) => `'${option}'`).join(', ')}])`,
+        `export const ${name} = ${enumFn}('${dbName}', [${options.map((option) => `'${option}'`).join(', ')}])`,
       )
     }
 
     if (this.payload.config.localization && enumImport) {
-      addEnum('enum__locales', this.payload.config.localization.localeCodes)
+      // The adapter creates this type as '_locales'; 'enum__locales' is only the key in
+      // the enums map. See postgres/init.ts.
+      addEnum('enum__locales', this.payload.config.localization.localeCodes, '_locales')
     }
 
     const tableFn = this.schemaName ? `db_schema.table` : tableImport
