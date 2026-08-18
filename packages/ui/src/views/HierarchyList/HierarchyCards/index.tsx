@@ -137,6 +137,12 @@ export type HierarchyCardGridProps = {
   onSelectionChange: (row: TableRow) => void
   rows: TableRow[]
   selectedIds: Set<number | string>
+  /**
+   * Renders each document card's collection label as a pill over its thumbnail. Defaults to showing
+   * the pill only when the grid mixes collections - a grid of a single document type labels itself,
+   * so the pill would repeat the same word on every card.
+   */
+  showCollectionType?: boolean
 }
 
 export function HierarchyCardGrid({
@@ -147,6 +153,7 @@ export function HierarchyCardGrid({
   onSelectionChange,
   rows,
   selectedIds,
+  showCollectionType,
 }: HierarchyCardGridProps) {
   const {
     config: {
@@ -157,6 +164,9 @@ export function HierarchyCardGrid({
   const { i18n } = useTranslation()
   const router = useRouter()
   const [gridRef, columns] = useColumnCount()
+
+  const showTypePill =
+    showCollectionType ?? new Set(rows.map((row) => row._collectionSlug)).size > 1
 
   const [marquee, setMarquee] = useState<MarqueeRect | null>(null)
 
@@ -433,7 +443,7 @@ export function HierarchyCardGrid({
                 href={href}
                 isSelected={isSelected}
                 lockedUser={lockedUser}
-                showType
+                showType={showTypePill}
                 // The pill labels a single document, so the singular label reads correctly
                 // ("Media"); _collectionLabel is the plural used for the table column heading.
                 typeLabel={

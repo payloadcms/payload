@@ -33,7 +33,14 @@ export type DocumentDrawerProps = {
   Pick<DrawerProps, 'Header'>
 
 export type DocumentTogglerProps = {
-  readonly buttonStyle?: 'dashed' | 'destructive' | 'ghost' | 'pill' | 'primary' | 'secondary'
+  readonly buttonStyle?:
+    | 'dashed'
+    | 'destructive'
+    | 'ghost'
+    | 'link'
+    | 'pill'
+    | 'primary'
+    | 'secondary'
   readonly children?: React.ReactNode
   readonly className?: string
   readonly collectionSlug: string

@@ -139,6 +139,29 @@
     }
   }
 
+  /*
+   * Text-only brand button. Unlike a document link it never underlines - only the background
+   * changes, tinting through the selected blues. The pressed fill is `selected-hover` rather than
+   * `selected-pressed` because the rest state is already transparent, so hover claims the base
+   * selected tint and press takes the next step up.
+   */
+  .btn--style-link {
+    color: var(--color-text-brand);
+    background-color: transparent;
+
+    &:hover:not(.btn--disabled) {
+      background-color: var(--color-bg-selected);
+    }
+
+    &:active:not(.btn--disabled) {
+      background-color: var(--color-bg-selected-hover);
+    }
+
+    &.btn--disabled {
+      color: var(--color-text-disabled);
+    }
+  }
+
   /* Selected state - ghost buttons */
   .btn.btn--style-ghost.btn--selected,
   .btn.btn--style-ghost.btn--selected:hover,

@@ -2,35 +2,31 @@
   /*
    * Single-row card: the folder icon leads, the title fills the remaining width and truncates.
    *
-   * State rings keep a CONSTANT 1px border and draw the second accent stroke as an inset outline,
-   * matching DocumentCard. Widening the border instead would grow the card's auto height by 2px on
-   * selection (border-box sizing does not absorb a border when no explicit height is set), which
-   * would grow the whole grid row and shift everything below it. Focus is left to the inner link's
-   * standard app-wide :focus-visible ring, so it stays distinguishable from the selected state.
+   * State rings are spread-only box-shadows rather than borders, matching DocumentCard. Widening a
+   * border on selection would grow the card's auto height by 2px (border-box sizing does not absorb
+   * a border when no explicit height is set), which would grow the whole grid row and shift
+   * everything below it. Focus is left to the inner link's standard app-wide :focus-visible ring, so
+   * it stays distinguishable from the selected state.
    */
   .hierarchy-folder-card {
     display: flex;
     align-items: stretch;
     min-width: 0;
     background: var(--color-bg);
-    border: var(--stroke-width-small) solid var(--color-border);
     border-radius: var(--radius-medium);
-    outline: var(--stroke-width-small) solid transparent;
-    outline-offset: calc(var(--stroke-width-small) * -1);
+    box-shadow: 0 0 0 var(--stroke-width-small) var(--color-border);
   }
 
   .hierarchy-folder-card:not(.hierarchy-folder-card--selected):hover {
-    border-color: var(--color-border-strong);
+    box-shadow: 0 0 0 var(--stroke-width-small) var(--special-border-translucent-strong);
   }
 
   .hierarchy-folder-card--selected {
-    border-color: var(--color-border-selected);
-    outline-color: var(--color-border-selected);
+    box-shadow: 0 0 0 var(--stroke-width-medium) var(--color-border-selected);
   }
 
   .hierarchy-folder-card--selected:hover {
-    border-color: var(--color-border-selected-strong);
-    outline-color: var(--color-border-selected-strong);
+    box-shadow: 0 0 0 var(--stroke-width-medium) var(--color-border-selected-strong);
   }
 
   .hierarchy-folder-card__link {

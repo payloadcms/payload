@@ -1,33 +1,31 @@
 @layer payload-default {
+  /*
+   * Every state ring is a spread-only box-shadow rather than a border, so the selected state can
+   * double the stroke width without taking layout space - a widening border would grow the card's
+   * auto height and shift the whole grid row below it. The ring is drawn outside the card box, so
+   * it also never crops the thumbnail it surrounds.
+   */
   .hierarchy-document-card {
     position: relative;
     display: flex;
     flex-direction: column;
     background: var(--color-bg);
-    border: var(--stroke-width-small) solid var(--color-border);
     border-radius: var(--radius-large);
     overflow: hidden;
-    /*
-     * The selected state reads as a 2px accent edge (1px border + 1px inset ring). Drawing the
-     * second stroke as an inset outline keeps the card the same size in every state, so selecting
-     * a card never reflows the grid.
-     */
-    outline: var(--stroke-width-small) solid transparent;
-    outline-offset: calc(var(--stroke-width-small) * -1);
+    box-shadow: 0 0 0 var(--stroke-width-small) var(--color-border);
   }
 
   /*
-   * :not(--selected) so the grey hover border cannot win over the accent border on a selected
-   * card - both rules live in the same layer and file, and the hover selector would otherwise
-   * have the higher specificity.
+   * :not(--selected) so the hover ring cannot win over the accent ring on a selected card - both
+   * rules live in the same layer and file, and the hover selector would otherwise have the higher
+   * specificity.
    */
   .hierarchy-document-card:not(.hierarchy-document-card--selected):hover {
-    border-color: var(--color-border-strong);
+    box-shadow: 0 0 0 var(--stroke-width-small) var(--special-border-translucent-strong);
   }
 
   .hierarchy-document-card--selected {
-    border-color: var(--color-border-selected);
-    outline-color: var(--color-border-selected);
+    box-shadow: 0 0 0 var(--stroke-width-medium) var(--color-border-selected);
   }
 
   /* Thumbnail */
@@ -88,7 +86,8 @@
     flex-direction: column;
     gap: var(--spacer-1);
     padding-inline: var(--spacer-3);
-    padding-block: var(--spacer-2-5);
+    padding-block-start: var(--spacer-2-5);
+    padding-block-end: var(--spacer-3);
     min-width: 0;
   }
 
@@ -194,6 +193,8 @@
 
   .hierarchy-document-card__status {
     display: inline-flex;
+    /* The pill is a direct child of the stretch-aligned properties column, so it shrink-wraps here */
+    align-self: flex-start;
     align-items: center;
     justify-content: center;
     padding-inline: var(--spacer-1);

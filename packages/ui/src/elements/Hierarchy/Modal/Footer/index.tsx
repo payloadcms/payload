@@ -114,7 +114,7 @@ export const HierarchyModalFooter: React.FC<HierarchyModalFooterProps> = ({
             <React.Fragment>
               <span className={`${baseClass}__placeholder`}>{selectionCountLabel}</span>
               <Button
-                buttonStyle="ghost"
+                buttonStyle="link"
                 className={`${baseClass}__clear`}
                 margin={false}
                 onClick={onClear}

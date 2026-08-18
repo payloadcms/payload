@@ -9,7 +9,7 @@ type secondaryAction = {
 export type Props = {
   'aria-label'?: string
   buttonId?: string
-  buttonStyle?: 'dashed' | 'destructive' | 'ghost' | 'pill' | 'primary' | 'secondary'
+  buttonStyle?: 'dashed' | 'destructive' | 'ghost' | 'link' | 'pill' | 'primary' | 'secondary'
   children?: React.ReactNode
   className?: string
   disabled?: boolean

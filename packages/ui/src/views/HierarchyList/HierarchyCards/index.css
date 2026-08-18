@@ -15,7 +15,8 @@
      * the section heading above them instead of sitting flush against the panel edge.
      */
     padding-inline: var(--gutter-h);
-    padding-block: var(--spacer-2);
+    padding-block-start: var(--spacer-4);
+    padding-block-end: var(--spacer-2);
     margin: 0;
     list-style: none;
   }

@@ -135,14 +135,11 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
           )}
 
           {status && (
-            <div className={`${baseClass}__property`}>
-              <span className={`${baseClass}__property-label`}>Status</span>
-              <span
-                className={`${baseClass}__status ${baseClass}__status--${statusModifiers[status] || 'draft'}`}
-              >
-                {statusLabels[status] || status}
-              </span>
-            </div>
+            <span
+              className={`${baseClass}__status ${baseClass}__status--${statusModifiers[status] || 'draft'}`}
+            >
+              {statusLabels[status] || status}
+            </span>
           )}
 
           {children ? <div className={`${baseClass}__extra`}>{children}</div> : null}
