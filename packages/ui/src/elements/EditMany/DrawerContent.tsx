@@ -169,7 +169,8 @@ export const EditManyDrawerContent: React.FC<EditManyDrawerContentProps> = (prop
   } = props
 
   const { permissions, user } = useAuth()
-  const locale = useLocale()?.code
+  const currentLocale = useLocale()
+  const locale = currentLocale?.code
 
   const { closeModal } = useModal()
 

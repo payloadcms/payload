@@ -106,7 +106,8 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
   const {
     routes: { api },
   } = config
-  const code = useLocale()?.code
+  const locale = useLocale()
+  const code = locale?.code
   const { i18n, t } = useTranslation()
 
   const { getDocumentSlots, getFormState } = useServerFunctions()

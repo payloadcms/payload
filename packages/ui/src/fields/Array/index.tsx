@@ -86,7 +86,8 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
     setModified,
   } = useForm()
   const submitted = useFormSubmitted()
-  const locale = useLocale()?.code
+  const currentLocale = useLocale()
+  const locale = currentLocale?.code
   const { i18n, t } = useTranslation()
 
   const {

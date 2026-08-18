@@ -70,7 +70,8 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
   const contextRef = useRef({} as SelectionContext)
   const { user } = useAuth()
 
-  const locale = useLocale()?.code
+  const currentLocale = useLocale()
+  const locale = currentLocale?.code
 
   const [selected, setSelected] = useState<SelectionContext['selected']>(() => {
     const rows = new Map()

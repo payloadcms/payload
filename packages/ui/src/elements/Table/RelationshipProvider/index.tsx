@@ -46,7 +46,8 @@ export const RelationshipProvider: React.FC<{ readonly children?: React.ReactNod
   } = useConfig()
 
   const { i18n } = useTranslation()
-  const locale = useLocale()?.code
+  const currentLocale = useLocale()
+  const locale = currentLocale?.code
   const prevLocale = useRef(locale)
 
   const loadRelationshipDocs = useCallback(

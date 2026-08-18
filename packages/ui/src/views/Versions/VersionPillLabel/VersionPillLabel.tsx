@@ -71,7 +71,8 @@ export const VersionPillLabel: React.FC<{
     },
   } = useConfig()
   const { i18n, t } = useTranslation()
-  const currentLocale = useLocale()?.code
+  const activeLocale = useLocale()
+  const currentLocale = activeLocale?.code
 
   const { name, label } = getVersionLabel({
     currentLocale,

@@ -28,7 +28,8 @@ export function ListEmptyTrashButton({
   hasDeletePermission: boolean
 }) {
   const { i18n, t } = useTranslation()
-  const locale = useLocale()?.code
+  const currentLocale = useLocale()
+  const locale = currentLocale?.code
   const { config } = useConfig()
   const { openModal } = useModal()
   const router = useRouter()

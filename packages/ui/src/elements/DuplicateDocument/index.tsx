@@ -43,7 +43,8 @@ export const DuplicateDocument: React.FC<Props> = ({
   const router = useRouter()
   const modified = useFormModified()
   const { openModal } = useModal()
-  const localeCode = useLocale()?.code
+  const locale = useLocale()
+  const localeCode = locale?.code
   const { setModified } = useForm()
   const { startRouteTransition } = useRouteTransition()
 

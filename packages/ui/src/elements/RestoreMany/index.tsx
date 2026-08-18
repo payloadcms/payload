@@ -35,7 +35,8 @@ export const RestoreMany: React.FC<Props> = (props) => {
   const {
     config: { collections, routes, serverURL },
   } = useConfig()
-  const locale = useLocale()?.code
+  const currentLocale = useLocale()
+  const locale = currentLocale?.code
   const router = useRouter()
   const { clearRouteCache } = useRouteCache()
   const searchParams = useSearchParams()

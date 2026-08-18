@@ -33,7 +33,8 @@ export const ReindexButtonClient: React.FC<ReindexButtonProps> = ({
     i18n: { t },
   } = useTranslation()
 
-  const localeCode = useLocale()?.code
+  const locale = useLocale()
+  const localeCode = locale?.code
   const router = useRouter()
 
   const [reindexCollections, setReindexCollections] = useState<string[]>([])
