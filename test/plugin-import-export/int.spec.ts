@@ -14,7 +14,7 @@ import { devUser, regularUser } from '../credentials.js'
 import { clearTestBucket, createTestBucket } from '../storage-s3/test-utils.js'
 import { readCSV, readJSON } from './helpers.js'
 import { richTextData } from './seed/richTextData.js'
-import { customIdPagesSlug, postsWithS3Slug } from './shared.js'
+import { customIdPagesSlug, postsWithS3Slug, postsWithSnakeCaseFieldsSlug } from './shared.js'
 
 let payload: Payload
 let restClient: NextRESTClient
@@ -8947,6 +8947,187 @@ describe('@payloadcms/plugin-import-export', () => {
 
       expect(posts.totalDocs).toBe(2)
       posts.docs.forEach((post) => createdPostIDs.push(post.id))
+    })
+  })
+
+  describe('field names containing underscores', () => {
+    const createdPostIDs: (number | string)[] = []
+
+    afterEach(async () => {
+      for (const id of createdPostIDs) {
+        await payload.delete({
+          collection: postsWithSnakeCaseFieldsSlug as CollectionSlug,
+          id,
+        })
+      }
+      createdPostIDs.length = 0
+    })
+
+    const importCSV = async (csvContent: string) => {
+      const csvBuffer = Buffer.from(csvContent)
+
+      const importDoc = await payload.create({
+        collection: 'imports',
+        user,
+        data: {
+          collectionSlug: postsWithSnakeCaseFieldsSlug,
+          importMode: 'update',
+          matchField: 'id',
+        },
+        file: {
+          data: csvBuffer,
+          mimetype: 'text/csv',
+          name: 'snake-case-import-test.csv',
+          size: csvBuffer.length,
+        },
+      })
+
+      await payload.jobs.run()
+
+      return payload.findByID({
+        collection: 'imports',
+        id: importDoc.id,
+      })
+    }
+
+    it('should update a snake_case field from CSV', async () => {
+      const post = await payload.create({
+        collection: postsWithSnakeCaseFieldsSlug as CollectionSlug,
+        data: {
+          title: 'Snake Case Import Test',
+          vat_number: 'IT00000000000',
+        },
+      })
+
+      createdPostIDs.push(post.id)
+
+      const importDoc = await importCSV(
+        `id,title,vat_number\n${post.id},"Snake Case Import Test","IT12345678901"`,
+      )
+
+      expect(importDoc.status).toBe('completed')
+      expect(importDoc.summary?.updated).toBe(1)
+      expect(importDoc.summary?.issues).toBe(0)
+
+      const updated = await payload.findByID({
+        collection: postsWithSnakeCaseFieldsSlug as CollectionSlug,
+        id: post.id,
+      })
+
+      expect(updated.vat_number).toBe('IT12345678901')
+    })
+
+    it('should update snake_case fields nested in a group and an array from CSV', async () => {
+      const post = await payload.create({
+        collection: postsWithSnakeCaseFieldsSlug as CollectionSlug,
+        data: {
+          title: 'Snake Case Nested Test',
+          billing_details: { vat_number: 'IT00000000000' },
+          line_items: [{ item_code: 'OLD-1' }],
+        },
+      })
+
+      createdPostIDs.push(post.id)
+
+      const importDoc = await importCSV(
+        `id,billing_details_vat_number,line_items_0_item_code\n${post.id},"IT12345678901","NEW-1"`,
+      )
+
+      expect(importDoc.status).toBe('completed')
+      expect(importDoc.summary?.issues).toBe(0)
+
+      const updated = await payload.findByID({
+        collection: postsWithSnakeCaseFieldsSlug as CollectionSlug,
+        id: post.id,
+      })
+
+      expect(updated.billing_details?.vat_number).toBe('IT12345678901')
+      expect(updated.line_items?.[0]?.item_code).toBe('NEW-1')
+    })
+
+    it('should update a localized snake_case field per locale from CSV', async () => {
+      const post = await payload.create({
+        collection: postsWithSnakeCaseFieldsSlug as CollectionSlug,
+        data: {
+          title: 'Snake Case Localized Test',
+          localized_note: 'english original',
+        },
+      })
+
+      createdPostIDs.push(post.id)
+
+      const importDoc = await importCSV(
+        `id,localized_note_en,localized_note_es\n${post.id},"english updated","spanish updated"`,
+      )
+
+      expect(importDoc.status).toBe('completed')
+      expect(importDoc.summary?.issues).toBe(0)
+
+      const english = await payload.findByID({
+        collection: postsWithSnakeCaseFieldsSlug as CollectionSlug,
+        id: post.id,
+        locale: 'en',
+      })
+      const spanish = await payload.findByID({
+        collection: postsWithSnakeCaseFieldsSlug as CollectionSlug,
+        id: post.id,
+        locale: 'es',
+      })
+
+      expect(english.localized_note).toBe('english updated')
+      expect(spanish.localized_note).toBe('spanish updated')
+    })
+
+    it('should round-trip snake_case fields through export and import', async () => {
+      const post = await payload.create({
+        collection: postsWithSnakeCaseFieldsSlug as CollectionSlug,
+        data: {
+          title: 'Snake Case Round Trip',
+          vat_number: 'IT12345678901',
+          billing_details: { vat_number: 'IT99999999999' },
+        },
+      })
+
+      createdPostIDs.push(post.id)
+
+      const exportDoc = await payload.create({
+        collection: 'exports',
+        user,
+        data: {
+          collectionSlug: postsWithSnakeCaseFieldsSlug,
+          fields: ['id', 'vat_number', 'billing_details.vat_number'],
+          format: 'csv',
+          where: {
+            title: { equals: 'Snake Case Round Trip' },
+          },
+        },
+      })
+
+      await payload.jobs.run()
+
+      const exportedDoc = await payload.findByID({
+        collection: 'exports',
+        id: exportDoc.id,
+      })
+
+      const csvPath = path.join(dirname, './uploads', exportedDoc.filename as string)
+      const csv = fs.readFileSync(csvPath, 'utf-8')
+
+      expect(csv).toContain('vat_number')
+      expect(csv).toContain('billing_details_vat_number')
+
+      const importDoc = await importCSV(csv.replace(/IT12345678901/, 'IT55555555555'))
+
+      expect(importDoc.status).toBe('completed')
+      expect(importDoc.summary?.issues).toBe(0)
+
+      const updated = await payload.findByID({
+        collection: postsWithSnakeCaseFieldsSlug as CollectionSlug,
+        id: post.id,
+      })
+
+      expect(updated.vat_number).toBe('IT55555555555')
+      expect(updated.billing_details?.vat_number).toBe('IT99999999999')
     })
   })
 })
