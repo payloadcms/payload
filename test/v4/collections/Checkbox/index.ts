@@ -25,6 +25,23 @@ const CheckboxFields: CollectionConfig = {
         readOnly: true,
       },
     },
+    {
+      name: 'enableFeatureDisabledUnchecked',
+      type: 'checkbox',
+      label: 'Enable Feature',
+      defaultValue: false,
+      admin: {
+        readOnly: true,
+      },
+    },
+    {
+      name: 'enableFeatureWithDescription',
+      type: 'checkbox',
+      label: 'Enable Feature',
+      admin: {
+        description: 'Turns the feature on for every document in this collection.',
+      },
+    },
   ],
   versions: false,
 }

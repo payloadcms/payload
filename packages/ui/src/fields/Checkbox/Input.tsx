@@ -1,13 +1,11 @@
 'use client'
 import type { StaticLabel } from 'payload'
 
-import React, { useEffect, useId, useState } from 'react'
+import React, { useCallback, useEffect, useId, useRef, useState } from 'react'
 
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { Tooltip } from '../../elements/Tooltip/index.js'
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
-import { CheckIcon } from '../../icons/Check/index.js'
-import { LineIcon } from '../../icons/Line/index.js'
 
 export type CheckboxInputProps = {
   readonly AfterInput?: React.ReactNode
@@ -30,8 +28,8 @@ export type CheckboxInputProps = {
   readonly tooltip?: string
   /**
    * Visual variant for the checkbox
-   * - 'default': Dark border, transparent background (for form fields)
-   * - 'muted': Light gray background and border (for tables)
+   * - 'default': Brand fill and an on-brand mark when checked (for form fields)
+   * - 'muted': Keeps the neutral surface when checked (for tables)
    */
   readonly variant?: 'default' | 'muted'
 }
@@ -61,16 +59,46 @@ export const CheckboxInput: React.FC<CheckboxInputProps> = ({
 }) => {
   const [isHydrated, setIsHydrated] = useState(false)
   const [showTooltip, setShowTooltip] = useState(false)
+  const [hasChanged, setHasChanged] = useState(false)
   const fallbackID = useId()
   const id = idFromProps || fallbackID
   const ariaLabel = ariaLabelFromProps || undefined
   const ariaLabelledBy = ariaLabel ? undefined : ariaLabelledByFromProps || name
+  const controlWrapRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
     setIsHydrated(true)
   }, [])
 
   const readOnly = readOnlyFromProps || !isHydrated
+  const isIndeterminate = !checked && Boolean(partialChecked)
+
+  /**
+   * `indeterminate` has no HTML attribute, so the mixed state has to be written to the
+   * node itself. The node is reached through the wrapper rather than a ref on the input
+   * so that a caller-supplied `inputRef` stays the only ref attached to it. Setting the
+   * property keeps mark selection in CSS and reports the real `mixed` state to
+   * assistive technology.
+   */
+  useEffect(() => {
+    const control = controlWrapRef.current?.querySelector(`.${inputBaseClass}__control`)
+
+    if (control instanceof HTMLInputElement) {
+      control.indeterminate = isIndeterminate
+    }
+  }, [isIndeterminate])
+
+  /**
+   * The mark only draws itself in once the value has actually changed, so a document
+   * that loads with the box already checked doesn't replay the animation.
+   */
+  const handleToggle = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      setHasChanged(true)
+      onToggle(event)
+    },
+    [onToggle],
+  )
 
   return (
     <div
@@ -78,7 +106,9 @@ export const CheckboxInput: React.FC<CheckboxInputProps> = ({
         className,
         inputBaseClass,
         checked && `${inputBaseClass}--checked`,
+        isIndeterminate && `${inputBaseClass}--indeterminate`,
         readOnly && `${inputBaseClass}--read-only`,
+        hasChanged && `${inputBaseClass}--changed`,
         tooltip && `${inputBaseClass}--has-tooltip`,
         variant !== 'default' && `${inputBaseClass}--${variant}`,
       ]
@@ -89,27 +119,31 @@ export const CheckboxInput: React.FC<CheckboxInputProps> = ({
     >
       {BeforeInput}
       <div className={`${inputBaseClass}__wrap`}>
-        <div className={`${inputBaseClass}__input`}>
+        <div className={`${inputBaseClass}__input`} ref={controlWrapRef}>
           <input
             aria-label={ariaLabel}
             aria-labelledby={ariaLabelledBy}
             checked={Boolean(checked)}
+            className={[
+              `${inputBaseClass}__control`,
+              variant !== 'default' && `${inputBaseClass}__control--${variant}`,
+            ]
+              .filter(Boolean)
+              .join(' ')}
             disabled={readOnly}
             id={id}
             name={name}
-            onChange={onToggle}
+            onChange={handleToggle}
             ref={inputRef}
             required={required}
             title={name}
             type="checkbox"
           />
-          <span
-            className={[`${inputBaseClass}__icon`, !checked && partialChecked ? 'partial' : 'check']
-              .filter(Boolean)
-              .join(' ')}
-          >
-            {checked && <CheckIcon />}
-            {!checked && partialChecked && <LineIcon />}
+          {/* Both marks are always rendered and revealed by CSS, so an uncontrolled
+              input that changes without React knowing still shows the right mark. */}
+          <span className={`${inputBaseClass}__visuals`}>
+            <Mark className={`${inputBaseClass}__mixed`} shape="mixed" />
+            <Mark className={`${inputBaseClass}__check`} shape="check" />
           </span>
         </div>
         <RenderCustomComponent
@@ -127,5 +161,35 @@ export const CheckboxInput: React.FC<CheckboxInputProps> = ({
       )}
       {AfterInput}
     </div>
+  )
+}
+
+const markShapes = {
+  check: { d: 'M5.00012 8.5L7.5 11L11.5 5', shapeRendering: 'geometricPrecision' },
+  mixed: { d: 'M5 8H11', shapeRendering: 'crispEdges' },
+} as const
+
+/**
+ * Each mark is drawn twice: a wider halo stroke underneath, then the mark itself on
+ * top. The halo is what keeps the mark legible against the brand fill.
+ */
+const Mark: React.FC<{
+  readonly className: string
+  readonly shape: keyof typeof markShapes
+}> = ({ className, shape }) => {
+  const { d, shapeRendering } = markShapes[shape]
+
+  return (
+    <svg
+      className={className}
+      fill="none"
+      height={16}
+      viewBox="0 0 16 16"
+      width={16}
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path className={`${inputBaseClass}__mark-halo`} d={d} shapeRendering={shapeRendering} />
+      <path className={`${inputBaseClass}__mark`} d={d} shapeRendering={shapeRendering} />
+    </svg>
   )
 }

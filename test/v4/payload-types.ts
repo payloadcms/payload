@@ -1433,6 +1433,11 @@ export interface CheckboxField {
   enableFeature?: boolean | null;
   enableFeatureRequired: boolean;
   enableFeatureDisabled?: boolean | null;
+  enableFeatureDisabledUnchecked?: boolean | null;
+  /**
+   * Turns the feature on for every document in this collection.
+   */
+  enableFeatureWithDescription?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -3055,6 +3060,8 @@ export interface CheckboxFieldsSelect<T extends boolean = true> {
   enableFeature?: T;
   enableFeatureRequired?: T;
   enableFeatureDisabled?: T;
+  enableFeatureDisabledUnchecked?: T;
+  enableFeatureWithDescription?: T;
   updatedAt?: T;
   createdAt?: T;
 }

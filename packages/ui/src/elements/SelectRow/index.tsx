@@ -35,7 +35,6 @@ export const SelectRow: React.FC<{
       checked={Boolean(selected.get(rowData.id))}
       className={[baseClass, `${baseClass}__checkbox`].join(' ')}
       onToggle={() => setSelection(rowData.id)}
-      variant="muted"
     />
   )
 }

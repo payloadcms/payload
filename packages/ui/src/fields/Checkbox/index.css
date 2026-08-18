@@ -5,141 +5,199 @@
 
   .checkbox-input {
     display: flex;
-
-    &:hover:not(.checkbox-input--read-only) {
-      label,
-      input {
-        cursor: pointer;
-      }
-    }
-
-    label.field-label {
-      padding-bottom: 0;
-    }
-
-    &:not(.checkbox-input--read-only) {
-      &:active,
-      &:focus-within,
-      &:focus {
-        .checkbox-input__input {
-          border-color: var(--field-color-border-focus);
-        }
-      }
-
-      &:hover {
-        .checkbox-input__input {
-          border-color: var(--field-color-toggle-border-hover);
-        }
-      }
-    }
-
-    &:not(.checkbox-input--read-only):not(.checkbox-input--checked) {
-      &:hover {
-        cursor: pointer;
-
-        .checkbox-input__icon svg {
-          opacity: 0.2;
-        }
-      }
-    }
   }
 
   .checkbox-input__wrap {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--spacer-2);
     position: relative;
+    display: inline-flex;
+    align-items: flex-start;
+    gap: var(--spacer-2);
     width: 100%;
   }
 
+  /* Positioning shell only. The border, fill and focus ring all live on
+     `__visuals`, which is a sibling of the input so every visual state can be
+     driven from the input's own pseudo-classes. */
   .checkbox-input__input {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
-    line-height: 0;
     position: relative;
+    display: inline-block;
+    flex-shrink: 0;
     width: var(--spacer-3);
     height: var(--spacer-3);
-    border: var(--stroke-width-small) solid var(--field-color-toggle-border);
-    border-radius: var(--button-radius);
-    background: transparent;
+    margin-block: var(--spacer-1);
 
-    & input[type='checkbox'] {
-      position: absolute;
-      padding: 0;
-      margin: 0;
-      opacity: 0;
-      border-radius: 0;
-      z-index: 1;
-    }
+    /* On iPad, inline elements are selectable by default */
+    user-select: none;
   }
 
-  .checkbox-input__icon {
+  /* Kept in the accessibility tree and hit-testable, but invisible */
+  .checkbox-input__control {
     position: absolute;
     inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    border-radius: 0;
+    outline: none;
+    opacity: 0;
+  }
 
-    svg {
-      opacity: 0;
+  .checkbox-input__visuals {
+    --checkbox-bg: var(--color-bg-secondary);
+    --checkbox-border-color: var(--special-border-translucent-strong);
+    --checkbox-focus-ring-color: transparent;
+    --checkbox-mark-color: var(--color-icon);
+    --checkbox-mark-halo-color: transparent;
+    --checkbox-duration: 100ms;
+    --checkbox-easing: cubic-bezier(0.645, 0.045, 0.355, 1);
+
+    position: absolute;
+    inset: 0;
+    display: inline-grid;
+    place-content: center;
+    border: var(--stroke-width-small) solid var(--checkbox-border-color);
+    border-radius: var(--radius-small);
+    outline: var(--stroke-width-small) solid var(--checkbox-focus-ring-color);
+    outline-offset: var(--stroke-width-small);
+    background: var(--checkbox-bg);
+    pointer-events: none;
+  }
+
+  .checkbox-input__check,
+  .checkbox-input__mixed {
+    display: none;
+    width: var(--spacer-3);
+    height: var(--spacer-3);
+  }
+
+  .checkbox-input__mark,
+  .checkbox-input__mark-halo {
+    stroke-linecap: round;
+    stroke-linejoin: round;
+
+    /* The dash pattern is longer than either path, so offsetting by its length
+       hides the mark entirely and animating back to 0 draws it in. */
+    stroke-dasharray: 12;
+    stroke-dashoffset: 0;
+  }
+
+  .checkbox-input__mark {
+    stroke: var(--checkbox-mark-color);
+    stroke-width: 1.5;
+  }
+
+  .checkbox-input__mark-halo {
+    stroke: var(--checkbox-mark-halo-color);
+    stroke-width: 4;
+  }
+
+  .checkbox-input__control:hover + .checkbox-input__visuals {
+    --checkbox-bg: var(--color-bg-secondary-hover);
+  }
+
+  .checkbox-input__control:focus-visible + .checkbox-input__visuals {
+    --checkbox-focus-ring-color: var(--accessibility-focus-color);
+  }
+
+  .checkbox-input__control:active + .checkbox-input__visuals {
+    --checkbox-bg: var(--color-bg-secondary-pressed);
+  }
+
+  .checkbox-input__control:disabled + .checkbox-input__visuals {
+    --checkbox-bg: transparent;
+    --checkbox-border-color: var(--color-border-disabled);
+    --checkbox-mark-color: var(--color-icon-ondisabled);
+  }
+
+  .checkbox-input__control:disabled:checked + .checkbox-input__visuals,
+  .checkbox-input__control:disabled:indeterminate + .checkbox-input__visuals {
+    --checkbox-mark-color: var(--color-icon-disabled);
+  }
+
+  .checkbox-input__control:disabled:not(.checkbox-input__control--muted):checked
+    + .checkbox-input__visuals,
+  .checkbox-input__control:disabled:not(.checkbox-input__control--muted):indeterminate
+    + .checkbox-input__visuals {
+    --checkbox-bg: var(--color-bg-disabled);
+    --checkbox-border-color: transparent;
+    --checkbox-mark-color: var(--color-icon-ondisabled);
+  }
+
+  /* The muted variant keeps the neutral surface when marked, so only the default
+     variant gets the brand fill, the on-brand mark and the mark halo. */
+  .checkbox-input__control:not(.checkbox-input__control--muted, :disabled)
+    + .checkbox-input__visuals {
+    --checkbox-mark-color: var(--color-icon-onbrand);
+    --checkbox-mark-halo-color: var(--special-border-translucent);
+  }
+
+  .checkbox-input__control:not(.checkbox-input__control--muted, :disabled):checked
+    + .checkbox-input__visuals,
+  .checkbox-input__control:not(.checkbox-input__control--muted, :disabled):indeterminate
+    + .checkbox-input__visuals {
+    --checkbox-bg: var(--color-bg-brand);
+    --checkbox-border-color: var(--special-border-translucent);
+
+    transition: background var(--checkbox-duration) var(--checkbox-easing);
+  }
+
+  .checkbox-input__control:not(.checkbox-input__control--muted, :disabled):checked:hover
+    + .checkbox-input__visuals,
+  .checkbox-input__control:not(.checkbox-input__control--muted, :disabled):indeterminate:hover
+    + .checkbox-input__visuals {
+    --checkbox-border-color: var(--special-border-translucent-strong);
+  }
+
+  .checkbox-input__control:not(.checkbox-input__control--muted, :disabled):checked:active
+    + .checkbox-input__visuals,
+  .checkbox-input__control:not(.checkbox-input__control--muted, :disabled):indeterminate:active
+    + .checkbox-input__visuals {
+    --checkbox-bg: var(--color-bg-brand-hover);
+  }
+
+  .checkbox-input__control:indeterminate + .checkbox-input__visuals .checkbox-input__mixed {
+    display: block;
+  }
+
+  .checkbox-input__control:checked:not(:indeterminate)
+    + .checkbox-input__visuals
+    .checkbox-input__check {
+    display: block;
+  }
+
+  .checkbox-input--changed .checkbox-input__mark,
+  .checkbox-input--changed .checkbox-input__mark-halo {
+    animation: payload-checkbox-mark-draw var(--checkbox-duration) var(--checkbox-easing) forwards;
+  }
+
+  @keyframes payload-checkbox-mark-draw {
+    from {
+      stroke-dashoffset: 12;
     }
 
-    .icon--line {
-      width: 1.4rem;
-      height: 1.4rem;
-    }
-
-    &.partial {
-      svg {
-        opacity: 1;
-        color: var(--color-icon-onbrand);
-      }
+    to {
+      stroke-dashoffset: 0;
     }
   }
 
-  /* Partial/indeterminate state - same blue background as checked */
-  .checkbox-input:has(.checkbox-input__icon.partial) {
-    .checkbox-input__input {
-      background-color: var(--field-color-toggle-bg-checked);
-      border-color: var(--field-color-toggle-border-checked);
-    }
-
-    &:has(:focus-visible) .checkbox-input__input {
-      outline: var(--stroke-width-small) solid var(--color-bg);
-      outline-offset: -2px;
-    }
+  .checkbox-input label.field-label {
+    margin-block-start: var(--spacer-1);
   }
 
-  .checkbox-input--checked {
-    .checkbox-input__input {
-      background-color: var(--field-color-toggle-bg-checked);
-      border-color: var(--field-color-toggle-border-checked);
-    }
-
-    &:has(:focus-visible) .checkbox-input__input {
-      outline: var(--stroke-width-small) solid var(--color-bg);
-      outline-offset: -2px; /* inset offset */
-    }
-
-    .checkbox-input__icon {
-      svg {
-        opacity: 1;
-        color: var(--field-color-toggle-icon);
-      }
-    }
+  /* Align the description with the label rather than the control */
+  .checkbox > .field-description {
+    padding-inline-start: var(--spacer-4);
   }
 
-  .checkbox-input--read-only {
-    .checkbox-input__input {
-      background: var(--field-color-toggle-bg-disabled);
-      border-color: var(--field-color-toggle-border-disabled);
-    }
+  .checkbox-input:not(.checkbox-input--read-only),
+  .checkbox-input:not(.checkbox-input--read-only) label,
+  .checkbox-input:not(.checkbox-input--read-only) input {
+    cursor: pointer;
+  }
 
-    label {
-      color: var(--field-color-text-disabled);
-    }
+  .checkbox-input--read-only label.field-label:not(.unstyled) {
+    color: var(--field-color-text-disabled);
   }
 
   .checkbox-input--has-tooltip {
@@ -168,58 +226,13 @@
     transform: translateX(-50%) rotate(180deg);
   }
 
-  /* Muted variant - used in tables with lighter appearance */
-  .checkbox-input--muted {
-    .checkbox-input__input {
-      background: var(--color-bg-secondary);
-      border-color: var(--color-border);
-    }
-
-    &:not(.checkbox-input--read-only):not(.checkbox-input--checked) {
-      &:hover {
-        .checkbox-input__input {
-          border-color: var(--field-color-toggle-border-hover);
-        }
-      }
-    }
-
-    /* Ensure checked state overrides muted base styles */
-    &.checkbox-input--checked {
-      .checkbox-input__input {
-        background-color: var(--field-color-toggle-bg-checked);
-        border-color: var(--field-color-toggle-border-checked);
-      }
-    }
-
-    /* Ensure partial state overrides muted base styles */
-    &:has(.checkbox-input__icon.partial) {
-      .checkbox-input__input {
-        background-color: var(--field-color-toggle-bg-checked);
-        border-color: var(--field-color-toggle-border-checked);
-      }
-    }
+  .checkbox.error .checkbox-input__visuals {
+    --checkbox-border-color: var(--field-color-border-error);
   }
 
-  .checkbox.error {
-    .checkbox-input--checked {
-      .checkbox-input__input {
-        background-color: var(--field-color-error-bg);
-        border-color: var(--field-color-border-error);
-      }
-
-      &:hover .checkbox-input__input {
-        border-color: var(--field-color-border-error);
-      }
-    }
-
-    .checkbox-input:not(.checkbox-input--checked) {
-      .checkbox-input__input {
-        border-color: var(--field-color-border-error);
-      }
-
-      &:hover .checkbox-input__input {
-        border-color: var(--field-color-border-error);
-      }
-    }
+  .checkbox.error .checkbox-input__control:checked + .checkbox-input__visuals,
+  .checkbox.error .checkbox-input__control:indeterminate + .checkbox-input__visuals {
+    --checkbox-bg: var(--field-color-error-bg);
+    --checkbox-border-color: var(--field-color-border-error);
   }
 }
