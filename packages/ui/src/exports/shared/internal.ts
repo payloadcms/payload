@@ -1,7 +1,6 @@
 // Modules exported here are not part of the public API.
 // They may change without notice or a major version bump.
 
-export { reduceToSerializableFields } from '../../forms/Form/reduceToSerializableFields.js'
 export {
   getViewportContent,
   getViewportMeta,
@@ -12,7 +11,6 @@ export { getInitialColumns } from '../../providers/TableColumns/getInitialColumn
 export { formatDocTitle } from '../../utilities/formatDocTitle/index.js'
 export { getGlobalData } from '../../utilities/getGlobalData.js'
 export { getNavGroups } from '../../utilities/getNavGroups.js'
-export { getVisibleEntities } from '../../utilities/getVisibleEntities.js'
 export { handleBackToDashboard } from '../../utilities/handleBackToDashboard.js'
 export { handleGoBack } from '../../utilities/handleGoBack.js'
 export { handleTakeOver } from '../../utilities/handleTakeOver.js'

@@ -12,7 +12,6 @@ export type {
   RenderTabServerFnArgs,
   RenderTabServerFnReturnType,
 } from '../../elements/Nav/SidebarTabs/renderTabServerFn.js'
-export { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
 export { renderField } from '../../forms/fieldSchemasToFormState/renderField.js'
 export { _internal_renderFieldHandler } from '../../forms/fieldSchemasToFormState/serverFunctions/renderFieldServerFn.js'
 export { metadata, RootLayout } from '../../layouts/Root/index.js'

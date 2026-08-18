@@ -20,8 +20,6 @@ type RenderServerComponentFn = (args: {
 
 /**
  * Can be used to render both MappedComponents and React Components.
- *
- * @internal
  */
 export const RenderServerComponent: RenderServerComponentFn = ({
   clientProps = {},

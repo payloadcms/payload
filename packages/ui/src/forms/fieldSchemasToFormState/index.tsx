@@ -81,7 +81,6 @@ type Args = {
   skipValidation?: boolean
 }
 
-/** @internal */
 export const fieldSchemasToFormState = async ({
   id,
   clientFieldSchemaMap,

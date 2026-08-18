@@ -9,11 +9,12 @@ import {
   ChevronIcon,
   CopyToClipboard,
   PopupList,
+  RenderFields,
   useForm,
   useFormFields,
   useTranslation,
 } from '@payloadcms/ui'
-import { Combobox, RenderFields } from '@payloadcms/ui/internal'
+import { Combobox } from '@payloadcms/ui/internal'
 import React from 'react'
 
 import type { AdditionalCodeComponentProps } from './Code.js'

@@ -1,10 +1,7 @@
 // Modules exported here are not part of the public API.
 // They may change without notice or a major version bump.
 
-export {
-  fieldSchemasToFormState,
-  iterateFields,
-} from '../../forms/fieldSchemasToFormState/index.js'
+export { iterateFields } from '../../forms/fieldSchemasToFormState/index.js'
 export { traverseFields } from '../../utilities/buildFieldSchemaMap/traverseFields.js'
 export type {
   BuildFormStateResult,
@@ -12,8 +9,6 @@ export type {
   StaleDataState,
 } from '../../utilities/buildFormState.js'
 export type { BuildTableStateResult } from '../../utilities/buildTableState.js'
-export { getClientConfig } from '../../utilities/getClientConfig.js'
-export { getClientSchemaMap } from '../../utilities/getClientSchemaMap.js'
 export { getDocPreferences } from '../../utilities/getDocPreferences.js'
 export { getDocumentData } from '../../utilities/getDocumentData.js'
 export { getDocumentPermissions } from '../../utilities/getDocumentPermissions.js'
@@ -29,7 +24,6 @@ export { getPreferences } from '../../utilities/getPreferences.js'
 export { getRequestEmbed } from '../../utilities/getRequestEmbed.js'
 export { getRequestTheme } from '../../utilities/getRequestTheme.js'
 export { getRouteWithoutAdmin } from '../../utilities/getRouteWithoutAdmin.js'
-export { getSchemaMap } from '../../utilities/getSchemaMap.js'
 export { getVersions } from '../../utilities/getVersions.js'
 export { handleAuthRedirect } from '../../utilities/handleAuthRedirect.js'
 export { initReq } from '../../utilities/initReq.js'

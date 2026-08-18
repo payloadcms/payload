@@ -3,8 +3,7 @@ import type { CollapsibleProps } from '@payloadcms/ui/elements/Collapsible'
 import type { ClientField, FormState } from 'payload'
 
 import { useLexicalEditable } from '@lexical/react/useLexicalEditable'
-import { useFormSubmitted } from '@payloadcms/ui'
-import { RenderFields } from '@payloadcms/ui/internal'
+import { RenderFields, useFormSubmitted } from '@payloadcms/ui'
 import React, { createContext, useMemo } from 'react'
 
 export type BlockCollapsibleProps = {

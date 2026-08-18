@@ -7,13 +7,14 @@ import {
   FieldError,
   FieldLabel,
   isFieldRTL,
+  RenderCustomComponent,
   useConfig,
   useEditDepth,
   useEffectEvent,
   useField,
   useLocale,
 } from '@payloadcms/ui'
-import { BulkUploadProvider, RenderCustomComponent } from '@payloadcms/ui/internal'
+import { BulkUploadProvider } from '@payloadcms/ui/internal'
 import { mergeFieldStyles } from '@payloadcms/ui/shared'
 import { dequal } from 'dequal/lite'
 import { type Validate } from 'payload'

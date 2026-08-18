@@ -120,6 +120,7 @@ export type {
   UseHierarchyModalArgs,
 } from '../../elements/Hierarchy/Modal/types.js'
 export { LoadingOverlay } from '../../elements/Loading/index.js'
+export { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 export { Spinner } from '../../elements/Spinner/index.js'
 export type { SpinnerProps } from '../../elements/Spinner/index.js'
 export { Switch } from '../../elements/Switch/index.js'
@@ -225,6 +226,7 @@ export {
 } from '../../forms/Form/context.js'
 export { Form, type FormProps } from '../../forms/Form/index.js'
 export { NullifyLocaleField } from '../../forms/NullifyField/index.js'
+export { RenderFields } from '../../forms/RenderFields/index.js'
 
 export { RowLabel, type RowLabelProps } from '../../forms/RowLabel/index.js'
 export { useRowLabel } from '../../forms/RowLabel/Context/index.js'

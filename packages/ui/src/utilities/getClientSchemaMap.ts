@@ -11,7 +11,6 @@ if (!cachedClientSchemaMap) {
   cachedClientSchemaMap = global._payload_clientSchemaMap = null
 }
 
-/** @internal */
 export const getClientSchemaMap = cache(
   (args: {
     collectionSlug?: string

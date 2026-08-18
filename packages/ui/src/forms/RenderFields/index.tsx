@@ -17,7 +17,6 @@ const baseClass = 'render-fields'
 
 export { RenderFieldsProps as Props }
 
-/** @internal */
 export const RenderFields: React.FC<RenderFieldsProps> = (props) => {
   const {
     className,

@@ -8,6 +8,7 @@ export {
 } from '../../elements/HTMLDiff/index.js'
 export { Logo } from '../../elements/Logo/index.js'
 export { DefaultNav, type NavProps } from '../../elements/Nav/index.js'
+export { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
 export { File } from '../../graphics/File/index.js'
 export { CheckIcon } from '../../icons/Check/index.js'
 export { DefaultTemplate, type DefaultTemplateProps } from '../../templates/Default/index.js'

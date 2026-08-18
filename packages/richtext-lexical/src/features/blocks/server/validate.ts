@@ -1,6 +1,6 @@
 import type { Block } from 'payload'
 
-import { fieldSchemasToFormState } from '@payloadcms/ui/internal/server'
+import { fieldSchemasToFormState } from '@payloadcms/ui/server'
 
 import type { NodeValidation } from '../../typesServer.js'
 import type { BlockFields, SerializedBlockNode, SerializedInlineBlockNode } from './schema.js'

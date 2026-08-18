@@ -94,6 +94,36 @@
       "types": "./src/elements/Collapsible/index.tsx",
       "default": "./src/elements/Collapsible/index.tsx"
     },
+    "./elements/DraggableSortable": {
+      "import": "./src/elements/DraggableSortable/index.tsx",
+      "types": "./src/elements/DraggableSortable/index.tsx",
+      "default": "./src/elements/DraggableSortable/index.tsx"
+    },
+    "./elements/DraggableSortable/DraggableSortableItem": {
+      "import": "./src/elements/DraggableSortable/DraggableSortableItem/index.tsx",
+      "types": "./src/elements/DraggableSortable/DraggableSortableItem/index.tsx",
+      "default": "./src/elements/DraggableSortable/DraggableSortableItem/index.tsx"
+    },
+    "./elements/Pill": {
+      "import": "./src/elements/Pill/index.tsx",
+      "types": "./src/elements/Pill/index.tsx",
+      "default": "./src/elements/Pill/index.tsx"
+    },
+    "./elements/RenderServerComponent": {
+      "import": "./src/elements/RenderServerComponent/index.tsx",
+      "types": "./src/elements/RenderServerComponent/index.tsx",
+      "default": "./src/elements/RenderServerComponent/index.tsx"
+    },
+    "./elements/Tooltip": {
+      "import": "./src/elements/Tooltip/index.tsx",
+      "types": "./src/elements/Tooltip/index.tsx",
+      "default": "./src/elements/Tooltip/index.tsx"
+    },
+    "./elements/Upload": {
+      "import": "./src/elements/Upload/index.tsx",
+      "types": "./src/elements/Upload/index.tsx",
+      "default": "./src/elements/Upload/index.tsx"
+    },
     "./elements/Table/DefaultCell/fields/Status": {
       "import": "./src/elements/Table/DefaultCell/fields/Status/index.tsx",
       "types": "./src/elements/Table/DefaultCell/fields/Status/index.tsx",
@@ -151,7 +181,6 @@
     "./views/Version/Default": null,
     "./views/Version/RenderFieldsToDiff/*": null,
     "./views/Versions/cells/*": null,
-    "./elements/RenderServerComponent": null,
     "./rsc": {
       "import": "./src/exports/rsc/index.ts",
       "types": "./src/exports/rsc/index.ts",
@@ -333,7 +362,6 @@
         "types": "./dist/assets/index.d.ts",
         "default": "./dist/assets/index.js"
       },
-      "./elements/RenderServerComponent": null,
       "./elements/Banner": {
         "import": "./dist/elements/Banner/index.js",
         "types": "./dist/elements/Banner/index.d.ts",
@@ -353,6 +381,36 @@
         "import": "./dist/elements/Collapsible/index.js",
         "types": "./dist/elements/Collapsible/index.d.ts",
         "default": "./dist/elements/Collapsible/index.js"
+      },
+      "./elements/DraggableSortable": {
+        "import": "./dist/elements/DraggableSortable/index.js",
+        "types": "./dist/elements/DraggableSortable/index.d.ts",
+        "default": "./dist/elements/DraggableSortable/index.js"
+      },
+      "./elements/DraggableSortable/DraggableSortableItem": {
+        "import": "./dist/elements/DraggableSortable/DraggableSortableItem/index.js",
+        "types": "./dist/elements/DraggableSortable/DraggableSortableItem/index.d.ts",
+        "default": "./dist/elements/DraggableSortable/DraggableSortableItem/index.js"
+      },
+      "./elements/Pill": {
+        "import": "./dist/elements/Pill/index.js",
+        "types": "./dist/elements/Pill/index.d.ts",
+        "default": "./dist/elements/Pill/index.js"
+      },
+      "./elements/RenderServerComponent": {
+        "import": "./dist/elements/RenderServerComponent/index.js",
+        "types": "./dist/elements/RenderServerComponent/index.d.ts",
+        "default": "./dist/elements/RenderServerComponent/index.js"
+      },
+      "./elements/Tooltip": {
+        "import": "./dist/elements/Tooltip/index.js",
+        "types": "./dist/elements/Tooltip/index.d.ts",
+        "default": "./dist/elements/Tooltip/index.js"
+      },
+      "./elements/Upload": {
+        "import": "./dist/elements/Upload/index.js",
+        "types": "./dist/elements/Upload/index.d.ts",
+        "default": "./dist/elements/Upload/index.js"
       },
       "./elements/Table/DefaultCell/fields/Status": {
         "import": "./dist/elements/Table/DefaultCell/fields/Status/index.js",
