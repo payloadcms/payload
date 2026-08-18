@@ -1806,6 +1806,42 @@ describe('database', () => {
     })
   })
 
+  describe('index creation on init', { db: 'mongo' }, () => {
+    it('should build every declared index on version collections before init resolves', async () => {
+      const db = payload.db as MongooseAdapter
+
+      const missingIndexes: string[] = []
+
+      for (const [slug, model] of Object.entries(db.versions)) {
+        const declaredKeys = model.schema.indexes().map(([fields]) => Object.keys(fields).join('_'))
+
+        if (declaredKeys.length === 0) {
+          continue
+        }
+
+        const namespaces = await db.connection
+          .db!.listCollections({ name: model.collection.name })
+          .toArray()
+
+        if (namespaces.length === 0) {
+          missingIndexes.push(`${slug}: collection does not exist`)
+          continue
+        }
+
+        const builtIndexes = await db.connection.db!.collection(model.collection.name).indexes()
+        const builtKeys = builtIndexes.map((index) => Object.keys(index.key).join('_'))
+
+        for (const declaredKey of declaredKeys) {
+          if (!builtKeys.includes(declaredKey)) {
+            missingIndexes.push(`${slug}: ${declaredKey}`)
+          }
+        }
+      }
+
+      expect(missingIndexes).toEqual([])
+    })
+  })
+
   describe('migrations', () => {
     let ranFreshTest = false
 
