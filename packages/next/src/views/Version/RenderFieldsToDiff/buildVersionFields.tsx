@@ -22,7 +22,6 @@ import {
   fieldIsID,
   fieldShouldBeLocalized,
   getFieldPaths,
-  getUniqueListBy,
   tabHasName,
 } from 'payload/shared'
 
@@ -450,25 +449,16 @@ const buildVersionField = ({
           (block) => typeof block !== 'string' && block.slug === blockSlugToMatch,
         ) as FlattenedBlock | undefined)
 
-      let fields = []
-
-      if (toRow.blockType === fromRow.blockType) {
-        fields = toBlock.fields
-      } else {
-        const fromBlockSlugToMatch: string = toRow?.blockType ?? fromRow?.blockType
-
-        const fromBlock =
-          req.payload.blocks[fromBlockSlugToMatch] ??
-          ((field.blockReferences ?? field.blocks).find(
-            (block) => typeof block !== 'string' && block.slug === fromBlockSlugToMatch,
-          ) as FlattenedBlock | undefined)
-
-        if (fromBlock) {
-          fields = getUniqueListBy<Field>([...toBlock.fields, ...fromBlock.fields], 'name')
-        } else {
-          fields = toBlock.fields
-        }
-      }
+      // Always diff against the current (to) block's own field schema. The version
+      // diff's `clientSchemaMap` is keyed by `toBlock.slug`, so only this block's
+      // fields resolve to client fields. Merging another block's fields collapsed
+      // unnamed presentational fields (row / collapsible / unnamed group) — which all
+      // share `name: undefined` — through `getUniqueListBy(..., 'name')`, shifting the
+      // `_index-N` schema paths and throwing "No client field found" whenever a block's
+      // type changed (or was added) between the compared versions. The merge was also a
+      // no-op: `fromBlockSlugToMatch` was computed identically to `blockSlugToMatch`, so
+      // `fromBlock` always resolved to `toBlock`.
+      const fields = toBlock.fields
 
       let blockFieldsPermissions: SanitizedFieldsPermissions = undefined
 
