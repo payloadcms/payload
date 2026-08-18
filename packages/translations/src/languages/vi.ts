@@ -478,6 +478,7 @@ export const viTranslations: DefaultTranslationsObject = {
     selectAllRows: 'Chọn tất cả các hàng',
     selectedCount: 'Đã chọn {{count}} {{label}}',
     selectLabel: 'Chọn {{label}}',
+    selectRow: undefined,
     selectValue: 'Chọn một giá trị',
     settings: 'Cài đặt',
     showAllLabel: 'Hiển thị tất cả {{label}}',
