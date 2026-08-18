@@ -11,7 +11,6 @@ import type {
   CustomIdNumberRelation,
   CustomIdRelation,
   Director,
-  Page,
   Post,
   PostsLocalized,
   Relation,
@@ -19,6 +18,8 @@ import type {
 
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { mongooseList } from '../__helpers/shared/isMongoose.js'
+import { devUser } from '../credentials.js'
+import { clearAndSeedEverything } from './seed.js'
 import {
   chainedRelSlug,
   customIdNumberSlug,
@@ -44,9 +45,8 @@ const mongoIt = mongooseList.includes(process.env.PAYLOAD_DATABASE || '') ? it :
 
 describe('Relationships', () => {
   beforeAll(async () => {
+    process.env.SEED_IN_CONFIG_ONINIT = 'false'
     ;({ payload, restClient } = await initPayloadInt(dirname))
-
-    await restClient.login({ slug: usersSlug })
   })
 
   afterAll(async () => {
@@ -54,7 +54,8 @@ describe('Relationships', () => {
   })
 
   beforeEach(async () => {
-    await clearDocs()
+    await clearAndSeedEverything(payload)
+    await restClient.login({ slug: usersSlug, credentials: devUser })
   })
 
   describe('Querying', () => {
@@ -505,6 +506,256 @@ describe('Relationships', () => {
       })
 
       describe('hasMany relationships', () => {
+        describe('has-many relationship operators', () => {
+          let directorWithoutMovies: Director
+          let electricCarsDirector: Director
+          let electricCarsMovieID: number | string
+          let mixedDirector: Director
+          let recallsDirector: Director
+          let recallsMovieID: number | string
+
+          beforeEach(async () => {
+            const recallsMovie = await payload.create({
+              collection: 'movies',
+              data: { name: 'recalls', select: ['a'] },
+            })
+
+            const electricCarsMovie = await payload.create({
+              collection: 'movies',
+              data: { name: 'electric-cars', select: ['a', 'b'] },
+            })
+
+            recallsMovieID = recallsMovie.id
+            electricCarsMovieID = electricCarsMovie.id
+
+            mixedDirector = await payload.create({
+              collection: 'directors',
+              data: { name: 'mixed', movies: [recallsMovie.id, electricCarsMovie.id] },
+            })
+
+            recallsDirector = await payload.create({
+              collection: 'directors',
+              data: { name: 'recalls', movies: [recallsMovie.id] },
+            })
+
+            electricCarsDirector = await payload.create({
+              collection: 'directors',
+              data: { name: 'electric-cars', movies: [electricCarsMovie.id] },
+            })
+
+            directorWithoutMovies = await payload.create({
+              collection: 'directors',
+              data: { name: 'empty', movies: [] },
+            })
+          })
+
+          it('should find documents where some related documents match', async () => {
+            const { docs } = await payload.find({
+              collection: 'directors',
+              depth: 0,
+              where: {
+                movies: {
+                  some: { name: { equals: 'recalls' } },
+                },
+              },
+            })
+
+            const foundDirectorIDs = docs.map(({ id }) => id)
+            expect(foundDirectorIDs).toHaveLength(2)
+            expect(foundDirectorIDs).toContain(mixedDirector.id)
+            expect(foundDirectorIDs).toContain(recallsDirector.id)
+          })
+
+          it('should find documents where no related documents match', async () => {
+            const { docs } = await payload.find({
+              collection: 'directors',
+              depth: 0,
+              where: {
+                movies: {
+                  none: { name: { equals: 'recalls' } },
+                },
+              },
+            })
+
+            const foundDirectorIDs = docs.map(({ id }) => id)
+            expect(foundDirectorIDs).toHaveLength(2)
+            expect(foundDirectorIDs).toContain(electricCarsDirector.id)
+            expect(foundDirectorIDs).toContain(directorWithoutMovies.id)
+          })
+
+          it('should find documents where every related document matches', async () => {
+            const { docs } = await payload.find({
+              collection: 'directors',
+              depth: 0,
+              where: {
+                movies: {
+                  every: { name: { equals: 'electric-cars' } },
+                },
+              },
+            })
+
+            const foundDirectorIDs = docs.map(({ id }) => id)
+            expect(foundDirectorIDs).toHaveLength(2)
+            expect(foundDirectorIDs).toContain(electricCarsDirector.id)
+            expect(foundDirectorIDs).toContain(directorWithoutMovies.id)
+          })
+
+          it('should query has-many relationship operators through REST', async () => {
+            const response = await restClient.GET('/directors', {
+              query: {
+                depth: 0,
+                where: {
+                  movies: { none: { name: { equals: 'recalls' } } },
+                },
+              },
+            })
+            const { docs } = await response.json()
+
+            const foundDirectorIDs = docs.map(({ id }) => id)
+            expect(response.status).toBe(200)
+            expect(foundDirectorIDs).toHaveLength(2)
+            expect(foundDirectorIDs).toContain(electricCarsDirector.id)
+            expect(foundDirectorIDs).toContain(directorWithoutMovies.id)
+          })
+
+          it('should reject has-many relationship operators on a singular relationship', async () => {
+            await expect(
+              payload.find({
+                collection: 'directors',
+                where: {
+                  movie: {
+                    none: { name: { equals: 'recalls' } },
+                  },
+                },
+              }),
+            ).rejects.toThrow('movie.none')
+          })
+
+          it('should reject has-many relationship operators on a scalar field', async () => {
+            await expect(
+              payload.find({
+                collection: 'directors',
+                where: {
+                  name: {
+                    none: { equals: 'mixed' },
+                  },
+                },
+              }),
+            ).rejects.toThrow('name.none')
+          })
+
+          it('should reject has-many relationship operators on a polymorphic relationship', async () => {
+            await expect(
+              payload.find({
+                collection: polymorphicRelationshipsSlug,
+                where: {
+                  polymorphicMany: {
+                    none: { name: { equals: 'recalls' } },
+                  },
+                },
+              }),
+            ).rejects.toThrow('polymorphicMany.none')
+          })
+
+          it('should support direct relationship ID conditions', async () => {
+            const { docs } = await payload.find({
+              collection: 'directors',
+              depth: 0,
+              where: {
+                movies: { none: { id: { equals: recallsMovieID } } },
+              },
+            })
+
+            const foundDirectorIDs = docs.map(({ id }) => id)
+            expect(foundDirectorIDs).toHaveLength(2)
+            expect(foundDirectorIDs).toContain(electricCarsDirector.id)
+            expect(foundDirectorIDs).toContain(directorWithoutMovies.id)
+          })
+
+          it('should apply a compound query to the same related document', async () => {
+            const { docs } = await payload.find({
+              collection: 'directors',
+              depth: 0,
+              where: {
+                movies: {
+                  some: {
+                    and: [{ name: { equals: 'recalls' } }, { id: { equals: electricCarsMovieID } }],
+                  },
+                },
+              },
+            })
+
+            expect(docs).toHaveLength(0)
+          })
+
+          it('should evaluate every against related documents instead of joined rows', async () => {
+            const { docs } = await payload.find({
+              collection: 'directors',
+              depth: 0,
+              where: {
+                movies: {
+                  every: { select: { equals: 'a' } },
+                },
+              },
+            })
+
+            expect(docs).toHaveLength(4)
+          })
+
+          it('should support nested has-many operators on a localized relationship inside a block', async () => {
+            const mixedBlock = await payload.create({
+              collection: 'blocks',
+              data: {
+                blocks: [
+                  {
+                    blockType: 'some',
+                    directors: [mixedDirector.id, electricCarsDirector.id],
+                  },
+                ],
+              },
+            })
+
+            const electricCarsBlock = await payload.create({
+              collection: 'blocks',
+              data: {
+                blocks: [{ blockType: 'some', directors: [electricCarsDirector.id] }],
+              },
+            })
+
+            const blockWithoutDirectors = await payload.create({
+              collection: 'blocks',
+              data: { blocks: [{ blockType: 'some', directors: [] }] },
+            })
+
+            const { docs } = await payload.find({
+              collection: 'blocks',
+              depth: 0,
+              locale: 'en',
+              where: {
+                and: [
+                  {
+                    id: {
+                      in: [mixedBlock.id, electricCarsBlock.id, blockWithoutDirectors.id],
+                    },
+                  },
+                  {
+                    'blocks.directors': {
+                      none: {
+                        movies: { some: { name: { equals: 'recalls' } } },
+                      },
+                    },
+                  },
+                ],
+              },
+            })
+
+            const foundBlockIDs = docs.map(({ id }) => id)
+            expect(foundBlockIDs).toHaveLength(2)
+            expect(foundBlockIDs).toContain(electricCarsBlock.id)
+            expect(foundBlockIDs).toContain(blockWithoutDirectors.id)
+          })
+        })
+
         it('should retrieve totalDocs correctly with hasMany,', async () => {
           const movie1 = await payload.create({
             collection: 'movies',
@@ -1103,7 +1354,7 @@ describe('Relationships', () => {
         let localizedPost1: PostsLocalized
         let localizedPost2: PostsLocalized
 
-        beforeAll(async () => {
+        beforeEach(async () => {
           relation1 = await payload.create<Relation>({
             collection: relationSlug,
             data: {
@@ -1195,7 +1446,7 @@ describe('Relationships', () => {
       let secondLevelID: string
       let firstLevelID: string
 
-      beforeAll(async () => {
+      beforeEach(async () => {
         const thirdLevelDoc = await payload.create({
           collection: 'chained',
           data: {
@@ -1401,7 +1652,7 @@ describe('Relationships', () => {
     describe('Nested Querying Separate Collections', () => {
       let director: Director
 
-      beforeAll(async () => {
+      beforeEach(async () => {
         // 1. create a director
         director = await payload.create({
           collection: 'directors',
@@ -1461,7 +1712,7 @@ describe('Relationships', () => {
         'Insidious',
       ]
 
-      beforeAll(async () => {
+      beforeEach(async () => {
         await Promise.all(
           movieList.map(async (movie) => {
             return await payload.create({
@@ -1534,28 +1785,6 @@ describe('Relationships', () => {
     })
 
     describe('Hierarchy', () => {
-      beforeAll(async () => {
-        await payload.delete({
-          collection: treeSlug,
-          where: { id: { exists: true } },
-        })
-
-        const root = await payload.create({
-          collection: 'tree',
-          data: {
-            text: 'root',
-          },
-        })
-
-        await payload.create({
-          collection: 'tree',
-          data: {
-            parent: root.id,
-            text: 'sub',
-          },
-        })
-      })
-
       it('finds 1 root item with equals', async () => {
         const {
           docs: [item],
@@ -2153,11 +2382,4 @@ describe('Relationships', () => {
 
 async function createPost(overrides?: Partial<Post>) {
   return payload.create({ collection: slug, data: { title: 'title', ...overrides } })
-}
-
-async function clearDocs(): Promise<void> {
-  await payload.delete({
-    collection: slug,
-    where: { id: { exists: true } },
-  })
 }

@@ -883,6 +883,9 @@ input Post_relationHasManyField_operator {
   in: [JSON]
   not_in: [JSON]
   all: [JSON]
+  some: JSON
+  none: JSON
+  every: JSON
   exists: Boolean
 }
 
@@ -1885,6 +1888,9 @@ input versionsPost_version__relationHasManyField_operator {
   in: [JSON]
   not_in: [JSON]
   all: [JSON]
+  some: JSON
+  none: JSON
+  every: JSON
   exists: Boolean
 }
 

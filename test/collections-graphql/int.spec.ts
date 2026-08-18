@@ -11,7 +11,8 @@ import type { Post } from './payload-types.js'
 
 import { idToString } from '../__helpers/shared/idToString.js'
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
-import { errorOnHookSlug, pointSlug, relationSlug, slug } from './config.js'
+import { clearAndSeedEverything } from './seed.js'
+import { errorOnHookSlug, pointSlug, relationSlug, slug } from './shared.js'
 
 const formatID = (id: number | string) => (typeof id === 'number' ? id : `"${id}"`)
 
@@ -25,11 +26,16 @@ const dirname = path.dirname(filename)
 
 describe('collections-graphql', () => {
   beforeAll(async () => {
+    process.env.SEED_IN_CONFIG_ONINIT = 'false'
     ;({ payload, restClient } = await initPayloadInt(dirname))
   })
 
   afterAll(async () => {
     await payload.destroy()
+  })
+
+  beforeEach(async () => {
+    await clearAndSeedEverything(payload)
   })
 
   describe('CRUD', () => {
@@ -336,6 +342,55 @@ describe('collections-graphql', () => {
   })
 
   describe('Querying', () => {
+    describe('has-many relationship operators', () => {
+      it('should query has-many relationship operators through GraphQL', async () => {
+        const recalls = await payload.create({
+          collection: relationSlug,
+          data: { name: 'recalls' },
+        })
+
+        const electricCars = await payload.create({
+          collection: relationSlug,
+          data: { name: 'electric-cars' },
+        })
+
+        const mixedPost = await createPost({
+          relationHasManyField: [recalls.id, electricCars.id],
+        })
+
+        const electricCarsPost = await createPost({
+          relationHasManyField: [electricCars.id],
+        })
+
+        const postWithoutRelations = await createPost({
+          relationHasManyField: [],
+        })
+
+        const fixtureIDFilters = [mixedPost.id, electricCarsPost.id, postWithoutRelations.id]
+          .map((id) => `{ id: { equals: ${formatID(id)} } }`)
+          .join(', ')
+
+        const query = `query {
+          Posts(where: {
+            AND: [
+              { OR: [${fixtureIDFilters}] }
+              { relationHasManyField: { none: { name: { equals: "recalls" } } } }
+            ]
+          }) {
+            docs { id }
+          }
+        }`
+        const response = await restClient
+          .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+          .then((res) => res.json())
+
+        expect(response.errors).toBeUndefined()
+        expect(response.data.Posts.docs).toHaveLength(2)
+        expect(response.data.Posts.docs).toContainEqual({ id: electricCarsPost.id })
+        expect(response.data.Posts.docs).toContainEqual({ id: postWithoutRelations.id })
+      })
+    })
+
     describe('Operators', () => {
       let post1: Post
       let post2: Post
