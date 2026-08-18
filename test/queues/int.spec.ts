@@ -1,14 +1,7 @@
 import { spawn } from 'node:child_process'
 import path from 'path'
-import {
-  _internal_jobSystemGlobals,
-  _internal_resetJobSystemGlobals,
-  createLocalReq,
-  Forbidden,
-  type JobTaskStatus,
-  type Payload,
-  type User,
-} from 'payload'
+import { createLocalReq, Forbidden, type JobTaskStatus, type Payload, type User } from 'payload'
+import { _internal_jobSystemGlobals, _internal_resetJobSystemGlobals } from 'payload/internal'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect } from 'vitest'

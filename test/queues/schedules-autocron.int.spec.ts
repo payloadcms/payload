@@ -1,13 +1,15 @@
+import type { Payload } from 'payload'
+
 import path from 'path'
-import { _internal_jobSystemGlobals, _internal_resetJobSystemGlobals, type Payload } from 'payload'
+import { _internal_jobSystemGlobals, _internal_resetJobSystemGlobals } from 'payload/internal'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
-import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { devUser } from '../credentials.js'
 import { clearAndSeedEverything } from './seed.js'
 
 let payload: Payload

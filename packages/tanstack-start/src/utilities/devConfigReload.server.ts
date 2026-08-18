@@ -1,4 +1,4 @@
-import { registerDevReloadStrategy } from 'payload'
+import { registerDevReloadStrategy } from 'payload/internal'
 
 import { PAYLOAD_CONFIG_CHANGED_EVENT } from './devConfigReloadEvent.js'
 

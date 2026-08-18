@@ -1,9 +1,5 @@
-import {
-  _internal_jobSystemGlobals,
-  countRunnableOrActiveJobsForQueue,
-  createLocalReq,
-  type Payload,
-} from 'payload'
+import { countRunnableOrActiveJobsForQueue, createLocalReq, type Payload } from 'payload'
+import { _internal_jobSystemGlobals } from 'payload/internal'
 
 export async function waitUntilAutorunIsDone({
   payload,

@@ -21,6 +21,19 @@ import type {
   SelectFromCollectionSlug,
   TypeWithID,
 } from './collections/config/types.js'
+import type { InitOptions, SanitizedConfig } from './config/types.js'
+import type { BaseDatabaseAdapter, PaginatedDistinctDocs, PaginatedDocs } from './database/types.js'
+import type { InitializedEmailAdapter } from './email/types.js'
+import type { DataFromGlobalSlug, Globals, SelectFromGlobalSlug } from './globals/config/types.js'
+import type {
+  ApplyDisableErrors,
+  DraftTransformCollectionWithSelect,
+  JsonObject,
+  SelectType,
+  TransformCollectionWithSelect,
+  TransformGlobalWithSelect,
+} from './types/index.js'
+import type { TraverseFieldsCallback } from './utilities/traverseFields.js'
 
 import { getRegisteredDevReloadStrategy } from './admin/adapters/devReload.js'
 import {
@@ -37,24 +50,6 @@ import {
   verifyEmailLocal,
   type Options as VerifyEmailOptions,
 } from './auth/operations/local/verifyEmail.js'
-export {
-  getRegisteredDevReloadStrategy,
-  registerDevReloadStrategy,
-} from './admin/adapters/devReload.js'
-import type { InitOptions, SanitizedConfig } from './config/types.js'
-import type { BaseDatabaseAdapter, PaginatedDistinctDocs, PaginatedDocs } from './database/types.js'
-import type { InitializedEmailAdapter } from './email/types.js'
-import type { DataFromGlobalSlug, Globals, SelectFromGlobalSlug } from './globals/config/types.js'
-import type {
-  ApplyDisableErrors,
-  DraftTransformCollectionWithSelect,
-  JsonObject,
-  SelectType,
-  TransformCollectionWithSelect,
-  TransformGlobalWithSelect,
-} from './types/index.js'
-import type { TraverseFieldsCallback } from './utilities/traverseFields.js'
-
 import { countLocal, type CountOptions } from './collections/operations/local/count.js'
 import {
   createLocal,
@@ -126,12 +121,10 @@ export type * from './admin/adapters/index.js'
 export type { FieldState } from './admin/forms/Form.js'
 export type * from './admin/types.js'
 export { EntityType } from './admin/views/dashboard.js'
-import type { SupportedLanguages } from '@payloadcms/translations'
-
 import { Cron } from 'croner'
 
 import type { EncryptionKeyring } from './auth/crypto.js'
-import type { ClientConfig } from './config/client.js'
+import type { ImportMap } from './bin/generateImportMap/index.js'
 import type { KVAdapter } from './kv/index.js'
 import type { JobLog, JobTaskStatus } from './queues/config/types/workflowTypes.js'
 import type { TypeWithVersion } from './versions/types.js'
@@ -140,7 +133,6 @@ import { buildEncryptionKeyring, decrypt, encrypt, reencrypt } from './auth/cryp
 import { authLocal } from './auth/operations/local/auth.js'
 import { APIKeyAuthentication } from './auth/strategies/apiKey.js'
 import { JWTAuthentication } from './auth/strategies/jwt.js'
-import { generateImportMap, type ImportMap } from './bin/generateImportMap/index.js'
 import { checkPayloadDependencies } from './checkPayloadDependencies.js'
 import {
   countVersionsLocal,
@@ -154,6 +146,7 @@ import { formatAdminURL } from './utilities/formatAdminURL.js'
 import { isNextBuild } from './utilities/isNextBuild.js'
 import { getLogger } from './utilities/logger.js'
 import { defaultNextJsDevReloadStrategy } from './utilities/nextJsDevReloadStrategy.js'
+import { reload } from './utilities/reload.js'
 import { serverInit as serverInitTelemetry } from './utilities/telemetry/events/serverInit.js'
 import { traverseFields } from './utilities/traverseFields.js'
 
@@ -1120,80 +1113,6 @@ const initialized = new BasePayload()
 // eslint-disable-next-line no-restricted-exports
 export default initialized
 
-export const reload = async (
-  config: SanitizedConfig,
-  payload: Payload,
-  skipImportMapGeneration?: boolean,
-  options?: InitOptions,
-): Promise<void> => {
-  if (typeof payload.db.destroy === 'function') {
-    // Only destroy db, as we then later only call payload.db.init and not payload.init
-    await payload.db.destroy()
-  }
-  payload.config = config
-
-  payload.collections = config.collections.reduce(
-    (collections, collection) => {
-      collections[collection.slug] = {
-        config: collection,
-        customIDType: payload.collections[collection.slug]?.customIDType,
-      }
-      return collections
-    },
-    {} as Record<string, any>,
-  )
-
-  payload.blocks = config.blocks.reduce(
-    (blocks, block) => {
-      blocks[block.slug] = block
-      return blocks
-    },
-    {} as Record<string, FlattenedBlock>,
-  )
-
-  payload.globals = {
-    config: config.globals,
-  }
-
-  // TODO: support HMR for other props in the future (see payload/src/index init()) that may change on Payload singleton
-
-  // Generate types
-  if (config.typescript.autoGenerate !== false) {
-    // We cannot run it directly here, as generate-types imports json-schema-to-typescript, which breaks on turbopack.
-    // see: https://github.com/vercel/next.js/issues/66723
-    void payload.bin({
-      args: ['generate:types'],
-      log: false,
-    })
-  }
-
-  // Generate import map
-  if (skipImportMapGeneration !== true && config.admin?.importMap?.autoGenerate !== false) {
-    // This may run outside of the admin panel, e.g. in the user's frontend, where we don't have an import map file.
-    // We don't want to throw an error in this case, as it would break the user's frontend.
-    // => just skip it => ignoreResolveError: true
-    await generateImportMap(config, {
-      ignoreResolveError: true,
-      log: true,
-    })
-  }
-
-  if (payload.db?.init) {
-    await payload.db.init()
-  }
-
-  if (!options?.disableDBConnect && payload.db.connect) {
-    await payload.db.connect({ hotReload: true })
-  }
-
-  ;(global as any)._payload_clientConfigs = {} as Record<keyof SupportedLanguages, ClientConfig>
-  ;(global as any)._payload_schemaMap = null
-  ;(global as any)._payload_clientSchemaMap = null
-  ;(global as any)._payload_doNotCacheClientConfig = true // This will help refreshing the client config cache more reliably. If you remove this, please test HMR + client config refreshing (do new fields appear in the document?)
-  ;(global as any)._payload_doNotCacheSchemaMap = true
-  ;(global as any)._payload_doNotCacheClientSchemaMap = true
-}
-
 type CachedPayload = {
   devReloadCleanup: (() => void) | null
   devReloadStrategy: DevReloadStrategy | null
@@ -1284,10 +1203,10 @@ function connectDevReload({
 export const getPayload = async (
   options: {
     /**
-     * Custom dev reload strategy. If provided, takes precedence over any strategy
-     * passed to `registerDevReloadStrategy` and over the default Next.js HMR
-     * WebSocket listener. The strategy's `connect` function receives a callback to
-     * trigger config reload.
+     * Custom dev reload strategy. If provided, takes precedence over a
+     * framework-registered strategy and over the default Next.js HMR WebSocket
+     * listener. The strategy's `connect` function receives a callback to trigger
+     * config reload.
      *
      * Pass a stable reference: a strategy is reconnected whenever its identity
      * changes, so a new object literal on every call reconnects on every call.
@@ -1526,8 +1445,6 @@ export {
 } from './config/client.js'
 export { addDefaultsToConfig } from './config/defaults.js'
 export { definePlugin } from './config/definePlugin.js'
-
-export { type OrderableEndpointBody } from './config/orderable/index.js'
 
 export { sanitizeConfig } from './config/sanitize.js'
 export type * from './config/types.js'
@@ -1810,7 +1727,7 @@ export { traverseFields as beforeChangeTraverseFields } from './fields/hooks/bef
 export { traverseFields as beforeValidateTraverseFields } from './fields/hooks/beforeValidate/traverseFields.js'
 export { sortableFieldTypes } from './fields/sortableFieldTypes.js'
 
-export { validateBlocksFilterOptions, validations } from './fields/validations.js'
+export { validations } from './fields/validations.js'
 
 export type {
   ArrayFieldValidation,
@@ -1916,7 +1833,6 @@ export type {
   TabsPreferences,
 } from './preferences/types.js'
 export type { QueryPreset } from './query-presets/types.js'
-export { jobAfterRead } from './queues/config/collection.js'
 export type { JobsConfig, RunJobAccess, RunJobAccessArgs } from './queues/config/types/index.js'
 export type {
   RunInlineTaskFunction,
@@ -1944,17 +1860,10 @@ export type {
 export { JobCancelledError } from './queues/errors/index.js'
 export { countRunnableOrActiveJobsForQueue } from './queues/operations/handleSchedules/countRunnableOrActiveJobsForQueue.js'
 
-export { importHandlerPath } from './queues/operations/runJobs/runJob/importHandlerPath.js'
-export {
-  _internal_jobSystemGlobals,
-  _internal_resetJobSystemGlobals,
-  getCurrentDate,
-} from './queues/utilities/getCurrentDate.js'
 export { getLocalI18n } from './translations/getLocalI18n.js'
 
 export * from './types/index.js'
 export { getFileByPath } from './uploads/getFileByPath.js'
-export { _internal_safeFetchGlobal } from './uploads/safeFetch.js'
 export type * from './uploads/types.js'
 export { addDataAndFileToRequest } from './utilities/addDataAndFileToRequest.js'
 export { addLocalesToRequestFromData, sanitizeLocales } from './utilities/addLocalesToRequest.js'

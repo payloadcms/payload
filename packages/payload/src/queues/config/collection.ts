@@ -269,6 +269,7 @@ export const getDefaultJobsCollection: (jobsConfig: SanitizedConfig['jobs']) => 
   return jobsCollection
 }
 
+/** @internal */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function jobAfterRead({ config, doc }: { config: SanitizedConfig; doc: Job }): Job {
   doc.taskStatus = getJobTaskStatus({

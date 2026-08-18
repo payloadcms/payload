@@ -4,7 +4,8 @@ import type { Payload, ValidationError } from 'payload'
 
 import { slugifyHandler } from '@payloadcms/ui/internal/server'
 import path from 'path'
-import { createLocalReq, reload } from 'payload'
+import { createLocalReq } from 'payload'
+import { reload } from 'payload/internal'
 import { fileURLToPath } from 'url'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect } from 'vitest'
 
