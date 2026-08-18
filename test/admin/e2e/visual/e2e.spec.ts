@@ -5,13 +5,10 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 
 import { expectScreenshot } from '../../../__helpers/e2e/expectScreenshot.js'
-import {
-  ensureCompilationIsDone,
-  initPageConsoleErrorCatch,
-} from '../../../__helpers/e2e/helpers.js'
 import { visual } from '../../../__helpers/e2e/visual.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
+import { initPage } from '../../../__setup/e2e/initPage.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { postsCollectionSlug } from '../../slugs.js'
 
@@ -30,9 +27,7 @@ test.describe('Visual', () => {
     url = new AdminUrlUtil(serverURL, postsCollectionSlug)
 
     const context = await browser.newContext()
-    page = await context.newPage()
-    initPageConsoleErrorCatch(page)
-    await ensureCompilationIsDone({ page, serverURL })
+    ;({ page } = await initPage({ context, serverURL }))
   })
 
   visual('renders the posts list view', async () => {
@@ -41,7 +36,7 @@ test.describe('Visual', () => {
     const textCell = page.locator('.row-1 .cell-title')
     await expect(textCell).toBeVisible()
 
-    await expectScreenshot({ name: 'posts-list-view.png', page })
+    await expectScreenshot({ name: 'posts-list-view.png', mask: [page.locator('.cell-id')], page })
   })
 
   visual('renders the dashboard status badge', async () => {

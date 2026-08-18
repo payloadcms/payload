@@ -28,6 +28,22 @@ if [ -z "$SUITES" ]; then
   exit 0
 fi
 
+UPDATE_SNAPSHOTS=false
+for arg in "$@"; do
+  if [ "$arg" = "--update-snapshots" ] || [[ "$arg" == --update-snapshots=* ]]; then
+    UPDATE_SNAPSHOTS=true
+  fi
+done
+
+# `@visual-canary` baselines are deliberately mismatched (see test/admin/e2e/visual/e2e.spec.ts) so
+# expectScreenshot always throws, exercising the diffing pipeline itself. `--update-snapshots`
+# would overwrite that mismatch and make the canary stop failing — exclude it from any snapshot
+# update, since a canary run only ever needs to intentionally fail, never to be refreshed.
+GREP_ARGS=(--grep @visual)
+if [ "$UPDATE_SNAPSHOTS" = true ]; then
+  GREP_ARGS+=(--grep-invert @visual-canary)
+fi
+
 status=0
 for suite in $SUITES; do
   echo "Running @visual tests in ${suite}..."
@@ -36,7 +52,7 @@ for suite in $SUITES; do
   # this loop just failed with, before the manifest step ever reads them.
   PLAYWRIGHT_JSON_OUTPUT_NAME="results_visual_${suite}.json" \
     PLAYWRIGHT_OUTPUT_DIR="test-results/${suite}" \
-    pnpm test:e2e:prod:server:run:noturbo "$suite" --grep @visual "$@" || status=1
+    pnpm test:e2e:prod:server:run:noturbo "$suite" "${GREP_ARGS[@]}" "$@" || status=1
 done
 
 exit "$status"

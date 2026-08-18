@@ -69,12 +69,12 @@ export async function expectScreenshot({
 
   // Only reached on a match — toHaveScreenshot throws before this line on a mismatch, and by then
   // Playwright has already attached actual/expected/diff itself.
-  await attachMatchedComparison({ mask, name, screenshotTarget, testInfo: test.info() })
+  await attachMatchedComparison({ name, mask, screenshotTarget, testInfo: test.info() })
 }
 
 async function attachMatchedComparison({
-  mask,
   name,
+  mask,
   screenshotTarget,
   testInfo,
 }: {

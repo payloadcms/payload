@@ -225,12 +225,14 @@ Generate types for a test directory: `pnpm run dev:generate-types <directory_nam
 
 ### Visual Regression Testing
 
-Screenshot comparisons live alongside normal e2e tests and are opt-in via the `@visual` tag:
+Screenshot comparisons live alongside normal e2e tests and are opt-in via the `visual()` helper,
+which applies the `@visual` tag for you:
 
 ```ts
 import { expectScreenshot } from '../__helpers/e2e/expectScreenshot.js'
+import { visual } from '../__helpers/e2e/visual.js'
 
-test('renders the posts list view', { tag: '@visual' }, async () => {
+visual('renders the posts list view', async () => {
   await page.goto(url.list)
   await expectScreenshot({ page, name: 'posts-list-view.png' })
 })

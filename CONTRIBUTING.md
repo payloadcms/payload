@@ -208,10 +208,13 @@ By default, `pnpm test:int` will only run int test against MongoDB. To run int t
 
 Some e2e tests compare a screenshot of the UI against a committed baseline image instead of (or alongside) asserting on the DOM. These are opt-in: only tests tagged `@visual` run this way, and they live alongside normal e2e tests in the same `e2e.spec.ts` files rather than in a separate directory.
 
+Use the `visual()` helper instead of `test()` — it applies the `@visual` tag for you, so there's nothing to remember:
+
 ```ts
 import { expectScreenshot } from '../__helpers/e2e/expectScreenshot.js'
+import { visual } from '../__helpers/e2e/visual.js'
 
-test('renders the posts list view', { tag: '@visual' }, async () => {
+visual('renders the posts list view', async () => {
   await page.goto(url.list)
   await expectScreenshot({ page, name: 'posts-list-view.png' })
 })

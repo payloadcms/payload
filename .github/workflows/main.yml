@@ -82,6 +82,7 @@ jobs:
               - 'test/**/e2e.spec.ts'
               - 'test/**/__snapshots__/**'
               - 'test/__helpers/e2e/expectScreenshot.ts'
+              - 'test/__helpers/e2e/visual.ts'
               - 'test/playwright.config.ts'
               - 'test/buildConfigWithDefaults.ts'
               # `test/admin/e2e/visual/e2e.spec.ts` renders the posts list view with the full admin
@@ -537,7 +538,7 @@ jobs:
   visual-regression:
     name: Visual Regression
     runs-on: ubuntu-24.04
-    needs: changes
+    needs: [changes, build]
     if: needs.changes.outputs.needs_visual == 'true'
     timeout-minutes: 30
     permissions:
@@ -554,9 +555,10 @@ jobs:
         id: playwright-version
         run: echo "version=$(node -p "require('./package.json').devDependencies['@playwright/test']")" >> "$GITHUB_OUTPUT"
 
-      # Best-effort: the `build` job only runs when `needs_build` is also true, so this misses on
-      # any PR where `needs_visual` fired without it (e.g. a fixture/screenshot-only change). The
-      # container command below builds fresh on a miss.
+      # Every `needs_visual` path is also a `needs_build` path (a subset of `packages/**`/
+      # `test/**`), so `build` always runs alongside this job — restoring here should always hit.
+      # The container command below builds fresh as a fallback on the rare miss (e.g. a cache
+      # eviction) rather than failing outright.
       - name: Restore dist output from build job
         uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:

@@ -85,19 +85,14 @@ if (!suiteName) {
     if (!baseTestFolder) {
       throw new Error(`No base test folder found for ${file}`)
     }
-    await executePlaywright(
-      file,
-      baseTestFolder,
+    await executePlaywright({
       bail,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      headed,
-      updateSnapshots,
-      effectiveGrepInvert,
-    )
+      baseTestFolder,
+      grepInvertArg: effectiveGrepInvert,
+      headedArg: headed,
+      suitePaths: file,
+      updateSnapshotsArg: updateSnapshots,
+    })
   }
 } else {
   let inputSuitePath: string | undefined = suiteName
@@ -130,19 +125,18 @@ if (!suiteName) {
 
   // Run all spec files in the folder with a single dev server and playwright invocation
   // This avoids port conflicts when multiple spec files exist in the same folder
-  await executePlaywright(
-    allSuitesInFolder,
+  await executePlaywright({
     baseTestFolder,
-    false,
+    fullyParallelArg: fullyParallel,
+    grepArg: grep,
+    grepInvertArg: effectiveGrepInvert,
+    headedArg: headed,
+    shardArg: shard,
     suiteConfigPath,
-    shard,
-    fullyParallel,
-    workers,
-    grep,
-    headed,
-    updateSnapshots,
-    effectiveGrepInvert,
-  )
+    suitePaths: allSuitesInFolder,
+    updateSnapshotsArg: updateSnapshots,
+    workersArg: workers,
+  })
 }
 
 console.log('\nRESULTS:')
@@ -154,19 +148,31 @@ console.log('\n')
 // baseTestFolder is the most top level folder of the test suite, that contains the payload config.
 // We need this because pnpm dev for a given test suite will always be run from the top level test folder,
 // not from a nested suite folder.
-async function executePlaywright(
-  suitePaths: string | string[],
-  baseTestFolder: string,
+async function executePlaywright({
   bail = false,
-  suiteConfigPath?: string,
-  shardArg?: string,
-  fullyParallelArg?: boolean,
-  workersArg?: number,
-  grepArg?: string,
-  headedArg?: boolean,
-  updateSnapshotsArg?: boolean,
-  grepInvertArg?: string,
-) {
+  baseTestFolder,
+  fullyParallelArg,
+  grepArg,
+  grepInvertArg,
+  headedArg,
+  shardArg,
+  suiteConfigPath,
+  suitePaths,
+  updateSnapshotsArg,
+  workersArg,
+}: {
+  bail?: boolean
+  baseTestFolder: string
+  fullyParallelArg?: boolean
+  grepArg?: string
+  grepInvertArg?: string
+  headedArg?: boolean
+  shardArg?: string
+  suiteConfigPath?: string
+  suitePaths: string | string[]
+  updateSnapshotsArg?: boolean
+  workersArg?: number
+}) {
   const paths = Array.isArray(suitePaths) ? suitePaths : [suitePaths]
   console.log(`Executing ${paths.join(', ')}...`)
   const playwrightCfg = path.resolve(
