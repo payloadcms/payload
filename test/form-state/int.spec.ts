@@ -1,7 +1,7 @@
 import type { FieldState, FormState, Payload, User } from 'payload'
 import type React from 'react'
 
-import { buildFormState } from '@payloadcms/ui/internal/server'
+import { buildFormState } from '@payloadcms/ui/internal/rsc'
 import path from 'path'
 import { createLocalReq } from 'payload'
 import { fileURLToPath } from 'url'
