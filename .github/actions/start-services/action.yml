@@ -3,7 +3,7 @@ description: Starts storage and database services for tests
 
 inputs:
   database:
-    description: 'Database type: mongodb, mongodb-atlas, cosmosdb, documentdb, firestore, postgres, postgres-custom-schema, postgres-uuid, postgres-uuidv7, postgres-read-replica, postgres-read-replicas, vercel-postgres-read-replica, sqlite, sqlite-uuid, sqlite-uuidv7, supabase, d1'
+    description: 'Database type: mongodb, mongodb-uuid, mongodb-atlas, cosmosdb, documentdb, firestore, postgres, postgres-custom-schema, postgres-uuid, postgres-uuidv7, postgres-read-replica, postgres-read-replicas, vercel-postgres-read-replica, sqlite, sqlite-uuid, sqlite-uuidv7, supabase, d1'
     required: true
 
 outputs:
@@ -42,7 +42,7 @@ runs:
 
     - name: Start MongoDB
       id: mongodb
-      if: contains(fromJSON('["mongodb", "cosmosdb", "documentdb", "firestore"]'), inputs.database)
+      if: contains(fromJSON('["mongodb", "mongodb-uuid", "cosmosdb", "documentdb", "firestore"]'), inputs.database)
       shell: bash
       run: |
         for i in 1 2 3; do
