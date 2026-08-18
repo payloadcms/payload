@@ -9,6 +9,10 @@
     "paths": {
       "@payloadcms/translations": ["../../translations/dist/index.d.ts"],
       "@payloadcms/ui": ["../../ui/dist/exports/client/index.d.ts"],
+      "@payloadcms/ui/internal": ["../../ui/dist/exports/client/internal.d.ts"],
+      "@payloadcms/ui/internal/rsc": ["../../ui/dist/exports/rsc/internal.d.ts"],
+      "@payloadcms/ui/internal/server": ["../../ui/dist/exports/server/internal.d.ts"],
+      "@payloadcms/ui/internal/shared": ["../../ui/dist/exports/shared/internal.d.ts"],
       "@payloadcms/ui/*": ["../../ui/dist/exports/*"],
       "payload": ["../../payload/dist/index.bundled.d.ts"],
       "payload/*": ["../../payload/dist/exports/*.d.ts"]

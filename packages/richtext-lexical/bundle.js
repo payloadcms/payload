@@ -38,7 +38,12 @@ async function build() {
     outdir: `${directoryArg}/bundled_scss`,
     loader: { '.svg': 'dataurl' },
     packages: 'external',
-    //external: ['*.svg'],
+    external: [
+      '@payloadcms/ui/internal',
+      '@payloadcms/ui/internal/rsc',
+      '@payloadcms/ui/internal/server',
+      '@payloadcms/ui/internal/shared',
+    ],
     plugins: [sassPlugin({ css: 'external' })],
   })
 
@@ -81,6 +86,10 @@ async function build() {
       '@payloadcms/ui',
       '@payloadcms/ui/*',
       '@payloadcms/ui/client',
+      '@payloadcms/ui/internal',
+      '@payloadcms/ui/internal/rsc',
+      '@payloadcms/ui/internal/server',
+      '@payloadcms/ui/internal/shared',
       '@payloadcms/ui/shared',
       'lexical',
       'lexical/*',
