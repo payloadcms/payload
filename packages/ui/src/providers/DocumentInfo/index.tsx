@@ -62,6 +62,7 @@ const DocumentInfo: React.FC<
     config: {
       admin: { dateFormat },
       collections,
+      localization,
       routes: { api },
     },
     getEntityConfig,
@@ -336,7 +337,7 @@ const DocumentInfo: React.FC<
     return `${baseAPIPath}${docPath}${qs.stringify(
       {
         depth: 0,
-        'fallback-locale': 'null',
+        'fallback-locale': localization ? 'null' : undefined,
         locale,
         uploadEdits: uploadEdits || undefined,
       },

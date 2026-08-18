@@ -42,6 +42,7 @@ export function UnpublishButton({
   const unPublishModalSlug = `confirm-un-publish-${id}`
 
   const {
+    localization,
     routes: { api },
     serverURL,
   } = config
@@ -67,7 +68,7 @@ export function UnpublishButton({
         const queryString = qs.stringify(
           {
             depth: 0,
-            'fallback-locale': 'null',
+            'fallback-locale': localization ? 'null' : undefined,
             locale: unpublishAll ? undefined : localeCode,
             unpublishAllLocales: unpublishAll,
           },
