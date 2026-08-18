@@ -17,12 +17,12 @@ export const stripeProxy: StripeProxy = async ({ stripeArgs, stripeMethod, strip
     const contextToBind = stripe[topLevelMethod]
     // NOTE: 'lodashGet' uses dot notation to get the property of an object
     // NOTE: Stripe API methods using reference "this" within their functions, so we need to bind context
-    const foundMethod = lodashGet(stripe, stripeMethod).bind(contextToBind)
+    const foundMethod = lodashGet(stripe, stripeMethod)
 
     if (typeof foundMethod === 'function') {
       if (Array.isArray(stripeArgs)) {
         try {
-          const stripeResponse = await foundMethod(...stripeArgs)
+          const stripeResponse = await foundMethod.bind(contextToBind)(...stripeArgs)
           return {
             data: stripeResponse,
             status: 200,
