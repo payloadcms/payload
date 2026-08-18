@@ -64,6 +64,15 @@ export type RowToInsert = {
   }
   numbers: Record<string, unknown>[]
   numbersToDelete: NumberToDelete[]
+  /**
+   * Path prefixes of array / blocks fields that are being replaced in full, ex: `myBlocks.`
+   *
+   * Rows in the `_rels`, `_texts` and `_numbers` tables are keyed by a path that embeds the row
+   * index of the array / block they belong to, ex: `myBlocks.1.myRelationship`. Deleting only the
+   * paths that are about to be reinserted leaves rows behind whenever the field is saved with
+   * fewer rows than it held before, so every path under these prefixes is deleted instead.
+   */
+  pathPrefixesToDelete: Set<string>
   relationships: Record<string, unknown>[]
   relationshipsToAppend: RelationshipToAppend[]
   relationshipsToDelete: RelationshipToDelete[]

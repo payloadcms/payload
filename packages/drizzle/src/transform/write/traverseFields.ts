@@ -68,6 +68,7 @@ type Args = {
    */
   parentTableName: string
   path: string
+  pathPrefixesToDelete: RowToInsert['pathPrefixesToDelete']
   relationships: Record<string, unknown>[]
   relationshipsToAppend: RelationshipToAppend[]
   relationshipsToDelete: RelationshipToDelete[]
@@ -105,6 +106,7 @@ export const traverseFields = ({
   parentIsLocalized,
   parentTableName,
   path,
+  pathPrefixesToDelete,
   relationships,
   relationshipsToAppend,
   relationshipsToDelete,
@@ -115,6 +117,16 @@ export const traverseFields = ({
   withinArrayOrBlockLocale,
 }: Args) => {
   let fieldsMatched = false
+
+  /**
+   * Rows nested within an array / block row are already covered by the prefix that array / blocks
+   * field registered, so only the outermost one needs to be tracked.
+   */
+  const trackPathPrefixToDelete = (fieldName: string) => {
+    if (!insideArrayOrBlock) {
+      pathPrefixesToDelete.add(`${path || ''}${fieldName}.`)
+    }
+  }
 
   if (row._uuid) {
     data._uuid = row._uuid
@@ -160,6 +172,10 @@ export const traverseFields = ({
             }
 
             if (Array.isArray(localeData)) {
+              if (!push) {
+                trackPathPrefixToDelete(field.name)
+              }
+
               const newRows = transformArray({
                 adapter,
                 arrayTableName,
@@ -173,6 +189,7 @@ export const traverseFields = ({
                 numbersToDelete,
                 parentIsLocalized: parentIsLocalized || field.localized,
                 path,
+                pathPrefixesToDelete,
                 relationships,
                 relationshipsToDelete,
                 selects,
@@ -203,6 +220,10 @@ export const traverseFields = ({
           push = true
         }
 
+        if (!push) {
+          trackPathPrefixToDelete(field.name)
+        }
+
         const newRows = transformArray({
           adapter,
           arrayTableName,
@@ -215,6 +236,7 @@ export const traverseFields = ({
           numbersToDelete,
           parentIsLocalized: parentIsLocalized || field.localized,
           path,
+          pathPrefixesToDelete,
           relationships,
           relationshipsToDelete,
           selects,
@@ -254,6 +276,8 @@ export const traverseFields = ({
         )
       })
 
+      trackPathPrefixToDelete(field.name)
+
       if (isLocalized) {
         if (typeof data[field.name] === 'object' && data[field.name] !== null) {
           Object.entries(data[field.name]).forEach(([localeKey, localeData]) => {
@@ -270,6 +294,7 @@ export const traverseFields = ({
                 numbersToDelete,
                 parentIsLocalized: parentIsLocalized || field.localized,
                 path,
+                pathPrefixesToDelete,
                 relationships,
                 relationshipsToDelete,
                 selects,
@@ -292,6 +317,7 @@ export const traverseFields = ({
           numbersToDelete,
           parentIsLocalized: parentIsLocalized || field.localized,
           path,
+          pathPrefixesToDelete,
           relationships,
           relationshipsToDelete,
           selects,
@@ -332,6 +358,7 @@ export const traverseFields = ({
               parentIsLocalized: parentIsLocalized || field.localized,
               parentTableName,
               path: `${path || ''}${field.name}.`,
+              pathPrefixesToDelete,
               relationships,
               relationshipsToAppend,
               relationshipsToDelete,
@@ -368,6 +395,7 @@ export const traverseFields = ({
             parentIsLocalized: parentIsLocalized || field.localized,
             parentTableName,
             path: `${path || ''}${field.name}.`,
+            pathPrefixesToDelete,
             relationships,
             relationshipsToAppend,
             relationshipsToDelete,
@@ -856,6 +884,7 @@ export const traverseFields = ({
           parentIsLocalized,
           parentTableName,
           path,
+          pathPrefixesToDelete,
           relationships,
           relationshipsToAppend,
           relationshipsToDelete,
