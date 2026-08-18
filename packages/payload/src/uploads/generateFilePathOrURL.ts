@@ -27,7 +27,13 @@ export function generateFilePathOrURL({
   urlOrPath: string | undefined
 }): null | string {
   if (urlOrPath) {
-    if (!urlOrPath.startsWith('/') && !urlOrPath.startsWith(serverURL || '')) {
+    const isRelativePath = urlOrPath.startsWith('/')
+    // Only treat urlOrPath as belonging to this server if a serverURL is actually
+    // configured. Otherwise `''.startsWith('')` is always true, which would cause
+    // every external (e.g. cloud storage / CDN) URL to be misidentified as internal.
+    const isSameOriginAsServer = Boolean(serverURL) && urlOrPath.startsWith(serverURL as string)
+
+    if (!isRelativePath && !isSameOriginAsServer) {
       // external url
       return urlOrPath
     }
