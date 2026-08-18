@@ -84,16 +84,20 @@ export const sanitizeQueryValue = ({
   if (['all', 'in', 'not_in'].includes(operator)) {
     if (typeof formattedValue === 'string') {
       formattedValue = createArrayFromCommaDelineated(formattedValue)
-
-      if (field.type === 'number') {
-        formattedValue = formattedValue.map((arrayVal) => parseFloat(arrayVal))
-      }
     } else if (typeof formattedValue === 'number') {
       formattedValue = [formattedValue]
     }
 
     if (!Array.isArray(formattedValue)) {
       return null
+    }
+
+    if (field.type === 'number') {
+      formattedValue = formattedValue
+        .map((arrayVal) => parseFloat(arrayVal))
+        .filter((arrayVal) => !Number.isNaN(arrayVal))
+    } else if (isUUID) {
+      formattedValue = formattedValue.filter((arrayVal) => uuidValidate(arrayVal))
     }
   }
 

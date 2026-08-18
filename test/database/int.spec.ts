@@ -117,6 +117,36 @@ describe('database', () => {
       expect(updated.id).toStrictEqual(created.doc.id)
     })
 
+    it(
+      'should ignore an empty id operand in in / not_in queries instead of erroring',
+      { db: 'drizzle' },
+      async () => {
+        const doc = await payload.create({
+          collection: postsSlug,
+          data: { title: 'empty id operand' },
+        })
+
+        // Payload's own relationship field asks for its options with the already-selected
+        // ids excluded, and still sends the parameter when nothing is selected yet:
+        // `?where[and][0][id][not_in][0]=`. That reaches the adapter as an empty-string
+        // operand, which cannot be cast to the id column's type.
+        const excludesNothing = await payload.find({
+          collection: postsSlug,
+          where: { id: { not_in: [''] } },
+        })
+
+        const matchesNothing = await payload.find({
+          collection: postsSlug,
+          where: { id: { in: [''] } },
+        })
+
+        await payload.delete({ collection: postsSlug, id: doc.id })
+
+        expect(excludesNothing.docs.map(({ id }) => id)).toContain(doc.id)
+        expect(matchesNothing.totalDocs).toStrictEqual(0)
+      },
+    )
+
     it('should create with generated ID text from hook', async () => {
       const doc = await payload.create({
         collection: 'custom-ids',
