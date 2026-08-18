@@ -112,6 +112,23 @@ export default buildConfig({
 })
 ```
 
+**SuperSend TX adapter:**
+
+You can also use the first-party [SuperSend TX](https://docs.supersendtx.com/guides/payload) email adapter ([`supersendtx-payload`](https://www.npmjs.com/package/supersendtx-payload)) for transactional email over their HTTP API:
+
+```ts
+import { buildConfig } from 'payload'
+import { supersendtxAdapter } from 'supersendtx-payload'
+
+export default buildConfig({
+  email: supersendtxAdapter({
+    defaultFromAddress: 'info@payloadcms.com',
+    defaultFromName: 'Payload',
+    // apiKey: process.env.SUPERSENDTX_API_KEY,
+  }),
+})
+```
+
 During development, if you pass nothing to `nodemailerAdapter`, it will use the [ethereal.email](https://ethereal.email) service.
 
 This will log the ethereal.email details to console on startup.
