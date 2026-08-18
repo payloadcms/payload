@@ -90,6 +90,15 @@ export type ReactSelectAdapterProps = {
         search: string,
       ) => boolean)
     | undefined
+  /**
+   * Renders the label for an option. The meta argument's `context` is `'menu'` while browsing the
+   * dropdown and `'value'` for the selected value(s), so each can render differently.
+   */
+  formatOptionLabel?: ReactSelectStateManagerProps<
+    Option,
+    boolean,
+    GroupBase<Option>
+  >['formatOptionLabel']
   getOptionValue?: ReactSelectStateManagerProps<
     Option,
     boolean,

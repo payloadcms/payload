@@ -7,6 +7,7 @@ import type { SelectionWithPath } from '../Modal/types.js'
 import { useForm, useFormFields } from '../../../forms/Form/context.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useDocumentInfo } from '../../../providers/DocumentInfo/index.js'
+import { useDocumentTitle } from '../../../providers/DocumentTitle/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { Button } from '../../Button/index.js'
 import { useHierarchyModal } from '../Modal/useHierarchyModal.js'
@@ -34,6 +35,7 @@ export const HierarchyButtonClient: React.FC<HierarchyButtonClientProps> = ({
   const { t } = useTranslation()
   const { config, getEntityConfig } = useConfig()
   const { collectionSlug: documentCollectionSlug } = useDocumentInfo()
+  const { title: documentTitle } = useDocumentTitle()
   const { disabled: formDisabled, setModified } = useForm()
   const readOnly = readOnlyFromProps || formDisabled
   const dispatchField = useFormFields(([_, dispatch]) => dispatch)
@@ -149,6 +151,7 @@ export const HierarchyButtonClient: React.FC<HierarchyButtonClientProps> = ({
         hasMany={hasMany}
         initialSelections={currentId ? [currentId] : undefined}
         onSave={handleModalSave}
+        title={!hasMany && documentTitle ? `${t('general:move')} "${documentTitle}"` : undefined}
       />
     </>
   )

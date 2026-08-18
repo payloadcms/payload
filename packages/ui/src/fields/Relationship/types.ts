@@ -12,6 +12,11 @@ import type {
 
 export type Option = {
   allowEdit: boolean
+  /**
+   * The document the option was built from, narrowed to the fields that were selected when it was
+   * loaded. Present for callers that need more than the title, e.g. `formatOptionLabel`.
+   */
+  doc?: Record<string, unknown>
   label: string
   options?: Option[]
   relationTo?: string
@@ -92,11 +97,25 @@ export type RelationshipInputProps = {
   readonly appearance?: 'drawer' | 'select'
   readonly BeforeInput?: React.ReactNode
   readonly className?: string
+  /**
+   * Replaces the button rendered at the end of the input row, which creates a new related
+   * document by default. Also suppresses that default button when provided.
+   */
+  readonly CreateButton?: React.ReactNode
   readonly Description?: React.ReactNode
   readonly description?: StaticDescription
   readonly Error?: React.ReactNode
   readonly filterOptions?: FilterOptionsResult
   readonly formatDisplayedOptions?: (options: OptionGroup[]) => Option[] | OptionGroup[]
+  /**
+   * Overrides the label of a single option. `context` is `'menu'` while browsing the dropdown and
+   * `'value'` for the selected value(s), so extra detail can be shown only while browsing.
+   */
+  readonly formatOptionLabel?: (args: {
+    context: 'menu' | 'value'
+    defaultLabel: string
+    doc?: Record<string, unknown>
+  }) => string
   readonly isSortable?: boolean
   readonly Label?: React.ReactNode
   readonly label?: StaticLabel
@@ -109,6 +128,11 @@ export type RelationshipInputProps = {
   readonly readOnly?: boolean
   readonly relationTo: string[]
   readonly required?: boolean
+  /**
+   * Extra fields to select when loading options, merged with the collection's title field.
+   * Required for virtual fields, which are only computed when explicitly selected.
+   */
+  readonly selectOptionFields?: Record<string, boolean>
   readonly showError?: boolean
   /**
    * Controls the height of the input. Defaults to `'large'`.

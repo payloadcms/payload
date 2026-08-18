@@ -4,14 +4,12 @@
     align-items: center;
   }
 
-  .hierarchy-cell__pill {
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: var(--spacer-2);
+  .hierarchy-cell__button {
+    margin: 0;
+    font-weight: normal;
 
-    &:hover {
-      background-color: var(--color-bg-hover);
+    .btn__content {
+      gap: 0;
     }
   }
 }

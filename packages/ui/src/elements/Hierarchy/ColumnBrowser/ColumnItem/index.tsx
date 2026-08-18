@@ -1,5 +1,5 @@
 'use client'
-import React, { useCallback, useMemo } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef } from 'react'
 
 import type { ColumnItemProps } from '../types.js'
 
@@ -13,14 +13,19 @@ const baseClass = 'hierarchy-column-item'
 export const ColumnItem: React.FC<ColumnItemProps> = ({
   disabled,
   filterByCollection,
-  hasSelectedDescendants,
+  hasMany,
   isExpanded,
   isSelected,
   item,
   onExpand,
   onSelect,
+  revealToken,
+  selectedDescendantCount,
 }) => {
   const { id, allowedCollections, hasChildren, title } = item
+  const rowRef = useRef<HTMLDivElement>(null)
+  const rowActionRef = useRef<HTMLButtonElement>(null)
+  const checkboxRef = useRef<HTMLInputElement>(null)
 
   // Disable selection if:
   // 1. This item is in the disabledIds set (e.g., being moved)
@@ -35,78 +40,102 @@ export const ColumnItem: React.FC<ColumnItemProps> = ({
     return !isSuperset(allowedCollections, filterByCollection)
   }, [allowedCollections, disabled, filterByCollection])
 
-  const handleCheckboxToggle = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      e.stopPropagation()
-      if (isDisabled) {
-        return
-      }
-      onSelect({ id })
-    },
-    [id, isDisabled, onSelect],
-  )
+  useEffect(() => {
+    if (revealToken === undefined) {
+      return
+    }
 
-  const handleRowClick = useCallback(
-    (e: React.MouseEvent) => {
-      // Don't expand when clicking the checkbox
-      if ((e.target as HTMLElement).closest(`.${baseClass}__checkbox`)) {
-        return
-      }
-      if (hasChildren) {
-        onExpand({ id })
-      }
-    },
-    [hasChildren, id, onExpand],
-  )
+    rowRef.current?.scrollIntoView({ behavior: 'instant', block: 'nearest', inline: 'nearest' })
 
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault()
-        if (hasChildren) {
-          onExpand({ id })
-        }
-      }
-    },
-    [hasChildren, id, onExpand],
-  )
+    // Focus whichever control owns selection for this mode
+    const target = hasMany ? checkboxRef.current : rowActionRef.current
+    target?.focus({ preventScroll: true })
+  }, [hasMany, revealToken])
+
+  const handleSelect = useCallback(() => {
+    onSelect({ id })
+
+    // Single-select mirrors the macOS column view: picking a folder also makes it the open one,
+    // which collapses any columns deeper than it.
+    if (!hasMany && hasChildren) {
+      onExpand({ id })
+    }
+  }, [hasChildren, hasMany, id, onExpand, onSelect])
+
+  const handleExpand = useCallback(() => {
+    onExpand({ id })
+  }, [id, onExpand])
 
   return (
     <div
       className={[
         baseClass,
+        hasMany && `${baseClass}--multi-select`,
         isExpanded && `${baseClass}--expanded`,
         isSelected && `${baseClass}--selected`,
         isDisabled && `${baseClass}--disabled`,
       ]
         .filter(Boolean)
         .join(' ')}
-      onClick={isDisabled ? undefined : handleRowClick}
-      onKeyDown={handleKeyDown}
-      role="button"
-      tabIndex={isDisabled ? -1 : 0}
+      ref={rowRef}
     >
-      <div className={`${baseClass}__checkbox`}>
-        <CheckboxInput
-          checked={isSelected}
-          onToggle={handleCheckboxToggle}
-          readOnly={isDisabled}
-          variant="muted"
+      {/*
+        Full-bleed overlay carrying the row's primary action. Single-select picks the row; in
+        multi-select the checkbox owns selection, so the row body opens children instead - and a
+        row with none gets no overlay at all. The chevron and checkbox are the controls exposed to
+        assistive tech in multi-select, so the overlay is hidden from it to avoid announcing the
+        same action twice.
+      */}
+      {(!hasMany || hasChildren) && (
+        <button
+          aria-hidden={hasMany ? 'true' : undefined}
+          aria-label={title}
+          aria-pressed={hasMany ? undefined : isSelected}
+          className={`${baseClass}__select`}
+          disabled={isDisabled}
+          onClick={hasMany ? handleExpand : handleSelect}
+          ref={rowActionRef}
+          tabIndex={hasMany ? -1 : undefined}
+          type="button"
         />
-      </div>
+      )}
+
+      {hasMany && (
+        <div className={`${baseClass}__checkbox`}>
+          <CheckboxInput
+            aria-label={title}
+            checked={isSelected}
+            inputRef={checkboxRef}
+            onToggle={handleSelect}
+            readOnly={isDisabled}
+          />
+        </div>
+      )}
 
       <span className={`${baseClass}__title`} title={title}>
         {title}
       </span>
 
-      {hasSelectedDescendants && !isSelected && (
-        <span className={`${baseClass}__descendant-indicator`} />
-      )}
+      {(selectedDescendantCount > 0 || hasChildren) && (
+        <div className={`${baseClass}__trail`}>
+          {selectedDescendantCount > 0 && (
+            <span className={`${baseClass}__descendant-count`}>{selectedDescendantCount}</span>
+          )}
 
-      {hasChildren && (
-        <span className={`${baseClass}__chevron`}>
-          <ChevronIcon direction="right" />
-        </span>
+          {hasChildren && (
+            <button
+              aria-expanded={isExpanded}
+              // TODO: replace with a translation key once the hierarchy strings are finalized
+              aria-label={`Open ${title}`}
+              className={`${baseClass}__chevron`}
+              disabled={isDisabled}
+              onClick={handleExpand}
+              type="button"
+            >
+              <ChevronIcon direction="right" size={16} />
+            </button>
+          )}
+        </div>
       )}
     </div>
   )

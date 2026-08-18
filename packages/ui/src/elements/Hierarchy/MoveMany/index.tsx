@@ -117,7 +117,7 @@ export function MoveMany({
   })
 
   // Calculate total count and label
-  const { count, label } = useMemo(() => {
+  const { count, label, modalTitleLabel } = useMemo(() => {
     let totalCount = 0
     const labels: string[] = []
 
@@ -137,8 +137,13 @@ export function MoveMany({
     return {
       count: totalCount,
       label: labels.join(', '),
+      // Mixed selections read better as "Move 3 Documents" than "Move 3 Posts, Pages"
+      modalTitleLabel:
+        labels.length === 1
+          ? labels[0]
+          : t(totalCount === 1 ? 'general:document' : 'general:documents'),
     }
-  }, [selections, collections, i18n])
+  }, [selections, collections, i18n, t])
 
   const hierarchyCollectionConfig = collections.find((c) => c.slug === hierarchySlug)
   const parentFieldName = getParentFieldName(hierarchyCollectionConfig)
@@ -275,6 +280,7 @@ export function MoveMany({
         onMoveToRoot={handleMoveToRoot}
         onSave={handleDrawerSave}
         showMoveToRoot
+        title={t('general:moveCount', { count, label: modalTitleLabel })}
       />
       <ConfirmationModal
         body={

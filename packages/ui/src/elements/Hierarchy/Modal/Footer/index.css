@@ -1,0 +1,61 @@
+@layer payload-default {
+  .hierarchy-modal-footer__lead {
+    display: flex;
+    align-items: center;
+    gap: var(--spacer-1);
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .hierarchy-modal-footer__trail {
+    display: flex;
+    align-items: center;
+    gap: var(--spacer-2);
+    flex-shrink: 0;
+  }
+
+  .hierarchy-modal-footer__placeholder {
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+  }
+
+  .hierarchy-modal-footer__arrow {
+    display: flex;
+    flex-shrink: 0;
+    color: var(--color-text-secondary);
+  }
+
+  .hierarchy-modal-footer__chip {
+    max-width: 280px;
+  }
+
+  /* Lets the breadcrumb ellipsize instead of forcing the chip past its max-width */
+  .hierarchy-modal-footer__chip .chip__label {
+    min-width: 0;
+  }
+
+  .hierarchy-modal-footer__chip-separator,
+  .hierarchy-modal-footer__chip-ellipsis {
+    color: var(--color-text-secondary);
+  }
+
+  .hierarchy-modal-footer__chip-separator {
+    padding-inline: calc(var(--spacer-1) / 2);
+  }
+
+  .hierarchy-modal-footer__clear {
+    height: auto;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: var(--color-text-brand);
+  }
+
+  .hierarchy-modal-footer__clear:hover:not(.btn--disabled),
+  .hierarchy-modal-footer__clear:active:not(.btn--disabled) {
+    background: transparent;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+}

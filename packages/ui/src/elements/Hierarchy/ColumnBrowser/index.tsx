@@ -13,6 +13,7 @@ import type {
   ColumnState,
   HierarchyColumnBrowserProps,
   HierarchyColumnBrowserRef,
+  PathSegment,
 } from './types.js'
 
 import { useEffectEvent } from '../../../hooks/useEffectEvent.js'
@@ -27,10 +28,10 @@ import './index.css'
 const baseClass = 'hierarchy-column-browser'
 
 export const HierarchyColumnBrowser = function HierarchyColumnBrowser({
-  ancestorsWithSelections,
   baseFilter,
   disabledIds,
   filterByCollection,
+  hasMany,
   hierarchyCollectionSlug,
   initialExpandedPath,
   isLoadingPath,
@@ -38,6 +39,7 @@ export const HierarchyColumnBrowser = function HierarchyColumnBrowser({
   onSelect,
   parentFieldName,
   ref,
+  selectedDescendantCounts,
   selectedIds,
   useAsTitle = 'id',
 }: { ref?: React.RefObject<HierarchyColumnBrowserRef | null> } & HierarchyColumnBrowserProps) {
@@ -61,10 +63,14 @@ export const HierarchyColumnBrowser = function HierarchyColumnBrowser({
   const collectionLabel = collectionConfig
     ? getTranslation(collectionConfig.labels?.singular || hierarchyCollectionSlug, i18n)
     : hierarchyCollectionSlug
+  const collectionLabelPlural = collectionConfig
+    ? getTranslation(collectionConfig.labels?.plural || hierarchyCollectionSlug, i18n)
+    : hierarchyCollectionSlug
   const canCreate = Boolean(permissions?.collections?.[hierarchyCollectionSlug]?.create)
 
   const [columns, setColumns] = useState<ColumnState[]>([])
   const [expandedPath, setExpandedPath] = useState<(number | string)[]>([])
+  const [revealed, setRevealed] = useState<{ id: number | string; token: number } | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const lastColumnRef = useRef<HTMLDivElement>(null)
   const hasLoadedRef = useRef(false)
@@ -235,79 +241,99 @@ export const HierarchyColumnBrowser = function HierarchyColumnBrowser({
     [columns, fetchItems],
   )
 
-  useImperativeHandle(ref, () => ({ refreshColumn }), [refreshColumn])
+  const loadColumnsForPath = useCallback(
+    async (path?: (number | string)[]) => {
+      // Build list of parentIds to fetch: [null, ...path]
+      const parentIds: (null | number | string)[] = [null]
+      if (path?.length) {
+        parentIds.push(...path)
+      }
+
+      // Set initial loading state for all columns
+      setColumns(
+        parentIds.map((parentId) => ({
+          hasNextPage: false,
+          isLoading: true,
+          items: [],
+          page: 1,
+          parentId,
+          totalDocs: 0,
+        })),
+      )
+
+      // Set expanded path to match (excluding null/root). Always reset - a `revealPath` back to the
+      // root would otherwise leave the previous path's items marked as expanded.
+      setExpandedPath(path ?? [])
+
+      // Fetch all columns in parallel
+      const results = await Promise.all(
+        parentIds.map(async (parentId, index) => {
+          try {
+            const { hasNextPage, items, totalDocs } = await fetchItems({ page: 1, parentId })
+            let parentTitle: string | undefined
+            if (index > 0 && parentId !== null) {
+              // Will be filled in after all fetches complete
+            }
+            return {
+              hasNextPage,
+              isLoading: false,
+              items,
+              page: 1,
+              parentId,
+              parentTitle,
+              totalDocs,
+            }
+          } catch {
+            return {
+              hasNextPage: false,
+              isLoading: false,
+              items: [],
+              page: 1,
+              parentId,
+              parentTitle: undefined,
+              totalDocs: 0,
+            }
+          }
+        }),
+      )
+
+      // Fill in parent titles from previous columns
+      const columnsWithTitles = results.map((col, index) => {
+        if (index === 0 || col.parentId === null) {
+          return col
+        }
+        const prevColumn = results[index - 1]
+        const parentItem = prevColumn?.items.find((item) => item.id === col.parentId)
+        return {
+          ...col,
+          parentTitle: parentItem?.title || String(col.parentId),
+        }
+      })
+
+      setColumns(columnsWithTitles)
+    },
+    [fetchItems],
+  )
 
   const loadColumns = useEffectEvent(async (path?: (number | string)[]) => {
-    // Build list of parentIds to fetch: [null, ...path]
-    const parentIds: (null | number | string)[] = [null]
-    if (path?.length) {
-      parentIds.push(...path)
-    }
-
-    // Set initial loading state for all columns
-    setColumns(
-      parentIds.map((parentId) => ({
-        hasNextPage: false,
-        isLoading: true,
-        items: [],
-        page: 1,
-        parentId,
-        totalDocs: 0,
-      })),
-    )
-
-    // Set expanded path to match (excluding null/root)
-    if (path?.length) {
-      setExpandedPath(path)
-    }
-
-    // Fetch all columns in parallel
-    const results = await Promise.all(
-      parentIds.map(async (parentId, index) => {
-        try {
-          const { hasNextPage, items, totalDocs } = await fetchItems({ page: 1, parentId })
-          let parentTitle: string | undefined
-          if (index > 0 && parentId !== null) {
-            // Will be filled in after all fetches complete
-          }
-          return {
-            hasNextPage,
-            isLoading: false,
-            items,
-            page: 1,
-            parentId,
-            parentTitle,
-            totalDocs,
-          }
-        } catch {
-          return {
-            hasNextPage: false,
-            isLoading: false,
-            items: [],
-            page: 1,
-            parentId,
-            parentTitle: undefined,
-            totalDocs: 0,
-          }
-        }
-      }),
-    )
-
-    // Fill in parent titles from previous columns
-    const columnsWithTitles = results.map((col, index) => {
-      if (index === 0 || col.parentId === null) {
-        return col
-      }
-      const prevColumn = results[index - 1]
-      const parentItem = prevColumn?.items.find((item) => item.id === col.parentId)
-      return {
-        ...col,
-        parentTitle: parentItem?.title || String(col.parentId),
-      }
-    })
-
-    setColumns(columnsWithTitles)
+    await loadColumnsForPath(path)
   })
+
+  const revealPath = useCallback(
+    async (path: PathSegment[]) => {
+      const target = path[path.length - 1]
+
+      if (!target) {
+        return
+      }
+
+      await loadColumnsForPath(path.slice(0, -1).map((segment) => segment.id))
+      setRevealed((prev) => ({ id: target.id, token: (prev?.token ?? 0) + 1 }))
+    },
+    [loadColumnsForPath],
+  )
+
+  useImperativeHandle(ref, () => ({ refreshColumn, revealPath }), [refreshColumn, revealPath])
 
   // Load columns on mount - wait for path loading to complete
   useEffect(() => {
@@ -340,6 +366,14 @@ export const HierarchyColumnBrowser = function HierarchyColumnBrowser({
       // Update expanded path - keep path up to this column, add new item
       const newExpandedPath = [...expandedPath.slice(0, columnIndex), itemId]
       setExpandedPath(newExpandedPath)
+
+      // Re-opening a folder that is already expanded here (e.g. clicking the grandparent while
+      // sitting in grandparent/parent/child) makes it the deepest open one again. Its child column
+      // is already loaded, so drop everything past it rather than refetching.
+      if (columns[columnIndex + 1]?.parentId === itemId) {
+        setColumns(columns.slice(0, columnIndex + 2))
+        return
+      }
 
       // Remove columns to the right and add new loading column
       const newColumns = columns.slice(0, columnIndex + 1)
@@ -484,13 +518,14 @@ export const HierarchyColumnBrowser = function HierarchyColumnBrowser({
             ref={isLastColumn ? lastColumnRef : undefined}
           >
             <Column
-              ancestorsWithSelections={ancestorsWithSelections}
               canCreate={canCreate && Boolean(onCreateNew)}
               collectionLabel={collectionLabel}
+              collectionLabelPlural={collectionLabelPlural}
               disabled={isLoadingPath}
               disabledIds={disabledIds}
               expandedId={expandedId}
               filterByCollection={filterByCollection}
+              hasMany={hasMany}
               hasNextPage={column.hasNextPage}
               isLoading={column.isLoading}
               items={column.items}
@@ -501,6 +536,9 @@ export const HierarchyColumnBrowser = function HierarchyColumnBrowser({
               parentId={column.parentId}
               parentTitle={column.parentTitle}
               pathToColumn={pathToColumn}
+              revealedId={revealed?.id}
+              revealToken={revealed?.token}
+              selectedDescendantCounts={selectedDescendantCounts}
               selectedIds={selectedIds}
               totalDocs={column.totalDocs}
             />

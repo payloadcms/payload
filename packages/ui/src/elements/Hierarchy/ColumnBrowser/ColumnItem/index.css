@@ -1,13 +1,16 @@
 @layer payload-default {
   .hierarchy-column-item {
+    position: relative;
     display: flex;
     align-items: center;
     padding: var(--spacer-1) var(--spacer-2);
-    cursor: pointer;
+    padding-inline-end: var(--spacer-1);
     user-select: none;
     gap: var(--spacer-2-5);
     border-radius: var(--button-radius);
     margin-inline: var(--spacer-1);
+    outline: var(--stroke-width-small) solid transparent;
+    outline-offset: calc(var(--stroke-width-small) * -1);
 
     &:first-child {
       margin-top: var(--spacer-1);
@@ -20,23 +23,54 @@
     &:hover {
       background-color: var(--color-bg-hover);
     }
+
+    &:has(.hierarchy-column-item__select:focus-visible) {
+      outline: var(--accessibility-outline);
+      outline-offset: var(--accessibility-outline-offset);
+    }
   }
 
+  /*
+   * Row-wide click target for the row's primary action, sitting under the checkbox and chevron.
+   * It is the topmost element across the row, so its cursor is the one the pointer shows.
+   */
+  .hierarchy-column-item__select {
+    position: absolute;
+    inset: 0;
+    padding: 0;
+    border: none;
+    background: transparent;
+    border-radius: inherit;
+    cursor: pointer;
+
+    &:focus-visible {
+      outline: none;
+    }
+
+    &:disabled {
+      cursor: not-allowed;
+    }
+  }
+
+  /* Shares the hover fill, so pointing at a row previews how an open folder reads */
   .hierarchy-column-item--expanded {
-    background-color: var(--color-bg-tertiary);
-
-    &:hover {
-      background-color: var(--color-bg-tertiary);
-    }
+    background-color: var(--color-bg-hover);
   }
 
-  .hierarchy-column-item--selected {
+  /*
+   * Only single-select rows carry a selected style. There is no checkbox in that mode, so the fill
+   * and ring are the only signal. In multi-select the checkbox already says what is picked, and
+   * filling those rows as well drowns out the `--expanded` fill that marks the current path.
+   *
+   * The ring is an inset outline rather than a border so the row's height does not shift when it
+   * becomes selected.
+   */
+  .hierarchy-column-item--selected:not(.hierarchy-column-item--multi-select) {
     background-color: var(--color-bg-selected);
+    outline-color: var(--color-border-selected);
 
-    &:hover {
-      background-color: var(--color-bg-selected);
-    }
-
+    /* Selection outranks hover - the fill holds while the pointer is over the row */
+    &:hover,
     &.hierarchy-column-item--expanded {
       background-color: var(--color-bg-selected);
     }
@@ -55,20 +89,33 @@
     }
   }
 
+  /*
+   * Raised above the select overlay so it takes its own clicks - in multi-select the checkbox is
+   * the only thing that toggles selection, while the overlay behind it opens children.
+   */
   .hierarchy-column-item__checkbox {
+    position: relative;
+    z-index: 1;
     flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: center;
+    cursor: pointer;
 
     input[type='checkbox'] {
       width: 100%;
       height: 100%;
       margin: 0;
+      cursor: inherit;
+
+      &:disabled {
+        cursor: not-allowed;
+      }
     }
   }
 
   .hierarchy-column-item__title {
+    position: relative;
     flex: 1;
     min-width: 0;
     overflow: hidden;
@@ -76,21 +123,56 @@
     white-space: nowrap;
     color: var(--color-text);
     font-weight: 500;
+    pointer-events: none;
   }
 
-  .hierarchy-column-item__descendant-indicator {
-    width: var(--spacer-1);
-    height: var(--spacer-1);
-    border-radius: 50%;
-    background-color: var(--color-bg-success);
+  /* Keeps the count badge tucked against the chevron rather than at the row's wider gap */
+  .hierarchy-column-item__trail {
     flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--spacer-1);
+  }
+
+  /* Count of selected items nested under a row, so a collapsed branch still reads as having picks */
+  .hierarchy-column-item__descendant-count {
+    min-width: var(--spacer-3);
+    padding-inline: var(--spacer-1);
+    border-radius: var(--radius-full);
+    background-color: var(--color-bg-secondary);
+    color: var(--color-text-secondary);
+    font-family: var(--text-body-small-strong-font-family);
+    font-size: var(--text-body-small-strong-font-size);
+    font-weight: var(--text-body-small-strong-font-weight);
+    line-height: var(--spacer-3);
+    letter-spacing: var(--text-body-small-strong-letter-spacing);
+    text-align: center;
+    pointer-events: none;
   }
 
   .hierarchy-column-item__chevron {
+    position: relative;
+    z-index: 1;
     flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: center;
+    width: var(--spacer-4);
+    height: var(--spacer-4);
+    padding: 0;
+    border: none;
+    background: transparent;
+    border-radius: var(--radius-small);
     color: var(--color-icon-tertiary);
+    cursor: pointer;
+
+    &:focus-visible {
+      outline: var(--accessibility-outline);
+      outline-offset: var(--accessibility-outline-offset);
+    }
+
+    &:disabled {
+      cursor: not-allowed;
+    }
   }
 }

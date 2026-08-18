@@ -14,66 +14,17 @@
     overflow: clip;
   }
 
-  .hierarchy-modal__header-actions {
-    display: flex;
-    gap: var(--spacer-2);
-  }
-
-  .dialog.hierarchy-modal .dialog__body {
+  /* Beats the `:has(.dialog__header)` / `:has(.dialog__footer)` padding rules in Dialog/index.css */
+  .dialog.hierarchy-modal .hierarchy-modal__content .dialog__body {
     display: flex;
     flex-direction: column;
     padding: 0;
   }
 
-  .hierarchy-modal__subheader {
-    display: flex;
+  .dialog.hierarchy-modal .dialog__footer {
     justify-content: space-between;
     align-items: center;
-    padding: var(--spacer-1) var(--spacer-3);
-    padding-inline-start: var(--spacer-2-5);
-    border-bottom: var(--stroke-width-small) solid var(--color-border);
-    flex-shrink: 0;
-  }
-
-  .hierarchy-modal__subheader-left {
-    display: flex;
-    align-items: center;
-    gap: var(--spacer-1);
-    font-weight: 500;
-    color: var(--color-text);
-  }
-
-  .hierarchy-modal__subheader-right {
-    display: flex;
-    align-items: center;
-    gap: var(--spacer-2);
-  }
-
-  .hierarchy-modal__selection-info {
-    color: var(--color-text-secondary);
-  }
-
-  .hierarchy-modal__move-to-root,
-  .hierarchy-modal__clear-all {
-    height: auto;
-    padding: 0;
-    border: 0;
-    border-radius: 0;
-    background: transparent;
-    color: var(--color-text-secondary);
-    text-decoration: underline;
-    text-underline-offset: 2px;
-  }
-
-  .hierarchy-modal__move-to-root:hover:not(.btn--disabled),
-  .hierarchy-modal__clear-all:hover:not(.btn--disabled) {
-    background: transparent;
-    color: var(--color-text);
-  }
-
-  .hierarchy-modal__move-to-root:active:not(.btn--disabled),
-  .hierarchy-modal__clear-all:active:not(.btn--disabled) {
-    background: transparent;
+    border-top: var(--stroke-width-small) solid var(--color-border);
   }
 
   .hierarchy-modal__columns {

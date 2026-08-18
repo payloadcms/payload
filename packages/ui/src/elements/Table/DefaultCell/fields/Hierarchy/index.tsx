@@ -1,5 +1,5 @@
 'use client'
-import type { DefaultCellComponentProps, RelationshipFieldClient } from 'payload'
+import type { DefaultCellComponentProps, RelationshipFieldClient, TypeWithID } from 'payload'
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
@@ -219,6 +219,19 @@ export const HierarchyCell: React.FC<HierarchyCellProps> = ({
     })
   }, [values, documents, getEntityConfig, config.admin.dateFormat, t, i18n])
 
+  // Title of the row's own document, used for the modal's `Move "..."` heading
+  const rowTitle = useMemo(
+    () =>
+      formatDocTitle({
+        collectionConfig: getEntityConfig({ collectionSlug }),
+        data: rowData as TypeWithID,
+        dateFormat: config.admin.dateFormat,
+        fallback: `${t('general:untitled')} - ID: ${rowData?.id}`,
+        i18n,
+      }),
+    [collectionSlug, config.admin.dateFormat, getEntityConfig, i18n, rowData, t],
+  )
+
   const displayText = labels.length > 0 ? labels.join(', ') : t('general:none')
   const isLoading =
     values.length > 0 &&
@@ -227,8 +240,8 @@ export const HierarchyCell: React.FC<HierarchyCellProps> = ({
   return (
     <div className={baseClass} ref={intersectionRef}>
       <Button
-        buttonStyle="pill"
-        className={`${baseClass}__pill`}
+        buttonStyle="secondary"
+        className={`${baseClass}__button`}
         icon={displayIcon}
         iconPosition="left"
         margin={false}
@@ -242,6 +255,7 @@ export const HierarchyCell: React.FC<HierarchyCellProps> = ({
           hasMany={hasMany}
           initialSelections={initialSelections}
           onSave={handleSave}
+          title={!hasMany && rowTitle ? `${t('general:move')} "${rowTitle}"` : undefined}
         />
       )}
     </div>

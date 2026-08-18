@@ -14,13 +14,14 @@ import './index.css'
 const baseClass = 'hierarchy-column'
 
 export const Column: React.FC<ColumnProps> = ({
-  ancestorsWithSelections,
   canCreate,
   collectionLabel,
+  collectionLabelPlural,
   disabled,
   disabledIds,
   expandedId,
   filterByCollection,
+  hasMany,
   hasNextPage,
   isLoading,
   items,
@@ -31,12 +32,22 @@ export const Column: React.FC<ColumnProps> = ({
   parentId,
   parentTitle,
   pathToColumn,
+  revealedId,
+  revealToken,
+  selectedDescendantCounts,
   selectedIds,
   totalDocs,
 }) => {
   const { t } = useTranslation()
 
   const headerTitle = parentTitle || (parentId === null ? t('general:all') : '')
+  const newItemLabel = `New ${collectionLabel}`
+  const isEmpty = !disabled && !isLoading && items.length === 0
+
+  // TODO: replace with translation keys once the hierarchy strings are finalized. The closest
+  // existing string, `version:noRowsFound`, belongs to the version-diff tables.
+  const emptyLabel =
+    parentId === null ? `No ${collectionLabelPlural}` : `No other ${collectionLabelPlural}`
 
   const handleSelect = useCallback(
     ({ id }: { id: number | string }) => {
@@ -57,17 +68,16 @@ export const Column: React.FC<ColumnProps> = ({
         <span className={`${baseClass}__header-title`}>{headerTitle}</span>
         {canCreate && (
           <Button
+            aria-label={newItemLabel}
             buttonStyle="ghost"
             className={`${baseClass}__add-button`}
             disabled={disabled}
-            icon={<PlusIcon size={16} />}
-            iconPosition="left"
+            icon={<PlusIcon size={24} />}
             margin={false}
             onClick={handleCreateNew}
             size="medium"
-          >
-            New {collectionLabel}
-          </Button>
+            tooltip={newItemLabel}
+          />
         )}
       </div>
 
@@ -76,13 +86,15 @@ export const Column: React.FC<ColumnProps> = ({
           <ColumnItem
             disabled={Boolean(disabled || disabledIds?.has(item.id))}
             filterByCollection={filterByCollection}
-            hasSelectedDescendants={ancestorsWithSelections.has(item.id)}
+            hasMany={hasMany}
             isExpanded={expandedId === item.id}
             isSelected={selectedIds.has(item.id)}
             item={item}
             key={String(item.id)}
             onExpand={onExpand}
             onSelect={handleSelect}
+            revealToken={revealedId === item.id ? revealToken : undefined}
+            selectedDescendantCount={selectedDescendantCounts.get(item.id) ?? 0}
           />
         ))}
 
@@ -91,6 +103,8 @@ export const Column: React.FC<ColumnProps> = ({
             <Spinner loadingText={null} size="sm" />
           </div>
         )}
+
+        {isEmpty && <div className={`${baseClass}__empty`}>{emptyLabel}</div>}
 
         {!disabled && !isLoading && totalDocs > 0 && (
           <LoadMoreRow

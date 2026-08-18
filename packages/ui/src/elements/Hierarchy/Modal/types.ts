@@ -20,7 +20,17 @@ export type UseHierarchyModalArgs = {
 }
 
 export type HierarchyModalProps = {
+  /**
+   * Label for the footer's primary action.
+   * Defaults to "Confirm" when `hasMany`, otherwise "Move".
+   */
+  readonly confirmLabel?: string
   readonly hasMany?: boolean
+  /**
+   * The item(s) already assigned when the modal opens.
+   * In multi-select mode these start checked; in single-select mode the first entry is shown
+   * in the footer as the origin of the move and the browser expands to reveal it.
+   */
   readonly initialSelections?: (number | string)[]
   readonly onMoveToRoot?: () => void
   readonly onSave: (params: {
@@ -28,6 +38,11 @@ export type HierarchyModalProps = {
     selections: Map<number | string, SelectionWithPath>
   }) => void
   readonly showMoveToRoot?: boolean
+  /**
+   * Header title, e.g. `Move "My Post"` or "Move 3 Documents".
+   * Defaults to "Select {collection label}".
+   */
+  readonly title?: string
 }
 
 export type HierarchyModalInternalProps = {

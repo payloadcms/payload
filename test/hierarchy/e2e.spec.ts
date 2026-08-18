@@ -773,9 +773,9 @@ test.describe('Hierarchy Sidebar', () => {
       await expect(folderButton).toBeVisible()
       await folderButton.click()
 
-      // The modal should open and show columns expanded to the current selection:
+      // The modal should open and show columns expanded to the current location:
       // Column 1 (root): Parent folder visible
-      // Column 2 (Parent's children): Child folder visible (and selected)
+      // Column 2 (Parent's children): Child folder visible
       const modal = page.locator('.hierarchy-modal')
       await expect(modal).toBeVisible()
 
@@ -797,7 +797,7 @@ test.describe('Hierarchy Sidebar', () => {
       const parentFolderItem = modal
         .locator('.hierarchy-column-item', { hasText: parentFolderName })
         .first()
-      await parentFolderItem.locator('.hierarchy-column-item__checkbox').click()
+      await parentFolderItem.locator('.hierarchy-column-item__select').click()
 
       await expect(
         modal.locator('.hierarchy-column-item--selected .hierarchy-column-item__title', {
@@ -805,22 +805,15 @@ test.describe('Hierarchy Sidebar', () => {
         }),
       ).toBeVisible()
 
-      await modal.getByRole('button', { name: 'Cancel' }).click()
+      await modal.getByRole('button', { name: 'Close' }).click()
       await expect(modal).toBeHidden()
 
       await folderButton.click()
       await expect(modal).toBeVisible()
 
-      await expect(
-        modal.locator('.hierarchy-column-item--selected .hierarchy-column-item__title', {
-          hasText: childFolderName,
-        }),
-      ).toBeVisible()
-      await expect(
-        modal.locator('.hierarchy-column-item--selected .hierarchy-column-item__title', {
-          hasText: parentFolderName,
-        }),
-      ).toBeHidden()
+      // Single-select treats the current value as the origin of the move, not a pre-made
+      // choice, so reopening leaves nothing checked
+      await expect(modal.locator('.hierarchy-column-item--selected')).toHaveCount(0)
     })
 
     test('should reset transient expanded location after canceling and reopening the modal', async () => {
@@ -835,11 +828,15 @@ test.describe('Hierarchy Sidebar', () => {
 
       await expect(modal.locator('.hierarchy-column')).toHaveCount(2)
 
-      await modal.locator('.hierarchy-column-item', { hasText: childFolderName }).first().click()
+      await modal
+        .locator('.hierarchy-column-item', { hasText: childFolderName })
+        .first()
+        .locator('.hierarchy-column-item__chevron')
+        .click()
 
       await expect(modal.locator('.hierarchy-column')).toHaveCount(3)
 
-      await modal.getByRole('button', { name: 'Cancel' }).click()
+      await modal.getByRole('button', { name: 'Close' }).click()
       await expect(modal).toBeHidden()
 
       await folderButton.click()
