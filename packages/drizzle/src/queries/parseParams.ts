@@ -9,7 +9,6 @@ import {
   isNotNull,
   isNull,
   like,
-  ne,
   notExists,
   notInArray,
   or,
@@ -22,12 +21,14 @@ import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter, GenericColumn } from '../types.js'
 import type { BuildQueryJoinAliases } from './buildQuery.js'
+import type { DrizzleResolvedOperator } from './operatorMap.js'
 
 import { escapeSQLValue } from '../utilities/escapeSQLValue.js'
 import { getNameFromDrizzleTable } from '../utilities/getNameFromDrizzleTable.js'
 import { isValidStringID } from '../utilities/isValidStringID.js'
 import { DistinctSymbol } from '../utilities/rawConstraint.js'
 import { buildAndOrConditions } from './buildAndOrConditions.js'
+import { buildOperatorConstraint } from './buildOperatorConstraint.js'
 import { getTableAlias } from './getTableAlias.js'
 import { getTableColumnFromPath } from './getTableColumnFromPath.js'
 import { resolveRelationshipPath } from './resolveRelationshipPath.js'
@@ -102,6 +103,7 @@ export function parseParams({
             for (let operator of Object.keys(pathOperators)) {
               if (validOperatorSet.has(operator as Operator)) {
                 const val = where[relationOrPath][operator]
+                const originalOperator = operator as Operator
 
                 if (hasManyRelationshipOperatorSet.has(operator as HasManyRelationshipOperator)) {
                   // These operators receive a nested `where` query instead of a scalar value and
@@ -271,9 +273,18 @@ export function parseParams({
                 if (operator === 'like') {
                   constraints.push(
                     and(
-                      ...val
-                        .split(' ')
-                        .map((word) => adapter.operators.like(table[columnName], `%${word}%`)),
+                      ...val.split(' ').map((word) =>
+                        buildOperatorConstraint({
+                          adapter,
+                          column: table[columnName],
+                          field,
+                          locale,
+                          originalOperator,
+                          path: relationOrPath,
+                          resolvedOperator: 'like',
+                          value: `%${word}%`,
+                        }),
+                      ),
                     ),
                   )
                   break
@@ -329,7 +340,16 @@ export function parseParams({
                   constraints.push(
                     wrapOperator(
                       ...queryColumns.map(({ rawColumn, value }) =>
-                        adapter.operators[queryOperator](rawColumn, value),
+                        buildOperatorConstraint({
+                          adapter,
+                          column: rawColumn,
+                          field,
+                          locale,
+                          originalOperator,
+                          path: relationOrPath,
+                          resolvedOperator: queryOperator as DrizzleResolvedOperator,
+                          value,
+                        }),
                       ),
                     ),
                   )
@@ -341,8 +361,16 @@ export function parseParams({
                   constraints.push(
                     or(
                       isNull(resolvedColumn),
-                      /* eslint-disable @typescript-eslint/no-explicit-any */
-                      ne<any>(resolvedColumn, queryValue),
+                      buildOperatorConstraint({
+                        adapter,
+                        column: resolvedColumn,
+                        field,
+                        locale,
+                        originalOperator,
+                        path: relationOrPath,
+                        resolvedOperator: 'not_equals',
+                        value: queryValue,
+                      }),
                     ),
                   )
                   break
@@ -439,7 +467,16 @@ export function parseParams({
                   // Create OR conditions for each value in the array
                   orConditions.push(
                     ...queryValue.map((val) =>
-                      adapter.operators[queryOperator](resolvedColumn, val),
+                      buildOperatorConstraint({
+                        adapter,
+                        column: resolvedColumn,
+                        field,
+                        locale,
+                        originalOperator,
+                        path: relationOrPath,
+                        resolvedOperator: queryOperator as DrizzleResolvedOperator,
+                        value: val,
+                      }),
                     ),
                   )
                   // Set constraint to combine all OR conditions
@@ -450,10 +487,16 @@ export function parseParams({
                   break
                 }
 
-                let constraint = adapter.operators[queryOperator](
-                  resolvedColumn,
-                  resolvedQueryValue,
-                )
+                let constraint = buildOperatorConstraint({
+                  adapter,
+                  column: resolvedColumn,
+                  field,
+                  locale,
+                  originalOperator,
+                  path: relationOrPath,
+                  resolvedOperator: queryOperator as DrizzleResolvedOperator,
+                  value: resolvedQueryValue,
+                })
 
                 if (
                   adapter.limitedBoundParameters &&

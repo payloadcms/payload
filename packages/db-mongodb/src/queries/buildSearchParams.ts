@@ -1,4 +1,4 @@
-import type { FilterQuery } from 'mongoose'
+import type { QueryFilter } from 'mongoose'
 import type {
   FlattenedField,
   HasManyRelationshipOperator,
@@ -261,7 +261,7 @@ export async function buildSearchParam({
           continue
         }
 
-        const subQuery = relationshipQuery.value as FilterQuery<any>
+        const subQuery = relationshipQuery.value as QueryFilter<any>
         const result = await SubModel.find(subQuery, subQueryOptions)
 
         const $in = result.map((doc) => doc._id)
@@ -453,12 +453,15 @@ async function buildHasManyRelationshipSearchParam({
     (await RelatedModel.find(query).lean().select({ _id: true })).map((document) => document._id)
 
   switch (operator) {
-    case 'some': {
-      const matchingRelatedDocumentIDs = await findRelatedDocumentIDs(matchingRelatedDocumentsQuery)
+    case 'every': {
+      // `every` matches when there are no related documents that fail the nested query.
+      const nonMatchingRelatedDocumentIDs = Object.keys(matchingRelatedDocumentsQuery).length
+        ? await findRelatedDocumentIDs({ $nor: [matchingRelatedDocumentsQuery] })
+        : []
 
       return {
         path,
-        value: { $in: matchingRelatedDocumentIDs },
+        value: { $nin: nonMatchingRelatedDocumentIDs },
       }
     }
 
@@ -471,15 +474,12 @@ async function buildHasManyRelationshipSearchParam({
       }
     }
 
-    case 'every': {
-      // `every` matches when there are no related documents that fail the nested query.
-      const nonMatchingRelatedDocumentIDs = Object.keys(matchingRelatedDocumentsQuery).length
-        ? await findRelatedDocumentIDs({ $nor: [matchingRelatedDocumentsQuery] })
-        : []
+    case 'some': {
+      const matchingRelatedDocumentIDs = await findRelatedDocumentIDs(matchingRelatedDocumentsQuery)
 
       return {
         path,
-        value: { $nin: nonMatchingRelatedDocumentIDs },
+        value: { $in: matchingRelatedDocumentIDs },
       }
     }
   }

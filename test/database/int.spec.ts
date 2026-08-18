@@ -2319,6 +2319,62 @@ describe('database', () => {
             }),
           ).rejects.toThrow('Not Found')
         })
+
+        it('should not roll back the caller transaction when a nested read throws', async () => {
+          const missing = await payload.create({
+            collection,
+            data: {
+              title,
+            },
+          })
+
+          await payload.delete({
+            id: missing.id,
+            collection,
+          })
+
+          const req = {
+            payload,
+            user,
+          } as unknown as PayloadRequest
+
+          await initTransaction(req)
+
+          const created = await payload.create({
+            collection,
+            data: {
+              title,
+            },
+            req,
+          })
+
+          // Hooks commonly look up a related doc and tolerate it being gone. A read
+          // operation does not own the transaction, so its failure must not discard the
+          // writes already made on this req.
+          await expect(() =>
+            payload.findByID({
+              id: missing.id,
+              collection,
+              req,
+            }),
+          ).rejects.toThrow('Not Found')
+
+          expect(req.transactionID).toBeTruthy()
+
+          await commitTransaction(req)
+
+          const result = await payload.findByID({
+            id: created.id,
+            collection,
+          })
+
+          expect(result.id).toStrictEqual(created.id)
+
+          await payload.delete({
+            id: created.id,
+            collection,
+          })
+        })
       }
 
       it(
@@ -3831,6 +3887,19 @@ describe('database', () => {
     })
 
     it('should allow to sort by a virtual field with a refence, Local / GraphQL', async () => {
+      // The `migrate:fresh` test earlier in this file drops the entire database, which removes
+      // the admin user backing the REST client's session. Re-authenticate so the GraphQL request
+      // below has a logged-in user for the field-level access checks the sort validation performs.
+      const { docs: existingUsers } = await payload.find({
+        collection: 'users',
+        limit: 1,
+        where: { email: { equals: devUser.email } },
+      })
+      if (existingUsers.length === 0) {
+        await payload.create({ collection: 'users', data: devUser })
+      }
+      await restClient.login({ slug: 'users', credentials: devUser })
+
       const post_1 = await payload.create({ collection: 'posts', data: { title: 'A' } })
       const post_2 = await payload.create({ collection: 'posts', data: { title: 'B' } })
       const doc_1 = await payload.create({
