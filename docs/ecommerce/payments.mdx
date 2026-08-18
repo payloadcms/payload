@@ -62,14 +62,28 @@ export default buildConfig({
 
 The Stripe payment adapter takes the following configuration options:
 
-| Option         | Type     | Description                                                                                                                                                                                 |
-| -------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| secretKey      | `string` | Your Stripe Secret Key, found in the [Stripe Dashboard](https://dashboard.stripe.com/apikeys).                                                                                              |
-| publishableKey | `string` | Your Stripe Publishable Key, found in the [Stripe Dashboard](https://dashboard.stripe.com/apikeys).                                                                                         |
-| webhookSecret  | `string` | (Optional) Your Stripe Webhooks Signing Secret, found in the [Stripe Dashboard](https://dashboard.stripe.com/webhooks). Required if you want to use webhooks.                               |
-| appInfo        | `object` | (Optional) An object containing `name` and `version` properties to identify your application to Stripe.                                                                                     |
-| webhooks       | `object` | (Optional) An object where the keys are Stripe event types and the values are functions that will be called when that event is received. See [Webhooks](#stripe-webhooks) for more details. |
-| groupOverrides | `object` | (Optional) An object to override the default fields of the payment group. See [Payment Fields](./advanced#payment-fields) for more details.                                                 |
+| Option         | Type         | Description                                                                                                                                                                                 |
+| -------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| secretKey      | `string`     | Your Stripe Secret Key, found in the [Stripe Dashboard](https://dashboard.stripe.com/apikeys).                                                                                              |
+| publishableKey | `string`     | Your Stripe Publishable Key, found in the [Stripe Dashboard](https://dashboard.stripe.com/apikeys).                                                                                         |
+| webhookSecret  | `string`     | (Optional) Your Stripe Webhooks Signing Secret, found in the [Stripe Dashboard](https://dashboard.stripe.com/webhooks). Required if you want to use webhooks.                               |
+| appInfo        | `object`     | (Optional) An object containing `name` and `version` properties to identify your application to Stripe.                                                                                     |
+| httpClient     | `HttpClient` | (Optional) The HTTP client used for Stripe API requests. Use Stripe's fetch HTTP client for fetch-only runtimes such as Cloudflare Workers.                                                 |
+| webhooks       | `object`     | (Optional) An object where the keys are Stripe event types and the values are functions that will be called when that event is received. See [Webhooks](#stripe-webhooks) for more details. |
+| groupOverrides | `object`     | (Optional) An object to override the default fields of the payment group. See [Payment Fields](./advanced#payment-fields) for more details.                                                 |
+
+For fetch-only runtimes such as Cloudflare Workers, configure Stripe's fetch HTTP client:
+
+```ts
+import { stripeAdapter } from '@payloadcms/plugin-ecommerce/payments/stripe'
+import Stripe from 'stripe'
+
+stripeAdapter({
+  httpClient: Stripe.createFetchHttpClient(),
+  publishableKey: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
+  secretKey: process.env.STRIPE_SECRET_KEY,
+})
+```
 
 ### Stripe Webhooks
 
