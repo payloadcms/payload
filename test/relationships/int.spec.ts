@@ -447,6 +447,31 @@ describe('Relationships', () => {
         expect(res.docs[0].id).toBe(doc.id)
       })
 
+      it('should query through a transitive has-many join using the related table alias', async () => {
+        const quest = await payload.create({
+          collection: 'transitive-join-quests',
+          data: {},
+        })
+        const lesson = await payload.create({
+          collection: 'transitive-join-lessons',
+          data: { quest: quest.id },
+        })
+        const course = await payload.create({
+          collection: 'transitive-join-courses',
+          data: { lessons: [lesson.id], name: 'Aliased course' },
+        })
+
+        const { docs } = await payload.find({
+          collection: 'transitive-join-quests',
+          where: {
+            'lesson.course.name': { equals: course.name },
+          },
+        })
+
+        expect(docs).toHaveLength(1)
+        expect(docs[0]?.id).toBe(quest.id)
+      })
+
       it('should allow 4x deep querying', async () => {
         const movie_1 = await payload.create({
           collection: 'movies',

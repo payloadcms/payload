@@ -1,9 +1,16 @@
 import type { FilterQuery } from 'mongoose'
-import type { FlattenedField, Operator, PathToQuery, Payload } from 'payload'
+import type {
+  FlattenedField,
+  HasManyRelationshipOperator,
+  Operator,
+  PathToQuery,
+  Payload,
+  Where,
+} from 'payload'
 
 import { Types } from 'mongoose'
 import { APIError, escapeRegExp, getFieldByPath, getLocalizedPaths } from 'payload'
-import { validOperatorSet } from 'payload/shared'
+import { hasManyRelationshipOperatorSet, validOperatorSet } from 'payload/shared'
 
 import type { MongooseAdapter } from '../index.js'
 import type { OperatorMapKey } from './operatorMap.js'
@@ -96,6 +103,19 @@ export async function buildSearchParam({
   }
 
   const [{ field, path }] = paths
+
+  if (hasManyRelationshipOperatorSet.has(operator as HasManyRelationshipOperator)) {
+    return buildHasManyRelationshipSearchParam({
+      field,
+      locale,
+      nestedWhere: val,
+      operator: operator as HasManyRelationshipOperator,
+      path,
+      pathCount: paths.length,
+      payload,
+    })
+  }
+
   if (path) {
     const sanitizedQueryValue = sanitizeQueryValue({
       field,
@@ -368,4 +388,99 @@ export async function buildSearchParam({
     }
   }
   return undefined
+}
+
+/**
+ * Builds the MongoDB condition for `some`, `none`, and `every` on a has-many relationship.
+ *
+ * First, it finds IDs from the related collection that match the nested query. The parent
+ * collection can then use `$in` or `$nin` against its stored relationship IDs.
+ *
+ * @example
+ * ```ts
+ * // Input
+ * { movies: { none: { name: { equals: 'recalls' } } } }
+ *
+ * // Simplified MongoDB result, after finding the matching movie IDs
+ * { movies: { $nin: [recallsMovieID] } }
+ * ```
+ */
+async function buildHasManyRelationshipSearchParam({
+  field,
+  locale,
+  nestedWhere,
+  operator,
+  path,
+  pathCount,
+  payload,
+}: {
+  field: FlattenedField
+  locale?: string
+  nestedWhere: unknown
+  operator: HasManyRelationshipOperator
+  path: string
+  pathCount: number
+  payload: Payload
+}): Promise<SearchParam | undefined> {
+  if (
+    pathCount !== 1 ||
+    (field.type !== 'relationship' && field.type !== 'upload') ||
+    !field.hasMany ||
+    typeof field.relationTo !== 'string' ||
+    nestedWhere === null ||
+    typeof nestedWhere !== 'object' ||
+    Array.isArray(nestedWhere)
+  ) {
+    return undefined
+  }
+
+  const { Model: RelatedModel } = getCollection({
+    adapter: payload.db as MongooseAdapter,
+    collectionSlug: field.relationTo,
+  })
+  const pathLocale = payload.config.localization
+    ? payload.config.localization.localeCodes.find(
+        (localeCode) => path.split('.').at(-1) === localeCode,
+      )
+    : undefined
+  const matchingRelatedDocumentsQuery = await RelatedModel.buildQuery({
+    locale: pathLocale ?? locale,
+    payload,
+    where: nestedWhere as Where,
+  })
+
+  const findRelatedDocumentIDs = async (query: Record<string, unknown>) =>
+    (await RelatedModel.find(query).lean().select({ _id: true })).map((document) => document._id)
+
+  switch (operator) {
+    case 'some': {
+      const matchingRelatedDocumentIDs = await findRelatedDocumentIDs(matchingRelatedDocumentsQuery)
+
+      return {
+        path,
+        value: { $in: matchingRelatedDocumentIDs },
+      }
+    }
+
+    case 'none': {
+      const matchingRelatedDocumentIDs = await findRelatedDocumentIDs(matchingRelatedDocumentsQuery)
+
+      return {
+        path,
+        value: { $nin: matchingRelatedDocumentIDs },
+      }
+    }
+
+    case 'every': {
+      // `every` matches when there are no related documents that fail the nested query.
+      const nonMatchingRelatedDocumentIDs = Object.keys(matchingRelatedDocumentsQuery).length
+        ? await findRelatedDocumentIDs({ $nor: [matchingRelatedDocumentsQuery] })
+        : []
+
+      return {
+        path,
+        value: { $nin: nonMatchingRelatedDocumentIDs },
+      }
+    }
+  }
 }

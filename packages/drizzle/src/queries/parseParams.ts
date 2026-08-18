@@ -1,10 +1,24 @@
 import type { SQL, Table } from 'drizzle-orm'
-import type { FlattenedField, Operator, Sort, Where } from 'payload'
+import type { FlattenedField, HasManyRelationshipOperator, Operator, Sort, Where } from 'payload'
 
-import { and, getTableName, isNotNull, isNull, ne, notInArray, or, sql } from 'drizzle-orm'
+import {
+  and,
+  eq,
+  exists,
+  getTableName,
+  isNotNull,
+  isNull,
+  like,
+  ne,
+  notExists,
+  notInArray,
+  or,
+  sql,
+} from 'drizzle-orm'
 import { PgUUID } from 'drizzle-orm/pg-core'
 import { APIError, QueryError } from 'payload'
-import { validOperatorSet } from 'payload/shared'
+import { hasManyRelationshipOperatorSet, validOperatorSet } from 'payload/shared'
+import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter, GenericColumn } from '../types.js'
 import type { BuildQueryJoinAliases } from './buildQuery.js'
@@ -14,7 +28,9 @@ import { getNameFromDrizzleTable } from '../utilities/getNameFromDrizzleTable.js
 import { isValidStringID } from '../utilities/isValidStringID.js'
 import { DistinctSymbol } from '../utilities/rawConstraint.js'
 import { buildAndOrConditions } from './buildAndOrConditions.js'
+import { getTableAlias } from './getTableAlias.js'
 import { getTableColumnFromPath } from './getTableColumnFromPath.js'
+import { resolveRelationshipPath } from './resolveRelationshipPath.js'
 import { sanitizeQueryValue } from './sanitizeQueryValue.js'
 
 export type QueryContext = { rawSort?: SQL; sort: Sort }
@@ -86,6 +102,25 @@ export function parseParams({
             for (let operator of Object.keys(pathOperators)) {
               if (validOperatorSet.has(operator as Operator)) {
                 const val = where[relationOrPath][operator]
+
+                if (hasManyRelationshipOperatorSet.has(operator as HasManyRelationshipOperator)) {
+                  // These operators receive a nested `where` query instead of a scalar value and
+                  // must evaluate the relationship as a group, so they use a correlated subquery.
+                  constraints.push(
+                    buildHasManyRelationshipCondition({
+                      adapter,
+                      aliasTable,
+                      fields,
+                      locale,
+                      operator: operator as HasManyRelationshipOperator,
+                      parentIsLocalized,
+                      relationOrPath,
+                      tableName,
+                      where: val as Where,
+                    }),
+                  )
+                  continue
+                }
 
                 const {
                   columnName,
@@ -491,4 +526,166 @@ export function parseParams({
   }
 
   return result
+}
+
+/**
+ * Builds the SQL condition for `some`, `none`, and `every` on a has-many relationship.
+ *
+ * `some`: at least one related document matches.
+ * `none`: no related documents match.
+ * `every`: all related documents match; an empty relationship also matches.
+ *
+ * A normal dotted relationship query adds joins to the parent query. That cannot implement
+ * `none` or `every`, because those operators must inspect all relationship rows before deciding
+ * whether to include the parent. A correlated `EXISTS` subquery keeps that decision scoped to one
+ * parent document.
+ *
+ * @example
+ * ```ts
+ * // Find directors who have no movie named "recalls".
+ * const where = {
+ *   movies: {
+ *     none: {
+ *       name: { equals: 'recalls' },
+ *     },
+ *   },
+ * }
+ * ```
+ */
+function buildHasManyRelationshipCondition({
+  adapter,
+  aliasTable,
+  fields,
+  locale,
+  operator,
+  parentIsLocalized,
+  relationOrPath,
+  tableName,
+  where,
+}: {
+  adapter: DrizzleAdapter
+  aliasTable?: Table
+  fields: FlattenedField[]
+  locale?: string
+  operator: HasManyRelationshipOperator
+  parentIsLocalized: boolean
+  relationOrPath: string
+  tableName: string
+  where: Where
+}): SQL {
+  const relationshipFieldPath = relationOrPath.replace(/__/g, '.')
+
+  if (!where || typeof where !== 'object' || Array.isArray(where)) {
+    throw new QueryError([{ path: `${relationshipFieldPath}.${operator}` }])
+  }
+
+  const relationshipPath = resolveRelationshipPath({
+    adapter,
+    fields,
+    locale,
+    parentIsLocalized,
+    path: relationshipFieldPath,
+  })
+
+  if (!relationshipPath) {
+    throw new QueryError([{ path: `${relationshipFieldPath}.${operator}` }])
+  }
+
+  const relationshipField = relationshipPath.field
+
+  if (!relationshipField.hasMany || typeof relationshipField.relationTo !== 'string') {
+    throw new QueryError([{ path: `${relationshipFieldPath}.${operator}` }])
+  }
+
+  // An empty nested query matches every document, so every relationship row passes. This is also
+  // true for a parent with no relationship rows.
+  if (operator === 'every' && Object.keys(where).length === 0) {
+    return sql`true`
+  }
+
+  const relationshipTableName = `${tableName}${adapter.relationshipsSuffix}`
+  const relatedCollection = adapter.payload.collections[relationshipField.relationTo]
+  const relatedTableName = adapter.tableNameMap.get(toSnakeCase(relatedCollection.config.slug))
+  const relationshipLocale = relationshipPath.locale
+  const { newAliasTable: relationshipTable } = getTableAlias({
+    adapter,
+    tableName: relationshipTableName,
+  })
+  const { newAliasTable: relatedTable } = getTableAlias({
+    adapter,
+    tableName: relatedTableName,
+  })
+
+  // Parse the nested `where` exactly like a normal query, but start from the related collection
+  // and keep its joins inside the subquery.
+  const nestedJoins: BuildQueryJoinAliases = []
+  const relatedDocumentWhere =
+    Object.keys(where).length > 0
+      ? parseParams({
+          adapter,
+          aliasTable: relatedTable,
+          context: { sort: undefined },
+          fields: relatedCollection.config.flattenedFields,
+          joins: nestedJoins,
+          locale: relationshipLocale,
+          parentIsLocalized: false,
+          selectFields: {},
+          tableName: relatedTableName,
+          where,
+        })
+      : undefined
+
+  // Correlate relationship rows back to the parent document currently being considered by the
+  // outer query. The stored path distinguishes this field from other relationships on the parent.
+  const outerTable = aliasTable ?? adapter.tables[tableName]
+  const relationshipRowConstraints: SQL[] = [
+    eq(relationshipTable.parent, outerTable.id),
+    relationshipPath.path.includes('%')
+      ? like(relationshipTable.path, relationshipPath.path)
+      : eq(relationshipTable.path, relationshipPath.path),
+  ]
+
+  if (relationshipLocale && relationshipLocale !== 'all' && relationshipPath.isLocalized) {
+    relationshipRowConstraints.push(eq(relationshipTable.locale, relationshipLocale))
+  }
+
+  const relatedDocumentConstraints = [
+    eq(relatedTable.id, relationshipTable[`${relationshipField.relationTo}ID`]),
+  ]
+
+  if (relatedDocumentWhere) {
+    relatedDocumentConstraints.push(relatedDocumentWhere)
+  }
+
+  let relatedDocumentSubquery = (adapter.drizzle as any)
+    .select({ id: relatedTable.id })
+    .from(relatedTable)
+    .$dynamic()
+
+  for (const join of nestedJoins) {
+    relatedDocumentSubquery = relatedDocumentSubquery[join.type ?? 'leftJoin'](
+      join.table,
+      join.condition,
+    )
+  }
+
+  relatedDocumentSubquery = relatedDocumentSubquery.where(and(...relatedDocumentConstraints))
+
+  const buildRelationshipRowsSubquery = (relatedDocumentCheck: SQL) =>
+    (adapter.drizzle as any)
+      .select({ id: relationshipTable.parent })
+      .from(relationshipTable)
+      .where(and(...relationshipRowConstraints, relatedDocumentCheck))
+
+  switch (operator) {
+    case 'every':
+      // `every` matches when no relationship row points to a document that fails the query.
+      return notExists(buildRelationshipRowsSubquery(notExists(relatedDocumentSubquery)))
+
+    case 'none':
+      return notExists(buildRelationshipRowsSubquery(exists(relatedDocumentSubquery)))
+
+    case 'some':
+      return exists(buildRelationshipRowsSubquery(exists(relatedDocumentSubquery)))
+  }
 }

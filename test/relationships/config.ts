@@ -300,6 +300,48 @@ export default buildConfigWithDefaults({
       versions: false,
     },
     {
+      slug: 'transitive-join-courses',
+      fields: [
+        {
+          name: 'name',
+          type: 'text',
+        },
+        {
+          name: 'lessons',
+          type: 'relationship',
+          relationTo: 'transitive-join-lessons',
+          hasMany: true,
+        },
+      ],
+    },
+    {
+      slug: 'transitive-join-lessons',
+      fields: [
+        {
+          name: 'quest',
+          type: 'relationship',
+          relationTo: 'transitive-join-quests',
+        },
+        {
+          name: 'course',
+          type: 'join',
+          collection: 'transitive-join-courses',
+          on: 'lessons',
+        },
+      ],
+    },
+    {
+      slug: 'transitive-join-quests',
+      fields: [
+        {
+          name: 'lesson',
+          type: 'join',
+          collection: 'transitive-join-lessons',
+          on: 'quest',
+        },
+      ],
+    },
+    {
       slug: 'movieReviews',
       fields: [
         {

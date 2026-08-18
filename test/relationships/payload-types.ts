@@ -77,6 +77,9 @@ export interface Config {
     screenings: Screening;
     movies: Movie;
     directors: Director;
+    'transitive-join-courses': TransitiveJoinCourse;
+    'transitive-join-lessons': TransitiveJoinLesson;
+    'transitive-join-quests': TransitiveJoinQuest;
     movieReviews: MovieReview;
     'polymorphic-relationships': PolymorphicRelationship;
     tree: Tree;
@@ -95,6 +98,12 @@ export interface Config {
     'payload-migrations': PayloadMigration;
   };
   collectionsJoins: {
+    'transitive-join-lessons': {
+      course: 'transitive-join-courses';
+    };
+    'transitive-join-quests': {
+      lesson: 'transitive-join-lessons';
+    };
     items: {
       relation: 'relations';
     };
@@ -110,6 +119,9 @@ export interface Config {
     screenings: ScreeningsSelect<false> | ScreeningsSelect<true>;
     movies: MoviesSelect<false> | MoviesSelect<true>;
     directors: DirectorsSelect<false> | DirectorsSelect<true>;
+    'transitive-join-courses': TransitiveJoinCoursesSelect<false> | TransitiveJoinCoursesSelect<true>;
+    'transitive-join-lessons': TransitiveJoinLessonsSelect<false> | TransitiveJoinLessonsSelect<true>;
+    'transitive-join-quests': TransitiveJoinQuestsSelect<false> | TransitiveJoinQuestsSelect<true>;
     movieReviews: MovieReviewsSelect<false> | MovieReviewsSelect<true>;
     'polymorphic-relationships': PolymorphicRelationshipsSelect<false> | PolymorphicRelationshipsSelect<true>;
     tree: TreeSelect<false> | TreeSelect<true>;
@@ -128,7 +140,7 @@ export interface Config {
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
-    defaultIDType: string;
+    defaultIDType: number;
   };
   fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'de') | ('en' | 'de')[];
   globals: {};
@@ -136,6 +148,8 @@ export interface Config {
   locale: 'en' | 'de';
   widgets: {
     collections: CollectionsWidget;
+    'collection-query': CollectionQueryWidget;
+    activity: ActivityWidget;
   };
   user: User;
   jobs: {
@@ -166,18 +180,18 @@ export interface UserAuthOperations {
  * via the `definition` "posts".
  */
 export interface Post {
-  id: string;
+  id: number;
   title?: string | null;
   description?: string | null;
   number?: number | null;
-  relationField?: (string | null) | Relation;
+  relationField?: (number | null) | Relation;
   blocks?: Block[] | null;
-  defaultAccessRelation?: (string | null) | StrictAccess;
-  chainedRelation?: (string | null) | Chained;
-  maxDepthRelation?: (string | null) | Relation;
+  defaultAccessRelation?: (number | null) | StrictAccess;
+  chainedRelation?: (number | null) | Chained;
+  maxDepthRelation?: (number | null) | Relation;
   customIdRelation?: (string | null) | CustomId;
   customIdNumberRelation?: (number | null) | CustomIdNumber;
-  filteredRelation?: (string | null) | Relation;
+  filteredRelation?: (number | null) | Relation;
   updatedAt: string;
   createdAt: string;
 }
@@ -186,7 +200,7 @@ export interface Post {
  * via the `definition` "relation".
  */
 export interface Relation {
-  id: string;
+  id: number;
   name?: string | null;
   disableRelation: boolean;
   updatedAt: string;
@@ -197,7 +211,7 @@ export interface Relation {
  * via the `definition` "Block".
  */
 export interface Block {
-  relationField?: (string | null) | Relation;
+  relationField?: (number | null) | Relation;
   id?: string | null;
   blockName?: string | null;
   blockType: 'block';
@@ -207,7 +221,7 @@ export interface Block {
  * via the `definition` "strict-access".
  */
 export interface StrictAccess {
-  id: string;
+  id: number;
   name?: string | null;
   disableRelation: boolean;
   updatedAt: string;
@@ -218,9 +232,9 @@ export interface StrictAccess {
  * via the `definition` "chained".
  */
 export interface Chained {
-  id: string;
+  id: number;
   name?: string | null;
-  relation?: (string | null) | Chained;
+  relation?: (number | null) | Chained;
   updatedAt: string;
   createdAt: string;
 }
@@ -249,9 +263,9 @@ export interface CustomIdNumber {
  * via the `definition` "postsLocalized".
  */
 export interface PostsLocalized {
-  id: string;
+  id: number;
   title?: string | null;
-  relationField?: (string | null) | Relation;
+  relationField?: (number | null) | Relation;
   updatedAt: string;
   createdAt: string;
 }
@@ -260,9 +274,9 @@ export interface PostsLocalized {
  * via the `definition` "screenings".
  */
 export interface Screening {
-  id: string;
+  id: number;
   name?: string | null;
-  movie?: (string | null) | Movie;
+  movie?: (number | null) | Movie;
   updatedAt: string;
   createdAt: string;
 }
@@ -271,16 +285,16 @@ export interface Screening {
  * via the `definition` "movies".
  */
 export interface Movie {
-  id: string;
+  id: number;
   name?: string | null;
   select?: ('a' | 'b' | 'c')[] | null;
-  director?: (string | null) | Director;
+  director?: (number | null) | Director;
   array?:
     | {
-        director?: (string | Director)[] | null;
+        director?: (number | Director)[] | null;
         polymorphic?: {
           relationTo: 'directors';
-          value: string | Director;
+          value: number | Director;
         } | null;
         id?: string | null;
       }[]
@@ -294,12 +308,52 @@ export interface Movie {
  * via the `definition` "directors".
  */
 export interface Director {
-  id: string;
+  id: number;
   name?: string | null;
   localized?: string | null;
-  movies?: (string | Movie)[] | null;
-  movie?: (string | null) | Movie;
-  directors?: (string | Director)[] | null;
+  movies?: (number | Movie)[] | null;
+  movie?: (number | null) | Movie;
+  directors?: (number | Director)[] | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "transitive-join-courses".
+ */
+export interface TransitiveJoinCourse {
+  id: number;
+  name?: string | null;
+  lessons?: (number | TransitiveJoinLesson)[] | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "transitive-join-lessons".
+ */
+export interface TransitiveJoinLesson {
+  id: number;
+  quest?: (number | null) | TransitiveJoinQuest;
+  course?: {
+    docs?: (number | TransitiveJoinCourse)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "transitive-join-quests".
+ */
+export interface TransitiveJoinQuest {
+  id: number;
+  lesson?: {
+    docs?: (number | TransitiveJoinLesson)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -308,9 +362,9 @@ export interface Director {
  * via the `definition` "movieReviews".
  */
 export interface MovieReview {
-  id: string;
-  movieReviewer: string | User;
-  likes?: (string | User)[] | null;
+  id: number;
+  movieReviewer: number | User;
+  likes?: (number | User)[] | null;
   visibility: 'followers' | 'public';
   updatedAt: string;
   createdAt: string;
@@ -320,7 +374,7 @@ export interface MovieReview {
  * via the `definition` "users".
  */
 export interface User {
-  id: string;
+  id: number;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -345,25 +399,25 @@ export interface User {
  * via the `definition` "polymorphic-relationships".
  */
 export interface PolymorphicRelationship {
-  id: string;
+  id: number;
   polymorphic?: {
     relationTo: 'movies';
-    value: string | Movie;
+    value: number | Movie;
   } | null;
   polymorphicLocalized?: {
     relationTo: 'movies';
-    value: string | Movie;
+    value: number | Movie;
   } | null;
   polymorphicMany?:
     | {
         relationTo: 'movies';
-        value: string | Movie;
+        value: number | Movie;
       }[]
     | null;
   polymorphicManyLocalized?:
     | {
         relationTo: 'movies';
-        value: string | Movie;
+        value: number | Movie;
       }[]
     | null;
   updatedAt: string;
@@ -374,9 +428,9 @@ export interface PolymorphicRelationship {
  * via the `definition` "tree".
  */
 export interface Tree {
-  id: string;
+  id: number;
   text?: string | null;
-  parent?: (string | null) | Tree;
+  parent?: (number | null) | Tree;
   updatedAt: string;
   createdAt: string;
 }
@@ -385,7 +439,7 @@ export interface Tree {
  * via the `definition` "pages".
  */
 export interface Page {
-  id: string;
+  id: number;
   menu?:
     | {
         label?: string | null;
@@ -400,8 +454,8 @@ export interface Page {
  * via the `definition` "rels-to-pages".
  */
 export interface RelsToPage {
-  id: string;
-  page?: (string | null) | Page;
+  id: number;
+  page?: (number | null) | Page;
   updatedAt: string;
   createdAt: string;
 }
@@ -410,11 +464,11 @@ export interface RelsToPage {
  * via the `definition` "rels-to-pages-and-custom-text-ids".
  */
 export interface RelsToPagesAndCustomTextId {
-  id: string;
+  id: number;
   rel?:
     | ({
         relationTo: 'pages';
-        value: string | Page;
+        value: number | Page;
       } | null)
     | ({
         relationTo: 'custom-id';
@@ -432,17 +486,17 @@ export interface RelsToPagesAndCustomTextId {
  * via the `definition` "object-writes".
  */
 export interface ObjectWrite {
-  id: string;
-  one?: (string | null) | Movie;
-  many?: (string | Movie)[] | null;
+  id: number;
+  one?: (number | null) | Movie;
+  many?: (number | Movie)[] | null;
   onePoly?: {
     relationTo: 'movies';
-    value: string | Movie;
+    value: number | Movie;
   } | null;
   manyPoly?:
     | {
         relationTo: 'movies';
-        value: string | Movie;
+        value: number | Movie;
       }[]
     | null;
   updatedAt: string;
@@ -453,7 +507,7 @@ export interface ObjectWrite {
  * via the `definition` "deep-nested".
  */
 export interface DeepNested {
-  id: string;
+  id: number;
   content?: {
     blocks?: TestBlock[] | null;
   };
@@ -466,7 +520,7 @@ export interface DeepNested {
  */
 export interface TestBlock {
   meta?: {
-    movie?: (string | null) | Movie;
+    movie?: (number | null) | Movie;
   };
   id?: string | null;
   blockName?: string | null;
@@ -477,10 +531,10 @@ export interface TestBlock {
  * via the `definition` "relations".
  */
 export interface Relation1 {
-  id: string;
+  id: number;
   item?: {
     relationTo: 'items';
-    value: string | Item;
+    value: number | Item;
   } | null;
   updatedAt: string;
   createdAt: string;
@@ -490,10 +544,10 @@ export interface Relation1 {
  * via the `definition` "items".
  */
 export interface Item {
-  id: string;
+  id: number;
   status?: ('completed' | 'failed' | 'pending') | null;
   relation?: {
-    docs?: (string | Relation1)[];
+    docs?: (number | Relation1)[];
     hasNextPage?: boolean;
     totalDocs?: number;
   };
@@ -505,7 +559,7 @@ export interface Item {
  * via the `definition` "blocks".
  */
 export interface Block1 {
-  id: string;
+  id: number;
   blocks?: Some[] | null;
   updatedAt: string;
   createdAt: string;
@@ -515,8 +569,8 @@ export interface Block1 {
  * via the `definition` "Some".
  */
 export interface Some {
-  director?: (string | null) | Director;
-  directors?: (string | Director)[] | null;
+  director?: (number | null) | Director;
+  directors?: (number | Director)[] | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'some';
@@ -526,7 +580,7 @@ export interface Some {
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
-  id: string;
+  id: number;
   key: string;
   data:
     | {
@@ -543,27 +597,27 @@ export interface PayloadKv {
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: string;
+  id: number;
   document?:
     | ({
         relationTo: 'posts';
-        value: string | Post;
+        value: number | Post;
       } | null)
     | ({
         relationTo: 'postsLocalized';
-        value: string | PostsLocalized;
+        value: number | PostsLocalized;
       } | null)
     | ({
         relationTo: 'relation';
-        value: string | Relation;
+        value: number | Relation;
       } | null)
     | ({
         relationTo: 'strict-access';
-        value: string | StrictAccess;
+        value: number | StrictAccess;
       } | null)
     | ({
         relationTo: 'chained';
-        value: string | Chained;
+        value: number | Chained;
       } | null)
     | ({
         relationTo: 'custom-id';
@@ -575,68 +629,80 @@ export interface PayloadLockedDocument {
       } | null)
     | ({
         relationTo: 'screenings';
-        value: string | Screening;
+        value: number | Screening;
       } | null)
     | ({
         relationTo: 'movies';
-        value: string | Movie;
+        value: number | Movie;
       } | null)
     | ({
         relationTo: 'directors';
-        value: string | Director;
+        value: number | Director;
+      } | null)
+    | ({
+        relationTo: 'transitive-join-courses';
+        value: number | TransitiveJoinCourse;
+      } | null)
+    | ({
+        relationTo: 'transitive-join-lessons';
+        value: number | TransitiveJoinLesson;
+      } | null)
+    | ({
+        relationTo: 'transitive-join-quests';
+        value: number | TransitiveJoinQuest;
       } | null)
     | ({
         relationTo: 'movieReviews';
-        value: string | MovieReview;
+        value: number | MovieReview;
       } | null)
     | ({
         relationTo: 'polymorphic-relationships';
-        value: string | PolymorphicRelationship;
+        value: number | PolymorphicRelationship;
       } | null)
     | ({
         relationTo: 'tree';
-        value: string | Tree;
+        value: number | Tree;
       } | null)
     | ({
         relationTo: 'pages';
-        value: string | Page;
+        value: number | Page;
       } | null)
     | ({
         relationTo: 'rels-to-pages';
-        value: string | RelsToPage;
+        value: number | RelsToPage;
       } | null)
     | ({
         relationTo: 'rels-to-pages-and-custom-text-ids';
-        value: string | RelsToPagesAndCustomTextId;
+        value: number | RelsToPagesAndCustomTextId;
       } | null)
     | ({
         relationTo: 'object-writes';
-        value: string | ObjectWrite;
+        value: number | ObjectWrite;
       } | null)
     | ({
         relationTo: 'deep-nested';
-        value: string | DeepNested;
+        value: number | DeepNested;
       } | null)
     | ({
         relationTo: 'relations';
-        value: string | Relation1;
+        value: number | Relation1;
       } | null)
     | ({
         relationTo: 'items';
-        value: string | Item;
+        value: number | Item;
       } | null)
     | ({
         relationTo: 'blocks';
-        value: string | Block1;
+        value: number | Block1;
       } | null)
     | ({
         relationTo: 'users';
-        value: string | User;
+        value: number | User;
       } | null);
   globalSlug?: string | null;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   updatedAt: string;
   createdAt: string;
@@ -646,10 +712,10 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: string;
+  id: number;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   key?: string | null;
   value?:
@@ -669,7 +735,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: string;
+  id: number;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
@@ -803,6 +869,35 @@ export interface DirectorsSelect<T extends boolean = true> {
   movies?: T;
   movie?: T;
   directors?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "transitive-join-courses_select".
+ */
+export interface TransitiveJoinCoursesSelect<T extends boolean = true> {
+  name?: T;
+  lessons?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "transitive-join-lessons_select".
+ */
+export interface TransitiveJoinLessonsSelect<T extends boolean = true> {
+  quest?: T;
+  course?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "transitive-join-quests_select".
+ */
+export interface TransitiveJoinQuestsSelect<T extends boolean = true> {
+  lesson?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1020,6 +1115,92 @@ export interface CollectionsWidget {
     [k: string]: unknown;
   };
   width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-query_widget".
+ */
+export interface CollectionQueryWidget {
+  data?: {
+    title?: string | null;
+    relatedCollection:
+      | 'posts'
+      | 'postsLocalized'
+      | 'relation'
+      | 'strict-access'
+      | 'chained'
+      | 'custom-id'
+      | 'custom-id-number'
+      | 'screenings'
+      | 'movies'
+      | 'directors'
+      | 'transitive-join-courses'
+      | 'transitive-join-lessons'
+      | 'transitive-join-quests'
+      | 'movieReviews'
+      | 'polymorphic-relationships'
+      | 'tree'
+      | 'pages'
+      | 'rels-to-pages'
+      | 'rels-to-pages-and-custom-text-ids'
+      | 'object-writes'
+      | 'deep-nested'
+      | 'relations'
+      | 'items'
+      | 'blocks'
+      | 'users';
+    where?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    sortField?: string | null;
+    sortDirection?: ('asc' | 'desc') | null;
+    limit?: number | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "activity_widget".
+ */
+export interface ActivityWidget {
+  data?: {
+    excludedCollections?:
+      | (
+          | 'posts'
+          | 'postsLocalized'
+          | 'relation'
+          | 'strict-access'
+          | 'chained'
+          | 'custom-id'
+          | 'custom-id-number'
+          | 'screenings'
+          | 'movies'
+          | 'directors'
+          | 'transitive-join-courses'
+          | 'transitive-join-lessons'
+          | 'transitive-join-quests'
+          | 'movieReviews'
+          | 'polymorphic-relationships'
+          | 'tree'
+          | 'pages'
+          | 'rels-to-pages'
+          | 'rels-to-pages-and-custom-text-ids'
+          | 'object-writes'
+          | 'deep-nested'
+          | 'relations'
+          | 'items'
+          | 'blocks'
+          | 'users'
+        )[]
+      | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

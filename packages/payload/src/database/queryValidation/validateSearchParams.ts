@@ -1,11 +1,16 @@
 import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
 import type { FlattenedField } from '../../fields/config/types.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
-import type { PayloadRequest, WhereField } from '../../types/index.js'
+import type {
+  HasManyRelationshipOperator,
+  PayloadRequest,
+  Where,
+  WhereField,
+} from '../../types/index.js'
 import type { EntityPolicies, PathToQuery } from './types.js'
 
 import { fieldAffectsData } from '../../fields/config/types.js'
-import { SAFE_FIELD_PATH_REGEX } from '../../types/constants.js'
+import { hasManyRelationshipOperatorSet, SAFE_FIELD_PATH_REGEX } from '../../types/constants.js'
 import { getEntityPermissions } from '../../utilities/getEntityPermissions/getEntityPermissions.js'
 import { isolateObjectProperty } from '../../utilities/isolateObjectProperty.js'
 import { getLocalizedPaths } from '../getLocalizedPaths.js'
@@ -85,6 +90,39 @@ export async function validateSearchParam({
   }
   const promises: Promise<void>[] = []
 
+  const isHasManyRelationshipOperator = hasManyRelationshipOperatorSet.has(
+    operator as HasManyRelationshipOperator,
+  )
+
+  if (isHasManyRelationshipOperator) {
+    const relationshipField = paths.length === 1 ? paths[0]?.field : undefined
+    const hasNestedWhere = val !== null && typeof val === 'object' && !Array.isArray(val)
+
+    if (
+      !relationshipField ||
+      (relationshipField.type !== 'relationship' && relationshipField.type !== 'upload') ||
+      !relationshipField.hasMany ||
+      typeof relationshipField.relationTo !== 'string' ||
+      !hasNestedWhere
+    ) {
+      errors.push({ path: `${incomingPath}.${operator}` })
+      return
+    }
+
+    // The value of `some`, `none`, or `every` is a complete `where` query for the related
+    // collection, so its field paths and access permissions must be validated in that collection.
+    promises.push(
+      validateQueryPaths({
+        collectionConfig: req.payload.collections[relationshipField.relationTo]!.config,
+        errors,
+        overrideAccess,
+        policies,
+        req,
+        where: val as Where,
+      }),
+    )
+  }
+
   // Sanitize relation.otherRelation.id to relation.otherRelation
   if (paths.at(-1)?.path === 'id') {
     const previousField = paths.at(-2)?.field
@@ -109,8 +147,10 @@ export async function validateSearchParam({
 
       // where: { relatedPosts: { equals: 1}} -> { 'relatedPosts.id': { equals: 1}}
       if (field.type === 'join' && path === incomingPath) {
-        constraint[`${path}.id` as keyof WhereField] = constraint[path as keyof WhereField]
-        delete constraint[path as keyof WhereField]
+        const mutableConstraint = constraint as Record<string, unknown>
+
+        mutableConstraint[`${path}.id`] = mutableConstraint[path]
+        delete mutableConstraint[path]
       }
 
       if ('virtual' in field && field.virtual) {
@@ -195,7 +235,7 @@ export async function validateSearchParam({
         }
       }
 
-      if (i > 1) {
+      if (!isHasManyRelationshipOperator && i > 1) {
         // Remove top collection and reverse array
         // to work backwards from top
         const pathsToQuery = paths.slice(1).reverse()

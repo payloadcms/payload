@@ -11,7 +11,7 @@ import {
   GraphQLString,
 } from 'graphql'
 import { DateTimeResolver, EmailAddressResolver } from 'graphql-scalars'
-import { optionIsObject } from 'payload/shared'
+import { hasManyRelationshipOperators, optionIsObject } from 'payload/shared'
 
 import { GraphQLJSON } from '../packages/graphql-type-json/index.js'
 import { combineParentName } from '../utilities/combineParentName.js'
@@ -258,6 +258,12 @@ const gqlTypeCache: Record<string, GraphQLType> = {}
  * @param field the field for which their valid operators inside a "where" argument is being defined
  * @param parentName the name of the parent field (if any)
  * @returns all the operators (including their types) which can be used as a condition for a given field inside a where
+ *
+ * @example
+ * A has-many relationship adds operators that accept a nested query:
+ * ```graphql
+ * Posts(where: { categories: { none: { slug: { equals: "recalls" } } } })
+ * ```
  */
 export const withOperators = (
   field: FieldAffectingData,
@@ -271,6 +277,18 @@ export const withOperators = (
 
   // Get the default operators for the field type which are hard-coded above
   const fieldOperators = [...defaults[field.type].operators]
+
+  // These operators accept a complete `where` query for the one collection targeted by the
+  // relationship. Polymorphic relationships are excluded because they can target multiple schemas.
+  if (
+    (field.type === 'relationship' || field.type === 'upload') &&
+    field.hasMany &&
+    typeof field.relationTo === 'string'
+  ) {
+    fieldOperators.push(
+      ...hasManyRelationshipOperators.map((name) => ({ name, type: GraphQLJSON })),
+    )
+  }
 
   if (!('required' in field) || !field.required) {
     fieldOperators.push({

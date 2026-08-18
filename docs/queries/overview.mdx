@@ -56,6 +56,9 @@ The following operators are available for use in queries:
 | `near`               | For distance related to a [Point Field](../fields/point) comma separated as `<longitude>, <latitude>, <maxDistance in meters (nullable)>, <minDistance in meters (nullable)>`.   |
 | `within`             | For [Point Fields](../fields/point) to filter documents based on whether points are inside of the given area defined in GeoJSON. [Example](../fields/point#querying-within)      |
 | `intersects`         | For [Point Fields](../fields/point) to filter documents based on whether points intersect with the given area defined in GeoJSON. [Example](../fields/point#querying-intersects) |
+| `some`               | For non-polymorphic `hasMany` relationship and upload fields. At least one related document must match a nested query.                                                           |
+| `none`               | For non-polymorphic `hasMany` relationship and upload fields. No related document may match a nested query.                                                                      |
+| `every`              | For non-polymorphic `hasMany` relationship and upload fields. Every related document must match a nested query.                                                                  |
 
 <Banner type="success">
   **Tip:** If you know your users will be querying on certain fields a lot, add
@@ -101,20 +104,82 @@ const query: Where = {
 
 Written in plain English, if the above query were passed to a `find` operation, it would translate to finding posts where either the `color` is `mint` OR the `color` is `white` AND `featured` is set to false.
 
-### Nested properties
+## Relationship queries
 
-When working with nested properties, which can happen when using relational fields, it is possible to use the dot notation to access the nested property. For example, when working with a `Song` collection that has an `artists` field which is related to an `Artists` collection using the `name: 'artists'`. You can access a property within the collection `Artists` like so:
+Relationship fields can be queried through properties on their related documents. For `hasMany`
+relationships, you can also control whether some, none, or every related document must match.
 
-```js
+### Nested relationship properties
+
+Use dot notation to query a field on a related document. For example, if a `Song` collection has an
+`artists` relationship field, you can query the `featured` field from the related `Artists`
+collection like this:
+
+```ts
 import type { Where } from 'payload'
 
 const query: Where = {
+  // `featured` is the nested property name to filter on
   'artists.featured': {
-    // nested property name to filter on
-    exists: true, // operator to use and boolean value that needs to be true
+    exists: true,
   },
 }
 ```
+
+### Has-many relationship operators
+
+For non-polymorphic `hasMany` relationship and upload fields, use `some`, `none`, or `every`
+to control how a nested query is applied to the related documents:
+
+```ts
+const directors = await payload.find({
+  collection: 'directors',
+  where: {
+    movies: {
+      none: {
+        name: {
+          equals: 'recalls',
+        },
+      },
+    },
+  },
+})
+```
+
+| Operator | Description                                                |
+| -------- | ---------------------------------------------------------- |
+| `some`   | At least one related document must match the nested query. |
+| `none`   | No related document may match the nested query.            |
+| `every`  | Every related document must match the nested query.        |
+
+The nested query supports the same `and` and `or` groups as any other Payload query. All conditions
+inside one operator are evaluated against the same related document:
+
+```ts
+const directors = await payload.find({
+  collection: 'directors',
+  where: {
+    movies: {
+      some: {
+        and: [
+          { rating: { greater_than_equal: 4 } },
+          {
+            or: [
+              { genre: { equals: 'documentary' } },
+              { featured: { equals: true } },
+            ],
+          },
+        ],
+      },
+    },
+  },
+})
+```
+
+This finds directors who have at least one movie with a rating of 4 or higher that is either a
+documentary or featured. The conditions cannot be satisfied by different movies.
+
+An empty relationship does not match `some`, but it does match `none` and `every`.
 
 ## Writing Queries
 

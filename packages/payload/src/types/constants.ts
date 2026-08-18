@@ -1,3 +1,26 @@
+/**
+ * Operators that apply a nested `where` query to documents in a non-polymorphic, has-many
+ * relationship or upload field.
+ *
+ * @example
+ * ```ts
+ * const where = {
+ *   movies: {
+ *     none: {
+ *       name: { equals: 'recalls' },
+ *     },
+ *   },
+ * }
+ * ```
+ */
+export const hasManyRelationshipOperators = ['some', 'none', 'every'] as const
+
+export type HasManyRelationshipOperator = (typeof hasManyRelationshipOperators)[number]
+
+export const hasManyRelationshipOperatorSet = new Set<HasManyRelationshipOperator>(
+  hasManyRelationshipOperators,
+)
+
 export const validOperators = [
   'equals',
   'contains',
@@ -15,6 +38,7 @@ export const validOperators = [
   'within',
   'intersects',
   'near',
+  ...hasManyRelationshipOperators,
 ] as const
 
 export type Operator = (typeof validOperators)[number]

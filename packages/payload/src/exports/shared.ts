@@ -103,7 +103,13 @@ export {
 export type { ClientHierarchyConfig, FolderBreadcrumb } from '../hierarchy/types.js'
 export { PREFERENCE_KEYS } from '../preferences/keys.js'
 
-export { validOperators, validOperatorSet } from '../types/constants.js'
+export {
+  hasManyRelationshipOperators,
+  hasManyRelationshipOperatorSet,
+  validOperators,
+  validOperatorSet,
+} from '../types/constants.js'
+export type { HasManyRelationshipOperator } from '../types/constants.js'
 export { formatFilesize } from '../uploads/formatFilesize.js'
 export { isImage } from '../uploads/isImage.js'
 export { matchMimeType } from '../uploads/matchMimeType.js'
