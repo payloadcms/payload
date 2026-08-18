@@ -90,6 +90,27 @@ describe('database', () => {
     await payload.destroy()
   })
 
+  describe(
+    'connection pool',
+    { db: (adapter) => adapter.startsWith('postgres') || adapter === 'supabase' },
+    () => {
+      it('should not leave a client checked out after connecting', async () => {
+        const { pool } = payload.db as unknown as PostgresAdapter
+
+        // Awaiting a query guarantees the pool has been used and that nothing is
+        // in flight while the counts below are read.
+        await payload.count({ collection: 'simple' })
+
+        expect(pool.totalCount).toBeGreaterThan(0)
+
+        // `connect` acquires a client to verify connectivity and to listen for
+        // ECONNRESET. Failing to release it pins that client for the lifetime of
+        // the process, so `pool.end()` never drains after `payload.destroy()`.
+        expect(pool.totalCount - pool.idleCount).toBe(0)
+      })
+    },
+  )
+
   describe('id type', () => {
     it('should sanitize incoming IDs if ID type is number', async () => {
       const created = await restClient
