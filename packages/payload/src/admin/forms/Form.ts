@@ -79,6 +79,15 @@ export type FieldState = {
    * from the current path of a given field, the field's components will be re-rendered.
    */
   lastRenderedPath?: string
+  /**
+   * Timestamp (from `Date.now()`) of the last time this field's value was changed locally. Unlike `isModified`,
+   * this is never reset. It is used to detect whether a field was edited _after_ a given autosave/submit request
+   * was sent, so that a response for an older, now-stale request cannot overwrite a newer local edit even after
+   * `isModified` has already been cleared for this field.
+   *
+   * @experimental This property is experimental and may change in the future. Use at your own risk.
+   */
+  modifiedAt?: number
   passesCondition?: boolean
   rows?: Row[]
   /**
