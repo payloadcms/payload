@@ -22,6 +22,7 @@ import { id } from '../languages/id.js'
 import { is } from '../languages/is.js'
 import { it } from '../languages/it.js'
 import { ja } from '../languages/ja.js'
+import { km } from '../languages/km.js'
 import { ko } from '../languages/ko.js'
 import { lt } from '../languages/lt.js'
 import { lv } from '../languages/lv.js'
@@ -69,6 +70,7 @@ export const translations = {
   is,
   it,
   ja,
+  km,
   ko,
   lt,
   lv,
