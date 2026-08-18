@@ -224,6 +224,7 @@ export {
   useWatchForm,
 } from '../../forms/Form/context.js'
 export { Form, type FormProps } from '../../forms/Form/index.js'
+export { NullifyLocaleField } from '../../forms/NullifyField/index.js'
 
 export { RowLabel, type RowLabelProps } from '../../forms/RowLabel/index.js'
 export { useRowLabel } from '../../forms/RowLabel/Context/index.js'
@@ -351,7 +352,7 @@ export type {
 } from '../../providers/DocumentSelection/types.js'
 export { useHierarchy } from '../../providers/Hierarchy/index.js'
 export type { AllowedCollection } from '../../providers/Hierarchy/types.js'
-export { useUploadHandlers } from '../../providers/UploadHandlers/index.js'
+export { UploadHandlersProvider, useUploadHandlers } from '../../providers/UploadHandlers/index.js'
 export type { UploadHandlersContext } from '../../providers/UploadHandlers/index.js'
 export {
   defaultTheme,
@@ -365,6 +366,7 @@ export { useTranslation } from '../../providers/Translation/index.js'
 export { useWindowInfo, WindowInfoProvider } from '../../providers/WindowInfo/index.js'
 export { EmailAndUsernameFields } from '../../elements/EmailAndUsername/index.js'
 
+export { DefaultEditView } from '../../views/Edit/index.js'
 export { DefaultListView } from '../../views/List/index.client.js'
 
 export { formatTimeToNow } from '../../utilities/formatDocTitle/formatDateTitle.js'

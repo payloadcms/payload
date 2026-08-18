@@ -6,11 +6,6 @@ export { FieldDiffLabel } from '../../elements/FieldDiffLabel/index.js'
 export { HierarchyButton } from '../../elements/Hierarchy/DocHeaderButton/index.server.js'
 export { HierarchyField } from '../../elements/Hierarchy/Field/index.server.js'
 export { HierarchySidebarTabServer } from '../../elements/Hierarchy/Tree/HierarchySidebarTab.server.js'
-export {
-  escapeDiffHTML,
-  getHTMLDiffComponents,
-  unescapeDiffHTML,
-} from '../../elements/HTMLDiff/index.js'
 export { getNavPrefs } from '../../elements/Nav/getNavPrefs.js'
 export { renderTabHandler } from '../../elements/Nav/SidebarTabs/renderTabServerFn.js'
 export type {

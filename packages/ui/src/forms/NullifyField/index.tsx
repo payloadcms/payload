@@ -19,7 +19,6 @@ type NullifyLocaleFieldProps = {
   readonly readOnly?: boolean
 }
 
-/** @internal */
 export const NullifyLocaleField: React.FC<NullifyLocaleFieldProps> = ({
   fieldValue,
   localized,

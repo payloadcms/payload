@@ -6,9 +6,9 @@ import React from 'react'
 import { DocumentHeader } from '../../elements/DocumentHeader/index.js'
 import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
 /* eslint-disable payload/no-imports-from-exports-dir -- Server component must reference exports/client bundle for proper client boundary in prod builds */
+import { DefaultEditView } from '../../exports/client/index.js'
 import {
   AccountClient,
-  DefaultEditView,
   DocumentInfoProvider,
   EditDepthProvider,
   HydrateAuthProvider,

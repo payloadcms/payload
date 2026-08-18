@@ -9,4 +9,9 @@ export { abortAndIgnore, handleAbortRef } from '../../utilities/abortAndIgnore.j
 export { requests } from '../../utilities/api.js'
 export { findLocaleFromCode } from '../../utilities/findLocaleFromCode.js'
 export { formatDate } from '../../utilities/formatDocTitle/formatDateTitle.js'
+export {
+  type EntityToGroup,
+  groupNavItems,
+  type NavGroupType,
+} from '../../utilities/groupNavItems.js'
 export { sanitizeID } from '../../utilities/sanitizeID.js'

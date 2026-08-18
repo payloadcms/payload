@@ -8,7 +8,6 @@ export { escapeDiffHTML, unescapeDiffHTML } from './escapeHtml.js'
 
 const baseClass = 'html-diff'
 
-/** @internal */
 export const getHTMLDiffComponents = ({
   fromHTML,
   postProcess,

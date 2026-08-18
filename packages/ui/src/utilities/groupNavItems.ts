@@ -11,7 +11,6 @@ import { getTranslation } from '@payloadcms/translations'
 
 import { isNavEntityVisible } from './isNavEntityVisible.js'
 
-/** @internal */
 export type EntityToGroup =
   | {
       entity: SanitizedCollectionConfig
@@ -22,7 +21,6 @@ export type EntityToGroup =
       type: EntityType.global
     }
 
-/** @internal */
 export type NavGroupType = {
   entities: {
     label: StaticLabel
@@ -32,7 +30,6 @@ export type NavGroupType = {
   label: string
 }
 
-/** @internal */
 export function groupNavItems(
   entities: EntityToGroup[],
   permissions: SanitizedPermissions,

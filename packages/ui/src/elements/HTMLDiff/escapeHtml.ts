@@ -19,8 +19,6 @@ const UNESCAPE_MAP = {
 /**
  * Escapes HTML special characters using Unicode placeholders.
  * These must be converted to HTML entities after diffing using unescapeDiffHTML.
- *
- * @internal
  */
 export function escapeDiffHTML(value: boolean | null | number | string | undefined): string {
   if (value == null) {
@@ -40,8 +38,6 @@ export function escapeDiffHTML(value: boolean | null | number | string | undefin
 /**
  * Converts Unicode placeholder characters to HTML entities.
  * Call this on the final HTML output after diffing.
- *
- * @internal
  */
 export function unescapeDiffHTML(html: string): string {
   return html

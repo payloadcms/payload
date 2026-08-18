@@ -1,7 +1,8 @@
 import type { SerializedEditorState } from 'lexical'
 import type { RichTextFieldDiffServerComponent } from 'payload'
 
-import { FieldDiffContainer, getHTMLDiffComponents } from '@payloadcms/ui/internal/rsc'
+import { FieldDiffContainer } from '@payloadcms/ui/internal/rsc'
+import { getHTMLDiffComponents } from '@payloadcms/ui/rsc'
 
 import './index.css'
 import '../bundled.css'

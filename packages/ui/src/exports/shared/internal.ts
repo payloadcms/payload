@@ -13,11 +13,6 @@ export { formatDocTitle } from '../../utilities/formatDocTitle/index.js'
 export { getGlobalData } from '../../utilities/getGlobalData.js'
 export { getNavGroups } from '../../utilities/getNavGroups.js'
 export { getVisibleEntities } from '../../utilities/getVisibleEntities.js'
-export {
-  type EntityToGroup,
-  groupNavItems,
-  type NavGroupType,
-} from '../../utilities/groupNavItems.js'
 export { handleBackToDashboard } from '../../utilities/handleBackToDashboard.js'
 export { handleGoBack } from '../../utilities/handleGoBack.js'
 export { handleTakeOver } from '../../utilities/handleTakeOver.js'
