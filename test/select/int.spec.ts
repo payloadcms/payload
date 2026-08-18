@@ -2673,6 +2673,55 @@ describe('Select', () => {
     expect(result.blocks[0]?.hasOne.text).toBe('rel-1')
     expect(result.blocks[0]?.hasMany[0].text).toBe('rel-1')
   })
+
+  it('should properly return relationships when using select on array with depth 0', async () => {
+    const rel_1 = await payload.create({ collection: 'rels', data: { text: 'rel-1' } })
+    const doc = await payload.create({
+      collection: 'relationships-array',
+      data: {
+        array: [
+          {
+            hasMany: [rel_1],
+            hasOne: rel_1,
+          },
+        ],
+      },
+    })
+    const result = await payload.findByID({
+      id: doc.id,
+      collection: 'relationships-array',
+      depth: 0,
+      select: { array: true },
+    })
+
+    expect(result.array[0]?.hasOne).toBe(rel_1.id)
+    expect(result.array[0]?.hasMany).toEqual([rel_1.id])
+  })
+
+  it('should populate relationships when using select on array', async () => {
+    const rel_1 = await payload.create({ collection: 'rels', data: { text: 'rel-1' } })
+    const doc = await payload.create({
+      collection: 'relationships-array',
+      data: {
+        array: [
+          {
+            hasMany: [rel_1],
+            hasOne: rel_1,
+          },
+        ],
+      },
+    })
+
+    const result = await payload.findByID({
+      id: doc.id,
+      collection: 'relationships-array',
+      depth: 1,
+      select: { array: true },
+    })
+
+    expect(result.array[0]?.hasOne.text).toBe('rel-1')
+    expect(result.array[0]?.hasMany[0].text).toBe('rel-1')
+  })
 })
 
 async function createPost() {
