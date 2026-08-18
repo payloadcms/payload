@@ -90,7 +90,7 @@ export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
                         <FieldLabel
                           as="span"
                           label={getTranslation(label, i18n)}
-                          localized={false}
+                          localized={groupHasName(field) ? Boolean(field.localized) : false}
                           path={path}
                           required={false}
                         />
