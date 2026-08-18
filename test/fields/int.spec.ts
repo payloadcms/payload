@@ -2601,6 +2601,70 @@ describe('Fields', () => {
       }).toBeDefined()
     })
 
+    it('should allow creating a second document when a localized unique required field falls back to its static defaultValue in an untouched locale', async () => {
+      const firstDoc = await payload.create({
+        collection: 'indexed-fields',
+        data: {
+          text: 'first-' + Date.now(),
+          localizedUniqueRequiredText: 'first-en-' + Date.now(),
+          uniqueRequiredText: 'uniqueRequired-first-' + Date.now(),
+        },
+      })
+
+      const firstDocAllLocales = await payload.findByID({
+        id: firstDoc.id,
+        collection: 'indexed-fields',
+        locale: 'all',
+      })
+
+      // The es locale was never submitted, so it should remain unset rather than being
+      // silently filled with the field's static defaultValue.
+      expect(firstDocAllLocales.localizedUniqueRequiredText.es).toBeUndefined()
+
+      await expect(
+        payload.create({
+          collection: 'indexed-fields',
+          data: {
+            text: 'second-' + Date.now(),
+            localizedUniqueRequiredText: 'second-en-' + Date.now(),
+            uniqueRequiredText: 'uniqueRequired-second-' + Date.now(),
+          },
+        }),
+      ).resolves.toBeDefined()
+    })
+
+    it('should still enforce uniqueness when a localized unique field explicitly keeps the same defaultValue in a locale', async () => {
+      await payload.create({
+        collection: 'indexed-fields',
+        locale: 'all',
+        data: {
+          text: 'first-' + Date.now(),
+          localizedUniqueRequiredText: {
+            en: 'first-en-' + Date.now(),
+            // explicitly kept as the field's defaultValue, rather than left untouched
+            es: 'localizedUniqueRequired',
+          },
+          uniqueRequiredText: 'uniqueRequired-first-' + Date.now(),
+        },
+      })
+
+      await expect(
+        payload.create({
+          collection: 'indexed-fields',
+          locale: 'all',
+          data: {
+            text: 'second-' + Date.now(),
+            localizedUniqueRequiredText: {
+              en: 'second-en-' + Date.now(),
+              // also explicitly kept as the same defaultValue -> should still collide
+              es: 'localizedUniqueRequired',
+            },
+            uniqueRequiredText: 'uniqueRequired-second-' + Date.now(),
+          },
+        }),
+      ).rejects.toThrow(/unique/i)
+    })
+
     it('should throw validation error saving on unique relationship fields hasMany: false non polymorphic', async () => {
       const textDoc = await payload.create({
         collection: 'text-fields',
