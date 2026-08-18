@@ -2,6 +2,7 @@ import type { SQL, Table } from 'drizzle-orm'
 import type { FlattenedField, HasManyRelationshipOperator, Operator, Sort, Where } from 'payload'
 
 import {
+  aliasedTable,
   and,
   eq,
   exists,
@@ -680,7 +681,7 @@ function buildHasManyRelationshipCondition({
 
   // Correlate relationship rows back to the parent document currently being considered by the
   // outer query. The stored path distinguishes this field from other relationships on the parent.
-  const outerTable = aliasTable ?? adapter.tables[tableName]
+  const outerTable = aliasTable ?? aliasedTable(adapter.tables[tableName], tableName)
   const relationshipRowConstraints: SQL[] = [
     eq(relationshipTable.parent, outerTable.id),
     relationshipPath.path.includes('%')
