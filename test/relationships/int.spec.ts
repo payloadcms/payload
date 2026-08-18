@@ -448,28 +448,28 @@ describe('Relationships', () => {
       })
 
       it('should query through a transitive has-many join using the related table alias', async () => {
-        const quest = await payload.create({
-          collection: 'transitive-join-quests',
+        const artist = await payload.create({
+          collection: 'transitive-join-artists',
           data: {},
         })
-        const lesson = await payload.create({
-          collection: 'transitive-join-lessons',
-          data: { quest: quest.id },
+        const album = await payload.create({
+          collection: 'transitive-join-albums',
+          data: { artist: artist.id },
         })
-        const course = await payload.create({
-          collection: 'transitive-join-courses',
-          data: { lessons: [lesson.id], name: 'Aliased course' },
+        const song = await payload.create({
+          collection: 'transitive-join-songs',
+          data: { albums: [album.id], name: 'Aliased song' },
         })
 
         const { docs } = await payload.find({
-          collection: 'transitive-join-quests',
+          collection: 'transitive-join-artists',
           where: {
-            'lesson.course.name': { equals: course.name },
+            'album.song.name': { equals: song.name },
           },
         })
 
         expect(docs).toHaveLength(1)
-        expect(docs[0]?.id).toBe(quest.id)
+        expect(docs[0]?.id).toBe(artist.id)
       })
 
       it('should allow 4x deep querying', async () => {

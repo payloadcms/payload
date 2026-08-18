@@ -148,12 +148,20 @@ export async function buildSearchParam({
       // Remove top collection and reverse array
       // to work backwards from top
       const pathsToQuery = paths.slice(1).reverse()
+      const parentPaths = paths.slice(0, -1).reverse()
 
       let relationshipQuery: SearchParam = {
         value: {},
       }
 
       for (const [i, { collectionSlug, path: subPath }] of pathsToQuery.entries()) {
+        // The arrays are reversed together, so both entries describe the same relationship hop.
+        const parentField = parentPaths[i]?.field
+
+        if (!parentField) {
+          return undefined
+        }
+
         if (!collectionSlug) {
           throw new APIError(`Collection with the slug ${collectionSlug} was not found.`)
         }
@@ -174,18 +182,16 @@ export async function buildSearchParam({
             },
           })
 
-          const field = paths[0].field
-
           const select: Record<string, boolean> = {
             _id: true,
           }
 
           let joinPath: null | string = null
 
-          if (field.type === 'join') {
+          if (parentField.type === 'join') {
             const relationshipField = getFieldByPath({
               fields: collectionConfig.flattenedFields,
-              path: field.on,
+              path: parentField.on,
             })
             if (!relationshipField) {
               throw new APIError('Relationship field was not found')
@@ -255,13 +261,46 @@ export async function buildSearchParam({
           const nextSubPath = pathsToQuery[i + 1]?.path
 
           if (nextSubPath) {
-            relationshipQuery = { value: { [nextSubPath]: $in } }
+            relationshipQuery = {
+              value: joinPath ? { _id: { $in } } : { [nextSubPath]: $in },
+            }
           }
 
           continue
         }
 
         const subQuery = relationshipQuery.value as QueryFilter<any>
+
+        /**
+         * Follow this join back to its parent IDs.
+         * For example, matching songs yield album IDs, then artist IDs.
+         */
+        if (parentField.type === 'join') {
+          const relationshipField = getFieldByPath({
+            fields: collectionConfig.flattenedFields,
+            path: parentField.on,
+          })
+          if (!relationshipField) {
+            throw new APIError('Relationship field was not found')
+          }
+
+          let joinPath = relationshipField.localizedPath
+          if (relationshipField.pathHasLocalized && payload.config.localization) {
+            joinPath = joinPath.replace(
+              '<locale>',
+              locale || payload.config.localization.defaultLocale,
+            )
+          }
+
+          const $in = await SubModel.distinct(joinPath, subQuery)
+          if (i + 1 === pathsToQuery.length) {
+            return { path: '_id', value: { $in } }
+          }
+
+          relationshipQuery = { value: { _id: { $in } } }
+          continue
+        }
+
         const result = await SubModel.find(subQuery, subQueryOptions)
 
         const $in = result.map((doc) => doc._id)

@@ -77,9 +77,9 @@ export interface Config {
     screenings: Screening;
     movies: Movie;
     directors: Director;
-    'transitive-join-courses': TransitiveJoinCourse;
-    'transitive-join-lessons': TransitiveJoinLesson;
-    'transitive-join-quests': TransitiveJoinQuest;
+    'transitive-join-songs': TransitiveJoinSong;
+    'transitive-join-albums': TransitiveJoinAlbum;
+    'transitive-join-artists': TransitiveJoinArtist;
     movieReviews: MovieReview;
     'polymorphic-relationships': PolymorphicRelationship;
     tree: Tree;
@@ -98,11 +98,11 @@ export interface Config {
     'payload-migrations': PayloadMigration;
   };
   collectionsJoins: {
-    'transitive-join-lessons': {
-      course: 'transitive-join-courses';
+    'transitive-join-albums': {
+      song: 'transitive-join-songs';
     };
-    'transitive-join-quests': {
-      lesson: 'transitive-join-lessons';
+    'transitive-join-artists': {
+      album: 'transitive-join-albums';
     };
     items: {
       relation: 'relations';
@@ -119,9 +119,9 @@ export interface Config {
     screenings: ScreeningsSelect<false> | ScreeningsSelect<true>;
     movies: MoviesSelect<false> | MoviesSelect<true>;
     directors: DirectorsSelect<false> | DirectorsSelect<true>;
-    'transitive-join-courses': TransitiveJoinCoursesSelect<false> | TransitiveJoinCoursesSelect<true>;
-    'transitive-join-lessons': TransitiveJoinLessonsSelect<false> | TransitiveJoinLessonsSelect<true>;
-    'transitive-join-quests': TransitiveJoinQuestsSelect<false> | TransitiveJoinQuestsSelect<true>;
+    'transitive-join-songs': TransitiveJoinSongsSelect<false> | TransitiveJoinSongsSelect<true>;
+    'transitive-join-albums': TransitiveJoinAlbumsSelect<false> | TransitiveJoinAlbumsSelect<true>;
+    'transitive-join-artists': TransitiveJoinArtistsSelect<false> | TransitiveJoinArtistsSelect<true>;
     movieReviews: MovieReviewsSelect<false> | MovieReviewsSelect<true>;
     'polymorphic-relationships': PolymorphicRelationshipsSelect<false> | PolymorphicRelationshipsSelect<true>;
     tree: TreeSelect<false> | TreeSelect<true>;
@@ -319,24 +319,24 @@ export interface Director {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "transitive-join-courses".
+ * via the `definition` "transitive-join-songs".
  */
-export interface TransitiveJoinCourse {
+export interface TransitiveJoinSong {
   id: string;
   name?: string | null;
-  lessons?: (string | TransitiveJoinLesson)[] | null;
+  albums?: (string | TransitiveJoinAlbum)[] | null;
   updatedAt: string;
   createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "transitive-join-lessons".
+ * via the `definition` "transitive-join-albums".
  */
-export interface TransitiveJoinLesson {
+export interface TransitiveJoinAlbum {
   id: string;
-  quest?: (string | null) | TransitiveJoinQuest;
-  course?: {
-    docs?: (string | TransitiveJoinCourse)[];
+  artist?: (string | null) | TransitiveJoinArtist;
+  song?: {
+    docs?: (string | TransitiveJoinSong)[];
     hasNextPage?: boolean;
     totalDocs?: number;
   };
@@ -345,12 +345,12 @@ export interface TransitiveJoinLesson {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "transitive-join-quests".
+ * via the `definition` "transitive-join-artists".
  */
-export interface TransitiveJoinQuest {
+export interface TransitiveJoinArtist {
   id: string;
-  lesson?: {
-    docs?: (string | TransitiveJoinLesson)[];
+  album?: {
+    docs?: (string | TransitiveJoinAlbum)[];
     hasNextPage?: boolean;
     totalDocs?: number;
   };
@@ -640,16 +640,16 @@ export interface PayloadLockedDocument {
         value: string | Director;
       } | null)
     | ({
-        relationTo: 'transitive-join-courses';
-        value: string | TransitiveJoinCourse;
+        relationTo: 'transitive-join-songs';
+        value: string | TransitiveJoinSong;
       } | null)
     | ({
-        relationTo: 'transitive-join-lessons';
-        value: string | TransitiveJoinLesson;
+        relationTo: 'transitive-join-albums';
+        value: string | TransitiveJoinAlbum;
       } | null)
     | ({
-        relationTo: 'transitive-join-quests';
-        value: string | TransitiveJoinQuest;
+        relationTo: 'transitive-join-artists';
+        value: string | TransitiveJoinArtist;
       } | null)
     | ({
         relationTo: 'movieReviews';
@@ -874,30 +874,30 @@ export interface DirectorsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "transitive-join-courses_select".
+ * via the `definition` "transitive-join-songs_select".
  */
-export interface TransitiveJoinCoursesSelect<T extends boolean = true> {
+export interface TransitiveJoinSongsSelect<T extends boolean = true> {
   name?: T;
-  lessons?: T;
+  albums?: T;
   updatedAt?: T;
   createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "transitive-join-lessons_select".
+ * via the `definition` "transitive-join-albums_select".
  */
-export interface TransitiveJoinLessonsSelect<T extends boolean = true> {
-  quest?: T;
-  course?: T;
+export interface TransitiveJoinAlbumsSelect<T extends boolean = true> {
+  artist?: T;
+  song?: T;
   updatedAt?: T;
   createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "transitive-join-quests_select".
+ * via the `definition` "transitive-join-artists_select".
  */
-export interface TransitiveJoinQuestsSelect<T extends boolean = true> {
-  lesson?: T;
+export interface TransitiveJoinArtistsSelect<T extends boolean = true> {
+  album?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1134,9 +1134,9 @@ export interface CollectionQueryWidget {
       | 'screenings'
       | 'movies'
       | 'directors'
-      | 'transitive-join-courses'
-      | 'transitive-join-lessons'
-      | 'transitive-join-quests'
+      | 'transitive-join-songs'
+      | 'transitive-join-albums'
+      | 'transitive-join-artists'
       | 'movieReviews'
       | 'polymorphic-relationships'
       | 'tree'
@@ -1182,9 +1182,9 @@ export interface ActivityWidget {
           | 'screenings'
           | 'movies'
           | 'directors'
-          | 'transitive-join-courses'
-          | 'transitive-join-lessons'
-          | 'transitive-join-quests'
+          | 'transitive-join-songs'
+          | 'transitive-join-albums'
+          | 'transitive-join-artists'
           | 'movieReviews'
           | 'polymorphic-relationships'
           | 'tree'

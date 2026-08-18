@@ -300,44 +300,44 @@ export default buildConfigWithDefaults({
       versions: false,
     },
     {
-      slug: 'transitive-join-courses',
+      slug: 'transitive-join-songs',
       fields: [
         {
           name: 'name',
           type: 'text',
         },
         {
-          name: 'lessons',
+          name: 'albums',
           type: 'relationship',
-          relationTo: 'transitive-join-lessons',
+          relationTo: 'transitive-join-albums',
           hasMany: true,
         },
       ],
     },
     {
-      slug: 'transitive-join-lessons',
+      slug: 'transitive-join-albums',
       fields: [
         {
-          name: 'quest',
+          name: 'artist',
           type: 'relationship',
-          relationTo: 'transitive-join-quests',
+          relationTo: 'transitive-join-artists',
         },
         {
-          name: 'course',
+          name: 'song',
           type: 'join',
-          collection: 'transitive-join-courses',
-          on: 'lessons',
+          collection: 'transitive-join-songs',
+          on: 'albums',
         },
       ],
     },
     {
-      slug: 'transitive-join-quests',
+      slug: 'transitive-join-artists',
       fields: [
         {
-          name: 'lesson',
+          name: 'album',
           type: 'join',
-          collection: 'transitive-join-lessons',
-          on: 'quest',
+          collection: 'transitive-join-albums',
+          on: 'artist',
         },
       ],
     },
