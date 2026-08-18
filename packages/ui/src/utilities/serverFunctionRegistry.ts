@@ -1,7 +1,7 @@
 import type { ServerFunction } from 'payload'
 
 import { renderTabHandler } from '../elements/Nav/SidebarTabs/renderTabServerFn.js'
-import { _internal_renderFieldHandler } from '../forms/fieldSchemasToFormState/serverFunctions/renderFieldServerFn.js'
+import { renderFieldHandler } from '../forms/fieldSchemasToFormState/serverFunctions/renderFieldServerFn.js'
 import { getDefaultLayoutHandler, renderWidgetHandler } from '../views/Dashboard/serverFunctions.js'
 import { renderDocumentHandler } from '../views/Document/handleServerFunction.js'
 import { renderDocumentSlotsHandler } from '../views/Document/renderDocumentSlots.js'
@@ -36,7 +36,7 @@ export const sharedServerFunctions: Record<string, ServerFunction<any, any>> = {
   'get-default-layout': getDefaultLayoutHandler,
   'render-document': renderDocumentHandler,
   'render-document-slots': renderDocumentSlotsHandler,
-  'render-field': _internal_renderFieldHandler,
+  'render-field': renderFieldHandler,
   'render-list': renderListHandler,
   'render-tab': renderTabHandler,
   'render-widget': renderWidgetHandler,

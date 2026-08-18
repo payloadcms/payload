@@ -4,7 +4,7 @@
  *
  * @internal
  */
-export const _internal_jobSystemGlobals = {
+export const jobSystemGlobals = {
   getCurrentDate: () => {
     return new Date()
   },
@@ -13,13 +13,13 @@ export const _internal_jobSystemGlobals = {
 }
 
 /** @internal */
-export function _internal_resetJobSystemGlobals() {
-  _internal_jobSystemGlobals.getCurrentDate = () => new Date()
-  _internal_jobSystemGlobals.shouldAutoRun = true
-  _internal_jobSystemGlobals.shouldAutoSchedule = true
+export function resetJobSystemGlobals() {
+  jobSystemGlobals.getCurrentDate = () => new Date()
+  jobSystemGlobals.shouldAutoRun = true
+  jobSystemGlobals.shouldAutoSchedule = true
 }
 
 /** @internal */
 export const getCurrentDate: () => Date = () => {
-  return _internal_jobSystemGlobals.getCurrentDate()
+  return jobSystemGlobals.getCurrentDate()
 }

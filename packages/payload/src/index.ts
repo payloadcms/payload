@@ -141,7 +141,7 @@ import {
 import { consoleEmailAdapter } from './email/consoleEmailAdapter.js'
 import { fieldAffectsData, type FlattenedBlock } from './fields/config/types.js'
 import { getJobsLocalAPI } from './queues/localAPI.js'
-import { _internal_jobSystemGlobals } from './queues/utilities/getCurrentDate.js'
+import { jobSystemGlobals } from './queues/utilities/getCurrentDate.js'
 import { formatAdminURL } from './utilities/formatAdminURL.js'
 import { isNextBuild } from './utilities/isNextBuild.js'
 import { getLogger } from './utilities/logger.js'
@@ -800,7 +800,7 @@ export class BasePayload {
             cronConfig.cron ?? DEFAULT_CRON,
             async () => {
               if (
-                _internal_jobSystemGlobals.shouldAutoSchedule &&
+                jobSystemGlobals.shouldAutoSchedule &&
                 !cronConfig.disableScheduling &&
                 this.config.jobs.scheduling
               ) {
@@ -810,7 +810,7 @@ export class BasePayload {
                 })
               }
 
-              if (!_internal_jobSystemGlobals.shouldAutoRun) {
+              if (!jobSystemGlobals.shouldAutoRun) {
                 return
               }
 

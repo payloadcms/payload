@@ -13,7 +13,7 @@ export type {
   RenderTabServerFnReturnType,
 } from '../../elements/Nav/SidebarTabs/renderTabServerFn.js'
 export { renderField } from '../../forms/fieldSchemasToFormState/renderField.js'
-export { _internal_renderFieldHandler } from '../../forms/fieldSchemasToFormState/serverFunctions/renderFieldServerFn.js'
+export { renderFieldHandler } from '../../forms/fieldSchemasToFormState/serverFunctions/renderFieldServerFn.js'
 export { metadata, RootLayout } from '../../layouts/Root/index.js'
 export { buildFormState, buildFormStateHandler } from '../../utilities/buildFormState.js'
 export { buildTableStateHandler } from '../../utilities/buildTableState.js'

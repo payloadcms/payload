@@ -1,5 +1,5 @@
 import { countRunnableOrActiveJobsForQueue, createLocalReq, type Payload } from 'payload'
-import { _internal_jobSystemGlobals } from 'payload/internal'
+import { jobSystemGlobals } from 'payload/internal'
 
 export async function waitUntilAutorunIsDone({
   payload,
@@ -29,30 +29,30 @@ export async function waitUntilAutorunIsDone({
 
 export function timeFreeze() {
   const curDate = new Date()
-  _internal_jobSystemGlobals.getCurrentDate = () => curDate
+  jobSystemGlobals.getCurrentDate = () => curDate
 }
 
 export function timeTravel(seconds: number) {
-  const curDate = _internal_jobSystemGlobals.getCurrentDate()
-  _internal_jobSystemGlobals.getCurrentDate = () => new Date(curDate.getTime() + seconds * 1000)
+  const curDate = jobSystemGlobals.getCurrentDate()
+  jobSystemGlobals.getCurrentDate = () => new Date(curDate.getTime() + seconds * 1000)
 }
 
 export async function withoutAutoRun<T>(fn: () => Promise<T>): Promise<T> {
-  const originalValue = _internal_jobSystemGlobals.shouldAutoRun
-  _internal_jobSystemGlobals.shouldAutoRun = false
+  const originalValue = jobSystemGlobals.shouldAutoRun
+  jobSystemGlobals.shouldAutoRun = false
   try {
     return await fn()
   } finally {
-    _internal_jobSystemGlobals.shouldAutoRun = originalValue
+    jobSystemGlobals.shouldAutoRun = originalValue
   }
 }
 
 export async function withoutAutoSchedule<T>(fn: () => Promise<T>): Promise<T> {
-  const originalValue = _internal_jobSystemGlobals.shouldAutoSchedule
-  _internal_jobSystemGlobals.shouldAutoSchedule = false
+  const originalValue = jobSystemGlobals.shouldAutoSchedule
+  jobSystemGlobals.shouldAutoSchedule = false
   try {
     return await fn()
   } finally {
-    _internal_jobSystemGlobals.shouldAutoSchedule = originalValue
+    jobSystemGlobals.shouldAutoSchedule = originalValue
   }
 }

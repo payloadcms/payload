@@ -7,7 +7,7 @@ import { Agent, fetch as undiciFetch } from 'undici'
 /**
  * @internal this is used to mock the IP `lookup` function in integration tests
  */
-export const _internal_safeFetchGlobal = {
+export const safeFetchGlobal = {
   lookup,
 }
 
@@ -33,7 +33,7 @@ const isSafeIp = (ip: string) => {
 }
 
 const ssrfFilterInterceptor: LookupFunction = (hostname, options, callback) => {
-  _internal_safeFetchGlobal.lookup(hostname, options, (err, address, family) => {
+  safeFetchGlobal.lookup(hostname, options, (err, address, family) => {
     if (err) {
       callback(err, address, family)
     } else {

@@ -1,7 +1,7 @@
 import type { Payload } from 'payload'
 
 import path from 'path'
-import { _internal_jobSystemGlobals, _internal_resetJobSystemGlobals } from 'payload/internal'
+import { jobSystemGlobals, resetJobSystemGlobals } from 'payload/internal'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
@@ -34,24 +34,24 @@ describe('Queues - scheduling, without automatic scheduling handling', () => {
 
   afterAll(async () => {
     // Ensure no new crons are scheduled
-    _internal_jobSystemGlobals.shouldAutoRun = false
-    _internal_jobSystemGlobals.shouldAutoSchedule = false
+    jobSystemGlobals.shouldAutoRun = false
+    jobSystemGlobals.shouldAutoSchedule = false
     // Wait 3 seconds to ensure all currently-running crons are done. If we shut down the db while a function is running, it can cause issues
     // Cron function runs may persist after a test has finished
     await wait(3000)
     // Now we can destroy the payload instance
     await payload.destroy()
-    _internal_resetJobSystemGlobals()
+    resetJobSystemGlobals()
   })
 
   afterEach(() => {
-    _internal_resetJobSystemGlobals()
+    resetJobSystemGlobals()
   })
 
   beforeEach(async () => {
     // Set autorun to false during seed process to ensure no crons are scheduled, which may affect the tests
-    _internal_jobSystemGlobals.shouldAutoRun = false
-    _internal_jobSystemGlobals.shouldAutoSchedule = false
+    jobSystemGlobals.shouldAutoRun = false
+    jobSystemGlobals.shouldAutoSchedule = false
     await clearAndSeedEverything(payload)
     const data = await restClient
       .POST('/users/login', {
@@ -66,8 +66,8 @@ describe('Queues - scheduling, without automatic scheduling handling', () => {
       token = data.token
     }
     payload.config.jobs.deleteJobOnComplete = true
-    _internal_jobSystemGlobals.shouldAutoRun = true
-    _internal_jobSystemGlobals.shouldAutoSchedule = true
+    jobSystemGlobals.shouldAutoRun = true
+    jobSystemGlobals.shouldAutoSchedule = true
   })
 
   it('can auto-schedule through local API and autorun jobs', async () => {

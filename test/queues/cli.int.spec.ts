@@ -1,6 +1,6 @@
 import path from 'path'
 import { getPayload, migrateCLI, type SanitizedConfig } from 'payload'
-import { _internal_jobSystemGlobals, _internal_resetJobSystemGlobals } from 'payload/internal'
+import { jobSystemGlobals, resetJobSystemGlobals } from 'payload/internal'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 import { beforeAll, describe, expect, it } from 'vitest'
@@ -53,15 +53,15 @@ describe('Queues - CLI', () => {
 
     // Shut down safely:
     // Ensure no new crons are scheduled
-    _internal_jobSystemGlobals.shouldAutoRun = false
-    _internal_jobSystemGlobals.shouldAutoSchedule = false
+    jobSystemGlobals.shouldAutoRun = false
+    jobSystemGlobals.shouldAutoSchedule = false
     // Wait 3 seconds to ensure all currently-running crons are done. If we shut down the db while a function is running, it can cause issues
     // Cron function runs may persist after a test has finished
     await wait(3000)
     // Now we can destroy the payload instance
     await _payload2.destroy()
     await payload.destroy()
-    _internal_resetJobSystemGlobals()
+    resetJobSystemGlobals()
   })
 
   it('can run migrate CLI without jobs attempting to run', async () => {

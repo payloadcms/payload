@@ -48,7 +48,7 @@ export type RenderFieldServerFnReturnType = {} & FieldState['customComponents']
  *
  * @internal
  */
-export const _internal_renderFieldHandler: ServerFunction<
+export const renderFieldHandler: ServerFunction<
   RenderFieldServerFnArgs,
   Promise<RenderFieldServerFnReturnType>
   // eslint-disable-next-line @typescript-eslint/require-await

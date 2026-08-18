@@ -7,7 +7,7 @@ import { createServer } from 'http'
 import os from 'os'
 import path from 'path'
 import { createPayloadRequest, getFileByPath } from 'payload'
-import { _internal_safeFetchGlobal } from 'payload/internal'
+import { safeFetchGlobal } from 'payload/internal'
 import { fileURLToPath } from 'url'
 import { promisify } from 'util'
 import { afterAll, afterEach, beforeAll, describe, expect, it, vitest } from 'vitest'
@@ -1190,7 +1190,7 @@ describe('Collections - Uploads', () => {
       `(
         'should block or filter uploading from $collection with URL: $url',
         async ({ url, collection, errorContains }) => {
-          const globalCachedFn = _internal_safeFetchGlobal.lookup
+          const globalCachedFn = safeFetchGlobal.lookup
 
           let hostname = new URL(url).hostname
 
@@ -1204,7 +1204,7 @@ describe('Collections - Uploads', () => {
           // Here we're essentially mocking our own DNS provider, to get 'https://www.payloadcms.com/test.png' to resolve to the IP
           // we'd like to test for
           // @ts-expect-error this does not need to be mocked 100% correctly
-          _internal_safeFetchGlobal.lookup = (_hostname, _options, callback) => {
+          safeFetchGlobal.lookup = (_hostname, _options, callback) => {
             callback(null, hostname as any, isIPV6 ? 6 : 4)
           }
 
@@ -1225,7 +1225,7 @@ describe('Collections - Uploads', () => {
             }),
           )
 
-          _internal_safeFetchGlobal.lookup = globalCachedFn
+          safeFetchGlobal.lookup = globalCachedFn
 
           // Now ensure this throws if we pass the IP address directly, without the mock
           await expect(
@@ -2327,10 +2327,10 @@ describe('Collections - Uploads', () => {
     })
 
     it('should validate resolved addresses', async () => {
-      const globalCachedFn = _internal_safeFetchGlobal.lookup
+      const globalCachedFn = safeFetchGlobal.lookup
 
       // @ts-expect-error mock lookup
-      _internal_safeFetchGlobal.lookup = (_hostname, _options, callback) => {
+      safeFetchGlobal.lookup = (_hostname, _options, callback) => {
         callback(null, '127.0.0.1' as any, 4)
       }
 
@@ -2340,7 +2340,7 @@ describe('Collections - Uploads', () => {
         })
         expect(response.status).toBe(500)
       } finally {
-        _internal_safeFetchGlobal.lookup = globalCachedFn
+        safeFetchGlobal.lookup = globalCachedFn
       }
     })
 

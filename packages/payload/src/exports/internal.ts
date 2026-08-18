@@ -10,9 +10,9 @@ export { validateBlocksFilterOptions } from '../fields/validations.js'
 export { jobAfterRead } from '../queues/config/collection.js'
 export { importHandlerPath } from '../queues/operations/runJobs/runJob/importHandlerPath.js'
 export {
-  _internal_jobSystemGlobals,
-  _internal_resetJobSystemGlobals,
   getCurrentDate,
+  jobSystemGlobals,
+  resetJobSystemGlobals,
 } from '../queues/utilities/getCurrentDate.js'
 export { getUploadInstructions } from '../uploads/endpoints/uploadInstructions.js'
 export { getExternalFile } from '../uploads/getExternalFile.js'
@@ -20,7 +20,7 @@ export { getFileFromUploadInstructions } from '../uploads/getFileFromUploadInstr
 export { getRangeRequestInfo } from '../uploads/getRangeRequestInfo.js'
 export { getSafeFileName } from '../uploads/getSafeFilename.js'
 export { parseRangeHeader } from '../uploads/parseRangeHeader.js'
-export { _internal_safeFetchGlobal } from '../uploads/safeFetch.js'
+export { safeFetchGlobal } from '../uploads/safeFetch.js'
 export { getEntityPermissions } from '../utilities/getEntityPermissions/getEntityPermissions.js'
 export { isURLAllowed } from '../utilities/isURLAllowed.js'
 export { reload } from '../utilities/reload.js'
