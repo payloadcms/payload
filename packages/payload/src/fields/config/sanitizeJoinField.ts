@@ -109,7 +109,7 @@ export const sanitizeJoinField = ({
 
   if (relationshipField.pathHasLocalized) {
     join.getForeignPath = ({ locale }) => {
-      return relationshipField.localizedPath.replace('<locale>', locale!)
+      return relationshipField.localizedPath.replaceAll('<locale>', locale!)
     }
   }
 
