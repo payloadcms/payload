@@ -9,14 +9,6 @@ import { fileURLToPath } from 'url'
 import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { Config, Post } from './payload-types.js'
 
-import {
-  ensureCompilationIsDone,
-  initPageConsoleErrorCatch,
-  saveDocAndAssert,
-  throttleTest,
-  waitForFormReady,
-} from '../__helpers/e2e/helpers.js'
-import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { assertElementStaysVisible } from '../__helpers/e2e/assertElementStaysVisible.js'
 import { assertNetworkRequests } from '../__helpers/e2e/assertNetworkRequests.js'
 import { assertRequestBody } from '../__helpers/e2e/assertRequestBody.js'
@@ -27,7 +19,15 @@ import {
   removeArrayRow,
 } from '../__helpers/e2e/fields/array/index.js'
 import { addBlock } from '../__helpers/e2e/fields/blocks/index.js'
+import {
+  ensureCompilationIsDone,
+  initPageConsoleErrorCatch,
+  saveDocAndAssert,
+  throttleTest,
+  waitForFormReady,
+} from '../__helpers/e2e/helpers.js'
 import { waitForAutoSaveToRunAndComplete } from '../__helpers/e2e/waitForAutoSaveToRunAndComplete.js'
+import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { autosavePostsSlug } from './collections/Autosave/index.js'
@@ -267,6 +267,33 @@ test.describe('Form State', () => {
     ).toHaveValue('2')
 
     await page.unroute(postsUrl.create)
+  })
+
+  test('should update the document title after a burst of input events', async () => {
+    const updatedTitle = '[검증용] PR #242 E2E 확인 — 곧 삭제됩니다'
+
+    await page.goto(postsUrl.create)
+    await waitForFormReady(page)
+
+    const titleField = page.locator('#field-title')
+
+    await titleField.evaluate((field: HTMLInputElement, value) => {
+      const setValue = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set
+
+      for (let index = 1; index <= value.length; index++) {
+        setValue?.call(field, value.slice(0, index))
+        field.dispatchEvent(
+          new InputEvent('input', {
+            bubbles: true,
+            data: value[index - 1],
+            inputType: 'insertText',
+          }),
+        )
+      }
+    }, updatedTitle)
+
+    await expect(titleField).toHaveValue(updatedTitle)
+    await expect(page.locator('.doc-header__title')).toHaveText(updatedTitle)
   })
 
   // TODO: This test is not very reliable but would be really nice to have
