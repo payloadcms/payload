@@ -136,17 +136,20 @@
 
   /* Count of selected items nested under a row, so a collapsed branch still reads as having picks */
   .hierarchy-column-item__descendant-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: var(--spacer-3);
     min-width: var(--spacer-3);
     padding-inline: var(--spacer-1);
-    border-radius: var(--radius-full);
-    background-color: var(--color-bg-secondary);
-    color: var(--color-text-secondary);
-    font-family: var(--text-body-small-strong-font-family);
-    font-size: var(--text-body-small-strong-font-size);
-    font-weight: var(--text-body-small-strong-font-weight);
-    line-height: var(--spacer-3);
-    letter-spacing: var(--text-body-small-strong-letter-spacing);
-    text-align: center;
+    border-radius: var(--radius-medium);
+    background-color: var(--color-bg-tertiary);
+    color: var(--color-text);
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--text-body-medium-font-size);
+    font-weight: var(--text-body-medium-font-weight);
+    line-height: var(--text-body-medium-line-height);
+    letter-spacing: var(--text-body-medium-letter-spacing);
     pointer-events: none;
   }
 
