@@ -1,11 +1,13 @@
 import type { Payload } from 'payload'
 
 import {
+  acquireMigrationLock,
   commitTransaction,
   createLocalReq,
   initTransaction,
   killTransaction,
   readMigrationFiles,
+  releaseMigrationLock,
 } from 'payload'
 import prompts from 'prompts'
 
@@ -27,63 +29,91 @@ export const migrate: DrizzleAdapter['migrate'] = async function migrate(
     return
   }
 
-  if ('createExtensions' in this && typeof this.createExtensions === 'function') {
-    await this.createExtensions()
+  // Create request context for lock operations
+  const lockReq = await createLocalReq({}, payload)
+
+  // Try to acquire migration lock
+  const { acquired, instanceId } = await acquireMigrationLock({
+    payload,
+    req: lockReq,
+    timeout: 300000, // 5 minutes
+  })
+
+  if (!acquired) {
+    payload.logger.info({
+      msg: 'Another instance is running migrations. Skipping.',
+    })
+    return
   }
 
-  let latestBatch = 0
-  let migrationsInDB = []
+  payload.logger.info({
+    instanceId,
+    msg: 'Acquired migration lock',
+  })
 
-  const hasMigrationTable = await migrationTableExists(this)
+  try {
+    if ('createExtensions' in this && typeof this.createExtensions === 'function') {
+      await this.createExtensions()
+    }
 
-  if (hasMigrationTable) {
-    ;({ docs: migrationsInDB } = await payload.find({
-      collection: 'payload-migrations',
-      limit: 0,
-      sort: '-name',
-    }))
+    let latestBatch = 0
+    let migrationsInDB = []
 
-    if (migrationsInDB.find((m) => m.batch === -1)) {
-      const { confirm: runMigrations } = await prompts(
-        {
-          name: 'confirm',
-          type: 'confirm',
-          initial: false,
-          message:
-            "It looks like you've run Payload in dev mode, meaning you've dynamically pushed changes to your database.\n\n" +
-            "If you'd like to run migrations, data loss will occur. Would you like to proceed?",
-        },
-        {
-          onCancel: () => {
-            process.exit(0)
+    const hasMigrationTable = await migrationTableExists(this)
+
+    if (hasMigrationTable) {
+      ;({ docs: migrationsInDB } = await payload.find({
+        collection: 'payload-migrations',
+        limit: 0,
+        sort: '-name',
+      }))
+
+      if (migrationsInDB.find((m) => m.batch === -1)) {
+        const { confirm: runMigrations } = await prompts(
+          {
+            name: 'confirm',
+            type: 'confirm',
+            initial: false,
+            message:
+              "It looks like you've run Payload in dev mode, meaning you've dynamically pushed changes to your database.\n\n" +
+              "If you'd like to run migrations, data loss will occur. Would you like to proceed?",
           },
-        },
-      )
+          {
+            onCancel: () => {
+              process.exit(0)
+            },
+          },
+        )
 
-      if (!runMigrations) {
-        process.exit(0)
+        if (!runMigrations) {
+          process.exit(0)
+        }
+        // ignore the dev migration so that the latest batch number increments correctly
+        migrationsInDB = migrationsInDB.filter((m) => m.batch !== -1)
       }
-      // ignore the dev migration so that the latest batch number increments correctly
-      migrationsInDB = migrationsInDB.filter((m) => m.batch !== -1)
+
+      if (Number(migrationsInDB?.[0]?.batch) > 0) {
+        latestBatch = Number(migrationsInDB[0]?.batch)
+      }
     }
 
-    if (Number(migrationsInDB?.[0]?.batch) > 0) {
-      latestBatch = Number(migrationsInDB[0]?.batch)
+    const newBatch = latestBatch + 1
+
+    // Execute 'up' function for each migration sequentially
+    for (const migration of migrationFiles) {
+      const alreadyRan = migrationsInDB.find((existing) => existing.name === migration.name)
+
+      // If already ran, skip
+      if (alreadyRan) {
+        continue
+      }
+
+      await runMigrationFile(payload, migration, newBatch)
     }
-  }
-
-  const newBatch = latestBatch + 1
-
-  // Execute 'up' function for each migration sequentially
-  for (const migration of migrationFiles) {
-    const alreadyRan = migrationsInDB.find((existing) => existing.name === migration.name)
-
-    // If already ran, skip
-    if (alreadyRan) {
-      continue
-    }
-
-    await runMigrationFile(payload, migration, newBatch)
+  } finally {
+    // Always release lock, even on error
+    await releaseMigrationLock({ instanceId, payload, req: lockReq })
+    payload.logger.info({ instanceId, msg: 'Released migration lock' })
   }
 }
 

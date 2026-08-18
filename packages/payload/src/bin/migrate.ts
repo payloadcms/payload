@@ -22,6 +22,7 @@ export const availableCommands = [
   'migrate:reset',
   'migrate:status',
   'migrate:fresh',
+  'migrate:unlock',
 ]
 
 const availableCommandsMsg = `Available commands: ${availableCommands.join(', ')}`
@@ -124,6 +125,55 @@ export const migrate = async ({ config, migrationDir, parsedArgs }: Args): Promi
       break
     case 'migrate:status':
       await adapter.migrateStatus()
+
+      // Display lock status
+      try {
+        const lock = await payload.findGlobal({
+          slug: 'payload-migrations-lock',
+        })
+
+        payload.logger.info({ msg: '\nMigration Lock Status:' })
+        payload.logger.info({ msg: `  Locked: ${lock.locked ? 'Yes' : 'No'}` })
+
+        if (lock.locked) {
+          payload.logger.info({ msg: `  Locked by: ${lock.locked_by}` })
+          payload.logger.info({ msg: `  Locked at: ${lock.locked_at}` })
+          payload.logger.info({ msg: `  Expires at: ${lock.expires_at}` })
+          const isStale = lock.expires_at && lock.expires_at < new Date()
+          payload.logger.info({ msg: `  Status: ${isStale ? 'STALE' : 'Active'}` })
+        }
+      } catch (err) {
+        // Lock global might not exist yet
+        payload.logger.info({ msg: '\nMigration Lock Status: Not initialized' })
+      }
+      break
+    case 'migrate:unlock':
+      try {
+        const lock = await payload.findGlobal({
+          slug: 'payload-migrations-lock',
+        })
+
+        if (!lock.locked) {
+          payload.logger.info({ msg: 'Migration lock is not currently held' })
+          process.exit(0)
+        }
+
+        await payload.updateGlobal({
+          slug: 'payload-migrations-lock',
+          data: { locked: false },
+        })
+
+        payload.logger.info({
+          msg: 'Migration lock forcibly released',
+          was_locked_by: lock.locked_by,
+        })
+      } catch (err) {
+        payload.logger.error({
+          err,
+          msg: 'Failed to unlock migrations. Lock global may not be initialized.',
+        })
+        process.exit(1)
+      }
       break
 
     default:
