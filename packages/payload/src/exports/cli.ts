@@ -1,6 +1,7 @@
 export { defineCLICommand } from '../cli/defineCLICommand.js'
 export type { CLIInputSchema } from '../cli/defineCLICommand.js'
 export { bin, createProgram } from '../cli/index.js'
+export { strictObject } from '../cli/zod.js'
 export type { CLIArgs, CLICommand, CLICommandEntry, CLICommands } from '../config/types.js'
 export { Argument, Command, Option } from 'commander'
-export { z } from 'zod'
+export { z } from 'zod/mini'

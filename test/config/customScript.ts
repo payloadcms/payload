@@ -1,5 +1,5 @@
 import { writeFileSync } from 'fs'
-import { defineCLICommand, z } from 'payload/cli'
+import { defineCLICommand, strictObject } from 'payload/cli'
 
 import { testFilePath } from './testFilePath.js'
 
@@ -11,7 +11,7 @@ export const createStartServerCommand = defineCLICommand({
 
     writeFileSync(testFilePath, JSON.stringify(data), 'utf-8')
   },
-  input: z.strictObject({}),
+  input: strictObject({}),
 })
 
 // eslint-disable-next-line no-restricted-exports

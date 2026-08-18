@@ -63,15 +63,14 @@ In Payload 4.0, define a real CLI command instead:
 
 ```ts
 // seed.ts
-import { defineCLICommand, z } from 'payload/cli'
+import { defineCLICommand, strictObject, z } from 'payload/cli'
 
 export const seedCommand = defineCLICommand({
   description: 'Seed the database.',
-  input: z.strictObject({
+  input: strictObject({
     clear: z
-      .boolean()
-      .default(false)
-      .describe('Delete existing documents first.'),
+      ._default(z.boolean(), false)
+      .check(z.describe('Delete existing documents first.')),
   }),
   handler: async ({ args, getPayload }) => {
     const payload = await getPayload()
