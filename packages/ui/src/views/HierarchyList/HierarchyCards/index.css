@@ -70,6 +70,14 @@
   }
 
   /*
+   * Cards stay in place while they are being dragged and fade instead, so the row keeps its shape and
+   * the stack under the cursor is the thing that reads as moving.
+   */
+  .hierarchy-card-grid__item--dragging {
+    opacity: 0.5;
+  }
+
+  /*
    * Drag-selection marquee: an accent hairline over a translucent accent fill, mirroring the
    * file-browser treatment. Absolutely positioned, so it stays out of the bands' flow, and inert
    * so it never intercepts the pointer mid-drag.

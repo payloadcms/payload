@@ -139,9 +139,19 @@ export const PlaneItem: React.FC<PlaneItemProps> = ({
     registerNode(flatIndex, node)
   }
 
-  // Dragged cards stay in place but read as lifted, matching the drag overlay following the cursor.
+  /*
+   * Every card in the active drag fades, not just the one under the pointer, so a multi-card move
+   * shows what is travelling. Membership is tested against the drag's own items rather than by
+   * comparing payload identity, which would silently stop matching the moment the plane re-rendered
+   * and rebuilt the shared selection payload mid-drag.
+   */
   const isBeingDragged =
-    isDragging || (Boolean(activeDrag) && isSelected && activeDrag === selectionDragData)
+    isDragging ||
+    Boolean(
+      activeDrag?.items.some(
+        (item) => item.collectionSlug === row._collectionSlug && String(item.id) === String(row.id),
+      ),
+    )
 
   /*
    * dnd-kit's sensors activate through listeners named exactly `onPointerDown` and `onKeyDown`, which
