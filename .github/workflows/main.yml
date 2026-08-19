@@ -553,6 +553,19 @@ jobs:
           path: packages/*/dist
           key: dist-${{ github.sha }}
 
+      # `pnpm install` still runs inside the container (see the job comment on why), but this
+      # avoids re-downloading every package from the registry each run. Safe across environments
+      # because pnpm's side-effects cache (built native addons like sharp) is itself keyed by
+      # platform/arch/Node version, so a mismatched entry is rebuilt rather than reused. Read-write
+      # (not cache/restore) so a lockfile change or a newly-cached package gets saved back.
+      - name: Restore pnpm store cache
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: .pnpm-store
+          key: visual-pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            visual-pnpm-store-
+
       - name: Run visual regression tests
         # PLAYWRIGHT_VERSION is read from package.json, which on a `pull_request` checkout is
         # fork-controlled content — passed via env and referenced as "$PLAYWRIGHT_VERSION" so it's
@@ -572,6 +585,9 @@ jobs:
             bash -lc "
               apt-get update -qq && apt-get install -y -qq build-essential python3 > /dev/null &&
               npm install -g pnpm@\$(grep '^pnpm ' .tool-versions | awk '{print \$2}') &&
+              # --location=user avoids writing storeDir into pnpm-workspace.yaml, which pnpm
+              # does by default when the cwd is a workspace root.
+              pnpm config set store-dir /repo/.pnpm-store --location=user &&
               pnpm install --frozen-lockfile &&
               ( [ -d packages/payload/dist ] || pnpm run build:all ) &&
               pnpm prepare-run-test-against-prod:ci &&
