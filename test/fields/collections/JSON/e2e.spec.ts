@@ -76,6 +76,7 @@ describe('JSON', () => {
     const longDoc = await payload.create({
       collection: jsonFieldsSlug,
       data: { json: longJsonData },
+      overrideAccess: true,
     })
 
     // Create a document with short JSON (<100 chars)
@@ -84,6 +85,7 @@ describe('JSON', () => {
     const shortDoc = await payload.create({
       collection: jsonFieldsSlug,
       data: { json: shortJsonData },
+      overrideAccess: true,
     })
 
     await page.goto(url.list)
@@ -122,6 +124,7 @@ describe('JSON', () => {
     const doc = await payload.create({
       collection: jsonFieldsSlug,
       data: { json: slightlyLongJsonData },
+      overrideAccess: true,
     })
 
     await page.goto(url.list)
@@ -187,6 +190,7 @@ describe('JSON', () => {
           default: 'value',
         },
       },
+      overrideAccess: true,
     })
 
     await page.goto(url.edit(createdDoc.id))

@@ -21,6 +21,7 @@ export const retriesBackoffTestWorkflow: WorkflowConfig<'retriesBackoffTest'> = 
         },
       },
       id: job.id,
+      overrideAccess: true,
     })
     job.input = newJob.input as any
 
@@ -34,6 +35,7 @@ export const retriesBackoffTestWorkflow: WorkflowConfig<'retriesBackoffTest'> = 
           data: {
             title: 'should not exist',
           },
+          overrideAccess: true,
         })
 
         // @ts-expect-error timeTried is new arbitrary data and not in the type
@@ -51,6 +53,7 @@ export const retriesBackoffTestWorkflow: WorkflowConfig<'retriesBackoffTest'> = 
             input: job.input,
           },
           id: job.id,
+          overrideAccess: true,
         })
         job.input = updated.input as any
 
@@ -60,6 +63,7 @@ export const retriesBackoffTestWorkflow: WorkflowConfig<'retriesBackoffTest'> = 
             collection: 'simple',
             id,
             req,
+            overrideAccess: true,
           })
 
           // Last try it should succeed

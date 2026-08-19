@@ -20,6 +20,7 @@ test.suite({ config: configPath })('@payloadcms/plugin-import-export — field-l
     const loginResult = await payload.login({
       collection: 'users',
       data: { email: devUser.email, password: devUser.password },
+      overrideAccess: true,
     })
 
     user = loginResult.user!
@@ -30,9 +31,14 @@ test.suite({ config: configPath })('@payloadcms/plugin-import-export — field-l
       collection: postsWithFieldHooksSlug,
       limit: 1000,
       pagination: false,
+      overrideAccess: true,
     })
     for (const doc of existing.docs) {
-      await payload.delete({ collection: postsWithFieldHooksSlug, id: doc.id })
+      await payload.delete({
+        collection: postsWithFieldHooksSlug,
+        id: doc.id,
+        overrideAccess: true,
+      })
     }
   })
 
@@ -45,6 +51,7 @@ test.suite({ config: configPath })('@payloadcms/plugin-import-export — field-l
       const post = await payload.create({
         collection: postsWithFieldHooksSlug,
         data: { customExport: 'raw value', title: 'Field Export Test' },
+        overrideAccess: true,
       })
 
       let exportDoc = await payload.create({
@@ -55,11 +62,13 @@ test.suite({ config: configPath })('@payloadcms/plugin-import-export — field-l
           where: { id: { equals: post.id } },
         },
         user,
+        overrideAccess: true,
       })
 
       exportDoc = await payload.findByID({
         id: exportDoc.id,
         collection: 'posts-with-field-hooks-export',
+        overrideAccess: true,
       })
 
       const csvPath = path.join(dirname, 'uploads', exportDoc.filename as string)
@@ -73,6 +82,7 @@ test.suite({ config: configPath })('@payloadcms/plugin-import-export — field-l
       const post = await payload.create({
         collection: postsWithFieldHooksSlug,
         data: { customExport: 'test', title: 'Format CSV Test' },
+        overrideAccess: true,
       })
 
       let exportDoc = await payload.create({
@@ -83,11 +93,13 @@ test.suite({ config: configPath })('@payloadcms/plugin-import-export — field-l
           where: { id: { equals: post.id } },
         },
         user,
+        overrideAccess: true,
       })
 
       exportDoc = await payload.findByID({
         id: exportDoc.id,
         collection: 'posts-with-field-hooks-export',
+        overrideAccess: true,
       })
 
       const csvPath = path.join(dirname, 'uploads', exportDoc.filename as string)
@@ -101,6 +113,7 @@ test.suite({ config: configPath })('@payloadcms/plugin-import-export — field-l
       const post = await payload.create({
         collection: postsWithFieldHooksSlug,
         data: { customExport: 'test', title: 'Format JSON Test' },
+        overrideAccess: true,
       })
 
       let exportDoc = await payload.create({
@@ -111,11 +124,13 @@ test.suite({ config: configPath })('@payloadcms/plugin-import-export — field-l
           where: { id: { equals: post.id } },
         },
         user,
+        overrideAccess: true,
       })
 
       exportDoc = await payload.findByID({
         id: exportDoc.id,
         collection: 'posts-with-field-hooks-export',
+        overrideAccess: true,
       })
 
       const jsonPath = path.join(dirname, 'uploads', exportDoc.filename as string)
@@ -134,6 +149,7 @@ test.suite({ config: configPath })('@payloadcms/plugin-import-export — field-l
           group: { namedTab: { deepField: 'deep value' } },
           title: 'Deep Field Test',
         },
+        overrideAccess: true,
       })
 
       let exportDoc = await payload.create({
@@ -144,11 +160,13 @@ test.suite({ config: configPath })('@payloadcms/plugin-import-export — field-l
           where: { id: { equals: post.id } },
         },
         user,
+        overrideAccess: true,
       })
 
       exportDoc = await payload.findByID({
         id: exportDoc.id,
         collection: 'posts-with-field-hooks-export',
+        overrideAccess: true,
       })
 
       const csvPath = path.join(dirname, 'uploads', exportDoc.filename as string)
@@ -168,6 +186,7 @@ test.suite({ config: configPath })('@payloadcms/plugin-import-export — field-l
           group: { namedTab: { deepField: 'preview deep value' } },
           title: 'Preview Deep Field Test',
         },
+        overrideAccess: true,
       })
 
       const previewResponse = await restClient
@@ -211,11 +230,13 @@ test.suite({ config: configPath })('@payloadcms/plugin-import-export — field-l
         data: { collectionSlug: postsWithFieldHooksSlug, importMode: 'create' },
         file,
         user,
+        overrideAccess: true,
       })
 
       importDoc = await payload.findByID({
         id: importDoc.id,
         collection: 'posts-with-field-hooks-import',
+        overrideAccess: true,
       })
 
       expect(importDoc.status).toBe('completed')
@@ -224,6 +245,7 @@ test.suite({ config: configPath })('@payloadcms/plugin-import-export — field-l
       const imported = await payload.find({
         collection: postsWithFieldHooksSlug,
         where: { customImport: { equals: 'original_value_imported_csv' } },
+        overrideAccess: true,
       })
       expect(imported.docs).toHaveLength(1)
     })
@@ -250,11 +272,13 @@ test.suite({ config: configPath })('@payloadcms/plugin-import-export — field-l
         },
         file,
         user,
+        overrideAccess: true,
       })
 
       importDoc = await payload.findByID({
         id: importDoc.id,
         collection: 'posts-with-field-hooks-import',
+        overrideAccess: true,
       })
 
       expect(importDoc.status).toBe('completed')
@@ -263,6 +287,7 @@ test.suite({ config: configPath })('@payloadcms/plugin-import-export — field-l
       const imported = await payload.find({
         collection: postsWithFieldHooksSlug,
         where: { customImport: { equals: 'json_value_imported_json' } },
+        overrideAccess: true,
       })
       expect(imported.docs).toHaveLength(1)
     })
@@ -279,6 +304,7 @@ test.suite({ config: configPath })('@payloadcms/plugin-import-export — field-l
       const existing = await payload.create({
         collection: postsWithFieldHooksSlug,
         data: { count: 5, title: 'Empty Cell Update Number Test' },
+        overrideAccess: true,
       })
 
       const csvContent = `id,title,count\n${existing.id},"Empty Cell Update Number Test",`
@@ -298,11 +324,13 @@ test.suite({ config: configPath })('@payloadcms/plugin-import-export — field-l
         },
         file,
         user,
+        overrideAccess: true,
       })
 
       importDoc = await payload.findByID({
         id: importDoc.id,
         collection: 'posts-with-field-hooks-import',
+        overrideAccess: true,
       })
 
       expect(importDoc.status).toBe('completed')
@@ -310,6 +338,7 @@ test.suite({ config: configPath })('@payloadcms/plugin-import-export — field-l
       const after = await payload.findByID({
         id: existing.id,
         collection: postsWithFieldHooksSlug,
+        overrideAccess: true,
       })
 
       expect(after.count).toBe(5)
@@ -331,6 +360,7 @@ test.suite({ config: configPath })('@payloadcms/plugin-import-export — field-l
       const post = await payload.create({
         collection: postsWithFieldHooksSlug,
         data: { customExport: 'raw', title: 'Order Test' },
+        overrideAccess: true,
       })
 
       let exportDoc = await payload.create({
@@ -341,11 +371,13 @@ test.suite({ config: configPath })('@payloadcms/plugin-import-export — field-l
           where: { id: { equals: post.id } },
         },
         user,
+        overrideAccess: true,
       })
 
       exportDoc = await payload.findByID({
         id: exportDoc.id,
         collection: 'posts-with-field-hooks-export',
+        overrideAccess: true,
       })
 
       const csvPath = path.join(dirname, 'uploads', exportDoc.filename as string)
@@ -366,6 +398,7 @@ test.suite({ config: configPath })('@payloadcms/plugin-import-export — field-l
       const post = await payload.create({
         collection: postsWithFieldHooksSlug,
         data: { email: 'USER@EXAMPLE.COM', title: 'Reusable Field Test' },
+        overrideAccess: true,
       })
 
       let exportDoc = await payload.create({
@@ -376,11 +409,13 @@ test.suite({ config: configPath })('@payloadcms/plugin-import-export — field-l
           where: { id: { equals: post.id } },
         },
         user,
+        overrideAccess: true,
       })
 
       exportDoc = await payload.findByID({
         id: exportDoc.id,
         collection: 'posts-with-field-hooks-export',
+        overrideAccess: true,
       })
 
       const csvPath = path.join(dirname, 'uploads', exportDoc.filename as string)
@@ -403,6 +438,7 @@ test.suite({ config: configPath })('@payloadcms/plugin-import-export — field-l
       const post = await payload.create({
         collection: postsWithFieldHooksSlug,
         data: { secret: 'plain-text', title: 'Default Behavior Test' },
+        overrideAccess: true,
       })
 
       let exportDoc = await payload.create({
@@ -413,11 +449,13 @@ test.suite({ config: configPath })('@payloadcms/plugin-import-export — field-l
           where: { id: { equals: post.id } },
         },
         user,
+        overrideAccess: true,
       })
 
       exportDoc = await payload.findByID({
         id: exportDoc.id,
         collection: 'posts-with-field-hooks-export',
+        overrideAccess: true,
       })
 
       const csvPath = path.join(dirname, 'uploads', exportDoc.filename as string)
@@ -442,6 +480,7 @@ test.suite({ config: configPath })('@payloadcms/plugin-import-export — field-l
           items: [{ note: 'first' }, { note: 'second' }],
           title: 'Array Export CSV',
         },
+        overrideAccess: true,
       })
 
       let exportDoc = await payload.create({
@@ -452,11 +491,13 @@ test.suite({ config: configPath })('@payloadcms/plugin-import-export — field-l
           where: { id: { equals: post.id } },
         },
         user,
+        overrideAccess: true,
       })
 
       exportDoc = await payload.findByID({
         id: exportDoc.id,
         collection: 'posts-with-field-hooks-export',
+        overrideAccess: true,
       })
 
       const csvPath = path.join(dirname, 'uploads', exportDoc.filename as string)
@@ -475,6 +516,7 @@ test.suite({ config: configPath })('@payloadcms/plugin-import-export — field-l
           items: [{ note: 'alpha' }, { note: 'beta' }],
           title: 'Array Export JSON',
         },
+        overrideAccess: true,
       })
 
       let exportDoc = await payload.create({
@@ -485,11 +527,13 @@ test.suite({ config: configPath })('@payloadcms/plugin-import-export — field-l
           where: { id: { equals: post.id } },
         },
         user,
+        overrideAccess: true,
       })
 
       exportDoc = await payload.findByID({
         id: exportDoc.id,
         collection: 'posts-with-field-hooks-export',
+        overrideAccess: true,
       })
 
       const jsonPath = path.join(dirname, 'uploads', exportDoc.filename as string)
@@ -515,11 +559,13 @@ test.suite({ config: configPath })('@payloadcms/plugin-import-export — field-l
         data: { collectionSlug: postsWithFieldHooksSlug, importMode: 'create' },
         file,
         user,
+        overrideAccess: true,
       })
 
       importDoc = await payload.findByID({
         id: importDoc.id,
         collection: 'posts-with-field-hooks-import',
+        overrideAccess: true,
       })
 
       expect(importDoc.status).toBe('completed')
@@ -527,6 +573,7 @@ test.suite({ config: configPath })('@payloadcms/plugin-import-export — field-l
       const imported = await payload.find({
         collection: postsWithFieldHooksSlug,
         where: { title: { equals: 'Array Import CSV' } },
+        overrideAccess: true,
       })
       expect(imported.docs).toHaveLength(1)
       expect((imported.docs[0] as any).items[0].note).toBe('one_array_imported')
@@ -555,11 +602,13 @@ test.suite({ config: configPath })('@payloadcms/plugin-import-export — field-l
         },
         file,
         user,
+        overrideAccess: true,
       })
 
       importDoc = await payload.findByID({
         id: importDoc.id,
         collection: 'posts-with-field-hooks-import',
+        overrideAccess: true,
       })
 
       expect(importDoc.status).toBe('completed')
@@ -567,6 +616,7 @@ test.suite({ config: configPath })('@payloadcms/plugin-import-export — field-l
       const imported = await payload.find({
         collection: postsWithFieldHooksSlug,
         where: { title: { equals: 'Array Import JSON' } },
+        overrideAccess: true,
       })
       expect(imported.docs).toHaveLength(1)
       expect((imported.docs[0] as any).items[0].note).toBe('uno_array_imported')
@@ -585,6 +635,7 @@ test.suite({ config: configPath })('@payloadcms/plugin-import-export — field-l
           ],
           title: 'Blocks Export CSV',
         },
+        overrideAccess: true,
       })
 
       let exportDoc = await payload.create({
@@ -595,11 +646,13 @@ test.suite({ config: configPath })('@payloadcms/plugin-import-export — field-l
           where: { id: { equals: post.id } },
         },
         user,
+        overrideAccess: true,
       })
 
       exportDoc = await payload.findByID({
         id: exportDoc.id,
         collection: 'posts-with-field-hooks-export',
+        overrideAccess: true,
       })
 
       const csvPath = path.join(dirname, 'uploads', exportDoc.filename as string)
@@ -616,6 +669,7 @@ test.suite({ config: configPath })('@payloadcms/plugin-import-export — field-l
           content: [{ blockType: 'textBlock', body: 'foo' }],
           title: 'Blocks Export JSON',
         },
+        overrideAccess: true,
       })
 
       let exportDoc = await payload.create({
@@ -626,11 +680,13 @@ test.suite({ config: configPath })('@payloadcms/plugin-import-export — field-l
           where: { id: { equals: post.id } },
         },
         user,
+        overrideAccess: true,
       })
 
       exportDoc = await payload.findByID({
         id: exportDoc.id,
         collection: 'posts-with-field-hooks-export',
+        overrideAccess: true,
       })
 
       const jsonPath = path.join(dirname, 'uploads', exportDoc.filename as string)
@@ -653,11 +709,13 @@ test.suite({ config: configPath })('@payloadcms/plugin-import-export — field-l
         data: { collectionSlug: postsWithFieldHooksSlug, importMode: 'create' },
         file,
         user,
+        overrideAccess: true,
       })
 
       importDoc = await payload.findByID({
         id: importDoc.id,
         collection: 'posts-with-field-hooks-import',
+        overrideAccess: true,
       })
 
       expect(importDoc.status).toBe('completed')
@@ -665,6 +723,7 @@ test.suite({ config: configPath })('@payloadcms/plugin-import-export — field-l
       const imported = await payload.find({
         collection: postsWithFieldHooksSlug,
         where: { title: { equals: 'Blocks Import CSV' } },
+        overrideAccess: true,
       })
       expect(imported.docs).toHaveLength(1)
       expect((imported.docs[0] as any).content[0].body).toBe('csv-body_block_imported')
@@ -693,11 +752,13 @@ test.suite({ config: configPath })('@payloadcms/plugin-import-export — field-l
         },
         file,
         user,
+        overrideAccess: true,
       })
 
       importDoc = await payload.findByID({
         id: importDoc.id,
         collection: 'posts-with-field-hooks-import',
+        overrideAccess: true,
       })
 
       expect(importDoc.status).toBe('completed')
@@ -705,6 +766,7 @@ test.suite({ config: configPath })('@payloadcms/plugin-import-export — field-l
       const imported = await payload.find({
         collection: postsWithFieldHooksSlug,
         where: { title: { equals: 'Blocks Import JSON' } },
+        overrideAccess: true,
       })
       expect(imported.docs).toHaveLength(1)
       expect((imported.docs[0] as any).content[0].body).toBe('json-body_block_imported')
@@ -745,11 +807,13 @@ test.suite({ config: configPath })('@payloadcms/plugin-import-export — field-l
         },
         file,
         user,
+        overrideAccess: true,
       })
 
       importDoc = await payload.findByID({
         id: importDoc.id,
         collection: 'posts-with-field-hooks-import',
+        overrideAccess: true,
       })
 
       expect(importDoc.status).toBe('completed')
@@ -757,6 +821,7 @@ test.suite({ config: configPath })('@payloadcms/plugin-import-export — field-l
       const imported = await payload.find({
         collection: postsWithFieldHooksSlug,
         where: { title: { equals: 'Sibling Echo Test' } },
+        overrideAccess: true,
       })
       expect(imported.docs).toHaveLength(1)
       expect((imported.docs[0] as any).metadata.siblingEcho).toBe('start:my-slug')
@@ -790,11 +855,13 @@ test.suite({ config: configPath })('@payloadcms/plugin-import-export — field-l
         data: { collectionSlug: postsWithFieldHooksSlug, importMode: 'create' },
         file,
         user,
+        overrideAccess: true,
       })
 
       importDoc = await payload.findByID({
         id: importDoc.id,
         collection: 'posts-with-field-hooks-import',
+        overrideAccess: true,
       })
 
       expect(importDoc.status).toBe('completed')
@@ -803,6 +870,7 @@ test.suite({ config: configPath })('@payloadcms/plugin-import-export — field-l
         collection: postsWithFieldHooksSlug,
         sort: 'title',
         where: { title: { in: ['Crash Row 1', 'Crash Row 2', 'Crash Row 3'] } },
+        overrideAccess: true,
       })
 
       expect(imported.docs).toHaveLength(3)
@@ -836,11 +904,13 @@ test.suite({ config: configPath })('@payloadcms/plugin-import-export — field-l
         },
         file,
         user,
+        overrideAccess: true,
       })
 
       importDoc = await payload.findByID({
         id: importDoc.id,
         collection: 'posts-with-field-hooks-import',
+        overrideAccess: true,
       })
 
       expect(importDoc.status).toBe('completed')
@@ -849,6 +919,7 @@ test.suite({ config: configPath })('@payloadcms/plugin-import-export — field-l
         collection: postsWithFieldHooksSlug,
         sort: 'title',
         where: { title: { in: ['JSON Crash 1', 'JSON Crash 2', 'JSON Crash 3'] } },
+        overrideAccess: true,
       })
 
       expect(imported.docs).toHaveLength(3)
@@ -865,14 +936,17 @@ test.suite({ config: configPath })('@payloadcms/plugin-import-export — field-l
         payload.create({
           collection: postsWithFieldHooksSlug,
           data: { mayCrash: 'safe-a', title: 'Export Crash A' },
+          overrideAccess: true,
         }),
         payload.create({
           collection: postsWithFieldHooksSlug,
           data: { mayCrash: 'CRASH', title: 'Export Crash B' },
+          overrideAccess: true,
         }),
         payload.create({
           collection: postsWithFieldHooksSlug,
           data: { mayCrash: 'safe-c', title: 'Export Crash C' },
+          overrideAccess: true,
         }),
       ])
 
@@ -884,11 +958,13 @@ test.suite({ config: configPath })('@payloadcms/plugin-import-export — field-l
           where: { id: { in: docs.map((d) => d.id) } },
         },
         user,
+        overrideAccess: true,
       })
 
       exportDoc = await payload.findByID({
         id: exportDoc.id,
         collection: 'posts-with-field-hooks-export',
+        overrideAccess: true,
       })
 
       const csvPath = path.join(dirname, 'uploads', exportDoc.filename as string)
@@ -908,14 +984,17 @@ test.suite({ config: configPath })('@payloadcms/plugin-import-export — field-l
         payload.create({
           collection: postsWithFieldHooksSlug,
           data: { mayCrash: 'json-safe-a', title: 'JSON Export Crash A' },
+          overrideAccess: true,
         }),
         payload.create({
           collection: postsWithFieldHooksSlug,
           data: { mayCrash: 'CRASH', title: 'JSON Export Crash B' },
+          overrideAccess: true,
         }),
         payload.create({
           collection: postsWithFieldHooksSlug,
           data: { mayCrash: 'json-safe-c', title: 'JSON Export Crash C' },
+          overrideAccess: true,
         }),
       ])
 
@@ -927,11 +1006,13 @@ test.suite({ config: configPath })('@payloadcms/plugin-import-export — field-l
           where: { id: { in: docs.map((d) => d.id) } },
         },
         user,
+        overrideAccess: true,
       })
 
       exportDoc = await payload.findByID({
         id: exportDoc.id,
         collection: 'posts-with-field-hooks-export',
+        overrideAccess: true,
       })
 
       const jsonPath = path.join(dirname, 'uploads', exportDoc.filename as string)
@@ -961,6 +1042,7 @@ test.suite({ config: configPath })('@payloadcms/plugin-import-export — field-l
       const post = await payload.create({
         collection: postsWithFieldHooksSlug,
         data: { rowField: 'inside-row', title: 'Row Wrapper Export' },
+        overrideAccess: true,
       })
 
       let exportDoc = await payload.create({
@@ -971,11 +1053,13 @@ test.suite({ config: configPath })('@payloadcms/plugin-import-export — field-l
           where: { id: { equals: post.id } },
         },
         user,
+        overrideAccess: true,
       })
 
       exportDoc = await payload.findByID({
         id: exportDoc.id,
         collection: 'posts-with-field-hooks-export',
+        overrideAccess: true,
       })
 
       const csvPath = path.join(dirname, 'uploads', exportDoc.filename as string)
@@ -1000,11 +1084,13 @@ test.suite({ config: configPath })('@payloadcms/plugin-import-export — field-l
         data: { collectionSlug: postsWithFieldHooksSlug, importMode: 'create' },
         file,
         user,
+        overrideAccess: true,
       })
 
       importDoc = await payload.findByID({
         id: importDoc.id,
         collection: 'posts-with-field-hooks-import',
+        overrideAccess: true,
       })
 
       expect(importDoc.status).toBe('completed')
@@ -1012,6 +1098,7 @@ test.suite({ config: configPath })('@payloadcms/plugin-import-export — field-l
       const imported = await payload.find({
         collection: postsWithFieldHooksSlug,
         where: { title: { equals: 'Row Wrapper Import' } },
+        overrideAccess: true,
       })
       expect(imported.docs).toHaveLength(1)
       expect((imported.docs[0] as any).rowField).toBe('incoming_row_imported')
@@ -1023,6 +1110,7 @@ test.suite({ config: configPath })('@payloadcms/plugin-import-export — field-l
       const post = await payload.create({
         collection: postsWithFieldHooksSlug,
         data: { collapsibleField: 'inside-collapsible', title: 'Collapsible Wrapper Export' },
+        overrideAccess: true,
       })
 
       let exportDoc = await payload.create({
@@ -1033,11 +1121,13 @@ test.suite({ config: configPath })('@payloadcms/plugin-import-export — field-l
           where: { id: { equals: post.id } },
         },
         user,
+        overrideAccess: true,
       })
 
       exportDoc = await payload.findByID({
         id: exportDoc.id,
         collection: 'posts-with-field-hooks-export',
+        overrideAccess: true,
       })
 
       const csvPath = path.join(dirname, 'uploads', exportDoc.filename as string)
@@ -1062,11 +1152,13 @@ test.suite({ config: configPath })('@payloadcms/plugin-import-export — field-l
         data: { collectionSlug: postsWithFieldHooksSlug, importMode: 'create' },
         file,
         user,
+        overrideAccess: true,
       })
 
       importDoc = await payload.findByID({
         id: importDoc.id,
         collection: 'posts-with-field-hooks-import',
+        overrideAccess: true,
       })
 
       expect(importDoc.status).toBe('completed')
@@ -1074,6 +1166,7 @@ test.suite({ config: configPath })('@payloadcms/plugin-import-export — field-l
       const imported = await payload.find({
         collection: postsWithFieldHooksSlug,
         where: { title: { equals: 'Collapsible Wrapper Import' } },
+        overrideAccess: true,
       })
       expect(imported.docs).toHaveLength(1)
       expect((imported.docs[0] as any).collapsibleField).toBe('incoming_collapsible_imported')
@@ -1105,11 +1198,13 @@ test.suite({ config: configPath })('@payloadcms/plugin-import-export — field-l
         },
         file,
         user,
+        overrideAccess: true,
       })
 
       importDoc = await payload.findByID({
         id: importDoc.id,
         collection: 'posts-with-field-hooks-import',
+        overrideAccess: true,
       })
 
       expect(importDoc.status).toBe('completed')
@@ -1117,6 +1212,7 @@ test.suite({ config: configPath })('@payloadcms/plugin-import-export — field-l
       const imported = await payload.find({
         collection: postsWithFieldHooksSlug,
         where: { title: { equals: 'Top Doc Access' } },
+        overrideAccess: true,
       })
       expect(imported.docs).toHaveLength(1)
       expect((imported.docs[0] as any).metadata.slugFromTitle).toBe('top-doc-access')

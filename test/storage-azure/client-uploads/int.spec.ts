@@ -140,7 +140,7 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-azure clientUploads',
 
     expect(blobKey).toBe('duplicate-target-1.png')
 
-    await payload.delete({ id: seedDoc.id, collection: mediaSlug })
+    await payload.delete({ id: seedDoc.id, collection: mediaSlug, overrideAccess: true })
   })
 
   test('preserves a user-defined prefix.defaultValue across the plugin', async ({ payload }) => {
@@ -148,6 +148,7 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-azure clientUploads',
       collection: mediaWithDocPrefixSlug,
       data: {},
       filePath: path.resolve(dirname, '../../uploads/image.png'),
+      overrideAccess: true,
     })
 
     expect(upload.prefix).toMatch(/^doc-[a-z0-9]{1,8}$/)
@@ -176,7 +177,7 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-azure clientUploads',
 
     test.afterEach(async ({ payload }) => {
       for (const id of createdIds) {
-        await payload.delete({ id, collection: mediaHeaderOnlySlug })
+        await payload.delete({ id, collection: mediaHeaderOnlySlug, overrideAccess: true })
       }
       createdIds.length = 0
     })
@@ -269,7 +270,7 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-azure clientUploads',
 
     test.afterEach(async ({ payload }) => {
       for (const id of createdIds) {
-        await payload.delete({ id, collection: mediaHeaderOnlyWithSizesSlug })
+        await payload.delete({ id, collection: mediaHeaderOnlyWithSizesSlug, overrideAccess: true })
       }
       createdIds.length = 0
     })

@@ -21,6 +21,7 @@ export const retriesRollbackTestWorkflow: WorkflowConfig<'retriesRollbackTest'> 
         },
       },
       id: job.id,
+      overrideAccess: true,
     })
 
     await inlineTask('1', {
@@ -31,6 +32,7 @@ export const retriesRollbackTestWorkflow: WorkflowConfig<'retriesRollbackTest'> 
           data: {
             title: job.input.message,
           },
+          overrideAccess: true,
         })
         return {
           output: {
@@ -48,6 +50,7 @@ export const retriesRollbackTestWorkflow: WorkflowConfig<'retriesRollbackTest'> 
           data: {
             title: 'should not exist',
           },
+          overrideAccess: true,
         })
         // Fail afterwards, so that we can also test that transactions work (i.e. the job is rolled back)
 

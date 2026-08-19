@@ -90,6 +90,7 @@ describe('Live Preview', () => {
           email: devUser.email,
           password: devUser.password,
         },
+        overrideAccess: true,
       })
       ?.then((res) => res.user) // TODO: this type is wrong
   })
@@ -477,6 +478,7 @@ describe('Live Preview', () => {
         },
         title: initialTitle,
       },
+      overrideAccess: true,
     })
 
     await page.goto(pagesURLUtil.edit(testDoc.id))
@@ -619,6 +621,7 @@ describe('Live Preview', () => {
         },
         title: initialTitle,
       },
+      overrideAccess: true,
     })
 
     await page.goto(ssrAutosavePagesURLUtil.edit(testDoc.id))

@@ -15,6 +15,7 @@ export const getLivePreviewDoc = createServerFn({ method: 'GET' })
         draft: true,
         trash: true,
         where: { slug: { equals: slug } },
+        overrideAccess: true,
       })
 
       return docs[0] ? toSerializable({ ...docs[0] }, {}) : null

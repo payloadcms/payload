@@ -195,6 +195,7 @@ describe('lexicalBlocks', () => {
           text: 'invalid',
         },
         depth: 0,
+        overrideAccess: true,
       })
 
       const { newBlock } = await createBlock({
@@ -391,6 +392,7 @@ describe('lexicalBlocks', () => {
           text: 'invalid',
         },
         depth: 0,
+        overrideAccess: true,
       })
 
       const { newBlock } = await createBlock({

@@ -24,6 +24,7 @@ test.suite({ config: './config.ts' })('array-update', () => {
           },
         ],
       },
+      overrideAccess: true,
     })
 
     const arrayWithExistingValues = [...doc.arrayOfFields]
@@ -41,6 +42,7 @@ test.suite({ config: './config.ts' })('array-update', () => {
       data: {
         arrayOfFields: arrayWithExistingValues,
       },
+      overrideAccess: true,
     })
 
     expect(updatedDoc.arrayOfFields?.[0]).toMatchObject({
@@ -70,6 +72,7 @@ test.suite({ config: './config.ts' })('array-update', () => {
           secondArrayItem,
         ],
       },
+      overrideAccess: true,
     })
 
     const updatedDoc = await payload.update({
@@ -88,6 +91,7 @@ test.suite({ config: './config.ts' })('array-update', () => {
           },
         ],
       },
+      overrideAccess: true,
     })
 
     expect(updatedDoc.arrayOfFields?.[0].required).toStrictEqual(updatedText)
@@ -102,10 +106,12 @@ test.suite({ config: './config.ts' })('array-update', () => {
     const docA = await payload.create({
       collection: arraySlug,
       data: { arrayOfFields: [] },
+      overrideAccess: true,
     })
     const docB = await payload.create({
       collection: arraySlug,
       data: { arrayOfFields: [] },
+      overrideAccess: true,
     })
 
     const reusedRowID = '6116a7f0f0f0f0f0f0f0f0f0'
@@ -123,13 +129,14 @@ test.suite({ config: './config.ts' })('array-update', () => {
         ],
       },
       where: { id: { in: [docA.id, docB.id] } },
+      overrideAccess: true,
     })
 
     expect(errors).toHaveLength(0)
     expect(docs).toHaveLength(2)
 
-    const updatedA = await payload.findByID({ id: docA.id, collection: arraySlug })
-    const updatedB = await payload.findByID({ id: docB.id, collection: arraySlug })
+    const updatedA = await payload.findByID({ id: docA.id, collection: arraySlug, overrideAccess: true })
+    const updatedB = await payload.findByID({ id: docB.id, collection: arraySlug, overrideAccess: true })
 
     expect(updatedA.arrayOfFields?.[0].required).toBe('bulk value')
     expect(updatedB.arrayOfFields?.[0].required).toBe('bulk value')
@@ -148,10 +155,12 @@ test.suite({ config: './config.ts' })('array-update', () => {
     const docWithExistingRow = await payload.create({
       collection: arraySlug,
       data: { arrayOfFields: [{ required: 'existing row' }] },
+      overrideAccess: true,
     })
     const otherDoc = await payload.create({
       collection: arraySlug,
       data: { arrayOfFields: [] },
+      overrideAccess: true,
     })
 
     const existingRowID = docWithExistingRow.arrayOfFields![0].id
@@ -165,6 +174,7 @@ test.suite({ config: './config.ts' })('array-update', () => {
         ],
       },
       where: { id: { in: [docWithExistingRow.id, otherDoc.id] } },
+      overrideAccess: true,
     })
 
     expect(errors).toHaveLength(0)
@@ -172,8 +182,9 @@ test.suite({ config: './config.ts' })('array-update', () => {
     const updatedWithExistingRow = await payload.findByID({
       id: docWithExistingRow.id,
       collection: arraySlug,
+      overrideAccess: true,
     })
-    const updatedOther = await payload.findByID({ id: otherDoc.id, collection: arraySlug })
+    const updatedOther = await payload.findByID({ id: otherDoc.id, collection: arraySlug, overrideAccess: true })
 
     expect(updatedWithExistingRow.arrayOfFields?.[0].id).toBe(existingRowID)
     expect(updatedWithExistingRow.arrayOfFields?.[0].required).toBe('updated existing row')
@@ -185,8 +196,8 @@ test.suite({ config: './config.ts' })('array-update', () => {
   test('should assign fresh row IDs for localized arrays, groups and blocks on bulk update', async ({
     payload,
   }) => {
-    const docA = await payload.create({ collection: complexSlug, data: {} })
-    const docB = await payload.create({ collection: complexSlug, data: {} })
+    const docA = await payload.create({ collection: complexSlug, data: {}, overrideAccess: true })
+    const docB = await payload.create({ collection: complexSlug, data: {}, overrideAccess: true })
 
     const { docs, errors } = await payload.update({
       collection: complexSlug,
@@ -208,13 +219,14 @@ test.suite({ config: './config.ts' })('array-update', () => {
         },
       },
       where: { id: { in: [docA.id, docB.id] } },
+      overrideAccess: true,
     })
 
     expect(errors).toHaveLength(0)
     expect(docs).toHaveLength(2)
 
-    const updatedA = await payload.findByID({ id: docA.id, collection: complexSlug })
-    const updatedB = await payload.findByID({ id: docB.id, collection: complexSlug })
+    const updatedA = await payload.findByID({ id: docA.id, collection: complexSlug, overrideAccess: true })
+    const updatedB = await payload.findByID({ id: docB.id, collection: complexSlug, overrideAccess: true })
 
     expect(updatedA.localizedArray?.[0].text).toBe('localized value')
     expect(updatedB.localizedArray?.[0].text).toBe('localized value')

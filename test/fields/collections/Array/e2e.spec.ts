@@ -336,6 +336,7 @@ describe('Array', () => {
         ],
         title: 'for test 1',
       },
+      overrideAccess: true,
     })
 
     await payload.create({
@@ -348,6 +349,7 @@ describe('Array', () => {
         ],
         title: 'for test 2',
       },
+      overrideAccess: true,
     })
 
     await payload.create({
@@ -366,6 +368,7 @@ describe('Array', () => {
         ],
         title: 'for test 3',
       },
+      overrideAccess: true,
     })
 
     const bulkText = 'Bulk update text'

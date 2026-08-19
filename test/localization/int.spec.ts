@@ -62,6 +62,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
         data: {
           title: englishTitle,
         },
+        overrideAccess: true,
       })
 
       postWithLocalizedData = await payload.create({
@@ -69,6 +70,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
         data: {
           title: englishTitle,
         },
+        overrideAccess: true,
       })
 
       await payload.update({
@@ -78,6 +80,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
           title: spanishTitle,
         },
         locale: spanishLocale,
+        overrideAccess: true,
       })
 
       await payload.updateGlobal({
@@ -86,6 +89,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
           text: spanishTitle,
         },
         locale: spanishLocale,
+        overrideAccess: true,
       })
 
       await payload.updateGlobal({
@@ -94,6 +98,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
           text: englishTitle,
         },
         locale: englishLocale,
+        overrideAccess: true,
       })
     })
 
@@ -104,6 +109,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
           where: {
             title: { equals: post1.title },
           },
+          overrideAccess: true,
         })
         expect(allDocs.docs).toContainEqual(expect.objectContaining(post1))
       })
@@ -116,6 +122,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
             title: spanishTitle,
           },
           locale: spanishLocale,
+          overrideAccess: true,
         })
 
         expect(updated.title).toEqual(spanishTitle)
@@ -124,6 +131,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
           id: post1.id,
           collection,
           locale: 'all',
+          overrideAccess: true,
         })
 
         expect(localized.title.en).toEqual(englishTitle)
@@ -138,12 +146,14 @@ test.suite({ config: './config.ts' })('Localization', () => {
             title: '',
           },
           locale: spanishLocale,
+          overrideAccess: true,
         })
 
         const retrievedInSpanish = await payload.findByID({
           id: post1.id,
           collection,
           locale: spanishLocale,
+          overrideAccess: true,
         })
 
         expect(retrievedInSpanish.title).toEqual(englishTitle)
@@ -152,6 +162,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
           id: post1.id,
           collection,
           locale: 'all',
+          overrideAccess: true,
         })
 
         expect(localizedFallback.title.en).toEqual(englishTitle)
@@ -168,12 +179,14 @@ test.suite({ config: './config.ts' })('Localization', () => {
               },
             ],
           },
+          overrideAccess: true,
         })
 
         const resultAllLocales: any = await payload.findByID({
           id: localizedArrayPost.id,
           collection: arrayCollectionSlug,
           locale: 'all',
+          overrideAccess: true,
         })
 
         expect(resultAllLocales.items.en[0].text).toEqual('localized array item')
@@ -183,6 +196,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
           id: localizedArrayPost.id,
           collection: arrayCollectionSlug,
           locale: spanishLocale,
+          overrideAccess: true,
         })
 
         expect(resultSpanishLocale.items[0].text).toEqual('localized array item')
@@ -195,6 +209,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
           id: postWithLocalizedData.id,
           collection,
           locale: portugueseLocale,
+          overrideAccess: true,
         })
 
         expect(localizedFallback.title).toEqual(spanishTitle)
@@ -206,6 +221,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
           collection,
           locale: portugueseLocale,
           fallbackLocale: 'none',
+          overrideAccess: true,
         })
 
         expect(localizedFallback.title).not.toBeDefined()
@@ -229,6 +245,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
             collection: localizedPostsSlug,
             data: englishData,
             locale: englishLocale,
+            overrideAccess: true,
           })
 
           await payload.update({
@@ -236,12 +253,14 @@ test.suite({ config: './config.ts' })('Localization', () => {
             collection: localizedPostsSlug,
             data: spanishData,
             locale: spanishLocale,
+            overrideAccess: true,
           })
           await payload.update({
             id: localizedDoc.id,
             collection: localizedPostsSlug,
             data: { localizedCheckbox: true },
             locale: portugueseLocale,
+            overrideAccess: true,
           })
         })
 
@@ -252,6 +271,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
             id: localizedDoc.id,
             collection: localizedPostsSlug,
             locale: portugueseLocale,
+            overrideAccess: true,
           })
 
           expect(portugueseDoc.title).toStrictEqual(spanishData.title)
@@ -267,6 +287,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
             data: {
               title: englishTitle,
             },
+            overrideAccess: true,
           })
 
           localizedPost = await payload.update({
@@ -276,6 +297,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
               title: spanishTitle,
             },
             locale: spanishLocale,
+            overrideAccess: true,
           })
         })
 
@@ -283,6 +305,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
           const localized = await payload.findByID({
             id: localizedPost.id,
             collection,
+            overrideAccess: true,
           })
 
           expect(localized.title).toEqual(englishTitle)
@@ -293,6 +316,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
             id: localizedPost.id,
             collection,
             locale: defaultLocale,
+            overrideAccess: true,
           })
 
           expect(localized.title).toEqual(englishTitle)
@@ -303,6 +327,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
             id: localizedPost.id,
             collection,
             locale: spanishLocale,
+            overrideAccess: true,
           })
 
           expect(localized.title).toEqual(spanishTitle)
@@ -313,6 +338,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
             id: localizedPost.id,
             collection,
             locale: 'all',
+            overrideAccess: true,
           })
 
           expect(localized.title.en).toEqual(englishTitle)
@@ -355,6 +381,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
                 equals: englishTitle,
               },
             },
+            overrideAccess: true,
           })
 
           expect(result.docs.map(({ id }) => id)).toContain(localizedPost.id)
@@ -369,6 +396,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
                 equals: spanishTitle,
               },
             },
+            overrideAccess: true,
           })
 
           expect(result.docs.map(({ id }) => id)).toContain(localizedPost.id)
@@ -383,17 +411,18 @@ test.suite({ config: './config.ts' })('Localization', () => {
                 equals: spanishTitle,
               },
             },
+            overrideAccess: true,
           })
 
           expect(result.docs.map(({ id }) => id)).toContain(localizedPost.id)
         })
 
         test('by localized field value with sorting', async ({ payload }) => {
-          const doc_1 = await payload.create({ collection, data: { title: 'word_b' } })
-          const doc_2 = await payload.create({ collection, data: { title: 'word_a' } })
-          const doc_3 = await payload.create({ collection, data: { title: 'word_c' } })
+          const doc_1 = await payload.create({ collection, data: { title: 'word_b' }, overrideAccess: true })
+          const doc_2 = await payload.create({ collection, data: { title: 'word_a' }, overrideAccess: true })
+          const doc_3 = await payload.create({ collection, data: { title: 'word_c' }, overrideAccess: true })
 
-          await payload.create({ collection, data: { title: 'others_c' } })
+          await payload.create({ collection, data: { title: 'others_c' }, overrideAccess: true })
 
           const { docs } = await payload.find({
             collection,
@@ -403,6 +432,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
                 like: 'word',
               },
             },
+            overrideAccess: true,
           })
 
           expect(docs).toHaveLength(3)
@@ -423,6 +453,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
                   localizedDescription: 'something',
                 },
                 locale: englishLocale,
+                overrideAccess: true,
               })
 
               localizedAccentPostTwo = await payload.create({
@@ -432,6 +463,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
                   localizedDescription: 'veterinarian',
                 },
                 locale: englishLocale,
+                overrideAccess: true,
               })
 
               await payload.update({
@@ -442,6 +474,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
                   localizedDescription: 'valami',
                 },
                 locale: hungarianLocale,
+                overrideAccess: true,
               })
 
               await payload.update({
@@ -452,6 +485,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
                   localizedDescription: 'állatorvos',
                 },
                 locale: hungarianLocale,
+                overrideAccess: true,
               })
             })
 
@@ -465,6 +499,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
                   },
                 },
                 locale: hungarianLocale,
+                overrideAccess: true,
               })
 
               expect(sortByDescriptionQuery.docs[0].id).toEqual(localizedAccentPostTwo.id)
@@ -482,6 +517,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
             localizedDate: new Date().toISOString(),
             date: new Date().toISOString(),
           },
+          overrideAccess: true,
         })
         expect(document.localizedDate).toBeTruthy()
       })
@@ -493,6 +529,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
             localizedDate: new Date().toISOString(),
             date: new Date().toISOString(),
           },
+          overrideAccess: true,
         })
 
         expect(typeof document.localizedDate).toBe('string')
@@ -514,6 +551,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
               title: `EN ${i}`,
             },
             locale: englishLocale,
+            overrideAccess: true,
           })
 
           posts.push(post)
@@ -526,6 +564,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
               title: `ES ${i}`,
             },
             locale: spanishLocale,
+            overrideAccess: true,
           })
         }
       })
@@ -533,10 +572,12 @@ test.suite({ config: './config.ts' })('Localization', () => {
       test('should have correct totalDocs when unsorted', async ({ payload }) => {
         const simpleQuery = await payload.find({
           collection: localizedSortSlug,
+          overrideAccess: true,
         })
         const sortByIdQuery = await payload.find({
           collection: localizedSortSlug,
           sort: 'id',
+          overrideAccess: true,
         })
 
         expect(simpleQuery.totalDocs).toEqual(expectedTotalDocs)
@@ -548,10 +589,12 @@ test.suite({ config: './config.ts' })('Localization', () => {
         const sortByTitleQuery = await payload.find({
           collection: localizedSortSlug,
           sort: 'title',
+          overrideAccess: true,
         })
         const sortByDateQuery = await payload.find({
           collection: localizedSortSlug,
           sort: 'date',
+          overrideAccess: true,
         })
 
         expect(sortByTitleQuery.totalDocs).toEqual(expectedTotalDocs)
@@ -562,6 +605,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
         const { docs: docsAsc } = await payload.find({
           collection: localizedSortSlug,
           sort: 'title',
+          overrideAccess: true,
         })
         docsAsc.forEach((doc, i) => {
           expect(posts[i].id).toBe(doc.id)
@@ -570,6 +614,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
         const { docs: docsDesc } = await payload.find({
           collection: localizedSortSlug,
           sort: '-title',
+          overrideAccess: true,
         })
         docsDesc.forEach((doc, i) => {
           expect(posts.at(posts.length - i - 1).id).toBe(doc.id)
@@ -608,13 +653,14 @@ test.suite({ config: './config.ts' })('Localization', () => {
 
         for (let i = 0; i < randomWords.length; i++) {
           const en = randomWords[i]
-          const post = await payload.create({ collection: 'localized-sort', data: { title: en } })
+          const post = await payload.create({ collection: 'localized-sort', data: { title: en }, overrideAccess: true })
           const es = randomWordsSpanish[i]
           await payload.update({
             collection: 'localized-sort',
             data: { title: es },
             id: post.id,
             locale: 'es',
+            overrideAccess: true,
           })
 
           randomWordsPosts.push(post.id)
@@ -629,6 +675,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
           collection: localizedSortSlug,
           sort: 'title',
           where: q,
+          overrideAccess: true,
         })
         randomWordsEnAsc.forEach((doc, i) => {
           expect(ascSortedWordsEn[i]).toBe(doc.title)
@@ -638,6 +685,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
           collection: localizedSortSlug,
           sort: '-title',
           where: q,
+          overrideAccess: true,
         })
 
         randomWordsEnDesc.forEach((doc, i) => {
@@ -654,6 +702,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
           sort: 'title',
           where: q,
           locale: 'es',
+          overrideAccess: true,
         })
 
         randomWordsEsAsc.forEach((doc, i) => {
@@ -666,6 +715,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
           sort: '-title',
           where: q,
           locale: 'es',
+          overrideAccess: true,
         })
 
         randomWordsEsDesc.forEach((doc, i) => {
@@ -713,6 +763,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
             ],
             localizedRelationship: localizedRelation.id,
           },
+          overrideAccess: true,
         })
       })
 
@@ -725,6 +776,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
                 equals: localizedRelation.title,
               },
             },
+            overrideAccess: true,
           })
 
           expect(result.docs[0].id).toEqual(withRelationship.id)
@@ -739,6 +791,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
                 equals: relationSpanishTitle,
               },
             },
+            overrideAccess: true,
           })
 
           expect(result.docs[0].id).toEqual(withRelationship.id)
@@ -753,6 +806,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
                 equals: relationSpanishTitle,
               },
             },
+            overrideAccess: true,
           })
 
           expect(result.docs[0].id).toEqual(withRelationship.id)
@@ -764,6 +818,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
             collection: relationshipLocalizedSlug,
             depth: 1,
             locale: 'all',
+            overrideAccess: true,
           })
 
           expect(result.docs[0].relationship.en.id).toBeDefined()
@@ -783,6 +838,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
                 equals: localizedRelation.title,
               },
             },
+            overrideAccess: true,
           })
 
           expect(result.docs.map(({ id }) => id)).toContain(withRelationship.id)
@@ -795,6 +851,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
                 equals: localizedRelation2.title,
               },
             },
+            overrideAccess: true,
           })
 
           expect(result2.docs.map(({ id }) => id)).toContain(withRelationship.id)
@@ -809,6 +866,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
                 equals: relationSpanishTitle,
               },
             },
+            overrideAccess: true,
           })
 
           expect(result.docs[0].id).toEqual(withRelationship.id)
@@ -822,6 +880,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
                 equals: relationSpanishTitle2,
               },
             },
+            overrideAccess: true,
           })
 
           expect(result2.docs[0].id).toEqual(withRelationship.id)
@@ -833,6 +892,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
             collection: withLocalizedRelSlug,
             depth: 1,
             locale: spanishLocale,
+            overrideAccess: true,
           })
           expect((result.localizedRelationship as LocalizedPost).title).toEqual(
             relationSpanishTitle,
@@ -845,6 +905,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
               collection: withLocalizedRelSlug,
               locale: 'all',
               where,
+              overrideAccess: true,
             })
           }
 
@@ -894,6 +955,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
                 equals: localizedRelation.id,
               },
             },
+            overrideAccess: true,
           })
 
           expect(result.docs[0].id).toEqual(withRelationship.id)
@@ -907,6 +969,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
                 equals: localizedRelation.id,
               },
             },
+            overrideAccess: true,
           })
 
           expect(result2.docs[0].id).toEqual(withRelationship.id)
@@ -922,6 +985,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
                 equals: localizedRelation.id,
               },
             },
+            overrideAccess: true,
           })
 
           expect(result.docs[0].id).toEqual(withRelationship.id)
@@ -935,6 +999,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
                 equals: localizedRelation.id,
               },
             },
+            overrideAccess: true,
           })
 
           expect(result2.docs[0].id).toEqual(withRelationship.id)
@@ -947,6 +1012,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
                 equals: localizedRelation2.id,
               },
             },
+            overrideAccess: true,
           })
 
           expect(result3.docs[0].id).toEqual(withRelationship.id)
@@ -959,6 +1025,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
                 equals: localizedRelation2.id,
               },
             },
+            overrideAccess: true,
           })
 
           expect(result4.docs[0].id).toEqual(withRelationship.id)
@@ -970,6 +1037,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
       test('should allow moving rows and retain existing row locale data', async ({ payload }) => {
         const globalArray: any = await payload.findGlobal({
           slug: 'global-array',
+          overrideAccess: true,
         })
 
         const reversedArrayRows = [...globalArray.array].reverse()
@@ -980,6 +1048,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
             array: reversedArrayRows,
           },
           locale: 'all',
+          overrideAccess: true,
         })
 
         expect(updatedGlobal.array[0].text.en).toStrictEqual('test en 2')
@@ -1002,6 +1071,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
             },
             title: 'hello',
           },
+          overrideAccess: true,
         })
 
         await payload.update({
@@ -1019,6 +1089,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
             title: 'en espanol, big bird',
           },
           locale: spanishLocale,
+          overrideAccess: true,
         })
 
         const updatedDoc = await payload.update({
@@ -1027,6 +1098,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
           data: {
             title: 'hello x2',
           },
+          overrideAccess: true,
         })
 
         expect(updatedDoc.nav.layout[0].blockType).toStrictEqual('text')
@@ -1035,6 +1107,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
           id: newDoc.id,
           collection: withRequiredLocalizedFields,
           locale: spanishLocale,
+          overrideAccess: true,
         })
 
         expect(spanishDoc.nav.layout[0].blockType).toStrictEqual('number')
@@ -1171,6 +1244,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
           id: createResult.id,
           collection: localizedPostsSlug,
           locale: 'all',
+          overrideAccess: true,
         })
 
         expect(createResult.title).toStrictEqual(englishTitle)
@@ -1186,6 +1260,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
             title: englishTitle,
           },
           locale: defaultLocale,
+          overrideAccess: true,
         })
         const spanishDoc = await payload.create({
           collection: localizedPostsSlug,
@@ -1193,6 +1268,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
             title: spanishTitle,
           },
           locale: spanishLocale,
+          overrideAccess: true,
         })
         const query = `
       {
@@ -1235,6 +1311,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
               },
             ],
           },
+          overrideAccess: true,
         })
 
         docID = englishDoc.id
@@ -1245,6 +1322,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
           id: docID,
           collection: arrayCollectionSlug,
           locale: spanishLocale,
+          overrideAccess: true,
         })
 
         expect(spanishDoc.items[0].text).toStrictEqual(englishTitle)
@@ -1259,6 +1337,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
           },
           fallbackLocale: false,
           locale: spanishLocale,
+          overrideAccess: true,
         })
 
         expect(updatedSpanishDoc.items).toStrictEqual(null)
@@ -1275,6 +1354,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
             ],
           },
           locale: defaultLocale,
+          overrideAccess: true,
         })
 
         await payload.update({
@@ -1284,12 +1364,14 @@ test.suite({ config: './config.ts' })('Localization', () => {
             items: [],
           },
           locale: spanishLocale,
+          overrideAccess: true,
         })
 
         const docWithoutFallback = await payload.findByID({
           id: englishDoc.id,
           collection: arrayCollectionSlug,
           locale: spanishLocale,
+          overrideAccess: true,
         })
 
         if (isMongoose(payload)) {
@@ -1313,6 +1395,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
             items: [],
           },
           locale: spanishLocale,
+          overrideAccess: true,
         })
 
         const updatedSpanishDoc = await payload.update({
@@ -1322,6 +1405,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
             items: null,
           },
           locale: spanishLocale,
+          overrideAccess: true,
         })
 
         // should return the value of the fallback locale
@@ -1343,6 +1427,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
               children: 'something',
             },
           },
+          overrideAccess: true,
         })
 
         const { docs: relationshipDocs } = await restClient
@@ -1393,6 +1478,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
             ],
           },
           locale: defaultLocale,
+          overrideAccess: true,
         })
 
         await payload.update({
@@ -1405,18 +1491,21 @@ test.suite({ config: './config.ts' })('Localization', () => {
             })),
           },
           locale: spanishLocale,
+          overrideAccess: true,
         })
 
         const docDefaultLocale = await payload.findByID({
           id,
           collection: nestedToArrayAndBlockCollectionSlug,
           locale: defaultLocale,
+          overrideAccess: true,
         })
 
         const docSpanishLocale = await payload.findByID({
           id,
           collection: nestedToArrayAndBlockCollectionSlug,
           locale: spanishLocale,
+          overrideAccess: true,
         })
 
         const rowDefault = docDefaultLocale.blocks[0].array[0]
@@ -1438,6 +1527,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
             title: englishTitle,
           },
           locale: defaultLocale,
+          overrideAccess: true,
         })
 
         const id = localizedPost.id.toString()
@@ -1450,18 +1540,21 @@ test.suite({ config: './config.ts' })('Localization', () => {
             title: spanishTitle,
           },
           locale: spanishLocale,
+          overrideAccess: true,
         })
 
         const result = await payload.duplicate({
           id,
           collection: localizedPostsSlug,
           locale: defaultLocale,
+          overrideAccess: true,
         })
 
         const allLocales = await payload.findByID({
           id: result.id,
           collection: localizedPostsSlug,
           locale: 'all',
+          overrideAccess: true,
         })
 
         // check fields
@@ -1547,6 +1640,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
             title: 'hello',
           },
           locale: defaultLocale,
+          overrideAccess: true,
         })
 
         await payload.update({
@@ -1612,18 +1706,21 @@ test.suite({ config: './config.ts' })('Localization', () => {
             },
           },
           locale: spanishLocale,
+          overrideAccess: true,
         })
 
         const result = await payload.duplicate({
           id: doc.id,
           collection: withRequiredLocalizedFields,
           locale: defaultLocale,
+          overrideAccess: true,
         })
 
         const allLocales = await payload.findByID({
           id: result.id,
           collection: withRequiredLocalizedFields,
           locale: 'all',
+          overrideAccess: true,
         })
 
         // check fields
@@ -1650,6 +1747,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
             title: englishTitle,
             description: 'keep me',
           },
+          overrideAccess: true,
         })
 
         await payload.update({
@@ -1659,18 +1757,21 @@ test.suite({ config: './config.ts' })('Localization', () => {
             title: spanishTitle,
           },
           locale: spanishLocale,
+          overrideAccess: true,
         })
 
         const duplicated = await payload.duplicate({
           id: post.id,
           collection,
           selectedLocales: [spanishLocale],
+          overrideAccess: true,
         })
 
         const allLocales = await payload.findByID({
           id: duplicated.id,
           collection,
           locale: 'all',
+          overrideAccess: true,
         })
 
         expect(allLocales?.title?.en).toBe(undefined)
@@ -1689,6 +1790,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
             },
           },
           locale: englishLocale,
+          overrideAccess: true,
         })
 
         expect(result.groupLocalized?.title).toBe('hello en')
@@ -1702,17 +1804,20 @@ test.suite({ config: './config.ts' })('Localization', () => {
               title: 'hello es',
             },
           },
+          overrideAccess: true,
         })
 
         const docEn = await payload.findByID({
           collection: groupSlug,
           locale: englishLocale,
           id: result.id,
+          overrideAccess: true,
         })
         const docEs = await payload.findByID({
           collection: groupSlug,
           locale: spanishLocale,
           id: result.id,
+          overrideAccess: true,
         })
 
         expect(docEn.groupLocalized.title).toBe('hello en')
@@ -1730,6 +1835,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
               title: 'hello en',
             },
           },
+          overrideAccess: true,
         })
 
         expect(result.group.title).toBe('hello en')
@@ -1743,17 +1849,20 @@ test.suite({ config: './config.ts' })('Localization', () => {
               title: 'hello es',
             },
           },
+          overrideAccess: true,
         })
 
         const docEn = await payload.findByID({
           collection: groupSlug,
           locale: englishLocale,
           id: result.id,
+          overrideAccess: true,
         })
         const docEs = await payload.findByID({
           collection: groupSlug,
           locale: spanishLocale,
           id: result.id,
+          overrideAccess: true,
         })
 
         expect(docEn.group.title).toBe('hello en')
@@ -1777,6 +1886,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
               array: [{ title: 'hello en' }],
             },
           },
+          overrideAccess: true,
         })
 
         expect(result.deep.array[0].title).toBe('hello en')
@@ -1802,17 +1912,20 @@ test.suite({ config: './config.ts' })('Localization', () => {
               ],
             },
           },
+          overrideAccess: true,
         })
 
         const docEn = await payload.findByID({
           collection: groupSlug,
           locale: englishLocale,
           id: result.id,
+          overrideAccess: true,
         })
         const docEs = await payload.findByID({
           collection: groupSlug,
           locale: spanishLocale,
           id: result.id,
+          overrideAccess: true,
         })
 
         expect(docEn.deep.array[0].title).toBe('hello en')
@@ -1830,6 +1943,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
             },
           },
           locale: 'en',
+          overrideAccess: true,
         })
 
         expect(doc.groupLocalizedRow.text).toBe('hello world')
@@ -1843,15 +1957,16 @@ test.suite({ config: './config.ts' })('Localization', () => {
           },
           locale: 'es',
           id: doc.id,
+          overrideAccess: true,
         })
 
         expect(docES.groupLocalizedRow.text).toBe('hola world or something')
 
         // check if docES didnt break EN
-        const docEN = await payload.findByID({ collection: 'groups', id: doc.id, locale: 'en' })
+        const docEN = await payload.findByID({ collection: 'groups', id: doc.id, locale: 'en', overrideAccess: true })
         expect(docEN.groupLocalizedRow.text).toBe('hello world')
 
-        const all = await payload.findByID({ collection: 'groups', id: doc.id, locale: 'all' })
+        const all = await payload.findByID({ collection: 'groups', id: doc.id, locale: 'all', overrideAccess: true })
 
         expect(all.groupLocalizedRow.en.text).toBe('hello world')
         expect(all.groupLocalizedRow.es.text).toBe('hola world or something')
@@ -1864,6 +1979,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
           data: {
             tabLocalized: {},
           },
+          overrideAccess: true,
         })
 
         expect(result).toBeTruthy()
@@ -1880,6 +1996,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
               title: 'hello en',
             },
           },
+          overrideAccess: true,
         })
 
         expect(result.tabLocalized?.title).toBe('hello en')
@@ -1893,18 +2010,21 @@ test.suite({ config: './config.ts' })('Localization', () => {
               title: 'hello es',
             },
           },
+          overrideAccess: true,
         })
 
         const docEn = await payload.findByID({
           collection: tabSlug,
           locale: englishLocale,
           id: result.id,
+          overrideAccess: true,
         })
 
         const docEs = await payload.findByID({
           collection: tabSlug,
           locale: spanishLocale,
           id: result.id,
+          overrideAccess: true,
         })
 
         expect(docEn.tabLocalized.title).toBe('hello en')
@@ -1924,6 +2044,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
               ],
             },
           },
+          overrideAccess: true,
         })
 
         expect(result.tabLocalized.array[0].title).toBe('hello en')
@@ -1937,18 +2058,21 @@ test.suite({ config: './config.ts' })('Localization', () => {
               array: [{ title: 'hello es' }],
             },
           },
+          overrideAccess: true,
         })
 
         const docEn = await payload.findByID({
           collection: tabSlug,
           locale: englishLocale,
           id: result.id,
+          overrideAccess: true,
         })
 
         const docEs = await payload.findByID({
           collection: tabSlug,
           locale: spanishLocale,
           id: result.id,
+          overrideAccess: true,
         })
 
         expect(docEn.tabLocalized.array[0].title).toBe('hello en')
@@ -1966,6 +2090,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
               title: 'hello en',
             },
           },
+          overrideAccess: true,
         })
 
         expect(result.tab.title).toBe('hello en')
@@ -1979,17 +2104,20 @@ test.suite({ config: './config.ts' })('Localization', () => {
               title: 'hello es',
             },
           },
+          overrideAccess: true,
         })
 
         const docEn = await payload.findByID({
           collection: tabSlug,
           locale: englishLocale,
           id: result.id,
+          overrideAccess: true,
         })
         const docEs = await payload.findByID({
           collection: tabSlug,
           locale: spanishLocale,
           id: result.id,
+          overrideAccess: true,
         })
 
         expect(docEn.tab.title).toBe('hello en')
@@ -2013,6 +2141,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
               array: [{ title: 'hello en' }],
             },
           },
+          overrideAccess: true,
         })
 
         expect(result.deep.array[0].title).toBe('hello en')
@@ -2038,17 +2167,20 @@ test.suite({ config: './config.ts' })('Localization', () => {
               ],
             },
           },
+          overrideAccess: true,
         })
 
         const docEn = await payload.findByID({
           collection: tabSlug,
           locale: englishLocale,
           id: result.id,
+          overrideAccess: true,
         })
         const docEs = await payload.findByID({
           collection: tabSlug,
           locale: spanishLocale,
           id: result.id,
+          overrideAccess: true,
         })
 
         expect(docEn.deep.array[0].title).toBe('hello en')
@@ -2070,6 +2202,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
               },
             },
           },
+          overrideAccess: true,
         })
 
         await payload.update({
@@ -2083,18 +2216,21 @@ test.suite({ config: './config.ts' })('Localization', () => {
               },
             },
           },
+          overrideAccess: true,
         })
 
         const readEn = await payload.findByID({
           collection: tabSlug,
           locale: englishLocale,
           id: docEs.id,
+          overrideAccess: true,
         })
 
         const readEs = await payload.findByID({
           collection: tabSlug,
           locale: spanishLocale,
           id: docEs.id,
+          overrideAccess: true,
         })
 
         expect(readEn.tabLocalized.group.heading).toBe('English heading')
@@ -2145,6 +2281,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
               },
             ],
           },
+          overrideAccess: true,
         })
 
         id = doc.id
@@ -2152,6 +2289,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
         const retrievedInEN = await payload.findByID({
           collection: 'blocks-fields',
           id,
+          overrideAccess: true,
         })
 
         await payload.update({
@@ -2183,12 +2321,14 @@ test.suite({ config: './config.ts' })('Localization', () => {
               },
             ],
           },
+          overrideAccess: true,
         })
 
         const retrieved = await payload.findByID({
           collection: 'blocks-fields',
           id,
           locale: 'all',
+          overrideAccess: true,
         })
 
         expect(retrieved.content.en[0].content).toHaveLength(1)
@@ -2210,6 +2350,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
           await payload.find({
             collection: 'localized-posts',
             depth: 0,
+            overrideAccess: true,
           })
         ).docs[0]
 
@@ -2217,6 +2358,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
           await payload.find({
             collection: 'localized-posts',
             depth: 0,
+            overrideAccess: true,
           })
         ).docs[1]
 
@@ -2285,6 +2427,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
               },
             ],
           },
+          overrideAccess: true,
         })
 
         const updatedEsDoc = await payload.update({
@@ -2299,6 +2442,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
               },
             ],
           },
+          overrideAccess: true,
         })
 
         const esArrayBlocks = updatedEsDoc.arrayWithBlocks[0].blocksWithinArray
@@ -2321,6 +2465,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
           collection: 'nested-arrays',
           locale: 'en',
           depth: 0,
+          overrideAccess: true,
         })
         removeId(enDoc2.arrayWithBlocks[0].blocksWithinArray)
         expect(enDoc2.arrayWithBlocks[0].blocksWithinArray).toEqual(blocksWithinArrayEN)
@@ -2331,12 +2476,14 @@ test.suite({ config: './config.ts' })('Localization', () => {
           await payload.find({
             collection: 'localized-posts',
             depth: 0,
+            overrideAccess: true,
           })
         ).docs[0]
         const randomTextDoc2 = (
           await payload.find({
             collection: 'localized-posts',
             depth: 0,
+            overrideAccess: true,
           })
         ).docs[1]
 
@@ -2351,6 +2498,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
               },
             ],
           },
+          overrideAccess: true,
         })
 
         const updatedEsDoc = await payload.update({
@@ -2366,6 +2514,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
               },
             ],
           },
+          overrideAccess: true,
         })
 
         expect(updatedEsDoc.arrayWithLocalizedRelation).toHaveLength(1)
@@ -2380,6 +2529,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
           collection: 'nested-arrays',
           locale: 'en',
           depth: 0,
+          overrideAccess: true,
         })
         expect(enDoc2.arrayWithLocalizedRelation).toHaveLength(1)
         expect(enDoc2.arrayWithLocalizedRelation[0].localizedRelation).toBe(randomTextDoc.id)
@@ -2404,6 +2554,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
               },
             ],
           },
+          overrideAccess: true,
         })
 
         const updated = await payload.update({
@@ -2433,6 +2584,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
             ],
           },
           locale: 'es',
+          overrideAccess: true,
         })
 
         console.dir(updated, { depth: null })
@@ -2460,6 +2612,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
               },
             ],
           },
+          overrideAccess: true,
         })
 
         expect(doc.blocks?.[0]?.someText).toBe('some-block-text-en')
@@ -2471,6 +2624,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
           id: doc.id,
           collection: 'nested',
           locale: 'all',
+          overrideAccess: true,
         })
 
         expect(findAllLocales.blocks?.[0]?.someText).toStrictEqual({
@@ -2500,6 +2654,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
               },
             ],
           },
+          overrideAccess: true,
         })
 
         expect(updatedDoc.blocks?.[0]?.someText).toBe('some-block-text-es')
@@ -2510,6 +2665,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
           id: doc.id,
           collection: 'nested',
           locale: 'all',
+          overrideAccess: true,
         })
 
         expect(refreshedDoc.blocks?.[0]?.someText).toStrictEqual({
@@ -2533,6 +2689,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
             description: 'some-not-localized-description',
             localizedDescription: 'some-localized-description',
           },
+          overrideAccess: true,
         })
 
         expect(doc.title).toBe('some-localized-title')
@@ -2542,6 +2699,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
           id: doc.id,
           collection: 'localized-posts',
           locale: 'all',
+          overrideAccess: true,
         })
 
         expect(findAllLocales.title).toStrictEqual({
@@ -2560,6 +2718,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
             description: 'some-not-localized-description-es',
             localizedDescription: 'some-localized-description-es',
           },
+          overrideAccess: true,
         })
 
         expect(updatedDoc.title).toBe('some-localized-title-es')
@@ -2569,6 +2728,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
           id: doc.id,
           collection: 'localized-posts',
           locale: 'all',
+          overrideAccess: true,
         })
 
         expect(refreshedDoc.title).toStrictEqual({
@@ -2587,12 +2747,14 @@ test.suite({ config: './config.ts' })('Localization', () => {
           await payload.find({
             collection: 'localized-posts',
             depth: 0,
+            overrideAccess: true,
           })
         ).docs[0]
         const randomDoc2 = (
           await payload.find({
             collection: 'localized-posts',
             depth: 0,
+            overrideAccess: true,
           })
         ).docs[1]
 
@@ -2622,6 +2784,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
               },
             ],
           },
+          overrideAccess: true,
         })
 
         await payload.update({
@@ -2652,6 +2815,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
               },
             ],
           },
+          overrideAccess: true,
         })
 
         const retrieved = await payload.findByID({
@@ -2659,6 +2823,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
           id: newDoc.id,
           depth: 0,
           locale: 'all',
+          overrideAccess: true,
         })
 
         expect(retrieved.array.en[0].relation.value).toStrictEqual(randomDoc.id)
@@ -2693,12 +2858,14 @@ test.suite({ config: './config.ts' })('Localization', () => {
           await payload.find({
             collection: 'localized-posts',
             depth: 0,
+            overrideAccess: true,
           })
         ).docs[0]
         const randomDoc2 = (
           await payload.find({
             collection: 'localized-posts',
             depth: 0,
+            overrideAccess: true,
           })
         ).docs[1]
 
@@ -2745,6 +2912,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
               },
             ],
           },
+          overrideAccess: true,
         })
 
         expect(docEn.blocks[0].nestedBlocks[0].relation.value).toBe(randomDoc.id)
@@ -2796,6 +2964,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
               },
             ],
           },
+          overrideAccess: true,
         })
 
         expect(docEs.blocks[0].nestedBlocks[0].relation.value).toBe(randomDoc2.id)
@@ -2807,6 +2976,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
           id: docEn.id,
           locale: 'all',
           depth: 0,
+          overrideAccess: true,
         })
 
         expect(docAll.blocks.en[0].nestedBlocks[0].relation.value).toBe(randomDoc.id)
@@ -2825,12 +2995,14 @@ test.suite({ config: './config.ts' })('Localization', () => {
           await payload.find({
             collection: 'localized-posts',
             depth: 0,
+            overrideAccess: true,
           })
         ).docs[0]
         const randomDoc2 = (
           await payload.find({
             collection: 'localized-posts',
             depth: 0,
+            overrideAccess: true,
           })
         ).docs[1]
 
@@ -2874,6 +3046,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
               },
             ],
           },
+          overrideAccess: true,
         })
 
         expect(docEn.blocks[0].array[0].relation.value).toBe(randomDoc.id)
@@ -2922,6 +3095,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
               },
             ],
           },
+          overrideAccess: true,
         })
 
         expect(docEs.blocks[0].array[0].relation.value).toBe(randomDoc2.id)
@@ -2933,6 +3107,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
           id: docEn.id,
           locale: 'all',
           depth: 0,
+          overrideAccess: true,
         })
 
         expect(docAll.blocks.en[0].array[0].relation.value).toBe(randomDoc.id)
@@ -2953,6 +3128,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
           data: {
             unique: 'text',
           },
+          overrideAccess: true,
         })
 
         await payload.create({
@@ -2961,6 +3137,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
           data: {
             unique: 'text',
           },
+          overrideAccess: true,
         })
 
         await payload.create({
@@ -2969,6 +3146,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
           data: {
             unique: 'text',
           },
+          overrideAccess: true,
         })
 
         await expect(
@@ -2978,6 +3156,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
             data: {
               unique: 'text',
             },
+            overrideAccess: true,
           }),
         ).rejects.toBeTruthy()
       })
@@ -2993,6 +3172,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
           data: {
             unique: uniqueValue,
           },
+          overrideAccess: true,
         })
 
         try {
@@ -3002,6 +3182,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
             data: {
               unique: uniqueValue,
             },
+            overrideAccess: true,
           })
           expect.unreachable('Should have thrown a ValidationError')
         } catch (error: any) {
@@ -3032,6 +3213,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
               layout: blockData,
             },
           },
+          overrideAccess: true,
         })
 
         try {
@@ -3045,6 +3227,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
                 layout: blockData,
               },
             },
+            overrideAccess: true,
           })
           expect.unreachable('Should have thrown a ValidationError')
         } catch (error: any) {
@@ -3071,6 +3254,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
                 equals: devUser.email,
               },
             },
+            overrideAccess: true,
           })
         ).docs[0] as unknown as User
 
@@ -3088,6 +3272,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
             unique: 'unique-field',
             localizedCheckbox: true,
           },
+          overrideAccess: true,
         })
 
         const req = await createLocalReq({ user }, payload)
@@ -3126,6 +3311,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
               },
             ],
           },
+          overrideAccess: true,
         })
 
         const req = await createLocalReq({ user }, payload)
@@ -3156,6 +3342,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
               },
             ],
           },
+          overrideAccess: true,
         })
 
         const req = await createLocalReq({ user }, payload)
@@ -3182,6 +3369,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
               },
             ],
           },
+          overrideAccess: true,
         })
 
         const req = await createLocalReq({ user }, payload)
@@ -3200,6 +3388,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
         const refreshedDoc = await payload.findByID({
           id: doc.id,
           collection: 'nested',
+          overrideAccess: true,
         })
 
         // The source data should remain unchanged
@@ -3219,6 +3408,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
               },
             ],
           },
+          overrideAccess: true,
         })
 
         const req = await createLocalReq({ user }, payload)
@@ -3236,6 +3426,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
         const refreshedDoc = await payload.findByID({
           id: doc.id,
           collection: 'nested',
+          overrideAccess: true,
         })
 
         // The source data should remain unchanged
@@ -3259,6 +3450,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
             ],
           },
           locale: 'en',
+          overrideAccess: true,
         })
 
         try {
@@ -3277,6 +3469,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
           await payload.delete({
             id: doc.id,
             collection: arrayCollectionSlug,
+            overrideAccess: true,
           })
         }
       })
@@ -3307,6 +3500,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
               },
             ],
           },
+          overrideAccess: true,
         })
 
         // Add content to Spanish locale separately
@@ -3323,6 +3517,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
               },
             ],
           },
+          overrideAccess: true,
         })
 
         // Verify initial state - English data should exist
@@ -3330,6 +3525,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
           id: doc.id,
           collection: 'blocks-fields',
           locale: 'en',
+          overrideAccess: true,
         })
 
         expect(enDocBefore.title).toBe('English Title')
@@ -3352,6 +3548,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
           id: doc.id,
           collection: 'blocks-fields',
           locale: 'en',
+          overrideAccess: true,
         })
 
         expect(enDocAfter.title).toBe('English Title')
@@ -3364,6 +3561,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
           collection: 'blocks-fields',
           locale: 'es',
           draft: true,
+          overrideAccess: true,
         })
 
         expect(esDocAfter.title).toBe('English Title')
@@ -3387,6 +3585,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
               },
             ],
           },
+          overrideAccess: true,
         })
 
         // Verify draft exists
@@ -3395,6 +3594,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
           collection: 'blocks-fields',
           locale: 'en',
           draft: true,
+          overrideAccess: true,
         })
 
         expect(draftBefore.title).toBe('Draft English Title')
@@ -3416,6 +3616,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
           collection: 'blocks-fields',
           locale: 'en',
           draft: true,
+          overrideAccess: true,
         })
 
         expect(draftAfter.title).toBe('Draft English Title')
@@ -3432,6 +3633,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
           data: {
             title: 'Published EN',
           },
+          overrideAccess: true,
         })
 
         // Create draft with different content
@@ -3443,6 +3645,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
           data: {
             title: 'Draft EN',
           },
+          overrideAccess: true,
         })
 
         // Verify both published and draft exist with different content
@@ -3451,12 +3654,14 @@ test.suite({ config: './config.ts' })('Localization', () => {
           collection: 'blocks-fields',
           locale: 'en',
           draft: false,
+          overrideAccess: true,
         })
         const enDraftBefore = await payload.findByID({
           id: doc.id,
           collection: 'blocks-fields',
           locale: 'en',
           draft: true,
+          overrideAccess: true,
         })
 
         expect(enPublishedBefore.title).toBe('Published EN')
@@ -3480,6 +3685,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
           collection: 'blocks-fields',
           locale: 'en',
           draft: false,
+          overrideAccess: true,
         })
 
         expect(enPublishedAfter.title).toBe('Published EN')
@@ -3495,6 +3701,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
               collection,
               locale: portugueseLocale,
               fallbackLocale: [spanishLocale, englishLocale],
+              overrideAccess: true,
             })
 
             expect(result).toBeDefined()
@@ -3509,6 +3716,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
               collection,
               locale: portugueseLocale,
               fallbackLocale: ['hu', 'ar', spanishLocale],
+              overrideAccess: true,
             })
 
             expect(result).toBeDefined()
@@ -3521,6 +3729,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
               collection,
               locale: portugueseLocale,
               fallbackLocale: ['hu', 'ar'],
+              overrideAccess: true,
             })
 
             expect(result).toBeDefined()
@@ -3534,6 +3743,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
               slug: global,
               locale: portugueseLocale,
               fallbackLocale: [spanishLocale, englishLocale],
+              overrideAccess: true,
             })
 
             expect(result).toBeDefined()
@@ -3547,6 +3757,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
               slug: global,
               locale: portugueseLocale,
               fallbackLocale: ['hu', spanishLocale],
+              overrideAccess: true,
             })
             expect(result).toBeDefined()
             expect(result.text).toBe(spanishTitle)
@@ -3557,6 +3768,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
               slug: global,
               locale: portugueseLocale,
               fallbackLocale: ['hu', 'ar'],
+              overrideAccess: true,
             })
 
             expect(result).toBeDefined()
@@ -3779,6 +3991,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
         data: {
           title: englishTitle,
         },
+        overrideAccess: true,
       })
 
       postWithLocalizedData = await payload.create({
@@ -3786,6 +3999,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
         data: {
           title: englishTitle,
         },
+        overrideAccess: true,
       })
 
       await payload.update({
@@ -3795,6 +4009,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
           title: spanishTitle,
         },
         locale: spanishLocale,
+        overrideAccess: true,
       })
     })
 
@@ -3805,6 +4020,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
           where: {
             title: { equals: post1.title },
           },
+          overrideAccess: true,
         })
         expect(allDocs.docs).toContainEqual(expect.objectContaining(post1))
       })
@@ -3817,6 +4033,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
             title: spanishTitle,
           },
           locale: spanishLocale,
+          overrideAccess: true,
         })
 
         expect(updated.title).toEqual(spanishTitle)
@@ -3825,6 +4042,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
           id: post1.id,
           collection,
           locale: 'all',
+          overrideAccess: true,
         })
 
         expect(localized.title.en).toEqual(englishTitle)
@@ -3836,6 +4054,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
           id: post1.id,
           collection,
           locale: portugueseLocale,
+          overrideAccess: true,
         })
 
         expect(retrievedDoc.title).not.toBeDefined()
@@ -3847,6 +4066,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
           collection,
           locale: portugueseLocale,
           fallbackLocale: englishLocale,
+          overrideAccess: true,
         })
 
         expect(fallbackDoc.title).toBe(englishTitle)
@@ -3859,6 +4079,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
           id: postWithLocalizedData.id,
           collection,
           locale: portugueseLocale,
+          overrideAccess: true,
         })
 
         expect(localizedFallback.title).not.toBeDefined()
@@ -3870,6 +4091,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
           collection,
           locale: portugueseLocale,
           fallbackLocale: false,
+          overrideAccess: true,
         })
 
         expect(localizedFallback.title).not.toBeDefined()
@@ -3882,6 +4104,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
             text: 'Post EN',
           },
           locale: 'en',
+          overrideAccess: true,
         })
 
         await payload.update({
@@ -3891,6 +4114,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
             selfRelation: originalPost.id,
           },
           locale: 'en',
+          overrideAccess: true,
         })
 
         const spanishPostWithEnglishFallback = await payload.findByID({
@@ -3898,6 +4122,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
           id: originalPost.id,
           locale: 'es',
           fallbackLocale: 'en',
+          overrideAccess: true,
         })
 
         expect(spanishPostWithEnglishFallback.text).toBe('Post EN')
@@ -3907,6 +4132,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
           id: originalPost.id,
           locale: 'es',
           fallbackLocale: false,
+          overrideAccess: true,
         })
 
         expect(spanishPostWithNoFallback?.selfRelation?.text).toBeUndefined()
@@ -3929,6 +4155,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
             exists: true,
           },
         },
+        overrideAccess: true,
       })
     })
     test('should only nest the top level localized field values under locale keys', async ({
@@ -3970,12 +4197,14 @@ test.suite({ config: './config.ts' })('Localization', () => {
           _status: 'draft',
         },
         locale: 'en',
+        overrideAccess: true,
       })
 
       const allLocalesDoc = await payload.findByID({
         collection: allFieldsLocalizedSlug,
         id: doc.id,
         locale: 'all',
+        overrideAccess: true,
       })
 
       // Verify simple localized fields have locale keys at top level
@@ -4046,6 +4275,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
             },
           },
         },
+        overrideAccess: true,
       })
 
       const queriedDoc = await payload.find({
@@ -4053,6 +4283,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
         where: {
           'group.en.text': { equals: 'some text' },
         },
+        overrideAccess: true,
       })
 
       expect(queriedDoc.docs).toHaveLength(1)
@@ -4077,12 +4308,14 @@ test.suite({ config: './config.ts' })('Localization', () => {
               _status: 'published',
             },
             locale: defaultLocale,
+            overrideAccess: true,
           })
 
           const esDoc = await payload.findByID({
             locale: spanishLocale,
             id: doc.id,
             collection: allFieldsLocalizedSlug,
+            overrideAccess: true,
           })
 
           expect(esDoc._status).toContain('draft')
@@ -4097,12 +4330,14 @@ test.suite({ config: './config.ts' })('Localization', () => {
             },
             locale: defaultLocale,
             publishAllLocales: true,
+            overrideAccess: true,
           })
 
           const esDoc = await payload.findByID({
             locale: spanishLocale,
             id: doc.id,
             collection: allFieldsLocalizedSlug,
+            overrideAccess: true,
           })
 
           expect(esDoc._status).toContain('published')
@@ -4123,6 +4358,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
             },
             draft: true,
             locale: defaultLocale,
+            overrideAccess: true,
           })
           // update english published 1
           await payload.update({
@@ -4133,6 +4369,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
               _status: 'published',
             },
             locale: defaultLocale,
+            overrideAccess: true,
           })
 
           // create spanish draft 1
@@ -4145,6 +4382,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
             },
             draft: true,
             locale: spanishLocale,
+            overrideAccess: true,
           })
           // update spanish published 1
           await payload.update({
@@ -4155,6 +4393,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
               _status: 'published',
             },
             locale: spanishLocale,
+            overrideAccess: true,
           })
           // update spanish draft 2
           await payload.update({
@@ -4166,6 +4405,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
             },
             draft: true,
             locale: spanishLocale,
+            overrideAccess: true,
           })
 
           const publishedDoc = await payload.findByID({
@@ -4173,6 +4413,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
             id: doc.id,
             locale: 'all',
             draft: false,
+            overrideAccess: true,
           })
 
           expect(publishedDoc._status!.en).toBe('published')
@@ -4185,6 +4426,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
             id: doc.id,
             draft: true,
             locale: 'all',
+            overrideAccess: true,
           })
 
           expect(latestVersionDoc._status!.en).toBe('published')
@@ -4201,6 +4443,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
               _status: 'published',
             },
             locale: defaultLocale,
+            overrideAccess: true,
           })
           await payload.update({
             collection: allFieldsLocalizedSlug,
@@ -4211,6 +4454,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
             },
             draft: true,
             locale: spanishLocale,
+            overrideAccess: true,
           })
 
           const esPublished = await payload.find({
@@ -4230,6 +4474,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
                 },
               ],
             },
+            overrideAccess: true,
           })
           expect(esPublished.totalDocs).toBe(0)
 
@@ -4251,6 +4496,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
                 },
               ],
             },
+            overrideAccess: true,
           })
 
           expect(esDraft.totalDocs).toBe(1)
@@ -4274,6 +4520,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
                 },
               ],
             },
+            overrideAccess: true,
           })
           expect(enPublished.totalDocs).toBe(1)
           expect(enPublished.docs[0]!.text).toBe('Localized Metadata EN')
@@ -4289,6 +4536,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
               _status: 'published',
             },
             locale: defaultLocale,
+            overrideAccess: true,
           })
 
           await payload.update({
@@ -4300,6 +4548,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
             },
             draft: true,
             locale: defaultLocale,
+            overrideAccess: true,
           })
 
           await payload.update({
@@ -4310,6 +4559,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
               _status: 'published',
             },
             locale: spanishLocale,
+            overrideAccess: true,
           })
 
           const mainDocument = await payload.findByID({
@@ -4317,6 +4567,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
             id: doc.id,
             collection: allFieldsLocalizedSlug,
             draft: false,
+            overrideAccess: true,
           })
 
           expect(mainDocument._status!.es).toBe('published')
@@ -4329,6 +4580,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
             id: doc.id,
             collection: allFieldsLocalizedSlug,
             draft: true,
+            overrideAccess: true,
           })
 
           expect(latestVersion._status!.es).toBe('published')
@@ -4345,6 +4597,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
               _status: 'draft',
             },
             locale: defaultLocale,
+            overrideAccess: true,
           })
 
           await payload.update({
@@ -4355,6 +4608,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
               _status: 'draft',
             },
             locale: spanishLocale,
+            overrideAccess: true,
           })
 
           await payload.update({
@@ -4366,6 +4620,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
             },
             locale: 'en',
             publishAllLocales: true,
+            overrideAccess: true,
           })
 
           const mainDocument = await payload.findByID({
@@ -4373,6 +4628,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
             id: doc.id,
             collection: allFieldsLocalizedSlug,
             draft: false,
+            overrideAccess: true,
           })
 
           expect(mainDocument._status!.en).toBe('published')
@@ -4385,6 +4641,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
             id: doc.id,
             unpublishAllLocales: true,
             data: {},
+            overrideAccess: true,
           })
 
           const unpublishedDocument = await payload.findByID({
@@ -4392,6 +4649,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
             id: doc.id,
             collection: allFieldsLocalizedSlug,
             draft: false,
+            overrideAccess: true,
           })
 
           expect(unpublishedDocument._status!.en).toBe('draft')
@@ -4415,6 +4673,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
             },
             draft: true,
             locale: defaultLocale,
+            overrideAccess: true,
           })
           // update english published 1
           await payload.updateGlobal({
@@ -4424,6 +4683,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
               _status: 'published',
             },
             locale: defaultLocale,
+            overrideAccess: true,
           })
 
           // create spanish draft 1
@@ -4435,6 +4695,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
             },
             draft: true,
             locale: spanishLocale,
+            overrideAccess: true,
           })
           // update spanish published 1
           await payload.updateGlobal({
@@ -4444,6 +4705,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
               _status: 'published',
             },
             locale: spanishLocale,
+            overrideAccess: true,
           })
           // update spanish draft 2
           await payload.updateGlobal({
@@ -4454,12 +4716,14 @@ test.suite({ config: './config.ts' })('Localization', () => {
             },
             draft: true,
             locale: spanishLocale,
+            overrideAccess: true,
           })
 
           const publishedDoc = await payload.findGlobal({
             slug: globalWithDraftsSlug,
             locale: 'all',
             draft: false,
+            overrideAccess: true,
           })
 
           expect(publishedDoc._status!.en).toBe('published')
@@ -4471,6 +4735,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
             slug: globalWithDraftsSlug,
             draft: true,
             locale: 'all',
+            overrideAccess: true,
           })
 
           expect(latestVersionDoc._status!.en).toBe('published')
@@ -4489,6 +4754,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
               _status: 'published',
             },
             locale: defaultLocale,
+            overrideAccess: true,
           })
 
           await payload.updateGlobal({
@@ -4499,6 +4765,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
             },
             draft: true,
             locale: defaultLocale,
+            overrideAccess: true,
           })
 
           await payload.updateGlobal({
@@ -4508,12 +4775,14 @@ test.suite({ config: './config.ts' })('Localization', () => {
               _status: 'published',
             },
             locale: spanishLocale,
+            overrideAccess: true,
           })
 
           const mainDocument = await payload.findGlobal({
             slug: globalWithDraftsSlug,
             locale: 'all',
             draft: false,
+            overrideAccess: true,
           })
 
           expect(mainDocument._status!.es).toBe('published')
@@ -4525,6 +4794,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
             slug: globalWithDraftsSlug,
             locale: 'all',
             draft: true,
+            overrideAccess: true,
           })
 
           expect(latestVersion._status!.es).toBe('published')
@@ -4541,6 +4811,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
               _status: 'draft',
             },
             locale: defaultLocale,
+            overrideAccess: true,
           })
 
           await payload.updateGlobal({
@@ -4550,6 +4821,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
               _status: 'draft',
             },
             locale: spanishLocale,
+            overrideAccess: true,
           })
 
           await payload.updateGlobal({
@@ -4560,12 +4832,14 @@ test.suite({ config: './config.ts' })('Localization', () => {
             },
             locale: defaultLocale,
             publishAllLocales: true,
+            overrideAccess: true,
           })
 
           const mainDocument = await payload.findGlobal({
             slug: globalWithDraftsSlug,
             locale: 'all',
             draft: false,
+            overrideAccess: true,
           })
 
           expect(mainDocument._status!.en).toBe('published')
@@ -4577,12 +4851,14 @@ test.suite({ config: './config.ts' })('Localization', () => {
             slug: globalWithDraftsSlug,
             unpublishAllLocales: true,
             data: {},
+            overrideAccess: true,
           })
 
           const unpublishedDocument = await payload.findGlobal({
             slug: globalWithDraftsSlug,
             locale: 'all',
             draft: false,
+            overrideAccess: true,
           })
 
           expect(unpublishedDocument._status!.en).toBe('draft')
@@ -4601,6 +4877,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
             text: englishTitle,
           },
           locale: englishLocale,
+          overrideAccess: true,
         })
 
         await payload.update({
@@ -4610,6 +4887,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
             text: spanishTitle,
           },
           locale: spanishLocale,
+          overrideAccess: true,
         })
       })
 
@@ -4621,12 +4899,14 @@ test.suite({ config: './config.ts' })('Localization', () => {
             text: '',
           },
           locale: spanishLocale,
+          overrideAccess: true,
         })
 
         const localizedFallback: any = await payload.findByID({
           id: allFieldsPostWithLocalizedData.id,
           collection: allFieldsLocalizedSlug,
           locale: 'all',
+          overrideAccess: true,
         })
 
         expect(localizedFallback.text.en).toEqual(englishTitle)
@@ -4636,6 +4916,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
           id: allFieldsPostWithLocalizedData.id,
           collection: allFieldsLocalizedSlug,
           locale: spanishLocale,
+          overrideAccess: true,
         })
 
         expect(retrievedInSpanish.text).toEqual(englishTitle)
@@ -4647,6 +4928,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
           collection: allFieldsLocalizedSlug,
           locale: portugueseLocale,
           fallbackLocale: 'none',
+          overrideAccess: true,
         })
 
         expect(localizedFallback.text).not.toBeDefined()
@@ -4662,6 +4944,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
           title: 'Localized Drafts EN',
         },
         locale: defaultLocale,
+        overrideAccess: true,
       })
 
       const result2 = await payload.countVersions({
@@ -4671,6 +4954,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
             equals: 'Localized Drafts EN',
           },
         },
+        overrideAccess: true,
       })
       expect(result2.totalDocs).toBe(1)
     })
@@ -4682,12 +4966,14 @@ test.suite({ config: './config.ts' })('Localization', () => {
         slug: globalWithDraftsSlug,
         data: { text: 'global count en', _status: 'published' },
         locale: defaultLocale,
+        overrideAccess: true,
       })
 
       await payload.updateGlobal({
         slug: globalWithDraftsSlug,
         data: { text: 'global count es', _status: 'published' },
         locale: spanishLocale,
+        overrideAccess: true,
       })
 
       const englishWhere = { 'version.text': { equals: 'global count en' } }
@@ -4696,12 +4982,14 @@ test.suite({ config: './config.ts' })('Localization', () => {
         global: globalWithDraftsSlug,
         locale: defaultLocale,
         where: englishWhere,
+        overrideAccess: true,
       })
 
       const inSpanish = await payload.countGlobalVersions({
         global: globalWithDraftsSlug,
         locale: spanishLocale,
         where: englishWhere,
+        overrideAccess: true,
       })
 
       expect(inEnglish.totalDocs).toBeGreaterThan(0)
@@ -4724,6 +5012,7 @@ async function createLocalizedPost(
     data: {
       title: data.title.en,
     },
+    overrideAccess: true,
   })
 
   await payload.update({
@@ -4733,6 +5022,7 @@ async function createLocalizedPost(
       title: data.title.es,
     },
     locale: spanishLocale,
+    overrideAccess: true,
   })
 
   return localizedRelation

@@ -20,6 +20,7 @@ export const subTaskWorkflow: WorkflowConfig<'subTask'> = {
               data: {
                 title: input.message,
               },
+              overrideAccess: true,
             })
             return {
               output: {
@@ -37,6 +38,7 @@ export const subTaskWorkflow: WorkflowConfig<'subTask'> = {
               data: {
                 title: input.message,
               },
+              overrideAccess: true,
             })
             return {
               output: {

@@ -36,6 +36,7 @@ test.suite({ config: './config.ts' })('Admin (Root) Tests', () => {
       data: {
         text: 'LOCAL API EXAMPLE',
       },
+      overrideAccess: true,
     })
 
     expect(newPost.text).toEqual('LOCAL API EXAMPLE')

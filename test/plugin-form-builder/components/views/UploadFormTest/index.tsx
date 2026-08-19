@@ -37,6 +37,7 @@ async function UploadFormTestViewAsync({
     collection: 'forms',
     depth: 0,
     limit: 100,
+    overrideAccess: true,
     pagination: false,
   })
 

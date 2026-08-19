@@ -40,11 +40,13 @@ test.suite({ config: './config.ts' })('Access Control', () => {
     post1 = await payload.create({
       collection: slug,
       data: {},
+      overrideAccess: true,
     })
 
     restricted = await payload.create({
       collection: fullyRestrictedSlug,
       data: { name: 'restricted' },
+      overrideAccess: true,
     })
   })
 
@@ -64,6 +66,7 @@ test.suite({ config: './config.ts' })('Access Control', () => {
             value: 'private_value',
           },
         },
+        overrideAccess: true,
       })
 
       await payload.update({
@@ -72,12 +75,14 @@ test.suite({ config: './config.ts' })('Access Control', () => {
         data: {
           title: 'Doc Title',
         },
+        overrideAccess: true,
       })
 
       const updatedDoc = await payload.findByID({
         id: doc.id,
         collection: hiddenFieldsSlug,
         showHiddenFields: true,
+        overrideAccess: true,
       })
 
       expect(updatedDoc.partiallyHiddenGroup.value).toStrictEqual('private_value')
@@ -101,6 +106,7 @@ test.suite({ config: './config.ts' })('Access Control', () => {
             value: 'private_value',
           },
         },
+        overrideAccess: true,
       })
 
       await payload.update({
@@ -111,12 +117,14 @@ test.suite({ config: './config.ts' })('Access Control', () => {
         where: {
           id: { equals: docsMany.id },
         },
+        overrideAccess: true,
       })
 
       const updatedMany = await payload.findByID({
         id: docsMany.id,
         collection: hiddenFieldsSlug,
         showHiddenFields: true,
+        overrideAccess: true,
       })
 
       expect(updatedMany.partiallyHiddenGroup.value).toStrictEqual('private_value')
@@ -138,6 +146,7 @@ test.suite({ config: './config.ts' })('Access Control', () => {
             },
           ],
         },
+        overrideAccess: true,
       })
 
       const doc = await payload.findByID({
@@ -154,6 +163,7 @@ test.suite({ config: './config.ts' })('Access Control', () => {
       const docOverride = await payload.findByID({
         id,
         collection: siblingDataSlug,
+        overrideAccess: true,
       })
 
       expect(docOverride.array?.[0].text).toBe(firstArrayText)
@@ -168,6 +178,7 @@ test.suite({ config: './config.ts' })('Access Control', () => {
         data: {
           cannotMutateRequired: 'original',
         },
+        overrideAccess: true,
       })
 
       const updatedDoc = await payload.update({
@@ -189,6 +200,7 @@ test.suite({ config: './config.ts' })('Access Control', () => {
         data: {
           cannotMutateRequired: 'original',
         },
+        overrideAccess: true,
       })
 
       const updatedDoc = await payload.update({
@@ -213,6 +225,7 @@ test.suite({ config: './config.ts' })('Access Control', () => {
           cannotMutateRequired: 'cannotMutateRequired',
           cannotMutateNotRequired: 'cannotMutateNotRequired',
         },
+        overrideAccess: true,
       })
 
       const updatedDoc = await payload.update({
@@ -236,6 +249,7 @@ test.suite({ config: './config.ts' })('Access Control', () => {
           title: 'Test Title',
         },
         showHiddenFields: true,
+        overrideAccess: true,
       })
 
       expect(doc.hiddenWithDefault).toBe('default value')
@@ -407,7 +421,7 @@ test.suite({ config: './config.ts' })('Access Control', () => {
           { restrictedField: 'restricted' },
         )
 
-        const retrievedDoc = await payload.findByID({ id, collection: slug })
+        const retrievedDoc = await payload.findByID({ id, collection: slug, overrideAccess: true })
 
         expect(retrievedDoc.restrictedField).toStrictEqual(restrictedField)
       })
@@ -505,6 +519,7 @@ test.suite({ config: './config.ts' })('Access Control', () => {
           id: post1.id,
           collection: slug,
           data: { restrictedField: restricted.id },
+          overrideAccess: true,
         })
 
         expect(doc).toMatchObject({ id: post1.id })
@@ -544,6 +559,7 @@ test.suite({ config: './config.ts' })('Access Control', () => {
           where: {
             id: { equals: post1.id },
           },
+          overrideAccess: true,
         })
 
         expect(doc.docs[0]).toMatchObject({ id: post1.id })
@@ -581,6 +597,7 @@ test.suite({ config: './config.ts' })('Access Control', () => {
           id: restricted.id,
           collection: fullyRestrictedSlug,
           data: { name: updatedName },
+          overrideAccess: true,
         })
 
         expect(doc).toMatchObject({ id: restricted.id, name: updatedName })
@@ -620,6 +637,7 @@ test.suite({ config: './config.ts' })('Access Control', () => {
           where: {
             id: { equals: restricted.id },
           },
+          overrideAccess: true,
         })
 
         expect(doc.docs[0]).toMatchObject({ id: restricted.id, name: updatedName })
@@ -634,6 +652,7 @@ test.suite({ config: './config.ts' })('Access Control', () => {
         data: {
           title: 'hello',
         },
+        overrideAccess: true,
       })
 
       await payload.create({
@@ -642,6 +661,7 @@ test.suite({ config: './config.ts' })('Access Control', () => {
           hidden: true,
           title: 'hello',
         },
+        overrideAccess: true,
       })
 
       const { docs } = await payload.find({
@@ -658,6 +678,7 @@ test.suite({ config: './config.ts' })('Access Control', () => {
         data: {
           title: 'hello',
         },
+        overrideAccess: true,
       })
 
       await payload.create({
@@ -666,6 +687,7 @@ test.suite({ config: './config.ts' })('Access Control', () => {
           hidden: true,
           title: 'hello',
         },
+        overrideAccess: true,
       })
 
       const { totalDocs } = await payload.count({
@@ -683,6 +705,7 @@ test.suite({ config: './config.ts' })('Access Control', () => {
           name: 'match',
           hidden: true,
         },
+        overrideAccess: true,
       })
 
       await payload.create({
@@ -691,6 +714,7 @@ test.suite({ config: './config.ts' })('Access Control', () => {
           name: 'match',
           hidden: false,
         },
+        overrideAccess: true,
       })
 
       const { docs } = await payload.findVersions({
@@ -710,14 +734,17 @@ test.suite({ config: './config.ts' })('Access Control', () => {
       await payload.create({
         collection: 'fields-and-top-access',
         data: { secret: 'will-fail-access-read' },
+        overrideAccess: true,
       })
       const { id: hitID } = await payload.create({
         collection: 'fields-and-top-access',
         data: { secret: 'will-success-access-read' },
+        overrideAccess: true,
       })
       await payload.create({
         collection: 'fields-and-top-access',
         data: { secret: 'will-fail-access-read' },
+        overrideAccess: true,
       })
 
       // assert find, only will-success should be in the result
@@ -752,19 +779,22 @@ test.suite({ config: './config.ts' })('Access Control', () => {
       payload,
     }) => {
       // clean up
-      await payload.delete({ collection: 'fields-and-top-access', where: {} })
+      await payload.delete({ collection: 'fields-and-top-access', where: {}, overrideAccess: true })
 
       await payload.create({
         collection: 'fields-and-top-access',
         data: { secret: 'will-fail-access-read' },
+        overrideAccess: true,
       })
       const { id: hitID } = await payload.create({
         collection: 'fields-and-top-access',
         data: { secret: 'will-success-access-read' },
+        overrideAccess: true,
       })
       await payload.create({
         collection: 'fields-and-top-access',
         data: { secret: 'will-fail-access-read' },
+        overrideAccess: true,
       })
 
       // Assert findVersions only will-success should be in the result
@@ -807,6 +837,7 @@ test.suite({ config: './config.ts' })('Access Control', () => {
           data: {
             email: 'dev@payloadcms.com',
           },
+          overrideAccess: true,
         })
       } finally {
         // Restore the original Date.now() after the forgotPassword call
@@ -836,6 +867,7 @@ test.suite({ config: './config.ts' })('Access Control', () => {
         data: {
           title: 'Test Document',
         },
+        overrideAccess: true,
       })
 
       const req = await createLocalReq(
@@ -904,6 +936,7 @@ test.suite({ config: './config.ts' })('Access Control', () => {
         data: {
           title: 'Test Document 2',
         },
+        overrideAccess: true,
       })
 
       // Create non-admin user request
@@ -974,6 +1007,7 @@ test.suite({ config: './config.ts' })('Access Control', () => {
         collection: 'users',
         limit: 1,
         where: { email: { equals: 'dev@payloadcms.com' } },
+        overrideAccess: true,
       })
       adminUser = { ...adminDocs[0], collection: 'users' }
 
@@ -981,6 +1015,7 @@ test.suite({ config: './config.ts' })('Access Control', () => {
         collection: publicUsersSlug,
         limit: 1,
         where: { email: { equals: publicUserEmail } },
+        overrideAccess: true,
       })
       publicUser = { ...publicDocs[0], collection: publicUsersSlug }
     })

@@ -98,6 +98,7 @@ test.suite({ config: './config.ts' })('Remove token from auth responses', () => 
       collection: collectionSlug,
       data: { email: devUser.email },
       disableEmail: true,
+      overrideAccess: true,
     })
 
     const response = await restClient.POST(`/${collectionSlug}/reset-password`, {

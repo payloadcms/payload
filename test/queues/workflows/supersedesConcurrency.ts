@@ -35,6 +35,7 @@ export const supersedesConcurrencyWorkflow: WorkflowConfig<'supersedesConcurrenc
           data: {
             title: `started:${job.input.resourceId}:${job.id}`,
           },
+          overrideAccess: true,
         })
 
         await wait(delayMs)
@@ -50,6 +51,7 @@ export const supersedesConcurrencyWorkflow: WorkflowConfig<'supersedesConcurrenc
           data: {
             title: `completed:${job.input.resourceId}:${job.id}`,
           },
+          overrideAccess: true,
         })
 
         return { output: {} }

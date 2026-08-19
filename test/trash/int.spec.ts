@@ -34,6 +34,7 @@ test.suite({ config: './config.ts' })('trash', () => {
         email: regularUser.email,
         password: regularUser.password,
       },
+      overrideAccess: true,
     })
 
     restrictedCollectionDoc = await payload.create({
@@ -41,6 +42,7 @@ test.suite({ config: './config.ts' })('trash', () => {
       data: {
         title: 'With Access Control one',
       },
+      overrideAccess: true,
     })
 
     postsDocOne = await payload.create({
@@ -48,6 +50,7 @@ test.suite({ config: './config.ts' })('trash', () => {
       data: {
         title: 'Doc one',
       },
+      overrideAccess: true,
     })
 
     postsDocTwo = await payload.create({
@@ -56,6 +59,7 @@ test.suite({ config: './config.ts' })('trash', () => {
         title: 'Doc two',
         deletedAt: new Date().toISOString(),
       },
+      overrideAccess: true,
     })
   })
 
@@ -68,6 +72,7 @@ test.suite({ config: './config.ts' })('trash', () => {
           exists: true,
         },
       },
+      overrideAccess: true,
     })
   })
 
@@ -139,6 +144,7 @@ test.suite({ config: './config.ts' })('trash', () => {
           email: devUser.email,
           password: devUser.password,
         },
+        overrideAccess: true,
       })
     })
 
@@ -150,6 +156,7 @@ test.suite({ config: './config.ts' })('trash', () => {
             collection: differentiatedTrashCollectionSlug as CollectionSlug,
             id,
             trash: true,
+            overrideAccess: true,
           })
         } catch (_e) {
           // Ignore errors from cleanup
@@ -164,6 +171,7 @@ test.suite({ config: './config.ts' })('trash', () => {
         const doc = await payload.create({
           collection: differentiatedTrashCollectionSlug as CollectionSlug,
           data: { title: 'Regular user trash test' },
+          overrideAccess: true,
         })
 
         createdDocIds.push(doc.id)
@@ -187,6 +195,7 @@ test.suite({ config: './config.ts' })('trash', () => {
         const doc = await payload.create({
           collection: differentiatedTrashCollectionSlug as CollectionSlug,
           data: { title: 'Admin trash test' },
+          overrideAccess: true,
         })
 
         createdDocIds.push(doc.id)
@@ -217,6 +226,7 @@ test.suite({ config: './config.ts' })('trash', () => {
             title: 'Regular user perm delete test',
             deletedAt: new Date().toISOString(),
           },
+          overrideAccess: true,
         })
 
         createdDocIds.push(doc.id)
@@ -245,6 +255,7 @@ test.suite({ config: './config.ts' })('trash', () => {
             title: 'Admin perm delete test',
             deletedAt: new Date().toISOString(),
           },
+          overrideAccess: true,
         })
 
         // Admin should be able to permanently delete
@@ -264,6 +275,7 @@ test.suite({ config: './config.ts' })('trash', () => {
             collection: differentiatedTrashCollectionSlug as CollectionSlug,
             id: doc.id,
             trash: true,
+            overrideAccess: true,
           }),
         ).rejects.toThrow('Not Found')
       })
@@ -275,11 +287,13 @@ test.suite({ config: './config.ts' })('trash', () => {
         const doc1 = await payload.create({
           collection: differentiatedTrashCollectionSlug as CollectionSlug,
           data: { title: 'Bulk trash test 1' },
+          overrideAccess: true,
         })
 
         const doc2 = await payload.create({
           collection: differentiatedTrashCollectionSlug as CollectionSlug,
           data: { title: 'Bulk trash test 2' },
+          overrideAccess: true,
         })
 
         createdDocIds.push(doc1.id, doc2.id)
@@ -313,6 +327,7 @@ test.suite({ config: './config.ts' })('trash', () => {
             title: 'Bulk perm delete test 1',
             deletedAt: new Date().toISOString(),
           },
+          overrideAccess: true,
         })
 
         const doc2 = await payload.create({
@@ -321,6 +336,7 @@ test.suite({ config: './config.ts' })('trash', () => {
             title: 'Bulk perm delete test 2',
             deletedAt: new Date().toISOString(),
           },
+          overrideAccess: true,
         })
 
         createdDocIds.push(doc1.id, doc2.id)
@@ -353,6 +369,7 @@ test.suite({ config: './config.ts' })('trash', () => {
               like: 'Bulk perm delete test',
             },
           },
+          overrideAccess: true,
         })
 
         expect(remaining.docs.length).toBe(2)
@@ -368,6 +385,7 @@ test.suite({ config: './config.ts' })('trash', () => {
             title: 'Admin bulk perm delete 1',
             deletedAt: new Date().toISOString(),
           },
+          overrideAccess: true,
         })
 
         const doc2 = await payload.create({
@@ -376,6 +394,7 @@ test.suite({ config: './config.ts' })('trash', () => {
             title: 'Admin bulk perm delete 2',
             deletedAt: new Date().toISOString(),
           },
+          overrideAccess: true,
         })
 
         // Admin should be able to bulk permanently delete
@@ -405,6 +424,7 @@ test.suite({ config: './config.ts' })('trash', () => {
               like: 'Admin bulk perm delete',
             },
           },
+          overrideAccess: true,
         })
 
         expect(remaining.docs.length).toBe(0)
@@ -420,6 +440,7 @@ test.suite({ config: './config.ts' })('trash', () => {
         const allDocs = await payload.find({
           collection: postsSlug,
           trash: true,
+          overrideAccess: true,
         })
 
         expect(allDocs.totalDocs).toEqual(2)
@@ -434,6 +455,7 @@ test.suite({ config: './config.ts' })('trash', () => {
             },
           },
           trash: true,
+          overrideAccess: true,
         })
 
         expect(trashedDocs.totalDocs).toEqual(1)
@@ -446,6 +468,7 @@ test.suite({ config: './config.ts' })('trash', () => {
         const normalDocs = await payload.find({
           collection: postsSlug,
           trash: false,
+          overrideAccess: true,
         })
 
         expect(normalDocs.totalDocs).toEqual(1)
@@ -462,11 +485,13 @@ test.suite({ config: './config.ts' })('trash', () => {
             deletedAt: null,
           },
           trash: true,
+          overrideAccess: true,
         })
 
         const result = await payload.find({
           collection: postsSlug,
-          trash: false, // Normal query should return it now
+          trash: false,
+          overrideAccess: true, // Normal query should return it now
         })
 
         const restored = result.docs.find(
@@ -486,11 +511,13 @@ test.suite({ config: './config.ts' })('trash', () => {
         await payload.create({
           collection: postsSlug,
           data: { title: 'Doc one' },
+          overrideAccess: true,
         })
 
         const result = await payload.findDistinct({
           collection: postsSlug,
           field: 'title',
+          overrideAccess: true,
         })
 
         const titles = result.values.map((v) => v.title)
@@ -506,6 +533,7 @@ test.suite({ config: './config.ts' })('trash', () => {
           collection: postsSlug,
           field: 'title',
           trash: true,
+          overrideAccess: true,
         })
 
         const titles = result.values.map((v) => v.title)
@@ -524,6 +552,7 @@ test.suite({ config: './config.ts' })('trash', () => {
           where: {
             deletedAt: { exists: true },
           },
+          overrideAccess: true,
         })
 
         const titles = result.values.map((v) => v.title)
@@ -538,6 +567,7 @@ test.suite({ config: './config.ts' })('trash', () => {
           where: {
             title: { equals: 'Doc two' },
           },
+          overrideAccess: true,
         })
 
         const titles = result.values.map((v) => v.title)
@@ -551,6 +581,7 @@ test.suite({ config: './config.ts' })('trash', () => {
           collection: postsSlug,
           id: postsDocTwo.id,
           trash: true,
+          overrideAccess: true,
         })
 
         expect(trashedPostDoc).toBeDefined()
@@ -566,6 +597,7 @@ test.suite({ config: './config.ts' })('trash', () => {
           payload.findByID({
             collection: postsSlug,
             id: postsDocTwo.id,
+            overrideAccess: true,
           }),
         ).rejects.toThrow('Not Found')
 
@@ -574,6 +606,7 @@ test.suite({ config: './config.ts' })('trash', () => {
             collection: postsSlug,
             id: postsDocTwo.id,
             trash: false,
+            overrideAccess: true,
           }),
         ).rejects.toThrow('Not Found')
       })
@@ -586,6 +619,7 @@ test.suite({ config: './config.ts' })('trash', () => {
         const allVersions = await payload.findVersions({
           collection: postsSlug,
           trash: true,
+          overrideAccess: true,
         })
 
         expect(allVersions.totalDocs).toEqual(2)
@@ -604,6 +638,7 @@ test.suite({ config: './config.ts' })('trash', () => {
             },
           },
           trash: true,
+          overrideAccess: true,
         })
 
         expect(trashedVersions.totalDocs).toEqual(1)
@@ -616,6 +651,7 @@ test.suite({ config: './config.ts' })('trash', () => {
         const normalVersions = await payload.findVersions({
           collection: postsSlug,
           trash: false,
+          overrideAccess: true,
         })
 
         expect(normalVersions.totalDocs).toEqual(1)
@@ -632,6 +668,7 @@ test.suite({ config: './config.ts' })('trash', () => {
             deletedAt: null,
           },
           trash: true,
+          overrideAccess: true,
         })
 
         const versions = await payload.findVersions({
@@ -642,6 +679,7 @@ test.suite({ config: './config.ts' })('trash', () => {
               equals: null,
             },
           },
+          overrideAccess: true,
         })
 
         expect(versions.docs.some((v) => v.parent === postsDocTwo.id)).toBe(true)
@@ -660,6 +698,7 @@ test.suite({ config: './config.ts' })('trash', () => {
             },
           },
           trash: true,
+          overrideAccess: true,
         })
 
         expect(trashedVersions.docs).toHaveLength(1)
@@ -670,6 +709,7 @@ test.suite({ config: './config.ts' })('trash', () => {
           collection: postsSlug,
           id: version!.id,
           trash: true,
+          overrideAccess: true,
         })
 
         expect(trashedVersionDoc).toBeDefined()
@@ -689,6 +729,7 @@ test.suite({ config: './config.ts' })('trash', () => {
             },
           },
           trash: true,
+          overrideAccess: true,
         })
 
         expect(trashedVersions.docs).toHaveLength(1)
@@ -699,6 +740,7 @@ test.suite({ config: './config.ts' })('trash', () => {
           payload.findVersionByID({
             collection: postsSlug,
             id: version!.id,
+            overrideAccess: true,
           }),
         ).rejects.toThrow('Not Found')
 
@@ -707,6 +749,7 @@ test.suite({ config: './config.ts' })('trash', () => {
             collection: postsSlug,
             id: version!.id,
             trash: false,
+            overrideAccess: true,
           }),
         ).rejects.toThrow('Not Found')
       })
@@ -721,6 +764,7 @@ test.suite({ config: './config.ts' })('trash', () => {
             title: 'Updated Doc Two',
           },
           trash: true,
+          overrideAccess: true,
         })
 
         expect(updatedPostDoc).toBeDefined()
@@ -740,6 +784,7 @@ test.suite({ config: './config.ts' })('trash', () => {
             data: {
               title: 'Updated Doc Two',
             },
+            overrideAccess: true,
           }),
         ).rejects.toThrow('Not Found')
 
@@ -751,6 +796,7 @@ test.suite({ config: './config.ts' })('trash', () => {
               title: 'Updated Doc Two',
             },
             trash: false,
+            overrideAccess: true,
           }),
         ).rejects.toThrow('Not Found')
       })
@@ -762,6 +808,7 @@ test.suite({ config: './config.ts' })('trash', () => {
           data: {
             title: 'Updated Doc One',
           },
+          overrideAccess: true,
         })
 
         expect(updatedPostDoc).toBeDefined()
@@ -780,6 +827,7 @@ test.suite({ config: './config.ts' })('trash', () => {
             deletedAt: null,
           },
           trash: true,
+          overrideAccess: true,
         })
 
         expect(restored.deletedAt).toBeNull()
@@ -788,6 +836,7 @@ test.suite({ config: './config.ts' })('trash', () => {
         const result = await payload.find({
           collection: postsSlug,
           trash: false,
+          overrideAccess: true,
         })
 
         const found = result.docs.find((doc) => doc.id === postsDocTwo.id)
@@ -809,6 +858,7 @@ test.suite({ config: './config.ts' })('trash', () => {
               exists: true,
             },
           },
+          overrideAccess: true,
         })
 
         expect(result.docs).toBeDefined()
@@ -835,6 +885,7 @@ test.suite({ config: './config.ts' })('trash', () => {
               exists: true,
             },
           },
+          overrideAccess: true,
         })
 
         expect(result.docs).toBeDefined()
@@ -859,6 +910,7 @@ test.suite({ config: './config.ts' })('trash', () => {
             title: 'Doc three',
             deletedAt: new Date().toISOString(),
           },
+          overrideAccess: true,
         })
 
         const result = await payload.update({
@@ -872,6 +924,7 @@ test.suite({ config: './config.ts' })('trash', () => {
               exists: true,
             },
           },
+          overrideAccess: true,
         })
         expect(result.docs).toBeDefined()
         expect(result.docs[0]?.id).toEqual(docThree.id)
@@ -886,6 +939,7 @@ test.suite({ config: './config.ts' })('trash', () => {
           collection: postsSlug,
           id: docThree.id,
           trash: true,
+          overrideAccess: true,
         })
       })
     })
@@ -902,11 +956,13 @@ test.suite({ config: './config.ts' })('trash', () => {
               exists: true,
             },
           },
+          overrideAccess: true,
         })
 
         const allDocs = await payload.find({
           collection: postsSlug,
           trash: true,
+          overrideAccess: true,
         })
 
         expect(allDocs.totalDocs).toEqual(0)
@@ -921,11 +977,13 @@ test.suite({ config: './config.ts' })('trash', () => {
               exists: true,
             },
           },
+          overrideAccess: true,
         })
 
         const allDocs = await payload.find({
           collection: postsSlug,
           trash: true,
+          overrideAccess: true,
         })
 
         expect(allDocs.totalDocs).toEqual(1)
@@ -945,6 +1003,7 @@ test.suite({ config: './config.ts' })('trash', () => {
             _status: 'draft',
           },
           draft: true,
+          overrideAccess: true,
         })
 
         expect(draftDoc.title).toBe('')
@@ -957,6 +1016,7 @@ test.suite({ config: './config.ts' })('trash', () => {
           data: {
             deletedAt: new Date().toISOString(),
           },
+          overrideAccess: true,
         })
 
         expect(trashedDoc.deletedAt).toBeDefined()
@@ -968,6 +1028,7 @@ test.suite({ config: './config.ts' })('trash', () => {
           collection: postsSlug,
           id: draftDoc.id,
           trash: true,
+          overrideAccess: true,
         })
       })
 
@@ -982,6 +1043,7 @@ test.suite({ config: './config.ts' })('trash', () => {
             _status: 'draft',
           },
           draft: true,
+          overrideAccess: true,
         })
 
         // Trash it
@@ -991,6 +1053,7 @@ test.suite({ config: './config.ts' })('trash', () => {
           data: {
             deletedAt: new Date().toISOString(),
           },
+          overrideAccess: true,
         })
 
         // Should be able to restore as draft without validation errors
@@ -1002,6 +1065,7 @@ test.suite({ config: './config.ts' })('trash', () => {
             _status: 'draft',
           },
           trash: true,
+          overrideAccess: true,
         })
 
         expect(restoredDoc.deletedAt).toBeNull()
@@ -1013,6 +1077,7 @@ test.suite({ config: './config.ts' })('trash', () => {
           collection: postsSlug,
           id: draftDoc.id,
           trash: true,
+          overrideAccess: true,
         })
       })
 
@@ -1027,6 +1092,7 @@ test.suite({ config: './config.ts' })('trash', () => {
             _status: 'draft',
           },
           draft: true,
+          overrideAccess: true,
         })
 
         // Trash it
@@ -1036,6 +1102,7 @@ test.suite({ config: './config.ts' })('trash', () => {
           data: {
             deletedAt: new Date().toISOString(),
           },
+          overrideAccess: true,
         })
 
         // Should NOT be able to restore as published - should fail validation
@@ -1048,6 +1115,7 @@ test.suite({ config: './config.ts' })('trash', () => {
               _status: 'published',
             },
             trash: true,
+            overrideAccess: true,
           }),
         ).rejects.toThrow(/invalid/i)
 
@@ -1056,6 +1124,7 @@ test.suite({ config: './config.ts' })('trash', () => {
           collection: postsSlug,
           id: draftDoc.id,
           trash: true,
+          overrideAccess: true,
         })
       })
     })
@@ -1068,6 +1137,7 @@ test.suite({ config: './config.ts' })('trash', () => {
           payload.delete({
             collection: postsSlug,
             id: postsDocTwo.id,
+            overrideAccess: true,
           }),
         ).rejects.toThrow('Not Found')
 
@@ -1076,6 +1146,7 @@ test.suite({ config: './config.ts' })('trash', () => {
             collection: postsSlug,
             id: postsDocTwo.id,
             trash: false,
+            overrideAccess: true,
           }),
         ).rejects.toThrow('Not Found')
       })
@@ -1085,11 +1156,13 @@ test.suite({ config: './config.ts' })('trash', () => {
           collection: postsSlug,
           id: postsDocTwo.id,
           trash: true,
+          overrideAccess: true,
         })
 
         const allDocs = await payload.find({
           collection: postsSlug,
           trash: true,
+          overrideAccess: true,
         })
 
         expect(allDocs.totalDocs).toEqual(1)
@@ -1107,11 +1180,13 @@ test.suite({ config: './config.ts' })('trash', () => {
           id: postsDocTwo.id,
           data: { title: 'Updated Before Restore Attempt' },
           trash: true,
+          overrideAccess: true,
         })
 
         const { docs: versions } = await payload.findVersions({
           collection: postsSlug,
           trash: true,
+          overrideAccess: true,
         })
         const version = versions.find((v) => v.parent === postsDocTwo.id)
 
@@ -1121,6 +1196,7 @@ test.suite({ config: './config.ts' })('trash', () => {
           payload.restoreVersion({
             collection: postsSlug,
             id: version!.id,
+            overrideAccess: true,
           }),
         ).rejects.toThrow(/Cannot restore a version of a trashed document/i)
       })
@@ -1132,6 +1208,7 @@ test.suite({ config: './config.ts' })('trash', () => {
       }) => {
         const result = await payload.count({
           collection: postsSlug,
+          overrideAccess: true,
         })
 
         expect(result.totalDocs).toEqual(1) // Only postsDocOne
@@ -1143,6 +1220,7 @@ test.suite({ config: './config.ts' })('trash', () => {
         const result = await payload.count({
           collection: postsSlug,
           trash: true,
+          overrideAccess: true,
         })
 
         expect(result.totalDocs).toEqual(2)
@@ -1155,6 +1233,7 @@ test.suite({ config: './config.ts' })('trash', () => {
           collection: postsSlug,
           trash: true,
           where: { deletedAt: { exists: true } },
+          overrideAccess: true,
         })
 
         expect(result.totalDocs).toEqual(1) // Only postsDocTwo
@@ -1173,6 +1252,7 @@ test.suite({ config: './config.ts' })('trash', () => {
           title: 'Draft with Localized Field',
           _status: 'draft',
         },
+        overrideAccess: true,
       })
 
       // Update en locale as draft - isSavingDraft = true skips updateOne on the main table,
@@ -1186,6 +1266,7 @@ test.suite({ config: './config.ts' })('trash', () => {
           _status: 'draft',
         },
         draft: true,
+        overrideAccess: true,
       })
 
       await payload.update({
@@ -1197,6 +1278,7 @@ test.suite({ config: './config.ts' })('trash', () => {
           _status: 'draft',
         },
         draft: true,
+        overrideAccess: true,
       })
 
       // Bulk trash the document (simulates list view "Move to Trash")
@@ -1211,6 +1293,7 @@ test.suite({ config: './config.ts' })('trash', () => {
             equals: post.id,
           },
         },
+        overrideAccess: true,
       })
 
       expect(trashResult.docs).toHaveLength(1)
@@ -1223,6 +1306,7 @@ test.suite({ config: './config.ts' })('trash', () => {
         locale: 'en',
         draft: true,
         trash: true,
+        overrideAccess: true,
       })
 
       const trashedDocES = await payload.findByID({
@@ -1231,6 +1315,7 @@ test.suite({ config: './config.ts' })('trash', () => {
         locale: 'es',
         draft: true,
         trash: true,
+        overrideAccess: true,
       })
 
       // localizedField should be preserved from the latest draft version for both locales,
@@ -1489,6 +1574,7 @@ test.suite({ config: './config.ts' })('trash', () => {
             title: 'Doc three',
             deletedAt: new Date().toISOString(),
           },
+          overrideAccess: true,
         })
 
         const res = await restClient.PATCH(`/${postsSlug}${query}`, {
@@ -1511,6 +1597,7 @@ test.suite({ config: './config.ts' })('trash', () => {
           collection: postsSlug,
           id: docThree.id,
           trash: true,
+          overrideAccess: true,
         })
       })
     })
@@ -1579,6 +1666,7 @@ test.suite({ config: './config.ts' })('trash', () => {
         const { docs: versions } = await payload.findVersions({
           collection: postsSlug,
           trash: true,
+          overrideAccess: true,
         })
         const version = versions.find((v) => v.parent === postsDocTwo.id)
 
@@ -2278,7 +2366,7 @@ test.suite({ config: './config.ts' })('trash', () => {
 
     test.afterEach(async ({ payload }) => {
       for (const id of createdPageIDs) {
-        await payload.delete({ collection: pagesSlug, id })
+        await payload.delete({ collection: pagesSlug, id, overrideAccess: true })
       }
       createdPageIDs.length = 0
     })
@@ -2293,6 +2381,7 @@ test.suite({ config: './config.ts' })('trash', () => {
           title: 'Page with related posts',
           relatedPosts: [postsDocOne.id, postsDocTwo.id],
         },
+        overrideAccess: true,
       })
       createdPageIDs.push(page.id)
 
@@ -2300,6 +2389,7 @@ test.suite({ config: './config.ts' })('trash', () => {
         collection: pagesSlug,
         id: page.id,
         depth: 1,
+        overrideAccess: true,
       })
 
       // The trashed post (postsDocTwo) should be absent from the relationship array
@@ -2318,6 +2408,7 @@ test.suite({ config: './config.ts' })('trash', () => {
           title: 'Page with featured post',
           featuredPost: postsDocTwo.id,
         },
+        overrideAccess: true,
       })
       createdPageIDs.push(page.id)
 
@@ -2325,6 +2416,7 @@ test.suite({ config: './config.ts' })('trash', () => {
         collection: pagesSlug,
         id: page.id,
         depth: 1,
+        overrideAccess: true,
       })
 
       expect(result.featuredPost).toBeNull()
@@ -2337,6 +2429,7 @@ test.suite({ config: './config.ts' })('trash', () => {
           title: 'Page with featured post',
           featuredPost: postsDocOne.id,
         },
+        overrideAccess: true,
       })
       createdPageIDs.push(page.id)
 
@@ -2344,6 +2437,7 @@ test.suite({ config: './config.ts' })('trash', () => {
         collection: pagesSlug,
         id: page.id,
         depth: 1,
+        overrideAccess: true,
       })
 
       expect((result.featuredPost as Post)?.id).toBe(postsDocOne.id)
@@ -2357,6 +2451,7 @@ test.suite({ config: './config.ts' })('trash', () => {
           title: 'Page with related posts depth 0',
           relatedPosts: [postsDocOne.id, postsDocTwo.id],
         },
+        overrideAccess: true,
       })
       createdPageIDs.push(page.id)
 
@@ -2364,6 +2459,7 @@ test.suite({ config: './config.ts' })('trash', () => {
         collection: pagesSlug,
         id: page.id,
         depth: 0,
+        overrideAccess: true,
       })
 
       // At depth=0, no population occurs - raw IDs are returned as stored
@@ -2379,7 +2475,7 @@ test.suite({ config: './config.ts' })('trash', () => {
 
     test.afterEach(async ({ payload }) => {
       for (const id of createdRegistrationIDs) {
-        await payload.delete({ id, collection: registrationsSlug })
+        await payload.delete({ id, collection: registrationsSlug, overrideAccess: true })
       }
       createdRegistrationIDs.length = 0
     })
@@ -2395,6 +2491,7 @@ test.suite({ config: './config.ts' })('trash', () => {
           post: postsDocTwo.id,
           title: 'Registration for a trashed post',
         },
+        overrideAccess: true,
       })
       createdRegistrationIDs.push(registration.id)
 
@@ -2405,6 +2502,7 @@ test.suite({ config: './config.ts' })('trash', () => {
             equals: registration.id,
           },
         },
+        overrideAccess: true,
       })
 
       expect(result.totalDocs).toBe(1)
@@ -2433,6 +2531,7 @@ test.suite({ config: './config.ts' })('trash', () => {
             equals: doc.id,
           },
         },
+        overrideAccess: true,
       })
 
       expect(result.totalDocs).toBe(1)

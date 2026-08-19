@@ -16,6 +16,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-nested-docs', () => {
             equals: 'child-page',
           },
         },
+        overrideAccess: true,
       })
 
       expect(query.docs[0].breadcrumbs).toHaveLength(2)
@@ -29,6 +30,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-nested-docs', () => {
             equals: 'grandchild-page',
           },
         },
+        overrideAccess: true,
       })
 
       expect(query.docs[0].breadcrumbs).toHaveLength(3)
@@ -47,6 +49,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-nested-docs', () => {
           title: '11 children',
           slug: '11-children',
         },
+        overrideAccess: true,
       })
 
       // create 11 children docs
@@ -59,6 +62,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-nested-docs', () => {
             parent: parentDoc.id,
             _status: 'published',
           },
+          overrideAccess: true,
         })
       }
       // update parent doc
@@ -70,6 +74,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-nested-docs', () => {
           slug: '11-children-updated',
           _status: 'published',
         },
+        overrideAccess: true,
       })
 
       // read children docs
@@ -81,6 +86,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-nested-docs', () => {
             equals: parentDoc.id,
           },
         },
+        overrideAccess: true,
       })
 
       const firstUpdatedChildBreadcrumbs = docs[0]?.breadcrumbs
@@ -103,6 +109,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-nested-docs', () => {
           slug: 'parent-doc',
           _status: 'published',
         },
+        overrideAccess: true,
       })
 
       const childDoc = await payload.create({
@@ -113,6 +120,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-nested-docs', () => {
           parent: parentDoc.id,
           _status: 'published',
         },
+        overrideAccess: true,
       })
 
       // expect breadcrumbs to be an array
@@ -134,6 +142,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-nested-docs', () => {
           title: 'parent doc',
           slug: 'parent',
         },
+        overrideAccess: true,
       })
 
       const childDoc = await payload.create({
@@ -144,6 +153,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-nested-docs', () => {
           parent: parentDoc.id,
           _status: 'published',
         },
+        overrideAccess: true,
       })
 
       await payload.update({
@@ -154,6 +164,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-nested-docs', () => {
           slug: 'parent-updated',
           _status: 'published',
         },
+        overrideAccess: true,
       })
 
       const updatedChild = await payload
@@ -164,6 +175,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-nested-docs', () => {
               equals: childDoc.id,
             },
           },
+          overrideAccess: true,
         })
         .then(({ docs }) => docs[0])
 
@@ -185,7 +197,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-nested-docs', () => {
     test.afterEach(async ({ payload }) => {
       // Clean up in reverse order (children before parents)
       for (const id of [...createdPageIDs].reverse()) {
-        await payload.delete({ collection: 'pages', id })
+        await payload.delete({ collection: 'pages', id, overrideAccess: true })
       }
       createdPageIDs.length = 0
     })
@@ -201,6 +213,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-nested-docs', () => {
           slug: 'version-parent',
           _status: 'published',
         },
+        overrideAccess: true,
       })
       createdPageIDs.push(parentDoc.id)
 
@@ -213,6 +226,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-nested-docs', () => {
           parent: parentDoc.id,
           _status: 'published',
         },
+        overrideAccess: true,
       })
       createdPageIDs.push(childDoc.id)
 
@@ -221,6 +235,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-nested-docs', () => {
         id: childDoc.id,
         collection: 'pages',
         draft: false,
+        overrideAccess: true,
       })
       expect(initialPublished._status).toBe('published')
       expect(initialPublished.breadcrumbs).toHaveLength(2)
@@ -233,6 +248,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-nested-docs', () => {
           title: 'Version Child Draft Edit',
         },
         draft: true,
+        overrideAccess: true,
       })
 
       // Step 4: Re-publish the parent (triggers resaveChildren)
@@ -244,6 +260,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-nested-docs', () => {
           slug: 'version-parent-updated',
           _status: 'published',
         },
+        overrideAccess: true,
       })
 
       // Step 5: Verify the child's published version is still accessible
@@ -251,6 +268,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-nested-docs', () => {
         id: childDoc.id,
         collection: 'pages',
         draft: false,
+        overrideAccess: true,
       })
 
       expect(publishedChild).toBeDefined()
@@ -263,6 +281,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-nested-docs', () => {
         id: childDoc.id,
         collection: 'pages',
         draft: true,
+        overrideAccess: true,
       })
 
       expect(draftChild).toBeDefined()
@@ -279,6 +298,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-nested-docs', () => {
           slug: 'draft-parent',
           _status: 'published',
         },
+        overrideAccess: true,
       })
       createdPageIDs.push(parentDoc.id)
 
@@ -291,6 +311,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-nested-docs', () => {
           parent: parentDoc.id,
           _status: 'draft',
         },
+        overrideAccess: true,
       })
       createdPageIDs.push(draftChild.id)
 
@@ -305,6 +326,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-nested-docs', () => {
           slug: 'draft-parent-updated',
           _status: 'published',
         },
+        overrideAccess: true,
       })
 
       // Draft-only child should have updated breadcrumbs
@@ -312,6 +334,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-nested-docs', () => {
         id: draftChild.id,
         collection: 'pages',
         draft: true,
+        overrideAccess: true,
       })
 
       expect(updatedDraftChild.breadcrumbs).toHaveLength(2)
@@ -328,6 +351,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-nested-docs', () => {
           slug: 'breadcrumb-parent',
           _status: 'published',
         },
+        overrideAccess: true,
       })
       createdPageIDs.push(parent.id)
 
@@ -339,6 +363,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-nested-docs', () => {
           parent: parent.id,
           _status: 'published',
         },
+        overrideAccess: true,
       })
       createdPageIDs.push(child.id)
 
@@ -350,6 +375,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-nested-docs', () => {
           title: 'Breadcrumb Child Draft',
         },
         draft: true,
+        overrideAccess: true,
       })
 
       // Update parent slug
@@ -360,6 +386,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-nested-docs', () => {
           slug: 'breadcrumb-parent-updated',
           _status: 'published',
         },
+        overrideAccess: true,
       })
 
       // Published child has updated breadcrumbs and is accessible
@@ -367,6 +394,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-nested-docs', () => {
         id: child.id,
         collection: 'pages',
         draft: false,
+        overrideAccess: true,
       })
 
       expect(published._status).toBe('published')
@@ -377,6 +405,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-nested-docs', () => {
         id: child.id,
         collection: 'pages',
         draft: true,
+        overrideAccess: true,
       })
 
       expect(draft._status).toBe('draft')
@@ -396,6 +425,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-nested-docs', () => {
           slug: 'scheduled-page',
         },
         draft: true,
+        overrideAccess: true,
       })
 
       expect(draft._status).toBe('draft')
@@ -426,11 +456,12 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-nested-docs', () => {
         id: draft.id,
         collection: 'pages',
         draft: false,
+        overrideAccess: true,
       })
 
       expect(retrieved._status).toBe('published')
 
-      await payload.delete({ collection: 'pages', id: draft.id })
+      await payload.delete({ collection: 'pages', id: draft.id, overrideAccess: true })
     })
   })
 
@@ -468,6 +499,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-nested-docs', () => {
         data: {
           name: 'parent',
         },
+        overrideAccess: true,
       })
       const child = await payload.create({
         collection: 'categories',
@@ -475,6 +507,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-nested-docs', () => {
           name: 'child',
           owner: parent.id,
         },
+        overrideAccess: true,
       })
       const grandchild = await payload.create({
         collection: 'categories',
@@ -482,6 +515,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-nested-docs', () => {
           name: 'grandchild',
           owner: child.id,
         },
+        overrideAccess: true,
       })
 
       expect(grandchild.categorization[0].doc).toStrictEqual(parent.id)

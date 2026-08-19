@@ -78,6 +78,7 @@ test.suite({ config: './config.schedules-autocron.ts' })(
       const allSimples = await payload.find({
         collection: 'simple',
         limit: 100,
+        overrideAccess: true,
       })
 
       expect(allSimples.totalDocs).toBeGreaterThanOrEqual(minJobsCompleted)

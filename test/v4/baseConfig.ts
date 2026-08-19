@@ -207,6 +207,7 @@ export const seed: NonNullable<Config['onInit']> = async (payload) => {
       password: devUser.password,
       roles: ['admin'],
     },
+    overrideAccess: true,
   })
 
   await payload.create({
@@ -216,6 +217,7 @@ export const seed: NonNullable<Config['onInit']> = async (payload) => {
       password: 'test',
       roles: ['user'],
     },
+    overrideAccess: true,
   })
 
   await payload.create({
@@ -225,6 +227,7 @@ export const seed: NonNullable<Config['onInit']> = async (payload) => {
       password: devUser.password,
       roles: ['admin'],
     },
+    overrideAccess: true,
   })
 
   const authors = [
@@ -237,6 +240,7 @@ export const seed: NonNullable<Config['onInit']> = async (payload) => {
     await payload.create({
       collection: 'users',
       data: author,
+      overrideAccess: true,
     })
   }
 
@@ -257,16 +261,18 @@ export const seed: NonNullable<Config['onInit']> = async (payload) => {
     const created = await payload.create({
       collection: textFieldsSlug,
       data: post,
+      overrideAccess: true,
     })
     createdPosts.push(created)
   }
 
-  const richTextCount = await payload.count({ collection: richTextFieldsSlug })
+  const richTextCount = await payload.count({ collection: richTextFieldsSlug, overrideAccess: true })
   if (richTextCount.totalDocs === 0) {
     const uploadDoc = await payload.create({
       collection: uploadsSlug,
       data: { alt: 'Farming image' },
       file: imageFile,
+      overrideAccess: true,
     })
 
     const formattedUploadID =
@@ -276,6 +282,7 @@ export const seed: NonNullable<Config['onInit']> = async (payload) => {
       collection: 'users',
       limit: 1,
       where: { email: { equals: devUser.email } },
+      overrideAccess: true,
     })
     const userId = devUserDoc.docs[0]?.id
     const formattedUserID =
@@ -297,6 +304,7 @@ export const seed: NonNullable<Config['onInit']> = async (payload) => {
         title: 'Data harvest \u2013 how AI and sensors are revolutionizing farming',
         typography: getTypographyContent(formattedUserID),
       },
+      overrideAccess: true,
     })
   }
 
@@ -307,6 +315,7 @@ export const seed: NonNullable<Config['onInit']> = async (payload) => {
       authorRequired: devUserDoc.id,
       relatedPosts: createdPosts.slice(0, 3).map((p) => p.id) as string[],
     },
+    overrideAccess: true,
   })
   await payload.create({
     collection: relationshipFieldsSlug,
@@ -314,12 +323,14 @@ export const seed: NonNullable<Config['onInit']> = async (payload) => {
       authorRequired: devUserDoc.id,
       relatedPosts: createdPosts.slice(3, 6).map((p) => p.id) as string[],
     },
+    overrideAccess: true,
   })
 
   // Seed blocks collection
   await payload.create({
     collection: blocksFieldsSlug,
     data: blocksSeedData,
+    overrideAccess: true,
   })
 
   // Seed join fields collection
@@ -328,6 +339,7 @@ export const seed: NonNullable<Config['onInit']> = async (payload) => {
     data: {
       name: 'Example Category',
     },
+    overrideAccess: true,
   })
 
   // Create 15 posts to test join field pagination (defaultLimit: 3)
@@ -339,6 +351,7 @@ export const seed: NonNullable<Config['onInit']> = async (payload) => {
         category: joinCategory.id,
         title: `Post ${i}`,
       },
+      overrideAccess: true,
     })
   }
 
@@ -346,41 +359,49 @@ export const seed: NonNullable<Config['onInit']> = async (payload) => {
   const techTag = await payload.create({
     collection: tagsSlug,
     data: { name: 'Technology' },
+    overrideAccess: true,
   })
 
   const frontendTag = await payload.create({
     collection: tagsSlug,
     data: { name: 'Frontend', parent: techTag.id },
+    overrideAccess: true,
   })
 
   await payload.create({
     collection: tagsSlug,
     data: { name: 'React', parent: frontendTag.id },
+    overrideAccess: true,
   })
 
   await payload.create({
     collection: tagsSlug,
     data: { name: 'Vue', parent: frontendTag.id },
+    overrideAccess: true,
   })
 
   const backendTag = await payload.create({
     collection: tagsSlug,
     data: { name: 'Backend', parent: techTag.id },
+    overrideAccess: true,
   })
 
   await payload.create({
     collection: tagsSlug,
     data: { name: 'Node.js', parent: backendTag.id },
+    overrideAccess: true,
   })
 
   await payload.create({
     collection: tagsSlug,
     data: { name: 'Python', parent: backendTag.id },
+    overrideAccess: true,
   })
 
   await payload.create({
     collection: tagsSlug,
     data: { name: 'Design' },
+    overrideAccess: true,
   })
 
   // Add more root-level tags to test pagination (20+ total root tags)
@@ -409,6 +430,7 @@ export const seed: NonNullable<Config['onInit']> = async (payload) => {
     await payload.create({
       collection: tagsSlug,
       data: { name: tagName },
+      overrideAccess: true,
     })
   }
 
@@ -420,6 +442,7 @@ export const seed: NonNullable<Config['onInit']> = async (payload) => {
         description: `Description for tag item ${i}`,
         title: `Tag Item ${i}`,
       },
+      overrideAccess: true,
     })
   }
 
@@ -427,28 +450,33 @@ export const seed: NonNullable<Config['onInit']> = async (payload) => {
   const rootFolder = await payload.create({
     collection: foldersSlug,
     data: { name: 'Root Folder' },
+    overrideAccess: true,
   })
 
   await payload.create({
     collection: foldersSlug,
     data: { name: 'Subfolder A', parent: rootFolder.id },
+    overrideAccess: true,
   })
 
   await payload.create({
     collection: foldersSlug,
     data: { name: 'Subfolder B', parent: rootFolder.id },
+    overrideAccess: true,
   })
 
   // Seed nested child folders under a single parent to test nested LoadMoreRow pagination
   const nestedParentFolder = await payload.create({
     collection: foldersSlug,
     data: { name: 'Nested Parent Folder', parent: rootFolder.id },
+    overrideAccess: true,
   })
 
   for (let i = 1; i <= 10; i++) {
     await payload.create({
       collection: foldersSlug,
       data: { name: `Nested Child ${i}`, parent: nestedParentFolder.id },
+      overrideAccess: true,
     })
   }
 
@@ -456,12 +484,14 @@ export const seed: NonNullable<Config['onInit']> = async (payload) => {
   const branchFolder = await payload.create({
     collection: foldersSlug,
     data: { name: 'Branch Folder', parent: nestedParentFolder.id },
+    overrideAccess: true,
   })
 
   for (let i = 1; i <= 10; i++) {
     await payload.create({
       collection: foldersSlug,
       data: { name: `Leaf Child ${i}`, parent: branchFolder.id },
+      overrideAccess: true,
     })
   }
 
@@ -472,6 +502,7 @@ export const seed: NonNullable<Config['onInit']> = async (payload) => {
       data: {
         title: `Folder Item ${i}`,
       },
+      overrideAccess: true,
     })
   }
 
@@ -490,6 +521,7 @@ export const seed: NonNullable<Config['onInit']> = async (payload) => {
         status: statuses[i % statuses.length],
         title: `Document ${index}`,
       },
+      overrideAccess: true,
     })
   }
 
@@ -506,6 +538,7 @@ export const seed: NonNullable<Config['onInit']> = async (payload) => {
     await payload.create({
       collection: orderableSlug,
       data: item,
+      overrideAccess: true,
     })
   }
 
@@ -527,6 +560,7 @@ export const seed: NonNullable<Config['onInit']> = async (payload) => {
         status: { equals: 'published' },
       },
     },
+    overrideAccess: true,
   })
 
   await payload.create({
@@ -540,6 +574,7 @@ export const seed: NonNullable<Config['onInit']> = async (payload) => {
         category: { equals: 'news' },
       },
     },
+    overrideAccess: true,
   })
 
   await payload.create({
@@ -553,6 +588,7 @@ export const seed: NonNullable<Config['onInit']> = async (payload) => {
         status: { equals: 'draft' },
       },
     },
+    overrideAccess: true,
   })
 
   // Seed draft-versions collection with many versions for pagination testing
@@ -563,6 +599,7 @@ export const seed: NonNullable<Config['onInit']> = async (payload) => {
       title: 'Document With Many Versions',
     },
     draft: true,
+    overrideAccess: true,
   })
 
   for (let i = 0; i < 20; i++) {
@@ -573,6 +610,7 @@ export const seed: NonNullable<Config['onInit']> = async (payload) => {
         content: `Updated content version ${i + 2}`,
         title: `Document With Many Versions - v${i + 2}`,
       },
+      overrideAccess: true,
     })
   }
 
@@ -580,6 +618,7 @@ export const seed: NonNullable<Config['onInit']> = async (payload) => {
   const existingUpload = await payload.find({
     collection: uploadsSlug,
     limit: 1,
+    overrideAccess: true,
   })
   const heroUploadID = existingUpload.docs[0]?.id
 
@@ -694,6 +733,7 @@ export const seed: NonNullable<Config['onInit']> = async (payload) => {
       track: 'frontend',
       venueLocation: [-122.4194, 37.7749],
     },
+    overrideAccess: true,
   })
 
   const aiTalk = await payload.create({
@@ -736,6 +776,7 @@ export const seed: NonNullable<Config['onInit']> = async (payload) => {
       title: 'LLM Agents Without the Hype',
       track: 'ai-ml',
     },
+    overrideAccess: true,
   })
 
   await payload.create({
@@ -760,6 +801,7 @@ export const seed: NonNullable<Config['onInit']> = async (payload) => {
       track: 'backend',
     },
     draft: true,
+    overrideAccess: true,
   })
 
   // Seed drawers collection: a couple of docs linked via the
@@ -865,6 +907,7 @@ export const seed: NonNullable<Config['onInit']> = async (payload) => {
         status: seed.status,
         title: seed.title,
       },
+      overrideAccess: true,
     })
     previousNestedChild = created.id
   }

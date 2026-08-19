@@ -36,6 +36,7 @@ test.suite({ config: './config.ts' })('Hooks', () => {
           localizedTransform: [2, 8],
           transform: [2, 8],
         },
+        overrideAccess: true,
       })
 
       expect(doc.transform).toBeDefined()
@@ -60,6 +61,7 @@ test.suite({ config: './config.ts' })('Hooks', () => {
       doc = await payload.create({
         collection: hooksSlug,
         data,
+        overrideAccess: true,
       })
     })
 
@@ -81,6 +83,7 @@ test.suite({ config: './config.ts' })('Hooks', () => {
         id: doc.id,
         collection: hooksSlug,
         data,
+        overrideAccess: true,
       })
 
       expect(doc.collectionAfterChange).toBeTruthy()
@@ -99,6 +102,7 @@ test.suite({ config: './config.ts' })('Hooks', () => {
       doc = await payload.findByID({
         id: doc.id,
         collection: hooksSlug,
+        overrideAccess: true,
       })
 
       expect(doc.collectionAfterRead).toBeTruthy()
@@ -117,6 +121,7 @@ test.suite({ config: './config.ts' })('Hooks', () => {
           },
           text: 'ok',
         },
+        overrideAccess: true,
       })
 
       expect(document.group.subGroup.afterRead).toEqual(generatedAfterReadText)
@@ -129,6 +134,7 @@ test.suite({ config: './config.ts' })('Hooks', () => {
         data: {
           title: 'Hello',
         },
+        overrideAccess: true,
       })
 
       const document = await payload.create({
@@ -146,11 +152,13 @@ test.suite({ config: './config.ts' })('Hooks', () => {
           },
           text: 'ok',
         },
+        overrideAccess: true,
       })
 
       const retrievedDoc = await payload.findByID({
         id: document.id,
         collection: nestedAfterReadHooksSlug,
+        overrideAccess: true,
       })
 
       expect(retrievedDoc.group.array[0].shouldPopulate.title).toEqual(relation.title)
@@ -165,11 +173,13 @@ test.suite({ config: './config.ts' })('Hooks', () => {
         data: {
           text: 'ok',
         },
+        overrideAccess: true,
       })
 
       const retrievedDoc = await payload.findByID({
         id: document.id,
         collection: chainingHooksSlug,
+        overrideAccess: true,
       })
 
       expect(retrievedDoc.text).toEqual('ok!!')
@@ -181,10 +191,12 @@ test.suite({ config: './config.ts' })('Hooks', () => {
         data: {
           text: 'ok',
         },
+        overrideAccess: true,
       })
 
       const { docs: retrievedDocs } = await payload.find({
         collection: chainingHooksSlug,
+        overrideAccess: true,
       })
 
       expect(retrievedDocs[0].text).toEqual('ok!!')
@@ -197,12 +209,14 @@ test.suite({ config: './config.ts' })('Hooks', () => {
           data: {
             title: 'Title',
           },
+          overrideAccess: true,
         }),
         await payload.create({
           collection: afterOperationSlug,
           data: {
             title: 'Title',
           },
+          overrideAccess: true,
         }),
       ])
 
@@ -211,6 +225,7 @@ test.suite({ config: './config.ts' })('Hooks', () => {
 
       const findResult = await payload.find({
         collection: afterOperationSlug,
+        overrideAccess: true,
       })
 
       expect(findResult.docs).toHaveLength(2)
@@ -224,6 +239,7 @@ test.suite({ config: './config.ts' })('Hooks', () => {
           data: {
             title: 'Title',
           },
+          overrideAccess: true,
         }),
         await payload.update({
           id: doc2.id,
@@ -231,6 +247,7 @@ test.suite({ config: './config.ts' })('Hooks', () => {
           data: {
             title: 'Title',
           },
+          overrideAccess: true,
         }),
       ])
 
@@ -239,6 +256,7 @@ test.suite({ config: './config.ts' })('Hooks', () => {
 
       const findResult2 = await payload.find({
         collection: afterOperationSlug,
+        overrideAccess: true,
       })
 
       expect(findResult2.docs).toHaveLength(2)
@@ -252,11 +270,13 @@ test.suite({ config: './config.ts' })('Hooks', () => {
         data: {
           value: 'wrongvalue',
         },
+        overrideAccess: true,
       })
 
       const retrievedDoc = await payload.findByID({
         id: document.id,
         collection: contextHooksSlug,
+        overrideAccess: true,
       })
 
       expect(retrievedDoc.value).toEqual('secret')
@@ -271,11 +291,13 @@ test.suite({ config: './config.ts' })('Hooks', () => {
         data: {
           value: 'wrongvalue',
         },
+        overrideAccess: true,
       })
 
       const retrievedDoc = await payload.findByID({
         id: document.id,
         collection: contextHooksSlug,
+        overrideAccess: true,
       })
 
       expect(retrievedDoc.value).toEqual('data from Local API')
@@ -284,6 +306,7 @@ test.suite({ config: './config.ts' })('Hooks', () => {
     test('should pass context from Local API to global hooks', async ({ payload }) => {
       const globalDocument = await payload.findGlobal({
         slug: dataHooksGlobalSlug,
+        overrideAccess: true,
       })
 
       expect(globalDocument.field_globalAndField).not.toEqual('data from Local API context')
@@ -293,6 +316,7 @@ test.suite({ config: './config.ts' })('Hooks', () => {
         context: {
           field_beforeChange_GlobalAndField_override: 'data from Local API context',
         },
+        overrideAccess: true,
       })
       expect(globalDocumentWithContext.field_globalAndField).toEqual('data from Local API context')
     })
@@ -313,6 +337,7 @@ test.suite({ config: './config.ts' })('Hooks', () => {
       const retrievedDoc = await payload.findByID({
         collection: contextHooksSlug,
         id: doc.id,
+        overrideAccess: true,
       })
 
       expect(retrievedDoc.value).toEqual('data from REST API')
@@ -332,6 +357,7 @@ test.suite({ config: './config.ts' })('Hooks', () => {
             ],
           },
         },
+        overrideAccess: true,
       })
 
       const updatedDoc = await payload.update({
@@ -347,6 +373,7 @@ test.suite({ config: './config.ts' })('Hooks', () => {
             ],
           },
         },
+        overrideAccess: true,
       })
 
       expect(updatedDoc).toBeDefined()
@@ -360,6 +387,7 @@ test.suite({ config: './config.ts' })('Hooks', () => {
         data: {
           title: 'Relation for nested afterChange',
         },
+        overrideAccess: true,
       })
 
       // this collection will throw an error if previousValue is not defined in nested afterChange hook
@@ -446,6 +474,7 @@ test.suite({ config: './config.ts' })('Hooks', () => {
             },
           },
         },
+        overrideAccess: true,
       })
 
       await expect(
@@ -455,6 +484,7 @@ test.suite({ config: './config.ts' })('Hooks', () => {
           data: {
             text: 'updated',
           },
+          overrideAccess: true,
         }),
       ).resolves.not.toThrow()
     })
@@ -474,6 +504,7 @@ test.suite({ config: './config.ts' })('Hooks', () => {
           password: devUser.password,
           roles: ['admin'],
         },
+        overrideAccess: true,
       })
 
       const { token } = await payload.login({
@@ -482,6 +513,7 @@ test.suite({ config: './config.ts' })('Hooks', () => {
           email: hookUser.email,
           password: devUser.password,
         },
+        overrideAccess: true,
       })
 
       hookUserToken = token
@@ -494,11 +526,13 @@ test.suite({ config: './config.ts' })('Hooks', () => {
           email: devUser.email,
           password: devUser.password,
         },
+        overrideAccess: true,
       })
 
       const result = await payload.findByID({
         id: user.id,
         collection: hooksUsersSlug,
+        overrideAccess: true,
       })
 
       expect(user).toBeDefined()
@@ -515,6 +549,7 @@ test.suite({ config: './config.ts' })('Hooks', () => {
           roles: ['admin'],
           afterLoginHook: false,
         },
+        overrideAccess: true,
       })
 
       expect(resetUser.afterLoginHook).toStrictEqual(false)
@@ -525,6 +560,7 @@ test.suite({ config: './config.ts' })('Hooks', () => {
           email: resetUser.email,
         },
         disableEmail: true,
+        overrideAccess: true,
       })
 
       const { user } = await payload.resetPassword({
@@ -542,6 +578,7 @@ test.suite({ config: './config.ts' })('Hooks', () => {
       const result = await payload.findByID({
         id: user.id,
         collection: hooksUsersSlug,
+        overrideAccess: true,
       })
 
       expect(result.afterLoginHook).toStrictEqual(true)
@@ -552,6 +589,7 @@ test.suite({ config: './config.ts' })('Hooks', () => {
         payload.login({
           collection: hooksUsersSlug,
           data: { email: regularUser.email, password: regularUser.password },
+          overrideAccess: true,
         }),
       ).rejects.toThrow(AuthenticationError)
     })
@@ -592,6 +630,7 @@ test.suite({ config: './config.ts' })('Hooks', () => {
       const doc = await payload.create({
         collection: dataHooksSlug,
         data: {},
+        overrideAccess: true,
       })
 
       expect(JSON.parse(doc.collection_beforeOperation_collection)).toStrictEqual(
@@ -618,6 +657,7 @@ test.suite({ config: './config.ts' })('Hooks', () => {
       const foundDoc = await payload.findByID({
         id: doc.id,
         collection: dataHooksSlug,
+        overrideAccess: true,
       })
 
       expect(JSON.parse(foundDoc.collection_beforeRead_collection)).toStrictEqual(
@@ -638,6 +678,7 @@ test.suite({ config: './config.ts' })('Hooks', () => {
       const doc = await payload.create({
         collection: dataHooksSlug,
         data: {},
+        overrideAccess: true,
       })
 
       const collectionAndField = JSON.stringify(sanitizedHooksCollection) + JSON.stringify(field)
@@ -654,6 +695,7 @@ test.suite({ config: './config.ts' })('Hooks', () => {
       const doc = await payload.updateGlobal({
         slug: dataHooksGlobalSlug,
         data: {},
+        overrideAccess: true,
       })
 
       expect(JSON.parse(doc.global_beforeChange_global)).toStrictEqual(sanitizedHooksGlobal)
@@ -663,6 +705,7 @@ test.suite({ config: './config.ts' })('Hooks', () => {
       // beforeRead is only run for findOne operations
       const foundDoc = await payload.findGlobal({
         slug: dataHooksGlobalSlug,
+        overrideAccess: true,
       })
 
       expect(JSON.parse(foundDoc.global_beforeRead_global)).toStrictEqual(sanitizedHooksGlobal)
@@ -685,6 +728,7 @@ test.suite({ config: './config.ts' })('Hooks', () => {
       const doc = await payload.updateGlobal({
         slug: dataHooksGlobalSlug,
         data: {},
+        overrideAccess: true,
       })
 
       const globalAndFieldString = globalString + fieldString
@@ -709,6 +753,7 @@ test.suite({ config: './config.ts' })('Hooks', () => {
         data: {
           selection: 'b',
         },
+        overrideAccess: true,
       })
 
       const updateResult = await payload.update({
@@ -720,6 +765,7 @@ test.suite({ config: './config.ts' })('Hooks', () => {
         context: {
           beforeValidateTest: true,
         },
+        overrideAccess: true,
       })
 
       expect(updateResult).toBeDefined()
@@ -735,6 +781,7 @@ test.suite({ config: './config.ts' })('Hooks', () => {
       await payload.create({
         collection: beforeOperationSlug,
         data: {},
+        overrideAccess: true,
       })
 
       expect(getLastOperation()).toEqual('create')
@@ -744,12 +791,14 @@ test.suite({ config: './config.ts' })('Hooks', () => {
       const doc = await payload.create({
         collection: beforeOperationSlug,
         data: {},
+        overrideAccess: true,
       })
 
       await payload.update({
         id: doc.id,
         collection: beforeOperationSlug,
         data: {},
+        overrideAccess: true,
       })
 
       expect(getLastOperation()).toEqual('update')
@@ -759,12 +808,14 @@ test.suite({ config: './config.ts' })('Hooks', () => {
       const doc = await payload.create({
         collection: beforeOperationSlug,
         data: {},
+        overrideAccess: true,
       })
 
       await payload.update({
         id: doc.id,
         collection: beforeOperationSlug,
         data: {},
+        overrideAccess: true,
       })
 
       expect(getLastOperation()).toEqual('update')
@@ -774,11 +825,13 @@ test.suite({ config: './config.ts' })('Hooks', () => {
       const doc = await payload.create({
         collection: beforeOperationSlug,
         data: {},
+        overrideAccess: true,
       })
 
       await payload.findByID({
         id: doc.id,
         collection: beforeOperationSlug,
+        overrideAccess: true,
       })
 
       expect(getLastOperation()).toEqual('read')
@@ -788,12 +841,14 @@ test.suite({ config: './config.ts' })('Hooks', () => {
       await payload.create({
         collection: beforeOperationSlug,
         data: {},
+        overrideAccess: true,
       })
 
       clearLastOperation()
 
       await payload.find({
         collection: beforeOperationSlug,
+        overrideAccess: true,
       })
 
       expect(getLastOperation()).toEqual('read')
@@ -805,19 +860,23 @@ test.suite({ config: './config.ts' })('Hooks', () => {
       await payload.create({
         collection: beforeOperationSlug,
         data: { category: 'test1' },
+        overrideAccess: true,
       })
       await payload.create({
         collection: beforeOperationSlug,
         data: { category: 'test2' },
+        overrideAccess: true,
       })
       await payload.create({
         collection: beforeOperationSlug,
         data: { category: 'test1' },
+        overrideAccess: true,
       })
 
       await payload.findDistinct({
         collection: beforeOperationSlug,
         field: 'category',
+        overrideAccess: true,
       })
 
       expect(getLastOperation()).toEqual('readDistinct')
@@ -827,11 +886,13 @@ test.suite({ config: './config.ts' })('Hooks', () => {
       const doc = await payload.create({
         collection: beforeOperationSlug,
         data: {},
+        overrideAccess: true,
       })
 
       await payload.delete({
         id: doc.id,
         collection: beforeOperationSlug,
+        overrideAccess: true,
       })
 
       expect(getLastOperation()).toEqual('delete')
@@ -841,11 +902,13 @@ test.suite({ config: './config.ts' })('Hooks', () => {
       const doc = await payload.create({
         collection: beforeOperationSlug,
         data: {},
+        overrideAccess: true,
       })
 
       await payload.delete({
         id: doc.id,
         collection: beforeOperationSlug,
+        overrideAccess: true,
       })
 
       expect(getLastOperation()).toEqual('delete')
@@ -855,10 +918,12 @@ test.suite({ config: './config.ts' })('Hooks', () => {
       await payload.create({
         collection: beforeOperationSlug,
         data: {},
+        overrideAccess: true,
       })
 
       await payload.count({
         collection: beforeOperationSlug,
+        overrideAccess: true,
       })
 
       expect(getLastOperation()).toEqual('count')
@@ -868,6 +933,7 @@ test.suite({ config: './config.ts' })('Hooks', () => {
       const doc = await payload.create({
         collection: beforeOperationSlug,
         data: {},
+        overrideAccess: true,
       })
 
       await payload.countVersions({
@@ -877,6 +943,7 @@ test.suite({ config: './config.ts' })('Hooks', () => {
             equals: doc.id,
           },
         },
+        overrideAccess: true,
       })
 
       expect(getLastOperation()).toEqual('countVersions')
@@ -886,6 +953,7 @@ test.suite({ config: './config.ts' })('Hooks', () => {
       const doc = await payload.create({
         collection: beforeOperationSlug,
         data: {},
+        overrideAccess: true,
       })
 
       await payload.findVersions({
@@ -895,6 +963,7 @@ test.suite({ config: './config.ts' })('Hooks', () => {
             equals: doc.id,
           },
         },
+        overrideAccess: true,
       })
 
       expect(getLastOperation()).toEqual('read')
@@ -904,6 +973,7 @@ test.suite({ config: './config.ts' })('Hooks', () => {
       const doc = await payload.create({
         collection: beforeOperationSlug,
         data: { category: 'v1' },
+        overrideAccess: true,
       })
 
       // Update to create a version
@@ -911,6 +981,7 @@ test.suite({ config: './config.ts' })('Hooks', () => {
         id: doc.id,
         collection: beforeOperationSlug,
         data: { category: 'v2' },
+        overrideAccess: true,
       })
 
       const versions = await payload.findVersions({
@@ -920,6 +991,7 @@ test.suite({ config: './config.ts' })('Hooks', () => {
             equals: doc.id,
           },
         },
+        overrideAccess: true,
       })
 
       expect(versions.docs.length).toBeGreaterThan(0)
@@ -927,6 +999,7 @@ test.suite({ config: './config.ts' })('Hooks', () => {
       await payload.findVersionByID({
         collection: beforeOperationSlug,
         id: versions.docs[0]!.id,
+        overrideAccess: true,
       })
 
       expect(getLastOperation()).toEqual('read')
@@ -936,6 +1009,7 @@ test.suite({ config: './config.ts' })('Hooks', () => {
       const doc = await payload.create({
         collection: beforeOperationSlug,
         data: { category: 'v1' },
+        overrideAccess: true,
       })
 
       // Update to create a version
@@ -943,6 +1017,7 @@ test.suite({ config: './config.ts' })('Hooks', () => {
         id: doc.id,
         collection: beforeOperationSlug,
         data: { category: 'v2' },
+        overrideAccess: true,
       })
 
       const versions = await payload.findVersions({
@@ -952,6 +1027,7 @@ test.suite({ config: './config.ts' })('Hooks', () => {
             equals: doc.id,
           },
         },
+        overrideAccess: true,
       })
 
       expect(versions.docs.length).toBeGreaterThan(0)
@@ -959,6 +1035,7 @@ test.suite({ config: './config.ts' })('Hooks', () => {
       await payload.restoreVersion({
         collection: beforeOperationSlug,
         id: versions.docs[0]!.id,
+        overrideAccess: true,
       })
 
       expect(getLastOperation()).toEqual('restoreVersion')
@@ -972,11 +1049,13 @@ test.suite({ config: './config.ts' })('Hooks', () => {
         data: {
           title: 'test',
         },
+        overrideAccess: true,
       })
 
       const docFromFind = await payload.findByID({
         collection: afterReadSlug,
         id: createdDoc.id,
+        overrideAccess: true,
       })
 
       const { docs } = await payload.find({
@@ -986,6 +1065,7 @@ test.suite({ config: './config.ts' })('Hooks', () => {
             equals: createdDoc.id,
           },
         },
+        overrideAccess: true,
       })
 
       const docFromFindMany = docs[0]
@@ -1001,7 +1081,7 @@ test.suite({ config: './config.ts' })('Hooks', () => {
 
     test.afterEach(async ({ payload }) => {
       for (const id of createdIDs) {
-        await payload.delete({ collection: overrideAccessSlug, id })
+        await payload.delete({ collection: overrideAccessSlug, id, overrideAccess: true })
       }
       createdIDs.length = 0
     })
@@ -1110,6 +1190,7 @@ test.suite({ config: './config.ts' })('Hooks', () => {
       const doc = await payload.create({
         collection: overrideAccessSlug,
         data: { title: 'Test Default' },
+        overrideAccess: true,
       })
 
       createdIDs.push(doc.id)
@@ -1117,6 +1198,7 @@ test.suite({ config: './config.ts' })('Hooks', () => {
       const result = await payload.findByID({
         collection: overrideAccessSlug,
         id: doc.id,
+        overrideAccess: true,
       })
 
       expect(result.beforeReadCalled).toBe(true)

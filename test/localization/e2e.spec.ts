@@ -274,6 +274,7 @@ describe('Localization', () => {
           title: englishTitle,
         },
         locale: defaultLocale,
+        overrideAccess: true,
       })
 
       const id = localizedPost.id.toString()
@@ -286,6 +287,7 @@ describe('Localization', () => {
           title: spanishTitle,
         },
         locale: spanishLocale,
+        overrideAccess: true,
       })
 
       await page.goto(url.edit(id))
@@ -773,6 +775,7 @@ describe('Localization', () => {
         collection: 'blocks-fields',
         locale: 'all',
         where: { id: { equals: docID } },
+        overrideAccess: true,
       })
 
       expect(doc.docs).toHaveLength(1)
@@ -1025,6 +1028,7 @@ describe('Localization', () => {
           title: 'Existing doc title',
         },
         locale: defaultLocale,
+        overrideAccess: true,
       })
 
       // seoTitle is in the SEO tab (active by default) — fill it first

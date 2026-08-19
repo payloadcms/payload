@@ -6,6 +6,7 @@ export const Image: React.FC<AdminViewServerProps> = async ({ payload }) => {
   const images = await payload.find({
     collection: 'uploads',
     limit: 1,
+    overrideAccess: true,
   })
 
   if (!images?.docs?.length) {

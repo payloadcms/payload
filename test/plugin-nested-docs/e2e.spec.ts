@@ -44,6 +44,7 @@ describe('Nested Docs Plugin', () => {
           parent,
           title,
         },
+        overrideAccess: true,
       }) as unknown as Promise<PayloadPage>
     }
 

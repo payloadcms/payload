@@ -45,6 +45,7 @@ test.describe('Field Paths', () => {
     const { id: docID } = await payload.create({
       collection: fieldPathsSlug,
       data: testDoc,
+      overrideAccess: true,
     })
 
     await page.goto(fieldPathsUrl.edit(docID))
@@ -56,6 +57,7 @@ test.describe('Field Paths', () => {
     const { id: docID } = await payload.create({
       collection: fieldPathsSlug,
       data: testDoc,
+      overrideAccess: true,
     })
 
     await navigateToDiffVersionView({

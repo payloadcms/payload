@@ -15,6 +15,7 @@ export const updatePostStep1: TaskHandler<'UpdatePost'> = async ({ req, input })
     data: {
       jobStep1Ran: input.message,
     },
+    overrideAccess: true,
   })
 
   return {
@@ -39,6 +40,7 @@ export const updatePostStep2: TaskHandler<'UpdatePostStep2'> = async ({ req, inp
     data: {
       jobStep2Ran: input.messageTwice + job.taskStatus.UpdatePost?.['1']?.output?.messageTwice,
     },
+    overrideAccess: true,
   })
 
   return {
