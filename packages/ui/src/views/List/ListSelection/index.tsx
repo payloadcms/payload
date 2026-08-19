@@ -6,11 +6,14 @@ import React, { Fragment, useCallback } from 'react'
 
 import { DeleteMany } from '../../../elements/DeleteMany/index.js'
 import { EditMany } from '../../../elements/EditMany/index.js'
+import { getFolderHierarchySlug } from '../../../elements/Hierarchy/getFolderHierarchySlug.js'
+import { MoveMany } from '../../../elements/Hierarchy/MoveMany/index.js'
 import { ListSelection_v4, ListSelectionButton } from '../../../elements/ListSelection/index.js'
 import { PublishMany } from '../../../elements/PublishMany/index.js'
 import { RestoreMany } from '../../../elements/RestoreMany/index.js'
 import { UnpublishMany } from '../../../elements/UnpublishMany/index.js'
 import { useAuth } from '../../../providers/Auth/index.js'
+import { useConfig } from '../../../providers/Config/index.js'
 import { useRouteCache } from '../../../providers/RouteCache/index.js'
 import { useRouter, useSearchParams } from '../../../providers/RouterAdapter/index.js'
 import { SelectAllStatus, useSelection } from '../../../providers/Selection/index.js'
@@ -45,9 +48,14 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
   const { count, selectAll, selectedIDs, toggleAll, totalDocs } = useSelection()
   const { t } = useTranslation()
   const { permissions } = useAuth()
+  const { config } = useConfig()
   const router = useRouter()
   const searchParams = useSearchParams()
   const { clearRouteCache } = useRouteCache()
+
+  const hierarchySlug = collectionConfig
+    ? getFolderHierarchySlug(config.collections, collectionConfig.slug)
+    : undefined
 
   const onActionSuccess = useCallback(() => toggleAll(), [toggleAll])
 
@@ -127,6 +135,14 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
               selectAll={selectAll === SelectAllStatus.AllAvailable}
               where={where}
             />
+            {hierarchySlug && collectionConfig && selectAll !== SelectAllStatus.AllAvailable && (
+              <MoveMany
+                hierarchySlug={hierarchySlug}
+                onSuccess={onActionSuccess}
+                requiredCollections={[collectionConfig.slug]}
+                selections={{ [collectionConfig.slug]: { ids: selectedIDs } }}
+              />
+            )}
           </Fragment>
         ),
         isTrashView && (
