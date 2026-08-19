@@ -36,7 +36,6 @@ export const DefaultListViewTabs: React.FC<DefaultListViewTabsProps> = ({
     isHierarchyEnabled && typeof collectionConfig.hierarchy === 'object'
       ? collectionConfig.hierarchy
       : undefined
-  const hierarchyIcon = hierarchyConfig?.admin?.icon
 
   if (!isTrashEnabled && !isHierarchyEnabled) {
     return null
@@ -91,7 +90,6 @@ export const DefaultListViewTabs: React.FC<DefaultListViewTabsProps> = ({
           .join(' ')}
         disabled={viewType === 'list'}
         el="button"
-        icon={hierarchyIcon}
         id={allButtonId}
         onClick={() => handleViewChange('list')}
       >
