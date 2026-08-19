@@ -22,6 +22,9 @@ import './index.css'
 
 const baseClass = 'tree'
 
+/** Root nodes have no ancestors; hoisted so the reference stays stable across renders. */
+const ROOT_ANCESTOR_IDS: (number | string)[] = []
+
 const getDocumentTitle = (doc: TreeDocument, useAsTitle: string | undefined): string => {
   const docId: number | string = doc.id
   const idStr = typeof docId === 'number' ? String(docId) : docId
@@ -361,10 +364,12 @@ const HierarchyTreeInner: React.FC<HierarchyTreeProps> = ({
         return (
           <TreeNode
             allPossibleTypeValues={allPossibleTypeValues}
+            ancestorIds={ROOT_ANCESTOR_IDS}
             baseFilter={baseFilter}
             cache={childrenCache}
             collectionSlug={collectionSlug}
             depth={0}
+            dropParentFieldName={parentFieldName}
             expandedNodes={expandedNodes}
             filterByCollections={filterByCollections}
             key={nodeIdStr}

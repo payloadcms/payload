@@ -55,10 +55,19 @@ export type TreeInitialData = {
 
 export type TreeNodeProps = {
   allPossibleTypeValues?: string[]
+  /**
+   * Ids of this node's ancestors, so a folder can't be dropped into its own subtree.
+   */
+  ancestorIds?: (number | string)[]
   baseFilter?: null | Where
   cache: TreeCache
   collectionSlug: string
   depth: number
+  /**
+   * Parent field name to set on documents dropped onto this node. Omit to make the tree inert as a
+   * drop target.
+   */
+  dropParentFieldName?: string
   expandedNodes: Set<number | string>
   filterByCollections?: string[]
   limit: number

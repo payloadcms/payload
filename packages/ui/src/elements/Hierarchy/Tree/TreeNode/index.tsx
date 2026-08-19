@@ -1,11 +1,14 @@
 'use client'
 
-import React, { useCallback, useRef } from 'react'
+import { useDroppable } from '@dnd-kit/core'
+import React, { useCallback, useEffect, useMemo, useRef } from 'react'
 
+import type { HierarchyDropData } from '../../../../providers/HierarchyDnd/types.js'
 import type { TreeNodeProps } from '../types.js'
 
 import { Spinner } from '../../../../elements/Spinner/index.js'
 import { ChevronIcon } from '../../../../icons/Chevron/index.js'
+import { useHierarchyDnd } from '../../../../providers/HierarchyDnd/index.js'
 import { useTranslation } from '../../../../providers/Translation/index.js'
 import { LoadMore } from '../LoadMore/index.js'
 import { useFocusableItem, useTreeFocus } from '../TreeFocusContext.js'
@@ -13,6 +16,12 @@ import { useChildren } from '../useChildren.js'
 import './index.css'
 
 const DEFAULT_TREE_LIMIT = 10
+
+/**
+ * How long a drag has to hover a collapsed node before it springs open, so a drag can drill into the
+ * tree without being dropped and restarted.
+ */
+const SPRING_LOAD_DELAY = 600
 
 const baseClass = 'tree-node'
 
@@ -33,10 +42,12 @@ const getDocumentTitle = (doc: Record<string, unknown>, useAsTitle: string | und
 
 export const TreeNode = ({
   allPossibleTypeValues,
+  ancestorIds,
   baseFilter,
   cache,
   collectionSlug,
   depth = 0,
+  dropParentFieldName,
   expandedNodes,
   filterByCollections,
   limit = DEFAULT_TREE_LIMIT,
@@ -109,9 +120,55 @@ export const TreeNode = ({
     [load, node.id, onToggle],
   )
 
+  const { canDrop } = useHierarchyDnd()
+
+  const childAncestorIds = useMemo(() => [...(ancestorIds ?? []), node.id], [ancestorIds, node.id])
+
+  const dropData = useMemo<HierarchyDropData | undefined>(
+    () =>
+      dropParentFieldName
+        ? {
+            type: 'hierarchy-folder',
+            // Tree nodes carry only id/title/hasChildren, not the folder's collectionSpecific value,
+            // so type acceptance is left to the server validator here. The self/descendant check
+            // below still runs, since that only needs ids.
+            ancestorIds: ancestorIds ?? [],
+            folderId: node.id,
+            hierarchySlug: collectionSlug,
+            parentFieldName: dropParentFieldName,
+            title: node.title,
+          }
+        : undefined,
+    [ancestorIds, collectionSlug, dropParentFieldName, node.id, node.title],
+  )
+
+  const { isOver, setNodeRef: setDropRef } = useDroppable({
+    id: `tree-node-drop-${collectionSlug}-${node.id}`,
+    data: dropData,
+    disabled: !dropData,
+  })
+
+  const dropState = isOver && dropData ? (canDrop(dropData) ? 'over' : 'invalid') : undefined
+
   const handleSelectClick = useCallback(() => {
     onSelect?.({ id: node.id })
   }, [node.id, onSelect])
+
+  /**
+   * Hovering a collapsed node mid-drag opens it after a beat. The timer is cleared when the drag
+   * leaves, so a pass-over on the way somewhere else doesn't expand the whole tree.
+   */
+  useEffect(() => {
+    if (!isOver || expanded || !hasChildren) {
+      return
+    }
+
+    const timeout = setTimeout(() => {
+      handleToggle()
+    }, SPRING_LOAD_DELAY)
+
+    return () => clearTimeout(timeout)
+  }, [expanded, handleToggle, hasChildren, isOver])
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -163,9 +220,14 @@ export const TreeNode = ({
     >
       <div className={`${baseClass}__content-wrapper`}>
         <div
-          className={[`${baseClass}__content`, selected && `${baseClass}__content--selected`]
+          className={[
+            `${baseClass}__content`,
+            selected && `${baseClass}__content--selected`,
+            dropState && `${baseClass}__content--drop-${dropState}`,
+          ]
             .filter(Boolean)
             .join(' ')}
+          ref={setDropRef}
         >
           {hasChildren && (
             <button
@@ -212,10 +274,12 @@ export const TreeNode = ({
               return (
                 <TreeNode
                   allPossibleTypeValues={allPossibleTypeValues}
+                  ancestorIds={childAncestorIds}
                   baseFilter={baseFilter}
                   cache={cache}
                   collectionSlug={collectionSlug}
                   depth={depth + 1}
+                  dropParentFieldName={dropParentFieldName}
                   expandedNodes={expandedNodes}
                   filterByCollections={filterByCollections}
                   key={String(childId)}

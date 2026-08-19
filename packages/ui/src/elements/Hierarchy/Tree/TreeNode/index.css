@@ -101,4 +101,17 @@
     display: inline-flex;
     align-items: center;
   }
+
+  /*
+   * Drop invitation. An inset ring rather than an outset one, because tree rows are full-bleed and
+   * an outset ring would be clipped by the sidebar's own overflow.
+   */
+  .tree-node__content--drop-over {
+    background: color-mix(in srgb, var(--color-border-selected) 8%, transparent);
+    box-shadow: inset 0 0 0 var(--stroke-width-medium) var(--color-border-selected);
+  }
+
+  .tree-node__content--drop-invalid {
+    cursor: not-allowed;
+  }
 }
