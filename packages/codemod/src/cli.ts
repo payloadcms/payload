@@ -10,6 +10,7 @@ import type { Transform } from './types.js'
 import { parseFlags } from './cli.parseFlags.js'
 import { transforms as registry } from './registry.js'
 import { runTransforms } from './runner.js'
+import { runDispatch } from './upgrade/dispatch.js'
 import { runUpgrade } from './upgrade/index.js'
 import { renderUpgradePrompt } from './upgrade/prompt.js'
 import { loadPackageJsons, serializePackageJson } from './utils/packageJson.js'
@@ -18,16 +19,24 @@ import { loadProject } from './utils/project.js'
 export async function main(argv: string[] = process.argv.slice(2)): Promise<void> {
   const flags = parseFlags(argv)
 
-  if (flags.command === 'upgrade' && flags.emitPrompt) {
-    console.log(renderUpgradePrompt())
-    return
-  }
-
   if (flags.command === 'upgrade') {
-    const { failed } = await runUpgrade({
-      flags: { dry: flags.dry, force: flags.force, tag: flags.tag ?? 'canary' },
-      path: flags.path,
-    })
+    if (flags.upgrade === 'prompt') {
+      console.log(renderUpgradePrompt())
+      return
+    }
+
+    if (flags.upgrade === 'run') {
+      const { failed } = await runUpgrade({
+        flags: { dry: flags.dry, force: flags.force, tag: flags.tag ?? 'canary' },
+        path: flags.path,
+      })
+      if (failed) {
+        process.exitCode = 1
+      }
+      return
+    }
+
+    const { failed } = await runDispatch({ agentFlag: flags.agent, path: flags.path })
     if (failed) {
       process.exitCode = 1
     }

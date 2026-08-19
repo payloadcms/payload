@@ -21,7 +21,23 @@ With no arguments, runs every registered transform against the current directory
 
 ## `upgrade` command
 
-`npx @payloadcms/codemod upgrade [path]` performs the mechanical v3 -> v4 slice:
+The `upgrade` command has three verbs.
+
+### `upgrade` (pick how to run it)
+
+`npx @payloadcms/codemod upgrade` is the front door. It detects installed coding-agent CLIs
+(`claude`, `codex`) and asks how you want to run the full v3 -> v4 upgrade, Next.js 16 included:
+
+- Hand the orchestration prompt to a detected agent. The agent runs the whole sequence, calling
+  `upgrade run` for the mechanical slice as one step.
+- Just print the prompt to run it yourself or paste it elsewhere.
+
+Pin an agent with `--agent <claude|codex>` to skip the picker. When there is no TTY (CI) or no
+agent is installed, it prints the prompt instead of prompting.
+
+### `upgrade run` (mechanical slice)
+
+`npx @payloadcms/codemod upgrade run [path]` performs the deterministic v3 -> v4 slice:
 
 1. Resolves the current Payload canary from the npm registry (override with `--tag <dist-tag>`).
 2. Rewrites `package.json`: pins `payload` + every `@payloadcms/*` to that exact version in
@@ -36,20 +52,20 @@ It does NOT upgrade Next.js. Payload v4 requires Next 16; run Next's own recomme
 workflow (linked from the bundled runbook) to bump Next and migrate the code together. The report
 prints the required Next target.
 
-### `upgrade` flags
+Flags:
 
 - `--tag <dist-tag>` — dist-tag to resolve Payload versions from (default `canary`).
 - `--dry` — preview the `package.json` changes and planned steps; write and install nothing.
 - `--force` — skip the dirty-git-tree warning.
 
-### `upgrade prompt`
+### `upgrade prompt` (print the prompt)
 
-`npx @payloadcms/codemod upgrade prompt` prints an orchestration prompt for a coding agent to run
-the full v3 -> v4 upgrade, Next.js 16 included. It is offline and stateless: it writes nothing and
-makes no network calls. The text is project-agnostic, so pipe it to your agent and run it from the
-project root.
+`npx @payloadcms/codemod upgrade prompt` prints the orchestration prompt to stdout and exits. It is
+offline and stateless: it writes nothing and makes no network calls. The text is project-agnostic,
+so pipe it to any agent and run it from the project root. This is the same prompt the `upgrade`
+picker hands off, minus the detection and spawn.
 
-The prompt sequences the upgrade (mechanical slice via this command, then Next.js via Next's own
+The prompt sequences the upgrade (mechanical slice via `upgrade run`, then Next.js via Next's own
 codemods and agent workflow, then regeneration, judgment work, and verification) and points at the
 bundled runbook and migration guide for detail rather than restating them.
 

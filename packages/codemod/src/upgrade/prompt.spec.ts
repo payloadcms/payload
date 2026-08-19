@@ -6,7 +6,7 @@ describe('renderUpgradePrompt', () => {
   it('emits a project-agnostic upgrade command', () => {
     const out = renderUpgradePrompt()
 
-    expect(out).toContain('npx @payloadcms/codemod upgrade .')
+    expect(out).toContain('npx @payloadcms/codemod upgrade run .')
   })
 
   it('documents --tag as an inline option rather than baking a value', () => {
