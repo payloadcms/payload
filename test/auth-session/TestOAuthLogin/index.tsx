@@ -7,7 +7,7 @@ import { formatAdminURL, getSafeRedirect } from 'payload/shared'
 import React from 'react'
 
 import { AUTH_SESSION_TEST_ROUTES, authSessionLoginButtonLabel } from '../shared.js'
-import './index.css'
+import './index.scss'
 
 export const TestOAuthLogin: PayloadClientReactComponent<
   SanitizedConfig['admin']['components']['beforeLogin'][0]
