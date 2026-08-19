@@ -29,6 +29,8 @@ export { initReq } from '../../utilities/initReq.js'
 export { isCustomAdminView } from '../../utilities/isCustomAdminView.js'
 export { isPublicAdminRoute } from '../../utilities/isPublicAdminRoute.js'
 export {
+  getUpcomingScheduledPublishHandler,
+  type GetUpcomingScheduledPublishHandlerArgs,
   schedulePublishHandler,
   type SchedulePublishHandlerArgs,
 } from '../../utilities/schedulePublishHandler.js'

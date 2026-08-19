@@ -90,6 +90,100 @@ describe('Queues - Payload', () => {
   })
 
   describe('access control', () => {
+    it('should deny raw job creation when access control is enabled', async () => {
+      const req = await createLocalReq({ user }, payload)
+
+      await expect(
+        payload.create({
+          collection: 'payload-jobs',
+          data: {
+            input: {
+              message: 'raw job',
+            },
+            taskSlug: 'CreateSimple',
+          },
+          overrideAccess: false,
+          req,
+        }),
+      ).rejects.toThrow()
+    })
+
+    it('should deny raw job reads when access control is enabled', async () => {
+      const req = await createLocalReq({ user }, payload)
+      const job = await payload.jobs.queue({
+        task: 'CreateSimple',
+        input: {
+          message: 'protected job',
+        },
+      })
+
+      await expect(
+        payload.findByID({
+          collection: 'payload-jobs',
+          id: job.id,
+          overrideAccess: false,
+          req,
+        }),
+      ).rejects.toThrow()
+    })
+
+    it('should deny raw job updates when access control is enabled', async () => {
+      const req = await createLocalReq({ user }, payload)
+      const job = await payload.jobs.queue({
+        task: 'CreateSimple',
+        input: {
+          message: 'protected job',
+        },
+      })
+
+      await expect(
+        payload.update({
+          collection: 'payload-jobs',
+          id: job.id,
+          data: {
+            input: {
+              message: 'attacker update',
+            },
+          },
+          overrideAccess: false,
+          req,
+        }),
+      ).rejects.toThrow()
+
+      const unchangedJob = await payload.findByID({
+        collection: 'payload-jobs',
+        id: job.id,
+      })
+
+      expect(unchangedJob.input).toEqual({ message: 'protected job' })
+    })
+
+    it('should deny raw job deletion when access control is enabled', async () => {
+      const req = await createLocalReq({ user }, payload)
+      const job = await payload.jobs.queue({
+        task: 'CreateSimple',
+        input: {
+          message: 'protected job',
+        },
+      })
+
+      await expect(
+        payload.delete({
+          collection: 'payload-jobs',
+          id: job.id,
+          overrideAccess: false,
+          req,
+        }),
+      ).rejects.toThrow()
+
+      const unchangedJob = await payload.findByID({
+        collection: 'payload-jobs',
+        id: job.id,
+      })
+
+      expect(unchangedJob.id).toBe(job.id)
+    })
+
     it('will run access control on jobs runner run endpoint', async () => {
       const response = await restClient.GET('/payload-jobs/run?silent=true', {
         headers: {
