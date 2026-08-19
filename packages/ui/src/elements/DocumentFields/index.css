@@ -40,7 +40,8 @@
     border-left: var(--main-border);
   }
 
-  .document-fields--has-sidebar .document-fields__fields > .tabs-field {
+  .document-fields--has-sidebar .document-fields__fields > .tabs-field,
+  .document-fields--has-sidebar .document-fields__fields > .group-field {
     margin-right: var(--main-field-margin);
   }
 
