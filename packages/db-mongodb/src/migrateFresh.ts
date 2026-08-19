@@ -58,6 +58,7 @@ export async function migrateFresh(
           name: migration.name,
           batch: 1,
         },
+        overrideAccess: true,
         req,
       })
 
