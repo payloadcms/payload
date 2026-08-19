@@ -47,6 +47,11 @@ const CollectionCell: SlotColumn<TableRow>['Cell'] = ({ row }) => (
 )
 
 export type HierarchyTableProps = {
+  /**
+   * Ids of the folders between the root and the folder currently open, so a folder can't be dropped
+   * into its own subtree.
+   */
+  ancestorIds?: (number | string)[]
   /** Base filter applied to hierarchy collection queries (e.g., tenant filter) */
   baseFilter?: Where
   /**
@@ -74,6 +79,7 @@ export type HierarchyTableProps = {
 }
 
 export function HierarchyTable({
+  ancestorIds,
   baseFilter,
   browseCollectionSlug,
   childrenData,
@@ -145,7 +151,8 @@ export function HierarchyTable({
   })
 
   // Get selection functions from context
-  const { isLocked, isSelected, toggleAllInCollection, toggleSelection } = useDocumentSelection()
+  const { clearAll, isLocked, isSelected, toggleAllInCollection, toggleSelection } =
+    useDocumentSelection()
 
   // Get the user who is locking a row (for SlotTable to show lock icon instead of checkbox)
   const getRowLockedUser = useCallback(
@@ -545,6 +552,15 @@ export function HierarchyTable({
     [toggleSelection],
   )
 
+  /**
+   * The moved documents no longer belong to this folder, so the selection that referenced them is
+   * cleared and the route refetched.
+   */
+  const handleDropMoveSuccess = useCallback(() => {
+    clearAll()
+    clearRouteCache()
+  }, [clearAll, clearRouteCache])
+
   const selectedKeys = useMemo(() => {
     const keys = new Set<string>()
 
@@ -638,9 +654,12 @@ export function HierarchyTable({
     return (
       <div className={baseClass}>
         <HierarchyCardGrid
+          ancestorIds={ancestorIds}
           bands={bands}
           fillHeight
           getRowLockedUser={getRowLockedUser}
+          hierarchySlug={collectionSlug}
+          onMoveSuccess={handleDropMoveSuccess}
           onSelectionChange={handlePlaneSelectionChange}
           selectedKeys={selectedKeys}
         />

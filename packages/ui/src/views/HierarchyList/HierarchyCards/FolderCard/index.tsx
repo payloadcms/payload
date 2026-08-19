@@ -14,6 +14,11 @@ const baseClass = 'hierarchy-folder-card'
 
 export type FolderCardProps = {
   /**
+   * Hover state while a hierarchy drag is over this card: `over` invites the drop, `invalid` marks a
+   * destination that would reject it (wrong collection type, or the folder's own subtree).
+   */
+  dropState?: 'invalid' | 'over'
+  /**
    * Renders a trailing chevron affordance signalling the folder can be drilled into.
    */
   hasChildren?: boolean
@@ -35,6 +40,7 @@ export type FolderCardProps = {
 }
 
 export const FolderCard: React.FC<FolderCardProps> = ({
+  dropState,
   hasChildren = false,
   href,
   icon,
@@ -53,6 +59,7 @@ export const FolderCard: React.FC<FolderCardProps> = ({
       className={[
         baseClass,
         isSelected && `${baseClass}--selected`,
+        dropState && `${baseClass}--drop-${dropState}`,
         // The trailing slot holds the lock indicator.
         lockedUser && `${baseClass}--has-corner-slot`,
       ]
@@ -63,6 +70,8 @@ export const FolderCard: React.FC<FolderCardProps> = ({
       <Link
         aria-describedby={shouldAnnounceSelection ? selectedStatusID : undefined}
         className={`${baseClass}__link`}
+        // The card itself is the drag handle; a link's native drag would fight the pointer sensor.
+        draggable={false}
         href={href}
       >
         <span className={`${baseClass}__icon`}>{icon || <FolderIcon />}</span>

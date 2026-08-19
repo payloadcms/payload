@@ -224,6 +224,13 @@ export function HierarchyListView(props: ListViewClientProps) {
 
   const parentId = hierarchyData?.parentId ?? null
 
+  // The breadcrumb trail is exactly the chain a folder may not be dropped into: its own ancestors
+  // plus the folder currently open.
+  const ancestorIds = useMemo(
+    () => (hierarchyData?.breadcrumbs ?? []).map((crumb) => crumb.id),
+    [hierarchyData?.breadcrumbs],
+  )
+
   // Build collections array for create button
   // Filter by allowedCollections when set (from parent's collectionSpecific field)
   const { allowedCollections } = hierarchyData || {}
@@ -457,6 +464,7 @@ export function HierarchyListView(props: ListViewClientProps) {
             </ListControlsBar>
 
             <HierarchyTable
+              ancestorIds={ancestorIds}
               baseFilter={baseFilter}
               browseCollectionSlug={collectionSlug}
               childrenData={filteredChildrenData}

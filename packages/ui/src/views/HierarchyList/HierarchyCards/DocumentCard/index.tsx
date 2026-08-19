@@ -118,7 +118,8 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
         )}
 
         {/* The link is a sibling of the checkbox and stretches over the whole card via ::after */}
-        <Link className={`${baseClass}__link`} href={href}>
+        {/* The card itself is the drag handle; a link's native drag would fight the pointer sensor. */}
+        <Link className={`${baseClass}__link`} draggable={false} href={href}>
           <span className={`${baseClass}__title`} title={title}>
             {title}
           </span>

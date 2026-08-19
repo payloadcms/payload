@@ -29,6 +29,19 @@
     box-shadow: 0 0 0 var(--stroke-width-medium) var(--color-border-selected-strong);
   }
 
+  /*
+   * Drop invitation. Reuses the selected ring's token and width so hovering a drag over a card never
+   * changes its geometry, and wins over the selected/hover rings above by being declared later.
+   */
+  .hierarchy-folder-card--drop-over {
+    background: color-mix(in srgb, var(--color-border-selected) 8%, var(--color-bg));
+    box-shadow: 0 0 0 var(--stroke-width-medium) var(--color-border-selected);
+  }
+
+  .hierarchy-folder-card--drop-invalid {
+    cursor: not-allowed;
+  }
+
   .hierarchy-folder-card__link {
     display: flex;
     flex: 1 1 auto;

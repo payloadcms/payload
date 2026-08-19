@@ -2,17 +2,16 @@
 
 import type { User } from 'payload'
 
-import { getTranslation } from '@payloadcms/translations'
 import { formatAdminURL } from 'payload/shared'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
+import type { HierarchyDragData } from '../../../providers/HierarchyDnd/types.js'
 import type { TableRow } from '../HierarchyTable/types.js'
 
 import { useConfig } from '../../../providers/Config/index.js'
 import { useRouter } from '../../../providers/RouterAdapter/index.js'
-import { useTranslation } from '../../../providers/Translation/index.js'
-import { DocumentCard } from './DocumentCard/index.js'
-import { FolderCard } from './FolderCard/index.js'
+import { HierarchyCard } from './HierarchyCard/index.js'
+import { PlaneItem } from './PlaneItem/index.js'
 import './index.css'
 
 const baseClass = 'hierarchy-card-grid'
@@ -100,6 +99,9 @@ type MarqueeRect = {
  */
 const DRAG_THRESHOLD = 4
 
+/** Matches the overlay's own cap, so no preview card is built that the overlay would discard. */
+const MAX_DRAG_PREVIEW_CARDS = 3
+
 const getSelectionIntent = (event: {
   ctrlKey: boolean
   metaKey: boolean
@@ -120,6 +122,18 @@ const getSelectionIntent = (event: {
  * One horizontal group of cards. Bands stack vertically and share a single selection scope, so a
  * range selection or a marquee can run from a folder straight through the documents below it.
  */
+/**
+ * A row plus the presentation values derived from its collection config.
+ */
+type CardDescriptor = {
+  href: string
+  isHierarchyGroup: boolean
+  key: string
+  parentFieldName: string
+  row: TableRow
+  title: string
+}
+
 export type PlaneBand = {
   /**
    * Hierarchy rows render as folder cards, related documents render as document cards.
@@ -139,6 +153,11 @@ export type PlaneBand = {
 
 export type HierarchyCardGridProps = {
   /**
+   * Ids of the folders between the root and the folder currently open, so a folder can't be dropped
+   * into its own subtree.
+   */
+  ancestorIds?: (number | string)[]
+  /**
    * Fallback accessible name for bands that don't carry their own label.
    */
   ariaLabel?: string
@@ -155,9 +174,17 @@ export type HierarchyCardGridProps = {
    */
   getRowLockedUser?: (row: TableRow) => undefined | User
   /**
+   * Slug of the collection that owns the folder tree, used to address drop destinations.
+   */
+  hierarchySlug?: string
+  /**
    * Toggles a single row's selected state. Multi-card intents (replace, range) are resolved into
    * the minimum set of per-row toggles by the plane, so consumers only implement one operation.
    */
+  /**
+   * Clears the selection once a drop has moved it, since those documents are no longer on this page.
+   */
+  onMoveSuccess?: () => void
   onSelectionChange: (row: TableRow) => void
   selectedKeys: Set<string>
   /**
@@ -169,10 +196,13 @@ export type HierarchyCardGridProps = {
 }
 
 export function HierarchyCardGrid({
+  ancestorIds = [],
   ariaLabel,
   bands,
   fillHeight = false,
   getRowLockedUser,
+  hierarchySlug,
+  onMoveSuccess,
   onSelectionChange,
   selectedKeys,
   showCollectionType,
@@ -183,7 +213,6 @@ export function HierarchyCardGrid({
     },
     getEntityConfig,
   } = useConfig()
-  const { i18n } = useTranslation()
   const router = useRouter()
   const [planeRef, columns] = useColumnCount()
 
@@ -192,6 +221,49 @@ export function HierarchyCardGrid({
    * what puts folders and documents on the same plane rather than in sibling scopes.
    */
   const flatRows = useMemo(() => bands.flatMap((band) => band.rows), [bands])
+
+  /**
+   * Everything needed to render one card, flattened into the same index space as `flatRows`. Built
+   * once so the render and the drag overlay agree on titles and hrefs without recomputing them.
+   */
+  const descriptors = useMemo<CardDescriptor[]>(
+    () =>
+      bands.flatMap((band) =>
+        band.rows.map((row) => {
+          const collectionConfig = getEntityConfig({ collectionSlug: row._collectionSlug })
+          const useAsTitle = collectionConfig?.admin?.useAsTitle || 'id'
+
+          const hierarchyConfig =
+            collectionConfig?.hierarchy && typeof collectionConfig.hierarchy === 'object'
+              ? collectionConfig.hierarchy
+              : undefined
+          const parentFieldName = hierarchyConfig?.parentFieldName || 'parent'
+
+          // Folders drill in via `_browseHref` so the click stays in the collection being browsed;
+          // the fallback covers rows built outside the hierarchy view.
+          const href = band.isHierarchyGroup
+            ? (row._browseHref ??
+              formatAdminURL({
+                adminRoute,
+                path: `/collections/${row._collectionSlug}?${parentFieldName}=${row.id}`,
+              }))
+            : formatAdminURL({
+                adminRoute,
+                path: `/collections/${row._collectionSlug}/${row.id}`,
+              })
+
+          return {
+            href,
+            isHierarchyGroup: band.isHierarchyGroup,
+            key: getRowKey(row),
+            parentFieldName,
+            row,
+            title: getRowTitle({ row, useAsTitle }),
+          }
+        }),
+      ),
+    [adminRoute, bands, getEntityConfig],
+  )
 
   const showTypePill = useMemo(() => {
     if (showCollectionType !== undefined) {
@@ -207,6 +279,37 @@ export function HierarchyCardGrid({
 
     return documentSlugs.size > 1
   }, [bands, showCollectionType])
+
+  /**
+   * Payload for dragging the current selection, shared by every selected card so it is built once
+   * per render rather than once per card. The preview is capped because the overlay only fans a few
+   * cards before collapsing the remainder into a count.
+   */
+  const selectionDragData = useMemo<HierarchyDragData>(() => {
+    const selected = descriptors.filter((descriptor) => selectedKeys.has(descriptor.key))
+
+    return {
+      type: 'hierarchy-items',
+      items: selected.map((descriptor) => ({
+        id: descriptor.row.id,
+        collectionSlug: descriptor.row._collectionSlug,
+        title: descriptor.title,
+      })),
+      onMoveSuccess,
+      preview: selected
+        .slice(0, MAX_DRAG_PREVIEW_CARDS)
+        .map((descriptor) => (
+          <HierarchyCard
+            href={descriptor.href}
+            isHierarchyGroup={descriptor.isHierarchyGroup}
+            key={descriptor.key}
+            row={descriptor.row}
+            showTypePill={showTypePill}
+            title={descriptor.title}
+          />
+        )),
+    }
+  }, [descriptors, onMoveSuccess, selectedKeys, showTypePill])
 
   const [marquee, setMarquee] = useState<MarqueeRect | null>(null)
 
@@ -334,6 +437,12 @@ export function HierarchyCardGrid({
     applySelectionIntent({ index, intent: getSelectionIntent(event) })
   }
 
+  // Pressing an unselected card collapses the selection onto it, so a drag that starts from it moves
+  // only that card. The pointer sensor's own distance threshold means this lands before any drag.
+  const handlePointerDownUnselected = (index: number) => {
+    applySelectionIntent({ index, intent: 'replace' })
+  }
+
   const handleCardDoubleClick = (event: React.MouseEvent, href: string) => {
     event.preventDefault()
     router.push(href)
@@ -458,71 +567,32 @@ export function HierarchyCardGrid({
             key={band.key}
             style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}
           >
-            {band.rows.map((row, rowIndex) => {
+            {band.rows.map((_row, rowIndex) => {
               const flatIndex = bandOffset + rowIndex
-              const collectionConfig = getEntityConfig({ collectionSlug: row._collectionSlug })
-              const useAsTitle = collectionConfig?.admin?.useAsTitle || 'id'
-              const title = getRowTitle({ row, useAsTitle })
-              const rowKey = getRowKey(row)
-              const isSelected = selectedKeys.has(rowKey)
-              const lockedUser = getRowLockedUser?.(row)
-
-              const hierarchyConfig =
-                collectionConfig?.hierarchy && typeof collectionConfig.hierarchy === 'object'
-                  ? collectionConfig.hierarchy
-                  : undefined
-              const parentFieldName = hierarchyConfig?.parentFieldName || 'parent'
-
-              // Folders drill in via `_browseHref` so the click stays in the collection being
-              // browsed; the fallback covers rows built outside the hierarchy view.
-              const href = band.isHierarchyGroup
-                ? (row._browseHref ??
-                  formatAdminURL({
-                    adminRoute,
-                    path: `/collections/${row._collectionSlug}?${parentFieldName}=${row.id}`,
-                  }))
-                : formatAdminURL({
-                    adminRoute,
-                    path: `/collections/${row._collectionSlug}/${row.id}`,
-                  })
+              const descriptor = descriptors[flatIndex]
 
               return (
-                // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions -- the card's own link remains the keyboard-operable control; these handlers only layer pointer selection gestures on top of it
-                <li
-                  className={`${baseClass}__item`}
-                  key={rowKey}
-                  onClickCapture={(event) => handleCardClickCapture(event, flatIndex)}
-                  onDoubleClick={(event) => handleCardDoubleClick(event, href)}
-                  onKeyDown={(event) => handleCardKeyDown(event, flatIndex)}
-                  ref={(node) => setItemRef(flatIndex, node)}
-                >
-                  {band.isHierarchyGroup ? (
-                    <FolderCard
-                      hasChildren={Boolean(row._hasChildren)}
-                      href={href}
-                      icon={row._hierarchyIcon}
-                      isSelected={isSelected}
-                      lockedUser={lockedUser}
-                      title={title}
-                    />
-                  ) : (
-                    <DocumentCard
-                      collectionSlug={row._collectionSlug}
-                      doc={row}
-                      href={href}
-                      isSelected={isSelected}
-                      lockedUser={lockedUser}
-                      showType={showTypePill}
-                      // The pill labels a single document, so the singular label reads correctly
-                      // ("Media"); _collectionLabel is the plural used for the table column heading.
-                      typeLabel={
-                        getTranslation(collectionConfig?.labels?.singular, i18n) ||
-                        row._collectionLabel
-                      }
-                      updatedAt={typeof row.updatedAt === 'string' ? row.updatedAt : undefined}
-                    />
-                  )}
-                </li>
+                <PlaneItem
+                  ancestorIds={ancestorIds}
+                  baseClass={baseClass}
+                  flatIndex={flatIndex}
+                  hierarchySlug={hierarchySlug ?? descriptor.row._collectionSlug}
+                  href={descriptor.href}
+                  isHierarchyGroup={descriptor.isHierarchyGroup}
+                  isSelected={selectedKeys.has(descriptor.key)}
+                  key={descriptor.key}
+                  lockedUser={getRowLockedUser?.(descriptor.row)}
+                  onClickCapture={handleCardClickCapture}
+                  onDoubleClick={handleCardDoubleClick}
+                  onKeyDown={handleCardKeyDown}
+                  onPointerDownUnselected={handlePointerDownUnselected}
+                  parentFieldName={descriptor.parentFieldName}
+                  registerNode={setItemRef}
+                  row={descriptor.row}
+                  selectionDragData={selectionDragData}
+                  showTypePill={showTypePill}
+                  title={descriptor.title}
+                />
               )
             })}
 
