@@ -1,11 +1,7 @@
 import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
 import type { FlattenedField } from '../../fields/config/types.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
-import type {
-  HasManyRelationshipOperator,
-  PayloadRequest,
-  WhereField,
-} from '../../types/index.js'
+import type { HasManyRelationshipOperator, PayloadRequest, WhereField } from '../../types/index.js'
 import type { EntityPolicies, PathToQuery } from './types.js'
 
 import { fieldAffectsData } from '../../fields/config/types.js'
