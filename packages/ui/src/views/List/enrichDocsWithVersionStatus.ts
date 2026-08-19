@@ -61,6 +61,7 @@ export async function enrichDocsWithVersionStatus({
       collection: collectionConfig.slug,
       depth: 0,
       limit: 0,
+      overrideAccess: true,
       pagination: false,
       select: {
         parent: true,
