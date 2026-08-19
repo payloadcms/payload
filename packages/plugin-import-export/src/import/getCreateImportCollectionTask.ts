@@ -40,6 +40,7 @@ export const getCreateCollectionImportTask = (
       const importDoc = await req.payload.findByID({
         id: importId,
         collection: importCollection,
+        overrideAccess: true,
       })
 
       if (!importDoc) {
@@ -121,6 +122,7 @@ export const getCreateCollectionImportTask = (
             updated: result.updated,
           },
         },
+        overrideAccess: true,
       })
 
       return {
