@@ -5,19 +5,18 @@
   }
 
   /*
-   * Fills its grid cell so the tile matches a FolderCard's footprint exactly, and repeats that
-   * card's internal metrics (icon gap, inline padding) so the two read as one row of cards.
+   * Fills its grid cell and repeats FolderCard's internal metrics - 24px icon, 4px gap, 12px padding,
+   * large radius - so the tile lands on exactly the same 48px footprint as the cards beside it.
    */
   .new-folder-card__button {
     display: flex;
     flex: 1 1 auto;
     align-items: center;
     justify-content: flex-start;
-    gap: var(--spacer-2);
+    gap: var(--spacer-1);
     min-width: 0;
-    padding-block: var(--spacer-2);
-    padding-inline: var(--spacer-2-5);
-    border-radius: var(--radius-medium);
+    padding: var(--spacer-2-5);
+    border-radius: var(--radius-large);
     color: var(--color-text-secondary);
 
     &:hover {

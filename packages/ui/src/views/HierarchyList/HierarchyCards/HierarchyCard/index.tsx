@@ -46,7 +46,6 @@ export const HierarchyCard: React.FC<HierarchyCardProps> = ({
     return (
       <FolderCard
         dropState={dropState}
-        hasChildren={Boolean(row._hasChildren)}
         href={href}
         icon={row._hierarchyIcon}
         isSelected={isSelected}

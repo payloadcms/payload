@@ -6,7 +6,6 @@ import React, { useId } from 'react'
 
 import { Link } from '../../../../elements/Link/index.js'
 import { Locked } from '../../../../elements/Locked/index.js'
-import { ChevronIcon } from '../../../../icons/Chevron/index.js'
 import { FolderIcon } from '../../../../icons/Folder/index.js'
 import './index.css'
 
@@ -18,10 +17,6 @@ export type FolderCardProps = {
    * destination that would reject it (wrong collection type, or the folder's own subtree).
    */
   dropState?: 'invalid' | 'over'
-  /**
-   * Renders a trailing chevron affordance signalling the folder can be drilled into.
-   */
-  hasChildren?: boolean
   /**
    * Admin URL the card navigates to when clicked.
    */
@@ -41,7 +36,6 @@ export type FolderCardProps = {
 
 export const FolderCard: React.FC<FolderCardProps> = ({
   dropState,
-  hasChildren = false,
   href,
   icon,
   isSelected = false,
@@ -78,11 +72,6 @@ export const FolderCard: React.FC<FolderCardProps> = ({
         <span className={`${baseClass}__title`} title={title}>
           {title}
         </span>
-        {hasChildren && (
-          <span className={`${baseClass}__chevron`}>
-            <ChevronIcon direction="right" />
-          </span>
-        )}
       </Link>
       {shouldAnnounceSelection && (
         <span className="sr-only" id={selectedStatusID}>

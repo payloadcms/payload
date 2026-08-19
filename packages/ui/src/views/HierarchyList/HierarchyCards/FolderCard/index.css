@@ -13,7 +13,7 @@
     align-items: stretch;
     min-width: 0;
     background: var(--color-bg);
-    border-radius: var(--radius-medium);
+    border-radius: var(--radius-large);
     box-shadow: 0 0 0 var(--stroke-width-small) var(--color-border);
   }
 
@@ -46,11 +46,10 @@
     display: flex;
     flex: 1 1 auto;
     align-items: center;
-    gap: var(--spacer-2);
+    gap: var(--spacer-1);
     min-width: 0;
-    padding-block: var(--spacer-2);
-    padding-inline: var(--spacer-2-5);
-    border-radius: var(--radius-medium);
+    padding: var(--spacer-2-5);
+    border-radius: var(--radius-large);
     color: var(--color-text);
     text-decoration: none;
     cursor: pointer;
@@ -83,22 +82,11 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    font-family: var(--text-body-medium-font-family);
-    font-size: var(--text-body-medium-font-size);
-    font-weight: var(--text-body-medium-font-weight);
-    line-height: var(--text-body-medium-line-height);
-    letter-spacing: var(--text-body-medium-letter-spacing);
-  }
-
-  .hierarchy-folder-card__chevron {
-    display: flex;
-    flex-shrink: 0;
-
-    svg {
-      width: var(--spacer-2-5);
-      height: var(--spacer-2-5);
-      color: var(--color-icon-tertiary);
-    }
+    font-family: var(--text-body-large-strong-font-family);
+    font-size: var(--text-body-large-strong-font-size);
+    font-weight: var(--text-body-large-strong-font-weight);
+    line-height: var(--text-body-large-strong-line-height);
+    letter-spacing: var(--text-body-large-strong-letter-spacing);
   }
 
   .hierarchy-folder-card__corner-slot {

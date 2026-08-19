@@ -31,11 +31,10 @@
   }
 
   /*
-   * Folder cards are single-row and much shorter than document cards, so they tolerate a denser
-   * grid. Their band also sheds its end padding, since the documents band below supplies the gap.
+   * Folders sit on the same grid as the documents - same columns, same gap - so the two bands read as
+   * one surface. Only the end padding differs, since the documents band below supplies that gap.
    */
   .hierarchy-card-grid__band--folders {
-    gap: var(--spacer-2);
     padding-block-end: var(--spacer-0);
   }
 
