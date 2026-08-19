@@ -262,7 +262,7 @@ export async function buildSearchParam({
 
           if (nextSubPath) {
             relationshipQuery = {
-              value: joinPath ? { _id: { $in } } : { [nextSubPath]: $in },
+              value: joinPath ? { _id: { $in } } : { [nextSubPath]: { $in } },
             }
           }
 
