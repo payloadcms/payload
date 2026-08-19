@@ -23,6 +23,11 @@ export type HierarchyListHeaderProps = {
   disableBulkEdit?: boolean
   /** Icon to display in the move drawer */
   HierarchyIcon?: React.ReactNode
+  /**
+   * Slug of the collection that owns the folder tree. Differs from `collectionConfig.slug` when the
+   * view browses one related collection by folder.
+   */
+  hierarchySlug: string
   i18n: I18nClient
   viewType?: ViewTypes
 }
@@ -34,6 +39,7 @@ export function HierarchyListHeader({
   disableBulkDelete,
   disableBulkEdit,
   HierarchyIcon,
+  hierarchySlug,
   i18n,
   viewType,
 }: HierarchyListHeaderProps) {
@@ -48,7 +54,7 @@ export function HierarchyListHeader({
           disableBulkDelete={disableBulkDelete}
           disableBulkEdit={disableBulkEdit}
           hierarchyIcon={HierarchyIcon}
-          hierarchySlug={collectionConfig.slug}
+          hierarchySlug={hierarchySlug}
           key="document-list-selection"
         />,
         <DefaultListViewTabs

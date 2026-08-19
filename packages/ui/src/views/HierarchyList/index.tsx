@@ -70,9 +70,16 @@ export function HierarchyListView(props: ListViewClientProps) {
   const collectionConfig = getEntityConfig({ collectionSlug })
   const { labels } = collectionConfig
 
+  // In scoped mode the viewed collection (Media) is not the collection that owns the tree
+  // (Folders), so every hierarchy-shaped lookup below has to go through the latter.
+  const hierarchySlug = hierarchyData?.hierarchySlug ?? collectionSlug
+  const scopedCollectionSlug = hierarchyData?.scopedCollectionSlug
+  const isScoped = Boolean(scopedCollectionSlug)
+  const hierarchyCollectionConfig = getEntityConfig({ collectionSlug: hierarchySlug })
+
   const hierarchyConfig =
-    collectionConfig?.hierarchy && typeof collectionConfig.hierarchy === 'object'
-      ? collectionConfig.hierarchy
+    hierarchyCollectionConfig?.hierarchy && typeof hierarchyCollectionConfig.hierarchy === 'object'
+      ? hierarchyCollectionConfig.hierarchy
       : undefined
   const parentFieldName = hierarchyConfig?.parentFieldName
 
@@ -110,8 +117,8 @@ export function HierarchyListView(props: ListViewClientProps) {
   // Callback for when a new document is created
   const handleSave = useCallback(() => {
     clearRouteCache()
-    refreshTree(collectionSlug)
-  }, [clearRouteCache, collectionSlug, refreshTree])
+    refreshTree(hierarchySlug)
+  }, [clearRouteCache, hierarchySlug, refreshTree])
 
   // Get search from URL params
   const searchFromURL = searchParams.get('search') || ''
@@ -153,23 +160,40 @@ export function HierarchyListView(props: ListViewClientProps) {
       // Breadcrumbs exclude the last item (current item) since it's shown in the header
       const ancestorBreadcrumbs = hierarchyData?.breadcrumbs?.slice(0, -1) || []
 
-      const baseLabel: StepNavItem = {
-        label: collectionLabel,
-        url: formatAdminURL({
-          adminRoute,
-          path: `/collections/${collectionSlug}`,
-        }),
-      }
+      // A scoped browse is its own destination ("Media by Folder"), distinct from the collection's
+      // plain list, so its crumb links to the browse root rather than to /collections/media.
+      const baseLabel: StepNavItem = isScoped
+        ? {
+            label: `${collectionLabel} ${t('general:by')} ${getTranslation(
+              hierarchyCollectionConfig?.labels?.singular,
+              i18n,
+            )}`,
+            url: formatAdminURL({
+              adminRoute,
+              path: `/collections/${collectionSlug}/hierarchy`,
+            }),
+          }
+        : {
+            label: collectionLabel,
+            url: formatAdminURL({
+              adminRoute,
+              path: `/collections/${collectionSlug}`,
+            }),
+          }
 
       let navItems = [baseLabel]
 
       if (ancestorBreadcrumbs.length > 0) {
         const queryParam = parentFieldName || 'parent'
+        // Ancestor crumbs have to stay inside whichever view the user is browsing.
+        const basePath: `/${string}` = isScoped
+          ? `/collections/${collectionSlug}/hierarchy`
+          : `/collections/${collectionSlug}`
         const hierarchyBreadcrumbs: StepNavItem[] = ancestorBreadcrumbs.map((crumb) => ({
           label: crumb.title,
           url: formatAdminURL({
             adminRoute,
-            path: `/collections/${collectionSlug}?${queryParam}=${crumb.id}`,
+            path: `${basePath}?${queryParam}=${crumb.id}`,
           }),
         }))
         navItems = [...navItems, ...hierarchyBreadcrumbs]
@@ -183,8 +207,12 @@ export function HierarchyListView(props: ListViewClientProps) {
     isInDrawer,
     collectionSlug,
     hierarchyData,
+    hierarchyCollectionConfig,
     collectionLabel,
+    i18n,
+    isScoped,
     parentFieldName,
+    t,
   ])
 
   const parentId = hierarchyData?.parentId ?? null
@@ -218,13 +246,18 @@ export function HierarchyListView(props: ListViewClientProps) {
   }
 
   collections.push({
-    collectionSlug,
+    collectionSlug: hierarchySlug,
     initialData: Object.keys(hierarchyInitialData).length > 0 ? hierarchyInitialData : {},
   })
 
   // Add related collections (for creating documents that reference this hierarchy)
   // Filter by allowedCollections when set
   for (const [slug, relatedConfig] of Object.entries(hierarchyConfig?.relatedCollections || {})) {
+    // A scoped browse only ever creates folders or documents of the collection being browsed.
+    if (isScoped && slug !== scopedCollectionSlug) {
+      continue
+    }
+
     // Skip if not in allowed list (when allowedCollections has restrictions)
     // Empty array means "no restrictions" (folder accepts all types)
     if (
@@ -333,7 +366,7 @@ export function HierarchyListView(props: ListViewClientProps) {
     () =>
       hierarchyData
         ? {
-            [collectionSlug]: { docs: hierarchyData.childrenData.docs },
+            [hierarchySlug]: { docs: hierarchyData.childrenData.docs },
             ...Object.fromEntries(
               Object.entries(hierarchyData.relatedDocumentsByCollection || {}).map(
                 ([slug, related]) => [slug, { docs: related.result.docs }],
@@ -343,7 +376,7 @@ export function HierarchyListView(props: ListViewClientProps) {
         : {},
     // hierarchyData is a server prop: stable across client re-renders, new only on
     // navigation/search — which is precisely when clearing the selection is intended.
-    [collectionSlug, hierarchyData],
+    [hierarchySlug, hierarchyData],
   )
 
   return (
@@ -380,6 +413,7 @@ export function HierarchyListView(props: ListViewClientProps) {
                 </React.Fragment>
               }
               HierarchyIcon={HierarchyIcon}
+              hierarchySlug={hierarchySlug}
               i18n={i18n}
               viewType={viewType}
             />
@@ -393,13 +427,16 @@ export function HierarchyListView(props: ListViewClientProps) {
                   onSearchChange={handleSearchChange}
                   searchQueryParam={searchFromURL}
                 />
-                <TypeFilter
-                  i18n={i18n}
-                  key={`type-filter-${hierarchyData.parent ? hierarchyData.parent.id : 'root'}`}
-                  onChange={handleTypeFilterChange}
-                  options={typeOptions}
-                  selectedValues={selectedTypes}
-                />
+                {/* A scoped browse has exactly one document type, so the filter would be noise. */}
+                {!isScoped && (
+                  <TypeFilter
+                    i18n={i18n}
+                    key={`type-filter-${hierarchyData.parent ? hierarchyData.parent.id : 'root'}`}
+                    onChange={handleTypeFilterChange}
+                    options={typeOptions}
+                    selectedValues={selectedTypes}
+                  />
+                )}
               </div>
               <ViewModeToggle onChange={handleViewModeChange} viewMode={viewMode} />
               {hasCreatePermission && collections.length > 0 && (
@@ -416,10 +453,10 @@ export function HierarchyListView(props: ListViewClientProps) {
               baseFilter={baseFilter}
               childrenData={filteredChildrenData}
               collections={collections}
-              collectionSlug={collectionSlug}
+              collectionSlug={hierarchySlug}
               hasCreatePermission={hasCreatePermission}
               HierarchyIcon={HierarchySmallIcon ?? HierarchyIcon}
-              hierarchyLabel={collectionLabel}
+              hierarchyLabel={getTranslation(hierarchyCollectionConfig?.labels?.plural, i18n)}
               key={`${collectionSlug}-${parentId}-${searchFromURL}-${JSON.stringify(baseFilter)}-${filteredChildrenData?.totalDocs}-${Object.entries(
                 hierarchyData?.relatedDocumentsByCollection || {},
               )
@@ -429,7 +466,7 @@ export function HierarchyListView(props: ListViewClientProps) {
               parentId={parentId}
               relatedGroups={filteredRelatedGroups}
               search={searchFromURL}
-              useAsTitle={collectionConfig?.admin?.useAsTitle || 'id'}
+              useAsTitle={hierarchyCollectionConfig?.admin?.useAsTitle || 'id'}
               viewMode={viewMode}
             />
           </div>
