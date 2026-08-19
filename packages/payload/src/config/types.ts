@@ -323,6 +323,7 @@ export type GraphQLInfo = {
     groupTypes: Record<string, GraphQL.GraphQLObjectType>
     localeInputType?: GraphQL.GraphQLEnumType | GraphQL.GraphQLScalarType
     tabTypes: Record<string, GraphQL.GraphQLObjectType>
+    validationResultType?: GraphQL.GraphQLObjectType
   }
 }
 export type GraphQLExtension = (

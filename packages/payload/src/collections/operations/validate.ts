@@ -133,35 +133,35 @@ async function validateOperationWithScopedRequest<TSlug extends CollectionSlug>(
     req,
   })
 
-  if (collectionConfig.hooks.beforeValidate?.length) {
-    for (const hook of collectionConfig.hooks.beforeValidate) {
-      data =
-        (await hook({
-          collection: collectionConfig,
-          context: req.context,
-          data,
-          operation: 'validate',
-          originalDoc,
-          req,
-        })) || data
-    }
-  }
-
-  if (collectionConfig.hooks.beforeChange?.length) {
-    for (const hook of collectionConfig.hooks.beforeChange) {
-      data =
-        (await hook({
-          collection: collectionConfig,
-          context: req.context,
-          data,
-          operation: 'validate',
-          originalDoc,
-          req,
-        })) || data
-    }
-  }
-
   try {
+    if (collectionConfig.hooks.beforeValidate?.length) {
+      for (const hook of collectionConfig.hooks.beforeValidate) {
+        data =
+          (await hook({
+            collection: collectionConfig,
+            context: req.context,
+            data,
+            operation: 'validate',
+            originalDoc,
+            req,
+          })) || data
+      }
+    }
+
+    if (collectionConfig.hooks.beforeChange?.length) {
+      for (const hook of collectionConfig.hooks.beforeChange) {
+        data =
+          (await hook({
+            collection: collectionConfig,
+            context: req.context,
+            data,
+            operation: 'validate',
+            originalDoc,
+            req,
+          })) || data
+      }
+    }
+
     await beforeChange({
       id,
       collection: collectionConfig,

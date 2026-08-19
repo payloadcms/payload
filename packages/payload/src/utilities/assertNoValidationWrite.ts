@@ -9,6 +9,6 @@ import { APIError } from '../errors/index.js'
  */
 export function assertNoValidationWrite(req?: Partial<PayloadRequest>): void {
   if (req?.operation === 'validate') {
-    throw new APIError('Payload writes are not allowed during validation.', 400)
+    throw new APIError('Payload writes are not allowed during validation.')
   }
 }

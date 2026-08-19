@@ -39,6 +39,7 @@ import {
 } from '../../utilities/getVersionsConfig.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import { resolvePublishAllLocales } from '../../utilities/resolvePublishAllLocales.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
@@ -122,11 +123,11 @@ export const createOperation = async <
 
     let { data } = args
 
-    // Explicit publish-all intent wins; otherwise new non-drafts publish all applicable locales.
-    const publishAllLocales =
-      publishAllLocalesArg === true ||
-      (!draft &&
-        (publishAllLocalesArg ?? (hasLocalizeStatusEnabled(collectionConfig) ? false : true)))
+    const publishAllLocales = resolvePublishAllLocales({
+      draft,
+      hasLocalizeStatusEnabled: hasLocalizeStatusEnabled(collectionConfig),
+      publishAllLocalesArg,
+    })
     const isSavingDraft = Boolean(draft && hasDraftsEnabled(collectionConfig) && !publishAllLocales)
 
     if (isSavingDraft) {

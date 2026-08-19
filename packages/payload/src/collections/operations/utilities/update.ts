@@ -38,6 +38,7 @@ import {
   hasDraftValidationEnabled,
   hasLocalizeStatusEnabled,
 } from '../../../utilities/getVersionsConfig.js'
+import { resolvePublishAllLocales } from '../../../utilities/resolvePublishAllLocales.js'
 import { buildLocalizedPublishData } from '../../../versions/buildSingleLocalePublishData.js'
 import { validateLocalWithDataLocale } from '../local/validate.js'
 export type SharedUpdateDocumentArgs<TSlug extends CollectionSlug> = {
@@ -102,11 +103,12 @@ export const updateDocument = async <
   unpublishAllLocales: unpublishAllLocalesArg,
 }: SharedUpdateDocumentArgs<TSlug>): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
   const password = data?.password
-  const publishAllLocales =
-    publishAllLocalesArg === true ||
-    (!draftArg &&
-      (publishAllLocalesArg ??
-        (hasLocalizeStatusEnabled(collectionConfig) && locale !== 'all' ? false : true)))
+  const publishAllLocales = resolvePublishAllLocales({
+    draft: draftArg,
+    hasLocalizeStatusEnabled: hasLocalizeStatusEnabled(collectionConfig),
+    locale,
+    publishAllLocalesArg,
+  })
   const unpublishAllLocales =
     typeof unpublishAllLocalesArg === 'string'
       ? unpublishAllLocalesArg === 'true'

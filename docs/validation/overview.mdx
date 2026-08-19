@@ -188,6 +188,31 @@ controls come from the HTTP request, not body properties.
 Other errors use Payload's normal REST error handling. REST validation always enforces access
 control.
 
+## GraphQL API
+
+Every collection and global gets a `validate<Name>` / `validateGlobal<Name>` mutation, matching the
+`create`/`update` mutations already generated for it. Omit `id` to validate create candidate data;
+supply `id` to validate a stored document, with the same draft-fallback behavior as the Local and
+REST APIs.
+
+```graphql
+mutation {
+  validatePost(data: { title: "Launch announcement" }) {
+    valid
+    errors {
+      path
+      message
+      locale
+    }
+  }
+}
+```
+
+Unlike the Local and REST APIs, the GraphQL mutations only validate one locale — the request's
+resolved locale, or the `locale` argument when the collection or global has localized fields. There
+is no GraphQL equivalent of `locale: 'all'` or a locale array; validate every locale individually, or
+use the Local or REST API for that. GraphQL validation always enforces access control.
+
 ## Locale semantics
 
 `locale` accepts one locale, a non-empty array, or `'all'`. Duplicate locales are removed. `'all'`
@@ -300,6 +325,7 @@ reported; the server-side publish validation remains authoritative.
 
 ## Current scope
 
-On-demand validation is available through the Local and REST APIs, and powers the Admin UI's default
-Publish button. It does not add a standalone "validate all locales" Admin UI action, a GraphQL
-validation operation, bulk Admin validation, or fallback-locale validation.
+On-demand validation is available through the Local, REST, and GraphQL APIs, and powers the Admin
+UI's default Publish button. GraphQL only validates one locale per call; multi-locale and `'all'`
+validation are Local and REST API only. It does not add a standalone "validate all locales" Admin UI
+action, bulk Admin validation, or fallback-locale validation.

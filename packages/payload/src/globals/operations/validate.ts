@@ -97,37 +97,37 @@ async function validateOperationWithScopedRequest<TSlug extends GlobalSlug>({
     req,
   })
 
-  if (globalConfig.hooks.beforeValidate?.length) {
-    for (const hook of globalConfig.hooks.beforeValidate) {
-      data =
-        (await hook({
-          context: req.context,
-          data,
-          global: globalConfig,
-          operation: 'validate',
-          originalDoc,
-          overrideAccess,
-          req,
-        })) || data
-    }
-  }
-
-  if (globalConfig.hooks.beforeChange?.length) {
-    for (const hook of globalConfig.hooks.beforeChange) {
-      data =
-        (await hook({
-          context: req.context,
-          data,
-          global: globalConfig,
-          operation: 'validate',
-          originalDoc,
-          overrideAccess,
-          req,
-        })) || data
-    }
-  }
-
   try {
+    if (globalConfig.hooks.beforeValidate?.length) {
+      for (const hook of globalConfig.hooks.beforeValidate) {
+        data =
+          (await hook({
+            context: req.context,
+            data,
+            global: globalConfig,
+            operation: 'validate',
+            originalDoc,
+            overrideAccess,
+            req,
+          })) || data
+      }
+    }
+
+    if (globalConfig.hooks.beforeChange?.length) {
+      for (const hook of globalConfig.hooks.beforeChange) {
+        data =
+          (await hook({
+            context: req.context,
+            data,
+            global: globalConfig,
+            operation: 'validate',
+            originalDoc,
+            overrideAccess,
+            req,
+          })) || data
+      }
+    }
+
     await beforeChange({
       collection: null,
       context: req.context,
@@ -159,6 +159,52 @@ async function validateOperationWithScopedRequest<TSlug extends GlobalSlug>({
   }
 }
 
+/**
+ * Loads the global through `where`, then substitutes the newest available draft when requested.
+ * Reports whether a main document existed so the caller can tell "no document yet" apart from
+ * "a document exists but this candidate wasn't derived from it" once a draft substitution runs.
+ */
+async function loadValidationGlobalCandidate({
+  slug,
+  accessResult,
+  draft,
+  globalConfig,
+  overrideAccess,
+  req,
+  where,
+}: {
+  accessResult: AccessResult
+  draft: boolean
+  globalConfig: SanitizedGlobalConfig
+  overrideAccess: boolean
+  req: PayloadRequest
+  slug: string
+  where: undefined | Where
+}): Promise<{ base: JsonObject; hasMain: boolean; source: JsonObject }> {
+  const main = await req.payload.db.findGlobal({
+    slug,
+    locale: req.locale!,
+    req,
+    where,
+  })
+  const hasMain = hasGlobalSource(main)
+  const base = hasMain ? main : { globalType: slug }
+  // Global version lookups are slug-scoped; the shared helper's ID constraint applies to collections.
+  const source =
+    draft && globalConfig.versions?.drafts
+      ? await replaceWithDraftIfAvailable({
+          accessResult,
+          doc: base as JsonObject & TypeWithID,
+          entity: globalConfig,
+          entityType: 'global',
+          overrideAccess,
+          req,
+        })
+      : base
+
+  return { base, hasMain, source }
+}
+
 async function resolveValidationGlobalSource({
   slug,
   accessResult,
@@ -174,53 +220,32 @@ async function resolveValidationGlobalSource({
   req: PayloadRequest
   slug: string
 }): Promise<JsonObject> {
-  const accessWhere = overrideAccess ? undefined : (accessResult as Where)
-  const accessibleMain = await req.payload.db.findGlobal({
+  const accessible = await loadValidationGlobalCandidate({
     slug,
-    locale: req.locale!,
+    accessResult,
+    draft,
+    globalConfig,
+    overrideAccess,
     req,
-    where: accessWhere,
+    where: overrideAccess ? undefined : (accessResult as Where),
   })
-  const hasAccessibleMain = hasGlobalSource(accessibleMain)
-  const accessibleBase = hasAccessibleMain ? accessibleMain : { globalType: slug }
-  // Global version lookups are slug-scoped; the shared helper's ID constraint applies to collections.
-  const accessibleSource =
-    draft && globalConfig.versions?.drafts
-      ? await replaceWithDraftIfAvailable({
-          accessResult,
-          doc: accessibleBase as JsonObject & TypeWithID,
-          entity: globalConfig,
-          entityType: 'global',
-          overrideAccess,
-          req,
-        })
-      : accessibleBase
 
-  if (hasAccessibleMain || accessibleSource !== accessibleBase) {
-    return accessibleSource
+  if (accessible.hasMain || accessible.source !== accessible.base) {
+    return accessible.source
   }
 
   if (hasWhereAccessResult(accessResult)) {
-    const unrestrictedMain = await req.payload.db.findGlobal({
+    const unrestricted = await loadValidationGlobalCandidate({
       slug,
-      locale: req.locale!,
+      accessResult: true,
+      draft,
+      globalConfig,
+      overrideAccess: true,
       req,
+      where: undefined,
     })
-    const hasUnrestrictedMain = hasGlobalSource(unrestrictedMain)
-    const unrestrictedBase = hasUnrestrictedMain ? unrestrictedMain : { globalType: slug }
-    const unrestrictedSource =
-      draft && globalConfig.versions?.drafts
-        ? await replaceWithDraftIfAvailable({
-            accessResult: true,
-            doc: unrestrictedBase as JsonObject & TypeWithID,
-            entity: globalConfig,
-            entityType: 'global',
-            overrideAccess: true,
-            req,
-          })
-        : unrestrictedBase
 
-    if (hasUnrestrictedMain || unrestrictedSource !== unrestrictedBase) {
+    if (unrestricted.hasMain || unrestricted.source !== unrestricted.base) {
       throw new Forbidden(req.t)
     }
   }

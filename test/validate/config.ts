@@ -601,6 +601,17 @@ const validationCollection: CollectionConfig = {
           throw new Error('collection validation hook failure')
         }
 
+        if (req.context.throwValidationErrorHook === true) {
+          throw new ValidationError(
+            {
+              collection: validationCollectionSlug,
+              errors: [{ message: 'Collection hook validation failure', path: 'title' }],
+              req,
+            },
+            req.t,
+          )
+        }
+
         return data
       },
       runWriteAttempt,
@@ -743,6 +754,17 @@ const validationGlobal: GlobalConfig = {
 
         if (req.context.throwValidationHook === true) {
           throw new Error('global validation hook failure')
+        }
+
+        if (req.context.throwValidationErrorHook === true) {
+          throw new ValidationError(
+            {
+              errors: [{ message: 'Global hook validation failure', path: 'title' }],
+              global: validationGlobalSlug,
+              req,
+            },
+            req.t,
+          )
         }
 
         return data

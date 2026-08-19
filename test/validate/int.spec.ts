@@ -53,6 +53,9 @@ let restClient: NextRESTClient
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
+const formatGraphQLID = (id: number | string) =>
+  payload.db.defaultIDType === 'number' ? id : `"${id}"`
+
 describe('validate Local API', () => {
   beforeAll(async () => {
     ;({ payload, restClient } = await initPayloadInt(dirname))
@@ -1147,6 +1150,30 @@ describe('validate Local API', () => {
 
       expect(req.operation).toBe('create')
     })
+
+    it('should return a validation result instead of throwing when a collection hook throws a ValidationError', async () => {
+      const result = await payload.validate({
+        collection: validationCollectionSlug,
+        context: {
+          throwValidationErrorHook: true,
+        },
+        data: {
+          summary: 'candidate summary',
+          title: 'Candidate title',
+        },
+        locale: 'en',
+      })
+
+      expect(result).toEqual({
+        errors: [
+          expect.objectContaining({
+            message: 'Collection hook validation failure',
+            path: 'title',
+          }),
+        ],
+        valid: false,
+      })
+    })
   })
 
   describe('globals', () => {
@@ -1691,6 +1718,26 @@ describe('validate Local API', () => {
 
       expect(req.operation).toBe('create')
     })
+
+    it('should return a validation result instead of throwing when a global hook throws a ValidationError', async () => {
+      const result = await payload.validateGlobal({
+        slug: validationGlobalSlug,
+        context: {
+          throwValidationErrorHook: true,
+        },
+        locale: 'en',
+      })
+
+      expect(result).toEqual({
+        errors: [
+          expect.objectContaining({
+            message: 'Global hook validation failure',
+            path: 'title',
+          }),
+        ],
+        valid: false,
+      })
+    })
   })
 
   describe('REST API', () => {
@@ -2186,6 +2233,119 @@ describe('validate Local API', () => {
       )
       expect(siblingResult.errors).not.toEqual(
         expect.arrayContaining([expect.objectContaining({ locale: 'de', path: 'title' })]),
+      )
+    })
+  })
+
+  describe('GraphQL API', () => {
+    let graphqlUserID: number | string
+
+    beforeAll(async () => {
+      const user = await payload.create({
+        collection: 'users',
+        data: {
+          email: 'validation-graphql-api@example.com',
+          password: 'validation-graphql-api-password',
+        },
+      })
+      graphqlUserID = user.id
+
+      await restClient.login({
+        slug: 'users',
+        credentials: {
+          email: 'validation-graphql-api@example.com',
+          password: 'validation-graphql-api-password',
+        },
+      })
+    })
+
+    afterAll(async () => {
+      await payload.delete({ id: graphqlUserID, collection: 'users' })
+    })
+
+    it('should return a validation result for an invalid collection create candidate without persisting it', async () => {
+      const docsBefore = await payload.count({ collection: writeTargetsSlug })
+
+      const query = `mutation {
+        validateValidationWriteTarget(data: {}) {
+          valid
+          errors {
+            path
+            message
+          }
+        }
+      }`
+
+      const { data } = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+        .then((res) => res.json())
+
+      expect(data.validateValidationWriteTarget.valid).toBe(false)
+      expect(data.validateValidationWriteTarget.errors).toEqual(
+        expect.arrayContaining([expect.objectContaining({ path: 'title' })]),
+      )
+      expect(await payload.count({ collection: writeTargetsSlug })).toEqual(docsBefore)
+    })
+
+    it('should return a valid result for a valid collection create candidate', async () => {
+      const query = `mutation {
+        validateValidationWriteTarget(data: { title: "GraphQL candidate" }) {
+          valid
+          errors {
+            path
+            message
+          }
+        }
+      }`
+
+      const { data } = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+        .then((res) => res.json())
+
+      expect(data.validateValidationWriteTarget).toEqual({ errors: [], valid: true })
+    })
+
+    it('should validate a stored collection document by id without persisting the candidate', async () => {
+      const target = await createWriteTarget()
+
+      const query = `mutation {
+        validateValidationWriteTarget(id: ${formatGraphQLID(target.id)}, data: { title: "" }) {
+          valid
+          errors {
+            path
+            message
+          }
+        }
+      }`
+
+      const { data } = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+        .then((res) => res.json())
+
+      expect(data.validateValidationWriteTarget.valid).toBe(false)
+      await expect(
+        payload.findByID({ id: target.id, collection: writeTargetsSlug }),
+      ).resolves.toMatchObject({ title: 'stored target' })
+    })
+
+    it('should return a validation result for a global document', async () => {
+      const query = `mutation {
+        validateValidationWriteTargetSetting(data: { title: "" }) {
+          valid
+          errors {
+            path
+            message
+          }
+        }
+      }`
+
+      const { data } = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+        .then((res) => res.json())
+
+      expect(data.validateValidationWriteTargetSetting.valid).toBe(false)
+      expect(data.validateValidationWriteTargetSetting.errors).toEqual(
+        expect.arrayContaining([expect.objectContaining({ path: 'title' })]),
       )
     })
   })
