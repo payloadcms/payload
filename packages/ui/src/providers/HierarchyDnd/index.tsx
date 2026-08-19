@@ -11,6 +11,7 @@ import {
   useSensor,
   useSensors,
 } from '@dnd-kit/core'
+import { snapCenterToCursor } from '@dnd-kit/modifiers'
 import React, { createContext, use, useCallback, useMemo, useState } from 'react'
 
 import type { HierarchyDragData, HierarchyDropData } from './types.js'
@@ -25,6 +26,15 @@ import { canDropItems } from './types.js'
 import './index.css'
 
 const baseClass = 'hierarchy-dnd'
+
+/**
+ * The overlay would otherwise be positioned against the dragged card's own rect, which puts a 40px
+ * stack at the top-left corner of a ~216px card - so it only sits under the cursor if you happened to
+ * grab that corner. Snapping the stack's centre to the pointer keeps it with the cursor wherever the
+ * card was picked up. Purely cosmetic: `pointerWithin` collision is computed from the pointer, not
+ * from the overlay.
+ */
+const OVERLAY_MODIFIERS = [snapCenterToCursor]
 
 /** How many thumbnails the stack shows; the count pill carries the rest. */
 const MAX_PREVIEW_CARDS = 3
@@ -143,7 +153,7 @@ export const HierarchyDndProvider: React.FC<{ children: React.ReactNode }> = ({ 
         sensors={sensors}
       >
         {children}
-        <DragOverlay dropAnimation={null}>
+        <DragOverlay dropAnimation={null} modifiers={OVERLAY_MODIFIERS}>
           {activeDrag ? (
             <div className={`${baseClass}__preview`}>
               {previewCards.map((card, index) => (
