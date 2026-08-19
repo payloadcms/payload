@@ -2,6 +2,7 @@ import type { FlattenedField } from '../fields/config/types.js'
 import type { Payload, Where } from '../types/index.js'
 
 import { hasManyRelationshipOperators } from '../types/constants.js'
+import { isNestedRelationshipQuery } from './isNestedRelationshipQuery.js'
 
 /**
  * Replaces virtual field names in a `where` query with the database paths they point to.
@@ -115,8 +116,8 @@ function sanitizeNestedHasManyRelationshipQueries({
   for (const operator of hasManyRelationshipOperators) {
     const nestedWhere = (value as Record<string, unknown>)[operator]
 
-    if (nestedWhere && typeof nestedWhere === 'object' && !Array.isArray(nestedWhere)) {
-      sanitizeWhereQuery({ fields: relatedFields, payload, where: nestedWhere as Where })
+    if (isNestedRelationshipQuery(nestedWhere)) {
+      sanitizeWhereQuery({ fields: relatedFields, payload, where: nestedWhere })
     }
   }
 }

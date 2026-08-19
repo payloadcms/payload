@@ -5,12 +5,15 @@ import type {
   Operator,
   PathToQuery,
   Payload,
-  Where,
 } from 'payload'
 
 import { Types } from 'mongoose'
 import { APIError, escapeRegExp, getFieldByPath, getLocalizedPaths } from 'payload'
-import { hasManyRelationshipOperatorSet, validOperatorSet } from 'payload/shared'
+import {
+  hasManyRelationshipOperatorSet,
+  isNestedRelationshipQuery,
+  validOperatorSet,
+} from 'payload/shared'
 
 import type { MongooseAdapter } from '../index.js'
 import type { OperatorMapKey } from './operatorMap.js'
@@ -110,9 +113,7 @@ export async function buildSearchParam({
     (field.type === 'relationship' || field.type === 'upload') &&
     field.hasMany &&
     typeof field.relationTo === 'string' &&
-    val !== null &&
-    typeof val === 'object' &&
-    !Array.isArray(val)
+    isNestedRelationshipQuery(val)
   ) {
     return buildHasManyRelationshipSearchParam({
       field,
@@ -471,9 +472,7 @@ async function buildHasManyRelationshipSearchParam({
     (field.type !== 'relationship' && field.type !== 'upload') ||
     !field.hasMany ||
     typeof field.relationTo !== 'string' ||
-    nestedWhere === null ||
-    typeof nestedWhere !== 'object' ||
-    Array.isArray(nestedWhere)
+    !isNestedRelationshipQuery(nestedWhere)
   ) {
     return undefined
   }
@@ -490,7 +489,7 @@ async function buildHasManyRelationshipSearchParam({
   const matchingRelatedDocumentsQuery = await RelatedModel.buildQuery({
     locale: pathLocale ?? locale,
     payload,
-    where: nestedWhere as Where,
+    where: nestedWhere,
   })
 
   const findRelatedDocumentIDs = async (query: Record<string, unknown>) =>

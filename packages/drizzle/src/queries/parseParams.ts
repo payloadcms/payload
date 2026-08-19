@@ -17,7 +17,11 @@ import {
 } from 'drizzle-orm'
 import { PgUUID } from 'drizzle-orm/pg-core'
 import { APIError, QueryError } from 'payload'
-import { hasManyRelationshipOperatorSet, validOperatorSet } from 'payload/shared'
+import {
+  hasManyRelationshipOperatorSet,
+  isNestedRelationshipQuery,
+  validOperatorSet,
+} from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter, GenericColumn } from '../types.js'
@@ -108,9 +112,7 @@ export function parseParams({
 
                 if (
                   hasManyRelationshipOperatorSet.has(operator as HasManyRelationshipOperator) &&
-                  val !== null &&
-                  typeof val === 'object' &&
-                  !Array.isArray(val) &&
+                  isNestedRelationshipQuery(val) &&
                   !isRawConstraint(val)
                 ) {
                   const relationshipPath = resolveRelationshipPath({
@@ -135,7 +137,7 @@ export function parseParams({
                         parentIsLocalized,
                         relationOrPath,
                         tableName,
-                        where: val as Where,
+                        where: val,
                       }),
                     )
                     continue

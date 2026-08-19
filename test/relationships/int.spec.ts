@@ -1,6 +1,7 @@
 import type { Payload, PayloadRequest } from 'payload'
 
 import { randomBytes, randomUUID } from 'crypto'
+import { Types } from 'mongoose'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import { afterAll, beforeAll, beforeEach, describe, expect } from 'vitest'
@@ -939,6 +940,30 @@ describe('Relationships', () => {
 
           expect(query1.totalDocs).toStrictEqual(1)
           expect(query2.totalDocs).toStrictEqual(2)
+        })
+
+        mongoIt('should treat an ObjectId as a relationship ID', async () => {
+          const movie = await payload.create({ collection: 'movies', data: {} })
+
+          const director = await payload.create({
+            collection: 'directors',
+            data: {
+              movies: [movie.id],
+            },
+          })
+
+          const { docs } = await payload.find({
+            collection: 'directors',
+            depth: 0,
+            where: {
+              movies: {
+                contains: new Types.ObjectId(String(movie.id)),
+              },
+            },
+          })
+
+          expect(docs).toHaveLength(1)
+          expect(docs[0]?.id).toBe(director.id)
         })
 
         // all operator is not supported in Postgres yet for any fields

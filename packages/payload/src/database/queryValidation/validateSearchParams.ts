@@ -4,7 +4,6 @@ import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
 import type {
   HasManyRelationshipOperator,
   PayloadRequest,
-  Where,
   WhereField,
 } from '../../types/index.js'
 import type { EntityPolicies, PathToQuery } from './types.js'
@@ -14,6 +13,7 @@ import { hasManyRelationshipOperatorSet, SAFE_FIELD_PATH_REGEX } from '../../typ
 import { getEntityPermissions } from '../../utilities/getEntityPermissions/getEntityPermissions.js'
 import { isolateObjectProperty } from '../../utilities/isolateObjectProperty.js'
 import { getLocalizedPaths } from '../getLocalizedPaths.js'
+import { isNestedRelationshipQuery } from '../isNestedRelationshipQuery.js'
 import { validateQueryPaths } from './validateQueryPaths.js'
 
 type Args = {
@@ -91,7 +91,7 @@ export async function validateSearchParam({
   const promises: Promise<void>[] = []
 
   const relationshipField = paths.length === 1 ? paths[0]?.field : undefined
-  const hasNestedWhere = val !== null && typeof val === 'object' && !Array.isArray(val)
+  const hasNestedWhere = isNestedRelationshipQuery(val)
   const relatedCollectionSlug =
     relationshipField &&
     (relationshipField.type === 'relationship' || relationshipField.type === 'upload') &&
@@ -113,7 +113,7 @@ export async function validateSearchParam({
         overrideAccess,
         policies,
         req,
-        where: val as Where,
+        where: val,
       }),
     )
   }
