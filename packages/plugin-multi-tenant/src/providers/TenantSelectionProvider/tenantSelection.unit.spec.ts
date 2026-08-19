@@ -1,13 +1,15 @@
-import { describe, it, expect } from 'vitest'
+import { describe, expect, it } from 'vitest'
+
+type TenantUser = { id: string; role: string }
 
 describe('Multi-Tenant Single-Tenant Auto-Select Protection (#17833)', () => {
   it('preserves undefined initialValue for users with global access (userHasAccessToAllTenants)', () => {
     const tenantOptions = [{ label: 'Tenant 1', value: 'tenant-1' }]
-    const user = { id: 'admin-1', role: 'super-admin' }
-    const userHasAccessToAllTenants = (u: any) => u.role === 'super-admin'
+    const user: TenantUser = { id: 'admin-1', role: 'super-admin' }
+    const userHasAccessToAllTenants = (currentUser: TenantUser) =>
+      currentUser.role === 'super-admin'
 
-    const hasGlobalAccess =
-      typeof userHasAccessToAllTenants === 'function' ? userHasAccessToAllTenants(user) : false
+    const hasGlobalAccess = userHasAccessToAllTenants(user)
 
     const initialValue = hasGlobalAccess
       ? undefined
@@ -20,11 +22,11 @@ describe('Multi-Tenant Single-Tenant Auto-Select Protection (#17833)', () => {
 
   it('auto-selects the single tenant when the user does not have global access', () => {
     const tenantOptions = [{ label: 'Tenant 1', value: 'tenant-1' }]
-    const user = { id: 'user-1', role: 'member' }
-    const userHasAccessToAllTenants = (u: any) => u.role === 'super-admin'
+    const user: TenantUser = { id: 'user-1', role: 'member' }
+    const userHasAccessToAllTenants = (currentUser: TenantUser) =>
+      currentUser.role === 'super-admin'
 
-    const hasGlobalAccess =
-      typeof userHasAccessToAllTenants === 'function' ? userHasAccessToAllTenants(user) : false
+    const hasGlobalAccess = userHasAccessToAllTenants(user)
 
     const initialValue = hasGlobalAccess
       ? undefined
@@ -40,7 +42,7 @@ describe('Multi-Tenant Single-Tenant Auto-Select Protection (#17833)', () => {
       { label: 'Tenant 1', value: 'tenant-1' },
       { label: 'Tenant 2', value: 'tenant-2' },
     ]
-    const user = { id: 'user-1', role: 'member' }
+    const user: TenantUser = { id: 'user-1', role: 'member' }
     const userHasAccessToAllTenants = () => false
 
     const hasGlobalAccess = userHasAccessToAllTenants()
