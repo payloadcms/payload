@@ -613,8 +613,6 @@ export const svTranslations: DefaultTranslationsObject = {
     width: 'Bredd',
   },
   validation: {
-    documentInvalid: 'Åtgärda följande problem.',
-    documentValid: 'Alla valda språk är giltiga.',
     emailAddress: 'Vänligen ange en giltig e-postadress.',
     enterNumber: 'Vänligen skriv in ett giltigt nummer.',
     fieldHasNo: 'Detta fält har ingen {{label}}',
@@ -631,7 +629,6 @@ export const svTranslations: DefaultTranslationsObject = {
     longitudeOutOfBounds: 'Longituden måste vara mellan -180 och 180.',
     notValidDate: '"{{value}}" är inte ett giltigt datum.',
     required: 'Detta fält är obligatoriskt.',
-    requiredLocale: 'Obligatorisk',
     requiresAtLeast: 'Detta fält kräver minst {{count}} {{label}}.',
     requiresNoMoreThan: 'Detta fält kräver inte mer än {{count}} {{label}}.',
     requiresTwoNumbers: 'Detta fält kräver två nummer.',
@@ -640,7 +637,6 @@ export const svTranslations: DefaultTranslationsObject = {
     trueOrFalse: 'Detta fält kan bara vara lika med sant eller falskt.',
     username:
       'Var god ange ett giltigt användarnamn. Kan innehålla bokstäver, siffror, bindestreck, punkter och understreck.',
-    validationResults: 'Valideringsresultat',
     validUploadID: 'Det här fältet är inte ett giltigt uppladdnings-ID',
   },
   version: {

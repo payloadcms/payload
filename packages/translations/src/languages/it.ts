@@ -617,8 +617,6 @@ export const itTranslations: DefaultTranslationsObject = {
     width: 'Larghezza',
   },
   validation: {
-    documentInvalid: 'Correggi i seguenti problemi.',
-    documentValid: 'Tutte le lingue selezionate sono valide.',
     emailAddress: 'Si prega di inserire un indirizzo email valido.',
     enterNumber: 'Si prega di inserire un numero valido.',
     fieldHasNo: 'Questo campo non ha {{label}}',
@@ -636,7 +634,6 @@ export const itTranslations: DefaultTranslationsObject = {
     longitudeOutOfBounds: 'La longitudine deve essere compresa tra -180 e 180.',
     notValidDate: '"{{value}}" non è una data valida.',
     required: 'Questo campo è obbligatorio.',
-    requiredLocale: 'Obbligatorio',
     requiresAtLeast: 'Questo campo richiede almeno {{count}} {{label}}.',
     requiresNoMoreThan: 'Questo campo richiede non più di {{count}} {{label}}.',
     requiresTwoNumbers: 'Questo campo richiede due numeri.',
@@ -646,7 +643,6 @@ export const itTranslations: DefaultTranslationsObject = {
     trueOrFalse: "Questo campo può essere solo uguale a 'true' o 'false'.",
     username:
       'Inserisci un nome utente valido. Può contenere lettere, numeri, trattini, punti e underscore.',
-    validationResults: 'Risultati della convalida',
     validUploadID: "'Questo campo non è un ID di Upload valido.'",
   },
   version: {

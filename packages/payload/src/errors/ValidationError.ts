@@ -52,30 +52,34 @@ export class ValidationError extends APIError<{
     // delete to avoid logging the whole req
     delete results['req']
 
+    const spansMultipleLocales = new Set(results.errors.map((f) => f.locale)).size > 1
+
     super(
       `${message} ${results.errors
         .map((f) => {
+          const localePrefix = spansMultipleLocales && f.locale ? `[${f.locale}] ` : ''
+
           if (f.label) {
             if (typeof f.label === 'function') {
               if (!req || !req.i18n || !req.t) {
-                return f.path
+                return `${localePrefix}${f.path}`
               }
 
-              return f.label({ i18n: req.i18n, t: req.t })
+              return `${localePrefix}${f.label({ i18n: req.i18n, t: req.t })}`
             }
 
             if (typeof f.label === 'object') {
               if (req?.i18n?.language) {
-                return f.label[req.i18n.language]
+                return `${localePrefix}${f.label[req.i18n.language]}`
               }
 
-              return f.label[Object.keys(f.label)[0]!]
+              return `${localePrefix}${f.label[Object.keys(f.label)[0]!]}`
             }
 
-            return f.label
+            return `${localePrefix}${f.label}`
           }
 
-          return f.path
+          return `${localePrefix}${f.path}`
         })
         .join(', ')}`,
       httpStatus.BAD_REQUEST,

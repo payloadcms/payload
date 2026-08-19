@@ -7,24 +7,30 @@ import { deepCopyObjectSimple } from './deepCopyObject.js'
 
 type Args = {
   configBlockReferences: SanitizedConfig['blocks']
+  /**
+   * Whether `docWithLocales` stores each localized field as a locale-code-keyed object (the
+   * stored document representation, and the internal publish-all-locales candidate). Pass
+   * `false` for a flat, single-locale candidate, such as the data passed to `payload.validate()`.
+   * @default true
+   */
+  dataIsLocaleKeyed?: boolean
   docWithLocales: JsonObject
   fields: Field[]
   locale: string
-  localeCodes?: string[]
   parentIsLocalized?: boolean
 }
 
 /**
- * Returns a copy of stored locale-keyed data flattened to one locale and converts field storage
+ * Returns a copy of locale-keyed data flattened to one locale and converts field storage
  * representations needed by validators, without running after-read hooks, access control,
  * sanitization, or population.
  */
 export function flattenDataByLocale({
   configBlockReferences,
+  dataIsLocaleKeyed = true,
   docWithLocales,
   fields,
   locale,
-  localeCodes,
   parentIsLocalized = false,
 }: Args): JsonObject {
   const result = deepCopyObjectSimple(docWithLocales)
@@ -32,9 +38,9 @@ export function flattenDataByLocale({
   flattenFields({
     configBlockReferences,
     data: result,
+    dataIsLocaleKeyed,
     fields,
     locale,
-    localeCodes,
     parentIsLocalized,
   })
 
@@ -44,18 +50,18 @@ export function flattenDataByLocale({
 type FlattenFieldsArgs = {
   configBlockReferences: SanitizedConfig['blocks']
   data: JsonObject
+  dataIsLocaleKeyed: boolean
   fields: Field[]
   locale: string
-  localeCodes?: string[]
   parentIsLocalized: boolean
 }
 
 function flattenFields({
   configBlockReferences,
   data,
+  dataIsLocaleKeyed,
   fields,
   locale,
-  localeCodes,
   parentIsLocalized,
 }: FlattenFieldsArgs): void {
   for (const field of fields) {
@@ -64,8 +70,8 @@ function flattenFields({
 
       if (isLocalized) {
         data[field.name] = getLocaleValue({
+          dataIsLocaleKeyed,
           locale,
-          localeCodes,
           value: data[field.name],
         })
       }
@@ -86,9 +92,9 @@ function flattenFields({
                 flattenFields({
                   configBlockReferences,
                   data: row,
+                  dataIsLocaleKeyed,
                   fields: field.fields,
                   locale,
-                  localeCodes,
                   parentIsLocalized: nestedParentIsLocalized,
                 })
               }
@@ -117,9 +123,9 @@ function flattenFields({
                 flattenFields({
                   configBlockReferences,
                   data: row,
+                  dataIsLocaleKeyed,
                   fields: block.fields,
                   locale,
-                  localeCodes,
                   parentIsLocalized: nestedParentIsLocalized,
                 })
               }
@@ -133,9 +139,9 @@ function flattenFields({
             flattenFields({
               configBlockReferences,
               data: fieldValue,
+              dataIsLocaleKeyed,
               fields: field.fields,
               locale,
-              localeCodes,
               parentIsLocalized: nestedParentIsLocalized,
             })
           }
@@ -153,9 +159,9 @@ function flattenFields({
         flattenFields({
           configBlockReferences,
           data,
+          dataIsLocaleKeyed,
           fields: field.fields,
           locale,
-          localeCodes,
           parentIsLocalized,
         })
         break
@@ -167,8 +173,8 @@ function flattenFields({
 
             if (isLocalized) {
               data[tab.name] = getLocaleValue({
+                dataIsLocaleKeyed,
                 locale,
-                localeCodes,
                 value: data[tab.name],
               })
             }
@@ -179,9 +185,9 @@ function flattenFields({
               flattenFields({
                 configBlockReferences,
                 data: tabData,
+                dataIsLocaleKeyed,
                 fields: tab.fields,
                 locale,
-                localeCodes,
                 parentIsLocalized: parentIsLocalized || Boolean(tab.localized),
               })
             }
@@ -189,9 +195,9 @@ function flattenFields({
             flattenFields({
               configBlockReferences,
               data,
+              dataIsLocaleKeyed,
               fields: tab.fields,
               locale,
-              localeCodes,
               parentIsLocalized,
             })
           }
@@ -225,20 +231,16 @@ function transformStoredFieldValue({ field, value }: { field: Field; value: unkn
 }
 
 function getLocaleValue({
+  dataIsLocaleKeyed,
   locale,
-  localeCodes,
   value,
 }: {
+  dataIsLocaleKeyed: boolean
   locale: string
-  localeCodes?: string[]
   value: unknown
 }): unknown {
-  if (value && typeof value === 'object' && !Array.isArray(value)) {
-    const objectValue = value as Record<string, unknown>
-    const isLocaleMap =
-      !localeCodes || Object.keys(objectValue).some((key) => localeCodes.includes(key))
-
-    return isLocaleMap ? objectValue[locale] : value
+  if (dataIsLocaleKeyed && value && typeof value === 'object' && !Array.isArray(value)) {
+    return (value as Record<string, unknown>)[locale]
   }
 
   return value

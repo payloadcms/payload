@@ -624,8 +624,6 @@ export const deTranslations: DefaultTranslationsObject = {
     width: 'Breite',
   },
   validation: {
-    documentInvalid: 'Beheben Sie die folgenden Probleme.',
-    documentValid: 'Alle ausgewählten Locales sind gültig.',
     emailAddress: 'Bitte gib eine korrekte E-Mail-Adresse an.',
     enterNumber: 'Bitte gib eine gültige Nummer an.',
     fieldHasNo: 'Dieses Feld hat kein {{label}}',
@@ -642,7 +640,6 @@ export const deTranslations: DefaultTranslationsObject = {
     longitudeOutOfBounds: 'Die Längengrad muss zwischen -180 und 180 liegen.',
     notValidDate: '"{{value}}" ist kein gültiges Datum.',
     required: 'Pflichtfeld',
-    requiredLocale: 'Erforderlich',
     requiresAtLeast: 'Dieses Feld muss mindestens {{count}} {{label}} enthalten.',
     requiresNoMoreThan: 'Dieses Feld darf nicht mehr als {{count}} {{label}} enthalten.',
     requiresTwoNumbers: 'Dieses Feld muss zwei Zahlen enthalten.',
@@ -652,7 +649,6 @@ export const deTranslations: DefaultTranslationsObject = {
     trueOrFalse: 'Dieses Feld kann nur wahr oder falsch sein.',
     username:
       'Bitte gib einen gültigen Benutzernamen ein. Dieser kann Buchstaben, Zahlen, Bindestriche, Punkte und Unterstriche enthalten.',
-    validationResults: 'Validierungsergebnisse',
     validUploadID: 'Dieses Feld enthält keine gültige Upload-ID.',
   },
   version: {

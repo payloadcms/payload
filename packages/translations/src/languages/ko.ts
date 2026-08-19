@@ -607,8 +607,6 @@ export const koTranslations: DefaultTranslationsObject = {
     width: '너비',
   },
   validation: {
-    documentInvalid: '다음 문제를 수정하십시오.',
-    documentValid: '선택된 모든 Locale은 유효합니다.',
     emailAddress: '유효한 이메일 주소를 입력하세요.',
     enterNumber: '유효한 숫자를 입력하세요.',
     fieldHasNo: '이 입력란에는 {{label}}이(가) 없습니다.',
@@ -625,7 +623,6 @@ export const koTranslations: DefaultTranslationsObject = {
     longitudeOutOfBounds: '경도는 -180에서 180 사이여야 합니다.',
     notValidDate: '"{{value}}"은(는) 유효한 날짜가 아닙니다.',
     required: '이 입력란은 필수입니다.',
-    requiredLocale: '필수',
     requiresAtLeast: '이 입력란운 최소한 {{count}} {{label}}이 필요합니다.',
     requiresNoMoreThan: '이 입력란은 최대 {{count}} {{label}} 이하이어야 합니다.',
     requiresTwoNumbers: '이 입력란은 두 개의 숫자가 필요합니다.',
@@ -634,7 +631,6 @@ export const koTranslations: DefaultTranslationsObject = {
     trueOrFalse: '이 입력란은 true 또는 false만 가능합니다.',
     username:
       '유효한 사용자 이름을 입력해 주세요. 글자, 숫자, 하이픈, 마침표, 및 밑줄을 사용할 수 있습니다.',
-    validationResults: '검증 결과',
     validUploadID: '이 입력란은 유효한 업로드 ID가 아닙니다.',
   },
   version: {

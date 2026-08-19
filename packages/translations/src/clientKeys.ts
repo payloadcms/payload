@@ -515,8 +515,6 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'upload:noFile',
   'upload:download',
 
-  'validation:documentInvalid',
-  'validation:documentValid',
   'validation:emailAddress',
   'validation:enterNumber',
   'validation:fieldHasNo',
@@ -533,7 +531,6 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'validation:longerThanMin',
   'validation:notValidDate',
   'validation:required',
-  'validation:requiredLocale',
   'validation:requiresAtLeast',
   'validation:requiresNoMoreThan',
   'validation:requiresTwoNumbers',
@@ -541,7 +538,6 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'validation:trueOrFalse',
   'validation:timezoneRequired',
   'validation:username',
-  'validation:validationResults',
   'validation:validUploadID',
 
   'version:aboutToPublishSelection',

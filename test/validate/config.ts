@@ -6,7 +6,7 @@ import type {
 } from 'payload'
 
 import path from 'path'
-import { saveVersion, ValidationError } from 'payload'
+import { logoutOperation, refreshOperation, saveVersion, ValidationError } from 'payload'
 import { fileURLToPath } from 'url'
 
 // Direct internal import intentionally exercises the upload write guard.
@@ -228,11 +228,34 @@ const runWriteAttempt: CollectionBeforeChangeHook = async ({ data, operation, re
       })
       break
 
+    case 'logout':
+      await logoutOperation({
+        collection: req.payload.collections['users']!,
+        req,
+      })
+      break
+
+    case 'refresh':
+      await refreshOperation({
+        collection: req.payload.collections['users']!,
+        req,
+      })
+      break
+
+    case 'resetPassword':
+      await req.payload.resetPassword({
+        collection: 'users',
+        data: { password: 'must-not-be-set', token: 'any-token' },
+        overrideAccess: true,
+        req,
+      })
+      break
+
     case 'restoreGlobalVersion':
       await req.payload.restoreGlobalVersion({
         id: targetID!,
-        req,
         slug: validationWriteTargetGlobalSlug,
+        req,
       })
       break
 
@@ -296,6 +319,14 @@ const runWriteAttempt: CollectionBeforeChangeHook = async ({ data, operation, re
       )
       break
     }
+
+    case 'verifyEmail':
+      await req.payload.verifyEmail({
+        collection: 'users',
+        req,
+        token: 'any-token',
+      })
+      break
 
     case 'version':
       await saveVersion({
@@ -430,12 +461,16 @@ const validationCollection: CollectionConfig = {
         'create',
         'delete',
         'deleteMany',
+        'logout',
+        'refresh',
+        'resetPassword',
         'restoreGlobalVersion',
         'restoreVersion',
         'update',
         'updateGlobal',
         'updateMany',
         'upload',
+        'verifyEmail',
         'version',
       ],
     },
@@ -1076,21 +1111,9 @@ const publishCollection: CollectionConfig = {
     },
   ],
   hooks: {
-    beforeChange: [
-      ({ data, operation, req }) => {
-        if (req.context.promoteDraftToPublished === true && operation !== 'validate') {
-          return {
-            ...data,
-            _status: 'published',
-          }
-        }
-
-        return data
-      },
-    ],
     beforeValidate: [
-      ({ data, operation, req }) => {
-        if (operation === 'validate' && data?.title === 'throw scheduled validation error') {
+      ({ data, req }) => {
+        if (data?._status === 'published' && data?.title === 'throw scheduled validation error') {
           throw new ValidationError(
             {
               errors: [
@@ -1106,7 +1129,7 @@ const publishCollection: CollectionConfig = {
           )
         }
 
-        if (operation === 'validate' && data?.title === 'throw transient scheduled error') {
+        if (data?._status === 'published' && data?.title === 'throw transient scheduled error') {
           throw new Error('transient scheduled validation error')
         }
 
@@ -1142,20 +1165,6 @@ const publishGlobal: GlobalConfig = {
       required: true,
     },
   ],
-  hooks: {
-    beforeChange: [
-      ({ data, operation, req }) => {
-        if (req.context.promoteDraftToPublished === true && operation !== 'validate') {
-          return {
-            ...data,
-            _status: 'published',
-          }
-        }
-
-        return data
-      },
-    ],
-  },
   versions: {
     drafts: {
       schedulePublish: true,
@@ -1346,10 +1355,10 @@ export default buildConfigWithDefaults({
       {
         code: 'es',
         label: 'Spanish',
-        required: true,
       },
       {
         code: 'de',
+        fallbackLocale: 'en',
         label: 'German',
       },
       {

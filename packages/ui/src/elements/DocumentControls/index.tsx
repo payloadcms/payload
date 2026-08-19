@@ -23,7 +23,6 @@ import { useElementHeightVariable } from '../../hooks/useElementHeightVariable.j
 import { MoreIcon } from '../../icons/More/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
-import { DocumentValidationProvider } from '../../providers/DocumentValidation/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useLivePreviewContext } from '../../providers/LivePreview/context.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -95,7 +94,7 @@ type DocumentControlsProps = {
   readonly variant?: 'default' | 'drawerHeaderActions'
 }
 
-const DocumentControlsContent: React.FC<DocumentControlsProps> = (props) => {
+export const DocumentControls: React.FC<DocumentControlsProps> = (props) => {
   const {
     id,
     slug,
@@ -462,9 +461,3 @@ const DocumentControlsContent: React.FC<DocumentControlsProps> = (props) => {
     </div>
   )
 }
-
-export const DocumentControls: React.FC<DocumentControlsProps> = (props) => (
-  <DocumentValidationProvider>
-    <DocumentControlsContent {...props} />
-  </DocumentValidationProvider>
-)

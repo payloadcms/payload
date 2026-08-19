@@ -609,8 +609,6 @@ export const lvTranslations: DefaultTranslationsObject = {
     width: 'Platums',
   },
   validation: {
-    documentInvalid: 'Izlabojiet šādas problēmas.',
-    documentValid: 'Visas atlasītās lokalizācijas ir derīgas.',
     emailAddress: 'Lūdzu, ievadiet derīgu e-pasta adresi.',
     enterNumber: 'Lūdzu, ievadiet derīgu numuru.',
     fieldHasNo: 'Šim laukam nav {{label}}',
@@ -627,7 +625,6 @@ export const lvTranslations: DefaultTranslationsObject = {
     longitudeOutOfBounds: 'Garuma līnijai jābūt starp -180 un 180.',
     notValidDate: '"{{value}}" nav derīgs datums.',
     required: 'Šis lauks ir obligāts.',
-    requiredLocale: 'Obligāts',
     requiresAtLeast: 'Šim laukam nepieciešami vismaz {{count}} {{label}}.',
     requiresNoMoreThan: 'Šim laukam nepieciešams ne vairāk kā {{count}} {{label}}.',
     requiresTwoNumbers: 'Šim laukam nepieciešami divi skaitļi.',
@@ -636,7 +633,6 @@ export const lvTranslations: DefaultTranslationsObject = {
     trueOrFalse: 'Šis lauks var būt tikai "true" vai "false".',
     username:
       'Lūdzu, ievadiet derīgu lietotājvārdu. Drīkst saturēt burtus, ciparus, defises, punktus un pasvītras.',
-    validationResults: 'Validācijas rezultāti',
     validUploadID: 'Šis lauks nav derīgs augšupielādes ID.',
   },
   version: {

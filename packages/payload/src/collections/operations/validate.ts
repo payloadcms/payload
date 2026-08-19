@@ -20,6 +20,12 @@ import { replaceWithDraftIfAvailable } from '../../versions/drafts/replaceWithDr
 export type Arguments<TSlug extends CollectionSlug> = {
   collection: Collection
   data?: DeepPartial<RequiredDataFromCollectionSlug<TSlug>>
+  /**
+   * Whether `data` stores each localized field as a locale-code-keyed object, as the internal
+   * publish-all-locales candidate does, rather than a flat, single-locale candidate.
+   * @default false
+   */
+  dataIsLocaleKeyed?: boolean
   draft: boolean
   id?: number | string
   overrideAccess: boolean
@@ -44,6 +50,7 @@ async function validateOperationWithScopedRequest<TSlug extends CollectionSlug>(
   id,
   collection,
   data: incomingData,
+  dataIsLocaleKeyed = false,
   draft,
   overrideAccess,
   req,
@@ -108,12 +115,10 @@ async function validateOperationWithScopedRequest<TSlug extends CollectionSlug>(
 
   let data = flattenDataByLocale({
     configBlockReferences: req.payload.config.blocks,
+    dataIsLocaleKeyed,
     docWithLocales: deepCopyObjectSimple(incomingData ?? {}) as JsonObject,
     fields: collectionConfig.fields,
     locale: req.locale!,
-    localeCodes: req.payload.config.localization
-      ? req.payload.config.localization.localeCodes
-      : undefined,
   })
 
   data = await beforeValidate({

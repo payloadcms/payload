@@ -285,7 +285,6 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
       ).locales.map((locale) => ({
         code: locale,
         label: locale,
-        required: false,
         rtl: false,
         toString: () => locale,
       }))
@@ -297,7 +296,6 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
         config.localization as LocalizationConfigWithLabels
       ).locales.map((locale) => ({
         ...locale,
-        required: locale.required ?? false,
         toString: () => locale.code,
       }))
     }

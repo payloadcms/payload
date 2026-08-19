@@ -46,33 +46,18 @@ test.describe('Admin document validation', () => {
     createdIDs.length = 0
   })
 
-  test('should block publish-all for an invalid optional locale but allow normal publish', async () => {
+  test('should report a blocked publish-all in a toast, but allow a normal publish of the current locale', async () => {
     const id = await createDraft({ spanishTitle: 'Título en español' })
 
     await openDraft(id)
     await page.locator('#action-save-popup').click()
     await page.locator('#publish-all-locales').click()
 
-    await expect(page.locator('.validation-results').getByRole('alert')).toBeVisible()
-    await expect(page.locator('.validation-results')).toContainText('German')
+    await expect(page.locator('.payload-toast-container')).toContainText('[de] Title')
 
-    await page.locator('.validation-results .drawer__header__close').click()
     await page.locator('#action-save').click()
 
     await expect(page.locator('.payload-toast-container')).toContainText('successfully')
-    await expect(page.locator('.validation-results')).toHaveCount(0)
-  })
-
-  test('should block normal publish when a required locale is invalid', async () => {
-    const id = await createDraft({})
-
-    await openDraft(id)
-    await page.locator('#action-save').click()
-
-    const result = page.locator('.validation-results')
-    await expect(result.getByRole('alert')).toBeVisible()
-    await expect(result).toContainText('Spanish')
-    await expect(result).toContainText('Required')
   })
 
   async function createDraft({

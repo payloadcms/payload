@@ -616,8 +616,6 @@ export const ruTranslations: DefaultTranslationsObject = {
     width: 'Ширина',
   },
   validation: {
-    documentInvalid: 'Исправьте следующие проблемы.',
-    documentValid: 'Все выбранные языки являются допустимыми.',
     emailAddress: 'Пожалуйста, введите корректный адрес email.',
     enterNumber: 'Пожалуйста, введите корректный номер.',
     fieldHasNo: 'У этого поля нет {{label}}',
@@ -634,7 +632,6 @@ export const ruTranslations: DefaultTranslationsObject = {
     longitudeOutOfBounds: 'Долгота должна быть между -180 и 180.',
     notValidDate: '"{{value}}" это не действительная дата.',
     required: 'Это обязательное поле.',
-    requiredLocale: 'Обязательный',
     requiresAtLeast: 'Это поле требует не менее {{count}} {{label}}',
     requiresNoMoreThan: 'Это поле требует не более {{count}} {{label}}',
     requiresTwoNumbers: 'В этом поле требуется два числа.',
@@ -643,7 +640,6 @@ export const ruTranslations: DefaultTranslationsObject = {
     trueOrFalse: 'Это поле может быть равно только true или false.',
     username:
       'Пожалуйста, введите действительное имя пользователя. Может содержать буквы, цифры, дефисы, точки и подчёркивания.',
-    validationResults: 'Результаты проверки',
     validUploadID: "'Это поле не является действительным ID загрузки.'",
   },
   version: {

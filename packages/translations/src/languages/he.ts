@@ -592,8 +592,6 @@ export const heTranslations: DefaultTranslationsObject = {
     width: 'רוחב',
   },
   validation: {
-    documentInvalid: 'תקן את הבעיות הבאות.',
-    documentValid: 'כל ה-Locales שנבחרו תקינים.',
     emailAddress: 'נא להזין כתובת דוא"ל תקנית.',
     enterNumber: 'נא להזין מספר תקני.',
     fieldHasNo: 'שדה זה אינו מכיל {{label}}',
@@ -610,7 +608,6 @@ export const heTranslations: DefaultTranslationsObject = {
     longitudeOutOfBounds: 'אורך צריך להיות בין -180 ל-180.',
     notValidDate: '"{{value}}" אינו תאריך תקני.',
     required: 'שדה זה הוא שדה חובה.',
-    requiredLocale: 'נדרש',
     requiresAtLeast: 'שדה זה דורש לפחות {{count}} {{label}}.',
     requiresNoMoreThan: 'שדה זה דורש לא יותר מ-{{count}} {{label}}.',
     requiresTwoNumbers: 'שדה זה דורש שני מספרים.',
@@ -618,7 +615,6 @@ export const heTranslations: DefaultTranslationsObject = {
     timezoneRequired: 'נדרשת אזור זמן.',
     trueOrFalse: 'שדה זה יכול להיות רק true או false.',
     username: 'אנא הזן שם משתמש חוקי. יכול להכיל אותיות, מספרים, מקפים, נקודות וקווים תחתונים.',
-    validationResults: 'תוצאות האימות',
     validUploadID: 'שדה זה אינו מזהה העלאה תקני.',
   },
   version: {

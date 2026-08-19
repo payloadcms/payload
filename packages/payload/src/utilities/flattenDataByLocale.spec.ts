@@ -181,4 +181,62 @@ describe('flattenDataByLocale', () => {
       pointGroup: { groupPoint: [5, 6] },
     })
   })
+
+  it('should not mistake a candidate sub-field named after a locale code for a locale map', () => {
+    const fields: Field[] = [
+      {
+        name: 'localizedGroup',
+        type: 'group',
+        fields: [localizedText('en'), localizedText('title')],
+        localized: true,
+      },
+    ]
+
+    const result = flattenDataByLocale({
+      configBlockReferences: [],
+      dataIsLocaleKeyed: false,
+      docWithLocales: {
+        localizedGroup: {
+          en: 'sneaky value',
+          title: 'Hi',
+        },
+      },
+      fields,
+      locale: 'en',
+    })
+
+    expect(result).toEqual({
+      localizedGroup: {
+        en: 'sneaky value',
+        title: 'Hi',
+      },
+    })
+  })
+
+  it('should still unwrap a locale-keyed value whose keys happen to include ordinary field names', () => {
+    const fields: Field[] = [
+      {
+        name: 'localizedGroup',
+        type: 'group',
+        fields: [localizedText('en'), localizedText('title')],
+        localized: true,
+      },
+    ]
+
+    const result = flattenDataByLocale({
+      configBlockReferences: [],
+      docWithLocales: {
+        localizedGroup: {
+          en: { en: 'English en value', title: 'English title' },
+          es: { en: 'Spanish en value', title: 'Spanish title' },
+        },
+      },
+      fields,
+      locale: 'es',
+    })
+
+    expect(result).toEqual({
+      localizedGroup: { en: 'Spanish en value', title: 'Spanish title' },
+    })
+  })
 })

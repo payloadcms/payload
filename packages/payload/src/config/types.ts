@@ -588,13 +588,6 @@ export type Locale = {
    */
   label: Record<string, string> | string
   /**
-   * Require this locale to pass validation whenever any one locale is published.
-   * Publish-all operations validate every available locale regardless of this setting.
-   * @default false
-   * @see https://payloadcms.com/docs/validation/overview#publishing-and-required-locales
-   */
-  required?: boolean
-  /**
    * if true, defaults textAligmnent on text fields to RTL
    */
   rtl?: boolean
@@ -646,11 +639,7 @@ export type LocalizationConfigWithLabels = Prettify<
   } & BaseLocalizationConfig
 >
 
-export type SanitizedLocale = Prettify<
-  {
-    required: boolean
-  } & Locale
->
+export type SanitizedLocale = Locale
 
 export type SanitizedLocalizationConfig = Prettify<
   {

@@ -618,8 +618,6 @@ export const esTranslations: DefaultTranslationsObject = {
     width: 'Ancho',
   },
   validation: {
-    documentInvalid: 'Corrija los siguientes problemas.',
-    documentValid: 'Todos los idiomas seleccionados son válidos.',
     emailAddress: 'Por favor, introduce un correo electrónico válido.',
     enterNumber: 'Por favor, introduce un número válido.',
     fieldHasNo: 'Este campo no tiene {{label}}',
@@ -636,7 +634,6 @@ export const esTranslations: DefaultTranslationsObject = {
     longitudeOutOfBounds: 'La longitud debe estar entre -180 y 180.',
     notValidDate: '"{{value}}" es una fecha inválida.',
     required: 'Este campo es obligatorio.',
-    requiredLocale: 'Obligatorio',
     requiresAtLeast: 'Este campo requiere al menos {{count}} {{label}}.',
     requiresNoMoreThan: 'Este campo require no más de {{count}} {{label}}',
     requiresTwoNumbers: 'Este campo requiere dos números.',
@@ -645,7 +642,6 @@ export const esTranslations: DefaultTranslationsObject = {
     trueOrFalse: 'Este campo solo puede ser verdadero o falso.',
     username:
       'Por favor, introduce un nombre de usuario válido. Puede contener letras, números, guiones, puntos y guiones bajos.',
-    validationResults: 'Resultados de validación',
     validUploadID: 'Este campo no es un ID de subida válido.',
   },
   version: {

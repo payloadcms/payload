@@ -613,8 +613,6 @@ export const ltTranslations: DefaultTranslationsObject = {
     width: 'Plotis',
   },
   validation: {
-    documentInvalid: 'Išspręskite šias problemas.',
-    documentValid: 'Visi pasirinkti Locale yra galiojantys.',
     emailAddress: 'Įveskite galiojantį el. pašto adresą.',
     enterNumber: 'Įveskite galiojantį skaičių.',
     fieldHasNo: 'Šiame lauke nėra {{label}}',
@@ -634,7 +632,6 @@ export const ltTranslations: DefaultTranslationsObject = {
     longitudeOutOfBounds: 'Ilguma turi būti tarp -180 ir 180.',
     notValidDate: '"{{value}}" nėra galiojanti data.',
     required: 'Šis laukas yra privalomas.',
-    requiredLocale: 'Privalomas',
     requiresAtLeast: 'Šis laukas reikalauja bent {{count}} {{label}}.',
     requiresNoMoreThan: 'Šiame laukelyje gali būti ne daugiau kaip {{count}} {{label}}.',
     requiresTwoNumbers: 'Šiame lauke reikia įvesti du skaičius.',
@@ -643,7 +640,6 @@ export const ltTranslations: DefaultTranslationsObject = {
     trueOrFalse: 'Šis laukas gali būti lygus tik „true“ ar „false“.',
     username:
       'Įveskite galiojantį vartotojo vardą. Galima naudoti raides, skaičius, brūkšnelius, taškus ir pabraukimus.',
-    validationResults: 'Patikros rezultatai',
     validUploadID: 'Šis laukas nėra tinkamas įkėlimo ID.',
   },
   version: {

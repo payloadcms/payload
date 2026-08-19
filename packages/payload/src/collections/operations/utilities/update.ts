@@ -38,8 +38,6 @@ import {
   hasDraftValidationEnabled,
   hasLocalizeStatusEnabled,
 } from '../../../utilities/getVersionsConfig.js'
-import { isPostHookPublishIntent } from '../../../utilities/isPostHookPublishIntent.js'
-import { resolvePublishLocales } from '../../../utilities/resolvePublishLocales.js'
 import { buildLocalizedPublishData } from '../../../versions/buildSingleLocalePublishData.js'
 import { validateLocalWithDataLocale } from '../local/validate.js'
 export type SharedUpdateDocumentArgs<TSlug extends CollectionSlug> = {
@@ -259,31 +257,20 @@ export const updateDocument = async <
 
   if (
     hasDraftsEnabled(collectionConfig) &&
-    isPostHookPublishIntent({
-      locale,
-      publishAllLocales,
-      status: result._status,
-      unpublishAllLocales,
-    })
+    config.localization &&
+    publishAllLocales &&
+    !unpublishAllLocales
   ) {
     const validationResult = await validateLocalWithDataLocale(payload, {
       id,
       collection: collectionConfig.slug,
       data: result,
+      dataIsLocaleKeyed: true,
       draft: true,
-      locale: resolvePublishLocales({
-        locale,
-        localization: config.localization,
-        publishAllLocales,
-      }),
+      locale: 'all',
       overrideAccess: true,
       req,
-      validationDataLocale:
-        locale !== 'all'
-          ? locale
-          : config.localization
-            ? config.localization.defaultLocale
-            : undefined,
+      validationDataLocale: locale !== 'all' ? locale : config.localization.defaultLocale,
       validationTrash: Boolean(originalDoc?.deletedAt),
     })
 

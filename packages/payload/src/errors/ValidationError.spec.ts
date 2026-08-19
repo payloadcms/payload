@@ -19,7 +19,7 @@ describe('ValidationError', () => {
       ],
     })
 
-    expect(error.message).toBe('The following fields are invalid: Title, seo.description')
+    expect(error.message).toBe('The following fields are invalid: [de] Title, seo.description')
     expect(error.data.errors).toEqual([
       {
         label: 'Title',

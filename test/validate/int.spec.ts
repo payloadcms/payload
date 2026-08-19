@@ -1,6 +1,7 @@
 import type { Payload, PayloadRequest } from 'payload'
 
 import { buildEditorState } from '@payloadcms/richtext-lexical'
+import { randomUUID } from 'crypto'
 import fs from 'fs/promises'
 import path from 'path'
 import { createLocalReq, getFileByPath } from 'payload'
@@ -210,8 +211,8 @@ describe('validate Local API', () => {
     it('should let an explicit null user override an authenticated reused collection request', async () => {
       const req = {
         user: {
-          collection: validationCollectionSlug,
           id: 'authenticated-user',
+          collection: validationCollectionSlug,
         } as never,
       } satisfies Partial<PayloadRequest>
 
@@ -540,15 +541,6 @@ describe('validate Local API', () => {
       expect(req.operation).toBe('update')
     })
 
-    it('should expose required localization metadata after config sanitization', () => {
-      expect(payload.config.localization && payload.config.localization.locales).toMatchObject([
-        { code: 'en', required: false },
-        { code: 'es', required: true },
-        { code: 'de', required: false },
-        { code: 'fr', required: false },
-      ])
-    })
-
     it('should validate explicit locales and tag only the invalid locale', async () => {
       const stored = await payload.create({
         collection: validationCollectionSlug,
@@ -568,6 +560,33 @@ describe('validate Local API', () => {
         errors: [
           {
             locale: 'es',
+            path: 'title',
+          },
+        ],
+        valid: false,
+      })
+    })
+
+    it('should not honor fallbackLocale when the checked locale has no value of its own', async () => {
+      const stored = await payload.create({
+        collection: validationCollectionSlug,
+        data: {
+          summary: 'stored summary',
+          title: 'English title',
+        },
+        locale: 'en',
+      })
+
+      const result = await payload.validate({
+        id: stored.id,
+        collection: validationCollectionSlug,
+        locale: 'de',
+      })
+
+      expect(result).toMatchObject({
+        errors: [
+          {
+            locale: 'de',
             path: 'title',
           },
         ],
@@ -607,7 +626,7 @@ describe('validate Local API', () => {
         de: 'German optional',
         deletedAt: new Date().toISOString(),
         en: 'English draft',
-        es: 'Spanish required',
+        es: 'Spanish valid',
       })
 
       await expect(
@@ -967,7 +986,7 @@ describe('validate Local API', () => {
       const draft = await seedPublishCollection({
         de: 'German optional',
         en: 'English draft',
-        es: 'Spanish required',
+        es: 'Spanish valid',
       })
 
       await payload.update({
@@ -1174,8 +1193,8 @@ describe('validate Local API', () => {
     it('should let an explicit null user override an authenticated reused global request', async () => {
       const req = {
         user: {
-          collection: validationCollectionSlug,
           id: 'authenticated-user',
+          collection: validationCollectionSlug,
         } as never,
       } satisfies Partial<PayloadRequest>
 
@@ -1563,7 +1582,7 @@ describe('validate Local API', () => {
       await seedPublishGlobal({
         de: 'German optional',
         en: 'English draft',
-        es: 'Spanish required',
+        es: 'Spanish valid',
       })
       await payload.updateGlobal({
         slug: publishGlobalSlug,
@@ -1730,6 +1749,24 @@ describe('validate Local API', () => {
       expect(response.status).toBe(403)
     })
 
+    it('should return 404 for a nonexistent collection document', async () => {
+      const stored = await payload.create({
+        collection: validationCollectionSlug,
+        data: {
+          summary: 'stored summary',
+          title: 'English title',
+        },
+        locale: 'en',
+      })
+      const nonexistentID = typeof stored.id === 'number' ? stored.id + 1000 : randomUUID()
+
+      const response = await restClient.POST(
+        `/${validationCollectionSlug}/${nonexistentID}/validate?locale=en`,
+      )
+
+      expect(response.status).toBe(404)
+    })
+
     it('should return invalid collection create validation without creating a document', async () => {
       const response = await restClient.POST(`/${validationCollectionSlug}/validate?locale=en`, {
         body: JSON.stringify({
@@ -1838,7 +1875,7 @@ describe('validate Local API', () => {
       const draft = await seedPublishCollection({
         de: 'German optional',
         en: 'English draft',
-        es: 'Spanish required',
+        es: 'Spanish valid',
       })
 
       await payload.update({
@@ -1880,7 +1917,7 @@ describe('validate Local API', () => {
       await seedPublishGlobal({
         de: 'German optional',
         en: 'English draft',
-        es: 'Spanish required',
+        es: 'Spanish valid',
       })
       await payload.updateGlobal({
         slug: publishGlobalSlug,
@@ -2361,6 +2398,46 @@ describe('validate Local API', () => {
       })
       expect(versionsAfter).toEqual(versionsBefore)
     })
+
+    it('should reject a logout that reuses the validation request before a session is removed', async () => {
+      const usersBefore = await payload.count({ collection: 'users' })
+
+      await expect(runWriteAttempt('logout')).rejects.toThrow(
+        'Payload writes are not allowed during validation',
+      )
+
+      expect(await payload.count({ collection: 'users' })).toEqual(usersBefore)
+    })
+
+    it('should reject a refresh that reuses the validation request before a session is written', async () => {
+      const usersBefore = await payload.count({ collection: 'users' })
+
+      await expect(runWriteAttempt('refresh')).rejects.toThrow(
+        'Payload writes are not allowed during validation',
+      )
+
+      expect(await payload.count({ collection: 'users' })).toEqual(usersBefore)
+    })
+
+    it('should reject a reset password that reuses the validation request before a password is written', async () => {
+      const usersBefore = await payload.count({ collection: 'users' })
+
+      await expect(runWriteAttempt('resetPassword')).rejects.toThrow(
+        'Payload writes are not allowed during validation',
+      )
+
+      expect(await payload.count({ collection: 'users' })).toEqual(usersBefore)
+    })
+
+    it('should reject a verify email that reuses the validation request before a user is written', async () => {
+      const usersBefore = await payload.count({ collection: 'users' })
+
+      await expect(runWriteAttempt('verifyEmail')).rejects.toThrow(
+        'Payload writes are not allowed during validation',
+      )
+
+      expect(await payload.count({ collection: 'users' })).toEqual(usersBefore)
+    })
   })
 
   describe('publish enforcement', () => {
@@ -2417,6 +2494,7 @@ describe('validate Local API', () => {
           },
           locale: 'en',
           overrideAccess: false,
+          publishAllLocales: true,
         }),
       ).rejects.toMatchObject({
         data: {
@@ -2521,6 +2599,7 @@ describe('validate Local API', () => {
           },
           file: replacementFile,
           locale: 'en',
+          publishAllLocales: true,
         }),
       ).rejects.toMatchObject({
         data: {
@@ -2564,120 +2643,6 @@ describe('validate Local API', () => {
           fs.readFile(path.join(validationPublishUploadsDir, filename)),
         ).resolves.toEqual(contents)
       }
-    })
-
-    it('should block collection create when a hook promotes a draft to published', async () => {
-      await expect(
-        payload.create({
-          collection: publishCollectionSlug,
-          context: {
-            promoteDraftToPublished: true,
-          },
-          data: {
-            ...getPublishCollectionLocaleData({ title: 'English candidate' }),
-            _status: 'draft',
-          },
-          locale: 'en',
-        }),
-      ).rejects.toMatchObject({
-        data: {
-          errors: expect.arrayContaining([
-            expect.objectContaining({
-              locale: 'es',
-              path: 'title',
-            }),
-          ]),
-        },
-      })
-
-      const documents = await payload.find({
-        collection: publishCollectionSlug,
-        draft: true,
-        limit: 1,
-        locale: 'all',
-      })
-
-      expect(documents.totalDocs).toBe(0)
-    })
-
-    it('should block collection update when a hook promotes a draft to published', async () => {
-      const draft = await seedPublishCollection({
-        de: 'German optional',
-        en: 'English draft',
-        es: '',
-      })
-
-      await expect(
-        payload.update({
-          id: draft.id,
-          collection: publishCollectionSlug,
-          context: {
-            promoteDraftToPublished: true,
-          },
-          data: {
-            _status: 'draft',
-            title: 'English candidate',
-          },
-          locale: 'en',
-        }),
-      ).rejects.toMatchObject({
-        data: {
-          errors: expect.arrayContaining([
-            expect.objectContaining({
-              locale: 'es',
-              path: 'title',
-            }),
-          ]),
-        },
-      })
-
-      const latestDraft = await payload.findByID({
-        id: draft.id,
-        collection: publishCollectionSlug,
-        draft: true,
-        locale: 'all',
-      })
-
-      expect(latestDraft._status.en).toBe('draft')
-    })
-
-    it('should block global update when a hook promotes a draft to published', async () => {
-      await seedPublishGlobal({
-        de: 'German optional',
-        en: 'English draft',
-        es: '',
-      })
-
-      await expect(
-        payload.updateGlobal({
-          slug: publishGlobalSlug,
-          context: {
-            promoteDraftToPublished: true,
-          },
-          data: {
-            _status: 'draft',
-            title: 'English candidate',
-          },
-          locale: 'en',
-        }),
-      ).rejects.toMatchObject({
-        data: {
-          errors: expect.arrayContaining([
-            expect.objectContaining({
-              locale: 'es',
-              path: 'title',
-            }),
-          ]),
-        },
-      })
-
-      const latestDraft = await payload.findGlobal({
-        slug: publishGlobalSlug,
-        draft: true,
-        locale: 'all',
-      })
-
-      expect(latestDraft._status.en).toBe('draft')
     })
 
     it('should block collection create publish-all when status is draft without persisting', async () => {
@@ -2746,7 +2711,7 @@ describe('validate Local API', () => {
       const draft = await seedPublishCollection({
         de: '',
         en: 'English draft',
-        es: 'Spanish required',
+        es: 'Spanish valid',
       })
 
       await expect(
@@ -2789,7 +2754,7 @@ describe('validate Local API', () => {
       const draft = await seedPublishCollection({
         de: '',
         en: 'English draft',
-        es: 'Spanish required',
+        es: 'Spanish valid',
       })
 
       await expect(
@@ -2832,7 +2797,7 @@ describe('validate Local API', () => {
       await seedPublishGlobal({
         de: '',
         en: 'English draft',
-        es: 'Spanish required',
+        es: 'Spanish valid',
       })
 
       await expect(
@@ -2873,7 +2838,7 @@ describe('validate Local API', () => {
       await seedPublishGlobal({
         de: '',
         en: 'English draft',
-        es: 'Spanish required',
+        es: 'Spanish valid',
       })
 
       await expect(
@@ -2915,7 +2880,7 @@ describe('validate Local API', () => {
         de: '',
         deletedAt: new Date().toISOString(),
         en: 'English draft',
-        es: 'Spanish required',
+        es: 'Spanish valid',
       })
 
       await expect(
@@ -2956,7 +2921,7 @@ describe('validate Local API', () => {
       })
     })
 
-    it('should not apply flat localized object candidates to a required sibling locale', async () => {
+    it('should not apply flat localized object candidates to a sibling locale during publish-all', async () => {
       const omittedFields: PublishCollectionLocalizedField[] = [
         'localizedArray',
         'localizedBlocks',
@@ -2969,7 +2934,7 @@ describe('validate Local API', () => {
       const draft = await seedPublishCollection({
         de: 'German optional',
         en: 'English draft',
-        es: 'Spanish required',
+        es: 'Spanish sibling',
         omit: {
           es: omittedFields,
         },
@@ -2984,6 +2949,7 @@ describe('validate Local API', () => {
             _status: 'published',
           },
           locale: 'en',
+          publishAllLocales: true,
         }),
       ).rejects.toMatchObject({
         data: {
@@ -3007,11 +2973,11 @@ describe('validate Local API', () => {
       })
     })
 
-    it('should not apply a flat localized JSON candidate to a required global sibling locale', async () => {
+    it('should not apply a flat localized JSON candidate to a global sibling locale during publish-all', async () => {
       await seedPublishGlobal({
         de: 'German optional',
         en: 'English draft',
-        es: 'Spanish required',
+        es: 'Spanish sibling',
         omitLocalizedJSON: {
           es: true,
         },
@@ -3025,6 +2991,7 @@ describe('validate Local API', () => {
             _status: 'published',
           },
           locale: 'en',
+          publishAllLocales: true,
         }),
       ).rejects.toMatchObject({
         data: {
@@ -3038,7 +3005,7 @@ describe('validate Local API', () => {
       })
     })
 
-    it('should bypass required-locale publish validation when trashing a draft', async () => {
+    it('should allow trashing a draft even when a sibling locale is invalid', async () => {
       const draft = await seedPublishCollection({
         de: 'German optional',
         en: 'English draft',
@@ -3060,7 +3027,7 @@ describe('validate Local API', () => {
       })
     })
 
-    it('should bypass required-locale publish validation when restoring a trashed draft', async () => {
+    it('should allow restoring a trashed draft even when a sibling locale is invalid', async () => {
       const draft = await seedPublishCollection({
         de: 'German optional',
         deletedAt: new Date().toISOString(),
@@ -3083,7 +3050,7 @@ describe('validate Local API', () => {
       })
     })
 
-    it('should bypass required-locale publish validation for collection unpublish metadata', async () => {
+    it('should allow collection unpublish metadata even when a sibling locale is invalid', async () => {
       const draft = await seedPublishCollection({
         de: 'German optional',
         en: 'English draft',
@@ -3104,7 +3071,7 @@ describe('validate Local API', () => {
       })
     })
 
-    it('should bypass required-locale publish validation for global unpublish metadata', async () => {
+    it('should allow global unpublish metadata even when a sibling locale is invalid', async () => {
       await seedPublishGlobal({
         de: 'German optional',
         en: 'English draft',
@@ -3124,66 +3091,11 @@ describe('validate Local API', () => {
       })
     })
 
-    it('should block collection publish when a required locale is invalid without changing status', async () => {
+    it('should publish a single locale even when every other locale is invalid', async () => {
       const draft = await seedPublishCollection({
         de: '',
         en: 'English draft',
         es: '',
-      })
-      const versionsBefore = await payload.countVersions({
-        collection: publishCollectionSlug,
-        where: {
-          parent: {
-            equals: draft.id,
-          },
-        },
-      })
-
-      await expect(
-        payload.update({
-          id: draft.id,
-          collection: publishCollectionSlug,
-          data: {
-            _status: 'published',
-            title: 'English published',
-          },
-          locale: 'en',
-        }),
-      ).rejects.toMatchObject({
-        data: {
-          errors: [
-            {
-              locale: 'es',
-              path: 'title',
-            },
-          ],
-        },
-      })
-
-      const latestDraft = await payload.findByID({
-        id: draft.id,
-        collection: publishCollectionSlug,
-        draft: true,
-        locale: 'all',
-      })
-      const versionsAfter = await payload.countVersions({
-        collection: publishCollectionSlug,
-        where: {
-          parent: {
-            equals: draft.id,
-          },
-        },
-      })
-
-      expect(latestDraft._status.en).toBe('draft')
-      expect(versionsAfter).toEqual(versionsBefore)
-    })
-
-    it('should allow collection publish when only an optional non-current locale is invalid', async () => {
-      const draft = await seedPublishCollection({
-        de: '',
-        en: 'English draft',
-        es: 'Spanish required',
       })
 
       await payload.update({
@@ -3206,11 +3118,11 @@ describe('validate Local API', () => {
       expect(published._status.en).toBe('published')
     })
 
-    it('should block collection publish-all when an optional locale is invalid', async () => {
+    it('should block collection publish-all when a locale is invalid', async () => {
       const draft = await seedPublishCollection({
         de: '',
         en: 'English draft',
-        es: 'Spanish required',
+        es: 'Spanish sibling',
       })
 
       await expect(
@@ -3245,54 +3157,11 @@ describe('validate Local API', () => {
       expect(latestDraft._status.en).toBe('draft')
     })
 
-    it('should block global publish when a required locale is invalid without changing status', async () => {
+    it('should publish a single global locale even when every other locale is invalid', async () => {
       await seedPublishGlobal({
         de: '',
         en: 'English draft',
         es: '',
-      })
-      const versionsBefore = await payload.countGlobalVersions({
-        global: publishGlobalSlug,
-      })
-
-      await expect(
-        payload.updateGlobal({
-          slug: publishGlobalSlug,
-          data: {
-            _status: 'published',
-            title: 'English published',
-          },
-          locale: 'en',
-        }),
-      ).rejects.toMatchObject({
-        data: {
-          errors: [
-            {
-              locale: 'es',
-              path: 'title',
-            },
-          ],
-        },
-      })
-
-      const latestDraft = await payload.findGlobal({
-        slug: publishGlobalSlug,
-        draft: true,
-        locale: 'all',
-      })
-      const versionsAfter = await payload.countGlobalVersions({
-        global: publishGlobalSlug,
-      })
-
-      expect(latestDraft._status.en).toBe('draft')
-      expect(versionsAfter).toEqual(versionsBefore)
-    })
-
-    it('should allow global publish when only an optional non-current locale is invalid', async () => {
-      await seedPublishGlobal({
-        de: '',
-        en: 'English draft',
-        es: 'Spanish required',
       })
 
       await payload.updateGlobal({
@@ -3313,11 +3182,11 @@ describe('validate Local API', () => {
       expect(published._status.en).toBe('published')
     })
 
-    it('should block global publish-all when an optional locale is invalid', async () => {
+    it('should block global publish-all when a locale is invalid', async () => {
       await seedPublishGlobal({
         de: '',
         en: 'English draft',
-        es: 'Spanish required',
+        es: 'Spanish sibling',
       })
 
       await expect(
@@ -3355,7 +3224,7 @@ describe('validate Local API', () => {
         const draft = await seedPublishCollection({
           de: 'German initially valid',
           en: 'private English scheduled value',
-          es: 'Spanish required',
+          es: 'Spanish valid',
           fr: 'French optional',
         })
         const job = await payload.jobs.queue({
@@ -3416,7 +3285,7 @@ describe('validate Local API', () => {
         const draft = await seedPublishCollection({
           de: 'German optional',
           en: 'English scheduled',
-          es: 'Spanish required',
+          es: 'Spanish valid',
           fr: 'French optional',
         })
         const job = await payload.jobs.queue({
@@ -3452,11 +3321,11 @@ describe('validate Local API', () => {
         })
       })
 
-      it('should validate the current and required collection locales but skip optional siblings', async () => {
+      it('should validate only the current locale and skip every sibling during a single-locale scheduled publish', async () => {
         const draft = await seedPublishCollection({
           de: '',
           en: 'English scheduled',
-          es: 'Spanish required',
+          es: '',
           fr: '',
         })
         const job = await payload.jobs.queue({
@@ -3487,41 +3356,11 @@ describe('validate Local API', () => {
         })
       })
 
-      it('should cancel a current-locale collection job when a required locale is invalid', async () => {
-        const draft = await seedPublishCollection({
-          de: 'German optional',
-          en: 'English scheduled',
-          es: '',
-        })
-        const job = await payload.jobs.queue({
-          input: {
-            doc: {
-              relationTo: publishCollectionSlug,
-              value: draft.id.toString(),
-            },
-            locale: 'en',
-          },
-          task: 'schedulePublish',
-        })
-
-        await payload.jobs.run({ silent: true })
-
-        const failedJob = await payload.findByID({
-          id: job.id,
-          collection: 'payload-jobs',
-          depth: 0,
-        })
-        const error = failedJob.error as { cancelled?: boolean; message?: string }
-
-        expect(error.cancelled).toBe(true)
-        expect(error.message).toContain('[es] title')
-      })
-
       it('should cancel invalid global publish-all jobs', async () => {
         await seedPublishGlobal({
           de: 'German initially valid',
           en: 'private English global value',
-          es: 'Spanish required',
+          es: 'Spanish valid',
           fr: 'French optional',
         })
         const job = await payload.jobs.queue({
@@ -3566,7 +3405,7 @@ describe('validate Local API', () => {
         await seedPublishGlobal({
           de: 'German optional',
           en: 'English scheduled',
-          es: 'Spanish required',
+          es: 'Spanish valid',
           fr: 'French optional',
         })
         const job = await payload.jobs.queue({
@@ -3661,11 +3500,11 @@ describe('validate Local API', () => {
         expect(scheduledValidationEvents).toEqual([])
       })
 
-      it('should validate the current and required global locales but skip optional siblings', async () => {
+      it('should validate only the current locale and skip every sibling during a single-locale global scheduled publish', async () => {
         await seedPublishGlobal({
           de: '',
           en: 'English scheduled',
-          es: 'Spanish required',
+          es: '',
           fr: '',
         })
         const job = await payload.jobs.queue({
@@ -3692,38 +3531,11 @@ describe('validate Local API', () => {
         })
       })
 
-      it('should cancel a current-locale global job when a required locale is invalid', async () => {
-        await seedPublishGlobal({
-          de: 'German optional',
-          en: 'English scheduled',
-          es: '',
-        })
-        const job = await payload.jobs.queue({
-          input: {
-            global: publishGlobalSlug,
-            locale: 'en',
-          },
-          task: 'schedulePublish',
-        })
-
-        await payload.jobs.run({ silent: true })
-
-        const failedJob = await payload.findByID({
-          id: job.id,
-          collection: 'payload-jobs',
-          depth: 0,
-        })
-        const error = failedJob.error as { cancelled?: boolean; message?: string }
-
-        expect(error.cancelled).toBe(true)
-        expect(error.message).toContain('[es] title')
-      })
-
       it('should cancel validation errors thrown by scheduled validation hooks without retrying', async () => {
         const draft = await seedPublishCollection({
           de: 'German optional',
           en: 'throw scheduled validation error',
-          es: 'Spanish required',
+          es: 'Spanish valid',
         })
         const job = await payload.jobs.queue({
           input: {
@@ -3771,7 +3583,7 @@ describe('validate Local API', () => {
         const draft = await seedPublishCollection({
           de: 'German optional',
           en: 'throw transient scheduled error',
-          es: 'Spanish required',
+          es: 'Spanish valid',
         })
         const job = await payload.jobs.queue({
           input: {
@@ -3815,12 +3627,16 @@ async function runWriteAttempt(
     | 'create'
     | 'delete'
     | 'deleteMany'
+    | 'logout'
+    | 'refresh'
+    | 'resetPassword'
     | 'restoreGlobalVersion'
     | 'restoreVersion'
     | 'update'
     | 'updateGlobal'
     | 'updateMany'
     | 'upload'
+    | 'verifyEmail'
     | 'version',
   targetID?: number | string,
 ) {

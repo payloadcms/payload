@@ -33,9 +33,7 @@ import {
   hasLocalizeStatusEnabled,
 } from '../../utilities/getVersionsConfig.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
-import { isPostHookPublishIntent } from '../../utilities/isPostHookPublishIntent.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
-import { resolvePublishLocales } from '../../utilities/resolvePublishLocales.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { buildLocalizedPublishData } from '../../versions/buildSingleLocalePublishData.js'
@@ -271,32 +269,20 @@ export const updateOperation = async <
 
     if (
       hasDraftsEnabled(globalConfig) &&
-      isPostHookPublishIntent({
-        locale:
-          locale ??
-          (payload.config.localization ? payload.config.localization.defaultLocale : undefined),
-        publishAllLocales,
-        status: result._status,
-        unpublishAllLocales,
-      })
+      payload.config.localization &&
+      publishAllLocales &&
+      !unpublishAllLocales
     ) {
       const validationResult = await validateGlobalLocalWithDataLocale(payload, {
         slug: globalConfig.slug,
         data: result,
+        dataIsLocaleKeyed: true,
         draft: true,
-        locale: resolvePublishLocales({
-          locale: locale ?? null,
-          localization: payload.config.localization,
-          publishAllLocales,
-        }),
+        locale: 'all',
         overrideAccess: true,
         req,
         validationDataLocale:
-          locale && locale !== 'all'
-            ? locale
-            : payload.config.localization
-              ? payload.config.localization.defaultLocale
-              : undefined,
+          locale && locale !== 'all' ? locale : payload.config.localization.defaultLocale,
       })
 
       if (!validationResult.valid) {

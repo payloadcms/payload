@@ -8,6 +8,7 @@ import { buildAfterOperation } from '../../collections/operations/utilities/buil
 import { buildBeforeOperation } from '../../collections/operations/utilities/buildBeforeOperation.js'
 import { APIError, Forbidden } from '../../errors/index.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
+import { assertNoValidationWrite } from '../../utilities/assertNoValidationWrite.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
@@ -47,6 +48,8 @@ export const resetPasswordOperation = async <TSlug extends AuthCollectionSlug>(
     },
     req,
   } = args
+
+  assertNoValidationWrite(req)
 
   if (
     !Object.prototype.hasOwnProperty.call(data, 'token') ||

@@ -102,6 +102,11 @@ export type ValidateCollectionOptions<TSlug extends CollectionSlug> =
     } & BaseOptions<TSlug>)
 
 type InternalValidateCollectionOptions<TSlug extends CollectionSlug> = {
+  /**
+   * Whether `data` stores each localized field as a locale-code-keyed object, as the internal
+   * publish-all-locales candidate does, rather than a flat, single-locale candidate.
+   */
+  dataIsLocaleKeyed?: boolean
   validationDataLocale?: string
   validationTrash?: boolean
 } & ValidateCollectionOptions<TSlug>
@@ -142,6 +147,7 @@ export async function validateLocalWithDataLocale<TSlug extends CollectionSlug>(
     id,
     collection: collectionSlug,
     data,
+    dataIsLocaleKeyed,
     draft = false,
     locale,
     overrideAccess = true,
@@ -205,6 +211,7 @@ export async function validateLocalWithDataLocale<TSlug extends CollectionSlug>(
         id,
         collection,
         data: validationData,
+        dataIsLocaleKeyed,
         draft,
         overrideAccess,
         req,

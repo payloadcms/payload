@@ -55,6 +55,11 @@ export type ValidateGlobalOptions<TSlug extends GlobalSlug> = {
 } & DraftFlagFromGlobalSlug<TSlug>
 
 type InternalValidateGlobalOptions<TSlug extends GlobalSlug> = {
+  /**
+   * Whether `data` stores each localized field as a locale-code-keyed object, as the internal
+   * publish-all-locales candidate does, rather than a flat, single-locale candidate.
+   */
+  dataIsLocaleKeyed?: boolean
   validationDataLocale?: string
 } & ValidateGlobalOptions<TSlug>
 
@@ -78,7 +83,14 @@ export async function validateGlobalLocalWithDataLocale<TSlug extends GlobalSlug
   payload: Payload,
   options: InternalValidateGlobalOptions<TSlug>,
 ): Promise<ValidationResult> {
-  const { slug, data, locale, overrideAccess = true, validationDataLocale } = options
+  const {
+    slug,
+    data,
+    dataIsLocaleKeyed,
+    locale,
+    overrideAccess = true,
+    validationDataLocale,
+  } = options
   const { draft = false } = options
 
   if (locale === undefined) {
@@ -130,6 +142,7 @@ export async function validateGlobalLocalWithDataLocale<TSlug extends GlobalSlug
       return validateOperation({
         slug,
         data: validationData,
+        dataIsLocaleKeyed,
         draft,
         globalConfig,
         overrideAccess,

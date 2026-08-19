@@ -5,6 +5,7 @@ import type { Document, PayloadRequest } from '../../types/index.js'
 import { buildAfterOperation } from '../../collections/operations/utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from '../../collections/operations/utilities/buildBeforeOperation.js'
 import { Forbidden } from '../../errors/index.js'
+import { assertNoValidationWrite } from '../../utilities/assertNoValidationWrite.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
@@ -26,6 +27,8 @@ export type Arguments = {
 
 export const refreshOperation = async (incomingArgs: Arguments): Promise<Result> => {
   let args = incomingArgs
+
+  assertNoValidationWrite(args.req)
 
   try {
     const shouldCommit = await initTransaction(args.req)

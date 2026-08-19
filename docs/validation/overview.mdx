@@ -200,43 +200,24 @@ same candidate into every selected locale, then aggregates the results. If a cus
 unsaved localized values for only its active locale, do not send those values as a flat
 multi-locale candidate.
 
-The built-in Admin UI handles this distinction for you: it validates the active locale with the
-current unsaved form data, then validates sibling locales with only non-localized candidate fields.
-Sibling localized values therefore come from their stored document data, or remain missing for a
-new document.
+Publishing every locale at once has this same problem: the request only carries unsaved data for
+the locale being edited. Payload validates that locale with the submitted data, then validates
+every other locale using only its stored, non-localized-field-stripped candidate, so sibling
+locales are never checked against localized values that were never meant for them.
 
 Fallback locale values are disabled during on-demand validation. Missing data must pass validation
 in the locale being checked.
 
-## Publishing and required locales
+## Publishing locales
 
-Use locale configuration objects to require a locale whenever any locale is published:
-
-```ts
-import { buildConfig } from 'payload'
-
-export default buildConfig({
-  localization: {
-    defaultLocale: 'en',
-    locales: [
-      { code: 'en', label: 'English' },
-      { code: 'es', label: 'Spanish', required: true },
-      { code: 'de', label: 'German' },
-    ],
-  },
-})
-```
-
-Publishing one locale validates that locale and every locale with `required: true`. Publishing all
-locales validates every available locale. If any locale is invalid, Payload throws a
-`ValidationError` before writing the document, version, or files.
+Publishing one locale validates only that locale, using the same field validation the `update`
+operation already runs. Publishing every locale at once additionally validates every other
+available locale, since their currently stored data is about to go live too. If any of those
+locales is invalid, Payload throws a `ValidationError` before writing the document, version, or
+files.
 
 Publishing uses its normal `create` or `update` access policy; the internal validity check does not
 require separate `validate` access.
-
-The default Admin Publish controls run a preflight so editors can see locale-grouped errors before
-submission. If you replace the default Publish button, your custom UI owns any preflight feedback;
-the server-side publish validation remains authoritative.
 
 Scheduled publishes revalidate the latest stored target when the job runs. An invalid target
 cancels the publish job without retrying or changing publication state. Unpublishing does not
@@ -305,8 +286,20 @@ const beforeChange: CollectionBeforeChangeHook = async ({
 }
 ```
 
+## Admin UI
+
+The default Publish button uses this same validation when it publishes. Publishing the active
+locale is validated by the normal update it performs; no separate request is made. Publishing every
+locale runs the additional all-locales check described above as part of that same request, before
+anything is written. If publishing fails, Payload reports the errors the way it reports any other
+save failure: invalid fields for the active locale are flagged inline, and a toast lists every
+invalid field, including those in other locales.
+
+If you replace the default Publish button, your custom UI owns how validation failures are
+reported; the server-side publish validation remains authoritative.
+
 ## Current scope
 
-On-demand validation is available through the Local and REST APIs, and powers the Admin UI's Publish
-preflight for localized documents. It does not add a standalone "validate all locales" Admin UI
-action, a GraphQL validation operation, bulk Admin validation, or fallback-locale validation.
+On-demand validation is available through the Local and REST APIs, and powers the Admin UI's default
+Publish button. It does not add a standalone "validate all locales" Admin UI action, a GraphQL
+validation operation, bulk Admin validation, or fallback-locale validation.

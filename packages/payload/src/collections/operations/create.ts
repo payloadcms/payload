@@ -38,9 +38,7 @@ import {
   hasLocalizeStatusEnabled,
 } from '../../utilities/getVersionsConfig.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
-import { isPostHookPublishIntent } from '../../utilities/isPostHookPublishIntent.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
-import { resolvePublishLocales } from '../../utilities/resolvePublishLocales.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
@@ -251,30 +249,16 @@ export const createOperation = async <
       skipValidation: isSavingDraft && !hasDraftValidationEnabled(collectionConfig),
     })
 
-    if (
-      hasDraftsEnabled(collectionConfig) &&
-      isPostHookPublishIntent({
-        locale: locale ?? (config.localization ? config.localization.defaultLocale : undefined),
-        publishAllLocales,
-        status: dataWithLocales._status,
-      })
-    ) {
+    if (hasDraftsEnabled(collectionConfig) && config.localization && publishAllLocales) {
       const validationResult = await validateLocalWithDataLocale(payload, {
         collection: collectionConfig.slug,
         data: dataWithLocales,
-        locale: resolvePublishLocales({
-          locale: locale ?? null,
-          localization: config.localization,
-          publishAllLocales,
-        }),
+        dataIsLocaleKeyed: true,
+        locale: 'all',
         overrideAccess: true,
         req,
         validationDataLocale:
-          locale && locale !== 'all'
-            ? locale
-            : config.localization
-              ? config.localization.defaultLocale
-              : undefined,
+          locale && locale !== 'all' ? locale : config.localization.defaultLocale,
       })
 
       if (!validationResult.valid) {

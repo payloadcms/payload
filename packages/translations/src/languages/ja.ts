@@ -610,8 +610,6 @@ export const jaTranslations: DefaultTranslationsObject = {
     width: '横幅',
   },
   validation: {
-    documentInvalid: '次の問題を修正してください。',
-    documentValid: 'すべての選択されたLocaleは有効です。',
     emailAddress: '有効なメールアドレスを入力してください。',
     enterNumber: '有効な数値を入力してください。',
     fieldHasNo: '{{label}} が必要です。',
@@ -628,7 +626,6 @@ export const jaTranslations: DefaultTranslationsObject = {
     longitudeOutOfBounds: '経度は-180から180の間でなければなりません。',
     notValidDate: '"{{value}}" は有効な日付ではありません。',
     required: '必須フィールドです。',
-    requiredLocale: '必須',
     requiresAtLeast: '少なくとも {{count}} {{label}} 以上が必要です。',
     requiresNoMoreThan: '最大で {{count}} {{label}} 以下にする必要があります。',
     requiresTwoNumbers: '2つの数値が必要です。',
@@ -637,7 +634,6 @@ export const jaTranslations: DefaultTranslationsObject = {
     trueOrFalse: '"true" または "false" の値にする必要があります。',
     username:
       '有効なユーザー名を入力してください。文字、数字、ハイフン、ピリオド、アンダースコアを使用できます。',
-    validationResults: '検証結果',
     validUploadID: '有効なアップロードIDではありません。',
   },
   version: {

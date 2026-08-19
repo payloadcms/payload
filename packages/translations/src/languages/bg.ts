@@ -611,8 +611,6 @@ export const bgTranslations: DefaultTranslationsObject = {
     width: 'Ширина',
   },
   validation: {
-    documentInvalid: 'Отстранете следните проблеми.',
-    documentValid: 'Всички избрани езици са валидни.',
     emailAddress: 'Моля, въведи валиден имейл адрес.',
     enterNumber: 'Моля, въведи валиден номер.',
     fieldHasNo: 'Това поле няма {{label}}',
@@ -630,7 +628,6 @@ export const bgTranslations: DefaultTranslationsObject = {
     longitudeOutOfBounds: 'Дължината трябва да бъде между -180 и 180.',
     notValidDate: '"{{value}}" не е валидна дата.',
     required: 'Това поле е задължително.',
-    requiredLocale: 'Задължително',
     requiresAtLeast: 'Това поле изисква поне {{count}} {{label}}.',
     requiresNoMoreThan: 'Това поле изисква не повече от {{count}} {{label}}.',
     requiresTwoNumbers: 'Това поле изисква 2 числа.',
@@ -640,7 +637,6 @@ export const bgTranslations: DefaultTranslationsObject = {
     trueOrFalse: 'Това поле може да бъде само "true" или "false".',
     username:
       'Моля, въведете валидно потребителско име. Може да съдържа букви, цифри, тирета, точки и долни черти.',
-    validationResults: 'Резултати от валидация',
     validUploadID: 'Това поле не е валиден идентификатор на качването.',
   },
   version: {

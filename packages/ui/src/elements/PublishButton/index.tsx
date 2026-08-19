@@ -12,7 +12,6 @@ import { FormSubmit } from '../../forms/Submit/index.js'
 import { useHotkey } from '../../hooks/useHotkey.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
-import { useDocumentValidation } from '../../providers/DocumentValidation/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useOperation } from '../../providers/Operation/index.js'
@@ -38,12 +37,12 @@ export function PublishButton({
   } = useDocumentInfo()
 
   const { config, getEntityConfig } = useConfig()
-  const { isValidating, validateBeforePublish } = useDocumentValidation()
   const { submit } = useForm()
   const modified = useFormModified()
   const editDepth = useEditDepth()
   const { code: localeCode } = useLocale()
   const {
+    blocksMap,
     localization,
     routes: { api },
   } = config
@@ -67,15 +66,14 @@ export function PublishButton({
   const canPublish =
     hasPublishPermission &&
     (modified || hasNewerVersions || !hasPublishedDoc) &&
-    uploadStatus !== 'uploading' &&
-    !isValidating
+    uploadStatus !== 'uploading'
 
   const [hasLocalizedFields, setHasLocalizedFields] = useState(false)
 
   useEffect(() => {
-    const hasLocalizedField = traverseForLocalizedFields(entityConfig?.fields)
+    const hasLocalizedField = traverseForLocalizedFields(entityConfig?.fields, { blocksMap })
     setHasLocalizedFields(hasLocalizedField)
-  }, [entityConfig?.fields])
+  }, [blocksMap, entityConfig?.fields])
 
   const isSpecificLocalePublishEnabled = localization && hasLocalizedFields && hasPublishPermission
 
@@ -147,12 +145,6 @@ export function PublishButton({
       return
     }
 
-    const isValid = await validateBeforePublish({ isPublishAll: localizeStatusEnabled })
-
-    if (!isValid) {
-      return
-    }
-
     const params = qs.stringify(
       {
         depth: 0,
@@ -193,18 +185,11 @@ export function PublishButton({
     setUnpublishedVersionCount,
     uploadStatus,
     setMostRecentVersionIsAutosaved,
-    validateBeforePublish,
   ])
 
   const publishLocale = useCallback(
     async (locale) => {
       if (uploadStatus === 'uploading') {
-        return
-      }
-
-      const isValid = await validateBeforePublish({ isPublishAll: false })
-
-      if (!isValid) {
         return
       }
 
@@ -247,7 +232,6 @@ export function PublishButton({
       setUnpublishedVersionCount,
       submit,
       uploadStatus,
-      validateBeforePublish,
     ],
   )
 

@@ -619,8 +619,6 @@ export const myTranslations: DefaultTranslationsObject = {
     width: 'အကျယ်',
   },
   validation: {
-    documentInvalid: 'အောက်ပါပြဿနာများကို ပြုပြင်ပါ။',
-    documentValid: 'ရွေးချယ်ထားသည့် Locale အားလုံးမှန်ကန်ပါသည်။',
     emailAddress: 'မှန်ကန်သော အီးမေးလ်လိပ်စာကို ထည့်သွင်းပါ။',
     enterNumber: 'မှန်ကန်သောနံပါတ်တစ်ခုထည့်ပါ။',
     fieldHasNo: 'ဤအကွက်တွင် {{label}} မရှိပါ။',
@@ -640,7 +638,6 @@ export const myTranslations: DefaultTranslationsObject = {
     longitudeOutOfBounds: 'လောင်ဂျီကျူဒ်သည် -180 နှင့် 180 ကြားတွင် ရှိရမည်။',
     notValidDate: '"{{value}}" သည် တရားဝင်ရက်စွဲမဟုတ်ပါ။',
     required: 'ဤအကွက်ကို လိုအပ်သည်။',
-    requiredLocale: 'လိုအပ်သည်',
     requiresAtLeast: 'ဤအကွက်သည် အနည်းဆုံး {{count}} {{label}} လိုအပ်သည်',
     requiresNoMoreThan: 'ဤအကွက်တွင် {{count}} {{label}} ထက် မပိုရပါ။',
     requiresTwoNumbers: 'ဤအကွက်သည် နံပါတ်နှစ်ခု လိုအပ်ပါသည်။',
@@ -649,7 +646,6 @@ export const myTranslations: DefaultTranslationsObject = {
     trueOrFalse: 'ဤအကွက်သည် တစ်ခုခုဖြစ်ရပါမည်။',
     username:
       'မှန်ကန်သော အသုံးပြုသူအမည် ထည့်သွင်းပါ။ အက္ခရာ၊ နံပါတ်၊ ဟိုင်ဖန်၊ အစက် နှင့် အောက်မျဉ်းတို့ ပါဝင်နိုင်ပါသည်။',
-    validationResults: 'အတည်ပြုမှုရလဒ်များ',
     validUploadID: "'ဤအကွက်သည် မှန်ကန်သော အပ်လုဒ် ID မဟုတ်ပါ။'",
   },
   version: {

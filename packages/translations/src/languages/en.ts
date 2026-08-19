@@ -610,8 +610,6 @@ export const enTranslations = {
     width: 'Width',
   },
   validation: {
-    documentInvalid: 'Fix the following issues.',
-    documentValid: 'All selected locales are valid.',
     emailAddress: 'Please enter a valid email address.',
     enterNumber: 'Please enter a valid number.',
     fieldHasNo: 'This field has no {{label}}',
@@ -628,7 +626,6 @@ export const enTranslations = {
     longitudeOutOfBounds: 'Longitude must be between -180 and 180.',
     notValidDate: '"{{value}}" is not a valid date.',
     required: 'This field is required.',
-    requiredLocale: 'Required',
     requiresAtLeast: 'This field requires at least {{count}} {{label}}.',
     requiresNoMoreThan: 'This field requires no more than {{count}} {{label}}.',
     requiresTwoNumbers: 'This field requires two numbers.',
@@ -637,7 +634,6 @@ export const enTranslations = {
     trueOrFalse: 'This field can only be equal to true or false.',
     username:
       'Please enter a valid username. Can contain letters, numbers, hyphens, periods and underscores.',
-    validationResults: 'Validation results',
     validUploadID: 'This field is not a valid upload ID.',
   },
   version: {

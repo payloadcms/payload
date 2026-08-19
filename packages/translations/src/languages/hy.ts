@@ -615,8 +615,6 @@ export const hyTranslations: DefaultTranslationsObject = {
     width: 'Լայնություն',
   },
   validation: {
-    documentInvalid: 'Ուղղեք հետևյալ խնդիրները։',
-    documentValid: 'Բոլոր ընտրված locale-ները վավեր են:',
     emailAddress: 'Խնդրում ենք մուտքագրել վավեր էլ. փոստի հասցե։',
     enterNumber: 'Խնդրում ենք մուտքագրել վավեր հեռախոսահամար։',
     fieldHasNo: 'Այս դաշտում {{label}} չկա',
@@ -635,7 +633,6 @@ export const hyTranslations: DefaultTranslationsObject = {
     longitudeOutOfBounds: 'Լոնգիտուդը պետք է լինի -180-ի և 180-ի միջակայքում:',
     notValidDate: '"{{value}}"-ը վավեր ամսաթիվ չէ։',
     required: 'Այս դաշտը պարտադիր է։',
-    requiredLocale: 'Պահանջված',
     requiresAtLeast: 'Այս դաշտը պահանջում է առնվազն {{count}} {{label}}։',
     requiresNoMoreThan: 'Այս դաշտը պահանջում է ոչ ավելի, քան {{count}} {{label}}։',
     requiresTwoNumbers: 'Այս դաշտը պահանջում է երկու թիվ։',
@@ -645,7 +642,6 @@ export const hyTranslations: DefaultTranslationsObject = {
     trueOrFalse: 'Այս դաշտի արժեքը կարող է միայն «ճիշտ» կամ «սխալ»։',
     username:
       'Խնդրում ենք մուտքագրել վավեր օգտանուն։ Կարող է պարունակել տառեր, թվեր, գծիկներ, կետեր և ընդգծում։',
-    validationResults: 'Վավերացման արդյունքներ',
     validUploadID: 'Այս դաշտը վավեր վերբեռնման ID չի պարունակում։',
   },
   version: {

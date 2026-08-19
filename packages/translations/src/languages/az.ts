@@ -617,8 +617,6 @@ export const azTranslations: DefaultTranslationsObject = {
     width: 'En',
   },
   validation: {
-    documentInvalid: 'Aşağıdakı problemləri aradan qaldırın.',
-    documentValid: 'Seçilmiş bütün locale-lar etibarlıdır.',
     emailAddress: 'Xahiş edirik doğru elektron poçt ünvanını daxil edin.',
     enterNumber: 'Xahiş edirik doğru nömrəni daxil edin.',
     fieldHasNo: 'Bu sahədə heç bir {{label}} yoxdur',
@@ -635,7 +633,6 @@ export const azTranslations: DefaultTranslationsObject = {
     longitudeOutOfBounds: 'Boylam -180 ilə 180 arasında olmalıdır.',
     notValidDate: '"{{value}}" doğru tarix deyil.',
     required: 'Bu sahə mütləq doldurulmalıdır.',
-    requiredLocale: 'Tələb olunur',
     requiresAtLeast: 'Bu sahə ən azı {{count}} {{label}} tələb edir.',
     requiresNoMoreThan: 'Bu sahə {{count}} {{label}}-dan çox olmamalıdır.',
     requiresTwoNumbers: 'Bu sahə iki nömrə tələb edir.',
@@ -644,7 +641,6 @@ export const azTranslations: DefaultTranslationsObject = {
     trueOrFalse: 'Bu sahə yalnız doğru və ya yanlış ola bilər.',
     username:
       'Zəhmət olmasa, etibarlı bir istifadəçi adı daxil edin. Hərflər, rəqəmlər, tire, nöqtə və alt xəttlər ola bilər.',
-    validationResults: 'Doğrulama nəticələri',
     validUploadID: 'Bu sahə doğru yükləmə ID-si deyil.',
   },
   version: {
