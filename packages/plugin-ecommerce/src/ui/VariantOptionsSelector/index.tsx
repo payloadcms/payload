@@ -21,6 +21,7 @@ export const VariantOptionsSelector: React.FC<Props> = async (props) => {
     collection: productsSlug,
     depth: 0,
     draft: true,
+    overrideAccess: true,
     select: {
       variants: true,
       variantTypes: true,
@@ -49,6 +50,7 @@ export const VariantOptionsSelector: React.FC<Props> = async (props) => {
             sort: 'value',
           },
         },
+        overrideAccess: true,
       })
 
       if (variantType) {
