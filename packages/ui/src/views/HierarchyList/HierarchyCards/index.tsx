@@ -145,10 +145,6 @@ export type PlaneBand = {
    */
   label?: string
   rows: TableRow[]
-  /**
-   * Rendered as the band's last cell — used for the "New Folder" tile.
-   */
-  TrailingItem?: React.ReactNode
 }
 
 export type HierarchyCardGridProps = {
@@ -592,12 +588,6 @@ export function HierarchyCardGrid({
                 />
               )
             })}
-
-            {band.TrailingItem ? (
-              <li className={`${baseClass}__item ${baseClass}__item--trailing`}>
-                {band.TrailingItem}
-              </li>
-            ) : null}
           </ul>
         )
       })}

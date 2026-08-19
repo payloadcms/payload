@@ -26,7 +26,6 @@ import { useDocumentSelection } from '../../../providers/DocumentSelection/index
 import { useRouteCache } from '../../../providers/RouteCache/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { getRowKey, HierarchyCardGrid } from '../HierarchyCards/index.js'
-import { NewFolderCard } from '../HierarchyCards/NewFolderCard/index.js'
 import { ChildNameCell } from './ChildNameCell.js'
 import { DateCell } from './DateCell.js'
 import { RelatedNameCell } from './RelatedNameCell.js'
@@ -513,14 +512,12 @@ export function HierarchyTable({
 
     const bands: PlaneBand[] = []
 
-    // The folders band survives an empty folder when the user can create one, so the New Folder
-    // tile still has somewhere to live.
-    if (folderGroup || hasCreatePermission) {
+    if (folderGroup) {
       bands.push({
         isHierarchyGroup: true,
         key: 'folders',
-        label: folderGroup?.label ?? hierarchyLabel,
-        rows: folderGroup?.docs ?? [],
+        label: folderGroup.label,
+        rows: folderGroup.docs,
       })
     }
 
@@ -534,7 +531,7 @@ export function HierarchyTable({
     }
 
     return bands
-  }, [allGroups, hasCreatePermission, hierarchyLabel, t])
+  }, [allGroups, t])
 
   /**
    * A merged band spans collections, so selection is driven off each row's own collection rather
@@ -575,12 +572,6 @@ export function HierarchyTable({
     return keys
   }, [isSelected, planeBands])
 
-  // The folder collection is the only creatable option on the tile itself.
-  const folderCreateCollections = useMemo(
-    () => (collections ?? []).filter((option) => option.collectionSlug === collectionSlug),
-    [collections, collectionSlug],
-  )
-
   // Column definitions
   const columns: SlotColumn<TableRow>[] = useMemo(
     () => [
@@ -606,12 +597,7 @@ export function HierarchyTable({
     [t],
   )
 
-  // Grid mode keeps its folders band (and the New Folder tile in it) when the folder is empty, so
-  // an empty folder is only a dead end when the user can't create anything either.
-  const showEmptyState =
-    !hasChildren && !hasRelated && (viewMode !== 'grid' || planeBands.length === 0)
-
-  if (showEmptyState) {
+  if (!hasChildren && !hasRelated) {
     const canShowCreateButton = hasCreatePermission && collections && collections.length > 0
 
     return (
@@ -636,26 +622,11 @@ export function HierarchyTable({
   }
 
   if (viewMode === 'grid') {
-    const bands = planeBands.map((band) =>
-      band.isHierarchyGroup && hasCreatePermission && folderCreateCollections.length > 0
-        ? {
-            ...band,
-            TrailingItem: (
-              <NewFolderCard
-                collections={folderCreateCollections}
-                drawerSlug={`hierarchy-create-folder-${collectionSlug}`}
-                onSave={clearRouteCache}
-              />
-            ),
-          }
-        : band,
-    )
-
     return (
       <div className={baseClass}>
         <HierarchyCardGrid
           ancestorIds={ancestorIds}
-          bands={bands}
+          bands={planeBands}
           fillHeight
           getRowLockedUser={getRowLockedUser}
           hierarchySlug={collectionSlug}
