@@ -156,6 +156,19 @@ export default buildConfigWithDefaults({
           relationTo: relationSlug,
           localized: true,
         },
+        // Localized array wrapping a relationship to a collection that owns a non-localized hasMany relationship
+        {
+          name: 'localizedDirectors',
+          type: 'array',
+          localized: true,
+          fields: [
+            {
+              name: 'director',
+              type: 'relationship',
+              relationTo: 'directors',
+            },
+          ],
+        },
       ],
       versions: false,
     },
@@ -242,6 +255,10 @@ export default buildConfigWithDefaults({
           type: 'select',
           hasMany: true,
           options: ['a', 'b', 'c'],
+        },
+        {
+          name: 'location',
+          type: 'point',
         },
         {
           name: 'director',

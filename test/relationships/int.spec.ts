@@ -3,7 +3,7 @@ import type { Payload, PayloadRequest } from 'payload'
 import { randomBytes, randomUUID } from 'crypto'
 import path from 'path'
 import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import { afterAll, beforeAll, beforeEach, describe, expect } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type {
@@ -16,6 +16,7 @@ import type {
   Relation,
 } from './payload-types.js'
 
+import { it } from '../__helpers/int/vitest.js'
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { mongooseList } from '../__helpers/shared/isMongoose.js'
 import { devUser } from '../credentials.js'
@@ -779,6 +780,65 @@ describe('Relationships', () => {
             expect(foundBlockIDs).toContain(electricCarsBlock.id)
             expect(foundBlockIDs).toContain(blockWithoutDirectors.id)
           })
+
+          // `near` on a point field is not implemented by the drizzle sqlite adapter
+          it(
+            'should support every with a geospatial nested query',
+            { db: (adapter) => adapter.startsWith('sqlite') === false },
+            async () => {
+              const nearbyMovie = await payload.create({
+                collection: 'movies',
+                data: { name: 'nearby', location: [10, 20] },
+              })
+
+              const nearbyDirector = await payload.create({
+                collection: 'directors',
+                data: { name: 'nearby', movies: [nearbyMovie.id] },
+              })
+
+              const { docs } = await payload.find({
+                collection: 'directors',
+                depth: 0,
+                where: {
+                  movies: { every: { location: { near: '10,20,100000' } } },
+                },
+              })
+
+              expect(docs.map(({ id }) => id)).toContain(nearbyDirector.id)
+            },
+          )
+        })
+
+        it('should query two hasMany levels deep when the middle document has multiple relations', async () => {
+          const alpha = await payload.create({
+            collection: 'movies',
+            data: { name: 'Alpha' },
+          })
+
+          const beta = await payload.create({
+            collection: 'movies',
+            data: { name: 'Beta' },
+          })
+
+          const child = await payload.create({
+            collection: 'directors',
+            data: { name: 'child', movies: [alpha.id, beta.id] },
+          })
+
+          const parent = await payload.create({
+            collection: 'directors',
+            data: { name: 'parent', directors: [child.id] },
+          })
+
+          const { docs } = await payload.find({
+            collection: 'directors',
+            depth: 0,
+            where: {
+              'directors.movies.name': { equals: 'Alpha' },
+            },
+          })
+
+          expect(docs.map(({ id }) => id)).toStrictEqual([parent.id])
         })
 
         it('should retrieve totalDocs correctly with hasMany,', async () => {
@@ -1449,6 +1509,34 @@ describe('Relationships', () => {
           })
 
           expect(docs.map((doc) => doc?.id)).not.toContain(localizedPost2.id)
+        })
+
+        it('should query a non-localized hasMany relationship nested under a localized array', async () => {
+          const movie = await payload.create({
+            collection: 'movies',
+            data: { name: 'Jackie Brown' },
+          })
+
+          const director = await payload.create({
+            collection: 'directors',
+            data: { name: 'Quentin Tarantino', movies: [movie.id] },
+          })
+
+          const post = await payload.create({
+            collection: slugWithLocalizedRel,
+            data: { localizedDirectors: [{ director: director.id }], title: 'english' },
+            locale: 'en',
+          })
+
+          const { docs } = await payload.find({
+            collection: slugWithLocalizedRel,
+            locale: 'en',
+            where: {
+              'localizedDirectors.director.movies.name': { equals: 'Jackie Brown' },
+            },
+          })
+
+          expect(docs.map(({ id }) => id)).toStrictEqual([post.id])
         })
       })
 

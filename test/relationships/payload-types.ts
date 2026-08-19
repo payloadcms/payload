@@ -266,17 +266,26 @@ export interface PostsLocalized {
   id: string;
   title?: string | null;
   relationField?: (string | null) | Relation;
+  localizedDirectors?:
+    | {
+        director?: (string | null) | Director;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "screenings".
+ * via the `definition` "directors".
  */
-export interface Screening {
+export interface Director {
   id: string;
   name?: string | null;
+  localized?: string | null;
+  movies?: (string | Movie)[] | null;
   movie?: (string | null) | Movie;
+  directors?: (string | Director)[] | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -288,6 +297,11 @@ export interface Movie {
   id: string;
   name?: string | null;
   select?: ('a' | 'b' | 'c')[] | null;
+  /**
+   * @minItems 2
+   * @maxItems 2
+   */
+  location?: [number, number] | null;
   director?: (string | null) | Director;
   array?:
     | {
@@ -305,15 +319,12 @@ export interface Movie {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "directors".
+ * via the `definition` "screenings".
  */
-export interface Director {
+export interface Screening {
   id: string;
   name?: string | null;
-  localized?: string | null;
-  movies?: (string | Movie)[] | null;
   movie?: (string | null) | Movie;
-  directors?: (string | Director)[] | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -777,6 +788,12 @@ export interface PostsSelect<T extends boolean = true> {
 export interface PostsLocalizedSelect<T extends boolean = true> {
   title?: T;
   relationField?: T;
+  localizedDirectors?:
+    | T
+    | {
+        director?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -847,6 +864,7 @@ export interface ScreeningsSelect<T extends boolean = true> {
 export interface MoviesSelect<T extends boolean = true> {
   name?: T;
   select?: T;
+  location?: T;
   director?: T;
   array?:
     | T
