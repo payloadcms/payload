@@ -1,0 +1,38 @@
+@layer payload-default {
+  /*
+   * A fixed 40px square, so a stack of these has a predictable footprint regardless of the aspect
+   * ratio of whatever was picked up.
+   */
+  .hierarchy-drag-preview-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--spacer-6);
+    height: var(--spacer-6);
+    overflow: hidden;
+    border-radius: var(--radius-medium);
+    background: var(--color-bg);
+  }
+
+  /* Fills the square and crops, rather than letter-boxing a wide image inside it. */
+  .hierarchy-drag-preview-item__thumbnail {
+    width: 100%;
+    height: 100%;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+
+  .hierarchy-drag-preview-item__icon {
+    display: flex;
+    color: var(--color-icon);
+
+    svg {
+      width: var(--spacer-4);
+      height: var(--spacer-4);
+    }
+  }
+}

@@ -1,43 +1,51 @@
 @layer payload-default {
   /*
-   * Card-width stack that follows the cursor. Sized to the grid's card width so the ghosted cards
-   * read at the same scale as the ones they were lifted from.
+   * The stack is sized to a single 40px tile; the staggered tiles behind it are out of flow, so they
+   * spill past this box without shifting the lead tile away from the cursor.
    */
   .hierarchy-dnd__preview {
     position: relative;
-    width: calc(var(--spacer-6) * 5.4);
+    width: var(--spacer-6);
+    height: var(--spacer-6);
     pointer-events: none;
   }
 
   /*
-   * The stack fans down-and-right behind the lead card. Physical translate offsets are deliberate:
-   * the stack trails the pointer, which is not a document-flow direction.
+   * Tiles fan down-and-right, first tile on top. Physical translate offsets are deliberate: the stack
+   * trails the pointer, which is not a document-flow direction.
    */
   .hierarchy-dnd__preview-card {
-    opacity: 0.8;
-    box-shadow: var(--elevation-500-modal-window);
-    transform: translate(
-      calc(var(--preview-index) * var(--spacer-4)),
-      calc(var(--preview-index) * var(--spacer-2-5))
-    );
-  }
-
-  /* Only the lead card holds the stack's height; the rest layer over it. */
-  .hierarchy-dnd__preview-card:not(:first-child) {
     position: absolute;
     inset-block-start: 0;
     inset-inline-start: 0;
+    border-radius: var(--radius-medium);
+    box-shadow:
+      0 0 0 var(--stroke-width-small) var(--color-border), var(--elevation-400-menu-panel);
+    /* Later tiles sit further back, so the lead tile is the one under the cursor. */
+    z-index: calc(3 - var(--preview-index));
+    transform: translate(
+      calc(var(--preview-index) * var(--spacer-1-5)),
+      calc(var(--preview-index) * var(--spacer-1-5))
+    );
   }
 
+  /*
+   * Total count, not the overflow: three tiles look the same whether five or fifty are moving, so the
+   * pill has to carry the whole number.
+   */
   .hierarchy-dnd__preview-count {
     position: absolute;
-    inset-block-start: calc(var(--spacer-2) * -1);
-    inset-inline-end: calc(var(--spacer-2) * -1);
-    padding-block: var(--spacer-1);
-    padding-inline: var(--spacer-2);
+    z-index: 4;
+    inset-block-start: calc(var(--spacer-1-5) * -1);
+    inset-inline-end: calc(var(--spacer-1-5) * -1);
+    min-width: var(--spacer-4);
+    padding-block: var(--spacer-0);
+    padding-inline: var(--spacer-1);
     border-radius: var(--radius-full);
     background: var(--color-border-selected);
     color: var(--color-text-onbrand);
     font-size: var(--text-body-small-font-size);
+    line-height: var(--spacer-4);
+    text-align: center;
   }
 }

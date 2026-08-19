@@ -12,6 +12,7 @@ import type {
 import type { TableRow } from '../../HierarchyTable/types.js'
 
 import { useHierarchyDnd } from '../../../../providers/HierarchyDnd/index.js'
+import { DragPreviewItem } from '../DragPreviewItem/index.js'
 import { HierarchyCard } from '../HierarchyCard/index.js'
 
 export type PlaneItemProps = {
@@ -84,18 +85,9 @@ export const PlaneItem: React.FC<PlaneItemProps> = ({
       type: 'hierarchy-items',
       items: [{ id: row.id, collectionSlug: row._collectionSlug, title }],
       onMoveSuccess: selectionDragData.onMoveSuccess,
-      preview: [
-        <HierarchyCard
-          href={href}
-          isHierarchyGroup={isHierarchyGroup}
-          key="preview"
-          row={row}
-          showTypePill={showTypePill}
-          title={title}
-        />,
-      ],
+      preview: [<DragPreviewItem isHierarchyGroup={isHierarchyGroup} key="preview" row={row} />],
     }),
-    [href, isHierarchyGroup, row, selectionDragData.onMoveSuccess, showTypePill, title],
+    [isHierarchyGroup, row, selectionDragData.onMoveSuccess, title],
   )
 
   // Dragging a card that is part of the selection moves the whole selection; dragging an unselected

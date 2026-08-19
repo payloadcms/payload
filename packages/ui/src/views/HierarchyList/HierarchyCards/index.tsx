@@ -10,7 +10,7 @@ import type { TableRow } from '../HierarchyTable/types.js'
 
 import { useConfig } from '../../../providers/Config/index.js'
 import { useRouter } from '../../../providers/RouterAdapter/index.js'
-import { HierarchyCard } from './HierarchyCard/index.js'
+import { DragPreviewItem } from './DragPreviewItem/index.js'
 import { PlaneItem } from './PlaneItem/index.js'
 import './index.css'
 
@@ -119,10 +119,6 @@ const getSelectionIntent = (event: {
 }
 
 /**
- * One horizontal group of cards. Bands stack vertically and share a single selection scope, so a
- * range selection or a marquee can run from a folder straight through the documents below it.
- */
-/**
  * A row plus the presentation values derived from its collection config.
  */
 type CardDescriptor = {
@@ -134,6 +130,10 @@ type CardDescriptor = {
   title: string
 }
 
+/**
+ * One horizontal group of cards. Bands stack vertically and share a single selection scope, so a
+ * range selection or a marquee can run from a folder straight through the documents below it.
+ */
 export type PlaneBand = {
   /**
    * Hierarchy rows render as folder cards, related documents render as document cards.
@@ -178,13 +178,13 @@ export type HierarchyCardGridProps = {
    */
   hierarchySlug?: string
   /**
-   * Toggles a single row's selected state. Multi-card intents (replace, range) are resolved into
-   * the minimum set of per-row toggles by the plane, so consumers only implement one operation.
-   */
-  /**
    * Clears the selection once a drop has moved it, since those documents are no longer on this page.
    */
   onMoveSuccess?: () => void
+  /**
+   * Toggles a single row's selected state. Multi-card intents (replace, range) are resolved into
+   * the minimum set of per-row toggles by the plane, so consumers only implement one operation.
+   */
   onSelectionChange: (row: TableRow) => void
   selectedKeys: Set<string>
   /**
@@ -299,17 +299,14 @@ export function HierarchyCardGrid({
       preview: selected
         .slice(0, MAX_DRAG_PREVIEW_CARDS)
         .map((descriptor) => (
-          <HierarchyCard
-            href={descriptor.href}
+          <DragPreviewItem
             isHierarchyGroup={descriptor.isHierarchyGroup}
             key={descriptor.key}
             row={descriptor.row}
-            showTypePill={showTypePill}
-            title={descriptor.title}
           />
         )),
     }
-  }, [descriptors, onMoveSuccess, selectedKeys, showTypePill])
+  }, [descriptors, onMoveSuccess, selectedKeys])
 
   const [marquee, setMarquee] = useState<MarqueeRect | null>(null)
 

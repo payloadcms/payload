@@ -2,7 +2,6 @@
 
 import type { User } from 'payload'
 
-import { getBestFitFromSizes, isImage } from 'payload/shared'
 import React, { useMemo } from 'react'
 
 import { Link } from '../../../../elements/Link/index.js'
@@ -11,6 +10,7 @@ import { Thumbnail } from '../../../../elements/Thumbnail/index.js'
 import { useConfig } from '../../../../providers/Config/index.js'
 import { useTranslation } from '../../../../providers/Translation/index.js'
 import { formatRelativeDate } from '../../../../utilities/formatRelativeDate.js'
+import { getThumbnailSrc } from '../getThumbnailSrc.js'
 import './index.css'
 
 const baseClass = 'hierarchy-document-card'
@@ -205,24 +205,4 @@ function getDocStatus({ doc }: { doc: Record<string, unknown> }): string | undef
   const rawStatus = doc._displayStatus ?? doc._status
 
   return typeof rawStatus === 'string' && rawStatus.length > 0 ? rawStatus : undefined
-}
-
-/**
- * Matches the upload thumbnail derivation used by the hierarchy table cells: images resolve to the
- * best fit from the generated sizes, everything else falls back to the configured thumbnail URL.
- */
-function getThumbnailSrc({ doc }: { doc: Record<string, unknown> }): string | undefined {
-  const mimeType = doc.mimeType as string | undefined
-  const isFileImage = mimeType ? isImage(mimeType) : false
-
-  if (!isFileImage) {
-    return doc.thumbnailURL as string
-  }
-
-  return getBestFitFromSizes({
-    sizes: doc.sizes as Record<string, { url?: string; width?: number }>,
-    thumbnailURL: doc.thumbnailURL as string,
-    url: doc.url as string,
-    width: doc.width as number,
-  })
 }

@@ -26,7 +26,7 @@ import './index.css'
 
 const baseClass = 'hierarchy-dnd'
 
-/** How many ghosted cards the overlay stacks before collapsing the rest into a "+N" badge. */
+/** How many thumbnails the stack shows; the count pill carries the rest. */
 const MAX_PREVIEW_CARDS = 3
 
 type HierarchyDndContextValue = {
@@ -131,7 +131,7 @@ export const HierarchyDndProvider: React.FC<{ children: React.ReactNode }> = ({ 
   )
 
   const previewCards = activeDrag?.preview.slice(0, MAX_PREVIEW_CARDS) ?? []
-  const overflowCount = (activeDrag?.items.length ?? 0) - previewCards.length
+  const draggedCount = activeDrag?.items.length ?? 0
 
   return (
     <Context value={contextValue}>
@@ -155,8 +155,8 @@ export const HierarchyDndProvider: React.FC<{ children: React.ReactNode }> = ({ 
                   {card}
                 </div>
               ))}
-              {overflowCount > 0 && (
-                <span className={`${baseClass}__preview-count`}>{`+${overflowCount}`}</span>
+              {draggedCount > 1 && (
+                <span className={`${baseClass}__preview-count`}>{draggedCount}</span>
               )}
             </div>
           ) : null}
