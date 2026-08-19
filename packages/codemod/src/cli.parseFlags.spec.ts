@@ -60,20 +60,18 @@ describe('parseFlags', () => {
     })
   })
 
-  it('parses `upgrade run` with path, tag, force, and dry', () => {
-    expect(
-      parseFlags(['upgrade', 'run', './app', '--tag', 'latest', '--force', '--dry']),
-    ).toMatchObject({
+  it('parses `upgrade run` with tag, force, and dry, always operating on cwd', () => {
+    expect(parseFlags(['upgrade', 'run', '--tag', 'latest', '--force', '--dry'])).toMatchObject({
       command: 'upgrade',
       dry: true,
       force: true,
-      path: './app',
+      path: process.cwd(),
       tag: 'latest',
       upgrade: 'run',
     })
   })
 
-  it('parses `upgrade run` with default path', () => {
+  it('parses `upgrade run` on cwd', () => {
     expect(parseFlags(['upgrade', 'run'])).toMatchObject({
       command: 'upgrade',
       path: process.cwd(),
@@ -81,7 +79,7 @@ describe('parseFlags', () => {
     })
   })
 
-  it('parses `upgrade prompt` with default path', () => {
+  it('parses `upgrade prompt` on cwd', () => {
     expect(parseFlags(['upgrade', 'prompt'])).toMatchObject({
       command: 'upgrade',
       path: process.cwd(),
@@ -89,19 +87,18 @@ describe('parseFlags', () => {
     })
   })
 
-  it('parses `upgrade prompt <path>` with tag', () => {
-    expect(parseFlags(['upgrade', 'prompt', './app', '--tag', 'latest'])).toMatchObject({
+  it('ignores a stray positional after an upgrade verb and stays on cwd', () => {
+    expect(parseFlags(['upgrade', 'run', './app'])).toMatchObject({
       command: 'upgrade',
-      path: './app',
-      tag: 'latest',
-      upgrade: 'prompt',
+      path: process.cwd(),
+      upgrade: 'run',
     })
   })
 
-  it('treats `upgrade <path>` as dispatch, not a mechanical run', () => {
-    expect(parseFlags(['upgrade', './app'])).toMatchObject({
+  it('treats a bare upgrade as dispatch, not a mechanical run', () => {
+    expect(parseFlags(['upgrade'])).toMatchObject({
       command: 'upgrade',
-      path: './app',
+      path: process.cwd(),
       upgrade: 'dispatch',
     })
   })
