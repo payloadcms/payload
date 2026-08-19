@@ -26,6 +26,11 @@ export type PlaneItemProps = {
   flatIndex: number
   hierarchySlug: string
   href: string
+  /**
+   * Turns the card into a plain selectable tile: no drag activation and no dragging treatment. Set
+   * by planes that have nowhere to drop, such as the flat collection grid.
+   */
+  isDragDisabled: boolean
   isHierarchyGroup: boolean
   isSelected: boolean
   lockedUser?: User
@@ -64,6 +69,7 @@ export const PlaneItem: React.FC<PlaneItemProps> = ({
   flatIndex,
   hierarchySlug,
   href,
+  isDragDisabled,
   isHierarchyGroup,
   isSelected,
   lockedUser,
@@ -120,13 +126,13 @@ export const PlaneItem: React.FC<PlaneItemProps> = ({
   } = useDraggable({
     id: `hierarchy-card-${rowKey}`,
     data: dragData,
-    disabled: Boolean(lockedUser),
+    disabled: isDragDisabled || Boolean(lockedUser),
   })
 
   const { isOver, setNodeRef: setDropRef } = useDroppable({
     id: `hierarchy-card-drop-${rowKey}`,
     data: dropData,
-    disabled: !dropData,
+    disabled: isDragDisabled || !dropData,
   })
 
   const dropState = isOver && dropData ? (canDrop(dropData) ? 'over' : 'invalid') : undefined
@@ -146,12 +152,14 @@ export const PlaneItem: React.FC<PlaneItemProps> = ({
    * and rebuilt the shared selection payload mid-drag.
    */
   const isBeingDragged =
-    isDragging ||
-    Boolean(
-      activeDrag?.items.some(
-        (item) => item.collectionSlug === row._collectionSlug && String(item.id) === String(row.id),
-      ),
-    )
+    !isDragDisabled &&
+    (isDragging ||
+      Boolean(
+        activeDrag?.items.some(
+          (item) =>
+            item.collectionSlug === row._collectionSlug && String(item.id) === String(row.id),
+        ),
+      ))
 
   /*
    * dnd-kit's sensors activate through listeners named exactly `onPointerDown` and `onKeyDown`, which

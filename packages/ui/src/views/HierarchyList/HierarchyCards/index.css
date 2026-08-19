@@ -13,11 +13,13 @@
   .hierarchy-card-grid__band {
     display: grid;
     /*
-     * The column count (2/4/5/8, snapping to ~200px cards) is computed from the plane's measured
-     * width via ResizeObserver and applied as an inline style - see `useColumnCount` in
-     * index.tsx. This is the pre-JS/SSR fallback.
+     * Holds the layout until the plane has been measured, which can only happen on the client: the
+     * measured count (2/4/5/8) then lands as an inline style - see `useColumnCount` in index.tsx.
+     * `auto-fill` is used rather than a fixed count because it resolves to the same ~200px card
+     * target the tiers aim for, so the first paint already matches the measured result closely and
+     * the grid doesn't visibly reflow on hydration.
      */
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     gap: var(--spacer-3);
     /*
      * Matches the horizontal gutter the tables get from their own cells, so cards line up with
@@ -36,6 +38,27 @@
    */
   .hierarchy-card-grid__band--folders {
     padding-block-end: var(--spacer-0);
+  }
+
+  /*
+   * Distinguishes documents that aren't grouped under any folder, e.g. "Documents not in a Folder"
+   * at the root of a hierarchy. Only some bands get one, so the band below tightens its own top
+   * padding rather than doubling up on the label's own spacing.
+   */
+  .hierarchy-card-grid__band-label {
+    margin: 0;
+    padding-inline: var(--gutter-h);
+    padding-block-start: var(--spacer-4);
+    color: var(--color-text-secondary);
+    font-family: var(--text-body-large-strong-font-family);
+    font-size: var(--text-body-large-strong-font-size);
+    font-weight: var(--text-body-large-strong-font-weight);
+    line-height: var(--text-body-large-strong-line-height);
+    letter-spacing: var(--text-body-large-strong-letter-spacing);
+  }
+
+  .hierarchy-card-grid__band--labeled {
+    padding-block-start: var(--spacer-3);
   }
 
   /*

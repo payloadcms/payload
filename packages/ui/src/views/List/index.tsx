@@ -263,10 +263,14 @@ export const renderListView = async (
   /** Automatically force select active columns. */
   const select = transformColumnsToSelect(columns)
 
-  /** Force select `useAsTitle` for accessible row-selection labels, even if its column is hidden. */
-  if (enableRowSelections && collectionConfig.admin.useAsTitle) {
+  /**
+   * Force select `useAsTitle` and `updatedAt`, even if their columns are hidden - the grid view
+   * always shows both on its cards regardless of which table columns are active.
+   */
+  if (collectionConfig.admin.useAsTitle) {
     select[collectionConfig.admin.useAsTitle] = true
   }
+  select.updatedAt = true
 
   /** Force select image fields for list view thumbnails */
   appendUploadSelectFields({

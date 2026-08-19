@@ -352,6 +352,14 @@ export function HierarchyTable({
     [collectionSlug, getEntityConfig, hierarchyLabel, i18n],
   )
 
+  // Singular form of the hierarchy's own collection label (e.g. "Folder", "Tag"), used to call out
+  // documents that aren't grouped under one.
+  const hierarchySingularLabel = useMemo(
+    () =>
+      getTranslation(getEntityConfig({ collectionSlug })?.labels?.singular, i18n) || hierarchyLabel,
+    [collectionSlug, getEntityConfig, hierarchyLabel, i18n],
+  )
+
   // Build children data for table
   const childTableData: TableRow[] = useMemo(() => {
     // Drilling into a folder has to stay in the collection being browsed, and the route is spelled
@@ -522,16 +530,23 @@ export function HierarchyTable({
     }
 
     if (documentRows.length > 0) {
+      const documentsLabel =
+        documentGroups.length === 1 ? documentGroups[0].label : t('general:documents')
+
       bands.push({
         isHierarchyGroup: false,
         key: 'documents',
-        label: documentGroups.length === 1 ? documentGroups[0].label : t('general:documents'),
+        label: documentsLabel,
         rows: documentRows,
+        // Only the root of a hierarchy has documents that aren't inside any folder - inside a
+        // folder, the ungrouped documents there are just that folder's contents.
+        visibleLabel:
+          parentId === null ? `${documentsLabel} not in a ${hierarchySingularLabel}` : undefined,
       })
     }
 
     return bands
-  }, [allGroups, t])
+  }, [allGroups, hierarchySingularLabel, parentId, t])
 
   /**
    * A merged band spans collections, so selection is driven off each row's own collection rather
@@ -637,16 +652,19 @@ export function HierarchyTable({
         {/*
           Each collection paginates on its own, so the merged documents band can surface more than
           one control. They only appear once a group actually has more than a page.
+
+          Each is named, because the grid above merges every collection into one band: an unlabelled
+          "1-25 of 30" would read as a count of the whole grid when it only ever describes its own
+          collection. The table mode gets this for free from its per-collection section headings.
         */}
         <div className={`${baseClass}__plane-pagination`}>
           {allGroups
             .filter((group) => group.paginationData.hasNextPage || group.paginationData.hasPrevPage)
             .map((group) => (
-              <SimplePagination
-                data={group.paginationData}
-                key={group.slug}
-                onChange={group.onPageChange}
-              />
+              <div className={`${baseClass}__plane-pagination-group`} key={group.slug}>
+                <span className={`${baseClass}__plane-pagination-label`}>{group.label}</span>
+                <SimplePagination data={group.paginationData} onChange={group.onPageChange} />
+              </div>
             ))}
         </div>
       </div>

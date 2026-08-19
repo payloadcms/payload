@@ -51,10 +51,15 @@ const getColumnCount = (containerWidth: number): number =>
  * column count is driven by explicit, easily-debuggable state instead of container-query support
  * or self-referencing-container edge cases. Every band shares the count, so folder cards and
  * document cards line up in the same columns.
+ *
+ * Starts `null` - not at a guessed tier - because the width can only be known on the client. Until
+ * it is measured the bands leave `grid-template-columns` to CSS, which auto-fills to the same ~200px
+ * target; seeding a guess instead would paint that many full-width-share cards on the server and
+ * then visibly snap to the measured count on hydration.
  */
 const useColumnCount = () => {
   const ref = useRef<HTMLDivElement>(null)
-  const [columns, setColumns] = useState(2)
+  const [columns, setColumns] = useState<null | number>(null)
 
   useEffect(() => {
     const node = ref.current
@@ -145,6 +150,12 @@ export type PlaneBand = {
    */
   label?: string
   rows: TableRow[]
+  /**
+   * Heading rendered above the band, e.g. distinguishing documents with no folder from the ones
+   * inside a folder. Separate from `label` because that one is read on every band as an accessible
+   * name, while this is opt-in and only some bands need it.
+   */
+  visibleLabel?: string
 }
 
 export type HierarchyCardGridProps = {
@@ -174,6 +185,11 @@ export type HierarchyCardGridProps = {
    */
   hierarchySlug?: string
   /**
+   * Renders the cards as plain selectable tiles, with no drag activation and no dragging treatment.
+   * For planes with nowhere to drop, such as the flat collection grid outside the hierarchy view.
+   */
+  isDragDisabled?: boolean
+  /**
    * Clears the selection once a drop has moved it, since those documents are no longer on this page.
    */
   onMoveSuccess?: () => void
@@ -198,6 +214,7 @@ export function HierarchyCardGrid({
   fillHeight = false,
   getRowLockedUser,
   hierarchySlug,
+  isDragDisabled = false,
   onMoveSuccess,
   onSelectionChange,
   selectedKeys,
@@ -549,46 +566,52 @@ export function HierarchyCardGrid({
           .reduce((total, earlier) => total + earlier.rows.length, 0)
 
         return (
-          <ul
-            aria-label={band.label ?? ariaLabel}
-            className={[
-              `${baseClass}__band`,
-              band.isHierarchyGroup && `${baseClass}__band--folders`,
-            ]
-              .filter(Boolean)
-              .join(' ')}
-            key={band.key}
-            style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}
-          >
-            {band.rows.map((_row, rowIndex) => {
-              const flatIndex = bandOffset + rowIndex
-              const descriptor = descriptors[flatIndex]
+          <div key={band.key}>
+            {band.visibleLabel && (
+              <h2 className={`${baseClass}__band-label`}>{band.visibleLabel}</h2>
+            )}
+            <ul
+              aria-label={band.label ?? ariaLabel}
+              className={[
+                `${baseClass}__band`,
+                band.isHierarchyGroup && `${baseClass}__band--folders`,
+                band.visibleLabel && `${baseClass}__band--labeled`,
+              ]
+                .filter(Boolean)
+                .join(' ')}
+              style={columns ? { gridTemplateColumns: `repeat(${columns}, 1fr)` } : undefined}
+            >
+              {band.rows.map((_row, rowIndex) => {
+                const flatIndex = bandOffset + rowIndex
+                const descriptor = descriptors[flatIndex]
 
-              return (
-                <PlaneItem
-                  ancestorIds={ancestorIds}
-                  baseClass={baseClass}
-                  flatIndex={flatIndex}
-                  hierarchySlug={hierarchySlug ?? descriptor.row._collectionSlug}
-                  href={descriptor.href}
-                  isHierarchyGroup={descriptor.isHierarchyGroup}
-                  isSelected={selectedKeys.has(descriptor.key)}
-                  key={descriptor.key}
-                  lockedUser={getRowLockedUser?.(descriptor.row)}
-                  onClickCapture={handleCardClickCapture}
-                  onDoubleClick={handleCardDoubleClick}
-                  onKeyDown={handleCardKeyDown}
-                  onPointerDownUnselected={handlePointerDownUnselected}
-                  parentFieldName={descriptor.parentFieldName}
-                  registerNode={setItemRef}
-                  row={descriptor.row}
-                  selectionDragData={selectionDragData}
-                  showTypePill={showTypePill}
-                  title={descriptor.title}
-                />
-              )
-            })}
-          </ul>
+                return (
+                  <PlaneItem
+                    ancestorIds={ancestorIds}
+                    baseClass={baseClass}
+                    flatIndex={flatIndex}
+                    hierarchySlug={hierarchySlug ?? descriptor.row._collectionSlug}
+                    href={descriptor.href}
+                    isDragDisabled={isDragDisabled}
+                    isHierarchyGroup={descriptor.isHierarchyGroup}
+                    isSelected={selectedKeys.has(descriptor.key)}
+                    key={descriptor.key}
+                    lockedUser={getRowLockedUser?.(descriptor.row)}
+                    onClickCapture={handleCardClickCapture}
+                    onDoubleClick={handleCardDoubleClick}
+                    onKeyDown={handleCardKeyDown}
+                    onPointerDownUnselected={handlePointerDownUnselected}
+                    parentFieldName={descriptor.parentFieldName}
+                    registerNode={setItemRef}
+                    row={descriptor.row}
+                    selectionDragData={selectionDragData}
+                    showTypePill={showTypePill}
+                    title={descriptor.title}
+                  />
+                )
+              })}
+            </ul>
+          </div>
         )
       })}
 

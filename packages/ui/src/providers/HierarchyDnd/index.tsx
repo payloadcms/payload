@@ -12,7 +12,7 @@ import {
   useSensors,
 } from '@dnd-kit/core'
 import { snapCenterToCursor } from '@dnd-kit/modifiers'
-import React, { createContext, use, useCallback, useMemo, useState } from 'react'
+import React, { createContext, use, useCallback, useId, useMemo, useState } from 'react'
 
 import type { HierarchyDragData, HierarchyDropData } from './types.js'
 
@@ -61,6 +61,14 @@ export const useHierarchyDnd = (): HierarchyDndContextValue => use(Context)
  */
 export const HierarchyDndProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [activeDrag, setActiveDrag] = useState<HierarchyDragData | null>(null)
+
+  /*
+   * Without an explicit id, dnd-kit names the `aria-describedby` it puts on every draggable from a
+   * module-level counter, which does not line up between the server render and hydration - the
+   * card's attribute then mismatches and React discards the whole tree's hydration.
+   * See https://github.com/clauderic/dnd-kit/issues/926.
+   */
+  const dndContextID = useId()
 
   const {
     config: {
@@ -147,6 +155,7 @@ export const HierarchyDndProvider: React.FC<{ children: React.ReactNode }> = ({ 
     <Context value={contextValue}>
       <DndContext
         collisionDetection={pointerWithin}
+        id={dndContextID}
         onDragCancel={handleDragCancel}
         onDragEnd={handleDragEnd}
         onDragStart={handleDragStart}

@@ -142,4 +142,34 @@
     font-weight: var(--text-body-large-strong-font-weight);
     line-height: var(--text-body-large-strong-line-height);
   }
+
+  /*
+   * Grid mode's per-collection pagination. Aligned to the same gutter as the cards above, and
+   * wrapping rather than compressing, since a hierarchy can surface one control per related
+   * collection.
+   */
+  .hierarchy-tables__plane-pagination {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--spacer-3);
+    padding-inline: var(--gutter-h);
+    padding-block: var(--spacer-3);
+  }
+
+  .hierarchy-tables__plane-pagination-group {
+    display: flex;
+    align-items: center;
+    gap: var(--spacer-2);
+  }
+
+  .hierarchy-tables__plane-pagination-label {
+    color: var(--color-text);
+    white-space: nowrap;
+    font-family: var(--text-body-medium-strong-font-family);
+    font-size: var(--text-body-medium-strong-font-size);
+    font-weight: var(--text-body-medium-strong-font-weight);
+    line-height: var(--text-body-medium-strong-line-height);
+    letter-spacing: var(--text-body-medium-strong-letter-spacing);
+  }
 }

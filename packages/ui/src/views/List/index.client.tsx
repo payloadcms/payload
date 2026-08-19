@@ -85,11 +85,14 @@ function ListGridOrTable({
     },
   ]
 
+  // There are no folders and no hierarchy drop targets here, so the cards are select-only: dragging
+  // one has nowhere to land, and the dragging fade would just read as a click flicker.
   return (
     <HierarchyCardGrid
       bands={bands}
       fillHeight
       getRowLockedUser={(row) => (row._isLocked ? row._userEditing : undefined)}
+      isDragDisabled
       onSelectionChange={(row) => setSelection(row.id)}
       selectedKeys={selectedKeys}
     />

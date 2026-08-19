@@ -174,8 +174,18 @@ export const handleHierarchy = async ({
   const relatedDocumentsByCollection: RelatedDocumentsGrouped = {}
   const relatedBaseFilters: Record<string, Where> = {}
 
+  /**
+   * At the root, related documents are the ones not filed under any hierarchy item. Aggregating
+   * those across every related collection isn't a meaningful grouping - it amounts to "everything
+   * unfiled, from everywhere" - so they are only listed when browsing one specific collection by
+   * hierarchy. Inside a hierarchy item they are that item's contents, so they always list.
+   */
+  const shouldListRelatedDocuments = parentId !== null || Boolean(scopedToCollection)
+
   // Use pre-computed relatedCollections from sanitized hierarchy config
-  const relatedCollectionsConfig = hierarchyConfig.relatedCollections || {}
+  const relatedCollectionsConfig = shouldListRelatedDocuments
+    ? hierarchyConfig.relatedCollections || {}
+    : {}
 
   for (const [relatedSlug, fieldInfo] of Object.entries(relatedCollectionsConfig)) {
     if (relatedSlug === collectionSlug) {

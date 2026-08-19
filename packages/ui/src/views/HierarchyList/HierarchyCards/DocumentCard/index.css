@@ -69,16 +69,6 @@
     text-overflow: ellipsis;
   }
 
-  /* Thumbnail-less cards have nothing to overlay, so the badge joins the text flow */
-  .hierarchy-document-card__type--inline {
-    position: static;
-    align-self: flex-start;
-    max-width: 100%;
-    background: var(--color-bg);
-    color: black;
-    border: var(--stroke-width-small) solid var(--color-border);
-  }
-
   /* Content */
 
   .hierarchy-document-card__content {
@@ -89,9 +79,6 @@
     padding-block-start: var(--spacer-2-5);
     padding-block-end: var(--spacer-3);
     min-width: 0;
-  }
-
-  .hierarchy-document-card--has-thumbnail .hierarchy-document-card__content {
     border-block-start: var(--stroke-width-small) solid var(--color-border);
   }
 
@@ -142,17 +129,6 @@
     font-weight: var(--text-body-medium-strong-font-weight);
     line-height: var(--text-body-medium-strong-line-height);
     letter-spacing: var(--text-body-medium-strong-letter-spacing);
-  }
-
-  /*
-   * Without a thumbnail the corner slot sits over the first line of content, so reserve room for
-   * it.
-   */
-  .hierarchy-document-card--no-thumbnail.hierarchy-document-card--has-corner-slot
-    .hierarchy-document-card__link,
-  .hierarchy-document-card--no-thumbnail.hierarchy-document-card--has-corner-slot
-    .hierarchy-document-card__type--inline {
-    padding-inline-end: var(--spacer-5);
   }
 
   /* Properties */

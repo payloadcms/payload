@@ -66,8 +66,20 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
   const collectionConfig = getEntityConfig({ collectionSlug })
   const uploadConfig = collectionConfig?.upload
   const isPreviewAllowed = uploadConfig?.displayPreview ?? true
-  const hasFile = typeof doc.filename === 'string' && doc.filename.length > 0
-  const hasThumbnail = Boolean(uploadConfig) && isPreviewAllowed && hasFile
+  const hasOwnFile = typeof doc.filename === 'string' && doc.filename.length > 0
+  const isOwnUpload = Boolean(uploadConfig) && isPreviewAllowed && hasOwnFile
+
+  // Falls back to the first field of type `upload` on the collection (resolved server-side), so a
+  // card can surface a thumbnail even when the collection itself isn't upload-enabled.
+  const useAsThumbnail = collectionConfig?.admin?.useAsThumbnail
+  const relatedUploadDoc =
+    !isOwnUpload && useAsThumbnail && typeof doc[useAsThumbnail] === 'object' && doc[useAsThumbnail]
+      ? (doc[useAsThumbnail] as Record<string, unknown>)
+      : undefined
+  const thumbnailDoc = isOwnUpload ? doc : relatedUploadDoc
+
+  const thumbnailSrc = thumbnailDoc ? getThumbnailSrc({ doc: thumbnailDoc }) : undefined
+  const hasThumbnailImage = Boolean(thumbnailSrc)
 
   const title = getDocTitle({ doc, titleField: collectionConfig?.admin?.useAsTitle || 'id' })
   const status = getDocStatus({ doc })
@@ -88,7 +100,6 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
     <div
       className={[
         baseClass,
-        hasThumbnail ? `${baseClass}--has-thumbnail` : `${baseClass}--no-thumbnail`,
         // The corner slot holds the lock indicator, and content below it must reserve space for it.
         lockedUser && `${baseClass}--has-corner-slot`,
         isSelected && `${baseClass}--selected`,
@@ -97,26 +108,24 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
         .join(' ')}
       data-selected={isSelected ? 'true' : undefined}
     >
-      {hasThumbnail && (
-        <div className={`${baseClass}__thumbnail-wrap`}>
+      <div className={`${baseClass}__thumbnail-wrap`}>
+        {hasThumbnailImage && (
           <Thumbnail
             className={`${baseClass}__thumbnail`}
-            collectionSlug={collectionConfig?.slug}
-            doc={doc}
-            fileSrc={getThumbnailSrc({ doc })}
-            imageCacheTag={uploadConfig?.cacheTags ? (doc.updatedAt as string) : undefined}
+            collectionSlug={isOwnUpload ? collectionConfig?.slug : undefined}
+            doc={thumbnailDoc}
+            fileSrc={thumbnailSrc}
+            imageCacheTag={
+              isOwnUpload && uploadConfig?.cacheTags ? (doc.updatedAt as string) : undefined
+            }
             size="expand"
-            uploadConfig={uploadConfig}
+            uploadConfig={isOwnUpload ? uploadConfig : undefined}
           />
-          {hasTypePill && <span className={`${baseClass}__type`}>{typeLabel}</span>}
-        </div>
-      )}
+        )}
+        {hasTypePill && <span className={`${baseClass}__type`}>{typeLabel}</span>}
+      </div>
 
       <div className={`${baseClass}__content`}>
-        {hasTypePill && !hasThumbnail && (
-          <span className={`${baseClass}__type ${baseClass}__type--inline`}>{typeLabel}</span>
-        )}
-
         {/* The link is a sibling of the checkbox and stretches over the whole card via ::after */}
         {/* The card itself is the drag handle; a link's native drag would fight the pointer sensor. */}
         <Link className={`${baseClass}__link`} draggable={false} href={href}>
