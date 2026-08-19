@@ -144,10 +144,8 @@ export interface JsonObject {
 }
 
 export type WhereField = {
-  // any json-serializable value
-  [key in Exclude<Operator, HasManyRelationshipOperator>]?: JsonValue
-} & {
-  [key in HasManyRelationshipOperator]?: Where
+  // any json-serializable value, including a nested query for supported relationship operators
+  [key in Operator]?: JsonValue
 }
 
 export type Where = {

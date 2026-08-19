@@ -11,7 +11,7 @@ import {
   GraphQLString,
 } from 'graphql'
 import { DateTimeResolver, EmailAddressResolver } from 'graphql-scalars'
-import { hasManyRelationshipOperators, optionIsObject } from 'payload/shared'
+import { optionIsObject } from 'payload/shared'
 
 import { GraphQLJSON } from '../packages/graphql-type-json/index.js'
 import { combineParentName } from '../utilities/combineParentName.js'
@@ -260,9 +260,9 @@ const gqlTypeCache: Record<string, GraphQLType> = {}
  * @returns all the operators (including their types) which can be used as a condition for a given field inside a where
  *
  * @example
- * A has-many relationship adds operators that accept a nested query:
+ * A has-many relationship accepts a nested query with its relationship operators:
  * ```graphql
- * Posts(where: { categories: { none: { slug: { equals: "recalls" } } } })
+ * Burgers(where: { ingredients: { not_equals: { isHealthy: { equals: false } } } })
  * ```
  */
 export const withOperators = (
@@ -285,9 +285,8 @@ export const withOperators = (
     field.hasMany &&
     typeof field.relationTo === 'string'
   ) {
-    fieldOperators.push(
-      ...hasManyRelationshipOperators.map((name) => ({ name, type: GraphQLJSON })),
-    )
+    // `equals` and `not_equals` already exist for relationship fields.
+    fieldOperators.push({ name: 'contains', type: GraphQLJSON })
   }
 
   if (!('required' in field) || !field.required) {

@@ -104,14 +104,22 @@ export async function buildSearchParam({
 
   const [{ field, path }] = paths
 
-  if (hasManyRelationshipOperatorSet.has(operator as HasManyRelationshipOperator)) {
+  if (
+    hasManyRelationshipOperatorSet.has(operator as HasManyRelationshipOperator) &&
+    paths.length === 1 &&
+    (field.type === 'relationship' || field.type === 'upload') &&
+    field.hasMany &&
+    typeof field.relationTo === 'string' &&
+    val !== null &&
+    typeof val === 'object' &&
+    !Array.isArray(val)
+  ) {
     return buildHasManyRelationshipSearchParam({
       field,
       locale,
       nestedWhere: val,
       operator: operator as HasManyRelationshipOperator,
       path,
-      pathCount: paths.length,
       payload,
     })
   }
@@ -430,7 +438,7 @@ export async function buildSearchParam({
 }
 
 /**
- * Builds the MongoDB condition for `some`, `none`, and `every` on a has-many relationship.
+ * Builds a MongoDB condition for an operator containing a nested has-many relationship query.
  *
  * First, it finds IDs from the related collection that match the nested query. The parent
  * collection can then use `$in` or `$nin` against its stored relationship IDs.
@@ -438,10 +446,10 @@ export async function buildSearchParam({
  * @example
  * ```ts
  * // Input
- * { movies: { none: { name: { equals: 'recalls' } } } }
+ * { ingredients: { not_equals: { isHealthy: { equals: false } } } }
  *
- * // Simplified MongoDB result, after finding the matching movie IDs
- * { movies: { $nin: [recallsMovieID] } }
+ * // Simplified MongoDB result, after finding the matching ingredient IDs
+ * { ingredients: { $nin: [unhealthyIngredientID] } }
  * ```
  */
 async function buildHasManyRelationshipSearchParam({
@@ -450,7 +458,6 @@ async function buildHasManyRelationshipSearchParam({
   nestedWhere,
   operator,
   path,
-  pathCount,
   payload,
 }: {
   field: FlattenedField
@@ -458,11 +465,9 @@ async function buildHasManyRelationshipSearchParam({
   nestedWhere: unknown
   operator: HasManyRelationshipOperator
   path: string
-  pathCount: number
   payload: Payload
 }): Promise<SearchParam | undefined> {
   if (
-    pathCount !== 1 ||
     (field.type !== 'relationship' && field.type !== 'upload') ||
     !field.hasMany ||
     typeof field.relationTo !== 'string' ||
@@ -492,7 +497,16 @@ async function buildHasManyRelationshipSearchParam({
     (await RelatedModel.find(query).lean().select({ _id: true })).map((document) => document._id)
 
   switch (operator) {
-    case 'every': {
+    case 'contains': {
+      const matchingRelatedDocumentIDs = await findRelatedDocumentIDs(matchingRelatedDocumentsQuery)
+
+      return {
+        path,
+        value: { $in: matchingRelatedDocumentIDs },
+      }
+    }
+
+    case 'equals': {
       // Every related document satisfies an empty nested query.
       if (!Object.keys(matchingRelatedDocumentsQuery).length) {
         return {
@@ -501,8 +515,8 @@ async function buildHasManyRelationshipSearchParam({
         }
       }
 
-      // Inverting the nested query with `$nor` would make MongoDB reject `$near` and `$text`, so
-      // `every` is asserted on the parent instead: none of its IDs may fall outside the match.
+      // MongoDB rejects `$near` and `$text` when they are inverted with `$nor`. Check the parent
+      // instead: none of its IDs may fall outside the matching IDs.
       const matchingRelatedDocumentIDs = await findRelatedDocumentIDs(matchingRelatedDocumentsQuery)
 
       return {
@@ -511,21 +525,12 @@ async function buildHasManyRelationshipSearchParam({
       }
     }
 
-    case 'none': {
+    case 'not_equals': {
       const matchingRelatedDocumentIDs = await findRelatedDocumentIDs(matchingRelatedDocumentsQuery)
 
       return {
         path,
         value: { $nin: matchingRelatedDocumentIDs },
-      }
-    }
-
-    case 'some': {
-      const matchingRelatedDocumentIDs = await findRelatedDocumentIDs(matchingRelatedDocumentsQuery)
-
-      return {
-        path,
-        value: { $in: matchingRelatedDocumentIDs },
       }
     }
   }

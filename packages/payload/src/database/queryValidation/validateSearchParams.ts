@@ -90,30 +90,25 @@ export async function validateSearchParam({
   }
   const promises: Promise<void>[] = []
 
-  const isHasManyRelationshipOperator = hasManyRelationshipOperatorSet.has(
-    operator as HasManyRelationshipOperator,
-  )
+  const relationshipField = paths.length === 1 ? paths[0]?.field : undefined
+  const hasNestedWhere = val !== null && typeof val === 'object' && !Array.isArray(val)
+  const relatedCollectionSlug =
+    relationshipField &&
+    (relationshipField.type === 'relationship' || relationshipField.type === 'upload') &&
+    relationshipField.hasMany &&
+    typeof relationshipField.relationTo === 'string'
+      ? relationshipField.relationTo
+      : undefined
+  const isNestedHasManyQuery =
+    hasManyRelationshipOperatorSet.has(operator as HasManyRelationshipOperator) &&
+    hasNestedWhere &&
+    Boolean(relatedCollectionSlug)
 
-  if (isHasManyRelationshipOperator) {
-    const relationshipField = paths.length === 1 ? paths[0]?.field : undefined
-    const hasNestedWhere = val !== null && typeof val === 'object' && !Array.isArray(val)
-
-    if (
-      !relationshipField ||
-      (relationshipField.type !== 'relationship' && relationshipField.type !== 'upload') ||
-      !relationshipField.hasMany ||
-      typeof relationshipField.relationTo !== 'string' ||
-      !hasNestedWhere
-    ) {
-      errors.push({ path: `${incomingPath}.${operator}` })
-      return
-    }
-
-    // The value of `some`, `none`, or `every` is a complete `where` query for the related
-    // collection, so its field paths and access permissions must be validated in that collection.
+  if (isNestedHasManyQuery && relatedCollectionSlug) {
+    // Validate the nested query against the related collection.
     promises.push(
       validateQueryPaths({
-        collectionConfig: req.payload.collections[relationshipField.relationTo]!.config,
+        collectionConfig: req.payload.collections[relatedCollectionSlug]!.config,
         errors,
         overrideAccess,
         policies,
@@ -235,7 +230,7 @@ export async function validateSearchParam({
         }
       }
 
-      if (!isHasManyRelationshipOperator && i > 1) {
+      if (!isNestedHasManyQuery && i > 1) {
         // Remove top collection and reverse array
         // to work backwards from top
         const pathsToQuery = paths.slice(1).reverse()

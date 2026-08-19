@@ -41,14 +41,14 @@ The following operators are available for use in queries:
 
 | Operator             | Description                                                                                                                                                                      |
 | -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `equals`             | The value must be exactly equal.                                                                                                                                                 |
-| `not_equals`         | The query will return all documents where the value is not equal.                                                                                                                |
+| `equals`             | The value must be exactly equal. With a nested query on a non-polymorphic `hasMany` relationship, every related document must match.                                             |
+| `not_equals`         | The query will return all documents where the value is not equal. With a nested query on a non-polymorphic `hasMany` relationship, no related document may match.                |
 | `greater_than`       | For numeric or date-based fields.                                                                                                                                                |
 | `greater_than_equal` | For numeric or date-based fields.                                                                                                                                                |
 | `less_than`          | For numeric or date-based fields.                                                                                                                                                |
 | `less_than_equal`    | For numeric or date-based fields.                                                                                                                                                |
 | `like`               | Case-insensitive string must be present. If string of words, all words must be present, in any order.                                                                            |
-| `contains`           | Must contain the value entered, case-insensitive.                                                                                                                                |
+| `contains`           | Must contain the value entered, case-insensitive. With a nested query on a non-polymorphic `hasMany` relationship, at least one related document must match.                     |
 | `in`                 | The value must be found within the provided comma-delimited list of values.                                                                                                      |
 | `not_in`             | The value must NOT be within the provided comma-delimited list of values.                                                                                                        |
 | `all`                | The value must contain all values provided in the comma-delimited list. Note: currently this operator is supported only with the MongoDB adapter.                                |
@@ -56,9 +56,6 @@ The following operators are available for use in queries:
 | `near`               | For distance related to a [Point Field](../fields/point) comma separated as `<longitude>, <latitude>, <maxDistance in meters (nullable)>, <minDistance in meters (nullable)>`.   |
 | `within`             | For [Point Fields](../fields/point) to filter documents based on whether points are inside of the given area defined in GeoJSON. [Example](../fields/point#querying-within)      |
 | `intersects`         | For [Point Fields](../fields/point) to filter documents based on whether points intersect with the given area defined in GeoJSON. [Example](../fields/point#querying-intersects) |
-| `some`               | For non-polymorphic `hasMany` relationship and upload fields. At least one related document must match a nested query.                                                           |
-| `none`               | For non-polymorphic `hasMany` relationship and upload fields. No related document may match a nested query.                                                                      |
-| `every`              | For non-polymorphic `hasMany` relationship and upload fields. Every related document must match a nested query.                                                                  |
 
 <Banner type="success">
   **Tip:** If you know your users will be querying on certain fields a lot, add
@@ -106,8 +103,8 @@ Written in plain English, if the above query were passed to a `find` operation, 
 
 ## Relationship queries
 
-Relationship fields can be queried through properties on their related documents. For `hasMany`
-relationships, you can also control whether some, none, or every related document must match.
+Relationship fields can be queried through properties on their related documents. You can also
+apply a nested query to a non-polymorphic `hasMany` relationship or upload field.
 
 ### Nested relationship properties
 
@@ -128,17 +125,17 @@ const query: Where = {
 
 ### Has-many relationship operators
 
-For non-polymorphic `hasMany` relationship and upload fields, use `some`, `none`, or `every`
-to control how a nested query is applied to the related documents:
+For non-polymorphic `hasMany` relationship and upload fields, pass a nested query to `contains`,
+`not_equals`, or `equals` to control how many related documents must match:
 
 ```ts
-const directors = await payload.find({
-  collection: 'directors',
+const burgers = await payload.find({
+  collection: 'burgers',
   where: {
-    movies: {
-      none: {
-        name: {
-          equals: 'recalls',
+    ingredients: {
+      not_equals: {
+        isHealthy: {
+          equals: false,
         },
       },
     },
@@ -146,27 +143,27 @@ const directors = await payload.find({
 })
 ```
 
-| Operator | Description                                                |
-| -------- | ---------------------------------------------------------- |
-| `some`   | At least one related document must match the nested query. |
-| `none`   | No related document may match the nested query.            |
-| `every`  | Every related document must match the nested query.        |
+| Operator     | Description                                                |
+| ------------ | ---------------------------------------------------------- |
+| `contains`   | At least one related document must match the nested query. |
+| `not_equals` | No related document may match the nested query.            |
+| `equals`     | Every related document must match the nested query.        |
 
 The nested query supports the same `and` and `or` groups as any other Payload query. All conditions
 inside one operator are evaluated against the same related document:
 
 ```ts
-const directors = await payload.find({
-  collection: 'directors',
+const burgers = await payload.find({
+  collection: 'burgers',
   where: {
-    movies: {
-      some: {
+    ingredients: {
+      contains: {
         and: [
-          { rating: { greater_than_equal: 4 } },
+          { isHealthy: { equals: true } },
           {
             or: [
-              { genre: { equals: 'documentary' } },
-              { featured: { equals: true } },
+              { name: { equals: 'lettuce' } },
+              { name: { equals: 'tomato' } },
             ],
           },
         ],
@@ -176,10 +173,12 @@ const directors = await payload.find({
 })
 ```
 
-This finds directors who have at least one movie with a rating of 4 or higher that is either a
-documentary or featured. The conditions cannot be satisfied by different movies.
+This finds burgers with at least one healthy ingredient named either `lettuce` or `tomato`. The
+conditions cannot be satisfied by different ingredients.
 
-An empty relationship does not match `some`, but it does match `none` and `every`.
+An empty relationship does not match a nested `contains` query, but it does match nested
+`not_equals` and `equals` queries. Passing a normal value instead of a nested query keeps the
+existing behavior of these operators.
 
 ## Writing Queries
 

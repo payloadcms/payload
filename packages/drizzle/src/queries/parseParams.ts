@@ -106,23 +106,39 @@ export function parseParams({
                 const val = where[relationOrPath][operator]
                 const originalOperator = operator as Operator
 
-                if (hasManyRelationshipOperatorSet.has(operator as HasManyRelationshipOperator)) {
-                  // These operators receive a nested `where` query instead of a scalar value and
-                  // must evaluate the relationship as a group, so they use a correlated subquery.
-                  constraints.push(
-                    buildHasManyRelationshipCondition({
-                      adapter,
-                      aliasTable,
-                      fields,
-                      locale,
-                      operator: operator as HasManyRelationshipOperator,
-                      parentIsLocalized,
-                      relationOrPath,
-                      tableName,
-                      where: val as Where,
-                    }),
-                  )
-                  continue
+                if (
+                  hasManyRelationshipOperatorSet.has(operator as HasManyRelationshipOperator) &&
+                  val !== null &&
+                  typeof val === 'object' &&
+                  !Array.isArray(val)
+                ) {
+                  const relationshipPath = resolveRelationshipPath({
+                    adapter,
+                    fields,
+                    locale,
+                    parentIsLocalized,
+                    path: relationOrPath.replace(/__/g, '.'),
+                  })
+
+                  if (
+                    relationshipPath?.field.hasMany &&
+                    typeof relationshipPath.field.relationTo === 'string'
+                  ) {
+                    constraints.push(
+                      buildHasManyRelationshipCondition({
+                        adapter,
+                        aliasTable,
+                        fields,
+                        locale,
+                        operator: operator as HasManyRelationshipOperator,
+                        parentIsLocalized,
+                        relationOrPath,
+                        tableName,
+                        where: val as Where,
+                      }),
+                    )
+                    continue
+                  }
                 }
 
                 const {
@@ -573,24 +589,23 @@ export function parseParams({
 }
 
 /**
- * Builds the SQL condition for `some`, `none`, and `every` on a has-many relationship.
+ * Builds a SQL condition for an operator containing a nested has-many relationship query.
  *
- * `some`: at least one related document matches.
- * `none`: no related documents match.
- * `every`: all related documents match; an empty relationship also matches.
+ * `contains`: at least one related document matches.
+ * `not_equals`: no related documents match.
+ * `equals`: all related documents match; an empty relationship also matches.
  *
  * A normal dotted relationship query adds joins to the parent query. That cannot implement
- * `none` or `every`, because those operators must inspect all relationship rows before deciding
- * whether to include the parent. A correlated `EXISTS` subquery keeps that decision scoped to one
- * parent document.
+ * the negative cases, because they must inspect all relationship rows before deciding whether to
+ * include the parent. A correlated `EXISTS` subquery keeps that decision scoped to one parent.
  *
  * @example
  * ```ts
- * // Find directors who have no movie named "recalls".
+ * // Find burgers with no unhealthy ingredients.
  * const where = {
- *   movies: {
- *     none: {
- *       name: { equals: 'recalls' },
+ *   ingredients: {
+ *     not_equals: {
+ *       isHealthy: { equals: false },
  *     },
  *   },
  * }
@@ -641,9 +656,8 @@ function buildHasManyRelationshipCondition({
     throw new QueryError([{ path: `${relationshipFieldPath}.${operator}` }])
   }
 
-  // An empty nested query matches every document, so every relationship row passes. This is also
-  // true for a parent with no relationship rows.
-  if (operator === 'every' && Object.keys(where).length === 0) {
+  // Every related document matches an empty query, including when there are no related documents.
+  if (operator === 'equals' && Object.keys(where).length === 0) {
     return sql`true`
   }
 
@@ -722,14 +736,14 @@ function buildHasManyRelationshipCondition({
       .where(and(...relationshipRowConstraints, relatedDocumentCheck))
 
   switch (operator) {
-    case 'every':
-      // `every` matches when no relationship row points to a document that fails the query.
+    case 'contains':
+      return exists(buildRelationshipRowsSubquery(exists(relatedDocumentSubquery)))
+
+    case 'equals':
+      // All related documents match when no relationship row points to one that fails.
       return notExists(buildRelationshipRowsSubquery(notExists(relatedDocumentSubquery)))
 
-    case 'none':
+    case 'not_equals':
       return notExists(buildRelationshipRowsSubquery(exists(relatedDocumentSubquery)))
-
-    case 'some':
-      return exists(buildRelationshipRowsSubquery(exists(relatedDocumentSubquery)))
   }
 }

@@ -516,12 +516,7 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(whereDef.type).toBe('object')
       expect(whereDef.properties.and.type).toBe('array')
       expect(whereDef.properties.or.type).toBe('array')
-      const whereFieldDef = whereDef.additionalProperties
-      expect(whereFieldDef.properties.equals).toBeDefined()
-      expect(whereFieldDef.properties.some.$ref).toBe(whereRef)
-      expect(whereFieldDef.properties.none.$ref).toBe(whereRef)
-      expect(whereFieldDef.properties.every.$ref).toBe(whereRef)
-      expect(whereFieldDef.additionalProperties).toBe(false)
+      expect(whereDef.additionalProperties.propertyNames.enum).toContain('equals')
 
       // Each document keeps its data and file together; shared options stay at the top level.
       expect(createDocuments.inputSchema).toBeDefined()

@@ -342,8 +342,8 @@ describe('collections-graphql', () => {
   })
 
   describe('Querying', () => {
-    describe('has-many relationship operators', () => {
-      it('should query has-many relationship operators through GraphQL', async () => {
+    describe('nested has-many relationship queries', () => {
+      it('should query a nested has-many relationship through GraphQL', async () => {
         const recalls = await payload.create({
           collection: relationSlug,
           data: { name: 'recalls' },
@@ -374,7 +374,7 @@ describe('collections-graphql', () => {
           Posts(where: {
             AND: [
               { OR: [${fixtureIDFilters}] }
-              { relationHasManyField: { none: { name: { equals: "recalls" } } } }
+              { relationHasManyField: { not_equals: { name: { equals: "recalls" } } } }
             ]
           }) {
             docs { id }

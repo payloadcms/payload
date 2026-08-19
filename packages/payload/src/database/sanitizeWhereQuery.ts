@@ -72,15 +72,15 @@ export const sanitizeWhereQuery = ({
 }
 
 /**
- * Resolves virtual field paths inside the nested query accepted by `some`, `none`, and `every`.
+ * Resolves virtual field paths inside a nested has-many relationship query.
  * The nested query uses fields from the related collection, not fields from the parent collection.
  *
  * @example
  * ```ts
  * {
- *   movies: {
- *     some: {
- *       displayTitle: { equals: 'Alien' }, // `displayTitle` may point to a virtual field path
+ *   ingredients: {
+ *     contains: {
+ *       displayName: { equals: 'Lettuce' }, // `displayName` may be a virtual field
  *     },
  *   },
  * }

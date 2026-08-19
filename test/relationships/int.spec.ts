@@ -581,7 +581,7 @@ describe('Relationships', () => {
               depth: 0,
               where: {
                 movies: {
-                  some: { name: { equals: 'recalls' } },
+                  contains: { name: { equals: 'recalls' } },
                 },
               },
             })
@@ -598,7 +598,7 @@ describe('Relationships', () => {
               depth: 0,
               where: {
                 movies: {
-                  none: { name: { equals: 'recalls' } },
+                  not_equals: { name: { equals: 'recalls' } },
                 },
               },
             })
@@ -615,7 +615,7 @@ describe('Relationships', () => {
               depth: 0,
               where: {
                 movies: {
-                  every: { name: { equals: 'electric-cars' } },
+                  equals: { name: { equals: 'electric-cars' } },
                 },
               },
             })
@@ -631,7 +631,7 @@ describe('Relationships', () => {
               query: {
                 depth: 0,
                 where: {
-                  movies: { none: { name: { equals: 'recalls' } } },
+                  movies: { not_equals: { name: { equals: 'recalls' } } },
                 },
               },
             })
@@ -644,51 +644,12 @@ describe('Relationships', () => {
             expect(foundDirectorIDs).toContain(directorWithoutMovies.id)
           })
 
-          it('should reject has-many relationship operators on a singular relationship', async () => {
-            await expect(
-              payload.find({
-                collection: 'directors',
-                where: {
-                  movie: {
-                    none: { name: { equals: 'recalls' } },
-                  },
-                },
-              }),
-            ).rejects.toThrow('movie.none')
-          })
-
-          it('should reject has-many relationship operators on a scalar field', async () => {
-            await expect(
-              payload.find({
-                collection: 'directors',
-                where: {
-                  name: {
-                    none: { equals: 'mixed' },
-                  },
-                },
-              }),
-            ).rejects.toThrow('name.none')
-          })
-
-          it('should reject has-many relationship operators on a polymorphic relationship', async () => {
-            await expect(
-              payload.find({
-                collection: polymorphicRelationshipsSlug,
-                where: {
-                  polymorphicMany: {
-                    none: { name: { equals: 'recalls' } },
-                  },
-                },
-              }),
-            ).rejects.toThrow('polymorphicMany.none')
-          })
-
           it('should support direct relationship ID conditions', async () => {
             const { docs } = await payload.find({
               collection: 'directors',
               depth: 0,
               where: {
-                movies: { none: { id: { equals: recallsMovieID } } },
+                movies: { not_equals: { id: { equals: recallsMovieID } } },
               },
             })
 
@@ -704,7 +665,7 @@ describe('Relationships', () => {
               depth: 0,
               where: {
                 movies: {
-                  some: {
+                  contains: {
                     and: [{ name: { equals: 'recalls' } }, { id: { equals: electricCarsMovieID } }],
                   },
                 },
@@ -714,13 +675,13 @@ describe('Relationships', () => {
             expect(docs).toHaveLength(0)
           })
 
-          it('should evaluate every against related documents instead of joined rows', async () => {
+          it('should evaluate nested equals against related documents instead of joined rows', async () => {
             const { docs } = await payload.find({
               collection: 'directors',
               depth: 0,
               where: {
                 movies: {
-                  every: { select: { equals: 'a' } },
+                  equals: { select: { equals: 'a' } },
                 },
               },
             })
@@ -766,8 +727,8 @@ describe('Relationships', () => {
                   },
                   {
                     'blocks.directors': {
-                      none: {
-                        movies: { some: { name: { equals: 'recalls' } } },
+                      not_equals: {
+                        movies: { contains: { name: { equals: 'recalls' } } },
                       },
                     },
                   },
@@ -783,7 +744,7 @@ describe('Relationships', () => {
 
           // `near` on a point field is not implemented by the drizzle sqlite adapter
           it(
-            'should support every with a geospatial nested query',
+            'should support equals with a geospatial nested query',
             { db: (adapter) => adapter.startsWith('sqlite') === false },
             async () => {
               const nearbyMovie = await payload.create({
@@ -800,7 +761,7 @@ describe('Relationships', () => {
                 collection: 'directors',
                 depth: 0,
                 where: {
-                  movies: { every: { location: { near: '10,20,100000' } } },
+                  movies: { equals: { location: { near: '10,20,100000' } } },
                 },
               })
 
