@@ -10,6 +10,7 @@ import { usePreferences } from '../../providers/Preferences/index.js'
 import { useRouter } from '../../providers/RouterAdapter/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Button } from '../Button/index.js'
+import { getFolderHierarchySlug } from '../Hierarchy/getFolderHierarchySlug.js'
 import './index.css'
 
 const baseClass = 'default-list-view-tabs'
@@ -31,11 +32,14 @@ export const DefaultListViewTabs: React.FC<DefaultListViewTabsProps> = ({
   const { setPreference } = usePreferences()
   const router = useRouter()
   const isTrashEnabled = collectionConfig.trash
-  const isHierarchyEnabled = Boolean(collectionConfig.hierarchy)
-  const hierarchyConfig =
-    isHierarchyEnabled && typeof collectionConfig.hierarchy === 'object'
-      ? collectionConfig.hierarchy
-      : undefined
+
+  // The collection either owns a tree (Folders) or belongs to one via a folder field (Media). Both
+  // get the pill, and the pill is labelled after whichever collection owns the tree.
+  const folderHierarchySlug = getFolderHierarchySlug(config.collections, collectionConfig.slug)
+  const hierarchyCollectionConfig = collectionConfig.hierarchy
+    ? collectionConfig
+    : config.collections.find((collection) => collection.slug === folderHierarchySlug)
+  const isHierarchyEnabled = Boolean(hierarchyCollectionConfig)
 
   if (!isTrashEnabled && !isHierarchyEnabled) {
     return null
@@ -110,7 +114,7 @@ export const DefaultListViewTabs: React.FC<DefaultListViewTabsProps> = ({
           id="hierarchy-view-pill"
           onClick={() => handleViewChange('hierarchy')}
         >
-          {`${t('general:by')} ${getTranslation(collectionConfig?.labels?.singular, i18n)}`}
+          {`${t('general:by')} ${getTranslation(hierarchyCollectionConfig?.labels?.singular, i18n)}`}
         </Button>
       )}
 
