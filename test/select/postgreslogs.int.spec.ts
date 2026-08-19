@@ -31,8 +31,8 @@ test.suite({ config: './config.postgreslogs.ts', db: (adapter) => adapter.starts
 
       // Clean up to safely mutate in each test
       test.afterEach(async ({ payload }) => {
-        await payload.delete({ id: postId, collection: 'posts' })
-        await payload.delete({ id: pointId, collection: 'points' })
+        await payload.delete({ id: postId, collection: 'posts', overrideAccess: true })
+        await payload.delete({ id: pointId, collection: 'points', overrideAccess: true })
       })
 
       test('ensure optimized db update is still used when using select', async ({ payload }) => {
@@ -80,6 +80,7 @@ test.suite({ config: './config.postgreslogs.ts', db: (adapter) => adapter.starts
               },
             ],
           },
+          overrideAccess: true,
         })
 
         // Count every console log
@@ -111,6 +112,7 @@ test.suite({ config: './config.postgreslogs.ts', db: (adapter) => adapter.starts
         const fullPage: any = await payload.findByID({
           collection: 'pages',
           id: page.id,
+          overrideAccess: true,
         })
 
         delete fullPage.createdAt
@@ -174,12 +176,14 @@ async function createPost({ payload }: { payload: Payload }) {
     collection: 'upload',
     data: {},
     filePath: path.resolve(dirname, 'image.jpg'),
+    overrideAccess: true,
   })
 
   const relation = await payload.create({
     depth: 0,
     collection: 'rels',
     data: {},
+    overrideAccess: true,
   })
 
   return payload.create({
@@ -224,9 +228,10 @@ async function createPost({ payload }: { payload: Payload }) {
       unnamedTabNumber: 2,
       unnamedTabText: 'text2',
     },
+    overrideAccess: true,
   })
 }
 
 function createPoint({ payload }: { payload: Payload }) {
-  return payload.create({ collection: 'points', data: { text: 'some', point: [10, 20] } })
+  return payload.create({ collection: 'points', data: { text: 'some', point: [10, 20] }, overrideAccess: true })
 }

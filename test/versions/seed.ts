@@ -42,12 +42,14 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
     collection: mediaCollectionSlug,
     data: {},
     file: imageFile,
+    overrideAccess: true,
   })
 
   const { id: uploadedImageMedia2 } = await _payload.create({
     collection: media2CollectionSlug,
     data: {},
     file: imageFile,
+    overrideAccess: true,
   })
 
   const imageFilePath2 = path.resolve(seedDir, './image.png')
@@ -57,12 +59,14 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
     collection: mediaCollectionSlug,
     data: {},
     file: imageFile2,
+    overrideAccess: true,
   })
 
   const { id: uploadedImage2Media2 } = await _payload.create({
     collection: media2CollectionSlug,
     data: {},
     file: imageFile2,
+    overrideAccess: true,
   })
 
   const { id: devUserID } = await _payload.create({
@@ -162,6 +166,7 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
     data: {
       title: 'Initial seeded title',
     },
+    overrideAccess: true,
   })
 
   const { id: doc1ID } = await _payload.create({
@@ -170,6 +175,7 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
       owner: devUserID,
       text: 'Document 1',
     },
+    overrideAccess: true,
   })
 
   const { id: doc2ID } = await _payload.create({
@@ -178,6 +184,7 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
       owner: devUserID,
       text: 'Document 2',
     },
+    overrideAccess: true,
   })
 
   const { id: otherUserDocID } = await _payload.create({
@@ -196,6 +203,7 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
       text: 'Draft 1',
     },
     depth: 0,
+    overrideAccess: true,
   })
 
   await _payload.update({
@@ -207,6 +215,7 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
     },
     depth: 0,
     id: diffDocDraft.id,
+    overrideAccess: true,
   })
 
   await _payload.update({
@@ -218,6 +227,7 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
     },
     depth: 0,
     id: diffDocDraft.id,
+    overrideAccess: true,
   })
   await _payload.update({
     collection: diffCollectionSlug,
@@ -228,6 +238,7 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
     },
     depth: 0,
     id: diffDocDraft.id,
+    overrideAccess: true,
   })
 
   const diffDoc = await _payload.update({
@@ -338,6 +349,7 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
       uploadHasMany: [uploadedImage],
     },
     depth: 0,
+    overrideAccess: true,
   })
 
   const pointGeoJSON: any = {
@@ -361,6 +373,7 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
     depth: 0,
     limit: 50,
     sort: '-createdAt',
+    overrideAccess: true,
   })
 
   let i = 0
@@ -491,5 +504,6 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
       zeroDepthRelationship: devUserID,
     },
     depth: 0,
+    overrideAccess: true,
   })
 }

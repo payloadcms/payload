@@ -53,6 +53,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-seo', () => {
       collection: mediaSlug,
       data: {},
       file,
+      overrideAccess: true,
     })
 
     page = await payload.create({
@@ -66,6 +67,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-seo', () => {
         },
       },
       depth: 0,
+      overrideAccess: true,
     })
 
     readablePage = await payload.create({
@@ -97,6 +99,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-seo', () => {
       collection: mediaSlug,
       data: {},
       file,
+      overrideAccess: true,
     })
   })
 
@@ -443,6 +446,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-seo', () => {
       },
       depth: 0,
       context,
+      overrideAccess: true,
     })
 
     // If identicalCount was incremented, it means previousValue === value incorrectly
@@ -460,6 +464,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-seo', () => {
         },
       },
       depth: 0,
+      overrideAccess: true,
     })
 
     expect(pageWithTitle).toHaveProperty('meta')
@@ -477,6 +482,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-seo', () => {
         },
       },
       depth: 0,
+      overrideAccess: true,
     })
 
     expect(pageWithDescription).toHaveProperty('meta')
@@ -494,6 +500,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-seo', () => {
         },
       },
       depth: 0,
+      overrideAccess: true,
     })
 
     expect(pageWithImage).toHaveProperty('meta')
@@ -511,6 +518,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-seo', () => {
         },
       },
       depth: 0,
+      overrideAccess: true,
     })
 
     expect(pageWithCustomField).toHaveProperty('meta')
@@ -530,6 +538,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-seo', () => {
       },
       locale: 'en',
       depth: 0,
+      overrideAccess: true,
     })
 
     const pageWithLocalizedMeta = await payload.update({
@@ -543,6 +552,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-seo', () => {
       },
       locale: 'es',
       depth: 0,
+      overrideAccess: true,
     })
 
     expect(pageWithLocalizedMeta).toHaveProperty('meta')
@@ -556,6 +566,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-seo', () => {
       collection: 'pages',
       id: page.id,
       depth: 0,
+      overrideAccess: true,
     })
 
     expect(pageInDefaultLocale).toHaveProperty('meta')

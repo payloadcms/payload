@@ -174,6 +174,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('ecommerce', () 
       collection: 'variants',
       depth: 0,
       limit: 1,
+      overrideAccess: true,
     })
 
     expect(variants).toBeTruthy()
@@ -413,12 +414,14 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('ecommerce', () 
       const products = await payload.find({
         collection: 'products',
         limit: 1,
+        overrideAccess: true,
       })
       productId = products.docs[0]?.id as string
 
       const variants = await payload.find({
         collection: 'variants',
         limit: 1,
+        overrideAccess: true,
       })
       variantId = variants.docs[0]?.id as string
     })
@@ -874,12 +877,14 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('ecommerce', () 
       const products = await payload.find({
         collection: 'products',
         limit: 1,
+        overrideAccess: true,
       })
       productId = products.docs[0]?.id as string
 
       const variants = await payload.find({
         collection: 'variants',
         limit: 1,
+        overrideAccess: true,
       })
       variantId = variants.docs[0]?.id as string
     })
@@ -898,6 +903,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('ecommerce', () 
           email: `merge-test-${Date.now()}@test.com`,
           password: 'test123',
         },
+        overrideAccess: true,
       })
 
       await restClient.login({
@@ -983,6 +989,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('ecommerce', () 
           email: `merge-combine-${Date.now()}@test.com`,
           password: 'test123',
         },
+        overrideAccess: true,
       })
 
       await restClient.login({
@@ -1047,6 +1054,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('ecommerce', () 
           email: `merge-delete-${Date.now()}@test.com`,
           password: 'test123',
         },
+        overrideAccess: true,
       })
 
       await restClient.login({
@@ -1127,6 +1135,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('ecommerce', () 
           email: `merge-invalid-${Date.now()}@test.com`,
           password: 'test123',
         },
+        overrideAccess: true,
       })
 
       await restClient.login({
@@ -1167,6 +1176,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('ecommerce', () 
       const products = await payload.find({
         collection: 'products',
         limit: 1,
+        overrideAccess: true,
       })
       productId = products.docs[0]?.id as string
     })
@@ -1181,6 +1191,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('ecommerce', () 
           email: `auth-cart-${Date.now()}@test.com`,
           password: 'test123',
         },
+        overrideAccess: true,
       })
 
       await restClient.login({
@@ -1220,6 +1231,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('ecommerce', () 
           email: `auth-add-${Date.now()}@test.com`,
           password: 'test123',
         },
+        overrideAccess: true,
       })
 
       await restClient.login({
@@ -1265,6 +1277,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('ecommerce', () 
           email: `auth-nosecret-${Date.now()}@test.com`,
           password: 'test123',
         },
+        overrideAccess: true,
       })
 
       await restClient.login({
@@ -1297,6 +1310,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('ecommerce', () 
       const products = await payload.find({
         collection: 'products',
         limit: 1,
+        overrideAccess: true,
       })
       productId = products.docs[0]?.id as string
     })
@@ -1318,6 +1332,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('ecommerce', () 
           email: `transfer-${Date.now()}@test.com`,
           password: 'test123',
         },
+        overrideAccess: true,
       })
 
       // Login as the user

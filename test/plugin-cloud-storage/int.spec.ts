@@ -52,6 +52,7 @@ async function verifyUploads({
   const uploadData = (await payload.findByID({
     id: uploadId,
     collection: collectionSlug,
+    overrideAccess: true,
   })) as unknown as { filename: string; sizes: Record<string, { filename: string }> }
 
   const sizes = uploadData.sizes ?? {}
@@ -302,6 +303,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-cloud-storage', () => 
             collection: mediaSlug,
             data: {},
             filePath: path.resolve(dirname, '../uploads/image.png'),
+            overrideAccess: true,
           })
 
           expect(upload.id).toBeTruthy()
@@ -322,6 +324,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-cloud-storage', () => 
             collection: mediaWithPrefixSlug,
             data: {},
             filePath: path.resolve(dirname, '../uploads/image.png'),
+            overrideAccess: true,
           })
 
           expect(upload.id).toBeTruthy()
@@ -352,6 +355,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-cloud-storage', () => 
               collection: restrictedMediaSlug,
               data: {},
               filePath: path.resolve(dirname, './test.json'),
+              overrideAccess: true,
             }),
           ).rejects.toThrow()
 
@@ -368,6 +372,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-cloud-storage', () => 
             collection: restrictedMediaSlug,
             data: {},
             filePath: path.resolve(dirname, './image.png'),
+            overrideAccess: true,
           })
 
           expect(upload.id).toBeTruthy()
@@ -393,11 +398,13 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-cloud-storage', () => 
             collection: mediaSlug,
             data: {},
             filePath: path.resolve(dirname, '../uploads/image.png'),
+            overrideAccess: true,
           })
 
           const apiResponse = await payload.findByID({
             id: upload.id,
             collection: mediaSlug,
+            overrideAccess: true,
           })
           expect(apiResponse.sizes).toBeTruthy()
 
@@ -439,6 +446,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-cloud-storage', () => 
             collection: mediaWithPrefixSlug,
             data: {},
             filePath: path.resolve(dirname, '../uploads/image.png'),
+            overrideAccess: true,
           })
 
           expect(upload.filename).toBeTruthy()
@@ -473,6 +481,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-cloud-storage', () => 
             collection: mediaWithCustomURLSlug,
             data: {},
             filePath: path.resolve(dirname, '../uploads/image.png'),
+            overrideAccess: true,
           })
 
           expect(upload.id).toBeTruthy()
@@ -500,6 +509,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-cloud-storage', () => 
           const apiResponse = await payload.findByID({
             id: upload.id,
             collection: mediaWithCustomURLSlug,
+            overrideAccess: true,
           })
 
           expect(apiResponse.url).toContain('test-cdn.example.com')
@@ -513,6 +523,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-cloud-storage', () => 
             collection: mediaWithGenerateFileURLSlug,
             data: {},
             filePath: path.resolve(dirname, '../uploads/image.png'),
+            overrideAccess: true,
           })
 
           expect(upload.id).toBeTruthy()
@@ -538,6 +549,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-cloud-storage', () => 
           const apiResponse = await payload.findByID({
             id: upload.id,
             collection: mediaWithGenerateFileURLSlug,
+            overrideAccess: true,
           })
 
           expect(apiResponse.url).toContain('cdn-proxied.example.com')
@@ -552,7 +564,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-cloud-storage', () => 
       test.afterEach(async ({ payload }) => {
         for (const id of createdIDs) {
           try {
-            await payload.delete({ id, collection: testMetadataSlug })
+            await payload.delete({ id, collection: testMetadataSlug, overrideAccess: true })
           } catch (e) {
             // Ignore
           }
@@ -783,6 +795,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-cloud-storage', () => 
             testNote: 'Testing automatic metadata persistence',
           },
           filePath: path.resolve(dirname, '../uploads/image.png'),
+          overrideAccess: true,
         })
 
         createdIDs.push(upload.id)
@@ -874,6 +887,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-cloud-storage', () => 
             testNote: 'Testing update metadata persistence',
           },
           filePath: path.resolve(dirname, '../uploads/image.png'),
+          overrideAccess: true,
         })
 
         createdIDs.push(upload.id)
@@ -888,6 +902,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-cloud-storage', () => 
             testNote: 'Updated test note',
           },
           filePath: path.resolve(dirname, './image.png'),
+          overrideAccess: true,
         })
 
         expect(updatedUpload.testNote).toBe('Updated test note')
@@ -924,7 +939,11 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-cloud-storage', () => 
       test.afterEach(async ({ payload }) => {
         for (const id of createdIDs) {
           try {
-            await payload.delete({ id, collection: mediaWithThrowingHookSlug })
+            await payload.delete({
+              id,
+              collection: mediaWithThrowingHookSlug,
+              overrideAccess: true,
+            })
           } catch (_) {
             // Ignore
           }
@@ -940,6 +959,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-cloud-storage', () => 
             collection: mediaWithThrowingHookSlug,
             data: { shouldThrow: true },
             filePath: path.resolve(dirname, '../uploads/image.png'),
+            overrideAccess: true,
           }),
         ).rejects.toThrow('User afterChange hook throws error')
       })
@@ -959,6 +979,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-cloud-storage', () => 
           collection: mediaWithThrowingHookSlug,
           data: { shouldThrow: false },
           file: buildFile('initial.png'),
+          overrideAccess: true,
         })
 
         createdIDs.push(initial.id)
@@ -975,6 +996,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-cloud-storage', () => 
             collection: mediaWithThrowingHookSlug,
             data: { shouldThrow: true },
             file: buildFile('replacement.png'),
+            overrideAccess: true,
           }),
         ).rejects.toThrow('User afterChange hook throws error')
 
@@ -991,7 +1013,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-cloud-storage', () => 
       test.afterEach(async ({ payload }) => {
         for (const id of createdIDs) {
           try {
-            await payload.delete({ id, collection: mediaWithOverwriteSlug })
+            await payload.delete({ id, collection: mediaWithOverwriteSlug, overrideAccess: true })
           } catch (_) {
             // Ignore
           }
@@ -1015,6 +1037,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-cloud-storage', () => 
           data: {},
           file: buildFile('overwrite.png'),
           overwriteExistingFiles: true,
+          overrideAccess: true,
         })) as unknown as {
           filename: string
           id: number | string
@@ -1042,6 +1065,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-cloud-storage', () => 
           data: {},
           file: buildFile('overwrite.png'),
           overwriteExistingFiles: true,
+          overrideAccess: true,
         })) as unknown as {
           filename: string
           sizes: Record<string, { filename: string }>

@@ -39,7 +39,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
     test.describe('Default sort', () => {
       test('should sort posts by default definition in collection', async ({ payload }) => {
         const posts = await payload.find({
-          collection: 'default-sort', // 'number,-text'
+          collection: 'default-sort',
+          overrideAccess: true, // 'number,-text'
         })
 
         expect(posts.docs.map((post) => post.text)).toEqual([
@@ -56,6 +57,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
         const posts = await payload.find({
           collection: 'posts',
           sort: 'text',
+          overrideAccess: true,
         })
 
         expect(posts.docs.map((post) => post.text)).toEqual([
@@ -72,6 +74,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
         const posts = await payload.find({
           collection: 'posts',
           sort: '-text',
+          overrideAccess: true,
         })
 
         expect(posts.docs.map((post) => post.text)).toEqual([
@@ -88,6 +91,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
         const posts = await payload.find({
           collection: 'posts',
           sort: 'number',
+          overrideAccess: true,
         })
 
         expect(posts.docs.map((post) => post.text)).toEqual([
@@ -104,6 +108,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
         const posts = await payload.find({
           collection: 'posts',
           sort: '-number',
+          overrideAccess: true,
         })
 
         expect(posts.docs.map((post) => post.text)).toEqual([
@@ -124,6 +129,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
         const posts = await payload.find({
           collection: nonUniqueSortSlug,
           sort: 'order',
+          overrideAccess: true,
         })
 
         const initialMap = posts.docs.map((post) => post.title)
@@ -133,6 +139,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
             payload.find({
               collection: nonUniqueSortSlug,
               sort: 'order',
+              overrideAccess: true,
             }),
           ),
         )
@@ -154,6 +161,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
           sort: 'order',
           limit: 5,
           page: 2,
+          overrideAccess: true,
         })
 
         const initialMap = posts.docs.map((post) => post.title)
@@ -165,6 +173,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
               sort: 'order',
               limit: 5,
               page: 2,
+              overrideAccess: true,
             }),
           ),
         )
@@ -191,6 +200,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
               sort: 'order',
               page: 2,
               limit: 4,
+              overrideAccess: true,
             }),
           ),
         )
@@ -211,6 +221,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
       test('should always be consistent without sort params in the query', async ({ payload }) => {
         const posts = await payload.find({
           collection: nonUniqueSortSlug,
+          overrideAccess: true,
         })
 
         const initialMap = posts.docs.map((post) => post.title)
@@ -219,6 +230,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
           Array.from({ length: 3 }).map(() =>
             payload.find({
               collection: nonUniqueSortSlug,
+              overrideAccess: true,
             }),
           ),
         )
@@ -241,6 +253,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
           collection: nonUniqueSortSlug,
           page: 2,
           limit: 4,
+          overrideAccess: true,
         })
 
         const initialMap = posts.docs.map((post) => post.title)
@@ -251,6 +264,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
               collection: nonUniqueSortSlug,
               page: 2,
               limit: 4,
+              overrideAccess: true,
             }),
           ),
         )
@@ -272,6 +286,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
         const posts = await payload.find({
           collection: 'posts',
           sort: ['number2', 'number'],
+          overrideAccess: true,
         })
 
         expect(posts.docs.map((post) => post.text)).toEqual([
@@ -288,6 +303,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
         const posts = await payload.find({
           collection: 'posts',
           sort: ['number2', '-number'],
+          overrideAccess: true,
         })
 
         expect(posts.docs.map((post) => post.text)).toEqual([
@@ -304,6 +320,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
         const posts = await payload.find({
           collection: 'posts',
           sort: ['-group.number', '-number'],
+          overrideAccess: true,
         })
 
         expect(posts.docs.map((post) => post.text)).toEqual([
@@ -323,46 +340,54 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
           collection: 'drafts',
           data: { text: 'Post 1 draft', number: 10 },
           draft: true,
+          overrideAccess: true,
         })
         await payload.update({
           collection: 'drafts',
           id: testData1.id,
           data: { text: 'Post 1 draft updated', number: 20 },
           draft: true,
+          overrideAccess: true,
         })
         await payload.update({
           collection: 'drafts',
           id: testData1.id,
           data: { text: 'Post 1 draft updated', number: 30 },
           draft: true,
+          overrideAccess: true,
         })
         await payload.update({
           collection: 'drafts',
           id: testData1.id,
           data: { text: 'Post 1 published', number: 15 },
           draft: false,
+          overrideAccess: true,
         })
         const testData2 = await payload.create({
           collection: 'drafts',
           data: { text: 'Post 2 draft', number: 1 },
           draft: true,
+          overrideAccess: true,
         })
         await payload.update({
           collection: 'drafts',
           id: testData2.id,
           data: { text: 'Post 2 published', number: 2 },
           draft: false,
+          overrideAccess: true,
         })
         await payload.update({
           collection: 'drafts',
           id: testData2.id,
           data: { text: 'Post 2 newdraft', number: 100 },
           draft: true,
+          overrideAccess: true,
         })
         await payload.create({
           collection: 'drafts',
           data: { text: 'Post 3 draft', number: 3 },
           draft: true,
+          overrideAccess: true,
         })
       })
 
@@ -371,6 +396,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
           collection: 'drafts',
           sort: 'number',
           draft: false,
+          overrideAccess: true,
         })
 
         expect(posts.docs.map((post) => post.text)).toEqual([
@@ -385,6 +411,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
           collection: 'drafts',
           sort: 'number',
           draft: true,
+          overrideAccess: true,
         })
 
         expect(posts.docs.map((post) => post.text)).toEqual([
@@ -399,6 +426,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
           collection: 'drafts',
           sort: 'version.number',
           draft: false,
+          overrideAccess: true,
         })
 
         expect(posts.docs.map((post) => post.version.text)).toEqual([
@@ -420,23 +448,27 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
           collection: 'localized',
           data: { text: 'Post 1 english', number: 10 },
           locale: 'en',
+          overrideAccess: true,
         })
         await payload.update({
           collection: 'localized',
           id: testData1.id,
           data: { text: 'Post 1 norsk', number: 20 },
           locale: 'nb',
+          overrideAccess: true,
         })
         const testData2 = await payload.create({
           collection: 'localized',
           data: { text: 'Post 2 english', number: 25 },
           locale: 'en',
+          overrideAccess: true,
         })
         await payload.update({
           collection: 'localized',
           id: testData2.id,
           data: { text: 'Post 2 norsk', number: 5 },
           locale: 'nb',
+          overrideAccess: true,
         })
       })
 
@@ -445,6 +477,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
           collection: 'localized',
           sort: 'number',
           locale: 'en',
+          overrideAccess: true,
         })
 
         expect(englishPosts.docs.map((post) => post.text)).toEqual([
@@ -456,6 +489,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
           collection: 'localized',
           sort: 'number',
           locale: 'nb',
+          overrideAccess: true,
         })
 
         expect(norwegianPosts.docs.map((post) => post.text)).toEqual([
@@ -478,12 +512,14 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
           data: {
             title: 'Orderable 1',
           },
+          overrideAccess: true,
         })
         orderable2 = await payload.create({
           collection: orderableSlug,
           data: {
             title: 'Orderable 2',
           },
+          overrideAccess: true,
         })
         orderableDraft1 = await payload.create({
           collection: draftsSlug,
@@ -491,6 +527,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
             text: 'Orderable 1',
             _status: 'draft',
           },
+          overrideAccess: true,
         })
         orderableDraft2 = await payload.create({
           collection: draftsSlug,
@@ -498,6 +535,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
             text: 'Orderable 2',
             _status: 'draft',
           },
+          overrideAccess: true,
         })
       })
 
@@ -516,6 +554,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
               contains: 'Orderable ',
             },
           },
+          overrideAccess: true,
         })
 
         expect(orderable1._order).toBeDefined()
@@ -548,6 +587,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
               contains: 'Orderable ',
             },
           },
+          overrideAccess: true,
         })
 
         expect(parseInt(ordered.docs[0]._order, 36)).toBeLessThan(
@@ -841,6 +881,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
               contains: 'Orderable ',
             },
           },
+          overrideAccess: true,
         })
 
         expect(ordered.docs).toHaveLength(2)
@@ -860,6 +901,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
             text: 'Published with newer draft',
             _status: 'published',
           },
+          overrideAccess: true,
         })
 
         const target = await payload.create({
@@ -868,6 +910,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
             text: 'Reorder target',
             _status: 'published',
           },
+          overrideAccess: true,
         })
 
         // Create a newer draft on top of the published version
@@ -878,11 +921,13 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
             text: 'Published with newer draft - edited',
           },
           draft: true,
+          overrideAccess: true,
         })
 
         const beforeReorder = await payload.findByID({
           id: publishedDoc.id,
           collection: draftsSlug,
+          overrideAccess: true,
         })
 
         expect(beforeReorder._status).toBe('published')
@@ -905,6 +950,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
         const afterReorder = await payload.findByID({
           id: publishedDoc.id,
           collection: draftsSlug,
+          overrideAccess: true,
         })
 
         // Reordering must not unpublish the document
@@ -917,6 +963,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
               equals: publishedDoc.id,
             },
           },
+          overrideAccess: true,
         })
 
         expect(published.docs).toHaveLength(1)
@@ -926,12 +973,14 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
         const doc = await payload.create({
           collection: 'orderable',
           data: { title: 'new document' },
+          overrideAccess: true,
         })
 
         const docDuplicated = await payload.create({
           duplicateFromID: doc.id,
           collection: 'orderable',
           data: {},
+          overrideAccess: true,
         })
         expect(docDuplicated.title).toBe('new document')
         expect(parseInt(doc._order, 36)).toBeLessThan(parseInt(docDuplicated._order, 36))
@@ -949,10 +998,11 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
           }),
         })
 
-        const docAfterReorder = await payload.findByID({ collection: 'orderable', id: doc.id })
+        const docAfterReorder = await payload.findByID({ collection: 'orderable', id: doc.id, overrideAccess: true })
         const docDuplicatedAfterReorder = await payload.findByID({
           collection: 'orderable',
           id: docDuplicated.id,
+          overrideAccess: true,
         })
         expect(parseInt(docAfterReorder._order, 36)).toBeGreaterThan(
           parseInt(docDuplicatedAfterReorder._order, 36),
@@ -968,6 +1018,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
             title: 'Base62 aa',
             _order: 'aa',
           },
+          overrideAccess: true,
         })
         const aA = await payload.create({
           collection,
@@ -975,6 +1026,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
             title: 'Base62 aA',
             _order: 'aA',
           },
+          overrideAccess: true,
         })
         const a0 = await payload.create({
           collection,
@@ -982,6 +1034,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
             title: 'Base62 a0',
             _order: 'a0',
           },
+          overrideAccess: true,
         })
 
         const orderableDoc = await payload.create({
@@ -989,6 +1042,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
           data: {
             title: 'Base62 new',
           },
+          overrideAccess: true,
         })
 
         const res = await restClient.POST('/reorder', {
@@ -1014,6 +1068,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
               contains: 'Base62 ',
             },
           },
+          overrideAccess: true,
         })
 
         expect(docs).toHaveLength(4)
@@ -1040,6 +1095,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
           collection,
           sort: '_order',
           limit: 1,
+          overrideAccess: true,
         })
         expect(allDocs).toHaveLength(1)
         const firstDoc = allDocs[0]!
@@ -1047,6 +1103,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
         const newDoc = await payload.create({
           collection,
           data: { title: 'Move to first test' },
+          overrideAccess: true,
         })
 
         const res = await restClient.POST('/reorder', {
@@ -1064,7 +1121,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
 
         expect(res.status).toStrictEqual(200)
 
-        const newDocAfter = await payload.findByID({ collection, id: newDoc.id })
+        const newDocAfter = await payload.findByID({ collection, id: newDoc.id, overrideAccess: true })
 
         expect(newDocAfter._order).toMatch(/^\d/)
         expect(parseInt(newDocAfter._order, 36)).toBeLessThan(parseInt(firstDoc._order, 36))
@@ -1080,6 +1137,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
           collection,
           sort: '_order',
           limit: 1,
+          overrideAccess: true,
         })
         expect(initialDocs).toHaveLength(1)
         const originalFirst = initialDocs[0]!
@@ -1087,11 +1145,13 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
         const docA = await payload.create({
           collection,
           data: { title: 'Multi first A' },
+          overrideAccess: true,
         })
 
         const docB = await payload.create({
           collection,
           data: { title: 'Multi first B' },
+          overrideAccess: true,
         })
 
         await restClient.POST('/reorder', {
@@ -1107,7 +1167,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
           }),
         })
 
-        const docAAfter = await payload.findByID({ collection, id: docA.id })
+        const docAAfter = await payload.findByID({ collection, id: docA.id, overrideAccess: true })
         expect(docAAfter._order).toMatch(/^\d/)
 
         const res = await restClient.POST('/reorder', {
@@ -1125,7 +1185,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
 
         expect(res.status).toStrictEqual(200)
 
-        const docBAfter = await payload.findByID({ collection, id: docB.id })
+        const docBAfter = await payload.findByID({ collection, id: docB.id, overrideAccess: true })
 
         expect(docBAfter._order).toMatch(/^\d/)
         expect(parseInt(docBAfter._order, 36)).toBeLessThan(parseInt(docAAfter._order, 36))
@@ -1141,6 +1201,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
           collection,
           sort: '_order',
           limit: 2,
+          overrideAccess: true,
         })
         expect(initialDocs.length).toBeGreaterThanOrEqual(2)
         const firstDoc = initialDocs[0]!
@@ -1159,7 +1220,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
           }),
         })
 
-        const firstDocMoved = await payload.findByID({ collection, id: firstDoc.id })
+        const firstDocMoved = await payload.findByID({ collection, id: firstDoc.id, overrideAccess: true })
         expect(parseInt(firstDocMoved._order, 36)).toBeGreaterThan(parseInt(secondDoc._order, 36))
 
         const res = await restClient.POST('/reorder', {
@@ -1177,7 +1238,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
 
         expect(res.status).toStrictEqual(200)
 
-        const firstDocBack = await payload.findByID({ collection, id: firstDoc.id })
+        const firstDocBack = await payload.findByID({ collection, id: firstDoc.id, overrideAccess: true })
         expect(parseInt(firstDocBack._order, 36)).toBeLessThan(parseInt(secondDoc._order, 36))
       })
     })
@@ -1194,6 +1255,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
           data: {
             title: 'test',
           },
+          overrideAccess: true,
         })
         orderable1 = await payload.create({
           collection: orderableSlug,
@@ -1201,6 +1263,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
             title: 'test 1',
             orderableField: related.id,
           },
+          overrideAccess: true,
         })
 
         orderable2 = await payload.create({
@@ -1209,6 +1272,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
             title: 'test 2',
             orderableField: related.id,
           },
+          overrideAccess: true,
         })
 
         orderable3 = await payload.create({
@@ -1217,6 +1281,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
             title: 'test 3',
             orderableField: related.id,
           },
+          overrideAccess: true,
         })
       })
 
@@ -1234,6 +1299,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
             orderableField: related.id,
             _orderable_orderableJoinField1_order: 'e4',
           },
+          overrideAccess: true,
         })
         const orderable4 = await payload.create({
           collection: orderableSlug,
@@ -1242,6 +1308,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
             orderableField: related.id,
             _orderable_orderableJoinField1_order: 'e2',
           },
+          overrideAccess: true,
         })
         expect(orderable2._orderable_orderableJoinField1_order).toBe('e4')
         expect(orderable4._orderable_orderableJoinField1_order).toBe('e2')
@@ -1252,6 +1319,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
           collection: orderableJoinSlug,
           id: related.id,
           depth: 1,
+          overrideAccess: true,
         })
         const orders = (related.orderableJoinField1 as { docs: Orderable[] }).docs.map((doc) =>
           parseInt(doc._orderable_orderableJoinField1_order, 36),
@@ -1269,12 +1337,14 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
           data: {
             title: 'scoped parent',
           },
+          overrideAccess: true,
         })
         const otherParent = await payload.create({
           collection: orderableJoinSlug,
           data: {
             title: 'other parent',
           },
+          overrideAccess: true,
         })
 
         const scopedTarget = await payload.create({
@@ -1284,6 +1354,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
             orderableField: scopedParent.id,
             _orderable_orderableJoinField1_order: 'a0',
           },
+          overrideAccess: true,
         })
 
         const scopedNeighbor = await payload.create({
@@ -1293,6 +1364,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
             orderableField: scopedParent.id,
             _orderable_orderableJoinField1_order: 'a2',
           },
+          overrideAccess: true,
         })
 
         const scopedMovedDoc = await payload.create({
@@ -1302,6 +1374,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
             orderableField: scopedParent.id,
             _orderable_orderableJoinField1_order: 'a3',
           },
+          overrideAccess: true,
         })
 
         await payload.create({
@@ -1311,6 +1384,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
             orderableField: otherParent.id,
             _orderable_orderableJoinField1_order: 'a1',
           },
+          overrideAccess: true,
         })
 
         const reorderResponse = await restClient.POST('/reorder', {
@@ -1335,6 +1409,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
         const scopedMovedDocAfter = await payload.findByID({
           collection: orderableSlug,
           id: scopedMovedDoc.id,
+          overrideAccess: true,
         })
 
         expect(scopedMovedDocAfter._orderable_orderableJoinField1_order).toBe('a1')
@@ -1357,6 +1432,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
           data: {
             title: 'localized parent en',
           },
+          overrideAccess: true,
         })
 
         const nbParent = await payload.create({
@@ -1364,6 +1440,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
           data: {
             title: 'localized parent nb',
           },
+          overrideAccess: true,
         })
 
         const otherNbParent = await payload.create({
@@ -1371,6 +1448,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
           data: {
             title: 'localized parent other nb',
           },
+          overrideAccess: true,
         })
 
         const localizedTarget = await payload.create({
@@ -1381,6 +1459,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
             orderableField: enParent.id,
             _orderable_orderableJoinField1_order: 'a0',
           },
+          overrideAccess: true,
         })
 
         await payload.update({
@@ -1390,6 +1469,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
           data: {
             orderableField: nbParent.id,
           },
+          overrideAccess: true,
         })
 
         const localizedNeighbor = await payload.create({
@@ -1400,6 +1480,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
             orderableField: enParent.id,
             _orderable_orderableJoinField1_order: 'a2',
           },
+          overrideAccess: true,
         })
 
         await payload.update({
@@ -1409,6 +1490,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
           data: {
             orderableField: nbParent.id,
           },
+          overrideAccess: true,
         })
 
         const localizedMovedDoc = await payload.create({
@@ -1419,6 +1501,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
             orderableField: enParent.id,
             _orderable_orderableJoinField1_order: 'a3',
           },
+          overrideAccess: true,
         })
 
         await payload.update({
@@ -1428,6 +1511,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
           data: {
             orderableField: nbParent.id,
           },
+          overrideAccess: true,
         })
 
         // This doc only pollutes the EN scope with `a1`.
@@ -1439,6 +1523,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
             orderableField: enParent.id,
             _orderable_orderableJoinField1_order: 'a1',
           },
+          overrideAccess: true,
         })
 
         await payload.update({
@@ -1448,6 +1533,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
             orderableField: otherNbParent.id,
           },
           locale: 'nb',
+          overrideAccess: true,
         })
 
         // Simulate "without req locale context": endpoint defaults to EN scope.
@@ -1476,6 +1562,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
           data: {
             _orderable_orderableJoinField1_order: 'a3',
           },
+          overrideAccess: true,
         })
 
         await payload.update({
@@ -1485,6 +1572,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
             orderableField: nbParent.id,
           },
           locale: 'nb',
+          overrideAccess: true,
         })
 
         // With locale in request context, scope is NB and result should be deterministic.
@@ -1509,6 +1597,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
         const localizedMovedDocAfter = await payload.findByID({
           collection: orderableSlug,
           id: localizedMovedDoc.id,
+          overrideAccess: true,
         })
 
         expect(localizedMovedDocAfter._orderable_orderableJoinField1_order).toBe('a1')
@@ -1677,6 +1766,6 @@ async function createData(
   data: Record<string, any>[],
 ) {
   for (const item of data) {
-    await payload.create({ collection, data: item })
+    await payload.create({ collection, data: item, overrideAccess: true })
   }
 }

@@ -95,6 +95,7 @@ test.suite({ config: './config.ts' })('Lexical', () => {
             equals: 'array doc 1',
           },
         },
+        overrideAccess: true,
       })
     ).docs[0].id
 
@@ -107,6 +108,7 @@ test.suite({ config: './config.ts' })('Lexical', () => {
             equals: 'payload.jpg',
           },
         },
+        overrideAccess: true,
       })
     ).docs[0].id
 
@@ -119,6 +121,7 @@ test.suite({ config: './config.ts' })('Lexical', () => {
             equals: 'Seeded text document',
           },
         },
+        overrideAccess: true,
       })
     ).docs[0].id
 
@@ -131,6 +134,7 @@ test.suite({ config: './config.ts' })('Lexical', () => {
             equals: 'Rich Text',
           },
         },
+        overrideAccess: true,
       })
     ).docs[0].id
   })
@@ -283,6 +287,7 @@ test.suite({ config: './config.ts' })('Lexical', () => {
               equals: richTextDocData.title,
             },
           },
+          overrideAccess: true,
         })
       ).docs[0] as never
 
@@ -321,6 +326,7 @@ test.suite({ config: './config.ts' })('Lexical', () => {
               equals: richTextDocData.title,
             },
           },
+          overrideAccess: true,
         })
       ).docs[0] as never
 
@@ -361,6 +367,7 @@ test.suite({ config: './config.ts' })('Lexical', () => {
               equals: richTextDocData.title,
             },
           },
+          overrideAccess: true,
         })
       ).docs[0] as never
 
@@ -586,6 +593,7 @@ test.suite({ config: './config.ts' })('Lexical', () => {
           },
         },
       },
+      overrideAccess: true,
     })
 
     expect(newLexicalDoc.lexicalWithBlocks_markdown).toEqual(
@@ -620,6 +628,7 @@ test.suite({ config: './config.ts' })('Lexical', () => {
             },
           },
         },
+        overrideAccess: true,
       })
 
       expect(newLexicalDoc.lexicalWithBlocks_markdown).toEqual(`![uploads:${createdJPGDocID}]()`)
@@ -630,6 +639,7 @@ test.suite({ config: './config.ts' })('Lexical', () => {
         collection: lexicalFieldsSlug,
         depth: 0,
         where: { title: { equals: lexicalDocData.title } },
+        overrideAccess: true,
       })
 
       const markdown = lexicalDoc.docs[0]?.lexicalWithBlocks_markdown as string
@@ -649,6 +659,7 @@ test.suite({ config: './config.ts' })('Lexical', () => {
               equals: lexicalDocData.title,
             },
           },
+          overrideAccess: true,
         })
       ).docs[0] as never
 
@@ -673,6 +684,7 @@ test.suite({ config: './config.ts' })('Lexical', () => {
               equals: lexicalDocData.title,
             },
           },
+          overrideAccess: true,
         })
       ).docs[0] as never
 
@@ -699,6 +711,7 @@ test.suite({ config: './config.ts' })('Lexical', () => {
               equals: lexicalDocData.title,
             },
           },
+          overrideAccess: true,
         })
       ).docs[0] as never
 
@@ -732,6 +745,7 @@ test.suite({ config: './config.ts' })('Lexical', () => {
               equals: lexicalDocData.title,
             },
           },
+          overrideAccess: true,
         })
       ).docs[0] as never
 
@@ -770,6 +784,7 @@ test.suite({ config: './config.ts' })('Lexical', () => {
               equals: lexicalDocData.title,
             },
           },
+          overrideAccess: true,
         })
       ).docs[0] as never
 
@@ -804,6 +819,7 @@ test.suite({ config: './config.ts' })('Lexical', () => {
               equals: lexicalDocData.title,
             },
           },
+          overrideAccess: true,
         })
       ).docs[0] as never
 
@@ -853,6 +869,7 @@ test.suite({ config: './config.ts' })('Lexical', () => {
               equals: lexicalDocData.title,
             },
           },
+          overrideAccess: true,
         })
       ).docs[0] as never
 
@@ -899,6 +916,7 @@ test.suite({ config: './config.ts' })('Lexical', () => {
             equals: 'Localized Lexical en',
           },
         },
+        overrideAccess: true,
       })
 
       expect(lexicalDocEN.docs[0].lexicalBlocksLocalized.root.children[0].children[0].text).toEqual(
@@ -909,6 +927,7 @@ test.suite({ config: './config.ts' })('Lexical', () => {
         collection: 'lexical-localized-fields',
         locale: 'es',
         id: lexicalDocEN.docs[0].id,
+        overrideAccess: true,
       })
 
       expect(lexicalDocES.lexicalBlocksLocalized.root.children[0].children[0].text).toEqual(
@@ -927,6 +946,7 @@ test.suite({ config: './config.ts' })('Lexical', () => {
             equals: 'Localized Lexical en',
           },
         },
+        overrideAccess: true,
       })
 
       expect(
@@ -942,6 +962,7 @@ test.suite({ config: './config.ts' })('Lexical', () => {
         collection: 'lexical-localized-fields',
         locale: 'es',
         id: lexicalDocEN.docs[0].id,
+        overrideAccess: true,
       })
 
       expect(lexicalDocES.lexicalBlocksSubLocalized.root.children[0].children[0].text).toEqual(
@@ -967,6 +988,7 @@ test.suite({ config: './config.ts' })('Lexical', () => {
             'English text in block',
           ) as any,
         },
+        overrideAccess: true,
       })
 
       expect(
@@ -979,6 +1001,7 @@ test.suite({ config: './config.ts' })('Lexical', () => {
         locale: 'en',
         id: lexicalDocEN.id,
         data: lexicalDocEN,
+        overrideAccess: true,
       })
 
       expect(
@@ -1028,6 +1051,7 @@ test.suite({ config: './config.ts' })('Lexical', () => {
             },
           ],
         },
+        overrideAccess: true,
       })
 
       // Verify create operation has undefined previousValue (expected)
@@ -1070,6 +1094,7 @@ test.suite({ config: './config.ts' })('Lexical', () => {
             },
           ],
         },
+        overrideAccess: true,
       })
 
       expect(autosaveHookLog.relationshipField?.operation).toBe('update')

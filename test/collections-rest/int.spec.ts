@@ -356,6 +356,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('collections-res
       const doc = await payload.create({
         collection: largeDocumentsCollectionSlug,
         data: {},
+        overrideAccess: true,
       })
 
       const arrayData = new Array(500).fill({ text: randomUUID().repeat(100) })
@@ -441,6 +442,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('collections-res
           limit: 10,
           collection: postsSlug,
           where: { id: { in: ids } },
+          overrideAccess: true,
         })
         expect(resDocs.at(-1).description).toEqual('to-update')
       })
@@ -466,6 +468,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('collections-res
 
         const { docs } = await payload.find({
           collection: postsSlug,
+          overrideAccess: true,
         })
 
         expect(docs[0].description).not.toEqual(description)
@@ -499,6 +502,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('collections-res
 
         const { docs } = await payload.find({
           collection: postsSlug,
+          overrideAccess: true,
         })
 
         expect(docs[0].description).not.toEqual(description)
@@ -514,6 +518,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('collections-res
           data: {
             restrictedField: 'restricted',
           },
+          overrideAccess: true,
         })
 
         const description = 'description'
@@ -528,6 +533,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('collections-res
         const doc = await payload.findByID({
           id,
           collection: postsSlug,
+          overrideAccess: true,
         })
 
         expect(response.status).toEqual(400)
@@ -546,6 +552,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('collections-res
             errorBeforeChange: true,
             text,
           },
+          overrideAccess: true,
         })
         const successDoc = await payload.create({
           collection: errorOnHookSlug,
@@ -553,6 +560,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('collections-res
             errorBeforeChange: false,
             text,
           },
+          overrideAccess: true,
         })
 
         const update = 'update'
@@ -602,6 +610,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('collections-res
           const { docs, errors } = await payload.delete({
             collection: postsSlug,
             where: { title: { equals: 'title' } },
+            overrideAccess: true,
           })
 
           expect(errors).toHaveLength(0)
@@ -635,6 +644,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('collections-res
             errorAfterDelete: true,
             text: 'test',
           },
+          overrideAccess: true,
         })
         await payload.create({
           collection: errorOnHookSlug,
@@ -642,6 +652,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('collections-res
             errorAfterDelete: false,
             text: 'test',
           },
+          overrideAccess: true,
         })
 
         const response = await restClient.DELETE(`/${errorOnHookSlug}`, {
@@ -897,6 +908,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('collections-res
             data: {
               title: 'find me buddy',
             },
+            overrideAccess: true,
           })
 
           const response = await restClient.GET(`/${postsSlug}`, {
@@ -1136,6 +1148,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('collections-res
         const relationship = await payload.create({
           collection: relationSlug,
           data: {},
+          overrideAccess: true,
         })
 
         await createPost({ restClient }, { relationField: relationship.id, title: 'not-me' })
@@ -1166,6 +1179,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('collections-res
         const relationship = await payload.create({
           collection: relationSlug,
           data: {},
+          overrideAccess: true,
         })
 
         const post1 = await createPost(
@@ -1577,6 +1591,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('collections-res
             const created = await payload.create({
               collection: pointSlug,
               data: { point: [queryLng, pointLat] },
+              overrideAccess: true,
             })
 
             createdId = created.id
@@ -1599,7 +1614,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('collections-res
             expect(result.docs.map((d: { id: number | string }) => d.id)).toContain(createdId)
           } finally {
             if (createdId !== undefined) {
-              await payload.delete({ collection: pointSlug, id: createdId })
+              await payload.delete({ collection: pointSlug, id: createdId, overrideAccess: true })
             }
           }
         })
@@ -1642,6 +1657,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('collections-res
                     // only randomize longitude to make distance comparison easy
                     point: [Math.random(), 0],
                   },
+                  overrideAccess: true,
                 }),
               )
             }, Math.random())
@@ -1895,6 +1911,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('collections-res
             data: {
               name: 'test',
             },
+            overrideAccess: true,
           })
           for (let i = 0; i < 10; i++) {
             await createPost(
@@ -2172,9 +2189,11 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('collections-res
     }) => {
       const post = await createPost({ restClient })
       const id = typeof post.id === 'string' ? randomUUID() : 999
-      await expect(payload.findByID({ collection: 'posts', id })).rejects.toBeInstanceOf(NotFound)
       await expect(
-        payload.findByID({ collection: 'posts', id, disableErrors: true }),
+        payload.findByID({ collection: 'posts', id, overrideAccess: true }),
+      ).rejects.toBeInstanceOf(NotFound)
+      await expect(
+        payload.findByID({ collection: 'posts', id, disableErrors: true, overrideAccess: true }),
       ).resolves.toBeNull()
     })
   })
@@ -2286,6 +2305,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('collections-res
         collection: 'disabled-bulk-edit-docs',
         where: {},
         data: {},
+        overrideAccess: true,
       }),
     ).resolves.toBeTruthy()
   })
@@ -2308,12 +2328,14 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('collections-res
     const doc = await payload.create({
       collection: 'disabled-bulk-delete-docs',
       data: { text: 'should be deletable by id' },
+      overrideAccess: true,
     })
 
     await expect(
       payload.delete({
         collection: 'disabled-bulk-delete-docs',
         id: doc.id,
+        overrideAccess: true,
       }),
     ).resolves.toBeTruthy()
 
@@ -2321,6 +2343,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('collections-res
       payload.delete({
         collection: 'disabled-bulk-delete-docs',
         where: {},
+        overrideAccess: true,
       }),
     ).resolves.toBeTruthy()
   })
@@ -2348,5 +2371,6 @@ async function clearDocs({ payload }: { payload: Payload }): Promise<void> {
   await payload.delete({
     collection: postsSlug,
     where: { id: { exists: true } },
+    overrideAccess: true,
   })
 }

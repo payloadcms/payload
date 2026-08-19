@@ -63,6 +63,7 @@ describe('Auth', () => {
             exists: true,
           },
         },
+        overrideAccess: true,
       })
     })
 
@@ -175,12 +176,14 @@ describe('Auth', () => {
           collection: slug,
           limit: 1,
           where: { email: { equals: devUser.email } },
+          overrideAccess: true,
         })
 
         await payload.update({
           id: docs[0]!.id,
           collection: slug,
           data: { password: devUser.password },
+          overrideAccess: true,
         })
       })
 
@@ -329,6 +332,7 @@ describe('Auth', () => {
             collection: 'payload-locked-documents',
             limit: 1,
             pagination: false,
+            overrideAccess: true,
           })
 
           return lockedDocs.docs.length
@@ -374,6 +378,7 @@ describe('Auth', () => {
         const users = await payload.find({
           collection: slug,
           limit: 1,
+          overrideAccess: true,
         })
 
         const userDocumentRoute = formatAdminURL({
@@ -409,6 +414,7 @@ describe('Auth', () => {
         const notInUserCollection = await payload.create({
           collection: 'relationsCollection',
           data: {},
+          overrideAccess: true,
         })
 
         await logout(page, serverURL)

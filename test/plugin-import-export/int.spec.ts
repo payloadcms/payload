@@ -31,6 +31,7 @@ test.suite({
         email: devUser.email,
         password: devUser.password,
       },
+      overrideAccess: true,
     })
 
     user = loginResult.user!
@@ -39,6 +40,7 @@ test.suite({
       where: {
         email: { equals: regularUser.email },
       },
+      overrideAccess: true,
     })
 
     if (userDocs.docs?.[0]) {
@@ -99,6 +101,7 @@ test.suite({
             title: { contains: 'Title ' },
           },
         },
+        overrideAccess: true,
       })
 
       await payload.jobs.run()
@@ -106,6 +109,7 @@ test.suite({
       doc = await payload.findByID({
         collection: 'exports',
         id: doc.id,
+        overrideAccess: true,
       })
 
       expect(doc.filename).toContain('pages.csv')
@@ -132,6 +136,7 @@ test.suite({
           format: 'csv',
           limit: 0,
         },
+        overrideAccess: true,
       })
 
       await payload.jobs.run()
@@ -139,10 +144,12 @@ test.suite({
       doc = await payload.findByID({
         collection: 'exports',
         id: doc.id,
+        overrideAccess: true,
       })
 
       const { totalDocs: totalNumberOfDocs } = await payload.count({
         collection: 'pages',
+        overrideAccess: true,
       })
 
       expect(doc.filename).toBeDefined()
@@ -162,6 +169,7 @@ test.suite({
           collectionSlug: 'pages',
           format: 'csv',
         },
+        overrideAccess: true,
       })
 
       await payload.jobs.run()
@@ -169,10 +177,12 @@ test.suite({
       doc = await payload.findByID({
         collection: 'exports',
         id: doc.id,
+        overrideAccess: true,
       })
 
       const { totalDocs: totalNumberOfDocs } = await payload.count({
         collection: 'pages',
+        overrideAccess: true,
       })
 
       expect(doc.filename).toBeDefined()
@@ -192,6 +202,7 @@ test.suite({
           limit: 100,
           page: 1,
         },
+        overrideAccess: true,
       })
 
       await payload.jobs.run()
@@ -199,12 +210,14 @@ test.suite({
       doc = await payload.findByID({
         collection: 'exports',
         id: doc.id,
+        overrideAccess: true,
       })
 
       const pages = await payload.find({
         collection: 'pages',
         limit: 100,
         page: 1,
+        overrideAccess: true,
       })
 
       const firstDocOnPage1 = pages.docs?.[0]
@@ -227,6 +240,7 @@ test.suite({
           limit: 100,
           page: 2,
         },
+        overrideAccess: true,
       })
 
       await payload.jobs.run()
@@ -234,12 +248,14 @@ test.suite({
       doc = await payload.findByID({
         collection: 'exports',
         id: doc.id,
+        overrideAccess: true,
       })
 
       const pages = await payload.find({
         collection: 'pages',
         limit: 100,
         page: 2,
+        overrideAccess: true,
       })
 
       const firstDocOnPage2 = pages.docs?.[0]
@@ -262,6 +278,7 @@ test.suite({
             format: 'csv',
             limit: -1,
           },
+          overrideAccess: true,
         }),
       ).rejects.toThrow(/Limit/)
     })
@@ -277,6 +294,7 @@ test.suite({
           format: 'csv',
           limit: 99,
         },
+        overrideAccess: true,
       })
 
       await payload.jobs.run()
@@ -284,6 +302,7 @@ test.suite({
       doc = await payload.findByID({
         collection: 'exports',
         id: doc.id,
+        overrideAccess: true,
       })
 
       expect(doc.filename).toBeDefined()
@@ -301,6 +320,7 @@ test.suite({
             or: [{ title: { contains: 'Title' } }, { title: { contains: 'Array' } }],
           },
         },
+        overrideAccess: true,
       })
 
       await payload.jobs.run()
@@ -308,6 +328,7 @@ test.suite({
       doc = await payload.findByID({
         collection: 'exports',
         id: doc.id,
+        overrideAccess: true,
       })
 
       expect(doc.filename).toBeDefined()
@@ -330,6 +351,7 @@ test.suite({
             or: [{ title: { contains: 'Title' } }, { title: { contains: 'Array' } }],
           },
         },
+        overrideAccess: true,
       })
 
       await payload.jobs.run()
@@ -337,6 +359,7 @@ test.suite({
       doc = await payload.findByID({
         collection: 'exports',
         id: doc.id,
+        overrideAccess: true,
       })
 
       expect(doc.filename).toBeDefined()
@@ -355,6 +378,7 @@ test.suite({
           title: 'Draft Page',
           _status: 'published',
         },
+        overrideAccess: true,
       })
 
       await payload.update({
@@ -364,6 +388,7 @@ test.suite({
           title: 'Draft Page Updated',
           _status: 'draft',
         },
+        overrideAccess: true,
       })
 
       let doc = await payload.create({
@@ -378,6 +403,7 @@ test.suite({
             title: { contains: 'Draft ' },
           },
         },
+        overrideAccess: true,
       })
 
       await payload.jobs.run()
@@ -385,6 +411,7 @@ test.suite({
       doc = await payload.findByID({
         collection: 'exports',
         id: doc.id,
+        overrideAccess: true,
       })
 
       expect(doc.filename).toBeDefined()
@@ -409,6 +436,7 @@ test.suite({
             title: { contains: 'Localized ' },
           },
         },
+        overrideAccess: true,
       })
 
       await payload.jobs.run()
@@ -416,6 +444,7 @@ test.suite({
       doc = await payload.findByID({
         collection: 'exports',
         id: doc.id,
+        overrideAccess: true,
       })
 
       expect(doc.filename).toBeDefined()
@@ -439,6 +468,7 @@ test.suite({
             title: { contains: 'Localized ' },
           },
         },
+        overrideAccess: true,
       })
 
       await payload.jobs.run()
@@ -446,6 +476,7 @@ test.suite({
       doc = await payload.findByID({
         collection: 'exports',
         id: doc.id,
+        overrideAccess: true,
       })
 
       expect(doc.filename).toBeDefined()
@@ -469,6 +500,7 @@ test.suite({
             title: { contains: 'Array ' },
           },
         },
+        overrideAccess: true,
       })
 
       await payload.jobs.run()
@@ -476,6 +508,7 @@ test.suite({
       doc = await payload.findByID({
         collection: 'exports',
         id: doc.id,
+        overrideAccess: true,
       })
 
       expect(doc.filename).toBeDefined()
@@ -503,6 +536,7 @@ test.suite({
             title: { contains: 'Title ' },
           },
         },
+        overrideAccess: true,
       })
 
       await payload.jobs.run()
@@ -510,6 +544,7 @@ test.suite({
       const exportDoc = await payload.findByID({
         collection: 'exports',
         id: doc.id,
+        overrideAccess: true,
       })
 
       expect(exportDoc.filename).toBeDefined()
@@ -537,6 +572,7 @@ test.suite({
             title: { contains: 'Virtual ' },
           },
         },
+        overrideAccess: true,
       })
 
       await payload.jobs.run()
@@ -544,6 +580,7 @@ test.suite({
       const exportDoc = await payload.findByID({
         collection: 'exports',
         id: doc.id,
+        overrideAccess: true,
       })
 
       expect(exportDoc.filename).toBeDefined()
@@ -566,6 +603,7 @@ test.suite({
             title: { contains: 'Array Subfield ' },
           },
         },
+        overrideAccess: true,
       })
 
       await payload.jobs.run()
@@ -573,6 +611,7 @@ test.suite({
       doc = await payload.findByID({
         collection: 'exports',
         id: doc.id,
+        overrideAccess: true,
       })
 
       expect(doc.filename).toBeDefined()
@@ -597,6 +636,7 @@ test.suite({
             title: { contains: 'hasMany Number ' },
           },
         },
+        overrideAccess: true,
       })
 
       await payload.jobs.run()
@@ -604,6 +644,7 @@ test.suite({
       doc = await payload.findByID({
         collection: 'exports',
         id: doc.id,
+        overrideAccess: true,
       })
 
       expect(doc.filename).toBeDefined()
@@ -629,6 +670,7 @@ test.suite({
             title: { contains: 'Blocks ' },
           },
         },
+        overrideAccess: true,
       })
 
       await payload.jobs.run()
@@ -636,6 +678,7 @@ test.suite({
       doc = await payload.findByID({
         collection: 'exports',
         id: doc.id,
+        overrideAccess: true,
       })
 
       expect(doc.filename).toBeDefined()
@@ -658,6 +701,7 @@ test.suite({
             title: { contains: 'Title ' },
           },
         },
+        overrideAccess: true,
       })
 
       await payload.jobs.run()
@@ -665,6 +709,7 @@ test.suite({
       const exportDoc = await payload.findByID({
         collection: 'exports',
         id: doc.id,
+        overrideAccess: true,
       })
 
       expect(exportDoc.filename).toBeDefined()
@@ -697,6 +742,7 @@ test.suite({
             title: { contains: 'Custom ' },
           },
         },
+        overrideAccess: true,
       })
 
       await payload.jobs.run()
@@ -704,6 +750,7 @@ test.suite({
       const exportDoc = await payload.findByID({
         collection: 'exports',
         id: doc.id,
+        overrideAccess: true,
       })
 
       expect(exportDoc.filename).toBeDefined()
@@ -733,6 +780,7 @@ test.suite({
             title: { contains: 'JSON ' },
           },
         },
+        overrideAccess: true,
       })
 
       await payload.jobs.run()
@@ -740,6 +788,7 @@ test.suite({
       doc = await payload.findByID({
         collection: 'exports',
         id: doc.id,
+        overrideAccess: true,
       })
 
       expect(doc.filename).toBeDefined()
@@ -787,6 +836,7 @@ test.suite({
           format: 'json',
           sort: 'title',
         },
+        overrideAccess: true,
       })
 
       await payload.jobs.run()
@@ -794,6 +844,7 @@ test.suite({
       doc = await payload.findByID({
         collection: 'exports',
         id: doc.id,
+        overrideAccess: true,
       })
 
       expect(doc.filename).toBeDefined()
@@ -819,6 +870,7 @@ test.suite({
             title: { contains: 'Jobs ' },
           },
         },
+        overrideAccess: true,
       })
 
       const {
@@ -826,6 +878,7 @@ test.suite({
       } = await payload.find({
         collection: 'payload-jobs',
         sort: '-createdAt',
+        overrideAccess: true,
       })
 
       expect(job).toBeDefined()
@@ -849,6 +902,7 @@ test.suite({
       const exportDoc = await payload.findByID({
         collection: 'exports' as CollectionSlug,
         id: doc.id,
+        overrideAccess: true,
       })
 
       expect(exportDoc.filename).toBeDefined()
@@ -867,6 +921,7 @@ test.suite({
           fields: ['id', 'title'],
           format: 'csv',
         },
+        overrideAccess: true,
       })
 
       await payload.jobs.run()
@@ -874,6 +929,7 @@ test.suite({
       const exportDoc = await payload.findByID({
         collection: 'exports',
         id: doc.id,
+        overrideAccess: true,
       })
 
       expect(exportDoc.filename).toBeDefined()
@@ -902,11 +958,13 @@ test.suite({
           format: 'csv',
           limit: 5,
         },
+        overrideAccess: true,
       })
 
       const exportDoc = await payload.findByID({
         collection: 'posts-export',
         id: doc.id,
+        overrideAccess: true,
       })
 
       expect(exportDoc.filename).toBeDefined()
@@ -930,11 +988,13 @@ test.suite({
           format: 'csv',
           limit: 1,
         },
+        overrideAccess: true,
       })
 
       const exportDoc = await payload.findByID({
         collection: 'posts-export',
         id: doc.id,
+        overrideAccess: true,
       })
 
       expect(exportDoc.filename).toBeDefined()
@@ -959,6 +1019,7 @@ test.suite({
             title: { contains: 'Polymorphic' },
           },
         },
+        overrideAccess: true,
       })
 
       await payload.jobs.run()
@@ -966,6 +1027,7 @@ test.suite({
       const exportDoc = await payload.findByID({
         collection: 'exports',
         id: doc.id,
+        overrideAccess: true,
       })
 
       expect(exportDoc.filename).toBeDefined()
@@ -995,6 +1057,7 @@ test.suite({
             title: { contains: 'Polymorphic' },
           },
         },
+        overrideAccess: true,
       })
 
       await payload.jobs.run()
@@ -1002,6 +1065,7 @@ test.suite({
       const exportDoc = await payload.findByID({
         collection: 'exports',
         id: doc.id,
+        overrideAccess: true,
       })
 
       expect(exportDoc.filename).toBeDefined()
@@ -1032,6 +1096,7 @@ test.suite({
             title: { contains: 'Monomorphic' },
           },
         },
+        overrideAccess: true,
       })
 
       await payload.jobs.run()
@@ -1039,6 +1104,7 @@ test.suite({
       const exportDoc = await payload.findByID({
         collection: 'exports',
         id: doc.id,
+        overrideAccess: true,
       })
 
       expect(exportDoc.filename).toBeDefined()
@@ -1073,6 +1139,7 @@ test.suite({
                 },
               ],
             },
+            overrideAccess: true,
           }),
         )
         if (promises.length >= 500) {
@@ -1093,6 +1160,7 @@ test.suite({
           fields: ['id', 'blocks'],
           format: 'csv',
         },
+        overrideAccess: true,
       })
 
       await payload.jobs.run()
@@ -1100,6 +1168,7 @@ test.suite({
       doc = await payload.findByID({
         collection: 'exports',
         id: doc.id,
+        overrideAccess: true,
       })
 
       expect(doc.filename).toBeDefined()
@@ -1125,6 +1194,7 @@ test.suite({
               title: { equals: 'Title 0' },
             },
           },
+          overrideAccess: true,
         })
 
         await payload.jobs.run()
@@ -1132,6 +1202,7 @@ test.suite({
         doc = await payload.findByID({
           collection: 'exports',
           id: doc.id,
+          overrideAccess: true,
         })
 
         expect(doc.filename).toBeDefined()
@@ -1161,6 +1232,7 @@ test.suite({
               title: { contains: 'Localized ' },
             },
           },
+          overrideAccess: true,
         })
 
         await payload.jobs.run()
@@ -1168,6 +1240,7 @@ test.suite({
         doc = await payload.findByID({
           collection: 'exports',
           id: doc.id,
+          overrideAccess: true,
         })
 
         expect(doc.filename).toBeDefined()
@@ -1192,6 +1265,7 @@ test.suite({
               title: { equals: 'nonexistent-title-xyz' },
             },
           },
+          overrideAccess: true,
         })
 
         await payload.jobs.run()
@@ -1199,6 +1273,7 @@ test.suite({
         doc = await payload.findByID({
           collection: 'exports',
           id: doc.id,
+          overrideAccess: true,
         })
 
         expect(doc.filename).toBeDefined()
@@ -1224,6 +1299,7 @@ test.suite({
               title: { contains: 'Virtual ' },
             },
           },
+          overrideAccess: true,
         })
 
         await payload.jobs.run()
@@ -1231,6 +1307,7 @@ test.suite({
         doc = await payload.findByID({
           collection: 'exports',
           id: doc.id,
+          overrideAccess: true,
         })
 
         expect(doc.filename).toBeDefined()
@@ -1255,6 +1332,7 @@ test.suite({
             excerpt: 'test excerpt',
             _status: 'published',
           },
+          overrideAccess: true,
         })
 
         const fields = ['id', 'title', 'customRelationship', 'excerpt']
@@ -1267,11 +1345,12 @@ test.suite({
             format: 'csv',
             where: { id: { equals: page.id } },
           },
+          overrideAccess: true,
         })
 
         await payload.jobs.run()
 
-        doc = await payload.findByID({ collection: 'exports', id: doc.id })
+        doc = await payload.findByID({ collection: 'exports', id: doc.id, overrideAccess: true })
         const csvPath = path.join(dirname, './uploads', doc.filename as string)
         const data = await readCSV(csvPath)
         const columns = Object.keys(data[0])
@@ -1291,7 +1370,7 @@ test.suite({
         expect(emailIdx).toBe(titleIdx + 2)
         expect(excerptIdx).toBeGreaterThan(emailIdx)
 
-        await payload.delete({ collection: 'pages', id: page.id })
+        await payload.delete({ collection: 'pages', id: page.id, overrideAccess: true })
       })
 
       test('should remove original column when beforeExport hook writes _name and _email (no _id)', async ({
@@ -1305,6 +1384,7 @@ test.suite({
             excerpt: 'test excerpt',
             _status: 'published',
           },
+          overrideAccess: true,
         })
 
         const fields = ['id', 'title', 'customRelNameEmail', 'excerpt']
@@ -1317,11 +1397,12 @@ test.suite({
             format: 'csv',
             where: { id: { equals: page.id } },
           },
+          overrideAccess: true,
         })
 
         await payload.jobs.run()
 
-        doc = await payload.findByID({ collection: 'exports', id: doc.id })
+        doc = await payload.findByID({ collection: 'exports', id: doc.id, overrideAccess: true })
         const csvPath = path.join(dirname, './uploads', doc.filename as string)
         const data = await readCSV(csvPath)
         const columns = Object.keys(data[0])
@@ -1343,7 +1424,7 @@ test.suite({
         expect(data[0].customRelNameEmail_name).toBe('name value')
         expect(data[0].customRelNameEmail_email).toBe(user.email)
 
-        await payload.delete({ collection: 'pages', id: page.id })
+        await payload.delete({ collection: 'pages', id: page.id, overrideAccess: true })
       })
 
       test('should remove original column when beforeExport hook writes _id and _locationName', async ({
@@ -1357,6 +1438,7 @@ test.suite({
             excerpt: 'test excerpt',
             _status: 'published',
           },
+          overrideAccess: true,
         })
 
         const fields = ['id', 'title', 'customRelIdName', 'excerpt']
@@ -1369,11 +1451,12 @@ test.suite({
             format: 'csv',
             where: { id: { equals: page.id } },
           },
+          overrideAccess: true,
         })
 
         await payload.jobs.run()
 
-        doc = await payload.findByID({ collection: 'exports', id: doc.id })
+        doc = await payload.findByID({ collection: 'exports', id: doc.id, overrideAccess: true })
         const csvPath = path.join(dirname, './uploads', doc.filename as string)
         const data = await readCSV(csvPath)
         const columns = Object.keys(data[0])
@@ -1395,7 +1478,7 @@ test.suite({
         expect(data[0].customRelIdName_id).toBe(String(user.id))
         expect(data[0].customRelIdName_locationName).toBe('name value')
 
-        await payload.delete({ collection: 'pages', id: page.id })
+        await payload.delete({ collection: 'pages', id: page.id, overrideAccess: true })
       })
 
       test('should keep derived columns before trailing fields and match preview column order', async ({
@@ -1410,6 +1493,7 @@ test.suite({
             excerpt: 'trailing field value',
             _status: 'published',
           },
+          overrideAccess: true,
         })
 
         const fields = ['id', 'title', 'customRelationship', 'excerpt']
@@ -1424,11 +1508,12 @@ test.suite({
             format: 'csv',
             where: { id: { equals: page.id } },
           },
+          overrideAccess: true,
         })
 
         await payload.jobs.run()
 
-        doc = await payload.findByID({ collection: 'exports', id: doc.id })
+        doc = await payload.findByID({ collection: 'exports', id: doc.id, overrideAccess: true })
         const csvPath = path.join(dirname, './uploads', doc.filename as string)
         const data = await readCSV(csvPath)
         const exportColumns = Object.keys(data[0])
@@ -1460,7 +1545,7 @@ test.suite({
 
         expect(previewResponse.columns).toStrictEqual(exportColumns)
 
-        await payload.delete({ collection: 'pages', id: page.id })
+        await payload.delete({ collection: 'pages', id: page.id, overrideAccess: true })
       })
 
       test('should respect custom field order with beforeExport field first and match preview column order', async ({
@@ -1475,6 +1560,7 @@ test.suite({
             excerpt: 'some excerpt',
             _status: 'published',
           },
+          overrideAccess: true,
         })
 
         // Put the beforeExport relationship field first
@@ -1490,11 +1576,12 @@ test.suite({
             format: 'csv',
             where: { id: { equals: page.id } },
           },
+          overrideAccess: true,
         })
 
         await payload.jobs.run()
 
-        doc = await payload.findByID({ collection: 'exports', id: doc.id })
+        doc = await payload.findByID({ collection: 'exports', id: doc.id, overrideAccess: true })
         const csvPath = path.join(dirname, './uploads', doc.filename as string)
         const data = await readCSV(csvPath)
         const exportColumns = Object.keys(data[0])
@@ -1527,7 +1614,7 @@ test.suite({
 
         expect(previewResponse.columns).toStrictEqual(exportColumns)
 
-        await payload.delete({ collection: 'pages', id: page.id })
+        await payload.delete({ collection: 'pages', id: page.id, overrideAccess: true })
       })
     })
 
@@ -1541,6 +1628,7 @@ test.suite({
             date: dateValue,
             _status: 'published',
           },
+          overrideAccess: true,
         })
 
         let doc = await payload.create({
@@ -1552,23 +1640,25 @@ test.suite({
             format: 'csv',
             where: { id: { equals: page.id } },
           },
+          overrideAccess: true,
         })
 
         await payload.jobs.run()
 
-        doc = await payload.findByID({ collection: 'exports', id: doc.id })
+        doc = await payload.findByID({ collection: 'exports', id: doc.id, overrideAccess: true })
         const csvPath = path.join(dirname, './uploads', doc.filename as string)
         const data = await readCSV(csvPath)
 
         expect(data[0].date).toBe('2026-01-22T00:00:00.000Z')
 
-        await payload.delete({ collection: 'pages', id: page.id })
+        await payload.delete({ collection: 'pages', id: page.id, overrideAccess: true })
       })
 
       test('should handle null date values', async ({ payload }) => {
         const page = await payload.create({
           collection: 'pages',
           data: { title: 'Null Date Test', date: null, _status: 'published' },
+          overrideAccess: true,
         })
 
         let doc = await payload.create({
@@ -1580,17 +1670,18 @@ test.suite({
             format: 'csv',
             where: { id: { equals: page.id } },
           },
+          overrideAccess: true,
         })
 
         await payload.jobs.run()
 
-        doc = await payload.findByID({ collection: 'exports', id: doc.id })
+        doc = await payload.findByID({ collection: 'exports', id: doc.id, overrideAccess: true })
         const csvPath = path.join(dirname, './uploads', doc.filename as string)
         const data = await readCSV(csvPath)
 
         expect(data[0].date).toBe('')
 
-        await payload.delete({ collection: 'pages', id: page.id })
+        await payload.delete({ collection: 'pages', id: page.id, overrideAccess: true })
       })
 
       test('should not include timezone column when only date field is selected', async ({
@@ -1604,6 +1695,7 @@ test.suite({
             dateWithTimezone_tz: 'Europe/London',
             _status: 'published',
           },
+          overrideAccess: true,
         })
 
         let doc = await payload.create({
@@ -1615,11 +1707,12 @@ test.suite({
             format: 'csv',
             where: { id: { equals: page.id } },
           },
+          overrideAccess: true,
         })
 
         await payload.jobs.run()
 
-        doc = await payload.findByID({ collection: 'exports', id: doc.id })
+        doc = await payload.findByID({ collection: 'exports', id: doc.id, overrideAccess: true })
         const csvPath = path.join(dirname, './uploads', doc.filename as string)
         const csvContent = fs.readFileSync(csvPath, 'utf-8')
         const headerLine = csvContent.split('\n')[0]
@@ -1627,7 +1720,7 @@ test.suite({
         expect(headerLine).toContain('dateWithTimezone')
         expect(headerLine).not.toContain('dateWithTimezone_tz')
 
-        await payload.delete({ collection: 'pages', id: page.id })
+        await payload.delete({ collection: 'pages', id: page.id, overrideAccess: true })
       })
 
       test('should not create duplicate columns when selecting both date and timezone fields', async ({
@@ -1641,6 +1734,7 @@ test.suite({
             dateWithTimezone_tz: 'Europe/London',
             _status: 'published',
           },
+          overrideAccess: true,
         })
 
         let doc = await payload.create({
@@ -1652,11 +1746,12 @@ test.suite({
             format: 'csv',
             where: { id: { equals: page.id } },
           },
+          overrideAccess: true,
         })
 
         await payload.jobs.run()
 
-        doc = await payload.findByID({ collection: 'exports', id: doc.id })
+        doc = await payload.findByID({ collection: 'exports', id: doc.id, overrideAccess: true })
         const csvPath = path.join(dirname, './uploads', doc.filename as string)
         const csvContent = fs.readFileSync(csvPath, 'utf-8')
         const headerLine = csvContent.split('\n')[0]
@@ -1669,7 +1764,7 @@ test.suite({
         expect(data[0].dateWithTimezone).toBe('2026-01-25T12:00:00.000Z')
         expect(data[0].dateWithTimezone_tz).toBe('Europe/London')
 
-        await payload.delete({ collection: 'pages', id: page.id })
+        await payload.delete({ collection: 'pages', id: page.id, overrideAccess: true })
       })
     })
 
@@ -1737,6 +1832,7 @@ test.suite({
               },
             ],
           },
+          overrideAccess: true,
         })
 
         let exportDoc = await payload.create({
@@ -1749,6 +1845,7 @@ test.suite({
               id: { equals: testPage.id },
             },
           },
+          overrideAccess: true,
         })
 
         await payload.jobs.run()
@@ -1756,6 +1853,7 @@ test.suite({
         exportDoc = await payload.findByID({
           collection: 'exports',
           id: exportDoc.id,
+          overrideAccess: true,
         })
 
         const csvPath = path.join(dirname, './uploads', exportDoc.filename as string)
@@ -1797,6 +1895,7 @@ test.suite({
         await payload.delete({
           collection: 'pages',
           id: testPage.id,
+          overrideAccess: true,
         })
       })
 
@@ -1828,6 +1927,7 @@ test.suite({
               },
             ],
           },
+          overrideAccess: true,
         })
 
         let exportDoc = await payload.create({
@@ -1840,6 +1940,7 @@ test.suite({
               id: { equals: testPage.id },
             },
           },
+          overrideAccess: true,
         })
 
         await payload.jobs.run()
@@ -1847,6 +1948,7 @@ test.suite({
         exportDoc = await payload.findByID({
           collection: 'exports',
           id: exportDoc.id,
+          overrideAccess: true,
         })
 
         const csvPath = path.join(dirname, './uploads', exportDoc.filename as string)
@@ -1854,6 +1956,7 @@ test.suite({
         await payload.delete({
           collection: 'pages',
           id: testPage.id,
+          overrideAccess: true,
         })
 
         let importDoc = await payload.create({
@@ -1869,6 +1972,7 @@ test.suite({
             name: 'json-roundtrip.csv',
             size: fs.statSync(csvPath).size,
           },
+          overrideAccess: true,
         })
 
         await payload.jobs.run()
@@ -1876,6 +1980,7 @@ test.suite({
         importDoc = await payload.findByID({
           collection: 'imports',
           id: importDoc.id,
+          overrideAccess: true,
         })
 
         expect(importDoc.status).toBe('completed')
@@ -1886,6 +1991,7 @@ test.suite({
           where: {
             title: { equals: 'JSON Roundtrip CSV Test' },
           },
+          overrideAccess: true,
         })
 
         expect(importedPages.docs).toHaveLength(1)
@@ -1910,6 +2016,7 @@ test.suite({
           where: {
             title: { equals: 'JSON Roundtrip CSV Test' },
           },
+          overrideAccess: true,
         })
       })
 
@@ -1930,6 +2037,7 @@ test.suite({
               },
             ],
           },
+          overrideAccess: true,
         })
 
         let exportDoc = await payload.create({
@@ -1940,15 +2048,16 @@ test.suite({
             format: 'csv',
             where: { id: { equals: testPage.id } },
           },
+          overrideAccess: true,
         })
 
         await payload.jobs.run()
 
-        exportDoc = await payload.findByID({ collection: 'exports', id: exportDoc.id })
+        exportDoc = await payload.findByID({ collection: 'exports', id: exportDoc.id, overrideAccess: true })
 
         const csvPath = path.join(dirname, './uploads', exportDoc.filename as string)
 
-        await payload.delete({ collection: 'pages', id: testPage.id })
+        await payload.delete({ collection: 'pages', id: testPage.id, overrideAccess: true })
 
         let importDoc = await payload.create({
           collection: 'imports',
@@ -1960,17 +2069,19 @@ test.suite({
             name: 'faq-roundtrip.csv',
             size: fs.statSync(csvPath).size,
           },
+          overrideAccess: true,
         })
 
         await payload.jobs.run()
 
-        importDoc = await payload.findByID({ collection: 'imports', id: importDoc.id })
+        importDoc = await payload.findByID({ collection: 'imports', id: importDoc.id, overrideAccess: true })
         expect(importDoc.status).toBe('completed')
         expect(importDoc.summary?.imported).toBe(1)
 
         const importedPages = await payload.find({
           collection: 'pages',
           where: { title: { equals: 'FAQ Block Roundtrip Test' } },
+          overrideAccess: true,
         })
 
         expect(importedPages.docs).toHaveLength(1)
@@ -1994,6 +2105,7 @@ test.suite({
         await payload.delete({
           collection: 'pages',
           where: { title: { equals: 'FAQ Block Roundtrip Test' } },
+          overrideAccess: true,
         })
       })
 
@@ -2018,6 +2130,7 @@ test.suite({
               ],
             },
           },
+          overrideAccess: true,
         })
 
         let exportDoc = await payload.create({
@@ -2030,6 +2143,7 @@ test.suite({
               id: { equals: testPage.id },
             },
           },
+          overrideAccess: true,
         })
 
         await payload.jobs.run()
@@ -2037,6 +2151,7 @@ test.suite({
         exportDoc = await payload.findByID({
           collection: 'exports',
           id: exportDoc.id,
+          overrideAccess: true,
         })
 
         const csvPath = path.join(dirname, './uploads', exportDoc.filename as string)
@@ -2059,6 +2174,7 @@ test.suite({
         await payload.delete({
           collection: 'pages',
           id: testPage.id,
+          overrideAccess: true,
         })
 
         let importDoc = await payload.create({
@@ -2074,6 +2190,7 @@ test.suite({
             name: 'nested-array-test.csv',
             size: fs.statSync(csvPath).size,
           },
+          overrideAccess: true,
         })
 
         await payload.jobs.run()
@@ -2081,6 +2198,7 @@ test.suite({
         importDoc = await payload.findByID({
           collection: 'imports',
           id: importDoc.id,
+          overrideAccess: true,
         })
 
         expect(importDoc.status).toBe('completed')
@@ -2090,6 +2208,7 @@ test.suite({
           where: {
             title: { equals: 'Nested Array Test' },
           },
+          overrideAccess: true,
         })
 
         expect(importedPages.docs).toHaveLength(1)
@@ -2111,6 +2230,7 @@ test.suite({
           where: {
             title: { equals: 'Nested Array Test' },
           },
+          overrideAccess: true,
         })
       })
 
@@ -2125,6 +2245,7 @@ test.suite({
             jsonField: initialJson,
             richTextField: richTextData,
           },
+          overrideAccess: true,
         })
 
         expect(existingPage.jsonField).toEqual(initialJson)
@@ -2149,6 +2270,7 @@ test.suite({
             name: 'json-update-test.csv',
             size: csvBuffer.length,
           },
+          overrideAccess: true,
         })
 
         await payload.jobs.run()
@@ -2156,6 +2278,7 @@ test.suite({
         importDoc = await payload.findByID({
           collection: 'imports',
           id: importDoc.id,
+          overrideAccess: true,
         })
 
         expect(importDoc.status).toBe('completed')
@@ -2165,6 +2288,7 @@ test.suite({
         const updatedPage = await payload.findByID({
           collection: 'pages',
           id: existingPage.id,
+          overrideAccess: true,
         })
 
         expect(updatedPage.jsonField).toEqual(updatedJson)
@@ -2173,6 +2297,7 @@ test.suite({
         await payload.delete({
           collection: 'pages',
           id: existingPage.id,
+          overrideAccess: true,
         })
       })
 
@@ -2189,6 +2314,7 @@ test.suite({
             jsonField: existingJson,
             richTextField: richTextData,
           },
+          overrideAccess: true,
         })
 
         const csvContent =
@@ -2212,6 +2338,7 @@ test.suite({
             name: 'json-upsert-test.csv',
             size: csvBuffer.length,
           },
+          overrideAccess: true,
         })
 
         await payload.jobs.run()
@@ -2219,6 +2346,7 @@ test.suite({
         importDoc = await payload.findByID({
           collection: 'imports',
           id: importDoc.id,
+          overrideAccess: true,
         })
 
         expect(importDoc.status).toBe('completed')
@@ -2229,6 +2357,7 @@ test.suite({
         const updatedPage = await payload.findByID({
           collection: 'pages',
           id: existingPage.id,
+          overrideAccess: true,
         })
 
         expect(updatedPage.jsonField).toEqual(updatedExistingJson)
@@ -2238,6 +2367,7 @@ test.suite({
           where: {
             title: { equals: `JSON Upsert New ${timestamp}` },
           },
+          overrideAccess: true,
         })
 
         expect(newPages.docs).toHaveLength(1)
@@ -2252,6 +2382,7 @@ test.suite({
               { title: { equals: `JSON Upsert New ${timestamp}` } },
             ],
           },
+          overrideAccess: true,
         })
       })
 
@@ -2283,6 +2414,7 @@ test.suite({
             name: 'manual-json-csv.csv',
             size: csvBuffer.length,
           },
+          overrideAccess: true,
         })
 
         await payload.jobs.run()
@@ -2290,6 +2422,7 @@ test.suite({
         importDoc = await payload.findByID({
           collection: 'imports',
           id: importDoc.id,
+          overrideAccess: true,
         })
 
         expect(importDoc.status).toBe('completed')
@@ -2300,6 +2433,7 @@ test.suite({
           where: {
             title: { equals: 'Manual CSV Import' },
           },
+          overrideAccess: true,
         })
 
         expect(importedPage.docs).toHaveLength(1)
@@ -2310,6 +2444,7 @@ test.suite({
           where: {
             title: { equals: 'Manual CSV Import' },
           },
+          overrideAccess: true,
         })
       })
 
@@ -2324,6 +2459,7 @@ test.suite({
             title: 'Sequential Import Test',
             jsonField: jsonV1,
           },
+          overrideAccess: true,
         })
 
         let csvContent =
@@ -2346,6 +2482,7 @@ test.suite({
             name: 'sequential-1.csv',
             size: csvBuffer.length,
           },
+          overrideAccess: true,
         })
 
         await payload.jobs.run()
@@ -2353,6 +2490,7 @@ test.suite({
         let updatedPage = await payload.findByID({
           collection: 'pages',
           id: page.id,
+          overrideAccess: true,
         })
         expect(updatedPage.jsonField).toEqual(jsonV2)
 
@@ -2376,6 +2514,7 @@ test.suite({
             name: 'sequential-2.csv',
             size: csvBuffer.length,
           },
+          overrideAccess: true,
         })
 
         await payload.jobs.run()
@@ -2383,12 +2522,14 @@ test.suite({
         updatedPage = await payload.findByID({
           collection: 'pages',
           id: page.id,
+          overrideAccess: true,
         })
         expect(updatedPage.jsonField).toEqual(jsonV3)
 
         await payload.delete({
           collection: 'pages',
           id: page.id,
+          overrideAccess: true,
         })
       })
     })
@@ -2402,6 +2543,7 @@ test.suite({
             excerpt: 'Testing BOM presence',
             _status: 'published',
           },
+          overrideAccess: true,
         })
 
         let doc = await payload.create({
@@ -2413,11 +2555,12 @@ test.suite({
             format: 'csv',
             where: { id: { equals: page.id } },
           },
+          overrideAccess: true,
         })
 
         await payload.jobs.run()
 
-        doc = await payload.findByID({ collection: 'exports', id: doc.id })
+        doc = await payload.findByID({ collection: 'exports', id: doc.id, overrideAccess: true })
         const csvPath = path.join(dirname, './uploads', doc.filename as string)
         const buffer = fs.readFileSync(csvPath)
 
@@ -2425,7 +2568,7 @@ test.suite({
         expect(buffer[1]).toBe(0xbb)
         expect(buffer[2]).toBe(0xbf)
 
-        await payload.delete({ collection: 'pages', id: page.id })
+        await payload.delete({ collection: 'pages', id: page.id, overrideAccess: true })
       })
 
       test('should correctly encode UTF-8 characters for Excel', async ({ payload }) => {
@@ -2439,6 +2582,7 @@ test.suite({
             excerpt: unicodeExcerpt,
             _status: 'published',
           },
+          overrideAccess: true,
         })
 
         let doc = await payload.create({
@@ -2450,11 +2594,12 @@ test.suite({
             format: 'csv',
             where: { id: { equals: page.id } },
           },
+          overrideAccess: true,
         })
 
         await payload.jobs.run()
 
-        doc = await payload.findByID({ collection: 'exports', id: doc.id })
+        doc = await payload.findByID({ collection: 'exports', id: doc.id, overrideAccess: true })
         const csvPath = path.join(dirname, './uploads', doc.filename as string)
 
         const rawContent = fs.readFileSync(csvPath, 'utf-8')
@@ -2467,7 +2612,7 @@ test.suite({
         expect(data[0].title).toBe(unicodeTitle)
         expect(data[0].excerpt).toBe(unicodeExcerpt)
 
-        await payload.delete({ collection: 'pages', id: page.id })
+        await payload.delete({ collection: 'pages', id: page.id, overrideAccess: true })
       })
 
       test('should handle special CSV characters that could break Excel parsing', async ({
@@ -2483,6 +2628,7 @@ test.suite({
             excerpt: specialCharsExcerpt,
             _status: 'published',
           },
+          overrideAccess: true,
         })
 
         let doc = await payload.create({
@@ -2494,18 +2640,19 @@ test.suite({
             format: 'csv',
             where: { id: { equals: page.id } },
           },
+          overrideAccess: true,
         })
 
         await payload.jobs.run()
 
-        doc = await payload.findByID({ collection: 'exports', id: doc.id })
+        doc = await payload.findByID({ collection: 'exports', id: doc.id, overrideAccess: true })
         const csvPath = path.join(dirname, './uploads', doc.filename as string)
         const data = await readCSV(csvPath)
 
         expect(data[0].title).toBe(specialCharsTitle)
         expect(data[0].excerpt).toBe(specialCharsExcerpt)
 
-        await payload.delete({ collection: 'pages', id: page.id })
+        await payload.delete({ collection: 'pages', id: page.id, overrideAccess: true })
       })
 
       test('should preserve Hebrew characters in CSV download via streaming endpoint', async ({
@@ -2523,6 +2670,7 @@ test.suite({
             _status: 'published',
           },
           locale: 'he',
+          overrideAccess: true,
         })
 
         const response = await restClient.POST('/exports/download', {
@@ -2556,7 +2704,7 @@ test.suite({
         const content = buffer.toString('utf-8')
         expect(content).toContain(hebrewLocalized)
 
-        await payload.delete({ collection: 'pages', id: page.id })
+        await payload.delete({ collection: 'pages', id: page.id, overrideAccess: true })
       })
 
       test('should preserve Hebrew characters in job-created CSV export', async ({ payload }) => {
@@ -2571,6 +2719,7 @@ test.suite({
             _status: 'published',
           },
           locale: 'he',
+          overrideAccess: true,
         })
 
         let doc = await payload.create({
@@ -2583,11 +2732,12 @@ test.suite({
             locale: 'he',
             where: { id: { equals: page.id } },
           },
+          overrideAccess: true,
         })
 
         await payload.jobs.run()
 
-        doc = await payload.findByID({ collection: 'exports', id: doc.id })
+        doc = await payload.findByID({ collection: 'exports', id: doc.id, overrideAccess: true })
 
         // Verify filename includes collection slug and csv extension
         expect(doc.filename).toContain('-pages')
@@ -2610,7 +2760,7 @@ test.suite({
         const data = await readCSV(csvPath)
         expect(data[0].localized).toBe(hebrewLocalized)
 
-        await payload.delete({ collection: 'pages', id: page.id })
+        await payload.delete({ collection: 'pages', id: page.id, overrideAccess: true })
       })
 
       test('should preserve Hebrew characters in hook-created CSV export (no jobs queue)', async ({
@@ -2626,6 +2776,7 @@ test.suite({
             content: richTextData,
             _status: 'published',
           },
+          overrideAccess: true,
         })
 
         const doc = await payload.create({
@@ -2637,11 +2788,13 @@ test.suite({
             format: 'csv',
             where: { id: { equals: post.id } },
           },
+          overrideAccess: true,
         })
 
         const exportDoc = await payload.findByID({
           collection: 'posts-export',
           id: doc.id,
+          overrideAccess: true,
         })
 
         // Verify filename includes collection slug and csv extension
@@ -2665,7 +2818,7 @@ test.suite({
         const data = await readCSV(csvPath)
         expect(data[0].title).toBe(hebrewTitle)
 
-        await payload.delete({ collection: 'posts', id: post.id })
+        await payload.delete({ collection: 'posts', id: post.id, overrideAccess: true })
       })
     })
 
@@ -2680,11 +2833,12 @@ test.suite({
             format: 'csv',
             where: { title: { contains: 'Checkbox ' } },
           },
+          overrideAccess: true,
         })
 
         await payload.jobs.run()
 
-        doc = await payload.findByID({ collection: 'exports', id: doc.id })
+        doc = await payload.findByID({ collection: 'exports', id: doc.id, overrideAccess: true })
         const data = await readCSV(path.join(dirname, './uploads', doc.filename as string))
 
         expect(data).toHaveLength(3)
@@ -2705,11 +2859,12 @@ test.suite({
             format: 'csv',
             where: { title: { contains: 'Select ' } },
           },
+          overrideAccess: true,
         })
 
         await payload.jobs.run()
 
-        doc = await payload.findByID({ collection: 'exports', id: doc.id })
+        doc = await payload.findByID({ collection: 'exports', id: doc.id, overrideAccess: true })
         const data = await readCSV(path.join(dirname, './uploads', doc.filename as string))
 
         expect(data).toHaveLength(3)
@@ -2728,11 +2883,12 @@ test.suite({
             format: 'csv',
             where: { title: { contains: 'SelectMany ' } },
           },
+          overrideAccess: true,
         })
 
         await payload.jobs.run()
 
-        doc = await payload.findByID({ collection: 'exports', id: doc.id })
+        doc = await payload.findByID({ collection: 'exports', id: doc.id, overrideAccess: true })
         const data = await readCSV(path.join(dirname, './uploads', doc.filename as string))
 
         expect(data).toHaveLength(3)
@@ -2750,11 +2906,12 @@ test.suite({
             format: 'csv',
             where: { title: { contains: 'Radio ' } },
           },
+          overrideAccess: true,
         })
 
         await payload.jobs.run()
 
-        doc = await payload.findByID({ collection: 'exports', id: doc.id })
+        doc = await payload.findByID({ collection: 'exports', id: doc.id, overrideAccess: true })
         const data = await readCSV(path.join(dirname, './uploads', doc.filename as string))
 
         expect(data).toHaveLength(3)
@@ -2773,11 +2930,12 @@ test.suite({
             format: 'csv',
             where: { title: { contains: 'Email ' } },
           },
+          overrideAccess: true,
         })
 
         await payload.jobs.run()
 
-        doc = await payload.findByID({ collection: 'exports', id: doc.id })
+        doc = await payload.findByID({ collection: 'exports', id: doc.id, overrideAccess: true })
         const data = await readCSV(path.join(dirname, './uploads', doc.filename as string))
 
         expect(data).toHaveLength(3)
@@ -2795,11 +2953,12 @@ test.suite({
             format: 'csv',
             where: { title: { contains: 'Textarea ' } },
           },
+          overrideAccess: true,
         })
 
         await payload.jobs.run()
 
-        doc = await payload.findByID({ collection: 'exports', id: doc.id })
+        doc = await payload.findByID({ collection: 'exports', id: doc.id, overrideAccess: true })
         const data = await readCSV(path.join(dirname, './uploads', doc.filename as string))
 
         expect(data).toHaveLength(3)
@@ -2818,11 +2977,12 @@ test.suite({
             format: 'csv',
             where: { title: { contains: 'Code ' } },
           },
+          overrideAccess: true,
         })
 
         await payload.jobs.run()
 
-        doc = await payload.findByID({ collection: 'exports', id: doc.id })
+        doc = await payload.findByID({ collection: 'exports', id: doc.id, overrideAccess: true })
         const data = await readCSV(path.join(dirname, './uploads', doc.filename as string))
 
         expect(data).toHaveLength(3)
@@ -2839,11 +2999,12 @@ test.suite({
             format: 'csv',
             where: { title: { contains: 'Point ' } },
           },
+          overrideAccess: true,
         })
 
         await payload.jobs.run()
 
-        doc = await payload.findByID({ collection: 'exports', id: doc.id })
+        doc = await payload.findByID({ collection: 'exports', id: doc.id, overrideAccess: true })
         const data = await readCSV(path.join(dirname, './uploads', doc.filename as string))
 
         expect(data).toHaveLength(3)
@@ -2860,11 +3021,12 @@ test.suite({
             format: 'csv',
             where: { title: { contains: 'TextMany ' } },
           },
+          overrideAccess: true,
         })
 
         await payload.jobs.run()
 
-        doc = await payload.findByID({ collection: 'exports', id: doc.id })
+        doc = await payload.findByID({ collection: 'exports', id: doc.id, overrideAccess: true })
         const data = await readCSV(path.join(dirname, './uploads', doc.filename as string))
 
         expect(data).toHaveLength(3)
@@ -2881,11 +3043,12 @@ test.suite({
             format: 'csv',
             where: { title: { contains: 'Upload ' } },
           },
+          overrideAccess: true,
         })
 
         await payload.jobs.run()
 
-        doc = await payload.findByID({ collection: 'exports', id: doc.id })
+        doc = await payload.findByID({ collection: 'exports', id: doc.id, overrideAccess: true })
         const data = await readCSV(path.join(dirname, './uploads', doc.filename as string))
 
         expect(data).toHaveLength(3)
@@ -2905,6 +3068,7 @@ test.suite({
             await payload.delete({
               collection: customIdPagesSlug as CollectionSlug,
               id,
+              overrideAccess: true,
             })
           } catch {
             // Ignore cleanup errors
@@ -2920,6 +3084,7 @@ test.suite({
             id: 'export-custom-1',
             title: 'Export Custom Page 1',
           },
+          overrideAccess: true,
         })
 
         await payload.create({
@@ -2928,6 +3093,7 @@ test.suite({
             id: 'export-custom-2',
             title: 'Export Custom Page 2',
           },
+          overrideAccess: true,
         })
 
         createdCustomIdPages.push('export-custom-1', 'export-custom-2')
@@ -2943,6 +3109,7 @@ test.suite({
               id: { in: ['export-custom-1', 'export-custom-2'] },
             },
           },
+          overrideAccess: true,
         })
 
         await payload.jobs.run()
@@ -2950,6 +3117,7 @@ test.suite({
         exportDoc = await payload.findByID({
           collection: 'exports',
           id: exportDoc.id,
+          overrideAccess: true,
         })
 
         expect(exportDoc.filename).toContain('.csv')
@@ -2974,6 +3142,7 @@ test.suite({
             id: 'export-json-1',
             title: 'Export JSON Page 1',
           },
+          overrideAccess: true,
         })
 
         await payload.create({
@@ -2982,6 +3151,7 @@ test.suite({
             id: 'export-json-2',
             title: 'Export JSON Page 2',
           },
+          overrideAccess: true,
         })
 
         createdCustomIdPages.push('export-json-1', 'export-json-2')
@@ -2997,6 +3167,7 @@ test.suite({
               id: { in: ['export-json-1', 'export-json-2'] },
             },
           },
+          overrideAccess: true,
         })
 
         await payload.jobs.run()
@@ -3004,6 +3175,7 @@ test.suite({
         exportDoc = await payload.findByID({
           collection: 'exports',
           id: exportDoc.id,
+          overrideAccess: true,
         })
 
         expect(exportDoc.filename).toContain('.json')
@@ -3030,6 +3202,7 @@ test.suite({
         where: {
           id: { exists: true },
         },
+        overrideAccess: true,
       })
 
       await payload.delete({
@@ -3037,6 +3210,7 @@ test.suite({
         where: {
           id: { exists: true },
         },
+        overrideAccess: true,
       })
     })
 
@@ -3052,6 +3226,7 @@ test.suite({
               array: [{ field1: `test ${i}` }],
             },
           },
+          overrideAccess: true,
         })
         createdPages.push(page)
       }
@@ -3067,6 +3242,7 @@ test.suite({
             title: { contains: 'Import Test ' },
           },
         },
+        overrideAccess: true,
       })
 
       await payload.jobs.run()
@@ -3074,6 +3250,7 @@ test.suite({
       const exportedDoc = await payload.findByID({
         collection: 'exports',
         id: exportDoc.id,
+        overrideAccess: true,
       })
 
       const csvPath = path.join(dirname, './uploads', exportedDoc.filename as string)
@@ -3083,6 +3260,7 @@ test.suite({
         where: {
           title: { contains: 'Import Test ' },
         },
+        overrideAccess: true,
       })
 
       let importDoc = await payload.create({
@@ -3098,6 +3276,7 @@ test.suite({
           name: 'import-test.csv',
           size: fs.statSync(csvPath).size,
         },
+        overrideAccess: true,
       })
 
       await payload.jobs.run()
@@ -3105,6 +3284,7 @@ test.suite({
       importDoc = await payload.findByID({
         collection: 'imports',
         id: importDoc.id,
+        overrideAccess: true,
       })
 
       if (importDoc.status !== 'completed') {
@@ -3124,6 +3304,7 @@ test.suite({
           title: { contains: 'Import Test ' },
         },
         sort: 'title',
+        overrideAccess: true,
       })
 
       expect(importedPages.docs).toHaveLength(3)
@@ -3163,6 +3344,7 @@ test.suite({
           name: 'import-test.json',
           size: jsonBuffer.length,
         },
+        overrideAccess: true,
       })
 
       await payload.jobs.run()
@@ -3170,6 +3352,7 @@ test.suite({
       importDoc = await payload.findByID({
         collection: 'imports',
         id: importDoc.id,
+        overrideAccess: true,
       })
 
       expect(importDoc.status).toBe('completed')
@@ -3182,6 +3365,7 @@ test.suite({
           title: { contains: 'JSON Import ' },
         },
         sort: 'title',
+        overrideAccess: true,
       })
 
       expect(importedPages.docs).toHaveLength(2)
@@ -3198,6 +3382,7 @@ test.suite({
             value: 'initial value 1',
           },
         },
+        overrideAccess: true,
       })
 
       const page2 = await payload.create({
@@ -3208,6 +3393,7 @@ test.suite({
             value: 'initial value 2',
           },
         },
+        overrideAccess: true,
       })
 
       const updateData = [
@@ -3243,6 +3429,7 @@ test.suite({
           name: 'update-test.csv',
           size: csvBuffer.length,
         },
+        overrideAccess: true,
       })
 
       await payload.jobs.run()
@@ -3250,6 +3437,7 @@ test.suite({
       importDoc = await payload.findByID({
         collection: 'imports',
         id: importDoc.id,
+        overrideAccess: true,
       })
 
       expect(importDoc.status).toBe('completed')
@@ -3260,6 +3448,7 @@ test.suite({
       const updatedPage1 = await payload.findByID({
         collection: 'pages',
         id: page1.id,
+        overrideAccess: true,
       })
 
       expect(updatedPage1.title).toBe('Updated Test 1')
@@ -3276,6 +3465,7 @@ test.suite({
           excerpt: 'existing',
           _status: 'published',
         },
+        overrideAccess: true,
       })
 
       const upsertData = [
@@ -3311,6 +3501,7 @@ test.suite({
           name: 'upsert-test.csv',
           size: csvBuffer.length,
         },
+        overrideAccess: true,
       })
 
       await payload.jobs.run()
@@ -3318,6 +3509,7 @@ test.suite({
       const importDoc = await payload.findByID({
         collection: 'imports',
         id: initialImportDoc.id,
+        overrideAccess: true,
       })
 
       expect(importDoc.status).toBe('completed')
@@ -3350,6 +3542,7 @@ test.suite({
         where: {
           title: { equals: `Upsert Test ${timestamp} New` },
         },
+        overrideAccess: true,
       })
       expect(newPages.docs).toHaveLength(1)
       expect(newPages.docs[0]?.excerpt).toBe('new')
@@ -3376,6 +3569,7 @@ test.suite({
           name: 'localized-single-test.csv',
           size: csvBuffer.length,
         },
+        overrideAccess: true,
       })
 
       await payload.jobs.run()
@@ -3383,6 +3577,7 @@ test.suite({
       importDoc = await payload.findByID({
         collection: 'imports',
         id: importDoc.id,
+        overrideAccess: true,
       })
 
       expect(importDoc.status).toBe('completed')
@@ -3396,6 +3591,7 @@ test.suite({
         },
         locale: 'en',
         sort: 'title',
+        overrideAccess: true,
       })
 
       expect(importedPages.docs).toHaveLength(2)
@@ -3408,6 +3604,7 @@ test.suite({
         where: {
           title: { contains: 'Localized ' },
         },
+        overrideAccess: true,
       })
 
       const csvContent =
@@ -3430,6 +3627,7 @@ test.suite({
           name: 'localized-multi-test.csv',
           size: csvBuffer.length,
         },
+        overrideAccess: true,
       })
 
       await payload.jobs.run()
@@ -3437,6 +3635,7 @@ test.suite({
       importDoc = await payload.findByID({
         collection: 'imports',
         id: importDoc.id,
+        overrideAccess: true,
       })
 
       expect(importDoc.status).toBe('completed')
@@ -3450,6 +3649,7 @@ test.suite({
         },
         locale: 'en',
         sort: 'title',
+        overrideAccess: true,
       })
 
       expect(importedPagesEn.docs).toHaveLength(2)
@@ -3462,6 +3662,7 @@ test.suite({
         },
         locale: 'es',
         sort: 'title',
+        overrideAccess: true,
       })
 
       expect(importedPagesEs.docs).toHaveLength(2)
@@ -3493,6 +3694,7 @@ test.suite({
           name: 'locale-order-test.csv',
           size: csvBuffer.length,
         },
+        overrideAccess: true,
       })
 
       await payload.jobs.run()
@@ -3500,6 +3702,7 @@ test.suite({
       importDoc = await payload.findByID({
         collection: 'imports',
         id: importDoc.id,
+        overrideAccess: true,
       })
 
       expect(importDoc.status).toBe('completed')
@@ -3514,6 +3717,7 @@ test.suite({
         },
         locale: 'en',
         sort: 'title',
+        overrideAccess: true,
       })
 
       expect(importedPagesEn.docs).toHaveLength(2)
@@ -3528,6 +3732,7 @@ test.suite({
         },
         locale: 'de',
         sort: 'title',
+        overrideAccess: true,
       })
 
       expect(importedPagesDe.docs).toHaveLength(2)
@@ -3542,6 +3747,7 @@ test.suite({
         },
         locale: 'es',
         sort: 'title',
+        overrideAccess: true,
       })
 
       expect(importedPagesEs.docs).toHaveLength(2)
@@ -3554,6 +3760,7 @@ test.suite({
         where: {
           title: { contains: 'Locale Order Test ' },
         },
+        overrideAccess: true,
       })
     })
 
@@ -3578,6 +3785,7 @@ test.suite({
           name: 'array-import-test.csv',
           size: csvBuffer.length,
         },
+        overrideAccess: true,
       })
 
       await payload.jobs.run()
@@ -3585,6 +3793,7 @@ test.suite({
       importDoc = await payload.findByID({
         collection: 'imports',
         id: importDoc.id,
+        overrideAccess: true,
       })
 
       expect(importDoc.status).toBe('completed')
@@ -3597,6 +3806,7 @@ test.suite({
           title: { contains: 'Array Import ' },
         },
         sort: 'title',
+        overrideAccess: true,
       })
 
       expect(importedPages.docs).toHaveLength(2)
@@ -3627,6 +3837,7 @@ test.suite({
           name: 'blocks-import-test.csv',
           size: csvBuffer.length,
         },
+        overrideAccess: true,
       })
 
       await payload.jobs.run()
@@ -3634,6 +3845,7 @@ test.suite({
       importDoc = await payload.findByID({
         collection: 'imports',
         id: importDoc.id,
+        overrideAccess: true,
       })
 
       expect(importDoc.status).toBe('completed')
@@ -3645,6 +3857,7 @@ test.suite({
         where: {
           title: { equals: 'Blocks Import 1' },
         },
+        overrideAccess: true,
       })
 
       expect(importedPages.docs).toHaveLength(1)
@@ -3685,6 +3898,7 @@ test.suite({
           name: 'hasmany-import-test.csv',
           size: csvBuffer.length,
         },
+        overrideAccess: true,
       })
 
       await payload.jobs.run()
@@ -3692,6 +3906,7 @@ test.suite({
       importDoc = await payload.findByID({
         collection: 'imports',
         id: importDoc.id,
+        overrideAccess: true,
       })
 
       if (importDoc.status !== 'completed') {
@@ -3711,6 +3926,7 @@ test.suite({
           title: { contains: 'HasMany ' },
         },
         sort: 'title',
+        overrideAccess: true,
       })
 
       expect(importedPages.docs).toHaveLength(5)
@@ -3740,6 +3956,7 @@ test.suite({
       const users = await payload.find({
         collection: 'users',
         limit: 3,
+        overrideAccess: true,
       })
       const userId1 = users.docs[0]?.id
       const userId2 = users.docs[1]?.id || userId1 // Fallback if only one user
@@ -3765,6 +3982,7 @@ test.suite({
           name: 'relationship-import-test.csv',
           size: csvBuffer.length,
         },
+        overrideAccess: true,
       })
 
       await payload.jobs.run()
@@ -3772,6 +3990,7 @@ test.suite({
       importDoc = await payload.findByID({
         collection: 'imports',
         id: importDoc.id,
+        overrideAccess: true,
       })
 
       expect(importDoc.status).toBe('completed')
@@ -3784,6 +4003,7 @@ test.suite({
           title: { contains: 'Relationship Import ' },
         },
         depth: 1,
+        overrideAccess: true,
       })
 
       expect(importedPages.docs).toHaveLength(2)
@@ -3800,8 +4020,8 @@ test.suite({
     test('should handle explicit null vs empty polymorphic relationships in import', async ({
       payload,
     }) => {
-      const users = await payload.find({ collection: 'users', limit: 1 })
-      const posts = await payload.find({ collection: 'posts', limit: 1 })
+      const users = await payload.find({ collection: 'users', limit: 1, overrideAccess: true })
+      const posts = await payload.find({ collection: 'posts', limit: 1, overrideAccess: true })
       const userId = users.docs[0]?.id
       const postId = posts.docs[0]?.id
 
@@ -3819,6 +4039,7 @@ test.suite({
             value: 'Original Group Value',
           },
         },
+        overrideAccess: true,
       })
 
       const csvUpdate = [
@@ -3840,6 +4061,7 @@ test.suite({
           name: 'update-polymorphic-test.csv',
           size: csvUpdate.length,
         },
+        overrideAccess: true,
       })
 
       await payload.jobs.run()
@@ -3847,6 +4069,7 @@ test.suite({
       importDoc = await payload.findByID({
         collection: 'imports',
         id: importDoc.id,
+        overrideAccess: true,
       })
 
       expect(importDoc.status).toBe('completed')
@@ -3856,6 +4079,7 @@ test.suite({
       const updatedPage = await payload.findByID({
         collection: 'pages',
         id: existingPage.id,
+        overrideAccess: true,
       })
 
       expect(updatedPage.title).toBe('Updated Title')
@@ -3866,6 +4090,7 @@ test.suite({
       await payload.delete({
         collection: 'pages',
         id: existingPage.id,
+        overrideAccess: true,
       })
     })
 
@@ -3873,10 +4098,12 @@ test.suite({
       const users = await payload.find({
         collection: 'users',
         limit: 1,
+        overrideAccess: true,
       })
       const posts = await payload.find({
         collection: 'posts',
         limit: 2,
+        overrideAccess: true,
       })
       const userId = users.docs[0]?.id
       const postId1 = posts.docs[0]?.id
@@ -3901,6 +4128,7 @@ test.suite({
           name: 'polymorphic-import-test.csv',
           size: csvBuffer.length,
         },
+        overrideAccess: true,
       })
 
       await payload.jobs.run()
@@ -3908,6 +4136,7 @@ test.suite({
       importDoc = await payload.findByID({
         collection: 'imports',
         id: importDoc.id,
+        overrideAccess: true,
       })
 
       expect(importDoc.status).toBe('completed')
@@ -3920,6 +4149,7 @@ test.suite({
           title: { equals: 'Polymorphic Import 1' },
         },
         depth: 0,
+        overrideAccess: true,
       })
 
       expect(importedPages.docs).toHaveLength(1)
@@ -3959,6 +4189,7 @@ test.suite({
           name: 'virtual-import-test.csv',
           size: csvBuffer.length,
         },
+        overrideAccess: true,
       })
 
       await payload.jobs.run()
@@ -3966,6 +4197,7 @@ test.suite({
       importDoc = await payload.findByID({
         collection: 'imports',
         id: importDoc.id,
+        overrideAccess: true,
       })
 
       expect(importDoc.status).toBe('completed')
@@ -3977,6 +4209,7 @@ test.suite({
         where: {
           title: { equals: 'Virtual Import Test' },
         },
+        overrideAccess: true,
       })
 
       expect(importedPages.docs).toHaveLength(1)
@@ -4007,6 +4240,7 @@ test.suite({
           name: 'status-import-test.csv',
           size: csvBuffer.length,
         },
+        overrideAccess: true,
       })
 
       await payload.jobs.run()
@@ -4014,6 +4248,7 @@ test.suite({
       importDoc = await payload.findByID({
         collection: 'imports',
         id: importDoc.id,
+        overrideAccess: true,
       })
 
       expect(importDoc.status).toBe('completed')
@@ -4026,6 +4261,7 @@ test.suite({
           title: { contains: 'Draft Import ' },
         },
         draft: true,
+        overrideAccess: true,
       })
 
       expect(draftPages.docs).toHaveLength(2)
@@ -4036,7 +4272,8 @@ test.suite({
         where: {
           title: { contains: 'Published Import ' },
         },
-        draft: false, // Query for published documents only
+        draft: false,
+        overrideAccess: true, // Query for published documents only
       })
 
       expect(publishedPages.docs).toHaveLength(1)
@@ -4067,6 +4304,7 @@ test.suite({
           name: 'default-status-test.csv',
           size: csvBuffer.length,
         },
+        overrideAccess: true,
       })
 
       await payload.jobs.run()
@@ -4074,6 +4312,7 @@ test.suite({
       importDoc = await payload.findByID({
         collection: 'imports',
         id: importDoc.id,
+        overrideAccess: true,
       })
 
       expect(importDoc.status).toBe('completed')
@@ -4085,7 +4324,8 @@ test.suite({
         where: {
           title: { contains: 'Default Status Test ' },
         },
-        draft: false, // Query for published documents
+        draft: false,
+        overrideAccess: true, // Query for published documents
       })
 
       expect(pages.docs).toHaveLength(2)
@@ -4110,6 +4350,7 @@ test.suite({
           name: 'missing-field-test.csv',
           size: missingFieldBuffer.length,
         },
+        overrideAccess: true,
       })
 
       await payload.jobs.run()
@@ -4117,6 +4358,7 @@ test.suite({
       importDoc1 = await payload.findByID({
         collection: 'imports',
         id: importDoc1.id,
+        overrideAccess: true,
       })
 
       expect(importDoc1.status).toBe('completed')
@@ -4139,6 +4381,7 @@ test.suite({
           name: 'invalid-type-test.csv',
           size: invalidTypeBuffer.length,
         },
+        overrideAccess: true,
       })
 
       await payload.jobs.run()
@@ -4146,6 +4389,7 @@ test.suite({
       importDoc2 = await payload.findByID({
         collection: 'imports',
         id: importDoc2.id,
+        overrideAccess: true,
       })
 
       expect(importDoc2.status).toBe('completed')
@@ -4169,6 +4413,7 @@ test.suite({
           name: 'non-existent-test.csv',
           size: nonExistentBuffer.length,
         },
+        overrideAccess: true,
       })
 
       await payload.jobs.run()
@@ -4176,6 +4421,7 @@ test.suite({
       importDoc3 = await payload.findByID({
         collection: 'imports',
         id: importDoc3.id,
+        overrideAccess: true,
       })
 
       expect(importDoc3.status).toBe('failed')
@@ -4207,6 +4453,7 @@ test.suite({
           name: 'mixed-import-test.csv',
           size: mixedBuffer.length,
         },
+        overrideAccess: true,
       })
 
       await payload.jobs.run()
@@ -4214,6 +4461,7 @@ test.suite({
       importDoc = await payload.findByID({
         collection: 'imports',
         id: importDoc.id,
+        overrideAccess: true,
       })
 
       expect(importDoc.status).toBe('partial')
@@ -4288,6 +4536,7 @@ test.suite({
           name: 'nested-group-test.csv',
           size: csvBuffer.length,
         },
+        overrideAccess: true,
       })
 
       await payload.jobs.run()
@@ -4295,6 +4544,7 @@ test.suite({
       importDoc = await payload.findByID({
         collection: 'imports',
         id: importDoc.id,
+        overrideAccess: true,
       })
 
       expect(importDoc.status).toBe('completed')
@@ -4306,6 +4556,7 @@ test.suite({
         where: {
           title: { equals: 'Nested Group Import' },
         },
+        overrideAccess: true,
       })
 
       expect(importedPages.docs).toHaveLength(1)
@@ -4337,6 +4588,7 @@ test.suite({
           name: 'tabs-collapsible-test.csv',
           size: csvBuffer.length,
         },
+        overrideAccess: true,
       })
 
       await payload.jobs.run()
@@ -4344,6 +4596,7 @@ test.suite({
       importDoc = await payload.findByID({
         collection: 'imports',
         id: importDoc.id,
+        overrideAccess: true,
       })
 
       expect(importDoc.status).toBe('completed')
@@ -4355,6 +4608,7 @@ test.suite({
         where: {
           title: { equals: 'Tab Import Test' },
         },
+        overrideAccess: true,
       })
 
       expect(importedPages.docs).toHaveLength(1)
@@ -4394,6 +4648,7 @@ test.suite({
           name: 'disabled-fields-test.csv',
           size: csvBuffer.length,
         },
+        overrideAccess: true,
       })
 
       await payload.jobs.run()
@@ -4401,6 +4656,7 @@ test.suite({
       importDoc = await payload.findByID({
         collection: 'imports',
         id: importDoc.id,
+        overrideAccess: true,
       })
 
       expect(importDoc.status).toBe('completed')
@@ -4412,6 +4668,7 @@ test.suite({
         where: {
           title: { equals: 'Disabled Fields Test' },
         },
+        overrideAccess: true,
       })
 
       expect(importedPages.docs).toHaveLength(1)
@@ -4446,6 +4703,7 @@ test.suite({
           name: 'jobs-import-test.csv',
           size: csvBuffer.length,
         },
+        overrideAccess: true,
       })
 
       const { docs: jobs } = await payload.find({
@@ -4453,6 +4711,7 @@ test.suite({
         where: {
           taskSlug: { equals: 'createCollectionImport' },
         },
+        overrideAccess: true,
       })
 
       expect(jobs.length).toBeGreaterThan(0)
@@ -4478,6 +4737,7 @@ test.suite({
       const importDoc = await payload.findByID({
         collection: 'imports' as CollectionSlug,
         id: doc.id,
+        overrideAccess: true,
       })
 
       interface ImportDocWithStatus {
@@ -4494,7 +4754,8 @@ test.suite({
         where: {
           title: { contains: 'Jobs Import ' },
         },
-        sort: 'title', // Sort by title to ensure consistent order
+        sort: 'title',
+        overrideAccess: true, // Sort by title to ensure consistent order
       })
 
       expect(importedPages.docs).toHaveLength(2)
@@ -4521,6 +4782,7 @@ test.suite({
             },
             customRelationship: user.id,
           },
+          overrideAccess: true,
         })
         createdPages.push(page)
       }
@@ -4544,6 +4806,7 @@ test.suite({
             title: { contains: 'Roundtrip Test ' },
           },
         },
+        overrideAccess: true,
       })
 
       await payload.jobs.run()
@@ -4551,6 +4814,7 @@ test.suite({
       const exportedDoc = await payload.findByID({
         collection: 'exports',
         id: exportDoc.id,
+        overrideAccess: true,
       })
 
       const csvPath = path.join(dirname, './uploads', exportedDoc.filename as string)
@@ -4564,6 +4828,7 @@ test.suite({
         where: {
           title: { contains: 'Roundtrip Test ' },
         },
+        overrideAccess: true,
       })
 
       let importDoc = await payload.create({
@@ -4579,6 +4844,7 @@ test.suite({
           name: 'roundtrip-test.csv',
           size: fs.statSync(csvPath).size,
         },
+        overrideAccess: true,
       })
 
       await payload.jobs.run()
@@ -4586,6 +4852,7 @@ test.suite({
       importDoc = await payload.findByID({
         collection: 'imports',
         id: importDoc.id,
+        overrideAccess: true,
       })
 
       expect(importDoc.status).toBe('completed')
@@ -4599,6 +4866,7 @@ test.suite({
         },
         sort: 'title',
         depth: 1,
+        overrideAccess: true,
       })
 
       expect(importedPages.docs).toHaveLength(3)
@@ -4611,12 +4879,14 @@ test.suite({
       const testUser = await payload.find({
         collection: 'users',
         limit: 1,
+        overrideAccess: true,
       })
       const testPost = await payload.create({
         collection: 'posts',
         data: {
           title: 'Test Post for Roundtrip',
         },
+        overrideAccess: true,
       })
 
       const testPage = await payload.create({
@@ -4663,6 +4933,7 @@ test.suite({
           },
           _status: 'published',
         },
+        overrideAccess: true,
       })
 
       const exportDoc = await payload.create({
@@ -4677,6 +4948,7 @@ test.suite({
             id: { equals: testPage.id },
           },
         },
+        overrideAccess: true,
       })
 
       await payload.jobs.run()
@@ -4684,6 +4956,7 @@ test.suite({
       const exportedDoc = await payload.findByID({
         collection: 'exports',
         id: exportDoc.id,
+        overrideAccess: true,
       })
 
       const csvPath = path.join(dirname, './uploads', exportedDoc.filename as string)
@@ -4691,6 +4964,7 @@ test.suite({
       await payload.delete({
         collection: 'pages',
         id: testPage.id,
+        overrideAccess: true,
       })
 
       let importDoc = await payload.create({
@@ -4706,6 +4980,7 @@ test.suite({
           name: 'complete-roundtrip.csv',
           size: fs.statSync(csvPath).size,
         },
+        overrideAccess: true,
       })
 
       await payload.jobs.run()
@@ -4713,6 +4988,7 @@ test.suite({
       importDoc = await payload.findByID({
         collection: 'imports',
         id: importDoc.id,
+        overrideAccess: true,
       })
 
       expect(importDoc.status).toBe('completed')
@@ -4725,6 +5001,7 @@ test.suite({
           title: { equals: 'Complete Roundtrip Test' },
         },
         depth: 0,
+        overrideAccess: true,
       })
 
       expect(importedPages.docs).toHaveLength(1)
@@ -4751,6 +5028,7 @@ test.suite({
       await payload.delete({
         collection: 'posts',
         id: testPost.id,
+        overrideAccess: true,
       })
     })
 
@@ -4776,6 +5054,7 @@ test.suite({
             name: 'batch-test.csv',
             size: csvBuffer.length,
           },
+          overrideAccess: true,
         })
 
         await payload.jobs.run()
@@ -4783,6 +5062,7 @@ test.suite({
         importDoc = await payload.findByID({
           collection: 'imports',
           id: importDoc.id,
+          overrideAccess: true,
         })
 
         expect(importDoc.status).toBe('completed')
@@ -4795,6 +5075,7 @@ test.suite({
             title: { contains: 'Batch Test ' },
           },
           limit: 300,
+          overrideAccess: true,
         })
 
         expect(importedPages.totalDocs).toBe(250)
@@ -4804,6 +5085,7 @@ test.suite({
           where: {
             title: { contains: 'Batch Test ' },
           },
+          overrideAccess: true,
         })
       })
 
@@ -4830,6 +5112,7 @@ test.suite({
             name: 'batch-errors-test.csv',
             size: csvBuffer.length,
           },
+          overrideAccess: true,
         })
 
         await payload.jobs.run()
@@ -4837,6 +5120,7 @@ test.suite({
         importDoc = await payload.findByID({
           collection: 'imports',
           id: importDoc.id,
+          overrideAccess: true,
         })
 
         expect(importDoc.status).toBe('partial')
@@ -4848,6 +5132,7 @@ test.suite({
           where: {
             title: { contains: 'Valid Doc ' },
           },
+          overrideAccess: true,
         })
       })
 
@@ -4855,6 +5140,7 @@ test.suite({
         const testUser = await payload.find({
           collection: 'users',
           limit: 1,
+          overrideAccess: true,
         })
         const userId = testUser.docs[0]?.id
 
@@ -4879,6 +5165,7 @@ test.suite({
             name: 'row-numbers-test.csv',
             size: csvBuffer.length,
           },
+          overrideAccess: true,
         })
 
         await payload.jobs.run()
@@ -4886,6 +5173,7 @@ test.suite({
         importDoc = await payload.findByID({
           collection: 'imports',
           id: importDoc.id,
+          overrideAccess: true,
         })
 
         expect(importDoc.summary?.imported).toBe(3)
@@ -4903,6 +5191,7 @@ test.suite({
           where: {
             title: { contains: 'Row ' },
           },
+          overrideAccess: true,
         })
       })
 
@@ -4927,6 +5216,7 @@ test.suite({
             name: 'batch-localized-test.csv',
             size: csvBuffer.length,
           },
+          overrideAccess: true,
         })
 
         await payload.jobs.run()
@@ -4934,6 +5224,7 @@ test.suite({
         importDoc = await payload.findByID({
           collection: 'imports',
           id: importDoc.id,
+          overrideAccess: true,
         })
 
         expect(importDoc.status).toBe('completed')
@@ -4947,6 +5238,7 @@ test.suite({
           },
           locale: 'en',
           limit: 200,
+          overrideAccess: true,
         })
 
         expect(importedPagesEn.totalDocs).toBe(150)
@@ -4959,6 +5251,7 @@ test.suite({
           },
           locale: 'es',
           limit: 200,
+          overrideAccess: true,
         })
 
         expect(importedPagesEs.docs[0]?.localized).toContain('Spanish')
@@ -4968,6 +5261,7 @@ test.suite({
           where: {
             title: { contains: 'Batch Localized ' },
           },
+          overrideAccess: true,
         })
       })
 
@@ -4991,6 +5285,7 @@ test.suite({
             name: 'default-status-test.csv',
             size: csvBuffer.length,
           },
+          overrideAccess: true,
         })
 
         await payload.jobs.run()
@@ -4998,6 +5293,7 @@ test.suite({
         importDoc = await payload.findByID({
           collection: 'imports',
           id: importDoc.id,
+          overrideAccess: true,
         })
 
         expect(importDoc.status).toBe('completed')
@@ -5010,6 +5306,7 @@ test.suite({
             title: { contains: 'Default Status Test ' },
           },
           draft: false,
+          overrideAccess: true,
         })
 
         expect(publishedPages.totalDocs).toBe(2)
@@ -5022,6 +5319,7 @@ test.suite({
           where: {
             title: { contains: 'Default Status Test ' },
           },
+          overrideAccess: true,
         })
       })
 
@@ -5045,6 +5343,7 @@ test.suite({
             name: 'explicit-draft-test.csv',
             size: csvBuffer.length,
           },
+          overrideAccess: true,
         })
 
         await payload.jobs.run()
@@ -5052,6 +5351,7 @@ test.suite({
         importDoc = await payload.findByID({
           collection: 'imports',
           id: importDoc.id,
+          overrideAccess: true,
         })
 
         expect(importDoc.status).toBe('completed')
@@ -5064,6 +5364,7 @@ test.suite({
             title: { contains: 'Explicit Draft Test ' },
           },
           draft: true,
+          overrideAccess: true,
         })
 
         expect(draftPages.totalDocs).toBe(2)
@@ -5076,6 +5377,7 @@ test.suite({
           where: {
             title: { contains: 'Explicit Draft Test ' },
           },
+          overrideAccess: true,
         })
       })
 
@@ -5100,6 +5402,7 @@ test.suite({
             name: 'upsert-new-published-test.csv',
             size: csvBuffer.length,
           },
+          overrideAccess: true,
         })
 
         await payload.jobs.run()
@@ -5107,6 +5410,7 @@ test.suite({
         importDoc = await payload.findByID({
           collection: 'imports',
           id: importDoc.id,
+          overrideAccess: true,
         })
 
         expect(importDoc.status).toBe('completed')
@@ -5119,6 +5423,7 @@ test.suite({
             title: { contains: 'Upsert New Published Test ' },
           },
           draft: false,
+          overrideAccess: true,
         })
 
         expect(publishedPages.totalDocs).toBe(2)
@@ -5131,6 +5436,7 @@ test.suite({
           where: {
             title: { contains: 'Upsert New Published Test ' },
           },
+          overrideAccess: true,
         })
       })
 
@@ -5154,6 +5460,7 @@ test.suite({
             name: 'manual-locale-test.csv',
             size: csvBuffer.length,
           },
+          overrideAccess: true,
         })
 
         await payload.jobs.run()
@@ -5161,6 +5468,7 @@ test.suite({
         importDoc = await payload.findByID({
           collection: 'imports',
           id: importDoc.id,
+          overrideAccess: true,
         })
 
         expect(importDoc.status).toBe('completed')
@@ -5172,6 +5480,7 @@ test.suite({
           where: {
             title: { contains: 'Manual Locale Test ' },
           },
+          overrideAccess: true,
         })
 
         expect(importedPages.totalDocs).toBe(2)
@@ -5187,6 +5496,7 @@ test.suite({
           where: {
             title: { contains: 'Manual Locale Test ' },
           },
+          overrideAccess: true,
         })
       })
     })
@@ -5215,11 +5525,12 @@ test.suite({
             name: 'checkbox-import.csv',
             size: csvBuffer.length,
           },
+          overrideAccess: true,
         })
 
         await payload.jobs.run()
 
-        importDoc = await payload.findByID({ collection: 'imports', id: importDoc.id })
+        importDoc = await payload.findByID({ collection: 'imports', id: importDoc.id, overrideAccess: true })
 
         expect(importDoc.status).toBe('completed')
         expect(importDoc.summary?.imported).toBe(4)
@@ -5228,6 +5539,7 @@ test.suite({
           collection: 'pages',
           where: { title: { contains: 'Checkbox Import ' } },
           sort: 'title',
+          overrideAccess: true,
         })
 
         expect(importedPages.docs).toHaveLength(4)
@@ -5245,6 +5557,7 @@ test.suite({
         await payload.delete({
           collection: 'pages',
           where: { title: { contains: 'Checkbox Import ' } },
+          overrideAccess: true,
         })
       })
 
@@ -5270,11 +5583,12 @@ test.suite({
             name: 'select-import.csv',
             size: csvBuffer.length,
           },
+          overrideAccess: true,
         })
 
         await payload.jobs.run()
 
-        importDoc = await payload.findByID({ collection: 'imports', id: importDoc.id })
+        importDoc = await payload.findByID({ collection: 'imports', id: importDoc.id, overrideAccess: true })
 
         expect(importDoc.status).toBe('completed')
         expect(importDoc.summary?.imported).toBe(3)
@@ -5283,6 +5597,7 @@ test.suite({
           collection: 'pages',
           where: { title: { contains: 'Select Import ' } },
           sort: 'title',
+          overrideAccess: true,
         })
 
         expect(importedPages.docs).toHaveLength(3)
@@ -5299,6 +5614,7 @@ test.suite({
         await payload.delete({
           collection: 'pages',
           where: { title: { contains: 'Select Import ' } },
+          overrideAccess: true,
         })
       })
 
@@ -5324,11 +5640,12 @@ test.suite({
             name: 'radio-import.csv',
             size: csvBuffer.length,
           },
+          overrideAccess: true,
         })
 
         await payload.jobs.run()
 
-        importDoc = await payload.findByID({ collection: 'imports', id: importDoc.id })
+        importDoc = await payload.findByID({ collection: 'imports', id: importDoc.id, overrideAccess: true })
 
         expect(importDoc.status).toBe('completed')
         expect(importDoc.summary?.imported).toBe(3)
@@ -5337,6 +5654,7 @@ test.suite({
           collection: 'pages',
           where: { title: { contains: 'Radio Import ' } },
           sort: 'title',
+          overrideAccess: true,
         })
 
         expect(importedPages.docs).toHaveLength(3)
@@ -5347,6 +5665,7 @@ test.suite({
         await payload.delete({
           collection: 'pages',
           where: { title: { contains: 'Radio Import ' } },
+          overrideAccess: true,
         })
       })
 
@@ -5371,11 +5690,12 @@ test.suite({
             name: 'email-import.csv',
             size: csvBuffer.length,
           },
+          overrideAccess: true,
         })
 
         await payload.jobs.run()
 
-        importDoc = await payload.findByID({ collection: 'imports', id: importDoc.id })
+        importDoc = await payload.findByID({ collection: 'imports', id: importDoc.id, overrideAccess: true })
 
         expect(importDoc.status).toBe('completed')
         expect(importDoc.summary?.imported).toBe(2)
@@ -5384,6 +5704,7 @@ test.suite({
           collection: 'pages',
           where: { title: { contains: 'Email Import ' } },
           sort: 'title',
+          overrideAccess: true,
         })
 
         expect(importedPages.docs).toHaveLength(2)
@@ -5397,6 +5718,7 @@ test.suite({
         await payload.delete({
           collection: 'pages',
           where: { title: { contains: 'Email Import ' } },
+          overrideAccess: true,
         })
       })
 
@@ -5418,11 +5740,12 @@ test.suite({
             name: 'textarea-import.csv',
             size: csvBuffer.length,
           },
+          overrideAccess: true,
         })
 
         await payload.jobs.run()
 
-        importDoc = await payload.findByID({ collection: 'imports', id: importDoc.id })
+        importDoc = await payload.findByID({ collection: 'imports', id: importDoc.id, overrideAccess: true })
 
         expect(importDoc.status).toBe('completed')
         expect(importDoc.summary?.imported).toBe(1)
@@ -5430,6 +5753,7 @@ test.suite({
         const importedPages = await payload.find({
           collection: 'pages',
           where: { title: { equals: 'Textarea Import 1' } },
+          overrideAccess: true,
         })
 
         expect(importedPages.docs).toHaveLength(1)
@@ -5439,6 +5763,7 @@ test.suite({
         await payload.delete({
           collection: 'pages',
           where: { title: { equals: 'Textarea Import 1' } },
+          overrideAccess: true,
         })
       })
 
@@ -5460,11 +5785,12 @@ test.suite({
             name: 'code-import.csv',
             size: csvBuffer.length,
           },
+          overrideAccess: true,
         })
 
         await payload.jobs.run()
 
-        importDoc = await payload.findByID({ collection: 'imports', id: importDoc.id })
+        importDoc = await payload.findByID({ collection: 'imports', id: importDoc.id, overrideAccess: true })
 
         expect(importDoc.status).toBe('completed')
         expect(importDoc.summary?.imported).toBe(1)
@@ -5472,6 +5798,7 @@ test.suite({
         const importedPages = await payload.find({
           collection: 'pages',
           where: { title: { equals: 'Code Import 1' } },
+          overrideAccess: true,
         })
 
         expect(importedPages.docs).toHaveLength(1)
@@ -5480,6 +5807,7 @@ test.suite({
         await payload.delete({
           collection: 'pages',
           where: { title: { equals: 'Code Import 1' } },
+          overrideAccess: true,
         })
       })
 
@@ -5504,11 +5832,12 @@ test.suite({
             name: 'point-import.csv',
             size: csvBuffer.length,
           },
+          overrideAccess: true,
         })
 
         await payload.jobs.run()
 
-        importDoc = await payload.findByID({ collection: 'imports', id: importDoc.id })
+        importDoc = await payload.findByID({ collection: 'imports', id: importDoc.id, overrideAccess: true })
 
         expect(importDoc.status).toBe('completed')
         expect(importDoc.summary?.imported).toBe(2)
@@ -5517,6 +5846,7 @@ test.suite({
           collection: 'pages',
           where: { title: { contains: 'Point Import ' } },
           sort: 'title',
+          overrideAccess: true,
         })
 
         expect(importedPages.docs).toHaveLength(2)
@@ -5530,6 +5860,7 @@ test.suite({
         await payload.delete({
           collection: 'pages',
           where: { title: { contains: 'Point Import ' } },
+          overrideAccess: true,
         })
       })
 
@@ -5557,11 +5888,12 @@ test.suite({
             name: 'select-hasmany-import.csv',
             size: csvBuffer.length,
           },
+          overrideAccess: true,
         })
 
         await payload.jobs.run()
 
-        importDoc = await payload.findByID({ collection: 'imports', id: importDoc.id })
+        importDoc = await payload.findByID({ collection: 'imports', id: importDoc.id, overrideAccess: true })
 
         expect(importDoc.status).toBe('completed')
         expect(importDoc.summary?.imported).toBe(3)
@@ -5570,6 +5902,7 @@ test.suite({
           collection: 'pages',
           where: { title: { contains: 'SelectHasMany Import ' } },
           sort: 'title',
+          overrideAccess: true,
         })
 
         expect(importedPages.docs).toHaveLength(3)
@@ -5586,6 +5919,7 @@ test.suite({
         await payload.delete({
           collection: 'pages',
           where: { title: { contains: 'SelectHasMany Import ' } },
+          overrideAccess: true,
         })
       })
 
@@ -5611,11 +5945,12 @@ test.suite({
             name: 'text-hasmany-import.csv',
             size: csvBuffer.length,
           },
+          overrideAccess: true,
         })
 
         await payload.jobs.run()
 
-        importDoc = await payload.findByID({ collection: 'imports', id: importDoc.id })
+        importDoc = await payload.findByID({ collection: 'imports', id: importDoc.id, overrideAccess: true })
 
         expect(importDoc.status).toBe('completed')
         expect(importDoc.summary?.imported).toBe(3)
@@ -5624,6 +5959,7 @@ test.suite({
           collection: 'pages',
           where: { title: { contains: 'TextHasMany Import ' } },
           sort: 'title',
+          overrideAccess: true,
         })
 
         expect(importedPages.docs).toHaveLength(3)
@@ -5640,6 +5976,7 @@ test.suite({
         await payload.delete({
           collection: 'pages',
           where: { title: { contains: 'TextHasMany Import ' } },
+          overrideAccess: true,
         })
       })
 
@@ -5656,6 +5993,7 @@ test.suite({
             ...imageFile,
             name: 'import-test-media.png',
           } as File,
+          overrideAccess: true,
         })
 
         const csvContent = `title,upload\n"Upload Import 1","${media.id}"\n"Upload Import 2","${media.id}"`
@@ -5675,11 +6013,12 @@ test.suite({
             name: 'upload-import.csv',
             size: csvBuffer.length,
           },
+          overrideAccess: true,
         })
 
         await payload.jobs.run()
 
-        importDoc = await payload.findByID({ collection: 'imports', id: importDoc.id })
+        importDoc = await payload.findByID({ collection: 'imports', id: importDoc.id, overrideAccess: true })
 
         expect(importDoc.status).toBe('completed')
         expect(importDoc.summary?.imported).toBe(2)
@@ -5689,6 +6028,7 @@ test.suite({
           where: { title: { contains: 'Upload Import ' } },
           sort: 'title',
           depth: 0,
+          overrideAccess: true,
         })
 
         expect(importedPages.docs).toHaveLength(2)
@@ -5698,10 +6038,12 @@ test.suite({
         await payload.delete({
           collection: 'pages',
           where: { title: { contains: 'Upload Import ' } },
+          overrideAccess: true,
         })
         await payload.delete({
           collection: 'media',
           id: media.id,
+          overrideAccess: true,
         })
       })
     })
@@ -5715,6 +6057,7 @@ test.suite({
             await payload.delete({
               collection: customIdPagesSlug as CollectionSlug,
               id,
+              overrideAccess: true,
             })
           } catch {
             // Ignore cleanup errors
@@ -5745,6 +6088,7 @@ test.suite({
             name: 'custom-id-import.json',
             size: jsonBuffer.length,
           },
+          overrideAccess: true,
         })
 
         await payload.jobs.run()
@@ -5752,6 +6096,7 @@ test.suite({
         const completedImport = await payload.findByID({
           collection: 'imports',
           id: importDoc.id,
+          overrideAccess: true,
         })
 
         expect(completedImport.status).toBe('completed')
@@ -5761,6 +6106,7 @@ test.suite({
         const importedPages = await payload.find({
           collection: customIdPagesSlug as CollectionSlug,
           sort: 'id',
+          overrideAccess: true,
         })
 
         expect(importedPages.docs).toHaveLength(3)
@@ -5789,6 +6135,7 @@ test.suite({
             name: 'custom-id-import.csv',
             size: csvBuffer.length,
           },
+          overrideAccess: true,
         })
 
         await payload.jobs.run()
@@ -5796,6 +6143,7 @@ test.suite({
         const completedImport = await payload.findByID({
           collection: 'imports',
           id: importDoc.id,
+          overrideAccess: true,
         })
 
         expect(completedImport.status).toBe('completed')
@@ -5807,6 +6155,7 @@ test.suite({
             id: { in: ['custom-csv-1', 'custom-csv-2'] },
           },
           sort: 'id',
+          overrideAccess: true,
         })
 
         expect(importedPages.docs).toHaveLength(2)
@@ -5840,6 +6189,7 @@ test.suite({
             name: 'upsert-custom-id.json',
             size: jsonBuffer.length,
           },
+          overrideAccess: true,
         })
 
         await payload.jobs.run()
@@ -5847,6 +6197,7 @@ test.suite({
         const completedImport = await payload.findByID({
           collection: 'imports',
           id: importDoc.id,
+          overrideAccess: true,
         })
 
         expect(completedImport.status).toBe('completed')
@@ -5858,6 +6209,7 @@ test.suite({
             id: { in: ['upsert-custom-1', 'upsert-custom-2'] },
           },
           sort: 'id',
+          overrideAccess: true,
         })
 
         expect(importedPages.docs).toHaveLength(2)
@@ -5876,6 +6228,7 @@ test.suite({
             id: 'existing-custom-1',
             title: 'Original Title',
           },
+          overrideAccess: true,
         })
 
         createdCustomIdPages.push('existing-custom-1')
@@ -5898,6 +6251,7 @@ test.suite({
             name: 'upsert-update-custom-id.json',
             size: jsonBuffer.length,
           },
+          overrideAccess: true,
         })
 
         await payload.jobs.run()
@@ -5905,6 +6259,7 @@ test.suite({
         const completedImport = await payload.findByID({
           collection: 'imports',
           id: importDoc.id,
+          overrideAccess: true,
         })
 
         expect(completedImport.status).toBe('completed')
@@ -5913,6 +6268,7 @@ test.suite({
         const updatedPage = await payload.findByID({
           collection: customIdPagesSlug as CollectionSlug,
           id: 'existing-custom-1',
+          overrideAccess: true,
         })
 
         expect(updatedPage.title).toBe('Updated Title via Upsert')
@@ -5927,6 +6283,7 @@ test.suite({
             id: 'update-mode-custom-1',
             title: 'Original Title for Update Mode',
           },
+          overrideAccess: true,
         })
 
         createdCustomIdPages.push('update-mode-custom-1')
@@ -5949,6 +6306,7 @@ test.suite({
             size: jsonBuffer.length,
           },
           user,
+          overrideAccess: true,
         })
 
         await payload.jobs.run()
@@ -5956,6 +6314,7 @@ test.suite({
         const completedImport = await payload.findByID({
           id: importDoc.id,
           collection: 'imports',
+          overrideAccess: true,
         })
 
         expect(completedImport.status).toBe('completed')
@@ -5964,6 +6323,7 @@ test.suite({
         const updatedPage = await payload.findByID({
           id: 'update-mode-custom-1',
           collection: customIdPagesSlug as CollectionSlug,
+          overrideAccess: true,
         })
 
         expect(updatedPage.title).toBe('Updated via Update Mode')
@@ -5990,6 +6350,7 @@ test.suite({
             size: jsonBuffer.length,
           },
           user,
+          overrideAccess: true,
         })
 
         await payload.jobs.run()
@@ -5997,6 +6358,7 @@ test.suite({
         const completedImport = await payload.findByID({
           id: importDoc.id,
           collection: 'imports',
+          overrideAccess: true,
         })
 
         expect(completedImport.status).toBe('failed')
@@ -6071,6 +6433,7 @@ test.suite({
             collectionSlug: 'posts-exports-only',
             format: 'csv',
           },
+          overrideAccess: true,
         })
 
         await payload.jobs.run()
@@ -6078,6 +6441,7 @@ test.suite({
         const exportDoc = await payload.findByID({
           collection: 'exports',
           id: doc.id,
+          overrideAccess: true,
         })
 
         expect(exportDoc.filename).toBeDefined()
@@ -6099,6 +6463,7 @@ test.suite({
             collectionSlug: 'posts-exports-only',
             format: 'csv',
           },
+          overrideAccess: true,
         })
 
         const {
@@ -6107,6 +6472,7 @@ test.suite({
           collection: 'payload-jobs',
           sort: '-createdAt',
           limit: 1,
+          overrideAccess: true,
         })
 
         expect(latestJob).toBeDefined()
@@ -6116,6 +6482,7 @@ test.suite({
         const exportDoc = await payload.findByID({
           collection: 'exports',
           id: doc.id,
+          overrideAccess: true,
         })
 
         const expectedPath = path.join(dirname, './uploads', exportDoc.filename as string)
@@ -6145,6 +6512,7 @@ test.suite({
             name: 'sync-import-test.csv',
             size: csvBuffer.length,
           },
+          overrideAccess: true,
         })
 
         await payload.jobs.run()
@@ -6152,6 +6520,7 @@ test.suite({
         importDoc = await payload.findByID({
           collection: 'imports',
           id: importDoc.id,
+          overrideAccess: true,
         })
 
         expect(importDoc.status).toBe('completed')
@@ -6163,6 +6532,7 @@ test.suite({
           where: {
             title: { contains: 'Sync Import Test' },
           },
+          overrideAccess: true,
         })
 
         expect(importedDocs.totalDocs).toBe(3)
@@ -6172,6 +6542,7 @@ test.suite({
           where: {
             title: { contains: 'Sync Import Test' },
           },
+          overrideAccess: true,
         })
       })
 
@@ -6194,6 +6565,7 @@ test.suite({
             name: 'restricted-import-test.csv',
             size: csvBuffer.length,
           },
+          overrideAccess: true,
         })
 
         await payload.jobs.run()
@@ -6213,6 +6585,7 @@ test.suite({
           where: {
             title: { contains: 'Restricted Import Test' },
           },
+          overrideAccess: true,
         })
 
         expect(importedDocs.totalDocs).toBe(0)
@@ -6238,6 +6611,7 @@ test.suite({
             name: 'default-draft-config-test.csv',
             size: csvBuffer.length,
           },
+          overrideAccess: true,
         })
 
         await payload.jobs.run()
@@ -6245,6 +6619,7 @@ test.suite({
         importDoc = await payload.findByID({
           collection: 'imports',
           id: importDoc.id,
+          overrideAccess: true,
         })
 
         expect(importDoc.status).toBe('completed')
@@ -6257,6 +6632,7 @@ test.suite({
             title: { contains: 'Default Draft Config Test' },
           },
           draft: true,
+          overrideAccess: true,
         })
 
         expect(draftDocs.totalDocs).toBe(2)
@@ -6270,6 +6646,7 @@ test.suite({
             title: { equals: 'Default Draft Config Override Test' },
           },
           draft: false,
+          overrideAccess: true,
         })
 
         expect(publishedDocs.totalDocs).toBe(1)
@@ -6283,6 +6660,7 @@ test.suite({
               { title: { equals: 'Default Draft Config Override Test' } },
             ],
           },
+          overrideAccess: true,
         })
       })
     })
@@ -6296,6 +6674,7 @@ test.suite({
           data: {
             title: `Access Control Export Test ${i}`,
           },
+          overrideAccess: true,
         })
       }
 
@@ -6307,6 +6686,7 @@ test.suite({
           format: 'csv',
           limit: 100,
         },
+        overrideAccess: true,
       })
 
       await payload.jobs.run()
@@ -6314,6 +6694,7 @@ test.suite({
       const exportDoc = await payload.findByID({
         collection: 'exports',
         id: doc.id,
+        overrideAccess: true,
       })
 
       expect(exportDoc.filename).toBeDefined()
@@ -6340,6 +6721,7 @@ test.suite({
           name: 'jobs-queue-import-test.csv',
           size: csvBuffer.length,
         },
+        overrideAccess: true,
       })
 
       await payload.jobs.run()
@@ -6347,6 +6729,7 @@ test.suite({
       const updatedImportDoc = await payload.findByID({
         collection: 'imports',
         id: importDoc.id,
+        overrideAccess: true,
       })
 
       expect(updatedImportDoc.status).toBe('completed')
@@ -6357,6 +6740,7 @@ test.suite({
         where: {
           title: { contains: 'Jobs Queue Import' },
         },
+        overrideAccess: true,
       })
 
       expect(importedDocs.totalDocs).toBe(2)
@@ -6366,6 +6750,7 @@ test.suite({
         where: {
           title: { contains: 'Jobs Queue Import' },
         },
+        overrideAccess: true,
       })
     })
   })
@@ -6379,6 +6764,7 @@ test.suite({
           excerpt: 'Excerpt for preview 1',
           _status: 'published',
         },
+        overrideAccess: true,
       })
 
       await payload.create({
@@ -6388,6 +6774,7 @@ test.suite({
           excerpt: 'Excerpt for preview 2',
           _status: 'published',
         },
+        overrideAccess: true,
       })
 
       const response = await restClient
@@ -6418,6 +6805,7 @@ test.suite({
         where: {
           title: { contains: 'Preview Export Test' },
         },
+        overrideAccess: true,
       })
     })
 
@@ -6432,6 +6820,7 @@ test.suite({
           },
           _status: 'published',
         },
+        overrideAccess: true,
       })
 
       const response = await restClient
@@ -6460,6 +6849,7 @@ test.suite({
         where: {
           title: { equals: 'JSON Preview Export Test' },
         },
+        overrideAccess: true,
       })
     })
 
@@ -6537,6 +6927,7 @@ test.suite({
         data: {
           title: 'Preview field validation',
         },
+        overrideAccess: true,
       })
       const objectPrototypeBefore = Object.getOwnPropertyDescriptors(Object.prototype)
 
@@ -6558,6 +6949,7 @@ test.suite({
         const unchangedPost = await payload.findByID({
           collection: 'posts-imports-only',
           id: post.id,
+          overrideAccess: true,
         })
 
         expect(previewResponse.status).toBe(400)
@@ -6569,6 +6961,7 @@ test.suite({
         await payload.delete({
           collection: 'posts-imports-only',
           id: post.id,
+          overrideAccess: true,
         })
       }
     })
@@ -6587,6 +6980,7 @@ test.suite({
           excerpt: 'preview excerpt',
           _status: 'published',
         },
+        overrideAccess: true,
       })
 
       const response = await restClient
@@ -6638,7 +7032,7 @@ test.suite({
       // excerpt should still be present
       expect(doc.excerpt).toBe('preview excerpt')
 
-      await payload.delete({ collection: 'pages', id: page.id })
+      await payload.delete({ collection: 'pages', id: page.id, overrideAccess: true })
     })
 
     test('should remove replaced columns from preview when no fields are selected', async ({
@@ -6654,6 +7048,7 @@ test.suite({
           customRelIdName: user.id,
           _status: 'published',
         },
+        overrideAccess: true,
       })
 
       const response = await restClient
@@ -6693,7 +7088,7 @@ test.suite({
       expect(responseColumns).not.toContain('customRelIdName')
       expect(doc).not.toHaveProperty('customRelIdName')
 
-      await payload.delete({ collection: 'pages', id: page.id })
+      await payload.delete({ collection: 'pages', id: page.id, overrideAccess: true })
     })
 
     test('should handle invalid collection slug in import preview', async ({ restClient }) => {
@@ -6909,6 +7304,7 @@ test.suite({
             title: `Preview Limit Test ${i}`,
             _status: 'published',
           },
+          overrideAccess: true,
         })
       }
 
@@ -6935,6 +7331,7 @@ test.suite({
         where: {
           title: { contains: 'Preview Limit Test' },
         },
+        overrideAccess: true,
       })
     })
 
@@ -6949,6 +7346,7 @@ test.suite({
             title: `Preview Pagination Test ${i}`,
             _status: 'published',
           },
+          overrideAccess: true,
         })
       }
 
@@ -7021,6 +7419,7 @@ test.suite({
         where: {
           title: { contains: 'Preview Pagination Test' },
         },
+        overrideAccess: true,
       })
     })
 
@@ -7035,6 +7434,7 @@ test.suite({
             title: `Preview Boundary Test ${i}`,
             _status: 'published',
           },
+          overrideAccess: true,
         })
       }
 
@@ -7073,6 +7473,7 @@ test.suite({
         where: {
           title: { contains: 'Preview Boundary Test' },
         },
+        overrideAccess: true,
       })
     })
 
@@ -7104,11 +7505,13 @@ test.suite({
           format: 'csv',
           limit: 5,
         },
+        overrideAccess: true,
       })
 
       const finalExportDoc = await payload.findByID({
         collection: 'posts-export',
         id: exportDoc.id,
+        overrideAccess: true,
       })
 
       expect(finalExportDoc.filename).toBeDefined()
@@ -7151,11 +7554,13 @@ test.suite({
           format: 'csv',
           limit: 5,
         },
+        overrideAccess: true,
       })
 
       const finalExportDoc = await payload.findByID({
         collection: 'posts-export',
         id: exportDoc.id,
+        overrideAccess: true,
       })
 
       expect(finalExportDoc.filename).toBeDefined()
@@ -7184,6 +7589,7 @@ test.suite({
             },
           ],
         },
+        overrideAccess: true,
       })
 
       const exportDoc = await payload.create({
@@ -7196,6 +7602,7 @@ test.suite({
             id: { equals: page.id },
           },
         },
+        overrideAccess: true,
       })
 
       await payload.jobs.run()
@@ -7203,6 +7610,7 @@ test.suite({
       const exportedDoc = await payload.findByID({
         collection: 'exports',
         id: exportDoc.id,
+        overrideAccess: true,
       })
 
       const jsonPath = path.join(dirname, './uploads', exportedDoc.filename as string)
@@ -7216,6 +7624,7 @@ test.suite({
         where: {
           id: { equals: page.id },
         },
+        overrideAccess: true,
       })
 
       const jsonBuffer = Buffer.from(JSON.stringify(exportedData))
@@ -7232,6 +7641,7 @@ test.suite({
           name: 'rich-text-test.json',
           size: jsonBuffer.length,
         },
+        overrideAccess: true,
       })
 
       await payload.jobs.run()
@@ -7239,6 +7649,7 @@ test.suite({
       importDoc = await payload.findByID({
         collection: 'imports',
         id: importDoc.id,
+        overrideAccess: true,
       })
 
       expect(importDoc.status).toBe('completed')
@@ -7248,6 +7659,7 @@ test.suite({
         where: {
           title: { equals: 'Rich Text JSON Test' },
         },
+        overrideAccess: true,
       })
 
       expect(importedPage.docs).toHaveLength(1)
@@ -7261,6 +7673,7 @@ test.suite({
         where: {
           title: { equals: 'Rich Text JSON Test' },
         },
+        overrideAccess: true,
       })
     })
 
@@ -7277,6 +7690,7 @@ test.suite({
             },
           ],
         },
+        overrideAccess: true,
       })
 
       const exportDoc = await payload.create({
@@ -7289,6 +7703,7 @@ test.suite({
             id: { equals: page.id },
           },
         },
+        overrideAccess: true,
       })
 
       await payload.jobs.run()
@@ -7296,6 +7711,7 @@ test.suite({
       const exportedDoc = await payload.findByID({
         collection: 'exports',
         id: exportDoc.id,
+        overrideAccess: true,
       })
 
       const csvPath = path.join(dirname, './uploads', exportedDoc.filename as string)
@@ -7305,6 +7721,7 @@ test.suite({
         where: {
           id: { equals: page.id },
         },
+        overrideAccess: true,
       })
 
       let importDoc = await payload.create({
@@ -7320,6 +7737,7 @@ test.suite({
           name: 'rich-text-csv-test.csv',
           size: fs.statSync(csvPath).size,
         },
+        overrideAccess: true,
       })
 
       await payload.jobs.run()
@@ -7327,6 +7745,7 @@ test.suite({
       importDoc = await payload.findByID({
         collection: 'imports',
         id: importDoc.id,
+        overrideAccess: true,
       })
 
       expect(importDoc.status).toBe('completed')
@@ -7336,6 +7755,7 @@ test.suite({
         where: {
           title: { equals: 'Rich Text CSV Block Test' },
         },
+        overrideAccess: true,
       })
 
       expect(importedPage.docs).toHaveLength(1)
@@ -7349,6 +7769,7 @@ test.suite({
         where: {
           title: { equals: 'Rich Text CSV Block Test' },
         },
+        overrideAccess: true,
       })
     })
   })
@@ -7377,6 +7798,7 @@ test.suite({
           name: 'error-recovery-test.csv',
           size: csvBuffer.length,
         },
+        overrideAccess: true,
       })
 
       await payload.jobs.run()
@@ -7384,6 +7806,7 @@ test.suite({
       importDoc = await payload.findByID({
         collection: 'imports',
         id: importDoc.id,
+        overrideAccess: true,
       })
 
       expect(importDoc.status).toBe('completed')
@@ -7394,6 +7817,7 @@ test.suite({
         where: {
           title: { contains: 'Error Recovery Test' },
         },
+        overrideAccess: true,
       })
 
       expect(importedDocs.totalDocs).toBeGreaterThanOrEqual(1)
@@ -7403,6 +7827,7 @@ test.suite({
         where: {
           title: { contains: 'Error Recovery Test' },
         },
+        overrideAccess: true,
       })
     })
 
@@ -7430,6 +7855,7 @@ test.suite({
           name: 'partial-fail-test.csv',
           size: csvBuffer.length,
         },
+        overrideAccess: true,
       })
 
       await payload.jobs.run()
@@ -7437,6 +7863,7 @@ test.suite({
       importDoc = await payload.findByID({
         collection: 'imports',
         id: importDoc.id,
+        overrideAccess: true,
       })
 
       expect(importDoc.status).toBe('completed')
@@ -7448,6 +7875,7 @@ test.suite({
         where: {
           title: { contains: 'Partial Fail Test' },
         },
+        overrideAccess: true,
       })
     })
 
@@ -7468,6 +7896,7 @@ test.suite({
           name: 'malformed-csv-test.csv',
           size: csvBuffer.length,
         },
+        overrideAccess: true,
       })
 
       await payload.jobs.run()
@@ -7475,6 +7904,7 @@ test.suite({
       importDoc = await payload.findByID({
         collection: 'imports',
         id: importDoc.id,
+        overrideAccess: true,
       })
 
       expect(['failed', 'completed', 'pending']).toContain(importDoc.status)
@@ -7489,6 +7919,7 @@ test.suite({
           title: 'ToCSV Undefined Test',
           custom: 'test value',
         },
+        overrideAccess: true,
       })
 
       const exportDoc = await payload.create({
@@ -7502,6 +7933,7 @@ test.suite({
             id: { equals: page.id },
           },
         },
+        overrideAccess: true,
       })
 
       await payload.jobs.run()
@@ -7509,6 +7941,7 @@ test.suite({
       const exportedDoc = await payload.findByID({
         collection: 'exports',
         id: exportDoc.id,
+        overrideAccess: true,
       })
 
       expect(exportedDoc.filename).toBeDefined()
@@ -7522,6 +7955,7 @@ test.suite({
         where: {
           id: { equals: page.id },
         },
+        overrideAccess: true,
       })
     })
 
@@ -7533,6 +7967,7 @@ test.suite({
           customRelationship: user.id,
           _status: 'published',
         },
+        overrideAccess: true,
       })
 
       const exportDoc = await payload.create({
@@ -7546,6 +7981,7 @@ test.suite({
             id: { equals: page.id },
           },
         },
+        overrideAccess: true,
       })
 
       await payload.jobs.run()
@@ -7553,6 +7989,7 @@ test.suite({
       const exportedDoc = await payload.findByID({
         collection: 'exports',
         id: exportDoc.id,
+        overrideAccess: true,
       })
 
       const csvPath = path.join(dirname, './uploads', exportedDoc.filename as string)
@@ -7566,6 +8003,7 @@ test.suite({
         where: {
           id: { equals: page.id },
         },
+        overrideAccess: true,
       })
 
       let importDoc = await payload.create({
@@ -7581,6 +8019,7 @@ test.suite({
           name: 'from-csv-test.csv',
           size: fs.statSync(csvPath).size,
         },
+        overrideAccess: true,
       })
 
       await payload.jobs.run()
@@ -7588,6 +8027,7 @@ test.suite({
       importDoc = await payload.findByID({
         collection: 'imports',
         id: importDoc.id,
+        overrideAccess: true,
       })
 
       expect(importDoc.status).toBe('completed')
@@ -7597,6 +8037,7 @@ test.suite({
         where: {
           title: { equals: 'FromCSV Relationship Test' },
         },
+        overrideAccess: true,
       })
 
       expect(importedPage.docs).toHaveLength(1)
@@ -7607,6 +8048,7 @@ test.suite({
         where: {
           title: { equals: 'FromCSV Relationship Test' },
         },
+        overrideAccess: true,
       })
     })
   })
@@ -7622,6 +8064,7 @@ test.suite({
             ignore: 'this field exists but is not disabled',
           },
         },
+        overrideAccess: true,
       })
 
       const exportDoc = await payload.create({
@@ -7635,6 +8078,7 @@ test.suite({
             id: { equals: page.id },
           },
         },
+        overrideAccess: true,
       })
 
       await payload.jobs.run()
@@ -7642,6 +8086,7 @@ test.suite({
       const exportedDoc = await payload.findByID({
         collection: 'exports',
         id: exportDoc.id,
+        overrideAccess: true,
       })
 
       const csvPath = path.join(dirname, './uploads', exportedDoc.filename as string)
@@ -7655,6 +8100,7 @@ test.suite({
         where: {
           id: { equals: page.id },
         },
+        overrideAccess: true,
       })
     })
   })
@@ -7695,6 +8141,7 @@ test.suite({
           name: 'deeply-nested-test.json',
           size: jsonBuffer.length,
         },
+        overrideAccess: true,
       })
 
       await payload.jobs.run()
@@ -7702,6 +8149,7 @@ test.suite({
       importDoc = await payload.findByID({
         collection: 'imports',
         id: importDoc.id,
+        overrideAccess: true,
       })
 
       expect(importDoc.status).toBe('completed')
@@ -7712,6 +8160,7 @@ test.suite({
         where: {
           title: { equals: 'Deeply Nested Test' },
         },
+        overrideAccess: true,
       })
 
       expect(importedPage.docs).toHaveLength(1)
@@ -7728,6 +8177,7 @@ test.suite({
         where: {
           title: { equals: 'Deeply Nested Test' },
         },
+        overrideAccess: true,
       })
     })
 
@@ -7751,6 +8201,7 @@ test.suite({
           },
         },
         locale: 'en',
+        overrideAccess: true,
       })
 
       const exportDoc = await payload.create({
@@ -7763,6 +8214,7 @@ test.suite({
             id: { equals: page.id },
           },
         },
+        overrideAccess: true,
       })
 
       await payload.jobs.run()
@@ -7770,6 +8222,7 @@ test.suite({
       const exportedDoc = await payload.findByID({
         collection: 'exports',
         id: exportDoc.id,
+        overrideAccess: true,
       })
 
       const jsonPath = path.join(dirname, './uploads', exportedDoc.filename as string)
@@ -7784,6 +8237,7 @@ test.suite({
         where: {
           id: { equals: page.id },
         },
+        overrideAccess: true,
       })
 
       const jsonBuffer = Buffer.from(JSON.stringify(exportedData))
@@ -7800,6 +8254,7 @@ test.suite({
           name: 'json-roundtrip-test.json',
           size: jsonBuffer.length,
         },
+        overrideAccess: true,
       })
 
       await payload.jobs.run()
@@ -7807,6 +8262,7 @@ test.suite({
       importDoc = await payload.findByID({
         collection: 'imports',
         id: importDoc.id,
+        overrideAccess: true,
       })
 
       expect(importDoc.status).toBe('completed')
@@ -7816,6 +8272,7 @@ test.suite({
         where: {
           title: { equals: 'JSON Roundtrip Test' },
         },
+        overrideAccess: true,
       })
 
       expect(importedPage.docs).toHaveLength(1)
@@ -7830,6 +8287,7 @@ test.suite({
         where: {
           title: { equals: 'JSON Roundtrip Test' },
         },
+        overrideAccess: true,
       })
     })
   })
@@ -7839,10 +8297,12 @@ test.suite({
       await payload.create({
         collection: 'pages',
         data: { title: 'Pagination Test 1', _status: 'published' },
+        overrideAccess: true,
       })
       await payload.create({
         collection: 'pages',
         data: { title: 'Pagination Test 2', _status: 'published' },
+        overrideAccess: true,
       })
 
       const exportDoc = await payload.create({
@@ -7857,6 +8317,7 @@ test.suite({
             title: { contains: 'Pagination Test' },
           },
         },
+        overrideAccess: true,
       })
 
       await payload.jobs.run()
@@ -7864,6 +8325,7 @@ test.suite({
       const exportedDoc = await payload.findByID({
         collection: 'exports',
         id: exportDoc.id,
+        overrideAccess: true,
       })
 
       expect(exportedDoc.filename).toBeDefined()
@@ -7877,6 +8339,7 @@ test.suite({
         where: {
           title: { contains: 'Pagination Test' },
         },
+        overrideAccess: true,
       })
     })
 
@@ -7885,6 +8348,7 @@ test.suite({
         await payload.create({
           collection: 'pages',
           data: { title: `Large Limit Test ${i}` },
+          overrideAccess: true,
         })
       }
 
@@ -7899,6 +8363,7 @@ test.suite({
             title: { contains: 'Large Limit Test' },
           },
         },
+        overrideAccess: true,
       })
 
       await payload.jobs.run()
@@ -7906,6 +8371,7 @@ test.suite({
       const exportedDoc = await payload.findByID({
         collection: 'exports',
         id: exportDoc.id,
+        overrideAccess: true,
       })
 
       expect(exportedDoc.filename).toBeDefined()
@@ -7919,6 +8385,7 @@ test.suite({
         where: {
           title: { contains: 'Large Limit Test' },
         },
+        overrideAccess: true,
       })
     })
 
@@ -7926,10 +8393,12 @@ test.suite({
       await payload.create({
         collection: 'pages',
         data: { title: 'Single Limit Test 1' },
+        overrideAccess: true,
       })
       await payload.create({
         collection: 'pages',
         data: { title: 'Single Limit Test 2' },
+        overrideAccess: true,
       })
 
       const exportDoc = await payload.create({
@@ -7943,6 +8412,7 @@ test.suite({
             title: { contains: 'Single Limit Test' },
           },
         },
+        overrideAccess: true,
       })
 
       await payload.jobs.run()
@@ -7950,6 +8420,7 @@ test.suite({
       const exportedDoc = await payload.findByID({
         collection: 'exports',
         id: exportDoc.id,
+        overrideAccess: true,
       })
 
       const csvPath = path.join(dirname, './uploads', exportedDoc.filename as string)
@@ -7962,6 +8433,7 @@ test.suite({
         where: {
           title: { contains: 'Single Limit Test' },
         },
+        overrideAccess: true,
       })
     })
   })
@@ -7978,6 +8450,7 @@ test.suite({
               excerpt: `Excerpt for stream test ${i}`,
               _status: 'published',
             },
+            overrideAccess: true,
           }),
         )
       }
@@ -7993,6 +8466,7 @@ test.suite({
             title: { contains: 'Stream Test' },
           },
         },
+        overrideAccess: true,
       })
 
       await payload.jobs.run()
@@ -8000,6 +8474,7 @@ test.suite({
       const exportedDoc = await payload.findByID({
         collection: 'exports',
         id: exportDoc.id,
+        overrideAccess: true,
       })
 
       expect(exportedDoc.filename).toBeDefined()
@@ -8013,6 +8488,7 @@ test.suite({
         where: {
           title: { contains: 'Stream Test' },
         },
+        overrideAccess: true,
       })
     })
 
@@ -8027,6 +8503,7 @@ test.suite({
             title: { equals: 'NonExistent Document XYZ123' },
           },
         },
+        overrideAccess: true,
       })
 
       await payload.jobs.run()
@@ -8034,6 +8511,7 @@ test.suite({
       const exportedDoc = await payload.findByID({
         collection: 'exports',
         id: exportDoc.id,
+        overrideAccess: true,
       })
 
       expect(exportedDoc).toBeDefined()
@@ -8060,6 +8538,7 @@ test.suite({
           name: `concurrent-import-1-${timestamp}.csv`,
           size: csv1.length,
         },
+        overrideAccess: true,
       })
 
       const import2 = await payload.create({
@@ -8075,13 +8554,14 @@ test.suite({
           name: `concurrent-import-2-${timestamp}.csv`,
           size: csv2.length,
         },
+        overrideAccess: true,
       })
 
       await payload.jobs.run()
 
       const [finalImport1, finalImport2] = await Promise.all([
-        payload.findByID({ collection: 'imports', id: import1.id }),
-        payload.findByID({ collection: 'imports', id: import2.id }),
+        payload.findByID({ collection: 'imports', id: import1.id, overrideAccess: true }),
+        payload.findByID({ collection: 'imports', id: import2.id, overrideAccess: true }),
       ])
 
       expect(finalImport1.status).toBe('completed')
@@ -8097,6 +8577,7 @@ test.suite({
             { title: { contains: String(timestamp) } },
           ],
         },
+        overrideAccess: true,
       })
 
       expect(allDocs.totalDocs).toBe(4)
@@ -8106,6 +8587,7 @@ test.suite({
         where: {
           title: { contains: String(timestamp) },
         },
+        overrideAccess: true,
       })
     })
 
@@ -8114,6 +8596,7 @@ test.suite({
         await payload.create({
           collection: 'pages',
           data: { title: `Concurrent Export Source ${i}`, _status: 'published' },
+          overrideAccess: true,
         })
       }
 
@@ -8132,6 +8615,7 @@ test.suite({
           name: 'concurrent-test.csv',
           size: csvData.length,
         },
+        overrideAccess: true,
       })
 
       const exportDoc = await payload.create({
@@ -8144,13 +8628,14 @@ test.suite({
             title: { contains: 'Concurrent Export Source' },
           },
         },
+        overrideAccess: true,
       })
 
       await payload.jobs.run()
 
       const [finalImport, finalExport] = await Promise.all([
-        payload.findByID({ collection: 'imports', id: importDoc.id }),
-        payload.findByID({ collection: 'exports', id: exportDoc.id }),
+        payload.findByID({ collection: 'imports', id: importDoc.id, overrideAccess: true }),
+        payload.findByID({ collection: 'exports', id: exportDoc.id, overrideAccess: true }),
       ])
 
       expect(finalImport.status).toBe('completed')
@@ -8171,6 +8656,7 @@ test.suite({
             { title: { contains: 'Concurrent Import During Export' } },
           ],
         },
+        overrideAccess: true,
       })
     })
   })
@@ -8184,6 +8670,7 @@ test.suite({
         const doc = await payload.create({
           collection: 'posts-with-limits',
           data: { title: `Limit Test Post ${i}` },
+          overrideAccess: true,
         })
         createdPostIds.push(doc.id)
       }
@@ -8215,6 +8702,7 @@ test.suite({
             collectionSlug: 'posts-with-limits',
             format: 'csv',
           },
+          overrideAccess: true,
         })
 
         expect(exportDoc.filename).toBeDefined()
@@ -8236,6 +8724,7 @@ test.suite({
             format: 'csv',
             limit: 100,
           },
+          overrideAccess: true,
         })
 
         expect(exportDoc.filename).toBeDefined()
@@ -8255,6 +8744,7 @@ test.suite({
             format: 'csv',
             limit: 3,
           },
+          overrideAccess: true,
         })
 
         expect(exportDoc.filename).toBeDefined()
@@ -8311,6 +8801,7 @@ test.suite({
             collectionSlug: 'posts-with-limits',
             format: 'csv',
           },
+          overrideAccess: true,
         })
 
         expect(exportDoc.filename).toBeDefined()
@@ -8387,6 +8878,7 @@ test.suite({
             name: 'exceed-limit-import.csv',
             size: csvBuffer.length,
           },
+          overrideAccess: true,
         })
 
         expect(importDoc.status).toBe('failed')
@@ -8398,6 +8890,7 @@ test.suite({
           where: {
             title: { contains: 'Exceed Limit Import' },
           },
+          overrideAccess: true,
         })
 
         expect(importedDocs.totalDocs).toBe(0)
@@ -8423,6 +8916,7 @@ test.suite({
             name: 'exact-limit-import.csv',
             size: csvBuffer.length,
           },
+          overrideAccess: true,
         })
 
         expect(importDoc.status).toBe('completed')
@@ -8434,6 +8928,7 @@ test.suite({
           where: {
             title: { contains: 'Exact Limit Import' },
           },
+          overrideAccess: true,
         })
       })
 
@@ -8457,6 +8952,7 @@ test.suite({
             name: 'below-limit-import.csv',
             size: csvBuffer.length,
           },
+          overrideAccess: true,
         })
 
         expect(importDoc.status).toBe('completed')
@@ -8468,6 +8964,7 @@ test.suite({
           where: {
             title: { contains: 'Below Limit Import' },
           },
+          overrideAccess: true,
         })
       })
 
@@ -8535,6 +9032,7 @@ test.suite({
             name: 'predict-fail.csv',
             size: exceedsBuffer.length,
           },
+          overrideAccess: true,
         })
 
         expect(failedImport.status).toBe('failed')
@@ -8572,6 +9070,7 @@ test.suite({
             name: 'predict-success.csv',
             size: withinBuffer.length,
           },
+          overrideAccess: true,
         })
 
         expect(successImport.status).toBe('completed')
@@ -8582,6 +9081,7 @@ test.suite({
           where: {
             title: { contains: 'Predict Success' },
           },
+          overrideAccess: true,
         })
       })
     })
@@ -8594,6 +9094,7 @@ test.suite({
         const devUserDocs = await payload.find({
           collection: 'users',
           where: { email: { equals: devUser.email } },
+          overrideAccess: true,
         })
 
         const devUserId = devUserDocs.docs[0]?.id
@@ -8602,6 +9103,7 @@ test.suite({
           id: devUserId,
           collection: 'users',
           data: { limit: 7 },
+          overrideAccess: true,
         })
 
         // Use the user document directly (not login result) so req.user.limit is accessible
@@ -8612,6 +9114,7 @@ test.suite({
           const doc = await payload.create({
             collection: 'posts-with-limits',
             data: { title: `Dynamic Limit Post ${i}` },
+            overrideAccess: true,
           })
 
           createdPostIds.push(doc.id)
@@ -8667,6 +9170,7 @@ test.suite({
               format: 'csv',
             },
             user: userWithDynamicLimit,
+            overrideAccess: true,
           })
 
           expect(exportDoc.filename).toBeDefined()
@@ -8686,6 +9190,7 @@ test.suite({
               limit: 100,
             },
             user: userWithDynamicLimit,
+            overrideAccess: true,
           })
 
           expect(exportDoc.filename).toBeDefined()
@@ -8705,6 +9210,7 @@ test.suite({
               limit: 4,
             },
             user: userWithDynamicLimit,
+            overrideAccess: true,
           })
 
           expect(exportDoc.filename).toBeDefined()
@@ -8762,6 +9268,7 @@ test.suite({
               format: 'csv',
             },
             user: userWithDynamicLimit,
+            overrideAccess: true,
           })
 
           expect(exportDoc.filename).toBeDefined()
@@ -8843,6 +9350,7 @@ test.suite({
               size: csvBuffer.length,
             },
             user: userWithDynamicLimit,
+            overrideAccess: true,
           })
 
           expect(importDoc.status).toBe('failed')
@@ -8853,6 +9361,7 @@ test.suite({
             where: {
               title: { contains: 'Dynamic Import Exceed' },
             },
+            overrideAccess: true,
           })
         })
 
@@ -8879,6 +9388,7 @@ test.suite({
               size: csvBuffer.length,
             },
             user: userWithDynamicLimit,
+            overrideAccess: true,
           })
 
           expect(importDoc.status).toBe('completed')
@@ -8889,6 +9399,7 @@ test.suite({
             where: {
               title: { contains: 'Dynamic Import Within' },
             },
+            overrideAccess: true,
           })
         })
 
@@ -8941,6 +9452,7 @@ test.suite({
           await payload.delete({
             collection: postsWithS3Slug as CollectionSlug,
             id,
+            overrideAccess: true,
           })
         } catch {
           // Ignore cleanup errors
@@ -8967,6 +9479,7 @@ test.suite({
           name: 's3-import-test.csv',
           size: csvBuffer.length,
         },
+        overrideAccess: true,
       })
 
       expect((importDoc as any).status).toBe('completed')
@@ -8978,6 +9491,7 @@ test.suite({
         where: {
           title: { contains: 'S3 Import Test' },
         },
+        overrideAccess: true,
       })
 
       expect(posts.totalDocs).toBe(3)
@@ -8989,10 +9503,12 @@ test.suite({
         payload.create({
           collection: postsWithS3Slug as CollectionSlug,
           data: { title: 'S3 Export Test 1' },
+          overrideAccess: true,
         }),
         payload.create({
           collection: postsWithS3Slug as CollectionSlug,
           data: { title: 'S3 Export Test 2' },
+          overrideAccess: true,
         }),
       ])
 
@@ -9008,6 +9524,7 @@ test.suite({
             title: { contains: 'S3 Export Test' },
           },
         },
+        overrideAccess: true,
       })
 
       expect((exportDoc as any).status).toBe('completed')
@@ -9043,6 +9560,7 @@ test.suite({
           name: 's3-import-error-test.csv',
           size: csvBuffer.length,
         },
+        overrideAccess: true,
       })
 
       expect((importDoc as any).status).toBe('failed')
@@ -9069,6 +9587,7 @@ test.suite({
           name: 's3-json-import-test.json',
           size: jsonBuffer.length,
         },
+        overrideAccess: true,
       })
 
       expect((importDoc as any).status).toBe('completed')
@@ -9079,6 +9598,7 @@ test.suite({
         where: {
           title: { contains: 'S3 JSON Import' },
         },
+        overrideAccess: true,
       })
 
       expect(posts.totalDocs).toBe(2)
