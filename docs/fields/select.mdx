@@ -84,6 +84,17 @@ The result of `filterOptions` will determine:
 
 This function can be synchronous or asynchronous, i.e. it can return `Option[]` or `Promise<Option[]>`, allowing you to perform an async lookup (e.g. querying another collection) before resolving the filtered options.
 
+When used, it will be called with an argument object with the following properties:
+
+| Property      | Description                                                                                                                                                                              |
+| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `data`        | An object containing the full collection or global document currently being edited. Will be an empty object when called on a `Filter` component within the list view.                    |
+| `options`     | The field's configured `Option[]` to filter from.                                                                                                                                        |
+| `req`         | The Payload Request, which contains references to `payload`, `user`, `locale`, and more.                                                                                                 |
+| `siblingData` | An object containing document data that is scoped to only fields within the same parent of this field. Will be an empty object when called on a `Filter` component within the list view. |
+
+If a returned option's `label` differs from the field's configured `label` for the same `value`, the Admin Panel will use the returned `label` wherever the option is displayed, for example after an async lookup that resolves labels from another collection.
+
 To do this, use the `filterOptions` property in your [Field Config](./overview):
 
 ```ts

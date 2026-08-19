@@ -1,7 +1,7 @@
 import type {
   Operator,
   Option,
-  ResolvedFilterOptions,
+  ResolvedListFilterOptions,
   SelectFieldClient,
   TextFieldClient,
 } from 'payload'
@@ -10,6 +10,7 @@ import React from 'react'
 
 import type { ReducedField, Value } from '../../types.js'
 
+import { isSelectFilterOptions } from '../../isSelectFilterOptions.js'
 import { DateFilter } from '../Date/index.js'
 import { NumberFilter } from '../Number/index.js'
 import { RelationshipFilter } from '../Relationship/index.js'
@@ -19,7 +20,7 @@ import { Text } from '../Text/index.js'
 type Props = {
   booleanSelect: boolean
   disabled: boolean
-  filterOptions?: ResolvedFilterOptions
+  filterOptions?: ResolvedListFilterOptions
   internalField: ReducedField
   onChange: React.Dispatch<React.SetStateAction<string>>
   operator: Operator
@@ -51,6 +52,8 @@ export const DefaultFilter: React.FC<Props> = ({
     )
   }
 
+  const whereFilterOptions = isSelectFilterOptions(filterOptions) ? {} : (filterOptions ?? {})
+
   switch (internalField?.field?.type) {
     case 'date': {
       return (
@@ -81,7 +84,7 @@ export const DefaultFilter: React.FC<Props> = ({
         <RelationshipFilter
           disabled={disabled}
           field={internalField.field}
-          filterOptions={filterOptions ?? {}}
+          filterOptions={whereFilterOptions}
           onChange={onChange}
           operator={operator}
           value={value}
@@ -94,7 +97,7 @@ export const DefaultFilter: React.FC<Props> = ({
         <RelationshipFilter
           disabled={disabled}
           field={internalField.field}
-          filterOptions={filterOptions ?? {}}
+          filterOptions={whereFilterOptions}
           onChange={onChange}
           operator={operator}
           value={value}

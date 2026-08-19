@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
-import { selectFieldsSlug } from '../../slugs.js'
+import { selectFieldsSlug, selectOptionsGlobalSlug } from '../../slugs.js'
 import { CustomJSXLabel } from './CustomJSXLabel.js'
 
 const SelectFields: CollectionConfig = {
@@ -296,18 +296,28 @@ const SelectFields: CollectionConfig = {
         },
       ],
       filterOptions: async ({ options, data, req }) => {
-        // real async lookup, e.g. checking another collection to decide which options are allowed
-        await req.payload.find({
-          collection: selectFieldsSlug,
-          limit: 0,
+        // real async lookup: labels come from a global so values can remain the same
+        // while proving the options the UI renders are truly DB-backed
+        const { options: optionLabels } = await req.payload.findGlobal({
+          slug: selectOptionsGlobalSlug,
           req,
         })
 
+        const optionsWithLabelsFromGlobal = options.map((option) => {
+          const value = typeof option === 'string' ? option : option.value
+          const labelFromGlobal = optionLabels?.find(
+            (optionLabel) => optionLabel.value === value,
+          )?.label
+
+          return {
+            label: labelFromGlobal ?? value,
+            value,
+          }
+        })
+
         return data.disallowOption2
-          ? options.filter(
-              (option) => (typeof option === 'string' ? options : option.value) !== 'one',
-            )
-          : options
+          ? optionsWithLabelsFromGlobal.filter((option) => option.value !== 'one')
+          : optionsWithLabelsFromGlobal
       },
     },
   ],
