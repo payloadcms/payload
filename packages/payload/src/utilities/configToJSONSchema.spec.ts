@@ -881,4 +881,34 @@ describe('configToJSONSchema', () => {
     // Doesn't pull in unrelated collections.
     expect(schema.$defs?.other).toBeUndefined()
   })
+
+  it('should generate valid locale schema with object-form localization.locales', () => {
+    // @ts-expect-error
+    const config: Config = {
+      localization: {
+        locales: [
+          { label: 'English', value: 'en' },
+          { label: 'French', value: 'fr' },
+        ],
+        defaultLocale: 'en',
+      },
+      collections: [
+        {
+          slug: 'posts',
+          fields: [{ name: 'title', type: 'text', localized: true }],
+          timestamps: false,
+          versions: false,
+        },
+      ],
+    }
+
+    const sanitizedConfig = sanitizeConfig(config)
+    const { jsonSchema: schema } = configToJSONSchema(sanitizedConfig, 'text')
+
+    expect(schema?.$defs?.locale).toStrictEqual({
+      type: 'string',
+      enum: ['en', 'fr'],
+    })
+    expect(schema?.$defs?.fallbackLocale).toBeDefined()
+  })
 })
