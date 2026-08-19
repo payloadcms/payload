@@ -60,6 +60,15 @@ export const getAfterChangeHook =
           req.file = undefined
           req.payloadUploadSizes = undefined
 
+          // `req.query.uploadEdits` (crop / resize / focal point) has already
+          // been consumed by the original request's `generateFileData`. The
+          // nested update below re-reads it straight from `req.query` and would
+          // re-enter the file re-processing path, re-cropping the already-cropped
+          // file. Drop it so the metadata persistence stays data-only.
+          if (req.query && 'uploadEdits' in req.query) {
+            delete req.query.uploadEdits
+          }
+
           try {
             await req.payload.update({
               id: doc.id,
