@@ -162,7 +162,9 @@ export async function getEntityPermissions<TEntityType extends 'collection' | 'g
       if (typeof accessFunction === 'function') {
         accessResults.push({
           operation,
-          result: Promise.resolve(accessFunction({ id, data, req })) as Promise<boolean | Where>,
+          result: Promise.resolve(accessFunction({ id, slug: entity.slug, data, req })) as Promise<
+            boolean | Where
+          >,
         })
       } else {
         entityPermissions[operation] = {

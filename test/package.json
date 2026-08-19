@@ -106,7 +106,7 @@
     "file-type": "22.0.1",
     "http-status": "2.1.0",
     "jwt-decode": "4.0.0",
-    "mongoose": "8.22.1",
+    "mongoose": "9.9.2",
     "next": "16.3.0",
     "nodemailer": "^8.0.5",
     "object-to-formdata": "4.5.1",

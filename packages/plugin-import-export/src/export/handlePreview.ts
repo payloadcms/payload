@@ -275,7 +275,7 @@ export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
 
         for (const key of fields) {
           const value = getObjectDotNotation(output, key)
-          setNestedValue(trimmed, key, value ?? null)
+          setNestedValue(trimmed, key, value ?? null, output)
         }
 
         output = trimmed

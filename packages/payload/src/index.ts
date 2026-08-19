@@ -5,7 +5,6 @@ import type { Logger } from 'pino'
 import type { NonNever } from 'ts-essentials'
 
 import { spawn } from 'child_process'
-import crypto from 'crypto'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
 
@@ -131,12 +130,13 @@ import type { SupportedLanguages } from '@payloadcms/translations'
 
 import { Cron } from 'croner'
 
+import type { EncryptionKeyring } from './auth/crypto.js'
 import type { ClientConfig } from './config/client.js'
 import type { KVAdapter } from './kv/index.js'
 import type { JobLog, JobTaskStatus } from './queues/config/types/workflowTypes.js'
 import type { TypeWithVersion } from './versions/types.js'
 
-import { decrypt, encrypt } from './auth/crypto.js'
+import { buildEncryptionKeyring, decrypt, encrypt, reencrypt } from './auth/crypto.js'
 import { authLocal } from './auth/operations/local/auth.js'
 import { APIKeyAuthentication } from './auth/strategies/apiKey.js'
 import { JWTAuthentication } from './auth/strategies/jwt.js'
@@ -572,6 +572,8 @@ export class BasePayload {
 
   encrypt = encrypt
 
+  encryptionKeyring!: EncryptionKeyring
+
   extensions!: (args: {
     args: OperationArgs<any>
     req: graphQLRequest<unknown, unknown>
@@ -718,6 +720,8 @@ export class BasePayload {
   ): Promise<LoginResult<TSlug>> => {
     return loginLocal<TSlug>(this, options)
   }
+
+  reencrypt = reencrypt
 
   resetPassword = async <TSlug extends CollectionSlug>(
     options: ResetPasswordOptions<TSlug>,
@@ -919,7 +923,11 @@ export class BasePayload {
       throw new Error('Error: missing secret key. A secret key is needed to secure Payload.')
     }
 
-    this.secret = crypto.createHash('sha256').update(this.config.secret).digest('hex').slice(0, 32)
+    this.encryptionKeyring = buildEncryptionKeyring([
+      this.config.secret,
+      ...(this.config.previousSecrets ?? []),
+    ])
+    this.secret = this.encryptionKeyring.active.legacyKey
 
     this.globals = {
       config: this.config.globals,
@@ -1402,6 +1410,8 @@ export { registerFirstUserOperation } from './auth/operations/registerFirstUser.
 export { resetPasswordOperation } from './auth/operations/resetPassword.js'
 export { unlockOperation } from './auth/operations/unlock.js'
 export { verifyEmailOperation } from './auth/operations/verifyEmail.js'
+export { rotateSecret } from './auth/rotateSecret.js'
+export type { RotateSecretArgs, RotateSecretResult } from './auth/rotateSecret.js'
 export { JWTAuthentication } from './auth/strategies/jwt.js'
 export { incrementLoginAttempts } from './auth/strategies/local/incrementLoginAttempts.js'
 export { resetLoginAttempts } from './auth/strategies/local/resetLoginAttempts.js'
@@ -1460,6 +1470,7 @@ export type {
   BeforeValidateHook as CollectionBeforeValidateHook,
   BulkOperationResult,
   Collection,
+  CollectionAccess,
   CollectionAdminOptions,
   CollectionConfig,
   DataFromCollectionSlug,
@@ -1839,6 +1850,7 @@ export type {
   BeforeReadHook as GlobalBeforeReadHook,
   BeforeValidateHook as GlobalBeforeValidateHook,
   DataFromGlobalSlug,
+  GlobalAccess,
   GlobalAdminOptions,
   GlobalConfig,
   SanitizedGlobalConfig,

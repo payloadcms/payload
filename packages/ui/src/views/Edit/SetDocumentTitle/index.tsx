@@ -43,7 +43,12 @@ export const SetDocumentTitle: React.FC<{
       return
     }
 
-    setDocumentTitle(title)
+    // Coalesce rapid field changes before updating the title and step navigation contexts.
+    const animationFrame = requestAnimationFrame(() => {
+      setDocumentTitle(title)
+    })
+
+    return () => cancelAnimationFrame(animationFrame)
   }, [setDocumentTitle, title])
 
   return null
