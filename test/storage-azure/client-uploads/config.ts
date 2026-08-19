@@ -9,6 +9,7 @@ import { Media } from '../collections/Media.js'
 import { MediaWithPrefix } from '../collections/MediaWithPrefix.js'
 import { Users } from '../collections/Users.js'
 import { mediaSlug, mediaWithPrefixSlug, prefix } from '../shared.js'
+import { MediaHeaderOnly, mediaHeaderOnlySlug } from './collections/MediaHeaderOnly.js'
 import { MediaWithDocPrefix, mediaWithDocPrefixSlug } from './collections/MediaWithDocPrefix.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -24,7 +25,7 @@ export default buildConfigWithDefaults({
       baseDir: path.resolve(dirname, '..'),
     },
   },
-  collections: [Media, MediaWithPrefix, MediaWithDocPrefix, Users],
+  collections: [Media, MediaWithPrefix, MediaWithDocPrefix, MediaHeaderOnly, Users],
   onInit: async (payload) => {
     await payload.create({
       collection: 'users',
@@ -37,14 +38,15 @@ export default buildConfigWithDefaults({
   storage: [
     azureStorage({
       collections: {
+        [mediaHeaderOnlySlug]: true,
         [mediaSlug]: true,
-        [mediaWithPrefixSlug]: {
-          prefix,
-        },
         // Configure a collection-level prefix on this slug to test that
         // a custom `prefix.defaultValue` does override the static prefix
         [mediaWithDocPrefixSlug]: {
           prefix: 'docprefix-collection',
+        },
+        [mediaWithPrefixSlug]: {
+          prefix,
         },
       },
       allowContainerCreate: process.env.AZURE_STORAGE_ALLOW_CONTAINER_CREATE === 'true',

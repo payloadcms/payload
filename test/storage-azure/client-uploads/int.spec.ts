@@ -1,7 +1,8 @@
 import type { ContainerClient } from '@azure/storage-blob'
 import type { Payload, UploadInstructions } from 'payload'
 
-import { BlobServiceClient } from '@azure/storage-blob'
+import { BlobServiceClient, BlockBlobClient } from '@azure/storage-blob'
+import { readFileSync } from 'node:fs'
 import { readFile } from 'node:fs/promises'
 import path from 'path'
 import { fileURLToPath } from 'url'
@@ -11,6 +12,7 @@ import type { NextRESTClient } from '../../__helpers/shared/NextRESTClient.js'
 
 import { initPayloadInt } from '../../__helpers/shared/initPayloadInt.js'
 import { mediaSlug } from '../shared.js'
+import { mediaHeaderOnlySlug } from './collections/MediaHeaderOnly.js'
 import { mediaWithDocPrefixSlug } from './collections/MediaWithDocPrefix.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -114,5 +116,65 @@ describe('@payloadcms/storage-azure clientUploads', () => {
       .getBlobClient(`${upload.prefix}/${upload.filename}`)
       .getProperties()
     expect(props.contentLength).toBeGreaterThan(0)
+  })
+
+  /**
+   * `media-header-only` has no resizeOptions/mimeTypes configured, so a plain image upload
+   * takes the `'header'` content-requirement path: the server only fetches a byte-range probe
+   * from the real Azure handler instead of the whole file. This is a regression test for a bug
+   * where that path crashed against the real adapter (it reads `req.signal`, which threw when
+   * the server cloned the request via `Object.create` to add the range header) - completing the
+   * full round trip end to end is the only way to exercise the real handler for this path, since
+   * unit tests mock the handler and never see that crash.
+   */
+  describe('header-only content requirement (real Azure handler)', () => {
+    const createdIds: (number | string)[] = []
+
+    afterEach(async () => {
+      for (const id of createdIds) {
+        await payload.delete({ id, collection: mediaHeaderOnlySlug })
+      }
+      createdIds.length = 0
+    })
+
+    it('creates a document from a client-uploaded image via the real Azure handler', async () => {
+      const file = readFileSync(path.resolve(dirname, '../../uploads/image.png'))
+
+      const instructions = (await restClient
+        .POST('/upload-instructions', {
+          body: JSON.stringify({
+            collectionSlug: mediaHeaderOnlySlug,
+            filename: 'header-only.png',
+            filesize: file.length,
+            mimeType: 'image/png',
+          }),
+        })
+        .then((res) => res.json())) as UploadInstructions
+
+      if (instructions.type !== 'dispatch') {
+        throw new Error('Expected dispatch upload instructions')
+      }
+
+      const { url } = instructions.data as { url: string }
+      await new BlockBlobClient(url).uploadData(file, {
+        blobHTTPHeaders: { blobContentType: 'image/png' },
+      })
+
+      const createFormData = new FormData()
+      createFormData.append('file', JSON.stringify(instructions.file))
+
+      const createRes = await restClient.POST(`/${mediaHeaderOnlySlug}`, {
+        body: createFormData,
+      })
+
+      expect(createRes.status).toBe(201)
+      const { doc } = await createRes.json()
+      createdIds.push(doc.id)
+
+      expect(doc.width).toBe(1600)
+      expect(doc.height).toBe(1600)
+      expect(doc.filesize).toBe(file.length)
+      expect(doc.mimeType).toBe('image/png')
+    })
   })
 })
