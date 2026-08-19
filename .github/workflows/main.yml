@@ -42,6 +42,7 @@ jobs:
               - '.github/workflows/main.yml'
               - '.github/actions/start-services/**'
               - '.github/actions/setup/**'
+              - '.github/scripts/visual/**'
               - 'packages/**'
               - 'test/**'
               - 'pnpm-lock.yaml'
@@ -56,20 +57,11 @@ jobs:
               - 'package.json'
             templates:
               - 'templates/**'
-            # Gates the visual-regression job: only run it when a PR could plausibly change
-            # rendered UI, or when it touches the visual-testing machinery itself (specs,
-            # baselines, the screenshot helper, or the Playwright config that governs the
-            # comparison). Source styles in this repo are .scss (see admin panel component
-            # structure conventions), so that's included alongside .css/.tsx/.jsx. Also covers
-            # image/icon assets and the fixture config/collections the current `@visual` test
-            # renders, since seeded content or a swapped icon can change a screenshot without
-            # touching a .tsx/.css file. This is a coverage tradeoff, not a guarantee: a plain
-            # `packages/**/*.ts` change (e.g. logic in a non-JSX helper a component imports) can
-            # still alter rendered output while being skipped here — deliberately, since
-            # `packages/**` is almost entirely `.ts`/`.tsx` and including plain `.ts` would make
-            # this gate fire on nearly every PR, defeating its purpose.
+            # Also gates tests-unit via its own `if`. Excludes plain `packages/**/*.ts` changes on
+            # purpose: matching all `.ts` would fire on nearly every PR.
             needs_visual:
               - '.github/workflows/main.yml'
+              - '.github/scripts/visual/**'
               - 'packages/**/*.css'
               - 'packages/**/*.scss'
               - 'packages/**/*.tsx'
@@ -91,8 +83,10 @@ jobs:
               # patterns above. Scoped to config-defining files rather than all of `test/admin/**`
               # (100+ files spanning unrelated e2e suites) for the same reason `packages/**/*.ts`
               # is excluded above: a blanket match would fire on nearly every admin-suite PR.
+              # seed.ts generates the post titles shown in the posts-list-view baseline.
               - 'test/admin/config.ts'
               - 'test/admin/slugs.ts'
+              - 'test/admin/seed.ts'
               - 'test/admin/collections/**'
               - 'test/admin/globals/**'
             build_approvals:
@@ -105,6 +99,7 @@ jobs:
         run: |
           echo "needs_build: ${{ steps.filter.outputs.needs_build }}"
           echo "needs_tests: ${{ steps.filter.outputs.needs_tests }}"
+          echo "needs_visual: ${{ steps.filter.outputs.needs_visual }}"
           echo "templates: ${{ steps.filter.outputs.templates }}"
           echo "build_approvals: ${{ steps.filter.outputs.build_approvals }}"
 
@@ -228,7 +223,7 @@ jobs:
   tests-unit:
     runs-on: ubuntu-24.04
     needs: [changes, build]
-    if: needs.changes.outputs.needs_tests == 'true'
+    if: needs.changes.outputs.needs_tests == 'true' || needs.changes.outputs.needs_visual == 'true'
     steps:
       - uses: actions/checkout@v5
 
@@ -513,28 +508,15 @@ jobs:
       #     report-tag: ${{ matrix.suite }}
       #     job-summary: true
 
-  # Runs `@visual`-tagged e2e tests (screenshot comparisons against committed baselines).
-  # Gated on `needs_visual` so it only runs when a PR could plausibly change rendered UI.
-  # Reports pass/fail only — if this job fails, reproduce and inspect the diff locally with
-  # `pnpm test:visual` rather than relying on a CI-posted comment.
+  # Runs `@visual`-tagged e2e tests (screenshot comparisons against baselines).
+  # If this fails, reproduce locally with `pnpm test:visual`; update an intentional baseline with
+  # `pnpm test:visual:update`. Both must run inside the pinned Playwright Docker image, since font
+  # rendering differs enough from a bare host to fail the comparison even with no real change.
   #
-  # Baselines are committed as PNGs next to their spec file (see `snapshotPathTemplate` in
-  # test/playwright.config.ts) and must be generated on this same OS/browser combination —
-  # never on a bare macOS/Windows host. Use `pnpm test:visual:update`
-  # locally to accept an intentional change.
-  #
-  # The comparison itself runs inside the same pinned `mcr.microsoft.com/playwright:vX-noble`
-  # image `pnpm test:visual` uses locally, rather than directly on this bare
-  # `ubuntu-24.04` runner. Both are nominally "Ubuntu 24.04", but the runner image isn't
-  # guaranteed to carry the same font/freetype packages as the pinned Playwright image — and this
-  # feature's entire premise (a baseline generated once is valid everywhere it's compared) depends
-  # on CI comparing against that exact environment, not just an OS version that happens to match.
-  # Installs fresh inside the container each run, and only ever reuses the `dist-${{ github.sha }}`
-  # cache below — never the `build`/`e2e-prep` `node_modules`, which were produced on the bare
-  # runner and would mix runner-compiled native modules (sharp, etc.) with the container's own
-  # Node/glibc — the same host/container ABI mismatch `pnpm test:visual` avoids locally
-  # via isolated volumes. `packages/*/dist` itself is plain compiled JS with no native bindings,
-  # so restoring just that (skipping `build:all` when it's already there) is safe.
+  # For the same reason, this job reinstalls node_modules fresh inside that Docker image rather
+  # than reusing the `build`/`e2e-prep` node_modules from the bare runner, which would mix
+  # runner-built native modules (sharp, etc.) with the container's own Node/glibc. It restores only
+  # `packages/*/dist` (plain compiled JS, no native bindings) from the `build` job's cache.
   visual-regression:
     name: Visual Regression
     runs-on: ubuntu-24.04
@@ -553,7 +535,13 @@ jobs:
 
       - name: Resolve pinned Playwright version
         id: playwright-version
-        run: echo "version=$(node -p "require('./package.json').devDependencies['@playwright/test']")" >> "$GITHUB_OUTPUT"
+        # This job skips ./.github/actions/setup, so there's no node_modules for `pnpm ls` to
+        # read (unlike elsewhere in this file) — read package.json directly instead. Strip a
+        # leading ^/~ in case the pin ever becomes a range.
+        run: |
+          VERSION=$(node -p "require('./package.json').devDependencies['@playwright/test']" | sed -E 's/^[\^~]//')
+          echo "Resolved Playwright version: $VERSION"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
       # Every `needs_visual` path is also a `needs_build` path (a subset of `packages/**`/
       # `test/**`), so `build` always runs alongside this job — restoring here should always hit.
@@ -566,8 +554,6 @@ jobs:
           key: dist-${{ github.sha }}
 
       - name: Run visual regression tests
-        id: visual
-        continue-on-error: true
         # PLAYWRIGHT_VERSION is read from package.json, which on a `pull_request` checkout is
         # fork-controlled content — passed via env and referenced as "$PLAYWRIGHT_VERSION" so it's
         # shell *data*, never spliced as raw text into the script the way a `${{ }}` reference
@@ -589,12 +575,8 @@ jobs:
               pnpm install --frozen-lockfile &&
               ( [ -d packages/payload/dist ] || pnpm run build:all ) &&
               pnpm prepare-run-test-against-prod:ci &&
-              bash .github/scripts/run-visual-suites.sh -- --fully-parallel
+              bash .github/scripts/visual/run-visual-suites.sh -- --fully-parallel
             "
-
-      - name: Fail if visual regressions were found
-        if: steps.visual.outcome == 'failure'
-        run: exit 1
 
   # Build listed templates with packed local packages and then runs their int and e2e tests
   build-and-test-templates:

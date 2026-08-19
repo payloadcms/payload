@@ -20,7 +20,7 @@ fi
 if [ -n "$SUITE" ]; then
   SUITES="$SUITE"
 else
-  SUITES="$(node .github/scripts/find-visual-suites.mjs)"
+  SUITES="$(node .github/scripts/visual/find-visual-suites.mjs)"
 fi
 
 if [ -z "$SUITES" ]; then

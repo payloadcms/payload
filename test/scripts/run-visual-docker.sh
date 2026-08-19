@@ -172,7 +172,7 @@ CONTAINER_CMD="
   ( [ -d packages/payload/dist ] || pnpm run build:all ) &&
   pnpm prepare-run-test-against-prod:ci &&
   export \$(grep -E '^PORT=' .env 2>/dev/null) &&
-  bash .github/scripts/run-visual-suites.sh ${SUITE} -- ${EXTRA_ARGS}
+  bash .github/scripts/visual/run-visual-suites.sh ${SUITE} -- ${EXTRA_ARGS}
 "
 
 # The prod-server e2e path needs a real MongoDB, resolved above from MONGODB_URL/DATABASE_URL or

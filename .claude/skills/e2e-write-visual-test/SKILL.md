@@ -14,8 +14,8 @@ Key pieces:
 - `test/__helpers/e2e/visual.ts` — the `visual()` helper. Declares a test tagged `@visual` without the tag needing to be typed (and possibly forgotten) at each call site. Prefer this over `test()` with a manual tag for any normal visual regression test.
 - `test/__helpers/e2e/expectScreenshot.ts` — the helper that takes the screenshot and diffs it against the baseline.
 - `test/playwright.config.ts` — `toHaveScreenshot.maxDiffPixelRatio` (anti-aliasing tolerance) and `snapshotPathTemplate` (where baselines are stored).
-- `.github/scripts/find-visual-suites.mjs` — discovers every suite that has an `@visual`-tagged test by scanning `test/**/e2e.spec.ts` for either the string `@visual` or a `visual()` helper import. Nothing needs to be registered anywhere else — add a `visual()` test and it's picked up automatically next time visual tests run.
-- `.github/scripts/run-visual-suites.sh` — loops `pnpm test:e2e:prod:server:run:noturbo <suite> --grep @visual` over either an explicit suite or every discovered suite. Shared by CI and the local Docker script.
+- `.github/scripts/visual/find-visual-suites.mjs` — discovers every suite that has an `@visual`-tagged test by scanning `test/**/e2e.spec.ts` for either the string `@visual` or a `visual()` helper import. Nothing needs to be registered anywhere else — add a `visual()` test and it's picked up automatically next time visual tests run.
+- `.github/scripts/visual/run-visual-suites.sh` — loops `pnpm test:e2e:prod:server:run:noturbo <suite> --grep @visual` over either an explicit suite or every discovered suite. Shared by CI and the local Docker script.
 
 ## Writing a new visual test
 
