@@ -77,6 +77,21 @@ describe('storage-r2 getFile', () => {
     expect(response.status).toBe(200)
   })
 
+  it('should not return 416 for an out-of-bounds Range header when operation is "transform"', async () => {
+    const bucket = makeBucket()
+
+    const response = await getFile({
+      bucket: bucket as never,
+      collection,
+      filename: 'logo.png',
+      prefix: '',
+      operation: 'transform',
+      req: makeReq('bytes=999999-9999999'),
+    })
+
+    expect(response.status).toBe(200)
+  })
+
   it('should not call modifyResponseHeaders for operation "transform"', async () => {
     const modifyResponseHeaders = vi.fn((args: { headers: Headers }) => args.headers)
     const bucket = makeBucket()

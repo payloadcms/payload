@@ -9,7 +9,7 @@ vi.mock('./planTransformerPipeline.js', () => ({
 }))
 
 vi.mock('./withFileTransformAccessContext.js', () => ({
-  withFileTransformAccessContext: vi.fn(({ run }) => run()),
+  withFileTransformAccessContext: vi.fn(({ callback }) => callback()),
 }))
 
 vi.mock('../checkFileAccess.js', () => ({
@@ -68,14 +68,14 @@ describe('handleDynamicFileRequest', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     vi.mocked(resolveUploadDocument).mockResolvedValue(document)
-    vi.mocked(withFileTransformAccessContext).mockImplementation(({ run }) => run())
+    vi.mocked(withFileTransformAccessContext).mockImplementation(({ callback }) => callback())
     vi.mocked(getSourceFileResponse).mockResolvedValue(new Response('source-bytes'))
     vi.mocked(finalizeFileResponse).mockImplementation(async ({ response }) => response)
     vi.mocked(checkFileAccess).mockResolvedValue(document)
     vi.mocked(retrieveFileResponse).mockResolvedValue(new Response('original-bytes'))
   })
 
-  it('should throw NotFound without planning, checking access, or fetching a source when the document is not found', async () => {
+  it('should throw NotFound without planning or fetching a source when the document is not found and access is allowed', async () => {
     vi.mocked(resolveUploadDocument).mockResolvedValue(undefined)
 
     await expect(
@@ -84,10 +84,30 @@ describe('handleDynamicFileRequest', () => {
         filename: 'missing.png',
         req: makeReq(),
       }),
-    ).rejects.toThrow()
+    ).rejects.toMatchObject({ status: 404 })
+
+    expect(checkFileAccess).toHaveBeenCalledWith(
+      expect.objectContaining({ filename: 'missing.png' }),
+    )
+    expect(planTransformerPipeline).not.toHaveBeenCalled()
+    expect(getSourceFileResponse).not.toHaveBeenCalled()
+  })
+
+  it('should defer to checkFileAccess before declaring NotFound, so a denied read on a non-existent filename throws Forbidden instead of leaking non-existence', async () => {
+    vi.mocked(resolveUploadDocument).mockResolvedValue(undefined)
+
+    const { Forbidden } = await import('../../errors/Forbidden.js')
+    vi.mocked(checkFileAccess).mockRejectedValue(new Forbidden())
+
+    await expect(
+      handleDynamicFileRequest({
+        collection: makeCollection(),
+        filename: 'missing.png',
+        req: makeReq(),
+      }),
+    ).rejects.toMatchObject({ status: 403 })
 
     expect(planTransformerPipeline).not.toHaveBeenCalled()
-    expect(checkFileAccess).not.toHaveBeenCalled()
     expect(getSourceFileResponse).not.toHaveBeenCalled()
   })
 

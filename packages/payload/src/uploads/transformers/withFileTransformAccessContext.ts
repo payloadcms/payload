@@ -1,19 +1,19 @@
 import type { PayloadRequest } from '../../types/index.js'
 
 /**
- * Sets `req.fileTransform = true` for the duration of `run()` when `isTransform`
- * is `true`, then restores whatever value the request carried before — including
- * when `run()` throws or rejects. Ordinary reads (`isTransform: false`) never see
- * the flag set.
+ * Sets `req.fileTransform = true` for the duration of `callback()` when
+ * `isTransform` is `true`, then restores the previous value afterward, even
+ * if `callback()` throws. Ordinary reads (`isTransform: false`) never see the
+ * flag set.
  */
 export async function withFileTransformAccessContext<T>({
+  callback,
   isTransform,
   req,
-  run,
 }: {
+  callback: () => Promise<T> | T
   isTransform: boolean
   req: PayloadRequest
-  run: () => Promise<T> | T
 }): Promise<T> {
   const previousFileTransform = req.fileTransform
 
@@ -22,7 +22,7 @@ export async function withFileTransformAccessContext<T>({
   }
 
   try {
-    return await run()
+    return await callback()
   } finally {
     req.fileTransform = previousFileTransform
   }

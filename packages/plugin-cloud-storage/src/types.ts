@@ -2,6 +2,7 @@ import type {
   CollectionConfig,
   Field,
   FileData,
+  FileHandlerOperation,
   ImageSize,
   PayloadHandler,
   PayloadRequest,
@@ -10,6 +11,8 @@ import type {
   UploadInstructionsAccess,
   UploadInstructionsCapability,
 } from 'payload'
+
+export type { FileHandlerOperation } from 'payload'
 
 export interface File {
   buffer: Buffer
@@ -50,14 +53,6 @@ export type GenerateURL = (args: {
   filename: string
   prefix?: string
 }) => Promise<string> | string
-
-/**
- * Kept in sync with `payload`'s `FileHandlerOperation` (`packages/payload/src/uploads/types.ts`).
- * Distinguishes an ordinary public file request (`read`) from Payload's internal
- * retrieval of a stored file's bytes for a dynamic transformation (`transform`).
- * Defaults to `read` when omitted.
- */
-export type FileHandlerOperation = 'read' | 'transform'
 
 export type StaticHandler = (
   req: PayloadRequest,

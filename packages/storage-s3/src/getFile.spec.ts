@@ -120,6 +120,24 @@ describe('storage-s3 getFile', () => {
     expect(callArgs.Range).toBe('bytes=0-99')
   })
 
+  it('should not return 416 for an out-of-bounds Range header when operation is "transform"', async () => {
+    const client = makeClient()
+
+    const response = await getFile({
+      bucket: 'test-bucket',
+      client,
+      collection,
+      filename: 'logo.png',
+      operation: 'transform',
+      req: makeReq('bytes=999999-9999999'),
+      signedDownloads: false,
+    })
+
+    expect(response.status).toBe(200)
+    const callArgs = client.getObject.mock.calls[0]?.[0]
+    expect(callArgs.Range).toBeUndefined()
+  })
+
   it('should not call modifyResponseHeaders for operation "transform"', async () => {
     const modifyResponseHeaders = vi.fn(({ headers }) => headers)
     const client = makeClient()

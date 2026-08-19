@@ -7,6 +7,61 @@ import type { Transform } from '../../types.js'
 const TRANSFORMER_MODULE = '@payloadcms/transformer-sharp'
 const TRANSFORMER_NAME = 'sharpTransformer'
 
+const IDENTIFIER_PATTERN = /^[A-Z_$][\w$]*$/i
+const RESERVED_WORDS = new Set([
+  'await',
+  'break',
+  'case',
+  'catch',
+  'class',
+  'const',
+  'continue',
+  'debugger',
+  'default',
+  'delete',
+  'do',
+  'else',
+  'enum',
+  'export',
+  'extends',
+  'false',
+  'finally',
+  'for',
+  'function',
+  'if',
+  'implements',
+  'import',
+  'in',
+  'instanceof',
+  'interface',
+  'let',
+  'new',
+  'null',
+  'package',
+  'private',
+  'protected',
+  'public',
+  'return',
+  'static',
+  'super',
+  'switch',
+  'this',
+  'throw',
+  'true',
+  'try',
+  'typeof',
+  'var',
+  'void',
+  'while',
+  'with',
+  'yield',
+])
+
+/** Whether `value` can be used as a plain (unquoted, non-bracketed) object literal key. */
+function isSafePlainObjectKey(value: string): boolean {
+  return IDENTIFIER_PATTERN.test(value) && !RESERVED_WORDS.has(value)
+}
+
 /** Fields moved from a collection's `upload` object into `sharpTransformer({ collections })`. */
 const MOVED_UPLOAD_FIELDS = [
   'constructorOptions',
@@ -15,10 +70,9 @@ const MOVED_UPLOAD_FIELDS = [
   'trimOptions',
   'withMetadata',
   'imageSizes',
+  'crop',
+  'focalPoint',
 ]
-
-/** Fields copied (not removed) since core still reads them off the collection directly. */
-const COPIED_UPLOAD_FIELDS = ['crop', 'focalPoint']
 
 const findBuildConfigLocalNames = (file: SourceFile): Set<string> => {
   const localNames = new Set<string>()
@@ -43,10 +97,23 @@ function ensureSharpTransformerImport(sourceFile: SourceFile): void {
     .find((decl) => decl.getModuleSpecifierValue() === TRANSFORMER_MODULE)
 
   if (!existing) {
-    sourceFile.addImportDeclaration({
+    const otherImports = sourceFile.getImportDeclarations()
+    const fileOmitsSemicolonsOnImports =
+      otherImports.length > 0 && otherImports.every((decl) => !decl.getText().endsWith(';'))
+
+    const insertedImport = sourceFile.addImportDeclaration({
       moduleSpecifier: TRANSFORMER_MODULE,
       namedImports: [TRANSFORMER_NAME],
     })
+
+    // ts-morph always appends a semicolon; strip it when the file's other imports don't use them.
+    if (fileOmitsSemicolonsOnImports) {
+      const insertedImportText = insertedImport.getText()
+      if (insertedImportText.endsWith(';')) {
+        insertedImport.replaceWithText(insertedImportText.slice(0, -1))
+      }
+    }
+
     return
   }
 
@@ -90,10 +157,17 @@ function extractCollectionSharpEntry({
   if (!uploadObj) {
     if (uploadProp.getInitializer()?.getKind() !== SyntaxKind.TrueKeyword) {
       notes.push(
-        `${filePath}: collection ${slugInitializer.getText()}'s \`upload\` option is not an inline object — check it for Sharp-specific fields (resizeOptions/imageSizes/formatOptions/trimOptions/constructorOptions/withMetadata) manually.`,
+        `${filePath}: collection ${slugInitializer.getText()}'s \`upload\` option is not an inline object — check it for Sharp-specific fields (resizeOptions/imageSizes/formatOptions/trimOptions/constructorOptions/withMetadata/crop/focalPoint) manually.`,
       )
     }
     return undefined
+  }
+
+  const uploadHasSpread = uploadObj.getProperties().some((prop) => Node.isSpreadAssignment(prop))
+  if (uploadHasSpread) {
+    notes.push(
+      `${filePath}: collection ${slugInitializer.getText()}'s \`upload\` object contains a spread — Sharp-specific fields (resizeOptions/imageSizes/formatOptions/trimOptions/constructorOptions/withMetadata/crop/focalPoint) hidden inside it need manual review.`,
+    )
   }
 
   const movedTexts: string[] = []
@@ -105,20 +179,24 @@ function extractCollectionSharpEntry({
     }
   }
 
-  const copiedTexts: string[] = []
-  for (const name of COPIED_UPLOAD_FIELDS) {
-    const prop = uploadObj.getProperty(name)
-    if (prop && Node.isPropertyAssignment(prop)) {
-      copiedTexts.push(prop.print())
-    }
-  }
-
-  const allTexts = [...movedTexts, ...copiedTexts]
-  if (allTexts.length === 0) {
+  if (movedTexts.length === 0) {
     return undefined
   }
 
-  return `[${slugInitializer.getText()}]: { ${allTexts.join(', ')} }`
+  // Avoid leaving `upload: {\n}` spread across two lines once every property moves out.
+  if (uploadObj.getProperties().length === 0) {
+    uploadObj.replaceWithText('{}')
+  }
+
+  const slugLiteralValue = Node.isStringLiteral(slugInitializer)
+    ? slugInitializer.getLiteralValue()
+    : undefined
+  const keyText =
+    slugLiteralValue !== undefined && isSafePlainObjectKey(slugLiteralValue)
+      ? slugLiteralValue
+      : `[${slugInitializer.getText()}]`
+
+  return `${keyText}: { ${movedTexts.join(', ')} }`
 }
 
 /**
@@ -143,7 +221,7 @@ function extractSharpCollectionEntries({
   const arrayLiteral = collectionsProp.getInitializerIfKind(SyntaxKind.ArrayLiteralExpression)
   if (!arrayLiteral) {
     notes.push(
-      `${filePath}: \`collections\` isn't an inline array — check each collection for Sharp-specific \`upload\` fields (resizeOptions/imageSizes/formatOptions/trimOptions/constructorOptions/withMetadata) and move them into \`sharpTransformer({ collections })\` manually.`,
+      `${filePath}: \`collections\` isn't an inline array — check each collection for Sharp-specific \`upload\` fields (resizeOptions/imageSizes/formatOptions/trimOptions/constructorOptions/withMetadata/crop/focalPoint) and move them into \`sharpTransformer({ collections })\` manually.`,
     )
     return []
   }
@@ -198,6 +276,9 @@ export const migrateSharpToTransformer: Transform = {
         const [arg] = call.getArguments()
         const configObj = arg?.asKind(SyntaxKind.ObjectLiteralExpression)
         if (!configObj) {
+          notes.push(
+            `${sourceFile.getFilePath()}: \`buildConfig\` argument is not an inline object literal — check it manually for a top-level \`sharp\` dependency and per-collection Sharp-specific \`upload\` options.`,
+          )
           continue
         }
 
@@ -211,7 +292,13 @@ export const migrateSharpToTransformer: Transform = {
           ?.getInitializerIfKind(SyntaxKind.ArrayLiteralExpression)
 
         if (existingTransformersArray && findSharpTransformerCall(existingTransformersArray)) {
-          // Already migrated.
+          // Already migrated, but a leftover `sharp` property would fail a later
+          // type-check with no signal from this codemod — flag it here.
+          if (configObj.getProperty('sharp')) {
+            notes.push(
+              `${sourceFile.getFilePath()}: a top-level \`sharp\` property remains even though \`sharpTransformer\` is already registered — move any value you still need into the existing \`sharpTransformer\` call, then remove \`sharp\` manually.`,
+            )
+          }
           continue
         }
 
@@ -240,7 +327,9 @@ export const migrateSharpToTransformer: Transform = {
 
         const transformerArgs: string[] = []
         if (sharpExpressionText) {
-          transformerArgs.push(`sharp: ${sharpExpressionText}`)
+          transformerArgs.push(
+            sharpExpressionText === 'sharp' ? 'sharp' : `sharp: ${sharpExpressionText}`,
+          )
         }
         if (collectionEntries.length > 0) {
           transformerArgs.push(`collections: { ${collectionEntries.join(', ')} }`)
@@ -280,5 +369,5 @@ export const migrateSharpToTransformer: Transform = {
     return { filesChanged: Array.from(filesChanged), notes: notes.length ? notes : undefined }
   },
   description:
-    'Move a top-level `sharp` dependency and per-collection Sharp-specific `upload` options (resizeOptions, imageSizes, formatOptions, trimOptions, constructorOptions, withMetadata) into `sharpTransformer({ collections })`, registered under `upload.transformers`.',
+    'Move a top-level `sharp` dependency and per-collection Sharp-specific `upload` options (resizeOptions, imageSizes, formatOptions, trimOptions, constructorOptions, withMetadata, crop, focalPoint) into `sharpTransformer({ collections })`, registered under `upload.transformers`.',
 }

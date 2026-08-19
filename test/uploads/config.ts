@@ -363,6 +363,12 @@ const sharpCollections: Record<string, SharpCollectionConfig> = {
         width: undefined,
         height: undefined,
       },
+      {
+        name: 'focalCrop',
+        width: 300,
+        height: 150,
+        withoutEnlargement: false,
+      },
     ],
   },
   [enlargeSlug]: {

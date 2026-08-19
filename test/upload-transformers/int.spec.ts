@@ -169,6 +169,15 @@ describe('Upload transformers', () => {
       expect(transformerCallCounts.appendSuffix).toBe(0)
     })
 
+    it('should return 403, not 404, for an anonymous dynamic-transform request against a non-existent filename', async () => {
+      const response = await restClient.GET(
+        `/${transformerMediaSlug}/file/does-not-exist.html?suffix=1`,
+        { auth: false },
+      )
+
+      expect(response.status).toBe(403)
+    })
+
     it('should allow an authenticated dynamic-transform request', async () => {
       const doc = await uploadTransformerFixture()
 
@@ -180,17 +189,14 @@ describe('Upload transformers', () => {
       expect(await response.text()).toBe(`${originalPdfText}-suffix`)
     })
 
-    it('should return 404 for a dynamic-transform request with a non-matching prefix, since prefix is resolution context', async () => {
-      // Unlike the existing checkFileAccess-only path (which folds a non-matching prefix into a
-      // privacy-preserving 403), resolveUploadDocument treats prefix as part of locating the
-      // document itself — a non-matching prefix means no document was found at that location.
+    it('should return 403 for a dynamic-transform request with a non-matching prefix, matching the existing checkFileAccess-only path', async () => {
       const doc = await uploadTransformerFixture()
 
       const response = await restClient.GET(
         `/${transformerMediaSlug}/file/${doc.filename}?suffix=1&prefix=nonexistent`,
       )
 
-      expect(response.status).toBe(404)
+      expect(response.status).toBe(403)
     })
 
     it('should never persist dynamic output: the document is unchanged after a transform request', async () => {

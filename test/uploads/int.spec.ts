@@ -20,11 +20,17 @@ import { checkFileRestrictions } from '../../packages/payload/src/uploads/checkF
 import { getExternalFile } from '../../packages/payload/src/uploads/getExternalFile.js'
 // eslint-disable-next-line payload/no-relative-monorepo-imports
 import { tempFileHandler } from '../../packages/payload/src/uploads/fetchAPI-multipart/handlers.js'
+import {
+  runAnimatedFocalPointResizeStaysValidTest,
+  runAnimatedResizeReportsPerFrameDimensionsTest,
+} from '../__helpers/shared/animatedResizeParityTests.js'
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { runTransformerContractShapeTests } from '../__helpers/shared/transformerContractShape.js'
 import { createStreamableFile } from './createStreamableFile.js'
 import {
   adminThumbnailSizeSlug,
   allowListMediaSlug,
+  animatedTypeMedia,
   anyImagesSlug,
   enlargeSlug,
   focalNoSizesSlug,
@@ -1692,6 +1698,32 @@ describe('Collections - Uploads', () => {
         id: result.id,
       })
     })
+
+    runAnimatedResizeReportsPerFrameDimensionsTest({
+      collection: animatedTypeMedia as CollectionSlug,
+      getPayload: () => payload,
+      mainDimensions: { height: 200, width: 200 },
+      sizes: [
+        // A real enlargement (200x200 -> 480x480), not a no-op — a wrong
+        // per-frame height would show up here instead of being masked.
+        { name: 'squareSmall', height: 480, width: 480 },
+      ],
+    })
+
+    runAnimatedFocalPointResizeStaysValidTest({
+      collection: animatedTypeMedia as CollectionSlug,
+      focalPoint: { x: 80, y: 50 },
+      getPayload: () => payload,
+      size: { name: 'focalCrop', height: 150, width: 300 },
+    })
+
+    runTransformerContractShapeTests(() => {
+      const transformer = payload.config.upload.transformers.find((t) => t.slug === 'sharp')
+      if (!transformer) {
+        throw new Error('Expected the "sharp" transformer to be registered for this suite.')
+      }
+      return transformer
+    })
   })
 
   describe('Required Files', () => {
@@ -2410,12 +2442,7 @@ describe('Collections - Uploads', () => {
       expect(response.status).toBe(200)
     })
 
-    it('should return 404 when the prefix query param does not match the stored document prefix', async () => {
-      // Once any transformer is configured anywhere in the app, every collection's file
-      // reads resolve the upload document unconditionally before access is checked
-      // (Decision 5) — a non-matching prefix means resolution finds no document, which is
-      // a 404, not the previous checkFileAccess-only path's privacy-preserving 403. See
-      // the "File transformers" describe block below for the equivalent, intentional case.
+    it('should return 403 when the prefix query param does not match the stored document prefix', async () => {
       const filePath = path.resolve(dirname, './image.png')
       const file = await getFileByPath(filePath)
 
@@ -2431,7 +2458,7 @@ describe('Collections - Uploads', () => {
         `/${prefixMediaSlug}/file/${doc.filename}?prefix=wrongprefix`,
       )
 
-      expect(response.status).toBe(404)
+      expect(response.status).toBe(403)
     })
 
     it('should return 200 without prefix param for documents that have no prefix (backward compatibility)', async () => {
@@ -2451,9 +2478,7 @@ describe('Collections - Uploads', () => {
       expect(response.status).toBe(200)
     })
 
-    it('should return 404 when prefix param is provided but no document has a matching prefix', async () => {
-      // See the comment above: resolveUploadDocument treats a non-matching prefix as
-      // "no document found" (404) once any transformer is configured anywhere.
+    it('should return 403 when prefix param is provided but no document has a matching prefix', async () => {
       const filePath = path.resolve(dirname, './image.png')
       const file = await getFileByPath(filePath)
 
@@ -2469,7 +2494,7 @@ describe('Collections - Uploads', () => {
         `/${prefixMediaSlug}/file/${doc.filename}?prefix=nonexistent`,
       )
 
-      expect(response.status).toBe(404)
+      expect(response.status).toBe(403)
     })
   })
 })

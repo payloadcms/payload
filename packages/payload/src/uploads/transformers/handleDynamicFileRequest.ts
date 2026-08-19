@@ -34,6 +34,14 @@ export async function handleDynamicFileRequest({
   const document = await resolveUploadDocument({ collection, filename, prefix, req })
 
   if (!document) {
+    // Force isTransform: true — there's no mimeType to plan a pipeline from, so this
+    // must assume the stricter transform-aware access check, or the status code would
+    // leak file existence to an access function keyed on req.fileTransform.
+    await withFileTransformAccessContext({
+      callback: () => checkFileAccess({ collection, filename, prefix, req }),
+      isTransform: true,
+      req,
+    })
     throw new NotFound(req.t)
   }
 
@@ -50,9 +58,9 @@ export async function handleDynamicFileRequest({
   })
 
   await withFileTransformAccessContext({
+    callback: () => checkFileAccess({ collection, filename, prefix, req }),
     isTransform: pipeline.length > 0,
     req,
-    run: () => checkFileAccess({ collection, filename, prefix, req }),
   })
 
   const source = createLazySourceGetter({

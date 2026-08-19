@@ -80,6 +80,22 @@ describe('storage-vercel-blob getFile', () => {
     expect(fetchHeaders.Range).toBeUndefined()
   })
 
+  it('should not return 416 for an out-of-bounds Range header when operation is "transform"', async () => {
+    const response = await getFile({
+      baseUrl: 'https://blob.example.com',
+      cacheControlMaxAge: 3600,
+      collection,
+      filename: 'logo.png',
+      operation: 'transform',
+      req: makeReq('bytes=999999-9999999'),
+      token: 'test-token',
+    })
+
+    expect(response.status).toBe(200)
+    const fetchHeaders = vi.mocked(fetch).mock.calls[0]?.[1]?.headers as Record<string, string>
+    expect(fetchHeaders.Range).toBeUndefined()
+  })
+
   it('should not call modifyResponseHeaders for operation "transform"', async () => {
     const modifyResponseHeaders = vi.fn(({ headers }) => headers)
 

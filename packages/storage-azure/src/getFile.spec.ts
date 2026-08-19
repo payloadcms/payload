@@ -75,6 +75,20 @@ describe('storage-azure getFile', () => {
     expect(response.status).toBe(200)
   })
 
+  it('should not return 416 for an out-of-bounds Range header when operation is "transform"', async () => {
+    const client = makeClient()
+
+    const response = await getFile({
+      client,
+      collection,
+      filename: 'logo.png',
+      operation: 'transform',
+      req: makeReq('bytes=999999-9999999'),
+    })
+
+    expect(response.status).toBe(200)
+  })
+
   it('should not call modifyResponseHeaders for operation "transform"', async () => {
     const modifyResponseHeaders = vi.fn(({ headers }) => headers)
     const client = makeClient()
