@@ -123,24 +123,48 @@ const query: Where = {
 }
 ```
 
+For a `hasMany` relationship, a dot-notation query matches when at least one related document
+matches. For example, `'ingredients.isHealthy': { not_equals: false }` matches a burger when at
+least one ingredient has an `isHealthy` value other than `false`. A burger with healthy lettuce and
+an unhealthy sauce still matches because of the lettuce. Use the nested relationship operators
+below when you need to control how many related documents must match.
+
 ### Has-many relationship operators
 
 For non-polymorphic `hasMany` relationship and upload fields, pass a nested query to `contains`,
-`not_equals`, or `equals` to control how many related documents must match:
+`not_equals`, or `equals` to control how many related documents must match. These examples assume
+that `burgers.ingredients` is a `hasMany` relationship and that each ingredient has an `isHealthy`
+field:
 
 ```ts
-const burgers = await payload.find({
-  collection: 'burgers',
-  where: {
-    ingredients: {
-      not_equals: {
-        isHealthy: {
-          equals: false,
-        },
-      },
+import type { Where } from 'payload'
+
+// At least one ingredient is healthy.
+const hasHealthyIngredient: Where = {
+  ingredients: {
+    contains: {
+      isHealthy: { equals: true },
     },
   },
-})
+}
+
+// No ingredient is unhealthy.
+const hasNoUnhealthyIngredient: Where = {
+  ingredients: {
+    not_equals: {
+      isHealthy: { equals: false },
+    },
+  },
+}
+
+// Every ingredient is healthy.
+const hasOnlyHealthyIngredients: Where = {
+  ingredients: {
+    equals: {
+      isHealthy: { equals: true },
+    },
+  },
+}
 ```
 
 | Operator     | Description                                                |
@@ -149,8 +173,9 @@ const burgers = await payload.find({
 | `not_equals` | No related document may match the nested query.            |
 | `equals`     | Every related document must match the nested query.        |
 
-The nested query supports the same `and` and `or` groups as any other Payload query. All conditions
-inside one operator are evaluated against the same related document:
+The value passed to the relationship operator is a normal Payload `where` query. It supports field
+operators, deeper relationship queries, and the same `and` and `or` groups as any other Payload
+query. All conditions inside one operator are evaluated against the same related document:
 
 ```ts
 const burgers = await payload.find({
@@ -177,8 +202,7 @@ This finds burgers with at least one healthy ingredient named either `lettuce` o
 conditions cannot be satisfied by different ingredients.
 
 An empty relationship does not match a nested `contains` query, but it does match nested
-`not_equals` and `equals` queries. Passing a normal value instead of a nested query keeps the
-existing behavior of these operators.
+`not_equals` and `equals` queries, just like JavaScript's `some` and `every` methods.
 
 ## Writing Queries
 
