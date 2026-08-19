@@ -151,18 +151,37 @@ export const PlaneItem: React.FC<PlaneItemProps> = ({
   const isBeingDragged =
     isDragging || (Boolean(activeDrag) && isSelected && activeDrag === selectionDragData)
 
+  /*
+   * dnd-kit's sensors activate through listeners named exactly `onPointerDown` and `onKeyDown`, which
+   * are also the events this card needs for selection. Spreading `listeners` and then declaring
+   * either prop would silently overwrite the activator and no drag would ever start, so the two are
+   * composed by hand and the rest of the listeners spread as-is.
+   */
+  const {
+    onKeyDown: onDragKeyDown,
+    onPointerDown: onDragPointerDown,
+    ...remainingListeners
+  } = listeners ?? {}
+
   return (
     // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions -- the card's own link remains the keyboard-operable control; these handlers only layer pointer selection and drag gestures on top of it
     <li
       {...attributes}
-      {...listeners}
+      {...remainingListeners}
       className={[`${baseClass}__item`, isBeingDragged && `${baseClass}__item--dragging`]
         .filter(Boolean)
         .join(' ')}
       onClickCapture={(event) => onClickCapture(event, flatIndex)}
       onDoubleClick={(event) => onDoubleClick(event, href)}
-      onKeyDown={(event) => onKeyDown(event, flatIndex)}
-      onPointerDown={() => {
+      onKeyDown={(event) => {
+        onDragKeyDown?.(event)
+        onKeyDown(event, flatIndex)
+      }}
+      onPointerDown={(event) => {
+        // The sensor goes first so it sees the untouched event; the selection collapse that follows
+        // only schedules React state, which the sensor never reads.
+        onDragPointerDown?.(event)
+
         if (!isSelected) {
           onPointerDownUnselected(flatIndex)
         }
