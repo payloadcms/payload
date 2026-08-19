@@ -1,0 +1,32 @@
+@layer payload-default {
+  .new-folder-card {
+    display: flex;
+    min-width: 0;
+  }
+
+  /*
+   * Fills its grid cell so the tile matches a FolderCard's footprint exactly, and repeats that
+   * card's internal metrics (icon gap, inline padding) so the two read as one row of cards.
+   */
+  .new-folder-card__button {
+    display: flex;
+    flex: 1 1 auto;
+    align-items: center;
+    justify-content: flex-start;
+    gap: var(--spacer-2);
+    min-width: 0;
+    padding-block: var(--spacer-2);
+    padding-inline: var(--spacer-2-5);
+    border-radius: var(--radius-medium);
+    color: var(--color-text-secondary);
+
+    &:hover {
+      color: var(--color-text);
+    }
+
+    svg {
+      width: var(--spacer-4);
+      height: var(--spacer-4);
+    }
+  }
+}

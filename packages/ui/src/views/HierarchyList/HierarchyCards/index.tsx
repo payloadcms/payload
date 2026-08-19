@@ -4,7 +4,7 @@ import type { User } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { formatAdminURL } from 'payload/shared'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import type { TableRow } from '../HierarchyTable/types.js'
 
@@ -16,6 +16,11 @@ import { FolderCard } from './FolderCard/index.js'
 import './index.css'
 
 const baseClass = 'hierarchy-card-grid'
+
+/**
+ * Rows are drawn from several collections whose ids can collide, so identity is the pair.
+ */
+export const getRowKey = (row: TableRow): string => `${row._collectionSlug}:${row.id}`
 
 const getRowTitle = ({ row, useAsTitle }: { row: TableRow; useAsTitle: string }): string => {
   const rawTitle = row[useAsTitle]
@@ -43,12 +48,13 @@ const getColumnCount = (containerWidth: number): number =>
   COLUMN_TIERS.find((tier) => containerWidth >= tier.minWidth)?.columns ?? 2
 
 /**
- * Measures the grid's own width via `ResizeObserver` rather than CSS container queries, so the
+ * Measures the plane's own width via `ResizeObserver` rather than CSS container queries, so the
  * column count is driven by explicit, easily-debuggable state instead of container-query support
- * or self-referencing-container edge cases.
+ * or self-referencing-container edge cases. Every band shares the count, so folder cards and
+ * document cards line up in the same columns.
  */
 const useColumnCount = () => {
-  const ref = useRef<HTMLUListElement>(null)
+  const ref = useRef<HTMLDivElement>(null)
   const [columns, setColumns] = useState(2)
 
   useEffect(() => {
@@ -79,7 +85,7 @@ const useColumnCount = () => {
 type ClickIntent = 'range' | 'replace' | 'toggle'
 
 /**
- * Grid-relative geometry of the drag-selection marquee.
+ * Plane-relative geometry of the drag-selection marquee.
  */
 type MarqueeRect = {
   height: number
@@ -110,13 +116,35 @@ const getSelectionIntent = (event: {
   return 'replace'
 }
 
+/**
+ * One horizontal group of cards. Bands stack vertically and share a single selection scope, so a
+ * range selection or a marquee can run from a folder straight through the documents below it.
+ */
+export type PlaneBand = {
+  /**
+   * Hierarchy rows render as folder cards, related documents render as document cards.
+   */
+  isHierarchyGroup: boolean
+  key: string
+  /**
+   * Accessible name for this band, so each list is distinguishable when several render.
+   */
+  label?: string
+  rows: TableRow[]
+  /**
+   * Rendered as the band's last cell — used for the "New Folder" tile.
+   */
+  TrailingItem?: React.ReactNode
+}
+
 export type HierarchyCardGridProps = {
   /**
-   * Accessible name for the grid, so the list is distinguishable when several groups render.
+   * Fallback accessible name for bands that don't carry their own label.
    */
   ariaLabel?: string
+  bands: PlaneBand[]
   /**
-   * Grows the grid to fill the remaining height of its container, so click-away and drag selection
+   * Grows the plane to fill the remaining height of its container, so click-away and drag selection
    * reach the empty space below the cards rather than only the gaps between them. Requires the
    * container to be a flex column.
    */
@@ -127,32 +155,26 @@ export type HierarchyCardGridProps = {
    */
   getRowLockedUser?: (row: TableRow) => undefined | User
   /**
-   * Hierarchy children render as folder cards, related documents render as document cards.
-   */
-  isHierarchyGroup: boolean
-  /**
    * Toggles a single row's selected state. Multi-card intents (replace, range) are resolved into
-   * the minimum set of per-row toggles by the grid, so consumers only implement one operation.
+   * the minimum set of per-row toggles by the plane, so consumers only implement one operation.
    */
   onSelectionChange: (row: TableRow) => void
-  rows: TableRow[]
-  selectedIds: Set<number | string>
+  selectedKeys: Set<string>
   /**
    * Renders each document card's collection label as a pill over its thumbnail. Defaults to showing
-   * the pill only when the grid mixes collections - a grid of a single document type labels itself,
-   * so the pill would repeat the same word on every card.
+   * the pill only when the documents span more than one collection - a grid of a single document
+   * type labels itself, so the pill would repeat the same word on every card.
    */
   showCollectionType?: boolean
 }
 
 export function HierarchyCardGrid({
   ariaLabel,
+  bands,
   fillHeight = false,
   getRowLockedUser,
-  isHierarchyGroup,
   onSelectionChange,
-  rows,
-  selectedIds,
+  selectedKeys,
   showCollectionType,
 }: HierarchyCardGridProps) {
   const {
@@ -163,10 +185,28 @@ export function HierarchyCardGrid({
   } = useConfig()
   const { i18n } = useTranslation()
   const router = useRouter()
-  const [gridRef, columns] = useColumnCount()
+  const [planeRef, columns] = useColumnCount()
 
-  const showTypePill =
-    showCollectionType ?? new Set(rows.map((row) => row._collectionSlug)).size > 1
+  /**
+   * Selection, range anchoring, and the marquee all operate over one flat index space, which is
+   * what puts folders and documents on the same plane rather than in sibling scopes.
+   */
+  const flatRows = useMemo(() => bands.flatMap((band) => band.rows), [bands])
+
+  const showTypePill = useMemo(() => {
+    if (showCollectionType !== undefined) {
+      return showCollectionType
+    }
+
+    const documentSlugs = new Set(
+      bands
+        .filter((band) => !band.isHierarchyGroup)
+        .flatMap((band) => band.rows)
+        .map((row) => row._collectionSlug),
+    )
+
+    return documentSlugs.size > 1
+  }, [bands, showCollectionType])
 
   const [marquee, setMarquee] = useState<MarqueeRect | null>(null)
 
@@ -174,14 +214,28 @@ export function HierarchyCardGrid({
   const anchorIndexRef = useRef<null | number>(null)
 
   /**
+   * Flat index → card element. The cards live across several lists now, so the marquee can no
+   * longer hit-test by walking one element's children.
+   */
+  const itemRefs = useRef<Map<number, HTMLElement>>(new Map())
+
+  const setItemRef = useCallback((flatIndex: number, node: HTMLElement | null) => {
+    if (node) {
+      itemRefs.current.set(flatIndex, node)
+    } else {
+      itemRefs.current.delete(flatIndex)
+    }
+  }, [])
+
+  /**
    * A drag binds its handlers to `window` for its whole lifetime, so those handlers have to read
    * the live rows and selection rather than the values captured when the press began - the
    * selection changes on every pointer move.
    */
-  const latestRef = useRef({ getRowLockedUser, onSelectionChange, rows, selectedIds })
+  const latestRef = useRef({ flatRows, getRowLockedUser, onSelectionChange, selectedKeys })
 
   useEffect(() => {
-    latestRef.current = { getRowLockedUser, onSelectionChange, rows, selectedIds }
+    latestRef.current = { flatRows, getRowLockedUser, onSelectionChange, selectedKeys }
   })
 
   // Unmounting mid-drag would otherwise leave the window listeners bound.
@@ -194,57 +248,59 @@ export function HierarchyCardGrid({
   /**
    * Reduces a desired selection to the minimum set of per-row toggles the consumer understands.
    */
-  const commitSelection = (nextSelectedIds: Set<number | string>) => {
+  const commitSelection = (nextSelectedKeys: Set<string>) => {
     const {
+      flatRows: latestRows,
       onSelectionChange: onChange,
-      rows: latestRows,
-      selectedIds: currentIds,
+      selectedKeys: currentKeys,
     } = latestRef.current
 
     latestRows.forEach((row) => {
-      if (isRowSelectable(row) && currentIds.has(row.id) !== nextSelectedIds.has(row.id)) {
+      const key = getRowKey(row)
+
+      if (isRowSelectable(row) && currentKeys.has(key) !== nextSelectedKeys.has(key)) {
         onChange(row)
       }
     })
   }
 
   const applySelectionIntent = ({ index, intent }: { index: number; intent: ClickIntent }) => {
-    const row = rows[index]
+    const row = flatRows[index]
 
     if (!row || !isRowSelectable(row)) {
       return
     }
 
-    const nextSelectedIds = new Set<number | string>()
+    const nextSelectedKeys = new Set<string>()
 
     if (intent === 'range') {
       const anchorIndex = anchorIndexRef.current ?? index
       const start = Math.min(anchorIndex, index)
       const end = Math.max(anchorIndex, index)
 
-      rows.slice(start, end + 1).forEach((rangeRow) => {
+      flatRows.slice(start, end + 1).forEach((rangeRow) => {
         if (isRowSelectable(rangeRow)) {
-          nextSelectedIds.add(rangeRow.id)
+          nextSelectedKeys.add(getRowKey(rangeRow))
         }
       })
     } else if (intent === 'toggle') {
-      selectedIds.forEach((id) => nextSelectedIds.add(id))
+      selectedKeys.forEach((key) => nextSelectedKeys.add(key))
 
-      if (nextSelectedIds.has(row.id)) {
-        nextSelectedIds.delete(row.id)
+      const key = getRowKey(row)
+
+      if (nextSelectedKeys.has(key)) {
+        nextSelectedKeys.delete(key)
       } else {
-        nextSelectedIds.add(row.id)
+        nextSelectedKeys.add(key)
       }
 
       anchorIndexRef.current = index
     } else {
-      nextSelectedIds.add(row.id)
+      nextSelectedKeys.add(getRowKey(row))
       anchorIndexRef.current = index
     }
 
-    // `selectedIds` only covers this grid, so a `replace` clears the other cards here but leaves
-    // sibling groups' selections alone - each group is its own selection scope.
-    commitSelection(nextSelectedIds)
+    commitSelection(nextSelectedKeys)
   }
 
   /**
@@ -284,20 +340,20 @@ export function HierarchyCardGrid({
   }
 
   /**
-   * A press on the grid's empty space either clears the selection (click-away) or draws a marquee
+   * A press on the plane's empty space either clears the selection (click-away) or draws a marquee
    * that selects every card it touches, matching a file browser. Holding a modifier keeps the
    * existing selection and adds to it.
    *
-   * All coordinates are kept relative to the grid so the marquee stays anchored to the cards if
+   * All coordinates are kept relative to the plane so the marquee stays anchored to the cards if
    * the page scrolls mid-drag.
    */
-  const handleGridMouseDown = (event: React.MouseEvent) => {
-    const gridNode = gridRef.current
+  const handlePlaneMouseDown = (event: React.MouseEvent) => {
+    const planeNode = planeRef.current
 
     // Presses that land on a card belong to the click handlers above.
     if (
       event.button !== 0 ||
-      !gridNode ||
+      !planeNode ||
       (event.target as HTMLElement).closest(`.${baseClass}__item`)
     ) {
       return
@@ -307,17 +363,17 @@ export function HierarchyCardGrid({
     event.preventDefault()
 
     const isAdditive = event.shiftKey || event.metaKey || event.ctrlKey
-    const baseSelectedIds = new Set(selectedIds)
-    const startBounds = gridNode.getBoundingClientRect()
+    const baseSelectedKeys = new Set(selectedKeys)
+    const startBounds = planeNode.getBoundingClientRect()
     const startX = event.clientX - startBounds.left
     const startY = event.clientY - startBounds.top
 
     let hasMoved = false
 
     const handleMouseMove = (moveEvent: MouseEvent) => {
-      const gridBounds = gridNode.getBoundingClientRect()
-      const currentX = moveEvent.clientX - gridBounds.left
-      const currentY = moveEvent.clientY - gridBounds.top
+      const planeBounds = planeNode.getBoundingClientRect()
+      const currentX = moveEvent.clientX - planeBounds.left
+      const currentY = moveEvent.clientY - planeBounds.top
 
       if (
         !hasMoved &&
@@ -336,11 +392,10 @@ export function HierarchyCardGrid({
 
       setMarquee({ height: bottom - top, left, top, width: right - left })
 
-      const nextSelectedIds = isAdditive ? new Set(baseSelectedIds) : new Set<number | string>()
+      const nextSelectedKeys = isAdditive ? new Set(baseSelectedKeys) : new Set<string>()
 
-      // Card elements are the grid's own children in row order, so they index alongside `rows`.
-      latestRef.current.rows.forEach((row, index) => {
-        const itemNode = gridNode.children[index]
+      latestRef.current.flatRows.forEach((row, index) => {
+        const itemNode = itemRefs.current.get(index)
 
         if (!itemNode || !isRowSelectable(row)) {
           return
@@ -348,17 +403,17 @@ export function HierarchyCardGrid({
 
         const itemBounds = itemNode.getBoundingClientRect()
         const intersects =
-          itemBounds.left - gridBounds.left < right &&
-          itemBounds.right - gridBounds.left > left &&
-          itemBounds.top - gridBounds.top < bottom &&
-          itemBounds.bottom - gridBounds.top > top
+          itemBounds.left - planeBounds.left < right &&
+          itemBounds.right - planeBounds.left > left &&
+          itemBounds.top - planeBounds.top < bottom &&
+          itemBounds.bottom - planeBounds.top > top
 
         if (intersects) {
-          nextSelectedIds.add(row.id)
+          nextSelectedKeys.add(getRowKey(row))
         }
       })
 
-      commitSelection(nextSelectedIds)
+      commitSelection(nextSelectedKeys)
     }
 
     const endDrag = () => {
@@ -380,89 +435,110 @@ export function HierarchyCardGrid({
   }
 
   return (
-    // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions -- pointer-only marquee selection layered over a list whose cards each remain keyboard-operable
-    <ul
-      aria-label={ariaLabel}
-      className={[
-        baseClass,
-        isHierarchyGroup && `${baseClass}--folders`,
-        fillHeight && `${baseClass}--fill-height`,
-      ]
-        .filter(Boolean)
-        .join(' ')}
-      onMouseDown={handleGridMouseDown}
-      ref={gridRef}
-      style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}
+    <div
+      className={[baseClass, fillHeight && `${baseClass}--fill-height`].filter(Boolean).join(' ')}
+      onMouseDown={handlePlaneMouseDown}
+      ref={planeRef}
     >
-      {rows.map((row, index) => {
-        const collectionConfig = getEntityConfig({ collectionSlug: row._collectionSlug })
-        const useAsTitle = collectionConfig?.admin?.useAsTitle || 'id'
-        const title = getRowTitle({ row, useAsTitle })
-        const isSelected = selectedIds.has(row.id)
-        const key = `${row._collectionSlug}-${row.id}`
-        const lockedUser = getRowLockedUser?.(row)
-
-        const hierarchyConfig =
-          collectionConfig?.hierarchy && typeof collectionConfig.hierarchy === 'object'
-            ? collectionConfig.hierarchy
-            : undefined
-        const parentFieldName = hierarchyConfig?.parentFieldName || 'parent'
-
-        const href = isHierarchyGroup
-          ? formatAdminURL({
-              adminRoute,
-              path: `/collections/${row._collectionSlug}?${parentFieldName}=${row.id}`,
-            })
-          : formatAdminURL({
-              adminRoute,
-              path: `/collections/${row._collectionSlug}/${row.id}`,
-            })
+      {bands.map((band, bandIndex) => {
+        // Bands render in order, so each band's rows start after every earlier band's rows.
+        const bandOffset = bands
+          .slice(0, bandIndex)
+          .reduce((total, earlier) => total + earlier.rows.length, 0)
 
         return (
-          // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions -- the card's own link remains the keyboard-operable control; these handlers only layer pointer selection gestures on top of it
-          <li
-            className={`${baseClass}__item`}
-            key={key}
-            onClickCapture={(event) => handleCardClickCapture(event, index)}
-            onDoubleClick={(event) => handleCardDoubleClick(event, href)}
-            onKeyDown={(event) => handleCardKeyDown(event, index)}
+          <ul
+            aria-label={band.label ?? ariaLabel}
+            className={[
+              `${baseClass}__band`,
+              band.isHierarchyGroup && `${baseClass}__band--folders`,
+            ]
+              .filter(Boolean)
+              .join(' ')}
+            key={band.key}
+            style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}
           >
-            {isHierarchyGroup ? (
-              <FolderCard
-                hasChildren={Boolean(row._hasChildren)}
-                href={href}
-                icon={row._hierarchyIcon}
-                isSelected={isSelected}
-                lockedUser={lockedUser}
-                title={title}
-              />
-            ) : (
-              <DocumentCard
-                collectionSlug={row._collectionSlug}
-                doc={row}
-                href={href}
-                isSelected={isSelected}
-                lockedUser={lockedUser}
-                showType={showTypePill}
-                // The pill labels a single document, so the singular label reads correctly
-                // ("Media"); _collectionLabel is the plural used for the table column heading.
-                typeLabel={
-                  getTranslation(collectionConfig?.labels?.singular, i18n) || row._collectionLabel
-                }
-                updatedAt={typeof row.updatedAt === 'string' ? row.updatedAt : undefined}
-              />
-            )}
-          </li>
+            {band.rows.map((row, rowIndex) => {
+              const flatIndex = bandOffset + rowIndex
+              const collectionConfig = getEntityConfig({ collectionSlug: row._collectionSlug })
+              const useAsTitle = collectionConfig?.admin?.useAsTitle || 'id'
+              const title = getRowTitle({ row, useAsTitle })
+              const rowKey = getRowKey(row)
+              const isSelected = selectedKeys.has(rowKey)
+              const lockedUser = getRowLockedUser?.(row)
+
+              const hierarchyConfig =
+                collectionConfig?.hierarchy && typeof collectionConfig.hierarchy === 'object'
+                  ? collectionConfig.hierarchy
+                  : undefined
+              const parentFieldName = hierarchyConfig?.parentFieldName || 'parent'
+
+              const href = band.isHierarchyGroup
+                ? formatAdminURL({
+                    adminRoute,
+                    path: `/collections/${row._collectionSlug}?${parentFieldName}=${row.id}`,
+                  })
+                : formatAdminURL({
+                    adminRoute,
+                    path: `/collections/${row._collectionSlug}/${row.id}`,
+                  })
+
+              return (
+                // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions -- the card's own link remains the keyboard-operable control; these handlers only layer pointer selection gestures on top of it
+                <li
+                  className={`${baseClass}__item`}
+                  key={rowKey}
+                  onClickCapture={(event) => handleCardClickCapture(event, flatIndex)}
+                  onDoubleClick={(event) => handleCardDoubleClick(event, href)}
+                  onKeyDown={(event) => handleCardKeyDown(event, flatIndex)}
+                  ref={(node) => setItemRef(flatIndex, node)}
+                >
+                  {band.isHierarchyGroup ? (
+                    <FolderCard
+                      hasChildren={Boolean(row._hasChildren)}
+                      href={href}
+                      icon={row._hierarchyIcon}
+                      isSelected={isSelected}
+                      lockedUser={lockedUser}
+                      title={title}
+                    />
+                  ) : (
+                    <DocumentCard
+                      collectionSlug={row._collectionSlug}
+                      doc={row}
+                      href={href}
+                      isSelected={isSelected}
+                      lockedUser={lockedUser}
+                      showType={showTypePill}
+                      // The pill labels a single document, so the singular label reads correctly
+                      // ("Media"); _collectionLabel is the plural used for the table column heading.
+                      typeLabel={
+                        getTranslation(collectionConfig?.labels?.singular, i18n) ||
+                        row._collectionLabel
+                      }
+                      updatedAt={typeof row.updatedAt === 'string' ? row.updatedAt : undefined}
+                    />
+                  )}
+                </li>
+              )
+            })}
+
+            {band.TrailingItem ? (
+              <li className={`${baseClass}__item ${baseClass}__item--trailing`}>
+                {band.TrailingItem}
+              </li>
+            ) : null}
+          </ul>
         )
       })}
 
       {/*
-        A list item rather than a bare div so the list's content model stays valid; it is absolutely
-        positioned, so it is out of flow and never occupies a grid cell. Physical `left`/`top` are
-        deliberate - the geometry comes from measured rects, which are already physical.
+        Inert overlay, positioned against the plane rather than any one band so it can span them.
+        Physical `left`/`top` are deliberate - the geometry comes from measured rects, which are
+        already physical.
       */}
       {marquee && (
-        <li
+        <div
           aria-hidden="true"
           className={`${baseClass}__marquee`}
           style={{
@@ -473,6 +549,6 @@ export function HierarchyCardGrid({
           }}
         />
       )}
-    </ul>
+    </div>
   )
 }

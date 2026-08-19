@@ -13,6 +13,7 @@ import React, { useCallback, useMemo, useState } from 'react'
 
 import type { CollectionOption } from '../../../elements/CreateDocumentButton/index.js'
 import type { HierarchyDocument } from '../../../elements/Hierarchy/Tree/types.js'
+import type { PlaneBand } from '../HierarchyCards/index.js'
 import type { SlotColumn } from './SlotTable.js'
 import type { RelatedGroup, TableRow } from './types.js'
 
@@ -24,7 +25,8 @@ import { useConfig } from '../../../providers/Config/index.js'
 import { useDocumentSelection } from '../../../providers/DocumentSelection/index.js'
 import { useRouteCache } from '../../../providers/RouteCache/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
-import { HierarchyCardGrid } from '../HierarchyCards/index.js'
+import { getRowKey, HierarchyCardGrid } from '../HierarchyCards/index.js'
+import { NewFolderCard } from '../HierarchyCards/NewFolderCard/index.js'
 import { ChildNameCell } from './ChildNameCell.js'
 import { DateCell } from './DateCell.js'
 import { RelatedNameCell } from './RelatedNameCell.js'
@@ -471,6 +473,76 @@ export function HierarchyTable({
     toggleSelection,
   ])
 
+  /**
+   * Grid mode puts folders and documents on one plane: a folders band, then a single documents band
+   * merging every related collection, so cross-collection selection and drag work as one gesture.
+   */
+  const planeBands: PlaneBand[] = useMemo(() => {
+    const folderGroup = allGroups.find((group) => group.isChildren)
+    const documentGroups = allGroups.filter((group) => !group.isChildren)
+    const documentRows = documentGroups.flatMap((group) => group.docs)
+
+    const bands: PlaneBand[] = []
+
+    // The folders band survives an empty folder when the user can create one, so the New Folder
+    // tile still has somewhere to live.
+    if (folderGroup || hasCreatePermission) {
+      bands.push({
+        isHierarchyGroup: true,
+        key: 'folders',
+        label: folderGroup?.label ?? hierarchyLabel,
+        rows: folderGroup?.docs ?? [],
+      })
+    }
+
+    if (documentRows.length > 0) {
+      bands.push({
+        isHierarchyGroup: false,
+        key: 'documents',
+        label: documentGroups.length === 1 ? documentGroups[0].label : t('general:documents'),
+        rows: documentRows,
+      })
+    }
+
+    return bands
+  }, [allGroups, hasCreatePermission, hierarchyLabel, t])
+
+  /**
+   * A merged band spans collections, so selection is driven off each row's own collection rather
+   * than a per-group closure.
+   */
+  const handlePlaneSelectionChange = useCallback(
+    (row: TableRow) =>
+      toggleSelection({
+        id: row.id,
+        collectionSlug: row._collectionSlug,
+        metadata: {
+          allowedCollections: row._allowedCollections as string[] | undefined,
+        },
+      }),
+    [toggleSelection],
+  )
+
+  const selectedKeys = useMemo(() => {
+    const keys = new Set<string>()
+
+    for (const band of planeBands) {
+      for (const row of band.rows) {
+        if (isSelected({ id: row.id, collectionSlug: row._collectionSlug })) {
+          keys.add(getRowKey(row))
+        }
+      }
+    }
+
+    return keys
+  }, [isSelected, planeBands])
+
+  // The folder collection is the only creatable option on the tile itself.
+  const folderCreateCollections = useMemo(
+    () => (collections ?? []).filter((option) => option.collectionSlug === collectionSlug),
+    [collections, collectionSlug],
+  )
+
   // Column definitions
   const columns: SlotColumn<TableRow>[] = useMemo(
     () => [
@@ -496,7 +568,12 @@ export function HierarchyTable({
     [t],
   )
 
-  if (!hasChildren && !hasRelated) {
+  // Grid mode keeps its folders band (and the New Folder tile in it) when the folder is empty, so
+  // an empty folder is only a dead end when the user can't create anything either.
+  const showEmptyState =
+    !hasChildren && !hasRelated && (viewMode !== 'grid' || planeBands.length === 0)
+
+  if (showEmptyState) {
     const canShowCreateButton = hasCreatePermission && collections && collections.length > 0
 
     return (
@@ -520,6 +597,50 @@ export function HierarchyTable({
     )
   }
 
+  if (viewMode === 'grid') {
+    const bands = planeBands.map((band) =>
+      band.isHierarchyGroup && hasCreatePermission && folderCreateCollections.length > 0
+        ? {
+            ...band,
+            TrailingItem: (
+              <NewFolderCard
+                collections={folderCreateCollections}
+                drawerSlug={`hierarchy-create-folder-${collectionSlug}`}
+                onSave={clearRouteCache}
+              />
+            ),
+          }
+        : band,
+    )
+
+    return (
+      <div className={baseClass}>
+        <HierarchyCardGrid
+          bands={bands}
+          fillHeight
+          getRowLockedUser={getRowLockedUser}
+          onSelectionChange={handlePlaneSelectionChange}
+          selectedKeys={selectedKeys}
+        />
+        {/*
+          Each collection paginates on its own, so the merged documents band can surface more than
+          one control. They only appear once a group actually has more than a page.
+        */}
+        <div className={`${baseClass}__plane-pagination`}>
+          {allGroups
+            .filter((group) => group.paginationData.hasNextPage || group.paginationData.hasPrevPage)
+            .map((group) => (
+              <SimplePagination
+                data={group.paginationData}
+                key={group.slug}
+                onChange={group.onPageChange}
+              />
+            ))}
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className={baseClass}>
       {allGroups.map((group, groupIndex) => {
@@ -539,33 +660,21 @@ export function HierarchyTable({
               <SimplePagination data={group.paginationData} onChange={group.onPageChange} />
             </TableSection.Header>
             <TableSection.Content>
-              {viewMode === 'grid' ? (
-                <HierarchyCardGrid
-                  ariaLabel={group.label}
-                  fillHeight={isLastGroup}
-                  getRowLockedUser={getRowLockedUser}
-                  isHierarchyGroup={group.isChildren}
-                  onSelectionChange={group.onCheckboxChange}
-                  rows={group.docs}
-                  selectedIds={selectedIds}
-                />
-              ) : (
-                <SlotTable
-                  collectionSlug={group.slug}
-                  columns={columns}
-                  data={group.docs}
-                  enableCheckbox={true}
-                  enableDragHandle={false}
-                  enableHeader={true}
-                  enableSelectAll={true}
-                  getRowLockedUser={getRowLockedUser}
-                  mergeCheckboxHeader={false}
-                  onCheckboxChange={group.onCheckboxChange}
-                  onSelectAllChange={group.onSelectAllChange}
-                  parentId={parentId}
-                  selectedIds={selectedIds}
-                />
-              )}
+              <SlotTable
+                collectionSlug={group.slug}
+                columns={columns}
+                data={group.docs}
+                enableCheckbox={true}
+                enableDragHandle={false}
+                enableHeader={true}
+                enableSelectAll={true}
+                getRowLockedUser={getRowLockedUser}
+                mergeCheckboxHeader={false}
+                onCheckboxChange={group.onCheckboxChange}
+                onSelectAllChange={group.onSelectAllChange}
+                parentId={parentId}
+                selectedIds={selectedIds}
+              />
             </TableSection.Content>
           </TableSection>
         )

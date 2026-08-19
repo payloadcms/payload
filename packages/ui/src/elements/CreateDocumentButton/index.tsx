@@ -27,10 +27,14 @@ export type CollectionOption = {
 export type CreateDocumentButtonProps = {
   /** Button style */
   buttonStyle?: ButtonProps['buttonStyle']
+  /** Additional class on the trigger, for callers that style it as something other than a button */
+  className?: string
   /** Collections available for creation */
   collections: CollectionOption[]
   /** Unique slug for the drawer modal */
   drawerSlug: string
+  /** Leading icon on the trigger */
+  icon?: ButtonProps['icon']
   /** Custom button label (defaults to "Create New" for multiple, "Create New {label}" for single) */
   label?: string
   /** Called when a document is successfully saved */
@@ -41,8 +45,10 @@ export type CreateDocumentButtonProps = {
 
 export function CreateDocumentButton({
   buttonStyle = 'pill',
+  className,
   collections,
   drawerSlug,
+  icon,
   label,
   onSave,
   size = 'medium',
@@ -87,7 +93,8 @@ export function CreateDocumentButton({
       <>
         <Button
           buttonStyle={buttonStyle}
-          className={baseClass}
+          className={[baseClass, className].filter(Boolean).join(' ')}
+          icon={icon}
           margin={false}
           onClick={() => handleSelect(collection)}
           size={size}

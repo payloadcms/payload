@@ -1,10 +1,19 @@
 @layer payload-default {
+  /*
+   * The plane stacks one band per group (folders, then documents) but owns the selection gestures
+   * itself, so a marquee or a Shift-click range can run across bands. It is also the containing
+   * block for the marquee, which is why the bands can't be the positioned elements.
+   */
   .hierarchy-card-grid {
-    /* Containing block for the drag-selection marquee. */
     position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .hierarchy-card-grid__band {
     display: grid;
     /*
-     * The column count (2/4/5/8, snapping to ~200px cards) is computed from the grid's measured
+     * The column count (2/4/5/8, snapping to ~200px cards) is computed from the plane's measured
      * width via ResizeObserver and applied as an inline style - see `useColumnCount` in
      * index.tsx. This is the pre-JS/SSR fallback.
      */
@@ -12,7 +21,7 @@
     gap: var(--spacer-3);
     /*
      * Matches the horizontal gutter the tables get from their own cells, so cards line up with
-     * the section heading above them instead of sitting flush against the panel edge.
+     * the header above them instead of sitting flush against the panel edge.
      */
     padding-inline: var(--gutter-h);
     padding-block-start: var(--spacer-4);
@@ -22,21 +31,27 @@
   }
 
   /*
-   * Claims the container's leftover height so click-away and drag selection work over the empty
-   * space below the cards, not just the gaps between them. `align-content` has to be pinned to the
-   * start because a grid's default would otherwise stretch the auto-sized rows into that space.
+   * Folder cards are single-row and much shorter than document cards, so they tolerate a denser
+   * grid. Their band also sheds its end padding, since the documents band below supplies the gap.
    */
-  .hierarchy-card-grid--fill-height {
-    flex-grow: 1;
-    align-content: start;
+  .hierarchy-card-grid__band--folders {
+    gap: var(--spacer-2);
+    padding-block-end: var(--spacer-0);
   }
 
   /*
-   * Folder cards are single-row and much shorter than document cards, so they
-   * tolerate a denser grid than the thumbnail-bearing document cards.
+   * Claims the container's leftover height so click-away and drag selection work over the empty
+   * space below the cards, not just the gaps between them. Only the last band grows, and its
+   * `align-content` has to be pinned to the start because a grid's default would otherwise stretch
+   * the auto-sized rows into that space.
    */
-  .hierarchy-card-grid--folders {
-    gap: var(--spacer-2);
+  .hierarchy-card-grid--fill-height {
+    flex-grow: 1;
+  }
+
+  .hierarchy-card-grid--fill-height .hierarchy-card-grid__band:last-child {
+    flex-grow: 1;
+    align-content: start;
   }
 
   /* Lets each card stretch to fill its grid cell rather than collapsing to content height. */
@@ -57,7 +72,7 @@
 
   /*
    * Drag-selection marquee: an accent hairline over a translucent accent fill, mirroring the
-   * file-browser treatment. Absolutely positioned, so it stays out of the grid's flow, and inert
+   * file-browser treatment. Absolutely positioned, so it stays out of the bands' flow, and inert
    * so it never intercepts the pointer mid-drag.
    */
   .hierarchy-card-grid__marquee {

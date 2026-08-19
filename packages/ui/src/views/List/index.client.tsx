@@ -33,7 +33,7 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { useWindowInfo } from '../../providers/WindowInfo/index.js'
 import { ListSelection } from '../../views/List/ListSelection/index.js'
 import { DocumentListSelection } from '../HierarchyList/DocumentListSelection/index.js'
-import { HierarchyCardGrid } from '../HierarchyList/HierarchyCards/index.js'
+import { getRowKey, HierarchyCardGrid } from '../HierarchyList/HierarchyCards/index.js'
 import { HierarchyTable } from '../HierarchyList/HierarchyTable/index.js'
 import { CollectionListHeader } from './ListHeader/index.js'
 import './index.css'
@@ -71,16 +71,27 @@ function ListGridOrTable({
     _collectionSlug: collectionSlug,
   })) as TableRow[]
 
-  const selectedIds = new Set(rows.filter((row) => selected.get(row.id)).map((row) => row.id))
+  const selectedKeys = new Set(
+    rows.filter((row) => selected.get(row.id)).map((row) => getRowKey(row)),
+  )
+
+  // The flat list has one collection and no folders, so it is a single-band plane.
+  const bands = [
+    {
+      isHierarchyGroup: false,
+      key: 'documents',
+      label: collectionLabel,
+      rows,
+    },
+  ]
 
   return (
     <HierarchyCardGrid
+      bands={bands}
       fillHeight
       getRowLockedUser={(row) => (row._isLocked ? row._userEditing : undefined)}
-      isHierarchyGroup={false}
       onSelectionChange={(row) => setSelection(row.id)}
-      rows={rows}
-      selectedIds={selectedIds}
+      selectedKeys={selectedKeys}
     />
   )
 }
