@@ -157,8 +157,9 @@ export function HierarchyListView(props: ListViewClientProps) {
 
   useEffect(() => {
     if (!isInDrawer) {
-      // Breadcrumbs exclude the last item (current item) since it's shown in the header
-      const ancestorBreadcrumbs = hierarchyData?.breadcrumbs?.slice(0, -1) || []
+      // The trail runs all the way to the current folder, which also titles the page - it is the
+      // page you are on, so it renders as an unlinked crumb.
+      const breadcrumbs = hierarchyData?.breadcrumbs || []
 
       // A scoped browse is its own destination ("Media by Folder"), distinct from the collection's
       // plain list, so its crumb links to the browse root rather than to /collections/media.
@@ -183,18 +184,24 @@ export function HierarchyListView(props: ListViewClientProps) {
 
       let navItems = [baseLabel]
 
-      if (ancestorBreadcrumbs.length > 0) {
+      if (breadcrumbs.length > 0) {
         const queryParam = parentFieldName || 'parent'
         // Ancestor crumbs have to stay inside whichever view the user is browsing.
         const basePath: `/${string}` = isScoped
           ? `/collections/${collectionSlug}/hierarchy`
           : `/collections/${collectionSlug}`
-        const hierarchyBreadcrumbs: StepNavItem[] = ancestorBreadcrumbs.map((crumb) => ({
+        const lastIndex = breadcrumbs.length - 1
+        const hierarchyBreadcrumbs: StepNavItem[] = breadcrumbs.map((crumb, index) => ({
           label: crumb.title,
-          url: formatAdminURL({
-            adminRoute,
-            path: `${basePath}?${queryParam}=${crumb.id}`,
-          }),
+          // StepNav renders a url-less item as plain text, which is what makes the current folder
+          // read as the trail's end rather than as another link back to itself.
+          url:
+            index === lastIndex
+              ? undefined
+              : formatAdminURL({
+                  adminRoute,
+                  path: `${basePath}?${queryParam}=${crumb.id}`,
+                }),
         }))
         navItems = [...navItems, ...hierarchyBreadcrumbs]
       }
