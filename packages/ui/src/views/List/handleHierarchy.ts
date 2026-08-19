@@ -23,6 +23,7 @@ export const handleHierarchy = async ({
   parentId,
   permissions,
   req,
+  scopedToCollection,
   search,
   typeFilter,
   user,
@@ -33,6 +34,11 @@ export const handleHierarchy = async ({
   parentId: null | number | string
   permissions?: SanitizedPermissions
   req: PayloadRequest
+  /**
+   * When set, only this collection's documents are listed and folder children are filtered to
+   * folders that accept it. `collectionConfig`/`collectionSlug` must be the folder collection.
+   */
+  scopedToCollection?: string
   search?: string
   /** Filter hierarchy items by their collectionSpecific type field */
   typeFilter?: string[]
@@ -116,6 +122,23 @@ export const handleHierarchy = async ({
     }
   }
 
+  // Scoped browse only lists folders that can hold the scoped collection, so no folder in the view
+  // is a dead end and every folder shown is a valid drop target.
+  if (
+    scopedToCollection &&
+    hierarchyConfig.collectionSpecific &&
+    typeof hierarchyConfig.collectionSpecific === 'object'
+  ) {
+    const typeFieldName = hierarchyConfig.collectionSpecific.fieldName
+
+    typeCondition = {
+      or: [
+        { [typeFieldName]: { in: [scopedToCollection] } },
+        { [typeFieldName]: { exists: false } },
+      ],
+    }
+  }
+
   // Combine conditions: parent + search + typeFilter
   const conditions: Record<string, unknown>[] = [parentCondition]
 
@@ -156,6 +179,10 @@ export const handleHierarchy = async ({
 
   for (const [relatedSlug, fieldInfo] of Object.entries(relatedCollectionsConfig)) {
     if (relatedSlug === collectionSlug) {
+      continue
+    }
+
+    if (scopedToCollection && relatedSlug !== scopedToCollection) {
       continue
     }
 
@@ -232,7 +259,9 @@ export const handleHierarchy = async ({
         where,
       })
 
-      if (data.totalDocs > 0) {
+      // The scoped collection's group is the whole point of a scoped browse, so it survives an
+      // empty folder rather than vanishing along with its band.
+      if (data.totalDocs > 0 || relatedSlug === scopedToCollection) {
         relatedDocumentsByCollection[relatedSlug] = {
           fieldName,
           hasMany,
@@ -274,10 +303,12 @@ export const handleHierarchy = async ({
     allowedCollections,
     breadcrumbs,
     childrenData,
+    hierarchySlug: collectionSlug,
     parent,
     parentFieldName,
     parentId,
     relatedBaseFilters: Object.keys(relatedBaseFilters).length > 0 ? relatedBaseFilters : undefined,
     relatedDocumentsByCollection,
+    scopedCollectionSlug: scopedToCollection,
   }
 }

@@ -26,6 +26,11 @@ export type HierarchyViewData = {
   breadcrumbs: Array<{ id: number | string; title: string }>
   /** Children of the current parent (same collection) */
   childrenData: PaginatedDocs
+  /**
+   * The collection that owns the folder tree being walked. Equals the viewed collection when it
+   * owns the hierarchy, and the folder collection when the view is scoped to a related collection.
+   */
+  hierarchySlug: string
   /** The current parent document data (for display and collectionSpecific field access) */
   parent: null | (Record<string, unknown> & TypeWithID)
   /** The parent field name for building queries */
@@ -36,6 +41,11 @@ export type HierarchyViewData = {
   relatedBaseFilters?: Record<string, Where>
   /** Related documents grouped by collection */
   relatedDocumentsByCollection: RelatedDocumentsGrouped
+  /**
+   * Set when the view browses one related collection's documents by folder (e.g. Media by Folder),
+   * rather than the folder collection's own list of everything it contains.
+   */
+  scopedCollectionSlug?: string
 }
 
 export type ListViewSlots = {

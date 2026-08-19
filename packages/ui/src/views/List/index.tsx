@@ -25,6 +25,7 @@ import {
 } from 'payload/shared'
 import React, { Fragment } from 'react'
 
+import { getFolderHierarchySlug } from '../../elements/Hierarchy/getFolderHierarchySlug.js'
 import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
 /* eslint-disable payload/no-imports-from-exports-dir -- Server component must reference exports/client bundle for proper client boundary in prod builds */
 import {
@@ -289,15 +290,26 @@ export const renderListView = async (
     select._status = true
   }
 
-  // Check for hierarchy parent param
-  const isHierarchyCollection = Boolean(collectionConfig.hierarchy)
+  // A collection reaches the hierarchy view either by owning a hierarchy or by belonging to one.
+  const ownHierarchySlug = collectionConfig.hierarchy ? collectionSlug : undefined
+  const folderHierarchySlug = ownHierarchySlug
+    ? undefined
+    : getFolderHierarchySlug(payload.config.collections, collectionSlug)
+  const hierarchySlug = ownHierarchySlug ?? folderHierarchySlug
+
+  // The tree being walked is the hierarchy collection's, so the parent field name and the query
+  // param both come from that collection - not from the collection being listed.
+  const hierarchyCollectionConfig = hierarchySlug
+    ? payload.collections[hierarchySlug]?.config
+    : undefined
   const hierarchyParentFieldName =
-    typeof collectionConfig.hierarchy === 'object'
-      ? (collectionConfig.hierarchy.parentFieldName ?? 'parent')
+    hierarchyCollectionConfig && typeof hierarchyCollectionConfig.hierarchy === 'object'
+      ? (hierarchyCollectionConfig.hierarchy.parentFieldName ?? 'parent')
       : 'parent'
+
   let hierarchyParentId: null | number | string = null
 
-  if (isHierarchyCollection) {
+  if (hierarchySlug) {
     const parentParam = searchParams?.[hierarchyParentFieldName]
     if (parentParam === 'null' || parentParam === undefined) {
       hierarchyParentId = null
@@ -397,7 +409,7 @@ export const renderListView = async (
   let HierarchyIcon: React.ReactNode | undefined
   const isHierarchyView = viewType === 'hierarchy'
 
-  if (isHierarchyCollection && isHierarchyView) {
+  if (hierarchySlug && hierarchyCollectionConfig && isHierarchyView) {
     // Extract typeFilter from searchParams (comma-separated list of collection slugs)
     const typeFilterParam = searchParams?.typeFilter
     const typeFilter =
@@ -407,11 +419,12 @@ export const renderListView = async (
 
     hierarchyData = await handleHierarchy({
       baseFilter: baseFilterConstraint,
-      collectionConfig,
-      collectionSlug,
+      collectionConfig: hierarchyCollectionConfig,
+      collectionSlug: hierarchySlug,
       parentId: hierarchyParentId,
       permissions,
       req,
+      scopedToCollection: folderHierarchySlug ? collectionSlug : undefined,
       search: typeof query?.search === 'string' ? query.search : undefined,
       typeFilter,
       user,
@@ -419,14 +432,16 @@ export const renderListView = async (
 
     data = hierarchyData.childrenData
 
-    // Resolve hierarchy icon from collection config
+    // Resolve hierarchy icon from the collection that owns the tree
     const hierarchyConfig =
-      typeof collectionConfig.hierarchy === 'object' ? collectionConfig.hierarchy : undefined
+      typeof hierarchyCollectionConfig.hierarchy === 'object'
+        ? hierarchyCollectionConfig.hierarchy
+        : undefined
 
     HierarchyIcon = RenderServerComponent({
       Component: hierarchyConfig?.admin?.components?.Icon,
       importMap: payload.importMap,
-      key: `hierarchy-icon-${collectionSlug}`,
+      key: `hierarchy-icon-${hierarchySlug}`,
     })
   }
 
@@ -537,25 +552,22 @@ export const renderListView = async (
             <HydrateHierarchyProvider
               allowedCollections={hierarchyData?.allowedCollections}
               baseFilter={baseFilterConstraint}
-              collectionSlug={collectionSlug}
+              collectionSlug={hierarchySlug}
               expandedNodes={hierarchyData?.breadcrumbs?.slice(0, -1).map((b) => b.id)}
               parent={hierarchyData?.parent}
-              parentFieldName={
-                typeof collectionConfig.hierarchy === 'object'
-                  ? collectionConfig.hierarchy?.parentFieldName
-                  : undefined
-              }
+              parentFieldName={hierarchyParentFieldName}
               tableData={data}
               treeLimit={
-                typeof collectionConfig.hierarchy === 'object'
-                  ? collectionConfig.hierarchy?.admin?.treeLimit
+                hierarchyCollectionConfig && typeof hierarchyCollectionConfig.hierarchy === 'object'
+                  ? hierarchyCollectionConfig.hierarchy.admin?.treeLimit
                   : undefined
               }
               typeFieldName={
-                typeof collectionConfig.hierarchy === 'object' &&
-                collectionConfig.hierarchy?.collectionSpecific &&
-                typeof collectionConfig.hierarchy.collectionSpecific === 'object'
-                  ? collectionConfig.hierarchy.collectionSpecific.fieldName
+                hierarchyCollectionConfig &&
+                typeof hierarchyCollectionConfig.hierarchy === 'object' &&
+                hierarchyCollectionConfig.hierarchy.collectionSpecific &&
+                typeof hierarchyCollectionConfig.hierarchy.collectionSpecific === 'object'
+                  ? hierarchyCollectionConfig.hierarchy.collectionSpecific.fieldName
                   : undefined
               }
             />
