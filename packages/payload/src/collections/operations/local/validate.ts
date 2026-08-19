@@ -9,7 +9,7 @@ import type {
   User,
   ValidationFieldError,
 } from '../../../index.js'
-import type { JsonObject, PayloadRequest } from '../../../types/index.js'
+import type { PayloadRequest } from '../../../types/index.js'
 import type { ValidationLocaleSelector } from '../../../utilities/resolveValidationLocales.js'
 import type {
   DataFromCollectionSlug,
@@ -18,15 +18,7 @@ import type {
 } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
-import { createLocalReq } from '../../../utilities/createLocalReq.js'
-import { projectNonLocalizedData } from '../../../utilities/projectNonLocalizedData.js'
-import {
-  cloneValidationRequest,
-  cloneValidationValue,
-  resolveValidationConcurrency,
-  resolveValidationLocales,
-  runValidationLocalePasses,
-} from '../../../utilities/resolveValidationLocales.js'
+import { runLocaleScopedValidation } from '../../../utilities/runLocaleScopedValidation.js'
 import { validateOperation } from '../validate.js'
 
 /**
@@ -171,43 +163,15 @@ export async function validateLocalWithDataLocale<TSlug extends CollectionSlug>(
     )
   }
 
-  const baseReq = await createLocalReq(
-    {
-      context: cloneValidationValue(options.context),
-      fallbackLocale: false,
-      req: cloneValidationRequest(options.req),
-      user: cloneValidationValue(options.user),
-    },
-    payload,
-  )
-  baseReq.operation = 'validate'
-  const locales = await resolveValidationLocales({
+  return runLocaleScopedValidation({
+    context: options.context,
+    data,
+    fields: collection.config.fields,
     locale,
-    req: baseReq,
-  })
-  const results = await runValidationLocalePasses({
-    concurrency: resolveValidationConcurrency(options.req),
-    locales,
-    validate: async (validationLocale) => {
-      const req = await createLocalReq(
-        {
-          fallbackLocale: false,
-          locale: validationLocale ?? undefined,
-          req: cloneValidationRequest(baseReq),
-        },
-        payload,
-      )
-      const validationCandidateData = cloneValidationValue(data)
-      const validationData =
-        validationDataLocale && validationLocale !== validationDataLocale && validationCandidateData
-          ? projectNonLocalizedData({
-              configBlockReferences: payload.config.blocks,
-              data: validationCandidateData as JsonObject,
-              fields: collection.config.fields,
-            })
-          : validationCandidateData
-
-      return validateOperation({
+    payload,
+    req: options.req,
+    runPass: ({ data: validationData, req }) =>
+      validateOperation({
         id,
         collection,
         data: validationData,
@@ -216,13 +180,8 @@ export async function validateLocalWithDataLocale<TSlug extends CollectionSlug>(
         overrideAccess,
         req,
         trash: validationTrash,
-      })
-    },
+      }),
+    user: options.user,
+    validationDataLocale,
   })
-  const errors = results.flatMap((result) => result.errors)
-
-  return {
-    errors,
-    valid: errors.length === 0,
-  }
 }

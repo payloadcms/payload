@@ -1650,21 +1650,3 @@ The Admin UI styles were migrated from SCSS to plain CSS. The `@payloadcms/ui/sc
 The `--theme-elevation-*` scale was removed. Use the semantic `--color-*` tokens (e.g. `--color-bg`, `--color-text`, `--color-border`, `--color-icon`) or the raw `--ramp-*` palette instead. See [Customizing CSS](../admin/customizing-css) for the full list of available tokens.
 
 Any custom component `.scss` files you authored should be renamed to `.css` and updated to plain CSS syntax — Payload no longer ships a SCSS toolchain.
-
-### Admin Publish button now defaults to the active locale
-
-`localization.defaultLocalePublishOption` was removed. For collections and globals with localized fields, the main Publish button now always publishes only the currently active locale. "Publish all locales" is available via the secondary button next to it.
-
-Previously, the button defaulted to publishing every locale unless `defaultLocalePublishOption: 'active'` was set, with "Publish in {locale}" as the secondary option. That split is gone — publishing a single locale is now the primary action for every project, and there's no config to change it.
-
-```diff
-  localization: {
-    defaultLocale: 'en',
--   defaultLocalePublishOption: 'active',
-    locales: [...],
-  },
-```
-
-Run `npx @payloadcms/codemod --transform remove-default-locale-publish-option` to migrate automatically.
-
-If you had `defaultLocalePublishOption: 'all'` (or left it unset) and relied on the Publish button publishing every locale by default, click the secondary "Publish all locales" button instead, or call `payload.update()`/`payload.updateGlobal()` with `publishAllLocales: true` directly.

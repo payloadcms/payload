@@ -52,16 +52,6 @@ export function parseValidationLocale(locale: unknown): ValidationLocale {
   throw new APIError('Validation requires a locale.', httpStatus.BAD_REQUEST)
 }
 
-export function parseSingleValidationLocale(locale: unknown): TypedLocale {
-  const parsedLocale = parseValidationLocale(locale)
-
-  if (parsedLocale.type !== 'single') {
-    throw new APIError('Validation requires a single locale.', httpStatus.BAD_REQUEST)
-  }
-
-  return parsedLocale.locale
-}
-
 /**
  * Parses a REST `locale` query value. Repeated query parameters are represented as an array and
  * `locale=all` selects all locales.

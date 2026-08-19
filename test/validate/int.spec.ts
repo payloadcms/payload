@@ -2399,6 +2399,42 @@ describe('validate Local API', () => {
       expect(versionsAfter).toEqual(versionsBefore)
     })
 
+    it('should reject a job queue call that reuses the validation request before a job is written', async () => {
+      const jobsBefore = await payload.count({ collection: 'payload-jobs' })
+
+      await expect(runWriteAttempt('jobsQueue')).rejects.toThrow(
+        'Payload writes are not allowed during validation',
+      )
+
+      expect(await payload.count({ collection: 'payload-jobs' })).toEqual(jobsBefore)
+    })
+
+    it('should reject a login that reuses the validation request before login attempts are recorded', async () => {
+      const user = await payload.create({
+        collection: 'users',
+        data: {
+          email: 'validation-write-guard-login@example.com',
+          password: 'correct-password',
+        },
+      })
+
+      try {
+        await expect(runWriteAttempt('login')).rejects.toThrow(
+          'Payload writes are not allowed during validation',
+        )
+
+        const userAfter = await payload.findByID({
+          id: user.id,
+          collection: 'users',
+          showHiddenFields: true,
+        })
+
+        expect(userAfter.loginAttempts).toEqual(0)
+      } finally {
+        await payload.delete({ id: user.id, collection: 'users' })
+      }
+    })
+
     it('should reject a logout that reuses the validation request before a session is removed', async () => {
       const usersBefore = await payload.count({ collection: 'users' })
 
@@ -3627,6 +3663,8 @@ async function runWriteAttempt(
     | 'create'
     | 'delete'
     | 'deleteMany'
+    | 'jobsQueue'
+    | 'login'
     | 'logout'
     | 'refresh'
     | 'resetPassword'

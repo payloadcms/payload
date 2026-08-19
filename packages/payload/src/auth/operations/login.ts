@@ -18,6 +18,7 @@ import {
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { commitTransaction, Forbidden, initTransaction } from '../../index.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
+import { assertNoValidationWrite } from '../../utilities/assertNoValidationWrite.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.js'
 import { getFieldsToSign } from '../getFieldsToSign.js'
@@ -73,6 +74,8 @@ export const loginOperation = async <TSlug extends AuthCollectionSlug>(
   incomingArgs: Arguments<TSlug>,
 ): Promise<LoginResult<TSlug>> => {
   let args = incomingArgs
+
+  assertNoValidationWrite(args.req)
 
   if (args.collection.config.auth.disableLocalStrategy) {
     throw new Forbidden(args.req.t)

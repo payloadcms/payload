@@ -2,7 +2,7 @@ import type { Block, Field, FlattenedBlock } from '../fields/config/types.js'
 import type { SanitizedConfig } from '../index.js'
 import type { JsonObject } from '../types/index.js'
 
-import { fieldAffectsData, fieldIsLocalized, tabHasName } from '../fields/config/types.js'
+import { fieldAffectsData, fieldShouldBeLocalized, tabHasName } from '../fields/config/types.js'
 import { deepCopyObjectSimple } from './deepCopyObject.js'
 
 type ProjectNonLocalizedDataArgs = {
@@ -40,7 +40,7 @@ function removeLocalizedData({
 }: RemoveLocalizedDataArgs): void {
   for (const field of fields) {
     if (fieldAffectsData(field)) {
-      if (parentIsLocalized || fieldIsLocalized(field)) {
+      if (parentIsLocalized || fieldShouldBeLocalized({ field, parentIsLocalized })) {
         delete data[field.name]
         continue
       }
@@ -122,7 +122,7 @@ function removeLocalizedData({
         case 'tabs': {
           for (const tab of field.tabs) {
             if (tabHasName(tab)) {
-              if (parentIsLocalized || fieldIsLocalized(tab)) {
+              if (parentIsLocalized || fieldShouldBeLocalized({ field: tab, parentIsLocalized })) {
                 delete data[tab.name]
               } else if (isObject(data[tab.name])) {
                 removeLocalizedData({

@@ -228,6 +228,22 @@ const runWriteAttempt: CollectionBeforeChangeHook = async ({ data, operation, re
       })
       break
 
+    case 'jobsQueue':
+      await req.payload.jobs.queue({
+        task: 'validationWriteGuardProbe',
+        input: {},
+        req,
+      })
+      break
+
+    case 'login':
+      await req.payload.login({
+        collection: 'users',
+        data: { email: devUser.email, password: 'not-the-real-password' },
+        req,
+      })
+      break
+
     case 'logout':
       await logoutOperation({
         collection: req.payload.collections['users']!,
@@ -461,6 +477,8 @@ const validationCollection: CollectionConfig = {
         'create',
         'delete',
         'deleteMany',
+        'jobsQueue',
+        'login',
         'logout',
         'refresh',
         'resetPassword',
@@ -1336,6 +1354,14 @@ export default buildConfigWithDefaults({
   ],
   jobs: {
     deleteJobOnComplete: false,
+    tasks: [
+      {
+        slug: 'validationWriteGuardProbe',
+        inputSchema: [],
+        outputSchema: [],
+        handler: () => ({ output: {} }),
+      },
+    ],
   },
   localization: {
     defaultLocale: 'en',

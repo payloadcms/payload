@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest'
 
 import {
   assertValidationData,
-  parseSingleValidationLocale,
   parseValidationLocale,
   parseValidationLocaleSelector,
 } from './parseValidationLocale.js'
@@ -42,20 +41,6 @@ describe('parseValidationLocale', () => {
 
   it('should reject a non-string, non-array value', () => {
     expect(() => parseValidationLocale({ locale: 'en' })).toThrow(/requires a locale/i)
-  })
-})
-
-describe('parseSingleValidationLocale', () => {
-  it('should return a single parsed locale', () => {
-    expect(parseSingleValidationLocale('en')).toBe('en')
-  })
-
-  it('should reject "all"', () => {
-    expect(() => parseSingleValidationLocale('all')).toThrow(/requires a single locale/i)
-  })
-
-  it('should reject a locale array', () => {
-    expect(() => parseSingleValidationLocale(['en', 'es'])).toThrow(/requires a single locale/i)
   })
 })
 

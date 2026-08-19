@@ -3,21 +3,13 @@ import type { DeepPartial } from 'ts-essentials'
 import { status as httpStatus } from 'http-status'
 
 import type { ValidationResult } from '../../../collections/operations/local/validate.js'
-import type { GlobalSlug, JsonObject, Payload, RequestContext, User } from '../../../index.js'
+import type { GlobalSlug, Payload, RequestContext, User } from '../../../index.js'
 import type { PayloadRequest } from '../../../types/index.js'
 import type { ValidationLocaleSelector } from '../../../utilities/resolveValidationLocales.js'
 import type { DataFromGlobalSlug, DraftFlagFromGlobalSlug } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
-import { createLocalReq } from '../../../utilities/createLocalReq.js'
-import { projectNonLocalizedData } from '../../../utilities/projectNonLocalizedData.js'
-import {
-  cloneValidationRequest,
-  cloneValidationValue,
-  resolveValidationConcurrency,
-  resolveValidationLocales,
-  runValidationLocalePasses,
-} from '../../../utilities/resolveValidationLocales.js'
+import { runLocaleScopedValidation } from '../../../utilities/runLocaleScopedValidation.js'
 import { validateOperation } from '../validate.js'
 
 /**
@@ -103,43 +95,15 @@ export async function validateGlobalLocalWithDataLocale<TSlug extends GlobalSlug
     throw new APIError(`The global with slug ${String(slug)} can't be found. Validate Operation.`)
   }
 
-  const baseReq = await createLocalReq(
-    {
-      context: cloneValidationValue(options.context),
-      fallbackLocale: false,
-      req: cloneValidationRequest(options.req),
-      user: cloneValidationValue(options.user),
-    },
-    payload,
-  )
-  baseReq.operation = 'validate'
-  const locales = await resolveValidationLocales({
+  return runLocaleScopedValidation({
+    context: options.context,
+    data,
+    fields: globalConfig.fields,
     locale,
-    req: baseReq,
-  })
-  const results = await runValidationLocalePasses({
-    concurrency: resolveValidationConcurrency(options.req),
-    locales,
-    validate: async (validationLocale) => {
-      const req = await createLocalReq(
-        {
-          fallbackLocale: false,
-          locale: validationLocale ?? undefined,
-          req: cloneValidationRequest(baseReq),
-        },
-        payload,
-      )
-      const validationCandidateData = cloneValidationValue(data)
-      const validationData =
-        validationDataLocale && validationLocale !== validationDataLocale && validationCandidateData
-          ? projectNonLocalizedData({
-              configBlockReferences: payload.config.blocks,
-              data: validationCandidateData as JsonObject,
-              fields: globalConfig.fields,
-            })
-          : validationCandidateData
-
-      return validateOperation({
+    payload,
+    req: options.req,
+    runPass: ({ data: validationData, req }) =>
+      validateOperation({
         slug,
         data: validationData,
         dataIsLocaleKeyed,
@@ -147,13 +111,8 @@ export async function validateGlobalLocalWithDataLocale<TSlug extends GlobalSlug
         globalConfig,
         overrideAccess,
         req,
-      })
-    },
+      }),
+    user: options.user,
+    validationDataLocale,
   })
-  const errors = results.flatMap((result) => result.errors)
-
-  return {
-    errors,
-    valid: errors.length === 0,
-  }
 }

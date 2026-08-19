@@ -791,7 +791,7 @@ describe('Localization', () => {
       await page.goto(urlPostsWithDrafts.create)
       await changeLocale(page, 'es')
       await fillValues({ title: 'Created In Spanish' })
-      await saveDocAndAssert(page)
+      await saveDocAndAssert(page, '#publish-locale')
 
       await expect(page.locator('#field-title')).toHaveValue('Created In Spanish')
       await changeLocale(page, defaultLocale)
@@ -833,7 +833,7 @@ describe('Localization', () => {
       test('should show unpublish in specific locale when localized fields exist', async () => {
         await page.goto(urlAllFieldsLocalized.create)
         await page.locator('#field-text').fill('EN Published')
-        await saveDocAndAssert(page)
+        await saveDocAndAssert(page, '#publish-locale')
         await openDocControls(page)
 
         await expect(page.locator('#action-unpublish')).toBeVisible()
@@ -852,11 +852,11 @@ describe('Localization', () => {
     })
   })
 
-  test('should not show publish all locales button when no localized fields exist', async () => {
+  test('should not show publish specific locale button when no localized fields exist', async () => {
     await page.goto(urlPostsWithDrafts.create)
-    await expect(page.locator('#publish-all-locales')).toHaveCount(1)
+    await expect(page.locator('#publish-locale')).toHaveCount(1)
     await page.goto(noLocalizedFieldsURL.create)
-    await expect(page.locator('#publish-all-locales')).toHaveCount(0)
+    await expect(page.locator('#publish-locale')).toHaveCount(0)
   })
 
   describe('duplicate selected locales', () => {
@@ -926,7 +926,7 @@ describe('Localization', () => {
 
         // publish en
         await page.locator('#field-text').fill('EN Published')
-        await saveDocAndAssert(page)
+        await saveDocAndAssert(page, '#publish-locale')
 
         await page.goto(urlAllFieldsLocalized.versions(docID))
 
@@ -940,7 +940,7 @@ describe('Localization', () => {
 
         // publish en
         await page.locator('#field-text').fill('EN Published')
-        await saveDocAndAssert(page)
+        await saveDocAndAssert(page, '#publish-locale')
 
         const docID = (await page.locator('.render-title').getAttribute('data-doc-id')) as string
 
@@ -952,7 +952,7 @@ describe('Localization', () => {
 
         // publish es
         await page.locator('#field-text').fill('ES Published')
-        await saveDocAndAssert(page)
+        await saveDocAndAssert(page, '#publish-locale')
 
         await page.goto(urlAllFieldsLocalized.versions(docID))
         await changeLocale(page, defaultLocale)
