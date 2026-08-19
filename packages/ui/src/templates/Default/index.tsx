@@ -214,7 +214,7 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
             serverProps,
           })}
           <div style={{ position: 'relative' }}>
-            <Wrapper baseClass={baseClass} className={className}>
+            <Wrapper baseClass={baseClass} className={className} viewType={viewType}>
               {NavComponent}
               <div className={`${baseClass}__wrap`}>
                 <AppHeader />

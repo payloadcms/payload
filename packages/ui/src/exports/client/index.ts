@@ -492,6 +492,7 @@ export type {
   DocumentSelectionContextValue,
   SelectableDocument,
 } from '../../providers/DocumentSelection/types.js'
+export { HierarchyDndProvider, useHierarchyDnd } from '../../providers/HierarchyDnd/index.js'
 export { HierarchyProvider, useHierarchy } from '../../providers/Hierarchy/index.js'
 export type { AllowedCollection } from '../../providers/Hierarchy/types.js'
 export { UploadHandlersProvider, useUploadHandlers } from '../../providers/UploadHandlers/index.js'

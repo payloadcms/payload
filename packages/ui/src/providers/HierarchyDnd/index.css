@@ -1,0 +1,43 @@
+@layer payload-default {
+  /*
+   * Card-width stack that follows the cursor. Sized to the grid's card width so the ghosted cards
+   * read at the same scale as the ones they were lifted from.
+   */
+  .hierarchy-dnd__preview {
+    position: relative;
+    width: calc(var(--spacer-6) * 5.4);
+    pointer-events: none;
+  }
+
+  /*
+   * The stack fans down-and-right behind the lead card. Physical translate offsets are deliberate:
+   * the stack trails the pointer, which is not a document-flow direction.
+   */
+  .hierarchy-dnd__preview-card {
+    opacity: 0.8;
+    box-shadow: var(--elevation-500-modal-window);
+    transform: translate(
+      calc(var(--preview-index) * var(--spacer-4)),
+      calc(var(--preview-index) * var(--spacer-2-5))
+    );
+  }
+
+  /* Only the lead card holds the stack's height; the rest layer over it. */
+  .hierarchy-dnd__preview-card:not(:first-child) {
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline-start: 0;
+  }
+
+  .hierarchy-dnd__preview-count {
+    position: absolute;
+    inset-block-start: calc(var(--spacer-2) * -1);
+    inset-inline-end: calc(var(--spacer-2) * -1);
+    padding-block: var(--spacer-1);
+    padding-inline: var(--spacer-2);
+    border-radius: var(--radius-full);
+    background: var(--color-border-selected);
+    color: var(--color-text-onbrand);
+    font-size: var(--text-body-small-font-size);
+  }
+}
