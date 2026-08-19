@@ -65,6 +65,7 @@ describe('Select', () => {
           collection: 'posts',
           depth: 0,
           select: {},
+          overrideAccess: true,
         })
 
         expect(res).toStrictEqual({
@@ -80,6 +81,7 @@ describe('Select', () => {
           collection: 'custom-ids',
           depth: 0,
           select: {},
+          overrideAccess: true,
         })
 
         expect(res).toStrictEqual({
@@ -95,6 +97,7 @@ describe('Select', () => {
           select: {
             number: true,
           },
+          overrideAccess: true,
         })
 
         expect(res).toStrictEqual({
@@ -113,6 +116,7 @@ describe('Select', () => {
           select: {
             text: true,
           },
+          overrideAccess: true,
         })
 
         expect(res).toStrictEqual({
@@ -129,6 +133,7 @@ describe('Select', () => {
           select: {
             select: true,
           },
+          overrideAccess: true,
         })
 
         expect(res).toStrictEqual({
@@ -145,6 +150,7 @@ describe('Select', () => {
           select: {
             selectMany: true,
           },
+          overrideAccess: true,
         })
 
         expect(res).toStrictEqual({
@@ -162,6 +168,7 @@ describe('Select', () => {
             number: true,
             text: true,
           },
+          overrideAccess: true,
         })
 
         expect(res).toStrictEqual({
@@ -179,6 +186,7 @@ describe('Select', () => {
           select: {
             hasManyUpload: true,
           },
+          overrideAccess: true,
         })
 
         expect(res_1).toStrictEqual({
@@ -193,6 +201,7 @@ describe('Select', () => {
           select: {
             hasOne: true,
           },
+          overrideAccess: true,
         })
 
         expect(res_2).toStrictEqual({
@@ -207,6 +216,7 @@ describe('Select', () => {
           select: {
             hasManyPoly: true,
           },
+          overrideAccess: true,
         })
 
         expect(res_3).toStrictEqual({
@@ -223,6 +233,7 @@ describe('Select', () => {
           select: {
             group: true,
           },
+          overrideAccess: true,
         })
 
         expect(res).toStrictEqual({
@@ -241,6 +252,7 @@ describe('Select', () => {
               text: true,
             },
           },
+          overrideAccess: true,
         })
 
         expect(res).toStrictEqual({
@@ -259,6 +271,7 @@ describe('Select', () => {
           select: {
             tab: true,
           },
+          overrideAccess: true,
         })
 
         expect(res).toStrictEqual({
@@ -277,6 +290,7 @@ describe('Select', () => {
               text: true,
             },
           },
+          overrideAccess: true,
         })
 
         expect(res).toStrictEqual({
@@ -295,6 +309,7 @@ describe('Select', () => {
           select: {
             unnamedTabText: true,
           },
+          overrideAccess: true,
         })
 
         expect(res).toStrictEqual({
@@ -311,6 +326,7 @@ describe('Select', () => {
           select: {
             array: {},
           },
+          overrideAccess: true,
         })
 
         expect(res).toStrictEqual({
@@ -327,6 +343,7 @@ describe('Select', () => {
           select: {
             array: true,
           },
+          overrideAccess: true,
         })
 
         expect(res).toStrictEqual({
@@ -345,6 +362,7 @@ describe('Select', () => {
               text: true,
             },
           },
+          overrideAccess: true,
         })
 
         expect(res).toStrictEqual({
@@ -364,6 +382,7 @@ describe('Select', () => {
           select: {
             blocks: {},
           },
+          overrideAccess: true,
         })
 
         expect(res).toStrictEqual({
@@ -380,6 +399,7 @@ describe('Select', () => {
           select: {
             blocks: true,
           },
+          overrideAccess: true,
         })
 
         expect(res).toStrictEqual({
@@ -398,6 +418,7 @@ describe('Select', () => {
               cta: true,
             },
           },
+          overrideAccess: true,
         })
 
         expect(res).toStrictEqual({
@@ -423,6 +444,7 @@ describe('Select', () => {
               cta: { ctaText: true },
             },
           },
+          overrideAccess: true,
         })
 
         expect(res).toStrictEqual({
@@ -447,6 +469,7 @@ describe('Select', () => {
           id: pointId,
           collection: 'points',
           select: { point: true },
+          overrideAccess: true,
         })
 
         expect(res).toStrictEqual({
@@ -465,6 +488,7 @@ describe('Select', () => {
           select: {
             text: false,
           },
+          overrideAccess: true,
         })
 
         const expected = { ...post }
@@ -484,6 +508,7 @@ describe('Select', () => {
           select: {
             text: false,
           },
+          overrideAccess: true,
         })
 
         expect(res).toStrictEqual({
@@ -501,6 +526,7 @@ describe('Select', () => {
           select: {
             number: false,
           },
+          overrideAccess: true,
         })
 
         const expected = { ...post }
@@ -518,6 +544,7 @@ describe('Select', () => {
           select: {
             select: false,
           },
+          overrideAccess: true,
         })
 
         const expected = { ...post }
@@ -535,6 +562,7 @@ describe('Select', () => {
           select: {
             selectMany: false,
           },
+          overrideAccess: true,
         })
 
         const expected = { ...post }
@@ -553,6 +581,7 @@ describe('Select', () => {
             number: false,
             text: false,
           },
+          overrideAccess: true,
         })
 
         const expected = { ...post }
@@ -574,6 +603,7 @@ describe('Select', () => {
             hasOne: false,
             hasOnePoly: false,
           },
+          overrideAccess: true,
         })
 
         const expected = { ...post }
@@ -594,6 +624,7 @@ describe('Select', () => {
           select: {
             group: false,
           },
+          overrideAccess: true,
         })
 
         const expected = { ...post }
@@ -613,6 +644,7 @@ describe('Select', () => {
               text: false,
             },
           },
+          overrideAccess: true,
         })
 
         const expected = deepCopyObject(post)
@@ -630,6 +662,7 @@ describe('Select', () => {
           select: {
             array: false,
           },
+          overrideAccess: true,
         })
 
         const expected = { ...post }
@@ -649,6 +682,7 @@ describe('Select', () => {
               text: false,
             },
           },
+          overrideAccess: true,
         })
 
         expect(res).toStrictEqual({
@@ -668,6 +702,7 @@ describe('Select', () => {
           select: {
             blocks: false,
           },
+          overrideAccess: true,
         })
 
         const expected = { ...post }
@@ -687,6 +722,7 @@ describe('Select', () => {
               cta: false,
             },
           },
+          overrideAccess: true,
         })
 
         expect(res).toStrictEqual({
@@ -707,6 +743,7 @@ describe('Select', () => {
               cta: { ctaText: false },
             },
           },
+          overrideAccess: true,
         })
 
         const expectedPost = deepCopyObject(post)
@@ -730,6 +767,7 @@ describe('Select', () => {
           id: pointId,
           collection: 'points',
           select: { point: false },
+          overrideAccess: true,
         })
 
         const copy = { ...point }
@@ -756,6 +794,7 @@ describe('Select', () => {
           id: postId,
           collection: 'localized-posts',
           select: {},
+          overrideAccess: true,
         })
 
         expect(res).toStrictEqual({
@@ -770,6 +809,7 @@ describe('Select', () => {
           select: {
             number: true,
           },
+          overrideAccess: true,
         })
 
         expect(res).toStrictEqual({
@@ -785,6 +825,7 @@ describe('Select', () => {
           select: {
             select: true,
           },
+          overrideAccess: true,
         })
 
         expect(res).toStrictEqual({
@@ -800,6 +841,7 @@ describe('Select', () => {
           select: {
             selectMany: true,
           },
+          overrideAccess: true,
         })
 
         expect(res).toStrictEqual({
@@ -816,6 +858,7 @@ describe('Select', () => {
             number: true,
             text: true,
           },
+          overrideAccess: true,
         })
 
         expect(res).toStrictEqual({
@@ -832,6 +875,7 @@ describe('Select', () => {
           select: {
             group: true,
           },
+          overrideAccess: true,
         })
 
         expect(res).toStrictEqual({
@@ -849,6 +893,7 @@ describe('Select', () => {
               text: true,
             },
           },
+          overrideAccess: true,
         })
 
         expect(res).toStrictEqual({
@@ -868,6 +913,7 @@ describe('Select', () => {
               text: true,
             },
           },
+          overrideAccess: true,
         })
 
         expect(res).toStrictEqual({
@@ -885,6 +931,7 @@ describe('Select', () => {
           select: {
             array: {},
           },
+          overrideAccess: true,
         })
 
         expect(res).toStrictEqual({
@@ -900,6 +947,7 @@ describe('Select', () => {
           select: {
             array: true,
           },
+          overrideAccess: true,
         })
 
         expect(res).toStrictEqual({
@@ -917,6 +965,7 @@ describe('Select', () => {
               text: true,
             },
           },
+          overrideAccess: true,
         })
 
         expect(res).toStrictEqual({
@@ -937,6 +986,7 @@ describe('Select', () => {
               text: true,
             },
           },
+          overrideAccess: true,
         })
 
         expect(res).toStrictEqual({
@@ -955,6 +1005,7 @@ describe('Select', () => {
           select: {
             blocks: {},
           },
+          overrideAccess: true,
         })
 
         expect(res).toStrictEqual({
@@ -970,6 +1021,7 @@ describe('Select', () => {
           select: {
             blocks: true,
           },
+          overrideAccess: true,
         })
 
         expect(res).toStrictEqual({
@@ -987,6 +1039,7 @@ describe('Select', () => {
               cta: true,
             },
           },
+          overrideAccess: true,
         })
 
         expect(res).toStrictEqual({
@@ -1011,6 +1064,7 @@ describe('Select', () => {
               cta: { ctaText: true },
             },
           },
+          overrideAccess: true,
         })
 
         expect(res).toStrictEqual({
@@ -1035,6 +1089,7 @@ describe('Select', () => {
               second: { text: true },
             },
           },
+          overrideAccess: true,
         })
 
         expect(res).toStrictEqual({
@@ -1059,6 +1114,7 @@ describe('Select', () => {
               first: { firstText: true },
             },
           },
+          overrideAccess: true,
         })
 
         expect(res).toStrictEqual({
@@ -1083,6 +1139,7 @@ describe('Select', () => {
           select: {
             text: false,
           },
+          overrideAccess: true,
         })
 
         const expected = { ...post }
@@ -1099,6 +1156,7 @@ describe('Select', () => {
           select: {
             number: false,
           },
+          overrideAccess: true,
         })
 
         const expected = { ...post }
@@ -1115,6 +1173,7 @@ describe('Select', () => {
           select: {
             select: false,
           },
+          overrideAccess: true,
         })
 
         const expected = { ...post }
@@ -1131,6 +1190,7 @@ describe('Select', () => {
           select: {
             selectMany: false,
           },
+          overrideAccess: true,
         })
 
         const expected = { ...post }
@@ -1148,6 +1208,7 @@ describe('Select', () => {
             number: false,
             text: false,
           },
+          overrideAccess: true,
         })
 
         const expected = { ...post }
@@ -1165,6 +1226,7 @@ describe('Select', () => {
           select: {
             group: false,
           },
+          overrideAccess: true,
         })
 
         const expected = { ...post }
@@ -1183,6 +1245,7 @@ describe('Select', () => {
               text: false,
             },
           },
+          overrideAccess: true,
         })
 
         const expected = deepCopyObject(post)
@@ -1201,6 +1264,7 @@ describe('Select', () => {
               text: false,
             },
           },
+          overrideAccess: true,
         })
 
         const expected = deepCopyObject(post)
@@ -1217,6 +1281,7 @@ describe('Select', () => {
           select: {
             array: false,
           },
+          overrideAccess: true,
         })
 
         const expected = { ...post }
@@ -1235,6 +1300,7 @@ describe('Select', () => {
               text: false,
             },
           },
+          overrideAccess: true,
         })
 
         expect(res).toStrictEqual({
@@ -1255,6 +1321,7 @@ describe('Select', () => {
               text: false,
             },
           },
+          overrideAccess: true,
         })
 
         expect(res).toStrictEqual({
@@ -1273,6 +1340,7 @@ describe('Select', () => {
           select: {
             blocks: false,
           },
+          overrideAccess: true,
         })
 
         const expected = { ...post }
@@ -1291,6 +1359,7 @@ describe('Select', () => {
               cta: false,
             },
           },
+          overrideAccess: true,
         })
 
         expect(res).toStrictEqual({
@@ -1310,6 +1379,7 @@ describe('Select', () => {
               cta: { ctaText: false },
             },
           },
+          overrideAccess: true,
         })
 
         const expectedPost = deepCopyObject(post)
@@ -1334,6 +1404,7 @@ describe('Select', () => {
               second: { text: false },
             },
           },
+          overrideAccess: true,
         })
 
         const expectedPost = deepCopyObject(post)
@@ -1358,6 +1429,7 @@ describe('Select', () => {
               first: { firstText: false },
             },
           },
+          overrideAccess: true,
         })
 
         const expectedPost = deepCopyObject(post)
@@ -1389,6 +1461,7 @@ describe('Select', () => {
         id: postId,
         collection: 'deep-posts',
         select: { group: { array: { group: { text: true } } } },
+        overrideAccess: true,
       })
 
       expect(res).toStrictEqual({
@@ -1409,6 +1482,7 @@ describe('Select', () => {
         id: postId,
         collection: 'deep-posts',
         select: { group: { array: { group: true } } },
+        overrideAccess: true,
       })
 
       expect(res).toStrictEqual({
@@ -1427,6 +1501,7 @@ describe('Select', () => {
         id: postId,
         collection: 'deep-posts',
         select: { group: { blocks: { block: { text: true } } } },
+        overrideAccess: true,
       })
 
       expect(res).toStrictEqual({
@@ -1446,6 +1521,7 @@ describe('Select', () => {
         id: postId,
         collection: 'deep-posts',
         select: { arrayTop: { arrayNested: { text: true } } },
+        overrideAccess: true,
       })
 
       expect(res).toStrictEqual({
@@ -1476,6 +1552,7 @@ describe('Select', () => {
         collection: 'versioned-posts',
         draft: true,
         select: {},
+        overrideAccess: true,
       })
 
       expect(res).toStrictEqual({
@@ -1491,6 +1568,7 @@ describe('Select', () => {
         select: {
           number: true,
         },
+        overrideAccess: true,
       })
 
       expect(res).toStrictEqual({
@@ -1507,6 +1585,7 @@ describe('Select', () => {
         select: {
           number: false,
         },
+        overrideAccess: true,
       })
 
       const expected = { ...post }
@@ -1524,6 +1603,7 @@ describe('Select', () => {
           number: true,
           text: true,
         },
+        overrideAccess: true,
       })
 
       expect(res).toStrictEqual({
@@ -1546,6 +1626,7 @@ describe('Select', () => {
             equals: postId,
           },
         },
+        overrideAccess: true,
       })
 
       expect(res.docs[0]).toStrictEqual({
@@ -1567,6 +1648,7 @@ describe('Select', () => {
             equals: postId,
           },
         },
+        overrideAccess: true,
       })
 
       expect(res.docs[0]).toStrictEqual({
@@ -1587,6 +1669,7 @@ describe('Select', () => {
             equals: postId,
           },
         },
+        overrideAccess: true,
       })
 
       expect(res.docs[0]).toStrictEqual({
@@ -1606,6 +1689,7 @@ describe('Select', () => {
         },
         sort: '-updatedAt',
         where: { parent: { equals: postId } },
+        overrideAccess: true,
       })
 
       // findVersions doesnt transform result with afterRead hook and so doesn't strip undefined values from the object
@@ -1627,6 +1711,7 @@ describe('Select', () => {
         collection: 'versioned-posts',
         data: { _status: 'draft', text: 'draft-post' },
         draft: true,
+        overrideAccess: true,
       })
 
       const res = await payload.findByID({
@@ -1634,12 +1719,14 @@ describe('Select', () => {
         collection: 'versioned-posts',
         draft: true,
         select: { text: true },
+        overrideAccess: true,
       })
       expect(res.text).toBe('draft-post')
       await payload.update({
         id: doc.id,
         collection: 'versioned-posts',
         data: { _status: 'published', text: 'published' },
+        overrideAccess: true,
       })
 
       const res_2 = await payload.findByID({
@@ -1647,6 +1734,7 @@ describe('Select', () => {
         collection: 'versioned-posts',
         draft: true,
         select: { text: true },
+        overrideAccess: true,
       })
 
       expect(res_2).toStrictEqual({
@@ -1665,6 +1753,7 @@ describe('Select', () => {
           text: 'updated text',
         },
         select: {},
+        overrideAccess: true,
       })
 
       // The update operation should only return the selected field
@@ -1678,6 +1767,7 @@ describe('Select', () => {
         limit: 1,
         sort: '-updatedAt',
         where: { parent: { equals: postId } },
+        overrideAccess: true,
       })
 
       const latestVersion = versions.docs[0]
@@ -1700,6 +1790,7 @@ describe('Select', () => {
           number: 2,
           text: '3',
         },
+        overrideAccess: true,
       })
     })
 
@@ -1709,6 +1800,7 @@ describe('Select', () => {
         select: {
           text: true,
         },
+        overrideAccess: true,
       })
 
       expect(res).toStrictEqual({
@@ -1724,6 +1816,7 @@ describe('Select', () => {
         select: {
           text: true,
         },
+        overrideAccess: true,
       })
 
       expect(res).toStrictEqual({
@@ -1744,6 +1837,7 @@ describe('Select', () => {
         select: {
           text: true,
         },
+        overrideAccess: true,
       })
 
       expect(res).toStrictEqual({
@@ -1760,6 +1854,7 @@ describe('Select', () => {
         collection: 'posts',
         data: {},
         select: { text: true },
+        overrideAccess: true,
       })
 
       expect(res).toStrictEqual({
@@ -1780,6 +1875,7 @@ describe('Select', () => {
             equals: post.id,
           },
         },
+        overrideAccess: true,
       })
 
       assert(res.docs[0])
@@ -1797,6 +1893,7 @@ describe('Select', () => {
         id: post.id,
         collection: 'posts',
         select: { text: true },
+        overrideAccess: true,
       })
 
       expect(res).toStrictEqual({
@@ -1816,6 +1913,7 @@ describe('Select', () => {
             equals: post.id,
           },
         },
+        overrideAccess: true,
       })
 
       assert(res.docs[0])
@@ -1833,6 +1931,7 @@ describe('Select', () => {
         id: post.id,
         collection: 'posts',
         select: { text: true },
+        overrideAccess: true,
       })
 
       expect(res).toStrictEqual({
@@ -2111,6 +2210,7 @@ describe('Select', () => {
           content: [],
         },
         depth: 0,
+        overrideAccess: true,
       })
 
       expectedHomePage = {
@@ -2176,11 +2276,17 @@ describe('Select', () => {
           ],
         },
         depth: 0,
+        overrideAccess: true,
       })
     })
 
     it('local API - should populate with the defaultPopulate select shape', async () => {
-      const result = await payload.findByID({ id: aboutPage.id, collection: 'pages', depth: 1 })
+      const result = await payload.findByID({
+        id: aboutPage.id,
+        collection: 'pages',
+        depth: 1,
+        overrideAccess: true,
+      })
 
       const block = result.content![0]!
 
@@ -2291,7 +2397,11 @@ describe('Select', () => {
 
     it('graphQL - should return relationship fields when using select flag', async () => {
       // Create a related document first
-      const rel = await payload.create({ collection: 'rels', data: { text: 'graphql-rel-test' } })
+      const rel = await payload.create({
+        collection: 'rels',
+        data: { text: 'graphql-rel-test' },
+        overrideAccess: true,
+      })
 
       // Create a post with the relationship
       const testPost = await payload.create({
@@ -2303,6 +2413,7 @@ describe('Select', () => {
           text: 'graphql-select-test',
         },
         depth: 0,
+        overrideAccess: true,
       })
 
       const testPostId = typeof testPost.id === 'string' ? `"${testPost.id}"` : testPost.id
@@ -2348,13 +2459,17 @@ describe('Select', () => {
       expect(doc.hasMany[0].text).toBe('graphql-rel-test')
 
       // Cleanup
-      await payload.delete({ id: testPost.id, collection: 'posts' })
-      await payload.delete({ id: rel.id, collection: 'rels' })
+      await payload.delete({ id: testPost.id, collection: 'posts', overrideAccess: true })
+      await payload.delete({ id: rel.id, collection: 'rels', overrideAccess: true })
     })
 
     it('graphQL - should return polymorphic relationship fields when using select flag', async () => {
       // Create a related document
-      const rel = await payload.create({ collection: 'rels', data: { text: 'graphql-poly-test' } })
+      const rel = await payload.create({
+        collection: 'rels',
+        data: { text: 'graphql-poly-test' },
+        overrideAccess: true,
+      })
 
       // Create a post with polymorphic relationships
       const testPost = await payload.create({
@@ -2366,6 +2481,7 @@ describe('Select', () => {
           text: 'graphql-poly-select-test',
         },
         depth: 0,
+        overrideAccess: true,
       })
 
       const testPostId = typeof testPost.id === 'string' ? `"${testPost.id}"` : testPost.id
@@ -2423,8 +2539,8 @@ describe('Select', () => {
       expect(doc.hasManyPoly[0].value.text).toBe('graphql-poly-test')
 
       // Cleanup
-      await payload.delete({ id: testPost.id, collection: 'posts' })
-      await payload.delete({ id: rel.id, collection: 'rels' })
+      await payload.delete({ id: testPost.id, collection: 'posts', overrideAccess: true })
+      await payload.delete({ id: rel.id, collection: 'rels', overrideAccess: true })
     })
 
     it('local API - should populate and override defaultSelect select shape from the populate arg', async () => {
@@ -2437,6 +2553,7 @@ describe('Select', () => {
             additional: true,
           },
         },
+        overrideAccess: true,
       })
 
       const {
@@ -2454,6 +2571,7 @@ describe('Select', () => {
             equals: aboutPage.id,
           },
         },
+        overrideAccess: true,
       })
 
       expect(resultFind).toStrictEqual(result)
@@ -2526,20 +2644,24 @@ describe('Select', () => {
       const page_1 = await payload.create({
         collection: 'pages',
         data: { slug: 'page-1', blocks: [{ blockType: 'some' }], relatedPage: null },
+        overrideAccess: true,
       })
       const page_2 = await payload.create({
         collection: 'pages',
         data: { slug: 'page-2', relatedPage: page_1.id },
+        overrideAccess: true,
       })
       const page_3 = await payload.create({
         collection: 'pages',
         data: { slug: 'page-3', relatedPage: page_2.id },
+        overrideAccess: true,
       })
       const result = await payload.findByID({
         id: page_3.id,
         collection: 'pages',
         depth: 3,
         populate: { pages: { slug: true, relatedPage: true } },
+        overrideAccess: true,
       })
 
       const relatedPage = result.relatedPage as Page
@@ -2557,6 +2679,7 @@ describe('Select', () => {
     const { id } = await payload.create({
       collection: 'force-select',
       data: { field1: 'one', field2: 'two', text: 'control' },
+      overrideAccess: true,
     })
 
     // Caller selects `field1` → hook auto-selects `field2`.
@@ -2564,6 +2687,7 @@ describe('Select', () => {
       id,
       collection: 'force-select',
       select: { field1: true },
+      overrideAccess: true,
     })
 
     expect(augmented).toStrictEqual({
@@ -2577,6 +2701,7 @@ describe('Select', () => {
       id,
       collection: 'force-select',
       select: { text: true },
+      overrideAccess: true,
     })
 
     expect(notAugmented).toStrictEqual({
@@ -2584,18 +2709,20 @@ describe('Select', () => {
       text: 'control',
     })
 
-    await payload.delete({ id, collection: 'force-select' })
+    await payload.delete({ id, collection: 'force-select', overrideAccess: true })
   })
 
   it('should auto-select field2 when caller selects field1 on globals', async () => {
     const { id } = await payload.updateGlobal({
       slug: 'force-select-global',
       data: { field1: 'one', field2: 'two', text: 'control' },
+      overrideAccess: true,
     })
 
     const augmented = await payload.findGlobal({
       slug: 'force-select-global',
       select: { field1: true },
+      overrideAccess: true,
     })
 
     expect(augmented).toStrictEqual({
@@ -2625,15 +2752,17 @@ describe('Select', () => {
         collection: 'force-select',
         data: { field1: 'a', field2: 'b' },
         select: { field1: true },
+        overrideAccess: true,
       })
 
       await payload.findByID({
         id: created.id,
         collection: 'force-select',
         select: { field1: true },
+        overrideAccess: true,
       })
 
-      await payload.delete({ id: created.id, collection: 'force-select' })
+      await payload.delete({ id: created.id, collection: 'force-select', overrideAccess: true })
 
       const operations = calls.map((c) => c.operation)
       expect(operations).toContain('create')
@@ -2648,7 +2777,11 @@ describe('Select', () => {
   })
 
   it('should properly return relationships when using select on block with depth 0', async () => {
-    const rel_1 = await payload.create({ collection: 'rels', data: { text: 'rel-1' } })
+    const rel_1 = await payload.create({
+      collection: 'rels',
+      data: { text: 'rel-1' },
+      overrideAccess: true,
+    })
     const doc = await payload.create({
       collection: 'relationships-blocks',
       data: {
@@ -2660,12 +2793,14 @@ describe('Select', () => {
           },
         ],
       },
+      overrideAccess: true,
     })
     const result = await payload.findByID({
       id: doc.id,
       collection: 'relationships-blocks',
       depth: 0,
       select: { blocks: true },
+      overrideAccess: true,
     })
 
     expect(result.blocks[0]?.hasOne).toBe(rel_1.id)
@@ -2673,7 +2808,11 @@ describe('Select', () => {
   })
 
   it('should populate relationships when using select on block', async () => {
-    const rel_1 = await payload.create({ collection: 'rels', data: { text: 'rel-1' } })
+    const rel_1 = await payload.create({
+      collection: 'rels',
+      data: { text: 'rel-1' },
+      overrideAccess: true,
+    })
     const doc = await payload.create({
       collection: 'relationships-blocks',
       data: {
@@ -2685,6 +2824,7 @@ describe('Select', () => {
           },
         ],
       },
+      overrideAccess: true,
     })
 
     const result = await payload.findByID({
@@ -2692,6 +2832,7 @@ describe('Select', () => {
       collection: 'relationships-blocks',
       depth: 1,
       select: { blocks: true },
+      overrideAccess: true,
     })
 
     expect(result.blocks[0]?.hasOne.text).toBe('rel-1')
@@ -2704,12 +2845,14 @@ async function createPost() {
     collection: 'upload',
     data: {},
     filePath: path.resolve(dirname, 'image.jpg'),
+    overrideAccess: true,
   })
 
   const relation = await payload.create({
     collection: 'rels',
     data: {},
     depth: 0,
+    overrideAccess: true,
   })
 
   return payload.create({
@@ -2754,6 +2897,7 @@ async function createPost() {
       unnamedTabText: 'text2',
     },
     depth: 0,
+    overrideAccess: true,
   })
 }
 
@@ -2811,6 +2955,7 @@ function createLocalizedPost() {
       text: 'text',
     },
     depth: 0,
+    overrideAccess: true,
   })
 }
 
@@ -2824,6 +2969,7 @@ function createDeepPost() {
         blocks: [{ blockType: 'block', number: 3, text: 'text-4' }],
       },
     },
+    overrideAccess: true,
   })
 }
 
@@ -2836,15 +2982,24 @@ function createVersionedPost() {
       number: 2,
       text: 'text',
     },
+    overrideAccess: true,
   })
 }
 
 function createPoint() {
-  return payload.create({ collection: 'points', data: { point: [10, 20], text: 'some' } })
+  return payload.create({
+    collection: 'points',
+    data: { point: [10, 20], text: 'some' },
+    overrideAccess: true,
+  })
 }
 
 let id = 1
 
 function createCustomID() {
-  return payload.create({ collection: 'custom-ids', data: { id: id++, text: randomUUID() } })
+  return payload.create({
+    collection: 'custom-ids',
+    data: { id: id++, text: randomUUID() },
+    overrideAccess: true,
+  })
 }

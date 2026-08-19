@@ -30,16 +30,26 @@ describe('@payloadcms/sdk', () => {
   beforeAll(async () => {
     ;({ payload, sdk } = await initPayloadInt(dirname))
 
-    post = await payload.create({ collection: 'posts', data: { number: 1, number2: 3 } })
+    post = await payload.create({
+      collection: 'posts',
+      data: { number: 1, number2: 3 },
+      overrideAccess: true,
+    })
     postTrash = await payload.create({
       collection: 'posts',
       data: { deletedAt: new Date().toISOString(), text: 'fixture-trash' },
+      overrideAccess: true,
     })
     await payload.create({
       collection: 'users',
       data: { ...testUserCredentials },
+      overrideAccess: true,
     })
-    await payload.updateGlobal({ slug: 'global', data: { text: 'some-global' } })
+    await payload.updateGlobal({
+      slug: 'global',
+      data: { text: 'some-global' },
+      overrideAccess: true,
+    })
   })
 
   afterAll(async () => {
@@ -55,14 +65,14 @@ describe('@payloadcms/sdk', () => {
 
     const ids = []
     for (let i = 0; i < 40; i++) {
-      const post = await payload.create({ collection: 'posts', data: {} })
+      const post = await payload.create({ collection: 'posts', data: {}, overrideAccess: true })
       ids.push(post.id)
     }
 
     const resultPaginationFalse = await sdk.find({ collection: 'posts', pagination: false })
     expect(resultPaginationFalse.docs).toHaveLength(41)
     expect(resultPaginationFalse.totalDocs).toBe(41)
-    await payload.delete({ collection: 'posts', where: { id: { in: ids } } })
+    await payload.delete({ collection: 'posts', where: { id: { in: ids } }, overrideAccess: true })
   })
 
   it('should return no docs for an empty array in `in` condition', async () => {
@@ -130,7 +140,11 @@ describe('@payloadcms/sdk', () => {
   it('should execute findVersionByID', async () => {
     const {
       docs: [version],
-    } = await payload.findVersions({ collection: 'posts', where: { parent: { equals: post.id } } })
+    } = await payload.findVersions({
+      collection: 'posts',
+      where: { parent: { equals: post.id } },
+      overrideAccess: true,
+    })
 
     const result = await sdk.findVersionByID({ collection: 'posts', id: version.id })
 
@@ -144,6 +158,7 @@ describe('@payloadcms/sdk', () => {
       collection: 'posts',
       trash: true,
       where: { parent: { equals: postTrash.id } },
+      overrideAccess: true,
     })
 
     expect(
@@ -229,13 +244,18 @@ describe('@payloadcms/sdk', () => {
   })
 
   it('should execute delete (by ID)', async () => {
-    const post = await payload.create({ collection: 'posts', data: {} })
+    const post = await payload.create({ collection: 'posts', data: {}, overrideAccess: true })
 
     const result = await sdk.delete({ id: post.id, collection: 'posts' })
 
     expect(result.id).toBe(post.id)
     expect(
-      await payload.findByID({ collection: 'posts', id: post.id, disableErrors: true }),
+      await payload.findByID({
+        collection: 'posts',
+        id: post.id,
+        disableErrors: true,
+        overrideAccess: true,
+      }),
     ).toBeNull()
   })
 
@@ -243,6 +263,7 @@ describe('@payloadcms/sdk', () => {
     const trashed = await payload.create({
       collection: 'posts',
       data: { deletedAt: new Date().toISOString() },
+      overrideAccess: true,
     })
 
     await sdk.delete({ collection: 'posts', id: trashed.id, trash: true })
@@ -253,18 +274,24 @@ describe('@payloadcms/sdk', () => {
         disableErrors: true,
         id: trashed.id,
         trash: true,
+        overrideAccess: true,
       }),
     ).toBeNull()
   })
 
   it('should execute delete (bulk)', async () => {
-    const post = await payload.create({ collection: 'posts', data: {} })
+    const post = await payload.create({ collection: 'posts', data: {}, overrideAccess: true })
 
     const result = await sdk.delete({ where: { id: { equals: post.id } }, collection: 'posts' })
 
     expect(result.docs[0].id).toBe(post.id)
     expect(
-      await payload.findByID({ collection: 'posts', id: post.id, disableErrors: true }),
+      await payload.findByID({
+        collection: 'posts',
+        id: post.id,
+        disableErrors: true,
+        overrideAccess: true,
+      }),
     ).toBeNull()
   })
 
@@ -272,10 +299,12 @@ describe('@payloadcms/sdk', () => {
     const trashedA = await payload.create({
       collection: 'posts',
       data: { deletedAt: new Date().toISOString(), text: 'bulk-perma-a' },
+      overrideAccess: true,
     })
     const trashedB = await payload.create({
       collection: 'posts',
       data: { deletedAt: new Date().toISOString(), text: 'bulk-perma-b' },
+      overrideAccess: true,
     })
 
     await sdk.delete({
@@ -290,6 +319,7 @@ describe('@payloadcms/sdk', () => {
         disableErrors: true,
         id: trashedA.id,
         trash: true,
+        overrideAccess: true,
       }),
     ).toBeNull()
     expect(
@@ -298,18 +328,32 @@ describe('@payloadcms/sdk', () => {
         disableErrors: true,
         id: trashedB.id,
         trash: true,
+        overrideAccess: true,
       }),
     ).toBeNull()
   })
 
   it('should execute restoreVersion', async () => {
-    const post = await payload.create({ collection: 'posts', data: { text: 'old' } })
+    const post = await payload.create({
+      collection: 'posts',
+      data: { text: 'old' },
+      overrideAccess: true,
+    })
 
     const {
       docs: [currentVersion],
-    } = await payload.findVersions({ collection: 'posts', where: { parent: { equals: post.id } } })
+    } = await payload.findVersions({
+      collection: 'posts',
+      where: { parent: { equals: post.id } },
+      overrideAccess: true,
+    })
 
-    await payload.update({ collection: 'posts', id: post.id, data: { text: 'new' } })
+    await payload.update({
+      collection: 'posts',
+      id: post.id,
+      data: { text: 'new' },
+      overrideAccess: true,
+    })
 
     const result = await sdk.restoreVersion({
       collection: 'posts',
@@ -318,7 +362,11 @@ describe('@payloadcms/sdk', () => {
 
     expect(result.text).toBe('old')
 
-    const resultDB = await payload.findByID({ collection: 'posts', id: post.id })
+    const resultDB = await payload.findByID({
+      collection: 'posts',
+      id: post.id,
+      overrideAccess: true,
+    })
 
     expect(resultDB.text).toBe('old')
   })
@@ -341,6 +389,7 @@ describe('@payloadcms/sdk', () => {
       docs: [version],
     } = await payload.findGlobalVersions({
       slug: 'global',
+      overrideAccess: true,
     })
 
     const result = await sdk.findGlobalVersionByID({ id: version.id, slug: 'global' })
@@ -354,15 +403,16 @@ describe('@payloadcms/sdk', () => {
   })
 
   it('should execute restoreGlobalVersion', async () => {
-    await payload.updateGlobal({ slug: 'global', data: { text: 'old' } })
+    await payload.updateGlobal({ slug: 'global', data: { text: 'old' }, overrideAccess: true })
 
     const {
       docs: [currentVersion],
     } = await payload.findGlobalVersions({
       slug: 'global',
+      overrideAccess: true,
     })
 
-    await payload.updateGlobal({ slug: 'global', data: { text: 'new' } })
+    await payload.updateGlobal({ slug: 'global', data: { text: 'new' }, overrideAccess: true })
 
     const { version: result } = await sdk.restoreGlobalVersion({
       slug: 'global',
@@ -371,7 +421,7 @@ describe('@payloadcms/sdk', () => {
 
     expect(result.text).toBe('old')
 
-    const resultDB = await payload.findGlobal({ slug: 'global' })
+    const resultDB = await payload.findGlobal({ slug: 'global', overrideAccess: true })
 
     expect(resultDB.text).toBe('old')
   })
@@ -417,6 +467,7 @@ describe('@payloadcms/sdk', () => {
     const user = await payload.create({
       collection: 'users',
       data: { email: 'new@payloadcms.com', password: 'HOW TO rEmeMber this password' },
+      overrideAccess: true,
     })
 
     const resForgotPassword = await sdk.forgotPassword({
@@ -430,6 +481,7 @@ describe('@payloadcms/sdk', () => {
       showHiddenFields: true,
       collection: 'users',
       id: user.id,
+      overrideAccess: true,
     })
 
     expect(afterForgotPassword.resetPasswordToken).toBeTruthy()
@@ -462,6 +514,7 @@ describe('@payloadcms/sdk', () => {
       await payload.create({
         collection: emailsSlug,
         data: { email: testEmail },
+        overrideAccess: true,
       })
 
       let thrownError: null | PayloadSDKError = null
@@ -523,11 +576,13 @@ describe('@payloadcms/sdk', () => {
       await payload.create({
         collection: emailsSlug,
         data: { email: testEmail },
+        overrideAccess: true,
       })
 
       const doc2 = await payload.create({
         collection: emailsSlug,
         data: { email: testEmail2 },
+        overrideAccess: true,
       })
 
       try {
@@ -588,6 +643,7 @@ describe('@payloadcms/sdk', () => {
       await payload.create({
         collection: emailsSlug,
         data: { email: testEmail },
+        overrideAccess: true,
       })
 
       let thrownError: null | PayloadSDKError = null

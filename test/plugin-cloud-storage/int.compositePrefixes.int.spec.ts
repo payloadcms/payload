@@ -76,6 +76,7 @@ describe('@payloadcms/plugin-cloud-storage (composite prefixes)', () => {
             prefix: docPrefix,
           },
           filePath: path.resolve(dirname, '../uploads/image.png'),
+          overrideAccess: true,
         })
 
         expect(upload.id).toBeTruthy()
@@ -98,6 +99,7 @@ describe('@payloadcms/plugin-cloud-storage (composite prefixes)', () => {
           collection: mediaWithCompositePrefixesSlug,
           data: {},
           filePath: path.resolve(dirname, '../uploads/image.png'),
+          overrideAccess: true,
         })
 
         expect(upload.id).toBeTruthy()

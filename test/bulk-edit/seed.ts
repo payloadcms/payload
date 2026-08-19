@@ -10,6 +10,7 @@ export const seed = async (payload: Payload) => {
       email: devUser.email,
       password: devUser.password,
     },
+    overrideAccess: true,
   })
 
   await payload.create({
@@ -17,5 +18,6 @@ export const seed = async (payload: Payload) => {
     data: {
       title: 'example post',
     },
+    overrideAccess: true,
   })
 }

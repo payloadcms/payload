@@ -82,6 +82,7 @@ describe('Collections - Live Preview', () => {
         title: 'Tenant 1',
         clientURL: `http://localhost:${process.env.PORT || 3000}`,
       },
+      overrideAccess: true,
     })
 
     // Create image
@@ -95,6 +96,7 @@ describe('Collections - Live Preview', () => {
         alt: 'Image 1',
       },
       file,
+      overrideAccess: true,
     })
 
     testPost = await payload.create({
@@ -109,6 +111,7 @@ describe('Collections - Live Preview', () => {
           media: media.id,
         },
       },
+      overrideAccess: true,
     })
   })
 
@@ -161,6 +164,7 @@ describe('Collections - Live Preview', () => {
         ...initialData,
         slug: 'testPage',
       } as Page,
+      overrideAccess: true,
     })
 
     return page
@@ -780,6 +784,7 @@ describe('Collections - Live Preview', () => {
       data: {
         title: 'Test Post (Recently Updated)',
       },
+      overrideAccess: true,
     })
 
     const merge2 = await mergeData({
@@ -821,6 +826,7 @@ describe('Collections - Live Preview', () => {
         localizedTitle: 'Test Post Spanish',
       },
       locale: 'es',
+      overrideAccess: true,
     })
 
     await payload.update({
@@ -830,6 +836,7 @@ describe('Collections - Live Preview', () => {
       data: {
         localizedTitle: 'Test Post English',
       },
+      overrideAccess: true,
     })
 
     const page = await payload.create({
@@ -840,6 +847,7 @@ describe('Collections - Live Preview', () => {
         slug: 'testpage',
       },
       locale: 'en',
+      overrideAccess: true,
     })
 
     const initialData = await createPageWithInitialData({

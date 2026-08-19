@@ -7,9 +7,9 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
-import { devUser, regularUser } from '../credentials.js'
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { isMongoose } from '../__helpers/shared/isMongoose.js'
+import { devUser, regularUser } from '../credentials.js'
 import { afterOperationSlug } from './collections/AfterOperation/index.js'
 import {
   beforeOperationSlug,
@@ -56,6 +56,7 @@ describe('Hooks', () => {
             localizedTransform: [2, 8],
             transform: [2, 8],
           },
+          overrideAccess: true,
         })
 
         expect(doc.transform).toBeDefined()
@@ -81,6 +82,7 @@ describe('Hooks', () => {
       doc = await payload.create({
         collection: hooksSlug,
         data,
+        overrideAccess: true,
       })
     })
 
@@ -102,6 +104,7 @@ describe('Hooks', () => {
         id: doc.id,
         collection: hooksSlug,
         data,
+        overrideAccess: true,
       })
 
       expect(doc.collectionAfterChange).toBeTruthy()
@@ -120,6 +123,7 @@ describe('Hooks', () => {
       doc = await payload.findByID({
         id: doc.id,
         collection: hooksSlug,
+        overrideAccess: true,
       })
 
       expect(doc.collectionAfterRead).toBeTruthy()
@@ -136,6 +140,7 @@ describe('Hooks', () => {
           },
           text: 'ok',
         },
+        overrideAccess: true,
       })
 
       expect(document.group.subGroup.afterRead).toEqual(generatedAfterReadText)
@@ -148,6 +153,7 @@ describe('Hooks', () => {
         data: {
           title: 'Hello',
         },
+        overrideAccess: true,
       })
 
       const document = await payload.create({
@@ -165,11 +171,13 @@ describe('Hooks', () => {
           },
           text: 'ok',
         },
+        overrideAccess: true,
       })
 
       const retrievedDoc = await payload.findByID({
         id: document.id,
         collection: nestedAfterReadHooksSlug,
+        overrideAccess: true,
       })
 
       expect(retrievedDoc.group.array[0].shouldPopulate.title).toEqual(relation.title)
@@ -182,11 +190,13 @@ describe('Hooks', () => {
         data: {
           text: 'ok',
         },
+        overrideAccess: true,
       })
 
       const retrievedDoc = await payload.findByID({
         id: document.id,
         collection: chainingHooksSlug,
+        overrideAccess: true,
       })
 
       expect(retrievedDoc.text).toEqual('ok!!')
@@ -198,10 +208,12 @@ describe('Hooks', () => {
         data: {
           text: 'ok',
         },
+        overrideAccess: true,
       })
 
       const { docs: retrievedDocs } = await payload.find({
         collection: chainingHooksSlug,
+        overrideAccess: true,
       })
 
       expect(retrievedDocs[0].text).toEqual('ok!!')
@@ -214,12 +226,14 @@ describe('Hooks', () => {
           data: {
             title: 'Title',
           },
+          overrideAccess: true,
         }),
         await payload.create({
           collection: afterOperationSlug,
           data: {
             title: 'Title',
           },
+          overrideAccess: true,
         }),
       ])
 
@@ -228,6 +242,7 @@ describe('Hooks', () => {
 
       const findResult = await payload.find({
         collection: afterOperationSlug,
+        overrideAccess: true,
       })
 
       expect(findResult.docs).toHaveLength(2)
@@ -241,6 +256,7 @@ describe('Hooks', () => {
           data: {
             title: 'Title',
           },
+          overrideAccess: true,
         }),
         await payload.update({
           id: doc2.id,
@@ -248,6 +264,7 @@ describe('Hooks', () => {
           data: {
             title: 'Title',
           },
+          overrideAccess: true,
         }),
       ])
 
@@ -256,6 +273,7 @@ describe('Hooks', () => {
 
       const findResult2 = await payload.find({
         collection: afterOperationSlug,
+        overrideAccess: true,
       })
 
       expect(findResult2.docs).toHaveLength(2)
@@ -269,11 +287,13 @@ describe('Hooks', () => {
         data: {
           value: 'wrongvalue',
         },
+        overrideAccess: true,
       })
 
       const retrievedDoc = await payload.findByID({
         id: document.id,
         collection: contextHooksSlug,
+        overrideAccess: true,
       })
 
       expect(retrievedDoc.value).toEqual('secret')
@@ -288,11 +308,13 @@ describe('Hooks', () => {
         data: {
           value: 'wrongvalue',
         },
+        overrideAccess: true,
       })
 
       const retrievedDoc = await payload.findByID({
         id: document.id,
         collection: contextHooksSlug,
+        overrideAccess: true,
       })
 
       expect(retrievedDoc.value).toEqual('data from Local API')
@@ -301,6 +323,7 @@ describe('Hooks', () => {
     it('should pass context from Local API to global hooks', async () => {
       const globalDocument = await payload.findGlobal({
         slug: dataHooksGlobalSlug,
+        overrideAccess: true,
       })
 
       expect(globalDocument.field_globalAndField).not.toEqual('data from Local API context')
@@ -310,6 +333,7 @@ describe('Hooks', () => {
         context: {
           field_beforeChange_GlobalAndField_override: 'data from Local API context',
         },
+        overrideAccess: true,
       })
       expect(globalDocumentWithContext.field_globalAndField).toEqual('data from Local API context')
     })
@@ -330,6 +354,7 @@ describe('Hooks', () => {
       const retrievedDoc = await payload.findByID({
         collection: contextHooksSlug,
         id: doc.id,
+        overrideAccess: true,
       })
 
       expect(retrievedDoc.value).toEqual('data from REST API')
@@ -349,6 +374,7 @@ describe('Hooks', () => {
             ],
           },
         },
+        overrideAccess: true,
       })
 
       const updatedDoc = await payload.update({
@@ -364,6 +390,7 @@ describe('Hooks', () => {
             ],
           },
         },
+        overrideAccess: true,
       })
 
       expect(updatedDoc).toBeDefined()
@@ -375,6 +402,7 @@ describe('Hooks', () => {
         data: {
           title: 'Relation for nested afterChange',
         },
+        overrideAccess: true,
       })
 
       // this collection will throw an error if previousValue is not defined in nested afterChange hook
@@ -461,6 +489,7 @@ describe('Hooks', () => {
             },
           },
         },
+        overrideAccess: true,
       })
 
       await expect(
@@ -470,6 +499,7 @@ describe('Hooks', () => {
           data: {
             text: 'updated',
           },
+          overrideAccess: true,
         }),
       ).resolves.not.toThrow()
     })
@@ -489,6 +519,7 @@ describe('Hooks', () => {
           password: devUser.password,
           roles: ['admin'],
         },
+        overrideAccess: true,
       })
 
       const { token } = await payload.login({
@@ -497,6 +528,7 @@ describe('Hooks', () => {
           email: hookUser.email,
           password: devUser.password,
         },
+        overrideAccess: true,
       })
 
       hookUserToken = token
@@ -509,11 +541,13 @@ describe('Hooks', () => {
           email: devUser.email,
           password: devUser.password,
         },
+        overrideAccess: true,
       })
 
       const result = await payload.findByID({
         id: user.id,
         collection: hooksUsersSlug,
+        overrideAccess: true,
       })
 
       expect(user).toBeDefined()
@@ -530,6 +564,7 @@ describe('Hooks', () => {
           roles: ['admin'],
           afterLoginHook: false,
         },
+        overrideAccess: true,
       })
 
       expect(resetUser.afterLoginHook).toStrictEqual(false)
@@ -540,6 +575,7 @@ describe('Hooks', () => {
           email: resetUser.email,
         },
         disableEmail: true,
+        overrideAccess: true,
       })
 
       const { user } = await payload.resetPassword({
@@ -557,6 +593,7 @@ describe('Hooks', () => {
       const result = await payload.findByID({
         id: user.id,
         collection: hooksUsersSlug,
+        overrideAccess: true,
       })
 
       expect(result.afterLoginHook).toStrictEqual(true)
@@ -567,6 +604,7 @@ describe('Hooks', () => {
         payload.login({
           collection: hooksUsersSlug,
           data: { email: regularUser.email, password: regularUser.password },
+          overrideAccess: true,
         }),
       ).rejects.toThrow(AuthenticationError)
     })
@@ -607,6 +645,7 @@ describe('Hooks', () => {
       const doc = await payload.create({
         collection: dataHooksSlug,
         data: {},
+        overrideAccess: true,
       })
 
       expect(JSON.parse(doc.collection_beforeOperation_collection)).toStrictEqual(
@@ -633,6 +672,7 @@ describe('Hooks', () => {
       const foundDoc = await payload.findByID({
         id: doc.id,
         collection: dataHooksSlug,
+        overrideAccess: true,
       })
 
       expect(JSON.parse(foundDoc.collection_beforeRead_collection)).toStrictEqual(
@@ -653,6 +693,7 @@ describe('Hooks', () => {
       const doc = await payload.create({
         collection: dataHooksSlug,
         data: {},
+        overrideAccess: true,
       })
 
       const collectionAndField = JSON.stringify(sanitizedHooksCollection) + JSON.stringify(field)
@@ -669,6 +710,7 @@ describe('Hooks', () => {
       const doc = await payload.updateGlobal({
         slug: dataHooksGlobalSlug,
         data: {},
+        overrideAccess: true,
       })
 
       expect(JSON.parse(doc.global_beforeChange_global)).toStrictEqual(sanitizedHooksGlobal)
@@ -678,6 +720,7 @@ describe('Hooks', () => {
       // beforeRead is only run for findOne operations
       const foundDoc = await payload.findGlobal({
         slug: dataHooksGlobalSlug,
+        overrideAccess: true,
       })
 
       expect(JSON.parse(foundDoc.global_beforeRead_global)).toStrictEqual(sanitizedHooksGlobal)
@@ -700,6 +743,7 @@ describe('Hooks', () => {
       const doc = await payload.updateGlobal({
         slug: dataHooksGlobalSlug,
         data: {},
+        overrideAccess: true,
       })
 
       const globalAndFieldString = globalString + fieldString
@@ -724,6 +768,7 @@ describe('Hooks', () => {
         data: {
           selection: 'b',
         },
+        overrideAccess: true,
       })
 
       const updateResult = await payload.update({
@@ -735,6 +780,7 @@ describe('Hooks', () => {
         context: {
           beforeValidateTest: true,
         },
+        overrideAccess: true,
       })
 
       expect(updateResult).toBeDefined()
@@ -750,6 +796,7 @@ describe('Hooks', () => {
       await payload.create({
         collection: beforeOperationSlug,
         data: {},
+        overrideAccess: true,
       })
 
       expect(getLastOperation()).toEqual('create')
@@ -759,12 +806,14 @@ describe('Hooks', () => {
       const doc = await payload.create({
         collection: beforeOperationSlug,
         data: {},
+        overrideAccess: true,
       })
 
       await payload.update({
         id: doc.id,
         collection: beforeOperationSlug,
         data: {},
+        overrideAccess: true,
       })
 
       expect(getLastOperation()).toEqual('update')
@@ -774,12 +823,14 @@ describe('Hooks', () => {
       const doc = await payload.create({
         collection: beforeOperationSlug,
         data: {},
+        overrideAccess: true,
       })
 
       await payload.update({
         id: doc.id,
         collection: beforeOperationSlug,
         data: {},
+        overrideAccess: true,
       })
 
       expect(getLastOperation()).toEqual('update')
@@ -789,11 +840,13 @@ describe('Hooks', () => {
       const doc = await payload.create({
         collection: beforeOperationSlug,
         data: {},
+        overrideAccess: true,
       })
 
       await payload.findByID({
         id: doc.id,
         collection: beforeOperationSlug,
+        overrideAccess: true,
       })
 
       expect(getLastOperation()).toEqual('read')
@@ -803,12 +856,14 @@ describe('Hooks', () => {
       await payload.create({
         collection: beforeOperationSlug,
         data: {},
+        overrideAccess: true,
       })
 
       clearLastOperation()
 
       await payload.find({
         collection: beforeOperationSlug,
+        overrideAccess: true,
       })
 
       expect(getLastOperation()).toEqual('read')
@@ -818,19 +873,23 @@ describe('Hooks', () => {
       await payload.create({
         collection: beforeOperationSlug,
         data: { category: 'test1' },
+        overrideAccess: true,
       })
       await payload.create({
         collection: beforeOperationSlug,
         data: { category: 'test2' },
+        overrideAccess: true,
       })
       await payload.create({
         collection: beforeOperationSlug,
         data: { category: 'test1' },
+        overrideAccess: true,
       })
 
       await payload.findDistinct({
         collection: beforeOperationSlug,
         field: 'category',
+        overrideAccess: true,
       })
 
       expect(getLastOperation()).toEqual('readDistinct')
@@ -840,11 +899,13 @@ describe('Hooks', () => {
       const doc = await payload.create({
         collection: beforeOperationSlug,
         data: {},
+        overrideAccess: true,
       })
 
       await payload.delete({
         id: doc.id,
         collection: beforeOperationSlug,
+        overrideAccess: true,
       })
 
       expect(getLastOperation()).toEqual('delete')
@@ -854,11 +915,13 @@ describe('Hooks', () => {
       const doc = await payload.create({
         collection: beforeOperationSlug,
         data: {},
+        overrideAccess: true,
       })
 
       await payload.delete({
         id: doc.id,
         collection: beforeOperationSlug,
+        overrideAccess: true,
       })
 
       expect(getLastOperation()).toEqual('delete')
@@ -868,10 +931,12 @@ describe('Hooks', () => {
       await payload.create({
         collection: beforeOperationSlug,
         data: {},
+        overrideAccess: true,
       })
 
       await payload.count({
         collection: beforeOperationSlug,
+        overrideAccess: true,
       })
 
       expect(getLastOperation()).toEqual('count')
@@ -881,6 +946,7 @@ describe('Hooks', () => {
       const doc = await payload.create({
         collection: beforeOperationSlug,
         data: {},
+        overrideAccess: true,
       })
 
       await payload.countVersions({
@@ -890,6 +956,7 @@ describe('Hooks', () => {
             equals: doc.id,
           },
         },
+        overrideAccess: true,
       })
 
       expect(getLastOperation()).toEqual('countVersions')
@@ -899,6 +966,7 @@ describe('Hooks', () => {
       const doc = await payload.create({
         collection: beforeOperationSlug,
         data: {},
+        overrideAccess: true,
       })
 
       await payload.findVersions({
@@ -908,6 +976,7 @@ describe('Hooks', () => {
             equals: doc.id,
           },
         },
+        overrideAccess: true,
       })
 
       expect(getLastOperation()).toEqual('read')
@@ -917,6 +986,7 @@ describe('Hooks', () => {
       const doc = await payload.create({
         collection: beforeOperationSlug,
         data: { category: 'v1' },
+        overrideAccess: true,
       })
 
       // Update to create a version
@@ -924,6 +994,7 @@ describe('Hooks', () => {
         id: doc.id,
         collection: beforeOperationSlug,
         data: { category: 'v2' },
+        overrideAccess: true,
       })
 
       const versions = await payload.findVersions({
@@ -933,6 +1004,7 @@ describe('Hooks', () => {
             equals: doc.id,
           },
         },
+        overrideAccess: true,
       })
 
       expect(versions.docs.length).toBeGreaterThan(0)
@@ -940,6 +1012,7 @@ describe('Hooks', () => {
       await payload.findVersionByID({
         collection: beforeOperationSlug,
         id: versions.docs[0]!.id,
+        overrideAccess: true,
       })
 
       expect(getLastOperation()).toEqual('read')
@@ -949,6 +1022,7 @@ describe('Hooks', () => {
       const doc = await payload.create({
         collection: beforeOperationSlug,
         data: { category: 'v1' },
+        overrideAccess: true,
       })
 
       // Update to create a version
@@ -956,6 +1030,7 @@ describe('Hooks', () => {
         id: doc.id,
         collection: beforeOperationSlug,
         data: { category: 'v2' },
+        overrideAccess: true,
       })
 
       const versions = await payload.findVersions({
@@ -965,6 +1040,7 @@ describe('Hooks', () => {
             equals: doc.id,
           },
         },
+        overrideAccess: true,
       })
 
       expect(versions.docs.length).toBeGreaterThan(0)
@@ -972,6 +1048,7 @@ describe('Hooks', () => {
       await payload.restoreVersion({
         collection: beforeOperationSlug,
         id: versions.docs[0]!.id,
+        overrideAccess: true,
       })
 
       expect(getLastOperation()).toEqual('restoreVersion')
@@ -985,11 +1062,13 @@ describe('Hooks', () => {
         data: {
           title: 'test',
         },
+        overrideAccess: true,
       })
 
       const docFromFind = await payload.findByID({
         collection: afterReadSlug,
         id: createdDoc.id,
+        overrideAccess: true,
       })
 
       const { docs } = await payload.find({
@@ -999,6 +1078,7 @@ describe('Hooks', () => {
             equals: createdDoc.id,
           },
         },
+        overrideAccess: true,
       })
 
       const docFromFindMany = docs[0]
@@ -1014,7 +1094,7 @@ describe('Hooks', () => {
 
     afterEach(async () => {
       for (const id of createdIDs) {
-        await payload.delete({ collection: overrideAccessSlug, id })
+        await payload.delete({ collection: overrideAccessSlug, id, overrideAccess: true })
       }
       createdIDs.length = 0
     })
@@ -1119,6 +1199,7 @@ describe('Hooks', () => {
       const doc = await payload.create({
         collection: overrideAccessSlug,
         data: { title: 'Test Default' },
+        overrideAccess: true,
       })
 
       createdIDs.push(doc.id)
@@ -1126,6 +1207,7 @@ describe('Hooks', () => {
       const result = await payload.findByID({
         collection: overrideAccessSlug,
         id: doc.id,
+        overrideAccess: true,
       })
 
       expect(result.beforeReadCalled).toBe(true)

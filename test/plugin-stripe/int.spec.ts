@@ -1,8 +1,8 @@
 import type { Payload } from 'payload'
-import { describe, beforeAll, afterAll, it, expect } from 'vitest'
 
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 
@@ -26,6 +26,7 @@ describe('Stripe Plugin', () => {
       data: {
         name: 'Test Product',
       },
+      overrideAccess: true,
     })
 
     expect(product).toHaveProperty('name', 'Test Product')

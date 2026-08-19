@@ -42,6 +42,7 @@ describe('@payloadcms/storage-vercel-blob clientUploads (composite prefixes)', (
       await payload.delete({
         id,
         collection: mediaWithCompositePrefixesSlug,
+        overrideAccess: true,
       })
     }
 
@@ -71,10 +72,10 @@ describe('@payloadcms/storage-vercel-blob clientUploads (composite prefixes)', (
     const instructions = (await instructionsResponse.json()) as {
       data: { pathname: string; token: string }
       file: {
-        uploadReference: { prefix: string }
         filename: string
         mimeType: string
         size: number
+        uploadReference: { prefix: string }
       }
     }
 

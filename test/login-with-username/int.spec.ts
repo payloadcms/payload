@@ -4,8 +4,8 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
-import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { devUser } from '../credentials.js'
 
 let payload: Payload
 
@@ -30,6 +30,7 @@ describe('Login With Username Feature', () => {
           email: null,
           username: null,
         },
+        overrideAccess: true,
       })
     } catch (error) {
       errors = error.data.errors
@@ -48,6 +49,7 @@ describe('Login With Username Feature', () => {
         username: usernameToUse,
         password: 'test',
       },
+      overrideAccess: true,
     })
 
     let errors = []
@@ -59,6 +61,7 @@ describe('Login With Username Feature', () => {
           email: null,
           username: null,
         },
+        overrideAccess: true,
       })
     } catch (error) {
       errors = error.data.errors
@@ -72,6 +75,7 @@ describe('Login With Username Feature', () => {
       data: {
         username: null,
       },
+      overrideAccess: true,
     })
     expect(errors).toHaveLength(0)
 
@@ -82,6 +86,7 @@ describe('Login With Username Feature', () => {
         data: {
           email: null,
         },
+        overrideAccess: true,
       })
     } catch (error) {
       errors = error.data.errors
@@ -97,6 +102,7 @@ describe('Login With Username Feature', () => {
         username: 'dev',
         password: devUser.password,
       },
+      overrideAccess: true,
     })
 
     const loginWithEmail = await payload.login({
@@ -105,6 +111,7 @@ describe('Login With Username Feature', () => {
         email: devUser.email,
         password: devUser.password,
       },
+      overrideAccess: true,
     })
     expect(loginWithEmail).toHaveProperty('token')
 
@@ -114,6 +121,7 @@ describe('Login With Username Feature', () => {
         username: 'dev',
         password: devUser.password,
       },
+      overrideAccess: true,
     })
     expect(loginWithUsername).toHaveProperty('token')
   })
@@ -126,6 +134,7 @@ describe('Login With Username Feature', () => {
         email: 'email1@mail.com',
         password: 'test',
       },
+      overrideAccess: true,
     })
 
     // create second user with just email
@@ -135,6 +144,7 @@ describe('Login With Username Feature', () => {
         email: 'email2@mail.com',
         password: 'test',
       },
+      overrideAccess: true,
     })
     expect(emailUser2).toHaveProperty('id')
 
@@ -145,6 +155,7 @@ describe('Login With Username Feature', () => {
         username: 'username1',
         password: 'test',
       },
+      overrideAccess: true,
     })
 
     // create second user with just username
@@ -154,6 +165,7 @@ describe('Login With Username Feature', () => {
         username: 'username2',
         password: 'test',
       },
+      overrideAccess: true,
     })
     expect(usernameUser2).toHaveProperty('id')
   })

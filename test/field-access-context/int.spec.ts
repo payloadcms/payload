@@ -26,12 +26,12 @@ describe('field access collection context', () => {
 
   afterEach(async () => {
     for (const id of parentIDs) {
-      await payload.delete({ id, collection: parentsSlug })
+      await payload.delete({ id, collection: parentsSlug, overrideAccess: true })
     }
     parentIDs.length = 0
 
     for (const id of childIDs) {
-      await payload.delete({ id, collection: childrenSlug })
+      await payload.delete({ id, collection: childrenSlug, overrideAccess: true })
     }
     childIDs.length = 0
 
@@ -89,6 +89,7 @@ describe('field access collection context', () => {
         accessReadProbe: 'local read',
         title: 'local read parent',
       },
+      overrideAccess: true,
     })
     parentIDs.push(doc.id)
     resetAccessLog()
@@ -115,6 +116,7 @@ describe('field access collection context', () => {
         accessReadProbe: 'rest read',
         title: 'rest read parent',
       },
+      overrideAccess: true,
     })
     parentIDs.push(doc.id)
     resetAccessLog()
@@ -138,6 +140,7 @@ describe('field access collection context', () => {
         accessReadProbe: 'graphql read',
         title: 'graphql read parent',
       },
+      overrideAccess: true,
     })
     parentIDs.push(doc.id)
     resetAccessLog()
@@ -172,6 +175,7 @@ describe('field access collection context', () => {
         childReadProbe: 'relationship child read',
         title: 'relationship child',
       },
+      overrideAccess: true,
     })
     childIDs.push(child.id)
 
@@ -181,6 +185,7 @@ describe('field access collection context', () => {
         child: child.id,
         title: 'relationship parent',
       },
+      overrideAccess: true,
     })
     parentIDs.push(parent.id)
     resetAccessLog()
@@ -208,6 +213,7 @@ describe('field access collection context', () => {
       data: {
         title: 'update parent',
       },
+      overrideAccess: true,
     })
     parentIDs.push(doc.id)
     resetAccessLog()
@@ -237,6 +243,7 @@ describe('field access collection context', () => {
         distinctProbe: 'one',
         title: 'distinct one',
       },
+      overrideAccess: true,
     })
     parentIDs.push(firstDoc.id)
 
@@ -246,6 +253,7 @@ describe('field access collection context', () => {
         distinctProbe: 'two',
         title: 'distinct two',
       },
+      overrideAccess: true,
     })
     parentIDs.push(secondDoc.id)
     resetAccessLog()
@@ -290,6 +298,7 @@ describe('field access collection context', () => {
       data: {
         globalReadProbe: 'global read',
       },
+      overrideAccess: true,
     })
     resetAccessLog()
 
@@ -323,6 +332,7 @@ describe('field access collection context', () => {
         childReadProbe: 'global relationship child',
         title: 'global relationship child',
       },
+      overrideAccess: true,
     })
     childIDs.push(child.id)
 
@@ -331,6 +341,7 @@ describe('field access collection context', () => {
       data: {
         globalChild: child.id,
       },
+      overrideAccess: true,
     })
     resetAccessLog()
 

@@ -68,6 +68,7 @@ export default buildConfigWithDefaults({
         password: devUser.password,
         roles: ['admin'],
       },
+      overrideAccess: true,
     })
 
     await seed(payload)

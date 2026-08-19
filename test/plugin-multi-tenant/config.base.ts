@@ -153,6 +153,7 @@ export const baseConfig: Partial<Config> = {
         const fullTenant = await req.payload.findByID({
           collection: 'tenants',
           id: tenant,
+          overrideAccess: true,
         })
         if (
           fullTenant &&

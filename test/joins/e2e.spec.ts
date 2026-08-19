@@ -91,6 +91,7 @@ describe('Join Field', () => {
           equals: 'example',
         },
       },
+      overrideAccess: true,
     })
 
     if (!docs[0]) {
@@ -99,7 +100,12 @@ describe('Join Field', () => {
 
     ;({ id: categoryID } = docs[0])
 
-    const folder = await payload.find({ collection: 'folders', depth: 0, sort: 'createdAt' })
+    const folder = await payload.find({
+      collection: 'folders',
+      depth: 0,
+      sort: 'createdAt',
+      overrideAccess: true,
+    })
     rootParentID = folder.docs[0]!.id
   })
 
@@ -130,6 +136,7 @@ describe('Join Field', () => {
     const result = await payload.find({
       collection: categoriesSlug,
       limit: 1,
+      overrideAccess: true,
     })
     const category = result.docs[0]
 
@@ -144,6 +151,7 @@ describe('Join Field', () => {
         category: category.id,
         title: 'a',
       },
+      overrideAccess: true,
     })
 
     await payload.create({
@@ -152,6 +160,7 @@ describe('Join Field', () => {
         category: category.id,
         title: 'b',
       },
+      overrideAccess: true,
     })
 
     await payload.create({
@@ -160,6 +169,7 @@ describe('Join Field', () => {
         category: category.id,
         title: 'z',
       },
+      overrideAccess: true,
     })
 
     await navigateToDoc(page, categoriesURL)
@@ -526,6 +536,7 @@ describe('Join Field', () => {
         category: categoryID as string,
         title,
       },
+      overrideAccess: true,
     })
 
     await page.goto(categoriesURL.edit(categoryID))
@@ -580,6 +591,7 @@ describe('Join Field', () => {
         title,
         category: categoryID as string,
       },
+      overrideAccess: true,
     })
 
     await page.goto(categoriesURL.edit(categoryID))
@@ -635,6 +647,7 @@ describe('Join Field', () => {
       data: {
         title: 'Test Category (With Versions)',
       },
+      overrideAccess: true,
     })
 
     await payload.create({
@@ -643,6 +656,7 @@ describe('Join Field', () => {
         categoryVersion: categoryVersionsDoc.id,
         title: 'Test Post',
       },
+      overrideAccess: true,
     })
 
     await page.goto(categoriesVersionsURL.edit(categoryVersionsDoc.id))
@@ -871,7 +885,7 @@ describe('Join Field', () => {
   })
 
   test('should render create-first-user with when users collection has a join field and hide it', async () => {
-    await payload.delete({ collection: 'users', where: {} })
+    await payload.delete({ collection: 'users', where: {}, overrideAccess: true })
     const url = new AdminUrlUtil(serverURL, 'users')
     await page.goto(url.admin + '/create-first-user')
     await expect(page.locator('.field-type.join')).toBeHidden()
@@ -908,6 +922,7 @@ describe('Join Field', () => {
       data: {
         title: 'Category Versions',
       },
+      overrideAccess: true,
     })
 
     const versionDoc = await payload.create({
@@ -916,6 +931,7 @@ describe('Join Field', () => {
         categoryVersion: categoryVersionsDoc.id,
         title: 'Version 1',
       },
+      overrideAccess: true,
     })
 
     await payload.update({
@@ -925,6 +941,7 @@ describe('Join Field', () => {
         title: 'Version 1 - Draft',
       },
       draft: true,
+      overrideAccess: true,
     })
 
     await page.goto(categoriesVersionsURL.edit(categoryVersionsDoc.id))

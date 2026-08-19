@@ -53,8 +53,8 @@ describePostgres('Select - with postgres logs', () => {
 
     // Clean up to safely mutate in each test
     afterEach(async () => {
-      await payload.delete({ id: postId, collection: 'posts' })
-      await payload.delete({ id: pointId, collection: 'points' })
+      await payload.delete({ id: postId, collection: 'posts', overrideAccess: true })
+      await payload.delete({ id: pointId, collection: 'points', overrideAccess: true })
     })
 
     it('ensure optimized db update is still used when using select', async () => {
@@ -64,14 +64,14 @@ describePostgres('Select - with postgres logs', () => {
       const consoleCount = vitest.spyOn(console, 'log').mockImplementation(() => {})
 
       const res = removeEmptyAndUndefined(
-        (await payload.db.updateOne({
+        await payload.db.updateOne({
           collection: 'posts',
           id: post.id,
           data: {
             text: 'new text',
           },
           select: { text: true, number: true },
-        })) as any,
+        }),
       )
 
       expect(consoleCount).toHaveBeenCalledTimes(1) // Should be 1 single sql call if the optimization is used. If not, this would be 2 calls
@@ -100,13 +100,14 @@ describePostgres('Select - with postgres logs', () => {
             },
           ],
         },
+        overrideAccess: true,
       })
 
       // Count every console log
       const consoleCount = vitest.spyOn(console, 'log').mockImplementation(() => {})
 
       const res = removeEmptyAndUndefined(
-        (await payload.db.updateOne({
+        await payload.db.updateOne({
           collection: 'pages',
           id: page.id,
           select: {
@@ -116,7 +117,7 @@ describePostgres('Select - with postgres logs', () => {
           data: {
             slug: 'new-slug',
           },
-        })) as any,
+        }),
       )
 
       expect(consoleCount).toHaveBeenCalledTimes(1) // Should be 1 single sql call if the optimization is used. If not, this would be 2 calls
@@ -131,6 +132,7 @@ describePostgres('Select - with postgres logs', () => {
       const fullPage: any = await payload.findByID({
         collection: 'pages',
         id: page.id,
+        overrideAccess: true,
       })
 
       delete fullPage.createdAt
@@ -193,12 +195,14 @@ async function createPost() {
     collection: 'upload',
     data: {},
     filePath: path.resolve(dirname, 'image.jpg'),
+    overrideAccess: true,
   })
 
   const relation = await payload.create({
     depth: 0,
     collection: 'rels',
     data: {},
+    overrideAccess: true,
   })
 
   return payload.create({
@@ -243,9 +247,14 @@ async function createPost() {
       unnamedTabNumber: 2,
       unnamedTabText: 'text2',
     },
+    overrideAccess: true,
   })
 }
 
 function createPoint() {
-  return payload.create({ collection: 'points', data: { text: 'some', point: [10, 20] } })
+  return payload.create({
+    collection: 'points',
+    data: { text: 'some', point: [10, 20] },
+    overrideAccess: true,
+  })
 }

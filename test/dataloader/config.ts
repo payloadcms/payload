@@ -128,25 +128,30 @@ export default buildConfigWithDefaults({
         email: devUser.email,
         password: devUser.password,
       },
+      overrideAccess: true,
     })
 
     await payload.create({
       collection: 'posts',
       data: postDoc,
       user,
+      overrideAccess: true,
     })
 
     const tag = await payload.create({
       collection: 'itemTags',
       data: { name: 'tag1' },
+      overrideAccess: true,
     })
     const item = await payload.create({
       collection: 'items',
       data: { name: 'item1', itemTags: [tag.id] },
+      overrideAccess: true,
     })
     const shop = await payload.create({
       collection: 'shops',
       data: { name: 'shop1', items: [item.id] },
+      overrideAccess: true,
     })
   },
   typescript: {

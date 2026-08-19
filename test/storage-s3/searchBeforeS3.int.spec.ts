@@ -40,12 +40,14 @@ describe('Search plugin before S3 - Issue #15431', () => {
     await payload.delete({
       collection: mediaSlug,
       where: { id: { exists: true } },
+      overrideAccess: true,
     })
     // Only delete from search if the collection exists
     if (payload.collections['search']) {
       await payload.delete({
         collection: 'search',
         where: { id: { exists: true } },
+        overrideAccess: true,
       })
     }
     await clearTestBucket()
@@ -66,6 +68,7 @@ describe('Search plugin before S3 - Issue #15431', () => {
       collection: mediaSlug,
       data: {},
       filePath: path.resolve(dirname, '../uploads/image.png'),
+      overrideAccess: true,
     })
 
     expect(upload.id).toBeTruthy()
@@ -83,6 +86,7 @@ describe('Search plugin before S3 - Issue #15431', () => {
       collection: mediaSlug,
       data: {},
       filePath: path.resolve(dirname, '../uploads/image.png'),
+      overrideAccess: true,
     })
 
     const { docs: searchDocs } = await payload.find({
@@ -91,6 +95,7 @@ describe('Search plugin before S3 - Issue #15431', () => {
         'doc.value': { equals: upload.id },
         'doc.relationTo': { equals: mediaSlug },
       },
+      overrideAccess: true,
     })
 
     expect(searchDocs.length).toBe(1)

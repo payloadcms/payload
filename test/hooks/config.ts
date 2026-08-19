@@ -81,6 +81,7 @@ export const HooksConfig: Promise<SanitizedConfig> = buildConfigWithDefaults({
         fieldAfterRead: false,
         collectionAfterRead: false,
       },
+      overrideAccess: true,
     })
   },
   typescript: {

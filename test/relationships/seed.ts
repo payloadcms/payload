@@ -14,6 +14,7 @@ import {
 export const seed = async (_payload: Payload) => {
   await _payload.create({
     collection: 'users',
+    overrideAccess: true,
     data: {
       email: devUser.email,
       password: devUser.password,
@@ -22,6 +23,7 @@ export const seed = async (_payload: Payload) => {
 
   const rel1 = await _payload.create({
     collection: relationSlug,
+    overrideAccess: true,
     data: {
       name: 'name',
     },
@@ -29,6 +31,7 @@ export const seed = async (_payload: Payload) => {
 
   const filteredRelation = await _payload.create({
     collection: relationSlug,
+    overrideAccess: true,
     data: {
       name: 'filtered',
     },
@@ -36,6 +39,7 @@ export const seed = async (_payload: Payload) => {
 
   const defaultAccessRelation = await _payload.create({
     collection: defaultAccessRelSlug,
+    overrideAccess: true,
     data: {
       name: 'name',
     },
@@ -43,6 +47,7 @@ export const seed = async (_payload: Payload) => {
 
   const chained3 = await _payload.create({
     collection: chainedRelSlug,
+    overrideAccess: true,
     data: {
       name: 'chain3',
     },
@@ -50,6 +55,7 @@ export const seed = async (_payload: Payload) => {
 
   const chained2 = await _payload.create({
     collection: chainedRelSlug,
+    overrideAccess: true,
     data: {
       name: 'chain2',
       relation: chained3.id,
@@ -58,6 +64,7 @@ export const seed = async (_payload: Payload) => {
 
   const chained = await _payload.create({
     collection: chainedRelSlug,
+    overrideAccess: true,
     data: {
       name: 'chain1',
       relation: chained2.id,
@@ -67,6 +74,7 @@ export const seed = async (_payload: Payload) => {
   await _payload.update({
     id: chained3.id,
     collection: chainedRelSlug,
+    overrideAccess: true,
     data: {
       name: 'chain3',
       relation: chained.id,
@@ -75,6 +83,7 @@ export const seed = async (_payload: Payload) => {
 
   const customIdRelation = await _payload.create({
     collection: customIdSlug,
+    overrideAccess: true,
     data: {
       id: 'custommmm',
       name: 'custom-id',
@@ -83,6 +92,7 @@ export const seed = async (_payload: Payload) => {
 
   const customIdNumberRelation = await _payload.create({
     collection: customIdNumberSlug,
+    overrideAccess: true,
     data: {
       id: 908234892340,
       name: 'custom-id',
@@ -91,6 +101,7 @@ export const seed = async (_payload: Payload) => {
 
   await _payload.create({
     collection: slug,
+    overrideAccess: true,
     data: {
       chainedRelation: chained.id,
       customIdNumberRelation: customIdNumberRelation.id,
@@ -105,6 +116,7 @@ export const seed = async (_payload: Payload) => {
 
   const root = await _payload.create({
     collection: 'tree',
+    overrideAccess: true,
     data: {
       text: 'root',
     },
@@ -112,6 +124,7 @@ export const seed = async (_payload: Payload) => {
 
   await _payload.create({
     collection: 'tree',
+    overrideAccess: true,
     data: {
       parent: root.id,
       text: 'sub',

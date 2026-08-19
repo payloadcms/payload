@@ -43,6 +43,7 @@ describePostgres('database - postgres logs', () => {
         text: 'Some title',
         number: 5,
       },
+      overrideAccess: true,
     })
 
     // Count every console log
@@ -71,6 +72,7 @@ describePostgres('database - postgres logs', () => {
         title: 'Some title',
         number: 5,
       },
+      overrideAccess: true,
     })
 
     // Count every console log
@@ -99,6 +101,7 @@ describePostgres('database - postgres logs', () => {
         title: 'Some title',
         number: 5,
       },
+      overrideAccess: true,
     })
     await payload.create({
       collection: 'posts',
@@ -106,6 +109,7 @@ describePostgres('database - postgres logs', () => {
         title: 'Some title 2',
         number: 5,
       },
+      overrideAccess: true,
     })
     await payload.create({
       collection: 'posts',
@@ -113,6 +117,7 @@ describePostgres('database - postgres logs', () => {
         title: 'Some title 2',
         number: 5,
       },
+      overrideAccess: true,
     })
     // Count every console log
     const consoleCount = vitest.spyOn(console, 'log').mockImplementation(() => {})
@@ -127,6 +132,7 @@ describePostgres('database - postgres logs', () => {
 
     const allPosts = await payload.find({
       collection: 'posts',
+      overrideAccess: true,
     })
 
     expect(allPosts.docs).toHaveLength(0)
@@ -139,6 +145,7 @@ describePostgres('database - postgres logs', () => {
         title: 'Some title',
         number: 5,
       },
+      overrideAccess: true,
     })
     await payload.create({
       collection: 'posts',
@@ -146,6 +153,7 @@ describePostgres('database - postgres logs', () => {
         title: 'Some title 2',
         number: 5,
       },
+      overrideAccess: true,
     })
     await payload.create({
       collection: 'posts',
@@ -153,6 +161,7 @@ describePostgres('database - postgres logs', () => {
         title: 'Some title 2',
         number: 5,
       },
+      overrideAccess: true,
     })
     // Count every console log
     const consoleCount = vitest.spyOn(console, 'log').mockImplementation(() => {})
@@ -169,6 +178,7 @@ describePostgres('database - postgres logs', () => {
 
     const allPosts = await payload.find({
       collection: 'posts',
+      overrideAccess: true,
     })
 
     expect(allPosts.docs).toHaveLength(1)
@@ -186,6 +196,7 @@ describePostgres('database - postgres logs', () => {
         ],
         title: 'post',
       },
+      overrideAccess: true,
     })
     const consoleCount = vitest.spyOn(console, 'log').mockImplementation(() => {})
 

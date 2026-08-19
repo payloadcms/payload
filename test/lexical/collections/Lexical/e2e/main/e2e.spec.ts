@@ -1894,6 +1894,7 @@ describe('lexicalMain', () => {
         },
         title: 'Test Custom Cell',
       },
+      overrideAccess: true,
     })
 
     const url = new AdminUrlUtil(serverURL, lexicalCustomCellSlug)

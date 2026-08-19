@@ -1,14 +1,14 @@
 import type { Payload } from 'payload'
-import { describe, beforeAll, afterAll, it, expect } from 'vitest'
 
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { Collection1 } from './payload-types.js'
 
-import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { devUser } from '../credentials.js'
 import { collection1Slug, versionedRelationshipFieldSlug } from './slugs.js'
 
 let payload: Payload
@@ -46,6 +46,7 @@ describe('Relationship Fields', () => {
         data: {
           name: relatedDocName,
         },
+        overrideAccess: true,
       })
 
       const version1 = await payload.create({
@@ -57,6 +58,7 @@ describe('Relationship Fields', () => {
             relationTo: collection1Slug,
           },
         },
+        overrideAccess: true,
       })
 
       const version2 = await payload.update({
@@ -65,6 +67,7 @@ describe('Relationship Fields', () => {
         data: {
           title: 'Version 2 Title',
         },
+        overrideAccess: true,
       })
 
       const versions = await payload.findVersions({
@@ -76,6 +79,7 @@ describe('Relationship Fields', () => {
         },
         sort: '-updatedAt',
         limit: 1,
+        overrideAccess: true,
       })
 
       version2ID = versions.docs[0].id
@@ -94,6 +98,7 @@ describe('Relationship Fields', () => {
         collection: versionedRelationshipFieldSlug,
         id: version2ID,
         locale: 'all',
+        overrideAccess: true,
       })
 
       expect(version2Data.version.title).toEqual('Version 2 Title')

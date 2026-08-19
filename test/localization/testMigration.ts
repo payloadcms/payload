@@ -43,6 +43,7 @@ async function main() {
   const post = await payload.create({
     collection: 'testMigrationPosts',
     data: { title: 'Test Post' },
+    overrideAccess: true,
   })
   console.log(`   Created post: ${post.id}`)
 
@@ -50,6 +51,7 @@ async function main() {
     id: post.id,
     collection: 'testMigrationPosts',
     data: { _status: 'published', title: 'Published Post' },
+    overrideAccess: true,
   })
   console.log(`   Published post: ${post.id}\n`)
 
