@@ -2,19 +2,16 @@
 import type { ClientCollectionConfig } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { formatAdminURL } from 'payload/shared'
-import * as qs from 'qs-esm'
 import React, { useCallback, useMemo } from 'react'
-import { toast } from 'sonner'
 
 import type { SelectionWithPath } from '../Modal/types.js'
 
 import { useConfig } from '../../../providers/Config/index.js'
 import { useLocale } from '../../../providers/Locale/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
-import { requests } from '../../../utilities/api.js'
 import { ListSelectionButton } from '../../ListSelection/index.js'
 import { useHierarchyModal } from '../Modal/useHierarchyModal.js'
+import { moveDocuments } from '../move/moveDocuments.js'
 
 export const baseClass = 'move-many'
 
@@ -119,86 +116,19 @@ export function MoveMany({
   // modal is closed as soon as a destination is chosen rather than staying open behind one.
   const performMove = useCallback(
     async (destination: { id: null | number | string; title: string }) => {
-      let totalMoved = 0
-      let hasErrors = false
+      const { hasErrors, totalMoved } = await moveDocuments({
+        apiRoute: api,
+        destination,
+        i18n,
+        label,
+        locale,
+        parentFieldName,
+        selections,
+        t,
+      })
 
-      try {
-        for (const [collectionSlug, { ids }] of Object.entries(selections)) {
-          if (ids.length === 0) {
-            continue
-          }
-
-          const queryString = qs.stringify(
-            {
-              locale,
-              where: { id: { in: ids } },
-            },
-            { addQueryPrefix: true },
-          )
-
-          const url = formatAdminURL({
-            apiRoute: api,
-            path: `/${collectionSlug}${queryString}`,
-          })
-
-          const response = await requests.patch(url, {
-            body: JSON.stringify({ [parentFieldName]: destination.id }),
-            headers: {
-              'Accept-Language': i18n.language,
-              'Content-Type': 'application/json',
-              credentials: 'include',
-            },
-          })
-
-          const json = await response.json()
-
-          if (response.status >= 400) {
-            hasErrors = true
-
-            if (json?.errors?.length > 0) {
-              toast.error(json.message || t('error:unknown'), {
-                description: json.errors
-                  .map((error: { message: string }) => error.message)
-                  .join('\n'),
-              })
-            } else {
-              toast.error(json?.message || t('error:unknown'))
-            }
-
-            continue
-          }
-
-          const movedCount = json?.docs?.length || 0
-          totalMoved += movedCount
-
-          if (json?.errors?.length > 0) {
-            hasErrors = true
-            toast.error(json.message, {
-              description: json.errors
-                .map((error: { message: string }) => error.message)
-                .join('\n'),
-            })
-          }
-        }
-
-        if (totalMoved > 0) {
-          const successKey =
-            destination.id === null ? 'hierarchy:itemsMovedToRoot' : 'hierarchy:itemsMovedTo'
-
-          toast.success(
-            t(successKey, {
-              count: totalMoved,
-              destination: destination.title,
-              label,
-            }),
-          )
-        }
-
-        if (!hasErrors || totalMoved > 0) {
-          onSuccess?.()
-        }
-      } catch (_err) {
-        toast.error(t('error:unknown'))
+      if (!hasErrors || totalMoved > 0) {
+        onSuccess?.()
       }
     },
     [selections, parentFieldName, locale, api, i18n, t, label, onSuccess],
