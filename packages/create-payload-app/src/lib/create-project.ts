@@ -55,6 +55,8 @@ async function installDeps(args: {
     installCmd = 'pnpm install'
   } else if (packageManager === 'bun') {
     installCmd = 'bun install'
+  } else if (packageManager === 'nub') {
+    installCmd = 'nub install'
   }
 
   await ensurePnpmBuildApprovals({ packageManager, projectDir })

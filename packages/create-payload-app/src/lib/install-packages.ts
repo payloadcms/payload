@@ -16,6 +16,7 @@ export async function installPackages(args: {
 
   switch (packageManager) {
     case 'bun':
+    case 'nub':
     case 'pnpm':
     case 'yarn': {
       if (packageManager === 'bun') {
