@@ -518,6 +518,7 @@ export function AuthProvider({
         setPermissions,
         setUser,
         token: tokenInMemory,
+        tokenExpirationMs: authSession?.expiresAt,
         user,
       }}
     >

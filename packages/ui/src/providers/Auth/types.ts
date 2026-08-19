@@ -64,6 +64,9 @@ export type AuthContext<T = ClientUser> = {
   setUser: (user: null | UserWithToken<T>) => void
   strategy?: string
   token?: string
+  /**
+   * @deprecated Use `authSession?.expiresAt` instead.
+   */
+  tokenExpirationMs?: number
   user?: null | T
 }
-
