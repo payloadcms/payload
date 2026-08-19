@@ -473,11 +473,14 @@ export function HierarchyCardGrid({
                   : undefined
               const parentFieldName = hierarchyConfig?.parentFieldName || 'parent'
 
+              // Folders drill in via `_browseHref` so the click stays in the collection being
+              // browsed; the fallback covers rows built outside the hierarchy view.
               const href = band.isHierarchyGroup
-                ? formatAdminURL({
+                ? (row._browseHref ??
+                  formatAdminURL({
                     adminRoute,
                     path: `/collections/${row._collectionSlug}?${parentFieldName}=${row.id}`,
-                  })
+                  }))
                 : formatAdminURL({
                     adminRoute,
                     path: `/collections/${row._collectionSlug}/${row.id}`,

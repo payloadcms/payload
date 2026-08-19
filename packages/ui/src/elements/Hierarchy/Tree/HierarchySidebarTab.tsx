@@ -3,15 +3,16 @@
 import type { SidebarTabClientProps } from 'payload'
 
 import { formatAdminURL } from 'payload/shared'
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import type { HierarchyInitialData } from './types.js'
 
 import { useConfig } from '../../../providers/Config/index.js'
 import { useHierarchy } from '../../../providers/Hierarchy/index.js'
-import { useRouter, useSearchParams } from '../../../providers/RouterAdapter/index.js'
+import { usePathname, useRouter, useSearchParams } from '../../../providers/RouterAdapter/index.js'
 import { useRouteTransition } from '../../../providers/RouteTransition/index.js'
 import { useSidebarTabs } from '../../../providers/SidebarTabs/index.js'
+import { getFolderHierarchySlug } from '../getFolderHierarchySlug.js'
 import { HydrateHierarchyProvider } from '../HydrateProvider/index.js'
 import { HierarchySearch } from '../Search/index.js'
 import { HierarchyTree } from './index.js'
@@ -44,9 +45,11 @@ export const HierarchySidebarTab: React.FC<
   useAsTitle,
 }) => {
   const router = useRouter()
+  const pathname = usePathname()
   const searchParams = useSearchParams()
   const { startRouteTransition } = useRouteTransition()
   const {
+    config,
     config: {
       routes: { admin: adminRoute },
     },
@@ -96,18 +99,36 @@ export const HierarchySidebarTab: React.FC<
 
   const baseFilterKey = baseFilter ? JSON.stringify(baseFilter) : ''
 
+  /**
+   * When the user is already browsing a collection by folder, clicking a folder in the tree keeps
+   * them in that collection rather than switching to the folder collection's own view.
+   */
+  const browsedCollectionSlug = useMemo(() => {
+    const routeSlug = pathname?.match(/\/collections\/([^/]+)\/hierarchy/)?.[1]
+
+    if (!routeSlug || routeSlug === hierarchyCollectionSlug) {
+      return hierarchyCollectionSlug
+    }
+
+    // Only follow the route when it really is scoped to this tree - another hierarchy's tab must
+    // not start linking into an unrelated collection.
+    return getFolderHierarchySlug(config.collections, routeSlug) === hierarchyCollectionSlug
+      ? routeSlug
+      : hierarchyCollectionSlug
+  }, [config.collections, hierarchyCollectionSlug, pathname])
+
   const handleNavigateToParent = useCallback(
     ({ id }: { id: number | string }) => {
       const url = formatAdminURL({
         adminRoute,
-        path: `/collections/${hierarchyCollectionSlug}/hierarchy?${resolvedParentFieldName}=${id}`,
+        path: `/collections/${browsedCollectionSlug}/hierarchy?${resolvedParentFieldName}=${id}`,
       })
       startRouteTransition(() => {
         router.push(url)
         router.refresh()
       })
     },
-    [adminRoute, hierarchyCollectionSlug, resolvedParentFieldName, router, startRouteTransition],
+    [adminRoute, browsedCollectionSlug, resolvedParentFieldName, router, startRouteTransition],
   )
   return (
     <>

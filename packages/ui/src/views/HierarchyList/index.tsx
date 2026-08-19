@@ -451,6 +451,7 @@ export function HierarchyListView(props: ListViewClientProps) {
 
             <HierarchyTable
               baseFilter={baseFilter}
+              browseCollectionSlug={collectionSlug}
               childrenData={filteredChildrenData}
               collections={collections}
               collectionSlug={hierarchySlug}

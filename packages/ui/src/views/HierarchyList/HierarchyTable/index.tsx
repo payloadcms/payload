@@ -49,6 +49,11 @@ const CollectionCell: SlotColumn<TableRow>['Cell'] = ({ row }) => (
 export type HierarchyTableProps = {
   /** Base filter applied to hierarchy collection queries (e.g., tenant filter) */
   baseFilter?: Where
+  /**
+   * Collection whose hierarchy view folder links should stay in. Differs from `collectionSlug` when
+   * browsing one related collection by folder. Defaults to `collectionSlug`.
+   */
+  browseCollectionSlug?: string
   childrenData?: PaginatedDocs<HierarchyDocument>
   /** Collections available for creation (for empty state) */
   collections?: CollectionOption[]
@@ -70,6 +75,7 @@ export type HierarchyTableProps = {
 
 export function HierarchyTable({
   baseFilter,
+  browseCollectionSlug,
   childrenData,
   collections,
   collectionSlug,
@@ -88,7 +94,7 @@ export function HierarchyTable({
   const { clearRouteCache } = useRouteCache()
   const {
     config: {
-      routes: { api: apiRoute },
+      routes: { admin: adminRoute, api: apiRoute },
       serverURL,
     },
     getEntityConfig,
@@ -341,21 +347,37 @@ export function HierarchyTable({
   )
 
   // Build children data for table
-  const childTableData: TableRow[] = useMemo(
-    () =>
-      childDocs.map((doc) => ({
-        ...doc,
-        id: doc.id,
-        _allowedCollections: allowedCollectionsFieldName
-          ? (doc[allowedCollectionsFieldName] as string[] | undefined)
-          : undefined,
-        _collectionLabel: childrenLabel,
-        _collectionSlug: collectionSlug,
-        _hasChildren: Boolean(doc._hasChildren),
-        _hierarchyIcon: HierarchyIcon,
-      })),
-    [HierarchyIcon, allowedCollectionsFieldName, childDocs, childrenLabel, collectionSlug],
-  )
+  const childTableData: TableRow[] = useMemo(() => {
+    // Drilling into a folder has to stay in the collection being browsed, and the route is spelled
+    // out rather than relying on the saved `listViewType` preference to redirect.
+    const browseSlug = browseCollectionSlug ?? collectionSlug
+    const parentQueryParam = parentFieldName || 'parent'
+
+    return childDocs.map((doc) => ({
+      ...doc,
+      id: doc.id,
+      _allowedCollections: allowedCollectionsFieldName
+        ? (doc[allowedCollectionsFieldName] as string[] | undefined)
+        : undefined,
+      _browseHref: formatAdminURL({
+        adminRoute,
+        path: `/collections/${browseSlug}/hierarchy?${parentQueryParam}=${doc.id}`,
+      }),
+      _collectionLabel: childrenLabel,
+      _collectionSlug: collectionSlug,
+      _hasChildren: Boolean(doc._hasChildren),
+      _hierarchyIcon: HierarchyIcon,
+    }))
+  }, [
+    HierarchyIcon,
+    adminRoute,
+    allowedCollectionsFieldName,
+    browseCollectionSlug,
+    childDocs,
+    childrenLabel,
+    collectionSlug,
+    parentFieldName,
+  ])
 
   const hasChildren = (childPaginationData.totalDocs || 0) > 0
   const hasRelated = relatedGroups.some((g) => relatedState[g.collectionSlug]?.totalDocs > 0)
