@@ -462,10 +462,10 @@ export const getTableColumnFromPath = ({
             aliasTable: relationshipTable,
             collectionPath: newCollectionPath,
             constraints,
-            // relationshipFields are fields from a different collection => no parentIsLocalized
             fields: relationshipFields,
             joins,
             locale,
+            // A join reads from a different collection, so localization does not carry over
             parentIsLocalized: false,
             pathSegments: pathSegments.slice(1),
             rootTableName: relationshipTableName,
@@ -557,7 +557,8 @@ export const getTableColumnFromPath = ({
           fields: adapter.payload.collections[field.collection].config.flattenedFields,
           joins,
           locale,
-          parentIsLocalized: parentIsLocalized || field.localized,
+          // A join reads from a different collection, so localization does not carry over
+          parentIsLocalized: false,
           pathSegments: pathSegments.slice(1),
           selectFields,
           tableName: newTableName,
@@ -854,10 +855,10 @@ export const getTableColumnFromPath = ({
             aliasTable: newAliasTable,
             collectionPath: newCollectionPath,
             constraints,
-            // relationshipFields are fields from a different collection => no parentIsLocalized
             fields: relationshipFields,
             joins,
             locale,
+            // A relationship jumps to a different collection, so localization does not carry over
             parentIsLocalized: false,
             pathSegments: pathSegments.slice(1),
             rootTableName: newTableName,
@@ -924,7 +925,8 @@ export const getTableColumnFromPath = ({
             fields: adapter.payload.collections[field.relationTo].config.flattenedFields,
             joins,
             locale,
-            parentIsLocalized: parentIsLocalized || field.localized,
+            // A relationship jumps to a different collection, so localization does not carry over
+            parentIsLocalized: false,
             pathSegments: pathSegments.slice(1),
             selectFields,
             tableName: newTableName,
