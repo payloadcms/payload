@@ -485,6 +485,41 @@ describe('Sort', () => {
       let orderable2: Orderable
       let orderableDraft1: Draft
       let orderableDraft2: Draft
+
+      const createPublishedOrderableDraft = (text: string) =>
+        payload.create({
+          collection: draftsSlug,
+          data: { _status: 'published', text },
+        })
+
+      const deleteOrderableDrafts = async (...docs: Draft[]) => {
+        for (const doc of docs) {
+          await payload.delete({ id: doc.id, collection: draftsSlug })
+        }
+      }
+
+      const reorderDraft = ({
+        doc,
+        target,
+        targetKey = target._order,
+      }: {
+        doc: Draft
+        target: Draft
+        targetKey?: Draft['_order']
+      }) =>
+        restClient.POST('/reorder', {
+          body: JSON.stringify({
+            collectionSlug: draftsSlug,
+            docsToMove: [doc.id],
+            newKeyWillBe: 'greater',
+            orderableFieldName: '_order',
+            target: {
+              id: target.id,
+              key: targetKey,
+            },
+          }),
+        })
+
       beforeAll(async () => {
         orderable1 = await payload.create({
           collection: orderableSlug,
@@ -592,6 +627,117 @@ describe('Sort', () => {
         expect(parseInt(ordered.docs[0]._order, 36)).toBeLessThan(
           parseInt(ordered.docs[1]._order, 36),
         )
+      })
+
+      it('should stage collection reordering until the moved document is published', async () => {
+        const first = await createPublishedOrderableDraft('Staged order first')
+        const second = await createPublishedOrderableDraft('Staged order second')
+
+        const res = await reorderDraft({ doc: first, target: second })
+
+        expect(res.status).toStrictEqual(200)
+
+        const where = {
+          id: {
+            in: [first.id, second.id],
+          },
+        }
+        const draftOrder = await payload.find({
+          collection: draftsSlug,
+          draft: true,
+          sort: '_order',
+          where,
+        })
+        const publishedOrder = await payload.find({
+          collection: draftsSlug,
+          draft: false,
+          sort: '_order',
+          where,
+        })
+
+        expect(draftOrder.docs.map(({ id }) => id)).toEqual([second.id, first.id])
+        expect(draftOrder.docs.find(({ id }) => id === first.id)?._status).toBe('draft')
+        expect(publishedOrder.docs.map(({ id }) => id)).toEqual([first.id, second.id])
+
+        await payload.update({
+          id: first.id,
+          collection: draftsSlug,
+          data: {
+            _status: 'published',
+          },
+          draft: true,
+        })
+
+        const orderAfterPublish = await payload.find({
+          collection: draftsSlug,
+          draft: false,
+          sort: '_order',
+          where,
+        })
+
+        expect(orderAfterPublish.docs.map(({ id }) => id)).toEqual([second.id, first.id])
+
+        await deleteOrderableDrafts(first, second)
+      })
+
+      it('should calculate consecutive collection reorders from the draft order', async () => {
+        const first = await createPublishedOrderableDraft('Consecutive order first')
+        const second = await createPublishedOrderableDraft('Consecutive order second')
+        const third = await createPublishedOrderableDraft('Consecutive order third')
+        const fourth = await createPublishedOrderableDraft('Consecutive order fourth')
+
+        await reorderDraft({ doc: first, target: third })
+        await reorderDraft({ doc: second, target: third })
+
+        const draftOrder = await payload.find({
+          collection: draftsSlug,
+          draft: true,
+          sort: '_order',
+          where: {
+            id: {
+              in: [first.id, second.id, third.id, fourth.id],
+            },
+          },
+        })
+
+        expect(draftOrder.docs.map(({ id }) => id)).toEqual([
+          third.id,
+          second.id,
+          first.id,
+          fourth.id,
+        ])
+
+        const firstDraftOrder = draftOrder.docs.find(({ id }) => id === first.id)?._order
+        const secondDraftOrder = draftOrder.docs.find(({ id }) => id === second.id)?._order
+
+        expect(secondDraftOrder).not.toBe(firstDraftOrder)
+        expect(secondDraftOrder! < firstDraftOrder!).toBe(true)
+
+        await deleteOrderableDrafts(first, second, third, fourth)
+      })
+
+      it('should resolve a pending collection reorder target from its draft order', async () => {
+        const first = await createPublishedOrderableDraft('Pending order first')
+        const second = await createPublishedOrderableDraft('Pending order second')
+        const third = await createPublishedOrderableDraft('Pending order third')
+
+        await reorderDraft({ doc: first, target: third })
+        await reorderDraft({ doc: second, target: first, targetKey: 'pending' })
+
+        const draftOrder = await payload.find({
+          collection: draftsSlug,
+          draft: true,
+          sort: '_order',
+          where: {
+            id: {
+              in: [first.id, second.id, third.id],
+            },
+          },
+        })
+
+        expect(draftOrder.docs.map(({ id }) => id)).toEqual([third.id, first.id, second.id])
+
+        await deleteOrderableDrafts(first, second, third)
       })
 
       it('should not unpublish a published document with a newer draft when reordering', async () => {
