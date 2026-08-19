@@ -10,6 +10,7 @@ import type {
   TypeWithID,
   TypeWithTimestamps,
 } from '../collections/config/types.js'
+import type { Option } from '../fields/config/types.js'
 import type payload from '../index.js'
 import type {
   AuthenticatedUser,
@@ -332,6 +333,13 @@ export type TransformGlobalWithSelect<
 export type PopulateType = Partial<TypedCollectionSelect>
 
 export type ResolvedFilterOptions = { [collection: string]: Where }
+
+/**
+ * The value the admin list view's where-builder resolves a field's `filterOptions` into:
+ * a `Where` query per related collection for `relationship`/`upload` fields, or the allowed
+ * `Option[]` for `select` fields. Use `isSelectFilterOptions` to narrow between the two.
+ */
+export type ResolvedListFilterOptions = Option[] | ResolvedFilterOptions
 
 export type PickPreserveOptional<T, K extends keyof T> = Partial<
   Pick<T, Extract<K, OptionalKeys<T>>>

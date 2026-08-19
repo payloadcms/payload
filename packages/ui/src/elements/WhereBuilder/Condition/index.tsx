@@ -15,7 +15,7 @@ export type Props = {
   readonly andIndex: number
   readonly disableRemoveButton: boolean
   readonly fieldPath: string
-  readonly filterOptions?: PayloadOption[] | ResolvedFilterOptions
+  readonly filterOptions?: ResolvedListFilterOptions
   readonly isFirstCondition: boolean
   readonly join: 'and' | 'or'
   readonly operator: Operator
@@ -28,7 +28,7 @@ export type Props = {
   readonly value: Value
 }
 
-import type { Operator, Option as PayloadOption, ResolvedFilterOptions } from 'payload'
+import type { Operator, Option as PayloadOption, ResolvedListFilterOptions } from 'payload'
 
 import { isFieldDisabled } from 'payload/shared'
 
@@ -40,6 +40,7 @@ import { LineIcon } from '../../../icons/Line/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { Button } from '../../Button/index.js'
 import { ReactSelect } from '../../ReactSelect/index.js'
+import { isSelectFilterOptions } from '../isSelectFilterOptions.js'
 import { DefaultFilter } from './DefaultFilter/index.js'
 import { getOperatorValueTypes } from './validOperators.js'
 import './index.css'
@@ -86,7 +87,7 @@ export const Condition: React.FC<Props> = (props) => {
       { label: t('general:false'), value: 'false' },
     ]
   } else if (reducedField?.field && 'options' in reducedField.field) {
-    valueOptions = Array.isArray(filterOptions) ? filterOptions : reducedField.field.options
+    valueOptions = isSelectFilterOptions(filterOptions) ? filterOptions : reducedField.field.options
   }
 
   const updateValue = useEffectEvent(async (debouncedValue: Value) => {

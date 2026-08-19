@@ -1,4 +1,4 @@
-import type { Field, Option, PayloadRequest, ResolvedFilterOptions } from 'payload'
+import type { Field, PayloadRequest, ResolvedListFilterOptions } from 'payload'
 
 import {
   fieldAffectsData,
@@ -8,6 +8,7 @@ import {
 } from 'payload/shared'
 
 import { resolveFilterOptions } from '../../utilities/resolveFilterOptions.js'
+import { resolveSelectFilterOptions } from '../../utilities/resolveSelectFilterOptions.js'
 
 export const resolveAllFilterOptions = async ({
   fields,
@@ -18,11 +19,9 @@ export const resolveAllFilterOptions = async ({
   fields: Field[]
   pathPrefix?: string
   req: PayloadRequest
-  result?: Map<string, Option[] | ResolvedFilterOptions>
-}): Promise<Map<string, Option[] | ResolvedFilterOptions>> => {
-  const resolvedFilterOptions = !result
-    ? new Map<string, Option[] | ResolvedFilterOptions>()
-    : result
+  result?: Map<string, ResolvedListFilterOptions>
+}): Promise<Map<string, ResolvedListFilterOptions>> => {
+  const resolvedFilterOptions = !result ? new Map<string, ResolvedListFilterOptions>() : result
 
   await Promise.all(
     fields.map(async (field) => {
@@ -54,10 +53,10 @@ export const resolveAllFilterOptions = async ({
         resolvedFilterOptions.set(fieldPath, options)
       }
 
-      if (field.type === 'select' && typeof field.filterOptions === 'function') {
-        const options = await field.filterOptions({
+      if (field.type === 'select' && field.filterOptions) {
+        const options = await resolveSelectFilterOptions({
           data: {}, // use empty object to prevent breaking queries when accessing properties of `data`
-          options: field.options,
+          field,
           req,
           siblingData: {}, // use empty object to prevent breaking queries when accessing properties of `siblingData`
         })

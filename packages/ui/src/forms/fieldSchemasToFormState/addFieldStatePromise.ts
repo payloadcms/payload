@@ -34,6 +34,7 @@ import {
 import type { RenderFieldMethod } from './types.js'
 
 import { resolveFilterOptions } from '../../utilities/resolveFilterOptions.js'
+import { resolveSelectFilterOptions } from '../../utilities/resolveSelectFilterOptions.js'
 import { isRowCollapsed } from './isRowCollapsed.js'
 import { iterateFields } from './iterateFields.js'
 
@@ -795,13 +796,15 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       }
 
       case 'select': {
-        if (typeof field.filterOptions === 'function') {
-          fieldState.selectFilterOptions = await field.filterOptions({
-            data: fullData,
-            options: field.options,
-            req,
-            siblingData: data,
-          })
+        const selectFilterOptions = await resolveSelectFilterOptions({
+          data: fullData,
+          field,
+          req,
+          siblingData: data,
+        })
+
+        if (selectFilterOptions) {
+          fieldState.selectFilterOptions = selectFilterOptions
         }
 
         if (data[field.name] !== undefined) {

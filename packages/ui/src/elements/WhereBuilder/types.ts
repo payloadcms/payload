@@ -1,8 +1,7 @@
 import type {
   ClientField,
   Operator,
-  Option,
-  ResolvedFilterOptions,
+  ResolvedListFilterOptions,
   SanitizedCollectionConfig,
   Where,
 } from 'payload'
@@ -16,7 +15,7 @@ export type WhereBuilderProps = {
   /** Called when the last condition is removed, so the parent has empty state control. */
   readonly onEmptyRemove?: () => void
   readonly renderedFilters?: Map<string, React.ReactNode>
-  readonly resolvedFilterOptions?: Map<string, Option[] | ResolvedFilterOptions>
+  readonly resolvedFilterOptions?: Map<string, ResolvedListFilterOptions>
   /** The current `where` value to render conditions from. */
   readonly value?: Where
 }

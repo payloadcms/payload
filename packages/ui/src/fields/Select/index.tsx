@@ -15,6 +15,7 @@ import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import { SelectInput } from './Input.js'
+import { mergeFilterOptionLabels } from './mergeFilterOptionLabels.js'
 
 export const formatOptions = (options: Option[]): OptionObject[] =>
   options.map((option) => {
@@ -76,27 +77,10 @@ const SelectFieldComponent: SelectFieldClientComponent = (props) => {
     validate: memoizedValidate,
   })
 
-  const optionsToRender = useMemo(() => {
-    if (!selectFilterOptions) {
-      return options
-    }
-
-    const labelsFromFilterOptions = new Map<string, OptionObject['label']>()
-
-    for (const filterOption of selectFilterOptions) {
-      if (typeof filterOption === 'object') {
-        labelsFromFilterOptions.set(filterOption.value, filterOption.label)
-      }
-    }
-
-    return options.map((option) => {
-      const labelFromFilterOptions = labelsFromFilterOptions.get(option.value)
-
-      return labelFromFilterOptions === undefined
-        ? option
-        : { ...option, label: labelFromFilterOptions }
-    })
-  }, [options, selectFilterOptions])
+  const optionsToRender = useMemo(
+    () => mergeFilterOptionLabels({ options, selectFilterOptions }),
+    [options, selectFilterOptions],
+  )
 
   const onChange: ReactSelectAdapterProps['onChange'] = useCallback(
     (selectedOption: OptionObject | OptionObject[]) => {

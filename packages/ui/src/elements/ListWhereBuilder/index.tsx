@@ -1,5 +1,5 @@
 'use client'
-import type { ClientField, Option, ResolvedFilterOptions, SanitizedCollectionConfig } from 'payload'
+import type { ClientField, ResolvedListFilterOptions, SanitizedCollectionConfig } from 'payload'
 
 import React, { useCallback } from 'react'
 
@@ -12,7 +12,7 @@ export type ListWhereBuilderProps = {
   readonly fields: ClientField[]
   readonly onEmptyRemove?: () => void
   readonly renderedFilters?: Map<string, React.ReactNode>
-  readonly resolvedFilterOptions?: Map<string, Option[] | ResolvedFilterOptions>
+  readonly resolvedFilterOptions?: Map<string, ResolvedListFilterOptions>
 }
 
 /**
