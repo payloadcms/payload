@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 import { spawn } from 'node:child_process'
-import { writeFileSync } from 'node:fs'
+import { mkdtempSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 import { createInterface } from 'node:readline/promises'
@@ -76,7 +76,8 @@ function defaultDispatchDeps(): DispatchDeps {
     renderPrompt: renderUpgradePrompt,
     spawnAgent: spawnAgentInteractive,
     writePromptFile: (contents) => {
-      const filePath = join(tmpdir(), 'payload-v4-upgrade-prompt.md')
+      const dir = mkdtempSync(join(tmpdir(), 'payload-v4-upgrade-'))
+      const filePath = join(dir, 'prompt.md')
       writeFileSync(filePath, contents)
       return filePath
     },
