@@ -27,7 +27,7 @@ import type { DrizzleResolvedOperator } from './operatorMap.js'
 import { escapeSQLValue } from '../utilities/escapeSQLValue.js'
 import { getNameFromDrizzleTable } from '../utilities/getNameFromDrizzleTable.js'
 import { isValidStringID } from '../utilities/isValidStringID.js'
-import { DistinctSymbol } from '../utilities/rawConstraint.js'
+import { DistinctSymbol, isRawConstraint } from '../utilities/rawConstraint.js'
 import { buildAndOrConditions } from './buildAndOrConditions.js'
 import { buildOperatorConstraint } from './buildOperatorConstraint.js'
 import { getTableAlias } from './getTableAlias.js'
@@ -110,7 +110,8 @@ export function parseParams({
                   hasManyRelationshipOperatorSet.has(operator as HasManyRelationshipOperator) &&
                   val !== null &&
                   typeof val === 'object' &&
-                  !Array.isArray(val)
+                  !Array.isArray(val) &&
+                  !isRawConstraint(val)
                 ) {
                   const relationshipPath = resolveRelationshipPath({
                     adapter,
