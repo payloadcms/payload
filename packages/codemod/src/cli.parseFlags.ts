@@ -42,7 +42,10 @@ export function parseFlags(argv: string[]): CliFlags {
 
   const isUpgrade = positionals[0] === 'upgrade'
   const command = isUpgrade ? 'upgrade' : undefined
-  const { path, upgrade } = resolveUpgrade(isUpgrade, positionals)
+  const upgrade = isUpgrade ? resolveUpgradeVerb(positionals[1]) : undefined
+  // The upgrade command always operates on the current directory; only the bare
+  // transform command takes a positional path.
+  const path = isUpgrade ? process.cwd() : (positionals[0] ?? process.cwd())
 
   return {
     agent: values.agent,
@@ -58,21 +61,9 @@ export function parseFlags(argv: string[]): CliFlags {
   }
 }
 
-/**
- * Resolve the upgrade verb and its path. `prompt`/`run` consume positional 1,
- * shifting the path to positional 2; a bare `upgrade` is the dispatch verb with
- * the path at positional 1. Non-upgrade invocations read the path at positional 0.
- */
-function resolveUpgrade(
-  isUpgrade: boolean,
-  positionals: string[],
-): { path: string; upgrade?: UpgradeSubcommand } {
-  if (!isUpgrade) {
-    return { path: positionals[0] ?? process.cwd() }
-  }
-  const verb = positionals[1]
+function resolveUpgradeVerb(verb: string | undefined): UpgradeSubcommand {
   if (verb === 'prompt' || verb === 'run') {
-    return { path: positionals[2] ?? process.cwd(), upgrade: verb }
+    return verb
   }
-  return { path: positionals[1] ?? process.cwd(), upgrade: 'dispatch' }
+  return 'dispatch'
 }
