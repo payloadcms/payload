@@ -1,0 +1,20 @@
+@layer payload-default {
+  /*
+   * Wraps a single crumb without altering the trail's layout - the crumb keeps its own padding, so
+   * this only supplies the hit area and the hover ring.
+   */
+  .step-nav-drop-target {
+    display: inline-flex;
+    min-width: 0;
+    border-radius: var(--radius-medium);
+  }
+
+  .step-nav-drop-target--drop-over {
+    background: color-mix(in srgb, var(--color-border-selected) 12%, transparent);
+    box-shadow: 0 0 0 var(--stroke-width-medium) var(--color-border-selected);
+  }
+
+  .step-nav-drop-target--drop-invalid {
+    cursor: not-allowed;
+  }
+}

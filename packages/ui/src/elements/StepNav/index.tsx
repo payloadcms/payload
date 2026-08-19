@@ -10,6 +10,7 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { Button } from '../Button/index.js'
 import { Popup, PopupList } from '../Popup/index.js'
 import { StepNavProvider, useStepNav } from './context.js'
+import { StepNavDropTarget } from './DropTarget/index.js'
 import './index.css'
 
 export { SetStepNav } from './SetStepNav.js'
@@ -113,15 +114,21 @@ const StepNav: React.FC<{
       .filter(Boolean)
       .join(' ')
 
-    if (item.url) {
-      return (
-        <Button buttonStyle="ghost" className={itemClassName} el="link" url={item.url}>
-          {StepLabel}
-        </Button>
-      )
-    }
+    const rendered = item.url ? (
+      <Button buttonStyle="ghost" className={itemClassName} el="link" url={item.url}>
+        {StepLabel}
+      </Button>
+    ) : (
+      <span className={itemClassName}>{StepLabel}</span>
+    )
 
-    return <span className={itemClassName}>{StepLabel}</span>
+    // Crumbs collapsed into the overflow popup are not visible mid-drag, so only the ones rendered
+    // in the trail itself become drop targets.
+    return item.dropTarget ? (
+      <StepNavDropTarget dropTarget={item.dropTarget}>{rendered}</StepNavDropTarget>
+    ) : (
+      rendered
+    )
   }
 
   const separator = <span className={`${baseClass}__separator`}>/</span>

@@ -10,6 +10,7 @@ import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'reac
 import type { CollectionOption } from '../../elements/CreateDocumentButton/index.js'
 import type { StepNavItem } from '../../elements/StepNav/index.js'
 import type { DocumentViewMode } from '../../elements/ViewModeToggle/index.js'
+import type { HierarchyDropData } from '../../providers/HierarchyDnd/types.js'
 
 import { CreateDocumentButton } from '../../elements/CreateDocumentButton/index.js'
 import { ListControlsBar } from '../../elements/ListControlsBar/index.js'
@@ -161,10 +162,24 @@ export function HierarchyListView(props: ListViewClientProps) {
       // page you are on, so it renders as an unlinked crumb.
       const breadcrumbs = hierarchyData?.breadcrumbs || []
 
+      // Dropping on the trail is the only way to move items *out* of a folder, since the tree has no
+      // root row: the base crumb moves them to root, an ancestor crumb moves them up.
+      const rootDropTarget: HierarchyDropData | undefined = parentFieldName
+        ? {
+            type: 'hierarchy-folder',
+            ancestorIds: [],
+            folderId: null,
+            hierarchySlug,
+            parentFieldName,
+            title: t('hierarchy:noParent'),
+          }
+        : undefined
+
       // A scoped browse is its own destination ("Media by Folder"), distinct from the collection's
       // plain list, so its crumb links to the browse root rather than to /collections/media.
       const baseLabel: StepNavItem = isScoped
         ? {
+            dropTarget: rootDropTarget,
             label: `${collectionLabel} ${t('general:by')} ${getTranslation(
               hierarchyCollectionConfig?.labels?.singular,
               i18n,
@@ -175,6 +190,7 @@ export function HierarchyListView(props: ListViewClientProps) {
             }),
           }
         : {
+            dropTarget: rootDropTarget,
             label: collectionLabel,
             url: formatAdminURL({
               adminRoute,
@@ -192,6 +208,19 @@ export function HierarchyListView(props: ListViewClientProps) {
           : `/collections/${collectionSlug}`
         const lastIndex = breadcrumbs.length - 1
         const hierarchyBreadcrumbs: StepNavItem[] = breadcrumbs.map((crumb, index) => ({
+          // The last crumb is the folder already open, so dropping on it would be a no-op. Ancestor
+          // folders carry no collectionSpecific value here, so type acceptance falls to the server.
+          dropTarget:
+            index === lastIndex || !parentFieldName
+              ? undefined
+              : {
+                  type: 'hierarchy-folder',
+                  ancestorIds: breadcrumbs.slice(0, index).map((ancestor) => ancestor.id),
+                  folderId: crumb.id,
+                  hierarchySlug,
+                  parentFieldName,
+                  title: crumb.title,
+                },
           label: crumb.title,
           // StepNav renders a url-less item as plain text, which is what makes the current folder
           // read as the trail's end rather than as another link back to itself.
@@ -215,6 +244,7 @@ export function HierarchyListView(props: ListViewClientProps) {
     collectionSlug,
     hierarchyData,
     hierarchyCollectionConfig,
+    hierarchySlug,
     collectionLabel,
     i18n,
     isScoped,
