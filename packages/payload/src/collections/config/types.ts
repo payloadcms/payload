@@ -526,6 +526,10 @@ export type CollectionAdminOptions = {
    */
   preview?: GeneratePreviewURL
   /**
+   * Field to use as the thumbnail image in grid/card views. Defaults to the first field of type `upload`.
+   */
+  useAsThumbnail?: string
+  /**
    * Field to use as title in Edit View and first column in List view
    */
   useAsTitle?: string
