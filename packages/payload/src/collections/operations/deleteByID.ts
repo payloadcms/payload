@@ -40,6 +40,7 @@ export type Arguments<TSlug extends CollectionSlug, TSelect extends SelectType> 
   trash?: boolean
 } & Pick<FindOptions<TSlug, TSelect>, 'select'>
 
+/** @internal */
 export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect extends SelectType>(
   incomingArgs: Arguments<TSlug, TSelect>,
 ): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {

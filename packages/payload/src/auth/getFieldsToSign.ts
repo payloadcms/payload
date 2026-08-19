@@ -113,6 +113,7 @@ const traverseFields = ({
   })
   return result
 }
+/** @internal */
 export const getFieldsToSign = (args: {
   collectionConfig: CollectionConfig
   email: string

@@ -1,6 +1,7 @@
 import type { Collection, CollectionSlug, DataFromCollectionSlug, PayloadRequest } from 'payload'
 
-import { isolateObjectProperty, updateByIDOperation } from 'payload'
+import { isolateObjectProperty } from 'payload'
+import { updateByIDOperation } from 'payload/internal'
 
 import type { Context } from '../types.js'
 

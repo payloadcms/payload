@@ -1,6 +1,6 @@
 import path from 'path'
-import { getPayload, migrateCLI, type SanitizedConfig } from 'payload'
-import { jobSystemGlobals, resetJobSystemGlobals } from 'payload/internal'
+import { getPayload, type SanitizedConfig } from 'payload'
+import { jobSystemGlobals, migrateCLI, resetJobSystemGlobals } from 'payload/internal'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 import { beforeAll, describe, expect, it } from 'vitest'

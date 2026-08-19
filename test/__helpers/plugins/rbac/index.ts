@@ -16,7 +16,8 @@ import type {
 } from 'payload'
 
 import { traverseFields } from '@payloadcms/ui/internal/server'
-import { defaultUserCollection, definePlugin, flattenAllFields, getLocalI18n } from 'payload'
+import { definePlugin, flattenAllFields, getLocalI18n } from 'payload'
+import { defaultUserCollection } from 'payload/internal'
 import { fieldAffectsData } from 'payload/shared'
 
 type CollectionOperation = keyof NonNullable<CollectionConfig['access']>

@@ -15,6 +15,7 @@ export type Arguments = {
   req: PayloadRequest
 }
 
+/** @internal */
 export const logoutOperation = async (incomingArgs: Arguments): Promise<boolean> => {
   let args = incomingArgs
   const {

@@ -237,6 +237,7 @@ type CreateCacheKeyArgs = {
   showHiddenFields: boolean
   transactionID: number | Promise<number | string> | string
 }
+/** @internal */
 export const createDataloaderCacheKey = ({
   collectionSlug,
   currentDepth,

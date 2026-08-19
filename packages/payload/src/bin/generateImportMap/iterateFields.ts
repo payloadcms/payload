@@ -19,6 +19,7 @@ const defaultUIFieldComponentKeys: Array<'Cell' | 'Description' | 'Field' | 'Fil
   'Field',
   'Filter',
 ]
+/** @internal */
 export function genImportMapIterateFields({
   addToImportMap,
   baseDir,

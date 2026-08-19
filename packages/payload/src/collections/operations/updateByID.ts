@@ -54,6 +54,7 @@ export type Arguments<TSlug extends CollectionSlug> = {
   unpublishAllLocales?: boolean
 } & Pick<FindOptions<TSlug, SelectType>, 'select'>
 
+/** @internal */
 export const updateByIDOperation = async <
   TSlug extends CollectionSlug,
   TSelect extends SelectFromCollectionSlug<TSlug> = SelectType,

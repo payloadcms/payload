@@ -1,11 +1,11 @@
 import type { I18nClient } from '@payloadcms/translations'
 import type {
-  EntityType,
   SanitizedCollectionConfig,
   SanitizedGlobalConfig,
   SanitizedPermissions,
   StaticLabel,
 } from 'payload'
+import type { EntityType } from 'payload/shared'
 
 import { getTranslation } from '@payloadcms/translations'
 

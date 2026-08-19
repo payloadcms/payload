@@ -33,6 +33,7 @@ export type Arguments<TSlug extends AuthCollectionSlug> = {
 
 export type Result = string
 
+/** @internal */
 export const forgotPasswordOperation = async <TSlug extends AuthCollectionSlug>(
   incomingArgs: Arguments<TSlug>,
 ): Promise<null | string> => {

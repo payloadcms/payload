@@ -1,6 +1,7 @@
 import type { Collection } from 'payload'
 
-import { extractJWT, isolateObjectProperty, meOperation } from 'payload'
+import { extractJWT, isolateObjectProperty } from 'payload'
+import { meOperation } from 'payload/internal'
 
 import type { Context } from '../types.js'
 

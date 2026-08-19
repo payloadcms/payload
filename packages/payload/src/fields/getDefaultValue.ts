@@ -10,6 +10,7 @@ type Args = {
   value?: JsonValue
 }
 
+/** @internal */
 export const getDefaultValue = async ({
   defaultValue,
   locale,

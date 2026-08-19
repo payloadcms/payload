@@ -65,6 +65,7 @@ export type Arguments<TSlug extends CollectionSlug> = {
   where: Where
 } & Pick<FindOptions<TSlug, SelectType>, 'select'>
 
+/** @internal */
 export const updateOperation = async <
   TSlug extends CollectionSlug,
   TSelect extends SelectFromCollectionSlug<TSlug>,

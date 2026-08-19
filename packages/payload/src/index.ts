@@ -120,7 +120,6 @@ import {
 export type * from './admin/adapters/index.js'
 export type { FieldState } from './admin/forms/Form.js'
 export type * from './admin/types.js'
-export { EntityType } from './admin/views/dashboard.js'
 import { Cron } from 'croner'
 
 import type { EncryptionKeyring } from './auth/crypto.js'
@@ -162,13 +161,10 @@ export { sessionsFieldConfig as baseSessionsField } from './auth/baseFields/sess
 export { usernameFieldConfig as baseUsernameField } from './auth/baseFields/username.js'
 export { verificationFields as baseVerificationFields } from './auth/baseFields/verification.js'
 
-export { defaultUserCollection } from './auth/defaultUser.js'
 export { executeAccess } from './auth/executeAccess.js'
 export { executeAuthStrategies } from './auth/executeAuthStrategies.js'
 export { extractAccessFromPermission } from './auth/extractAccessFromPermission.js'
 export { getAccessResults } from './auth/getAccessResults.js'
-export { getFieldsToSign } from './auth/getFieldsToSign.js'
-export { getLoginOptions } from './auth/getLoginOptions.js'
 
 /**
  * Shape constraint for PayloadTypes.
@@ -1325,25 +1321,14 @@ export interface DatabaseAdapter extends BaseDatabaseAdapter {}
 export type { Payload, RequestContext }
 export * from './auth/index.js'
 export { jwtSign } from './auth/jwt.js'
-export { accessOperation } from './auth/operations/access.js'
-export { forgotPasswordOperation } from './auth/operations/forgotPassword.js'
-export { initOperation } from './auth/operations/init.js'
 export type { LoginResult } from './auth/operations/login.js'
 export { checkLoginPermission } from './auth/operations/login.js'
 export { loginOperation } from './auth/operations/login.js'
-export { logoutOperation } from './auth/operations/logout.js'
 export type { MeOperationResult } from './auth/operations/me.js'
-export { meOperation } from './auth/operations/me.js'
-export { refreshOperation } from './auth/operations/refresh.js'
 export { registerFirstUserOperation } from './auth/operations/registerFirstUser.js'
-export { resetPasswordOperation } from './auth/operations/resetPassword.js'
-export { unlockOperation } from './auth/operations/unlock.js'
-export { verifyEmailOperation } from './auth/operations/verifyEmail.js'
 export { rotateSecret } from './auth/rotateSecret.js'
 export type { RotateSecretArgs, RotateSecretResult } from './auth/rotateSecret.js'
 export { JWTAuthentication } from './auth/strategies/jwt.js'
-export { incrementLoginAttempts } from './auth/strategies/local/incrementLoginAttempts.js'
-export { resetLoginAttempts } from './auth/strategies/local/resetLoginAttempts.js'
 export type {
   AuthStrategyFunction,
   AuthStrategyFunctionArgs,
@@ -1365,8 +1350,6 @@ export type {
 export { generateImportMap } from './bin/generateImportMap/index.js'
 export type { ImportMap } from './bin/generateImportMap/index.js'
 
-export { genImportMapIterateFields } from './bin/generateImportMap/iterateFields.js'
-export { migrate as migrateCLI } from './bin/migrate.js'
 export {
   type ClientCollectionConfig,
   createClientCollectionConfig,
@@ -1418,21 +1401,7 @@ export type {
 export type { CompoundIndex, FoldersConfig, TagsConfig } from './collections/config/types.js'
 
 export type { SanitizedCompoundIndex } from './collections/config/types.js'
-export { createDataloaderCacheKey, getDataLoader } from './collections/dataloader.js'
-
-export { countOperation } from './collections/operations/count.js'
-export { createOperation } from './collections/operations/create.js'
-export { deleteOperation } from './collections/operations/delete.js'
-export { deleteByIDOperation } from './collections/operations/deleteByID.js'
-export { docAccessOperation } from './collections/operations/docAccess.js'
-export { duplicateOperation } from './collections/operations/duplicate.js'
-export { findOperation } from './collections/operations/find.js'
-export { findByIDOperation } from './collections/operations/findByID.js'
-export { findVersionByIDOperation } from './collections/operations/findVersionByID.js'
-export { findVersionsOperation } from './collections/operations/findVersions.js'
-export { restoreVersionOperation } from './collections/operations/restoreVersion.js'
-export { updateOperation } from './collections/operations/update.js'
-export { updateByIDOperation } from './collections/operations/updateByID.js'
+export { getDataLoader } from './collections/dataloader.js'
 export { buildConfig } from './config/build.js'
 export {
   type ClientConfig,
@@ -1717,10 +1686,7 @@ export type {
   ValidateOptions,
   ValueWithRelation,
 } from './fields/config/types.js'
-export { getDefaultValue } from './fields/getDefaultValue.js'
-
 export { traverseFields as afterChangeTraverseFields } from './fields/hooks/afterChange/traverseFields.js'
-export { promise as afterReadPromise } from './fields/hooks/afterRead/promise.js'
 
 export { traverseFields as afterReadTraverseFields } from './fields/hooks/afterRead/traverseFields.js'
 export { traverseFields as beforeChangeTraverseFields } from './fields/hooks/beforeChange/traverseFields.js'
@@ -1781,29 +1747,12 @@ export type {
   GlobalConfig,
   SanitizedGlobalConfig,
 } from './globals/config/types.js'
-export { docAccessOperation as docAccessOperationGlobal } from './globals/operations/docAccess.js'
-export { findOneOperation } from './globals/operations/findOne.js'
-export { findVersionByIDOperation as findVersionByIDOperationGlobal } from './globals/operations/findVersionByID.js'
-
-export { findVersionsOperation as findVersionsOperationGlobal } from './globals/operations/findVersions.js'
-export { restoreVersionOperation as restoreVersionOperationGlobal } from './globals/operations/restoreVersion.js'
-export { updateOperation as updateOperationGlobal } from './globals/operations/update.js'
-export {
-  DEFAULT_ALLOW_HAS_MANY,
-  DEFAULT_HIERARCHY_TREE_LIMIT,
-  getHierarchyFieldName,
-  HIERARCHY_DEFAULT_LOCALE,
-  HIERARCHY_SLUG_PATH_FIELD,
-  HIERARCHY_TITLE_PATH_FIELD,
-} from './hierarchy/constants.js'
 export { createFolderField } from './hierarchy/createFolderField.js'
 export type { CreateFolderFieldOptions } from './hierarchy/createFolderField.js'
 export { createTagField } from './hierarchy/createTagField.js'
 export type { CreateTagFieldOptions } from './hierarchy/createTagField.js'
 export { getInitialTreeData } from './hierarchy/getInitialTreeData.js'
 export type { GetInitialTreeDataArgs, InitialTreeData } from './hierarchy/getInitialTreeData.js'
-export { injectHierarchyButton } from './hierarchy/injectHierarchyButton.js'
-export { resolveHierarchyCollections } from './hierarchy/resolveHierarchyCollections.js'
 export type {
   HierarchyConfig,
   SanitizedHierarchyConfig,
@@ -1946,15 +1895,8 @@ export { buildVersionCollectionFields } from './versions/buildCollectionFields.j
 export { buildVersionGlobalFields } from './versions/buildGlobalFields.js'
 export { buildVersionCompoundIndexes } from './versions/buildVersionCompoundIndexes.js'
 
-export { versionDefaults } from './versions/defaults.js'
-export { deleteCollectionVersions } from './versions/deleteCollectionVersions.js'
 export { appendVersionToQueryKey } from './versions/drafts/appendVersionToQueryKey.js'
 export { getQueryDraftsSort } from './versions/drafts/getQueryDraftsSort.js'
-export { enforceMaxVersions } from './versions/enforceMaxVersions.js'
-export { getLatestCollectionVersion } from './versions/getLatestCollectionVersion.js'
-export { getLatestGlobalVersion } from './versions/getLatestGlobalVersion.js'
-
-export { saveVersion } from './versions/saveVersion.js'
 export type { SchedulePublishTaskInput } from './versions/schedule/types.js'
 
 export type { SchedulePublish, TypeWithVersion } from './versions/types.js'

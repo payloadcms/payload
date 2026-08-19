@@ -9,6 +9,7 @@ type Args = {
   req: PayloadRequest
 }
 
+/** @internal */
 export const resetLoginAttempts = async ({
   collection,
   doc,

@@ -16,6 +16,7 @@ type Args = {
   req?: PayloadRequest
 }
 
+/** @internal */
 export const getLatestCollectionVersion = async <T extends TypeWithID = any>({
   id,
   config,

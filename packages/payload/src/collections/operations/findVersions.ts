@@ -34,6 +34,7 @@ export type Arguments = {
   where?: Where
 } & Pick<FindOptions<string, SelectType>, 'select'>
 
+/** @internal */
 export const findVersionsOperation = async <TData extends TypeWithVersion<TData>>(
   args: Arguments,
 ): Promise<PaginatedDocs<TData>> => {

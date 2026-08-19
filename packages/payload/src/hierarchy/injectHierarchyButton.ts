@@ -5,6 +5,7 @@ import type { CollectionConfig } from '../collections/config/types.js'
  *
  * The HierarchyButton provides a header UI for selecting parent hierarchy items
  * via miller columns, replacing the standard relationship field input.
+ * @internal
  */
 export const injectHierarchyButton = ({
   collection,

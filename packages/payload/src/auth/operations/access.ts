@@ -8,6 +8,7 @@ type Arguments = {
   req: PayloadRequest
 }
 
+/** @internal */
 export const accessOperation = async (args: Arguments): Promise<SanitizedPermissions> => {
   const { req } = args
 

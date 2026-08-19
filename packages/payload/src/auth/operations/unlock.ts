@@ -26,6 +26,7 @@ export type Arguments<TSlug extends AuthCollectionSlug> = {
   req: PayloadRequest
 }
 
+/** @internal */
 export const unlockOperation = async <TSlug extends AuthCollectionSlug>(
   args: Arguments<TSlug>,
 ): Promise<boolean> => {

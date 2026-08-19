@@ -12,6 +12,7 @@ type Args = {
   req?: PayloadRequest
 }
 
+/** @internal */
 export const enforceMaxVersions = async ({
   id,
   collection,

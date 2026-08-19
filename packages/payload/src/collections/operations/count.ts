@@ -20,7 +20,7 @@ export type Arguments = {
   where?: Where
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+/** @internal */
 export const countOperation = async <TSlug extends CollectionSlug>(
   incomingArgs: Arguments,
 ): Promise<{ totalDocs: number }> => {

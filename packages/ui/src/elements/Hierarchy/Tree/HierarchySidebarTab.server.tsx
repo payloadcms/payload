@@ -1,7 +1,8 @@
 import type { SidebarTabServerProps, Where } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { DEFAULT_HIERARCHY_TREE_LIMIT, getInitialTreeData } from 'payload'
+import { getInitialTreeData } from 'payload'
+import { DEFAULT_HIERARCHY_TREE_LIMIT } from 'payload/internal'
 import { PREFERENCE_KEYS } from 'payload/shared'
 import React from 'react'
 
