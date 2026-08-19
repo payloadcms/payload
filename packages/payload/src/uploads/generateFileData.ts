@@ -19,6 +19,7 @@ import { getFileByPath } from './getFileByPath.js'
 import { getImageSize } from './getImageSize.js'
 import { getSafeFileName } from './getSafeFilename.js'
 import { createImageSizes } from './image-resizing/createImageSizes.js'
+import { isAnimatedImage } from './isAnimatedImage.js'
 import { isImage } from './isImage.js'
 import { optionallyAppendMetadata } from './optionallyAppendMetadata.js'
 type Args<T> = {
@@ -175,7 +176,7 @@ export const generateFileData = async <T>({
   let newData = incomingFileData as T
   const filesToSave: FileToSave[] = []
   const fileData: Partial<FileData> = {}
-  const fileIsAnimatedType = ['image/avif', 'image/gif', 'image/webp'].includes(file.mimetype)
+  const fileIsAnimatedType = isAnimatedImage(file.mimetype)
   const cropData =
     typeof uploadEdits === 'object' && 'crop' in uploadEdits ? uploadEdits.crop : undefined
 
@@ -351,31 +352,42 @@ export const generateFileData = async <T>({
       }
     } else {
       // For non-image files with useTempFiles, read the buffer from the temp file
-      // since file.data is empty when using temp files
+      // since file.data is empty when using temp files.
+      //
+      // When local storage is disabled, filesToSave is never written to disk (create/update
+      // skip uploadFiles for it), and an unmodified temp file's bytes on disk are already
+      // correct, so there's nothing to read into memory or write back out. Skipping this
+      // avoids buffering the entire file just to discard or rewrite it unchanged - a client
+      // upload can be far larger than server memory allows.
+      const skipTempFileBuffer =
+        disableLocalStorage && Boolean(file.tempFilePath) && !fileBuffer?.data
+
       let bufferToSave: Buffer
       if (fileBuffer?.data) {
         bufferToSave = fileBuffer.data
       } else if (file.tempFilePath) {
-        bufferToSave = await fs.readFile(file.tempFilePath)
+        bufferToSave = skipTempFileBuffer ? Buffer.alloc(0) : await fs.readFile(file.tempFilePath)
       } else {
         bufferToSave = file.data
       }
 
-      filesToSave.push({
-        buffer: bufferToSave,
-        path: `${staticPath}/${fsSafeName}`,
-      })
+      if (!skipTempFileBuffer) {
+        filesToSave.push({
+          buffer: bufferToSave,
+          path: `${staticPath}/${fsSafeName}`,
+        })
 
-      // If using temp files and the image is being resized, write the file to the temp path
-      if (fileBuffer?.data || bufferToSave.length > 0) {
-        if (file.tempFilePath) {
-          await fs.writeFile(file.tempFilePath, fileBuffer?.data || bufferToSave) // write fileBuffer to the temp path
-        } else {
-          // Assign the _possibly modified_ file to the request object
-          req.file = {
-            ...file,
-            data: fileBuffer?.data || bufferToSave,
-            size: fileBuffer?.info.size,
+        // If using temp files and the image is being resized, write the file to the temp path
+        if (fileBuffer?.data || bufferToSave.length > 0) {
+          if (file.tempFilePath) {
+            await fs.writeFile(file.tempFilePath, fileBuffer?.data || bufferToSave) // write fileBuffer to the temp path
+          } else {
+            // Assign the _possibly modified_ file to the request object
+            req.file = {
+              ...file,
+              data: fileBuffer?.data || bufferToSave,
+              size: fileBuffer?.info.size,
+            }
           }
         }
       }
