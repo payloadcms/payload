@@ -386,6 +386,7 @@ jobs:
 
       - name: Setup Playwright
         uses: ./.github/actions/setup-playwright
+        timeout-minutes: 10
 
       - name: E2E Tests
         # E2E Test Execution Strategy:
@@ -498,6 +499,7 @@ jobs:
 
       - name: Setup Playwright
         uses: ./.github/actions/setup-playwright
+        timeout-minutes: 10
 
       - name: Runs Template Int Tests
         run: pnpm --filter ${{ matrix.template }} run test:int
