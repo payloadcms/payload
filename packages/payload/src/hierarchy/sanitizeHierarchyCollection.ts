@@ -106,10 +106,12 @@ export const sanitizeHierarchyCollection = (
   const smallIconComponent = collectionConfig.hierarchy.admin?.components?.SmallIcon
 
   const slugField = collectionConfig.hierarchy.slugField
+  const deleteStrategy = collectionConfig.hierarchy.deleteStrategy ?? 'reparent'
 
   // Apply hierarchy to collection (adds fields and hooks)
   addHierarchyToCollection({
     collectionConfig,
+    deleteStrategy,
     parentFieldName: collectionConfig.hierarchy.parentFieldName,
     slugFieldName: slugField,
     slugPathFieldName,
@@ -152,6 +154,7 @@ export const sanitizeHierarchyCollection = (
     },
     allowHasMany,
     collectionSpecific,
+    deleteStrategy,
     joinField,
     parentFieldName,
     relatedCollections: {},
