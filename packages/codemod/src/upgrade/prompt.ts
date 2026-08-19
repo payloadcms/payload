@@ -28,7 +28,7 @@ Do not proceed to step 2 until these are complete and committed.
 ## 2. Payload mechanical slice
 Run this from the project root:
 
-    npx @payloadcms/codemod upgrade .
+    npx @payloadcms/codemod upgrade run .
 
 Add \`--tag <dist-tag>\` to resolve Payload from a non-default dist-tag (default is \`canary\`).
 This pins the Payload packages to v4, removes conflicting overrides, writes the toolchain

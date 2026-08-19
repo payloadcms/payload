@@ -1,6 +1,6 @@
 # Payload v3 -> v4: remaining steps
 
-`payload-codemod upgrade` has done the mechanical slice: pinned Payload packages to v4,
+`npx @payloadcms/codemod upgrade run` has done the mechanical slice: pinned Payload packages to v4,
 removed conflicting overrides, written the toolchain floors, installed, and run the AST
 transforms. This checklist is what it did NOT do. The authoritative breaking-change list is
 the migration guide (`docs/migration-guide/v4.mdx`, also bundled at `dist/runbook/v4.mdx`):
@@ -11,7 +11,7 @@ any gate fails or any generated file is stale.
 
 ## 0. Before upgrading (do on v3)
 
-Some migrations need v3 tooling that v4 removes, so they must run BEFORE `payload-codemod upgrade`,
+Some migrations need v3 tooling that v4 removes, so they must run BEFORE `upgrade run`,
 while the v3 packages are still installed:
 
 - Slate richtext is deleted in v4. Migrate Slate -> Lexical on v3; the migration path is gone once
