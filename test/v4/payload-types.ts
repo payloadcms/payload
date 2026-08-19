@@ -840,7 +840,7 @@ export interface Tag {
   createdAt: string;
   _h_slugPath?: string | null;
   _h_titlePath?: string | null;
-  allowedCollections?: ('talks' | 'text-fields' | 'tag-items')[] | null;
+  allowedCollections?: ('talks' | 'text-fields' | 'tag-items' | 'uploads')[] | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1166,6 +1166,8 @@ export interface Talk {
 export interface Upload {
   id: string;
   alt?: string | null;
+  parent?: (string | null) | Folder;
+  _h_tags?: (string | Tag)[] | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -3486,6 +3488,8 @@ export interface RubbishWithDraftsSelect<T extends boolean = true> {
  */
 export interface UploadsSelect<T extends boolean = true> {
   alt?: T;
+  parent?: T;
+  _h_tags?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;

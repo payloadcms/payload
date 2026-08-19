@@ -215,52 +215,63 @@ function injectCollectionSpecificValidation({
     }
 
     // No hierarchy selected, no validation needed
-    if (!value) {
+    if (!value || (Array.isArray(value) && value.length === 0)) {
       return true
     }
 
     const { collectionSlug, overrideAccess, previousValue, req } = options
-    const newID = extractID<Document>(value)
 
-    // Value didn't change, no validation needed
-    if (previousValue && extractID<Document>(previousValue) === newID) {
-      return true
-    }
+    // Field may be hasMany, in which case value/previousValue are arrays of IDs
+    const newIDs = (Array.isArray(value) ? value : [value]).map((item) => extractID<Document>(item))
+    const previousIDs = new Set(
+      (Array.isArray(previousValue) ? previousValue : previousValue ? [previousValue] : []).map(
+        (item) => extractID<Document>(item),
+      ),
+    )
 
-    // Fetch the hierarchy item to check its type field
-    let parentItem: Document | null = null
-    if (typeof newID === 'string' || typeof newID === 'number') {
-      try {
-        parentItem = await req.payload.findByID({
-          id: newID,
-          collection: hierarchySlug,
-          depth: 0,
-          overrideAccess: overrideAccess ?? false,
-          req,
-          select: { [typeFieldName]: true },
-        })
-      } catch {
+    for (const newID of newIDs) {
+      // Value didn't change, no validation needed
+      if (previousIDs.has(newID)) {
+        continue
+      }
+
+      // Fetch the hierarchy item to check its type field
+      let parentItem: Document | null = null
+      if (typeof newID === 'string' || typeof newID === 'number') {
+        try {
+          parentItem = await req.payload.findByID({
+            id: newID,
+            collection: hierarchySlug,
+            depth: 0,
+            overrideAccess: overrideAccess ?? false,
+            req,
+            select: { [typeFieldName]: true },
+          })
+        } catch {
+          return `Hierarchy item with ID ${newID} not found`
+        }
+      }
+
+      if (!parentItem) {
         return `Hierarchy item with ID ${newID} not found`
       }
+
+      const allowedTypes: string[] = (parentItem[typeFieldName] as string[]) || []
+
+      // If hierarchy has no types, it accepts all collections
+      if (allowedTypes.length === 0) {
+        continue
+      }
+
+      // Check if this collection is allowed
+      if (collectionSlug && allowedTypes.includes(collectionSlug)) {
+        continue
+      }
+
+      return `Hierarchy item "${newID}" does not allow documents of type "${collectionSlug}"`
     }
 
-    if (!parentItem) {
-      return `Hierarchy item with ID ${newID} not found`
-    }
-
-    const allowedTypes: string[] = (parentItem[typeFieldName] as string[]) || []
-
-    // If hierarchy has no types, it accepts all collections
-    if (allowedTypes.length === 0) {
-      return true
-    }
-
-    // Check if this collection is allowed
-    if (collectionSlug && allowedTypes.includes(collectionSlug)) {
-      return true
-    }
-
-    return `Hierarchy item "${newID}" does not allow documents of type "${collectionSlug}"`
+    return true
   }
 
   hierarchyField.validate = validate

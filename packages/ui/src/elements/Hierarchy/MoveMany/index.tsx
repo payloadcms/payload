@@ -1,23 +1,19 @@
 'use client'
 import type { ClientCollectionConfig } from 'payload'
 
-import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
-import React, { useCallback, useMemo, useState } from 'react'
+import React, { useCallback, useMemo } from 'react'
 import { toast } from 'sonner'
 
 import type { SelectionWithPath } from '../Modal/types.js'
 
 import { useConfig } from '../../../providers/Config/index.js'
-import { useDocumentSelection } from '../../../providers/DocumentSelection/index.js'
 import { useLocale } from '../../../providers/Locale/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { requests } from '../../../utilities/api.js'
-import { ConfirmationModal } from '../../ConfirmationModal/index.js'
 import { ListSelectionButton } from '../../ListSelection/index.js'
-import { Translation } from '../../Translation/index.js'
 import { useHierarchyModal } from '../Modal/useHierarchyModal.js'
 
 export const baseClass = 'move-many'
@@ -29,10 +25,14 @@ type MoveManyProps = {
   hierarchySlug: string
   /** Icon to display in the hierarchy modal */
   Icon?: React.ReactNode
-  /** When multiple MoveMany components are rendered on the page, this will differentiate them */
-  modalPrefix?: string
   /** Callback after successful move */
   onSuccess?: () => void
+  /**
+   * Collection slugs the destination folder must accept (via its `allowedCollections` config).
+   * Pass the selected items' own collection slugs, plus any `allowedCollections` of selected
+   * folders, so the picker only shows folders that can hold every selected item.
+   */
+  requiredCollections?: string[]
   /** Selections grouped by collection slug */
   selections: Record<string, { ids: (number | string)[] }>
 }
@@ -54,54 +54,18 @@ export function MoveMany({
   currentParentID,
   hierarchySlug,
   Icon,
-  modalPrefix,
   onSuccess,
+  requiredCollections,
   selections,
 }: MoveManyProps) {
   const { i18n, t } = useTranslation()
   const { code: locale } = useLocale()
-  const { openModal } = useModal()
   const {
     config: {
       collections,
       routes: { api },
     },
   } = useConfig()
-
-  const { getSelectionsWithMetadata } = useDocumentSelection()
-
-  const [destination, setDestination] = useState<{
-    id: null | number | string
-    title: string
-  } | null>(null)
-
-  const confirmMoveDrawerSlug = `${modalPrefix ? `${modalPrefix}-` : ''}confirm-move-many`
-
-  // Compute required collections from selection metadata
-  // For related items: add their collection slug
-  // For folders: add their allowedCollections values
-  const requiredCollections = useMemo(() => {
-    const selectionsWithMeta = getSelectionsWithMetadata()
-    const required = new Set<string>()
-
-    for (const [collectionSlug, { selections: items }] of Object.entries(selectionsWithMeta)) {
-      if (collectionSlug === hierarchySlug) {
-        // For folders, add their allowedCollections to required set
-        for (const { metadata } of items) {
-          if (metadata.allowedCollections) {
-            for (const slug of metadata.allowedCollections) {
-              required.add(slug)
-            }
-          }
-        }
-      } else {
-        // For related items, add their collection slug
-        required.add(collectionSlug)
-      }
-    }
-
-    return required.size > 0 ? Array.from(required) : undefined
-  }, [getSelectionsWithMetadata, hierarchySlug])
 
   // Folders being moved cannot be selected as destination (can't move into themselves)
   const disabledIds = useMemo(() => {
@@ -151,6 +115,95 @@ export function MoveMany({
   // Check if hierarchy has a valid parentFieldName
   const canMove = parentFieldName !== undefined
 
+  // Performs the move immediately - there is no separate confirmation step, so the browse
+  // modal is closed as soon as a destination is chosen rather than staying open behind one.
+  const performMove = useCallback(
+    async (destination: { id: null | number | string; title: string }) => {
+      let totalMoved = 0
+      let hasErrors = false
+
+      try {
+        for (const [collectionSlug, { ids }] of Object.entries(selections)) {
+          if (ids.length === 0) {
+            continue
+          }
+
+          const queryString = qs.stringify(
+            {
+              locale,
+              where: { id: { in: ids } },
+            },
+            { addQueryPrefix: true },
+          )
+
+          const url = formatAdminURL({
+            apiRoute: api,
+            path: `/${collectionSlug}${queryString}`,
+          })
+
+          const response = await requests.patch(url, {
+            body: JSON.stringify({ [parentFieldName]: destination.id }),
+            headers: {
+              'Accept-Language': i18n.language,
+              'Content-Type': 'application/json',
+              credentials: 'include',
+            },
+          })
+
+          const json = await response.json()
+
+          if (response.status >= 400) {
+            hasErrors = true
+
+            if (json?.errors?.length > 0) {
+              toast.error(json.message || t('error:unknown'), {
+                description: json.errors
+                  .map((error: { message: string }) => error.message)
+                  .join('\n'),
+              })
+            } else {
+              toast.error(json?.message || t('error:unknown'))
+            }
+
+            continue
+          }
+
+          const movedCount = json?.docs?.length || 0
+          totalMoved += movedCount
+
+          if (json?.errors?.length > 0) {
+            hasErrors = true
+            toast.error(json.message, {
+              description: json.errors
+                .map((error: { message: string }) => error.message)
+                .join('\n'),
+            })
+          }
+        }
+
+        if (totalMoved > 0) {
+          const successKey =
+            destination.id === null ? 'hierarchy:itemsMovedToRoot' : 'hierarchy:itemsMovedTo'
+
+          toast.success(
+            t(successKey, {
+              count: totalMoved,
+              destination: destination.title,
+              label,
+            }),
+          )
+        }
+
+        if (!hasErrors || totalMoved > 0) {
+          onSuccess?.()
+        }
+      } catch (_err) {
+        toast.error(t('error:unknown'))
+      }
+    },
+    [selections, parentFieldName, locale, api, i18n, t, label, onSuccess],
+  )
+
   const handleDrawerSave = useCallback(
     ({ selections: selectionsMap }: { selections: Map<number | string, SelectionWithPath> }) => {
       if (selectionsMap.size === 0) {
@@ -158,108 +211,20 @@ export function MoveMany({
       }
 
       const firstSelection = selectionsMap.values().next().value
-      const destinationId = firstSelection?.id
+      const destinationId = firstSelection?.id ?? null
       const destinationTitle =
         firstSelection?.path?.[firstSelection.path.length - 1]?.title || String(destinationId)
 
-      setDestination({ id: destinationId, title: destinationTitle })
-      openModal(confirmMoveDrawerSlug)
+      closeModal()
+      void performMove({ id: destinationId, title: destinationTitle })
     },
-    [openModal, confirmMoveDrawerSlug],
+    [closeModal, performMove],
   )
 
   const handleMoveToRoot = useCallback(() => {
-    setDestination({ id: null, title: t('hierarchy:noParent') })
-    openModal(confirmMoveDrawerSlug)
-  }, [openModal, confirmMoveDrawerSlug, t])
-
-  const handleConfirmMove = useCallback(async () => {
-    if (destination === null) {
-      return
-    }
-
-    let totalMoved = 0
-    let hasErrors = false
-
-    try {
-      for (const [collectionSlug, { ids }] of Object.entries(selections)) {
-        if (ids.length === 0) {
-          continue
-        }
-
-        const queryString = qs.stringify(
-          {
-            locale,
-            where: { id: { in: ids } },
-          },
-          { addQueryPrefix: true },
-        )
-
-        const url = formatAdminURL({
-          apiRoute: api,
-          path: `/${collectionSlug}${queryString}`,
-        })
-
-        const response = await requests.patch(url, {
-          body: JSON.stringify({ [parentFieldName]: destination.id }),
-          headers: {
-            'Accept-Language': i18n.language,
-            'Content-Type': 'application/json',
-            credentials: 'include',
-          },
-        })
-
-        const json = await response.json()
-
-        if (response.status >= 400) {
-          hasErrors = true
-
-          if (json?.errors?.length > 0) {
-            toast.error(json.message || t('error:unknown'), {
-              description: json.errors
-                .map((error: { message: string }) => error.message)
-                .join('\n'),
-            })
-          } else {
-            toast.error(json?.message || t('error:unknown'))
-          }
-
-          continue
-        }
-
-        const movedCount = json?.docs?.length || 0
-        totalMoved += movedCount
-
-        if (json?.errors?.length > 0) {
-          hasErrors = true
-          toast.error(json.message, {
-            description: json.errors.map((error: { message: string }) => error.message).join('\n'),
-          })
-        }
-      }
-
-      if (totalMoved > 0) {
-        const successKey =
-          destination.id === null ? 'hierarchy:itemsMovedToRoot' : 'hierarchy:itemsMovedTo'
-
-        toast.success(
-          t(successKey, {
-            destination: destination.title,
-            title: label,
-          }),
-        )
-      }
-
-      if (!hasErrors || totalMoved > 0) {
-        closeModal()
-        onSuccess?.()
-      }
-    } catch (_err) {
-      toast.error(t('error:unknown'))
-    } finally {
-      setDestination(null)
-    }
-  }, [closeModal, destination, selections, parentFieldName, locale, api, i18n, t, label, onSuccess])
+    closeModal()
+    void performMove({ id: null, title: t('hierarchy:noParent') })
+  }, [closeModal, performMove, t])
 
   if (count === 0 || !canMove) {
     return null
@@ -281,42 +246,6 @@ export function MoveMany({
         onSave={handleDrawerSave}
         showMoveToRoot
         title={t('general:moveCount', { count, label: modalTitleLabel })}
-      />
-      <ConfirmationModal
-        body={
-          <p>
-            {destination?.id === null ? (
-              <Translation
-                elements={{
-                  '1': ({ children }) => <strong>{children}</strong>,
-                }}
-                i18nKey="hierarchy:moveItemsToRootConfirmation"
-                t={t}
-                variables={{
-                  count,
-                  label,
-                }}
-              />
-            ) : (
-              <Translation
-                elements={{
-                  '1': ({ children }) => <strong>{children}</strong>,
-                }}
-                i18nKey="general:moveConfirm"
-                t={t}
-                variables={{
-                  count,
-                  destination: destination?.title || '',
-                  label,
-                }}
-              />
-            )}
-          </p>
-        }
-        confirmingLabel={t('general:moving')}
-        heading={t('general:confirmMove')}
-        modalSlug={confirmMoveDrawerSlug}
-        onConfirm={handleConfirmMove}
       />
     </React.Fragment>
   )

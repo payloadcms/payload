@@ -534,8 +534,8 @@ export const enTranslations = {
     yes: 'Yes',
   },
   hierarchy: {
-    itemsMovedTo: '{{title}} moved to {{destination}}',
-    itemsMovedToRoot: '{{title}} moved to root',
+    itemsMovedTo: 'Moved {{count}} {{label}} to {{destination}}',
+    itemsMovedToRoot: 'Moved {{count}} {{label}} to root',
     moveItemsToRootConfirmation:
       'You are about to move <1>{{count}} {{label}}</1> to root. Are you sure?',
     moveToRoot: 'Move to Root',
