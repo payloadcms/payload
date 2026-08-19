@@ -566,7 +566,10 @@ jobs:
           restore-keys: |
             visual-pnpm-store-
 
-      - name: Run visual regression tests
+      # A long-lived, named container that the steps below `docker exec` into, so setup and the
+      # actual test run show as separate steps instead of one `docker run ... && ... && ...` step
+      # that buries the test output under several minutes of install/build output.
+      - name: Start visual regression container
         # PLAYWRIGHT_VERSION is read from package.json, which on a `pull_request` checkout is
         # fork-controlled content — passed via env and referenced as "$PLAYWRIGHT_VERSION" so it's
         # shell *data*, never spliced as raw text into the script the way a `${{ }}` reference
@@ -574,7 +577,8 @@ jobs:
         env:
           PLAYWRIGHT_VERSION: ${{ steps.playwright-version.outputs.version }}
         run: |
-          docker run --rm \
+          docker run -d --rm \
+            --name visual-regression \
             --network host \
             --ipc=host \
             -v "$PWD":/repo \
@@ -582,17 +586,31 @@ jobs:
             -e PAYLOAD_DATABASE=mongodb \
             -e NEXT_TELEMETRY_DISABLED=1 \
             "mcr.microsoft.com/playwright:v${PLAYWRIGHT_VERSION}-noble" \
-            bash -lc "
-              apt-get update -qq && apt-get install -y -qq build-essential python3 > /dev/null &&
-              npm install -g pnpm@\$(grep '^pnpm ' .tool-versions | awk '{print \$2}') &&
-              # --location=user avoids writing storeDir into pnpm-workspace.yaml, which pnpm
-              # does by default when the cwd is a workspace root.
-              pnpm config set store-dir /repo/.pnpm-store --location=user &&
-              pnpm install --frozen-lockfile &&
-              ( [ -d packages/payload/dist ] || pnpm run build:all ) &&
-              pnpm prepare-run-test-against-prod:ci &&
-              bash .github/scripts/visual/run-visual-suites.sh -- --fully-parallel
-            "
+            sleep infinity
+
+      - name: Install dependencies
+        run: |
+          docker exec visual-regression bash -lc "
+            apt-get update -qq && apt-get install -y -qq build-essential python3 > /dev/null &&
+            npm install -g pnpm@\$(grep '^pnpm ' .tool-versions | awk '{print \$2}') &&
+            # --location=user avoids writing storeDir into pnpm-workspace.yaml, which pnpm
+            # does by default when the cwd is a workspace root.
+            pnpm config set store-dir /repo/.pnpm-store --location=user &&
+            pnpm install --frozen-lockfile
+          "
+
+      - name: Build packages
+        run: docker exec visual-regression bash -lc "[ -d packages/payload/dist ] || pnpm run build:all"
+
+      - name: Prepare test environment
+        run: docker exec visual-regression bash -lc "pnpm prepare-run-test-against-prod:ci"
+
+      - name: Run visual regression tests
+        run: docker exec visual-regression bash -lc "bash .github/scripts/visual/run-visual-suites.sh -- --fully-parallel"
+
+      - name: Stop visual regression container
+        if: always()
+        run: docker stop visual-regression
 
   # Build listed templates with packed local packages and then runs their int and e2e tests
   build-and-test-templates:
