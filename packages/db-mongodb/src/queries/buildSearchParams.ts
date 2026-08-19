@@ -493,14 +493,21 @@ async function buildHasManyRelationshipSearchParam({
 
   switch (operator) {
     case 'every': {
-      // `every` matches when there are no related documents that fail the nested query.
-      const nonMatchingRelatedDocumentIDs = Object.keys(matchingRelatedDocumentsQuery).length
-        ? await findRelatedDocumentIDs({ $nor: [matchingRelatedDocumentsQuery] })
-        : []
+      // Every related document satisfies an empty nested query.
+      if (!Object.keys(matchingRelatedDocumentsQuery).length) {
+        return {
+          path,
+          value: { $nin: [] },
+        }
+      }
+
+      // Inverting the nested query with `$nor` would make MongoDB reject `$near` and `$text`, so
+      // `every` is asserted on the parent instead: none of its IDs may fall outside the match.
+      const matchingRelatedDocumentIDs = await findRelatedDocumentIDs(matchingRelatedDocumentsQuery)
 
       return {
         path,
-        value: { $nin: nonMatchingRelatedDocumentIDs },
+        value: { $not: { $elemMatch: { $nin: matchingRelatedDocumentIDs } } },
       }
     }
 
