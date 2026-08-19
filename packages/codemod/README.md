@@ -37,7 +37,8 @@ agent is installed, it prints the prompt instead of prompting.
 
 ### `upgrade run` (mechanical slice)
 
-`npx @payloadcms/codemod upgrade run [path]` performs the deterministic v3 -> v4 slice:
+`npx @payloadcms/codemod upgrade run` performs the deterministic v3 -> v4 slice against the current
+directory (run it from your project root):
 
 1. Resolves the current Payload canary from the npm registry (override with `--tag <dist-tag>`).
 2. Rewrites `package.json`: pins `payload` + every `@payloadcms/*` to that exact version in
