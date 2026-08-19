@@ -18,6 +18,7 @@ import { formatAdminURL, isNumber } from 'payload/shared'
 
 import type { ViewFromConfig } from './getCustomViewByRoute.js'
 
+import { getFolderHierarchySlug } from '../../elements/Hierarchy/getFolderHierarchySlug.js'
 import { isPathMatchingRoute } from '../../utilities/isPathMatchingRoute.js'
 import { TrashView } from '../CollectionTrash/index.js'
 import { DocumentView } from '../Document/index.js'
@@ -106,6 +107,16 @@ export const getRouteData = ({
   const [segmentOne, segmentTwo, segmentThree, segmentFour, segmentFive, segmentSix] = segments
 
   const viewActions: CustomComponent[] = [...(config?.admin?.components?.actions || [])]
+
+  /**
+   * A collection reaches the hierarchy view either by owning a hierarchy (Folders) or by belonging
+   * to one via a folder field (Media). The latter renders the same view scoped to its own documents.
+   */
+  const canRenderHierarchyView = Boolean(
+    collectionConfig &&
+      (collectionConfig.hierarchy ||
+        getFolderHierarchySlug(config.collections, collectionConfig.slug)),
+  )
 
   const oneSegmentViews: OneSegmentViews = {
     account: adminViews.account?.Component as React.FC<AdminViewServerProps>,
@@ -209,7 +220,7 @@ export const getRouteData = ({
         // --> /collections/:collectionSlug'
         routeParams.collection = collectionConfig.slug
 
-        if (collectionPreferences?.listViewType === 'hierarchy' && collectionConfig.hierarchy) {
+        if (collectionPreferences?.listViewType === 'hierarchy' && canRenderHierarchyView) {
           // Render hierarchy view by default if set in preferences
           ViewToRender = {
             Component: HierarchyView,
@@ -305,7 +316,7 @@ export const getRouteData = ({
           viewType = 'trash'
 
           viewActions.push(...(collectionConfig.admin.components?.views?.list?.actions || []))
-        } else if (segmentThree === 'hierarchy' && collectionConfig.hierarchy) {
+        } else if (segmentThree === 'hierarchy' && canRenderHierarchyView) {
           // --> /collections/:collectionSlug/hierarchy
           ViewToRender = {
             Component: HierarchyView,
