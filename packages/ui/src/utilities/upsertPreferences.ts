@@ -30,6 +30,7 @@ export const getPreferences = cache(
         collection: 'payload-preferences',
         depth: 0,
         limit: 1,
+        overrideAccess: true,
         pagination: false,
         where: {
           and: [
@@ -95,6 +96,7 @@ export const upsertPreferences = async <T extends Record<string, unknown> | stri
       },
       depth: 0,
       disableTransaction: true,
+      overrideAccess: true,
       user: req.user,
     })
     return createdPrefs.value
@@ -126,6 +128,7 @@ export const upsertPreferences = async <T extends Record<string, unknown> | stri
           },
           depth: 0,
           disableTransaction: true,
+          overrideAccess: true,
           user: req.user,
         })
         ?.then((res) => res.value)
