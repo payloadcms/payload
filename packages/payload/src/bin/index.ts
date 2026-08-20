@@ -174,7 +174,6 @@ async function runBinScript({
     await payload.jobs.run({
       allQueues,
       limit,
-      overrideAccess: true,
       queue,
     })
 
