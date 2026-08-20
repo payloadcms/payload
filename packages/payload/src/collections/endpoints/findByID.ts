@@ -24,6 +24,7 @@ export const findByIDHandler: PayloadHandler = async (req) => {
     draft,
     flattenLocales,
     joins,
+    overrideAccess: false,
     populate,
     req,
     select,

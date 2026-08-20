@@ -18,6 +18,7 @@ export const findVersionByIDHandler: PayloadHandler = async (req) => {
     id: req.routeParams!.id as string,
     depth: isNumber(depth) ? Number(depth) : undefined,
     globalConfig,
+    overrideAccess: false,
     populate: sanitizePopulateParam(req.query.populate),
     req,
     select: sanitizeSelectParam(req.query.select),

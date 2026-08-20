@@ -16,6 +16,7 @@ export const deleteByIDHandler: PayloadHandler = async (req) => {
     id,
     collection,
     depth,
+    overrideAccess: false,
     overrideLock: overrideLock ?? false,
     populate,
     req,
