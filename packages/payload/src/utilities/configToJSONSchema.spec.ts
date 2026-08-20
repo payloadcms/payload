@@ -905,10 +905,10 @@ describe('configToJSONSchema', () => {
     const sanitizedConfig = sanitizeConfig(config)
     const { jsonSchema: schema } = configToJSONSchema(sanitizedConfig, 'text')
 
-    expect(schema?.$defs?.locale).toStrictEqual({
+    expect(schema?.properties?.locale).toStrictEqual({
       type: 'string',
       enum: ['en', 'fr'],
     })
-    expect(schema?.$defs?.fallbackLocale).toBeDefined()
+    expect(schema?.properties?.fallbackLocale).toBeDefined()
   })
 })

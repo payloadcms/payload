@@ -278,8 +278,8 @@ function generateLocaleEntitySchemas(localization: SanitizedConfig['localization
           if ('code' in locale && typeof locale.code === 'string') {
             return locale.code
           }
-          if ('value' in locale && typeof (locale as any).value === 'string') {
-            return (locale as any).value
+          if ('value' in locale && typeof locale.value === 'string') {
+            return locale.value
           }
         }
         return undefined
@@ -305,13 +305,20 @@ function generateFallbackLocaleEntitySchemas(
       'localeCodes' in localization && localization.localeCodes
         ? localization.localeCodes
         : 'locales' in localization && localization.locales
-          ? localization.locales.map((l) =>
-              typeof l === 'string'
-                ? l
-                : typeof l === 'object' && l !== null
-                  ? l.code ?? (l as any).value
-                  : undefined,
-            )
+          ? localization.locales.map((l) => {
+              if (typeof l === 'string') {
+                return l
+              }
+              if (typeof l === 'object' && l !== null) {
+                if ('code' in l && typeof l.code === 'string') {
+                  return l.code
+                }
+                if ('value' in l && typeof l.value === 'string') {
+                  return l.value
+                }
+              }
+              return undefined
+            })
           : []
 
     const localeCodes = [...rawCodes].filter((c): c is string => Boolean(c))
