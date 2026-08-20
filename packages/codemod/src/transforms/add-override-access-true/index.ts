@@ -1,4 +1,6 @@
-import { Node } from 'ts-morph'
+import type { ObjectLiteralExpression } from 'ts-morph'
+
+import { Node, SyntaxKind } from 'ts-morph'
 
 import type { Transform } from '../../types.js'
 
@@ -53,7 +55,7 @@ export const addOverrideAccessTrue: Transform = {
     const filesChanged = new Set<string>()
 
     for (const sourceFile of project.getSourceFiles()) {
-      let mutated = false
+      const insertions: Insertion[] = []
 
       sourceFile.forEachDescendant((node) => {
         if (!Node.isCallExpression(node)) {
@@ -89,25 +91,89 @@ export const addOverrideAccessTrue: Transform = {
           return
         }
 
-        // `addPropertyAssignment` emits a double comma when the object ends with a
-        // trailing comment. Inserting at the property count avoids that, and keeps
-        // the comment attached to the end of the object.
-        firstArg.insertPropertyAssignment(firstArg.getProperties().length, {
-          name: 'overrideAccess',
-          initializer: 'true',
-        })
-        mutated = true
+        insertions.push(planInsertion(firstArg))
       })
 
-      if (mutated) {
-        filesChanged.add(sourceFile.getFilePath())
+      if (insertions.length === 0) {
+        continue
       }
+
+      // Applying back to front keeps every earlier offset valid, and means nested
+      // calls are handled before the call that contains them.
+      for (const { position, text } of insertions.sort((a, b) => b.position - a.position)) {
+        sourceFile.insertText(position, text)
+      }
+
+      filesChanged.add(sourceFile.getFilePath())
     }
 
     return { filesChanged: [...filesChanged] }
   },
   description:
     'Add an explicit `overrideAccess: true` to Local API calls that omit it. Payload 4 requires the property; `true` preserves the Payload 3 default of skipping access control. Review each inserted value and switch to `false` wherever the operation acts on behalf of a user.',
+}
+
+type Insertion = {
+  position: number
+  text: string
+}
+
+/**
+ * Works out where to put `overrideAccess: true` and what to write, without
+ * asking ts-morph to insert a property node.
+ *
+ * ts-morph's property insertion mishandles the comma whenever the object holds a
+ * comment — it emitted `req,,` for a comment sitting between two properties, and
+ * a double comma for one trailing the last property. Both produce a file that no
+ * longer parses, which in turn makes ESLint report nothing at all. Writing the
+ * text ourselves sidesteps the whole problem.
+ *
+ * The property goes last so the surrounding formatting is left alone. Callers are
+ * expected to run ESLint's `perfectionist/sort-objects` fixer afterwards.
+ */
+const planInsertion = (object: ObjectLiteralExpression): Insertion => {
+  const properties = object.getProperties()
+  const isSingleLine = !object.getText().includes('\n')
+
+  if (properties.length === 0) {
+    const openBrace = object.getFirstChildByKindOrThrow(SyntaxKind.OpenBraceToken)
+
+    return {
+      position: openBrace.getEnd(),
+      text: isSingleLine ? ' overrideAccess: true ' : `\n  overrideAccess: true,`,
+    }
+  }
+
+  const lastProperty = properties[properties.length - 1]!
+  const fullText = object.getSourceFile().getFullText()
+
+  // Step past any whitespace to see whether the last property already has a
+  // trailing comma. Inserting after that comma, rather than after the property,
+  // is what keeps a following comment attached to the end of the object.
+  let cursor = lastProperty.getEnd()
+
+  while (cursor < fullText.length && /\s/.test(fullText[cursor]!)) {
+    cursor += 1
+  }
+
+  const hasTrailingComma = fullText[cursor] === ','
+  const position = hasTrailingComma ? cursor + 1 : lastProperty.getEnd()
+
+  if (isSingleLine) {
+    return {
+      position,
+      text: hasTrailingComma ? ' overrideAccess: true,' : ', overrideAccess: true',
+    }
+  }
+
+  const indent = lastProperty.getIndentationText()
+
+  return {
+    position,
+    text: hasTrailingComma
+      ? `\n${indent}overrideAccess: true,`
+      : `,\n${indent}overrideAccess: true,`,
+  }
 }
 
 /**
