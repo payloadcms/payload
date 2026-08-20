@@ -6,9 +6,9 @@ import { describe, expect, it } from 'vitest'
 
 import type { CLIRuntime, Config, SanitizedConfig } from '../config/types.js'
 
-import { addDefaultsToConfig } from '../config/defaults.js'
+import { sanitizeConfig } from '../config/sanitize.js'
 import { defineCLICommand } from './defineCLICommand.js'
-import { createProgram } from './index.js'
+import { createCLI } from './index.js'
 import { CLICommandError, getCLIErrorOutput } from './runtime/output.js'
 import { strictObject } from './zod.js'
 
@@ -16,14 +16,15 @@ const cliDirectory = path.dirname(fileURLToPath(import.meta.url))
 const testConfigDirectory = path.resolve(cliDirectory, '../../../../test/config')
 
 const createConfig = ({ cli }: { cli?: Config['cli'] } = {}): SanitizedConfig => {
-  const config = addDefaultsToConfig({ cli } as Config)
-
-  return {
-    ...config,
-    paths: {
-      configDir: cliDirectory,
+  return sanitizeConfig({
+    cli,
+    db: {
+      defaultIDType: 'text',
+      // @ts-expect-error The CLI tests do not connect to a database.
+      init: () => undefined,
     },
-  } as SanitizedConfig
+    secret: 'test',
+  })
 }
 
 const createArgs = ({
@@ -49,7 +50,7 @@ const replacementCommand = defineCLICommand({
   input: strictObject({}),
 })
 
-describe('createProgram', () => {
+describe('createCLI', () => {
   it('should add built-in command references from one module to the sanitized config', () => {
     const config = createConfig()
 
@@ -60,13 +61,13 @@ describe('createProgram', () => {
   })
 
   it('should register built-in commands by their map key', async () => {
-    const program = await createProgram(createArgs({ config: createConfig() }))
+    const cli = await createCLI(createArgs({ config: createConfig() }))
 
-    expect(program.commands.map((command) => command.name())).toContain('generate:types')
+    expect(cli.commands.map((command) => command.name())).toContain('generate:types')
   })
 
   it('should replace a built-in command with a direct command definition', async () => {
-    const program = await createProgram(
+    const cli = await createCLI(
       createArgs({
         config: createConfig({
           cli: {
@@ -78,13 +79,13 @@ describe('createProgram', () => {
       }),
     )
 
-    expect(program.commands.find((command) => command.name() === 'info')?.description()).toBe(
+    expect(cli.commands.find((command) => command.name() === 'info')?.description()).toBe(
       'Replacement command.',
     )
   })
 
   it('should disable an individual command with false', async () => {
-    const program = await createProgram(
+    const cli = await createCLI(
       createArgs({
         config: createConfig({
           cli: {
@@ -96,18 +97,18 @@ describe('createProgram', () => {
       }),
     )
 
-    expect(program.commands.some((command) => command.name() === 'info')).toBe(false)
-    expect(program.commands.length).toBeGreaterThan(0)
+    expect(cli.commands.some((command) => command.name() === 'info')).toBe(false)
+    expect(cli.commands.length).toBeGreaterThan(0)
   })
 
   it('should disable all commands with cli false', async () => {
-    const program = await createProgram(createArgs({ config: createConfig({ cli: false }) }))
+    const cli = await createCLI(createArgs({ config: createConfig({ cli: false }) }))
 
-    expect(program.commands).toHaveLength(0)
+    expect(cli.commands).toHaveLength(0)
   })
 
   it('should load a named command export from a path', async () => {
-    const program = await createProgram(
+    const cli = await createCLI(
       createArgs({
         config: createConfig({
           cli: {
@@ -120,12 +121,12 @@ describe('createProgram', () => {
     )
 
     expect(
-      program.commands.find((command) => command.name() === 'environment')?.description(),
+      cli.commands.find((command) => command.name() === 'environment')?.description(),
     ).toBe('Print environment and dependency information.')
   })
 
   it('should load a named command export from an object reference', async () => {
-    const program = await createProgram(
+    const cli = await createCLI(
       createArgs({
         config: createConfig({
           cli: {
@@ -140,11 +141,11 @@ describe('createProgram', () => {
       }),
     )
 
-    expect(program.commands.some((command) => command.name() === 'environment')).toBe(true)
+    expect(cli.commands.some((command) => command.name() === 'environment')).toBe(true)
   })
 
   it('should load a default command export from a path', async () => {
-    const program = await createProgram(
+    const cli = await createCLI(
       createArgs({
         config: createConfig({
           cli: {
@@ -157,12 +158,12 @@ describe('createProgram', () => {
       }),
     )
 
-    expect(program.commands.some((command) => command.name() === 'start-server')).toBe(true)
+    expect(cli.commands.some((command) => command.name() === 'start-server')).toBe(true)
   })
 
   it('should report a missing command export', async () => {
     await expect(
-      createProgram(
+      createCLI(
         createArgs({
           config: createConfig({
             cli: {
@@ -178,7 +179,7 @@ describe('createProgram', () => {
 
   it('should reject an export that is not a CLI command', async () => {
     await expect(
-      createProgram(
+      createCLI(
         createArgs({
           config: createConfig({
             cli: {
@@ -202,7 +203,7 @@ describe('createProgram', () => {
     })
 
     await expect(
-      createProgram(
+      createCLI(
         createArgs({
           config: createConfig({
             cli: {
@@ -225,7 +226,7 @@ describe('createProgram', () => {
       handler: () => ({ result: { value: 42 } }),
       input: strictObject({}),
     })
-    const program = await createProgram(
+    const cli = await createCLI(
       createArgs({
         config: createConfig({
           cli: {
@@ -236,11 +237,11 @@ describe('createProgram', () => {
         }),
       }),
     )
-    const command = program.commands.find((item) => item.name() === 'result')!
+    const command = cli.commands.find((item) => item.name() === 'result')!
     let output = ''
 
     command.configureOutput({ writeOut: (value) => (output += value) })
-    await program.parseAsync(argv, { from: 'user' })
+    await cli.parseAsync(argv, { from: 'user' })
 
     expect(JSON.parse(output)).toEqual({
       command: 'result',
@@ -257,7 +258,7 @@ describe('createProgram', () => {
         count: z.int(),
       }),
     })
-    const program = await createProgram(
+    const cli = await createCLI(
       createArgs({
         config: createConfig({
           cli: {
@@ -272,7 +273,7 @@ describe('createProgram', () => {
     let thrownError: unknown
 
     try {
-      await program.parseAsync(['validate', '--count', 'nope', '--json'], { from: 'user' })
+      await cli.parseAsync(['validate', '--count', 'nope', '--json'], { from: 'user' })
     } catch (error) {
       thrownError = error
     }

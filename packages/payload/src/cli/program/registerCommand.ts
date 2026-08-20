@@ -7,15 +7,15 @@ import { invokeCLICommand } from '../runtime/invokeCommand.js'
 
 export const registerCLICommand = ({
   name,
+  cli,
   definition,
   help,
-  rootCommand,
   runtime,
 }: {
+  cli: Command
   definition: CLICommand
   help: CLIHelp
   name: string
-  rootCommand: Command
   runtime: CLIRuntime
 }): void => {
   const command = new Command(name)
@@ -35,7 +35,7 @@ export const registerCLICommand = ({
   command.exitOverride()
 
   // Register the completed command with the root CLI.
-  rootCommand.addCommand(command)
+  cli.addCommand(command)
 }
 
 /**

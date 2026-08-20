@@ -1,5 +1,5 @@
 export { defineCLICommand } from '../cli/defineCLICommand.js'
-export { bin, createProgram } from '../cli/index.js'
+export { bin, createCLI } from '../cli/index.js'
 export { strictObject } from '../cli/zod.js'
 export type {
   CLICommand,

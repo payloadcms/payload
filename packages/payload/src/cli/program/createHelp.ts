@@ -4,11 +4,11 @@ import type { CLIHelp } from '../../config/types.js'
 import type { ResolvedCLICommand } from './loadCommands.js'
 
 export const createCLIHelp = ({
+  cli,
   commands,
-  rootCommand,
 }: {
+  cli: Command
   commands: ResolvedCLICommand[]
-  rootCommand: Command
 }): CLIHelp => ({
   commands: commands.map(({ name, definition }) => ({
     name,
@@ -18,10 +18,10 @@ export const createCLIHelp = ({
   })),
   output: ({ command: commandName } = {}) => {
     const selectedCommand = commandName
-      ? rootCommand.commands.find(
+      ? cli.commands.find(
           (command) => command.name() === commandName || command.aliases().includes(commandName),
         )
-      : rootCommand
+      : cli
 
     if (!selectedCommand) {
       throw new Error(`Unknown command '${commandName}'.`)

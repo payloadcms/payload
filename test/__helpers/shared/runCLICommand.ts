@@ -3,7 +3,7 @@ import type { CLIRuntime } from 'payload/cli'
 
 import path from 'node:path'
 import payload from 'payload'
-import { createProgram } from 'payload/internal'
+import { createCLI } from 'payload/internal'
 
 export const runCLICommand = async ({
   argv,
@@ -29,7 +29,7 @@ export const runCLICommand = async ({
     isScheduled: false,
     markScheduled: () => undefined,
   }
-  const program = await createProgram(runtime)
+  const cli = await createCLI(runtime)
 
-  await program.parseAsync(argv, { from: 'user' })
+  await cli.parseAsync(argv, { from: 'user' })
 }

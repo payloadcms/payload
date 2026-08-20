@@ -88,14 +88,14 @@ export const getCLIErrorOutput = ({
   }
 }
 
-export const handleCLIError = ({ error, program }: { error: unknown; program?: Command }): void => {
+export const handleCLIError = ({ cli, error }: { cli?: Command; error: unknown }): void => {
   const exitCode = error instanceof CommanderError ? error.exitCode : 1
-  const shouldOutputJSON = program ? isJSONOutput(program) : process.argv.includes('--json')
+  const shouldOutputJSON = cli ? isJSONOutput(cli) : process.argv.includes('--json')
 
   if (shouldOutputJSON && exitCode !== 0) {
     writeCLIJSON({
-      command: program,
-      value: getCLIErrorOutput({ command: program?.args[0], error }),
+      command: cli,
+      value: getCLIErrorOutput({ command: cli?.args[0], error }),
     })
   } else if (!(error instanceof CommanderError)) {
     // eslint-disable-next-line no-console
