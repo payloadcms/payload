@@ -274,6 +274,13 @@ functions all receive the first-class
 and collection/global `beforeValidate` and `beforeChange` hooks also receive
 `operation: 'validate'`. Payload never simulates `'create'` or `'update'` as the access operation.
 
+When `validate` access returns a `where` constraint and a document exists but doesn't match it,
+validation throws `Forbidden` rather than treating the document as absent. Without this, candidate
+data could validate against an empty base as though the restricted document didn't exist yet.
+Collections already apply this through their existing `update`-by-ID access checks; globals apply
+the same rule for validation specifically, even though a global's `find` and `update` stay silent
+about a document being restricted rather than absent.
+
 The validation lifecycle itself does not persist the candidate. Payload also rejects document,
 global, upload, and version writes that reuse the active validation request. Hooks still run,
 however, and can cause side effects through other Payload APIs, an external service, a raw database

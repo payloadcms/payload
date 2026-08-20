@@ -7,6 +7,8 @@ import type {
 } from 'payload'
 import type { DeepPartial } from 'ts-essentials'
 
+import { isolateObjectProperty } from 'payload'
+
 import type { Context } from '../types.js'
 
 export type Resolver<TSlug extends GlobalSlug> = (
@@ -39,7 +41,7 @@ export function validateResolver<TSlug extends GlobalSlug>(
       draft: args.draft,
       locale,
       overrideAccess: false,
-      req,
+      req: isolateObjectProperty(req, 'transactionID'),
     })
   }
 }

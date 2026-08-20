@@ -663,6 +663,22 @@ describe('validate Local API', () => {
       expect(localeFilterOperationEvents).toEqual(['validate'])
     })
 
+    it('should not duplicate a non-localized field error once per resolved locale', async () => {
+      const result = await payload.validate({
+        collection: validationCollectionSlug,
+        context: {
+          availableLocaleCodes: ['en', 'de'],
+        },
+        data: {
+          title: 'Candidate title',
+        },
+        locale: 'all',
+      })
+
+      expect(result.valid).toBe(false)
+      expect(result.errors.filter((error) => error.path === 'summary')).toHaveLength(1)
+    })
+
     it('should deduplicate explicit locales in deterministic order', async () => {
       const result = await payload.validate({
         collection: validationCollectionSlug,
