@@ -168,14 +168,6 @@ describe('Branching', () => {
     })
   })
 
-  /**
-   * Remaining matrix from CONTENT_BRANCHING_PLAN.md §20. Declared here so the
-   * suite is a complete map of the work rather than only of what exists.
-   *
-   * Everything below requires machinery not yet built: the internal branch
-   * collections, `req.branch` resolution, the change manifest, the predicate
-   * wired into the adapters, and copy-on-write writes.
-   */
   describe('Read path — documents created on a branch', () => {
     const mainIDs: (number | string)[] = []
     const branchIDs: (number | string)[] = []

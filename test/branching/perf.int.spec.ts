@@ -21,7 +21,7 @@ let payload: Payload
  * query counts are exact, and they are the thing that scales.
  *
  * The same numbers hold on MongoDB and SQLite. When one legitimately changes, update the
- * expectation and the table in `CONTENT_BRANCHING_PLAN.md` together.
+ * expectation here.
  */
 const METHODS = [
   'count',
@@ -366,8 +366,7 @@ describe('Branching query cost', () => {
       globalQueries: branchGlobal.calls,
     }).toMatchObject({ create: 2, delete: 6, global: 1 })
 
-    // Written for the humans reading `CONTENT_BRANCHING_PLAN.md`; the assertions above are
-    // what actually guards the numbers.
+    // A human-readable table of the numbers above; the assertions are what actually guards them.
     fs.writeFileSync(
       '/tmp/branch-perf.md',
       [

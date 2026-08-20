@@ -1,8 +1,3 @@
-/** Phase 0 spike probes — see spike.config.ts */
-export const antiJoinProbeSlug = 'anti-join-probe'
-export const sentinelProbeSlug = 'sentinel-probe'
-export const latestProbeSlug = 'latest-probe'
-
 /** Branching feature suite */
 export const postsSlug = 'posts'
 export const pagesSlug = 'pages'
