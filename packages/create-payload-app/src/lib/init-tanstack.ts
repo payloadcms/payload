@@ -152,12 +152,12 @@ function getRequiredDependencies({
     '@payloadcms/plugin-mcp': payloadVersion,
     '@payloadcms/richtext-lexical': payloadVersion,
     '@payloadcms/tanstack-start': payloadVersion,
+    '@payloadcms/transformer-sharp': payloadVersion,
     '@payloadcms/ui': payloadVersion,
     '@vitejs/plugin-rsc': '^0.5.21',
     [getDbPackageName(dbType)]: payloadVersion,
     graphql: '^16.8.1',
     payload: payloadVersion,
-    sharp: '0.34.2',
   }
 
   if (appDetails.kind === 'router-only') {
