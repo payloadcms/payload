@@ -139,6 +139,7 @@ describe('Lexical Views Provider', () => {
           },
         },
         depth: 0,
+        overrideAccess: true,
       })
 
       try {
@@ -163,6 +164,7 @@ describe('Lexical Views Provider', () => {
         await _payload.delete({
           id: doc.id,
           collection: lexicalViewsProviderSlug,
+          overrideAccess: true,
         })
       }
     })
