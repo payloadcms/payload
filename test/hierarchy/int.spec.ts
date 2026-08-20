@@ -229,7 +229,7 @@ describe('Hierarchy', () => {
         await expect(payload.findByID({ collection: 'pages', id: grandchild.id })).rejects.toThrow()
       })
 
-      it('should respect delete access during cascade operations', async () => {
+      it('should abort cascade operations when delete access denies a descendant', async () => {
         const root = await payload.create({
           collection: 'pages',
           data: { slug: 'root', title: 'Root' },
@@ -243,10 +243,10 @@ describe('Hierarchy', () => {
           data: { parent: child.id, slug: 'grandchild', title: 'Grandchild' },
         })
 
-        await payload.delete({ collection: 'pages', id: root.id })
+        await expect(payload.delete({ collection: 'pages', id: root.id })).rejects.toThrow()
 
-        const remainingChild = await payload.findByID({ collection: 'pages', id: child.id })
-        expect(remainingChild.id).toBe(child.id)
+        await expect(payload.findByID({ collection: 'pages', id: root.id })).resolves.toBeDefined()
+        await expect(payload.findByID({ collection: 'pages', id: child.id })).resolves.toBeDefined()
         await expect(payload.findByID({ collection: 'pages', id: grandchild.id })).resolves.toBeDefined()
       })
     })

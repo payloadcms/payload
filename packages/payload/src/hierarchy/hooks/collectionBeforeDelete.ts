@@ -20,29 +20,6 @@ export const hierarchyCollectionBeforeDelete =
     req.context = req.context || {}
     req.context.isDeleting = true
 
-    if (deleteStrategy === 'cascade') {
-      await req.payload.delete({
-        collection: collection.slug,
-        overrideAccess: false,
-        req,
-        where: {
-          [parentFieldName]: {
-            equals: id,
-          },
-        },
-      })
-      return
-    }
-
-    const deletedDocument = await req.payload.findByID({
-      id,
-      collection: collection.slug,
-      depth: 0,
-      overrideAccess: true,
-      req,
-      select: { [parentFieldName]: true },
-    })
-
     const children = await req.payload.find({
       collection: collection.slug,
       depth: 0,
@@ -55,6 +32,27 @@ export const hierarchyCollectionBeforeDelete =
           equals: id,
         },
       },
+    })
+
+    if (deleteStrategy === 'cascade') {
+      for (const { id: childID } of children.docs) {
+        await req.payload.delete({
+          collection: collection.slug,
+          id: childID,
+          overrideAccess: false,
+          req,
+        })
+      }
+      return
+    }
+
+    const deletedDocument = await req.payload.findByID({
+      id,
+      collection: collection.slug,
+      depth: 0,
+      overrideAccess: true,
+      req,
+      select: { [parentFieldName]: true },
     })
 
     const parent = deletedDocument[parentFieldName]
