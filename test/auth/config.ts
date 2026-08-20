@@ -10,7 +10,11 @@ import { seed } from './seed.js'
 import {
   apiKeysSlug,
   BASE_PATH,
+  collisionAuthASlug,
+  collisionAuthBSlug,
+  defaultAccessFixtureSlug,
   namedSaveToJWTValue,
+  openUpdateAuthSlug,
   partialDisableLocalStrategiesSlug,
   publicUsersSlug,
   rotateSecretLoginSlug,
@@ -302,6 +306,38 @@ export default buildConfigWithDefaults({
         verify: true,
       },
       fields: [],
+      versions: false,
+    },
+    {
+      slug: openUpdateAuthSlug,
+      access: {
+        update: () => true,
+      },
+      auth: true,
+      fields: [{ name: 'note', type: 'text' }],
+      versions: false,
+    },
+    {
+      slug: collisionAuthASlug,
+      auth: true,
+      fields: [
+        { name: 'id', type: 'number' },
+        { name: 'label', type: 'text' },
+      ],
+      versions: false,
+    },
+    {
+      slug: collisionAuthBSlug,
+      auth: true,
+      fields: [
+        { name: 'id', type: 'number' },
+        { name: 'label', type: 'text' },
+      ],
+      versions: false,
+    },
+    {
+      slug: defaultAccessFixtureSlug,
+      fields: [{ name: 'title', type: 'text' }],
       versions: false,
     },
     {

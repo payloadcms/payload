@@ -23,7 +23,11 @@ import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { devUser } from '../credentials.js'
 import {
   apiKeysSlug,
+  collisionAuthASlug,
+  collisionAuthBSlug,
+  defaultAccessFixtureSlug,
   namedSaveToJWTValue,
+  openUpdateAuthSlug,
   partialDisableLocalStrategiesSlug,
   publicUsersSlug,
   rotateSecretLoginSlug,
@@ -2580,6 +2584,254 @@ describe('Auth', () => {
         })
         .then((res) => res.json())
       expect(underUnknown.user).toBeFalsy()
+    })
+  })
+
+  describe('Default access (auth collection)', () => {
+    const createdUserIDs: (number | string)[] = []
+
+    afterEach(async () => {
+      for (const id of createdUserIDs) {
+        await payload.delete({ collection: slug, id, overrideAccess: true }).catch(() => {})
+      }
+      createdUserIDs.length = 0
+    })
+
+    it('denies updating another user by default', async () => {
+      const userA = await payload.create({
+        collection: slug,
+        data: { email: `a-${uuid()}@test.com`, password: 'test1234', roles: ['user'] },
+        overrideAccess: true,
+      })
+      const userB = await payload.create({
+        collection: slug,
+        data: { email: `b-${uuid()}@test.com`, password: 'test1234', roles: ['user'] },
+        overrideAccess: true,
+      })
+      createdUserIDs.push(userA.id, userB.id)
+
+      const req = await createLocalReq({ user: userA }, payload)
+
+      const result = await payload
+        .update({
+          collection: slug,
+          id: userB.id,
+          data: { custom: 'should not persist' },
+          overrideAccess: false,
+          req,
+        })
+        .catch((err) => err)
+
+      expect(result).toBeInstanceOf(Error)
+      expect(['NotFound', 'Forbidden']).toContain((result as Error).name)
+
+      const stillUserB = await payload.findByID({
+        collection: slug,
+        id: userB.id,
+        overrideAccess: true,
+      })
+      expect(stillUserB.custom).not.toBe('should not persist')
+    })
+
+    it('allows a user to update their own record by default', async () => {
+      const user = await payload.create({
+        collection: slug,
+        data: { email: `self-${uuid()}@test.com`, password: 'test1234', roles: ['user'] },
+        overrideAccess: true,
+      })
+      createdUserIDs.push(user.id)
+
+      const req = await createLocalReq({ user }, payload)
+
+      const updated = await payload.update({
+        collection: slug,
+        id: user.id,
+        data: { custom: 'self-updated' },
+        overrideAccess: false,
+        req,
+      })
+
+      expect(updated.custom).toBe('self-updated')
+    })
+
+    it('respects a user-provided access.update over the auth default', async () => {
+      const userA = await payload.create({
+        collection: openUpdateAuthSlug,
+        data: { email: `oa-${uuid()}@test.com`, password: 'test1234' },
+        overrideAccess: true,
+      })
+      const userB = await payload.create({
+        collection: openUpdateAuthSlug,
+        data: { email: `ob-${uuid()}@test.com`, password: 'test1234' },
+        overrideAccess: true,
+      })
+
+      const req = await createLocalReq({ user: userA }, payload)
+
+      const updated = await payload.update({
+        collection: openUpdateAuthSlug,
+        id: userB.id,
+        data: { note: 'overridden default lets this through' },
+        overrideAccess: false,
+        req,
+      })
+
+      expect(updated.note).toBe('overridden default lets this through')
+
+      await payload.delete({ collection: openUpdateAuthSlug, id: userA.id, overrideAccess: true })
+      await payload.delete({ collection: openUpdateAuthSlug, id: userB.id, overrideAccess: true })
+    })
+
+    it('denies cross-collection updates even when ids collide', async () => {
+      const collidingId = 424242
+
+      const userA = await payload.create({
+        collection: collisionAuthASlug,
+        data: {
+          id: collidingId,
+          email: `ca-${uuid()}@test.com`,
+          password: 'test1234',
+          label: 'A original',
+        },
+        overrideAccess: true,
+      })
+
+      const docB = await payload.create({
+        collection: collisionAuthBSlug,
+        data: {
+          id: collidingId,
+          email: `cb-${uuid()}@test.com`,
+          password: 'test1234',
+          label: 'B original',
+        },
+        overrideAccess: true,
+      })
+
+      expect(userA.id).toBe(collidingId)
+      expect(docB.id).toBe(collidingId)
+
+      userA.collection = collisionAuthASlug
+
+      const req = await createLocalReq({ user: userA }, payload)
+      expect(req.user?.collection).toBe(collisionAuthASlug)
+
+      const result = await payload
+        .update({
+          collection: collisionAuthBSlug,
+          id: collidingId,
+          data: { label: 'B HIJACKED' },
+          overrideAccess: false,
+          req,
+        })
+        .catch((err) => err)
+
+      expect(result).toBeInstanceOf(Error)
+      expect((result as Error).name).toBe('Forbidden')
+
+      const stillDocB = await payload.findByID({
+        collection: collisionAuthBSlug,
+        id: collidingId,
+        overrideAccess: true,
+      })
+      expect(stillDocB.label).toBe('B original')
+
+      await payload.delete({
+        collection: collisionAuthASlug,
+        id: collidingId,
+        overrideAccess: true,
+      })
+      await payload.delete({
+        collection: collisionAuthBSlug,
+        id: collidingId,
+        overrideAccess: true,
+      })
+    })
+
+    it('does not apply the auth default to non-auth collections', async () => {
+      const authUser = await payload.create({
+        collection: slug,
+        data: { email: `nonauth-${uuid()}@test.com`, password: 'test1234', roles: ['user'] },
+        overrideAccess: true,
+      })
+      createdUserIDs.push(authUser.id)
+
+      const doc = await payload.create({
+        collection: defaultAccessFixtureSlug,
+        data: { title: 'original' },
+        overrideAccess: true,
+      })
+
+      const req = await createLocalReq({ user: authUser }, payload)
+
+      const updated = await payload.update({
+        collection: defaultAccessFixtureSlug,
+        id: doc.id,
+        data: { title: 'edited by another user' },
+        overrideAccess: false,
+        req,
+      })
+
+      expect(updated.title).toBe('edited by another user')
+
+      await payload.delete({
+        collection: defaultAccessFixtureSlug,
+        id: doc.id,
+        overrideAccess: true,
+      })
+    })
+
+    it('denies unlock to anonymous callers by default', async () => {
+      const user = await payload.create({
+        collection: slug,
+        data: { email: `unlock-a-${uuid()}@test.com`, password: 'test1234', roles: ['user'] },
+        overrideAccess: true,
+      })
+      createdUserIDs.push(user.id)
+
+      const req = await createLocalReq({}, payload)
+      req.user = undefined
+      expect(req.user).toBeUndefined()
+
+      const result = await payload
+        .unlock({
+          collection: slug,
+          data: { email: user.email },
+          overrideAccess: false,
+          req,
+        })
+        .catch((err) => err)
+
+      expect(result).toBeInstanceOf(Error)
+      expect((result as Error).name).toBe('Forbidden')
+    })
+
+    it('denies unlocking another user by default', async () => {
+      const caller = await payload.create({
+        collection: slug,
+        data: { email: `unlock-c-${uuid()}@test.com`, password: 'test1234', roles: ['user'] },
+        overrideAccess: true,
+      })
+      const target = await payload.create({
+        collection: slug,
+        data: { email: `unlock-t-${uuid()}@test.com`, password: 'test1234', roles: ['user'] },
+        overrideAccess: true,
+      })
+      createdUserIDs.push(caller.id, target.id)
+
+      const req = await createLocalReq({ user: caller }, payload)
+
+      const result = await payload
+        .unlock({
+          collection: slug,
+          data: { email: target.email },
+          overrideAccess: false,
+          req,
+        })
+        .catch((err) => err)
+
+      // The where-constraint (id === caller.id) mismatches target.email, so no user is found and unlock throws Forbidden.
+      expect(result).toBeInstanceOf(Error)
+      expect((result as Error).name).toBe('Forbidden')
     })
   })
 })
