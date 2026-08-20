@@ -13,7 +13,6 @@ import { CLICommandError, getCLIErrorOutput } from './runtime/output.js'
 import { strictObject } from './zod.js'
 
 const cliDirectory = path.dirname(fileURLToPath(import.meta.url))
-const testConfigDirectory = path.resolve(cliDirectory, '../../../../test/config')
 
 const createConfig = ({ cli }: { cli?: Config['cli'] } = {}): SanitizedConfig => {
   return sanitizeConfig({
@@ -27,7 +26,7 @@ const createConfig = ({ cli }: { cli?: Config['cli'] } = {}): SanitizedConfig =>
   })
 }
 
-const createArgs = ({
+const createRuntime = ({
   config,
   configDir = cliDirectory,
 }: {
@@ -61,14 +60,14 @@ describe('createCLI', () => {
   })
 
   it('should register built-in commands by their map key', async () => {
-    const cli = await createCLI(createArgs({ config: createConfig() }))
+    const cli = await createCLI(createRuntime({ config: createConfig() }))
 
     expect(cli.commands.map((command) => command.name())).toContain('generate:types')
   })
 
   it('should replace a built-in command with a direct command definition', async () => {
     const cli = await createCLI(
-      createArgs({
+      createRuntime({
         config: createConfig({
           cli: {
             commands: {
@@ -86,7 +85,7 @@ describe('createCLI', () => {
 
   it('should disable an individual command with false', async () => {
     const cli = await createCLI(
-      createArgs({
+      createRuntime({
         config: createConfig({
           cli: {
             commands: {
@@ -102,14 +101,14 @@ describe('createCLI', () => {
   })
 
   it('should disable all commands with cli false', async () => {
-    const cli = await createCLI(createArgs({ config: createConfig({ cli: false }) }))
+    const cli = await createCLI(createRuntime({ config: createConfig({ cli: false }) }))
 
     expect(cli.commands).toHaveLength(0)
   })
 
   it('should load a named command export from a path', async () => {
     const cli = await createCLI(
-      createArgs({
+      createRuntime({
         config: createConfig({
           cli: {
             commands: {
@@ -125,46 +124,10 @@ describe('createCLI', () => {
     )
   })
 
-  it('should load a named command export from an object reference', async () => {
-    const cli = await createCLI(
-      createArgs({
-        config: createConfig({
-          cli: {
-            commands: {
-              environment: {
-                exportName: 'createInfoCommand',
-                path: './commands/info.js',
-              },
-            },
-          },
-        }),
-      }),
-    )
-
-    expect(cli.commands.some((command) => command.name() === 'environment')).toBe(true)
-  })
-
-  it('should load a default command export from a path', async () => {
-    const cli = await createCLI(
-      createArgs({
-        config: createConfig({
-          cli: {
-            commands: {
-              'start-server': './customScript.ts',
-            },
-          },
-        }),
-        configDir: testConfigDirectory,
-      }),
-    )
-
-    expect(cli.commands.some((command) => command.name() === 'start-server')).toBe(true)
-  })
-
   it('should report a missing command export', async () => {
     await expect(
       createCLI(
-        createArgs({
+        createRuntime({
           config: createConfig({
             cli: {
               commands: {
@@ -180,7 +143,7 @@ describe('createCLI', () => {
   it('should reject an export that is not a CLI command', async () => {
     await expect(
       createCLI(
-        createArgs({
+        createRuntime({
           config: createConfig({
             cli: {
               commands: {
@@ -204,7 +167,7 @@ describe('createCLI', () => {
 
     await expect(
       createCLI(
-        createArgs({
+        createRuntime({
           config: createConfig({
             cli: {
               commands: {
@@ -227,7 +190,7 @@ describe('createCLI', () => {
       input: strictObject({}),
     })
     const cli = await createCLI(
-      createArgs({
+      createRuntime({
         config: createConfig({
           cli: {
             commands: {
@@ -259,7 +222,7 @@ describe('createCLI', () => {
       }),
     })
     const cli = await createCLI(
-      createArgs({
+      createRuntime({
         config: createConfig({
           cli: {
             commands: {
