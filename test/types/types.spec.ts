@@ -89,6 +89,26 @@ describe('Types testing', () => {
     expect<'payload-jobs'>().type.not.toBeAssignableTo<CollectionSlug>()
   })
 
+  describe('overrideAccess is required', () => {
+    test('omitting overrideAccess is not allowed', () => {
+      expect(payload.find).type.not.toBeCallableWith({ collection: 'posts' })
+      expect(payload.findByID).type.not.toBeCallableWith({ id: 'id', collection: 'posts' })
+      expect(payload.findGlobal).type.not.toBeCallableWith({ slug: 'menu' })
+    })
+
+    test('an explicit undefined is not allowed', () => {
+      expect(payload.find).type.not.toBeCallableWith({
+        collection: 'posts',
+        overrideAccess: undefined,
+      })
+    })
+
+    test('an explicit boolean is allowed', () => {
+      expect(payload.find).type.toBeCallableWith({ collection: 'posts', overrideAccess: false })
+      expect(payload.find).type.toBeCallableWith({ collection: 'posts', overrideAccess: true })
+    })
+  })
+
   describe('authenticated user', () => {
     test('should use AuthenticatedUser for request and me operation users', () => {
       expect<PayloadRequest['user']>().type.toBe<AuthenticatedUser | null>()
