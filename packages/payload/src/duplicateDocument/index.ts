@@ -90,7 +90,7 @@ export const getDuplicateDocumentData = async ({
     collection: collectionConfig,
     context: req.context,
     doc: duplicatedFromDocWithLocales,
-    overrideAccess: overrideAccess!,
+    overrideAccess: overrideAccess,
     req,
   })
 

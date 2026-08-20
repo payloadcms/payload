@@ -36,7 +36,7 @@ export type Arguments = {
   collection: Collection
   depth?: number
   disableTransaction?: boolean
-  overrideAccess?: boolean
+  overrideAccess: boolean
   overrideLock?: boolean
   populate?: PopulateType
   req: PayloadRequest
@@ -67,7 +67,7 @@ export const deleteOperation = async <
       args,
       collection: args.collection.config,
       operation: 'delete',
-      overrideAccess: args.overrideAccess!,
+      overrideAccess: args.overrideAccess,
     })
 
     const {
@@ -108,7 +108,7 @@ export const deleteOperation = async <
 
     await validateQueryPaths({
       collectionConfig,
-      overrideAccess: overrideAccess!,
+      overrideAccess: overrideAccess,
       req,
       where,
     })
@@ -249,7 +249,7 @@ export const deleteOperation = async <
           fallbackLocale: fallbackLocale!,
           global: null,
           locale: locale!,
-          overrideAccess: overrideAccess!,
+          overrideAccess: overrideAccess,
           populate,
           req,
           select,

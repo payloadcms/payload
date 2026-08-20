@@ -61,7 +61,7 @@ export const beforeChange = async <T extends JsonObject>({
     global,
     mergeLocaleActions,
     operation,
-    overrideAccess: overrideAccess!,
+    overrideAccess: overrideAccess,
     parentIndexPath: '',
     parentIsLocalized: false,
     parentPath: '',

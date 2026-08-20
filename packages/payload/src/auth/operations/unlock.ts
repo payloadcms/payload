@@ -22,7 +22,7 @@ import { resetLoginAttempts } from '../strategies/local/resetLoginAttempts.js'
 export type Arguments<TSlug extends AuthCollectionSlug> = {
   collection: Collection
   data: AuthOperationsFromCollectionSlug<TSlug>['unlock']
-  overrideAccess?: boolean
+  overrideAccess: boolean
   req: PayloadRequest
 }
 

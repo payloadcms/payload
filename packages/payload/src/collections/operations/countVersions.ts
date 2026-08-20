@@ -13,7 +13,7 @@ import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
 export type Arguments = {
   collection: Collection
   disableErrors?: boolean
-  overrideAccess?: boolean
+  overrideAccess: boolean
   req?: PayloadRequest
   where?: Where
 }
@@ -32,7 +32,7 @@ export const countVersionsOperation = async <TSlug extends CollectionSlug>(
     args,
     collection: args.collection.config,
     operation: 'countVersions',
-    overrideAccess: args.overrideAccess!,
+    overrideAccess: args.overrideAccess,
   })
 
   const {
@@ -75,7 +75,7 @@ export const countVersionsOperation = async <TSlug extends CollectionSlug>(
 
   await validateQueryPaths({
     collectionConfig,
-    overrideAccess: overrideAccess!,
+    overrideAccess: overrideAccess,
     req: req!,
     versionFields,
     where: where!,

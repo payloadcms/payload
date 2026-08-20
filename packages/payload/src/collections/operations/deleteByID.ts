@@ -32,7 +32,7 @@ export type Arguments<TSlug extends CollectionSlug, TSelect extends SelectType> 
   depth?: number
   disableTransaction?: boolean
   id: number | string
-  overrideAccess?: boolean
+  overrideAccess: boolean
   overrideLock?: boolean
   populate?: PopulateType
   req: PayloadRequest
@@ -56,7 +56,7 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
       args,
       collection: args.collection.config,
       operation: 'delete',
-      overrideAccess: args.overrideAccess!,
+      overrideAccess: args.overrideAccess,
     })
 
     const {
@@ -230,7 +230,7 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
       fallbackLocale: fallbackLocale!,
       global: null,
       locale: locale!,
-      overrideAccess: overrideAccess!,
+      overrideAccess: overrideAccess,
       populate,
       req,
       select,

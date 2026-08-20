@@ -14,7 +14,7 @@ import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
 export type Arguments = {
   collection: Collection
   disableErrors?: boolean
-  overrideAccess?: boolean
+  overrideAccess: boolean
   req?: PayloadRequest
   trash?: boolean
   where?: Where
@@ -34,7 +34,7 @@ export const countOperation = async <TSlug extends CollectionSlug>(
     args,
     collection: args.collection.config,
     operation: 'count',
-    overrideAccess: args.overrideAccess!,
+    overrideAccess: args.overrideAccess,
   })
 
   const {
@@ -82,7 +82,7 @@ export const countOperation = async <TSlug extends CollectionSlug>(
 
   await validateQueryPaths({
     collectionConfig,
-    overrideAccess: overrideAccess!,
+    overrideAccess: overrideAccess,
     req: req!,
     where: where!,
   })

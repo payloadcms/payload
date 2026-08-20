@@ -32,7 +32,7 @@ export type GlobalFindOneArgs = {
   draft?: boolean
   globalConfig: SanitizedGlobalConfig
   includeLockStatus?: boolean
-  overrideAccess?: boolean
+  overrideAccess: boolean
   populate?: PopulateType
   req: PayloadRequest
   showHiddenFields?: boolean

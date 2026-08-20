@@ -27,7 +27,7 @@ export type Arguments<TSlug extends AuthCollectionSlug> = {
   } & AuthOperationsFromCollectionSlug<TSlug>['forgotPassword']
   disableEmail?: boolean
   expiration?: number
-  overrideAccess?: boolean
+  overrideAccess: boolean
   req: PayloadRequest
 }
 
