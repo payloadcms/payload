@@ -338,7 +338,7 @@ export const sanitizeCollection = (
     sanitized.admin!.pagination!.limits = collection.admin.pagination.limits
   }
 
-  for (const operation of ['create', 'delete', 'read', 'unlock', 'update'] as const) {
+  for (const operation of ['create', 'delete', 'read', 'unlock', 'update', 'validate'] as const) {
     sanitized.access![operation] = withBaseAccess({
       slug: sanitized.slug,
       access: sanitized.access?.[operation],

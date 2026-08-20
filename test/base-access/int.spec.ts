@@ -126,6 +126,44 @@ describe('baseAccess', () => {
     ).rejects.toThrow(Forbidden)
   })
 
+  it('should enforce base access for collection validate operation', async () => {
+    const req = await createRequest({
+      [denyHeader]: 'true',
+    })
+
+    await expect(
+      payload.validate({
+        collection: postsSlug,
+        data: {
+          status: 'published',
+          tenant: 'tenant-1',
+          title: 'denied',
+        },
+        locale: null,
+        overrideAccess: false,
+        req,
+      }),
+    ).rejects.toThrow(Forbidden)
+  })
+
+  it('should enforce base access for globals validate operation', async () => {
+    const req = await createRequest({
+      [denyHeader]: 'true',
+    })
+
+    await expect(
+      payload.validateGlobal({
+        slug: settingsSlug,
+        data: {
+          title: 'denied',
+        },
+        locale: null,
+        overrideAccess: false,
+        req,
+      }),
+    ).rejects.toThrow(Forbidden)
+  })
+
   it('should enforce base access for generated collections', async () => {
     const req = await createRequest({
       [denyHeader]: 'true',

@@ -42,9 +42,23 @@ const baseAccess: BaseAccess = {
 
       return true
     },
+    validate: ({ slug, req }) => {
+      if (req.headers.get(denyHeader) === 'true' && slug === postsSlug) {
+        return false
+      }
+
+      return true
+    },
   },
   globals: {
     update: ({ slug, req }) => {
+      if (req.headers.get(denyHeader) === 'true' && slug === settingsSlug) {
+        return false
+      }
+
+      return true
+    },
+    validate: ({ slug, req }) => {
       if (req.headers.get(denyHeader) === 'true' && slug === settingsSlug) {
         return false
       }

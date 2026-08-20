@@ -190,10 +190,9 @@ control.
 
 ## GraphQL API
 
-Every collection and global gets a `validate<Name>` / `validateGlobal<Name>` mutation, matching the
-`create`/`update` mutations already generated for it. Omit `id` to validate create candidate data;
-supply `id` to validate a stored document, with the same draft-fallback behavior as the Local and
-REST APIs.
+Every collection and global gets a `validate<Name>` mutation, matching the `create`/`update`
+mutations already generated for it. Omit `id` to validate create candidate data; supply `id` to
+validate a stored document, with the same draft-fallback behavior as the Local and REST APIs.
 
 ```graphql
 mutation {
