@@ -10,6 +10,7 @@ import {
   type TypedJobs,
   type Where,
 } from '../index.js'
+import { warnMissingOverrideAccess } from '../utilities/warnMissingOverrideAccess.js'
 import { jobAfterRead, jobsCollectionSlug } from './config/collection.js'
 import { handleSchedules, type HandleSchedulesResult } from './operations/handleSchedules/index.js'
 import { runJobs } from './operations/runJobs/index.js'
@@ -58,14 +59,14 @@ export const getJobsLocalAPI = (payload: Payload) => ({
           input: TypedJobs['tasks'][TTaskOrWorkflowSlug]['input']
           meta?: Job['meta']
           /**
-           * If set to false, access control as defined in jobsConfig.access.queue will be run.
-           * By default, this is true and no access control will be run.
-           * If you set this to false and do not have jobsConfig.access.queue defined, the default access control will be
-           * run (which is a function that returns `true` if the user is logged in).
+           * Whether to skip the access control defined in `jobsConfig.access`.
            *
-           * @default true
+           * `false` runs it — the default access function returns `true` when a user is logged in.
+           * `true` bypasses it — use this for trusted server-side work.
+           *
+           * Required. Omitting it used to bypass access control silently.
            */
-          overrideAccess?: boolean
+          overrideAccess: boolean
           /**
            * The queue to add the job to.
            * If not specified, the job will be added to the default queue.
@@ -82,14 +83,14 @@ export const getJobsLocalAPI = (payload: Payload) => ({
           input: TypedJobs['workflows'][TTaskOrWorkflowSlug]['input']
           meta?: Job['meta']
           /**
-           * If set to false, access control as defined in jobsConfig.access.queue will be run.
-           * By default, this is true and no access control will be run.
-           * If you set this to false and do not have jobsConfig.access.queue defined, the default access control will be
-           * run (which is a function that returns `true` if the user is logged in).
+           * Whether to skip the access control defined in `jobsConfig.access`.
            *
-           * @default true
+           * `false` runs it — the default access function returns `true` when a user is logged in.
+           * `true` bypasses it — use this for trusted server-side work.
+           *
+           * Required. Omitting it used to bypass access control silently.
            */
-          overrideAccess?: boolean
+          overrideAccess: boolean
           /**
            * The queue to add the job to.
            * If not specified, the job will be added to the default queue.
@@ -109,7 +110,13 @@ export const getJobsLocalAPI = (payload: Payload) => ({
       ? Job<TTaskOrWorkflowSlug>
       : JobFromTask<TTaskOrWorkflowSlug>
   > => {
-    const overrideAccess = args?.overrideAccess !== false
+    // `!== false` used to make a missing value mean *bypass* — the opposite of every other
+    // Local API operation. Coerce it the same way they do, and warn the untyped callers the
+    // compiler cannot reach.
+    if (args?.overrideAccess === undefined) {
+      warnMissingOverrideAccess({ operation: 'payload.jobs.queue', payload })
+    }
+    const overrideAccess = args?.overrideAccess ?? false
     const req: PayloadRequest = args.req ?? (await createLocalReq({}, payload))
 
     if (!overrideAccess) {
@@ -234,14 +241,14 @@ export const getJobsLocalAPI = (payload: Payload) => ({
      */
     limit?: number
     /**
-     * If set to false, access control as defined in jobsConfig.access.run will be run.
-     * By default, this is true and no access control will be run.
-     * If you set this to false and do not have jobsConfig.access.run defined, the default access control will be
-     * run (which is a function that returns `true` if the user is logged in).
+     * Whether to skip the access control defined in `jobsConfig.access`.
      *
-     * @default true
+     * `false` runs it — the default access function returns `true` when a user is logged in.
+     * `true` bypasses it — use this for trusted server-side work.
+     *
+     * Required. Omitting it used to bypass access control silently.
      */
-    overrideAccess?: boolean
+    overrideAccess: boolean
     /**
      * Adjust the job processing order using a Payload sort string.
      *
@@ -273,10 +280,14 @@ export const getJobsLocalAPI = (payload: Payload) => ({
   }): Promise<ReturnType<typeof runJobs>> => {
     const newReq: PayloadRequest = args?.req ?? (await createLocalReq({}, payload))
 
+    if (args?.overrideAccess === undefined) {
+      warnMissingOverrideAccess({ operation: 'payload.jobs.run', payload })
+    }
+
     return await runJobs({
       allQueues: args?.allQueues,
       limit: args?.limit,
-      overrideAccess: args?.overrideAccess !== false,
+      overrideAccess: args?.overrideAccess ?? false,
       processingOrder: args?.processingOrder,
       queue: args?.queue,
       req: newReq,
@@ -289,14 +300,14 @@ export const getJobsLocalAPI = (payload: Payload) => ({
   runByID: async (args: {
     id: number | string
     /**
-     * If set to false, access control as defined in jobsConfig.access.run will be run.
-     * By default, this is true and no access control will be run.
-     * If you set this to false and do not have jobsConfig.access.run defined, the default access control will be
-     * run (which is a function that returns `true` if the user is logged in).
+     * Whether to skip the access control defined in `jobsConfig.access`.
      *
-     * @default true
+     * `false` runs it — the default access function returns `true` when a user is logged in.
+     * `true` bypasses it — use this for trusted server-side work.
+     *
+     * Required. Omitting it used to bypass access control silently.
      */
-    overrideAccess?: boolean
+    overrideAccess: boolean
     req?: PayloadRequest
     /**
      * If set to true, the job system will not log any output to the console (for both info and error logs).
@@ -310,9 +321,13 @@ export const getJobsLocalAPI = (payload: Payload) => ({
   }): Promise<ReturnType<typeof runJobs>> => {
     const newReq: PayloadRequest = args.req ?? (await createLocalReq({}, payload))
 
+    if (args.overrideAccess === undefined) {
+      warnMissingOverrideAccess({ operation: 'payload.jobs.runByID', payload })
+    }
+
     return await runJobs({
       id: args.id,
-      overrideAccess: args.overrideAccess !== false,
+      overrideAccess: args.overrideAccess ?? false,
       req: newReq,
       silent: args.silent,
     })
@@ -320,21 +335,27 @@ export const getJobsLocalAPI = (payload: Payload) => ({
 
   cancel: async (args: {
     /**
-     * If set to false, access control as defined in jobsConfig.access.cancel will be run.
-     * By default, this is true and no access control will be run.
-     * If you set this to false and do not have jobsConfig.access.cancel defined, the default access control will be
-     * run (which is a function that returns `true` if the user is logged in).
+     * Whether to skip the access control defined in `jobsConfig.access`.
      *
-     * @default true
+     * `false` runs it — the default access function returns `true` when a user is logged in.
+     * `true` bypasses it — use this for trusted server-side work.
+     *
+     * Required. Omitting it used to bypass access control silently.
      */
-    overrideAccess?: boolean
+    overrideAccess: boolean
     queue?: string
     req?: PayloadRequest
     where: Where
   }): Promise<void> => {
     const req: PayloadRequest = args.req ?? (await createLocalReq({}, payload))
 
-    const overrideAccess = args.overrideAccess !== false
+    // `!== false` used to make a missing value mean *bypass* — the opposite of every other
+    // Local API operation. Coerce it the same way they do, and warn the untyped callers the
+    // compiler cannot reach.
+    if (args.overrideAccess === undefined) {
+      warnMissingOverrideAccess({ operation: 'payload.jobs.cancel', payload })
+    }
+    const overrideAccess = args.overrideAccess ?? false
     if (!overrideAccess) {
       /**
        * By default, jobsConfig.access.cancel will be `defaultAccess` which is a function that returns `true` if the user is logged in.
@@ -387,19 +408,25 @@ export const getJobsLocalAPI = (payload: Payload) => ({
   cancelByID: async (args: {
     id: number | string
     /**
-     * If set to false, access control as defined in jobsConfig.access.cancel will be run.
-     * By default, this is true and no access control will be run.
-     * If you set this to false and do not have jobsConfig.access.cancel defined, the default access control will be
-     * run (which is a function that returns `true` if the user is logged in).
+     * Whether to skip the access control defined in `jobsConfig.access`.
      *
-     * @default true
+     * `false` runs it — the default access function returns `true` when a user is logged in.
+     * `true` bypasses it — use this for trusted server-side work.
+     *
+     * Required. Omitting it used to bypass access control silently.
      */
-    overrideAccess?: boolean
+    overrideAccess: boolean
     req?: PayloadRequest
   }): Promise<void> => {
     const req: PayloadRequest = args.req ?? (await createLocalReq({}, payload))
 
-    const overrideAccess = args.overrideAccess !== false
+    // `!== false` used to make a missing value mean *bypass* — the opposite of every other
+    // Local API operation. Coerce it the same way they do, and warn the untyped callers the
+    // compiler cannot reach.
+    if (args.overrideAccess === undefined) {
+      warnMissingOverrideAccess({ operation: 'payload.jobs.cancelByID', payload })
+    }
+    const overrideAccess = args.overrideAccess ?? false
     if (!overrideAccess) {
       /**
        * By default, jobsConfig.access.cancel will be `defaultAccess` which is a function that returns `true` if the user is logged in.
