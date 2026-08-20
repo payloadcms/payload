@@ -565,6 +565,7 @@ jobs:
             --ipc=host \
             -v "$PWD":/repo \
             -w /repo \
+            -e CI=true \
             -e PAYLOAD_DATABASE=mongodb \
             -e NEXT_TELEMETRY_DISABLED=1 \
             "mcr.microsoft.com/playwright:v${PLAYWRIGHT_VERSION}-noble" \
