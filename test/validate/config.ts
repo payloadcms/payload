@@ -32,7 +32,6 @@ export const publishGlobalSlug = 'validation-publish-settings'
 export const writeTargetsSlug = 'validation-write-targets'
 export const validationUploadsSlug = 'validation-uploads'
 export const validationPublishUploadsSlug = 'validation-publish-uploads'
-export const validationAdminCollectionSlug = 'validation-admin-items'
 export const validationCustomButtonsCollectionSlug = 'validation-custom-buttons-items'
 export const validationDeniedCollectionSlug = 'validation-denied-items'
 export const validationNonLocalizedCollectionSlug = 'validation-non-localized-items'
@@ -1213,28 +1212,6 @@ const publishGlobal: GlobalConfig = {
   },
 }
 
-const validationAdminCollection: CollectionConfig = {
-  slug: validationAdminCollectionSlug,
-  fields: [
-    {
-      name: 'title',
-      type: 'text',
-      localized: true,
-      required: true,
-    },
-    {
-      name: 'summary',
-      type: 'text',
-      required: true,
-    },
-  ],
-  versions: {
-    drafts: {
-      validate: false,
-    },
-  },
-}
-
 const validationCustomButtonsCollection: CollectionConfig = {
   slug: validationCustomButtonsCollectionSlug,
   admin: {
@@ -1312,7 +1289,6 @@ export default buildConfigWithDefaults({
     validationFallbackCollection,
     validationWhereCollection,
     publishCollection,
-    validationAdminCollection,
     validationCustomButtonsCollection,
     validationDeniedCollection,
     validationNonLocalizedCollection,

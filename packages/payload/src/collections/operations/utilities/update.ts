@@ -24,7 +24,6 @@ import type {
 
 import { ensureUsernameOrEmail } from '../../../auth/ensureUsernameOrEmail.js'
 import { generatePasswordSaltHash } from '../../../auth/strategies/local/generatePasswordSaltHash.js'
-import { ValidationError } from '../../../errors/index.js'
 import { afterChange } from '../../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../../fields/hooks/afterRead/index.js'
 import { beforeChange } from '../../../fields/hooks/beforeChange/index.js'
@@ -40,7 +39,6 @@ import {
 } from '../../../utilities/getVersionsConfig.js'
 import { resolvePublishAllLocales } from '../../../utilities/resolvePublishAllLocales.js'
 import { buildLocalizedPublishData } from '../../../versions/buildSingleLocalePublishData.js'
-import { validateLocalWithDataLocale } from '../local/validate.js'
 export type SharedUpdateDocumentArgs<TSlug extends CollectionSlug> = {
   autosave: boolean
   collectionConfig: SanitizedCollectionConfig
@@ -257,40 +255,8 @@ export const updateDocument = async <
 
   let result: JsonObject = await beforeChange(beforeChangeArgs)
 
-  if (
-    hasDraftsEnabled(collectionConfig) &&
-    config.localization &&
-    publishAllLocales &&
-    !unpublishAllLocales
-  ) {
-    const validationResult = await validateLocalWithDataLocale(payload, {
-      id,
-      collection: collectionConfig.slug,
-      data: result,
-      dataIsLocaleKeyed: true,
-      draft: true,
-      locale: 'all',
-      overrideAccess: true,
-      req,
-      validationDataLocale: locale !== 'all' ? locale : config.localization.defaultLocale,
-      validationTrash: Boolean(originalDoc?.deletedAt),
-    })
-
-    if (!validationResult.valid) {
-      throw new ValidationError(
-        {
-          id,
-          collection: collectionConfig.slug,
-          errors: validationResult.errors,
-          req,
-        },
-        req.t,
-      )
-    }
-  }
-
-  // File deletion and writes must occur after the final post-hook publication validation barrier.
-  // Validation failures leave both the persisted upload and local files untouched.
+  // File deletion and writes must occur after beforeChange's field validation. Validation
+  // failures leave both the persisted upload and local files untouched.
   if (!isDraftOverPublished) {
     await deleteAssociatedFiles({
       collectionConfig,

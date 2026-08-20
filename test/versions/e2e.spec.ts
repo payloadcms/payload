@@ -1522,7 +1522,7 @@ describe('Versions', () => {
       await expect(page.locator('#schedule-publish-button')).toBeHidden()
 
       // save draft then try to schedule publish
-      await saveDocAndAssert(page, '#action-save-draft')
+      await saveDocAndAssert(page)
       await page.locator('#schedule-publish-button').click()
 
       // drawer should open
@@ -1554,7 +1554,7 @@ describe('Versions', () => {
       await expect(page.locator('#schedule-publish-button')).toBeHidden()
 
       // save draft then try to schedule publish
-      await saveDocAndAssert(page, '#action-save-draft')
+      await saveDocAndAssert(page)
       await page.locator('#schedule-publish-button').click()
 
       // drawer should open
@@ -1582,7 +1582,7 @@ describe('Versions', () => {
       await page.locator('#field-title').fill('scheduled publish positioning')
       await page.locator('#field-description').fill('scheduled publish positioning description')
 
-      await saveDocAndAssert(page, '#action-save-draft')
+      await saveDocAndAssert(page)
       await page.locator('#schedule-publish-button').click()
 
       await expect(page.locator('.drawer__header')).toBeVisible()

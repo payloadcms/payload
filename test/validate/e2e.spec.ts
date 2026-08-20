@@ -9,105 +9,10 @@ import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { RESTClient } from '../__helpers/shared/rest.js'
 import { initPage } from '../__setup/e2e/initPage.js'
-import { validationAdminCollectionSlug, validationCustomButtonsCollectionSlug } from './config.js'
+import { validationCustomButtonsCollectionSlug } from './config.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
-
-test.describe('Admin document validation', () => {
-  const createdIDs: string[] = []
-  let client: RESTClient
-  let page: Page
-  let serverURL: string
-  let validationURL: AdminUrlUtil
-
-  test.beforeAll(async ({ browser }) => {
-    ;({ serverURL } = await initPayloadE2ENoConfig({ dirname }))
-    validationURL = new AdminUrlUtil(serverURL, validationAdminCollectionSlug)
-    client = new RESTClient({
-      defaultSlug: validationAdminCollectionSlug,
-      serverURL,
-    })
-
-    const context = await browser.newContext()
-    ;({ page } = await initPage({ context, serverURL }))
-    await client.login()
-  })
-
-  test.afterEach(async () => {
-    await page.goto(validationURL.admin)
-
-    for (const id of createdIDs) {
-      await client.delete(id, {
-        id,
-        slug: validationAdminCollectionSlug,
-      })
-    }
-    createdIDs.length = 0
-  })
-
-  test('should report a blocked publish-all in a toast, but allow a normal publish of the current locale', async () => {
-    const id = await createDraft({ spanishTitle: 'Título en español' })
-
-    await openDraft(id)
-    await page.locator('#action-save-popup').click()
-    await page.locator('#publish-all-locales').click()
-
-    await expect(page.locator('.payload-toast-container')).toContainText('[de] Title')
-
-    await page.locator('#action-save').click()
-
-    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
-  })
-
-  async function createDraft({
-    frenchTitle,
-    germanTitle,
-    spanishTitle,
-  }: {
-    frenchTitle?: string
-    germanTitle?: string
-    spanishTitle?: string
-  }): Promise<string> {
-    const response = await client.endpointWithAuth<{ doc: { id: number | string } }>(
-      `/api/${validationAdminCollectionSlug}?draft=true&locale=en`,
-      'POST',
-      {
-        _status: 'draft',
-        summary: 'Shared summary',
-        title: 'English title',
-      },
-    )
-    const id = String(response.data.doc.id)
-
-    createdIDs.push(id)
-
-    for (const [locale, title] of [
-      ['es', spanishTitle],
-      ['de', germanTitle],
-      ['fr', frenchTitle],
-    ]) {
-      if (title) {
-        await client.endpointWithAuth(
-          `/api/${validationAdminCollectionSlug}/${id}?draft=true&locale=${locale}`,
-          'PATCH',
-          {
-            _status: 'draft',
-            title,
-          },
-        )
-      }
-    }
-
-    return id
-  }
-
-  async function openDraft(id: string): Promise<void> {
-    await page.goto(validationURL.edit(id))
-    await changeLocale(page, 'en')
-    await waitForFormReady(page)
-  }
-})
 
 test.describe('Custom locale validation buttons', () => {
   const createdIDs: string[] = []

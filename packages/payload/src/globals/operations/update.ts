@@ -17,7 +17,6 @@ import type {
 } from '../config/types.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
-import { ValidationError } from '../../errors/index.js'
 import { afterChange } from '../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { beforeChange } from '../../fields/hooks/beforeChange/index.js'
@@ -40,7 +39,6 @@ import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { buildLocalizedPublishData } from '../../versions/buildSingleLocalePublishData.js'
 import { getLatestGlobalVersion } from '../../versions/getLatestGlobalVersion.js'
 import { saveVersion } from '../../versions/saveVersion.js'
-import { validateGlobalLocalWithDataLocale } from './local/validate.js'
 type Args<TSlug extends GlobalSlug> = {
   autosave?: boolean
   data: DeepPartial<Omit<DataFromGlobalSlug<TSlug>, 'id'>>
@@ -268,36 +266,6 @@ export const updateOperation = async <
     }
 
     let result: JsonObject = await beforeChange(beforeChangeArgs)
-
-    if (
-      hasDraftsEnabled(globalConfig) &&
-      payload.config.localization &&
-      publishAllLocales &&
-      !unpublishAllLocales
-    ) {
-      const validationResult = await validateGlobalLocalWithDataLocale(payload, {
-        slug: globalConfig.slug,
-        data: result,
-        dataIsLocaleKeyed: true,
-        draft: true,
-        locale: 'all',
-        overrideAccess: true,
-        req,
-        validationDataLocale:
-          locale && locale !== 'all' ? locale : payload.config.localization.defaultLocale,
-      })
-
-      if (!validationResult.valid) {
-        throw new ValidationError(
-          {
-            errors: validationResult.errors,
-            global: globalConfig.slug,
-            req,
-          },
-          req.t,
-        )
-      }
-    }
 
     if (
       config?.localization &&

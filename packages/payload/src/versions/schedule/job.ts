@@ -3,44 +3,10 @@ import type { User } from '../../index.js'
 import type { TaskConfig } from '../../queues/config/types/taskTypes.js'
 import type { SchedulePublishTaskInput } from './types.js'
 
-import { ValidationError } from '../../errors/index.js'
-import { JobCancelledError } from '../../queues/errors/index.js'
-
 type Args = {
   adminUserSlug: string
   collections: string[]
   globals: string[]
-}
-
-function throwScheduledPublishValidationError(
-  errors: {
-    locale?: string
-    message: string
-    path: string
-  }[],
-): never {
-  const details = errors
-    .map(
-      ({ locale, message, path }) =>
-        `[${locale ?? 'default'}] ${path}${message ? `: ${message}` : ''}`,
-    )
-    .join('; ')
-
-  throw new JobCancelledError(`Scheduled publish validation failed: ${details}`)
-}
-
-async function runWithScheduledPublishValidationErrorHandling<T>(
-  operation: () => Promise<T>,
-): Promise<T> {
-  try {
-    return await operation()
-  } catch (error) {
-    if (error instanceof ValidationError) {
-      throwScheduledPublishValidationError(error.data.errors)
-    }
-
-    throw error
-  }
 }
 
 export const getSchedulePublishTask = ({
@@ -79,40 +45,36 @@ export const getSchedulePublishTask = ({
           'text'
         const id = idType === 'number' ? Number(input.doc.value) : input.doc.value
 
-        await runWithScheduledPublishValidationErrorHandling(() =>
-          req.payload.update({
-            id,
-            collection: collectionSlug,
-            data: {
-              _status,
-            },
-            depth: 0,
-            locale: input.locale,
-            overrideAccess: user === null,
-            publishAllLocales: _status === 'published' && isPublishAllLocales,
-            req,
-            user,
-          }),
-        )
+        await req.payload.update({
+          id,
+          collection: collectionSlug,
+          data: {
+            _status,
+          },
+          depth: 0,
+          locale: input.locale,
+          overrideAccess: user === null,
+          publishAllLocales: _status === 'published' && isPublishAllLocales,
+          req,
+          user,
+        })
       }
 
       if (input.global) {
         const globalSlug = input.global
 
-        await runWithScheduledPublishValidationErrorHandling(() =>
-          req.payload.updateGlobal({
-            slug: globalSlug,
-            data: {
-              _status,
-            },
-            depth: 0,
-            locale: input.locale,
-            overrideAccess: user === null,
-            publishAllLocales: _status === 'published' && isPublishAllLocales,
-            req,
-            user,
-          }),
-        )
+        await req.payload.updateGlobal({
+          slug: globalSlug,
+          data: {
+            _status,
+          },
+          depth: 0,
+          locale: input.locale,
+          overrideAccess: user === null,
+          publishAllLocales: _status === 'published' && isPublishAllLocales,
+          req,
+          user,
+        })
       }
 
       return {
