@@ -5,8 +5,7 @@ import type { SharpDependency, SharpDynamicDefaults } from './types.js'
 
 import { parseDynamicResize } from './parseDynamicResize.js'
 
-// Matches core's existing `generateFileData.ts` allow-list for upload-time processing —
-// Sharp only auto-detects and preserves multi-frame animation for these MIME types.
+// Must match generateFileData.ts's allow-list — the only MIME types Sharp auto-detects multi-frame animation for.
 const ANIMATED_MIME_TYPES = ['image/avif', 'image/gif', 'image/webp']
 
 /**

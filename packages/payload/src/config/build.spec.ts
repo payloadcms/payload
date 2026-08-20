@@ -131,4 +131,22 @@ describe('buildConfig', () => {
       buildConfig(makeConfig({ storage: [{} as unknown as StorageAdapter] })),
     ).rejects.toThrow(/storage/i)
   })
+
+  it('should reject a config still using the removed top-level sharp option', async () => {
+    await expect(buildConfig({ ...makeConfig(), sharp: {} } as unknown as Config)).rejects.toThrow(
+      /sharp/i,
+    )
+  })
+
+  it('should reject a collection still using a removed Sharp-specific upload option', async () => {
+    await expect(
+      buildConfig(
+        makeConfig({
+          collections: [
+            { slug: 'media', upload: { resizeOptions: { width: 100 } } },
+          ] as unknown as Config['collections'],
+        }),
+      ),
+    ).rejects.toThrow(/resizeOptions/)
+  })
 })

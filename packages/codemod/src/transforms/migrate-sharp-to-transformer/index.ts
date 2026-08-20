@@ -344,7 +344,7 @@ export const migrateSharpToTransformer: Transform = {
             name: 'transformers',
             initializer: `[${transformerCallText}]`,
           })
-        } else if (uploadProp && Node.isPropertyAssignment(uploadProp)) {
+        } else if (uploadProp) {
           notes.push(
             `${sourceFile.getFilePath()}: \`upload\` isn't an inline object — add \`transformers: [${transformerCallText}]\` to it manually.`,
           )

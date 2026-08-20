@@ -51,12 +51,10 @@ export const getFileHandler: PayloadHandler = async (req) => {
 }
 
 /**
- * Runs the collection's custom `handlers`, falling back to a local-filesystem read.
- * Shared by the ordinary `read` endpoint and, with `operation: 'transform'`,
- * by `getSourceFileResponse` — Payload's internal source retrieval for a dynamic
- * transformation. `transform` ignores the incoming `Range` header and never
- * calls `modifyResponseHeaders` or CORS header wrapping, since those apply exactly
- * once, later, to the transformer pipeline's final outward response.
+ * Shared by the ordinary `read` endpoint and, via `operation: 'transform'`, by
+ * `getSourceFileResponse` for internal source retrieval. `transform` ignores the
+ * `Range` header and skips `modifyResponseHeaders`/CORS wrapping, since those are
+ * applied once, later, to the transformer pipeline's final response.
  */
 export async function retrieveFileResponse({
   collection,
@@ -151,7 +149,7 @@ export async function retrieveFileResponse({
   const isTransformSource = operation === 'transform'
 
   // The client's Range header must never leak into an internal source retrieval —
-  // Sharp (and any other transformer) needs the complete original bytes to decode.
+  // a transformer needs the complete original bytes to decode.
   const rangeHeader = isTransformSource ? null : req.headers.get('range')
   const rangeResult = parseRangeHeader({
     fileSize: stats.size,

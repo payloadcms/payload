@@ -7,30 +7,30 @@ import { withFileTransformAccessContext } from './withFileTransformAccessContext
 const makeReq = (): PayloadRequest => ({}) as unknown as PayloadRequest
 
 describe('withFileTransformAccessContext', () => {
-  it('should set req.fileTransform to true only while run() is executing', async () => {
+  it('should set req.fileTransform to true only while callback() is executing', async () => {
     const req = makeReq()
-    let observedDuringRun: true | undefined
+    let observedDuringCallback: true | undefined
 
     await withFileTransformAccessContext({
       isTransform: true,
       req,
-      run: () => {
-        observedDuringRun = req.fileTransform
+      callback: () => {
+        observedDuringCallback = req.fileTransform
       },
     })
 
-    expect(observedDuringRun).toBe(true)
+    expect(observedDuringCallback).toBe(true)
     expect(req.fileTransform).toBeUndefined()
   })
 
-  it('should restore the previous value when run() throws synchronously', async () => {
+  it('should restore the previous value when callback() throws synchronously', async () => {
     const req = makeReq()
 
     await expect(
       withFileTransformAccessContext({
         isTransform: true,
         req,
-        run: () => {
+        callback: () => {
           throw new Error('denied')
         },
       }),
@@ -39,14 +39,14 @@ describe('withFileTransformAccessContext', () => {
     expect(req.fileTransform).toBeUndefined()
   })
 
-  it('should restore the previous value when run() rejects asynchronously', async () => {
+  it('should restore the previous value when callback() rejects asynchronously', async () => {
     const req = makeReq()
 
     await expect(
       withFileTransformAccessContext({
         isTransform: true,
         req,
-        run: async () => {
+        callback: async () => {
           throw new Error('denied')
         },
       }),
@@ -57,26 +57,26 @@ describe('withFileTransformAccessContext', () => {
 
   it('should never set req.fileTransform when isTransform is false', async () => {
     const req = makeReq()
-    let observedDuringRun: true | undefined
+    let observedDuringCallback: true | undefined
 
     await withFileTransformAccessContext({
       isTransform: false,
       req,
-      run: () => {
-        observedDuringRun = req.fileTransform
+      callback: () => {
+        observedDuringCallback = req.fileTransform
       },
     })
 
-    expect(observedDuringRun).toBeUndefined()
+    expect(observedDuringCallback).toBeUndefined()
   })
 
-  it("should return run()'s resolved value", async () => {
+  it("should return callback()'s resolved value", async () => {
     const req = makeReq()
 
     const result = await withFileTransformAccessContext({
       isTransform: true,
       req,
-      run: async () => 'access-granted',
+      callback: async () => 'access-granted',
     })
 
     expect(result).toBe('access-granted')
@@ -89,7 +89,7 @@ describe('withFileTransformAccessContext', () => {
     await withFileTransformAccessContext({
       isTransform: true,
       req,
-      run: async () => undefined,
+      callback: async () => undefined,
     })
 
     expect(req.fileTransform).toBe(true)

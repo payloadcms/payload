@@ -34,8 +34,8 @@ export function matchesMimeType({
 
   const [patternType, patternSubtype] = patternParts
 
-  // Only the universal wildcard ("*/*") is a supported full wildcard; a wildcard
-  // type paired with a concrete subtype (e.g. "*/png") is not a valid pattern.
+  // "*/*" is the only valid full wildcard — a wildcard type with a concrete
+  // subtype (e.g. "*/png") is invalid.
   if (patternType === '*') {
     return false
   }

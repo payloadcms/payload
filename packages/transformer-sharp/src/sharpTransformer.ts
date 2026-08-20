@@ -67,9 +67,8 @@ export function sharpTransformer(
     [uploadTransformerInternal]: {
       prepareUpload: createPrepareLegacyUpload({ collections, sharpDependency }),
     },
-    // `transformFile` only ever receives `options` this transformer itself computed,
-    // via `prepareUpload`'s `transform` callback — the public contract's `unknown`
-    // reflects that core never inspects it, not that any shape could arrive here.
+    // `options` here is always what this transformer computed via `prepareUpload`'s
+    // `transform` callback; the public contract's `unknown` just reflects that core never inspects it.
     transformFile: createTransformFile({ sharpDependency }) as (
       args: TransformFileArgs,
     ) => Promise<TransformFileResult>,

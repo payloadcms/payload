@@ -11,10 +11,8 @@ import { mapWithBoundedConcurrency } from './mapWithBoundedConcurrency.js'
 import { sanitizeResizeConfig } from './sanitizeResizeConfig.js'
 
 /**
- * Sharp decodes the full image and rejects truncated/header-only files.
- * Returns `undefined` rather than throwing — matching core's own dependency-free
- * probe's resilience — since a file whose dimensions can't be determined can't
- * be meaningfully resized/cropped either, but that alone shouldn't fail the upload.
+ * Sharp throws on truncated/header-only files. Returns `undefined` instead —
+ * matching core's dependency-free probe — since unreadable dimensions shouldn't fail the upload.
  */
 async function tryProbe(file: File, sharpDependency: SharpDependency) {
   try {
@@ -27,13 +25,11 @@ async function tryProbe(file: File, sharpDependency: SharpDependency) {
 }
 
 /**
- * Computes the legacy upload tasks (the main file, optionally cropped, and
- * every configured legacy image size) and hands each to the injected
- * `transform` callback — Payload's own generic `transformFile` pipeline
- * runner — exactly once. Reads each collection's Sharp-owned upload config
- * from `sharpTransformer({ collections })`, authored at factory-construction
- * time — not from the sanitized collection, which only ever gets the narrowed,
- * Sharp-agnostic projection `init()` writes back.
+ * Computes the legacy upload tasks (the main file, optionally cropped, and every
+ * configured legacy image size) and hands each to the injected `transform` callback
+ * exactly once. Reads the Sharp-owned config from `sharpTransformer({ collections })`
+ * at factory-construction time — not from the sanitized collection, which only gets
+ * the narrowed projection `init()` writes back.
  */
 export function createPrepareLegacyUpload({
   collections,
@@ -61,8 +57,7 @@ export function createPrepareLegacyUpload({
       }
     }
 
-    // A file whose dimensions couldn't be read can't be meaningfully cropped or
-    // resized — treat it like a non-resizable file rather than failing the upload.
+    // Unreadable dimensions can't be cropped/resized — treat as non-resizable rather than failing the upload.
     const canProcessAsImage = fileSupportsResize && originalDimensions !== undefined
 
     const mainResultFile = await transform({
@@ -164,9 +159,8 @@ async function describeResult({
     return { fieldPath, file: resultFile, mimeType: resultFile.type }
   }
 
-  // `tryProbe` never constructs Sharp with `animated: true`, so `meta.height` is
-  // already the single-page/frame height for a multi-page image, not the full
-  // page-stack — no division by page count is needed (or correct) here.
+  // `tryProbe` never sets `animated: true`, so `meta.height` is already the
+  // single-frame height — do not divide by page count here.
   return {
     fieldPath,
     file: resultFile,

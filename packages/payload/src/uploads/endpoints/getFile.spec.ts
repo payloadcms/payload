@@ -202,7 +202,7 @@ describe('retrieveFileResponse', () => {
     expect(response.headers.get('Access-Control-Allow-Origin')).toBeNull()
   })
 
-  it("should let modifyResponseHeaders override the CORS 'Access-Control-Allow-Origin' header on the existing serve path (regression, Correction 10)", async () => {
+  it("should let modifyResponseHeaders override the CORS 'Access-Control-Allow-Origin' header on the existing serve path (regression)", async () => {
     const modifyResponseHeaders = vi.fn(({ headers }: { headers: Headers }) => {
       headers.set('Access-Control-Allow-Origin', 'https://custom.example.com')
       return headers

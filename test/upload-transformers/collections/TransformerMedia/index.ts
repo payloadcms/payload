@@ -12,8 +12,7 @@ const dirname = path.dirname(filename)
 export const TransformerMedia: CollectionConfig = {
   slug: transformerMediaSlug,
   access: {
-    // Matches the design specification's documented pattern: ordinary reads are
-    // public, but a dynamic transformation request requires an authenticated user.
+    // Ordinary reads are public; a dynamic transformation request requires an authenticated user.
     read: ({ req }) => (req.fileTransform ? Boolean(req.user) : true),
   },
   fields: [

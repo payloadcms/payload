@@ -1673,7 +1673,7 @@ export type Config = {
   typescript?: RootTypeScriptConfig
   /**
    * Customize the handling of incoming file uploads for collections that have uploads enabled,
-   * and configure the ordered `transformers` pipeline for upload processing and dynamic requests.
+   * including the `transformers` pipeline.
    */
   upload?: GlobalUploadConfig
 }

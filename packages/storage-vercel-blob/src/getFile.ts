@@ -112,8 +112,7 @@ export async function getFile({
     })
 
     if (!response.ok || !response.body) {
-      // A transformer distinguishing "empty" from "source retrieval failed" needs
-      // the real status; masking every failure as 204 is only safe for a public download.
+      // A transformer needs the real failure status; masking it as 204 is only safe for a plain download.
       if (isTransformSource) {
         return new Response(null, { status: response.status, statusText: response.statusText })
       }

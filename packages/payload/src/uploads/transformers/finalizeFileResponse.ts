@@ -14,7 +14,7 @@ const MANDATORY_CORS_HEADER_NAMES = [
  * The single header pass for the dynamic-transform response path. Unlike the
  * existing `serve` path — where a collection's `modifyResponseHeaders` can still
  * win on any header it touches, including CORS — mandatory CORS and security
- * headers are asserted last here, so they are never overridable (Decision 6).
+ * headers are asserted last here, so they are never overridable.
  */
 export function finalizeFileResponse({
   collection,

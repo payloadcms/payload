@@ -143,7 +143,6 @@ async function transformCrop({
     croppedBuffer = data
   }
 
-  // Re-apply resizeOptions to the crop output, matching today's behavior exactly.
   if (resizeOptions && !resizeOptions.withoutEnlargement) {
     const { data: resizedBuffer } = await sharpDependency(croppedBuffer)
       .resize({

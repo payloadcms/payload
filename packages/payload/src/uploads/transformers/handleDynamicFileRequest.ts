@@ -17,8 +17,8 @@ import { withFileTransformAccessContext } from './withFileTransformAccessContext
  * request-capable transformer pipeline from its authoritative MIME type, enforce
  * transform-aware read access, then run every eligible transformer in declaration
  * order against a lazily-fetched source. Called from `getFileHandler` only when at
- * least one transformer is configured (Decision 5) — the zero-transformer path
- * never reaches this function.
+ * least one transformer is configured — the zero-transformer path never reaches
+ * this function.
  */
 export async function handleDynamicFileRequest({
   collection,
@@ -105,9 +105,7 @@ export async function handleDynamicFileRequest({
     return finalizeFileResponse({ collection, req, response: currentResponse })
   }
 
-  // No transformer ultimately produced a response — serve the original file
-  // exactly as the non-transformer path would (full Range/ETag/redirect support,
-  // `modifyResponseHeaders` applied in its existing order), per the error contract's
-  // "No transformer joins the pipeline: serve the original file normally."
+  // No transformer produced a response — serve the original file through the
+  // normal path (Range/ETag/redirect support, existing `modifyResponseHeaders` order).
   return retrieveFileResponse({ collection, doc: document, filename, prefix, req })
 }

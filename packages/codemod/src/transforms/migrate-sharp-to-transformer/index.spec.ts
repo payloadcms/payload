@@ -117,6 +117,27 @@ export default buildConfig(myConfig)
     expect(result.notes?.some((note) => note.includes('buildConfig'))).toBe(true)
   })
 
+  it('notes when upload is a shorthand property instead of duplicating the key', async () => {
+    const input = `import sharp from 'sharp'
+import { buildConfig } from 'payload'
+
+const upload = { staticDir: 'media' }
+
+export default buildConfig({
+  collections: [],
+  upload,
+  sharp,
+})
+`
+    const project = new (await import('ts-morph')).Project({ useInMemoryFileSystem: true })
+    const file = project.createSourceFile('input.ts', input)
+
+    const result = await migrateSharpToTransformer.apply({ packageJsons: [], project })
+
+    expect(result.notes?.some((note) => note.includes('upload'))).toBe(true)
+    expect(file.getFullText()).not.toMatch(/upload,\s*\n\s*upload:/)
+  })
+
   it('notes when a collection upload object contains a spread that may hide Sharp-specific fields', async () => {
     const input = `import sharp from 'sharp'
 import { buildConfig } from 'payload'

@@ -61,9 +61,7 @@ export async function getFile({
     const fileSize = headObj.size
 
     // Don't return large file uploads back to the client, or the Worker will run out of memory.
-    // Never applies to `transform`: a transformer needs the real bytes regardless of
-    // size, and silently degrading to an empty body would corrupt the transform without any
-    // error signal.
+    // Skipped for `transform`, which needs the real bytes and would otherwise silently corrupt.
     if (fileSize > 50 * 1024 * 1024 && uploadReference && !isTransformSource) {
       return new Response(null, { status: 200 })
     }

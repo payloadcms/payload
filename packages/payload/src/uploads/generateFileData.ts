@@ -267,8 +267,7 @@ export const generateFileData = async <T>({
         fileData.width = probed.width
         fileData.height = probed.height
       } catch {
-        // Not a recognized/parseable image format — leave width/height unset,
-        // matching today's non-image pass-through behavior.
+        // Not a recognized image format — leave width/height unset.
       }
     }
 

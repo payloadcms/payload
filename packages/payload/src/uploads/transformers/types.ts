@@ -70,7 +70,7 @@ export type UploadTransformer = {
    */
   mimeTypes: string[]
   /**
-   * Unique transformer identity. Required to be unique across `upload.transformers`.
+   * Must be unique across `upload.transformers`.
    */
   slug: string
   /**
