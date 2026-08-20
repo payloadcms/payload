@@ -157,7 +157,7 @@ describe('Types testing', () => {
 
   test('payload.update many', () => {
     expect(
-      payload.update({ collection: 'users', data: {}, where: {}, overrideAccess: true }),
+      payload.update({ collection: 'users', data: {}, overrideAccess: true, where: {} }),
     ).type.toBe<Promise<BulkOperationResult<'users', SelectType>>>()
   })
 
@@ -168,7 +168,7 @@ describe('Types testing', () => {
   })
 
   test('payload.delete many', () => {
-    expect(payload.delete({ collection: 'users', where: {}, overrideAccess: true })).type.toBe<
+    expect(payload.delete({ collection: 'users', overrideAccess: true, where: {} })).type.toBe<
       Promise<BulkOperationResult<'users', SelectType>>
     >()
   })
@@ -210,7 +210,7 @@ describe('Types testing', () => {
   describe('select', () => {
     test('should include only ID if select is an empty object', () => {
       expect(
-        payload.findByID({ id: 'id', collection: 'posts', select: {}, overrideAccess: true }),
+        payload.findByID({ id: 'id', collection: 'posts', overrideAccess: true, select: {} }),
       ).type.toBe<Promise<{ id: Post['id'] }>>()
     })
 
@@ -219,8 +219,8 @@ describe('Types testing', () => {
         payload.findByID({
           id: 'id',
           collection: 'posts',
-          select: { title: true },
           overrideAccess: true,
+          select: { title: true },
         }),
       ).type.toBe<Promise<{ id: Post['id']; title?: Post['title'] }>>()
     })
@@ -230,8 +230,8 @@ describe('Types testing', () => {
         payload.findByID({
           id: 'id',
           collection: 'posts',
-          select: { title: false },
           overrideAccess: true,
+          select: { title: false },
         }),
       ).type.toBe<Promise<Omit<Post, 'title'>>>()
     })
@@ -287,6 +287,7 @@ describe('Types testing', () => {
         data: {
           email: 'test@example.com',
         },
+        overrideAccess: true,
       })
     })
 
@@ -1357,6 +1358,7 @@ describe('Types testing', () => {
           richText: buildEditorState<Post['richText']>({ text: 'hello' }),
           selectField: 'option-1',
         },
+        overrideAccess: true,
       })
     })
 
@@ -1398,6 +1400,7 @@ describe('Types testing', () => {
           },
           selectField: 'option-1',
         },
+        overrideAccess: true,
       })
     })
 
@@ -1408,6 +1411,7 @@ describe('Types testing', () => {
         data: {
           richText: buildEditorState<Post['richText']>({ text: 'updated' }),
         },
+        overrideAccess: true,
       })
     })
 
@@ -1417,6 +1421,7 @@ describe('Types testing', () => {
         data: {
           richText: buildEditorState<Menu['richText']>({ text: 'nav content' }),
         },
+        overrideAccess: true,
       })
     })
 
@@ -1505,13 +1510,27 @@ describe('Types testing', () => {
   describe('input types are assignable to create / update data (which expect the read shape)', () => {
     test('a full PostInput is valid payload.create and payload.update data', () => {
       const data = {} as PostInput
-      expect(payload.create).type.toBeCallableWith({ collection: 'posts', data })
-      expect(payload.update).type.toBeCallableWith({ id: 1, collection: 'posts', data })
+      expect(payload.create).type.toBeCallableWith({
+        collection: 'posts',
+        data,
+        overrideAccess: true,
+      })
+      expect(payload.update).type.toBeCallableWith({
+        id: 1,
+        collection: 'posts',
+        data,
+        overrideAccess: true,
+      })
     })
 
     test('a full InputTypeInput is valid payload.update data', () => {
       const data = {} as InputTypeInput
-      expect(payload.update).type.toBeCallableWith({ id: 1, collection: 'input-types', data })
+      expect(payload.update).type.toBeCallableWith({
+        id: 1,
+        collection: 'input-types',
+        data,
+        overrideAccess: true,
+      })
     })
 
     test('input field values (relationship, hasMany, polymorphic, upload, defaulted) are valid update data', () => {
@@ -1526,6 +1545,7 @@ describe('Types testing', () => {
           related: input.related,
           status: input.status,
         },
+        overrideAccess: true,
       })
     })
 
@@ -1535,6 +1555,7 @@ describe('Types testing', () => {
         id: 1,
         collection: 'input-types',
         data: { richText },
+        overrideAccess: true,
       })
     })
   })
@@ -1587,6 +1608,7 @@ describe('Types testing', () => {
             title: 'Test', // Only one required field
           },
           draft: true,
+          overrideAccess: true,
         })
       })
 
@@ -1598,16 +1620,18 @@ describe('Types testing', () => {
             title: 'Test',
           },
           draft: false,
+          overrideAccess: true,
         })
 
         // All required fields present - should not error
         expect(payload.create).type.toBeCallableWith({
           collection: 'draft-posts',
           data: {
-            title: 'Test',
             description: 'Description',
+            title: 'Test',
           },
           draft: false,
+          overrideAccess: true,
         })
       })
 
@@ -1618,15 +1642,17 @@ describe('Types testing', () => {
           data: {
             title: 'Test',
           },
+          overrideAccess: true,
         })
 
         // All required fields present - should not error
         expect(payload.create).type.toBeCallableWith({
           collection: 'draft-posts',
           data: {
-            title: 'Test',
             description: 'Description',
+            title: 'Test',
           },
+          overrideAccess: true,
         })
       })
 
@@ -1637,6 +1663,7 @@ describe('Types testing', () => {
             title: 'Test',
           },
           draft: true,
+          overrideAccess: true,
         })
 
         expect(payload.create).type.not.toBeCallableWith({
@@ -1645,6 +1672,7 @@ describe('Types testing', () => {
             title: 'Test',
           },
           draft: false,
+          overrideAccess: true,
         })
 
         // Without draft property - should not error
@@ -1653,6 +1681,7 @@ describe('Types testing', () => {
           data: {
             title: 'Test',
           },
+          overrideAccess: true,
         })
       })
 
@@ -1660,20 +1689,22 @@ describe('Types testing', () => {
         expect(payload.create).type.not.toBeCallableWith({
           collection: 'draft-posts',
           data: {
-            title: 'Test',
             description: 'Description',
             invalidProperty: 'should error',
+            title: 'Test',
           },
           draft: false,
+          overrideAccess: true,
         })
 
         expect(payload.create).type.not.toBeCallableWith({
           collection: 'draft-posts',
           data: {
-            title: 'Test',
             invalidProperty: 'should error',
+            title: 'Test',
           },
           draft: true,
+          overrideAccess: true,
         })
       })
 
@@ -1683,6 +1714,7 @@ describe('Types testing', () => {
           data: {
             title: 'Page Title',
           },
+          overrideAccess: true,
         })
       })
 
@@ -1693,111 +1725,149 @@ describe('Types testing', () => {
             title: 'Page Title',
             // category is optional relationship, can be omitted
           },
+          overrideAccess: true,
         })
       })
 
       // Additional operations tests
       test('find with draft:true on non-draft collection should error', () => {
-        expect(payload.find).type.not.toBeCallableWith({ collection: 'pages', draft: true })
+        expect(payload.find).type.not.toBeCallableWith({
+          collection: 'pages',
+          draft: true,
+          overrideAccess: true,
+        })
       })
 
       test('find with draft:false on non-draft collection should error', () => {
-        expect(payload.find).type.not.toBeCallableWith({ collection: 'pages', draft: false })
+        expect(payload.find).type.not.toBeCallableWith({
+          collection: 'pages',
+          draft: false,
+          overrideAccess: true,
+        })
       })
 
       test('find with draft:true on draft-enabled collection should work', () => {
-        expect(payload.find).type.toBeCallableWith({ collection: 'draft-posts', draft: true })
+        expect(payload.find).type.toBeCallableWith({
+          collection: 'draft-posts',
+          draft: true,
+          overrideAccess: true,
+        })
       })
 
       test('find with draft:false on draft-enabled collection should work', () => {
-        expect(payload.find).type.toBeCallableWith({ collection: 'draft-posts', draft: false })
+        expect(payload.find).type.toBeCallableWith({
+          collection: 'draft-posts',
+          draft: false,
+          overrideAccess: true,
+        })
       })
 
       test('findByID with draft:true on non-draft collection should error', () => {
         expect(payload.findByID).type.not.toBeCallableWith({
-          collection: 'pages',
           id: 1,
+          collection: 'pages',
           draft: true,
+          overrideAccess: true,
         })
       })
 
       test('findByID with draft:false on non-draft collection should error', () => {
         expect(payload.findByID).type.not.toBeCallableWith({
-          collection: 'pages',
           id: 1,
+          collection: 'pages',
           draft: false,
+          overrideAccess: true,
         })
       })
 
       test('findByID with draft:true on draft-enabled collection should work', () => {
         expect(payload.findByID).type.toBeCallableWith({
-          collection: 'draft-posts',
           id: 1,
+          collection: 'draft-posts',
           draft: true,
+          overrideAccess: true,
         })
       })
 
       test('update with draft:true on non-draft collection should error', () => {
         expect(payload.update).type.not.toBeCallableWith({
-          collection: 'pages',
           id: 1,
+          collection: 'pages',
           data: { title: 'Test' },
           draft: true,
+          overrideAccess: true,
         })
       })
 
       test('update with draft:false on non-draft collection should error', () => {
         expect(payload.update).type.not.toBeCallableWith({
-          collection: 'pages',
           id: 1,
+          collection: 'pages',
           data: { title: 'Test' },
           draft: false,
+          overrideAccess: true,
         })
       })
 
       test('update with draft:true on draft-enabled collection should work', () => {
         expect(payload.update).type.toBeCallableWith({
-          collection: 'draft-posts',
           id: 1,
+          collection: 'draft-posts',
           data: { title: 'Test' },
           draft: true,
+          overrideAccess: true,
         })
       })
 
       test('duplicate with draft:true on non-draft collection should error', () => {
         expect(payload.duplicate).type.not.toBeCallableWith({
-          collection: 'pages',
           id: 1,
+          collection: 'pages',
           draft: true,
+          overrideAccess: true,
         })
       })
 
       test('duplicate with draft:false on non-draft collection should error', () => {
         expect(payload.duplicate).type.not.toBeCallableWith({
-          collection: 'pages',
           id: 1,
+          collection: 'pages',
           draft: false,
+          overrideAccess: true,
         })
       })
 
       test('duplicate with draft:true on draft-enabled collection should work', () => {
         expect(payload.duplicate).type.toBeCallableWith({
-          collection: 'draft-posts',
           id: 1,
+          collection: 'draft-posts',
           draft: true,
+          overrideAccess: true,
         })
       })
 
       test('global findOne with draft:true on non-draft global should error', () => {
-        expect(payload.findGlobal).type.not.toBeCallableWith({ slug: 'menu', draft: true })
+        expect(payload.findGlobal).type.not.toBeCallableWith({
+          slug: 'menu',
+          draft: true,
+          overrideAccess: true,
+        })
       })
 
       test('global findOne with draft:false on non-draft global should error', () => {
-        expect(payload.findGlobal).type.not.toBeCallableWith({ slug: 'menu', draft: false })
+        expect(payload.findGlobal).type.not.toBeCallableWith({
+          slug: 'menu',
+          draft: false,
+          overrideAccess: true,
+        })
       })
 
       test('global findOne with draft:true on draft-enabled global should work', () => {
-        expect(payload.findGlobal).type.toBeCallableWith({ slug: 'settings', draft: true })
+        expect(payload.findGlobal).type.toBeCallableWith({
+          slug: 'settings',
+          draft: true,
+          overrideAccess: true,
+        })
       })
 
       test('global update with draft:true on non-draft global should error', () => {
@@ -1805,6 +1875,7 @@ describe('Types testing', () => {
           slug: 'menu',
           data: {},
           draft: true,
+          overrideAccess: true,
         })
       })
 
@@ -1813,6 +1884,7 @@ describe('Types testing', () => {
           slug: 'menu',
           data: {},
           draft: false,
+          overrideAccess: true,
         })
       })
 
@@ -1821,6 +1893,7 @@ describe('Types testing', () => {
           slug: 'settings',
           data: {},
           draft: true,
+          overrideAccess: true,
         })
       })
     })
