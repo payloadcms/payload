@@ -36,6 +36,7 @@ import type { Config, Diff } from './payload-types.js'
 
 import { assertNetworkRequests } from '../__helpers/e2e/assertNetworkRequests.js'
 import { checkFocusIndicators } from '../__helpers/e2e/checkFocusIndicators.js'
+import { expectScreenshot } from '../__helpers/e2e/expectScreenshot.js'
 import {
   changeLocale,
   exactText,
@@ -49,6 +50,7 @@ import { navigateToDiffVersionView as _navigateToDiffVersionView } from '../__he
 import { openDocControls } from '../__helpers/e2e/openDocControls.js'
 import { runAxeScan } from '../__helpers/e2e/runAxeScan.js'
 import { getSelectMenu } from '../__helpers/e2e/selectInput.js'
+import { visual } from '../__helpers/e2e/visual.js'
 import { waitForAutoSaveToRunAndComplete } from '../__helpers/e2e/waitForAutoSaveToRunAndComplete.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
@@ -243,6 +245,35 @@ describe('Versions', () => {
       await expect(() => {
         expect(page.url()).toMatch(/\/versions/)
       }).toPass({ intervals: [100], timeout: 10000 })
+    })
+
+    visual('should visually render the collection versions list', async () => {
+      await page.goto(url.list)
+
+      const documentLink = page
+        .locator('tbody tr .cell-title a', {
+          hasText: exactText('Title With Many Versions 11'),
+        })
+        .first()
+
+      await expect(documentLink).toBeVisible()
+
+      const documentHref = await documentLink.getAttribute('href')
+
+      await page.goto(`${serverURL}${documentHref}/versions`)
+
+      const versionsView = page.locator('main.versions')
+      const versionsTable = versionsView.locator('table')
+
+      await expect(versionsTable).toBeVisible()
+      await expect(versionsTable.locator('tbody tr')).toHaveCount(10)
+
+      await expectScreenshot({
+        mask: [versionsView.locator('.cell-updatedAt'), versionsView.locator('.cell-id')],
+        name: 'collection-versions-list.png',
+        page,
+        target: versionsView,
+      })
     })
 
     test('autosave relationships - should select doc after creating from relationship field', async () => {

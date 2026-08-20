@@ -14,10 +14,12 @@ import {
   openListColumns,
   toggleColumn,
 } from '../../../__helpers/e2e/columns/index.js'
+import { expectScreenshot } from '../../../__helpers/e2e/expectScreenshot.js'
 import { addListFilter } from '../../../__helpers/e2e/filters/index.js'
 import { exactText, saveDocAndAssert, selectTableRow } from '../../../__helpers/e2e/helpers.js'
 import { upsertPreferences } from '../../../__helpers/e2e/preferences.js'
 import { runAxeScan } from '../../../__helpers/e2e/runAxeScan.js'
+import { visual } from '../../../__helpers/e2e/visual.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
@@ -155,6 +157,18 @@ describe('Text', () => {
     await page.goto(url.list)
     const textCell = page.locator('.row-1 .cell-text')
     await expect(textCell).toHaveText(textDoc.text)
+  })
+
+  visual('should visually render a text field', async () => {
+    await page.goto(url.create)
+
+    const input = page.locator('#field-text')
+    const field = page.locator('.field-type.text', { has: input })
+
+    await input.fill('Visual regression text')
+    await expect(input).toHaveValue('Visual regression text')
+
+    await expectScreenshot({ name: 'text-field.png', page, target: field })
   })
 
   test('should respect admin.disableListColumn despite preferences', async () => {
