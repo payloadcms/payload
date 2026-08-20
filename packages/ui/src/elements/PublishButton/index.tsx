@@ -6,6 +6,7 @@ import { getTranslation } from '@payloadcms/translations'
 import { formatAdminURL, hasAutosaveEnabled, hasLocalizeStatusEnabled } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useState } from 'react'
+import { toast } from 'sonner'
 
 import { useForm, useFormModified } from '../../forms/Form/context.js'
 import { FormSubmit } from '../../forms/Submit/index.js'
@@ -18,6 +19,8 @@ import { useOperation } from '../../providers/Operation/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { traverseForLocalizedFields } from '../../utilities/traverseForLocalizedFields.js'
 import { PopupList } from '../Popup/index.js'
+import { FieldErrorsToast } from '../Toasts/fieldErrors.js'
+import { getValidationEndpoint, validateDocumentLocales } from './validateAllLocales.js'
 import './index.css'
 
 export function PublishButton({
@@ -37,7 +40,7 @@ export function PublishButton({
   } = useDocumentInfo()
 
   const { config, getEntityConfig } = useConfig()
-  const { submit } = useForm()
+  const { getData, submit } = useForm()
   const modified = useFormModified()
   const editDepth = useEditDepth()
   const { code: localeCode } = useLocale()
@@ -69,6 +72,7 @@ export function PublishButton({
     uploadStatus !== 'uploading'
 
   const [hasLocalizedFields, setHasLocalizedFields] = useState(false)
+  const [isValidatingLocales, setIsValidatingLocales] = useState(false)
 
   useEffect(() => {
     const hasLocalizedField = traverseForLocalizedFields(entityConfig?.fields, { blocksMap })
@@ -145,6 +149,34 @@ export function PublishButton({
       return
     }
 
+    if (localization && hasLocalizedFields) {
+      setIsValidatingLocales(true)
+      let validation
+
+      try {
+        validation = await validateDocumentLocales({
+          activeLocale: localeCode,
+          blocksMap,
+          data: { ...getData(), _status: 'published' },
+          endpoint: getValidationEndpoint({ id, apiRoute: api, collectionSlug, globalSlug }),
+          fields: entityConfig?.fields ?? [],
+          locales: localization.locales.map(({ code }) => code),
+        })
+      } finally {
+        setIsValidatingLocales(false)
+      }
+
+      if (!validation.valid) {
+        const introMessage = t('error:followingFieldsInvalid', { count: validation.errors.length })
+        const fieldList = validation.errors
+          .map((error) => `${error.locale ? `[${error.locale}] ` : ''}${error.label ?? error.path}`)
+          .join(', ')
+
+        toast.error(<FieldErrorsToast errorMessage={`${introMessage} ${fieldList}`} />)
+        return
+      }
+    }
+
     const params = qs.stringify(
       {
         depth: 0,
@@ -177,12 +209,18 @@ export function PublishButton({
     localeCode,
     localizeStatusEnabled,
     api,
+    blocksMap,
     collectionSlug,
+    entityConfig?.fields,
+    getData,
     globalSlug,
+    hasLocalizedFields,
     id,
+    localization,
     setHasPublishedDoc,
     submit,
     setUnpublishedVersionCount,
+    t,
     uploadStatus,
     setMostRecentVersionIsAutosaved,
   ])
@@ -256,7 +294,8 @@ export function PublishButton({
     <React.Fragment>
       <FormSubmit
         buttonId="action-save"
-        disabled={!canPublish}
+        disabled={!canPublish || isValidatingLocales}
+        loading={isValidatingLocales}
         onClick={isDefaultPublishAll ? publish : () => publishLocale(activeLocale.code)}
         size="medium"
         SubMenuPopupContent={

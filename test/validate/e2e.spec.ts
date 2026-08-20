@@ -4,7 +4,7 @@ import { expect, test } from '@playwright/test'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import { changeLocale, waitForFormReady } from '../__helpers/e2e/helpers.js'
+import { changeLocale, saveDocAndAssert, waitForFormReady } from '../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { RESTClient } from '../__helpers/shared/rest.js'
@@ -94,6 +94,36 @@ test.describe('Custom locale validation buttons', () => {
     await expect(result).toContainText('es title')
     await expect(result).toContainText('fr title')
     await expect(result).not.toContainText('de title')
+  })
+
+  test('should block publishing all locales and toast the invalid locale when a sibling locale is missing required data', async () => {
+    const id = await createDraft({ spanishTitle: 'Título en español' })
+
+    await openDraft(id)
+    await saveDocAndAssert(page, '#action-save', 'error')
+    await expect(page.locator('.payload-toast-container')).toContainText('[de]')
+
+    await expect
+      .poll(async () => {
+        const { doc } = await client.findByID({
+          id,
+          slug: validationCustomButtonsCollectionSlug,
+        })
+
+        return doc._status
+      })
+      .not.toBe('published')
+  })
+
+  test('should publish successfully when every locale has valid data', async () => {
+    const id = await createDraft({
+      frenchTitle: 'Titre en français',
+      germanTitle: 'Deutscher Titel',
+      spanishTitle: 'Título en español',
+    })
+
+    await openDraft(id)
+    await saveDocAndAssert(page, '#action-save', 'success')
   })
 
   async function createDraft({
