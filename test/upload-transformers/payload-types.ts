@@ -69,6 +69,7 @@ export interface Config {
   collections: {
     'transformer-media': TransformerMedia;
     'resize-preview-media': ResizePreviewMedia;
+    'kitchen-sink-media': KitchenSinkMedia;
     'payload-kv': PayloadKv;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
@@ -79,6 +80,7 @@ export interface Config {
   collectionsSelect: {
     'transformer-media': TransformerMediaSelect<false> | TransformerMediaSelect<true>;
     'resize-preview-media': ResizePreviewMediaSelect<false> | ResizePreviewMediaSelect<true>;
+    'kitchen-sink-media': KitchenSinkMediaSelect<false> | KitchenSinkMediaSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -160,6 +162,24 @@ export interface ResizePreviewMedia {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "kitchen-sink-media".
+ */
+export interface KitchenSinkMedia {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -214,6 +234,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'resize-preview-media';
         value: string | ResizePreviewMedia;
+      } | null)
+    | ({
+        relationTo: 'kitchen-sink-media';
+        value: string | KitchenSinkMedia;
       } | null)
     | ({
         relationTo: 'users';
@@ -284,6 +308,23 @@ export interface TransformerMediaSelect<T extends boolean = true> {
  * via the `definition` "resize-preview-media_select".
  */
 export interface ResizePreviewMediaSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "kitchen-sink-media_select".
+ */
+export interface KitchenSinkMediaSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -375,7 +416,7 @@ export interface CollectionsWidget {
 export interface CollectionQueryWidget {
   data?: {
     title?: string | null;
-    relatedCollection: 'transformer-media' | 'resize-preview-media' | 'users';
+    relatedCollection: 'transformer-media' | 'resize-preview-media' | 'kitchen-sink-media' | 'users';
     where?:
       | {
           [k: string]: unknown;
@@ -397,7 +438,7 @@ export interface CollectionQueryWidget {
  */
 export interface ActivityWidget {
   data?: {
-    excludedCollections?: ('transformer-media' | 'resize-preview-media' | 'users')[] | null;
+    excludedCollections?: ('transformer-media' | 'resize-preview-media' | 'kitchen-sink-media' | 'users')[] | null;
   };
   width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }

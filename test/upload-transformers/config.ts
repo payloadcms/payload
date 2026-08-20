@@ -4,8 +4,10 @@ import { fileURLToPath } from 'url'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
+import { KitchenSinkMedia } from './collections/KitchenSinkMedia/index.js'
 import { ResizePreviewMedia } from './collections/ResizePreviewMedia/index.js'
 import { TransformerMedia } from './collections/TransformerMedia/index.js'
+import { kitchenSinkSharpTransformer } from './kitchenSinkSharpTransformer.js'
 import { testTransformers } from './transformerFixtures.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -17,7 +19,7 @@ export default buildConfigWithDefaults({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [TransformerMedia, ResizePreviewMedia],
+  collections: [TransformerMedia, ResizePreviewMedia, KitchenSinkMedia],
   onInit: async (payload) => {
     await payload.create({
       collection: 'users',
@@ -31,6 +33,6 @@ export default buildConfigWithDefaults({
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
   upload: {
-    transformers: [sharpTransformer(), ...testTransformers],
+    transformers: [sharpTransformer(), kitchenSinkSharpTransformer, ...testTransformers],
   },
 })
