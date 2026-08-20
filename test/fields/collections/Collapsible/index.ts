@@ -154,7 +154,22 @@ const CollapsibleFields: CollectionConfig = {
         },
       ],
     },
-  ]
+    {
+      label: 'Collapsible Field - Do Not Persist State',
+      type: 'collapsible',
+      admin: {
+        description: 'This collapsible does not persist collapsed state via document preferences.',
+        initCollapsed: false,
+        persistCollapsedState: false,
+      },
+      fields: [
+        {
+          name: 'noPersistText',
+          type: 'text',
+        },
+      ],
+    },
+  ],
 }
 
 export default CollapsibleFields
