@@ -23,6 +23,7 @@
     "@payloadcms/plugin-mcp": "workspace:*",
     "@payloadcms/richtext-lexical": "workspace:*",
     "@payloadcms/tanstack-start": "workspace:*",
+    "@payloadcms/transformer-sharp": "workspace:*",
     "@payloadcms/ui": "workspace:*",
     "@tanstack/react-router": "^1.120.0",
     "@tanstack/react-start": "^1.168.26",
@@ -32,7 +33,6 @@
     "payload": "workspace:*",
     "react": "19.2.6",
     "react-dom": "19.2.6",
-    "sharp": "0.34.2",
     "srvx": "0.11.21",
     "vite": "8.1.0"
   },

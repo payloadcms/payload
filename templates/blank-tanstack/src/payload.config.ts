@@ -1,10 +1,10 @@
 import { mongooseAdapter } from '@payloadcms/db-mongodb'
 import { mcpPlugin } from '@payloadcms/plugin-mcp'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
+import { sharpTransformer } from '@payloadcms/transformer-sharp'
 import path from 'path'
 import { buildConfig } from 'payload'
 import { fileURLToPath } from 'url'
-import sharp from 'sharp'
 
 import { Users } from './collections/Users'
 import { Media } from './collections/Media'
@@ -30,11 +30,13 @@ export default buildConfig({
   db: mongooseAdapter({
     url: process.env.DATABASE_URL || '',
   }),
-  sharp,
   localization: {
     locales: ['en'],
     fallback: true,
     defaultLocale: 'en',
   },
   plugins: [mcpPlugin({})],
+  upload: {
+    transformers: [sharpTransformer()],
+  },
 })
