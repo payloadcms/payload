@@ -112,6 +112,7 @@ export const schedulePublishHandler: ServerFunction<SchedulePublishHandlerArgs> 
         timezone,
         user: user.id,
       },
+      overrideAccess: true,
       task: 'schedulePublish',
       waitUntil: date,
     })
