@@ -1,4 +1,5 @@
-import type { TypeWithID, Where } from 'payload'
+import type { Where } from 'payload'
+import type { TypeWithID } from 'payload/shared'
 import type { ReactNode, RefObject } from 'react'
 
 export type HierarchyDocument = {

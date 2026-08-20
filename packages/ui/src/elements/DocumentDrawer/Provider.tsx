@@ -1,4 +1,5 @@
-import type { ClientCollectionConfig, Data, FormState, TypeWithID } from 'payload'
+import type { ClientCollectionConfig, Data, FormState } from 'payload'
+import type { TypeWithID } from 'payload/shared'
 
 import { createContext, use } from 'react'
 

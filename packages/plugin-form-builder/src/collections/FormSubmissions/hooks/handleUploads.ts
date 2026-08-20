@@ -1,10 +1,5 @@
-import type {
-  CollectionBeforeChangeHook,
-  File,
-  FileData,
-  TypeWithID,
-  UploadCollectionSlug,
-} from 'payload'
+import type { CollectionBeforeChangeHook, File, FileData, UploadCollectionSlug } from 'payload'
+import type { TypeWithID } from 'payload/shared'
 
 import { ValidationError } from 'payload'
 import { validateMimeType } from 'payload/shared'

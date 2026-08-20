@@ -25,7 +25,6 @@ import type {
 } from '../index.js'
 import type { File } from '../uploads/types.js'
 import type { Operator } from './constants.js'
-export type { TypeWithID } from '../collections/config/types.js'
 export type { Payload } from '../index.js'
 
 export interface PayloadRequestAPI {

@@ -4,9 +4,9 @@ import type {
   RelatedDocumentsGrouped,
   SanitizedCollectionConfig,
   SanitizedPermissions,
-  TypeWithID,
   Where,
 } from 'payload'
+import type { TypeWithID } from 'payload/shared'
 
 import { getTranslation } from '@payloadcms/translations'
 import { getAncestors } from 'payload'

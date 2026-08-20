@@ -3,9 +3,9 @@ import type {
   Config,
   FileData,
   PayloadRequest,
-  TypeWithID,
   UploadCollectionSlug,
 } from 'payload'
+import type { TypeWithID } from 'payload/shared'
 
 export interface File {
   buffer: Buffer

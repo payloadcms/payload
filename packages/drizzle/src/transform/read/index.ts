@@ -1,4 +1,5 @@
-import type { FlattenedField, JoinQuery, SanitizedConfig, TypeWithID } from 'payload'
+import type { FlattenedField, JoinQuery, SanitizedConfig } from 'payload'
+import type { TypeWithID } from 'payload/shared'
 
 import type { DrizzleAdapter } from '../../types.js'
 

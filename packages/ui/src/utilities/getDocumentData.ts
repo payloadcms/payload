@@ -1,11 +1,6 @@
-import {
-  type Locale,
-  logError,
-  type Payload,
-  type PayloadRequest,
-  type TypeWithID,
-  type User,
-} from 'payload'
+import type { TypeWithID } from 'payload/shared'
+
+import { type Locale, logError, type Payload, type PayloadRequest, type User } from 'payload'
 
 import { sanitizeID } from '../utilities/sanitizeID.js'
 

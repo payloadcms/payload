@@ -1,4 +1,5 @@
-import type { CollectionBeforeChangeHook, FileData, TypeWithID } from 'payload'
+import type { CollectionBeforeChangeHook, FileData } from 'payload'
+import type { TypeWithID } from 'payload/shared'
 
 /**
  * Preserves req.file in req.context and ensures nested calls don't overwrite the original file data.

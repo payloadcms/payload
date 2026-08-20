@@ -1,4 +1,5 @@
-import type { FileData, PayloadRequest, TypeWithID } from 'payload'
+import type { FileData, PayloadRequest } from 'payload'
+import type { TypeWithID } from 'payload/shared'
 
 import { type I18nClient } from '@payloadcms/translations'
 import { File } from '@payloadcms/ui/rsc'

@@ -1,4 +1,5 @@
-import type { FileData, FileSize, TypeWithID } from 'payload'
+import type { FileData, FileSize } from 'payload'
+import type { TypeWithID } from 'payload/shared'
 
 import escapeHTML from 'escape-html'
 

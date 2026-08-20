@@ -1,4 +1,5 @@
-import type { FindOneArgs, SanitizedCollectionConfig, TypeWithID } from 'payload'
+import type { FindOneArgs, SanitizedCollectionConfig } from 'payload'
+import type { TypeWithID } from 'payload/shared'
 
 import toSnakeCase from 'to-snake-case'
 

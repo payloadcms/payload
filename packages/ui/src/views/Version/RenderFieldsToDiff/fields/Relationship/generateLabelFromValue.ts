@@ -1,4 +1,5 @@
-import type { PayloadRequest, RelationshipField, TypeWithID } from 'payload'
+import type { PayloadRequest, RelationshipField } from 'payload'
+import type { TypeWithID } from 'payload/shared'
 
 import {
   fieldAffectsData,

@@ -2,8 +2,8 @@ import type {
   PayloadRequest,
   RelationshipField,
   RelationshipFieldDiffServerComponent,
-  TypeWithID,
 } from 'payload'
+import type { TypeWithID } from 'payload/shared'
 
 import { getTranslation, type I18nClient } from '@payloadcms/translations'
 import React from 'react'

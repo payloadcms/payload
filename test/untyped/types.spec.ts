@@ -5,7 +5,6 @@ import type {
   JsonObject,
   Payload,
   TypedCollection,
-  TypeWithID,
 } from 'payload'
 
 import { describe, expect, test } from 'tstyche'
@@ -42,6 +41,6 @@ describe('Untyped Payload types', () => {
           title: 'Example',
         },
       }),
-    ).type.toBe<Promise<JsonObject & TypeWithID>>()
+    ).type.toBe<Promise<{ id: number | string } & JsonObject>>()
   })
 })

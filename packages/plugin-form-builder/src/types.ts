@@ -3,9 +3,9 @@ import type {
   CollectionBeforeChangeHook,
   CollectionConfig,
   Field,
-  TypeWithID,
   UploadCollectionSlug,
 } from 'payload'
+import type { TypeWithID } from 'payload/shared'
 
 export interface BlockConfig {
   block: Block
