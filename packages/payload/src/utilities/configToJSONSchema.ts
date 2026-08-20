@@ -301,9 +301,14 @@ function generateFallbackLocaleEntitySchemas(
   localization: SanitizedConfig['localization'],
 ): JSONSchema4 {
   if (localization) {
+    const localeCodesFromConfig =
+      'localeCodes' in localization && Array.isArray(localization.localeCodes)
+        ? localization.localeCodes.filter((localeCode) => typeof localeCode === 'string')
+        : []
+
     const rawCodes =
-      'localeCodes' in localization && localization.localeCodes
-        ? localization.localeCodes
+      localeCodesFromConfig.length > 0
+        ? localeCodesFromConfig
         : 'locales' in localization && localization.locales
           ? localization.locales.map((l) => {
               if (typeof l === 'string') {

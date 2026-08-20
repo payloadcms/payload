@@ -909,6 +909,14 @@ describe('configToJSONSchema', () => {
       type: 'string',
       enum: ['en', 'fr'],
     })
-    expect(schema?.properties?.fallbackLocale).toBeDefined()
+    expect(schema?.properties?.fallbackLocale).toStrictEqual({
+      oneOf: [
+        { type: 'string', enum: ['false', 'none', 'null'] },
+        { type: 'boolean', enum: [false] },
+        { type: 'null' },
+        { type: 'string', enum: ['en', 'fr'] },
+        { type: 'array', items: { type: 'string', enum: ['en', 'fr'] } },
+      ],
+    })
   })
 })
