@@ -1,6 +1,7 @@
 import type { PayloadRequest, Where } from '../types/index.js'
 
 import { assertBranchWritable } from './assertBranchWritable.js'
+import { createShadowRow } from './createShadowRow.js'
 import { resetBranchState, resolveBranch } from './resolveBranch.js'
 import { resolveBranchQuery } from './resolveBranchQuery.js'
 import {
@@ -154,39 +155,68 @@ export const resolveBranchDelete = async ({
       data: { [branchOpField]: 'delete' },
       req,
     })
+
+    await req.payload.db.deleteMany({
+      collection: branchChangesCollectionSlug,
+      req,
+      where: { and: [{ branch: { equals: branch } }, { 'doc.value': { equals: canonicalID } }] },
+    })
+
+    await req.payload.create({
+      collection: branchChangesCollectionSlug,
+      data: {
+        branch,
+        collectionSlug,
+        doc: { relationTo: collectionSlug, value: canonicalID },
+        entityType: 'collection',
+        operation: 'delete',
+      },
+      overrideAccess: true,
+      req,
+    })
   } else {
     const { id: _discardedID, ...data } = target
 
-    await req.payload.db.create({
-      collection: collectionSlug,
+    // Two concurrent deletes of the same never-forked document on the same
+    // branch both land here — the row create is what can lose that race, so
+    // it (and the bookkeeping that must land with it) runs isolated from the
+    // caller's own transaction. A losing side simply accepts the winner's
+    // tombstone rather than recording a second one.
+    await createShadowRow({
+      branch,
+      collectionSlug,
       data: {
         ...data,
         [branchDocIDField]: canonicalID,
         [branchField]: branch,
         [branchOpField]: 'delete',
       },
-      req,
+      docID: canonicalID,
+      onCreated: async (createReq) => {
+        await createReq.payload.db.deleteMany({
+          collection: branchChangesCollectionSlug,
+          req: createReq,
+          where: {
+            and: [{ branch: { equals: branch } }, { 'doc.value': { equals: canonicalID } }],
+          },
+        })
+
+        await createReq.payload.create({
+          collection: branchChangesCollectionSlug,
+          data: {
+            branch,
+            collectionSlug,
+            doc: { relationTo: collectionSlug, value: canonicalID },
+            entityType: 'collection',
+            operation: 'delete',
+          },
+          overrideAccess: true,
+          req: createReq,
+        })
+      },
+      req: req as PayloadRequest,
     })
   }
-
-  await req.payload.db.deleteMany({
-    collection: branchChangesCollectionSlug,
-    req,
-    where: { and: [{ branch: { equals: branch } }, { 'doc.value': { equals: canonicalID } }] },
-  })
-
-  await req.payload.create({
-    collection: branchChangesCollectionSlug,
-    data: {
-      branch,
-      collectionSlug,
-      doc: { relationTo: collectionSlug, value: canonicalID },
-      entityType: 'collection',
-      operation: 'delete',
-    },
-    overrideAccess: true,
-    req,
-  })
 
   resetBranchState(req as PayloadRequest)
   ;(req as PayloadRequest).branch = branch

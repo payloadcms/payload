@@ -19,7 +19,7 @@ export const getBranchesCollection = (branching: SanitizedBranchingConfig): Coll
   slug: branchesCollectionSlug,
   access: {
     create: branching.access?.createBranch ?? defaultAccess,
-    delete: defaultAccess,
+    delete: branching.access?.deleteBranch ?? defaultAccess,
     read: branching.access?.readBranch ?? defaultAccess,
     update: defaultAccess,
   },
@@ -85,10 +85,10 @@ export const getBranchesCollection = (branching: SanitizedBranchingConfig): Coll
       defaultValue: 'open',
       index: true,
       options: [
-        { label: ({ t }) => t('branching:status_open'), value: 'open' },
-        { label: ({ t }) => t('branching:status_merging'), value: 'merging' },
-        { label: ({ t }) => t('branching:status_merged'), value: 'merged' },
-        { label: ({ t }) => t('branching:status_closed'), value: 'closed' },
+        { label: ({ t }) => t('general:open'), value: 'open' },
+        { label: ({ t }) => t('branching:branchMerging'), value: 'merging' },
+        { label: ({ t }) => t('branching:merged'), value: 'merged' },
+        { label: ({ t }) => t('general:closed'), value: 'closed' },
       ],
     },
     {

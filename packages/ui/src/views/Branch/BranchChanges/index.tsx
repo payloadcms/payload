@@ -157,6 +157,13 @@ export const BranchChanges: React.FC<{
             {showSectionHeadings && (
               <h3 className={`${baseClass}__section-title`}>{t('branching:currentChanges')}</h3>
             )}
+            {/* Only the documents this branch has touched are listed below — everything
+                else on the branch is main, live, not a snapshot from when the branch was
+                created. Placed here rather than as a permanent banner: it matters only
+                while there is something to compare it against. */}
+            <p className={`${baseClass}__untouched-note`}>
+              {t('branching:untouchedDocumentsNote')}
+            </p>
             <ChangedDocuments
               branch={branchSlug}
               changes={changes}

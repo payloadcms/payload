@@ -63,11 +63,13 @@
   .branch-changes__history-position,
   .branch-changes__since,
   .branch-changes__empty,
-  .branch-changes__closed {
+  .branch-changes__closed,
+  .branch-changes__untouched-note {
     color: var(--color-text-secondary);
   }
 
-  .branch-changes__since {
+  .branch-changes__since,
+  .branch-changes__untouched-note {
     margin-block: 0 var(--spacer-2);
   }
 

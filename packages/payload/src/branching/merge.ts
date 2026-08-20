@@ -6,7 +6,9 @@ import type { BranchOperation } from './types.js'
 
 import { updateByIDOperation } from '../collections/operations/updateByID.js'
 import { copyDataWithFreshRowIDs } from '../collections/operations/utilities/copyDataWithFreshRowIDs.js'
+import { commitTransaction } from '../utilities/commitTransaction.js'
 import { createLocalReq } from '../utilities/createLocalReq.js'
+import { initTransaction } from '../utilities/initTransaction.js'
 import { killTransaction } from '../utilities/killTransaction.js'
 import { discardBranchChanges } from './discard.js'
 import { resolveEffectiveOperations } from './effectiveOperations.js'
@@ -267,11 +269,10 @@ export const mergeBranch = async (
 
   await branchingHooks?.beforeMerge?.({ branch, changes: mergeable, req, warnings })
 
-  const shouldCommit = !incomingReq && (await payload.db.beginTransaction?.())
-
-  if (shouldCommit) {
-    req.transactionID = shouldCommit
-  }
+  // Gated on `req.transactionID`, not on whether a `req` was passed in: a merge
+  // triggered over HTTP hands in a `req` of its own that has no transaction on
+  // it yet, and it must get one just as much as a Local API call would.
+  const shouldCommit = await initTransaction(req)
 
   // Both sides of every change, for the ledger. Read either side of the write
   // because that is the only moment both exist: afterwards the branch's copy is
@@ -446,7 +447,7 @@ export const mergeBranch = async (
     }
 
     if (shouldCommit) {
-      await payload.db.commitTransaction?.(shouldCommit)
+      await commitTransaction(req)
     }
   } catch (error) {
     await killTransaction(req)

@@ -132,6 +132,17 @@ export const injectBranchFields = (collection: CollectionConfig): CollectionConf
 
   const indexes = collection.indexes ?? []
 
+  // Catches two concurrent first-edits of the same document on the same branch:
+  // whichever write loses the race gets a constraint violation from the
+  // database instead of a second, silently duplicate shadow row. Scoped to rows
+  // that have a `_branchDocID` at all — a main row's is null, and a unique
+  // index would otherwise treat every main row as colliding with every other.
+  indexes.push({
+    fields: [branchDocIDField, branchField],
+    requireExists: [branchDocIDField],
+    unique: true,
+  })
+
   for (const field of collection.fields) {
     if ('name' in field && 'unique' in field && field.unique) {
       field.unique = false

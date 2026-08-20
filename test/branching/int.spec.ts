@@ -8,7 +8,7 @@ import {
   resolveEffectiveOperations,
 } from 'payload'
 import { fileURLToPath } from 'url'
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
@@ -4370,6 +4370,302 @@ describe('Branching', () => {
 
       expect([401, 403]).toContain(res.status)
       expect((await pendingChanges()).docs).toHaveLength(2)
+    })
+  })
+
+  /**
+   * Both merge and discard walk several changes in a loop and must apply either
+   * all of them or none of them. A `req` supplied by an HTTP handler must not
+   * change that: the transaction is owned by the operation, not by whoever
+   * happens to have created the request object.
+   */
+  describe('Transactional integrity', () => {
+    let branchSlug: string
+    let deleteOneSpy: ReturnType<typeof vi.spyOn> | undefined
+
+    afterEach(async () => {
+      hookSpy.beforeChange = undefined
+      deleteOneSpy?.mockRestore()
+      deleteOneSpy = undefined
+
+      const rows = await payload.find({ branch: false, collection: postsSlug, pagination: false })
+
+      for (const row of rows.docs) {
+        await payload.delete({ id: row.id, branch: false, collection: postsSlug })
+      }
+
+      for (const collection of [branchChangesSlug, branchesSlug]) {
+        const found = await payload.find({
+          collection,
+          pagination: false,
+          where: { [collection === branchesSlug ? 'slug' : 'branch']: { equals: branchSlug } },
+        })
+
+        for (const row of found.docs) {
+          await payload.delete({ id: row.id, collection })
+        }
+      }
+    })
+
+    it('should roll back every change in a non-streaming merge when a later change fails', async () => {
+      branchSlug = 'txnmerge'
+
+      const branchDoc = await payload.create({
+        collection: branchesSlug,
+        data: { name: 'Txn merge', slug: branchSlug },
+      })
+
+      const a = await payload.create({ collection: postsSlug, data: { title: 'A original' } })
+      const b = await payload.create({ collection: postsSlug, data: { title: 'B original' } })
+      const c = await payload.create({ collection: postsSlug, data: { title: 'C original' } })
+
+      await payload.update({
+        id: a.id,
+        branch: 'txnmerge',
+        collection: postsSlug,
+        data: { title: 'A edited' },
+      })
+      await payload.update({
+        id: b.id,
+        branch: 'txnmerge',
+        collection: postsSlug,
+        data: { title: 'B edited' },
+      })
+      await payload.update({
+        id: c.id,
+        branch: 'txnmerge',
+        collection: postsSlug,
+        data: { title: 'C edited' },
+      })
+
+      hookSpy.beforeChange = ({ data }: { data: Record<string, unknown> }) => {
+        if (data.title === 'B edited') {
+          throw new Error('Simulated validation failure')
+        }
+      }
+
+      const res = await restClient.POST(`/${branchesSlug}/${branchDoc.id}/merge`, {
+        body: JSON.stringify({}),
+        headers: { Authorization: `JWT ${token}` },
+      })
+
+      hookSpy.beforeChange = undefined
+
+      expect(res.status).toBeGreaterThanOrEqual(400)
+
+      const onMainA = await payload.findByID({ id: a.id, collection: postsSlug })
+      const onMainB = await payload.findByID({ id: b.id, collection: postsSlug })
+      const onMainC = await payload.findByID({ id: c.id, collection: postsSlug })
+
+      // Not "B was rejected but A and C went through" — the batch is one unit.
+      expect(onMainA.title).toBe('A original')
+      expect(onMainB.title).toBe('B original')
+      expect(onMainC.title).toBe('C original')
+
+      const remainingChanges = await payload.find({
+        collection: branchChangesSlug,
+        pagination: false,
+        where: { branch: { equals: 'txnmerge' } },
+      })
+
+      expect(remainingChanges.docs).toHaveLength(3)
+    })
+
+    it('should roll back every change in a discard when a later change fails', async () => {
+      branchSlug = 'txndiscard'
+
+      const branchDoc = await payload.create({
+        collection: branchesSlug,
+        data: { name: 'Txn discard', slug: branchSlug },
+      })
+
+      const a = await payload.create({ collection: postsSlug, data: { title: 'A original' } })
+      const b = await payload.create({ collection: postsSlug, data: { title: 'B original' } })
+      const c = await payload.create({ collection: postsSlug, data: { title: 'C original' } })
+
+      await payload.update({
+        id: a.id,
+        branch: branchSlug,
+        collection: postsSlug,
+        data: { title: 'A edited' },
+      })
+      await payload.update({
+        id: b.id,
+        branch: branchSlug,
+        collection: postsSlug,
+        data: { title: 'B edited' },
+      })
+      await payload.update({
+        id: c.id,
+        branch: branchSlug,
+        collection: postsSlug,
+        data: { title: 'C edited' },
+      })
+
+      const shadowRows = await payload.find({
+        branch: false,
+        collection: postsSlug,
+        pagination: false,
+        showHiddenFields: true,
+        where: { _branch: { equals: branchSlug } },
+      })
+
+      const bShadow = shadowRows.docs.find((row) => String(row._branchDocID) === String(b.id))!
+
+      const originalDeleteOne = payload.db.deleteOne.bind(payload.db)
+
+      deleteOneSpy = vi.spyOn(payload.db, 'deleteOne').mockImplementation(async (args: any) => {
+        if (args?.where?.id?.equals === bShadow.id) {
+          throw new Error('Simulated database failure')
+        }
+
+        return originalDeleteOne(args)
+      })
+
+      const res = await restClient.POST(`/${branchesSlug}/${branchDoc.id}/discard`, {
+        body: JSON.stringify({}),
+        headers: { Authorization: `JWT ${token}` },
+      })
+
+      expect(res.status).toBeGreaterThanOrEqual(400)
+
+      // A's shadow row was already dropped by the time B failed — the whole
+      // batch is one transaction, so that drop must be undone too.
+      const onBranchA = await payload.findByID({
+        id: a.id,
+        branch: branchSlug,
+        collection: postsSlug,
+      })
+
+      expect(onBranchA.title).toBe('A edited')
+
+      const remainingChanges = await payload.find({
+        collection: branchChangesSlug,
+        pagination: false,
+        where: { branch: { equals: branchSlug } },
+      })
+
+      expect(remainingChanges.docs).toHaveLength(3)
+    })
+  })
+
+  /**
+   * `forkDocument` (and the tombstone path in `resolveBranchDelete`) check
+   * whether the branch already has a shadow row, then create one if not. Two
+   * concurrent first-edits of the same document on the same branch can both
+   * pass that check before either write lands, each creating its own row.
+   */
+  describe('Fork race safety', () => {
+    afterEach(async () => {
+      const rows = await payload.find({ branch: false, collection: postsSlug, pagination: false })
+
+      for (const row of rows.docs) {
+        await payload.delete({ id: row.id, branch: false, collection: postsSlug })
+      }
+
+      for (const collection of [branchChangesSlug, branchesSlug]) {
+        const found = await payload.find({
+          collection,
+          pagination: false,
+          where: { [collection === branchesSlug ? 'slug' : 'branch']: { equals: 'racebranch' } },
+        })
+
+        for (const row of found.docs) {
+          await payload.delete({ id: row.id, collection })
+        }
+      }
+    })
+
+    it('should create exactly one shadow row when two edits race to fork the same document', async () => {
+      await payload.create({
+        collection: branchesSlug,
+        data: { name: 'Race', slug: 'racebranch' },
+      })
+
+      const doc = await payload.create({ collection: postsSlug, data: { title: 'racer' } })
+
+      await Promise.all([
+        payload.update({
+          id: doc.id,
+          branch: 'racebranch',
+          collection: postsSlug,
+          data: { title: 'edit A' },
+        }),
+        payload.update({
+          id: doc.id,
+          branch: 'racebranch',
+          collection: postsSlug,
+          data: { title: 'edit B' },
+        }),
+      ])
+
+      const shadows = await payload.find({
+        branch: false,
+        collection: postsSlug,
+        pagination: false,
+        showHiddenFields: true,
+        where: {
+          and: [{ _branch: { equals: 'racebranch' } }, { _branchDocID: { equals: doc.id } }],
+        },
+      })
+
+      expect(shadows.docs).toHaveLength(1)
+
+      const changes = await payload.find({
+        collection: branchChangesSlug,
+        pagination: false,
+        where: { branch: { equals: 'racebranch' } },
+      })
+
+      expect(changes.docs).toHaveLength(1)
+    })
+
+    it('should create exactly one tombstone when two deletes race to remove the same never-forked document', async () => {
+      await payload.create({
+        collection: branchesSlug,
+        data: { name: 'Race', slug: 'racebranch' },
+      })
+
+      const doc = await payload.create({ collection: postsSlug, data: { title: 'doomed' } })
+
+      // Whichever delete loses the DB-level race recovers gracefully (asserted
+      // below by the row counts). Occasionally, though, one delete finishes
+      // entirely — tombstoning the document and hiding it on this branch —
+      // before the other's own lookup of the document to delete even runs;
+      // that lookup then legitimately finds nothing, which is `NotFound`, not
+      // a bug. Either outcome is acceptable here; a raw, unhandled database
+      // error from the race itself is not.
+      const results = await Promise.allSettled([
+        payload.delete({ id: doc.id, branch: 'racebranch', collection: postsSlug }),
+        payload.delete({ id: doc.id, branch: 'racebranch', collection: postsSlug }),
+      ])
+
+      const rejectedNames = results
+        .filter((result): result is PromiseRejectedResult => result.status === 'rejected')
+        .map((result) => (result.reason as { name?: string })?.name)
+
+      expect(rejectedNames.every((name) => name === 'NotFound')).toBe(true)
+
+      const shadows = await payload.find({
+        branch: false,
+        collection: postsSlug,
+        pagination: false,
+        showHiddenFields: true,
+        where: {
+          and: [{ _branch: { equals: 'racebranch' } }, { _branchDocID: { equals: doc.id } }],
+        },
+      })
+
+      expect(shadows.docs).toHaveLength(1)
+      expect(shadows.docs[0]!._branchOp).toBe('delete')
+
+      const changes = await payload.find({
+        collection: branchChangesSlug,
+        pagination: false,
+        where: { branch: { equals: 'racebranch' } },
+      })
+
+      expect(changes.docs).toHaveLength(1)
     })
   })
 

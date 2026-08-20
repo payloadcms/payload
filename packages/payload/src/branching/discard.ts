@@ -1,7 +1,9 @@
 import type { Payload, PayloadRequest } from '../types/index.js'
 import type { BranchOperation } from './types.js'
 
+import { commitTransaction } from '../utilities/commitTransaction.js'
 import { createLocalReq } from '../utilities/createLocalReq.js'
+import { initTransaction } from '../utilities/initTransaction.js'
 import { killTransaction } from '../utilities/killTransaction.js'
 import { assertBranchWritable } from './assertBranchWritable.js'
 import { resetBranchState, withoutBranch } from './resolveBranch.js'
@@ -109,11 +111,10 @@ export const discardBranchChanges = async (
     return result
   }
 
-  const shouldCommit = !incomingReq && (await payload.db.beginTransaction?.())
-
-  if (shouldCommit) {
-    req.transactionID = shouldCommit
-  }
+  // Gated on `req.transactionID`, not on whether a `req` was passed in: a discard
+  // triggered over HTTP hands in a `req` of its own that has no transaction on it
+  // yet, and it must get one just as much as a Local API call would.
+  const shouldCommit = await initTransaction(req)
 
   try {
     for (const change of applicable) {
@@ -197,7 +198,7 @@ export const discardBranchChanges = async (
     }
 
     if (shouldCommit) {
-      await payload.db.commitTransaction?.(shouldCommit)
+      await commitTransaction(req)
     }
   } catch (error) {
     await killTransaction(req)

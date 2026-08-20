@@ -912,6 +912,14 @@ export type TypeWithTimestamps = {
 
 export type CompoundIndex = {
   fields: string[]
+  /**
+   * MongoDB-only: scopes the unique constraint to documents where every field
+   * named here is present. Postgres and SQLite need no equivalent — a NULL in
+   * any column of a composite unique constraint already excludes that row from
+   * the comparison, but MongoDB's compound unique indexes treat a missing
+   * field as an ordinary value that can collide with another document's.
+   */
+  requireExists?: string[]
   unique?: boolean
 }
 
@@ -922,5 +930,6 @@ export type SanitizedCompoundIndex = {
     path: string
     pathHasLocalized: boolean
   }[]
+  requireExists?: string[]
   unique: boolean
 }

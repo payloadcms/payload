@@ -26,10 +26,10 @@ export const BranchStatusCell: React.FC<DefaultCellComponentProps<SelectFieldCli
   const status = String(Array.isArray(cellData) ? cellData[0] : cellData)
 
   const label = {
-    closed: t('branching:status_closed'),
-    merged: t('branching:status_merged'),
-    merging: t('branching:status_merging'),
-    open: t('branching:status_open'),
+    closed: t('general:closed'),
+    merged: t('branching:merged'),
+    merging: t('branching:branchMerging'),
+    open: t('general:open'),
   }[status]
 
   return (

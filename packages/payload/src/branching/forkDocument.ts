@@ -2,6 +2,7 @@ import { v4 as uuid } from 'uuid'
 
 import type { PayloadRequest } from '../types/index.js'
 
+import { createShadowRow } from './createShadowRow.js'
 import {
   addToBranchManifest,
   peekBranchRowID,
@@ -94,29 +95,31 @@ export const forkDocument = async ({ id, collectionSlug, req }: Args): Promise<n
   // flat-field test ever saw this.
   const copied = stripRowIDs(data)
 
-  const shadow = await req.payload.db.create({
-    collection: collectionSlug,
+  const shadow = await createShadowRow({
+    branch,
+    collectionSlug,
     data: {
       ...copied,
       [branchDocIDField]: id,
       [branchField]: branch,
       [branchOpField]: 'update',
     },
-    req,
-  })
-
-  await req.payload.create({
-    collection: branchChangesCollectionSlug,
-    data: {
-      baseUpdatedAt: mainDoc.updatedAt,
-      branch,
-      collectionSlug,
-      doc: { relationTo: collectionSlug, value: id },
-      entityType: 'collection',
-      operation: 'update',
-      rowID: String(shadow.id),
-    },
-    overrideAccess: true,
+    docID: id,
+    onCreated: (createReq, createdShadow) =>
+      createReq.payload.create({
+        collection: branchChangesCollectionSlug,
+        data: {
+          baseUpdatedAt: mainDoc.updatedAt,
+          branch,
+          collectionSlug,
+          doc: { relationTo: collectionSlug, value: id },
+          entityType: 'collection',
+          operation: 'update',
+          rowID: String(createdShadow.id),
+        },
+        overrideAccess: true,
+        req: createReq,
+      }),
     req,
   })
 

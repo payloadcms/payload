@@ -38,6 +38,7 @@ export type BranchingConfig = {
    */
   access?: {
     createBranch?: Access
+    deleteBranch?: Access
     readBranch?: Access
   }
   /**

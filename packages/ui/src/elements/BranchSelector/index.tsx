@@ -85,9 +85,7 @@ export const BranchSelector: React.FC<{ className?: string }> = ({ className }) 
                 </span>
               ) : (
                 option.isMerged && (
-                  <span className={`${baseClass}__option-merged`}>
-                    {t('branching:status_merged')}
-                  </span>
+                  <span className={`${baseClass}__option-merged`}>{t('branching:merged')}</span>
                 )
               )}
             </span>
