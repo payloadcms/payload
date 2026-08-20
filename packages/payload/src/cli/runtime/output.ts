@@ -1,4 +1,6 @@
-import type { Command } from 'commander'
+import { type Command, CommanderError } from 'commander'
+
+import type { CLIRuntime } from '../../config/types.js'
 
 export type CLIErrorIssue = {
   message: string
@@ -87,3 +89,37 @@ export const getCLIErrorOutput = ({
     success: false,
   }
 }
+
+export const handleCLIError = ({ error, program }: { error: unknown; program?: Command }): void => {
+  const exitCode = error instanceof CommanderError ? error.exitCode : 1
+  const shouldOutputJSON = program ? isJSONOutput(program) : process.argv.includes('--json')
+
+  if (shouldOutputJSON && exitCode !== 0) {
+    writeCLIJSON({
+      command: program,
+      value: getCLIErrorOutput({ command: program?.args[0], error }),
+    })
+  } else if (!(error instanceof CommanderError)) {
+    console.error(error instanceof Error ? error.message : error)
+  }
+
+  process.exitCode = exitCode
+}
+
+/** Runs CLI work, formats failures, and closes Payload when the command finishes. */
+export const withErrorHandling = ({
+  run,
+  runtime,
+}: {
+  run: () => Promise<void>
+  runtime: CLIRuntime
+}): Promise<void> =>
+  run()
+    .catch((error) => {
+      handleCLIError({ error })
+    })
+    .finally(async () => {
+      if (!runtime.isScheduled) {
+        await runtime.destroy()
+      }
+    })

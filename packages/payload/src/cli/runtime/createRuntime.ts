@@ -1,11 +1,11 @@
 import path from 'node:path'
 import { pathToFileURL } from 'node:url'
 
-import type { CLIRuntime, SanitizedConfig } from '../config/types.js'
-import type { Payload } from '../index.js'
+import type { CLIRuntime, SanitizedConfig } from '../../config/types.js'
+import type { Payload } from '../../index.js'
 
-import { findConfig } from '../config/find.js'
-import { getPayload } from '../index.js'
+import { findConfig } from '../../config/find.js'
+import { getPayload } from '../../index.js'
 
 /**
  * Creates the shared resources used by the CLI.

@@ -3,7 +3,7 @@ import dotenvExpand from 'dotenv-expand'
 import { existsSync } from 'fs'
 import nodePath from 'path'
 
-import { findUpSync } from '../utilities/findUp.js'
+import { findUpSync } from '../../utilities/findUp.js'
 
 /**
  * Loads env files in priority order (same as Next.js convention):

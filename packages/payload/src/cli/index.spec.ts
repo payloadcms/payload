@@ -9,7 +9,7 @@ import type { CLIRuntime, Config, SanitizedConfig } from '../config/types.js'
 import { addDefaultsToConfig } from '../config/defaults.js'
 import { defineCLICommand } from './defineCLICommand.js'
 import { createProgram } from './index.js'
-import { CLICommandError, getCLIErrorOutput } from './output.js'
+import { CLICommandError, getCLIErrorOutput } from './runtime/output.js'
 import { strictObject } from './zod.js'
 
 const cliDirectory = path.dirname(fileURLToPath(import.meta.url))

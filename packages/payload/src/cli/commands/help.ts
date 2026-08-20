@@ -1,7 +1,7 @@
 import * as z from 'zod/mini'
 
 import { defineCLICommand } from '../defineCLICommand.js'
-import { CLICommandError } from '../output.js'
+import { CLICommandError } from '../runtime/output.js'
 import { strictObject } from '../zod.js'
 
 export const createHelpCommand = defineCLICommand({
