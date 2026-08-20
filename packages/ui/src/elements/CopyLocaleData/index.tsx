@@ -32,7 +32,8 @@ export const CopyLocaleData: React.FC = () => {
       routes: { admin },
     },
   } = useConfig()
-  const { code } = useLocale()
+  const locale = useLocale()
+  const code = locale?.code
   const { id, collectionSlug, globalSlug } = useDocumentInfo()
   const { i18n, t } = useTranslation()
   const modified = useFormModified()
