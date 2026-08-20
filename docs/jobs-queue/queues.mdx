@@ -612,17 +612,7 @@ autoRun: [{ queue: 'default' }] // won't pick up the job
 
 **Check the jobs collection**
 
-Enable the jobs collection in admin:
-
-```ts
-jobsCollectionOverrides: ({ defaultJobsCollection }) => ({
-  ...defaultJobsCollection,
-  admin: {
-    ...defaultJobsCollection.admin,
-    hidden: false,
-  },
-})
-```
+See [Inspecting Jobs](/docs/jobs-queue/overview#inspecting-jobs) to inspect jobs from trusted server code or enable read-only Admin Panel access.
 
 Look for jobs with:
 

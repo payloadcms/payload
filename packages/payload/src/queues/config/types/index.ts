@@ -161,6 +161,8 @@ export type JobsConfig = {
   /**
    * Override any settings on the default Jobs collection. Accepts the default collection and allows you to return
    * a new collection.
+   *
+   * @experimental
    */
   jobsCollectionOverrides?: (args: { defaultJobsCollection: CollectionConfig }) => CollectionConfig
   /**
