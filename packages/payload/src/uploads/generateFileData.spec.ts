@@ -107,4 +107,38 @@ describe('generateFileData', () => {
 
     expect(toBufferMock).toHaveBeenCalledTimes(1)
   })
+
+  it('does not overwrite req.file with a truncated header-only buffer', async () => {
+    // Mirrors what `getFileFromUploadInstructions` returns for the `'header'` content
+    // requirement: only the first bytes of the file, alongside the real, full declared size.
+    const truncatedBuffer = PNG_SIGNATURE.subarray(0, 4)
+    const fullFileSize = 5_000_000
+    const { sharp } = createSharpMock()
+
+    const req = {
+      file: {
+        data: truncatedBuffer,
+        mimetype: 'image/png',
+        name: 'photo.png',
+        size: fullFileSize,
+        uploadReference: { key: 'media/photo.png' },
+      },
+      payload: {
+        config: { sharp },
+        logger: { error: vi.fn() },
+      },
+    } as unknown as PayloadRequest
+
+    await generateFileData({
+      collection: createCollection(),
+      config: {} as SanitizedConfig,
+      data: {},
+      operation: 'create',
+      overwriteExistingFiles: true,
+      req,
+    })
+
+    expect(req.file?.size).toBe(fullFileSize)
+    expect(req.file?.data).toBe(truncatedBuffer)
+  })
 })

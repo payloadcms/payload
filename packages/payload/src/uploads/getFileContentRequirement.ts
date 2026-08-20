@@ -19,8 +19,9 @@ export type FileContentRequirement = 'full' | 'header' | 'none'
  * actually reads instead of always being re-downloaded in full.
  *
  * - `full`: local storage needs the real bytes, or the file will be resized/reformatted/
- *   trimmed/animated, or the collection restricts mime types (which also runs SVG/PDF
- *   content-safety checks that must see the whole file).
+ *   trimmed/animated, or additional image sizes will be generated from it, or the collection
+ *   restricts mime types (which also runs SVG/PDF content-safety checks that must see the
+ *   whole file).
  * - `header`: the file is an image and only its dimensions are needed.
  * - `none`: nothing downstream reads file content at all.
  */
@@ -49,7 +50,8 @@ export function getFileContentRequirement({
     uploadConfig.resizeOptions ||
       uploadConfig.formatOptions ||
       uploadConfig.trimOptions ||
-      uploadConfig.constructorOptions,
+      uploadConfig.constructorOptions ||
+      (Array.isArray(uploadConfig.imageSizes) && uploadConfig.imageSizes.length > 0),
   )
 
   if ((isResizableImage && hasConfiguredAdjustments) || isAnimatedImage(mimeType)) {

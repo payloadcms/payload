@@ -2,7 +2,7 @@ import type { ReadableStream } from 'node:stream/web'
 
 import { randomUUID } from 'node:crypto'
 import fs from 'node:fs'
-import { mkdir } from 'node:fs/promises'
+import { mkdir, rm } from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
 import { Readable } from 'node:stream'
@@ -272,10 +272,15 @@ const streamResponseToTempFile = async ({
   await mkdir(tempFileDir, { recursive: true })
   const tempFilePath = path.join(tempFileDir, `payload-client-upload-${randomUUID()}`)
 
-  await pipeline(
-    Readable.fromWeb(response.body as ReadableStream<Uint8Array>),
-    fs.createWriteStream(tempFilePath),
-  )
+  try {
+    await pipeline(
+      Readable.fromWeb(response.body as ReadableStream<Uint8Array>),
+      fs.createWriteStream(tempFilePath),
+    )
+  } catch (error) {
+    await rm(tempFilePath, { force: true })
+    throw error
+  }
 
   return tempFilePath
 }

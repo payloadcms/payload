@@ -13,6 +13,7 @@ import type { NextRESTClient } from '../../__helpers/shared/NextRESTClient.js'
 import { initPayloadInt } from '../../__helpers/shared/initPayloadInt.js'
 import { mediaSlug } from '../shared.js'
 import { mediaHeaderOnlySlug } from './collections/MediaHeaderOnly.js'
+import { mediaHeaderOnlyWithSizesSlug } from './collections/MediaHeaderOnlyWithSizes.js'
 import { mediaWithDocPrefixSlug } from './collections/MediaWithDocPrefix.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -176,5 +177,65 @@ describe('@payloadcms/storage-azure clientUploads', () => {
       expect(doc.filesize).toBe(file.length)
       expect(doc.mimeType).toBe('image/png')
     })
+  })
+
+  /**
+   * `media-header-only-with-sizes` has `imageSizes` configured but no `resizeOptions`, so a
+   * client upload larger than `HEADER_PROBE_BYTE_LENGTH` (1MB) is a regression test for a bug
+   * where `getFileContentRequirement` ignored `imageSizes` and chose the `'header'` content
+   * requirement anyway - handing `createImageSizes` a truncated buffer and crashing instead of
+   * fetching the full file through the real Azure handler.
+   */
+  describe('imageSizes with a large upload (real Azure handler)', () => {
+    const createdIds: (number | string)[] = []
+
+    afterEach(async () => {
+      for (const id of createdIds) {
+        await payload.delete({ id, collection: mediaHeaderOnlyWithSizesSlug })
+      }
+      createdIds.length = 0
+    })
+
+    it('creates a document and generates image sizes from a large client-uploaded image via the real Azure handler', async () => {
+      const file = readFileSync(path.resolve(dirname, '../../uploads/2mb.jpg'))
+      expect(file.length).toBeGreaterThan(1024 * 1024)
+
+      const instructions = (await restClient
+        .POST('/upload-instructions', {
+          body: JSON.stringify({
+            collectionSlug: mediaHeaderOnlyWithSizesSlug,
+            filename: 'large-with-sizes.jpg',
+            filesize: file.length,
+            mimeType: 'image/jpeg',
+          }),
+        })
+        .then((res) => res.json())) as UploadInstructions
+
+      if (instructions.type !== 'dispatch') {
+        throw new Error('Expected dispatch upload instructions')
+      }
+
+      const { url } = instructions.data as { url: string }
+      await new BlockBlobClient(url).uploadData(file, {
+        blobHTTPHeaders: { blobContentType: 'image/jpeg' },
+      })
+
+      const createFormData = new FormData()
+      createFormData.append('file', JSON.stringify(instructions.file))
+
+      const createRes = await restClient.POST(`/${mediaHeaderOnlyWithSizesSlug}`, {
+        body: createFormData,
+      })
+
+      expect(createRes.status).toBe(201)
+      const { doc } = await createRes.json()
+      createdIds.push(doc.id)
+
+      expect(doc.filesize).toBe(file.length)
+      expect(doc.mimeType).toBe('image/jpeg')
+      expect(doc.sizes.thumbnail.width).toBe(400)
+      expect(doc.sizes.thumbnail.height).toBe(300)
+      expect(doc.sizes.thumbnail.filename).toBeTruthy()
+    }, 60000)
   })
 })

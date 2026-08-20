@@ -26,6 +26,7 @@ import {
   adminThumbnailSizeSlug,
   allowListMediaSlug,
   anyImagesSlug,
+  clientUploadTempFileSlug,
   enlargeSlug,
   focalNoSizesSlug,
   focalOnlySlug,
@@ -2463,6 +2464,71 @@ describe('Collections - Uploads', () => {
       )
 
       expect(response.status).toBe(403)
+    })
+  })
+
+  /**
+   * `client-upload-temp-file` forces the `'full'` content requirement (see
+   * getFileContentRequirement.ts), so every request against it fetches the file through
+   * `getFileFromUploadInstructions` into its own temp file, regardless of the global
+   * `useTempFiles` setting (see unlinkTempFiles.ts). These temp files live under `os.tmpdir()`
+   * with a `payload-client-upload-` prefix - this is a regression test for those files leaking
+   * on disk when something after the fetch (e.g. a `beforeChange` hook) makes the operation fail.
+   */
+  describe('client upload temp file cleanup', () => {
+    const createdIds: (number | string)[] = []
+
+    afterEach(async () => {
+      for (const id of createdIds) {
+        await payload.delete({ id, collection: clientUploadTempFileSlug })
+      }
+      createdIds.length = 0
+    })
+
+    const listClientUploadTempFiles = async (): Promise<Set<string>> => {
+      const entries = await fs.promises.readdir(os.tmpdir()).catch(() => [] as string[])
+      return new Set(entries.filter((name) => name.startsWith('payload-client-upload-')))
+    }
+
+    const clientUploadFormData = (overrides: Record<string, unknown> = {}) => {
+      const formData = new FormData()
+      if (Object.keys(overrides).length > 0) {
+        formData.append('_payload', JSON.stringify(overrides))
+      }
+      formData.append(
+        'file',
+        JSON.stringify({
+          filename: 'client-upload-temp-file.png',
+          mimeType: 'image/png',
+          size: 1,
+          uploadReference: { key: 'unused' },
+        }),
+      )
+      return formData
+    }
+
+    it('removes the temp file after a successful create', async () => {
+      const before = await listClientUploadTempFiles()
+
+      const response = await restClient.POST(`/${clientUploadTempFileSlug}`, {
+        body: clientUploadFormData(),
+      })
+      expect(response.status).toBe(201)
+      const { doc } = await response.json()
+      createdIds.push(doc.id)
+
+      expect(await listClientUploadTempFiles()).toEqual(before)
+    })
+
+    it('removes the temp file even when a beforeChange hook throws after the file was fetched', async () => {
+      const before = await listClientUploadTempFiles()
+
+      const response = await restClient.POST(`/${clientUploadTempFileSlug}`, {
+        body: clientUploadFormData({ shouldFail: true }),
+      })
+      expect(response.status).toBe(422)
+
+      expect(await listClientUploadTempFiles()).toEqual(before)
     })
   })
 })

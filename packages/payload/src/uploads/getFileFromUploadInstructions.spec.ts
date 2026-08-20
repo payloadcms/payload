@@ -1,6 +1,7 @@
 import type { PayloadRequest } from '../types/index.js'
 import type { UploadInstructions } from './types.js'
 
+import { randomUUID } from 'node:crypto'
 import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
@@ -260,6 +261,38 @@ describe('getFileFromUploadInstructions', () => {
     abortController.abort()
     expect(observedSignal?.aborted).toBe(true)
     expect(file.data.equals(MINIMAL_PNG)).toBe(true)
+  })
+
+  it('removes the partial temp file if the response stream fails partway through', async () => {
+    const customTempDir = path.join(os.tmpdir(), `payload-test-stream-failure-${randomUUID()}`)
+    const streamError = new Error('stream boom')
+
+    const stream = new ReadableStream({
+      pull(controller) {
+        controller.enqueue(new Uint8Array([1, 2, 3]))
+        controller.error(streamError)
+      },
+    })
+
+    const handler = vi.fn(
+      async () => new Response(stream, { headers: { 'Content-Type': 'video/mp4' }, status: 200 }),
+    )
+
+    const req = createReq([handler])
+    req.payload.config.upload = { tempFileDir: customTempDir }
+
+    await expect(
+      getFileFromUploadInstructions({
+        collectionSlug: 'media',
+        file: createUploadReferenceFile(),
+        req,
+      }),
+    ).rejects.toThrow('stream boom')
+
+    const filesLeftBehind = await fs.promises.readdir(customTempDir).catch(() => [])
+    expect(filesLeftBehind).toEqual([])
+
+    await fs.promises.rm(customTempDir, { force: true, recursive: true })
   })
 
   it('falls back to a full fetch when the header is not enough to determine image dimensions', async () => {

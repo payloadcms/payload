@@ -371,7 +371,14 @@ export const generateFileData = async <T>({
         bufferToSave = file.data
       }
 
-      if (!skipTempFileBuffer) {
+      // A client upload with a `header` or `none` content requirement (see
+      // getFileContentRequirement.ts) only fetches a byte-range probe or nothing at all, so
+      // `file.data` is shorter than the file's real, declared size - it must not be saved or
+      // copied back onto `req.file` in place of the real content.
+      const fileDataIsPartialView =
+        !fileBuffer?.data && !file.tempFilePath && bufferToSave.length !== file.size
+
+      if (!skipTempFileBuffer && !fileDataIsPartialView) {
         filesToSave.push({
           buffer: bufferToSave,
           path: `${staticPath}/${fsSafeName}`,

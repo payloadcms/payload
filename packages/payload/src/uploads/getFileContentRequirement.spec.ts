@@ -71,6 +71,24 @@ describe('getFileContentRequirement', () => {
     ).toBe('full')
   })
 
+  it('requires the full file for an image with imageSizes configured, even with no other adjustments', () => {
+    expect(
+      getFileContentRequirement({
+        mimeType: 'image/png',
+        uploadConfig: createUploadConfig({ imageSizes: [{ name: 'thumbnail', width: 100 }] }),
+      }),
+    ).toBe('full')
+  })
+
+  it('requires only the header for an image with an empty imageSizes array', () => {
+    expect(
+      getFileContentRequirement({
+        mimeType: 'image/png',
+        uploadConfig: createUploadConfig({ imageSizes: [] }),
+      }),
+    ).toBe('header')
+  })
+
   it('requires the full file for an animated image even with no configured adjustments', () => {
     expect(
       getFileContentRequirement({
