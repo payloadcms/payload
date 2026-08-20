@@ -230,6 +230,8 @@ pnpm test:visual         # run every suite that has an @visual-tagged test
 pnpm test:visual:update  # accept intentional visual changes and regenerate baselines
 ```
 
+For a new `visual()` test with no baseline PNG yet, plain `pnpm test:visual` is enough — Playwright writes the missing baseline on that first run. Reach for `pnpm test:visual:update` only to accept changes to baselines that already exist, since it regenerates every baseline the run touches, not just the new one.
+
 To view an interactive report comparing the actual, expected, and diff images for a suite, run `pnpm test:visual:preview <suite>`.
 
 On a PR, CI only runs `@visual` tests when the diff could plausibly change rendered UI (styles, components, screenshots, or the fixture config the current `@visual` tests render). If the `visual-regression` CI job fails, reproduce and inspect the diff locally with the commands above — there is no CI-posted comment, so you'll need to run the tests yourself to see what changed.
