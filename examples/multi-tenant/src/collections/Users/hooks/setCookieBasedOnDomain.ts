@@ -12,6 +12,7 @@ export const setCookieBasedOnDomain: CollectionAfterLoginHook = async ({ req, us
         equals: req.headers.get('host'),
       },
     },
+    overrideAccess: true,
   })
 
   // If a matching tenant is found, set the 'payload-tenant' cookie

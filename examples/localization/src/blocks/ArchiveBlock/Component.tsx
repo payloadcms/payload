@@ -41,6 +41,7 @@ export const ArchiveBlock: React.FC<
       depth: 1,
       locale,
       limit,
+      overrideAccess: true,
       ...(flattenedCategories && flattenedCategories.length > 0
         ? {
             where: {
