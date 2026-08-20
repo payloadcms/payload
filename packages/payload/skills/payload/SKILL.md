@@ -230,6 +230,7 @@ export const ownPostsOnly: Access = ({ req }) => {
 // Local API
 const posts = await payload.find({
   collection: 'posts',
+  overrideAccess: true,
   where: {
     status: { equals: 'published' },
     'author.name': { contains: 'john' },
@@ -242,6 +243,7 @@ const posts = await payload.find({
 // Query with populated relationships
 const post = await payload.findByID({
   collection: 'posts',
+  overrideAccess: true,
   id: '123',
   depth: 2, // Populates relationships (default is 2)
 })
@@ -250,6 +252,7 @@ const post = await payload.findByID({
 // Without depth, relationships return IDs only
 const post = await payload.findByID({
   collection: 'posts',
+  overrideAccess: true,
   id: '123',
   depth: 0,
 })
@@ -265,23 +268,32 @@ For all query operators and REST/GraphQL examples, see [QUERIES.md](reference/QU
 import { getPayload } from 'payload'
 import config from '@payload-config'
 
-export async function GET() {
+export async function GET(request: Request) {
   const payload = await getPayload({ config })
+  const { user } = await payload.auth({ headers: request.headers })
 
   const posts = await payload.find({
     collection: 'posts',
+    overrideAccess: false, // this route answers for whoever called it
+    user,
   })
 
   return Response.json(posts)
 }
 
 // In Server Components
+import { headers } from 'next/headers'
 import { getPayload } from 'payload'
 import config from '@payload-config'
 
 export default async function Page() {
   const payload = await getPayload({ config })
-  const { docs } = await payload.find({ collection: 'posts' })
+  const { user } = await payload.auth({ headers: await headers() })
+  const { docs } = await payload.find({
+    collection: 'posts',
+    overrideAccess: false,
+    user,
+  })
 
   return <div>{docs.map(post => <h1 key={post.id}>{post.title}</h1>)}</div>
 }
@@ -291,27 +303,30 @@ export default async function Page() {
 
 ### 1. Local API Access Control (CRITICAL)
 
-**By default, Local API operations bypass ALL access control**, even when passing a user.
+**`overrideAccess: true` bypasses ALL access control**, even when a user is passed.
 
 ```ts
 // ❌ SECURITY BUG: Passes user but ignores their permissions
 await payload.find({
   collection: 'posts',
-  user: someUser, // Access control is BYPASSED!
+  user: someUser,
+  overrideAccess: true, // Access control is BYPASSED!
 })
 
 // ✅ SECURE: Actually enforces the user's permissions
 await payload.find({
   collection: 'posts',
   user: someUser,
-  overrideAccess: false, // REQUIRED for access control
+  overrideAccess: false, // respect Access Control — this call acts for a user
 })
 ```
 
-**When to use each:**
+`overrideAccess` is **required**. There is no default — every call states its intent.
 
-- `overrideAccess: true` (default) - Server-side operations you trust (cron jobs, system tasks)
-- `overrideAccess: false` - When operating on behalf of a user (API routes, webhooks)
+- `overrideAccess: false` - operating on behalf of a user (API routes, webhooks, server functions). Pass `user` alongside it.
+- `overrideAccess: true` - server-side work you trust (cron jobs, seeds, migrations, system tasks)
+
+It is required because omitting it used to skip access control, which made "no access control" the result of not deciding. Never copy a value from a nearby call — pick the one this call means.
 
 See [QUERIES.md#access-control-in-local-api](reference/QUERIES.md#access-control-in-local-api).
 
@@ -326,6 +341,7 @@ hooks: {
     async ({ doc, req }) => {
       await req.payload.create({
         collection: 'audit-log',
+        overrideAccess: true,
         data: { docId: doc.id },
         // Missing req - runs in separate transaction!
       })
@@ -339,6 +355,7 @@ hooks: {
     async ({ doc, req }) => {
       await req.payload.create({
         collection: 'audit-log',
+        overrideAccess: true,
         data: { docId: doc.id },
         req, // Maintains atomicity
       })
@@ -360,6 +377,7 @@ hooks: {
     async ({ doc, req }) => {
       await req.payload.update({
         collection: 'posts',
+        overrideAccess: true,
         id: doc.id,
         data: { views: doc.views + 1 },
         req,
@@ -376,6 +394,7 @@ hooks: {
 
       await req.payload.update({
         collection: 'posts',
+        overrideAccess: true,
         id: doc.id,
         data: { views: doc.views + 1 },
         context: { skipHooks: true },
@@ -439,7 +458,7 @@ import type { Post, User } from '@/payload-types'
 
 ## Common Gotchas
 
-1. **Local API bypasses access control** unless you pass `overrideAccess: false`
+1. **`overrideAccess` is required on every Local API call** — there is no default to fall back on
 2. **Missing `req` in nested operations** breaks transaction atomicity
 3. **Hook loops** — operations in hooks can re-trigger the same hooks; use `req.context` flags
 4. **Field-level access** returns boolean only, no query constraints
@@ -466,7 +485,7 @@ import type { Post, User } from '@/payload-types'
 ### Security
 
 - Default to restrictive access, gradually add permissions
-- Use `overrideAccess: false` when passing `user` to Local API
+- Use `overrideAccess: false` whenever the call acts for a user, and pass that `user`
 - Field-level access only returns boolean (no query constraints)
 - Never trust client-provided data
 - Use `saveToJWT: true` for roles to avoid database lookups

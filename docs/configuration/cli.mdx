@@ -162,6 +162,7 @@ export const seedCommand = defineCLICommand({
 
     await payload.create({
       collection: 'pages',
+      overrideAccess: true,
       data: { title: 'My page' },
     })
 

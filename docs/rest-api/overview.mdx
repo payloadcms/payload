@@ -631,6 +631,8 @@ export const Orders: CollectionConfig = {
         const data = await req.json()
         await req.payload.update({
           collection: 'tracking',
+          overrideAccess: false,
+          req,
           data: {
             // data to update the document with
           },
@@ -687,6 +689,7 @@ import { addDataAndFileToRequest } from 'payload'
     await addDataAndFileToRequest(req)
     await req.payload.update({
       collection: 'tracking',
+      overrideAccess: true,
       data: {
         // data to update the document with
       }
