@@ -245,10 +245,10 @@ async function executePlaywright({
     if (bail) {
       console.error(`TEST FAILURE DURING ${suite} suite.`)
     }
-    child?.kill(1)
+    await stopServer(child)
     process.exit(1)
   } else {
-    child?.kill()
+    await stopServer(child)
   }
   testRunCodes.push(results)
 
@@ -258,6 +258,32 @@ async function executePlaywright({
 function clearWebpackCache() {
   const webpackCachePath = path.resolve(dirname, '../node_modules/.cache/webpack')
   shelljs.rm('-rf', webpackCachePath)
+}
+
+/**
+ * Waits for the spawned server to fully exit before resolving, instead of firing the kill signal
+ * and moving on. Without this, a caller that runs several suites back-to-back (each against its
+ * own config, bound to the same port) can start the next suite's port-in-use check before this
+ * server has actually released the port — that next suite then silently reuses the still-dying
+ * server from the wrong suite instead of starting its own.
+ */
+async function stopServer(serverChild: ReturnType<typeof spawn> | undefined): Promise<void> {
+  if (!serverChild || serverChild.exitCode !== null) {
+    return
+  }
+
+  await new Promise<void>((resolve) => {
+    const killTimer = setTimeout(() => {
+      serverChild.kill('SIGKILL')
+    }, 15000)
+
+    serverChild.once('exit', () => {
+      clearTimeout(killTimer)
+      resolve()
+    })
+
+    serverChild.kill('SIGTERM')
+  })
 }
 
 /**
