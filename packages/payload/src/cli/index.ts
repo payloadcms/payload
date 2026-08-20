@@ -1,8 +1,8 @@
+import { Command } from 'commander'
 import { config as configureZod } from 'zod/mini'
 import en from 'zod/v4/locales/en.js'
 
 import { createCLIHelp } from './program/createHelp.js'
-import { createRootProgram } from './program/createRootProgram.js'
 import { loadCLICommands, validateCLICommandNames } from './program/loadCommands.js'
 import { registerCLICommand } from './program/registerCommand.js'
 import { createCLIRuntime } from './runtime/createRuntime.js'
@@ -11,7 +11,7 @@ import { withErrorHandling } from './runtime/output.js'
 
 configureZod(en())
 
-export const bin = async (): Promise<void> => {
+export const bin = withErrorHandling(async (): Promise<void> => {
   // /////////////////////////////////////
   // Setup environment
   // /////////////////////////////////////
@@ -20,45 +20,53 @@ export const bin = async (): Promise<void> => {
 
   const runtime = createCLIRuntime()
 
-  await withErrorHandling({
-    run: async () => {
-      // /////////////////////////////////////
-      // Create CLI program
-      // /////////////////////////////////////
-      const program = createRootProgram()
-      const commands = await loadCLICommands({ runtime })
+  // /////////////////////////////////////
+  // Create root command
+  // /////////////////////////////////////
+  const rootCommand = new Command()
+    .name('payload')
+    .description('Manage and operate a local Payload project.')
+    .exitOverride()
+    .showHelpAfterError()
+    .showSuggestionAfterError()
+    .option('--cron <expression>', 'Run the command on a cron schedule.')
+    .option('--json', 'Return machine-readable JSON output.')
 
-      validateCLICommandNames({ commands })
+  // /////////////////////////////////////
+  // Load, validate and register commands
+  // /////////////////////////////////////
 
-      const help = createCLIHelp({ commands, program })
+  const commands = await loadCLICommands({ runtime })
 
-      // /////////////////////////////////////
-      // Register commands
-      // /////////////////////////////////////
+  validateCLICommandNames({ commands })
 
-      for (const { name, definition } of commands) {
-        registerCLICommand({
-          name,
-          definition,
-          help,
-          program,
-          runtime,
-        })
-      }
+  const help = createCLIHelp({ commands, rootCommand })
 
-      // /////////////////////////////////////
-      // Output help if requested
-      // /////////////////////////////////////
-      if (process.argv.length === 2) {
-        program.outputHelp()
-        return
-      }
+  for (const { name, definition } of commands) {
+    registerCLICommand({
+      name,
+      definition,
+      help,
+      rootCommand,
+      runtime,
+    })
+  }
 
-      // /////////////////////////////////////
-      // Run the program with the provided arguments
-      // /////////////////////////////////////
-      await program.parseAsync(process.argv)
-    },
-    runtime,
+  // /////////////////////////////////////
+  // Output help if requested
+  // /////////////////////////////////////
+  if (process.argv.length === 2) {
+    rootCommand.outputHelp()
+    return
+  }
+
+  // /////////////////////////////////////
+  // Run the CLI with the provided arguments
+  // /////////////////////////////////////
+  await rootCommand.parseAsync(process.argv).finally(async () => {
+    // Cleanup runtime
+    if (!runtime.isScheduled) {
+      await runtime.destroy()
+    }
   })
-}
+})

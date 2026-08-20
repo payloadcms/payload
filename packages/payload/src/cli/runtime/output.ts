@@ -1,7 +1,5 @@
 import { type Command, CommanderError } from 'commander'
 
-import type { CLIRuntime } from '../../config/types.js'
-
 export type CLIErrorIssue = {
   message: string
   path?: string
@@ -100,26 +98,20 @@ export const handleCLIError = ({ error, program }: { error: unknown; program?: C
       value: getCLIErrorOutput({ command: program?.args[0], error }),
     })
   } else if (!(error instanceof CommanderError)) {
+    // eslint-disable-next-line no-console
     console.error(error instanceof Error ? error.message : error)
   }
 
   process.exitCode = exitCode
 }
 
-/** Runs CLI work, formats failures, and closes Payload when the command finishes. */
-export const withErrorHandling = ({
-  run,
-  runtime,
-}: {
-  run: () => Promise<void>
-  runtime: CLIRuntime
-}): Promise<void> =>
-  run()
-    .catch((error) => {
+/** Wraps a CLI function so every failure uses the same output and exit code handling. */
+export const withErrorHandling =
+  (run: () => Promise<void>): (() => Promise<void>) =>
+  async () => {
+    try {
+      await run()
+    } catch (error) {
       handleCLIError({ error })
-    })
-    .finally(async () => {
-      if (!runtime.isScheduled) {
-        await runtime.destroy()
-      }
-    })
+    }
+  }

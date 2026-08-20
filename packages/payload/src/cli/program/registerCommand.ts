@@ -9,13 +9,13 @@ export const registerCLICommand = ({
   name,
   definition,
   help,
-  program,
+  rootCommand,
   runtime,
 }: {
   definition: CLICommand
   help: CLIHelp
   name: string
-  program: Command
+  rootCommand: Command
   runtime: CLIRuntime
 }): void => {
   const command = new Command(name)
@@ -35,7 +35,7 @@ export const registerCLICommand = ({
   command.exitOverride()
 
   // Register the completed command with the root CLI.
-  program.addCommand(command)
+  rootCommand.addCommand(command)
 }
 
 /**

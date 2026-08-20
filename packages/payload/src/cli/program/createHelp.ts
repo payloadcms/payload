@@ -5,10 +5,10 @@ import type { ResolvedCLICommand } from './loadCommands.js'
 
 export const createCLIHelp = ({
   commands,
-  program,
+  rootCommand,
 }: {
   commands: ResolvedCLICommand[]
-  program: Command
+  rootCommand: Command
 }): CLIHelp => ({
   commands: commands.map(({ name, definition }) => ({
     name,
@@ -18,10 +18,10 @@ export const createCLIHelp = ({
   })),
   output: ({ command: commandName } = {}) => {
     const selectedCommand = commandName
-      ? program.commands.find(
+      ? rootCommand.commands.find(
           (command) => command.name() === commandName || command.aliases().includes(commandName),
         )
-      : program
+      : rootCommand
 
     if (!selectedCommand) {
       throw new Error(`Unknown command '${commandName}'.`)
