@@ -1722,19 +1722,12 @@ describe('Versions', () => {
 
     test('should show option to publish current locale', async () => {
       await page.goto(url.create)
-      const publishButton = page.locator('#action-save')
-
-      await expect(publishButton).toContainText('English')
-    })
-
-    test('should show option to publish all locales in dropdown', async () => {
-      await page.goto(url.create)
       const publishOptions = page.locator('.doc-controls__controls .popup')
       await publishOptions.click()
 
-      const publishAllLocalesContent = page.locator('.popup__content')
+      const publishLocaleContent = page.locator('.popup__content')
 
-      await expect(publishAllLocalesContent).toContainText('Publish all locales')
+      await expect(publishLocaleContent).toContainText('English')
     })
 
     test('should publish specific locale', async () => {
@@ -1753,7 +1746,23 @@ describe('Versions', () => {
 
       await changeLocale(page, 'en')
       await textField.fill('english published')
-      await saveDocAndAssert(page)
+
+      const publishOptions = page.locator('#action-save-popup')
+      await publishOptions.click()
+
+      const publishLocaleButton = page.locator('#publish-locale')
+      await expect(publishLocaleButton).toContainText('English')
+      await publishLocaleButton.click()
+
+      await wait(500)
+
+      await expect(async () => {
+        await expect(
+          page.locator('.payload-toast-item:has-text("Updated successfully.")'),
+        ).toBeVisible()
+      }).toPass({
+        timeout: POLL_TOPASS_TIMEOUT,
+      })
 
       const id = await page.locator('.id-label').getAttribute('title')
 
@@ -2232,19 +2241,12 @@ describe('Versions', () => {
 
     test('should show option to publish current locale', async () => {
       await page.goto(url.global(localizedGlobalSlug))
-      const publishButton = page.locator('#action-save')
-
-      await expect(publishButton).toContainText('English')
-    })
-
-    test('should show option to publish all locales in dropdown', async () => {
-      await page.goto(url.global(localizedGlobalSlug))
       const publishOptions = page.locator('.doc-controls__controls .popup')
       await publishOptions.click()
 
-      const publishAllLocalesContent = page.locator('.popup__content')
+      const publishLocaleContent = page.locator('.popup__content')
 
-      await expect(publishAllLocalesContent).toContainText('Publish all locales')
+      await expect(publishLocaleContent).toContainText('English')
     })
   })
 

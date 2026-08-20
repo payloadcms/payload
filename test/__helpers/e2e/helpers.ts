@@ -101,7 +101,7 @@ export async function saveDocAndAssert(
     | '#action-publish'
     | '#action-save'
     | '#action-save-draft'
-    | '#publish-all-locales'
+    | '#publish-locale'
     | string = '#action-save',
   expectation: 'error' | 'success' = 'success',
   options?: {
@@ -112,7 +112,7 @@ export async function saveDocAndAssert(
   },
 ): Promise<void> {
   await wait(500) // TODO: Fix this
-  if (selector === '#publish-all-locales') {
+  if (selector === '#publish-locale') {
     // open dropdown
     const chevronButton = page.locator('.form-submit .popup__trigger-wrap > .popup-button')
     await chevronButton.click()
