@@ -25,6 +25,7 @@
  */
 
 import { readFileSync } from 'fs'
+import { join } from 'path'
 import { fileURLToPath } from 'url'
 
 /**
@@ -103,4 +104,127 @@ export function getNextjsVersion() {
     console.error('Payload: Error getting Next.js version', e)
     return undefined
   }
+}
+
+/**
+ * Reads the `next` peer dependency range declared by `@payloadcms/next` itself,
+ * so the supported range stays in sync with `package.json` rather than being
+ * duplicated. Returns undefined if it cannot be read.
+ * @returns {string | undefined}
+ */
+export function getSupportedNextRange() {
+  try {
+    /** @type {string} */
+    let pkgPath
+
+    if (typeof import.meta?.url === 'string') {
+      // ESM environment - resolve relative to this module. Both the source
+      // (src/withPayload/) and published (dist/withPayload/ and dist/cjs/)
+      // locations are two levels below the package root.
+      pkgPath = fileURLToPath(new URL('../../package.json', import.meta.url))
+    } else if (typeof __dirname !== 'undefined') {
+      // CJS environment
+      pkgPath = join(__dirname, '../../package.json')
+    } else {
+      return undefined
+    }
+
+    const pkgJson = JSON.parse(readFileSync(pkgPath, 'utf8'))
+    return pkgJson?.peerDependencies?.next
+  } catch {
+    return undefined
+  }
+}
+
+/**
+ * Compares the core (major.minor.patch) of two SemVer objects, ignoring
+ * prerelease and build metadata.
+ * @param {SemVer} a
+ * @param {SemVer} b
+ * @returns {number} negative if a < b, 0 if equal, positive if a > b
+ */
+function compareCoreVersion(a, b) {
+  return (
+    (a.major ?? 0) - (b.major ?? 0) ||
+    (a.minor ?? 0) - (b.minor ?? 0) ||
+    (a.patch ?? 0) - (b.patch ?? 0)
+  )
+}
+
+/**
+ * Minimal semver range check supporting the comparator syntax Payload uses in
+ * its `next` peer dependency, e.g. `>=16.2.6 <17.0.0` and disjoint ranges joined
+ * by `||`. We avoid a runtime `semver` dependency because this file runs inside
+ * `next.config` before the build, where extra dependencies are undesirable.
+ * @param {SemVer} version
+ * @param {string} range
+ * @returns {boolean}
+ */
+export function satisfiesNextRange(version, range) {
+  if (version?.major === undefined || !range) {
+    return false
+  }
+
+  return range.split('||').some((clause) => {
+    const comparators = clause.trim().split(/\s+/).filter(Boolean)
+
+    if (comparators.length === 0) {
+      return false
+    }
+
+    return comparators.every((comparator) => {
+      const match = comparator.match(/^(>=|<=|>|<|=)?\s*(.+)$/)
+
+      if (!match) {
+        return false
+      }
+
+      const operator = match[1] || '='
+      const bound = parseSemver(match[2])
+
+      if (bound.major === undefined) {
+        return false
+      }
+
+      const comparison = compareCoreVersion(version, bound)
+
+      switch (operator) {
+        case '<':
+          return comparison < 0
+        case '<=':
+          return comparison <= 0
+        case '>':
+          return comparison > 0
+        case '>=':
+          return comparison >= 0
+        default:
+          return comparison === 0
+      }
+    })
+  })
+}
+
+/**
+ * Pure builder for the unsupported-version warning. Returns a clear, actionable
+ * message when `installedVersion` falls outside `supportedRange`, or undefined
+ * when the version is supported or either input is missing (so the build is
+ * never blocked by the check itself). Inputs are explicit so this stays pure and
+ * easy to test; callers resolve them via `getNextjsVersion` / `getSupportedNextRange`.
+ * @param {SemVer | undefined} installedVersion
+ * @param {string | undefined} supportedRange
+ * @returns {string | undefined}
+ */
+export function getUnsupportedNextVersionWarning(installedVersion, supportedRange) {
+  if (
+    !installedVersion ||
+    installedVersion.major === undefined ||
+    !supportedRange ||
+    satisfiesNextRange(installedVersion, supportedRange)
+  ) {
+    return undefined
+  }
+
+  const installedString = `${installedVersion.major}.${installedVersion.minor}.${installedVersion.patch}`
+
+  return `Payload: the installed Next.js version (${installedString}) is outside the supported range "${supportedRange}". Unsupported versions may break the Admin Panel or contain unpatched security advisories. Install a supported Next.js version to clear this warning.`
 }
