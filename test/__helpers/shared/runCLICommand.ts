@@ -1,5 +1,5 @@
 import type { Payload, SanitizedConfig } from 'payload'
-import type { CLIArgs } from 'payload/cli'
+import type { CLIRuntime } from 'payload/cli'
 
 import path from 'node:path'
 import payload from 'payload'
@@ -14,10 +14,11 @@ export const runCLICommand = async ({
   config: SanitizedConfig
   preparePayload?: ({ payload }: { payload: Payload }) => Promise<void> | void
 }): Promise<void> => {
-  const cliArgs: CLIArgs = {
+  const runtime: CLIRuntime = {
     configDir: process.env.PAYLOAD_CONFIG_PATH
       ? path.dirname(path.resolve(process.env.PAYLOAD_CONFIG_PATH))
       : process.cwd(),
+    destroy: () => Promise.resolve(),
     getConfig: () => Promise.resolve(config),
     async getPayload(options = {}) {
       await payload.init({ config, ...options })
@@ -25,11 +26,10 @@ export const runCLICommand = async ({
 
       return payload
     },
-    async run({ handler }) {
-      await handler()
-    },
+    isScheduled: false,
+    markScheduled: () => undefined,
   }
-  const program = await createProgram(cliArgs)
+  const program = await createProgram(runtime)
 
   await program.parseAsync(argv, { from: 'user' })
 }

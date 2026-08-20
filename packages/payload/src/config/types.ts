@@ -6,8 +6,8 @@ import type {
   I18nOptions,
   TFunction,
 } from '@payloadcms/translations'
+import type { StandardJSONSchemaV1, StandardSchemaV1 } from '@standard-schema/spec'
 import type { BusboyConfig } from 'busboy'
-import type { Command } from 'commander'
 import type GraphQL from 'graphql'
 import type { GraphQLFormattedError } from 'graphql'
 import type { JSONSchema4 } from 'json-schema'
@@ -145,26 +145,71 @@ export type ResolvedComponent<
   serverProps?: TComponentServerProps
 }
 
-/** Utilities available to every Payload CLI command. */
-export type CLIArgs = {
+/** Shared resources used while the Payload CLI is running. */
+export type CLIRuntime = {
   /** Directory containing the Payload config, used to resolve relative command paths. */
   configDir: string
+  destroy: () => Promise<void>
   getConfig: () => Promise<SanitizedConfig>
   getPayload: (options?: Omit<InitOptions, 'config'>) => Promise<Payload>
-  run: ({
-    command,
-    handler,
-  }: {
-    command: Command
-    handler: () => Promise<number | void>
-  }) => Promise<void>
+  readonly isScheduled: boolean
+  markScheduled: () => void
 }
 
-/** A schema-backed command created with `defineCLICommand`. */
+export type CLICommandDescription = {
+  aliases?: string[]
+  description: string
+  inputSchema: Record<string, unknown>
+  name: string
+}
+
+export type CLIHelp = {
+  commands: CLICommandDescription[]
+  output: (args?: { command?: string }) => void
+}
+
+export type CLIInputSchema<
+  Input extends Record<string, unknown> = Record<string, unknown>,
+  Output extends Record<string, unknown> = Input,
+> = StandardJSONSchemaV1<Input, Output> & StandardSchemaV1<Input, Output>
+
+export type CLIFieldOverride =
+  | 'argument'
+  | {
+      flags?: string
+      parse?: (value: string) => unknown
+      type?: 'option'
+    }
+  | {
+      parse?: (value: string) => unknown
+      position?: number
+      syntax?: string
+      type: 'argument'
+    }
+  | false
+
+/** A schema-backed command definition created with `defineCLICommand`. */
 export type CLICommand = {
-  /** Creates the Commander command with Payload's runtime CLI helpers. */
-  command: (args: { cliArgs: CLIArgs; name: string }) => Command
+  aliases?: string[]
+  allowUnknownOption: boolean
+  cli: false | Partial<Record<string, CLIFieldOverride>>
+  description: string
+  handler: (context: {
+    args: Record<string, unknown>
+    getConfig: CLIRuntime['getConfig']
+    getPayload: CLIRuntime['getPayload']
+    help: CLIHelp
+    isJSON: boolean
+  }) => CLICommandResult | number | Promise<CLICommandResult | number | void> | void
+  helpGroup?: string
+  input: CLIInputSchema
   readonly schema: Record<string, unknown>
+}
+
+/** Structured data and an optional exit code returned by a Payload CLI command. */
+export type CLICommandResult = {
+  exitCode?: number
+  result?: unknown
 }
 
 /** A CLI command definition, import reference, or `false` to disable the command. */

@@ -8,7 +8,7 @@ import { strictObject } from '../zod.js'
 
 export const createInfoCommand = defineCLICommand({
   description: 'Print environment and dependency information.',
-  handler: async () => {
+  handler: async ({ isJSON }) => {
     const dependencies = await getDependencies(process.cwd(), [
       ...PAYLOAD_PACKAGE_LIST,
       'next',
@@ -32,23 +32,43 @@ export const createInfoCommand = defineCLICommand({
     const formattedDependencies = [...primaryDependencies, ...otherDependencies]
       .map(({ name, version }) => `  ${name}: ${version}`)
       .join('\n')
+    const result = {
+      binaries: {
+        node: process.versions.node,
+        npm: getBinaryVersion('npm'),
+        pnpm: getBinaryVersion('pnpm'),
+        yarn: getBinaryVersion('yarn'),
+      },
+      operatingSystem: {
+        architecture: os.arch(),
+        availableCPUCores: cpuCores > 0 ? cpuCores : null,
+        availableMemoryMB: Math.ceil(os.totalmem() / 1024 / 1024),
+        platform: os.platform(),
+        version: os.version(),
+      },
+      packages: resolvedDependencies,
+    }
 
-    // eslint-disable-next-line no-console
-    console.log(`
+    if (!isJSON) {
+      // eslint-disable-next-line no-console
+      console.log(`
 Binaries:
-  Node: ${process.versions.node}
-  npm: ${getBinaryVersion('npm')}
-  Yarn: ${getBinaryVersion('yarn')}
-  pnpm: ${getBinaryVersion('pnpm')}
+  Node: ${result.binaries.node}
+  npm: ${result.binaries.npm}
+  Yarn: ${result.binaries.yarn}
+  pnpm: ${result.binaries.pnpm}
 Relevant Packages:
 ${formattedDependencies}
 Operating System:
-  Platform: ${os.platform()}
-  Arch: ${os.arch()}
-  Version: ${os.version()}
-  Available memory (MB): ${Math.ceil(os.totalmem() / 1024 / 1024)}
+  Platform: ${result.operatingSystem.platform}
+  Arch: ${result.operatingSystem.architecture}
+  Version: ${result.operatingSystem.version}
+  Available memory (MB): ${result.operatingSystem.availableMemoryMB}
   Available CPU cores: ${cpuCores > 0 ? cpuCores : 'N/A'}
 `)
+    }
+
+    return { result }
   },
   helpGroup: 'Core commands',
   input: strictObject({}),

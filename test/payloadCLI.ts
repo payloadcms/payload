@@ -17,7 +17,7 @@ const dirname = path.dirname(filename)
 const [testSuiteArg, ...cliArgs] = process.argv.slice(2)
 
 if (!testSuiteArg || testSuiteArg.startsWith('-')) {
-  console.log(
+  console.error(
     chalk.red(
       'ERROR: The test suite folder must be the first argument, e.g. `pnpm payload fields generate:types`',
     ),
@@ -28,7 +28,7 @@ if (!testSuiteArg || testSuiteArg.startsWith('-')) {
 const testDir = path.resolve(dirname, testSuiteArg)
 
 if (!setTestEnvPaths(testDir)) {
-  console.log(chalk.red(`ERROR: No config.ts found in the test folder "${testSuiteArg}"`))
+  console.error(chalk.red(`ERROR: No config.ts found in the test folder "${testSuiteArg}"`))
   process.exit(1)
 }
 
@@ -39,8 +39,6 @@ if (process.env.WRITE_DB_ADAPTER !== 'false') {
 
 // generateImportMap discovers the admin app relative to ROOT_DIR
 process.env.ROOT_DIR = getNextRootDir(testSuiteArg).rootDir
-
-console.log(chalk.dim(`Selected test suite: ${testSuiteArg}`))
 
 // Hide the test suite arg from commander so the CLI only parses its own args
 process.argv = [process.argv[0]!, process.argv[1]!, ...cliArgs]

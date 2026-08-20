@@ -5,7 +5,7 @@ import { strictObject } from '../zod.js'
 
 export const createGenerateDBSchemaCommand = defineCLICommand({
   description: 'Generate the database adapter schema.',
-  handler: async ({ args, getPayload }) => {
+  handler: async ({ args, getPayload, isJSON }) => {
     const payload = await getPayload({
       disableDBConnect: true,
       disableOnInit: true,
@@ -15,7 +15,7 @@ export const createGenerateDBSchemaCommand = defineCLICommand({
       throw new Error(`${payload.db.packageName} does not support database schema generation`)
     }
 
-    await payload.db.generateSchema(args)
+    await payload.db.generateSchema({ ...args, log: isJSON ? false : args.log })
   },
   helpGroup: 'Core commands',
   input: strictObject({

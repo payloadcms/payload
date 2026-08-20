@@ -1,4 +1,4 @@
-import type { CLIArgs } from '../../../config/types.js'
+import type { CLIRuntime } from '../../../config/types.js'
 import type { BaseDatabaseAdapter } from '../../../database/types.js'
 import type { Payload } from '../../../index.js'
 
@@ -14,7 +14,7 @@ export const initializeMigration = async ({
   getPayload,
 }: {
   disableDBConnect?: boolean
-  getPayload: CLIArgs['getPayload']
+  getPayload: CLIRuntime['getPayload']
 }): Promise<{ adapter: BaseDatabaseAdapter; payload: Payload }> => {
   process.env.PAYLOAD_MIGRATING = 'true'
 

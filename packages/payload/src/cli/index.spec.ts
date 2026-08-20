@@ -1,13 +1,15 @@
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import * as z from 'zod/mini'
 
 import { describe, expect, it } from 'vitest'
 
-import type { CLIArgs, Config, SanitizedConfig } from '../config/types.js'
+import type { CLIRuntime, Config, SanitizedConfig } from '../config/types.js'
 
 import { addDefaultsToConfig } from '../config/defaults.js'
 import { defineCLICommand } from './defineCLICommand.js'
 import { createProgram } from './index.js'
+import { CLICommandError, getCLIErrorOutput } from './output.js'
 import { strictObject } from './zod.js'
 
 const cliDirectory = path.dirname(fileURLToPath(import.meta.url))
@@ -30,15 +32,15 @@ const createArgs = ({
 }: {
   config: SanitizedConfig
   configDir?: string
-}): CLIArgs => ({
+}): CLIRuntime => ({
   configDir,
+  destroy: async () => undefined,
   getConfig: async () => config,
   getPayload: async () => {
     throw new Error('Payload should not be initialized by these tests.')
   },
-  run: async ({ handler }) => {
-    await handler()
-  },
+  isScheduled: false,
+  markScheduled: () => undefined,
 })
 
 const replacementCommand = defineCLICommand({
@@ -212,5 +214,82 @@ describe('createProgram', () => {
         }),
       ),
     ).rejects.toThrow("CLI command 'custom' conflicts with 'info'")
+  })
+
+  it.each([
+    ['before', ['--json', 'result']],
+    ['after', ['result', '--json']],
+  ])('should accept the global JSON option %s the command', async (_, argv) => {
+    const resultCommand = defineCLICommand({
+      description: 'Return a result.',
+      handler: () => ({ result: { value: 42 } }),
+      input: strictObject({}),
+    })
+    const program = await createProgram(
+      createArgs({
+        config: createConfig({
+          cli: {
+            commands: {
+              result: resultCommand,
+            },
+          },
+        }),
+      }),
+    )
+    const command = program.commands.find((item) => item.name() === 'result')!
+    let output = ''
+
+    command.configureOutput({ writeOut: (value) => (output += value) })
+    await program.parseAsync(argv, { from: 'user' })
+
+    expect(JSON.parse(output)).toEqual({
+      command: 'result',
+      result: { value: 42 },
+      success: true,
+    })
+  })
+
+  it('should include validation issues and the input schema in JSON errors', async () => {
+    const validatedCommand = defineCLICommand({
+      description: 'Validate input.',
+      handler: () => undefined,
+      input: strictObject({
+        count: z.int(),
+      }),
+    })
+    const program = await createProgram(
+      createArgs({
+        config: createConfig({
+          cli: {
+            commands: {
+              validate: validatedCommand,
+            },
+          },
+        }),
+      }),
+    )
+
+    let thrownError: unknown
+
+    try {
+      await program.parseAsync(['validate', '--count', 'nope', '--json'], { from: 'user' })
+    } catch (error) {
+      thrownError = error
+    }
+
+    expect(thrownError).toBeInstanceOf(CLICommandError)
+    expect(getCLIErrorOutput({ error: thrownError })).toMatchObject({
+      command: 'validate',
+      error: {
+        code: 'INVALID_INPUT',
+        inputSchema: {
+          properties: {
+            count: { type: 'integer' },
+          },
+        },
+        issues: [{ path: 'count' }],
+      },
+      success: false,
+    })
   })
 })

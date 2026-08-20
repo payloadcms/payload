@@ -198,7 +198,6 @@ describe('bin resolution walks the consumer project node_modules', () => {
 })
 
 describe('build', () => {
-  let exitMock: ReturnType<typeof vi.spyOn>
   let originalFrameworkEnv: string | undefined
   let cwdSpy: ReturnType<typeof vi.spyOn> | undefined
   const buildTempDirs: string[] = []
@@ -207,7 +206,6 @@ describe('build', () => {
     spawnMock.mockClear()
     generateImportMapMock.mockClear()
     generateTypesMock.mockClear()
-    exitMock = vi.spyOn(process, 'exit').mockImplementation((() => undefined) as never)
     originalFrameworkEnv = process.env.PAYLOAD_FRAMEWORK
     // Force next for the legacy tests so they don't depend on the repo-root
     // package.json's ambient `next` dependency for auto-detection.
@@ -215,7 +213,6 @@ describe('build', () => {
   })
 
   afterEach(() => {
-    exitMock.mockRestore()
     if (originalFrameworkEnv === undefined) {
       delete process.env.PAYLOAD_FRAMEWORK
     } else {
@@ -250,12 +247,12 @@ describe('build', () => {
     expect(spawnMock).toHaveBeenCalledTimes(1)
   })
 
-  it('exits 1 and does not spawn when generation fails', async () => {
+  it('returns 1 and does not spawn when generation fails', async () => {
     generateImportMapMock.mockRejectedValueOnce(new Error('boom'))
 
-    await build({ config: fakeConfig })
+    const exitCode = await build({ config: fakeConfig })
 
-    expect(exitMock).toHaveBeenCalledWith(1)
+    expect(exitCode).toBe(1)
     expect(spawnMock).not.toHaveBeenCalled()
   })
 
@@ -285,8 +282,7 @@ describe('build', () => {
 
     // Simulate the child exiting with a non-zero code
     closeCb?.(2, null)
-    await buildPromise
-    expect(exitMock).toHaveBeenCalledWith(2)
+    await expect(buildPromise).resolves.toBe(2)
   })
 
   it('exits non-zero when the child is terminated by a signal (code null)', async () => {
@@ -308,9 +304,7 @@ describe('build', () => {
 
     // A signal kill (e.g. OOM SIGKILL) reports code null; must not become success.
     closeCb?.(null, 'SIGKILL')
-    await buildPromise
-    expect(exitMock).toHaveBeenCalledWith(1)
-    expect(exitMock).not.toHaveBeenCalledWith(0)
+    await expect(buildPromise).resolves.toBe(1)
   })
 
   it('does not exit until the spawned child exits, then propagates its code', async () => {
@@ -328,8 +322,9 @@ describe('build', () => {
     })
 
     let resolved = false
-    const buildPromise = build({ config: fakeConfig }).then(() => {
+    const buildPromise = build({ config: fakeConfig }).then((exitCode) => {
       resolved = true
+      return exitCode
     })
 
     // Wait for generation to settle and the child to be spawned. build() must
@@ -339,13 +334,12 @@ describe('build', () => {
     // without awaiting the child, so this assertion catches the race.
     await new Promise((r) => setTimeout(r, 0))
     expect(resolved).toBe(false)
-    expect(exitMock).not.toHaveBeenCalled()
 
-    // Child exits non-zero -> build() must exit with that exact code
+    // Child exits non-zero -> build() must return that exact code
     closeCb?.(3, null)
-    await buildPromise
+    const exitCode = await buildPromise
     expect(resolved).toBe(true)
-    expect(exitMock).toHaveBeenCalledWith(3)
+    expect(exitCode).toBe(3)
   })
 
   it('spawns vite build for a detected tanstack project', async () => {
@@ -366,17 +360,25 @@ describe('build', () => {
     expect(spawnArgs.slice(1)).toEqual(['build', '--mode', 'staging'])
   })
 
-  it('exits 1 and does not spawn when the framework cannot be detected', async () => {
+  it('returns 1 and does not spawn when the framework cannot be detected', async () => {
     delete process.env.PAYLOAD_FRAMEWORK
     const emptyDir = mkdtempSync(path.join(os.tmpdir(), 'payload-build-empty-'))
     buildTempDirs.push(emptyDir)
     writeFileSync(path.join(emptyDir, 'package.json'), JSON.stringify({}))
     cwdSpy = vi.spyOn(process, 'cwd').mockReturnValue(emptyDir)
 
-    await build({ config: fakeConfig })
+    const exitCode = await build({ config: fakeConfig })
 
-    expect(exitMock).toHaveBeenCalledWith(1)
+    expect(exitCode).toBe(1)
     expect(spawnMock).not.toHaveBeenCalled()
+  })
+
+  it('keeps stdout available for JSON and sends build output to stderr', async () => {
+    await build({ config: fakeConfig, isJSON: true })
+
+    expect(generateImportMapMock).toHaveBeenCalledWith(fakeConfig, { log: false })
+    expect(generateTypesMock).toHaveBeenCalledWith(fakeConfig, { log: false })
+    expect(spawnMock.mock.calls[0]?.[2]).toEqual({ stdio: ['inherit', 2, 2] })
   })
 })
 

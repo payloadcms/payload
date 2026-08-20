@@ -4,16 +4,24 @@ import path from 'node:path'
 import { config as configureZod } from 'zod/mini'
 import en from 'zod/v4/locales/en.js'
 
-import type { CLIArgs, CLICommand, CLICommandEntry } from '../config/types.js'
+import type {
+  CLICommand,
+  CLICommandDescription,
+  CLICommandEntry,
+  CLIHelp,
+  CLIRuntime,
+} from '../config/types.js'
 
 import { dynamicImport } from '../utilities/dynamicImport.js'
-import { createCLIArgs } from './args.js'
 import { parsePayloadComponent } from './commands/generateImportMap/utilities/parsePayloadComponent.js'
 import { loadEnv } from './loadEnv.js'
+import { getCLIErrorOutput, isJSONOutput, writeCLIJSON } from './output.js'
+import { registerCLICommand } from './registerCLICommand.js'
+import { createCLIRuntime } from './runtime.js'
 
 configureZod(en())
 
-export const createProgram = async (args: CLIArgs): Promise<Command> => {
+export const createProgram = async (runtime: CLIRuntime): Promise<Command> => {
   const program = new Command()
     .name('payload')
     .description('Manage and operate a local Payload project.')
@@ -21,7 +29,8 @@ export const createProgram = async (args: CLIArgs): Promise<Command> => {
     .showHelpAfterError()
     .showSuggestionAfterError()
     .option('--cron <expression>', 'Run the command on a cron schedule.')
-  const config = await args.getConfig()
+    .option('--json', 'Return machine-readable JSON output.')
+  const config = await runtime.getConfig()
   const commandEntries = config.cli === false ? [] : Object.entries(config.cli.commands)
   const moduleImports = new Map<string, Promise<Record<string, unknown>>>()
   const resolvedCommands = await Promise.all(
@@ -31,16 +40,31 @@ export const createProgram = async (args: CLIArgs): Promise<Command> => {
         name,
         cliCommand: await resolveCLICommand({
           name,
-          configDir: args.configDir,
+          configDir: runtime.configDir,
           entry,
           moduleImports,
         }),
       })),
   )
+
   const registeredNames = new Map<string, string>()
+  const help = createCLIHelp({
+    commands: resolvedCommands.map(({ name, cliCommand }) => ({
+      name,
+      ...(cliCommand.aliases?.length ? { aliases: cliCommand.aliases } : {}),
+      description: cliCommand.description,
+      inputSchema: cliCommand.schema,
+    })),
+    program,
+  })
 
   for (const { name, cliCommand } of resolvedCommands) {
-    const command = cliCommand.command({ name, cliArgs: args })
+    const command = registerCLICommand({
+      name,
+      commandDefinition: cliCommand,
+      help,
+      runtime,
+    })
 
     for (const registeredName of [name, ...command.aliases()]) {
       const existingCommand = registeredNames.get(registeredName)
@@ -54,12 +78,6 @@ export const createProgram = async (args: CLIArgs): Promise<Command> => {
       registeredNames.set(registeredName, name)
     }
 
-    Object.defineProperty(command, 'inputSchema', {
-      configurable: true,
-      enumerable: false,
-      value: cliCommand.schema,
-    })
-
     program.addCommand(command)
   }
 
@@ -69,6 +87,29 @@ export const createProgram = async (args: CLIArgs): Promise<Command> => {
 
   return program
 }
+
+const createCLIHelp = ({
+  commands,
+  program,
+}: {
+  commands: CLICommandDescription[]
+  program: Command
+}): CLIHelp => ({
+  commands,
+  output: ({ command: commandName } = {}) => {
+    const selectedCommand = commandName
+      ? program.commands.find(
+          (command) => command.name() === commandName || command.aliases().includes(commandName),
+        )
+      : program
+
+    if (!selectedCommand) {
+      throw new Error(`Unknown command '${commandName}'.`)
+    }
+
+    selectedCommand.outputHelp()
+  },
+})
 
 const resolveCLICommand = async ({
   name,
@@ -127,8 +168,13 @@ const resolveCLICommand = async ({
 const isCLICommand = (value: unknown): value is CLICommand =>
   typeof value === 'object' &&
   value !== null &&
-  'command' in value &&
-  typeof value.command === 'function' &&
+  'description' in value &&
+  typeof value.description === 'string' &&
+  'handler' in value &&
+  typeof value.handler === 'function' &&
+  'input' in value &&
+  typeof value.input === 'object' &&
+  value.input !== null &&
   'schema' in value &&
   typeof value.schema === 'object' &&
   value.schema !== null
@@ -137,10 +183,11 @@ export const bin = async (): Promise<void> => {
   loadEnv()
   process.env.DISABLE_PAYLOAD_HMR = 'true'
 
-  const args = createCLIArgs()
+  const runtime = createCLIRuntime()
+  let program: Command | undefined
 
   try {
-    const program = await createProgram(args)
+    program = await createProgram(runtime)
 
     if (process.argv.length === 2) {
       program.outputHelp()
@@ -148,15 +195,22 @@ export const bin = async (): Promise<void> => {
       await program.parseAsync(process.argv)
     }
   } catch (error) {
-    if (error instanceof CommanderError) {
-      process.exitCode = error.exitCode
-    } else {
+    const exitCode = error instanceof CommanderError ? error.exitCode : 1
+    const shouldOutputJSON = program ? isJSONOutput(program) : process.argv.includes('--json')
+
+    if (shouldOutputJSON && exitCode !== 0) {
+      writeCLIJSON({
+        command: program,
+        value: getCLIErrorOutput({ command: program?.args[0], error }),
+      })
+    } else if (!(error instanceof CommanderError)) {
       console.error(error instanceof Error ? error.message : error)
-      process.exitCode = 1
     }
+
+    process.exitCode = exitCode
   } finally {
-    if (!args.isScheduled) {
-      await args.destroy()
+    if (!runtime.isScheduled) {
+      await runtime.destroy()
     }
   }
 }

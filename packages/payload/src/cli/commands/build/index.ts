@@ -5,10 +5,11 @@ import { strictObject } from '../../zod.js'
 import { build } from './build.js'
 
 export const createBuildCommand = defineCLICommand({
-  handler: async ({ args, getConfig }) => {
-    await build({
+  handler: async ({ args, getConfig, isJSON }) => {
+    return build({
       config: await getConfig(),
       forwardedArgs: args.frameworkArgs,
+      isJSON,
       skipTypes: !args.types,
     })
   },

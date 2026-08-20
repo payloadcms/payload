@@ -53,7 +53,25 @@ pnpm payload migrate:create --help
 pnpm payload jobs:run --help
 ```
 
-## JSON help and input
+## JSON output, help, and input
+
+Every command accepts the global `--json` option. It returns a predictable response that scripts and coding agents can read:
+
+```sh
+pnpm payload generate:types --json
+```
+
+```json
+{
+  "command": "generate:types",
+  "result": {
+    "outputFile": "/project/src/payload-types.ts"
+  },
+  "success": true
+}
+```
+
+You can place `--json` before or after the command. Commands that do not return data omit `result`. A failed command returns `success: false`, an error code, and an error message. Input validation errors also include the issues and the command's input schema.
 
 Payload can return help as JSON. This is useful for scripts and coding agents that need to know which commands exist and what input they accept.
 
@@ -130,6 +148,8 @@ export const seedCommand = defineCLICommand({
     })
 
     payload.logger.info('Successfully seeded!')
+
+    return { result: { seeded: true } }
   },
 })
 ```
@@ -151,6 +171,8 @@ import { z } from 'zod'
 You can also use another schema library. Its schema must support both [Standard Schema](https://standardschema.dev/) validation and Standard JSON Schema output.
 
 Call `getPayload()` only when the command needs the Local API. Payload closes the instance when the command finishes.
+
+Returning `{ result }` makes that value available when the command runs with `--json`. Return a number to set only the process exit code, or return `{ exitCode, result }` when you need both. Payload disables its own logger in JSON mode. If your command uses `console.log`, check `isJSON` so stdout remains valid JSON.
 
 ### Register the command
 
@@ -193,8 +215,12 @@ export default buildConfig({
       hello: defineCLICommand({
         description: 'Print a greeting.',
         input: strictObject({}),
-        handler: () => {
-          console.log('Hello!')
+        handler: ({ isJSON }) => {
+          if (!isJSON) {
+            console.log('Hello!')
+          }
+
+          return { result: { message: 'Hello!' } }
         },
       }),
     },

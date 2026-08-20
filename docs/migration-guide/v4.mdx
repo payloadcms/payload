@@ -28,7 +28,7 @@ Collection and Global Access Control callback arguments now include the document
 
 ### Custom bin scripts replaced by native CLI commands
 
-The `config.bin` API has been removed. Custom commands are now registered through `config.cli.commands` and use the same schema-backed Commander API as Payload's built-in commands.
+The `config.bin` API has been removed. Custom commands are now registered through `config.cli.commands` and use the same schema-backed CLI API as Payload's built-in commands.
 
 In Payload 3.x, config entries connected a command name to a script path:
 
@@ -105,9 +105,9 @@ When migrating custom scripts:
 - Register commands by import path to keep them out of the Payload config's module graph. Paths use the existing `PayloadComponent` syntax, resolve relative to `payload.config.ts`, and support default or named exports. Direct `CLICommand` values are also accepted.
 - Define the handler's semantic input with a Standard Schema implementation such as Zod. Supported top-level properties become options automatically; use `cli` only to mark positional arguments, hide fields, or override unusual shell syntax.
 - Use the provided `getPayload()` function so Payload can shut down database connections after the command finishes.
-- Return an exit code from the handler when needed. Do not call `process.exit()` from the command.
+- Return an exit code from the handler when needed. Return `{ exitCode, result }` to also provide structured output for the new global `--json` option. Do not call `process.exit()` from the command.
 
-Payload adds built-in command import references to `cli.commands` while sanitizing the config, then applies project entries over those defaults. All built-ins are named exports from `payload/cli/builtin`, and Payload imports a referenced module only once even when it provides several commands. The sanitized map therefore contains the complete local CLI, and built-in and project commands use the same loader. Custom commands appear in `payload --help` and receive Standard Schema validation and Commander help generation. A command with the same map key as a built-in command replaces it, while `false` disables that command. Set `cli: false` to disable the entire Payload CLI. Commands also appear with a generated JSON Schema in `payload help --json`, and every command accepts the schema object directly through `--input <json|@file|->`. Command names are case-sensitive. Because custom commands must be registered before Commander parses input, the Payload config is now loaded before displaying root CLI help.
+Payload adds built-in command import references to `cli.commands` while sanitizing the config, then applies project entries over those defaults. All built-ins are named exports from `payload/cli/builtin`, and Payload imports a referenced module only once even when it provides several commands. The sanitized map therefore contains the complete local CLI, and built-in and project commands use the same loader. Custom commands appear in `payload --help` and receive Standard Schema validation and generated shell help. A command with the same map key as a built-in command replaces it, while `false` disables that command. Set `cli: false` to disable the entire Payload CLI. Every command accepts `--json` for structured success and error output. Commands also appear with a generated JSON Schema in `payload help --json`, and every command accepts the schema object directly through `--input <json|@file|->`. Command names are case-sensitive. Because custom commands must be registered before the CLI parses input, the Payload config is now loaded before displaying root CLI help.
 
 See the [Payload CLI documentation](../configuration/cli) for the complete API.
 

@@ -31,28 +31,29 @@ const VITE_CONFIG_FILES = [
  * framework (Next.js or TanStack Start) and run its build, forwarding any extra
  * CLI args verbatim.
  *
- * Owns its own process lifecycle: it exits with the framework build's exit code,
- * or exits 1 if pre-build generation or framework detection fails (never builds
- * against a stale map or the wrong bundler).
+ * Returns the framework build's exit code, or 1 if pre-build generation or
+ * framework detection fails.
  */
 export async function build({
   config,
   forwardedArgs = [],
+  isJSON = false,
   skipTypes = false,
 }: {
   config: SanitizedConfig
   forwardedArgs?: string[]
+  isJSON?: boolean
   skipTypes?: boolean
-}): Promise<void> {
+}): Promise<number> {
   try {
-    await generateImportMap(config, { log: true })
+    await generateImportMap(config, { log: !isJSON })
     if (!skipTypes) {
-      await generateTypes(config, { log: true })
+      await generateTypes(config, { log: !isJSON })
     }
   } catch (err) {
     console.error('Pre-build generation failed:')
     console.error(err)
-    return process.exit(1)
+    return 1
   }
 
   let bin: string
@@ -62,12 +63,12 @@ export async function build({
     ;({ args, bin } = resolveBuildCommand({ forwardedArgs, framework }))
   } catch (err) {
     console.error(err instanceof Error ? err.message : err)
-    return process.exit(1)
+    return 1
   }
 
   const exitCode = await new Promise<number>((resolve) => {
     const child = spawn(process.execPath, [bin, ...args], {
-      stdio: 'inherit',
+      stdio: isJSON ? ['inherit', 2, 2] : 'inherit',
     })
     child.on('error', (err) => {
       console.error('Failed to run build:')
@@ -86,7 +87,7 @@ export async function build({
     })
   })
 
-  process.exit(exitCode)
+  return exitCode
 }
 
 /**
