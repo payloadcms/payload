@@ -7,6 +7,7 @@ export async function up({ payload }: MigrateUpArgs): Promise<void> {
       email: 'demo@payloadcms.com',
       password: 'demo',
     },
+    overrideAccess: true,
   })
 
   await payload.create({
@@ -14,5 +15,6 @@ export async function up({ payload }: MigrateUpArgs): Promise<void> {
     data: {
       title: 'Custom Fields',
     },
+    overrideAccess: true,
   })
 }
