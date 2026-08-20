@@ -26,6 +26,7 @@ import {
   adminThumbnailSizeSlug,
   allowListMediaSlug,
   anyImagesSlug,
+  bulkUploadsHookErrorSlug,
   draftReuploadMediaSlug,
   enlargeSlug,
   focalNoSizesSlug,
@@ -2335,6 +2336,97 @@ describe('Collections - Uploads', () => {
       )
 
       expect(response.status).toBe(403)
+    })
+  })
+
+  describe('temp file cleanup when an operation fails', () => {
+    const createdIDs: (number | string)[] = []
+    const createdTmpFiles: string[] = []
+    let originalUploadConfig: typeof payload.config.upload
+
+    beforeAll(() => {
+      originalUploadConfig = payload.config.upload
+      payload.config.upload = { ...payload.config.upload, useTempFiles: true }
+    })
+
+    afterAll(() => {
+      payload.config.upload = originalUploadConfig
+    })
+
+    afterEach(async () => {
+      for (const id of createdIDs) {
+        await payload.delete({ collection: bulkUploadsHookErrorSlug as CollectionSlug, id })
+      }
+      createdIDs.length = 0
+
+      for (const tmpFile of createdTmpFiles) {
+        await fs.promises.unlink(tmpFile).catch(() => undefined)
+      }
+      createdTmpFiles.length = 0
+    })
+
+    const createTempFileCopy = async () => {
+      const pngData = await fs.promises.readFile(path.resolve(dirname, './image.png'))
+      const tmpFile = path.join(os.tmpdir(), `payload-test-${randomUUID()}.png`)
+      createdTmpFiles.push(tmpFile)
+      await fs.promises.writeFile(tmpFile, pngData)
+      return { size: pngData.length, tmpFile }
+    }
+
+    it('removes the temp file when a beforeChange hook throws during create', async () => {
+      const { size, tmpFile } = await createTempFileCopy()
+
+      await expect(
+        payload.create({
+          collection: bulkUploadsHookErrorSlug as CollectionSlug,
+          data: { shouldFail: true },
+          file: {
+            data: Buffer.alloc(0),
+            mimetype: 'image/png',
+            name: 'temp-cleanup-create.png',
+            size,
+            tempFilePath: tmpFile,
+          },
+        }),
+      ).rejects.toThrow()
+
+      expect(await fileExists(tmpFile)).toBe(false)
+    })
+
+    it('removes the temp file when a beforeChange hook throws during update', async () => {
+      const initial = await createTempFileCopy()
+
+      const doc = await payload.create({
+        collection: bulkUploadsHookErrorSlug as CollectionSlug,
+        data: { shouldFail: false },
+        file: {
+          data: Buffer.alloc(0),
+          mimetype: 'image/png',
+          name: 'temp-cleanup-update-initial.png',
+          size: initial.size,
+          tempFilePath: initial.tmpFile,
+        },
+      })
+      createdIDs.push(doc.id)
+
+      const { size, tmpFile } = await createTempFileCopy()
+
+      await expect(
+        payload.update({
+          collection: bulkUploadsHookErrorSlug as CollectionSlug,
+          id: doc.id,
+          data: { shouldFail: true },
+          file: {
+            data: Buffer.alloc(0),
+            mimetype: 'image/png',
+            name: 'temp-cleanup-update.png',
+            size,
+            tempFilePath: tmpFile,
+          },
+        }),
+      ).rejects.toThrow()
+
+      expect(await fileExists(tmpFile)).toBe(false)
     })
   })
 })
