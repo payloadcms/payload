@@ -250,6 +250,8 @@ export const createOperation = async <
       skipValidation: isSavingDraft && !hasDraftValidationEnabled(collectionConfig),
     })
 
+    // No `!unpublishAllLocales` check here, unlike the update operations: a brand new document has
+    // no prior publication to unpublish, so create never receives that argument at all.
     if (hasDraftsEnabled(collectionConfig) && config.localization && publishAllLocales) {
       const validationResult = await validateLocalWithDataLocale(payload, {
         collection: collectionConfig.slug,

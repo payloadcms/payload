@@ -4,7 +4,11 @@ import type { SanitizedLocalizationConfig } from '../config/types.js'
 import type { PayloadRequest } from '../types/index.js'
 import type { TypedLocale } from '../index.js'
 
-import { resolveValidationLocales, runValidationLocalePasses } from './resolveValidationLocales.js'
+import {
+  cloneValidationRequest,
+  resolveValidationLocales,
+  runValidationLocalePasses,
+} from './resolveValidationLocales.js'
 
 function createReq(localization: false | SanitizedLocalizationConfig): PayloadRequest {
   return {
@@ -185,5 +189,62 @@ describe('runValidationLocalePasses - concurrency', () => {
     })
 
     expect(maxObservedActiveCount).toBe(tenLocales.length)
+  })
+})
+
+describe('cloneValidationRequest', () => {
+  it('should return an empty object for an undefined request', () => {
+    expect(cloneValidationRequest(undefined)).toEqual({})
+  })
+
+  it('should clone headers into a new instance while sharing the abort signal', () => {
+    const request = new Request('https://example.com/api/posts', {
+      headers: { 'x-test': 'value' },
+      method: 'POST',
+    }) as unknown as PayloadRequest
+
+    const cloned = cloneValidationRequest(request)
+
+    expect(cloned.url).toBe('https://example.com/api/posts')
+    expect(cloned.method).toBe('POST')
+    // `Request` derives its own `.signal` rather than exposing the one passed to its constructor
+    // by reference, so this compares against the request's own signal, not a controller's.
+    expect(cloned.signal).toBe(request.signal)
+    expect(cloned.headers).not.toBe(request.headers)
+    expect((cloned.headers as unknown as Headers).get('x-test')).toBe('value')
+  })
+
+  it('should clone own enumerable properties independently of the source request', () => {
+    const request = {
+      context: { marker: 'original' },
+    } as unknown as PayloadRequest
+
+    const cloned = cloneValidationRequest(request)
+
+    expect(cloned.context).toEqual({ marker: 'original' })
+    expect(cloned.context).not.toBe(request.context)
+  })
+
+  it('should default context, query, and routeParams to empty objects when absent from the source request', () => {
+    const request = {} as unknown as PayloadRequest
+
+    const cloned = cloneValidationRequest(request)
+
+    expect(cloned.context).toEqual({})
+    expect(cloned.query).toEqual({})
+    expect(cloned.routeParams).toEqual({})
+  })
+
+  it('should share, not clone, the properties reused across validation locale passes', () => {
+    const payload = {}
+    const request = {
+      payload,
+      transactionID: 'txn-1',
+    } as unknown as PayloadRequest
+
+    const cloned = cloneValidationRequest(request)
+
+    expect(cloned.payload).toBe(payload)
+    expect(cloned.transactionID).toBe('txn-1')
   })
 })

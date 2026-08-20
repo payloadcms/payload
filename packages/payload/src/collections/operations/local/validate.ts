@@ -117,6 +117,9 @@ export async function validateLocal<TSlug extends CollectionSlug>(
     user: options.user,
   }
 
+  // Both branches call the same function with the same data; the split exists only because
+  // `InternalValidateCollectionOptions`'s `id` follows the same discriminated union as the public
+  // `ValidateCollectionOptions`, so `id` must be omitted entirely rather than passed as `undefined`.
   if (options.id === undefined) {
     return validateLocalWithDataLocale(payload, {
       ...publicOptions,

@@ -157,29 +157,21 @@ export function cloneValidationRequest(
       : cloneValidationValue(value)
   }
 
+  // `context`/`query`/`routeParams` default to an empty object even when the source request never
+  // set them, since downstream code reads their properties without checking for `undefined` first.
   Object.assign(clonedRequest, {
     context: cloneValidationValue(request.context ?? {}),
-    data: cloneValidationValue(request.data),
-    file: cloneValidationValue(request.file),
-    files: cloneValidationValue(request.files),
-    hash: request.hash,
-    headers: cloneValidationValue(request.headers),
-    host: request.host,
-    href: request.href,
-    method: request.method,
-    origin: request.origin,
-    pathname: request.pathname,
-    payloadUploadSizes: cloneValidationValue(request.payloadUploadSizes),
-    port: request.port,
-    protocol: request.protocol,
     query: cloneValidationValue(request.query ?? {}),
-    responseHeaders: cloneValidationValue(request.responseHeaders),
     routeParams: cloneValidationValue(request.routeParams ?? {}),
-    search: request.search,
-    searchParams: cloneValidationValue(request.searchParams),
+  })
+
+  // `headers`/`method`/`signal`/`url` come from the underlying Fetch `Request` prototype as
+  // getters rather than own properties, so the loop above never sees them to clone or share.
+  Object.assign(clonedRequest, {
+    headers: cloneValidationValue(request.headers),
+    method: request.method,
     signal: request.signal,
     url: request.url,
-    user: cloneValidationValue(request.user),
   })
 
   return clonedRequest as Partial<PayloadRequest>
