@@ -62,7 +62,8 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
   const modified = useFormModified()
   const submitted = useFormSubmitted()
 
-  const { code: locale } = useLocale()
+  const currentLocale = useLocale()
+  const locale = currentLocale?.code
   const branch = useBranchParam()
   const { t } = useTranslation()
 

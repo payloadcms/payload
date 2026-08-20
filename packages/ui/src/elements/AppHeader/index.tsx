@@ -121,7 +121,7 @@ export function AppHeader({ CustomAvatar, CustomLogoutButton, settingsItemGroups
                     {...ariaProps}
                   >
                     <div className="localizer__button-content">
-                      {locale.code}
+                      {locale?.code}
                       <ChevronIcon direction={active ? 'up' : 'down'} size={16} />
                     </div>
                   </Button>

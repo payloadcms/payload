@@ -29,7 +29,8 @@ export const APIViewClient: React.FC = () => {
 
   const searchParams = useSearchParams()
   const { i18n, t } = useTranslation()
-  const { code } = useLocale()
+  const currentLocale = useLocale()
+  const code = currentLocale?.code
   const branch = useBranchParam()
 
   const {

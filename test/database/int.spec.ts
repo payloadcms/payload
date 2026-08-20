@@ -2319,6 +2319,62 @@ describe('database', () => {
             }),
           ).rejects.toThrow('Not Found')
         })
+
+        it('should not roll back the caller transaction when a nested read throws', async () => {
+          const missing = await payload.create({
+            collection,
+            data: {
+              title,
+            },
+          })
+
+          await payload.delete({
+            id: missing.id,
+            collection,
+          })
+
+          const req = {
+            payload,
+            user,
+          } as unknown as PayloadRequest
+
+          await initTransaction(req)
+
+          const created = await payload.create({
+            collection,
+            data: {
+              title,
+            },
+            req,
+          })
+
+          // Hooks commonly look up a related doc and tolerate it being gone. A read
+          // operation does not own the transaction, so its failure must not discard the
+          // writes already made on this req.
+          await expect(() =>
+            payload.findByID({
+              id: missing.id,
+              collection,
+              req,
+            }),
+          ).rejects.toThrow('Not Found')
+
+          expect(req.transactionID).toBeTruthy()
+
+          await commitTransaction(req)
+
+          const result = await payload.findByID({
+            id: created.id,
+            collection,
+          })
+
+          expect(result.id).toStrictEqual(created.id)
+
+          await payload.delete({
+            id: created.id,
+            collection,
+          })
+        })
       }
 
       it(

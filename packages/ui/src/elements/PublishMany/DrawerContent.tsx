@@ -46,7 +46,8 @@ export function PublishManyDrawerContent(props: PublishManyDrawerContentProps) {
     },
   } = useConfig()
 
-  const { code: locale } = useLocale()
+  const currentLocale = useLocale()
+  const locale = currentLocale?.code
   const branch = useBranchParam()
 
   const router = useRouter()

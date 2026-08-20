@@ -10,7 +10,6 @@ import { useEffect } from 'react'
 import { useStepNav } from '../../../elements/StepNav/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useDocumentTitle } from '../../../providers/DocumentTitle/index.js'
-import { useLocale } from '../../../providers/Locale/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 
 export const SetStepNav: React.FC<{
@@ -31,13 +30,11 @@ export const SetStepNav: React.FC<{
   const { config } = useConfig()
   const { setStepNav } = useStepNav()
   const { i18n, t } = useTranslation()
-  const locale = useLocale()
   const { title } = useDocumentTitle()
 
   useEffect(() => {
     const {
       routes: { admin: adminRoute },
-      serverURL,
     } = config
 
     if (collectionConfig) {
@@ -122,7 +119,6 @@ export const SetStepNav: React.FC<{
     setStepNav,
     id,
     isTrashed,
-    locale,
     t,
     i18n,
     collectionConfig,

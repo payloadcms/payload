@@ -257,7 +257,6 @@ export const renderDocument = async ({
       globalConfig,
       hasPublishPermission,
       payload,
-      user,
     }),
   ])
 

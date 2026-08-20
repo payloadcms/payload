@@ -109,7 +109,7 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
           branch,
           depth: 0,
           limit: maxResultsPerRequest,
-          locale: locale.code,
+          locale: locale?.code,
           page: loadedRelationship.nextPage,
           select: {
             [fieldToSearch]: true,

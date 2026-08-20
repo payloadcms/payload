@@ -47,7 +47,8 @@ export const RelationshipProvider: React.FC<{ readonly children?: React.ReactNod
   } = useConfig()
 
   const { i18n } = useTranslation()
-  const { code: locale } = useLocale()
+  const currentLocale = useLocale()
+  const locale = currentLocale?.code
   const branch = useBranchParam()
   const prevLocale = useRef(locale)
 

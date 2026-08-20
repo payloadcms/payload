@@ -88,7 +88,8 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
 
   const { i18n, t } = useTranslation()
   const { permissions } = useAuth()
-  const { code: locale } = useLocale()
+  const currentLocale = useLocale()
+  const locale = currentLocale?.code
   const branch = useBranchParam()
 
   const [currentlyOpenRelationship, setCurrentlyOpenRelationship] = useState<

@@ -132,7 +132,8 @@ const DocumentInfo: React.FC<
   )
 
   const { getPreference, setPreference } = usePreferences()
-  const { code: locale } = useLocale()
+  const currentLocale = useLocale()
+  const locale = currentLocale?.code
   const branch = useBranchParam()
   const { localeIsLoading } = useLocaleLoading()
 

@@ -1,5 +1,12 @@
-import { canAccessAdmin, type SchedulePublishTaskInput, type ServerFunction } from 'payload'
-import { MAIN_BRANCH } from 'payload/shared'
+import type { SchedulePublishTaskInput, ServerFunction } from 'payload'
+
+import { canAccessAdmin, Forbidden } from 'payload'
+import { hasScheduledPublishEnabled, MAIN_BRANCH } from 'payload/shared'
+
+import type { UpcomingEvent } from '../elements/PublishButton/ScheduleDrawer/types.js'
+
+import { buildUpcomingScheduleWhere } from '../elements/PublishButton/ScheduleDrawer/buildUpcomingScheduleWhere.js'
+import { getDocumentPermissions } from './getDocumentPermissions.js'
 
 export type SchedulePublishHandlerArgs = {
   date?: Date
@@ -10,6 +17,65 @@ export type SchedulePublishHandlerArgs = {
   localeToPublish?: string
   timezone?: string
 } & Pick<SchedulePublishTaskInput, 'doc' | 'global' | 'type'>
+
+export type GetUpcomingScheduledPublishHandlerArgs = {
+  collectionSlug?: string
+  globalSlug?: string
+  id?: number | string
+}
+
+export const getUpcomingScheduledPublishHandler: ServerFunction<
+  GetUpcomingScheduledPublishHandlerArgs,
+  Promise<UpcomingEvent[]>
+> = async ({ id, collectionSlug, globalSlug, req }) => {
+  const { payload } = req
+
+  await canAccessAdmin({ req })
+
+  const collectionConfig = collectionSlug ? payload.collections[collectionSlug]?.config : undefined
+  const globalConfig = globalSlug
+    ? payload.config.globals.find(({ slug }) => slug === globalSlug)
+    : undefined
+  const entityConfig = collectionConfig || globalConfig
+  const hasValidTarget = Boolean(
+    entityConfig &&
+      hasScheduledPublishEnabled(entityConfig) &&
+      ((collectionConfig && id !== undefined && !globalSlug) || (globalConfig && !collectionSlug)),
+  )
+
+  if (!hasValidTarget) {
+    throw new Forbidden(req.t)
+  }
+
+  const { hasPublishPermission } = await getDocumentPermissions({
+    id,
+    collectionConfig,
+    data: {},
+    globalConfig,
+    req,
+  })
+
+  if (!hasPublishPermission) {
+    throw new Forbidden(req.t)
+  }
+
+  const { docs } = await payload.db.find<UpcomingEvent>({
+    collection: 'payload-jobs',
+    limit: 0,
+    sort: 'waitUntil',
+    where: buildUpcomingScheduleWhere({ id, collectionSlug, globalSlug }),
+  })
+
+  return docs.map((job) => ({
+    id: job.id,
+    input: {
+      type: job.input?.type === 'unpublish' ? 'unpublish' : 'publish',
+      locale: job.input?.locale,
+      timezone: job.input?.timezone,
+    },
+    waitUntil: job.waitUntil,
+  }))
+}
 
 export const schedulePublishHandler: ServerFunction<SchedulePublishHandlerArgs> = async ({
   type,
@@ -40,7 +106,9 @@ export const schedulePublishHandler: ServerFunction<SchedulePublishHandlerArgs> 
       await payload.delete({
         collection: 'payload-jobs',
         req,
-        where: { id: { equals: deleteID } },
+        where: {
+          and: [{ id: { equals: deleteID } }, { taskSlug: { equals: 'schedulePublish' } }],
+        },
       })
     }
 

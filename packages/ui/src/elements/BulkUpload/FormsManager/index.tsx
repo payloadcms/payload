@@ -107,7 +107,8 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
   const {
     routes: { api },
   } = config
-  const { code } = useLocale()
+  const locale = useLocale()
+  const code = locale?.code
   const branch = useBranchParam()
   const { i18n, t } = useTranslation()
 

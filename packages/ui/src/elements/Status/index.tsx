@@ -41,7 +41,8 @@ export const Status: React.FC = () => {
   } = useConfig()
 
   const { reset: resetForm } = useForm()
-  const { code: locale } = useLocale()
+  const currentLocale = useLocale()
+  const locale = currentLocale?.code
   const branch = useBranchParam()
   const { i18n, t } = useTranslation()
 
