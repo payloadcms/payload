@@ -120,9 +120,9 @@ describe('createCLI', () => {
       }),
     )
 
-    expect(
-      cli.commands.find((command) => command.name() === 'environment')?.description(),
-    ).toBe('Print environment and dependency information.')
+    expect(cli.commands.find((command) => command.name() === 'environment')?.description()).toBe(
+      'Print environment and dependency information.',
+    )
   })
 
   it('should load a named command export from an object reference', async () => {
