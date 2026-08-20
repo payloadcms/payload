@@ -1,9 +1,13 @@
 import type { SelectType } from 'payload'
 
+import { ValidationError } from 'payload'
 import { z } from 'zod'
+
+import type { MCPToolResponse } from '../../../types.js'
 
 import { defaultAccess } from '../../../defaultAccess.js'
 import { defineCollectionTool } from '../../../defineTool.js'
+import { withMcpErrorType } from '../../../telemetry/errorType.js'
 import { getLogger } from '../../../utils/getLogger.js'
 import {
   getCollectionVirtualFieldNames,
@@ -85,6 +89,8 @@ export const createDocumentsTool = defineCollectionTool({
     const virtualFieldNames = getCollectionVirtualFieldNames(payload.config, collectionSlug)
     const docs: Array<{ doc: Record<string, unknown>; index: number }> = []
     const errors: Array<{ index: number; message: string }> = []
+    let hasNonValidationError = false
+    let hasValidationError = false
     let validationSchema: Record<string, unknown> | undefined
 
     for (const [index, document] of documents.entries()) {
@@ -93,6 +99,7 @@ export const createDocumentsTool = defineCollectionTool({
         const validationError = validateCollectionData({ collectionSlug, data: inputData, req })
 
         if (validationError) {
+          hasValidationError = true
           const firstContent = validationError.content[0]
           const validationContent = validationError.structuredContent as
             | Record<string, unknown>
@@ -132,6 +139,11 @@ export const createDocumentsTool = defineCollectionTool({
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Unknown error'
 
+        if (error instanceof ValidationError) {
+          hasValidationError = true
+        } else {
+          hasNonValidationError = true
+        }
         logger.error(`Error creating document at index ${index} in ${collectionSlug}: ${message}`)
         errors.push({ index, message })
       }
@@ -148,7 +160,7 @@ export const createDocumentsTool = defineCollectionTool({
 
     logger.info(`Created ${docs.length} of ${documents.length} documents in ${collectionSlug}`)
 
-    return {
+    const response: MCPToolResponse = {
       content: [
         {
           type: 'text',
@@ -159,6 +171,10 @@ export const createDocumentsTool = defineCollectionTool({
       isError: docs.length === 0 && errors.length > 0,
       structuredContent,
     }
+
+    return response.isError && hasValidationError && !hasNonValidationError
+      ? withMcpErrorType({ errorType: 'validation', response })
+      : response
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error'
 

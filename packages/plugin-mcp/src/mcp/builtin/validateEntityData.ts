@@ -4,6 +4,7 @@ import { CfWorkerJsonSchemaValidator } from '@modelcontextprotocol/server/valida
 
 import type { JsonSchemaType, MCPToolResponse } from '../../types.js'
 
+import { withMcpErrorType } from '../../telemetry/errorType.js'
 import {
   getCollectionInputSchema,
   getGlobalInputSchema,
@@ -109,20 +110,23 @@ const validateData = ({
 
   const { schema } = entityValidator
 
-  return {
-    content: [
-      {
-        type: 'text',
-        text: `Invalid data for ${entity} "${slug}": ${result.errorMessage}\n\nUse this schema for data:\n\`\`\`json\n${JSON.stringify(schema)}\n\`\`\``,
+  return withMcpErrorType({
+    errorType: 'validation',
+    response: {
+      content: [
+        {
+          type: 'text',
+          text: `Invalid data for ${entity} "${slug}": ${result.errorMessage}\n\nUse this schema for data:\n\`\`\`json\n${JSON.stringify(schema)}\n\`\`\``,
+        },
+      ],
+      isError: true,
+      structuredContent: {
+        [`${entity}Slug`]: slug,
+        errors: [{ message: result.errorMessage }],
+        schema,
       },
-    ],
-    isError: true,
-    structuredContent: {
-      [`${entity}Slug`]: slug,
-      errors: [{ message: result.errorMessage }],
-      schema,
     },
-  }
+  })
 }
 
 /** Updates are partial — drop the schema's top-level `required` before validating. */

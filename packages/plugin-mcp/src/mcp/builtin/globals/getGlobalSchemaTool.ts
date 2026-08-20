@@ -2,6 +2,7 @@ import { getAccessResults } from 'payload'
 
 import { defaultAccess } from '../../../defaultAccess.js'
 import { defineGlobalTool } from '../../../defineTool.js'
+import { withMcpErrorType } from '../../../telemetry/errorType.js'
 import { getGlobalInputSchema } from '../../../utils/schemaConversion/getEntityInputSchema.js'
 
 export const getGlobalSchemaTool = defineGlobalTool({
@@ -24,15 +25,18 @@ export const getGlobalSchemaTool = defineGlobalTool({
     : (await getAccessResults({ req })).globals?.[globalSlug]
 
   if (!authorizedMCP.overrideAccess && !permissions?.update) {
-    return {
-      content: [
-        {
-          type: 'text',
-          text: `Error: MCP access to "getGlobalSchema" is not enabled for global "${globalSlug}"`,
-        },
-      ],
-      isError: true,
-    }
+    return withMcpErrorType({
+      errorType: 'access',
+      response: {
+        content: [
+          {
+            type: 'text',
+            text: `Error: MCP access to "getGlobalSchema" is not enabled for global "${globalSlug}"`,
+          },
+        ],
+        isError: true,
+      },
+    })
   }
 
   const inputSchema = getGlobalInputSchema({
@@ -42,10 +46,13 @@ export const getGlobalSchemaTool = defineGlobalTool({
   })
 
   if (!inputSchema) {
-    return {
-      content: [{ type: 'text', text: `Error: Global "${globalSlug}" not found` }],
-      isError: true,
-    }
+    return withMcpErrorType({
+      errorType: 'bad-request',
+      response: {
+        content: [{ type: 'text', text: `Error: Global "${globalSlug}" not found` }],
+        isError: true,
+      },
+    })
   }
 
   return {
