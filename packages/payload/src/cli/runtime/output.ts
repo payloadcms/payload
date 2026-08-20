@@ -35,8 +35,11 @@ export class CLICommandError extends Error {
   }
 }
 
-export const isJSONOutput = (command: Command): boolean =>
-  Boolean(command.optsWithGlobals<{ json?: boolean }>().json)
+export const isJSONOutput = (command?: Command): boolean =>
+  process.env.PAYLOAD_CLI_JSON !== undefined ||
+  (command
+    ? Boolean(command.optsWithGlobals<{ json?: boolean }>().json)
+    : process.argv.includes('--json'))
 
 export const writeCLIJSON = ({ command, value }: { command?: Command; value: unknown }): void => {
   const output = `${JSON.stringify(value, (_key, item) =>
@@ -90,7 +93,7 @@ export const getCLIErrorOutput = ({
 
 export const handleCLIError = ({ cli, error }: { cli?: Command; error: unknown }): void => {
   const exitCode = error instanceof CommanderError ? error.exitCode : 1
-  const shouldOutputJSON = cli ? isJSONOutput(cli) : process.argv.includes('--json')
+  const shouldOutputJSON = isJSONOutput(cli)
 
   if (shouldOutputJSON && exitCode !== 0) {
     writeCLIJSON({

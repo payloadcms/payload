@@ -213,6 +213,47 @@ describe('createCLI', () => {
     })
   })
 
+  it('should use JSON output when PAYLOAD_CLI_JSON is set', async () => {
+    const resultCommand = defineCLICommand({
+      description: 'Return a result.',
+      handler: () => ({ result: { value: 42 } }),
+      input: strictObject({}),
+    })
+    const cli = await createCLI(
+      createRuntime({
+        config: createConfig({
+          cli: {
+            commands: {
+              result: resultCommand,
+            },
+          },
+        }),
+      }),
+    )
+    const command = cli.commands.find((item) => item.name() === 'result')!
+    const previousValue = process.env.PAYLOAD_CLI_JSON
+    let output = ''
+
+    command.configureOutput({ writeOut: (value) => (output += value) })
+    process.env.PAYLOAD_CLI_JSON = '1'
+
+    try {
+      await cli.parseAsync(['result'], { from: 'user' })
+    } finally {
+      if (previousValue === undefined) {
+        delete process.env.PAYLOAD_CLI_JSON
+      } else {
+        process.env.PAYLOAD_CLI_JSON = previousValue
+      }
+    }
+
+    expect(JSON.parse(output)).toEqual({
+      command: 'result',
+      result: { value: 42 },
+      success: true,
+    })
+  })
+
   it('should include validation issues and the input schema in JSON errors', async () => {
     const validatedCommand = defineCLICommand({
       description: 'Validate input.',

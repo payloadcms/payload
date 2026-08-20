@@ -16,7 +16,7 @@ import { readCommandInput } from './readCommandInput.js'
  * - reads arguments and options, or the complete JSON value passed through `--input`
  * - validates the input and includes the schema when reporting validation errors
  * - passes the validated `args` and runtime helpers to the command handler
- * - suppresses regular logs and writes a consistent response when using `--json`
+ * - suppresses regular logs and writes a consistent response in JSON mode
  * - normalizes handler results, errors, and exit codes
  * - runs the handler on a schedule when using `--cron`
  *
