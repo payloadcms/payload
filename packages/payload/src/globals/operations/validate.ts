@@ -9,11 +9,12 @@ import type { DataFromGlobalSlug, SanitizedGlobalConfig } from '../config/types.
 
 import { executeAccess } from '../../auth/executeAccess.js'
 import { hasWhereAccessResult } from '../../auth/types.js'
-import { Forbidden, ValidationError } from '../../errors/index.js'
+import { Forbidden } from '../../errors/index.js'
 import { beforeChange } from '../../fields/hooks/beforeChange/index.js'
 import { beforeValidate } from '../../fields/hooks/beforeValidate/index.js'
 import { deepCopyObjectSimple } from '../../utilities/deepCopyObject.js'
 import { flattenDataByLocale } from '../../utilities/flattenDataByLocale.js'
+import { toValidationResult } from '../../utilities/toValidationResult.js'
 import { replaceWithDraftIfAvailable } from '../../versions/drafts/replaceWithDraftIfAvailable.js'
 
 export type Arguments<TSlug extends GlobalSlug> = {
@@ -140,17 +141,7 @@ async function validateOperationWithScopedRequest<TSlug extends GlobalSlug>({
       req,
     })
   } catch (error) {
-    if (error instanceof ValidationError) {
-      return {
-        errors: error.data.errors.map((validationError) => ({
-          ...validationError,
-          locale: req.locale ?? undefined,
-        })),
-        valid: false,
-      }
-    }
-
-    throw error
+    return toValidationResult({ error, req })
   }
 
   return {
@@ -205,6 +196,12 @@ async function loadValidationGlobalCandidate({
   return { base, hasMain, source }
 }
 
+/**
+ * Deliberately more revealing than `findOne`/`update`, which treat an access-restricted global
+ * the same as an unconfigured one and stay silent. Validation instead throws `Forbidden` once it
+ * confirms real data exists behind the `where` policy - otherwise a restricted, already-configured
+ * global would validate the candidate against an empty base, as if it were still unset.
+ */
 async function resolveValidationGlobalSource({
   slug,
   accessResult,

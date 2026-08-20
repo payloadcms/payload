@@ -9,12 +9,13 @@ import type { ValidationResult } from './local/validate.js'
 import { executeAccess } from '../../auth/executeAccess.js'
 import { hasWhereAccessResult } from '../../auth/types.js'
 import { combineQueries } from '../../database/combineQueries.js'
-import { Forbidden, NotFound, ValidationError } from '../../errors/index.js'
+import { Forbidden, NotFound } from '../../errors/index.js'
 import { beforeChange } from '../../fields/hooks/beforeChange/index.js'
 import { beforeValidate } from '../../fields/hooks/beforeValidate/index.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { deepCopyObjectSimple } from '../../utilities/deepCopyObject.js'
 import { flattenDataByLocale } from '../../utilities/flattenDataByLocale.js'
+import { toValidationResult } from '../../utilities/toValidationResult.js'
 import { replaceWithDraftIfAvailable } from '../../versions/drafts/replaceWithDraftIfAvailable.js'
 
 export type Arguments<TSlug extends CollectionSlug> = {
@@ -175,17 +176,7 @@ async function validateOperationWithScopedRequest<TSlug extends CollectionSlug>(
       req,
     })
   } catch (error) {
-    if (error instanceof ValidationError) {
-      return {
-        errors: error.data.errors.map((validationError) => ({
-          ...validationError,
-          locale: req.locale ?? undefined,
-        })),
-        valid: false,
-      }
-    }
-
-    throw error
+    return toValidationResult({ error, req })
   }
 
   return {

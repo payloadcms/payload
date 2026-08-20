@@ -1,9 +1,11 @@
 import type { ValidationResult } from '../collections/operations/local/validate.js'
+import type { ValidationFieldError } from '../errors/index.js'
 import type { Field } from '../fields/config/types.js'
-import type { Payload, RequestContext, User } from '../index.js'
+import type { Payload, RequestContext, SanitizedConfig, User } from '../index.js'
 import type { JsonObject, PayloadRequest } from '../types/index.js'
 
 import { createLocalReq } from './createLocalReq.js'
+import { isValidationErrorPathLocalized } from './isValidationErrorPathLocalized.js'
 import { projectNonLocalizedData } from './projectNonLocalizedData.js'
 import {
   cloneValidationRequest,
@@ -80,10 +82,60 @@ export async function runLocaleScopedValidation<TData>({
       return runPass({ data: validationData, req: localeReq })
     },
   })
-  const errors = results.flatMap((result) => result.errors)
+  const rawErrors = results.flatMap((result) => result.errors)
+
+  // A non-localized field carries one shared value, so every locale pass validates it
+  // identically and would otherwise report the same failure once per resolved locale.
+  const errors =
+    locales.length > 1
+      ? dedupeNonLocalizedFieldErrors({
+          configBlockReferences: payload.config.blocks,
+          data: data as JsonObject,
+          errors: rawErrors,
+          fields,
+        })
+      : rawErrors
 
   return {
     errors,
     valid: errors.length === 0,
   }
+}
+
+function dedupeNonLocalizedFieldErrors({
+  configBlockReferences,
+  data,
+  errors,
+  fields,
+}: {
+  configBlockReferences: SanitizedConfig['blocks']
+  data: JsonObject
+  errors: ValidationFieldError[]
+  fields: Field[]
+}): ValidationFieldError[] {
+  const seenNonLocalizedPaths = new Set<string>()
+  const deduped: ValidationFieldError[] = []
+
+  for (const error of errors) {
+    const isLocalized = isValidationErrorPathLocalized({
+      configBlockReferences,
+      data,
+      fields,
+      path: error.path,
+    })
+
+    if (isLocalized) {
+      deduped.push(error)
+      continue
+    }
+
+    if (seenNonLocalizedPaths.has(error.path)) {
+      continue
+    }
+
+    seenNonLocalizedPaths.add(error.path)
+    deduped.push({ ...error, locale: undefined })
+  }
+
+  return deduped
 }
