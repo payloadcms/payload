@@ -26,7 +26,6 @@ import { lockedDocumentsCollectionSlug } from '../../locked-documents/config.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { getSelectMode } from '../../utilities/getSelectMode.js'
 import { hasDraftsEnabled } from '../../utilities/getVersionsConfig.js'
-import { killTransaction } from '../../utilities/killTransaction.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { replaceWithDraftIfAvailable } from '../../versions/drafts/replaceWithDraftIfAvailable.js'
@@ -64,302 +63,294 @@ export const findByIDOperation = async <
 ): Promise<ApplyDisableErrors<TransformCollectionWithSelect<TSlug, TSelect>, TDisableErrors>> => {
   let args = incomingArgs
 
-  try {
-    // /////////////////////////////////////
-    // beforeOperation - Collection
-    // /////////////////////////////////////
+  // /////////////////////////////////////
+  // beforeOperation - Collection
+  // /////////////////////////////////////
 
-    args = await buildBeforeOperation({
-      args,
-      collection: args.collection.config,
+  args = await buildBeforeOperation({
+    args,
+    collection: args.collection.config,
+    operation: 'read',
+    overrideAccess: args.overrideAccess!,
+  })
+
+  const {
+    id,
+    collection: { config: collectionConfig },
+    currentDepth,
+    depth,
+    disableErrors,
+    draft: replaceWithVersion = false,
+    flattenLocales,
+    includeLockStatus: includeLockStatusFromArgs,
+    joins,
+    overrideAccess = false,
+    populate,
+    req: { fallbackLocale, locale, t },
+    req,
+    select: incomingSelect,
+    showHiddenFields,
+    trash = false,
+  } = args
+
+  const includeLockStatus =
+    includeLockStatusFromArgs && req.payload.collections?.[lockedDocumentsCollectionSlug]
+
+  const select = sanitizeSelect({
+    fields: collectionConfig.flattenedFields,
+    select: resolveSelect({
+      config: collectionConfig.select,
       operation: 'read',
-      overrideAccess: args.overrideAccess!,
-    })
-
-    const {
-      id,
-      collection: { config: collectionConfig },
-      currentDepth,
-      depth,
-      disableErrors,
-      draft: replaceWithVersion = false,
-      flattenLocales,
-      includeLockStatus: includeLockStatusFromArgs,
-      joins,
-      overrideAccess = false,
-      populate,
-      req: { fallbackLocale, locale, t },
       req,
       select: incomingSelect,
-      showHiddenFields,
-      trash = false,
-    } = args
+    }),
+  })
 
-    const includeLockStatus =
-      includeLockStatusFromArgs && req.payload.collections?.[lockedDocumentsCollectionSlug]
+  // /////////////////////////////////////
+  // Access
+  // /////////////////////////////////////
 
-    const select = sanitizeSelect({
-      fields: collectionConfig.flattenedFields,
-      select: resolveSelect({
-        config: collectionConfig.select,
-        operation: 'read',
-        req,
-        select: incomingSelect,
-      }),
-    })
+  const accessResult = !overrideAccess
+    ? await executeAccess(
+        { id, slug: collectionConfig.slug, disableErrors, req },
+        collectionConfig.access.read,
+      )
+    : true
 
-    // /////////////////////////////////////
-    // Access
-    // /////////////////////////////////////
+  // If errors are disabled, and access returns false, return null
+  if (accessResult === false) {
+    return null!
+  }
 
-    const accessResult = !overrideAccess
-      ? await executeAccess(
-          { id, slug: collectionConfig.slug, disableErrors, req },
-          collectionConfig.access.read,
-        )
-      : true
+  const where = { id: { equals: id } }
 
-    // If errors are disabled, and access returns false, return null
-    if (accessResult === false) {
-      return null!
-    }
+  let fullWhere = combineQueries(where, accessResult)
 
-    const where = { id: { equals: id } }
+  // Exclude trashed documents when trash: false
+  fullWhere = appendNonTrashedFilter({
+    enableTrash: collectionConfig.trash,
+    trash,
+    where: fullWhere,
+  })
 
-    let fullWhere = combineQueries(where, accessResult)
+  sanitizeWhereQuery({
+    fields: collectionConfig.flattenedFields,
+    payload: args.req.payload,
+    where: fullWhere,
+  })
 
-    // Exclude trashed documents when trash: false
-    fullWhere = appendNonTrashedFilter({
-      enableTrash: collectionConfig.trash,
-      trash,
-      where: fullWhere,
-    })
+  const sanitizedJoins = await sanitizeJoinQuery({
+    collectionConfig,
+    joins,
+    overrideAccess,
+    req,
+  })
 
-    sanitizeWhereQuery({
-      fields: collectionConfig.flattenedFields,
-      payload: args.req.payload,
-      where: fullWhere,
-    })
-
-    const sanitizedJoins = await sanitizeJoinQuery({
+  // execute only if there's a custom ID and potentially overwriten access on id
+  if (req.payload.collections[collectionConfig.slug]!.customIDType) {
+    await validateQueryPaths({
       collectionConfig,
-      joins,
       overrideAccess,
       req,
+      where,
     })
+  }
 
-    // execute only if there's a custom ID and potentially overwriten access on id
-    if (req.payload.collections[collectionConfig.slug]!.customIDType) {
-      await validateQueryPaths({
-        collectionConfig,
-        overrideAccess,
+  // /////////////////////////////////////
+  // Find by ID
+  // /////////////////////////////////////
+
+  let dbSelect = select
+
+  if (
+    collectionConfig.versions?.drafts &&
+    replaceWithVersion &&
+    select &&
+    getSelectMode(select) === 'include'
+  ) {
+    dbSelect = { ...select, createdAt: true, updatedAt: true }
+  }
+
+  const findOneArgs: FindOneArgs = {
+    collection: collectionConfig.slug,
+    draftsEnabled: replaceWithVersion,
+    joins: req.payloadAPI === 'GraphQL' ? false : sanitizedJoins,
+    locale: locale!,
+    req: {
+      transactionID: req.transactionID,
+    } as PayloadRequest,
+    select: dbSelect,
+    where: fullWhere,
+  }
+
+  if (!findOneArgs.where?.and?.[0]?.id) {
+    throw new NotFound(t)
+  }
+
+  const docWithLocales = await req.payload.db.findOne(findOneArgs)
+
+  if (!docWithLocales && !args.data) {
+    if (!disableErrors) {
+      throw new NotFound(req.t)
+    }
+    return null!
+  }
+
+  let result: DataFromCollectionSlug<TSlug> =
+    (args.data as DataFromCollectionSlug<TSlug>) ?? docWithLocales!
+
+  // /////////////////////////////////////
+  // Add collection property for auth collections
+  // /////////////////////////////////////
+
+  if (collectionConfig.auth) {
+    result = { ...result, collection: collectionConfig.slug }
+  }
+
+  // /////////////////////////////////////
+  // Include Lock Status if required
+  // /////////////////////////////////////
+
+  if (includeLockStatus && id) {
+    let lockStatus: (JsonObject & TypeWithID) | null = null
+
+    try {
+      const lockDocumentsProp = collectionConfig?.lockDocuments
+
+      const lockDurationDefault = 300 // Default 5 minutes in seconds
+      const lockDuration =
+        typeof lockDocumentsProp === 'object' ? lockDocumentsProp.duration : lockDurationDefault
+      const lockDurationInMilliseconds = lockDuration * 1000
+
+      const lockedDocument = await req.payload.find({
+        collection: lockedDocumentsCollectionSlug,
+        depth: 1,
+        limit: 1,
+        overrideAccess: false,
+        pagination: false,
         req,
-        where,
+        where: {
+          and: [
+            {
+              'document.relationTo': {
+                equals: collectionConfig.slug,
+              },
+            },
+            {
+              'document.value': {
+                equals: id,
+              },
+            },
+            // Query where the lock is newer than the current time minus lock time
+            {
+              updatedAt: {
+                greater_than: new Date(new Date().getTime() - lockDurationInMilliseconds),
+              },
+            },
+          ],
+        },
       })
-    }
 
-    // /////////////////////////////////////
-    // Find by ID
-    // /////////////////////////////////////
-
-    let dbSelect = select
-
-    if (
-      collectionConfig.versions?.drafts &&
-      replaceWithVersion &&
-      select &&
-      getSelectMode(select) === 'include'
-    ) {
-      dbSelect = { ...select, createdAt: true, updatedAt: true }
-    }
-
-    const findOneArgs: FindOneArgs = {
-      collection: collectionConfig.slug,
-      draftsEnabled: replaceWithVersion,
-      joins: req.payloadAPI === 'GraphQL' ? false : sanitizedJoins,
-      locale: locale!,
-      req: {
-        transactionID: req.transactionID,
-      } as PayloadRequest,
-      select: dbSelect,
-      where: fullWhere,
-    }
-
-    if (!findOneArgs.where?.and?.[0]?.id) {
-      throw new NotFound(t)
-    }
-
-    const docWithLocales = await req.payload.db.findOne(findOneArgs)
-
-    if (!docWithLocales && !args.data) {
-      if (!disableErrors) {
-        throw new NotFound(req.t)
+      if (lockedDocument && lockedDocument.docs.length > 0) {
+        lockStatus = lockedDocument.docs[0]!
       }
-      return null!
+    } catch {
+      // swallow error
     }
 
-    let result: DataFromCollectionSlug<TSlug> =
-      (args.data as DataFromCollectionSlug<TSlug>) ?? docWithLocales!
+    result._isLocked = !!lockStatus
+    result._userEditing = lockStatus?.user?.value ?? null
+  }
 
-    // /////////////////////////////////////
-    // Add collection property for auth collections
-    // /////////////////////////////////////
+  // /////////////////////////////////////
+  // Replace document with draft if available
+  // /////////////////////////////////////
 
-    if (collectionConfig.auth) {
-      result = { ...result, collection: collectionConfig.slug }
-    }
-
-    // /////////////////////////////////////
-    // Include Lock Status if required
-    // /////////////////////////////////////
-
-    if (includeLockStatus && id) {
-      let lockStatus: (JsonObject & TypeWithID) | null = null
-
-      try {
-        const lockDocumentsProp = collectionConfig?.lockDocuments
-
-        const lockDurationDefault = 300 // Default 5 minutes in seconds
-        const lockDuration =
-          typeof lockDocumentsProp === 'object' ? lockDocumentsProp.duration : lockDurationDefault
-        const lockDurationInMilliseconds = lockDuration * 1000
-
-        const lockedDocument = await req.payload.find({
-          collection: lockedDocumentsCollectionSlug,
-          depth: 1,
-          limit: 1,
-          overrideAccess: false,
-          pagination: false,
-          req,
-          where: {
-            and: [
-              {
-                'document.relationTo': {
-                  equals: collectionConfig.slug,
-                },
-              },
-              {
-                'document.value': {
-                  equals: id,
-                },
-              },
-              // Query where the lock is newer than the current time minus lock time
-              {
-                updatedAt: {
-                  greater_than: new Date(new Date().getTime() - lockDurationInMilliseconds),
-                },
-              },
-            ],
-          },
-        })
-
-        if (lockedDocument && lockedDocument.docs.length > 0) {
-          lockStatus = lockedDocument.docs[0]!
-        }
-      } catch {
-        // swallow error
-      }
-
-      result._isLocked = !!lockStatus
-      result._userEditing = lockStatus?.user?.value ?? null
-    }
-
-    // /////////////////////////////////////
-    // Replace document with draft if available
-    // /////////////////////////////////////
-
-    if (replaceWithVersion && hasDraftsEnabled(collectionConfig)) {
-      result = await replaceWithDraftIfAvailable({
-        accessResult,
-        doc: result,
-        entity: collectionConfig,
-        entityType: 'collection',
-        overrideAccess,
-        req,
-        select,
-      })
-    }
-
-    // /////////////////////////////////////
-    // beforeRead - Collection
-    // /////////////////////////////////////
-
-    if (collectionConfig.hooks?.beforeRead?.length) {
-      for (const hook of collectionConfig.hooks.beforeRead) {
-        result =
-          (await hook({
-            collection: collectionConfig,
-            context: req.context,
-            doc: result,
-            overrideAccess,
-            query: findOneArgs.where,
-            req,
-          })) || result
-      }
-    }
-
-    // /////////////////////////////////////
-    // afterRead - Fields
-    // /////////////////////////////////////
-
-    result = await afterRead({
-      collection: collectionConfig,
-      context: req.context,
-      currentDepth,
-      depth: depth!,
+  if (replaceWithVersion && hasDraftsEnabled(collectionConfig)) {
+    result = await replaceWithDraftIfAvailable({
+      accessResult,
       doc: result,
-      draft: replaceWithVersion,
-      fallbackLocale: fallbackLocale!,
-      flattenLocales,
-      global: null,
-      locale: locale!,
+      entity: collectionConfig,
+      entityType: 'collection',
       overrideAccess,
-      populate,
       req,
       select,
-      showHiddenFields: showHiddenFields!,
     })
-
-    // /////////////////////////////////////
-    // afterRead - Collection
-    // /////////////////////////////////////
-
-    if (collectionConfig.hooks?.afterRead?.length) {
-      for (const hook of collectionConfig.hooks.afterRead) {
-        result =
-          (await hook({
-            collection: collectionConfig,
-            context: req.context,
-            doc: result,
-            overrideAccess,
-            query: findOneArgs.where,
-            req,
-          })) || result
-      }
-    }
-
-    // /////////////////////////////////////
-    // afterOperation - Collection
-    // /////////////////////////////////////
-
-    result = await buildAfterOperation({
-      args,
-      collection: collectionConfig,
-      operation: 'findByID',
-      overrideAccess,
-      result,
-    })
-
-    // /////////////////////////////////////
-    // Return results
-    // /////////////////////////////////////
-
-    return result as ApplyDisableErrors<
-      TransformCollectionWithSelect<TSlug, TSelect>,
-      TDisableErrors
-    >
-  } catch (error: unknown) {
-    await killTransaction(args.req)
-    throw error
   }
+
+  // /////////////////////////////////////
+  // beforeRead - Collection
+  // /////////////////////////////////////
+
+  if (collectionConfig.hooks?.beforeRead?.length) {
+    for (const hook of collectionConfig.hooks.beforeRead) {
+      result =
+        (await hook({
+          collection: collectionConfig,
+          context: req.context,
+          doc: result,
+          overrideAccess,
+          query: findOneArgs.where,
+          req,
+        })) || result
+    }
+  }
+
+  // /////////////////////////////////////
+  // afterRead - Fields
+  // /////////////////////////////////////
+
+  result = await afterRead({
+    collection: collectionConfig,
+    context: req.context,
+    currentDepth,
+    depth: depth!,
+    doc: result,
+    draft: replaceWithVersion,
+    fallbackLocale: fallbackLocale!,
+    flattenLocales,
+    global: null,
+    locale: locale!,
+    overrideAccess,
+    populate,
+    req,
+    select,
+    showHiddenFields: showHiddenFields!,
+  })
+
+  // /////////////////////////////////////
+  // afterRead - Collection
+  // /////////////////////////////////////
+
+  if (collectionConfig.hooks?.afterRead?.length) {
+    for (const hook of collectionConfig.hooks.afterRead) {
+      result =
+        (await hook({
+          collection: collectionConfig,
+          context: req.context,
+          doc: result,
+          overrideAccess,
+          query: findOneArgs.where,
+          req,
+        })) || result
+    }
+  }
+
+  // /////////////////////////////////////
+  // afterOperation - Collection
+  // /////////////////////////////////////
+
+  result = await buildAfterOperation({
+    args,
+    collection: collectionConfig,
+    operation: 'findByID',
+    overrideAccess,
+    result,
+  })
+
+  // /////////////////////////////////////
+  // Return results
+  // /////////////////////////////////////
+
+  return result as ApplyDisableErrors<TransformCollectionWithSelect<TSlug, TSelect>, TDisableErrors>
 }
