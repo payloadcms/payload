@@ -1,6 +1,7 @@
 export const mediaSlug = 'media'
 export const mediaWithPrefixSlug = 'media-with-prefix'
 export const mediaWithCompositePrefixesSlug = 'media-with-composite-prefixes'
+export const mediaWithDisabledPluginSlug = 'media-with-disabled-plugin'
 export const mediaWithCustomURLSlug = 'media-with-custom-url'
 export const mediaWithGenerateFileURLSlug = 'media-with-generate-file-url'
 export const restrictedMediaSlug = 'restricted-media'

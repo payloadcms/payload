@@ -12,17 +12,6 @@ import type { R2Bucket } from './types.js'
 import { createR2Adapter } from './adapter.js'
 
 export interface R2StorageOptions {
-  /**
-   * When enabled, fields (like the prefix field) will always be inserted into
-   * the collection schema regardless of whether the plugin is enabled. This
-   * ensures a consistent schema across all environments.
-   *
-   * This will be enabled by default in Payload v4.
-   *
-   * @default false
-   */
-  alwaysInsertFields?: boolean
-
   bucket: R2Bucket
   /**
    * Upload files in chunks through Payload before document creation.
@@ -67,7 +56,23 @@ export const r2Storage: R2StorageFactory = (
     const isPluginDisabled = r2StorageOptions.enabled === false
 
     if (isPluginDisabled) {
-      return incomingConfig
+      // Still call cloudStoragePlugin with adapter: null so fields (like prefix) are
+      // inserted into the schema, keeping it consistent across environments.
+      const collectionsWithoutAdapter: CloudStoragePluginOptions['collections'] = Object.entries(
+        r2StorageOptions.collections,
+      ).reduce(
+        (acc, [slug, collOptions]) => ({
+          ...acc,
+          [slug]: { ...(collOptions === true ? {} : collOptions), adapter: null },
+        }),
+        {} as Record<string, CollectionOptions>,
+      )
+
+      return cloudStoragePlugin({
+        collections: collectionsWithoutAdapter,
+        enabled: false,
+        useCompositePrefixes: r2StorageOptions.useCompositePrefixes,
+      })(incomingConfig)
     }
 
     // Add adapter to each collection option object
@@ -103,7 +108,6 @@ export const r2Storage: R2StorageFactory = (
     }
 
     return cloudStoragePlugin({
-      alwaysInsertFields: r2StorageOptions.alwaysInsertFields,
       collections: collectionsWithAdapter,
       useCompositePrefixes: r2StorageOptions.useCompositePrefixes,
     })(config)

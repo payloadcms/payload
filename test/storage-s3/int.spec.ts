@@ -83,9 +83,9 @@ describe('@payloadcms/storage-s3', () => {
     )
   })
 
-  it('has prefix field with alwaysInsertFields even when plugin is disabled', async () => {
-    // This collection uses a s3Storage plugin with enabled: false but alwaysInsertFields: true
-    // The upload will use local storage, but the prefix field should still exist
+  it('has prefix field by default even when plugin is disabled', async () => {
+    // This collection uses a s3Storage plugin with enabled: false.
+    // The upload will use local storage, but the prefix field should still exist.
     const upload = await payload.create({
       collection: mediaWithAlwaysInsertFieldsSlug,
       data: {
@@ -95,7 +95,6 @@ describe('@payloadcms/storage-s3', () => {
     })
 
     expect(upload.id).toBeTruthy()
-    // With alwaysInsertFields: true and enabled: false, the prefix field should still exist
     expect(upload.prefix).toBe('test')
   })
 
@@ -339,10 +338,10 @@ describe('@payloadcms/storage-s3', () => {
 
       expect(upload1.filename).toBe('image.png')
       expect(upload2.filename).toBe('image-1.png')
-      // @ts-expect-error prefix should never be set
-      expect(upload1.prefix).toBeUndefined()
-      // @ts-expect-error prefix should never be set
-      expect(upload2.prefix).toBeUndefined()
+      // The prefix field is always inserted by default, defaulting to an empty string
+      // for collections that don't configure a prefix.
+      expect(upload1.prefix).toBe('')
+      expect(upload2.prefix).toBe('')
     })
 
     it('allows same filename under different prefixes', async () => {

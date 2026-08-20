@@ -69,9 +69,8 @@ export default buildConfigWithDefaults({
       },
       token: process.env.BLOB_READ_WRITE_TOKEN,
     }),
-    // Test alwaysInsertFields with enabled: false
+    // Plugin disabled: the prefix field should still be inserted by default
     vercelBlobStorage({
-      alwaysInsertFields: true,
       collections: {
         [mediaWithAlwaysInsertFieldsSlug]: {
           prefix: '',

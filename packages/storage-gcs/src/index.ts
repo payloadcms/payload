@@ -15,17 +15,6 @@ export interface GcsStorageOptions {
   acl?: 'Private' | 'Public'
 
   /**
-   * When enabled, fields (like the prefix field) will always be inserted into
-   * the collection schema regardless of whether the plugin is enabled. This
-   * ensures a consistent schema across all environments.
-   *
-   * This will be enabled by default in Payload v4.
-   *
-   * @default false
-   */
-  alwaysInsertFields?: boolean
-
-  /**
    * The name of the bucket to use.
    */
   bucket: string
@@ -105,7 +94,23 @@ export const gcsStorage: GcsStorageFactory = (
     const isPluginDisabled = gcsStorageOptions.enabled === false
 
     if (isPluginDisabled) {
-      return incomingConfig
+      // Still call cloudStoragePlugin with adapter: null so fields (like prefix) are
+      // inserted into the schema, keeping it consistent across environments.
+      const collectionsWithoutAdapter: CloudStoragePluginOptions['collections'] = Object.entries(
+        gcsStorageOptions.collections,
+      ).reduce(
+        (acc, [slug, collOptions]) => ({
+          ...acc,
+          [slug]: { ...(collOptions === true ? {} : collOptions), adapter: null },
+        }),
+        {} as Record<string, CollectionOptions>,
+      )
+
+      return cloudStoragePlugin({
+        collections: collectionsWithoutAdapter,
+        enabled: false,
+        useCompositePrefixes: gcsStorageOptions.useCompositePrefixes,
+      })(incomingConfig)
     }
 
     // Add adapter to each collection option object
@@ -141,7 +146,6 @@ export const gcsStorage: GcsStorageFactory = (
     }
 
     return cloudStoragePlugin({
-      alwaysInsertFields: gcsStorageOptions.alwaysInsertFields,
       collections: collectionsWithAdapter,
       useCompositePrefixes: gcsStorageOptions.useCompositePrefixes,
     })(config)

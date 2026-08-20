@@ -18,6 +18,7 @@ import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import {
   mediaSlug,
   mediaWithCustomURLSlug,
+  mediaWithDisabledPluginSlug,
   mediaWithGenerateFileURLSlug,
   mediaWithOverwriteSlug,
   mediaWithPrefixSlug,
@@ -853,6 +854,23 @@ describe('@payloadcms/plugin-cloud-storage', () => {
 
     describe('R2', () => {
       it.todo('can upload')
+    })
+
+    describe('disabled plugin', () => {
+      it('inserts the prefix field by default even when the plugin is disabled', async () => {
+        const upload = await payload.create({
+          collection: mediaWithDisabledPluginSlug,
+          data: {
+            prefix: 'test',
+          },
+          filePath: path.resolve(dirname, '../uploads/image.png'),
+        })
+
+        expect(upload.id).toBeTruthy()
+        expect(upload.prefix).toBe('test')
+
+        await payload.delete({ id: upload.id, collection: mediaWithDisabledPluginSlug })
+      })
     })
   })
 })

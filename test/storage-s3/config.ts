@@ -83,9 +83,8 @@ export default buildConfigWithDefaults({
         region: process.env.S3_REGION,
       },
     }),
-    // Test alwaysInsertFields with enabled: false
+    // Plugin disabled: the prefix field should still be inserted by default
     s3Storage({
-      alwaysInsertFields: true,
       collections: {
         [mediaWithAlwaysInsertFieldsSlug]: {
           prefix: '',
