@@ -49,6 +49,24 @@ describe('add-override-access-true', () => {
     expect(result).toBe(output)
   })
 
+  it('handles a comment between properties without corrupting the preceding comma', async () => {
+    const input = await fixture('comment-between-properties.input.ts')
+    const output = await fixture('comment-between-properties.output.ts')
+
+    const result = await runTransform({ source: input, transform: addOverrideAccessTrue })
+
+    expect(result).toBe(output)
+  })
+
+  it('keeps single-line and empty argument objects on one line', async () => {
+    const input = await fixture('single-line.input.ts')
+    const output = await fixture('single-line.output.ts')
+
+    const result = await runTransform({ source: input, transform: addOverrideAccessTrue })
+
+    expect(result).toBe(output)
+  })
+
   it('leaves internal operations, already-required operations, spreads and non-Payload receivers untouched', async () => {
     const input = await fixture('non-matching.input.ts')
     const output = await fixture('non-matching.output.ts')
