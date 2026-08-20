@@ -92,6 +92,7 @@ If you're using the Local API, include the `encodeSourceMaps` via the `context` 
 if (isDraftMode || process.env.VERCEL_ENV === 'preview') {
   const res = await payload.find({
     collection: 'pages',
+    overrideAccess: true,
     where: {
       slug: {
         equals: slug,

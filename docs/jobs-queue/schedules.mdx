@@ -364,6 +364,7 @@ export const DailyDigestTask: TaskConfig<'DailyDigest'> = {
   handler: async ({ req }) => {
     const users = await req.payload.find({
       collection: 'users',
+      overrideAccess: true,
       where: { digestEnabled: { equals: true } },
     })
 
@@ -391,6 +392,7 @@ export const WeeklyReportTask: TaskConfig<'WeeklyReport'> = {
     const report = await generateWeeklyReport()
     await req.payload.create({
       collection: 'reports',
+      overrideAccess: true,
       data: report,
     })
 
@@ -414,6 +416,7 @@ export const SyncDataTask: TaskConfig<'SyncData'> = {
     const data = await fetchFromExternalAPI()
     await req.payload.create({
       collection: 'synced-data',
+      overrideAccess: true,
       data,
     })
 
@@ -461,6 +464,7 @@ Test your cron expressions at [crontab.guru](https://crontab.guru) (for 5-field 
 ```ts
 const stats = await payload.findGlobal({
   slug: 'payload-jobs-stats',
+  overrideAccess: true,
 })
 
 console.log(stats.lastScheduled) // Check when each task was last scheduled

@@ -77,6 +77,7 @@ export default buildConfig({
         handler: async ({ input, job, req }) => {
           const newPost = await req.payload.create({
             collection: 'post',
+            overrideAccess: true,
             req,
             data: {
               title: input.title,
@@ -132,6 +133,7 @@ export default buildConfig({
           // Send daily digest emails
           const users = await req.payload.find({
             collection: 'users',
+            overrideAccess: true,
             where: { subscribed: { equals: true } },
           })
 
@@ -221,6 +223,7 @@ Creating or updating documents based on other document changes:
   handler: async ({ input, req }) => {
     const posts = await req.payload.find({
       collection: 'posts',
+      overrideAccess: true,
       where: {
         category: {
           equals: input.categoryId,
@@ -232,6 +235,7 @@ Creating or updating documents based on other document changes:
     for (const post of posts.docs) {
       await req.payload.update({
         collection: 'posts',
+        overrideAccess: true,
         id: post.id,
         data: {
           categoryUpdatedAt: new Date().toISOString(),
@@ -266,6 +270,7 @@ Calling third-party services without blocking your API:
   handler: async ({ input, req }) => {
     const doc = await req.payload.findByID({
       collection: 'documents',
+      overrideAccess: true,
       id: input.documentId,
     })
 
@@ -308,6 +313,7 @@ Sometimes you want to fail a task based on business logic:
   handler: async ({ input, req }) => {
     const order = await req.payload.findByID({
       collection: 'orders',
+      overrideAccess: true,
       id: input.orderId,
     })
 
@@ -336,6 +342,7 @@ Tasks fail by throwing errors. When a task encounters any type of failure—whet
 handler: async ({ input, req }) => {
   const order = await req.payload.findByID({
     collection: 'orders',
+    overrideAccess: true,
     id: input.orderId,
   })
 
@@ -384,6 +391,7 @@ await payload.jobs.run()
 // Check the job status
 const completedJob = await payload.findByID({
   collection: 'payload-jobs',
+  overrideAccess: true,
   id: job.id,
 })
 
@@ -469,6 +477,7 @@ export const createPostHandler: TaskHandler<'createPost'> = async ({
 }) => {
   const newPost = await req.payload.create({
     collection: 'post',
+    overrideAccess: true,
     req,
     data: {
       title: input.title,

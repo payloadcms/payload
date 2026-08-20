@@ -118,6 +118,7 @@ describe('Plugin tests', () => {
   it('seeds data accordingly', async () => {
     const newCollectionQuery = await payload.find({
       collection: 'newCollection',
+      overrideAccess: true,
       sort: 'createdAt',
     })
 
@@ -148,6 +149,7 @@ export const seed = async (payload: Payload): Promise<void> => {
 
   await payload.create({
     collection: 'new-collection',
+    overrideAccess: true,
     data: {
       title: 'Seeded title',
     },

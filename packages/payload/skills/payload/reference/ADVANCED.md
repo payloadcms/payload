@@ -20,6 +20,7 @@ const response = await fetch('/api/users/login', {
 // Local API
 const result = await payload.login({
   collection: 'users',
+  overrideAccess: false,
   data: {
     email: 'user@example.com',
     password: 'password',
@@ -200,6 +201,7 @@ const featuredEndpoint: Endpoint = {
   handler: async (req) => {
     const posts = await req.payload.find({
       collection: 'posts',
+      overrideAccess: true,
       where: { featured: { equals: true } },
     })
     return Response.json(posts)
@@ -361,6 +363,7 @@ const localizedField: TextField = {
 // Query with locale
 const posts = await payload.find({
   collection: 'posts',
+  overrideAccess: true,
   locale: 'es',
 })
 ```

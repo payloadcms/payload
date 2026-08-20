@@ -34,6 +34,7 @@ import type { Payload } from 'payload'
 const getPosts = async (payload: Payload) => {
   const posts = await payload.find({
     collection: 'posts',
+    overrideAccess: true,
     // highlight-start
     limit: 10,
     page: 2,
@@ -123,6 +124,7 @@ To do this, set the `limit` option in your query:
 ```ts
 await payload.find({
   collection: 'posts',
+  overrideAccess: true,
   where: {
     slug: {
       equals: 'post-1',
@@ -148,6 +150,7 @@ import type { Payload } from 'payload'
 const getPost = async (payload: Payload) => {
   const posts = await payload.find({
     collection: 'posts',
+    overrideAccess: true,
     where: {
       title: { equals: 'My Post' },
     },

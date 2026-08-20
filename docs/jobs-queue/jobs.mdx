@@ -189,6 +189,7 @@ const job = await payload.jobs.queue({
 // Later, check the job status
 const updatedJob = await payload.findByID({
   collection: 'payload-jobs',
+  overrideAccess: true,
   id: job.id,
 })
 
@@ -237,6 +238,8 @@ Use Payload's dedicated Jobs APIs and endpoints, such as `payload.jobs.*`, `/run
 Raw collection create, read, update, and delete access is denied by default. You can adjust these rules through `jobsCollectionOverrides`. REST and GraphQL always run them; Local API CRUD runs them when you pass `overrideAccess: false`.
 
 The dedicated job operations use `jobs.access.queue`, `run`, and `cancel`. Local API calls run these functions when you pass `overrideAccess: false`. The `/run` and `/handle-schedules` endpoints always check `jobs.access.run`.
+
+On `payload.jobs.*`, `overrideAccess` is optional and still defaults to `true`. This is the exception to the [Local API](../local-api/access-control), where the property is required and has no default.
 
 Configure access for the dedicated job operations in your Jobs Config:
 
