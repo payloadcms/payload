@@ -210,6 +210,11 @@ async function executePlaywright({
   } else {
     child = spawn('pnpm', spawnDevArgs, {
       cwd: path.resolve(dirname, '..'),
+      // Makes this process the leader of its own process group, so `stopServer` can signal every
+      // descendant it spawns (pnpm -> a shell -> cross-env -> tsx -> the actual Next.js server)
+      // by targeting the group instead of just this one PID, which by itself never reaches the
+      // real server process running several layers down.
+      detached: true,
       env: {
         ...process.env,
       },
@@ -268,21 +273,30 @@ function clearWebpackCache() {
  * server from the wrong suite instead of starting its own.
  */
 async function stopServer(serverChild: ReturnType<typeof spawn> | undefined): Promise<void> {
-  if (!serverChild || serverChild.exitCode !== null) {
+  if (!serverChild || serverChild.exitCode !== null || !serverChild.pid) {
     return
   }
 
+  // Negative PID targets the whole process group `spawn`'s `detached: true` made this process the
+  // leader of, not just this one PID — see the comment where it's spawned. Already exited by the
+  // time this fires is the expected, common case (ESRCH), not an error.
+  const killGroup = (signal: NodeJS.Signals) => {
+    try {
+      process.kill(-serverChild.pid!, signal)
+    } catch {
+      // Already exited — nothing left to signal.
+    }
+  }
+
   await new Promise<void>((resolve) => {
-    const killTimer = setTimeout(() => {
-      serverChild.kill('SIGKILL')
-    }, 15000)
+    const killTimer = setTimeout(() => killGroup('SIGKILL'), 15000)
 
     serverChild.once('exit', () => {
       clearTimeout(killTimer)
       resolve()
     })
 
-    serverChild.kill('SIGTERM')
+    killGroup('SIGTERM')
   })
 }
 
