@@ -709,6 +709,7 @@ const validateFilterOptions: Validate<
             collection,
             depth: 0,
             limit: 0,
+            overrideAccess: true,
             pagination: false,
             req,
             where: findWhere,

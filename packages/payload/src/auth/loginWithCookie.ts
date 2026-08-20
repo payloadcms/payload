@@ -13,7 +13,7 @@ type LoginWithCookieArgs<TReturnCookieAsObject extends boolean> = {
   collection: Collection
   data: Parameters<typeof loginOperation>[0]['data']
   depth?: number
-  overrideAccess?: boolean
+  overrideAccess: boolean
   req: PayloadRequest
   /** Return the cookie as parts rather than a serialized header string. */
   returnCookieAsObject?: TReturnCookieAsObject

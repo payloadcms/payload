@@ -21,6 +21,7 @@ export function restoreVersion(globalConfig: SanitizedGlobalConfig): Resolver {
       depth: 0,
       draft: args.draft,
       globalConfig,
+      overrideAccess: false,
       req: isolateObjectProperty(context.req, 'transactionID'),
     }
 

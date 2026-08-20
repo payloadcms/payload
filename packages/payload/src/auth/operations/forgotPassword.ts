@@ -151,6 +151,7 @@ export const forgotPasswordOperation = async <TSlug extends AuthCollectionSlug>(
         resetPasswordExpiration,
         resetPasswordToken: token,
       },
+      overrideAccess: true,
       req,
     })
 

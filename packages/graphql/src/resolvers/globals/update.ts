@@ -43,6 +43,7 @@ export function update<TSlug extends GlobalSlug>(
       depth: 0,
       draft: args.draft,
       globalConfig,
+      overrideAccess: false,
       req: isolateObjectProperty(context.req, 'transactionID'),
     }
 

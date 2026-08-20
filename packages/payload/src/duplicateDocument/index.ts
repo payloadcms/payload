@@ -17,7 +17,7 @@ type GetDuplicateDocumentArgs = {
   collectionConfig: SanitizedCollectionConfig
   draftArg?: boolean
   id: number | string
-  overrideAccess?: boolean
+  overrideAccess: boolean
   req: PayloadRequest
   selectedLocales?: string[]
 }
@@ -90,7 +90,7 @@ export const getDuplicateDocumentData = async ({
     collection: collectionConfig,
     context: req.context,
     doc: duplicatedFromDocWithLocales,
-    overrideAccess: overrideAccess,
+    overrideAccess,
     req,
   })
 

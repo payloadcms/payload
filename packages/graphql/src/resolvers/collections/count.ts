@@ -30,6 +30,7 @@ export function countResolver(collection: Collection): Resolver {
 
     const options = {
       collection,
+      overrideAccess: false,
       req: isolateObjectProperty(req, 'transactionID'),
       trash: args.trash,
       where: args.where,

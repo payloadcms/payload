@@ -57,6 +57,7 @@ export function findResolver(collection: Collection): Resolver {
       depth: 0,
       draft: args.draft,
       limit: args.limit,
+      overrideAccess: false,
       page: args.page,
       pagination: args.pagination,
       req,

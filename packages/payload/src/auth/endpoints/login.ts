@@ -27,6 +27,7 @@ export const loginHandler: PayloadHandler = async (req) => {
     collection,
     data: authData,
     depth: isNumber(depth) ? Number(depth) : undefined,
+    overrideAccess: false,
     req,
   })
 

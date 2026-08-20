@@ -18,6 +18,7 @@ export function resetPassword(collection: Collection): any {
       collection,
       data: args,
       depth: 0,
+      overrideAccess: false,
       req: isolateObjectProperty(context.req, 'transactionID'),
     }
 

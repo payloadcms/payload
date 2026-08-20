@@ -42,6 +42,7 @@ export function findVersions(globalConfig: SanitizedGlobalConfig): Resolver {
       depth: 0,
       globalConfig,
       limit: args.limit,
+      overrideAccess: false,
       page: args.page,
       pagination: args.pagination,
       req,

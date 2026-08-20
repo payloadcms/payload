@@ -59,6 +59,7 @@ export const registerLocalStrategy = async ({
     collection: collection.slug,
     depth: 0,
     limit: 1,
+    overrideAccess: true,
     pagination: false,
     req,
     where: whereConstraint,
