@@ -65,6 +65,7 @@ const nestedQuery: Where = {
 // Find documents
 const posts = await payload.find({
   collection: 'posts',
+  overrideAccess: true,
   where: {
     status: { equals: 'published' },
     'author.name': { contains: 'john' },
@@ -83,6 +84,7 @@ const posts = await payload.find({
 // Find by ID
 const post = await payload.findByID({
   collection: 'posts',
+  overrideAccess: true,
   id: '123',
   depth: 2,
 })
@@ -90,6 +92,7 @@ const post = await payload.findByID({
 // Create
 const post = await payload.create({
   collection: 'posts',
+  overrideAccess: true,
   data: {
     title: 'New Post',
     status: 'draft',
@@ -99,6 +102,7 @@ const post = await payload.create({
 // Update
 await payload.update({
   collection: 'posts',
+  overrideAccess: true,
   id: '123',
   data: {
     status: 'published',
@@ -108,12 +112,14 @@ await payload.update({
 // Delete
 await payload.delete({
   collection: 'posts',
+  overrideAccess: true,
   id: '123',
 })
 
 // Count
 const count = await payload.count({
   collection: 'posts',
+  overrideAccess: true,
   where: {
     status: { equals: 'published' },
   },
@@ -129,6 +135,7 @@ When performing operations in hooks or nested operations, pass the `req` paramet
 const afterChange: CollectionAfterChangeHook = async ({ doc, req }) => {
   await req.payload.create({
     collection: 'audit-log',
+    overrideAccess: true,
     data: { action: 'created', docId: doc.id },
     req, // Maintains transaction atomicity
   })
@@ -138,6 +145,7 @@ const afterChange: CollectionAfterChangeHook = async ({ doc, req }) => {
 const afterChange: CollectionAfterChangeHook = async ({ doc, req }) => {
   await req.payload.create({
     collection: 'audit-log',
+    overrideAccess: true,
     data: { action: 'created', docId: doc.id },
     // Missing req - runs in separate transaction
   })
@@ -148,14 +156,14 @@ This is critical for MongoDB replica sets and Postgres. See [ADAPTERS.md#threadi
 
 ### Access Control in Local API
 
-**Important**: Local API bypasses access control by default (`overrideAccess: true`). When passing a `user` parameter, you must explicitly set `overrideAccess: false` to respect that user's permissions.
+**Important**: `overrideAccess` is required on every Local API operation. There is no default. Set it to `false` to respect a user's permissions, or `true` to bypass access control.
 
 ```ts
 // ❌ WRONG: User is passed but access control is bypassed
 const posts = await payload.find({
   collection: 'posts',
   user: currentUser,
-  // Missing: overrideAccess: false
+  overrideAccess: true,
   // Result: Operation runs with ADMIN privileges, ignoring user's permissions
 })
 
@@ -163,7 +171,7 @@ const posts = await payload.find({
 const posts = await payload.find({
   collection: 'posts',
   user: currentUser,
-  overrideAccess: false, // Required to enforce access control
+  overrideAccess: false, // enforce access control
   // Result: User only sees posts they have permission to read
 })
 
@@ -171,7 +179,7 @@ const posts = await payload.find({
 const allPosts = await payload.find({
   collection: 'posts',
   // No user parameter
-  // overrideAccess defaults to true
+  overrideAccess: true,
   // Result: Returns all posts regardless of access control
 })
 ```

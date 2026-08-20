@@ -159,6 +159,7 @@ mutation {
 ```ts
 const result = await payload.login({
   collection: 'collection-slug',
+  overrideAccess: false,
   data: {
     email: 'dev@payloadcms.com',
     password: 'get-out',

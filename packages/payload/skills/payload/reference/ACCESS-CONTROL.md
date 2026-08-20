@@ -73,6 +73,7 @@ export const Posts: CollectionConfig = {
     delete: async ({ req, id }) => {
       const hasComments = await req.payload.count({
         collection: 'comments',
+        overrideAccess: true,
         where: { post: { equals: id } },
       })
       return hasComments === 0
@@ -543,6 +544,7 @@ export const projectMemberAccess: Access = async ({ req, id }) => {
   // Check if document exists and user is member
   const project = await payload.findByID({
     collection: 'projects',
+    overrideAccess: true,
     id: id as string,
     depth: 0,
   })
@@ -556,6 +558,7 @@ export const preventDeleteWithDependencies: Access = async ({ req, id }) => {
 
   const dependencyCount = await payload.count({
     collection: 'related-items',
+    overrideAccess: true,
     where: {
       parent: { equals: id },
     },
@@ -651,12 +654,13 @@ access: {
 
 ## Important Notes
 
-1. **Local API Default**: Access control is **skipped by default** in Local API (`overrideAccess: true`). When passing a `user` parameter, you almost always want to set `overrideAccess: false` to respect that user's permissions:
+1. **Local API `overrideAccess`**: The property is **required** on every Local API operation and has no default. When passing a `user`, you almost always want `overrideAccess: false` so that user's permissions apply:
 
    ```ts
-   // ❌ WRONG: Passes user but bypasses access control (default behavior)
+   // ❌ WRONG: Passes user but bypasses access control
    await payload.find({
      collection: 'posts',
+     overrideAccess: true,
      user: someUser, // User is ignored for access control!
    })
 
@@ -664,11 +668,11 @@ access: {
    await payload.find({
      collection: 'posts',
      user: someUser,
-     overrideAccess: false, // Required to enforce access control
+     overrideAccess: false, // enforce access control
    })
    ```
 
-   **Why this matters**: If you pass `user` without `overrideAccess: false`, the operation runs with admin privileges regardless of the user's actual permissions. This is a common security mistake.
+   **Why this matters**: `overrideAccess: true` alongside a `user` runs with admin privileges regardless of that user's actual permissions. This is a common security mistake.
 
 2. **Field Access Limitations**: Field-level access does NOT support query constraints - only boolean returns.
 

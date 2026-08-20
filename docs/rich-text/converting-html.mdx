@@ -268,7 +268,8 @@ const payload = await getPayload({ config })
 
 // Step 1: Upload the image to Payload
 const uploadedMedia = await payload.create({
-  collection: 'media', // Your upload collection slug
+  collection: 'media',
+  overrideAccess: true, // Your upload collection slug
   data: {
     alt: 'My image description',
   },
@@ -337,6 +338,7 @@ async function convertHTMLWithImageUpload(htmlString: string) {
       // Upload to Payload
       const uploadedMedia = await payload.create({
         collection: 'media',
+        overrideAccess: true,
         data: {
           alt: img.getAttribute('alt') || '',
         },
@@ -402,6 +404,7 @@ const lexicalJSON = buildEditorState({
 // Save to your collection
 await payload.create({
   collection: 'pages',
+  overrideAccess: true,
   data: {
     title: 'My Page',
     content: lexicalJSON,
