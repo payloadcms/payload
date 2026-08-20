@@ -80,7 +80,11 @@ export default async function UserStatsWidget({ req }: WidgetServerProps) {
   const { payload } = req
 
   // Fetch data server-side
-  const userCount = await payload.count({ collection: 'users' })
+  const userCount = await payload.count({
+    collection: 'users',
+    overrideAccess: false,
+    req,
+  })
 
   return (
     <div className="card">

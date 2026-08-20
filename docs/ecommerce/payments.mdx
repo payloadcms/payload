@@ -272,6 +272,7 @@ export const initiatePayment: NonNullable<PaymentAdapter>['initiatePayment'] =
       // Create a transaction for the payment intent in the database
       const transaction = await payload.create({
         collection: transactionsSlug,
+        overrideAccess: true,
         data: {},
       })
 
@@ -349,6 +350,7 @@ export const confirmOrder: NonNullable<PaymentAdapter>['confirmOrder'] =
       // Find our existing transaction by the payment intent ID
       const transactionsResults = await payload.find({
         collection: transactionsSlug,
+        overrideAccess: true,
         where: {
           'stripe.paymentIntentID': {
             equals: paymentIntentID,
@@ -365,6 +367,7 @@ export const confirmOrder: NonNullable<PaymentAdapter>['confirmOrder'] =
       // Create the order in the database
       const order = await payload.create({
         collection: ordersSlug,
+        overrideAccess: true,
         data: {},
       })
 
@@ -374,6 +377,7 @@ export const confirmOrder: NonNullable<PaymentAdapter>['confirmOrder'] =
       await payload.update({
         id: cartID,
         collection: 'carts',
+        overrideAccess: true,
         data: {
           purchasedAt: timestamp,
         },
@@ -383,6 +387,7 @@ export const confirmOrder: NonNullable<PaymentAdapter>['confirmOrder'] =
       await payload.update({
         id: transaction.id,
         collection: transactionsSlug,
+        overrideAccess: true,
         data: {
           order: order.id,
           status: 'succeeded',

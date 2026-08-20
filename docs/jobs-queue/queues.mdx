@@ -593,6 +593,7 @@ autoRun: [{ cron: '* * * * *', queue: 'reports' }] // Now they match!
 ```ts
 const jobs = await payload.find({
   collection: 'payload-jobs',
+  overrideAccess: true,
   where: {
     completedAt: { exists: false },
   },
@@ -659,6 +660,7 @@ Check the job logs in the `payload-jobs` collection:
 ```ts
 const job = await payload.findByID({
   collection: 'payload-jobs',
+  overrideAccess: true,
   id: jobId,
 })
 

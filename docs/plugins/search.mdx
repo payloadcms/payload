@@ -180,6 +180,7 @@ This function is called once per locale per document and should return `true` to
       // Only index locales that are enabled for this document's tenant
       const tenant = await req.payload.findByID({
         collection: 'tenants',
+        overrideAccess: true,
         id: doc.tenant.id,
       })
 

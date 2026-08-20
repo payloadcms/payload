@@ -77,6 +77,7 @@ When hierarchy is enabled, virtual path fields are automatically added to your c
 ```ts
 const page = await payload.findByID({
   collection: 'pages',
+  overrideAccess: true,
   id: 'page-id',
   context: { computeHierarchyPaths: true }, // Request path computation
 })
@@ -109,6 +110,7 @@ const url = `/${page._h_slugPath}` // "/store/products/widgets"
 ```tsx
 const page = await payload.findByID({
   collection: 'pages',
+  overrideAccess: true,
   id: 'page-id',
   context: { computeHierarchyPaths: true },
 })
@@ -129,6 +131,7 @@ Pass `computeHierarchyPaths: true` in the context:
 // Single document
 const page = await payload.findByID({
   collection: 'pages',
+  overrideAccess: true,
   id: 'page-id',
   context: { computeHierarchyPaths: true },
 })
@@ -136,6 +139,7 @@ const page = await payload.findByID({
 // Query multiple documents
 const pages = await payload.find({
   collection: 'pages',
+  overrideAccess: true,
   where: { parent: { equals: null } },
   context: { computeHierarchyPaths: true },
 })
@@ -160,6 +164,7 @@ Paths are automatically computed when you explicitly select them:
 ```ts
 const page = await payload.findByID({
   collection: 'pages',
+  overrideAccess: true,
   id: 'page-id',
   select: {
     title: true,
@@ -182,6 +187,7 @@ const page = await payload.findByID({
 // Load 50 folders with same parent
 const folders = await payload.find({
   collection: 'folders',
+  overrideAccess: true,
   where: { parent: { equals: 'parent-id' } },
   context: { computeHierarchyPaths: true },
 })
@@ -365,6 +371,7 @@ When creating a document with a polymorphic parent, specify both the collection 
 // Create a page
 const blogPage = await payload.create({
   collection: 'pages',
+  overrideAccess: true,
   data: {
     title: 'Blog',
     parent: null,
@@ -374,6 +381,7 @@ const blogPage = await payload.create({
 // Create a post under the page (cross-collection parent)
 const post = await payload.create({
   collection: 'posts',
+  overrideAccess: true,
   data: {
     title: 'First Post',
     parent: {
@@ -386,6 +394,7 @@ const post = await payload.create({
 // Create a reply post under the post (same-collection parent)
 const reply = await payload.create({
   collection: 'posts',
+  overrideAccess: true,
   data: {
     title: 'Reply',
     parent: {
@@ -404,6 +413,7 @@ Paths are computed across collections automatically:
 // Get post with computed paths
 const post = await payload.findByID({
   collection: 'posts',
+  overrideAccess: true,
   id: post.id,
   context: { computeHierarchyPaths: true },
 })
@@ -414,6 +424,7 @@ const post = await payload.findByID({
 // Get reply with nested path
 const reply = await payload.findByID({
   collection: 'posts',
+  overrideAccess: true,
   id: reply.id,
   context: { computeHierarchyPaths: true },
 })
@@ -509,11 +520,13 @@ Circular reference detection works across collections:
 
 const pageA = await payload.create({
   collection: 'pages',
+  overrideAccess: true,
   data: { title: 'Page A', parent: null },
 })
 
 const postB = await payload.create({
   collection: 'posts',
+  overrideAccess: true,
   data: {
     title: 'Post B',
     parent: { relationTo: 'pages', value: pageA.id },
@@ -523,6 +536,7 @@ const postB = await payload.create({
 // ❌ This throws an error
 await payload.update({
   collection: 'pages',
+  overrideAccess: true,
   id: pageA.id,
   data: { parent: { relationTo: 'posts', value: postB.id } },
 })
@@ -718,6 +732,7 @@ Hierarchy maintains parent-child relationships through a simple `parent` field:
 // Move "Page C" from under "Page A" to under "Page B"
 await payload.update({
   collection: 'pages',
+  overrideAccess: true,
   id: 'page-c',
   data: { parent: 'page-b' }, // Changed from page-a
 })
@@ -745,6 +760,7 @@ When you change a document's title, paths are automatically updated on the next 
 // Change a parent's title from "Products" to "Items"
 await payload.update({
   collection: 'pages',
+  overrideAccess: true,
   id: 'parent-id',
   data: { title: 'Items' },
 })
@@ -752,6 +768,7 @@ await payload.update({
 // Next time a child is read with path computation:
 const child = await payload.findByID({
   collection: 'pages',
+  overrideAccess: true,
   id: 'child-id',
   context: { computeHierarchyPaths: true },
 })
@@ -781,6 +798,7 @@ When you move or rename a document, descendants are not updated:
 // Moving a folder with 50 descendant pages
 await payload.update({
   collection: 'pages',
+  overrideAccess: true,
   id: 'folder-id',
   data: { parent: 'new-parent' },
 })
@@ -813,6 +831,7 @@ When versioning with drafts is enabled, paths are computed based on the current 
 // Reading published version
 const published = await payload.findByID({
   collection: 'pages',
+  overrideAccess: true,
   id: 'page-id',
   context: { computeHierarchyPaths: true },
   // draft: false (default)
@@ -822,6 +841,7 @@ const published = await payload.findByID({
 // Reading draft version
 const draft = await payload.findByID({
   collection: 'pages',
+  overrideAccess: true,
   id: 'page-id',
   draft: true,
   context: { computeHierarchyPaths: true },
@@ -869,6 +889,7 @@ When you publish a draft with a changed parent for one locale:
 // Draft changes parent
 await payload.update({
   collection: 'pages',
+  overrideAccess: true,
   id: 'doc-id',
   data: { parent: 'parent-2' },
   draft: true,
@@ -877,6 +898,7 @@ await payload.update({
 // Publish only French
 await payload.update({
   collection: 'pages',
+  overrideAccess: true,
   id: 'doc-id',
   locale: 'fr',
   data: { _status: 'published' },
@@ -892,6 +914,7 @@ await payload.update({
 // ✅ Clear: publishes parent change for all locales
 await payload.update({
   collection: 'pages',
+  overrideAccess: true,
   id: 'doc-id',
   data: { parent: 'new-parent' },
   // publishAllLocales is default
@@ -938,6 +961,7 @@ For collections with many documents:
 // ❌ Unnecessary path computation for a tag relationship
 const post = await payload.findByID({
   collection: 'posts',
+  overrideAccess: true,
   id: 'post-id',
   depth: 2, // Populates category relationship
   context: { computeHierarchyPaths: true }, // Computes paths for category too
@@ -946,6 +970,7 @@ const post = await payload.findByID({
 // ✅ Only compute paths when you'll use them
 const post = await payload.findByID({
   collection: 'posts',
+  overrideAccess: true,
   id: 'post-id',
   depth: 2,
   // No path computation - category.parent populated but no _h_slugPath
@@ -962,6 +987,7 @@ import type { Page } from './payload-types'
 // Fetched document type includes all hierarchy fields
 const page = await payload.findByID({
   collection: 'pages',
+  overrideAccess: true,
   id: 'page-id',
   context: { computeHierarchyPaths: true },
 })
