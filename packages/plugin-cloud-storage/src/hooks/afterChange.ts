@@ -63,10 +63,10 @@ export const getAfterChangeHook =
           try {
             await req.payload.update({
               id: doc.id,
+              action: isDraftSave ? 'saveDraft' : 'publish',
               collection: collection.slug,
               data: uploadMetadata,
               depth: 0,
-              draft: isDraftSave,
               req,
             })
           } finally {

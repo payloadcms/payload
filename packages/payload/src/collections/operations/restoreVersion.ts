@@ -310,7 +310,6 @@ export const restoreVersionOperation = async <
       context: req.context,
       depth: depth!,
       doc: result,
-      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       draft: undefined,
       fallbackLocale: fallbackLocale!,
       global: null,

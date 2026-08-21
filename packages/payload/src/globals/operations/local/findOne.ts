@@ -129,8 +129,6 @@ export async function findOneGlobalLocal<
     data,
     depth,
     disableErrors,
-    draft:
-      (version as string | undefined) === 'draft' || (version as string | undefined) === 'latest',
     flattenLocales,
     globalConfig,
     includeLockStatus,
@@ -139,5 +137,6 @@ export async function findOneGlobalLocal<
     req: await createLocalReq(options as CreateLocalReqOptions, payload),
     select,
     showHiddenFields,
+    version,
   })
 }

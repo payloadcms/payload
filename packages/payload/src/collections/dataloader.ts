@@ -5,6 +5,7 @@ import DataLoader from 'dataloader'
 import type { FindArgs } from '../database/types.js'
 import type { Payload, TypedFallbackLocale } from '../index.js'
 import type { PayloadRequest, PopulateType, SelectType } from '../types/index.js'
+import type { ReadVersion } from '../versions/types.js'
 import type { TypeWithID } from './config/types.js'
 import type { FindOptions } from './operations/local/find.js'
 
@@ -59,7 +60,7 @@ const batchAndLoadDocs =
         fallbackLocale,
         overrideAccess,
         showHiddenFields,
-        draft,
+        version,
         select,
         populate,
       ] = JSON.parse(key)
@@ -73,7 +74,7 @@ const batchAndLoadDocs =
         fallbackLocale,
         overrideAccess,
         showHiddenFields,
-        draft,
+        version,
         select,
         populate,
       ]
@@ -100,7 +101,7 @@ const batchAndLoadDocs =
         fallbackLocale,
         overrideAccess,
         showHiddenFields,
-        draft,
+        version,
         select,
         populate,
       ] = JSON.parse(batchKey)
@@ -123,7 +124,7 @@ const batchAndLoadDocs =
         req,
         select: selectWithDeletedAt,
         showHiddenFields: Boolean(showHiddenFields),
-        version: draft ? 'latest' : 'published',
+        version,
         ...(enableTrash ? { trash: true } : {}),
         where: {
           id: {
@@ -140,7 +141,6 @@ const batchAndLoadDocs =
           currentDepth,
           depth,
           docID: doc.id,
-          draft,
           fallbackLocale,
           locale,
           overrideAccess,
@@ -148,6 +148,7 @@ const batchAndLoadDocs =
           select,
           showHiddenFields,
           transactionID: req.transactionID!,
+          version,
         })
         const docsIndex = keys.findIndex((key) => key === docKey)
 
@@ -228,7 +229,6 @@ type CreateCacheKeyArgs = {
   currentDepth: number
   depth: number
   docID: number | string
-  draft: boolean
   fallbackLocale: TypedFallbackLocale
   locale: string | string[]
   overrideAccess: boolean
@@ -236,13 +236,13 @@ type CreateCacheKeyArgs = {
   select?: SelectType
   showHiddenFields: boolean
   transactionID: number | Promise<number | string> | string
+  version: ReadVersion
 }
 export const createDataloaderCacheKey = ({
   collectionSlug,
   currentDepth,
   depth,
   docID,
-  draft,
   fallbackLocale,
   locale,
   overrideAccess,
@@ -250,6 +250,7 @@ export const createDataloaderCacheKey = ({
   select,
   showHiddenFields,
   transactionID,
+  version,
 }: CreateCacheKeyArgs): string =>
   JSON.stringify([
     transactionID,
@@ -261,7 +262,7 @@ export const createDataloaderCacheKey = ({
     fallbackLocale,
     overrideAccess,
     showHiddenFields,
-    draft,
+    version,
     select,
     populate,
   ])

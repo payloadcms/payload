@@ -234,8 +234,6 @@ export async function findLocal<
     currentDepth,
     depth,
     disableErrors,
-    draft:
-      (version as string | undefined) === 'draft' || (version as string | undefined) === 'latest',
     includeLockStatus,
     joins,
     limit,
@@ -248,6 +246,7 @@ export async function findLocal<
     showHiddenFields,
     sort,
     trash,
+    version,
     where,
   })
 }

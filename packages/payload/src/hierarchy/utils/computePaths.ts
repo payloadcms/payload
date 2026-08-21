@@ -1,5 +1,6 @@
 import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
 import type { Document, PayloadRequest } from '../../types/index.js'
+import type { ReadVersion } from '../../versions/types.js'
 
 import { slugify as payloadSlugify } from '../../utilities/slugify.js'
 import { HIERARCHY_SLUG_PATH_FIELD, HIERARCHY_TITLE_PATH_FIELD } from '../constants.js'
@@ -16,6 +17,7 @@ type ComputePathsArgs = {
   req: PayloadRequest
   slugPathFieldName?: string
   titlePathFieldName?: string
+  version?: ReadVersion
 }
 
 type ComputePathsResult = {
@@ -123,7 +125,10 @@ export async function computePaths(args: ComputePathsArgs): Promise<ComputePaths
     req,
     slugPathFieldName = HIERARCHY_SLUG_PATH_FIELD,
     titlePathFieldName = HIERARCHY_TITLE_PATH_FIELD,
+    version,
   } = args
+
+  const readVersion = version ?? (draft ? 'latest' : 'published')
 
   const slugify =
     (collection.hierarchy !== false && collection.hierarchy.slugify) ||
@@ -378,7 +383,7 @@ export async function computePaths(args: ComputePathsArgs): Promise<ComputePaths
               ...(slugFieldName ? { [slugFieldName]: true } : {}),
             },
             user: req.user,
-            version: draft ? 'latest' : 'published',
+            version: readVersion,
           })
         }
       }

@@ -1118,13 +1118,13 @@ describe('Relationships', () => {
             collection: 'movies',
             sort: '-director.name',
             depth: 0,
-            draft: true,
+            version: 'latest',
           })
           const draft_res_2 = await payload.find({
             collection: 'movies',
             sort: 'director.name',
             depth: 0,
-            draft: true,
+            version: 'latest',
           })
 
           expect(draft_res_1.docs).toStrictEqual([movie_2, movie_1])

@@ -8,6 +8,7 @@ import type {
   SelectMode,
   SelectType,
 } from '../../../types/index.js'
+import type { ReadVersion } from '../../../versions/types.js'
 import type { Field, TabAsField } from '../../config/types.js'
 
 import { promise } from './promise.js'
@@ -58,6 +59,7 @@ type Args = {
   siblingDoc: JsonObject
   triggerAccessControl?: boolean
   triggerHooks?: boolean
+  version: ReadVersion
 }
 
 export const traverseFields = ({
@@ -90,6 +92,7 @@ export const traverseFields = ({
   siblingDoc,
   triggerAccessControl = true,
   triggerHooks = true,
+  version,
 }: Args): void => {
   fields.forEach((field, fieldIndex) => {
     fieldPromises.push(
@@ -125,6 +128,7 @@ export const traverseFields = ({
         siblingFields: fields,
         triggerAccessControl,
         triggerHooks,
+        version,
       }),
     )
   })

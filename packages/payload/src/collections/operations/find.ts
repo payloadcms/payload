@@ -9,6 +9,7 @@ import type {
   TransformCollectionWithSelect,
   Where,
 } from '../../types/index.js'
+import type { ReadVersion } from '../../versions/types.js'
 import type {
   Collection,
   DataFromCollectionSlug,
@@ -31,6 +32,8 @@ import { buildVersionCollectionFields } from '../../versions/buildCollectionFiel
 import { appendVersionToQueryKey } from '../../versions/drafts/appendVersionToQueryKey.js'
 import { getQueryDraftsSelect } from '../../versions/drafts/getQueryDraftsSelect.js'
 import { getQueryDraftsSort } from '../../versions/drafts/getQueryDraftsSort.js'
+import { getDraftStatusWhere } from '../../versions/read/getDraftStatusWhere.js'
+import { isVersionedRead, resolveOperationReadVersion } from '../../versions/resolveReadVersion.js'
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
 import { sanitizeSortQuery } from './utilities/sanitizeSortQuery.js'
@@ -52,6 +55,7 @@ export type Arguments = {
   showHiddenFields?: boolean
   sort?: Sort
   trash?: boolean
+  version?: ReadVersion
   where?: Where
 } & Pick<FindOptions<string, SelectType>, 'select'>
 
@@ -82,7 +86,7 @@ export const findOperation = async <
     currentDepth,
     depth,
     disableErrors,
-    draft: draftsEnabled,
+    draft: draftArg,
     includeLockStatus: includeLockStatusFromArgs,
     joins,
     limit,
@@ -94,6 +98,7 @@ export const findOperation = async <
     showHiddenFields,
     sort: incomingSort,
     trash = false,
+    version,
     where,
   } = args
 
@@ -103,6 +108,14 @@ export const findOperation = async <
     includeLockStatusFromArgs && req.payload.collections?.[lockedDocumentsCollectionSlug]
 
   const { fallbackLocale, locale, payload } = req
+
+  const draftsEnabledOnCollection = hasDraftsEnabled(collectionConfig)
+  const readVersion = resolveOperationReadVersion({
+    draft: draftArg,
+    draftsEnabled: draftsEnabledOnCollection,
+    version,
+  })
+  const queryVersions = isVersionedRead(readVersion) && draftsEnabledOnCollection
 
   const select = sanitizeSelect({
     fields: collectionConfig.flattenedFields,
@@ -182,7 +195,22 @@ export const findOperation = async <
     req,
   })
 
-  if (hasDraftsEnabled(collectionConfig) && draftsEnabled) {
+  if (readVersion === 'draft' && !draftsEnabledOnCollection) {
+    return {
+      docs: [],
+      hasNextPage: false,
+      hasPrevPage: false,
+      limit: limit!,
+      nextPage: null,
+      page: 1,
+      pagingCounter: 1,
+      prevPage: null,
+      totalDocs: 0,
+      totalPages: 1,
+    }
+  }
+
+  if (queryVersions) {
     fullWhere = appendVersionToQueryKey(fullWhere)
 
     await validateQueryPaths({
@@ -192,6 +220,17 @@ export const findOperation = async <
       versionFields: buildVersionCollectionFields(payload.config, collection.config, true),
       where: appendVersionToQueryKey(where),
     })
+
+    if (readVersion === 'draft') {
+      fullWhere = combineQueries(
+        fullWhere,
+        getDraftStatusWhere({
+          entity: collectionConfig,
+          locale: locale!,
+          payload,
+        }),
+      )
+    }
 
     result = await payload.db.queryDrafts<DataFromCollectionSlug<TSlug>>({
       collection: collectionConfig.slug,
@@ -218,7 +257,7 @@ export const findOperation = async <
 
     result = await payload.db.find<DataFromCollectionSlug<TSlug>>({
       collection: collectionConfig.slug,
-      draftsEnabled,
+      draftsEnabled: queryVersions,
       joins: req.payloadAPI === 'GraphQL' ? false : sanitizedJoins,
       limit: sanitizedLimit,
       locale: locale!,
@@ -337,7 +376,7 @@ export const findOperation = async <
         currentDepth,
         depth: depth!,
         doc,
-        draft: draftsEnabled!,
+        draft: isVersionedRead(readVersion),
         fallbackLocale: fallbackLocale!,
         findMany: true,
         global: null,
@@ -347,6 +386,7 @@ export const findOperation = async <
         req,
         select,
         showHiddenFields: showHiddenFields!,
+        version: readVersion,
       }),
     ),
   )

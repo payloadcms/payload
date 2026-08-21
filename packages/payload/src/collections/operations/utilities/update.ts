@@ -366,7 +366,7 @@ export const updateDocument = async <
     dataToUpdate.updatedAt = new Date().toISOString()
     if (localizedPublishData) {
       // Single-locale publish: save filtered data to main doc but keep full locale data for
-      // the version so draft fetches (replaceWithDraftIfAvailable) return complete data.
+      // the version so latest/draft fetches (replaceWithVersion) return complete data.
       await req.payload.db.updateOne({
         id,
         collection: collectionConfig.slug,

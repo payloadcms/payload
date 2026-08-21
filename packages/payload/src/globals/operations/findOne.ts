@@ -9,6 +9,7 @@ import type {
   SelectType,
   Where,
 } from '../../types/index.js'
+import type { ReadVersion } from '../../versions/types.js'
 import type { SanitizedGlobalConfig } from '../config/types.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
@@ -19,7 +20,8 @@ import { getSelectMode } from '../../utilities/getSelectMode.js'
 import { hasDraftsEnabled } from '../../utilities/getVersionsConfig.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
-import { replaceWithDraftIfAvailable } from '../../versions/drafts/replaceWithDraftIfAvailable.js'
+import { replaceWithVersion } from '../../versions/read/replaceWithVersion.js'
+import { isVersionedRead, resolveOperationReadVersion } from '../../versions/resolveReadVersion.js'
 
 export type GlobalFindOneArgs = {
   /**
@@ -37,6 +39,7 @@ export type GlobalFindOneArgs = {
   req: PayloadRequest
   showHiddenFields?: boolean
   slug: string
+  version?: ReadVersion
 } & Pick<AfterReadArgs<JsonObject>, 'flattenLocales'> &
   Pick<FindOptions<string, SelectType>, 'select'>
 
@@ -47,7 +50,7 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
     slug,
     depth,
     disableErrors,
-    draft: replaceWithVersion = false,
+    draft: draftArg,
     flattenLocales,
     globalConfig,
     includeLockStatus: includeLockStatusFromArgs,
@@ -57,10 +60,19 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
     req,
     select: incomingSelect,
     showHiddenFields,
+    version,
   } = args
 
   const includeLockStatus =
     includeLockStatusFromArgs && req.payload.collections?.[lockedDocumentsCollectionSlug]
+
+  const draftsEnabledOnGlobal = hasDraftsEnabled(globalConfig)
+  const readVersion = resolveOperationReadVersion({
+    draft: draftArg,
+    draftsEnabled: draftsEnabledOnGlobal,
+    version,
+  })
+  const queryVersions = isVersionedRead(readVersion) && draftsEnabledOnGlobal
 
   // /////////////////////////////////////
   // beforeOperation - Global
@@ -118,7 +130,7 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
 
   if (
     globalConfig.versions?.drafts &&
-    replaceWithVersion &&
+    queryVersions &&
     select &&
     getSelectMode(select) === 'include'
   ) {
@@ -192,20 +204,37 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
     doc._userEditing = lockStatus?.user?.value ?? null
   }
 
+  if (readVersion === 'draft' && !draftsEnabledOnGlobal) {
+    if (!disableErrors) {
+      throw new NotFound(req.t)
+    }
+    return null!
+  }
+
   // /////////////////////////////////////
-  // Replace document with draft if available
+  // Replace published document with the requested version
   // /////////////////////////////////////
 
-  if (replaceWithVersion && hasDraftsEnabled(globalConfig)) {
-    doc = await replaceWithDraftIfAvailable({
+  if (queryVersions) {
+    const versionedDoc = await replaceWithVersion({
       accessResult,
       doc,
       entity: globalConfig,
       entityType: 'global',
       overrideAccess,
+      policy: readVersion === 'draft' ? 'draft' : 'latest',
       req,
       select,
     })
+
+    if (!versionedDoc) {
+      if (!disableErrors) {
+        throw new NotFound(req.t)
+      }
+      return null!
+    }
+
+    doc = versionedDoc
   }
 
   // /////////////////////////////////////
@@ -247,7 +276,7 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
     context: req.context,
     depth: depth!,
     doc,
-    draft: replaceWithVersion,
+    draft: isVersionedRead(readVersion),
     fallbackLocale: fallbackLocale!,
     flattenLocales,
     global: globalConfig,
@@ -257,6 +286,7 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
     req,
     select,
     showHiddenFields: showHiddenFields!,
+    version: readVersion,
   })
 
   // /////////////////////////////////////

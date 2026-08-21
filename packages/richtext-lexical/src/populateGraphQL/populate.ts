@@ -45,13 +45,13 @@ export const populate: PopulateFn = async ({
       currentDepth: currentDepth! + 1,
       depth,
       docID: id as string,
-      draft,
       fallbackLocale: req.fallbackLocale!,
       locale: req.locale!,
       overrideAccess,
       select,
       showHiddenFields,
       transactionID: req.transactionID!,
+      version: draft ? 'latest' : 'published',
     }),
   )
 

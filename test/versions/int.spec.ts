@@ -36,6 +36,8 @@ import {
   localizedCollectionSlug,
   localizedGlobalSlug,
   nestedArraySelectCollectionSlug,
+  postCollectionSlug,
+  simpleDraftGlobalSlug,
   versionCollectionSlug,
 } from './slugs.js'
 
@@ -102,7 +104,7 @@ describe('Versions', () => {
             description: undefined,
             title: 'i have a title',
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         expect(draft.id).toBeDefined()
@@ -349,7 +351,7 @@ describe('Versions', () => {
         const fromNonVersionsTable = await payload.findByID({
           id: doc.id,
           collection: autosaveCollectionSlug,
-          draft: false,
+          version: 'published',
         })
 
         // createdAt from non-versions should be the same as version_createdAt in versions
@@ -375,7 +377,7 @@ describe('Versions', () => {
             ],
           },
           depth: 0,
-          draft: true,
+          action: 'saveDraft',
         })
         expect(res.blocks[0]?.array[0]?.relationship).toEqual(post.id)
         const {
@@ -392,7 +394,7 @@ describe('Versions', () => {
         const post = await payload.create({
           collection: 'autosave-posts',
           data: { _status: 'draft', description: 'description', title: 'post' },
-          draft: true,
+          action: 'saveDraft',
         })
 
         await payload.update({
@@ -400,7 +402,7 @@ describe('Versions', () => {
           autosave: true,
           collection: 'autosave-posts',
           data: { title: 'autosave' },
-          draft: true,
+          action: 'saveDraft',
         })
 
         const getVersionsCount = async () => {
@@ -422,7 +424,7 @@ describe('Versions', () => {
           autosave: true,
           collection: 'autosave-posts',
           data: { title: 'post-updated-1' },
-          draft: true,
+          action: 'saveDraft',
         })
 
         expect(await getVersionsCount()).toBe(2)
@@ -432,7 +434,7 @@ describe('Versions', () => {
           autosave: true,
           collection: 'autosave-posts',
           data: { title: 'post-updated-2' },
-          draft: true,
+          action: 'saveDraft',
           where: { id: { equals: post.id } },
         })
         expect(await getVersionsCount()).toBe(2)
@@ -453,7 +455,7 @@ describe('Versions', () => {
           autosave: true,
           collection: autosaveCollectionSlug,
           data: { title: 'Autosaved Title' },
-          draft: true,
+          action: 'saveDraft',
         })
 
         // Simulate page reload: read the latest draft version (what getLatestCollectionVersion does)
@@ -485,7 +487,7 @@ describe('Versions', () => {
           autosave: true,
           collection: autosaveCollectionSlug,
           data: { title: 'Change 1' },
-          draft: true,
+          action: 'saveDraft',
         })
 
         const countAfterFirst = await payload.countVersions({
@@ -499,7 +501,7 @@ describe('Versions', () => {
           autosave: true,
           collection: autosaveCollectionSlug,
           data: { title: 'Change 2' },
-          draft: true,
+          action: 'saveDraft',
         })
 
         const countAfterSecond = await payload.countVersions({
@@ -515,7 +517,7 @@ describe('Versions', () => {
           autosave: true,
           collection: autosaveCollectionSlug,
           data: { title: 'Change 3' },
-          draft: true,
+          action: 'saveDraft',
         })
 
         const countAfterThird = await payload.countVersions({
@@ -543,7 +545,7 @@ describe('Versions', () => {
         const post = await payload.create({
           collection,
           data: { description: 'description' },
-          draft: true,
+          action: 'saveDraft',
         })
 
         const docWithLocales = await payload.findByID({
@@ -574,7 +576,7 @@ describe('Versions', () => {
             title: 'Original Title',
             _status: 'published',
           },
-          draft: false,
+          action: 'publish',
         })
 
         const duplicatedDoc = await payload.create({
@@ -583,7 +585,7 @@ describe('Versions', () => {
           data: {
             _status: 'draft',
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         expect(duplicatedDoc._status).toBe('draft')
@@ -599,14 +601,14 @@ describe('Versions', () => {
             title: 'Draft with partial data',
             _status: 'draft',
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         // description is required but missing — duplicate should still succeed as a draft
         const duplicatedDoc = await payload.duplicate({
           id: originalDoc.id,
           collection: draftCollectionSlug,
-          draft: true,
+          action: 'saveDraft',
         })
 
         expect(duplicatedDoc._status).toBe('draft')
@@ -624,7 +626,7 @@ describe('Versions', () => {
             title: 'REST draft partial',
             _status: 'draft',
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         // Mimics the admin UI: POST to /:collection/:id/duplicate
@@ -654,7 +656,7 @@ describe('Versions', () => {
         // Create a document with many versions for pagination testing
         await createDocumentWithManyVersions({
           collection: draftCollectionSlug,
-          draft: true,
+          action: 'saveDraft',
           initialData: {
             description: 'Description',
             radio: 'test',
@@ -708,13 +710,13 @@ describe('Versions', () => {
       it('should query drafts with sort', async () => {
         const draftsAscending = await payload.find({
           collection: draftCollectionSlug,
-          draft: true,
+          version: 'latest',
           sort: 'title',
         })
 
         const draftsDescending = await payload.find({
           collection: draftCollectionSlug,
-          draft: true,
+          version: 'latest',
           sort: '-title',
         })
 
@@ -728,14 +730,14 @@ describe('Versions', () => {
       it('should `findVersions` with sort', async () => {
         const draftsAscending = await payload.findVersions({
           collection: draftCollectionSlug,
-          draft: true,
+          version: 'latest',
           limit: 100,
           sort: 'createdAt',
         })
 
         const draftsDescending = await payload.findVersions({
           collection: draftCollectionSlug,
-          draft: true,
+          version: 'latest',
           limit: 100,
           sort: '-createdAt',
         })
@@ -809,7 +811,7 @@ describe('Versions', () => {
             description: 'version description',
             title: 'version title',
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         let updatedPost = await payload.update({
@@ -825,7 +827,7 @@ describe('Versions', () => {
             ],
             title: title2,
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         updatedPost = await payload.update({
@@ -843,7 +845,7 @@ describe('Versions', () => {
             ],
             title: title2,
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         expect(updatedPost.title).toBe(title2)
@@ -854,7 +856,7 @@ describe('Versions', () => {
         const draftFromUpdatedPost = await payload.findByID({
           id: versionedPost.id,
           collection: draftCollectionSlug,
-          draft: true,
+          version: 'latest',
         })
         expect(draftFromUpdatedPost.title).toBe(title2)
         expect(draftFromUpdatedPost.blocksField).toHaveLength(1)
@@ -884,7 +886,7 @@ describe('Versions', () => {
         const latestDraft = await payload.findByID({
           id: versionedPost.id,
           collection: draftCollectionSlug,
-          draft: true,
+          version: 'latest',
         })
 
         expect(latestDraft).toMatchObject({
@@ -900,7 +902,7 @@ describe('Versions', () => {
         const target = await payload.create({
           collection: draftCollectionSlug,
           data: { description: 'target', title: 'filter-options target' },
-          draft: true,
+          action: 'saveDraft',
         })
 
         const doc = await payload.create({
@@ -910,7 +912,7 @@ describe('Versions', () => {
             relationWithFilterOptions: [target.id],
             title: 'filter-options doc',
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         await payload.update({
@@ -920,7 +922,7 @@ describe('Versions', () => {
             relationWithFilterOptions: [target.id],
             title: 'filter-options doc updated',
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         const versions = await payload.findVersions({
@@ -944,7 +946,7 @@ describe('Versions', () => {
           id: doc.id,
           collection: draftCollectionSlug,
           depth: 0,
-          draft: true,
+          version: 'latest',
         })
         expect(restored.relationWithFilterOptions).toStrictEqual([target.id])
 
@@ -966,7 +968,7 @@ describe('Versions', () => {
             description: 'initial description',
             title: 'leak test',
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         const blockId = doc.blocksField?.[0]!.id
@@ -989,7 +991,7 @@ describe('Versions', () => {
             select: ['test1'],
             title: 'leak test',
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         // Find versions and restore the original (oldest) version
@@ -1008,7 +1010,7 @@ describe('Versions', () => {
         const restored = await payload.findByID({
           id: doc.id,
           collection: draftCollectionSlug,
-          draft: true,
+          version: 'latest',
         })
 
         // Top-level fields should NOT have leaked from the updated version
@@ -1040,7 +1042,7 @@ describe('Versions', () => {
           _status: 'published',
           title: 'v2',
         },
-        draft: true,
+        action: 'saveDraft',
       })
 
       // get the version id of the original draft
@@ -1064,7 +1066,7 @@ describe('Versions', () => {
       const latestDraft = await payload.findByID({
         id: originalPost.id,
         collection: draftCollectionSlug,
-        draft: true,
+        version: 'latest',
       })
 
       // assert it has the original post content
@@ -1090,7 +1092,7 @@ describe('Versions', () => {
           description: 'description v2',
           title: 'title v2 en',
         },
-        draft: true,
+        action: 'saveDraft',
       })
 
       const versions = await payload.findVersions({
@@ -1176,7 +1178,7 @@ describe('Versions', () => {
             _status: 'draft',
             title: patchedTitle,
           },
-          draft: true,
+          action: 'saveDraft',
           locale: 'en',
         })
 
@@ -1190,7 +1192,7 @@ describe('Versions', () => {
             _status: 'draft',
             title: spanishTitle,
           },
-          draft: true,
+          action: 'saveDraft',
           locale: 'es',
         })
 
@@ -1202,7 +1204,7 @@ describe('Versions', () => {
         const draftPost = await payload.findByID({
           id: originalPublishedPost.id,
           collection: autosaveCollectionSlug,
-          draft: true,
+          version: 'latest',
           locale: 'all',
         })
 
@@ -1218,7 +1220,7 @@ describe('Versions', () => {
             description: 'desc',
             title: 'title',
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         await wait(10)
@@ -1229,7 +1231,7 @@ describe('Versions', () => {
           data: {
             title: 'updated title',
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         const createdUpdatedAt = new Date(created.updatedAt)
@@ -1245,7 +1247,7 @@ describe('Versions', () => {
             description: 'desc',
             title: 'title',
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         await wait(10)
@@ -1257,7 +1259,7 @@ describe('Versions', () => {
           data: {
             title: 'updated title',
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         const createdUpdatedAt = new Date(created.updatedAt)
@@ -1275,7 +1277,7 @@ describe('Versions', () => {
             tag: firstDocTag,
             title: 'title 1',
           },
-          draft: false,
+          action: 'publish',
         })
         await payload.update({
           id: doc.id,
@@ -1285,7 +1287,7 @@ describe('Versions', () => {
             tag: firstDocTag,
             title: 'title 2',
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         const doc2 = await payload.create({
@@ -1295,7 +1297,7 @@ describe('Versions', () => {
             tag: ['blog'],
             title: 'title 1-2',
           },
-          draft: false,
+          action: 'publish',
         })
 
         await payload.update({
@@ -1306,7 +1308,7 @@ describe('Versions', () => {
             tag: ['blog'],
             title: 'title 2-2',
           },
-          draft: true,
+          action: 'saveDraft',
         })
         await payload.update({
           id: doc2.id,
@@ -1316,7 +1318,7 @@ describe('Versions', () => {
             tag: ['blog'],
             title: 'title 3-2',
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         const lastDocVersion = await payload.findVersions({
@@ -1348,7 +1350,7 @@ describe('Versions', () => {
           data: {
             outer: [{ inner: [{ days: ['monday'] }] }],
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         expect(updated.outer?.[0]?.inner?.[0]?.days).toEqual(['monday'])
@@ -1366,7 +1368,7 @@ describe('Versions', () => {
           data: {
             description: 'desc',
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         await expect(
@@ -1374,7 +1376,7 @@ describe('Versions', () => {
             id: doc.id,
             collection: draftCollectionSlug,
             data: { _status: 'published' },
-            draft: true,
+            action: 'saveDraft',
           }),
         ).rejects.toThrow(ValidationError)
 
@@ -1382,7 +1384,7 @@ describe('Versions', () => {
         const updateManyResult = await payload.update({
           collection: draftCollectionSlug,
           data: { _status: 'published' },
-          draft: true,
+          action: 'saveDraft',
           where: {
             id: { equals: doc.id },
           },
@@ -1399,7 +1401,7 @@ describe('Versions', () => {
         const { id } = await payload.create({
           collection: autosaveCollectionSlug,
           data: { _status: 'draft', description: 'some-description', title: 'my-title' },
-          draft: true,
+          action: 'saveDraft',
         })
 
         // Autosave the same draft, calls db.updateVersion
@@ -1410,7 +1412,7 @@ describe('Versions', () => {
           data: {
             title: 'new-title',
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         const versionsCount = await payload.countVersions({
@@ -1430,7 +1432,7 @@ describe('Versions', () => {
           data: {
             title: 'new-title-2',
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         const versionsCountAfter = await payload.countVersions({
@@ -1480,7 +1482,7 @@ describe('Versions', () => {
           data: {
             title: 'updated title',
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         // bulk publish
@@ -1490,7 +1492,7 @@ describe('Versions', () => {
             _status: 'published',
             description: 'updated description',
           },
-          draft: true,
+          action: 'saveDraft',
           where: {
             id: {
               in: [doc.id],
@@ -1579,7 +1581,7 @@ describe('Versions', () => {
             description: 'A',
             title: 'A',
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         await payload.update({
@@ -1590,7 +1592,7 @@ describe('Versions', () => {
             description: 'B',
             title: 'B',
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         await payload.update({
@@ -1601,13 +1603,13 @@ describe('Versions', () => {
             description: 'C',
             title: 'C',
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         const mostRecentDraft = await payload.findByID({
           id: originalDraft.id,
           collection: draftCollectionSlug,
-          draft: true,
+          version: 'latest',
         })
 
         expect(mostRecentDraft.title).toStrictEqual('C')
@@ -1717,7 +1719,7 @@ describe('Versions', () => {
         const found = await payload.findByID({
           id: doc.id,
           collection: draftCollectionSlug,
-          draft: false,
+          version: 'published',
         })
 
         expect(found._status).toBe('draft')
@@ -1785,7 +1787,7 @@ describe('Versions', () => {
             title: 'Draft without description',
             // description is required but omitted - should work with draft: true
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         expect(draft.title).toBe('Draft without description')
@@ -1803,7 +1805,7 @@ describe('Versions', () => {
             data: {
               title: 'Published without description',
             },
-            draft: false,
+            action: 'publish',
           }),
         ).rejects.toThrow(ValidationError)
       })
@@ -1828,7 +1830,7 @@ describe('Versions', () => {
           data: {
             // Both title and description are required but omitted
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         expect(draft._status).toBe('draft')
@@ -1961,7 +1963,7 @@ describe('Versions', () => {
                   id: doc.id,
                   collection: draftCollectionSlug,
                   data: {},
-                  draft: true,
+                  action: 'saveDraft',
                 })
                 .then(resolve)
                 .catch(resolve)
@@ -2001,7 +2003,7 @@ describe('Versions', () => {
         const doc = await payload.create({
           collection: autosaveCollectionSlug,
           data: { title: 'original', _status: 'draft' },
-          draft: true,
+          action: 'saveDraft',
         })
 
         // Establish an existing autosave version so updateLatestVersion has something to update
@@ -2010,7 +2012,7 @@ describe('Versions', () => {
           autosave: true,
           collection: autosaveCollectionSlug,
           data: { title: 'first autosave' },
-          draft: true,
+          action: 'saveDraft',
         })
 
         const spy = vi
@@ -2023,7 +2025,7 @@ describe('Versions', () => {
           autosave: true,
           collection: autosaveCollectionSlug,
           data: { title: 'second autosave' },
-          draft: true,
+          action: 'saveDraft',
         })
 
         spy.mockRestore()
@@ -2050,7 +2052,7 @@ describe('Versions', () => {
         const doc = await payload.create({
           collection: autosaveCollectionSlug,
           data: { title: 'original', _status: 'draft' },
-          draft: true,
+          action: 'saveDraft',
         })
 
         const updateVersionSpy = vi
@@ -2066,7 +2068,7 @@ describe('Versions', () => {
             autosave: true,
             collection: autosaveCollectionSlug,
             data: { title: 'will fail' },
-            draft: true,
+            action: 'saveDraft',
           }),
         ).rejects.toThrow('database connection lost')
 
@@ -2128,7 +2130,7 @@ describe('Versions', () => {
           _status: 'draft',
           alt: 'Updated in draft',
         },
-        draft: true,
+        action: 'saveDraft',
         file: draftImageFile,
       })
 
@@ -2140,7 +2142,7 @@ describe('Versions', () => {
       const draftDoc = await payload.findByID({
         id: publishedDoc.id,
         collection: draftWithUploadCollectionSlug,
-        draft: true,
+        version: 'latest',
       })
 
       uploadedFilenames.push(draftDoc.filename)
@@ -2185,14 +2187,14 @@ describe('Versions', () => {
           _status: 'draft',
           alt: 'Draft with new file',
         },
-        draft: true,
+        action: 'saveDraft',
         file: draftImageFile,
       })
 
       const draftDoc = await payload.findByID({
         id: publishedDoc.id,
         collection: draftWithUploadCollectionSlug,
-        draft: true,
+        version: 'latest',
       })
 
       uploadedFilenames.push(draftDoc.filename)
@@ -2227,14 +2229,14 @@ describe('Versions', () => {
           _status: 'draft',
           alt: 'Draft version',
         },
-        draft: true,
+        action: 'saveDraft',
         file: draftImageFile,
       })
 
       const draftDoc = await payload.findByID({
         id: publishedDoc.id,
         collection: draftWithUploadCollectionSlug,
-        draft: true,
+        version: 'latest',
       })
 
       uploadedFilenames.push(draftDoc.filename)
@@ -2244,7 +2246,7 @@ describe('Versions', () => {
         data: {
           _status: 'published',
         },
-        draft: true,
+        action: 'saveDraft',
         where: {
           id: { equals: publishedDoc.id },
         },
@@ -2282,7 +2284,7 @@ describe('Versions', () => {
         data: {
           alt: 'Duplicated draft',
         },
-        draft: true,
+        action: 'saveDraft',
         duplicateFromID: publishedDoc.id,
       })
 
@@ -2328,7 +2330,7 @@ describe('Versions', () => {
           _status: 'draft',
           alt: 'Updated in draft',
         },
-        draft: true,
+        action: 'saveDraft',
         file: draftImageFile,
       })
 
@@ -2340,7 +2342,7 @@ describe('Versions', () => {
       const draftDoc = await payload.findByID({
         id: publishedDoc.id,
         collection: draftWithUploadCloudStorageCollectionSlug,
-        draft: true,
+        version: 'latest',
       })
 
       expect(mainDoc._status).toBe('published')
@@ -2377,7 +2379,7 @@ describe('Versions', () => {
           _status: 'draft',
           alt: 'Updated in draft',
         },
-        draft: true,
+        action: 'saveDraft',
         file: draftImageFile,
       })
 
@@ -2409,14 +2411,14 @@ describe('Versions', () => {
           _status: 'draft',
           alt: 'Draft version',
         },
-        draft: true,
+        action: 'saveDraft',
         file: draftImageFile,
       })
 
       const draftDoc = await payload.findByID({
         id: publishedDoc.id,
         collection: draftWithUploadCloudStorageCollectionSlug,
-        draft: true,
+        version: 'latest',
       })
 
       const republishedDoc = await payload.update({
@@ -2425,7 +2427,7 @@ describe('Versions', () => {
         data: {
           _status: 'published',
         },
-        draft: true,
+        action: 'saveDraft',
       })
 
       expect(republishedDoc._status).toBe('published')
@@ -2495,7 +2497,7 @@ describe('Versions', () => {
         data: {
           title: updatedTitle1,
         },
-        draft: true,
+        action: 'saveDraft',
       })
 
       // This will be created in the `_draft-posts_versions` collection
@@ -2506,7 +2508,7 @@ describe('Versions', () => {
         data: {
           title: updatedTitle2,
         },
-        draft: true,
+        action: 'saveDraft',
       })
     }
 
@@ -2577,7 +2579,7 @@ describe('Versions', () => {
     it('should not be able to query an old draft version with draft=true', async () => {
       const draftFindResults = await payload.find({
         collection: draftCollectionSlug,
-        draft: true,
+        version: 'latest',
         where: {
           title: {
             equals: updatedTitle1,
@@ -2591,7 +2593,7 @@ describe('Versions', () => {
     it('should be able to query the newest draft version with draft=true', async () => {
       const draftFindResults = await payload.find({
         collection: draftCollectionSlug,
-        draft: true,
+        version: 'latest',
         where: {
           title: {
             equals: updatedTitle2,
@@ -2639,7 +2641,7 @@ describe('Versions', () => {
 
       const draftFindResults = await payload.find({
         collection: draftCollectionSlug,
-        draft: true,
+        version: 'latest',
         where: query,
       })
 
@@ -2650,7 +2652,7 @@ describe('Versions', () => {
     it("should not be able to query old drafts that don't match with draft=true", async () => {
       const draftFindResults = await payload.find({
         collection: draftCollectionSlug,
-        draft: true,
+        version: 'latest',
         where: {
           title: {
             equals: originalTitle,
@@ -2665,14 +2667,14 @@ describe('Versions', () => {
       await createPostWithVersions({ title: 'different document' })
       const allDocs = await payload.find({
         collection: draftCollectionSlug,
-        draft: true,
+        version: 'latest',
       })
 
       expect(allDocs.docs).toHaveLength(2)
 
       const byID = await payload.find({
         collection: draftCollectionSlug,
-        draft: true,
+        version: 'latest',
         where: {
           id: {
             equals: firstDraft.id,
@@ -2687,7 +2689,7 @@ describe('Versions', () => {
       await createPostWithVersions({ title: 'title document 2' })
       const allDocs = await payload.find({
         collection: draftCollectionSlug,
-        draft: true,
+        version: 'latest',
         where: {
           title: {
             like: 'title',
@@ -2699,7 +2701,7 @@ describe('Versions', () => {
 
       const results = await payload.find({
         collection: draftCollectionSlug,
-        draft: true,
+        version: 'latest',
         where: {
           and: [
             {
@@ -3170,7 +3172,7 @@ describe('Versions', () => {
             _status: 'draft',
             title: 'Draft',
           },
-          draft: true,
+          action: 'saveDraft',
         })
         expect(draftVersion.title).toStrictEqual('Draft')
         expect(draftVersion._status).toStrictEqual('draft')
@@ -3181,7 +3183,7 @@ describe('Versions', () => {
             _status: 'published',
             title: 'Published',
           },
-          draft: false,
+          action: 'publish',
         })
         expect(publishedVersion.title).toStrictEqual('Published')
         expect(publishedVersion._status).toStrictEqual('published')
@@ -3222,7 +3224,7 @@ describe('Versions', () => {
 
         const fromNonVersionsTable = await payload.findGlobal({
           slug: autoSaveGlobalSlug,
-          draft: false,
+          version: 'published',
         })
 
         // createdAt from non-versions should be the same as version_createdAt in versions
@@ -3350,7 +3352,7 @@ describe('Versions', () => {
           data: {
             title: 'title',
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         await wait(10)
@@ -3360,7 +3362,7 @@ describe('Versions', () => {
           data: {
             title: 'updated title',
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         const createdUpdatedAt = new Date(created.updatedAt)
@@ -3375,7 +3377,7 @@ describe('Versions', () => {
           data: {
             title: 'title',
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         await wait(10)
@@ -3385,7 +3387,7 @@ describe('Versions', () => {
           data: {
             title: 'updated title',
           },
-          draft: true,
+          action: 'saveDraft',
           autosave: true,
         })
 
@@ -3413,7 +3415,7 @@ describe('Versions', () => {
         // Make sure it was updated correctly
         const foundUpdatedGlobal = await payload.findGlobal({
           slug: autoSaveGlobalSlug,
-          draft: true,
+          version: 'latest',
         })
         expect(foundUpdatedGlobal.title).toBe(title2)
 
@@ -3430,7 +3432,7 @@ describe('Versions', () => {
 
         const restoredGlobal = await payload.findGlobal({
           slug: autoSaveGlobalSlug,
-          draft: true,
+          version: 'latest',
         })
 
         expect(restoredGlobal.title).toBe(restore.version.title.en)
@@ -3453,7 +3455,7 @@ describe('Versions', () => {
 
         const publishedGlobal = await payload.findGlobal({
           slug: autoSaveGlobalSlug,
-          draft: true,
+          version: 'latest',
         })
 
         const updatedTitle2 = 'Here is a draft global with a patched title'
@@ -3464,7 +3466,7 @@ describe('Versions', () => {
             _status: 'draft',
             title: updatedTitle2,
           },
-          draft: true,
+          action: 'saveDraft',
           locale: 'en',
         })
 
@@ -3474,13 +3476,13 @@ describe('Versions', () => {
             _status: 'draft',
             title: updatedTitle2,
           },
-          draft: true,
+          action: 'saveDraft',
           locale: 'es',
         })
 
         const updatedGlobal = await payload.findGlobal({
           slug: autoSaveGlobalSlug,
-          draft: true,
+          version: 'latest',
           locale: 'all',
         })
 
@@ -3498,7 +3500,7 @@ describe('Versions', () => {
             _status: 'draft',
             title: originalTitle,
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         const updatedTitle2 = 'Now try to publish'
@@ -3654,7 +3656,7 @@ describe('Versions', () => {
           description: 'hello',
           title: 'my doc to publish in the future',
         },
-        draft: true,
+        action: 'saveDraft',
       })
 
       expect(draft._status).toStrictEqual('draft')
@@ -3679,7 +3681,7 @@ describe('Versions', () => {
       const retrieved = await payload.findByID({
         id: draft.id,
         collection: draftCollectionSlug,
-        draft: false,
+        version: 'published',
       })
 
       expect(retrieved._status).toStrictEqual('published')
@@ -3698,7 +3700,7 @@ describe('Versions', () => {
           restrictedToUpdate: true,
           title: 'my doc to publish in the future',
         },
-        draft: true,
+        action: 'saveDraft',
       })
 
       expect(draft._status).toStrictEqual('draft')
@@ -3786,7 +3788,7 @@ describe('Versions', () => {
           description: 'hello',
           title: 'my doc to publish in the future',
         },
-        draft: true,
+        action: 'saveDraft',
       })
 
       expect(draft._status).toStrictEqual('draft')
@@ -3836,7 +3838,7 @@ describe('Versions', () => {
           description: 'hello',
           title: 'my doc to publish in the future',
         },
-        draft: true,
+        action: 'saveDraft',
       })
 
       expect(draft._status).toStrictEqual('draft')
@@ -3884,7 +3886,7 @@ describe('Versions', () => {
           _status: 'draft',
           title: 'i will publish',
         },
-        draft: true,
+        action: 'saveDraft',
       })
 
       expect(draft._status).toStrictEqual('draft')
@@ -3953,7 +3955,7 @@ describe('Versions', () => {
           _status: 'draft',
           title: 'draft only',
         },
-        draft: true,
+        action: 'saveDraft',
       })
 
       expect(draft._status).toStrictEqual('draft')
@@ -4182,7 +4184,7 @@ describe('Versions', () => {
           data: {
             text: 'Spanish draft',
           },
-          draft: true,
+          action: 'saveDraft',
           locale: 'es',
         })
 
@@ -4194,7 +4196,7 @@ describe('Versions', () => {
             description: 'My English description',
             text: 'English draft',
           },
-          draft: true,
+          action: 'saveDraft',
           locale: 'en',
         })
 
@@ -4205,7 +4207,7 @@ describe('Versions', () => {
           data: {
             text: 'German draft',
           },
-          draft: true,
+          action: 'saveDraft',
           locale: 'de',
         })
 
@@ -4217,7 +4219,7 @@ describe('Versions', () => {
             _status: 'published',
             text: 'English published 1',
           },
-          draft: false,
+          action: 'publish',
           locale: 'en',
         })
 
@@ -4238,7 +4240,7 @@ describe('Versions', () => {
         const docWithSpanishDraft1 = await payload.findByID({
           id: draft1.id,
           collection: localizedCollectionSlug,
-          draft: true,
+          version: 'latest',
           locale: 'all',
         })
 
@@ -4255,7 +4257,7 @@ describe('Versions', () => {
             _status: 'published',
             text: 'English published 2',
           },
-          draft: false,
+          action: 'publish',
           locale: 'en',
         })
 
@@ -4280,14 +4282,14 @@ describe('Versions', () => {
             _status: 'draft',
             text: 'German draft 1',
           },
-          draft: true,
+          action: 'saveDraft',
           locale: 'de',
         })
 
         const docWithGermanDraft = await payload.findByID({
           id: draft1.id,
           collection: localizedCollectionSlug,
-          draft: true,
+          version: 'latest',
           locale: 'all',
         })
 
@@ -4306,7 +4308,7 @@ describe('Versions', () => {
             _status: 'published',
             text: 'German published 1',
           },
-          draft: false,
+          action: 'publish',
           locale: 'de',
         })
 
@@ -4317,7 +4319,7 @@ describe('Versions', () => {
             _status: 'published',
             text: 'English published 3',
           },
-          draft: false,
+          action: 'publish',
           locale: 'en',
         })
 
@@ -4335,7 +4337,7 @@ describe('Versions', () => {
         const finalDraft = await payload.findByID({
           id: draft1.id,
           collection: localizedCollectionSlug,
-          draft: true,
+          version: 'latest',
           locale: 'all',
         })
 
@@ -4354,7 +4356,7 @@ describe('Versions', () => {
         const finalPublished = await payload.findByID({
           id: draft1.id,
           collection: localizedCollectionSlug,
-          draft: true,
+          version: 'latest',
           locale: 'all',
         })
 
@@ -4369,7 +4371,7 @@ describe('Versions', () => {
           data: {
             text: 'Spanish draft',
           },
-          draft: true,
+          action: 'saveDraft',
           locale: 'es',
         })
 
@@ -4380,7 +4382,7 @@ describe('Versions', () => {
             _status: 'published',
             text: 'English publish',
           },
-          draft: false,
+          action: 'publish',
         })
 
         const publishedOnlyEN = await payload.findByID({
@@ -4399,7 +4401,7 @@ describe('Versions', () => {
           data: {
             text: 'Spanish draft',
           },
-          draft: true,
+          action: 'saveDraft',
           locale: 'es',
         })
 
@@ -4410,7 +4412,7 @@ describe('Versions', () => {
             _status: 'published',
             text: 'English publish',
           },
-          draft: false,
+          action: 'publish',
         })
 
         const publishedOnlyEN = await payload.findByID({
@@ -4428,7 +4430,7 @@ describe('Versions', () => {
           data: {
             _status: 'published',
           },
-          draft: false,
+          action: 'publish',
           publishAllLocales: true,
         })
 
@@ -4448,7 +4450,7 @@ describe('Versions', () => {
           data: {
             text: 'Spanish draft',
           },
-          draft: true,
+          action: 'saveDraft',
           locale: 'es',
         })
 
@@ -4459,7 +4461,7 @@ describe('Versions', () => {
             _status: 'published',
             text: 'German publish',
           },
-          draft: false,
+          action: 'publish',
           locale: 'de',
         })
 
@@ -4480,7 +4482,7 @@ describe('Versions', () => {
           data: {
             text: 'Spanish draft',
           },
-          draft: true,
+          action: 'saveDraft',
           locale: 'es',
         })
 
@@ -4491,7 +4493,7 @@ describe('Versions', () => {
             _status: 'published',
             text: 'English publish',
           },
-          draft: false,
+          action: 'publish',
         })
 
         const publishedOnlyEN = await payload.findByID({
@@ -4522,7 +4524,7 @@ describe('Versions', () => {
           data: {
             text: 'English draft',
           },
-          draft: true,
+          action: 'saveDraft',
           locale: 'en',
         })
 
@@ -4539,7 +4541,7 @@ describe('Versions', () => {
             ],
             text: 'English with blocks',
           },
-          draft: true,
+          action: 'saveDraft',
           locale: 'en',
         })
 
@@ -4557,7 +4559,7 @@ describe('Versions', () => {
             ],
             text: 'English published with blocks',
           },
-          draft: false,
+          action: 'publish',
           locale: 'en',
         })
 
@@ -4604,7 +4606,7 @@ describe('Versions', () => {
             content: 'Spanish draft content',
             title: 'Spanish draft',
           },
-          draft: true,
+          action: 'saveDraft',
           locale: 'es',
         })
 
@@ -4636,7 +4638,7 @@ describe('Versions', () => {
           data: {
             title: 'Another spanish draft',
           },
-          draft: true,
+          action: 'saveDraft',
           locale: 'es',
         })
 
@@ -4647,7 +4649,7 @@ describe('Versions', () => {
             _status: 'published',
             title: 'Eng published',
           },
-          draft: false,
+          action: 'publish',
           locale: 'en',
         })
 
@@ -4669,7 +4671,7 @@ describe('Versions', () => {
             content: 'Spanish draft content',
             title: 'Spanish draft',
           },
-          draft: true,
+          action: 'saveDraft',
           locale: 'es',
         })
 
@@ -4716,7 +4718,7 @@ describe('Versions', () => {
             content: 'Test span draft content',
             title: 'Test span draft',
           },
-          draft: true,
+          action: 'saveDraft',
           locale: 'es',
         })
 
@@ -4748,7 +4750,7 @@ describe('Versions', () => {
             content: 'New spanish draft content',
             title: 'New spanish draft',
           },
-          draft: true,
+          action: 'saveDraft',
           locale: 'es',
         })
 
@@ -4759,7 +4761,7 @@ describe('Versions', () => {
             _status: 'published',
             title: 'New eng',
           },
-          draft: false,
+          action: 'publish',
         })
 
         const allVersions = await payload.findGlobalVersions({
@@ -4777,6 +4779,353 @@ describe('Versions', () => {
         expect(latestVersion.title.es).toStrictEqual('New spanish draft')
         expect(latestVersion.title.en).toStrictEqual('New eng')
       })
+    })
+  })
+
+  describe('version read modes', () => {
+    const createdIDs: (number | string)[] = []
+
+    const draftData = (title: string) => ({
+      description: 'Description',
+      title,
+    })
+
+    afterEach(async () => {
+      for (const id of createdIDs) {
+        await payload.delete({
+          collection: draftCollectionSlug,
+          id,
+          overrideAccess: true,
+        })
+      }
+
+      createdIDs.length = 0
+
+      await payload.delete({
+        collection: postCollectionSlug,
+        overrideAccess: true,
+        where: {
+          id: {
+            exists: true,
+          },
+        },
+      })
+
+      await payload.db.deleteVersions({
+        globalSlug: simpleDraftGlobalSlug,
+        where: {},
+      })
+    })
+
+    async function createDraftOnly(title: string) {
+      const doc = await payload.create({
+        action: 'saveDraft',
+        collection: draftCollectionSlug,
+        data: draftData(title),
+        overrideAccess: true,
+      })
+
+      createdIDs.push(doc.id)
+      return doc
+    }
+
+    async function createPublishedOnly(title: string) {
+      const doc = await payload.create({
+        collection: draftCollectionSlug,
+        data: {
+          ...draftData(title),
+          _status: 'published',
+        },
+        overrideAccess: true,
+      })
+
+      createdIDs.push(doc.id)
+      return doc
+    }
+
+    async function createPublishedWithNewerDraft({
+      draftTitle,
+      publishedTitle,
+    }: {
+      draftTitle: string
+      publishedTitle: string
+    }) {
+      const doc = await payload.create({
+        collection: draftCollectionSlug,
+        data: {
+          ...draftData(publishedTitle),
+          _status: 'published',
+        },
+        overrideAccess: true,
+      })
+
+      createdIDs.push(doc.id)
+
+      await payload.update({
+        id: doc.id,
+        action: 'saveDraft',
+        collection: draftCollectionSlug,
+        data: {
+          title: draftTitle,
+        },
+        overrideAccess: true,
+      })
+
+      return doc
+    }
+
+    it('should return published content for omitted and published collection reads', async () => {
+      const published = await createPublishedWithNewerDraft({
+        draftTitle: 'Draft title',
+        publishedTitle: 'Published title',
+      })
+
+      const omitted = await payload.findByID({
+        id: published.id,
+        collection: draftCollectionSlug,
+        overrideAccess: true,
+      })
+      const explicit = await payload.findByID({
+        id: published.id,
+        collection: draftCollectionSlug,
+        overrideAccess: true,
+        version: 'published',
+      })
+
+      expect(omitted.title).toBe('Published title')
+      expect(explicit.title).toBe('Published title')
+    })
+
+    it('should fall back to published content for latest collection reads', async () => {
+      const published = await createPublishedOnly('Only published')
+      const withDraft = await createPublishedWithNewerDraft({
+        draftTitle: 'Newer draft',
+        publishedTitle: 'Original published',
+      })
+
+      const latestPublished = await payload.findByID({
+        id: published.id,
+        collection: draftCollectionSlug,
+        overrideAccess: true,
+        version: 'latest',
+      })
+      const latestWithDraft = await payload.findByID({
+        id: withDraft.id,
+        collection: draftCollectionSlug,
+        overrideAccess: true,
+        version: 'latest',
+      })
+
+      expect(latestPublished.title).toBe('Only published')
+      expect(latestWithDraft.title).toBe('Newer draft')
+    })
+
+    it('should exclude documents without drafts from draft-only collection lists', async () => {
+      const draftOnly = await createDraftOnly('Draft only')
+      const publishedOnly = await createPublishedOnly('Published only')
+      const withDraft = await createPublishedWithNewerDraft({
+        draftTitle: 'Has newer draft',
+        publishedTitle: 'Has published',
+      })
+
+      const result = await payload.find({
+        collection: draftCollectionSlug,
+        overrideAccess: true,
+        pagination: false,
+        version: 'draft',
+        where: {
+          id: {
+            in: [draftOnly.id, publishedOnly.id, withDraft.id],
+          },
+        },
+      })
+
+      const titles = result.docs.map((doc) => doc.title).sort()
+      expect(titles).toEqual(['Draft only', 'Has newer draft'])
+    })
+
+    it('should not find published-only documents with draft collection reads', async () => {
+      const published = await createPublishedOnly('Published only by id')
+
+      await expect(
+        payload.findByID({
+          id: published.id,
+          collection: draftCollectionSlug,
+          overrideAccess: true,
+          version: 'draft',
+        }),
+      ).rejects.toThrow()
+
+      const silenced = await payload.findByID({
+        id: published.id,
+        collection: draftCollectionSlug,
+        disableErrors: true,
+        overrideAccess: true,
+        version: 'draft',
+      })
+
+      expect(silenced).toBeNull()
+    })
+
+    it('should honor select on latest collection reads', async () => {
+      const doc = await createPublishedWithNewerDraft({
+        draftTitle: 'Selected draft',
+        publishedTitle: 'Selected published',
+      })
+
+      const result = await payload.findByID({
+        id: doc.id,
+        collection: draftCollectionSlug,
+        overrideAccess: true,
+        select: {
+          title: true,
+        },
+        version: 'latest',
+      })
+
+      expect(result.title).toBe('Selected draft')
+      expect(result).not.toHaveProperty('description')
+    })
+
+    it('should populate relationships using the same version', async () => {
+      const related = await createPublishedWithNewerDraft({
+        draftTitle: 'Related draft',
+        publishedTitle: 'Related published',
+      })
+      const parent = await payload.create({
+        collection: draftCollectionSlug,
+        data: {
+          ...draftData('Parent published'),
+          _status: 'published',
+          relation: related.id,
+        },
+        overrideAccess: true,
+      })
+      createdIDs.push(parent.id)
+
+      const published = await payload.findByID({
+        id: parent.id,
+        collection: draftCollectionSlug,
+        depth: 1,
+        overrideAccess: true,
+        version: 'published',
+      })
+      const latest = await payload.findByID({
+        id: parent.id,
+        collection: draftCollectionSlug,
+        depth: 1,
+        overrideAccess: true,
+        version: 'latest',
+      })
+
+      expect(typeof published.relation).toBe('object')
+      expect((published.relation as { title: string }).title).toBe('Related published')
+      expect((latest.relation as { title: string }).title).toBe('Related draft')
+    })
+
+    it('should return no results for draft reads on collections without drafts', async () => {
+      const doc = await payload.create({
+        collection: postCollectionSlug,
+        data: {},
+        overrideAccess: true,
+      })
+
+      const list = await payload.find({
+        collection: postCollectionSlug,
+        overrideAccess: true,
+        version: 'draft',
+        where: {
+          id: {
+            equals: doc.id,
+          },
+        },
+      })
+      const latest = await payload.findByID({
+        id: doc.id,
+        collection: postCollectionSlug,
+        overrideAccess: true,
+        version: 'latest',
+      })
+
+      expect(list.docs).toHaveLength(0)
+      expect(latest.id).toBe(doc.id)
+
+      await expect(
+        payload.findByID({
+          id: doc.id,
+          collection: postCollectionSlug,
+          overrideAccess: true,
+          version: 'draft',
+        }),
+      ).rejects.toThrow()
+    })
+
+    it('should apply the same read modes to globals', async () => {
+      await payload.updateGlobal({
+        data: {
+          _status: 'published',
+          title: 'Published global',
+        },
+        overrideAccess: true,
+        slug: simpleDraftGlobalSlug,
+      })
+
+      await payload.updateGlobal({
+        action: 'saveDraft',
+        data: {
+          title: 'Draft global',
+        },
+        overrideAccess: true,
+        slug: simpleDraftGlobalSlug,
+      })
+
+      const published = await payload.findGlobal({
+        overrideAccess: true,
+        slug: simpleDraftGlobalSlug,
+        version: 'published',
+      })
+      const latest = await payload.findGlobal({
+        overrideAccess: true,
+        slug: simpleDraftGlobalSlug,
+        version: 'latest',
+      })
+      const draft = await payload.findGlobal({
+        overrideAccess: true,
+        slug: simpleDraftGlobalSlug,
+        version: 'draft',
+      })
+
+      expect(published.title).toBe('Published global')
+      expect(latest.title).toBe('Draft global')
+      expect(draft.title).toBe('Draft global')
+    })
+
+    it('should not find a published-only global with a draft read', async () => {
+      await payload.updateGlobal({
+        data: {
+          _status: 'published',
+          title: 'Only published global',
+        },
+        overrideAccess: true,
+        slug: simpleDraftGlobalSlug,
+      })
+
+      await expect(
+        payload.findGlobal({
+          overrideAccess: true,
+          slug: simpleDraftGlobalSlug,
+          version: 'draft',
+        }),
+      ).rejects.toThrow()
+
+      const silenced = await payload.findGlobal({
+        disableErrors: true,
+        overrideAccess: true,
+        slug: simpleDraftGlobalSlug,
+        version: 'draft',
+      })
+
+      expect(silenced).toBeNull()
     })
   })
 })

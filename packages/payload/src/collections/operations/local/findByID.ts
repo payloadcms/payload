@@ -171,8 +171,6 @@ export async function findByIDLocal<
     data,
     depth,
     disableErrors,
-    draft:
-      (version as string | undefined) === 'draft' || (version as string | undefined) === 'latest',
     flattenLocales,
     includeLockStatus,
     joins,
@@ -182,5 +180,6 @@ export async function findByIDLocal<
     select,
     showHiddenFields,
     trash,
+    version,
   })
 }

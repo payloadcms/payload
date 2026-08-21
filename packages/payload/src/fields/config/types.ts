@@ -148,6 +148,7 @@ import type {
   Where,
 } from '../../types/index.js'
 import type { SchemaVariant } from '../../utilities/configToJSONSchema.js'
+import type { ReadVersion } from '../../versions/types.js'
 import type { Slugify } from '../baseFields/slug/types.js'
 import type { DisabledOptions } from '../isFieldDisabled.js'
 import type {
@@ -235,6 +236,10 @@ export type FieldHookArgs<TData extends TypeWithID = any, TValue = any, TSibling
   siblingFields: (Field | TabAsField)[]
   /** The value of the field. */
   value?: TValue
+  /**
+   * Only available in the `afterRead` hook.
+   */
+  version?: ReadVersion
 }
 
 export type FieldHook<TData extends TypeWithID = any, TValue = any, TSiblingData = any> = (

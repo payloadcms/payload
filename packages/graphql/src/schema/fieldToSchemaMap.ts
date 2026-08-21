@@ -706,13 +706,13 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
                   currentDepth: 0,
                   depth: 0,
                   docID: id,
-                  draft,
                   fallbackLocale,
                   locale,
                   overrideAccess: false,
                   select,
                   showHiddenFields: false,
                   transactionID: context.req.transactionID,
+                  version: draft ? 'latest' : 'published',
                 }),
               )
 
@@ -756,13 +756,13 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
                 currentDepth: 0,
                 depth: 0,
                 docID: id,
-                draft,
                 fallbackLocale,
                 locale,
                 overrideAccess: false,
                 select,
                 showHiddenFields: false,
                 transactionID: context.req.transactionID,
+                version: draft ? 'latest' : 'published',
               }),
             )
 
@@ -1125,13 +1125,13 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
                   currentDepth: 0,
                   depth: 0,
                   docID: id,
-                  draft,
                   fallbackLocale,
                   locale,
                   overrideAccess: false,
                   select,
                   showHiddenFields: false,
                   transactionID: context.req.transactionID,
+                  version: draft ? 'latest' : 'published',
                 }),
               )
 
@@ -1175,13 +1175,13 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
                 currentDepth: 0,
                 depth: 0,
                 docID: id,
-                draft,
                 fallbackLocale,
                 locale,
                 overrideAccess: false,
                 select,
                 showHiddenFields: false,
                 transactionID: context.req.transactionID,
+                version: draft ? 'latest' : 'published',
               }),
             )
 

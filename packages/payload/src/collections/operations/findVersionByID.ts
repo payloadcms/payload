@@ -164,7 +164,6 @@ export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
     currentDepth,
     depth: depth!,
     doc: result.version,
-    // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
     draft: undefined,
     fallbackLocale: fallbackLocale!,
     global: null,
