@@ -681,6 +681,39 @@ If you use a `declare module` augmentation to extend `GeneratedDatabaseSchema` (
 
 Run `npx @payloadcms/codemod --transform migrate-db-types-subpath` to migrate automatically. The codemod handles import declarations, re-export declarations, and `declare module` augmentations.
 
+### `getLocalizedPaths` and `hasLocalesTable` now require `parentIsLocalized`
+
+`getLocalizedPaths` (exported from `payload`) and `hasLocalesTable` (exported from `@payloadcms/drizzle`) previously accepted an optional `parentIsLocalized` argument. It is now required. Pass `false` when calling at the root of a collection or global — the value is only `true` when the fields being processed are nested inside a localized parent (such as a localized array, block, group, or tab).
+
+```diff
+  import { getLocalizedPaths } from 'payload'
+
+  const paths = getLocalizedPaths({
+    collectionSlug,
+    fields,
+    incomingPath,
+    locale,
++   parentIsLocalized: false,
+    payload,
+  })
+```
+
+### Custom database adapters must set `name`
+
+The `name` property on the object returned by a database adapter (the `DatabaseAdapterResult` type, also exported as `DatabaseAdapterObj`) is now required. Payload's official adapters already set this, so no action is needed unless you maintain a custom database adapter — in which case add a `name` to the object your adapter factory returns:
+
+```diff
+  export function myAdapter(args): DatabaseAdapterObj {
+    return {
+      defaultIDType: 'text',
++     name: 'my-adapter',
+      init: ({ payload }) => {
+        // ...
+      },
+    }
+  }
+```
+
 ### Minimum supported Node.js version is now 24.15.0 ([#16540](https://github.com/payloadcms/payload/pull/16540))
 
 The minimum supported Node.js version is now **24.15.0** (previously 18.20.2). Upgrade your runtime — along with any CI, Docker images, and deployment targets — to the latest node LTS version or newer before upgrading to 4.0.

@@ -714,10 +714,8 @@ export type DatabaseAdapterResult<T = BaseDatabaseAdapter> = {
   init: (args: { payload: Payload }) => T
   /**
    * The name of the database adapter. For example, "postgres" or "mongoose".
-   *
-   * @todo make required in 4.0
    */
-  name?: string
+  name: string
 }
 
 export type DBIdentifierName =
