@@ -116,6 +116,7 @@ localization: {
       const fullTenant = await req.payload.findByID({
         id: getTenantFromCookie(req.headers, 'text') as string,
         collection: 'tenants',
+        overrideAccess: true,
         req,
       })
       if (fullTenant && fullTenant.supportedLocales?.length) {
@@ -191,6 +192,7 @@ When the `_status` field is localized, publishing and unpublishing are scoped to
 // Publishes ONLY the Spanish status; English, German, etc. are unchanged
 await payload.update({
   collection: 'posts',
+  overrideAccess: true,
   id,
   locale: 'es',
   data: { _status: 'published' },
@@ -203,6 +205,7 @@ To publish or unpublish every locale at once, use `publishAllLocales` or `unpubl
 // Publishes every locale
 await payload.update({
   collection: 'posts',
+  overrideAccess: true,
   id,
   publishAllLocales: true,
   data: { _status: 'published' },
@@ -211,6 +214,7 @@ await payload.update({
 // Unpublishes every locale
 await payload.update({
   collection: 'posts',
+  overrideAccess: true,
   id,
   unpublishAllLocales: true,
   data: { _status: 'draft' },
@@ -291,6 +295,7 @@ locale, array of locales, as well as `'null'`, `'false'`, `false`, and `'none'`.
 ```js
 const posts = await payload.find({
   collection: 'posts',
+  overrideAccess: true,
   locale: 'es',
   fallbackLocale: false,
 })
