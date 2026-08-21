@@ -27,11 +27,10 @@ import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.j
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
-import { resolveSelect } from '../../utilities/resolveSelect.js'
-import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion.js'
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
+import { getOperationSelect } from './utilities/getOperationSelect.js'
 import { updateDocument } from './utilities/update.js'
 
 export type Arguments<TSlug extends CollectionSlug> = {
@@ -191,14 +190,11 @@ export const updateByIDOperation = async <
       throwOnMissingFile: false,
     })
 
-    const select = sanitizeSelect({
-      fields: collectionConfig.flattenedFields,
-      select: resolveSelect({
-        config: collectionConfig.select,
-        operation: 'update',
-        req,
-        select: incomingSelect,
-      }),
+    const select = getOperationSelect({
+      collectionConfig,
+      incomingSelect,
+      operation: 'update',
+      req,
     })
 
     // ///////////////////////////////////////////////

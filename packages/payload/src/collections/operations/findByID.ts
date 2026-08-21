@@ -26,11 +26,11 @@ import { lockedDocumentsCollectionSlug } from '../../locked-documents/config.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { getSelectMode } from '../../utilities/getSelectMode.js'
 import { hasDraftsEnabled } from '../../utilities/getVersionsConfig.js'
-import { resolveSelect } from '../../utilities/resolveSelect.js'
-import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { replaceWithDraftIfAvailable } from '../../versions/drafts/replaceWithDraftIfAvailable.js'
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
+import { getOperationSelect } from './utilities/getOperationSelect.js'
+import { runCollectionHooks } from './utilities/runCollectionHooks.js'
 
 export type FindByIDArgs = {
   collection: Collection
@@ -96,14 +96,11 @@ export const findByIDOperation = async <
   const includeLockStatus =
     includeLockStatusFromArgs && req.payload.collections?.[lockedDocumentsCollectionSlug]
 
-  const select = sanitizeSelect({
-    fields: collectionConfig.flattenedFields,
-    select: resolveSelect({
-      config: collectionConfig.select,
-      operation: 'read',
-      req,
-      select: incomingSelect,
-    }),
+  const select = getOperationSelect({
+    collectionConfig,
+    incomingSelect,
+    operation: 'read',
+    req,
   })
 
   // /////////////////////////////////////
@@ -282,19 +279,19 @@ export const findByIDOperation = async <
   // beforeRead - Collection
   // /////////////////////////////////////
 
-  if (collectionConfig.hooks?.beforeRead?.length) {
-    for (const hook of collectionConfig.hooks.beforeRead) {
-      result =
-        (await hook({
-          collection: collectionConfig,
-          context: req.context,
-          doc: result,
-          overrideAccess,
-          query: findOneArgs.where,
-          req,
-        })) || result
-    }
-  }
+  result = await runCollectionHooks({
+    hooks: collectionConfig.hooks?.beforeRead,
+    invoke: (hook, doc) =>
+      hook({
+        collection: collectionConfig,
+        context: req.context,
+        doc,
+        overrideAccess,
+        query: findOneArgs.where!,
+        req,
+      }),
+    payload: result,
+  })
 
   // /////////////////////////////////////
   // afterRead - Fields
@@ -322,19 +319,19 @@ export const findByIDOperation = async <
   // afterRead - Collection
   // /////////////////////////////////////
 
-  if (collectionConfig.hooks?.afterRead?.length) {
-    for (const hook of collectionConfig.hooks.afterRead) {
-      result =
-        (await hook({
-          collection: collectionConfig,
-          context: req.context,
-          doc: result,
-          overrideAccess,
-          query: findOneArgs.where,
-          req,
-        })) || result
-    }
-  }
+  result = await runCollectionHooks({
+    hooks: collectionConfig.hooks?.afterRead,
+    invoke: (hook, doc) =>
+      hook({
+        collection: collectionConfig,
+        context: req.context,
+        doc,
+        overrideAccess,
+        query: findOneArgs.where,
+        req,
+      }),
+    payload: result,
+  })
 
   // /////////////////////////////////////
   // afterOperation - Collection

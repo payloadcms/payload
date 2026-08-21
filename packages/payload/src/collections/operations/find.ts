@@ -25,14 +25,14 @@ import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { lockedDocumentsCollectionSlug } from '../../locked-documents/config.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { hasDraftsEnabled } from '../../utilities/getVersionsConfig.js'
-import { resolveSelect } from '../../utilities/resolveSelect.js'
-import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { buildVersionCollectionFields } from '../../versions/buildCollectionFields.js'
 import { appendVersionToQueryKey } from '../../versions/drafts/appendVersionToQueryKey.js'
 import { getQueryDraftsSelect } from '../../versions/drafts/getQueryDraftsSelect.js'
 import { getQueryDraftsSort } from '../../versions/drafts/getQueryDraftsSort.js'
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
+import { getOperationSelect } from './utilities/getOperationSelect.js'
+import { runCollectionHooks } from './utilities/runCollectionHooks.js'
 import { sanitizeSortQuery } from './utilities/sanitizeSortQuery.js'
 
 export type Arguments = {
@@ -104,14 +104,11 @@ export const findOperation = async <
 
   const { fallbackLocale, locale, payload } = req
 
-  const select = sanitizeSelect({
-    fields: collectionConfig.flattenedFields,
-    select: resolveSelect({
-      config: collectionConfig.select,
-      operation: 'read',
-      req,
-      select: incomingSelect,
-    }),
+  const select = getOperationSelect({
+    collectionConfig,
+    incomingSelect,
+    operation: 'read',
+    req,
   })
 
   // /////////////////////////////////////
@@ -305,23 +302,21 @@ export const findOperation = async <
 
   if (collectionConfig?.hooks?.beforeRead?.length) {
     result.docs = await Promise.all(
-      result.docs.map(async (doc) => {
-        let docRef = doc
-
-        for (const hook of collectionConfig.hooks.beforeRead) {
-          docRef =
-            (await hook({
+      result.docs.map((doc) =>
+        runCollectionHooks({
+          hooks: collectionConfig.hooks.beforeRead,
+          invoke: (hook, docRef) =>
+            hook({
               collection: collectionConfig,
               context: req.context,
               doc: docRef,
               overrideAccess: overrideAccess!,
               query: fullWhere,
               req,
-            })) || docRef
-        }
-
-        return docRef
-      }),
+            }),
+          payload: doc,
+        }),
+      ),
     )
   }
 
@@ -357,12 +352,11 @@ export const findOperation = async <
 
   if (collectionConfig?.hooks?.afterRead?.length) {
     result.docs = await Promise.all(
-      result.docs.map(async (doc) => {
-        let docRef = doc
-
-        for (const hook of collectionConfig.hooks.afterRead) {
-          docRef =
-            (await hook({
+      result.docs.map((doc) =>
+        runCollectionHooks({
+          hooks: collectionConfig.hooks.afterRead,
+          invoke: (hook, docRef) =>
+            hook({
               collection: collectionConfig,
               context: req.context,
               doc: docRef,
@@ -370,11 +364,10 @@ export const findOperation = async <
               overrideAccess: overrideAccess!,
               query: fullWhere,
               req,
-            })) || docRef
-        }
-
-        return docRef
-      }),
+            }),
+          payload: doc,
+        }),
+      ),
     )
   }
 
