@@ -26,7 +26,7 @@ import type {
   TypedGlobalSelect,
 } from '../../index.js'
 import type { PayloadRequest, SelectIncludeType, Where, WithSelectFn } from '../../types/index.js'
-import type { UpdateAction } from '../../versions/actions/types.js'
+import type { RestoreAction, UpdateAction } from '../../versions/actions/types.js'
 import type {
   IncomingGlobalVersions,
   ReadVersion,
@@ -102,6 +102,29 @@ export type UpdateActionFromGlobalSlug<TSlug extends GlobalSlug> =
         }
       : {
           action?: UpdateAction
+        }
+
+/**
+ * Allows restore `action` on draft-enabled globals. Non-draft globals may only omit it or pass `publish`.
+ * Restore does not accept `unpublish`. Omitted action publishes.
+ */
+export type RestoreActionFromGlobalSlug<TSlug extends GlobalSlug> =
+  keyof GeneratedTypes extends never
+    ? {
+        /**
+         * Restore and publish (`publish`, default) or restore as a draft (`saveDraft`).
+         */
+        action?: RestoreAction
+      }
+    : TSlug extends GlobalsWithoutDrafts
+      ? {
+          action?: 'publish'
+        }
+      : {
+          /**
+           * Restore and publish (`publish`, default) or restore as a draft (`saveDraft`).
+           */
+          action?: RestoreAction
         }
 
 export type BeforeValidateHook = (args: {

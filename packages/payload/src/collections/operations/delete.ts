@@ -244,7 +244,6 @@ export const deleteOperation = async <
           context: req.context,
           depth: depth!,
           doc: result || doc,
-          draft: undefined,
           fallbackLocale: fallbackLocale!,
           global: null,
           locale: locale!,

@@ -164,7 +164,6 @@ export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
     currentDepth,
     depth: depth!,
     doc: result.version,
-    draft: undefined,
     fallbackLocale: fallbackLocale!,
     global: null,
     locale: locale!,

@@ -180,7 +180,6 @@ export const findVersionsOperation = async <TData extends TypeWithVersion<TData>
         context: req.context,
         depth: depth!,
         doc: data.version,
-        draft: undefined,
         fallbackLocale: fallbackLocale!,
         findMany: true,
         global: null,

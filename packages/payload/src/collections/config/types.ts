@@ -158,10 +158,14 @@ export type UpdateActionFromCollectionSlug<TSlug extends CollectionSlug> =
 
 /**
  * Allows restore `action` on draft-enabled collections. Non-draft collections may only omit it or pass `publish`.
+ * Restore does not accept `unpublish`. Omitted action publishes.
  */
 export type RestoreActionFromCollectionSlug<TSlug extends CollectionSlug> =
   keyof GeneratedTypes extends never
     ? {
+        /**
+         * Restore and publish (`publish`, default) or restore as a draft (`saveDraft`).
+         */
         action?: RestoreAction
       }
     : TSlug extends CollectionsWithoutDrafts
@@ -169,6 +173,9 @@ export type RestoreActionFromCollectionSlug<TSlug extends CollectionSlug> =
           action?: 'publish'
         }
       : {
+          /**
+           * Restore and publish (`publish`, default) or restore as a draft (`saveDraft`).
+           */
           action?: RestoreAction
         }
 

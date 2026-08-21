@@ -1811,6 +1811,165 @@ describe('Types testing', () => {
           action: 'saveDraft',
         })
       })
+
+      test('restoreVersion accepts saveDraft and publish, and rejects unpublish', () => {
+        expect(payload.restoreVersion).type.toBeCallableWith({
+          collection: 'draft-posts',
+          id: 'id',
+        })
+        expect(payload.restoreVersion).type.toBeCallableWith({
+          collection: 'draft-posts',
+          id: 'id',
+          action: 'publish',
+        })
+        expect(payload.restoreVersion).type.toBeCallableWith({
+          collection: 'draft-posts',
+          id: 'id',
+          action: 'saveDraft',
+        })
+        expect(payload.restoreVersion).type.not.toBeCallableWith({
+          collection: 'draft-posts',
+          id: 'id',
+          action: 'unpublish',
+        })
+        expect(payload.restoreVersion).type.not.toBeCallableWith({
+          collection: 'draft-posts',
+          id: 'id',
+          draft: true,
+        })
+        expect(payload.restoreVersion).type.not.toBeCallableWith({
+          collection: 'pages',
+          id: 'id',
+          action: 'saveDraft',
+        })
+        expect(payload.restoreVersion).type.toBeCallableWith({
+          collection: 'pages',
+          id: 'id',
+          action: 'publish',
+        })
+      })
+
+      test('restoreGlobalVersion accepts saveDraft and publish, and rejects unpublish', () => {
+        expect(payload.restoreGlobalVersion).type.toBeCallableWith({
+          slug: 'settings',
+          id: 'id',
+          action: 'saveDraft',
+        })
+        expect(payload.restoreGlobalVersion).type.not.toBeCallableWith({
+          slug: 'settings',
+          id: 'id',
+          action: 'unpublish',
+        })
+        expect(payload.restoreGlobalVersion).type.not.toBeCallableWith({
+          slug: 'menu',
+          id: 'id',
+          action: 'saveDraft',
+        })
+        expect(payload.restoreGlobalVersion).type.toBeCallableWith({
+          slug: 'menu',
+          id: 'id',
+          action: 'publish',
+        })
+      })
+
+      test('delete rejects draft, action, and version', () => {
+        expect(payload.delete).type.not.toBeCallableWith({
+          collection: 'draft-posts',
+          id: 1,
+          draft: true,
+        })
+        expect(payload.delete).type.not.toBeCallableWith({
+          collection: 'draft-posts',
+          id: 1,
+          action: 'saveDraft',
+        })
+        expect(payload.delete).type.not.toBeCallableWith({
+          collection: 'draft-posts',
+          id: 1,
+          version: 'latest',
+        })
+        expect(payload.delete).type.not.toBeCallableWith({
+          collection: 'draft-posts',
+          where: {},
+          draft: true,
+        })
+        expect(payload.delete).type.not.toBeCallableWith({
+          collection: 'draft-posts',
+          where: {},
+          action: 'publish',
+        })
+        expect(payload.delete).type.not.toBeCallableWith({
+          collection: 'draft-posts',
+          where: {},
+          version: 'draft',
+        })
+      })
+
+      test('findVersions rejects draft, action, and version', () => {
+        expect(payload.findVersions).type.not.toBeCallableWith({
+          collection: 'draft-posts',
+          draft: true,
+        })
+        expect(payload.findVersions).type.not.toBeCallableWith({
+          collection: 'draft-posts',
+          action: 'saveDraft',
+        })
+        expect(payload.findVersions).type.not.toBeCallableWith({
+          collection: 'draft-posts',
+          version: 'latest',
+        })
+      })
+
+      test('findVersionByID rejects draft, action, and version', () => {
+        expect(payload.findVersionByID).type.not.toBeCallableWith({
+          collection: 'draft-posts',
+          id: 'id',
+          draft: true,
+        })
+        expect(payload.findVersionByID).type.not.toBeCallableWith({
+          collection: 'draft-posts',
+          id: 'id',
+          action: 'publish',
+        })
+        expect(payload.findVersionByID).type.not.toBeCallableWith({
+          collection: 'draft-posts',
+          id: 'id',
+          version: 'published',
+        })
+      })
+
+      test('findGlobalVersions rejects draft, action, and version', () => {
+        expect(payload.findGlobalVersions).type.not.toBeCallableWith({
+          slug: 'settings',
+          draft: true,
+        })
+        expect(payload.findGlobalVersions).type.not.toBeCallableWith({
+          slug: 'settings',
+          action: 'saveDraft',
+        })
+        expect(payload.findGlobalVersions).type.not.toBeCallableWith({
+          slug: 'settings',
+          version: 'latest',
+        })
+      })
+
+      test('findGlobalVersionByID rejects draft, action, and version', () => {
+        expect(payload.findGlobalVersionByID).type.not.toBeCallableWith({
+          slug: 'settings',
+          id: 'id',
+          draft: true,
+        })
+        expect(payload.findGlobalVersionByID).type.not.toBeCallableWith({
+          slug: 'settings',
+          id: 'id',
+          action: 'unpublish',
+        })
+        expect(payload.findGlobalVersionByID).type.not.toBeCallableWith({
+          slug: 'settings',
+          id: 'id',
+          version: 'draft',
+        })
+      })
     })
   })
 })

@@ -1200,6 +1200,7 @@ describe('Versions', () => {
 
         expect({ ...restoredVersion }).toMatchObject({
           ...versionToRestore!.version,
+          _status: 'published',
           updatedAt: restoredVersion.updatedAt,
         })
 
@@ -1211,6 +1212,7 @@ describe('Versions', () => {
 
         expect(latestDraft).toMatchObject({
           ...versionToRestore!.version,
+          _status: 'published',
           // timestamps cannot be guaranteed to be the exact same to the milliseconds
           createdAt: latestDraft.createdAt,
           updatedAt: latestDraft.updatedAt,
@@ -1434,6 +1436,376 @@ describe('Versions', () => {
       })
 
       expect(restoredVersion.id).toStrictEqual(originalPost.id)
+    })
+
+    describe('Restore actions', () => {
+      const createdIDs: { collection: string; id: number | string }[] = []
+
+      afterEach(async () => {
+        for (const created of createdIDs) {
+          await payload.delete({
+            collection: created.collection,
+            id: created.id,
+            overrideAccess: true,
+          })
+        }
+
+        createdIDs.length = 0
+
+        await payload.db.deleteVersions({
+          globalSlug: simpleDraftGlobalSlug,
+          where: {},
+        })
+      })
+
+      async function oldestCollectionVersion({
+        collection,
+        parent,
+      }: {
+        collection: string
+        parent: number | string
+      }) {
+        const versions = await payload.findVersions({
+          collection,
+          where: { parent: { equals: parent } },
+        })
+
+        return versions.docs[versions.docs.length - 1]!
+      }
+
+      it('should publish when restore omits action, even if the version is a draft', async () => {
+        const doc = await payload.create({
+          action: 'saveDraft',
+          collection: draftCollectionSlug,
+          data: {
+            description: 'Draft v1',
+            title: 'Restore omitted v1',
+          },
+          overrideAccess: true,
+        })
+
+        createdIDs.push({ collection: draftCollectionSlug, id: doc.id })
+
+        await payload.update({
+          id: doc.id,
+          action: 'saveDraft',
+          collection: draftCollectionSlug,
+          data: {
+            title: 'Restore omitted v2',
+          },
+          overrideAccess: true,
+        })
+
+        const versionToRestore = await oldestCollectionVersion({
+          collection: draftCollectionSlug,
+          parent: doc.id,
+        })
+
+        expect(versionToRestore.version._status).toBe('draft')
+
+        const restored = await payload.restoreVersion({
+          id: versionToRestore.id,
+          collection: draftCollectionSlug,
+          overrideAccess: true,
+        })
+
+        expect(restored._status).toBe('published')
+        expect(restored.title).toBe('Restore omitted v1')
+
+        const published = await payload.findByID({
+          id: doc.id,
+          collection: draftCollectionSlug,
+          overrideAccess: true,
+        })
+
+        expect(published._status).toBe('published')
+        expect(published.title).toBe('Restore omitted v1')
+      })
+
+      it('should publish when restore is given an explicit publish action', async () => {
+        const doc = await payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            description: 'Published v1',
+            title: 'Restore publish v1',
+            _status: 'published',
+          },
+          overrideAccess: true,
+        })
+
+        createdIDs.push({ collection: draftCollectionSlug, id: doc.id })
+
+        await payload.update({
+          id: doc.id,
+          action: 'saveDraft',
+          collection: draftCollectionSlug,
+          data: {
+            title: 'Restore publish v2',
+          },
+          overrideAccess: true,
+        })
+
+        const versionToRestore = await oldestCollectionVersion({
+          collection: draftCollectionSlug,
+          parent: doc.id,
+        })
+
+        const restored = await payload.restoreVersion({
+          id: versionToRestore.id,
+          action: 'publish',
+          collection: draftCollectionSlug,
+          overrideAccess: true,
+        })
+
+        expect(restored._status).toBe('published')
+        expect(restored.title).toBe('Restore publish v1')
+      })
+
+      it('should restore as a draft without replacing the published document', async () => {
+        const doc = await payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            description: 'Published v1',
+            title: 'Restore draft v1',
+            _status: 'published',
+          },
+          overrideAccess: true,
+        })
+
+        createdIDs.push({ collection: draftCollectionSlug, id: doc.id })
+
+        await payload.update({
+          id: doc.id,
+          collection: draftCollectionSlug,
+          data: {
+            title: 'Restore draft v2',
+            _status: 'published',
+          },
+          overrideAccess: true,
+        })
+
+        const versionToRestore = await oldestCollectionVersion({
+          collection: draftCollectionSlug,
+          parent: doc.id,
+        })
+
+        const restored = await payload.restoreVersion({
+          id: versionToRestore.id,
+          action: 'saveDraft',
+          collection: draftCollectionSlug,
+          overrideAccess: true,
+        })
+
+        expect(restored._status).toBe('draft')
+        expect(restored.title).toBe('Restore draft v1')
+
+        const published = await payload.findByID({
+          id: doc.id,
+          collection: draftCollectionSlug,
+          overrideAccess: true,
+        })
+        const latest = await payload.findByID({
+          id: doc.id,
+          collection: draftCollectionSlug,
+          overrideAccess: true,
+          version: 'latest',
+        })
+
+        expect(published._status).toBe('published')
+        expect(published.title).toBe('Restore draft v2')
+        expect(latest._status).toBe('draft')
+        expect(latest.title).toBe('Restore draft v1')
+      })
+
+      it('should restore localized content as a draft without publishing', async () => {
+        const doc = await payload.create({
+          collection: localizedCollectionSlug,
+          data: {
+            text: 'en v1',
+            _status: 'published',
+          },
+          locale: 'en',
+          overrideAccess: true,
+        })
+
+        createdIDs.push({ collection: localizedCollectionSlug, id: doc.id })
+
+        await payload.update({
+          id: doc.id,
+          action: 'publish',
+          collection: localizedCollectionSlug,
+          data: {
+            text: 'es v1',
+          },
+          locale: 'es',
+          overrideAccess: true,
+        })
+
+        await payload.update({
+          id: doc.id,
+          action: 'publish',
+          collection: localizedCollectionSlug,
+          data: {
+            text: 'en v2',
+          },
+          locale: 'en',
+          overrideAccess: true,
+        })
+
+        const versionToRestore = await oldestCollectionVersion({
+          collection: localizedCollectionSlug,
+          parent: doc.id,
+        })
+
+        const restored = await payload.restoreVersion({
+          id: versionToRestore.id,
+          action: 'saveDraft',
+          collection: localizedCollectionSlug,
+          locale: 'en',
+          overrideAccess: true,
+        })
+
+        expect(restored._status).toBe('draft')
+        expect(restored.text).toBe('en v1')
+
+        const publishedEN = await payload.findByID({
+          id: doc.id,
+          collection: localizedCollectionSlug,
+          locale: 'en',
+          overrideAccess: true,
+        })
+        const latestEN = await payload.findByID({
+          id: doc.id,
+          collection: localizedCollectionSlug,
+          locale: 'en',
+          overrideAccess: true,
+          version: 'latest',
+        })
+
+        expect(publishedEN.text).toBe('en v2')
+        expect(latestEN._status).toBe('draft')
+        expect(latestEN.text).toBe('en v1')
+      })
+
+      it('should reject unpublish on restore', async () => {
+        const doc = await payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            description: 'Description',
+            title: 'Restore unpublish',
+            _status: 'published',
+          },
+          overrideAccess: true,
+        })
+
+        createdIDs.push({ collection: draftCollectionSlug, id: doc.id })
+
+        const versionToRestore = await oldestCollectionVersion({
+          collection: draftCollectionSlug,
+          parent: doc.id,
+        })
+
+        await expect(
+          payload.restoreVersion({
+            id: versionToRestore.id,
+            // @ts-expect-error restore does not accept unpublish
+            action: 'unpublish',
+            collection: draftCollectionSlug,
+            overrideAccess: true,
+          }),
+        ).rejects.toThrow(
+          'Invalid action "unpublish". Valid actions for restore are: saveDraft, publish.',
+        )
+      })
+
+      it('should reject saveDraft restore when drafts are not enabled', async () => {
+        const doc = await payload.create({
+          collection: versionCollectionSlug,
+          data: {
+            description: 'Versioned v1',
+            title: `Restore no drafts ${Date.now()}`,
+          },
+          overrideAccess: true,
+        })
+
+        createdIDs.push({ collection: versionCollectionSlug, id: doc.id })
+
+        await payload.update({
+          id: doc.id,
+          collection: versionCollectionSlug,
+          data: {
+            description: 'Versioned v2',
+            title: `Restore no drafts updated ${Date.now()}`,
+          },
+          overrideAccess: true,
+        })
+
+        const versionToRestore = await oldestCollectionVersion({
+          collection: versionCollectionSlug,
+          parent: doc.id,
+        })
+
+        await expect(
+          payload.restoreVersion({
+            id: versionToRestore.id,
+            // @ts-expect-error restore does not accept saveDraft on collections without drafts
+            action: 'saveDraft',
+            collection: versionCollectionSlug,
+            overrideAccess: true,
+          }),
+        ).rejects.toThrow('The action "saveDraft" cannot be used because drafts are not enabled.')
+      })
+
+      it('should restore as a draft via leftover REST draft=true', async () => {
+        const doc = await payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            description: 'REST published v1',
+            title: 'REST restore v1',
+            _status: 'published',
+          },
+          overrideAccess: true,
+        })
+
+        createdIDs.push({ collection: draftCollectionSlug, id: doc.id })
+
+        await payload.update({
+          id: doc.id,
+          collection: draftCollectionSlug,
+          data: {
+            title: 'REST restore v2',
+            _status: 'published',
+          },
+          overrideAccess: true,
+        })
+
+        const versionToRestore = await oldestCollectionVersion({
+          collection: draftCollectionSlug,
+          parent: doc.id,
+        })
+
+        const response = await restClient.POST(
+          `/${draftCollectionSlug}/versions/${versionToRestore.id}?draft=true`,
+        )
+
+        expect(response.status).toBe(200)
+
+        const published = await payload.findByID({
+          id: doc.id,
+          collection: draftCollectionSlug,
+          overrideAccess: true,
+        })
+        const latest = await payload.findByID({
+          id: doc.id,
+          collection: draftCollectionSlug,
+          overrideAccess: true,
+          version: 'latest',
+        })
+
+        expect(published.title).toBe('REST restore v2')
+        expect(latest.title).toBe('REST restore v1')
+        expect(latest._status).toBe('draft')
+      })
     })
 
     it('findVersions - pagination should work correctly', async () => {
@@ -4232,6 +4604,130 @@ describe('Versions', () => {
         })
 
         expect(restoredGlobal.title).toBe(restore.version.title.en)
+      })
+
+      describe('Restore actions', () => {
+        afterEach(async () => {
+          await payload.db.deleteVersions({
+            globalSlug: simpleDraftGlobalSlug,
+            where: {},
+          })
+        })
+
+        it('should publish when global restore omits action, even if the version is a draft', async () => {
+          await payload.updateGlobal({
+            action: 'saveDraft',
+            data: {
+              title: 'Global restore omitted v1',
+            },
+            overrideAccess: true,
+            slug: simpleDraftGlobalSlug,
+          })
+
+          const firstVersions = await payload.findGlobalVersions({
+            limit: 1,
+            slug: simpleDraftGlobalSlug,
+            sort: '-createdAt',
+          })
+          const versionToRestore = firstVersions.docs[0]!
+
+          expect(versionToRestore.version._status).toBe('draft')
+
+          await payload.updateGlobal({
+            action: 'saveDraft',
+            data: {
+              title: 'Global restore omitted v2',
+            },
+            overrideAccess: true,
+            slug: simpleDraftGlobalSlug,
+          })
+
+          await payload.restoreGlobalVersion({
+            id: versionToRestore.id,
+            overrideAccess: true,
+            slug: simpleDraftGlobalSlug,
+          })
+
+          const published = await payload.findGlobal({
+            overrideAccess: true,
+            slug: simpleDraftGlobalSlug,
+          })
+
+          expect(published._status).toBe('published')
+          expect(published.title).toBe('Global restore omitted v1')
+        })
+
+        it('should restore a global as a draft with an explicit action', async () => {
+          await payload.updateGlobal({
+            data: {
+              title: 'Global restore draft v1',
+              _status: 'published',
+            },
+            overrideAccess: true,
+            slug: simpleDraftGlobalSlug,
+          })
+
+          const firstVersions = await payload.findGlobalVersions({
+            limit: 1,
+            slug: simpleDraftGlobalSlug,
+            sort: '-createdAt',
+          })
+          const versionToRestore = firstVersions.docs[0]!
+
+          await payload.updateGlobal({
+            data: {
+              title: 'Global restore draft v2',
+              _status: 'published',
+            },
+            overrideAccess: true,
+            slug: simpleDraftGlobalSlug,
+          })
+
+          await payload.restoreGlobalVersion({
+            id: versionToRestore.id,
+            action: 'saveDraft',
+            overrideAccess: true,
+            slug: simpleDraftGlobalSlug,
+          })
+
+          const latest = await payload.findGlobal({
+            overrideAccess: true,
+            slug: simpleDraftGlobalSlug,
+            version: 'latest',
+          })
+
+          expect(latest._status).toBe('draft')
+          expect(latest.title).toBe('Global restore draft v1')
+        })
+
+        it('should reject unpublish on global restore', async () => {
+          await payload.updateGlobal({
+            data: {
+              title: 'Global restore unpublish',
+              _status: 'published',
+            },
+            overrideAccess: true,
+            slug: simpleDraftGlobalSlug,
+          })
+
+          const versions = await payload.findGlobalVersions({
+            limit: 1,
+            slug: simpleDraftGlobalSlug,
+            sort: '-createdAt',
+          })
+
+          await expect(
+            payload.restoreGlobalVersion({
+              id: versions.docs[0]!.id,
+              // @ts-expect-error restore does not accept unpublish
+              action: 'unpublish',
+              overrideAccess: true,
+              slug: simpleDraftGlobalSlug,
+            }),
+          ).rejects.toThrow(
+            'Invalid action "unpublish". Valid actions for restore are: saveDraft, publish.',
+          )
+        })
       })
     })
 

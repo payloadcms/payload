@@ -1,4 +1,5 @@
 import type { PayloadRequest, PopulateType } from '../../types/index.js'
+import type { RestoreAction } from '../../versions/actions/types.js'
 import type { TypeWithVersion } from '../../versions/types.js'
 import type { SanitizedGlobalConfig } from '../config/types.js'
 
@@ -7,11 +8,21 @@ import { NotFound } from '../../errors/index.js'
 import { afterChange } from '../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
+import { hasDraftsEnabled } from '../../utilities/getVersionsConfig.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import {
+  canonicalizeWriteStatus,
+  requestedActionFromLegacyDraft,
+  resolveAction,
+} from '../../versions/actions/resolveAction.js'
 
 export type Arguments = {
+  action?: RestoreAction
   depth?: number
+  /**
+   * Leftover REST/GraphQL boolean until those transports are converted.
+   */
   draft?: boolean
   globalConfig: SanitizedGlobalConfig
   id: number | string
@@ -22,11 +33,10 @@ export type Arguments = {
 }
 
 export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any>(
-  args: Arguments,
+  incomingArgs: Arguments,
 ): Promise<T> => {
-  const { id, depth, draft, globalConfig, overrideAccess, populate, showHiddenFields } = args
+  let args = incomingArgs
   const req = args.req!
-  const { fallbackLocale, locale, payload } = req
 
   try {
     const shouldCommit = await initTransaction(req)
@@ -35,19 +45,32 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
     // beforeOperation - Global
     // /////////////////////////////////////
 
-    if (globalConfig.hooks?.beforeOperation?.length) {
-      for (const hook of globalConfig.hooks.beforeOperation) {
+    if (args.globalConfig.hooks?.beforeOperation?.length) {
+      for (const hook of args.globalConfig.hooks.beforeOperation) {
         args =
           (await hook({
             args,
             context: req.context,
-            global: globalConfig,
+            global: args.globalConfig,
             operation: 'restoreVersion',
-            overrideAccess,
+            overrideAccess: args.overrideAccess,
             req,
           })) || args
       }
     }
+
+    const { id, action, depth, draft, globalConfig, overrideAccess, populate, showHiddenFields } =
+      args
+    const { fallbackLocale, locale, payload } = req
+
+    const resolvedAction = resolveAction({
+      action: requestedActionFromLegacyDraft({ action, draft }),
+      draftsEnabled: hasDraftsEnabled(globalConfig),
+      locale,
+      operation: 'restore',
+    })
+    const isSavingDraft = resolvedAction === 'saveDraft'
+    const readVersion = isSavingDraft ? 'latest' : 'published'
 
     // /////////////////////////////////////
     // Access
@@ -76,12 +99,12 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
 
     // Patch globalType onto version doc
     rawVersion.version.globalType = globalConfig.slug
+    rawVersion.version = canonicalizeWriteStatus({
+      action: resolvedAction,
+      data: rawVersion.version,
+      locale,
+    })
 
-    // Overwrite draft status if draft is true
-
-    if (draft) {
-      rawVersion.version._status = 'draft'
-    }
     // /////////////////////////////////////
     // fetch previousDoc
     // /////////////////////////////////////
@@ -121,7 +144,7 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
         createdAt: result.createdAt ? new Date(result.createdAt).toISOString() : now,
         globalSlug: globalConfig.slug,
         req,
-        updatedAt: draft ? now : new Date(result.updatedAt).toISOString(),
+        updatedAt: isSavingDraft ? now : new Date(result.updatedAt).toISOString(),
         versionData: result,
       })
     } else {
@@ -141,7 +164,6 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
       context: req.context,
       depth: depth!,
       doc: result,
-      draft: undefined!,
       fallbackLocale: fallbackLocale!,
       global: globalConfig,
       locale: locale!,
@@ -149,6 +171,7 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
       populate,
       req,
       showHiddenFields: showHiddenFields!,
+      version: readVersion,
     })
 
     // /////////////////////////////////////
