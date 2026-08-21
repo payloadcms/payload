@@ -1,5 +1,5 @@
 import type { GraphQLResolveInfo } from 'graphql'
-import type { Collection, PaginatedDocs, Where } from 'payload'
+import type { Collection, PaginatedDocs, ReadVersion, Where } from 'payload'
 
 import { findOperation, isolateObjectProperty } from 'payload'
 
@@ -11,7 +11,6 @@ export type Resolver = (
   _: unknown,
   args: {
     data: Record<string, unknown>
-    draft: boolean
     fallbackLocale?: string
     limit?: number
     locale?: string
@@ -20,6 +19,7 @@ export type Resolver = (
     select?: boolean
     sort?: string
     trash?: boolean
+    version?: ReadVersion
     where?: Where
   },
   context: Context,
@@ -40,14 +40,8 @@ export function findResolver(collection: Collection): Resolver {
     req.fallbackLocale = args.fallbackLocale || req.fallbackLocale
     req.query = req.query || {}
 
-    const draft: boolean =
-      (args.draft ?? req.query?.draft === 'false')
-        ? false
-        : req.query?.draft === 'true'
-          ? true
-          : undefined
-    if (typeof draft === 'boolean') {
-      req.query.draft = String(draft)
+    if (args.version) {
+      req.query.version = args.version
     }
 
     const { sort } = args
@@ -55,7 +49,6 @@ export function findResolver(collection: Collection): Resolver {
     const options = {
       collection,
       depth: 0,
-      draft: args.draft,
       limit: args.limit,
       page: args.page,
       pagination: args.pagination,
@@ -63,6 +56,7 @@ export function findResolver(collection: Collection): Resolver {
       select,
       sort: sort && typeof sort === 'string' ? sort.split(',') : undefined,
       trash: args.trash,
+      version: args.version,
       where: args.where,
     }
 

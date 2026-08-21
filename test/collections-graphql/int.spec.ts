@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url'
 import path from 'path'
 import { getFileByPath, mapAsync } from 'payload'
 import { wait } from 'payload/shared'
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { Post } from './payload-types.js'
@@ -1116,7 +1116,7 @@ describe('collections-graphql', () => {
         const relation_1_draft = await payload.create({
           collection: 'relation',
           data: { _status: 'draft', name: 'relation_1_draft' },
-          draft: true,
+          action: 'saveDraft',
         })
 
         const relation_2 = await payload.create({
@@ -1126,7 +1126,7 @@ describe('collections-graphql', () => {
 
         await payload.create({
           collection: 'posts',
-          draft: true,
+          action: 'saveDraft',
           data: {
             _status: 'draft',
             title: 'post with relations in draft',
@@ -1137,7 +1137,7 @@ describe('collections-graphql', () => {
         await payload.delete({ collection: 'relation', id: relation_1_draft.id })
 
         const query = `query {
-          Posts(draft:true,where: { title: { equals: "post with relations in draft" }}) {
+          Posts(version: latest, where: { title: { equals: "post with relations in draft" }}) {
             docs {
               id
               title
@@ -1173,7 +1173,7 @@ describe('collections-graphql', () => {
 
         await payload.create({
           collection: 'posts',
-          draft: true,
+          action: 'saveDraft',
           data: {
             _status: 'draft',
             title: 'post with relation restricted',
@@ -1182,7 +1182,7 @@ describe('collections-graphql', () => {
         })
 
         const query = `query {
-          Posts(draft:true,where: { title: { equals: "post with relation restricted" }}) {
+          Posts(version: latest, where: { title: { equals: "post with relation restricted" }}) {
             docs {
               id
               title
@@ -1207,7 +1207,7 @@ describe('collections-graphql', () => {
     })
   })
 
-  it('should query correctly with draft argument', async () => {
+  it('should query correctly with version argument', async () => {
     const publishValue = '1'
     const draftValue = '2'
 
@@ -1217,7 +1217,7 @@ describe('collections-graphql', () => {
       data: {
         title: publishValue,
       },
-      draft: false,
+      action: 'publish',
     })
 
     // create cyclical relationship
@@ -1236,14 +1236,14 @@ describe('collections-graphql', () => {
       data: {
         title: draftValue,
       },
-      draft: true,
+      action: 'saveDraft',
     })
 
     const draftParentPublishedChild = `{
-      CyclicalRelationships(draft: true) {
+      CyclicalRelationships(version: latest) {
         docs {
           title
-          relationToSelf(draft: false) {
+          relationToSelf(version: published) {
             title
           }
         }
@@ -1260,10 +1260,10 @@ describe('collections-graphql', () => {
     expect(queriedDoc.relationToSelf.title).toEqual(publishValue)
 
     const publishedParentDraftChild = `{
-      CyclicalRelationships(draft: false) {
+      CyclicalRelationships(version: published) {
         docs {
           title
-          relationToSelf(draft: true) {
+          relationToSelf(version: latest) {
             title
           }
         }
@@ -1337,7 +1337,7 @@ describe('collections-graphql', () => {
 
     it('should return have an array of errors when failing to pass validation', async () => {
       const query = `mutation {
-          createPost(data: {min: 1}) {
+          createPost(action: publish, data: {min: 1}) {
               id
               min
               createdAt
@@ -1429,6 +1429,212 @@ describe('collections-graphql', () => {
       expect(errors[0].path[0]).toEqual('QueryWithInternalError')
       expect(errors[0].extensions.statusCode).toEqual(500)
       expect(errors[0].extensions.name).toEqual('Error')
+    })
+  })
+
+  describe('version and action parameters', () => {
+    const createdIDs: Array<{ collection: string; id: number | string }> = []
+
+    afterEach(async () => {
+      for (const { collection, id } of createdIDs) {
+        await payload.delete({ collection, id })
+      }
+
+      createdIDs.length = 0
+    })
+
+    const graphqlQuery = async (query: string) =>
+      restClient.GRAPHQL_POST({ body: JSON.stringify({ query }) }).then((res) => res.json())
+
+    const argNames = (
+      fields: Array<{ args: Array<{ name: string }>; name: string }>,
+      fieldName: string,
+    ) => fields.find((field) => field.name === fieldName)?.args.map((arg) => arg.name) ?? []
+
+    const argTypeName = (
+      fields: Array<{
+        args: Array<{ name: string; type: { name?: null | string } }>
+        name: string
+      }>,
+      fieldName: string,
+      argName: string,
+    ) =>
+      fields.find((field) => field.name === fieldName)?.args.find((arg) => arg.name === argName)
+        ?.type.name
+
+    it('should expose version and action enums and drop draft from migrated fields', async () => {
+      const { data } = await graphqlQuery(`{
+          queryType: __type(name: "Query") {
+            fields {
+              name
+              args { name type { name } }
+            }
+          }
+          mutationType: __type(name: "Mutation") {
+            fields {
+              name
+              args { name type { name } }
+            }
+          }
+          postType: __type(name: "Post") {
+            fields {
+              name
+              args { name type { name } }
+            }
+          }
+          cyclicalType: __type(name: "CyclicalRelationship") {
+            fields {
+              name
+              args { name type { name } }
+            }
+          }
+          createInput: __type(name: "mutationPostInput") {
+            inputFields { name }
+          }
+          updateInput: __type(name: "mutationPostUpdateInput") {
+            inputFields { name }
+          }
+          readVersion: __type(name: "ReadVersion") {
+            enumValues { name }
+          }
+          createAction: __type(name: "CreateAction") {
+            enumValues { name }
+          }
+          updateAction: __type(name: "UpdateAction") {
+            enumValues { name }
+          }
+          restoreAction: __type(name: "RestoreAction") {
+            enumValues { name }
+          }
+        }`)
+
+      expect(data.readVersion.enumValues.map(({ name }) => name)).toEqual([
+        'published',
+        'latest',
+        'draft',
+      ])
+      expect(data.createAction.enumValues.map(({ name }) => name)).toEqual(['publish', 'saveDraft'])
+      expect(data.updateAction.enumValues.map(({ name }) => name)).toEqual([
+        'publish',
+        'saveDraft',
+        'unpublish',
+      ])
+      expect(data.restoreAction.enumValues.map(({ name }) => name)).toEqual([
+        'publish',
+        'saveDraft',
+      ])
+
+      expect(argNames(data.queryType.fields, 'Post')).toContain('version')
+      expect(argNames(data.queryType.fields, 'Post')).not.toContain('draft')
+      expect(argNames(data.queryType.fields, 'Posts')).toContain('version')
+      expect(argNames(data.queryType.fields, 'Posts')).not.toContain('draft')
+      expect(argTypeName(data.queryType.fields, 'Posts', 'version')).toBe('ReadVersion')
+      expect(argNames(data.queryType.fields, 'countPosts')).not.toContain('draft')
+      expect(argNames(data.queryType.fields, 'countPosts')).not.toContain('version')
+      expect(argNames(data.queryType.fields, 'versionsPosts')).not.toContain('draft')
+      expect(argNames(data.queryType.fields, 'versionsPosts')).not.toContain('version')
+      expect(argNames(data.queryType.fields, 'meUser')).toContain('version')
+      expect(argNames(data.queryType.fields, 'meUser')).not.toContain('draft')
+
+      expect(argNames(data.mutationType.fields, 'createPost')).toContain('action')
+      expect(argNames(data.mutationType.fields, 'createPost')).not.toContain('draft')
+      expect(argTypeName(data.mutationType.fields, 'createPost', 'action')).toBe('CreateAction')
+      expect(argNames(data.mutationType.fields, 'updatePost')).toContain('action')
+      expect(argNames(data.mutationType.fields, 'updatePost')).not.toContain('draft')
+      expect(argTypeName(data.mutationType.fields, 'updatePost', 'action')).toBe('UpdateAction')
+      expect(argNames(data.mutationType.fields, 'duplicatePost')).toContain('action')
+      expect(argNames(data.mutationType.fields, 'duplicatePost')).not.toContain('draft')
+      expect(argNames(data.mutationType.fields, 'restoreVersionPost')).toContain('action')
+      expect(argNames(data.mutationType.fields, 'restoreVersionPost')).not.toContain('draft')
+      expect(argTypeName(data.mutationType.fields, 'restoreVersionPost', 'action')).toBe(
+        'RestoreAction',
+      )
+      expect(argNames(data.mutationType.fields, 'deletePost')).not.toContain('draft')
+      expect(argNames(data.mutationType.fields, 'deletePost')).not.toContain('action')
+
+      expect(argNames(data.cyclicalType.fields, 'relationToSelf')).toContain('version')
+      expect(argNames(data.cyclicalType.fields, 'relationToSelf')).not.toContain('draft')
+      expect(data.createInput.inputFields.map(({ name }) => name)).toContain('_status')
+      expect(data.updateInput.inputFields.map(({ name }) => name)).toContain('_status')
+    })
+
+    it('should save a draft when GraphQL create omits action and _status', async () => {
+      const { data } = await graphqlQuery(`mutation {
+          createPost(data: { title: "GQL omitted create action" }) {
+            id
+            title
+            _status
+          }
+        }`)
+
+      createdIDs.push({ collection: 'posts', id: data.createPost.id })
+
+      expect(data.createPost._status).toBe('draft')
+    })
+
+    it('should honor body _status and let explicit GraphQL action win', async () => {
+      const published = await graphqlQuery(`mutation {
+          createPost(data: { title: "GQL create from published status", _status: published }) {
+            id
+            _status
+          }
+        }`)
+      createdIDs.push({ collection: 'posts', id: published.data.createPost.id })
+      expect(published.data.createPost._status).toBe('published')
+
+      const actionWins = await graphqlQuery(`mutation {
+          createPost(action: saveDraft, data: { title: "GQL create action wins", _status: published }) {
+            id
+            _status
+          }
+        }`)
+      createdIDs.push({ collection: 'posts', id: actionWins.data.createPost.id })
+      expect(actionWins.data.createPost._status).toBe('draft')
+    })
+
+    it('should publish when GraphQL update has neither action nor status', async () => {
+      const doc = await payload.create({
+        action: 'saveDraft',
+        collection: 'posts',
+        data: {
+          title: 'GQL update omitted source',
+        },
+      })
+      createdIDs.push({ collection: 'posts', id: doc.id })
+
+      const { data } = await graphqlQuery(`mutation {
+          updatePost(id: ${formatID(doc.id)}, data: { title: "GQL update omitted next" }) {
+            title
+            _status
+          }
+        }`)
+
+      expect(data.updatePost._status).toBe('published')
+      expect(data.updatePost.title).toBe('GQL update omitted next')
+    })
+
+    it('should reject invalid GraphQL enums, booleans, and obsolete draft', async () => {
+      const invalidVersion = await graphqlQuery(`query { Posts(version: Latest) { docs { id } } }`)
+      expect(invalidVersion.errors?.[0].message).toMatch(/invalid value Latest/)
+
+      const booleanVersion = await graphqlQuery(`query { Posts(version: true) { docs { id } } }`)
+      expect(booleanVersion.errors?.[0].message).toBeDefined()
+
+      const obsoleteDraft = await graphqlQuery(`query { Posts(draft: true) { docs { id } } }`)
+      expect(obsoleteDraft.errors?.[0].message).toMatch(/draft/)
+
+      const createUnpublish = await graphqlQuery(
+        `mutation { createPost(action: unpublish, data: { title: "nope" }) { id } }`,
+      )
+      expect(createUnpublish.errors?.[0].message).toMatch(/unpublish/)
+    })
+
+    it('should reject saveDraft on a collection without drafts', async () => {
+      const { errors } = await graphqlQuery(
+        `mutation { createDummy(action: saveDraft, data: { name: "no drafts" }) { id } }`,
+      )
+
+      expect(errors?.[0].message).toBeDefined()
     })
   })
 })

@@ -1384,6 +1384,254 @@ describe('Versions', () => {
       })
     })
 
+    describe('GraphQL version and action parameters', () => {
+      const createdIDs: Array<{ collection: string; id: number | string }> = []
+
+      afterEach(async () => {
+        for (const { collection, id } of createdIDs) {
+          await payload.delete({ collection, id })
+        }
+
+        createdIDs.length = 0
+      })
+
+      const graphqlQuery = async (query: string) =>
+        restClient.GRAPHQL_POST({ body: JSON.stringify({ query }) }).then((res) => res.json())
+
+      it('should read published, latest, and draft representations over GraphQL', async () => {
+        const publishedOnly = await payload.create({
+          action: 'publish',
+          collection: draftCollectionSlug,
+          data: {
+            description: 'Published only',
+            title: 'GQL read published only',
+          },
+        })
+        createdIDs.push({ collection: draftCollectionSlug, id: publishedOnly.id })
+
+        const draftOnly = await payload.create({
+          action: 'saveDraft',
+          collection: draftCollectionSlug,
+          data: {
+            title: 'GQL read draft only',
+          },
+        })
+        createdIDs.push({ collection: draftCollectionSlug, id: draftOnly.id })
+
+        const publishedWithDraft = await payload.create({
+          action: 'publish',
+          collection: draftCollectionSlug,
+          data: {
+            description: 'Published with draft',
+            title: 'GQL read published with draft',
+          },
+        })
+        createdIDs.push({ collection: draftCollectionSlug, id: publishedWithDraft.id })
+
+        await payload.update({
+          id: publishedWithDraft.id,
+          action: 'saveDraft',
+          collection: draftCollectionSlug,
+          data: {
+            title: 'GQL read newer draft',
+          },
+        })
+
+        const publishedByID = await graphqlQuery(`{
+          DraftPost(id: ${formatGraphQLID(publishedOnly.id)}) { title }
+        }`)
+        expect(publishedByID.data.DraftPost.title).toBe('GQL read published only')
+
+        const latestPublishedOnly = await graphqlQuery(`{
+          DraftPost(id: ${formatGraphQLID(publishedOnly.id)}, version: latest) { title }
+        }`)
+        expect(latestPublishedOnly.data.DraftPost.title).toBe('GQL read published only')
+
+        const draftOfPublishedOnly = await graphqlQuery(`{
+          DraftPost(id: ${formatGraphQLID(publishedOnly.id)}, version: draft) { title }
+        }`)
+        expect(draftOfPublishedOnly.data.DraftPost).toBeNull()
+        expect(draftOfPublishedOnly.errors?.[0].message).toBeDefined()
+
+        const missingPublishedDraftOnly = await graphqlQuery(`{
+          DraftPost(id: ${formatGraphQLID(draftOnly.id)}) { title _status }
+        }`)
+        expect(missingPublishedDraftOnly.data.DraftPost._status).toBe('draft')
+
+        const latestDraftOnly = await graphqlQuery(`{
+          DraftPost(id: ${formatGraphQLID(draftOnly.id)}, version: latest) { title }
+        }`)
+        expect(latestDraftOnly.data.DraftPost.title).toBe('GQL read draft only')
+
+        const titles = [
+          'GQL read published only',
+          'GQL read draft only',
+          'GQL read published with draft',
+          'GQL read newer draft',
+        ]
+        const titleWhere = titles.map((title) => `"${title}"`).join(', ')
+
+        const listPublished = await graphqlQuery(`{
+          DraftPosts(where: { title: { in: [${titleWhere}] } }) {
+            docs { title }
+          }
+        }`)
+        expect(listPublished.data.DraftPosts.docs.map(({ title }) => title).sort()).toEqual([
+          'GQL read draft only',
+          'GQL read published only',
+          'GQL read published with draft',
+        ])
+
+        const listLatest = await graphqlQuery(`{
+          DraftPosts(version: latest, where: { title: { in: [${titleWhere}] } }) {
+            docs { title }
+          }
+        }`)
+        expect(listLatest.data.DraftPosts.docs.map(({ title }) => title).sort()).toEqual([
+          'GQL read draft only',
+          'GQL read newer draft',
+          'GQL read published only',
+        ])
+
+        const listDraft = await graphqlQuery(`{
+          DraftPosts(version: draft, where: { title: { in: [${titleWhere}] } }) {
+            docs { title }
+          }
+        }`)
+        expect(listDraft.data.DraftPosts.docs.map(({ title }) => title).sort()).toEqual([
+          'GQL read draft only',
+          'GQL read newer draft',
+        ])
+      })
+
+      it('should save a draft when GraphQL create omits action and publish when update omits action', async () => {
+        const created = await graphqlQuery(`mutation {
+          createDraftPost(data: { title: "GQL omitted create", description: "Omitted action" }) {
+            id
+            _status
+          }
+        }`)
+        createdIDs.push({ collection: draftCollectionSlug, id: created.data.createDraftPost.id })
+        expect(created.data.createDraftPost._status).toBe('draft')
+
+        const updated = await graphqlQuery(`mutation {
+          updateDraftPost(id: ${formatGraphQLID(created.data.createDraftPost.id)}, data: { title: "GQL omitted update", description: "Now published" }) {
+            title
+            _status
+          }
+        }`)
+        expect(updated.data.updateDraftPost._status).toBe('published')
+        expect(updated.data.updateDraftPost.title).toBe('GQL omitted update')
+      })
+
+      it('should apply explicit GraphQL update actions including unpublish', async () => {
+        const doc = await payload.create({
+          action: 'publish',
+          collection: draftCollectionSlug,
+          data: {
+            description: 'Published',
+            title: 'GQL update actions',
+          },
+        })
+        createdIDs.push({ collection: draftCollectionSlug, id: doc.id })
+
+        const savedDraft = await graphqlQuery(`mutation {
+          updateDraftPost(id: ${formatGraphQLID(doc.id)}, action: saveDraft, data: { title: "GQL update saveDraft" }) {
+            _status
+          }
+        }`)
+        expect(savedDraft.data.updateDraftPost._status).toBe('draft')
+
+        const unpublished = await graphqlQuery(`mutation {
+          updateDraftPost(id: ${formatGraphQLID(doc.id)}, action: unpublish, data: {}) {
+            _status
+          }
+        }`)
+        expect(unpublished.data.updateDraftPost._status).toBe('draft')
+      })
+
+      it('should restore over GraphQL with omitted publish and explicit saveDraft', async () => {
+        const doc = await payload.create({
+          action: 'publish',
+          collection: draftCollectionSlug,
+          data: {
+            description: 'GQL restore published v1',
+            title: 'GQL restore v1',
+          },
+        })
+        createdIDs.push({ collection: draftCollectionSlug, id: doc.id })
+
+        await payload.update({
+          id: doc.id,
+          action: 'publish',
+          collection: draftCollectionSlug,
+          data: {
+            title: 'GQL restore v2',
+          },
+        })
+
+        const versions = await payload.findVersions({
+          collection: draftCollectionSlug,
+          sort: 'createdAt',
+          where: {
+            parent: {
+              equals: doc.id,
+            },
+          },
+        })
+        const versionToRestore = versions.docs[0]
+
+        const publishedRestore = await graphqlQuery(`mutation {
+          restoreVersionDraftPost(id: ${formatGraphQLID(versionToRestore.id)}) {
+            title
+            _status
+          }
+        }`)
+        expect(publishedRestore.data.restoreVersionDraftPost.title).toBe('GQL restore v1')
+        expect(publishedRestore.data.restoreVersionDraftPost._status).toBe('published')
+
+        const draftRestore = await graphqlQuery(`mutation {
+          restoreVersionDraftPost(id: ${formatGraphQLID(versionToRestore.id)}, action: saveDraft) {
+            title
+            _status
+          }
+        }`)
+        expect(draftRestore.data.restoreVersionDraftPost.title).toBe('GQL restore v1')
+        expect(draftRestore.data.restoreVersionDraftPost._status).toBe('draft')
+      })
+
+      it('should read and write draft globals over GraphQL', async () => {
+        await graphqlQuery(`mutation {
+          updateSimpleDraftGlobal(action: publish, data: { title: "GQL global published" }) {
+            title
+          }
+        }`)
+
+        const published = await graphqlQuery(`{ SimpleDraftGlobal { title } }`)
+        expect(published.data.SimpleDraftGlobal.title).toBe('GQL global published')
+
+        await graphqlQuery(`mutation {
+          updateSimpleDraftGlobal(action: saveDraft, data: { title: "GQL global draft" }) {
+            title
+          }
+        }`)
+
+        const latest = await graphqlQuery(`{ SimpleDraftGlobal(version: latest) { title } }`)
+        expect(latest.data.SimpleDraftGlobal.title).toBe('GQL global draft')
+
+        const stillPublished = await graphqlQuery(`{ SimpleDraftGlobal { title } }`)
+        expect(stillPublished.data.SimpleDraftGlobal.title).toBe('GQL global published')
+      })
+
+      it('should reject saveDraft on a GraphQL collection without drafts', async () => {
+        const { errors } = await graphqlQuery(
+          `mutation { createPost(action: saveDraft, data: {}) { id } }`,
+        )
+
+        expect(errors?.[0].message).toBeDefined()
+      })
+    })
+
     describe('Query operations', () => {
       beforeAll(async () => {
         // Create test data for query-only tests (pagination, sorting)
@@ -5278,7 +5526,7 @@ describe('Versions', () => {
 
     async function createAndSetVersionID() {
       const update = `mutation {
-        updateAutosaveGlobal(draft: true, data: {
+        updateAutosaveGlobal(action: saveDraft, data: {
           title: "${globalGraphQLOriginalTitle}"
         }) {
           _status
@@ -5367,7 +5615,7 @@ describe('Versions', () => {
 
         // Update it
         const update = `mutation {
-          updateAutosaveGlobal(draft: true, data: {
+          updateAutosaveGlobal(action: saveDraft, data: {
             title: "${updatedTitle}"
           }) {
             title

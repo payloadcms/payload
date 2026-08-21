@@ -4,6 +4,7 @@ import type {
   PayloadRequest,
   SanitizedGlobalConfig,
   SelectType,
+  UpdateAction,
 } from 'payload'
 import type { DeepPartial } from 'ts-essentials'
 
@@ -14,8 +15,8 @@ import type { Context } from '../types.js'
 type Resolver<TSlug extends GlobalSlug> = (
   _: unknown,
   args: {
+    action?: UpdateAction
     data?: DeepPartial<Omit<DataFromGlobalSlug<TSlug>, 'id'>>
-    draft?: boolean
     fallbackLocale?: string
     locale?: string
   },
@@ -39,9 +40,9 @@ export function update<TSlug extends GlobalSlug>(
 
     const options = {
       slug,
+      action: args.action,
       data: args.data,
       depth: 0,
-      draft: args.draft,
       globalConfig,
       req: isolateObjectProperty(context.req, 'transactionID'),
     }

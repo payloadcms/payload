@@ -1,4 +1,10 @@
-import type { Collection, CollectionSlug, DataFromCollectionSlug, PayloadRequest } from 'payload'
+import type {
+  Collection,
+  CollectionSlug,
+  CreateAction,
+  DataFromCollectionSlug,
+  PayloadRequest,
+} from 'payload'
 
 import { duplicateOperation, isolateObjectProperty } from 'payload'
 
@@ -7,8 +13,8 @@ import type { Context } from '../types.js'
 export type Resolver<TData> = (
   _: unknown,
   args: {
+    action?: CreateAction
     data: TData
-    draft: boolean
     fallbackLocale?: string
     id: string
     locale?: string
@@ -31,10 +37,10 @@ export function duplicateResolver<TSlug extends CollectionSlug>(
 
     const result = await duplicateOperation({
       id: args.id,
+      action: args.action,
       collection,
       data: args.data,
       depth: 0,
-      draft: args.draft,
       req: isolateObjectProperty(req, 'transactionID'),
     })
 
