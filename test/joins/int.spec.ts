@@ -58,6 +58,7 @@ describe('Joins Field', () => {
         name: 'paginate example',
         group: {},
       },
+      overrideAccess: true,
     })
 
     otherCategory = await payload.create({
@@ -66,6 +67,7 @@ describe('Joins Field', () => {
         name: 'otherCategory',
         group: {},
       },
+      overrideAccess: true,
     })
 
     // create an upload
@@ -76,6 +78,7 @@ describe('Joins Field', () => {
       collection: uploadsSlug,
       data: {},
       file: imageFile,
+      overrideAccess: true,
     })
 
     categoryID = idToString(category.id, payload)
@@ -136,6 +139,7 @@ describe('Joins Field', () => {
         },
       },
       collection: categoriesSlug,
+      overrideAccess: true,
     })
 
     expect(categoryWithPosts.group.relatedPosts.docs).toHaveLength(10)
@@ -154,6 +158,7 @@ describe('Joins Field', () => {
       },
       select: {},
       collection: categoriesSlug,
+      overrideAccess: true,
     })
 
     expect(Object.keys(categoryWithPosts)).toStrictEqual(['id'])
@@ -173,6 +178,7 @@ describe('Joins Field', () => {
         },
       },
       collection: categoriesSlug,
+      overrideAccess: true,
     })
 
     expect(categoryWithPosts).toStrictEqual({
@@ -196,6 +202,7 @@ describe('Joins Field', () => {
         },
       },
       collection: categoriesSlug,
+      overrideAccess: true,
     })
 
     expect(categoryWithPosts.group.relatedPosts?.totalDocs).toBe(15)
@@ -211,6 +218,7 @@ describe('Joins Field', () => {
         },
       },
       collection: categoriesSlug,
+      overrideAccess: true,
     })
 
     expect(categoryWithPosts.group.relatedPosts?.totalDocs).toBe(15)
@@ -223,6 +231,7 @@ describe('Joins Field', () => {
       joins: {
         hasManyPosts: { limit: 1, count: true },
       },
+      overrideAccess: true,
     })
 
     expect(res.hasManyPosts?.totalDocs).toBe(15)
@@ -233,6 +242,7 @@ describe('Joins Field', () => {
       limit: 1,
       collection: postsSlug,
       depth: 2,
+      overrideAccess: true,
     })
 
     expect(docs[0].category.id).toBeDefined()
@@ -244,6 +254,7 @@ describe('Joins Field', () => {
     const { docs } = await payload.find({
       limit: 1,
       collection: postsSlug,
+      overrideAccess: true,
     })
 
     expect(docs[0].group.camelCaseCategory.id).toBeDefined()
@@ -255,6 +266,7 @@ describe('Joins Field', () => {
     const categoryWithPosts = await payload.findByID({
       id: category.id,
       collection: categoriesSlug,
+      overrideAccess: true,
     })
 
     expect(categoryWithPosts.arrayPosts.docs).toBeDefined()
@@ -265,6 +277,7 @@ describe('Joins Field', () => {
     const categoryWithPosts = await payload.findByID({
       id: category.id,
       collection: categoriesSlug,
+      overrideAccess: true,
     })
 
     expect(categoryWithPosts.arrayHasManyPosts.docs).toBeDefined()
@@ -275,6 +288,7 @@ describe('Joins Field', () => {
     const categoryWithPosts = await payload.findByID({
       id: category.id,
       collection: categoriesSlug,
+      overrideAccess: true,
     })
 
     expect(categoryWithPosts.localizedArrayPosts.docs).toBeDefined()
@@ -285,6 +299,7 @@ describe('Joins Field', () => {
     const categoryWithPosts = await payload.findByID({
       id: category.id,
       collection: categoriesSlug,
+      overrideAccess: true,
     })
 
     expect(categoryWithPosts.blocksPosts.docs).toBeDefined()
@@ -294,6 +309,7 @@ describe('Joins Field', () => {
     const { docs } = await payload.find({
       limit: 1,
       collection: postsSlug,
+      overrideAccess: true,
     })
 
     expect(docs[0].upload.id).toBeDefined()
@@ -304,6 +320,7 @@ describe('Joins Field', () => {
     const categoryWithPosts = await payload.findByID({
       collection: categoriesSlug,
       id: category.id,
+      overrideAccess: true,
     })
     expect(categoryWithPosts.polymorphic.docs[0]).toHaveProperty('id')
     expect(categoryWithPosts.polymorphics.docs[0]).toHaveProperty('id')
@@ -317,6 +334,7 @@ describe('Joins Field', () => {
       data: {
         name: 'sharedFolder',
       },
+      overrideAccess: true,
     })
 
     await payload.create({
@@ -326,6 +344,7 @@ describe('Joins Field', () => {
         _h_folders: folderDoc.id,
       },
       depth: 0,
+      overrideAccess: true,
     })
 
     await payload.create({
@@ -335,6 +354,7 @@ describe('Joins Field', () => {
         _h_folders: folderDoc.id,
       },
       depth: 0,
+      overrideAccess: true,
     })
 
     const result = await payload.find({
@@ -364,6 +384,7 @@ describe('Joins Field', () => {
           equals: folderDoc.id,
         },
       },
+      overrideAccess: true,
     })
 
     expect(result.docs[0]?.children.docs).toHaveLength(1)
@@ -376,6 +397,7 @@ describe('Joins Field', () => {
         name: 'scopedFolder',
         folderType: ['folderPoly1', 'folderPoly2'],
       },
+      overrideAccess: true,
     })
 
     await payload.create({
@@ -385,6 +407,7 @@ describe('Joins Field', () => {
         folderType: ['folderPoly1'],
         _h_folders: folderDoc.id,
       },
+      overrideAccess: true,
     })
 
     const findFolder = await payload.find({
@@ -414,19 +437,21 @@ describe('Joins Field', () => {
           },
         },
       },
+      overrideAccess: true,
     })
 
     expect(findFolder?.docs[0]?.children?.docs).toHaveLength(1)
   })
 
   it('should query where with exists for hasMany select fields', async () => {
-    await payload.delete({ collection: 'folders', where: {} })
+    await payload.delete({ collection: 'folders', where: {}, overrideAccess: true })
     const folderDoc = await payload.create({
       collection: 'folders',
       data: {
         name: 'scopedFolder',
         folderType: ['folderPoly1', 'folderPoly2'],
       },
+      overrideAccess: true,
     })
 
     await payload.create({
@@ -436,6 +461,7 @@ describe('Joins Field', () => {
         folderType: ['folderPoly1'],
         _h_folders: folderDoc.id,
       },
+      overrideAccess: true,
     })
 
     const findFolder = await payload.find({
@@ -474,6 +500,7 @@ describe('Joins Field', () => {
           },
         },
       },
+      overrideAccess: true,
     })
 
     expect(findFolder?.docs[0]?.children?.docs).toHaveLength(1)
@@ -493,6 +520,7 @@ describe('Joins Field', () => {
         },
       },
       collection: categoriesSlug,
+      overrideAccess: true,
     })
 
     expect(categoryWithPosts.relatedPosts.docs).toHaveLength(1)
@@ -503,6 +531,7 @@ describe('Joins Field', () => {
     const categoryWithPosts = await payload.findByID({
       id: category.id,
       collection: categoriesSlug,
+      overrideAccess: true,
     })
 
     // relatedPosts join has defaultSort: '-title', defaultLimit: 5
@@ -519,6 +548,7 @@ describe('Joins Field', () => {
           sort: 'title',
         },
       },
+      overrideAccess: true,
     })
 
     // ascending sort overrides defaultSort: '-title'
@@ -531,6 +561,7 @@ describe('Joins Field', () => {
       where: {
         id: { equals: category.id },
       },
+      overrideAccess: true,
     })
 
     const [categoryWithPosts] = result.docs
@@ -546,12 +577,14 @@ describe('Joins Field', () => {
       where: {
         id: { equals: category.id },
       },
+      overrideAccess: true,
     })
     const otherResult = await payload.find({
       collection: categoriesSlug,
       where: {
         id: { equals: otherCategory.id },
       },
+      overrideAccess: true,
     })
 
     const [categoryWithPosts] = result.docs
@@ -595,12 +628,14 @@ describe('Joins Field', () => {
       where: {
         id: { equals: category.id },
       },
+      overrideAccess: true,
     })
     const otherResultEn = await payload.find({
       collection: categoriesSlug,
       where: {
         id: { equals: otherCategory.id },
       },
+      overrideAccess: true,
     })
 
     const [categoryWithPostsEn] = resultEn.docs
@@ -619,6 +654,7 @@ describe('Joins Field', () => {
       where: {
         id: { equals: category.id },
       },
+      overrideAccess: true,
     })
     const otherResultEs = await payload.find({
       collection: categoriesSlug,
@@ -626,6 +662,7 @@ describe('Joins Field', () => {
       where: {
         id: { equals: otherCategory.id },
       },
+      overrideAccess: true,
     })
 
     const [categoryWithPostsEs] = resultEs.docs
@@ -645,6 +682,7 @@ describe('Joins Field', () => {
           in: [post_1.id, post_2.id],
         },
       },
+      overrideAccess: true,
     })
   })
 
@@ -654,6 +692,7 @@ describe('Joins Field', () => {
       data: {
         name: 'category with post',
       },
+      overrideAccess: true,
     })
 
     await createPost({
@@ -666,6 +705,7 @@ describe('Joins Field', () => {
       where: {
         id: { equals: category.id },
       },
+      overrideAccess: true,
     })
 
     expect(result.docs[0].id).toStrictEqual(category.id)
@@ -679,6 +719,7 @@ describe('Joins Field', () => {
         data: {
           name: 'category with filtered post',
         },
+        overrideAccess: true,
       })
 
       await createPost({
@@ -696,6 +737,7 @@ describe('Joins Field', () => {
       categoryWithFilteredPost = await payload.findByID({
         id: categoryWithFilteredPost.id,
         collection: categoriesSlug,
+        overrideAccess: true,
       })
     })
 
@@ -714,6 +756,7 @@ describe('Joins Field', () => {
             },
           },
         },
+        overrideAccess: true,
       })
 
       expect(categoryWithFilteredPost.filtered.docs).toHaveLength(0)
@@ -730,6 +773,7 @@ describe('Joins Field', () => {
         data: {
           name: 'localized category',
         },
+        overrideAccess: true,
       })
       const post1 = await payload.create({
         collection: 'localized-posts',
@@ -738,6 +782,7 @@ describe('Joins Field', () => {
           title: 'english post 1',
           category: localizedCategory.id,
         },
+        overrideAccess: true,
       })
       await payload.update({
         collection: 'localized-posts',
@@ -747,6 +792,7 @@ describe('Joins Field', () => {
           title: 'spanish post',
           category: localizedCategory.id,
         },
+        overrideAccess: true,
       })
       await payload.create({
         collection: 'localized-posts',
@@ -755,6 +801,7 @@ describe('Joins Field', () => {
           title: 'english post 2',
           category: localizedCategory.id,
         },
+        overrideAccess: true,
       })
     })
 
@@ -763,11 +810,13 @@ describe('Joins Field', () => {
         id: localizedCategory.id,
         collection: 'localized-categories',
         locale: 'en',
+        overrideAccess: true,
       })
       const esCategory = await payload.findByID({
         id: localizedCategory.id,
         collection: 'localized-categories',
         locale: 'es',
+        overrideAccess: true,
       })
       expect(enCategory.relatedPosts.docs).toHaveLength(2)
       expect(esCategory.relatedPosts.docs).toHaveLength(1)
@@ -776,47 +825,71 @@ describe('Joins Field', () => {
 
   describe('Joins with versions', () => {
     afterEach(async () => {
-      await payload.delete({ collection: 'versions', where: {} })
-      await payload.delete({ collection: 'categories-versions', where: {} })
+      await payload.delete({ collection: 'versions', where: {}, overrideAccess: true })
+      await payload.delete({ collection: 'categories-versions', where: {}, overrideAccess: true })
     })
 
     it('should populate joins when versions on both sides draft false', async () => {
-      const category = await payload.create({ collection: 'categories-versions', data: {} })
+      const category = await payload.create({
+        collection: 'categories-versions',
+        data: {},
+        overrideAccess: true,
+      })
 
       const version = await payload.create({
         collection: 'versions',
         data: { title: 'version', categoryVersion: category.id },
+        overrideAccess: true,
       })
 
-      const res = await payload.find({ collection: 'categories-versions', draft: false })
+      const res = await payload.find({
+        collection: 'categories-versions',
+        draft: false,
+        overrideAccess: true,
+      })
 
       expect(res.docs[0].relatedVersions.docs[0].id).toBe(version.id)
     })
 
     it('should populate joins with hasMany relationships when versions on both sides draft false', async () => {
-      const category = await payload.create({ collection: 'categories-versions', data: {} })
+      const category = await payload.create({
+        collection: 'categories-versions',
+        data: {},
+        overrideAccess: true,
+      })
 
       const version = await payload.create({
         collection: 'versions',
         data: { title: 'version', categoryVersions: [category.id] },
+        overrideAccess: true,
       })
 
-      const res = await payload.find({ collection: 'categories-versions', draft: false })
+      const res = await payload.find({
+        collection: 'categories-versions',
+        draft: false,
+        overrideAccess: true,
+      })
 
       expect(res.docs[0].relatedVersionsMany.docs[0].id).toBe(version.id)
     })
 
     it('should populate joins with hasMany relationships when versions on both sides draft true payload.db.queryDrafts', async () => {
-      const category = await payload.create({ collection: 'categories-versions', data: {} })
+      const category = await payload.create({
+        collection: 'categories-versions',
+        data: {},
+        overrideAccess: true,
+      })
 
       const version = await payload.create({
         collection: 'versions',
         data: { title: 'version', categoryVersion: category.id },
+        overrideAccess: true,
       })
 
       const res = await payload.find({
         collection: 'categories-versions',
         draft: true,
+        overrideAccess: true,
       })
 
       expect(res.docs[0].relatedVersions.docs[0].id).toBe(version.id)
@@ -827,12 +900,14 @@ describe('Joins Field', () => {
         collection: 'categories-versions',
         data: { _status: 'draft' },
         draft: true,
+        overrideAccess: true,
       })
 
       const version = await payload.create({
         collection: 'versions',
         data: { title: 'original-title', _status: 'draft', categoryVersion: category.id },
         draft: true,
+        overrideAccess: true,
       })
 
       await payload.update({
@@ -840,11 +915,13 @@ describe('Joins Field', () => {
         id: version.id,
         data: { title: 'updated-title' },
         draft: true,
+        overrideAccess: true,
       })
 
       const res = await payload.find({
         collection: 'categories-versions',
         draft: true,
+        overrideAccess: true,
       })
 
       expect(res.docs[0].relatedVersions.docs[0].id).toBe(version.id)
@@ -852,16 +929,22 @@ describe('Joins Field', () => {
     })
 
     it('should populate joins when versions on both sides draft true payload.db.queryDrafts', async () => {
-      const category = await payload.create({ collection: 'categories-versions', data: {} })
+      const category = await payload.create({
+        collection: 'categories-versions',
+        data: {},
+        overrideAccess: true,
+      })
 
       const version = await payload.create({
         collection: 'versions',
         data: { categoryVersions: [category.id], title: 'version' },
+        overrideAccess: true,
       })
 
       const res = await payload.find({
         collection: 'categories-versions',
         draft: true,
+        overrideAccess: true,
       })
 
       expect(res.docs[0].relatedVersionsMany.docs[0].id).toBe(version.id)
@@ -976,6 +1059,7 @@ describe('Joins Field', () => {
         data: {
           name: 'restricted category',
         },
+        overrideAccess: true,
       })
       await createPost({
         collection: restrictedPostsSlug,
@@ -1280,12 +1364,14 @@ describe('Joins Field', () => {
         collection: 'categories-versions',
         data: { _status: 'draft' },
         draft: true,
+        overrideAccess: true,
       })
 
       const version = await payload.create({
         collection: 'versions',
         data: { _status: 'draft', title: 'original-title', categoryVersion: category.id },
         draft: true,
+        overrideAccess: true,
       })
 
       await payload.update({
@@ -1293,6 +1379,7 @@ describe('Joins Field', () => {
         draft: true,
         id: version.id,
         data: { title: 'updated-title' },
+        overrideAccess: true,
       })
 
       const query = `query {
@@ -1455,7 +1542,11 @@ describe('Joins Field', () => {
   })
 
   it('should work id.in command delimited querying with joins', async () => {
-    const allCategories = await payload.find({ collection: categoriesSlug, pagination: false })
+    const allCategories = await payload.find({
+      collection: categoriesSlug,
+      pagination: false,
+      overrideAccess: true,
+    })
 
     const allCategoriesByIds = await restClient
       .GET(`/categories`, {
@@ -1475,16 +1566,18 @@ describe('Joins Field', () => {
   it('should join with singular collection name', async () => {
     const {
       docs: [category],
-    } = await payload.find({ collection: categoriesSlug, limit: 1, depth: 0 })
+    } = await payload.find({ collection: categoriesSlug, limit: 1, depth: 0, overrideAccess: true })
 
     const singular = await payload.create({
       collection: 'singular',
       data: { category: category.id },
+      overrideAccess: true,
     })
 
     const categoryWithJoins = await payload.findByID({
       collection: categoriesSlug,
       id: category.id,
+      overrideAccess: true,
     })
 
     expect((categoryWithJoins.singulars.docs[0] as Singular).id).toBe(singular.id)
@@ -1501,6 +1594,7 @@ describe('Joins Field', () => {
       joins: {
         relatedPosts: false,
       },
+      overrideAccess: true,
     })
 
     // removed from the result
@@ -1539,12 +1633,17 @@ describe('Joins Field', () => {
 
   it('should have correct totalDocs', async () => {
     for (let i = 0; i < 50; i++) {
-      await payload.create({ collection: categoriesSlug, data: { name: 'totalDocs' } })
+      await payload.create({
+        collection: categoriesSlug,
+        data: { name: 'totalDocs' },
+        overrideAccess: true,
+      })
     }
 
     const count = await payload.count({
       collection: categoriesSlug,
       where: { name: { equals: 'totalDocs' } },
+      overrideAccess: true,
     })
     expect(count.totalDocs).toBe(50)
 
@@ -1552,40 +1651,63 @@ describe('Joins Field', () => {
       collection: categoriesSlug,
       limit: 5,
       where: { name: { equals: 'totalDocs' } },
+      overrideAccess: true,
     })
     expect(find.totalDocs).toBe(50)
     expect(find.docs).toHaveLength(5)
 
-    await payload.delete({ collection: categoriesSlug, where: { name: { equals: 'totalDocs' } } })
+    await payload.delete({
+      collection: categoriesSlug,
+      where: { name: { equals: 'totalDocs' } },
+      overrideAccess: true,
+    })
   })
 
   it('should self join', async () => {
-    const doc_1 = await payload.create({ collection: 'self-joins', data: {} })
-    const doc_2 = await payload.create({ collection: 'self-joins', data: { rel: doc_1 }, depth: 0 })
+    const doc_1 = await payload.create({ collection: 'self-joins', data: {}, overrideAccess: true })
+    const doc_2 = await payload.create({
+      collection: 'self-joins',
+      data: { rel: doc_1 },
+      depth: 0,
+      overrideAccess: true,
+    })
 
-    const data = await payload.findByID({ collection: 'self-joins', id: doc_1.id, depth: 1 })
+    const data = await payload.findByID({
+      collection: 'self-joins',
+      id: doc_1.id,
+      depth: 1,
+      overrideAccess: true,
+    })
 
     expect((data.joins.docs[0] as TypeWithID).id).toBe(doc_2.id)
   })
 
   it('should populate joins on depth 2', async () => {
-    const depthJoin_2 = await payload.create({ collection: 'depth-joins-2', data: {}, depth: 0 })
+    const depthJoin_2 = await payload.create({
+      collection: 'depth-joins-2',
+      data: {},
+      depth: 0,
+      overrideAccess: true,
+    })
     const depthJoin_1 = await payload.create({
       collection: 'depth-joins-1',
       data: { rel: depthJoin_2 },
       depth: 0,
+      overrideAccess: true,
     })
 
     const depthJoin_3 = await payload.create({
       collection: 'depth-joins-3',
       data: { rel: depthJoin_1 },
       depth: 0,
+      overrideAccess: true,
     })
 
     const data = await payload.findByID({
       collection: 'depth-joins-2',
       id: depthJoin_2.id,
       depth: 2,
+      overrideAccess: true,
     })
 
     const joinedDoc = data.joins.docs[0] as DepthJoins1
@@ -1603,6 +1725,7 @@ describe('Joins Field', () => {
         collection: 'multiple-collections-parents',
         depth: 0,
         data: {},
+        overrideAccess: true,
       })
 
       const child_1 = await payload.create({
@@ -1612,6 +1735,7 @@ describe('Joins Field', () => {
           parent,
           title: 'doc-1',
         },
+        overrideAccess: true,
       })
 
       const child_2 = await payload.create({
@@ -1621,12 +1745,14 @@ describe('Joins Field', () => {
           parent,
           title: 'doc-2',
         },
+        overrideAccess: true,
       })
 
       parent = await payload.findByID({
         collection: 'multiple-collections-parents',
         id: parent.id,
         depth: 0,
+        overrideAccess: true,
       })
 
       expect(parent.children.docs[0].value).toBe(child_2.id)
@@ -1638,6 +1764,7 @@ describe('Joins Field', () => {
         collection: 'multiple-collections-parents',
         id: parent.id,
         depth: 1,
+        overrideAccess: true,
       })
 
       expect(parent.children.docs[0].value.id).toBe(child_2.id)
@@ -1656,6 +1783,7 @@ describe('Joins Field', () => {
             sort: 'title',
           },
         },
+        overrideAccess: true,
       })
 
       expect(parent.children.docs).toHaveLength(1)
@@ -1671,6 +1799,7 @@ describe('Joins Field', () => {
             sort: 'title',
           },
         },
+        overrideAccess: true,
       })
 
       expect(parent.children.docs).toHaveLength(2)
@@ -1686,6 +1815,7 @@ describe('Joins Field', () => {
             sort: 'title',
           },
         },
+        overrideAccess: true,
       })
 
       expect(parent.children.docs[0]?.value.title).toBe('doc-1')
@@ -1700,6 +1830,7 @@ describe('Joins Field', () => {
             sort: '-title',
           },
         },
+        overrideAccess: true,
       })
 
       expect(parent.children.docs[0]?.value.title).toBe('doc-2')
@@ -1719,6 +1850,7 @@ describe('Joins Field', () => {
             },
           },
         },
+        overrideAccess: true,
       })
 
       expect(parent.children?.docs).toHaveLength(1)
@@ -1738,6 +1870,7 @@ describe('Joins Field', () => {
             },
           },
         },
+        overrideAccess: true,
       })
 
       // WHERE by relationTo with overrideAccess:false
@@ -1770,6 +1903,7 @@ describe('Joins Field', () => {
             count: true,
           },
         },
+        overrideAccess: true,
       })
 
       expect(parent.children?.totalDocs).toBe(2)
@@ -1789,6 +1923,7 @@ describe('Joins Field', () => {
             },
           },
         },
+        overrideAccess: true,
       })
 
       expect(parent.children?.totalDocs).toBe(1)
@@ -1796,14 +1931,20 @@ describe('Joins Field', () => {
   })
 
   it('should support where querying by a top level join field', async () => {
-    const category = await payload.create({ collection: 'categories', data: {} })
+    const category = await payload.create({
+      collection: 'categories',
+      data: {},
+      overrideAccess: true,
+    })
     await payload.create({
       collection: 'posts',
       data: { category: category.id, title: 'my-title' },
+      overrideAccess: true,
     })
     const found = await payload.find({
       collection: 'categories',
       where: { 'relatedPosts.title': { equals: 'my-title' } },
+      overrideAccess: true,
     })
 
     expect(found.docs).toHaveLength(1)
@@ -1811,10 +1952,15 @@ describe('Joins Field', () => {
   })
 
   it('should support where querying by a join field as ID', async () => {
-    const category = await payload.create({ collection: 'categories', data: {} })
+    const category = await payload.create({
+      collection: 'categories',
+      data: {},
+      overrideAccess: true,
+    })
     const post = await payload.create({
       collection: 'posts',
       data: { category: category.id, title: 'my-title' },
+      overrideAccess: true,
     })
     const found_1 = await payload.find({
       collection: 'categories',
@@ -1836,29 +1982,41 @@ describe('Joins Field', () => {
   })
 
   it('should support where querying by a join field with hasMany relationship', async () => {
-    const category = await payload.create({ collection: 'categories', data: {} })
+    const category = await payload.create({
+      collection: 'categories',
+      data: {},
+      overrideAccess: true,
+    })
     await payload.create({
       collection: 'posts',
       data: { categories: [category.id], title: 'my-title' },
+      overrideAccess: true,
     })
 
     const found = await payload.find({
       collection: 'categories',
       where: { 'hasManyPosts.title': { equals: 'my-title' } },
+      overrideAccess: true,
     })
     expect(found.docs).toHaveLength(1)
     expect(found.docs[0].id).toBe(category.id)
   })
 
   it('should support where querying by a join field with relationship nested to a group', async () => {
-    const category = await payload.create({ collection: 'categories', data: {} })
+    const category = await payload.create({
+      collection: 'categories',
+      data: {},
+      overrideAccess: true,
+    })
     await payload.create({
       collection: 'posts',
       data: { group: { category: category.id }, title: 'my-category-title' },
+      overrideAccess: true,
     })
     const found = await payload.find({
       collection: 'categories',
       where: { 'group.relatedPosts.title': { equals: 'my-category-title' } },
+      overrideAccess: true,
     })
 
     expect(found.docs).toHaveLength(1)
@@ -1866,28 +2024,39 @@ describe('Joins Field', () => {
   })
 
   it('should support where querying by a join field with relationship nested to an array', async () => {
-    const category = await payload.create({ collection: 'categories', data: {} })
+    const category = await payload.create({
+      collection: 'categories',
+      data: {},
+      overrideAccess: true,
+    })
     const post = await payload.create({
       collection: 'posts',
       data: { array: [{ category: category.id }], title: 'array-join-where-test' },
+      overrideAccess: true,
     })
     const found = await payload.find({
       collection: 'categories',
       where: { 'arrayPosts.title': { equals: 'array-join-where-test' } },
+      overrideAccess: true,
     })
 
     expect(found.docs).toHaveLength(1)
     expect(found.docs[0].id).toBe(category.id)
 
-    await payload.delete({ collection: 'posts', id: post.id })
-    await payload.delete({ collection: 'categories', id: category.id })
+    await payload.delete({ collection: 'posts', id: post.id, overrideAccess: true })
+    await payload.delete({ collection: 'categories', id: category.id, overrideAccess: true })
   })
 
   it('should support where querying by a join field multiple times', async () => {
-    const category = await payload.create({ collection: 'categories', data: {} })
+    const category = await payload.create({
+      collection: 'categories',
+      data: {},
+      overrideAccess: true,
+    })
     await payload.create({
       collection: 'posts',
       data: { group: { category: category.id }, isFiltered: true, title: 'my-category-title' },
+      overrideAccess: true,
     })
 
     const found = await payload.find({
@@ -1905,6 +2074,7 @@ describe('Joins Field', () => {
           },
         ],
       },
+      overrideAccess: true,
     })
 
     expect(found.docs).toHaveLength(1)
@@ -1912,10 +2082,15 @@ describe('Joins Field', () => {
   })
 
   it('should support where querying by a join field with hasMany relationship multiple times', async () => {
-    const category = await payload.create({ collection: 'categories', data: {} })
+    const category = await payload.create({
+      collection: 'categories',
+      data: {},
+      overrideAccess: true,
+    })
     await payload.create({
       collection: 'posts',
       data: { categories: [category.id], title: 'my-title', isFiltered: true },
+      overrideAccess: true,
     })
 
     const found = await payload.find({
@@ -1933,6 +2108,7 @@ describe('Joins Field', () => {
           },
         ],
       },
+      overrideAccess: true,
     })
     expect(found.docs).toHaveLength(1)
     expect(found.docs[0].id).toBe(category.id)
@@ -2106,6 +2282,7 @@ describe('Joins Field', () => {
           collection: postsSlug,
           limit: 1,
           where: { title: { $raw: 'true' } } as any,
+          overrideAccess: true,
         }),
       ).rejects.toBeTruthy()
     })
@@ -2177,5 +2354,6 @@ async function createPost(overrides?: Partial<Post>, locale?: Config['locale']) 
       title: 'test',
       ...overrides,
     },
+    overrideAccess: true,
   })
 }

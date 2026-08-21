@@ -1,13 +1,13 @@
 import path from 'path'
-import { describe, beforeAll, afterAll, afterEach, beforeEach, it, expect } from 'vitest'
 import { _internal_jobSystemGlobals, _internal_resetJobSystemGlobals, type Payload } from 'payload'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
-import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { devUser } from '../credentials.js'
 import { clearAndSeedEverything } from './seed.js'
 import { timeFreeze, timeTravel, waitUntilAutorunIsDone, withoutAutoRun } from './utilities.js'
 
@@ -83,6 +83,7 @@ describe('Queues - scheduling, without automatic scheduling handling', () => {
     const allSimples = await payload.find({
       collection: 'simple',
       limit: 100,
+      overrideAccess: true,
     })
 
     expect(allSimples.totalDocs).toBe(1)
@@ -104,6 +105,7 @@ describe('Queues - scheduling, without automatic scheduling handling', () => {
     const allSimples = await payload.find({
       collection: 'simple',
       limit: 100,
+      overrideAccess: true,
     })
 
     expect(allSimples.totalDocs).toBe(1)
@@ -125,6 +127,7 @@ describe('Queues - scheduling, without automatic scheduling handling', () => {
     const allSimples = await payload.find({
       collection: 'simple',
       limit: 100,
+      overrideAccess: true,
     })
 
     expect(allSimples.totalDocs).toBe(0)
@@ -149,6 +152,7 @@ describe('Queues - scheduling, without automatic scheduling handling', () => {
     const allSimples = await payload.find({
       collection: 'simple',
       limit: 100,
+      overrideAccess: true,
     })
 
     expect(allSimples.totalDocs).toBe(1)
@@ -172,6 +176,7 @@ describe('Queues - scheduling, without automatic scheduling handling', () => {
     const allSimples = await payload.find({
       collection: 'simple',
       limit: 100,
+      overrideAccess: true,
     })
 
     expect(allSimples.totalDocs).toBe(1)
@@ -195,6 +200,7 @@ describe('Queues - scheduling, without automatic scheduling handling', () => {
     const allSimples = await payload.find({
       collection: 'simple',
       limit: 100,
+      overrideAccess: true,
     })
 
     expect(allSimples.totalDocs).toBe(0)
@@ -216,6 +222,7 @@ describe('Queues - scheduling, without automatic scheduling handling', () => {
     const allSimples = await payload.find({
       collection: 'simple',
       limit: 100,
+      overrideAccess: true,
     })
 
     expect(allSimples.totalDocs).toBe(1)
@@ -247,6 +254,7 @@ describe('Queues - scheduling, without automatic scheduling handling', () => {
     const allSimples = await payload.find({
       collection: 'simple',
       limit: 100,
+      overrideAccess: true,
     })
 
     expect(allSimples.totalDocs).toBe(3)
@@ -279,6 +287,7 @@ describe('Queues - scheduling, without automatic scheduling handling', () => {
     const allSimples = await payload.find({
       collection: 'simple',
       limit: 100,
+      overrideAccess: true,
     })
 
     expect(allSimples.totalDocs).toBe(2) // Would be 4 by default, if only scheduled jobs were respected in handleSchedules condition
@@ -302,6 +311,7 @@ describe('Queues - scheduling, without automatic scheduling handling', () => {
     const allSimples = await payload.find({
       collection: 'simple',
       limit: 100,
+      overrideAccess: true,
     })
 
     expect(allSimples.totalDocs).toBe(2)
@@ -329,6 +339,7 @@ describe('Queues - scheduling, without automatic scheduling handling', () => {
     const allSimples = await payload.find({
       collection: 'simple',
       limit: 100,
+      overrideAccess: true,
     })
 
     expect(allSimples.totalDocs).toBe(3)
@@ -363,6 +374,7 @@ describe('Queues - scheduling, without automatic scheduling handling', () => {
           equals: 'This task runs every second - max 2 per second',
         },
       },
+      overrideAccess: true,
     })
 
     expect(allSimples.totalDocs).toBe(6)
@@ -376,6 +388,7 @@ describe('Queues - scheduling, without automatic scheduling handling', () => {
     const allSimples = await payload.find({
       collection: 'simple',
       limit: 100,
+      overrideAccess: true,
     })
 
     expect(allSimples.totalDocs).toBe(0)

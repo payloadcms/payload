@@ -68,6 +68,7 @@ describe('Point', () => {
         localized: [4, 2],
         point: [5, 5],
       },
+      overrideAccess: true,
     })
     emptyGroupPoint = await payload.create({
       collection: pointFieldsSlug,
@@ -76,6 +77,7 @@ describe('Point', () => {
         localized: [3, -2],
         point: [5, 5],
       },
+      overrideAccess: true,
     })
   })
 

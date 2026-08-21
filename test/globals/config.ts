@@ -131,6 +131,7 @@ export default buildConfigWithDefaults({
         email: devUser.email,
         password: devUser.password,
       },
+      overrideAccess: true,
     })
 
     await payload.updateGlobal({
@@ -138,6 +139,7 @@ export default buildConfigWithDefaults({
         title: 'hello',
       },
       slug: accessControlSlug,
+      overrideAccess: true,
     })
   },
   typescript: {

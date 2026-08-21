@@ -206,6 +206,7 @@ describe('i18n', () => {
         data: {
           i18nFieldLabel: 'Test',
         },
+        overrideAccess: true,
       })
 
       // set language to Spanish

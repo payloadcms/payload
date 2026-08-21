@@ -1,15 +1,15 @@
 import type { Payload, SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload'
-import { describe, beforeAll, afterAll, afterEach, it, expect } from 'vitest'
 
 import path from 'path'
 import { Locked, NotFound } from 'payload'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
+import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
 
 import type { Post, User } from './payload-types.js'
 
-import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { devUser } from '../credentials.js'
 import { menuSlug } from './globals/Menu/index.js'
 import { pagesSlug, postsSlug } from './slugs.js'
 
@@ -40,6 +40,7 @@ describe('Locked documents', () => {
         email: devUser.email,
         password: devUser.password,
       },
+      overrideAccess: true,
     })
 
     user = loginResult.user
@@ -50,6 +51,7 @@ describe('Locked documents', () => {
         email: 'test@payloadcms.com',
         password: 'test',
       },
+      overrideAccess: true,
     })
 
     post = await payload.create({
@@ -57,6 +59,7 @@ describe('Locked documents', () => {
       data: {
         text: 'some post',
       },
+      overrideAccess: true,
     })
 
     await payload.create({
@@ -64,6 +67,7 @@ describe('Locked documents', () => {
       data: {
         text: 'some page',
       },
+      overrideAccess: true,
     })
 
     await payload.updateGlobal({
@@ -71,6 +75,7 @@ describe('Locked documents', () => {
       data: {
         globalText: 'global text',
       },
+      overrideAccess: true,
     })
   })
 
@@ -89,6 +94,7 @@ describe('Locked documents', () => {
         text: 'updated post',
       },
       id: post.id,
+      overrideAccess: true,
     })
 
     expect(updatedPost.text).toEqual('updated post')
@@ -100,6 +106,7 @@ describe('Locked documents', () => {
       data: {
         globalText: 'updated global text',
       },
+      overrideAccess: true,
     })
 
     expect(updatedGlobalMenu.globalText).toEqual('updated global text')
@@ -109,6 +116,7 @@ describe('Locked documents', () => {
     const { docs } = await payload.find({
       collection: postsSlug,
       depth: 0,
+      overrideAccess: true,
     })
 
     expect(docs).toHaveLength(2)
@@ -116,11 +124,13 @@ describe('Locked documents', () => {
     await payload.delete({
       collection: postsSlug,
       id: post.id,
+      overrideAccess: true,
     })
 
     const { docs: deletedResults } = await payload.find({
       collection: postsSlug,
       depth: 0,
+      overrideAccess: true,
     })
 
     expect(deletedResults).toHaveLength(1)
@@ -132,6 +142,7 @@ describe('Locked documents', () => {
       data: {
         text: 'new post 2',
       },
+      overrideAccess: true,
     })
 
     // Set lock duration to 1 second for testing purposes
@@ -151,6 +162,7 @@ describe('Locked documents', () => {
         },
         globalSlug: undefined,
       },
+      overrideAccess: true,
     })
 
     await wait(1100)
@@ -162,6 +174,7 @@ describe('Locked documents', () => {
       },
       overrideLock: false,
       id: newPost2.id,
+      overrideAccess: true,
     })
     postConfig.lockDocuments = { duration: 300 }
 
@@ -174,6 +187,7 @@ describe('Locked documents', () => {
       await payload.findByID({
         collection: lockedDocumentCollection,
         id: lockedDocInstance.id,
+        overrideAccess: true,
       })
     } catch (error) {
       expect(error).toBeInstanceOf(NotFound)
@@ -184,6 +198,7 @@ describe('Locked documents', () => {
       where: {
         id: { equals: lockedDocInstance.id },
       },
+      overrideAccess: true,
     })
 
     // Updating a document with the local API should not keep a stored doc
@@ -208,6 +223,7 @@ describe('Locked documents', () => {
         document: undefined,
         globalSlug: menuSlug,
       },
+      overrideAccess: true,
     })
 
     await wait(1100)
@@ -218,6 +234,7 @@ describe('Locked documents', () => {
       },
       overrideLock: false,
       slug: menuSlug,
+      overrideAccess: true,
     })
     globalConfig.lockDocuments = { duration: 300 }
 
@@ -230,6 +247,7 @@ describe('Locked documents', () => {
       await payload.findByID({
         collection: lockedDocumentCollection,
         id: lockedGlobalInstance.id,
+        overrideAccess: true,
       })
     } catch (error) {
       expect(error).toBeInstanceOf(NotFound)
@@ -240,6 +258,7 @@ describe('Locked documents', () => {
       where: {
         id: { equals: lockedGlobalInstance.id },
       },
+      overrideAccess: true,
     })
 
     // Updating a document with the local API should not keep a stored doc
@@ -253,6 +272,7 @@ describe('Locked documents', () => {
       data: {
         text: 'some post',
       },
+      overrideAccess: true,
     })
 
     // Give locking ownership to another user
@@ -269,6 +289,7 @@ describe('Locked documents', () => {
           value: user2.id,
         },
       },
+      overrideAccess: true,
     })
 
     try {
@@ -279,6 +300,7 @@ describe('Locked documents', () => {
         },
         overrideLock: false, // necessary to trigger the lock check
         id: newPost.id,
+        overrideAccess: true,
       })
     } catch (error: any) {
       expect(error).toBeInstanceOf(Locked)
@@ -288,6 +310,7 @@ describe('Locked documents', () => {
     const updatedPost = await payload.findByID({
       collection: postsSlug,
       id: newPost.id,
+      overrideAccess: true,
     })
 
     // Should not allow update - expect data not to change
@@ -306,6 +329,7 @@ describe('Locked documents', () => {
           value: user2.id,
         },
       },
+      overrideAccess: true,
     })
 
     try {
@@ -315,6 +339,7 @@ describe('Locked documents', () => {
         },
         overrideLock: false, // necessary to trigger the lock check
         slug: menuSlug,
+        overrideAccess: true,
       })
     } catch (error: any) {
       expect(error).toBeInstanceOf(Locked)
@@ -323,6 +348,7 @@ describe('Locked documents', () => {
 
     const updatedGlobalMenu = await payload.findGlobal({
       slug: menuSlug,
+      overrideAccess: true,
     })
 
     // Should not allow update - expect data not to change
@@ -336,6 +362,7 @@ describe('Locked documents', () => {
       data: {
         text: 'new post 3',
       },
+      overrideAccess: true,
     })
 
     // Give locking ownership to another user
@@ -352,6 +379,7 @@ describe('Locked documents', () => {
           value: user2.id,
         },
       },
+      overrideAccess: true,
     })
 
     try {
@@ -359,6 +387,7 @@ describe('Locked documents', () => {
         collection: postsSlug,
         id: newPost3.id,
         overrideLock: false, // necessary to trigger the lock check
+        overrideAccess: true,
       })
     } catch (error: any) {
       expect(error).toBeInstanceOf(Locked)
@@ -370,6 +399,7 @@ describe('Locked documents', () => {
       where: {
         id: { equals: newPost3.id },
       },
+      overrideAccess: true,
     })
 
     expect(findPostDocs.docs).toHaveLength(1)
@@ -381,6 +411,7 @@ describe('Locked documents', () => {
       data: {
         text: 'new post 4',
       },
+      overrideAccess: true,
     })
 
     // Set lock duration to 1 second for testing purposes
@@ -400,6 +431,7 @@ describe('Locked documents', () => {
         },
         globalSlug: undefined,
       },
+      overrideAccess: true,
     })
 
     await wait(1100)
@@ -408,6 +440,7 @@ describe('Locked documents', () => {
       collection: postsSlug,
       id: newPost4.id,
       overrideLock: false,
+      overrideAccess: true,
     })
 
     const findPostDocs = await payload.find({
@@ -415,6 +448,7 @@ describe('Locked documents', () => {
       where: {
         id: { equals: newPost4.id },
       },
+      overrideAccess: true,
     })
 
     expect(findPostDocs.docs).toHaveLength(0)
@@ -424,6 +458,7 @@ describe('Locked documents', () => {
       await payload.findByID({
         collection: lockedDocumentCollection,
         id: lockedDocInstance.id,
+        overrideAccess: true,
       })
     } catch (error) {
       expect(error).toBeInstanceOf(NotFound)
@@ -434,6 +469,7 @@ describe('Locked documents', () => {
       where: {
         id: { equals: lockedDocInstance.id },
       },
+      overrideAccess: true,
     })
 
     expect(docsFromLocksCollection.docs).toHaveLength(0)
@@ -445,6 +481,7 @@ describe('Locked documents', () => {
       data: {
         text: 'new post 5',
       },
+      overrideAccess: true,
     })
 
     // Give locking ownership to another user
@@ -461,6 +498,7 @@ describe('Locked documents', () => {
         },
         globalSlug: undefined,
       },
+      overrideAccess: true,
     })
 
     const updateLockedDoc = await payload.update({
@@ -470,6 +508,7 @@ describe('Locked documents', () => {
       },
       id: newPost5.id,
       overrideLock: true,
+      overrideAccess: true,
     })
 
     // Should allow update since using overrideLock flag
@@ -480,6 +519,7 @@ describe('Locked documents', () => {
       await payload.findByID({
         collection: lockedDocumentCollection,
         id: lockedDocInstance.id,
+        overrideAccess: true,
       })
     } catch (error) {
       expect(error).toBeInstanceOf(NotFound)
@@ -490,6 +530,7 @@ describe('Locked documents', () => {
       where: {
         id: { equals: lockedDocInstance.id },
       },
+      overrideAccess: true,
     })
 
     // Updating a document with the local API should not keep a stored doc
@@ -509,6 +550,7 @@ describe('Locked documents', () => {
         },
         document: undefined,
       },
+      overrideAccess: true,
     })
 
     const updateGlobalLockedDoc = await payload.updateGlobal({
@@ -517,6 +559,7 @@ describe('Locked documents', () => {
       },
       slug: menuSlug,
       overrideLock: true,
+      overrideAccess: true,
     })
 
     // Should allow update since using overrideLock flag
@@ -527,6 +570,7 @@ describe('Locked documents', () => {
       await payload.findByID({
         collection: lockedDocumentCollection,
         id: lockedGlobalInstance.id,
+        overrideAccess: true,
       })
     } catch (error) {
       expect(error).toBeInstanceOf(NotFound)
@@ -537,6 +581,7 @@ describe('Locked documents', () => {
       where: {
         id: { equals: lockedGlobalInstance.id },
       },
+      overrideAccess: true,
     })
 
     // Updating a document with the local API should not keep a stored doc
@@ -550,6 +595,7 @@ describe('Locked documents', () => {
       data: {
         text: 'new post 6',
       },
+      overrideAccess: true,
     })
 
     // Give locking ownership to another user
@@ -566,12 +612,14 @@ describe('Locked documents', () => {
         },
         globalSlug: undefined,
       },
+      overrideAccess: true,
     })
 
     await payload.delete({
       collection: postsSlug,
       id: newPost6.id,
       overrideLock: true,
+      overrideAccess: true,
     })
 
     const findPostDocs = await payload.find({
@@ -579,6 +627,7 @@ describe('Locked documents', () => {
       where: {
         id: { equals: newPost6.id },
       },
+      overrideAccess: true,
     })
 
     expect(findPostDocs.docs).toHaveLength(0)
@@ -588,6 +637,7 @@ describe('Locked documents', () => {
       await payload.findByID({
         collection: lockedDocumentCollection,
         id: lockedDocInstance.id,
+        overrideAccess: true,
       })
     } catch (error) {
       expect(error).toBeInstanceOf(NotFound)
@@ -598,6 +648,7 @@ describe('Locked documents', () => {
       where: {
         id: { equals: lockedDocInstance.id },
       },
+      overrideAccess: true,
     })
 
     expect(docsFromLocksCollection.docs).toHaveLength(0)
@@ -609,6 +660,7 @@ describe('Locked documents', () => {
       data: {
         text: 'new post 7',
       },
+      overrideAccess: true,
     })
 
     const lockedDocInstance = await payload.create({
@@ -624,6 +676,7 @@ describe('Locked documents', () => {
         },
         globalSlug: undefined,
       },
+      overrideAccess: true,
     })
 
     // This is the take over action - changing the user to the current user
@@ -633,6 +686,7 @@ describe('Locked documents', () => {
         user: { relationTo: 'users', value: user?.id },
       },
       id: lockedDocInstance.id,
+      overrideAccess: true,
     })
 
     const docsFromLocksCollection = await payload.find({
@@ -640,6 +694,7 @@ describe('Locked documents', () => {
       where: {
         'user.value': { equals: user.id },
       },
+      overrideAccess: true,
     })
 
     expect(docsFromLocksCollection.docs).toHaveLength(1)

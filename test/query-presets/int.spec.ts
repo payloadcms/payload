@@ -1,11 +1,11 @@
 import type { Payload, User } from 'payload'
-import { describe, beforeAll, afterAll, it, expect } from 'vitest'
 
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
-import { devUser, regularUser } from '../credentials.js'
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { devUser, regularUser } from '../credentials.js'
 
 const queryPresetsCollectionSlug = 'payload-query-presets'
 
@@ -29,6 +29,7 @@ describe('Query Presets', () => {
           email: devUser.email,
           password: devUser.password,
         },
+        overrideAccess: true,
       })
       ?.then((result) => result.user)
 
@@ -39,6 +40,7 @@ describe('Query Presets', () => {
           email: regularUser.email,
           password: regularUser.password,
         },
+        overrideAccess: true,
       })
       ?.then((result) => result.user)
 
@@ -49,6 +51,7 @@ describe('Query Presets', () => {
           email: 'public@email.com',
           password: regularUser.password,
         },
+        overrideAccess: true,
       })
       ?.then((result) => result.user)
   })
@@ -82,6 +85,7 @@ describe('Query Presets', () => {
           title: 'Only Logged In Users',
           relatedCollection: 'pages',
         },
+        overrideAccess: true,
       })
 
       // read
@@ -120,6 +124,7 @@ describe('Query Presets', () => {
           collection: queryPresetsCollectionSlug,
           depth: 0,
           id,
+          overrideAccess: true,
         })
 
         expect(preset.title).toBe('Only Logged In Users')
@@ -143,6 +148,7 @@ describe('Query Presets', () => {
           collection: queryPresetsCollectionSlug,
           depth: 0,
           id,
+          overrideAccess: true,
         })
 
         expect(preset.title).toBe('Only Logged In Users')
@@ -725,6 +731,7 @@ describe('Query Presets', () => {
             },
           },
         },
+        overrideAccess: true,
       })
 
       try {

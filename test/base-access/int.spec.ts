@@ -34,6 +34,7 @@ describe('baseAccess', () => {
       await payload.delete({
         id,
         collection: postsSlug,
+        overrideAccess: true,
       })
     }
     createdPostIDs.length = 0
@@ -64,6 +65,7 @@ describe('baseAccess', () => {
       const doc = await payload.create({
         collection: postsSlug,
         data,
+        overrideAccess: true,
       })
       createdPostIDs.push(doc.id)
     }
@@ -103,6 +105,7 @@ describe('baseAccess', () => {
       collection: postsSlug,
       data,
       req,
+      overrideAccess: true,
     })
     createdPostIDs.push(doc.id)
 

@@ -221,6 +221,7 @@ describe('relationship', () => {
       data: {
         text: 'doc to be deleted',
       },
+      overrideAccess: true,
     })
     const doc = await payload.create({
       collection: relationshipFieldsSlug,
@@ -230,10 +231,12 @@ describe('relationship', () => {
           value: createdRelatedDoc.id,
         },
       },
+      overrideAccess: true,
     })
     await payload.delete({
       id: createdRelatedDoc.id,
       collection: textFieldsSlug,
+      overrideAccess: true,
     })
 
     await page.goto(url.edit(doc.id))
@@ -458,10 +461,12 @@ describe('relationship', () => {
           equals: 'some updated text value',
         },
       },
+      overrideAccess: true,
     })
 
     const relationshipDocuments = await payload.find({
       collection: relationshipFieldsSlug,
+      overrideAccess: true,
     })
 
     // The Seeded text document should now have a text field with value 'some updated text value',
@@ -1068,6 +1073,7 @@ describe('relationship', () => {
         },
         relationshipDrawer: textDoc.id,
       },
+      overrideAccess: true,
     })
 
     await page.goto(url.edit(doc.id))
@@ -1161,6 +1167,7 @@ async function createTextFieldDoc(overrides?: Partial<TextField>): Promise<TextF
       text: 'some text',
       ...overrides,
     },
+    overrideAccess: true,
   }) as unknown as Promise<TextField>
 }
 
@@ -1174,5 +1181,6 @@ async function createRelationshipFieldDoc(
       relationship,
       ...overrides,
     },
+    overrideAccess: true,
   }) as unknown as Promise<RelationshipField>
 }

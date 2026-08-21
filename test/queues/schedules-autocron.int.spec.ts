@@ -6,8 +6,8 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
-import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { devUser } from '../credentials.js'
 import { clearAndSeedEverything } from './seed.js'
 
 let payload: Payload
@@ -97,6 +97,7 @@ describe('Queues - scheduling, with automatic scheduling handling', () => {
     const allSimples = await payload.find({
       collection: 'simple',
       limit: 100,
+      overrideAccess: true,
     })
 
     expect(allSimples.totalDocs).toBeGreaterThanOrEqual(minJobsCompleted)

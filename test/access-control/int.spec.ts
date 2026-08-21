@@ -52,11 +52,13 @@ describe('Access Control', () => {
     post1 = await payload.create({
       collection: slug,
       data: {},
+      overrideAccess: true,
     })
 
     restricted = await payload.create({
       collection: fullyRestrictedSlug,
       data: { name: 'restricted' },
+      overrideAccess: true,
     })
   })
 
@@ -80,6 +82,7 @@ describe('Access Control', () => {
             value: 'private_value',
           },
         },
+        overrideAccess: true,
       })
 
       await payload.update({
@@ -88,11 +91,13 @@ describe('Access Control', () => {
         data: {
           title: 'Doc Title',
         },
+        overrideAccess: true,
       })
 
       const updatedDoc = await payload.findByID({
         id: doc.id,
         collection: hiddenFieldsSlug,
+        overrideAccess: true,
         showHiddenFields: true,
       })
 
@@ -115,6 +120,7 @@ describe('Access Control', () => {
             value: 'private_value',
           },
         },
+        overrideAccess: true,
       })
 
       await payload.update({
@@ -122,6 +128,7 @@ describe('Access Control', () => {
         data: {
           title: 'Doc Title',
         },
+        overrideAccess: true,
         where: {
           id: { equals: docsMany.id },
         },
@@ -130,6 +137,7 @@ describe('Access Control', () => {
       const updatedMany = await payload.findByID({
         id: docsMany.id,
         collection: hiddenFieldsSlug,
+        overrideAccess: true,
         showHiddenFields: true,
       })
 
@@ -152,6 +160,7 @@ describe('Access Control', () => {
             },
           ],
         },
+        overrideAccess: true,
       })
 
       const doc = await payload.findByID({
@@ -168,6 +177,7 @@ describe('Access Control', () => {
       const docOverride = await payload.findByID({
         id,
         collection: siblingDataSlug,
+        overrideAccess: true,
       })
 
       expect(docOverride.array?.[0].text).toBe(firstArrayText)
@@ -180,16 +190,17 @@ describe('Access Control', () => {
         data: {
           cannotMutateRequired: 'original',
         },
+        overrideAccess: true,
       })
 
       const updatedDoc = await payload.update({
         id: doc.id,
         collection: hooksSlug,
-        overrideAccess: false,
         data: {
-          cannotMutateRequired: 'new',
           canMutate: 'canMutate',
+          cannotMutateRequired: 'new',
         },
+        overrideAccess: false,
       })
 
       expect(updatedDoc.cannotMutateRequired).toBe('original')
@@ -201,15 +212,16 @@ describe('Access Control', () => {
         data: {
           cannotMutateRequired: 'original',
         },
+        overrideAccess: true,
       })
 
       const updatedDoc = await payload.update({
         id: doc.id,
         collection: hooksSlug,
-        overrideAccess: false,
         data: {
           canMutate: 'canMutate',
         },
+        overrideAccess: false,
       })
 
       // should fallback to original data and not throw validation error
@@ -220,18 +232,19 @@ describe('Access Control', () => {
       const doc = await payload.create({
         collection: hooksSlug,
         data: {
-          cannotMutateRequired: 'cannotMutateRequired',
           cannotMutateNotRequired: 'cannotMutateNotRequired',
+          cannotMutateRequired: 'cannotMutateRequired',
         },
+        overrideAccess: true,
       })
 
       const updatedDoc = await payload.update({
         id: doc.id,
         collection: hooksSlug,
-        overrideAccess: false,
         data: {
           cannotMutateNotRequired: 'updated',
         },
+        overrideAccess: false,
       })
 
       // should fallback to original data and not throw validation error
@@ -245,6 +258,7 @@ describe('Access Control', () => {
         data: {
           title: 'Test Title',
         },
+        overrideAccess: true,
         showHiddenFields: true,
       })
 
@@ -309,7 +323,7 @@ describe('Access Control', () => {
 
       it('should respect access control for join request where queries of relationship properties', async () => {
         const post = await createDoc({})
-        await createDoc({ post: post.id, name: 'test' }, 'relation-restricted')
+        await createDoc({ name: 'test', post: post.id }, 'relation-restricted')
         await expect(
           payload.find({
             collection: 'relation-restricted',
@@ -405,7 +419,7 @@ describe('Access Control', () => {
       it('field without read access should not show when overrideAccess default', async () => {
         const { id, restrictedField } = await createDoc({ restrictedField: 'restricted' })
 
-        const retrievedDoc = await payload.findByID({ id, collection: slug })
+        const retrievedDoc = await payload.findByID({ id, collection: slug, overrideAccess: true })
 
         expect(retrievedDoc.restrictedField).toStrictEqual(restrictedField)
       })
@@ -503,6 +517,7 @@ describe('Access Control', () => {
           id: post1.id,
           collection: slug,
           data: { restrictedField: restricted.id },
+          overrideAccess: true,
         })
 
         expect(doc).toMatchObject({ id: post1.id })
@@ -539,6 +554,7 @@ describe('Access Control', () => {
         const doc = await payload.update({
           collection: slug,
           data: { restrictedField: restricted.id },
+          overrideAccess: true,
           where: {
             id: { equals: post1.id },
           },
@@ -579,6 +595,7 @@ describe('Access Control', () => {
           id: restricted.id,
           collection: fullyRestrictedSlug,
           data: { name: updatedName },
+          overrideAccess: true,
         })
 
         expect(doc).toMatchObject({ id: restricted.id, name: updatedName })
@@ -615,6 +632,7 @@ describe('Access Control', () => {
         const doc = await payload.update({
           collection: fullyRestrictedSlug,
           data: { name: updatedName },
+          overrideAccess: true,
           where: {
             id: { equals: restricted.id },
           },
@@ -632,6 +650,7 @@ describe('Access Control', () => {
         data: {
           title: 'hello',
         },
+        overrideAccess: true,
       })
 
       await payload.create({
@@ -640,6 +659,7 @@ describe('Access Control', () => {
           hidden: true,
           title: 'hello',
         },
+        overrideAccess: true,
       })
 
       const { docs } = await payload.find({
@@ -656,6 +676,7 @@ describe('Access Control', () => {
         data: {
           title: 'hello',
         },
+        overrideAccess: true,
       })
 
       await payload.create({
@@ -664,6 +685,7 @@ describe('Access Control', () => {
           hidden: true,
           title: 'hello',
         },
+        overrideAccess: true,
       })
 
       const { totalDocs } = await payload.count({
@@ -681,6 +703,7 @@ describe('Access Control', () => {
           name: 'match',
           hidden: true,
         },
+        overrideAccess: true,
       })
 
       await payload.create({
@@ -689,6 +712,7 @@ describe('Access Control', () => {
           name: 'match',
           hidden: false,
         },
+        overrideAccess: true,
       })
 
       const { docs } = await payload.findVersions({
@@ -706,29 +730,32 @@ describe('Access Control', () => {
       await payload.create({
         collection: 'fields-and-top-access',
         data: { secret: 'will-fail-access-read' },
+        overrideAccess: true,
       })
       const { id: hitID } = await payload.create({
         collection: 'fields-and-top-access',
         data: { secret: 'will-success-access-read' },
+        overrideAccess: true,
       })
       await payload.create({
         collection: 'fields-and-top-access',
         data: { secret: 'will-fail-access-read' },
+        overrideAccess: true,
       })
 
       // assert find, only will-success should be in the result
       const resFind = await payload.find({
-        overrideAccess: false,
         collection: 'fields-and-top-access',
+        overrideAccess: false,
       })
       expect(resFind.docs[0].id).toBe(hitID)
       expect(resFind.docs).toHaveLength(1)
 
       // assert find draft: true
       const resFindDraft = await payload.find({
+        collection: 'fields-and-top-access',
         draft: true,
         overrideAccess: false,
-        collection: 'fields-and-top-access',
       })
 
       expect(resFindDraft.docs).toHaveLength(1)
@@ -746,25 +773,28 @@ describe('Access Control', () => {
 
     it('should ignore false access in versions on query constraint added by top collection level access control', async () => {
       // clean up
-      await payload.delete({ collection: 'fields-and-top-access', where: {} })
+      await payload.delete({ collection: 'fields-and-top-access', overrideAccess: true, where: {} })
 
       await payload.create({
         collection: 'fields-and-top-access',
         data: { secret: 'will-fail-access-read' },
+        overrideAccess: true,
       })
       const { id: hitID } = await payload.create({
         collection: 'fields-and-top-access',
         data: { secret: 'will-success-access-read' },
+        overrideAccess: true,
       })
       await payload.create({
         collection: 'fields-and-top-access',
         data: { secret: 'will-fail-access-read' },
+        overrideAccess: true,
       })
 
       // Assert findVersions only will-success should be in the result
       const resFind = await payload.findVersions({
-        overrideAccess: false,
         collection: 'fields-and-top-access',
+        overrideAccess: false,
       })
       expect(resFind.docs).toHaveLength(1)
 
@@ -799,6 +829,7 @@ describe('Access Control', () => {
           data: {
             email: 'dev@payloadcms.com',
           },
+          overrideAccess: true,
         })
       } finally {
         // Restore the original Date.now() after the forgotPassword call
@@ -826,6 +857,7 @@ describe('Access Control', () => {
         data: {
           title: 'Test Document',
         },
+        overrideAccess: true,
       })
 
       const req = await createLocalReq(
@@ -833,10 +865,10 @@ describe('Access Control', () => {
           user: {
             id: 123 as any,
             collection: 'users',
-            roles: ['admin'],
             createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
             email: 'test@test.com',
+            roles: ['admin'],
+            updatedAt: new Date().toISOString(),
           },
         },
         payload,
@@ -848,23 +880,19 @@ describe('Access Control', () => {
         blockReferencesPermissions: {} as any,
         entity: payload.collections[asyncParentSlug].config,
         entityType: 'collection',
-        operations: ['read', 'update'],
         fetchData: true,
+        operations: ['read', 'update'],
         req,
       })
 
       expect(permissions).toEqual({
         fields: {
-          title: { read: { permission: true }, update: { permission: true } },
+          createdAt: { read: { permission: true }, update: { permission: true } },
           parentField: {
-            read: { permission: true },
-            update: { permission: true },
             fields: {
               childField1: { read: { permission: true }, update: { permission: true } },
               childField2: { read: { permission: true }, update: { permission: true } },
               nestedGroup: {
-                read: { permission: true },
-                update: { permission: true },
                 fields: {
                   deepChild1: {
                     read: { permission: true },
@@ -875,11 +903,15 @@ describe('Access Control', () => {
                     update: { permission: true },
                   },
                 },
+                read: { permission: true },
+                update: { permission: true },
               },
             },
+            read: { permission: true },
+            update: { permission: true },
           },
+          title: { read: { permission: true }, update: { permission: true } },
           updatedAt: { read: { permission: true }, update: { permission: true } },
-          createdAt: { read: { permission: true }, update: { permission: true } },
         },
         read: { permission: true },
         update: { permission: true },
@@ -892,6 +924,7 @@ describe('Access Control', () => {
         data: {
           title: 'Test Document 2',
         },
+        overrideAccess: true,
       })
 
       // Create non-admin user request
@@ -900,10 +933,10 @@ describe('Access Control', () => {
           user: {
             id: 456 as any,
             collection: 'users',
-            roles: ['user'], // Not admin
             createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
             email: 'user@test.com',
+            roles: ['user'], // Not admin
+            updatedAt: new Date().toISOString(),
           },
         },
         payload,
@@ -914,23 +947,19 @@ describe('Access Control', () => {
         blockReferencesPermissions: {} as any,
         entity: payload.collections[asyncParentSlug].config,
         entityType: 'collection',
-        operations: ['read', 'update'],
         fetchData: true,
+        operations: ['read', 'update'],
         req: nonAdminReq,
       })
 
       expect(permissions).toEqual({
         fields: {
-          title: { read: { permission: true }, update: { permission: true } },
+          createdAt: { read: { permission: true }, update: { permission: true } },
           parentField: {
-            read: { permission: false },
-            update: { permission: false },
             fields: {
               childField1: { read: { permission: false }, update: { permission: false } },
               childField2: { read: { permission: false }, update: { permission: false } },
               nestedGroup: {
-                read: { permission: false },
-                update: { permission: false },
                 fields: {
                   deepChild1: {
                     read: { permission: false },
@@ -941,11 +970,15 @@ describe('Access Control', () => {
                     update: { permission: false },
                   },
                 },
+                read: { permission: false },
+                update: { permission: false },
               },
             },
+            read: { permission: false },
+            update: { permission: false },
           },
+          title: { read: { permission: true }, update: { permission: true } },
           updatedAt: { read: { permission: true }, update: { permission: true } },
-          createdAt: { read: { permission: true }, update: { permission: true } },
         },
         read: { permission: true },
         update: { permission: true },
@@ -961,6 +994,7 @@ describe('Access Control', () => {
       const { docs: adminDocs } = await payload.find({
         collection: 'users',
         limit: 1,
+        overrideAccess: true,
         where: { email: { equals: 'dev@payloadcms.com' } },
       })
       adminUser = { ...adminDocs[0], collection: 'users' }
@@ -968,6 +1002,7 @@ describe('Access Control', () => {
       const { docs: publicDocs } = await payload.find({
         collection: publicUsersSlug,
         limit: 1,
+        overrideAccess: true,
         where: { email: { equals: publicUserEmail } },
       })
       publicUser = { ...publicDocs[0], collection: publicUsersSlug }
@@ -1004,6 +1039,7 @@ async function createDoc<TSlug extends CollectionSlug = 'posts'>(
 ): Promise<DataFromCollectionSlug<TSlug>> {
   // @ts-expect-error
   return await payload.create({
+    overrideAccess: true,
     ...options,
     collection: overrideSlug ?? slug,
     // @ts-expect-error

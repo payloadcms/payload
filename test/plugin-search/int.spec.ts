@@ -43,6 +43,7 @@ describe('@payloadcms/plugin-search', () => {
           exists: true,
         },
       },
+      overrideAccess: true,
     })
     await Promise.all([
       payload.delete({
@@ -53,6 +54,7 @@ describe('@payloadcms/plugin-search', () => {
             exists: true,
           },
         },
+        overrideAccess: true,
       }),
       payload.delete({
         collection: pagesSlug,
@@ -62,6 +64,7 @@ describe('@payloadcms/plugin-search', () => {
             exists: true,
           },
         },
+        overrideAccess: true,
       }),
     ])
   })
@@ -75,6 +78,7 @@ describe('@payloadcms/plugin-search', () => {
       collection: 'search',
       depth: 0,
       limit: 1,
+      overrideAccess: true,
     })
 
     expect(search).toBeTruthy()
@@ -88,6 +92,7 @@ describe('@payloadcms/plugin-search', () => {
         excerpt: 'This is a test page',
         title: 'Hello, world!',
       },
+      overrideAccess: true,
     })
 
     const { docs: results } = await payload.find({
@@ -98,6 +103,7 @@ describe('@payloadcms/plugin-search', () => {
           equals: pageToSync.id,
         },
       },
+      overrideAccess: true,
     })
 
     expect(results).toHaveLength(1)
@@ -114,6 +120,7 @@ describe('@payloadcms/plugin-search', () => {
         excerpt: 'This is a test page',
         title: 'Hello, world!',
       },
+      overrideAccess: true,
     })
 
     // wait for the search document to be potentially created
@@ -128,6 +135,7 @@ describe('@payloadcms/plugin-search', () => {
           equals: draftPage.id,
         },
       },
+      overrideAccess: true,
     })
 
     expect(results).toHaveLength(0)
@@ -140,6 +148,7 @@ describe('@payloadcms/plugin-search', () => {
         _status: 'published',
         title: 'Published title!',
       },
+      overrideAccess: true,
     })
 
     // wait for the search document to be potentially created
@@ -154,6 +163,7 @@ describe('@payloadcms/plugin-search', () => {
           equals: publishedPage.id,
         },
       },
+      overrideAccess: true,
     })
 
     expect(results).toHaveLength(1)
@@ -167,6 +177,7 @@ describe('@payloadcms/plugin-search', () => {
         _status: 'draft',
         title: 'Draft title!',
       },
+      overrideAccess: true,
     })
 
     // This should remain with the published content
@@ -178,6 +189,7 @@ describe('@payloadcms/plugin-search', () => {
           equals: publishedPage.id,
         },
       },
+      overrideAccess: true,
     })
 
     expect(updatedResults).toHaveLength(1)
@@ -189,6 +201,7 @@ describe('@payloadcms/plugin-search', () => {
         _status: 'draft',
         title: 'Drafted again',
       },
+      overrideAccess: true,
     })
 
     // Should now be deleted given we've unpublished the page
@@ -200,6 +213,7 @@ describe('@payloadcms/plugin-search', () => {
           equals: publishedPage.id,
         },
       },
+      overrideAccess: true,
     })
 
     expect(deletedResults).toHaveLength(0)
@@ -213,6 +227,7 @@ describe('@payloadcms/plugin-search', () => {
         excerpt: 'This is a test page',
         title: 'Hello, world!',
       },
+      overrideAccess: true,
     })
 
     const { docs: results } = await payload.find({
@@ -223,6 +238,7 @@ describe('@payloadcms/plugin-search', () => {
           equals: pageToReceiveUpdates.id,
         },
       },
+      overrideAccess: true,
     })
 
     expect(results).toHaveLength(1)
@@ -237,6 +253,7 @@ describe('@payloadcms/plugin-search', () => {
         excerpt: 'This is a test page (updated)',
         title: 'Hello, world! (updated)',
       },
+      overrideAccess: true,
     })
 
     // wait for the search document to be potentially updated
@@ -252,6 +269,7 @@ describe('@payloadcms/plugin-search', () => {
           equals: pageToReceiveUpdates.id,
         },
       },
+      overrideAccess: true,
     })
 
     expect(updatedResults).toHaveLength(1)
@@ -268,6 +286,7 @@ describe('@payloadcms/plugin-search', () => {
         excerpt: 'This is a test page',
         title: 'Hello, world!',
       },
+      overrideAccess: true,
     })
 
     // wait for the search document to be created
@@ -282,6 +301,7 @@ describe('@payloadcms/plugin-search', () => {
           equals: page.id,
         },
       },
+      overrideAccess: true,
     })
 
     expect(results).toHaveLength(1)
@@ -290,6 +310,7 @@ describe('@payloadcms/plugin-search', () => {
     await payload.delete({
       id: page.id,
       collection: 'pages',
+      overrideAccess: true,
     })
 
     // wait for the search document to be potentially deleted
@@ -304,6 +325,7 @@ describe('@payloadcms/plugin-search', () => {
           equals: results[0].id,
         },
       },
+      overrideAccess: true,
     })
 
     expect(deletedResults).toHaveLength(0)
@@ -313,11 +335,13 @@ describe('@payloadcms/plugin-search', () => {
     const custom_id_1 = await payload.create({
       collection: 'custom-ids-1',
       data: { id: 'custom_id' },
+      overrideAccess: true,
     })
 
     await payload.create({
       collection: 'custom-ids-2',
       data: { id: 'custom_id' },
+      overrideAccess: true,
     })
 
     await wait(200)
@@ -329,11 +353,12 @@ describe('@payloadcms/plugin-search', () => {
       where: { 'doc.value': { equals: 'custom_id' } },
       limit: 1,
       sort: 'createdAt',
+      overrideAccess: true,
     })
 
     expect(docBefore.doc.relationTo).toBe('custom-ids-1')
 
-    await payload.delete({ collection: 'custom-ids-1', id: custom_id_1.id })
+    await payload.delete({ collection: 'custom-ids-1', id: custom_id_1.id, overrideAccess: true })
 
     await wait(200)
 
@@ -344,6 +369,7 @@ describe('@payloadcms/plugin-search', () => {
       where: { 'doc.value': { equals: 'custom_id' } },
       limit: 1,
       sort: 'createdAt',
+      overrideAccess: true,
     })
 
     expect(docAfter.doc.relationTo).toBe('custom-ids-2')
@@ -358,6 +384,7 @@ describe('@payloadcms/plugin-search', () => {
         slug: 'es',
       },
       locale: 'es',
+      overrideAccess: true,
     })
 
     await payload.update({
@@ -369,6 +396,7 @@ describe('@payloadcms/plugin-search', () => {
         slug: 'en',
       },
       locale: 'en',
+      overrideAccess: true,
     })
 
     const syncedSearchData = await payload.find({
@@ -383,6 +411,7 @@ describe('@payloadcms/plugin-search', () => {
           },
         ],
       },
+      overrideAccess: true,
     })
 
     expect(syncedSearchData.docs[0].slug).toEqual('es')
@@ -397,6 +426,7 @@ describe('@payloadcms/plugin-search', () => {
     await payload.create({
       collection: 'users',
       data: testCreds,
+      overrideAccess: true,
     })
 
     const testUserRes = await restClient.POST(`/users/login`, {
@@ -455,6 +485,7 @@ describe('@payloadcms/plugin-search', () => {
         title: 'post_1',
         _status: 'published',
       },
+      overrideAccess: true,
     })
 
     await wait(200)
@@ -465,9 +496,10 @@ describe('@payloadcms/plugin-search', () => {
         title: 'post_2',
         _status: 'published',
       },
+      overrideAccess: true,
     })
 
-    const { docs } = await payload.find({ collection: 'search' })
+    const { docs } = await payload.find({ collection: 'search', overrideAccess: true })
 
     await wait(200)
 
@@ -489,6 +521,7 @@ describe('@payloadcms/plugin-search', () => {
           in: docs.map((doc) => doc.id),
         },
       },
+      overrideAccess: true,
     })
 
     // Should have no docs with these ID
@@ -504,6 +537,7 @@ describe('@payloadcms/plugin-search', () => {
           title: 'Test page title',
           _status: 'published',
         },
+        overrideAccess: true,
       }),
       payload.create({
         collection: postsSlug,
@@ -511,6 +545,7 @@ describe('@payloadcms/plugin-search', () => {
           title: 'Test page title',
           _status: 'published',
         },
+        overrideAccess: true,
       }),
     ])
 
@@ -518,6 +553,7 @@ describe('@payloadcms/plugin-search', () => {
 
     const { totalDocs: totalBeforeReindex } = await payload.count({
       collection: 'search',
+      overrideAccess: true,
     })
 
     const endpointRes = await restClient.POST(`/search/reindex`, {
@@ -533,6 +569,7 @@ describe('@payloadcms/plugin-search', () => {
 
     const { totalDocs: totalAfterReindex } = await payload.count({
       collection: 'search',
+      overrideAccess: true,
     })
 
     expect(totalAfterReindex).toBe(totalBeforeReindex)
@@ -543,14 +580,17 @@ describe('@payloadcms/plugin-search', () => {
       payload.create({
         collection: postsSlug,
         data: { title: 'Post one', _status: 'published' },
+        overrideAccess: true,
       }),
       payload.create({
         collection: postsSlug,
         data: { title: 'Post two', _status: 'published' },
+        overrideAccess: true,
       }),
       payload.create({
         collection: pagesSlug,
         data: { title: 'Page one', _status: 'published' },
+        overrideAccess: true,
       }),
     ])
 
@@ -575,6 +615,7 @@ describe('@payloadcms/plugin-search', () => {
       collection: postsSlug,
       data: { title: 'Locale test post', _status: 'published', slug: 'post-slug-en' },
       locale: 'en',
+      overrideAccess: true,
     })
 
     await payload.update({
@@ -582,18 +623,21 @@ describe('@payloadcms/plugin-search', () => {
       id: postId,
       data: { slug: 'post-slug-es' },
       locale: 'es',
+      overrideAccess: true,
     })
     await payload.update({
       collection: postsSlug,
       id: postId,
       data: { slug: 'post-slug-de' },
       locale: 'de',
+      overrideAccess: true,
     })
 
     // Create a page so both collections are reindexed together, exercising the multi-collection path
     await payload.create({
       collection: pagesSlug,
       data: { title: 'Locale test page', _status: 'published' },
+      overrideAccess: true,
     })
 
     const endpointRes = await restClient.POST(`/search/reindex`, {
@@ -609,6 +653,7 @@ describe('@payloadcms/plugin-search', () => {
       where: {
         and: [{ 'doc.relationTo': { equals: postsSlug } }, { 'doc.value': { equals: postId } }],
       },
+      overrideAccess: true,
     })
 
     expect(searchDocs).toHaveLength(1)
@@ -616,9 +661,24 @@ describe('@payloadcms/plugin-search', () => {
     const searchDocId = searchDocs[0]!.id
 
     const [enDoc, esDoc, deDoc] = await Promise.all([
-      payload.findByID({ collection: 'search', id: searchDocId, locale: 'en' }),
-      payload.findByID({ collection: 'search', id: searchDocId, locale: 'es' }),
-      payload.findByID({ collection: 'search', id: searchDocId, locale: 'de' }),
+      payload.findByID({
+        collection: 'search',
+        id: searchDocId,
+        locale: 'en',
+        overrideAccess: true,
+      }),
+      payload.findByID({
+        collection: 'search',
+        id: searchDocId,
+        locale: 'es',
+        overrideAccess: true,
+      }),
+      payload.findByID({
+        collection: 'search',
+        id: searchDocId,
+        locale: 'de',
+        overrideAccess: true,
+      }),
     ])
 
     // With localization fallback: true, a missing locale update would silently fall back to 'en'
@@ -636,6 +696,7 @@ describe('@payloadcms/plugin-search', () => {
           title: 'Test page published',
           _status: 'published',
         },
+        overrideAccess: true,
       }),
       payload.create({
         collection: pagesSlug,
@@ -643,6 +704,7 @@ describe('@payloadcms/plugin-search', () => {
           title: 'Test page draft',
           _status: 'draft',
         },
+        overrideAccess: true,
       }),
     ])
 
@@ -650,6 +712,7 @@ describe('@payloadcms/plugin-search', () => {
 
     const { totalDocs: totalBeforeReindex } = await payload.count({
       collection: 'search',
+      overrideAccess: true,
     })
 
     expect(totalBeforeReindex).toBe(1)
@@ -667,6 +730,7 @@ describe('@payloadcms/plugin-search', () => {
 
     const { totalDocs: totalAfterReindex } = await payload.count({
       collection: 'search',
+      overrideAccess: true,
     })
 
     expect(totalAfterReindex).toBe(totalBeforeReindex)
@@ -689,6 +753,7 @@ describe('@payloadcms/plugin-search', () => {
         _status: 'published',
         slug: 'test-en',
       },
+      overrideAccess: true,
     })
     await payload.update({
       collection: postsSlug,
@@ -698,6 +763,7 @@ describe('@payloadcms/plugin-search', () => {
         _status: 'published',
         slug: 'test-es',
       },
+      overrideAccess: true,
     })
     await payload.update({
       collection: postsSlug,
@@ -707,6 +773,7 @@ describe('@payloadcms/plugin-search', () => {
         _status: 'published',
         slug: 'test-de',
       },
+      overrideAccess: true,
     })
 
     const {
@@ -725,6 +792,7 @@ describe('@payloadcms/plugin-search', () => {
       pagination: false,
       limit: 1,
       depth: 0,
+      overrideAccess: true,
     })
 
     expect(postBeforeReindex?.slug).not.toBeFalsy()
@@ -756,6 +824,7 @@ describe('@payloadcms/plugin-search', () => {
       pagination: false,
       limit: 1,
       depth: 0,
+      overrideAccess: true,
     })
 
     expect(postAfterReindex?.slug).not.toBeFalsy()
@@ -771,6 +840,7 @@ describe('@payloadcms/plugin-search', () => {
         excerpt: 'This post will be soft deleted',
         _status: 'published',
       },
+      overrideAccess: true,
     })
 
     // Wait for the search document to be created
@@ -785,6 +855,7 @@ describe('@payloadcms/plugin-search', () => {
           equals: publishedPost.id,
         },
       },
+      overrideAccess: true,
     })
 
     expect(initialSearchResults).toHaveLength(1)
@@ -797,6 +868,7 @@ describe('@payloadcms/plugin-search', () => {
       data: {
         deletedAt: new Date().toISOString(),
       },
+      overrideAccess: true,
     })
 
     // Wait for the search plugin to sync the trashed document
@@ -812,6 +884,7 @@ describe('@payloadcms/plugin-search', () => {
           equals: publishedPost.id,
         },
       },
+      overrideAccess: true,
     })
 
     // The search document should still exist
@@ -822,6 +895,7 @@ describe('@payloadcms/plugin-search', () => {
       collection: postsSlug,
       id: publishedPost.id,
       trash: true, // permanently delete
+      overrideAccess: true,
     })
   })
 
@@ -838,6 +912,7 @@ describe('@payloadcms/plugin-search', () => {
           syncEnglishOnly: true,
         },
         locale: 'en',
+        overrideAccess: true,
       })
 
       // Query for ALL search docs with locale: 'all' to see total count
@@ -849,6 +924,7 @@ describe('@payloadcms/plugin-search', () => {
             equals: enDoc.id,
           },
         },
+        overrideAccess: true,
       })
 
       // Should only have 1 search doc total (English only)
@@ -864,6 +940,7 @@ describe('@payloadcms/plugin-search', () => {
             equals: enDoc.id,
           },
         },
+        overrideAccess: true,
       })
 
       expect(docs).toHaveLength(1)
@@ -879,6 +956,7 @@ describe('@payloadcms/plugin-search', () => {
       await payload.delete({
         collection: 'filtered-locales',
         id: enDoc.id,
+        overrideAccess: true,
       })
     })
 
@@ -894,6 +972,7 @@ describe('@payloadcms/plugin-search', () => {
           title: 'Test Post for All Locales',
         },
         locale: 'en',
+        overrideAccess: true,
       })
 
       // Update the post in Spanish locale
@@ -905,6 +984,7 @@ describe('@payloadcms/plugin-search', () => {
           _status: 'published',
           title: 'Test Post para Todos los Locales',
         },
+        overrideAccess: true,
       })
 
       // Update the post in German locale
@@ -916,6 +996,7 @@ describe('@payloadcms/plugin-search', () => {
           _status: 'published',
           title: 'Testbeitrag für alle Sprachen',
         },
+        overrideAccess: true,
       })
 
       // Query for search doc with locale: 'all'
@@ -927,6 +1008,7 @@ describe('@payloadcms/plugin-search', () => {
             equals: post.id,
           },
         },
+        overrideAccess: true,
       })
 
       // Should have 1 search doc with all locales embedded
@@ -941,6 +1023,7 @@ describe('@payloadcms/plugin-search', () => {
       await payload.delete({
         collection: postsSlug,
         id: post.id,
+        overrideAccess: true,
       })
     })
 
@@ -955,6 +1038,7 @@ describe('@payloadcms/plugin-search', () => {
           syncEnglishOnly: false,
         },
         locale: 'en',
+        overrideAccess: true,
       })
 
       // Verify search doc exists for English
@@ -966,6 +1050,7 @@ describe('@payloadcms/plugin-search', () => {
             equals: doc.id,
           },
         },
+        overrideAccess: true,
       })
       expect(enSearchDocs).toHaveLength(1)
 
@@ -978,6 +1063,7 @@ describe('@payloadcms/plugin-search', () => {
             equals: doc.id,
           },
         },
+        overrideAccess: true,
       })
       expect(esSearchDocs).toHaveLength(1)
 
@@ -990,6 +1076,7 @@ describe('@payloadcms/plugin-search', () => {
             equals: doc.id,
           },
         },
+        overrideAccess: true,
       })
       expect(deSearchDocs).toHaveLength(1)
 
@@ -997,6 +1084,7 @@ describe('@payloadcms/plugin-search', () => {
       await payload.delete({
         collection: 'filtered-locales',
         id: doc.id,
+        overrideAccess: true,
       })
     })
   })

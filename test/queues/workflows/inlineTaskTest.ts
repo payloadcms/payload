@@ -18,6 +18,7 @@ export const inlineTaskTestWorkflow: WorkflowConfig<'inlineTaskTest'> = {
           data: {
             title: input.message,
           },
+          overrideAccess: true,
         })
         return {
           output: {

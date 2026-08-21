@@ -65,6 +65,7 @@ test.describe('Group By', () => {
         email: devUser.email,
         password: devUser.password,
       },
+      overrideAccess: true,
     })
   })
 
@@ -267,6 +268,7 @@ test.describe('Group By', () => {
         category: null,
         title: 'My Post',
       },
+      overrideAccess: true,
     })
 
     await page.goto(url.list)
@@ -287,6 +289,7 @@ test.describe('Group By', () => {
         date: null,
         title: 'My Post',
       },
+      overrideAccess: true,
     })
 
     await page.goto(url.list)
@@ -308,6 +311,7 @@ test.describe('Group By', () => {
           checkbox: null,
           title: 'Null Post',
         },
+        overrideAccess: true,
       }),
       await payload.create({
         collection: postsSlug,
@@ -315,6 +319,7 @@ test.describe('Group By', () => {
           checkbox: true,
           title: 'True Post',
         },
+        overrideAccess: true,
       }),
       await payload.create({
         collection: postsSlug,
@@ -322,6 +327,7 @@ test.describe('Group By', () => {
           checkbox: false,
           title: 'False Post',
         },
+        overrideAccess: true,
       }),
     ])
 
@@ -978,6 +984,7 @@ test.describe('Group By', () => {
         ...data,
         deletedAt: new Date().toISOString(), // Set the post as trashed
       },
+      overrideAccess: true,
     }) as unknown as Promise<Post>
   }
 
@@ -1046,6 +1053,7 @@ test.describe('Group By', () => {
           title: 'Virtual Field Cell Test',
           where: {},
         },
+        overrideAccess: true,
         user,
       })
 
@@ -1085,6 +1093,7 @@ test.describe('Group By', () => {
           title: presetTitle,
           where: {},
         },
+        overrideAccess: true,
         user,
       })
 

@@ -121,6 +121,7 @@ describe('Document View', () => {
         const noAPIViewDoc = await payload.create({
           collection: noApiViewCollectionSlug,
           data: {},
+          overrideAccess: true,
         })
 
         const urlUtil = new AdminUrlUtil(serverURL, noApiViewCollectionSlug)
@@ -958,5 +959,6 @@ async function createPost(overrides?: Partial<Post>): Promise<Post> {
       title,
       ...overrides,
     },
+    overrideAccess: true,
   }) as unknown as Promise<Post>
 }

@@ -6,8 +6,8 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import type { NextRESTClient } from '../../__helpers/shared/NextRESTClient.js'
 
-import { devUser } from '../../credentials.js'
 import { initPayloadInt } from '../../__helpers/shared/initPayloadInt.js'
+import { devUser } from '../../credentials.js'
 import { collectionSlug } from './config.js'
 
 let restClient: NextRESTClient | undefined
@@ -43,6 +43,7 @@ describe('Forgot password operation with localized fields', () => {
       data: {
         localizedField: 'Polish content',
       },
+      overrideAccess: true,
     })
   })
 
@@ -56,6 +57,7 @@ describe('Forgot password operation with localized fields', () => {
       collection: collectionSlug,
       data: { email: devUser.email },
       disableEmail: true,
+      overrideAccess: true,
     })
 
     // Verify token was generated successfully
@@ -71,6 +73,7 @@ describe('Forgot password operation with localized fields', () => {
         collection: collectionSlug,
         data: { email: devUser.email },
         disableEmail: true,
+        overrideAccess: true,
       }),
     ).resolves.not.toThrow()
   })

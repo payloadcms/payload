@@ -67,12 +67,14 @@ describe('Field Paths', () => {
       const originalDoc = await payload.create({
         collection: fieldPathsSlug,
         data: testDoc,
+        overrideAccess: true,
       })
 
       // duplicate the doc to ensure that the beforeDuplicate hook is run
       const doc = await payload.duplicate({
         id: originalDoc.id,
         collection: fieldPathsSlug,
+        overrideAccess: true,
       })
 
       const expectedDoc = {

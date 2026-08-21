@@ -92,6 +92,7 @@ describe('globals', () => {
           },
         },
         slug,
+        overrideAccess: true,
       })
 
       expect(createdJSON.json.state).toEqual({})
@@ -104,6 +105,7 @@ describe('globals', () => {
       const doc = await payload.updateGlobal({
         data,
         slug,
+        overrideAccess: true,
       })
       expect(doc).toMatchObject(data)
     })
@@ -116,9 +118,11 @@ describe('globals', () => {
       await payload.updateGlobal({
         data,
         slug,
+        overrideAccess: true,
       })
       const doc = await payload.findGlobal({
         slug,
+        overrideAccess: true,
       })
 
       expect(doc.globalType).toEqual(slug)
@@ -149,6 +153,7 @@ describe('globals', () => {
         },
         locale: englishLocale,
         slug: arraySlug,
+        overrideAccess: true,
       })
 
       await payload.updateGlobal({
@@ -157,16 +162,19 @@ describe('globals', () => {
         },
         locale: spanishLocale,
         slug: arraySlug,
+        overrideAccess: true,
       })
 
       const en = await payload.findGlobal({
         locale: englishLocale,
         slug: arraySlug,
+        overrideAccess: true,
       })
 
       const es = await payload.findGlobal({
         locale: spanishLocale,
         slug: arraySlug,
+        overrideAccess: true,
       })
 
       expect(en).toMatchObject(localized.en)
@@ -196,6 +204,7 @@ describe('globals', () => {
           enabled: true,
         },
         slug: accessControlSlug,
+        overrideAccess: true,
       })
 
       const hasAccess = await payload.findGlobal({
@@ -209,6 +218,7 @@ describe('globals', () => {
     it('should get globals with defaultValues populated before first creation', async () => {
       const defaultValueGlobal = await payload.findGlobal({
         slug: defaultValueSlug,
+        overrideAccess: true,
       })
 
       expect(defaultValueGlobal.text).toStrictEqual('test')
@@ -242,6 +252,7 @@ describe('globals', () => {
       await payload.updateGlobal({
         data,
         slug,
+        overrideAccess: true,
       })
 
       const query = `query {

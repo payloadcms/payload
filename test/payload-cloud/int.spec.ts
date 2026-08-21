@@ -83,6 +83,7 @@ describe('@payloadcms/payload--cloud', () => {
         await payload.delete({
           collection: 'documents',
           id: doc.id,
+          overrideAccess: true,
         })
       },
     )

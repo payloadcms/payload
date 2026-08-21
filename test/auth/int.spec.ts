@@ -218,11 +218,13 @@ describe('Auth', () => {
           password: testPassword,
           roles: ['user'],
         },
+        overrideAccess: true,
       })
 
       const userBefore: any = await payload.findByID({
         id: testUser.id,
         collection: slug,
+        overrideAccess: true,
       })
       const sessionCountBefore = userBefore.sessions?.length || 0
 
@@ -259,6 +261,7 @@ describe('Auth', () => {
       const userAfter: any = await payload.findByID({
         id: testUser.id,
         collection: slug,
+        overrideAccess: true,
       })
 
       expect(userAfter.loginMetadata).toHaveLength(2)
@@ -271,6 +274,7 @@ describe('Auth', () => {
       await payload.delete({
         id: testUser.id,
         collection: slug,
+        overrideAccess: true,
       })
     })
 
@@ -298,6 +302,7 @@ describe('Auth', () => {
           data: {
             password: 'test',
           },
+          overrideAccess: true,
         })
 
         expect(result.id).toStrictEqual(loggedInUser.id)
@@ -401,6 +406,7 @@ describe('Auth', () => {
             email: 'dev@example.com',
             password: 'test',
           },
+          overrideAccess: true,
         })
 
         const response = await restClient.GET(`/${slug}/me`, {
@@ -452,6 +458,7 @@ describe('Auth', () => {
           data: {
             custom: 'Goodbye, world!',
           },
+          overrideAccess: true,
         })
 
         const response = await restClient.POST(`/${slug}/refresh-token`, {
@@ -471,10 +478,12 @@ describe('Auth', () => {
         const user = await payload.create({
           collection: slug,
           data: { apiKey, email: 'user@example.com', enableAPIKey: true, password: 'Password123' },
+          overrideAccess: true,
         })
         const { token } = await payload.login({
           collection: 'users',
           data: { email: 'user@example.com', password: 'Password123' },
+          overrideAccess: true,
         })
         await restClient.POST('/users/refresh-token', {
           headers: { Authorization: `JWT ${token}` },
@@ -491,6 +500,7 @@ describe('Auth', () => {
         const { token } = await payload.login({
           collection: 'users',
           data: { email: 'user@example.com', password: 'Password123' },
+          overrideAccess: true,
         })
 
         const res = await restClient
@@ -551,6 +561,7 @@ describe('Auth', () => {
               equals: emailToVerify,
             },
           },
+          overrideAccess: true,
         })
 
         const { _verificationToken, _verified } = userResult.docs[0]
@@ -573,6 +584,7 @@ describe('Auth', () => {
               equals: emailToVerify,
             },
           },
+          overrideAccess: true,
         })
 
         const { _verificationToken: afterToken, _verified: afterVerified } =
@@ -646,6 +658,7 @@ describe('Auth', () => {
                 },
               ],
             },
+            overrideAccess: true,
           })
 
           expect(data.doc.key).toStrictEqual(key)
@@ -693,6 +706,7 @@ describe('Auth', () => {
                 },
               ],
             },
+            overrideAccess: true,
           })
 
           expect((result.docs[0]?.value as any)?.property).toStrictEqual('updated')
@@ -729,6 +743,7 @@ describe('Auth', () => {
                 },
               ],
             },
+            overrideAccess: true,
           })
 
           expect(result.docs).toHaveLength(0)
@@ -761,6 +776,7 @@ describe('Auth', () => {
             collection: publicUsersSlug,
             id: publicUserId,
             showHiddenFields: true,
+            overrideAccess: true,
           })
           await restClient.POST(`/${publicUsersSlug}/verify/${(user as any)._verificationToken}`)
 
@@ -781,11 +797,15 @@ describe('Auth', () => {
         afterAll(async () => {
           await Promise.all(
             createdIDs.map((id) =>
-              payload.delete({ collection: 'payload-preferences', id }).catch(() => {}),
+              payload
+                .delete({ collection: 'payload-preferences', id, overrideAccess: true })
+                .catch(() => {}),
             ),
           )
           if (publicUserId) {
-            await payload.delete({ collection: publicUsersSlug, id: publicUserId }).catch(() => {})
+            await payload
+              .delete({ collection: publicUsersSlug, id: publicUserId, overrideAccess: true })
+              .catch(() => {})
           }
         })
 
@@ -804,6 +824,7 @@ describe('Auth', () => {
           const before = await payload.find({
             collection: 'payload-preferences',
             where: { 'user.relationTo': { equals: 'users' } },
+            overrideAccess: true,
           })
           expect(before.docs).toHaveLength(1)
 
@@ -814,6 +835,7 @@ describe('Auth', () => {
           const after = await payload.find({
             collection: 'payload-preferences',
             where: { 'user.relationTo': { equals: 'users' } },
+            overrideAccess: true,
           })
           expect(after.docs).toHaveLength(1)
           expect((after.docs[0]?.value as any)?.data).toBe('admin-sensitive')
@@ -823,12 +845,14 @@ describe('Auth', () => {
           const publicPrefs = await payload.find({
             collection: 'payload-preferences',
             where: { 'user.relationTo': { equals: publicUsersSlug } },
+            overrideAccess: true,
           })
           expect(publicPrefs.docs).toHaveLength(1)
 
           const adminPrefs = await payload.find({
             collection: 'payload-preferences',
             where: { 'user.relationTo': { equals: 'users' } },
+            overrideAccess: true,
           })
           expect(adminPrefs.docs).toHaveLength(1)
         })
@@ -913,6 +937,7 @@ describe('Auth', () => {
                 equals: userEmail,
               },
             },
+            overrideAccess: true,
           })
 
           const { lockUntil, loginAttempts } = userResult.docs[0]!
@@ -954,6 +979,7 @@ describe('Auth', () => {
                 equals: userEmail,
               },
             },
+            overrideAccess: true,
           })
 
           const { lockUntil, loginAttempts } = userResult.docs[0]!
@@ -1038,6 +1064,7 @@ describe('Auth', () => {
                 equals: userEmail,
               },
             },
+            overrideAccess: true,
           })
 
           expect(lockedUser.docs[0]!.loginAttempts).toBe(2)
@@ -1056,6 +1083,7 @@ describe('Auth', () => {
             collection: slug,
             id: lockedUser.docs[0]!.id,
             showHiddenFields: true,
+            overrideAccess: true,
           })
 
           expect(userAfterUpdate.lockUntil).toEqual(manuallyReleaseLock)
@@ -1080,6 +1108,7 @@ describe('Auth', () => {
                 equals: userEmail,
               },
             },
+            overrideAccess: true,
           })
 
           const { lockUntil, loginAttempts } = userResult.docs[0]
@@ -1109,6 +1138,7 @@ describe('Auth', () => {
           email: devUser.email,
         },
         disableEmail: true,
+        overrideAccess: true,
       })
 
       const result = await payload
@@ -1134,6 +1164,7 @@ describe('Auth', () => {
           password: 'test',
           roles: ['admin'],
         },
+        overrideAccess: true,
       })
 
       const response = await restClient.POST(`/${slug}/login`, {
@@ -1160,6 +1191,7 @@ describe('Auth', () => {
         data: {
           roles: ['editor'],
         },
+        overrideAccess: true,
       })
 
       const editorMe = await restClient
@@ -1201,6 +1233,7 @@ describe('Auth', () => {
           email,
           // password is not required
         },
+        overrideAccess: true,
       })
       expect(user.email).toStrictEqual(email)
     })
@@ -1232,6 +1265,7 @@ describe('Auth', () => {
           email: devUser.email,
           password: devUser.password,
         },
+        overrideAccess: true,
       })
 
       await expect(
@@ -1241,6 +1275,7 @@ describe('Auth', () => {
             email: devUser.email,
             password: devUser.password,
           },
+          overrideAccess: true,
         }),
       ).rejects.toThrow('You are not allowed to perform this action.')
     })
@@ -1260,12 +1295,14 @@ describe('Auth', () => {
       const doc = await payload.create({
         collection: 'disable-local-strategy-password',
         data: { password: '123' },
+        overrideAccess: true,
       })
       expect(doc.password).toBe('123')
       const updated = await payload.update({
         id: doc.id,
         collection: 'disable-local-strategy-password',
         data: { password: '1234' },
+        overrideAccess: true,
       })
       expect(updated.password).toBe('1234')
     })
@@ -1275,6 +1312,7 @@ describe('Auth', () => {
     it('should authenticate via the correct API key user', async () => {
       const usersQuery = await payload.find({
         collection: apiKeysSlug,
+        overrideAccess: true,
       })
 
       const [user1, user2] = usersQuery.docs
@@ -1301,6 +1339,7 @@ describe('Auth', () => {
     it('should allow authentication with an API key saved with sha1', async () => {
       const usersQuery = await payload.find({
         collection: apiKeysSlug,
+        overrideAccess: true,
       })
 
       const [user] = usersQuery.docs as [ApiKey]
@@ -1337,6 +1376,7 @@ describe('Auth', () => {
           apiKey,
           enableAPIKey: true,
         },
+        overrideAccess: true,
       })
 
       const updatedUser = await payload.update({
@@ -1345,6 +1385,7 @@ describe('Auth', () => {
         data: {
           enableAPIKey: true,
         },
+        overrideAccess: true,
       })
 
       const userResult = await payload.find({
@@ -1354,6 +1395,7 @@ describe('Auth', () => {
             equals: user.id,
           },
         },
+        overrideAccess: true,
       })
 
       expect(updatedUser.apiKey).toStrictEqual(user.apiKey)
@@ -1368,6 +1410,7 @@ describe('Auth', () => {
           apiKey,
           enableAPIKey: true,
         },
+        overrideAccess: true,
       })
 
       const updatedUser = await payload.update({
@@ -1376,6 +1419,7 @@ describe('Auth', () => {
         data: {
           apiKey: null,
         },
+        overrideAccess: true,
       })
 
       // use the api key in a fetch to assert that it is disabled
@@ -1399,6 +1443,7 @@ describe('Auth', () => {
           apiKey,
           enableAPIKey: true,
         },
+        overrideAccess: true,
       })
 
       const updatedUser = await payload.update({
@@ -1407,6 +1452,7 @@ describe('Auth', () => {
         data: {
           enableAPIKey: false,
         },
+        overrideAccess: true,
       })
 
       // use the api key in a fetch to assert that it is disabled
@@ -1431,6 +1477,7 @@ describe('Auth', () => {
           email: devUser.email,
           password: devUser.password,
         },
+        overrideAccess: true,
       })
 
       expect(authenticated.token).toBeTruthy()
@@ -1446,6 +1493,7 @@ describe('Auth', () => {
           password: 'test',
           roles: ['user'],
         },
+        overrideAccess: true,
       })
 
       expect(createdUser.collection).toBe(slug)
@@ -1453,6 +1501,7 @@ describe('Auth', () => {
       const foundUser = await payload.findByID({
         id: createdUser.id,
         collection: slug,
+        overrideAccess: true,
       })
 
       expect(foundUser.collection).toBe(slug)
@@ -1460,6 +1509,7 @@ describe('Auth', () => {
       const foundUsers = await payload.find({
         collection: slug,
         where: { id: { equals: createdUser.id } },
+        overrideAccess: true,
       })
 
       expect(foundUsers.docs[0]?.collection).toBe(slug)
@@ -1468,6 +1518,7 @@ describe('Auth', () => {
         id: createdUser.id,
         collection: slug,
         data: { roles: ['admin'] },
+        overrideAccess: true,
       })
 
       expect(updatedUser.collection).toBe(slug)
@@ -1475,6 +1526,7 @@ describe('Auth', () => {
       const deletedUser = await payload.delete({
         id: createdUser.id,
         collection: slug,
+        overrideAccess: true,
       })
 
       expect(deletedUser.collection).toBe(slug)
@@ -1486,6 +1538,7 @@ describe('Auth', () => {
         data: {
           enableAPIKey: true,
         },
+        overrideAccess: true,
       })
 
       expect(createdApiKey.collection).toBe(apiKeysSlug)
@@ -1493,6 +1546,7 @@ describe('Auth', () => {
       const foundApiKey = await payload.findByID({
         id: createdApiKey.id,
         collection: apiKeysSlug,
+        overrideAccess: true,
       })
 
       expect(foundApiKey.collection).toBe(apiKeysSlug)
@@ -1500,6 +1554,7 @@ describe('Auth', () => {
       const foundApiKeys = await payload.find({
         collection: apiKeysSlug,
         where: { id: { equals: createdApiKey.id } },
+        overrideAccess: true,
       })
 
       expect(foundApiKeys.docs[0]?.collection).toBe(apiKeysSlug)
@@ -1508,6 +1563,7 @@ describe('Auth', () => {
         id: createdApiKey.id,
         collection: apiKeysSlug,
         data: { enableAPIKey: false },
+        overrideAccess: true,
       })
 
       expect(updatedApiKey.collection).toBe(apiKeysSlug)
@@ -1515,6 +1571,7 @@ describe('Auth', () => {
       const deletedApiKey = await payload.delete({
         id: createdApiKey.id,
         collection: apiKeysSlug,
+        overrideAccess: true,
       })
 
       expect(deletedApiKey.collection).toBe(apiKeysSlug)
@@ -1526,6 +1583,7 @@ describe('Auth', () => {
         data: {
           email: 'dev@payloadcms.com',
         },
+        overrideAccess: true,
       })
 
       const reset = await payload.resetPassword({
@@ -1556,6 +1614,7 @@ describe('Auth', () => {
           data: {
             email: 'dev@payloadcms.com',
           },
+          overrideAccess: true,
         })
       } finally {
         // Restore the original Date.now() after the forgotPassword call
@@ -1775,6 +1834,7 @@ describe('Auth', () => {
           email: devUser.email,
           password: devUser.password,
         },
+        overrideAccess: true,
       })
 
       expect(authenticated.token).toBeTruthy()
@@ -1808,6 +1868,7 @@ describe('Auth', () => {
           email: devUser.email,
           password: devUser.password,
         },
+        overrideAccess: true,
       })
 
       const authenticated2 = await payload.login({
@@ -1816,6 +1877,7 @@ describe('Auth', () => {
           email: devUser.email,
           password: devUser.password,
         },
+        overrideAccess: true,
       })
 
       await restClient.POST(`/${slug}/logout`, {
@@ -1855,6 +1917,7 @@ describe('Auth', () => {
           email: devUser.email,
           password: devUser.password,
         },
+        overrideAccess: true,
       })
 
       const decoded = jwtDecode<{ sid: string }>(String(authenticated.token))
@@ -1907,6 +1970,7 @@ describe('Auth', () => {
           email: devUser.email,
           password: devUser.password,
         },
+        overrideAccess: true,
       })
       const { sid } = jwtDecode<{ sid: string }>(String(authenticated.token))
 
@@ -1941,6 +2005,7 @@ describe('Auth', () => {
           email: devUser.email,
           password: devUser.password,
         },
+        overrideAccess: true,
       })
 
       await restClient.POST(`/${slug}/logout?allSessions=true`, {
@@ -1987,6 +2052,7 @@ describe('Auth', () => {
             },
           ],
         },
+        overrideAccess: true,
       })
 
       expect(userWithExpiredSession.sessions).toHaveLength(1)
@@ -1997,6 +2063,7 @@ describe('Auth', () => {
           email: devUser.email,
           password: devUser.password,
         },
+        overrideAccess: true,
       })
 
       const user2 = await payload.db.find<User>({
@@ -2020,6 +2087,7 @@ describe('Auth', () => {
           password: 'test123',
           roles: ['admin'],
         },
+        overrideAccess: true,
       })
 
       const originalUpdatedAt = testUser.updatedAt
@@ -2034,6 +2102,7 @@ describe('Auth', () => {
           email: testUser.email,
           password: 'test123',
         },
+        overrideAccess: true,
       })
 
       // Fetch the user to check updatedAt
@@ -2061,6 +2130,7 @@ describe('Auth', () => {
           password: 'test123',
           roles: ['admin'],
         },
+        overrideAccess: true,
       })
 
       const authenticated = await payload.login({
@@ -2069,6 +2139,7 @@ describe('Auth', () => {
           email: testUser.email,
           password: 'test123',
         },
+        overrideAccess: true,
       })
 
       const userAfterLogin = await payload.db.findOne<User>({
@@ -2115,6 +2186,7 @@ describe('Auth', () => {
           password: 'test123',
           roles: ['admin'],
         },
+        overrideAccess: true,
       })
 
       const authenticated = await payload.login({
@@ -2123,6 +2195,7 @@ describe('Auth', () => {
           email: testUser.email,
           password: 'test123',
         },
+        overrideAccess: true,
       })
 
       const userAfterLogin = await payload.db.findOne<User>({
@@ -2194,6 +2267,7 @@ describe('Auth', () => {
       const user = await payload.create({
         collection,
         data: { apiKey: rawApiKey, enableAPIKey: true, ...data },
+        overrideAccess: true,
       })
       createdIDs.push({ id: user.id, collection })
 
@@ -2217,6 +2291,7 @@ describe('Auth', () => {
       const user = await payload.create({
         collection,
         data: { apiKey: rawApiKey, enableAPIKey: true },
+        overrideAccess: true,
       })
       createdIDs.push({ id: user.id, collection })
 
@@ -2239,7 +2314,7 @@ describe('Auth', () => {
         idsByCollection.set(collection, [...(idsByCollection.get(collection) ?? []), id])
       }
       for (const [collection, ids] of idsByCollection) {
-        await payload.delete({ collection, where: { id: { in: ids } } })
+        await payload.delete({ collection, where: { id: { in: ids } }, overrideAccess: true })
       }
       createdIDs.length = 0
     })
@@ -2348,7 +2423,11 @@ describe('Auth', () => {
       expect(payload.decrypt(raw.apiKey)).toBe(rawApiKey)
 
       // Remove the corrupt row; the re-run completes and skips the migrated row.
-      await payload.delete({ id: corrupt.id, collection: rotateSecretSecondarySlug })
+      await payload.delete({
+        id: corrupt.id,
+        collection: rotateSecretSecondarySlug,
+        overrideAccess: true,
+      })
       const rerun = await rotateSecret(rotateArgs)
       expect(rerun).toEqual({ migrated: 0, skipped: 1 })
     })
@@ -2407,6 +2486,7 @@ describe('Auth', () => {
       const user = await payload.create({
         collection: rotateSecretSlug,
         data: { apiKey: rawApiKey, enableAPIKey: true },
+        overrideAccess: true,
       })
       createdIDs.push({ id: user.id, collection: rotateSecretSlug })
 
@@ -2443,6 +2523,7 @@ describe('Auth', () => {
       const user = await payload.create({
         collection: rotateSecretSlug,
         data: { apiKey: rawApiKey, enableAPIKey: true },
+        overrideAccess: true,
       })
       createdIDs.push({ id: user.id, collection: rotateSecretSlug })
 
@@ -2455,7 +2536,11 @@ describe('Auth', () => {
 
       // Reading through the Local API runs the afterRead decrypt hook, which must
       // mask the undecryptable field rather than failing the whole document read.
-      const doc = await payload.findByID({ collection: rotateSecretSlug, id: user.id })
+      const doc = await payload.findByID({
+        collection: rotateSecretSlug,
+        id: user.id,
+        overrideAccess: true,
+      })
       expect(doc.apiKey).toBeNull()
     })
 
@@ -2482,6 +2567,7 @@ describe('Auth', () => {
       const { token } = await payload.login({
         collection: rotateSecretLoginSlug,
         data: { email: loginEmail, password: loginPassword },
+        overrideAccess: true,
       })
       expect(token).toBeDefined()
     })
@@ -2557,7 +2643,11 @@ describe('Auth', () => {
     }
 
     it('should verify a JWT signed under a previous secret, and reject an unknown secret', async () => {
-      const { token, user } = await payload.login({ collection: slug, data: { email, password } })
+      const { token, user } = await payload.login({
+        collection: slug,
+        data: { email, password },
+        overrideAccess: true,
+      })
 
       const { exp: _exp, iat: _iat, ...claims } = jwtDecode<Record<string, unknown>>(token)
       const nowInSeconds = Math.floor(Date.now() / 1000)

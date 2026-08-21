@@ -102,93 +102,117 @@ describe('Types testing', () => {
   })
 
   test('payload.find', () => {
-    expect(payload.find({ collection: 'users' })).type.toBe<Promise<PaginatedDocs<User>>>()
-  })
-
-  test('payload.findByID', () => {
-    expect(payload.findByID({ id: 1, collection: 'users' })).type.toBe<Promise<User>>()
-  })
-
-  test('payload.findByID with disableErrors: true', () => {
-    expect(payload.findByID({ id: 1, collection: 'users', disableErrors: true })).type.toBe<
-      Promise<null | User>
+    expect(payload.find({ collection: 'users', overrideAccess: true })).type.toBe<
+      Promise<PaginatedDocs<User>>
     >()
   })
 
-  test('payload.create', () => {
-    expect(payload.create({ collection: 'users', data: { email: 'user@email.com' } })).type.toBe<
+  test('payload.findByID', () => {
+    expect(payload.findByID({ id: 1, collection: 'users', overrideAccess: true })).type.toBe<
       Promise<User>
     >()
   })
 
+  test('payload.findByID with disableErrors: true', () => {
+    expect(
+      payload.findByID({ id: 1, collection: 'users', disableErrors: true, overrideAccess: true }),
+    ).type.toBe<Promise<null | User>>()
+  })
+
+  test('payload.create', () => {
+    expect(
+      payload.create({
+        collection: 'users',
+        data: { email: 'user@email.com' },
+        overrideAccess: true,
+      }),
+    ).type.toBe<Promise<User>>()
+  })
+
   test('payload.update by ID', () => {
-    expect(payload.update({ id: 1, collection: 'users', data: {} })).type.toBe<Promise<User>>()
+    expect(
+      payload.update({ id: 1, collection: 'users', data: {}, overrideAccess: true }),
+    ).type.toBe<Promise<User>>()
   })
 
   test('payload.update many', () => {
-    expect(payload.update({ collection: 'users', data: {}, where: {} })).type.toBe<
-      Promise<BulkOperationResult<'users', SelectType>>
-    >()
+    expect(
+      payload.update({ collection: 'users', data: {}, where: {}, overrideAccess: true }),
+    ).type.toBe<Promise<BulkOperationResult<'users', SelectType>>>()
   })
 
   test('payload.delete by ID', () => {
-    expect(payload.delete({ id: 1, collection: 'users' })).type.toBe<Promise<User>>()
+    expect(payload.delete({ id: 1, collection: 'users', overrideAccess: true })).type.toBe<
+      Promise<User>
+    >()
   })
 
   test('payload.delete many', () => {
-    expect(payload.delete({ collection: 'users', where: {} })).type.toBe<
+    expect(payload.delete({ collection: 'users', where: {}, overrideAccess: true })).type.toBe<
       Promise<BulkOperationResult<'users', SelectType>>
     >()
   })
 
   test('payload.findGlobal', () => {
-    expect(payload.findGlobal({ slug: 'menu' })).type.toBe<Promise<Menu>>()
+    expect(payload.findGlobal({ slug: 'menu', overrideAccess: true })).type.toBe<Promise<Menu>>()
   })
 
   test('payload.updateGlobal', () => {
-    expect(payload.updateGlobal({ slug: 'menu', data: {} })).type.toBe<Promise<Menu>>()
+    expect(payload.updateGlobal({ slug: 'menu', data: {}, overrideAccess: true })).type.toBe<
+      Promise<Menu>
+    >()
   })
 
   test('payload.findVersions', () => {
-    expect(payload.findVersions({ collection: 'posts' })).type.toBe<
+    expect(payload.findVersions({ collection: 'posts', overrideAccess: true })).type.toBe<
       Promise<PaginatedDocs<TypeWithVersion<Post>>>
     >()
   })
 
   test('payload.findVersionByID', () => {
-    expect(payload.findVersionByID({ id: 'id', collection: 'posts' })).type.toBe<
-      Promise<TypeWithVersion<Post>>
-    >()
+    expect(
+      payload.findVersionByID({ id: 'id', collection: 'posts', overrideAccess: true }),
+    ).type.toBe<Promise<TypeWithVersion<Post>>>()
   })
 
   test('payload.findGlobalVersions', () => {
-    expect(payload.findGlobalVersions({ slug: 'menu' })).type.toBe<
+    expect(payload.findGlobalVersions({ slug: 'menu', overrideAccess: true })).type.toBe<
       Promise<PaginatedDocs<TypeWithVersion<Menu>>>
     >()
   })
 
   test('payload.findGlobalVersionByID', () => {
-    expect(payload.findGlobalVersionByID({ id: 'id', slug: 'menu' })).type.toBe<
-      Promise<TypeWithVersion<Menu>>
-    >()
+    expect(
+      payload.findGlobalVersionByID({ id: 'id', slug: 'menu', overrideAccess: true }),
+    ).type.toBe<Promise<TypeWithVersion<Menu>>>()
   })
 
   describe('select', () => {
     test('should include only ID if select is an empty object', () => {
-      expect(payload.findByID({ id: 'id', collection: 'posts', select: {} })).type.toBe<
-        Promise<{ id: Post['id'] }>
-      >()
+      expect(
+        payload.findByID({ id: 'id', collection: 'posts', select: {}, overrideAccess: true }),
+      ).type.toBe<Promise<{ id: Post['id'] }>>()
     })
 
     test('should include only title and ID', () => {
       expect(
-        payload.findByID({ id: 'id', collection: 'posts', select: { title: true } }),
+        payload.findByID({
+          id: 'id',
+          collection: 'posts',
+          select: { title: true },
+          overrideAccess: true,
+        }),
       ).type.toBe<Promise<{ id: Post['id']; title?: Post['title'] }>>()
     })
 
     test('should exclude title', () => {
       expect(
-        payload.findByID({ id: 'id', collection: 'posts', select: { title: false } }),
+        payload.findByID({
+          id: 'id',
+          collection: 'posts',
+          select: { title: false },
+          overrideAccess: true,
+        }),
       ).type.toBe<Promise<Omit<Post, 'title'>>>()
     })
   })
@@ -230,7 +254,7 @@ describe('Types testing', () => {
     })
 
     test('payload operations return users with collection property', async () => {
-      const user = await payload.findByID({ id: 'id', collection: 'users' })
+      const user = await payload.findByID({ id: 'id', collection: 'users', overrideAccess: true })
       expect(user.collection).type.toBe<'users'>()
     })
 
@@ -1501,6 +1525,7 @@ describe('Types testing', () => {
         const result = await payload.find({
           collection: 'draft-posts',
           draft: true,
+          overrideAccess: true,
         })
 
         const doc = result.docs[0]!
@@ -1518,6 +1543,7 @@ describe('Types testing', () => {
       test('non-draft find query returns required fields as required', async () => {
         const result = await payload.find({
           collection: 'draft-posts',
+          overrideAccess: true,
         })
 
         const doc = result.docs[0]!

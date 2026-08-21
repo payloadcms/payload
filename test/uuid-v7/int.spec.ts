@@ -37,7 +37,7 @@ describeUuidV7('UUID v7 idType (postgres)', () => {
 
     for (const { collection, id } of [...createdStack].reverse()) {
       try {
-        await payload.delete({ collection, id })
+        await payload.delete({ collection, id, overrideAccess: true })
       } catch {
         // ignore: already deleted or FK race
       }
@@ -60,6 +60,7 @@ describeUuidV7('UUID v7 idType (postgres)', () => {
     const doc = await payload.create({
       collection: 'posts',
       data: { title: 'uuid v7 post' },
+      overrideAccess: true,
     })
 
     track('posts', String(doc.id))
@@ -74,10 +75,12 @@ describeUuidV7('UUID v7 idType (postgres)', () => {
     const first = await payload.create({
       collection: 'posts',
       data: { title: 'first' },
+      overrideAccess: true,
     })
     const second = await payload.create({
       collection: 'posts',
       data: { title: 'second' },
+      overrideAccess: true,
     })
 
     track('posts', String(first.id))
@@ -90,6 +93,7 @@ describeUuidV7('UUID v7 idType (postgres)', () => {
     const created = await payload.create({
       collection: 'posts',
       data: { title: 'find me' },
+      overrideAccess: true,
     })
 
     track('posts', String(created.id))
@@ -97,6 +101,7 @@ describeUuidV7('UUID v7 idType (postgres)', () => {
     const found = await payload.findByID({
       collection: 'posts',
       id: created.id,
+      overrideAccess: true,
     })
 
     expect(found.id).toBe(created.id)
@@ -107,6 +112,7 @@ describeUuidV7('UUID v7 idType (postgres)', () => {
     const category = await payload.create({
       collection: 'categories',
       data: { name: 'Cat A' },
+      overrideAccess: true,
     })
     const article = await payload.create({
       collection: 'articles',
@@ -115,6 +121,7 @@ describeUuidV7('UUID v7 idType (postgres)', () => {
         category: category.id,
       },
       depth: 1,
+      overrideAccess: true,
     })
 
     track('articles', String(article.id))
@@ -127,6 +134,7 @@ describeUuidV7('UUID v7 idType (postgres)', () => {
     const created = await payload.create({
       collection: 'posts',
       data: { title: 'query by id' },
+      overrideAccess: true,
     })
 
     track('posts', String(created.id))
@@ -134,6 +142,7 @@ describeUuidV7('UUID v7 idType (postgres)', () => {
     const res = await payload.find({
       collection: 'posts',
       where: { id: { equals: created.id } },
+      overrideAccess: true,
     })
 
     expect(res.docs).toHaveLength(1)

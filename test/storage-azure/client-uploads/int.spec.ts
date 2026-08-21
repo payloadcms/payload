@@ -98,7 +98,7 @@ describe('@payloadcms/storage-azure clientUploads', () => {
 
     expect(blobKey).toBe('duplicate-target-1.png')
 
-    await payload.delete({ id: seedDoc.id, collection: mediaSlug })
+    await payload.delete({ id: seedDoc.id, collection: mediaSlug, overrideAccess: true })
   })
 
   it('preserves a user-defined prefix.defaultValue across the plugin', async () => {
@@ -106,6 +106,7 @@ describe('@payloadcms/storage-azure clientUploads', () => {
       collection: mediaWithDocPrefixSlug,
       data: {},
       filePath: path.resolve(dirname, '../../uploads/image.png'),
+      overrideAccess: true,
     })
 
     expect(upload.prefix).toMatch(/^doc-[a-z0-9]{1,8}$/)
