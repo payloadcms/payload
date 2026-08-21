@@ -747,6 +747,22 @@ describe('Versions', () => {
         expect(doc._status).toBe('published')
       })
 
+      it('should save a draft when REST create omits draft query and _status', async () => {
+        const response = await restClient.POST(`/${draftCollectionSlug}`, {
+          body: JSON.stringify({
+            title: 'REST omitted create',
+          }),
+        })
+
+        const { doc } = await response.json()
+
+        createdIDs.push({ collection: draftCollectionSlug, id: doc.id })
+
+        expect(response.status).toBe(201)
+        expect(doc._status).toBe('draft')
+        expect(doc.description).toBeFalsy()
+      })
+
       it('should let explicit create action win when it conflicts with _status', async () => {
         const data = {
           description: 'Conflict description',
@@ -766,18 +782,21 @@ describe('Versions', () => {
         expect(data._status).toBe('published')
       })
 
-      it('should not infer unpublish from _status on create', async () => {
-        await expect(
-          payload.create({
-            collection: draftCollectionSlug,
-            data: {
-              description: 'No unpublish inference',
-              title: 'Create unpublish is invalid',
-            },
-            // @ts-expect-error - unpublish is not a create action
-            action: 'unpublish',
-          }),
-        ).rejects.toThrow('Invalid action "unpublish"')
+      it('should not infer unpublish from unrecognized _status on create', async () => {
+        const data = {
+          title: 'Unrecognized status stays default',
+          _status: 'unpublished',
+        }
+
+        const doc = await payload.create({
+          collection: draftCollectionSlug,
+          data,
+        })
+
+        createdIDs.push({ collection: draftCollectionSlug, id: doc.id })
+
+        expect(doc._status).toBe('draft')
+        expect(data._status).toBe('unpublished')
       })
 
       it('should create a draft upload without a file and require a file when publishing', async () => {
@@ -854,12 +873,39 @@ describe('Versions', () => {
         expect(duplicatedDoc.description).toBe('Original published description')
       })
 
-      it('should infer duplicate action from _status and leave the input object unchanged', async () => {
+      it('should infer saveDraft from _status draft when duplicate action is omitted', async () => {
         const originalDoc = await payload.create({
           collection: draftCollectionSlug,
           data: {
             description: 'Original published description',
-            title: 'Duplicate status inference source',
+            title: 'Duplicate draft status source',
+            _status: 'published',
+          },
+          action: 'publish',
+        })
+
+        createdIDs.push({ collection: draftCollectionSlug, id: originalDoc.id })
+
+        const duplicatedDoc = await payload.duplicate({
+          id: originalDoc.id,
+          collection: draftCollectionSlug,
+          data: {
+            title: 'Duplicate draft status copy',
+            _status: 'draft',
+          },
+        })
+
+        createdIDs.push({ collection: draftCollectionSlug, id: duplicatedDoc.id })
+
+        expect(duplicatedDoc._status).toBe('draft')
+      })
+
+      it('should let explicit duplicate action win when it conflicts with _status', async () => {
+        const originalDoc = await payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            description: 'Original published description',
+            title: 'Duplicate conflict source',
             _status: 'published',
           },
           action: 'publish',
@@ -868,7 +914,7 @@ describe('Versions', () => {
         createdIDs.push({ collection: draftCollectionSlug, id: originalDoc.id })
 
         const data = {
-          title: 'Duplicate status inference copy',
+          title: 'Duplicate conflict copy',
           _status: 'published' as const,
         }
 
@@ -876,11 +922,12 @@ describe('Versions', () => {
           id: originalDoc.id,
           collection: draftCollectionSlug,
           data,
+          action: 'saveDraft',
         })
 
         createdIDs.push({ collection: draftCollectionSlug, id: duplicatedDoc.id })
 
-        expect(duplicatedDoc._status).toBe('published')
+        expect(duplicatedDoc._status).toBe('draft')
         expect(data._status).toBe('published')
       })
 
@@ -2052,27 +2099,22 @@ describe('Versions', () => {
       })
 
       it('should allow creating drafts without required fields', async () => {
-        // This test validates that when draft: true is set, required fields become optional
-        // TypeScript should not complain about missing 'description' field even though it's required
         const draft = await payload.create({
           collection: draftCollectionSlug,
           data: {
             title: 'Draft without description',
-            // description is required but omitted - should work with draft: true
           },
           action: 'saveDraft',
         })
 
         expect(draft.title).toBe('Draft without description')
-        // Different databases return null vs undefined for missing fields
         expect(draft.description).toBeFalsy()
         expect(draft._status).toBe('draft')
       })
 
-      it('should require all required fields when draft is false', async () => {
-        // This validates that required fields are still enforced when draft is false
+      it('should require all required fields when publishing', async () => {
         await expect(
-          // @ts-expect-error - description is required when not creating a draft
+          // @ts-expect-error - description is required when publishing
           payload.create({
             collection: draftCollectionSlug,
             data: {
@@ -2095,7 +2137,7 @@ describe('Versions', () => {
         expect(draft.description).toBeFalsy()
       })
 
-      it('should allow all fields to be optional with draft: true', async () => {
+      it('should allow all fields to be optional with saveDraft', async () => {
         // Test that even fields nested in groups can be omitted
         const draft = await payload.create({
           collection: draftCollectionSlug,
