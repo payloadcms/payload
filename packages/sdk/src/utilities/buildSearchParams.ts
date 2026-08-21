@@ -3,8 +3,8 @@ import type { Sort, Where } from 'payload'
 import { stringify } from 'qs-esm'
 
 export type OperationArgs = {
+  action?: string
   depth?: number
-  draft?: boolean
   fallbackLocale?: unknown
   joins?: false | Record<string, unknown>
   limit?: number
@@ -15,6 +15,7 @@ export type OperationArgs = {
   select?: unknown
   sort?: Sort
   trash?: boolean
+  version?: string
   where?: Where
 }
 
@@ -33,8 +34,12 @@ export const buildSearchParams = (args: OperationArgs): string => {
     search.limit = String(args.limit)
   }
 
-  if (typeof args.draft === 'boolean') {
-    search.draft = String(args.draft)
+  if (typeof args.version === 'string') {
+    search.version = args.version
+  }
+
+  if (typeof args.action === 'string') {
+    search.action = args.action
   }
 
   if (typeof args.trash === 'boolean') {

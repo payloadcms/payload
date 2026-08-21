@@ -7,6 +7,7 @@ import type {
   PaginatedDocs,
   PayloadTypes,
   PayloadTypesShape,
+  ReadVersion,
   SelectType,
   TypeWithVersion,
 } from 'payload'
@@ -36,7 +37,9 @@ import type {
   SelectFromCollectionSlug,
   SelectFromGlobalSlug,
   TransformCollectionWithSelect,
+  TransformCollectionWithSelectByVersion,
   TransformGlobalWithSelect,
+  TransformGlobalWithSelectByVersion,
 } from './types.js'
 import type { OperationArgs } from './utilities/buildSearchParams.js'
 
@@ -196,10 +199,14 @@ export class PayloadSDK<T extends PayloadTypesShape = PayloadTypes> {
    * @param options
    * @returns documents satisfying query
    */
-  find<TSlug extends CollectionSlug<T>, TSelect extends SelectFromCollectionSlug<T, TSlug>>(
-    options: FindOptions<T, TSlug, TSelect>,
+  find<
+    TSlug extends CollectionSlug<T>,
+    TSelect extends SelectFromCollectionSlug<T, TSlug>,
+    TVersion extends ReadVersion | undefined = undefined,
+  >(
+    options: { version?: TVersion } & FindOptions<T, TSlug, TSelect>,
     init?: RequestInit,
-  ): Promise<PaginatedDocs<TransformCollectionWithSelect<T, TSlug, TSelect>>> {
+  ): Promise<PaginatedDocs<TransformCollectionWithSelectByVersion<T, TSlug, TSelect, TVersion>>> {
     return find(this, options, init)
   }
 
@@ -212,17 +219,27 @@ export class PayloadSDK<T extends PayloadTypesShape = PayloadTypes> {
     TSlug extends CollectionSlug<T>,
     TDisableErrors extends boolean,
     TSelect extends SelectFromCollectionSlug<T, TSlug>,
+    TVersion extends ReadVersion | undefined = undefined,
   >(
-    options: FindByIDOptions<T, TSlug, TDisableErrors, TSelect>,
+    options: { version?: TVersion } & FindByIDOptions<T, TSlug, TDisableErrors, TSelect>,
     init?: RequestInit,
-  ): Promise<ApplyDisableErrors<TransformCollectionWithSelect<T, TSlug, TSelect>, TDisableErrors>> {
+  ): Promise<
+    ApplyDisableErrors<
+      TransformCollectionWithSelectByVersion<T, TSlug, TSelect, TVersion>,
+      TDisableErrors
+    >
+  > {
     return findByID(this, options, init)
   }
 
-  findGlobal<TSlug extends GlobalSlug<T>, TSelect extends SelectFromGlobalSlug<T, TSlug>>(
-    options: FindGlobalOptions<T, TSlug, TSelect>,
+  findGlobal<
+    TSlug extends GlobalSlug<T>,
+    TSelect extends SelectFromGlobalSlug<T, TSlug>,
+    TVersion extends ReadVersion | undefined = undefined,
+  >(
+    options: { version?: TVersion } & FindGlobalOptions<T, TSlug, TSelect>,
     init?: RequestInit,
-  ): Promise<TransformGlobalWithSelect<T, TSlug, TSelect>> {
+  ): Promise<TransformGlobalWithSelectByVersion<T, TSlug, TSelect, TVersion>> {
     return findGlobal(this, options, init)
   }
 

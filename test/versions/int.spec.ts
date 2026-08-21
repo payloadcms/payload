@@ -12,6 +12,7 @@ import * as qs from 'qs-esm'
 import { fileURLToPath } from 'url'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
+import type { TypedPayloadSDK } from '../__helpers/shared/getSDK.js'
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { AutosaveMultiSelectPost, DraftPost } from './payload-types.js'
 
@@ -44,6 +45,8 @@ import {
 
 let payload: Payload
 let restClient: NextRESTClient
+let sdk: TypedPayloadSDK
+let sdkAuth: RequestInit
 
 const collectionGraphQLOriginalTitle = 'autosave title'
 
@@ -60,7 +63,7 @@ describe('Versions', () => {
 
   beforeAll(async () => {
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
-    ;({ payload, restClient } = await initPayloadInt(dirname))
+    ;({ payload, restClient, sdk } = await initPayloadInt(dirname))
 
     const newUser = await payload.create({
       collection: 'users',
@@ -83,6 +86,20 @@ describe('Versions', () => {
         password: devUser.password,
       },
     })
+
+    const loginResult = await sdk.login({
+      collection: 'users',
+      data: {
+        email: devUser.email,
+        password: devUser.password,
+      },
+    })
+
+    sdkAuth = {
+      headers: {
+        Authorization: `JWT ${loginResult.token}`,
+      },
+    }
   })
 
   afterAll(async () => {
@@ -1629,6 +1646,405 @@ describe('Versions', () => {
         )
 
         expect(errors?.[0].message).toBeDefined()
+      })
+    })
+
+    describe('SDK version and action parameters', () => {
+      const createdIDs: Array<{ collection: string; id: number | string }> = []
+
+      afterEach(async () => {
+        for (const { id, collection } of createdIDs) {
+          await payload.delete({ id, collection })
+        }
+
+        createdIDs.length = 0
+      })
+
+      it('should read published, latest, and draft representations over the SDK', async () => {
+        const publishedOnly = await payload.create({
+          action: 'publish',
+          collection: draftCollectionSlug,
+          data: {
+            description: 'Published only',
+            title: 'SDK read published only',
+          },
+        })
+        createdIDs.push({ id: publishedOnly.id, collection: draftCollectionSlug })
+
+        const draftOnly = await payload.create({
+          action: 'saveDraft',
+          collection: draftCollectionSlug,
+          data: {
+            title: 'SDK read draft only',
+          },
+        })
+        createdIDs.push({ id: draftOnly.id, collection: draftCollectionSlug })
+
+        const publishedWithDraft = await payload.create({
+          action: 'publish',
+          collection: draftCollectionSlug,
+          data: {
+            description: 'Published with draft',
+            title: 'SDK read published with draft',
+          },
+        })
+        createdIDs.push({ id: publishedWithDraft.id, collection: draftCollectionSlug })
+
+        await payload.update({
+          id: publishedWithDraft.id,
+          action: 'saveDraft',
+          collection: draftCollectionSlug,
+          data: {
+            title: 'SDK read newer draft',
+          },
+        })
+
+        const publishedByID = await sdk.findByID(
+          { id: publishedOnly.id, collection: draftCollectionSlug },
+          sdkAuth,
+        )
+        expect(publishedByID.title).toBe('SDK read published only')
+
+        const latestPublishedOnly = await sdk.findByID(
+          { id: publishedOnly.id, collection: draftCollectionSlug, version: 'latest' },
+          sdkAuth,
+        )
+        expect(latestPublishedOnly.title).toBe('SDK read published only')
+
+        await expect(
+          sdk.findByID(
+            { id: publishedOnly.id, collection: draftCollectionSlug, version: 'draft' },
+            sdkAuth,
+          ),
+        ).rejects.toMatchObject({ status: 404 })
+
+        const missingPublishedDraftOnly = await sdk.findByID(
+          { id: draftOnly.id, collection: draftCollectionSlug },
+          sdkAuth,
+        )
+        expect(missingPublishedDraftOnly._status).toBe('draft')
+
+        const latestDraftOnly = await sdk.findByID(
+          { id: draftOnly.id, collection: draftCollectionSlug, version: 'latest' },
+          sdkAuth,
+        )
+        expect(latestDraftOnly.title).toBe('SDK read draft only')
+
+        const publishedSide = await sdk.findByID(
+          { id: publishedWithDraft.id, collection: draftCollectionSlug },
+          sdkAuth,
+        )
+        expect(publishedSide.title).toBe('SDK read published with draft')
+
+        const latestSide = await sdk.findByID(
+          { id: publishedWithDraft.id, collection: draftCollectionSlug, version: 'latest' },
+          sdkAuth,
+        )
+        expect(latestSide.title).toBe('SDK read newer draft')
+
+        const titleWhere = {
+          title: {
+            in: [
+              'SDK read published only',
+              'SDK read draft only',
+              'SDK read published with draft',
+              'SDK read newer draft',
+            ],
+          },
+        }
+
+        const publishedDocs = await sdk.find(
+          { collection: draftCollectionSlug, where: titleWhere },
+          sdkAuth,
+        )
+        expect(publishedDocs.docs.map(({ title }) => title).sort()).toEqual([
+          'SDK read draft only',
+          'SDK read published only',
+          'SDK read published with draft',
+        ])
+
+        const latestDocs = await sdk.find(
+          { collection: draftCollectionSlug, version: 'latest', where: titleWhere },
+          sdkAuth,
+        )
+        expect(latestDocs.docs.map(({ title }) => title).sort()).toEqual([
+          'SDK read draft only',
+          'SDK read newer draft',
+          'SDK read published only',
+        ])
+
+        const draftDocs = await sdk.find(
+          { collection: draftCollectionSlug, version: 'draft', where: titleWhere },
+          sdkAuth,
+        )
+        expect(draftDocs.docs.map(({ title }) => title).sort()).toEqual([
+          'SDK read draft only',
+          'SDK read newer draft',
+        ])
+      })
+
+      it('should save a draft when SDK create omits action and _status', async () => {
+        const doc = await sdk.create(
+          {
+            collection: draftCollectionSlug,
+            data: {
+              title: 'SDK omitted create action',
+            },
+          },
+          sdkAuth,
+        )
+        createdIDs.push({ id: doc.id, collection: draftCollectionSlug })
+
+        expect(doc._status).toBe('draft')
+      })
+
+      it('should retain _status in the write body and let explicit SDK action win', async () => {
+        const publishedDoc = await sdk.create(
+          {
+            collection: draftCollectionSlug,
+            data: {
+              _status: 'published',
+              description: 'From status',
+              title: 'SDK create from published status',
+            },
+          },
+          sdkAuth,
+        )
+        createdIDs.push({ id: publishedDoc.id, collection: draftCollectionSlug })
+        expect(publishedDoc._status).toBe('published')
+
+        const actionWins = await sdk.create(
+          {
+            action: 'saveDraft',
+            collection: draftCollectionSlug,
+            data: {
+              _status: 'published',
+              description: 'Conflict',
+              title: 'SDK create action wins',
+            },
+          },
+          sdkAuth,
+        )
+        createdIDs.push({ id: actionWins.id, collection: draftCollectionSlug })
+        expect(actionWins._status).toBe('draft')
+
+        const explicitPublish = await sdk.create(
+          {
+            action: 'publish',
+            collection: draftCollectionSlug,
+            data: {
+              description: 'Explicit publish',
+              title: 'SDK create explicit publish',
+            },
+          },
+          sdkAuth,
+        )
+        createdIDs.push({ id: explicitPublish.id, collection: draftCollectionSlug })
+        expect(explicitPublish._status).toBe('published')
+      })
+
+      it('should publish when SDK update has neither action nor status', async () => {
+        const doc = await payload.create({
+          action: 'saveDraft',
+          collection: draftCollectionSlug,
+          data: {
+            title: 'SDK update omitted source',
+          },
+        })
+        createdIDs.push({ id: doc.id, collection: draftCollectionSlug })
+
+        const updated = await sdk.update(
+          {
+            id: doc.id,
+            collection: draftCollectionSlug,
+            data: {
+              description: 'Now published',
+              title: 'SDK update omitted next',
+            },
+          },
+          sdkAuth,
+        )
+
+        expect(updated._status).toBe('published')
+        expect(updated.title).toBe('SDK update omitted next')
+      })
+
+      it('should honor body _status on SDK update and let explicit action win', async () => {
+        const doc = await payload.create({
+          action: 'publish',
+          collection: draftCollectionSlug,
+          data: {
+            description: 'Published',
+            title: 'SDK update status inference',
+          },
+        })
+        createdIDs.push({ id: doc.id, collection: draftCollectionSlug })
+
+        const savedFromStatus = await sdk.update(
+          {
+            id: doc.id,
+            collection: draftCollectionSlug,
+            data: {
+              _status: 'draft',
+              title: 'SDK update from draft status',
+            },
+          },
+          sdkAuth,
+        )
+        expect(savedFromStatus._status).toBe('draft')
+
+        const actionWins = await sdk.update(
+          {
+            id: doc.id,
+            action: 'publish',
+            collection: draftCollectionSlug,
+            data: {
+              _status: 'draft',
+              description: 'Published again',
+              title: 'SDK update action wins',
+            },
+          },
+          sdkAuth,
+        )
+        expect(actionWins._status).toBe('published')
+      })
+
+      it('should apply explicit SDK update actions including unpublish', async () => {
+        const doc = await payload.create({
+          action: 'publish',
+          collection: draftCollectionSlug,
+          data: {
+            description: 'Published',
+            title: 'SDK update actions',
+          },
+        })
+        createdIDs.push({ id: doc.id, collection: draftCollectionSlug })
+
+        const savedDraft = await sdk.update(
+          {
+            id: doc.id,
+            action: 'saveDraft',
+            collection: draftCollectionSlug,
+            data: {
+              title: 'SDK update saveDraft',
+            },
+          },
+          sdkAuth,
+        )
+        expect(savedDraft._status).toBe('draft')
+
+        const unpublished = await sdk.update(
+          {
+            id: doc.id,
+            action: 'unpublish',
+            collection: draftCollectionSlug,
+            data: {},
+          },
+          sdkAuth,
+        )
+        expect(unpublished._status).toBe('draft')
+      })
+
+      it('should restore over the SDK with omitted publish and explicit saveDraft', async () => {
+        const doc = await payload.create({
+          action: 'publish',
+          collection: draftCollectionSlug,
+          data: {
+            description: 'SDK restore published v1',
+            title: 'SDK restore v1',
+          },
+        })
+        createdIDs.push({ id: doc.id, collection: draftCollectionSlug })
+
+        await payload.update({
+          id: doc.id,
+          action: 'publish',
+          collection: draftCollectionSlug,
+          data: {
+            title: 'SDK restore v2',
+          },
+        })
+
+        const versions = await payload.findVersions({
+          collection: draftCollectionSlug,
+          sort: 'createdAt',
+          where: {
+            parent: {
+              equals: doc.id,
+            },
+          },
+        })
+        const versionToRestore = versions.docs[0]!
+
+        const publishedRestore = await sdk.restoreVersion(
+          {
+            id: versionToRestore.id,
+            collection: draftCollectionSlug,
+          },
+          sdkAuth,
+        )
+        expect(publishedRestore.title).toBe('SDK restore v1')
+        expect(publishedRestore._status).toBe('published')
+
+        const draftRestore = await sdk.restoreVersion(
+          {
+            id: versionToRestore.id,
+            action: 'saveDraft',
+            collection: draftCollectionSlug,
+          },
+          sdkAuth,
+        )
+        expect(draftRestore.title).toBe('SDK restore v1')
+        expect(draftRestore._status).toBe('draft')
+      })
+
+      it('should read and write draft globals over the SDK', async () => {
+        await sdk.updateGlobal(
+          {
+            slug: simpleDraftGlobalSlug,
+            action: 'publish',
+            data: {
+              title: 'SDK global published',
+            },
+          },
+          sdkAuth,
+        )
+
+        const published = await sdk.findGlobal({ slug: simpleDraftGlobalSlug }, sdkAuth)
+        expect(published.title).toBe('SDK global published')
+
+        await sdk.updateGlobal(
+          {
+            slug: simpleDraftGlobalSlug,
+            action: 'saveDraft',
+            data: {
+              title: 'SDK global draft',
+            },
+          },
+          sdkAuth,
+        )
+
+        const latest = await sdk.findGlobal(
+          { slug: simpleDraftGlobalSlug, version: 'latest' },
+          sdkAuth,
+        )
+        expect(latest.title).toBe('SDK global draft')
+
+        const stillPublished = await sdk.findGlobal({ slug: simpleDraftGlobalSlug }, sdkAuth)
+        expect(stillPublished.title).toBe('SDK global published')
+      })
+
+      it('should reject saveDraft on an SDK collection without drafts', async () => {
+        await expect(
+          sdk.create(
+            {
+              action: 'saveDraft',
+              collection: postCollectionSlug,
+              data: {},
+            } as Parameters<typeof sdk.create>[0],
+            sdkAuth,
+          ),
+        ).rejects.toMatchObject({ status: 400 })
       })
     })
 

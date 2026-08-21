@@ -1,14 +1,28 @@
 import type {
   AuthCollectionSlug,
   CollectionSlug,
+  CreateAction,
+  CreateDataFromCollectionSlug,
+  DraftTransformCollectionWithSelect,
+  DraftTransformGlobalWithSelect,
   GlobalSlug,
   JsonObject,
   PayloadTypesShape,
+  QueryDraftDataFromCollectionSlug,
+  QueryDraftDataFromGlobalSlug,
+  ReadVersion,
+  RestoreAction,
+  RestoreActionFromCollectionSlug,
+  RestoreActionFromGlobalSlug,
   SelectType,
   Sort,
   TransformDataWithSelect,
-  TypedCollectionSelect,
   TypeWithID,
+  UpdateAction,
+  UpdateActionFromCollectionSlug,
+  UpdateActionFromGlobalSlug,
+  VersionFromCollectionSlug,
+  VersionFromGlobalSlug,
   Where,
 } from 'payload'
 
@@ -101,3 +115,91 @@ export type BulkOperationResult<
   docs: TransformCollectionWithSelect<T, TSlug, TSelect>[]
   errors: { id: IDType<T, TSlug>; message: string }[]
 }
+
+export type CollectionVersionOptions<TSlug> = TSlug extends CollectionSlug
+  ? VersionFromCollectionSlug<TSlug>
+  : {
+      /**
+       * Which document representation to read. [More](https://payloadcms.com/docs/versions/drafts)
+       *
+       * @default 'published'
+       */
+      version?: ReadVersion
+    }
+
+export type CollectionCreateWriteOptions<
+  T extends PayloadTypesShape,
+  TSlug extends CollectionSlug<T>,
+> = TSlug extends CollectionSlug
+  ? CreateDataFromCollectionSlug<TSlug>
+  : {
+      action?: CreateAction
+      data: RequiredDataFromCollectionSlug<T, TSlug>
+    }
+
+export type CollectionUpdateActionOptions<TSlug> = TSlug extends CollectionSlug
+  ? UpdateActionFromCollectionSlug<TSlug>
+  : {
+      action?: UpdateAction
+    }
+
+export type CollectionRestoreActionOptions<TSlug> = TSlug extends CollectionSlug
+  ? RestoreActionFromCollectionSlug<TSlug>
+  : {
+      /**
+       * Restore and publish (`publish`, default) or restore as a draft (`saveDraft`).
+       */
+      action?: RestoreAction
+    }
+
+export type GlobalVersionOptions<TSlug> = TSlug extends GlobalSlug
+  ? VersionFromGlobalSlug<TSlug>
+  : {
+      /**
+       * Which document representation to read. [More](https://payloadcms.com/docs/versions/drafts)
+       *
+       * @default 'published'
+       */
+      version?: ReadVersion
+    }
+
+export type GlobalUpdateActionOptions<TSlug> = TSlug extends GlobalSlug
+  ? UpdateActionFromGlobalSlug<TSlug>
+  : {
+      action?: UpdateAction
+    }
+
+export type GlobalRestoreActionOptions<TSlug> = TSlug extends GlobalSlug
+  ? RestoreActionFromGlobalSlug<TSlug>
+  : {
+      /**
+       * Restore and publish (`publish`, default) or restore as a draft (`saveDraft`).
+       */
+      action?: RestoreAction
+    }
+
+export type TransformCollectionWithSelectByVersion<
+  T extends PayloadTypesShape,
+  TSlug extends CollectionSlug<T>,
+  TSelect,
+  TVersion extends ReadVersion | undefined,
+> = TVersion extends 'draft' | 'latest'
+  ? TSlug extends CollectionSlug
+    ? TSelect extends SelectType
+      ? DraftTransformCollectionWithSelect<TSlug, TSelect>
+      : QueryDraftDataFromCollectionSlug<TSlug>
+    : TransformCollectionWithSelect<T, TSlug, TSelect>
+  : TransformCollectionWithSelect<T, TSlug, TSelect>
+
+export type TransformGlobalWithSelectByVersion<
+  T extends PayloadTypesShape,
+  TSlug extends GlobalSlug<T>,
+  TSelect,
+  TVersion extends ReadVersion | undefined,
+> = TVersion extends 'draft' | 'latest'
+  ? TSlug extends GlobalSlug
+    ? TSelect extends SelectType
+      ? DraftTransformGlobalWithSelect<TSlug, TSelect>
+      : QueryDraftDataFromGlobalSlug<TSlug>
+    : TransformGlobalWithSelect<T, TSlug, TSelect>
+  : TransformGlobalWithSelect<T, TSlug, TSelect>

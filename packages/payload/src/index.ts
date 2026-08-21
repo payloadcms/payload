@@ -1498,17 +1498,25 @@ export type {
   CollectionAccess,
   CollectionAdminOptions,
   CollectionConfig,
+  CollectionsWithoutDrafts,
+  CreateActionFromCollectionSlug,
+  CreateDataFromCollectionSlug,
   DataFromCollectionSlug,
+  DraftDataFromCollectionSlug,
   HookOperationType,
   IDTypeForCollectionSlug,
   MeHook as CollectionMeHook,
+  QueryDraftDataFromCollectionSlug,
   RefreshHook as CollectionRefreshHook,
   RequiredDataFromCollection,
   RequiredDataFromCollectionSlug,
+  RestoreActionFromCollectionSlug,
   SanitizedCollectionConfig,
   SanitizedJoins,
   TypeWithID,
   TypeWithTimestamps,
+  UpdateActionFromCollectionSlug,
+  VersionFromCollectionSlug,
 } from './collections/config/types.js'
 
 export type { CompoundIndex, FoldersConfig, TagsConfig } from './collections/config/types.js'
@@ -1877,7 +1885,12 @@ export type {
   GlobalAccess,
   GlobalAdminOptions,
   GlobalConfig,
+  GlobalsWithoutDrafts,
+  QueryDraftDataFromGlobalSlug,
+  RestoreActionFromGlobalSlug,
   SanitizedGlobalConfig,
+  UpdateActionFromGlobalSlug,
+  VersionFromGlobalSlug,
 } from './globals/config/types.js'
 export { docAccessOperation as docAccessOperationGlobal } from './globals/operations/docAccess.js'
 export { findOneOperation } from './globals/operations/findOne.js'

@@ -1313,6 +1313,317 @@ describe('Types testing', () => {
       })
       expect(result).type.toBe<Omit<Post, 'richText'>>()
     })
+
+    describe('version and action types', () => {
+      test('latest and draft reads type required fields as optional', async () => {
+        const _sdk = new PayloadSDK<LocalConfig>({ baseURL: '' })
+        const latest = await _sdk.find({
+          collection: 'draft-posts',
+          version: 'latest',
+        })
+        const draftOnly = await _sdk.find({
+          collection: 'draft-posts',
+          version: 'draft',
+        })
+
+        expect(latest.docs[0]!.description).type.toBe<string | undefined>()
+        expect(latest.docs[0]!.title).type.toBe<string | undefined>()
+        expect(latest.docs[0]!.id).type.not.toBe<undefined>()
+
+        expect(draftOnly.docs[0]!.title).type.toBe<string | undefined>()
+      })
+
+      test('published and omitted reads keep required fields required', async () => {
+        const _sdk = new PayloadSDK<LocalConfig>({ baseURL: '' })
+        const omitted = await _sdk.find({
+          collection: 'draft-posts',
+        })
+        const published = await _sdk.find({
+          collection: 'draft-posts',
+          version: 'published',
+        })
+
+        expect(omitted.docs[0]!.description).type.toBe<string>()
+        expect(omitted.docs[0]!.title).type.toBe<string>()
+        expect(published.docs[0]!.title).type.toBe<string>()
+      })
+
+      test('old draft option is rejected', () => {
+        const _sdk = new PayloadSDK<LocalConfig>({ baseURL: '' })
+
+        expect(_sdk.find).type.not.toBeCallableWith({ collection: 'draft-posts', draft: true })
+        expect(_sdk.findByID).type.not.toBeCallableWith({
+          id: 1,
+          collection: 'draft-posts',
+          draft: true,
+        })
+        expect(_sdk.create).type.not.toBeCallableWith({
+          collection: 'draft-posts',
+          data: {
+            description: 'Description',
+            title: 'Test',
+          },
+          draft: true,
+        })
+        expect(_sdk.update).type.not.toBeCallableWith({
+          id: 1,
+          collection: 'draft-posts',
+          data: { title: 'Test' },
+          draft: true,
+        })
+        expect(_sdk.restoreVersion).type.not.toBeCallableWith({
+          id: 'id',
+          collection: 'draft-posts',
+          draft: true,
+        })
+        expect(_sdk.delete).type.not.toBeCallableWith({
+          id: 1,
+          collection: 'draft-posts',
+          draft: true,
+        })
+      })
+
+      test('create with saveDraft allows partial data regardless of status', () => {
+        const _sdk = new PayloadSDK<LocalConfig>({ baseURL: '' })
+
+        expect(_sdk.create).type.toBeCallableWith({
+          action: 'saveDraft',
+          collection: 'draft-posts',
+          data: {
+            title: 'Test',
+          },
+        })
+
+        expect(_sdk.create).type.toBeCallableWith({
+          action: 'saveDraft',
+          collection: 'draft-posts',
+          data: {
+            _status: 'published',
+            title: 'Test',
+          },
+        })
+      })
+
+      test('create with publish requires all required fields regardless of status', () => {
+        const _sdk = new PayloadSDK<LocalConfig>({ baseURL: '' })
+
+        expect(_sdk.create).type.not.toBeCallableWith({
+          action: 'publish',
+          collection: 'draft-posts',
+          data: {
+            title: 'Test',
+          },
+        })
+
+        expect(_sdk.create).type.toBeCallableWith({
+          action: 'publish',
+          collection: 'draft-posts',
+          data: {
+            description: 'Description',
+            title: 'Test',
+          },
+        })
+      })
+
+      test('create with omitted action and published status requires all required fields', () => {
+        const _sdk = new PayloadSDK<LocalConfig>({ baseURL: '' })
+
+        expect(_sdk.create).type.not.toBeCallableWith({
+          collection: 'draft-posts',
+          data: {
+            _status: 'published',
+            title: 'Test',
+          },
+        })
+
+        expect(_sdk.create).type.toBeCallableWith({
+          collection: 'draft-posts',
+          data: {
+            _status: 'published',
+            description: 'Description',
+            title: 'Test',
+          },
+        })
+      })
+
+      test('create with omitted action and draft or omitted status allows partial data', () => {
+        const _sdk = new PayloadSDK<LocalConfig>({ baseURL: '' })
+
+        expect(_sdk.create).type.toBeCallableWith({
+          collection: 'draft-posts',
+          data: {
+            title: 'Test',
+          },
+        })
+
+        expect(_sdk.create).type.toBeCallableWith({
+          collection: 'draft-posts',
+          data: {
+            _status: 'draft',
+            title: 'Test',
+          },
+        })
+      })
+
+      test('create still accepts _status in write data', () => {
+        const _sdk = new PayloadSDK<LocalConfig>({ baseURL: '' })
+
+        expect(_sdk.create).type.toBeCallableWith({
+          action: 'publish',
+          collection: 'draft-posts',
+          data: {
+            _status: 'published',
+            description: 'Description',
+            title: 'Test',
+          },
+        })
+      })
+
+      test('create on non-draft collection forbids draft-only actions', () => {
+        const _sdk = new PayloadSDK<LocalConfig>({ baseURL: '' })
+
+        expect(_sdk.create).type.not.toBeCallableWith({
+          action: 'saveDraft',
+          collection: 'pages',
+          data: {
+            title: 'Test',
+          },
+        })
+
+        expect(_sdk.create).type.toBeCallableWith({
+          collection: 'pages',
+          data: {
+            title: 'Test',
+          },
+        })
+
+        expect(_sdk.create).type.toBeCallableWith({
+          action: 'publish',
+          collection: 'pages',
+          data: {
+            title: 'Test',
+          },
+        })
+      })
+
+      test('find rejects version on non-draft collections', () => {
+        const _sdk = new PayloadSDK<LocalConfig>({ baseURL: '' })
+
+        expect(_sdk.find).type.not.toBeCallableWith({ collection: 'pages', version: 'latest' })
+        expect(_sdk.find).type.toBeCallableWith({ collection: 'pages' })
+        expect(_sdk.find).type.toBeCallableWith({ collection: 'draft-posts', version: 'latest' })
+        expect(_sdk.find).type.toBeCallableWith({
+          collection: 'draft-posts',
+          version: 'published',
+        })
+        expect(_sdk.find).type.toBeCallableWith({ collection: 'draft-posts', version: 'draft' })
+      })
+
+      test('update rejects draft-only actions on non-draft collections', () => {
+        const _sdk = new PayloadSDK<LocalConfig>({ baseURL: '' })
+
+        expect(_sdk.update).type.not.toBeCallableWith({
+          id: 1,
+          action: 'saveDraft',
+          collection: 'pages',
+          data: { title: 'Test' },
+        })
+        expect(_sdk.update).type.not.toBeCallableWith({
+          id: 1,
+          action: 'unpublish',
+          collection: 'pages',
+          data: { title: 'Test' },
+        })
+        expect(_sdk.update).type.toBeCallableWith({
+          id: 1,
+          action: 'saveDraft',
+          collection: 'draft-posts',
+          data: { title: 'Test' },
+        })
+        expect(_sdk.update).type.toBeCallableWith({
+          id: 1,
+          action: 'unpublish',
+          collection: 'draft-posts',
+          data: { title: 'Test' },
+        })
+      })
+
+      test('restoreVersion accepts saveDraft and publish, and rejects unpublish', () => {
+        const _sdk = new PayloadSDK<LocalConfig>({ baseURL: '' })
+
+        expect(_sdk.restoreVersion).type.toBeCallableWith({
+          id: 'id',
+          collection: 'draft-posts',
+        })
+        expect(_sdk.restoreVersion).type.toBeCallableWith({
+          id: 'id',
+          action: 'publish',
+          collection: 'draft-posts',
+        })
+        expect(_sdk.restoreVersion).type.toBeCallableWith({
+          id: 'id',
+          action: 'saveDraft',
+          collection: 'draft-posts',
+        })
+        expect(_sdk.restoreVersion).type.not.toBeCallableWith({
+          id: 'id',
+          action: 'unpublish',
+          collection: 'draft-posts',
+        })
+        expect(_sdk.restoreVersion).type.not.toBeCallableWith({
+          id: 'id',
+          action: 'saveDraft',
+          collection: 'pages',
+        })
+      })
+
+      test('global findOne rejects version on non-draft globals', () => {
+        const _sdk = new PayloadSDK<LocalConfig>({ baseURL: '' })
+
+        expect(_sdk.findGlobal).type.not.toBeCallableWith({ slug: 'menu', version: 'latest' })
+        expect(_sdk.findGlobal).type.toBeCallableWith({ slug: 'menu' })
+        expect(_sdk.findGlobal).type.toBeCallableWith({ slug: 'settings', version: 'latest' })
+      })
+
+      test('global update rejects draft-only actions on non-draft globals', () => {
+        const _sdk = new PayloadSDK<LocalConfig>({ baseURL: '' })
+
+        expect(_sdk.updateGlobal).type.not.toBeCallableWith({
+          slug: 'menu',
+          action: 'saveDraft',
+          data: {},
+        })
+        expect(_sdk.updateGlobal).type.toBeCallableWith({
+          slug: 'settings',
+          action: 'saveDraft',
+          data: {},
+        })
+      })
+
+      test('restoreGlobalVersion accepts saveDraft and publish, and rejects unpublish', () => {
+        const _sdk = new PayloadSDK<LocalConfig>({ baseURL: '' })
+
+        expect(_sdk.restoreGlobalVersion).type.toBeCallableWith({
+          id: 'id',
+          slug: 'settings',
+        })
+        expect(_sdk.restoreGlobalVersion).type.toBeCallableWith({
+          id: 'id',
+          slug: 'settings',
+          action: 'saveDraft',
+        })
+        expect(_sdk.restoreGlobalVersion).type.not.toBeCallableWith({
+          id: 'id',
+          slug: 'settings',
+          action: 'unpublish',
+        })
+        expect(_sdk.restoreGlobalVersion).type.not.toBeCallableWith({
+          id: 'id',
+          slug: 'menu',
+          action: 'saveDraft',
+        })
+      })
+    })
   })
 
   describe('richText enforcement in local API and SDK', () => {
