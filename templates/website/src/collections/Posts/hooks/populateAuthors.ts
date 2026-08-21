@@ -15,6 +15,7 @@ export const populateAuthors: CollectionAfterReadHook = async ({ doc, req, req: 
           id: typeof author === 'object' ? author?.id : author,
           collection: 'users',
           depth: 0,
+          overrideAccess: true,
         })
 
         if (authorDoc) {
