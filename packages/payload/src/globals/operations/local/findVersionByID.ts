@@ -13,6 +13,7 @@ import type { DataFromGlobalSlug } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
+import { warnMissingOverrideAccess } from '../../../utilities/warnMissingOverrideAccess.js'
 import { findVersionByIDOperation } from '../findVersionByID.js'
 
 export type Options<TSlug extends GlobalSlug> = {
@@ -45,11 +46,16 @@ export type Options<TSlug extends GlobalSlug> = {
    */
   locale?: 'all' | TypedLocale
   /**
-   * Skip access control.
-   * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the front-end.
-   * @default true
+   * Whether to skip access control for this operation.
+   *
+   * `false` respects Access Control — use this whenever the operation acts on behalf of a
+   * user, such as fetching data for the front-end.
+   * `true` bypasses it — use this for trusted server-side work such as cron jobs, seeding,
+   * and migrations.
+   *
+   * Required. Omitting it used to skip access control silently.
    */
-  overrideAccess?: boolean
+  overrideAccess: boolean
   /**
    * Specify [populate](https://payloadcms.com/docs/queries/select#populate) to control which fields to include to the result from populated documents.
    */
@@ -84,11 +90,21 @@ export async function findGlobalVersionByIDLocal<TSlug extends GlobalSlug>(
     slug: globalSlug,
     depth,
     disableErrors = false,
-    overrideAccess = true,
+    overrideAccess: overrideAccessFromOptions,
     populate,
     select,
     showHiddenFields,
   } = options
+
+  // An untyped caller — plain JavaScript, an `as any` cast, or a plugin whose JavaScript was
+  // compiled against Payload 3 — can still omit this. Coerce once, here, so nothing further
+  // in has to decide what a missing value means. `false` enforces access control, so the
+  // failure mode is a missing document rather than a leaked one.
+  if (overrideAccessFromOptions === undefined) {
+    warnMissingOverrideAccess({ operation: 'payload.findGlobalVersionByID', payload })
+  }
+
+  const overrideAccess = overrideAccessFromOptions ?? false
 
   const globalConfig = payload.globals.config.find((config) => config.slug === globalSlug)
 

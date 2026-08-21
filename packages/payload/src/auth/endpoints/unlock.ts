@@ -23,6 +23,7 @@ export const unlockHandler: PayloadHandler = async (req) => {
   await unlockOperation({
     collection,
     data: authData,
+    overrideAccess: false,
     req,
   })
 

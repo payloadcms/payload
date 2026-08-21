@@ -22,6 +22,7 @@ export const findDistinctHandler: PayloadHandler = async (req) => {
     depth,
     field,
     limit,
+    overrideAccess: false,
     page,
     req,
     sort,

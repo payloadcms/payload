@@ -9,6 +9,7 @@ export function unlock(collection: Collection) {
     const options = {
       collection,
       data: { email: args.email, username: args.username },
+      overrideAccess: false,
       req: isolateObjectProperty(context.req, 'transactionID'),
     }
 

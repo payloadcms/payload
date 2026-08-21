@@ -16,6 +16,7 @@ export const deleteHandler: PayloadHandler = async (req) => {
   const result = await deleteOperation({
     collection,
     depth,
+    overrideAccess: false,
     overrideLock: overrideLock ?? false,
     populate,
     req,

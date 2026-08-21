@@ -43,7 +43,7 @@ export type Arguments<TSlug extends CollectionSlug> = {
   disableVerificationEmail?: boolean
   draft?: boolean
   id: number | string
-  overrideAccess?: boolean
+  overrideAccess: boolean
   overrideLock?: boolean
   overwriteExistingFiles?: boolean
   populate?: PopulateType
@@ -73,7 +73,7 @@ export const updateByIDOperation = async <
       args,
       collection: args.collection.config,
       operation: 'update',
-      overrideAccess: args.overrideAccess!,
+      overrideAccess: args.overrideAccess,
     })
 
     const {
@@ -217,7 +217,7 @@ export const updateByIDOperation = async <
       fallbackLocale: fallbackLocale!,
       filesToUpload,
       locale: locale!,
-      overrideAccess: overrideAccess!,
+      overrideAccess: overrideAccess,
       overrideLock: overrideLock!,
       payload,
       populate,

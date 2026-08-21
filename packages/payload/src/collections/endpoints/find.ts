@@ -19,6 +19,7 @@ export const findHandler: PayloadHandler = async (req) => {
     draft,
     joins,
     limit,
+    overrideAccess: false,
     page,
     pagination,
     populate,

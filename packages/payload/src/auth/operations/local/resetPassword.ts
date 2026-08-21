@@ -4,6 +4,7 @@ import type { Result } from '../resetPassword.js'
 
 import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
+import { warnMissingOverrideAccess } from '../../../utilities/warnMissingOverrideAccess.js'
 import { resetPasswordOperation } from '../resetPassword.js'
 
 export type Options<TSlug extends AuthCollectionSlug> = {
@@ -21,7 +22,17 @@ export async function resetPasswordLocal<TSlug extends AuthCollectionSlug>(
   payload: Payload,
   options: Options<TSlug>,
 ): Promise<Result> {
-  const { collection: collectionSlug, data, overrideAccess } = options
+  const { collection: collectionSlug, data, overrideAccess: overrideAccessFromOptions } = options
+
+  // An untyped caller — plain JavaScript, an `as any` cast, or a plugin whose JavaScript was
+  // compiled against Payload 3 — can still omit this. Coerce once, here, so nothing further
+  // in has to decide what a missing value means. `false` enforces access control, so the
+  // failure mode is a missing document rather than a leaked one.
+  if (overrideAccessFromOptions === undefined) {
+    warnMissingOverrideAccess({ operation: 'payload.resetPassword', payload })
+  }
+
+  const overrideAccess = overrideAccessFromOptions ?? false
 
   const collection = payload.collections[collectionSlug]
 

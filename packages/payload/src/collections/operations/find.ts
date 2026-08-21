@@ -44,7 +44,7 @@ export type Arguments = {
   includeLockStatus?: boolean
   joins?: JoinQuery
   limit?: number
-  overrideAccess?: boolean
+  overrideAccess: boolean
   page?: number
   pagination?: boolean
   populate?: PopulateType
@@ -73,7 +73,7 @@ export const findOperation = async <
     args,
     collection: args.collection.config,
     operation: 'read',
-    overrideAccess: args.overrideAccess!,
+    overrideAccess: args.overrideAccess,
   })
 
   const {
@@ -170,7 +170,7 @@ export const findOperation = async <
 
   await validateSortQuery({
     collectionConfig,
-    overrideAccess: overrideAccess!,
+    overrideAccess: overrideAccess,
     req,
     sort,
   })
@@ -178,7 +178,7 @@ export const findOperation = async <
   const sanitizedJoins = await sanitizeJoinQuery({
     collectionConfig,
     joins,
-    overrideAccess: overrideAccess!,
+    overrideAccess: overrideAccess,
     req,
   })
 
@@ -187,7 +187,7 @@ export const findOperation = async <
 
     await validateQueryPaths({
       collectionConfig: collection.config,
-      overrideAccess: overrideAccess!,
+      overrideAccess: overrideAccess,
       req,
       versionFields: buildVersionCollectionFields(payload.config, collection.config, true),
       where: appendVersionToQueryKey(where),
@@ -211,7 +211,7 @@ export const findOperation = async <
   } else {
     await validateQueryPaths({
       collectionConfig,
-      overrideAccess: overrideAccess!,
+      overrideAccess: overrideAccess,
       req,
       where: where!,
     })
@@ -314,7 +314,7 @@ export const findOperation = async <
               collection: collectionConfig,
               context: req.context,
               doc: docRef,
-              overrideAccess: overrideAccess!,
+              overrideAccess: overrideAccess,
               query: fullWhere,
               req,
             })) || docRef
@@ -342,7 +342,7 @@ export const findOperation = async <
         findMany: true,
         global: null,
         locale: locale!,
-        overrideAccess: overrideAccess!,
+        overrideAccess: overrideAccess,
         populate,
         req,
         select,
@@ -367,7 +367,7 @@ export const findOperation = async <
               context: req.context,
               doc: docRef,
               findMany: true,
-              overrideAccess: overrideAccess!,
+              overrideAccess: overrideAccess,
               query: fullWhere,
               req,
             })) || docRef
@@ -386,7 +386,7 @@ export const findOperation = async <
     args,
     collection: collectionConfig,
     operation: 'find',
-    overrideAccess: overrideAccess!,
+    overrideAccess: overrideAccess,
     result,
   })
 

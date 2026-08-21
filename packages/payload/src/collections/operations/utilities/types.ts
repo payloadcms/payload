@@ -56,7 +56,7 @@ export type AfterOperationArg<TOperationGeneric extends CollectionSlug> = {
   /**
    * Whether access control is being overridden for this operation
    */
-  overrideAccess?: boolean
+  overrideAccess: boolean
   req: PayloadRequest
 } & (
   | {
@@ -192,7 +192,7 @@ export type BeforeOperationArg<TOperationGeneric extends CollectionSlug> = {
   /**
    * Whether access control is being overridden for this operation
    */
-  overrideAccess?: boolean
+  overrideAccess: boolean
   req: PayloadRequest
 } & (
   | {

@@ -2,7 +2,6 @@ import type { BatchLoadFn } from 'dataloader'
 
 import DataLoader from 'dataloader'
 
-import type { FindArgs } from '../database/types.js'
 import type { Payload, TypedFallbackLocale } from '../index.js'
 import type { PayloadRequest, PopulateType, SelectType } from '../types/index.js'
 import type { TypeWithID } from './config/types.js'
@@ -167,7 +166,7 @@ export const getDataLoader = (req: PayloadRequest) => {
   const findQueries = new Map()
   const dataLoader = new DataLoader(batchAndLoadDocs(req)) as PayloadRequest['payloadDataLoader']
 
-  dataLoader.find = ((args: FindArgs) => {
+  dataLoader.find = ((args: Parameters<Payload['find']>[0]) => {
     const key = createFindDataloaderCacheKey(args)
     const cached = findQueries.get(key)
     if (cached) {

@@ -17,6 +17,7 @@ export const restoreVersionHandler: PayloadHandler = async (req) => {
     collection,
     depth,
     draft,
+    overrideAccess: false,
     populate,
     req,
   })

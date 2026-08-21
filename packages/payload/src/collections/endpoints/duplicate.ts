@@ -19,6 +19,7 @@ export const duplicateHandler: PayloadHandler = async (req) => {
     data: req.data,
     depth,
     draft,
+    overrideAccess: false,
     populate,
     req,
     select,

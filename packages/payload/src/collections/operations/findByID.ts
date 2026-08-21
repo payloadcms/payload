@@ -46,7 +46,7 @@ export type FindByIDArgs = {
   id: number | string
   includeLockStatus?: boolean
   joins?: JoinQuery
-  overrideAccess?: boolean
+  overrideAccess: boolean
   populate?: PopulateType
   req: PayloadRequest
   showHiddenFields?: boolean
@@ -71,7 +71,7 @@ export const findByIDOperation = async <
     args,
     collection: args.collection.config,
     operation: 'read',
-    overrideAccess: args.overrideAccess!,
+    overrideAccess: args.overrideAccess,
   })
 
   const {

@@ -29,6 +29,7 @@ export const updateByIDHandler: PayloadHandler = async (req) => {
     data: req.data!,
     depth,
     draft,
+    overrideAccess: false,
     overrideLock: overrideLock ?? false,
     populate,
     publishAllLocales,

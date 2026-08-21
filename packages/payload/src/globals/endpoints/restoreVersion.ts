@@ -18,6 +18,7 @@ export const restoreVersionHandler: PayloadHandler = async (req) => {
     depth: isNumber(depth) ? Number(depth) : undefined,
     draft: draft === 'true' ? true : undefined,
     globalConfig,
+    overrideAccess: false,
     populate: sanitizePopulateParam(req.query.populate),
     req,
   })

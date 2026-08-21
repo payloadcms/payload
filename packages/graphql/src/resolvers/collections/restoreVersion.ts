@@ -22,6 +22,7 @@ export function restoreVersionResolver(collection: Collection): Resolver {
       collection,
       depth: 0,
       draft: args.draft,
+      overrideAccess: false,
       req: isolateObjectProperty(context.req, 'transactionID'),
     }
 

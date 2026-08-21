@@ -23,6 +23,7 @@ export const forgotPasswordHandler: PayloadHandler = async (req) => {
   await forgotPasswordOperation({
     collection,
     data: authData,
+    overrideAccess: false,
     req,
   })
 

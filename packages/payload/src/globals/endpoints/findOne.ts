@@ -31,6 +31,7 @@ export const findOneHandler: PayloadHandler = async (req) => {
     draft: data ? data.draft : searchParams.get('draft') === 'true',
     flattenLocales,
     globalConfig,
+    overrideAccess: false,
     populate: sanitizePopulateParam(req.query.populate),
     req,
     select: sanitizeSelectParam(req.query.select),

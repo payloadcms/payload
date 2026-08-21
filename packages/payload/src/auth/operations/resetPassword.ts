@@ -29,7 +29,7 @@ export type Arguments = {
     token: string
   }
   depth?: number
-  overrideAccess?: boolean
+  overrideAccess: boolean
   req: PayloadRequest
 }
 

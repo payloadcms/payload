@@ -17,7 +17,7 @@ export type Args<T extends JsonObject> = {
   global: null | SanitizedGlobalConfig
   id?: number | string
   operation: Operation
-  overrideAccess?: boolean
+  overrideAccess: boolean
   req: PayloadRequest
   skipValidation?: boolean
 }
@@ -61,7 +61,7 @@ export const beforeChange = async <T extends JsonObject>({
     global,
     mergeLocaleActions,
     operation,
-    overrideAccess: overrideAccess!,
+    overrideAccess,
     parentIndexPath: '',
     parentIsLocalized: false,
     parentPath: '',

@@ -12,6 +12,7 @@ export function forgotPassword(collection: Collection): any {
         email: args.email,
         username: args.username,
       },
+      overrideAccess: false,
       req: isolateObjectProperty(context.req, 'transactionID'),
     }
 

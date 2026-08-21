@@ -23,7 +23,7 @@ export type Arguments = {
   collection: Collection
   depth?: number
   limit?: number
-  overrideAccess?: boolean
+  overrideAccess: boolean
   page?: number
   pagination?: boolean
   populate?: PopulateType
@@ -45,7 +45,7 @@ export const findVersionsOperation = async <TData extends TypeWithVersion<TData>
     args,
     collection: args.collection.config,
     operation: 'findVersions',
-    overrideAccess: args.overrideAccess!,
+    overrideAccess: args.overrideAccess,
   })
 
   const {
@@ -83,7 +83,7 @@ export const findVersionsOperation = async <TData extends TypeWithVersion<TData>
 
   await validateQueryPaths({
     collectionConfig,
-    overrideAccess: overrideAccess!,
+    overrideAccess: overrideAccess,
     req,
     versionFields,
     where: where!,
@@ -91,7 +91,7 @@ export const findVersionsOperation = async <TData extends TypeWithVersion<TData>
 
   await validateSortQuery({
     collectionConfig,
-    overrideAccess: overrideAccess!,
+    overrideAccess: overrideAccess,
     req,
     sort,
     versionFields,
@@ -186,7 +186,7 @@ export const findVersionsOperation = async <TData extends TypeWithVersion<TData>
         findMany: true,
         global: null,
         locale: locale!,
-        overrideAccess: overrideAccess!,
+        overrideAccess: overrideAccess,
         populate,
         req,
         select: typeof select?.version === 'object' ? select.version : undefined,

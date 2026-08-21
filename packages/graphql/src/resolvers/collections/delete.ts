@@ -49,6 +49,7 @@ export function getDeleteResolver<TSlug extends CollectionSlug>(
       id: args.id,
       collection,
       depth: 0,
+      overrideAccess: false,
       req: isolateObjectProperty(req, 'transactionID'),
       trash: args.trash,
     }

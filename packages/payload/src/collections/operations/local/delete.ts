@@ -18,6 +18,7 @@ import type { BulkOperationResult, SelectFromCollectionSlug } from '../../config
 
 import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
+import { warnMissingOverrideAccess } from '../../../utilities/warnMissingOverrideAccess.js'
 import { deleteOperation } from '../delete.js'
 import { deleteByIDOperation } from '../deleteByID.js'
 
@@ -51,11 +52,16 @@ export type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType
    */
   locale?: TypedLocale
   /**
-   * Skip access control.
-   * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the front-end.
-   * @default true
+   * Whether to skip access control for this operation.
+   *
+   * `false` respects Access Control — use this whenever the operation acts on behalf of a
+   * user, such as fetching data for the front-end.
+   * `true` bypasses it — use this for trusted server-side work such as cron jobs, seeding,
+   * and migrations.
+   *
+   * Required. Omitting it used to skip access control silently.
    */
-  overrideAccess?: boolean
+  overrideAccess: boolean
   /**
    * By default, document locks are ignored (`true`). Set to `false` to enforce locks and prevent operations when a document is locked by another user. [More details](https://payloadcms.com/docs/admin/locked-documents).
    * @default true
@@ -155,7 +161,7 @@ async function deleteLocal<
     collection: collectionSlug,
     depth,
     disableTransaction,
-    overrideAccess = true,
+    overrideAccess: overrideAccessFromOptions,
     overrideLock,
     populate,
     select,
@@ -163,6 +169,16 @@ async function deleteLocal<
     trash = false,
     where,
   } = options
+
+  // An untyped caller — plain JavaScript, an `as any` cast, or a plugin whose JavaScript was
+  // compiled against Payload 3 — can still omit this. Coerce once, here, so nothing further
+  // in has to decide what a missing value means. `false` enforces access control, so the
+  // failure mode is a missing document rather than a leaked one.
+  if (overrideAccessFromOptions === undefined) {
+    warnMissingOverrideAccess({ operation: 'payload.delete', payload })
+  }
+
+  const overrideAccess = overrideAccessFromOptions ?? false
 
   const collection = payload.collections[collectionSlug]
 

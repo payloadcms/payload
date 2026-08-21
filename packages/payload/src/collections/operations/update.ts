@@ -47,7 +47,7 @@ export type Arguments<TSlug extends CollectionSlug> = {
   disableVerificationEmail?: boolean
   draft?: boolean
   limit?: number
-  overrideAccess?: boolean
+  overrideAccess: boolean
   overrideLock?: boolean
   overwriteExistingFiles?: boolean
   populate?: PopulateType
@@ -88,7 +88,7 @@ export const updateOperation = async <
       args,
       collection: args.collection.config,
       operation: 'update',
-      overrideAccess: args.overrideAccess!,
+      overrideAccess: args.overrideAccess,
     })
 
     const {
@@ -139,7 +139,7 @@ export const updateOperation = async <
 
     await validateQueryPaths({
       collectionConfig,
-      overrideAccess: overrideAccess!,
+      overrideAccess: overrideAccess,
       req,
       where,
     })
@@ -183,7 +183,7 @@ export const updateOperation = async <
 
     await validateSortQuery({
       collectionConfig,
-      overrideAccess: overrideAccess!,
+      overrideAccess: overrideAccess,
       req,
       sort,
     })
@@ -195,7 +195,7 @@ export const updateOperation = async <
 
       await validateQueryPaths({
         collectionConfig: collection.config,
-        overrideAccess: overrideAccess!,
+        overrideAccess: overrideAccess,
         req,
         versionFields: buildVersionCollectionFields(payload.config, collection.config, true),
         where: appendVersionToQueryKey(where),
@@ -282,7 +282,7 @@ export const updateOperation = async <
           fallbackLocale: fallbackLocale!,
           filesToUpload,
           locale: locale!,
-          overrideAccess: overrideAccess!,
+          overrideAccess: overrideAccess,
           overrideLock: overrideLock!,
           payload,
           populate,

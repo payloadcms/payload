@@ -25,6 +25,7 @@ export const updateHandler: PayloadHandler = async (req) => {
     depth: isNumber(depth) ? Number(depth) : undefined,
     draft,
     globalConfig,
+    overrideAccess: false,
     populate: sanitizePopulateParam(req.query.populate),
     publishAllLocales,
     req,

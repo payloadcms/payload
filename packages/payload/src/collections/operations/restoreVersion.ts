@@ -33,7 +33,7 @@ export type Arguments = {
   disableTransaction?: boolean
   draft?: boolean
   id: number | string
-  overrideAccess?: boolean
+  overrideAccess: boolean
   populate?: PopulateType
   req: PayloadRequest
   showHiddenFields?: boolean

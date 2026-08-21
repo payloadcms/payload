@@ -19,6 +19,7 @@ export const resetPasswordHandler: PayloadHandler = async (req) => {
       token: typeof req.data?.token === 'string' ? req.data.token : '',
     },
     depth: depth ? Number(depth) : undefined,
+    overrideAccess: false,
     req,
   })
 
