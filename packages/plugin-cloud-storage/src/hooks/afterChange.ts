@@ -67,6 +67,7 @@ export const getAfterChangeHook =
               data: uploadMetadata,
               depth: 0,
               draft: isDraftSave,
+              overrideAccess: true,
               req,
             })
           } finally {
