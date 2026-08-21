@@ -1713,7 +1713,7 @@ describe('Versions', () => {
       url = new AdminUrlUtil(serverURL, localizedCollectionSlug)
     })
 
-    test('should show publish individual locale dropdown', async () => {
+    test('should show publish all locales dropdown', async () => {
       await page.goto(url.create)
       const publishOptions = page.locator('.doc-controls__controls .popup')
 
@@ -1722,12 +1722,9 @@ describe('Versions', () => {
 
     test('should show option to publish current locale', async () => {
       await page.goto(url.create)
-      const publishOptions = page.locator('.doc-controls__controls .popup')
-      await publishOptions.click()
+      const publishButton = page.locator('#action-save')
 
-      const publishLocaleContent = page.locator('.popup__content')
-
-      await expect(publishLocaleContent).toContainText('English')
+      await expect(publishButton).toContainText('English')
     })
 
     test('should publish specific locale', async () => {
@@ -1747,12 +1744,9 @@ describe('Versions', () => {
       await changeLocale(page, 'en')
       await textField.fill('english published')
 
-      const publishOptions = page.locator('#action-save-popup')
-      await publishOptions.click()
-
-      const publishLocaleButton = page.locator('#publish-locale')
-      await expect(publishLocaleButton).toContainText('English')
-      await publishLocaleButton.click()
+      const publishButton = page.locator('#action-save')
+      await expect(publishButton).toContainText('English')
+      await publishButton.click()
 
       await wait(500)
 
@@ -2232,7 +2226,7 @@ describe('Versions', () => {
       url = new AdminUrlUtil(serverURL, localizedGlobalSlug)
     })
 
-    test('should show publish individual locale dropdown', async () => {
+    test('should show publish all locales dropdown', async () => {
       await page.goto(url.global(localizedGlobalSlug))
       const publishOptions = page.locator('.doc-controls__controls .popup')
 
@@ -2241,12 +2235,9 @@ describe('Versions', () => {
 
     test('should show option to publish current locale', async () => {
       await page.goto(url.global(localizedGlobalSlug))
-      const publishOptions = page.locator('.doc-controls__controls .popup')
-      await publishOptions.click()
+      const publishButton = page.locator('#action-save')
 
-      const publishLocaleContent = page.locator('.popup__content')
-
-      await expect(publishLocaleContent).toContainText('English')
+      await expect(publishButton).toContainText('English')
     })
   })
 
