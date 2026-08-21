@@ -43,13 +43,13 @@ export const meOperation = async (args: Arguments): Promise<MeOperationResult> =
       id: req.user.id,
       collection: collection.config.slug,
       depth: isGraphQL ? 0 : (depth ?? collection.config.auth.depth),
-      draft,
       joins,
       overrideAccess: false,
       populate,
       req,
       select,
       showHiddenFields: false,
+      version: draft ? 'latest' : undefined,
     })) as AuthenticatedUser
 
     if (user) {

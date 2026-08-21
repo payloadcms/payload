@@ -61,8 +61,10 @@ import type {
   WithSelectFn,
 } from '../../types/index.js'
 import type { SanitizedUploadConfig, UploadConfig } from '../../uploads/types.js'
+import type { CreateAction, RestoreAction, UpdateAction } from '../../versions/actions/types.js'
 import type {
   IncomingCollectionVersions,
+  ReadVersion,
   SanitizedCollectionVersions,
 } from '../../versions/types.js'
 import type {
@@ -93,31 +95,82 @@ export type CollectionsWithoutDrafts = {
 }[CollectionSlug]
 
 /**
- * Conditionally allows or forbids the `draft` property based on collection configuration.
- * When `strictDraftTypes` is enabled, the `draft` property is forbidden on collections without drafts.
+ * Allows `version` on draft-enabled collections and forbids it on collections without drafts.
+ * When generated types are untyped, `CollectionsWithoutDrafts` is wide and version remains allowed.
  */
-export type DraftFlagFromCollectionSlug<TSlug extends CollectionSlug> = GeneratedTypes extends {
-  strictDraftTypes: true
-}
-  ? TSlug extends CollectionsWithoutDrafts
+export type VersionFromCollectionSlug<TSlug extends CollectionSlug> =
+  keyof GeneratedTypes extends never
     ? {
         /**
-         * The `draft` property is not allowed because this collection does not have `versions.drafts` enabled.
+         * Which document representation to read. [More](https://payloadcms.com/docs/versions/drafts)
+         *
+         * @default 'published'
          */
-        draft?: never
+        version?: ReadVersion
       }
-    : {
-        /**
-         * Whether the document(s) should be queried from the versions table/collection or not. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
-         */
-        draft?: boolean
+    : TSlug extends CollectionsWithoutDrafts
+      ? {
+          /**
+           * `version` is not allowed because this collection does not have `versions.drafts` enabled.
+           */
+          version?: never
+        }
+      : {
+          /**
+           * Which document representation to read. [More](https://payloadcms.com/docs/versions/drafts)
+           *
+           * @default 'published'
+           */
+          version?: ReadVersion
+        }
+
+/**
+ * Allows create/duplicate `action` on draft-enabled collections. Non-draft collections may only omit it or pass `publish`.
+ */
+export type CreateActionFromCollectionSlug<TSlug extends CollectionSlug> =
+  keyof GeneratedTypes extends never
+    ? {
+        action?: CreateAction
       }
-  : {
-      /**
-       * Whether the document(s) should be queried from the versions table/collection or not. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
-       */
-      draft?: boolean
-    }
+    : TSlug extends CollectionsWithoutDrafts
+      ? {
+          action?: 'publish'
+        }
+      : {
+          action?: CreateAction
+        }
+
+/**
+ * Allows update `action` on draft-enabled collections. Non-draft collections may only omit it or pass `publish`.
+ */
+export type UpdateActionFromCollectionSlug<TSlug extends CollectionSlug> =
+  keyof GeneratedTypes extends never
+    ? {
+        action?: UpdateAction
+      }
+    : TSlug extends CollectionsWithoutDrafts
+      ? {
+          action?: 'publish'
+        }
+      : {
+          action?: UpdateAction
+        }
+
+/**
+ * Allows restore `action` on draft-enabled collections. Non-draft collections may only omit it or pass `publish`.
+ */
+export type RestoreActionFromCollectionSlug<TSlug extends CollectionSlug> =
+  keyof GeneratedTypes extends never
+    ? {
+        action?: RestoreAction
+      }
+    : TSlug extends CollectionsWithoutDrafts
+      ? {
+          action?: 'publish'
+        }
+      : {
+          action?: RestoreAction
+        }
 
 export type AuthOperationsFromCollectionSlug<TSlug extends CollectionSlug> =
   TypedAuthOperations[TSlug]
@@ -143,6 +196,51 @@ export type DraftDataFromCollection<TData extends JsonObject> = Partial<
 export type DraftDataFromCollectionSlug<TSlug extends CollectionSlug> = DraftDataFromCollection<
   DataFromCollectionSlug<TSlug>
 >
+
+/**
+ * Create write data discriminated by explicit `action`, then omitted-action `_status`.
+ * Explicit `saveDraft` always accepts draft-safe partial data. Explicit `publish` always requires
+ * publish-valid data. Omitted action with published status requires publish-valid data; omitted
+ * action with draft or omitted status accepts draft-safe partial data.
+ */
+type PermissiveCreateDataFromCollectionSlug<TSlug extends CollectionSlug> = {
+  action?: CreateAction
+  data: DraftDataFromCollectionSlug<TSlug> | RequiredDataFromCollectionSlug<TSlug>
+}
+
+export type CreateDataFromCollectionSlug<TSlug extends CollectionSlug> =
+  keyof GeneratedTypes extends never
+    ? PermissiveCreateDataFromCollectionSlug<TSlug>
+    : CollectionsWithoutDrafts extends TSlug
+      ? PermissiveCreateDataFromCollectionSlug<TSlug>
+      : TSlug extends CollectionsWithoutDrafts
+        ? {
+            action?: 'publish'
+            data: RequiredDataFromCollectionSlug<TSlug>
+          }
+        :
+            | {
+                /**
+                 * Publish the document. Required fields must be provided.
+                 */
+                action: 'publish'
+                data: RequiredDataFromCollectionSlug<TSlug>
+              }
+            | {
+                /**
+                 * Save a draft. Required fields are optional because draft validation is skipped.
+                 */
+                action: 'saveDraft'
+                data: DraftDataFromCollectionSlug<TSlug>
+              }
+            | {
+                action?: undefined
+                data: { _status: 'published' } & RequiredDataFromCollectionSlug<TSlug>
+              }
+            | {
+                action?: undefined
+                data: { _status?: 'draft' } & DraftDataFromCollectionSlug<TSlug>
+              }
 
 /**
  * Helper type for draft data OUTPUT (e.g., query results) - makes user fields optional but keeps id required

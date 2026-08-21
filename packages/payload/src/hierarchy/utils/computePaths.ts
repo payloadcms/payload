@@ -308,11 +308,11 @@ export async function computePaths(args: ComputePathsArgs): Promise<ComputePaths
                   id: validParentID,
                   collection: collection.slug,
                   depth: 0,
-                  draft: true,
                   locale: loc,
                   overrideAccess: true,
                   req: localeReq,
                   user: req.user,
+                  version: 'latest',
                 })
 
                 // Extract the path fields and title from the parent
@@ -367,7 +367,6 @@ export async function computePaths(args: ComputePathsArgs): Promise<ComputePaths
             id: validParentID,
             collection: collection.slug,
             depth: 0,
-            draft,
             locale,
             overrideAccess: true,
             req: parentReq,
@@ -379,6 +378,7 @@ export async function computePaths(args: ComputePathsArgs): Promise<ComputePaths
               ...(slugFieldName ? { [slugFieldName]: true } : {}),
             },
             user: req.user,
+            version: draft ? 'latest' : 'published',
           })
         }
       }

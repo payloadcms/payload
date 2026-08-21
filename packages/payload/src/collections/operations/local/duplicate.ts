@@ -2,10 +2,15 @@ import type { DeepPartial } from 'ts-essentials'
 
 import type { CollectionSlug, TypedLocale } from '../../..//index.js'
 import type { FindOptions, Payload, RequestContext, User } from '../../../index.js'
-import type { PayloadRequest, PopulateType, SelectType, TransformCollectionWithSelect } from '../../../types/index.js'
+import type {
+  PayloadRequest,
+  PopulateType,
+  SelectType,
+  TransformCollectionWithSelect,
+} from '../../../types/index.js'
 import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
 import type {
-  DraftFlagFromCollectionSlug,
+  CreateActionFromCollectionSlug,
   RequiredDataFromCollectionSlug,
   SelectFromCollectionSlug,
 } from '../../config/types.js'
@@ -86,7 +91,7 @@ export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> = 
   TSlug,
   TSelect
 > &
-  DraftFlagFromCollectionSlug<TSlug>
+  CreateActionFromCollectionSlug<TSlug>
 
 export async function duplicateLocal<
   TSlug extends CollectionSlug,
@@ -97,11 +102,11 @@ export async function duplicateLocal<
 ): Promise<TransformCollectionWithSelect<TSlug, TSelect>> {
   const {
     id,
+    action,
     collection: collectionSlug,
     data,
     depth,
     disableTransaction,
-    draft,
     overrideAccess = true,
     populate,
     select,
@@ -132,7 +137,7 @@ export async function duplicateLocal<
     data,
     depth,
     disableTransaction,
-    draft,
+    draft: (action as string | undefined) === 'saveDraft',
     overrideAccess,
     populate,
     req,

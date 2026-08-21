@@ -38,11 +38,11 @@ export const fieldValueExists = async ({
   const { docs } = await req.payload.find({
     collection,
     depth: 0,
-    draft: Boolean(draftsEnabled),
     limit: 2,
     locale: locale as Parameters<typeof req.payload.find>[0]['locale'],
     overrideAccess: true,
     pagination: false,
+    version: draftsEnabled ? 'latest' : undefined,
     where: { [field]: { equals: value } },
   })
 

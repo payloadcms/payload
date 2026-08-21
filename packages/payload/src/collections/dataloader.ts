@@ -115,7 +115,6 @@ const batchAndLoadDocs =
         currentDepth,
         depth,
         disableErrors: true,
-        draft,
         fallbackLocale,
         locale,
         overrideAccess: Boolean(overrideAccess),
@@ -124,6 +123,7 @@ const batchAndLoadDocs =
         req,
         select: selectWithDeletedAt,
         showHiddenFields: Boolean(showHiddenFields),
+        version: draft ? 'latest' : 'published',
         ...(enableTrash ? { trash: true } : {}),
         where: {
           id: {
@@ -186,7 +186,6 @@ const createFindDataloaderCacheKey = ({
   currentDepth,
   depth,
   disableErrors,
-  draft,
   includeLockStatus,
   joins,
   limit,
@@ -198,6 +197,7 @@ const createFindDataloaderCacheKey = ({
   select,
   showHiddenFields,
   sort,
+  version,
   where,
 }: FindOptions<string, SelectType>): string =>
   JSON.stringify([
@@ -205,7 +205,7 @@ const createFindDataloaderCacheKey = ({
     currentDepth,
     depth,
     disableErrors,
-    draft,
+    version,
     includeLockStatus,
     joins,
     limit,

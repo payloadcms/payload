@@ -11,12 +11,14 @@ import type {
 } from '../../../index.js'
 import type {
   ApplyDisableErrors,
+  DraftTransformCollectionWithSelect,
   PayloadRequest,
   PopulateType,
   TransformCollectionWithSelect,
 } from '../../../types/index.js'
 import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
-import type { DraftFlagFromCollectionSlug, SelectFromCollectionSlug } from '../../config/types.js'
+import type { ReadVersion } from '../../../versions/types.js'
+import type { SelectFromCollectionSlug, VersionFromCollectionSlug } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
@@ -118,16 +120,24 @@ export type Options<
   TSlug extends CollectionSlug,
   TDisableErrors extends boolean,
   TSelect extends SelectType,
-> = BaseFindByIDOptions<TSlug, TDisableErrors, TSelect> & DraftFlagFromCollectionSlug<TSlug>
+> = BaseFindByIDOptions<TSlug, TDisableErrors, TSelect> & VersionFromCollectionSlug<TSlug>
 
 export async function findByIDLocal<
   TSlug extends CollectionSlug,
   TDisableErrors extends boolean,
   TSelect extends SelectFromCollectionSlug<TSlug>,
+  TVersion extends ReadVersion | undefined = undefined,
 >(
   payload: Payload,
-  options: Options<TSlug, TDisableErrors, TSelect>,
-): Promise<ApplyDisableErrors<TransformCollectionWithSelect<TSlug, TSelect>, TDisableErrors>> {
+  options: { version?: TVersion } & Options<TSlug, TDisableErrors, TSelect>,
+): Promise<
+  ApplyDisableErrors<
+    TVersion extends 'draft' | 'latest'
+      ? DraftTransformCollectionWithSelect<TSlug, TSelect>
+      : TransformCollectionWithSelect<TSlug, TSelect>,
+    TDisableErrors
+  >
+> {
   const {
     id,
     collection: collectionSlug,
@@ -135,7 +145,6 @@ export async function findByIDLocal<
     data,
     depth,
     disableErrors = false,
-    draft = false,
     flattenLocales,
     includeLockStatus,
     joins,
@@ -144,6 +153,7 @@ export async function findByIDLocal<
     select,
     showHiddenFields,
     trash = false,
+    version,
   } = options
 
   const collection = payload.collections[collectionSlug]
@@ -161,7 +171,8 @@ export async function findByIDLocal<
     data,
     depth,
     disableErrors,
-    draft,
+    draft:
+      (version as string | undefined) === 'draft' || (version as string | undefined) === 'latest',
     flattenLocales,
     includeLockStatus,
     joins,

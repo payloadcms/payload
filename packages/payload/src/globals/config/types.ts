@@ -20,16 +20,31 @@ import type {
   GlobalAdminCustom,
   GlobalCustom,
   GlobalSlug,
+  JsonObject,
   RequestContext,
   TypedGlobal,
   TypedGlobalSelect,
 } from '../../index.js'
 import type { PayloadRequest, SelectIncludeType, Where, WithSelectFn } from '../../types/index.js'
-import type { IncomingGlobalVersions, SanitizedGlobalVersions } from '../../versions/types.js'
+import type { UpdateAction } from '../../versions/actions/types.js'
+import type {
+  IncomingGlobalVersions,
+  ReadVersion,
+  SanitizedGlobalVersions,
+} from '../../versions/types.js'
 
 export type DataFromGlobalSlug<TSlug extends GlobalSlug> = TypedGlobal[TSlug]
 
 export type SelectFromGlobalSlug<TSlug extends GlobalSlug> = TypedGlobalSelect[TSlug]
+
+/**
+ * Helper type for draft data OUTPUT (e.g., query results) - makes user fields optional
+ */
+export type QueryDraftDataFromGlobal<TData extends JsonObject> = Partial<TData>
+
+export type QueryDraftDataFromGlobalSlug<TSlug extends GlobalSlug> = QueryDraftDataFromGlobal<
+  DataFromGlobalSlug<TSlug>
+>
 
 export type GlobalAccess<TData = any> = {
   read?: Access<TData>
@@ -46,31 +61,48 @@ export type GlobalsWithoutDrafts = {
 }[GlobalSlug]
 
 /**
- * Conditionally allows or forbids the `draft` property based on global configuration.
- * When `strictDraftTypes` is enabled, the `draft` property is forbidden on globals without drafts.
+ * Allows `version` on draft-enabled globals and forbids it on globals without drafts.
  */
-export type DraftFlagFromGlobalSlug<TSlug extends GlobalSlug> = GeneratedTypes extends {
-  strictDraftTypes: true
-}
-  ? TSlug extends GlobalsWithoutDrafts
+export type VersionFromGlobalSlug<TSlug extends GlobalSlug> = keyof GeneratedTypes extends never
+  ? {
+      /**
+       * Which document representation to read. [More](https://payloadcms.com/docs/versions/drafts)
+       *
+       * @default 'published'
+       */
+      version?: ReadVersion
+    }
+  : TSlug extends GlobalsWithoutDrafts
     ? {
         /**
-         * The `draft` property is not allowed because this global does not have `versions.drafts` enabled.
+         * `version` is not allowed because this global does not have `versions.drafts` enabled.
          */
-        draft?: never
+        version?: never
       }
     : {
         /**
-         * Whether the global should be queried from the versions table/collection or not. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
+         * Which document representation to read. [More](https://payloadcms.com/docs/versions/drafts)
+         *
+         * @default 'published'
          */
-        draft?: boolean
+        version?: ReadVersion
       }
-  : {
-      /**
-       * Whether the global should be queried from the versions table/collection or not. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
-       */
-      draft?: boolean
-    }
+
+/**
+ * Allows update `action` on draft-enabled globals. Non-draft globals may only omit it or pass `publish`.
+ */
+export type UpdateActionFromGlobalSlug<TSlug extends GlobalSlug> =
+  keyof GeneratedTypes extends never
+    ? {
+        action?: UpdateAction
+      }
+    : TSlug extends GlobalsWithoutDrafts
+      ? {
+          action?: 'publish'
+        }
+      : {
+          action?: UpdateAction
+        }
 
 export type BeforeValidateHook = (args: {
   context: RequestContext

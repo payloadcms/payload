@@ -9,8 +9,8 @@ import type {
 import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
 import type {
   DataFromGlobalSlug,
-  DraftFlagFromGlobalSlug,
   SelectFromGlobalSlug,
+  UpdateActionFromGlobalSlug,
 } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
@@ -102,7 +102,7 @@ export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> = Base
   TSlug,
   TSelect
 > &
-  DraftFlagFromGlobalSlug<TSlug>
+  UpdateActionFromGlobalSlug<TSlug>
 
 export async function updateGlobalLocal<
   TSlug extends GlobalSlug,
@@ -113,9 +113,9 @@ export async function updateGlobalLocal<
 ): Promise<TransformGlobalWithSelect<TSlug, TSelect>> {
   const {
     slug: globalSlug,
+    action,
     data,
     depth,
-    draft,
     overrideAccess = true,
     overrideLock,
     populate,
@@ -135,7 +135,7 @@ export async function updateGlobalLocal<
     slug: globalSlug as string,
     data: deepCopyObjectSimple(data), // Ensure mutation of data in create operation hooks doesn't affect the original data
     depth,
-    draft,
+    draft: (action as string | undefined) === 'saveDraft',
     globalConfig,
     overrideAccess,
     overrideLock,

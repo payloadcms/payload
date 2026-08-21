@@ -20,9 +20,9 @@ import type { File } from '../../../uploads/types.js'
 import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
 import type {
   BulkOperationResult,
-  DraftFlagFromCollectionSlug,
   RequiredDataFromCollectionSlug,
   SelectFromCollectionSlug,
+  UpdateActionFromCollectionSlug,
 } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
@@ -157,7 +157,7 @@ export type ByIDOptions<
    */
   where?: never
 } & BaseOptions<TSlug, TSelect> &
-  DraftFlagFromCollectionSlug<TSlug>
+  UpdateActionFromCollectionSlug<TSlug>
 
 export type ManyOptions<
   TSlug extends CollectionSlug,
@@ -182,7 +182,7 @@ export type ManyOptions<
    */
   where: Where
 } & BaseOptions<TSlug, TSelect> &
-  DraftFlagFromCollectionSlug<TSlug>
+  UpdateActionFromCollectionSlug<TSlug>
 
 export type Options<
   TSlug extends CollectionSlug,
@@ -219,12 +219,12 @@ async function updateLocal<
 ): Promise<BulkOperationResult<TSlug, TSelect> | TransformCollectionWithSelect<TSlug, TSelect>> {
   const {
     id,
+    action,
     autosave,
     collection: collectionSlug,
     data,
     depth,
     disableTransaction,
-    draft,
     file,
     filePath,
     limit,
@@ -259,7 +259,7 @@ async function updateLocal<
     data,
     depth,
     disableTransaction,
-    draft,
+    draft: (action as string | undefined) === 'saveDraft',
     limit,
     overrideAccess,
     overrideLock,
