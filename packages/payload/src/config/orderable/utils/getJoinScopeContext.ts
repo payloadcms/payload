@@ -8,6 +8,7 @@ import { getValueAtPath } from './getValueAtPath.js'
  */
 export async function getJoinScopeContext(args: {
   collectionSlug: string
+  draft?: boolean
   joinFieldPathsByCollection: Map<string, Map<string, string>>
   orderableFieldName: string
   req: Parameters<PayloadHandler>[0]
@@ -16,7 +17,8 @@ export async function getJoinScopeContext(args: {
   joinScopeWhere: ReturnType<typeof buildJoinScopeWhere>
   targetDoc: null | Record<string, unknown>
 }> {
-  const { collectionSlug, joinFieldPathsByCollection, orderableFieldName, req, target } = args
+  const { collectionSlug, draft, joinFieldPathsByCollection, orderableFieldName, req, target } =
+    args
 
   const joinOnFieldPath = joinFieldPathsByCollection.get(collectionSlug)?.get(orderableFieldName)
   let targetDoc: null | Record<string, unknown> = null
@@ -34,6 +36,7 @@ export async function getJoinScopeContext(args: {
         id: targetID,
         collection: collectionSlug,
         depth: 0,
+        draft,
         req,
         select: {
           ...(joinOnFieldPath ? { [joinOnFieldPath]: true } : {}),
