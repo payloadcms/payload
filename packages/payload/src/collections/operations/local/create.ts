@@ -153,12 +153,12 @@ export async function createLocal<
   req.file = file ?? (await getFileByPath(filePath!))
 
   return createOperation<TSlug, TSelect>({
+    action,
     collection,
     data: deepCopyObjectSimple(data) as RequiredDataFromCollectionSlug<TSlug>, // Ensure mutation of data in create operation hooks doesn't affect the original data
     depth,
     disableTransaction,
     disableVerificationEmail,
-    draft: (action as string | undefined) === 'saveDraft',
     duplicateFromID,
     overrideAccess,
     overwriteExistingFiles,

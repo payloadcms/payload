@@ -3,7 +3,12 @@ import { describe, expect, it } from 'vitest'
 import type { ResolveActionArgs } from './types.js'
 
 import { APIError } from '../../errors/APIError.js'
-import { canonicalizeWriteStatus, resolveAction, statusFromAction } from './resolveAction.js'
+import {
+  canonicalizeWriteStatus,
+  requestedActionFromLegacyDraft,
+  resolveAction,
+  statusFromAction,
+} from './resolveAction.js'
 
 const draftOps = (overrides: Partial<ResolveActionArgs> & Pick<ResolveActionArgs, 'operation'>) =>
   resolveAction({
@@ -486,5 +491,18 @@ describe('canonicalizeWriteStatus', () => {
       en: 'published',
       es: 'published',
     })
+  })
+})
+
+describe('requestedActionFromLegacyDraft', () => {
+  it('prefers explicit action over leftover draft booleans', () => {
+    expect(requestedActionFromLegacyDraft({ action: 'publish', draft: true })).toBe('publish')
+    expect(requestedActionFromLegacyDraft({ action: 'saveDraft', draft: false })).toBe('saveDraft')
+  })
+
+  it('maps leftover draft booleans when action is omitted', () => {
+    expect(requestedActionFromLegacyDraft({ draft: true })).toBe('saveDraft')
+    expect(requestedActionFromLegacyDraft({ draft: false })).toBe('publish')
+    expect(requestedActionFromLegacyDraft({})).toBeUndefined()
   })
 })

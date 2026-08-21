@@ -25,6 +25,9 @@ type Args<T> = {
   collection: Collection
   config: SanitizedConfig
   data: T
+  /**
+   * Derived storage flag: skip requiring a file and mark uploaded file data as a draft.
+   */
   draft?: boolean
   isDuplicating?: boolean
   operation: 'create' | 'update'

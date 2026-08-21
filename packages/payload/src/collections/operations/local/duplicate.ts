@@ -133,11 +133,11 @@ export async function duplicateLocal<
 
   return duplicateOperation<TSlug, TSelect>({
     id,
+    action,
     collection,
     data,
     depth,
     disableTransaction,
-    draft: (action as string | undefined) === 'saveDraft',
     overrideAccess,
     populate,
     req,

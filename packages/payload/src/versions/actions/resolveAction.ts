@@ -14,6 +14,32 @@ import type {
 import { APIError } from '../../errors/APIError.js'
 import { deepCopyObjectSimple } from '../../utilities/deepCopyObject.js'
 
+/**
+ * Maps leftover REST/GraphQL `draft` booleans onto the action argument until those
+ * transports are converted. Explicit `action` always wins.
+ */
+export function requestedActionFromLegacyDraft({
+  action,
+  draft,
+}: {
+  action?: unknown
+  draft?: boolean
+}): unknown {
+  if (action !== undefined && action !== null) {
+    return action
+  }
+
+  if (draft === true) {
+    return 'saveDraft'
+  }
+
+  if (draft === false) {
+    return 'publish'
+  }
+
+  return undefined
+}
+
 type DocumentStatus = 'draft' | 'published'
 
 /**
