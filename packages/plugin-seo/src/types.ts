@@ -47,6 +47,12 @@ export type GenerateDescription<T = any> = (
   } & PartialDocumentInfoContext,
 ) => Promise<string> | string
 
+/**
+ * A resolved image value as produced by {@link GenerateImage} and stored in {@link Meta.image}.
+ * Can be an upload document reference (`{ id }`), its numeric/string ID, or a URL string.
+ */
+export type MetaImageValue = { id: number | string } | number | string
+
 export type GenerateImage<T = any> = (
   args: {
     collectionConfig?: CollectionConfig
@@ -55,7 +61,7 @@ export type GenerateImage<T = any> = (
     locale?: string
     req: PayloadRequest
   } & PartialDocumentInfoContext,
-) => { id: number | string } | number | Promise<{ id: number | string } | number | string> | string
+) => MetaImageValue | Promise<MetaImageValue>
 
 export type GenerateURL<T = any> = (
   args: {
@@ -104,7 +110,7 @@ export type SEOPluginConfig = {
 
 export type Meta = {
   description?: string
-  image?: any // TODO: type this
+  image?: MetaImageValue
   keywords?: string
   title?: string
 }
