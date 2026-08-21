@@ -19,6 +19,7 @@ type LeaveWithoutSavingProps = {
 
 const leaveWithoutSavingModalSlug = 'leave-without-saving'
 
+/** @internal */
 export const LeaveWithoutSaving: React.FC<LeaveWithoutSavingProps> = ({
   disablePreventLeave = false,
   modalSlug: modalSlugProp,

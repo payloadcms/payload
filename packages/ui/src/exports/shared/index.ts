@@ -6,31 +6,14 @@ export { mergeFieldStyles } from '../../fields/mergeFieldStyles.js'
 export { reduceToSerializableFields } from '../../forms/Form/reduceToSerializableFields.js'
 export { PayloadIcon } from '../../graphics/Icon/index.js'
 export { PayloadLogo } from '../../graphics/Logo/index.js'
-export {
-  getViewportContent,
-  getViewportMeta,
-  isIPhoneUserAgent,
-} from '../../layouts/Root/viewport.js'
-export { filterFields } from '../../providers/TableColumns/buildColumnState/filterFields.js'
-export { getInitialColumns } from '../../providers/TableColumns/getInitialColumns.js'
 export { abortAndIgnore, handleAbortRef } from '../../utilities/abortAndIgnore.js'
 export { requests } from '../../utilities/api.js'
 export { findLocaleFromCode } from '../../utilities/findLocaleFromCode.js'
 export { formatDate } from '../../utilities/formatDocTitle/formatDateTitle.js'
-export { formatDocTitle } from '../../utilities/formatDocTitle/index.js'
-export { getGlobalData } from '../../utilities/getGlobalData.js'
-export { getNavGroups } from '../../utilities/getNavGroups.js'
 export { getVisibleEntities } from '../../utilities/getVisibleEntities.js'
 export {
   type EntityToGroup,
   groupNavItems,
   type NavGroupType,
 } from '../../utilities/groupNavItems.js'
-export { handleBackToDashboard } from '../../utilities/handleBackToDashboard.js'
-export { handleGoBack } from '../../utilities/handleGoBack.js'
-export { handleTakeOver } from '../../utilities/handleTakeOver.js'
-export { hasSavePermission } from '../../utilities/hasSavePermission.js'
-export { isClientUserObject } from '../../utilities/isClientUserObject.js'
-export { isEditing } from '../../utilities/isEditing.js'
 export { sanitizeID } from '../../utilities/sanitizeID.js'
-export { traverseForLocalizedFields } from '../../utilities/traverseForLocalizedFields.js'

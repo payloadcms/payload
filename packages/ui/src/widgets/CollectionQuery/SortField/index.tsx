@@ -13,6 +13,7 @@ import { getCollectionFieldPaths } from '../getCollectionFieldPaths.js'
 
 const baseFieldValues = new Set(['createdAt', 'id', 'updatedAt'])
 
+/** @internal */
 export const CollectionQuerySortField: TextFieldClientComponent = ({
   field,
   path: pathFromProps,

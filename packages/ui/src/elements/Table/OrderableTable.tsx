@@ -1,6 +1,7 @@
 'use client'
 
-import type { ClientCollectionConfig, Column, OrderableEndpointBody } from 'payload'
+import type { ClientCollectionConfig, Column } from 'payload'
+import type { OrderableEndpointBody } from 'payload/internal'
 
 import './index.css'
 
@@ -32,6 +33,7 @@ export type Props = {
   readonly heading?: React.ReactNode
 }
 
+/** @internal */
 export const OrderableTable: React.FC<Props> = ({
   appearance = 'default',
   BeforeTable,

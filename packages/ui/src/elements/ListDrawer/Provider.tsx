@@ -42,6 +42,7 @@ export type ListDrawerContextType = {
 
 export const ListDrawerContext = createContext({} as ListDrawerContextType)
 
+/** @internal */
 export const ListDrawerContextProvider: React.FC<
   {
     children: React.ReactNode

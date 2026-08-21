@@ -16,6 +16,7 @@ export type VisibleEntitiesContextType = {
 
 export const EntityVisibilityContext = createContext({} as VisibleEntitiesContextType)
 
+/** @internal */
 export const EntityVisibilityProvider: React.FC<{
   children: React.ReactNode
   visibleEntities?: VisibleEntities

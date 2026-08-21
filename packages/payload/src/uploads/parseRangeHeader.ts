@@ -14,6 +14,8 @@ export type ParseRangeResult =
  * Parses HTTP Range header according to RFC 7233
  *
  * @returns Result object indicating whether to serve full file, partial content, or invalid range
+ *
+ * @internal
  */
 export function parseRangeHeader({
   fileSize,

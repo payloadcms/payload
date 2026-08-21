@@ -8,6 +8,7 @@ import type { HydrateHierarchyProviderProps } from '../../../providers/Hierarchy
 
 import { useHierarchy } from '../../../providers/Hierarchy/index.js'
 
+/** @internal */
 export const HydrateHierarchyProvider: React.FC<HydrateHierarchyProviderProps> = ({
   allowedCollections,
   baseFilter,

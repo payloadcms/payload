@@ -1,12 +1,11 @@
 import type { PayloadRequest, ServerProps } from 'payload'
 
-import { EntityType } from 'payload'
 import React from 'react'
 
 import type { EntityToGroup } from '../../utilities/groupNavItems.js'
 
 /* eslint-disable payload/no-imports-from-exports-dir -- Server component must reference exports dir for proper client boundary */
-import { DefaultNavClient, NavWrapper, SettingsMenuButton } from '../../exports/client/index.js'
+import { DefaultNavClient, NavWrapper, SettingsMenuButton } from '../../exports/client/internal.js'
 /* eslint-enable payload/no-imports-from-exports-dir */
 import { AlignJustifiedIcon } from '../../icons/AlignJustified/index.js'
 import { groupNavItems } from '../../utilities/groupNavItems.js'
@@ -15,6 +14,8 @@ import { SidebarTabs } from './SidebarTabs/index.js'
 import './index.css'
 
 const baseClass = 'nav'
+
+import { EntityType } from 'payload/shared'
 
 import { getNavPrefs } from './getNavPrefs.js'
 

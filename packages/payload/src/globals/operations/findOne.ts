@@ -40,6 +40,7 @@ export type GlobalFindOneArgs = {
 } & Pick<AfterReadArgs<JsonObject>, 'flattenLocales'> &
   Pick<FindOptions<string, SelectType>, 'select'>
 
+/** @internal */
 export const findOneOperation = async <T extends Record<string, unknown>>(
   args: GlobalFindOneArgs,
 ): Promise<T> => {

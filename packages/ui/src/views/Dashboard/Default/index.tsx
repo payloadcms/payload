@@ -35,6 +35,7 @@ export type DashboardViewServerPropsOnly = {
 
 export type DashboardViewServerProps = DashboardViewClientProps & DashboardViewServerPropsOnly
 
+/** @internal */
 export function DefaultDashboard(props: DashboardViewServerProps) {
   const { i18n, locale, params, payload, permissions, searchParams, server, user } = props
   const { afterDashboard, beforeDashboard } = payload.config.admin.components

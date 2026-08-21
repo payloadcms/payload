@@ -21,6 +21,19 @@ import type {
   SelectFromCollectionSlug,
   TypeWithID,
 } from './collections/config/types.js'
+import type { InitOptions, SanitizedConfig } from './config/types.js'
+import type { BaseDatabaseAdapter, PaginatedDistinctDocs, PaginatedDocs } from './database/types.js'
+import type { InitializedEmailAdapter } from './email/types.js'
+import type { DataFromGlobalSlug, Globals, SelectFromGlobalSlug } from './globals/config/types.js'
+import type {
+  ApplyDisableErrors,
+  DraftTransformCollectionWithSelect,
+  JsonObject,
+  SelectType,
+  TransformCollectionWithSelect,
+  TransformGlobalWithSelect,
+} from './types/index.js'
+import type { TraverseFieldsCallback } from './utilities/traverseFields.js'
 
 import { getRegisteredDevReloadStrategy } from './admin/adapters/devReload.js'
 import {
@@ -37,24 +50,6 @@ import {
   verifyEmailLocal,
   type Options as VerifyEmailOptions,
 } from './auth/operations/local/verifyEmail.js'
-export {
-  getRegisteredDevReloadStrategy,
-  registerDevReloadStrategy,
-} from './admin/adapters/devReload.js'
-import type { InitOptions, SanitizedConfig } from './config/types.js'
-import type { BaseDatabaseAdapter, PaginatedDistinctDocs, PaginatedDocs } from './database/types.js'
-import type { InitializedEmailAdapter } from './email/types.js'
-import type { DataFromGlobalSlug, Globals, SelectFromGlobalSlug } from './globals/config/types.js'
-import type {
-  ApplyDisableErrors,
-  DraftTransformCollectionWithSelect,
-  JsonObject,
-  SelectType,
-  TransformCollectionWithSelect,
-  TransformGlobalWithSelect,
-} from './types/index.js'
-import type { TraverseFieldsCallback } from './utilities/traverseFields.js'
-
 import { countLocal, type CountOptions } from './collections/operations/local/count.js'
 import {
   createLocal,
@@ -125,13 +120,10 @@ import {
 export type * from './admin/adapters/index.js'
 export type { FieldState } from './admin/forms/Form.js'
 export type * from './admin/types.js'
-export { EntityType } from './admin/views/dashboard.js'
-import type { SupportedLanguages } from '@payloadcms/translations'
-
 import { Cron } from 'croner'
 
 import type { EncryptionKeyring } from './auth/crypto.js'
-import type { ClientConfig } from './config/client.js'
+import type { ImportMap } from './bin/generateImportMap/index.js'
 import type { KVAdapter } from './kv/index.js'
 import type { JobLog, JobTaskStatus } from './queues/config/types/workflowTypes.js'
 import type { TypeWithVersion } from './versions/types.js'
@@ -140,7 +132,6 @@ import { buildEncryptionKeyring, decrypt, encrypt, reencrypt } from './auth/cryp
 import { authLocal } from './auth/operations/local/auth.js'
 import { APIKeyAuthentication } from './auth/strategies/apiKey.js'
 import { JWTAuthentication } from './auth/strategies/jwt.js'
-import { generateImportMap, type ImportMap } from './bin/generateImportMap/index.js'
 import { checkPayloadDependencies } from './checkPayloadDependencies.js'
 import {
   countVersionsLocal,
@@ -149,11 +140,12 @@ import {
 import { consoleEmailAdapter } from './email/consoleEmailAdapter.js'
 import { fieldAffectsData, type FlattenedBlock } from './fields/config/types.js'
 import { getJobsLocalAPI } from './queues/localAPI.js'
-import { _internal_jobSystemGlobals } from './queues/utilities/getCurrentDate.js'
+import { jobSystemGlobals } from './queues/utilities/getCurrentDate.js'
 import { formatAdminURL } from './utilities/formatAdminURL.js'
 import { isNextBuild } from './utilities/isNextBuild.js'
 import { getLogger } from './utilities/logger.js'
 import { defaultNextJsDevReloadStrategy } from './utilities/nextJsDevReloadStrategy.js'
+import { reload } from './utilities/reload.js'
 import { serverInit as serverInitTelemetry } from './utilities/telemetry/events/serverInit.js'
 import { traverseFields } from './utilities/traverseFields.js'
 
@@ -169,13 +161,10 @@ export { sessionsFieldConfig as baseSessionsField } from './auth/baseFields/sess
 export { usernameFieldConfig as baseUsernameField } from './auth/baseFields/username.js'
 export { verificationFields as baseVerificationFields } from './auth/baseFields/verification.js'
 
-export { defaultUserCollection } from './auth/defaultUser.js'
 export { executeAccess } from './auth/executeAccess.js'
 export { executeAuthStrategies } from './auth/executeAuthStrategies.js'
 export { extractAccessFromPermission } from './auth/extractAccessFromPermission.js'
 export { getAccessResults } from './auth/getAccessResults.js'
-export { getFieldsToSign } from './auth/getFieldsToSign.js'
-export { getLoginOptions } from './auth/getLoginOptions.js'
 
 /**
  * Shape constraint for PayloadTypes.
@@ -807,7 +796,7 @@ export class BasePayload {
             cronConfig.cron ?? DEFAULT_CRON,
             async () => {
               if (
-                _internal_jobSystemGlobals.shouldAutoSchedule &&
+                jobSystemGlobals.shouldAutoSchedule &&
                 !cronConfig.disableScheduling &&
                 this.config.jobs.scheduling
               ) {
@@ -817,7 +806,7 @@ export class BasePayload {
                 })
               }
 
-              if (!_internal_jobSystemGlobals.shouldAutoRun) {
+              if (!jobSystemGlobals.shouldAutoRun) {
                 return
               }
 
@@ -1120,80 +1109,6 @@ const initialized = new BasePayload()
 // eslint-disable-next-line no-restricted-exports
 export default initialized
 
-export const reload = async (
-  config: SanitizedConfig,
-  payload: Payload,
-  skipImportMapGeneration?: boolean,
-  options?: InitOptions,
-): Promise<void> => {
-  if (typeof payload.db.destroy === 'function') {
-    // Only destroy db, as we then later only call payload.db.init and not payload.init
-    await payload.db.destroy()
-  }
-  payload.config = config
-
-  payload.collections = config.collections.reduce(
-    (collections, collection) => {
-      collections[collection.slug] = {
-        config: collection,
-        customIDType: payload.collections[collection.slug]?.customIDType,
-      }
-      return collections
-    },
-    {} as Record<string, any>,
-  )
-
-  payload.blocks = config.blocks.reduce(
-    (blocks, block) => {
-      blocks[block.slug] = block
-      return blocks
-    },
-    {} as Record<string, FlattenedBlock>,
-  )
-
-  payload.globals = {
-    config: config.globals,
-  }
-
-  // TODO: support HMR for other props in the future (see payload/src/index init()) that may change on Payload singleton
-
-  // Generate types
-  if (config.typescript.autoGenerate !== false) {
-    // We cannot run it directly here, as generate-types imports json-schema-to-typescript, which breaks on turbopack.
-    // see: https://github.com/vercel/next.js/issues/66723
-    void payload.bin({
-      args: ['generate:types'],
-      log: false,
-    })
-  }
-
-  // Generate import map
-  if (skipImportMapGeneration !== true && config.admin?.importMap?.autoGenerate !== false) {
-    // This may run outside of the admin panel, e.g. in the user's frontend, where we don't have an import map file.
-    // We don't want to throw an error in this case, as it would break the user's frontend.
-    // => just skip it => ignoreResolveError: true
-    await generateImportMap(config, {
-      ignoreResolveError: true,
-      log: true,
-    })
-  }
-
-  if (payload.db?.init) {
-    await payload.db.init()
-  }
-
-  if (!options?.disableDBConnect && payload.db.connect) {
-    await payload.db.connect({ hotReload: true })
-  }
-
-  ;(global as any)._payload_clientConfigs = {} as Record<keyof SupportedLanguages, ClientConfig>
-  ;(global as any)._payload_schemaMap = null
-  ;(global as any)._payload_clientSchemaMap = null
-  ;(global as any)._payload_doNotCacheClientConfig = true // This will help refreshing the client config cache more reliably. If you remove this, please test HMR + client config refreshing (do new fields appear in the document?)
-  ;(global as any)._payload_doNotCacheSchemaMap = true
-  ;(global as any)._payload_doNotCacheClientSchemaMap = true
-}
-
 type CachedPayload = {
   devReloadCleanup: (() => void) | null
   devReloadStrategy: DevReloadStrategy | null
@@ -1284,10 +1199,10 @@ function connectDevReload({
 export const getPayload = async (
   options: {
     /**
-     * Custom dev reload strategy. If provided, takes precedence over any strategy
-     * passed to `registerDevReloadStrategy` and over the default Next.js HMR
-     * WebSocket listener. The strategy's `connect` function receives a callback to
-     * trigger config reload.
+     * Custom dev reload strategy. If provided, takes precedence over a
+     * framework-registered strategy and over the default Next.js HMR WebSocket
+     * listener. The strategy's `connect` function receives a callback to trigger
+     * config reload.
      *
      * Pass a stable reference: a strategy is reconnected whenever its identity
      * changes, so a new object literal on every call reconnects on every call.
@@ -1406,25 +1321,14 @@ export interface DatabaseAdapter extends BaseDatabaseAdapter {}
 export type { Payload, RequestContext }
 export * from './auth/index.js'
 export { jwtSign } from './auth/jwt.js'
-export { accessOperation } from './auth/operations/access.js'
-export { forgotPasswordOperation } from './auth/operations/forgotPassword.js'
-export { initOperation } from './auth/operations/init.js'
 export type { LoginResult } from './auth/operations/login.js'
 export { checkLoginPermission } from './auth/operations/login.js'
 export { loginOperation } from './auth/operations/login.js'
-export { logoutOperation } from './auth/operations/logout.js'
 export type { MeOperationResult } from './auth/operations/me.js'
-export { meOperation } from './auth/operations/me.js'
-export { refreshOperation } from './auth/operations/refresh.js'
 export { registerFirstUserOperation } from './auth/operations/registerFirstUser.js'
-export { resetPasswordOperation } from './auth/operations/resetPassword.js'
-export { unlockOperation } from './auth/operations/unlock.js'
-export { verifyEmailOperation } from './auth/operations/verifyEmail.js'
 export { rotateSecret } from './auth/rotateSecret.js'
 export type { RotateSecretArgs, RotateSecretResult } from './auth/rotateSecret.js'
 export { JWTAuthentication } from './auth/strategies/jwt.js'
-export { incrementLoginAttempts } from './auth/strategies/local/incrementLoginAttempts.js'
-export { resetLoginAttempts } from './auth/strategies/local/resetLoginAttempts.js'
 export type {
   AuthStrategyFunction,
   AuthStrategyFunctionArgs,
@@ -1446,8 +1350,6 @@ export type {
 export { generateImportMap } from './bin/generateImportMap/index.js'
 export type { ImportMap } from './bin/generateImportMap/index.js'
 
-export { genImportMapIterateFields } from './bin/generateImportMap/iterateFields.js'
-export { migrate as migrateCLI } from './bin/migrate.js'
 export {
   type ClientCollectionConfig,
   createClientCollectionConfig,
@@ -1499,21 +1401,7 @@ export type {
 export type { CompoundIndex, FoldersConfig, TagsConfig } from './collections/config/types.js'
 
 export type { SanitizedCompoundIndex } from './collections/config/types.js'
-export { createDataloaderCacheKey, getDataLoader } from './collections/dataloader.js'
-
-export { countOperation } from './collections/operations/count.js'
-export { createOperation } from './collections/operations/create.js'
-export { deleteOperation } from './collections/operations/delete.js'
-export { deleteByIDOperation } from './collections/operations/deleteByID.js'
-export { docAccessOperation } from './collections/operations/docAccess.js'
-export { duplicateOperation } from './collections/operations/duplicate.js'
-export { findOperation } from './collections/operations/find.js'
-export { findByIDOperation } from './collections/operations/findByID.js'
-export { findVersionByIDOperation } from './collections/operations/findVersionByID.js'
-export { findVersionsOperation } from './collections/operations/findVersions.js'
-export { restoreVersionOperation } from './collections/operations/restoreVersion.js'
-export { updateOperation } from './collections/operations/update.js'
-export { updateByIDOperation } from './collections/operations/updateByID.js'
+export { getDataLoader } from './collections/dataloader.js'
 export { buildConfig } from './config/build.js'
 export {
   type ClientConfig,
@@ -1526,8 +1414,6 @@ export {
 } from './config/client.js'
 export { addDefaultsToConfig } from './config/defaults.js'
 export { definePlugin } from './config/definePlugin.js'
-
-export { type OrderableEndpointBody } from './config/orderable/index.js'
 
 export { sanitizeConfig } from './config/sanitize.js'
 export type * from './config/types.js'
@@ -1800,17 +1686,14 @@ export type {
   ValidateOptions,
   ValueWithRelation,
 } from './fields/config/types.js'
-export { getDefaultValue } from './fields/getDefaultValue.js'
-
 export { traverseFields as afterChangeTraverseFields } from './fields/hooks/afterChange/traverseFields.js'
-export { promise as afterReadPromise } from './fields/hooks/afterRead/promise.js'
 
 export { traverseFields as afterReadTraverseFields } from './fields/hooks/afterRead/traverseFields.js'
 export { traverseFields as beforeChangeTraverseFields } from './fields/hooks/beforeChange/traverseFields.js'
 export { traverseFields as beforeValidateTraverseFields } from './fields/hooks/beforeValidate/traverseFields.js'
 export { sortableFieldTypes } from './fields/sortableFieldTypes.js'
 
-export { validateBlocksFilterOptions, validations } from './fields/validations.js'
+export { validations } from './fields/validations.js'
 
 export type {
   ArrayFieldValidation,
@@ -1864,29 +1747,12 @@ export type {
   GlobalConfig,
   SanitizedGlobalConfig,
 } from './globals/config/types.js'
-export { docAccessOperation as docAccessOperationGlobal } from './globals/operations/docAccess.js'
-export { findOneOperation } from './globals/operations/findOne.js'
-export { findVersionByIDOperation as findVersionByIDOperationGlobal } from './globals/operations/findVersionByID.js'
-
-export { findVersionsOperation as findVersionsOperationGlobal } from './globals/operations/findVersions.js'
-export { restoreVersionOperation as restoreVersionOperationGlobal } from './globals/operations/restoreVersion.js'
-export { updateOperation as updateOperationGlobal } from './globals/operations/update.js'
-export {
-  DEFAULT_ALLOW_HAS_MANY,
-  DEFAULT_HIERARCHY_TREE_LIMIT,
-  getHierarchyFieldName,
-  HIERARCHY_DEFAULT_LOCALE,
-  HIERARCHY_SLUG_PATH_FIELD,
-  HIERARCHY_TITLE_PATH_FIELD,
-} from './hierarchy/constants.js'
 export { createFolderField } from './hierarchy/createFolderField.js'
 export type { CreateFolderFieldOptions } from './hierarchy/createFolderField.js'
 export { createTagField } from './hierarchy/createTagField.js'
 export type { CreateTagFieldOptions } from './hierarchy/createTagField.js'
 export { getInitialTreeData } from './hierarchy/getInitialTreeData.js'
 export type { GetInitialTreeDataArgs, InitialTreeData } from './hierarchy/getInitialTreeData.js'
-export { injectHierarchyButton } from './hierarchy/injectHierarchyButton.js'
-export { resolveHierarchyCollections } from './hierarchy/resolveHierarchyCollections.js'
 export type {
   HierarchyConfig,
   SanitizedHierarchyConfig,
@@ -1916,7 +1782,6 @@ export type {
   TabsPreferences,
 } from './preferences/types.js'
 export type { QueryPreset } from './query-presets/types.js'
-export { jobAfterRead } from './queues/config/collection.js'
 export type { JobsConfig, RunJobAccess, RunJobAccessArgs } from './queues/config/types/index.js'
 export type {
   RunInlineTaskFunction,
@@ -1944,17 +1809,10 @@ export type {
 export { JobCancelledError } from './queues/errors/index.js'
 export { countRunnableOrActiveJobsForQueue } from './queues/operations/handleSchedules/countRunnableOrActiveJobsForQueue.js'
 
-export { importHandlerPath } from './queues/operations/runJobs/runJob/importHandlerPath.js'
-export {
-  _internal_jobSystemGlobals,
-  _internal_resetJobSystemGlobals,
-  getCurrentDate,
-} from './queues/utilities/getCurrentDate.js'
 export { getLocalI18n } from './translations/getLocalI18n.js'
 
 export * from './types/index.js'
 export { getFileByPath } from './uploads/getFileByPath.js'
-export { _internal_safeFetchGlobal } from './uploads/safeFetch.js'
 export type * from './uploads/types.js'
 export { addDataAndFileToRequest } from './utilities/addDataAndFileToRequest.js'
 export { addLocalesToRequestFromData, sanitizeLocales } from './utilities/addLocalesToRequest.js'
@@ -2037,15 +1895,8 @@ export { buildVersionCollectionFields } from './versions/buildCollectionFields.j
 export { buildVersionGlobalFields } from './versions/buildGlobalFields.js'
 export { buildVersionCompoundIndexes } from './versions/buildVersionCompoundIndexes.js'
 
-export { versionDefaults } from './versions/defaults.js'
-export { deleteCollectionVersions } from './versions/deleteCollectionVersions.js'
 export { appendVersionToQueryKey } from './versions/drafts/appendVersionToQueryKey.js'
 export { getQueryDraftsSort } from './versions/drafts/getQueryDraftsSort.js'
-export { enforceMaxVersions } from './versions/enforceMaxVersions.js'
-export { getLatestCollectionVersion } from './versions/getLatestCollectionVersion.js'
-export { getLatestGlobalVersion } from './versions/getLatestGlobalVersion.js'
-
-export { saveVersion } from './versions/saveVersion.js'
 export type { SchedulePublishTaskInput } from './versions/schedule/types.js'
 
 export type { SchedulePublish, TypeWithVersion } from './versions/types.js'

@@ -30,6 +30,7 @@ export type ListSelectionProps = {
   where?: Where
 }
 
+/** @internal */
 export const ListSelection: React.FC<ListSelectionProps> = ({
   collectionConfig,
   disableBulkDelete,

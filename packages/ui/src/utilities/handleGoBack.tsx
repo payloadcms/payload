@@ -9,6 +9,7 @@ type GoBackProps = {
   serverURL?: string
 }
 
+/** @internal */
 export const handleGoBack = ({ adminRoute, collectionSlug, router, serverURL }: GoBackProps) => {
   const redirectRoute = formatAdminURL({
     adminRoute,

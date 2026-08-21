@@ -20,6 +20,7 @@ type Props<T> = {
   readonly children: React.ReactNode
 } & Omit<RowLabelType<T>, 'data'>
 
+/** @internal */
 export const RowLabelProvider: React.FC<Props<unknown>> = ({ children, path, rowNumber }) => {
   const { getDataByPath, getSiblingData } = useWatchForm()
   const collapsibleData = getSiblingData(path)

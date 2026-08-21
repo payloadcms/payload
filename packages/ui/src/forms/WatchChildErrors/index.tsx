@@ -17,6 +17,7 @@ type TrackSubSchemaErrorCountProps = {
   path: (number | string)[]
   setErrorCount: (count: number) => void
 }
+/** @internal */
 export const WatchChildErrors: React.FC<TrackSubSchemaErrorCountProps> = ({
   fields,
   path: parentPath,

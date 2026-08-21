@@ -19,10 +19,16 @@ let registeredStrategy: DevReloadStrategy | null = null
  * to run in the same module graph as the `getPayload` calls it should affect.
  * Framework adapters register from their server runtime, which resolves the
  * same copy of `payload` as the app.
+ *
+ * @internal
  */
 export const registerDevReloadStrategy = (strategy: DevReloadStrategy | null): void => {
   registeredStrategy = strategy
 }
 
-/** The strategy set by {@link registerDevReloadStrategy}, or `null` if none is registered. */
+/**
+ * The strategy set by {@link registerDevReloadStrategy}, or `null` if none is registered.
+ *
+ * @internal
+ */
 export const getRegisteredDevReloadStrategy = (): DevReloadStrategy | null => registeredStrategy

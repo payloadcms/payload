@@ -211,6 +211,7 @@ function removeIdIfParentIsLocalized(data: Data, fields: Field[]): Data {
   return data
 }
 
+/** @internal */
 export const copyDataFromLocaleHandler: ServerFunction<CopyDataFromLocaleArgs> = async (args) => {
   const { req } = args
 

@@ -16,6 +16,7 @@ type Props = {
   message: string
   redirectTo: string
 }
+/** @internal */
 export function ToastAndRedirect({ message, redirectTo }: Props) {
   const router = useRouter()
   const { startRouteTransition } = useRouteTransition()
@@ -42,6 +43,7 @@ export function ToastAndRedirect({ message, redirectTo }: Props) {
   return null
 }
 
+/** @internal */
 export function VerifyClient({ loginRoute }: { loginRoute: string }) {
   const router = useRouter()
   const { startRouteTransition } = useRouteTransition()

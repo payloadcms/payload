@@ -12,6 +12,7 @@ export type TabErrorProps = {
   onRetry: () => void
 }
 
+/** @internal */
 export const TabError: React.FC<TabErrorProps> = ({ message, onRetry }) => {
   const { t } = useTranslation()
   return (

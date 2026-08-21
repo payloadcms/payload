@@ -11,6 +11,7 @@ import './index.css'
 
 const baseClass = 'select-row'
 
+/** @internal */
 export const SelectRow: React.FC<{
   rowData: {
     _isLocked?: boolean

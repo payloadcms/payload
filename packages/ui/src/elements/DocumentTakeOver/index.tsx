@@ -16,6 +16,7 @@ import { useModal } from '../Modal/index.js'
 
 const modalSlug = 'document-take-over'
 
+/** @internal */
 export const DocumentTakeOver: React.FC<{
   handleBackToDashboard: () => void
   isActive: boolean

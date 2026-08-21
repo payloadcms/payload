@@ -32,6 +32,8 @@ const reqCache = selectiveCache<InitReqResult>('req')
  * Initializes a full request object, including the `req` object and access control.
  * Reads headers/cookies through the supplied `serverAdapter` so the function is
  * framework-agnostic; the consuming framework wires its own adapter.
+ *
+ * @internal
  */
 export const initReq = async function ({
   canSetHeaders,

@@ -9,6 +9,7 @@ type Args = {
   slug: string
 }
 
+/** @internal */
 export const deleteCollectionVersions = async ({ id, slug, payload, req }: Args): Promise<void> => {
   try {
     await payload.db.deleteVersions({

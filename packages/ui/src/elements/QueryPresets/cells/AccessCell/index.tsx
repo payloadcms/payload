@@ -4,6 +4,7 @@ import type { JSX } from 'react'
 import { toWords } from 'payload/shared'
 import React, { Fragment } from 'react'
 
+/** @internal */
 export const QueryPresetsAccessCell: React.FC<DefaultCellComponentProps> = ({ cellData }) => {
   // first sort the operations in the order they should be displayed
   const operations = ['read', 'update', 'delete']

@@ -28,6 +28,7 @@ function useSort() {
   return { handleSortPress, isActive, isAscending }
 }
 
+/** @internal */
 export const SortHeader: React.FC<SortHeaderProps> = (props) => {
   const { appearance } = props
   const { handleSortPress, isActive, isAscending } = useSort()

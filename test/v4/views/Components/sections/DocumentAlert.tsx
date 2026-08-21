@@ -1,13 +1,7 @@
 'use client'
 
-import {
-  Button,
-  ConfirmationModal,
-  DocumentLocked,
-  DocumentStaleData,
-  DocumentTakeOver,
-  useModal,
-} from '@payloadcms/ui'
+import { Button, ConfirmationModal, useModal } from '@payloadcms/ui'
+import { DocumentLocked, DocumentStaleData, DocumentTakeOver } from '@payloadcms/ui/internal'
 import React, { useState } from 'react'
 
 import { Section, Variant } from '../shared.js'

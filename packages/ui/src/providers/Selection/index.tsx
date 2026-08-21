@@ -66,6 +66,7 @@ const reduceActiveSelections = (selected: Map<number | string, boolean>): (numbe
   return ids
 }
 
+/** @internal */
 export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalDocs }) => {
   const contextRef = useRef({} as SelectionContext)
   const { user } = useAuth()

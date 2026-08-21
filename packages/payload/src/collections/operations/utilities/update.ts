@@ -28,7 +28,7 @@ import { afterChange } from '../../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../../fields/hooks/afterRead/index.js'
 import { beforeChange } from '../../../fields/hooks/beforeChange/index.js'
 import { beforeValidate } from '../../../fields/hooks/beforeValidate/index.js'
-import { deepCopyObjectSimple, saveVersion } from '../../../index.js'
+import { deepCopyObjectSimple } from '../../../index.js'
 import { deleteAssociatedFiles } from '../../../uploads/deleteAssociatedFiles.js'
 import { uploadFiles } from '../../../uploads/uploadFiles.js'
 import { checkDocumentLockStatus } from '../../../utilities/checkDocumentLockStatus.js'
@@ -38,6 +38,7 @@ import {
   hasLocalizeStatusEnabled,
 } from '../../../utilities/getVersionsConfig.js'
 import { buildLocalizedPublishData } from '../../../versions/buildSingleLocalePublishData.js'
+import { saveVersion } from '../../../versions/saveVersion.js'
 export type SharedUpdateDocumentArgs<TSlug extends CollectionSlug> = {
   autosave: boolean
   collectionConfig: SanitizedCollectionConfig

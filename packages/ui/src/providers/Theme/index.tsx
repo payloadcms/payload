@@ -89,6 +89,8 @@ const isValidThemeParam = (value: null | string): value is 'auto' | Theme =>
  *
  * The ThemeProvider also reads the `?theme=light|dark|auto` query parameter and
  * persists it to the theme cookie using the same mechanism as manual theme selection.
+ *
+ * @internal
  */
 export const ThemeProvider: React.FC<{
   children?: React.ReactNode

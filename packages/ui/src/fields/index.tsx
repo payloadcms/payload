@@ -51,6 +51,7 @@ export type FieldTypesComponents = {
   hidden: React.FC<HiddenFieldProps>
 }
 
+/** @internal */
 export const fieldComponents: FieldTypesComponents = {
   slug: SlugField,
   array: ArrayField,
@@ -87,6 +88,7 @@ export type FieldComponentsWithSlots = {
   RowLabel: React.FC
 } & FieldTypesComponents
 
+/** @internal */
 export const allFieldComponents: FieldComponentsWithSlots = {
   ...fieldComponents,
   Description: FieldDescription,

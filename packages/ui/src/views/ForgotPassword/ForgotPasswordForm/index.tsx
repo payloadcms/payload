@@ -18,6 +18,7 @@ import './index.css'
 
 const baseClass = 'forgot-password__form'
 
+/** @internal */
 export const ForgotPasswordForm: React.FC = () => {
   const { config, getEntityConfig } = useConfig()
 

@@ -3,7 +3,8 @@
 import type { RouterAdapterContextValue } from '@payloadcms/ui'
 import type { LinkAdapterProps, RouterAdapterComponent } from 'payload'
 
-import { RouterAdapterContext, useRouteTransition } from '@payloadcms/ui'
+import { useRouteTransition } from '@payloadcms/ui'
+import { RouterAdapterContext } from '@payloadcms/ui/internal'
 import {
   Link as TanStackLink,
   useLocation,

@@ -2,10 +2,11 @@ import { status as httpStatus } from 'http-status'
 
 import type { PayloadHandler } from '../../config/types.js'
 
-import { restoreVersionOperationGlobal, sanitizePopulateParam } from '../../index.js'
+import { sanitizePopulateParam } from '../../index.js'
 import { getRequestGlobal } from '../../utilities/getRequestEntity.js'
 import { headersWithCors } from '../../utilities/headersWithCors.js'
 import { isNumber } from '../../utilities/isNumber.js'
+import { restoreVersionOperation } from '../operations/restoreVersion.js'
 
 export const restoreVersionHandler: PayloadHandler = async (req) => {
   const globalConfig = getRequestGlobal(req)
@@ -13,7 +14,7 @@ export const restoreVersionHandler: PayloadHandler = async (req) => {
   const depth = searchParams.get('depth')
   const draft = searchParams.get('draft')
 
-  const doc = await restoreVersionOperationGlobal({
+  const doc = await restoreVersionOperation({
     id: req.routeParams!.id as string,
     depth: isNumber(depth) ? Number(depth) : undefined,
     draft: draft === 'true' ? true : undefined,

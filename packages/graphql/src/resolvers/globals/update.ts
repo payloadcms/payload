@@ -7,7 +7,8 @@ import type {
 } from 'payload'
 import type { DeepPartial } from 'ts-essentials'
 
-import { isolateObjectProperty, updateOperationGlobal } from 'payload'
+import { isolateObjectProperty } from 'payload'
+import { updateOperationGlobal } from 'payload/internal'
 
 import type { Context } from '../types.js'
 

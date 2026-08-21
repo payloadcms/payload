@@ -2,6 +2,7 @@ import type { PayloadRequest, Where } from '../../types/index.js'
 
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 
+/** @internal */
 export const initOperation = async (args: {
   collection: string
   req: PayloadRequest

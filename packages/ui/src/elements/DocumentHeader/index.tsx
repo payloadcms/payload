@@ -8,7 +8,9 @@ import type {
 import React from 'react'
 
 // eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports dir for proper client boundary
-import { DocumentHeaderRoot, Gutter, RenderTitle } from '../../exports/client/index.js'
+import { Gutter, RenderTitle } from '../../exports/client/index.js'
+// eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports dir for proper client boundary
+import { DocumentHeaderRoot } from '../../exports/client/internal.js'
 import { DocumentTabs } from './Tabs/index.js'
 import './index.css'
 

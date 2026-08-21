@@ -5,12 +5,11 @@ import {
   FieldContext,
   FieldPathContext,
   type FieldType,
-  type RenderFieldServerFnArgs,
-  ServerFunctionsContext,
   type ServerFunctionsContextType,
   ShimmerEffect,
   useServerFunctions,
 } from '@payloadcms/ui'
+import { type RenderFieldServerFnArgs, ServerFunctionsContext } from '@payloadcms/ui/internal'
 import React, { useCallback, useEffect, useRef } from 'react'
 
 import type { LexicalRichTextField } from '../../types/index.js'

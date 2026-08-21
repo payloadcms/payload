@@ -1,1 +1,1 @@
-export { DefaultDashboard as default } from '@payloadcms/ui/views/Dashboard'
+export { DefaultDashboard as default } from '@payloadcms/ui/internal/rsc'

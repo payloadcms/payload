@@ -26,10 +26,12 @@ const baseClass = 'hierarchy-field'
 
 type Value = (number | string)[] | null | (number | string)
 
+/** @internal */
 export type HierarchyFieldClientProps = {
   Icon?: React.ReactNode
 } & RelationshipFieldClientProps
 
+/** @internal */
 export const HierarchyFieldClient: React.FC<HierarchyFieldClientProps> = (props) => {
   const {
     field,

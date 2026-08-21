@@ -5,7 +5,8 @@ import type {
   SanitizedGlobalPermission,
 } from 'payload'
 
-import { docAccessOperation, isolateObjectProperty } from 'payload'
+import { isolateObjectProperty } from 'payload'
+import { docAccessOperation } from 'payload/internal'
 
 import type { Context } from '../types.js'
 

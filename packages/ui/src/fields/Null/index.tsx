@@ -8,5 +8,7 @@
  *
  * Unlike HiddenField which renders `<input type="hidden">`, NullField
  * produces no DOM output at all.
+ *
+ * @internal
  */
 export const NullField = (): null => null

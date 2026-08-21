@@ -8,6 +8,7 @@ import React, { Fragment, useEffect } from 'react'
 
 import { ShimmerEffect } from '../../../elements/ShimmerEffect/index.js'
 
+/** @internal */
 export const RenderVersionFieldsToDiff = ({
   parent = false,
   versionFields,

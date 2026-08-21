@@ -8,6 +8,7 @@ import './index.css'
 
 const baseClass = 'api-key-input'
 
+/** @internal */
 export type APIKeyInputProps = {
   readonly 'aria-label'?: string
   readonly highlighted?: boolean
@@ -18,6 +19,8 @@ export type APIKeyInputProps = {
 /**
  * Read-only masked API key field: key icon, value, show/hide toggle, and copy
  * control. Shared by the core auth API-key field and the MCP API-keys collection.
+ *
+ * @internal
  */
 export const APIKeyInput: React.FC<APIKeyInputProps> = ({
   id,

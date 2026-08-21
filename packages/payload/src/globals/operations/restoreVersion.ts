@@ -21,6 +21,7 @@ export type Arguments = {
   showHiddenFields?: boolean
 }
 
+/** @internal */
 export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any>(
   args: Arguments,
 ): Promise<T> => {

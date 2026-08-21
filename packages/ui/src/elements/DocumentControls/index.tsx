@@ -49,6 +49,7 @@ import './index.css'
 
 const baseClass = 'doc-controls'
 
+/** @internal */
 export const DocumentControls: React.FC<{
   readonly apiURL: string
   readonly BeforeDocumentControls?: React.ReactNode

@@ -1,6 +1,6 @@
 import type { Payload } from 'payload'
 
-import { renderTabHandler } from '@payloadcms/ui/rsc'
+import { renderTabHandler } from '@payloadcms/ui/internal/rsc'
 import path from 'path'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { fileURLToPath } from 'url'

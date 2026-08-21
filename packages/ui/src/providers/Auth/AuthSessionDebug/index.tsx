@@ -19,6 +19,8 @@ type Props = {
  * Displays the current auth session's expiration, refresh, and activity lifecycle.
  *
  * Register this component as an admin provider to render it on every admin page.
+ *
+ * @internal
  */
 export const AuthSessionDebug: React.FC<Props> = ({ children }) => {
   const { authSession } = useAuth()

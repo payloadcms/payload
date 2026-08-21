@@ -14,6 +14,7 @@ import { useDocumentTitle } from '../../../providers/DocumentTitle/index.js'
 import { useEntityVisibility } from '../../../providers/EntityVisibility/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 
+/** @internal */
 export const SetDocumentStepNav: React.FC<{
   collectionSlug?: SanitizedCollectionConfig['slug']
   globalLabel?: SanitizedGlobalConfig['label']

@@ -104,6 +104,8 @@ export const useBlockComponentContext = () => React.use(BlockComponentContext)
  * The actual content of the Block. This should be INSIDE a Form component,
  * scoped to the block. All format operations in here are thus scoped to the block's form, and
  * not the whole document.
+ *
+ * @internal
  */
 export const BlockContent: React.FC<BlockContentProps> = (props) => {
   const { Collapsible, CustomBlock, CustomLabel, ...contextProps } = props

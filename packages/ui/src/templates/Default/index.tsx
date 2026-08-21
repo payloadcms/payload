@@ -22,7 +22,7 @@ import {
   CommandPalette,
   EntityVisibilityProvider,
   DefaultTemplateWrapper as Wrapper,
-} from '../../exports/client/index.js'
+} from '../../exports/client/internal.js'
 /* eslint-enable payload/no-imports-from-exports-dir */
 import type { UserMenuSettingsGroup } from '../../elements/UserMenu/SettingsMenu/index.js'
 

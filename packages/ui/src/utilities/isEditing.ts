@@ -1,3 +1,4 @@
+/** @internal */
 export const isEditing = ({
   id,
   collectionSlug,

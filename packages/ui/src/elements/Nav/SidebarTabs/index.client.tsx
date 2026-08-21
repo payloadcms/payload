@@ -12,6 +12,7 @@ import { DelayedSpinner } from '../../DelayedSpinner/index.js'
 import { Tooltip } from '../../Tooltip/index.js'
 import { TabError } from './TabError/index.js'
 
+/** @internal */
 export type TabMetadata = {
   icon: React.ReactNode
   isDefaultActive?: boolean
@@ -21,6 +22,7 @@ export type TabMetadata = {
   slug: string
 }
 
+/** @internal */
 export type SidebarTabsClientProps = {
   baseClass: string
   initialActiveTabID: string
@@ -33,6 +35,7 @@ export type SidebarTabsClientProps = {
   tabs: TabMetadata[]
 }
 
+/** @internal */
 export const SidebarTabsClient: React.FC<SidebarTabsClientProps> = ({
   baseClass,
   initialActiveTabID,

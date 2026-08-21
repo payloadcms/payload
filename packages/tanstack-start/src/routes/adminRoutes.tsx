@@ -2,7 +2,8 @@
 
 import type { NotFoundRouteProps } from '@tanstack/react-router'
 
-import { NotFoundClient, useRouteTransition } from '@payloadcms/ui'
+import { useRouteTransition } from '@payloadcms/ui'
+import { NotFoundClient } from '@payloadcms/ui/internal'
 import { notFound, redirect, useLoaderData } from '@tanstack/react-router'
 import { Fragment, type ReactNode, useDeferredValue, useEffect } from 'react'
 

@@ -31,6 +31,7 @@ import './index.css'
 
 const baseClass = 'hierarchy-list'
 
+/** @internal */
 export function HierarchyListView(props: ListViewClientProps) {
   const {
     AfterList,

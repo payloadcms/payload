@@ -11,6 +11,7 @@ const baseClass = 'field-diff'
 
 const gutterOffset = 6.5
 
+/** @internal */
 export const FieldDiffContainer: React.FC<{
   className?: string
   From: React.ReactNode

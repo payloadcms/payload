@@ -9,6 +9,7 @@ import './index.css'
 
 const baseClass = 'not-found'
 
+/** @internal */
 export const NotFoundClient: React.FC = () => {
   const { setStepNav } = useStepNav()
   const { t } = useTranslation()

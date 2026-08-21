@@ -1,7 +1,7 @@
 import type { SanitizedConfig, SanitizedPermissions, VisibleEntities } from 'payload'
 
 import { type I18nClient } from '@payloadcms/translations'
-import { EntityType } from 'payload'
+import { EntityType } from 'payload/shared'
 
 import { type EntityToGroup, groupNavItems } from './groupNavItems.js'
 

@@ -11,6 +11,7 @@ import { getClientSchemaMap } from '../../../utilities/getClientSchemaMap.js'
 import { getSchemaMap } from '../../../utilities/getSchemaMap.js'
 import { renderField } from '../renderField.js'
 
+/** @internal */
 export type RenderFieldServerFnArgs<TField = Field> = {
   /**
    * Override field config pulled from schemaPath lookup
@@ -39,12 +40,15 @@ export type RenderFieldServerFnArgs<TField = Field> = {
    */
   schemaPath: string
 }
+/** @internal */
 export type RenderFieldServerFnReturnType = {} & FieldState['customComponents']
 
 /**
  * @experimental - may break in minor releases
+ *
+ * @internal
  */
-export const _internal_renderFieldHandler: ServerFunction<
+export const renderFieldHandler: ServerFunction<
   RenderFieldServerFnArgs,
   Promise<RenderFieldServerFnReturnType>
   // eslint-disable-next-line @typescript-eslint/require-await

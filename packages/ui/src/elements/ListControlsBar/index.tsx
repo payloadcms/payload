@@ -6,6 +6,7 @@ import './index.css'
 
 const baseClass = 'list-controls-bar'
 
+/** @internal */
 export type ListControlsBarProps = {
   readonly children: React.ReactNode
   readonly className?: string
@@ -18,6 +19,8 @@ export type ListControlsBarProps = {
 /**
  * A simple container for list controls (search, filters, actions).
  * Provides consistent padding and layout across list views.
+ *
+ * @internal
  */
 export const ListControlsBar: React.FC<ListControlsBarProps> = ({
   children,

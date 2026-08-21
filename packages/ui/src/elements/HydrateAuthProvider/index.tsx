@@ -17,6 +17,7 @@ type Props = {
   permissions: SanitizedPermissions
 }
 
+/** @internal */
 export function HydrateAuthProvider({ permissions }: Props) {
   const { setPermissions } = useAuth()
 

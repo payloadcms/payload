@@ -7,12 +7,12 @@
  */
 import fs from 'fs'
 import path from 'path'
-import { migrateCLI } from 'payload'
+import { migrateCLI } from 'payload/internal'
 import { fileURLToPath } from 'url'
 import { afterEach, beforeEach, expect } from 'vitest'
 
-import { removeFiles } from '../__helpers/shared/removeFiles.js'
 import { describe, it } from '../__helpers/int/vitest.js'
+import { removeFiles } from '../__helpers/shared/removeFiles.js'
 import configPromise from './config.js'
 
 const filename = fileURLToPath(import.meta.url)

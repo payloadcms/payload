@@ -11,7 +11,7 @@ import {
   VersionFieldDiffSelect as Select,
   VersionFieldDiffTabs as Tabs,
   VersionFieldDiffText as Text,
-} from '../../../../exports/client/index.js'
+} from '../../../../exports/client/internal.js'
 /* eslint-enable payload/no-imports-from-exports-dir */
 import { Relationship } from './Relationship/index.js'
 import { Upload } from './Upload/index.js'

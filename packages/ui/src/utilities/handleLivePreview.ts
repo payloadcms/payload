@@ -63,6 +63,8 @@ export const isLivePreviewEnabled = ({
  * 4. Executes the `url` function, if necessary.
  *
  * Notice: internal function only. Subject to change at any time. Use at your own risk.
+ *
+ * @internal
  */
 export const handleLivePreview = async ({
   collectionSlug,

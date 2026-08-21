@@ -10,6 +10,8 @@ type GetRequestEmbedArgs = {
  * first paint for any load once the cookie exists. The `?embed=true` query
  * parameter is handled client-side, because the root layout cannot see search
  * params.
+ *
+ * @internal
  */
 export const getRequestEmbed = ({ config, cookies }: GetRequestEmbedArgs): boolean =>
   cookies.get(`${config.cookiePrefix || 'payload'}-embed`) === 'true'

@@ -26,6 +26,7 @@ type AutosaveCellProps = {
   }
 }
 
+/** @internal */
 export const AutosaveCell: React.FC<AutosaveCellProps> = ({
   currentlyPublishedVersion,
   latestDraftVersion,

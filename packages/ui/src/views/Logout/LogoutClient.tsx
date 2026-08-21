@@ -22,6 +22,8 @@ const baseClass = 'logout'
  *
  * This view is still useful if cookies attempt to refresh and fail, i.e. the user
  * is logged out due to inactivity.
+ *
+ * @internal
  */
 export const LogoutClient: React.FC<{
   adminRoute: string

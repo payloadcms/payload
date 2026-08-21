@@ -1,14 +1,7 @@
 import { spawn } from 'node:child_process'
 import path from 'path'
-import {
-  _internal_jobSystemGlobals,
-  _internal_resetJobSystemGlobals,
-  createLocalReq,
-  Forbidden,
-  type JobTaskStatus,
-  type Payload,
-  type User,
-} from 'payload'
+import { createLocalReq, Forbidden, type JobTaskStatus, type Payload, type User } from 'payload'
+import { jobSystemGlobals, resetJobSystemGlobals } from 'payload/internal'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect } from 'vitest'
@@ -43,25 +36,25 @@ describe('Queues - Payload', () => {
 
   afterAll(async () => {
     // Ensure no new crons are scheduled
-    _internal_jobSystemGlobals.shouldAutoRun = false
-    _internal_jobSystemGlobals.shouldAutoSchedule = false
+    jobSystemGlobals.shouldAutoRun = false
+    jobSystemGlobals.shouldAutoSchedule = false
     // Wait 3 seconds to ensure all currently-running crons are done. If we shut down the db while a function is running, it can cause issues
     // Cron function runs may persist after a test has finished
     await wait(3000)
     // Now we can destroy the payload instance
     await payload.destroy()
-    _internal_resetJobSystemGlobals()
+    resetJobSystemGlobals()
   })
 
   afterEach(() => {
-    _internal_resetJobSystemGlobals()
+    resetJobSystemGlobals()
     Object.assign(payload.config.jobs.processingLease, processingLeaseDefaults)
   })
 
   beforeEach(async () => {
     // Set autorun to false during seed process to ensure no crons are scheduled, which may affect the tests
-    _internal_jobSystemGlobals.shouldAutoRun = false
-    _internal_jobSystemGlobals.shouldAutoSchedule = false
+    jobSystemGlobals.shouldAutoRun = false
+    jobSystemGlobals.shouldAutoSchedule = false
     await clearAndSeedEverything(payload)
     const data = await restClient
       .POST('/users/login', {
@@ -77,8 +70,8 @@ describe('Queues - Payload', () => {
     }
     user = data.user
     payload.config.jobs.deleteJobOnComplete = true
-    _internal_jobSystemGlobals.shouldAutoRun = true
-    _internal_jobSystemGlobals.shouldAutoSchedule = true
+    jobSystemGlobals.shouldAutoRun = true
+    jobSystemGlobals.shouldAutoSchedule = true
   })
 
   describe('default config', () => {
@@ -865,7 +858,7 @@ describe('Queues - Payload', () => {
   })
 
   it('should run a job only once when multiple workers poll the same queue', async () => {
-    _internal_jobSystemGlobals.shouldAutoRun = false
+    jobSystemGlobals.shouldAutoRun = false
     payload.config.jobs.deleteJobOnComplete = false
 
     const message = 'run once with multiple workers'
@@ -903,7 +896,7 @@ describe('Queues - Payload', () => {
   })
 
   it('should run a job only once when multiple workers run the same job by ID', async () => {
-    _internal_jobSystemGlobals.shouldAutoRun = false
+    jobSystemGlobals.shouldAutoRun = false
     payload.config.jobs.deleteJobOnComplete = false
 
     const message = 'run once by ID with multiple workers'
@@ -1248,7 +1241,7 @@ describe('Queues - Payload', () => {
       'should recover a job after its worker process is killed',
       { db: (type) => type.startsWith('sqlite') },
       async () => {
-        _internal_jobSystemGlobals.shouldAutoRun = false
+        jobSystemGlobals.shouldAutoRun = false
         payload.config.jobs.deleteJobOnComplete = false
 
         const postTitle = 'created after a worker process crash'
@@ -1360,7 +1353,7 @@ describe('Queues - Payload', () => {
     )
 
     it('should let only one replacement worker recover a job after its original worker stops responding', async () => {
-      _internal_jobSystemGlobals.shouldAutoRun = false
+      jobSystemGlobals.shouldAutoRun = false
       payload.config.jobs.deleteJobOnComplete = false
       // Short lease (shorter than 500ms task delay in longRunning workflow) to simulate lease expiry
       payload.config.jobs.processingLease.duration = 300
@@ -1426,7 +1419,7 @@ describe('Queues - Payload', () => {
     })
 
     it('should not let another worker pick up a healthy long-running job', async () => {
-      _internal_jobSystemGlobals.shouldAutoRun = false
+      jobSystemGlobals.shouldAutoRun = false
       expect(payload.config.jobs.processingLease.duration).toBe(20 * 60 * 1000)
       expect(payload.config.jobs.processingLease.safetyBuffer).toBe(30_000)
       payload.config.jobs.deleteJobOnComplete = false
@@ -1474,7 +1467,7 @@ describe('Queues - Payload', () => {
     })
 
     it('should recover an interrupted job without consuming a retry', async () => {
-      _internal_jobSystemGlobals.shouldAutoRun = false
+      jobSystemGlobals.shouldAutoRun = false
       payload.config.jobs.deleteJobOnComplete = false
       payload.config.jobs.processingLease.duration = 300
       payload.config.jobs.processingLease.safetyBuffer = 250
@@ -1508,7 +1501,7 @@ describe('Queues - Payload', () => {
     })
 
     it('should ignore task results from a timed-out worker after another worker recovers the job', async () => {
-      _internal_jobSystemGlobals.shouldAutoRun = false
+      jobSystemGlobals.shouldAutoRun = false
       payload.config.jobs.deleteJobOnComplete = false
       payload.config.jobs.processingLease.duration = 300
       payload.config.jobs.processingLease.safetyBuffer = 250
@@ -3228,7 +3221,7 @@ describe('Queues - Payload', () => {
     it('should recover cron after a transient DB error in jobs.run', async () => {
       // --- Step 1: Verify cron works normally ---
 
-      _internal_jobSystemGlobals.shouldAutoRun = false
+      jobSystemGlobals.shouldAutoRun = false
 
       await payload.jobs.queue({
         task: 'CreateSimple',
@@ -3236,7 +3229,7 @@ describe('Queues - Payload', () => {
         queue: 'autorunSecond',
       })
 
-      _internal_jobSystemGlobals.shouldAutoRun = true
+      jobSystemGlobals.shouldAutoRun = true
       await wait(2500)
 
       const baselineDocs = await payload.find({
@@ -3247,7 +3240,7 @@ describe('Queues - Payload', () => {
 
       // --- Step 2: Inject a transient DB failure ---
 
-      _internal_jobSystemGlobals.shouldAutoRun = false
+      jobSystemGlobals.shouldAutoRun = false
       await wait(1500)
 
       const originalUpdateJobs = payload.db.updateJobs.bind(payload.db)
@@ -3267,7 +3260,7 @@ describe('Queues - Payload', () => {
       })
 
       // Enable autorun — first cron tick will fail, but handler is wrapped in try/catch
-      _internal_jobSystemGlobals.shouldAutoRun = true
+      jobSystemGlobals.shouldAutoRun = true
       await wait(2500)
 
       // --- Step 3: Restore DB and queue another job ---

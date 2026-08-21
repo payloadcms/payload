@@ -21,4 +21,4 @@ export {
   tanstackServerAdapter,
 } from '../utilities/serverAdapter.server.js'
 export { type SerializableRecord, toSerializable } from '../utilities/toSerializable.js'
-export { getRequestTheme } from '@payloadcms/ui/utilities/getRequestTheme'
+export { getRequestTheme } from '@payloadcms/ui/internal/server'

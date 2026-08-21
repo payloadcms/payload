@@ -17,6 +17,7 @@ const publicAdminRoutes: (keyof Pick<
   'reset',
 ]
 
+/** @internal */
 export const isPublicAdminRoute = ({
   adminRoute,
   config,

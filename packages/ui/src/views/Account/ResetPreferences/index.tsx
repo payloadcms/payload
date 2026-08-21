@@ -14,6 +14,7 @@ import { useTranslation } from '../../../providers/Translation/index.js'
 
 const confirmResetModalSlug = 'confirm-reset-modal'
 
+/** @internal */
 export const ResetPreferences: React.FC<{
   readonly user?: User
 }> = ({ user }) => {

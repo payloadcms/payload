@@ -84,6 +84,8 @@ type Args = {
 
 /**
  * Flattens the fields schema and fields data
+ *
+ * @internal
  */
 export const iterateFields = async ({
   id,

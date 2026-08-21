@@ -14,6 +14,7 @@ type Args = {
   where: Where
 }
 
+/** @internal */
 export const getLatestGlobalVersion = async ({
   slug,
   config,

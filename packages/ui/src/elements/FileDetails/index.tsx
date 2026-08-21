@@ -39,6 +39,7 @@ type DraggableFileDetailsProps = {
 export type FileDetailsProps = (DraggableFileDetailsProps | StaticFileDetailsProps) &
   SharedFileDetailsProps
 
+/** @internal */
 export const FileDetails: React.FC<FileDetailsProps> = (props) => {
   const { hasMany } = props
 

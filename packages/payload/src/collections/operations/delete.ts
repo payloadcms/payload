@@ -45,6 +45,7 @@ export type Arguments = {
   where: Where
 } & Pick<FindOptions<string, SelectType>, 'select'>
 
+/** @internal */
 export const deleteOperation = async <
   TSlug extends CollectionSlug,
   TSelect extends SelectFromCollectionSlug<TSlug>,

@@ -20,6 +20,7 @@ type Arguments = {
   req: PayloadRequest
 }
 
+/** @internal */
 export async function docAccessOperation(args: Arguments): Promise<SanitizedCollectionPermission> {
   const {
     id,

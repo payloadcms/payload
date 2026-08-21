@@ -13,6 +13,7 @@ type Args = {
   schemaMap: FieldSchemaMap
 }
 
+/** @internal */
 export const traverseFields = ({
   config,
   fields,

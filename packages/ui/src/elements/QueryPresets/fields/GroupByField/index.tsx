@@ -9,6 +9,7 @@ import { useConfig } from '../../../../providers/Config/index.js'
 import { GroupByButton } from '../../../GroupBy/index.js'
 import '../fields.css'
 
+/** @internal */
 export const QueryPresetsGroupByField: TextFieldClientComponent = ({
   field: { label, required },
 }) => {

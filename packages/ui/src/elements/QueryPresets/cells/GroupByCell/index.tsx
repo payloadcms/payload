@@ -8,6 +8,7 @@ import { useConfig } from '../../../../providers/Config/index.js'
 import { useTranslation } from '../../../../providers/Translation/index.js'
 import { reduceFieldsToOptions } from '../../../../utilities/reduceFieldsToOptions.js'
 
+/** @internal */
 export const QueryPresetsGroupByCell: React.FC<DefaultCellComponentProps> = ({
   cellData,
   rowData,

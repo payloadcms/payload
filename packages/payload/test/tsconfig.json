@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "noEmit": true,
+    "paths": {
+      "payload": ["../dist/index.bundled.d.ts"],
+      "payload/internal": ["../dist/exports/internal.d.ts"],
+      "payload/shared": ["../dist/exports/shared.d.ts"]
+    },
+    "skipLibCheck": true,
+    "strict": true,
+    "target": "ES2022",
+    "types": ["node"]
+  },
+  "include": ["internal-exports.ts"]
+}

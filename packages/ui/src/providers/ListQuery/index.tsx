@@ -17,6 +17,7 @@ import { sanitizeQuery } from './sanitizeQuery.js'
 
 export { useListQuery } from './context.js'
 
+/** @internal */
 export const ListQueryProvider: React.FC<ListQueryProps> = ({
   children,
   collectionSlug,

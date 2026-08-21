@@ -25,6 +25,7 @@ export type Arguments = {
   showHiddenFields?: boolean
 } & Pick<FindOptions<string, SelectType>, 'select'>
 
+/** @internal */
 export const findVersionByIDOperation = async <T extends TypeWithVersion<T> = any>(
   args: Arguments,
 ): Promise<T> => {

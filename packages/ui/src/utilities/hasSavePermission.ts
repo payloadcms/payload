@@ -4,6 +4,7 @@ import type {
   SanitizedGlobalPermission,
 } from 'payload'
 
+/** @internal */
 export const hasSavePermission = (args: {
   /*
    * Pass either `collectionSlug` or `globalSlug`

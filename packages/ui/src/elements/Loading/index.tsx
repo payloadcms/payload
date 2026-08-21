@@ -48,6 +48,7 @@ export type UseLoadingOverlayToggleProps = {
   show: boolean
   type?: LoadingOverlayTypes
 }
+/** @internal */
 export const LoadingOverlayToggle: React.FC<UseLoadingOverlayToggleProps> = ({
   name: key,
   type = 'fullscreen',
@@ -84,6 +85,7 @@ export type FormLoadingOverlayToggleProps = {
   type?: LoadingOverlayTypes
 }
 
+/** @internal */
 export const FormLoadingOverlayToggle: React.FC<FormLoadingOverlayToggleProps> = ({
   name,
   type = 'fullscreen',

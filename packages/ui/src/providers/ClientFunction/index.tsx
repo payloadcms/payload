@@ -15,6 +15,7 @@ const ClientFunctionsContext = React.createContext<ClientFunctionsContextType>({
 
 type ModifyFunctionArgs = { func: any; key: string }
 
+/** @internal */
 export const ClientFunctionProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [clientFunctions, setClientFunctions] = React.useState({})
 

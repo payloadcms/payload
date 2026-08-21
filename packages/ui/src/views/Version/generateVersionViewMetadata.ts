@@ -9,6 +9,8 @@ import { formatMetadata } from '../../utilities/formatMetadata.js'
 
 /**
  * @todo Remove the `MetaConfig` type assertions. They are currently required because of how the `Metadata` type from `next` consumes the `URL` type.
+ *
+ * @internal
  */
 export const generateVersionViewMetadata: GenerateEditViewMetadata = async ({
   collectionConfig,

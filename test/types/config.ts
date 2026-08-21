@@ -6,7 +6,7 @@ import {
 } from '@payloadcms/richtext-lexical'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
-import { defaultUserCollection } from 'payload'
+import { defaultUserCollection } from 'payload/internal'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 
@@ -213,7 +213,10 @@ export default buildConfigWithDefaults({
               RelationshipFeature(),
               BlocksFeature({
                 blocks: [
-                  { slug: 'cta', fields: [{ name: 'link', type: 'relationship', relationTo: 'pages' }] },
+                  {
+                    slug: 'cta',
+                    fields: [{ name: 'link', type: 'relationship', relationTo: 'pages' }],
+                  },
                 ],
               }),
             ],

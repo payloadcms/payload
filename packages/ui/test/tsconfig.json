@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "jsx": "react-jsx",
+    "lib": ["DOM", "DOM.Iterable", "ES2022"],
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "noEmit": true,
+    "paths": {
+      "@payloadcms/ui": ["../dist/exports/client/index.d.ts"],
+      "@payloadcms/ui/rsc": ["../dist/exports/rsc/index.d.ts"],
+      "@payloadcms/ui/server": ["../dist/exports/server/index.d.ts"],
+      "@payloadcms/ui/shared": ["../dist/exports/shared/index.d.ts"],
+      "payload": ["../../payload/dist/index.bundled.d.ts"],
+      "payload/*": ["../../payload/dist/exports/*.d.ts"]
+    },
+    "skipLibCheck": true,
+    "strict": true,
+    "target": "ES2022",
+    "types": ["node"]
+  },
+  "include": ["public-exports.ts", "public-subpaths.mjs"]
+}

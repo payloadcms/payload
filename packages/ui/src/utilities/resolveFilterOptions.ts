@@ -1,5 +1,6 @@
 import type { FilterOptions, FilterOptionsProps, ResolvedFilterOptions } from 'payload'
 
+/** @internal */
 export const resolveFilterOptions = async (
   filterOptions: FilterOptions,
   options: { relationTo: string | string[] } & Omit<FilterOptionsProps, 'relationTo'>,

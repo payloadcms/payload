@@ -3,6 +3,7 @@ import React, { createContext, use } from 'react'
 
 export const OperationContext = createContext('' as Operation)
 
+/** @internal */
 export const OperationProvider: React.FC<{ children: React.ReactNode; operation: Operation }> = ({
   children,
   operation,

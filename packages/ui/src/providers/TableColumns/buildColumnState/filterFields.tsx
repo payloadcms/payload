@@ -5,6 +5,8 @@ import { fieldIsHiddenOrDisabled, fieldIsID, isFieldDisabled } from 'payload/sha
 /**
  * Filters fields that are hidden, disabled, or have `disabled.column` set to `true`.
  * Recurses through `tabs` and any container with `.fields` (e.g., `row`, `group`, `collapsible`).
+ *
+ * @internal
  */
 export const filterFields = <T extends ClientField | Field>(incomingFields: T[]): T[] => {
   const shouldSkipField = (field: T): boolean =>

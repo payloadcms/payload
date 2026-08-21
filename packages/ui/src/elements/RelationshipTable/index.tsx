@@ -55,6 +55,7 @@ type RelationshipTableComponentProps = {
 
 export type OnDrawerOpen = (id?: string, collectionSlug?: string) => void
 
+/** @internal */
 export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (props) => {
   const {
     AfterInput,

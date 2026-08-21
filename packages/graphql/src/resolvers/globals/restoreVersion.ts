@@ -1,6 +1,7 @@
 import type { Document, PayloadRequest, SanitizedGlobalConfig } from 'payload'
 
-import { isolateObjectProperty, restoreVersionOperationGlobal } from 'payload'
+import { isolateObjectProperty } from 'payload'
+import { restoreVersionOperationGlobal } from 'payload/internal'
 
 import type { Context } from '../types.js'
 

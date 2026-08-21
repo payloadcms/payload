@@ -54,6 +54,7 @@ type Args<TSlug extends GlobalSlug> = {
   unpublishAllLocales?: boolean
 } & Pick<FindOptions<string, SelectType>, 'select'>
 
+/** @internal */
 export const updateOperation = async <
   TSlug extends GlobalSlug,
   TSelect extends SelectFromGlobalSlug<TSlug>,

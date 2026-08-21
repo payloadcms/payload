@@ -6,7 +6,8 @@ import type {
   RequiredDataFromCollectionSlug,
 } from 'payload'
 
-import { createOperation, isolateObjectProperty } from 'payload'
+import { isolateObjectProperty } from 'payload'
+import { createOperation } from 'payload/internal'
 
 import type { Context } from '../types.js'
 

@@ -30,7 +30,7 @@ export const getConstraints = (config: Config): Field => ({
   admin: {
     className: 'query-preset-access-group',
     components: {
-      Cell: '@payloadcms/ui#QueryPresetsAccessCell',
+      Cell: '@payloadcms/ui/internal#QueryPresetsAccessCell',
     },
     condition: (data) => Boolean(data?.isShared),
   },

@@ -23,6 +23,7 @@ type FilterTriggerProps = {
   showBadge?: boolean
 }
 
+/** @internal */
 export function FilterTrigger({
   id,
   children,

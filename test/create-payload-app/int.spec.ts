@@ -270,6 +270,7 @@ describe('create-payload-app', () => {
         dbType: 'mongodb',
         projectDirOrConfigPath: { payloadConfigPath: result.payloadConfigPath },
       })
+      alignTanStackImportMapWithInstalledUI({ projectDir })
 
       expect(await readFile(indexPath, 'utf8')).toBe(originalIndex)
       expectRequiredTanStackFiles({ projectDir })
@@ -329,6 +330,7 @@ describe('create-payload-app', () => {
         dbType: 'mongodb',
         projectDirOrConfigPath: { payloadConfigPath: result.payloadConfigPath },
       })
+      alignTanStackImportMapWithInstalledUI({ projectDir })
 
       for (const [relativePath, originalContent] of originalContents) {
         expect(await readFile(path.join(projectDir, relativePath), 'utf8')).toBe(originalContent)
@@ -481,6 +483,27 @@ async function createTanStackProject({
   args.push('--target-dir', projectDir)
 
   await execa('pnpm', args, { stdio: 'inherit' })
+}
+
+function alignTanStackImportMapWithInstalledUI({ projectDir }: { projectDir: string }): void {
+  const uiPackageJson = fse.readJsonSync(
+    path.join(projectDir, 'node_modules/@payloadcms/ui/package.json'),
+  ) as { exports?: Record<string, unknown> }
+
+  if (uiPackageJson.exports?.['./internal']) {
+    return
+  }
+
+  // These tests install published canary packages but copy the local template.
+  // Preserve compatibility until the matching package set is published.
+  const importMapPath = path.join(projectDir, 'src/routes/_payload/importMap.js')
+  const importMap = fse.readFileSync(importMapPath, 'utf8')
+  fse.writeFileSync(
+    importMapPath,
+    importMap
+      .replaceAll('@payloadcms/ui/internal/rsc', '@payloadcms/ui/rsc')
+      .replaceAll('@payloadcms/ui/internal', '@payloadcms/ui'),
+  )
 }
 
 function expectRequiredTanStackFiles({ projectDir }: { projectDir: string }): void {

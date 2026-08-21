@@ -1,6 +1,6 @@
 import type { RichTextAdapter } from 'payload'
 
-import { genImportMapIterateFields } from 'payload'
+import { genImportMapIterateFields } from 'payload/internal'
 
 import type { ResolvedServerFeatureMap } from '../features/typesServer.js'
 import type { LexicalEditorProps } from '../types/index.js'

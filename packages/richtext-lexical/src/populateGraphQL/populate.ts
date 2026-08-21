@@ -1,6 +1,6 @@
 import type { PayloadRequest, SelectType } from 'payload'
 
-import { createDataloaderCacheKey } from 'payload'
+import { createDataloaderCacheKey } from 'payload/internal'
 
 type PopulateArguments = {
   collectionSlug: string

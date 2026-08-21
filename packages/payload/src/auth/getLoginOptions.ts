@@ -1,5 +1,6 @@
 import type { Auth } from './types.js'
 
+/** @internal */
 export const getLoginOptions = (
   loginWithUsername: Auth['loginWithUsername'],
 ): {

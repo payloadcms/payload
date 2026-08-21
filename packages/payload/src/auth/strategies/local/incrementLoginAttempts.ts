@@ -11,6 +11,7 @@ type Args = {
 
 // Note: this function does not use req in its updates, as we want those to be visible in parallel requests that are on a different
 // transaction. At the same time, we want updates from parallel requests to be visible here.
+/** @internal */
 export const incrementLoginAttempts = async ({
   collection,
   payload,

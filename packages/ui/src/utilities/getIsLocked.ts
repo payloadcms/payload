@@ -24,6 +24,7 @@ type Result = Promise<{
   lastUpdateTime?: number
 }>
 
+/** @internal */
 export const getIsLocked = async ({
   id,
   collectionConfig,

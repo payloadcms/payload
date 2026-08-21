@@ -8,8 +8,8 @@ import type {
 } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
-import { renderField } from '@payloadcms/ui/forms/renderField'
+import { renderField } from '@payloadcms/ui/internal/rsc'
+import { RenderServerComponent } from '@payloadcms/ui/rsc'
 import { getFromImportMap } from 'payload/shared'
 import React from 'react'
 

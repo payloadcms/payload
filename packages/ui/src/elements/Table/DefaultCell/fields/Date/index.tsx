@@ -8,6 +8,7 @@ import { useConfig } from '../../../../../providers/Config/index.js'
 import { useTranslation } from '../../../../../providers/Translation/index.js'
 import { formatDate } from '../../../../../utilities/formatDocTitle/formatDateTitle.js'
 
+/** @internal */
 export const DateCell: React.FC<
   DefaultCellComponentProps<{ accessor?: string } & DateFieldClient>
 > = (props) => {

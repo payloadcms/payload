@@ -11,6 +11,7 @@ export type Arguments<TSlug extends CollectionSlug> = {
   id: number | string
 } & Omit<CreateArguments<TSlug>, 'data' | 'duplicateFromID'>
 
+/** @internal */
 export const duplicateOperation = async <
   TSlug extends CollectionSlug,
   TSelect extends SelectFromCollectionSlug<TSlug>,

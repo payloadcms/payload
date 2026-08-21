@@ -9,7 +9,7 @@ import {
   SetDocumentStepNav,
   VersionDrawerCreatedAtCell,
   VersionsViewClient,
-} from '../../exports/client/index.js'
+} from '../../exports/client/internal.js'
 /* eslint-enable payload/no-imports-from-exports-dir */
 import { buildVersionColumns } from './buildColumns.js'
 import { fetchLatestVersion, fetchVersions } from './fetchVersions.js'

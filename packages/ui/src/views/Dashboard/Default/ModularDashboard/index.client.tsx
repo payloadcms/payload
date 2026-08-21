@@ -62,6 +62,7 @@ const WIDTH_TO_PERCENTAGE = {
   full: 100,
 } as const
 
+/** @internal */
 export function ModularDashboardClient({
   clientLayout: initialLayout,
   widgets,

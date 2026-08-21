@@ -18,6 +18,7 @@ export type CreatedAtCellProps = {
   }
 }
 
+/** @internal */
 export const CreatedAtCell: React.FC<CreatedAtCellProps> = ({
   collectionSlug,
   docID,

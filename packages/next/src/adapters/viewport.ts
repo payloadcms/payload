@@ -1,6 +1,6 @@
 import type { Viewport } from 'next'
 
-import { isIPhoneUserAgent } from '@payloadcms/ui/layouts'
+import { isIPhoneUserAgent } from '@payloadcms/ui/internal/shared'
 import { headers } from 'next/headers.js'
 
 export const getNextViewport = (userAgent?: string): Viewport => ({

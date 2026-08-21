@@ -3,6 +3,7 @@ import React, { createContext, use } from 'react'
 
 const Context = createContext(false)
 
+/** @internal */
 export const TabsProvider: React.FC<{ children?: React.ReactNode; withinTab?: boolean }> = ({
   children,
   withinTab = true,

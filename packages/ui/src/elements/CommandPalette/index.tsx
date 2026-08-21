@@ -16,12 +16,14 @@ import { filterActions } from './filterActions.js'
 import { splitLabelByMatches } from './highlightLabel.js'
 import './index.css'
 
+/** @internal */
 export const commandPaletteSlug = 'command-palette'
 const baseClass = 'cmd-palette'
 
 const cmdKKeyCodes = ['k']
 const optionId = (action: CommandPaletteAction) => `${baseClass}-option-${action.id}`
 
+/** @internal */
 export const CommandPalette: React.FC = () => {
   const { closeModal, modalState, openModal } = useModal()
   const router = useRouter()

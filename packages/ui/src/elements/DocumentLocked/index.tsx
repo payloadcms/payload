@@ -35,6 +35,7 @@ const formatDate = (date: null | number | undefined) => {
   }).format(new Date(date))
 }
 
+/** @internal */
 export const DocumentLocked: React.FC<{
   handleGoBack: () => void
   isActive: boolean

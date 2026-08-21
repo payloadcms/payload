@@ -24,6 +24,7 @@ export type Arguments = {
   req: PayloadRequest
 }
 
+/** @internal */
 export const refreshOperation = async (incomingArgs: Arguments): Promise<Result> => {
   let args = incomingArgs
 

@@ -9,6 +9,7 @@ import { Link } from '../Link/index.js'
 
 const baseClass = 'nav'
 
+/** @internal */
 export const Logout: React.FC<{
   tabIndex?: number
 }> = ({ tabIndex = 0 }) => {

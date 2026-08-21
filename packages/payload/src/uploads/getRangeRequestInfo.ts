@@ -36,6 +36,8 @@ export type RangeRequestResult =
  * @param fileSize - The total size of the file in bytes
  * @param rangeHeader - The Range header value from the request (e.g., "bytes=0-1023")
  * @returns Result object with headers and status code for the response
+ *
+ * @internal
  */
 export function getRangeRequestInfo({
   fileSize,

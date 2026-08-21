@@ -20,7 +20,11 @@ type Args = {
   user?: User
 }
 
-/** Builds the redirect URL for unauthenticated or unauthorized admin access. */
+/**
+ * Builds the redirect URL for unauthenticated or unauthorized admin access.
+ *
+ * @internal
+ */
 export const handleAuthRedirect = ({ config, route, searchParams, user }: Args): string => {
   const {
     admin: {

@@ -10,7 +10,7 @@ import type {
 import React from 'react'
 
 // eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports dir for proper client boundary
-import { ShouldRenderTabs } from '../../../exports/client/index.js'
+import { ShouldRenderTabs } from '../../../exports/client/internal.js'
 import { RenderServerComponent } from '../../RenderServerComponent/index.js'
 import { DefaultDocumentTab } from './Tab/index.js'
 import { getTabs } from './tabs/index.js'

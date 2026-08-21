@@ -29,21 +29,25 @@ import {
   TableSectionRoot,
 } from '../elements/TableSection/index.js'
 import {
+  Pill,
+  Table,
+  // eslint-disable-next-line payload/no-imports-from-exports-dir -- these MUST reference the exports dir: https://github.com/payloadcms/payload/issues/12002#issuecomment-2791493587
+} from '../exports/client/index.js'
+import {
   GroupByHeader,
   GroupByPageControls,
   OrderableTable,
-  Pill,
   SelectAll,
   SelectionProvider,
   SelectRow,
   SortHeader,
   SortRow,
-  Table,
   // eslint-disable-next-line payload/no-imports-from-exports-dir -- these MUST reference the exports dir: https://github.com/payloadcms/payload/issues/12002#issuecomment-2791493587
-} from '../exports/client/index.js'
+} from '../exports/client/internal.js'
 import { filterFieldsWithPermissions } from '../providers/TableColumns/buildColumnState/filterFieldsWithPermissions.js'
 import { buildColumnState } from '../providers/TableColumns/buildColumnState/index.js'
 
+/** @internal */
 export const renderFilters = (
   fields: Field[],
   importMap: ImportMap,
@@ -69,6 +73,7 @@ export const renderFilters = (
     new Map() as Map<string, React.ReactNode>,
   )
 
+/** @internal */
 export const renderTable = ({
   clientCollectionConfig,
   clientConfig,

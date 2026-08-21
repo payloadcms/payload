@@ -8,6 +8,7 @@ import type { RenderDocumentServerFunction } from '../../providers/ServerFunctio
 import { getClientConfig } from '../../utilities/getClientConfig.js'
 import { renderDocument } from './index.js'
 
+/** @internal */
 export const renderDocumentHandler: RenderDocumentServerFunction = async (args) => {
   const {
     collectionSlug,

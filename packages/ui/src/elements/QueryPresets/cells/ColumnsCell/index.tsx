@@ -8,6 +8,7 @@ import './index.css'
 
 const baseClass = 'query-preset-columns-cell'
 
+/** @internal */
 export const QueryPresetsColumnsCell: React.FC<DefaultCellComponentProps> = ({ cellData }) => {
   return (
     <div className={baseClass}>

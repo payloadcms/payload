@@ -79,6 +79,7 @@ type Args = {
 // - Execute read access control
 // - Populate relationships
 
+/** @internal */
 export const promise = async ({
   blockData,
   collection,
