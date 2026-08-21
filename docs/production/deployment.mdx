@@ -273,6 +273,44 @@ ENV PORT 3000
 CMD HOSTNAME="0.0.0.0" node server.js
 ```
 
+## Output file tracing in monorepos
+
+With `output: 'standalone'`, Next.js does not copy your `node_modules` into the build. It traces the imports of each route and copies only the files it finds. Two properties of that tracing regularly break monorepo deployments, and neither reproduces locally - `next dev` has no tracing step at all, so the first sign of trouble is a container that exits on boot.
+
+### Set the tracing root
+
+Next.js infers the root of the trace from the directory that holds your `next.config`. In a monorepo your dependencies live above that, at the workspace root, so point it there explicitly:
+
+```js
+// apps/web/next.config.mjs
+import path from 'path'
+import { withPayload } from '@payloadcms/next/withPayload'
+
+const nextConfig = {
+  output: 'standalone',
+  outputFileTracingRoot: path.join(import.meta.dirname, '../../'),
+}
+
+export default withPayload(nextConfig)
+```
+
+### Files the tracer cannot see
+
+Tracing follows imports, so anything that is not a statically analyzable import can be missed: compiler-injected helpers, optional native bindings, and modules loaded through a dynamic `require`. If a standalone container throws `MODULE_NOT_FOUND` for a package that is plainly in your lockfile, this is usually why.
+
+`@swc/helpers` is a common example - it is injected into compiled output by the SWC transform rather than imported by your source, and under pnpm's symlinked `node_modules` the tracer can miss it. Add the missing files explicitly:
+
+```js
+const nextConfig = {
+  output: 'standalone',
+  outputFileTracingIncludes: {
+    '**/*': ['../../node_modules/@swc/helpers/**/*'],
+  },
+}
+```
+
+Two things to know about these values. They are glob patterns resolved from the Next.js project root - the directory holding `next.config`, not the monorepo root - so a bare package name such as `@swc/helpers` matches nothing at all, and the path has to walk up to wherever the package actually lives. `withPayload` merges its own includes with yours, so passing this through the plugin is safe.
+
 ## Docker Compose
 
 Here is an example of a docker-compose.yml file that can be used for development
