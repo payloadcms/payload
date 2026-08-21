@@ -4,7 +4,7 @@ import { randomBytes, randomUUID } from 'crypto'
 import { Types } from 'mongoose'
 import path from 'path'
 import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, beforeEach, describe, expect } from 'vitest'
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type {
@@ -17,9 +17,8 @@ import type {
   Relation,
 } from './payload-types.js'
 
-import { it } from '../__helpers/int/vitest.js'
+import { test } from '../__helpers/int/vitest.js'
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
-import { mongooseList } from '../__helpers/shared/isMongoose.js'
 import { devUser } from '../credentials.js'
 import { clearAndSeedEverything } from './seed.js'
 import {
@@ -43,7 +42,7 @@ const dirname = path.dirname(filename)
 
 type EasierChained = { id: string; relation: EasierChained }
 
-const mongoIt = mongooseList.includes(process.env.PAYLOAD_DATABASE || '') ? it : it.skip
+const mongoIt = test.options({ db: 'mongo' })
 
 describe('Relationships', () => {
   beforeAll(async () => {

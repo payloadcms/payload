@@ -90,10 +90,11 @@ describe('database', () => {
     await payload.destroy()
   })
 
-  describe(
-    'connection pool',
-    { db: (adapter) => adapter.startsWith('postgres') || adapter === 'supabase' },
-    () => {
+  test
+    .options({
+      db: (adapter) => adapter.startsWith('postgres') || adapter === 'supabase',
+    })
+    .describe('connection pool', () => {
       it('should not leave a client checked out after connecting', async () => {
         const { pool } = payload.db as unknown as PostgresAdapter
 
@@ -108,8 +109,7 @@ describe('database', () => {
         // the process, so `pool.end()` never drains after `payload.destroy()`.
         expect(pool.totalCount - pool.idleCount).toBe(0)
       })
-    },
-  )
+    })
 
   describe('id type', () => {
     it('should sanitize incoming IDs if ID type is number', async () => {
@@ -798,7 +798,6 @@ describe('database', () => {
       },
     )
 
-     
     test.options({ db: 'mongo' })(
       'ensure timestamps are not created in db adapter update or create when timestamps are disabled even with allowAdditionalKeys true',
       async () => {
