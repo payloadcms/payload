@@ -1340,16 +1340,6 @@ type RootTypeScriptConfig = {
       jsonSchema: JSONSchema4
     }) => JSONSchema4
   >
-
-  /**
-   * Enable strict type safety for draft operations. When enabled, the `draft` parameter is forbidden
-   * on collections without drafts, and query results with `draft: true` type required fields as optional.
-   * This prevents invalid draft usage at compile time and ensures type correctness across all Local API operations.
-   *
-   * @default false
-   * @todo Remove in v4. Strict draft types will become the default behavior.
-   */
-  strictDraftTypes?: boolean
 }
 
 /**
