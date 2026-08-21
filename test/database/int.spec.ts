@@ -29,13 +29,13 @@ import {
 } from 'payload'
 import { assert } from 'ts-essentials'
 import { fileURLToPath } from 'url'
-import { afterAll, afterEach, beforeAll, beforeEach, expect } from 'vitest'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { Global2, Post } from './payload-types.js'
 
 import { sanitizeQueryValue } from '../../packages/db-mongodb/src/queries/sanitizeQueryValue.js'
-import { describe, it } from '../__helpers/int/vitest.js'
+import { test } from '../__helpers/int/vitest.js'
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { removeFiles } from '../__helpers/shared/removeFiles.js'
 import { devUser } from '../credentials.js'
@@ -788,10 +788,8 @@ describe('database', () => {
       await noTimestampsTestDB(true)
     })
 
-    // eslint-disable-next-line vitest/expect-expect
-    it(
+    test.options({ db: 'mongo' })(
       'ensure timestamps are not created in update or create when timestamps are disabled even with allowAdditionalKeys true',
-      { db: 'mongo' },
       async () => {
         const originalAllowAdditionalKeys = payload.db.allowAdditionalKeys
         payload.db.allowAdditionalKeys = true
@@ -800,10 +798,9 @@ describe('database', () => {
       },
     )
 
-    // eslint-disable-next-line vitest/expect-expect
-    it(
+     
+    test.options({ db: 'mongo' })(
       'ensure timestamps are not created in db adapter update or create when timestamps are disabled even with allowAdditionalKeys true',
-      { db: 'mongo' },
       async () => {
         const originalAllowAdditionalKeys = payload.db.allowAdditionalKeys
         payload.db.allowAdditionalKeys = true
@@ -1892,7 +1889,7 @@ describe('database', () => {
     })
 
     // known drizzle issue: https://github.com/payloadcms/payload/issues/4597
-    it('should run migrate:down', { db: 'mongo' }, async () => {
+    test.options({ db: 'mongo' })('should run migrate:down', async () => {
       // migrate existing if there any
       await payload.db.migrate()
 
@@ -1926,7 +1923,7 @@ describe('database', () => {
     })
 
     // known drizzle issue: https://github.com/payloadcms/payload/issues/4597
-    it('should run migrate:refresh', { db: 'mongo' }, async () => {
+    test.options({ db: 'mongo' })('should run migrate:refresh', async () => {
       let error
       try {
         await payload.db.migrateRefresh()
@@ -1944,7 +1941,7 @@ describe('database', () => {
   })
 
   // known drizzle issue: https://github.com/payloadcms/payload/issues/4597
-  it('should run migrate:reset', { db: 'mongo' }, async () => {
+  test.options({ db: 'mongo' })('should run migrate:reset', async () => {
     let error
     try {
       await payload.db.migrateReset()
@@ -2398,48 +2395,42 @@ describe('database', () => {
         })
       }
 
-      it(
-        'should throw error when beginTransaction fails to connect (drizzle)',
-        { db: (adapter) => adapter.startsWith('postgres') || adapter === 'supabase' },
-        async () => {
-          const db = payload.db as unknown as Record<string, unknown>
-          const originalDrizzle = db.drizzle
-          try {
-            db.drizzle = {
-              transaction: () => Promise.reject(new Error('connection refused')),
-            }
-
-            await expect(() => payload.db.beginTransaction()).rejects.toThrow(/connection refused/)
-          } finally {
-            db.drizzle = originalDrizzle
+      test.options({
+        db: (adapter) => adapter.startsWith('postgres') || adapter === 'supabase',
+      })('should throw error when beginTransaction fails to connect (drizzle)', async () => {
+        const db = payload.db as unknown as Record<string, unknown>
+        const originalDrizzle = db.drizzle
+        try {
+          db.drizzle = {
+            transaction: () => Promise.reject(new Error('connection refused')),
           }
-        },
-      )
 
-      it(
-        'should throw error when beginTransaction fails to connect (mongo)',
-        {
-          db: (adapter) =>
-            adapter === 'mongodb' || adapter === 'mongodb-atlas' || adapter === 'documentdb',
-        },
-        async () => {
-          const db = payload.db as unknown as Record<string, unknown>
-          const originalConnection = db.connection
-          try {
-            db.connection = {
-              getClient: () => ({
-                startSession: () => {
-                  throw new Error('connection refused')
-                },
-              }),
-            }
+          await expect(() => payload.db.beginTransaction()).rejects.toThrow(/connection refused/)
+        } finally {
+          db.drizzle = originalDrizzle
+        }
+      })
 
-            await expect(() => payload.db.beginTransaction()).rejects.toThrow(/connection refused/)
-          } finally {
-            db.connection = originalConnection
+      test.options({
+        db: (adapter) =>
+          adapter === 'mongodb' || adapter === 'mongodb-atlas' || adapter === 'documentdb',
+      })('should throw error when beginTransaction fails to connect (mongo)', async () => {
+        const db = payload.db as unknown as Record<string, unknown>
+        const originalConnection = db.connection
+        try {
+          db.connection = {
+            getClient: () => ({
+              startSession: () => {
+                throw new Error('connection refused')
+              },
+            }),
           }
-        },
-      )
+
+          await expect(() => payload.db.beginTransaction()).rejects.toThrow(/connection refused/)
+        } finally {
+          db.connection = originalConnection
+        }
+      })
 
       describe('disableTransaction', () => {
         let disabledTransactionPost
@@ -3244,7 +3235,7 @@ describe('database', () => {
     })
   })
 
-  describe('Schema generation', { db: 'drizzle' }, () => {
+  test.options({ db: 'drizzle' }).describe('Schema generation', () => {
     it('should generate Drizzle Postgres schema', async () => {
       const generatedAdapterName = process.env.PAYLOAD_DATABASE
       if (!generatedAdapterName?.includes('postgres') && generatedAdapterName !== 'supabase') {
@@ -5952,7 +5943,7 @@ describe('database', () => {
     await payload.db.connect()
   })
 
-  it('ensure mongodb query sanitization does not duplicate IDs', { db: 'mongo' }, () => {
+  test.options({ db: 'mongo' })('ensure mongodb query sanitization does not duplicate IDs', () => {
     const res: any = sanitizeQueryValue({
       field: {
         name: '_id',
@@ -5971,9 +5962,8 @@ describe('database', () => {
     expect(JSON.parse(JSON.stringify(res)).val[0]).toEqual('68378b649ca45274fb10126f')
   })
 
-  it(
+  test.options({ db: 'mongo' })(
     'ensure mongodb respects collation when using collection in the config',
-    { db: 'mongo' },
     async () => {
       // Clear any existing documents
       await payload.delete({ collection: 'simple', where: {} })
@@ -6023,9 +6013,8 @@ describe('database', () => {
     },
   )
 
-  it(
+  test.options({ db: 'mongo' })(
     'ensure mongodb collation works with draft pagination without sort',
-    { db: 'mongo' },
     async () => {
       // Clear any existing documents
       await payload.delete({ collection: 'categories', where: {} })

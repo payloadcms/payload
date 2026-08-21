@@ -4,18 +4,17 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import { afterAll, beforeAll, expect, it } from 'vitest'
 
+import { test } from '../__helpers/int/vitest.js'
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
-import { describe } from '../__helpers/int/vitest.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 let payload: Payload
 
-describe(
-  'database - sqlite bound parameters limit',
-  { db: (type) => type.startsWith('sqlite') },
-  () => {
+test
+  .options({ db: (type) => type.startsWith('sqlite') })
+  .describe('database - sqlite bound parameters limit', () => {
     beforeAll(async () => {
       ;({ payload } = await initPayloadInt(dirname))
     })
@@ -127,5 +126,4 @@ describe(
       expect(res.docs[0].id).toBe(simpleLocalizedDoc.id)
       expect(res.docs[0].text).toBe('Test')
     })
-  },
-)
+  })

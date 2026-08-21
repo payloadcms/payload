@@ -1,115 +1,116 @@
-import type { SuiteFactory, TestFunction } from 'vitest'
+import path from 'node:path'
+import { getPayload } from 'payload'
+import { expect, test as vitestTest } from 'vitest'
 
-import { describe as vitestDescribe, it as vitestIt } from 'vitest'
+import type { DatabaseAdapterType } from '../../dbAdapters.js'
 
-import { type DatabaseAdapterType, getCurrentDatabaseAdapter } from '../../dbAdapters.js'
+import { getCurrentDatabaseAdapter } from '../../dbAdapters.js'
+import { getSDK } from '../shared/getSDK.js'
+import { initPayloadInt } from '../shared/initPayloadInt.js'
 import { mongooseList } from '../shared/isMongoose.js'
+import { NextRESTClient } from '../shared/NextRESTClient.js'
+import { runCLICommand } from '../shared/runCLICommand.js'
 
-type ItOptions = {
-  /**
-   * Specify which database(s) the test should run on.
-   * - 'all': Run on all databases (default)
-   * - 'drizzle': Run only on Drizzle (Postgres/SQLite)
-   * - 'mongo': Run only on MongoDB
-   * - function: Custom function that receives the current adapter type and returns a boolean indicating whether to run the test.
-   */
+type TestOptions = {
+  /** Limits the test or suite to the selected database adapters. */
   db?: 'all' | 'drizzle' | 'mongo' | ((adapterType: DatabaseAdapterType) => boolean)
+}
+
+const testWithDirectory = vitestTest.extend('testDir', { scope: 'file' }, () => getTestDirectory())
+
+const testWithConfig = testWithDirectory.extend(
+  'config',
+  { scope: 'file' },
+  async ({ testDir }) => {
+    const { config } = await initPayloadInt(testDir, undefined, false)
+
+    return config
+  },
+)
+
+const testWithPayload = testWithConfig.extend(
+  'payload',
+  { scope: 'file' },
+  async ({ config }, { onCleanup }) => {
+    const payload = await getPayload({ config, cron: true })
+
+    onCleanup(() => payload.destroy())
+
+    return payload
+  },
+)
+
+const testWithRestClient = testWithPayload.extend('restClient', ({ payload }) => {
+  return new NextRESTClient(payload.config)
+})
+
+const testWithSDK = testWithRestClient.extend('sdk', ({ payload }) => {
+  return getSDK(payload.config)
+})
+
+const testWithFixtures = testWithSDK.extend('cli', ({ testDir }) => {
+  return async (input: Parameters<typeof runCLICommand>[0]) => {
+    const configPath = typeof input === 'string' ? undefined : input.configPath
+
+    await initPayloadInt(testDir, undefined, false, configPath)
+
+    return runCLICommand(input, { cwd: testDir })
+  }
+})
+
+/**
+ * Integration test API with Payload's shared fixtures and database filtering.
+ *
+ * `config`, `payload`, and `testDir` are shared for the test file. `payload` is destroyed
+ * automatically after the file finishes. Clients are new for every test so
+ * authentication and other mutable state cannot leak into the next test.
+ *
+ * @example
+ * test.options({ db: 'mongo' })('MongoDB only', async ({ payload }) => {
+ *   await payload.find({ collection: 'posts' })
+ * })
+ *
+ * @example
+ * test.options({ db: 'drizzle' }).describe('Drizzle only', () => {
+ *   test('works', async ({ payload }) => { ... })
+ * })
+ */
+export const test = Object.assign(testWithFixtures, {
+  options: (options: TestOptions) => {
+    const shouldRun = matchesDatabase(options)
+
+    return Object.assign(testWithFixtures.runIf(shouldRun), {
+      describe: testWithFixtures.describe.runIf(shouldRun),
+    })
+  },
+})
+
+const getTestDirectory = (): string => {
+  const testPath = expect.getState().testPath
+
+  if (!testPath) {
+    throw new Error('Could not determine the integration test file path.')
+  }
+
+  return path.dirname(testPath)
 }
 
 const isMongo = mongooseList.includes(process.env.PAYLOAD_DATABASE!)
 
-/**
- * Custom `it` wrapper that supports database-specific test execution.
- *
- * @example
- * // Run only on Drizzle (Postgres/SQLite)
- * it('drizzle-specific test', { db: 'drizzle' }, async () => { ... })
- *
- * // Run only on MongoDB
- * it('mongo-specific test', { db: 'mongo' }, async () => { ... })
- *
- * // Run on all databases (default)
- * it('universal test', async () => { ... })
- */
-const itWithOptions = (
-  name: string,
-  optionsOrFn?: ItOptions | TestFunction,
-  fn?: TestFunction,
-): ReturnType<typeof vitestIt> => {
-  // Handle overloads: it(name, fn) or it(name, options, fn)
-  const options: ItOptions | undefined = typeof optionsOrFn === 'object' ? optionsOrFn : undefined
-  const testFn: TestFunction | undefined = typeof optionsOrFn === 'function' ? optionsOrFn : fn
-
-  const db = options?.db ?? 'all'
-
+const matchesDatabase = ({ db = 'all' }: TestOptions = {}): boolean => {
   if (typeof db === 'function') {
-    if (!db(getCurrentDatabaseAdapter())) {
-      return vitestIt.skip(name, testFn)
-    }
-
-    return vitestIt(name, testFn)
+    return db(getCurrentDatabaseAdapter())
   }
 
-  if (db === 'drizzle' && isMongo) {
-    return vitestIt.skip(name, testFn)
+  if (db === 'mongo') {
+    return isMongo
   }
-  if (db === 'mongo' && !isMongo) {
-    return vitestIt.skip(name, testFn)
+
+  if (db === 'drizzle') {
+    return !isMongo
   }
-  return vitestIt(name, testFn)
+
+  return true
 }
 
-// Add skip property for compatibility
-itWithOptions.skip = vitestIt.skip
-
-// Needs to be called `it` for the vitest vs code extension to recognize it as a test function
-export const it = itWithOptions
-
-/**
- * Custom `describe` wrapper that supports database-specific suite execution.
- *
- * @example
- * // Run only on Drizzle (Postgres/SQLite)
- * describe('drizzle-specific suite', { db: 'drizzle' }, () => { ... })
- *
- * // Run only on MongoDB
- * describe('mongo-specific suite', { db: 'mongo' }, () => { ... })
- *
- * // Run on all databases (default)
- * describe('universal suite', () => { ... })
- */
-const describeWithOptions = (
-  name: string,
-  optionsOrFn?: ItOptions | SuiteFactory,
-  fn?: SuiteFactory,
-): ReturnType<typeof vitestDescribe> => {
-  // Handle overloads: describe(name, fn) or describe(name, options, fn)
-  const options: ItOptions | undefined = typeof optionsOrFn === 'object' ? optionsOrFn : undefined
-  const suiteFn: SuiteFactory | undefined = typeof optionsOrFn === 'function' ? optionsOrFn : fn
-
-  const db = options?.db ?? 'all'
-
-  if (typeof db === 'function') {
-    if (!db(getCurrentDatabaseAdapter())) {
-      return vitestDescribe.skip(name, suiteFn)
-    }
-    return vitestDescribe(name, suiteFn)
-  }
-
-  if (db === 'drizzle' && isMongo) {
-    return vitestDescribe.skip(name, suiteFn)
-  }
-  if (db === 'mongo' && !isMongo) {
-    return vitestDescribe.skip(name, suiteFn)
-  }
-  return vitestDescribe(name, suiteFn)
-}
-
-// Add skip property for compatibility
-describeWithOptions.skip = vitestDescribe.skip
-
-// Needs to be called `describe` for the vitest vs code extension to recognize it
-export const describe = describeWithOptions
-
-// Re-export for convenience
 export { isMongo }

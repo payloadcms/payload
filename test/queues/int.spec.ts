@@ -11,11 +11,11 @@ import {
 } from 'payload'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect } from 'vitest'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
-import { it } from '../__helpers/int/vitest.js'
+import { test } from '../__helpers/int/vitest.js'
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { devUser } from '../credentials.js'
 import { clearAndSeedEverything } from './seed.js'
@@ -1244,9 +1244,8 @@ describe('Queues - Payload', () => {
 
   describe('worker recovery', () => {
     // The child process can share the file-backed SQLite test database.
-    it(
+    test.options({ db: (type) => type.startsWith('sqlite') })(
       'should recover a job after its worker process is killed',
-      { db: (type) => type.startsWith('sqlite') },
       async () => {
         _internal_jobSystemGlobals.shouldAutoRun = false
         payload.config.jobs.deleteJobOnComplete = false

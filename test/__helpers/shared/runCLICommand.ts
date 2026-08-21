@@ -1,35 +1,37 @@
-import type { Payload, SanitizedConfig } from 'payload'
-import type { CLIRuntime } from 'payload/cli'
-
+import execa from 'execa'
 import path from 'node:path'
-import payload from 'payload'
-import { createCLI } from 'payload/internal'
+import { fileURLToPath } from 'node:url'
+import { parseArgsStringToArgv } from 'string-argv'
 
-export const runCLICommand = async ({
-  argv,
-  config,
-  preparePayload,
-}: {
-  argv: string[]
-  config: SanitizedConfig
-  preparePayload?: ({ payload }: { payload: Payload }) => Promise<void> | void
-}): Promise<void> => {
-  const runtime: CLIRuntime = {
-    configDir: process.env.PAYLOAD_CONFIG_PATH
-      ? path.dirname(path.resolve(process.env.PAYLOAD_CONFIG_PATH))
-      : process.cwd(),
-    destroy: () => Promise.resolve(),
-    getConfig: () => Promise.resolve(config),
-    async getPayload(options = {}) {
-      await payload.init({ config, ...options })
-      await preparePayload?.({ payload })
+const dirname = path.dirname(fileURLToPath(import.meta.url))
+const runnerPath = path.resolve(dirname, 'runPayloadCLI.ts')
 
-      return payload
+type CLIInput =
+  | {
+      command: string
+      configPath?: string
+    }
+  | string
+
+/** Runs the real Payload CLI in an isolated process against a test project. */
+export const runCLICommand = async (
+  input: CLIInput,
+  { cwd = process.cwd() }: { cwd?: string } = {},
+): Promise<{ stderr: string; stdout: string }> => {
+  const command = typeof input === 'string' ? input : input.command
+  const configPath = typeof input === 'string' ? undefined : input.configPath
+
+  const { stderr, stdout } = await execa(
+    process.execPath,
+    ['--import', 'tsx', runnerPath, ...parseArgsStringToArgv(command)],
+    {
+      cwd,
+      env: {
+        ...process.env,
+        ...(configPath ? { PAYLOAD_CONFIG_PATH: configPath } : {}),
+      },
     },
-    isScheduled: false,
-    markScheduled: () => undefined,
-  }
-  const cli = await createCLI(runtime)
+  )
 
-  await cli.parseAsync(argv, { from: 'user' })
+  return { stderr, stdout }
 }

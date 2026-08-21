@@ -1,28 +1,14 @@
-import path from 'path'
-import {
-  _internal_jobSystemGlobals,
-  _internal_resetJobSystemGlobals,
-  getPayload,
-  type SanitizedConfig,
-} from 'payload'
+import { _internal_jobSystemGlobals, _internal_resetJobSystemGlobals, getPayload } from 'payload'
 import { wait } from 'payload/shared'
-import { fileURLToPath } from 'url'
-import { beforeAll, describe, expect, it } from 'vitest'
+import { describe, expect } from 'vitest'
 
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
-import { runCLICommand } from '../__helpers/shared/runCLICommand.js'
+import { test } from '../__helpers/int/vitest.js'
 import { waitUntilAutorunIsDone } from './utilities.js'
 
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
-
 describe('Queues - CLI', () => {
-  let config: SanitizedConfig
-  beforeAll(async () => {
-    ;({ config } = await initPayloadInt(dirname, undefined, false))
-  })
-
-  it('ensure consecutive getPayload call with cron: true will autorun jobs', async () => {
+  test('ensure consecutive getPayload call with cron: true will autorun jobs', async ({
+    config,
+  }) => {
     const payload = await getPayload({
       config,
     })
@@ -69,11 +55,8 @@ describe('Queues - CLI', () => {
     _internal_resetJobSystemGlobals()
   })
 
-  it('can run migrate CLI without jobs attempting to run', async () => {
-    await runCLICommand({
-      argv: ['migrate'],
-      config,
-    })
+  test('can run migrate CLI without jobs attempting to run', async ({ cli }) => {
+    await cli('migrate')
 
     // Wait 3 seconds to let potential autorun crons trigger
     await new Promise((resolve) => setTimeout(resolve, 3000))
