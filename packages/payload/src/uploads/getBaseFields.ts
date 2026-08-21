@@ -1,10 +1,17 @@
 import type { CollectionConfig } from '../collections/config/types.js'
 import type { Config } from '../config/types.js'
 import type { Field } from '../fields/config/types.js'
-import type { UploadConfig } from './types.js'
+import type { PayloadRequest } from '../types/index.js'
+import type { UploadConfig, UploadEdits } from './types.js'
 
+import { isNumber } from '../utilities/isNumber.js'
 import { generateFilePathOrURL } from './generateFilePathOrURL.js'
 import { mimeTypeValidator } from './mimeTypeValidator.js'
+
+const getUploadEdits = (req: PayloadRequest): undefined | UploadEdits =>
+  req.query?.uploadEdits && typeof req.query.uploadEdits === 'object'
+    ? (req.query.uploadEdits as UploadEdits)
+    : undefined
 
 const disabledFromImageSize = (
   sizeAdmin: { disabled?: { column?: boolean; filter?: boolean; groupBy?: boolean } } | undefined,
@@ -169,6 +176,63 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
     height,
   ]
 
+  if (uploadOptions.crop !== false) {
+    uploadFields.push({
+      name: 'cropRect',
+      type: 'group',
+      admin: {
+        disabled: { column: true, filter: true, groupBy: true },
+        hidden: true,
+      },
+      fields: [
+        {
+          name: 'x',
+          type: 'number',
+          label: 'X',
+        },
+        {
+          name: 'y',
+          type: 'number',
+          label: 'Y',
+        },
+        {
+          name: 'width',
+          type: 'number',
+          label: ({ t }) => t('upload:width'),
+        },
+        {
+          name: 'height',
+          type: 'number',
+          label: ({ t }) => t('upload:height'),
+        },
+        {
+          name: 'unit',
+          type: 'select',
+          label: 'Unit',
+          options: ['%', 'px'],
+        },
+      ],
+      hooks: {
+        beforeChange: [
+          ({ data, req, value }) => {
+            const crop = getUploadEdits(req)?.crop
+
+            if (crop) {
+              return crop
+            }
+
+            if (data?.filename === null) {
+              return null
+            }
+
+            return value
+          },
+        ],
+      },
+      label: ({ t }) => t('upload:crop'),
+    })
+  }
+
   // Add focal point fields if not disabled
   if (
     uploadOptions.focalPoint !== false ||
@@ -176,13 +240,27 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
     uploadOptions.resizeOptions
   ) {
     uploadFields = uploadFields.concat(
-      ['focalX', 'focalY'].map((name) => {
+      (['focalX', 'focalY'] as const).map((name) => {
         return {
           name,
           type: 'number',
           admin: {
             disabled: { column: true, filter: true, groupBy: true },
             hidden: true,
+          },
+          hooks: {
+            beforeChange: [
+              ({ req, value }) => {
+                const focalPoint = getUploadEdits(req)?.focalPoint
+
+                if (!focalPoint) {
+                  return value
+                }
+
+                const coordinate = name === 'focalX' ? focalPoint.x : focalPoint.y
+                return isNumber(coordinate) ? Math.round(Number(coordinate)) : 50
+              },
+            ],
           },
         }
       }),

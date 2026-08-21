@@ -42,8 +42,9 @@ type Result<T> = Promise<{
 const shouldReupload = (
   uploadEdits: UploadEdits,
   fileData: Record<string, unknown> | undefined,
+  hasSharp: boolean,
 ) => {
-  if (!fileData) {
+  if (!fileData || !hasSharp) {
     return false
   }
 
@@ -87,6 +88,7 @@ export const generateFileData = async <T>({
   const { serverURL, sharp } = req.payload.config
 
   let file = isDuplicating ? undefined : req.file
+  const hasIncomingFile = Boolean(file)
 
   const uploadEdits = parseUploadEditsFromReqOrIncomingData({
     data,
@@ -115,7 +117,8 @@ export const generateFileData = async <T>({
 
   if (
     !file &&
-    (isDuplicating || shouldReupload(uploadEdits, incomingFileData as Record<string, unknown>))
+    (isDuplicating ||
+      shouldReupload(uploadEdits, incomingFileData as Record<string, unknown>, Boolean(sharp)))
   ) {
     const { filename, url } = incomingFileData as unknown as FileData
     if (filename && (filename.includes('../') || filename.includes('..\\'))) {
@@ -178,6 +181,16 @@ export const generateFileData = async <T>({
   const fileIsAnimatedType = ['image/avif', 'image/gif', 'image/webp'].includes(file.mimetype)
   const cropData =
     typeof uploadEdits === 'object' && 'crop' in uploadEdits ? uploadEdits.crop : undefined
+
+  if (hasIncomingFile && operation === 'update' && !cropData) {
+    fileData.cropRect = {
+      height: null,
+      unit: null,
+      width: null,
+      x: null,
+      y: null,
+    }
+  }
 
   try {
     const fileSupportsResize = canResizeImage(file.mimetype)

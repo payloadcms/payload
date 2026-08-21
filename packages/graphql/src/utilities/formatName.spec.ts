@@ -15,6 +15,10 @@ describe('formatName', () => {
     expect(formatName(char)).toEqual(expected)
   })
 
+  it('should replace percent signs', () => {
+    expect(formatName('%')).toEqual('_')
+  })
+
   describe('UTC offset handling', () => {
     it.each`
       offset      | expected

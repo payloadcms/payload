@@ -14,6 +14,7 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { appendCacheTag } from '../../utilities/appendCacheTag.js'
 import { Button } from '../Button/index.js'
 import { DialogFooter, DialogHeader, DialogModal } from '../Dialog/index.js'
+import { getCropState } from './getCropState.js'
 import './index.css'
 import './library.css'
 
@@ -35,14 +36,6 @@ export type EditUploadProps = {
   showFocalPoint?: boolean
 }
 
-const defaultCrop: UploadEdits['crop'] = {
-  height: 100,
-  unit: '%',
-  width: 100,
-  x: 0,
-  y: 0,
-}
-
 export const EditUpload: React.FC<EditUploadProps> = ({
   fileName,
   fileSrc,
@@ -56,10 +49,11 @@ export const EditUpload: React.FC<EditUploadProps> = ({
   const { closeModal } = useModal()
   const { t } = useTranslation()
 
-  const [crop, setCrop] = useState<UploadEdits['crop']>(() => ({
-    ...defaultCrop,
-    ...(initialCrop || {}),
-  }))
+  const [crop, setCrop] = useState<UploadEdits['crop']>(() => getCropState(initialCrop))
+
+  React.useEffect(() => {
+    setCrop(getCropState(initialCrop))
+  }, [initialCrop])
 
   const defaultFocalPosition: FocalPosition = { x: 50, y: 50 }
 
@@ -204,7 +198,7 @@ export const EditUpload: React.FC<EditUploadProps> = ({
                     <button
                       aria-label={t('general:reset')}
                       className={`${baseClass}__reset`}
-                      onClick={() => setCrop({ height: 100, unit: '%', width: 100, x: 0, y: 0 })}
+                      onClick={() => setCrop(getCropState())}
                       type="button"
                     >
                       <ResetIcon />
