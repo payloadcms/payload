@@ -2033,6 +2033,13 @@ export { sanitizeSortParams } from './utilities/sanitizeSortParams.js'
 export { stripUnselectedFields } from './utilities/stripUnselectedFields.js'
 export { traverseFields } from './utilities/traverseFields.js'
 export type { TraverseFieldsCallback } from './utilities/traverseFields.js'
+export type {
+  CreateAction,
+  RestoreAction,
+  UpdateAction,
+  WriteAction,
+  WriteOperation,
+} from './versions/actions/types.js'
 export { buildVersionCollectionFields } from './versions/buildCollectionFields.js'
 export { buildVersionGlobalFields } from './versions/buildGlobalFields.js'
 export { buildVersionCompoundIndexes } from './versions/buildVersionCompoundIndexes.js'
@@ -2048,5 +2055,5 @@ export { getLatestGlobalVersion } from './versions/getLatestGlobalVersion.js'
 export { saveVersion } from './versions/saveVersion.js'
 export type { SchedulePublishTaskInput } from './versions/schedule/types.js'
 
-export type { SchedulePublish, TypeWithVersion } from './versions/types.js'
+export type { ReadVersion, SchedulePublish, TypeWithVersion } from './versions/types.js'
 export { deepMergeSimple } from '@payloadcms/translations/utilities'
