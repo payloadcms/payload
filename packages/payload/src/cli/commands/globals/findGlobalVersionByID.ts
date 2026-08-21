@@ -23,7 +23,7 @@ export const createFindGlobalVersionByIDCommand = defineCLICommand({
     select: { flags: '--select <json|@file>', parse: parseJSON },
   },
   description: 'Find one version of a local global by ID.',
-  handler: async ({ args, getPayload }) => {
+  handler: async ({ args, getPayload, isJSON }) => {
     const payload = await getPayload()
     const result = await payload.findGlobalVersionByID({
       id: args.id,
@@ -31,7 +31,11 @@ export const createFindGlobalVersionByIDCommand = defineCLICommand({
       ...getReadOptions(args),
     })
 
-    printJSON(result)
+    if (!isJSON) {
+      printJSON(result)
+    }
+
+    return { result }
   },
   helpGroup: 'Data commands',
   input: strictObject({

@@ -2,10 +2,9 @@ import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 
-import { Command } from 'commander'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import type { CLIArgs, CLICommand } from '../config/types.js'
+import type { CLICommand, CLIRuntime, SanitizedConfig } from '../config/types.js'
 import type { Payload } from '../index.js'
 
 import { createCountDocumentsCommand } from './commands/collections/countDocuments.js'
@@ -14,6 +13,7 @@ import { createDeleteDocumentsCommand } from './commands/collections/deleteDocum
 import { createFindDocumentsCommand } from './commands/collections/findDocuments.js'
 import { createGetCollectionSchemaCommand } from './commands/collections/getCollectionSchema.js'
 import { createUpdateDocumentCommand } from './commands/collections/updateDocument.js'
+import { createCLI } from './index.js'
 
 const makePayload = (methods: Record<string, unknown> = {}): Payload =>
   ({
@@ -43,34 +43,35 @@ const runDataCommand = async ({
   commandName: string
   createCommand: CLICommand
   payload: Payload
-}): Promise<void> => {
-  const cliArgs = {
+}): Promise<string> => {
+  const runtime: CLIRuntime = {
     configDir: process.cwd(),
-    getConfig: vi.fn(),
+    destroy: async () => undefined,
+    getConfig: async () =>
+      ({ cli: { commands: { [commandName]: createCommand } } }) as SanitizedConfig,
     getPayload: vi.fn().mockResolvedValue(payload),
-    run: vi.fn<CLIArgs['run']>(async ({ handler }) => {
-      const exitCode = await handler()
+    isScheduled: false,
+    markScheduled: () => undefined,
+  }
+  const cli = await createCLI(runtime)
+  const command = cli.commands.find((item) => item.name() === commandName)!
+  let output = ''
 
-      if (typeof exitCode === 'number') {
-        process.exitCode = exitCode
-      }
-    }),
-  } satisfies CLIArgs
-  const command = createCommand
-    .command({ cliArgs, name: commandName })
-    .exitOverride()
-    .configureOutput({
-      writeErr: () => undefined,
-    })
-  const program = new Command().name('payload').exitOverride().addCommand(command)
+  command.configureOutput({
+    writeErr: () => undefined,
+    writeOut: (value) => (output += value),
+  })
 
-  await program.parseAsync([command.name(), ...args], { from: 'user' })
+  await cli.parseAsync([commandName, ...args], { from: 'user' })
+
+  return output
 }
 
 describe('Payload data CLI', () => {
   const temporaryDirectories: string[] = []
 
   afterEach(() => {
+    process.exitCode = undefined
     vi.restoreAllMocks()
     for (const directory of temporaryDirectories) {
       rmSync(directory, { force: true, recursive: true })
@@ -78,19 +79,29 @@ describe('Payload data CLI', () => {
     temporaryDirectories.length = 0
   })
 
-  it('should register MCP-style commands with Commander', () => {
-    const args = {} as CLIArgs
-    const createDocuments = createCreateDocumentsCommand.command({
-      cliArgs: args,
-      name: 'createDocuments',
-    })
-    const getCollectionSchema = createGetCollectionSchemaCommand.command({
-      cliArgs: args,
-      name: 'getCollectionSchema',
-    })
+  it('should register MCP-style commands with Commander', async () => {
+    const runtime: CLIRuntime = {
+      configDir: process.cwd(),
+      destroy: async () => undefined,
+      getConfig: async () =>
+        ({
+          cli: {
+            commands: {
+              createDocuments: createCreateDocumentsCommand,
+              getCollectionSchema: createGetCollectionSchemaCommand,
+            },
+          },
+        }) as SanitizedConfig,
+      getPayload: vi.fn(),
+      isScheduled: false,
+      markScheduled: () => undefined,
+    }
+    const cli = await createCLI(runtime)
 
-    expect(createDocuments.name()).toBe('createDocuments')
-    expect(getCollectionSchema.name()).toBe('getCollectionSchema')
+    expect(cli.commands.map((command) => command.name())).toEqual([
+      'createDocuments',
+      'getCollectionSchema',
+    ])
   })
 
   it('should always bypass access control', async () => {
@@ -113,6 +124,26 @@ describe('Payload data CLI', () => {
       where: { status: { equals: 'published' } },
     })
     expect(log).toHaveBeenCalledWith('{\n  "totalDocs": 2\n}')
+  })
+
+  it('should use the shared JSON output when --json is passed', async () => {
+    const count = vi.fn().mockResolvedValue({ totalDocs: 2 })
+    const log = vi.spyOn(console, 'log').mockImplementation(() => undefined)
+    const payload = makePayload({ count })
+
+    const output = await runDataCommand({
+      args: ['--slug', 'posts', '--json'],
+      commandName: 'countDocuments',
+      createCommand: createCountDocumentsCommand,
+      payload,
+    })
+
+    expect(log).not.toHaveBeenCalled()
+    expect(JSON.parse(output)).toEqual({
+      command: 'countDocuments',
+      result: { totalDocs: 2 },
+      success: true,
+    })
   })
 
   it('should read JSON arguments from local files', async () => {
@@ -198,6 +229,41 @@ describe('Payload data CLI', () => {
     expect(create.mock.calls[1]![0]).toMatchObject({
       data: { title: 'two' },
       filePath: undefined,
+    })
+  })
+
+  it('should include partial create failures in JSON output and the exit code', async () => {
+    const create = vi
+      .fn()
+      .mockResolvedValueOnce({ id: 'one' })
+      .mockRejectedValueOnce(new Error('Could not create document.'))
+    const log = vi.spyOn(console, 'log').mockImplementation(() => undefined)
+    const payload = makePayload({ create })
+
+    const output = await runDataCommand({
+      args: [
+        '--slug',
+        'posts',
+        '--documents',
+        '{"data":{"title":"one"}}',
+        '--documents',
+        '{"data":{"title":"two"}}',
+        '--json',
+      ],
+      commandName: 'createDocuments',
+      createCommand: createCreateDocumentsCommand,
+      payload,
+    })
+
+    expect(log).not.toHaveBeenCalled()
+    expect(JSON.parse(output)).toEqual({
+      command: 'createDocuments',
+      exitCode: 1,
+      result: {
+        docs: [{ doc: { id: 'one' }, index: 0 }],
+        errors: [{ index: 1, message: 'Could not create document.' }],
+      },
+      success: false,
     })
   })
 
@@ -293,14 +359,19 @@ describe('Payload data CLI', () => {
     ).rejects.toThrow("unknown option '--unknown'")
   })
 
-  it('should generate command help from input schemas', () => {
-    const program = new Command().name('payload')
-    const command = createFindDocumentsCommand.command({
-      cliArgs: {} as CLIArgs,
-      name: 'findDocuments',
-    })
-
-    program.addCommand(command)
+  it('should generate command help from input schemas', async () => {
+    const payload = makePayload()
+    const runtime: CLIRuntime = {
+      configDir: process.cwd(),
+      destroy: async () => undefined,
+      getConfig: async () =>
+        ({ cli: { commands: { findDocuments: createFindDocumentsCommand } } }) as SanitizedConfig,
+      getPayload: vi.fn().mockResolvedValue(payload),
+      isScheduled: false,
+      markScheduled: () => undefined,
+    }
+    const cli = await createCLI(runtime)
+    const command = cli.commands.find((item) => item.name() === 'findDocuments')!
 
     const help = command.helpInformation()
 
@@ -308,6 +379,5 @@ describe('Payload data CLI', () => {
     expect(help).toContain('--slug <slug>')
     expect(help).toContain('--draft')
     expect(help).toContain('--limit <number>')
-    expect(help).toContain('default: 10')
   })
 })

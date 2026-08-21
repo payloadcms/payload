@@ -33,7 +33,7 @@ export const createDuplicateDocumentCommand = defineCLICommand({
     selectedLocales: { flags: '--selected-locales <locale>', parse: parseSelectedLocales },
   },
   description: 'Duplicate a document in a local collection.',
-  handler: async ({ args, getPayload }) => {
+  handler: async ({ args, getPayload, isJSON }) => {
     const payload = await getPayload()
     const collection = args.slug
     const result = await payload.duplicate({
@@ -51,7 +51,11 @@ export const createDuplicateDocumentCommand = defineCLICommand({
       showHiddenFields: args.showHiddenFields,
     })
 
-    printJSON(result)
+    if (!isJSON) {
+      printJSON(result)
+    }
+
+    return { result }
   },
   helpGroup: 'Data commands',
   input: strictObject({

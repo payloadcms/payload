@@ -20,14 +20,18 @@ export const createFindGlobalCommand = defineCLICommand({
     select: { flags: '--select <json|@file>', parse: parseJSON },
   },
   description: 'Find a local global.',
-  handler: async ({ args, getPayload }) => {
+  handler: async ({ args, getPayload, isJSON }) => {
     const payload = await getPayload()
     const result = await payload.findGlobal({
       slug: args.slug,
       ...getReadOptions(args),
     })
 
-    printJSON(result)
+    if (!isJSON) {
+      printJSON(result)
+    }
+
+    return { result }
   },
   helpGroup: 'Data commands',
   input: strictObject({

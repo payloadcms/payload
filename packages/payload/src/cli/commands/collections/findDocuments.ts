@@ -39,7 +39,7 @@ export const createFindDocumentsCommand = defineCLICommand({
     where: { flags: '--where <json|@file>', parse: parseJSON },
   },
   description: 'Find documents in a local collection, or find one document by ID.',
-  handler: async ({ args, getPayload }) => {
+  handler: async ({ args, getPayload, isJSON }) => {
     const payload = await getPayload()
     const collection = args.slug
     const commonOptions = getReadOptions(args)
@@ -66,7 +66,11 @@ export const createFindDocumentsCommand = defineCLICommand({
             where: args.where as undefined | Where,
           })
 
-    printJSON(result)
+    if (!isJSON) {
+      printJSON(result)
+    }
+
+    return { result }
   },
   helpGroup: 'Data commands',
   input: strictObject({

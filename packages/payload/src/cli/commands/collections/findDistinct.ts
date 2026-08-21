@@ -26,7 +26,7 @@ export const createFindDistinctCommand = defineCLICommand({
     where: { flags: '--where <json|@file>', parse: parseJSON },
   },
   description: 'Find distinct field values in a local collection.',
-  handler: async ({ args, getPayload }) => {
+  handler: async ({ args, getPayload, isJSON }) => {
     const payload = await getPayload()
     const result = await payload.findDistinct({
       collection: args.slug,
@@ -43,7 +43,11 @@ export const createFindDistinctCommand = defineCLICommand({
       where: args.where as undefined | Where,
     })
 
-    printJSON(result)
+    if (!isJSON) {
+      printJSON(result)
+    }
+
+    return { result }
   },
   helpGroup: 'Data commands',
   input: strictObject({

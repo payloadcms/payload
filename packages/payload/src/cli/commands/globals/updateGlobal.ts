@@ -28,7 +28,7 @@ export const createUpdateGlobalCommand = defineCLICommand({
     select: { flags: '--select <json|@file>', parse: parseJSON },
   },
   description: 'Update a local global.',
-  handler: async ({ args, getPayload }) => {
+  handler: async ({ args, getPayload, isJSON }) => {
     const payload = await getPayload()
     const slug = args.slug
     const result = await payload.updateGlobal({
@@ -47,7 +47,11 @@ export const createUpdateGlobalCommand = defineCLICommand({
       unpublishAllLocales: args.unpublishAllLocales,
     })
 
-    printJSON(result)
+    if (!isJSON) {
+      printJSON(result)
+    }
+
+    return { result }
   },
   helpGroup: 'Data commands',
   input: strictObject({

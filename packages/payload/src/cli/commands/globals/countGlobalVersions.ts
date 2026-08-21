@@ -10,7 +10,7 @@ export const createCountGlobalVersionsCommand = defineCLICommand({
     where: { flags: '--where <json|@file>', parse: parseJSON },
   },
   description: 'Count versions of a local global.',
-  handler: async ({ args, getPayload }) => {
+  handler: async ({ args, getPayload, isJSON }) => {
     const payload = await getPayload()
     const result = await payload.countGlobalVersions({
       global: args.slug,
@@ -19,7 +19,11 @@ export const createCountGlobalVersionsCommand = defineCLICommand({
       where: args.where as undefined | Where,
     })
 
-    printJSON(result)
+    if (!isJSON) {
+      printJSON(result)
+    }
+
+    return { result }
   },
   helpGroup: 'Data commands',
   input: strictObject({

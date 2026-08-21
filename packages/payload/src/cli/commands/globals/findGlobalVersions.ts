@@ -30,7 +30,7 @@ export const createFindGlobalVersionsCommand = defineCLICommand({
     where: { flags: '--where <json|@file>', parse: parseJSON },
   },
   description: 'Find versions of a local global.',
-  handler: async ({ args, getPayload }) => {
+  handler: async ({ args, getPayload, isJSON }) => {
     const payload = await getPayload()
     const result = await payload.findGlobalVersions({
       slug: args.slug,
@@ -42,7 +42,11 @@ export const createFindGlobalVersionsCommand = defineCLICommand({
       where: args.where as undefined | Where,
     })
 
-    printJSON(result)
+    if (!isJSON) {
+      printJSON(result)
+    }
+
+    return { result }
   },
   helpGroup: 'Data commands',
   input: strictObject({

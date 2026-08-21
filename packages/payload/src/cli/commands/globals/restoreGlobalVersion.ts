@@ -23,7 +23,7 @@ export const createRestoreGlobalVersionCommand = defineCLICommand({
     select: { flags: '--select <json|@file>', parse: parseJSON },
   },
   description: 'Restore one version of a local global.',
-  handler: async ({ args, getPayload }) => {
+  handler: async ({ args, getPayload, isJSON }) => {
     const payload = await getPayload()
     const result = await payload.restoreGlobalVersion({
       id: String(args.id),
@@ -31,7 +31,11 @@ export const createRestoreGlobalVersionCommand = defineCLICommand({
       ...getReadOptions(args),
     })
 
-    printJSON(result)
+    if (!isJSON) {
+      printJSON(result)
+    }
+
+    return { result }
   },
   helpGroup: 'Data commands',
   input: strictObject({

@@ -24,7 +24,7 @@ export const createRestoreVersionCommand = defineCLICommand({
     select: { flags: '--select <json|@file>', parse: parseJSON },
   },
   description: 'Restore one document version in a local collection.',
-  handler: async ({ args, getPayload }) => {
+  handler: async ({ args, getPayload, isJSON }) => {
     const payload = await getPayload()
     const result = await payload.restoreVersion({
       id: String(args.id),
@@ -33,7 +33,11 @@ export const createRestoreVersionCommand = defineCLICommand({
       draft: args.draft,
     })
 
-    printJSON(result)
+    if (!isJSON) {
+      printJSON(result)
+    }
+
+    return { result }
   },
   helpGroup: 'Data commands',
   input: strictObject({

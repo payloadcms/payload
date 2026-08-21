@@ -7,7 +7,7 @@ import { printJSON } from '../data/utilities.js'
 
 export const createGetCollectionSchemaCommand = defineCLICommand({
   description: 'Print the writable JSON schema for a local collection.',
-  handler: async ({ args, getPayload }) => {
+  handler: async ({ args, getPayload, isJSON }) => {
     const payload = await getPayload()
     const collectionSlug = args.slug
     const req = await createLocalReq({}, payload)
@@ -30,7 +30,13 @@ export const createGetCollectionSchemaCommand = defineCLICommand({
         }
       : { enabled: false }
 
-    printJSON({ collectionSlug, schema, upload })
+    const result = { collectionSlug, schema, upload }
+
+    if (!isJSON) {
+      printJSON(result)
+    }
+
+    return { result }
   },
   helpGroup: 'Data commands',
   input: strictObject({

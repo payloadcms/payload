@@ -36,7 +36,7 @@ export const createDeleteDocumentsCommand = defineCLICommand({
     where: { flags: '--where <json|@file>', parse: parseJSON },
   },
   description: 'Delete documents from a local collection by ID or where query.',
-  handler: async ({ args, getPayload }) => {
+  handler: async ({ args, getPayload, isJSON }) => {
     const payload = await getPayload()
     const result = await payload.delete({
       id: args.id,
@@ -48,7 +48,11 @@ export const createDeleteDocumentsCommand = defineCLICommand({
       where: args.where as undefined | Where,
     } as Parameters<Payload['delete']>[0])
 
-    printJSON(result)
+    if (!isJSON) {
+      printJSON(result)
+    }
+
+    return { result }
   },
   helpGroup: 'Data commands',
   input,

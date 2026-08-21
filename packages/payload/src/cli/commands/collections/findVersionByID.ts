@@ -25,7 +25,7 @@ export const createFindVersionByIDCommand = defineCLICommand({
     select: { flags: '--select <json|@file>', parse: parseJSON },
   },
   description: 'Find one document version in a local collection by ID.',
-  handler: async ({ args, getPayload }) => {
+  handler: async ({ args, getPayload, isJSON }) => {
     const payload = await getPayload()
     const result = await payload.findVersionByID({
       id: String(args.id),
@@ -35,7 +35,11 @@ export const createFindVersionByIDCommand = defineCLICommand({
       trash: args.trash,
     })
 
-    printJSON(result)
+    if (!isJSON) {
+      printJSON(result)
+    }
+
+    return { result }
   },
   helpGroup: 'Data commands',
   input: strictObject({

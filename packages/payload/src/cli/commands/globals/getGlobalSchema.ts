@@ -7,7 +7,7 @@ import { printJSON } from '../data/utilities.js'
 
 export const createGetGlobalSchemaCommand = defineCLICommand({
   description: 'Print the writable JSON schema for a local global.',
-  handler: async ({ args, getPayload }) => {
+  handler: async ({ args, getPayload, isJSON }) => {
     const payload = await getPayload()
     const globalSlug = args.slug
     const req = await createLocalReq({}, payload)
@@ -17,7 +17,13 @@ export const createGetGlobalSchemaCommand = defineCLICommand({
       throw new Error(`Global "${globalSlug}" not found.`)
     }
 
-    printJSON({ globalSlug, schema })
+    const result = { globalSlug, schema }
+
+    if (!isJSON) {
+      printJSON(result)
+    }
+
+    return { result }
   },
   helpGroup: 'Data commands',
   input: strictObject({

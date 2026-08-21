@@ -32,7 +32,7 @@ export const createFindVersionsCommand = defineCLICommand({
     where: { flags: '--where <json|@file>', parse: parseJSON },
   },
   description: 'Find document versions in a local collection.',
-  handler: async ({ args, getPayload }) => {
+  handler: async ({ args, getPayload, isJSON }) => {
     const payload = await getPayload()
     const result = await payload.findVersions({
       collection: args.slug,
@@ -46,7 +46,11 @@ export const createFindVersionsCommand = defineCLICommand({
       where: args.where as undefined | Where,
     })
 
-    printJSON(result)
+    if (!isJSON) {
+      printJSON(result)
+    }
+
+    return { result }
   },
   helpGroup: 'Data commands',
   input: strictObject({

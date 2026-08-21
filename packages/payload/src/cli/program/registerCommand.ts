@@ -161,7 +161,7 @@ const isArgumentOverride = (
 ): override is
   | 'argument'
   | {
-      parse?: (value: string) => unknown
+      parse?: (value: string, previous: unknown) => unknown
       position?: number
       syntax?: string
       type: 'argument'

@@ -31,7 +31,7 @@ export const createCreateDocumentsCommand = defineCLICommand({
     select: { flags: '--select <json|@file>', parse: parseJSON },
   },
   description: 'Create one or more documents in a local collection.',
-  handler: async ({ args, getPayload }) => {
+  handler: async ({ args, getPayload, isJSON }) => {
     const payload = await getPayload()
     const collection = args.slug
     const docs: Array<{ doc: unknown; index: number }> = []
@@ -64,9 +64,16 @@ export const createCreateDocumentsCommand = defineCLICommand({
       }
     }
 
-    printJSON({ docs, errors })
+    const result = { docs, errors }
 
-    return errors.length > 0 ? 1 : undefined
+    if (!isJSON) {
+      printJSON(result)
+    }
+
+    return {
+      exitCode: errors.length > 0 ? 1 : undefined,
+      result,
+    }
   },
   helpGroup: 'Data commands',
   input: strictObject({
