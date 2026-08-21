@@ -1,8 +1,21 @@
 import type { DeepPartial } from 'ts-essentials'
 
 import type { CollectionSlug, TypedLocale } from '../../..//index.js'
-import type { FindOptions, Payload, RequestContext, User } from '../../../index.js'
-import type { PayloadRequest, PopulateType, SelectType, TransformCollectionWithSelect } from '../../../types/index.js'
+import type {
+  AllowedDepth,
+  DefaultDepth,
+  FindOptions,
+  Payload,
+  RequestContext,
+  User,
+} from '../../../index.js'
+import type {
+  ApplyDepthInternal,
+  PayloadRequest,
+  PopulateType,
+  SelectType,
+  TransformCollectionWithSelect,
+} from '../../../types/index.js'
 import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
 import type {
   DraftFlagFromCollectionSlug,
@@ -14,7 +27,11 @@ import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { duplicateOperation } from '../duplicate.js'
 
-type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType> = {
+type BaseOptions<
+  TSlug extends CollectionSlug,
+  TSelect extends SelectType,
+  TDepth extends AllowedDepth = DefaultDepth,
+> = {
   /**
    * the Collection slug to operate against.
    */
@@ -33,7 +50,7 @@ type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType> = {
   /**
    * [Control auto-population](https://payloadcms.com/docs/queries/depth) of nested relationship and upload fields.
    */
-  depth?: number
+  depth?: TDepth
   /**
    * When set to `true`, a [database transactions](https://payloadcms.com/docs/database/transactions) will not be initialized.
    * @default false
@@ -82,19 +99,20 @@ type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType> = {
   user?: null | User
 } & Pick<FindOptions<TSlug, TSelect>, 'select'>
 
-export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> = BaseOptions<
-  TSlug,
-  TSelect
-> &
-  DraftFlagFromCollectionSlug<TSlug>
+export type Options<
+  TSlug extends CollectionSlug,
+  TSelect extends SelectType,
+  TDepth extends AllowedDepth = DefaultDepth,
+> = BaseOptions<TSlug, TSelect, TDepth> & DraftFlagFromCollectionSlug<TSlug>
 
 export async function duplicateLocal<
   TSlug extends CollectionSlug,
   TSelect extends SelectFromCollectionSlug<TSlug>,
+  TDepth extends AllowedDepth = DefaultDepth,
 >(
   payload: Payload,
-  options: Options<TSlug, TSelect>,
-): Promise<TransformCollectionWithSelect<TSlug, TSelect>> {
+  options: Options<TSlug, TSelect, TDepth>,
+): Promise<ApplyDepthInternal<TransformCollectionWithSelect<TSlug, TSelect>, TDepth>> {
   const {
     id,
     collection: collectionSlug,

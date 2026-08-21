@@ -1,6 +1,9 @@
 import type {
+  AllowedDepth,
+  ApplyDepthToFieldInternal,
   CollectionSlug,
   DataFromCollectionSlug,
+  DefaultDepth,
   PaginatedDistinctDocs,
   Payload,
   PayloadRequest,
@@ -19,6 +22,7 @@ import { findDistinctOperation } from '../findDistinct.js'
 export type Options<
   TSlug extends CollectionSlug,
   TField extends keyof DataFromCollectionSlug<TSlug>,
+  TDepth extends AllowedDepth = DefaultDepth,
 > = {
   /**
    * the Collection slug to operate against.
@@ -34,7 +38,7 @@ export type Options<
   /**
    * [Control auto-population](https://payloadcms.com/docs/queries/depth) of nested relationship and upload fields.
    */
-  depth?: number
+  depth?: TDepth
   /**
    * When set to `true`, errors will not be thrown.
    */
@@ -105,10 +109,15 @@ export type Options<
 export async function findDistinct<
   TSlug extends CollectionSlug,
   TField extends keyof DataFromCollectionSlug<TSlug> & string,
+  TDepth extends AllowedDepth = DefaultDepth,
 >(
   payload: Payload,
-  options: Options<TSlug, TField>,
-): Promise<PaginatedDistinctDocs<Record<TField, DataFromCollectionSlug<TSlug>[TField]>>> {
+  options: Options<TSlug, TField, TDepth>,
+): Promise<
+  PaginatedDistinctDocs<
+    Record<TField, ApplyDepthToFieldInternal<DataFromCollectionSlug<TSlug>[TField], TDepth>>
+  >
+> {
   const {
     collection: collectionSlug,
     depth = 0,

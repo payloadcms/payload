@@ -1,4 +1,5 @@
 import type {
+  ApplyDepthInternal,
   PayloadRequest,
   PopulateType,
   SelectType,
@@ -16,8 +17,10 @@ import type {
 
 import { APIError } from '../../../errors/index.js'
 import {
+  type AllowedDepth,
   type CollectionSlug,
   deepCopyObjectSimple,
+  type DefaultDepth,
   type FindOptions,
   type GeneratedTypes,
   type Payload,
@@ -29,7 +32,11 @@ import { getFileByPath } from '../../../uploads/getFileByPath.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { createOperation } from '../create.js'
 
-type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType> = {
+type BaseOptions<
+  TSlug extends CollectionSlug,
+  TSelect extends SelectType,
+  TDepth extends AllowedDepth = DefaultDepth,
+> = {
   /**
    * the Collection slug to operate against.
    */
@@ -44,7 +51,7 @@ type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType> = {
   /**
    * [Control auto-population](https://payloadcms.com/docs/queries/depth) of nested relationship and upload fields.
    */
-  depth?: number
+  depth?: TDepth
   /**
    * When set to `true`, a [database transactions](https://payloadcms.com/docs/database/transactions) will not be initialized.
    * @default false
@@ -114,6 +121,7 @@ type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType> = {
 export type Options<
   TSlug extends CollectionSlug,
   TSelect extends SelectType,
+  TDepth extends AllowedDepth = DefaultDepth,
 > = GeneratedTypes extends { strictDraftTypes: true }
   ? CollectionsWithoutDrafts extends TSlug
     ? {
@@ -125,7 +133,7 @@ export type Options<
          * Create a **draft** document. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
          */
         draft?: boolean
-      } & BaseOptions<TSlug, TSelect>
+      } & BaseOptions<TSlug, TSelect, TDepth>
     : TSlug extends CollectionsWithoutDrafts
       ? {
           data: RequiredDataFromCollectionSlug<TSlug>
@@ -133,7 +141,7 @@ export type Options<
            * The `draft` property is not allowed because this collection does not have `versions.drafts` enabled.
            */
           draft?: never
-        } & BaseOptions<TSlug, TSelect>
+        } & BaseOptions<TSlug, TSelect, TDepth>
       : (
           | {
               /**
@@ -158,7 +166,7 @@ export type Options<
               draft: true
             }
         ) &
-          BaseOptions<TSlug, TSelect>
+          BaseOptions<TSlug, TSelect, TDepth>
   :
       | ({
           /**
@@ -169,7 +177,7 @@ export type Options<
            * Create a **draft** document. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
            */
           draft?: false
-        } & BaseOptions<TSlug, TSelect>)
+        } & BaseOptions<TSlug, TSelect, TDepth>)
       | ({
           /**
            * The data for the document to create.
@@ -180,15 +188,16 @@ export type Options<
            * Create a **draft** document. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
            */
           draft: true
-        } & BaseOptions<TSlug, TSelect>)
+        } & BaseOptions<TSlug, TSelect, TDepth>)
 
 export async function createLocal<
   TSlug extends CollectionSlug,
   TSelect extends SelectFromCollectionSlug<TSlug>,
+  TDepth extends AllowedDepth = DefaultDepth,
 >(
   payload: Payload,
-  options: Options<TSlug, TSelect>,
-): Promise<TransformCollectionWithSelect<TSlug, TSelect>> {
+  options: Options<TSlug, TSelect, TDepth>,
+): Promise<ApplyDepthInternal<TransformCollectionWithSelect<TSlug, TSelect>, TDepth>> {
   const {
     collection: collectionSlug,
     data,

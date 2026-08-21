@@ -1,5 +1,7 @@
 import type { PaginatedDocs } from '../../../database/types.js'
 import type {
+  AllowedDepth,
+  DefaultDepth,
   FindOptions,
   GlobalSlug,
   Payload,
@@ -7,7 +9,14 @@ import type {
   TypedLocale,
   User,
 } from '../../../index.js'
-import type { PayloadRequest, PopulateType, SelectType, Sort, Where } from '../../../types/index.js'
+import type {
+  ApplyDepthInternal,
+  PayloadRequest,
+  PopulateType,
+  SelectType,
+  Sort,
+  Where,
+} from '../../../types/index.js'
 import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
 import type { TypeWithVersion } from '../../../versions/types.js'
 import type { DataFromGlobalSlug } from '../../config/types.js'
@@ -16,7 +25,7 @@ import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { findVersionsOperation } from '../findVersions.js'
 
-export type Options<TSlug extends GlobalSlug> = {
+export type Options<TSlug extends GlobalSlug, TDepth extends AllowedDepth = DefaultDepth> = {
   /**
    * [Context](https://payloadcms.com/docs/hooks/context), which will then be passed to `context` and `req.context`,
    * which can be read by hooks. Useful if you want to pass additional information to the hooks which
@@ -27,7 +36,7 @@ export type Options<TSlug extends GlobalSlug> = {
   /**
    * [Control auto-population](https://payloadcms.com/docs/queries/depth) of nested relationship and upload fields.
    */
-  depth?: number
+  depth?: TDepth
   /**
    * Specify a [fallback locale](https://payloadcms.com/docs/configuration/localization) to use for any returned documents.
    */
@@ -92,10 +101,13 @@ export type Options<TSlug extends GlobalSlug> = {
   where?: Where
 } & Pick<FindOptions<string, SelectType>, 'select'>
 
-export async function findGlobalVersionsLocal<TSlug extends GlobalSlug>(
+export async function findGlobalVersionsLocal<
+  TSlug extends GlobalSlug,
+  TDepth extends AllowedDepth = DefaultDepth,
+>(
   payload: Payload,
   options: Options<TSlug>,
-): Promise<PaginatedDocs<TypeWithVersion<DataFromGlobalSlug<TSlug>>>> {
+): Promise<PaginatedDocs<TypeWithVersion<ApplyDepthInternal<DataFromGlobalSlug<TSlug>, TDepth>>>> {
   const {
     slug: globalSlug,
     depth,

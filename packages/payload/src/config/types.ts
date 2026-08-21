@@ -1350,6 +1350,28 @@ type RootTypeScriptConfig = {
    * @todo Remove in v4. Strict draft types will become the default behavior.
    */
   strictDraftTypes?: boolean
+
+  /**
+   * This option allows you to have much better result types for relationship and join fields, depending on `depth`.
+   * @example:
+   * ```ts
+   *  const post = await payload.findByID({
+   *     collection: 'posts',
+   *     depth: 1,
+   *     id,
+   *  })
+   *  post.category
+   * ```
+   * Here, without this option `post.category` type will be `Category | string`
+   * which isn't exactly right, since we passed `depth: 1`. With this option - `Category`.
+   * The same if you'd pass `depth: 0`, the result type will be `string`.
+   *
+   * This option is opt in because it may break existing types.
+   *
+   * @default false
+   * @todo Remove in v4. Depth-aware result types will become the default behavior.
+   */
+  typeSafeDepth?: boolean
 }
 
 /**

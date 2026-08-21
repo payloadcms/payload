@@ -1,12 +1,19 @@
 import type {
+  AllowedDepth,
   CollectionSlug,
+  DefaultDepth,
   FindOptions,
   Payload,
   RequestContext,
   TypedLocale,
   User,
 } from '../../../index.js'
-import type { PayloadRequest, PopulateType, SelectType } from '../../../types/index.js'
+import type {
+  ApplyDepthInternal,
+  PayloadRequest,
+  PopulateType,
+  SelectType,
+} from '../../../types/index.js'
 import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
 import type { TypeWithVersion } from '../../../versions/types.js'
 import type { DataFromCollectionSlug, DraftFlagFromCollectionSlug } from '../../config/types.js'
@@ -15,7 +22,7 @@ import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { findVersionByIDOperation } from '../findVersionByID.js'
 
-type BaseOptions<TSlug extends CollectionSlug> = {
+type BaseOptions<TSlug extends CollectionSlug, TDepth extends AllowedDepth = DefaultDepth> = {
   /**
    * the Collection slug to operate against.
    */
@@ -30,7 +37,7 @@ type BaseOptions<TSlug extends CollectionSlug> = {
   /**
    * [Control auto-population](https://payloadcms.com/docs/queries/depth) of nested relationship and upload fields.
    */
-  depth?: number
+  depth?: TDepth
   /**
    * When set to `true`, errors will not be thrown.
    * `null` will be returned instead, if the document on this ID was not found.
@@ -83,13 +90,18 @@ type BaseOptions<TSlug extends CollectionSlug> = {
   user?: null | User
 } & Pick<FindOptions<TSlug, SelectType>, 'select'>
 
-export type Options<TSlug extends CollectionSlug> = BaseOptions<TSlug> &
-  DraftFlagFromCollectionSlug<TSlug>
+export type Options<
+  TSlug extends CollectionSlug,
+  TDepth extends AllowedDepth = DefaultDepth,
+> = BaseOptions<TSlug, TDepth> & DraftFlagFromCollectionSlug<TSlug>
 
-export async function findVersionByIDLocal<TSlug extends CollectionSlug>(
+export async function findVersionByIDLocal<
+  TSlug extends CollectionSlug,
+  TDepth extends AllowedDepth = DefaultDepth,
+>(
   payload: Payload,
   options: Options<TSlug>,
-): Promise<TypeWithVersion<DataFromCollectionSlug<TSlug>>> {
+): Promise<TypeWithVersion<ApplyDepthInternal<DataFromCollectionSlug<TSlug>, TDepth>>> {
   const {
     id,
     collection: collectionSlug,

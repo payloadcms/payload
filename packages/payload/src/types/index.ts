@@ -1,6 +1,6 @@
 import type { I18n, TFunction } from '@payloadcms/translations'
 import type DataLoader from 'dataloader'
-import type { OptionalKeys, RequiredKeys } from 'ts-essentials'
+import type { OptionalKeys, Prettify, RequiredKeys } from 'ts-essentials'
 import type { URL } from 'url'
 
 import type { ServerAdapter } from '../admin/adapters/server.js'
@@ -12,9 +12,11 @@ import type {
 } from '../collections/config/types.js'
 import type payload from '../index.js'
 import type {
+  AllowedDepth,
   AuthenticatedUser,
   CollectionSlug,
   DataFromGlobalSlug,
+  DecrementDepth,
   GlobalSlug,
   Payload,
   RequestContext,
@@ -339,3 +341,109 @@ export type PickPreserveOptional<T, K extends keyof T> = Partial<
   Pick<T, Extract<K, RequiredKeys<T>>>
 
 export type MaybePromise<T> = Promise<T> | T
+
+type ExcludeID<T> = Exclude<T, number | string>
+
+type ExcludeObject<T> = Exclude<T, object>
+
+type IsNever<T> = [T] extends [never] ? true : false
+
+/**
+ * A relationship / upload field is generated as `ID | Doc`, where `Doc` carries the `__collection`
+ * marker that `typescript.typeSafeDepth` adds to every generated document interface. Both halves
+ * have to be there: without the ID half this would also match a plain nested document, and without
+ * the marker it would match any union of a primitive and an object - a `json` field, for example,
+ * whose object and array members would then get stripped as if they were populated relationships.
+ */
+type HasCollectionType<T> =
+  IsNever<ExcludeID<NonNullable<T>>> extends true
+    ? false
+    : IsNever<ExcludeObject<NonNullable<T>>> extends true
+      ? false
+      : '__collection' extends keyof ExcludeID<NonNullable<T>>
+        ? true
+        : false
+
+type IsPolymorphicRelationship<T> = T extends { relationTo: string; value: unknown }
+  ? '__collection' extends keyof ExcludeID<T['value']>
+    ? true
+    : false
+  : false
+
+type ApplyDepthOnRelationship<T, Depth extends AllowedDepth> = 0 extends Depth
+  ? ExcludeObject<T>
+  : ApplyDepthOnObject<ExcludeID<T>, DecrementDepth<Depth>>
+
+type ApplyDepthOnPolyRelationship<T, Depth extends AllowedDepth> = T extends {
+  relationTo: string
+  value: unknown
+}
+  ? Prettify<{
+      relationTo: T['relationTo']
+      value: 0 extends Depth
+        ? ExcludeObject<T['value']>
+        : ApplyDepthOnObject<ExcludeID<T['value']>, DecrementDepth<Depth>>
+    }>
+  : T
+
+type ApplyDepthProcessKey<T, Depth extends AllowedDepth> =
+  // HAS ONE
+  HasCollectionType<T> extends true
+    ? ApplyDepthOnRelationship<T, Depth>
+    : T extends (infer U)[]
+      ? // HAS MANY
+        HasCollectionType<U> extends true
+        ? ApplyDepthOnRelationship<U, Depth>[]
+        : // HAS MANY POLY
+          IsPolymorphicRelationship<U> extends true
+          ? ApplyDepthOnPolyRelationship<U, Depth>[]
+          : // JUST ARRAY / BLOCKS
+            ApplyDepthOnObject<U, Depth>[]
+      : // HAS ONE POLY
+        IsPolymorphicRelationship<T> extends true
+        ? ApplyDepthOnPolyRelationship<T, Depth>
+        : // OBJECT (NAMED TAB OR GROUP)
+          ApplyDepthOnObject<T, Depth>
+
+/**
+ * Recurses into object types and leaves everything else (including `null` and `undefined`) alone.
+ * The naked `T extends object` check distributes over unions, which is what keeps `Doc | null`
+ * nullable, and - unlike `T extends Record<string, unknown>` - it also matches `interface`
+ * declarations, which do not get an implicit index signature.
+ */
+type ApplyDepthOnObject<T, Depth extends AllowedDepth> = T extends object
+  ? {
+      [K in keyof T]: ApplyDepthProcessKey<T[K], Depth>
+    }
+  : T
+
+/**
+ * Rewrites the relationship, upload and join fields of a generated document type as they are
+ * actually returned for the given `depth`. Requires `typescript.typeSafeDepth`.
+ */
+export type ApplyDepth<T extends object, Depth extends AllowedDepth> = ApplyDepthOnObject<T, Depth>
+
+/**
+ * `ApplyDepth` for a single field value rather than a whole document. Used by operations that
+ * return one field, such as `findDistinct`.
+ */
+export type ApplyDepthToField<T, Depth extends AllowedDepth> = ApplyDepthProcessKey<T, Depth>
+
+/**
+ * Use this type to support both, `typescript.typeSafeDepth` enabled and disabled.
+ * This is not needed to use in an actual project, since you either have it enabled or disabled, use `ApplyDepth` directly.
+ * Having this wrapper is preferred over doing this check directly in `ApplyDepth` to:
+ * * Preserve hover type output of `payload.find()` to `PaginatedDocs<Post>` instead of `PaginatedDocs<ApplyDepth<Post>>`
+ * * With enabled, make hover type output of `payload.find({ depth: 0 })` to `PaginatedDocs<ApplyDepth<Post, 0>>` instead of `PaginatedDocs<{ id : number, ///}>`
+ */
+export type ApplyDepthInternal<
+  T extends object,
+  Depth extends AllowedDepth,
+> = number extends AllowedDepth ? T : ApplyDepth<T, Depth>
+
+/**
+ * `ApplyDepthInternal` for a single field value. See {@link ApplyDepthToField}.
+ */
+export type ApplyDepthToFieldInternal<T, Depth extends AllowedDepth> = number extends AllowedDepth
+  ? T
+  : ApplyDepthToField<T, Depth>

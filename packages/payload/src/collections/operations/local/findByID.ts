@@ -1,5 +1,7 @@
 import type {
+  AllowedDepth,
   CollectionSlug,
+  DefaultDepth,
   FindOptions,
   JoinQuery,
   Payload,
@@ -10,6 +12,7 @@ import type {
   User,
 } from '../../../index.js'
 import type {
+  ApplyDepthInternal,
   ApplyDisableErrors,
   PayloadRequest,
   PopulateType,
@@ -26,6 +29,7 @@ type BaseFindByIDOptions<
   TSlug extends CollectionSlug,
   TDisableErrors extends boolean,
   TSelect extends SelectType,
+  TDepth extends AllowedDepth = DefaultDepth,
 > = {
   /**
    * the Collection slug to operate against.
@@ -51,7 +55,7 @@ type BaseFindByIDOptions<
   /**
    * [Control auto-population](https://payloadcms.com/docs/queries/depth) of nested relationship and upload fields.
    */
-  depth?: number
+  depth?: TDepth
   /**
    * When set to `true`, errors will not be thrown.
    * `null` will be returned instead, if the document on this ID was not found.
@@ -118,16 +122,23 @@ export type Options<
   TSlug extends CollectionSlug,
   TDisableErrors extends boolean,
   TSelect extends SelectType,
-> = BaseFindByIDOptions<TSlug, TDisableErrors, TSelect> & DraftFlagFromCollectionSlug<TSlug>
+  TDepth extends AllowedDepth = DefaultDepth,
+> = BaseFindByIDOptions<TSlug, TDisableErrors, TSelect, TDepth> & DraftFlagFromCollectionSlug<TSlug>
 
 export async function findByIDLocal<
   TSlug extends CollectionSlug,
   TDisableErrors extends boolean,
   TSelect extends SelectFromCollectionSlug<TSlug>,
+  TDepth extends AllowedDepth = DefaultDepth,
 >(
   payload: Payload,
-  options: Options<TSlug, TDisableErrors, TSelect>,
-): Promise<ApplyDisableErrors<TransformCollectionWithSelect<TSlug, TSelect>, TDisableErrors>> {
+  options: Options<TSlug, TDisableErrors, TSelect, TDepth>,
+): Promise<
+  ApplyDisableErrors<
+    ApplyDepthInternal<TransformCollectionWithSelect<TSlug, TSelect>, TDepth>,
+    TDisableErrors
+  >
+> {
   const {
     id,
     collection: collectionSlug,

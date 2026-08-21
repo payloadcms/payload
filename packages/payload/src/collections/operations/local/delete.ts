@@ -1,5 +1,7 @@
 import type {
+  AllowedDepth,
   CollectionSlug,
+  DefaultDepth,
   FindOptions,
   Payload,
   RequestContext,
@@ -7,6 +9,7 @@ import type {
   User,
 } from '../../../index.js'
 import type {
+  ApplyDepthInternal,
   PayloadRequest,
   PopulateType,
   SelectType,
@@ -21,7 +24,11 @@ import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { deleteOperation } from '../delete.js'
 import { deleteByIDOperation } from '../deleteByID.js'
 
-export type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType> = {
+export type BaseOptions<
+  TSlug extends CollectionSlug,
+  TSelect extends SelectType,
+  TDepth extends AllowedDepth = DefaultDepth,
+> = {
   /**
    * the Collection slug to operate against.
    */
@@ -36,7 +43,7 @@ export type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType
   /**
    * [Control auto-population](https://payloadcms.com/docs/queries/depth) of nested relationship and upload fields.
    */
-  depth?: number
+  depth?: TDepth
   /**
    * When set to `true`, a [database transactions](https://payloadcms.com/docs/database/transactions) will not be initialized.
    * @default false
@@ -92,6 +99,7 @@ export type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType
 export type ByIDOptions<
   TSlug extends CollectionSlug,
   TSelect extends SelectFromCollectionSlug<TSlug>,
+  TDepth extends AllowedDepth = DefaultDepth,
 > = {
   /**
    * The ID of the document to delete.
@@ -101,11 +109,12 @@ export type ByIDOptions<
    * A filter [query](https://payloadcms.com/docs/queries/overview)
    */
   where?: never
-} & BaseOptions<TSlug, TSelect>
+} & BaseOptions<TSlug, TSelect, TDepth>
 
 export type ManyOptions<
   TSlug extends CollectionSlug,
   TSelect extends SelectFromCollectionSlug<TSlug>,
+  TDepth extends AllowedDepth = DefaultDepth,
 > = {
   /**
    * The ID of the document to delete.
@@ -115,41 +124,52 @@ export type ManyOptions<
    * A filter [query](https://payloadcms.com/docs/queries/overview)
    */
   where: Where
-} & BaseOptions<TSlug, TSelect>
+} & BaseOptions<TSlug, TSelect, TDepth>
 
 export type Options<
   TSlug extends CollectionSlug,
   TSelect extends SelectFromCollectionSlug<TSlug>,
-> = ByIDOptions<TSlug, TSelect> | ManyOptions<TSlug, TSelect>
+  TDepth extends AllowedDepth = DefaultDepth,
+> = ByIDOptions<TSlug, TSelect, TDepth> | ManyOptions<TSlug, TSelect, TDepth>
 
 async function deleteLocal<
   TSlug extends CollectionSlug,
   TSelect extends SelectFromCollectionSlug<TSlug>,
+  TDepth extends AllowedDepth = DefaultDepth,
 >(
   payload: Payload,
-  options: ByIDOptions<TSlug, TSelect>,
-): Promise<TransformCollectionWithSelect<TSlug, TSelect>>
+  options: ByIDOptions<TSlug, TSelect, TDepth>,
+): Promise<ApplyDepthInternal<TransformCollectionWithSelect<TSlug, TSelect>, TDepth>>
 async function deleteLocal<
   TSlug extends CollectionSlug,
   TSelect extends SelectFromCollectionSlug<TSlug>,
+  TDepth extends AllowedDepth = DefaultDepth,
 >(
   payload: Payload,
-  options: ManyOptions<TSlug, TSelect>,
-): Promise<BulkOperationResult<TSlug, TSelect>>
+  options: ManyOptions<TSlug, TSelect, TDepth>,
+): Promise<BulkOperationResult<TSlug, TSelect, TDepth>>
 async function deleteLocal<
   TSlug extends CollectionSlug,
   TSelect extends SelectFromCollectionSlug<TSlug>,
+  TDepth extends AllowedDepth = DefaultDepth,
 >(
   payload: Payload,
-  options: Options<TSlug, TSelect>,
-): Promise<BulkOperationResult<TSlug, TSelect> | TransformCollectionWithSelect<TSlug, TSelect>>
+  options: Options<TSlug, TSelect, TDepth>,
+): Promise<
+  | ApplyDepthInternal<TransformCollectionWithSelect<TSlug, TSelect>, TDepth>
+  | BulkOperationResult<TSlug, TSelect, TDepth>
+>
 async function deleteLocal<
   TSlug extends CollectionSlug,
   TSelect extends SelectFromCollectionSlug<TSlug>,
+  TDepth extends AllowedDepth = DefaultDepth,
 >(
   payload: Payload,
-  options: Options<TSlug, TSelect>,
-): Promise<BulkOperationResult<TSlug, TSelect> | TransformCollectionWithSelect<TSlug, TSelect>> {
+  options: Options<TSlug, TSelect, TDepth>,
+): Promise<
+  | ApplyDepthInternal<TransformCollectionWithSelect<TSlug, TSelect>, TDepth>
+  | BulkOperationResult<TSlug, TSelect, TDepth>
+> {
   const {
     id,
     collection: collectionSlug,
@@ -192,7 +212,7 @@ async function deleteLocal<
     return deleteByIDOperation<TSlug, TSelect>(args)
   }
   // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-  return deleteOperation<TSlug, TSelect>(args)
+  return deleteOperation<TSlug, TSelect, TDepth>(args)
 }
 
 export { deleteLocal }

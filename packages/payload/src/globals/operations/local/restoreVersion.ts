@@ -1,5 +1,13 @@
-import type { GlobalSlug, Payload, RequestContext, TypedLocale, User } from '../../../index.js'
-import type { PayloadRequest, PopulateType } from '../../../types/index.js'
+import type {
+  AllowedDepth,
+  DefaultDepth,
+  GlobalSlug,
+  Payload,
+  RequestContext,
+  TypedLocale,
+  User,
+} from '../../../index.js'
+import type { ApplyDepthInternal, PayloadRequest, PopulateType } from '../../../types/index.js'
 import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
 import type { DataFromGlobalSlug } from '../../config/types.js'
 
@@ -7,7 +15,7 @@ import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { restoreVersionOperation } from '../restoreVersion.js'
 
-export type Options<TSlug extends GlobalSlug> = {
+export type Options<TSlug extends GlobalSlug, TDepth extends AllowedDepth = DefaultDepth> = {
   /**
    * [Context](https://payloadcms.com/docs/hooks/context), which will then be passed to `context` and `req.context`,
    * which can be read by hooks. Useful if you want to pass additional information to the hooks which
@@ -18,7 +26,7 @@ export type Options<TSlug extends GlobalSlug> = {
   /**
    * [Control auto-population](https://payloadcms.com/docs/queries/depth) of nested relationship and upload fields.
    */
-  depth?: number
+  depth?: TDepth
   /**
    * Specify a [fallback locale](https://payloadcms.com/docs/configuration/localization) to use for any returned documents.
    */
@@ -61,10 +69,13 @@ export type Options<TSlug extends GlobalSlug> = {
   user?: null | User
 }
 
-export async function restoreGlobalVersionLocal<TSlug extends GlobalSlug>(
+export async function restoreGlobalVersionLocal<
+  TSlug extends GlobalSlug,
+  TDepth extends AllowedDepth = DefaultDepth,
+>(
   payload: Payload,
   options: Options<TSlug>,
-): Promise<DataFromGlobalSlug<TSlug>> {
+): Promise<ApplyDepthInternal<DataFromGlobalSlug<TSlug>, TDepth>> {
   const { id, slug: globalSlug, depth, overrideAccess = true, populate, showHiddenFields } = options
 
   const globalConfig = payload.globals.config.find((config) => config.slug === globalSlug)

@@ -1069,6 +1069,15 @@ export function entityToJSONSchema(
     jsonSchema.description = entityDescription
   }
 
+  // Read-only marker that lets `ApplyDepth` recognise a populated relationship. Input types
+  // describe what `create`/`update` accept, so it has no place there.
+  if (config.typescript?.typeSafeDepth && !isInput) {
+    jsonSchema.properties!.__collection = {
+      type: 'string',
+      enum: [entity.slug],
+    }
+  }
+
   return jsonSchema
 }
 
@@ -1699,6 +1708,7 @@ export function configToJSONSchema(
       jsonSchema.$defs![key] = value
     }
   }
+
   if (jobsSchemas.properties) {
     jsonSchema.properties!.jobs = {
       type: 'object',
@@ -1706,6 +1716,44 @@ export function configToJSONSchema(
       properties: jobsSchemas.properties,
       required: ['tasks', 'workflows'],
     }
+  }
+
+  if (config.typescript?.typeSafeDepth) {
+    // Depth is emitted as literal types so `ApplyDepth` can decrement it at the type level.
+    // When disabled we emit nothing at all - `UntypedPayloadTypes['depth']` then supplies plain
+    // `number`, which turns every depth-aware result type back into a no-op.
+    jsonSchema.properties!.depth = {
+      type: 'object',
+      additionalProperties: false,
+      properties: {
+        allowed: {
+          type: 'number',
+          enum: Array.from({ length: config.maxDepth + 1 }, (_, i) => i),
+        },
+        decremented: {
+          type: 'array',
+          items: [
+            { type: 'null' },
+            ...Array.from({ length: config.maxDepth }, (_, i) => ({
+              type: 'number',
+              enum: [i],
+            })),
+          ],
+          maxItems: config.maxDepth + 1,
+          minItems: config.maxDepth + 1,
+        },
+        default: {
+          type: 'number',
+          // `afterRead` clamps an incoming depth to `maxDepth`, and `defaultDepth` is not validated
+          // against it, so mirror the clamp here. Emitting an out-of-range default would leave
+          // `DecrementDepth` indexing past the end of the tuple and silently type every relationship
+          // as unpopulated.
+          enum: [Math.min(config.defaultDepth, config.maxDepth)],
+        },
+      },
+      required: ['allowed', 'default', 'decremented'],
+    }
+    ;(jsonSchema.required as string[]).push('depth')
   }
 
   if (config?.typescript?.schema?.length) {

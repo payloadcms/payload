@@ -3,8 +3,14 @@ import type {
   Collection,
   DataFromCollectionSlug,
 } from '../../collections/config/types.js'
-import type { AuthCollectionSlug, AuthenticatedUser, User } from '../../index.js'
-import type { PayloadRequest, Where } from '../../types/index.js'
+import type {
+  AllowedDepth,
+  AuthCollectionSlug,
+  AuthenticatedUser,
+  DefaultDepth,
+  User,
+} from '../../index.js'
+import type { ApplyDepthInternal, PayloadRequest, Where } from '../../types/index.js'
 import type { AuthRuntimeFields } from '../types.js'
 
 import { buildAfterOperation } from '../../collections/operations/utilities/buildAfterOperation.js'
@@ -29,10 +35,13 @@ import { authenticateLocalStrategy } from '../strategies/local/authenticate.js'
 import { incrementLoginAttempts } from '../strategies/local/incrementLoginAttempts.js'
 import { resetLoginAttempts } from '../strategies/local/resetLoginAttempts.js'
 
-export type LoginResult<TSlug extends AuthCollectionSlug> = {
+export type LoginResult<
+  TSlug extends AuthCollectionSlug,
+  TDepth extends AllowedDepth = DefaultDepth,
+> = {
   exp?: number
   token?: string
-  user?: AuthRuntimeFields & DataFromCollectionSlug<TSlug>
+  user?: ApplyDepthInternal<AuthRuntimeFields & DataFromCollectionSlug<TSlug>, TDepth>
 }
 
 export type Arguments<TSlug extends AuthCollectionSlug> = {

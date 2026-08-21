@@ -1,6 +1,7 @@
 import type { DeepPartial } from 'ts-essentials'
 
 import type {
+  ApplyDepthInternal,
   PayloadRequest,
   PopulateType,
   SelectType,
@@ -15,7 +16,9 @@ import type {
 
 import { APIError } from '../../../errors/index.js'
 import {
+  type AllowedDepth,
   deepCopyObjectSimple,
+  type DefaultDepth,
   type FindOptions,
   type GlobalSlug,
   type Payload,
@@ -26,7 +29,11 @@ import {
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { updateOperation } from '../update.js'
 
-type BaseOptions<TSlug extends GlobalSlug, TSelect extends SelectType> = {
+type BaseOptions<
+  TSlug extends GlobalSlug,
+  TSelect extends SelectType,
+  TDepth extends AllowedDepth = DefaultDepth,
+> = {
   /**
    * [Context](https://payloadcms.com/docs/hooks/context), which will then be passed to `context` and `req.context`,
    * which can be read by hooks. Useful if you want to pass additional information to the hooks which
@@ -41,7 +48,7 @@ type BaseOptions<TSlug extends GlobalSlug, TSelect extends SelectType> = {
   /**
    * [Control auto-population](https://payloadcms.com/docs/queries/depth) of nested relationship and upload fields.
    */
-  depth?: number
+  depth?: TDepth
   /**
    * Specify a [fallback locale](https://payloadcms.com/docs/configuration/localization) to use for any returned documents.
    */
@@ -98,19 +105,20 @@ type BaseOptions<TSlug extends GlobalSlug, TSelect extends SelectType> = {
   user?: null | User
 } & Pick<FindOptions<string, SelectType>, 'select'>
 
-export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> = BaseOptions<
-  TSlug,
-  TSelect
-> &
-  DraftFlagFromGlobalSlug<TSlug>
+export type Options<
+  TSlug extends GlobalSlug,
+  TSelect extends SelectType,
+  TDepth extends AllowedDepth = DefaultDepth,
+> = BaseOptions<TSlug, TSelect, TDepth> & DraftFlagFromGlobalSlug<TSlug>
 
 export async function updateGlobalLocal<
   TSlug extends GlobalSlug,
   TSelect extends SelectFromGlobalSlug<TSlug>,
+  TDepth extends AllowedDepth = DefaultDepth,
 >(
   payload: Payload,
-  options: Options<TSlug, TSelect>,
-): Promise<TransformGlobalWithSelect<TSlug, TSelect>> {
+  options: Options<TSlug, TSelect, TDepth>,
+): Promise<ApplyDepthInternal<TransformGlobalWithSelect<TSlug, TSelect>, TDepth>> {
   const {
     slug: globalSlug,
     data,
