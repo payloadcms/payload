@@ -29,6 +29,90 @@ const markdown = convertLexicalToMarkdown({
 })
 ```
 
+### Internal Links
+
+By default, Payload doesn't know how to convert **internal** links to Markdown, as it doesn't know what the corresponding URL of the internal link is. Internal links store a reference to a document rather than a URL, so only your app knows how that reference maps to a route. You'll notice the following warning in the console when converting content that contains internal links:
+
+```
+Lexical → Markdown converter: found internal link but internalDocToHref is not provided — link will have an empty href
+```
+
+Unlike the [JSX converter](/docs/rich-text/converting-jsx#internal-links), which takes the same function via `LinkJSXConverter`, `convertLexicalToMarkdown` does not accept a `converters` argument. Markdown transformers are defined on the features, so the `internalDocToHref` function is passed to the `LinkFeature` of the editor config that you provide as `editorConfig`:
+
+```ts
+import type { SerializedLinkNode } from '@payloadcms/richtext-lexical'
+import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
+
+import {
+  convertLexicalToMarkdown,
+  editorConfigFactory,
+  LinkFeature,
+} from '@payloadcms/richtext-lexical'
+
+// Your richtext data here
+const data: SerializedEditorState = {}
+
+const internalDocToHref = ({ linkNode }: { linkNode: SerializedLinkNode }) => {
+  const { relationTo, value } = linkNode.fields.doc!
+
+  // The doc must already be populated to read a slug from it.
+  // With `depth: 0` you only receive the ID here.
+  if (typeof value !== 'object') {
+    return `/${relationTo}/${value}`
+  }
+
+  const slug = value.slug
+
+  switch (relationTo) {
+    case 'posts':
+      return `/posts/${slug}`
+    case 'categories':
+      return `/category/${slug}`
+    case 'pages':
+      return `/${slug}`
+    default:
+      return `/${relationTo}/${slug}`
+  }
+}
+
+const markdown = convertLexicalToMarkdown({
+  data,
+  editorConfig: await editorConfigFactory.fromFeatures({
+    config, // <= make sure you have access to your Payload Config
+    features: ({ defaultFeatures }) => [
+      ...defaultFeatures,
+      // Re-declaring LinkFeature overrides the default one -
+      // the last feature with a given key wins.
+      LinkFeature({ internalDocToHref }),
+    ],
+  }),
+})
+```
+
+Note that `editorConfigFactory.default({ config })` always builds its config from the default features, so it cannot carry an `internalDocToHref`. Use `fromFeatures` as shown above, or set the prop on the field's own editor and retrieve the config with `fromField`:
+
+```ts
+{
+  name: 'nameOfYourRichTextField',
+  type: 'richText',
+  editor: lexicalEditor({
+    features: ({ defaultFeatures }) => [
+      ...defaultFeatures,
+      LinkFeature({ internalDocToHref }),
+    ],
+  }),
+}
+```
+
+<Banner type="warning">
+  `internalDocToHref` is **synchronous** and **server-side only**. There is no
+  `populate` helper available like there is in the async HTML converter, so
+  convert against fully populated data (`depth` of at least `1`), or resolve
+  document IDs to URLs ahead of time and close over a lookup map. The
+  client-side link transformer runs without this function, which only affects
+  Markdown shortcuts typed into the editor, not converted output.
+</Banner>
+
 ### Example - outputting Markdown from the Collection
 
 ```ts
@@ -39,6 +123,7 @@ import {
   convertLexicalToMarkdown,
   editorConfigFactory,
   lexicalEditor,
+  LinkFeature,
 } from '@payloadcms/richtext-lexical'
 
 const Pages: CollectionConfig = {
@@ -47,7 +132,14 @@ const Pages: CollectionConfig = {
     {
       name: 'nameOfYourRichTextField',
       type: 'richText',
-      editor: lexicalEditor(),
+      editor: lexicalEditor({
+        features: ({ defaultFeatures }) => [
+          ...defaultFeatures,
+          // Required for internal links to export with a href.
+          // See "Internal Links" above.
+          LinkFeature({ internalDocToHref }),
+        ],
+      }),
     },
     {
       name: 'markdown',
@@ -161,6 +253,7 @@ import {
   convertLexicalToMarkdown,
   editorConfigFactory,
   lexicalEditor,
+  LinkFeature,
 } from '@payloadcms/richtext-lexical'
 
 const BannerBlock: Block = {
@@ -179,7 +272,14 @@ const BannerBlock: Block = {
     {
       name: 'content',
       type: 'richText',
-      editor: lexicalEditor(),
+      // Nested editors need their own LinkFeature configuration -
+      // the block's content is converted using this field's editor config.
+      editor: lexicalEditor({
+        features: ({ defaultFeatures }) => [
+          ...defaultFeatures,
+          LinkFeature({ internalDocToHref }),
+        ],
+      }),
     },
   ],
   jsx: {
@@ -222,6 +322,9 @@ const Pages: CollectionConfig = {
           BlocksFeature({
             blocks: [BannerBlock],
           }),
+          // Required for internal links to export with a href.
+          // See "Internal Links" above.
+          LinkFeature({ internalDocToHref }),
         ],
       }),
     },
