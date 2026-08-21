@@ -279,7 +279,11 @@ export const EditManyDrawerContent: React.FC<EditManyDrawerContentProps> = (prop
     router.replace(
       qs.stringify(
         {
-          ...parseSearchParams(searchParams),
+          // Read the live location instead of `useSearchParams()`, which is stale
+          // here: `ListQueryProvider` syncs the list query to the URL through the
+          // History API to avoid a re-render, and the hook never observes that.
+          // Spreading the stale value wipes columns/filters/limit off the URL.
+          ...parseSearchParams(new URLSearchParams(window.location.search)),
           _r: Date.now(), // Cache buster to force fresh data fetch. Prevents an e2e race condition where sometimes the data is not updated.
           page: selectAll ? '1' : undefined,
         },
