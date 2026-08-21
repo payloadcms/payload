@@ -3,6 +3,7 @@ import { decodeJwt } from 'jose'
 import type { Collection } from '../../collections/config/types.js'
 import type { AuthenticatedUser } from '../../index.js'
 import type { JoinQuery, PayloadRequest, PopulateType, SelectType } from '../../types/index.js'
+import type { ReadVersion } from '../../versions/types.js'
 
 export type MeOperationResult = {
   collection?: string
@@ -15,15 +16,19 @@ export type Arguments = {
   collection: Collection
   currentToken?: string
   depth?: number
+  /**
+   * Leftover GraphQL boolean until that transport is converted.
+   */
   draft?: boolean
   joins?: JoinQuery
   populate?: PopulateType
   req: PayloadRequest
   select?: SelectType
+  version?: ReadVersion
 }
 
 export const meOperation = async (args: Arguments): Promise<MeOperationResult> => {
-  const { collection, currentToken, depth, draft, joins, populate, req, select } = args
+  const { collection, currentToken, depth, draft, joins, populate, req, select, version } = args
 
   let result: MeOperationResult = {
     user: null!,
@@ -49,7 +54,7 @@ export const meOperation = async (args: Arguments): Promise<MeOperationResult> =
       req,
       select,
       showHiddenFields: false,
-      version: draft ? 'latest' : undefined,
+      version: version ?? (draft ? 'latest' : undefined),
     })) as AuthenticatedUser
 
     if (user) {

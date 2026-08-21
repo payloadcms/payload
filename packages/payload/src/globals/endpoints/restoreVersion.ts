@@ -6,17 +6,27 @@ import { restoreVersionOperationGlobal, sanitizePopulateParam } from '../../inde
 import { getRequestGlobal } from '../../utilities/getRequestEntity.js'
 import { headersWithCors } from '../../utilities/headersWithCors.js'
 import { isNumber } from '../../utilities/isNumber.js'
+import {
+  parseEnumParam,
+  parseParams,
+  restoreActionValues,
+} from '../../utilities/parseParams/index.js'
 
 export const restoreVersionHandler: PayloadHandler = async (req) => {
   const globalConfig = getRequestGlobal(req)
   const { searchParams } = req
+  const { action: requestedAction } = parseParams(req.query)
+  const action = parseEnumParam({
+    allowed: restoreActionValues,
+    param: 'action',
+    value: requestedAction,
+  })
   const depth = searchParams.get('depth')
-  const draft = searchParams.get('draft')
 
   const doc = await restoreVersionOperationGlobal({
     id: req.routeParams!.id as string,
+    action,
     depth: isNumber(depth) ? Number(depth) : undefined,
-    draft: draft === 'true' ? true : undefined,
     globalConfig,
     populate: sanitizePopulateParam(req.query.populate),
     req,

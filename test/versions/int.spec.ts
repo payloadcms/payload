@@ -969,6 +969,384 @@ describe('Versions', () => {
       })
     })
 
+    describe('REST version and action parameters', () => {
+      const createdIDs: Array<{ collection: string; id: number | string }> = []
+
+      afterEach(async () => {
+        for (const { collection, id } of createdIDs) {
+          await payload.delete({ collection, id })
+        }
+
+        createdIDs.length = 0
+      })
+
+      it('should read published, latest, and draft representations over REST', async () => {
+        const publishedOnly = await payload.create({
+          action: 'publish',
+          collection: draftCollectionSlug,
+          data: {
+            description: 'Published only',
+            title: 'REST read published only',
+          },
+        })
+        createdIDs.push({ collection: draftCollectionSlug, id: publishedOnly.id })
+
+        const draftOnly = await payload.create({
+          action: 'saveDraft',
+          collection: draftCollectionSlug,
+          data: {
+            title: 'REST read draft only',
+          },
+        })
+        createdIDs.push({ collection: draftCollectionSlug, id: draftOnly.id })
+
+        const publishedWithDraft = await payload.create({
+          action: 'publish',
+          collection: draftCollectionSlug,
+          data: {
+            description: 'Published with draft',
+            title: 'REST read published with draft',
+          },
+        })
+        createdIDs.push({ collection: draftCollectionSlug, id: publishedWithDraft.id })
+
+        await payload.update({
+          id: publishedWithDraft.id,
+          action: 'saveDraft',
+          collection: draftCollectionSlug,
+          data: {
+            title: 'REST read newer draft',
+          },
+        })
+
+        const publishedByID = await restClient.GET(`/${draftCollectionSlug}/${publishedOnly.id}`)
+        expect(publishedByID.status).toBe(200)
+        expect((await publishedByID.json()).title).toBe('REST read published only')
+
+        const latestPublishedOnly = await restClient.GET(
+          `/${draftCollectionSlug}/${publishedOnly.id}?version=latest`,
+        )
+        expect(latestPublishedOnly.status).toBe(200)
+        expect((await latestPublishedOnly.json()).title).toBe('REST read published only')
+
+        const draftOfPublishedOnly = await restClient.GET(
+          `/${draftCollectionSlug}/${publishedOnly.id}?version=draft`,
+        )
+        expect(draftOfPublishedOnly.status).toBe(404)
+
+        const missingPublishedDraftOnly = await restClient.GET(
+          `/${draftCollectionSlug}/${draftOnly.id}`,
+        )
+        expect(missingPublishedDraftOnly.status).toBe(200)
+        expect((await missingPublishedDraftOnly.json())._status).toBe('draft')
+
+        const latestDraftOnly = await restClient.GET(
+          `/${draftCollectionSlug}/${draftOnly.id}?version=latest`,
+        )
+        expect(latestDraftOnly.status).toBe(200)
+        expect((await latestDraftOnly.json()).title).toBe('REST read draft only')
+
+        const draftOnlyByVersion = await restClient.GET(
+          `/${draftCollectionSlug}/${draftOnly.id}?version=draft`,
+        )
+        expect(draftOnlyByVersion.status).toBe(200)
+
+        const publishedSide = await restClient.GET(
+          `/${draftCollectionSlug}/${publishedWithDraft.id}`,
+        )
+        expect((await publishedSide.json()).title).toBe('REST read published with draft')
+
+        const latestSide = await restClient.GET(
+          `/${draftCollectionSlug}/${publishedWithDraft.id}?version=latest`,
+        )
+        expect((await latestSide.json()).title).toBe('REST read newer draft')
+
+        const listPublished = await restClient.GET(`/${draftCollectionSlug}`, {
+          query: {
+            where: {
+              title: {
+                in: [
+                  'REST read published only',
+                  'REST read draft only',
+                  'REST read published with draft',
+                  'REST read newer draft',
+                ],
+              },
+            },
+          },
+        })
+        const publishedDocs = (await listPublished.json()).docs
+        expect(publishedDocs.map(({ title }) => title).sort()).toEqual([
+          'REST read draft only',
+          'REST read published only',
+          'REST read published with draft',
+        ])
+
+        const listLatest = await restClient.GET(`/${draftCollectionSlug}`, {
+          query: {
+            version: 'latest',
+            where: {
+              title: {
+                in: [
+                  'REST read published only',
+                  'REST read draft only',
+                  'REST read published with draft',
+                  'REST read newer draft',
+                ],
+              },
+            },
+          },
+        })
+        expect((await listLatest.json()).docs.map(({ title }) => title).sort()).toEqual([
+          'REST read draft only',
+          'REST read newer draft',
+          'REST read published only',
+        ])
+
+        const listDraft = await restClient.GET(`/${draftCollectionSlug}`, {
+          query: {
+            version: 'draft',
+            where: {
+              title: {
+                in: [
+                  'REST read published only',
+                  'REST read draft only',
+                  'REST read published with draft',
+                  'REST read newer draft',
+                ],
+              },
+            },
+          },
+        })
+        expect((await listDraft.json()).docs.map(({ title }) => title).sort()).toEqual([
+          'REST read draft only',
+          'REST read newer draft',
+        ])
+      })
+
+      it('should save a draft when REST create omits action and _status', async () => {
+        const response = await restClient.POST(`/${draftCollectionSlug}`, {
+          body: JSON.stringify({
+            title: 'REST omitted create action',
+          }),
+        })
+
+        const { doc } = await response.json()
+        createdIDs.push({ collection: draftCollectionSlug, id: doc.id })
+
+        expect(response.status).toBe(201)
+        expect(doc._status).toBe('draft')
+      })
+
+      it('should honor body _status and let explicit REST action win', async () => {
+        const publishedFromStatus = await restClient.POST(`/${draftCollectionSlug}`, {
+          body: JSON.stringify({
+            description: 'From status',
+            title: 'REST create from published status',
+            _status: 'published',
+          }),
+        })
+        const publishedDoc = (await publishedFromStatus.json()).doc
+        createdIDs.push({ collection: draftCollectionSlug, id: publishedDoc.id })
+
+        expect(publishedFromStatus.status).toBe(201)
+        expect(publishedDoc._status).toBe('published')
+
+        const actionWins = await restClient.POST(`/${draftCollectionSlug}?action=saveDraft`, {
+          body: JSON.stringify({
+            description: 'Conflict',
+            title: 'REST create action wins',
+            _status: 'published',
+          }),
+        })
+        const draftDoc = (await actionWins.json()).doc
+        createdIDs.push({ collection: draftCollectionSlug, id: draftDoc.id })
+
+        expect(actionWins.status).toBe(201)
+        expect(draftDoc._status).toBe('draft')
+
+        const explicitPublish = await restClient.POST(`/${draftCollectionSlug}?action=publish`, {
+          body: JSON.stringify({
+            description: 'Explicit publish',
+            title: 'REST create explicit publish',
+          }),
+        })
+        const explicitDoc = (await explicitPublish.json()).doc
+        createdIDs.push({ collection: draftCollectionSlug, id: explicitDoc.id })
+
+        expect(explicitPublish.status).toBe(201)
+        expect(explicitDoc._status).toBe('published')
+      })
+
+      it('should publish when REST update has neither action nor status', async () => {
+        const doc = await payload.create({
+          action: 'saveDraft',
+          collection: draftCollectionSlug,
+          data: {
+            title: 'REST update omitted source',
+          },
+        })
+        createdIDs.push({ collection: draftCollectionSlug, id: doc.id })
+
+        const response = await restClient.PATCH(`/${draftCollectionSlug}/${doc.id}`, {
+          body: JSON.stringify({
+            description: 'Now published',
+            title: 'REST update omitted next',
+          }),
+        })
+        const { doc: updated } = await response.json()
+
+        expect(response.status).toBe(200)
+        expect(updated._status).toBe('published')
+        expect(updated.title).toBe('REST update omitted next')
+      })
+
+      it('should apply explicit REST update actions including unpublish', async () => {
+        const doc = await payload.create({
+          action: 'publish',
+          collection: draftCollectionSlug,
+          data: {
+            description: 'Published',
+            title: 'REST update actions',
+          },
+        })
+        createdIDs.push({ collection: draftCollectionSlug, id: doc.id })
+
+        const savedDraft = await restClient.PATCH(
+          `/${draftCollectionSlug}/${doc.id}?action=saveDraft`,
+          {
+            body: JSON.stringify({
+              title: 'REST update saveDraft',
+            }),
+          },
+        )
+        expect((await savedDraft.json()).doc._status).toBe('draft')
+
+        const unpublished = await restClient.PATCH(
+          `/${draftCollectionSlug}/${doc.id}?action=unpublish`,
+          {
+            body: JSON.stringify({}),
+          },
+        )
+        expect(unpublished.status).toBe(200)
+        expect((await unpublished.json()).doc._status).toBe('draft')
+      })
+
+      it('should restore over REST with omitted publish and explicit saveDraft', async () => {
+        const doc = await payload.create({
+          action: 'publish',
+          collection: draftCollectionSlug,
+          data: {
+            description: 'REST restore published v1',
+            title: 'REST restore v1',
+          },
+        })
+        createdIDs.push({ collection: draftCollectionSlug, id: doc.id })
+
+        await payload.update({
+          id: doc.id,
+          action: 'publish',
+          collection: draftCollectionSlug,
+          data: {
+            title: 'REST restore v2',
+          },
+        })
+
+        const versions = await payload.findVersions({
+          collection: draftCollectionSlug,
+          sort: 'createdAt',
+          where: {
+            parent: {
+              equals: doc.id,
+            },
+          },
+        })
+        const versionToRestore = versions.docs[0]
+
+        const publishedRestore = await restClient.POST(
+          `/${draftCollectionSlug}/versions/${versionToRestore.id}`,
+        )
+        expect(publishedRestore.status).toBe(200)
+
+        const published = await payload.findByID({
+          id: doc.id,
+          collection: draftCollectionSlug,
+        })
+        expect(published.title).toBe('REST restore v1')
+        expect(published._status).toBe('published')
+
+        const draftRestore = await restClient.POST(
+          `/${draftCollectionSlug}/versions/${versionToRestore.id}?action=saveDraft`,
+        )
+        expect(draftRestore.status).toBe(200)
+
+        const latest = await payload.findByID({
+          id: doc.id,
+          collection: draftCollectionSlug,
+          version: 'latest',
+        })
+        expect(latest.title).toBe('REST restore v1')
+        expect(latest._status).toBe('draft')
+      })
+
+      it('should reject invalid REST version and action values and obsolete draft', async () => {
+        const invalidVersion = await restClient.GET(`/${draftCollectionSlug}?version=Latest`)
+        expect(invalidVersion.status).toBe(400)
+
+        const invalidAction = await restClient.POST(`/${draftCollectionSlug}?action=SaveDraft`, {
+          body: JSON.stringify({
+            title: 'REST invalid action',
+          }),
+        })
+        expect(invalidAction.status).toBe(400)
+
+        const createUnpublish = await restClient.POST(`/${draftCollectionSlug}?action=unpublish`, {
+          body: JSON.stringify({
+            title: 'REST create unpublish',
+          }),
+        })
+        expect(createUnpublish.status).toBe(400)
+
+        const obsoleteDraft = await restClient.GET(`/${draftCollectionSlug}?draft=true`)
+        expect(obsoleteDraft.status).toBe(400)
+      })
+
+      it('should read and write draft globals over REST', async () => {
+        await payload.updateGlobal({
+          action: 'publish',
+          data: {
+            title: 'REST global published',
+          },
+          slug: simpleDraftGlobalSlug,
+        })
+
+        const published = await restClient.GET(`/globals/${simpleDraftGlobalSlug}`)
+        expect((await published.json()).title).toBe('REST global published')
+
+        const saveDraft = await restClient.POST(
+          `/globals/${simpleDraftGlobalSlug}?action=saveDraft`,
+          {
+            body: JSON.stringify({
+              title: 'REST global draft',
+            }),
+          },
+        )
+        expect(saveDraft.status).toBe(200)
+
+        const latest = await restClient.GET(`/globals/${simpleDraftGlobalSlug}?version=latest`)
+        expect((await latest.json()).title).toBe('REST global draft')
+
+        const stillPublished = await restClient.GET(`/globals/${simpleDraftGlobalSlug}`)
+        expect((await stillPublished.json()).title).toBe('REST global published')
+      })
+
+      it('should accept version on auth me', async () => {
+        const response = await restClient.GET('/users/me?version=latest')
+        expect(response.status).toBe(200)
+        expect((await response.json()).user.email).toBe(devUser.email)
+      })
+    })
+
     describe('Query operations', () => {
       beforeAll(async () => {
         // Create test data for query-only tests (pagination, sorting)
@@ -1756,12 +2134,12 @@ describe('Versions', () => {
         ).rejects.toThrow('The action "saveDraft" cannot be used because drafts are not enabled.')
       })
 
-      it('should restore as a draft via leftover REST draft=true', async () => {
+      it('should restore as a draft via REST action=saveDraft', async () => {
         const doc = await payload.create({
           collection: draftCollectionSlug,
           data: {
             description: 'REST published v1',
-            title: 'REST restore v1',
+            title: 'REST restore leftover v1',
             _status: 'published',
           },
           overrideAccess: true,
@@ -1773,7 +2151,7 @@ describe('Versions', () => {
           id: doc.id,
           collection: draftCollectionSlug,
           data: {
-            title: 'REST restore v2',
+            title: 'REST restore leftover v2',
             _status: 'published',
           },
           overrideAccess: true,
@@ -1785,7 +2163,7 @@ describe('Versions', () => {
         })
 
         const response = await restClient.POST(
-          `/${draftCollectionSlug}/versions/${versionToRestore.id}?draft=true`,
+          `/${draftCollectionSlug}/versions/${versionToRestore.id}?action=saveDraft`,
         )
 
         expect(response.status).toBe(200)
@@ -1802,8 +2180,8 @@ describe('Versions', () => {
           version: 'latest',
         })
 
-        expect(published.title).toBe('REST restore v2')
-        expect(latest.title).toBe('REST restore v1')
+        expect(published.title).toBe('REST restore leftover v2')
+        expect(latest.title).toBe('REST restore leftover v1')
         expect(latest._status).toBe('draft')
       })
     })
