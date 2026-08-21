@@ -1050,7 +1050,29 @@ If you relied on either option, remove it from your `jobs` config. If you depend
 
 The `jobsCollectionOverrides` warning that detected extra hooks and prompted users to set `runHooks` has also been removed.
 
-### Jobs: `BaseJob` has been removed
+### Jobs Queue breaking changes ([#17220](https://github.com/payloadcms/payload/pull/17220), [#17441](https://github.com/payloadcms/payload/pull/17441), [#17504](https://github.com/payloadcms/payload/pull/17504), [#17505](https://github.com/payloadcms/payload/pull/17505))
+
+If your project uses the Jobs Queue with a SQL database, use the single predefined `jobs-v4` migration for all v4 Jobs Queue database changes. Run the command for your database adapter:
+
+```sh
+# PostgreSQL
+pnpm payload migrate:create --file @payloadcms/db-postgres/jobs-v4
+
+# Vercel PostgreSQL
+pnpm payload migrate:create --file @payloadcms/db-vercel-postgres/jobs-v4
+
+# SQLite
+pnpm payload migrate:create --file @payloadcms/db-sqlite/jobs-v4
+
+# D1 SQLite
+pnpm payload migrate:create --file @payloadcms/db-d1-sqlite/jobs-v4
+```
+
+The migration replaces `processing` with `processingUntil`, adds `processingToken`, adds the `meta` and indexed `concurrencyKey` columns, creates the `payload-jobs-stats` global table, adds parent task log columns, and backfills task log input before making it required. It leaves stats, metadata, concurrency controls, or parent logging in place if you had already enabled them. It also keeps custom table, schema, and index names. Any old job with `processing: true` receives an expired lease so a jobs runner can recover it.
+
+MongoDB does not require a database migration for these changes.
+
+#### `BaseJob` has been removed
 
 The deprecated `BaseJob` type is no longer exported. Use `Job` everywhere you previously used `BaseJob`.
 
@@ -1083,19 +1105,17 @@ The `false` fallback used by job and workflow generics has also been removed. Om
 
 Generated workflow slugs and explicit input objects continue to work as before. For example, `Job<'my-workflow'>` uses the generated workflow input, while `Job<{ message: string }>` uses the provided input type.
 
-### Jobs: stats and metadata are enabled by default
+#### Stats and metadata are enabled by default
 
 When jobs are enabled, Payload now always adds the `payload-jobs-stats` global and the `meta` field on the `payload-jobs` collection. Previously, these were only added when a task or workflow used a schedule.
 
-Existing projects that use sqlite/postgres and jobs may need a database migration.
-
-### Jobs: concurrency controls and parent task logging are always enabled
+#### Concurrency controls and parent task logging are always enabled
 
 Concurrency controls add the indexed `concurrencyKey` field to the `payload-jobs` collection. Parent task logging adds parent information to nested task logs. Task log input is also now required and is stored as an empty object when a task has no input.
 
-The `jobs.enableConcurrencyControl` and `jobs.addParentToTaskLog` options have been removed. Existing SQL projects that use jobs should generate a database migration for these schema changes.
+The `jobs.enableConcurrencyControl` and `jobs.addParentToTaskLog` options have been removed.
 
-### Jobs: task and workflow types have been renamed
+#### Task and workflow types have been renamed
 
 The `TaskType` and `WorkflowTypes` exports have been renamed to `TaskSlug` and `WorkflowSlug`.
 
@@ -1108,19 +1128,17 @@ The deprecated `RunningJob` and `RunningJobSimple` types have also been removed.
 
 JSON workflow steps without a `task` must now provide an `inlineTask` handler. This removes a type escape that previously allowed an incomplete step even though it could not run.
 
-### Jobs: custom database adapters must implement `updateJobs`
+#### Custom database adapters must implement `updateJobs`
 
-Payload now uses a unique `processingToken` when claiming jobs so multiple workers cannot run the same job. This adds an internal, nullable `processingToken` field to the `payload-jobs` collection. Existing SQL databases need a migration that adds this column. MongoDB does not require a migration.
+Payload now uses a unique `processingToken` when claiming jobs so multiple workers cannot run the same job. This adds an internal, nullable `processingToken` field to the `payload-jobs` collection.
 
 The default `updateJobs` implementation has been removed because it could not safely claim jobs across multiple workers. If you maintain a custom database adapter, you must now provide `updateJobs`. It must only claim jobs that still match the provided `where` condition and, when a `processingToken` is provided, return only the jobs claimed with that token. The official Payload database adapters already implement this behavior.
 
-### Jobs: crashed workers are recovered with processing leases
+#### Crashed workers are recovered with processing leases
 
 The permanent `processing` flag on `payload-jobs` has been replaced by a renewable `processingUntil` lease. If a worker exits, a later jobs runner call can claim the job after its lease expires. Worker crashes do not consume the job's handler retry configuration.
 
 Worker updates use a 30-second safety buffer by default, so an update only starts when enough lease time remains for it to finish before another claim. Configure the lease with `jobs.processingLease.duration` and `jobs.processingLease.safetyBuffer`.
-
-Existing SQL databases need a migration that replaces `processing` with the nullable, indexed `processingUntil` column. MongoDB does not require a migration.
 
 ### Jobs: the `state` field on task return values has been removed ([#16416](https://github.com/payloadcms/payload/pull/16416))
 
