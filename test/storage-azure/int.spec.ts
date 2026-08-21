@@ -10,7 +10,12 @@ import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
-import { mediaSlug, mediaWithPrefixSlug, prefix } from './shared.js'
+import {
+  mediaSlug,
+  mediaWithAlwaysInsertFieldsSlug,
+  mediaWithPrefixSlug,
+  prefix,
+} from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -96,6 +101,21 @@ describe('@payloadcms/storage-azure', () => {
   it('returns 404 for non-existing file', async () => {
     const response = await restClient.GET(`/${mediaSlug}/file/nonexistent.png`)
     expect(response.status).toBe(404)
+  })
+
+  it('has prefix field by default even when plugin is disabled', async () => {
+    // This collection uses an azureStorage plugin with enabled: false.
+    // The upload will use local storage, but the prefix field should still exist.
+    const upload = await payload.create({
+      collection: mediaWithAlwaysInsertFieldsSlug,
+      data: {
+        prefix: 'test',
+      },
+      filePath: path.resolve(dirname, '../uploads/image.png'),
+    })
+
+    expect(upload.id).toBeTruthy()
+    expect(upload.prefix).toBe('test')
   })
 
   async function verifyUploads({

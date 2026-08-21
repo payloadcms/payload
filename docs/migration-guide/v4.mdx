@@ -1437,6 +1437,21 @@ azureStorage({
 
 Run `npx @payloadcms/codemod --transform migrate-azure-chunk-large-files` to remove the flag automatically (it collapses `clientUploads: { chunkLargeFiles: true }` to `clientUploads: true` and keeps any other `clientUploads` options).
 
+### Storage adapters always insert the `prefix` field now — `alwaysInsertFields` removed
+
+The `alwaysInsertFields` option (on `cloudStoragePlugin` and every `storage-*` adapter: `-s3`, `-azure`, `-gcs`, `-r2`, `-vercel-blob`) has been removed. The behavior it used to opt into — always inserting the hidden `prefix` field into the collection schema — is now unconditional, so the schema stays consistent whether or not a collection configures a `prefix` and whether or not the plugin is `enabled`.
+
+**Who is affected:**
+
+- Anyone with an upload collection that uses a storage adapter or `cloudStoragePlugin`. Every such collection now gets a hidden `prefix` field, including collections that never configured a `prefix` and collections where the plugin is disabled (`enabled: false`).
+- Anyone who set `alwaysInsertFields` explicitly — the option no longer exists on any storage adapter or plugin option type.
+- Postgres, SQLite, and D1 users: the new field is a new database column. Running `payload migrate:create` will generate a migration that adds a `prefix` column to every affected collection's table.
+
+**How to migrate:**
+
+- Remove `alwaysInsertFields` from your storage adapter or `cloudStoragePlugin` config — it has no effect and no longer exists on the option types.
+- For Postgres, SQLite, or D1 projects, run `payload migrate:create` to generate the migration that adds the `prefix` column, then run `payload migrate` to apply it.
+
 ### `FileSizeImproved` removed — use `FileSize` ([#16593](https://github.com/payloadcms/payload/pull/16593))
 
 `FileSizeImproved` has been merged into `FileSize`. The `url`, `width`, `height`, `filesize`, `mimeType`, and `filename` properties now accept `null` directly on `FileSize`, matching what the database stores for sizes that were not generated.

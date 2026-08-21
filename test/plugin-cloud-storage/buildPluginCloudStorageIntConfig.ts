@@ -14,6 +14,7 @@ import { devUser } from '../credentials.js'
 import { Media } from './collections/Media.js'
 import { MediaWithCompositePrefixes } from './collections/MediaWithCompositePrefixes.js'
 import { MediaWithCustomURL } from './collections/MediaWithCustomURL.js'
+import { MediaWithDisabledPlugin } from './collections/MediaWithDisabledPlugin.js'
 import { MediaWithGenerateFileURL } from './collections/MediaWithGenerateFileURL.js'
 import { MediaWithOverwrite } from './collections/MediaWithOverwrite.js'
 import { MediaWithPrefix } from './collections/MediaWithPrefix.js'
@@ -26,6 +27,7 @@ import {
   mediaSlug,
   mediaWithCompositePrefixesSlug,
   mediaWithCustomURLSlug,
+  mediaWithDisabledPluginSlug,
   mediaWithGenerateFileURLSlug,
   mediaWithOverwriteSlug,
   mediaWithPrefixSlug,
@@ -158,6 +160,15 @@ export function buildPluginCloudStorageIntConfig({
     })
   }
 
+  const disabledStoragePlugin = cloudStoragePlugin({
+    collections: {
+      [mediaWithDisabledPluginSlug]: {
+        adapter: null,
+      },
+    },
+    enabled: false,
+  })
+
   const testMetadataPlugin = cloudStoragePlugin({
     collections: {
       [testMetadataSlug]: {
@@ -193,6 +204,7 @@ export function buildPluginCloudStorageIntConfig({
       Media,
       MediaWithCompositePrefixes,
       MediaWithCustomURL,
+      MediaWithDisabledPlugin,
       MediaWithGenerateFileURL,
       MediaWithOverwrite,
       MediaWithPrefix,
@@ -234,7 +246,7 @@ export function buildPluginCloudStorageIntConfig({
         `Using plugin-cloud-storage adapter: ${process.env.PAYLOAD_PUBLIC_CLOUD_STORAGE_ADAPTER}`,
       )
     },
-    plugins: [testMetadataPlugin],
+    plugins: [testMetadataPlugin, disabledStoragePlugin],
     storage: storagePlugin ? [storagePlugin] : [],
     typescript: {
       outputFile: path.resolve(dirname, 'payload-types.ts'),
