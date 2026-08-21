@@ -239,13 +239,14 @@ export default buildConfigWithDefaults({
     {
       slug: partialDisableLocalStrategiesSlug,
       auth: {
-        disableLocalStrategy: {
+        localStrategy: {
+          enabled: false,
+          disableFields: false,
           // optionalPassword: true,
-          enableFields: true,
         },
       },
       fields: [
-        // with `enableFields: true`, the following DB columns will be created:
+        // with `disableFields: false`, the following DB columns will be created:
         // email
         // reset_password_token
         // reset_password_expiration
@@ -258,7 +259,7 @@ export default buildConfigWithDefaults({
     },
     {
       slug: 'disable-local-strategy-password',
-      auth: { disableLocalStrategy: true },
+      auth: { localStrategy: false },
       fields: [
         {
           name: 'password',
@@ -286,7 +287,7 @@ export default buildConfigWithDefaults({
         },
       },
       auth: {
-        disableLocalStrategy: true,
+        localStrategy: false,
         useAPIKey: true,
       },
       fields: [],
@@ -314,7 +315,7 @@ export default buildConfigWithDefaults({
           user?.collection === rotateSecretSlug ? { id: { equals: user.id } } : false,
       },
       auth: {
-        disableLocalStrategy: true,
+        localStrategy: false,
         useAPIKey: true,
       },
       fields: [],
@@ -327,7 +328,7 @@ export default buildConfigWithDefaults({
       // before this one aborts, regardless of primary-key type.
       slug: rotateSecretSecondarySlug,
       auth: {
-        disableLocalStrategy: true,
+        localStrategy: false,
         useAPIKey: true,
       },
       fields: [],
@@ -361,7 +362,7 @@ export default buildConfigWithDefaults({
     {
       slug: 'api-keys-with-field-read-access',
       auth: {
-        disableLocalStrategy: true,
+        localStrategy: false,
         useAPIKey: true,
       },
       fields: [

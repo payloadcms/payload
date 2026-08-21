@@ -13,6 +13,7 @@ import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { getFieldsToSign } from '../getFieldsToSign.js'
 import { jwtSign } from '../jwt.js'
+import { isLocalStrategyEnabled } from '../localStrategy.js'
 import { addSessionToUser, revokeSession } from '../sessions.js'
 import { authenticateLocalStrategy } from '../strategies/local/authenticate.js'
 import { generatePasswordSaltHash } from '../strategies/local/generatePasswordSaltHash.js'
@@ -55,7 +56,7 @@ export const resetPasswordOperation = async <TSlug extends AuthCollectionSlug>(
     throw new APIError('Missing required data.', httpStatus.BAD_REQUEST)
   }
 
-  if (collectionConfig.auth.disableLocalStrategy) {
+  if (!isLocalStrategyEnabled(collectionConfig.auth.localStrategy)) {
     throw new Forbidden(req.t)
   }
 

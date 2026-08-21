@@ -1,5 +1,6 @@
 import type { AdminViewServerProps, ServerProps } from 'payload'
 
+import { isLocalStrategyEnabled } from 'payload'
 import { getSafeRedirect } from 'payload/shared'
 import React, { Fragment } from 'react'
 
@@ -80,7 +81,7 @@ export function LoginView({ initPageResult, params, searchParams }: AdminViewSer
           user,
         } satisfies ServerProps,
       })}
-      {!collectionConfig?.auth?.disableLocalStrategy && (
+      {isLocalStrategyEnabled(collectionConfig?.auth?.localStrategy) && (
         <LoginForm
           prefillEmail={prefillEmail}
           prefillPassword={prefillPassword}

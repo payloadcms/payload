@@ -17,6 +17,7 @@ import type {
 
 import { ensureUsernameOrEmail } from '../../auth/ensureUsernameOrEmail.js'
 import { executeAccess } from '../../auth/executeAccess.js'
+import { isLocalStrategyEnabled } from '../../auth/localStrategy.js'
 import { sendVerificationEmail } from '../../auth/sendVerificationEmail.js'
 import { registerLocalStrategy } from '../../auth/strategies/local/register.js'
 import { getDuplicateDocumentData } from '../../duplicateDocument/index.js'
@@ -310,7 +311,7 @@ export const createOperation = async <
       }),
     })
 
-    if (collectionConfig.auth && !collectionConfig.auth.disableLocalStrategy) {
+    if (collectionConfig.auth && isLocalStrategyEnabled(collectionConfig.auth.localStrategy)) {
       if (collectionConfig.auth.verify) {
         dataWithLocales._verified = Boolean(dataWithLocales._verified) || false
         dataWithLocales._verificationToken = crypto.randomBytes(20).toString('hex')

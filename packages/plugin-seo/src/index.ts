@@ -1,6 +1,6 @@
 import type { Config, Field, GroupField, TabsField } from 'payload'
 
-import { definePlugin } from 'payload'
+import { definePlugin, isLocalStrategyEnabled } from 'payload'
 import { deepMergeSimple } from 'payload/shared'
 
 import type {
@@ -77,7 +77,8 @@ export const seoPlugin = definePlugin<SEOPluginConfig>({
               // prevent issues with auth enabled collections having an email field that shouldn't be moved to the SEO tab
               const emailField =
                 collection.auth &&
-                !(typeof collection.auth === 'object' && collection.auth.disableLocalStrategy) &&
+                (typeof collection.auth !== 'object' ||
+                  isLocalStrategyEnabled(collection.auth.localStrategy)) &&
                 collection.fields?.find((field) => 'name' in field && field.name === 'email')
               const hasOnlyEmailField = collection.fields?.length === 1 && emailField
 

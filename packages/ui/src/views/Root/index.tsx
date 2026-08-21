@@ -13,6 +13,7 @@ import type {
   SanitizedGlobalConfig,
 } from 'payload'
 
+import { isLocalStrategyEnabled } from 'payload'
 import { applyLocaleFiltering, formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React from 'react'
@@ -242,18 +243,18 @@ export const renderRoot = async ({
   }
 
   const usersCollection = config.collections.find(({ slug }) => slug === userSlug)
-  const disableLocalStrategy = usersCollection?.auth?.disableLocalStrategy
+  const localStrategyEnabled = isLocalStrategyEnabled(usersCollection?.auth?.localStrategy)
 
   const createFirstUserRoute = formatAdminURL({
     adminRoute,
     path: _createFirstUserRoute,
   })
 
-  if (disableLocalStrategy && currentRoute === createFirstUserRoute) {
+  if (!localStrategyEnabled && currentRoute === createFirstUserRoute) {
     req.server.redirect(adminRoute)
   }
 
-  if (!dbHasUser && currentRoute !== createFirstUserRoute && !disableLocalStrategy) {
+  if (!dbHasUser && currentRoute !== createFirstUserRoute && localStrategyEnabled) {
     req.server.redirect(createFirstUserRoute)
   }
 

@@ -2,6 +2,7 @@
 
 import type { SanitizedFieldPermissions } from 'payload'
 
+import { isLocalStrategyEnabled, shouldIncludeAuthFields } from 'payload'
 import { formatAdminURL, getFieldPermissions } from 'payload/shared'
 import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
@@ -26,8 +27,8 @@ export const Auth: React.FC<Props> = (props) => {
   const {
     className,
     collectionSlug,
-    disableLocalStrategy,
     email,
+    localStrategy,
     loginWithUsername,
     operation,
     readOnly,
@@ -37,6 +38,9 @@ export const Auth: React.FC<Props> = (props) => {
     username,
     verify,
   } = props
+
+  const localStrategyEnabled = isLocalStrategyEnabled(localStrategy)
+  const includeAuthFields = shouldIncludeAuthFields(localStrategy)
 
   const [changingPassword, setChangingPassword] = useState(requirePassword)
   const enableAPIKey = useFormFields(([fields]) => (fields && fields?.enableAPIKey) || null)
@@ -107,10 +111,7 @@ export const Auth: React.FC<Props> = (props) => {
     }
   }
 
-  const enableFields =
-    (!disableLocalStrategy ||
-      (typeof disableLocalStrategy === 'object' && disableLocalStrategy.enableFields === true)) &&
-    (showUnlock || showPasswordFields)
+  const enableFields = includeAuthFields && (showUnlock || showPasswordFields)
 
   const disabled = readOnly || isInitializing || isTrashed
 
@@ -214,7 +215,7 @@ export const Auth: React.FC<Props> = (props) => {
   const Controls =
     enableFields &&
     (changingPassword ||
-      (!changingPassword && !requirePassword && !disableLocalStrategy && showPasswordFields) ||
+      (!changingPassword && !requirePassword && localStrategyEnabled && showPasswordFields) ||
       (!changingPassword && operation === 'update' && hasPermissionToUnlock)) ? (
       <div className={`${baseClass}__controls`}>
         {changingPassword && !requirePassword && (
@@ -228,7 +229,7 @@ export const Auth: React.FC<Props> = (props) => {
             {t('general:cancel')}
           </Button>
         )}
-        {!changingPassword && !requirePassword && !disableLocalStrategy && showPasswordFields && (
+        {!changingPassword && !requirePassword && localStrategyEnabled && showPasswordFields && (
           <Button
             buttonStyle="secondary"
             disabled={disabled}
@@ -270,25 +271,24 @@ export const Auth: React.FC<Props> = (props) => {
                 readOnly={readOnly || isTrashed}
                 t={t}
               />
-              {(changingPassword || requirePassword) &&
-                (!disableLocalStrategy || !enableFields) && (
-                  <div className={`${baseClass}__changing-password`}>
-                    <PasswordField
-                      autoComplete="new-password"
-                      field={{
-                        name: 'password',
-                        label: t('authentication:newPassword'),
-                        required: true,
-                      }}
-                      indexPath=""
-                      parentPath=""
-                      parentSchemaPath=""
-                      path="password"
-                      schemaPath="password"
-                    />
-                    <ConfirmPasswordField disabled={readOnly || isTrashed} />
-                  </div>
-                )}
+              {(changingPassword || requirePassword) && (localStrategyEnabled || !enableFields) && (
+                <div className={`${baseClass}__changing-password`}>
+                  <PasswordField
+                    autoComplete="new-password"
+                    field={{
+                      name: 'password',
+                      label: t('authentication:newPassword'),
+                      required: true,
+                    }}
+                    indexPath=""
+                    parentPath=""
+                    parentSchemaPath=""
+                    path="password"
+                    schemaPath="password"
+                  />
+                  <ConfirmPasswordField disabled={readOnly || isTrashed} />
+                </div>
+              )}
             </Fragment>
           )}
           {showAPIKeyBlock && (
