@@ -8,12 +8,14 @@ import { findFieldByName, findUseAsTitleField } from './utils/findUseAsTitle.js'
 
 export const addHierarchyToCollection = ({
   collectionConfig,
+  deleteStrategy,
   parentFieldName,
   slugFieldName,
   slugPathFieldName,
   titlePathFieldName,
 }: {
   collectionConfig: CollectionConfig
+  deleteStrategy: 'cascade' | 'reparent'
   parentFieldName: string
   slugFieldName?: string
   slugPathFieldName: string
@@ -71,7 +73,7 @@ export const addHierarchyToCollection = ({
     ],
     beforeDelete: [
       ...(collectionConfig.hooks?.beforeDelete || []),
-      hierarchyCollectionBeforeDelete({ parentFieldName }),
+      hierarchyCollectionBeforeDelete({ deleteStrategy, parentFieldName }),
     ],
     beforeOperation: [
       ...(collectionConfig.hooks?.beforeOperation || []),
