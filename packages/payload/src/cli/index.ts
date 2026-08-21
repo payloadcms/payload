@@ -44,6 +44,10 @@ export const bin = withErrorHandling(async (): Promise<void> => {
       await runtime.destroy()
     }
   })
+
+  if (!runtime.isScheduled) {
+    process.exit(process.exitCode ?? 0)
+  }
 })
 
 export const createCLI = async (runtime: CLIRuntime): Promise<Command> => {

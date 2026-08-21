@@ -108,7 +108,7 @@ export const handleCLIError = ({ cli, error }: { cli?: Command; error: unknown }
   process.exitCode = exitCode
 }
 
-/** Wraps a CLI function so every failure uses the same output and exit code handling. */
+/** Wraps the CLI entry point so every failure uses the same output and exits cleanly. */
 export const withErrorHandling =
   (run: () => Promise<void>): (() => Promise<void>) =>
   async () => {
@@ -116,5 +116,6 @@ export const withErrorHandling =
       await run()
     } catch (error) {
       handleCLIError({ error })
+      process.exit(process.exitCode ?? 1)
     }
   }
