@@ -284,11 +284,14 @@ Next.js infers the root of the trace from the directory that holds your `next.co
 ```js
 // apps/web/next.config.mjs
 import path from 'path'
+import { fileURLToPath } from 'url'
 import { withPayload } from '@payloadcms/next/withPayload'
+
+const dirname = path.dirname(fileURLToPath(import.meta.url))
 
 const nextConfig = {
   output: 'standalone',
-  outputFileTracingRoot: path.join(import.meta.dirname, '../../'),
+  outputFileTracingRoot: path.join(dirname, '../../'),
 }
 
 export default withPayload(nextConfig)
