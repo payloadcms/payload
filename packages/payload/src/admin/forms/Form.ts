@@ -64,13 +64,6 @@ export type FieldState = {
   filterOptions?: FilterOptionsResult
   initialValue?: unknown
   /**
-   * Every time a field is changed locally, this flag is set to true. Prevents form state from server from overwriting local changes.
-   * After merging server form state, this flag is reset.
-   *
-   * @experimental This property is experimental and may change in the future. Use at your own risk.
-   */
-  isModified?: boolean
-  /**
    * The path of the field when its custom components were last rendered.
    * This is used to denote if a field has been rendered, and if so,
    * what path it was rendered under last.

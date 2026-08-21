@@ -193,6 +193,7 @@ export interface AutosavePost {
   id: string;
   title?: string | null;
   computedTitle?: string | null;
+  programmaticValue?: string | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -378,6 +379,7 @@ export interface PostsSelect<T extends boolean = true> {
 export interface AutosavePostsSelect<T extends boolean = true> {
   title?: T;
   computedTitle?: T;
+  programmaticValue?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;

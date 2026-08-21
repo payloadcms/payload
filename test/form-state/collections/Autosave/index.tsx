@@ -19,6 +19,19 @@ export const AutosavePostsCollection: CollectionConfig = {
         beforeChange: [({ data }) => data?.title],
       },
     },
+    {
+      name: 'programmaticValue',
+      type: 'text',
+    },
+    {
+      name: 'nonDirtyFieldUpdater',
+      type: 'ui',
+      admin: {
+        components: {
+          Field: './collections/Autosave/NonDirtyFieldUpdater.js#NonDirtyFieldUpdater',
+        },
+      },
+    },
   ],
   versions: {
     drafts: {
