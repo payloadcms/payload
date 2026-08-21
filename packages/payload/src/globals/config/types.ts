@@ -14,6 +14,7 @@ import type {
   StaticLabel,
 } from '../../config/types.js'
 import type { DBIdentifierName } from '../../database/types.js'
+import type { Authorship, SanitizedAuthorship } from '../../fields/baseFields/authorship/types.js'
 import type { Field, FlattenedField } from '../../fields/config/types.js'
 import type {
   GeneratedTypes,
@@ -208,6 +209,16 @@ export type GlobalConfig<TSlug extends GlobalSlug = any> = {
   _sanitized?: boolean
   access?: GlobalAccess
   admin?: GlobalAdminOptions
+  /**
+   * Automatically track the user that created and last updated this global via
+   * polymorphic `createdBy` / `updatedBy` relationship fields to your auth collections.
+   *
+   * Use `true` (default) to enable both, `false` to disable both, or an object to
+   * toggle each field independently, e.g. `{ updatedBy: false }`.
+   *
+   * @default true
+   */
+  authorship?: Authorship | boolean
   /** Extension point to add your custom data. Server only. */
   custom?: GlobalCustom
   /**
@@ -260,6 +271,7 @@ export interface SanitizedGlobalConfig
       | '_sanitized'
       | 'access'
       | 'admin'
+      | 'authorship'
       | 'custom'
       | 'endpoints'
       | 'hooks'
@@ -270,6 +282,7 @@ export interface SanitizedGlobalConfig
     Required<Pick<GlobalConfig, 'admin' | 'custom' | 'label'>> {
   _sanitized: true
   access: Pick<GlobalAccess, 'readVersions'> & Required<Pick<GlobalAccess, 'read' | 'update'>>
+  authorship: SanitizedAuthorship
   endpoints: Endpoint[] | false
   /**
    * Fields in the database schema structure

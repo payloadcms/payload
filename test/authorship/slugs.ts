@@ -1,0 +1,8 @@
+export const usersSlug = 'users'
+export const adminsSlug = 'admins'
+export const postsSlug = 'posts'
+export const draftPostsSlug = 'draft-posts'
+export const noAuthorshipSlug = 'no-authorship'
+export const createdOnlySlug = 'created-only'
+export const updatedOnlySlug = 'updated-only'
+export const menuSlug = 'menu'
