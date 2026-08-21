@@ -323,6 +323,38 @@ describe('@payloadcms/plugin-cloud-storage', () => {
           expect(upload.url).toEqual(`/api/${mediaSlug}/file/${String(upload.filename)}`)
         })
 
+        it('uploads every file when one context object is reused across creates', async () => {
+          // `createLocalReq` assigns this exact object to `req.context`, so
+          // anything a hook writes onto it survives into the next create.
+          const sharedContext: Record<string, unknown> = {}
+
+          const uploads = []
+
+          for (let i = 0; i < 3; i++) {
+            uploads.push(
+              await payload.create({
+                collection: mediaSlug,
+                context: sharedContext,
+                data: {},
+                filePath: path.resolve(dirname, '../uploads/image.png'),
+              }),
+            )
+          }
+
+          // The documents are written either way — only the bytes go missing.
+          for (const upload of uploads) {
+            await verifyUploads({
+              client,
+              collectionSlug: mediaSlug,
+              payload,
+              TEST_BUCKET,
+              uploadId: upload.id,
+            })
+          }
+
+          expect(sharedContext).not.toHaveProperty('skipCloudStorage')
+        })
+
         it('can upload with prefix', async () => {
           const upload = await payload.create({
             collection: mediaWithPrefixSlug,
