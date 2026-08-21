@@ -23,7 +23,6 @@
     "@payloadcms/plugin-mcp": "workspace:*",
     "@payloadcms/richtext-lexical": "workspace:*",
     "@payloadcms/tanstack-start": "workspace:*",
-    "@payloadcms/transformer-sharp": "workspace:*",
     "@payloadcms/ui": "workspace:*",
     "@tanstack/react-router": "^1.120.0",
     "@tanstack/react-start": "^1.168.26",
@@ -60,7 +59,6 @@
   },
   "pnpm": {
     "onlyBuiltDependencies": [
-      "sharp",
       "esbuild",
       "unrs-resolver"
     ]

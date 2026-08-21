@@ -152,7 +152,6 @@ function getRequiredDependencies({
     '@payloadcms/plugin-mcp': payloadVersion,
     '@payloadcms/richtext-lexical': payloadVersion,
     '@payloadcms/tanstack-start': payloadVersion,
-    '@payloadcms/transformer-sharp': payloadVersion,
     '@payloadcms/ui': payloadVersion,
     '@vitejs/plugin-rsc': '^0.5.21',
     [getDbPackageName(dbType)]: payloadVersion,

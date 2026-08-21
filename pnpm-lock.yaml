@@ -1969,9 +1969,6 @@ importers:
       '@payloadcms/tanstack-start':
         specifier: workspace:*
         version: link:../../packages/tanstack-start
-      '@payloadcms/transformer-sharp':
-        specifier: workspace:*
-        version: link:../../packages/transformer-sharp
       '@payloadcms/ui':
         specifier: workspace:*
         version: link:../../packages/ui
