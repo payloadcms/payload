@@ -405,13 +405,13 @@ export const checkbox: CheckboxFieldValidation = (value, { req: { t }, required 
   return true
 }
 
-export type DateFieldValidation = Validate<Date, unknown, unknown, DateField>
+export type DateFieldValidation = Validate<string, unknown, unknown, DateField>
 
 export const date: DateFieldValidation = (
   value,
   { name, req: { t }, required, siblingData, timezone },
 ) => {
-  const validDate = value && !isNaN(Date.parse(value.toString()))
+  const validDate = value && !isNaN(Date.parse(value))
 
   // We need to also check for the timezone data based on this field's config
   // We cannot do this inside the timezone field validation as it's visually hidden
