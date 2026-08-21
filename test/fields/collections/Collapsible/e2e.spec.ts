@@ -69,6 +69,28 @@ describe('Collapsibles', () => {
     await expect(collapsedCollapsible).toBeVisible()
   })
 
+  test('should render nested fields inside a collapsible even when document is hidden at mount', async () => {
+    // Simulate document.hidden === true at the point the page first renders.
+    // This reproduces the condition where CollapsibleField previously dropped
+    // the forceRender prop, causing RenderIfInViewport to defer indefinitely
+    // because IntersectionObserver callbacks are suspended for hidden documents.
+    await page.addInitScript(() => {
+      Object.defineProperty(document, 'hidden', { get: () => true, configurable: true })
+      Object.defineProperty(document, 'visibilityState', {
+        get: () => 'hidden',
+        configurable: true,
+      })
+    })
+
+    await page.goto(url.create)
+
+    // The first collapsible (index 0) is open by default and contains a text field.
+    // It must be visible without any scrolling — forceRender bypasses the
+    // IntersectionObserver gate that would otherwise block rendering when hidden.
+    const nestedField = page.locator('#field-collapsible-_index-0').getByRole('textbox').first()
+    await expect(nestedField).toBeVisible()
+  })
+
   test('should render CollapsibleLabel using a function', async () => {
     const label = 'custom row label'
     await page.goto(url.create)
