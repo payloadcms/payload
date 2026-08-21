@@ -73,7 +73,10 @@ export function MoveDocToFolder({
       collectionSlug={collectionSlug}
       docData={initialData as FolderOrDocument['value']}
       docID={id}
-      docTitle={title}
+      // In bulk edit there is no document, so `title` resolves to the `[Untitled]`
+      // placeholder. Passing `undefined` lets the button fall back to the
+      // collection's singular label instead of showing a fake document title.
+      docTitle={id ? title : undefined}
       folderCollectionSlug={folderCollectionSlug}
       folderFieldName={folderFieldName}
       fromFolderID={fromFolderID as number | string}
