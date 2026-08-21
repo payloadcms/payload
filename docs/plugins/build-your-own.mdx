@@ -104,26 +104,20 @@ And then start the project with `pnpm dev` and pull up `http://localhost:3000` i
 
 Another benefit of the dev folder is that you have the perfect environment established for testing.
 
-A good test suite is essential to ensure quality and stability in your plugin. Payload typically uses [Jest](https://jestjs.io/); a popular testing framework, widely used for testing JavaScript and particularly for applications built with React.
+Having a test suite for your plugin is essential to ensure quality and stability. **Vitest** is a fast, modern testing framework that works seamlessly with Vite and supports TypeScript out of the box.
 
-Jest organizes tests into test suites and cases. We recommend creating tests based on the expected behavior of your plugin from start to finish. Read more about tests in the [Jest documentation.](https://jestjs.io/)
+Vitest organizes tests into test suites and cases, similar to other testing frameworks. We recommend creating individual tests based on the expected behavior of your plugin from start to finish.
 
-The plugin template provides a stubbed out test suite at `dev/plugin.spec.ts` which is ready to go - just add in your own test conditions and you're all set!
+Writing tests with Vitest is very straightforward, and you can learn more about how it works in the [Vitest documentation.](https://vitest.dev/)
 
-```
-let payload: Payload
+For this template, we stubbed out `int.spec.ts` in the `dev` folder where you can write your tests.
 
+```ts
 describe('Plugin tests', () => {
-  // Example test to check for seeded data
-  it('seeds data accordingly', async () => {
-    const newCollectionQuery = await payload.find({
-      collection: 'newCollection',
-      sort: 'createdAt',
-    })
-
-    newCollection = newCollectionQuery.docs
-
-    expect(newCollectionQuery.totalDocs).toEqual(1)
+  // Create tests to ensure expected behavior from the plugin
+  it('some condition that must be met', () => {
+   // Write your test logic here
+   expect(...)
   })
 })
 ```
@@ -132,17 +126,10 @@ describe('Plugin tests', () => {
 
 For development and testing, you will likely need some data to work with. You can streamline this process by seeding and dropping your database - instead of manually entering data.
 
-In the plugin template, you can navigate to `dev/src/server.ts` and see an example seed function.
 
-```
-if (process.env.PAYLOAD_SEED === 'true') {
-    await seed(payload)
-}
-```
+A sample seed function has been created for you at `dev/seed.ts`, update this file with additional data as needed.
 
-A sample seed function has been created for you at `dev/src/seed`, update this file with additional data as needed.
-
-```
+```ts
 export const seed = async (payload: Payload): Promise<void> => {
   payload.logger.info('Seeding data...')
 
