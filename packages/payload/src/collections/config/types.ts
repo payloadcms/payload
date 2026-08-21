@@ -323,23 +323,41 @@ export type BeforeChangeHook<T extends TypeWithID = any> = (args: {
   req: PayloadRequest
 }) => any
 
-export type AfterChangeHook<T extends TypeWithID = any> = (args: {
+type AfterChangeHookBase<T extends TypeWithID = any> = {
   /** The collection which this hook is being run on */
   collection: SanitizedCollectionConfig
   context: RequestContext
   data: Partial<T>
   doc: T
   /**
-   * Hook operation being performed
-   */
-  operation: CreateOrUpdateOperation
-  /**
    * Whether access control is being overridden for this operation
    */
   overrideAccess?: boolean
   previousDoc: T
   req: PayloadRequest
-}) => any
+}
+
+export type AfterChangeHook<T extends TypeWithID = any> = (
+  args: (
+    | {
+        /**
+         * Resolved write action for this operation. `undefined` when drafts are not enabled.
+         * Create/duplicate expose `saveDraft` or `publish` only.
+         */
+        action?: CreateAction
+        operation: 'create'
+      }
+    | {
+        /**
+         * Resolved write action for this operation. `undefined` when drafts are not enabled.
+         * Update exposes `saveDraft`, `publish`, or `unpublish`. Restore exposes `saveDraft` or `publish`.
+         */
+        action?: RestoreAction | UpdateAction
+        operation: 'update'
+      }
+  ) &
+    AfterChangeHookBase<T>,
+) => any
 
 export type BeforeReadHook<T extends TypeWithID = any> = (args: {
   /** The collection which this hook is being run on */

@@ -7,9 +7,14 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
-import { devUser, regularUser } from '../credentials.js'
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { isMongoose } from '../__helpers/shared/isMongoose.js'
+import { devUser, regularUser } from '../credentials.js'
+import {
+  afterChangeActionSlug,
+  clearAfterChangeActions,
+  getAfterChangeActions,
+} from './collections/AfterChangeAction/index.js'
 import { afterOperationSlug } from './collections/AfterOperation/index.js'
 import {
   beforeOperationSlug,
@@ -20,7 +25,11 @@ import { chainingHooksSlug } from './collections/ChainingHooks/index.js'
 import { contextHooksSlug } from './collections/ContextHooks/index.js'
 import { dataHooksSlug } from './collections/Data/index.js'
 import { hooksSlug } from './collections/Hook/index.js'
-import { nestedAfterChangeHooksSlug } from './collections/NestedAfterChangeHook/index.js'
+import {
+  clearLastNestedAfterChangeActions,
+  getLastNestedAfterChangeActions,
+  nestedAfterChangeHooksSlug,
+} from './collections/NestedAfterChangeHook/index.js'
 import {
   generatedAfterReadText,
   nestedAfterReadHooksSlug,
@@ -29,7 +38,16 @@ import { relationsSlug } from './collections/Relations/index.js'
 import { transformSlug } from './collections/Transform/index.js'
 import { hooksUsersSlug } from './collections/Users/index.js'
 import { HooksConfig } from './config.js'
-import { dataHooksGlobalSlug } from './globals/Data/index.js'
+import {
+  afterChangeActionGlobalSlug,
+  clearGlobalAfterChangeActions,
+  getGlobalAfterChangeActions,
+} from './globals/AfterChangeAction/index.js'
+import {
+  clearLastDataGlobalAfterChangeActions,
+  dataHooksGlobalSlug,
+  getLastDataGlobalAfterChangeActions,
+} from './globals/Data/index.js'
 import { afterReadSlug, beforeValidateSlug, overrideAccessSlug } from './shared.js'
 
 let restClient: NextRESTClient
@@ -1132,6 +1150,454 @@ describe('Hooks', () => {
       expect(result.afterReadCalled).toBe(true)
       expect(result.beforeReadOverrideAccess).toBe(true)
       expect(result.afterReadOverrideAccess).toBe(true)
+    })
+  })
+
+  describe('afterChange action', () => {
+    const createdIDs: (number | string)[] = []
+
+    afterEach(async () => {
+      for (const id of createdIDs) {
+        await payload.delete({
+          id,
+          collection: afterChangeActionSlug,
+        })
+      }
+
+      createdIDs.length = 0
+      clearAfterChangeActions()
+      clearGlobalAfterChangeActions()
+      clearLastNestedAfterChangeActions()
+      clearLastDataGlobalAfterChangeActions()
+    })
+
+    it('should expose saveDraft for omitted create on draft collections', async () => {
+      const doc = await payload.create({
+        collection: afterChangeActionSlug,
+        data: {
+          title: 'Create omitted',
+        },
+      })
+
+      createdIDs.push(doc.id)
+      expect(getAfterChangeActions()).toMatchObject({
+        collection: { action: 'saveDraft', operation: 'create' },
+        field: { action: 'saveDraft', operation: 'create' },
+      })
+    })
+
+    it('should expose saveDraft when create infers from draft status', async () => {
+      const doc = await payload.create({
+        collection: afterChangeActionSlug,
+        data: {
+          title: 'Create draft status',
+          _status: 'draft',
+        },
+      })
+
+      createdIDs.push(doc.id)
+      expect(getAfterChangeActions()).toMatchObject({
+        collection: { action: 'saveDraft', operation: 'create' },
+        field: { action: 'saveDraft', operation: 'create' },
+      })
+    })
+
+    it('should expose publish when create infers from published status', async () => {
+      const doc = await payload.create({
+        collection: afterChangeActionSlug,
+        data: {
+          title: 'Create published status',
+          _status: 'published',
+        },
+      })
+
+      createdIDs.push(doc.id)
+      expect(getAfterChangeActions()).toMatchObject({
+        collection: { action: 'publish', operation: 'create' },
+        field: { action: 'publish', operation: 'create' },
+      })
+    })
+
+    it('should expose explicit create actions and ignore conflicting status', async () => {
+      const published = await payload.create({
+        action: 'publish',
+        collection: afterChangeActionSlug,
+        data: {
+          title: 'Create explicit publish',
+          _status: 'draft',
+        },
+      })
+
+      createdIDs.push(published.id)
+      expect(getAfterChangeActions()).toMatchObject({
+        collection: { action: 'publish', operation: 'create' },
+        field: { action: 'publish', operation: 'create' },
+      })
+
+      clearAfterChangeActions()
+
+      const draft = await payload.create({
+        action: 'saveDraft',
+        collection: afterChangeActionSlug,
+        data: {
+          title: 'Create explicit draft',
+          _status: 'published',
+        },
+      })
+
+      createdIDs.push(draft.id)
+      expect(getAfterChangeActions()).toMatchObject({
+        collection: { action: 'saveDraft', operation: 'create' },
+        field: { action: 'saveDraft', operation: 'create' },
+      })
+    })
+
+    it('should expose saveDraft for omitted duplicate', async () => {
+      const doc = await payload.create({
+        action: 'publish',
+        collection: afterChangeActionSlug,
+        data: {
+          title: 'Duplicate source',
+        },
+      })
+
+      createdIDs.push(doc.id)
+      clearAfterChangeActions()
+
+      const duplicated = await payload.duplicate({
+        id: doc.id,
+        collection: afterChangeActionSlug,
+      })
+
+      createdIDs.push(duplicated.id)
+      expect(getAfterChangeActions()).toMatchObject({
+        collection: { action: 'saveDraft', operation: 'create' },
+        field: { action: 'saveDraft', operation: 'create' },
+      })
+    })
+
+    it('should expose publish for omitted update on draft collections', async () => {
+      const doc = await payload.create({
+        action: 'publish',
+        collection: afterChangeActionSlug,
+        data: {
+          title: 'Update omitted',
+        },
+      })
+
+      createdIDs.push(doc.id)
+      clearAfterChangeActions()
+
+      await payload.update({
+        id: doc.id,
+        collection: afterChangeActionSlug,
+        data: {
+          title: 'Update omitted next',
+        },
+      })
+
+      expect(getAfterChangeActions()).toMatchObject({
+        collection: { action: 'publish', operation: 'update' },
+        field: { action: 'publish', operation: 'update' },
+      })
+    })
+
+    it('should expose saveDraft when update infers from draft status', async () => {
+      const doc = await payload.create({
+        action: 'publish',
+        collection: afterChangeActionSlug,
+        data: {
+          title: 'Update draft status',
+        },
+      })
+
+      createdIDs.push(doc.id)
+      clearAfterChangeActions()
+
+      await payload.update({
+        id: doc.id,
+        collection: afterChangeActionSlug,
+        data: {
+          title: 'Update draft status next',
+          _status: 'draft',
+        },
+      })
+
+      expect(getAfterChangeActions()).toMatchObject({
+        collection: { action: 'saveDraft', operation: 'update' },
+        field: { action: 'saveDraft', operation: 'update' },
+      })
+    })
+
+    it('should expose explicit update publish, saveDraft, and unpublish', async () => {
+      const doc = await payload.create({
+        action: 'publish',
+        collection: afterChangeActionSlug,
+        data: {
+          title: 'Update explicit',
+        },
+      })
+
+      createdIDs.push(doc.id)
+
+      clearAfterChangeActions()
+      await payload.update({
+        id: doc.id,
+        action: 'saveDraft',
+        collection: afterChangeActionSlug,
+        data: {
+          title: 'Update explicit draft',
+          _status: 'published',
+        },
+      })
+      expect(getAfterChangeActions()).toMatchObject({
+        collection: { action: 'saveDraft', operation: 'update' },
+        field: { action: 'saveDraft', operation: 'update' },
+      })
+
+      clearAfterChangeActions()
+      await payload.update({
+        id: doc.id,
+        action: 'publish',
+        collection: afterChangeActionSlug,
+        data: {
+          title: 'Update explicit publish',
+        },
+      })
+      expect(getAfterChangeActions()).toMatchObject({
+        collection: { action: 'publish', operation: 'update' },
+        field: { action: 'publish', operation: 'update' },
+      })
+
+      clearAfterChangeActions()
+      await payload.update({
+        id: doc.id,
+        action: 'unpublish',
+        collection: afterChangeActionSlug,
+        data: {},
+      })
+      expect(getAfterChangeActions()).toMatchObject({
+        collection: { action: 'unpublish', operation: 'update' },
+        field: { action: 'unpublish', operation: 'update' },
+      })
+    })
+
+    it('should expose the same resolved action for every bulk update document', async () => {
+      const first = await payload.create({
+        action: 'publish',
+        collection: afterChangeActionSlug,
+        data: {
+          title: 'Bulk first',
+        },
+      })
+      const second = await payload.create({
+        action: 'publish',
+        collection: afterChangeActionSlug,
+        data: {
+          title: 'Bulk second',
+        },
+      })
+
+      createdIDs.push(first.id, second.id)
+      clearAfterChangeActions()
+
+      await payload.update({
+        action: 'unpublish',
+        collection: afterChangeActionSlug,
+        data: {},
+        where: {
+          id: {
+            in: [first.id, second.id],
+          },
+        },
+      })
+
+      const captured = getAfterChangeActions()
+
+      expect(captured.collections.map(({ action }) => action)).toEqual(['unpublish', 'unpublish'])
+      expect(captured.fields.map(({ action }) => action)).toEqual(['unpublish', 'unpublish'])
+    })
+
+    it('should expose publish for omitted restore and saveDraft when requested', async () => {
+      const doc = await payload.create({
+        action: 'publish',
+        collection: afterChangeActionSlug,
+        data: {
+          title: 'Restore v1',
+        },
+      })
+
+      createdIDs.push(doc.id)
+
+      await payload.update({
+        id: doc.id,
+        action: 'saveDraft',
+        collection: afterChangeActionSlug,
+        data: {
+          title: 'Restore v2',
+        },
+      })
+
+      const versions = await payload.findVersions({
+        collection: afterChangeActionSlug,
+        sort: 'createdAt',
+        where: {
+          parent: {
+            equals: doc.id,
+          },
+        },
+      })
+
+      const versionToRestore = versions.docs[0]
+
+      clearAfterChangeActions()
+      await payload.restoreVersion({
+        id: versionToRestore.id,
+        collection: afterChangeActionSlug,
+      })
+      expect(getAfterChangeActions()).toMatchObject({
+        collection: { action: 'publish', operation: 'update' },
+        field: { action: 'publish', operation: 'update' },
+      })
+
+      clearAfterChangeActions()
+      await payload.restoreVersion({
+        id: versionToRestore.id,
+        action: 'saveDraft',
+        collection: afterChangeActionSlug,
+      })
+      expect(getAfterChangeActions()).toMatchObject({
+        collection: { action: 'saveDraft', operation: 'update' },
+        field: { action: 'saveDraft', operation: 'update' },
+      })
+    })
+
+    it('should expose undefined action for non-draft collection create and update', async () => {
+      const doc = await payload.create({
+        collection: nestedAfterChangeHooksSlug,
+        data: {
+          text: 'non-draft create',
+          group: {
+            array: [
+              {
+                nestedAfterChange: 'create',
+              },
+            ],
+          },
+        },
+      })
+
+      expect(getLastNestedAfterChangeActions().collection?.action).toBeUndefined()
+      expect(getLastNestedAfterChangeActions().field?.action).toBeUndefined()
+
+      clearLastNestedAfterChangeActions()
+
+      await payload.update({
+        id: doc.id,
+        collection: nestedAfterChangeHooksSlug,
+        data: {
+          text: 'non-draft update',
+          group: {
+            array: [
+              {
+                nestedAfterChange: 'update',
+              },
+            ],
+          },
+        },
+      })
+
+      expect(getLastNestedAfterChangeActions().collection?.action).toBeUndefined()
+      expect(getLastNestedAfterChangeActions().field?.action).toBeUndefined()
+
+      await payload.delete({
+        id: doc.id,
+        collection: nestedAfterChangeHooksSlug,
+      })
+    })
+
+    it('should expose publish, saveDraft, and unpublish on draft global afterChange hooks', async () => {
+      await payload.updateGlobal({
+        slug: afterChangeActionGlobalSlug,
+        data: {
+          title: 'Global omitted',
+        },
+      })
+      expect(getGlobalAfterChangeActions().global?.action).toBe('publish')
+      expect(getGlobalAfterChangeActions().field?.action).toBe('publish')
+
+      clearGlobalAfterChangeActions()
+      await payload.updateGlobal({
+        action: 'saveDraft',
+        data: {
+          title: 'Global draft',
+          _status: 'published',
+        },
+        slug: afterChangeActionGlobalSlug,
+      })
+      expect(getGlobalAfterChangeActions().global?.action).toBe('saveDraft')
+      expect(getGlobalAfterChangeActions().field?.action).toBe('saveDraft')
+
+      clearGlobalAfterChangeActions()
+      await payload.updateGlobal({
+        action: 'unpublish',
+        data: {},
+        slug: afterChangeActionGlobalSlug,
+      })
+      expect(getGlobalAfterChangeActions().global?.action).toBe('unpublish')
+      expect(getGlobalAfterChangeActions().field?.action).toBe('unpublish')
+    })
+
+    it('should expose restore actions on draft global afterChange hooks', async () => {
+      await payload.updateGlobal({
+        action: 'publish',
+        data: {
+          title: 'Global restore v1',
+        },
+        slug: afterChangeActionGlobalSlug,
+      })
+
+      const versionsAfterPublish = await payload.findGlobalVersions({
+        limit: 1,
+        slug: afterChangeActionGlobalSlug,
+        sort: '-createdAt',
+      })
+      const versionToRestore = versionsAfterPublish.docs[0]
+
+      await payload.updateGlobal({
+        action: 'saveDraft',
+        data: {
+          title: 'Global restore v2',
+        },
+        slug: afterChangeActionGlobalSlug,
+      })
+
+      clearGlobalAfterChangeActions()
+      await payload.restoreGlobalVersion({
+        id: versionToRestore.id,
+        slug: afterChangeActionGlobalSlug,
+      })
+      expect(getGlobalAfterChangeActions().global?.action).toBe('publish')
+      expect(getGlobalAfterChangeActions().field?.action).toBe('publish')
+
+      clearGlobalAfterChangeActions()
+      await payload.restoreGlobalVersion({
+        id: versionToRestore.id,
+        action: 'saveDraft',
+        slug: afterChangeActionGlobalSlug,
+      })
+      expect(getGlobalAfterChangeActions().global?.action).toBe('saveDraft')
+      expect(getGlobalAfterChangeActions().field?.action).toBe('saveDraft')
+    })
+
+    it('should expose undefined action for non-draft global afterChange hooks', async () => {
+      await payload.updateGlobal({
+        slug: dataHooksGlobalSlug,
+        data: {},
+      })
+
+      expect(getLastDataGlobalAfterChangeActions().global?.action).toBeUndefined()
+      expect(getLastDataGlobalAfterChangeActions().field?.action).toBeUndefined()
     })
   })
 })

@@ -3,10 +3,18 @@ import type { useAuth } from '@payloadcms/ui'
 import type {
   AuthenticatedUser,
   BulkOperationResult,
+  CollectionAfterChangeHook,
+  CollectionAfterOperationHook,
+  CollectionAfterReadHook,
+  CollectionBeforeChangeHook,
   CollectionSlug,
+  CreateAction,
   CustomDocumentViewConfig,
   DefaultDocumentViewConfig,
+  FieldHook,
   GeneratedTypes,
+  GlobalAfterChangeHook,
+  GlobalBeforeChangeHook,
   Job,
   JobTaskStatus,
   JoinQuery,
@@ -14,11 +22,14 @@ import type {
   PaginatedDocs,
   PayloadRequest,
   PayloadTypesShape,
+  RestoreAction,
   SelectType,
   TypedCollectionSelect,
   TypeWithVersion,
   UntypedPayloadTypes,
+  UpdateAction,
   Where,
+  WriteAction,
 } from 'payload'
 
 import {
@@ -1983,6 +1994,30 @@ describe('Types testing', () => {
           id: 'id',
           version: 'draft',
         })
+      })
+
+      test('afterChange hooks expose operation-appropriate actions', () => {
+        type AfterChangeArgs = Parameters<CollectionAfterChangeHook>[0]
+        type CreateAfterChangeAction = Extract<AfterChangeArgs, { operation: 'create' }>['action']
+        type UpdateAfterChangeAction = Extract<AfterChangeArgs, { operation: 'update' }>['action']
+
+        expect<CreateAfterChangeAction>().type.toBe<CreateAction | undefined>()
+        expect<CreateAfterChangeAction>().type.not.toBeAssignableTo<'unpublish'>()
+        expect<'unpublish'>().type.not.toBeAssignableTo<CreateAfterChangeAction>()
+        expect<UpdateAfterChangeAction>().type.toBe<RestoreAction | undefined | UpdateAction>()
+        expect<RestoreAction>().type.toBe<'publish' | 'saveDraft'>()
+        expect<'unpublish'>().type.not.toBeAssignableTo<RestoreAction>()
+        expect<Parameters<GlobalAfterChangeHook>[0]['action']>().type.toBe<
+          RestoreAction | undefined | UpdateAction
+        >()
+        expect<Parameters<FieldHook>[0]['action']>().type.toBe<undefined | WriteAction>()
+      })
+
+      test('non-afterChange hooks do not gain action', () => {
+        expect<Parameters<CollectionBeforeChangeHook>[0]>().type.not.toHaveProperty('action')
+        expect<Parameters<CollectionAfterReadHook>[0]>().type.not.toHaveProperty('action')
+        expect<Parameters<CollectionAfterOperationHook>[0]>().type.not.toHaveProperty('action')
+        expect<Parameters<GlobalBeforeChangeHook>[0]>().type.not.toHaveProperty('action')
       })
     })
   })

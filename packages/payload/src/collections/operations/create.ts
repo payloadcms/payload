@@ -446,6 +446,7 @@ export const createOperation = async <
     // /////////////////////////////////////
 
     result = await afterChange({
+      action: resolvedAction,
       collection: collectionConfig,
       context: req.context,
       data,
@@ -464,6 +465,7 @@ export const createOperation = async <
       for (const hook of collectionConfig.hooks.afterChange) {
         result =
           (await hook({
+            action: resolvedAction as CreateAction | undefined,
             collection: collectionConfig,
             context: req.context,
             data,

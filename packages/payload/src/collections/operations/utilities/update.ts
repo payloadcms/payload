@@ -442,6 +442,7 @@ export const updateDocument = async <
   // /////////////////////////////////////
 
   result = await afterChange({
+    action,
     collection: collectionConfig,
     context: req.context,
     data,
@@ -460,6 +461,7 @@ export const updateDocument = async <
     for (const hook of collectionConfig.hooks.afterChange) {
       result =
         (await hook({
+          action,
           collection: collectionConfig,
           context: req.context,
           data,

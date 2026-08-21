@@ -197,6 +197,7 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
     // /////////////////////////////////////
 
     result = await afterChange({
+      action: resolvedAction,
       collection: null,
       context: req.context,
       data: result,
@@ -215,6 +216,7 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
       for (const hook of globalConfig.hooks.afterChange) {
         result =
           (await hook({
+            action: resolvedAction,
             context: req.context,
             data: result,
             doc: result,

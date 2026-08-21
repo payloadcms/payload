@@ -488,6 +488,7 @@ export const updateOperation = async <
     // /////////////////////////////////////
 
     result = await afterChange({
+      action: resolvedAction,
       collection: null,
       context: req.context,
       data,
@@ -506,6 +507,7 @@ export const updateOperation = async <
       for (const hook of globalConfig.hooks.afterChange) {
         result =
           (await hook({
+            action: resolvedAction,
             context: req.context,
             data,
             doc: result,

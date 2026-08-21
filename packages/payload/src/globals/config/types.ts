@@ -154,6 +154,10 @@ export type BeforeChangeHook = (args: {
 }) => any
 
 export type AfterChangeHook = (args: {
+  /**
+   * Resolved write action for this operation. `undefined` when drafts are not enabled.
+   */
+  action?: RestoreAction | UpdateAction
   context: RequestContext
   data: any
   doc: any

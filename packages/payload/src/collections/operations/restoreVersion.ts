@@ -375,6 +375,7 @@ export const restoreVersionOperation = async <
     // /////////////////////////////////////
 
     result = await afterChange({
+      action: resolvedAction,
       collection: collectionConfig,
       context: req.context,
       data: result,
@@ -393,6 +394,7 @@ export const restoreVersionOperation = async <
       for (const hook of collectionConfig.hooks.afterChange) {
         result =
           (await hook({
+            action: resolvedAction,
             collection: collectionConfig,
             context: req.context,
             data: result,
