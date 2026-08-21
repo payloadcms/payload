@@ -1201,6 +1201,40 @@ describe('Versions', () => {
         expect(updated.title).toBe('REST update omitted next')
       })
 
+      it('should honor body _status on REST update and let explicit action win', async () => {
+        const doc = await payload.create({
+          action: 'publish',
+          collection: draftCollectionSlug,
+          data: {
+            description: 'Published',
+            title: 'REST update status inference',
+          },
+        })
+        createdIDs.push({ collection: draftCollectionSlug, id: doc.id })
+
+        const savedFromStatus = await restClient.PATCH(`/${draftCollectionSlug}/${doc.id}`, {
+          body: JSON.stringify({
+            title: 'REST update from draft status',
+            _status: 'draft',
+          }),
+        })
+        expect(savedFromStatus.status).toBe(200)
+        expect((await savedFromStatus.json()).doc._status).toBe('draft')
+
+        const actionWins = await restClient.PATCH(
+          `/${draftCollectionSlug}/${doc.id}?action=publish`,
+          {
+            body: JSON.stringify({
+              description: 'Published again',
+              title: 'REST update action wins',
+              _status: 'draft',
+            }),
+          },
+        )
+        expect(actionWins.status).toBe(200)
+        expect((await actionWins.json()).doc._status).toBe('published')
+      })
+
       it('should apply explicit REST update actions including unpublish', async () => {
         const doc = await payload.create({
           action: 'publish',
@@ -1340,10 +1374,13 @@ describe('Versions', () => {
         expect((await stillPublished.json()).title).toBe('REST global published')
       })
 
-      it('should accept version on auth me', async () => {
+      it('should accept version on auth me and reject obsolete draft', async () => {
         const response = await restClient.GET('/users/me?version=latest')
         expect(response.status).toBe(200)
         expect((await response.json()).user.email).toBe(devUser.email)
+
+        const obsoleteDraft = await restClient.GET('/users/me?draft=true')
+        expect(obsoleteDraft.status).toBe(400)
       })
     })
 
