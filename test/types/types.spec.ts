@@ -1853,12 +1853,26 @@ describe('Types testing', () => {
         expect(payload.restoreGlobalVersion).type.toBeCallableWith({
           slug: 'settings',
           id: 'id',
+        })
+        expect(payload.restoreGlobalVersion).type.toBeCallableWith({
+          slug: 'settings',
+          id: 'id',
+          action: 'publish',
+        })
+        expect(payload.restoreGlobalVersion).type.toBeCallableWith({
+          slug: 'settings',
+          id: 'id',
           action: 'saveDraft',
         })
         expect(payload.restoreGlobalVersion).type.not.toBeCallableWith({
           slug: 'settings',
           id: 'id',
           action: 'unpublish',
+        })
+        expect(payload.restoreGlobalVersion).type.not.toBeCallableWith({
+          slug: 'settings',
+          id: 'id',
+          draft: true,
         })
         expect(payload.restoreGlobalVersion).type.not.toBeCallableWith({
           slug: 'menu',

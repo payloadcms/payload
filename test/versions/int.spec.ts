@@ -4657,6 +4657,48 @@ describe('Versions', () => {
           expect(published.title).toBe('Global restore omitted v1')
         })
 
+        it('should publish when global restore is given an explicit publish action', async () => {
+          await payload.updateGlobal({
+            data: {
+              title: 'Global restore publish v1',
+              _status: 'published',
+            },
+            overrideAccess: true,
+            slug: simpleDraftGlobalSlug,
+          })
+
+          const firstVersions = await payload.findGlobalVersions({
+            limit: 1,
+            slug: simpleDraftGlobalSlug,
+            sort: '-createdAt',
+          })
+          const versionToRestore = firstVersions.docs[0]!
+
+          await payload.updateGlobal({
+            action: 'saveDraft',
+            data: {
+              title: 'Global restore publish v2',
+            },
+            overrideAccess: true,
+            slug: simpleDraftGlobalSlug,
+          })
+
+          await payload.restoreGlobalVersion({
+            id: versionToRestore.id,
+            action: 'publish',
+            overrideAccess: true,
+            slug: simpleDraftGlobalSlug,
+          })
+
+          const published = await payload.findGlobal({
+            overrideAccess: true,
+            slug: simpleDraftGlobalSlug,
+          })
+
+          expect(published._status).toBe('published')
+          expect(published.title).toBe('Global restore publish v1')
+        })
+
         it('should restore a global as a draft with an explicit action', async () => {
           await payload.updateGlobal({
             data: {
@@ -4695,7 +4737,13 @@ describe('Versions', () => {
             slug: simpleDraftGlobalSlug,
             version: 'latest',
           })
+          const published = await payload.findGlobal({
+            overrideAccess: true,
+            slug: simpleDraftGlobalSlug,
+          })
 
+          expect(published._status).toBe('published')
+          expect(published.title).toBe('Global restore draft v2')
           expect(latest._status).toBe('draft')
           expect(latest.title).toBe('Global restore draft v1')
         })

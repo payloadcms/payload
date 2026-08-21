@@ -121,39 +121,40 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
     // Update global
     // /////////////////////////////////////
 
-    const global = await payload.db.findGlobal({
+    const existingGlobal = await payload.db.findGlobal({
       slug: globalConfig.slug,
       req,
     })
 
     let result = rawVersion.version
+    result.updatedAt = new Date().toISOString()
 
-    if (global) {
-      // Ensure updatedAt date is always updated
-      result.updatedAt = new Date().toISOString()
-      result = await payload.db.updateGlobal({
-        slug: globalConfig.slug,
-        data: result,
-        req,
-      })
-
-      const now = new Date().toISOString()
-
-      result = await payload.db.createGlobalVersion({
-        autosave: false,
-        createdAt: result.createdAt ? new Date(result.createdAt).toISOString() : now,
-        globalSlug: globalConfig.slug,
-        req,
-        updatedAt: isSavingDraft ? now : new Date(result.updatedAt).toISOString(),
-        versionData: result,
-      })
-    } else {
-      result = await payload.db.createGlobal({
-        slug: globalConfig.slug,
-        data: result,
-        req,
-      })
+    if (!isSavingDraft) {
+      if (existingGlobal) {
+        result = await payload.db.updateGlobal({
+          slug: globalConfig.slug,
+          data: result,
+          req,
+        })
+      } else {
+        result = await payload.db.createGlobal({
+          slug: globalConfig.slug,
+          data: result,
+          req,
+        })
+      }
     }
+
+    const now = new Date().toISOString()
+
+    result = await payload.db.createGlobalVersion({
+      autosave: false,
+      createdAt: result.createdAt ? new Date(result.createdAt).toISOString() : now,
+      globalSlug: globalConfig.slug,
+      req,
+      updatedAt: isSavingDraft ? now : new Date(result.updatedAt).toISOString(),
+      versionData: result,
+    })
 
     // /////////////////////////////////////
     // afterRead - Fields
