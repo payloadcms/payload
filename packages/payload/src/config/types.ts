@@ -208,7 +208,9 @@ export type CLICommand = {
 
 /** Structured data and an optional exit code returned by a Payload CLI command. */
 export type CLICommandResult = {
+  /** Process exit code. Omit this, or use `0`, when the command succeeds. */
   exitCode?: number
+  /** Data included under `result` when the command uses JSON output. */
   result?: unknown
 }
 

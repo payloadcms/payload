@@ -16,6 +16,16 @@ type CLICommandDefinition<TInput extends CLIInputSchema> = {
     | false
     | Partial<Record<Extract<keyof StandardSchemaV1.InferInput<TInput>, string>, CLIFieldOverride>>
   description: string
+  /**
+   * Runs after Payload validates the command input. `args` contains the validated values.
+   *
+   * - Return nothing when the command succeeds without a result.
+   * - Return a number to set the process exit code.
+   * - Return `{ result }` to include data in JSON output.
+   * - Return `{ exitCode, result }` when the command needs both.
+   *
+   * Use `isJSON` to avoid printing human-readable output when Payload is producing JSON.
+   */
   handler: (
     context: {
       args: StandardSchemaV1.InferOutput<TInput>
