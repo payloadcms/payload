@@ -283,13 +283,15 @@ export const sanitizeField = ({
 
     // Required by default so the admin marks the slug as required. The value is always populated by
     // the field hooks (source or id fallback), and validations.slug permits empty so the fallback
-    // isn't blocked before it runs.
+    // isn't blocked before it runs. A nested slug has no fallback to fill it, so it is left optional
+    // rather than blocking the save of a row that has no source value yet.
     if (typeof field.required === 'undefined') {
-      field.required = true
+      field.required = isTopLevelField
     }
 
+    // Uniqueness is a root-level concept here
     if (typeof field.unique === 'undefined') {
-      field.unique = true
+      field.unique = isTopLevelField
     }
 
     if (typeof field.index === 'undefined') {

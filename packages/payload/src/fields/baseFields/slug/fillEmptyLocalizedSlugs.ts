@@ -48,7 +48,8 @@ export const fillEmptyLocalizedSlugs = async ({
 
     const slugify = (valueToSlugify: unknown) =>
       customSlugify
-        ? customSlugify({ data, req, valueToSlugify })
+        ? // siblingData is the same as data here because this runs at the operation level, not the field level
+          customSlugify({ data, req, siblingData: data, valueToSlugify })
         : defaultSlugify(valueToSlugify as string)
 
     // The source value for a given locale: a non-localized source is shared across all locales, a

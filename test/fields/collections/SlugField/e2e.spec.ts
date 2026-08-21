@@ -8,6 +8,7 @@ import type { PayloadTestSDK } from '../../../__helpers/shared/sdk/index.js'
 import type { Config } from '../../payload-types.js'
 
 import { checkFocusIndicators } from '../../../__helpers/e2e/checkFocusIndicators.js'
+import { addArrayRow } from '../../../__helpers/e2e/fields/array/index.js'
 import { changeLocale, saveDocAndAssert } from '../../../__helpers/e2e/helpers.js'
 import { runAxeScan } from '../../../__helpers/e2e/runAxeScan.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
@@ -167,6 +168,51 @@ describe('SlugField', () => {
       await saveDocAndAssert(page)
 
       await expect(page.locator('#field-localizedSlug')).toHaveValue('title-in-spanish')
+    })
+  })
+
+  describe('nested slugs', () => {
+    test('should generate slug from a sibling field within a group', async () => {
+      await page.goto(url.create)
+      await page.locator('#field-title').fill('Test nested title')
+      await page.locator('#field-group__nestedTitle').fill('Nested title')
+
+      await saveDocAndAssert(page)
+
+      await expect(page.locator('#field-group__nestedSlug')).toHaveValue('nested-title')
+    })
+
+    test('should generate slug from a sibling field within an array row', async () => {
+      await page.goto(url.create)
+      await page.locator('#field-title').fill('Test array title')
+
+      await addArrayRow(page, { fieldName: 'items' })
+      await page.locator('#field-items__0__itemTitle').fill('First item')
+
+      await addArrayRow(page, { fieldName: 'items' })
+      await page.locator('#field-items__1__itemTitle').fill('Second item')
+
+      await saveDocAndAssert(page)
+
+      await expect(page.locator('#field-items__0__itemSlug')).toHaveValue('FIRST ITEM')
+      await expect(page.locator('#field-items__1__itemSlug')).toHaveValue('SECOND ITEM')
+    })
+
+    test('should generate nested slug on demand from client side', async () => {
+      await page.goto(url.create)
+      await page.locator('#field-title').fill('Test nested title client side')
+
+      await addArrayRow(page, { fieldName: 'items' })
+      await page.locator('#field-items__0__itemTitle').fill('First item')
+
+      await saveDocAndAssert(page)
+
+      await page.locator('#field-items__0__itemTitle').fill('This should have regenerated')
+      await regenerateSlug('items__0__itemSlug')
+
+      await expect(page.locator('#field-items__0__itemSlug')).toHaveValue(
+        'THIS SHOULD HAVE REGENERATED',
+      )
     })
   })
 

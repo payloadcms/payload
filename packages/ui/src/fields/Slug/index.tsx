@@ -27,12 +27,13 @@ const baseClass = 'slug-field-component'
 type SlugFieldProps = {
   readonly field: SlugFieldClient
   readonly path?: string
+  readonly schemaPath?: string
 }
 
 /**
  * @experimental This component is experimental and may change or be removed in the future. Use at your own risk.
  */
-const SlugFieldComponent: React.FC<SlugFieldProps> = ({ field, path }) => {
+const SlugFieldComponent: React.FC<SlugFieldProps> = ({ field, path, schemaPath }) => {
   const { admin, label, required, useAsSlug } = field
   const { description, placeholder, readOnly: readOnlyFromProps } = admin || {}
 
@@ -52,7 +53,7 @@ const SlugFieldComponent: React.FC<SlugFieldProps> = ({ field, path }) => {
     value,
   } = useField<string>({ path: path || field.name })
 
-  const { getData, getDataByPath } = useForm()
+  const { getData, getSiblingData } = useForm()
 
   const [isLocked, setIsLocked] = useState(true)
 
@@ -64,7 +65,8 @@ const SlugFieldComponent: React.FC<SlugFieldProps> = ({ field, path }) => {
     async (e: React.MouseEvent<Element>) => {
       e.preventDefault()
 
-      const valueToSlugify = useAsSlug ? getDataByPath(useAsSlug) : undefined
+      const siblingData = getSiblingData(fieldPath)
+      const valueToSlugify = useAsSlug ? siblingData?.[useAsSlug] : undefined
 
       let formattedSlug: null | string | undefined
 
@@ -76,6 +78,8 @@ const SlugFieldComponent: React.FC<SlugFieldProps> = ({ field, path }) => {
           globalSlug,
           locale,
           path: fieldPath,
+          schemaPath,
+          siblingData,
           valueToSlugify,
         })
       } catch (_err) {
@@ -102,12 +106,13 @@ const SlugFieldComponent: React.FC<SlugFieldProps> = ({ field, path }) => {
       useAsSlug,
       getData,
       slugify,
-      getDataByPath,
+      getSiblingData,
       id,
       collectionSlug,
       globalSlug,
       locale,
       fieldPath,
+      schemaPath,
       t,
     ],
   )
@@ -138,7 +143,11 @@ const SlugFieldComponent: React.FC<SlugFieldProps> = ({ field, path }) => {
         .filter(Boolean)
         .join(' ')}
     >
-      <FieldLabel htmlFor={`field-${fieldPath}`} label={label} required={required} />
+      <FieldLabel
+        htmlFor={`field-${fieldPath?.replace(/\./g, '__')}`}
+        label={label}
+        required={required}
+      />
       <div className={`${baseClass}__wrap`}>
         <FieldError path={fieldPath} showError={showError} />
 

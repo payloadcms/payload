@@ -30,14 +30,38 @@ type Args = {
  * Generated values dedupe against existing slugs; a localized slug is unique per-locale, so its
  * dedupe and fallback are scoped to the locale being written. Globals have no collection to dedupe
  * against, so their slug is left as-is.
+ *
+ * `useAsSlug` names a *sibling* of the slug, so a slug nested in a group, array row or block derives
+ * from that same level rather than from the root of the document.
  */
 export const generateSlug =
   ({ name, localized, slugify: customSlugify, useAsSlug }: Args): FieldHook =>
-  async ({ collection, context, data, operation, originalDoc, req, value }) => {
+  async ({
+    collection,
+    context,
+    data,
+    operation,
+    originalDoc,
+    path,
+    previousSiblingDoc,
+    req,
+    siblingData,
+    value,
+  }) => {
     const slugify = (valueToSlugify: unknown) =>
       customSlugify
-        ? customSlugify({ data: (data ?? {}) as TypeWithID, req, valueToSlugify })
+        ? customSlugify({
+            data: (data ?? {}) as TypeWithID,
+            req,
+            siblingData: siblingData ?? {},
+            valueToSlugify,
+          })
         : defaultSlugify(valueToSlugify as string)
+
+    // Every uniqueness query below runs against a collection-wide field, which only addresses a slug
+    // at the root of the document — a nested path has no such field to query. A nested slug is scoped
+    // to its own row or group, so it is neither deduped nor given a fallback.
+    const isTopLevelField = path.length === 1
 
     // A localized slug is unique only within its locale, so every uniqueness query below is scoped
     // to the locale being written.
@@ -46,11 +70,11 @@ export const generateSlug =
     // A duplicated document:
     //  - Takes a fresh `<singular>-<N>` fallback — not the original's slug, not a source-derived one
     //  - Skips the explicit-collision check below (see generateSlugBeforeDuplicate).
-    if (collection && consumeSlugDuplicateFallback(context, name)) {
+    if (collection && isTopLevelField && consumeSlugDuplicateFallback(context, name)) {
       return await getSlugFallbackValue({ collection, field: name, locale, req, slugify })
     }
 
-    const storedSlug = originalDoc?.[name]
+    const storedSlug = previousSiblingDoc?.[name]
 
     const storedSlugHasValue = hasValue(storedSlug)
 
@@ -71,6 +95,7 @@ export const generateSlug =
 
         if (
           collection &&
+          isTopLevelField &&
           (await fieldValueExists({
             id: originalDoc?.id,
             collection: collection.slug,
@@ -99,11 +124,11 @@ export const generateSlug =
     // Derive an empty slug from its source, when present.
     // Dedupe so two documents don't both claim it if they have the same source value.
     // Globals have no collection to dedupe against.
-    const source = useAsSlug ? data?.[useAsSlug] : undefined
+    const source = useAsSlug ? siblingData?.[useAsSlug] : undefined
     const derived = source ? await slugify(source) : undefined
 
     if (hasValue(derived)) {
-      if (!collection) {
+      if (!collection || !isTopLevelField) {
         return derived
       }
 
@@ -123,7 +148,7 @@ export const generateSlug =
       return storedSlug
     }
 
-    if (!collection) {
+    if (!collection || !isTopLevelField) {
       return undefined
     }
 
