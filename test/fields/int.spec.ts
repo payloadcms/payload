@@ -40,6 +40,7 @@ import {
   dateFieldsSlug,
   groupFieldsSlug,
   numberFieldsSlug,
+  pointFieldsOptimizedSlug,
   relationshipFieldsSlug,
   tabsFieldsSlug,
   textFieldsSlug,
@@ -2513,6 +2514,30 @@ describe('Fields', () => {
         data: { point, camelCasePoint: [7, -7] },
       })
       expect(res.camelCasePoint).toEqual([7, -7])
+    })
+
+    it('should return the point field when updating a document by id on a collection without localized fields', async () => {
+      if (payload.db.name === 'sqlite') {
+        return
+      }
+
+      // This collection has no localized/hasMany fields, so the update takes the
+      // `shouldUseOptimizedUpsertRow` fast path in upsertRow, which historically
+      // dropped `point` field values from its result. See #17461.
+      const created = await payload.create({
+        collection: pointFieldsOptimizedSlug,
+        data: { point, title: 'original' },
+      })
+
+      const updated = await payload.update({
+        id: created.id,
+        collection: pointFieldsOptimizedSlug,
+        data: { title: 'updated' },
+      })
+
+      expect(updated.point).toEqual(point)
+
+      await payload.delete({ id: created.id, collection: pointFieldsOptimizedSlug })
     })
   })
 
