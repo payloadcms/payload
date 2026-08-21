@@ -87,7 +87,21 @@ export const withPayload = (nextConfig = {}, options = {}) => {
     },
     outputFileTracingIncludes: {
       ...(nextConfig.outputFileTracingIncludes || {}),
-      '**/*': [...(nextConfig.outputFileTracingIncludes?.['**/*'] || []), '@libsql/client'],
+      /**
+       * Next.js resolves these values as glob patterns relative to the Next.js project root, not as
+       * package specifiers - a bare `@libsql/client` matches zero files and silently ships nothing.
+       * Both layouts are listed because a pattern that matches nothing is a no-op, so the unused one
+       * costs the build nothing.
+       *
+       * Note that in a pnpm workspace the store lives at the workspace root, which is outside the
+       * project root these globs resolve from. Those projects need their own `../../node_modules/...`
+       * include - see the deployment docs.
+       */
+      '**/*': [
+        ...(nextConfig.outputFileTracingIncludes?.['**/*'] || []),
+        'node_modules/@libsql/client/**/*',
+        'node_modules/.pnpm/@libsql+client@*/node_modules/@libsql/client/**/*',
+      ],
     },
     turbopack: {
       ...(nextConfig.turbopack || {}),
