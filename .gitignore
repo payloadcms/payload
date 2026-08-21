@@ -26,6 +26,7 @@ CLAUDE.local.md
 
 test/packed
 test-results
+playwright-report
 .localstack
 /migrations
 .localstack

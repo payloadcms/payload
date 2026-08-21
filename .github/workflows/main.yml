@@ -25,6 +25,7 @@ jobs:
     outputs:
       needs_build: ${{ steps.filter.outputs.needs_build }}
       needs_tests: ${{ steps.filter.outputs.needs_tests }}
+      needs_visual: ${{ steps.filter.outputs.needs_visual }}
       templates: ${{ steps.filter.outputs.templates }}
       build_approvals: ${{ steps.filter.outputs.build_approvals }}
     steps:
@@ -41,6 +42,7 @@ jobs:
               - '.github/workflows/main.yml'
               - '.github/actions/start-services/**'
               - '.github/actions/setup/**'
+              - '.github/scripts/visual/**'
               - '.github/actions/setup-playwright/**'
               - 'packages/**'
               - 'test/**'
@@ -56,6 +58,38 @@ jobs:
               - 'package.json'
             templates:
               - 'templates/**'
+            # Also gates tests-unit via its own `if`. Excludes plain `packages/**/*.ts` changes on
+            # purpose: matching all `.ts` would fire on nearly every PR.
+            needs_visual:
+              - '.github/workflows/main.yml'
+              - '.github/scripts/visual/**'
+              - 'packages/**/*.css'
+              - 'packages/**/*.scss'
+              - 'packages/**/*.tsx'
+              - 'packages/**/*.jsx'
+              - 'packages/**/*.svg'
+              - 'test/**/*.css'
+              - 'test/**/*.scss'
+              - 'test/**/*.tsx'
+              - 'test/**/*.jsx'
+              - 'test/**/e2e.spec.ts'
+              - 'test/**/__snapshots__/**'
+              - 'test/__helpers/e2e/expectScreenshot.ts'
+              - 'test/__helpers/e2e/visual.ts'
+              - 'test/playwright.config.ts'
+              - 'test/buildConfigWithDefaults.ts'
+              # `test/admin/e2e/visual/e2e.spec.ts` renders the posts list view with the full admin
+              # sidebar nav, which test/admin/config.ts assembles from every collection/global here
+              # (labels, grouping, visibility) — plain .ts, so not caught by the *.tsx/*.scss
+              # patterns above. Scoped to config-defining files rather than all of `test/admin/**`
+              # (100+ files spanning unrelated e2e suites) for the same reason `packages/**/*.ts`
+              # is excluded above: a blanket match would fire on nearly every admin-suite PR.
+              # seed.ts generates the post titles shown in the posts-list-view baseline.
+              - 'test/admin/config.ts'
+              - 'test/admin/slugs.ts'
+              - 'test/admin/seed.ts'
+              - 'test/admin/collections/**'
+              - 'test/admin/globals/**'
             build_approvals:
               - '.github/workflows/main.yml'
               # Any dependency-graph change (packages/* or the blank workspace member) lands in
@@ -66,6 +100,7 @@ jobs:
         run: |
           echo "needs_build: ${{ steps.filter.outputs.needs_build }}"
           echo "needs_tests: ${{ steps.filter.outputs.needs_tests }}"
+          echo "needs_visual: ${{ steps.filter.outputs.needs_visual }}"
           echo "templates: ${{ steps.filter.outputs.templates }}"
           echo "build_approvals: ${{ steps.filter.outputs.build_approvals }}"
 
@@ -175,10 +210,21 @@ jobs:
           path: ./*
           key: ${{ github.sha }}
 
+      # Narrower than "Cache build" above: just the compiled, platform-independent package
+      # output, with no `node_modules`. The `visual-regression` job restores this directly onto
+      # the runner (not inside its Docker container's own install) to skip re-running `build:all`
+      # without reintroducing the native-module ABI mismatch that job's own install step exists to
+      # avoid — see the comment on that job for why it can't reuse the `Cache build` entry above.
+      - name: Cache dist output
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: packages/*/dist
+          key: dist-${{ github.sha }}
+
   tests-unit:
     runs-on: ubuntu-24.04
     needs: [changes, build]
-    if: needs.changes.outputs.needs_tests == 'true'
+    if: needs.changes.outputs.needs_tests == 'true' || needs.changes.outputs.needs_visual == 'true'
     steps:
       - uses: actions/checkout@v5
 
@@ -418,7 +464,12 @@ jobs:
         # Note: The e2e-prep job runs prepare-run-test-against-prod:ci once and uploads the result
         # as an artifact. This job downloads that artifact, so we skip preparation. Each shard runs a
         # real production server (next build / vite build, ~10s), booted per shard by runE2E.
-        run: PLAYWRIGHT_JSON_OUTPUT_NAME=results_${{ matrix.suite }}_${{ matrix.framework }}_${{ matrix.shard }}.json pnpm test:e2e:prod:server:run:noturbo ${{ matrix.suite }} --shard=${{ matrix.shard }}/${{ matrix.total-shards }} --fully-parallel${{ matrix.parallel == false && ' --workers=1' || '' }}
+        #
+        # --grep-invert="@visual": screenshot comparisons are handled exclusively by the dedicated
+        # `visual-regression` job (gated on `needs_visual`), never by this unconditional matrix —
+        # otherwise a `@visual` test would also run here on every PR that touches test/packages
+        # code, including under the tanstack-start framework it was never baselined against.
+        run: PLAYWRIGHT_JSON_OUTPUT_NAME=results_${{ matrix.suite }}_${{ matrix.framework }}_${{ matrix.shard }}.json pnpm test:e2e:prod:server:run:noturbo ${{ matrix.suite }} --shard=${{ matrix.shard }}/${{ matrix.total-shards }} --fully-parallel --grep-invert="@visual"${{ matrix.parallel == false && ' --workers=1' || '' }}
         env:
           PLAYWRIGHT_JSON_OUTPUT_NAME: results_${{ matrix.suite }}_${{ matrix.framework }}_${{ matrix.shard }}.json
           NEXT_TELEMETRY_DISABLED: 1
@@ -438,6 +489,111 @@ jobs:
       #     report-file: results_${{ matrix.suite }}.json
       #     report-tag: ${{ matrix.suite }}
       #     job-summary: true
+
+  # Runs `@visual`-tagged e2e tests (screenshot comparisons against baselines).
+  # If this fails, reproduce locally with `pnpm test:visual`; update an intentional baseline with
+  # `pnpm test:visual:update`. Both must run inside the pinned Playwright Docker image, since font
+  # rendering differs enough from a bare host to fail the comparison even with no real change.
+  #
+  # For the same reason, this job reinstalls node_modules fresh inside that Docker image rather
+  # than reusing the `build`/`e2e-prep` node_modules from the bare runner, which would mix
+  # runner-built native modules (sharp, etc.) with the container's own Node/glibc. It restores only
+  # `packages/*/dist` (plain compiled JS, no native bindings) from the `build` job's cache.
+  visual-regression:
+    name: Visual Regression
+    runs-on: ubuntu-24.04
+    needs: [changes, build]
+    if: needs.changes.outputs.needs_visual == 'true'
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Start services
+        uses: ./.github/actions/start-services
+        with:
+          database: mongodb
+
+      - name: Resolve pinned Playwright version
+        id: playwright-version
+        # This job skips ./.github/actions/setup, so there's no node_modules for `pnpm ls` to
+        # read (unlike elsewhere in this file) — read package.json directly instead. Strip a
+        # leading ^/~ in case the pin ever becomes a range.
+        run: |
+          VERSION=$(node -p "require('./package.json').devDependencies['@playwright/test']" | sed -E 's/^[\^~]//')
+          echo "Resolved Playwright version: $VERSION"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      # Every `needs_visual` path is also a `needs_build` path (a subset of `packages/**`/
+      # `test/**`), so `build` always runs alongside this job — restoring here should always hit.
+      # The container command below builds fresh as a fallback on the rare miss (e.g. a cache
+      # eviction) rather than failing outright.
+      - name: Restore dist output from build job
+        uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: packages/*/dist
+          key: dist-${{ github.sha }}
+
+      # `pnpm install` still runs inside the container (see the job comment on why), but this
+      # avoids re-downloading every package from the registry each run. Safe across environments
+      # because pnpm's side-effects cache (built native addons like sharp) is itself keyed by
+      # platform/arch/Node version, so a mismatched entry is rebuilt rather than reused. Read-write
+      # (not cache/restore) so a lockfile change or a newly-cached package gets saved back.
+      - name: Restore pnpm store cache
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: .pnpm-store
+          key: visual-pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            visual-pnpm-store-
+
+      # A long-lived, named container that the steps below `docker exec` into, so setup and the
+      # actual test run show as separate steps instead of one `docker run ... && ... && ...` step
+      # that buries the test output under several minutes of install/build output.
+      - name: Start visual regression container
+        # PLAYWRIGHT_VERSION is read from package.json, which on a `pull_request` checkout is
+        # fork-controlled content — passed via env and referenced as "$PLAYWRIGHT_VERSION" so it's
+        # shell *data*, never spliced as raw text into the script the way a `${{ }}` reference
+        # inside `run:` would be.
+        env:
+          PLAYWRIGHT_VERSION: ${{ steps.playwright-version.outputs.version }}
+        run: |
+          docker run -d --rm \
+            --name visual-regression \
+            --network host \
+            --ipc=host \
+            -v "$PWD":/repo \
+            -w /repo \
+            -e CI=true \
+            -e PAYLOAD_DATABASE=mongodb \
+            -e NEXT_TELEMETRY_DISABLED=1 \
+            "mcr.microsoft.com/playwright:v${PLAYWRIGHT_VERSION}-noble" \
+            sleep infinity
+
+      - name: Install dependencies
+        run: |
+          docker exec visual-regression bash -lc "
+            apt-get update -qq && apt-get install -y -qq build-essential python3 > /dev/null &&
+            npm install -g pnpm@\$(grep '^pnpm ' .tool-versions | awk '{print \$2}') &&
+            # --location=user avoids writing storeDir into pnpm-workspace.yaml, which pnpm
+            # does by default when the cwd is a workspace root.
+            pnpm config set store-dir /repo/.pnpm-store --location=user &&
+            pnpm install --frozen-lockfile
+          "
+
+      - name: Build packages
+        run: docker exec visual-regression bash -lc "[ -d packages/payload/dist ] || pnpm run build:all"
+
+      - name: Prepare test environment
+        run: docker exec visual-regression bash -lc "pnpm prepare-run-test-against-prod:ci"
+
+      - name: Run visual regression tests
+        run: docker exec visual-regression bash -lc "bash .github/scripts/visual/run-visual-suites.sh -- --fully-parallel"
+
+      - name: Stop visual regression container
+        if: always()
+        run: docker stop visual-regression
 
   # Build listed templates with packed local packages and then runs their int and e2e tests
   build-and-test-templates:
@@ -702,6 +858,7 @@ jobs:
         tests-types,
         tests-type-generation,
         tests-content-api,
+        visual-regression,
       ]
 
     steps:
