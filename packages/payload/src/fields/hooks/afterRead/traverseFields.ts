@@ -59,7 +59,7 @@ type Args = {
   siblingDoc: JsonObject
   triggerAccessControl?: boolean
   triggerHooks?: boolean
-  version: ReadVersion
+  version?: ReadVersion
 }
 
 export const traverseFields = ({
@@ -94,6 +94,8 @@ export const traverseFields = ({
   triggerHooks = true,
   version,
 }: Args): void => {
+  const readVersion = version ?? (draft ? 'latest' : 'published')
+
   fields.forEach((field, fieldIndex) => {
     fieldPromises.push(
       promise({
@@ -128,7 +130,7 @@ export const traverseFields = ({
         siblingFields: fields,
         triggerAccessControl,
         triggerHooks,
-        version,
+        version: readVersion,
       }),
     )
   })

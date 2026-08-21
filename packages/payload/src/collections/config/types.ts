@@ -359,6 +359,10 @@ export type AfterReadHook<T extends TypeWithID = any> = (args: {
   overrideAccess?: boolean
   query?: { [key: string]: any }
   req: PayloadRequest
+  /**
+   * Only available on find / findByID / findGlobal reads.
+   */
+  version?: ReadVersion
 }) => any
 
 export type BeforeDeleteHook = (args: {

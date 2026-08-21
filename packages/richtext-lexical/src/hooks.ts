@@ -176,6 +176,7 @@ export const getLexicalHooks: (args: {
           showHiddenFields,
           triggerAccessControl,
           triggerHooks,
+          version,
         } = args
 
         let { value } = args
@@ -262,6 +263,7 @@ export const getLexicalHooks: (args: {
                 siblingDoc: nodeSiblingData,
                 triggerAccessControl,
                 triggerHooks,
+                version,
               })
             }
           }

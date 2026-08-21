@@ -223,7 +223,7 @@ export async function computePaths(args: ComputePathsArgs): Promise<ComputePaths
     }
 
     const cache = context.hierarchyAncestorCache[collection.slug]
-    const cacheKey = `${parentID}_${locale || 'default'}`
+    const cacheKey = `${parentID}_${locale || 'default'}_${readVersion}`
 
     // Check cache first
     let parent = cache[cacheKey]

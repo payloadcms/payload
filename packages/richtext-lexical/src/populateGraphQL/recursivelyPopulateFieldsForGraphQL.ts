@@ -70,5 +70,6 @@ export const recursivelyPopulateFieldsForGraphQL = ({
     showHiddenFields,
     siblingDoc,
     triggerHooks: false,
+    version: draft ? 'latest' : 'published',
   })
 }

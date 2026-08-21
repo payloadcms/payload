@@ -4967,6 +4967,39 @@ describe('Versions', () => {
       expect(silenced).toBeNull()
     })
 
+    it('should not populate published-only relationships on draft reads', async () => {
+      const related = await createPublishedOnly('Related published only')
+      const parent = await payload.create({
+        action: 'saveDraft',
+        collection: draftCollectionSlug,
+        data: {
+          ...draftData('Parent draft'),
+          relation: related.id,
+        },
+        overrideAccess: true,
+      })
+      createdIDs.push(parent.id)
+
+      const draftRead = await payload.findByID({
+        id: parent.id,
+        collection: draftCollectionSlug,
+        depth: 1,
+        overrideAccess: true,
+        version: 'draft',
+      })
+      const latestRead = await payload.findByID({
+        id: parent.id,
+        collection: draftCollectionSlug,
+        depth: 1,
+        overrideAccess: true,
+        version: 'latest',
+      })
+
+      expect(draftRead.relation).toBe(related.id)
+      expect(typeof latestRead.relation).toBe('object')
+      expect((latestRead.relation as { title: string }).title).toBe('Related published only')
+    })
+
     it('should honor select on latest collection reads', async () => {
       const doc = await createPublishedWithNewerDraft({
         draftTitle: 'Selected draft',

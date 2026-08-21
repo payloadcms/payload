@@ -21,7 +21,7 @@ type PopulateArgs = {
   populateArg?: PopulateType
   req: PayloadRequest
   showHiddenFields: boolean
-  version: ReadVersion
+  version?: ReadVersion
 }
 
 // TODO: this function is mess, refactor logic
@@ -42,6 +42,7 @@ const populate = async ({
   showHiddenFields,
   version,
 }: PopulateArgs) => {
+  const readVersion = version ?? (draft ? 'latest' : 'published')
   const dataToUpdate = dataReference
   let relation
   if (field.type === 'join') {
@@ -92,7 +93,7 @@ const populate = async ({
             relatedCollection.config.defaultPopulate,
           showHiddenFields,
           transactionID: req.transactionID!,
-          version,
+          version: readVersion,
         }),
       )
     }
@@ -152,7 +153,7 @@ type PromiseArgs = {
   req: PayloadRequest
   showHiddenFields: boolean
   siblingDoc: Record<string, any>
-  version: ReadVersion
+  version?: ReadVersion
 }
 
 export const relationshipPopulationPromise = async ({

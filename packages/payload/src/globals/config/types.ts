@@ -168,6 +168,10 @@ export type AfterReadHook = (args: {
   overrideAccess?: boolean
   query?: Where
   req: PayloadRequest
+  /**
+   * Only available on findGlobal reads.
+   */
+  version?: ReadVersion
 }) => any
 
 export type HookOperationType = 'countVersions' | 'read' | 'restoreVersion' | 'update'

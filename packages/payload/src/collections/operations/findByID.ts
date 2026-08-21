@@ -362,6 +362,7 @@ export const findByIDOperation = async <
           overrideAccess,
           query: findOneArgs.where,
           req,
+          version: readVersion,
         })) || result
     }
   }

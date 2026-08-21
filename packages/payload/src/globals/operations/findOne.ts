@@ -302,6 +302,7 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
           global: globalConfig,
           overrideAccess,
           req,
+          version: readVersion,
         })) || doc
     }
   }

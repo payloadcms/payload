@@ -410,6 +410,7 @@ export const findOperation = async <
               overrideAccess: overrideAccess!,
               query: fullWhere,
               req,
+              version: readVersion,
             })) || docRef
         }
 
