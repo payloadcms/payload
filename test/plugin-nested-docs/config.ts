@@ -8,8 +8,10 @@ import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { Categories } from './collections/Categories.js'
 import { Pages } from './collections/Pages.js'
+import { Regions } from './collections/Regions.js'
 import { Users } from './collections/Users.js'
 import { seed } from './seed/index.js'
+import { regionsSlug } from './shared.js'
 
 export default buildConfigWithDefaults({
   admin: {
@@ -17,7 +19,7 @@ export default buildConfigWithDefaults({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Pages, Categories, Users],
+  collections: [Pages, Categories, Regions, Users],
   localization: {
     defaultLocale: 'en',
     fallback: true,
@@ -39,6 +41,9 @@ export default buildConfigWithDefaults({
       collections: ['pages'],
       generateLabel: (_, doc) => doc.title as string,
       generateURL: (docs) => docs.reduce((url, doc) => `${url}/${doc.slug}`, ''),
+    }),
+    nestedDocsPlugin({
+      collections: [regionsSlug],
     }),
     nestedDocsPlugin({
       breadcrumbsFieldSlug: 'categorization',
