@@ -27,6 +27,11 @@ const availableScripts = [
 ] as const
 
 export const bin = async () => {
+  // Default to failure. A dropped or never-settling config import drains the event
+  // loop and lets Node exit before the explicit exit(0) below runs; without this the
+  // process would report success. The success paths set 0 explicitly.
+  process.exitCode = 1
+
   loadEnv()
   process.env.DISABLE_PAYLOAD_HMR = 'true'
 
@@ -104,11 +109,18 @@ async function runBinScript({
     return {}
   }
 
-  const configPath = findConfig()
-  const configPromise = await import(pathToFileURL(configPath).toString())
-  let config = await configPromise
-  if (config.default) {
-    config = await config.default
+  let config
+  try {
+    const configPath = findConfig()
+    const configModule = await import(pathToFileURL(configPath).toString())
+    config = await configModule
+    if (config.default) {
+      config = await config.default
+    }
+  } catch (err) {
+    console.error('Failed to load the Payload config.')
+    console.error(err)
+    process.exit(1)
   }
 
   const userBinScript = Array.isArray(config.bin)
