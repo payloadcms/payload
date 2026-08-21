@@ -40,6 +40,47 @@ export function requestedActionFromLegacyDraft({
   return undefined
 }
 
+/**
+ * Maps leftover REST `draft` booleans and `unpublishAllLocales` onto update `action`
+ * until those transports are converted. Explicit `action` always wins.
+ *
+ * Leftover REST `draft=true` selected the latest versions; `_status` decided write intent.
+ * `draft=true` with `_status: 'published'` therefore maps to `publish` (PublishMany).
+ */
+export function requestedUpdateActionFromLegacy({
+  action,
+  draft,
+  status,
+  unpublishAllLocales,
+}: {
+  action?: unknown
+  draft?: boolean
+  status?: unknown
+  unpublishAllLocales?: boolean | string
+}): unknown {
+  if (action !== undefined && action !== null) {
+    return action
+  }
+
+  if (draft === true && status === 'published') {
+    return 'publish'
+  }
+
+  if (draft === true) {
+    return 'saveDraft'
+  }
+
+  if (draft === false) {
+    return 'publish'
+  }
+
+  if (unpublishAllLocales === true || unpublishAllLocales === 'true') {
+    return 'unpublish'
+  }
+
+  return undefined
+}
+
 type DocumentStatus = 'draft' | 'published'
 
 /**

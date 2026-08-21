@@ -4,6 +4,7 @@ import { status as httpStatus } from 'http-status'
 
 import type { AccessResult } from '../../config/types.js'
 import type { PayloadRequest, PopulateType, SelectType, Sort, Where } from '../../types/index.js'
+import type { UpdateAction } from '../../versions/actions/types.js'
 import type {
   BulkOperationResult,
   Collection,
@@ -29,6 +30,11 @@ import { isErrorPublic } from '../../utilities/isErrorPublic.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
+import {
+  canonicalizeWriteStatus,
+  requestedUpdateActionFromLegacy,
+  resolveAction,
+} from '../../versions/actions/resolveAction.js'
 import { buildVersionCollectionFields } from '../../versions/buildCollectionFields.js'
 import { appendVersionToQueryKey } from '../../versions/drafts/appendVersionToQueryKey.js'
 import { getQueryDraftsSort } from '../../versions/drafts/getQueryDraftsSort.js'
@@ -39,12 +45,16 @@ import { sanitizeSortQuery } from './utilities/sanitizeSortQuery.js'
 import { updateDocument } from './utilities/update.js'
 
 export type Arguments<TSlug extends CollectionSlug> = {
+  action?: UpdateAction
   autosave?: boolean
   collection: Collection
   data: DeepPartial<RequiredDataFromCollectionSlug<TSlug>>
   depth?: number
   disableTransaction?: boolean
   disableVerificationEmail?: boolean
+  /**
+   * Leftover REST/GraphQL boolean until those transports are converted.
+   */
   draft?: boolean
   limit?: number
   overrideAccess?: boolean
@@ -92,11 +102,12 @@ export const updateOperation = async <
     })
 
     const {
+      action,
       autosave = false,
       collection: { config: collectionConfig },
       collection,
       depth,
-      draft: draftArg = false,
+      draft: draftArg,
       limit = 0,
       overrideAccess,
       overrideLock,
@@ -122,8 +133,43 @@ export const updateOperation = async <
       throw new APIError("Missing 'where' query of documents to update.", httpStatus.BAD_REQUEST)
     }
 
-    const { data: bulkUpdateData } = args
-    const shouldSaveDraft = Boolean(draftArg && hasDraftsEnabled(collectionConfig))
+    let { data: bulkUpdateData } = args
+    const resolvedAction = resolveAction({
+      action: requestedUpdateActionFromLegacy({
+        action,
+        draft: draftArg,
+        status:
+          bulkUpdateData &&
+          typeof bulkUpdateData === 'object' &&
+          bulkUpdateData !== null &&
+          '_status' in bulkUpdateData
+            ? bulkUpdateData._status
+            : undefined,
+        unpublishAllLocales,
+      }),
+      autosave,
+      draftsEnabled: hasDraftsEnabled(collectionConfig),
+      locale,
+      operation: 'update',
+      publishAllLocales,
+      status:
+        bulkUpdateData &&
+        typeof bulkUpdateData === 'object' &&
+        bulkUpdateData !== null &&
+        '_status' in bulkUpdateData
+          ? bulkUpdateData._status
+          : undefined,
+      unpublishAllLocales: unpublishAllLocales === true || unpublishAllLocales === 'true',
+    })
+    const shouldSaveDraft = resolvedAction === 'saveDraft'
+
+    bulkUpdateData = canonicalizeWriteStatus({
+      action: resolvedAction,
+      data: bulkUpdateData,
+      locale,
+      publishAllLocales,
+      unpublishAllLocales: unpublishAllLocales === true || unpublishAllLocales === 'true',
+    })
 
     // /////////////////////////////////////
     // Access
@@ -190,7 +236,10 @@ export const updateOperation = async <
 
     let docs
 
-    if (hasDraftsEnabled(collectionConfig) && (shouldSaveDraft || isTrashAttempt)) {
+    if (
+      hasDraftsEnabled(collectionConfig) &&
+      (shouldSaveDraft || resolvedAction === 'publish' || isTrashAttempt)
+    ) {
       const versionsWhere = appendVersionToQueryKey(fullWhere)
 
       await validateQueryPaths({
@@ -234,6 +283,7 @@ export const updateOperation = async <
       collection,
       config,
       data: bulkUpdateData,
+      draft: shouldSaveDraft,
       operation: 'update',
       overwriteExistingFiles,
       req,
@@ -267,6 +317,7 @@ export const updateOperation = async <
         // ///////////////////////////////////////////////
         let updatedDoc = await updateDocument({
           id,
+          action: resolvedAction as undefined | UpdateAction,
           autosave,
           collectionConfig,
           config,
@@ -278,7 +329,6 @@ export const updateOperation = async <
           }),
           depth: depth!,
           docWithLocales,
-          draftArg,
           fallbackLocale: fallbackLocale!,
           filesToUpload,
           locale: locale!,

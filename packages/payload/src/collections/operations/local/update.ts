@@ -254,12 +254,12 @@ async function updateLocal<
 
   const args = {
     id,
+    action,
     autosave,
     collection,
     data,
     depth,
     disableTransaction,
-    draft: (action as string | undefined) === 'saveDraft',
     limit,
     overrideAccess,
     overrideLock,

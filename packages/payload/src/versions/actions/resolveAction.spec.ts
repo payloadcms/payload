@@ -6,6 +6,7 @@ import { APIError } from '../../errors/APIError.js'
 import {
   canonicalizeWriteStatus,
   requestedActionFromLegacyDraft,
+  requestedUpdateActionFromLegacy,
   resolveAction,
   statusFromAction,
 } from './resolveAction.js'
@@ -504,5 +505,40 @@ describe('requestedActionFromLegacyDraft', () => {
     expect(requestedActionFromLegacyDraft({ draft: true })).toBe('saveDraft')
     expect(requestedActionFromLegacyDraft({ draft: false })).toBe('publish')
     expect(requestedActionFromLegacyDraft({})).toBeUndefined()
+  })
+})
+
+describe('requestedUpdateActionFromLegacy', () => {
+  it('maps leftover unpublishAllLocales onto unpublish when action is omitted', () => {
+    expect(requestedUpdateActionFromLegacy({ unpublishAllLocales: true })).toBe('unpublish')
+    expect(requestedUpdateActionFromLegacy({ unpublishAllLocales: 'true' })).toBe('unpublish')
+  })
+
+  it('maps leftover draft=true with published status to publish', () => {
+    expect(
+      requestedUpdateActionFromLegacy({
+        draft: true,
+        status: 'published',
+      }),
+    ).toBe('publish')
+  })
+
+  it('maps leftover draft=true without published status to saveDraft', () => {
+    expect(requestedUpdateActionFromLegacy({ draft: true })).toBe('saveDraft')
+    expect(
+      requestedUpdateActionFromLegacy({
+        draft: true,
+        status: 'draft',
+      }),
+    ).toBe('saveDraft')
+  })
+
+  it('prefers leftover draft booleans over unpublishAllLocales', () => {
+    expect(
+      requestedUpdateActionFromLegacy({
+        draft: true,
+        unpublishAllLocales: true,
+      }),
+    ).toBe('saveDraft')
   })
 })

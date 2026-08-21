@@ -9,6 +9,7 @@ import type {
   SelectType,
   TransformCollectionWithSelect,
 } from '../../types/index.js'
+import type { UpdateAction } from '../../versions/actions/types.js'
 import type {
   Collection,
   RequiredDataFromCollectionSlug,
@@ -25,22 +26,32 @@ import { generateFileData } from '../../uploads/generateFileData.js'
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
+import { hasDraftsEnabled } from '../../utilities/getVersionsConfig.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
+import {
+  canonicalizeWriteStatus,
+  requestedUpdateActionFromLegacy,
+  resolveAction,
+} from '../../versions/actions/resolveAction.js'
 import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion.js'
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
 import { updateDocument } from './utilities/update.js'
 
 export type Arguments<TSlug extends CollectionSlug> = {
+  action?: UpdateAction
   autosave?: boolean
   collection: Collection
   data: DeepPartial<RequiredDataFromCollectionSlug<TSlug>>
   depth?: number
   disableTransaction?: boolean
   disableVerificationEmail?: boolean
+  /**
+   * Leftover REST/GraphQL boolean until those transports are converted.
+   */
   draft?: boolean
   id: number | string
   overrideAccess?: boolean
@@ -78,11 +89,12 @@ export const updateByIDOperation = async <
 
     const {
       id,
+      action,
       autosave = false,
       collection: { config: collectionConfig },
       collection,
       depth,
-      draft: draftArg = false,
+      draft: draftArg,
       overrideAccess,
       overrideLock,
       overwriteExistingFiles = false,
@@ -105,7 +117,38 @@ export const updateByIDOperation = async <
       throw new APIError('Missing ID of document to update.', httpStatus.BAD_REQUEST)
     }
 
-    const { data } = args
+    let { data } = args
+
+    const resolvedAction = resolveAction({
+      action: requestedUpdateActionFromLegacy({
+        action,
+        draft: draftArg,
+        status:
+          data && typeof data === 'object' && data !== null && '_status' in data
+            ? data._status
+            : undefined,
+        unpublishAllLocales,
+      }),
+      autosave,
+      draftsEnabled: hasDraftsEnabled(collectionConfig),
+      locale,
+      operation: 'update',
+      publishAllLocales,
+      status:
+        data && typeof data === 'object' && data !== null && '_status' in data
+          ? data._status
+          : undefined,
+      unpublishAllLocales: unpublishAllLocales === true || unpublishAllLocales === 'true',
+    })
+    const isSavingDraft = resolvedAction === 'saveDraft'
+
+    data = canonicalizeWriteStatus({
+      action: resolvedAction,
+      data,
+      locale,
+      publishAllLocales,
+      unpublishAllLocales: unpublishAllLocales === true || unpublishAllLocales === 'true',
+    })
 
     // /////////////////////////////////////
     // Access
@@ -185,6 +228,7 @@ export const updateByIDOperation = async <
       collection,
       config,
       data,
+      draft: isSavingDraft,
       operation: 'update',
       overwriteExistingFiles,
       req,
@@ -207,13 +251,18 @@ export const updateByIDOperation = async <
 
     let result = await updateDocument<TSlug, TSelect>({
       id,
+      action:
+        resolvedAction === 'unpublish' ||
+        resolvedAction === 'saveDraft' ||
+        resolvedAction === 'publish'
+          ? resolvedAction
+          : undefined,
       autosave,
       collectionConfig,
       config,
       data: deepCopyObjectSimple(newFileData),
       depth: depth!,
       docWithLocales,
-      draftArg,
       fallbackLocale: fallbackLocale!,
       filesToUpload,
       locale: locale!,

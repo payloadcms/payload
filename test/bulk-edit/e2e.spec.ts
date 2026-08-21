@@ -148,7 +148,7 @@ test.describe('Bulk Edit', () => {
     await page.locator('#publish-posts [data-dialog-action="confirm"]').click()
 
     await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
-      'Updated 2 Posts successfully.',
+      'Updated 1 Post successfully.',
     )
 
     await expect(await findTableCell(page, '_status', titleOfPostToPublish1)).toContainText(
@@ -317,7 +317,9 @@ test.describe('Bulk Edit', () => {
       'Updated 2 Posts successfully.',
     )
 
-    await expect(await findTableCell(page, '_status', titleOfPostToDraft1)).toContainText('Draft')
+    await expect(await findTableCell(page, '_status', titleOfPostToDraft1)).toContainText(
+      'Published',
+    )
     await expect(await findTableCell(page, '_status', titleOfPostToDraft2)).toContainText('Draft')
   })
 
@@ -1072,9 +1074,15 @@ async function createPost(
   dataOverrides?: RequiredDataFromCollectionSlug<'posts'>,
   overrides?: Record<string, unknown>,
 ): Promise<Post> {
+  const { draft, ...restOverrides } = (overrides || {}) as { draft?: boolean } & Record<
+    string,
+    unknown
+  >
+
   return payload.create({
     collection: postsSlug,
-    ...(overrides || {}),
+    ...restOverrides,
+    action: draft ? 'saveDraft' : 'publish',
     data: {
       title: 'Post Title',
       ...(dataOverrides || {}),

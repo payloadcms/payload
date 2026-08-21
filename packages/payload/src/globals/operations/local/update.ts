@@ -28,6 +28,11 @@ import { updateOperation } from '../update.js'
 
 type BaseOptions<TSlug extends GlobalSlug, TSelect extends SelectType> = {
   /**
+   * Whether the current update should be marked as from autosave.
+   * `versions.drafts.autosave` should be specified.
+   */
+  autosave?: boolean
+  /**
    * [Context](https://payloadcms.com/docs/hooks/context), which will then be passed to `context` and `req.context`,
    * which can be read by hooks. Useful if you want to pass additional information to the hooks which
    * shouldn't be necessarily part of the document, for example a `triggerBeforeChange` option which can be read by the BeforeChange hook
@@ -114,6 +119,7 @@ export async function updateGlobalLocal<
   const {
     slug: globalSlug,
     action,
+    autosave,
     data,
     depth,
     overrideAccess = true,
@@ -133,9 +139,10 @@ export async function updateGlobalLocal<
 
   return updateOperation<TSlug, TSelect>({
     slug: globalSlug as string,
+    action,
+    autosave,
     data: deepCopyObjectSimple(data), // Ensure mutation of data in create operation hooks doesn't affect the original data
     depth,
-    draft: (action as string | undefined) === 'saveDraft',
     globalConfig,
     overrideAccess,
     overrideLock,
