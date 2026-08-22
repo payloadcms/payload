@@ -154,7 +154,23 @@ const CollapsibleFields: CollectionConfig = {
         },
       ],
     },
-  ]
+    {
+      type: 'collapsible',
+      label: 'Offscreen Collapsible Field',
+      admin: {
+        initCollapsed: false,
+        style: {
+          marginTop: '2500px',
+        },
+      },
+      fields: [
+        {
+          name: 'forceRenderedText',
+          type: 'text',
+        },
+      ],
+    },
+  ],
 }
 
 export default CollapsibleFields
