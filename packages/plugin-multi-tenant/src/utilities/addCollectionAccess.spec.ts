@@ -65,6 +65,26 @@ describe('addCollectionAccess', () => {
     await expect(config.baseAccess?.collections?.create?.(createArgs())).resolves.toBe(true)
   })
 
+  it('falls back to update access for validate when accessResultCallback is configured', async () => {
+    const documentUpdate = vi.fn(() => true)
+    const accessResultCallback = vi.fn(({ accessResult }) => accessResult)
+    const collection: CollectionConfig = {
+      slug: 'posts',
+      access: { update: documentUpdate },
+      fields: [],
+    }
+    const config = {} as Config
+
+    addCollectionAccess({
+      config,
+      scopes: [createScope(collection, accessResultCallback)],
+    })
+
+    await collection.access?.validate?.(createArgs())
+
+    expect(documentUpdate).toHaveBeenCalled()
+  })
+
   it('keeps callback wrapping when an access result override is configured', async () => {
     const documentResult = { published: { equals: true } }
     const documentRead = vi.fn(() => documentResult)

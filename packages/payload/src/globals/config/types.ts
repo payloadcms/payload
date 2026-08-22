@@ -35,6 +35,13 @@ export type GlobalAccess<TData = any> = {
   read?: Access<TData>
   readVersions?: Access<TData>
   update?: Access<TData>
+  /**
+   * Controls on-demand validation for this global.
+   * Falls back to `update` access when omitted.
+   * The access function receives `req.operation === 'validate'`.
+   * @see https://payloadcms.com/docs/validation/overview#access-control-and-hooks
+   */
+  validate?: Access<TData>
 }
 
 /**
@@ -77,6 +84,8 @@ export type BeforeValidateHook = (args: {
   data?: any
   /** The global which this hook is being run on */
   global: SanitizedGlobalConfig
+  /** Hook operation being performed. */
+  operation: 'update' | 'validate'
   originalDoc?: any
   /**
    * Whether access control is being overridden for this operation
@@ -90,6 +99,8 @@ export type BeforeChangeHook = (args: {
   data: any
   /** The global which this hook is being run on */
   global: SanitizedGlobalConfig
+  /** Hook operation being performed. */
+  operation: 'update' | 'validate'
   originalDoc?: any
   /**
    * Whether access control is being overridden for this operation
@@ -104,6 +115,8 @@ export type AfterChangeHook = (args: {
   doc: any
   /** The global which this hook is being run on */
   global: SanitizedGlobalConfig
+  /** Hook operation being performed. */
+  operation: 'update'
   /**
    * Whether access control is being overridden for this operation
    */
@@ -269,7 +282,8 @@ export interface SanitizedGlobalConfig
     >,
     Required<Pick<GlobalConfig, 'admin' | 'custom' | 'label'>> {
   _sanitized: true
-  access: Pick<GlobalAccess, 'readVersions'> & Required<Pick<GlobalAccess, 'read' | 'update'>>
+  access: Pick<GlobalAccess, 'readVersions'> &
+    Required<Pick<GlobalAccess, 'read' | 'update' | 'validate'>>
   endpoints: Endpoint[] | false
   /**
    * Fields in the database schema structure

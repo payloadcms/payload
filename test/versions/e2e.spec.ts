@@ -283,7 +283,26 @@ describe('Versions', () => {
     })
 
     test('should restore version with correct data', async () => {
-      await page.goto(url.create)
+      // Seed the sibling locales so the later publish click (which now validates every
+      // locale) doesn't get blocked by their otherwise-empty required title field.
+      const seed = await payload.create({
+        collection: draftCollectionSlug,
+        data: { title: 'seed' },
+        draft: true,
+        overrideAccess: true,
+      })
+
+      for (const locale of ['es', 'de', 'fr']) {
+        await payload.update({
+          id: seed.id,
+          collection: draftCollectionSlug,
+          data: { title: 'seed' },
+          locale,
+          overrideAccess: true,
+        })
+      }
+
+      await page.goto(url.edit(seed.id))
       await waitForFormReady(page)
       await page.locator('#field-title').fill('v1')
       await page.locator('#field-description').fill('hello')
@@ -303,7 +322,27 @@ describe('Versions', () => {
     })
 
     test('should restore version as draft', async () => {
-      await page.goto(url.create)
+      // Seed the sibling locales so the later publish clicks (which now validate every
+      // locale) don't get blocked by their otherwise-empty required title field.
+      const seed = await payload.create({
+        collection: draftCollectionSlug,
+        data: { title: 'seed' },
+        draft: true,
+        overrideAccess: true,
+      })
+
+      for (const locale of ['es', 'de', 'fr']) {
+        await payload.update({
+          id: seed.id,
+          collection: draftCollectionSlug,
+          data: { title: 'seed' },
+          locale,
+          overrideAccess: true,
+        })
+      }
+
+      await page.goto(url.edit(seed.id))
+      await waitForFormReady(page)
       await page.locator('#field-title').fill('v1')
       await saveDocAndAssert(page, '#action-save-draft')
       await page.locator('#field-title').fill('v2')
@@ -600,7 +639,27 @@ describe('Versions', () => {
     })
 
     test('collection - should update updatedAt', async () => {
-      await page.goto(url.create)
+      // Seed the sibling locales so the later publish click (which now validates every
+      // locale) doesn't get blocked by their otherwise-empty required title field.
+      const seed = await payload.create({
+        collection: draftCollectionSlug,
+        data: { title: 'seed' },
+        draft: true,
+        overrideAccess: true,
+      })
+
+      for (const locale of ['es', 'de', 'fr']) {
+        await payload.update({
+          id: seed.id,
+          collection: draftCollectionSlug,
+          data: { title: 'seed' },
+          locale,
+          overrideAccess: true,
+        })
+      }
+
+      await page.goto(url.edit(seed.id))
+      await waitForFormReady(page)
 
       // fill out doc in english
       await page.locator('#field-title').fill('title')
@@ -679,7 +738,28 @@ describe('Versions', () => {
       const spanishTitle = 'spanish title'
       const englishTitle = 'english title'
 
-      await page.goto(url.create)
+      // Seed the sibling locales so the later publish clicks (which now validate every
+      // locale) don't get blocked by their otherwise-empty required title field. This adds
+      // one extra version, accounted for in the version-count assertion below.
+      const seed = await payload.create({
+        collection: draftCollectionSlug,
+        data: { title: 'seed' },
+        draft: true,
+        overrideAccess: true,
+      })
+
+      for (const locale of ['es', 'de', 'fr']) {
+        await payload.update({
+          id: seed.id,
+          collection: draftCollectionSlug,
+          data: { title: 'seed' },
+          locale,
+          overrideAccess: true,
+        })
+      }
+
+      await page.goto(url.edit(seed.id))
+      await waitForFormReady(page)
 
       // fill out doc in english
       await page.locator('#field-title').fill(englishTitle)
@@ -700,7 +780,7 @@ describe('Versions', () => {
             await page.locator('.doc-tab[aria-label="Versions"] .pill-version-count').textContent(),
           { timeout: POLL_TOPASS_TIMEOUT },
         )
-        .toEqual('2')
+        .toEqual('3')
 
       // fill out draft content in spanish
       await page.locator('#field-title').fill(`${spanishTitle}--draft`)
@@ -720,14 +800,14 @@ describe('Versions', () => {
       await page.locator('#field-title').fill('first post title')
       await expect(page.locator('#field-description')).toBeEnabled()
       await page.locator('#field-description').fill('first post description')
-      await saveDocAndAssert(page)
+      await saveDocAndAssert(page, '#action-save-draft')
       await page.goto(autosaveURL.create)
       await wait(500)
       await expect(page.locator('#field-title')).toBeEnabled()
       await page.locator('#field-title').fill('second post title')
       await expect(page.locator('#field-description')).toBeEnabled()
       await page.locator('#field-description').fill('second post description')
-      await saveDocAndAssert(page)
+      await saveDocAndAssert(page, '#action-save-draft')
       await page.locator('#field-title').fill('updated second post title')
       await page.locator('#field-description').fill('updated second post description')
       await waitForAutoSaveToRunAndComplete(page)
@@ -1522,7 +1602,7 @@ describe('Versions', () => {
       await expect(page.locator('#schedule-publish-button')).toBeHidden()
 
       // save draft then try to schedule publish
-      await saveDocAndAssert(page)
+      await saveDocAndAssert(page, '#action-save-draft')
       await page.locator('#schedule-publish-button').click()
 
       // drawer should open
@@ -1554,7 +1634,7 @@ describe('Versions', () => {
       await expect(page.locator('#schedule-publish-button')).toBeHidden()
 
       // save draft then try to schedule publish
-      await saveDocAndAssert(page)
+      await saveDocAndAssert(page, '#action-save-draft')
       await page.locator('#schedule-publish-button').click()
 
       // drawer should open
@@ -1582,7 +1662,7 @@ describe('Versions', () => {
       await page.locator('#field-title').fill('scheduled publish positioning')
       await page.locator('#field-description').fill('scheduled publish positioning description')
 
-      await saveDocAndAssert(page)
+      await saveDocAndAssert(page, '#action-save-draft')
       await page.locator('#schedule-publish-button').click()
 
       await expect(page.locator('.drawer__header')).toBeVisible()
@@ -1607,7 +1687,7 @@ describe('Versions', () => {
       await page.locator('#field-title').fill('scheduled publish')
       await page.locator('#field-description').fill('scheduled publish description')
 
-      await saveDocAndAssert(page)
+      await saveDocAndAssert(page, '#action-save-draft')
 
       await page.locator('#field-title').fill('scheduled publish updated')
 
@@ -1682,7 +1762,7 @@ describe('Versions', () => {
       await page.locator('#field-title').fill('test past times')
       await page.locator('#field-description').fill('test past times description')
 
-      await saveDocAndAssert(page)
+      await saveDocAndAssert(page, '#action-save-draft')
       await page.locator('#schedule-publish-button').click()
       await expect(page.locator('.drawer__header')).toBeVisible()
 
