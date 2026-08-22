@@ -1,5 +1,7 @@
 import type { CollectionSlug, Payload, RequiredDataFromCollectionSlug } from 'payload'
 
+type File = any
+
 import path from 'path'
 import { getFileByPath } from 'payload'
 import { fileURLToPath } from 'url'
