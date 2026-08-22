@@ -11,6 +11,7 @@ import {
   useConfig,
   useDebouncedEffect,
   useDocumentInfo,
+  useForm,
   useFormFields,
   useTranslation,
 } from '@payloadcms/ui'
@@ -23,6 +24,10 @@ import type {
 import type { ExportPreviewResponse } from '../../types.js'
 
 import { DEFAULT_PREVIEW_LIMIT, PREVIEW_LIMIT_OPTIONS } from '../../constants.js'
+import {
+  getFormStateSignature,
+  getSubmittedFormValues,
+} from '../../utilities/getSubmittedFormValues.js'
 import { useImportExport } from '../ImportExportProvider/index.js'
 import './index.css'
 
@@ -47,6 +52,10 @@ export const ExportPreview: React.FC = () => {
       where: fields['where']?.value as Where,
     }
   })
+  const { getData } = useForm()
+  // The endpoint passes the request body to export.hooks.before as `exportDoc`, so the whole
+  // form has to go with it — a field added via `overrideCollection` is not read above.
+  const formStateSignature = useFormFields(([fields]) => getFormStateSignature({ fields }))
   const [dataToRender, setDataToRender] = useState<any[]>([])
   const [exportTotalDocs, setExportTotalDocs] = useState<number>(0)
   const [maxLimit, setMaxLimit] = useState<number | undefined>(undefined)
@@ -100,6 +109,7 @@ export const ExportPreview: React.FC = () => {
         try {
           const res = await fetch(`${routes.api}/${collectionSlug}/export-preview`, {
             body: JSON.stringify({
+              ...getSubmittedFormValues({ formData: getData() }),
               collectionSlug: targetCollectionSlug,
               draft,
               fields,
@@ -197,6 +207,8 @@ export const ExportPreview: React.FC = () => {
       draft,
       fields,
       format,
+      formStateSignature,
+      getData,
       i18n,
       limit,
       locale,
