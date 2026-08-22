@@ -3,6 +3,7 @@ import type { GetPlatformProxyOptions } from 'wrangler'
 
 import { getCloudflareContext } from '@opennextjs/cloudflare'
 import { r2Storage } from '@payloadcms/storage-r2'
+import { sharpTransformer } from '@payloadcms/transformer-sharp'
 import dotenv from 'dotenv'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
@@ -63,6 +64,36 @@ export default buildConfigWithDefaults({
       clientUploads: true,
     }),
   ],
+  upload: {
+    transformers: [
+      sharpTransformer({
+        collections: {
+          [mediaSlug]: {
+            imageSizes: [
+              { height: 400, width: 400, crop: 'center', name: 'square' },
+              { width: 900, height: 450, crop: 'center', name: 'sixteenByNineMedium' },
+            ],
+            resizeOptions: {
+              position: 'center',
+              width: 200,
+              height: 200,
+            },
+          },
+          'media-client': {
+            imageSizes: [
+              { height: 400, width: 400, crop: 'center', name: 'square' },
+              { width: 900, height: 450, crop: 'center', name: 'sixteenByNineMedium' },
+            ],
+            resizeOptions: {
+              position: 'center',
+              width: 200,
+              height: 200,
+            },
+          },
+        },
+      }),
+    ],
+  },
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },

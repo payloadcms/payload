@@ -1,5 +1,7 @@
 import type { Payload } from 'payload'
 
+import { createHash } from 'crypto'
+import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
@@ -128,6 +130,28 @@ describe('@payloadcms/storage-s3', () => {
     })
     expect(response.status).toBe(200)
     expect(response.headers.get('Content-Type')).toBe('image/png')
+  })
+
+  it('should read the real object body for a transform-source request instead of a signed-download redirect', async () => {
+    const originalFilePath = path.resolve(dirname, '../uploads/image.png')
+    const originalHash = createHash('sha256')
+      .update(fs.readFileSync(originalFilePath))
+      .digest('hex')
+
+    const doc = await payload.create({
+      collection: mediaWithSignedDownloadsSlug,
+      data: {},
+      filePath: originalFilePath,
+    })
+
+    const response = await restClient.GET(
+      `/${mediaWithSignedDownloadsSlug}/file/${String(doc.filename)}?proveSourceHash=1`,
+    )
+
+    expect(response.status).toBe(200)
+    expect(response.headers.get('X-Source-Hash')).toBe(originalHash)
+
+    await payload.delete({ collection: mediaWithSignedDownloadsSlug, id: doc.id })
   })
 
   it('should return 404 when the file is not found', async () => {

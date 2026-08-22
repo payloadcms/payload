@@ -2,6 +2,7 @@ import type {
   CollectionConfig,
   Field,
   FileData,
+  FileHandlerOperation,
   ImageSize,
   PayloadHandler,
   PayloadRequest,
@@ -10,6 +11,8 @@ import type {
   UploadInstructionsAccess,
   UploadInstructionsCapability,
 } from 'payload'
+
+export type { FileHandlerOperation } from 'payload'
 
 export interface File {
   buffer: Buffer
@@ -56,7 +59,13 @@ export type StaticHandler = (
   args: {
     doc?: TypeWithID
     headers?: Headers
-    params: { collection: string; filename: string; prefix?: string; uploadReference?: unknown }
+    params: {
+      collection: string
+      filename: string
+      operation?: FileHandlerOperation
+      prefix?: string
+      uploadReference?: unknown
+    }
   },
 ) => Promise<Response> | Response
 

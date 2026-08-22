@@ -22,6 +22,7 @@
     "@payloadcms/next": "workspace:*",
     "@payloadcms/plugin-mcp": "workspace:*",
     "@payloadcms/richtext-lexical": "workspace:*",
+    "@payloadcms/transformer-sharp": "workspace:*",
     "@payloadcms/ui": "workspace:*",
     "cross-env": "10.1.0",
     "dotenv": "16.4.7",
@@ -29,8 +30,7 @@
     "next": "16.3.0",
     "payload": "workspace:*",
     "react": "19.2.6",
-    "react-dom": "19.2.6",
-    "sharp": "0.34.2"
+    "react-dom": "19.2.6"
   },
   "devDependencies": {
     "@playwright/test": "1.59.1",

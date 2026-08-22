@@ -173,7 +173,7 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
   if (
     uploadOptions.focalPoint !== false ||
     uploadOptions.imageSizes ||
-    uploadOptions.resizeOptions
+    uploadOptions.hasImageAdjustments
   ) {
     uploadFields = uploadFields.concat(
       ['focalX', 'focalY'].map((name) => {

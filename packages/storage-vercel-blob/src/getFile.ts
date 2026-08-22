@@ -1,4 +1,4 @@
-import type { CollectionConfig, PayloadRequest } from 'payload'
+import type { CollectionConfig, FileHandlerOperation, PayloadRequest } from 'payload'
 
 import { getFilePrefix as getDocPrefix } from '@payloadcms/plugin-cloud-storage/utilities'
 import { BlobNotFoundError, head } from '@vercel/blob'
@@ -13,6 +13,7 @@ interface GetFileArgs {
   collectionPrefix?: string
   filename: string
   incomingHeaders?: Headers
+  operation?: FileHandlerOperation
   prefixQueryParam?: string
   req: PayloadRequest
   token: string
@@ -27,12 +28,15 @@ export async function getFile({
   collectionPrefix = '',
   filename,
   incomingHeaders,
+  operation = 'read',
   prefixQueryParam,
   req,
   token,
   uploadReference,
   useCompositePrefixes = false,
 }: GetFileArgs): Promise<Response> {
+  const isTransformSource = operation === 'transform'
+
   try {
     const docPrefix = await getDocPrefix({
       collection,
@@ -56,8 +60,7 @@ export async function getFile({
     const fileKeyForETag = fileUrl.replace(`${baseUrl}/`, '')
     const ETag = `"${fileKeyForETag}-${uploadedAtString}"`
 
-    // Handle range request
-    const rangeHeader = req.headers.get('range')
+    const rangeHeader = isTransformSource ? null : req.headers.get('range')
     const rangeResult = getRangeRequestInfo({ fileSize: size, rangeHeader })
 
     if (rangeResult.type === 'invalid') {
@@ -69,7 +72,6 @@ export async function getFile({
 
     let headers = new Headers(incomingHeaders)
 
-    // Add range-related headers from the result
     for (const [key, value] of Object.entries(rangeResult.headers)) {
       headers.append(key, value)
     }
@@ -79,12 +81,12 @@ export async function getFile({
     headers.append('Content-Type', contentType)
     headers.append('ETag', ETag)
 
-    // Add Content-Security-Policy header for SVG files to prevent executable code
     if (contentType === 'image/svg+xml') {
       headers.append('Content-Security-Policy', "script-src 'none'")
     }
 
     if (
+      !isTransformSource &&
       collection.upload &&
       typeof collection.upload === 'object' &&
       typeof collection.upload.modifyResponseHeaders === 'function'
@@ -92,7 +94,7 @@ export async function getFile({
       headers = collection.upload.modifyResponseHeaders({ headers }) || headers
     }
 
-    if (etagFromHeaders && etagFromHeaders === ETag) {
+    if (!isTransformSource && etagFromHeaders && etagFromHeaders === ETag) {
       return new Response(null, {
         headers,
         status: 304,
@@ -110,6 +112,11 @@ export async function getFile({
     })
 
     if (!response.ok || !response.body) {
+      // A transformer needs the real failure status; masking it as 204 is only safe for a plain download.
+      if (isTransformSource) {
+        return new Response(null, { status: response.status, statusText: response.statusText })
+      }
+
       return new Response(null, { status: 204, statusText: 'No Content' })
     }
 

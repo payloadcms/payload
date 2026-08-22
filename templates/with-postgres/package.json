@@ -22,14 +22,14 @@
     "@payloadcms/db-postgres": "3.82.1",
     "@payloadcms/next": "3.82.1",
     "@payloadcms/richtext-lexical": "3.82.1",
+    "@payloadcms/transformer-sharp": "3.82.1",
     "@payloadcms/ui": "3.82.1",
     "cross-env": "10.1.0",
     "graphql": "^16.8.1",
     "next": "16.3.0",
     "payload": "3.82.1",
     "react": "19.2.6",
-    "react-dom": "19.2.6",
-    "sharp": "0.34.2"
+    "react-dom": "19.2.6"
   },
   "devDependencies": {
     "@playwright/test": "1.59.1",

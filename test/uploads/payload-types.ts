@@ -62,15 +62,15 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_104D6ABA".
+ * via the `definition` "LexicalNodes_2129C05D".
  */
-export type LexicalNodes_104D6ABA =
+export type LexicalNodes_2129C05D =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_104D6ABA>
+  | SerializedParagraphNode<LexicalNodes_2129C05D>
   | SerializedBlockNode<MyBlock>
-  | SerializedHeadingNode<LexicalNodes_104D6ABA>
+  | SerializedHeadingNode<LexicalNodes_2129C05D>
   | SerializedUploadNode<'gif-resize'>
   | SerializedUploadNode<'filename-compound-index'>
   | SerializedUploadNode<'no-image-sizes'>
@@ -124,14 +124,15 @@ export type LexicalNodes_104D6ABA =
   | SerializedUploadNode<'file-mime-type'>
   | SerializedUploadNode<'svg-only'>
   | SerializedUploadNode<'media-without-delete-access'>
+  | SerializedUploadNode<'media-without-write-access'>
   | SerializedUploadNode<'media-with-image-size-admin-props'>
   | SerializedUploadNode<'prefix-media'>
   | SerializedUploadNode<'media-with-fields'>
-  | SerializedQuoteNode<LexicalNodes_104D6ABA>
-  | SerializedListNode<LexicalNodes_104D6ABA>
-  | SerializedListItemNode<LexicalNodes_104D6ABA>
-  | SerializedAutoLinkNode<LexicalNodes_104D6ABA, LexicalLinkFields_0A7E9EC0>
-  | SerializedLinkNode<LexicalNodes_104D6ABA, LexicalLinkFields_0A7E9EC0>
+  | SerializedQuoteNode<LexicalNodes_2129C05D>
+  | SerializedListNode<LexicalNodes_2129C05D>
+  | SerializedListItemNode<LexicalNodes_2129C05D>
+  | SerializedAutoLinkNode<LexicalNodes_2129C05D, LexicalLinkFields_0A7E9EC0>
+  | SerializedLinkNode<LexicalNodes_2129C05D, LexicalLinkFields_0A7E9EC0>
   | SerializedRelationshipNode<
       | 'relation'
       | 'audio'
@@ -215,6 +216,7 @@ export interface Config {
     'file-mime-type': FileMimeType;
     'svg-only': SvgOnly;
     'media-without-delete-access': MediaWithoutDeleteAccess;
+    'media-without-write-access': MediaWithoutWriteAccess;
     'media-with-image-size-admin-props': MediaWithImageSizeAdminProp;
     'prefix-media': PrefixMedia;
     'media-with-fields': MediaWithField;
@@ -288,6 +290,7 @@ export interface Config {
     'file-mime-type': FileMimeTypeSelect<false> | FileMimeTypeSelect<true>;
     'svg-only': SvgOnlySelect<false> | SvgOnlySelect<true>;
     'media-without-delete-access': MediaWithoutDeleteAccessSelect<false> | MediaWithoutDeleteAccessSelect<true>;
+    'media-without-write-access': MediaWithoutWriteAccessSelect<false> | MediaWithoutWriteAccessSelect<true>;
     'media-with-image-size-admin-props': MediaWithImageSizeAdminPropsSelect<false> | MediaWithImageSizeAdminPropsSelect<true>;
     'prefix-media': PrefixMediaSelect<false> | PrefixMediaSelect<true>;
     'media-with-fields': MediaWithFieldsSelect<false> | MediaWithFieldsSelect<true>;
@@ -559,7 +562,7 @@ export interface Uploads1 {
   singleUpload?: (string | null) | Uploads2;
   hasManyThumbnailUpload?: (string | AdminThumbnailSize)[] | null;
   singleThumbnailUpload?: (string | null) | AdminThumbnailSize;
-  richText?: LexicalRichText<LexicalNodes_104D6ABA> | null;
+  richText?: LexicalRichText<LexicalNodes_2129C05D> | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1226,6 +1229,14 @@ export interface AnimatedTypeMedia {
       filename?: string | null;
     };
     undefinedAll?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    focalCrop?: {
       url?: string | null;
       width?: number | null;
       height?: number | null;
@@ -1933,6 +1944,24 @@ export interface MediaWithoutDeleteAccess {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-without-write-access".
+ */
+export interface MediaWithoutWriteAccess {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media-with-image-size-admin-props".
  */
 export interface MediaWithImageSizeAdminProp {
@@ -2535,6 +2564,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'media-without-delete-access';
         value: string | MediaWithoutDeleteAccess;
+      } | null)
+    | ({
+        relationTo: 'media-without-write-access';
+        value: string | MediaWithoutWriteAccess;
       } | null)
     | ({
         relationTo: 'media-with-image-size-admin-props';
@@ -3438,6 +3471,16 @@ export interface AnimatedTypeMediaSelect<T extends boolean = true> {
               filesize?: T;
               filename?: T;
             };
+        focalCrop?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
       };
 }
 /**
@@ -4257,6 +4300,23 @@ export interface MediaWithoutDeleteAccessSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-without-write-access_select".
+ */
+export interface MediaWithoutWriteAccessSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media-with-image-size-admin-props_select".
  */
 export interface MediaWithImageSizeAdminPropsSelect<T extends boolean = true> {
@@ -4766,6 +4826,7 @@ export interface CollectionQueryWidget {
       | 'file-mime-type'
       | 'svg-only'
       | 'media-without-delete-access'
+      | 'media-without-write-access'
       | 'media-with-image-size-admin-props'
       | 'prefix-media'
       | 'media-with-fields'
@@ -4855,6 +4916,7 @@ export interface ActivityWidget {
           | 'file-mime-type'
           | 'svg-only'
           | 'media-without-delete-access'
+          | 'media-without-write-access'
           | 'media-with-image-size-admin-props'
           | 'prefix-media'
           | 'media-with-fields'

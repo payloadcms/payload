@@ -157,8 +157,7 @@
     "react-datepicker": "7.6.0",
     "rimraf": "6.0.1",
     "rollup": "4.59.0",
-    "rollup-plugin-dts": "6.2.3",
-    "sharp": "0.32.6"
+    "rollup-plugin-dts": "6.2.3"
   },
   "peerDependencies": {
     "graphql": "^16.8.1"

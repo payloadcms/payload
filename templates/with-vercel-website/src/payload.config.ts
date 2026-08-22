@@ -1,11 +1,11 @@
 import { vercelPostgresAdapter } from '@payloadcms/db-vercel-postgres'
-import sharp from 'sharp'
+import { sharpTransformer } from '@payloadcms/transformer-sharp'
 import path from 'path'
 import { buildConfig, PayloadRequest } from 'payload'
 import { fileURLToPath } from 'url'
 
 import { Categories } from './collections/Categories'
-import { Media } from './collections/Media'
+import { Media, mediaSharpOptions } from './collections/Media'
 import { Pages } from './collections/Pages'
 import { Posts } from './collections/Posts'
 import { Users } from './collections/Users'
@@ -89,9 +89,11 @@ export default buildConfig({
   plugins: [...plugins],
   globals: [Header, Footer],
   secret: process.env.PAYLOAD_SECRET,
-  sharp,
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
+  },
+  upload: {
+    transformers: [sharpTransformer({ collections: { media: mediaSharpOptions } })],
   },
   jobs: {
     access: {

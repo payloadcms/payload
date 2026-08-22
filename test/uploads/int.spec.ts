@@ -20,11 +20,17 @@ import { checkFileRestrictions } from '../../packages/payload/src/uploads/checkF
 import { getExternalFile } from '../../packages/payload/src/uploads/getExternalFile.js'
 // eslint-disable-next-line payload/no-relative-monorepo-imports
 import { tempFileHandler } from '../../packages/payload/src/uploads/fetchAPI-multipart/handlers.js'
+import {
+  runAnimatedFocalPointResizeStaysValidTest,
+  runAnimatedResizeReportsPerFrameDimensionsTest,
+} from '../__helpers/shared/animatedResizeParityTests.js'
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { runTransformerContractShapeTests } from '../__helpers/shared/transformerContractShape.js'
 import { createStreamableFile } from './createStreamableFile.js'
 import {
   adminThumbnailSizeSlug,
   allowListMediaSlug,
+  animatedTypeMedia,
   anyImagesSlug,
   enlargeSlug,
   focalNoSizesSlug,
@@ -1691,6 +1697,32 @@ describe('Collections - Uploads', () => {
         collection: enlargeSlug,
         id: result.id,
       })
+    })
+
+    runAnimatedResizeReportsPerFrameDimensionsTest({
+      collection: animatedTypeMedia as CollectionSlug,
+      getPayload: () => payload,
+      mainDimensions: { height: 200, width: 200 },
+      sizes: [
+        // A real enlargement (200x200 -> 480x480), not a no-op — a wrong
+        // per-frame height would show up here instead of being masked.
+        { name: 'squareSmall', height: 480, width: 480 },
+      ],
+    })
+
+    runAnimatedFocalPointResizeStaysValidTest({
+      collection: animatedTypeMedia as CollectionSlug,
+      focalPoint: { x: 80, y: 50 },
+      getPayload: () => payload,
+      size: { name: 'focalCrop', height: 150, width: 300 },
+    })
+
+    runTransformerContractShapeTests(() => {
+      const transformer = payload.config.upload.transformers.find((t) => t.slug === 'sharp')
+      if (!transformer) {
+        throw new Error('Expected the "sharp" transformer to be registered for this suite.')
+      }
+      return transformer
     })
   })
 

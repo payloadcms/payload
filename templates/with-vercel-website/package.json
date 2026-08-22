@@ -34,6 +34,7 @@
     "@payloadcms/plugin-seo": "3.82.1",
     "@payloadcms/richtext-lexical": "3.82.1",
     "@payloadcms/storage-vercel-blob": "3.82.1",
+    "@payloadcms/transformer-sharp": "3.82.1",
     "@payloadcms/ui": "3.82.1",
     "@radix-ui/react-checkbox": "^1.0.4",
     "@radix-ui/react-label": "^2.0.2",
@@ -53,7 +54,6 @@
     "react": "19.2.6",
     "react-dom": "19.2.6",
     "react-hook-form": "7.71.1",
-    "sharp": "0.34.2",
     "tailwind-merge": "^3.4.0"
   },
   "devDependencies": {

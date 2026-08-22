@@ -1,0 +1,312 @@
+---
+title: File Transformers
+label: File Transformers
+order: 30
+desc: Payload's file-transformer boundary lets you process uploaded files and serve dynamically-transformed variants of them, without changing where or how files are stored.
+keywords: uploads, images, media, transformers, sharp, resize, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
+---
+
+A file transformer is a small, ordered stage in Payload's upload pipeline. Transformers can:
+
+- Process a file's bytes at upload time (resizing an image, converting a format, and so on)
+- Serve a dynamically-transformed variant of an already-stored file at request time (for example, resizing an image on the fly based on query parameters)
+
+Payload core owns transformer configuration, ordering, access control, and storage retrieval. Transformer packages own the actual byte manipulation. `@payloadcms/transformer-sharp` is Payload's official transformer, and covers the image-resizing behavior that shipped as part of core in Payload 3.x.
+
+<Banner type="info">
+  **Note:** If you only need Sharp-based image resizing at upload time — the
+  same behavior Payload has always provided — see [Image
+  Sizes](./overview#image-sizes) and [`@payloadcms/transformer-sharp`
+  configuration](#payloadcmstransformer-sharp) below. You do not need to write a
+  custom transformer for that.
+</Banner>
+
+## Configuring transformers
+
+Transformers are configured once, globally, under `upload.transformers` in your Payload Config:
+
+```ts
+import { buildConfig } from 'payload'
+import { sharpTransformer } from '@payloadcms/transformer-sharp'
+
+export default buildConfig({
+  collections: [
+    /* ... */
+  ],
+  upload: {
+    transformers: [sharpTransformer()],
+  },
+})
+```
+
+`upload.transformers` is the only transformer configuration surface — there is no per-collection or per-field transformer list. Each transformer decides, per request or per upload, which collections and MIME types it applies to.
+
+Every transformer must declare a unique `slug`. Payload throws a startup error if two transformers share a slug, or if a transformer's `mimeTypes` array is empty.
+
+### MIME patterns
+
+A transformer's `mimeTypes` array accepts:
+
+- An exact value, e.g. `image/png`
+- A category wildcard, e.g. `image/*`
+- The universal wildcard, `*/*`
+
+## How the pipeline runs
+
+For both upload-time and request-time processing, Payload builds a fixed, ordered list of eligible transformers before running any of them:
+
+1. Filter to transformers that declare the capability being used (`transformFile` for uploads, `handleRequest` for dynamic requests).
+2. Filter to transformers whose `mimeTypes` match the file's MIME type.
+3. Call each remaining transformer's `canTransform` (if defined) to decide whether it's eligible for this specific file/request. A transformer with no `canTransform` is always eligible once it passes the MIME filter.
+
+The result is a plan — a fixed list — computed before any transformer actually runs. Every eligible transformer then runs once, in the order it appears in `upload.transformers`, passing its result to the next:
+
+- **`continue`** — hand the (possibly-replaced) file/response to the next transformer in the pipeline. Returning `continue` without a replacement preserves the same object reference; nothing is copied.
+- **`complete`** — stop the pipeline here and use this result. No later transformer runs.
+- **Throwing** — aborts the pipeline immediately. The error is logged and mapped to a `500` for dynamic requests; for uploads, no document is committed and no partial file is written.
+
+Payload only ever keeps the current accumulator, never a history of every stage's output.
+
+## The `canTransform` capability
+
+```ts
+canTransform: (args: {
+  collectionSlug: string
+  documentID?: number | string
+  mimeType: string
+  operation: 'request' | 'upload'
+  req: PayloadRequest
+}) => boolean | Promise<boolean>
+```
+
+`canTransform` must be inexpensive and side-effect-free — it must not fetch the file's source, call an external service, or perform the transformation itself. It only decides eligibility. If you omit it, the transformer is eligible for every request/upload that already passed the MIME filter.
+
+## The `transformFile` capability (uploads)
+
+```ts
+transformFile: (args: {
+  collectionSlug: string
+  file: File
+  options: unknown
+  req: PayloadRequest
+}) =>
+  Promise<
+    { file?: File; status: 'continue' } | { file: File; status: 'complete' }
+  >
+```
+
+`transformFile` is a one-file-in, one-file-out primitive — it never writes to storage itself. Payload's upload pipeline calls every eligible transformer's `transformFile` in declaration order, threading the result of one into the next, then persists whatever the pipeline produces.
+
+## The `handleRequest` capability (dynamic requests)
+
+```ts
+handleRequest: (args: {
+  collectionSlug: string
+  documentID: number | string
+  filename: string
+  getSourceFile: () => Promise<Response>
+  mimeType: string
+  req: PayloadRequest
+}) =>
+  Promise<
+    | { response?: Response; status: 'continue' }
+    | { response: Response; status: 'complete' }
+  >
+```
+
+`getSourceFile` is a **lazy, single-use** getter for the stored file's bytes. It performs no work until called, and calling it a second time — including while the first call is still pending, or after it has rejected — throws. This means:
+
+- A transformer that only redirects, or that answers from a source it already has, never has to pay the cost of reading the stored file.
+- Once any transformer in the pipeline calls `getSourceFile`, no other transformer can call it again — the bytes are handed off exactly once.
+
+Dynamic requests never write anything back to storage, and never trigger a document's own upload/delete hooks. A dynamic-transform request is a read-only view over an already-uploaded file.
+
+### Example: a multi-stage local transformer
+
+```ts
+const uppercaseTextTransformer: UploadTransformer = {
+  slug: 'uppercase-text',
+  mimeTypes: ['text/plain'],
+  canTransform: ({ req }) => req.searchParams?.has('uppercase') ?? false,
+  handleRequest: async ({ getSourceFile }) => {
+    const source = await getSourceFile()
+    const text = await source.text()
+
+    return {
+      response: new Response(text.toUpperCase(), { headers: source.headers }),
+      status: 'complete',
+    }
+  },
+}
+```
+
+### Example: redirecting without fetching the source
+
+A transformer that hands off to an external image-processing service never needs to read the stored file itself — it can `complete` with a redirect and skip `getSourceFile` entirely:
+
+```ts
+const externalResizeTransformer: UploadTransformer = {
+  slug: 'external-resize',
+  mimeTypes: ['image/*'],
+  canTransform: ({ req }) => req.searchParams?.has('width') ?? false,
+  handleRequest: async ({ collectionSlug, filename, req }) => {
+    const width = req.searchParams!.get('width')
+
+    return {
+      response: Response.redirect(
+        `https://images.example.com/${collectionSlug}/${filename}?w=${width}`,
+        302,
+      ),
+      status: 'complete',
+    }
+  },
+}
+```
+
+## Access control
+
+Ordinary file reads are unaffected by transformers: they use the same collection `read` access control that governs every other file request.
+
+A **dynamic-transform request** (one that at least one configured transformer is eligible for) additionally sets `req.fileTransform: true` for the duration of the single `access.read` call that decides whether the request may proceed. This lets a collection distinguish "someone is asking for a transformed variant of this file" from an ordinary read:
+
+```ts
+export const Media: CollectionConfig = {
+  slug: 'media',
+  access: {
+    // Ordinary reads stay public; transformed variants require a signed-in user.
+    read: ({ req }) => (req.fileTransform ? Boolean(req.user) : true),
+  },
+  upload: true,
+}
+```
+
+`req.fileTransform` is `true` only during that one access-control call. It is not set during `canTransform`, `transformFile`, or `handleRequest`. If access is denied, the pipeline never runs — `getSourceFile`, every transformer's `handleRequest`, and any external service a transformer would have called are all skipped entirely.
+
+This access check runs before any transformer executes, and before Payload resolves which storage adapter or external provider would serve the source bytes. A denied request never reaches storage.
+
+<Banner type="warning">
+  **Note:** This access-control lifecycle only applies to requests that go
+  through Payload's file endpoint. A direct storage/CDN URL (for example, an S3
+  bucket URL or a CDN-fronted URL returned by a storage adapter's
+  `generateFileURL`) bypasses Payload entirely, including this access check. If
+  you need every access to a file to be gated by Payload's access control, do
+  not expose direct storage/CDN URLs for that collection.
+</Banner>
+
+## `@payloadcms/transformer-sharp`
+
+`@payloadcms/transformer-sharp` is Payload's official Sharp-based transformer. Install it and register it once:
+
+```sh
+pnpm add @payloadcms/transformer-sharp
+```
+
+```ts
+import { buildConfig } from 'payload'
+import { sharpTransformer } from '@payloadcms/transformer-sharp'
+
+export default buildConfig({
+  upload: {
+    transformers: [sharpTransformer()],
+  },
+})
+```
+
+### Upload-time image processing
+
+Per-collection Sharp settings — `imageSizes`, `resizeOptions`, `formatOptions`, `trimOptions`, `constructorOptions`, `withMetadata`, `crop`, and `focalPoint` — are authored through `sharpTransformer({ collections })`, not on the collection's own `upload` config:
+
+```ts
+import { buildConfig } from 'payload'
+import { sharpTransformer } from '@payloadcms/transformer-sharp'
+
+export default buildConfig({
+  collections: [
+    {
+      slug: 'media',
+      upload: true,
+      fields: [],
+    },
+  ],
+  upload: {
+    transformers: [
+      sharpTransformer({
+        collections: {
+          media: {
+            imageSizes: [
+              { name: 'thumbnail', width: 400, height: 300 },
+              { name: 'card', width: 768, height: 1024 },
+            ],
+            resizeOptions: {
+              width: 2048,
+              height: 2048,
+              withoutEnlargement: true,
+            },
+          },
+        },
+      }),
+    ],
+  },
+})
+```
+
+At startup, `sharpTransformer` writes a Sharp-agnostic projection of `imageSizes` (name, `admin`, and `generateImageName` only), `crop`, and `focalPoint` back onto the collection's sanitized `upload` config — so the Admin Panel, generated types, and the rest of core continue to see `collection.upload.imageSizes`/`.crop`/`.focalPoint` exactly as before. The `sizes` shape on your documents is unchanged.
+
+See [Image Sizes](./overview#image-sizes) for what each Sharp-specific image size option does, and [Crop and Focal Point Selector](./overview#crop-and-focal-point-selector) for the Admin Panel behavior these settings control.
+
+### Dynamic (request-time) resizing
+
+Once `sharpTransformer` is registered for a collection with image uploads, requesting a file with recognized query parameters resizes it on the fly, without storing the resized result:
+
+```
+GET /api/media/file/photo.png?width=400
+GET /api/media/file/photo.png?height=300
+GET /api/media/file/photo.png?width=400&height=300
+GET /api/media/file/photo.png?width=400&withoutEnlargement=true
+```
+
+| Parameter            | Description                                                                              |
+| -------------------- | ---------------------------------------------------------------------------------------- |
+| `width`              | Target width, in pixels. A positive integer.                                             |
+| `height`             | Target height, in pixels. A positive integer.                                            |
+| `withoutEnlargement` | `true` or `false`. Overrides the transformer's configured default for this request only. |
+
+Recognized behavior:
+
+- Presence of any recognized parameter routes the request through this transformer. Malformed values (a non-integer `width`, for example) return `400`, not a fallback to the original file.
+- Repeated occurrences of the same parameter are invalid and return `400`.
+- Unrelated query keys (`draft`, `depth`, `where`, `prefix`, and so on) are ignored — the request falls through as an ordinary read.
+- Specifying both `width` and `height` crops to that exact box, centered (`fit: 'cover'`), by default.
+- Specifying only one of `width`/`height` preserves the original aspect ratio.
+- Images smaller than the requested size are upscaled by default. Pass `withoutEnlargement=true` to return the original size instead, or configure a different default (below).
+- The output keeps the source image's own format — there is no `format`/quality query parameter in this version.
+- The stored file's own MIME type governs whether it's eligible; unsupported types (for example, JPEG XL) are served unchanged, without error.
+- `GET` and `HEAD` are both supported. A `Range` header on a recognized dynamic-resize request returns `416` — partial dynamic resizes are not supported.
+- `prefix` is core-owned routing context, used to locate the stored document. It is never a resize parameter.
+
+Configure defaults for every dynamic-resize request on this transformer instance:
+
+```ts
+sharpTransformer({
+  dynamic: {
+    fit: 'cover', // default
+    position: 'center', // default
+    maxWidth: 4096, // default
+    maxHeight: 4096, // default
+    maxPixels: 16_777_216, // default
+    withoutEnlargement: false, // default
+  },
+})
+```
+
+As with every transformer, dynamic-resize output is never written back to storage — it is generated for that one response and discarded.
+
+## Non-goals
+
+The transformer boundary intentionally does not include:
+
+- **Caching.** Every dynamic-transform request re-runs the pipeline. A future version may introduce a cache-key insertion point ahead of `handleRequest` (derived from the collection, filename, and the recognized transform parameters), but no caching exists today.
+- **CDN integration.** Transformers don't know about, and don't configure, any CDN in front of Payload. Serving transformed output through a CDN is entirely up to your own infrastructure.
+- **A background jobs queue.** All transformation happens synchronously, in the request/upload path. A future version may accept a job-shaped input for expensive, queueable transforms, but no such queue exists today.
+
+None of the above is implemented as a stub or a partial feature — they are simply not built yet.

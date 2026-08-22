@@ -1,10 +1,7 @@
-import type { ResizeOptions, Sharp, SharpOptions } from 'sharp'
-
 import type { CollectionConfig, TypeWithID } from '../collections/config/types.js'
 import type { PayloadComponent } from '../config/types.js'
 import type { UploadCollectionSlug } from '../index.js'
 import type { PayloadRequest } from '../types/index.js'
-import type { WithMetadata } from './optionallyAppendMetadata.js'
 
 export type FileSize = {
   filename: null | string
@@ -36,21 +33,6 @@ export type ProbedImageSize = {
   height: number
   width: number
 }
-
-/**
- * Params sent to the sharp `toFormat()` function
- * @link https://sharp.pixelplumbing.com/api-output#toformat
- */
-export type ImageUploadFormatOptions = {
-  format: Parameters<Sharp['toFormat']>[0]
-  options?: Parameters<Sharp['toFormat']>[1]
-}
-
-/**
- * Params sent to the sharp trim() function
- * @link https://sharp.pixelplumbing.com/api-resize#trim
- */
-export type ImageUploadTrimOptions = Parameters<Sharp['trim']>[0]
 
 export type GenerateImageName = (args: {
   extension: string
@@ -87,32 +69,11 @@ type ImageSizeBase = {
 }
 
 /**
- * Image size options implemented by Payload's default Sharp image processor.
- */
-export type SharpImageSizeOptions = {
-  /**
-   * @deprecated prefer position
-   */
-  crop?: string // comes from sharp package
-  formatOptions?: ImageUploadFormatOptions
-  trimOptions?: ImageUploadTrimOptions
-  /**
-   * When an uploaded image is smaller than the defined image size, we have 3 options:
-   *
-   * `undefined | false | true`
-   *
-   * 1. `undefined` [default]: uploading images with smaller width AND height than the image size will return null
-   * 2. `false`: always enlarge images to the image size
-   * 3. `true`: if the image is smaller than the image size, return the original image
-   */
-  withoutEnlargement?: ResizeOptions['withoutEnlargement']
-} & Omit<ResizeOptions, 'withoutEnlargement'>
-
-/**
  * Interface to be module-augmented by image processing providers.
  *
- * When no provider is registered, ImageSize uses SharpImageSizeOptions.
- * When providers are registered, ImageSize uses their registered options instead.
+ * When no provider is registered, ImageSize carries no processor-specific options.
+ * When one or more providers are registered (e.g. `@payloadcms/transformer-sharp`),
+ * ImageSize uses the union of their registered options instead.
  *
  * @example
  * declare module 'payload' {
@@ -125,7 +86,7 @@ export type SharpImageSizeOptions = {
 export interface RegisteredImageSizeOptions {}
 
 type ImageSizeOptions = keyof RegisteredImageSizeOptions extends never
-  ? SharpImageSizeOptions
+  ? unknown
   : RegisteredImageSizeOptions[keyof RegisteredImageSizeOptions]
 
 export type ImageSize = ImageSizeBase & ImageSizeOptions
@@ -158,6 +119,13 @@ export type UploadFilePreviewClientProps = {
 type UploadFilePreviewMap = {
   [mimeTypePattern: string]: PayloadComponent
 }
+
+/**
+ * Distinguishes an ordinary public file request (`read`) from Payload's internal
+ * retrieval of a stored file's bytes for a dynamic transformation (`transform`).
+ * Defaults to `read` when omitted, for third-party handler compatibility.
+ */
+export type FileHandlerOperation = 'read' | 'transform'
 
 type Admin = {
   components?: {
@@ -213,11 +181,6 @@ export type UploadConfig = {
    */
   cacheTags?: boolean
   /**
-   * Sharp constructor options to be passed to the uploaded file.
-   * @link https://sharp.pixelplumbing.com/api-constructor/#sharp
-   */
-  constructorOptions?: SharpOptions
-  /**
    * Enables cropping of images.
    * @default true
    */
@@ -260,17 +223,12 @@ export type UploadConfig = {
    */
   focalPoint?: boolean
   /**
-   * Format options for the uploaded file. Formatting image sizes needs to be done within each formatOptions individually.
-   */
-  formatOptions?: ImageUploadFormatOptions
-  /**
    * Custom handlers to run when a file is fetched.
    *
    * - If a handler returns a Response, the response will be sent to the client and no further handlers will be run.
    * - If a handler returns null, the next handler will be run.
    * - If no handlers return a response the file will be returned by default.
    *
-   * @link https://sharp.pixelplumbing.com/api-output/#toformat
    * @default undefined
    */
   handlers?: ((
@@ -281,11 +239,22 @@ export type UploadConfig = {
       params: {
         collection: string
         filename: string
+        /** @default 'read' */
+        operation?: FileHandlerOperation
         prefix?: string
         uploadReference?: unknown
       }
     },
   ) => Promise<Response> | Promise<void> | Response | void)[]
+  /**
+   * Whether a registered transformer performs additional processing on the main
+   * uploaded file beyond simple pass-through (e.g. resizing, format conversion,
+   * trimming). Written by a transformer's `init()`; not intended to be set
+   * directly in collection config. Used by the Admin UI to decide whether to
+   * show focal-point controls when no image sizes are configured.
+   * @internal
+   */
+  hasImageAdjustments?: boolean
   /**
    * Set to `true` to prevent the admin UI from showing file inputs during document creation, useful for programmatic file generation.
    */
@@ -319,12 +288,6 @@ export type UploadConfig = {
       }
     | false
   /**
-   * Sharp resize options for the original image.
-   * @link https://sharp.pixelplumbing.com/api-resize#resize
-   * @default undefined
-   */
-  resizeOptions?: ResizeOptions
-  /**
    *  Skip safe fetch when using server-side fetching for external files from these URLs.
    *  @default false
    */
@@ -334,23 +297,11 @@ export type UploadConfig = {
    * @default undefined
    */
   staticDir?: string
-  trimOptions?: ImageUploadTrimOptions
   /**
    * Adapter-provided upload instructions.
    * @internal
    */
   uploadInstructions?: UploadInstructionsCapability
-  /**
-   * Optionally append metadata to the image during processing.
-   *
-   * Can be a boolean or a function.
-   *
-   * If true, metadata will be appended to the image.
-   * If false, no metadata will be appended.
-   * If a function, it will receive an object containing the metadata and should return a boolean indicating whether to append the metadata.
-   * @default false
-   */
-  withMetadata?: WithMetadata
 }
 
 export type UploadInstructionsAccess = (args: {
