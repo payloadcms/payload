@@ -9,12 +9,11 @@ import { expect, it } from 'vitest'
 
 import { buildJoinAggregation } from '../../packages/db-mongodb/src/utilities/buildJoinAggregation.js'
 import { buildProjectionFromSelect } from '../../packages/db-mongodb/src/utilities/buildProjectionFromSelect.js'
-import { describe } from '../__helpers/int/vitest.js'
+import { test } from '../__helpers/int/vitest.js'
 
-describe(
-  'buildJoinAggregation',
-  { db: (adapter) => adapter === 'mongodb' || adapter === 'mongodb-atlas' },
-  () => {
+test
+  .options({ db: (adapter) => adapter === 'mongodb' || adapter === 'mongodb-atlas' })
+  .describe('buildJoinAggregation', () => {
     const getAdapter = async (): Promise<MongooseAdapter> => {
       const payload = await getPayload({
         key: '_buildJoinAggregation',
@@ -339,5 +338,4 @@ describe(
       expect(aggregation).toBeInstanceOf(Array)
       expect(aggregation).toHaveLength(0)
     })
-  },
-)
+  })

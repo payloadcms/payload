@@ -111,6 +111,10 @@ ComponentName/
 - `pnpm run dev <directory_name>` - Start dev server with specific test config (e.g. `pnpm run dev fields` loads `test/fields/config.ts`)
 - `pnpm run dev:postgres` - Run dev server with Postgres
 
+### Running the Payload CLI
+
+`pnpm payload <directory_name> <command> [...args]` runs the real Payload CLI against a test suite config. The first argument selects the test folder (e.g. `pnpm payload fields generate:types` uses `test/fields/config.ts`); everything after it is forwarded to the CLI unchanged. Run `pnpm payload <directory_name>` with no command to list all commands.
+
 ### Development Environment
 
 - Auto-login is enabled by default with credentials: `dev@payloadcms.com` / `test`

@@ -6,12 +6,12 @@ import { slugifyHandler } from '@payloadcms/ui/utilities/slugify'
 import path from 'path'
 import { createLocalReq, reload } from 'payload'
 import { fileURLToPath } from 'url'
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect } from 'vitest'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { BlockField, GroupField } from './payload-types.js'
 
-import { it } from '../__helpers/int/vitest.js'
+import { test } from '../__helpers/int/vitest.js'
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { isMongoose } from '../__helpers/shared/isMongoose.js'
 import { devUser } from '../credentials.js'
@@ -3178,7 +3178,7 @@ describe('Fields', () => {
       expect((idFields[0].admin?.disabled as { filter?: boolean })?.filter).toBe(true)
     })
 
-    it('should query exists true', { db: 'mongo' }, async () => {
+    test.options({ db: 'mongo' })('should query exists true', async () => {
       await payload.delete({ collection: 'array-fields', where: {} })
 
       const withoutCollapsed = await payload.create({
@@ -3226,7 +3226,7 @@ describe('Fields', () => {
       expect(res.docs[0].id).toBe(withCollapsed.id)
     })
 
-    it('should query exists false', { db: 'mongo' }, async () => {
+    test.options({ db: 'mongo' })('should query exists false', async () => {
       await payload.delete({ collection: 'array-fields', where: {} })
 
       const withoutCollapsed = await payload.create({
@@ -3927,9 +3927,8 @@ describe('Fields', () => {
 
     // TODO: re-enable on sqlite once the drizzle sqlite adapter's createJSONQuery supports
     // lexical's `{root: {children: [...]}}` shape
-    it(
+    test.options({ db: (adapter) => adapter.startsWith('sqlite') === false })(
       'should query based on richtext data within a block',
-      { db: (adapter) => adapter.startsWith('sqlite') === false },
       async () => {
         const blockFieldsSuccess = await payload.find({
           collection: 'block-fields',
@@ -3956,9 +3955,8 @@ describe('Fields', () => {
     )
 
     // TODO: re-enable on sqlite — see note above.
-    it(
+    test.options({ db: (adapter) => adapter.startsWith('sqlite') === false })(
       'should query based on richtext data within a localized block, specifying locale',
-      { db: (adapter) => adapter.startsWith('sqlite') === false },
       async () => {
         const blockFieldsSuccess = await payload.find({
           collection: 'block-fields',
@@ -3985,9 +3983,8 @@ describe('Fields', () => {
     )
 
     // TODO: re-enable on sqlite — see note above.
-    it(
+    test.options({ db: (adapter) => adapter.startsWith('sqlite') === false })(
       'should query based on richtext data within a localized block, without specifying locale',
-      { db: (adapter) => adapter.startsWith('sqlite') === false },
       async () => {
         const blockFieldsSuccess = await payload.find({
           collection: 'block-fields',
@@ -4745,7 +4742,7 @@ describe('Fields', () => {
         ).rejects.toBeTruthy()
       })
 
-      it('should disallow unsafe query values', { db: 'drizzle' }, async () => {
+      test.options({ db: 'drizzle' })('should disallow unsafe query values', async () => {
         await expect(
           payload.find({
             collection: 'json-fields',
