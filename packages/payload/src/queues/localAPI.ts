@@ -10,6 +10,7 @@ import {
   type TypedJobs,
   type Where,
 } from '../index.js'
+import { assertNoValidationWrite } from '../utilities/assertNoValidationWrite.js'
 import { jobAfterRead, jobsCollectionSlug } from './config/collection.js'
 import { handleSchedules, type HandleSchedulesResult } from './operations/handleSchedules/index.js'
 import { runJobs } from './operations/runJobs/index.js'
@@ -111,6 +112,8 @@ export const getJobsLocalAPI = (payload: Payload) => ({
   > => {
     const overrideAccess = args?.overrideAccess !== false
     const req: PayloadRequest = args.req ?? (await createLocalReq({}, payload))
+
+    assertNoValidationWrite(req)
 
     if (!overrideAccess) {
       /**

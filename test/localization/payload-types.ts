@@ -200,6 +200,8 @@ export interface Config {
   locale: 'xx' | 'en' | 'es' | 'pt' | 'ar' | 'hu';
   widgets: {
     collections: CollectionsWidget;
+    'collection-query': CollectionQueryWidget;
+    activity: ActivityWidget;
   };
   user: User;
   jobs: {
@@ -1916,6 +1918,88 @@ export interface CollectionsWidget {
     [k: string]: unknown;
   };
   width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-query_widget".
+ */
+export interface CollectionQueryWidget {
+  data?: {
+    title?: string | null;
+    relatedCollection:
+      | 'richText'
+      | 'blocks-fields'
+      | 'nested-arrays'
+      | 'nested-field-tables'
+      | 'localized-drafts'
+      | 'localized-date-fields'
+      | 'all-fields-localized'
+      | 'users'
+      | 'localized-posts'
+      | 'no-localized-fields'
+      | 'array-fields'
+      | 'localized-required'
+      | 'with-localized-relationship'
+      | 'relationship-localized'
+      | 'cannot-create-default-locale'
+      | 'locale-restricted'
+      | 'nested'
+      | 'groups'
+      | 'tabs'
+      | 'localized-sort'
+      | 'blocks-same-name'
+      | 'localized-within-localized'
+      | 'array-with-fallback-fields';
+    where?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    sortField?: string | null;
+    sortDirection?: ('asc' | 'desc') | null;
+    limit?: number | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "activity_widget".
+ */
+export interface ActivityWidget {
+  data?: {
+    excludedCollections?:
+      | (
+          | 'richText'
+          | 'blocks-fields'
+          | 'nested-arrays'
+          | 'nested-field-tables'
+          | 'localized-drafts'
+          | 'localized-date-fields'
+          | 'all-fields-localized'
+          | 'users'
+          | 'localized-posts'
+          | 'no-localized-fields'
+          | 'array-fields'
+          | 'localized-required'
+          | 'with-localized-relationship'
+          | 'relationship-localized'
+          | 'cannot-create-default-locale'
+          | 'locale-restricted'
+          | 'nested'
+          | 'groups'
+          | 'tabs'
+          | 'localized-sort'
+          | 'blocks-same-name'
+          | 'localized-within-localized'
+          | 'array-with-fallback-fields'
+        )[]
+      | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

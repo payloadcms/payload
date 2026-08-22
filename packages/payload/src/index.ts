@@ -99,6 +99,11 @@ import {
   type Options as UpdateOptions,
 } from './collections/operations/local/update.js'
 import {
+  type ValidateCollectionOptions,
+  validateLocal,
+  type ValidationResult,
+} from './collections/operations/local/validate.js'
+import {
   countGlobalVersionsLocal,
   type CountGlobalVersionsOptions,
 } from './globals/operations/local/countVersions.js'
@@ -122,6 +127,10 @@ import {
   updateGlobalLocal,
   type Options as UpdateGlobalOptions,
 } from './globals/operations/local/update.js'
+import {
+  validateGlobalLocal,
+  type ValidateGlobalOptions,
+} from './globals/operations/local/validate.js'
 export type * from './admin/adapters/index.js'
 export type { FieldState } from './admin/forms/Form.js'
 export type * from './admin/types.js'
@@ -777,6 +786,40 @@ export class BasePayload {
     options: UpdateGlobalOptions<TSlug, TSelect>,
   ): Promise<TransformGlobalWithSelect<TSlug, TSelect>> => {
     return updateGlobalLocal<TSlug, TSelect>(this, options)
+  }
+
+  /**
+   * Validates a collection document candidate for selected locales without persisting data,
+   * versions, or files.
+   *
+   * Omit `id` to validate create data. With `id`, the stored main document is the default base;
+   * `draft: true` selects the newest available draft version and falls back to the main document.
+   * Partial candidate data is merged over that base. Field validation failures resolve to
+   * `{ valid: false, errors }`; access, argument, lookup, and other lifecycle errors throw.
+   *
+   * @see https://payloadcms.com/docs/validation/overview#local-api
+   */
+  validate = async <TSlug extends CollectionSlug>(
+    options: ValidateCollectionOptions<TSlug>,
+  ): Promise<ValidationResult> => {
+    return validateLocal<TSlug>(this, options)
+  }
+
+  /**
+   * Validates a global document candidate for selected locales without persisting data or
+   * versions.
+   *
+   * The stored main global is the default base; `draft: true` selects the newest available draft
+   * version and falls back to the main global. Partial candidate data is merged over that base.
+   * Field validation failures resolve to `{ valid: false, errors }`; access, argument, and other
+   * lifecycle errors throw.
+   *
+   * @see https://payloadcms.com/docs/validation/overview#local-api
+   */
+  validateGlobal = async <TSlug extends GlobalSlug>(
+    options: ValidateGlobalOptions<TSlug>,
+  ): Promise<ValidationResult> => {
+    return validateGlobalLocal<TSlug>(this, options)
   }
 
   validationRules!: (args: OperationArgs<any>) => ValidationRule[]
@@ -1511,6 +1554,10 @@ export { findOperation } from './collections/operations/find.js'
 export { findByIDOperation } from './collections/operations/findByID.js'
 export { findVersionByIDOperation } from './collections/operations/findVersionByID.js'
 export { findVersionsOperation } from './collections/operations/findVersions.js'
+export type {
+  ValidateCollectionOptions,
+  ValidationResult,
+} from './collections/operations/local/validate.js'
 export { restoreVersionOperation } from './collections/operations/restoreVersion.js'
 export { updateOperation } from './collections/operations/update.js'
 export { updateByIDOperation } from './collections/operations/updateByID.js'
@@ -1867,8 +1914,8 @@ export type {
 export { docAccessOperation as docAccessOperationGlobal } from './globals/operations/docAccess.js'
 export { findOneOperation } from './globals/operations/findOne.js'
 export { findVersionByIDOperation as findVersionByIDOperationGlobal } from './globals/operations/findVersionByID.js'
-
 export { findVersionsOperation as findVersionsOperationGlobal } from './globals/operations/findVersions.js'
+export type { ValidateGlobalOptions } from './globals/operations/local/validate.js'
 export { restoreVersionOperation as restoreVersionOperationGlobal } from './globals/operations/restoreVersion.js'
 export { updateOperation as updateOperationGlobal } from './globals/operations/update.js'
 export {

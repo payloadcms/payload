@@ -141,8 +141,8 @@ import type {
 import type { DocumentPreferences } from '../../preferences/types.js'
 import type {
   DefaultValue,
+  FieldOperation,
   JsonObject,
-  Operation,
   PayloadRequest,
   PickPreserveOptional,
   Where,
@@ -199,7 +199,7 @@ export type FieldHookArgs<TData extends TypeWithID = any, TValue = any, TSibling
   global: null | SanitizedGlobalConfig
   indexPath: number[]
   /** A string relating to which operation the field type is currently executing within. Useful within beforeValidate, beforeChange, and afterChange hooks to differentiate between create and update operations. */
-  operation?: 'create' | 'delete' | 'read' | 'update'
+  operation?: FieldOperation
   /** The full original document in `update` operations. In the `afterChange` hook, this is the resulting document of the operation. */
   originalDoc?: TData
   overrideAccess?: boolean
@@ -303,7 +303,7 @@ export type Condition<TData extends TypeWithID = any, TSiblingData = any> = (
     /**
      * A string relating to which operation the field type is currently executing within.
      */
-    operation: Operation
+    operation: FieldOperation
     /**
      * The path of the field, e.g. ["group", "myArray", 1, "textField"]. The path is the schemaPath but with indexes and would be used in the context of field data, not field schemas.
      */
@@ -437,7 +437,7 @@ export type BaseValidateOptions<TData, TSiblingData, TValue> = {
   data: Partial<TData>
   event?: 'onChange' | 'submit'
   id?: number | string
-  operation?: Operation
+  operation?: FieldOperation
   /**
    * The `overrideAccess` flag that was attached to the request. This is used to bypass access control checks for fields.
    */
@@ -504,6 +504,13 @@ export interface FieldBase {
     create?: FieldAccess
     read?: FieldAccess
     update?: FieldAccess
+    /**
+     * Controls whether candidate field data participates in on-demand validation.
+     * Falls back to `update` access when omitted.
+     * The access function receives `req.operation === 'validate'`.
+     * @see https://payloadcms.com/docs/validation/overview#access-control-and-hooks
+     */
+    validate?: FieldAccess
   }
   admin?: FieldAdmin
   /** Extension point to add your custom data. Server only. */
@@ -1668,6 +1675,7 @@ export type JoinField = {
     create?: never
     read?: FieldAccess
     update?: never
+    validate?: never
   }
   admin?: {
     allowCreate?: boolean

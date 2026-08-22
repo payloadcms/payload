@@ -4,6 +4,7 @@ import type { CreateGlobalVersionArgs, CreateVersionArgs, Payload } from '../ind
 import type { JsonObject, PayloadRequest, SelectType } from '../types/index.js'
 
 import { deepCopyObjectSimple } from '../index.js'
+import { assertNoValidationWrite } from '../utilities/assertNoValidationWrite.js'
 import { getVersionsMax, hasLocalizeStatusEnabled } from '../utilities/getVersionsConfig.js'
 import { sanitizeInternalFields } from '../utilities/sanitizeInternalFields.js'
 import { getQueryDraftsSelect } from './drafts/getQueryDraftsSelect.js'
@@ -48,6 +49,8 @@ export async function saveVersion<TData extends JsonObject = JsonObject>({
   select,
   unpublish,
 }: Args<TData>): Promise<JsonObject | null> {
+  assertNoValidationWrite(req)
+
   let result: JsonObject | undefined
   let createdNewVersion = false
   const now = new Date().toISOString()

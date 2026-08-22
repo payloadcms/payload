@@ -29,7 +29,7 @@ export const hierarchyCollectionBeforeChange =
     const newParentID =
       data[parentFieldName] !== undefined ? data[parentFieldName] : originalDoc?.[parentFieldName]
     const parentChanged =
-      operation === 'update' &&
+      (operation === 'update' || operation === 'validate') &&
       data[parentFieldName] !== undefined &&
       data[parentFieldName] !== originalDoc?.[parentFieldName]
 

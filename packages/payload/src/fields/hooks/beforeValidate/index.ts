@@ -13,7 +13,7 @@ type Args<T extends JsonObject> = {
   duplicate?: boolean
   global: null | SanitizedGlobalConfig
   id?: number | string
-  operation: 'create' | 'update'
+  operation: 'create' | 'update' | 'validate'
   overrideAccess: boolean
   req: PayloadRequest
 }

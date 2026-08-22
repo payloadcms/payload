@@ -2,7 +2,7 @@ import type { RichTextAdapter } from '../../../admin/RichText.js'
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { ValidationFieldError } from '../../../errors/index.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
-import type { JsonObject, Operation, PayloadRequest } from '../../../types/index.js'
+import type { FieldOperation, JsonObject, PayloadRequest } from '../../../types/index.js'
 import type { Block, Field, TabAsField, Validate } from '../../config/types.js'
 
 import { MissingEditorProp } from '../../../errors/index.js'
@@ -46,7 +46,7 @@ type Args = {
   global: null | SanitizedGlobalConfig
   id?: number | string
   mergeLocaleActions: (() => Promise<void> | void)[]
-  operation: Operation
+  operation: FieldOperation
   overrideAccess: boolean
   parentIndexPath: string
   parentIsLocalized: boolean
@@ -239,6 +239,7 @@ export const promise = async ({
 
                 errors.push({
                   label: blockLabelPath,
+                  locale: req.locale ?? undefined,
                   message: req.t('validation:invalidBlock', { block: block.blockType }),
                   path: `${path}.${rowIndex}.id`,
                 })
@@ -257,6 +258,7 @@ export const promise = async ({
 
           errors.push({
             label: fieldLabel,
+            locale: req.locale ?? undefined,
             message: validationResult,
             path,
           })
