@@ -16,6 +16,7 @@ import type {
 } from './types.js'
 
 import { useDebouncedCallback } from '../../hooks/useDebouncedCallback.js'
+import { useBranchParam } from '../Branch/index.js'
 import { useConfig } from '../Config/index.js'
 import { usePreferences } from '../Preferences/index.js'
 import { useRouter } from '../RouterAdapter/index.js'
@@ -31,6 +32,8 @@ export const HierarchyProvider: React.FC<HierarchyProviderProps> = ({ children }
       serverURL,
     },
   } = useConfig()
+
+  const branch = useBranchParam()
 
   const [baseFilter, setBaseFilter] = useState<null | Where>(null)
   const [collectionSlug, setCollectionSlug] = useState<null | string>(null)
@@ -299,7 +302,7 @@ export const HierarchyProvider: React.FC<HierarchyProviderProps> = ({ children }
             : { [parentFieldName]: { equals: parentId } }
 
         const queryString = qs.stringify(
-          { limit: treeLimit, page: nextPage, sort: useAsTitle ?? 'id', where },
+          { branch, limit: treeLimit, page: nextPage, sort: useAsTitle ?? 'id', where },
           { addQueryPrefix: true },
         )
         const url = formatAdminURL({
@@ -348,6 +351,7 @@ export const HierarchyProvider: React.FC<HierarchyProviderProps> = ({ children }
       }
     },
     [
+      branch,
       api,
       collectionSlug,
       isLoadingMore,

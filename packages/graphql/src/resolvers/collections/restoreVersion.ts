@@ -7,6 +7,7 @@ import type { Context } from '../types.js'
 export type Resolver = (
   _: unknown,
   args: {
+    branch?: string
     draft?: boolean
     id: number | string
   },

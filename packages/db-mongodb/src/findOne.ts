@@ -1,6 +1,11 @@
 import type { AggregateOptions, QueryOptions } from 'mongoose'
 
-import { type FindOne } from 'payload'
+import {
+  applyBranchIDProjection,
+  type FindOne,
+  resolveBranchQuery,
+  withBranchIDSelect,
+} from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
@@ -15,9 +20,11 @@ import { transform } from './utilities/transform.js'
 
 export const findOne: FindOne = async function findOne(
   this: MongooseAdapter,
-  { collection: collectionSlug, draftsEnabled, joins, locale, req, select, where = {} },
+  { branch, collection: collectionSlug, draftsEnabled, joins, locale, req, select, where = {} },
 ) {
   const { collectionConfig, Model } = getCollection({ adapter: this, collectionSlug })
+
+  where = (await resolveBranchQuery({ branch, collectionSlug, req, where })) ?? {}
 
   const query = await buildQuery({
     adapter: this,
@@ -30,7 +37,7 @@ export const findOne: FindOne = async function findOne(
   const projection = buildProjectionFromSelect({
     adapter: this,
     fields: collectionConfig.flattenedFields,
-    select,
+    select: withBranchIDSelect({ branch, collectionSlug, req, select }),
   })
 
   const aggregate = await buildJoinAggregation({
@@ -42,6 +49,7 @@ export const findOne: FindOne = async function findOne(
     locale,
     projection,
     query,
+    req,
   })
 
   const session = await getSession(this, req)
@@ -83,6 +91,13 @@ export const findOne: FindOne = async function findOne(
   }
 
   transform({ adapter: this, data: doc, fields: collectionConfig.fields, operation: 'read' })
+
+  applyBranchIDProjection({
+    branch,
+    collectionSlug,
+    docs: [doc as Record<string, unknown>],
+    req,
+  })
 
   return doc
 }

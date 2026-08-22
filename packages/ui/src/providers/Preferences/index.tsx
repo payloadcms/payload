@@ -16,7 +16,9 @@ type PreferencesContext = {
   /**
    * @param key - a string identifier for the property being set
    * @param value - preference data to store
-   * @param merge - when true will combine the existing preference object batch the change into one request for objects, default = false
+   * @param merge - when true, combines the value with the existing preference stored under the key
+   * and batches concurrent changes to that key into one request, default = false. Awaiting the
+   * returned promise waits for the write to land either way.
    */
   setPreference: <T = Preferences>(key: string, value: T, merge?: boolean) => Promise<void>
 }
@@ -161,9 +163,15 @@ export const PreferencesProvider: React.FC<{ children?: React.ReactNode }> = ({ 
         delete pendingUpdate.current[key]
       }
 
-      // use timeout to allow multiple changes of different values using the same key in one request
-      setTimeout(() => {
-        void updatePreference()
+      // Deferred by a macrotask so several changes to different values under the
+      // same key coalesce into one request — but still awaited, so a caller that
+      // needs the write to have landed can rely on `await`. A branch switch
+      // depends on this: it refreshes the route afterwards, and the server
+      // re-reads this preference to resolve the branch it renders against.
+      await new Promise<void>((resolve, reject) => {
+        setTimeout(() => {
+          updatePreference().then(resolve, reject)
+        })
       })
     },
     [api, getPreference, i18n.language, pendingUpdate],

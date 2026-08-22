@@ -1,7 +1,13 @@
 import type { PaginateOptions, QueryOptions } from 'mongoose'
 import type { FindVersions } from 'payload'
 
-import { buildVersionCollectionFields, flattenWhereToOperators } from 'payload'
+import {
+  buildVersionCollectionFields,
+  flattenWhereToOperators,
+  projectBranchVersionParents,
+  resolveBranchVersionHistoryQuery,
+  withBranchVersionSelect,
+} from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
@@ -15,6 +21,7 @@ import { transform } from './utilities/transform.js'
 export const findVersions: FindVersions = async function findVersions(
   this: MongooseAdapter,
   {
+    branch,
     collection: collectionSlug,
     limit = 0,
     locale,
@@ -31,6 +38,8 @@ export const findVersions: FindVersions = async function findVersions(
     collectionSlug,
     versions: true,
   })
+
+  where = resolveBranchVersionHistoryQuery({ branch, collectionSlug, req, where }) ?? {}
 
   let hasNearConstraint = false
 
@@ -81,7 +90,7 @@ export const findVersions: FindVersions = async function findVersions(
     projection: buildProjectionFromSelect({
       adapter: this,
       fields,
-      select,
+      select: withBranchVersionSelect({ branch, collectionSlug, req, select }),
     }),
     sort,
     useEstimatedCount,
@@ -147,6 +156,10 @@ export const findVersions: FindVersions = async function findVersions(
     fields: buildVersionCollectionFields(this.payload.config, collectionConfig),
     operation: 'read',
   })
+
+  // A branch version hangs off the shadow row, so its `parent` is that row rather
+  // than the document the history belongs to.
+  projectBranchVersionParents(result.docs as Record<string, unknown>[])
 
   return result
 }

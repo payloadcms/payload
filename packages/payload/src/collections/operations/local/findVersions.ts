@@ -18,6 +18,11 @@ import { findVersionsOperation } from '../findVersions.js'
 
 type BaseOptions<TSlug extends CollectionSlug> = {
   /**
+   * Read version history as seen from this branch. `false` bypasses branching
+   * entirely.
+   */
+  branch?: false | string
+  /**
    * the Collection slug to operate against.
    */
   collection: TSlug

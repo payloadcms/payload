@@ -2,6 +2,8 @@ import type { ServerFunction } from 'payload'
 
 import { renderTabHandler } from '../elements/Nav/SidebarTabs/renderTabServerFn.js'
 import { _internal_renderFieldHandler } from '../forms/fieldSchemasToFormState/serverFunctions/renderFieldServerFn.js'
+import { renderBranchDiffHandler } from '../views/Branch/renderBranchDiff.js'
+import { renderMergeDiffHandler } from '../views/Branch/renderMergeDiff.js'
 import { getDefaultLayoutHandler, renderWidgetHandler } from '../views/Dashboard/serverFunctions.js'
 import { renderDocumentHandler } from '../views/Document/handleServerFunction.js'
 import { renderDocumentSlotsHandler } from '../views/Document/renderDocumentSlots.js'
@@ -9,6 +11,7 @@ import { renderListHandler } from '../views/List/handleServerFunction.js'
 import { buildFormStateHandler } from './buildFormState.js'
 import { buildTableStateHandler } from './buildTableState.js'
 import { copyDataFromLocaleHandler } from './copyDataFromLocale.js'
+import { scheduleMergeHandler } from './scheduleMergeHandler.js'
 import {
   getUpcomingScheduledPublishHandler,
   schedulePublishHandler,
@@ -36,12 +39,15 @@ export const sharedServerFunctions: Record<string, ServerFunction<any, any>> = {
   'form-state': buildFormStateHandler,
   'get-default-layout': getDefaultLayoutHandler,
   'get-upcoming-scheduled-publish': getUpcomingScheduledPublishHandler,
+  'render-branch-diff': renderBranchDiffHandler,
   'render-document': renderDocumentHandler,
   'render-document-slots': renderDocumentSlotsHandler,
   'render-field': _internal_renderFieldHandler,
   'render-list': renderListHandler,
+  'render-merge-diff': renderMergeDiffHandler,
   'render-tab': renderTabHandler,
   'render-widget': renderWidgetHandler,
+  'schedule-merge': scheduleMergeHandler,
   'schedule-publish': schedulePublishHandler,
   slugify: slugifyHandler,
   'switch-language': switchLanguageHandler,

@@ -6,6 +6,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 
 import type { TreeCache, TreeDocument, TreeInitialData } from './types.js'
 
+import { useBranchParam } from '../../../providers/Branch/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { isSuperset } from '../../../utilities/isSuperset.js'
 
@@ -100,6 +101,8 @@ export const useChildren = ({
     },
   } = useConfig()
 
+  const branch = useBranchParam()
+
   const fetchPage = useCallback(
     async (
       pageToFetch: number,
@@ -141,6 +144,7 @@ export const useChildren = ({
         const where = combineWhereConstraints([parentCondition, filterCondition, baseFilter])
 
         const queryParams: Record<string, unknown> = {
+          branch,
           limit,
           page: pageToFetch,
           sort: useAsTitle ?? 'id',
@@ -212,6 +216,7 @@ export const useChildren = ({
       }
     },
     [
+      branch,
       allPossibleTypeValues,
       baseFilter,
       parentId,

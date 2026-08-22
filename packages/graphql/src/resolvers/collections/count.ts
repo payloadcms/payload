@@ -7,6 +7,7 @@ import type { Context } from '../types.js'
 export type Resolver = (
   _: unknown,
   args: {
+    branch?: string
     data: Record<string, unknown>
     locale?: string
     trash?: boolean

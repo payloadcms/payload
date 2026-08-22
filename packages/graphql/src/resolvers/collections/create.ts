@@ -13,6 +13,7 @@ import type { Context } from '../types.js'
 export type Resolver<TSlug extends CollectionSlug> = (
   _: unknown,
   args: {
+    branch?: string
     data: RequiredDataFromCollectionSlug<TSlug>
     draft: boolean
     locale?: string

@@ -1,5 +1,5 @@
 'use client'
-import type { NavPreferences } from 'payload'
+import type { AdminPreferences } from 'payload'
 
 import { PREFERENCE_KEYS } from 'payload/shared'
 import React, { useState } from 'react'
@@ -27,7 +27,7 @@ export const NavGroup: React.FC<Props> = ({ children, isOpen: isOpenFromProps, l
 
   if (label) {
     const toggleCollapsed = () => {
-      const newGroupPrefs: NavPreferences['groups'] = {}
+      const newGroupPrefs: AdminPreferences['groups'] = {}
 
       if (!newGroupPrefs?.[label]) {
         newGroupPrefs[label] = { open: Boolean(collapsed) }
@@ -35,7 +35,7 @@ export const NavGroup: React.FC<Props> = ({ children, isOpen: isOpenFromProps, l
         newGroupPrefs[label].open = Boolean(collapsed)
       }
 
-      void setPreference(PREFERENCE_KEYS.NAV, { groups: newGroupPrefs }, true)
+      void setPreference(PREFERENCE_KEYS.ADMIN, { groups: newGroupPrefs }, true)
       setCollapsed(!collapsed)
     }
 

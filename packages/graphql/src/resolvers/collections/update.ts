@@ -1,6 +1,6 @@
 import type { Collection, CollectionSlug, DataFromCollectionSlug, PayloadRequest } from 'payload'
 
-import { isolateObjectProperty, updateByIDOperation } from 'payload'
+import { isolateObjectProperty, resetBranchState, updateByIDOperation } from 'payload'
 
 import type { Context } from '../types.js'
 
@@ -8,6 +8,7 @@ export type Resolver<TSlug extends CollectionSlug> = (
   _: unknown,
   args: {
     autosave: boolean
+    branch?: string
     data: DataFromCollectionSlug<TSlug>
     draft: boolean
     fallbackLocale?: string
@@ -31,6 +32,15 @@ export function updateResolver<TSlug extends CollectionSlug>(
     req = isolateObjectProperty(req, 'fallbackLocale')
     req.locale = args.locale || locale
     req.fallbackLocale = args.fallbackLocale || fallbackLocale
+
+    // Same shape as `locale`: an argument on the field, resolved onto the request the
+    // operation reads. Branch state is memoized per request, so a field that names its own
+    // branch gets its own copy of that state rather than the previous field's.
+    if (args.branch && args.branch !== req.branch) {
+      req.branch = args.branch
+      req.context = { ...req.context }
+      resetBranchState(req)
+    }
     if (!req.query) {
       req.query = {}
     }

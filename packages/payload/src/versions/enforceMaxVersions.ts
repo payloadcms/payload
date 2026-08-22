@@ -3,6 +3,8 @@ import type { DeleteVersionsArgs } from '../database/types.js'
 import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 import type { Payload, PayloadRequest, Where } from '../types/index.js'
 
+import { resolveBranchOwnVersions } from '../branching/versions.js'
+
 type Args = {
   collection?: SanitizedCollectionConfig
   global?: SanitizedGlobalConfig
@@ -28,9 +30,18 @@ export const enforceMaxVersions = async ({
     let oldestAllowedDoc
 
     if (collection) {
-      where.parent = {
-        equals: id,
-      }
+      // Scoped to the chain being pruned, which on a branch is the branch's own —
+      // hanging off its shadow row, not the canonical ID.
+      //
+      // Both halves need it. Unscoped, the probe counted main's versions as part of the
+      // branch's ancestry (a branch reads main's history as its own past, §12), and then
+      // the delete addressed `parent: <canonical id>` with no `_branch` filter, which on
+      // a branch matches *only main's rows*. Saving on a branch therefore deleted
+      // production version history and never pruned the branch at all.
+      Object.assign(
+        where,
+        await resolveBranchOwnVersions({ id: id!, collectionSlug: collection.slug, req }),
+      )
 
       const query = await payload.db.findVersions({
         collection: collection.slug,
@@ -65,9 +76,9 @@ export const enforceMaxVersions = async ({
       }
 
       if (collection) {
-        deleteQuery.parent = {
-          equals: id,
-        }
+        // The same scoped predicate the probe used, so what is counted and what is
+        // deleted are the same set of rows.
+        Object.assign(deleteQuery, where)
       }
 
       const deleteVersionsArgs: DeleteVersionsArgs = { req, where: deleteQuery }

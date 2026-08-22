@@ -1,23 +1,27 @@
 import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 import type { SQLiteSelect, SQLiteSelectBase } from 'drizzle-orm/sqlite-core'
+import type {
+  FlattenedField,
+  JoinQuery,
+  PayloadRequest,
+  SelectMode,
+  SelectType,
+  Where,
+} from 'payload'
 
 import { and, asc, count, desc, eq, getTableName, or, sql } from 'drizzle-orm'
 import {
   appendVersionToQueryKey,
   buildVersionCollectionFields,
   combineQueries,
-  type FlattenedField,
+  getBranchPredicateSync,
   getFieldByPath,
   getQueryDraftsSort,
-  type JoinQuery,
-  type SelectMode,
-  type SelectType,
-  type Where,
 } from 'payload'
 import { fieldIsVirtual, fieldShouldBeLocalized, hasDraftsEnabled } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
-import type { BuildQueryJoinAliases, DrizzleAdapter } from '../types.js'
+import type { BuildQueryJoinAliases, DrizzleAdapter, GenericColumn } from '../types.js'
 import type { Result } from './buildFindManyArgs.js'
 
 import { buildQuery } from '../queries/buildQuery.js'
@@ -110,6 +114,7 @@ type TraverseFieldArgs = {
   locale?: string
   parentIsLocalized?: boolean
   path: string
+  req?: Partial<PayloadRequest>
   select?: SelectType
   selectAllOnCurrentLevel?: boolean
   selectMode?: SelectMode
@@ -139,6 +144,7 @@ export const traverseFields = ({
   locale,
   parentIsLocalized = false,
   path,
+  req,
   select,
   selectAllOnCurrentLevel = false,
   selectMode,
@@ -698,6 +704,17 @@ export const traverseFields = ({
             }
           }
 
+          // A join subquery must carry the same branch predicate as the
+          // top-level read, or a branch would see main's related documents.
+          const joinBranchPredicate = getBranchPredicateSync({
+            collectionSlug: field.collection,
+            req,
+          })
+
+          if (joinBranchPredicate) {
+            joinQueryWhere = { and: [joinQueryWhere, joinBranchPredicate] }
+          }
+
           if (useDrafts) {
             joinQueryWhere = combineQueries(appendVersionToQueryKey(joinQueryWhere), {
               latest: { equals: true },
@@ -747,6 +764,18 @@ export const traverseFields = ({
 
           if (useDrafts) {
             selectFields.parent = newAliasTable.parent
+          }
+
+          // Surface the canonical document ID rather than the shadow row's own
+          // primary key, so join results address documents the same way every
+          // other read does.
+          if (joinBranchPredicate && newAliasTable._branchDocID) {
+            // `selectFields` is typed as a column map, but Drizzle accepts an
+            // aliased expression in the same position — as the sibling
+            // `sql\`...\`.as()` assignments above already rely on.
+            selectFields.id = sql`COALESCE(${newAliasTable._branchDocID}, ${newAliasTable.id})`.as(
+              'id',
+            ) as unknown as GenericColumn
           }
 
           let query: SQLiteSelect = db

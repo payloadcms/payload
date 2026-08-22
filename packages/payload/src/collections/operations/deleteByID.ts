@@ -9,6 +9,7 @@ import type { Collection, DataFromCollectionSlug } from '../config/types.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
 import { hasWhereAccessResult } from '../../auth/types.js'
+import { willBranchAbsorbDelete } from '../../branching/tombstone.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { Forbidden, NotFound } from '../../errors/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
@@ -144,13 +145,25 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
       req,
     })
 
-    await deleteAssociatedFiles({
-      collectionConfig,
-      config,
-      doc: docToDelete!,
-      overrideDelete: true,
+    // A delete on a branch becomes a tombstone, and main keeps its row — so the
+    // cascades below, which all address the canonical document, would strip data
+    // main still depends on. The version cascade is scoped to the branch rather
+    // than skipped, since a branch's own version rows do go with it.
+    const absorbedByBranch = willBranchAbsorbDelete({
+      collectionSlug: collectionConfig.slug,
+      doc: docToDelete,
       req,
     })
+
+    if (!absorbedByBranch) {
+      await deleteAssociatedFiles({
+        collectionConfig,
+        config,
+        doc: docToDelete!,
+        overrideDelete: true,
+        req,
+      })
+    }
 
     // /////////////////////////////////////
     // Delete versions
@@ -168,7 +181,7 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
     // /////////////////////////////////////
     // Delete scheduled posts
     // /////////////////////////////////////
-    if (hasScheduledPublishEnabled(collectionConfig)) {
+    if (hasScheduledPublishEnabled(collectionConfig) && !absorbedByBranch) {
       await deleteScheduledPublishJobs({
         id,
         slug: collectionConfig.slug,

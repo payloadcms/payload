@@ -40,6 +40,7 @@ import { createGlobal } from './createGlobal.js'
 import { createGlobalVersion } from './createGlobalVersion.js'
 import { createMigration } from './createMigration.js'
 import { createVersion } from './createVersion.js'
+import { deleteBranchGlobal } from './deleteBranchGlobal.js'
 import { deleteMany } from './deleteMany.js'
 import { deleteOne } from './deleteOne.js'
 import { deleteVersions } from './deleteVersions.js'
@@ -311,6 +312,7 @@ export function mongooseAdapter({
       createMigration,
       createVersion,
       defaultIDType: 'text',
+      deleteBranchGlobal,
       deleteMany,
       deleteOne,
       deleteVersions,

@@ -14,6 +14,7 @@ import type { Context } from '../types.js'
 type Resolver<TSlug extends GlobalSlug> = (
   _: unknown,
   args: {
+    branch?: string
     data?: DeepPartial<Omit<DataFromGlobalSlug<TSlug>, 'id'>>
     draft?: boolean
     fallbackLocale?: string

@@ -11,6 +11,7 @@ import { Button } from '../../../elements/Button/index.js'
 import { ConfirmationModal } from '../../../elements/ConfirmationModal/index.js'
 import { useModal } from '../../../elements/Modal/index.js'
 import * as PopupList from '../../../elements/Popup/PopupButtonList/index.js'
+import { useBranchParam } from '../../../providers/Branch/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useRouter } from '../../../providers/RouterAdapter/index.js'
 import { useRouteTransition } from '../../../providers/RouteTransition/index.js'
@@ -51,6 +52,7 @@ export const Restore: React.FC<Props> = ({
   const { toggleModal } = useModal()
   const router = useRouter()
   const { i18n, t } = useTranslation()
+  const branch = useBranchParam()
   const [draft, setDraft] = useState(false)
   const { startRouteTransition } = useRouteTransition()
 
@@ -65,6 +67,8 @@ export const Restore: React.FC<Props> = ({
   const canRestoreAsDraft = status !== 'draft' && collectionConfig?.versions?.drafts
 
   const handleRestore = useCallback(async () => {
+    const branchParam = branch ? `&branch=${encodeURIComponent(branch)}` : ''
+
     let fetchURL = formatAdminURL({
       apiRoute,
       path: '',
@@ -72,7 +76,7 @@ export const Restore: React.FC<Props> = ({
     let redirectURL: string
 
     if (collectionConfig) {
-      fetchURL = `${fetchURL}/${collectionConfig.slug}/versions/${versionID}?draft=${draft}`
+      fetchURL = `${fetchURL}/${collectionConfig.slug}/versions/${versionID}?draft=${draft}${branchParam}`
       redirectURL = formatAdminURL({
         adminRoute,
         path: `/collections/${collectionConfig.slug}/${originalDocID}`,
@@ -80,7 +84,7 @@ export const Restore: React.FC<Props> = ({
     }
 
     if (globalConfig) {
-      fetchURL = `${fetchURL}/globals/${globalConfig.slug}/versions/${versionID}?draft=${draft}`
+      fetchURL = `${fetchURL}/globals/${globalConfig.slug}/versions/${versionID}?draft=${draft}${branchParam}`
       redirectURL = formatAdminURL({
         adminRoute,
         path: `/globals/${globalConfig.slug}`,
@@ -101,6 +105,7 @@ export const Restore: React.FC<Props> = ({
       toast.error(t('version:problemRestoringVersion'))
     }
   }, [
+    branch,
     apiRoute,
     collectionConfig,
     globalConfig,

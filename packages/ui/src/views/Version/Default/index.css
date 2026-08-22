@@ -87,6 +87,14 @@
     letter-spacing: var(--text-body-medium-letter-spacing);
   }
 
+  /* Keeps the timestamp and the branch pill together on the right, so the label
+     row still has two flex children and `space-between` behaves as before. */
+  .view-version__label-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--spacer-2);
+  }
+
   .view-version__version-to-version {
     display: flex;
     flex-direction: row;
@@ -160,7 +168,15 @@
   }
 
   @media (max-width: 1024px) {
-    .view-version__version-to-version {
+    /* Keeps the timestamp and the branch pill together on the right, so the label
+     row still has two flex children and `space-between` behaves as before. */
+  .view-version__label-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--spacer-2);
+  }
+
+  .view-version__version-to-version {
       flex-direction: column;
       align-items: flex-start;
     }
@@ -172,7 +188,15 @@
       flex-direction: column;
     }
 
-    .view-version__version-to-version {
+    /* Keeps the timestamp and the branch pill together on the right, so the label
+     row still has two flex children and `space-between` behaves as before. */
+  .view-version__label-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--spacer-2);
+  }
+
+  .view-version__version-to-version {
       flex-direction: row;
       align-items: center;
     }

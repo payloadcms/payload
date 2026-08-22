@@ -65,7 +65,6 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   	"version__status" "enum__posts_versioned_v_version_status" DEFAULT 'draft',
   	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
   	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
-  	"snapshot" boolean,
   	"published_locale" "enum__posts_versioned_v_published_locale",
   	"latest" boolean
   );
@@ -251,7 +250,6 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   	"version_created_at" timestamp(3) with time zone,
   	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
   	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
-  	"snapshot" boolean,
   	"published_locale" "enum__global_versioned_v_published_locale",
   	"latest" boolean
   );
@@ -323,7 +321,6 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   CREATE INDEX "_posts_versioned_v_version_version__status_idx" ON "_posts_versioned_v" USING btree ("version__status");
   CREATE INDEX "_posts_versioned_v_created_at_idx" ON "_posts_versioned_v" USING btree ("created_at");
   CREATE INDEX "_posts_versioned_v_updated_at_idx" ON "_posts_versioned_v" USING btree ("updated_at");
-  CREATE INDEX "_posts_versioned_v_snapshot_idx" ON "_posts_versioned_v" USING btree ("snapshot");
   CREATE INDEX "_posts_versioned_v_published_locale_idx" ON "_posts_versioned_v" USING btree ("published_locale");
   CREATE INDEX "_posts_versioned_v_latest_idx" ON "_posts_versioned_v" USING btree ("latest");
   CREATE INDEX "_posts_versioned_v_rels_order_idx" ON "_posts_versioned_v_rels" USING btree ("order");
@@ -391,7 +388,6 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   CREATE INDEX "_global_versioned_v_version_version__status_idx" ON "_global_versioned_v" USING btree ("version__status");
   CREATE INDEX "_global_versioned_v_created_at_idx" ON "_global_versioned_v" USING btree ("created_at");
   CREATE INDEX "_global_versioned_v_updated_at_idx" ON "_global_versioned_v" USING btree ("updated_at");
-  CREATE INDEX "_global_versioned_v_snapshot_idx" ON "_global_versioned_v" USING btree ("snapshot");
   CREATE INDEX "_global_versioned_v_published_locale_idx" ON "_global_versioned_v" USING btree ("published_locale");
   CREATE INDEX "_global_versioned_v_latest_idx" ON "_global_versioned_v" USING btree ("latest");
   CREATE INDEX "global_blocks_text_block_order_idx" ON "global_blocks_text_block" USING btree ("_order");

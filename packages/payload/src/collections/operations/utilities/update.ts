@@ -50,6 +50,14 @@ export type SharedUpdateDocumentArgs<TSlug extends CollectionSlug> = {
   filesToUpload: FileToSave[]
   id: number | string
   locale: string
+  /**
+   * Hook `operation` label. Merge reports a branch-created document as a
+   * `create` on main even though the row is updated in place, since deleting
+   * and recreating it would cascade away every inbound relationship.
+   *
+   * @default 'update'
+   */
+  operation?: 'create' | 'update'
   overrideAccess: boolean
   overrideLock: boolean
   payload: Payload
@@ -89,6 +97,7 @@ export const updateDocument = async <
   fallbackLocale,
   filesToUpload,
   locale,
+  operation = 'update',
   overrideAccess,
   overrideLock,
   payload,
@@ -158,6 +167,8 @@ export const updateDocument = async <
       authOptions: collectionConfig.auth,
       collectionSlug: collectionConfig.slug,
       data,
+      // Not a hook label — this discriminates validation mode, and the update
+      // path is always an update as far as auth field requirements go.
       operation: 'update',
       originalDoc,
       req,
@@ -197,7 +208,7 @@ export const updateDocument = async <
     data,
     doc: originalDoc,
     global: null,
-    operation: 'update',
+    operation,
     overrideAccess,
     req,
   })
@@ -213,7 +224,7 @@ export const updateDocument = async <
           collection: collectionConfig,
           context: req.context,
           data,
-          operation: 'update',
+          operation,
           originalDoc,
           req,
         })) || data
@@ -239,7 +250,7 @@ export const updateDocument = async <
           collection: collectionConfig,
           context: req.context,
           data,
-          operation: 'update',
+          operation,
           originalDoc,
           req,
         })) || data
@@ -258,7 +269,7 @@ export const updateDocument = async <
     doc: originalDoc,
     docWithLocales,
     global: null,
-    operation: 'update',
+    operation,
     overrideAccess,
     req,
     skipValidation:
@@ -451,7 +462,7 @@ export const updateDocument = async <
     data,
     doc: result,
     global: null,
-    operation: 'update',
+    operation,
     previousDoc: originalDoc,
     req,
   })
@@ -468,7 +479,7 @@ export const updateDocument = async <
           context: req.context,
           data,
           doc: result,
-          operation: 'update',
+          operation,
           overrideAccess,
           previousDoc: originalDoc,
           req,

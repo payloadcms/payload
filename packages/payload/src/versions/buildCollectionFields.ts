@@ -42,6 +42,29 @@ export const buildVersionCollectionFields = <T extends boolean = false>(
     },
   ]
 
+  if (config.branching?.branchableCollections?.has(collection.slug)) {
+    // Mirrors the discriminator on the collection itself. `_branchParent` holds
+    // the canonical parent document, since a branch version's `parent` points
+    // at the shadow row rather than at the document the editor knows about.
+    fields.push(
+      {
+        name: '_branch',
+        type: 'text',
+        admin: { disabled: true },
+        defaultValue: 'main',
+        index: true,
+      },
+      {
+        name: '_branchParent',
+        type: 'relationship',
+        admin: { disabled: true },
+        index: true,
+        maxDepth: 0,
+        relationTo: collection.slug,
+      },
+    )
+  }
+
   if (hasDraftsEnabled(collection)) {
     if (config.localization) {
       fields.push({

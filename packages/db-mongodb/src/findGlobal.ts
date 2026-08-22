@@ -1,7 +1,13 @@
 import type { QueryOptions } from 'mongoose'
 import type { FindGlobal } from 'payload'
 
-import { combineQueries } from 'payload'
+import {
+  branchGlobalNeedsBothRows,
+  combineQueries,
+  pickBranchGlobal,
+  resolveBranch,
+  resolveBranchGlobalQuery,
+} from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
@@ -13,18 +19,20 @@ import { transform } from './utilities/transform.js'
 
 export const findGlobal: FindGlobal = async function findGlobal(
   this: MongooseAdapter,
-  { slug: globalSlug, locale, req, select, where = {} },
+  { slug: globalSlug, branch, locale, req, select, where = {} },
 ) {
   const { globalConfig, Model } = getGlobal({ adapter: this, globalSlug })
 
   const fields = globalConfig.flattenedFields
+
+  const branchedWhere = resolveBranchGlobalQuery({ branch, globalSlug, req, where })
 
   const query = await buildQuery({
     adapter: this,
     fields,
     globalSlug,
     locale,
-    where: combineQueries({ globalType: { equals: globalSlug } }, where),
+    where: combineQueries({ globalType: { equals: globalSlug } }, branchedWhere ?? {}),
   })
 
   const options: QueryOptions = {
@@ -37,7 +45,18 @@ export const findGlobal: FindGlobal = async function findGlobal(
     session: await getSession(this, req),
   }
 
-  const doc: any = await Model.findOne(query, {}, options)
+  // A global is one document, so the branch's row and main's row can be fetched
+  // together and the branch's preferred in memory. There is no result set to
+  // paginate, so nothing a post-query step could get wrong.
+  let doc: any
+
+  if (branchGlobalNeedsBothRows({ branch, globalSlug, req })) {
+    const rows = await Model.find(query, {}, { ...options, limit: 2 }).lean()
+
+    doc = pickBranchGlobal(rows as Record<string, any>[], branch || resolveBranch(req as never))
+  } else {
+    doc = await Model.findOne(query, {}, options)
+  }
 
   if (!doc) {
     return null

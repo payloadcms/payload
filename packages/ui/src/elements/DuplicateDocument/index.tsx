@@ -12,6 +12,7 @@ import { toast } from 'sonner'
 import type { DocumentDrawerContextType } from '../DocumentDrawer/Provider.js'
 
 import { useForm, useFormModified } from '../../forms/Form/context.js'
+import { useBranchParam } from '../../providers/Branch/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useRouter } from '../../providers/RouterAdapter/index.js'
@@ -45,6 +46,7 @@ export const DuplicateDocument: React.FC<Props> = ({
   const { openModal } = useModal()
   const locale = useLocale()
   const localeCode = locale?.code
+  const branch = useBranchParam()
   const { setModified } = useForm()
   const { startRouteTransition } = useRouteTransition()
 
@@ -76,6 +78,9 @@ export const DuplicateDocument: React.FC<Props> = ({
       const hasSelectedLocales = selectedLocales && selectedLocales.length > 0
 
       const queryParams: Record<string, string | string[]> = {}
+      if (branch) {
+        queryParams.branch = branch
+      }
       if (localeCode) {
         queryParams.locale = localeCode
       }
@@ -141,6 +146,7 @@ export const DuplicateDocument: React.FC<Props> = ({
     [
       adminRoute,
       apiRoute,
+      branch,
       collectionConfig,
       i18n,
       id,

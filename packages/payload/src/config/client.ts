@@ -2,6 +2,7 @@ import type { I18nClient, TFunction } from '@payloadcms/translations'
 import type { DeepPartial } from 'ts-essentials'
 
 import type { ImportMap } from '../bin/generateImportMap/index.js'
+import type { ClientBranchingConfig } from '../branching/types.js'
 import type { ClientBlock } from '../fields/config/types.js'
 import type { BlockSlug, User } from '../index.js'
 import type {
@@ -55,11 +56,15 @@ export type ClientConfig = {
   } & Omit<SanitizedConfig['admin'], 'components' | 'dashboard' | 'dependencies' | 'livePreview'>
   blocks: ClientBlock[]
   blocksMap: Record<BlockSlug, ClientBlock>
+  branching: ClientBranchingConfig
   collections: ClientCollectionConfig[]
   custom?: Record<string, any>
   globals: ClientGlobalConfig[]
   unauthenticated?: boolean
-} & Omit<SanitizedConfig, 'admin' | 'collections' | 'globals' | 'i18n' | ServerOnlyRootProperties>
+} & Omit<
+  SanitizedConfig,
+  'admin' | 'branching' | 'collections' | 'globals' | 'i18n' | ServerOnlyRootProperties
+>
 
 export type UnauthenticatedClientConfig = {
   admin: {
@@ -247,6 +252,17 @@ export const createClientConfig = ({
 
         break
       }
+
+      // Only which entities branch — access functions, merge hooks and the
+      // shadowed-ID ceiling are server concerns and aren't serializable.
+      case 'branching':
+        clientConfig.branching = {
+          branchableCollections: Array.from(config.branching.branchableCollections),
+          branchableGlobals: Array.from(config.branching.branchableGlobals),
+          enabled: config.branching.enabled,
+        }
+
+        break
 
       case 'collections':
         ;(clientConfig.collections as ClientCollectionConfig[]) = createClientCollectionConfigs({

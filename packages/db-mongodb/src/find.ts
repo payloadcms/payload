@@ -1,7 +1,12 @@
 import type { PaginateOptions, PipelineStage } from 'mongoose'
 import type { Find } from 'payload'
 
-import { flattenWhereToOperators } from 'payload'
+import {
+  applyBranchIDProjection,
+  flattenWhereToOperators,
+  resolveBranchQuery,
+  withBranchIDSelect,
+} from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
@@ -18,6 +23,7 @@ import { transform } from './utilities/transform.js'
 export const find: Find = async function find(
   this: MongooseAdapter,
   {
+    branch,
     collection: collectionSlug,
     draftsEnabled,
     joins = {},
@@ -33,6 +39,8 @@ export const find: Find = async function find(
   },
 ) {
   const { collectionConfig, Model } = getCollection({ adapter: this, collectionSlug })
+
+  where = (await resolveBranchQuery({ branch, collectionSlug, req, where })) ?? {}
 
   let hasNearConstraint = false
 
@@ -81,11 +89,13 @@ export const find: Find = async function find(
     useEstimatedCount,
   }
 
-  if (select) {
+  const selectWithBranchID = withBranchIDSelect({ branch, collectionSlug, req, select })
+
+  if (selectWithBranchID) {
     paginationOptions.projection = buildProjectionFromSelect({
       adapter: this,
       fields: collectionConfig.flattenedFields,
-      select,
+      select: selectWithBranchID,
     })
   }
 
@@ -152,6 +162,7 @@ export const find: Find = async function find(
     locale,
     projection: paginationOptions.projection,
     query,
+    req,
   })
 
   if (aggregate.length > 0 || sortAggregation.length > 0) {
@@ -189,6 +200,13 @@ export const find: Find = async function find(
     data: result.docs,
     fields: collectionConfig.fields,
     operation: 'read',
+  })
+
+  applyBranchIDProjection({
+    branch,
+    collectionSlug,
+    docs: result.docs as Record<string, unknown>[],
+    req,
   })
 
   return result
