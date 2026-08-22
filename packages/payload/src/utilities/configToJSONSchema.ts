@@ -269,9 +269,22 @@ function generateLocaleEntitySchemas(localization: SanitizedConfig['localization
   if (localization && 'locales' in localization && localization?.locales) {
     const localesFromConfig = localization?.locales
 
-    const locales = [...localesFromConfig].map((locale) => {
-      return locale.code
-    }, [])
+    const locales = [...localesFromConfig]
+      .map((locale) => {
+        if (typeof locale === 'string') {
+          return locale
+        }
+        if (typeof locale === 'object' && locale !== null) {
+          if ('code' in locale && typeof locale.code === 'string') {
+            return locale.code
+          }
+          if ('value' in locale && typeof locale.value === 'string') {
+            return locale.value
+          }
+        }
+        return undefined
+      })
+      .filter((l): l is string => Boolean(l))
 
     return {
       type: 'string',
@@ -287,19 +300,44 @@ function generateLocaleEntitySchemas(localization: SanitizedConfig['localization
 function generateFallbackLocaleEntitySchemas(
   localization: SanitizedConfig['localization'],
 ): JSONSchema4 {
-  if (localization && 'localeCodes' in localization && localization?.localeCodes) {
-    const localeCodes = [...localization.localeCodes].map((localeCode) => {
-      return localeCode
-    }, [])
+  if (localization) {
+    const localeCodesFromConfig =
+      'localeCodes' in localization && Array.isArray(localization.localeCodes)
+        ? localization.localeCodes.filter((localeCode) => typeof localeCode === 'string')
+        : []
 
-    return {
-      oneOf: [
-        { type: 'string', enum: ['false', 'none', 'null'] },
-        { type: 'boolean', enum: [false] },
-        { type: 'null' },
-        { type: 'string', enum: localeCodes },
-        { type: 'array', items: { type: 'string', enum: localeCodes } },
-      ],
+    const rawCodes =
+      localeCodesFromConfig.length > 0
+        ? localeCodesFromConfig
+        : 'locales' in localization && localization.locales
+          ? localization.locales.map((l) => {
+              if (typeof l === 'string') {
+                return l
+              }
+              if (typeof l === 'object' && l !== null) {
+                if ('code' in l && typeof l.code === 'string') {
+                  return l.code
+                }
+                if ('value' in l && typeof l.value === 'string') {
+                  return l.value
+                }
+              }
+              return undefined
+            })
+          : []
+
+    const localeCodes = [...rawCodes].filter((c): c is string => Boolean(c))
+
+    if (localeCodes.length > 0) {
+      return {
+        oneOf: [
+          { type: 'string', enum: ['false', 'none', 'null'] },
+          { type: 'boolean', enum: [false] },
+          { type: 'null' },
+          { type: 'string', enum: localeCodes },
+          { type: 'array', items: { type: 'string', enum: localeCodes } },
+        ],
+      }
     }
   }
 
