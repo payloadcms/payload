@@ -8,8 +8,15 @@ import { devUser } from '../../credentials.js'
 import { Media } from '../collections/Media.js'
 import { MediaWithPrefix } from '../collections/MediaWithPrefix.js'
 import { Users } from '../collections/Users.js'
-import { mediaSlug, mediaWithPrefixSlug } from '../shared.js'
+import {
+  mediaHeaderOnlySlug,
+  mediaHeaderOnlyWithSizesSlug,
+  mediaSlug,
+  mediaWithPrefixSlug,
+} from '../shared.js'
 import { MediaContainer } from './collections/MediaContainer.js'
+import { MediaHeaderOnly } from './collections/MediaHeaderOnly.js'
+import { MediaHeaderOnlyWithSizes } from './collections/MediaHeaderOnlyWithSizes.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -24,7 +31,14 @@ export default buildConfigWithDefaults({
       baseDir: path.resolve(dirname, '..'),
     },
   },
-  collections: [Media, MediaWithPrefix, MediaContainer, Users],
+  collections: [
+    Media,
+    MediaWithPrefix,
+    MediaContainer,
+    MediaHeaderOnly,
+    MediaHeaderOnlyWithSizes,
+    Users,
+  ],
   onInit: async (payload) => {
     await payload.create({
       collection: 'users',
@@ -37,6 +51,8 @@ export default buildConfigWithDefaults({
   storage: [
     s3Storage({
       collections: {
+        [mediaHeaderOnlySlug]: true,
+        [mediaHeaderOnlyWithSizesSlug]: true,
         [mediaSlug]: true,
         [mediaWithPrefixSlug]: {
           prefix: 'test-prefix',
