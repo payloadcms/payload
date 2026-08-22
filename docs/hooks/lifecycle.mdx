@@ -1,0 +1,124 @@
+---
+title: Hook Lifecycle
+label: Lifecycle
+order: 15
+desc: The exact order that collection hooks, field hooks, validation, and database operations run in Payload.
+keywords: hooks, lifecycle, collections, validation, beforeChange, afterChange, afterRead, beforeRead, documentation, Payload CMS
+---
+
+This page documents the current hook lifecycle for collection operations in
+Payload, based on the implementation in core. In every collection operation,
+[`beforeOperation`](./collections#beforeoperation) runs first and
+[`afterOperation`](./collections#afteroperation) runs last. If a REST request
+throws, [`afterError`](./collections#aftererror) runs later in request error
+handling, not inline with the CRUD lifecycle itself.
+
+<Banner type="info">
+  `beforeOperation` currently receives the backward-compatible operation names
+  `read`, `update`, and `delete` for `find` / `findByID`, `updateByID`, and
+  `deleteByID`. `afterOperation` receives the concrete operation name.
+</Banner>
+
+## Create
+
+1. [`beforeOperation`](./collections#beforeoperation) - collection
+2. Access control and upload preprocessing
+3. [`beforeValidate`](./fields#beforevalidate) - fields
+4. [`beforeValidate`](./collections#beforevalidate) - collection
+5. [`beforeChange`](./collections#beforechange) - collection
+6. [`beforeChange`](./fields#beforechange) - fields
+7. Field validation runs inside field `beforeChange`
+8. Files are written to storage, when applicable
+9. Database create (`payload.db.create()` or the auth registration flow)
+10. Version and auth side effects run, when enabled
+11. [`afterRead`](./fields#afterread) - fields
+12. [`afterRead`](./collections#afterread) - collection
+13. [`afterChange`](./fields#afterchange) - fields
+14. [`afterChange`](./collections#afterchange) - collection
+15. [`afterOperation`](./collections#afteroperation) - collection
+
+Within step 6, each field is processed in this order: field condition, field
+`beforeChange`, `field.validate`, then transformation for storage. If you do
+not define `field.validate`, Payload injects the built-in validator for that
+field type during field sanitization. If you do define `field.validate`, your
+function is what runs, so call the built-in validator yourself if you want both.
+
+## Update and updateByID
+
+1. [`beforeOperation`](./collections#beforeoperation) - collection
+2. Access control and existing document lookup
+3. Payload normalizes the existing document into `originalDoc` using field
+   `afterRead` internals
+4. [`beforeValidate`](./fields#beforevalidate) - fields
+5. [`beforeValidate`](./collections#beforevalidate) - collection
+6. Replacement files are written to storage, when applicable
+7. [`beforeChange`](./collections#beforechange) - collection
+8. [`beforeChange`](./fields#beforechange) - fields
+9. Database update (`payload.db.updateOne()`), unless a versioned draft save
+   only writes a version
+10. Version save runs, when enabled
+11. [`afterRead`](./fields#afterread) - fields
+12. [`afterRead`](./collections#afterread) - collection
+13. [`afterChange`](./fields#afterchange) - fields
+14. [`afterChange`](./collections#afterchange) - collection
+15. [`afterOperation`](./collections#afteroperation) - collection
+
+Bulk `update` wraps the request in one outer `beforeOperation` / `afterOperation`
+pair, then runs the document-level update lifecycle above once per matched
+document.
+
+`restoreVersion` follows the same `beforeValidate` / `beforeChange` /
+`afterRead` / `afterChange` sequence, but its outer operation name is
+`restoreVersion`.
+
+## Delete and deleteByID
+
+1. [`beforeOperation`](./collections#beforeoperation) - collection
+2. Access control
+3. [`beforeDelete`](./collections#beforedelete) - collection
+4. Existing document lookup and cleanup for files / versions / scheduled jobs
+5. Database delete (`payload.db.deleteOne()`)
+6. Preferences cleanup
+7. [`afterRead`](./fields#afterread) - fields
+8. [`afterRead`](./collections#afterread) - collection
+9. [`afterDelete`](./collections#afterdelete) - collection
+10. [`afterOperation`](./collections#afteroperation) - collection
+
+Bulk `delete` also uses one outer `beforeOperation` / `afterOperation` pair,
+then runs the document-level delete lifecycle above once per matched document.
+
+## Read Operations
+
+This is the lifecycle for `find`, `findByID`, `findVersions`, and
+`findVersionByID`:
+
+1. [`beforeOperation`](./collections#beforeoperation) - collection
+2. Access control and database query
+3. [`beforeRead`](./collections#beforeread) - collection
+4. [`afterRead`](./fields#afterread) - fields
+5. [`afterRead`](./collections#afterread) - collection
+6. [`afterOperation`](./collections#afteroperation) - collection
+
+For `find` and `findVersions`, steps 3 through 5 run once per returned
+document.
+
+## Imports
+
+Imports created with
+[`@payloadcms/plugin-import-export`](../plugins/import-export) do not use a
+separate target-collection hook pipeline. After the file is parsed, CSV
+`fromCSV` transforms run, disabled fields are removed, and each row eventually
+calls `payload.create()` or `payload.update()` on the target collection.
+
+That means the same create or update lifecycle above applies to every imported
+row:
+
+1. `create` mode runs the create lifecycle for each row
+2. `update` mode first runs `find` to locate the document by `matchField`, then
+   runs the update lifecycle
+3. `upsert` mode first runs `find` by `matchField`, then runs either the update
+   lifecycle or the create lifecycle
+
+For localized imports, the plugin writes the default locale first and then
+issues additional `update` calls for the remaining locales, so hooks and field
+validation run once per locale-specific write.
