@@ -58,10 +58,17 @@ export const TenantSelectionProvider = async ({
   }
 
   /**
-   * If the there was no cookie or the cookie was an invalid tenantID set intialValue
+   * If there was no cookie or the cookie was an invalid tenantID set intialValue
    */
   if (!initialValue) {
-    initialValue = tenantOptions.length > 1 ? undefined : tenantOptions[0]?.value
+    const hasGlobalAccess =
+      typeof userHasAccessToAllTenants === 'function' ? userHasAccessToAllTenants(user) : false
+
+    initialValue = hasGlobalAccess
+      ? undefined
+      : tenantOptions.length > 1
+        ? undefined
+        : tenantOptions[0]?.value
   }
 
   return (
