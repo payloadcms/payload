@@ -4318,6 +4318,36 @@ describe('Fields', () => {
       expect(updatedJsonFieldsDoc.json.state).toEqual({})
     })
 
+    it('should preserve nested arrays in a json field omitted from a partial update', async () => {
+      const arrayOfArrays = [
+        [1, 2],
+        [3, 4],
+      ]
+
+      const jsonFieldsDoc = await payload.create({
+        collection: 'json-fields',
+        data: {
+          customJSON: arrayOfArrays,
+        },
+      })
+
+      expect(jsonFieldsDoc.customJSON).toStrictEqual(arrayOfArrays)
+
+      // Partial update that intentionally omits `customJSON` so that its
+      // existing value is cloned from the original doc via
+      // `cloneDataFromOriginalDoc`. Nested arrays must survive that clone
+      // instead of being turned into index-keyed objects.
+      const updatedJsonFieldsDoc = await payload.update({
+        id: jsonFieldsDoc.id,
+        collection: 'json-fields',
+        data: {
+          json: { foo: 'bar' },
+        },
+      })
+
+      expect(updatedJsonFieldsDoc.customJSON).toStrictEqual(arrayOfArrays)
+    })
+
     describe('querying', () => {
       let fooBar
       let bazBar
