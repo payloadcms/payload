@@ -282,6 +282,33 @@ test.describe('Form State', () => {
     await page.unroute(postsUrl.create)
   })
 
+  test('should update the document title after a burst of input events', async () => {
+    const updatedTitle = '[검증용] PR #242 E2E 확인 — 곧 삭제됩니다'
+
+    await page.goto(postsUrl.create)
+    await waitForFormReady(page)
+
+    const titleField = page.locator('#field-title')
+
+    await titleField.evaluate((field: HTMLInputElement, value) => {
+      const setValue = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set
+
+      for (let index = 1; index <= value.length; index++) {
+        setValue?.call(field, value.slice(0, index))
+        field.dispatchEvent(
+          new InputEvent('input', {
+            bubbles: true,
+            data: value[index - 1],
+            inputType: 'insertText',
+          }),
+        )
+      }
+    }, updatedTitle)
+
+    await expect(titleField).toHaveValue(updatedTitle)
+    await expect(page.locator('.doc-header__title')).toHaveText(updatedTitle)
+  })
+
   // TODO: This test is not very reliable but would be really nice to have
   test.skip('should not lag on slow CPUs', async () => {
     await page.goto(postsUrl.create)

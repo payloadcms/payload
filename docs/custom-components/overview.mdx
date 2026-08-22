@@ -460,7 +460,7 @@ export default async function MyServerComponent({ payload, locale }) {
 }
 ```
 
-The best way to do this within a Client Component is to import the `useLocale` hook from `@payloadcms/ui`:
+The best way to do this within a Client Component is to import the `useLocale` hook from `@payloadcms/ui`. The hook returns `null` when localization is disabled or configured without any locales:
 
 ```tsx
 'use client'
@@ -469,6 +469,10 @@ import { useLocale } from '@payloadcms/ui'
 
 function Greeting() {
   const locale = useLocale() // highlight-line
+
+  if (!locale) {
+    return null
+  }
 
   const trans = {
     en: 'Hello',

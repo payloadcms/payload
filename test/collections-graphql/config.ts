@@ -5,7 +5,8 @@ const dirname = path.dirname(filename)
 import type { CollectionConfig } from 'payload'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
-import { devUser } from '../credentials.js'
+import { seed } from './seed.js'
+import { errorOnHookSlug, pointSlug, relationSlug, slug } from './shared.js'
 
 export interface Relation {
   id: string
@@ -36,13 +37,6 @@ const collectionWithName = (
     ...extra,
   }
 }
-
-export const slug = 'posts'
-export const relationSlug = 'relation'
-
-export const pointSlug = 'point'
-
-export const errorOnHookSlug = 'error-on-hooks'
 
 export default buildConfigWithDefaults({
   admin: {
@@ -439,149 +433,9 @@ export default buildConfigWithDefaults({
     locales: ['en', 'es'],
   },
   onInit: async (payload) => {
-    await payload.create({
-      collection: 'users',
-      data: {
-        email: devUser.email,
-        password: devUser.password,
-      },
-    })
-
-    await payload.create({
-      collection: 'custom-ids',
-      data: {
-        id: 1,
-        title: 'hello',
-      },
-    })
-
-    await payload.create({
-      collection: slug,
-      data: {
-        relationToCustomID: 1,
-        title: 'has custom ID relation',
-      },
-    })
-
-    await payload.create({
-      collection: slug,
-      data: {
-        title: 'post1',
-      },
-    })
-
-    await payload.create({
-      collection: slug,
-      data: {
-        title: 'post2',
-      },
-    })
-
-    await payload.create({
-      collection: slug,
-      data: {
-        description: 'description',
-        title: 'with-description',
-      },
-    })
-
-    await payload.create({
-      collection: slug,
-      data: {
-        number: 1,
-        title: 'numPost1',
-      },
-    })
-    await payload.create({
-      collection: slug,
-      data: {
-        number: 2,
-        title: 'numPost2',
-      },
-    })
-
-    const rel1 = await payload.create({
-      collection: relationSlug,
-      data: {
-        name: 'name',
-      },
-    })
-    const rel2 = await payload.create({
-      collection: relationSlug,
-      data: {
-        name: 'name2',
-      },
-    })
-
-    // Relation - hasMany
-    await payload.create({
-      collection: slug,
-      data: {
-        relationHasManyField: rel1.id,
-        title: 'rel to hasMany',
-      },
-    })
-    await payload.create({
-      collection: slug,
-      data: {
-        relationHasManyField: rel2.id,
-        title: 'rel to hasMany 2',
-      },
-    })
-
-    // Relation - relationTo multi
-    await payload.create({
-      collection: slug,
-      data: {
-        relationMultiRelationTo: {
-          relationTo: relationSlug,
-          value: rel2.id,
-        },
-        title: 'rel to multi',
-      },
-    })
-
-    // Relation - relationTo multi hasMany
-    await payload.create({
-      collection: slug,
-      data: {
-        relationMultiRelationToHasMany: [
-          {
-            relationTo: relationSlug,
-            value: rel1.id,
-          },
-          {
-            relationTo: relationSlug,
-            value: rel2.id,
-          },
-        ],
-        title: 'rel to multi hasMany',
-      },
-    })
-
-    const payloadAPITest1 = await payload.create({
-      collection: 'payload-api-test-ones',
-      data: {},
-    })
-
-    const t = await payload.create({
-      collection: 'payload-api-test-twos',
-      data: {
-        relation: payloadAPITest1.id,
-      },
-    })
-
-    await payload.create({
-      collection: pointSlug,
-      data: {
-        point: [10, 20],
-      },
-    })
-
-    await payload.create({
-      collection: 'content-type',
-      data: {},
-    })
+    if (process.env.SEED_IN_CONFIG_ONINIT !== 'false') {
+      await seed(payload)
+    }
   },
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
