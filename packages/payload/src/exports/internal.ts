@@ -8,6 +8,7 @@ export { getFileFromUploadInstructions } from '../uploads/getFileFromUploadInstr
 export { getRangeRequestInfo } from '../uploads/getRangeRequestInfo.js'
 export { getSafeFileName } from '../uploads/getSafeFilename.js'
 export { parseRangeHeader } from '../uploads/parseRangeHeader.js'
+export { sanitizeUploadFilename } from '../uploads/sanitizeUploadFilename.js'
 export { getEntityPermissions } from '../utilities/getEntityPermissions/getEntityPermissions.js'
 export { isURLAllowed } from '../utilities/isURLAllowed.js'
 export { sanitizePermissions } from '../utilities/sanitizePermissions.js'
