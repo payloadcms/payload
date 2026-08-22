@@ -247,7 +247,8 @@ export { RelationshipServerNode } from './features/relationship/server/nodes/Rel
 export type { RelationshipData } from './features/relationship/server/schema.js'
 export { TableFeature } from './features/table/server/index.js'
 export { defaultColors } from './features/textState/defaultColors.js'
-export { TextStateFeature } from './features/textState/feature.server.js'
+export { TextStateFeature, TextStateFeature as TextColorFeature } from './features/textState/feature.server.js'
+export type { TextStateFeatureProps } from './features/textState/feature.server.js'
 
 export { FixedToolbarFeature } from './features/toolbars/fixed/server/index.js'
 
