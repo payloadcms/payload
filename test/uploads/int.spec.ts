@@ -1808,6 +1808,37 @@ describe('Collections - Uploads', () => {
     })
   })
 
+  describe('req.file preservation across nested Local API calls', () => {
+    it('should preserve req.file when a hook calls the Local API with the original req', async () => {
+      const filePath = path.resolve(dirname, './image.png')
+      const file = await getFileByPath(filePath)
+      file.name = 'preserve-req-file-test.png'
+
+      // Simulate `req` as it would exist on an upload request, i.e. already
+      // carrying a `file` reference before any nested Local API call is made.
+      const req = { file } as PayloadRequest
+
+      // Simulate a hook (e.g. an upload collection's afterChange) that calls
+      // the Local API on another, non-upload collection, passing the original
+      // `req` through per the docs' recommendation to preserve request context.
+      const relationDoc = await payload.create({
+        collection: relationSlug,
+        data: {},
+        req,
+      })
+
+      expect(relationDoc.id).toBeDefined()
+
+      // The original file reference on `req` must still be accessible after
+      // the nested Local API call returns, so that a subsequent hook (or an
+      // upload storage adapter) can still read it.
+      expect(req.file).toBeDefined()
+      expect(req.file?.name).toBe('preserve-req-file-test.png')
+
+      await payload.delete({ collection: relationSlug, id: relationDoc.id })
+    })
+  })
+
   describe('serverURL handling', () => {
     it('should store relative URLs in database even when serverURL is set', async () => {
       // Temporarily set serverURL for this test
