@@ -38,20 +38,6 @@ test.describe('CLI', () => {
     await rm(schemaFile, { force: true })
   })
 
-  async function resetCLIState({ payload }: { payload: Payload }): Promise<void> {
-    await rm(generatedDirectory, { force: true, recursive: true })
-    await rm(migrationsDirectory, { force: true, recursive: true })
-    await rm(schemaFile, { force: true })
-    await mkdir(generatedDirectory, { recursive: true })
-    process.env.PAYLOAD_DROP_DATABASE = 'false'
-
-    await payload.delete({
-      collection: 'payload-jobs',
-      where: { id: { exists: true } },
-    } as never)
-    await clearAndSeedEverything(payload)
-  }
-
   test(
     'build --no-types -- --help',
     testCLICommand(async (command, { cli }) => {
@@ -711,6 +697,20 @@ test.describe('CLI', () => {
     expect(`${output.stdout}\n${output.stderr}`).not.toContain('Hello, Payload!')
   })
 })
+
+async function resetCLIState({ payload }: { payload: Payload }): Promise<void> {
+  await rm(generatedDirectory, { force: true, recursive: true })
+  await rm(migrationsDirectory, { force: true, recursive: true })
+  await rm(schemaFile, { force: true })
+  await mkdir(generatedDirectory, { recursive: true })
+  process.env.PAYLOAD_DROP_DATABASE = 'false'
+
+  await payload.delete({
+    collection: 'payload-jobs',
+    where: { id: { exists: true } },
+  } as never)
+  await clearAndSeedEverything(payload)
+}
 
 type CLIOutput<TResult = Record<string, unknown>> = {
   command: string
