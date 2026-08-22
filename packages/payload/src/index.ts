@@ -1992,6 +1992,11 @@ export {
 } from './utilities/dependencies/dependencyChecker.js'
 export { getDependencies } from './utilities/dependencies/getDependencies.js'
 export { dynamicImport } from './utilities/dynamicImport.js'
+export {
+  getCollectionInputSchema,
+  getGlobalInputSchema,
+} from './utilities/entityInputSchema/getEntityInputSchema.js'
+export type { EntityInputSchema } from './utilities/entityInputSchema/types.js'
 export { escapeRegExp } from './utilities/escapeRegExp.js'
 export {
   findUp,
@@ -2010,6 +2015,11 @@ export { getObjectDotNotation } from './utilities/getObjectDotNotation.js'
 export { getRequestLanguage } from './utilities/getRequestLanguage.js'
 export { getUniqueFieldValue } from './utilities/getUniqueFieldValue.js'
 export { hasDraftsEnabled } from './utilities/getVersionsConfig.js'
+export {
+  getCollectionVirtualFieldNames,
+  getGlobalVirtualFieldNames,
+  stripVirtualFields,
+} from './utilities/getVirtualFieldNames.js'
 export { handleEndpoints } from './utilities/handleEndpoints.js'
 export { headersWithCors } from './utilities/headersWithCors.js'
 export { initTransaction } from './utilities/initTransaction.js'
@@ -2033,6 +2043,7 @@ export { sanitizePopulateParam } from './utilities/sanitizePopulateParam.js'
 export { sanitizeSelectParam } from './utilities/sanitizeSelectParam.js'
 export { sanitizeSortParams } from './utilities/sanitizeSortParams.js'
 export { stripUnselectedFields } from './utilities/stripUnselectedFields.js'
+export { transformPointDataToPayload } from './utilities/transformPointDataToPayload.js'
 export { traverseFields } from './utilities/traverseFields.js'
 export type { TraverseFieldsCallback } from './utilities/traverseFields.js'
 export { buildVersionCollectionFields } from './versions/buildCollectionFields.js'

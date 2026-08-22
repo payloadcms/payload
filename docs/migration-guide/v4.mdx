@@ -111,6 +111,23 @@ Payload adds built-in command import references to `cli.commands` while sanitizi
 
 See the [Payload CLI documentation](../configuration/cli) for the complete API.
 
+### Local data commands added
+
+The Payload CLI now includes commands for inspecting the current config and working with collection and global data through the Local API. For example:
+
+```sh
+payload getConfigInfo
+payload getCollectionSchema --slug posts
+payload findDocuments --slug posts --where '{"status":{"equals":"published"}}'
+payload createDocuments \
+  --slug posts \
+  --documents '{"data":{"title":"My post"}}'
+```
+
+These commands load the current Payload config, do not require a running development server, and intentionally set `overrideAccess: true`. They are intended for trusted local development and automation. Their input schemas are included in `payload help --json`, and complete structured input can be passed with `--input <json|@file|->`.
+
+See [Working with data from the CLI](../configuration/cli#working-with-data-from-the-cli) for examples.
+
 ### `migrateCLI` removed
 
 The undocumented `migrateCLI` export has been removed. It accepted an already-sanitized config, a minimist-shaped `parsedArgs` object, and a special `migrationDir` override. This duplicated migration command registration and kept the old argument format alive after the main CLI moved to Commander.

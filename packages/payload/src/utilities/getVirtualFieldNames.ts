@@ -1,6 +1,6 @@
-import type { SanitizedConfig } from 'payload'
+import type { SanitizedConfig } from '../config/types.js'
 
-import { fieldIsVirtual } from 'payload/shared'
+import { fieldIsVirtual } from '../fields/config/types.js'
 
 /**
  * Returns the names of all top-level virtual fields for a given collection slug.

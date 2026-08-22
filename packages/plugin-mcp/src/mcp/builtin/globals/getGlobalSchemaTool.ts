@@ -1,8 +1,7 @@
-import { getAccessResults } from 'payload'
+import { getAccessResults, getGlobalInputSchema } from 'payload'
 
 import { defaultAccess } from '../../../defaultAccess.js'
 import { defineGlobalTool } from '../../../defineTool.js'
-import { getGlobalInputSchema } from '../../../utils/schemaConversion/getEntityInputSchema.js'
 
 export const getGlobalSchemaTool = defineGlobalTool({
   access: (args) => {

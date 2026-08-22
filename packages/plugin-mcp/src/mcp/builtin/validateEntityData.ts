@@ -1,13 +1,9 @@
 import type { CollectionSlug, GlobalSlug, PayloadRequest, SanitizedConfig } from 'payload'
 
 import { CfWorkerJsonSchemaValidator } from '@modelcontextprotocol/server/validators/cf-worker'
+import { getCollectionInputSchema, getGlobalInputSchema } from 'payload'
 
 import type { JsonSchemaType, MCPToolResponse } from '../../types.js'
-
-import {
-  getCollectionInputSchema,
-  getGlobalInputSchema,
-} from '../../utils/schemaConversion/getEntityInputSchema.js'
 
 /**
  * Keep the default `shortcircuit: true` - `false` makes validating nested rich text exponentially slow.
@@ -38,7 +34,7 @@ export const validateCollectionData = ({
 }): MCPToolResponse | null =>
   validateData({
     slug: collectionSlug,
-    buildSchema: () => getCollectionInputSchema({ collectionSlug, req }),
+    buildSchema: () => getCollectionInputSchema({ collectionSlug, req }) as JsonSchemaType | null,
     data,
     entity: 'collection',
     partial,
@@ -56,7 +52,7 @@ export const validateGlobalData = ({
 }): MCPToolResponse | null =>
   validateData({
     slug: globalSlug,
-    buildSchema: () => getGlobalInputSchema({ globalSlug, req }),
+    buildSchema: () => getGlobalInputSchema({ globalSlug, req }) as JsonSchemaType | null,
     data,
     entity: 'global',
     partial: true,

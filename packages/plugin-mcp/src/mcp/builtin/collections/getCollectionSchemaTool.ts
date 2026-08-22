@@ -1,8 +1,7 @@
-import { getAccessResults } from 'payload'
+import { getAccessResults, getCollectionInputSchema } from 'payload'
 
 import { defaultAccess } from '../../../defaultAccess.js'
 import { defineCollectionTool } from '../../../defineTool.js'
-import { getCollectionInputSchema } from '../../../utils/schemaConversion/getEntityInputSchema.js'
 
 export const getCollectionSchemaTool = defineCollectionTool({
   access: (args) => {

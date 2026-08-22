@@ -1,16 +1,16 @@
 import type { SelectType, Where } from 'payload'
 
+import {
+  getCollectionInputSchema,
+  getCollectionVirtualFieldNames,
+  stripVirtualFields,
+  transformPointDataToPayload,
+} from 'payload'
 import { z } from 'zod'
 
 import { defaultAccess } from '../../../defaultAccess.js'
 import { defineCollectionTool } from '../../../defineTool.js'
 import { getLogger } from '../../../utils/getLogger.js'
-import {
-  getCollectionVirtualFieldNames,
-  stripVirtualFields,
-} from '../../../utils/getVirtualFieldNames.js'
-import { getCollectionInputSchema } from '../../../utils/schemaConversion/getEntityInputSchema.js'
-import { transformPointDataToPayload } from '../../../utils/transformPointDataToPayload.js'
 import { whereSchema } from '../../../utils/whereSchema.js'
 import { validateCollectionData } from '../validateEntityData.js'
 import { fileInputSchema, resolveFile } from './fileInput.js'
