@@ -1,3 +1,5 @@
+import type { Payload, SanitizedConfig } from 'payload'
+
 import path from 'node:path'
 import { getPayload } from 'payload'
 import { expect, test as vitestTest } from 'vitest'
@@ -16,46 +18,60 @@ type TestOptions = {
   db?: 'all' | 'drizzle' | 'mongo' | ((adapterType: DatabaseAdapterType) => boolean)
 }
 
-const testWithDirectory = vitestTest.extend('testDir', { scope: 'file' }, () => getTestDirectory())
-
-const testWithConfig = testWithDirectory.extend(
-  'config',
-  { scope: 'file' },
-  async ({ testDir }) => {
-    const { config } = await initPayloadInt(testDir, undefined, false)
-
-    return config
-  },
-)
-
-const testWithPayload = testWithConfig.extend(
-  'payload',
-  { scope: 'file' },
-  async ({ config }, { onCleanup }) => {
-    const payload = await getPayload({ config, cron: true })
-
-    onCleanup(() => payload.destroy())
-
-    return payload
-  },
-)
-
-const testWithRestClient = testWithPayload.extend('restClient', ({ payload }) => {
-  return new NextRESTClient(payload.config)
-})
-
-const testWithSDK = testWithRestClient.extend('sdk', ({ payload }) => {
-  return getSDK(payload.config)
-})
-
-const testWithFixtures = testWithSDK.extend('cli', ({ testDir }) => {
-  return async (input: Parameters<typeof runCLICommand>[0]) => {
-    const configPath = typeof input === 'string' ? undefined : input.configPath
-
-    await initPayloadInt(testDir, undefined, false, configPath)
-
-    return runCLICommand(input, { cwd: testDir })
+type IntegrationFixtures = {
+  $file: {
+    config: SanitizedConfig
+    payload: Payload
+    testDir: string
   }
+  $test: {
+    cli: (input: Parameters<typeof runCLICommand>[0]) => ReturnType<typeof runCLICommand>
+    restClient: NextRESTClient
+    sdk: ReturnType<typeof getSDK>
+  }
+}
+
+// Keep all fixtures in one extension so Vitest can trace test calls back to their source lines.
+const testWithFixtures = vitestTest.extend<IntegrationFixtures>({
+  cli: async ({ testDir }, use) => {
+    await use(async (input: Parameters<typeof runCLICommand>[0]) => {
+      const configPath = typeof input === 'string' ? undefined : input.configPath
+
+      await initPayloadInt(testDir, undefined, false, configPath)
+
+      return runCLICommand(input, { cwd: testDir })
+    })
+  },
+  config: [
+    async ({ testDir }, use) => {
+      const { config } = await initPayloadInt(testDir, undefined, false)
+
+      await use(config)
+    },
+    { scope: 'file' },
+  ],
+  payload: [
+    async ({ config }, use) => {
+      const payload = await getPayload({ config, cron: true })
+
+      await use(payload)
+      await payload.destroy()
+    },
+    { scope: 'file' },
+  ],
+  restClient: async ({ payload }, use) => {
+    await use(new NextRESTClient(payload.config))
+  },
+  sdk: async ({ payload }, use) => {
+    await use(getSDK(payload.config))
+  },
+  testDir: [
+    // eslint-disable-next-line no-empty-pattern
+    async ({}, use) => {
+      await use(getTestDirectory())
+    },
+    { scope: 'file' },
+  ],
 })
 
 /**
