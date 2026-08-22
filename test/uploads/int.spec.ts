@@ -1759,6 +1759,31 @@ describe('Collections - Uploads', () => {
       await payload.delete({ collection: 'media', id: duplicatedDoc.id })
     })
 
+    it('should respect data overrides when duplicating an upload collection doc', async () => {
+      const filePath = path.resolve(dirname, './image.png')
+      const file = await getFileByPath(filePath)
+      file.name = 'file-to-duplicate-override.png'
+
+      const mediaDoc = await payload.create({
+        collection: mediaSlug,
+        data: { alt: 'source-alt' },
+        file,
+      })
+
+      expect(mediaDoc).toBeDefined()
+
+      const duplicatedDoc = await payload.duplicate({
+        collection: mediaSlug,
+        id: mediaDoc.id,
+        data: { alt: 'override-alt' },
+      })
+
+      expect(duplicatedDoc.alt).toBe('override-alt')
+
+      await payload.delete({ collection: mediaSlug, id: mediaDoc.id })
+      await payload.delete({ collection: mediaSlug, id: duplicatedDoc.id })
+    })
+
     it('should not leak req.file between sequential duplicate() calls on a shared req', async () => {
       const filePath1 = path.resolve(dirname, './image.png')
       const file1 = await getFileByPath(filePath1)
