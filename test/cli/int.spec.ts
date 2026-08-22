@@ -1,5 +1,4 @@
-/* eslint-disable vitest/no-standalone-expect -- Assertions run inside `testCLICommand`. */
-
+/* eslint-disable vitest/no-conditional-expect */
 import type { CLIRuntime, Payload } from 'payload'
 
 import { access, mkdir, readdir, readFile, rm, writeFile } from 'node:fs/promises'
