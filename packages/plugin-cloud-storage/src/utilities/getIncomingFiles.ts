@@ -22,13 +22,22 @@ export function getIncomingFiles({
   let files: File[] = []
 
   if (file && data.filename && data.mimeType) {
+    /**
+     * A client upload is already stored under the filename it was given upload instructions for.
+     * When Payload settles on a different filename - a duplicate was uniquified, or the name was
+     * sanitized - the stored file no longer belongs to the document, so it has to be uploaded
+     * again under the final filename. The originally stored file is left alone - another document
+     * may have been saved with that filename in the meantime.
+     */
+    const isStoredUnderFinalFilename = Boolean(file.uploadReference) && file.name === data.filename
+
     const mainFile: File = {
       buffer: file.data,
       filename: data.filename,
       filesize: file.size,
       mimeType: data.mimeType,
       tempFilePath: file.tempFilePath,
-      uploadReference: file.uploadReference,
+      uploadReference: isStoredUnderFinalFilename ? file.uploadReference : undefined,
     }
 
     files = [mainFile]
