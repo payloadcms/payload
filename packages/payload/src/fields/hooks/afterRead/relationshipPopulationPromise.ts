@@ -120,12 +120,20 @@ const populate = async ({
           dataToUpdate[field.name].docs[index ?? key!].value = relationshipValue
         }
       } else if (Array.isArray(field.relationTo)) {
-        dataToUpdate[field.name][index ?? key!].value = relationshipValue
+        if (relationshipValue === null) {
+          dataToUpdate[field.name][index ?? key!] = null
+        } else {
+          dataToUpdate[field.name][index ?? key!].value = relationshipValue
+        }
       } else {
         dataToUpdate[field.name][index ?? key!] = relationshipValue
       }
     } else if (field.type !== 'join' && Array.isArray(field.relationTo)) {
-      dataToUpdate[field.name].value = relationshipValue
+      if (relationshipValue === null) {
+        dataToUpdate[field.name] = null
+      } else {
+        dataToUpdate[field.name].value = relationshipValue
+      }
     } else {
       if (field.type === 'join' && Array.isArray(field.collection)) {
         dataToUpdate[field.name].value = relationshipValue

@@ -26,6 +26,23 @@ export const Pages: CollectionConfig = {
       type: 'relationship',
       relationTo: postsSlug,
     },
+    {
+      name: 'featuredItem',
+      type: 'relationship',
+      relationTo: [postsSlug, pagesSlug],
+    },
+    {
+      name: 'relatedItems',
+      type: 'relationship',
+      relationTo: [postsSlug, pagesSlug],
+      hasMany: true,
+    },
+    {
+      name: 'localizedFeaturedItem',
+      type: 'relationship',
+      relationTo: [postsSlug, pagesSlug],
+      localized: true,
+    },
   ],
   versions: {
     drafts: true,
