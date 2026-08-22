@@ -23,231 +23,266 @@ const typesFile = path.resolve(generatedDirectory, 'payload-types.ts')
 
 process.env.SQLITE_URL ??= `file:${path.resolve(dirname, 'payload.db')}`
 
-test.beforeAll(() => {
-  process.env.PAYLOAD_FRAMEWORK = 'next'
-})
+test.describe('CLI', () => {
+  test.beforeAll(() => {
+    process.env.PAYLOAD_FRAMEWORK = 'next'
+  })
 
-test.beforeEach(async ({ payload }) => {
-  await resetCLIState({ payload })
-})
+  test.beforeEach(async ({ payload }) => {
+    await resetCLIState({ payload })
+  })
 
-test.afterAll(async () => {
-  await rm(generatedDirectory, { force: true, recursive: true })
-  await rm(migrationsDirectory, { force: true, recursive: true })
-  await rm(schemaFile, { force: true })
-})
+  test.afterAll(async () => {
+    await rm(generatedDirectory, { force: true, recursive: true })
+    await rm(migrationsDirectory, { force: true, recursive: true })
+    await rm(schemaFile, { force: true })
+  })
 
-async function resetCLIState({ payload }: { payload: Payload }): Promise<void> {
-  await rm(generatedDirectory, { force: true, recursive: true })
-  await rm(migrationsDirectory, { force: true, recursive: true })
-  await rm(schemaFile, { force: true })
-  await mkdir(generatedDirectory, { recursive: true })
-  process.env.PAYLOAD_DROP_DATABASE = 'false'
+  async function resetCLIState({ payload }: { payload: Payload }): Promise<void> {
+    await rm(generatedDirectory, { force: true, recursive: true })
+    await rm(migrationsDirectory, { force: true, recursive: true })
+    await rm(schemaFile, { force: true })
+    await mkdir(generatedDirectory, { recursive: true })
+    process.env.PAYLOAD_DROP_DATABASE = 'false'
 
-  await payload.delete({
-    collection: 'payload-jobs',
-    where: { id: { exists: true } },
-  } as never)
-  await clearAndSeedEverything(payload)
-}
+    await payload.delete({
+      collection: 'payload-jobs',
+      where: { id: { exists: true } },
+    } as never)
+    await clearAndSeedEverything(payload)
+  }
 
-test(
-  'build --no-types -- --help',
-  testCLICommand(async (command, { cli }) => {
+  test(
+    'build --no-types -- --help',
+    testCLICommand(async (command, { cli }) => {
+      await expect(access(importMapFile)).rejects.toThrow()
+
+      const output = await cli(command)
+
+      await expect(readFile(importMapFile, 'utf8')).resolves.toContain('export const importMap')
+      expect(`${output.stdout}\n${output.stderr}`).toContain('Usage:')
+
+      if (command.includes('--json')) {
+        expect(JSON.parse(output.stdout.trim().split('\n').at(-1)!)).toMatchObject({
+          command: 'build',
+          success: true,
+        })
+      } else {
+        expect(output.stdout).not.toContain('"command":"build"')
+      }
+    }),
+  )
+
+  test('build --help', async ({ cli }) => {
     await expect(access(importMapFile)).rejects.toThrow()
 
-    const output = await cli(command)
+    const output = await cli('build --help')
 
-    await expect(readFile(importMapFile, 'utf8')).resolves.toContain('export const importMap')
-    expect(`${output.stdout}\n${output.stderr}`).toContain('Usage:')
+    expect(`${output.stdout}\n${output.stderr}`).toContain('Usage: payload build')
+    await expect(access(importMapFile)).rejects.toThrow()
+  })
 
-    if (command.includes('--json')) {
-      expect(JSON.parse(output.stdout.trim().split('\n').at(-1)!)).toMatchObject({
-        command: 'build',
-        success: true,
-      })
-    } else {
-      expect(output.stdout).not.toContain('"command":"build"')
-    }
-  }),
-)
+  test.options({ db: 'drizzle' })(
+    'generate:db-schema --no-log',
+    testCLICommand(async (command, { cli }) => {
+      await expect(access(schemaFile)).rejects.toThrow()
 
-test('build --help', async ({ cli }) => {
-  await expect(access(importMapFile)).rejects.toThrow()
+      const output = await cli(command)
 
-  const output = await cli('build --help')
+      await expect(readFile(schemaFile, 'utf8')).resolves.toContain('export const pages')
 
-  expect(`${output.stdout}\n${output.stderr}`).toContain('Usage: payload build')
-  await expect(access(importMapFile)).rejects.toThrow()
-})
+      if (command.includes('--json')) {
+        expect(JSON.parse(output.stdout.trim().split('\n').at(-1)!)).toMatchObject({
+          command: 'generate:db-schema',
+          success: true,
+        })
+      } else {
+        expect(output.stdout).not.toContain('"command":"generate:db-schema"')
+      }
+    }),
+  )
 
-test.options({ db: 'drizzle' })(
-  'generate:db-schema --no-log',
-  testCLICommand(async (command, { cli }) => {
+  test.options({ db: 'drizzle' })('generate:db-schema --help', async ({ cli }) => {
     await expect(access(schemaFile)).rejects.toThrow()
 
-    const output = await cli(command)
+    const output = await cli('generate:db-schema --help')
 
-    await expect(readFile(schemaFile, 'utf8')).resolves.toContain('export const pages')
+    expect(`${output.stdout}\n${output.stderr}`).toContain('Usage: payload generate:db-schema')
+    await expect(access(schemaFile)).rejects.toThrow()
+  })
 
-    if (command.includes('--json')) {
-      expect(JSON.parse(output.stdout.trim().split('\n').at(-1)!)).toMatchObject({
-        command: 'generate:db-schema',
-        success: true,
-      })
-    } else {
-      expect(output.stdout).not.toContain('"command":"generate:db-schema"')
-    }
-  }),
-)
+  test(
+    'generate:importmap',
+    testCLICommand(async (command, { cli }) => {
+      await expect(access(importMapFile)).rejects.toThrow()
 
-test.options({ db: 'drizzle' })('generate:db-schema --help', async ({ cli }) => {
-  await expect(access(schemaFile)).rejects.toThrow()
+      const output = await cli(command)
 
-  const output = await cli('generate:db-schema --help')
+      await expect(readFile(importMapFile, 'utf8')).resolves.toContain('export const importMap')
 
-  expect(`${output.stdout}\n${output.stderr}`).toContain('Usage: payload generate:db-schema')
-  await expect(access(schemaFile)).rejects.toThrow()
-})
+      if (command.includes('--json')) {
+        expect(JSON.parse(output.stdout.trim().split('\n').at(-1)!)).toMatchObject({
+          command: 'generate:importmap',
+          success: true,
+        })
+      } else {
+        expect(output.stdout).not.toContain('"command":"generate:importmap"')
+      }
+    }),
+  )
 
-test(
-  'generate:importmap',
-  testCLICommand(async (command, { cli }) => {
+  test('generate:importmap --help', async ({ cli }) => {
     await expect(access(importMapFile)).rejects.toThrow()
 
-    const output = await cli(command)
+    const output = await cli('generate:importmap --help')
 
-    await expect(readFile(importMapFile, 'utf8')).resolves.toContain('export const importMap')
+    expect(`${output.stdout}\n${output.stderr}`).toContain('Usage: payload generate:importmap')
+    await expect(access(importMapFile)).rejects.toThrow()
+  })
 
-    if (command.includes('--json')) {
-      expect(JSON.parse(output.stdout.trim().split('\n').at(-1)!)).toMatchObject({
-        command: 'generate:importmap',
-        success: true,
-      })
-    } else {
-      expect(output.stdout).not.toContain('"command":"generate:importmap"')
-    }
-  }),
-)
+  test(
+    'generate:types',
+    testCLICommand(async (command, { cli }) => {
+      await expect(access(typesFile)).rejects.toThrow()
 
-test('generate:importmap --help', async ({ cli }) => {
-  await expect(access(importMapFile)).rejects.toThrow()
+      const output = await cli(command)
 
-  const output = await cli('generate:importmap --help')
+      await expect(readFile(typesFile, 'utf8')).resolves.toContain('export interface Page')
 
-  expect(`${output.stdout}\n${output.stderr}`).toContain('Usage: payload generate:importmap')
-  await expect(access(importMapFile)).rejects.toThrow()
-})
+      if (command.includes('--json')) {
+        expect(JSON.parse(output.stdout.trim().split('\n').at(-1)!)).toMatchObject({
+          command: 'generate:types',
+          result: { outputFile: typesFile },
+          success: true,
+        })
+      } else {
+        expect(output.stdout).not.toContain('"command":"generate:types"')
+      }
+    }),
+  )
 
-test(
-  'generate:types',
-  testCLICommand(async (command, { cli }) => {
+  test('generate:types --help', async ({ cli }) => {
     await expect(access(typesFile)).rejects.toThrow()
 
-    const output = await cli(command)
+    const output = await cli('generate:types --help')
 
-    await expect(readFile(typesFile, 'utf8')).resolves.toContain('export interface Page')
+    expect(`${output.stdout}\n${output.stderr}`).toContain('Usage: payload generate:types')
+    await expect(access(typesFile)).rejects.toThrow()
+  })
 
-    if (command.includes('--json')) {
+  test(
+    'help',
+    testCLICommand(async (command, { cli }) => {
+      const output = await cli(command)
+
+      if (!command.includes('--json')) {
+        expect(output.stdout).toContain('Manage and operate a local Payload project.')
+        expect(output.stdout).toContain('generate:types')
+        return
+      }
+
+      const response = JSON.parse(output.stdout.trim().split('\n').at(-1)!) as CLIOutput<{
+        commands: Array<{ name: string }>
+        version: number
+      }>
+
+      expect(response).toMatchObject({ command: 'help', success: true })
+      expect(response.result.version).toBe(1)
+      expect(response.result.commands.map(({ name }) => name)).toEqual(
+        expect.arrayContaining([
+          'build',
+          'generate:db-schema',
+          'generate:importmap',
+          'generate:types',
+          'help',
+          'hello',
+          'info',
+          'jobs:handle-schedules',
+          'jobs:run',
+          'migrate',
+          'migrate:create',
+          'migrate:down',
+          'migrate:fresh',
+          'migrate:refresh',
+          'migrate:reset',
+          'migrate:status',
+          'run',
+        ]),
+      )
+    }),
+  )
+
+  test('help --help', async ({ cli }) => {
+    const output = await cli('help --help')
+
+    expect(`${output.stdout}\n${output.stderr}`).toContain('Usage: payload help')
+  })
+
+  test(
+    'info',
+    testCLICommand(async (command, { cli }) => {
+      const output = await cli(command)
+
+      if (!command.includes('--json')) {
+        expect(output.stdout).toContain('Binaries:')
+        expect(output.stdout).toContain(`Node: ${process.versions.node}`)
+        return
+      }
+
       expect(JSON.parse(output.stdout.trim().split('\n').at(-1)!)).toMatchObject({
-        command: 'generate:types',
-        result: { outputFile: typesFile },
+        command: 'info',
+        result: {
+          binaries: { node: process.versions.node },
+          packages: expect.arrayContaining([expect.objectContaining({ name: 'payload' })]),
+        },
         success: true,
       })
-    } else {
-      expect(output.stdout).not.toContain('"command":"generate:types"')
-    }
-  }),
-)
+    }),
+  )
 
-test('generate:types --help', async ({ cli }) => {
-  await expect(access(typesFile)).rejects.toThrow()
+  test('info --help', async ({ cli }) => {
+    const output = await cli('info --help')
 
-  const output = await cli('generate:types --help')
+    expect(`${output.stdout}\n${output.stderr}`).toContain('Usage: payload info')
+  })
 
-  expect(`${output.stdout}\n${output.stderr}`).toContain('Usage: payload generate:types')
-  await expect(access(typesFile)).rejects.toThrow()
-})
+  test(
+    'jobs:handle-schedules --all-queues',
+    testCLICommand(async (command, { cli, payload }) => {
+      const jobsBefore = (await payload.find({
+        collection: 'payload-jobs',
+        limit: 100,
+      } as never)) as { docs: unknown[] }
 
-test(
-  'help',
-  testCLICommand(async (command, { cli }) => {
-    const output = await cli(command)
+      expect(jobsBefore.docs).toHaveLength(0)
 
-    if (!command.includes('--json')) {
-      expect(output.stdout).toContain('Manage and operate a local Payload project.')
-      expect(output.stdout).toContain('generate:types')
-      return
-    }
+      const output = await cli(command)
+      const jobsAfter = (await payload.find({
+        collection: 'payload-jobs',
+        limit: 100,
+      } as never)) as {
+        docs: Array<{ meta?: { scheduled?: boolean }; taskSlug?: string }>
+      }
 
-    const response = JSON.parse(output.stdout.trim().split('\n').at(-1)!) as CLIOutput<{
-      commands: Array<{ name: string }>
-      version: number
-    }>
+      expect(jobsAfter.docs).toEqual([
+        expect.objectContaining({
+          meta: expect.objectContaining({ scheduled: true }),
+          taskSlug: 'noop',
+        }),
+      ])
 
-    expect(response).toMatchObject({ command: 'help', success: true })
-    expect(response.result.version).toBe(1)
-    expect(response.result.commands.map(({ name }) => name)).toEqual(
-      expect.arrayContaining([
-        'build',
-        'generate:db-schema',
-        'generate:importmap',
-        'generate:types',
-        'help',
-        'hello',
-        'info',
-        'jobs:handle-schedules',
-        'jobs:run',
-        'migrate',
-        'migrate:create',
-        'migrate:down',
-        'migrate:fresh',
-        'migrate:refresh',
-        'migrate:reset',
-        'migrate:status',
-        'run',
-      ]),
-    )
-  }),
-)
+      if (command.includes('--json')) {
+        expect(JSON.parse(output.stdout.trim().split('\n').at(-1)!)).toMatchObject({
+          command: 'jobs:handle-schedules',
+          success: true,
+        })
+      } else {
+        expect(output.stdout).not.toContain('"command":"jobs:handle-schedules"')
+      }
+    }),
+  )
 
-test('help --help', async ({ cli }) => {
-  const output = await cli('help --help')
-
-  expect(`${output.stdout}\n${output.stderr}`).toContain('Usage: payload help')
-})
-
-test(
-  'info',
-  testCLICommand(async (command, { cli }) => {
-    const output = await cli(command)
-
-    if (!command.includes('--json')) {
-      expect(output.stdout).toContain('Binaries:')
-      expect(output.stdout).toContain(`Node: ${process.versions.node}`)
-      return
-    }
-
-    expect(JSON.parse(output.stdout.trim().split('\n').at(-1)!)).toMatchObject({
-      command: 'info',
-      result: {
-        binaries: { node: process.versions.node },
-        packages: expect.arrayContaining([expect.objectContaining({ name: 'payload' })]),
-      },
-      success: true,
-    })
-  }),
-)
-
-test('info --help', async ({ cli }) => {
-  const output = await cli('info --help')
-
-  expect(`${output.stdout}\n${output.stderr}`).toContain('Usage: payload info')
-})
-
-test(
-  'jobs:handle-schedules --all-queues',
-  testCLICommand(async (command, { cli, payload }) => {
+  test('jobs:handle-schedules --help', async ({ cli, payload }) => {
     const jobsBefore = (await payload.find({
       collection: 'payload-jobs',
       limit: 100,
@@ -255,103 +290,96 @@ test(
 
     expect(jobsBefore.docs).toHaveLength(0)
 
-    const output = await cli(command)
+    const output = await cli('jobs:handle-schedules --help')
     const jobsAfter = (await payload.find({
       collection: 'payload-jobs',
       limit: 100,
-    } as never)) as {
-      docs: Array<{ meta?: { scheduled?: boolean }; taskSlug?: string }>
-    }
-
-    expect(jobsAfter.docs).toEqual([
-      expect.objectContaining({
-        meta: expect.objectContaining({ scheduled: true }),
-        taskSlug: 'noop',
-      }),
-    ])
-
-    if (command.includes('--json')) {
-      expect(JSON.parse(output.stdout.trim().split('\n').at(-1)!)).toMatchObject({
-        command: 'jobs:handle-schedules',
-        success: true,
-      })
-    } else {
-      expect(output.stdout).not.toContain('"command":"jobs:handle-schedules"')
-    }
-  }),
-)
-
-test('jobs:handle-schedules --help', async ({ cli, payload }) => {
-  const jobsBefore = (await payload.find({
-    collection: 'payload-jobs',
-    limit: 100,
-  } as never)) as { docs: unknown[] }
-
-  expect(jobsBefore.docs).toHaveLength(0)
-
-  const output = await cli('jobs:handle-schedules --help')
-  const jobsAfter = (await payload.find({
-    collection: 'payload-jobs',
-    limit: 100,
-  } as never)) as { docs: unknown[] }
-
-  expect(`${output.stdout}\n${output.stderr}`).toContain('Usage: payload jobs:handle-schedules')
-  expect(jobsAfter.docs).toHaveLength(0)
-})
-
-test.options({ db: 'mongo' })(
-  'jobs:run --all-queues --limit 1',
-  testCLICommand(async (command, { cli, payload }) => {
-    await payload.jobs.queue({ input: {}, task: 'noop' } as never)
-    const jobsBefore = (await payload.find({
-      collection: 'payload-jobs',
-      limit: 100,
     } as never)) as { docs: unknown[] }
+
+    expect(`${output.stdout}\n${output.stderr}`).toContain('Usage: payload jobs:handle-schedules')
+    expect(jobsAfter.docs).toHaveLength(0)
+  })
+
+  test.options({ db: 'mongo' })(
+    'jobs:run --all-queues --limit 1',
+    testCLICommand(async (command, { cli, payload }) => {
+      await payload.jobs.queue({ input: {}, task: 'noop' } as never)
+      const jobsBefore = (await payload.find({
+        collection: 'payload-jobs',
+        limit: 100,
+      } as never)) as { docs: unknown[] }
+      const pagesBefore = (await payload.find({ collection: 'pages', limit: 100 } as never)) as {
+        docs: Array<{ title: string }>
+      }
+
+      expect(jobsBefore.docs).toHaveLength(1)
+      expect(pagesBefore.docs.map(({ title }) => title)).not.toContain('CLI job ran')
+
+      const output = await cli(command)
+      const pagesAfter = (await payload.find({ collection: 'pages', limit: 100 } as never)) as {
+        docs: Array<{ title: string }>
+      }
+
+      expect(pagesAfter.docs.map(({ title }) => title)).toContain('CLI job ran')
+
+      if (command.includes('--json')) {
+        expect(JSON.parse(output.stdout.trim().split('\n').at(-1)!)).toMatchObject({
+          command: 'jobs:run',
+          success: true,
+        })
+      } else {
+        expect(output.stdout).not.toContain('"command":"jobs:run"')
+      }
+    }),
+  )
+
+  test.options({ db: 'mongo' })('jobs:run --help', async ({ cli, payload }) => {
+    await payload.jobs.queue({ input: {}, task: 'noop' } as never)
     const pagesBefore = (await payload.find({ collection: 'pages', limit: 100 } as never)) as {
       docs: Array<{ title: string }>
     }
 
-    expect(jobsBefore.docs).toHaveLength(1)
     expect(pagesBefore.docs.map(({ title }) => title)).not.toContain('CLI job ran')
 
-    const output = await cli(command)
+    const output = await cli('jobs:run --help')
     const pagesAfter = (await payload.find({ collection: 'pages', limit: 100 } as never)) as {
       docs: Array<{ title: string }>
     }
 
-    expect(pagesAfter.docs.map(({ title }) => title)).toContain('CLI job ran')
+    expect(`${output.stdout}\n${output.stderr}`).toContain('Usage: payload jobs:run')
+    expect(pagesAfter.docs.map(({ title }) => title)).not.toContain('CLI job ran')
+  })
 
-    if (command.includes('--json')) {
-      expect(JSON.parse(output.stdout.trim().split('\n').at(-1)!)).toMatchObject({
-        command: 'jobs:run',
-        success: true,
+  test.options({ db: 'mongo' })(
+    'migrate',
+    testCLICommand(async (command, { cli, payload }) => {
+      await cli('migrate:create pending --force-accept-warning --json')
+      const migrationName = (await readdir(migrationsDirectory))
+        .find((file) => file.endsWith('_pending.ts'))!
+        .replace('.ts', '')
+      const migrationsBefore = await payload.find({ collection: 'payload-migrations', limit: 100 })
+
+      expect(migrationsBefore.docs.find(({ name }) => name === migrationName)).toBeUndefined()
+
+      const output = await cli(command)
+      const migrationsAfter = await payload.find({ collection: 'payload-migrations', limit: 100 })
+
+      expect(migrationsAfter.docs.find(({ name }) => name === migrationName)).toMatchObject({
+        batch: 1,
       })
-    } else {
-      expect(output.stdout).not.toContain('"command":"jobs:run"')
-    }
-  }),
-)
 
-test.options({ db: 'mongo' })('jobs:run --help', async ({ cli, payload }) => {
-  await payload.jobs.queue({ input: {}, task: 'noop' } as never)
-  const pagesBefore = (await payload.find({ collection: 'pages', limit: 100 } as never)) as {
-    docs: Array<{ title: string }>
-  }
+      if (command.includes('--json')) {
+        expect(JSON.parse(output.stdout.trim().split('\n').at(-1)!)).toMatchObject({
+          command: 'migrate',
+          success: true,
+        })
+      } else {
+        expect(output.stdout).not.toContain('"command":"migrate"')
+      }
+    }),
+  )
 
-  expect(pagesBefore.docs.map(({ title }) => title)).not.toContain('CLI job ran')
-
-  const output = await cli('jobs:run --help')
-  const pagesAfter = (await payload.find({ collection: 'pages', limit: 100 } as never)) as {
-    docs: Array<{ title: string }>
-  }
-
-  expect(`${output.stdout}\n${output.stderr}`).toContain('Usage: payload jobs:run')
-  expect(pagesAfter.docs.map(({ title }) => title)).not.toContain('CLI job ran')
-})
-
-test.options({ db: 'mongo' })(
-  'migrate',
-  testCLICommand(async (command, { cli, payload }) => {
+  test.options({ db: 'mongo' })('migrate --help', async ({ cli, payload }) => {
     await cli('migrate:create pending --force-accept-warning --json')
     const migrationName = (await readdir(migrationsDirectory))
       .find((file) => file.endsWith('_pending.ts'))!
@@ -360,120 +388,120 @@ test.options({ db: 'mongo' })(
 
     expect(migrationsBefore.docs.find(({ name }) => name === migrationName)).toBeUndefined()
 
-    const output = await cli(command)
+    const output = await cli('migrate --help')
     const migrationsAfter = await payload.find({ collection: 'payload-migrations', limit: 100 })
 
-    expect(migrationsAfter.docs.find(({ name }) => name === migrationName)).toMatchObject({
-      batch: 1,
-    })
+    expect(`${output.stdout}\n${output.stderr}`).toContain('Usage: payload migrate')
+    expect(migrationsAfter.docs.find(({ name }) => name === migrationName)).toBeUndefined()
+  })
 
-    if (command.includes('--json')) {
-      expect(JSON.parse(output.stdout.trim().split('\n').at(-1)!)).toMatchObject({
-        command: 'migrate',
-        success: true,
-      })
-    } else {
-      expect(output.stdout).not.toContain('"command":"migrate"')
-    }
-  }),
-)
+  test(
+    'migrate:create cli-test --force-accept-warning',
+    testCLICommand(async (command, { cli }) => {
+      await expect(access(migrationsDirectory)).rejects.toThrow()
 
-test.options({ db: 'mongo' })('migrate --help', async ({ cli, payload }) => {
-  await cli('migrate:create pending --force-accept-warning --json')
-  const migrationName = (await readdir(migrationsDirectory))
-    .find((file) => file.endsWith('_pending.ts'))!
-    .replace('.ts', '')
-  const migrationsBefore = await payload.find({ collection: 'payload-migrations', limit: 100 })
+      const output = await cli(command)
+      const migrationFile = (await readdir(migrationsDirectory)).find((file) =>
+        /_cli[-_]test\.ts$/.test(file),
+      )
 
-  expect(migrationsBefore.docs.find(({ name }) => name === migrationName)).toBeUndefined()
+      expect(migrationFile).toBeDefined()
+      await expect(
+        readFile(path.resolve(migrationsDirectory, 'index.ts'), 'utf8'),
+      ).resolves.toContain(migrationFile!.replace('.ts', ''))
 
-  const output = await cli('migrate --help')
-  const migrationsAfter = await payload.find({ collection: 'payload-migrations', limit: 100 })
+      if (command.includes('--json')) {
+        expect(JSON.parse(output.stdout.trim().split('\n').at(-1)!)).toMatchObject({
+          command: 'migrate:create',
+          success: true,
+        })
+      } else {
+        expect(output.stdout).not.toContain('"command":"migrate:create"')
+      }
+    }),
+  )
 
-  expect(`${output.stdout}\n${output.stderr}`).toContain('Usage: payload migrate')
-  expect(migrationsAfter.docs.find(({ name }) => name === migrationName)).toBeUndefined()
-})
-
-test(
-  'migrate:create cli-test --force-accept-warning',
-  testCLICommand(async (command, { cli }) => {
+  test('migrate:create --help', async ({ cli }) => {
     await expect(access(migrationsDirectory)).rejects.toThrow()
 
-    const output = await cli(command)
-    const migrationFile = (await readdir(migrationsDirectory)).find((file) =>
-      /_cli[-_]test\.ts$/.test(file),
-    )
+    const output = await cli('migrate:create --help')
 
-    expect(migrationFile).toBeDefined()
-    await expect(
-      readFile(path.resolve(migrationsDirectory, 'index.ts'), 'utf8'),
-    ).resolves.toContain(migrationFile!.replace('.ts', ''))
+    expect(`${output.stdout}\n${output.stderr}`).toContain('Usage: payload migrate:create')
+    await expect(access(migrationsDirectory)).rejects.toThrow()
+  })
 
-    if (command.includes('--json')) {
-      expect(JSON.parse(output.stdout.trim().split('\n').at(-1)!)).toMatchObject({
-        command: 'migrate:create',
-        success: true,
-      })
-    } else {
-      expect(output.stdout).not.toContain('"command":"migrate:create"')
-    }
-  }),
-)
+  test.options({ db: 'mongo' })(
+    'migrate:down',
+    testCLICommand(async (command, { cli, payload }) => {
+      await cli('migrate:create down --force-accept-warning --json')
+      const migrationName = (await readdir(migrationsDirectory))
+        .find((file) => file.endsWith('_down.ts'))!
+        .replace('.ts', '')
+      await cli('migrate --json')
+      const migrationsBefore = await payload.find({ collection: 'payload-migrations', limit: 100 })
 
-test('migrate:create --help', async ({ cli }) => {
-  await expect(access(migrationsDirectory)).rejects.toThrow()
+      expect(migrationsBefore.docs.find(({ name }) => name === migrationName)).toBeDefined()
 
-  const output = await cli('migrate:create --help')
+      const output = await cli(command)
+      const migrationsAfter = await payload.find({ collection: 'payload-migrations', limit: 100 })
 
-  expect(`${output.stdout}\n${output.stderr}`).toContain('Usage: payload migrate:create')
-  await expect(access(migrationsDirectory)).rejects.toThrow()
-})
+      expect(migrationsAfter.docs.find(({ name }) => name === migrationName)).toBeUndefined()
 
-test.options({ db: 'mongo' })(
-  'migrate:down',
-  testCLICommand(async (command, { cli, payload }) => {
+      if (command.includes('--json')) {
+        expect(JSON.parse(output.stdout.trim().split('\n').at(-1)!)).toMatchObject({
+          command: 'migrate:down',
+          success: true,
+        })
+      } else {
+        expect(output.stdout).not.toContain('"command":"migrate:down"')
+      }
+    }),
+  )
+
+  test.options({ db: 'mongo' })('migrate:down --help', async ({ cli, payload }) => {
     await cli('migrate:create down --force-accept-warning --json')
     const migrationName = (await readdir(migrationsDirectory))
       .find((file) => file.endsWith('_down.ts'))!
       .replace('.ts', '')
     await cli('migrate --json')
-    const migrationsBefore = await payload.find({ collection: 'payload-migrations', limit: 100 })
 
-    expect(migrationsBefore.docs.find(({ name }) => name === migrationName)).toBeDefined()
-
-    const output = await cli(command)
+    const output = await cli('migrate:down --help')
     const migrationsAfter = await payload.find({ collection: 'payload-migrations', limit: 100 })
 
-    expect(migrationsAfter.docs.find(({ name }) => name === migrationName)).toBeUndefined()
+    expect(`${output.stdout}\n${output.stderr}`).toContain('Usage: payload migrate:down')
+    expect(migrationsAfter.docs.find(({ name }) => name === migrationName)).toBeDefined()
+  })
 
-    if (command.includes('--json')) {
-      expect(JSON.parse(output.stdout.trim().split('\n').at(-1)!)).toMatchObject({
-        command: 'migrate:down',
-        success: true,
+  test.options({ db: 'mongo' })(
+    'migrate:fresh --force-accept-warning',
+    testCLICommand(async (command, { cli, payload }) => {
+      await cli('migrate:create fresh --force-accept-warning --json')
+      const migrationName = (await readdir(migrationsDirectory))
+        .find((file) => file.endsWith('_fresh.ts'))!
+        .replace('.ts', '')
+      const migrationsBefore = await payload.find({ collection: 'payload-migrations', limit: 100 })
+
+      expect(migrationsBefore.docs.find(({ name }) => name === migrationName)).toBeUndefined()
+
+      const output = await cli(command)
+      const migrationsAfter = await payload.find({ collection: 'payload-migrations', limit: 100 })
+
+      expect(migrationsAfter.docs.find(({ name }) => name === migrationName)).toMatchObject({
+        batch: 1,
       })
-    } else {
-      expect(output.stdout).not.toContain('"command":"migrate:down"')
-    }
-  }),
-)
 
-test.options({ db: 'mongo' })('migrate:down --help', async ({ cli, payload }) => {
-  await cli('migrate:create down --force-accept-warning --json')
-  const migrationName = (await readdir(migrationsDirectory))
-    .find((file) => file.endsWith('_down.ts'))!
-    .replace('.ts', '')
-  await cli('migrate --json')
+      if (command.includes('--json')) {
+        expect(JSON.parse(output.stdout.trim().split('\n').at(-1)!)).toMatchObject({
+          command: 'migrate:fresh',
+          success: true,
+        })
+      } else {
+        expect(output.stdout).not.toContain('"command":"migrate:fresh"')
+      }
+    }),
+  )
 
-  const output = await cli('migrate:down --help')
-  const migrationsAfter = await payload.find({ collection: 'payload-migrations', limit: 100 })
-
-  expect(`${output.stdout}\n${output.stderr}`).toContain('Usage: payload migrate:down')
-  expect(migrationsAfter.docs.find(({ name }) => name === migrationName)).toBeDefined()
-})
-
-test.options({ db: 'mongo' })(
-  'migrate:fresh --force-accept-warning',
-  testCLICommand(async (command, { cli, payload }) => {
+  test.options({ db: 'mongo' })('migrate:fresh --help', async ({ cli, payload }) => {
     await cli('migrate:create fresh --force-accept-warning --json')
     const migrationName = (await readdir(migrationsDirectory))
       .find((file) => file.endsWith('_fresh.ts'))!
@@ -482,232 +510,206 @@ test.options({ db: 'mongo' })(
 
     expect(migrationsBefore.docs.find(({ name }) => name === migrationName)).toBeUndefined()
 
-    const output = await cli(command)
+    const output = await cli('migrate:fresh --help')
     const migrationsAfter = await payload.find({ collection: 'payload-migrations', limit: 100 })
 
-    expect(migrationsAfter.docs.find(({ name }) => name === migrationName)).toMatchObject({
-      batch: 1,
-    })
+    expect(`${output.stdout}\n${output.stderr}`).toContain('Usage: payload migrate:fresh')
+    expect(migrationsAfter.docs.find(({ name }) => name === migrationName)).toBeUndefined()
+  })
 
-    if (command.includes('--json')) {
-      expect(JSON.parse(output.stdout.trim().split('\n').at(-1)!)).toMatchObject({
-        command: 'migrate:fresh',
-        success: true,
-      })
-    } else {
-      expect(output.stdout).not.toContain('"command":"migrate:fresh"')
-    }
-  }),
-)
+  test.options({ db: 'mongo' })(
+    'migrate:refresh',
+    testCLICommand(async (command, { cli, payload }) => {
+      await cli('migrate:create refresh --force-accept-warning --json')
+      const migrationName = (await readdir(migrationsDirectory))
+        .find((file) => file.endsWith('_refresh.ts'))!
+        .replace('.ts', '')
+      await cli('migrate --json')
+      const migrationsBefore = await payload.find({ collection: 'payload-migrations', limit: 100 })
+      const migrationBefore = migrationsBefore.docs.find(({ name }) => name === migrationName)
 
-test.options({ db: 'mongo' })('migrate:fresh --help', async ({ cli, payload }) => {
-  await cli('migrate:create fresh --force-accept-warning --json')
-  const migrationName = (await readdir(migrationsDirectory))
-    .find((file) => file.endsWith('_fresh.ts'))!
-    .replace('.ts', '')
-  const migrationsBefore = await payload.find({ collection: 'payload-migrations', limit: 100 })
+      expect(migrationBefore).toBeDefined()
 
-  expect(migrationsBefore.docs.find(({ name }) => name === migrationName)).toBeUndefined()
+      const output = await cli(command)
+      const migrationsAfter = await payload.find({ collection: 'payload-migrations', limit: 100 })
+      const migrationAfter = migrationsAfter.docs.find(({ name }) => name === migrationName)
 
-  const output = await cli('migrate:fresh --help')
-  const migrationsAfter = await payload.find({ collection: 'payload-migrations', limit: 100 })
+      expect(migrationAfter).toBeDefined()
+      expect(migrationAfter?.id).not.toBe(migrationBefore?.id)
 
-  expect(`${output.stdout}\n${output.stderr}`).toContain('Usage: payload migrate:fresh')
-  expect(migrationsAfter.docs.find(({ name }) => name === migrationName)).toBeUndefined()
-})
+      if (command.includes('--json')) {
+        expect(JSON.parse(output.stdout.trim().split('\n').at(-1)!)).toMatchObject({
+          command: 'migrate:refresh',
+          success: true,
+        })
+      } else {
+        expect(output.stdout).not.toContain('"command":"migrate:refresh"')
+      }
+    }),
+  )
 
-test.options({ db: 'mongo' })(
-  'migrate:refresh',
-  testCLICommand(async (command, { cli, payload }) => {
+  test.options({ db: 'mongo' })('migrate:refresh --help', async ({ cli, payload }) => {
     await cli('migrate:create refresh --force-accept-warning --json')
     const migrationName = (await readdir(migrationsDirectory))
       .find((file) => file.endsWith('_refresh.ts'))!
       .replace('.ts', '')
     await cli('migrate --json')
-    const migrationsBefore = await payload.find({ collection: 'payload-migrations', limit: 100 })
+    const migrationsBefore = await payload.find({
+      collection: 'payload-migrations',
+      limit: 100,
+    })
     const migrationBefore = migrationsBefore.docs.find(({ name }) => name === migrationName)
 
-    expect(migrationBefore).toBeDefined()
+    const output = await cli('migrate:refresh --help')
+    const migrationsAfter = await payload.find({
+      collection: 'payload-migrations',
+      limit: 100,
+    })
 
-    const output = await cli(command)
-    const migrationsAfter = await payload.find({ collection: 'payload-migrations', limit: 100 })
-    const migrationAfter = migrationsAfter.docs.find(({ name }) => name === migrationName)
-
-    expect(migrationAfter).toBeDefined()
-    expect(migrationAfter?.id).not.toBe(migrationBefore?.id)
-
-    if (command.includes('--json')) {
-      expect(JSON.parse(output.stdout.trim().split('\n').at(-1)!)).toMatchObject({
-        command: 'migrate:refresh',
-        success: true,
-      })
-    } else {
-      expect(output.stdout).not.toContain('"command":"migrate:refresh"')
-    }
-  }),
-)
-
-test.options({ db: 'mongo' })('migrate:refresh --help', async ({ cli, payload }) => {
-  await cli('migrate:create refresh --force-accept-warning --json')
-  const migrationName = (await readdir(migrationsDirectory))
-    .find((file) => file.endsWith('_refresh.ts'))!
-    .replace('.ts', '')
-  await cli('migrate --json')
-  const migrationsBefore = await payload.find({
-    collection: 'payload-migrations',
-    limit: 100,
-  })
-  const migrationBefore = migrationsBefore.docs.find(({ name }) => name === migrationName)
-
-  const output = await cli('migrate:refresh --help')
-  const migrationsAfter = await payload.find({
-    collection: 'payload-migrations',
-    limit: 100,
+    expect(`${output.stdout}\n${output.stderr}`).toContain('Usage: payload migrate:refresh')
+    expect(migrationsAfter.docs.find(({ name }) => name === migrationName)?.id).toBe(
+      migrationBefore?.id,
+    )
   })
 
-  expect(`${output.stdout}\n${output.stderr}`).toContain('Usage: payload migrate:refresh')
-  expect(migrationsAfter.docs.find(({ name }) => name === migrationName)?.id).toBe(
-    migrationBefore?.id,
+  test.options({ db: 'mongo' })(
+    'migrate:reset',
+    testCLICommand(async (command, { cli, payload }) => {
+      await cli('migrate:create reset --force-accept-warning --json')
+      const migrationName = (await readdir(migrationsDirectory))
+        .find((file) => file.endsWith('_reset.ts'))!
+        .replace('.ts', '')
+      await cli('migrate --json')
+      const migrationsBefore = await payload.find({ collection: 'payload-migrations', limit: 100 })
+
+      expect(migrationsBefore.docs.find(({ name }) => name === migrationName)).toBeDefined()
+
+      const output = await cli(command)
+      const migrationsAfter = await payload.find({ collection: 'payload-migrations', limit: 100 })
+
+      expect(migrationsAfter.docs).toHaveLength(0)
+
+      if (command.includes('--json')) {
+        expect(JSON.parse(output.stdout.trim().split('\n').at(-1)!)).toMatchObject({
+          command: 'migrate:reset',
+          success: true,
+        })
+      } else {
+        expect(output.stdout).not.toContain('"command":"migrate:reset"')
+      }
+    }),
   )
-})
 
-test.options({ db: 'mongo' })(
-  'migrate:reset',
-  testCLICommand(async (command, { cli, payload }) => {
+  test.options({ db: 'mongo' })('migrate:reset --help', async ({ cli, payload }) => {
     await cli('migrate:create reset --force-accept-warning --json')
     const migrationName = (await readdir(migrationsDirectory))
       .find((file) => file.endsWith('_reset.ts'))!
       .replace('.ts', '')
     await cli('migrate --json')
-    const migrationsBefore = await payload.find({ collection: 'payload-migrations', limit: 100 })
 
-    expect(migrationsBefore.docs.find(({ name }) => name === migrationName)).toBeDefined()
+    const output = await cli('migrate:reset --help')
+    const migrationsAfter = await payload.find({
+      collection: 'payload-migrations',
+      limit: 100,
+    })
 
-    const output = await cli(command)
-    const migrationsAfter = await payload.find({ collection: 'payload-migrations', limit: 100 })
-
-    expect(migrationsAfter.docs).toHaveLength(0)
-
-    if (command.includes('--json')) {
-      expect(JSON.parse(output.stdout.trim().split('\n').at(-1)!)).toMatchObject({
-        command: 'migrate:reset',
-        success: true,
-      })
-    } else {
-      expect(output.stdout).not.toContain('"command":"migrate:reset"')
-    }
-  }),
-)
-
-test.options({ db: 'mongo' })('migrate:reset --help', async ({ cli, payload }) => {
-  await cli('migrate:create reset --force-accept-warning --json')
-  const migrationName = (await readdir(migrationsDirectory))
-    .find((file) => file.endsWith('_reset.ts'))!
-    .replace('.ts', '')
-  await cli('migrate --json')
-
-  const output = await cli('migrate:reset --help')
-  const migrationsAfter = await payload.find({
-    collection: 'payload-migrations',
-    limit: 100,
+    expect(`${output.stdout}\n${output.stderr}`).toContain('Usage: payload migrate:reset')
+    expect(migrationsAfter.docs.find(({ name }) => name === migrationName)).toBeDefined()
   })
 
-  expect(`${output.stdout}\n${output.stderr}`).toContain('Usage: payload migrate:reset')
-  expect(migrationsAfter.docs.find(({ name }) => name === migrationName)).toBeDefined()
-})
+  test(
+    'migrate:status',
+    testCLICommand(async (command, { cli, payload }) => {
+      await cli('migrate:create status --force-accept-warning --json')
+      const migrationName = (await readdir(migrationsDirectory))
+        .find((file) => file.endsWith('_status.ts'))!
+        .replace('.ts', '')
+      const migrationsBefore = await payload.find({ collection: 'payload-migrations', limit: 100 })
 
-test(
-  'migrate:status',
-  testCLICommand(async (command, { cli, payload }) => {
+      expect(migrationsBefore.docs.find(({ name }) => name === migrationName)).toBeUndefined()
+
+      const output = await cli(command)
+
+      expect(`${output.stdout}\n${output.stderr}`).toContain(migrationName)
+      expect(`${output.stdout}\n${output.stderr}`).toContain('No')
+
+      if (command.includes('--json')) {
+        expect(JSON.parse(output.stdout.trim().split('\n').at(-1)!)).toMatchObject({
+          command: 'migrate:status',
+          success: true,
+        })
+      } else {
+        expect(output.stdout).not.toContain('"command":"migrate:status"')
+      }
+    }),
+  )
+
+  test('migrate:status --help', async ({ cli, payload }) => {
     await cli('migrate:create status --force-accept-warning --json')
     const migrationName = (await readdir(migrationsDirectory))
       .find((file) => file.endsWith('_status.ts'))!
       .replace('.ts', '')
-    const migrationsBefore = await payload.find({ collection: 'payload-migrations', limit: 100 })
 
-    expect(migrationsBefore.docs.find(({ name }) => name === migrationName)).toBeUndefined()
+    const output = await cli('migrate:status --help')
+    const migrationsAfter = await payload.find({ collection: 'payload-migrations', limit: 100 })
 
-    const output = await cli(command)
+    expect(`${output.stdout}\n${output.stderr}`).toContain('Usage: payload migrate:status')
+    expect(`${output.stdout}\n${output.stderr}`).not.toContain(migrationName)
+    expect(migrationsAfter.docs.find(({ name }) => name === migrationName)).toBeUndefined()
+  })
 
-    expect(`${output.stdout}\n${output.stderr}`).toContain(migrationName)
-    expect(`${output.stdout}\n${output.stderr}`).toContain('No')
+  test(
+    'run ./scripts/example.ts completed',
+    testCLICommand(async (command, { cli }) => {
+      await expect(access(scriptOutputFile)).rejects.toThrow()
 
-    if (command.includes('--json')) {
-      expect(JSON.parse(output.stdout.trim().split('\n').at(-1)!)).toMatchObject({
-        command: 'migrate:status',
-        success: true,
-      })
-    } else {
-      expect(output.stdout).not.toContain('"command":"migrate:status"')
-    }
-  }),
-)
+      const output = await cli(command)
 
-test('migrate:status --help', async ({ cli, payload }) => {
-  await cli('migrate:create status --force-accept-warning --json')
-  const migrationName = (await readdir(migrationsDirectory))
-    .find((file) => file.endsWith('_status.ts'))!
-    .replace('.ts', '')
+      await expect(readFile(scriptOutputFile, 'utf8')).resolves.toBe('completed')
 
-  const output = await cli('migrate:status --help')
-  const migrationsAfter = await payload.find({ collection: 'payload-migrations', limit: 100 })
+      if (command.includes('--json')) {
+        expect(JSON.parse(output.stdout.trim().split('\n').at(-1)!)).toMatchObject({
+          command: 'run',
+          success: true,
+        })
+      } else {
+        expect(output.stdout).not.toContain('"command":"run"')
+      }
+    }),
+  )
 
-  expect(`${output.stdout}\n${output.stderr}`).toContain('Usage: payload migrate:status')
-  expect(`${output.stdout}\n${output.stderr}`).not.toContain(migrationName)
-  expect(migrationsAfter.docs.find(({ name }) => name === migrationName)).toBeUndefined()
-})
-
-test(
-  'run ./scripts/example.ts completed',
-  testCLICommand(async (command, { cli }) => {
+  test('run --help', async ({ cli }) => {
     await expect(access(scriptOutputFile)).rejects.toThrow()
 
-    const output = await cli(command)
+    const output = await cli('run --help')
 
-    await expect(readFile(scriptOutputFile, 'utf8')).resolves.toBe('completed')
+    expect(`${output.stdout}\n${output.stderr}`).toContain('Usage: payload run')
+    await expect(access(scriptOutputFile)).rejects.toThrow()
+  })
 
-    if (command.includes('--json')) {
-      expect(JSON.parse(output.stdout.trim().split('\n').at(-1)!)).toMatchObject({
-        command: 'run',
-        success: true,
-      })
-    } else {
-      expect(output.stdout).not.toContain('"command":"run"')
-    }
-  }),
-)
+  test(
+    'hello --name Payload',
+    testCLICommand(async (command, { cli }) => {
+      const output = await cli(command)
 
-test('run --help', async ({ cli }) => {
-  await expect(access(scriptOutputFile)).rejects.toThrow()
+      if (command.includes('--json')) {
+        expect(JSON.parse(output.stdout.trim().split('\n').at(-1)!)).toMatchObject({
+          command: 'hello',
+          result: { message: 'Hello, Payload!' },
+          success: true,
+        })
+      } else {
+        expect(output.stdout).toContain('Hello, Payload!')
+      }
+    }),
+  )
 
-  const output = await cli('run --help')
+  test('hello --help', async ({ cli }) => {
+    const output = await cli('hello --help')
 
-  expect(`${output.stdout}\n${output.stderr}`).toContain('Usage: payload run')
-  await expect(access(scriptOutputFile)).rejects.toThrow()
-})
-
-test(
-  'hello --name Payload',
-  testCLICommand(async (command, { cli }) => {
-    const output = await cli(command)
-
-    if (command.includes('--json')) {
-      expect(JSON.parse(output.stdout.trim().split('\n').at(-1)!)).toMatchObject({
-        command: 'hello',
-        result: { message: 'Hello, Payload!' },
-        success: true,
-      })
-    } else {
-      expect(output.stdout).toContain('Hello, Payload!')
-    }
-  }),
-)
-
-test('hello --help', async ({ cli }) => {
-  const output = await cli('hello --help')
-
-  expect(`${output.stdout}\n${output.stderr}`).toContain('Usage: payload hello')
-  expect(`${output.stdout}\n${output.stderr}`).not.toContain('Hello, Payload!')
+    expect(`${output.stdout}\n${output.stderr}`).toContain('Usage: payload hello')
+    expect(`${output.stdout}\n${output.stderr}`).not.toContain('Hello, Payload!')
+  })
 })
 
 type CLIOutput<TResult = Record<string, unknown>> = {
