@@ -3223,7 +3223,7 @@ describe('@payloadcms/plugin-import-export', () => {
       const timestamp = Date.now()
       const existingPage = await payload.create({
         collection: 'pages',
-        draft: false,
+        action: 'publish',
         data: {
           title: `Upsert Test ${timestamp}`,
           excerpt: 'existing',
@@ -3282,7 +3282,7 @@ describe('@payloadcms/plugin-import-export', () => {
         collection: 'pages',
         id: existingPage.id,
         depth: 0,
-        draft: false, // Get published version
+        version: 'published', // Get published version
         overrideAccess: true,
       })
 
@@ -3290,7 +3290,7 @@ describe('@payloadcms/plugin-import-export', () => {
         collection: 'pages',
         id: existingPage.id,
         depth: 0,
-        draft: true, // Get draft version
+        version: 'latest', // Get draft version
         overrideAccess: true,
       })
 
@@ -3973,7 +3973,7 @@ describe('@payloadcms/plugin-import-export', () => {
         where: {
           title: { contains: 'Draft Import ' },
         },
-        draft: true,
+        version: 'latest',
       })
 
       expect(draftPages.docs).toHaveLength(2)
@@ -3984,7 +3984,7 @@ describe('@payloadcms/plugin-import-export', () => {
         where: {
           title: { contains: 'Published Import ' },
         },
-        draft: false, // Query for published documents only
+        version: 'published', // Query for published documents only
       })
 
       expect(publishedPages.docs).toHaveLength(1)
@@ -4031,7 +4031,7 @@ describe('@payloadcms/plugin-import-export', () => {
         where: {
           title: { contains: 'Default Status Test ' },
         },
-        draft: false, // Query for published documents
+        version: 'published', // Query for published documents
       })
 
       expect(pages.docs).toHaveLength(2)
@@ -4171,7 +4171,7 @@ describe('@payloadcms/plugin-import-export', () => {
 
       const validPage1 = await payload.find({
         collection: 'pages',
-        draft: true,
+        version: 'latest',
         overrideAccess: true,
         where: {
           title: { equals: `Partial Valid ${timestamp}-1` },
@@ -4179,7 +4179,7 @@ describe('@payloadcms/plugin-import-export', () => {
       })
       const validPage2 = await payload.find({
         collection: 'pages',
-        draft: true,
+        version: 'latest',
         overrideAccess: true,
         where: {
           title: { equals: `Partial Valid ${timestamp}-2` },
@@ -4196,7 +4196,7 @@ describe('@payloadcms/plugin-import-export', () => {
 
         const allPages = await payload.find({
           collection: 'pages',
-          draft: true,
+          version: 'latest',
           overrideAccess: true,
           limit: 100,
         })
@@ -4951,7 +4951,7 @@ describe('@payloadcms/plugin-import-export', () => {
           where: {
             title: { contains: 'Default Status Test ' },
           },
-          draft: false,
+          version: 'published',
         })
 
         expect(publishedPages.totalDocs).toBe(2)
@@ -5003,7 +5003,7 @@ describe('@payloadcms/plugin-import-export', () => {
           where: {
             title: { contains: 'Explicit Draft Test ' },
           },
-          draft: true,
+          version: 'latest',
         })
 
         expect(draftPages.totalDocs).toBe(2)
@@ -5056,7 +5056,7 @@ describe('@payloadcms/plugin-import-export', () => {
           where: {
             title: { contains: 'Upsert New Published Test ' },
           },
-          draft: false,
+          version: 'published',
         })
 
         expect(publishedPages.totalDocs).toBe(2)
@@ -6168,7 +6168,7 @@ describe('@payloadcms/plugin-import-export', () => {
           where: {
             title: { contains: 'Default Draft Config Test' },
           },
-          draft: true,
+          version: 'latest',
         })
 
         expect(draftDocs.totalDocs).toBe(2)
@@ -6181,7 +6181,7 @@ describe('@payloadcms/plugin-import-export', () => {
           where: {
             title: { equals: 'Default Draft Config Override Test' },
           },
-          draft: false,
+          version: 'published',
         })
 
         expect(publishedDocs.totalDocs).toBe(1)

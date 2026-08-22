@@ -20,6 +20,7 @@ import { MediaWithPrefix } from './collections/MediaWithPrefix.js'
 import { MediaWithThrowingHook } from './collections/MediaWithThrowingHook.js'
 import { RestrictedMedia } from './collections/RestrictedMedia.js'
 import { TestMetadata } from './collections/TestMetadata.js'
+import { TestMetadataDrafts } from './collections/TestMetadataDrafts.js'
 import { Users } from './collections/Users.js'
 import {
   collectionPrefix,
@@ -32,6 +33,7 @@ import {
   mediaWithThrowingHookSlug,
   prefix,
   restrictedMediaSlug,
+  testMetadataDraftsSlug,
   testMetadataSlug,
 } from './shared.js'
 import { createTestBucket } from './utils.js'
@@ -180,6 +182,20 @@ export function buildPluginCloudStorageIntConfig({
           staticHandler: () => new Response('Not found', { status: 404 }),
         }),
       },
+      [testMetadataDraftsSlug]: {
+        adapter: () => ({
+          name: 'test-metadata-drafts-adapter',
+          handleDelete: () => Promise.resolve(),
+          handleUpload: ({ data, file }) => ({
+            ...data,
+            _status: 'published',
+            customStorageId: `storage-draft-${Date.now()}`,
+            objectKey: data.filename || file.filename,
+            storageProvider: 'test-adapter',
+          }),
+          staticHandler: () => new Response('Not found', { status: 404 }),
+        }),
+      },
     },
   })
 
@@ -199,6 +215,7 @@ export function buildPluginCloudStorageIntConfig({
       MediaWithThrowingHook,
       RestrictedMedia,
       TestMetadata,
+      TestMetadataDrafts,
       Users,
     ],
     onInit: async (payload) => {

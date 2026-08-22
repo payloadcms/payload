@@ -36,12 +36,6 @@ export const findDocumentsTool = defineCollectionTool({
       .describe('How many levels deep to populate relationships (default: 0)')
       .optional()
       .default(0),
-    draft: z
-      .boolean()
-      .describe(
-        'For versioned collections, true returns the latest draft version when available. False reads the main document.',
-      )
-      .optional(),
     fallbackLocale: z
       .string()
       .describe('Optional: fallback locale code to use when requested locale is not available')
@@ -95,6 +89,12 @@ export const findDocumentsTool = defineCollectionTool({
       .boolean()
       .describe('Optional: include soft-deleted documents when trash is enabled on the collection')
       .optional(),
+    version: z
+      .enum(['published', 'latest', 'draft'])
+      .describe(
+        'For versioned collections: published reads the main document, latest returns the newest draft when available, and draft returns only the newest draft with no published fallback.',
+      )
+      .optional(),
     where: whereSchema
       .describe(
         'Optional: where clause for filtering. Use field names with Payload operators, and/or arrays for grouping. Example: {"title":{"contains":"test"}}',
@@ -108,7 +108,6 @@ export const findDocumentsTool = defineCollectionTool({
   const {
     id,
     depth,
-    draft,
     fallbackLocale,
     joins,
     limit,
@@ -119,6 +118,7 @@ export const findDocumentsTool = defineCollectionTool({
     select,
     sort,
     trash,
+    version,
     where,
   } = input
 
@@ -140,7 +140,7 @@ export const findDocumentsTool = defineCollectionTool({
           ...(joins !== undefined && { joins: joins as JoinQuery }),
           ...(locale && { locale }),
           ...(fallbackLocale && { fallbackLocale }),
-          ...(draft !== undefined && { draft }),
+          ...(version !== undefined && { version }),
           ...(trash !== undefined && { trash }),
         })
 
@@ -178,7 +178,7 @@ export const findDocumentsTool = defineCollectionTool({
       ...(joins !== undefined && { joins: joins as JoinQuery }),
       ...(locale && { locale }),
       ...(fallbackLocale && { fallbackLocale }),
-      ...(draft !== undefined && { draft }),
+      ...(version !== undefined && { version }),
       ...(pagination !== undefined && { pagination }),
       ...(trash !== undefined && { trash }),
     }

@@ -23,10 +23,10 @@ import {
 const dirname = path.dirname(fileURLToPath(import.meta.url))
 
 type CreateOneDocumentInput = {
+  action?: 'publish' | 'saveDraft'
   collectionSlug: string
   data: Record<string, unknown>
   depth?: number
-  draft?: boolean
   fallbackLocale?: string
   file?: Record<string, unknown>
   locale?: string
@@ -532,7 +532,7 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(createDocuments.inputSchema.properties.documents.items.required).toContain('data')
       expect(createDocuments.inputSchema.properties.documents.items.properties.file).toBeDefined()
       expect(createDocuments.inputSchema.properties.depth).toBeDefined()
-      expect(createDocuments.inputSchema.properties.draft).toBeDefined()
+      expect(createDocuments.inputSchema.properties.action).toBeDefined()
       expect(createDocuments.inputSchema.properties.fallbackLocale).toBeDefined()
       expect(createDocuments.inputSchema.properties.locale).toBeDefined()
       expect(createDocuments.inputSchema.properties.select).toBeDefined()
@@ -558,6 +558,31 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(findVersions.inputSchema.properties.collectionSlug).toBeDefined()
       expect(findVersions.inputSchema.properties.where).toBeDefined()
       expect(restoreVersion.inputSchema.properties.id).toBeDefined()
+      expect(findDocuments.inputSchema.properties.version).toEqual(
+        expect.objectContaining({
+          enum: ['published', 'latest', 'draft'],
+        }),
+      )
+      expect(createDocuments.inputSchema.properties.action).toEqual(
+        expect.objectContaining({
+          enum: ['saveDraft', 'publish'],
+        }),
+      )
+      expect(toolsByName.updateDocument.inputSchema.properties.action).toEqual(
+        expect.objectContaining({
+          enum: ['saveDraft', 'publish', 'unpublish'],
+        }),
+      )
+      expect(duplicateDocument.inputSchema.properties.action).toEqual(
+        expect.objectContaining({
+          enum: ['saveDraft', 'publish'],
+        }),
+      )
+      expect(restoreVersion.inputSchema.properties.action).toEqual(
+        expect.objectContaining({
+          enum: ['saveDraft', 'publish'],
+        }),
+      )
 
       const getUploadInstructions = toolsByName.getUploadInstructions
       expect(getUploadInstructions.inputSchema.properties.collectionSlug.type).toBe('string')
@@ -1276,7 +1301,7 @@ describe('@payloadcms/plugin-mcp', () => {
             _status: 'published',
             title: 'Published through MCP',
           },
-          draft: false,
+          action: 'publish',
           locale: 'en',
         },
       })
@@ -1286,11 +1311,42 @@ describe('@payloadcms/plugin-mcp', () => {
       const storedPost = await payload.findByID({
         id: createdPost.id,
         collection: 'posts',
-        draft: false,
+        version: 'published',
         locale: 'all',
       })
 
       expect(storedPost._status).toMatchObject({ en: 'published' })
+    })
+
+    it('should reject invalid version and action values', async ({ mcp }) => {
+      const apiKey = await getApiKey()
+      const client = await mcp.connect(apiKey)
+
+      const findResponse = await client.callTool({
+        arguments: {
+          collectionSlug: 'posts',
+          version: 'preview',
+        },
+        name: 'findDocuments',
+      })
+
+      expect(findResponse.isError).toBe(true)
+      expect(findResponse.content[0].text).toContain('Input validation error')
+      expect(findResponse.content[0].text).toContain('version')
+
+      const updateResponse = await client.callTool({
+        arguments: {
+          action: 'draft',
+          collectionSlug: 'posts',
+          data: { title: 'Should not update' },
+          id: '1',
+        },
+        name: 'updateDocument',
+      })
+
+      expect(updateResponse.isError).toBe(true)
+      expect(updateResponse.content[0].text).toContain('Input validation error')
+      expect(updateResponse.content[0].text).toContain('action')
     })
 
     it('should call createDocuments with select to limit returned fields', async ({ mcp }) => {
@@ -1763,7 +1819,7 @@ describe('@payloadcms/plugin-mcp', () => {
         data: {
           title: 'English draft title',
         },
-        draft: true,
+        action: 'saveDraft',
         locale: 'en',
       })
 
@@ -1772,7 +1828,7 @@ describe('@payloadcms/plugin-mcp', () => {
           id: post.id,
           collection: 'posts',
           data: { title: 'Spanish draft title' },
-          draft: true,
+          action: 'saveDraft',
           locale: 'es',
         })
 
@@ -1786,7 +1842,7 @@ describe('@payloadcms/plugin-mcp', () => {
               _status: 'published',
               title: 'Published English title',
             },
-            draft: false,
+            action: 'publish',
             locale: 'en',
             publishAllLocales: false,
           },
@@ -1795,13 +1851,13 @@ describe('@payloadcms/plugin-mcp', () => {
         const publishedPost = await payload.findByID({
           id: post.id,
           collection: 'posts',
-          draft: false,
+          version: 'published',
           locale: 'all',
         })
         const spanishDraft = await payload.findByID({
           id: post.id,
           collection: 'posts',
-          draft: true,
+          version: 'latest',
           locale: 'es',
         })
 
@@ -3093,6 +3149,7 @@ describe('@payloadcms/plugin-mcp', () => {
     it('should find post with locale "all"', async ({ mcp }) => {
       // Create a post with multiple translations
       const post = await payload.create({
+        action: 'publish',
         collection: 'posts',
         data: {
           content: 'English Content',

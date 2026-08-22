@@ -162,7 +162,7 @@ describe('@payloadcms/plugin-search', () => {
     await payload.update({
       collection: 'pages',
       id: publishedPage.id,
-      draft: true,
+      action: 'saveDraft',
       data: {
         _status: 'draft',
         title: 'Draft title!',
@@ -183,6 +183,7 @@ describe('@payloadcms/plugin-search', () => {
     expect(updatedResults).toHaveLength(1)
 
     await payload.update({
+      action: 'unpublish',
       collection: 'pages',
       id: publishedPage.id,
       data: {

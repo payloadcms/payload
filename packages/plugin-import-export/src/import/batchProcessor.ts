@@ -12,6 +12,20 @@ import {
   extractErrorMessage,
 } from '../utilities/useBatchProcessor.js'
 
+const resolveImportWriteAction = ({
+  collectionHasVersions,
+  status,
+}: {
+  collectionHasVersions: boolean
+  status: unknown
+}): 'publish' | 'saveDraft' | undefined => {
+  if (!collectionHasVersions) {
+    return undefined
+  }
+
+  return status === 'draft' ? 'saveDraft' : 'publish'
+}
+
 /**
  * Import-specific batch processor options
  */
@@ -205,11 +219,14 @@ async function processImportBatch({
           delete createData.id
         }
 
-        let draftOption: boolean | undefined
+        let writeAction: 'publish' | 'saveDraft' | undefined
         if (collectionHasVersions) {
           const statusValue = createData._status || options.defaultVersionStatus
           const isPublished = statusValue !== 'draft'
-          draftOption = !isPublished
+          writeAction = resolveImportWriteAction({
+            collectionHasVersions,
+            status: statusValue,
+          })
           createData._status = statusValue
 
           if (req.payload.config.debug) {
@@ -217,7 +234,7 @@ async function processImportBatch({
               _status: createData._status,
               isPublished,
               msg: 'Status handling in create',
-              willSetDraft: draftOption,
+              writeAction,
             })
           }
         }
@@ -244,10 +261,10 @@ async function processImportBatch({
           savedDocument = await req.payload.create({
             collection: collectionSlug,
             data: flatData,
-            draft: draftOption,
             overrideAccess: false,
             req: defaultLocaleReq,
             user,
+            ...(writeAction ? { action: writeAction } : {}),
           })
 
           if (savedDocument && Object.keys(localeUpdates).length > 0) {
@@ -257,10 +274,10 @@ async function processImportBatch({
                   id: savedDocument.id as number | string,
                   collection: collectionSlug,
                   data: localeData,
-                  draft: collectionHasVersions ? false : undefined,
                   overrideAccess: false,
                   req: { ...req, locale },
                   user,
+                  ...(writeAction ? { action: writeAction } : {}),
                 })
               } catch (error) {
                 req.payload.logger.error({
@@ -275,10 +292,10 @@ async function processImportBatch({
           savedDocument = await req.payload.create({
             collection: collectionSlug,
             data: createData,
-            draft: draftOption,
             overrideAccess: false,
             req,
             user,
+            ...(writeAction ? { action: writeAction } : {}),
           })
         }
       } else if (importMode === 'update' || importMode === 'upsert') {
@@ -356,6 +373,11 @@ async function processImportBatch({
           delete updateData.createdAt
           delete updateData.updatedAt
 
+          const writeAction = resolveImportWriteAction({
+            collectionHasVersions,
+            status: updateData._status || options.defaultVersionStatus,
+          })
+
           // Check if we have multi-locale data and extract it
           const { flatData, hasMultiLocale, localeUpdates } = extractMultiLocaleData(
             updateData,
@@ -389,10 +411,10 @@ async function processImportBatch({
               collection: collectionSlug,
               data: flatData,
               depth: 0,
-              // Don't specify draft - this creates a new draft for versioned collections
               overrideAccess: false,
               req: defaultLocaleReq,
               user,
+              ...(writeAction ? { action: writeAction } : {}),
             })
 
             if (savedDocument && Object.keys(localeUpdates).length > 0) {
@@ -406,6 +428,7 @@ async function processImportBatch({
                     overrideAccess: false,
                     req: { ...req, locale },
                     user,
+                    ...(writeAction ? { action: writeAction } : {}),
                   })
                 } catch (error) {
                   req.payload.logger.error({
@@ -428,17 +451,15 @@ async function processImportBatch({
                 })
               }
 
-              // Update the document - don't specify draft to let Payload handle versions properly
-              // This will create a new draft version for collections with versions enabled
               savedDocument = await req.payload.update({
                 id: existingDoc.id as number | string,
                 collection: collectionSlug,
                 data: updateData,
                 depth: 0,
-                // Don't specify draft - this creates a new draft for versioned collections
                 overrideAccess: false,
                 req,
                 user,
+                ...(writeAction ? { action: writeAction } : {}),
               })
 
               if (req.payload.config.debug && savedDocument) {
@@ -475,12 +496,14 @@ async function processImportBatch({
           }
 
           // Only handle _status for versioned collections
-          let draftOption: boolean | undefined
+          let writeAction: 'publish' | 'saveDraft' | undefined
           if (collectionHasVersions) {
             // Use defaultVersionStatus from config if _status not provided
             const statusValue = createData._status || options.defaultVersionStatus
-            const isPublished = statusValue !== 'draft'
-            draftOption = !isPublished
+            writeAction = resolveImportWriteAction({
+              collectionHasVersions,
+              status: statusValue,
+            })
             createData._status = statusValue
           }
 
@@ -497,10 +520,10 @@ async function processImportBatch({
             savedDocument = await req.payload.create({
               collection: collectionSlug,
               data: flatData,
-              draft: draftOption,
               overrideAccess: false,
               req: defaultLocaleReq,
               user,
+              ...(writeAction ? { action: writeAction } : {}),
             })
 
             if (savedDocument && Object.keys(localeUpdates).length > 0) {
@@ -510,10 +533,10 @@ async function processImportBatch({
                     id: savedDocument.id as number | string,
                     collection: collectionSlug,
                     data: localeData,
-                    draft: collectionHasVersions ? false : undefined,
                     overrideAccess: false,
                     req: { ...req, locale },
                     user,
+                    ...(writeAction ? { action: writeAction } : {}),
                   })
                 } catch (error) {
                   req.payload.logger.error({
@@ -528,10 +551,10 @@ async function processImportBatch({
             savedDocument = await req.payload.create({
               collection: collectionSlug,
               data: createData,
-              draft: draftOption,
               overrideAccess: false,
               req,
               user,
+              ...(writeAction ? { action: writeAction } : {}),
             })
           }
         } else {

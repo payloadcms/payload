@@ -26,17 +26,18 @@ export const updateGlobalTool = defineGlobalTool({
   },
   description: DEFAULT_DESCRIPTION,
   input: z.object({
+    action: z
+      .enum(['saveDraft', 'publish', 'unpublish'])
+      .describe(
+        'Whether to save as a draft (saveDraft), publish, or unpublish. When omitted, recognized data._status infers the action, otherwise update defaults to publish.',
+      )
+      .optional(),
     data: z.record(z.string(), z.unknown()).describe('The global fields to update'),
     depth: z
       .number()
       .describe('Optional: Depth of relationships to populate')
       .optional()
       .default(0),
-    draft: z
-      .boolean()
-      .describe('Optional: Whether to save as draft (default: false)')
-      .optional()
-      .default(false),
     fallbackLocale: z
       .string()
       .describe('Optional: fallback locale code to use when requested locale is not available')
@@ -58,10 +59,10 @@ export const updateGlobalTool = defineGlobalTool({
   const payload = req.payload
   const logger = getLogger({ payload })
 
-  const { data, depth, draft, fallbackLocale, locale, select } = input
+  const { action, data, depth, fallbackLocale, locale, select } = input
 
   logger.info(
-    `Updating global: ${globalSlug}, draft: ${draft}${locale ? `, locale: ${locale}` : ''}`,
+    `Updating global: ${globalSlug}, action: ${action}${locale ? `, locale: ${locale}` : ''}`,
   )
 
   try {
@@ -79,9 +80,9 @@ export const updateGlobalTool = defineGlobalTool({
       slug: globalSlug,
       data: parsedData,
       depth,
-      draft,
       overrideAccess: authorizedMCP.overrideAccess,
       req,
+      ...(action ? { action } : {}),
     }
 
     if (locale) {
