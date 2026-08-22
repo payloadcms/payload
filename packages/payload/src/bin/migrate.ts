@@ -1,17 +1,28 @@
 import type { ParsedArgs } from 'minimist'
 
+import { pino } from 'pino'
+
 import type { SanitizedConfig } from '../config/types.js'
 
 import payload from '../index.js'
+import { stderrSyncLoggerDestination, writeJsonResult } from '../utilities/jsonReporter.js'
 import { prettySyncLoggerDestination } from '../utilities/logger.js'
 
 /**
- * The default logger's options did not allow for forcing sync logging
- * Using these options, to force both pretty print and sync logging
+ * Read all data from stdin. Returns empty string if stdin is a TTY (no pipe).
  */
-const prettySyncLogger = {
-  loggerDestination: prettySyncLoggerDestination,
-  loggerOptions: {},
+async function readStdin(): Promise<string> {
+  if (process.stdin.isTTY) {
+    return ''
+  }
+
+  const chunks: Buffer[] = []
+
+  return new Promise((resolve) => {
+    process.stdin.on('data', (chunk) => chunks.push(chunk))
+    process.stdin.on('end', () => resolve(Buffer.concat(chunks).toString('utf8').trim()))
+    process.stdin.on('error', () => resolve(''))
+  })
 }
 
 export const availableCommands = [
@@ -37,7 +48,15 @@ type Args = {
 }
 
 export const migrate = async ({ config, migrationDir, parsedArgs }: Args): Promise<void> => {
-  const { _: args, file, forceAcceptWarning: forceAcceptFromProps, help } = parsedArgs
+  const {
+    _: args,
+    dryRun: dryRunFromProps,
+    file,
+    forceAcceptWarning: forceAcceptFromProps,
+    fromStdin: fromStdinFromProps,
+    help,
+    json: jsonFromProps,
+  } = parsedArgs
 
   const formattedArgs = Object.keys(parsedArgs)
     .map((key) => {
@@ -57,6 +76,9 @@ export const migrate = async ({ config, migrationDir, parsedArgs }: Args): Promi
 
   const forceAcceptWarning = forceAcceptFromProps || formattedArgs.includes('forceAcceptWarning')
   const skipEmpty = formattedArgs.includes('skipEmpty')
+  const json = jsonFromProps || formattedArgs.includes('json')
+  const dryRun = dryRunFromProps || formattedArgs.includes('dryRun')
+  const fromStdinFlag = fromStdinFromProps || formattedArgs.includes('fromStdin')
 
   if (help) {
     // eslint-disable-next-line no-console
@@ -66,13 +88,15 @@ export const migrate = async ({ config, migrationDir, parsedArgs }: Args): Promi
 
   process.env.PAYLOAD_MIGRATING = 'true'
 
-  // Barebones instance to access database adapter
   await payload.init({
     config,
     disableDBConnect: args[0] === 'migrate:create',
     disableOnInit: true,
-    ...prettySyncLogger,
   })
+
+  // Replace with sync logger so output flushes before process.exit.
+  // Redirect to stderr when --json is active so logger doesn't pollute stdout JSON.
+  payload.logger = pino(json ? stderrSyncLoggerDestination : prettySyncLoggerDestination)
 
   const adapter = payload.db
 
@@ -94,22 +118,102 @@ export const migrate = async ({ config, migrationDir, parsedArgs }: Args): Promi
 
   switch (args[0]) {
     case 'migrate':
-      await adapter.migrate()
-      break
-    case 'migrate:create':
       try {
-        await adapter.createMigration({
-          file,
+        const result = await adapter.migrate({
+          dryRun,
           forceAcceptWarning,
-          migrationName: args[1],
-          payload,
-          skipEmpty,
         })
+
+        if (json) {
+          writeJsonResult(result)
+        }
       } catch (err) {
         const error = err instanceof Error ? err.message : 'Unknown error'
-        throw new Error(`Error creating migration: ${error}`)
+        if (json) {
+          writeJsonResult({ error, migrationsRan: [], pending: 0, status: 'error' })
+        }
+        payload.logger.error({ msg: error })
+        process.exit(1)
       }
       break
+    case 'migrate:create': {
+      let createResult: Awaited<ReturnType<typeof adapter.createMigration>> | undefined
+
+      if (fromStdinFlag) {
+        // Support string value passed directly (e.g. from tests) or read from stdin
+        const fromStdin =
+          typeof fromStdinFromProps === 'string' ? fromStdinFromProps : await readStdin()
+        if (!fromStdin) {
+          if (json) {
+            writeJsonResult({
+              error: 'No data received on stdin',
+              hasChanges: false,
+              status: 'error',
+            })
+          }
+          payload.logger.error({
+            msg: 'No data received on stdin. Pipe JSON to stdin when using --from-stdin.',
+          })
+          process.exit(1)
+        } else {
+          try {
+            createResult = await adapter.createMigration({
+              dryRun,
+              file,
+              forceAcceptWarning,
+              fromStdin,
+              migrationName: args[1],
+              payload,
+              skipEmpty,
+            })
+          } catch (err) {
+            const error = err instanceof Error ? err.message : 'Unknown error'
+            if (json) {
+              writeJsonResult({ error, hasChanges: false, status: 'error' })
+            }
+            payload.logger.error({ msg: `Error creating migration: ${error}` })
+            process.exit(1)
+          }
+        }
+      } else {
+        try {
+          createResult = await adapter.createMigration({
+            dryRun,
+            file,
+            forceAcceptWarning,
+            migrationName: args[1],
+            payload,
+            skipEmpty,
+          })
+        } catch (err) {
+          const error = err instanceof Error ? err.message : 'Unknown error'
+          if (json) {
+            writeJsonResult({ error, hasChanges: false, status: 'error' })
+          }
+          payload.logger.error({ msg: `Error creating migration: ${error}` })
+          process.exit(1)
+        }
+      }
+
+      if (createResult) {
+        if (json) {
+          writeJsonResult(createResult)
+        }
+
+        if (createResult.status === 'error') {
+          process.exit(1)
+        }
+
+        if (
+          createResult.status === 'no-changes' ||
+          (createResult.status === 'dry-run' && !createResult.hasChanges)
+        ) {
+          process.exit(2)
+        }
+      }
+
+      break
+    }
     case 'migrate:down':
       await adapter.migrateDown()
       break
