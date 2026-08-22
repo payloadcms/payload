@@ -653,6 +653,31 @@ describe('General', () => {
       await expect(link).toBeHidden()
     })
 
+    test('nav — should be open by default at sidebar widths and persist the toggle preference', async () => {
+      // 1280px is within the sidebar width range (1025px - 1440px) where the nav is not a modal
+      await page.setViewportSize({ height: 720, width: 1280 })
+
+      await page.goto(postsUrl.admin)
+      await expect(page.locator('.template-default--nav-hydrated')).toBeVisible()
+
+      // the nav should be open by default, without requiring a toggle click
+      await expect(page.locator('.template-default.template-default--nav-open')).toBeVisible()
+
+      // close the nav, then reload: the preference should be persisted and the nav stays closed
+      await page.locator('.app-header__sidebar-toggle').click()
+      await expect(page.locator('.template-default.template-default--nav-open')).toBeHidden()
+      await page.reload()
+      await expect(page.locator('.template-default--nav-hydrated')).toBeVisible()
+      await expect(page.locator('.template-default.template-default--nav-open')).toBeHidden()
+
+      // reopen the nav, then reload: the preference should be persisted and the nav stays open
+      await page.locator('.app-header__sidebar-toggle').click()
+      await expect(page.locator('.template-default.template-default--nav-open')).toBeVisible()
+      await page.reload()
+      await expect(page.locator('.template-default--nav-hydrated')).toBeVisible()
+      await expect(page.locator('.template-default.template-default--nav-open')).toBeVisible()
+    })
+
     test('should disable active nav item', async () => {
       await page.goto(postsUrl.list)
       await openNav(page)
