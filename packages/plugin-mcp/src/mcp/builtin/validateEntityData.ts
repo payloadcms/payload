@@ -127,6 +127,9 @@ const validateData = ({
 
 /** Updates are partial — drop the schema's top-level `required` before validating. */
 const withoutRequired = (schema: JsonSchemaType): JsonSchemaType => {
+  if (!schema || typeof schema !== 'object') {
+    return schema
+  }
   const { required: _required, ...rest } = schema
   return rest
 }
