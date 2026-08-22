@@ -147,13 +147,8 @@ export const TenantSelectionProviderClient = ({
   const setTenant = React.useCallback<ContextType['setTenant']>(
     ({ id, refresh }) => {
       if (id === undefined) {
-        if (tenantOptions.length > 1 || tenantOptions.length === 0) {
-          // users with multiple tenants can clear the tenant selection
-          setTenantAndCookie({ id: undefined, refresh })
-        } else if (tenantOptions[0]) {
-          // if there is only one tenant, auto-select that tenant
-          setTenantAndCookie({ id: tenantOptions[0].value, refresh: true })
-        }
+        // users can clear the tenant selection
+        setTenantAndCookie({ id: undefined, refresh })
       } else if (!tenantOptions.find((option) => option.value === id)) {
         // if the tenant is invalid, set the first tenant as selected
         setTenantAndCookie({
@@ -186,7 +181,7 @@ export const TenantSelectionProviderClient = ({
       if (result.tenantOptions && userID) {
         setTenantOptions(result.tenantOptions)
 
-        if (result.tenantOptions.length === 1) {
+        if (initialValue && result.tenantOptions.length === 1) {
           setSelectedTenantID(result.tenantOptions[0].value)
           setTenantCookie({ value: String(result.tenantOptions[0].value) })
         }
@@ -194,7 +189,7 @@ export const TenantSelectionProviderClient = ({
     } catch (e) {
       toast.error(`Error fetching tenants`)
     }
-  }, [config.routes.api, tenantsCollectionSlug, userID])
+  }, [config.routes.api, tenantsCollectionSlug, userID, initialValue])
 
   const updateTenants = React.useCallback<ContextType['updateTenants']>(
     ({ id, label }) => {
@@ -234,12 +229,12 @@ export const TenantSelectionProviderClient = ({
         return initialTenantOptions
       })
 
-      if (initialTenantOptions.length === 1 && initialTenantOptions[0]) {
+      if (initialValue && initialTenantOptions.length === 1 && initialTenantOptions[0]) {
         setSelectedTenantID(initialTenantOptions[0].value)
         setTenantCookie({ value: String(initialTenantOptions[0].value) })
       }
     }
-  }, [initialTenantOptions])
+  }, [initialTenantOptions, initialValue])
 
   React.useEffect(() => {
     if (userChanged || (initialValue && String(initialValue) !== getTenantCookie())) {

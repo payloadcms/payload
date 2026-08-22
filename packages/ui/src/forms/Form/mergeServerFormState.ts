@@ -88,17 +88,21 @@ export const mergeServerFormState = ({
 
   for (const [path, incomingField] of Object.entries(incomingState || {})) {
     if (!(path in currentState) && !incomingField.addedByServer) {
-      continue
+      const parsed = parseArrayFieldPath(path)
+      if (!parsed || !(parsed.arrayPath in currentState)) {
+        continue
+      }
     }
 
     /**
-     * If it's a new field added by the server, always accept the value.
+     * If it's a new field added by the server or a subfield of an existing array, always accept the value.
      * Otherwise:
      *   a. accept all values when explicitly requested, e.g. on submit
      *   b. only accept values for unmodified fields, e.g. on autosave
      */
     let shouldAcceptValue =
       incomingField.addedByServer ||
+      !(path in currentState) ||
       acceptValues === true ||
       (typeof acceptValues === 'object' &&
         acceptValues !== null &&
