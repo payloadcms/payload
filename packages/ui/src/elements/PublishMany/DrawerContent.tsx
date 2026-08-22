@@ -98,6 +98,7 @@ export function PublishManyDrawerContent(props: PublishManyDrawerContentProps) {
 
     return qs.stringify(
       {
+        action: 'publish',
         locale,
         select: {},
         where: combineWhereConstraints(whereConstraints),

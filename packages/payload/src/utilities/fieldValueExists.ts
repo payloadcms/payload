@@ -23,7 +23,7 @@ type Args = {
  * Runs the `find` operation without threading `req`, so it queries outside the caller's transaction:
  * a committed read is what a uniqueness check wants (other documents are committed, the document
  * being written is excluded by `id`), and it avoids the "cursor on a session with a transaction in
- * progress" error that a transactional read from inside a hook would hit. `draft` includes slugs
+ * progress" error that a transactional read from inside a hook would hit. `version: 'latest'` includes slugs
  * that only exist in a draft version.
  */
 export const fieldValueExists = async ({

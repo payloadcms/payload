@@ -1,4 +1,4 @@
-import type { PayloadRequest, SelectType } from 'payload'
+import type { PayloadRequest, ReadVersion, SelectType } from 'payload'
 
 import { createDataloaderCacheKey } from 'payload'
 
@@ -7,13 +7,13 @@ type PopulateArguments = {
   currentDepth?: number
   data: unknown
   depth: number
-  draft: boolean
   id: number | string
   key: number | string
   overrideAccess: boolean
   req: PayloadRequest
   select?: SelectType
   showHiddenFields: boolean
+  version?: ReadVersion
 }
 
 type PopulateFn = (args: PopulateArguments) => Promise<void>
@@ -24,12 +24,12 @@ export const populate: PopulateFn = async ({
   currentDepth,
   data,
   depth,
-  draft,
   key,
   overrideAccess,
   req,
   select,
   showHiddenFields,
+  version,
 }) => {
   const shouldPopulate = depth && currentDepth! <= depth
   // usually depth is checked within recursivelyPopulateFieldsForGraphQL. But since this populate function can be called outside of that (in rest afterRead node hooks) we need to check here too
@@ -51,7 +51,7 @@ export const populate: PopulateFn = async ({
       select,
       showHiddenFields,
       transactionID: req.transactionID!,
-      version: draft ? 'latest' : 'published',
+      version: version ?? 'published',
     }),
   )
 

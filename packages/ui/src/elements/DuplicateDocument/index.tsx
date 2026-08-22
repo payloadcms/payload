@@ -82,6 +82,9 @@ export const DuplicateDocument: React.FC<Props> = ({
       if (hasSelectedLocales) {
         queryParams.selectedLocales = selectedLocales
       }
+      if (hasDraftsEnabled(collectionConfig)) {
+        queryParams.action = 'saveDraft'
+      }
 
       const headers = {
         'Accept-Language': i18n.language,

@@ -42,7 +42,6 @@ export const getDocumentData = async ({
         id,
         collection: collectionSlug,
         depth: 0,
-        draft: true,
         fallbackLocale: false,
         locale: locale?.code,
         overrideAccess: false,
@@ -51,6 +50,7 @@ export const getDocumentData = async ({
         },
         trash: isTrashedDoc ? true : false,
         user,
+        version: 'latest',
       })
     }
 
@@ -58,7 +58,6 @@ export const getDocumentData = async ({
       resolvedData = await payload.findGlobal({
         slug: globalSlug,
         depth: 0,
-        draft: true,
         fallbackLocale: false,
         locale: locale?.code,
         overrideAccess: false,
@@ -66,6 +65,7 @@ export const getDocumentData = async ({
           ...rest,
         },
         user,
+        version: 'latest',
       })
     }
   } catch (err) {

@@ -74,6 +74,7 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
     [
       () =>
         _payload.create({
+          action: 'saveDraft',
           collection: draftCollectionSlug,
           data: {
             blocksField,
@@ -83,13 +84,13 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
           },
           depth: 0,
           overrideAccess: true,
-          draft: true,
         }),
     ],
     parallel,
   )
 
   const { id: manyDraftsID } = await _payload.create({
+    action: 'saveDraft',
     collection: draftCollectionSlug,
     data: {
       blocksField,
@@ -99,7 +100,6 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
     },
     depth: 0,
     overrideAccess: true,
-    draft: true,
   })
 
   for (let i = 0; i < 10; i++) {
@@ -115,6 +115,7 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
   }
 
   const draft2 = await _payload.create({
+    action: 'publish',
     collection: draftCollectionSlug,
     data: {
       _status: 'published',
@@ -125,10 +126,10 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
     },
     depth: 0,
     overrideAccess: true,
-    draft: false,
   })
 
   const draft3 = await _payload.create({
+    action: 'publish',
     collection: draftCollectionSlug,
     data: {
       _status: 'published',
@@ -139,7 +140,6 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
     },
     depth: 0,
     overrideAccess: true,
-    draft: false,
   })
 
   await _payload.create({

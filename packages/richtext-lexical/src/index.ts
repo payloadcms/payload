@@ -124,7 +124,6 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
         context,
         currentDepth,
         depth,
-        draft,
         field,
         fieldPromises,
         findMany,
@@ -135,6 +134,7 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
         req,
         showHiddenFields,
         siblingDoc,
+        version,
       }) {
         // check if there are any features with nodes which have populationPromises for this field
         if (finalSanitizedEditorConfig?.features?.graphQLPopulationPromises?.size) {
@@ -142,7 +142,6 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
             context,
             currentDepth: currentDepth ?? 0,
             depth,
-            draft,
             editorPopulationPromises: finalSanitizedEditorConfig.features.graphQLPopulationPromises,
             field,
             fieldPromises,
@@ -154,6 +153,7 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
             req,
             showHiddenFields,
             siblingDoc,
+            version,
           })
         }
       },

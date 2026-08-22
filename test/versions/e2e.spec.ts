@@ -362,11 +362,11 @@ describe('Versions', () => {
       // Unpublish the document
       await payload.update({
         id: publishedDoc.id,
+        action: 'unpublish',
         collection: draftCollectionSlug,
         data: {
           _status: 'draft',
         },
-        draft: false,
       })
 
       await page.goto(`${url.edit(publishedDoc.id)}/versions`)
@@ -532,7 +532,7 @@ describe('Versions', () => {
         // Important: assert that depth is 0 in this request
         formatAdminURL({
           apiRoute: '/api',
-          path: `/autosave-posts/${docID}?autosave=true&depth=0&draft=true&fallback-locale=null&locale=en`,
+          path: `/autosave-posts/${docID}?action=saveDraft&autosave=true&depth=0&fallback-locale=null&locale=en`,
           serverURL,
         }),
         async () => {
@@ -563,7 +563,7 @@ describe('Versions', () => {
       // This test checks that when we click "Create new" in the list view, it only creates 1 extra document and not more
       const { totalDocs: initialDocsCount } = await payload.find({
         collection: autosaveCollectionSlug,
-        draft: true,
+        version: 'latest',
       })
 
       await page.goto(autosaveURL.create)
@@ -573,7 +573,7 @@ describe('Versions', () => {
 
       const { totalDocs: updatedDocsCount } = await payload.find({
         collection: autosaveCollectionSlug,
-        draft: true,
+        version: 'latest',
       })
 
       await expect(() => {
@@ -591,7 +591,7 @@ describe('Versions', () => {
 
       const { totalDocs: latestDocsCount } = await payload.find({
         collection: autosaveCollectionSlug,
-        draft: true,
+        version: 'latest',
       })
 
       await expect(() => {
@@ -901,12 +901,12 @@ describe('Versions', () => {
 
     test('should show documents title in relationship even if draft document', async () => {
       await payload.create({
+        action: 'saveDraft',
         collection: autosaveCollectionSlug,
         data: {
           description: 'some description',
           title: 'some title',
         },
-        draft: true,
       })
 
       await page.goto(postURL.create)
@@ -926,12 +926,12 @@ describe('Versions', () => {
 
     test('correctly increments version count', async () => {
       const createdDoc = await payload.create({
+        action: 'saveDraft',
         collection: draftCollectionSlug,
         data: {
           description: 'some description',
           title: 'some title',
         },
-        draft: true,
       })
 
       await page.goto(url.edit(createdDoc.id))
@@ -972,12 +972,12 @@ describe('Versions', () => {
 
     test('collection — respects max number of versions', async () => {
       const maxOneCollection = await payload.create({
+        action: 'saveDraft',
         collection: draftWithMaxCollectionSlug,
         data: {
           description: 'some description',
           title: 'initial title',
         },
-        draft: true,
       })
 
       const collection = new AdminUrlUtil(serverURL, draftWithMaxCollectionSlug)
@@ -1212,7 +1212,7 @@ describe('Versions', () => {
       await expect(async () => {
         const { docs: draftDocs } = await payload.find({
           collection: draftWithUploadCollectionSlug,
-          draft: true,
+          version: 'latest',
           where: { id: { equals: publishedDoc.id } },
         })
         expect(draftDocs[0]!._status).toStrictEqual('draft')
@@ -1254,7 +1254,7 @@ describe('Versions', () => {
       await expect(async () => {
         const { docs: draftDocs } = await payload.find({
           collection: draftWithUploadCollectionSlug,
-          draft: true,
+          version: 'latest',
           where: { id: { equals: duplicatedDocID } },
         })
         expect(draftDocs[0]!._status).toStrictEqual('draft')
@@ -1799,6 +1799,7 @@ describe('Versions', () => {
       // Step 2: Add a block via API (simpler and more reliable than UI interaction)
       await payload.update({
         id,
+        action: 'saveDraft',
         collection: localizedCollectionSlug,
         data: {
           blocks: [
@@ -1808,13 +1809,13 @@ describe('Versions', () => {
             },
           ],
         },
-        draft: true,
         locale: 'en',
       })
 
       // Step 3: Publish specific locale (English) via API
       const published = await payload.update({
         id,
+        action: 'publish',
         collection: localizedCollectionSlug,
         data: {
           _status: 'published',
@@ -1826,7 +1827,6 @@ describe('Versions', () => {
           ],
           text: 'english text',
         },
-        draft: false,
         locale: 'en',
       })
 
@@ -2276,6 +2276,7 @@ describe('Versions', () => {
 
       await payload.update({
         id: postID,
+        action: 'saveDraft',
         collection: draftCollectionSlug,
         data: {
           blocksField: [
@@ -2289,7 +2290,6 @@ describe('Versions', () => {
           title: 'current draft post title',
         },
         depth: 0,
-        draft: true,
       })
 
       const versions = await payload.findVersions({

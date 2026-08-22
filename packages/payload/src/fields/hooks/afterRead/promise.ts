@@ -828,7 +828,6 @@ export const promise = async ({
                   currentDepth,
                   data: doc,
                   depth,
-                  draft,
                   fallbackLocale: fallbackLocale!,
                   field,
                   fieldPromises,
@@ -851,6 +850,7 @@ export const promise = async ({
                   triggerAccessControl,
                   triggerHooks,
                   value,
+                  version,
                 })
 
                 if (hookedValue !== undefined) {
@@ -865,7 +865,6 @@ export const promise = async ({
               currentDepth,
               data: doc,
               depth,
-              draft,
               fallbackLocale: fallbackLocale!,
               field,
               fieldPromises,
@@ -888,6 +887,7 @@ export const promise = async ({
               triggerAccessControl,
               triggerHooks,
               value: siblingDoc[field.name],
+              version,
             })
 
             if (hookedValue !== undefined) {

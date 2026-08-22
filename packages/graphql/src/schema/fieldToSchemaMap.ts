@@ -860,7 +860,6 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
           editor?.graphQLPopulationPromises({
             context,
             depth: populateDepth,
-            draft: version === 'latest' || version === 'draft',
             field,
             fieldPromises,
             findMany: false,
@@ -871,6 +870,7 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
             req: context.req,
             showHiddenFields: false,
             siblingDoc: parent,
+            version,
           })
           await Promise.all(fieldPromises)
           await Promise.all(populationPromises)
