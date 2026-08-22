@@ -1,4 +1,4 @@
-/* eslint-disable vitest/no-conditional-expect */
+/* eslint-disable vitest/no-standalone-expect -- Assertions run inside `testCLICommand`. */
 
 import type { CLIRuntime, Payload } from 'payload'
 
@@ -73,7 +73,7 @@ test(
   }),
 )
 
-test('should show build help without running the build', async ({ cli }) => {
+test('build --help', async ({ cli }) => {
   await expect(access(importMapFile)).rejects.toThrow()
 
   const output = await cli('build --help')
@@ -102,17 +102,14 @@ test.options({ db: 'drizzle' })(
   }),
 )
 
-test.options({ db: 'drizzle' })(
-  'should show generate:db-schema help without generating a schema',
-  async ({ cli }) => {
-    await expect(access(schemaFile)).rejects.toThrow()
+test.options({ db: 'drizzle' })('generate:db-schema --help', async ({ cli }) => {
+  await expect(access(schemaFile)).rejects.toThrow()
 
-    const output = await cli('generate:db-schema --help')
+  const output = await cli('generate:db-schema --help')
 
-    expect(`${output.stdout}\n${output.stderr}`).toContain('Usage: payload generate:db-schema')
-    await expect(access(schemaFile)).rejects.toThrow()
-  },
-)
+  expect(`${output.stdout}\n${output.stderr}`).toContain('Usage: payload generate:db-schema')
+  await expect(access(schemaFile)).rejects.toThrow()
+})
 
 test(
   'generate:importmap',
@@ -134,7 +131,7 @@ test(
   }),
 )
 
-test('should show generate:importmap help without generating an import map', async ({ cli }) => {
+test('generate:importmap --help', async ({ cli }) => {
   await expect(access(importMapFile)).rejects.toThrow()
 
   const output = await cli('generate:importmap --help')
@@ -164,7 +161,7 @@ test(
   }),
 )
 
-test('should show generate:types help without generating types', async ({ cli }) => {
+test('generate:types --help', async ({ cli }) => {
   await expect(access(typesFile)).rejects.toThrow()
 
   const output = await cli('generate:types --help')
@@ -215,7 +212,7 @@ test(
   }),
 )
 
-test('should show help command help', async ({ cli }) => {
+test('help --help', async ({ cli }) => {
   const output = await cli('help --help')
 
   expect(`${output.stdout}\n${output.stderr}`).toContain('Usage: payload help')
@@ -243,7 +240,7 @@ test(
   }),
 )
 
-test('should show info help', async ({ cli }) => {
+test('info --help', async ({ cli }) => {
   const output = await cli('info --help')
 
   expect(`${output.stdout}\n${output.stderr}`).toContain('Usage: payload info')
@@ -285,10 +282,7 @@ test(
   }),
 )
 
-test('should show jobs:handle-schedules help without scheduling a job', async ({
-  cli,
-  payload,
-}) => {
+test('jobs:handle-schedules --help', async ({ cli, payload }) => {
   const jobsBefore = (await payload.find({
     collection: 'payload-jobs',
     limit: 100,
@@ -339,25 +333,22 @@ test.options({ db: 'mongo' })(
   }),
 )
 
-test.options({ db: 'mongo' })(
-  'should show jobs:run help without running a job',
-  async ({ cli, payload }) => {
-    await payload.jobs.queue({ input: {}, task: 'noop' } as never)
-    const pagesBefore = (await payload.find({ collection: 'pages', limit: 100 } as never)) as {
-      docs: Array<{ title: string }>
-    }
+test.options({ db: 'mongo' })('jobs:run --help', async ({ cli, payload }) => {
+  await payload.jobs.queue({ input: {}, task: 'noop' } as never)
+  const pagesBefore = (await payload.find({ collection: 'pages', limit: 100 } as never)) as {
+    docs: Array<{ title: string }>
+  }
 
-    expect(pagesBefore.docs.map(({ title }) => title)).not.toContain('CLI job ran')
+  expect(pagesBefore.docs.map(({ title }) => title)).not.toContain('CLI job ran')
 
-    const output = await cli('jobs:run --help')
-    const pagesAfter = (await payload.find({ collection: 'pages', limit: 100 } as never)) as {
-      docs: Array<{ title: string }>
-    }
+  const output = await cli('jobs:run --help')
+  const pagesAfter = (await payload.find({ collection: 'pages', limit: 100 } as never)) as {
+    docs: Array<{ title: string }>
+  }
 
-    expect(`${output.stdout}\n${output.stderr}`).toContain('Usage: payload jobs:run')
-    expect(pagesAfter.docs.map(({ title }) => title)).not.toContain('CLI job ran')
-  },
-)
+  expect(`${output.stdout}\n${output.stderr}`).toContain('Usage: payload jobs:run')
+  expect(pagesAfter.docs.map(({ title }) => title)).not.toContain('CLI job ran')
+})
 
 test.options({ db: 'mongo' })(
   'migrate',
@@ -388,24 +379,21 @@ test.options({ db: 'mongo' })(
   }),
 )
 
-test.options({ db: 'mongo' })(
-  'should show migrate help without running a pending migration',
-  async ({ cli, payload }) => {
-    await cli('migrate:create pending --force-accept-warning --json')
-    const migrationName = (await readdir(migrationsDirectory))
-      .find((file) => file.endsWith('_pending.ts'))!
-      .replace('.ts', '')
-    const migrationsBefore = await payload.find({ collection: 'payload-migrations', limit: 100 })
+test.options({ db: 'mongo' })('migrate --help', async ({ cli, payload }) => {
+  await cli('migrate:create pending --force-accept-warning --json')
+  const migrationName = (await readdir(migrationsDirectory))
+    .find((file) => file.endsWith('_pending.ts'))!
+    .replace('.ts', '')
+  const migrationsBefore = await payload.find({ collection: 'payload-migrations', limit: 100 })
 
-    expect(migrationsBefore.docs.find(({ name }) => name === migrationName)).toBeUndefined()
+  expect(migrationsBefore.docs.find(({ name }) => name === migrationName)).toBeUndefined()
 
-    const output = await cli('migrate --help')
-    const migrationsAfter = await payload.find({ collection: 'payload-migrations', limit: 100 })
+  const output = await cli('migrate --help')
+  const migrationsAfter = await payload.find({ collection: 'payload-migrations', limit: 100 })
 
-    expect(`${output.stdout}\n${output.stderr}`).toContain('Usage: payload migrate')
-    expect(migrationsAfter.docs.find(({ name }) => name === migrationName)).toBeUndefined()
-  },
-)
+  expect(`${output.stdout}\n${output.stderr}`).toContain('Usage: payload migrate')
+  expect(migrationsAfter.docs.find(({ name }) => name === migrationName)).toBeUndefined()
+})
 
 test(
   'migrate:create cli-test --force-accept-warning',
@@ -433,7 +421,7 @@ test(
   }),
 )
 
-test('should show migrate:create help without creating a migration', async ({ cli }) => {
+test('migrate:create --help', async ({ cli }) => {
   await expect(access(migrationsDirectory)).rejects.toThrow()
 
   const output = await cli('migrate:create --help')
@@ -470,22 +458,19 @@ test.options({ db: 'mongo' })(
   }),
 )
 
-test.options({ db: 'mongo' })(
-  'should show migrate:down help without rolling back a migration',
-  async ({ cli, payload }) => {
-    await cli('migrate:create down --force-accept-warning --json')
-    const migrationName = (await readdir(migrationsDirectory))
-      .find((file) => file.endsWith('_down.ts'))!
-      .replace('.ts', '')
-    await cli('migrate --json')
+test.options({ db: 'mongo' })('migrate:down --help', async ({ cli, payload }) => {
+  await cli('migrate:create down --force-accept-warning --json')
+  const migrationName = (await readdir(migrationsDirectory))
+    .find((file) => file.endsWith('_down.ts'))!
+    .replace('.ts', '')
+  await cli('migrate --json')
 
-    const output = await cli('migrate:down --help')
-    const migrationsAfter = await payload.find({ collection: 'payload-migrations', limit: 100 })
+  const output = await cli('migrate:down --help')
+  const migrationsAfter = await payload.find({ collection: 'payload-migrations', limit: 100 })
 
-    expect(`${output.stdout}\n${output.stderr}`).toContain('Usage: payload migrate:down')
-    expect(migrationsAfter.docs.find(({ name }) => name === migrationName)).toBeDefined()
-  },
-)
+  expect(`${output.stdout}\n${output.stderr}`).toContain('Usage: payload migrate:down')
+  expect(migrationsAfter.docs.find(({ name }) => name === migrationName)).toBeDefined()
+})
 
 test.options({ db: 'mongo' })(
   'migrate:fresh --force-accept-warning',
@@ -516,24 +501,21 @@ test.options({ db: 'mongo' })(
   }),
 )
 
-test.options({ db: 'mongo' })(
-  'should show migrate:fresh help without running migrations',
-  async ({ cli, payload }) => {
-    await cli('migrate:create fresh --force-accept-warning --json')
-    const migrationName = (await readdir(migrationsDirectory))
-      .find((file) => file.endsWith('_fresh.ts'))!
-      .replace('.ts', '')
-    const migrationsBefore = await payload.find({ collection: 'payload-migrations', limit: 100 })
+test.options({ db: 'mongo' })('migrate:fresh --help', async ({ cli, payload }) => {
+  await cli('migrate:create fresh --force-accept-warning --json')
+  const migrationName = (await readdir(migrationsDirectory))
+    .find((file) => file.endsWith('_fresh.ts'))!
+    .replace('.ts', '')
+  const migrationsBefore = await payload.find({ collection: 'payload-migrations', limit: 100 })
 
-    expect(migrationsBefore.docs.find(({ name }) => name === migrationName)).toBeUndefined()
+  expect(migrationsBefore.docs.find(({ name }) => name === migrationName)).toBeUndefined()
 
-    const output = await cli('migrate:fresh --help')
-    const migrationsAfter = await payload.find({ collection: 'payload-migrations', limit: 100 })
+  const output = await cli('migrate:fresh --help')
+  const migrationsAfter = await payload.find({ collection: 'payload-migrations', limit: 100 })
 
-    expect(`${output.stdout}\n${output.stderr}`).toContain('Usage: payload migrate:fresh')
-    expect(migrationsAfter.docs.find(({ name }) => name === migrationName)).toBeUndefined()
-  },
-)
+  expect(`${output.stdout}\n${output.stderr}`).toContain('Usage: payload migrate:fresh')
+  expect(migrationsAfter.docs.find(({ name }) => name === migrationName)).toBeUndefined()
+})
 
 test.options({ db: 'mongo' })(
   'migrate:refresh',
@@ -566,32 +548,29 @@ test.options({ db: 'mongo' })(
   }),
 )
 
-test.options({ db: 'mongo' })(
-  'should show migrate:refresh help without refreshing migrations',
-  async ({ cli, payload }) => {
-    await cli('migrate:create refresh --force-accept-warning --json')
-    const migrationName = (await readdir(migrationsDirectory))
-      .find((file) => file.endsWith('_refresh.ts'))!
-      .replace('.ts', '')
-    await cli('migrate --json')
-    const migrationsBefore = await payload.find({
-      collection: 'payload-migrations',
-      limit: 100,
-    })
-    const migrationBefore = migrationsBefore.docs.find(({ name }) => name === migrationName)
+test.options({ db: 'mongo' })('migrate:refresh --help', async ({ cli, payload }) => {
+  await cli('migrate:create refresh --force-accept-warning --json')
+  const migrationName = (await readdir(migrationsDirectory))
+    .find((file) => file.endsWith('_refresh.ts'))!
+    .replace('.ts', '')
+  await cli('migrate --json')
+  const migrationsBefore = await payload.find({
+    collection: 'payload-migrations',
+    limit: 100,
+  })
+  const migrationBefore = migrationsBefore.docs.find(({ name }) => name === migrationName)
 
-    const output = await cli('migrate:refresh --help')
-    const migrationsAfter = await payload.find({
-      collection: 'payload-migrations',
-      limit: 100,
-    })
+  const output = await cli('migrate:refresh --help')
+  const migrationsAfter = await payload.find({
+    collection: 'payload-migrations',
+    limit: 100,
+  })
 
-    expect(`${output.stdout}\n${output.stderr}`).toContain('Usage: payload migrate:refresh')
-    expect(migrationsAfter.docs.find(({ name }) => name === migrationName)?.id).toBe(
-      migrationBefore?.id,
-    )
-  },
-)
+  expect(`${output.stdout}\n${output.stderr}`).toContain('Usage: payload migrate:refresh')
+  expect(migrationsAfter.docs.find(({ name }) => name === migrationName)?.id).toBe(
+    migrationBefore?.id,
+  )
+})
 
 test.options({ db: 'mongo' })(
   'migrate:reset',
@@ -621,25 +600,22 @@ test.options({ db: 'mongo' })(
   }),
 )
 
-test.options({ db: 'mongo' })(
-  'should show migrate:reset help without resetting migrations',
-  async ({ cli, payload }) => {
-    await cli('migrate:create reset --force-accept-warning --json')
-    const migrationName = (await readdir(migrationsDirectory))
-      .find((file) => file.endsWith('_reset.ts'))!
-      .replace('.ts', '')
-    await cli('migrate --json')
+test.options({ db: 'mongo' })('migrate:reset --help', async ({ cli, payload }) => {
+  await cli('migrate:create reset --force-accept-warning --json')
+  const migrationName = (await readdir(migrationsDirectory))
+    .find((file) => file.endsWith('_reset.ts'))!
+    .replace('.ts', '')
+  await cli('migrate --json')
 
-    const output = await cli('migrate:reset --help')
-    const migrationsAfter = await payload.find({
-      collection: 'payload-migrations',
-      limit: 100,
-    })
+  const output = await cli('migrate:reset --help')
+  const migrationsAfter = await payload.find({
+    collection: 'payload-migrations',
+    limit: 100,
+  })
 
-    expect(`${output.stdout}\n${output.stderr}`).toContain('Usage: payload migrate:reset')
-    expect(migrationsAfter.docs.find(({ name }) => name === migrationName)).toBeDefined()
-  },
-)
+  expect(`${output.stdout}\n${output.stderr}`).toContain('Usage: payload migrate:reset')
+  expect(migrationsAfter.docs.find(({ name }) => name === migrationName)).toBeDefined()
+})
 
 test(
   'migrate:status',
@@ -668,10 +644,7 @@ test(
   }),
 )
 
-test('should show migrate:status help without reading migration status', async ({
-  cli,
-  payload,
-}) => {
+test('migrate:status --help', async ({ cli, payload }) => {
   await cli('migrate:create status --force-accept-warning --json')
   const migrationName = (await readdir(migrationsDirectory))
     .find((file) => file.endsWith('_status.ts'))!
@@ -705,7 +678,7 @@ test(
   }),
 )
 
-test('should show run help without running a script', async ({ cli }) => {
+test('run --help', async ({ cli }) => {
   await expect(access(scriptOutputFile)).rejects.toThrow()
 
   const output = await cli('run --help')
@@ -731,7 +704,7 @@ test(
   }),
 )
 
-test('should show custom command help without running it', async ({ cli }) => {
+test('hello --help', async ({ cli }) => {
   const output = await cli('hello --help')
 
   expect(`${output.stdout}\n${output.stderr}`).toContain('Usage: payload hello')
