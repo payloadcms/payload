@@ -134,6 +134,26 @@ describe('Group', () => {
     })
   })
 
+  describe('Localized', () => {
+    test('should show locale badge on localized group field label', async () => {
+      await page.goto(url.create)
+
+      const localizedGroupLabel = page.locator(
+        '#field-localizedGroup .group-field__title .localized',
+      )
+
+      await expect(localizedGroupLabel).toBeVisible()
+    })
+
+    test('should not show locale badge on non-localized group field label', async () => {
+      await page.goto(url.create)
+
+      const groupLabel = page.locator('#field-group .group-field__title .localized')
+
+      await expect(groupLabel).toBeHidden()
+    })
+  })
+
   describe.skip('A11y', () => {
     test.fixme('Edit view should have no accessibility violations', async ({}, testInfo) => {
       await page.goto(url.create)
