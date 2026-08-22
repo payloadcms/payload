@@ -37,11 +37,11 @@ import {
 } from '../../utilities/getVersionsConfig.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
-import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.js'
-import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
+import { getOperationSelect } from './utilities/getOperationSelect.js'
+import { runCollectionHooks } from './utilities/runCollectionHooks.js'
 
 export type Arguments<TSlug extends CollectionSlug> = {
   autosave?: boolean
@@ -194,37 +194,37 @@ export const createOperation = async <
     // beforeValidate - Collections
     // /////////////////////////////////////
 
-    if (collectionConfig.hooks.beforeValidate?.length) {
-      for (const hook of collectionConfig.hooks.beforeValidate) {
-        data =
-          (await hook({
-            collection: collectionConfig,
-            context: req.context,
-            data,
-            operation: 'create',
-            originalDoc: duplicatedFromDoc,
-            req,
-          })) || data
-      }
-    }
+    data = await runCollectionHooks({
+      hooks: collectionConfig.hooks.beforeValidate,
+      invoke: (hook, current) =>
+        hook({
+          collection: collectionConfig,
+          context: req.context,
+          data: current,
+          operation: 'create',
+          originalDoc: duplicatedFromDoc,
+          req,
+        }),
+      payload: data,
+    })
 
     // /////////////////////////////////////
     // beforeChange - Collection
     // /////////////////////////////////////
 
-    if (collectionConfig.hooks?.beforeChange?.length) {
-      for (const hook of collectionConfig.hooks.beforeChange) {
-        data =
-          (await hook({
-            collection: collectionConfig,
-            context: req.context,
-            data,
-            operation: 'create',
-            originalDoc: duplicatedFromDoc,
-            req,
-          })) || data
-      }
-    }
+    data = await runCollectionHooks({
+      hooks: collectionConfig.hooks?.beforeChange,
+      invoke: (hook, current) =>
+        hook({
+          collection: collectionConfig,
+          context: req.context,
+          data: current,
+          operation: 'create',
+          originalDoc: duplicatedFromDoc,
+          req,
+        }),
+      payload: data,
+    })
 
     // /////////////////////////////////////
     // beforeChange - Fields
@@ -300,14 +300,11 @@ export const createOperation = async <
 
     let doc
 
-    const select = sanitizeSelect({
-      fields: collectionConfig.flattenedFields,
-      select: resolveSelect({
-        config: collectionConfig.select,
-        operation: 'create',
-        req,
-        select: incomingSelect,
-      }),
+    const select = getOperationSelect({
+      collectionConfig,
+      incomingSelect,
+      operation: 'create',
+      req,
     })
 
     if (collectionConfig.auth && !collectionConfig.auth.disableLocalStrategy) {
@@ -399,18 +396,12 @@ export const createOperation = async <
     // afterRead - Collection
     // /////////////////////////////////////
 
-    if (collectionConfig.hooks?.afterRead?.length) {
-      for (const hook of collectionConfig.hooks.afterRead) {
-        result =
-          (await hook({
-            collection: collectionConfig,
-            context: req.context,
-            doc: result,
-            overrideAccess,
-            req,
-          })) || result
-      }
-    }
+    result = await runCollectionHooks({
+      hooks: collectionConfig.hooks?.afterRead,
+      invoke: (hook, doc) =>
+        hook({ collection: collectionConfig, context: req.context, doc, overrideAccess, req }),
+      payload: result,
+    })
 
     // /////////////////////////////////////
     // afterChange - Fields
@@ -431,21 +422,21 @@ export const createOperation = async <
     // afterChange - Collection
     // /////////////////////////////////////
 
-    if (collectionConfig.hooks?.afterChange?.length) {
-      for (const hook of collectionConfig.hooks.afterChange) {
-        result =
-          (await hook({
-            collection: collectionConfig,
-            context: req.context,
-            data,
-            doc: result,
-            operation: 'create',
-            overrideAccess,
-            previousDoc: {},
-            req: args.req,
-          })) || result
-      }
-    }
+    result = await runCollectionHooks({
+      hooks: collectionConfig.hooks?.afterChange,
+      invoke: (hook, doc) =>
+        hook({
+          collection: collectionConfig,
+          context: req.context,
+          data,
+          doc,
+          operation: 'create',
+          overrideAccess,
+          previousDoc: {},
+          req: args.req,
+        }),
+      payload: result,
+    })
 
     // /////////////////////////////////////
     // afterOperation - Collection

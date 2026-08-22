@@ -38,6 +38,7 @@ import {
   hasLocalizeStatusEnabled,
 } from '../../../utilities/getVersionsConfig.js'
 import { buildLocalizedPublishData } from '../../../versions/buildSingleLocalePublishData.js'
+import { runCollectionHooks } from './runCollectionHooks.js'
 export type SharedUpdateDocumentArgs<TSlug extends CollectionSlug> = {
   autosave: boolean
   collectionConfig: SanitizedCollectionConfig
@@ -206,19 +207,19 @@ export const updateDocument = async <
   // beforeValidate - Collection
   // /////////////////////////////////////
 
-  if (collectionConfig.hooks?.beforeValidate?.length) {
-    for (const hook of collectionConfig.hooks.beforeValidate) {
-      data =
-        (await hook({
-          collection: collectionConfig,
-          context: req.context,
-          data,
-          operation: 'update',
-          originalDoc,
-          req,
-        })) || data
-    }
-  }
+  data = await runCollectionHooks({
+    hooks: collectionConfig.hooks?.beforeValidate,
+    invoke: (hook, current) =>
+      hook({
+        collection: collectionConfig,
+        context: req.context,
+        data: current,
+        operation: 'update',
+        originalDoc,
+        req,
+      }),
+    payload: data,
+  })
 
   // /////////////////////////////////////
   // Write files to local storage
@@ -232,19 +233,19 @@ export const updateDocument = async <
   // beforeChange - Collection
   // /////////////////////////////////////
 
-  if (collectionConfig.hooks?.beforeChange?.length) {
-    for (const hook of collectionConfig.hooks.beforeChange) {
-      data =
-        (await hook({
-          collection: collectionConfig,
-          context: req.context,
-          data,
-          operation: 'update',
-          originalDoc,
-          req,
-        })) || data
-    }
-  }
+  data = await runCollectionHooks({
+    hooks: collectionConfig.hooks?.beforeChange,
+    invoke: (hook, current) =>
+      hook({
+        collection: collectionConfig,
+        context: req.context,
+        data: current,
+        operation: 'update',
+        originalDoc,
+        req,
+      }),
+    payload: data,
+  })
 
   // /////////////////////////////////////
   // beforeChange - Fields
@@ -428,18 +429,12 @@ export const updateDocument = async <
   // afterRead - Collection
   // /////////////////////////////////////
 
-  if (collectionConfig.hooks?.afterRead?.length) {
-    for (const hook of collectionConfig.hooks.afterRead) {
-      result =
-        (await hook({
-          collection: collectionConfig,
-          context: req.context,
-          doc: result,
-          overrideAccess,
-          req,
-        })) || result
-    }
-  }
+  result = await runCollectionHooks({
+    hooks: collectionConfig.hooks?.afterRead,
+    invoke: (hook, doc) =>
+      hook({ collection: collectionConfig, context: req.context, doc, overrideAccess, req }),
+    payload: result,
+  })
 
   // /////////////////////////////////////
   // afterChange - Fields
@@ -460,21 +455,21 @@ export const updateDocument = async <
   // afterChange - Collection
   // /////////////////////////////////////
 
-  if (collectionConfig.hooks?.afterChange?.length) {
-    for (const hook of collectionConfig.hooks.afterChange) {
-      result =
-        (await hook({
-          collection: collectionConfig,
-          context: req.context,
-          data,
-          doc: result,
-          operation: 'update',
-          overrideAccess,
-          previousDoc: originalDoc,
-          req,
-        })) || result
-    }
-  }
+  result = await runCollectionHooks({
+    hooks: collectionConfig.hooks?.afterChange,
+    invoke: (hook, doc) =>
+      hook({
+        collection: collectionConfig,
+        context: req.context,
+        data,
+        doc,
+        operation: 'update',
+        overrideAccess,
+        previousDoc: originalDoc,
+        req,
+      }),
+    payload: result,
+  })
 
   return result as TransformCollectionWithSelect<TSlug, TSelect>
 }

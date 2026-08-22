@@ -25,12 +25,12 @@ import { hasScheduledPublishEnabled } from '../../utilities/getVersionsConfig.js
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { isErrorPublic } from '../../utilities/isErrorPublic.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
-import { resolveSelect } from '../../utilities/resolveSelect.js'
-import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { deleteCollectionVersions } from '../../versions/deleteCollectionVersions.js'
 import { deleteScheduledPublishJobs } from '../../versions/deleteScheduledPublishJobs.js'
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
+import { getOperationSelect } from './utilities/getOperationSelect.js'
+import { runCollectionHooks } from './utilities/runCollectionHooks.js'
 
 export type Arguments = {
   collection: Collection
@@ -124,14 +124,11 @@ export const deleteOperation = async <
 
     sanitizeWhereQuery({ fields: collectionConfig.flattenedFields, payload, where: fullWhere })
 
-    const select = sanitizeSelect({
-      fields: collectionConfig.flattenedFields,
-      select: resolveSelect({
-        config: collectionConfig.select,
-        operation: 'delete',
-        req,
-        select: incomingSelect,
-      }),
+    const select = getOperationSelect({
+      collectionConfig,
+      incomingSelect,
+      operation: 'delete',
+      req,
     })
 
     // /////////////////////////////////////
@@ -176,16 +173,17 @@ export const deleteOperation = async <
         // beforeDelete - Collection
         // /////////////////////////////////////
 
-        if (collectionConfig.hooks?.beforeDelete?.length) {
-          for (const hook of collectionConfig.hooks.beforeDelete) {
-            await hook({
+        await runCollectionHooks({
+          hooks: collectionConfig.hooks?.beforeDelete,
+          invoke: (hook) =>
+            hook({
               id,
               collection: collectionConfig,
               context: req.context,
               req,
-            })
-          }
-        }
+            }),
+          payload: undefined,
+        })
 
         await deleteAssociatedFiles({
           collectionConfig,
@@ -268,35 +266,35 @@ export const deleteOperation = async <
         // afterRead - Collection
         // /////////////////////////////////////
 
-        if (collectionConfig.hooks?.afterRead?.length) {
-          for (const hook of collectionConfig.hooks.afterRead) {
-            result =
-              (await hook({
-                collection: collectionConfig,
-                context: req.context,
-                doc: result || doc,
-                overrideAccess,
-                req,
-              })) || result
-          }
-        }
+        result = await runCollectionHooks({
+          hooks: collectionConfig.hooks?.afterRead,
+          invoke: (hook, current) =>
+            hook({
+              collection: collectionConfig,
+              context: req.context,
+              doc: current || doc,
+              overrideAccess,
+              req,
+            }),
+          payload: result,
+        })
 
         // /////////////////////////////////////
         // afterDelete - Collection
         // /////////////////////////////////////
 
-        if (collectionConfig.hooks?.afterDelete?.length) {
-          for (const hook of collectionConfig.hooks.afterDelete) {
-            result =
-              (await hook({
-                id,
-                collection: collectionConfig,
-                context: req.context,
-                doc: result,
-                req,
-              })) || result
-          }
-        }
+        result = await runCollectionHooks({
+          hooks: collectionConfig.hooks?.afterDelete,
+          invoke: (hook, doc) =>
+            hook({
+              id,
+              collection: collectionConfig,
+              context: req.context,
+              doc,
+              req,
+            }),
+          payload: result,
+        })
 
         // /////////////////////////////////////
         // 8. Return results
@@ -358,6 +356,7 @@ export const deleteOperation = async <
       collection: collectionConfig,
       operation: 'delete',
       overrideAccess,
+      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       result,
     })
 
@@ -365,6 +364,7 @@ export const deleteOperation = async <
       await commitTransaction(req)
     }
 
+    // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
     return result
   } catch (error: unknown) {
     await killTransaction(args.req)
