@@ -192,6 +192,10 @@ export type FieldHookArgs<TData extends TypeWithID = any, TValue = any, TSibling
   /** The global which the field belongs to. If the field belongs to a collection, this will be null. */
   global: null | SanitizedGlobalConfig
   indexPath: number[]
+  /**
+   * The locale currently being processed. Only available in `beforeDuplicate` field hooks running against a localized field.
+   */
+  locale?: string
   /** A string relating to which operation the field type is currently executing within. Useful within beforeValidate, beforeChange, and afterChange hooks to differentiate between create and update operations. */
   operation?: 'create' | 'delete' | 'read' | 'update'
   /** The full original document in `update` operations. In the `afterChange` hook, this is the resulting document of the operation. */

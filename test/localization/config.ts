@@ -126,9 +126,9 @@ export default buildConfigWithDefaults({
           localized: true,
           hooks: {
             // Echoes the locale received by the hook so tests can assert that
-            // beforeDuplicate runs each locale with the matching req.locale.
+            // beforeDuplicate runs each locale with the matching locale arg.
             beforeDuplicate: [
-              ({ req, value }) => (value == null ? value : `${value}-${req.locale}`),
+              ({ locale, value }) => (value == null ? value : `${value}-${locale}`),
             ],
           },
         },

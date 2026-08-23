@@ -78,11 +78,12 @@ export const promise = async <T>({
             field,
             global: undefined!,
             indexPath: indexPathSegments,
+            // Expose the locale currently being duplicated so hooks can localize their result
+            locale,
             path: pathSegments,
             previousSiblingDoc: siblingDoc,
             previousValue: siblingDoc[field.name!]?.[locale],
-            // Expose the locale currently being duplicated so hooks can localize their result
-            req: { ...req, locale },
+            req,
             schemaPath: schemaPathSegments,
             siblingData: siblingDoc,
             siblingDocWithLocales: siblingDoc,

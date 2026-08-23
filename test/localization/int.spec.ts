@@ -1483,7 +1483,7 @@ describe('Localization', () => {
           locale: 'all',
         })
 
-        // Each locale's beforeDuplicate hook must run with its own req.locale
+        // Each locale's beforeDuplicate hook must receive its own locale
         expect(allLocales.localizedHookLocale.en).toStrictEqual(`src-${defaultLocale}`)
         expect(allLocales.localizedHookLocale.es).toStrictEqual(`src-${spanishLocale}`)
       })
