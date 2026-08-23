@@ -198,5 +198,18 @@ describe('reduceFields', () => {
 
       expect(result['meta.title']).toBe('Meta > Title')
     })
+
+    it('should not prefix sub-field labels with "unnamed field" for an unnamed group', () => {
+      const fields: ClientField[] = [
+        {
+          type: 'group',
+          fields: [{ name: 'title', type: 'text', label: 'Title' }],
+        } as ClientField,
+      ]
+
+      const result = labels(reduceFields({ fields }))
+
+      expect(result.title).toBe('Title')
+    })
   })
 })
