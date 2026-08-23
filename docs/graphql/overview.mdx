@@ -119,7 +119,7 @@ User [preferences](../admin/preferences) for the [Admin Panel](../admin/overview
 
 ## GraphQL Playground
 
-GraphQL Playground is enabled by default for development purposes, but disabled in production. You can enable it in production by passing `graphQL.disablePlaygroundInProduction` a `false` setting in the main Payload Config.
+Payload serves an in-browser [GraphiQL](https://github.com/graphql/graphiql) IDE (including the point-and-click Explorer plugin) so you can explore and run queries against your API. It is enabled by default for development purposes, but disabled in production. You can enable it in production by passing `graphQL.disablePlaygroundInProduction` a `false` setting in the main Payload Config.
 
 You can even log in using the `login[collection-singular-label-here]` mutation to use the Playground as an authenticated user.
 
@@ -129,7 +129,7 @@ You can even log in using the `login[collection-singular-label-here]` mutation t
 To see more regarding how the above queries and mutations are used, visit your GraphQL playground
 (by default at
 [`${SERVER_URL}/api/graphql-playground`](http://localhost:3000/api/graphql-playground))
-while your server is running. There, you can use the "Schema" and "Docs" buttons on the right to
+while your server is running. There, you can use the "Docs" and "Explorer" buttons to
 see a ton of detail about how GraphQL operates within Payload.
 
 </Banner>
