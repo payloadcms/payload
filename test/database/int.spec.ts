@@ -2558,6 +2558,32 @@ describe('database', () => {
       expect(result.point).toEqual([5, 10])
     })
 
+    it('should return point field after update by ID', async () => {
+      // Regression: the drizzle upsertRow fast-path (UPDATE … RETURNING) was
+      // not including findManyArgs.extras in selectedFields, so ST_AsGeoJSON
+      // expressions for point fields were silently dropped from the result.
+      const created = await payload.create({
+        collection: 'default-values',
+        data: {
+          point: [7, 14],
+          title: 'point-update-test',
+        },
+      })
+
+      expect(created.point).toEqual([7, 14])
+
+      const updated = await payload.update({
+        collection: 'default-values',
+        id: created.id,
+        data: {
+          title: 'point-update-test-updated',
+        },
+      })
+
+      // The point field must survive an update that doesn't touch it.
+      expect(updated.point).toEqual([7, 14])
+    })
+
     it('ensure updateMany updates all docs and respects where query', async () => {
       await payload.db.deleteMany({
         collection: postsSlug,
