@@ -4,6 +4,7 @@ import type { PayloadRequest } from '../types/index.js'
 import { getDataLoader } from '../collections/dataloader.js'
 import { getLocalI18n } from '../translations/getLocalI18n.js'
 import { sanitizeFallbackLocale } from '../utilities/sanitizeFallbackLocale.js'
+import { isolateObjectProperty } from './isolateObjectProperty.js'
 
 function getRequestContext(
   req: Partial<PayloadRequest> = { context: null } as unknown as PayloadRequest,
@@ -136,6 +137,7 @@ export const createLocalReq: CreateLocalReq = async (
     req.headers = new Headers()
   }
 
+  req = isolateObjectProperty(req, 'context')
   req.context = getRequestContext(req, context)
   req.payloadAPI = req?.payloadAPI || 'local'
   req.payload = payload

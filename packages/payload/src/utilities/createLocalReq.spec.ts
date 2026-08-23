@@ -4,7 +4,7 @@ import type { Payload } from '../index.js'
 
 import { createLocalReq } from './createLocalReq.js'
 
-describe('createLocalReq - URL construction', () => {
+describe('createLocalReq', () => {
   const mockPayload = {
     config: {
       serverURL: undefined,
@@ -19,6 +19,27 @@ describe('createLocalReq - URL construction', () => {
       error: vi.fn(),
     },
   } as unknown as Payload
+
+  it('should isolate context passed to nested Local API calls', async () => {
+    const req = await createLocalReq({}, mockPayload)
+
+    const nestedReq = await createLocalReq({ context: { value: 5 }, req }, mockPayload)
+    const siblingReq = await createLocalReq({ req }, mockPayload)
+
+    expect(nestedReq.context).toEqual({ value: 5 })
+    expect(req.context).toEqual({})
+    expect(siblingReq.context).toEqual({})
+  })
+
+  it('should inherit parent context without sharing its object', async () => {
+    const req = await createLocalReq({ context: { parentValue: 1 } }, mockPayload)
+
+    const nestedReq = await createLocalReq({ context: { nestedValue: 2 }, req }, mockPayload)
+
+    expect(nestedReq.context).toEqual({ nestedValue: 2, parentValue: 1 })
+    expect(nestedReq.context).not.toBe(req.context)
+    expect(req.context).toEqual({ parentValue: 1 })
+  })
 
   it('should use req.url when provided and serverURL is undefined', async () => {
     const req = {
