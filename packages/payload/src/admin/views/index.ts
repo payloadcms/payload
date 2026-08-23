@@ -19,7 +19,7 @@ import type { Data, StaticDescription } from '../types.js'
 import type { DocumentSubViewTypes } from './document.js'
 
 export type AdminViewConfig = {
-  Component: PayloadComponent
+  Component: PayloadComponent<AdminViewServerProps>
   /** Whether the path should be matched exactly or as a prefix */
   exact?: boolean
   meta?: MetaConfig

@@ -22,6 +22,10 @@ The codemod is idempotent and safe to run on a partially-migrated project.
 
 ## Breaking Changes
 
+### Collection and Global Access Control callbacks receive `slug`
+
+Collection and Global Access Control callback arguments now include the document's `slug`. This additive property is unlikely to affect most projects, but code that manually invokes access callbacks or `executeAccess` must now pass `slug`. Code that validates, enumerates, or compares the exact callback argument shape may also need updating.
+
 ### Default query depth reduced to `1`
 
 Queries that omit `depth` now populate one relationship level instead of two. This reduces database work and response size by default.
@@ -245,6 +249,33 @@ const useAPIKey = collection.auth.useAPIKey ?? false
 
 Properties sanitization does fill, including standard access functions, hook arrays, cookie defaults, and normalized auth options, are now required. Use `CollectionConfig` or `IncomingAuthType` for input and `SanitizedCollectionConfig` after sanitization.
 
+### Sanitized root config types now match runtime defaults
+
+`SanitizedConfig` no longer uses `DeepRequired`. This reduces TypeScript checker work and preserves optionality for nested values Payload does not populate, such as `admin.autoLogin`, `graphQL.mutations`, `queryPresets`, and `typescript.postProcess`.
+
+Code that consumes these properties from `payload.config` may now need to handle `undefined`:
+
+```ts
+const autoLogin = payload.config.admin.autoLogin
+const presets = payload.config.queryPresets?.constraints
+```
+
+Properties filled during sanitization, including `auth.jwtOrder`, root routes, GraphQL defaults, TypeScript output settings, and admin dashboard defaults, remain required. `Config.auth.jwtOrder` is now optional for incoming configs because Payload supplies its documented default. The unused `SanitizedConfig.paths` property was also removed because it is not present at runtime.
+
+### Sanitized global config types now match runtime defaults
+
+`SanitizedGlobalConfig` no longer uses `DeepRequired`. This reduces TypeScript checker work and preserves optionality for values global sanitization does not populate, such as `access.readVersions`, `admin.components`, `graphQL`, `lockDocuments`, and `typescript`.
+
+Code that consumes these properties may now need to handle `undefined`:
+
+```ts
+if (global.access.readVersions) await global.access.readVersions(args)
+const views = global.admin.components?.views
+const interfaceName = global.typescript?.interface
+```
+
+Properties filled during sanitization, including `_sanitized`, `admin`, `custom`, `label`, standard access functions, hook arrays, endpoints, and flattened fields, remain required. Use `GlobalConfig` for input and `SanitizedGlobalConfig` after sanitization.
+
 ### User types consolidated into `User` and `AuthenticatedUser`
 
 Payload's user types have been consolidated so each one has a clear job. This completes a cleanup already planned in 3.x: `UntypedUser` was deprecated for removal in 4.0, and `TypedUser` was marked to be renamed to `User` in 4.0.
@@ -449,6 +480,36 @@ const Heading: React.FC = () => {
 If you only used `useDocumentInfo` for `title` / `setDocumentTitle`, drop the import entirely. If you used it for other properties as well, leave the original `useDocumentInfo()` call in place and add a separate `useDocumentTitle()` call alongside it.
 
 Run `npx @payloadcms/codemod --transform migrate-document-title-context` to migrate automatically. The codemod splits mixed destructures, removes the `useDocumentInfo` import when no other properties are still used, and preserves any rename aliases (e.g. `{ title: docTitle }`).
+
+### `useLocale` returns `null` without an active locale
+
+The return type of `useLocale` is now `Locale | null`. It returns `null` when localization is disabled or configured without any locales. In Payload 3, the hook was typed as `Locale` and returned an empty object when localization was unavailable.
+
+Custom Client Components that read locale properties directly must handle the nullable value:
+
+```diff
+'use client'
+import { useLocale } from '@payloadcms/ui'
+
+const Greeting: React.FC = () => {
+-  const { code } = useLocale()
++  const locale = useLocale()
++
++  if (!locale) {
++    return null
++  }
++
++  const { code } = locale
+
+  return <span>{code}</span>
+}
+```
+
+When a missing locale is already valid for the receiving API, optional chaining is sufficient:
+
+```ts
+const locale = useLocale()?.code
+```
 
 ### RichText adapter `i18n` property removed
 
@@ -956,6 +1017,30 @@ And update any `$ref` pointers you wrote by hand to point at `$defs`:
 ```
 
 Do not keep your additions on `definitions` while new ones land on `$defs`.
+
+### Jobs: generic collection access is denied by default
+
+The generated `payload-jobs` collection now denies generic create, read, update, and delete access by default. This affects REST and GraphQL CRUD, plus Local API collection operations that use `overrideAccess: false`. Dedicated operations such as `payload.jobs.queue()`, `payload.jobs.run()`, and `payload.jobs.cancel()` continue to work as before.
+
+If your application intentionally exposes the internal payload-jobs collection, configure only the access it needs through `jobsCollectionOverrides`. For example, the following enables read-only Admin Panel access for trusted administrators:
+
+```ts
+jobs: {
+  jobsCollectionOverrides: ({ defaultJobsCollection }) => ({
+    ...defaultJobsCollection,
+    access: {
+      ...defaultJobsCollection.access,
+      read: ({ req }) => Boolean(req.user?.roles?.includes('admin')),
+    },
+    admin: {
+      ...defaultJobsCollection.admin,
+      hidden: false,
+    },
+  }),
+}
+```
+
+Job documents can contain inputs, outputs, logs, and execution state, so avoid enabling write access unless your application specifically requires it.
 
 ### Jobs: `jobs.depth` and `jobs.runHooks` have been removed ([#16414](https://github.com/payloadcms/payload/pull/16414))
 

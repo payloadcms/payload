@@ -241,6 +241,10 @@ const addDefaultDashboardWidgets = ({
       widgetSlug: 'collections',
       width: 'full',
     } satisfies WidgetInstance,
+    {
+      widgetSlug: 'activity',
+      width: 'small',
+    } satisfies WidgetInstance,
   ]
 }
 
@@ -267,7 +271,7 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
     config.endpoints.push(endpoint)
   }
 
-  if (config.localization && config.localization.locales?.length > 0) {
+  if (config.localization) {
     // clone localization config so to not break everything
     const firstLocale = config.localization.locales[0]
     if (typeof firstLocale === 'string') {
