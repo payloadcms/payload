@@ -460,6 +460,19 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
         const { promises, rowMetadata } = blocksValue.reduce(
           (acc, row, i: number) => {
+            // Guard: sparse arrays from a gapped _order sequence in the DB
+            // produce undefined entries. Unknown block types from stale data
+            // also have no matching config. In both cases, skip the row and
+            // emit a warning so the document stays editable rather than
+            // bricking the entire edit view. Editors can then remove/fix the
+            // affected block without needing a DB-level intervention.
+            if (!row || !row.blockType) {
+              req.payload.logger.warn(
+                `Skipping undefined block row at index ${i} in field "${schemaPath}" — the row is null/undefined (likely a sparse _order gap in the database).`,
+              )
+              return acc
+            }
+
             const blockTypeToMatch: string = row.blockType
 
             const block =
@@ -469,9 +482,10 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
               ) as FlattenedBlock | undefined)
 
             if (!block) {
-              throw new Error(
-                `Block with type "${row.blockType}" was found in block data, but no block with that type is defined in the config for field with schema path ${schemaPath}.`,
+              req.payload.logger.warn(
+                `Skipping block at index ${i} in field "${schemaPath}" — block type "${row.blockType}" is not defined in the field config. This may indicate stale or corrupt data. The document will remain editable so the block can be removed.`,
               )
+              return acc
             }
 
             const { blockSelect, blockSelectMode } = getBlockSelect({
