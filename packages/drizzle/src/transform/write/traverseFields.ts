@@ -240,6 +240,11 @@ export const traverseFields = ({
     }
 
     if (field.type === 'blocks' && !adapter.blocksAsJSON) {
+      // Track the path prefix so orphaned _rels rows for removed block positions can be wiped.
+      // e.g. if `sections` shrinks from 3 blocks to 1, rows at `sections.1.*` and `sections.2.*`
+      // must be deleted even though they are never in relationsToInsert.
+      relationshipsToDelete.push({ pathPrefix: `${path}${field.name}` })
+
       field.blocks.forEach((block) => {
         const matchedBlock =
           typeof block === 'string'
