@@ -32,11 +32,15 @@ export default buildConfigWithDefaults(
           read: ({ req: { user } }) => (user ? { id: { equals: user.id } } : false),
         },
         fields: [],
+        // Auth-session writes on login churn version docs, which flakes on Atlas with
+        // "catalog changes" errors; auth records don't need versioning here.
+        versions: false,
       },
       {
         slug: adminsSlug,
         auth: true,
         fields: [],
+        versions: false,
       },
       {
         // Default authorship: both createdBy and updatedBy
