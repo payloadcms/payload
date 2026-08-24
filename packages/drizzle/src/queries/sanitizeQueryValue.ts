@@ -231,6 +231,15 @@ export const sanitizeQueryValue = ({
       } else {
         if (idType === 'number') {
           formattedValue = Number(val)
+          // Guard: a non-numeric search term (e.g. "hello") produces NaN.
+          // Returning null tells the query builder to drop this condition,
+          // preventing "invalid input syntax for type integer: NaN" from
+          // Postgres when `id` is in listSearchableFields and the user
+          // types a string value (the list-search uses `like` which is
+          // coerced to `equals` for numeric ID columns).
+          if (Number.isNaN(formattedValue)) {
+            return null
+          }
         }
         if (idType === 'text') {
           formattedValue = String(val)
