@@ -9,10 +9,10 @@ import fs from 'fs'
 import path from 'path'
 import { migrateCLI } from 'payload'
 import { fileURLToPath } from 'url'
-import { afterEach, beforeEach, expect } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
+import { test } from '../__helpers/int/vitest.js'
 import { removeFiles } from '../__helpers/shared/removeFiles.js'
-import { describe, it } from '../__helpers/int/vitest.js'
 import configPromise from './config.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -66,9 +66,8 @@ describe('migrations CLI', () => {
     expect(migrationContent).toContain("import { sql } from 'drizzle-orm'")
   })
 
-  it(
+  test.options({ db: 'mongo' })(
     'should create migration from @payloadcms/db-* adapter predefinedMigrations folder',
-    { db: 'mongo' },
     async () => {
       // Tests: Path 1 in getPredefinedMigration.ts - @payloadcms/db-* prefix handling
       // These load directly from adapter's predefinedMigrations folder WITHOUT package.json exports
