@@ -4,6 +4,7 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
 
+import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { Admin, Post, User } from './payload-types.js'
 
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
@@ -11,9 +12,11 @@ import { devUser } from '../credentials.js'
 import {
   adminsSlug,
   createdOnlySlug,
+  customAuthorshipSlug,
   menuSlug,
   noAuthorshipSlug,
   postsSlug,
+  rawAuthorshipSlug,
   updatedOnlySlug,
   usersSlug,
 } from './slugs.js'
@@ -21,6 +24,7 @@ import {
 type TestUser = Admin | User
 
 let payload: Payload
+let restClient: NextRESTClient
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -44,7 +48,7 @@ const createPost = async ({ data, user }: { data: Partial<Post>; user?: TestUser
 
 describe('Authorship', () => {
   beforeAll(async () => {
-    ;({ payload } = await initPayloadInt(dirname))
+    ;({ payload, restClient } = await initPayloadInt(dirname))
 
     const userDoc = (
       await payload.find({
@@ -415,5 +419,200 @@ describe('Authorship', () => {
 
     expect(updated.updatedBy).toEqual({ relationTo: adminsSlug, value: admin.id })
     expect(updated.createdBy).toEqual({ relationTo: adminsSlug, value: admin.id })
+  })
+
+  it('should apply overrides from createCreatedByField / createUpdatedByField while preserving stamping', async () => {
+    const created = await payload.create({
+      collection: customAuthorshipSlug,
+      data: { title: 'custom' },
+      depth: 0,
+      user,
+    })
+
+    // Hooks are preserved through the override, so createdBy is still stamped.
+    expect(created.createdBy).toEqual({ relationTo: usersSlug, value: user.id })
+
+    const updated = await payload.update({
+      collection: customAuthorshipSlug,
+      id: created.id,
+      data: { title: 'custom updated' },
+      depth: 0,
+      user: admin,
+    })
+
+    // updatedBy is still stamped from the acting user through its override.
+    expect(updated.updatedBy).toEqual({ relationTo: adminsSlug, value: admin.id })
+
+    const fields = payload.collections[customAuthorshipSlug].config.fields
+    const findField = (name: string) =>
+      fields.find((field) => 'name' in field && field.name === name) as {
+        admin?: { hidden?: boolean }
+        label?: unknown
+        relationTo?: string[]
+      }
+
+    const createdByField = findField('createdBy')
+    const updatedByField = findField('updatedBy')
+
+    // Overrides applied on both fields, and relationTo backfilled with the config's auth collections.
+    expect(createdByField.admin?.hidden).toBe(false)
+    expect(createdByField.label).toBe('Author')
+    expect(createdByField.relationTo).toEqual([usersSlug, adminsSlug])
+
+    expect(updatedByField.admin?.hidden).toBe(false)
+    expect(updatedByField.label).toBe('Editor')
+    expect(updatedByField.relationTo).toEqual([usersSlug, adminsSlug])
+
+    await payload.delete({ collection: customAuthorshipSlug, id: created.id }).catch(() => null)
+  })
+
+  it('should use a user-defined raw createdBy field as-is (no stamping or spoof protection)', async () => {
+    const rawCreatedByField = payload.collections[rawAuthorshipSlug].config.fields.find(
+      (field) => 'name' in field && field.name === 'createdBy',
+    ) as { hooks?: { beforeChange?: unknown[] }; relationTo?: string[] }
+
+    // Accepted as-is: no stamping hooks attached, but the empty relationTo is backfilled.
+    expect(rawCreatedByField.hooks?.beforeChange ?? []).toHaveLength(0)
+    expect(rawCreatedByField.relationTo).toEqual([usersSlug, adminsSlug])
+
+    // Created with a user, but the raw field has no hook, so createdBy is not stamped.
+    const created = await payload.create({
+      collection: rawAuthorshipSlug,
+      data: { title: 'raw' },
+      depth: 0,
+      user,
+    })
+    expect(created.createdBy).toBeFalsy()
+
+    // Only createdBy was overridden, so updatedBy is still auto-injected and stamped.
+    expect(created.updatedBy).toEqual({ relationTo: usersSlug, value: user.id })
+
+    // No anti-spoof access on the raw field, so a client-provided value is honored.
+    const spoofed = await payload.create({
+      collection: rawAuthorshipSlug,
+      data: { createdBy: { relationTo: adminsSlug, value: admin.id }, title: 'raw spoof' },
+      depth: 0,
+      overrideAccess: false,
+      user,
+    })
+    expect(spoofed.createdBy).toEqual({ relationTo: adminsSlug, value: admin.id })
+
+    await payload.delete({ collection: rawAuthorshipSlug, id: created.id }).catch(() => null)
+    await payload.delete({ collection: rawAuthorshipSlug, id: spoofed.id }).catch(() => null)
+  })
+
+  describe('GraphQL', () => {
+    beforeAll(async () => {
+      // Default access only allows the admin-panel user collection (`users` here).
+      await restClient.login({ slug: usersSlug })
+    })
+
+    it('should return polymorphic createdBy / updatedBy on a collection query', async () => {
+      const post = await createPost({ data: { title: 'gql post' }, user })
+
+      const query = `query {
+        Post(id: ${typeof post.id === 'number' ? post.id : `"${post.id}"`}) {
+          id
+          createdBy {
+            relationTo
+            value {
+              ... on User {
+                id
+              }
+            }
+          }
+          updatedBy {
+            relationTo
+            value {
+              ... on User {
+                id
+              }
+            }
+          }
+        }
+      }`
+
+      const { data } = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+        .then((res) => res.json())
+
+      expect(data.Post.createdBy.relationTo).toBe(usersSlug)
+      expect(data.Post.createdBy.value.id).toBe(user.id)
+      expect(data.Post.updatedBy.relationTo).toBe(usersSlug)
+      expect(data.Post.updatedBy.value.id).toBe(user.id)
+    })
+
+    it('should resolve the Admin union branch for admin-authored docs', async () => {
+      const post = await createPost({ data: { title: 'gql admin post' }, user: admin })
+
+      const query = `query {
+        Post(id: ${typeof post.id === 'number' ? post.id : `"${post.id}"`}) {
+          createdBy {
+            relationTo
+            value {
+              ... on Admin {
+                id
+              }
+            }
+          }
+        }
+      }`
+
+      const { data } = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+        .then((res) => res.json())
+
+      expect(data.Post.createdBy.relationTo).toBe(adminsSlug)
+      expect(data.Post.createdBy.value.id).toBe(admin.id)
+    })
+
+    it('should return authorship on a global query', async () => {
+      await payload.updateGlobal({
+        slug: menuSlug,
+        data: { title: 'gql menu' },
+        depth: 0,
+        user,
+      })
+
+      const query = `query {
+        Menu {
+          updatedBy {
+            relationTo
+            value {
+              ... on User {
+                id
+              }
+            }
+          }
+        }
+      }`
+
+      const { data } = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+        .then((res) => res.json())
+
+      expect(data.Menu.updatedBy.relationTo).toBe(usersSlug)
+      expect(data.Menu.updatedBy.value.id).toBe(user.id)
+    })
+
+    it('should ignore a client-provided createdBy in a create mutation', async () => {
+      const mutation = `mutation {
+        createPost(data: { title: "gql spoof", createdBy: { relationTo: admins, value: ${typeof admin.id === 'number' ? admin.id : `"${admin.id}"`} } }) {
+          id
+          createdBy {
+            relationTo
+          }
+        }
+      }`
+
+      const { data, errors } = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query: mutation }) })
+        .then((res) => res.json())
+
+      // The acting user (from the `users` collection) must be stamped, never the injected admin.
+      expect(errors).toBeUndefined()
+      createdPostIDs.push(data.createPost.id)
+      expect(data.createPost.createdBy.relationTo).toBe(usersSlug)
+    })
   })
 })

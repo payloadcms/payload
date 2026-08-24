@@ -6,7 +6,8 @@ import type { GlobalConfig, SanitizedGlobalConfig } from './types.js'
 import { defaultAccess } from '../../auth/defaultAccess.js'
 import { withBaseAccess } from '../../auth/withBaseAccess.js'
 import {
-  getAuthorshipFields,
+  createCreatedByField,
+  createUpdatedByField,
   sanitizeAuthorship,
 } from '../../fields/baseFields/authorship/index.js'
 import { sanitizeFields } from '../../fields/config/sanitize.js'
@@ -106,20 +107,30 @@ export const sanitizeGlobal = (
         if (field.name === 'updatedBy') {
           hasUpdatedBy = true
         }
+
+        // A user may spread `getAuthorshipFields` into their `fields` to customize these
+        // without knowing the auth collections; backfill the polymorphic relationTo here.
+        if (
+          (field.name === 'createdBy' || field.name === 'updatedBy') &&
+          field.type === 'relationship' &&
+          (!field.relationTo || (Array.isArray(field.relationTo) && field.relationTo.length === 0))
+        ) {
+          field.relationTo = authCollections
+        }
       }
 
       return hasCreatedBy && hasUpdatedBy
     })
 
-    global.fields.push(
-      ...getAuthorshipFields({
-        authCollections,
-        authorship: {
-          createdBy: authorship.createdBy && !hasCreatedBy,
-          updatedBy: authorship.updatedBy && !hasUpdatedBy,
-        },
-      }),
-    )
+    if (authCollections.length > 0) {
+      if (authorship.createdBy && !hasCreatedBy) {
+        global.fields.push(createCreatedByField({ authCollections }))
+      }
+
+      if (authorship.updatedBy && !hasUpdatedBy) {
+        global.fields.push(createUpdatedByField({ authCollections }))
+      }
+    }
   }
 
   global.fields = sanitizeFields({

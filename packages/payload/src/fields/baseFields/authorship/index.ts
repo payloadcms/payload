@@ -90,68 +90,63 @@ const clearUpdatedByOnDuplicate: FieldHook = ({ siblingData }) => {
   delete siblingData.updatedBy
 }
 
-/**
- * Builds the `createdBy` / `updatedBy` fields to inject, per the sanitized `authorship` config.
- * Empty when there are no auth-enabled collections to relate to.
- */
-export const getAuthorshipFields = ({
-  authCollections,
-  authorship,
-}: {
-  authCollections: CollectionSlug[]
-  authorship: SanitizedAuthorship
-}): PolymorphicRelationshipField[] => {
-  const fields: PolymorphicRelationshipField[] = []
-
-  if (authCollections.length === 0) {
-    return fields
-  }
-
-  if (authorship.createdBy) {
-    fields.push({
-      name: 'createdBy',
-      type: 'relationship',
-      // Block client writes so authorship can't be spoofed; the hook sets the value.
-      access: {
-        create: () => false,
-        update: () => false,
-      },
-      admin: {
-        disabled: { bulkEdit: true },
-        hidden: true,
-      },
-      hooks: {
-        beforeChange: [setCreatedBy],
-        beforeDuplicate: [clearCreatedByOnDuplicate],
-      },
-      label: ({ t }) => t('general:createdBy'),
-      maxDepth: 1,
-      relationTo: authCollections,
-    })
-  }
-
-  if (authorship.updatedBy) {
-    fields.push({
-      name: 'updatedBy',
-      type: 'relationship',
-      // Block client writes so authorship can't be spoofed; the hook sets the value.
-      access: {
-        create: () => false,
-        update: () => false,
-      },
-      admin: {
-        disabled: { bulkEdit: true },
-        hidden: true,
-      },
-      hooks: {
-        beforeChange: [setUpdatedBy],
-        beforeDuplicate: [clearUpdatedByOnDuplicate],
-      },
-      label: ({ t }) => t('general:updatedBy'),
-      maxDepth: 1,
-      relationTo: authCollections,
-    })
-  }
-
-  return fields
+export type AuthorshipFieldArgs = {
+  /**
+   * The auth-enabled collections to relate to. Optional when spreading into a collection's
+   * `fields` — the polymorphic `relationTo` is backfilled during config sanitization.
+   */
+  authCollections?: CollectionSlug[]
+  overrides?: Partial<PolymorphicRelationshipField>
 }
+
+/**
+ * Builds the `createdBy` field. Exported so it can be added to a collection's (or global's)
+ * `fields` to customize the field (e.g. unhide or relabel it) while keeping the stamping hooks.
+ *
+ * `overrides` win for `label`, `relationTo`, etc.; `access`/`admin` merge onto the secure
+ * defaults, and the stamping/duplicate hooks are always kept (caller hooks are appended).
+ */
+export const createCreatedByField = ({
+  authCollections = [],
+  overrides,
+}: AuthorshipFieldArgs = {}): PolymorphicRelationshipField =>
+  ({
+    label: ({ t }) => t('general:createdBy'),
+    maxDepth: 1,
+    relationTo: authCollections,
+    ...overrides,
+    name: 'createdBy',
+    type: 'relationship',
+    // Block client writes so authorship can't be spoofed; the hook sets the value.
+    access: { create: () => false, update: () => false, ...overrides?.access },
+    admin: { disabled: { bulkEdit: true }, hidden: true, ...overrides?.admin },
+    hooks: {
+      ...overrides?.hooks,
+      beforeChange: [setCreatedBy, ...(overrides?.hooks?.beforeChange ?? [])],
+      beforeDuplicate: [clearCreatedByOnDuplicate, ...(overrides?.hooks?.beforeDuplicate ?? [])],
+    },
+  }) as PolymorphicRelationshipField
+
+/**
+ * Builds the `updatedBy` field. See {@link createCreatedByField} for override semantics.
+ */
+export const createUpdatedByField = ({
+  authCollections = [],
+  overrides,
+}: AuthorshipFieldArgs = {}): PolymorphicRelationshipField =>
+  ({
+    label: ({ t }) => t('general:updatedBy'),
+    maxDepth: 1,
+    relationTo: authCollections,
+    ...overrides,
+    name: 'updatedBy',
+    type: 'relationship',
+    // Block client writes so authorship can't be spoofed; the hook sets the value.
+    access: { create: () => false, update: () => false, ...overrides?.access },
+    admin: { disabled: { bulkEdit: true }, hidden: true, ...overrides?.admin },
+    hooks: {
+      ...overrides?.hooks,
+      beforeChange: [setUpdatedBy, ...(overrides?.hooks?.beforeChange ?? [])],
+      beforeDuplicate: [clearUpdatedByOnDuplicate, ...(overrides?.hooks?.beforeDuplicate ?? [])],
+    },
+  }) as PolymorphicRelationshipField

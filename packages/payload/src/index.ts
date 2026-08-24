@@ -1651,7 +1651,8 @@ export {
 } from './errors/index.js'
 
 export type { ValidationFieldError } from './errors/index.js'
-export type { Authorship, SanitizedAuthorship } from './fields/baseFields/authorship/types.js'
+export type { Authorship, SanitizedAuthorship } from './fields/baseFields/authorship/index.js'
+export { createCreatedByField, createUpdatedByField } from './fields/baseFields/authorship/index.js'
 
 export { baseBlockFields } from './fields/baseFields/baseBlockFields.js'
 export { baseIDField } from './fields/baseFields/baseIDField.js'

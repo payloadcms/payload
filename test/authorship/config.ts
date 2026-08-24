@@ -1,15 +1,18 @@
 import { fileURLToPath } from 'node:url'
 import path from 'path'
+import { createCreatedByField, createUpdatedByField } from 'payload'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import {
   adminsSlug,
   createdOnlySlug,
+  customAuthorshipSlug,
   draftPostsSlug,
   menuSlug,
   noAuthorshipSlug,
   postsSlug,
+  rawAuthorshipSlug,
   updatedOnlySlug,
   usersSlug,
 } from './slugs.js'
@@ -96,6 +99,46 @@ export default buildConfigWithDefaults(
         versions: {
           drafts: true,
         },
+      },
+      {
+        // Both authorship fields customized via the exported builders (unhidden + relabelled)
+        // while the stamping hooks are preserved.
+        slug: customAuthorshipSlug,
+        fields: [
+          {
+            name: 'title',
+            type: 'text',
+          },
+          createCreatedByField({
+            overrides: {
+              admin: { hidden: false },
+              label: 'Author',
+            },
+          }),
+          createUpdatedByField({
+            overrides: {
+              admin: { hidden: false },
+              label: 'Editor',
+            },
+          }),
+        ],
+      },
+      {
+        // A raw user-defined createdBy (NOT via the builders): accepted as-is, so it gets no
+        // stamping hooks and no anti-spoof access. updatedBy is still auto-injected.
+        slug: rawAuthorshipSlug,
+        fields: [
+          {
+            name: 'title',
+            type: 'text',
+          },
+          {
+            name: 'createdBy',
+            type: 'relationship',
+            // Left empty to verify sanitization backfills the auth collections.
+            relationTo: [],
+          },
+        ],
       },
     ],
     globals: [

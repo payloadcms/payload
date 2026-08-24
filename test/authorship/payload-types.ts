@@ -75,6 +75,8 @@ export interface Config {
     'no-authorship': NoAuthorship;
     'created-only': CreatedOnly;
     'updated-only': UpdatedOnly;
+    'custom-authorship': CustomAuthorship;
+    'raw-authorship': RawAuthorship;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -89,6 +91,8 @@ export interface Config {
     'no-authorship': NoAuthorshipSelect<false> | NoAuthorshipSelect<true>;
     'created-only': CreatedOnlySelect<false> | CreatedOnlySelect<true>;
     'updated-only': UpdatedOnlySelect<false> | UpdatedOnlySelect<true>;
+    'custom-authorship': CustomAuthorshipSelect<false> | CustomAuthorshipSelect<true>;
+    'raw-authorship': RawAuthorshipSelect<false> | RawAuthorshipSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -347,6 +351,62 @@ export interface UpdatedOnly {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-authorship".
+ */
+export interface CustomAuthorship {
+  id: string;
+  title?: string | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'admins';
+        value: string | Admin;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'admins';
+        value: string | Admin;
+      } | null);
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "raw-authorship".
+ */
+export interface RawAuthorship {
+  id: string;
+  title?: string | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'admins';
+        value: string | Admin;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'admins';
+        value: string | Admin;
+      } | null);
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -414,6 +474,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'updated-only';
         value: string | UpdatedOnly;
+      } | null)
+    | ({
+        relationTo: 'custom-authorship';
+        value: string | CustomAuthorship;
+      } | null)
+    | ({
+        relationTo: 'raw-authorship';
+        value: string | RawAuthorship;
       } | null);
   globalSlug?: string | null;
   user:
@@ -571,6 +639,28 @@ export interface UpdatedOnlySelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-authorship_select".
+ */
+export interface CustomAuthorshipSelect<T extends boolean = true> {
+  title?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "raw-authorship_select".
+ */
+export interface RawAuthorshipSelect<T extends boolean = true> {
+  title?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
@@ -668,7 +758,16 @@ export interface CollectionsWidget {
 export interface CollectionQueryWidget {
   data?: {
     title?: string | null;
-    relatedCollection: 'users' | 'admins' | 'posts' | 'draft-posts' | 'no-authorship' | 'created-only' | 'updated-only';
+    relatedCollection:
+      | 'users'
+      | 'admins'
+      | 'posts'
+      | 'draft-posts'
+      | 'no-authorship'
+      | 'created-only'
+      | 'updated-only'
+      | 'custom-authorship'
+      | 'raw-authorship';
     where?:
       | {
           [k: string]: unknown;
@@ -691,7 +790,17 @@ export interface CollectionQueryWidget {
 export interface ActivityWidget {
   data?: {
     excludedCollections?:
-      | ('users' | 'admins' | 'posts' | 'draft-posts' | 'no-authorship' | 'created-only' | 'updated-only')[]
+      | (
+          | 'users'
+          | 'admins'
+          | 'posts'
+          | 'draft-posts'
+          | 'no-authorship'
+          | 'created-only'
+          | 'updated-only'
+          | 'custom-authorship'
+          | 'raw-authorship'
+        )[]
       | null;
   };
   width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';

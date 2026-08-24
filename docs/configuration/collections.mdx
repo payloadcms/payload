@@ -179,6 +179,33 @@ How the values are set:
   and preserve the previous behaviour.
 </Banner>
 
+### Customizing the authorship fields
+
+To change how `createdBy` / `updatedBy` are rendered — for example to make them visible, relabel them, or move them into the sidebar — add the exported `createCreatedByField` / `createUpdatedByField` builders to your collection's `fields`. Fields you add this way are used as-is (Payload won't re-inject its own), and the stamping hooks are preserved:
+
+```ts
+import { createCreatedByField, createUpdatedByField } from 'payload'
+
+export const Posts: CollectionConfig = {
+  slug: 'posts',
+  fields: [
+    // ...your fields
+    createCreatedByField({
+      overrides: {
+        label: 'Author',
+        admin: { hidden: false },
+      },
+    }),
+    // updatedBy is still auto-injected with its defaults — only add the builder for
+    // the field you want to customize.
+  ],
+}
+```
+
+`overrides` win for `label`, `relationTo`, and other top-level props; `admin` and `access` are merged onto the secure defaults, and the stamping hooks are always kept (any hooks you pass are appended). The polymorphic `relationTo` is filled in automatically with your auth-enabled collections during sanitization, so you don't need to enumerate them.
+
+If instead you define your own raw `createdBy` / `updatedBy` field (not via these builders), Payload accepts it wholesale and does **not** attach the stamping hooks — you're responsible for setting the value.
+
 ## Admin Options
 
 The behavior of Collections within the [Admin Panel](../admin/overview) can be fully customized to fit the needs of your application. This includes grouping or hiding their navigation links, adding [Custom Components](../custom-components/overview), selecting which fields to display in the List View, and more.
