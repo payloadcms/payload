@@ -171,21 +171,20 @@ export type DefaultValue =
  * Applies pagination for join fields for including collection relationships
  */
 export type JoinQuery<TSlug extends CollectionSlug = string> =
-  TypedCollectionJoins[TSlug] extends Record<string, string>
-    ?
-        | false
-        | Partial<{
-            [K in keyof TypedCollectionJoins[TSlug]]:
-              | {
-                  count?: boolean
-                  limit?: number
-                  page?: number
-                  sort?: string
-                  where?: Where
-                }
-              | false
-          }>
-    : never
+  | false
+  | (TypedCollectionJoins[TSlug] extends Record<string, string>
+      ? Partial<{
+          [K in keyof TypedCollectionJoins[TSlug]]:
+            | {
+                count?: boolean
+                limit?: number
+                page?: number
+                sort?: string
+                where?: Where
+              }
+            | false
+        }>
+      : never)
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type Document = any
