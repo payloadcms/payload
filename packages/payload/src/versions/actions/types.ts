@@ -12,7 +12,7 @@ export type ResolveActionArgs = {
   action?: unknown
   autosave?: boolean
   draftsEnabled: boolean
-  locale?: string
+  locale?: null | string
   operation: WriteOperation
   publishAllLocales?: boolean
   status?: unknown
@@ -22,7 +22,7 @@ export type ResolveActionArgs = {
 export type CanonicalizeWriteStatusArgs<T extends object> = {
   action: undefined | WriteAction
   data: T
-  locale?: string
+  locale?: null | string
   publishAllLocales?: boolean
   unpublishAllLocales?: boolean
 }

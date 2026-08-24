@@ -269,7 +269,7 @@ function inferActionFromStatus({
   locale,
   status,
 }: {
-  locale?: string
+  locale?: null | string
   status: unknown
 }): 'publish' | 'saveDraft' | undefined {
   const recognized = recognizedStatus({ locale, status })
@@ -288,7 +288,7 @@ function recognizedStatus({
   locale,
   status,
 }: {
-  locale?: string
+  locale?: null | string
   status: unknown
 }): DocumentStatus | undefined {
   if (status === 'draft' || status === 'published') {

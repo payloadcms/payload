@@ -129,7 +129,7 @@ export const updateOperation = async <
         data && typeof data === 'object' && data !== null && '_status' in data
           ? data._status
           : undefined,
-      unpublishAllLocales: args.unpublishAllLocales === true || args.unpublishAllLocales === 'true',
+      unpublishAllLocales: args.unpublishAllLocales,
     })
 
     data = canonicalizeWriteStatus({
@@ -137,7 +137,7 @@ export const updateOperation = async <
       data,
       locale,
       publishAllLocales: publishAllLocalesArg,
-      unpublishAllLocales: unpublishAllLocalesArg === true || unpublishAllLocalesArg === 'true',
+      unpublishAllLocales: unpublishAllLocalesArg,
     })
 
     const isSavingDraft = resolvedAction === 'saveDraft'
@@ -147,10 +147,7 @@ export const updateOperation = async <
       !isUnpublishing &&
       (publishAllLocalesArg ??
         (hasLocalizeStatusEnabled(globalConfig) && locale !== 'all' ? false : true))
-    const unpublishAllLocales =
-      typeof unpublishAllLocalesArg === 'string'
-        ? unpublishAllLocalesArg === 'true'
-        : !!unpublishAllLocalesArg
+    const unpublishAllLocales = !!unpublishAllLocalesArg
 
     // /////////////////////////////////////
     // 1. Retrieve and execute access

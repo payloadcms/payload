@@ -159,7 +159,7 @@ export const updateOperation = async <
         '_status' in bulkUpdateData
           ? bulkUpdateData._status
           : undefined,
-      unpublishAllLocales: unpublishAllLocales === true || unpublishAllLocales === 'true',
+      unpublishAllLocales,
     })
     const shouldSaveDraft = resolvedAction === 'saveDraft'
 
@@ -168,7 +168,7 @@ export const updateOperation = async <
       data: bulkUpdateData,
       locale,
       publishAllLocales,
-      unpublishAllLocales: unpublishAllLocales === true || unpublishAllLocales === 'true',
+      unpublishAllLocales,
     })
 
     // /////////////////////////////////////

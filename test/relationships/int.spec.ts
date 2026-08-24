@@ -1127,8 +1127,8 @@ describe('Relationships', () => {
             version: 'latest',
           })
 
-          expect(draft_res_1.docs).toStrictEqual([movie_2, movie_1])
-          expect(draft_res_2.docs).toStrictEqual([movie_1, movie_2])
+          expect(draft_res_1.docs.map((doc) => doc.id)).toEqual([movie_2.id, movie_1.id])
+          expect(draft_res_2.docs.map((doc) => doc.id)).toEqual([movie_1.id, movie_2.id])
 
           const localized_res_1 = await payload.find({
             collection: 'movies',

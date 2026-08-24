@@ -14,7 +14,7 @@ const sdk = new PayloadSDK<Config>({
 // Find operation
 const posts = await sdk.find({
   collection: 'posts',
-  draft: true,
+  version: 'latest',
   limit: 10,
   locale: 'en',
   page: 1,
@@ -25,7 +25,7 @@ const posts = await sdk.find({
 const posts = await sdk.findByID({
   id,
   collection: 'posts',
-  draft: true,
+  version: 'latest',
   locale: 'en',
 })
 

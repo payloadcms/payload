@@ -138,7 +138,7 @@ export const updateByIDOperation = async <
         data && typeof data === 'object' && data !== null && '_status' in data
           ? data._status
           : undefined,
-      unpublishAllLocales: unpublishAllLocales === true || unpublishAllLocales === 'true',
+      unpublishAllLocales,
     })
     const isSavingDraft = resolvedAction === 'saveDraft'
 
@@ -147,7 +147,7 @@ export const updateByIDOperation = async <
       data,
       locale,
       publishAllLocales,
-      unpublishAllLocales: unpublishAllLocales === true || unpublishAllLocales === 'true',
+      unpublishAllLocales,
     })
 
     // /////////////////////////////////////
