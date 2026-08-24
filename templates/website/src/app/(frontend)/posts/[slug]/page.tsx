@@ -19,7 +19,7 @@ export async function generateStaticParams() {
   const payload = await getPayload({ config: configPromise })
   const posts = await payload.find({
     collection: 'posts',
-    draft: false,
+    version: 'published',
     limit: 1000,
     overrideAccess: false,
     pagination: false,
@@ -94,7 +94,7 @@ const queryPostBySlug = cache(async ({ slug }: { slug: string }) => {
   const result = await payload.find({
     collection: 'posts',
     depth: 2,
-    draft,
+    version: draft ? 'latest' : 'published',
     limit: 1,
     overrideAccess: draft,
     pagination: false,
@@ -105,5 +105,5 @@ const queryPostBySlug = cache(async ({ slug }: { slug: string }) => {
     },
   })
 
-  return result.docs?.[0] || null
+  return (result.docs?.[0] || null) as Post | null
 })

@@ -41,121 +41,113 @@ Within the Admin UI, if drafts are enabled, a document can be shown with one of 
 1. **Changed** - if a document has been published, but there are newer drafts available
    and not yet published
 
-## Draft API
+## Version and action APIs
 
 <Banner type="success">
-  If drafts are enabled on your collection or global, important and powerful
-  changes are made to your REST, GraphQL, and Local APIs that allow you to
-  specify if you are interacting with drafts or with live documents.
+  If drafts are enabled on your collection or global, REST, GraphQL, Local, and
+  SDK operations expose `version` on reads and `action` on writes. There is no
+  public `draft` boolean on these operations.
 </Banner>
 
-#### Using the `draft` parameter
-
-When drafts are enabled, the `create`, `update`, `find`, and `findByID` operations for REST, GraphQL, and Local APIs expose a `draft` parameter. For write operations, it controls validation and where data is written. For read operations, it determines whether to return draft versions.
+Reads use `version`. Writes use `action`. `_status` remains on returned documents and in typed write `data`; it is a fallback for write intent only when `action` is omitted.
 
 ```ts
 // REST API
-POST /api/your-collection?draft=true
+GET /api/pages?version=latest
+POST /api/pages?action=saveDraft
+PATCH /api/pages/123?action=publish
 
-// Local API
+// Local API / SDK
+await payload.find({ collection: 'pages', version: 'latest' })
 await payload.create({
-  collection: 'your-collection',
-  data: {
-    // your data here
-  },
-  draft: true,
+  collection: 'pages',
+  data: { title: 'Draft page' },
+  action: 'saveDraft',
+})
+await payload.update({
+  collection: 'pages',
+  id,
+  data: { title: 'Published page' },
+  action: 'publish',
 })
 
 // GraphQL
+query {
+  Pages(version: latest) { docs { title } }
+}
 mutation {
-  createYourCollection(data: { ... }, draft: true) {
-    // ...
-  }
+  createPage(data: { title: "Draft page" }, action: saveDraft) { title }
 }
 ```
 
-**Understanding `draft` parameter and `_status` field**
+### Reading with `version`
 
-The `draft` parameter and `_status` field work together but serve different purposes:
+| `version`               | Result                                                                                                                         |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| omitted / `'published'` | Published content from the main document. This is the default.                                                                 |
+| `'latest'`              | Newest saved draft when one exists, otherwise the published document.                                                          |
+| `'draft'`               | Newest draft only, with **no** published fallback. Missing drafts follow each operation's existing empty / not-found behavior. |
 
-**`draft` parameter** - Controls two things:
-
-1. **Validation**: When `draft: true`, required fields are not enforced, allowing you to save incomplete documents
-2. **Write location**: Determines whether the main collection document is updated
-   - `draft: true` - Saves ONLY to versions table (main collection unchanged)
-   - `draft: false` or omitted - Saves to BOTH main collection AND versions table
-
-**`_status` field** - Indicates whether a document is published or in draft state
-
-- Defaults to `'draft'` when not explicitly provided
-- Can be explicitly set in your data to `'published'` or `'draft'`
-
-**First document creation**
-
-When you first create a document, it's always written to the main collection (since no document exists yet):
-
-- If you don't specify `_status`, it defaults to `_status: 'draft'`
-- A version is also created in the versions table
-- The `draft` parameter controls validation but doesn't change where the initial document is written
-
-**Subsequent updates**
-
-After initial creation, the `draft` parameter controls where your updates are written:
-
-- **`draft: true`** - Only the versions table is updated; the main collection document remains unchanged
-- **`draft: false` or omitted** - Both the main collection and versions table are updated
-
-**Important:** The `draft` parameter does NOT control whether a document is published or not. A document remains with `_status: 'draft'` by default unless you explicitly set `_status: 'published'` in your data.
-
-**Publishing a document**
-
-To publish a document, you must explicitly set `_status: 'published'` in your data. When you do this:
-
-- If you use `draft: false` or omit it, the main collection will be updated with the published status
-- If you use `draft: true`, the `_status: 'published'` takes precedence and will still update the main collection as published (overriding the `draft: true` behavior)
-
-**Quick reference**
-
-| Operation | `draft` param      | `_status` in data    | Result                                                         |
-| --------- | ------------------ | -------------------- | -------------------------------------------------------------- |
-| Create    | `true` or `false`  | omitted              | Main collection updated with `_status: 'draft'`                |
-| Create    | `true` or `false`  | `'published'`        | Main collection updated with `_status: 'published'`            |
-| Update    | `true`             | omitted or `'draft'` | Only versions table updated, main collection unchanged         |
-| Update    | `true`             | `'published'`        | Main collection updated with `_status: 'published'` (override) |
-| Update    | `false` or omitted | omitted              | Main collection updated with `_status: 'draft'`                |
-| Update    | `false` or omitted | `'published'`        | Main collection updated with `_status: 'published'`            |
-
-**Required fields**
-
-Setting `_status: "draft"` will not bypass required field validation. You need to set `draft: true` to save incomplete documents as shown in the previous examples.
-
-#### Reading drafts vs. published documents
-
-In addition to the `draft` argument within `create` and `update` operations, a `draft` argument is also exposed for `find` and `findByID` operations.
-
-When `draft` is set to `true` while reading a document, **Payload will return the most recent version from the versions table**, regardless of whether it's a draft or published document.
+`latest` is the preview mode: show unpublished work when it exists, otherwise fall back to what is live. `draft` is draft-only and never falls back.
 
 **Example scenario:**
 
-1. You create a document with `_status: 'published'` (published in main collection)
-1. You update with `draft: true` to make changes without affecting the published version
-1. You update again with `draft: true` to make more draft changes
+1. You create a document with `action: 'publish'`
+1. You update with `action: 'saveDraft'` so the published document is unchanged
+1. You save another draft
 
-At this point, your published document remains unchanged in the main collection, and you have two newer draft versions in the `_[collectionSlug]_versions` table.
+A normal `find` / `findByID` (or `version: 'published'`) returns the published document. `version: 'latest'` returns the newest draft. `version: 'draft'` also returns that draft, but returns empty / not-found if no draft exists.
 
-When you fetch the document with a standard `find` or `findByID` operation, the published document from the main collection is returned and draft versions are ignored.
-
-However, if you pass `draft: true` to the read operation, Payload will return the most recent version from the versions table. In the scenario above with two draft versions, you'll get the latest (second) draft.
-
-**Note:** If there are no newer drafts (e.g., you published a document and haven't made draft changes since), querying with `draft: true` will still return the latest version from the versions table, which would be the same published content as in the main collection.
+On collections and globals **without** drafts, omitted and `'published'` are ordinary reads, `'latest'` maps to published, and `'draft'` returns no result.
 
 <Banner type="error">
-  **Important:** the `draft` argument on its own will not restrict documents
-  with `_status: 'draft'` from being returned from the API. You need to use
-  Access Control to prevent documents with `_status: 'draft'` from being
-  returned to unauthenticated users. Read below for more information on how this
-  works.
+  **Important:** `version` does not replace Access Control. Restrict who can
+  read unpublished documents with a query constraint on `_status`, as shown
+  below.
 </Banner>
+
+### Writing with `action`
+
+| Operation          | Allowed `action` values             | Default when `action` and recognized `_status` are both omitted |
+| ------------------ | ----------------------------------- | --------------------------------------------------------------- |
+| Create / duplicate | `saveDraft`, `publish`              | `saveDraft`                                                     |
+| Update             | `saveDraft`, `publish`, `unpublish` | `publish`                                                       |
+| Restore            | `saveDraft`, `publish`              | `publish`                                                       |
+
+`saveDraft` skips required-field validation (unless `versions.drafts.validate` is `true`) and writes only the versions table on updates, leaving the published document unchanged. `publish` enforces validation and updates the main document. `unpublish` reverts a published document to draft; it is never inferred from `_status`.
+
+**Runtime precedence** is explicit `action`, then a recognized `_status` in write data, then the operation default. Explicit `action` always wins. Payload then canonicalizes persisted `_status` from the effective action; it does not mutate the caller's original `data` object.
+
+| `_status` in data       | Inferred action when `action` is omitted |
+| ----------------------- | ---------------------------------------- |
+| `'draft'`               | `saveDraft`                              |
+| `'published'`           | `publish`                                |
+| omitted / anything else | Operation default                        |
+
+Localized `_status` inference uses the active write locale. Publishing or unpublishing every locale requires explicit `action` plus `publishAllLocales` / `unpublishAllLocales`. `autosave: true` is valid only with `saveDraft`.
+
+**Required fields:** `_status: 'draft'` infers `saveDraft` and therefore skips required-field validation. Setting `_status: 'published'` infers `publish` and enforces them. To save incomplete documents, use `action: 'saveDraft'` or omit action with `_status: 'draft'` / omitted status on create.
+
+**Quick reference**
+
+| Operation | `action`      | `_status` in data | Result                                                          |
+| --------- | ------------- | ----------------- | --------------------------------------------------------------- |
+| Create    | omitted       | omitted           | Draft (`saveDraft` default). Partial data allowed.              |
+| Create    | omitted       | `'published'`     | Published. Required fields enforced.                            |
+| Create    | `'saveDraft'` | any               | Draft. Action wins; status is canonicalized to `draft`.         |
+| Create    | `'publish'`   | any               | Published. Action wins; status is canonicalized to `published`. |
+| Update    | omitted       | omitted           | Published (`publish` default).                                  |
+| Update    | omitted       | `'draft'`         | Draft (`saveDraft`). Main document unchanged.                   |
+| Update    | `'unpublish'` | any               | Unpublished. `_status` cannot infer this.                       |
+| Restore   | omitted       | n/a               | Published (`publish` default).                                  |
+
+On collections and globals **without** drafts, omitted action and `publish` perform ordinary writes. `saveDraft` and `unpublish` throw `400`.
+
+`afterChange` (collection, global, and field) receives the **resolved** `action`, including defaults. It is `undefined` on entities without drafts.
+
+### TypeScript
+
+Local API and SDK `version` / `action` types are always strict. `typescript.strictDraftTypes` has been removed with no replacement flag. Non-draft collections reject `version` and draft-only actions. `latest` and `draft` reads use draft-safe result shapes. `saveDraft` (and omitted-action create with draft or omitted status) accepts partial data; `publish` (and omitted-action create with `_status: 'published'`) requires publish-valid data. `_status` remains on generated write input types.
 
 ## Controlling who can see Collection drafts
 
@@ -303,7 +295,7 @@ You can enable this functionality on both collections and globals via the `versi
 
 ## Unpublishing drafts
 
-If a document is published, the Payload Admin UI will be updated to show an "unpublish" button at the top of the sidebar, which will "unpublish" the currently published document. Consider this as a way to "revert" a document back to a draft state. On the API side, this is done by simply setting `_status: 'draft'` on any document.
+If a document is published, the Payload Admin UI will be updated to show an "unpublish" button at the top of the sidebar, which will "unpublish" the currently published document. Consider this as a way to "revert" a document back to a draft state. On the API side, this is `action: 'unpublish'`. `_status: 'draft'` infers `saveDraft` and never unpublishes.
 
 ## Reverting to published
 

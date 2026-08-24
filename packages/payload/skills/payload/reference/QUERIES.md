@@ -65,6 +65,7 @@ const nestedQuery: Where = {
 // Find documents
 const posts = await payload.find({
   collection: 'posts',
+  version: 'published',
   where: {
     status: { equals: 'published' },
     'author.name': { contains: 'john' },

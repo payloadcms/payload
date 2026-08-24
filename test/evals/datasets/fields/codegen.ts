@@ -130,4 +130,34 @@ export const fieldsCodegenDataset: EvalCase[] = [
       )
     },
   },
+  {
+    category: 'fields',
+    configPath: 'fields/codegen/version-action',
+    input:
+      'version-action: Enable Payload drafts on the posts collection using versions.drafts. Do not add a custom status select field. Add an afterChange hook that uses the resolved action argument (not a draft boolean) and only performs a side effect when action is publish.',
+    verify: ({
+      ast,
+      config: {
+        collections: { posts },
+      },
+      expect,
+      score,
+      source,
+    }) => {
+      expect(posts).toBeDefined()
+      expect(
+        posts?.versions && typeof posts.versions === 'object' && Boolean(posts.versions.drafts),
+      ).toBe(true)
+      expect(posts?.hooks?.afterChange).toBeDefined()
+      expect(source).toMatch(/action\s*===?\s*['"]publish['"]/)
+      expect(source).not.toMatch(/\bdraft\s*:\s*true\b/)
+      expect(source).not.toMatch(/strictDraftTypes/)
+      expect(
+        ast.collections.find((collection) => collection.slug === 'posts')?.hooks.afterChange,
+      ).toBe(true)
+      return score(
+        'posts.versions.drafts enabled, no custom status field, afterChange hook reads resolved action and branches on action === "publish"',
+      )
+    },
+  },
 ]

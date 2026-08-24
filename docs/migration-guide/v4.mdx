@@ -83,6 +83,61 @@ Run `migrate-versions-default` if you want zero schema changes — it adds `vers
 
 Run `remove-versions-true` to clean up any bare `versions: true` that is now the default.
 
+### Public `draft` operation argument replaced by `version` and `action`
+
+There is no v4 compatibility shim for the public `draft` boolean on read and write operations. Reads use `version`. Writes use `action`. `_status` remains on returned documents and in typed write inputs.
+
+The `migrate-version-action-api` transform in `@payloadcms/codemod` rewrites unambiguous Local, REST, GraphQL, and SDK call sites and removes `typescript.strictDraftTypes`. It emits notes rather than guessing for dynamic `draft` values, update `draft: false` without a static `_status`, wrapper helpers, and conflicting `draft` / `_status` / `action` combinations.
+
+**Reads**
+
+| v3                       | v4                                                         |
+| ------------------------ | ---------------------------------------------------------- |
+| omitted / `draft: false` | omitted / `version: 'published'` (default)                 |
+| `draft: true`            | `version: 'latest'` (newest draft with published fallback) |
+| n/a                      | `version: 'draft'` (newest draft only, no fallback)        |
+
+**Writes** — precedence is explicit `action`, then recognized `_status`, then the operation default. `_status: 'draft'` infers `saveDraft`; `_status: 'published'` infers `publish`; `_status` never infers `unpublish`. Create and duplicate default to `saveDraft`. Update and restore default to `publish`.
+
+```ts
+// Local API
+await payload.find({ collection: 'posts', version: 'latest' })
+await payload.create({ collection: 'posts', data: { title: 'Draft' }, action: 'saveDraft' })
+await payload.update({ collection: 'posts', id, data: { title: 'Live' }, action: 'publish' })
+await payload.update({ collection: 'posts', id, action: 'unpublish' })
+
+// REST
+GET /api/posts?version=latest
+POST /api/posts?action=saveDraft
+PATCH /api/posts/123?action=publish
+
+// GraphQL
+query { Posts(version: latest) { docs { title } } }
+mutation { updatePost(id: $id, action: saveDraft, data: { title: "Draft" }) { title } }
+
+// SDK
+await sdk.find({ collection: 'posts', version: 'latest' })
+await sdk.create({ collection: 'posts', data: { title: 'Draft' }, action: 'saveDraft' })
+```
+
+`afterChange` receives the resolved `action` (including defaults). It is `undefined` on collections and globals without drafts.
+
+`typescript.strictDraftTypes` is removed with no replacement. Local API and SDK version/action typing is always strict.
+
+Cases the codemod will not rewrite, which you must migrate by hand:
+
+- `draft: shouldSaveDraft` and other dynamic expressions
+- Update `draft: false` without a static `_status` (old behavior depended on existing document state)
+- Detached options objects and wrappers whose operation cannot be identified
+- Conflicting `draft` + `_status` values
+- REST URLs and GraphQL strings without enough surrounding operation context
+
+Search leftover operation arguments with:
+
+```sh
+rg -n "draft:\\s*(true|false)|[?&]draft=" src
+```
+
 ### List View Select API is now the default
 
 The `admin.enableListViewSelectAPI` Collection Config property has been removed. The List View now always uses the [Select API](../queries/select) to query only the active columns, which was previously opt-in.
@@ -1600,7 +1655,7 @@ defineCollectionTool({
 })
 ```
 
-**Built-in collection tools are now generic.** Per-collection names like `createPosts` / `updatePosts` were replaced by `createDocument` / `updateDocument`. Pass the target collection as `collectionSlug`; document fields live under `data` alongside options like `depth`, `draft` and `locale`. For update and delete calls, pass `id` or `where` as top-level arguments. `_status`, `id`, `createdAt` and `updatedAt` are no longer accepted inside `data`; set publish state with a custom tool if you need to.
+**Built-in collection tools are now generic.** Per-collection names like `createPosts` / `updatePosts` were replaced by `createDocument` / `updateDocument`. Pass the target collection as `collectionSlug`; document fields live under `data` alongside options like `depth`, `action`, `version`, and `locale`. For update and delete calls, pass `id` or `where` as top-level arguments. `id`, `createdAt` and `updatedAt` are no longer accepted inside `data`. `_status` remains accepted in write `data` and infers action when `action` is omitted.
 
 ```ts
 // arguments to a `createDocument` tool call
@@ -1609,7 +1664,7 @@ defineCollectionTool({
 { title: 'Hello', _status: 'draft', draft: true, depth: 2 }
 
 // after
-{ collectionSlug: 'posts', data: { title: 'Hello' }, draft: true, depth: 2 }
+{ collectionSlug: 'posts', data: { title: 'Hello' }, action: 'saveDraft', depth: 2 }
 ```
 
 **Auth tools are per-collection and opt-in.** The old `experimental.tools.auth` block is gone. Opt in per auth collection via its `tools` map, and pass the target auth collection as `collectionSlug`. Like every MCP item, auth tools now use default MCP access unless you provide an `access` callback, so unauthenticated auth tools such as `login` need `access: () => true`.
