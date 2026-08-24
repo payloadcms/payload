@@ -481,6 +481,36 @@ If you only used `useDocumentInfo` for `title` / `setDocumentTitle`, drop the im
 
 Run `npx @payloadcms/codemod --transform migrate-document-title-context` to migrate automatically. The codemod splits mixed destructures, removes the `useDocumentInfo` import when no other properties are still used, and preserves any rename aliases (e.g. `{ title: docTitle }`).
 
+### `useLocale` returns `null` without an active locale
+
+The return type of `useLocale` is now `Locale | null`. It returns `null` when localization is disabled or configured without any locales. In Payload 3, the hook was typed as `Locale` and returned an empty object when localization was unavailable.
+
+Custom Client Components that read locale properties directly must handle the nullable value:
+
+```diff
+'use client'
+import { useLocale } from '@payloadcms/ui'
+
+const Greeting: React.FC = () => {
+-  const { code } = useLocale()
++  const locale = useLocale()
++
++  if (!locale) {
++    return null
++  }
++
++  const { code } = locale
+
+  return <span>{code}</span>
+}
+```
+
+When a missing locale is already valid for the receiving API, optional chaining is sufficient:
+
+```ts
+const locale = useLocale()?.code
+```
+
 ### RichText adapter `i18n` property removed
 
 The `i18n` property on `RichTextAdapter` (and its return type from adapter provider functions) has been removed. It was deprecated in v3 in favour of merging translations directly into `config.i18n.translations` inside the adapter provider.
@@ -987,6 +1017,30 @@ And update any `$ref` pointers you wrote by hand to point at `$defs`:
 ```
 
 Do not keep your additions on `definitions` while new ones land on `$defs`.
+
+### Jobs: generic collection access is denied by default
+
+The generated `payload-jobs` collection now denies generic create, read, update, and delete access by default. This affects REST and GraphQL CRUD, plus Local API collection operations that use `overrideAccess: false`. Dedicated operations such as `payload.jobs.queue()`, `payload.jobs.run()`, and `payload.jobs.cancel()` continue to work as before.
+
+If your application intentionally exposes the internal payload-jobs collection, configure only the access it needs through `jobsCollectionOverrides`. For example, the following enables read-only Admin Panel access for trusted administrators:
+
+```ts
+jobs: {
+  jobsCollectionOverrides: ({ defaultJobsCollection }) => ({
+    ...defaultJobsCollection,
+    access: {
+      ...defaultJobsCollection.access,
+      read: ({ req }) => Boolean(req.user?.roles?.includes('admin')),
+    },
+    admin: {
+      ...defaultJobsCollection.admin,
+      hidden: false,
+    },
+  }),
+}
+```
+
+Job documents can contain inputs, outputs, logs, and execution state, so avoid enabling write access unless your application specifically requires it.
 
 ### Jobs: `jobs.depth` and `jobs.runHooks` have been removed ([#16414](https://github.com/payloadcms/payload/pull/16414))
 

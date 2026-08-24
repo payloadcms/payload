@@ -102,7 +102,8 @@ export function DeleteMany({
     },
   } = useConfig()
 
-  const { code: locale } = useLocale()
+  const currentLocale = useLocale()
+  const locale = currentLocale?.code
   const { i18n } = useTranslation()
   const { openModal } = useModal()
 

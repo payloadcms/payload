@@ -5,7 +5,7 @@ const dirname = path.dirname(filename)
 import type { CollectionConfig } from 'payload'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
-import { devUser } from '../credentials.js'
+import { seed } from './seed.js'
 import {
   chainedRelSlug,
   customIdNumberSlug,
@@ -156,6 +156,19 @@ export default buildConfigWithDefaults({
           relationTo: relationSlug,
           localized: true,
         },
+        // Localized array wrapping a relationship to a collection that owns a non-localized hasMany relationship
+        {
+          name: 'localizedDirectors',
+          type: 'array',
+          localized: true,
+          fields: [
+            {
+              name: 'director',
+              type: 'relationship',
+              relationTo: 'directors',
+            },
+          ],
+        },
       ],
       versions: false,
     },
@@ -244,6 +257,10 @@ export default buildConfigWithDefaults({
           options: ['a', 'b', 'c'],
         },
         {
+          name: 'location',
+          type: 'point',
+        },
+        {
           name: 'director',
           type: 'relationship',
           relationTo: 'directors',
@@ -298,6 +315,48 @@ export default buildConfigWithDefaults({
         },
       ],
       versions: false,
+    },
+    {
+      slug: 'transitive-join-songs',
+      fields: [
+        {
+          name: 'name',
+          type: 'text',
+        },
+        {
+          name: 'albums',
+          type: 'relationship',
+          relationTo: 'transitive-join-albums',
+          hasMany: true,
+        },
+      ],
+    },
+    {
+      slug: 'transitive-join-albums',
+      fields: [
+        {
+          name: 'artist',
+          type: 'relationship',
+          relationTo: 'transitive-join-artists',
+        },
+        {
+          name: 'song',
+          type: 'join',
+          collection: 'transitive-join-songs',
+          on: 'albums',
+        },
+      ],
+    },
+    {
+      slug: 'transitive-join-artists',
+      fields: [
+        {
+          name: 'album',
+          type: 'join',
+          collection: 'transitive-join-albums',
+          on: 'artist',
+        },
+      ],
     },
     {
       slug: 'movieReviews',
@@ -544,112 +603,9 @@ export default buildConfigWithDefaults({
     },
   ],
   onInit: async (payload) => {
-    await payload.create({
-      collection: 'users',
-      data: {
-        email: devUser.email,
-        password: devUser.password,
-      },
-    })
-
-    const rel1 = await payload.create({
-      collection: relationSlug,
-      data: {
-        name: 'name',
-      },
-    })
-
-    const filteredRelation = await payload.create({
-      collection: relationSlug,
-      data: {
-        name: 'filtered',
-      },
-    })
-
-    const defaultAccessRelation = await payload.create({
-      collection: defaultAccessRelSlug,
-      data: {
-        name: 'name',
-      },
-    })
-
-    const chained3 = await payload.create({
-      collection: chainedRelSlug,
-      data: {
-        name: 'chain3',
-      },
-    })
-
-    const chained2 = await payload.create({
-      collection: chainedRelSlug,
-      data: {
-        name: 'chain2',
-        relation: chained3.id,
-      },
-    })
-
-    const chained = await payload.create({
-      collection: chainedRelSlug,
-      data: {
-        name: 'chain1',
-        relation: chained2.id,
-      },
-    })
-
-    await payload.update({
-      collection: chainedRelSlug,
-      id: chained3.id,
-      data: {
-        name: 'chain3',
-        relation: chained.id,
-      },
-    })
-
-    const customIdRelation = await payload.create({
-      collection: customIdSlug,
-      data: {
-        id: 'custommmm',
-        name: 'custom-id',
-      },
-    })
-
-    const customIdNumberRelation = await payload.create({
-      collection: customIdNumberSlug,
-      data: {
-        id: 908234892340,
-        name: 'custom-id',
-      },
-    })
-
-    // Relationship
-    await payload.create({
-      collection: slug,
-      data: {
-        title: 'with relationship',
-        relationField: rel1.id,
-        defaultAccessRelation: defaultAccessRelation.id,
-        chainedRelation: chained.id,
-        maxDepthRelation: rel1.id,
-        customIdRelation: customIdRelation.id,
-        customIdNumberRelation: customIdNumberRelation.id,
-        filteredRelation: filteredRelation.id,
-      },
-    })
-
-    const root = await payload.create({
-      collection: 'tree',
-      data: {
-        text: 'root',
-      },
-    })
-
-    await payload.create({
-      collection: 'tree',
-      data: {
-        text: 'sub',
-        parent: root.id,
-      },
-    })
+    if (process.env.SEED_IN_CONFIG_ONINIT !== 'false') {
+      await seed(payload)
+    }
   },
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),

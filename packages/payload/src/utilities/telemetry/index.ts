@@ -8,9 +8,11 @@ import { fileURLToPath } from 'url'
 import type { Payload } from '../../types/index.js'
 import type { AdminInitEvent } from './events/adminInit.js'
 import type { ServerInitEvent } from './events/serverInit.js'
+import type { FigmaProduct, ProjectCohort } from './getProjectContext.js'
 
 import { findUp } from '../findUp.js'
 import { Conf } from './conf/index.js'
+import { getProjectContext } from './getProjectContext.js'
 import { oneWayHash } from './oneWayHash.js'
 
 export type BaseEvent = {
@@ -18,6 +20,7 @@ export type BaseEvent = {
   dbAdapter: string
   emailAdapter: null | string
   envID: string
+  figmaProduct?: FigmaProduct
   isCI: boolean
   locales: string[]
   localizationDefaultLocale: null | string
@@ -27,6 +30,7 @@ export type BaseEvent = {
   payloadVersion: string
   /** Slugs of installed first-party (`@payloadcms/`) plugins. */
   plugins: string[]
+  projectCohorts: ProjectCohort[]
   projectID: string
   projectIDSource: 'cwd' | 'git' | 'packageJSON' | 'serverURL'
   uploadAdapters: string[]
@@ -57,6 +61,7 @@ export const sendTelemetryEvent = async <TEvent extends { type: string }>({
       // Only generate the base event once
       if (!baseEvent) {
         const { projectID, source: projectIDSource } = getProjectID(payload, packageJSON!)
+        const plugins = getInstalledPluginSlugs(payload)
         baseEvent = {
           ciName: ciInfo.isCI ? ciInfo.name : null,
           envID: getEnvID(),
@@ -66,10 +71,15 @@ export const sendTelemetryEvent = async <TEvent extends { type: string }>({
           payloadVersion: getPayloadVersion(packageJSON!),
           projectID,
           projectIDSource,
+          ...getProjectContext({
+            packages: Object.keys(packageJSON!.dependencies ?? {}),
+            payload,
+            plugins,
+          }),
           ...getLocalizationInfo(payload),
           dbAdapter: payload.db.name,
           emailAdapter: payload.email?.name || null,
-          plugins: getInstalledPluginSlugs(payload),
+          plugins,
           uploadAdapters: payload.config.upload.adapters,
         }
       }
