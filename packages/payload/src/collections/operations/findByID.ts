@@ -30,7 +30,7 @@ import { hasDraftsEnabled } from '../../utilities/getVersionsConfig.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { replaceWithVersion } from '../../versions/read/replaceWithVersion.js'
-import { isVersionedRead, resolveOperationReadVersion } from '../../versions/resolveReadVersion.js'
+import { isVersionedRead, resolveReadVersion } from '../../versions/resolveReadVersion.js'
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
 
@@ -44,7 +44,6 @@ export type FindByIDArgs = {
   data?: Record<string, unknown>
   depth?: number
   disableErrors?: boolean
-  draft?: boolean
   id: number | string
   includeLockStatus?: boolean
   joins?: JoinQuery
@@ -83,7 +82,6 @@ export const findByIDOperation = async <
     currentDepth,
     depth,
     disableErrors,
-    draft: draftArg,
     flattenLocales,
     includeLockStatus: includeLockStatusFromArgs,
     joins,
@@ -101,8 +99,7 @@ export const findByIDOperation = async <
     includeLockStatusFromArgs && req.payload.collections?.[lockedDocumentsCollectionSlug]
 
   const draftsEnabledOnCollection = hasDraftsEnabled(collectionConfig)
-  const readVersion = resolveOperationReadVersion({
-    draft: draftArg,
+  const readVersion = resolveReadVersion({
     draftsEnabled: draftsEnabledOnCollection,
     version,
   })

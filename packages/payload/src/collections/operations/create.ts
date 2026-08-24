@@ -41,11 +41,7 @@ import { killTransaction } from '../../utilities/killTransaction.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
-import {
-  canonicalizeWriteStatus,
-  requestedActionFromLegacyDraft,
-  resolveAction,
-} from '../../versions/actions/resolveAction.js'
+import { canonicalizeWriteStatus, resolveAction } from '../../versions/actions/resolveAction.js'
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
 
@@ -57,10 +53,6 @@ export type Arguments<TSlug extends CollectionSlug> = {
   depth?: number
   disableTransaction?: boolean
   disableVerificationEmail?: boolean
-  /**
-   * Leftover REST/GraphQL boolean until those transports are converted.
-   */
-  draft?: boolean
   duplicateFromID?: DataFromCollectionSlug<TSlug>['id']
   overrideAccess?: boolean
   overwriteExistingFiles?: boolean
@@ -108,7 +100,6 @@ export const createOperation = async <
       collection,
       depth,
       disableVerificationEmail,
-      draft,
       duplicateFromID,
       overrideAccess,
       overwriteExistingFiles = false,
@@ -130,7 +121,7 @@ export const createOperation = async <
 
     const draftsEnabled = hasDraftsEnabled(collectionConfig)
     const resolvedAction = resolveAction({
-      action: requestedActionFromLegacyDraft({ action, draft }),
+      action,
       autosave,
       draftsEnabled,
       locale,

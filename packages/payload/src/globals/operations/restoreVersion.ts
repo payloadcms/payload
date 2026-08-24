@@ -11,19 +11,11 @@ import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { hasDraftsEnabled } from '../../utilities/getVersionsConfig.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
-import {
-  canonicalizeWriteStatus,
-  requestedActionFromLegacyDraft,
-  resolveAction,
-} from '../../versions/actions/resolveAction.js'
+import { canonicalizeWriteStatus, resolveAction } from '../../versions/actions/resolveAction.js'
 
 export type Arguments = {
   action?: RestoreAction
   depth?: number
-  /**
-   * Leftover REST/GraphQL boolean until those transports are converted.
-   */
-  draft?: boolean
   globalConfig: SanitizedGlobalConfig
   id: number | string
   overrideAccess?: boolean
@@ -59,12 +51,11 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
       }
     }
 
-    const { id, action, depth, draft, globalConfig, overrideAccess, populate, showHiddenFields } =
-      args
+    const { id, action, depth, globalConfig, overrideAccess, populate, showHiddenFields } = args
     const { fallbackLocale, locale, payload } = req
 
     const resolvedAction = resolveAction({
-      action: requestedActionFromLegacyDraft({ action, draft }),
+      action,
       draftsEnabled: hasDraftsEnabled(globalConfig),
       locale,
       operation: 'restore',

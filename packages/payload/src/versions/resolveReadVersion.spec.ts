@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { APIError } from '../errors/APIError.js'
-import { resolveOperationReadVersion, resolveReadVersion } from './resolveReadVersion.js'
+import { resolveReadVersion } from './resolveReadVersion.js'
 
 describe('resolveReadVersion', () => {
   it('defaults omission to published', () => {
@@ -38,34 +38,5 @@ describe('resolveReadVersion', () => {
     expect(() => resolveReadVersion({ draftsEnabled: true, version: true })).toThrow(
       'Invalid version true. Valid values are: published, latest, draft.',
     )
-  })
-})
-
-describe('resolveOperationReadVersion', () => {
-  it('prefers explicit version over the internal draft boolean', () => {
-    expect(
-      resolveOperationReadVersion({
-        draft: true,
-        draftsEnabled: true,
-        version: 'published',
-      }),
-    ).toBe('published')
-  })
-
-  it('maps leftover draft true to latest', () => {
-    expect(
-      resolveOperationReadVersion({
-        draft: true,
-        draftsEnabled: true,
-      }),
-    ).toBe('latest')
-  })
-
-  it('treats omitted version and draft as published', () => {
-    expect(
-      resolveOperationReadVersion({
-        draftsEnabled: true,
-      }),
-    ).toBe('published')
   })
 })

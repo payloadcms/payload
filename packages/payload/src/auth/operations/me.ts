@@ -16,10 +16,6 @@ export type Arguments = {
   collection: Collection
   currentToken?: string
   depth?: number
-  /**
-   * Leftover GraphQL boolean until that transport is converted.
-   */
-  draft?: boolean
   joins?: JoinQuery
   populate?: PopulateType
   req: PayloadRequest
@@ -28,7 +24,7 @@ export type Arguments = {
 }
 
 export const meOperation = async (args: Arguments): Promise<MeOperationResult> => {
-  const { collection, currentToken, depth, draft, joins, populate, req, select, version } = args
+  const { collection, currentToken, depth, joins, populate, req, select, version } = args
 
   let result: MeOperationResult = {
     user: null!,
@@ -54,7 +50,7 @@ export const meOperation = async (args: Arguments): Promise<MeOperationResult> =
       req,
       select,
       showHiddenFields: false,
-      version: version ?? (draft ? 'latest' : undefined),
+      version,
     })) as AuthenticatedUser
 
     if (user) {

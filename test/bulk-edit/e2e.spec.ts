@@ -99,7 +99,7 @@ test.describe('Bulk Edit', () => {
 
     await Promise.all([
       createPost({ title: titleOfPostToDelete1 }),
-      createPost({ title: titleOfPostToDelete2 }, { draft: true }),
+      createPost({ title: titleOfPostToDelete2 }, { action: 'saveDraft' }),
     ])
 
     await page.goto(postsUrl.list)
@@ -131,7 +131,7 @@ test.describe('Bulk Edit', () => {
 
     await Promise.all([
       createPost({ title: titleOfPostToPublish1 }),
-      createPost({ title: titleOfPostToPublish2 }, { draft: true }),
+      createPost({ title: titleOfPostToPublish2 }, { action: 'saveDraft' }),
     ])
 
     await page.goto(postsUrl.list)
@@ -167,7 +167,7 @@ test.describe('Bulk Edit', () => {
 
     await Promise.all([
       createPost({ title: titleOfPostToUnpublish1 }),
-      createPost({ title: titleOfPostToUnpublish2 }, { draft: true }),
+      createPost({ title: titleOfPostToUnpublish2 }, { action: 'saveDraft' }),
     ])
 
     await page.goto(postsUrl.list)
@@ -242,7 +242,7 @@ test.describe('Bulk Edit', () => {
 
     await Promise.all([
       createPost({ title: titleOfPostToPublish1 }),
-      createPost({ title: titleOfPostToPublish2 }, { draft: true }),
+      createPost({ title: titleOfPostToPublish2 }, { action: 'saveDraft' }),
     ])
 
     const description = 'published document'
@@ -289,7 +289,7 @@ test.describe('Bulk Edit', () => {
 
     await Promise.all([
       createPost({ title: titleOfPostToDraft1 }),
-      createPost({ title: titleOfPostToDraft2 }, { draft: true }),
+      createPost({ title: titleOfPostToDraft2 }, { action: 'saveDraft' }),
     ])
 
     const description = 'draft document'
@@ -576,7 +576,7 @@ test.describe('Bulk Edit', () => {
 
     const postCount = 3
     for (let i = 1; i <= postCount; i++) {
-      await createPost({ title: `Post ${i}` }, { draft: true })
+      await createPost({ title: `Post ${i}` }, { action: 'saveDraft' })
       // Wait 50ms to ensure the createdAt date is different enough to ensure posts are in the correct order
       await wait(50)
     }
@@ -1074,15 +1074,10 @@ async function createPost(
   dataOverrides?: RequiredDataFromCollectionSlug<'posts'>,
   overrides?: Record<string, unknown>,
 ): Promise<Post> {
-  const { draft, ...restOverrides } = (overrides || {}) as { draft?: boolean } & Record<
-    string,
-    unknown
-  >
-
   return payload.create({
     collection: postsSlug,
-    ...restOverrides,
-    action: draft ? 'saveDraft' : 'publish',
+    action: 'publish',
+    ...(overrides || {}),
     data: {
       title: 'Post Title',
       ...(dataOverrides || {}),

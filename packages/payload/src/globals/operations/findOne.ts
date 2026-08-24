@@ -21,7 +21,7 @@ import { hasDraftsEnabled } from '../../utilities/getVersionsConfig.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { replaceWithVersion } from '../../versions/read/replaceWithVersion.js'
-import { isVersionedRead, resolveOperationReadVersion } from '../../versions/resolveReadVersion.js'
+import { isVersionedRead, resolveReadVersion } from '../../versions/resolveReadVersion.js'
 
 export type GlobalFindOneArgs = {
   /**
@@ -31,7 +31,6 @@ export type GlobalFindOneArgs = {
   data?: Record<string, unknown>
   depth?: number
   disableErrors?: boolean
-  draft?: boolean
   globalConfig: SanitizedGlobalConfig
   includeLockStatus?: boolean
   overrideAccess?: boolean
@@ -50,7 +49,6 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
     slug,
     depth,
     disableErrors,
-    draft: draftArg,
     flattenLocales,
     globalConfig,
     includeLockStatus: includeLockStatusFromArgs,
@@ -67,8 +65,7 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
     includeLockStatusFromArgs && req.payload.collections?.[lockedDocumentsCollectionSlug]
 
   const draftsEnabledOnGlobal = hasDraftsEnabled(globalConfig)
-  const readVersion = resolveOperationReadVersion({
-    draft: draftArg,
+  const readVersion = resolveReadVersion({
     draftsEnabled: draftsEnabledOnGlobal,
     version,
   })

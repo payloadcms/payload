@@ -4509,7 +4509,7 @@ describe('Versions', () => {
       expect(republishedDoc.alt).toBe('Draft version')
     })
 
-    it('should create a draft when duplicating a published upload document with draft: true', async () => {
+    it('should create a draft when duplicating a published upload document with action saveDraft', async () => {
       const imageFile = await getFileByPath(path.resolve(dirname, './image.jpg'))
 
       imageFile.name = 'duplicate-source.jpg'

@@ -35,11 +35,7 @@ import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
-import {
-  canonicalizeWriteStatus,
-  requestedUpdateActionFromLegacy,
-  resolveAction,
-} from '../../versions/actions/resolveAction.js'
+import { canonicalizeWriteStatus, resolveAction } from '../../versions/actions/resolveAction.js'
 import { buildLocalizedPublishData } from '../../versions/buildSingleLocalePublishData.js'
 import { getLatestGlobalVersion } from '../../versions/getLatestGlobalVersion.js'
 import { saveVersion } from '../../versions/saveVersion.js'
@@ -49,10 +45,6 @@ type Args<TSlug extends GlobalSlug> = {
   data: DeepPartial<Omit<DataFromGlobalSlug<TSlug>, 'id'>>
   depth?: number
   disableTransaction?: boolean
-  /**
-   * Leftover REST/GraphQL boolean until those transports are converted.
-   */
-  draft?: boolean
   globalConfig: SanitizedGlobalConfig
   overrideAccess?: boolean
   overrideLock?: boolean
@@ -111,15 +103,7 @@ export const updateOperation = async <
     let { data } = args
 
     const resolvedAction = resolveAction({
-      action: requestedUpdateActionFromLegacy({
-        action: args.action,
-        draft: args.draft,
-        status:
-          data && typeof data === 'object' && data !== null && '_status' in data
-            ? data._status
-            : undefined,
-        unpublishAllLocales: args.unpublishAllLocales,
-      }),
+      action: args.action,
       autosave: args.autosave,
       draftsEnabled: hasDraftsEnabled(globalConfig),
       locale,

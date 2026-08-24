@@ -9,15 +9,6 @@ export type ResolveReadVersionArgs = {
   version?: unknown
 }
 
-export type ResolveOperationReadVersionArgs = {
-  /**
-   * Internal boolean still passed by REST/GraphQL until those layers are converted.
-   */
-  draft?: boolean
-  draftsEnabled: boolean
-  version?: unknown
-}
-
 /**
  * Normalizes a public read `version` value.
  *
@@ -46,26 +37,6 @@ export function resolveReadVersion({
  */
 export function isVersionedRead(version: ReadVersion): boolean {
   return version === 'draft' || version === 'latest'
-}
-
-/**
- * Resolves a read version from public `version`, with an internal `draft` fallback for
- * REST and GraphQL callers that have not been converted yet.
- */
-export function resolveOperationReadVersion({
-  draft,
-  draftsEnabled,
-  version,
-}: ResolveOperationReadVersionArgs): ReadVersion {
-  if (version !== undefined && version !== null) {
-    return resolveReadVersion({ draftsEnabled, version })
-  }
-
-  if (draft === true) {
-    return resolveReadVersion({ draftsEnabled, version: 'latest' })
-  }
-
-  return 'published'
 }
 
 function parseReadVersion(version: unknown): ReadVersion {

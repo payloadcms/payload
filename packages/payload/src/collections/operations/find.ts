@@ -33,7 +33,7 @@ import { appendVersionToQueryKey } from '../../versions/drafts/appendVersionToQu
 import { getQueryDraftsSelect } from '../../versions/drafts/getQueryDraftsSelect.js'
 import { getQueryDraftsSort } from '../../versions/drafts/getQueryDraftsSort.js'
 import { getDraftStatusWhere } from '../../versions/read/getDraftStatusWhere.js'
-import { isVersionedRead, resolveOperationReadVersion } from '../../versions/resolveReadVersion.js'
+import { isVersionedRead, resolveReadVersion } from '../../versions/resolveReadVersion.js'
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
 import { sanitizeSortQuery } from './utilities/sanitizeSortQuery.js'
@@ -43,7 +43,6 @@ export type Arguments = {
   currentDepth?: number
   depth?: number
   disableErrors?: boolean
-  draft?: boolean
   includeLockStatus?: boolean
   joins?: JoinQuery
   limit?: number
@@ -86,7 +85,6 @@ export const findOperation = async <
     currentDepth,
     depth,
     disableErrors,
-    draft: draftArg,
     includeLockStatus: includeLockStatusFromArgs,
     joins,
     limit,
@@ -110,8 +108,7 @@ export const findOperation = async <
   const { fallbackLocale, locale, payload } = req
 
   const draftsEnabledOnCollection = hasDraftsEnabled(collectionConfig)
-  const readVersion = resolveOperationReadVersion({
-    draft: draftArg,
+  const readVersion = resolveReadVersion({
     draftsEnabled: draftsEnabledOnCollection,
     version,
   })

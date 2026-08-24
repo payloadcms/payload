@@ -337,47 +337,47 @@ describe('Sort', () => {
         const testData1 = await payload.create({
           collection: 'drafts',
           data: { text: 'Post 1 draft', number: 10 },
-          draft: true,
+          action: 'saveDraft',
         })
         await payload.update({
           collection: 'drafts',
           id: testData1.id,
           data: { text: 'Post 1 draft updated', number: 20 },
-          draft: true,
+          action: 'saveDraft',
         })
         await payload.update({
           collection: 'drafts',
           id: testData1.id,
           data: { text: 'Post 1 draft updated', number: 30 },
-          draft: true,
+          action: 'saveDraft',
         })
         await payload.update({
           collection: 'drafts',
           id: testData1.id,
           data: { text: 'Post 1 published', number: 15 },
-          draft: false,
+          action: 'publish',
         })
         const testData2 = await payload.create({
           collection: 'drafts',
           data: { text: 'Post 2 draft', number: 1 },
-          draft: true,
+          action: 'saveDraft',
         })
         await payload.update({
           collection: 'drafts',
           id: testData2.id,
           data: { text: 'Post 2 published', number: 2 },
-          draft: false,
+          action: 'publish',
         })
         await payload.update({
           collection: 'drafts',
           id: testData2.id,
           data: { text: 'Post 2 newdraft', number: 100 },
-          draft: true,
+          action: 'saveDraft',
         })
         await payload.create({
           collection: 'drafts',
           data: { text: 'Post 3 draft', number: 3 },
-          draft: true,
+          action: 'saveDraft',
         })
       })
 
@@ -385,7 +385,7 @@ describe('Sort', () => {
         const posts = await payload.find({
           collection: 'drafts',
           sort: 'number',
-          draft: false,
+          version: 'published',
         })
 
         expect(posts.docs.map((post) => post.text)).toEqual([
@@ -399,7 +399,7 @@ describe('Sort', () => {
         const posts = await payload.find({
           collection: 'drafts',
           sort: 'number',
-          draft: true,
+          version: 'latest',
         })
 
         expect(posts.docs.map((post) => post.text)).toEqual([
@@ -413,7 +413,6 @@ describe('Sort', () => {
         const posts = await payload.findVersions({
           collection: 'drafts',
           sort: 'version.number',
-          draft: false,
         })
 
         expect(posts.docs.map((post) => post.version.text)).toEqual([
@@ -579,7 +578,7 @@ describe('Sort', () => {
 
         const ordered = await payload.find({
           collection: draftsSlug,
-          draft: true,
+          version: 'latest',
           where: {
             text: {
               contains: 'Orderable ',
@@ -618,7 +617,7 @@ describe('Sort', () => {
           data: {
             text: 'Published with newer draft - edited',
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         const beforeReorder = await payload.findByID({

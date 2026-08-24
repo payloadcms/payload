@@ -504,7 +504,7 @@ describe('Hierarchy', () => {
         id: child.id,
         collection: 'organizations',
         data: { title: 'Apparel' },
-        draft: true,
+        action: 'saveDraft',
       })
 
       // Move parent
@@ -524,7 +524,7 @@ describe('Hierarchy', () => {
         id: child.id,
         collection: 'organizations',
         context: { computeHierarchyPaths: true },
-        draft: false,
+        version: 'published',
       })
 
       expect(publishedChild._h_slugPath).toBe('categories/products/clothing')
@@ -534,7 +534,7 @@ describe('Hierarchy', () => {
         id: child.id,
         collection: 'organizations',
         context: { computeHierarchyPaths: true },
-        draft: true,
+        version: 'latest',
       })
 
       expect(draftChild._h_slugPath).toBe('categories/products/apparel')
@@ -572,12 +572,12 @@ describe('Hierarchy', () => {
       expect(publishedChild._h_slugPath).toBe('offerings/services/consulting')
       expect(publishedChild._status).toBe('published')
 
-      // When no draft exists, draft: true returns published version
+      // When no draft exists, version: 'latest' returns published version
       const draftChild = await payload.findByID({
         id: child.id,
         collection: 'organizations',
         context: { computeHierarchyPaths: true },
-        draft: true,
+        version: 'latest',
       })
 
       expect(draftChild._h_slugPath).toBe('offerings/services/consulting')
@@ -588,26 +588,26 @@ describe('Hierarchy', () => {
       const parent1 = await payload.create({
         collection: 'organizations',
         data: { parent: null, title: 'Future' },
-        draft: true,
+        action: 'saveDraft',
       })
 
       const child = await payload.create({
         collection: 'organizations',
         data: { parent: parent1.id, title: 'Plans' },
-        draft: true,
+        action: 'saveDraft',
       })
 
       const newParent = await payload.create({
         collection: 'organizations',
         data: { parent: null, title: 'Roadmap' },
-        draft: true,
+        action: 'saveDraft',
       })
 
       await payload.update({
         id: parent1.id,
         collection: 'organizations',
         data: { parent: newParent.id },
-        draft: true,
+        action: 'saveDraft',
       })
 
       // Path is computed from current draft parent chain
@@ -615,7 +615,7 @@ describe('Hierarchy', () => {
         id: child.id,
         collection: 'organizations',
         context: { computeHierarchyPaths: true },
-        draft: true,
+        version: 'latest',
       })
 
       expect(draftChild._h_slugPath).toBe('roadmap/future/plans')
@@ -660,6 +660,7 @@ describe('Hierarchy', () => {
       // Create parent with default locale (en)
       const parent = await payload.create({
         collection: 'products',
+        action: 'publish',
         data: {
           name: 'Clothing',
           parent: null,
@@ -685,6 +686,7 @@ describe('Hierarchy', () => {
       // Create child with default locale (en)
       const child = await payload.create({
         collection: 'products',
+        action: 'publish',
         data: {
           name: 'Shirts',
           parent: parent.id,
@@ -733,6 +735,7 @@ describe('Hierarchy', () => {
       // Create parent with default locale (en)
       const parent = await payload.create({
         collection: 'products',
+        action: 'publish',
         data: {
           name: 'Clothing',
           parent: null,
@@ -756,6 +759,7 @@ describe('Hierarchy', () => {
       // Create child with default locale (en)
       const child = await payload.create({
         collection: 'products',
+        action: 'publish',
         data: {
           name: 'Shirts',
           parent: parent.id,
@@ -779,6 +783,7 @@ describe('Hierarchy', () => {
       // Create new parent with default locale (en)
       const newParent = await payload.create({
         collection: 'products',
+        action: 'publish',
         data: {
           name: 'Apparel',
           parent: null,
@@ -831,6 +836,7 @@ describe('Hierarchy', () => {
       // Create parent with default locale (en)
       const parent = await payload.create({
         collection: 'products',
+        action: 'publish',
         data: {
           name: 'Clothing',
           parent: null,
@@ -854,6 +860,7 @@ describe('Hierarchy', () => {
       // Create child with default locale (en)
       const child = await payload.create({
         collection: 'products',
+        action: 'publish',
         data: {
           name: 'Shirts',
           parent: parent.id,
@@ -921,6 +928,7 @@ describe('Hierarchy', () => {
       // Create parent with default locale (en)
       const parent = await payload.create({
         collection: 'products',
+        action: 'publish',
         data: {
           name: 'Clothing',
           parent: null,
@@ -944,6 +952,7 @@ describe('Hierarchy', () => {
       // Create child with default locale (en)
       const child = await payload.create({
         collection: 'products',
+        action: 'publish',
         data: {
           name: 'Shirts',
           parent: parent.id,
@@ -969,7 +978,7 @@ describe('Hierarchy', () => {
         id: child.id,
         collection: 'products',
         data: { _status: 'published' },
-        draft: false,
+        action: 'publish',
         publishAllLocales: true,
       })
 
@@ -986,7 +995,7 @@ describe('Hierarchy', () => {
           data: {
             name: titleMap[locale],
           },
-          draft: true,
+          action: 'saveDraft',
           locale,
         })
       }
@@ -994,6 +1003,7 @@ describe('Hierarchy', () => {
       // Create newParent with default locale (en)
       const newParent = await payload.create({
         collection: 'products',
+        action: 'publish',
         data: {
           name: 'Apparel',
           parent: null,
@@ -1040,7 +1050,7 @@ describe('Hierarchy', () => {
         id: child.id,
         collection: 'products',
         context: { computeHierarchyPaths: true },
-        draft: true,
+        version: 'latest',
         locale: 'all',
       })
 
@@ -1059,7 +1069,7 @@ describe('Hierarchy', () => {
           name: 'Future',
           parent: null,
         },
-        draft: true,
+        action: 'saveDraft',
         locale: 'en',
       })
 
@@ -1068,14 +1078,14 @@ describe('Hierarchy', () => {
         id: parent.id,
         collection: 'products',
         data: { name: 'Futuro' },
-        draft: true,
+        action: 'saveDraft',
         locale: 'es',
       })
       await payload.update({
         id: parent.id,
         collection: 'products',
         data: { name: 'Zukunft' },
-        draft: true,
+        action: 'saveDraft',
         locale: 'de',
       })
 
@@ -1086,7 +1096,7 @@ describe('Hierarchy', () => {
           name: 'Plans',
           parent: parent.id,
         },
-        draft: true,
+        action: 'saveDraft',
         locale: 'en',
       })
 
@@ -1095,20 +1105,21 @@ describe('Hierarchy', () => {
         id: child.id,
         collection: 'products',
         data: { name: 'Planes' },
-        draft: true,
+        action: 'saveDraft',
         locale: 'es',
       })
       await payload.update({
         id: child.id,
         collection: 'products',
         data: { name: 'Pläne' },
-        draft: true,
+        action: 'saveDraft',
         locale: 'de',
       })
 
       // Create new parent (published) with default locale
       const newParent = await payload.create({
         collection: 'products',
+        action: 'publish',
         data: {
           name: 'Roadmap',
           parent: null,
@@ -1134,7 +1145,7 @@ describe('Hierarchy', () => {
         id: parent.id,
         collection: 'products',
         data: { parent: newParent.id },
-        draft: true,
+        action: 'saveDraft',
         locale: 'en',
       })
 
@@ -1142,7 +1153,7 @@ describe('Hierarchy', () => {
         id: child.id,
         collection: 'products',
         context: { computeHierarchyPaths: true },
-        draft: true,
+        version: 'latest',
         locale: 'all',
       })
 

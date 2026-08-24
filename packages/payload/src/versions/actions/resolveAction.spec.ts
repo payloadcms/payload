@@ -3,13 +3,7 @@ import { describe, expect, it } from 'vitest'
 import type { ResolveActionArgs } from './types.js'
 
 import { APIError } from '../../errors/APIError.js'
-import {
-  canonicalizeWriteStatus,
-  requestedActionFromLegacyDraft,
-  requestedUpdateActionFromLegacy,
-  resolveAction,
-  statusFromAction,
-} from './resolveAction.js'
+import { canonicalizeWriteStatus, resolveAction, statusFromAction } from './resolveAction.js'
 
 const draftOps = (overrides: Partial<ResolveActionArgs> & Pick<ResolveActionArgs, 'operation'>) =>
   resolveAction({
@@ -492,53 +486,5 @@ describe('canonicalizeWriteStatus', () => {
       en: 'published',
       es: 'published',
     })
-  })
-})
-
-describe('requestedActionFromLegacyDraft', () => {
-  it('prefers explicit action over leftover draft booleans', () => {
-    expect(requestedActionFromLegacyDraft({ action: 'publish', draft: true })).toBe('publish')
-    expect(requestedActionFromLegacyDraft({ action: 'saveDraft', draft: false })).toBe('saveDraft')
-  })
-
-  it('maps leftover draft booleans when action is omitted', () => {
-    expect(requestedActionFromLegacyDraft({ draft: true })).toBe('saveDraft')
-    expect(requestedActionFromLegacyDraft({ draft: false })).toBe('publish')
-    expect(requestedActionFromLegacyDraft({})).toBeUndefined()
-  })
-})
-
-describe('requestedUpdateActionFromLegacy', () => {
-  it('maps leftover unpublishAllLocales onto unpublish when action is omitted', () => {
-    expect(requestedUpdateActionFromLegacy({ unpublishAllLocales: true })).toBe('unpublish')
-    expect(requestedUpdateActionFromLegacy({ unpublishAllLocales: 'true' })).toBe('unpublish')
-  })
-
-  it('maps leftover draft=true with published status to publish', () => {
-    expect(
-      requestedUpdateActionFromLegacy({
-        draft: true,
-        status: 'published',
-      }),
-    ).toBe('publish')
-  })
-
-  it('maps leftover draft=true without published status to saveDraft', () => {
-    expect(requestedUpdateActionFromLegacy({ draft: true })).toBe('saveDraft')
-    expect(
-      requestedUpdateActionFromLegacy({
-        draft: true,
-        status: 'draft',
-      }),
-    ).toBe('saveDraft')
-  })
-
-  it('prefers leftover draft booleans over unpublishAllLocales', () => {
-    expect(
-      requestedUpdateActionFromLegacy({
-        draft: true,
-        unpublishAllLocales: true,
-      }),
-    ).toBe('saveDraft')
   })
 })

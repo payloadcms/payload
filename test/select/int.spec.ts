@@ -1474,7 +1474,7 @@ describe('Select', () => {
       const res = await payload.findByID({
         id: postId,
         collection: 'versioned-posts',
-        draft: true,
+        version: 'latest',
         select: {},
       })
 
@@ -1487,7 +1487,7 @@ describe('Select', () => {
       const res = await payload.findByID({
         id: postId,
         collection: 'versioned-posts',
-        draft: true,
+        version: 'latest',
         select: {
           number: true,
         },
@@ -1503,23 +1503,28 @@ describe('Select', () => {
       const res = await payload.findByID({
         id: postId,
         collection: 'versioned-posts',
-        draft: true,
+        version: 'latest',
         select: {
           number: false,
         },
       })
 
       const expected = { ...post }
+      const actual = { ...res }
 
       delete expected['number']
-      expect(res).toStrictEqual(expected)
+      delete expected['createdAt']
+      delete expected['updatedAt']
+      delete actual['createdAt']
+      delete actual['updatedAt']
+      expect(actual).toStrictEqual(expected)
     })
 
     it('should select number and text', async () => {
       const res = await payload.findByID({
         id: postId,
         collection: 'versioned-posts',
-        draft: true,
+        version: 'latest',
         select: {
           number: true,
           text: true,
@@ -1536,7 +1541,7 @@ describe('Select', () => {
     it('payload.find should select number and text', async () => {
       const res = await payload.find({
         collection: 'versioned-posts',
-        draft: true,
+        version: 'latest',
         select: {
           number: true,
           text: true,
@@ -1558,7 +1563,7 @@ describe('Select', () => {
     it('should select base id field inside of array', async () => {
       const res = await payload.find({
         collection: 'versioned-posts',
-        draft: true,
+        version: 'latest',
         select: {
           array: {},
         },
@@ -1578,7 +1583,7 @@ describe('Select', () => {
     it('should select base id field inside of blocks', async () => {
       const res = await payload.find({
         collection: 'versioned-posts',
-        draft: true,
+        version: 'latest',
         select: {
           blocks: {},
         },
@@ -1622,17 +1627,17 @@ describe('Select', () => {
       expect(doc.version.text).toBe(post.text)
     })
 
-    it('should return a latest version with findByID and draft: true', async () => {
+    it('should return a latest version with findByID and version latest', async () => {
       const doc = await payload.create({
         collection: 'versioned-posts',
         data: { _status: 'draft', text: 'draft-post' },
-        draft: true,
+        action: 'saveDraft',
       })
 
       const res = await payload.findByID({
         id: doc.id,
         collection: 'versioned-posts',
-        draft: true,
+        version: 'latest',
         select: { text: true },
       })
       expect(res.text).toBe('draft-post')
@@ -1645,7 +1650,7 @@ describe('Select', () => {
       const res_2 = await payload.findByID({
         id: doc.id,
         collection: 'versioned-posts',
-        draft: true,
+        version: 'latest',
         select: { text: true },
       })
 

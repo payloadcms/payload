@@ -22,11 +22,7 @@ import { isolateObjectProperty } from '../../utilities/isolateObjectProperty.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
-import {
-  canonicalizeWriteStatus,
-  requestedActionFromLegacyDraft,
-  resolveAction,
-} from '../../versions/actions/resolveAction.js'
+import { canonicalizeWriteStatus, resolveAction } from '../../versions/actions/resolveAction.js'
 import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion.js'
 import { saveVersion } from '../../versions/saveVersion.js'
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
@@ -39,10 +35,6 @@ export type Arguments = {
   depth?: number
   disableErrors?: boolean
   disableTransaction?: boolean
-  /**
-   * Leftover REST/GraphQL boolean until those transports are converted.
-   */
-  draft?: boolean
   id: number | string
   overrideAccess?: boolean
   populate?: PopulateType
@@ -76,7 +68,6 @@ export const restoreVersionOperation = async <
       action,
       collection: { config: collectionConfig },
       depth,
-      draft: draftArg,
       overrideAccess = false,
       populate,
       req,
@@ -90,7 +81,7 @@ export const restoreVersionOperation = async <
     }
 
     const resolvedAction = resolveAction({
-      action: requestedActionFromLegacyDraft({ action, draft: draftArg }),
+      action,
       draftsEnabled: hasDraftsEnabled(collectionConfig),
       locale,
       operation: 'restore',

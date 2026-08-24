@@ -30,11 +30,7 @@ import { isErrorPublic } from '../../utilities/isErrorPublic.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
-import {
-  canonicalizeWriteStatus,
-  requestedUpdateActionFromLegacy,
-  resolveAction,
-} from '../../versions/actions/resolveAction.js'
+import { canonicalizeWriteStatus, resolveAction } from '../../versions/actions/resolveAction.js'
 import { buildVersionCollectionFields } from '../../versions/buildCollectionFields.js'
 import { appendVersionToQueryKey } from '../../versions/drafts/appendVersionToQueryKey.js'
 import { getQueryDraftsSort } from '../../versions/drafts/getQueryDraftsSort.js'
@@ -52,10 +48,6 @@ export type Arguments<TSlug extends CollectionSlug> = {
   depth?: number
   disableTransaction?: boolean
   disableVerificationEmail?: boolean
-  /**
-   * Leftover REST/GraphQL boolean until those transports are converted.
-   */
-  draft?: boolean
   limit?: number
   overrideAccess?: boolean
   overrideLock?: boolean
@@ -107,7 +99,6 @@ export const updateOperation = async <
       collection: { config: collectionConfig },
       collection,
       depth,
-      draft: draftArg,
       limit = 0,
       overrideAccess,
       overrideLock,
@@ -135,18 +126,7 @@ export const updateOperation = async <
 
     let { data: bulkUpdateData } = args
     const resolvedAction = resolveAction({
-      action: requestedUpdateActionFromLegacy({
-        action,
-        draft: draftArg,
-        status:
-          bulkUpdateData &&
-          typeof bulkUpdateData === 'object' &&
-          bulkUpdateData !== null &&
-          '_status' in bulkUpdateData
-            ? bulkUpdateData._status
-            : undefined,
-        unpublishAllLocales,
-      }),
+      action,
       autosave,
       draftsEnabled: hasDraftsEnabled(collectionConfig),
       locale,

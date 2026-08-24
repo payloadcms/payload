@@ -371,7 +371,7 @@ describe('Access Control', () => {
           }),
           payload.find({
             collection: 'fields-and-top-access',
-            draft: true,
+            version: 'latest',
             overrideAccess: false,
             sort: 'secret',
           }),
@@ -724,9 +724,9 @@ describe('Access Control', () => {
       expect(resFind.docs[0].id).toBe(hitID)
       expect(resFind.docs).toHaveLength(1)
 
-      // assert find draft: true
+      // assert find version: 'latest'
       const resFindDraft = await payload.find({
-        draft: true,
+        version: 'latest',
         overrideAccess: false,
         collection: 'fields-and-top-access',
       })
