@@ -75,6 +75,8 @@ To scope it to one suite:
 pnpm test:visual <suite> -- --update-snapshots
 ```
 
+**Never produce the baseline PNG any other way** — not a manual screenshot, not a screenshot/browser tool, not an agent's own screenshot capability, not copying an image from somewhere else — even if it looks pixel-identical when you look at it. The comparison in CI runs against the exact renderer/font stack inside that Docker image; a PNG from anywhere else can look correct to a human and still fail every single CI run, deterministically, because the mismatch is systemic (font hinting), not random. If you did not run one of the two commands above to produce the file, don't commit it.
+
 ## Running visual tests locally (without updating baselines)
 
 ```bash
@@ -103,5 +105,7 @@ So the Docker script is the only supported way to run or update these tests, bot
 
 - **Screenshotting before the page settles** — always assert something meaningful is visible (`await expect(locator).toBeVisible()`) before calling `expectScreenshot`, otherwise a loading spinner or error state can get baselined.
 - **Not masking non-deterministic content** — timestamps, relative dates, avatars, anything that legitimately differs between runs needs `mask`, not a wider `maxDiffPixelRatio`.
+- **Masking a table cell doesn't stop its content from affecting layout** — a mask paints over a cell after layout, but an auto-layout table still sizes its columns from the cell's real (masked-out) text. A non-deterministic value in a masked cell (a live timestamp, a generated ID) can still shift that column's width by a pixel and reflow every other column in the row, failing the comparison intermittently even though nothing in the visible content changed. If a masked cell sits in a table, force `table-layout: fixed` (via `page.addStyleTag`) before the screenshot so column widths stop depending on cell content at all. The signature: an intermittent failure — sometimes clean, sometimes not — with a different pixel-diff count each time it fails, concentrated at column boundaries and in text right next to the masked cell (see `test/versions/e2e.spec.ts`'s versions-list visual test).
 - **Generating a baseline on a bare host** — it will look fine locally and fail every time on CI. Always use `pnpm test:visual:update`.
+- **Committing a manually captured screenshot as the baseline** — a screenshot from dev tools, an agent's screenshot tool, or anywhere else outside `pnpm test:visual`/`pnpm test:visual:update` is never a valid baseline, no matter how closely it matches by eye. It will fail the CI comparison deterministically, every run, with the same pixel diff each time — that's the signature to recognize it by if you're debugging a failure like this.
 - **Expecting `pnpm test:e2e` to run `@visual` tests** — it won't; use the Docker script.

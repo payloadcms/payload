@@ -230,6 +230,8 @@ pnpm test:visual         # run every suite that has an @visual-tagged test
 pnpm test:visual:update  # accept intentional visual changes and regenerate baselines
 ```
 
+Never commit a baseline PNG from any other source — a manual screenshot, a screenshot tool, an editor extension, an AI agent's screenshot capability, or a browser's own "save image" — even if it looks identical to you. Only a PNG written by the commands above is guaranteed to match what CI renders; anything else reads as a match locally and then fails every time on CI.
+
 For a new `visual()` test with no baseline PNG yet, plain `pnpm test:visual` is enough — Playwright writes the missing baseline on that first run. Reach for `pnpm test:visual:update` only to accept changes to baselines that already exist, since it regenerates every baseline the run touches, not just the new one.
 
 To view an interactive report comparing the actual, expected, and diff images for a suite, run `pnpm test:visual:preview <suite>`.
