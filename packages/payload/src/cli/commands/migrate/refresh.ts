@@ -7,8 +7,11 @@ export const createMigrateRefreshCommand = defineCLICommand({
   handler: async ({ getPayload }) => {
     const { adapter, payload } = await initializeMigration({ getPayload })
 
-    await adapter.migrateRefresh()
+    const result = await adapter.migrateRefresh()
+
     payload.logger.info('Done.')
+
+    return result ? { result } : undefined
   },
   helpGroup: 'Migration commands',
   input: strictObject({}),

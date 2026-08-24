@@ -58,6 +58,7 @@ export const createCLI = async (runtime: CLIRuntime): Promise<Command> => {
     .showHelpAfterError()
     .showSuggestionAfterError()
     .option('--cron <expression>', 'Run the command on a cron schedule.')
+    .option('--json', 'Return machine-readable JSON output.')
 
   // /////////////////////////////////////
   // Load, validate and register commands
@@ -67,7 +68,7 @@ export const createCLI = async (runtime: CLIRuntime): Promise<Command> => {
 
   validateCLICommandNames({ commands })
 
-  const help = createCLIHelp({ cli })
+  const help = createCLIHelp({ cli, commands })
 
   for (const { name, definition } of commands) {
     registerCLICommand({

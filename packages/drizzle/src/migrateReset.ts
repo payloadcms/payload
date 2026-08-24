@@ -1,3 +1,5 @@
+import type { MigrationResult } from 'payload'
+
 import {
   commitTransaction,
   createLocalReq,
@@ -15,7 +17,7 @@ import { migrationTableExists } from './utilities/migrationTableExists.js'
 /**
  * Run all migrate down functions
  */
-export async function migrateReset(this: DrizzleAdapter): Promise<void> {
+export async function migrateReset(this: DrizzleAdapter): Promise<MigrationResult> {
   const { payload } = this
   const migrationFiles = await readMigrationFiles({ payload })
 
@@ -23,12 +25,13 @@ export async function migrateReset(this: DrizzleAdapter): Promise<void> {
 
   if (!existingMigrations?.length) {
     payload.logger.info({ msg: 'No migrations to reset.' })
-    return
+    return { migrated: [], rolledBack: [] }
   }
 
   const req = await createLocalReq({}, payload)
 
   existingMigrations.reverse()
+  const rolledBack: string[] = []
 
   // Rollback all migrations in order
   for (const migration of existingMigrations) {
@@ -57,8 +60,9 @@ export async function migrateReset(this: DrizzleAdapter): Promise<void> {
       }
 
       await commitTransaction(req)
+      rolledBack.push(migrationFile.name)
     } catch (err: unknown) {
-      let msg = `Error running migration ${migrationFile.name}.`
+      let msg = `Error running migration ${migration.name}.`
 
       if (err instanceof Error) {
         msg += ` ${err.message}`
@@ -69,7 +73,7 @@ export async function migrateReset(this: DrizzleAdapter): Promise<void> {
         err,
         msg,
       })
-      process.exit(1)
+      throw err
     }
   }
 
@@ -88,6 +92,9 @@ export async function migrateReset(this: DrizzleAdapter): Promise<void> {
       })
     } catch (err: unknown) {
       payload.logger.error({ err, msg: 'Error deleting dev migration' })
+      throw err
     }
   }
+
+  return { migrated: [], rolledBack }
 }

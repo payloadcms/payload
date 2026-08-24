@@ -3,7 +3,9 @@ export { bin, createCLI } from '../cli/index.js'
 export { strictObject } from '../cli/zod.js'
 export type {
   CLICommand,
+  CLICommandDescription,
   CLICommandEntry,
+  CLICommandResult,
   CLICommands,
   CLIHelp,
   CLIInputSchema,

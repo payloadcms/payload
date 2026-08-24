@@ -23,14 +23,25 @@ export const prettySyncLoggerDestination: PinoPretty.PrettyStream = build({
 
 export const defaultLoggerOptions: PinoPretty.PrettyStream = build(prettyOptions)
 
+let stderrLoggerDestination: PinoPretty.PrettyStream | undefined
+let stderrSyncLoggerDestination: PinoPretty.PrettyStream | undefined
+
 export const getLogger = (name = 'payload', logger?: Config['logger']): PayloadLogger => {
+  if (process.env.DISABLE_LOGGING === 'true') {
+    return pino({ enabled: false })
+  }
+
+  const isJSONOutput = process.env.PAYLOAD_CLI_JSON !== undefined
+
   if (!logger) {
-    return pino(defaultLoggerOptions)
+    return pino(isJSONOutput ? getStderrLoggerDestination({ isSync: false }) : defaultLoggerOptions)
   }
 
   // Synchronous logger used by bin scripts
   if (logger === 'sync') {
-    return pino(prettySyncLoggerDestination)
+    return pino(
+      isJSONOutput ? getStderrLoggerDestination({ isSync: true }) : prettySyncLoggerDestination,
+    )
   }
 
   // Check if logger is an object
@@ -45,9 +56,28 @@ export const getLogger = (name = 'payload', logger?: Config['logger']): PayloadL
       options.enabled = process.env.DISABLE_LOGGING !== 'true'
     }
 
-    return pino(options, destination)
+    return pino(options, isJSONOutput ? process.stderr : destination)
   } else {
     // Instantiated logger
     return logger
   }
+}
+
+const getStderrLoggerDestination = ({ isSync }: { isSync: boolean }): PinoPretty.PrettyStream => {
+  if (isSync) {
+    stderrSyncLoggerDestination ??= build({
+      ...prettyOptions,
+      destination: process.stderr,
+      sync: true,
+    })
+
+    return stderrSyncLoggerDestination
+  }
+
+  stderrLoggerDestination ??= build({
+    ...prettyOptions,
+    destination: process.stderr,
+  })
+
+  return stderrLoggerDestination
 }

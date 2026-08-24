@@ -101,8 +101,11 @@ export const createGenerateTypesCommand = defineCLICommand({
   description: 'Generate TypeScript types from the Payload config.',
   handler: async ({ getConfig }) => {
     const config = await getConfig()
+    const outputFile = process.env.PAYLOAD_TS_OUTPUT_PATH || config.typescript.outputFile
 
     await generateTypes(config)
+
+    return { result: { outputFile } }
   },
   helpGroup: 'Core commands',
   input: strictObject({}),

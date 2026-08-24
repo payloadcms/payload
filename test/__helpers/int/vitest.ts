@@ -11,6 +11,7 @@ import { getSDK } from '../shared/getSDK.js'
 import { initPayloadInt } from '../shared/initPayloadInt.js'
 import { mongooseList } from '../shared/isMongoose.js'
 import { NextRESTClient } from '../shared/NextRESTClient.js'
+import { runCLICommand } from '../shared/runCLICommand.js'
 
 type TestOptions = {
   /** Limits the test or suite to the selected database adapters. */
@@ -24,6 +25,7 @@ type IntegrationFixtures = {
     testDir: string
   }
   $test: {
+    cli: (input: Parameters<typeof runCLICommand>[0]) => ReturnType<typeof runCLICommand>
     restClient: NextRESTClient
     sdk: ReturnType<typeof getSDK>
   }
@@ -31,6 +33,15 @@ type IntegrationFixtures = {
 
 // Keep all fixtures in one extension so Vitest can trace test calls back to their source lines.
 const testWithFixtures = vitestTest.extend<IntegrationFixtures>({
+  cli: async ({ testDir }, use) => {
+    await use(async (input: Parameters<typeof runCLICommand>[0]) => {
+      const configPath = typeof input === 'string' ? undefined : input.configPath
+
+      await initPayloadInt(testDir, undefined, false, configPath)
+
+      return runCLICommand(input, { cwd: testDir })
+    })
+  },
   config: [
     async ({ testDir }, use) => {
       const { config } = await initPayloadInt(testDir, undefined, false)

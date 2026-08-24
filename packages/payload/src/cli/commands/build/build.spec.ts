@@ -373,6 +373,13 @@ describe('build', () => {
     expect(spawnMock).not.toHaveBeenCalled()
   })
 
+  it('keeps stdout available for JSON and sends build output to stderr', async () => {
+    await build({ config: fakeConfig, isJSON: true })
+
+    expect(generateImportMapMock).toHaveBeenCalledWith(fakeConfig, { log: false })
+    expect(generateTypesMock).toHaveBeenCalledWith(fakeConfig, { log: false })
+    expect(spawnMock.mock.calls[0]?.[2]).toEqual({ stdio: ['inherit', 2, 2] })
+  })
 })
 
 describe('detectFramework', () => {

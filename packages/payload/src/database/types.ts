@@ -92,28 +92,35 @@ export interface BaseDatabaseAdapter {
   /**
    * Run any migration up functions that have not yet been performed and update the status
    */
-  migrate: (args?: { migrations?: Migration[] }) => Promise<void>
+  migrate: (args?: {
+    forceAcceptWarning?: boolean
+    migrations?: Migration[]
+    shouldPrompt?: boolean
+  }) => Promise<MigrationResult | void>
   /**
    * Run any migration down functions that have been performed
    */
-  migrateDown: () => Promise<void>
+  migrateDown: () => Promise<MigrationResult | void>
 
   /**
    * Drop the current database and run all migrate up functions
    */
-  migrateFresh: (args: { forceAcceptWarning?: boolean }) => Promise<void>
+  migrateFresh: (args: {
+    forceAcceptWarning?: boolean
+    shouldPrompt?: boolean
+  }) => Promise<MigrationResult | void>
   /**
    * Run all migration down functions before running up
    */
-  migrateRefresh: () => Promise<void>
+  migrateRefresh: () => Promise<MigrationResult | void>
   /**
    * Run all migrate down functions
    */
-  migrateReset: () => Promise<void>
+  migrateReset: () => Promise<MigrationResult | void>
   /**
    * Read the current state of migrations and output the result to show which have been run
    */
-  migrateStatus: () => Promise<void>
+  migrateStatus: () => Promise<MigrationStatus[] | void>
 
   /**
    * Path to read and write migration files from
@@ -180,11 +187,31 @@ export type CreateMigration = (args: {
   forceAcceptWarning?: boolean
   migrationName?: string
   payload: Payload
+  /** Set to false when the caller cannot answer interactive prompts. */
+  shouldPrompt?: boolean
   /**
    * Skips the prompt asking to create empty migrations
    */
   skipEmpty?: boolean
-}) => Promise<void> | void
+}) => CreateMigrationResult | Promise<CreateMigrationResult | void> | void
+
+export type CreateMigrationResult = {
+  created: boolean
+  path?: string
+}
+
+export type MigrationResult = {
+  batch?: number
+  cancelled?: true
+  migrated: string[]
+  rolledBack: string[]
+}
+
+export type MigrationStatus = {
+  batch?: number
+  name: string
+  ran: boolean
+}
 
 export type Transaction = (
   callback: () => Promise<void>,

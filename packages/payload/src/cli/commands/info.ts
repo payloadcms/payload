@@ -8,7 +8,7 @@ import { strictObject } from '../zod.js'
 
 export const createInfoCommand = defineCLICommand({
   description: 'Print environment and dependency information.',
-  handler: async () => {
+  handler: async ({ isJSON }) => {
     const dependencies = await getDependencies(process.cwd(), [
       ...PAYLOAD_PACKAGE_LIST,
       'next',
@@ -49,8 +49,9 @@ export const createInfoCommand = defineCLICommand({
       .map(({ name, version }) => `  ${name}: ${version}`)
       .join('\n')
 
-    // eslint-disable-next-line no-console
-    console.log(`
+    if (!isJSON) {
+      // eslint-disable-next-line no-console
+      console.log(`
 Binaries:
   Node: ${result.binaries.node}
   npm: ${result.binaries.npm}
@@ -65,6 +66,9 @@ Operating System:
   Available memory (MB): ${result.operatingSystem.availableMemoryMB}
   Available CPU cores: ${result.operatingSystem.availableCPUCores ?? 'N/A'}
 `)
+    }
+
+    return { result }
   },
   helpGroup: 'Core commands',
   input: strictObject({}),

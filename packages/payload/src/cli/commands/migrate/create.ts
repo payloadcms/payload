@@ -9,27 +9,30 @@ export const createMigrateCreateCommand = defineCLICommand({
     migrationName: 'argument',
   },
   description: 'Create a migration.',
-  handler: async ({ args, getPayload }) => {
+  handler: async ({ args, getPayload, isJSON }) => {
     const { adapter, payload } = await initializeMigration({
       disableDBConnect: true,
       getPayload,
     })
 
     try {
-      await adapter.createMigration({
+      const result = await adapter.createMigration({
         file: args.file,
         forceAcceptWarning: args.forceAcceptWarning,
         migrationName: args.migrationName,
         payload,
+        shouldPrompt: !isJSON,
         skipEmpty: args.skipEmpty,
       })
+
+      payload.logger.info(result && !result.created ? 'Cancelled.' : 'Done.')
+
+      return result ? { result } : undefined
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error'
 
       throw new Error(`Error creating migration: ${message}`)
     }
-
-    payload.logger.info('Done.')
   },
   helpGroup: 'Migration commands',
   input: strictObject({

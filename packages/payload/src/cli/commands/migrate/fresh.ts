@@ -6,11 +6,17 @@ import { initializeMigration } from './initialize.js'
 
 export const createMigrateFreshCommand = defineCLICommand({
   description: 'Run all migrations from a clean database.',
-  handler: async ({ args, getPayload }) => {
+  handler: async ({ args, getPayload, isJSON }) => {
     const { adapter, payload } = await initializeMigration({ getPayload })
 
-    await adapter.migrateFresh({ forceAcceptWarning: args.forceAcceptWarning })
-    payload.logger.info('Done.')
+    const result = await adapter.migrateFresh({
+      forceAcceptWarning: args.forceAcceptWarning,
+      shouldPrompt: !isJSON,
+    })
+
+    payload.logger.info(result?.cancelled ? 'Cancelled.' : 'Done.')
+
+    return result ? { result } : undefined
   },
   helpGroup: 'Migration commands',
   input: strictObject({

@@ -55,11 +55,13 @@ export const registerCLICommand = ({
  * })
  * ```
  *
- * registers `<file>` and `--force`. This helper also:
+ * registers `[file]`, `--force`, and the shared `--input <json|@file|->` option.
+ * This helper also:
  *
  * - infers parsers, descriptions, and choices from the schema
  * - applies overrides such as positional arguments and custom flags
- * - keeps required and optional positional arguments in sync with the schema
+ * - keeps positional arguments optional in Commander because `--input` may supply
+ *   them; the schema still checks whether they are required
  */
 const addCommandInput = ({
   command,
@@ -69,9 +71,6 @@ const addCommandInput = ({
   definition: CLICommand
 }): void => {
   const properties = (definition.schema.properties ?? {}) as Record<string, Record<string, unknown>>
-  const requiredFields = new Set(
-    Array.isArray(definition.schema.required) ? definition.schema.required : [],
-  )
   const overrides = definition.cli === false ? {} : definition.cli
 
   if (definition.cli !== false) {
@@ -91,10 +90,8 @@ const addCommandInput = ({
         typeof override === 'object' && override.type === 'argument' ? override : undefined
       const property = properties[field]!
       const isArray = property.type === 'array'
-      const isRequired = requiredFields.has(field)
       const argument = new Argument(
-        argumentOverride?.syntax ??
-          `${isRequired ? '<' : '['}${field}${isArray ? '...' : ''}${isRequired ? '>' : ']'}`,
+        argumentOverride?.syntax ?? `[${field}${isArray ? '...' : ''}]`,
         typeof property.description === 'string' ? property.description : '',
       )
       const parser = argumentOverride?.parse ?? getInferredParser({ property })
@@ -130,6 +127,27 @@ const addCommandInput = ({
       command.addOption(option)
     }
   }
+
+  const reservedOption = command.options.find((option) =>
+    ['input', 'json'].includes(option.attributeName()),
+  )
+
+  if (reservedOption) {
+    throw new Error(
+      `CLI command '${command.name()}' cannot register the reserved '--${reservedOption.attributeName()}' option.`,
+    )
+  }
+
+  for (const argument of command.registeredArguments) {
+    argument.argOptional()
+  }
+
+  command.addOption(
+    new Option(
+      '--input <json|@file|->',
+      'Pass the complete command input as JSON, from a file, or from stdin.',
+    ),
+  )
 }
 
 /**

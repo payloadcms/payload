@@ -1,4 +1,4 @@
-import type { Payload } from 'payload'
+import type { MigrationResult, Payload } from 'payload'
 
 import {
   commitTransaction,
@@ -18,13 +18,14 @@ import { parseError } from './utilities/parseError.js'
 export const migrate: DrizzleAdapter['migrate'] = async function migrate(
   this: DrizzleAdapter,
   args,
-): Promise<void> {
+) {
   const { payload } = this
+  const { forceAcceptWarning = false, shouldPrompt = true } = args ?? {}
   const migrationFiles = args?.migrations || (await readMigrationFiles({ payload }))
 
   if (!migrationFiles.length) {
     payload.logger.info({ msg: 'No migrations to run.' })
-    return
+    return { migrated: [], rolledBack: [] }
   }
 
   if ('createExtensions' in this && typeof this.createExtensions === 'function') {
@@ -44,24 +45,23 @@ export const migrate: DrizzleAdapter['migrate'] = async function migrate(
     }))
 
     if (migrationsInDB.find((m) => m.batch === -1)) {
-      const { confirm: runMigrations } = await prompts(
-        {
+      if (!forceAcceptWarning) {
+        if (!shouldPrompt) {
+          return { cancelled: true, migrated: [], rolledBack: [] }
+        }
+
+        const { confirm: runMigrations } = await prompts({
           name: 'confirm',
           type: 'confirm',
           initial: false,
           message:
             "It looks like you've run Payload in dev mode, meaning you've dynamically pushed changes to your database.\n\n" +
             "If you'd like to run migrations, data loss will occur. Would you like to proceed?",
-        },
-        {
-          onCancel: () => {
-            process.exit(0)
-          },
-        },
-      )
+        })
 
-      if (!runMigrations) {
-        process.exit(0)
+        if (!runMigrations) {
+          return { cancelled: true, migrated: [], rolledBack: [] }
+        }
       }
       // ignore the dev migration so that the latest batch number increments correctly
       migrationsInDB = migrationsInDB.filter((m) => m.batch !== -1)
@@ -73,6 +73,7 @@ export const migrate: DrizzleAdapter['migrate'] = async function migrate(
   }
 
   const newBatch = latestBatch + 1
+  const migrated: string[] = []
 
   // Execute 'up' function for each migration sequentially
   for (const migration of migrationFiles) {
@@ -84,7 +85,14 @@ export const migrate: DrizzleAdapter['migrate'] = async function migrate(
     }
 
     await runMigrationFile(payload, migration, newBatch)
+    migrated.push(migration.name)
   }
+
+  return {
+    ...(migrated.length ? { batch: newBatch } : {}),
+    migrated,
+    rolledBack: [],
+  } satisfies MigrationResult
 }
 
 async function runMigrationFile(payload: Payload, migration: Migration, batch: number) {
@@ -113,6 +121,6 @@ async function runMigrationFile(payload: Payload, migration: Migration, batch: n
       err,
       msg: parseError(err, `Error running migration ${migration.name}`),
     })
-    process.exit(1)
+    throw err
   }
 }

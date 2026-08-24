@@ -7,8 +7,11 @@ export const createMigrateDownCommand = defineCLICommand({
   handler: async ({ getPayload }) => {
     const { adapter, payload } = await initializeMigration({ getPayload })
 
-    await adapter.migrateDown()
+    const result = await adapter.migrateDown()
+
     payload.logger.info('Done.')
+
+    return result ? { result } : undefined
   },
   helpGroup: 'Migration commands',
   input: strictObject({}),

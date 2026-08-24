@@ -3,6 +3,7 @@
  */
 
 export { createCLI } from '../cli/index.js'
+export { readCommandInput } from '../cli/runtime/readCommandInput.js'
 export { getUploadInstructions } from '../uploads/endpoints/uploadInstructions.js'
 export { getExternalFile } from '../uploads/getExternalFile.js'
 export { getFileFromUploadInstructions } from '../uploads/getFileFromUploadInstructions.js'
