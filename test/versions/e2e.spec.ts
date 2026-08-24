@@ -268,6 +268,13 @@ describe('Versions', () => {
       await expect(versionsTable).toBeVisible()
       await expect(versionsTable.locator('tbody tr')).toHaveCount(10)
 
+      // The Updated At / Version ID cells are masked below, but their real rendered text still
+      // drives the table's auto column widths before the mask ever paints over it — a longer or
+      // shorter date/ID string shifts those widths by a pixel or two and reflows the visible
+      // Status column next to it, causing an intermittent screenshot mismatch unrelated to any
+      // real UI change. Pinning the layout removes that dependency on the masked cells' content.
+      await page.addStyleTag({ content: 'main.versions table { table-layout: fixed; }' })
+
       await expectScreenshot({
         mask: [versionsView.locator('.cell-updatedAt'), versionsView.locator('.cell-id')],
         name: 'collection-versions-list.png',
