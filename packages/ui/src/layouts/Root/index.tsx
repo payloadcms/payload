@@ -1,8 +1,9 @@
 import type {
   ImportMap,
+  InitReqArgs,
+  InitReqResult,
   LanguageOptions,
   SanitizedConfig,
-  ServerAdapter,
   ServerFunctionClient,
 } from 'payload'
 
@@ -18,7 +19,6 @@ import { getLanguageDir } from '../../utilities/getLanguageDir.js'
 import { getRequestEmbed } from '../../utilities/getRequestEmbed.js'
 import { getRequestHighContrast } from '../../utilities/getRequestHighContrast.js'
 import { getRequestTheme } from '../../utilities/getRequestTheme.js'
-import { initReq } from '../../utilities/initReq.js'
 import { NestProviders } from './NestProviders.js'
 import { getViewportMeta } from './viewport.js'
 // eslint-disable-next-line payload/no-imports-from-self -- Self-import via package path ensures consumer's bundler resolves the full CSS chain (design tokens, preflight, etc.) in prod builds
@@ -68,16 +68,12 @@ type RootLayoutProps = {
   readonly head?: React.ReactNode
   readonly htmlProps?: React.HtmlHTMLAttributes<HTMLHtmlElement>
   readonly importMap: ImportMap
+  readonly initReq: (args: Omit<InitReqArgs, 'cache' | 'serverAdapter'>) => Promise<InitReqResult>
   /**
    * Client router adapter. Caller supplies a framework-specific provider
    * (for Next.js use the `NextRouterAdapter` exported from `@payloadcms/next`).
    */
   readonly RouterAdapter: React.FC<{ children: React.ReactNode }>
-  /**
-   * Server adapter providing framework-specific access to headers, cookies, redirects,
-   * and other server APIs (for Next.js use `nextServerAdapter` from `@payloadcms/next`).
-   */
-  readonly serverAdapter: ServerAdapter
   readonly serverFunction: ServerFunctionClient
 }
 
@@ -100,8 +96,8 @@ const RootLayoutContent = async ({
   head: headFromProps,
   htmlProps = {},
   importMap,
+  initReq,
   RouterAdapter,
-  serverAdapter,
   serverFunction,
 }: RootLayoutProps) => {
   const {
@@ -113,7 +109,7 @@ const RootLayoutContent = async ({
     req: {
       payload: { config },
     },
-  } = await initReq({ configPromise, importMap, key: 'RootLayout', serverAdapter })
+  } = await initReq({ configPromise, importMap, key: 'RootLayout' })
 
   const theme = getRequestTheme({
     config,

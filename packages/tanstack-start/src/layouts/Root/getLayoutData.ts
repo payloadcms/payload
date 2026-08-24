@@ -65,7 +65,10 @@ export async function getLayoutData({
     req: {
       payload: { config },
     },
-  } = await initReq({ configPromise, importMap })
+  } = await initReq({
+    configPromise,
+    importMap,
+  })
 
   const theme = getRequestTheme({ config, cookies, headers })
   const isEmbedded = getRequestEmbed({ config, cookies })
