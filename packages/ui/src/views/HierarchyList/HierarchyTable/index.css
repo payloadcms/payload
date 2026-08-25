@@ -122,10 +122,6 @@
   .hierarchy-tables__col-type {
     width: 120px;
     min-width: 100px;
-
-    &:not(.slot-table__th) {
-      color: var(--color-text-secondary);
-    }
   }
 
   .hierarchy-tables__section-title {

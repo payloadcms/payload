@@ -20,7 +20,7 @@
     }
 
     tbody {
-      color: var(--color-text-secondary);
+      color: var(--color-text);
 
       tr {
         border-top: var(--stroke-width-small) solid var(--color-border);
