@@ -12,6 +12,7 @@ type Args = {
   collection: SanitizedCollectionConfig
   /** The post-`beforeChange` data, with localized fields already keyed by locale. */
   data: JsonObject
+  overrideAccess?: boolean
   req: PayloadRequest
 }
 
@@ -29,6 +30,7 @@ type Args = {
 export const fillEmptyLocalizedSlugs = async ({
   collection,
   data,
+  overrideAccess = true,
   req,
 }: Args): Promise<JsonObject> => {
   const { localization } = req.payload.config
@@ -77,10 +79,18 @@ export const fillEmptyLocalizedSlugs = async ({
             draftsEnabled,
             field: field.name,
             locale,
+            overrideAccess,
             req,
             value: derived as string,
           })
-        : await getSlugFallbackValue({ collection, field: field.name, locale, req, slugify })
+        : await getSlugFallbackValue({
+            collection,
+            field: field.name,
+            locale,
+            overrideAccess,
+            req,
+            slugify,
+          })
     }
 
     data[field.name] = localeValues
