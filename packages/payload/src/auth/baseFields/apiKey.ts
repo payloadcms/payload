@@ -1,6 +1,15 @@
 import crypto from 'crypto'
 
-import type { CheckboxField, Field, FieldHook, TextField } from '../../fields/config/types.js'
+import type {
+  CheckboxField,
+  Field,
+  FieldAccess,
+  FieldHook,
+  TextField,
+} from '../../fields/config/types.js'
+
+import { UnauthorizedError } from '../../errors/UnauthorizedError.js'
+import { canAccessAdmin } from '../../utilities/canAccessAdmin.js'
 
 const encryptKey: FieldHook = ({ req, value }) =>
   value ? req.payload.encrypt(value as string) : null
@@ -18,6 +27,31 @@ const decryptKey: FieldHook = ({ req, value }) => {
     // document read; API key auth is unaffected (it matches the apiKeyIndex), and
     // running rotateSecret restores the displayed value.
     return null
+  }
+}
+
+const canReadAPIKey: FieldAccess = ({ id, collection, req }) =>
+  Boolean(
+    req.user &&
+      id !== undefined &&
+      String(req.user.id) === String(id) &&
+      req.user.collection === collection?.slug,
+  )
+
+const canReadAPIKeyStatus: FieldAccess = async ({ req }) => {
+  if (!req.user) {
+    return false
+  }
+
+  try {
+    await canAccessAdmin({ req })
+    return true
+  } catch (error) {
+    if (error instanceof UnauthorizedError) {
+      return false
+    }
+
+    throw error
   }
 }
 
@@ -44,6 +78,9 @@ export const createAPIKeyFields = ({
     fields.push({
       name: 'enableAPIKey',
       type: 'checkbox',
+      access: {
+        read: canReadAPIKeyStatus,
+      },
       ...enableAPIKeyField,
       admin: {
         components: {
@@ -59,6 +96,9 @@ export const createAPIKeyFields = ({
     {
       name: 'apiKey',
       type: 'text',
+      access: {
+        read: canReadAPIKey,
+      },
       ...apiKeyField,
       admin: {
         components: {

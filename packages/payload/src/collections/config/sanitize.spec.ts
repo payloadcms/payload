@@ -3,7 +3,165 @@ import type { CollectionConfig } from './types.js'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { canAccessAdmin } from '../../utilities/canAccessAdmin.js'
+import type { FieldAccess } from '../../fields/config/types.js'
 import { sanitizeCollection, warnOnInvalidCustomViews } from './sanitize.js'
+
+describe('API key fields', () => {
+  const getAPIKeyFields = ({
+    access,
+    fields = [],
+  }: {
+    access?: CollectionConfig['access']
+    fields?: CollectionConfig['fields']
+  } = {}) => {
+    const config = {
+      admin: {
+        user: 'users',
+      },
+      collections: [],
+      globals: [],
+    } as any
+    const collection: CollectionConfig = {
+      slug: 'users',
+      access,
+      auth: {
+        useAPIKey: true,
+      },
+      fields,
+    }
+    const sanitizedCollection = sanitizeCollection(config, collection)
+    const apiKey = sanitizedCollection.fields.find(
+      (field) => 'name' in field && field.name === 'apiKey',
+    )
+    const enableAPIKey = sanitizedCollection.fields.find(
+      (field) => 'name' in field && field.name === 'enableAPIKey',
+    )
+
+    return { apiKey, config, enableAPIKey, sanitizedCollection }
+  }
+
+  it('should only allow an authenticated user to read their own API key', async () => {
+    const { apiKey, sanitizedCollection } = getAPIKeyFields()
+    const read = apiKey && 'access' in apiKey ? apiKey.access?.read : undefined
+    const args = {
+      collection: sanitizedCollection,
+      id: 'user-1',
+      req: {
+        user: {
+          collection: 'users',
+          id: 'user-1',
+        },
+      },
+    } as any
+
+    expect(await read?.(args)).toBe(true)
+    expect(
+      await read?.({
+        ...args,
+        id: 1,
+        req: { user: { collection: 'users', id: '1' } },
+      }),
+    ).toBe(true)
+    expect(await read?.({ ...args, id: 'user-2' })).toBe(false)
+    expect(
+      await read?.({
+        ...args,
+        req: { user: { collection: 'customers', id: 'user-1' } },
+      }),
+    ).toBe(false)
+    expect(await read?.({ ...args, req: { user: null } })).toBe(false)
+  })
+
+  it('should only allow authenticated Admin Panel users to read API key status', async () => {
+    const { config, enableAPIKey, sanitizedCollection } = getAPIKeyFields({
+      access: {
+        admin: async ({ req }) => req.user?.role === 'admin',
+      },
+    })
+    const read = enableAPIKey && 'access' in enableAPIKey ? enableAPIKey.access?.read : undefined
+    const req = {
+      payload: {
+        collections: {
+          users: {
+            config: sanitizedCollection,
+          },
+        },
+        config,
+      },
+      user: {
+        collection: 'users',
+        id: 'user-1',
+        role: 'admin',
+      },
+    } as any
+
+    expect(await read?.({ collection: sanitizedCollection, id: 'user-1', req })).toBe(true)
+
+    req.user.role = 'editor'
+    expect(await read?.({ collection: sanitizedCollection, id: 'user-1', req })).toBe(false)
+
+    req.user = null
+    expect(await read?.({ collection: sanitizedCollection, id: 'user-1', req })).toBe(false)
+  })
+
+  it('should allow collection fields to make API keys readable by all Admin users', async () => {
+    const apiKeyRead: FieldAccess = ({ req: { payload, user } }) =>
+      Boolean(user) && user.collection === payload.config.admin.user
+    const enableAPIKeyRead = () => true
+    const { apiKey, config, enableAPIKey, sanitizedCollection } = getAPIKeyFields({
+      fields: [
+        {
+          name: 'apiKey',
+          type: 'text',
+          access: {
+            read: apiKeyRead,
+          },
+        },
+        {
+          name: 'enableAPIKey',
+          type: 'checkbox',
+          access: {
+            read: enableAPIKeyRead,
+          },
+        },
+      ],
+    })
+
+    expect(apiKey && 'access' in apiKey && apiKey.access?.read).toBe(apiKeyRead)
+    expect(enableAPIKey && 'access' in enableAPIKey && enableAPIKey.access?.read).toBe(
+      enableAPIKeyRead,
+    )
+    expect(
+      await (apiKey && 'access' in apiKey
+        ? apiKey.access?.read?.({
+            collection: sanitizedCollection,
+            id: 'user-1',
+            req: {
+              payload: { config },
+              user: {
+                collection: 'users',
+                id: 'user-2',
+              },
+            },
+          } as any)
+        : undefined),
+    ).toBe(true)
+    expect(
+      await (apiKey && 'access' in apiKey
+        ? apiKey.access?.read?.({
+            collection: sanitizedCollection,
+            id: 'user-1',
+            req: { payload: { config }, user: null },
+          } as any)
+        : undefined),
+    ).toBe(false)
+    expect(
+      await (enableAPIKey && 'access' in enableAPIKey
+        ? enableAPIKey.access?.read?.({ collection: sanitizedCollection } as any)
+        : undefined),
+    ).toBe(true)
+  })
+})
 
 describe('baseAccess', () => {
   it('should combine base and collection access constraints', async () => {

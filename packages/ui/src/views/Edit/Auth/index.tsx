@@ -19,6 +19,7 @@ import { useDocumentInfo } from '../../../providers/DocumentInfo/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import './index.css'
 import { APIKey } from './APIKey.js'
+import { getAPIKeyPermissions } from './getAPIKeyPermissions.js'
 
 const baseClass = 'auth-fields'
 
@@ -39,6 +40,7 @@ export const Auth: React.FC<Props> = (props) => {
   } = props
 
   const [changingPassword, setChangingPassword] = useState(requirePassword)
+  const apiKey = useFormFields(([fields]) => (fields && fields?.apiKey) || null)
   const enableAPIKey = useFormFields(([fields]) => (fields && fields?.enableAPIKey) || null)
   const dispatchFields = useFormFields((reducer) => reducer[1])
   const modified = useFormModified()
@@ -114,20 +116,13 @@ export const Auth: React.FC<Props> = (props) => {
 
   const disabled = readOnly || isInitializing || isTrashed
 
-  const apiKeyPermissions =
-    docPermissions?.fields === true ? true : docPermissions?.fields?.enableAPIKey
-
-  const apiKeyReadOnly =
-    readOnly ||
-    (apiKeyPermissions !== true &&
-      apiKeyPermissions &&
-      typeof apiKeyPermissions === 'object' &&
-      !apiKeyPermissions?.update)
-
-  const enableAPIKeyReadOnly =
-    readOnly || (apiKeyPermissions !== true && !apiKeyPermissions?.update)
-
-  const canReadApiKey = apiKeyPermissions === true || apiKeyPermissions?.read
+  const { canModifyAPIKey, canModifyAPIKeyStatus, canReadAPIKey, canReadAPIKeyStatus } =
+    getAPIKeyPermissions({
+      fields: docPermissions.fields,
+      operation,
+    })
+  const showAPIKey = canReadAPIKey || (operation === 'create' && canModifyAPIKey)
+  const showAPIKeyStatus = canReadAPIKeyStatus || (operation === 'create' && canModifyAPIKeyStatus)
 
   const hasPermissionToUnlock: boolean = useMemo(() => {
     if (docPermissions) {
@@ -196,7 +191,7 @@ export const Auth: React.FC<Props> = (props) => {
   }, [modified])
 
   const showAuthBlock = enableFields
-  const showAPIKeyBlock = useAPIKey && canReadApiKey
+  const showAPIKeyBlock = useAPIKey && (showAPIKey || showAPIKeyStatus)
   const showVerifyBlock = verify && isEditing
 
   if (!(showAuthBlock || showAPIKeyBlock || showVerifyBlock)) {
@@ -293,16 +288,23 @@ export const Auth: React.FC<Props> = (props) => {
           )}
           {showAPIKeyBlock && (
             <div className={`${baseClass}__api-key`}>
-              <CheckboxField
-                field={{
-                  name: 'enableAPIKey',
-                  admin: { disabled, readOnly: enableAPIKeyReadOnly },
-                  label: t('authentication:enableAPIKey'),
-                }}
-                path="enableAPIKey"
-                schemaPath={`${collectionSlug}.enableAPIKey`}
-              />
-              <APIKey enabled={!!enableAPIKey?.value} readOnly={apiKeyReadOnly} />
+              {showAPIKeyStatus && (
+                <CheckboxField
+                  field={{
+                    name: 'enableAPIKey',
+                    admin: { disabled, readOnly: readOnly || !canModifyAPIKeyStatus },
+                    label: t('authentication:enableAPIKey'),
+                  }}
+                  path="enableAPIKey"
+                  schemaPath={`${collectionSlug}.enableAPIKey`}
+                />
+              )}
+              {showAPIKey && (
+                <APIKey
+                  enabled={showAPIKeyStatus ? Boolean(enableAPIKey?.value) : Boolean(apiKey?.value)}
+                  readOnly={readOnly || !canModifyAPIKey}
+                />
+              )}
             </div>
           )}
           {showVerifyBlock && (

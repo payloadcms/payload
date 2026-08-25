@@ -19,7 +19,13 @@ import { ensureCompilationIsDone } from '../__setup/e2e/ensureCompilationIsDone.
 import { initPage } from '../__setup/e2e/initPage.js'
 import { devUser } from '../credentials.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
-import { apiKeysSlug, BASE_PATH, slug } from './shared.js'
+import {
+  apiKeysSlug,
+  apiKeysWithHiddenKeysSlug,
+  apiKeysWithReadableKeysSlug,
+  BASE_PATH,
+  slug,
+} from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -27,7 +33,38 @@ process.env.NEXT_BASE_PATH = BASE_PATH
 
 let payload: PayloadTestSDK<Config>
 
-const { afterAll, beforeAll, beforeEach, describe } = test
+type APIKeyTestCollectionSlug =
+  | typeof apiKeysWithHiddenKeysSlug
+  | typeof apiKeysWithReadableKeysSlug
+
+type APIKeyTestDocument = {
+  apiKey?: null | string
+  id: number | string
+  name?: null | string
+}
+
+type APIKeyTestPayload = {
+  create: (args: {
+    collection: APIKeyTestCollectionSlug
+    data: {
+      apiKey: string
+      enableAPIKey: boolean
+      name?: string
+    }
+  }) => Promise<APIKeyTestDocument>
+  delete: (args: {
+    collection: APIKeyTestCollectionSlug
+    where: { id: { equals: number | string } }
+  }) => Promise<unknown>
+  find: (args: {
+    collection: APIKeyTestCollectionSlug
+    where: { id: { equals: number | string } }
+  }) => Promise<{ docs: APIKeyTestDocument[] }>
+}
+
+const getAPIKeyTestPayload = (): APIKeyTestPayload => payload as unknown as APIKeyTestPayload
+
+const { afterAll, afterEach, beforeAll, beforeEach, describe } = test
 
 const headers = {
   'Content-Type': 'application/json',
@@ -395,13 +432,16 @@ describe('Auth', () => {
         const apiKey = await apiKeyLocator.inputValue()
 
         await saveDocAndAssert(page)
+        await expect(apiKeyLocator).toBeHidden()
 
-        await expect(async () => {
-          const apiKeyAfterSave = await apiKeyLocator.inputValue()
-          expect(apiKey).toStrictEqual(apiKeyAfterSave)
-        }).toPass({
-          timeout: POLL_TOPASS_TIMEOUT,
-        })
+        const response = await fetch(`${apiURL}/${apiKeysSlug}/me`, {
+          headers: {
+            ...headers,
+            Authorization: `${apiKeysSlug} API-Key ${apiKey}`,
+          },
+        }).then((res) => res.json())
+
+        expect(response.user?.apiKey).toBe(apiKey)
       })
 
       test('should disable api key', async () => {
@@ -428,6 +468,100 @@ describe('Auth', () => {
         }).toPass({
           timeout: POLL_TOPASS_TIMEOUT,
         })
+      })
+    })
+
+    describe('api-key-rotation', () => {
+      const createdIDs: Array<number | string> = []
+
+      afterEach(async () => {
+        for (const id of createdIDs) {
+          await getAPIKeyTestPayload().delete({
+            collection: apiKeysWithReadableKeysSlug,
+            where: {
+              id: {
+                equals: id,
+              },
+            },
+          })
+        }
+        createdIDs.length = 0
+      })
+
+      test('should rotate a readable API key', async () => {
+        const originalAPIKey = uuid()
+        const user = await getAPIKeyTestPayload().create({
+          collection: apiKeysWithReadableKeysSlug,
+          data: {
+            apiKey: originalAPIKey,
+            enableAPIKey: true,
+          },
+        })
+        createdIDs.push(user.id)
+        const userURL = new AdminUrlUtil(serverURL, apiKeysWithReadableKeysSlug)
+
+        await page.goto(userURL.edit(user.id))
+        const apiKeyInput = page.locator('#apiKey')
+        await expect(apiKeyInput).toHaveValue(originalAPIKey)
+
+        await page.getByRole('button', { name: 'Generate new API key' }).click()
+        await page
+          .locator(`#generate-confirmation-${user.id} [data-dialog-action="confirm"]`)
+          .click()
+        await expect(apiKeyInput).not.toHaveValue(originalAPIKey)
+        const rotatedAPIKey = await apiKeyInput.inputValue()
+        await saveDocAndAssert(page)
+        await expect(apiKeyInput).toHaveValue(rotatedAPIKey)
+      })
+    })
+
+    describe('api-keys-with-hidden-keys', () => {
+      const createdIDs: Array<number | string> = []
+
+      afterEach(async () => {
+        for (const id of createdIDs) {
+          await getAPIKeyTestPayload().delete({
+            collection: apiKeysWithHiddenKeysSlug,
+            where: {
+              id: {
+                equals: id,
+              },
+            },
+          })
+        }
+        createdIDs.length = 0
+      })
+
+      test('should not replace an unreadable API key during an unrelated edit', async () => {
+        const originalAPIKey = uuid()
+        const user = await getAPIKeyTestPayload().create({
+          collection: apiKeysWithHiddenKeysSlug,
+          data: {
+            name: 'Before',
+            apiKey: originalAPIKey,
+            enableAPIKey: true,
+          },
+        })
+        createdIDs.push(user.id)
+        const hiddenKeyURL = new AdminUrlUtil(serverURL, apiKeysWithHiddenKeysSlug)
+
+        await page.goto(hiddenKeyURL.edit(user.id))
+        await expect(page.locator('#field-enableAPIKey')).toBeChecked()
+        await expect(page.locator('#apiKey')).toBeHidden()
+        await page.locator('#field-name').fill('After')
+        await saveDocAndAssert(page)
+
+        const result = await getAPIKeyTestPayload().find({
+          collection: apiKeysWithHiddenKeysSlug,
+          where: {
+            id: {
+              equals: user.id,
+            },
+          },
+        })
+
+        expect(result.docs[0]?.apiKey).toBe(originalAPIKey)
+        expect(result.docs[0]?.name).toBe('After')
       })
     })
 

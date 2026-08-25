@@ -4,6 +4,10 @@ export const publicUsersSlug = 'public-users'
 
 export const apiKeysSlug = 'api-keys'
 
+export const apiKeysWithHiddenKeysSlug = 'api-keys-with-hidden-keys'
+
+export const apiKeysWithReadableKeysSlug = 'api-keys-with-readable-keys'
+
 export const rotateSecretSlug = 'rotate-secret'
 
 export const rotateSecretLoginSlug = 'rotate-secret-login'

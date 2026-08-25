@@ -9,6 +9,8 @@ import { devUser } from '../credentials.js'
 import { seed } from './seed.js'
 import {
   apiKeysSlug,
+  apiKeysWithHiddenKeysSlug,
+  apiKeysWithReadableKeysSlug,
   BASE_PATH,
   namedSaveToJWTValue,
   partialDisableLocalStrategiesSlug,
@@ -383,6 +385,59 @@ export default buildConfigWithDefaults({
       labels: {
         plural: 'API Keys With Field Read Access',
         singular: 'API Key With Field Read Access',
+      },
+      versions: false,
+    },
+    {
+      slug: apiKeysWithHiddenKeysSlug,
+      auth: {
+        disableLocalStrategy: true,
+        useAPIKey: true,
+      },
+      fields: [
+        {
+          name: 'name',
+          type: 'text',
+        },
+        {
+          name: 'apiKey',
+          type: 'text',
+          access: {
+            read: () => false,
+          },
+        },
+        {
+          name: 'enableAPIKey',
+          type: 'checkbox',
+          access: {
+            read: () => true,
+          },
+        },
+      ],
+      labels: {
+        plural: 'API Keys With Hidden Keys',
+        singular: 'API Key With Hidden Key',
+      },
+      versions: false,
+    },
+    {
+      slug: apiKeysWithReadableKeysSlug,
+      auth: {
+        disableLocalStrategy: true,
+        useAPIKey: true,
+      },
+      fields: [
+        {
+          name: 'apiKey',
+          type: 'text',
+          access: {
+            read: () => true,
+          },
+        },
+      ],
+      labels: {
+        plural: 'API Keys With Readable Keys',
+        singular: 'API Key With Readable Key',
       },
       versions: false,
     },
