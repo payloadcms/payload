@@ -56,6 +56,10 @@
     padding-block-end: var(--spacer-3);
   }
 
+  .hierarchy-column__items--selectable-background {
+    cursor: pointer;
+  }
+
   .hierarchy-column__empty {
     flex: 1;
     display: flex;

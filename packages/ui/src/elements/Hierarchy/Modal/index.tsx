@@ -222,9 +222,15 @@ export const HierarchyModalContent = function HierarchyModalContent({
 
   const handleRevealPath = useCallback(
     (path: PathSegment[]) => {
+      // Clicking a footer breadcrumb chip (previous or destination folder) makes that folder the
+      // current selection, same as clicking its row in the browser would.
+      const target = path[path.length - 1]
+      if (target) {
+        handleSelect({ id: target.id, path })
+      }
       void columnBrowserRef?.current?.revealPath(path)
     },
-    [columnBrowserRef],
+    [columnBrowserRef, handleSelect],
   )
 
   const handleCancel = useCallback(() => {

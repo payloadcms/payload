@@ -29,6 +29,7 @@ export const Column: React.FC<ColumnProps> = ({
   onExpand,
   onLoadMore,
   onSelect,
+  onSelectParent,
   parentId,
   parentTitle,
   pathToColumn,
@@ -62,6 +63,18 @@ export const Column: React.FC<ColumnProps> = ({
     onCreateNew({ parentId })
   }, [onCreateNew, parentId])
 
+  // Single-select only: clicking the empty space below the rows (not a row itself) makes this
+  // column's own folder the current destination, mirroring a click on the row that opened it.
+  const handleBackgroundClick = useCallback(
+    (event: React.MouseEvent<HTMLDivElement>) => {
+      if (!onSelectParent || parentId === null || event.target !== event.currentTarget) {
+        return
+      }
+      onSelectParent({ id: parentId })
+    },
+    [onSelectParent, parentId],
+  )
+
   return (
     <div className={baseClass}>
       <div className={`${baseClass}__header`}>
@@ -81,7 +94,18 @@ export const Column: React.FC<ColumnProps> = ({
         )}
       </div>
 
-      <div className={`${baseClass}__items`}>
+      <div
+        className={[
+          `${baseClass}__items`,
+          onSelectParent && parentId !== null && `${baseClass}__items--selectable-background`,
+        ]
+          .filter(Boolean)
+          .join(' ')}
+        onClick={handleBackgroundClick}
+        // Mouse-only shortcut on a plain container: keyboard users reach the same selection by
+        // activating the folder's own row, so this adds no semantics of its own.
+        role="presentation"
+      >
         {items.map((item) => (
           <ColumnItem
             disabled={Boolean(disabled || disabledIds?.has(item.id))}

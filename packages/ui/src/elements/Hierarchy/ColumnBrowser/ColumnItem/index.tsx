@@ -116,9 +116,9 @@ export const ColumnItem: React.FC<ColumnItemProps> = ({
         {title}
       </span>
 
-      {(selectedDescendantCount > 0 || hasChildren) && (
+      {((hasMany && selectedDescendantCount > 0) || hasChildren) && (
         <div className={`${baseClass}__trail`}>
-          {selectedDescendantCount > 0 && (
+          {hasMany && selectedDescendantCount > 0 && (
             <span className={`${baseClass}__descendant-count`}>{selectedDescendantCount}</span>
           )}
 

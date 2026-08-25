@@ -56,6 +56,11 @@ export type ColumnProps = {
   onExpand: (params: { id: number | string }) => void
   onLoadMore: () => void
   onSelect: (params: { id: number | string; path: PathSegment[] }) => void
+  /**
+   * Called when the user clicks the empty space below the rows (not a row itself). Single-select
+   * only - makes this column's own folder the current destination.
+   */
+  onSelectParent?: (params: { id: number | string }) => void
   parentId: null | number | string
   parentTitle?: string
   pathToColumn: PathSegment[]

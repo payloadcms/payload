@@ -488,21 +488,37 @@ export const HierarchyColumnBrowser = function HierarchyColumnBrowser({
   )
 
   // Build path for each column based on parent info
-  const getPathToColumn = (columnIndex: number) => {
-    const path: Array<{ id: number | string; title: string }> = []
+  const getPathToColumn = useCallback(
+    (columnIndex: number) => {
+      const path: Array<{ id: number | string; title: string }> = []
 
-    for (let i = 1; i <= columnIndex; i++) {
-      const col = columns[i]
-      if (col?.parentId !== null && col?.parentId !== undefined) {
-        path.push({
-          id: col.parentId,
-          title: col.parentTitle || String(col.parentId),
-        })
+      for (let i = 1; i <= columnIndex; i++) {
+        const col = columns[i]
+        if (col?.parentId !== null && col?.parentId !== undefined) {
+          path.push({
+            id: col.parentId,
+            title: col.parentTitle || String(col.parentId),
+          })
+        }
       }
-    }
 
-    return path
-  }
+      return path
+    },
+    [columns],
+  )
+
+  // Single-select only: clicking the empty space in a column makes that column's own folder the
+  // current destination - e.g. in grandparent/parent/child, clicking empty space in the column
+  // showing grandparent's children (headed "grandparent") makes grandparent current again,
+  // dropping the parent/child columns opened past it.
+  const handleSelectParent = useCallback(
+    ({ id, columnIndex }: { columnIndex: number; id: number | string }) => {
+      onSelect({ id, path: getPathToColumn(columnIndex) })
+      setExpandedPath((prev) => prev.slice(0, columnIndex))
+      setColumns((prev) => prev.slice(0, columnIndex + 1))
+    },
+    [getPathToColumn, onSelect],
+  )
 
   return (
     <div className={baseClass} ref={containerRef}>
@@ -533,6 +549,9 @@ export const HierarchyColumnBrowser = function HierarchyColumnBrowser({
               onExpand={({ id }) => handleExpand({ columnIndex: index, itemId: id })}
               onLoadMore={() => handleLoadMore({ columnIndex: index })}
               onSelect={onSelect}
+              onSelectParent={
+                hasMany ? undefined : ({ id }) => handleSelectParent({ id, columnIndex: index })
+              }
               parentId={column.parentId}
               parentTitle={column.parentTitle}
               pathToColumn={pathToColumn}
