@@ -18,7 +18,7 @@ export type Arguments = {
   depth?: number
   globalConfig: SanitizedGlobalConfig
   limit?: number
-  overrideAccess?: boolean
+  overrideAccess: boolean
   page?: number
   pagination?: boolean
   populate?: PopulateType
@@ -59,7 +59,7 @@ export const findVersionsOperation = async <T extends TypeWithVersion<T>>(
 
   await validateQueryPaths({
     globalConfig,
-    overrideAccess: overrideAccess!,
+    overrideAccess: overrideAccess,
     req,
     versionFields,
     where: where!,
@@ -67,7 +67,7 @@ export const findVersionsOperation = async <T extends TypeWithVersion<T>>(
 
   await validateSortQuery({
     globalConfig,
-    overrideAccess: overrideAccess!,
+    overrideAccess: overrideAccess,
     req,
     sort,
     versionFields,
@@ -134,7 +134,7 @@ export const findVersionsOperation = async <T extends TypeWithVersion<T>>(
             findMany: true,
             global: globalConfig,
             locale: locale!,
-            overrideAccess: overrideAccess!,
+            overrideAccess: overrideAccess,
             populate,
             req,
             select,

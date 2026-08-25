@@ -19,7 +19,7 @@ export type Arguments = {
   disableErrors?: boolean
   globalConfig: SanitizedGlobalConfig
   id: number | string
-  overrideAccess?: boolean
+  overrideAccess: boolean
   populate?: PopulateType
   req: PayloadRequest
   showHiddenFields?: boolean
@@ -143,7 +143,7 @@ export const findVersionByIDOperation = async <T extends TypeWithVersion<T> = an
     fallbackLocale: fallbackLocale!,
     global: globalConfig,
     locale: locale!,
-    overrideAccess: overrideAccess!,
+    overrideAccess: overrideAccess,
     populate,
     req,
     select: typeof select?.version === 'object' ? select.version : undefined,

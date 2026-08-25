@@ -18,6 +18,7 @@ export const findVersionsHandler: PayloadHandler = async (req) => {
     collection,
     depth,
     limit,
+    overrideAccess: false,
     page,
     pagination,
     populate,

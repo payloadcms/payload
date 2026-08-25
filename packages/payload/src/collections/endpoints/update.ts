@@ -31,6 +31,7 @@ export const updateHandler: PayloadHandler = async (req) => {
     depth,
     draft,
     limit,
+    overrideAccess: false,
     overrideLock: overrideLock ?? false,
     populate,
     publishAllLocales,

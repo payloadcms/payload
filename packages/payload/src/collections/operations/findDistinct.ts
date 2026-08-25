@@ -26,7 +26,7 @@ export type Arguments = {
   field: string
   limit?: number
   locale?: string
-  overrideAccess?: boolean
+  overrideAccess: boolean
   page?: number
   populate?: PopulateType
   req?: PayloadRequest
@@ -48,7 +48,7 @@ export const findDistinctOperation = async (
     args,
     collection: args.collection.config,
     operation: 'readDistinct',
-    overrideAccess: args.overrideAccess!,
+    overrideAccess: args.overrideAccess,
   })
 
   const {
@@ -109,7 +109,7 @@ export const findDistinctOperation = async (
 
   await validateQueryPaths({
     collectionConfig,
-    overrideAccess: overrideAccess!,
+    overrideAccess: overrideAccess,
     req,
     where: where ?? {},
   })
@@ -144,7 +144,7 @@ export const findDistinctOperation = async (
 
   await validateSortQuery({
     collectionConfig,
-    overrideAccess: overrideAccess!,
+    overrideAccess: overrideAccess,
     req,
     sort: args.sort,
   })

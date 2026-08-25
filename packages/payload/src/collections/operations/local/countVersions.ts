@@ -4,6 +4,7 @@ import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js
 
 import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
+import { warnMissingOverrideAccess } from '../../../utilities/warnMissingOverrideAccess.js'
 import { countVersionsOperation } from '../countVersions.js'
 
 export type CountVersionsOptions<TSlug extends CollectionSlug> = {
@@ -27,11 +28,16 @@ export type CountVersionsOptions<TSlug extends CollectionSlug> = {
    */
   locale?: TypedLocale
   /**
-   * Skip access control.
-   * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the front-end.
-   * @default true
+   * Whether to skip access control for this operation.
+   *
+   * `false` respects Access Control — use this whenever the operation acts on behalf of a
+   * user, such as fetching data for the front-end.
+   * `true` bypasses it — use this for trusted server-side work such as cron jobs, seeding,
+   * and migrations.
+   *
+   * Required. Omitting it used to skip access control silently.
    */
-  overrideAccess?: boolean
+  overrideAccess: boolean
   /**
    * The `PayloadRequest` object. You can pass it to thread the current [transaction](https://payloadcms.com/docs/database/transactions), user and locale to the operation.
    * Recommended to pass when using the Local API from hooks, as usually you want to execute the operation within the current transaction.
@@ -51,7 +57,22 @@ export async function countVersionsLocal<TSlug extends CollectionSlug>(
   payload: Payload,
   options: CountVersionsOptions<TSlug>,
 ): Promise<{ totalDocs: number }> {
-  const { collection: collectionSlug, disableErrors, overrideAccess = true, where } = options
+  const {
+    collection: collectionSlug,
+    disableErrors,
+    overrideAccess: overrideAccessFromOptions,
+    where,
+  } = options
+
+  // An untyped caller — plain JavaScript, an `as any` cast, or a plugin whose JavaScript was
+  // compiled against Payload 3 — can still omit this. Coerce once, here, so nothing further
+  // in has to decide what a missing value means. `false` enforces access control, so the
+  // failure mode is a missing document rather than a leaked one.
+  if (overrideAccessFromOptions === undefined) {
+    warnMissingOverrideAccess({ operation: 'payload.countVersions', payload })
+  }
+
+  const overrideAccess = overrideAccessFromOptions ?? false
 
   const collection = payload.collections[collectionSlug]
 

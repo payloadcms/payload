@@ -19,6 +19,7 @@ export const createHandler: PayloadHandler = async (req) => {
     data: req.data!,
     depth,
     draft,
+    overrideAccess: false,
     populate,
     publishAllLocales,
     req,

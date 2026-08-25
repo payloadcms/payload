@@ -27,7 +27,7 @@ export type Arguments<TSlug extends AuthCollectionSlug> = {
   } & AuthOperationsFromCollectionSlug<TSlug>['forgotPassword']
   disableEmail?: boolean
   expiration?: number
-  overrideAccess?: boolean
+  overrideAccess: boolean
   req: PayloadRequest
 }
 
@@ -151,6 +151,7 @@ export const forgotPasswordOperation = async <TSlug extends AuthCollectionSlug>(
         resetPasswordExpiration,
         resetPasswordToken: token,
       },
+      overrideAccess: true,
       req,
     })
 

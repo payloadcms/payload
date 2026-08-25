@@ -28,6 +28,7 @@ export const findVersionsHandler: PayloadHandler = async (req) => {
     depth: isNumber(depth) ? Number(depth) : undefined,
     globalConfig,
     limit: isNumber(limit) ? Number(limit) : undefined,
+    overrideAccess: false,
     page: isNumber(page) ? Number(page) : undefined,
     pagination: pagination === 'false' ? false : undefined,
     populate: sanitizePopulateParam(populate),

@@ -39,7 +39,7 @@ export type Arguments<TSlug extends AuthCollectionSlug> = {
   collection: Collection
   data: AuthOperationsFromCollectionSlug<TSlug>['login']
   depth?: number
-  overrideAccess?: boolean
+  overrideAccess: boolean
   req: PayloadRequest
   showHiddenFields?: boolean
 }
@@ -86,7 +86,7 @@ export const loginOperation = async <TSlug extends AuthCollectionSlug>(
     args,
     collection: args.collection.config,
     operation: 'login',
-    overrideAccess: args.overrideAccess!,
+    overrideAccess: args.overrideAccess,
   })
 
   const {
@@ -396,7 +396,7 @@ export const loginOperation = async <TSlug extends AuthCollectionSlug>(
       args,
       collection: args.collection?.config,
       operation: 'login',
-      overrideAccess: args.overrideAccess!,
+      overrideAccess: args.overrideAccess,
       result,
     })
 

@@ -44,7 +44,7 @@ type Args<TSlug extends GlobalSlug> = {
   disableTransaction?: boolean
   draft?: boolean
   globalConfig: SanitizedGlobalConfig
-  overrideAccess?: boolean
+  overrideAccess: boolean
   overrideLock?: boolean
   populate?: PopulateType
   publishAllLocales?: boolean
@@ -198,7 +198,7 @@ export const updateOperation = async <
       doc: originalDoc,
       global: globalConfig,
       operation: 'update',
-      overrideAccess: overrideAccess!,
+      overrideAccess,
       req,
     })
 
@@ -250,6 +250,7 @@ export const updateOperation = async <
       docWithLocales: globalJSON,
       global: globalConfig,
       operation: 'update' as Operation,
+      overrideAccess,
       req,
       skipValidation:
         (isSavingDraft && !hasDraftValidationEnabled(globalConfig)) ||
@@ -428,7 +429,7 @@ export const updateOperation = async <
       fallbackLocale: null,
       global: globalConfig,
       locale: locale!,
-      overrideAccess: overrideAccess!,
+      overrideAccess,
       populate,
       req,
       select,

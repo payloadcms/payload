@@ -16,6 +16,7 @@ export const findVersionByIDHandler: PayloadHandler = async (req) => {
     id,
     collection,
     depth,
+    overrideAccess: false,
     populate,
     req,
     select,

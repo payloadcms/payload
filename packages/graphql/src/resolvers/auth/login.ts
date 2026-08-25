@@ -14,6 +14,7 @@ export function login(collection: Collection): any {
         username: args.username,
       },
       depth: 0,
+      overrideAccess: false,
       req: isolateObjectProperty(context.req, 'transactionID'),
     }
 

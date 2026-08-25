@@ -52,13 +52,13 @@ describe('migrateToBlocksAsJSON', { db: 'drizzle' }, () => {
         // @ts-expect-error not generated
         collection: 'posts-batches',
         data: {
-          title: `Batch Post ${i + 1}`,
           content: [
             {
               blockType: 'textBlock',
               text: `This is batch post content ${i + 1}`,
             },
           ],
+          title: `Batch Post ${i + 1}`,
         },
         overrideAccess: true,
       })
@@ -74,10 +74,10 @@ describe('migrateToBlocksAsJSON', { db: 'drizzle' }, () => {
         content: [
           {
             blockType: 'textBlock',
-            text: 'This is a text block',
-            relation: relatedItem.id,
             manyRelations: [relatedItem.id],
+            relation: relatedItem.id,
             select: 'option1',
+            text: 'This is a text block',
           },
         ],
       },
@@ -92,9 +92,9 @@ describe('migrateToBlocksAsJSON', { db: 'drizzle' }, () => {
         content: [
           {
             blockType: 'textBlock',
-            text: 'This is a text block',
-            relation: relatedItem.id,
             manyRelations: [relatedItem.id],
+            relation: relatedItem.id,
+            text: 'This is a text block',
           },
         ],
       },
@@ -103,26 +103,26 @@ describe('migrateToBlocksAsJSON', { db: 'drizzle' }, () => {
 
     // create another version of post
     await payload.update({
-      collection: 'posts-versioned',
       id: versionedPost.id,
+      collection: 'posts-versioned',
       data: {
-        title: 'Versioned Post 1 - Updated',
         content: [
           {
             blockType: 'textBlock',
-            text: 'This is a text block - updated',
-            relation: relatedItem.id,
             manyRelations: [relatedItem.id],
+            relation: relatedItem.id,
+            text: 'This is a text block - updated',
           },
         ],
+        title: 'Versioned Post 1 - Updated',
       },
       overrideAccess: true,
     })
 
     // and more
     await payload.update({
-      collection: 'posts-versioned',
       id: versionedPost.id,
+      collection: 'posts-versioned',
       data: {
         title: 'Versioned Post 1 - Updated Again',
       },
@@ -174,8 +174,8 @@ describe('migrateToBlocksAsJSON', { db: 'drizzle' }, () => {
     process.env.PAYLOAD_CONFIG_PATH = tempConfigPath
 
     await adapter.createMigration({
-      payload,
       file: '@payloadcms/db-postgres/blocks-as-json',
+      payload,
     })
 
     process.env.PAYLOAD_DROP_DATABASE = 'false'
@@ -200,8 +200,8 @@ describe('migrateToBlocksAsJSON', { db: 'drizzle' }, () => {
 
     // verify data was migrated
     const updatedPost = await migratedPayload.findByID({
-      collection: 'posts',
       id: post.id,
+      collection: 'posts',
       depth: 0,
       overrideAccess: true,
     })
@@ -211,16 +211,16 @@ describe('migrateToBlocksAsJSON', { db: 'drizzle' }, () => {
         id: expect.any(String),
         blockName: null,
         blockType: 'textBlock',
-        text: 'This is a text block',
-        relation: relatedItem.id,
         manyRelations: [relatedItem.id],
+        relation: relatedItem.id,
         select: 'option1',
+        text: 'This is a text block',
       },
     ])
 
     const updatedVersionedPost = await migratedPayload.findByID({
-      collection: 'posts-versioned',
       id: versionedPost.id,
+      collection: 'posts-versioned',
       depth: 0,
       overrideAccess: true,
     })
@@ -229,18 +229,18 @@ describe('migrateToBlocksAsJSON', { db: 'drizzle' }, () => {
     const { totalDocs: batchPostsTotal } = await migratedPayload.find({
       // @ts-expect-error not generated
       collection: 'posts-batches',
-      overrideAccess: true,
       limit: 0,
+      overrideAccess: true,
     })
     expect(batchPostsTotal).toBe(1000)
 
     // Verify a sample batch post
     const sampleBatchPost = await migratedPayload.findByID({
       // @ts-expect-error not generated
-      collection: 'posts-batches',
       id: batchPosts[500], // Check middle post
-      overrideAccess: true,
+      collection: 'posts-batches',
       depth: 0,
+      overrideAccess: true,
     })
     expect(sampleBatchPost.title).toBe('Batch Post 501')
     expect(sampleBatchPost.content).toEqual([
@@ -257,18 +257,18 @@ describe('migrateToBlocksAsJSON', { db: 'drizzle' }, () => {
         id: expect.any(String),
         blockName: null,
         blockType: 'textBlock',
-        text: 'This is a text block - updated',
-        relation: relatedItem.id,
         manyRelations: [relatedItem.id],
+        relation: relatedItem.id,
+        text: 'This is a text block - updated',
       },
     ])
 
     const updatedVersions = await migratedPayload.findVersions({
       collection: 'posts-versioned',
-      limit: 0,
-      sort: 'createdAt',
       depth: 0,
+      limit: 0,
       overrideAccess: true,
+      sort: 'createdAt',
     })
 
     expect(updatedVersions.totalDocs).toBe(3)
@@ -278,9 +278,9 @@ describe('migrateToBlocksAsJSON', { db: 'drizzle' }, () => {
         id: expect.any(String),
         blockName: null,
         blockType: 'textBlock',
-        text: 'This is a text block',
-        relation: relatedItem.id,
         manyRelations: [relatedItem.id],
+        relation: relatedItem.id,
+        text: 'This is a text block',
       },
     ])
 
@@ -289,9 +289,9 @@ describe('migrateToBlocksAsJSON', { db: 'drizzle' }, () => {
         id: expect.any(String),
         blockName: null,
         blockType: 'textBlock',
-        text: 'This is a text block - updated',
-        relation: relatedItem.id,
         manyRelations: [relatedItem.id],
+        relation: relatedItem.id,
+        text: 'This is a text block - updated',
       },
     ])
 
@@ -327,9 +327,10 @@ describe('migrateToBlocksAsJSON', { db: 'drizzle' }, () => {
 
     const updatedGlobalVersions = await migratedPayload.findGlobalVersions({
       slug: 'global-versioned',
-      limit: 0,
-      sort: 'createdAt',
       depth: 0,
+      limit: 0,
+      overrideAccess: true,
+      sort: 'createdAt',
     })
 
     expect(updatedGlobalVersions.totalDocs).toBe(2)

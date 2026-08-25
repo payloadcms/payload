@@ -13,6 +13,7 @@ export const countHandler: PayloadHandler = async (req) => {
 
   const result = await countOperation({
     collection,
+    overrideAccess: false,
     req,
     trash,
     where,

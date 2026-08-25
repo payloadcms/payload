@@ -52,7 +52,7 @@ export type Arguments<TSlug extends CollectionSlug> = {
   disableVerificationEmail?: boolean
   draft?: boolean
   duplicateFromID?: DataFromCollectionSlug<TSlug>['id']
-  overrideAccess?: boolean
+  overrideAccess: boolean
   overwriteExistingFiles?: boolean
   populate?: PopulateType
   publishAllLocales?: boolean
@@ -88,7 +88,7 @@ export const createOperation = async <
       args,
       collection: args.collection.config,
       operation: 'create',
-      overrideAccess: args.overrideAccess!,
+      overrideAccess: args.overrideAccess,
     })
 
     const {
@@ -186,7 +186,7 @@ export const createOperation = async <
       doc: duplicatedFromDoc,
       global: null,
       operation: 'create',
-      overrideAccess: overrideAccess!,
+      overrideAccess: overrideAccess,
       req,
     })
 
@@ -388,7 +388,7 @@ export const createOperation = async <
       fallbackLocale: fallbackLocale!,
       global: null,
       locale: locale!,
-      overrideAccess: overrideAccess!,
+      overrideAccess: overrideAccess,
       populate,
       req,
       select,
@@ -455,7 +455,7 @@ export const createOperation = async <
       args,
       collection: collectionConfig,
       operation: 'create',
-      overrideAccess: args.overrideAccess!,
+      overrideAccess: args.overrideAccess,
       result,
     })
 

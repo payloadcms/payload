@@ -35,6 +35,7 @@ export function createResolver<TSlug extends CollectionSlug>(
       data: args.data,
       depth: 0,
       draft: args.draft,
+      overrideAccess: false,
       req: isolateObjectProperty(context.req, 'transactionID'),
     })
 

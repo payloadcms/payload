@@ -22,7 +22,7 @@ export type Arguments = {
   depth?: number
   disableErrors?: boolean
   id: number | string
-  overrideAccess?: boolean
+  overrideAccess: boolean
   populate?: PopulateType
   req: PayloadRequest
   showHiddenFields?: boolean
@@ -169,7 +169,7 @@ export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
     fallbackLocale: fallbackLocale!,
     global: null,
     locale: locale!,
-    overrideAccess: overrideAccess!,
+    overrideAccess: overrideAccess,
     populate,
     req,
     select: typeof select?.version === 'object' ? select.version : undefined,

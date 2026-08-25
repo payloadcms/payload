@@ -54,6 +54,7 @@ export function findVersionsResolver(collection: Collection): Resolver {
       collection,
       depth: 0,
       limit: args.limit,
+      overrideAccess: false,
       page: args.page,
       pagination: args.pagination,
       req,

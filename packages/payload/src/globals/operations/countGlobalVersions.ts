@@ -13,7 +13,7 @@ import {
 export type Arguments = {
   disableErrors?: boolean
   global: SanitizedGlobalConfig
-  overrideAccess?: boolean
+  overrideAccess: boolean
   req?: PayloadRequest
   where?: Where
 }
@@ -70,7 +70,7 @@ export const countGlobalVersionsOperation = async <TSlug extends GlobalSlug>(
 
   await validateQueryPaths({
     globalConfig: global,
-    overrideAccess: overrideAccess!,
+    overrideAccess: overrideAccess,
     req,
     versionFields,
     where: where!,
