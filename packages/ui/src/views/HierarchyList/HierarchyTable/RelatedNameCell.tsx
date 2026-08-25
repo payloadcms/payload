@@ -1,72 +1,29 @@
 'use client'
 
-import { formatAdminURL, getBestFitFromSizes, isImage } from 'payload/shared'
-import React from 'react'
+import type { TextFieldClient, UploadFieldClient } from 'payload'
+
+import { formatAdminURL } from 'payload/shared'
+import React, { useMemo } from 'react'
 
 import type { SlotColumn } from './SlotTable.js'
 import type { TableRow } from './types.js'
 
 import { Link } from '../../../elements/Link/index.js'
-import { Thumbnail } from '../../../elements/Thumbnail/index.js'
+import { FileCell } from '../../../elements/Table/DefaultCell/fields/File/index.js'
 import { DocumentIcon } from '../../../icons/Document/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { baseClass } from './types.js'
 
-type RelatedDocIconProps = {
-  collectionSlug: string
-  row: TableRow
-}
-
-const RelatedDocIcon = ({ collectionSlug, row }: RelatedDocIconProps) => {
-  const { getEntityConfig } = useConfig()
-
-  const config = getEntityConfig({ collectionSlug })
-  const isUploadCollection = Boolean(config?.upload)
-  const previewAllowed = config?.upload?.displayPreview ?? true
-
-  if (!isUploadCollection || !previewAllowed) {
-    return <DocumentIcon />
-  }
-
-  const mimeType = row.mimeType as string | undefined
-  const isFileImage = mimeType ? isImage(mimeType) : false
-
-  let thumbnailSrc: string | undefined = isFileImage
-    ? (row.thumbnailURL as string) || (row.url as string)
-    : (row.thumbnailURL as string)
-
-  if (isFileImage) {
-    thumbnailSrc = getBestFitFromSizes({
-      sizes: row.sizes as Record<string, { url?: string; width?: number }>,
-      thumbnailURL: row.thumbnailURL as string,
-      url: row.url as string,
-      width: row.width as number,
-    })
-  }
-
-  return (
-    <Thumbnail
-      className={`${baseClass}__thumbnail`}
-      collectionSlug={config?.slug}
-      doc={row}
-      fileSrc={thumbnailSrc}
-      imageCacheTag={config?.upload?.cacheTags ? (row.updatedAt as string) : undefined}
-      size="small"
-      uploadConfig={config?.upload}
-    />
-  )
-}
-
 export const RelatedNameCell: SlotColumn<TableRow>['Cell'] = ({ row }) => {
-  const { getEntityConfig } = useConfig()
   const {
     config: {
       routes: { admin: adminRoute },
     },
+    getEntityConfig,
   } = useConfig()
 
-  const config = getEntityConfig({ collectionSlug: row._collectionSlug })
-  const titleField = config?.admin?.useAsTitle || 'id'
+  const collectionConfig = getEntityConfig({ collectionSlug: row._collectionSlug })
+  const titleField = collectionConfig?.admin?.useAsTitle || 'id'
   const rawTitle =
     typeof row[titleField] === 'string' || typeof row[titleField] === 'number'
       ? row[titleField]
@@ -78,10 +35,91 @@ export const RelatedNameCell: SlotColumn<TableRow>['Cell'] = ({ row }) => {
     path: `/collections/${row._collectionSlug}/${row.id}`,
   })
 
+  // Upload collections delegate to the list view's file cell, so thumbnail resolution and styling
+  // stay in one place. Everything else gets a generic document icon.
+  const filenameField = collectionConfig?.upload
+    ? collectionConfig.fields.find((field) => 'name' in field && field.name === 'filename')
+    : undefined
+
+  // Collections that aren't upload-enabled can still point at an upload field via
+  // `admin.useAsThumbnail`. The list query populates it to a depth of 1, so the related upload doc
+  // arrives on the row and can drive the same file cell.
+  const relatedUpload = useMemo(() => {
+    const fieldName = collectionConfig?.admin?.useAsThumbnail
+
+    if (!fieldName || collectionConfig?.upload) {
+      return undefined
+    }
+
+    const uploadField = collectionConfig.fields.find(
+      (field) => 'name' in field && field.name === fieldName && field.type === 'upload',
+    ) as undefined | UploadFieldClient
+
+    if (!uploadField) {
+      return undefined
+    }
+
+    // `useAsThumbnail` can point at a `hasMany` upload field, in which case the populated value is
+    // an array of docs rather than a single one - use the first.
+    const rawValue = row[fieldName]
+    const value = Array.isArray(rawValue) ? rawValue[0] : rawValue
+
+    if (!value || typeof value !== 'object') {
+      return undefined
+    }
+
+    // Polymorphic upload fields populate as `{ relationTo, value }` rather than the doc itself.
+    const isPolymorphic = 'relationTo' in value && 'value' in value
+    const doc = (isPolymorphic ? value.value : value) as Record<string, unknown>
+    const uploadSlug = isPolymorphic
+      ? String(value.relationTo)
+      : Array.isArray(uploadField.relationTo)
+        ? undefined
+        : uploadField.relationTo
+
+    if (!doc || typeof doc !== 'object' || !uploadSlug) {
+      return undefined
+    }
+
+    const uploadCollectionConfig = getEntityConfig({ collectionSlug: uploadSlug })
+
+    if (!uploadCollectionConfig) {
+      return undefined
+    }
+
+    return { collectionConfig: uploadCollectionConfig, doc, field: uploadField }
+  }, [collectionConfig, getEntityConfig, row])
+
+  const fileCellProps = filenameField
+    ? {
+        collectionConfig,
+        field: filenameField as TextFieldClient,
+        rowData: row,
+      }
+    : relatedUpload
+      ? {
+          collectionConfig: relatedUpload.collectionConfig,
+          field: relatedUpload.field,
+          rowData: relatedUpload.doc,
+        }
+      : undefined
+
   return (
-    <Link className={`${baseClass}__name-link`} href={editUrl}>
-      <RelatedDocIcon collectionSlug={row._collectionSlug} row={row} />
-      <span className={`${baseClass}__name-text`}>{title}</span>
+    <Link className={`${baseClass}__name-link cell-link`} href={editUrl}>
+      {fileCellProps ? (
+        <FileCell
+          cellData={title}
+          collectionSlug={fileCellProps.collectionConfig.slug}
+          {...fileCellProps}
+        />
+      ) : (
+        <>
+          <span className={`${baseClass}__name-icon`}>
+            <DocumentIcon />
+          </span>
+          <span className={`${baseClass}__name-text`}>{title}</span>
+        </>
+      )}
     </Link>
   )
 }
