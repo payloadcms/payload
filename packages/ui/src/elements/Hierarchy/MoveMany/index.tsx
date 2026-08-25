@@ -6,12 +6,16 @@ import React, { useCallback, useMemo } from 'react'
 
 import type { SelectionWithPath } from '../Modal/types.js'
 
+import { ArrowIcon } from '../../../icons/Arrow/index.js'
+import { XIcon } from '../../../icons/X/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useLocale } from '../../../providers/Locale/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { ListSelectionButton } from '../../ListSelection/index.js'
+import { Popup, PopupList } from '../../Popup/index.js'
 import { useHierarchyModal } from '../Modal/useHierarchyModal.js'
 import { moveDocuments } from '../move/moveDocuments.js'
+import './index.css'
 
 export const baseClass = 'move-many'
 
@@ -108,6 +112,8 @@ export function MoveMany({
 
   const hierarchyCollectionConfig = collections.find((c) => c.slug === hierarchySlug)
   const parentFieldName = getParentFieldName(hierarchyCollectionConfig)
+  // e.g. "Folder" / "Tag" - the hierarchy collection the selected documents are filed under.
+  const hierarchyLabel = getTranslation(hierarchyCollectionConfig?.labels?.singular, i18n)
 
   // Check if hierarchy has a valid parentFieldName
   const canMove = parentFieldName !== undefined
@@ -156,19 +162,75 @@ export function MoveMany({
     void performMove({ id: null, title: t('hierarchy:noParent') })
   }, [closeModal, performMove, t])
 
+  // Every document in a folder-scoped listing shares that folder, so a known parent is what makes
+  // "Remove from Folder" safe to offer for the whole selection.
+  const canRemoveFromFolder = currentParentID !== null && currentParentID !== undefined && canMove
+
+  const handleRemoveFromFolder = useCallback(async () => {
+    await performMove({ id: null, title: t('hierarchy:noParent') })
+  }, [performMove, t])
+
   if (count === 0 || !canMove) {
     return null
   }
 
   return (
     <React.Fragment>
-      <ListSelectionButton
-        aria-label={t('general:move')}
-        className={`${baseClass}__toggle`}
-        onClick={openHierarchyModal}
-      >
-        {t('general:move')}
-      </ListSelectionButton>
+      {canRemoveFromFolder ? (
+        <Popup
+          caret={false}
+          className={`${baseClass}__popup`}
+          horizontalAlign="left"
+          portalClassName={`${baseClass}__popup-content`}
+          render={({ close }) => (
+            <PopupList.MenuItem>
+              <PopupList.Button
+                icon={<ArrowIcon direction="right" />}
+                onClick={() => {
+                  close()
+                  openHierarchyModal()
+                }}
+              >
+                Move to...
+              </PopupList.Button>
+              <PopupList.Button
+                icon={<XIcon />}
+                onClick={() => {
+                  close()
+                  void handleRemoveFromFolder()
+                }}
+              >
+                {`Remove from ${hierarchyLabel}`}
+              </PopupList.Button>
+            </PopupList.MenuItem>
+          )}
+          renderButton={({ active, onClick, onKeyDown }) => (
+            <ListSelectionButton
+              aria-label={t('general:move')}
+              className={`${baseClass}__toggle`}
+              extraButtonProps={{
+                'aria-expanded': active,
+                'aria-haspopup': 'menu',
+                onKeyDown,
+              }}
+              onClick={onClick}
+              selected={active}
+            >
+              {t('general:move')}
+            </ListSelectionButton>
+          )}
+          size="fit-content"
+          verticalAlign="bottom"
+        />
+      ) : (
+        <ListSelectionButton
+          aria-label={t('general:move')}
+          className={`${baseClass}__toggle`}
+          onClick={openHierarchyModal}
+        >
+          {t('general:move')}
+        </ListSelectionButton>
+      )}
       <HierarchyModal
         hasMany={false}
         initialSelections={currentParentID ? [currentParentID] : null}

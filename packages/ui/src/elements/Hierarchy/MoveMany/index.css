@@ -1,0 +1,6 @@
+@layer payload-default {
+  /* Dividers span the full menu width rather than sitting inside the list's inline padding. */
+  .move-many__popup-content .popup-divider {
+    margin-inline: calc(var(--spacer-2) * -1);
+  }
+}
