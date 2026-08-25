@@ -426,7 +426,6 @@ export function UploadInput(props: UploadInputProps) {
     }
   }, [onLocalFileSelection, t])
 
-  // only hasMany can bulk select
   const onListBulkSelect = React.useCallback<NonNullable<ListDrawerProps['onBulkSelect']>>(
     async (docs, collectionSlug) => {
       const isPoly = Array.isArray(relationTo)
@@ -439,25 +438,51 @@ export function UploadInput(props: UploadInputProps) {
         }
       }
 
-      const itemsToLoad = selectedDocIDs.map((id) => ({
+      if (!selectedDocIDs.length) {
+        return
+      }
+
+      // A single-value field only has room for one pick, so it takes the first and replaces rather
+      // than appending - otherwise confirming would hand a scalar field an array.
+      const idsToApply = hasMany ? selectedDocIDs : selectedDocIDs.slice(0, 1)
+
+      const itemsToLoad = idsToApply.map((id) => ({
         relationTo: relationToUse,
         value: id,
       }))
 
       const loadedDocs = await populateDocs(itemsToLoad)
       if (loadedDocs) {
-        setPopulatedDocs((currentDocs) => [...(currentDocs || []), ...loadedDocs])
+        setPopulatedDocs((currentDocs) =>
+          hasMany ? [...(currentDocs || []), ...loadedDocs] : loadedDocs,
+        )
       }
 
-      const newValues = selectedDocIDs.map((id) =>
+      const newValues = idsToApply.map((id) =>
         isPoly ? { relationTo: relationToUse, value: id } : id,
       )
+
+      if (!hasMany) {
+        onChange(newValues[0])
+        closeListDrawer()
+        return
+      }
+
       // Normalize existing values before merging
       const normalizedExisting = Array.isArray(value) ? value.map(normalizeValue) : []
       onChange([...normalizedExisting, ...newValues])
       closeListDrawer()
     },
-    [activeRelationTo, closeListDrawer, onChange, populateDocs, value, relationTo, normalizeValue],
+    [
+      activeRelationTo,
+      closeListDrawer,
+      hasMany,
+      onChange,
+      populateDocs,
+      value,
+      relationTo,
+      normalizeValue,
+    ],
   )
 
   const onDocCreate = React.useCallback(
@@ -796,7 +821,8 @@ export function UploadInput(props: UploadInputProps) {
                   <CreateDocDrawer onSave={onDocCreate} />
                   <ListDrawer
                     allowCreate={canCreate}
-                    enableRowSelections={hasMany}
+                    // Single-value fields select too, so the drawer always has a Confirm action.
+                    enableRowSelections
                     onBulkSelect={onListBulkSelect}
                     onSelect={onListSelect}
                   />
