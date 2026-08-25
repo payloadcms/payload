@@ -6,9 +6,6 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { SelectionWithPath } from '../Modal/types.js'
 
 import { useForm, useFormFields } from '../../../forms/Form/context.js'
-import { ArrowIcon } from '../../../icons/Arrow/index.js'
-import { FolderIcon } from '../../../icons/Folder/index.js'
-import { XIcon } from '../../../icons/X/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useDocumentInfo } from '../../../providers/DocumentInfo/index.js'
 import { useDocumentTitle } from '../../../providers/DocumentTitle/index.js'
@@ -209,7 +206,6 @@ export const HierarchyButtonClient: React.FC<HierarchyButtonClientProps> = ({
             render={({ close }) => (
               <PopupList.MenuItem>
                 <PopupList.Button
-                  icon={<ArrowIcon direction="right" />}
                   onClick={() => {
                     close()
                     openModal()
@@ -218,7 +214,6 @@ export const HierarchyButtonClient: React.FC<HierarchyButtonClientProps> = ({
                   Move to...
                 </PopupList.Button>
                 <PopupList.Button
-                  icon={<XIcon />}
                   onClick={() => {
                     close()
                     handleRemove()
@@ -227,9 +222,9 @@ export const HierarchyButtonClient: React.FC<HierarchyButtonClientProps> = ({
                   {`Remove from ${hierarchyLabel}`}
                 </PopupList.Button>
                 <PopupList.Divider />
-                <PopupList.Button href={goToHref} icon={<FolderIcon />} onClick={close}>
+                <PopupList.Button href={goToHref} onClick={close}>
                   <span className={`${baseClass}__truncate`} title={displayName}>
-                    {`Go to ${displayName}`}
+                    {`Go to "${displayName}"`}
                   </span>
                 </PopupList.Button>
               </PopupList.MenuItem>
