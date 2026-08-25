@@ -617,6 +617,8 @@ mcpPlugin({
         const user = await req.payload.findByID({
           id: params.userId,
           collection: 'users',
+          overrideAccess: false,
+          req,
         })
         return {
           contents: [{ uri: uri.href, text: JSON.stringify(user) }],

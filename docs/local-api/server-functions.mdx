@@ -54,6 +54,7 @@ export async function createPost(data) {
   try {
     const post = await payload.create({
       collection: 'posts',
+      overrideAccess: true,
       data,
     })
     return post
@@ -113,6 +114,7 @@ export async function updatePost(id, data) {
   try {
     const post = await payload.update({
       collection: 'posts',
+      overrideAccess: true,
       id, // the document id is required
       data,
     })
@@ -242,6 +244,7 @@ export async function createPostWithUpload(data, upload) {
 
     const post = await payload.create({
       collection: 'posts',
+      overrideAccess: true,
       data: postData,
     })
 
@@ -330,7 +333,11 @@ Example of good error handling:
 export async function createPost(data) {
   try {
     const payload = await getPayload({ config })
-    return await payload.create({ collection: 'posts', data })
+    return await payload.create({
+      collection: 'posts',
+      data,
+      overrideAccess: true,
+    })
   } catch (error) {
     console.error('Error creating post:', error)
     return { error: 'Failed to create post' }
@@ -359,6 +366,11 @@ export async function deletePost(postId, user) {
   }
 
   const payload = await getPayload({ config })
-  return await payload.delete({ collection: 'posts', id: postId })
+  return await payload.delete({
+    collection: 'posts',
+    id: postId,
+    overrideAccess: false,
+    user,
+  })
 }
 ```
