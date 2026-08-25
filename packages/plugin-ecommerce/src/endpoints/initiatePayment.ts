@@ -312,10 +312,24 @@ export const initiatePaymentHandler: InitiatePayment =
       }
     }
 
+    // Extract well-known fields; any remaining fields in req.data are forwarded verbatim so that
+    // adapters can receive caller-supplied values such as `amount` (to include shipping costs or
+    // apply discounts) without the endpoint needing to be modified.
+    const {
+      billingAddress: _billingAddress,
+      cartID: _cartID,
+      currency: _currency,
+      customerEmail: _customerEmail,
+      secret: _secret,
+      shippingAddress: _shippingAddress,
+      ...extraData
+    } = (data as Record<string, unknown>) ?? {}
+
     try {
       const paymentResponse = await paymentMethod.initiatePayment({
         customersSlug,
         data: {
+          ...extraData,
           billingAddress,
           cart,
           currency,

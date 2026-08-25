@@ -70,6 +70,18 @@ type InitiatePayment = (args: {
   customersSlug?: string
   data: {
     /**
+     * Any additional fields forwarded from the request body.
+     */
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    [key: string]: any
+    /**
+     * Override the amount charged to the customer, in the currency's smallest unit (e.g. cents).
+     * When omitted the adapter falls back to `cart.subtotal`.
+     * Pass this to include shipping fees, apply gift-card discounts, or add surcharges that are
+     * not represented as cart line items.
+     */
+    amount?: number
+    /**
      * Billing address for the payment.
      */
     billingAddress: TypedCollection['addresses']
