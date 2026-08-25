@@ -580,13 +580,15 @@ describe('Auth', () => {
         })
       })
 
-      test('should hide auth parent container if api keys enabled but no read access', async () => {
+      test('should show modifiable API key fields while creating without read access', async () => {
         await page.goto(url.create)
 
-        // assert that the auth parent container is hidden
-        await expect(page.locator('.auth-fields')).toBeHidden()
+        await expect(page.locator('.auth-fields')).toBeVisible()
+        await page.locator('#field-enableAPIKey').click()
+        await expect(page.locator('#apiKey')).toBeVisible()
 
         await saveDocAndAssert(page)
+        await expect(page.locator('.auth-fields')).toBeHidden()
       })
 
       test('ensure `?redirect=` param is injected into the URL and handled properly after login', async () => {
