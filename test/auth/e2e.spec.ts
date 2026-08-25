@@ -598,8 +598,8 @@ describe('Auth', () => {
         const apiKeyInput = page.locator('#apiKey')
         await expect(apiKeyInput).toBeEnabled()
         await expect(apiKeyInput).toHaveAttribute('type', 'text')
-        const replacementAPIKey = apiKeyInput
-        await expect(replacementAPIKey).not.toHaveValue(originalAPIKey)
+        await expect(apiKeyInput).not.toHaveValue(originalAPIKey)
+        const replacementAPIKey = await apiKeyInput.inputValue()
         await expect(
           page.getByText("Copy this API key before saving. You won't be able to view it again."),
         ).toBeVisible()
