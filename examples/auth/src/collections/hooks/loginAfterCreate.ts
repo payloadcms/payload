@@ -15,6 +15,7 @@ export const loginAfterCreate: AfterChangeHook = async ({
         data: { email, password },
         req,
         res,
+        overrideAccess: true,
       })
 
       return {
