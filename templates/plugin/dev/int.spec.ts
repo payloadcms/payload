@@ -38,6 +38,7 @@ describe('Plugin integration tests', () => {
       data: {
         addedByPlugin: 'added by plugin',
       },
+      overrideAccess: true,
     })
     expect(post.addedByPlugin).toBe('added by plugin')
   })
@@ -45,7 +46,7 @@ describe('Plugin integration tests', () => {
   test('plugin creates and seeds plugin-collection', async () => {
     expect(payload.collections['plugin-collection']).toBeDefined()
 
-    const { docs } = await payload.find({ collection: 'plugin-collection' })
+    const { docs } = await payload.find({ collection: 'plugin-collection', overrideAccess: true })
 
     expect(docs).toHaveLength(1)
   })

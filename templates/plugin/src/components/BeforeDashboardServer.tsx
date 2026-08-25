@@ -5,7 +5,7 @@ import styles from './BeforeDashboardServer.module.css'
 export const BeforeDashboardServer = async (props: ServerComponentProps) => {
   const { payload } = props
 
-  const { docs } = await payload.find({ collection: 'plugin-collection' })
+  const { docs } = await payload.find({ collection: 'plugin-collection', overrideAccess: true })
 
   return (
     <div className={styles.wrapper}>

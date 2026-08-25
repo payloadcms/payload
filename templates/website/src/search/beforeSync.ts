@@ -38,6 +38,7 @@ export const beforeSyncWithSearch: BeforeSync = async ({ req, originalDoc, searc
         depth: 0,
         select: { title: true },
         req,
+        overrideAccess: true,
       })
 
       if (doc !== null) {

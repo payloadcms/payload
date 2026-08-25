@@ -14,6 +14,7 @@ async function List() {
       title: true,
       slug: true,
     },
+    overrideAccess: true,
   })
 
   const categories = categoriesData.docs?.map((category) => {
