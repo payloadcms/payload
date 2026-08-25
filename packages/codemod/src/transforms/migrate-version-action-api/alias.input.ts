@@ -1,4 +1,7 @@
-export async function aliasedReads(payload, sdk, req) {
+import type { Payload, PayloadRequest } from 'payload'
+import type { PayloadSDK } from '@payloadcms/sdk'
+
+export async function aliasedReads(payload: Payload, sdk: PayloadSDK, req: PayloadRequest) {
   const fromReq = await req.payload.find({
     collection: 'posts',
     draft: true,

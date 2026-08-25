@@ -1,4 +1,6 @@
-export async function conflicts(payload) {
+import type { Payload } from 'payload'
+
+export async function conflicts(payload: Payload) {
   const read = await payload.find({
     collection: 'posts',
     draft: true,

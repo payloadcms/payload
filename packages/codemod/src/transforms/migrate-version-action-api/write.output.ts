@@ -1,4 +1,6 @@
-export async function writePosts(payload) {
+import type { Payload } from 'payload'
+
+export async function writePosts(payload: Payload) {
   const draft = await payload.create({
     collection: 'posts',
     data: {

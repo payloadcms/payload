@@ -33,6 +33,7 @@ import { appendVersionToQueryKey } from '../../versions/drafts/appendVersionToQu
 import { getQueryDraftsSelect } from '../../versions/drafts/getQueryDraftsSelect.js'
 import { getQueryDraftsSort } from '../../versions/drafts/getQueryDraftsSort.js'
 import { getDraftStatusWhere } from '../../versions/read/getDraftStatusWhere.js'
+import { getPublishedStatusWhere } from '../../versions/read/getPublishedStatusWhere.js'
 import { isVersionedRead, resolveReadVersion } from '../../versions/resolveReadVersion.js'
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
@@ -112,7 +113,7 @@ export const findOperation = async <
     draftsEnabled: draftsEnabledOnCollection,
     version,
   })
-  const queryVersions = isVersionedRead(readVersion) && draftsEnabledOnCollection
+  const queryVersions = isVersionedRead({ version: readVersion }) && draftsEnabledOnCollection
 
   const select = sanitizeSelect({
     fields: collectionConfig.flattenedFields,
@@ -164,6 +165,18 @@ export const findOperation = async <
   let result: PaginatedDocs<DataFromCollectionSlug<TSlug>>
 
   let fullWhere = combineQueries(where!, accessResult!)
+
+  if (readVersion === 'published' && draftsEnabledOnCollection) {
+    fullWhere = combineQueries(
+      fullWhere,
+      getPublishedStatusWhere({
+        entity: collectionConfig,
+        locale: locale!,
+        payload,
+      }),
+    )
+  }
+
   sanitizeWhereQuery({ fields: collectionConfig.flattenedFields, payload, where: fullWhere })
 
   // Exclude trashed documents when trash: false
@@ -373,7 +386,7 @@ export const findOperation = async <
         currentDepth,
         depth: depth!,
         doc,
-        draft: isVersionedRead(readVersion),
+        draft: isVersionedRead({ version: readVersion }),
         fallbackLocale: fallbackLocale!,
         findMany: true,
         global: null,

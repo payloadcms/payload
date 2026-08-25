@@ -1,4 +1,6 @@
-export async function writeWithStatus(payload) {
+import type { Payload } from 'payload'
+
+export async function writeWithStatus(payload: Payload) {
   const inferredDraft = await payload.create({
     collection: 'posts',
     data: {

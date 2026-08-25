@@ -1488,6 +1488,12 @@ describe('collections-graphql', () => {
               args { name type { name } }
             }
           }
+          nonDraftRelationshipType: __type(name: "PayloadApiTestTwo") {
+            fields {
+              name
+              args { name type { name } }
+            }
+          }
           createInput: __type(name: "mutationPostInput") {
             inputFields { name }
           }
@@ -1554,6 +1560,7 @@ describe('collections-graphql', () => {
 
       expect(argNames(data.cyclicalType.fields, 'relationToSelf')).toContain('version')
       expect(argNames(data.cyclicalType.fields, 'relationToSelf')).not.toContain('draft')
+      expect(argNames(data.nonDraftRelationshipType.fields, 'relation')).toContain('version')
       expect(data.createInput.inputFields.map(({ name }) => name)).toContain('_status')
       expect(data.updateInput.inputFields.map(({ name }) => name)).toContain('_status')
     })

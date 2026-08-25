@@ -28,6 +28,7 @@ export function resolveAction({
   autosave,
   draftsEnabled,
   locale,
+  localizedStatusEnabled,
   operation,
   publishAllLocales,
   status,
@@ -42,6 +43,16 @@ export function resolveAction({
       unpublishAllLocales,
     })
   }
+
+  validateAllLocaleTransition({
+    explicitAction,
+    locale,
+    localizedStatusEnabled,
+    operation,
+    publishAllLocales,
+    status,
+    unpublishAllLocales,
+  })
 
   const resolvedAction =
     explicitAction ?? inferActionFromStatus({ locale, status }) ?? defaultAction(operation)
@@ -67,7 +78,7 @@ export function canonicalizeWriteStatus<T extends object>({
   publishAllLocales,
   unpublishAllLocales,
 }: CanonicalizeWriteStatusArgs<T>): T {
-  const nextStatus = statusFromAction(action)
+  const nextStatus = statusFromAction({ action })
 
   if (nextStatus === undefined) {
     return data
@@ -98,7 +109,11 @@ export function canonicalizeWriteStatus<T extends object>({
   return nextData
 }
 
-export function statusFromAction(action: undefined | WriteAction): DocumentStatus | undefined {
+export function statusFromAction({
+  action,
+}: {
+  action: undefined | WriteAction
+}): DocumentStatus | undefined {
   if (action === undefined) {
     return undefined
   }
@@ -114,6 +129,53 @@ export function statusFromAction(action: undefined | WriteAction): DocumentStatu
       return exhaustive
     }
   }
+}
+
+function validateAllLocaleTransition({
+  explicitAction,
+  locale,
+  localizedStatusEnabled,
+  operation,
+  publishAllLocales,
+  status,
+  unpublishAllLocales,
+}: {
+  explicitAction: undefined | WriteAction
+  locale?: null | string
+  localizedStatusEnabled?: boolean
+  operation: WriteOperation
+  publishAllLocales?: boolean
+  status: unknown
+  unpublishAllLocales?: boolean
+}): void {
+  if (
+    locale !== 'all' ||
+    operation === 'restore' ||
+    (!localizedStatusEnabled && !isLocalizedStatus(status)) ||
+    explicitAction === 'saveDraft'
+  ) {
+    return
+  }
+
+  if (explicitAction === 'unpublish') {
+    if (unpublishAllLocales) {
+      return
+    }
+
+    throw new APIError(
+      'Unpublishing all locales requires an explicit "unpublish" action and unpublishAllLocales: true.',
+      httpStatus.BAD_REQUEST,
+    )
+  }
+
+  if (explicitAction === 'publish' && publishAllLocales) {
+    return
+  }
+
+  throw new APIError(
+    'Publishing all locales requires an explicit "publish" action and publishAllLocales: true.',
+    httpStatus.BAD_REQUEST,
+  )
 }
 
 function parseExplicitAction({

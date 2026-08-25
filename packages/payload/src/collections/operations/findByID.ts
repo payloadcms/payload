@@ -29,6 +29,7 @@ import { getSelectMode } from '../../utilities/getSelectMode.js'
 import { hasDraftsEnabled } from '../../utilities/getVersionsConfig.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
+import { getPublishedStatusWhere } from '../../versions/read/getPublishedStatusWhere.js'
 import { replaceWithVersion } from '../../versions/read/replaceWithVersion.js'
 import { isVersionedRead, resolveReadVersion } from '../../versions/resolveReadVersion.js'
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
@@ -103,7 +104,7 @@ export const findByIDOperation = async <
     draftsEnabled: draftsEnabledOnCollection,
     version,
   })
-  const queryVersions = isVersionedRead(readVersion) && draftsEnabledOnCollection
+  const queryVersions = isVersionedRead({ version: readVersion }) && draftsEnabledOnCollection
 
   const select = sanitizeSelect({
     fields: collectionConfig.flattenedFields,
@@ -134,6 +135,19 @@ export const findByIDOperation = async <
   const where = { id: { equals: id } }
 
   let fullWhere = combineQueries(where, accessResult)
+
+  if (readVersion === 'published' && draftsEnabledOnCollection) {
+    fullWhere = {
+      and: [
+        ...(fullWhere.and ?? []),
+        getPublishedStatusWhere({
+          entity: collectionConfig,
+          locale: locale!,
+          payload: req.payload,
+        }),
+      ],
+    }
+  }
 
   // Exclude trashed documents when trash: false
   fullWhere = appendNonTrashedFilter({
@@ -332,7 +346,7 @@ export const findByIDOperation = async <
     currentDepth,
     depth: depth!,
     doc: result,
-    draft: isVersionedRead(readVersion),
+    draft: isVersionedRead({ version: readVersion }),
     fallbackLocale: fallbackLocale!,
     flattenLocales,
     global: null,

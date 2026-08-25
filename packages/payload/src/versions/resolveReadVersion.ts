@@ -35,7 +35,7 @@ export function resolveReadVersion({
 /**
  * True when the read should come from version storage rather than published main documents.
  */
-export function isVersionedRead(version: ReadVersion): boolean {
+export function isVersionedRead({ version }: { version: ReadVersion }): boolean {
   return version === 'draft' || version === 'latest'
 }
 

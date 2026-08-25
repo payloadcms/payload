@@ -1,4 +1,6 @@
-export async function statusConflicts(payload) {
+import type { Payload } from 'payload'
+
+export async function statusConflicts(payload: Payload) {
   const publishMany = await payload.update({
     id: '1',
     collection: 'posts',

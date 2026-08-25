@@ -436,11 +436,7 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
         sort: {
           type: GraphQLString,
         },
-        ...(Array.isArray(field.collection)
-          ? {}
-          : graphqlResult.collections[field.collection]?.config.versions?.drafts
-            ? { version: { type: GraphQLReadVersion } }
-            : {}),
+        version: { type: GraphQLReadVersion },
         where: {
           type: Array.isArray(field.collection)
             ? GraphQLJSON
@@ -662,14 +658,8 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
       where: GraphQLArgumentConfig
     } = {} as any
 
-    const relationsUseDrafts = (Array.isArray(relationTo) ? relationTo : [relationTo])
-      .filter((relation) => graphQLCollections.some((collection) => collection.slug === relation))
-      .some((relation) => graphqlResult.collections[relation].config.versions?.drafts)
-
-    if (relationsUseDrafts) {
-      relationshipArgs.version = {
-        type: GraphQLReadVersion,
-      }
+    relationshipArgs.version = {
+      type: GraphQLReadVersion,
     }
 
     if (config.localization) {
@@ -1082,14 +1072,8 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
       where?: GraphQLArgumentConfig
     } = {} as any
 
-    const relationsUseDrafts = (Array.isArray(relationTo) ? relationTo : [relationTo]).some(
-      (relation) => graphqlResult.collections[relation].config.versions?.drafts,
-    )
-
-    if (relationsUseDrafts) {
-      relationshipArgs.version = {
-        type: GraphQLReadVersion,
-      }
+    relationshipArgs.version = {
+      type: GraphQLReadVersion,
     }
 
     if (config.localization) {

@@ -285,10 +285,10 @@ export class PayloadSDK<T extends PayloadTypesShape = PayloadTypes> {
     return login(this, options, init)
   }
 
-  me<TSlug extends AuthCollectionSlug<T>>(
-    options: MeOptions<T, TSlug>,
+  me<TSlug extends AuthCollectionSlug<T>, TVersion extends ReadVersion | undefined = undefined>(
+    options: MeOptions<T, TSlug, TVersion>,
     init?: RequestInit,
-  ): Promise<MeResult<T, TSlug>> {
+  ): Promise<MeResult<T, TSlug, TVersion>> {
     return me(this, options, init)
   }
 

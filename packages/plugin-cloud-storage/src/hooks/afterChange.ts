@@ -9,8 +9,13 @@ interface Args {
   collection: CollectionConfig
 }
 
+type CloudStorageDocument = {
+  _status?: 'draft' | 'published' | Record<string, 'draft' | 'published'>
+} & FileData &
+  TypeWithID
+
 export const getAfterChangeHook =
-  ({ adapter, collection }: Args): CollectionAfterChangeHook<FileData & TypeWithID> =>
+  ({ adapter, collection }: Args): CollectionAfterChangeHook<CloudStorageDocument> =>
   async ({ action, doc, operation, previousDoc, req }) => {
     // Skip if this is an internal update to prevent infinite loop
     if (req.context?.skipCloudStorage) {

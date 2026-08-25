@@ -107,6 +107,7 @@ export const updateOperation = async <
       autosave: args.autosave,
       draftsEnabled: hasDraftsEnabled(globalConfig),
       locale,
+      localizedStatusEnabled: hasLocalizeStatusEnabled(globalConfig),
       operation: 'update',
       publishAllLocales: args.publishAllLocales,
       status:

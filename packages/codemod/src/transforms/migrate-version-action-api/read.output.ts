@@ -1,4 +1,6 @@
-export async function loadPosts(payload) {
+import type { Payload } from 'payload'
+
+export async function loadPosts(payload: Payload) {
   const latest = await payload.find({
     collection: 'posts',
     // fetch the newest draft when one exists

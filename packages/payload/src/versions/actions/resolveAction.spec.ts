@@ -85,14 +85,81 @@ describe('resolveAction', () => {
       ).toBe('publish')
     })
 
-    it('does not infer an all-locale transition from localized status', () => {
-      expect(
+    it('requires an explicit action and modifier for an all-locale transition', () => {
+      expect(() =>
+        draftOps({
+          action: 'publish',
+          locale: 'all',
+          localizedStatusEnabled: true,
+          operation: 'update',
+          status: 'published',
+        }),
+      ).toThrow(
+        'Publishing all locales requires an explicit "publish" action and publishAllLocales: true.',
+      )
+
+      expect(() =>
         draftOps({
           locale: 'all',
           operation: 'update',
           status: localizedStatus,
         }),
+      ).toThrow(
+        'Publishing all locales requires an explicit "publish" action and publishAllLocales: true.',
+      )
+
+      expect(() =>
+        draftOps({
+          locale: 'all',
+          operation: 'update',
+          publishAllLocales: true,
+          status: localizedStatus,
+        }),
+      ).toThrow(
+        'Publishing all locales requires an explicit "publish" action and publishAllLocales: true.',
+      )
+
+      expect(() =>
+        draftOps({
+          action: 'publish',
+          locale: 'all',
+          operation: 'update',
+          status: localizedStatus,
+        }),
+      ).toThrow(
+        'Publishing all locales requires an explicit "publish" action and publishAllLocales: true.',
+      )
+
+      expect(
+        draftOps({
+          action: 'publish',
+          locale: 'all',
+          operation: 'update',
+          publishAllLocales: true,
+          status: localizedStatus,
+        }),
       ).toBe('publish')
+
+      expect(() =>
+        draftOps({
+          action: 'unpublish',
+          locale: 'all',
+          operation: 'update',
+          status: localizedStatus,
+        }),
+      ).toThrow(
+        'Unpublishing all locales requires an explicit "unpublish" action and unpublishAllLocales: true.',
+      )
+
+      expect(
+        draftOps({
+          action: 'unpublish',
+          locale: 'all',
+          operation: 'update',
+          status: localizedStatus,
+          unpublishAllLocales: true,
+        }),
+      ).toBe('unpublish')
     })
 
     it('does not infer from localized status when no locale is provided', () => {
@@ -368,7 +435,7 @@ describe('statusFromAction', () => {
     ['unpublish', 'draft'],
     [undefined, undefined],
   ] as const)('%s derives status %s', (action, expected) => {
-    expect(statusFromAction(action)).toBe(expected)
+    expect(statusFromAction({ action })).toBe(expected)
   })
 })
 

@@ -192,7 +192,7 @@ export const createExport = async (args: CreateExportArgs) => {
     select,
     sort,
     user,
-    version: draft ? 'latest' : 'published',
+    version: draft ? ('latest' as const) : ('published' as const),
     where,
   }
 

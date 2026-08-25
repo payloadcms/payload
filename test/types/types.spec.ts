@@ -1348,6 +1348,36 @@ describe('Types testing', () => {
         expect(published.docs[0]!.title).type.toBe<string>()
       })
 
+      test('me types latest and draft auth users with optional user fields', async () => {
+        type DraftAuthConfig = {
+          auth: {
+            'draft-users': unknown
+          }
+          collections: {
+            'draft-users': {
+              displayName: string
+              email: string
+              id: string
+            }
+          }
+          collectionsSelect: {
+            'draft-users': Record<string, boolean>
+          }
+        } & Omit<LocalConfig, 'auth' | 'collections' | 'collectionsSelect'>
+
+        const _sdk = new PayloadSDK<DraftAuthConfig>({ baseURL: '' })
+        const omitted = await _sdk.me({ collection: 'draft-users' })
+        const published = await _sdk.me({ collection: 'draft-users', version: 'published' })
+        const latest = await _sdk.me({ collection: 'draft-users', version: 'latest' })
+        const draft = await _sdk.me({ collection: 'draft-users', version: 'draft' })
+
+        expect(omitted.user.email).type.toBe<string>()
+        expect(published.user.email).type.toBe<string>()
+        expect(latest.user.email).type.toBe<string | undefined>()
+        expect(draft.user.displayName).type.toBe<string | undefined>()
+        expect(draft.user.id).type.toBe<string>()
+      })
+
       test('old draft option is rejected', () => {
         const _sdk = new PayloadSDK<LocalConfig>({ baseURL: '' })
 

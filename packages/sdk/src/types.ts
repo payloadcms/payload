@@ -8,6 +8,7 @@ import type {
   GlobalSlug,
   JsonObject,
   PayloadTypesShape,
+  QueryDraftDataFromCollection,
   QueryDraftDataFromCollectionSlug,
   QueryDraftDataFromGlobalSlug,
   ReadVersion,
@@ -190,6 +191,16 @@ export type TransformCollectionWithSelectByVersion<
       : QueryDraftDataFromCollectionSlug<TSlug>
     : TransformCollectionWithSelect<T, TSlug, TSelect>
   : TransformCollectionWithSelect<T, TSlug, TSelect>
+
+export type TransformAuthWithVersion<
+  T extends PayloadTypesShape,
+  TSlug extends AuthCollectionSlug<T>,
+  TVersion extends ReadVersion | undefined,
+> = TVersion extends 'draft' | 'latest'
+  ? DataFromAuthSlug<T, TSlug> extends JsonObject
+    ? QueryDraftDataFromCollection<DataFromAuthSlug<T, TSlug>>
+    : DataFromAuthSlug<T, TSlug>
+  : DataFromAuthSlug<T, TSlug>
 
 export type TransformGlobalWithSelectByVersion<
   T extends PayloadTypesShape,

@@ -1,4 +1,6 @@
-export async function dynamicDraft(payload, shouldSaveDraft: boolean) {
+import type { Payload } from 'payload'
+
+export async function dynamicDraft(payload: Payload, shouldSaveDraft: boolean) {
   return payload.update({
     id: '1',
     collection: 'posts',

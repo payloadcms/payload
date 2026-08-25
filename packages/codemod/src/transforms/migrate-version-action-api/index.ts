@@ -259,6 +259,21 @@ function rewriteStringDrafts({
       continue
     }
 
+    if (!isPayloadRestUrl({ node: urlArg })) {
+      const urlText = getStringLikeText({ node: urlArg })
+      if (hasDynamicDraftQuery(urlText)) {
+        notes.push(
+          `${filePath}: dynamic \`draft\` query cannot be rewritten safely — replace it with \`version\` or \`action\` manually.`,
+        )
+      } else if (hasDraftQueryParam(urlText)) {
+        notes.push(
+          `${filePath}: REST \`draft\` query without enough operation context — replace with \`version\` or \`action\` manually.`,
+        )
+      }
+      handled.add(urlArg)
+      continue
+    }
+
     const fetchKind = getFetchOperationKind(call)
     const rewritten = rewriteQueryDraft(urlArg.getText(), fetchKind)
 
@@ -272,6 +287,24 @@ function rewriteStringDrafts({
     }
 
     handled.add(urlArg)
+
+    if (isPayloadGraphqlUrl({ node: urlArg })) {
+      const initArg = call.getArguments()[1]
+      if (initArg) {
+        for (const literal of getStringLikeDescendants({ node: initArg })) {
+          const rewrittenGraphql = rewriteGraphqlDraftArgs(literal.getText())
+          if (rewrittenGraphql.changed) {
+            literal.replaceWithText(rewrittenGraphql.text)
+            mutated = true
+          } else if (rewrittenGraphql.ambiguous) {
+            notes.push(
+              `${filePath}: GraphQL \`draft\` argument without enough operation context — replace with \`version\` or \`action\` manually.`,
+            )
+          }
+          handled.add(literal)
+        }
+      }
+    }
   }
 
   for (const literal of [
@@ -282,16 +315,14 @@ function rewriteStringDrafts({
       continue
     }
 
-    const original = literal.getText()
-    const graphqlRewritten = rewriteGraphqlDraftArgs(original)
-
-    if (graphqlRewritten.changed) {
-      literal.replaceWithText(graphqlRewritten.text)
-      mutated = true
+    if (Node.isTaggedTemplateExpression(literal.getParent())) {
       continue
     }
 
-    if (graphqlRewritten.ambiguous) {
+    const original = literal.getText()
+    const graphqlRewritten = rewriteGraphqlDraftArgs(original)
+
+    if (graphqlRewritten.changed || graphqlRewritten.ambiguous) {
       notes.push(
         `${filePath}: GraphQL \`draft\` argument without enough operation context — replace with \`version\` or \`action\` manually.`,
       )
@@ -325,10 +356,7 @@ function rewriteStringDrafts({
     const original = template.getText()
     const graphqlRewritten = rewriteGraphqlDraftArgs(original)
 
-    if (graphqlRewritten.changed) {
-      template.replaceWithText(graphqlRewritten.text)
-      mutated = true
-    } else if (graphqlRewritten.ambiguous) {
+    if (graphqlRewritten.changed || graphqlRewritten.ambiguous) {
       notes.push(
         `${filePath}: GraphQL \`draft\` argument without enough operation context — replace with \`version\` or \`action\` manually.`,
       )
@@ -336,6 +364,36 @@ function rewriteStringDrafts({
   }
 
   return mutated
+}
+
+function isPayloadRestUrl({ node }: { node: MorphNode }): boolean {
+  const text = getStringLikeText({ node })
+
+  if (/^https?:\/\//i.test(text)) {
+    return false
+  }
+
+  return text.startsWith('/api/') || text.includes('}/api/')
+}
+
+function isPayloadGraphqlUrl({ node }: { node: MorphNode }): boolean {
+  const text = getStringLikeText({ node })
+  return /\/api\/graphql(?:[/?#]|$)/.test(text)
+}
+
+function getStringLikeText({ node }: { node: MorphNode }): string {
+  if (Node.isStringLiteral(node) || Node.isNoSubstitutionTemplateLiteral(node)) {
+    return node.getLiteralText()
+  }
+
+  return node.getText().slice(1, -1)
+}
+
+function getStringLikeDescendants({ node }: { node: MorphNode }) {
+  return [
+    ...node.getDescendantsOfKind(SyntaxKind.StringLiteral),
+    ...node.getDescendantsOfKind(SyntaxKind.NoSubstitutionTemplateLiteral),
+  ]
 }
 
 function noteUnhandledDraftOptions({
@@ -366,6 +424,10 @@ function noteUnhandledDraftOptions({
 }
 
 function getOperationKind(call: CallExpression): OperationKind | undefined {
+  if (!isProvenPayloadOperationCall({ call })) {
+    return undefined
+  }
+
   const methodName = getCallMethodName(call)
   if (!methodName) {
     return undefined
@@ -385,6 +447,193 @@ function getOperationKind(call: CallExpression): OperationKind | undefined {
   }
 
   return undefined
+}
+
+function isProvenPayloadOperationCall({ call }: { call: CallExpression }): boolean {
+  const expression = call.getExpression()
+
+  if (Node.isPropertyAccessExpression(expression)) {
+    return isProvenPayloadReceiver({ node: expression.getExpression() })
+  }
+
+  if (!Node.isIdentifier(expression)) {
+    return false
+  }
+
+  const sourceFile = call.getSourceFile()
+  const name = expression.getText()
+
+  for (const declaration of sourceFile.getDescendantsOfKind(SyntaxKind.VariableDeclaration)) {
+    const nameNode = declaration.getNameNode()
+    if (!Node.isObjectBindingPattern(nameNode)) {
+      continue
+    }
+
+    const binding = nameNode
+      .getElements()
+      .find((element) => element.getNameNode().getText() === name)
+    const initializer = declaration.getInitializer()
+
+    if (binding && initializer && isProvenPayloadReceiver({ node: initializer })) {
+      return true
+    }
+  }
+
+  return false
+}
+
+function isProvenPayloadReceiver({ node }: { node: MorphNode }): boolean {
+  const receiver = unwrapReceiver({ node })
+  if (!receiver) {
+    return false
+  }
+  const sourceFile = receiver.getSourceFile()
+
+  if (Node.isPropertyAccessExpression(receiver) && receiver.getName() === 'payload') {
+    return isIdentifierWithPayloadType({
+      allowedExports: ['PayloadRequest'],
+      node: receiver.getExpression(),
+    })
+  }
+
+  if (!Node.isIdentifier(receiver)) {
+    return false
+  }
+
+  const name = receiver.getText()
+
+  for (const importDeclaration of sourceFile.getImportDeclarations()) {
+    const moduleName = importDeclaration.getModuleSpecifierValue()
+    const defaultImport = importDeclaration.getDefaultImport()
+
+    if (moduleName === 'payload' && defaultImport?.getText() === name) {
+      return true
+    }
+  }
+
+  return (
+    isIdentifierWithPayloadType({
+      allowedExports: ['Payload', 'PayloadSDK'],
+      node: receiver,
+    }) || isIdentifierInitializedByPayloadFactory({ node: receiver })
+  )
+}
+
+function isIdentifierWithPayloadType({
+  allowedExports,
+  node,
+}: {
+  allowedExports: string[]
+  node: MorphNode
+}): boolean {
+  if (!Node.isIdentifier(node)) {
+    return false
+  }
+
+  const name = node.getText()
+  const sourceFile = node.getSourceFile()
+  const payloadTypeNames = getImportedPayloadNames({ allowedExports, sourceFile })
+
+  for (const parameter of sourceFile.getDescendantsOfKind(SyntaxKind.Parameter)) {
+    if (
+      parameter.getName() === name &&
+      typeUsesPayloadName({ payloadTypeNames, typeNode: parameter.getTypeNode() })
+    ) {
+      return true
+    }
+  }
+
+  for (const declaration of sourceFile.getDescendantsOfKind(SyntaxKind.VariableDeclaration)) {
+    if (
+      declaration.getName() === name &&
+      typeUsesPayloadName({ payloadTypeNames, typeNode: declaration.getTypeNode() })
+    ) {
+      return true
+    }
+  }
+
+  return false
+}
+
+function getImportedPayloadNames({
+  allowedExports,
+  sourceFile,
+}: {
+  allowedExports: string[]
+  sourceFile: SourceFile
+}): Set<string> {
+  const names = new Set<string>()
+
+  for (const importDeclaration of sourceFile.getImportDeclarations()) {
+    const moduleName = importDeclaration.getModuleSpecifierValue()
+    if (moduleName !== 'payload' && moduleName !== '@payloadcms/sdk') {
+      continue
+    }
+
+    for (const namedImport of importDeclaration.getNamedImports()) {
+      if (allowedExports.includes(namedImport.getName())) {
+        names.add(namedImport.getAliasNode()?.getText() ?? namedImport.getName())
+      }
+    }
+  }
+
+  return names
+}
+
+function typeUsesPayloadName({
+  payloadTypeNames,
+  typeNode,
+}: {
+  payloadTypeNames: Set<string>
+  typeNode: MorphNode | undefined
+}): boolean {
+  if (!typeNode) {
+    return false
+  }
+
+  const typeText = typeNode.getText()
+  return [...payloadTypeNames].some((name) => new RegExp(`\\b${name}\\b`).test(typeText))
+}
+
+function isIdentifierInitializedByPayloadFactory({ node }: { node: MorphNode }): boolean {
+  if (!Node.isIdentifier(node)) {
+    return false
+  }
+
+  const name = node.getText()
+  const sourceFile = node.getSourceFile()
+  const sdkNames = getImportedPayloadNames({ allowedExports: ['PayloadSDK'], sourceFile })
+  const getPayloadNames = getImportedPayloadNames({ allowedExports: ['getPayload'], sourceFile })
+
+  for (const declaration of sourceFile.getDescendantsOfKind(SyntaxKind.VariableDeclaration)) {
+    if (declaration.getName() !== name) {
+      continue
+    }
+
+    const initializer = unwrapReceiver({ node: declaration.getInitializer() })
+    if (Node.isNewExpression(initializer)) {
+      return sdkNames.has(initializer.getExpression().getText())
+    }
+
+    if (Node.isCallExpression(initializer)) {
+      return getPayloadNames.has(initializer.getExpression().getText())
+    }
+  }
+
+  return false
+}
+
+function unwrapReceiver({ node }: { node: MorphNode | undefined }): MorphNode | undefined {
+  if (!node) {
+    return undefined
+  }
+
+  let current = unwrap(node) ?? node
+  while (Node.isAwaitExpression(current)) {
+    current = unwrap(current.getExpression()) ?? current.getExpression()
+  }
+
+  return current
 }
 
 function getCallMethodName(call: CallExpression): string | undefined {

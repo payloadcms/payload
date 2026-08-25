@@ -1,4 +1,6 @@
-export async function restorePosts(payload) {
+import type { Payload } from 'payload'
+
+export async function restorePosts(payload: Payload) {
   const published = await payload.restoreVersion({
     id: '1',
     collection: 'posts',

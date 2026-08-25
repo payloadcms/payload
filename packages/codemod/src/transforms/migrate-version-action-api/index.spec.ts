@@ -91,6 +91,22 @@ describe('migrate-version-action-api', () => {
     expect(await apply('alias.input.ts')).toBe(output)
   })
 
+  it('leaves unrelated client calls, REST URLs, and GraphQL documents unchanged', async () => {
+    const input = await fixture('external.input.ts')
+    const output = await fixture('external.output.ts')
+    const project = new Project({ useInMemoryFileSystem: true })
+    project.createSourceFile('/external.ts', input)
+
+    const result = await migrateVersionActionApi.apply({ packageJsons: [], project })
+
+    expect(project.getSourceFileOrThrow('/external.ts').getFullText()).toBe(output)
+    expect(result.notes).toEqual([
+      expect.stringContaining('wrapper or unclassified call'),
+      expect.stringContaining('REST `draft` query without enough operation context'),
+      expect.stringContaining('GraphQL `draft` argument without enough operation context'),
+    ])
+  })
+
   it('is a no-op on already-migrated input', async () => {
     const input = await fixture('already-migrated.input.ts')
 

@@ -125,6 +125,7 @@ export const createOperation = async <
       autosave,
       draftsEnabled,
       locale,
+      localizedStatusEnabled: hasLocalizeStatusEnabled(collectionConfig),
       operation: duplicateFromID ? 'duplicate' : 'create',
       publishAllLocales: publishAllLocalesArg,
       status: data && typeof data === 'object' && '_status' in data ? data._status : undefined,

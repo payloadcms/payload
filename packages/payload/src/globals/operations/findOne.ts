@@ -13,6 +13,7 @@ import type { ReadVersion } from '../../versions/types.js'
 import type { SanitizedGlobalConfig } from '../config/types.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
+import { combineQueries } from '../../database/combineQueries.js'
 import { NotFound } from '../../errors/NotFound.js'
 import { afterRead, type AfterReadArgs } from '../../fields/hooks/afterRead/index.js'
 import { lockedDocumentsCollectionSlug } from '../../locked-documents/config.js'
@@ -20,6 +21,7 @@ import { getSelectMode } from '../../utilities/getSelectMode.js'
 import { hasDraftsEnabled } from '../../utilities/getVersionsConfig.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
+import { getPublishedStatusWhere } from '../../versions/read/getPublishedStatusWhere.js'
 import { replaceWithVersion } from '../../versions/read/replaceWithVersion.js'
 import { isVersionedRead, resolveReadVersion } from '../../versions/resolveReadVersion.js'
 
@@ -69,7 +71,7 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
     draftsEnabled: draftsEnabledOnGlobal,
     version,
   })
-  const queryVersions = isVersionedRead(readVersion) && draftsEnabledOnGlobal
+  const queryVersions = isVersionedRead({ version: readVersion }) && draftsEnabledOnGlobal
 
   // /////////////////////////////////////
   // beforeOperation - Global
@@ -133,16 +135,36 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
   ) {
     dbSelect = { ...select, createdAt: true, updatedAt: true }
   }
+  let where = overrideAccess ? undefined : (accessResult as Where)
+
+  if (readVersion === 'published' && draftsEnabledOnGlobal) {
+    where = combineQueries(
+      where!,
+      getPublishedStatusWhere({
+        entity: globalConfig,
+        locale: locale!,
+        payload: req.payload,
+      }),
+    )
+  }
+
   const docFromDB = await req.payload.db.findGlobal({
     slug,
     locale: locale!,
     req,
     select: dbSelect,
-    where: overrideAccess ? undefined : (accessResult as Where),
+    where,
   })
 
   // Check if no document was returned (Postgres returns {} instead of null)
   const hasDoc = docFromDB && Object.keys(docFromDB).length > 0
+
+  if (!hasDoc && !args.data && readVersion === 'published' && draftsEnabledOnGlobal) {
+    if (!disableErrors) {
+      throw new NotFound(req.t)
+    }
+    return null!
+  }
 
   if (!hasDoc && !args.data && !overrideAccess && accessResult !== true) {
     if (!disableErrors) {
@@ -273,7 +295,7 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
     context: req.context,
     depth: depth!,
     doc,
-    draft: isVersionedRead(readVersion),
+    draft: isVersionedRead({ version: readVersion }),
     fallbackLocale: fallbackLocale!,
     flattenLocales,
     global: globalConfig,

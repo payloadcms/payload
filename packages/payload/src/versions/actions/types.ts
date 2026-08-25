@@ -13,6 +13,7 @@ export type ResolveActionArgs = {
   autosave?: boolean
   draftsEnabled: boolean
   locale?: null | string
+  localizedStatusEnabled?: boolean
   operation: WriteOperation
   publishAllLocales?: boolean
   status?: unknown

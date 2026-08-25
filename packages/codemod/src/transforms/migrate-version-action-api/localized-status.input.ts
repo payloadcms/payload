@@ -1,4 +1,6 @@
-export async function localizedStatus(payload) {
+import type { Payload } from 'payload'
+
+export async function localizedStatus(payload: Payload) {
   return payload.update({
     id: '1',
     collection: 'posts',

@@ -1054,8 +1054,7 @@ describe('Versions', () => {
         const missingPublishedDraftOnly = await restClient.GET(
           `/${draftCollectionSlug}/${draftOnly.id}`,
         )
-        expect(missingPublishedDraftOnly.status).toBe(200)
-        expect((await missingPublishedDraftOnly.json())._status).toBe('draft')
+        expect(missingPublishedDraftOnly.status).toBe(404)
 
         const latestDraftOnly = await restClient.GET(
           `/${draftCollectionSlug}/${draftOnly.id}?version=latest`,
@@ -1094,7 +1093,6 @@ describe('Versions', () => {
         })
         const publishedDocs = (await listPublished.json()).docs
         expect(publishedDocs.map(({ title }) => title).sort()).toEqual([
-          'REST read draft only',
           'REST read published only',
           'REST read published with draft',
         ])
@@ -1473,7 +1471,8 @@ describe('Versions', () => {
         const missingPublishedDraftOnly = await graphqlQuery(`{
           DraftPost(id: ${formatGraphQLID(draftOnly.id)}) { title _status }
         }`)
-        expect(missingPublishedDraftOnly.data.DraftPost._status).toBe('draft')
+        expect(missingPublishedDraftOnly.data.DraftPost).toBeNull()
+        expect(missingPublishedDraftOnly.errors?.[0].message).toBeDefined()
 
         const latestDraftOnly = await graphqlQuery(`{
           DraftPost(id: ${formatGraphQLID(draftOnly.id)}, version: latest) { title }
@@ -1494,7 +1493,6 @@ describe('Versions', () => {
           }
         }`)
         expect(listPublished.data.DraftPosts.docs.map(({ title }) => title).sort()).toEqual([
-          'GQL read draft only',
           'GQL read published only',
           'GQL read published with draft',
         ])
@@ -1718,11 +1716,9 @@ describe('Versions', () => {
           ),
         ).rejects.toMatchObject({ status: 404 })
 
-        const missingPublishedDraftOnly = await sdk.findByID(
-          { id: draftOnly.id, collection: draftCollectionSlug },
-          sdkAuth,
-        )
-        expect(missingPublishedDraftOnly._status).toBe('draft')
+        await expect(
+          sdk.findByID({ id: draftOnly.id, collection: draftCollectionSlug }, sdkAuth),
+        ).rejects.toMatchObject({ status: 404 })
 
         const latestDraftOnly = await sdk.findByID(
           { id: draftOnly.id, collection: draftCollectionSlug, version: 'latest' },
@@ -1758,7 +1754,6 @@ describe('Versions', () => {
           sdkAuth,
         )
         expect(publishedDocs.docs.map(({ title }) => title).sort()).toEqual([
-          'SDK read draft only',
           'SDK read published only',
           'SDK read published with draft',
         ])
@@ -3860,18 +3855,22 @@ describe('Versions', () => {
 
         createdIDs.push({ collection: localizedCollectionSlug, id: doc.id })
 
-        const updated = await payload.update({
-          id: doc.id,
-          collection: localizedCollectionSlug,
-          data: {
-            _status: {
-              en: 'draft',
-              es: 'published',
+        await expect(
+          payload.update({
+            id: doc.id,
+            collection: localizedCollectionSlug,
+            data: {
+              _status: {
+                en: 'draft',
+                es: 'published',
+              },
             },
-          },
-          locale: 'all',
-          overrideAccess: true,
-        })
+            locale: 'all',
+            overrideAccess: true,
+          }),
+        ).rejects.toThrow(
+          'Publishing all locales requires an explicit "publish" action and publishAllLocales: true.',
+        )
 
         const published = await payload.findByID({
           id: doc.id,
@@ -3881,10 +3880,6 @@ describe('Versions', () => {
         })
 
         expect(published._status).toBe('published')
-        expect(
-          updated._status === 'published' ||
-            (typeof updated._status === 'object' && updated._status?.en === 'published'),
-        ).toBe(true)
       })
 
       it('should reject autosave unless the resolved action is saveDraft', async () => {
@@ -7315,6 +7310,43 @@ describe('Versions', () => {
       expect(explicit.title).toBe('Published title')
     })
 
+    it('should hide never-published documents from omitted and published collection reads', async () => {
+      const draft = await createDraftOnly('Never published')
+
+      for (const version of [undefined, 'published'] as const) {
+        await expect(
+          payload.findByID({
+            id: draft.id,
+            collection: draftCollectionSlug,
+            overrideAccess: true,
+            version,
+          }),
+        ).rejects.toThrow()
+
+        const result = await payload.find({
+          collection: draftCollectionSlug,
+          overrideAccess: true,
+          version,
+          where: {
+            id: {
+              equals: draft.id,
+            },
+          },
+        })
+
+        expect(result.docs).toHaveLength(0)
+      }
+
+      const latest = await payload.findByID({
+        id: draft.id,
+        collection: draftCollectionSlug,
+        overrideAccess: true,
+        version: 'latest',
+      })
+
+      expect(latest.title).toBe('Never published')
+    })
+
     it('should fall back to published content for latest collection reads', async () => {
       const published = await createPublishedOnly('Only published')
       const withDraft = await createPublishedWithNewerDraft({
@@ -7550,6 +7582,40 @@ describe('Versions', () => {
       expect(published.title).toBe('Published global')
       expect(latest.title).toBe('Draft global')
       expect(draft.title).toBe('Draft global')
+    })
+
+    it('should hide a never-published global from omitted and published reads', async () => {
+      await cleanupGlobal({
+        globalSlug: simpleDraftGlobalSlug,
+        payload,
+      })
+
+      await payload.updateGlobal({
+        action: 'saveDraft',
+        data: {
+          title: 'Never published global',
+        },
+        overrideAccess: true,
+        slug: simpleDraftGlobalSlug,
+      })
+
+      for (const version of [undefined, 'published'] as const) {
+        await expect(
+          payload.findGlobal({
+            overrideAccess: true,
+            slug: simpleDraftGlobalSlug,
+            version,
+          }),
+        ).rejects.toThrow()
+      }
+
+      const latest = await payload.findGlobal({
+        overrideAccess: true,
+        slug: simpleDraftGlobalSlug,
+        version: 'latest',
+      })
+
+      expect(latest.title).toBe('Never published global')
     })
 
     it('should not find a published-only global with a draft read', async () => {

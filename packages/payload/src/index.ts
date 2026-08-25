@@ -1506,6 +1506,7 @@ export type {
   HookOperationType,
   IDTypeForCollectionSlug,
   MeHook as CollectionMeHook,
+  QueryDraftDataFromCollection,
   QueryDraftDataFromCollectionSlug,
   RefreshHook as CollectionRefreshHook,
   RequiredDataFromCollection,
