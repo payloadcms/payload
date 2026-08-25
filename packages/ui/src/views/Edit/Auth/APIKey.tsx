@@ -72,8 +72,9 @@ export const UnreadableAPIKey: React.FC<{
 export const APIKey: React.FC<{
   readonly description?: string
   readonly enabled: boolean
+  readonly initiallyVisible?: boolean
   readonly readOnly?: boolean
-}> = ({ description, enabled, readOnly }) => {
+}> = ({ description, enabled, initiallyVisible, readOnly }) => {
   const [initialAPIKey] = useState(uuidv4())
   const [highlightedField, setHighlightedField] = useState(false)
   const { t } = useTranslation()
@@ -149,6 +150,7 @@ export const APIKey: React.FC<{
           aria-label={apiKeyLabel}
           highlighted={highlightedField}
           id="apiKey"
+          initiallyVisible={initiallyVisible}
           value={value as string}
         />
         <FieldDescription description={description} path="apiKey" />

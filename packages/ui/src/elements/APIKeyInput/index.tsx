@@ -1,5 +1,5 @@
 'use client'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 import { EyeIcon } from '../../icons/Eye/index.js'
 import { KeyIcon } from '../../icons/Key/index.js'
@@ -13,6 +13,7 @@ export type APIKeyInputProps = {
   readonly disabled?: boolean
   readonly highlighted?: boolean
   readonly id?: string
+  readonly initiallyVisible?: boolean
   readonly value: null | string | undefined
 }
 
@@ -25,10 +26,17 @@ export const APIKeyInput: React.FC<APIKeyInputProps> = ({
   'aria-label': ariaLabel = 'API Key',
   disabled,
   highlighted,
+  initiallyVisible = false,
   value,
 }) => {
-  const [showKey, setShowKey] = useState(false)
+  const [showKey, setShowKey] = useState(initiallyVisible)
   const keyValue = value ?? ''
+
+  useEffect(() => {
+    if (highlighted) {
+      setShowKey(true)
+    }
+  }, [highlighted])
 
   return (
     <div className={baseClass}>

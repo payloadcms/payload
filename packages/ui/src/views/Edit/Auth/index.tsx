@@ -336,6 +336,9 @@ export const Auth: React.FC<Props> = (props) => {
                       : undefined
                   }
                   enabled={apiKeyEnabled}
+                  initiallyVisible={
+                    operation === 'create' || isEnablingAPIKey || (!canReadAPIKey && hasDraftAPIKey)
+                  }
                   readOnly={readOnly || !canModifyAPIKey}
                 />
               )}

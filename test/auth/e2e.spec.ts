@@ -428,6 +428,7 @@ describe('Auth', () => {
         await expect
           .poll(async () => await apiKeyLocator.inputValue(), { timeout: POLL_TOPASS_TIMEOUT })
           .toBeDefined()
+        await expect(apiKeyLocator).toHaveAttribute('type', 'text')
 
         const apiKey = await apiKeyLocator.inputValue()
 
@@ -507,12 +508,14 @@ describe('Auth', () => {
         await page.goto(userURL.edit(user.id))
         const apiKeyInput = page.locator('#apiKey')
         await expect(apiKeyInput).toHaveValue(originalAPIKey)
+        await expect(apiKeyInput).toHaveAttribute('type', 'password')
 
         await page.getByRole('button', { name: 'Generate new API key' }).click()
         await page
           .locator(`#generate-confirmation-${user.id} [data-dialog-action="confirm"]`)
           .click()
         await expect(apiKeyInput).not.toHaveValue(originalAPIKey)
+        await expect(apiKeyInput).toHaveAttribute('type', 'text')
         const rotatedAPIKey = await apiKeyInput.inputValue()
         await saveDocAndAssert(page)
         await expect(apiKeyInput).toHaveValue(rotatedAPIKey)
@@ -594,6 +597,7 @@ describe('Auth', () => {
 
         const apiKeyInput = page.locator('#apiKey')
         await expect(apiKeyInput).toBeEnabled()
+        await expect(apiKeyInput).toHaveAttribute('type', 'text')
         const replacementAPIKey = apiKeyInput
         await expect(replacementAPIKey).not.toHaveValue(originalAPIKey)
         await expect(
@@ -635,6 +639,7 @@ describe('Auth', () => {
 
         const apiKeyInput = page.locator('#apiKey')
         await expect(apiKeyInput).toBeEnabled()
+        await expect(apiKeyInput).toHaveAttribute('type', 'text')
         const newAPIKey = await apiKeyInput.inputValue()
         await expect(
           page.getByText("Copy this API key before saving. You won't be able to view it again."),
