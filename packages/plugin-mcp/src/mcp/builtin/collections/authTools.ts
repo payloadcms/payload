@@ -94,6 +94,7 @@ export const forgotPasswordCollectionTool = defineCollectionTool({
       collection: collectionSlug,
       data: { email: input.email },
       disableEmail: input.disableEmail,
+      overrideAccess: true,
     })
     return {
       content: [
@@ -144,6 +145,7 @@ export const loginCollectionTool = defineCollectionTool({
       collection: collectionSlug,
       data: { email: input.email, password: input.password },
       depth: input.depth,
+      overrideAccess: true,
       showHiddenFields: input.showHiddenFields,
     })
     return {
