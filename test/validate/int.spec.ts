@@ -926,6 +926,46 @@ describe('validate Local API', () => {
       ).toBe(true)
     })
 
+    it('should pass the validate operation into fields nested inside a Lexical block', async () => {
+      const result = await payload.validate({
+        collection: validationCollectionSlug,
+        data: {
+          blockRichText: {
+            root: {
+              type: 'root',
+              children: [
+                {
+                  type: 'block',
+                  fields: {
+                    id: 'nested-field-validate-block',
+                    blockType: 'nestedFieldValidateBlock',
+                    value: 'nested block value',
+                  },
+                  format: '',
+                  version: 2,
+                },
+              ],
+              format: '',
+              indent: 0,
+              version: 1,
+            },
+          },
+          summary: 'candidate summary',
+          title: 'Candidate title',
+        },
+        locale: 'en',
+      })
+
+      expect(result.valid).toBe(true)
+
+      const nestedBlockFieldValidateEvent = hookEvents.find(
+        ({ hook }) => hook === 'nestedBlockFieldValidate',
+      )
+      expect(nestedBlockFieldValidateEvent).toBeDefined()
+      expect(nestedBlockFieldValidateEvent?.operation).toBe('validate')
+      expect(nestedBlockFieldValidateEvent?.requestOperation).toBe('validate')
+    })
+
     it('should apply defaults before validating required fields', async () => {
       const result = await payload.validate({
         collection: validationCollectionSlug,

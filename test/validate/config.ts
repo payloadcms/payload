@@ -1,10 +1,12 @@
 import type {
+  Block,
   CollectionBeforeChangeHook,
   CollectionConfig,
   GlobalConfig,
   PayloadRequest,
 } from 'payload'
 
+import { BlocksFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
 import path from 'path'
 import { logoutOperation, refreshOperation, saveVersion, ValidationError } from 'payload'
 import { fileURLToPath } from 'url'
@@ -361,6 +363,28 @@ const runWriteAttempt: CollectionBeforeChangeHook = async ({ data, operation, re
   return data
 }
 
+// Exercises the fix for the operation value that Lexical's Blocks, Link, and Upload features pass
+// down to their nested fields' own `validate` functions, which used to coerce anything other than
+// `create`/`update` to `update`, so nested fields never saw `operation: 'validate'`.
+const nestedFieldValidateBlock: Block = {
+  slug: 'nestedFieldValidateBlock',
+  fields: [
+    {
+      name: 'value',
+      type: 'text',
+      validate: (value, { operation, req }) => {
+        recordHook({
+          context: req.context,
+          hook: 'nestedBlockFieldValidate',
+          operation,
+          requestOperation: req.operation,
+        })
+        return typeof value === 'string' && value.length > 0 ? true : 'Value is required'
+      },
+    },
+  ],
+}
+
 const validationCollection: CollectionConfig = {
   slug: validationCollectionSlug,
   access: {
@@ -449,6 +473,13 @@ const validationCollection: CollectionConfig = {
         })
         return typeof value === 'string' && value.length > 0 ? true : 'Title is required'
       },
+    },
+    {
+      name: 'blockRichText',
+      type: 'richText',
+      editor: lexicalEditor({
+        features: [BlocksFeature({ blocks: [nestedFieldValidateBlock] })],
+      }),
     },
     {
       name: 'summary',

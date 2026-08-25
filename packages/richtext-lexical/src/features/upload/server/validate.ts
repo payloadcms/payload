@@ -51,7 +51,7 @@ export const uploadValidation = (
       fields: collection.fields,
       fieldSchemaMap: undefined,
       initialBlockData: node?.fields ?? {},
-      operation: operation === 'create' || operation === 'update' ? operation : 'update',
+      operation,
       permissions: {},
       preferences,
       renderAllFields: false,

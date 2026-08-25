@@ -9,6 +9,7 @@ import type {
   FlattenedBlock,
   FormState,
   FormStateWithoutComponents,
+  Operation,
   PayloadRequest,
   Row,
   SanitizedFieldPermissions,
@@ -76,7 +77,7 @@ export type AddFieldStatePromiseArgs = {
    * Whether to omit parent fields in the state. @default false
    */
   omitParents?: boolean
-  operation: 'create' | 'update'
+  operation: Operation
   parentIndexPath: string
   parentPath: string
   parentPermissions: SanitizedFieldsPermissions
