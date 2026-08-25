@@ -67,7 +67,7 @@ All-in-one on Vercel — one click to deploy Payload with a **Next.js** front en
 
 ### Deploy on RepoCloud
 
-One-click cloud deployment with competitive pricing for open-source applications.
+One click to deploy Payload on RepoCloud with managed hosting for open-source applications.
 
 [![Deploy on RepoCloud](https://d16t0pc4846x52.cloudfront.net/deploylobe.svg)](https://repocloud.io/details/Payload/)
 
@@ -77,7 +77,7 @@ Jumpstart your next project with a ready-to-go template. These are **production-
 
 #### 🌐 [Website](https://github.com/payloadcms/payload/tree/main/templates/website)
 
-#### 🛒️ [Ecommerce](https://github.com/payloadcms/payload/tree/main/templates/ecommerce) 🎉 _**NEW**_ 🎉
+#### 🛍️ [Ecommerce](https://github.com/payloadcms/payload/tree/main/templates/ecommerce) 🎉 _**NEW**_ 🎉
 
 We're constantly adding more templates to our [**Templates Directory**](https://github.com/payloadcms/payload/tree/main/templates).
 If you maintain your own, add the `payload-template` topic to your GitHub repo so others can discover it.
