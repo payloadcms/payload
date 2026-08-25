@@ -17,7 +17,6 @@ import { useModal } from '../../elements/Modal/index.js'
 import { NoListResults } from '../../elements/NoListResults/index.js'
 import { PageControls } from '../../elements/PageControls/index.js'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
-import { SelectMany } from '../../elements/SelectMany/index.js'
 import { useStepNav } from '../../elements/StepNav/index.js'
 import { RelationshipProvider } from '../../elements/Table/RelationshipProvider/index.js'
 import { ViewDescription } from '../../elements/ViewDescription/index.js'
@@ -112,7 +111,6 @@ export function DefaultListView(props: ListViewClientProps) {
     disableBulkDelete,
     disableBulkEdit,
     disableQueryPresets,
-    enableRowSelections,
     hasCreatePermission: hasCreatePermissionFromProps,
     hasDeletePermission,
     hasTrashPermission,
@@ -131,7 +129,7 @@ export function DefaultListView(props: ListViewClientProps) {
 
   const [Table] = useControllableState(InitialTable)
 
-  const { allowCreate, createNewDrawerSlug, isInDrawer, onBulkSelect } = useListDrawerContext()
+  const { allowCreate, createNewDrawerSlug, isInDrawer } = useListDrawerContext()
 
   const hasCreatePermission =
     allowCreate !== undefined
@@ -308,13 +306,8 @@ export function DefaultListView(props: ListViewClientProps) {
               viewType={viewType}
             />
             <ListControls
-              beforeActions={
-                enableRowSelections && typeof onBulkSelect === 'function'
-                  ? beforeActions
-                    ? [...beforeActions, <SelectMany key="select-many" onClick={onBulkSelect} />]
-                    : [<SelectMany key="select-many" onClick={onBulkSelect} />]
-                  : beforeActions
-              }
+              // The drawer's confirm action lives in its header now, so nothing is injected here.
+              beforeActions={beforeActions}
               collectionConfig={collectionConfig}
               collectionSlug={collectionSlug}
               disableQueryPresets={
@@ -439,16 +432,7 @@ export function DefaultListView(props: ListViewClientProps) {
                         label={collectionLabel}
                         showSelectAllAcrossPages={!isGroupingBy}
                       />
-                      <div className={`${baseClass}__list-selection-actions`}>
-                        {enableRowSelections && typeof onBulkSelect === 'function'
-                          ? beforeActions
-                            ? [
-                                ...beforeActions,
-                                <SelectMany key="select-many" onClick={onBulkSelect} />,
-                              ]
-                            : [<SelectMany key="select-many" onClick={onBulkSelect} />]
-                          : beforeActions}
-                      </div>
+                      <div className={`${baseClass}__list-selection-actions`}>{beforeActions}</div>
                     </div>
                   ) : null
                 }

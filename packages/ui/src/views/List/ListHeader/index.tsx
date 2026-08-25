@@ -8,7 +8,10 @@ import { CloseModalButton } from '../../../elements/CloseModalButton/index.js'
 import { DefaultListViewTabs } from '../../../elements/DefaultListViewTabs/index.js'
 import { useListDrawerContext } from '../../../elements/ListDrawer/Provider.js'
 import { DrawerRelationshipSelect } from '../../../elements/ListHeader/DrawerRelationshipSelect/index.js'
-import { ListDrawerCreateNewDocButton } from '../../../elements/ListHeader/DrawerTitleActions/index.js'
+import {
+  ListDrawerConfirmSelectionButton,
+  ListDrawerCreateNewDocButton,
+} from '../../../elements/ListHeader/DrawerTitleActions/index.js'
 import { ListHeader } from '../../../elements/ListHeader/index.js'
 import {
   ListBulkUploadButton,
@@ -85,6 +88,7 @@ export const CollectionListHeader: React.FC<ListHeaderProps> = ({
             hasCreatePermission={hasCreatePermission}
             key="list-drawer-create-new-doc"
           />,
+          <ListDrawerConfirmSelectionButton key="list-drawer-confirm-selection" />,
         ].filter(Boolean)}
       />
     )
