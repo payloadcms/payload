@@ -5,7 +5,7 @@ import { serialize } from 'object-to-formdata'
 import path from 'path'
 import { APIError, NotFound } from 'payload'
 import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { Relation } from './config.js'
@@ -364,6 +364,42 @@ describe('collections-rest', () => {
         expect(response.status).toEqual(200)
         expect(docs[0].title).toEqual('title') // Check was not modified
         expect(docs).toHaveLength(count)
+      })
+
+      it('should not scale database delete calls with the number of documents', async () => {
+        const deleteOneSpy = vi.spyOn(payload.db, 'deleteOne')
+        const deleteManySpy = vi.spyOn(payload.db, 'deleteMany')
+
+        const countDeleteCalls = async (count: number) => {
+          await createPosts(count)
+
+          deleteOneSpy.mockClear()
+          deleteManySpy.mockClear()
+
+          const { docs, errors } = await payload.delete({
+            collection: postsSlug,
+            where: { title: { equals: 'title' } },
+          })
+
+          expect(errors).toHaveLength(0)
+          expect(docs).toHaveLength(count)
+
+          return {
+            deleteMany: deleteManySpy.mock.calls.length,
+            deleteOne: deleteOneSpy.mock.calls.length,
+          }
+        }
+
+        const few = await countDeleteCalls(2)
+        const many = await countDeleteCalls(20)
+
+        // Deleting ten times as many documents must not cost ten times as many queries
+        expect(few.deleteOne).toBe(0)
+        expect(many.deleteOne).toBe(0)
+        expect(many.deleteMany).toBe(few.deleteMany)
+
+        deleteOneSpy.mockRestore()
+        deleteManySpy.mockRestore()
       })
 
       it('should return formatted errors for bulk deletes', async () => {

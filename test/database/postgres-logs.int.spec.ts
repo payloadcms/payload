@@ -175,6 +175,42 @@ describePostgres('database - postgres logs', () => {
     expect(allPosts.docs[0]?.id).toEqual(doc1.id)
   })
 
+  it('ensure bulk delete uses a constant number of db queries regardless of how many documents match', async () => {
+    const countQueriesForBulkDelete = async (documentCount: number) => {
+      for (let i = 0; i < documentCount; i++) {
+        await payload.create({
+          collection: 'simple',
+          data: {
+            text: 'bulk-delete',
+            number: i,
+          },
+        })
+      }
+
+      // Count every console log
+      const consoleCount = vitest.spyOn(console, 'log').mockImplementation(() => {})
+
+      const { docs, errors } = await payload.delete({
+        collection: 'simple',
+        where: {
+          text: { equals: 'bulk-delete' },
+        },
+      })
+
+      const queryCount = consoleCount.mock.calls.length
+      consoleCount.mockRestore()
+
+      expect(errors).toHaveLength(0)
+      expect(docs).toHaveLength(documentCount)
+
+      return queryCount
+    }
+
+    // Deleting ten times as many documents must not cost ten times as many queries. Before
+    // batching this was 4 queries per document, so 13 vs 85 rather than 8 vs 8.
+    expect(await countQueriesForBulkDelete(20)).toBe(await countQueriesForBulkDelete(2))
+  })
+
   it('ensure array update using $push is done in single db call', async () => {
     const post = await payload.create({
       collection: 'posts',

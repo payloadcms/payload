@@ -5,6 +5,10 @@ import { jobsCollectionSlug } from '../queues/config/collection.js'
 
 type Args = {
   id?: number | string
+  /**
+   * Delete the scheduled publish jobs of many documents at once. Takes precedence over `id`.
+   */
+  ids?: (number | string)[]
   payload: Payload
   req?: PayloadRequest
   slug: string
@@ -13,6 +17,7 @@ type Args = {
 export const deleteScheduledPublishJobs = async ({
   id,
   slug,
+  ids,
   payload,
   req,
 }: Args): Promise<void> => {
@@ -34,9 +39,7 @@ export const deleteScheduledPublishJobs = async ({
             },
           },
           {
-            'input.doc.value': {
-              equals: id,
-            },
+            'input.doc.value': ids ? { in: ids } : { equals: id },
           },
           {
             'input.doc.relationTo': {
@@ -55,7 +58,9 @@ export const deleteScheduledPublishJobs = async ({
   } catch (err) {
     payload.logger.error({
       err,
-      msg: `There was an error deleting scheduled publish jobs from the queue for ${slug} document with ID ${id}.`,
+      msg: ids
+        ? `There was an error deleting scheduled publish jobs from the queue for ${ids.length} ${slug} documents.`
+        : `There was an error deleting scheduled publish jobs from the queue for ${slug} document with ID ${id}.`,
     })
   }
 }
