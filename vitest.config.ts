@@ -52,7 +52,11 @@ export default defineConfig({
           },
         },
         test: {
-          include: ['packages/**/*.spec.ts', 'tools/**/*.spec.ts'],
+          include: [
+            'packages/**/*.spec.ts',
+            'tools/**/*.spec.ts',
+            '.github/scripts/**/*.spec.mjs',
+          ],
           name: 'unit',
           environment: 'node',
         },

@@ -155,6 +155,55 @@ const getPosts = async () => {
   the `/api/globals` endpoint.
 </Banner>
 
+## GraphQL API
+
+In the [GraphQL API](../graphql/overview), `select` is a **boolean** argument on collection and global queries (including version queries). When set to `true`, Payload builds a [Select](./select) projection from your GraphQL selection set and only loads those fields from the database.
+
+Unlike the Local and REST APIs, you do not pass a field map. The fields you request in the GraphQL query become the select projection:
+
+```graphql
+query {
+  # highlight-start
+  Posts(select: true) {
+  # highlight-end
+    docs {
+      id
+      text
+      group {
+        number
+      }
+    }
+  }
+}
+```
+
+The same argument works on singular document queries and globals:
+
+```graphql
+query {
+  Post(id: "123", select: true) {
+    id
+    text
+  }
+}
+
+query {
+  Header(select: true) {
+    title
+  }
+}
+```
+
+Without `select: true`, GraphQL still returns only the fields in your selection set over the wire, but Payload may load the full document from the database. Passing `select: true` applies the Select API at the database level for better performance.
+
+<Banner type="warning">
+  **Important:** Because `select` is applied on the database level, your
+  `beforeRead` and `afterRead` hooks may not receive the full `doc`. To ensure
+  that some fields are always selected for your hooks / access control, use the
+  [entity-level `select`](#entity-level-select-config) function on your
+  Collection or Global config.
+</Banner>
+
 ## defaultPopulate collection config property
 
 The `defaultPopulate` property allows you specify which fields to select when populating the collection from another document.

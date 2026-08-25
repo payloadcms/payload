@@ -70,6 +70,7 @@ export default buildConfigWithDefaults({
       afterDashboard: [
         '/components/AfterDashboard/index.js#AfterDashboard',
         '/components/AfterDashboardClient/index.js#AfterDashboardClient',
+        '/components/DashboardStatus/index.js#DashboardStatus',
       ],
       afterNav: ['/components/AfterNav/index.js#AfterNav'],
       afterNavLinks: ['/components/AfterNavLinks/index.js#AfterNavLinks'],
