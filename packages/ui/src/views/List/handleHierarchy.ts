@@ -102,6 +102,15 @@ export const handleHierarchy = async ({
   // Filter to folders that allow ANY of the selected types OR are unrestricted
   let typeCondition: Record<string, unknown> | undefined
 
+  // A folder is unrestricted either because the type field was never set or because it holds an
+  // empty array. `exists: false` only catches the former - an empty array still "exists" - so the
+  // latter is matched with `not_in` over every possible value, which works on Mongo and Postgres.
+  const allPossibleTypes = Object.keys(hierarchyConfig.relatedCollections || {})
+  const unrestrictedConditions = (typeFieldName: string): Record<string, unknown>[] => [
+    { [typeFieldName]: { exists: false } },
+    ...(allPossibleTypes.length > 0 ? [{ [typeFieldName]: { not_in: allPossibleTypes } }] : []),
+  ]
+
   if (
     typeFilter &&
     typeFilter.length > 0 &&
@@ -114,10 +123,7 @@ export const handleHierarchy = async ({
 
     if (filteredTypes.length > 0) {
       typeCondition = {
-        or: [
-          { [typeFieldName]: { in: filteredTypes } },
-          { [typeFieldName]: { exists: false } }, // Include unrestricted folders
-        ],
+        or: [{ [typeFieldName]: { in: filteredTypes } }, ...unrestrictedConditions(typeFieldName)],
       }
     }
   }
@@ -134,7 +140,7 @@ export const handleHierarchy = async ({
     typeCondition = {
       or: [
         { [typeFieldName]: { in: [scopedToCollection] } },
-        { [typeFieldName]: { exists: false } },
+        ...unrestrictedConditions(typeFieldName),
       ],
     }
   }
@@ -155,7 +161,9 @@ export const handleHierarchy = async ({
   // Fetch children (hierarchy items with this parent, or root items if parentId is null)
   const childrenData = await req.payload.find({
     collection: collectionSlug,
-    depth: 0,
+    // Populates admin.useAsThumbnail relationships (e.g. a featured image field) so grid/card
+    // views can render a thumbnail instead of a raw ID.
+    depth: 1,
     draft: true,
     fallbackLocale: false,
     includeLockStatus: true,
@@ -256,7 +264,9 @@ export const handleHierarchy = async ({
     try {
       const data = await req.payload.find({
         collection: relatedSlug,
-        depth: 0,
+        // Populates admin.useAsThumbnail relationships (e.g. a featured image field) so grid/card
+        // views can render a thumbnail instead of a raw ID.
+        depth: 1,
         draft: true,
         fallbackLocale: false,
         includeLockStatus: true,
