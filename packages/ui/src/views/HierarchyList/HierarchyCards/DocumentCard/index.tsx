@@ -72,9 +72,15 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
   // Falls back to the first field of type `upload` on the collection (resolved server-side), so a
   // card can surface a thumbnail even when the collection itself isn't upload-enabled.
   const useAsThumbnail = collectionConfig?.admin?.useAsThumbnail
+  const useAsThumbnailValue = useAsThumbnail ? doc[useAsThumbnail] : undefined
+  // `useAsThumbnail` can point at a `hasMany` upload field, in which case the populated value is
+  // an array of docs rather than a single one - use the first.
+  const relatedUploadDocValue = Array.isArray(useAsThumbnailValue)
+    ? useAsThumbnailValue[0]
+    : useAsThumbnailValue
   const relatedUploadDoc =
-    !isOwnUpload && useAsThumbnail && typeof doc[useAsThumbnail] === 'object' && doc[useAsThumbnail]
-      ? (doc[useAsThumbnail] as Record<string, unknown>)
+    !isOwnUpload && relatedUploadDocValue && typeof relatedUploadDocValue === 'object'
+      ? (relatedUploadDocValue as Record<string, unknown>)
       : undefined
   const thumbnailDoc = isOwnUpload ? doc : relatedUploadDoc
 

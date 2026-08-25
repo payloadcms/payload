@@ -16,6 +16,11 @@ export const appendUploadSelectFields = ({
     return
   }
 
+  /**
+   * `filename` is how consumers tell that a doc actually has a file, and it supplies the thumbnail's
+   * alt text - without it a selected-down upload doc looks fileless and renders no thumbnail.
+   */
+  select.filename = true
   select.mimeType = true
   select.thumbnailURL = true
 

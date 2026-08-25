@@ -9,8 +9,10 @@ import type {
   ListViewServerPropsOnly,
   PaginatedDocs,
   PayloadComponent,
+  PopulateType,
   QueryPreset,
   SanitizedCollectionPermission,
+  SelectType,
 } from 'payload'
 
 import {
@@ -278,6 +280,47 @@ export const renderListView = async (
     select,
   })
 
+  /**
+   * Force select the `admin.useAsThumbnail` field so grid cards can show a thumbnail on collections
+   * that aren't upload-enabled themselves. `appendUploadSelectFields` only covers a collection's own
+   * file fields, and this one is an upload *relationship*, so it also needs the depth of 1 below to
+   * arrive populated rather than as a bare ID. `populate` then trims those related docs to the very
+   * same fields a thumbnail needs, so the raised depth doesn't pull whole upload documents along.
+   */
+  const thumbnailFieldName = collectionConfig.admin?.useAsThumbnail
+  let thumbnailPopulate: PopulateType | undefined
+
+  if (thumbnailFieldName) {
+    select[thumbnailFieldName] = true
+
+    const thumbnailField = collectionConfig.flattenedFields.find(
+      (field) => field.name === thumbnailFieldName && field.type === 'upload',
+    )
+
+    if (thumbnailField && 'relationTo' in thumbnailField) {
+      const relatedSlugs = Array.isArray(thumbnailField.relationTo)
+        ? thumbnailField.relationTo
+        : [thumbnailField.relationTo]
+
+      thumbnailPopulate = {}
+
+      for (const relatedSlug of relatedSlugs) {
+        const relatedCollectionConfig = payload.collections[relatedSlug]?.config
+
+        if (relatedCollectionConfig) {
+          const relatedSelect: SelectType = {}
+
+          appendUploadSelectFields({
+            collectionConfig: relatedCollectionConfig,
+            select: relatedSelect,
+          })
+
+          thumbnailPopulate[relatedSlug] = relatedSelect
+        }
+      }
+    }
+  }
+
   /** Force select `_tz` siblings for any timezone-enabled date fields in select */
   appendDateTimezoneSelectFields({
     fields: collectionConfig.flattenedFields,
@@ -358,7 +401,9 @@ export const renderListView = async (
     } else {
       data = await req.payload.find({
         collection: collectionSlug,
-        depth: 0,
+        // Only collections with a thumbnail relationship pay for population; the rest stay at 0 and
+        // resolve their relationship cells client-side via RelationshipProvider.
+        depth: thumbnailFieldName ? 1 : 0,
         draft: true,
         fallbackLocale: false,
         includeLockStatus: true,
@@ -366,6 +411,7 @@ export const renderListView = async (
         locale: req.locale,
         overrideAccess: false,
         page: query?.page ? Number(query.page) : undefined,
+        populate: thumbnailPopulate,
         req,
         select,
         sort: query?.sort,
