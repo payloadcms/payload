@@ -78,6 +78,7 @@ describe('Relationships', () => {
       beforeEach(async () => {
         relation = await payload.create({
           collection: relationSlug,
+          overrideAccess: true,
           data: {
             name: nameToQuery,
           },
@@ -85,6 +86,7 @@ describe('Relationships', () => {
 
         filteredRelation = await payload.create({
           collection: relationSlug,
+          overrideAccess: true,
           data: {
             name: nameToQuery,
             disableRelation: false,
@@ -93,6 +95,7 @@ describe('Relationships', () => {
 
         defaultAccessRelation = await payload.create({
           collection: defaultAccessRelSlug,
+          overrideAccess: true,
           data: {
             name: 'default access',
           },
@@ -100,6 +103,7 @@ describe('Relationships', () => {
 
         chained3 = await payload.create({
           collection: chainedRelSlug,
+          overrideAccess: true,
           data: {
             name: 'chain3',
           },
@@ -107,6 +111,7 @@ describe('Relationships', () => {
 
         chained2 = await payload.create({
           collection: chainedRelSlug,
+          overrideAccess: true,
           data: {
             name: 'chain2',
             relation: chained3.id,
@@ -115,6 +120,7 @@ describe('Relationships', () => {
 
         chained = await payload.create({
           collection: chainedRelSlug,
+          overrideAccess: true,
           data: {
             name: 'chain1',
             relation: chained2.id,
@@ -124,6 +130,7 @@ describe('Relationships', () => {
         chained3 = await payload.update({
           id: chained3.id,
           collection: chainedRelSlug,
+          overrideAccess: true,
           data: {
             name: 'chain3',
             relation: chained.id,
@@ -133,6 +140,7 @@ describe('Relationships', () => {
         generatedCustomId = `custom-${randomBytes(32).toString('hex').slice(0, 12)}`
         customIdRelation = await payload.create({
           collection: customIdSlug,
+          overrideAccess: true,
           data: {
             id: generatedCustomId,
             name: 'custom-id',
@@ -142,6 +150,7 @@ describe('Relationships', () => {
         generatedCustomIdNumber = Math.floor(Math.random() * 1_000_000) + 1
         customIdNumberRelation = await payload.create({
           collection: customIdNumberSlug,
+          overrideAccess: true,
           data: {
             id: generatedCustomIdNumber,
             name: 'custom-id-number',
@@ -209,11 +218,13 @@ describe('Relationships', () => {
         const user = (
           await payload.find({
             collection: 'users',
+            overrideAccess: true,
           })
         ).docs[0]
 
         const user2 = await payload.create({
           collection: 'users',
+          overrideAccess: true,
           data: {
             email: '1@test.com',
             password: 'fwefe',
@@ -221,6 +232,7 @@ describe('Relationships', () => {
         })
         const user3 = await payload.create({
           collection: 'users',
+          overrideAccess: true,
           data: {
             email: '2@test.com',
             password: 'fwsefe',
@@ -228,6 +240,7 @@ describe('Relationships', () => {
         })
         const user4 = await payload.create({
           collection: 'users',
+          overrideAccess: true,
           data: {
             email: '3@test.com',
             password: 'fwddsefe',
@@ -235,6 +248,7 @@ describe('Relationships', () => {
         })
         await payload.create({
           collection: 'movieReviews',
+          overrideAccess: true,
           data: {
             likes: [user3.id, user2.id, user.id, user4.id],
             movieReviewer: user.id,
@@ -243,6 +257,7 @@ describe('Relationships', () => {
         })
         await payload.create({
           collection: 'movieReviews',
+          overrideAccess: true,
           data: {
             movieReviewer: user2.id,
             visibility: 'public',
@@ -251,6 +266,7 @@ describe('Relationships', () => {
 
         const query = await payload.find({
           collection: 'movieReviews',
+          overrideAccess: true,
           depth: 1,
           where: {
             or: [
@@ -277,6 +293,7 @@ describe('Relationships', () => {
          */
         const someDirector = await payload.create({
           collection: 'directors',
+          overrideAccess: true,
           data: {
             name: 'Quentin Tarantino',
           },
@@ -284,6 +301,7 @@ describe('Relationships', () => {
 
         await payload.create({
           collection: 'movies',
+          overrideAccess: true,
           data: {
             name: 'Pulp Fiction',
           },
@@ -291,6 +309,7 @@ describe('Relationships', () => {
 
         await payload.create({
           collection: 'movies',
+          overrideAccess: true,
           data: {
             name: 'Pulp Fiction',
           },
@@ -298,6 +317,7 @@ describe('Relationships', () => {
 
         await payload.create({
           collection: 'movies',
+          overrideAccess: true,
           data: {
             name: 'Harry Potter',
           },
@@ -305,6 +325,7 @@ describe('Relationships', () => {
 
         await payload.create({
           collection: 'movies',
+          overrideAccess: true,
           data: {
             name: 'Lord of the Rings is boring',
             director: someDirector.id,
@@ -316,6 +337,7 @@ describe('Relationships', () => {
         // This only happens on postgres, not on mongodb
         const query = await payload.find({
           collection: 'movies',
+          overrideAccess: true,
           depth: 5,
           limit: 1,
           where: {
@@ -341,17 +363,20 @@ describe('Relationships', () => {
       it('should allow querying by relationships with an object where as AND', async () => {
         const director = await payload.create({
           collection: 'directors',
+          overrideAccess: true,
           data: { name: 'Director1', localized: 'Director1_Localized' },
         })
 
         const movie = await payload.create({
           collection: 'movies',
+          overrideAccess: true,
           data: { director: director.id },
           depth: 0,
         })
 
         const { docs: trueRes } = await payload.find({
           collection: 'movies',
+          overrideAccess: true,
           depth: 0,
           where: {
             'director.name': { equals: 'Director1' },
@@ -363,6 +388,7 @@ describe('Relationships', () => {
 
         const { docs: falseRes } = await payload.find({
           collection: 'movies',
+          overrideAccess: true,
           depth: 0,
           where: {
             'director.name': { equals: 'Director1_Fake' },
@@ -376,6 +402,7 @@ describe('Relationships', () => {
       it('should allow querying within blocks', async () => {
         const rel = await payload.create({
           collection: relationSlug,
+          overrideAccess: true,
           data: {
             name: 'test',
             disableRelation: false,
@@ -384,6 +411,7 @@ describe('Relationships', () => {
 
         const doc = await payload.create({
           collection: slug,
+          overrideAccess: true,
           data: {
             blocks: [
               {
@@ -396,6 +424,7 @@ describe('Relationships', () => {
 
         const { docs } = await payload.find({
           collection: slug,
+          overrideAccess: true,
           where: { 'blocks.relationField': { equals: rel.id } },
         })
 
@@ -403,10 +432,15 @@ describe('Relationships', () => {
       })
 
       it('should allow querying within tabs-blocks-tabs', async () => {
-        const movie = await payload.create({ collection: 'movies', data: { name: 'Pulp Fiction' } })
+        const movie = await payload.create({
+          overrideAccess: true,
+          collection: 'movies',
+          data: { name: 'Pulp Fiction' },
+        })
 
         const { id } = await payload.create({
           collection: 'deep-nested',
+          overrideAccess: true,
           data: {
             content: {
               blocks: [
@@ -423,6 +457,7 @@ describe('Relationships', () => {
 
         const result = await payload.find({
           collection: 'deep-nested',
+          overrideAccess: true,
           where: {
             'content.blocks.meta.movie': {
               equals: movie.id,
@@ -435,14 +470,20 @@ describe('Relationships', () => {
       })
 
       it('should allow query hasMany select in relationship', async () => {
-        const movie = await payload.create({ collection: 'movies', data: { select: ['a', 'b'] } })
+        const movie = await payload.create({
+          overrideAccess: true,
+          collection: 'movies',
+          data: { select: ['a', 'b'] },
+        })
         const doc = await payload.create({
           collection: 'directors',
+          overrideAccess: true,
           data: { name: 'Mega Director', movie },
         })
 
         const res = await payload.find({
           collection: 'directors',
+          overrideAccess: true,
           where: { 'movie.select': { equals: 'a' } },
         })
         expect(res.docs).toHaveLength(1)
@@ -452,19 +493,23 @@ describe('Relationships', () => {
       it('should query through a transitive has-many join using the related table alias', async () => {
         const artist = await payload.create({
           collection: 'transitive-join-artists',
+          overrideAccess: true,
           data: {},
         })
         const album = await payload.create({
           collection: 'transitive-join-albums',
+          overrideAccess: true,
           data: { artist: artist.id },
         })
         const song = await payload.create({
           collection: 'transitive-join-songs',
+          overrideAccess: true,
           data: { albums: [album.id], name: 'Aliased song' },
         })
 
         const { docs } = await payload.find({
           collection: 'transitive-join-artists',
+          overrideAccess: true,
           where: {
             'album.song.name': { equals: song.name },
           },
@@ -477,23 +522,28 @@ describe('Relationships', () => {
       it('should allow 4x deep querying', async () => {
         const movie_1 = await payload.create({
           collection: 'movies',
+          overrideAccess: true,
           data: { name: 'random_movie_1' },
         })
         const director_1 = await payload.create({
           collection: 'directors',
+          overrideAccess: true,
           data: { name: 'random_director_1', movie: movie_1.id },
         })
         const movie_2 = await payload.create({
           collection: 'movies',
+          overrideAccess: true,
           data: { name: 'random_movie_2', director: director_1.id },
         })
         const director_2 = await payload.create({
           collection: 'directors',
+          overrideAccess: true,
           data: { name: 'random_director_2', movie: movie_2.id },
         })
 
         const res = await payload.find({
           collection: 'directors',
+          overrideAccess: true,
           where: { 'movie.director.movie.name': { equals: 'random_movie_1' } },
         })
 
@@ -506,6 +556,7 @@ describe('Relationships', () => {
       mongoIt('should not duplicate IDs in $in when querying through a relationship', async () => {
         const movie = await payload.create({
           collection: 'movies',
+          overrideAccess: true,
           data: { name: 'dup_test_movie' },
         })
 
@@ -520,6 +571,7 @@ describe('Relationships', () => {
         try {
           await payload.find({
             collection: 'directors',
+            overrideAccess: true,
             where: { 'movie.name': { equals: 'dup_test_movie' } },
           })
         } finally {
@@ -529,7 +581,11 @@ describe('Relationships', () => {
         // eslint-disable-next-line vitest/no-standalone-expect
         expect(capturedQuery.$and[0].movie.$in).toHaveLength(1)
 
-        await payload.delete({ collection: 'movies', id: movie.id })
+        await payload.delete({
+          overrideAccess: true,
+          collection: 'movies',
+          id: movie.id,
+        })
       })
 
       describe('hasMany relationships', () => {
@@ -544,11 +600,13 @@ describe('Relationships', () => {
           beforeEach(async () => {
             const recallsMovie = await payload.create({
               collection: 'movies',
+              overrideAccess: true,
               data: { name: 'recalls', select: ['a'] },
             })
 
             const electricCarsMovie = await payload.create({
               collection: 'movies',
+              overrideAccess: true,
               data: { name: 'electric-cars', select: ['a', 'b'] },
             })
 
@@ -557,21 +615,25 @@ describe('Relationships', () => {
 
             mixedDirector = await payload.create({
               collection: 'directors',
+              overrideAccess: true,
               data: { name: 'mixed', movies: [recallsMovie.id, electricCarsMovie.id] },
             })
 
             recallsDirector = await payload.create({
               collection: 'directors',
+              overrideAccess: true,
               data: { name: 'recalls', movies: [recallsMovie.id] },
             })
 
             electricCarsDirector = await payload.create({
               collection: 'directors',
+              overrideAccess: true,
               data: { name: 'electric-cars', movies: [electricCarsMovie.id] },
             })
 
             directorWithoutMovies = await payload.create({
               collection: 'directors',
+              overrideAccess: true,
               data: { name: 'empty', movies: [] },
             })
           })
@@ -579,6 +641,7 @@ describe('Relationships', () => {
           it('should find documents where some related documents match', async () => {
             const { docs } = await payload.find({
               collection: 'directors',
+              overrideAccess: true,
               depth: 0,
               where: {
                 movies: {
@@ -596,6 +659,7 @@ describe('Relationships', () => {
           it('should find documents where no related documents match', async () => {
             const { docs } = await payload.find({
               collection: 'directors',
+              overrideAccess: true,
               depth: 0,
               where: {
                 movies: {
@@ -613,6 +677,7 @@ describe('Relationships', () => {
           it('should find documents where every related document matches', async () => {
             const { docs } = await payload.find({
               collection: 'directors',
+              overrideAccess: true,
               depth: 0,
               where: {
                 movies: {
@@ -648,6 +713,7 @@ describe('Relationships', () => {
           it('should support direct relationship ID conditions', async () => {
             const { docs } = await payload.find({
               collection: 'directors',
+              overrideAccess: true,
               depth: 0,
               where: {
                 movies: { not_equals: { id: { equals: recallsMovieID } } },
@@ -663,6 +729,7 @@ describe('Relationships', () => {
           it('should apply a compound query to the same related document', async () => {
             const { docs } = await payload.find({
               collection: 'directors',
+              overrideAccess: true,
               depth: 0,
               where: {
                 movies: {
@@ -679,6 +746,7 @@ describe('Relationships', () => {
           it('should evaluate nested equals against related documents instead of joined rows', async () => {
             const { docs } = await payload.find({
               collection: 'directors',
+              overrideAccess: true,
               depth: 0,
               where: {
                 movies: {
@@ -693,6 +761,7 @@ describe('Relationships', () => {
           it('should support nested has-many operators on a localized relationship inside a block', async () => {
             const mixedBlock = await payload.create({
               collection: 'blocks',
+              overrideAccess: true,
               data: {
                 blocks: [
                   {
@@ -705,6 +774,7 @@ describe('Relationships', () => {
 
             const electricCarsBlock = await payload.create({
               collection: 'blocks',
+              overrideAccess: true,
               data: {
                 blocks: [{ blockType: 'some', directors: [electricCarsDirector.id] }],
               },
@@ -712,11 +782,13 @@ describe('Relationships', () => {
 
             const blockWithoutDirectors = await payload.create({
               collection: 'blocks',
+              overrideAccess: true,
               data: { blocks: [{ blockType: 'some', directors: [] }] },
             })
 
             const { docs } = await payload.find({
               collection: 'blocks',
+              overrideAccess: true,
               depth: 0,
               locale: 'en',
               where: {
@@ -750,16 +822,19 @@ describe('Relationships', () => {
             async () => {
               const nearbyMovie = await payload.create({
                 collection: 'movies',
+                overrideAccess: true,
                 data: { name: 'nearby', location: [10, 20] },
               })
 
               const nearbyDirector = await payload.create({
                 collection: 'directors',
+                overrideAccess: true,
                 data: { name: 'nearby', movies: [nearbyMovie.id] },
               })
 
               const { docs } = await payload.find({
                 collection: 'directors',
+                overrideAccess: true,
                 depth: 0,
                 where: {
                   movies: { equals: { location: { near: '10,20,100000' } } },
@@ -774,26 +849,31 @@ describe('Relationships', () => {
         it('should query two hasMany levels deep when the middle document has multiple relations', async () => {
           const alpha = await payload.create({
             collection: 'movies',
+            overrideAccess: true,
             data: { name: 'Alpha' },
           })
 
           const beta = await payload.create({
             collection: 'movies',
+            overrideAccess: true,
             data: { name: 'Beta' },
           })
 
           const child = await payload.create({
             collection: 'directors',
+            overrideAccess: true,
             data: { name: 'child', movies: [alpha.id, beta.id] },
           })
 
           const parent = await payload.create({
             collection: 'directors',
+            overrideAccess: true,
             data: { name: 'parent', directors: [child.id] },
           })
 
           const { docs } = await payload.find({
             collection: 'directors',
+            overrideAccess: true,
             depth: 0,
             where: {
               'directors.movies.name': { equals: 'Alpha' },
@@ -806,25 +886,30 @@ describe('Relationships', () => {
         it('should retrieve totalDocs correctly with hasMany,', async () => {
           const movie1 = await payload.create({
             collection: 'movies',
+            overrideAccess: true,
             data: {},
           })
           const movie2 = await payload.create({
             collection: 'movies',
+            overrideAccess: true,
             data: {},
           })
 
           const movie3 = await payload.create({
             collection: 'movies',
+            overrideAccess: true,
             data: { name: 'some-name' },
           })
 
           const movie4 = await payload.create({
             collection: 'movies',
+            overrideAccess: true,
             data: { name: 'some-name' },
           })
 
           await payload.create({
             collection: 'directors',
+            overrideAccess: true,
             data: {
               name: 'Quentin Tarantino',
               movies: [movie2.id, movie1.id, movie3.id, movie4.id],
@@ -833,6 +918,7 @@ describe('Relationships', () => {
 
           const res = await payload.find({
             collection: 'directors',
+            overrideAccess: true,
             limit: 10,
             where: {
               or: [
@@ -859,6 +945,7 @@ describe('Relationships', () => {
 
           const res_2 = await payload.find({
             collection: 'directors',
+            overrideAccess: true,
             limit: 10,
             where: {
               or: [
@@ -873,16 +960,26 @@ describe('Relationships', () => {
 
           expect(res_2.totalDocs).toBe(1)
 
-          const dir_1 = await payload.create({ collection: 'directors', data: { name: 'dir' } })
-          const dir_2 = await payload.create({ collection: 'directors', data: { name: 'dir' } })
+          const dir_1 = await payload.create({
+            overrideAccess: true,
+            collection: 'directors',
+            data: { name: 'dir' },
+          })
+          const dir_2 = await payload.create({
+            overrideAccess: true,
+            collection: 'directors',
+            data: { name: 'dir' },
+          })
 
           const dir_3 = await payload.create({
             collection: 'directors',
+            overrideAccess: true,
             data: { directors: [dir_1.id, dir_2.id] },
           })
 
           const result = await payload.find({
             collection: 'directors',
+            overrideAccess: true,
             where: {
               'directors.name': { equals: 'dir' },
             },
@@ -896,15 +993,18 @@ describe('Relationships', () => {
         it('should query using "contains" by hasMany relationship field', async () => {
           const movie1 = await payload.create({
             collection: 'movies',
+            overrideAccess: true,
             data: {},
           })
           const movie2 = await payload.create({
             collection: 'movies',
+            overrideAccess: true,
             data: {},
           })
 
           await payload.create({
             collection: 'directors',
+            overrideAccess: true,
             data: {
               name: 'Quentin Tarantino',
               movies: [movie2.id, movie1.id],
@@ -913,6 +1013,7 @@ describe('Relationships', () => {
 
           await payload.create({
             collection: 'directors',
+            overrideAccess: true,
             data: {
               name: 'Quentin Tarantino',
               movies: [movie2.id],
@@ -921,6 +1022,7 @@ describe('Relationships', () => {
 
           const query1 = await payload.find({
             collection: 'directors',
+            overrideAccess: true,
             depth: 0,
             where: {
               movies: {
@@ -930,6 +1032,7 @@ describe('Relationships', () => {
           })
           const query2 = await payload.find({
             collection: 'directors',
+            overrideAccess: true,
             depth: 0,
             where: {
               movies: {
@@ -943,10 +1046,15 @@ describe('Relationships', () => {
         })
 
         mongoIt('should treat an ObjectId as a relationship ID', async () => {
-          const movie = await payload.create({ collection: 'movies', data: {} })
+          const movie = await payload.create({
+            overrideAccess: true,
+            collection: 'movies',
+            data: {},
+          })
 
           const director = await payload.create({
             collection: 'directors',
+            overrideAccess: true,
             data: {
               movies: [movie.id],
             },
@@ -954,6 +1062,7 @@ describe('Relationships', () => {
 
           const { docs } = await payload.find({
             collection: 'directors',
+            overrideAccess: true,
             depth: 0,
             where: {
               movies: {
@@ -970,15 +1079,18 @@ describe('Relationships', () => {
         mongoIt('should query using "all" by hasMany relationship field', async () => {
           const movie1 = await payload.create({
             collection: 'movies',
+            overrideAccess: true,
             data: {},
           })
           const movie2 = await payload.create({
             collection: 'movies',
+            overrideAccess: true,
             data: {},
           })
 
           await payload.create({
             collection: 'directors',
+            overrideAccess: true,
             data: {
               name: 'Quentin Tarantino',
               movies: [movie2.id, movie1.id],
@@ -987,6 +1099,7 @@ describe('Relationships', () => {
 
           await payload.create({
             collection: 'directors',
+            overrideAccess: true,
             data: {
               name: 'Quentin Tarantino',
               movies: [movie2.id],
@@ -995,6 +1108,7 @@ describe('Relationships', () => {
 
           const query1 = await payload.find({
             collection: 'directors',
+            overrideAccess: true,
             depth: 0,
             where: {
               movies: {
@@ -1010,6 +1124,7 @@ describe('Relationships', () => {
         it('should query using "in" by hasMany relationship field', async () => {
           const tree1 = await payload.create({
             collection: treeSlug,
+            overrideAccess: true,
             data: {
               text: 'Tree 1',
             },
@@ -1017,6 +1132,7 @@ describe('Relationships', () => {
 
           const tree2 = await payload.create({
             collection: treeSlug,
+            overrideAccess: true,
             data: {
               parent: tree1.id,
               text: 'Tree 2',
@@ -1025,6 +1141,7 @@ describe('Relationships', () => {
 
           const tree3 = await payload.create({
             collection: treeSlug,
+            overrideAccess: true,
             data: {
               parent: tree2.id,
               text: 'Tree 3',
@@ -1033,6 +1150,7 @@ describe('Relationships', () => {
 
           const tree4 = await payload.create({
             collection: treeSlug,
+            overrideAccess: true,
             data: {
               parent: tree3.id,
               text: 'Tree 4',
@@ -1043,6 +1161,7 @@ describe('Relationships', () => {
 
           const query = await payload.find({
             collection: treeSlug,
+            overrideAccess: true,
             depth: 0,
             sort: 'createdAt',
             where: {
@@ -1061,16 +1180,26 @@ describe('Relationships', () => {
 
       describe('sorting by relationships', () => {
         it('should sort by a property of a relationship', async () => {
-          await payload.delete({ collection: 'directors', where: {} })
-          await payload.delete({ collection: 'movies', where: {} })
+          await payload.delete({
+            overrideAccess: true,
+            collection: 'directors',
+            where: {},
+          })
+          await payload.delete({
+            overrideAccess: true,
+            collection: 'movies',
+            where: {},
+          })
 
           const director_2 = await payload.create({
             collection: 'directors',
+            overrideAccess: true,
             data: { name: 'Mr. Dan', localized: 'Mr. Dan' },
           })
 
           await payload.update({
             collection: 'directors',
+            overrideAccess: true,
             id: director_2.id,
             locale: 'de',
             data: { localized: 'Dan' },
@@ -1078,11 +1207,13 @@ describe('Relationships', () => {
 
           const director_1 = await payload.create({
             collection: 'directors',
+            overrideAccess: true,
             data: { name: 'Dan', localized: 'Dan' },
           })
 
           await payload.update({
             collection: 'directors',
+            overrideAccess: true,
             id: director_1.id,
             locale: 'de',
             data: { localized: 'Mr. Dan' },
@@ -1090,23 +1221,27 @@ describe('Relationships', () => {
 
           const movie_1 = await payload.create({
             collection: 'movies',
+            overrideAccess: true,
             depth: 0,
             data: { director: director_1.id, name: 'Some Movie 1' },
           })
 
           const movie_2 = await payload.create({
             collection: 'movies',
+            overrideAccess: true,
             depth: 0,
             data: { director: director_2.id, name: 'Some Movie 2' },
           })
 
           const res_1 = await payload.find({
             collection: 'movies',
+            overrideAccess: true,
             sort: '-director.name',
             depth: 0,
           })
           const res_2 = await payload.find({
             collection: 'movies',
+            overrideAccess: true,
             sort: 'director.name',
             depth: 0,
           })
@@ -1116,12 +1251,14 @@ describe('Relationships', () => {
 
           const draft_res_1 = await payload.find({
             collection: 'movies',
+            overrideAccess: true,
             sort: '-director.name',
             depth: 0,
             draft: true,
           })
           const draft_res_2 = await payload.find({
             collection: 'movies',
+            overrideAccess: true,
             sort: 'director.name',
             depth: 0,
             draft: true,
@@ -1132,12 +1269,14 @@ describe('Relationships', () => {
 
           const localized_res_1 = await payload.find({
             collection: 'movies',
+            overrideAccess: true,
             sort: 'director.localized',
             depth: 0,
             locale: 'de',
           })
           const localized_res_2 = await payload.find({
             collection: 'movies',
+            overrideAccess: true,
             sort: 'director.localized',
             depth: 0,
           })
@@ -1147,50 +1286,87 @@ describe('Relationships', () => {
         })
 
         it('should sort by a property of a nested relationship', async () => {
-          await payload.delete({ collection: 'directors', where: {} })
-          await payload.delete({ collection: 'movies', where: {} })
+          await payload.delete({
+            overrideAccess: true,
+            collection: 'directors',
+            where: {},
+          })
+          await payload.delete({
+            overrideAccess: true,
+            collection: 'movies',
+            where: {},
+          })
 
-          const director = await payload.create({ collection: 'directors', data: {} })
+          const director = await payload.create({
+            overrideAccess: true,
+            collection: 'directors',
+            data: {},
+          })
 
           const movie = await payload.create({
             collection: 'movies',
+            overrideAccess: true,
             data: { director: director.id, name: 'movie 1' },
           })
 
           await payload.update({
             collection: 'directors',
+            overrideAccess: true,
             id: director.id,
             data: { movie: movie.id },
           })
 
-          const director_2 = await payload.create({ collection: 'directors', data: {} })
+          const director_2 = await payload.create({
+            overrideAccess: true,
+            collection: 'directors',
+            data: {},
+          })
 
           const movie_2 = await payload.create({
             collection: 'movies',
+            overrideAccess: true,
             data: { director: director_2.id, name: 'movie 2' },
           })
 
           await payload.update({
             collection: 'directors',
+            overrideAccess: true,
             id: director_2.id,
             data: { movie: movie_2.id },
           })
 
-          const res = await payload.find({ collection: 'movies', sort: 'director.movie.name' })
+          const res = await payload.find({
+            overrideAccess: true,
+            collection: 'movies',
+            sort: 'director.movie.name',
+          })
           expect(res.docs[0].id).toBe(movie.id)
           expect(res.docs[1].id).toBe(movie_2.id)
 
-          const res_2 = await payload.find({ collection: 'movies', sort: '-director.movie.name' })
+          const res_2 = await payload.find({
+            overrideAccess: true,
+            collection: 'movies',
+            sort: '-director.movie.name',
+          })
           expect(res_2.docs[0].id).toBe(movie_2.id)
           expect(res_2.docs[1].id).toBe(movie.id)
         })
 
         it('should sort by multiple properties of a relationship', async () => {
-          await payload.delete({ collection: 'directors', where: {} })
-          await payload.delete({ collection: 'movies', where: {} })
+          await payload.delete({
+            overrideAccess: true,
+            collection: 'directors',
+            where: {},
+          })
+          await payload.delete({
+            overrideAccess: true,
+            collection: 'movies',
+            where: {},
+          })
 
           const createDirector = {
             collection: 'directors',
+            overrideAccess: true,
             data: {
               name: 'Dan',
             },
@@ -1201,23 +1377,27 @@ describe('Relationships', () => {
 
           const movie_1 = await payload.create({
             collection: 'movies',
+            overrideAccess: true,
             depth: 0,
             data: { director: director_1.id, name: 'Some Movie 1' },
           })
 
           const movie_2 = await payload.create({
             collection: 'movies',
+            overrideAccess: true,
             depth: 0,
             data: { director: director_2.id, name: 'Some Movie 2' },
           })
 
           const res_1 = await payload.find({
             collection: 'movies',
+            overrideAccess: true,
             sort: ['director.name', 'director.createdAt'],
             depth: 0,
           })
           const res_2 = await payload.find({
             collection: 'movies',
+            overrideAccess: true,
             sort: ['director.name', '-director.createdAt'],
             depth: 0,
           })
@@ -1229,6 +1409,7 @@ describe('Relationships', () => {
         it('should sort by a property of a hasMany relationship', async () => {
           const movie1 = await payload.create({
             collection: 'movies',
+            overrideAccess: true,
             data: {
               name: 'Pulp Fiction',
             },
@@ -1236,15 +1417,21 @@ describe('Relationships', () => {
 
           const movie2 = await payload.create({
             collection: 'movies',
+            overrideAccess: true,
             data: {
               name: 'Inception',
             },
           })
 
-          await payload.delete({ collection: 'directors', where: {} })
+          await payload.delete({
+            overrideAccess: true,
+            collection: 'directors',
+            where: {},
+          })
 
           const director1 = await payload.create({
             collection: 'directors',
+            overrideAccess: true,
             data: {
               name: 'Quentin Tarantino',
               movies: [movie1.id],
@@ -1252,6 +1439,7 @@ describe('Relationships', () => {
           })
           const director2 = await payload.create({
             collection: 'directors',
+            overrideAccess: true,
             data: {
               name: 'Christopher Nolan',
               movies: [movie2.id],
@@ -1260,6 +1448,7 @@ describe('Relationships', () => {
 
           const result = await payload.find({
             collection: 'directors',
+            overrideAccess: true,
             depth: 0,
             sort: '-movies.name',
           })
@@ -1337,6 +1526,7 @@ describe('Relationships', () => {
           it('should populate to depth via local API find', async () => {
             const result = await payload.find({
               collection: slug,
+              overrideAccess: true,
               depth: 2,
               where: {
                 id: { equals: post.id },
@@ -1354,6 +1544,7 @@ describe('Relationships', () => {
           it('should only populate ID if depth 0 via local API find', async () => {
             const result = await payload.find({
               collection: slug,
+              overrideAccess: true,
               depth: 0,
               where: {
                 id: { equals: post.id },
@@ -1368,6 +1559,7 @@ describe('Relationships', () => {
           it('should respect maxDepth at field level via local API find', async () => {
             const result = await payload.find({
               collection: slug,
+              overrideAccess: true,
               depth: 1,
               where: {
                 id: { equals: post.id },
@@ -1385,6 +1577,7 @@ describe('Relationships', () => {
           it('should use depth option even if req.query.depth is set', async () => {
             const result = await payload.find({
               collection: slug,
+              overrideAccess: true,
               depth: 0,
               where: {
                 id: { equals: post.id },
@@ -1403,6 +1596,7 @@ describe('Relationships', () => {
             // and the default depth behavior should apply
             const result = await payload.find({
               collection: slug,
+              overrideAccess: true,
               where: {
                 id: { equals: post.id },
               },
@@ -1452,6 +1646,7 @@ describe('Relationships', () => {
           await payload.update({
             id: localizedPost1.id,
             collection: slugWithLocalizedRel,
+            overrideAccess: true,
             locale: 'de',
             data: {
               relationField: relation2.id,
@@ -1460,6 +1655,7 @@ describe('Relationships', () => {
 
           localizedPost2 = await payload.create({
             collection: slugWithLocalizedRel,
+            overrideAccess: true,
             data: {
               title: 'german',
               relationField: relation2.id,
@@ -1500,22 +1696,26 @@ describe('Relationships', () => {
         it('should query a non-localized hasMany relationship nested under a localized array', async () => {
           const movie = await payload.create({
             collection: 'movies',
+            overrideAccess: true,
             data: { name: 'Jackie Brown' },
           })
 
           const director = await payload.create({
             collection: 'directors',
+            overrideAccess: true,
             data: { name: 'Quentin Tarantino', movies: [movie.id] },
           })
 
           const post = await payload.create({
             collection: slugWithLocalizedRel,
+            overrideAccess: true,
             data: { localizedDirectors: [{ director: director.id }], title: 'english' },
             locale: 'en',
           })
 
           const { docs } = await payload.find({
             collection: slugWithLocalizedRel,
+            overrideAccess: true,
             locale: 'en',
             where: {
               'localizedDirectors.director.movies.name': { equals: 'Jackie Brown' },
@@ -1548,6 +1748,7 @@ describe('Relationships', () => {
       beforeEach(async () => {
         const thirdLevelDoc = await payload.create({
           collection: 'chained',
+          overrideAccess: true,
           data: {
             name: 'third',
           },
@@ -1557,6 +1758,7 @@ describe('Relationships', () => {
 
         const secondLevelDoc = await payload.create({
           collection: 'chained',
+          overrideAccess: true,
           data: {
             name: 'second',
             relation: thirdLevelID,
@@ -1567,6 +1769,7 @@ describe('Relationships', () => {
 
         const firstLevelDoc = await payload.create({
           collection: 'chained',
+          overrideAccess: true,
           data: {
             name: 'first',
             relation: secondLevelID,
@@ -1579,6 +1782,7 @@ describe('Relationships', () => {
       it('should allow querying one level deep', async () => {
         const query1 = await payload.find({
           collection: 'chained',
+          overrideAccess: true,
           where: {
             'relation.name': {
               equals: 'second',
@@ -1591,6 +1795,7 @@ describe('Relationships', () => {
 
         const query2 = await payload.find({
           collection: 'chained',
+          overrideAccess: true,
           where: {
             'relation.name': {
               equals: 'third',
@@ -1605,6 +1810,7 @@ describe('Relationships', () => {
       it('should allow querying two levels deep', async () => {
         const query = await payload.find({
           collection: 'chained',
+          overrideAccess: true,
           where: {
             'relation.relation.name': {
               equals: 'third',
@@ -1619,6 +1825,7 @@ describe('Relationships', () => {
       it('should allow querying on id two levels deep', async () => {
         const query = await payload.find({
           collection: 'chained',
+          overrideAccess: true,
           where: {
             'relation.relation.id': {
               equals: thirdLevelID,
@@ -1648,6 +1855,7 @@ describe('Relationships', () => {
       it('should allow querying within array nesting', async () => {
         const page = await payload.create({
           collection: 'pages',
+          overrideAccess: true,
           data: {
             menu: [
               {
@@ -1657,10 +1865,15 @@ describe('Relationships', () => {
           },
         })
 
-        const rel = await payload.create({ collection: 'rels-to-pages', data: { page: page.id } })
+        const rel = await payload.create({
+          overrideAccess: true,
+          collection: 'rels-to-pages',
+          data: { page: page.id },
+        })
 
         const resEquals = await payload.find({
           collection: 'rels-to-pages',
+          overrideAccess: true,
           where: { 'page.menu.label': { equals: 'hello' } },
         })
 
@@ -1669,6 +1882,7 @@ describe('Relationships', () => {
 
         const resIn = await payload.find({
           collection: 'rels-to-pages',
+          overrideAccess: true,
           where: { 'page.menu.label': { in: ['hello'] } },
         })
 
@@ -1680,26 +1894,31 @@ describe('Relationships', () => {
     it('should allow querying within block nesting', async () => {
       const director = await payload.create({
         collection: 'directors',
+        overrideAccess: true,
         data: { name: 'Test Director' },
       })
 
       const director_false = await payload.create({
         collection: 'directors',
+        overrideAccess: true,
         data: { name: 'False Director' },
       })
 
       const doc = await payload.create({
         collection: 'blocks',
+        overrideAccess: true,
         data: { blocks: [{ blockType: 'some', director: director.id }] },
       })
 
       await payload.create({
         collection: 'blocks',
+        overrideAccess: true,
         data: { blocks: [{ blockType: 'some', director: director_false.id }] },
       })
 
       const result = await payload.find({
         collection: 'blocks',
+        overrideAccess: true,
         where: { 'blocks.director.name': { equals: 'Test Director' } },
       })
 
@@ -1710,15 +1929,18 @@ describe('Relationships', () => {
     it('should allow querying polymorphic in an array', async () => {
       const director = await payload.create({
         collection: 'directors',
+        overrideAccess: true,
         data: { name: 'direcotr' },
       })
       const movie = await payload.create({
         collection: 'movies',
+        overrideAccess: true,
         data: { array: [{ polymorphic: { relationTo: 'directors', value: director.id } }] },
       })
 
       const res = await payload.find({
         collection: 'movies',
+        overrideAccess: true,
         where: { 'array.polymorphic': { equals: { value: director.id, relationTo: 'directors' } } },
       })
       expect(res.docs).toHaveLength(1)
@@ -1728,20 +1950,24 @@ describe('Relationships', () => {
     it('should allow querying hasMany in array', async () => {
       const director = await payload.create({
         collection: 'directors',
+        overrideAccess: true,
         data: { name: 'Test Director1337' },
       })
       const movie = await payload.create({
         collection: 'movies',
+        overrideAccess: true,
         data: { array: [{ director: [director.id] }] },
       })
       const res = await payload.find({
         collection: 'movies',
+        overrideAccess: true,
         where: { 'array.director': { equals: director.id } },
       })
       expect(res.docs).toHaveLength(1)
       expect(res.docs[0].id).toBe(movie.id)
       const res2 = await payload.find({
         collection: 'movies',
+        overrideAccess: true,
         where: { 'array.director.name': { equals: 'Test Director1337' } },
       })
       expect(res2.docs).toHaveLength(1)
@@ -1755,6 +1981,7 @@ describe('Relationships', () => {
         // 1. create a director
         director = await payload.create({
           collection: 'directors',
+          overrideAccess: true,
           data: {
             name: 'Quentin Tarantino',
           },
@@ -1763,6 +1990,7 @@ describe('Relationships', () => {
         // 2. create a movie
         const movie = await payload.create({
           collection: 'movies',
+          overrideAccess: true,
           data: {
             name: 'Pulp Fiction',
             director: director.id,
@@ -1772,6 +2000,7 @@ describe('Relationships', () => {
         // 3. create a screening
         await payload.create({
           collection: 'screenings',
+          overrideAccess: true,
           data: {
             name: 'Pulp Fiction Screening',
             movie: movie.id,
@@ -1782,6 +2011,7 @@ describe('Relationships', () => {
       it('should allow querying two levels deep', async () => {
         const query = await payload.find({
           collection: 'screenings',
+          overrideAccess: true,
           where: {
             'movie.director.name': {
               equals: director.name,
@@ -1816,6 +2046,7 @@ describe('Relationships', () => {
           movieList.map(async (movie) => {
             return await payload.create({
               collection: 'movies',
+              overrideAccess: true,
               data: {
                 name: movie,
               },
@@ -1827,6 +2058,7 @@ describe('Relationships', () => {
       it('should return more than 10 docs in relationship', async () => {
         const allMovies = await payload.find({
           collection: 'movies',
+          overrideAccess: true,
           limit: 20,
         })
 
@@ -1834,6 +2066,7 @@ describe('Relationships', () => {
 
         await payload.create({
           collection: 'directors',
+          overrideAccess: true,
           data: {
             name: 'Quentin Tarantino',
             movies: movieIDs,
@@ -1842,6 +2075,7 @@ describe('Relationships', () => {
 
         const director = await payload.find({
           collection: 'directors',
+          overrideAccess: true,
           where: {
             name: {
               equals: 'Quentin Tarantino',
@@ -1855,6 +2089,7 @@ describe('Relationships', () => {
       it('should allow clearing hasMany relationships', async () => {
         const fiveMovies = await payload.find({
           collection: 'movies',
+          overrideAccess: true,
           depth: 0,
           limit: 5,
         })
@@ -1863,6 +2098,7 @@ describe('Relationships', () => {
 
         const stanley = await payload.create({
           collection: 'directors',
+          overrideAccess: true,
           data: {
             name: 'Stanley Kubrick',
             movies: movieIDs,
@@ -1874,6 +2110,7 @@ describe('Relationships', () => {
         const stanleyNeverMadeMovies = await payload.update({
           id: stanley.id,
           collection: 'directors',
+          overrideAccess: true,
           data: {
             movies: null,
           },
@@ -1890,6 +2127,7 @@ describe('Relationships', () => {
           totalDocs: count,
         } = await payload.find({
           collection: treeSlug,
+          overrideAccess: true,
           where: {
             parent: { equals: null },
           },
@@ -1904,6 +2142,7 @@ describe('Relationships', () => {
           totalDocs: count,
         } = await payload.find({
           collection: treeSlug,
+          overrideAccess: true,
           where: {
             parent: { exists: false },
           },
@@ -1918,6 +2157,7 @@ describe('Relationships', () => {
           totalDocs: count,
         } = await payload.find({
           collection: treeSlug,
+          overrideAccess: true,
           where: {
             parent: { not_equals: null },
           },
@@ -1932,6 +2172,7 @@ describe('Relationships', () => {
           totalDocs: count,
         } = await payload.find({
           collection: treeSlug,
+          overrideAccess: true,
           where: {
             parent: { exists: true },
           },
@@ -1949,6 +2190,7 @@ describe('Relationships', () => {
         req.transactionID = await payload.db.beginTransaction?.()
         const related = await payload.create({
           collection: relationSlug,
+          overrideAccess: true,
           data: {
             name: 'parent',
           },
@@ -1956,6 +2198,7 @@ describe('Relationships', () => {
         })
         const withRelation = await payload.create({
           collection: slug,
+          overrideAccess: true,
           data: {
             filteredRelation: related.id,
           },
@@ -1972,9 +2215,14 @@ describe('Relationships', () => {
 
     describe('With passing an object', () => {
       it('should create with passing an object', async () => {
-        const movie = await payload.create({ collection: 'movies', data: {} })
+        const movie = await payload.create({
+          overrideAccess: true,
+          collection: 'movies',
+          data: {},
+        })
         const result = await payload.create({
           collection: 'object-writes',
+          overrideAccess: true,
           data: {
             many: [movie],
             manyPoly: [{ relationTo: 'movies', value: movie }],
@@ -1993,10 +2241,19 @@ describe('Relationships', () => {
       })
 
       it('should update with passing an object', async () => {
-        const movie = await payload.create({ collection: 'movies', data: {} })
-        const { id } = await payload.create({ collection: 'object-writes', data: {} })
+        const movie = await payload.create({
+          overrideAccess: true,
+          collection: 'movies',
+          data: {},
+        })
+        const { id } = await payload.create({
+          overrideAccess: true,
+          collection: 'object-writes',
+          data: {},
+        })
         const result = await payload.update({
           collection: 'object-writes',
+          overrideAccess: true,
           id,
           data: {
             many: [movie],
@@ -2018,14 +2275,17 @@ describe('Relationships', () => {
       it('should allow a localized hasMany relationship inside a block', async () => {
         const director1 = await payload.create({
           collection: 'directors',
+          overrideAccess: true,
           data: { name: 'director-1' },
         })
         const director2 = await payload.create({
           collection: 'directors',
+          overrideAccess: true,
           data: { name: 'director-2' },
         })
         const result = await payload.create({
           collection: 'blocks',
+          overrideAccess: true,
           data: {
             blocks: [
               {
@@ -2046,12 +2306,14 @@ describe('Relationships', () => {
     it('should allow REST querying on polymorphic relationships', async () => {
       const movie = await payload.create({
         collection: 'movies',
+        overrideAccess: true,
         data: {
           name: 'Pulp Fiction 2',
         },
       })
       await payload.create({
         collection: polymorphicRelationshipsSlug,
+        overrideAccess: true,
         data: {
           polymorphic: {
             relationTo: 'movies',
@@ -2110,12 +2372,14 @@ describe('Relationships', () => {
     mongoIt('should allow REST all querying on polymorphic relationships', async () => {
       const movie = await payload.create({
         collection: 'movies',
+        overrideAccess: true,
         data: {
           name: 'Pulp Fiction 2',
         },
       })
       await payload.create({
         collection: polymorphicRelationshipsSlug,
+        overrideAccess: true,
         data: {
           polymorphic: {
             relationTo: 'movies',
@@ -2143,12 +2407,14 @@ describe('Relationships', () => {
     it('should allow querying on polymorphic relationships with an object syntax', async () => {
       const movie = await payload.create({
         collection: 'movies',
+        overrideAccess: true,
         data: {
           name: 'Pulp Fiction 2',
         },
       })
       await payload.create({
         collection: polymorphicRelationshipsSlug,
+        overrideAccess: true,
         data: {
           polymorphic: {
             relationTo: 'movies',
@@ -2159,6 +2425,7 @@ describe('Relationships', () => {
 
       const res = await payload.find({
         collection: 'polymorphic-relationships',
+        overrideAccess: true,
         where: {
           polymorphic: {
             equals: {
@@ -2173,6 +2440,7 @@ describe('Relationships', () => {
 
       const res_2 = await payload.find({
         collection: 'polymorphic-relationships',
+        overrideAccess: true,
         where: {
           polymorphic: {
             equals: {
@@ -2189,6 +2457,7 @@ describe('Relationships', () => {
     it('should allow querying on hasMany polymorphic relationships with an object syntax', async () => {
       const movie = await payload.create({
         collection: 'movies',
+        overrideAccess: true,
         data: {
           name: 'Pulp Fiction 2',
         },
@@ -2196,6 +2465,7 @@ describe('Relationships', () => {
 
       const { id } = await payload.create({
         collection: polymorphicRelationshipsSlug,
+        overrideAccess: true,
         data: {
           polymorphicMany: [
             {
@@ -2208,6 +2478,7 @@ describe('Relationships', () => {
 
       const res = await payload.find({
         collection: 'polymorphic-relationships',
+        overrideAccess: true,
         where: {
           polymorphicMany: {
             equals: {
@@ -2225,6 +2496,7 @@ describe('Relationships', () => {
     it('should allow querying on localized polymorphic relationships with an object syntax', async () => {
       const movie = await payload.create({
         collection: 'movies',
+        overrideAccess: true,
         data: {
           name: 'Pulp Fiction 2',
         },
@@ -2232,6 +2504,7 @@ describe('Relationships', () => {
 
       const { id } = await payload.create({
         collection: polymorphicRelationshipsSlug,
+        overrideAccess: true,
         data: {
           polymorphicLocalized: {
             relationTo: 'movies',
@@ -2242,6 +2515,7 @@ describe('Relationships', () => {
 
       const res = await payload.find({
         collection: 'polymorphic-relationships',
+        overrideAccess: true,
         where: {
           polymorphicLocalized: {
             equals: {
@@ -2259,6 +2533,7 @@ describe('Relationships', () => {
     it('should allow querying on hasMany localized polymorphic relationships with an object syntax', async () => {
       const movie = await payload.create({
         collection: 'movies',
+        overrideAccess: true,
         data: {
           name: 'Pulp Fiction 2',
         },
@@ -2266,6 +2541,7 @@ describe('Relationships', () => {
 
       const { id } = await payload.create({
         collection: polymorphicRelationshipsSlug,
+        overrideAccess: true,
         data: {
           polymorphicManyLocalized: [
             {
@@ -2278,6 +2554,7 @@ describe('Relationships', () => {
 
       const res = await payload.find({
         collection: 'polymorphic-relationships',
+        overrideAccess: true,
         where: {
           polymorphicManyLocalized: {
             equals: {
@@ -2293,15 +2570,21 @@ describe('Relationships', () => {
     })
 
     it('should update document that polymorphicaly joined to another collection', async () => {
-      const item = await payload.create({ collection: 'items', data: { status: 'pending' } })
+      const item = await payload.create({
+        overrideAccess: true,
+        collection: 'items',
+        data: { status: 'pending' },
+      })
 
       await payload.create({
         collection: 'relations',
+        overrideAccess: true,
         data: { item: { relationTo: 'items', value: item } },
       })
 
       const updated = await payload.update({
         collection: 'items',
+        overrideAccess: true,
         data: { status: 'completed' },
         id: item.id,
       })
@@ -2330,21 +2613,25 @@ describe('Relationships', () => {
     it('should query a polymorphic relationship field with mixed custom ids and default', async () => {
       const customIDNumber = await payload.create({
         collection: 'custom-id-number',
+        overrideAccess: true,
         data: { id: 999 },
       })
 
       const customIDText = await payload.create({
         collection: 'custom-id',
+        overrideAccess: true,
         data: { id: 'custom-id' },
       })
 
       const page = await payload.create({
         collection: 'pages',
+        overrideAccess: true,
         data: {},
       })
 
       const relToCustomIdText = await payload.create({
         collection: 'rels-to-pages-and-custom-text-ids',
+        overrideAccess: true,
         data: {
           rel: {
             relationTo: 'custom-id',
@@ -2355,6 +2642,7 @@ describe('Relationships', () => {
 
       const relToCustomIdNumber = await payload.create({
         collection: 'rels-to-pages-and-custom-text-ids',
+        overrideAccess: true,
         data: {
           rel: {
             relationTo: 'custom-id-number',
@@ -2365,6 +2653,7 @@ describe('Relationships', () => {
 
       const relToPage = await payload.create({
         collection: 'rels-to-pages-and-custom-text-ids',
+        overrideAccess: true,
         data: {
           rel: {
             relationTo: 'pages',
@@ -2375,6 +2664,7 @@ describe('Relationships', () => {
 
       const pageResult = await payload.find({
         collection: 'rels-to-pages-and-custom-text-ids',
+        overrideAccess: true,
         where: {
           and: [
             {
@@ -2396,6 +2686,7 @@ describe('Relationships', () => {
 
       const customIDResult = await payload.find({
         collection: 'rels-to-pages-and-custom-text-ids',
+        overrideAccess: true,
         where: {
           and: [
             {
@@ -2417,6 +2708,7 @@ describe('Relationships', () => {
 
       const customIDNumberResult = await payload.find({
         collection: 'rels-to-pages-and-custom-text-ids',
+        overrideAccess: true,
         where: {
           and: [
             {
@@ -2438,6 +2730,7 @@ describe('Relationships', () => {
 
       const inResult_1 = await payload.find({
         collection: 'rels-to-pages-and-custom-text-ids',
+        overrideAccess: true,
         where: {
           'rel.value': {
             in: [page.id, customIDNumber.id],
@@ -2451,6 +2744,7 @@ describe('Relationships', () => {
 
       const inResult_2 = await payload.find({
         collection: 'rels-to-pages-and-custom-text-ids',
+        overrideAccess: true,
         where: {
           'rel.value': {
             in: [customIDNumber.id, customIDText.id],
@@ -2464,6 +2758,7 @@ describe('Relationships', () => {
 
       const inResult_3 = await payload.find({
         collection: 'rels-to-pages-and-custom-text-ids',
+        overrideAccess: true,
         where: {
           'rel.value': {
             in: [customIDNumber.id, customIDText.id, page.id],

@@ -1,8 +1,8 @@
 import type { Payload } from 'payload'
-import { describe, beforeAll, afterAll, it, expect } from 'vitest'
 
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import type { Page } from './payload-types.js'
 
@@ -24,6 +24,7 @@ describe('@payloadcms/plugin-redirects', () => {
       data: {
         title: 'Test',
       },
+      overrideAccess: true,
     })
   })
 
@@ -36,6 +37,7 @@ describe('@payloadcms/plugin-redirects', () => {
       collection: 'redirects',
       depth: 0,
       limit: 1,
+      overrideAccess: true,
     })
 
     expect(redirect).toBeTruthy()
@@ -55,6 +57,7 @@ describe('@payloadcms/plugin-redirects', () => {
         },
         type: '301',
       },
+      overrideAccess: true,
     })
 
     expect(redirect).toBeTruthy()
@@ -73,6 +76,7 @@ describe('@payloadcms/plugin-redirects', () => {
         },
         type: '301',
       },
+      overrideAccess: true,
     })
 
     expect(redirect).toBeTruthy()

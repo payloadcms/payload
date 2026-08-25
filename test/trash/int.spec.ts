@@ -54,6 +54,7 @@ describe('trash', () => {
         email: regularUser.email,
         password: regularUser.password,
       },
+      overrideAccess: true,
     })
 
     restrictedCollectionDoc = await payload.create({
@@ -61,6 +62,7 @@ describe('trash', () => {
       data: {
         title: 'With Access Control one',
       },
+      overrideAccess: true,
     })
 
     postsDocOne = await payload.create({
@@ -68,6 +70,7 @@ describe('trash', () => {
       data: {
         title: 'Doc one',
       },
+      overrideAccess: true,
     })
 
     postsDocTwo = await payload.create({
@@ -76,6 +79,7 @@ describe('trash', () => {
         title: 'Doc two',
         deletedAt: new Date().toISOString(),
       },
+      overrideAccess: true,
     })
   })
 
@@ -88,6 +92,7 @@ describe('trash', () => {
           exists: true,
         },
       },
+      overrideAccess: true,
     })
   })
 
@@ -155,6 +160,7 @@ describe('trash', () => {
           email: devUser.email,
           password: devUser.password,
         },
+        overrideAccess: true,
       })
     })
 
@@ -166,6 +172,7 @@ describe('trash', () => {
             collection: differentiatedTrashCollectionSlug as CollectionSlug,
             id,
             trash: true,
+            overrideAccess: true,
           })
         } catch (_e) {
           // Ignore errors from cleanup
@@ -180,6 +187,7 @@ describe('trash', () => {
         const doc = await payload.create({
           collection: differentiatedTrashCollectionSlug as CollectionSlug,
           data: { title: 'Regular user trash test' },
+          overrideAccess: true,
         })
 
         createdDocIds.push(doc.id)
@@ -203,6 +211,7 @@ describe('trash', () => {
         const doc = await payload.create({
           collection: differentiatedTrashCollectionSlug as CollectionSlug,
           data: { title: 'Admin trash test' },
+          overrideAccess: true,
         })
 
         createdDocIds.push(doc.id)
@@ -231,6 +240,7 @@ describe('trash', () => {
             title: 'Regular user perm delete test',
             deletedAt: new Date().toISOString(),
           },
+          overrideAccess: true,
         })
 
         createdDocIds.push(doc.id)
@@ -259,6 +269,7 @@ describe('trash', () => {
             title: 'Admin perm delete test',
             deletedAt: new Date().toISOString(),
           },
+          overrideAccess: true,
         })
 
         // Admin should be able to permanently delete
@@ -278,6 +289,7 @@ describe('trash', () => {
             collection: differentiatedTrashCollectionSlug as CollectionSlug,
             id: doc.id,
             trash: true,
+            overrideAccess: true,
           }),
         ).rejects.toThrow('Not Found')
       })
@@ -289,11 +301,13 @@ describe('trash', () => {
         const doc1 = await payload.create({
           collection: differentiatedTrashCollectionSlug as CollectionSlug,
           data: { title: 'Bulk trash test 1' },
+          overrideAccess: true,
         })
 
         const doc2 = await payload.create({
           collection: differentiatedTrashCollectionSlug as CollectionSlug,
           data: { title: 'Bulk trash test 2' },
+          overrideAccess: true,
         })
 
         createdDocIds.push(doc1.id, doc2.id)
@@ -325,6 +339,7 @@ describe('trash', () => {
             title: 'Bulk perm delete test 1',
             deletedAt: new Date().toISOString(),
           },
+          overrideAccess: true,
         })
 
         const doc2 = await payload.create({
@@ -333,6 +348,7 @@ describe('trash', () => {
             title: 'Bulk perm delete test 2',
             deletedAt: new Date().toISOString(),
           },
+          overrideAccess: true,
         })
 
         createdDocIds.push(doc1.id, doc2.id)
@@ -365,6 +381,7 @@ describe('trash', () => {
               like: 'Bulk perm delete test',
             },
           },
+          overrideAccess: true,
         })
 
         expect(remaining.docs.length).toBe(2)
@@ -378,6 +395,7 @@ describe('trash', () => {
             title: 'Admin bulk perm delete 1',
             deletedAt: new Date().toISOString(),
           },
+          overrideAccess: true,
         })
 
         const doc2 = await payload.create({
@@ -386,6 +404,7 @@ describe('trash', () => {
             title: 'Admin bulk perm delete 2',
             deletedAt: new Date().toISOString(),
           },
+          overrideAccess: true,
         })
 
         // Admin should be able to bulk permanently delete
@@ -415,6 +434,7 @@ describe('trash', () => {
               like: 'Admin bulk perm delete',
             },
           },
+          overrideAccess: true,
         })
 
         expect(remaining.docs.length).toBe(0)
@@ -428,6 +448,7 @@ describe('trash', () => {
         const allDocs = await payload.find({
           collection: postsSlug,
           trash: true,
+          overrideAccess: true,
         })
 
         expect(allDocs.totalDocs).toEqual(2)
@@ -442,6 +463,7 @@ describe('trash', () => {
             },
           },
           trash: true,
+          overrideAccess: true,
         })
 
         expect(trashedDocs.totalDocs).toEqual(1)
@@ -452,6 +474,7 @@ describe('trash', () => {
         const normalDocs = await payload.find({
           collection: postsSlug,
           trash: false,
+          overrideAccess: true,
         })
 
         expect(normalDocs.totalDocs).toEqual(1)
@@ -466,11 +489,13 @@ describe('trash', () => {
             deletedAt: null,
           },
           trash: true,
+          overrideAccess: true,
         })
 
         const result = await payload.find({
           collection: postsSlug,
           trash: false, // Normal query should return it now
+          overrideAccess: true,
         })
 
         const restored = result.docs.find(
@@ -488,11 +513,13 @@ describe('trash', () => {
         await payload.create({
           collection: postsSlug,
           data: { title: 'Doc one' },
+          overrideAccess: true,
         })
 
         const result = await payload.findDistinct({
           collection: postsSlug,
           field: 'title',
+          overrideAccess: true,
         })
 
         const titles = result.values.map((v) => v.title)
@@ -508,6 +535,7 @@ describe('trash', () => {
           collection: postsSlug,
           field: 'title',
           trash: true,
+          overrideAccess: true,
         })
 
         const titles = result.values.map((v) => v.title)
@@ -524,6 +552,7 @@ describe('trash', () => {
           where: {
             deletedAt: { exists: true },
           },
+          overrideAccess: true,
         })
 
         const titles = result.values.map((v) => v.title)
@@ -538,6 +567,7 @@ describe('trash', () => {
           where: {
             title: { equals: 'Doc two' },
           },
+          overrideAccess: true,
         })
 
         const titles = result.values.map((v) => v.title)
@@ -551,6 +581,7 @@ describe('trash', () => {
           collection: postsSlug,
           id: postsDocTwo.id,
           trash: true,
+          overrideAccess: true,
         })
 
         expect(trashedPostDoc).toBeDefined()
@@ -564,6 +595,7 @@ describe('trash', () => {
           payload.findByID({
             collection: postsSlug,
             id: postsDocTwo.id,
+            overrideAccess: true,
           }),
         ).rejects.toThrow('Not Found')
 
@@ -572,6 +604,7 @@ describe('trash', () => {
             collection: postsSlug,
             id: postsDocTwo.id,
             trash: false,
+            overrideAccess: true,
           }),
         ).rejects.toThrow('Not Found')
       })
@@ -590,12 +623,14 @@ describe('trash', () => {
               exists: true,
             },
           },
+          overrideAccess: true,
         })
       })
       it('should return all versions including soft-deleted docs in findVersions with trash: true', async () => {
         const allVersions = await payload.findVersions({
           collection: postsSlug,
           trash: true,
+          overrideAccess: true,
         })
 
         expect(allVersions.totalDocs).toEqual(2)
@@ -612,6 +647,7 @@ describe('trash', () => {
             },
           },
           trash: true,
+          overrideAccess: true,
         })
 
         expect(trashedVersions.totalDocs).toEqual(1)
@@ -622,6 +658,7 @@ describe('trash', () => {
         const normalVersions = await payload.findVersions({
           collection: postsSlug,
           trash: false,
+          overrideAccess: true,
         })
 
         expect(normalVersions.totalDocs).toEqual(1)
@@ -636,6 +673,7 @@ describe('trash', () => {
             deletedAt: null,
           },
           trash: true,
+          overrideAccess: true,
         })
 
         const versions = await payload.findVersions({
@@ -646,6 +684,7 @@ describe('trash', () => {
               equals: null,
             },
           },
+          overrideAccess: true,
         })
 
         expect(versions.docs.some((v) => v.parent === postsDocTwo.id)).toBe(true)
@@ -665,6 +704,7 @@ describe('trash', () => {
               exists: true,
             },
           },
+          overrideAccess: true,
         })
       })
 
@@ -677,6 +717,7 @@ describe('trash', () => {
             },
           },
           trash: true,
+          overrideAccess: true,
         })
 
         expect(trashedVersions.docs).toHaveLength(1)
@@ -687,6 +728,7 @@ describe('trash', () => {
           collection: postsSlug,
           id: version!.id,
           trash: true,
+          overrideAccess: true,
         })
 
         expect(trashedVersionDoc).toBeDefined()
@@ -704,6 +746,7 @@ describe('trash', () => {
             },
           },
           trash: true,
+          overrideAccess: true,
         })
 
         expect(trashedVersions.docs).toHaveLength(1)
@@ -714,6 +757,7 @@ describe('trash', () => {
           payload.findVersionByID({
             collection: postsSlug,
             id: version!.id,
+            overrideAccess: true,
           }),
         ).rejects.toThrow('Not Found')
 
@@ -722,6 +766,7 @@ describe('trash', () => {
             collection: postsSlug,
             id: version!.id,
             trash: false,
+            overrideAccess: true,
           }),
         ).rejects.toThrow('Not Found')
       })
@@ -736,6 +781,7 @@ describe('trash', () => {
             title: 'Updated Doc Two',
           },
           trash: true,
+          overrideAccess: true,
         })
 
         expect(updatedPostDoc).toBeDefined()
@@ -753,6 +799,7 @@ describe('trash', () => {
             data: {
               title: 'Updated Doc Two',
             },
+            overrideAccess: true,
           }),
         ).rejects.toThrow('Not Found')
 
@@ -764,6 +811,7 @@ describe('trash', () => {
               title: 'Updated Doc Two',
             },
             trash: false,
+            overrideAccess: true,
           }),
         ).rejects.toThrow('Not Found')
       })
@@ -775,6 +823,7 @@ describe('trash', () => {
           data: {
             title: 'Updated Doc One',
           },
+          overrideAccess: true,
         })
 
         expect(updatedPostDoc).toBeDefined()
@@ -791,6 +840,7 @@ describe('trash', () => {
             deletedAt: null,
           },
           trash: true,
+          overrideAccess: true,
         })
 
         expect(restored.deletedAt).toBeNull()
@@ -799,6 +849,7 @@ describe('trash', () => {
         const result = await payload.find({
           collection: postsSlug,
           trash: false,
+          overrideAccess: true,
         })
 
         const found = result.docs.find((doc) => doc.id === postsDocTwo.id)
@@ -820,6 +871,7 @@ describe('trash', () => {
               exists: true,
             },
           },
+          overrideAccess: true,
         })
 
         expect(result.docs).toBeDefined()
@@ -844,6 +896,7 @@ describe('trash', () => {
               exists: true,
             },
           },
+          overrideAccess: true,
         })
 
         expect(result.docs).toBeDefined()
@@ -866,6 +919,7 @@ describe('trash', () => {
             title: 'Doc three',
             deletedAt: new Date().toISOString(),
           },
+          overrideAccess: true,
         })
 
         const result = await payload.update({
@@ -879,6 +933,7 @@ describe('trash', () => {
               exists: true,
             },
           },
+          overrideAccess: true,
         })
         expect(result.docs).toBeDefined()
         expect(result.docs[0]?.id).toEqual(docThree.id)
@@ -893,6 +948,7 @@ describe('trash', () => {
           collection: postsSlug,
           id: docThree.id,
           trash: true,
+          overrideAccess: true,
         })
       })
     })
@@ -907,11 +963,13 @@ describe('trash', () => {
               exists: true,
             },
           },
+          overrideAccess: true,
         })
 
         const allDocs = await payload.find({
           collection: postsSlug,
           trash: true,
+          overrideAccess: true,
         })
 
         expect(allDocs.totalDocs).toEqual(0)
@@ -926,11 +984,13 @@ describe('trash', () => {
               exists: true,
             },
           },
+          overrideAccess: true,
         })
 
         const allDocs = await payload.find({
           collection: postsSlug,
           trash: true,
+          overrideAccess: true,
         })
 
         expect(allDocs.totalDocs).toEqual(1)
@@ -948,6 +1008,7 @@ describe('trash', () => {
             _status: 'draft',
           },
           draft: true,
+          overrideAccess: true,
         })
 
         expect(draftDoc.title).toBe('')
@@ -960,6 +1021,7 @@ describe('trash', () => {
           data: {
             deletedAt: new Date().toISOString(),
           },
+          overrideAccess: true,
         })
 
         expect(trashedDoc.deletedAt).toBeDefined()
@@ -971,6 +1033,7 @@ describe('trash', () => {
           collection: postsSlug,
           id: draftDoc.id,
           trash: true,
+          overrideAccess: true,
         })
       })
 
@@ -983,6 +1046,7 @@ describe('trash', () => {
             _status: 'draft',
           },
           draft: true,
+          overrideAccess: true,
         })
 
         // Trash it
@@ -992,6 +1056,7 @@ describe('trash', () => {
           data: {
             deletedAt: new Date().toISOString(),
           },
+          overrideAccess: true,
         })
 
         // Should be able to restore as draft without validation errors
@@ -1003,6 +1068,7 @@ describe('trash', () => {
             _status: 'draft',
           },
           trash: true,
+          overrideAccess: true,
         })
 
         expect(restoredDoc.deletedAt).toBeNull()
@@ -1014,6 +1080,7 @@ describe('trash', () => {
           collection: postsSlug,
           id: draftDoc.id,
           trash: true,
+          overrideAccess: true,
         })
       })
 
@@ -1026,6 +1093,7 @@ describe('trash', () => {
             _status: 'draft',
           },
           draft: true,
+          overrideAccess: true,
         })
 
         // Trash it
@@ -1035,6 +1103,7 @@ describe('trash', () => {
           data: {
             deletedAt: new Date().toISOString(),
           },
+          overrideAccess: true,
         })
 
         // Should NOT be able to restore as published - should fail validation
@@ -1047,6 +1116,7 @@ describe('trash', () => {
               _status: 'published',
             },
             trash: true,
+            overrideAccess: true,
           }),
         ).rejects.toThrow(/invalid/i)
 
@@ -1055,6 +1125,7 @@ describe('trash', () => {
           collection: postsSlug,
           id: draftDoc.id,
           trash: true,
+          overrideAccess: true,
         })
       })
     })
@@ -1065,6 +1136,7 @@ describe('trash', () => {
           payload.delete({
             collection: postsSlug,
             id: postsDocTwo.id,
+            overrideAccess: true,
           }),
         ).rejects.toThrow('Not Found')
 
@@ -1073,6 +1145,7 @@ describe('trash', () => {
             collection: postsSlug,
             id: postsDocTwo.id,
             trash: false,
+            overrideAccess: true,
           }),
         ).rejects.toThrow('Not Found')
       })
@@ -1082,11 +1155,13 @@ describe('trash', () => {
           collection: postsSlug,
           id: postsDocTwo.id,
           trash: true,
+          overrideAccess: true,
         })
 
         const allDocs = await payload.find({
           collection: postsSlug,
           trash: true,
+          overrideAccess: true,
         })
 
         expect(allDocs.totalDocs).toEqual(1)
@@ -1102,11 +1177,13 @@ describe('trash', () => {
           id: postsDocTwo.id,
           data: { title: 'Updated Before Restore Attempt' },
           trash: true,
+          overrideAccess: true,
         })
 
         const { docs: versions } = await payload.findVersions({
           collection: postsSlug,
           trash: true,
+          overrideAccess: true,
         })
         const version = versions.find((v) => v.parent === postsDocTwo.id)
 
@@ -1116,6 +1193,7 @@ describe('trash', () => {
           payload.restoreVersion({
             collection: postsSlug,
             id: version!.id,
+            overrideAccess: true,
           }),
         ).rejects.toThrow(/Cannot restore a version of a trashed document/i)
       })
@@ -1125,6 +1203,7 @@ describe('trash', () => {
       it('should return total count of non-soft-deleted documents by default (trash: false)', async () => {
         const result = await payload.count({
           collection: postsSlug,
+          overrideAccess: true,
         })
 
         expect(result.totalDocs).toEqual(1) // Only postsDocOne
@@ -1134,6 +1213,7 @@ describe('trash', () => {
         const result = await payload.count({
           collection: postsSlug,
           trash: true,
+          overrideAccess: true,
         })
 
         expect(result.totalDocs).toEqual(2)
@@ -1144,6 +1224,7 @@ describe('trash', () => {
           collection: postsSlug,
           trash: true,
           where: { deletedAt: { exists: true } },
+          overrideAccess: true,
         })
 
         expect(result.totalDocs).toEqual(1) // Only postsDocTwo
@@ -1160,6 +1241,7 @@ describe('trash', () => {
           title: 'Draft with Localized Field',
           _status: 'draft',
         },
+        overrideAccess: true,
       })
 
       // Update en locale as draft - isSavingDraft = true skips updateOne on the main table,
@@ -1173,6 +1255,7 @@ describe('trash', () => {
           _status: 'draft',
         },
         draft: true,
+        overrideAccess: true,
       })
 
       await payload.update({
@@ -1184,6 +1267,7 @@ describe('trash', () => {
           _status: 'draft',
         },
         draft: true,
+        overrideAccess: true,
       })
 
       // Bulk trash the document (simulates list view "Move to Trash")
@@ -1198,6 +1282,7 @@ describe('trash', () => {
             equals: post.id,
           },
         },
+        overrideAccess: true,
       })
 
       expect(trashResult.docs).toHaveLength(1)
@@ -1210,6 +1295,7 @@ describe('trash', () => {
         locale: 'en',
         draft: true,
         trash: true,
+        overrideAccess: true,
       })
 
       const trashedDocES = await payload.findByID({
@@ -1218,6 +1304,7 @@ describe('trash', () => {
         locale: 'es',
         draft: true,
         trash: true,
+        overrideAccess: true,
       })
 
       // localizedField should be preserved from the latest draft version for both locales,
@@ -1294,6 +1381,7 @@ describe('trash', () => {
               exists: true,
             },
           },
+          overrideAccess: true,
         })
       })
       it('should return all versions including soft-deleted docs in findVersions with trash: true', async () => {
@@ -1350,6 +1438,7 @@ describe('trash', () => {
               exists: true,
             },
           },
+          overrideAccess: true,
         })
       })
 
@@ -1476,6 +1565,7 @@ describe('trash', () => {
             title: 'Doc three',
             deletedAt: new Date().toISOString(),
           },
+          overrideAccess: true,
         })
 
         const res = await restClient.PATCH(`/${postsSlug}${query}`, {
@@ -1498,6 +1588,7 @@ describe('trash', () => {
           collection: postsSlug,
           id: docThree.id,
           trash: true,
+          overrideAccess: true,
         })
       })
     })
@@ -1559,6 +1650,7 @@ describe('trash', () => {
         const { docs: versions } = await payload.findVersions({
           collection: postsSlug,
           trash: true,
+          overrideAccess: true,
         })
         const version = versions.find((v) => v.parent === postsDocTwo.id)
 
@@ -1743,6 +1835,7 @@ describe('trash', () => {
               exists: true,
             },
           },
+          overrideAccess: true,
         })
       })
       it('should return all versions including soft-deleted docs in findVersions with trash: true', async () => {
@@ -1889,6 +1982,7 @@ describe('trash', () => {
               exists: true,
             },
           },
+          overrideAccess: true,
         })
       })
 
@@ -2226,7 +2320,7 @@ describe('trash', () => {
 
     afterEach(async () => {
       for (const id of createdPageIDs) {
-        await payload.delete({ collection: pagesSlug, id })
+        await payload.delete({ collection: pagesSlug, id, overrideAccess: true })
       }
       createdPageIDs.length = 0
     })
@@ -2239,6 +2333,7 @@ describe('trash', () => {
           title: 'Page with related posts',
           relatedPosts: [postsDocOne.id, postsDocTwo.id],
         },
+        overrideAccess: true,
       })
       createdPageIDs.push(page.id)
 
@@ -2246,6 +2341,7 @@ describe('trash', () => {
         collection: pagesSlug,
         id: page.id,
         depth: 1,
+        overrideAccess: true,
       })
 
       // The trashed post (postsDocTwo) should be absent from the relationship array
@@ -2262,6 +2358,7 @@ describe('trash', () => {
           title: 'Page with featured post',
           featuredPost: postsDocTwo.id,
         },
+        overrideAccess: true,
       })
       createdPageIDs.push(page.id)
 
@@ -2269,6 +2366,7 @@ describe('trash', () => {
         collection: pagesSlug,
         id: page.id,
         depth: 1,
+        overrideAccess: true,
       })
 
       expect(result.featuredPost).toBeNull()
@@ -2281,6 +2379,7 @@ describe('trash', () => {
           title: 'Page with featured post',
           featuredPost: postsDocOne.id,
         },
+        overrideAccess: true,
       })
       createdPageIDs.push(page.id)
 
@@ -2288,6 +2387,7 @@ describe('trash', () => {
         collection: pagesSlug,
         id: page.id,
         depth: 1,
+        overrideAccess: true,
       })
 
       expect((result.featuredPost as Post)?.id).toBe(postsDocOne.id)
@@ -2301,6 +2401,7 @@ describe('trash', () => {
           title: 'Page with related posts depth 0',
           relatedPosts: [postsDocOne.id, postsDocTwo.id],
         },
+        overrideAccess: true,
       })
       createdPageIDs.push(page.id)
 
@@ -2308,6 +2409,7 @@ describe('trash', () => {
         collection: pagesSlug,
         id: page.id,
         depth: 0,
+        overrideAccess: true,
       })
 
       // At depth=0, no population occurs - raw IDs are returned as stored
@@ -2323,7 +2425,7 @@ describe('trash', () => {
 
     afterEach(async () => {
       for (const id of createdRegistrationIDs) {
-        await payload.delete({ id, collection: registrationsSlug })
+        await payload.delete({ id, collection: registrationsSlug, overrideAccess: true })
       }
       createdRegistrationIDs.length = 0
     })
@@ -2337,6 +2439,7 @@ describe('trash', () => {
           post: postsDocTwo.id,
           title: 'Registration for a trashed post',
         },
+        overrideAccess: true,
       })
       createdRegistrationIDs.push(registration.id)
 
@@ -2347,6 +2450,7 @@ describe('trash', () => {
             equals: registration.id,
           },
         },
+        overrideAccess: true,
       })
 
       expect(result.totalDocs).toBe(1)
@@ -2372,6 +2476,7 @@ describe('trash', () => {
             equals: doc.id,
           },
         },
+        overrideAccess: true,
       })
 
       expect(result.totalDocs).toBe(1)

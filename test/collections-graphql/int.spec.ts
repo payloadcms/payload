@@ -119,10 +119,26 @@ describe('collections-graphql', () => {
     })
 
     it('should sort by multiple fields', async () => {
-      const doc1 = await payload.create({ collection: 'sort', data: { title: 'a', number: 1 } })
-      const doc2 = await payload.create({ collection: 'sort', data: { title: 'b', number: 1 } })
-      const doc3 = await payload.create({ collection: 'sort', data: { title: 'a', number: 2 } })
-      const doc4 = await payload.create({ collection: 'sort', data: { title: 'b', number: 3 } })
+      const doc1 = await payload.create({
+        collection: 'sort',
+        data: { title: 'a', number: 1 },
+        overrideAccess: true,
+      })
+      const doc2 = await payload.create({
+        collection: 'sort',
+        data: { title: 'b', number: 1 },
+        overrideAccess: true,
+      })
+      const doc3 = await payload.create({
+        collection: 'sort',
+        data: { title: 'a', number: 2 },
+        overrideAccess: true,
+      })
+      const doc4 = await payload.create({
+        collection: 'sort',
+        data: { title: 'b', number: 3 },
+        overrideAccess: true,
+      })
 
       const query = `query {
         Sorts(sort: "title, number") {
@@ -211,6 +227,7 @@ describe('collections-graphql', () => {
           errorBeforeChange: true,
           title: firstTitle,
         },
+        overrideAccess: true,
       })
       const second = await payload.create({
         collection: errorOnHookSlug,
@@ -218,6 +235,7 @@ describe('collections-graphql', () => {
           errorBeforeChange: true,
           title: secondTitle,
         },
+        overrideAccess: true,
       })
 
       const updated = 'updated title'
@@ -249,14 +267,17 @@ describe('collections-graphql', () => {
       const createdResult = await payload.findByID({
         id: data.createPost.id,
         collection: slug,
+        overrideAccess: true,
       })
       const updateFirstResult = await payload.findByID({
         id: first.id,
         collection: errorOnHookSlug,
+        overrideAccess: true,
       })
       const updateSecondResult = await payload.findByID({
         id: second.id,
         collection: errorOnHookSlug,
+        overrideAccess: true,
       })
 
       expect(data?.createPost.id).toBeDefined()
@@ -346,11 +367,13 @@ describe('collections-graphql', () => {
       it('should query a nested has-many relationship through GraphQL', async () => {
         const recalls = await payload.create({
           collection: relationSlug,
+          overrideAccess: true,
           data: { name: 'recalls' },
         })
 
         const electricCars = await payload.create({
           collection: relationSlug,
+          overrideAccess: true,
           data: { name: 'electric-cars' },
         })
 
@@ -740,6 +763,7 @@ describe('collections-graphql', () => {
                 // only randomize longitude to make distance comparison easy
                 point: [Math.random(), 0],
               },
+              overrideAccess: true,
             })
           })
 
@@ -996,6 +1020,7 @@ describe('collections-graphql', () => {
           data: {
             name: 'test',
           },
+          overrideAccess: true,
         })
 
         await payload.create({
@@ -1004,11 +1029,13 @@ describe('collections-graphql', () => {
             relationField: relation.id,
             title: 'has deleted relation',
           },
+          overrideAccess: true,
         })
 
         await payload.delete({
           id: relation.id,
           collection: relationSlug,
+          overrideAccess: true,
         })
 
         const query = `query {
@@ -1038,6 +1065,7 @@ describe('collections-graphql', () => {
           data: {
             name: 'test',
           },
+          overrideAccess: true,
         })
 
         await payload.create({
@@ -1046,11 +1074,13 @@ describe('collections-graphql', () => {
             relationHasManyField: [relation.id],
             title: 'has deleted relation hasMany',
           },
+          overrideAccess: true,
         })
 
         await payload.delete({
           id: relation.id,
           collection: relationSlug,
+          overrideAccess: true,
         })
 
         const query = `query {
@@ -1084,6 +1114,7 @@ describe('collections-graphql', () => {
             },
           },
           locale: '*',
+          overrideAccess: true,
         })
 
         await payload.update({
@@ -1092,6 +1123,7 @@ describe('collections-graphql', () => {
           data: {
             relationToSelf: newDoc.id,
           },
+          overrideAccess: true,
         })
 
         const query = `query {
@@ -1117,11 +1149,13 @@ describe('collections-graphql', () => {
           collection: 'relation',
           data: { _status: 'draft', name: 'relation_1_draft' },
           draft: true,
+          overrideAccess: true,
         })
 
         const relation_2 = await payload.create({
           collection: 'relation',
           data: { name: 'relation_2', _status: 'published' },
+          overrideAccess: true,
         })
 
         await payload.create({
@@ -1132,9 +1166,14 @@ describe('collections-graphql', () => {
             title: 'post with relations in draft',
             relationHasManyField: [relation_1_draft.id, relation_2.id],
           },
+          overrideAccess: true,
         })
 
-        await payload.delete({ collection: 'relation', id: relation_1_draft.id })
+        await payload.delete({
+          collection: 'relation',
+          id: relation_1_draft.id,
+          overrideAccess: true,
+        })
 
         const query = `query {
           Posts(draft:true,where: { title: { equals: "post with relations in draft" }}) {
@@ -1164,11 +1203,13 @@ describe('collections-graphql', () => {
         const relation_1_draft = await payload.create({
           collection: 'relation',
           data: { name: 'restricted' },
+          overrideAccess: true,
         })
 
         const relation_2 = await payload.create({
           collection: 'relation',
           data: { name: 'relation_2' },
+          overrideAccess: true,
         })
 
         await payload.create({
@@ -1179,6 +1220,7 @@ describe('collections-graphql', () => {
             title: 'post with relation restricted',
             relationHasManyField: [relation_1_draft.id, relation_2.id],
           },
+          overrideAccess: true,
         })
 
         const query = `query {
@@ -1218,6 +1260,7 @@ describe('collections-graphql', () => {
         title: publishValue,
       },
       draft: false,
+      overrideAccess: true,
     })
 
     // create cyclical relationship
@@ -1227,6 +1270,7 @@ describe('collections-graphql', () => {
       data: {
         relationToSelf: newDoc.id,
       },
+      overrideAccess: true,
     })
 
     // save new version
@@ -1237,6 +1281,7 @@ describe('collections-graphql', () => {
         title: draftValue,
       },
       draft: true,
+      overrideAccess: true,
     })
 
     const draftParentPublishedChild = `{
@@ -1289,6 +1334,7 @@ describe('collections-graphql', () => {
         title: 'example',
       },
       file,
+      overrideAccess: true,
     })
 
     // doc with upload relation
@@ -1297,6 +1343,7 @@ describe('collections-graphql', () => {
       data: {
         media: mediaDoc.id,
       },
+      overrideAccess: true,
     })
 
     const query = `{
@@ -1437,6 +1484,7 @@ async function createPost(overrides?: Partial<Post>) {
   const doc = await payload.create({
     collection: slug,
     data: { title: 'title', ...overrides },
+    overrideAccess: true,
   })
   return doc
 }

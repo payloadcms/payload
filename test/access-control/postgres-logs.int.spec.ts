@@ -62,6 +62,7 @@ describePostgres('Access Control - postgres logs', () => {
             title: 'Test Document',
             userRole: 'admin',
           },
+          overrideAccess: true,
         })
 
         const consoleCount = vitest.spyOn(console, 'log').mockImplementation(() => {})
@@ -102,6 +103,7 @@ describePostgres('Access Control - postgres logs', () => {
             title: 'Test Document',
             userRole: 'noAccess',
           },
+          overrideAccess: true,
         })
 
         const consoleCount = vitest.spyOn(console, 'log').mockImplementation(() => {})
@@ -147,6 +149,7 @@ describePostgres('Access Control - postgres logs', () => {
             updateRole: 'noAccess',
             deleteRole: 'admin',
           },
+          overrideAccess: true,
         })
 
         const consoleCount = vitest.spyOn(console, 'log').mockImplementation(() => {})
@@ -190,6 +193,7 @@ describePostgres('Access Control - postgres logs', () => {
             updateRole: 'noAccess',
             deleteRole: 'admin',
           },
+          overrideAccess: true,
         })
 
         const consoleCount = vitest.spyOn(console, 'log').mockImplementation(() => {})
@@ -234,6 +238,7 @@ describePostgres('Access Control - postgres logs', () => {
             updateRole: 'admin',
             deleteRole: 'noAccess',
           },
+          overrideAccess: true,
         })
 
         const permissions = await getEntityPermissions({
@@ -270,6 +275,7 @@ describePostgres('Access Control - postgres logs', () => {
             updateRole: 'noAccess',
             deleteRole: 'admin',
           },
+          overrideAccess: true,
         })
 
         const consoleCount = vitest.spyOn(console, 'log').mockImplementation(() => {})

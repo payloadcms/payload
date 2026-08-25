@@ -68,6 +68,7 @@ describe('@payloadcms/storage-azure', () => {
       collection: mediaSlug,
       data: {},
       filePath: path.resolve(dirname, '../uploads/image.png'),
+      overrideAccess: true,
     })
 
     expect(upload.id).toBeTruthy()
@@ -80,6 +81,7 @@ describe('@payloadcms/storage-azure', () => {
       collection: mediaWithPrefixSlug,
       data: {},
       filePath: path.resolve(dirname, '../uploads/image.png'),
+      overrideAccess: true,
     })
 
     expect(upload.id).toBeTruthy()
@@ -110,6 +112,7 @@ describe('@payloadcms/storage-azure', () => {
     const uploadData = (await payload.findByID({
       collection: collectionSlug,
       id: uploadId,
+      overrideAccess: true,
     })) as unknown as { filename: string; sizes: Record<string, { filename: string }> }
 
     const fileKeys = Object.values(uploadData.sizes || {}).map(({ filename: rawFilename }) =>

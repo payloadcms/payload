@@ -78,6 +78,7 @@ describe('graphql', () => {
         data: {
           title: 'example post',
         },
+        overrideAccess: true,
       })
       await payload.update({
         collection: 'posts',
@@ -85,6 +86,7 @@ describe('graphql', () => {
         data: {
           relationToSelf: post.id,
         },
+        overrideAccess: true,
       })
 
       const query = `query {
@@ -114,6 +116,7 @@ describe('graphql', () => {
           title: 'example post',
           'hyphenated-name': 'example-hyphenated-name',
         },
+        overrideAccess: true,
       })
 
       const query = `query {
@@ -132,7 +135,7 @@ describe('graphql', () => {
     })
 
     it('should not error because of non nullable fields', async () => {
-      await payload.delete({ collection: 'posts', where: {} })
+      await payload.delete({ collection: 'posts', where: {}, overrideAccess: true })
 
       // this is an array if any errors
       const res_1 = await restClient
@@ -156,6 +159,7 @@ query {
       await payload.create({
         collection: 'posts',
         data: { title: 'any-title' },
+        overrideAccess: true,
       })
 
       const res_2 = await restClient
@@ -188,6 +192,7 @@ query {
             },
           ],
         },
+        overrideAccess: true,
       })
 
       // Query without select: true
@@ -242,6 +247,7 @@ query {
       await payload.delete({
         collection: 'posts',
         id: createdPost.id,
+        overrideAccess: true,
       })
     })
 
@@ -251,6 +257,7 @@ query {
         data: {
           title: 'Post 1',
         },
+        overrideAccess: true,
       })
 
       await payload.updateGlobal({
@@ -263,6 +270,7 @@ query {
             },
           ],
         },
+        overrideAccess: true,
       })
 
       const query = `query {
@@ -287,6 +295,7 @@ query {
       await payload.delete({
         collection: 'posts',
         id: post1.id,
+        overrideAccess: true,
       })
 
       const afterDelete = await restClient

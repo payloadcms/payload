@@ -77,6 +77,7 @@ export default buildConfigWithDefaults({
         email: devUser.email,
         password: devUser.password,
       },
+      overrideAccess: true,
     })
 
     await payload.create({
@@ -101,6 +102,7 @@ export default buildConfigWithDefaults({
           field9: 'text field 9',
         })),
       },
+      overrideAccess: true,
     })
   },
   typescript: {

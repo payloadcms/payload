@@ -137,6 +137,7 @@ export const getConfig: () => Partial<Config> = () => ({
         email: devUser.email,
         password: devUser.password,
       },
+      overrideAccess: true,
     })
 
     // // Create image

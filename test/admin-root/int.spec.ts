@@ -6,8 +6,8 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
-import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { devUser } from '../credentials.js'
 import { postsSlug } from './collections/Posts/index.js'
 
 let payload: Payload
@@ -54,6 +54,7 @@ describe('Admin (Root) Tests', () => {
       data: {
         text: 'LOCAL API EXAMPLE',
       },
+      overrideAccess: true,
     })
 
     expect(newPost.text).toEqual('LOCAL API EXAMPLE')

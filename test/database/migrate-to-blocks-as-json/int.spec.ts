@@ -41,6 +41,7 @@ describe('migrateToBlocksAsJSON', { db: 'drizzle' }, () => {
         name: 'Related Item 1',
       },
       depth: 0,
+      overrideAccess: true,
     })
 
     // Seed many documents to test batching (250 documents to ensure multiple batches with default size of 100)
@@ -59,6 +60,7 @@ describe('migrateToBlocksAsJSON', { db: 'drizzle' }, () => {
             },
           ],
         },
+        overrideAccess: true,
       })
       batchPosts.push(batchPost.id)
     }
@@ -79,6 +81,7 @@ describe('migrateToBlocksAsJSON', { db: 'drizzle' }, () => {
           },
         ],
       },
+      overrideAccess: true,
     })
 
     const versionedPost = await payload.create({
@@ -95,6 +98,7 @@ describe('migrateToBlocksAsJSON', { db: 'drizzle' }, () => {
           },
         ],
       },
+      overrideAccess: true,
     })
 
     // create another version of post
@@ -112,6 +116,7 @@ describe('migrateToBlocksAsJSON', { db: 'drizzle' }, () => {
           },
         ],
       },
+      overrideAccess: true,
     })
 
     // and more
@@ -121,6 +126,7 @@ describe('migrateToBlocksAsJSON', { db: 'drizzle' }, () => {
       data: {
         title: 'Versioned Post 1 - Updated Again',
       },
+      overrideAccess: true,
     })
 
     await payload.updateGlobal({
@@ -133,6 +139,7 @@ describe('migrateToBlocksAsJSON', { db: 'drizzle' }, () => {
           },
         ],
       },
+      overrideAccess: true,
     })
 
     await payload.updateGlobal({
@@ -145,6 +152,7 @@ describe('migrateToBlocksAsJSON', { db: 'drizzle' }, () => {
           },
         ],
       },
+      overrideAccess: true,
     })
 
     await payload.updateGlobal({
@@ -157,6 +165,7 @@ describe('migrateToBlocksAsJSON', { db: 'drizzle' }, () => {
           },
         ],
       },
+      overrideAccess: true,
     })
 
     const currentConfig = readFileSync(path.resolve(dirname, 'config.ts'), 'utf-8')
@@ -194,6 +203,7 @@ describe('migrateToBlocksAsJSON', { db: 'drizzle' }, () => {
       collection: 'posts',
       id: post.id,
       depth: 0,
+      overrideAccess: true,
     })
 
     expect(updatedPost.content).toEqual([
@@ -212,12 +222,14 @@ describe('migrateToBlocksAsJSON', { db: 'drizzle' }, () => {
       collection: 'posts-versioned',
       id: versionedPost.id,
       depth: 0,
+      overrideAccess: true,
     })
 
     // Verify all batch posts were migrated
     const { totalDocs: batchPostsTotal } = await migratedPayload.find({
       // @ts-expect-error not generated
       collection: 'posts-batches',
+      overrideAccess: true,
       limit: 0,
     })
     expect(batchPostsTotal).toBe(1000)
@@ -227,6 +239,7 @@ describe('migrateToBlocksAsJSON', { db: 'drizzle' }, () => {
       // @ts-expect-error not generated
       collection: 'posts-batches',
       id: batchPosts[500], // Check middle post
+      overrideAccess: true,
       depth: 0,
     })
     expect(sampleBatchPost.title).toBe('Batch Post 501')
@@ -255,6 +268,7 @@ describe('migrateToBlocksAsJSON', { db: 'drizzle' }, () => {
       limit: 0,
       sort: 'createdAt',
       depth: 0,
+      overrideAccess: true,
     })
 
     expect(updatedVersions.totalDocs).toBe(3)
@@ -284,6 +298,7 @@ describe('migrateToBlocksAsJSON', { db: 'drizzle' }, () => {
     const updatedGlobal = await migratedPayload.findGlobal({
       slug: 'global',
       depth: 0,
+      overrideAccess: true,
     })
 
     expect(updatedGlobal.content).toEqual([
@@ -298,6 +313,7 @@ describe('migrateToBlocksAsJSON', { db: 'drizzle' }, () => {
     const updatedVersionedGlobal = await migratedPayload.findGlobal({
       slug: 'global-versioned',
       depth: 0,
+      overrideAccess: true,
     })
 
     expect(updatedVersionedGlobal.content).toEqual([

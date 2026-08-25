@@ -21,6 +21,7 @@ export const inlineTaskTestDelayedWorkflow: WorkflowConfig<'inlineTaskTestDelaye
           data: {
             title: input.message,
           },
+          overrideAccess: true,
         })
         await new Promise((resolve) => setTimeout(resolve, 100))
 

@@ -1,14 +1,18 @@
 import type { Payload } from 'payload'
 
-import { devUser } from '../credentials.js'
 import { executePromises } from '../__helpers/shared/executePromises.js'
+import { devUser } from '../credentials.js'
 import { nonUniqueSortSlug } from './collections/NonUniqueSort/index.js'
 
 export async function seedSortable(payload: Payload) {
-  await payload.delete({ collection: 'orderable', where: {} })
-  await payload.delete({ collection: 'orderable-join', where: {} })
+  await payload.delete({ collection: 'orderable', where: {}, overrideAccess: true })
+  await payload.delete({ collection: 'orderable-join', where: {}, overrideAccess: true })
 
-  const joinA = await payload.create({ collection: 'orderable-join', data: { title: 'Join A' } })
+  const joinA = await payload.create({
+    collection: 'orderable-join',
+    data: { title: 'Join A' },
+    overrideAccess: true,
+  })
 
   await executePromises(
     [
@@ -21,11 +25,16 @@ export async function seedSortable(payload: Payload) {
         payload.create({
           collection: 'orderable',
           data,
+          overrideAccess: true,
         }),
     ),
   )
 
-  await payload.create({ collection: 'orderable-join', data: { title: 'Join B' } })
+  await payload.create({
+    collection: 'orderable-join',
+    data: { title: 'Join B' },
+    overrideAccess: true,
+  })
 
   // Create 10 items to be sorted by non-unique field
   for (const i of Array.from({ length: 10 }, (_, index) => index)) {
@@ -43,6 +52,7 @@ export async function seedSortable(payload: Payload) {
         title: `Post ${i}`,
         order,
       },
+      overrideAccess: true,
     })
 
     // Wait 2 seconds to guarantee that the createdAt date is different

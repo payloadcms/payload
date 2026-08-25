@@ -53,6 +53,7 @@ describe(
         collection: 'categories',
         // @ts-expect-error not generated
         data: { title: 'a' },
+        overrideAccess: true,
       })
       createdIDs.push(category.id)
 
@@ -69,7 +70,7 @@ describe(
       const payload = await getPayloadInstance()
 
       for (const id of createdIDs) {
-        await payload.delete({ collection: 'categories', id })
+        await payload.delete({ collection: 'categories', id, overrideAccess: true })
       }
 
       createdIDs.length = 0
@@ -88,6 +89,7 @@ describe(
         // @ts-expect-error not generated
         select: { title: true },
         where: { title: { equals: 'a' } },
+        overrideAccess: true,
       })
 
       expect(aggregateSpy).not.toHaveBeenCalled()
@@ -107,6 +109,7 @@ describe(
         joins: { posts: false },
         limit: 20,
         where: { title: { equals: 'a' } },
+        overrideAccess: true,
       })
 
       expect(aggregateSpy).not.toHaveBeenCalled()
@@ -125,6 +128,7 @@ describe(
         id: category.id,
         // @ts-expect-error not generated
         select: { title: true },
+        overrideAccess: true,
       })
 
       expect(aggregateSpy).not.toHaveBeenCalled()
@@ -142,6 +146,7 @@ describe(
         collection: 'categories',
         limit: 20,
         where: { title: { equals: 'a' } },
+        overrideAccess: true,
       })
 
       expect(aggregateSpy).toHaveBeenCalledTimes(1)

@@ -7,6 +7,7 @@ export const externalTaskHandler: TaskHandler<'ExternalTask'> = async ({ input, 
     data: {
       title: input.message,
     },
+    overrideAccess: true,
   })
   return {
     output: {

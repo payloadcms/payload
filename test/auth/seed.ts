@@ -14,6 +14,7 @@ export const seed: Config['onInit'] = async (payload) => {
       password: devUser.password,
       roles: ['admin'],
     },
+    overrideAccess: true,
   })
 
   await payload.create({
@@ -22,6 +23,7 @@ export const seed: Config['onInit'] = async (payload) => {
       apiKey: uuid(),
       enableAPIKey: true,
     },
+    overrideAccess: true,
   })
 
   await payload.create({
@@ -30,5 +32,6 @@ export const seed: Config['onInit'] = async (payload) => {
       apiKey: uuid(),
       enableAPIKey: true,
     },
+    overrideAccess: true,
   })
 }

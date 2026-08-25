@@ -4,8 +4,8 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import { afterAll, beforeAll, expect, it } from 'vitest'
 
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { describe } from '../__helpers/int/vitest.js'
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -48,6 +48,7 @@ describe(
           collection: 'simple',
           pagination: false,
           where: { id: { in: IN } },
+          overrideAccess: true,
         }),
       ).rejects.toBeTruthy()
 
@@ -57,6 +58,7 @@ describe(
           collection: 'simple',
           pagination: false,
           where: { id: { not_in: IN } },
+          overrideAccess: true,
         }),
       ).rejects.toBeTruthy()
 
@@ -68,6 +70,7 @@ describe(
           collection: 'simple',
           pagination: false,
           where: { id: { in: IN } },
+          overrideAccess: true,
         }),
       ).resolves.toBeTruthy()
 
@@ -77,19 +80,23 @@ describe(
           collection: 'simple',
           pagination: false,
           where: { id: { not_in: IN } },
+          overrideAccess: true,
         }),
       ).resolves.toBeTruthy()
 
       // Verify that "in" still works properly
 
       const docs = await Promise.all(
-        Array.from({ length: 300 }, () => payload.create({ collection: 'simple', data: {} })),
+        Array.from({ length: 300 }, () =>
+          payload.create({ collection: 'simple', data: {}, overrideAccess: true }),
+        ),
       )
 
       const res = await payload.find({
         collection: 'simple',
         pagination: false,
         where: { id: { in: docs.map((e) => e.id) } },
+        overrideAccess: true,
       })
 
       expect(res.totalDocs).toBe(300)
@@ -107,6 +114,7 @@ describe(
           text: 'Test',
         },
         locale: 'en',
+        overrideAccess: true,
       })
 
       const res = await payload.find({
@@ -121,6 +129,7 @@ describe(
           },
         },
         locale: 'en',
+        overrideAccess: true,
       })
 
       expect(res.totalDocs).toBe(1)

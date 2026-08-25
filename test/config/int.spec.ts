@@ -7,8 +7,8 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { testFilePath } from './testFilePath.js'
 
 let restClient: NextRESTClient
@@ -61,6 +61,7 @@ describe('Config', () => {
       // creation will reset the db schema.
       const result2: any = await payload2.create({
         collection: 'payload2',
+        overrideAccess: true,
         data: {
           title2: 'Payload 2',
         },
@@ -84,6 +85,7 @@ describe('Config', () => {
       // If payload was still incorrectly cached, this would fail, as the old payload config would still be used
       const result3: any = await payload3.create({
         collection: 'payload3',
+        overrideAccess: true,
         data: {
           title3: 'Payload 3',
         },

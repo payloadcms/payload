@@ -22,6 +22,7 @@ export const HooksConfig: Promise<SanitizedConfig> = buildConfigWithDefaults({
         email: devUser.email,
         password: devUser.password,
       },
+      overrideAccess: true,
     })
   },
   typescript: {

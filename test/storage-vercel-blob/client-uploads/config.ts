@@ -32,6 +32,7 @@ export default buildConfigWithDefaults({
         email: devUser.email,
         password: devUser.password,
       },
+      overrideAccess: true,
     })
   },
   storage: [

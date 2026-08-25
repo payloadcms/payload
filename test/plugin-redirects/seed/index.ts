@@ -14,6 +14,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
         password: 'demo',
       },
       req,
+      overrideAccess: true,
     })
 
     return true

@@ -226,6 +226,7 @@ export function buildPluginCloudStorageIntConfig({
           email: devUser.email,
           password: devUser.password,
         },
+        overrideAccess: true,
       })
 
       await createTestBucket()

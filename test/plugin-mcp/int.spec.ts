@@ -775,6 +775,7 @@ describe('@payloadcms/plugin-mcp', () => {
             equals: userId,
           },
         },
+        overrideAccess: true,
       })
 
       const modifiedPrompt = docs?.[0]
@@ -806,6 +807,7 @@ describe('@payloadcms/plugin-mcp', () => {
             equals: userId,
           },
         },
+        overrideAccess: true,
       })
 
       const returnedResource = docs?.[0]
@@ -835,6 +837,7 @@ describe('@payloadcms/plugin-mcp', () => {
             equals: userId,
           },
         },
+        overrideAccess: true,
       })
 
       const returnedResource = docs?.[0]
@@ -873,6 +876,7 @@ describe('@payloadcms/plugin-mcp', () => {
             equals: userId,
           },
         },
+        overrideAccess: true,
       })
 
       const roll = docs?.[0]
@@ -893,12 +897,12 @@ describe('@payloadcms/plugin-mcp', () => {
       uploadServers.length = 0
 
       for (const id of createdMediaIDs) {
-        await payload.delete({ collection: 'media', id })
+        await payload.delete({ collection: 'media', id, overrideAccess: true })
       }
       createdMediaIDs.length = 0
 
       for (const id of createdPostIDs) {
-        await payload.delete({ collection: 'posts', id })
+        await payload.delete({ collection: 'posts', id, overrideAccess: true })
       }
       createdPostIDs.length = 0
     })
@@ -1059,7 +1063,9 @@ describe('@payloadcms/plugin-mcp', () => {
       createdMediaIDs.push(...result.docs.map(({ doc }) => doc.id))
 
       const [storedPNG, storedJPEG] = await Promise.all(
-        result.docs.map(({ doc }) => payload.findByID({ collection: 'media', id: doc.id })),
+        result.docs.map(({ doc }) =>
+          payload.findByID({ collection: 'media', id: doc.id, overrideAccess: true }),
+        ),
       )
 
       expect(result.errors).toEqual([])
@@ -1106,6 +1112,7 @@ describe('@payloadcms/plugin-mcp', () => {
       const storedMedia = await payload.findByID({
         id: createdMedia.id,
         collection: 'media',
+        overrideAccess: true,
       })
 
       expect(storedMedia.alt).toBe('Uploaded from a URL through MCP')
@@ -1121,6 +1128,7 @@ describe('@payloadcms/plugin-mcp', () => {
           alt: 'Original asset',
         },
         filePath: path.resolve(dirname, '../uploads/image.jpg'),
+        overrideAccess: true,
       })
       createdMediaIDs.push(media.id)
       const image = await readFile(path.resolve(dirname, '../uploads/image.png'))
@@ -1147,6 +1155,7 @@ describe('@payloadcms/plugin-mcp', () => {
       const storedMedia = await payload.findByID({
         id: media.id,
         collection: 'media',
+        overrideAccess: true,
       })
 
       expect(storedMedia.alt).toBe('Replaced from base64 through MCP')
@@ -1231,7 +1240,7 @@ describe('@payloadcms/plugin-mcp', () => {
         expect(updated.filename).toBe('mcp-updated.png')
       } finally {
         if (id !== undefined) {
-          await payload.delete({ id, collection: 'media' })
+          await payload.delete({ id, collection: 'media', overrideAccess: true })
         }
       }
     })
@@ -1288,6 +1297,7 @@ describe('@payloadcms/plugin-mcp', () => {
         collection: 'posts',
         draft: false,
         locale: 'all',
+        overrideAccess: true,
       })
 
       expect(storedPost._status).toMatchObject({ en: 'published' })
@@ -1354,6 +1364,7 @@ describe('@payloadcms/plugin-mcp', () => {
       const storedMedia = await payload.findByID({
         id: createdMedia.id,
         collection: 'media',
+        overrideAccess: true,
       })
 
       expect(storedMedia.alt).toBe('Uploaded from base64 through MCP')
@@ -1369,6 +1380,7 @@ describe('@payloadcms/plugin-mcp', () => {
           content: 'Content for test post.',
           title: 'Test Post for Finding',
         },
+        overrideAccess: true,
       })
       createdPostIDs.push(post.id)
 
@@ -1405,6 +1417,7 @@ describe('@payloadcms/plugin-mcp', () => {
           content: 'Content that should be omitted',
           title: 'Select Test Post',
         },
+        overrideAccess: true,
       })
 
       const apiKey = await getApiKey()
@@ -1435,6 +1448,7 @@ describe('@payloadcms/plugin-mcp', () => {
           price: 25,
           title: 'Countable Product',
         },
+        overrideAccess: true,
       })
 
       const apiKey = await getApiKey()
@@ -1455,7 +1469,7 @@ describe('@payloadcms/plugin-mcp', () => {
 
       expect(result.totalDocs).toBeGreaterThanOrEqual(1)
 
-      await payload.delete({ id: product.id, collection: 'products' })
+      await payload.delete({ id: product.id, collection: 'products', overrideAccess: true })
     })
 
     it('should call duplicateDocument', async ({ mcp }) => {
@@ -1465,6 +1479,7 @@ describe('@payloadcms/plugin-mcp', () => {
           price: 35,
           title: 'Original Product',
         },
+        overrideAccess: true,
       })
 
       const apiKey = await getApiKey()
@@ -1485,8 +1500,8 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(duplicated.id).not.toBe(product.id)
       expect(duplicated.title).toBe('Duplicated Product')
 
-      await payload.delete({ id: duplicated.id, collection: 'products' })
-      await payload.delete({ id: product.id, collection: 'products' })
+      await payload.delete({ id: duplicated.id, collection: 'products', overrideAccess: true })
+      await payload.delete({ id: product.id, collection: 'products', overrideAccess: true })
     })
 
     it('should not enable duplicateDocument for auth collections by default', async ({ mcp }) => {
@@ -1528,6 +1543,7 @@ describe('@payloadcms/plugin-mcp', () => {
           price: 45,
           title: 'Distinct Product',
         },
+        overrideAccess: true,
       })
 
       const apiKey = await getApiKey()
@@ -1543,7 +1559,7 @@ describe('@payloadcms/plugin-mcp', () => {
 
       expect(result.values.some((value) => value.title === 'Distinct Product')).toBe(true)
 
-      await payload.delete({ id: product.id, collection: 'products' })
+      await payload.delete({ id: product.id, collection: 'products', overrideAccess: true })
     })
 
     it('should call collection version tools', async ({ mcp }) => {
@@ -1553,6 +1569,7 @@ describe('@payloadcms/plugin-mcp', () => {
           content: 'Initial version content',
           title: 'Versioned Post',
         },
+        overrideAccess: true,
       })
 
       await payload.update({
@@ -1561,6 +1578,7 @@ describe('@payloadcms/plugin-mcp', () => {
         data: {
           title: 'Versioned Post Updated',
         },
+        overrideAccess: true,
       })
 
       const versions = await payload.findVersions({
@@ -1572,6 +1590,7 @@ describe('@payloadcms/plugin-mcp', () => {
             equals: post.id,
           },
         },
+        overrideAccess: true,
       })
       const versionID = String(versions.docs[0]!.id)
 
@@ -1630,7 +1649,7 @@ describe('@payloadcms/plugin-mcp', () => {
       const restored = getToolDoc<{ id: number | string }>(restoreResponse)
       expect(restored.id).toBe(post.id)
 
-      await payload.delete({ id: post.id, collection: 'posts' })
+      await payload.delete({ id: post.id, collection: 'posts', overrideAccess: true })
     })
 
     it('should pass populate, joins, trash, and pagination to findDocuments list queries', async ({
@@ -1643,6 +1662,7 @@ describe('@payloadcms/plugin-mcp', () => {
           content: 'Find options pass-through content',
           title: 'Find Options Pass Through',
         },
+        overrideAccess: true,
       })
       const apiKey = await getApiKey()
       const client = await mcp.connect(apiKey)
@@ -1676,7 +1696,7 @@ describe('@payloadcms/plugin-mcp', () => {
         )
       } finally {
         findSpy.mockRestore()
-        await payload.delete({ id: post.id, collection: 'posts' })
+        await payload.delete({ id: post.id, collection: 'posts', overrideAccess: true })
       }
     })
 
@@ -1688,6 +1708,7 @@ describe('@payloadcms/plugin-mcp', () => {
           content: 'Find by ID options pass-through content',
           title: 'Find By ID Options Pass Through',
         },
+        overrideAccess: true,
       })
       const apiKey = await getApiKey()
       const client = await mcp.connect(apiKey)
@@ -1718,7 +1739,7 @@ describe('@payloadcms/plugin-mcp', () => {
         )
       } finally {
         findByIDSpy.mockRestore()
-        await payload.delete({ id: post.id, collection: 'posts' })
+        await payload.delete({ id: post.id, collection: 'posts', overrideAccess: true })
       }
     })
 
@@ -1729,6 +1750,7 @@ describe('@payloadcms/plugin-mcp', () => {
           content: 'Content for test post to update.',
           title: 'Test Post for Updating',
         },
+        overrideAccess: true,
       })
 
       const apiKey = await getApiKey()
@@ -1765,6 +1787,7 @@ describe('@payloadcms/plugin-mcp', () => {
         },
         draft: true,
         locale: 'en',
+        overrideAccess: true,
       })
 
       try {
@@ -1774,6 +1797,7 @@ describe('@payloadcms/plugin-mcp', () => {
           data: { title: 'Spanish draft title' },
           draft: true,
           locale: 'es',
+          overrideAccess: true,
         })
 
         const apiKey = await getApiKey()
@@ -1797,12 +1821,14 @@ describe('@payloadcms/plugin-mcp', () => {
           collection: 'posts',
           draft: false,
           locale: 'all',
+          overrideAccess: true,
         })
         const spanishDraft = await payload.findByID({
           id: post.id,
           collection: 'posts',
           draft: true,
           locale: 'es',
+          overrideAccess: true,
         })
 
         expect(callResponse).toBeDefined()
@@ -1812,7 +1838,7 @@ describe('@payloadcms/plugin-mcp', () => {
         expect(spanishDraft.title).toBe('Spanish draft title')
         expect(spanishDraft._status).toBe('draft')
       } finally {
-        await payload.delete({ collection: 'posts', id: post.id })
+        await payload.delete({ collection: 'posts', id: post.id, overrideAccess: true })
       }
     })
 
@@ -1823,6 +1849,7 @@ describe('@payloadcms/plugin-mcp', () => {
           content: 'Content to be cleared',
           title: 'Union Type Null Test',
         },
+        overrideAccess: true,
       })
 
       const apiKey = await getApiKey()
@@ -1845,7 +1872,7 @@ describe('@payloadcms/plugin-mcp', () => {
       )
       expect(callResponse.content[0].text).toContain('"content":null')
 
-      await payload.delete({ id: post.id, collection: 'posts' })
+      await payload.delete({ id: post.id, collection: 'posts', overrideAccess: true })
     })
 
     it('should call updateDocument with relationship union type field', async ({ mcp }) => {
@@ -1854,6 +1881,7 @@ describe('@payloadcms/plugin-mcp', () => {
         data: {
           title: 'Union Type Relationship Test',
         },
+        overrideAccess: true,
       })
 
       const apiKey = await getApiKey()
@@ -1878,7 +1906,7 @@ describe('@payloadcms/plugin-mcp', () => {
       const updatedDoc = getToolDoc(callResponse)
       expect(updatedDoc.author).toBe(userId)
 
-      await payload.delete({ id: post.id, collection: 'posts' })
+      await payload.delete({ id: post.id, collection: 'posts', overrideAccess: true })
     })
 
     it('should call updateDocument with select to limit returned fields', async ({ mcp }) => {
@@ -1888,6 +1916,7 @@ describe('@payloadcms/plugin-mcp', () => {
           content: 'Original content',
           title: 'Select Update Post',
         },
+        overrideAccess: true,
       })
 
       const apiKey = await getApiKey()
@@ -1919,6 +1948,7 @@ describe('@payloadcms/plugin-mcp', () => {
           content: 'Content for test post to delete.',
           title: 'Test Post for Deleting',
         },
+        overrideAccess: true,
       })
 
       const apiKey = await getApiKey()
@@ -1949,6 +1979,7 @@ describe('@payloadcms/plugin-mcp', () => {
           content: 'Original content',
           title: 'Where Object Update Match',
         },
+        overrideAccess: true,
       })
       const excluded = await payload.create({
         collection: 'posts',
@@ -1956,6 +1987,7 @@ describe('@payloadcms/plugin-mcp', () => {
           content: 'Original content',
           title: 'Where Object Update Excluded',
         },
+        overrideAccess: true,
       })
 
       const apiKey = await getApiKey()
@@ -1981,12 +2013,16 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(callResponse.content[0].text).toContain('Updated: 1 documents')
       expect(callResponse.content[0].text).toContain('"content":"Updated by object where"')
 
-      const untouched = await payload.findByID({ id: excluded.id, collection: 'posts' })
+      const untouched = await payload.findByID({
+        id: excluded.id,
+        collection: 'posts',
+        overrideAccess: true,
+      })
 
       expect(untouched.content).toBe('Original content')
 
-      await payload.delete({ id: matching.id, collection: 'posts' })
-      await payload.delete({ id: excluded.id, collection: 'posts' })
+      await payload.delete({ id: matching.id, collection: 'posts', overrideAccess: true })
+      await payload.delete({ id: excluded.id, collection: 'posts', overrideAccess: true })
     })
 
     it('should call deleteDocuments with object where clause', async ({ mcp }) => {
@@ -1996,6 +2032,7 @@ describe('@payloadcms/plugin-mcp', () => {
           content: 'Content for object where delete.',
           title: 'Where Object Delete One',
         },
+        overrideAccess: true,
       })
       await payload.create({
         collection: 'posts',
@@ -2003,6 +2040,7 @@ describe('@payloadcms/plugin-mcp', () => {
           content: 'Content for object where delete.',
           title: 'Where Object Delete Two',
         },
+        overrideAccess: true,
       })
 
       const apiKey = await getApiKey()
@@ -2072,7 +2110,7 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(callResponse.content[1].type).toBe('text')
       expect(callResponse.content[1].text).toContain('Override MCP response for Posts!')
 
-      await payload.delete({ id: createdDoc.id, collection: 'posts' })
+      await payload.delete({ id: createdDoc.id, collection: 'posts', overrideAccess: true })
     })
 
     it('should handle point fields with object format in updateDocument', async ({ mcp }) => {
@@ -2085,6 +2123,7 @@ describe('@payloadcms/plugin-mcp', () => {
           location: [-118.2437, 34.0522],
           title: 'Post to Update Location',
         },
+        overrideAccess: true,
       })
 
       const callResponse = await client.callTool({
@@ -2113,7 +2152,7 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(callResponse.content[1].type).toBe('text')
       expect(callResponse.content[1].text).toContain('Override MCP response for Posts!')
 
-      await payload.delete({ id: createdPost.id, collection: 'posts' })
+      await payload.delete({ id: createdPost.id, collection: 'posts', overrideAccess: true })
     })
   })
 
@@ -2191,6 +2230,7 @@ describe('@payloadcms/plugin-mcp', () => {
           title: 'Page to Update',
           layout: [],
         },
+        overrideAccess: true,
       })
 
       createdPageIds.push(page.id)
@@ -2228,6 +2268,7 @@ describe('@payloadcms/plugin-mcp', () => {
       const updatedPage = await payload.findByID({
         collection: 'pages',
         id: page.id,
+        overrideAccess: true,
       })
 
       expect((updatedPage as any).layout).toHaveLength(2)
@@ -2271,7 +2312,7 @@ describe('@payloadcms/plugin-mcp', () => {
 
       const { id: createdId } = getCreatedDocument<{ id: string }>(callResponse)
       if (createdId) {
-        await payload.delete({ id: createdId, collection: 'posts' })
+        await payload.delete({ id: createdId, collection: 'posts', overrideAccess: true })
       }
     })
 
@@ -2279,6 +2320,7 @@ describe('@payloadcms/plugin-mcp', () => {
       const post = await payload.create({
         collection: 'posts',
         data: { title: 'Virtual Field Update Test' },
+        overrideAccess: true,
       })
 
       const apiKey = await getApiKey()
@@ -2297,7 +2339,7 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(text).toContain('"title":"Virtual Field Updated Title"')
       expect(text).not.toContain('"computedTitle"')
 
-      await payload.delete({ id: post.id, collection: 'posts' })
+      await payload.delete({ id: post.id, collection: 'posts', overrideAccess: true })
     })
   })
 
@@ -2309,6 +2351,7 @@ describe('@payloadcms/plugin-mcp', () => {
           content: 'Content for test post.',
           title: 'Test Post for Finding',
         },
+        overrideAccess: true,
       })
 
       const apiKey = await getApiKey()
@@ -2387,6 +2430,7 @@ describe('@payloadcms/plugin-mcp', () => {
           siteDescription: 'Should be excluded by select',
           siteName: 'MCP Site',
         },
+        overrideAccess: true,
       })
 
       const apiKey = await getApiKey()
@@ -2491,6 +2535,7 @@ describe('@payloadcms/plugin-mcp', () => {
           siteDescription: 'Initial global version',
           siteName: 'Versioned Global',
         },
+        overrideAccess: true,
       })
 
       await payload.updateGlobal({
@@ -2500,12 +2545,14 @@ describe('@payloadcms/plugin-mcp', () => {
           siteDescription: 'Updated global version',
           siteName: 'Versioned Global Updated',
         },
+        overrideAccess: true,
       })
 
       const versions = await payload.findGlobalVersions({
         slug: 'site-settings',
         limit: 1,
         sort: '-updatedAt',
+        overrideAccess: true,
       })
       const versionID = String(versions.docs[0]!.id)
 
@@ -2869,7 +2916,7 @@ describe('@payloadcms/plugin-mcp', () => {
 
     afterEach(async () => {
       for (const id of createdIDs) {
-        await payload.delete({ collection: 'posts', id })
+        await payload.delete({ collection: 'posts', id, overrideAccess: true })
       }
       createdIDs.length = 0
     })
@@ -2883,6 +2930,7 @@ describe('@payloadcms/plugin-mcp', () => {
           title: 'Minified JSON Test',
           content: 'Content for minified test.',
         },
+        overrideAccess: true,
       })
 
       createdIDs.push(doc.id)
@@ -2938,6 +2986,7 @@ describe('@payloadcms/plugin-mcp', () => {
           title: 'Minified JSON FindByID Test',
           content: 'Content for findByID minified test.',
         },
+        overrideAccess: true,
       })
 
       createdIDs.push(doc.id)
@@ -3027,6 +3076,7 @@ describe('@payloadcms/plugin-mcp', () => {
           content: 'English Content',
           title: 'English Title',
         },
+        overrideAccess: true,
       })
 
       // Update with Spanish translation via MCP
@@ -3059,6 +3109,7 @@ describe('@payloadcms/plugin-mcp', () => {
           content: 'English Content',
           title: 'English Post',
         },
+        overrideAccess: true,
       })
 
       await payload.update({
@@ -3069,6 +3120,7 @@ describe('@payloadcms/plugin-mcp', () => {
           title: 'Publicación Española',
         },
         locale: 'es',
+        overrideAccess: true,
       })
 
       // Find in Spanish via MCP
@@ -3098,6 +3150,7 @@ describe('@payloadcms/plugin-mcp', () => {
           content: 'English Content',
           title: 'English Title',
         },
+        overrideAccess: true,
       })
 
       await payload.update({
@@ -3108,6 +3161,7 @@ describe('@payloadcms/plugin-mcp', () => {
           title: 'Título Español',
         },
         locale: 'es',
+        overrideAccess: true,
       })
 
       await payload.update({
@@ -3118,6 +3172,7 @@ describe('@payloadcms/plugin-mcp', () => {
           title: 'Titre Français',
         },
         locale: 'fr',
+        overrideAccess: true,
       })
 
       // Find with locale: all via MCP
@@ -3152,6 +3207,7 @@ describe('@payloadcms/plugin-mcp', () => {
           title: 'English Only Title',
         },
         locale: 'en',
+        overrideAccess: true,
       })
 
       // Try to find in French (which doesn't exist)
@@ -3558,6 +3614,7 @@ describe('@payloadcms/plugin-mcp', () => {
       it('should find documents in field-types collection', async ({ mcp }) => {
         const created = await (payload as any).create({
           collection: 'field-types',
+          overrideAccess: true,
           data: { textField: 'Findable doc', numberField: 7 },
         })
         createdFieldTypeIds.push(created.id)
@@ -3584,6 +3641,7 @@ describe('@payloadcms/plugin-mcp', () => {
       it('should update document with group field', async ({ mcp }) => {
         const created = await (payload as any).create({
           collection: 'field-types',
+          overrideAccess: true,
           data: {
             textField: 'Group update test',
             groupField: { groupText: 'Original', groupNumber: 1 },
@@ -3624,6 +3682,7 @@ describe('@payloadcms/plugin-mcp', () => {
       }) => {
         const created = await (payload as any).create({
           collection: 'field-types',
+          overrideAccess: true,
           data: {
             numberField: 1,
             textField: 'Validation update test',
@@ -3655,6 +3714,7 @@ describe('@payloadcms/plugin-mcp', () => {
       }) => {
         const created = await (payload as any).create({
           collection: 'field-types',
+          overrideAccess: true,
           data: {
             textField: 'Collapsible update test',
             collapsibleText: 'Original collapsible text',
@@ -3686,6 +3746,7 @@ describe('@payloadcms/plugin-mcp', () => {
       it('should update document with array field', async ({ mcp }) => {
         const created = await (payload as any).create({
           collection: 'field-types',
+          overrideAccess: true,
           data: {
             textField: 'Array update test',
             arrayField: [{ item: 'Original item', itemNumber: 0 }],

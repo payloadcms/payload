@@ -4,11 +4,12 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 import type { GenerateDescription, GenerateTitle, GenerateURL } from '@payloadcms/plugin-seo/types'
 import type { Field } from 'payload'
-import type { Page } from './payload-types.js'
 
 import { seoPlugin } from '@payloadcms/plugin-seo'
 import { en } from '@payloadcms/translations/languages/en'
 import { es } from '@payloadcms/translations/languages/es'
+
+import type { Page } from './payload-types.js'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
@@ -62,6 +63,7 @@ export default buildConfigWithDefaults({
         email: devUser.email,
         password: devUser.password,
       },
+      overrideAccess: true,
     })
 
     await seed(payload)

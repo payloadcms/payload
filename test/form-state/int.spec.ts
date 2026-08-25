@@ -61,6 +61,7 @@ describe('Form State', () => {
       data: {
         title: 'Test Post',
       },
+      overrideAccess: true,
     })
 
     const { state } = await buildFormState({
@@ -117,6 +118,7 @@ describe('Form State', () => {
       data: {
         title: 'Test Post',
       },
+      overrideAccess: true,
     })
 
     const { state } = await buildFormState({
@@ -245,6 +247,7 @@ describe('Form State', () => {
       data: {
         showField: false,
       },
+      overrideAccess: true,
     })
 
     const { state: stateHidden } = await buildFormState({
@@ -273,6 +276,7 @@ describe('Form State', () => {
       data: {
         showField: true,
       },
+      overrideAccess: true,
     })
 
     const { state: stateVisible } = await buildFormState({
@@ -295,8 +299,8 @@ describe('Form State', () => {
     expect(stateVisible?.conditionalCustomField).toHaveProperty('customComponents')
     expect(stateVisible?.conditionalCustomField?.customComponents?.Field).toBeDefined()
 
-    await payload.delete({ collection: conditionsSlug, id: hiddenDoc.id })
-    await payload.delete({ collection: conditionsSlug, id: visibleDoc.id })
+    await payload.delete({ collection: conditionsSlug, id: hiddenDoc.id, overrideAccess: true })
+    await payload.delete({ collection: conditionsSlug, id: visibleDoc.id, overrideAccess: true })
   })
 
   it('should preserve values of fields nested inside a row hidden by admin.condition', async () => {
@@ -308,6 +312,7 @@ describe('Form State', () => {
         showField: false,
         conditionalRowField: 'value in db',
       },
+      overrideAccess: true,
     })
 
     const { state: stateHidden } = await buildFormState({
@@ -333,7 +338,7 @@ describe('Form State', () => {
     // `withCondition` (rather than rendering an empty, visible row).
     expect(stateHidden?.['_index-2']?.passesCondition).toBe(false)
 
-    await payload.delete({ collection: conditionsSlug, id: hiddenDoc.id })
+    await payload.delete({ collection: conditionsSlug, id: hiddenDoc.id, overrideAccess: true })
   })
 
   it('should preserve values of fields nested inside a collapsible hidden by admin.condition', async () => {
@@ -345,6 +350,7 @@ describe('Form State', () => {
         showField: false,
         conditionalCollapsibleField: 'collapsible db value',
       },
+      overrideAccess: true,
     })
 
     const { state: stateHidden } = await buildFormState({
@@ -367,7 +373,7 @@ describe('Form State', () => {
     // nested field's value must survive even though the collapsible is hidden.
     expect(stateHidden?.conditionalCollapsibleField?.value).toBe('collapsible db value')
 
-    await payload.delete({ collection: conditionsSlug, id: hiddenDoc.id })
+    await payload.delete({ collection: conditionsSlug, id: hiddenDoc.id, overrideAccess: true })
   })
 
   it('should render custom Field component when admin.condition flips from false to true via onChange', async () => {
@@ -378,6 +384,7 @@ describe('Form State', () => {
       data: {
         showField: false,
       },
+      overrideAccess: true,
     })
 
     const { state: initialState } = await buildFormState({
@@ -422,7 +429,7 @@ describe('Form State', () => {
     expect(flippedState?.conditionalCustomField).toHaveProperty('customComponents')
     expect(flippedState?.conditionalCustomField?.customComponents?.Field).toBeDefined()
 
-    await payload.delete({ collection: conditionsSlug, id: doc.id })
+    await payload.delete({ collection: conditionsSlug, id: doc.id, overrideAccess: true })
   })
 
   it('should add `addedByServer` flag to fields that originate on the server', async () => {
@@ -439,6 +446,7 @@ describe('Form State', () => {
           },
         ],
       },
+      overrideAccess: true,
     })
 
     const { state } = await buildFormState({
@@ -1313,6 +1321,7 @@ describe('Form State', () => {
         title: 'Test Post',
         array: [], // Empty array - this should result in rows: [] in form state
       },
+      overrideAccess: true,
     })
 
     const { state } = await buildFormState({
@@ -1350,6 +1359,7 @@ describe('Form State', () => {
       data: {
         title: 'Test Post',
       },
+      overrideAccess: true,
     })
 
     const { state } = await buildFormState({
@@ -1370,6 +1380,6 @@ describe('Form State', () => {
 
     expect(state.selectWithAsyncFilterOptions?.selectFilterOptions).toStrictEqual(['allowed'])
 
-    await payload.delete({ collection: postsSlug, id: postData.id })
+    await payload.delete({ collection: postsSlug, id: postData.id, overrideAccess: true })
   })
 })

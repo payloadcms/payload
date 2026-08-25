@@ -668,6 +668,7 @@ test.describe('Multi Tenant', () => {
             equals: globalTenant,
           },
         },
+        overrideAccess: true,
       })
       await expect.poll(() => autosaveGlobal?.totalDocs).toBe(1)
       await expect.poll(() => autosaveGlobal?.docs?.[0]?.tenant).toBeDefined()
@@ -1452,6 +1453,7 @@ async function getSelectedTenantFilterName({
           equals: tenantIDFromCookie,
         },
       },
+      overrideAccess: true,
     })
     return tenant?.docs?.[0]?.name || undefined
   }

@@ -87,7 +87,11 @@ describeReplica('postgres read replicas', () => {
     it('should set lastWriteTimestamp after a create', async () => {
       adapter.lastWriteTimestamp = undefined
 
-      await payload.create({ collection: 'posts', data: { title: 'write-tracking' } })
+      await payload.create({
+        collection: 'posts',
+        data: { title: 'write-tracking' },
+        overrideAccess: true,
+      })
 
       expect(adapter.lastWriteTimestamp).toBeDefined()
       expect(typeof adapter.lastWriteTimestamp).toBe('number')
@@ -95,19 +99,32 @@ describeReplica('postgres read replicas', () => {
     })
 
     it('should set lastWriteTimestamp after an update', async () => {
-      const doc = await payload.create({ collection: 'posts', data: { title: 'before-update' } })
+      const doc = await payload.create({
+        collection: 'posts',
+        data: { title: 'before-update' },
+        overrideAccess: true,
+      })
       adapter.lastWriteTimestamp = undefined
 
-      await payload.update({ collection: 'posts', id: doc.id, data: { title: 'after-update' } })
+      await payload.update({
+        collection: 'posts',
+        id: doc.id,
+        data: { title: 'after-update' },
+        overrideAccess: true,
+      })
 
       expect(adapter.lastWriteTimestamp).toBeDefined()
     })
 
     it('should set lastWriteTimestamp after a delete', async () => {
-      const doc = await payload.create({ collection: 'posts', data: { title: 'to-delete' } })
+      const doc = await payload.create({
+        collection: 'posts',
+        data: { title: 'to-delete' },
+        overrideAccess: true,
+      })
       adapter.lastWriteTimestamp = undefined
 
-      await payload.delete({ collection: 'posts', id: doc.id })
+      await payload.delete({ collection: 'posts', id: doc.id, overrideAccess: true })
 
       expect(adapter.lastWriteTimestamp).toBeDefined()
     })
@@ -118,20 +135,38 @@ describeReplica('postgres read replicas', () => {
       const doc = await payload.create({
         collection: 'posts',
         data: { title: 'find-after-create' },
+        overrideAccess: true,
       })
 
-      const found = await payload.findByID({ collection: 'posts', id: doc.id })
+      const found = await payload.findByID({
+        collection: 'posts',
+        id: doc.id,
+        overrideAccess: true,
+      })
 
       expect(found).toBeDefined()
       expect(found.title).toBe('find-after-create')
     })
 
     it('should find updated data immediately after updating', async () => {
-      const doc = await payload.create({ collection: 'posts', data: { title: 'original' } })
+      const doc = await payload.create({
+        collection: 'posts',
+        data: { title: 'original' },
+        overrideAccess: true,
+      })
 
-      await payload.update({ collection: 'posts', id: doc.id, data: { title: 'updated' } })
+      await payload.update({
+        collection: 'posts',
+        id: doc.id,
+        data: { title: 'updated' },
+        overrideAccess: true,
+      })
 
-      const found = await payload.findByID({ collection: 'posts', id: doc.id })
+      const found = await payload.findByID({
+        collection: 'posts',
+        id: doc.id,
+        overrideAccess: true,
+      })
 
       expect(found.title).toBe('updated')
     })
@@ -139,26 +174,32 @@ describeReplica('postgres read replicas', () => {
     it('should return correct count immediately after creating documents', async () => {
       const unique = `count-test-${Date.now()}`
 
-      await payload.create({ collection: 'posts', data: { title: unique } })
-      await payload.create({ collection: 'posts', data: { title: unique } })
-      await payload.create({ collection: 'posts', data: { title: unique } })
+      await payload.create({ collection: 'posts', data: { title: unique }, overrideAccess: true })
+      await payload.create({ collection: 'posts', data: { title: unique }, overrideAccess: true })
+      await payload.create({ collection: 'posts', data: { title: unique }, overrideAccess: true })
 
       const result = await payload.count({
         collection: 'posts',
         where: { title: { equals: unique } },
+        overrideAccess: true,
       })
 
       expect(result.totalDocs).toBe(3)
     })
 
     it('should not find a document after deleting it', async () => {
-      const doc = await payload.create({ collection: 'posts', data: { title: 'delete-me' } })
+      const doc = await payload.create({
+        collection: 'posts',
+        data: { title: 'delete-me' },
+        overrideAccess: true,
+      })
 
-      await payload.delete({ collection: 'posts', id: doc.id })
+      await payload.delete({ collection: 'posts', id: doc.id, overrideAccess: true })
 
       const result = await payload.find({
         collection: 'posts',
         where: { id: { equals: doc.id } },
+        overrideAccess: true,
       })
 
       expect(result.docs).toHaveLength(0)
@@ -171,7 +212,11 @@ describeReplica('postgres read replicas', () => {
       adapter.readReplicasAfterWriteInterval = 0
 
       // Create a doc — this sets lastWriteTimestamp
-      await payload.create({ collection: 'posts', data: { title: 'interval-zero' } })
+      await payload.create({
+        collection: 'posts',
+        data: { title: 'interval-zero' },
+        overrideAccess: true,
+      })
 
       // With interval=0, the window is effectively disabled:
       // Date.now() - lastWriteTimestamp >= 0 is NOT < 0
@@ -190,7 +235,11 @@ describeReplica('postgres read replicas', () => {
   describe('expired write window falls back to replica routing', () => {
     it('should route to replica when lastWriteTimestamp is old', async () => {
       // Create a doc so the table has data
-      const doc = await payload.create({ collection: 'posts', data: { title: 'old-write' } })
+      const doc = await payload.create({
+        collection: 'posts',
+        data: { title: 'old-write' },
+        overrideAccess: true,
+      })
 
       // Simulate an old write (outside the window)
       adapter.lastWriteTimestamp = Date.now() - 10_000
@@ -198,7 +247,11 @@ describeReplica('postgres read replicas', () => {
       // This read should go through adapter.drizzle (replica-wrapped).
       // With real replication in Docker, the replica should have caught up
       // by now, so the read still succeeds.
-      const found = await payload.findByID({ collection: 'posts', id: doc.id })
+      const found = await payload.findByID({
+        collection: 'posts',
+        id: doc.id,
+        overrideAccess: true,
+      })
 
       expect(found).toBeDefined()
       expect(found.title).toBe('old-write')
@@ -211,6 +264,7 @@ describeReplica('postgres read replicas', () => {
       // causing the read-back after insert to hit a stale replica
       const doc = await (payload as any).create({
         collection: 'posts',
+        overrideAccess: true,
         data: { title: 'versioned-doc', _status: 'draft' },
         draft: true,
       })
@@ -220,6 +274,7 @@ describeReplica('postgres read replicas', () => {
 
       const versions = await (payload as any).findVersions({
         collection: 'posts',
+        overrideAccess: true,
         where: { parent: { equals: doc.id } },
       })
 
@@ -229,6 +284,7 @@ describeReplica('postgres read replicas', () => {
     it('should update a draft and create a new version without errors', async () => {
       const doc = await (payload as any).create({
         collection: 'posts',
+        overrideAccess: true,
         data: { title: 'draft-original', _status: 'draft' },
         draft: true,
       })
@@ -236,6 +292,7 @@ describeReplica('postgres read replicas', () => {
       // This triggers updateOne (has getPrimaryDb) + createVersion (now fixed)
       const updated = await (payload as any).update({
         collection: 'posts',
+        overrideAccess: true,
         id: doc.id,
         data: { title: 'draft-updated' },
         draft: true,
@@ -245,6 +302,7 @@ describeReplica('postgres read replicas', () => {
 
       const versions = await (payload as any).findVersions({
         collection: 'posts',
+        overrideAccess: true,
         where: { parent: { equals: doc.id } },
       })
 
@@ -254,12 +312,14 @@ describeReplica('postgres read replicas', () => {
     it('should restore a version without errors', async () => {
       const doc = await (payload as any).create({
         collection: 'posts',
+        overrideAccess: true,
         data: { title: 'restore-v1', _status: 'draft' },
         draft: true,
       })
 
       await (payload as any).update({
         collection: 'posts',
+        overrideAccess: true,
         id: doc.id,
         data: { title: 'restore-v2' },
         draft: true,
@@ -267,6 +327,7 @@ describeReplica('postgres read replicas', () => {
 
       const versions = await (payload as any).findVersions({
         collection: 'posts',
+        overrideAccess: true,
         where: { parent: { equals: doc.id } },
         sort: '-updatedAt',
       })
@@ -276,6 +337,7 @@ describeReplica('postgres read replicas', () => {
       // restoreVersion triggers updateVersion (now fixed)
       const restored = await (payload as any).restoreVersion({
         collection: 'posts',
+        overrideAccess: true,
         id: firstVersion.id,
       })
 
@@ -288,6 +350,7 @@ describeReplica('postgres read replicas', () => {
       // First update creates the global row (createGlobal, now fixed)
       const result = await (payload as any).updateGlobal({
         slug: 'settings',
+        overrideAccess: true,
         data: { siteTitle: 'My Site' },
       })
 
@@ -297,6 +360,7 @@ describeReplica('postgres read replicas', () => {
       // Second update uses updateGlobal path (also fixed)
       const updated = await (payload as any).updateGlobal({
         slug: 'settings',
+        overrideAccess: true,
         data: { siteTitle: 'Updated Site' },
       })
 
@@ -307,6 +371,7 @@ describeReplica('postgres read replicas', () => {
       // This exercises createGlobalVersion (now fixed)
       const result = await (payload as any).updateGlobal({
         slug: 'nav',
+        overrideAccess: true,
         data: { label: 'Home' },
       })
 
@@ -322,6 +387,7 @@ describeReplica('postgres read replicas', () => {
       // Update again to exercise updateGlobalVersion path
       const updated = await (payload as any).updateGlobal({
         slug: 'nav',
+        overrideAccess: true,
         data: { label: 'Updated Home' },
       })
 
@@ -334,12 +400,14 @@ describeReplica('postgres read replicas', () => {
       const doc = await payload.create({
         collection: 'posts',
         data: { title: 'to-delete-replica-test' },
+        overrideAccess: true,
       })
 
       // deleteOne reads the doc before deleting (now uses getPrimaryDb)
       const deleted = await payload.delete({
         collection: 'posts',
         id: doc.id,
+        overrideAccess: true,
       })
 
       expect(deleted).toBeDefined()

@@ -84,6 +84,7 @@ describePostgres('postgres vector custom column', () => {
         embedding: [-5.2, 3.1, 0.2, 8.1, 3.5],
         title: 'apple',
       },
+      overrideAccess: true,
     })
 
     await payload.create({
@@ -92,6 +93,7 @@ describePostgres('postgres vector custom column', () => {
         embedding: catEmbedding,
         title: 'cat',
       },
+      overrideAccess: true,
     })
 
     await payload.create({
@@ -100,6 +102,7 @@ describePostgres('postgres vector custom column', () => {
         embedding: [-5.1, 2.9, 0.8, 7.9, 3.1],
         title: 'fruit',
       },
+      overrideAccess: true,
     })
 
     await payload.create({
@@ -108,6 +111,7 @@ describePostgres('postgres vector custom column', () => {
         embedding: [1.7, -0.3, 6.9, 19.1, 21.1],
         title: 'dog',
       },
+      overrideAccess: true,
     })
 
     const similarity = sql<number>`1 - (${cosineDistance(payload.db.tables.posts.embedding, catEmbedding)})`
@@ -206,6 +210,7 @@ describePostgres('postgres vector custom column', () => {
         embedding: '{2:1,4:2}/5',
         title: 'apple',
       },
+      overrideAccess: true,
     })
 
     await payload.create({
@@ -214,6 +219,7 @@ describePostgres('postgres vector custom column', () => {
         embedding: catEmbedding,
         title: 'cat',
       },
+      overrideAccess: true,
     })
 
     await payload.create({
@@ -222,6 +228,7 @@ describePostgres('postgres vector custom column', () => {
         embedding: '{2:4,4:6}/5',
         title: 'fruit',
       },
+      overrideAccess: true,
     })
 
     await payload.create({
@@ -230,6 +237,7 @@ describePostgres('postgres vector custom column', () => {
         embedding: '{1:1,3:2,5:2}/5',
         title: 'dog',
       },
+      overrideAccess: true,
     })
 
     const distance = sql<number>`(${l2Distance(payload.db.tables.posts.embedding, catEmbedding)})`
@@ -318,6 +326,7 @@ describePostgres('postgres vector custom column', () => {
         embedding: '01010',
         title: 'apple',
       },
+      overrideAccess: true,
     })
 
     await payload.create({
@@ -326,6 +335,7 @@ describePostgres('postgres vector custom column', () => {
         embedding: '10101',
         title: 'cat',
       },
+      overrideAccess: true,
     })
 
     await payload.create({
@@ -334,6 +344,7 @@ describePostgres('postgres vector custom column', () => {
         embedding: '11111',
         title: 'fruit',
       },
+      overrideAccess: true,
     })
 
     await payload.create({
@@ -342,6 +353,7 @@ describePostgres('postgres vector custom column', () => {
         embedding: '10100',
         title: 'dog',
       },
+      overrideAccess: true,
     })
 
     const similarity = sql<number>`1 - (${jaccardDistance(payload.db.tables.posts.embedding, catEmbedding)})`

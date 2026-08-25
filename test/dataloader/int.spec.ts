@@ -29,6 +29,7 @@ describe('dataloader', () => {
         email: devUser.email,
         password: devUser.password,
       },
+      overrideAccess: true,
     })
 
     if (loginResult.token) {
@@ -111,6 +112,7 @@ describe('dataloader', () => {
         data: {
           richText: buildDefaultEditorState({ text: 'relation a' }),
         },
+        overrideAccess: true,
       })
 
       const relationB = await payload.create({
@@ -119,6 +121,7 @@ describe('dataloader', () => {
           relationship: relationA.id,
           richText: buildDefaultEditorState({ text: 'relation b' }),
         },
+        overrideAccess: true,
       })
 
       expect(relationA.id).toBeDefined()
@@ -142,12 +145,14 @@ describe('dataloader', () => {
             ],
           }),
         },
+        overrideAccess: true,
       })
 
       const relationANoDepth = await payload.findByID({
         id: relationA.id,
         collection: 'relation-a',
         depth: 0,
+        overrideAccess: true,
       })
 
       expect(relationANoDepth.relationship).toStrictEqual(relationB.id)
@@ -156,6 +161,7 @@ describe('dataloader', () => {
         id: relationA.id,
         collection: 'relation-a',
         depth: 4,
+        overrideAccess: true,
       })
 
       const innerMostRelationship =
@@ -176,6 +182,7 @@ describe('dataloader', () => {
         collection: 'items' as CollectionSlug,
         req,
         depth: 0,
+        overrideAccess: true,
         where: {
           name: { exists: true },
         },

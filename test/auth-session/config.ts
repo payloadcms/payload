@@ -71,6 +71,7 @@ export default buildConfigWithDefaults(
       const existingUsers = await payload.find({
         collection: authSessionUsersSlug,
         limit: 1,
+        overrideAccess: true,
       })
 
       if (existingUsers.docs.length === 0) {
@@ -79,6 +80,7 @@ export default buildConfigWithDefaults(
           data: {
             name: 'Session Test User',
           },
+          overrideAccess: true,
         })
       }
 

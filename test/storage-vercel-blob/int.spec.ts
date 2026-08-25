@@ -40,11 +40,15 @@ describe('@payloadcms/storage-vercel-blob', () => {
   afterEach(async () => {
     await clearTestBlobs()
     await Promise.all([
-      payload.delete({ collection: mediaSlug, where: {} }),
-      payload.delete({ collection: mediaWithPrefixSlug, where: {} }),
-      payload.delete({ collection: mediaWithAlwaysInsertFieldsSlug, where: {} }),
-      payload.delete({ collection: mediaWithDirectAccessSlug, where: {} }),
-      payload.delete({ collection: mediaWithDynamicPrefixSlug, where: {} }),
+      payload.delete({ collection: mediaSlug, where: {}, overrideAccess: true }),
+      payload.delete({ collection: mediaWithPrefixSlug, where: {}, overrideAccess: true }),
+      payload.delete({
+        collection: mediaWithAlwaysInsertFieldsSlug,
+        where: {},
+        overrideAccess: true,
+      }),
+      payload.delete({ collection: mediaWithDirectAccessSlug, where: {}, overrideAccess: true }),
+      payload.delete({ collection: mediaWithDynamicPrefixSlug, where: {}, overrideAccess: true }),
     ])
   })
 
@@ -53,6 +57,7 @@ describe('@payloadcms/storage-vercel-blob', () => {
       collection: mediaSlug,
       data: {},
       filePath: path.resolve(dirname, '../uploads/image.png'),
+      overrideAccess: true,
     })
 
     expect(upload.id).toBeTruthy()
@@ -71,6 +76,7 @@ describe('@payloadcms/storage-vercel-blob', () => {
       collection: mediaWithPrefixSlug,
       data: {},
       filePath: path.resolve(dirname, '../uploads/image.png'),
+      overrideAccess: true,
     })
 
     expect(upload.id).toBeTruthy()
@@ -94,6 +100,7 @@ describe('@payloadcms/storage-vercel-blob', () => {
         prefix: 'test',
       },
       filePath: path.resolve(dirname, '../uploads/image.png'),
+      overrideAccess: true,
     })
 
     expect(upload.id).toBeTruthy()
@@ -110,6 +117,7 @@ describe('@payloadcms/storage-vercel-blob', () => {
       collection: mediaSlug,
       data: {},
       filePath: path.resolve(dirname, '../uploads/image.png'),
+      overrideAccess: true,
     })
 
     const response = await restClient.GET(`/${mediaSlug}/file/image.png`)
@@ -125,6 +133,7 @@ describe('@payloadcms/storage-vercel-blob', () => {
       collection: mediaSlug,
       data: {},
       filePath: path.resolve(dirname, '../uploads/image.png'),
+      overrideAccess: true,
     })
 
     const first = await restClient.GET(`/${mediaSlug}/file/image.png`)
@@ -145,6 +154,7 @@ describe('@payloadcms/storage-vercel-blob', () => {
         collection: mediaWithDirectAccessSlug,
         data: {},
         filePath: path.resolve(dirname, '../uploads/image.png'),
+        overrideAccess: true,
       })
 
       expect(upload.id).toBeTruthy()
@@ -162,6 +172,7 @@ describe('@payloadcms/storage-vercel-blob', () => {
         collection: mediaWithDirectAccessSlug,
         data: {},
         filePath: path.resolve(dirname, '../uploads/image.png'),
+        overrideAccess: true,
       })
 
       expect(upload.sizes?.thumbnail?.url).toContain(process.env.STORAGE_VERCEL_BLOB_BASE_URL)
@@ -181,6 +192,7 @@ describe('@payloadcms/storage-vercel-blob', () => {
         collection: mediaWithDirectAccessSlug,
         data: {},
         filePath: path.resolve(dirname, '../uploads/image with spaces.png'),
+        overrideAccess: true,
       })
 
       expect(upload.id).toBeTruthy()
@@ -196,9 +208,13 @@ describe('@payloadcms/storage-vercel-blob', () => {
   describe('prefix collision detection', () => {
     beforeEach(async () => {
       await clearTestBlobs()
-      await payload.delete({ collection: mediaWithPrefixSlug, where: {} })
-      await payload.delete({ collection: mediaSlug, where: {} })
-      await payload.delete({ collection: mediaWithAlwaysInsertFieldsSlug, where: {} })
+      await payload.delete({ collection: mediaWithPrefixSlug, where: {}, overrideAccess: true })
+      await payload.delete({ collection: mediaSlug, where: {}, overrideAccess: true })
+      await payload.delete({
+        collection: mediaWithAlwaysInsertFieldsSlug,
+        where: {},
+        overrideAccess: true,
+      })
     })
 
     it('detects collision within same prefix', async () => {
@@ -208,12 +224,14 @@ describe('@payloadcms/storage-vercel-blob', () => {
         collection: mediaWithPrefixSlug,
         data: {},
         filePath: imageFile,
+        overrideAccess: true,
       })
 
       const upload2 = await payload.create({
         collection: mediaWithPrefixSlug,
         data: {},
         filePath: imageFile,
+        overrideAccess: true,
       })
 
       expect(upload1.filename).toBe('image.png')
@@ -229,12 +247,14 @@ describe('@payloadcms/storage-vercel-blob', () => {
         collection: mediaSlug,
         data: {},
         filePath: imageFile,
+        overrideAccess: true,
       })
 
       const upload2 = await payload.create({
         collection: mediaSlug,
         data: {},
         filePath: imageFile,
+        overrideAccess: true,
       })
 
       expect(upload1.filename).toBe('image.png')
@@ -252,12 +272,14 @@ describe('@payloadcms/storage-vercel-blob', () => {
         collection: mediaWithPrefixSlug,
         data: {},
         filePath: imageFile,
+        overrideAccess: true,
       })
 
       const upload2 = await payload.create({
         collection: mediaWithPrefixSlug,
         data: { prefix: 'different-prefix' },
         filePath: imageFile,
+        overrideAccess: true,
       })
 
       expect(upload1.filename).toBe('image.png')
@@ -273,12 +295,14 @@ describe('@payloadcms/storage-vercel-blob', () => {
         collection: mediaWithDynamicPrefixSlug,
         data: { tenant: 'a' },
         filePath: imageFile,
+        overrideAccess: true,
       })
 
       const tenantBUpload = await payload.create({
         collection: mediaWithDynamicPrefixSlug,
         data: { tenant: 'b' },
         filePath: imageFile,
+        overrideAccess: true,
       })
 
       expect(tenantAUpload.filename).toBe('image.png')
