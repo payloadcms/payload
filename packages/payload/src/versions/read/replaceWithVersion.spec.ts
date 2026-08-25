@@ -7,7 +7,7 @@ describe('applyReplacePolicy', () => {
   const published = { id: '1', title: 'Published' }
   const draft = { id: '1', title: 'Draft' }
 
-  it('returns the draft when one exists for latest and draft policies', () => {
+  it('should return the draft when one exists for latest and draft policies', () => {
     expect(
       applyReplacePolicy({
         draftVersion: draft,
@@ -25,7 +25,7 @@ describe('applyReplacePolicy', () => {
     ).toBe(draft)
   })
 
-  it('falls back to published content for latest when no draft exists', () => {
+  it('should fall back to published content for latest when no draft exists', () => {
     expect(
       applyReplacePolicy({
         draftVersion: undefined,
@@ -35,7 +35,7 @@ describe('applyReplacePolicy', () => {
     ).toBe(published)
   })
 
-  it('returns no result for draft-only when no draft exists', () => {
+  it('should return no result for draft-only when no draft exists', () => {
     expect(
       applyReplacePolicy({
         draftVersion: undefined,
@@ -69,7 +69,7 @@ describe('getDraftStatusWhere', () => {
     },
   } as Parameters<typeof getDraftStatusWhere>[0]['entity']
 
-  it('constrains scalar status to draft', () => {
+  it('should constrain scalar status to draft', () => {
     expect(getDraftStatusWhere({ entity: collection, payload })).toEqual({
       'version._status': {
         equals: 'draft',
@@ -77,7 +77,7 @@ describe('getDraftStatusWhere', () => {
     })
   })
 
-  it('uses the active locale for localized status', () => {
+  it('should use the active locale for localized status', () => {
     expect(
       getDraftStatusWhere({
         entity: localizedCollection,
@@ -91,7 +91,7 @@ describe('getDraftStatusWhere', () => {
     })
   })
 
-  it('matches any locale when locale is all', () => {
+  it('should match any locale when locale is all', () => {
     expect(
       getDraftStatusWhere({
         entity: localizedCollection,

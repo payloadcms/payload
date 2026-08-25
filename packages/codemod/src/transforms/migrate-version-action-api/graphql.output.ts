@@ -1,5 +1,9 @@
-export async function queryPayloadGraphQL() {
-  const latestPosts = await fetch('/api/graphql', {
+import type { Payload } from 'payload'
+
+export async function queryPayloadGraphQL(payload: Payload) {
+  const latestPosts = await fetch(
+    `${payload.config.serverURL}${payload.config.routes.api}/graphql`,
+    {
     method: 'POST',
     body: JSON.stringify({
       query: `
@@ -10,9 +14,12 @@ export async function queryPayloadGraphQL() {
         }
       `,
     }),
-  })
+    },
+  )
 
-  const publishedPost = await fetch('/api/graphql', {
+  const publishedPost = await fetch(
+    `${payload.config.serverURL}${payload.config.routes.api}/graphql`,
+    {
     method: 'POST',
     body: JSON.stringify({
       query: `
@@ -21,9 +28,12 @@ export async function queryPayloadGraphQL() {
         }
       `,
     }),
-  })
+    },
+  )
 
-  const createDraft = await fetch('/api/graphql', {
+  const createDraft = await fetch(
+    `${payload.config.serverURL}${payload.config.routes.api}/graphql`,
+    {
     method: 'POST',
     body: JSON.stringify({
       query: `
@@ -32,7 +42,8 @@ export async function queryPayloadGraphQL() {
         }
       `,
     }),
-  })
+    },
+  )
 
   return { createDraft, latestPosts, publishedPost }
 }

@@ -16,6 +16,39 @@ import { deepCopyObjectSimple } from '../../utilities/deepCopyObject.js'
 
 type DocumentStatus = 'draft' | 'published'
 
+type ActionForOperation = {
+  create: CreateAction
+  duplicate: CreateAction
+  restore: RestoreAction
+  update: UpdateAction
+}
+
+type OperationPolicies = {
+  [TOperation in WriteOperation]: {
+    defaultAction: ActionForOperation[TOperation]
+    validActions: readonly ActionForOperation[TOperation][]
+  }
+}
+
+const operationPolicies = {
+  create: {
+    defaultAction: 'saveDraft',
+    validActions: ['saveDraft', 'publish'],
+  },
+  duplicate: {
+    defaultAction: 'saveDraft',
+    validActions: ['saveDraft', 'publish'],
+  },
+  restore: {
+    defaultAction: 'publish',
+    validActions: ['saveDraft', 'publish'],
+  },
+  update: {
+    defaultAction: 'publish',
+    validActions: ['saveDraft', 'publish', 'unpublish'],
+  },
+} as const satisfies OperationPolicies
+
 /**
  * Resolves the effective write action from explicit `action`, recognized `_status`, and the
  * operation default. Returns `undefined` for ordinary writes on entities without drafts.
@@ -55,7 +88,9 @@ export function resolveAction({
   })
 
   const resolvedAction =
-    explicitAction ?? inferActionFromStatus({ locale, status }) ?? defaultAction(operation)
+    explicitAction ??
+    inferActionFromStatus({ locale, status }) ??
+    operationPolicies[operation].defaultAction
 
   validateModifiers({
     action: resolvedAction,
@@ -193,38 +228,15 @@ function parseExplicitAction({
     throw invalidAction({ action, operation })
   }
 
-  switch (operation) {
-    case 'create':
-    case 'duplicate':
-      switch (action) {
-        case 'publish':
-        case 'saveDraft':
-          return action
-        default:
-          throw invalidAction({ action, operation })
-      }
-    case 'restore':
-      switch (action) {
-        case 'publish':
-        case 'saveDraft':
-          return action
-        default:
-          throw invalidAction({ action, operation })
-      }
-    case 'update':
-      switch (action) {
-        case 'publish':
-        case 'saveDraft':
-        case 'unpublish':
-          return action
-        default:
-          throw invalidAction({ action, operation })
-      }
-    default: {
-      const exhaustive: never = operation
-      throw new APIError(`Invalid write operation "${String(exhaustive)}".`, httpStatus.BAD_REQUEST)
-    }
+  const isValidAction = operationPolicies[operation].validActions.some(
+    (validAction) => validAction === action,
+  )
+
+  if (!isValidAction) {
+    throw invalidAction({ action, operation })
   }
+
+  return action as WriteAction
 }
 
 function resolveNonDraftAction({
@@ -302,21 +314,6 @@ function recognizedStatus({
   return undefined
 }
 
-function defaultAction(operation: WriteOperation): CreateAction | RestoreAction | UpdateAction {
-  switch (operation) {
-    case 'create':
-    case 'duplicate':
-      return 'saveDraft'
-    case 'restore':
-    case 'update':
-      return 'publish'
-    default: {
-      const exhaustive: never = operation
-      return exhaustive
-    }
-  }
-}
-
 function validateModifiers({
   action,
   autosave,
@@ -365,24 +362,9 @@ function invalidAction({
   operation: WriteOperation
 }): APIError {
   return new APIError(
-    `Invalid action ${JSON.stringify(action)}. Valid actions for ${operation} are: ${validActionsForOperation(operation).join(', ')}.`,
+    `Invalid action ${JSON.stringify(action)}. Valid actions for ${operation} are: ${operationPolicies[operation].validActions.join(', ')}.`,
     httpStatus.BAD_REQUEST,
   )
-}
-
-function validActionsForOperation(operation: WriteOperation): WriteAction[] {
-  switch (operation) {
-    case 'create':
-    case 'duplicate':
-    case 'restore':
-      return ['saveDraft', 'publish']
-    case 'update':
-      return ['saveDraft', 'publish', 'unpublish']
-    default: {
-      const exhaustive: never = operation
-      return exhaustive
-    }
-  }
 }
 
 function isLocalizedStatus(status: unknown): status is Record<string, unknown> {

@@ -54,7 +54,7 @@ describe('resolveAction', () => {
       },
     )
 
-    it('does not infer an action from unrecognized status values', () => {
+    it('should not infer an action from unrecognized status values', () => {
       expect(draftOps({ operation: 'update', status: 'archived' })).toBe('publish')
       expect(draftOps({ operation: 'create', status: true })).toBe('saveDraft')
       expect(draftOps({ operation: 'create', status: 1 })).toBe('saveDraft')
@@ -67,7 +67,7 @@ describe('resolveAction', () => {
       es: 'published',
     }
 
-    it('uses the active write locale to infer action', () => {
+    it('should use the active write locale to infer action', () => {
       expect(
         draftOps({
           locale: 'en',
@@ -85,7 +85,7 @@ describe('resolveAction', () => {
       ).toBe('publish')
     })
 
-    it('requires an explicit action and modifier for an all-locale transition', () => {
+    it('should require an explicit action and modifier for an all-locale transition', () => {
       expect(() =>
         draftOps({
           action: 'publish',
@@ -162,7 +162,7 @@ describe('resolveAction', () => {
       ).toBe('unpublish')
     })
 
-    it('does not infer from localized status when no locale is provided', () => {
+    it('should not infer from localized status when no locale is provided', () => {
       expect(
         draftOps({
           operation: 'create',
@@ -171,7 +171,7 @@ describe('resolveAction', () => {
       ).toBe('saveDraft')
     })
 
-    it('does not infer from a missing locale key', () => {
+    it('should not infer from a missing locale key', () => {
       expect(
         draftOps({
           locale: 'de',
@@ -183,7 +183,7 @@ describe('resolveAction', () => {
   })
 
   describe('explicit action wins over status', () => {
-    it('uses publish when action and draft status conflict', () => {
+    it('should use publish when action and draft status conflict', () => {
       expect(
         draftOps({
           action: 'publish',
@@ -193,7 +193,7 @@ describe('resolveAction', () => {
       ).toBe('publish')
     })
 
-    it('uses saveDraft when action and published status conflict', () => {
+    it('should use saveDraft when action and published status conflict', () => {
       expect(
         draftOps({
           action: 'saveDraft',
@@ -203,7 +203,7 @@ describe('resolveAction', () => {
       ).toBe('saveDraft')
     })
 
-    it('uses unpublish when action and published status conflict', () => {
+    it('should use unpublish when action and published status conflict', () => {
       expect(
         draftOps({
           action: 'unpublish',
@@ -215,19 +215,19 @@ describe('resolveAction', () => {
   })
 
   describe('unpublish is never inferred', () => {
-    it('does not infer unpublish from any status value', () => {
+    it('should not infer unpublish from any status value', () => {
       expect(draftOps({ operation: 'update', status: 'draft' })).toBe('saveDraft')
       expect(draftOps({ operation: 'update', status: 'published' })).toBe('publish')
       expect(draftOps({ operation: 'update', status: 'unpublished' })).toBe('publish')
     })
 
-    it('requires an explicit unpublish action', () => {
+    it('should require an explicit unpublish action', () => {
       expect(draftOps({ action: 'unpublish', operation: 'update' })).toBe('unpublish')
     })
   })
 
   describe('non-draft entities', () => {
-    it('returns undefined for omitted action', () => {
+    it('should return undefined for omitted action', () => {
       expect(
         resolveAction({
           draftsEnabled: false,
@@ -236,7 +236,7 @@ describe('resolveAction', () => {
       ).toBeUndefined()
     })
 
-    it('returns undefined for explicit publish', () => {
+    it('should return undefined for explicit publish', () => {
       expect(
         resolveAction({
           action: 'publish',
@@ -246,7 +246,7 @@ describe('resolveAction', () => {
       ).toBeUndefined()
     })
 
-    it('ignores recognized status because no publication transition occurs', () => {
+    it('should ignore recognized status because no publication transition occurs', () => {
       expect(
         resolveAction({
           draftsEnabled: false,
@@ -277,7 +277,7 @@ describe('resolveAction', () => {
       },
     )
 
-    it('rejects unpublish when drafts are not enabled', () => {
+    it('should reject unpublish when drafts are not enabled', () => {
       expect(() =>
         resolveAction({
           action: 'unpublish',
@@ -289,13 +289,13 @@ describe('resolveAction', () => {
   })
 
   describe('invalid runtime values', () => {
-    it('rejects unknown action strings', () => {
+    it('should reject unknown action strings', () => {
       expect(() => draftOps({ action: 'SAVE_DRAFT', operation: 'update' })).toThrow(
         'Invalid action "SAVE_DRAFT". Valid actions for update are: saveDraft, publish, unpublish.',
       )
     })
 
-    it('rejects leftover boolean draft intent', () => {
+    it('should reject leftover boolean draft intent', () => {
       expect(() => draftOps({ action: true, operation: 'create' })).toThrow(
         'Invalid action true. Valid actions for create are: saveDraft, publish.',
       )
@@ -313,7 +313,7 @@ describe('resolveAction', () => {
   })
 
   describe('autosave', () => {
-    it('allows autosave when the resolved action is saveDraft', () => {
+    it('should allow autosave when the resolved action is saveDraft', () => {
       expect(
         draftOps({
           action: 'saveDraft',
@@ -330,7 +330,7 @@ describe('resolveAction', () => {
       ).toBe('saveDraft')
     })
 
-    it('rejects autosave when the resolved action is not saveDraft', () => {
+    it('should reject autosave when the resolved action is not saveDraft', () => {
       expect(() =>
         draftOps({
           action: 'publish',
@@ -347,7 +347,7 @@ describe('resolveAction', () => {
       ).toThrow('autosave is only valid when the resolved action is "saveDraft".')
     })
 
-    it('rejects autosave on non-draft entities', () => {
+    it('should reject autosave on non-draft entities', () => {
       expect(() =>
         resolveAction({
           autosave: true,
@@ -359,7 +359,7 @@ describe('resolveAction', () => {
   })
 
   describe('locale modifiers', () => {
-    it('allows publishAllLocales with publish', () => {
+    it('should allow publishAllLocales with publish', () => {
       expect(
         draftOps({
           action: 'publish',
@@ -369,7 +369,7 @@ describe('resolveAction', () => {
       ).toBe('publish')
     })
 
-    it('allows unpublishAllLocales with unpublish', () => {
+    it('should allow unpublishAllLocales with unpublish', () => {
       expect(
         draftOps({
           action: 'unpublish',
@@ -379,7 +379,7 @@ describe('resolveAction', () => {
       ).toBe('unpublish')
     })
 
-    it('rejects publishAllLocales when the resolved action is not publish', () => {
+    it('should reject publishAllLocales when the resolved action is not publish', () => {
       expect(() =>
         draftOps({
           action: 'saveDraft',
@@ -396,7 +396,7 @@ describe('resolveAction', () => {
       ).toThrow('publishAllLocales is only valid when the resolved action is "publish".')
     })
 
-    it('rejects unpublishAllLocales when the resolved action is not unpublish', () => {
+    it('should reject unpublishAllLocales when the resolved action is not unpublish', () => {
       expect(() =>
         draftOps({
           operation: 'update',
@@ -405,7 +405,7 @@ describe('resolveAction', () => {
       ).toThrow('unpublishAllLocales is only valid when the resolved action is "unpublish".')
     })
 
-    it('rejects combining both locale modifiers', () => {
+    it('should reject combining both locale modifiers', () => {
       expect(() =>
         draftOps({
           action: 'publish',
@@ -416,7 +416,7 @@ describe('resolveAction', () => {
       ).toThrow('publishAllLocales and unpublishAllLocales cannot both be true.')
     })
 
-    it('does not infer all-locale unpublish from status', () => {
+    it('should not infer all-locale unpublish from status', () => {
       expect(() =>
         draftOps({
           operation: 'update',
@@ -440,7 +440,7 @@ describe('statusFromAction', () => {
 })
 
 describe('canonicalizeWriteStatus', () => {
-  it('does not mutate the caller data object', () => {
+  it('should not mutate the caller data object', () => {
     const data = {
       _status: 'published' as const,
       title: 'Hello',
@@ -457,7 +457,7 @@ describe('canonicalizeWriteStatus', () => {
     expect(result.title).toBe('Hello')
   })
 
-  it('does not mutate nested localized status objects', () => {
+  it('should not mutate nested localized status objects', () => {
     const data = {
       _status: {
         en: 'published',
@@ -479,7 +479,7 @@ describe('canonicalizeWriteStatus', () => {
     expect(result._status).not.toBe(data._status)
   })
 
-  it('replaces conflicting caller status with the action-derived status', () => {
+  it('should replace conflicting caller status with the action-derived status', () => {
     expect(
       canonicalizeWriteStatus({
         action: 'publish',
@@ -495,7 +495,7 @@ describe('canonicalizeWriteStatus', () => {
     ).toBe('draft')
   })
 
-  it('returns the original data when no publication transition occurred', () => {
+  it('should return the original data when no publication transition occurred', () => {
     const data = { title: 'Page' }
 
     expect(
@@ -506,7 +506,7 @@ describe('canonicalizeWriteStatus', () => {
     ).toBe(data)
   })
 
-  it('writes all locale keys when publishing or unpublishing all locales', () => {
+  it('should write all locale keys when publishing or unpublishing all locales', () => {
     const data = {
       _status: {
         en: 'draft',
@@ -537,7 +537,7 @@ describe('canonicalizeWriteStatus', () => {
     })
   })
 
-  it('writes all locale keys when locale is all', () => {
+  it('should write all locale keys when locale is all', () => {
     expect(
       canonicalizeWriteStatus({
         action: 'publish',

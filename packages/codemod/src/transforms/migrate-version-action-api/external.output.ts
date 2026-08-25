@@ -8,6 +8,13 @@ declare const client: {
 void payload.find({ collection: 'posts', version: 'latest' })
 void client.find({ collection: 'articles', draft: true })
 void fetch('https://other.example/posts?draft=true')
+void fetch('/api/feature-flags?draft=true')
+void fetch('/api/graphql', {
+  method: 'POST',
+  body: JSON.stringify({
+    query: `query ThirdPartyQuery { Articles(draft: true) { id } }`,
+  }),
+})
 
 const thirdPartyQuery = `
   query Articles {

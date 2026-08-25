@@ -4,28 +4,28 @@ import { APIError } from '../errors/APIError.js'
 import { resolveReadVersion } from './resolveReadVersion.js'
 
 describe('resolveReadVersion', () => {
-  it('defaults omission to published', () => {
+  it('should default omission to published', () => {
     expect(resolveReadVersion({ draftsEnabled: true })).toBe('published')
     expect(resolveReadVersion({ draftsEnabled: false })).toBe('published')
     expect(resolveReadVersion({ draftsEnabled: true, version: null })).toBe('published')
   })
 
-  it('preserves published, latest, and draft on draft-enabled entities', () => {
+  it('should preserve published, latest, and draft on draft-enabled entities', () => {
     expect(resolveReadVersion({ draftsEnabled: true, version: 'published' })).toBe('published')
     expect(resolveReadVersion({ draftsEnabled: true, version: 'latest' })).toBe('latest')
     expect(resolveReadVersion({ draftsEnabled: true, version: 'draft' })).toBe('draft')
   })
 
-  it('maps latest to published on entities without drafts', () => {
+  it('should map latest to published on entities without drafts', () => {
     expect(resolveReadVersion({ draftsEnabled: false, version: 'latest' })).toBe('published')
     expect(resolveReadVersion({ draftsEnabled: false, version: 'published' })).toBe('published')
   })
 
-  it('keeps draft as draft-only even on entities without drafts', () => {
+  it('should keep draft as draft-only even on entities without drafts', () => {
     expect(resolveReadVersion({ draftsEnabled: false, version: 'draft' })).toBe('draft')
   })
 
-  it('rejects invalid runtime strings', () => {
+  it('should reject invalid runtime strings', () => {
     expect(() => resolveReadVersion({ draftsEnabled: true, version: 'Published' })).toThrow(
       APIError,
     )
@@ -34,7 +34,7 @@ describe('resolveReadVersion', () => {
     )
   })
 
-  it('rejects leftover boolean draft intent', () => {
+  it('should reject leftover boolean draft intent', () => {
     expect(() => resolveReadVersion({ draftsEnabled: true, version: true })).toThrow(
       'Invalid version true. Valid values are: published, latest, draft.',
     )

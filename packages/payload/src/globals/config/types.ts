@@ -37,6 +37,8 @@ export type DataFromGlobalSlug<TSlug extends GlobalSlug> = TypedGlobal[TSlug]
 
 export type SelectFromGlobalSlug<TSlug extends GlobalSlug> = TypedGlobalSelect[TSlug]
 
+type HasGeneratedGlobalTypes = 'globals' extends keyof GeneratedTypes ? true : false
+
 /**
  * Helper type for draft data OUTPUT (e.g., query results) - makes user fields optional
  */
@@ -63,7 +65,7 @@ export type GlobalsWithoutDrafts = {
 /**
  * Allows `version` on draft-enabled globals and forbids it on globals without drafts.
  */
-export type VersionFromGlobalSlug<TSlug extends GlobalSlug> = keyof GeneratedTypes extends never
+export type VersionFromGlobalSlug<TSlug extends GlobalSlug> = HasGeneratedGlobalTypes extends false
   ? {
       /**
        * Which document representation to read. [More](https://payloadcms.com/docs/versions/drafts)
@@ -92,7 +94,7 @@ export type VersionFromGlobalSlug<TSlug extends GlobalSlug> = keyof GeneratedTyp
  * Allows update `action` on draft-enabled globals. Non-draft globals may only omit it or pass `publish`.
  */
 export type UpdateActionFromGlobalSlug<TSlug extends GlobalSlug> =
-  keyof GeneratedTypes extends never
+  HasGeneratedGlobalTypes extends false
     ? {
         action?: UpdateAction
       }
@@ -109,7 +111,7 @@ export type UpdateActionFromGlobalSlug<TSlug extends GlobalSlug> =
  * Restore does not accept `unpublish`. Omitted action publishes.
  */
 export type RestoreActionFromGlobalSlug<TSlug extends GlobalSlug> =
-  keyof GeneratedTypes extends never
+  HasGeneratedGlobalTypes extends false
     ? {
         /**
          * Restore and publish (`publish`, default) or restore as a draft (`saveDraft`).

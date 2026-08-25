@@ -86,6 +86,8 @@ export type IDTypeForCollectionSlug<TSlug extends CollectionSlug> =
 
 export type SelectFromCollectionSlug<TSlug extends CollectionSlug> = TypedCollectionSelect[TSlug]
 
+type HasGeneratedCollectionTypes = 'collections' extends keyof GeneratedTypes ? true : false
+
 /**
  * Collection slugs that do not have drafts enabled.
  * Detects collections without drafts by checking for the absence of the `_status` field.
@@ -99,7 +101,7 @@ export type CollectionsWithoutDrafts = {
  * When generated types are untyped, `CollectionsWithoutDrafts` is wide and version remains allowed.
  */
 export type VersionFromCollectionSlug<TSlug extends CollectionSlug> =
-  keyof GeneratedTypes extends never
+  HasGeneratedCollectionTypes extends false
     ? {
         /**
          * Which document representation to read. [More](https://payloadcms.com/docs/versions/drafts)
@@ -128,7 +130,7 @@ export type VersionFromCollectionSlug<TSlug extends CollectionSlug> =
  * Allows create/duplicate `action` on draft-enabled collections. Non-draft collections may only omit it or pass `publish`.
  */
 export type CreateActionFromCollectionSlug<TSlug extends CollectionSlug> =
-  keyof GeneratedTypes extends never
+  HasGeneratedCollectionTypes extends false
     ? {
         action?: CreateAction
       }
@@ -144,7 +146,7 @@ export type CreateActionFromCollectionSlug<TSlug extends CollectionSlug> =
  * Allows update `action` on draft-enabled collections. Non-draft collections may only omit it or pass `publish`.
  */
 export type UpdateActionFromCollectionSlug<TSlug extends CollectionSlug> =
-  keyof GeneratedTypes extends never
+  HasGeneratedCollectionTypes extends false
     ? {
         action?: UpdateAction
       }
@@ -161,7 +163,7 @@ export type UpdateActionFromCollectionSlug<TSlug extends CollectionSlug> =
  * Restore does not accept `unpublish`. Omitted action publishes.
  */
 export type RestoreActionFromCollectionSlug<TSlug extends CollectionSlug> =
-  keyof GeneratedTypes extends never
+  HasGeneratedCollectionTypes extends false
     ? {
         /**
          * Restore and publish (`publish`, default) or restore as a draft (`saveDraft`).
@@ -216,7 +218,7 @@ type PermissiveCreateDataFromCollectionSlug<TSlug extends CollectionSlug> = {
 }
 
 export type CreateDataFromCollectionSlug<TSlug extends CollectionSlug> =
-  keyof GeneratedTypes extends never
+  HasGeneratedCollectionTypes extends false
     ? PermissiveCreateDataFromCollectionSlug<TSlug>
     : CollectionsWithoutDrafts extends TSlug
       ? PermissiveCreateDataFromCollectionSlug<TSlug>

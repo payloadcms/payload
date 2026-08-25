@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 import { extractMultiLocaleData, resolveImportWriteAction } from './batchProcessor.js'
 
 describe('localized import publication actions', () => {
-  it('resolves each locale from its own localized status', () => {
+  it('should resolve each locale from its own localized status', () => {
     const { flatData, localeUpdates } = extractMultiLocaleData({
       configuredLocales: ['en', 'es'],
       data: {
@@ -32,7 +32,7 @@ describe('localized import publication actions', () => {
     ).toBe('saveDraft')
   })
 
-  it('does not collapse a localized status object into a single publish action', () => {
+  it('should not collapse a localized status object into a single publish action', () => {
     expect(
       resolveImportWriteAction({
         collectionHasVersions: true,

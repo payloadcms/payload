@@ -367,18 +367,41 @@ function rewriteStringDrafts({
 }
 
 function isPayloadRestUrl({ node }: { node: MorphNode }): boolean {
-  const text = getStringLikeText({ node })
-
-  if (/^https?:\/\//i.test(text)) {
+  if (!Node.isTemplateExpression(node)) {
     return false
   }
 
-  return text.startsWith('/api/') || text.includes('}/api/')
+  return node
+    .getTemplateSpans()
+    .some((span) => isPayloadApiRouteExpression({ node: span.getExpression() }))
 }
 
 function isPayloadGraphqlUrl({ node }: { node: MorphNode }): boolean {
+  if (!isPayloadRestUrl({ node })) {
+    return false
+  }
+
   const text = getStringLikeText({ node })
-  return /\/api\/graphql(?:[/?#]|$)/.test(text)
+  return /\}\s*\/graphql(?:[/?#]|$)/.test(text)
+}
+
+function isPayloadApiRouteExpression({ node }: { node: MorphNode }): boolean {
+  const apiAccess = unwrap(node) ?? node
+  if (!Node.isPropertyAccessExpression(apiAccess) || apiAccess.getName() !== 'api') {
+    return false
+  }
+
+  const routesAccess = unwrap(apiAccess.getExpression()) ?? apiAccess.getExpression()
+  if (!Node.isPropertyAccessExpression(routesAccess) || routesAccess.getName() !== 'routes') {
+    return false
+  }
+
+  const configAccess = unwrap(routesAccess.getExpression()) ?? routesAccess.getExpression()
+  if (!Node.isPropertyAccessExpression(configAccess) || configAccess.getName() !== 'config') {
+    return false
+  }
+
+  return isProvenPayloadReceiver({ node: configAccess.getExpression() })
 }
 
 function getStringLikeText({ node }: { node: MorphNode }): string {
