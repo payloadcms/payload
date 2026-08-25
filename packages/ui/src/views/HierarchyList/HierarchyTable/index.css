@@ -20,10 +20,12 @@
     flex-grow: 1;
   }
 
+  /* The title link and its edit affordance sit inline; the cell keeps the shared td padding. */
   .hierarchy-tables__name-cell {
     display: flex;
     align-items: center;
     gap: var(--spacer-1);
+    min-width: 0;
   }
 
   .hierarchy-tables__edit-button {
@@ -47,33 +49,12 @@
     }
   }
 
+  /* The underline comes from the shared `cell-link` class - see elements/Table/index.css. */
   .hierarchy-tables__name-link {
     display: flex;
     align-items: center;
-    gap: var(--spacer-2);
-    color: var(--color-text);
-    text-decoration: none;
-    background: none;
-    border: none;
-    padding: var(--spacer-2) 0;
-    padding-inline-start: var(--spacer-2);
-    font: inherit;
-    cursor: pointer;
-    text-align: left;
-    min-height: calc(var(--spacer-4) * 2);
-
-    &:hover {
-      color: var(--color-text);
-      text-decoration: underline;
-    }
-  }
-
-  .hierarchy-tables__thumbnail {
-    display: inline-block;
-    max-width: var(--spacer-3);
-    height: var(--spacer-3);
-    border-radius: var(--radius-small);
-    flex-shrink: 0;
+    gap: var(--spacer-1);
+    min-width: 0;
   }
 
   .hierarchy-tables__name-icon {
@@ -81,16 +62,21 @@
     flex-shrink: 0;
   }
 
+  /*
+   * `overflow: hidden` is required for the ellipsis, so the line box must be tall enough to
+   * contain the link underline. A line-height shorter than the glyph box crops it away.
+   */
   .hierarchy-tables__name-text {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    line-height: var(--spacer-3);
+    min-width: 0;
+    line-height: var(--text-body-large-line-height);
   }
 
   .hierarchy-tables__chevron {
-    margin-inline-start: auto;
-    padding-inline-start: var(--spacer-2);
+    display: flex;
+    flex-shrink: 0;
 
     svg {
       width: var(--spacer-2-5);
@@ -102,11 +88,6 @@
   .hierarchy-tables__col-name {
     width: auto;
     min-width: 200px;
-
-    /* Move padding to link for full-cell clickability */
-    &:has(.hierarchy-tables__name-link) {
-      padding: 0;
-    }
   }
 
   .hierarchy-tables__col-collection {

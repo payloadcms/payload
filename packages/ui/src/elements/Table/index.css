@@ -75,6 +75,29 @@
       padding-inline-start: var(--spacer-3);
     }
 
+    /* Underline treatment for a cell's primary link. Linked cells get it for free; a table that
+     * renders its own anchor inside the cell (e.g. the hierarchy tables) opts in with `cell-link`. */
+    td.cell--linked > :is(a, button),
+    .cell-link {
+      font-weight: var(--text-body-medium-strong-font-weight);
+      text-decoration-line: underline;
+      text-decoration-style: solid;
+      text-decoration-skip-ink: none;
+      text-decoration-color: var(--color-border);
+      text-decoration-thickness: auto;
+      text-underline-offset: 2px;
+      text-underline-position: from-font;
+
+      &:hover {
+        text-decoration-color: var(--color-text);
+      }
+    }
+
+    /* The ID cell renders its own pill with a hover background instead of an underline */
+    td.cell--linked > :is(a, button):has(.id-label) {
+      text-decoration-line: none;
+    }
+
     #heading-_select,
     .cell-_select {
       width: var(--spacer-5);
