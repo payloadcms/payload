@@ -164,6 +164,32 @@ describe('getFileFromUploadInstructions', () => {
     expect(file.mimetype).toBe('image/png')
   })
 
+  it('fetches the full file for an image with no configured adjustments when the request includes a crop edit', async () => {
+    const handler = vi.fn(async (handlerReq: PayloadRequest) => {
+      expect(handlerReq.headers.get('range')).toBeNull()
+      return new Response(MINIMAL_PNG, { headers: { 'Content-Type': 'image/png' }, status: 200 })
+    })
+
+    const req = createReq([handler], {})
+    req.query = { uploadEdits: { crop: { height: 10, unit: 'px', width: 10, x: 0, y: 0 } } }
+
+    const file = await getFileFromUploadInstructions({
+      collectionSlug: 'media',
+      file: createUploadReferenceFile({
+        filename: 'photo.png',
+        mimeType: 'image/png',
+        size: MINIMAL_PNG.length,
+      }),
+      req,
+    })
+
+    expect(handler).toHaveBeenCalledTimes(1)
+    expect(file.tempFilePath).toBeTruthy()
+    tempFilesToClean.push(file.tempFilePath!)
+    expect(file.data.length).toBe(0)
+    expect(fs.readFileSync(file.tempFilePath!)).toEqual(MINIMAL_PNG)
+  })
+
   it('stops reading once it has enough bytes to probe dimensions, even if the handler ignores the range hint', async () => {
     const totalSize = HEADER_PROBE_BYTE_LENGTH * 4
     let cancelled = false

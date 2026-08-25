@@ -67,6 +67,15 @@ const shouldReupload = (
   return false
 }
 
+/**
+ * Builds the document's file metadata and the list of files to write to disk.
+ *
+ * A large client upload may arrive as a temp file instead of an in-memory buffer (see
+ * getFileFromUploadInstructions.ts), and `file.data` can hold only a partial probe rather than
+ * the full file. To avoid loading such files into memory unnecessarily, this skips reading a
+ * temp file entirely when local storage is disabled, and copies it straight to its destination
+ * when local storage is enabled.
+ */
 export const generateFileData = async <T>({
   collection: { config: collectionConfig },
   data,
@@ -129,13 +138,11 @@ export const generateFileData = async <T>({
 
     try {
       if (!disableLocalStorage && isLocalFile) {
-        // File is stored locally
         const filePath = `${staticPath}/${filename}`
         const response = await getFileByPath(filePath)
         file = response
         overwriteExistingFiles = true
       } else if (filename && url) {
-        // File is remote
         file = await getExternalFile({
           data: incomingFileData as unknown as FileData,
           req,
@@ -188,8 +195,8 @@ export const generateFileData = async <T>({
     let fileBuffer!: { data: Buffer; info: OutputInfo }
     let ext
     let mime: string
-    // Exclude tempFilePath from adjustments since it can depend only on resize/format/trim
-    // config, not on whether the bytes live on disk or in memory.
+    // Depends only on configured resize/format/trim options, not on whether the bytes are on
+    // disk or in memory.
     const fileHasAdjustments =
       fileSupportsResize &&
       Boolean(resizeOptions || formatOptions || trimOptions || constructorOptions)
@@ -201,11 +208,10 @@ export const generateFileData = async <T>({
     }
 
     if (sharp && (fileIsAnimatedType || fileHasAdjustments)) {
-      if (file.tempFilePath) {
-        sharpFile = sharp(file.tempFilePath, sharpOptions).rotate() // pass rotate() to auto-rotate based on EXIF data. https://github.com/payloadcms/payload/pull/3081
-      } else {
-        sharpFile = sharp(file.data, sharpOptions).rotate() // pass rotate() to auto-rotate based on EXIF data. https://github.com/payloadcms/payload/pull/3081
-      }
+      // rotate() auto-rotates based on EXIF data - see #3081
+      sharpFile = file.tempFilePath
+        ? sharp(file.tempFilePath, sharpOptions).rotate()
+        : sharp(file.data, sharpOptions).rotate()
 
       if (fileHasAdjustments) {
         if (resizeOptions) {
@@ -234,12 +240,12 @@ export const generateFileData = async <T>({
         withMetadata: withMetadata!,
       })
       fileBuffer = await sharpFile.toBuffer({ resolveWithObject: true })
-      ;({ ext, mime } = (await fileTypeFromBuffer(fileBuffer.data))!) // This is getting an incorrect gif height back.
+      ;({ ext, mime } = (await fileTypeFromBuffer(fileBuffer.data))!)
       fileData.width = fileBuffer.info.width
       fileData.height = fileBuffer.info.height
       fileData.filesize = fileBuffer.info.size
 
-      // Animated GIFs + WebP aggregate the height from every frame, so we need to use divide by number of pages
+      // Animated GIFs/WebP report height summed across all frames - divide by page count.
       if (metadata.pages) {
         fileData.height = fileBuffer.info.height / metadata.pages
         fileData.filesize = fileBuffer.data.length
@@ -324,7 +330,6 @@ export const generateFileData = async <T>({
         }
         fileData.filesize = resizedAfterCrop.info.size
       } else {
-        // If resizeOptions is not present, just save the cropped image
         filesToSave.push({
           buffer: croppedImage,
           path: `${staticPath}/${fsSafeName}`,
@@ -346,54 +351,55 @@ export const generateFileData = async <T>({
       }
 
       if (file.tempFilePath) {
-        await fs.writeFile(file.tempFilePath, croppedImage) // write fileBuffer to the temp path
+        await fs.writeFile(file.tempFilePath, croppedImage)
       } else {
         req.file = fileForResize
       }
     } else {
-      // For non-image files with useTempFiles, read the buffer from the temp file
-      // since file.data is empty when using temp files.
-      //
-      // When local storage is disabled, filesToSave is never written to disk (create/update
-      // skip uploadFiles for it), and an unmodified temp file's bytes on disk are already
-      // correct, so there's nothing to read into memory or write back out. Skipping this
-      // avoids buffering the entire file just to discard or rewrite it unchanged - a client
-      // upload can be far larger than server memory allows.
+      // file.data is empty when useTempFiles is on, so the real content lives at
+      // file.tempFilePath instead (see the function doc for why we avoid buffering it).
       const skipTempFileBuffer =
         disableLocalStorage && Boolean(file.tempFilePath) && !fileBuffer?.data
 
-      let bufferToSave: Buffer
-      if (fileBuffer?.data) {
-        bufferToSave = fileBuffer.data
-      } else if (file.tempFilePath) {
-        bufferToSave = skipTempFileBuffer ? Buffer.alloc(0) : await fs.readFile(file.tempFilePath)
-      } else {
-        bufferToSave = file.data
-      }
+      const shouldCopyFromTempFile =
+        !fileBuffer?.data && Boolean(file.tempFilePath) && !disableLocalStorage
 
-      // A client upload with a `header` or `none` content requirement (see
-      // getFileContentRequirement.ts) only fetches a byte-range probe or nothing at all, so
-      // `file.data` is shorter than the file's real, declared size - it must not be saved or
-      // copied back onto `req.file` in place of the real content.
-      const fileDataIsPartialView =
-        !fileBuffer?.data && !file.tempFilePath && bufferToSave.length !== file.size
-
-      if (!skipTempFileBuffer && !fileDataIsPartialView) {
+      if (shouldCopyFromTempFile) {
         filesToSave.push({
-          buffer: bufferToSave,
           path: `${staticPath}/${fsSafeName}`,
+          sourcePath: file.tempFilePath!,
         })
+      } else {
+        let bufferToSave: Buffer
+        if (fileBuffer?.data) {
+          bufferToSave = fileBuffer.data
+        } else if (file.tempFilePath) {
+          bufferToSave = skipTempFileBuffer ? Buffer.alloc(0) : await fs.readFile(file.tempFilePath)
+        } else {
+          bufferToSave = file.data
+        }
 
-        // If using temp files and the image is being resized, write the file to the temp path
-        if (fileBuffer?.data || bufferToSave.length > 0) {
-          if (file.tempFilePath) {
-            await fs.writeFile(file.tempFilePath, fileBuffer?.data || bufferToSave) // write fileBuffer to the temp path
-          } else {
-            // Assign the _possibly modified_ file to the request object
-            req.file = {
-              ...file,
-              data: fileBuffer?.data || bufferToSave,
-              size: fileBuffer?.info.size,
+        // A 'header'/'none' content requirement (see getFileContentRequirement.ts) means
+        // file.data is only a partial probe, not the real content - never save it as-is.
+        const fileDataIsPartialView =
+          !fileBuffer?.data && !file.tempFilePath && bufferToSave.length !== file.size
+
+        if (!skipTempFileBuffer && !fileDataIsPartialView) {
+          filesToSave.push({
+            buffer: bufferToSave,
+            path: `${staticPath}/${fsSafeName}`,
+          })
+
+          if (fileBuffer?.data || bufferToSave.length > 0) {
+            if (file.tempFilePath) {
+              await fs.writeFile(file.tempFilePath, fileBuffer?.data || bufferToSave)
+            } else {
+              // Keep req.file in sync, since downstream hooks/plugins may read it.
+              req.file = {
+                ...file,
+                data: fileBuffer?.data || bufferToSave,
+                size: fileBuffer?.info.size,
+              }
             }
           }
         }
@@ -402,7 +408,6 @@ export const generateFileData = async <T>({
 
     if (fileSupportsResize && (Array.isArray(imageSizes) || focalPointEnabled !== false)) {
       req.payloadUploadSizes = {}
-      // Focal point adjustments
       const focalPoint =
         focalPointEnabled && uploadEdits?.focalPoint
           ? {
@@ -478,8 +483,7 @@ function parseUploadEditsFromReqOrIncomingData(args: {
   const origDoc = originalDoc as FileData
 
   if (origDoc && 'focalX' in origDoc && 'focalY' in origDoc) {
-    // If no change in focal point, return undefined.
-    // This prevents a refocal operation triggered from admin, because it always sends the focal point.
+    // Admin always resends the current focal point, so treat an unchanged value as no edit.
     if (incomingData.focalX === origDoc.focalX && incomingData.focalY === origDoc.focalY) {
       return undefined!
     }

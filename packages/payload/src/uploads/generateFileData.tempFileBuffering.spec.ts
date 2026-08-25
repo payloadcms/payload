@@ -68,9 +68,8 @@ describe('generateFileData - non-image temp file buffering', () => {
     expect(result.data).toMatchObject({ filesize: 5_000_000_000, mimeType: 'video/mp4' })
   })
 
-  it('still reads and saves the temp file when local storage is enabled', async () => {
-    readFileMock.mockResolvedValueOnce(Buffer.from('video-bytes'))
-    const req = createReq('/tmp/payload-client-upload-def', 1234)
+  it('copies the temp file directly, without reading it into memory, when local storage is enabled', async () => {
+    const req = createReq('/tmp/payload-client-upload-def', 5_000_000_000)
 
     const result = await generateFileData({
       collection: createCollection(false),
@@ -81,13 +80,10 @@ describe('generateFileData - non-image temp file buffering', () => {
       req,
     })
 
-    expect(readFileMock).toHaveBeenCalledWith('/tmp/payload-client-upload-def')
-    expect(writeFileMock).toHaveBeenCalledWith(
-      '/tmp/payload-client-upload-def',
-      Buffer.from('video-bytes'),
-    )
+    expect(readFileMock).not.toHaveBeenCalled()
+    expect(writeFileMock).not.toHaveBeenCalled()
     expect(result.files).toEqual([
-      { buffer: Buffer.from('video-bytes'), path: '/tmp/media/big-video.mp4' },
+      { path: '/tmp/media/big-video.mp4', sourcePath: '/tmp/payload-client-upload-def' },
     ])
   })
 })

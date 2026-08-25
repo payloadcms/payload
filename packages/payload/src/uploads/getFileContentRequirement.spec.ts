@@ -98,6 +98,26 @@ describe('getFileContentRequirement', () => {
     ).toBe('full')
   })
 
+  it('requires the full file when the request includes a crop edit, even with no configured adjustments', () => {
+    expect(
+      getFileContentRequirement({
+        hasSizeEdits: true,
+        mimeType: 'image/png',
+        uploadConfig: createUploadConfig(),
+      }),
+    ).toBe('full')
+  })
+
+  it('requires only the header when the request has no size edits and no configured adjustments', () => {
+    expect(
+      getFileContentRequirement({
+        hasSizeEdits: false,
+        mimeType: 'image/png',
+        uploadConfig: createUploadConfig(),
+      }),
+    ).toBe('header')
+  })
+
   it('requires only the header for a non-resizable but recognized image type', () => {
     expect(
       getFileContentRequirement({

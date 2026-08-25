@@ -141,4 +141,63 @@ describe('generateFileData', () => {
     expect(req.file?.size).toBe(fullFileSize)
     expect(req.file?.data).toBe(truncatedBuffer)
   })
+
+  it('copies straight from the temp file instead of reading it into memory when local storage is enabled', async () => {
+    const req = {
+      file: {
+        data: Buffer.alloc(0),
+        mimetype: 'application/pdf',
+        name: 'document.pdf',
+        size: PNG_SIGNATURE.length,
+        tempFilePath,
+      },
+      payload: {
+        config: { sharp: undefined },
+        logger: { error: vi.fn() },
+      },
+    } as unknown as PayloadRequest
+
+    const { files } = await generateFileData({
+      collection: createCollection({ disableLocalStorage: false }),
+      config: {} as SanitizedConfig,
+      data: {},
+      operation: 'create',
+      overwriteExistingFiles: true,
+      req,
+    })
+
+    expect(files).toEqual([
+      {
+        path: `${os.tmpdir()}/document.pdf`,
+        sourcePath: tempFilePath,
+      },
+    ])
+  })
+
+  it('does not save anything when local storage is disabled and no processing is needed', async () => {
+    const req = {
+      file: {
+        data: Buffer.alloc(0),
+        mimetype: 'application/pdf',
+        name: 'document.pdf',
+        size: PNG_SIGNATURE.length,
+        tempFilePath,
+      },
+      payload: {
+        config: { sharp: undefined },
+        logger: { error: vi.fn() },
+      },
+    } as unknown as PayloadRequest
+
+    const { files } = await generateFileData({
+      collection: createCollection({ disableLocalStorage: true }),
+      config: {} as SanitizedConfig,
+      data: {},
+      operation: 'create',
+      overwriteExistingFiles: true,
+      req,
+    })
+
+    expect(files).toEqual([])
+  })
 })

@@ -9,7 +9,7 @@ import { Readable } from 'node:stream'
 import { pipeline } from 'node:stream/promises'
 
 import type { PayloadRequest } from '../types/index.js'
-import type { SanitizedUploadConfig, UploadInstructions } from './types.js'
+import type { SanitizedUploadConfig, UploadEdits, UploadInstructions } from './types.js'
 
 import { APIError } from '../errors/APIError.js'
 import { getFileContentRequirement, HEADER_PROBE_BYTE_LENGTH } from './getFileContentRequirement.js'
@@ -48,7 +48,11 @@ export const getFileFromUploadInstructions = async ({
     throw new APIError('uploadConfig.handlers is not present for ' + collectionSlug)
   }
 
-  const contentRequirement = getFileContentRequirement({ mimeType: file.mimeType, uploadConfig })
+  const contentRequirement = getFileContentRequirement({
+    hasSizeEdits: requestHasSizeEdits(req),
+    mimeType: file.mimeType,
+    uploadConfig,
+  })
 
   // Nothing downstream reads this file's content - use the client-reported metadata directly
   // instead of re-downloading a file that, for a chunked upload, can be far larger than
@@ -83,6 +87,22 @@ export const getFileFromUploadInstructions = async ({
     tempFilePath,
     uploadReference: file.uploadReference,
   }
+}
+
+/**
+ * Whether the request's `uploadEdits` query param carries a crop or resize edit - mirrors the
+ * raw `req.query.uploadEdits` read in generateFileData.ts's `shouldReupload`/`cropData` checks,
+ * since a full parse (with its `data`/`originalDoc` focal-point fallback) isn't available yet
+ * at this point in the request lifecycle.
+ */
+const requestHasSizeEdits = (req: PayloadRequest): boolean => {
+  const uploadEdits = req.query?.uploadEdits
+  if (typeof uploadEdits !== 'object' || uploadEdits === null) {
+    return false
+  }
+
+  const { crop, heightInPixels, widthInPixels } = uploadEdits as UploadEdits
+  return Boolean(crop || heightInPixels || widthInPixels)
 }
 
 /**

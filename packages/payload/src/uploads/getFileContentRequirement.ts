@@ -21,14 +21,22 @@ export type FileContentRequirement = 'full' | 'header' | 'none'
  * - `full`: local storage needs the real bytes, or the file will be resized/reformatted/
  *   trimmed/animated, or additional image sizes will be generated from it, or the collection
  *   restricts mime types (which also runs SVG/PDF content-safety checks that must see the
- *   whole file).
+ *   whole file), or the request itself carries a crop/resize edit (`uploadEdits`) that will
+ *   run sharp against the fetched bytes.
  * - `header`: the file is an image and only its dimensions are needed.
  * - `none`: nothing downstream reads file content at all.
  */
 export function getFileContentRequirement({
+  hasSizeEdits,
   mimeType,
   uploadConfig,
 }: {
+  /**
+   * Whether the request's `uploadEdits` (crop, heightInPixels, widthInPixels) will resize the
+   * fetched file - if so, the full file is needed even when the collection config alone would
+   * only require a header probe.
+   */
+  hasSizeEdits?: boolean
   mimeType: string
   uploadConfig: SanitizedUploadConfig
 }): FileContentRequirement {
@@ -54,7 +62,7 @@ export function getFileContentRequirement({
       (Array.isArray(uploadConfig.imageSizes) && uploadConfig.imageSizes.length > 0),
   )
 
-  if ((isResizableImage && hasConfiguredAdjustments) || isAnimatedImage(mimeType)) {
+  if (hasSizeEdits || (isResizableImage && hasConfiguredAdjustments) || isAnimatedImage(mimeType)) {
     return 'full'
   }
 

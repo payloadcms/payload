@@ -2531,6 +2531,72 @@ describe('Collections - Uploads', () => {
       expect(await listClientUploadTempFiles()).toEqual(before)
     })
   })
+
+  /**
+   * When local storage is enabled and no image processing changes the bytes, generateFileData
+   * copies straight from `file.tempFilePath` to its destination instead of reading the whole
+   * file into memory (see generateFileData.ts). `mediaSlug` has no restrictions on non-image
+   * mime types, so an audio file uploaded there skips all sharp processing and exercises that
+   * copy against real disk I/O.
+   */
+  describe('temp file copy to local storage', () => {
+    const createdIds: (number | string)[] = []
+    const tempFilesToClean: string[] = []
+
+    afterEach(async () => {
+      for (const id of createdIds) {
+        await payload.delete({ id, collection: mediaSlug })
+      }
+      createdIds.length = 0
+
+      for (const tempFilePath of tempFilesToClean) {
+        await fs.promises.rm(tempFilePath, { force: true })
+      }
+      tempFilesToClean.length = 0
+    })
+
+    it('copies the temp file to its destination instead of reading it into memory', async () => {
+      const fileContents = Buffer.from(`fake-audio-bytes-${randomUUID()}`)
+      const tempFilePath = path.join(os.tmpdir(), `payload-test-temp-file-${randomUUID()}.mp3`)
+      await fs.promises.writeFile(tempFilePath, fileContents)
+      tempFilesToClean.push(tempFilePath)
+
+      // fs.promises is the same object `fs/promises` exports, so this observes the real calls
+      // generateFileData.ts/uploadFiles.ts make - it doesn't replace their behavior.
+      const copyFileSpy = vitest.spyOn(fs.promises, 'copyFile')
+      const readFileSpy = vitest.spyOn(fs.promises, 'readFile')
+
+      const doc = await payload.create({
+        collection: mediaSlug,
+        data: {},
+        file: {
+          name: `temp-file-copy-${randomUUID()}.mp3`,
+          data: Buffer.alloc(0),
+          mimetype: 'audio/mpeg',
+          size: fileContents.length,
+          tempFilePath,
+        },
+      })
+
+      createdIds.push(doc.id)
+
+      const savedFilePath = path.join(dirname, './media', doc.filename)
+
+      expect(copyFileSpy).toHaveBeenCalledWith(tempFilePath, savedFilePath)
+      expect(readFileSpy).not.toHaveBeenCalledWith(tempFilePath)
+
+      copyFileSpy.mockRestore()
+      readFileSpy.mockRestore()
+
+      expect(doc.filesize).toBe(fileContents.length)
+      expect(await fileExists(savedFilePath)).toBe(true)
+      expect(await fs.promises.readFile(savedFilePath)).toEqual(fileContents)
+
+      // Copied, not moved - the original temp file must be untouched.
+      expect(await fileExists(tempFilePath)).toBe(true)
+      expect(await fs.promises.readFile(tempFilePath)).toEqual(fileContents)
+    })
+  })
 })
 
 async function fileExists(fileName: string): Promise<boolean> {
