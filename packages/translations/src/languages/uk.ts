@@ -8,6 +8,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     alreadyActivated: 'Вже активований',
     alreadyLoggedIn: 'Вже увійшли в систему',
     apiKey: 'API ключ',
+    apiKeyNotVisible: 'У вас немає дозволу на перегляд цього API ключа.',
     authenticated: 'Аутентифікований',
     backToLogin: 'Повернутися до входу',
     beginCreateFirstUser: 'Створіть свого першого користувача, щоб розпочати.',
@@ -16,6 +17,8 @@ export const ukTranslations: DefaultTranslationsObject = {
       'Якщо адреса електронної пошти пов\'язана з обліковим записом, незабаром ви отримаєте інструкції щодо скидання пароля. Будь ласка, перевірте папку "Спам" або "Небажана пошта", якщо ви не бачите цього електронного листа у своїй вхідній пошті.',
     confirmGeneration: 'Підтвердити генерацію',
     confirmPassword: 'Підтвердження паролю',
+    copyAPIKeyBeforeSaving:
+      'Скопіюйте цей API ключ перед збереженням. Ви більше не зможете його переглянути.',
     createFirstUser: 'Створення першого користувача',
     createUser: 'Створити користувача',
     emailNotValid: 'Вказана адреса електронної пошти недійсна',

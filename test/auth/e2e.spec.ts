@@ -432,7 +432,11 @@ describe('Auth', () => {
         const apiKey = await apiKeyLocator.inputValue()
 
         await saveDocAndAssert(page)
-        await expect(apiKeyLocator).toBeHidden()
+        await expect(apiKeyLocator).toBeDisabled()
+        await expect(apiKeyLocator).toHaveValue('')
+        await expect(
+          page.getByText("You don't have permission to view this API key."),
+        ).toBeVisible()
 
         const response = await fetch(`${apiURL}/${apiKeysSlug}/me`, {
           headers: {
@@ -547,7 +551,13 @@ describe('Auth', () => {
 
         await page.goto(hiddenKeyURL.edit(user.id))
         await expect(page.locator('#field-enableAPIKey')).toBeChecked()
-        await expect(page.locator('#apiKey')).toBeHidden()
+        await expect(page.locator('#apiKey')).toBeDisabled()
+        await expect(page.locator('#apiKey')).toHaveValue('')
+        await expect(page.getByRole('button', { name: 'Show API key' })).toBeHidden()
+        await expect(page.locator('.copy-to-clipboard')).toBeHidden()
+        await expect(
+          page.getByText("You don't have permission to view this API key."),
+        ).toBeVisible()
         await page.locator('#field-name').fill('After')
         await saveDocAndAssert(page)
 
@@ -562,6 +572,87 @@ describe('Auth', () => {
 
         expect(result.docs[0]?.apiKey).toBe(originalAPIKey)
         expect(result.docs[0]?.name).toBe('After')
+      })
+
+      test('should show a replacement key until it is saved', async () => {
+        const originalAPIKey = uuid()
+        const user = await getAPIKeyTestPayload().create({
+          collection: apiKeysWithHiddenKeysSlug,
+          data: {
+            apiKey: originalAPIKey,
+            enableAPIKey: true,
+          },
+        })
+        createdIDs.push(user.id)
+        const hiddenKeyURL = new AdminUrlUtil(serverURL, apiKeysWithHiddenKeysSlug)
+
+        await page.goto(hiddenKeyURL.edit(user.id))
+        await page.getByRole('button', { name: 'Generate new API key' }).click()
+        await page
+          .locator(`#generate-confirmation-${user.id} [data-dialog-action="confirm"]`)
+          .click()
+
+        const apiKeyInput = page.locator('#apiKey')
+        await expect(apiKeyInput).toBeEnabled()
+        const replacementAPIKey = apiKeyInput
+        await expect(replacementAPIKey).not.toHaveValue(originalAPIKey)
+        await expect(
+          page.getByText("Copy this API key before saving. You won't be able to view it again."),
+        ).toBeVisible()
+
+        await saveDocAndAssert(page)
+        await expect(apiKeyInput).toBeDisabled()
+        await expect(
+          page.getByText("You don't have permission to view this API key."),
+        ).toBeVisible()
+
+        const result = await getAPIKeyTestPayload().find({
+          collection: apiKeysWithHiddenKeysSlug,
+          where: {
+            id: {
+              equals: user.id,
+            },
+          },
+        })
+
+        expect(result.docs[0]?.apiKey).toBe(replacementAPIKey)
+      })
+
+      test('should show a new key when enabling an unreadable API key', async () => {
+        const user = await getAPIKeyTestPayload().create({
+          collection: apiKeysWithHiddenKeysSlug,
+          data: {
+            apiKey: uuid(),
+            enableAPIKey: false,
+          },
+        })
+        createdIDs.push(user.id)
+        const hiddenKeyURL = new AdminUrlUtil(serverURL, apiKeysWithHiddenKeysSlug)
+
+        await page.goto(hiddenKeyURL.edit(user.id))
+        await expect(page.locator('#apiKey')).toBeHidden()
+        await page.locator('#field-enableAPIKey').click()
+
+        const apiKeyInput = page.locator('#apiKey')
+        await expect(apiKeyInput).toBeEnabled()
+        const newAPIKey = await apiKeyInput.inputValue()
+        await expect(
+          page.getByText("Copy this API key before saving. You won't be able to view it again."),
+        ).toBeVisible()
+
+        await saveDocAndAssert(page)
+        await expect(apiKeyInput).toBeDisabled()
+
+        const result = await getAPIKeyTestPayload().find({
+          collection: apiKeysWithHiddenKeysSlug,
+          where: {
+            id: {
+              equals: user.id,
+            },
+          },
+        })
+
+        expect(result.docs[0]?.apiKey).toBe(newAPIKey)
       })
     })
 

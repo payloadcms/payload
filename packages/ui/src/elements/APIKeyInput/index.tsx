@@ -10,6 +10,7 @@ const baseClass = 'api-key-input'
 
 export type APIKeyInputProps = {
   readonly 'aria-label'?: string
+  readonly disabled?: boolean
   readonly highlighted?: boolean
   readonly id?: string
   readonly value: null | string | undefined
@@ -22,6 +23,7 @@ export type APIKeyInputProps = {
 export const APIKeyInput: React.FC<APIKeyInputProps> = ({
   id,
   'aria-label': ariaLabel = 'API Key',
+  disabled,
   highlighted,
   value,
 }) => {
@@ -31,27 +33,37 @@ export const APIKeyInput: React.FC<APIKeyInputProps> = ({
   return (
     <div className={baseClass}>
       <div
-        className={[`${baseClass}__control`, highlighted && 'highlight'].filter(Boolean).join(' ')}
+        className={[
+          `${baseClass}__control`,
+          disabled && `${baseClass}__control--disabled`,
+          highlighted && 'highlight',
+        ]
+          .filter(Boolean)
+          .join(' ')}
       >
         <KeyIcon className={`${baseClass}__icon`} />
         <input
           aria-label={ariaLabel}
           className={`${baseClass}__field`}
+          disabled={disabled}
           id={id}
+          placeholder={disabled ? '••••••••••••••••' : undefined}
           readOnly
-          type={showKey ? 'text' : 'password'}
+          type={disabled || showKey ? 'text' : 'password'}
           value={keyValue}
         />
-        <button
-          aria-label={showKey ? 'Hide API key' : 'Show API key'}
-          className={`${baseClass}__toggle`}
-          onClick={() => setShowKey((prev) => !prev)}
-          type="button"
-        >
-          <EyeIcon active={showKey} size={24} />
-        </button>
+        {!disabled && (
+          <button
+            aria-label={showKey ? 'Hide API key' : 'Show API key'}
+            className={`${baseClass}__toggle`}
+            onClick={() => setShowKey((prev) => !prev)}
+            type="button"
+          >
+            <EyeIcon active={showKey} size={24} />
+          </button>
+        )}
       </div>
-      <CopyToClipboard value={keyValue} />
+      {!disabled && <CopyToClipboard value={keyValue} />}
     </div>
   )
 }

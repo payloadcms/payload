@@ -8,6 +8,7 @@ export const svTranslations: DefaultTranslationsObject = {
     alreadyActivated: 'Redan aktiverad',
     alreadyLoggedIn: 'Redan inloggad',
     apiKey: 'API-nyckel',
+    apiKeyNotVisible: 'Du har inte behörighet att visa den här API-nyckeln.',
     authenticated: 'Autentiserad',
     backToLogin: 'Tillbaka till inloggningen',
     beginCreateFirstUser: 'Skapa din första användare för att börja.',
@@ -16,6 +17,8 @@ export const svTranslations: DefaultTranslationsObject = {
       'Om e-postadressen är kopplad till ett konto kommer du inom kort att få instruktioner för att återställa ditt lösenord. Vänligen kontrollera din skräppost-mapp om du inte ser e-postmeddelandet i din inkorg.',
     confirmGeneration: 'Bekräfta generering',
     confirmPassword: 'Bekräfta lösenord',
+    copyAPIKeyBeforeSaving:
+      'Kopiera den här API-nyckeln innan du sparar. Du kommer inte att kunna visa den igen.',
     createFirstUser: 'Skapa första användaren',
     createUser: 'Skapa användare',
     emailNotValid: 'Angiven e-postadress är inte giltig',

@@ -8,6 +8,7 @@ export const taTranslations: DefaultTranslationsObject = {
     alreadyActivated: 'ஏற்கனவே செயல்படுத்தப்பட்டது',
     alreadyLoggedIn: 'ஏற்கனவே உள்நுழைந்துள்ளீர்கள்',
     apiKey: 'API விசை',
+    apiKeyNotVisible: 'இந்த API விசையைப் பார்க்க உங்களுக்கு அனுமதி இல்லை.',
     authenticated: 'அங்கீகரிக்கப்பட்டது',
     backToLogin: 'உள்நுழைவுக்கு திரும்ப',
     beginCreateFirstUser: 'தொடக்கம் செய்ய உங்கள் முதலாவது பயனரை உருவாக்குங்கள்.',
@@ -16,6 +17,8 @@ export const taTranslations: DefaultTranslationsObject = {
       'இந்த மின்னஞ்சல் முகவரி ஒரு கணக்குடன் இணைக்கப்பட்டிருந்தால், விரைவில் உங்கள் கடவுச்சொல்லை மீட்டமைக்கும் வழிமுறைகள் அனுப்பப்படும். உங்கள் இன்பாக்ஸில் இல்லாவிட்டால், "Spam/Junk" கோப்புறையைச் சரிபார்க்கவும்.',
     confirmGeneration: 'உருவாக்கலை உறுதிப்படுத்து',
     confirmPassword: 'கடவுச்சொல்லை உறுதிப்படுத்து',
+    copyAPIKeyBeforeSaving:
+      'சேமிப்பதற்கு முன் இந்த API விசையை நகலெடுக்கவும். இதை மீண்டும் பார்க்க முடியாது.',
     createFirstUser: 'முதல் பயனரை உருவாக்கவும்',
     createUser: 'பயனர் உருவாக்கு',
     emailNotValid: 'கொடுக்கப்பட்ட மின்னஞ்சல் செல்லுபடியானதல்ல',

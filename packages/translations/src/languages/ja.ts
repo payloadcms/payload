@@ -8,6 +8,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     alreadyActivated: 'すでに有効です',
     alreadyLoggedIn: 'すでにログインしています',
     apiKey: 'API Key',
+    apiKeyNotVisible: 'このAPIキーを表示する権限がありません。',
     authenticated: '認証済み',
     backToLogin: 'ログイン画面へ戻る',
     beginCreateFirstUser: '開始するには最初のユーザーを作成してください。',
@@ -16,6 +17,8 @@ export const jaTranslations: DefaultTranslationsObject = {
       'そのメールアドレスがアカウントに関連付けられている場合、すぐにパスワードをリセットするための指示が送信されます。メールが受信トレイにない場合は、迷惑メールフォルダーまたはジャンクメールフォルダーを確認してください。',
     confirmGeneration: '生成の確認',
     confirmPassword: 'パスワードの確認',
+    copyAPIKeyBeforeSaving:
+      '保存する前にこのAPIキーをコピーしてください。保存後は再表示できません。',
     createFirstUser: '最初のユーザーを作成',
     createUser: 'ユーザーを作成',
     emailNotValid: '入力されたメールアドレスは無効です。',

@@ -8,6 +8,7 @@ export const faTranslations: DefaultTranslationsObject = {
     alreadyActivated: 'این حساب قبلاً فعال شده است.',
     alreadyLoggedIn: 'شما در حال حاضر وارد شده‌اید.',
     apiKey: 'کلید API',
+    apiKeyNotVisible: 'شما اجازه مشاهده این کلید API را ندارید.',
     authenticated: 'احراز هویت شده',
     backToLogin: 'بازگشت به صفحه ورود',
     beginCreateFirstUser: 'برای شروع، اولین کاربر خود را ایجاد کنید.',
@@ -16,6 +17,8 @@ export const faTranslations: DefaultTranslationsObject = {
       'ایمیلی حاوی لینک بازنشانی رمز عبور برای شما ارسال شد. لطفاً پوشه اسپم (spam) خود را نیز بررسی کنید.',
     confirmGeneration: 'تأیید تولید',
     confirmPassword: 'تکرار رمز عبور',
+    copyAPIKeyBeforeSaving:
+      'پیش از ذخیره، این کلید API را کپی کنید. دیگر نمی‌توانید آن را مشاهده کنید.',
     createFirstUser: 'ایجاد اولین کاربر',
     createUser: 'ایجاد کاربر',
     emailNotValid: 'ایمیل وارد شده معتبر نیست.',

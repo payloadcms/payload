@@ -8,6 +8,7 @@ export const myTranslations: DefaultTranslationsObject = {
     alreadyActivated: 'အတည်ပြုပြီး',
     alreadyLoggedIn: 'ဝင်ရောက်ပြီးသား',
     apiKey: 'API Key',
+    apiKeyNotVisible: 'ဤ API Key ကို ကြည့်ရှုရန် သင့်တွင် ခွင့်ပြုချက်မရှိပါ။',
     authenticated: 'အတည်ပြုပြီး',
     backToLogin: 'အကောင့်ထဲ ပြန်ဝင်မည်။',
     beginCreateFirstUser: 'အသုံးပြုသူတစ်ဦးကို တည်ဆောက်၍ စတင်ပါ။',
@@ -16,6 +17,8 @@ export const myTranslations: DefaultTranslationsObject = {
       'အီးမေးလ်လိပ်စာသည် အကောင့်တစ်ခုနှင့် ဆက်စပ်နေပါက သင့်စကားဝှက်ကို ပြန်လည်သတ်မှတ်ရန် ညွှန်ကြားချက်များကို မကြာမီ လက်ခံရရှိမည်ဖြစ်သည်။ သင့်ဝင်စာပုံးတွင် အီးမေးလ်မတွေ့ပါက spam သို့မဟုတ် junk mail ဖိုလ်ဒါကို စစ်ဆေးပါ။',
     confirmGeneration: 'Generation အတည်ပြု',
     confirmPassword: 'စကားဝှက်အား ထပ်မံ ရိုက်ထည့်ပါ။',
+    copyAPIKeyBeforeSaving:
+      'မသိမ်းမီ ဤ API Key ကို ကူးယူပါ။ သိမ်းပြီးနောက် ထပ်မံကြည့်ရှုနိုင်မည် မဟုတ်ပါ။',
     createFirstUser: 'ပထမဆုံး အသုံးပြုသူကို ဖန်တီးပါ။',
     createUser: 'အသုံးပြုသူဖန်တီးပါ',
     emailNotValid: 'ထည့်သွင်းထားသော အီးမေလ်မှာ မှားယွင်းနေပါသည်။',

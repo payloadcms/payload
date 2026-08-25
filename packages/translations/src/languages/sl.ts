@@ -8,6 +8,7 @@ export const slTranslations: DefaultTranslationsObject = {
     alreadyActivated: 'Že aktivirano',
     alreadyLoggedIn: 'Že prijavljeni',
     apiKey: 'API ključ',
+    apiKeyNotVisible: 'Nimate dovoljenja za ogled tega API ključa.',
     authenticated: 'Avtenticirano',
     backToLogin: 'Nazaj na prijavo',
     beginCreateFirstUser: 'Ustvarite svojega prvega uporabnika za začetek.',
@@ -16,6 +17,8 @@ export const slTranslations: DefaultTranslationsObject = {
       'Če je e-poštni naslov povezan z računom, boste kmalu prejeli navodila za ponastavitev gesla. Prosimo, preverite mapo za neželeno pošto ali spam, če e-pošte ne vidite v vašem prejemu.',
     confirmGeneration: 'Potrdi generiranje',
     confirmPassword: 'Potrdi geslo',
+    copyAPIKeyBeforeSaving:
+      'Pred shranjevanjem kopirajte ta API ključ. Pozneje ga ne boste mogli več videti.',
     createFirstUser: 'Ustvari prvega uporabnika',
     createUser: 'Ustvari uporabnika',
     emailNotValid: 'Vneseni e-poštni naslov ni veljaven',

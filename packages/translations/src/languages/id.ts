@@ -8,6 +8,7 @@ export const idTranslations: DefaultTranslationsObject = {
     alreadyActivated: 'Sudah Diaktifkan',
     alreadyLoggedIn: 'Sudah masuk',
     apiKey: 'API Key',
+    apiKeyNotVisible: 'Anda tidak memiliki izin untuk melihat kunci API ini.',
     authenticated: 'Terautentikasi',
     backToLogin: 'Kembali ke halaman masuk',
     beginCreateFirstUser: 'Buat pengguna pertama Anda untuk memulai.',
@@ -16,6 +17,8 @@ export const idTranslations: DefaultTranslationsObject = {
       'Jika alamat email dikaitkan dengan sebuah akun, Anda akan segera menerima instruksi untuk mengatur ulang kata sandi Anda. Silakan periksa folder spam atau junk mail Anda jika Anda tidak melihat email di kotak masuk Anda.',
     confirmGeneration: 'Konfirmasi Pembuatan',
     confirmPassword: 'Konfirmasi Kata Sandi',
+    copyAPIKeyBeforeSaving:
+      'Salin kunci API ini sebelum menyimpan. Anda tidak akan dapat melihatnya lagi.',
     createFirstUser: 'Buat pengguna pertama',
     createUser: 'Buat pengguna',
     emailNotValid: 'Email yang diberikan tidak valid',

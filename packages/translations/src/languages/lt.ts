@@ -8,6 +8,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     alreadyActivated: 'Jau aktyvuota',
     alreadyLoggedIn: 'Jau prisijungęs',
     apiKey: 'API raktas',
+    apiKeyNotVisible: 'Neturite leidimo peržiūrėti šio API rakto.',
     authenticated: 'Autentifikuotas',
     backToLogin: 'Grįžti į prisijungimą',
     beginCreateFirstUser: 'Sukurkite savo pirmąjį naudotoją, kad pradėtumėte.',
@@ -16,6 +17,8 @@ export const ltTranslations: DefaultTranslationsObject = {
       'Jei šis el. pašto adresas yra susijęs su paskyra, netrukus gausite instrukcijas, kaip atstatyti savo slaptažodį. Jei laiško nesimate savo gautiesiųjų dėžutėje, patikrinkite savo šlamšto ar nereikalingų laiškų aplanką.',
     confirmGeneration: 'Patvirtinkite generavimą',
     confirmPassword: 'Patvirtinkite slaptažodį',
+    copyAPIKeyBeforeSaving:
+      'Prieš išsaugodami nukopijuokite šį API raktą. Vėliau jo peržiūrėti nebegalėsite.',
     createFirstUser: 'Sukurkite pirmąjį vartotoją',
     createUser: 'Sukurti naudotoją',
     emailNotValid: 'Pateiktas el. paštas negalioja',

@@ -8,6 +8,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     alreadyActivated: 'Allerede aktivert',
     alreadyLoggedIn: 'Allerede logget inn',
     apiKey: 'API-nøkkel',
+    apiKeyNotVisible: 'Du har ikke tillatelse til å se denne API-nøkkelen.',
     authenticated: 'Autentisert',
     backToLogin: 'Tilbake til innlogging',
     beginCreateFirstUser: 'Opprett din første bruker for å begynne.',
@@ -16,6 +17,8 @@ export const nbTranslations: DefaultTranslationsObject = {
       'Hvis e-postadressen er knyttet til en konto, vil du motta instruksjoner for å tilbakestille passordet ditt snart. Vennligst sjekk spam- eller søppelpost-mappen din hvis du ikke ser e-posten i innboksen din.',
     confirmGeneration: 'Bekreft generering',
     confirmPassword: 'Bekreft passord',
+    copyAPIKeyBeforeSaving:
+      'Kopier denne API-nøkkelen før du lagrer. Du vil ikke kunne se den igjen.',
     createFirstUser: 'Opprett første bruker',
     createUser: 'Opprett bruker',
     emailNotValid: 'E-posten er ikke gyldig',

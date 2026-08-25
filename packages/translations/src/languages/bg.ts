@@ -8,6 +8,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     alreadyActivated: 'Вече активиран',
     alreadyLoggedIn: 'Вече влязъл',
     apiKey: 'API ключ',
+    apiKeyNotVisible: 'Нямате разрешение да видите този API ключ.',
     authenticated: 'Удостоверен',
     backToLogin: 'Обратно към влизане',
     beginCreateFirstUser: 'Създайте първия си потребител, за да започнете.',
@@ -16,6 +17,8 @@ export const bgTranslations: DefaultTranslationsObject = {
       'Ако имейл адресът е свързан с акаунт, скоро ще получите инструкции за възстановяване на паролата си. Моля, проверете папката си за спам или нежелана поща, ако не виждате имейла във входящата си поща.',
     confirmGeneration: 'Потвърди създаването',
     confirmPassword: 'Потвърди парола',
+    copyAPIKeyBeforeSaving:
+      'Копирайте този API ключ преди записване. Няма да можете да го видите отново.',
     createFirstUser: 'Създай първи потребител',
     createUser: 'Създаване на потребител',
     emailNotValid: 'Даденият имейл не е валиден',

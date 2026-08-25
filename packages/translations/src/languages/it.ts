@@ -8,6 +8,7 @@ export const itTranslations: DefaultTranslationsObject = {
     alreadyActivated: 'Già Attivato',
     alreadyLoggedIn: 'Sei già loggato',
     apiKey: 'Chiave API',
+    apiKeyNotVisible: 'Non hai il permesso di visualizzare questa chiave API.',
     authenticated: 'Autenticato',
     backToLogin: 'Torna al login',
     beginCreateFirstUser: 'Crea il tuo primo utente per iniziare.',
@@ -16,6 +17,8 @@ export const itTranslations: DefaultTranslationsObject = {
       "Se l'indirizzo email è associato a un account, riceverai a breve le istruzioni per reimpostare la tua password. Si prega di controllare la cartella dello spam o della posta indesiderata se non vedi l'email nella tua casella di posta.",
     confirmGeneration: 'Conferma Generazione',
     confirmPassword: 'Conferma Password',
+    copyAPIKeyBeforeSaving:
+      'Copia questa chiave API prima di salvare. Non potrai visualizzarla di nuovo.',
     createFirstUser: 'Crea il primo utente',
     createUser: 'Crea utente',
     emailNotValid: "L'email fornita non è valida",

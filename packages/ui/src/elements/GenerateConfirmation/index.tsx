@@ -10,7 +10,7 @@ import { ConfirmationModal } from '../ConfirmationModal/index.js'
 import { Translation } from '../Translation/index.js'
 
 export type GenerateConfirmationProps = {
-  highlightField: (Boolean) => void
+  highlightField?: (Boolean) => void
   setKey: () => void
 }
 
@@ -26,7 +26,7 @@ export function GenerateConfirmation(props: GenerateConfirmationProps) {
   const handleGenerate = useCallback(() => {
     setKey()
     toast.success(t('authentication:newAPIKeyGenerated'))
-    highlightField(true)
+    highlightField?.(true)
   }, [highlightField, setKey, t])
 
   return (

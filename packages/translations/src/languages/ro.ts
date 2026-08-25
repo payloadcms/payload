@@ -8,6 +8,7 @@ export const roTranslations: DefaultTranslationsObject = {
     alreadyActivated: 'Deja activat',
     alreadyLoggedIn: 'Deja autorizat',
     apiKey: 'Cheia API',
+    apiKeyNotVisible: 'Nu aveți permisiunea de a vedea această cheie API.',
     authenticated: 'Autentificat',
     backToLogin: 'Înapoi la login',
     beginCreateFirstUser: 'Creați primul dvs. utilizator pentru a începe.',
@@ -16,6 +17,8 @@ export const roTranslations: DefaultTranslationsObject = {
       'Dacă adresa de e-mail este asociată cu un cont, veți primi în curând instrucțiuni pentru resetarea parolei voastre. Vă rugăm să verificați dosarul de spam sau de mesaje nedorite dacă nu vedeți e-mailul în inbox-ul dvs.',
     confirmGeneration: 'Confirmați generarea',
     confirmPassword: 'Confirmați parola',
+    copyAPIKeyBeforeSaving:
+      'Copiați această cheie API înainte de salvare. Nu o veți mai putea vedea.',
     createFirstUser: 'Creați primul utilizator',
     createUser: 'Creați utilizator',
     emailNotValid: 'Emailul furnizat nu este valid',

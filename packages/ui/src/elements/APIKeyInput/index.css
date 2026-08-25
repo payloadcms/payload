@@ -19,6 +19,10 @@
     border-radius: var(--radius-medium);
   }
 
+  .api-key-input__control--disabled {
+    opacity: 0.65;
+  }
+
   .api-key-input__icon {
     flex-shrink: 0;
     width: var(--spacer-4);
