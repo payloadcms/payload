@@ -8,10 +8,10 @@ import type {
 } from 'payload'
 
 import path from 'path'
-import { createLocalReq, Forbidden } from 'payload'
+import { AuthenticationError, createLocalReq, Forbidden } from 'payload'
 import { getEntityPermissions } from 'payload/internal'
 import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, beforeEach, describe, expect, it, vitest } from 'vitest'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vitest } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { FullyRestricted, Post } from './payload-types.js'
@@ -20,6 +20,7 @@ import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { requestHeaders } from './getConfig.js'
 import {
   asyncParentSlug,
+  authSlug,
   firstArrayText,
   fullyRestrictedSlug,
   hiddenAccessCountSlug,
@@ -234,6 +235,92 @@ describe('Access Control', () => {
       // should fallback to original data and not throw validation error
       expect(updatedDoc.cannotMutateRequired).toBe('cannotMutateRequired')
       expect(updatedDoc.cannotMutateNotRequired).toBe('cannotMutateNotRequired')
+    })
+
+    describe('Password update access', () => {
+      const createdAuthIDs: string[] = []
+
+      afterEach(async () => {
+        for (const id of createdAuthIDs) {
+          await payload.delete({ id, collection: authSlug })
+        }
+        createdAuthIDs.length = 0
+      })
+
+      it('should preserve credentials when password update access is denied', async () => {
+        const originalPassword = 'OriginalPassword123!'
+        const replacementPassword = 'ReplacementPassword123!'
+
+        const caller = await payload.create({
+          collection: authSlug,
+          data: {
+            _verified: true,
+            email: 'credential-editor@example.com',
+            password: 'CallerPassword123!',
+            roles: ['user'],
+          },
+        })
+
+        createdAuthIDs.push(caller.id)
+
+        const account = await payload.create({
+          collection: authSlug,
+          data: {
+            _verified: true,
+            email: 'credential-owner@example.com',
+            password: originalPassword,
+            roles: ['user'],
+          },
+        })
+
+        createdAuthIDs.push(account.id)
+
+        const credentialsBefore = await payload.findByID({
+          id: account.id,
+          collection: authSlug,
+          showHiddenFields: true,
+        })
+
+        await payload.update({
+          id: account.id,
+          collection: authSlug,
+          data: {
+            password: replacementPassword,
+          },
+          overrideAccess: false,
+          user: caller,
+        })
+
+        const credentialsAfter = await payload.findByID({
+          id: account.id,
+          collection: authSlug,
+          showHiddenFields: true,
+        })
+
+        expect({ hash: credentialsAfter.hash, salt: credentialsAfter.salt }).toStrictEqual({
+          hash: credentialsBefore.hash,
+          salt: credentialsBefore.salt,
+        })
+
+        const authenticated = await payload.login({
+          collection: authSlug,
+          data: {
+            email: account.email,
+            password: originalPassword,
+          },
+        })
+
+        expect(authenticated.user.id).toBe(account.id)
+        await expect(
+          payload.login({
+            collection: authSlug,
+            data: {
+              email: account.email,
+              password: replacementPassword,
+            },
+          }),
+        ).rejects.toThrow(AuthenticationError)
+      })
     })
 
     it('should not return default values for hidden fields with values', async () => {
