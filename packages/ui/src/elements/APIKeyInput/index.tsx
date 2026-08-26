@@ -66,7 +66,7 @@ export const APIKeyInput: React.FC<APIKeyInputProps> = ({
           className={`${baseClass}__field`}
           disabled={disabled}
           id={id}
-          placeholder={disabled ? '••••••••••••••••' : undefined}
+          placeholder={disabled ? '•'.repeat(36) : undefined}
           readOnly
           type={disabled || showKey ? 'text' : 'password'}
           value={keyValue}
