@@ -49,7 +49,7 @@ import {
   useDrawerSubmit,
 } from '../../../../utilities/fieldsDrawer/useDrawerSubmit.js'
 import { useLexicalDrawer } from '../../../../utilities/fieldsDrawer/useLexicalDrawer.js'
-import { mergeCurrentFormDataIntoFormState } from '../mergeCurrentFormDataIntoFormState.js'
+import { getCachedFormStateIfDataMatches } from '../getCachedFormStateIfDataMatches.js'
 import { $isBlockNode } from '../nodes/BlocksNode.js'
 import {
   type BlockCollapsibleWithErrorProps,
@@ -140,19 +140,21 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
       return false
     }
 
-    // Merge current formData values into the cached form state
-    // This ensures that when the component remounts (e.g., due to view changes), we don't lose user edits
-    const mergedState = mergeCurrentFormDataIntoFormState({ cachedFormState, formData })
-
-    // Manually add blockName, as it's not part of cachedFormState
-    mergedState.blockName = {
-      initialValue: formData.blockName,
-      passesCondition: true,
-      valid: true,
-      value: formData.blockName,
+    const matchingCachedState = getCachedFormStateIfDataMatches({ cachedFormState, formData })
+    if (!matchingCachedState) {
+      return false
     }
 
-    return mergedState
+    // Manually add blockName, as it's not part of cachedFormState
+    return {
+      ...matchingCachedState,
+      blockName: {
+        initialValue: formData.blockName,
+        passesCondition: true,
+        valid: true,
+        value: formData.blockName,
+      },
+    }
   })
 
   const hasMounted = useRef(false)
