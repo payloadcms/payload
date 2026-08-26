@@ -283,7 +283,12 @@ export const createOperation = async <
     // Fill every locale of a localized slug so switching locales never lands on an empty slug. The
     // slug field hook only sees the active locale, so the rest are seeded here on create.
     if (config.localization) {
-      await fillEmptyLocalizedSlugs({ collection: collectionConfig, data: dataWithLocales, req })
+      await fillEmptyLocalizedSlugs({
+        collection: collectionConfig,
+        data: dataWithLocales,
+        overrideAccess,
+        req,
+      })
     }
 
     // /////////////////////////////////////
