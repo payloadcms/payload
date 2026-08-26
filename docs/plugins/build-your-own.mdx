@@ -54,6 +54,16 @@ The initialization process goes in the following order:
 4. Sanitization cleans and validates data
 5. Final config gets initialized
 
+<Banner type="warning">
+  A plugin receives the config as it exists at that point in the plugin
+  sequence. Later plugins can return new config, collection, or global objects,
+  so references captured during plugin execution are not guaranteed to match the
+  final runtime config. Hooks and other delayed callbacks should resolve final
+  state from their runtime arguments instead of closing over plugin-time config
+  objects. In hooks, use the runtime `collection` or `global` argument, or read
+  `req.payload.config`.
+</Banner>
+
 ## Plugin Template
 
 In the [Payload Plugin Template](https://github.com/payloadcms/payload/tree/main/templates/plugin), you will see a common file structure that is used across plugins:
