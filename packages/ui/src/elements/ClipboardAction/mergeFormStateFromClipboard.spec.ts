@@ -610,14 +610,14 @@ describe('mergeFormStateFromClipboard', () => {
           valid: true,
           value: 13,
           rows: Array.from({ length: 13 }, () => ({
-            id: new ObjectId().toHexString(),
+            id: generateObjectIdHex(),
             isLoading: false,
           })),
         },
-        'children.5.id': { value: new ObjectId().toHexString(), valid: true },
+        'children.5.id': { value: generateObjectIdHex(), valid: true },
       }
 
-      const sourceID = new ObjectId().toHexString()
+      const sourceID = generateObjectIdHex()
       const clipboardData: ClipboardPasteData = {
         type: 'array',
         path: 'children',
@@ -627,11 +627,11 @@ describe('mergeFormStateFromClipboard', () => {
           'children.1.id': { value: sourceID, valid: true },
           'children.1.title': { value: 'Row 1 title', valid: true },
           // Leaked siblings — these must be dropped, not rewritten to .50/.51/.52.
-          'children.10.id': { value: new ObjectId().toHexString(), valid: true },
+          'children.10.id': { value: generateObjectIdHex(), valid: true },
           'children.10.title': { value: 'Leaked Row 10', valid: true },
-          'children.11.id': { value: new ObjectId().toHexString(), valid: true },
+          'children.11.id': { value: generateObjectIdHex(), valid: true },
           'children.11.title': { value: 'Leaked Row 11', valid: true },
-          'children.12.id': { value: new ObjectId().toHexString(), valid: true },
+          'children.12.id': { value: generateObjectIdHex(), valid: true },
           'children.12.title': { value: 'Leaked Row 12', valid: true },
         },
       }
@@ -664,13 +664,13 @@ describe('mergeFormStateFromClipboard', () => {
       // `childrenOther.0.title` must NOT be deleted by the cleanup loop.
       const formState: FormState = {
         children: { valid: true, value: 0, rows: [{ isLoading: false }] },
-        'children.0.id': { value: new ObjectId().toHexString(), valid: true },
+        'children.0.id': { value: generateObjectIdHex(), valid: true },
         childrenOther: { valid: true, value: 1, rows: [{ isLoading: false }] },
-        'childrenOther.0.id': { value: new ObjectId().toHexString(), valid: true },
+        'childrenOther.0.id': { value: generateObjectIdHex(), valid: true },
         'childrenOther.0.title': { value: 'Unrelated field', valid: true },
       }
 
-      const sourceID = new ObjectId().toHexString()
+      const sourceID = generateObjectIdHex()
       const clipboardData: ClipboardPasteData = {
         type: 'array',
         path: 'someOtherArray',
@@ -725,8 +725,8 @@ describe('mergeFormStateFromClipboard', () => {
     })
 
     it('paste should copy the exact row key across to the target row', () => {
-      const sourceBlockID = new ObjectId().toHexString()
-      const targetBlockID = new ObjectId().toHexString()
+      const sourceBlockID = generateObjectIdHex()
+      const targetBlockID = generateObjectIdHex()
 
       const formState: FormState = {
         ctas: {
