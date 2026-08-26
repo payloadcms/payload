@@ -1,7 +1,29 @@
+import crypto from 'crypto'
+
 import type { SanitizedCollectionConfig } from '../collections/config/types.js'
 import type { JsonObject, PayloadRequest } from '../types/index.js'
 
 import { ValidationError } from '../errors/index.js'
+
+const serverGeneratedAPIKeyRequests = new WeakSet<PayloadRequest>()
+
+export const generateAPIKey = (): string => crypto.randomUUID()
+
+export const isServerGeneratedAPIKeyRequest = (req: PayloadRequest): boolean =>
+  serverGeneratedAPIKeyRequests.has(req)
+
+export const withServerGeneratedAPIKey = async <T>(
+  req: PayloadRequest,
+  callback: () => Promise<T>,
+): Promise<T> => {
+  serverGeneratedAPIKeyRequests.add(req)
+
+  try {
+    return await callback()
+  } finally {
+    serverGeneratedAPIKeyRequests.delete(req)
+  }
+}
 
 export const assertAPIKeyAssignment = ({
   collection,
@@ -23,7 +45,10 @@ export const assertAPIKeyAssignment = ({
     return
   }
 
-  if (req.payloadAPI === 'local' && overrideAccess === true) {
+  if (
+    (req.payloadAPI === 'local' && overrideAccess === true) ||
+    isServerGeneratedAPIKeyRequest(req)
+  ) {
     return
   }
 

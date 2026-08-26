@@ -8,6 +8,8 @@ export const apiKeysWithHiddenKeysSlug = 'api-keys-with-hidden-keys'
 
 export const apiKeysWithReadableKeysSlug = 'api-keys-with-readable-keys'
 
+export const apiKeysWithFieldReadAccessSlug = 'api-keys-with-field-read-access'
+
 export const rotateSecretSlug = 'rotate-secret'
 
 export const rotateSecretLoginSlug = 'rotate-secret-login'

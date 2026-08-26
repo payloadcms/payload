@@ -9,6 +9,7 @@ import { devUser } from '../credentials.js'
 import { seed } from './seed.js'
 import {
   apiKeysSlug,
+  apiKeysWithFieldReadAccessSlug,
   apiKeysWithHiddenKeysSlug,
   apiKeysWithReadableKeysSlug,
   BASE_PATH,
@@ -361,7 +362,7 @@ export default buildConfigWithDefaults({
       versions: false,
     },
     {
-      slug: 'api-keys-with-field-read-access',
+      slug: apiKeysWithFieldReadAccessSlug,
       auth: {
         disableLocalStrategy: true,
         useAPIKey: true,
@@ -379,6 +380,7 @@ export default buildConfigWithDefaults({
           type: 'text',
           access: {
             read: () => false,
+            update: () => Promise.resolve(false),
           },
         },
       ],
@@ -427,6 +429,10 @@ export default buildConfigWithDefaults({
         useAPIKey: true,
       },
       fields: [
+        {
+          name: 'name',
+          type: 'text',
+        },
         {
           name: 'apiKey',
           type: 'text',

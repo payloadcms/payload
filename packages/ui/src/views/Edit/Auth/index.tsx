@@ -41,11 +41,14 @@ export const Auth: React.FC<Props> = (props) => {
 
   const [changingPassword, setChangingPassword] = useState(requirePassword)
   const apiKey = useFormFields(([fields]) => (fields && fields?.apiKey) || null)
+  const [apiKeyDisplayValue, setAPIKeyDisplayValue] = useState<string | undefined>(() =>
+    typeof apiKey?.value === 'string' ? apiKey.value : undefined,
+  )
   const enableAPIKey = useFormFields(([fields]) => (fields && fields?.enableAPIKey) || null)
   const dispatchFields = useFormFields((reducer) => reducer[1])
   const modified = useFormModified()
   const { i18n, t } = useTranslation()
-  const { docPermissions, isEditing, isInitializing, isTrashed } = useDocumentInfo()
+  const { id, docPermissions, isEditing, isInitializing, isTrashed } = useDocumentInfo()
 
   const {
     config: {
@@ -122,14 +125,14 @@ export const Auth: React.FC<Props> = (props) => {
       operation,
     })
   const showAPIKeyStatus = canReadAPIKeyStatus
-  const apiKeyEnabled = showAPIKeyStatus ? Boolean(enableAPIKey?.value) : Boolean(apiKey?.value)
-  const hasAPIKeyValue = typeof apiKey?.value === 'string' && apiKey.value.length > 0
-  const isEnablingAPIKey =
+  const apiKeyEnabled = showAPIKeyStatus
+    ? Boolean(enableAPIKey?.value)
+    : Boolean(apiKeyDisplayValue)
+  const canGenerateAPIKey =
     operation === 'update' &&
-    modified &&
+    !readOnly &&
     canModifyAPIKey &&
-    enableAPIKey?.initialValue !== true &&
-    enableAPIKey.value === true
+    (canReadAPIKeyStatus ? enableAPIKey?.initialValue === true : true)
   const showReadableAPIKey = canReadAPIKey
   const showUnreadableAPIKey =
     !canReadAPIKey &&
@@ -203,10 +206,61 @@ export const Auth: React.FC<Props> = (props) => {
   }, [modified])
 
   useEffect(() => {
-    if (!modified && operation === 'update' && !canReadAPIKey && apiKey) {
-      dispatchFields({ type: 'REMOVE', path: 'apiKey' })
+    if (typeof apiKey?.value === 'string') {
+      setAPIKeyDisplayValue(apiKey.value)
     }
-  }, [apiKey, canReadAPIKey, dispatchFields, modified, operation])
+
+    if (apiKey && apiKey.disableFormData !== true) {
+      dispatchFields({ type: 'UPDATE', disableFormData: true, path: 'apiKey' })
+    }
+  }, [apiKey, dispatchFields])
+
+  useEffect(() => {
+    if (
+      modified ||
+      operation !== 'update' ||
+      !id ||
+      !canReadAPIKey ||
+      !apiKeyEnabled ||
+      apiKeyDisplayValue
+    ) {
+      return
+    }
+
+    const controller = new AbortController()
+
+    void fetch(
+      formatAdminURL({
+        apiRoute: api,
+        path: `/${collectionSlug}/${id}`,
+      }),
+      {
+        credentials: 'include',
+        headers: {
+          'Accept-Language': i18n.language,
+        },
+        signal: controller.signal,
+      },
+    )
+      .then((response) => (response.ok ? response.json() : null))
+      .then((result) => {
+        if (typeof result?.apiKey === 'string') {
+          setAPIKeyDisplayValue(result.apiKey)
+        }
+      })
+
+    return () => controller.abort()
+  }, [
+    api,
+    apiKeyDisplayValue,
+    apiKeyEnabled,
+    canReadAPIKey,
+    collectionSlug,
+    i18n.language,
+    id,
+    modified,
+    operation,
+  ])
 
   const showAuthBlock = enableFields
   const showAPIKeyBlock =
@@ -320,22 +374,17 @@ export const Auth: React.FC<Props> = (props) => {
               )}
               {showUnreadableAPIKey && (
                 <UnreadableAPIKey
-                  canModify={!readOnly && canModifyAPIKey}
-                  description={
-                    hasAPIKeyValue
-                      ? `${t('authentication:newAPIKeyGenerated')} ${t('general:unsavedChanges')}`
-                      : t('authentication:apiKeyNotVisible')
-                  }
-                  shouldGenerate={
-                    canModifyAPIKey && apiKeyEnabled && (operation === 'create' || isEnablingAPIKey)
-                  }
+                  canGenerate={canGenerateAPIKey}
+                  description={t('authentication:apiKeyNotVisible')}
                 />
               )}
               {showReadableAPIKey && (
                 <APIKey
+                  canGenerate={canGenerateAPIKey}
                   enabled={apiKeyEnabled}
-                  initiallyVisible={operation === 'create' || (isEnablingAPIKey && !hasAPIKeyValue)}
-                  readOnly={readOnly || !canModifyAPIKey}
+                  isFormModified={modified}
+                  onGenerated={setAPIKeyDisplayValue}
+                  value={apiKeyDisplayValue}
                 />
               )}
             </div>

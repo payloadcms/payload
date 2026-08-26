@@ -23,6 +23,9 @@ import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { devUser } from '../credentials.js'
 import {
   apiKeysSlug,
+  apiKeysWithFieldReadAccessSlug,
+  apiKeysWithHiddenKeysSlug,
+  apiKeysWithReadableKeysSlug,
   namedSaveToJWTValue,
   partialDisableLocalStrategiesSlug,
   publicUsersSlug,
@@ -1377,6 +1380,58 @@ describe('Auth', () => {
           id: user.id,
         })
       })
+
+      it('rejects a caller-supplied API key when updating through REST', async () => {
+        const originalAPIKey = uuid()
+        const user = await payload.create({
+          collection: apiKeysSlug,
+          data: {
+            apiKey: originalAPIKey,
+            enableAPIKey: true,
+          },
+        })
+        const { token } = await payload.login({
+          collection: slug,
+          data: {
+            email: devUser.email,
+            password: devUser.password,
+          },
+        })
+
+        const response = await restClient.PATCH(`/${apiKeysSlug}/${user.id}`, {
+          body: JSON.stringify({ apiKey: staticAPIKey }),
+          headers: {
+            Authorization: `JWT ${token}`,
+          },
+        })
+        const updated = await payload.findByID({
+          collection: apiKeysSlug,
+          id: user.id,
+        })
+
+        expect(response.status).toBe(400)
+        expect(updated.apiKey).toBe(originalAPIKey)
+      })
+
+      it('allows a caller-supplied API key update through the Local API with overrideAccess', async () => {
+        const user = await payload.create({
+          collection: apiKeysSlug,
+          data: {
+            enableAPIKey: true,
+          },
+        })
+
+        const updated = await payload.update({
+          collection: apiKeysSlug,
+          id: user.id,
+          data: {
+            apiKey: staticAPIKey,
+          },
+          overrideAccess: true,
+        })
+
+        expect(updated.apiKey).toBe(staticAPIKey)
+      })
     })
 
     describe('server-generated API keys', () => {
@@ -1473,6 +1528,271 @@ describe('Auth', () => {
           .then((result) => result.json())
 
         expect(response.user?.id).toBe(user.id)
+      })
+    })
+
+    describe('generate API key endpoint', () => {
+      let token: string
+
+      beforeAll(async () => {
+        ;({ token } = await payload.login({
+          collection: slug,
+          data: {
+            email: devUser.email,
+            password: devUser.password,
+          },
+        }))
+      })
+
+      it('immediately generates and returns a readable API key', async () => {
+        const originalAPIKey = uuid()
+        const user = await payload.create({
+          collection: apiKeysWithReadableKeysSlug,
+          data: {
+            apiKey: originalAPIKey,
+            enableAPIKey: true,
+          },
+        })
+
+        const response = await restClient.POST(
+          `/${apiKeysWithReadableKeysSlug}/generate-api-key/${user.id}`,
+          {
+            headers: {
+              Authorization: `JWT ${token}`,
+            },
+          },
+        )
+        const result = await response.json()
+
+        expect(response.status).toBe(200)
+        expect(result.apiKey).toEqual(expect.any(String))
+        expect(result.apiKey).not.toBe(originalAPIKey)
+        const rawUser = await payload.db.findOne<Record<string, unknown>>({
+          collection: apiKeysWithReadableKeysSlug,
+          req: { locale: 'en' } as any,
+          where: { id: { equals: user.id } },
+        })
+        expect(rawUser?.apiKeyIndex).toBe(
+          crypto.createHmac('sha256', payload.secret).update(result.apiKey).digest('hex'),
+        )
+      })
+
+      it('applies the generated API key immediately', async () => {
+        const originalAPIKey = uuid()
+        const user = await payload.create({
+          collection: apiKeysSlug,
+          data: {
+            apiKey: originalAPIKey,
+            enableAPIKey: true,
+          },
+        })
+
+        const response = await restClient.POST(`/${apiKeysSlug}/generate-api-key/${user.id}`, {
+          headers: {
+            Authorization: `JWT ${token}`,
+          },
+        })
+        const result = await response.json()
+        const updated = await payload.findByID({
+          collection: apiKeysSlug,
+          id: user.id,
+        })
+
+        expect(response.status).toBe(200)
+        expect(result).not.toHaveProperty('apiKey')
+        expect(updated.apiKey).not.toBe(originalAPIKey)
+
+        const oldAuthentication = await restClient
+          .GET(`/${apiKeysSlug}/me`, {
+            headers: {
+              Authorization: `${apiKeysSlug} API-Key ${originalAPIKey}`,
+            },
+          })
+          .then((authResponse) => authResponse.json())
+        const newAuthentication = await restClient
+          .GET(`/${apiKeysSlug}/me`, {
+            headers: {
+              Authorization: `${apiKeysSlug} API-Key ${updated.apiKey}`,
+            },
+          })
+          .then((authResponse) => authResponse.json())
+
+        expect(oldAuthentication.user).toBeNull()
+        expect(newAuthentication.user?.id).toBe(user.id)
+      })
+
+      it('immediately generates an unreadable API key without returning it', async () => {
+        const originalAPIKey = uuid()
+        const user = await payload.create({
+          collection: apiKeysWithHiddenKeysSlug,
+          data: {
+            apiKey: originalAPIKey,
+            enableAPIKey: true,
+          },
+        })
+
+        const response = await restClient.POST(
+          `/${apiKeysWithHiddenKeysSlug}/generate-api-key/${user.id}`,
+          {
+            headers: {
+              Authorization: `JWT ${token}`,
+            },
+          },
+        )
+        const result = await response.json()
+        const updated = await payload.findByID({
+          collection: apiKeysWithHiddenKeysSlug,
+          id: user.id,
+        })
+
+        expect(response.status).toBe(200)
+        expect(result).not.toHaveProperty('apiKey')
+        expect(updated.apiKey).toEqual(expect.any(String))
+        expect(updated.apiKey).not.toBe(originalAPIKey)
+      })
+
+      it('does not generate an API key while it is disabled', async () => {
+        const originalAPIKey = uuid()
+        const user = await payload.create({
+          collection: apiKeysWithReadableKeysSlug,
+          data: {
+            apiKey: originalAPIKey,
+            enableAPIKey: false,
+          },
+        })
+
+        const response = await restClient.POST(
+          `/${apiKeysWithReadableKeysSlug}/generate-api-key/${user.id}`,
+          {
+            headers: {
+              Authorization: `JWT ${token}`,
+            },
+          },
+        )
+        const updated = await payload.findByID({
+          collection: apiKeysWithReadableKeysSlug,
+          id: user.id,
+        })
+
+        expect(response.status).toBe(400)
+        expect(updated.apiKey).toBe(originalAPIKey)
+      })
+
+      it('respects custom API key update access', async () => {
+        const originalAPIKey = uuid()
+        const user = await payload.create({
+          collection: apiKeysWithFieldReadAccessSlug,
+          data: {
+            apiKey: originalAPIKey,
+            enableAPIKey: true,
+          },
+        })
+
+        const response = await restClient.POST(
+          `/${apiKeysWithFieldReadAccessSlug}/generate-api-key/${user.id}`,
+          {
+            headers: {
+              Authorization: `JWT ${token}`,
+            },
+          },
+        )
+        const updated = await payload.findByID({
+          collection: apiKeysWithFieldReadAccessSlug,
+          id: user.id,
+        })
+
+        expect(response.status).toBe(403)
+        expect(updated.apiKey).toBe(originalAPIKey)
+      })
+
+      it('rejects a caller-supplied API key', async () => {
+        const originalAPIKey = uuid()
+        const user = await payload.create({
+          collection: apiKeysWithReadableKeysSlug,
+          data: {
+            apiKey: originalAPIKey,
+            enableAPIKey: true,
+          },
+        })
+
+        const response = await restClient.POST(
+          `/${apiKeysWithReadableKeysSlug}/generate-api-key/${user.id}`,
+          {
+            body: JSON.stringify({ apiKey: 'caller-selected-key' }),
+            headers: {
+              Authorization: `JWT ${token}`,
+            },
+          },
+        )
+        const updated = await payload.findByID({
+          collection: apiKeysWithReadableKeysSlug,
+          id: user.id,
+        })
+
+        expect(response.status).toBe(400)
+        expect(updated.apiKey).toBe(originalAPIKey)
+      })
+
+      it('requires document update access', async () => {
+        const originalAPIKey = uuid()
+        const user = await payload.create({
+          collection: apiKeysWithReadableKeysSlug,
+          data: {
+            apiKey: originalAPIKey,
+            enableAPIKey: true,
+          },
+        })
+
+        const response = await restClient.POST(
+          `/${apiKeysWithReadableKeysSlug}/generate-api-key/${user.id}`,
+          {
+            auth: false,
+          },
+        )
+        const updated = await payload.findByID({
+          collection: apiKeysWithReadableKeysSlug,
+          id: user.id,
+        })
+
+        expect(response.status).toBe(403)
+        expect(updated.apiKey).toBe(originalAPIKey)
+      })
+
+      it('checks document update access before the enabled state', async () => {
+        const user = await payload.create({
+          collection: apiKeysWithReadableKeysSlug,
+          data: {
+            enableAPIKey: false,
+          },
+        })
+
+        const response = await restClient.POST(
+          `/${apiKeysWithReadableKeysSlug}/generate-api-key/${user.id}`,
+          {
+            auth: false,
+          },
+        )
+
+        expect(response.status).toBe(403)
+      })
+
+      it('checks document update access before validating a caller-supplied key', async () => {
+        const user = await payload.create({
+          collection: apiKeysWithReadableKeysSlug,
+          data: {
+            enableAPIKey: true,
+          },
+        })
+
+        const response = await restClient.POST(
+          `/${apiKeysWithReadableKeysSlug}/generate-api-key/${user.id}`,
+          {
+            auth: false,
+            body: JSON.stringify({ apiKey: 'caller-selected-key' }),
+          },
+        )
+
+        expect(response.status).toBe(403)
       })
     })
 

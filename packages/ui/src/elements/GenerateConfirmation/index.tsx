@@ -10,12 +10,11 @@ import { ConfirmationModal } from '../ConfirmationModal/index.js'
 import { Translation } from '../Translation/index.js'
 
 export type GenerateConfirmationProps = {
-  highlightField?: (Boolean) => void
-  setKey: () => void
+  generate: () => Promise<void>
 }
 
 export function GenerateConfirmation(props: GenerateConfirmationProps) {
-  const { highlightField, setKey } = props
+  const { generate } = props
 
   const { id } = useDocumentInfo()
   const { toggleModal } = useModal()
@@ -23,11 +22,14 @@ export function GenerateConfirmation(props: GenerateConfirmationProps) {
 
   const modalSlug = `generate-confirmation-${id}`
 
-  const handleGenerate = useCallback(() => {
-    setKey()
-    toast.success(t('authentication:newAPIKeyGenerated'))
-    highlightField?.(true)
-  }, [highlightField, setKey, t])
+  const handleGenerate = useCallback(async () => {
+    try {
+      await generate()
+      toast.success(t('authentication:newAPIKeyGenerated'))
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : t('general:error'))
+    }
+  }, [generate, t])
 
   return (
     <React.Fragment>

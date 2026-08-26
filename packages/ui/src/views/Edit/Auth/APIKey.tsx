@@ -1,21 +1,17 @@
 'use client'
-import type { PayloadRequest, TextFieldClient } from 'payload'
+import type { TextFieldClient } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { text } from 'payload/shared'
-import React, { useEffect, useMemo, useState } from 'react'
-import { v4 as uuidv4 } from 'uuid'
+import { formatAdminURL } from 'payload/shared'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { APIKeyInput } from '../../../elements/APIKeyInput/index.js'
 import { GenerateConfirmation } from '../../../elements/GenerateConfirmation/index.js'
 import { FieldDescription } from '../../../fields/FieldDescription/index.js'
-import { useForm, useFormFields, useFormModified } from '../../../forms/Form/context.js'
-import { useField } from '../../../forms/useField/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useDocumentInfo } from '../../../providers/DocumentInfo/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 
-const path = 'apiKey'
 const baseClass = 'api-key'
 const fieldBaseClass = 'field-type'
 
@@ -38,6 +34,46 @@ const useAPIKeyLabel = () => {
   }, [apiKeyField, i18n])
 }
 
+const useGenerateAPIKey = () => {
+  const {
+    config: {
+      routes: { api },
+    },
+  } = useConfig()
+  const { id, collectionSlug, setData } = useDocumentInfo()
+  const { i18n, t } = useTranslation()
+
+  return useCallback(async (): Promise<{ apiKey?: string }> => {
+    if (!id) {
+      throw new Error(t('general:error'))
+    }
+
+    const response = await fetch(
+      formatAdminURL({
+        apiRoute: api,
+        path: `/${collectionSlug}/generate-api-key/${id}`,
+      }),
+      {
+        credentials: 'include',
+        headers: {
+          'Accept-Language': i18n.language,
+          'Content-Type': 'application/json',
+        },
+        method: 'post',
+      },
+    )
+    const result = await response.json()
+
+    if (!response.ok) {
+      throw new Error(result.errors?.[0]?.message ?? t('general:error'))
+    }
+
+    setData(result)
+
+    return result
+  }, [api, collectionSlug, i18n.language, id, setData, t])
+}
+
 const APIKeyLabel = ({ label }: { label: string }) => (
   <label className={`${baseClass}__label field-label`} htmlFor="apiKey">
     <span>{label}</span>
@@ -45,26 +81,11 @@ const APIKeyLabel = ({ label }: { label: string }) => (
 )
 
 export const UnreadableAPIKey: React.FC<{
-  readonly canModify: boolean
+  readonly canGenerate: boolean
   readonly description: string
-  readonly shouldGenerate?: boolean
-}> = ({ canModify, description, shouldGenerate }) => {
+}> = ({ canGenerate, description }) => {
   const apiKeyLabel = useAPIKeyLabel()
-  const apiKey = useFormFields(([fields]) => (fields && fields[path]) || null)
-  const dispatchFields = useFormFields((reducer) => reducer[1])
-  const { setModified } = useForm()
-
-  const generateAPIKey = () => {
-    dispatchFields({ type: 'UPDATE', path, value: uuidv4() })
-    setModified(true)
-  }
-
-  useEffect(() => {
-    if (shouldGenerate && !apiKey?.value) {
-      dispatchFields({ type: 'UPDATE', path, value: uuidv4() })
-      setModified(true)
-    }
-  }, [apiKey?.value, dispatchFields, setModified, shouldGenerate])
+  const generateAPIKey = useGenerateAPIKey()
 
   return (
     <React.Fragment>
@@ -73,80 +94,41 @@ export const UnreadableAPIKey: React.FC<{
         <APIKeyInput aria-label={apiKeyLabel} disabled id="apiKey" value={undefined} />
         <FieldDescription description={description} path="apiKey" />
       </div>
-      {canModify && <GenerateConfirmation setKey={generateAPIKey} />}
+      {canGenerate && <GenerateConfirmation generate={async () => void (await generateAPIKey())} />}
     </React.Fragment>
   )
 }
 
 export const APIKey: React.FC<{
+  readonly canGenerate: boolean
   readonly description?: string
   readonly enabled: boolean
-  readonly initiallyVisible?: boolean
-  readonly readOnly?: boolean
-}> = ({ description, enabled, initiallyVisible, readOnly }) => {
-  const [initialAPIKey] = useState(uuidv4())
+  readonly isFormModified: boolean
+  readonly onGenerated: (apiKey: string) => void
+  readonly value?: string
+}> = ({ canGenerate, description, enabled, isFormModified, onGenerated, value }) => {
   const [highlightedField, setHighlightedField] = useState(false)
-  const { t } = useTranslation()
-  const { config } = useConfig()
   const apiKeyLabel = useAPIKeyLabel()
-  const isFormModified = useFormModified()
-
-  const apiKey = useFormFields(([fields]) => (fields && fields[path]) || null)
-
-  const validate = (val) =>
-    text(val, {
-      name: 'apiKey',
-      type: 'text',
-      blockData: {},
-      data: {},
-      event: 'onChange',
-      maxLength: 48,
-      minLength: 24,
-      path: ['apiKey'],
-      preferences: { fields: {} },
-      req: {
-        payload: {
-          config,
-        },
-        t,
-      } as unknown as PayloadRequest,
-      siblingData: {},
-    })
-
-  const apiKeyValue = apiKey?.value
-
-  const fieldType = useField({
-    path: 'apiKey',
-    validate,
-  })
-
-  const highlightField = () => {
-    if (highlightedField) {
-      setHighlightedField(false)
-    }
-    setTimeout(() => {
-      setHighlightedField(true)
-    }, 1)
-  }
-
-  const { setValue, value } = fieldType
-
-  useEffect(() => {
-    if (!apiKeyValue && enabled) {
-      setValue(initialAPIKey)
-    }
-    if (!enabled && apiKeyValue) {
-      setValue(null)
-    }
-  }, [apiKeyValue, enabled, setValue, initialAPIKey])
+  const generateAPIKey = useGenerateAPIKey()
 
   useEffect(() => {
     if (highlightedField) {
-      setTimeout(() => {
+      const timeout = setTimeout(() => {
         setHighlightedField(false)
       }, 10000)
+
+      return () => clearTimeout(timeout)
     }
   }, [highlightedField])
+
+  const generate = useCallback(async () => {
+    const result = await generateAPIKey()
+
+    if (result.apiKey) {
+      onGenerated(result.apiKey)
+      setHighlightedField(true)
+    }
+  }, [generateAPIKey, onGenerated])
 
   if (!enabled) {
     return null
@@ -154,21 +136,19 @@ export const APIKey: React.FC<{
 
   return (
     <React.Fragment>
-      <div className={[fieldBaseClass, 'api-key', 'read-only'].filter(Boolean).join(' ')}>
+      <div className={[fieldBaseClass, 'api-key', 'read-only'].join(' ')}>
         <APIKeyLabel label={apiKeyLabel} />
         <APIKeyInput
           aria-label={apiKeyLabel}
+          disabled={!value}
           highlighted={highlightedField}
           id="apiKey"
-          initiallyVisible={initiallyVisible}
           isFormModified={isFormModified}
-          value={value as string}
+          value={value}
         />
         <FieldDescription description={description} path="apiKey" />
       </div>
-      {!readOnly && (
-        <GenerateConfirmation highlightField={highlightField} setKey={() => setValue(uuidv4())} />
-      )}
+      {canGenerate && <GenerateConfirmation generate={generate} />}
     </React.Fragment>
   )
 }

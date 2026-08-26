@@ -10,6 +10,7 @@ import type {
 
 import { UnauthorizedError } from '../../errors/UnauthorizedError.js'
 import { canAccessAdmin } from '../../utilities/canAccessAdmin.js'
+import { generateAPIKey } from '../apiKeys.js'
 
 const encryptKey: FieldHook = ({ req, value }) =>
   value ? req.payload.encrypt(value as string) : null
@@ -28,7 +29,7 @@ const generateKey: FieldHook = ({
 }) => {
   if (
     siblingData.enableAPIKey !== true ||
-    (data && Object.prototype.hasOwnProperty.call(data, 'apiKey'))
+    (data?.apiKey !== null && data?.apiKey !== undefined && data.apiKey !== '')
   ) {
     return value
   }
@@ -36,7 +37,7 @@ const generateKey: FieldHook = ({
   const isFirstEnable = operation === 'update' && previousSiblingDoc?.enableAPIKey !== true
 
   if (operation === 'create' || (isFirstEnable && !previousValue)) {
-    const key = crypto.randomUUID()
+    const key = generateAPIKey()
     siblingData.apiKeyIndex = createKeyIndex({ key, secret: req.payload.secret })
     return key
   }

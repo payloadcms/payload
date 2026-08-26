@@ -3,6 +3,7 @@ import type { Endpoint } from '../../config/types.js'
 import { wrapInternalEndpoints } from '../../utilities/wrapInternalEndpoints.js'
 import { accessHandler } from './access.js'
 import { forgotPasswordHandler } from './forgotPassword.js'
+import { generateAPIKeyHandler } from './generateAPIKey.js'
 import { initHandler } from './init.js'
 import { loginHandler } from './login.js'
 import { logoutHandler } from './logout.js'
@@ -26,6 +27,11 @@ export const authCollectionEndpoints: Endpoint[] = wrapInternalEndpoints([
     handler: forgotPasswordHandler,
     method: 'post',
     path: '/forgot-password',
+  },
+  {
+    handler: generateAPIKeyHandler,
+    method: 'post',
+    path: '/generate-api-key/:id',
   },
   {
     handler: initHandler,
