@@ -20,6 +20,7 @@ export const generateAPIKeyOperation = async ({
   req: PayloadRequest
   requestData: JsonObject
 }): Promise<JsonObject> => {
+  const generateIfMissing = requestData.generateIfMissing === true
   const apiKey = generateAPIKey()
   const data = { apiKey }
   const accessResult = await executeAccess(
@@ -76,7 +77,11 @@ export const generateAPIKeyOperation = async ({
     }
   }
 
-  if (doc.enableAPIKey !== true) {
+  if (generateIfMissing && doc.apiKey) {
+    return {}
+  }
+
+  if (!generateIfMissing && doc.enableAPIKey !== true) {
     throw new ValidationError(
       {
         id,

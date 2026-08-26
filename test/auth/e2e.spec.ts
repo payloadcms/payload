@@ -569,20 +569,22 @@ describe('Auth', () => {
 
         await page.goto(userURL.edit(user.id))
         await expect(page.locator('#apiKey')).toBeHidden()
+        const generationRequestPromise = page.waitForRequest(
+          (request) =>
+            request.method() === 'POST' &&
+            request.url().includes(`/${apiKeysWithReadableKeysSlug}/generate-api-key/${user.id}`),
+        )
         await page.locator('#field-enableAPIKey').click()
 
         const apiKeyInput = page.locator('#apiKey')
-        await expect(apiKeyInput).toBeDisabled()
-        await expect(apiKeyInput).toHaveValue('')
+        const generationRequest = await generationRequestPromise
+        expect(generationRequest.postDataJSON()).toEqual({ generateIfMissing: true })
+        await expect(apiKeyInput).not.toHaveValue('')
+        await expect(apiKeyInput).toHaveAttribute('type', 'text')
+        const generatedAPIKey = await apiKeyInput.inputValue()
 
         await saveDocAndAssert(page)
-        const readResult = await page.evaluate(
-          async (requestURL) =>
-            await fetch(requestURL, { credentials: 'include' }).then((response) => response.json()),
-          `${apiURL}/${apiKeysWithReadableKeysSlug}/${user.id}`,
-        )
-        expect(readResult.apiKey).toEqual(expect.any(String))
-        await expect(apiKeyInput).not.toHaveValue('')
+        await expect(apiKeyInput).toHaveValue(generatedAPIKey)
         await expect(apiKeyInput).toHaveAttribute('type', 'password')
         await page.getByRole('button', { name: 'Show API key' }).click()
         await expect(apiKeyInput).toHaveAttribute('type', 'text')

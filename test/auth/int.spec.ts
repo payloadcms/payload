@@ -1678,6 +1678,106 @@ describe('Auth', () => {
         expect(updated.apiKey).toBe(originalAPIKey)
       })
 
+      it('generates a missing disabled API key without enabling it', async () => {
+        const user = await payload.create({
+          collection: apiKeysWithReadableKeysSlug,
+          data: {
+            enableAPIKey: false,
+          },
+        })
+
+        const response = await restClient.POST(
+          `/${apiKeysWithReadableKeysSlug}/generate-api-key/${user.id}`,
+          {
+            body: JSON.stringify({ generateIfMissing: true }),
+            headers: {
+              Authorization: `JWT ${token}`,
+            },
+          },
+        )
+        const result = await response.json()
+        const stored = await payload.findByID({
+          collection: apiKeysWithReadableKeysSlug,
+          id: user.id,
+        })
+
+        expect(response.status).toBe(200)
+        expect(result.apiKey).toEqual(expect.any(String))
+        expect(stored.apiKey).toBe(result.apiKey)
+        expect(stored.enableAPIKey).toBe(false)
+
+        const disabledAuthentication = await payload.auth({
+          headers: new Headers({
+            Authorization: `${apiKeysWithReadableKeysSlug} API-Key ${result.apiKey}`,
+          }),
+        })
+
+        expect(disabledAuthentication.user).toBeNull()
+
+        await payload.update({
+          collection: apiKeysWithReadableKeysSlug,
+          id: user.id,
+          data: {
+            enableAPIKey: true,
+          },
+        })
+
+        const enabled = await payload.findByID({
+          collection: apiKeysWithReadableKeysSlug,
+          id: user.id,
+        })
+        const rawEnabled = await payload.db.findOne<Record<string, unknown>>({
+          collection: apiKeysWithReadableKeysSlug,
+          req: { locale: 'en' } as any,
+          where: { id: { equals: user.id } },
+        })
+
+        expect(enabled.apiKey).toBe(result.apiKey)
+        expect(enabled.enableAPIKey).toBe(true)
+        expect(rawEnabled?.apiKeyIndex).toBe(
+          crypto.createHmac('sha256', payload.secret).update(result.apiKey).digest('hex'),
+        )
+
+        const enabledAuthentication = await payload.auth({
+          headers: new Headers({
+            Authorization: `${apiKeysWithReadableKeysSlug} API-Key ${result.apiKey}`,
+          }),
+        })
+
+        expect(enabledAuthentication.user?.id).toBe(user.id)
+      })
+
+      it('does not replace an existing API key when generating if missing', async () => {
+        const originalAPIKey = uuid()
+        const user = await payload.create({
+          collection: apiKeysWithReadableKeysSlug,
+          data: {
+            apiKey: originalAPIKey,
+            enableAPIKey: false,
+          },
+        })
+
+        const response = await restClient.POST(
+          `/${apiKeysWithReadableKeysSlug}/generate-api-key/${user.id}`,
+          {
+            body: JSON.stringify({ generateIfMissing: true }),
+            headers: {
+              Authorization: `JWT ${token}`,
+            },
+          },
+        )
+        const result = await response.json()
+        const stored = await payload.findByID({
+          collection: apiKeysWithReadableKeysSlug,
+          id: user.id,
+        })
+
+        expect(response.status).toBe(200)
+        expect(result).not.toHaveProperty('apiKey')
+        expect(stored.apiKey).toBe(originalAPIKey)
+        expect(stored.enableAPIKey).toBe(false)
+      })
+
       it('respects custom API key update access', async () => {
         const originalAPIKey = uuid()
         const user = await payload.create({

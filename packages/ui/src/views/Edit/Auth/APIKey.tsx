@@ -3,7 +3,8 @@ import type { TextFieldClient } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { formatAdminURL } from 'payload/shared'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { toast } from 'sonner'
 
 import { APIKeyInput } from '../../../elements/APIKeyInput/index.js'
 import { GenerateConfirmation } from '../../../elements/GenerateConfirmation/index.js'
@@ -43,35 +44,39 @@ const useGenerateAPIKey = () => {
   const { id, collectionSlug, setData } = useDocumentInfo()
   const { i18n, t } = useTranslation()
 
-  return useCallback(async (): Promise<{ apiKey?: string }> => {
-    if (!id) {
-      throw new Error(t('general:error'))
-    }
+  return useCallback(
+    async ({ generateIfMissing = false } = {}): Promise<{ apiKey?: string }> => {
+      if (!id) {
+        throw new Error(t('general:error'))
+      }
 
-    const response = await fetch(
-      formatAdminURL({
-        apiRoute: api,
-        path: `/${collectionSlug}/generate-api-key/${id}`,
-      }),
-      {
-        credentials: 'include',
-        headers: {
-          'Accept-Language': i18n.language,
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        formatAdminURL({
+          apiRoute: api,
+          path: `/${collectionSlug}/generate-api-key/${id}`,
+        }),
+        {
+          body: generateIfMissing ? JSON.stringify({ generateIfMissing: true }) : undefined,
+          credentials: 'include',
+          headers: {
+            'Accept-Language': i18n.language,
+            'Content-Type': 'application/json',
+          },
+          method: 'post',
         },
-        method: 'post',
-      },
-    )
-    const result = await response.json()
+      )
+      const result = await response.json()
 
-    if (!response.ok) {
-      throw new Error(result.errors?.[0]?.message ?? t('general:error'))
-    }
+      if (!response.ok) {
+        throw new Error(result.errors?.[0]?.message ?? t('general:error'))
+      }
 
-    setData(result)
+      setData(result)
 
-    return result
-  }, [api, collectionSlug, i18n.language, id, setData, t])
+      return result
+    },
+    [api, collectionSlug, i18n.language, id, setData, t],
+  )
 }
 
 const APIKeyLabel = ({ label }: { label: string }) => (
@@ -103,11 +108,21 @@ export const APIKey: React.FC<{
   readonly canGenerate: boolean
   readonly description?: string
   readonly enabled: boolean
+  readonly generateIfMissing: boolean
   readonly isFormModified: boolean
   readonly onGenerated: (apiKey: string) => void
   readonly value?: string
-}> = ({ canGenerate, description, enabled, isFormModified, onGenerated, value }) => {
+}> = ({
+  canGenerate,
+  description,
+  enabled,
+  generateIfMissing,
+  isFormModified,
+  onGenerated,
+  value,
+}) => {
   const [highlightedField, setHighlightedField] = useState(false)
+  const requestedMissingKey = useRef(false)
   const apiKeyLabel = useAPIKeyLabel()
   const generateAPIKey = useGenerateAPIKey()
 
@@ -129,6 +144,30 @@ export const APIKey: React.FC<{
       setHighlightedField(true)
     }
   }, [generateAPIKey, onGenerated])
+
+  useEffect(() => {
+    if (!generateIfMissing) {
+      requestedMissingKey.current = false
+      return
+    }
+
+    if (value || requestedMissingKey.current) {
+      return
+    }
+
+    requestedMissingKey.current = true
+
+    void generateAPIKey({ generateIfMissing: true })
+      .then((result) => {
+        if (result.apiKey) {
+          onGenerated(result.apiKey)
+          setHighlightedField(true)
+        }
+      })
+      .catch((error) => {
+        toast.error(error instanceof Error ? error.message : 'Error')
+      })
+  }, [generateAPIKey, generateIfMissing, onGenerated, value])
 
   if (!enabled) {
     return null
