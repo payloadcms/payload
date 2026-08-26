@@ -43,12 +43,12 @@ export const Users: CollectionConfig = {
 
 The following fields are available on collections and globals without enabling authentication, uploads, or versions:
 
-| Field       | Used by                                     | Override behavior                                                           |
-| ----------- | ------------------------------------------- | --------------------------------------------------------------------------- |
-| `id`        | Collections                                 | Replaces the generated ID field. See [Custom ID fields](#custom-id-fields). |
-| `createdAt` | Collections with timestamps and all globals | Replaces the generated field. Keep this as a `date` field.                  |
-| `updatedAt` | Collections with timestamps and all globals | Replaces the generated field. Keep this as a `date` field.                  |
-| `deletedAt` | Collections with `trash` enabled            | Replaces the generated field. Keep this as a `date` field.                  |
+| Field | Used by | Override behavior |
+| --- | --- | --- |
+| `id` | Collections | Replaces the generated ID field. See [Custom ID fields](#custom-id-fields). |
+| `createdAt` | Collections with timestamps and all globals | Replaces the generated field. Keep this as a `date` field. |
+| `updatedAt` | Collections with timestamps and all globals | Replaces the generated field. Keep this as a `date` field. |
+| `deletedAt` | Collections with `trash` enabled | Replaces the generated field. Keep this as a `date` field. |
 
 ### Custom ID fields
 
@@ -72,22 +72,22 @@ export const MyCollection: CollectionConfig = {
 ```
 
 <Banner type="warning">
-  Custom ID fields can only be [`Number`](./number) or [`Text`](./text) fields.
-  Custom text IDs must not contain `/` or `.` characters.
+  Custom ID fields can only be [`Number`](./number) or [`Text`](./text)
+  fields. Custom text IDs must not contain `/` or `.` characters.
 </Banner>
 
 ## Authentication fields
 
 Authentication fields are added to a collection according to its [auth configuration](../authentication/overview). Payload deep-merges matching fields from your collection's `fields` array into these defaults, except for the special `password` override described below.
 
-| Fields                                                               | Added when                                    |
-| -------------------------------------------------------------------- | --------------------------------------------- |
+| Fields | Added when |
+| --- | --- |
 | `email`, `password`, `resetPasswordToken`, `resetPasswordExpiration` | The local authentication strategy is enabled. |
-| `username`                                                           | `auth.loginWithUsername` is enabled.          |
-| `enableAPIKey`, `apiKey`, `apiKeyIndex`                              | `auth.useAPIKey` is enabled.                  |
-| `_verified`, `_verificationToken`                                    | `auth.verify` is enabled.                     |
-| `loginAttempts`, `lockUntil`                                         | `auth.maxLoginAttempts` is greater than `0`.  |
-| `sessions`                                                           | `auth.useSessions` is enabled.                |
+| `username` | `auth.loginWithUsername` is enabled. |
+| `enableAPIKey`, `apiKey`, `apiKeyIndex` | `auth.useAPIKey` is enabled. |
+| `_verified`, `_verificationToken` | `auth.verify` is enabled. |
+| `loginAttempts`, `lockUntil` | `auth.maxLoginAttempts` is greater than `0`. |
+| `sessions` | `auth.useSessions` is enabled. |
 
 The `password` override is also applied to the generated new-password and confirm-password fields in the Admin Panel. You may need to set `hidden: true` on the override to prevent an additional field from being displayed.
 
@@ -97,11 +97,11 @@ The `salt` and `hash` fields are reserved and cannot be overridden.
 
 The following fields are added to [upload-enabled collections](../upload/overview). Payload deep-merges matching fields from your collection's `fields` array into these defaults.
 
-| Fields                                                                       | Added when                                                                                    |
-| ---------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
-| `filename`, `mimeType`, `filesize`, `width`, `height`, `url`, `thumbnailURL` | Uploads are enabled.                                                                          |
-| `focalX`, `focalY`                                                           | Focal points are enabled, or `imageSizes` or `resizeOptions` is configured.                   |
-| `sizes`                                                                      | `imageSizes` is configured. Matching fields nested under `sizes` are also merged recursively. |
+| Fields | Added when |
+| --- | --- |
+| `filename`, `mimeType`, `filesize`, `width`, `height`, `url`, `thumbnailURL` | Uploads are enabled. |
+| `focalX`, `focalY` | Focal points are enabled, or `imageSizes` or `resizeOptions` is configured. |
+| `sizes` | `imageSizes` is configured. Matching fields nested under `sizes` are also merged recursively. |
 
 The `file` field is reserved and cannot be overridden.
 
