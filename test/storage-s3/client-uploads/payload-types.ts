@@ -70,6 +70,8 @@ export interface Config {
     media: Media;
     'media-with-prefix': MediaWithPrefix;
     'media-container': MediaContainer;
+    'media-header-only': MediaHeaderOnly;
+    'media-header-only-with-sizes': MediaHeaderOnlyWithSize;
     users: User;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
@@ -81,6 +83,8 @@ export interface Config {
     media: MediaSelect<false> | MediaSelect<true>;
     'media-with-prefix': MediaWithPrefixSelect<false> | MediaWithPrefixSelect<true>;
     'media-container': MediaContainerSelect<false> | MediaContainerSelect<true>;
+    'media-header-only': MediaHeaderOnlySelect<false> | MediaHeaderOnlySelect<true>;
+    'media-header-only-with-sizes': MediaHeaderOnlyWithSizesSelect<false> | MediaHeaderOnlyWithSizesSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -192,6 +196,52 @@ export interface MediaContainer {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-header-only".
+ */
+export interface MediaHeaderOnly {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-header-only-with-sizes".
+ */
+export interface MediaHeaderOnlyWithSize {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+  sizes?: {
+    thumbnail?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -250,6 +300,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'media-container';
         value: string | MediaContainer;
+      } | null)
+    | ({
+        relationTo: 'media-header-only';
+        value: string | MediaHeaderOnly;
+      } | null)
+    | ({
+        relationTo: 'media-header-only-with-sizes';
+        value: string | MediaHeaderOnlyWithSize;
       } | null)
     | ({
         relationTo: 'users';
@@ -369,6 +427,54 @@ export interface MediaContainerSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-header-only_select".
+ */
+export interface MediaHeaderOnlySelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-header-only-with-sizes_select".
+ */
+export interface MediaHeaderOnlyWithSizesSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+  sizes?:
+    | T
+    | {
+        thumbnail?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+      };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
@@ -446,7 +552,13 @@ export interface CollectionsWidget {
 export interface CollectionQueryWidget {
   data?: {
     title?: string | null;
-    relatedCollection: 'media' | 'media-with-prefix' | 'media-container' | 'users';
+    relatedCollection:
+      | 'media'
+      | 'media-with-prefix'
+      | 'media-container'
+      | 'media-header-only'
+      | 'media-header-only-with-sizes'
+      | 'users';
     where?:
       | {
           [k: string]: unknown;
@@ -468,7 +580,16 @@ export interface CollectionQueryWidget {
  */
 export interface ActivityWidget {
   data?: {
-    excludedCollections?: ('media' | 'media-with-prefix' | 'media-container' | 'users')[] | null;
+    excludedCollections?:
+      | (
+          | 'media'
+          | 'media-with-prefix'
+          | 'media-container'
+          | 'media-header-only'
+          | 'media-header-only-with-sizes'
+          | 'users'
+        )[]
+      | null;
   };
   width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
@@ -482,6 +603,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore 
+  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }

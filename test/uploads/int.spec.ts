@@ -26,6 +26,7 @@ import {
   adminThumbnailSizeSlug,
   allowListMediaSlug,
   anyImagesSlug,
+  clientUploadTempFileSlug,
   enlargeSlug,
   focalNoSizesSlug,
   focalOnlySlug,
@@ -2463,6 +2464,137 @@ describe('Collections - Uploads', () => {
       )
 
       expect(response.status).toBe(403)
+    })
+  })
+
+  /**
+   * `client-upload-temp-file` forces the `'full'` content requirement (see
+   * getFileContentRequirement.ts), so every request against it fetches the file through
+   * `getFileFromUploadInstructions` into its own temp file, regardless of the global
+   * `useTempFiles` setting (see unlinkTempFiles.ts). These temp files live under `os.tmpdir()`
+   * with a `payload-client-upload-` prefix - this is a regression test for those files leaking
+   * on disk when something after the fetch (e.g. a `beforeChange` hook) makes the operation fail.
+   */
+  describe('client upload temp file cleanup', () => {
+    const createdIds: (number | string)[] = []
+
+    afterEach(async () => {
+      for (const id of createdIds) {
+        await payload.delete({ id, collection: clientUploadTempFileSlug })
+      }
+      createdIds.length = 0
+    })
+
+    const listClientUploadTempFiles = async (): Promise<Set<string>> => {
+      const entries = await fs.promises.readdir(os.tmpdir()).catch(() => [] as string[])
+      return new Set(entries.filter((name) => name.startsWith('payload-client-upload-')))
+    }
+
+    const clientUploadFormData = (overrides: Record<string, unknown> = {}) => {
+      const formData = new FormData()
+      if (Object.keys(overrides).length > 0) {
+        formData.append('_payload', JSON.stringify(overrides))
+      }
+      formData.append(
+        'file',
+        JSON.stringify({
+          filename: 'client-upload-temp-file.png',
+          mimeType: 'image/png',
+          size: 1,
+          uploadReference: { key: 'unused' },
+        }),
+      )
+      return formData
+    }
+
+    it('removes the temp file after a successful create', async () => {
+      const before = await listClientUploadTempFiles()
+
+      const response = await restClient.POST(`/${clientUploadTempFileSlug}`, {
+        body: clientUploadFormData(),
+      })
+      expect(response.status).toBe(201)
+      const { doc } = await response.json()
+      createdIds.push(doc.id)
+
+      expect(await listClientUploadTempFiles()).toEqual(before)
+    })
+
+    it('removes the temp file even when a beforeChange hook throws after the file was fetched', async () => {
+      const before = await listClientUploadTempFiles()
+
+      const response = await restClient.POST(`/${clientUploadTempFileSlug}`, {
+        body: clientUploadFormData({ shouldFail: true }),
+      })
+      expect(response.status).toBe(422)
+
+      expect(await listClientUploadTempFiles()).toEqual(before)
+    })
+  })
+
+  /**
+   * When local storage is enabled and no image processing changes the bytes, generateFileData
+   * copies straight from `file.tempFilePath` to its destination instead of reading the whole
+   * file into memory (see generateFileData.ts). `mediaSlug` has no restrictions on non-image
+   * mime types, so an audio file uploaded there skips all sharp processing and exercises that
+   * copy against real disk I/O.
+   */
+  describe('temp file copy to local storage', () => {
+    const createdIds: (number | string)[] = []
+    const tempFilesToClean: string[] = []
+
+    afterEach(async () => {
+      for (const id of createdIds) {
+        await payload.delete({ id, collection: mediaSlug })
+      }
+      createdIds.length = 0
+
+      for (const tempFilePath of tempFilesToClean) {
+        await fs.promises.rm(tempFilePath, { force: true })
+      }
+      tempFilesToClean.length = 0
+    })
+
+    it('copies the temp file to its destination instead of reading it into memory', async () => {
+      const fileContents = Buffer.from(`fake-audio-bytes-${randomUUID()}`)
+      const tempFilePath = path.join(os.tmpdir(), `payload-test-temp-file-${randomUUID()}.mp3`)
+      await fs.promises.writeFile(tempFilePath, fileContents)
+      tempFilesToClean.push(tempFilePath)
+
+      // fs.promises is the same object `fs/promises` exports, so this observes the real calls
+      // generateFileData.ts/uploadFiles.ts make - it doesn't replace their behavior.
+      const copyFileSpy = vitest.spyOn(fs.promises, 'copyFile')
+      const readFileSpy = vitest.spyOn(fs.promises, 'readFile')
+
+      const doc = await payload.create({
+        collection: mediaSlug,
+        data: {},
+        file: {
+          name: `temp-file-copy-${randomUUID()}.mp3`,
+          data: Buffer.alloc(0),
+          mimetype: 'audio/mpeg',
+          size: fileContents.length,
+          tempFilePath,
+        },
+      })
+
+      createdIds.push(doc.id)
+
+      const savedFilePath = path.join(dirname, './media', doc.filename)
+
+      expect(copyFileSpy).toHaveBeenCalledWith(tempFilePath, savedFilePath)
+      expect(readFileSpy).not.toHaveBeenCalledWith(tempFilePath)
+
+      copyFileSpy.mockRestore()
+      readFileSpy.mockRestore()
+
+      expect(doc.filesize).toBe(fileContents.length)
+      expect(await fileExists(savedFilePath)).toBe(true)
+      expect(await fs.promises.readFile(savedFilePath)).toEqual(fileContents)
+
+      // Copied, not moved - the original temp file must be untouched.
+      expect(await fileExists(tempFilePath)).toBe(true)
+      expect(await fs.promises.readFile(tempFilePath)).toEqual(fileContents)
     })
   })
 })
