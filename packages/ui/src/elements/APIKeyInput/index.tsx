@@ -1,5 +1,5 @@
 'use client'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 
 import { EyeIcon } from '../../icons/Eye/index.js'
 import { KeyIcon } from '../../icons/Key/index.js'
@@ -14,6 +14,7 @@ export type APIKeyInputProps = {
   readonly highlighted?: boolean
   readonly id?: string
   readonly initiallyVisible?: boolean
+  readonly isFormModified?: boolean
   readonly value: null | string | undefined
 }
 
@@ -27,9 +28,11 @@ export const APIKeyInput: React.FC<APIKeyInputProps> = ({
   disabled,
   highlighted,
   initiallyVisible = false,
+  isFormModified = false,
   value,
 }) => {
   const [showKey, setShowKey] = useState(initiallyVisible)
+  const wasFormModified = useRef(isFormModified)
   const keyValue = value ?? ''
 
   useEffect(() => {
@@ -37,6 +40,14 @@ export const APIKeyInput: React.FC<APIKeyInputProps> = ({
       setShowKey(true)
     }
   }, [highlighted])
+
+  useEffect(() => {
+    if (wasFormModified.current && !isFormModified) {
+      setShowKey(false)
+    }
+
+    wasFormModified.current = isFormModified
+  }, [isFormModified])
 
   return (
     <div className={baseClass}>

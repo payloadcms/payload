@@ -519,6 +519,9 @@ describe('Auth', () => {
         const rotatedAPIKey = await apiKeyInput.inputValue()
         await saveDocAndAssert(page)
         await expect(apiKeyInput).toHaveValue(rotatedAPIKey)
+        await expect(apiKeyInput).toHaveAttribute('type', 'password')
+        await page.getByRole('button', { name: 'Show API key' }).click()
+        await expect(apiKeyInput).toHaveAttribute('type', 'text')
       })
     })
 

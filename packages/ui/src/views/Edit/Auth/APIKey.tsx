@@ -9,7 +9,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { APIKeyInput } from '../../../elements/APIKeyInput/index.js'
 import { GenerateConfirmation } from '../../../elements/GenerateConfirmation/index.js'
 import { FieldDescription } from '../../../fields/FieldDescription/index.js'
-import { useForm, useFormFields } from '../../../forms/Form/context.js'
+import { useForm, useFormFields, useFormModified } from '../../../forms/Form/context.js'
 import { useField } from '../../../forms/useField/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useDocumentInfo } from '../../../providers/DocumentInfo/index.js'
@@ -80,6 +80,7 @@ export const APIKey: React.FC<{
   const { t } = useTranslation()
   const { config } = useConfig()
   const apiKeyLabel = useAPIKeyLabel()
+  const isFormModified = useFormModified()
 
   const apiKey = useFormFields(([fields]) => (fields && fields[path]) || null)
 
@@ -151,6 +152,7 @@ export const APIKey: React.FC<{
           highlighted={highlightedField}
           id="apiKey"
           initiallyVisible={initiallyVisible}
+          isFormModified={isFormModified}
           value={value as string}
         />
         <FieldDescription description={description} path="apiKey" />
