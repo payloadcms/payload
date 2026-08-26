@@ -19,6 +19,57 @@ With no arguments, runs every registered transform against the current directory
 - `--dry` — analyze only; write nothing.
 - `--print` — print transformed sources to stdout instead of writing.
 
+## `upgrade` command
+
+The `upgrade` command has three verbs.
+
+### `upgrade` (pick how to run it)
+
+`npx @payloadcms/codemod upgrade` is the front door. It detects installed coding-agent CLIs
+(`claude`, `codex`) and asks how you want to run the full v3 -> v4 upgrade, Next.js 16 included:
+
+- Hand the orchestration prompt to a detected agent. The agent runs the whole sequence, calling
+  `upgrade run` for the mechanical slice as one step.
+- Just print the prompt to run it yourself or paste it elsewhere.
+
+Pin an agent with `--agent <claude|codex>` to skip the picker. When there is no TTY (CI) or no
+agent is installed, it prints the prompt instead of prompting.
+
+### `upgrade run` (mechanical slice)
+
+`npx @payloadcms/codemod upgrade run` performs the deterministic v3 -> v4 slice against the current
+directory (run it from your project root):
+
+1. Resolves the current Payload canary from the npm registry (override with `--tag <dist-tag>`).
+2. Rewrites `package.json`: pins `payload` + every `@payloadcms/*` to that exact version in
+   lockstep, removes dependency overrides pinning them, converts their carets to exact, and writes
+   the TypeScript / `@types/node` / `engines.node` floors. The `@payloadcms/eslint-*` packages are
+   versioned independently, so they are set to `latest` rather than lockstep-pinned.
+3. Installs with your detected package manager.
+4. Runs every registered transform against the now-v4 tree.
+5. Prints a report and points you at the bundled runbook for the rest.
+
+It does NOT upgrade Next.js. Payload v4 requires Next 16; run Next's own recommended agent
+workflow (linked from the bundled runbook) to bump Next and migrate the code together. The report
+prints the required Next target.
+
+Flags:
+
+- `--tag <dist-tag>` — dist-tag to resolve Payload versions from (default `canary`).
+- `--dry` — preview the `package.json` changes and planned steps; write and install nothing.
+- `--force` — skip the dirty-git-tree warning.
+
+### `upgrade prompt` (print the prompt)
+
+`npx @payloadcms/codemod upgrade prompt` prints the orchestration prompt to stdout and exits. It is
+offline and stateless: it writes nothing and makes no network calls. The text is project-agnostic,
+so pipe it to any agent and run it from the project root. This is the same prompt the `upgrade`
+picker hands off, minus the detection and spawn.
+
+The prompt sequences the upgrade (mechanical slice via `upgrade run`, then Next.js via Next's own
+codemods and agent workflow, then regeneration, judgment work, and verification) and points at the
+bundled runbook and migration guide for detail rather than restating them.
+
 ## How it works
 
 The tool loads your project via [ts-morph](https://ts-morph.com/), using your `tsconfig.json` when present, otherwise globbing `**/*.{ts,tsx,js,jsx}` (excluding `node_modules`, `dist`, `.next`, `build`). Each registered transform is applied in order against the shared project; changes are saved at the end unless `--dry` or `--print` is passed.

@@ -29,7 +29,8 @@
     "README.md"
   ],
   "scripts": {
-    "build": "pnpm typecheck && pnpm build:swc",
+    "build": "pnpm typecheck && pnpm build:swc && pnpm build:copy-docs",
+    "build:copy-docs": "node scripts/copy-migration-guide.mjs",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "clean": "rimraf -g {dist,*.tsbuildinfo}",
     "lint": "eslint .",
@@ -38,11 +39,13 @@
     "typecheck": "tsc"
   },
   "dependencies": {
+    "semver": "^7.8.5",
     "ts-morph": "^21.0.1"
   },
   "devDependencies": {
     "@swc/core": "1.15.3",
     "@types/node": "24.12.3",
+    "@types/semver": "^7.7.1",
     "rimraf": "6.0.1",
     "typescript": "6.0.3",
     "vitest": "4.1.6"

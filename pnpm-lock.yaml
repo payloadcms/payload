@@ -260,6 +260,9 @@ importers:
 
   packages/codemod:
     dependencies:
+      semver:
+        specifier: ^7.8.5
+        version: 7.8.5
       ts-morph:
         specifier: ^21.0.1
         version: 21.0.1
@@ -270,6 +273,9 @@ importers:
       '@types/node':
         specifier: 24.12.3
         version: 24.12.3
+      '@types/semver':
+        specifier: ^7.7.1
+        version: 7.7.1
       rimraf:
         specifier: 6.0.1
         version: 6.0.1
