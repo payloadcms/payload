@@ -17,13 +17,7 @@ import {
   type SanitizedFieldsPermissions,
   type VersionField,
 } from 'payload'
-import {
-  fieldIsID,
-  fieldShouldBeLocalized,
-  getFieldPaths,
-  getUniqueListBy,
-  tabHasName,
-} from 'payload/shared'
+import { fieldIsID, fieldShouldBeLocalized, getFieldPaths, tabHasName } from 'payload/shared'
 
 import { RenderServerComponent } from '../../../elements/RenderServerComponent/index.js'
 import { diffComponents } from './fields/index.js'
@@ -450,11 +444,9 @@ const buildVersionField = ({
           (block) => typeof block !== 'string' && block.slug === blockSlugToMatch,
         ) as FlattenedBlock | undefined)
 
-      let fields = []
+      let replacedBlock: FlattenedBlock | undefined = undefined
 
-      if (toRow.blockType === fromRow.blockType) {
-        fields = toBlock.fields
-      } else {
+      if (toRow.blockType !== fromRow.blockType) {
         const fromBlockSlugToMatch: string = fromRow?.blockType ?? toRow?.blockType
 
         const fromBlock =
@@ -463,10 +455,8 @@ const buildVersionField = ({
             (block) => typeof block !== 'string' && block.slug === fromBlockSlugToMatch,
           ) as FlattenedBlock | undefined)
 
-        if (fromBlock) {
-          fields = getUniqueListBy<Field>([...toBlock.fields, ...fromBlock.fields], 'name')
-        } else {
-          fields = toBlock.fields
+        if (fromBlock && fromBlock.slug !== toBlock.slug) {
+          replacedBlock = fromBlock
         }
       }
 
@@ -486,11 +476,10 @@ const buildVersionField = ({
         }
       }
 
-      const versionFields = buildVersionFields({
+      const blockDiffArgs = {
         clientSchemaMap,
         customDiffComponents,
         entitySlug,
-        fields,
         fieldsPermissions: blockFieldsPermissions,
         i18n,
         modifiedOnly,
@@ -498,12 +487,29 @@ const buildVersionField = ({
         parentIndexPath: 'name' in field ? '' : indexPath,
         parentIsLocalized: parentIsLocalized || ('localized' in field && field.localized),
         parentPath: ('name' in field ? path : parentPath) + '.' + i,
-        parentSchemaPath: schemaPath + '.' + toBlock.slug,
         req,
         selectedLocales,
-        versionFromSiblingData: fromRow,
+      }
+
+      const oldBlockFields = replacedBlock
+        ? buildVersionFields({
+            ...blockDiffArgs,
+            fields: replacedBlock.fields,
+            parentSchemaPath: schemaPath + '.' + replacedBlock.slug,
+            versionFromSiblingData: fromRow,
+            versionToSiblingData: {},
+          }).versionFields
+        : []
+
+      const newBlockFields = buildVersionFields({
+        ...blockDiffArgs,
+        fields: toBlock.fields,
+        parentSchemaPath: schemaPath + '.' + toBlock.slug,
+        versionFromSiblingData: replacedBlock ? {} : fromRow,
         versionToSiblingData: toRow,
       }).versionFields
+
+      const versionFields = [...oldBlockFields, ...newBlockFields]
 
       if (versionFields?.length) {
         baseVersionField.rows[i] = versionFields
