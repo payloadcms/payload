@@ -1,6 +1,11 @@
 import { addDataAndFileToRequest, type DefaultDocumentIDType, type Endpoint } from 'payload'
 
-import type { CurrenciesConfig, PaymentAdapter, ProductsValidation } from '../types/index.js'
+import type {
+  CurrenciesConfig,
+  PaymentAdapter,
+  ProductsValidation,
+  UserWithCart,
+} from '../types/index.js'
 
 type Args = {
   /**
@@ -58,7 +63,7 @@ export const confirmOrderHandler: ConfirmOrderHandler =
 
     const data = req.data
     const payload = req.payload
-    const user = req.user
+    const user = req.user as null | UserWithCart
 
     let currency: string = currenciesConfig.defaultCurrency
     let cartID: DefaultDocumentIDType = data?.cartID

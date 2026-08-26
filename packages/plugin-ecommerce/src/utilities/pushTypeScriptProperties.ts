@@ -25,7 +25,7 @@ export const pushTypeScriptProperties = ({
   const propertiesMap = new Map<string, { $ref: string }>()
 
   Object.entries(collectionSlugMap).forEach(([key, slug]) => {
-    propertiesMap.set(key, { $ref: `#/definitions/${slug}` })
+    propertiesMap.set(key, { $ref: `#/$defs/${slug}` })
 
     requiredCollectionProperties.push(slug)
   })

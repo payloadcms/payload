@@ -1,7 +1,8 @@
 import React from 'react'
 
 import { HtmlDiff } from './diff/index.js'
-import './index.scss'
+import './colors.css'
+import './index.css'
 
 export { escapeDiffHTML, unescapeDiffHTML } from './escapeHtml.js'
 

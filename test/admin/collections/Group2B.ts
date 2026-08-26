@@ -13,4 +13,5 @@ export const CollectionGroup2B: CollectionConfig = {
       type: 'text',
     },
   ],
+  versions: false,
 }

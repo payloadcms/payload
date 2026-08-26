@@ -1,0 +1,9 @@
+@layer payload-default {
+  .icon--filter {
+    flex-shrink: 0;
+  }
+
+  .icon--filter__badge {
+    fill: var(--color-icon-danger);
+  }
+}

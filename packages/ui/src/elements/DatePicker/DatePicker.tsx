@@ -13,8 +13,8 @@ import type { Props } from './types.js'
 import { CalendarIcon } from '../../icons/Calendar/index.js'
 import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import './index.css'
 import { getFormattedLocale } from './getFormattedLocale.js'
+import './index.css'
 
 const baseClass = 'date-time-picker'
 
@@ -90,12 +90,16 @@ const DatePicker: React.FC<Props> = (props) => {
     minDate,
     minTime,
     monthsShown: Math.min(2, monthsToShow),
-    nextMonthButtonLabel: <ChevronIcon direction="right" large size={24} />,
+    nextMonthButtonLabel: <ChevronIcon direction="right" />,
+    nextYearButtonLabel: '›',
     onChange,
     placeholderText,
     popperPlacement: 'bottom-start',
-    previousMonthButtonLabel: <ChevronIcon direction="left" large size={24} />,
+    portalId: 'date-time-picker-portal',
+    previousMonthButtonLabel: <ChevronIcon direction="left" />,
+    previousYearButtonLabel: '‹',
     selected: value && new Date(value),
+    shouldCloseOnSelect: false,
     showMonthYearPicker: pickerAppearance === 'monthOnly',
     showPopperArrow: false,
     showTimeSelect: pickerAppearance === 'dayAndTime' || pickerAppearance === 'timeOnly',
@@ -118,7 +122,7 @@ const DatePicker: React.FC<Props> = (props) => {
         const datepickerLocale = getFormattedLocale(i18n.language)
         registerLocale(datepickerLocale, i18n.dateFNS)
         setDefaultLocale(datepickerLocale)
-      } catch (e) {
+      } catch (_error) {
         // eslint-disable-next-line no-console
         console.warn(`Could not find DatePicker locale for ${i18n.language}`)
       }
@@ -131,8 +135,8 @@ const DatePicker: React.FC<Props> = (props) => {
         <ReactDatePicker
           {...dateTimePickerProps}
           dropdownMode="select"
-          showMonthDropdown
-          showYearDropdown
+          showMonthDropdown={pickerAppearance !== 'monthOnly'}
+          showYearDropdown={pickerAppearance !== 'monthOnly'}
         />
         <CalendarIcon />
       </div>

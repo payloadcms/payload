@@ -1,0 +1,5 @@
+@layer payload-default {
+  .icon--interaction-enter {
+    flex-shrink: 0;
+  }
+}

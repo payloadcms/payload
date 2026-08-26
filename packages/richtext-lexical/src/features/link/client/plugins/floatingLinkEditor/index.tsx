@@ -5,7 +5,7 @@ import { createPortal } from 'react-dom'
 import type { PluginComponentWithAnchor } from '../../../../typesClient.js'
 import type { ClientProps } from '../../index.js'
 
-import './index.scss'
+import './index.css'
 import { LinkEditor } from './LinkEditor/index.js'
 
 export const FloatingLinkEditorPlugin: PluginComponentWithAnchor<ClientProps> = (props) => {

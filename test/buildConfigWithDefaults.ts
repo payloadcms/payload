@@ -1,5 +1,6 @@
 import type { Config, SanitizedConfig } from 'payload'
 
+import { mcpPlugin } from '@payloadcms/plugin-mcp'
 import {
   AlignFeature,
   BlockquoteFeature,
@@ -171,6 +172,13 @@ export async function buildConfigWithDefaults(
       config.admin = {}
     }
     config.admin.disable = true
+  }
+
+  // Auto-add the MCP plugin so every test suite exercises it. Suites that need
+  // to configure it explicitly add their own `mcpPlugin({...})` call.
+  const hasMcpPlugin = (config.plugins ?? []).some((p) => p.slug === '@payloadcms/plugin-mcp')
+  if (!hasMcpPlugin) {
+    config.plugins = [...(config.plugins ?? []), mcpPlugin({})]
   }
 
   return await buildConfig(config)

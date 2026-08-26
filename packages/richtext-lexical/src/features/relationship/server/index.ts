@@ -6,6 +6,9 @@ import { createNode } from '../../typeUtilities.js'
 import { relationshipPopulationPromiseHOC } from './graphQLPopulationPromise.js'
 import { i18n } from './i18n.js'
 import { RelationshipServerNode } from './nodes/RelationshipNode.js'
+import { createRelationshipNodeJSONSchema } from './schema.js'
+
+export type { RelationshipData, SerializedRelationshipNode } from './schema.js'
 
 export type ExclusiveRelationshipFeatureProps =
   | {
@@ -101,6 +104,7 @@ export const RelationshipFeature = createServerFeature<
               },
             ],
           },
+          jsonSchema: createRelationshipNodeJSONSchema(props),
           node: RelationshipServerNode,
         }),
       ],

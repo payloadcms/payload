@@ -1,8 +1,11 @@
 import type { Project } from 'ts-morph'
 
-import type { Transform, TransformResult } from './types.js'
+import { IndentationText, NewLineKind, QuoteKind } from 'ts-morph'
+
+import type { PackageJsonFile, Transform, TransformResult } from './types.js'
 
 export type RunTransformsArgs = {
+  packageJsons?: PackageJsonFile[]
   project: Project
   transforms: Transform[]
 }
@@ -18,15 +21,23 @@ export type RunTransformsResult = {
 }
 
 export async function runTransforms({
+  packageJsons = [],
   project,
   transforms,
 }: RunTransformsArgs): Promise<RunTransformsResult> {
+  project.manipulationSettings.set({
+    indentationText: IndentationText.TwoSpaces,
+    newLineKind: NewLineKind.LineFeed,
+    quoteKind: QuoteKind.Single,
+    useTrailingCommas: true,
+  })
+
   const results: TransformRunResult[] = []
   let failed = false
 
   for (const transform of transforms) {
     try {
-      const result = await transform.apply({ project })
+      const result = await transform.apply({ packageJsons, project })
       results.push({ name: transform.name, ...result })
     } catch (err) {
       failed = true

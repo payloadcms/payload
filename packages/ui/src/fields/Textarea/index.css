@@ -4,6 +4,7 @@
     display: flex;
     flex-direction: column;
     gap: var(--spacer-2);
+    flex-grow: 1;
 
     .field-type__wrap {
       display: flex;
@@ -14,32 +15,24 @@
     textarea {
       overflow-y: auto;
       resize: vertical;
-      min-height: 3.75rem;
+      min-height: calc(var(--field-min-height-large) * 2);
       height: auto;
       display: flex;
       field-sizing: content;
-      padding: var(--spacer-2);
+      padding: var(--field-padding-inline);
 
-      &:hover:not(:focus):not(:disabled) {
-        border-color: var(--border-default-default);
-      }
-
-      &:focus {
-        border-color: var(--border-selected);
-      }
-    }
-
-    &.read-only {
-      textarea {
-        background: var(--bg-default-default);
-        border-color: var(--border-default-default);
-        color: var(--text-default);
+      &:hover:not(:focus):not(:disabled):not(:read-only) {
+        border-color: var(--field-color-border-hover);
       }
     }
 
     &.error {
       textarea {
-        border-color: var(--border-danger-strong);
+        border-color: var(--field-color-border-error);
+
+        &:hover:not(:focus):not(:disabled) {
+          border-color: var(--field-color-border-error);
+        }
       }
     }
   }

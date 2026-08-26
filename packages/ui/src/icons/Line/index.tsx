@@ -3,8 +3,8 @@ import React from 'react'
 import './index.css'
 
 const paths = {
-  16: 'M12.854 3.146a.5.5 0 0 1 0 .708l-9 9a.5.5 0 0 1-.708-.708l9-9a.5.5 0 0 1 .708 0',
-  24: 'M19.854 4.146a.5.5 0 0 1 0 .708l-15 15a.5.5 0 0 1-.708-.708l15-15a.5.5 0 0 1 .708 0',
+  16: 'M4 7.5H12V8.5H4Z',
+  24: 'M6 11.5H18V12.5H6Z',
 }
 
 export const LineIcon: React.FC<{

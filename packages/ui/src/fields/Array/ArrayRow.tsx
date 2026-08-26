@@ -39,6 +39,7 @@ type ArrayRowProps = {
   readonly moveRow: (fromIndex: number, toIndex: number) => void
   readonly parentPath: string
   readonly pasteRow: (rowIndex: number) => void
+  readonly pasteRowBelow: (rowIndex: number) => void
   readonly path: string
   readonly permissions: SanitizedFieldPermissions
   readonly readOnly?: boolean
@@ -70,6 +71,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
   moveRow,
   parentPath,
   pasteRow,
+  pasteRowBelow,
   path,
   permissions,
   readOnly,
@@ -89,6 +91,8 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
   const { i18n } = useTranslation()
   const hasSubmitted = useFormSubmitted()
 
+  const pasteData = React.useMemo(() => ({ path, schemaFields: fields }), [path, fields])
+
   const fallbackLabel = `${getTranslation(labels.singular, i18n)} ${String(rowIndex + 1).padStart(
     2,
     '0',
@@ -99,6 +103,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
   const classNames = [
     `${baseClass}__row`,
     fieldHasErrors ? `${baseClass}__row--has-errors` : `${baseClass}__row--no-errors`,
+    isDragging && `${baseClass}__row--is-dragging`,
   ]
     .filter(Boolean)
     .join(' ')
@@ -125,7 +130,9 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
               index={rowIndex}
               isSortable={isSortable}
               moveRow={moveRow}
+              pasteData={pasteData}
               pasteRow={pasteRow}
+              pasteRowBelow={pasteRowBelow}
               removeRow={removeRow}
               rowCount={rowCount}
             />
@@ -167,7 +174,6 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
             className={`${baseClass}__fields`}
             fields={fields}
             forceRender={forceRender}
-            margins="small"
             parentIndexPath=""
             parentPath={path}
             parentSchemaPath={schemaPath}

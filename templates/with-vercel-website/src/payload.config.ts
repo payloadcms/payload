@@ -63,17 +63,30 @@ export default buildConfig({
       connectionString: process.env.POSTGRES_URL || '',
     },
   }),
-  collections: [Pages, Posts, Media, Categories, Users],
-  cors: [getServerSideURL()].filter(Boolean),
-  plugins: [
-    ...plugins,
-    vercelBlobStorage({
-      collections: {
-        media: true,
+  collections: [
+    {
+      slug: 'folders',
+      folders: true,
+      admin: {
+        useAsTitle: 'name',
       },
-      token: process.env.BLOB_READ_WRITE_TOKEN || '',
-    }),
+      fields: [
+        {
+          name: 'name',
+          type: 'text',
+          required: true,
+          label: 'Folder Name',
+        },
+      ],
+    },
+    Pages,
+    Posts,
+    Media,
+    Categories,
+    Users,
   ],
+  cors: [getServerSideURL()].filter(Boolean),
+  plugins: [...plugins],
   globals: [Header, Footer],
   secret: process.env.PAYLOAD_SECRET,
   sharp,
@@ -98,4 +111,12 @@ export default buildConfig({
     },
     tasks: [],
   },
+  storage: [
+    vercelBlobStorage({
+      collections: {
+        media: true,
+      },
+      token: process.env.BLOB_READ_WRITE_TOKEN || '',
+    }),
+  ],
 })

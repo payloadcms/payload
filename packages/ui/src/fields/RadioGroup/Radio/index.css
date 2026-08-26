@@ -15,13 +15,12 @@
     }
 
     input[type='radio']:focus-visible + .radio-input__styled-radio {
-      outline: 2px solid var(--border-selected-default);
-      outline-offset: 1px;
+      border: var(--accessibility-outline);
     }
   }
 
   .radio-input__styled-radio {
-    border: 1px solid var(--border-default-strong);
+    border: var(--stroke-width-small) solid var(--field-color-toggle-border);
     background-color: transparent;
     width: 1rem;
     height: 1rem;
@@ -38,19 +37,18 @@
       content: '';
       display: block;
       border-radius: var(--radius-full);
-      background-color: var(--border-default-strong);
+      background-color: var(--field-color-toggle-border);
       width: 0.5rem;
       height: 0.5rem;
       opacity: 0;
-      transition: opacity 0.1s ease;
     }
   }
 
   .radio-input__styled-radio--disabled {
-    border-color: var(--border-disabled-default);
+    border-color: var(--field-color-toggle-border-disabled);
 
     &::before {
-      background-color: var(--border-disabled-default);
+      background-color: var(--field-color-toggle-border-disabled);
     }
   }
 
@@ -60,7 +58,7 @@
     font-weight: var(--text-body-medium-font-weight);
     line-height: var(--text-body-medium-line-height);
     letter-spacing: var(--text-letter-spacing);
-    color: var(--text-default-default);
+    color: var(--color-text);
   }
 
   .radio-input--is-selected {

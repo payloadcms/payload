@@ -8,9 +8,9 @@ import {
   useConfig,
   useLocale,
   useModal,
+  useRouter,
   useTranslation,
 } from '@payloadcms/ui'
-import { useRouter } from 'next/navigation.js'
 import { formatAdminURL } from 'payload/shared'
 import React, { useCallback, useMemo, useState } from 'react'
 
@@ -34,6 +34,7 @@ export const ReindexButtonClient: React.FC<ReindexButtonProps> = ({
   } = useTranslation()
 
   const locale = useLocale()
+  const localeCode = locale?.code
   const router = useRouter()
 
   const [reindexCollections, setReindexCollections] = useState<string[]>([])
@@ -49,7 +50,7 @@ export const ReindexButtonClient: React.FC<ReindexButtonProps> = ({
       const res = await fetch(
         formatAdminURL({
           apiRoute: config.routes.api,
-          path: `/${searchSlug}/reindex?locale=${locale.code}`,
+          path: `/${searchSlug}/reindex${localeCode ? `?locale=${localeCode}` : ''}`,
         }),
         {
           body: JSON.stringify({
@@ -72,7 +73,7 @@ export const ReindexButtonClient: React.FC<ReindexButtonProps> = ({
     } finally {
       setReindexCollections([])
     }
-  }, [reindexCollections, router, searchSlug, locale, config])
+  }, [reindexCollections, router, searchSlug, localeCode, config])
 
   const handleShowConfirmModal = useCallback(
     (collections: string | string[] = searchCollections) => {
@@ -96,10 +97,10 @@ export const ReindexButtonClient: React.FC<ReindexButtonProps> = ({
       if (typeof label === 'string') {
         return label
       } else {
-        return label && Object.hasOwn(label, locale.code) ? label[locale.code] : slug
+        return label && localeCode && Object.hasOwn(label, localeCode) ? label[localeCode] : slug
       }
     },
-    [collectionLabels, locale.code],
+    [collectionLabels, localeCode],
   )
 
   const pluralizedLabels = useMemo(() => {
@@ -125,7 +126,6 @@ export const ReindexButtonClient: React.FC<ReindexButtonProps> = ({
   return (
     <div>
       <Popup
-        button={<ReindexButtonLabel />}
         render={({ close }) => (
           <PopupList.ButtonGroup>
             {searchCollections.map((collectionSlug) => (
@@ -141,6 +141,7 @@ export const ReindexButtonClient: React.FC<ReindexButtonProps> = ({
             </PopupList.Button>
           </PopupList.ButtonGroup>
         )}
+        renderButton={(buttonProps) => <ReindexButtonLabel {...buttonProps} />}
         showScrollbar
         size="large"
         verticalAlign="bottom"

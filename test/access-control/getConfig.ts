@@ -153,11 +153,13 @@ export const getConfig: () => Partial<Config> = () => ({
           options: ['admin', 'user'],
         },
       ],
+      versions: false,
     },
     {
       slug: publicUsersSlug,
       auth: true,
       fields: [],
+      versions: false,
     },
     {
       slug,
@@ -218,7 +220,14 @@ export const getConfig: () => Partial<Config> = () => ({
           ],
           label: 'Access',
         },
+        {
+          name: 'relatedItems',
+          type: 'join',
+          collection: 'relation-restricted',
+          on: 'post',
+        },
       ],
+      versions: false,
     },
     {
       slug: unrestrictedSlug,
@@ -254,11 +263,13 @@ export const getConfig: () => Partial<Config> = () => ({
           relationTo: createNotUpdateCollectionSlug,
         },
       ],
+      versions: false,
     },
     {
       slug: 'relation-restricted',
       access: {
         read: () => true,
+        update: () => true,
       },
       fields: [
         {
@@ -266,9 +277,38 @@ export const getConfig: () => Partial<Config> = () => ({
           type: 'text',
         },
         {
+          name: 'rank',
+          type: 'number',
+          access: {
+            read: () => false,
+          },
+        },
+        {
           name: 'post',
           type: 'relationship',
           relationTo: slug,
+        },
+        {
+          name: 'postLabel',
+          type: 'text',
+          virtual: 'post.restrictedField',
+        },
+      ],
+      versions: false,
+    },
+    {
+      slug: 'sort-default-restricted',
+      access: {
+        read: () => true,
+      },
+      defaultSort: 'rank',
+      fields: [
+        {
+          name: 'rank',
+          type: 'number',
+          access: {
+            read: () => false,
+          },
         },
       ],
     },
@@ -286,6 +326,7 @@ export const getConfig: () => Partial<Config> = () => ({
           type: 'text',
         },
       ],
+      versions: false,
     },
     {
       slug: readOnlySlug,
@@ -301,6 +342,7 @@ export const getConfig: () => Partial<Config> = () => ({
           type: 'text',
         },
       ],
+      versions: false,
     },
     {
       slug: userRestrictedCollectionSlug,
@@ -323,6 +365,7 @@ export const getConfig: () => Partial<Config> = () => ({
           type: 'text',
         },
       ],
+      versions: false,
     },
     {
       slug: createNotUpdateCollectionSlug,
@@ -341,6 +384,7 @@ export const getConfig: () => Partial<Config> = () => ({
           type: 'text',
         },
       ],
+      versions: false,
     },
     {
       slug: restrictedVersionsSlug,
@@ -438,6 +482,7 @@ export const getConfig: () => Partial<Config> = () => ({
           ],
         },
       ],
+      versions: false,
     },
     {
       slug: relyOnRequestHeadersSlug,
@@ -453,6 +498,7 @@ export const getConfig: () => Partial<Config> = () => ({
           type: 'text',
         },
       ],
+      versions: false,
     },
     {
       slug: docLevelAccessSlug,
@@ -496,6 +542,7 @@ export const getConfig: () => Partial<Config> = () => ({
         plural: 'Doc Level Access',
         singular: 'Doc Level Access',
       },
+      versions: false,
     },
     {
       slug: hiddenFieldsSlug,
@@ -547,6 +594,7 @@ export const getConfig: () => Partial<Config> = () => ({
           defaultValue: 'default value',
         },
       ],
+      versions: false,
     },
     {
       slug: hiddenAccessSlug,
@@ -575,6 +623,7 @@ export const getConfig: () => Partial<Config> = () => ({
           hidden: true,
         },
       ],
+      versions: false,
     },
     {
       slug: hiddenAccessCountSlug,
@@ -603,6 +652,7 @@ export const getConfig: () => Partial<Config> = () => ({
           hidden: true,
         },
       ],
+      versions: false,
     },
     {
       slug: 'fields-and-top-access',
@@ -658,6 +708,7 @@ export const getConfig: () => Partial<Config> = () => ({
           type: 'checkbox',
         },
       ],
+      versions: false,
     },
     // Collection for testing where query cache with SAME where queries
     {
@@ -696,6 +747,7 @@ export const getConfig: () => Partial<Config> = () => ({
           required: true,
         },
       ],
+      versions: false,
     },
 
     // Collection for testing where query cache with UNIQUE where queries
@@ -745,6 +797,7 @@ export const getConfig: () => Partial<Config> = () => ({
           required: true,
         },
       ],
+      versions: false,
     },
     // Collection for testing async parent permission inheritance
     {
@@ -801,14 +854,18 @@ export const getConfig: () => Partial<Config> = () => ({
           ],
         },
       ],
+      versions: false,
     },
   ],
   globals: [
     {
       slug: 'settings',
+      access: {
+        readVersions: () => true,
+      },
       admin: {
         components: {
-          elements: {
+          edit: {
             SaveButton: '/TestButton.js#TestButton',
           },
         },
@@ -819,7 +876,15 @@ export const getConfig: () => Partial<Config> = () => ({
           type: 'checkbox',
           label: 'Allow access to test global',
         },
+        {
+          name: 'secret',
+          type: 'text',
+          access: {
+            read: () => false,
+          },
+        },
       ],
+      versions: true,
     },
     {
       slug: 'test',
@@ -830,6 +895,7 @@ export const getConfig: () => Partial<Config> = () => ({
         },
       },
       fields: [],
+      versions: false,
     },
     {
       slug: readOnlyGlobalSlug,
@@ -843,6 +909,7 @@ export const getConfig: () => Partial<Config> = () => ({
           type: 'text',
         },
       ],
+      versions: false,
     },
     {
       slug: userRestrictedGlobalSlug,
@@ -856,6 +923,7 @@ export const getConfig: () => Partial<Config> = () => ({
           type: 'text',
         },
       ],
+      versions: false,
     },
     {
       slug: readNotUpdateGlobalSlug,
@@ -869,6 +937,7 @@ export const getConfig: () => Partial<Config> = () => ({
           type: 'text',
         },
       ],
+      versions: false,
     },
   ],
   onInit: async (payload) => {

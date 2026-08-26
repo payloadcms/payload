@@ -19,8 +19,7 @@ export const ClearIndicator: React.FC<ClearIndicatorProps<OptionType, true>> = (
   return (
     <div
       className={baseClass}
-      // TODO Fix this - Broke with React 19 types
-      ref={typeof ref === 'string' ? null : ref}
+      ref={ref}
       {...restInnerProps}
       onKeyDown={(e) => {
         if (e.key === 'Enter') {
@@ -31,7 +30,7 @@ export const ClearIndicator: React.FC<ClearIndicatorProps<OptionType, true>> = (
       role="button"
       tabIndex={0}
     >
-      <CircledXIcon className={`${baseClass}__icon`} />
+      <CircledXIcon className={`${baseClass}__icon`} size={24} />
     </div>
   )
 }

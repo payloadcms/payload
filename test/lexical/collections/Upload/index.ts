@@ -3,9 +3,14 @@ import type { CollectionConfig } from 'payload'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
+import { getTestSuiteDir } from '../../../__helpers/shared/getTestSuiteDir.js'
 import { uploads2Slug, uploadsSlug } from '../../slugs.js'
+
 const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
+const dirname = getTestSuiteDir({
+  fallbackDir: path.dirname(filename),
+  suitePath: 'lexical/collections/Upload',
+})
 
 export const Uploads: CollectionConfig = {
   slug: uploadsSlug,
@@ -32,6 +37,7 @@ export const Uploads: CollectionConfig = {
   upload: {
     staticDir: path.resolve(dirname, './uploads'),
   },
+  versions: false,
 }
 
 export const Uploads2: CollectionConfig = {
@@ -44,4 +50,5 @@ export const Uploads2: CollectionConfig = {
       type: 'text',
     },
   ],
+  versions: false,
 }

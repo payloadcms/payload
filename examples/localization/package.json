@@ -4,7 +4,7 @@
   "description": "An example of how to use Payload's localization features",
   "type": "module",
   "scripts": {
-    "build": "cross-env NODE_OPTIONS=--no-deprecation next build",
+    "build": "cross-env NODE_OPTIONS=--no-deprecation payload build",
     "dev": "cross-env NODE_OPTIONS=--no-deprecation next dev",
     "dev:prod": "cross-env NODE_OPTIONS=--no-deprecation rm -rf .next && pnpm build && pnpm start",
     "generate:importmap": "cross-env NODE_OPTIONS=--no-deprecation payload generate:importmap",
@@ -56,7 +56,7 @@
     "@types/escape-html": "^1.0.2",
     "@types/jsonwebtoken": "^9.0.6",
     "@types/node": "22.5.4",
-    "@types/react": "19.2.9",
+    "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
     "autoprefixer": "^10.4.19",
     "copyfiles": "^2.4.1",

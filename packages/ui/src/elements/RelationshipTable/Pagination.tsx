@@ -8,18 +8,20 @@ import { Pagination } from '../Pagination/index.js'
 export const RelationshipTablePagination: React.FC = () => {
   const { data, handlePageChange } = useListQuery()
 
+  if (!data?.totalDocs || !data?.limit) {
+    return null
+  }
+
   return (
     <Pagination
       hasNextPage={data.hasNextPage}
       hasPrevPage={data.hasPrevPage}
       limit={data.limit}
-      nextPage={data.nextPage || 2}
+      nextPage={data.nextPage}
       numberOfNeighbors={1}
-      onChange={(e) => {
-        void handlePageChange(e)
-      }}
-      page={data.page || 1}
-      prevPage={data.prevPage || undefined}
+      onChange={handlePageChange}
+      page={data.page}
+      prevPage={data.prevPage}
       totalPages={data.totalPages}
     />
   )

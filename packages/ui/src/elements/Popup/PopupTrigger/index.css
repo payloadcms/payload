@@ -6,15 +6,9 @@
     font-size: inherit;
     line-height: inherit;
     font-family: inherit;
-    border: 1px solid transparent;
     cursor: pointer;
     display: inline-flex;
-    border-radius: var(--radius-medium, 0.3125rem);
-
-    &:focus-visible {
-      outline: var(--accessibility-outline);
-      outline-offset: var(--accessibility-outline-offset);
-    }
+    border-radius: var(--button-radius, 0.3125rem);
   }
 
   .popup-button--background {
@@ -22,11 +16,12 @@
   }
 
   .popup-button:hover:not(.popup-button--disabled) {
-    background: var(--bg-transparent-hover);
+    background: var(--color-bg-transparent-hover);
   }
 
-  .popup-button:active:not(.popup-button--disabled) {
-    background: var(--bg-transparent-pressed);
+  .popup-button:active:not(.popup-button--disabled),
+  .popup-button--active:not(.popup-button--disabled) {
+    background: var(--color-bg-transparent-pressed);
   }
 
   .popup-button--disabled {

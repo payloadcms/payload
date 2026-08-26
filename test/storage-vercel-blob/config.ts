@@ -55,7 +55,7 @@ export default buildConfigWithDefaults({
       },
     })
   },
-  plugins: [
+  storage: [
     vercelBlobStorage({
       collections: {
         [mediaSlug]: true,

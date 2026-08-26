@@ -11,4 +11,5 @@ export const UploadTwoCollection: CollectionConfig = {
     },
   ],
   upload: true,
+  versions: false,
 }

@@ -51,6 +51,7 @@ describe('Config', () => {
             {
               slug: 'payload2',
               fields: [{ name: 'title2', type: 'text' }],
+              versions: false,
             },
           ],
         }),
@@ -74,6 +75,7 @@ describe('Config', () => {
             {
               slug: 'payload3',
               fields: [{ name: 'title3', type: 'text' }],
+              versions: false,
             },
           ],
         }),

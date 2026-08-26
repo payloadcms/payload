@@ -51,7 +51,7 @@ export const MultiValueRemove: React.FC<
       <Tooltip className={`${baseClass}__tooltip`} show={showTooltip}>
         {t('general:remove')}
       </Tooltip>
-      <XIcon className={`${baseClass}__icon`} />
+      <XIcon className={`${baseClass}__icon`} size={16} />
     </button>
   )
 }

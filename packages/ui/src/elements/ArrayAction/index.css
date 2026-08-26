@@ -3,6 +3,13 @@
     cursor: pointer;
   }
 
+  .array-actions__button.popup-button--active,
+  .array-actions__button.popup-button--active:hover,
+  .array-actions__button.popup-button--active:active {
+    background: var(--color-bg-selected);
+    color: var(--color-icon-selected);
+  }
+
   .array-actions__actions {
     list-style: none;
     margin: 0;

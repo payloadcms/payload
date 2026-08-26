@@ -26,11 +26,14 @@ import {
   hiddenAccessSlug,
   hiddenFieldsSlug,
   hooksSlug,
+  publicUserEmail,
+  publicUsersSlug,
   relyOnRequestHeadersSlug,
   restrictedVersionsSlug,
   secondArrayText,
   siblingDataSlug,
   slug,
+  unrestrictedSlug,
 } from './shared.js'
 
 let payload: Payload
@@ -266,25 +269,40 @@ describe('Access Control', () => {
         expect(retrievedDoc.restrictedField).toBeUndefined()
       })
 
-      it('should error when querying field without read access', async () => {
-        const { id } = await createDoc({ restrictedField: 'restricted' })
+      it.each(['AND', 'OR', 'AnD', 'oR'])(
+        'validates field read access inside case-insensitive %s conditions',
+        async (logicalOperator) => {
+          const { id } = await createDoc({ restrictedField: 'example' })
 
+          await expect(
+            payload.find({
+              collection: slug,
+              overrideAccess: false,
+              where: {
+                [logicalOperator]: [
+                  {
+                    id: { equals: id },
+                  },
+                  {
+                    restrictedField: {
+                      equals: 'example',
+                    },
+                  },
+                ],
+              },
+            }),
+          ).rejects.toThrow('The following path cannot be queried: restrictedField')
+        },
+      )
+
+      it('rejects array-valued field conditions', async () => {
         await expect(
           payload.find({
             collection: slug,
             overrideAccess: false,
             where: {
-              and: [
-                {
-                  id: { equals: id },
-                },
-                {
-                  restrictedField: {
-                    equals: 'restricted',
-                  },
-                },
-              ],
-            },
+              restrictedField: [{ equals: 'example' }],
+            } as any,
           }),
         ).rejects.toThrow('The following path cannot be queried: restrictedField')
       })
@@ -303,6 +321,77 @@ describe('Access Control', () => {
             },
           }),
         ).rejects.toThrow('The following path cannot be queried: restrictedField')
+      })
+
+      it('should reject constrained sort paths', async () => {
+        const requests = [
+          payload.find({
+            collection: slug,
+            overrideAccess: false,
+            sort: 'restrictedField',
+          }),
+          payload.find({
+            collection: 'relation-restricted',
+            overrideAccess: false,
+            sort: 'post.restrictedField',
+          }),
+          payload.find({
+            collection: 'relation-restricted',
+            overrideAccess: false,
+            sort: 'postLabel',
+          }),
+          payload.find({
+            collection: 'sort-default-restricted',
+            overrideAccess: false,
+          }),
+          payload.find({
+            collection: slug,
+            joins: {
+              relatedItems: {
+                sort: 'rank',
+              },
+            },
+            overrideAccess: false,
+          }),
+          payload.findDistinct({
+            collection: 'relation-restricted',
+            field: 'name',
+            overrideAccess: false,
+            sort: 'rank',
+          }),
+          payload.update({
+            collection: 'relation-restricted',
+            data: {
+              name: 'updated',
+            },
+            limit: 1,
+            overrideAccess: false,
+            sort: 'rank',
+            where: {},
+          }),
+          payload.find({
+            collection: 'fields-and-top-access',
+            draft: true,
+            overrideAccess: false,
+            sort: 'secret',
+          }),
+          payload.findVersions({
+            collection: 'fields-and-top-access',
+            overrideAccess: false,
+            sort: 'version.secret',
+          }),
+          payload.findGlobalVersions({
+            slug: 'settings',
+            overrideAccess: false,
+            sort: 'version.secret',
+          }),
+        ]
+
+        await Promise.all(
+          requests.map((request) =>
+            expect(request).rejects.toThrow('The following path cannot be queried'),
+          ),
+        )
       })
 
       it('field without read access should not show when overrideAccess: true', async () => {
@@ -861,6 +950,49 @@ describe('Access Control', () => {
         read: { permission: true },
         update: { permission: true },
       } satisfies CollectionPermission)
+    })
+  })
+
+  describe('Default access - admin auth collection scoping', () => {
+    let adminUser: Record<string, unknown>
+    let publicUser: Record<string, unknown>
+
+    beforeAll(async () => {
+      const { docs: adminDocs } = await payload.find({
+        collection: 'users',
+        limit: 1,
+        where: { email: { equals: 'dev@payloadcms.com' } },
+      })
+      adminUser = { ...adminDocs[0], collection: 'users' }
+
+      const { docs: publicDocs } = await payload.find({
+        collection: publicUsersSlug,
+        limit: 1,
+        where: { email: { equals: publicUserEmail } },
+      })
+      publicUser = { ...publicDocs[0], collection: publicUsersSlug }
+    })
+
+    it('should grant default access to a user from the admin auth collection', async () => {
+      const doc = await payload.create({
+        collection: unrestrictedSlug,
+        data: { name: 'created by admin user' },
+        overrideAccess: false,
+        user: adminUser as any,
+      })
+
+      expect(doc.id).toBeDefined()
+    })
+
+    it('should deny default access to a user from a non-admin auth collection', async () => {
+      await expect(
+        payload.create({
+          collection: unrestrictedSlug,
+          data: { name: 'created by public user' },
+          overrideAccess: false,
+          user: publicUser as any,
+        }),
+      ).rejects.toThrow(Forbidden)
     })
   })
 })

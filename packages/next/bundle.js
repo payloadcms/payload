@@ -16,15 +16,21 @@ async function build() {
     format: 'esm',
     outfile: `${directoryArg}/index.js`,
     splitting: false,
-    external: ['@payloadcms/ui', 'payload', '@payloadcms/translations', '@payloadcms/graphql'],
+    external: [
+      '@payloadcms/ui',
+      '@payloadcms/ui/*',
+      'payload',
+      '@payloadcms/translations',
+      '@payloadcms/graphql',
+    ],
     minify: true,
     metafile: true,
     tsconfig: path.resolve(dirname, './tsconfig.json'),
     // plugins: [commonjs()],
     sourcemap: true,
     plugins: [sassPlugin({ css: 'external' })],
-    // 18.20.2 is the lowest version of node supported by Payload
-    target: 'node18.20.2',
+    // 24.15.0 is the lowest version of node supported by Payload
+    target: 'node24.15.0',
   })
   console.log('payload server bundled successfully')
 

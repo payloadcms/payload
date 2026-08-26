@@ -96,4 +96,4 @@ export async function verifyUploads({
   }
 }
 
-export const MB = (mb: number) => mb * 1024 * 1024
+export const MB = (mb: number) => Math.round(mb * 1024 * 1024)

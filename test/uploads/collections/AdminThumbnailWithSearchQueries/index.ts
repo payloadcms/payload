@@ -24,4 +24,5 @@ export const AdminThumbnailWithSearchQueries: CollectionConfig = {
     staticDir: path.resolve(dirname, 'test/uploads/media'),
   },
   fields: [],
+  versions: false,
 }

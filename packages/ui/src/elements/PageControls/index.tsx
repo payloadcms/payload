@@ -2,7 +2,7 @@
 import type { ClientCollectionConfig, PaginatedDocs } from 'payload'
 
 import { isNumber } from 'payload/shared'
-import React, { Fragment } from 'react'
+import React from 'react'
 
 import type { IListQueryContext } from '../../providers/ListQuery/types.js'
 
@@ -10,7 +10,7 @@ import { Pagination } from '../../elements/Pagination/index.js'
 import { PerPage } from '../../elements/PerPage/index.js'
 import { useListQuery } from '../../providers/ListQuery/context.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'page-controls'
 
@@ -19,52 +19,47 @@ const baseClass = 'page-controls'
  */
 export const PageControlsComponent: React.FC<{
   AfterPageControls?: React.ReactNode
-  collectionConfig: ClientCollectionConfig
   data: PaginatedDocs
   handlePageChange?: IListQueryContext['handlePageChange']
   handlePerPageChange?: IListQueryContext['handlePerPageChange']
   limit?: number
-}> = ({
-  AfterPageControls,
-  collectionConfig,
-  data,
-  handlePageChange,
-  handlePerPageChange,
-  limit,
-}) => {
+  limits?: number[]
+}> = ({ AfterPageControls, data, handlePageChange, handlePerPageChange, limit, limits }) => {
   const { i18n } = useTranslation()
 
   return (
     <div className={baseClass}>
-      <Pagination
-        hasNextPage={data.hasNextPage}
-        hasPrevPage={data.hasPrevPage}
-        limit={data.limit}
-        nextPage={data.nextPage}
-        numberOfNeighbors={1}
-        onChange={handlePageChange}
-        page={data.page}
-        prevPage={data.prevPage}
-        totalPages={data.totalPages}
-      />
-      {data.totalDocs > 0 && (
-        <Fragment>
-          <div className={`${baseClass}__page-info`}>
-            {data.page * data.limit - (data.limit - 1)}-
-            {data.totalPages > 1 && data.totalPages !== data.page
-              ? data.limit * data.page
-              : data.totalDocs}{' '}
-            {i18n.t('general:of')} {data.totalDocs}
+      {AfterPageControls}
+      <div className={`${baseClass}__inner`}>
+        <Pagination
+          hasNextPage={data.hasNextPage}
+          hasPrevPage={data.hasPrevPage}
+          limit={data.limit}
+          nextPage={data.nextPage}
+          numberOfNeighbors={1}
+          onChange={handlePageChange}
+          page={data.page}
+          prevPage={data.prevPage}
+          totalPages={data.totalPages}
+        />
+        {data.totalDocs > 0 && (
+          <div className={`${baseClass}__per-page-container`}>
+            <div className={`${baseClass}__page-info`}>
+              {data.page * data.limit - (data.limit - 1)}-
+              {data.totalPages > 1 && data.totalPages !== data.page
+                ? data.limit * data.page
+                : data.totalDocs}{' '}
+              {i18n.t('general:of')} {data.totalDocs}
+            </div>
+            <PerPage
+              handleChange={handlePerPageChange}
+              limit={limit}
+              limits={limits}
+              resetPage={data.totalDocs <= data.pagingCounter}
+            />
           </div>
-          <PerPage
-            handleChange={handlePerPageChange}
-            limit={limit}
-            limits={collectionConfig?.admin?.pagination?.limits}
-            resetPage={data.totalDocs <= data.pagingCounter}
-          />
-          {AfterPageControls}
-        </Fragment>
-      )}
+        )}
+      </div>
     </div>
   )
 }
@@ -90,11 +85,11 @@ export const PageControls: React.FC<{
   return (
     <PageControlsComponent
       AfterPageControls={AfterPageControls}
-      collectionConfig={collectionConfig}
       data={data}
       handlePageChange={handlePageChange}
       handlePerPageChange={handlePerPageChange}
       limit={isNumber(query.limit) ? query.limit : initialLimit}
+      limits={collectionConfig?.admin?.pagination?.limits}
     />
   )
 }

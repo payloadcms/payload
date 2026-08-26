@@ -90,6 +90,7 @@ export default buildConfigWithDefaults({
           saveToJWT: true,
         },
       ],
+      versions: false,
     },
   ],
   typescript: {

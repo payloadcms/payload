@@ -1,0 +1,25 @@
+@layer payload-default {
+  .file {
+    display: flex;
+    flex-wrap: nowrap;
+  }
+
+  .file__thumbnail {
+    display: inline-block;
+    max-width: var(--spacer-6);
+    height: var(--spacer-6);
+    border-radius: var(--radius-small);
+  }
+
+  .file__filename {
+    align-self: center;
+
+    [dir='ltr'] & {
+      margin-left: calc(var(--spacer-4) - var(--spacer-1));
+    }
+
+    [dir='rtl'] & {
+      margin-right: calc(var(--spacer-4) - var(--spacer-1));
+    }
+  }
+}

@@ -1,0 +1,23 @@
+@layer payload-default {
+  .query-preset-columns-field,
+  .query-preset-group-by-field,
+  .query-preset-where-field {
+    .field-label {
+      margin-bottom: var(--spacer-2);
+    }
+  }
+
+  .query-preset-columns-field__hint,
+  .query-preset-group-by-field__hint,
+  .query-preset-where-field__hint {
+    margin: 0;
+    color: var(--color-text-secondary);
+  }
+
+  /* The builder sits inline within the form here, so drop the list-panel chrome
+     (border + gutter padding) it carries in the list view. */
+  .query-preset-where-field .where-builder {
+    padding: 0;
+    border-bottom: none;
+  }
+}

@@ -5,6 +5,7 @@ import type {
   ArrayField as ArrayFieldType,
 } from 'payload'
 
+import { verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { getTranslation } from '@payloadcms/translations'
 import React, { Fragment, useCallback, useId, useMemo } from 'react'
 import { toast } from 'sonner'
@@ -16,11 +17,13 @@ import { Button } from '../../elements/Button/index.js'
 import { clipboardCopy, clipboardPaste } from '../../elements/ClipboardAction/clipboardUtilities.js'
 import { ClipboardAction } from '../../elements/ClipboardAction/index.js'
 import {
+  insertRowFromClipboard,
   mergeFormStateFromClipboard,
   reduceFormStateByPath,
 } from '../../elements/ClipboardAction/mergeFormStateFromClipboard.js'
 import { CollapseAllToggle } from '../../elements/CollapseAllToggle/index.js'
 import { DraggableSortableItem } from '../../elements/DraggableSortable/DraggableSortableItem/index.js'
+import { DragOverlayPreview } from '../../elements/DraggableSortable/DragOverlayPreview/index.js'
 import { DraggableSortable } from '../../elements/DraggableSortable/index.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
@@ -30,6 +33,7 @@ import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useForm, useFormSubmitted } from '../../forms/Form/context.js'
 import { extractRowsAndCollapsedIDs, toggleAllRows } from '../../forms/Form/rowHelpers.js'
 import { NullifyLocaleField } from '../../forms/NullifyField/index.js'
+import { RowLabel } from '../../forms/RowLabel/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { CirclePlusIcon } from '../../icons/CirclePlus/index.js'
@@ -82,7 +86,8 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
     setModified,
   } = useForm()
   const submitted = useFormSubmitted()
-  const { code: locale } = useLocale()
+  const currentLocale = useLocale()
+  const locale = currentLocale?.code
   const { i18n, t } = useTranslation()
 
   const {
@@ -249,9 +254,9 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
 
   const pasteRow = useCallback(
     (rowIndex: number) => {
-      const formState = { ...getFields() }
       const pasteArgs = {
         onPaste: (dataFromClipboard: ClipboardPasteData) => {
+          const formState = { ...getFields() }
           const newState = mergeFormStateFromClipboard({
             dataFromClipboard,
             formState,
@@ -273,6 +278,38 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
       }
     },
     [fields, getFields, path, replaceState, setModified, t],
+  )
+
+  const pasteRowBelow = useCallback(
+    (rowIndex: number) => {
+      const pasteArgs = {
+        onPaste: (dataFromClipboard: ClipboardPasteData) => {
+          const formState = { ...getFields() }
+          const newState = insertRowFromClipboard({
+            dataFromClipboard,
+            formState,
+            path,
+            rowIndex: rowIndex + 1,
+          })
+          replaceState(newState)
+          setModified(true)
+
+          setTimeout(() => {
+            scrollToID(`${scrollIdPrefix}-row-${rowIndex + 1}`)
+          }, 0)
+        },
+        path,
+        schemaFields: fields,
+        t,
+      }
+
+      const clipboardResult = clipboardPaste(pasteArgs)
+
+      if (typeof clipboardResult === 'string') {
+        toast.error(clipboardResult)
+      }
+    },
+    [fields, getFields, path, replaceState, scrollIdPrefix, setModified, t],
   )
 
   const pasteField = useCallback(
@@ -301,12 +338,38 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
   const hasMaxRows = maxRows && rows.length >= maxRows
 
   const fieldErrorCount = errorPaths.length
-  const fieldHasErrors = submitted && errorPaths.length > 0
+  const fieldHasErrors = submitted && (fieldErrorCount > 0 || !valid)
+  const displayedErrorCount = fieldErrorCount > 0 ? fieldErrorCount : fieldHasErrors ? 1 : 0
 
   const showRequired = (readOnly || disabled) && rows.length === 0
   const showMinRows = (rows.length && rows.length < minRows) || (required && rows.length === 0)
+  const shouldShowSummaryBanner = !valid && (showRequired || showMinRows)
+  const shouldShowFieldError = showError && !shouldShowSummaryBanner
 
   const styles = useMemo(() => mergeFieldStyles(field), [field])
+
+  const renderDragOverlay = useCallback(
+    (activeId: number | string) => {
+      const activeIndex = rows.findIndex((row) => row.id === activeId)
+      if (activeIndex === -1) {
+        return null
+      }
+
+      return (
+        <DragOverlayPreview
+          header={
+            <RowLabel
+              CustomComponent={rows?.[activeIndex]?.customComponents?.RowLabel}
+              label={`${getTranslation(label, i18n)} ${String(activeIndex + 1).padStart(2, '0')}`}
+              path={`${path}.${activeIndex}`}
+              rowNumber={activeIndex}
+            />
+          }
+        />
+      )
+    },
+    [rows, label, i18n, path],
+  )
 
   return (
     <div
@@ -321,7 +384,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
       id={`field-${path.replace(/\./g, '__')}`}
       style={styles}
     >
-      {showError && (
+      {shouldShowFieldError && (
         <RenderCustomComponent
           CustomComponent={Error}
           Fallback={<FieldError path={path} showError={showError} />}
@@ -344,8 +407,8 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
                 }
               />
             </h3>
-            {fieldHasErrors && fieldErrorCount > 0 && (
-              <ErrorPill count={fieldErrorCount} i18n={i18n} withMessage />
+            {displayedErrorCount > 0 && (
+              <ErrorPill count={displayedErrorCount} i18n={i18n} withMessage />
             )}
           </div>
           <ul className={`${baseClass}__header-actions`}>
@@ -382,6 +445,8 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
           className={`${baseClass}__draggable-rows`}
           ids={rows.map((row) => row.id)}
           onDragEnd={({ moveFromIndex, moveToIndex }) => moveRow(moveFromIndex, moveToIndex)}
+          renderDragOverlay={isSortable && !readOnly && !disabled ? renderDragOverlay : undefined}
+          sortingStrategy={verticalListSortingStrategy}
         >
           {rows.map((rowData, i) => {
             const { id: rowID, isLoading } = rowData
@@ -415,6 +480,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
                     moveRow={moveRow}
                     parentPath={path}
                     pasteRow={pasteRow}
+                    pasteRowBelow={pasteRowBelow}
                     path={rowPath}
                     permissions={permissions}
                     readOnly={readOnly || disabled}
@@ -438,7 +504,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
                 </Banner>
               )}
               {showMinRows && (
-                <Banner type="error">
+                <Banner type="danger">
                   {t('validation:requiresAtLeast', {
                     count: minRows,
                     label:
@@ -453,7 +519,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
       )}
       {!hasMaxRows && !readOnly && (
         <Button
-          buttonStyle="icon-label"
+          buttonStyle="ghost"
           className={`${baseClass}__add-row`}
           disabled={disabled}
           icon={<CirclePlusIcon />}

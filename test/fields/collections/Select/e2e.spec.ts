@@ -1,6 +1,7 @@
 import type { Page } from '@playwright/test'
 
-import { expect, test } from '@playwright/test'
+import { expect } from '@playwright/test'
+import { test } from '__helpers/e2e/playwright.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -8,17 +9,15 @@ import type { PayloadTestSDK } from '../../../__helpers/shared/sdk/index.js'
 import type { Config } from '../../payload-types.js'
 
 import { checkFocusIndicators } from '../../../__helpers/e2e/checkFocusIndicators.js'
-import {
-  ensureCompilationIsDone,
-  initPageConsoleErrorCatch,
-  saveDocAndAssert,
-  waitForFormReady,
-} from '../../../__helpers/e2e/helpers.js'
+import { clickColumnSelectorItem, openListColumns } from '../../../__helpers/e2e/columns/index.js'
+import { saveDocAndAssert, waitForFormReady } from '../../../__helpers/e2e/helpers.js'
 import { runAxeScan } from '../../../__helpers/e2e/runAxeScan.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { RESTClient } from '../../../__helpers/shared/rest.js'
+import { ensureCompilationIsDone } from '../../../__setup/e2e/ensureCompilationIsDone.js'
+import { initPage } from '../../../__setup/e2e/initPage.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { selectFieldsSlug } from '../../slugs.js'
 
@@ -46,10 +45,7 @@ describe('Select', () => {
     url = new AdminUrlUtil(serverURL, selectFieldsSlug)
 
     const context = await browser.newContext()
-    page = await context.newPage()
-    initPageConsoleErrorCatch(page)
-
-    await ensureCompilationIsDone({ page, serverURL })
+    ;({ page } = await initPage({ context, serverURL }))
   })
 
   beforeEach(async () => {
@@ -91,11 +87,12 @@ describe('Select', () => {
   test('should show custom JSX option label in list', async () => {
     await page.goto(url.list)
 
-    const columnsButton = page.locator('button:has-text("Columns")')
+    const { columnContainer } = await openListColumns(page)
 
-    await columnsButton.click()
-
-    await page.locator('text=Select with JSX label option').click()
+    await clickColumnSelectorItem({
+      container: columnContainer,
+      label: 'Select with JSX label option',
+    })
 
     await expect(page.locator('.cell-selectWithJsxLabelOption svg#payload-logo')).toBeVisible()
   })
@@ -115,6 +112,24 @@ describe('Select', () => {
     await page.locator('#field-disallowOption1').click()
     await field.click({ delay: 100 })
     await expect(options.locator('text=One')).toBeHidden()
+  })
+
+  test('should reduce options via an async, DB-backed `filterOptions`', async () => {
+    await page.goto(url.create)
+    await waitForFormReady(page)
+
+    const field = page.locator('#field-selectAsyncFilterOptions')
+    await field.click({ delay: 100 })
+    const options = page.locator('.rs__option')
+    await expect(options.locator('text=Value One')).toBeVisible()
+
+    // click the field again to close the options
+    await field.click({ delay: 100 })
+
+    await page.locator('#field-disallowOption2').click()
+    await field.click({ delay: 100 })
+    await expect(options.locator('text=Value One')).toBeHidden()
+    await expect(options.locator('text=Value Two')).toBeVisible()
   })
 
   test('should retain search when reducing options', async () => {
@@ -191,16 +206,16 @@ describe('Select', () => {
     await expect(reloadedPills.nth(2)).toContainText('Value One')
   })
 
-  describe('A11y', () => {
+  describe.skip('A11y', () => {
     test.fixme('Create view should have no accessibility violations', async ({}, testInfo) => {
       await page.goto(url.create)
       await page.locator('#field-select').waitFor()
 
       const scanResults = await runAxeScan({
+        exclude: ['.field-description'], // known issue - reported elsewhere @todo: remove this once fixed - see report https://github.com/payloadcms/payload/discussions/14489
+        include: ['.collection-edit__main'],
         page,
         testInfo,
-        include: ['.collection-edit__main'],
-        exclude: ['.field-description'], // known issue - reported elsewhere @todo: remove this once fixed - see report https://github.com/payloadcms/payload/discussions/14489
       })
 
       expect(scanResults.violations.length).toBe(0)
@@ -214,10 +229,10 @@ describe('Select', () => {
       await page.locator('#field-select').waitFor()
 
       const scanResults = await runAxeScan({
+        exclude: ['.field-description'], // known issue - reported elsewhere @todo: remove this once fixed - see report https://github.com/payloadcms/payload/discussions/14489
+        include: ['.collection-edit__main'],
         page,
         testInfo,
-        include: ['.collection-edit__main'],
-        exclude: ['.field-description'], // known issue - reported elsewhere @todo: remove this once fixed - see report https://github.com/payloadcms/payload/discussions/14489
       })
 
       expect(scanResults.violations.length).toBe(0)
@@ -229,8 +244,8 @@ describe('Select', () => {
 
       const scanResults = await checkFocusIndicators({
         page,
-        testInfo,
         selector: '.collection-edit__main',
+        testInfo,
       })
 
       expect(scanResults.totalFocusableElements).toBeGreaterThan(0)

@@ -4,6 +4,7 @@ import { uploadsSlug } from '../../slugs.js'
 
 const Uploads: CollectionConfig = {
   slug: uploadsSlug,
+  admin: {},
   upload: true,
   fields: [
     {
@@ -12,6 +13,7 @@ const Uploads: CollectionConfig = {
       label: 'Alt Text',
     },
   ],
+  versions: false,
 }
 
 export default Uploads

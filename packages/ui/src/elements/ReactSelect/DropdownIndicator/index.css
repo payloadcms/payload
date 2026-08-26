@@ -7,15 +7,12 @@
     padding: 0;
     font: inherit;
     cursor: pointer;
-
-    &:focus-visible {
-      outline: var(--accessibility-outline);
-    }
+    border-radius: var(--button-radius);
   }
 
   .dropdown-indicator__icon {
     .stroke {
-      stroke-width: 1px;
+      stroke-width: var(--stroke-width-small);
     }
   }
 }

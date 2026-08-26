@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/richtext-lexical",
-  "version": "4.0.0-beta.0",
+  "version": "4.0.0-canary.14",
   "description": "The officially supported Lexical richtext adapter for Payload",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -18,7 +18,6 @@
     }
   ],
   "sideEffects": [
-    "*.scss",
     "*.css"
   ],
   "type": "module",
@@ -59,8 +58,8 @@
       "default": "./src/exports/plaintext/index.ts"
     },
     "./rsc": {
-      "import": "./src/exports/server/rsc.ts",
       "types": "./src/exports/server/rsc.ts",
+      "import": "./src/exports/server/rsc.ts",
       "default": "./src/exports/server/rsc.ts"
     },
     "./lexical": {
@@ -112,6 +111,11 @@
       "import": "./src/lexical-proxy/@lexical-utils.ts",
       "types": "./src/lexical-proxy/@lexical-utils.ts",
       "default": "./src/lexical-proxy/@lexical-utils.ts"
+    },
+    "./lexical/react/ExtensionComponent": {
+      "import": "./src/lexical-proxy/@lexical-react/ExtensionComponent.ts",
+      "types": "./src/lexical-proxy/@lexical-react/ExtensionComponent.ts",
+      "default": "./src/lexical-proxy/@lexical-react/ExtensionComponent.ts"
     },
     "./lexical/react/LexicalAutoEmbedPlugin": {
       "import": "./src/lexical-proxy/@lexical-react/LexicalAutoEmbedPlugin.ts",
@@ -178,10 +182,15 @@
       "types": "./src/lexical-proxy/@lexical-react/LexicalContentEditable.ts",
       "default": "./src/lexical-proxy/@lexical-react/LexicalContentEditable.ts"
     },
-    "./lexical/react/LexicalContextMenuPlugin": {
-      "import": "./src/lexical-proxy/@lexical-react/LexicalContextMenuPlugin.ts",
-      "types": "./src/lexical-proxy/@lexical-react/LexicalContextMenuPlugin.ts",
-      "default": "./src/lexical-proxy/@lexical-react/LexicalContextMenuPlugin.ts"
+    "./lexical/react/LexicalExtensionComposer": {
+      "import": "./src/lexical-proxy/@lexical-react/LexicalExtensionComposer.ts",
+      "types": "./src/lexical-proxy/@lexical-react/LexicalExtensionComposer.ts",
+      "default": "./src/lexical-proxy/@lexical-react/LexicalExtensionComposer.ts"
+    },
+    "./lexical/react/LexicalExtensionEditorComposer": {
+      "import": "./src/lexical-proxy/@lexical-react/LexicalExtensionEditorComposer.ts",
+      "types": "./src/lexical-proxy/@lexical-react/LexicalExtensionEditorComposer.ts",
+      "default": "./src/lexical-proxy/@lexical-react/LexicalExtensionEditorComposer.ts"
     },
     "./lexical/react/LexicalNodeContextMenuPlugin": {
       "import": "./src/lexical-proxy/@lexical-react/LexicalNodeContextMenuPlugin.ts",
@@ -273,6 +282,11 @@
       "types": "./src/lexical-proxy/@lexical-react/LexicalRichTextPlugin.ts",
       "default": "./src/lexical-proxy/@lexical-react/LexicalRichTextPlugin.ts"
     },
+    "./lexical/react/LexicalSelectionAlwaysOnDisplay": {
+      "import": "./src/lexical-proxy/@lexical-react/LexicalSelectionAlwaysOnDisplay.ts",
+      "types": "./src/lexical-proxy/@lexical-react/LexicalSelectionAlwaysOnDisplay.ts",
+      "default": "./src/lexical-proxy/@lexical-react/LexicalSelectionAlwaysOnDisplay.ts"
+    },
     "./lexical/react/LexicalTabIndentationPlugin": {
       "import": "./src/lexical-proxy/@lexical-react/LexicalTabIndentationPlugin.ts",
       "types": "./src/lexical-proxy/@lexical-react/LexicalTabIndentationPlugin.ts",
@@ -298,10 +312,55 @@
       "types": "./src/lexical-proxy/@lexical-react/LexicalTypeaheadMenuPlugin.ts",
       "default": "./src/lexical-proxy/@lexical-react/LexicalTypeaheadMenuPlugin.ts"
     },
+    "./lexical/react/ReactExtension": {
+      "import": "./src/lexical-proxy/@lexical-react/ReactExtension.ts",
+      "types": "./src/lexical-proxy/@lexical-react/ReactExtension.ts",
+      "default": "./src/lexical-proxy/@lexical-react/ReactExtension.ts"
+    },
+    "./lexical/react/ReactPluginHostExtension": {
+      "import": "./src/lexical-proxy/@lexical-react/ReactPluginHostExtension.ts",
+      "types": "./src/lexical-proxy/@lexical-react/ReactPluginHostExtension.ts",
+      "default": "./src/lexical-proxy/@lexical-react/ReactPluginHostExtension.ts"
+    },
+    "./lexical/react/ReactProviderExtension": {
+      "import": "./src/lexical-proxy/@lexical-react/ReactProviderExtension.ts",
+      "types": "./src/lexical-proxy/@lexical-react/ReactProviderExtension.ts",
+      "default": "./src/lexical-proxy/@lexical-react/ReactProviderExtension.ts"
+    },
+    "./lexical/react/TreeViewExtension": {
+      "import": "./src/lexical-proxy/@lexical-react/TreeViewExtension.ts",
+      "types": "./src/lexical-proxy/@lexical-react/TreeViewExtension.ts",
+      "default": "./src/lexical-proxy/@lexical-react/TreeViewExtension.ts"
+    },
+    "./lexical/react/useExtensionComponent": {
+      "import": "./src/lexical-proxy/@lexical-react/useExtensionComponent.ts",
+      "types": "./src/lexical-proxy/@lexical-react/useExtensionComponent.ts",
+      "default": "./src/lexical-proxy/@lexical-react/useExtensionComponent.ts"
+    },
+    "./lexical/react/useExtensionSignalValue": {
+      "import": "./src/lexical-proxy/@lexical-react/useExtensionSignalValue.ts",
+      "types": "./src/lexical-proxy/@lexical-react/useExtensionSignalValue.ts",
+      "default": "./src/lexical-proxy/@lexical-react/useExtensionSignalValue.ts"
+    },
+    "./lexical/react/useLexicalAriaLiveRegion": {
+      "import": "./src/lexical-proxy/@lexical-react/useLexicalAriaLiveRegion.ts",
+      "types": "./src/lexical-proxy/@lexical-react/useLexicalAriaLiveRegion.ts",
+      "default": "./src/lexical-proxy/@lexical-react/useLexicalAriaLiveRegion.ts"
+    },
     "./lexical/react/useLexicalEditable": {
       "import": "./src/lexical-proxy/@lexical-react/useLexicalEditable.ts",
       "types": "./src/lexical-proxy/@lexical-react/useLexicalEditable.ts",
       "default": "./src/lexical-proxy/@lexical-react/useLexicalEditable.ts"
+    },
+    "./lexical/react/useLexicalFocusManagerRef": {
+      "import": "./src/lexical-proxy/@lexical-react/useLexicalFocusManagerRef.ts",
+      "types": "./src/lexical-proxy/@lexical-react/useLexicalFocusManagerRef.ts",
+      "default": "./src/lexical-proxy/@lexical-react/useLexicalFocusManagerRef.ts"
+    },
+    "./lexical/react/useLexicalFocusTrapRef": {
+      "import": "./src/lexical-proxy/@lexical-react/useLexicalFocusTrapRef.ts",
+      "types": "./src/lexical-proxy/@lexical-react/useLexicalFocusTrapRef.ts",
+      "default": "./src/lexical-proxy/@lexical-react/useLexicalFocusTrapRef.ts"
     },
     "./lexical/react/useLexicalIsTextContentEmpty": {
       "import": "./src/lexical-proxy/@lexical-react/useLexicalIsTextContentEmpty.ts",
@@ -312,6 +371,16 @@
       "import": "./src/lexical-proxy/@lexical-react/useLexicalNodeSelection.ts",
       "types": "./src/lexical-proxy/@lexical-react/useLexicalNodeSelection.ts",
       "default": "./src/lexical-proxy/@lexical-react/useLexicalNodeSelection.ts"
+    },
+    "./lexical/react/useLexicalRovingTabIndexRef": {
+      "import": "./src/lexical-proxy/@lexical-react/useLexicalRovingTabIndexRef.ts",
+      "types": "./src/lexical-proxy/@lexical-react/useLexicalRovingTabIndexRef.ts",
+      "default": "./src/lexical-proxy/@lexical-react/useLexicalRovingTabIndexRef.ts"
+    },
+    "./lexical/react/useLexicalSlotRef": {
+      "import": "./src/lexical-proxy/@lexical-react/useLexicalSlotRef.ts",
+      "types": "./src/lexical-proxy/@lexical-react/useLexicalSlotRef.ts",
+      "default": "./src/lexical-proxy/@lexical-react/useLexicalSlotRef.ts"
     },
     "./lexical/react/useLexicalSubscription": {
       "import": "./src/lexical-proxy/@lexical-react/useLexicalSubscription.ts",
@@ -367,32 +436,33 @@
     ]
   },
   "dependencies": {
-    "@lexical/clipboard": "0.41.0",
-    "@lexical/headless": "0.41.0",
-    "@lexical/html": "0.41.0",
-    "@lexical/link": "0.41.0",
-    "@lexical/list": "0.41.0",
-    "@lexical/mark": "0.41.0",
-    "@lexical/react": "0.41.0",
-    "@lexical/rich-text": "0.41.0",
-    "@lexical/selection": "0.41.0",
-    "@lexical/table": "0.41.0",
-    "@lexical/utils": "0.41.0",
+    "@lexical/clipboard": "0.48.0",
+    "@lexical/headless": "0.48.0",
+    "@lexical/html": "0.48.0",
+    "@lexical/link": "0.48.0",
+    "@lexical/list": "0.48.0",
+    "@lexical/mark": "0.48.0",
+    "@lexical/markdown": "0.48.0",
+    "@lexical/react": "0.48.0",
+    "@lexical/rich-text": "0.48.0",
+    "@lexical/selection": "0.48.0",
+    "@lexical/table": "0.48.0",
+    "@lexical/utils": "0.48.0",
     "@payloadcms/translations": "workspace:*",
     "@payloadcms/ui": "workspace:*",
     "acorn": "8.16.0",
-    "csstype": "3.1.3",
+    "csstype": "3.2.3",
     "dequal": "2.0.3",
     "escape-html": "1.0.3",
-    "jsox": "1.2.121",
-    "lexical": "0.41.0",
-    "mdast-util-from-markdown": "2.0.2",
-    "mdast-util-mdx-jsx": "3.1.3",
-    "micromark-extension-mdx-jsx": "3.0.1",
+    "jsox": "1.2.125",
+    "lexical": "0.48.0",
+    "mdast-util-from-markdown": "2.0.3",
+    "mdast-util-mdx-jsx": "3.2.0",
+    "micromark-extension-mdx-jsx": "3.0.2",
     "qs-esm": "8.0.1",
-    "react-error-boundary": "4.1.2",
+    "react-error-boundary": "6.1.1",
     "ts-essentials": "10.0.3",
-    "uuid": "11.1.0"
+    "uuid": "14.0.0"
   },
   "devDependencies": {
     "@babel/cli": "7.27.2",
@@ -400,12 +470,12 @@
     "@babel/preset-env": "7.27.2",
     "@babel/preset-react": "7.27.1",
     "@babel/preset-typescript": "7.27.1",
-    "@lexical/eslint-plugin": "0.41.0",
+    "@lexical/eslint-plugin": "0.48.0",
     "@payloadcms/eslint-config": "workspace:*",
     "@types/escape-html": "1.0.4",
     "@types/json-schema": "7.0.15",
-    "@types/node": "22.15.30",
-    "@types/react": "19.2.9",
+    "@types/node": "24.12.3",
+    "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
     "babel-plugin-react-compiler": "19.1.0-rc.3",
     "babel-plugin-transform-remove-imports": "^1.8.0",
@@ -415,15 +485,14 @@
     "swc-plugin-transform-remove-imports": "8.3.0"
   },
   "peerDependencies": {
-    "@faceless-ui/modal": "3.0.0",
+    "@faceless-ui/modal": "3.0.1",
     "@faceless-ui/scroll-info": "2.0.0",
-    "@payloadcms/next": "workspace:*",
     "payload": "workspace:*",
     "react": "^19.0.1 || ^19.1.2 || ^19.2.1",
     "react-dom": "^19.0.1 || ^19.1.2 || ^19.2.1"
   },
   "engines": {
-    "node": "^18.20.2 || >=20.9.0"
+    "node": ">=24.15.0"
   },
   "publishConfig": {
     "exports": {
@@ -463,8 +532,8 @@
         "default": "./dist/exports/plaintext/index.js"
       },
       "./rsc": {
-        "import": "./dist/exports/server/rsc.js",
         "types": "./dist/exports/server/rsc.d.ts",
+        "import": "./dist/exports/server/rsc.js",
         "default": "./dist/exports/server/rsc.js"
       },
       "./lexical": {
@@ -516,6 +585,11 @@
         "import": "./dist/lexical-proxy/@lexical-utils.js",
         "types": "./dist/lexical-proxy/@lexical-utils.d.ts",
         "default": "./dist/lexical-proxy/@lexical-utils.js"
+      },
+      "./lexical/react/ExtensionComponent": {
+        "import": "./dist/lexical-proxy/@lexical-react/ExtensionComponent.js",
+        "types": "./dist/lexical-proxy/@lexical-react/ExtensionComponent.d.ts",
+        "default": "./dist/lexical-proxy/@lexical-react/ExtensionComponent.js"
       },
       "./lexical/react/LexicalAutoEmbedPlugin": {
         "import": "./dist/lexical-proxy/@lexical-react/LexicalAutoEmbedPlugin.js",
@@ -582,10 +656,15 @@
         "types": "./dist/lexical-proxy/@lexical-react/LexicalContentEditable.d.ts",
         "default": "./dist/lexical-proxy/@lexical-react/LexicalContentEditable.js"
       },
-      "./lexical/react/LexicalContextMenuPlugin": {
-        "import": "./dist/lexical-proxy/@lexical-react/LexicalContextMenuPlugin.js",
-        "types": "./dist/lexical-proxy/@lexical-react/LexicalContextMenuPlugin.d.ts",
-        "default": "./dist/lexical-proxy/@lexical-react/LexicalContextMenuPlugin.js"
+      "./lexical/react/LexicalExtensionComposer": {
+        "import": "./dist/lexical-proxy/@lexical-react/LexicalExtensionComposer.js",
+        "types": "./dist/lexical-proxy/@lexical-react/LexicalExtensionComposer.d.ts",
+        "default": "./dist/lexical-proxy/@lexical-react/LexicalExtensionComposer.js"
+      },
+      "./lexical/react/LexicalExtensionEditorComposer": {
+        "import": "./dist/lexical-proxy/@lexical-react/LexicalExtensionEditorComposer.js",
+        "types": "./dist/lexical-proxy/@lexical-react/LexicalExtensionEditorComposer.d.ts",
+        "default": "./dist/lexical-proxy/@lexical-react/LexicalExtensionEditorComposer.js"
       },
       "./lexical/react/LexicalNodeContextMenuPlugin": {
         "import": "./dist/lexical-proxy/@lexical-react/LexicalNodeContextMenuPlugin.js",
@@ -677,6 +756,11 @@
         "types": "./dist/lexical-proxy/@lexical-react/LexicalRichTextPlugin.d.ts",
         "default": "./dist/lexical-proxy/@lexical-react/LexicalRichTextPlugin.js"
       },
+      "./lexical/react/LexicalSelectionAlwaysOnDisplay": {
+        "import": "./dist/lexical-proxy/@lexical-react/LexicalSelectionAlwaysOnDisplay.js",
+        "types": "./dist/lexical-proxy/@lexical-react/LexicalSelectionAlwaysOnDisplay.d.ts",
+        "default": "./dist/lexical-proxy/@lexical-react/LexicalSelectionAlwaysOnDisplay.js"
+      },
       "./lexical/react/LexicalTabIndentationPlugin": {
         "import": "./dist/lexical-proxy/@lexical-react/LexicalTabIndentationPlugin.js",
         "types": "./dist/lexical-proxy/@lexical-react/LexicalTabIndentationPlugin.d.ts",
@@ -702,10 +786,55 @@
         "types": "./dist/lexical-proxy/@lexical-react/LexicalTypeaheadMenuPlugin.d.ts",
         "default": "./dist/lexical-proxy/@lexical-react/LexicalTypeaheadMenuPlugin.js"
       },
+      "./lexical/react/ReactExtension": {
+        "import": "./dist/lexical-proxy/@lexical-react/ReactExtension.js",
+        "types": "./dist/lexical-proxy/@lexical-react/ReactExtension.d.ts",
+        "default": "./dist/lexical-proxy/@lexical-react/ReactExtension.js"
+      },
+      "./lexical/react/ReactPluginHostExtension": {
+        "import": "./dist/lexical-proxy/@lexical-react/ReactPluginHostExtension.js",
+        "types": "./dist/lexical-proxy/@lexical-react/ReactPluginHostExtension.d.ts",
+        "default": "./dist/lexical-proxy/@lexical-react/ReactPluginHostExtension.js"
+      },
+      "./lexical/react/ReactProviderExtension": {
+        "import": "./dist/lexical-proxy/@lexical-react/ReactProviderExtension.js",
+        "types": "./dist/lexical-proxy/@lexical-react/ReactProviderExtension.d.ts",
+        "default": "./dist/lexical-proxy/@lexical-react/ReactProviderExtension.js"
+      },
+      "./lexical/react/TreeViewExtension": {
+        "import": "./dist/lexical-proxy/@lexical-react/TreeViewExtension.js",
+        "types": "./dist/lexical-proxy/@lexical-react/TreeViewExtension.d.ts",
+        "default": "./dist/lexical-proxy/@lexical-react/TreeViewExtension.js"
+      },
+      "./lexical/react/useExtensionComponent": {
+        "import": "./dist/lexical-proxy/@lexical-react/useExtensionComponent.js",
+        "types": "./dist/lexical-proxy/@lexical-react/useExtensionComponent.d.ts",
+        "default": "./dist/lexical-proxy/@lexical-react/useExtensionComponent.js"
+      },
+      "./lexical/react/useExtensionSignalValue": {
+        "import": "./dist/lexical-proxy/@lexical-react/useExtensionSignalValue.js",
+        "types": "./dist/lexical-proxy/@lexical-react/useExtensionSignalValue.d.ts",
+        "default": "./dist/lexical-proxy/@lexical-react/useExtensionSignalValue.js"
+      },
+      "./lexical/react/useLexicalAriaLiveRegion": {
+        "import": "./dist/lexical-proxy/@lexical-react/useLexicalAriaLiveRegion.js",
+        "types": "./dist/lexical-proxy/@lexical-react/useLexicalAriaLiveRegion.d.ts",
+        "default": "./dist/lexical-proxy/@lexical-react/useLexicalAriaLiveRegion.js"
+      },
       "./lexical/react/useLexicalEditable": {
         "import": "./dist/lexical-proxy/@lexical-react/useLexicalEditable.js",
         "types": "./dist/lexical-proxy/@lexical-react/useLexicalEditable.d.ts",
         "default": "./dist/lexical-proxy/@lexical-react/useLexicalEditable.js"
+      },
+      "./lexical/react/useLexicalFocusManagerRef": {
+        "import": "./dist/lexical-proxy/@lexical-react/useLexicalFocusManagerRef.js",
+        "types": "./dist/lexical-proxy/@lexical-react/useLexicalFocusManagerRef.d.ts",
+        "default": "./dist/lexical-proxy/@lexical-react/useLexicalFocusManagerRef.js"
+      },
+      "./lexical/react/useLexicalFocusTrapRef": {
+        "import": "./dist/lexical-proxy/@lexical-react/useLexicalFocusTrapRef.js",
+        "types": "./dist/lexical-proxy/@lexical-react/useLexicalFocusTrapRef.d.ts",
+        "default": "./dist/lexical-proxy/@lexical-react/useLexicalFocusTrapRef.js"
       },
       "./lexical/react/useLexicalIsTextContentEmpty": {
         "import": "./dist/lexical-proxy/@lexical-react/useLexicalIsTextContentEmpty.js",
@@ -716,6 +845,16 @@
         "import": "./dist/lexical-proxy/@lexical-react/useLexicalNodeSelection.js",
         "types": "./dist/lexical-proxy/@lexical-react/useLexicalNodeSelection.d.ts",
         "default": "./dist/lexical-proxy/@lexical-react/useLexicalNodeSelection.js"
+      },
+      "./lexical/react/useLexicalRovingTabIndexRef": {
+        "import": "./dist/lexical-proxy/@lexical-react/useLexicalRovingTabIndexRef.js",
+        "types": "./dist/lexical-proxy/@lexical-react/useLexicalRovingTabIndexRef.d.ts",
+        "default": "./dist/lexical-proxy/@lexical-react/useLexicalRovingTabIndexRef.js"
+      },
+      "./lexical/react/useLexicalSlotRef": {
+        "import": "./dist/lexical-proxy/@lexical-react/useLexicalSlotRef.js",
+        "types": "./dist/lexical-proxy/@lexical-react/useLexicalSlotRef.d.ts",
+        "default": "./dist/lexical-proxy/@lexical-react/useLexicalSlotRef.js"
       },
       "./lexical/react/useLexicalSubscription": {
         "import": "./dist/lexical-proxy/@lexical-react/useLexicalSubscription.js",

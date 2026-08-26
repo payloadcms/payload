@@ -1,37 +1,49 @@
 'use client'
 
-import type { SlugFieldClientProps } from 'payload'
+import type { SlugFieldClient } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback, useState } from 'react'
+import { toast } from 'sonner'
 
+import { Button } from '../../elements/Button/index.js'
 import { FieldDescription } from '../../fields/FieldDescription/index.js'
 import { FieldError } from '../../fields/FieldError/index.js'
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useForm } from '../../forms/Form/index.js'
 import { useField } from '../../forms/useField/index.js'
+import { withCondition } from '../../forms/withCondition/index.js'
 import { LockIcon } from '../../icons/Lock/index.js'
 import { LockOpenIcon } from '../../icons/LockOpen/index.js'
 import { RefreshIcon } from '../../icons/Refresh/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
+import { useLocale } from '../../providers/Locale/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import './index.css'
 
 const baseClass = 'slug-field-component'
 
+type SlugFieldProps = {
+  readonly field: SlugFieldClient
+  readonly path?: string
+}
+
 /**
  * @experimental This component is experimental and may change or be removed in the future. Use at your own risk.
  */
-export const SlugField: React.FC<SlugFieldClientProps> = ({ field, path, useAsSlug }) => {
-  const { admin, label, required } = field
+const SlugFieldComponent: React.FC<SlugFieldProps> = ({ field, path }) => {
+  const { admin, label, required, useAsSlug } = field
   const { description, placeholder, readOnly: readOnlyFromProps } = admin || {}
 
   const { i18n, t } = useTranslation()
 
-  const { collectionSlug, globalSlug } = useDocumentInfo()
+  const { id, collectionSlug, globalSlug } = useDocumentInfo()
 
   const { slugify } = useServerFunctions()
+
+  const currentLocale = useLocale()
+  const locale = currentLocale?.code
 
   const {
     path: fieldPath,
@@ -52,18 +64,28 @@ export const SlugField: React.FC<SlugFieldClientProps> = ({ field, path, useAsSl
     async (e: React.MouseEvent<Element>) => {
       e.preventDefault()
 
-      const valueToSlugify = getDataByPath(useAsSlug)
+      const valueToSlugify = useAsSlug ? getDataByPath(useAsSlug) : undefined
 
-      const formattedSlug = await slugify({
-        collectionSlug,
-        data: getData(),
-        globalSlug,
-        path: fieldPath,
-        valueToSlugify,
-      })
+      let formattedSlug: null | string | undefined
 
-      if (formattedSlug === null || formattedSlug === undefined) {
-        setValue('')
+      try {
+        formattedSlug = await slugify({
+          id: id ?? undefined,
+          collectionSlug,
+          data: getData(),
+          globalSlug,
+          locale,
+          path: fieldPath,
+          valueToSlugify,
+        })
+      } catch (_err) {
+        toast.error(t('error:unspecific'))
+        return
+      }
+
+      // Empty only comes back for globals (no counter fallback) — keep the current value. For
+      // collections the server returns the `<singular>-N` fallback when there's no source.
+      if (formattedSlug === null || formattedSlug === undefined || formattedSlug === '') {
         return
       }
 
@@ -81,9 +103,12 @@ export const SlugField: React.FC<SlugFieldClientProps> = ({ field, path, useAsSl
       getData,
       slugify,
       getDataByPath,
+      id,
       collectionSlug,
       globalSlug,
+      locale,
       fieldPath,
+      t,
     ],
   )
 
@@ -141,25 +166,25 @@ export const SlugField: React.FC<SlugFieldClientProps> = ({ field, path, useAsSl
           {!readOnlyFromProps && (
             <div className={`${baseClass}__actions`}>
               {!isLocked && (
-                <button
+                <Button
                   aria-label={t('authentication:generate')}
+                  buttonStyle="ghost"
                   className={`${baseClass}__action-btn`}
+                  icon={<RefreshIcon />}
                   id={`field-${fieldPath?.replace(/\./g, '__')}-generate`}
+                  margin={false}
                   onClick={handleGenerate}
-                  type="button"
-                >
-                  <RefreshIcon />
-                </button>
+                />
               )}
-              <button
+              <Button
                 aria-label={isLocked ? t('general:unlock') : t('general:lock')}
+                buttonStyle="ghost"
                 className={`${baseClass}__action-btn`}
+                icon={isLocked ? <LockIcon size={16} /> : <LockOpenIcon size={16} />}
                 id={`field-${fieldPath?.replace(/\./g, '__')}-lock`}
+                margin={false}
                 onClick={toggleLock}
-                type="button"
-              >
-                {isLocked ? <LockIcon size={16} /> : <LockOpenIcon size={16} />}
-              </button>
+              />
             </div>
           )}
         </div>
@@ -169,3 +194,5 @@ export const SlugField: React.FC<SlugFieldClientProps> = ({ field, path, useAsSl
     </div>
   )
 }
+
+export const SlugField = withCondition(SlugFieldComponent)

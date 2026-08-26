@@ -1,0 +1,6 @@
+@layer payload-default {
+  .tabs-diff__tab:not(:first-of-type),
+  .tabs-diff__tab-locale:not(:first-of-type) {
+    margin-top: var(--spacer-3);
+  }
+}

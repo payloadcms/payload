@@ -35,4 +35,5 @@ export const Categories: CollectionConfig = {
     }),
   ],
   slug: 'categories',
+  versions: false,
 }

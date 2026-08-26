@@ -3,12 +3,12 @@ import type { PayloadRequest } from 'payload'
 
 import { type I18nClient } from '@payloadcms/translations'
 
-import './index.scss'
+import './index.css'
 
 import { createHash } from 'crypto'
 
 import type { HTMLConvertersAsync } from '../../../../features/converters/lexicalToHtml/async/types.js'
-import type { SerializedBlockNode } from '../../../../nodeTypes.js'
+import type { SerializedBlockNode } from '../../../../types/nodeTypes.js'
 
 const baseClass = 'lexical-unknown-diff'
 

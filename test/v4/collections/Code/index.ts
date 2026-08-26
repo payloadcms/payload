@@ -65,6 +65,7 @@ const CodeFields: CollectionConfig = {
       defaultValue: 'const example = "disabled";',
     },
   ],
+  versions: false,
 }
 
 export default CodeFields

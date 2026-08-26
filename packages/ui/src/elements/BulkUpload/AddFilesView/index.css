@@ -1,0 +1,44 @@
+@layer payload-default {
+  .bulk-upload--add-files__body {
+    display: flex;
+    flex: 1 1 auto;
+    min-height: 0;
+    padding: var(--spacer-2-5);
+  }
+
+  .bulk-upload--add-files__dropArea {
+    display: flex;
+    flex: 1 1 auto;
+    min-height: 0;
+    /* Prefer a 1.5 aspect ratio, but never exceed the available height. When the dialog is height
+       constrained the body shrinks (via the flex chain) and `max-height: 100%` caps the drop area so
+       the ratio yields instead of the bottom being clipped by the dialog's `overflow: clip`. */
+    max-height: 100%;
+    aspect-ratio: 1.5;
+
+    .dropzone {
+      flex: 1 1 auto;
+      align-items: center;
+      flex-direction: column;
+      justify-content: center;
+      display: flex;
+      gap: var(--spacer-2);
+
+      p {
+        margin: 0;
+      }
+    }
+  }
+
+  /* The modal is narrow enough that the drag-and-drop hint only earns its space once the
+     dialog has room to grow past its mobile width. */
+  .bulk-upload--add-files__dropzoneContent .upload-dropzone-content__drag-text {
+    display: none;
+  }
+
+  @media (min-width: 768px) {
+    .bulk-upload--add-files__dropzoneContent .upload-dropzone-content__drag-text {
+      display: block;
+    }
+  }
+}

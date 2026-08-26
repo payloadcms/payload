@@ -4,17 +4,23 @@ import React, { useState } from 'react'
 import { CopyIcon } from '../../icons/Copy/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Tooltip } from '../Tooltip/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'copy-to-clipboard'
 
 export type Props = {
   defaultMessage?: string
+  icon?: React.ReactNode
   successMessage?: string
   value?: string
 }
 
-export const CopyToClipboard: React.FC<Props> = ({ defaultMessage, successMessage, value }) => {
+export const CopyToClipboard: React.FC<Props> = ({
+  defaultMessage,
+  icon,
+  successMessage,
+  value,
+}) => {
   const [copied, setCopied] = useState(false)
   const [hovered, setHovered] = useState(false)
   const { t } = useTranslation()
@@ -37,7 +43,7 @@ export const CopyToClipboard: React.FC<Props> = ({ defaultMessage, successMessag
         }}
         type="button"
       >
-        <CopyIcon />
+        {icon ?? <CopyIcon />}
         <Tooltip delay={copied ? 0 : undefined} show={hovered || copied}>
           {copied && (successMessage ?? t('general:copied'))}
           {!copied && (defaultMessage ?? t('general:copy'))}

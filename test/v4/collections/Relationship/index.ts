@@ -15,6 +15,16 @@ const RelationshipFields: CollectionConfig = {
       },
     },
     {
+      name: 'authorWithDrawer',
+      type: 'relationship',
+      relationTo: 'users',
+      label: 'Author (Drawer)',
+      admin: {
+        appearance: 'drawer',
+        description: 'Relationship with drawer appearance',
+      },
+    },
+    {
       name: 'authorRequired',
       type: 'relationship',
       relationTo: 'users',
@@ -54,7 +64,17 @@ const RelationshipFields: CollectionConfig = {
         description: 'This field is read-only',
       },
     },
+    {
+      name: 'polymorphic',
+      type: 'relationship',
+      relationTo: ['users', textFieldsSlug],
+      label: 'Polymorphic',
+      admin: {
+        description: 'Can relate to users or text fields',
+      },
+    },
   ],
+  versions: false,
 }
 
 export default RelationshipFields

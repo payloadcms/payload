@@ -67,6 +67,7 @@ const ContextHooks: CollectionConfig = {
       type: 'text',
     },
   ],
+  versions: false,
 }
 
 export default ContextHooks

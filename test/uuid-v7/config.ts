@@ -1,8 +1,7 @@
 import type { PostgresAdapter } from '@payloadcms/db-postgres'
-import type { DatabaseAdapterObj } from 'payload'
 
 import path from 'path'
-import { buildConfig } from 'payload'
+import { buildConfig, type DatabaseAdapterObj } from 'payload'
 import { fileURLToPath } from 'url'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -23,10 +22,12 @@ export default await buildConfig({
     {
       slug: 'posts',
       fields: [{ name: 'title', type: 'text' }],
+      versions: false,
     },
     {
       slug: 'categories',
       fields: [{ name: 'name', type: 'text' }],
+      versions: false,
     },
     {
       slug: 'articles',
@@ -38,6 +39,7 @@ export default await buildConfig({
           relationTo: 'categories',
         },
       ],
+      versions: false,
     },
   ],
 })

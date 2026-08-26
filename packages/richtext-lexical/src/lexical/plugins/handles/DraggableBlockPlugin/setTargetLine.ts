@@ -113,7 +113,7 @@ export function setTargetLine(
 
   const left = TEXT_BOX_HORIZONTAL_PADDING - offsetLeft
 
-  targetLineElem.style.width = `calc(${anchorWidth}px - ${offsetWidth})`
+  targetLineElem.style.width = `calc(${anchorWidth}px - ${offsetWidth} - var(--spacer-5))`
   targetLineElem.style.opacity = '.8'
 
   // if (DEBUG) {

@@ -35,8 +35,12 @@
       }
     }
 
-    &.error .form-input-group {
-      border-color: var(--border-danger-strong);
+    &.error .form-input-group:not(:focus-within) {
+      border-color: var(--field-color-border-error);
+
+      &:hover {
+        border-color: var(--field-color-border-error);
+      }
     }
 
     &.read-only .input-stepper {

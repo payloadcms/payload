@@ -141,7 +141,6 @@ const CollapsibleFieldComponent: CollapsibleFieldClientComponent = (props) => {
         >
           <RenderFields
             fields={fields}
-            margins="small"
             parentIndexPath={indexPath}
             parentPath={parentPath}
             parentSchemaPath={parentSchemaPath}

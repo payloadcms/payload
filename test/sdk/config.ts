@@ -24,6 +24,7 @@ export default buildConfigWithDefaults({
       slug: 'media',
       upload: { staticDir: path.resolve(dirname, './media') },
       fields: [],
+      versions: false,
     },
   ],
   globals: [

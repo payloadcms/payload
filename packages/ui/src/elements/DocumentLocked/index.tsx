@@ -1,6 +1,7 @@
 'use client'
-import type { ClientUser } from 'payload'
+import type { User } from 'payload'
 
+import { useModal } from '@faceless-ui/modal'
 import React, { useEffect } from 'react'
 
 import { useRouteCache } from '../../providers/RouteCache/index.js'
@@ -8,14 +9,19 @@ import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { isClientUserObject } from '../../utilities/isClientUserObject.js'
 import { Button } from '../Button/index.js'
-import { Modal, useModal } from '../Modal/index.js'
-import './index.scss'
+import {
+  DialogBody,
+  DialogCancel,
+  DialogConfirm,
+  DialogFooter,
+  DialogHeader,
+  DialogModal,
+} from '../Dialog/index.js'
+import './index.css'
 
 const modalSlug = 'document-locked'
 
-const baseClass = 'document-locked'
-
-const formatDate = (date) => {
+const formatDate = (date: null | number | undefined) => {
   if (!date) {
     return ''
   }
@@ -35,7 +41,7 @@ export const DocumentLocked: React.FC<{
   onReadOnly: () => void
   onTakeOver: () => void
   updatedAt?: null | number
-  user?: ClientUser | number | string
+  user?: number | string | User
 }> = ({ handleGoBack, isActive, onReadOnly, onTakeOver, updatedAt, user }) => {
   const { closeModal, openModal } = useModal()
   const { t } = useTranslation()
@@ -51,65 +57,39 @@ export const DocumentLocked: React.FC<{
   }, [isActive, openModal, closeModal])
 
   return (
-    <Modal
-      className={baseClass}
-      // Fixes https://github.com/payloadcms/payload/issues/13778
-      closeOnBlur={false}
-      onClose={() => {
-        startRouteTransition(() => handleGoBack())
-      }}
-      slug={modalSlug}
-    >
-      <div className={`${baseClass}__wrapper`}>
-        <div className={`${baseClass}__content`}>
-          <h1>{t('general:documentLocked')}</h1>
-          <p>
-            <strong>
-              {isClientUserObject(user) ? (user.email ?? user.id) : `${t('general:user')}: ${user}`}
-            </strong>{' '}
-            {t('general:currentlyEditing')}
-          </p>
-          <p>
-            {t('general:editedSince')} <strong>{formatDate(updatedAt)}</strong>
-          </p>
-        </div>
-        <div className={`${baseClass}__controls`}>
-          <Button
-            buttonStyle="secondary"
-            id={`${modalSlug}-go-back`}
-            onClick={() => {
-              closeModal(modalSlug)
-              startRouteTransition(() => handleGoBack())
-            }}
-            size="large"
-          >
-            {t('general:goBack')}
-          </Button>
-          <Button
-            buttonStyle="secondary"
-            id={`${modalSlug}-view-read-only`}
-            onClick={() => {
-              onReadOnly()
-              closeModal(modalSlug)
-              clearRouteCache()
-            }}
-            size="large"
-          >
-            {t('general:viewReadOnly')}
-          </Button>
-          <Button
-            buttonStyle="primary"
-            id={`${modalSlug}-take-over`}
-            onClick={() => {
-              onTakeOver()
-              closeModal(modalSlug)
-            }}
-            size="large"
-          >
-            {t('general:takeOver')}
-          </Button>
-        </div>
-      </div>
-    </Modal>
+    <DialogModal closeOnEsc={false} size="small" slug={modalSlug}>
+      <DialogHeader title={t('general:documentLocked')} />
+      <DialogBody>
+        <p>
+          <strong>
+            {isClientUserObject(user) ? (user.email ?? user.id) : `${t('general:user')}: ${user}`}
+          </strong>{' '}
+          {t('general:currentlyEditing')}
+        </p>
+        <p className="document-locked__updated-at">
+          {t('general:editedSince')} <strong>{formatDate(updatedAt)}</strong>
+        </p>
+      </DialogBody>
+      <DialogFooter>
+        <DialogCancel
+          label={t('general:goBack')}
+          onClick={() => startRouteTransition(() => handleGoBack())}
+        />
+        <Button
+          buttonStyle="secondary"
+          id={`${modalSlug}-view-read-only`}
+          margin={false}
+          onClick={() => {
+            onReadOnly()
+            closeModal(modalSlug)
+            clearRouteCache()
+          }}
+          size="medium"
+        >
+          {t('general:viewReadOnly')}
+        </Button>
+        <DialogConfirm label={t('general:takeOver')} onClick={onTakeOver} />
+      </DialogFooter>
+    </DialogModal>
   )
 }

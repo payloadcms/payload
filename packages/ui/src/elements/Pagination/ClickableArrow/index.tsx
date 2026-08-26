@@ -2,7 +2,7 @@
 import React from 'react'
 
 import { ChevronIcon } from '../../../icons/Chevron/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'clickable-arrow'
 

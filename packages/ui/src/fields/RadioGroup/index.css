@@ -4,11 +4,10 @@
     flex-direction: column;
     gap: var(--spacer-2);
 
-    .tooltip:not([aria-hidden='true']) {
-      right: auto;
-      position: static;
-      margin-bottom: 0.2em;
-      max-width: fit-content;
+    .field-type__wrap {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacer-2);
     }
 
     ul {
@@ -19,7 +18,11 @@
 
     &.error {
       .radio-input__styled-radio {
-        border-color: var(--border-danger-strong);
+        border-color: var(--field-color-border-error);
+
+        &:hover {
+          border-color: var(--field-color-border-error);
+        }
       }
     }
   }
@@ -47,14 +50,14 @@
     }
 
     .radio-input__label {
-      color: var(--text-default-default);
+      color: var(--field-color-text-readonly);
     }
 
     .radio-input__styled-radio {
-      border-color: var(--border-disabled-default);
+      border-color: var(--field-color-toggle-border-disabled);
 
       &::before {
-        background-color: var(--border-disabled-default);
+        background-color: var(--field-color-toggle-border-disabled);
       }
     }
 

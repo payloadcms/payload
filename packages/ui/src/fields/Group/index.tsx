@@ -111,7 +111,6 @@ export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
           {groupHasName(field) ? (
             <RenderFields
               fields={fields}
-              margins="small"
               parentIndexPath=""
               parentPath={path}
               parentSchemaPath={schemaPath}
@@ -121,7 +120,6 @@ export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
           ) : (
             <RenderFields
               fields={fields}
-              margins="small"
               parentIndexPath={indexPath}
               parentPath={parentPath}
               parentSchemaPath={parentSchemaPath}

@@ -4,6 +4,10 @@ import { selectFieldsSlug } from '../../slugs.js'
 
 const SelectFields: CollectionConfig = {
   slug: selectFieldsSlug,
+  admin: {
+    groupBy: true,
+  },
+  enableQueryPresets: true,
   fields: [
     {
       name: 'status',
@@ -131,6 +135,7 @@ const SelectFields: CollectionConfig = {
       ],
     },
   ],
+  versions: false,
 }
 
 export default SelectFields

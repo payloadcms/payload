@@ -1,7 +1,7 @@
-import type { BrowserContext, CDPSession, Page } from '@playwright/test'
+import type { BrowserContext, CDPSession, Page, Request, Route } from '@playwright/test'
 import type { FormState } from 'payload'
 
-import { expect, test } from '@playwright/test'
+import { expect } from '@playwright/test'
 import * as path from 'path'
 import { formatAdminURL, wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -9,14 +9,6 @@ import { fileURLToPath } from 'url'
 import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { Config, Post } from './payload-types.js'
 
-import {
-  ensureCompilationIsDone,
-  initPageConsoleErrorCatch,
-  saveDocAndAssert,
-  throttleTest,
-  waitForFormReady,
-} from '../__helpers/e2e/helpers.js'
-import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { assertElementStaysVisible } from '../__helpers/e2e/assertElementStaysVisible.js'
 import { assertNetworkRequests } from '../__helpers/e2e/assertNetworkRequests.js'
 import { assertRequestBody } from '../__helpers/e2e/assertRequestBody.js'
@@ -27,13 +19,17 @@ import {
   removeArrayRow,
 } from '../__helpers/e2e/fields/array/index.js'
 import { addBlock } from '../__helpers/e2e/fields/blocks/index.js'
+import { saveDocAndAssert, throttleTest, waitForFormReady } from '../__helpers/e2e/helpers.js'
+import { currentFramework, test } from '../__helpers/e2e/playwright.js'
 import { waitForAutoSaveToRunAndComplete } from '../__helpers/e2e/waitForAutoSaveToRunAndComplete.js'
+import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { initPage } from '../__setup/e2e/initPage.js'
 import { TEST_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { autosavePostsSlug } from './collections/Autosave/index.js'
 import { postsSlug } from './collections/Posts/index.js'
 
-const { describe, beforeEach, afterEach } = test
+const { afterEach, beforeEach, describe } = test
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -55,9 +51,7 @@ test.describe('Form State', () => {
     autosavePostsUrl = new AdminUrlUtil(serverURL, autosavePostsSlug)
 
     context = await browser.newContext()
-    page = await context.newPage()
-    initPageConsoleErrorCatch(page)
-    await ensureCompilationIsDone({ page, serverURL })
+    ;({ page } = await initPage({ context, serverURL }))
   })
 
   test.beforeEach(async () => {
@@ -68,9 +62,22 @@ test.describe('Form State', () => {
     // })
   })
 
-  test('should disable fields during initialization', async () => {
+  // Next.js renders the create view then runs an initial client-side form-state
+  // fetch during which fields are disabled. TanStack Start serves the form
+  // already-initialized in the RSC payload, so there is no disabled phase — the
+  // tanstack-start variant below asserts the form is immediately editable instead.
+  test('should disable fields during initialization', { framework: 'next' }, async () => {
     await page.goto(postsUrl.create, { waitUntil: 'commit' })
     await expect(page.locator('#field-title')).toBeDisabled()
+  })
+
+  test('should render the create form ready to edit', { framework: 'tanstack-start' }, async () => {
+    await page.goto(postsUrl.create)
+    // No client-init disabled phase: the RSC payload arrives with form state
+    // already initialized, so the field is immediately enabled and editable.
+    await expect(page.locator('#field-title')).toBeEnabled()
+    await page.locator('#field-title').fill(title)
+    await expect(page.locator('#field-title')).toHaveValue(title)
   })
 
   test('should disable fields while processing', async () => {
@@ -107,9 +114,9 @@ test.describe('Form State', () => {
       postsUrl.create,
       async () => {
         await addBlock({
-          page,
           blockToSelect: 'Text',
           fieldName: 'blocks',
+          page,
         })
       },
       {
@@ -176,7 +183,13 @@ test.describe('Form State', () => {
     )
   })
 
-  test('should send `lastRenderedPath` only when necessary', async () => {
+  // Asserts the `lastRenderedPath` form-state optimization by inspecting the form
+  // state embedded in Next.js's RSC form-state request body. TanStack Start
+  // dispatches form state through the `createServerFn` RPC with a seroval-encoded
+  // body, so this Next-transport-specific assertion does not apply. The underlying
+  // optimization is framework-agnostic shared form logic exercised by the other
+  // form-state tests on both adapters.
+  test('should send `lastRenderedPath` only when necessary', { framework: 'next' }, async () => {
     await page.goto(postsUrl.create)
     await waitForFormReady(page)
 
@@ -186,12 +199,12 @@ test.describe('Form State', () => {
     // The `array` itself SHOULD have a `lastRenderedPath` because it was rendered on initial load
     await assertRequestBody<{ args: { formState: FormState } }[]>(page, {
       action: async () => await addArrayRowAsync(page, 'array'),
-      url: postsUrl.create,
       expect: (body) =>
         Boolean(
           body?.[0]?.args?.formState?.['array'] &&
             body[0].args.formState['array'].lastRenderedPath === 'array',
         ),
+      url: postsUrl.create,
     })
 
     await page.waitForResponse(
@@ -205,7 +218,6 @@ test.describe('Form State', () => {
     // The custom text field in the first row SHOULD ALSO have a `lastRenderedPath` bc it was rendered in the first request
     await assertRequestBody<{ args: { formState: FormState } }[]>(page, {
       action: async () => await addArrayRowAsync(page, 'array'),
-      url: postsUrl.create,
       expect: (body) =>
         Boolean(
           body?.[0]?.args?.formState?.['array'] &&
@@ -213,6 +225,7 @@ test.describe('Form State', () => {
             body[0].args.formState['array.0.customTextField']?.lastRenderedPath ===
               'array.0.customTextField',
         ),
+      url: postsUrl.create,
     })
 
     await page.waitForResponse(
@@ -227,7 +240,6 @@ test.describe('Form State', () => {
     // The custom text field in the second row SHOULD ALSO have a `lastRenderedPath` bc it was rendered in the second request
     await assertRequestBody<{ args: { formState: FormState } }[]>(page, {
       action: async () => await addArrayRowAsync(page, 'array'),
-      url: postsUrl.create,
       expect: (body) =>
         Boolean(
           body?.[0]?.args?.formState?.['array'] &&
@@ -237,6 +249,7 @@ test.describe('Form State', () => {
             body[0].args.formState['array.1.customTextField']?.lastRenderedPath ===
               'array.1.customTextField',
         ),
+      url: postsUrl.create,
     })
   })
 
@@ -267,6 +280,33 @@ test.describe('Form State', () => {
     ).toHaveValue('2')
 
     await page.unroute(postsUrl.create)
+  })
+
+  test('should update the document title after a burst of input events', async () => {
+    const updatedTitle = '[검증용] PR #242 E2E 확인 — 곧 삭제됩니다'
+
+    await page.goto(postsUrl.create)
+    await waitForFormReady(page)
+
+    const titleField = page.locator('#field-title')
+
+    await titleField.evaluate((field: HTMLInputElement, value) => {
+      const setValue = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set
+
+      for (let index = 1; index <= value.length; index++) {
+        setValue?.call(field, value.slice(0, index))
+        field.dispatchEvent(
+          new InputEvent('input', {
+            bubbles: true,
+            data: value[index - 1],
+            inputType: 'insertText',
+          }),
+        )
+      }
+    }, updatedTitle)
+
+    await expect(titleField).toHaveValue(updatedTitle)
+    await expect(page.locator('.doc-header__title')).toHaveText(updatedTitle)
   })
 
   // TODO: This test is not very reliable but would be really nice to have
@@ -385,8 +425,8 @@ test.describe('Form State', () => {
         await page.click('#action-save', { delay: 100 })
       },
       {
-        minimumNumberOfRequests: 2,
         allowedNumberOfRequests: 2,
+        minimumNumberOfRequests: 2,
         timeout: 3000,
       },
     )
@@ -495,8 +535,14 @@ test.describe('Form State', () => {
     await expect(computedTitleField).toHaveValue('Test Title - Edited')
 
     // but then when editing another field, the computed field should update
+    const autosaveResponse = page.waitForResponse(
+      (response) =>
+        response.request().method() === 'PATCH' &&
+        response.url().includes(`/api/${autosavePostsSlug}/`) &&
+        response.ok(),
+    )
     await titleField.fill('Test Title 2')
-    await waitForAutoSaveToRunAndComplete(page)
+    await autosaveResponse
     await expect(computedTitleField).toHaveValue('Test Title 2')
   })
 
@@ -547,9 +593,9 @@ test.describe('Form State', () => {
     await expect(field).toBeEnabled()
 
     const cdpSession = await throttleTest({
-      page,
       context,
       delay: 'Slow 3G',
+      page,
     })
 
     try {
@@ -572,9 +618,9 @@ test.describe('Form State', () => {
     } finally {
       // Ensure throttling is always cleaned up, even if the test fails
       await cdpSession.send('Network.emulateNetworkConditions', {
-        offline: false,
-        latency: 0,
         downloadThroughput: -1,
+        latency: 0,
+        offline: false,
         uploadThroughput: -1,
       })
 
@@ -597,17 +643,17 @@ test.describe('Form State', () => {
       await wait(1000)
 
       cdpSession = await throttleTest({
-        page,
         context,
         delay: 'Slow 3G',
+        page,
       })
     })
 
     afterEach(async () => {
       await cdpSession.send('Network.emulateNetworkConditions', {
-        offline: false,
-        latency: 0,
         downloadThroughput: -1,
+        latency: 0,
+        offline: false,
         uploadThroughput: -1,
       })
 
@@ -617,9 +663,31 @@ test.describe('Form State', () => {
     test('optimistic rows should not disappear between pending network requests', async () => {
       let requestCount = 0
 
+      // Identifies a form-state request across adapters. Next.js posts RSC form
+      // state to the document URL; TanStack Start dispatches it through the
+      // `createServerFn` RPC at `/_serverFn/<id>` (shared by all server functions,
+      // so the `form-state` name in the request body disambiguates it).
+      const isFormStatePOST = (request: Request) => {
+        if (request.method() !== 'POST') {
+          return false
+        }
+        if (request.url() === postsUrl.create) {
+          return true
+        }
+        return (
+          currentFramework === 'tanstack-start' &&
+          request.url().includes('/_serverFn/') &&
+          (request.postData() ?? '').includes('form-state')
+        )
+      }
+
+      const formStateRouteURL = (url: URL) =>
+        url.href === postsUrl.create ||
+        (currentFramework === 'tanstack-start' && url.pathname.includes('/_serverFn/'))
+
       // increment the response count for form state requests
       page.on('request', (request) => {
-        if (request.url() === postsUrl.create && request.method() === 'POST') {
+        if (isFormStatePOST(request)) {
           requestCount++
         }
       })
@@ -648,24 +716,25 @@ test.describe('Form State', () => {
 
       // Wait for the first request to finish
       await page.waitForResponse(
-        (response) =>
-          response.url() === postsUrl.create &&
-          response.status() === 200 &&
-          response.headers()['content-type'] === 'text/x-component',
+        (response) => isFormStatePOST(response.request()) && response.status() === 200,
       )
 
       // block the second request from executing to ensure the form remains in stale state
-      await page.route(postsUrl.create, async (route) => {
-        if (route.request().method() === 'POST' && route.request().url() === postsUrl.create) {
+      const blockFormState = async (route: Route) => {
+        if (isFormStatePOST(route.request())) {
           await route.abort()
           return
         }
         await route.continue()
-      })
+      }
+      await page.route(formStateRouteURL, blockFormState)
 
       await assertElementStaysVisible(page, '#field-array #array-row-1')
 
-      await page.unroute(postsUrl.create)
+      // Remove all routes from the shared page. `unroute()` with a function
+      // matcher does not reliably remove the route, which would otherwise leak
+      // into subsequent tests and abort their form-state requests.
+      await page.unrouteAll({ behavior: 'ignoreErrors' })
     })
 
     test.fixme('should queue onChange functions', async () => {
@@ -681,14 +750,14 @@ test.describe('Form State', () => {
           await field.pressSequentially('Some text to type', { delay: 275 })
         },
         {
+          allowedNumberOfRequests: 2,
+          minimumNumberOfRequests: 2,
           requestFilter(request) {
             if (request.url() === postsUrl.create && request.method() === 'POST') {
               return true
             }
             return false
           },
-          allowedNumberOfRequests: 2,
-          minimumNumberOfRequests: 2,
           timeout: 10000, // watch network for 10 seconds to allow requests to build up
         },
       )

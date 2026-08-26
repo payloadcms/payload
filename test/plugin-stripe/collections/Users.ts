@@ -15,4 +15,5 @@ export const Users: CollectionConfig = {
       type: 'text',
     },
   ],
+  versions: false,
 }

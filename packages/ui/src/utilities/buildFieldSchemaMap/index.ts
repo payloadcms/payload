@@ -83,7 +83,7 @@ export const buildFieldSchemaMap = (args: {
     const matchedWidget = config.admin?.dashboard?.widgets?.find(
       (widget) => widget.slug === widgetSlug,
     )
-    const widgetFields = matchedWidget?.fields as Field[] | undefined
+    const widgetFields = matchedWidget?.fields
 
     if (widgetFields?.length) {
       schemaMap.set(widgetSlug, {

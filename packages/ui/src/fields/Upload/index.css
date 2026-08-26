@@ -2,55 +2,65 @@
   .upload__dropzoneAndUpload {
     display: flex;
     flex-direction: column;
-    gap: var(--spacer-1);
+    gap: var(--spacer-2);
+    container-type: inline-size;
+    container-name: upload-dropzone;
+  }
+
+  .upload__dropzoneAndUpload .dropzone.dropzone--style-default {
+    padding-block: 0;
   }
 
   .upload__dropzoneContent {
     display: flex;
+    align-items: center;
     flex-wrap: wrap;
-    gap: 0.5rem;
-    justify-content: space-between;
+    row-gap: var(--spacer-2);
+    padding: var(--spacer-3);
+    gap: var(--spacer-2);
     width: 100%;
   }
 
   .upload__dropzoneContent__buttons {
     display: flex;
+    align-items: center;
     gap: var(--spacer-2);
-    position: relative;
-    left: -2px;
+    flex-wrap: wrap;
+  }
 
-    .btn .btn__content {
-      gap: 0.25rem;
+  @supports (flex-wrap: balance) {
+    .upload__dropzoneContent__buttons {
+      flex-wrap: balance;
     }
   }
 
   .upload__dropzoneContent__orText {
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
     text-transform: lowercase;
   }
 
   .upload__dragAndDropText {
+    display: none;
     flex-shrink: 0;
     margin: 0;
     text-transform: lowercase;
-    align-self: center;
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
   }
 
   .upload__loadingRows {
     display: flex;
     flex-direction: column;
-    gap: var(--spacer-1);
+    gap: var(--spacer-2);
   }
 
   .upload .shimmer-effect {
     border-radius: var(--radius-medium);
-    border: 1px solid var(--border-default);
+    border: var(--stroke-width-small) solid var(--color-border);
   }
 
-  @media (max-width: 768px) {
+  @container upload-dropzone (min-width: 400px) {
     .upload__dragAndDropText {
-      display: none;
+      display: block;
     }
   }
 }

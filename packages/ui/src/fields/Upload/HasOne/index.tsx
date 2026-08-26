@@ -70,7 +70,7 @@ export function UploadComponentHasOne(props: Props) {
   }
 
   return (
-    <UploadCard className={[baseClass, className].filter(Boolean).join(' ')}>
+    <UploadCard className={[baseClass, className].filter(Boolean).join(' ')} readOnly={readonly}>
       <RelationshipContent
         allowEdit={!readonly}
         allowRemove={!readonly}

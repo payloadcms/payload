@@ -23,7 +23,7 @@
       overflow: hidden;
 
       &::placeholder {
-        color: var(--text-secondary);
+        color: var(--color-text-secondary);
       }
     }
 
@@ -44,50 +44,46 @@
       border: none;
       border-radius: var(--radius-small);
       background: transparent;
-      color: var(--icon-secondary);
+      color: var(--color-icon-secondary);
       cursor: pointer;
-      transition: color 100ms;
 
       &:hover {
-        color: var(--icon-default);
-      }
-
-      &:focus-visible {
-        outline: 1px solid var(--border-selected);
+        color: var(--color-icon);
       }
     }
 
     /* Locked state - override form-input-group styles */
     &.slug-field-component--locked {
       .slug-field-component__input-container {
-        background: var(--bg-default);
-        border-color: var(--border-default);
+        background: var(--field-color-bg-readonly);
+        border-color: var(--field-color-border-readonly);
       }
 
       .slug-field-component__input:disabled {
-        color: var(--text-secondary);
-        -webkit-text-fill-color: var(--text-secondary);
+        color: var(--field-color-text-readonly);
+        -webkit-text-fill-color: var(--field-color-text-readonly);
       }
     }
 
-    /* Error state - keep error border even when focused */
+    /* Error state - keep error border even when focused or hovered */
     &.slug-field-component--error {
       .slug-field-component__input-container,
+      .slug-field-component__input-container:hover,
       .slug-field-component__input-container:focus-within {
-        border-color: var(--border-danger-default);
+        border-color: var(--field-color-border-error);
       }
     }
 
     /* Read-only state (admin.readOnly) */
     &.slug-field-component--read-only {
       .slug-field-component__input-container {
-        background: var(--bg-default);
-        border-color: var(--border-default);
+        background: var(--field-color-bg-readonly);
+        border-color: var(--field-color-border-readonly);
       }
 
       .slug-field-component__input:disabled {
-        color: var(--text-secondary);
-        -webkit-text-fill-color: var(--text-secondary);
+        color: var(--field-color-text-readonly);
+        -webkit-text-fill-color: var(--field-color-text-readonly);
       }
     }
   }

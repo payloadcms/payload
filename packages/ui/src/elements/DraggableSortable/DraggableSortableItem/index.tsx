@@ -23,12 +23,7 @@ export const DraggableSortableItem: React.FC<
   return (
     <Fragment>
       {children({
-        attributes: {
-          ...attributes,
-          style: {
-            cursor: isDragging ? 'grabbing' : 'grab',
-          },
-        },
+        attributes,
         isDragging,
         listeners,
         setNodeRef,

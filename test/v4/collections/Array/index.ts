@@ -13,6 +13,10 @@ const ArrayFields: CollectionConfig = {
           name: 'name',
           type: 'text',
         },
+        {
+          name: 'anotherNestedTextField',
+          type: 'text',
+        },
       ],
     },
     {
@@ -82,7 +86,20 @@ const ArrayFields: CollectionConfig = {
         },
       ],
     },
+    {
+      name: 'localizedArray',
+      type: 'array',
+      label: 'Localized Array (locale fallback)',
+      localized: true,
+      fields: [
+        {
+          name: 'name',
+          type: 'text',
+        },
+      ],
+    },
   ],
+  versions: false,
 }
 
 export default ArrayFields

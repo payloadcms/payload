@@ -16,7 +16,7 @@ import {
 import { useEffect } from 'react'
 
 import type { PluginComponent } from '../../../../typesClient.js'
-import type { LinkFields } from '../../../nodes/types.js'
+import type { LinkFields } from '../../../server/schema.js'
 import type { ClientProps } from '../../index.js'
 
 import { $createAutoLinkNode, $isAutoLinkNode, AutoLinkNode } from '../../../nodes/AutoLinkNode.js'

@@ -3,7 +3,7 @@ import type { DeepPartial } from 'ts-essentials'
 
 import type { ImportMap } from '../bin/generateImportMap/index.js'
 import type { ClientBlock } from '../fields/config/types.js'
-import type { BlockSlug, TypedUser } from '../index.js'
+import type { BlockSlug, User } from '../index.js'
 import type {
   ClientWidget,
   RootLivePreviewConfig,
@@ -20,6 +20,7 @@ import { type ClientGlobalConfig, createClientGlobalConfigs } from '../globals/c
 
 export type ServerOnlyRootProperties = keyof Pick<
   SanitizedConfig,
+  | 'baseAccess'
   | 'bin'
   | 'cors'
   | 'csrf'
@@ -39,6 +40,7 @@ export type ServerOnlyRootProperties = keyof Pick<
   | 'queryPresets'
   | 'secret'
   | 'sharp'
+  | 'storage'
   | 'typescript'
 >
 
@@ -79,6 +81,7 @@ export type UnauthenticatedClientConfig = {
 export const serverOnlyAdminConfigProperties: readonly Partial<ServerOnlyRootAdminProperties>[] = []
 
 export const serverOnlyConfigProperties: readonly Partial<ServerOnlyRootProperties>[] = [
+  'baseAccess',
   'endpoints',
   'db',
   'editor',
@@ -99,6 +102,7 @@ export const serverOnlyConfigProperties: readonly Partial<ServerOnlyRootProperti
   'logger',
   'kv',
   'queryPresets',
+  'storage',
   // `admin`, `onInit`, `localization`, `collections`, and `globals` are all handled separately
 ]
 
@@ -114,7 +118,7 @@ export type CreateClientConfigArgs = {
    * For example, allow `true` to generate a client config for the "create first user" page
    * where there is no user yet, but the config should still be complete.
    */
-  user: true | TypedUser
+  user: true | User
 }
 
 export const createUnauthenticatedClientConfig = ({
@@ -224,11 +228,11 @@ export const createClientConfig = ({
 
       case 'blocks': {
         ;(clientConfig.blocks as ClientBlock[]) = createClientBlocks({
-          blocks: config.blocks!,
+          blocks: config.blocks,
           defaultIDType: config.db.defaultIDType,
           i18n,
           importMap,
-        }).filter((block) => typeof block !== 'string') as ClientBlock[]
+        }).filter((block) => typeof block !== 'string')
 
         clientConfig.blocksMap = {}
         if (clientConfig.blocks?.length) {
@@ -251,18 +255,6 @@ export const createClientConfig = ({
           i18n,
           importMap,
         })
-
-        break
-
-      case 'folders':
-        if (config.folders) {
-          clientConfig.folders = {
-            slug: config.folders.slug,
-            browseByFolder: config.folders.browseByFolder,
-            debug: config.folders.debug,
-            fieldName: config.folders.fieldName,
-          }
-        }
 
         break
 

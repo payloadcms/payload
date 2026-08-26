@@ -20,4 +20,5 @@ export const Media: CollectionConfig = {
     //   type: 'richText',
     // },
   ],
+  versions: false,
 }

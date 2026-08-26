@@ -1,6 +1,6 @@
 {
   "name": "create-payload-app",
-  "version": "4.0.0-beta.0",
+  "version": "4.0.0-canary.14",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -24,9 +24,9 @@
       "require": "./src/types.ts"
     },
     "./commands": {
-      "import": "./src/lib/init-next.ts",
-      "require": "./src/lib/init-next.ts",
-      "types": "./src/lib/init-next.ts"
+      "import": "./src/commands.ts",
+      "require": "./src/commands.ts",
+      "types": "./src/commands.ts"
     },
     "./lib/*": {
       "import": "./src/lib/*",
@@ -55,7 +55,7 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "pack-template-files": "node --no-deprecation --import @swc-node/register/esm-register src/scripts/pack-template-files.ts",
-    "test": "jest",
+    "test": "vitest --run",
     "typecheck": "tsc"
   },
   "dependencies": {
@@ -78,9 +78,9 @@
   "devDependencies": {
     "@types/esprima": "^4.0.6",
     "@types/fs-extra": "^9.0.12",
-    "@types/node": "22.15.30"
+    "@types/node": "24.12.3"
   },
   "engines": {
-    "node": "^18.20.2 || >=20.9.0"
+    "node": ">=24.15.0"
   }
 }

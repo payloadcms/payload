@@ -27,6 +27,7 @@ import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.j
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion.js'
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
@@ -47,7 +48,6 @@ export type Arguments<TSlug extends CollectionSlug> = {
   overwriteExistingFiles?: boolean
   populate?: PopulateType
   publishAllLocales?: boolean
-  publishSpecificLocale?: string
   req: PayloadRequest
   showHiddenFields?: boolean
   trash?: boolean
@@ -76,10 +76,6 @@ export const updateByIDOperation = async <
       overrideAccess: args.overrideAccess!,
     })
 
-    if (args.publishSpecificLocale) {
-      args.req.locale = args.publishSpecificLocale
-    }
-
     const {
       id,
       autosave = false,
@@ -92,7 +88,6 @@ export const updateByIDOperation = async <
       overwriteExistingFiles = false,
       populate,
       publishAllLocales,
-      publishSpecificLocale,
       req: {
         fallbackLocale,
         locale,
@@ -117,7 +112,10 @@ export const updateByIDOperation = async <
     // /////////////////////////////////////
 
     const accessResults = !overrideAccess
-      ? await executeAccess({ id, data, req }, collectionConfig.access.update)
+      ? await executeAccess(
+          { id, slug: collectionConfig.slug, data, req },
+          collectionConfig.access.update,
+        )
       : true
     const hasWherePolicy = hasWhereAccessResult(accessResults)
 
@@ -138,7 +136,10 @@ export const updateByIDOperation = async <
 
     if (isTrashAttempt && !overrideAccess) {
       // Pass data so access function can check data.deletedAt to know it's a trash attempt
-      const deleteAccessResult = await executeAccess({ data, req }, collectionConfig.access.delete)
+      const deleteAccessResult = await executeAccess(
+        { id, slug: collectionConfig.slug, data, req },
+        collectionConfig.access.delete,
+      )
       fullWhere = combineQueries(fullWhere, deleteAccessResult)
     }
 
@@ -192,8 +193,12 @@ export const updateByIDOperation = async <
 
     const select = sanitizeSelect({
       fields: collectionConfig.flattenedFields,
-      forceSelect: collectionConfig.forceSelect,
-      select: incomingSelect,
+      select: resolveSelect({
+        config: collectionConfig.select,
+        operation: 'update',
+        req,
+        select: incomingSelect,
+      }),
     })
 
     // ///////////////////////////////////////////////
@@ -217,7 +222,6 @@ export const updateByIDOperation = async <
       payload,
       populate,
       publishAllLocales,
-      publishSpecificLocale,
       req,
       select: select!,
       showHiddenFields: showHiddenFields!,

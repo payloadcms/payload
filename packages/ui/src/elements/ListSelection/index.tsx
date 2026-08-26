@@ -5,7 +5,7 @@ import type { Props as ButtonProps } from '../Button/types.js'
 
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Button } from '../Button/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'list-selection'
 
@@ -32,7 +32,9 @@ export function ListSelection_v4({ count, ListActions, SelectionActions }: ListS
 
   return (
     <div className={baseClass}>
-      <span>{t('general:selectedCount', { count, label: '' })}</span>
+      <span className={`${baseClass}__count`}>
+        {t('general:selectedCount', { count, label: '' })}
+      </span>
       {ListActions && ListActions.length > 0 && (
         <React.Fragment>
           <span>&mdash;</span>
@@ -54,7 +56,7 @@ export function ListSelectionButton({ children, className, ...props }: ListSelec
   return (
     <Button
       {...props}
-      buttonStyle="none"
+      buttonStyle="ghost"
       className={[`${baseClass}__button`, className].filter(Boolean).join(' ')}
     >
       {children}

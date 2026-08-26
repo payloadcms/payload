@@ -121,7 +121,7 @@ export const BlockSelector: React.FC<Props> = (props) => {
                     return (
                       <li className={`${baseClass}__block`} key={index}>
                         <ThumbnailCard
-                          alignLabel="center"
+                          alignLabel="left"
                           isSelected={selectedBlock === slug}
                           label={getTranslation(blockLabels?.singular, i18n)}
                           onClick={() => {

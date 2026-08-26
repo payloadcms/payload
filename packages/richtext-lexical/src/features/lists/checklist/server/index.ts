@@ -1,10 +1,10 @@
 import { ListItemNode, ListNode } from '@lexical/list'
+import { CHECK_LIST } from '@lexical/markdown'
 
 import { createServerFeature } from '../../../../utilities/createServerFeature.js'
 import { createNode } from '../../../typeUtilities.js'
-import { ListHTMLConverter, ListItemHTMLConverter } from '../../htmlConverter.js'
+import { listItemNodeJSONSchema, listNodeJSONSchema } from '../../shared/schema.js'
 import { shouldRegisterListBaseNodes } from '../../shared/shouldRegisterListBaseNodes.js'
-import { CHECK_LIST } from '../markdownTransformers.js'
 import { i18n } from './i18n.js'
 
 export const ChecklistFeature = createServerFeature({
@@ -16,15 +16,11 @@ export const ChecklistFeature = createServerFeature({
       nodes: shouldRegisterListBaseNodes('checklist', featureProviderMap)
         ? [
             createNode({
-              converters: {
-                html: ListHTMLConverter as any, // ListHTMLConverter uses a different generic type than ListNode[exportJSON], thus we need to cast as any
-              },
+              jsonSchema: listNodeJSONSchema,
               node: ListNode,
             }),
             createNode({
-              converters: {
-                html: ListItemHTMLConverter as any,
-              },
+              jsonSchema: listItemNodeJSONSchema,
               node: ListItemNode,
             }),
           ]

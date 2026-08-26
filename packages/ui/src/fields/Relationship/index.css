@@ -27,14 +27,18 @@
   }
 
   .relationship__error-loading {
-    border: 1px solid var(--border-danger-strong);
+    border: var(--stroke-width-small) solid var(--field-color-border-error);
     min-height: var(--spacer-6);
     padding: var(--spacer-2) var(--spacer-3);
-    background-color: var(--bg-danger);
-    color: var(--text-danger-ondanger);
+    background-color: var(--field-color-error-bg);
+    color: var(--field-color-error-text);
   }
 
   .relationship.error > .relationship__wrap .rs__control {
-    border-color: var(--border-danger-strong);
+    border-color: var(--field-color-border-error);
+
+    &:hover {
+      border-color: var(--field-color-border-error);
+    }
   }
 }

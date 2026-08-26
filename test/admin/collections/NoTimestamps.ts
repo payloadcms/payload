@@ -11,4 +11,5 @@ export const NoTimestampsCollection: CollectionConfig = {
       type: 'text',
     },
   ],
+  versions: false,
 }

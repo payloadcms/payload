@@ -37,6 +37,7 @@ type BlocksFieldProps = {
   moveRow: (fromIndex: number, toIndex: number) => void
   parentPath: string
   pasteRow: (rowIndex: number) => void
+  pasteRowBelow: (rowIndex: number) => void
   path: string
   permissions: SanitizedFieldPermissions
   readOnly: boolean
@@ -58,6 +59,7 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
   errorCount,
   fields,
   hasMaxRows,
+  isDragging,
   isLoading: isLoadingFromProps,
   isSortable,
   Label,
@@ -66,6 +68,7 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
   moveRow,
   parentPath,
   pasteRow,
+  pasteRowBelow,
   path,
   permissions,
   readOnly,
@@ -77,11 +80,17 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
   setCollapse,
   setNodeRef,
   transform,
+  transition,
 }) => {
   const isLoading = useThrottledValue(isLoadingFromProps, 500)
 
   const { i18n } = useTranslation()
   const hasSubmitted = useFormSubmitted()
+
+  const pasteData = React.useMemo(
+    () => ({ path, schemaBlocks: blocks as ClientBlock[] }),
+    [path, blocks],
+  )
 
   const fieldHasErrors = hasSubmitted && errorCount > 0
 
@@ -90,6 +99,7 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
   const classNames = [
     `${baseClass}__row`,
     fieldHasErrors ? `${baseClass}__row--has-errors` : `${baseClass}__row--no-errors`,
+    isDragging && `${baseClass}__row--is-dragging`,
   ]
     .filter(Boolean)
     .join(' ')
@@ -133,10 +143,12 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
   return (
     <div
       id={`${parentPath?.split('.').join('-')}-row-${rowIndex}`}
-      key={`${parentPath}-row-${rowIndex}`}
+      key={`${parentPath}-row-${row.id}`}
       ref={setNodeRef}
       style={{
         transform,
+        transition,
+        zIndex: isDragging ? 1 : undefined,
       }}
     >
       <Collapsible
@@ -153,7 +165,9 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
               isSortable={isSortable}
               labels={labels}
               moveRow={moveRow}
+              pasteData={pasteData}
               pasteRow={pasteRow}
+              pasteRowBelow={pasteRowBelow}
               removeRow={removeRow}
               rowCount={rowCount}
               rowIndex={rowIndex}
@@ -212,7 +226,6 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
           <RenderFields
             className={`${baseClass}__fields`}
             fields={fields}
-            margins="small"
             parentIndexPath=""
             parentPath={path}
             parentSchemaPath={schemaPath}

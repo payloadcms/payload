@@ -7,14 +7,15 @@ import { useConfig } from '../Config/index.js'
 import { useDocumentInfo } from '../DocumentInfo/index.js'
 import { useTranslation } from '../Translation/index.js'
 
-type IDocumentTitleContext = {
+export type DocumentTitleContext = {
+  isPlaceholder: boolean
   setDocumentTitle: (title: string) => void
   title: string
 }
 
-const DocumentTitleContext = createContext({} as IDocumentTitleContext)
+const Context = createContext({} as DocumentTitleContext)
 
-export const useDocumentTitle = (): IDocumentTitleContext => use(DocumentTitleContext)
+export const useDocumentTitle = (): DocumentTitleContext => use(Context)
 
 export const DocumentTitleProvider: React.FC<{
   children: React.ReactNode
@@ -53,5 +54,7 @@ export const DocumentTitleProvider: React.FC<{
     )
   }, [data, dateFormat, i18n, id, collectionSlug, docConfig, globalSlug])
 
-  return <DocumentTitleContext value={{ setDocumentTitle, title }}>{children}</DocumentTitleContext>
+  const isPlaceholder = title === i18n.t('general:untitled')
+
+  return <Context value={{ isPlaceholder, setDocumentTitle, title }}>{children}</Context>
 }

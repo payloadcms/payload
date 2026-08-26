@@ -1,0 +1,23 @@
+@layer payload-default {
+  .template-default {
+    background-color: var(--color-bg);
+    color: var(--color-text);
+  }
+
+  .template-default__wrap {
+    min-width: 0;
+    width: 100%;
+    flex-grow: 1;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--color-bg);
+
+  }
+
+  @media (max-width: 768px) {
+    .template-default__wrap {
+      min-width: 100%;
+    }
+  }
+}

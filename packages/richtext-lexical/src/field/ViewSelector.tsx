@@ -3,7 +3,7 @@ import { ChevronIcon, Popup, PopupList } from '@payloadcms/ui'
 import React from 'react'
 
 import { useRichTextView } from './RichTextViewProvider.js'
-import './ViewSelector.scss'
+import './ViewSelector.css'
 
 export function ViewSelector(): null | React.ReactElement {
   const { currentView, setCurrentView, views } = useRichTextView()

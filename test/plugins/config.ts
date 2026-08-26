@@ -1,8 +1,6 @@
-import type { Config } from 'payload'
-
 import { fileURLToPath } from 'node:url'
 import path from 'path'
-import { definePlugin } from 'payload'
+import { type Config, definePlugin } from 'payload'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
@@ -28,12 +26,12 @@ declare module 'payload' {
 const readerPlugin = definePlugin<ReaderPluginOptions>({
   slug: 'priority-reader',
   order: 10,
-  plugin: ({ config, items }): Config => ({
+  plugin: ({ config, options }): Config => ({
     ...config,
     custom: {
       ...(config.custom || {}),
       readerSawValue: (config.custom?.writerValue as string) ?? null,
-      readerItems: items.map((i) => i.name),
+      readerItems: options.items.map((i) => i.name),
     },
   }),
 })
@@ -72,6 +70,7 @@ export default buildConfigWithDefaults({
       slug: 'users',
       auth: true,
       fields: [],
+      versions: false,
     },
   ],
   plugins: [
@@ -87,6 +86,7 @@ export default buildConfigWithDefaults({
               type: 'text',
             },
           ],
+          versions: false,
         },
       ],
     }),

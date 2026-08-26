@@ -3,7 +3,6 @@ import type { ClientComponentProps, ClientField, SanitizedFieldPermissions } fro
 export type RenderFieldsProps = {
   readonly className?: string
   readonly fields: ClientField[]
-  readonly margins?: 'small' | false
   readonly parentIndexPath: string
   readonly parentPath: string
   readonly parentSchemaPath: string

@@ -1,6 +1,6 @@
 import type { Config } from 'payload'
 
-import type { AllowList, PluginOptions } from './types.js'
+import type { Adapter, AllowList, PluginOptions } from './types.js'
 
 import { getFields } from './fields/getFields.js'
 import { getAfterChangeHook } from './hooks/afterChange.js'
@@ -69,124 +69,176 @@ export const cloudStoragePlugin =
     }
 
     const initFunctions: Array<() => void> = []
+    const endpointPaths = new Map<Adapter, string>()
 
-    return {
-      ...config,
-      collections: (config.collections || []).map((existingCollection) => {
-        const options = allCollectionOptions[existingCollection.slug]
+    const collections = (config.collections || []).map((existingCollection) => {
+      const options = allCollectionOptions[existingCollection.slug]
 
-        if (options?.adapter) {
-          const adapter = options.adapter({
-            collection: existingCollection,
-            prefix: options.prefix,
-          })
+      if (options?.adapter) {
+        const adapter = options.adapter({
+          collection: existingCollection,
+          prefix: options.prefix,
+        })
 
-          if (adapter.onInit) {
-            initFunctions.push(adapter.onInit)
+        if (adapter.onInit) {
+          initFunctions.push(adapter.onInit)
+        }
+
+        let uploadInstructions
+
+        if (adapter.uploadInstructions) {
+          const { adminHandler, enabled, endpoint, ...instructions } = adapter.uploadInstructions
+          let endpointPath = endpointPaths.get(options.adapter)
+
+          if (enabled && endpoint && !endpointPath) {
+            const endpointCount =
+              config.endpoints?.filter(({ path }) => path?.startsWith(endpoint.path)).length || 0
+
+            endpointPath = endpointCount ? `${endpoint.path}-${endpointCount}` : endpoint.path
+            config.endpoints ??= []
+            config.endpoints.push({
+              handler: endpoint.handler,
+              method: 'post',
+              path: endpointPath,
+            })
+            endpointPaths.set(options.adapter, endpointPath)
           }
 
-          const fields = getFields({
-            adapter,
-            collection: existingCollection,
-            disablePayloadAccessControl: options.disablePayloadAccessControl,
-            generateFileURL: options.generateFileURL,
-            prefix: options.prefix,
-            useCompositePrefixes,
-          })
-
-          const handlers = [
-            ...(typeof existingCollection.upload === 'object' &&
-            Array.isArray(existingCollection.upload.handlers)
-              ? existingCollection.upload.handlers
-              : []),
-          ]
-
-          if (!options.disablePayloadAccessControl) {
-            handlers.push(adapter.staticHandler)
-            // Else if disablePayloadAccessControl: true and clientUploads is used
-            // Build the "proxied" handler that responses only when the file was requested by client upload in addDataAndFileToRequest
-          } else if (adapter.clientUploads) {
-            handlers.push((req, args) => {
-              if ('clientUploadContext' in args.params) {
-                return adapter.staticHandler(req, args)
-              }
+          if (enabled && adminHandler) {
+            config.admin ??= {}
+            config.admin.components ??= {}
+            config.admin.components.providers ??= []
+            config.admin.components.providers.push({
+              clientProps: {
+                collectionSlug: existingCollection.slug,
+                endpointPath,
+                prefix: options.prefix,
+                props: adminHandler.props || {},
+              },
+              path: adminHandler.path,
             })
           }
 
-          const getSkipSafeFetchSetting = (): AllowList | boolean => {
-            if (options.disablePayloadAccessControl) {
-              return true
+          if (enabled) {
+            uploadInstructions = instructions
+          } else if (adminHandler) {
+            /** Avoid importMap.js differences when client uploads vary between dev and production. */
+            config.admin ??= {}
+            config.admin.dependencies ??= {}
+            config.admin.dependencies[adminHandler.path] = {
+              type: 'component',
+              path: adminHandler.path,
             }
-            const isBooleanTrueSkipSafeFetch =
-              typeof existingCollection.upload === 'object' &&
-              existingCollection.upload.skipSafeFetch === true
-
-            const isAllowListSkipSafeFetch =
-              typeof existingCollection.upload === 'object' &&
-              Array.isArray(existingCollection.upload.skipSafeFetch)
-
-            if (isBooleanTrueSkipSafeFetch) {
-              return true
-            } else if (isAllowListSkipSafeFetch) {
-              const existingSkipSafeFetch =
-                typeof existingCollection.upload === 'object' &&
-                Array.isArray(existingCollection.upload.skipSafeFetch)
-                  ? existingCollection.upload.skipSafeFetch
-                  : []
-
-              const hasExactLocalhostMatch = existingSkipSafeFetch.some((entry) => {
-                const entryKeys = Object.keys(entry)
-                return entryKeys.length === 1 && entry.hostname === 'localhost'
-              })
-
-              const localhostEntry =
-                process.env.NODE_ENV !== 'production' && !hasExactLocalhostMatch
-                  ? [{ hostname: 'localhost' }]
-                  : []
-
-              return [...existingSkipSafeFetch, ...localhostEntry]
-            }
-
-            if (process.env.NODE_ENV !== 'production') {
-              return [{ hostname: 'localhost' }]
-            }
-
-            return false
-          }
-
-          return {
-            ...existingCollection,
-            fields,
-            hooks: {
-              ...(existingCollection.hooks || {}),
-              afterChange: [
-                ...(existingCollection.hooks?.afterChange || []),
-                getAfterChangeHook({ adapter, collection: existingCollection }),
-              ],
-              afterDelete: [
-                ...(existingCollection.hooks?.afterDelete || []),
-                getAfterDeleteHook({ adapter, collection: existingCollection }),
-              ],
-              beforeChange: [
-                ...(existingCollection.hooks?.beforeChange || []),
-                getPreserveFileDataHook(),
-              ],
-            },
-            upload: {
-              ...(typeof existingCollection.upload === 'object' ? existingCollection.upload : {}),
-              adapter: adapter.name,
-              disableLocalStorage:
-                typeof options.disableLocalStorage === 'boolean'
-                  ? options.disableLocalStorage
-                  : true,
-              handlers,
-              skipSafeFetch: getSkipSafeFetchSetting(),
-            },
           }
         }
 
-        return existingCollection
-      }),
+        const fields = getFields({
+          adapter,
+          collection: existingCollection,
+          disablePayloadAccessControl: options.disablePayloadAccessControl,
+          generateFileURL: options.generateFileURL,
+          prefix: options.prefix,
+          useCompositePrefixes,
+        })
+
+        const handlers = [
+          ...(typeof existingCollection.upload === 'object' &&
+          Array.isArray(existingCollection.upload.handlers)
+            ? existingCollection.upload.handlers
+            : []),
+        ]
+
+        if (!options.disablePayloadAccessControl) {
+          handlers.push(adapter.staticHandler)
+          // Else if disablePayloadAccessControl: true and upload instructions are used
+          // Build the "proxied" handler that responds only when addDataAndFileToRequest fetches the uploaded file
+        } else if (uploadInstructions) {
+          handlers.push((req, args) => {
+            if ('uploadReference' in args.params) {
+              return adapter.staticHandler(req, args)
+            }
+          })
+        }
+
+        const getSkipSafeFetchSetting = (): AllowList | boolean => {
+          if (options.disablePayloadAccessControl) {
+            return true
+          }
+          const isBooleanTrueSkipSafeFetch =
+            typeof existingCollection.upload === 'object' &&
+            existingCollection.upload.skipSafeFetch === true
+
+          const isAllowListSkipSafeFetch =
+            typeof existingCollection.upload === 'object' &&
+            Array.isArray(existingCollection.upload.skipSafeFetch)
+
+          if (isBooleanTrueSkipSafeFetch) {
+            return true
+          } else if (isAllowListSkipSafeFetch) {
+            const existingSkipSafeFetch =
+              typeof existingCollection.upload === 'object' &&
+              Array.isArray(existingCollection.upload.skipSafeFetch)
+                ? existingCollection.upload.skipSafeFetch
+                : []
+
+            const hasExactLocalhostMatch = existingSkipSafeFetch.some((entry) => {
+              const entryKeys = Object.keys(entry)
+              return entryKeys.length === 1 && entry.hostname === 'localhost'
+            })
+
+            const localhostEntry =
+              process.env.NODE_ENV !== 'production' && !hasExactLocalhostMatch
+                ? [{ hostname: 'localhost' }]
+                : []
+
+            return [...existingSkipSafeFetch, ...localhostEntry]
+          }
+
+          if (process.env.NODE_ENV !== 'production') {
+            return [{ hostname: 'localhost' }]
+          }
+
+          return false
+        }
+
+        return {
+          ...existingCollection,
+          fields,
+          hooks: {
+            ...(existingCollection.hooks || {}),
+            afterChange: [
+              ...(existingCollection.hooks?.afterChange || []),
+              getAfterChangeHook({ adapter, collection: existingCollection }),
+            ],
+            afterDelete: [
+              ...(existingCollection.hooks?.afterDelete || []),
+              getAfterDeleteHook({ adapter, collection: existingCollection }),
+            ],
+            beforeChange: [
+              ...(existingCollection.hooks?.beforeChange || []),
+              getPreserveFileDataHook(),
+            ],
+          },
+          upload: {
+            ...(typeof existingCollection.upload === 'object' ? existingCollection.upload : {}),
+            adapter: adapter.name,
+            ...(uploadInstructions && {
+              uploadInstructions,
+            }),
+            disableLocalStorage:
+              typeof options.disableLocalStorage === 'boolean' ? options.disableLocalStorage : true,
+            handlers,
+            skipSafeFetch: getSkipSafeFetchSetting(),
+          },
+        }
+      }
+
+      return existingCollection
+    })
+
+    return {
+      ...config,
+      collections,
       onInit: async (payload) => {
         initFunctions.forEach((fn) => fn())
         if (config.onInit) {

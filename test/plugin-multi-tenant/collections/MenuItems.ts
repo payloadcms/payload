@@ -1,9 +1,8 @@
-import type { Access, CollectionConfig, Where } from 'payload'
-
 import { getUserTenantIDs } from '@payloadcms/plugin-multi-tenant/utilities'
 import { BlocksFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
+import { type Access, type CollectionConfig, createFolderField, type Where } from 'payload'
 
-import { menuItemsSlug, notTenantedSlug, relationshipsSlug } from '../shared.js'
+import { foldersSlug, menuItemsSlug, notTenantedSlug, relationshipsSlug } from '../shared.js'
 
 const collectionTenantReadAccess: Access = ({ req }) => {
   // admins can access all tenants
@@ -125,5 +124,9 @@ export const MenuItems: CollectionConfig = {
         appearance: 'drawer',
       },
     },
+    createFolderField({
+      relationTo: foldersSlug,
+    }),
   ],
+  versions: false,
 }

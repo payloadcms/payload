@@ -23,4 +23,5 @@ export const MediaWithDirectAccess: CollectionConfig = {
       type: 'text',
     },
   ],
+  versions: false,
 }

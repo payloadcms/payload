@@ -54,9 +54,15 @@ const ssrfFilterInterceptor: LookupFunction = (hostname, options, callback) => {
   })
 }
 
-const safeDispatcher = new Agent({
-  connect: { lookup: ssrfFilterInterceptor },
-})
+let safeDispatcher: Agent | undefined
+
+const getSafeDispatcher = (): Agent => {
+  if (!safeDispatcher) {
+    safeDispatcher = new Agent({ connect: { lookup: ssrfFilterInterceptor } })
+  }
+  return safeDispatcher
+}
+
 /**
  * A "safe" version of undici's fetch that prevents SSRF attacks.
  *
@@ -84,7 +90,7 @@ export const safeFetch = async (...args: Parameters<typeof undiciFetch>): Promis
     }
     return (await undiciFetch(url, {
       ...options,
-      dispatcher: safeDispatcher,
+      dispatcher: getSafeDispatcher(),
       redirect: 'manual', // Prevent automatic redirects
     })) as unknown as Response
   } catch (error) {

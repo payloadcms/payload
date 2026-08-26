@@ -1,8 +1,8 @@
 @layer payload-default {
   .collapsible {
     position: relative;
-    border-radius: var(--radius-medium);
-    background: var(--bg-default-default);
+    border-radius: var(--button-radius);
+    background: var(--color-bg);
   }
 
   .collapsible__toggle-wrap {
@@ -11,15 +11,17 @@
     padding: 0 var(--spacer-1) 0 var(--spacer-2);
     display: flex;
     align-items: center;
-    background: var(--bg-default-secondary);
-    border: 1px solid var(--border-default-default);
-    border-radius: var(--radius-medium);
+    background: var(--color-bg-secondary);
+    border: var(--stroke-width-small) solid var(--color-border);
+    border-radius: var(--button-radius);
     height: var(--spacer-5);
     z-index: 2;
     cursor: pointer;
 
-    &:not(.toggle-disabled):hover {
-      background: var(--bg-default-secondary-hover);
+    &:not(.toggle-disabled):hover:not(
+        :has(.section-title__input:hover, .section-title__input:focus)
+      ) {
+      background: var(--color-bg-secondary-hover);
     }
 
     &.toggle-disabled {
@@ -40,7 +42,7 @@
     position: relative;
     cursor: grab;
     touch-action: none;
-    border-radius: var(--radius-medium, 0.3125rem);
+    border-radius: var(--button-radius, 0.3125rem);
 
     &:active {
       cursor: grabbing;
@@ -50,7 +52,7 @@
       width: var(--spacer-3);
       height: var(--spacer-3);
       .fill {
-        fill: var(--icon-tertiary);
+        fill: var(--color-icon-tertiary);
       }
     }
   }
@@ -62,12 +64,11 @@
     cursor: pointer;
     text-align: left;
     outline: none;
-    border-radius: var(--radius-medium);
+    border-radius: var(--button-radius);
 
     &:focus-visible {
-      border-radius: var(--radius-medium, 0.3125rem);
       outline: var(--accessibility-outline);
-      outline-offset: calc(var(--accessibility-outline-offset) + 1px);
+      outline-offset: -1px;
     }
 
     span {
@@ -76,7 +77,7 @@
   }
 
   .collapsible .row-label {
-    color: var(--text-default-default);
+    color: var(--color-text);
     letter-spacing: var(--text-letter-spacing);
     white-space: nowrap;
     overflow: hidden;
@@ -85,11 +86,11 @@
   }
 
   .collapsible--style-error > .collapsible__toggle-wrap {
-    background-color: var(--bg-danger-tertiary);
-    border-color: var(--border-danger-strong);
+    background-color: var(--color-bg-danger-tertiary);
+    border-color: var(--color-border-danger-strong);
 
-    &:hover {
-      background: var(--bg-danger-tertiary-hover);
+    &:hover:not(:has(.section-title__input:hover, .section-title__input:focus)) {
+      background: var(--color-bg-danger-tertiary-hover);
     }
   }
 
@@ -106,7 +107,7 @@
 
   /* When expanded, toggle should only have top corners rounded */
   .collapsible:not(.collapsible--collapsed) > .collapsible__toggle-wrap {
-    border-radius: var(--radius-medium) var(--radius-medium) 0 0;
+    border-radius: var(--button-radius) var(--button-radius) 0 0;
   }
 
   /* When collapsed, animate border-radius after content finishes closing */
@@ -120,8 +121,8 @@
       border-bottom-right-radius: 0;
     }
     to {
-      border-bottom-left-radius: var(--radius-medium);
-      border-bottom-right-radius: var(--radius-medium);
+      border-bottom-left-radius: var(--button-radius);
+      border-bottom-right-radius: var(--button-radius);
     }
   }
 
@@ -129,7 +130,7 @@
   .collapsible:not(.collapsible--collapsed)
     > .collapsible__toggle-wrap
     .collapsible__toggle:focus-visible {
-    border-radius: var(--radius-medium) var(--radius-medium) 0 0;
+    border-radius: var(--button-radius) var(--button-radius) 0 0;
   }
 
   /* Focus ring: when collapsed, animate border-radius after content finishes closing */
@@ -163,7 +164,7 @@
     justify-content: center;
     min-width: var(--spacer-4);
     min-height: var(--spacer-4);
-    border-radius: var(--radius-medium);
+    border-radius: var(--button-radius);
     flex-shrink: 0;
     pointer-events: all;
     cursor: pointer;
@@ -171,38 +172,38 @@
   }
 
   .collapsible__toggle-wrap:hover .collapsible__indicator {
-    color: var(--icon-default-default);
+    color: var(--color-icon);
   }
 
   .collapsible__indicator:hover {
-    background: var(--bg-transparent-hover);
+    background: var(--color-bg-transparent-hover);
   }
 
   .collapsible__indicator:focus-visible {
-    border: 1px solid var(--border-selected-strong);
-    border-radius: var(--radius-medium, 0.3125rem);
-    background: var(--bg-default-secondary);
+    border: var(--stroke-width-small) solid var(--accessibility-focus-color);
+    border-radius: var(--button-radius, 0.3125rem);
+    background: var(--color-bg-secondary);
   }
 
   .collapsible__indicator:active {
-    background: var(--bg-transparent-pressed);
+    background: var(--color-bg-transparent-pressed);
   }
 
   .collapsible__content {
-    background-color: var(--bg-default-default);
-    border: 1px solid var(--border-default-default);
+    background-color: var(--color-bg);
+    border: var(--stroke-width-small) solid var(--color-border);
     border-top: none;
-    border-radius: 0 0 var(--radius-medium) var(--radius-medium);
+    border-radius: 0 0 var(--button-radius) var(--button-radius);
     padding: var(--spacer-3);
     z-index: 1;
   }
 
   .collapsible--style-error .collapsible__content {
-    border-color: var(--border-danger-strong);
+    border-color: var(--color-border-danger-strong);
   }
 
   .collapsible--style-error .collapsible:not(.collapsible--style-error) .collapsible__content {
-    border-color: var(--border-default-default);
+    border-color: var(--color-border);
   }
 
   @media (max-width: 768px) {

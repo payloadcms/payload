@@ -60,7 +60,28 @@ export default buildConfig({
   db: mongooseAdapter({
     url: process.env.DATABASE_URL,
   }),
-  collections: [Pages, Posts, Media, Categories, Users],
+  collections: [
+    {
+      slug: 'folders',
+      folders: true,
+      admin: {
+        useAsTitle: 'name',
+      },
+      fields: [
+        {
+          name: 'name',
+          type: 'text',
+          required: true,
+          label: 'Folder Name',
+        },
+      ],
+    },
+    Pages,
+    Posts,
+    Media,
+    Categories,
+    Users,
+  ],
   cors: [getServerSideURL()].filter(Boolean),
   globals: [Header, Footer],
   plugins,

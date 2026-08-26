@@ -3,33 +3,29 @@
     /* Base styles */
     direction: ltr;
     width: 100%;
+    contain: inline-size; /* Width doesn't depend on children - helps Monaco calculate correctly */
     height: auto;
     padding: var(--spacer-2) 0;
     -webkit-appearance: none;
 
     /* Theme */
-    background: var(--bg-default-secondary);
-    border: 1px solid var(--border-default-default);
-    border-radius: var(--radius-medium);
+    background: var(--field-color-bg);
+    border: var(--stroke-width-small) solid var(--field-color-border);
+    border-radius: var(--field-border-radius);
     box-shadow: none;
 
     /* Typography */
     font-family: var(--font-mono);
     font-size: var(--text-body);
-    color: var(--text-default-primary);
-
-    /* Transitions */
-    transition-property: border, box-shadow, background-color;
-    transition-duration: 100ms, 100ms, 500ms;
-    transition-timing-function: cubic-bezier(0, 0.2, 0.2, 1);
+    color: var(--color-text-default-primary);
 
     &:focus-within {
-      border-color: var(--border-selected-strong);
+      border-color: var(--field-color-border-focus);
     }
 
     &.read-only {
-      background: var(--bg-default-default);
-      border-color: var(--border-default-default);
+      background: var(--field-color-bg-readonly);
+      border-color: var(--field-color-border-readonly);
     }
 
     /* Monaco editor resets */
@@ -44,6 +40,11 @@
           border: none;
         }
       }
+    }
+
+    .context-view:has(.monaco-hover.workbench-hover.compact) {
+      display: none;
+      pointer-events: none;
     }
   }
 }

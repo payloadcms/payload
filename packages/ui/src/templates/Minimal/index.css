@@ -1,0 +1,25 @@
+@layer payload-default {
+  .template-minimal {
+    display: flex;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    padding: var(--spacer-6) 0;
+    margin-left: auto;
+    margin-right: auto;
+    min-height: 100%;
+    background-color: var(--color-bg);
+    color: var(--color-text);
+  }
+
+  .template-minimal--width-normal .template-minimal__wrap {
+    max-width: calc(var(--spacer-6) * 10); /* 400px */
+    width: 100%;
+    padding: 0 var(--spacer-4) var(--spacer-6);
+  }
+
+  .template-minimal--width-wide .template-minimal__wrap {
+    max-width: calc(var(--spacer-6) * 24); /* 960px */
+    width: 100%;
+  }
+}

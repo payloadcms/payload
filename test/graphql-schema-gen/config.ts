@@ -90,6 +90,7 @@ export default buildConfigWithDefaults({
           ],
         },
       ],
+      versions: false,
     },
     {
       slug: 'collection2',
@@ -163,6 +164,7 @@ export default buildConfigWithDefaults({
           ],
         },
       ],
+      versions: false,
     },
     {
       // this should not be written to the generated schema
@@ -174,6 +176,7 @@ export default buildConfigWithDefaults({
           type: 'text',
         },
       ],
+      versions: false,
     },
   ],
 })

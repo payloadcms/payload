@@ -27,7 +27,7 @@
   }
 
   .value-container__label {
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
   }
 
   .react-select .rs__value-container--is-multi {

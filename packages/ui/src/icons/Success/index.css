@@ -1,0 +1,11 @@
+@layer payload-default {
+  .icon--success {
+    .icon__circle {
+      fill: var(--color-bg-success);
+    }
+
+    .icon__symbol {
+      stroke: var(--color-text-onsuccess);
+    }
+  }
+}

@@ -1919,6 +1919,38 @@ describe('collections-rest', () => {
       }),
     ).resolves.toBeTruthy()
   })
+
+  it('should disable bulk delete for the collection with disableBulkDelete: true', async () => {
+    const res = await restClient.DELETE('/disabled-bulk-delete-docs?where[id][equals]=0')
+    expect(res.status).toBe(403)
+
+    await expect(
+      payload.delete({
+        collection: 'disabled-bulk-delete-docs',
+        where: {},
+        overrideAccess: false,
+      }),
+    ).rejects.toBeInstanceOf(APIError)
+
+    const doc = await payload.create({
+      collection: 'disabled-bulk-delete-docs',
+      data: { text: 'should be deletable by id' },
+    })
+
+    await expect(
+      payload.delete({
+        collection: 'disabled-bulk-delete-docs',
+        id: doc.id,
+      }),
+    ).resolves.toBeTruthy()
+
+    await expect(
+      payload.delete({
+        collection: 'disabled-bulk-delete-docs',
+        where: {},
+      }),
+    ).resolves.toBeTruthy()
+  })
 })
 
 async function createPost(overrides?: Partial<Post>) {

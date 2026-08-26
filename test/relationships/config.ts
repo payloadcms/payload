@@ -5,7 +5,7 @@ const dirname = path.dirname(filename)
 import type { CollectionConfig } from 'payload'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
-import { devUser } from '../credentials.js'
+import { seed } from './seed.js'
 import {
   chainedRelSlug,
   customIdNumberSlug,
@@ -48,6 +48,7 @@ const collectionWithName = (collectionSlug: string): CollectionConfig => {
         },
       },
     ],
+    versions: false,
   }
 }
 
@@ -138,6 +139,7 @@ export default buildConfigWithDefaults({
           },
         },
       ],
+      versions: false,
     },
     {
       slug: slugWithLocalizedRel,
@@ -154,7 +156,21 @@ export default buildConfigWithDefaults({
           relationTo: relationSlug,
           localized: true,
         },
+        // Localized array wrapping a relationship to a collection that owns a non-localized hasMany relationship
+        {
+          name: 'localizedDirectors',
+          type: 'array',
+          localized: true,
+          fields: [
+            {
+              name: 'director',
+              type: 'relationship',
+              relationTo: 'directors',
+            },
+          ],
+        },
       ],
+      versions: false,
     },
     collectionWithName(relationSlug),
     {
@@ -165,6 +181,7 @@ export default buildConfigWithDefaults({
         update: defaultAccess,
         delete: defaultAccess,
       },
+      versions: false,
     },
     {
       slug: chainedRelSlug,
@@ -180,6 +197,7 @@ export default buildConfigWithDefaults({
           relationTo: chainedRelSlug,
         },
       ],
+      versions: false,
     },
     {
       slug: customIdSlug,
@@ -193,6 +211,7 @@ export default buildConfigWithDefaults({
           type: 'text',
         },
       ],
+      versions: false,
     },
     {
       slug: customIdNumberSlug,
@@ -206,6 +225,7 @@ export default buildConfigWithDefaults({
           type: 'text',
         },
       ],
+      versions: false,
     },
     {
       slug: 'screenings',
@@ -220,6 +240,7 @@ export default buildConfigWithDefaults({
           relationTo: 'movies',
         },
       ],
+      versions: false,
     },
     {
       slug: 'movies',
@@ -234,6 +255,10 @@ export default buildConfigWithDefaults({
           type: 'select',
           hasMany: true,
           options: ['a', 'b', 'c'],
+        },
+        {
+          name: 'location',
+          type: 'point',
         },
         {
           name: 'director',
@@ -289,6 +314,49 @@ export default buildConfigWithDefaults({
           hasMany: true,
         },
       ],
+      versions: false,
+    },
+    {
+      slug: 'transitive-join-songs',
+      fields: [
+        {
+          name: 'name',
+          type: 'text',
+        },
+        {
+          name: 'albums',
+          type: 'relationship',
+          relationTo: 'transitive-join-albums',
+          hasMany: true,
+        },
+      ],
+    },
+    {
+      slug: 'transitive-join-albums',
+      fields: [
+        {
+          name: 'artist',
+          type: 'relationship',
+          relationTo: 'transitive-join-artists',
+        },
+        {
+          name: 'song',
+          type: 'join',
+          collection: 'transitive-join-songs',
+          on: 'albums',
+        },
+      ],
+    },
+    {
+      slug: 'transitive-join-artists',
+      fields: [
+        {
+          name: 'album',
+          type: 'join',
+          collection: 'transitive-join-albums',
+          on: 'artist',
+        },
+      ],
     },
     {
       slug: 'movieReviews',
@@ -321,6 +389,7 @@ export default buildConfigWithDefaults({
           type: 'radio',
         },
       ],
+      versions: false,
     },
     {
       slug: polymorphicRelationshipsSlug,
@@ -350,6 +419,7 @@ export default buildConfigWithDefaults({
           relationTo: ['movies'],
         },
       ],
+      versions: false,
     },
     {
       slug: treeSlug,
@@ -364,6 +434,7 @@ export default buildConfigWithDefaults({
           relationTo: 'tree',
         },
       ],
+      versions: false,
     },
     {
       slug: 'pages',
@@ -379,6 +450,7 @@ export default buildConfigWithDefaults({
           ],
         },
       ],
+      versions: false,
     },
     {
       slug: 'rels-to-pages',
@@ -389,6 +461,7 @@ export default buildConfigWithDefaults({
           relationTo: 'pages',
         },
       ],
+      versions: false,
     },
     {
       slug: 'rels-to-pages-and-custom-text-ids',
@@ -399,6 +472,7 @@ export default buildConfigWithDefaults({
           relationTo: ['pages', 'custom-id', 'custom-id-number'],
         },
       ],
+      versions: false,
     },
     {
       slug: 'object-writes',
@@ -426,6 +500,7 @@ export default buildConfigWithDefaults({
           hasMany: true,
         },
       ],
+      versions: false,
     },
     {
       slug: 'deep-nested',
@@ -467,6 +542,7 @@ export default buildConfigWithDefaults({
           ],
         },
       ],
+      versions: false,
     },
     {
       slug: 'relations',
@@ -477,6 +553,7 @@ export default buildConfigWithDefaults({
           relationTo: ['items'],
         },
       ],
+      versions: false,
     },
     {
       slug: 'items',
@@ -493,6 +570,7 @@ export default buildConfigWithDefaults({
           name: 'relation',
         },
       ],
+      versions: false,
     },
     {
       slug: 'blocks',
@@ -521,115 +599,13 @@ export default buildConfigWithDefaults({
           ],
         },
       ],
+      versions: false,
     },
   ],
   onInit: async (payload) => {
-    await payload.create({
-      collection: 'users',
-      data: {
-        email: devUser.email,
-        password: devUser.password,
-      },
-    })
-
-    const rel1 = await payload.create({
-      collection: relationSlug,
-      data: {
-        name: 'name',
-      },
-    })
-
-    const filteredRelation = await payload.create({
-      collection: relationSlug,
-      data: {
-        name: 'filtered',
-      },
-    })
-
-    const defaultAccessRelation = await payload.create({
-      collection: defaultAccessRelSlug,
-      data: {
-        name: 'name',
-      },
-    })
-
-    const chained3 = await payload.create({
-      collection: chainedRelSlug,
-      data: {
-        name: 'chain3',
-      },
-    })
-
-    const chained2 = await payload.create({
-      collection: chainedRelSlug,
-      data: {
-        name: 'chain2',
-        relation: chained3.id,
-      },
-    })
-
-    const chained = await payload.create({
-      collection: chainedRelSlug,
-      data: {
-        name: 'chain1',
-        relation: chained2.id,
-      },
-    })
-
-    await payload.update({
-      collection: chainedRelSlug,
-      id: chained3.id,
-      data: {
-        name: 'chain3',
-        relation: chained.id,
-      },
-    })
-
-    const customIdRelation = await payload.create({
-      collection: customIdSlug,
-      data: {
-        id: 'custommmm',
-        name: 'custom-id',
-      },
-    })
-
-    const customIdNumberRelation = await payload.create({
-      collection: customIdNumberSlug,
-      data: {
-        id: 908234892340,
-        name: 'custom-id',
-      },
-    })
-
-    // Relationship
-    await payload.create({
-      collection: slug,
-      data: {
-        title: 'with relationship',
-        relationField: rel1.id,
-        defaultAccessRelation: defaultAccessRelation.id,
-        chainedRelation: chained.id,
-        maxDepthRelation: rel1.id,
-        customIdRelation: customIdRelation.id,
-        customIdNumberRelation: customIdNumberRelation.id,
-        filteredRelation: filteredRelation.id,
-      },
-    })
-
-    const root = await payload.create({
-      collection: 'tree',
-      data: {
-        text: 'root',
-      },
-    })
-
-    await payload.create({
-      collection: 'tree',
-      data: {
-        text: 'sub',
-        parent: root.id,
-      },
-    })
+    if (process.env.SEED_IN_CONFIG_ONINIT !== 'false') {
+      await seed(payload)
+    }
   },
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),

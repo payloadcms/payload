@@ -3,7 +3,7 @@
  * R2Range is sourced from Cloudflare so it cannot drift; other types are our own
  * so Node's Blob/Buffer/Headers are accepted and we avoid strict Workers-only types.
  */
-import type { R2Range } from '@cloudflare/workers-types/2023-07-01'
+import type { R2Range } from '@cloudflare/workers-types/2023-07-01/index.js'
 
 export type { R2Range }
 
@@ -65,7 +65,7 @@ export interface R2UploadedPart {
   partNumber: number
 }
 
-export interface R2StorageClientUploadContext {
+export interface R2StorageUploadReference {
   key: string
   prefix: string
 }

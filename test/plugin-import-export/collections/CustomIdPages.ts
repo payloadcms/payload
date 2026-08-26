@@ -19,4 +19,5 @@ export const CustomIdPages: CollectionConfig = {
       required: true,
     },
   ],
+  versions: false,
 }

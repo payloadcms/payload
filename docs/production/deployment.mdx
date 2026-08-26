@@ -22,6 +22,22 @@ to consider these main aspects:
 
 Payload can be deployed _anywhere that Next.js can run_ - including Vercel, Netlify, SST, DigitalOcean, AWS, and more. Because it's open source, you can self-host it.
 
+<VideoDrawer
+  id="8jPNsLX7XGg"
+  label="Deploy Payload on Cloudflare Workers"
+  drawerTitle="Deploy Payload on Cloudflare Workers"
+/>
+<VideoDrawer
+  id="Teug6mTdRsg"
+  label="Deploy Payload with Cloudflare Workers (Full Guide)"
+  drawerTitle="Deploy Payload with Cloudflare Workers (Full Guide)"
+/>
+<VideoDrawer
+  id="7jAYKaRaI30"
+  label="Deploy Payload on Vercel"
+  drawerTitle="Deploy Payload on Vercel in minutes with our one click templates"
+/>
+
 But it's important to remember that most Payload projects will also need a database, file storage, an email provider, and a CDN. Make sure you have all of the requirements that your project needs, no matter what deployment platform you choose.
 
 ## Basics
@@ -62,6 +78,14 @@ Note that this is different than running `next dev`. Generally, Next.js apps com
 You should be using an SSL certificate for production Payload instances, which means you
 can [enable secure cookies](/docs/authentication/overview) in your Authentication-enabled Collection configs.
 
+### HTTP Security Headers
+
+Payload does not automatically configure application-specific HTTP security headers because the appropriate values depend on your customizations, embedding requirements, domains, and deployment environment. Before deploying to production, evaluate headers such as `Content-Security-Policy`, `X-Frame-Options`, `X-Content-Type-Options`, and `Strict-Transport-Security` for your application.
+
+For implementation guidance, see the official [Next.js headers](https://nextjs.org/docs/app/api-reference/config/next-config-js/headers) and [Content Security Policy](https://nextjs.org/docs/app/guides/content-security-policy) documentation. TanStack Start users can configure response headers with [middleware](https://tanstack.com/start/latest/docs/framework/react/guide/middleware) or [server function utilities](https://tanstack.com/start/latest/docs/framework/react/guide/server-functions).
+
+CSP and framing restrictions can affect custom Admin components and applications that embed the Admin Panel. If your frontend is displayed inside the Admin Panel, also review the [Live Preview CSP guidance](/docs/live-preview/client#iframe-refuses-to-connect). HSTS applies to the entire hostname and is commonly configured by your production host, proxy, or CDN.
+
 ### Preventing API Abuse
 
 Payload comes with a robust set of built-in anti-abuse measures, such as locking out users after X amount of failed
@@ -77,13 +101,15 @@ Out of the box, Payload templates pass the `process.env.DATABASE_URL` environmen
 ### DocumentDB
 
 When using AWS DocumentDB, you will need to configure connection options for authentication in the `connectOptions`
-passed to the `mongooseAdapter` . You also need to set `connectOptions.useFacet` to `false` to disable use of the
-unsupported `$facet` aggregation.
+passed to the `mongooseAdapter`.
 
 ### CosmosDB
 
 <Banner type="warning">
-While Azure Cosmos DB offers a MongoDB API it is not fully compatible due to strict and limited indexing behavior and many core features may not work reliably. For more details, see the [MongoDB driver's CosmosDB compatibility documentation](https://www.mongodb.com/docs/drivers/cosmosdb-support/#compatibility).
+  While Azure Cosmos DB offers a MongoDB API it is not fully compatible due to
+  strict and limited indexing behavior and many core features may not work
+  reliably. For more details, see the [MongoDB driver's CosmosDB compatibility
+  documentation](https://www.mongodb.com/docs/drivers/cosmosdb-support/#compatibility).
 </Banner>
 
 To improve compatibility, spread the `compatibilityOptions.cosmosdb` preset into your adapter. This applies all recommended settings at once:
@@ -160,7 +186,6 @@ Payload provides a list of official cloud storage adapters for you to use:
 - [Azure Blob Storage](https://github.com/payloadcms/payload/tree/main/packages/storage-azure)
 - [Google Cloud Storage](https://github.com/payloadcms/payload/tree/main/packages/storage-gcs)
 - [AWS S3](https://github.com/payloadcms/payload/tree/main/packages/storage-s3)
-- [Uploadthing](https://github.com/payloadcms/payload/tree/main/packages/storage-uploadthing)
 - [Vercel Blob Storage](https://github.com/payloadcms/payload/tree/main/packages/storage-vercel-blob)
 
 Follow the docs to configure any one of these storage providers. For local development, it might be handy to simply store uploads on your own computer, and then when it comes to production, simply enable the plugin for the cloud storage vendor of your choice.

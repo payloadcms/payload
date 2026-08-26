@@ -9,7 +9,7 @@ import type {
 import { getBestFitFromSizes, isImage } from 'payload/shared'
 import React from 'react'
 
-import './index.scss'
+import './index.css'
 import { Thumbnail } from '../../../../Thumbnail/index.js'
 
 const baseClass = 'file'

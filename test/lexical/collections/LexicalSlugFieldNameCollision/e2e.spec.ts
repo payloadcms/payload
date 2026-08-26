@@ -5,9 +5,9 @@ import { fileURLToPath } from 'url'
 import type { PayloadTestSDK } from '../../../__helpers/shared/sdk/index.js'
 import type { Config } from '../../payload-types.js'
 
-import { ensureCompilationIsDone } from '../../../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
+import { ensureCompilationIsDone } from '../../../__setup/e2e/ensureCompilationIsDone.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { lexicalSlugFieldNameCollisionSlug } from '../../slugs.js'
 import { LexicalHelpers } from '../utils.js'
@@ -40,6 +40,7 @@ describe('Lexical: collection slug equals top-level field name', () => {
     const url = new AdminUrlUtil(serverURL, lexicalSlugFieldNameCollisionSlug)
     lexical = new LexicalHelpers(page)
     await page.goto(url.create)
+    await expect(lexical.editor.first()).toBeVisible()
     await lexical.editor.first().focus()
   })
 

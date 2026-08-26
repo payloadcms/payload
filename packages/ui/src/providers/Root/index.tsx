@@ -4,9 +4,10 @@ import type {
   ClientConfig,
   LanguageOptions,
   Locale,
+  RouterAdapterComponent,
   SanitizedPermissions,
   ServerFunctionClient,
-  TypedUser,
+  User,
 } from 'payload'
 
 import { DndContext, pointerWithin } from '@dnd-kit/core'
@@ -17,6 +18,7 @@ import React from 'react'
 import type { Theme } from '../Theme/index.js'
 
 import { CloseModalOnRouteChange } from '../../elements/CloseModalOnRouteChange/index.js'
+import { DrawerStackProvider } from '../../elements/Drawer/index.js'
 import { LoadingOverlayProvider } from '../../elements/LoadingOverlay/index.js'
 import { NavProvider } from '../../elements/Nav/context.js'
 import { StayLoggedInModal } from '../../elements/StayLoggedIn/index.js'
@@ -27,12 +29,12 @@ import { AuthProvider } from '../Auth/index.js'
 import { ClientFunctionProvider } from '../ClientFunction/index.js'
 import { ConfigProvider } from '../Config/index.js'
 import { DocumentEventsProvider } from '../DocumentEvents/index.js'
+import { EmbedProvider } from '../Embed/index.js'
+import { HierarchyProvider } from '../Hierarchy/index.js'
 import { LocaleProvider } from '../Locale/index.js'
-import { ParamsProvider } from '../Params/index.js'
 import { PreferencesProvider } from '../Preferences/index.js'
 import { RouteCache } from '../RouteCache/index.js'
 import { RouteTransitionProvider } from '../RouteTransition/index.js'
-import { SearchParamsProvider } from '../SearchParams/index.js'
 import { ServerFunctionsProvider } from '../ServerFunctions/index.js'
 import { ThemeProvider } from '../Theme/index.js'
 import { ToastContainer } from '../ToastContainer/index.js'
@@ -43,31 +45,35 @@ type Props = {
   readonly children: React.ReactNode
   readonly config: ClientConfig
   readonly dateFNSKey: Language['dateFNSKey']
+  readonly embed?: boolean
   readonly fallbackLang: I18nOptions['fallbackLanguage']
+  readonly highContrastMode: boolean
   readonly isNavOpen?: boolean
   readonly languageCode: string
   readonly languageOptions: LanguageOptions
   readonly locale?: Locale['code']
   readonly permissions: SanitizedPermissions
+  readonly RouterAdapter: RouterAdapterComponent
   readonly serverFunction: ServerFunctionClient
-  readonly switchLanguageServerAction?: (lang: string) => Promise<void>
   readonly theme: Theme
   readonly translations: I18nClient['translations']
-  readonly user: null | TypedUser
+  readonly user: null | User
 }
 
 export const RootProvider: React.FC<Props> = ({
   children,
   config,
   dateFNSKey,
+  embed,
   fallbackLang,
+  highContrastMode,
   isNavOpen,
   languageCode,
   languageOptions,
   locale,
   permissions,
+  RouterAdapter,
   serverFunction,
-  switchLanguageServerAction,
   theme,
   translations,
   user,
@@ -76,72 +82,75 @@ export const RootProvider: React.FC<Props> = ({
 
   return (
     <ClickOutsideProvider>
-      <ServerFunctionsProvider serverFunction={serverFunction}>
-        <RouteTransitionProvider>
-          <RouteCache
-            cachingEnabled={process.env.NEXT_PUBLIC_ENABLE_ROUTER_CACHE_REFRESH === 'true'}
-          >
-            <ConfigProvider config={config}>
-              <ClientFunctionProvider>
-                <TranslationProvider
-                  dateFNSKey={dateFNSKey}
-                  fallbackLang={fallbackLang}
-                  language={languageCode}
-                  languageOptions={languageOptions}
-                  switchLanguageServerAction={switchLanguageServerAction}
-                  translations={translations}
-                >
-                  <WindowInfoProvider
-                    breakpoints={{
-                      l: '(max-width: 1440px)',
-                      m: '(max-width: 1024px)',
-                      s: '(max-width: 768px)',
-                      xs: '(max-width: 400px)',
-                    }}
+      <RouteTransitionProvider>
+        <RouterAdapter>
+          <ServerFunctionsProvider serverFunction={serverFunction}>
+            <RouteCache
+              cachingEnabled={process.env.NEXT_PUBLIC_ENABLE_ROUTER_CACHE_REFRESH === 'true'}
+            >
+              <ConfigProvider config={config}>
+                <ClientFunctionProvider>
+                  <TranslationProvider
+                    dateFNSKey={dateFNSKey}
+                    fallbackLang={fallbackLang}
+                    language={languageCode}
+                    languageOptions={languageOptions}
+                    translations={translations}
                   >
-                    <ScrollInfoProvider>
-                      <SearchParamsProvider>
+                    <WindowInfoProvider
+                      breakpoints={{
+                        l: '(max-width: 1440px)',
+                        m: '(max-width: 1024px)',
+                        s: '(max-width: 768px)',
+                        xs: '(max-width: 400px)',
+                      }}
+                    >
+                      <ScrollInfoProvider>
                         <ModalProvider classPrefix="payload" transTime={0} zIndex="var(--z-modal)">
-                          <CloseModalOnRouteChange />
-                          <AuthProvider permissions={permissions} user={user}>
-                            <PreferencesProvider>
-                              <ThemeProvider theme={theme}>
-                                <ParamsProvider>
-                                  <LocaleProvider locale={locale}>
-                                    <StepNavProvider>
-                                      <LoadingOverlayProvider>
-                                        <DocumentEventsProvider>
-                                          <NavProvider initialIsOpen={isNavOpen}>
-                                            <UploadHandlersProvider>
-                                              <DndContext
-                                                collisionDetection={pointerWithin}
-                                                // Provide stable ID to fix hydration issues: https://github.com/clauderic/dnd-kit/issues/926
-                                                id={dndContextID}
-                                              >
-                                                {children}
-                                              </DndContext>
-                                            </UploadHandlersProvider>
-                                          </NavProvider>
-                                        </DocumentEventsProvider>
-                                      </LoadingOverlayProvider>
-                                    </StepNavProvider>
-                                  </LocaleProvider>
-                                </ParamsProvider>
-                              </ThemeProvider>
-                            </PreferencesProvider>
-                            <ModalContainer />
-                            <StayLoggedInModal />
-                          </AuthProvider>
+                          <DrawerStackProvider>
+                            <CloseModalOnRouteChange />
+                            <AuthProvider permissions={permissions} user={user}>
+                              <PreferencesProvider>
+                                <HierarchyProvider>
+                                  <ThemeProvider highContrastMode={highContrastMode} theme={theme}>
+                                    <EmbedProvider embed={embed}>
+                                      <LocaleProvider locale={locale}>
+                                        <StepNavProvider>
+                                          <LoadingOverlayProvider>
+                                            <DocumentEventsProvider>
+                                              <NavProvider initialIsOpen={isNavOpen}>
+                                                <UploadHandlersProvider>
+                                                  <DndContext
+                                                    collisionDetection={pointerWithin}
+                                                    // Provide stable ID to fix hydration issues: https://github.com/clauderic/dnd-kit/issues/926
+                                                    id={dndContextID}
+                                                  >
+                                                    {children}
+                                                  </DndContext>
+                                                </UploadHandlersProvider>
+                                              </NavProvider>
+                                            </DocumentEventsProvider>
+                                          </LoadingOverlayProvider>
+                                        </StepNavProvider>
+                                      </LocaleProvider>
+                                    </EmbedProvider>
+                                  </ThemeProvider>
+                                </HierarchyProvider>
+                              </PreferencesProvider>
+                              <ModalContainer />
+                              <StayLoggedInModal />
+                            </AuthProvider>
+                          </DrawerStackProvider>
                         </ModalProvider>
-                      </SearchParamsProvider>
-                    </ScrollInfoProvider>
-                  </WindowInfoProvider>
-                </TranslationProvider>
-              </ClientFunctionProvider>
-            </ConfigProvider>
-          </RouteCache>
-        </RouteTransitionProvider>
-      </ServerFunctionsProvider>
+                      </ScrollInfoProvider>
+                    </WindowInfoProvider>
+                  </TranslationProvider>
+                </ClientFunctionProvider>
+              </ConfigProvider>
+            </RouteCache>
+          </ServerFunctionsProvider>
+        </RouterAdapter>
+      </RouteTransitionProvider>
       <ToastContainer config={config} />
     </ClickOutsideProvider>
   )

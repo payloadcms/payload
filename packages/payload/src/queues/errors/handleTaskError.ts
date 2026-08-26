@@ -93,9 +93,9 @@ export async function handleTaskError({
     completedAt: currentDate.toISOString(),
     error: errorJSON,
     executedAt: executedAt.toISOString(),
-    input,
+    input: input ?? {},
     output: output ?? {},
-    parent: req.payload.config.jobs.addParentToTaskLog ? parent : undefined,
+    parent,
     state: 'failed',
     taskID,
     taskSlug,
@@ -112,7 +112,7 @@ export async function handleTaskError({
       log: {
         $push: taskLogToPush,
       } as any,
-      processing: false,
+      processingUntil: null,
       totalTried: (job.totalTried ?? 0) + 1,
       waitUntil: job.waitUntil,
     })
@@ -174,7 +174,7 @@ export async function handleTaskError({
     log: {
       $push: taskLogToPush,
     } as any,
-    processing: false,
+    processingUntil: null,
     totalTried: (job.totalTried ?? 0) + 1,
     waitUntil: job.waitUntil,
   })

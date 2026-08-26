@@ -7,6 +7,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type {
+  ArrayField,
   BlocksField,
   LocalizedPost,
   LocalizedSort,
@@ -3193,6 +3194,43 @@ describe('Localization', () => {
         expect(refreshedDoc.topLevelArrayLocalized?.[0]?.text).toBe('some-text')
       })
 
+      it('should copy nested arrays through tabs within localized arrays', async () => {
+        const doc = await payload.create({
+          collection: arrayCollectionSlug,
+          data: {
+            items: [
+              {
+                nestedItems: [
+                  {
+                    text: 'nested text',
+                  },
+                ],
+              },
+            ],
+          },
+          locale: 'en',
+        })
+
+        try {
+          const req = await createLocalReq({ user }, payload)
+
+          const res = (await copyDataFromLocaleHandler({
+            collectionSlug: arrayCollectionSlug,
+            docID: doc.id,
+            fromLocale: 'en',
+            req,
+            toLocale: 'es',
+          })) as ArrayField
+
+          expect(res.items?.[0]?.nestedItems?.[0]?.text).toBe('nested text')
+        } finally {
+          await payload.delete({
+            id: doc.id,
+            collection: arrayCollectionSlug,
+          })
+        }
+      })
+
       it('should copy to locale without losing data when autosave and drafts are enabled', async () => {
         // The blocks-fields collection has versions.drafts.autosave: true
         // This test verifies that copyToLocale doesn't cause data loss
@@ -4557,6 +4595,37 @@ describe('Localization', () => {
         },
       })
       expect(result2.totalDocs).toBe(1)
+    })
+
+    it('should count global versions with query on localized field respecting locale', async () => {
+      await payload.updateGlobal({
+        slug: globalWithDraftsSlug,
+        data: { text: 'global count en', _status: 'published' },
+        locale: defaultLocale,
+      })
+
+      await payload.updateGlobal({
+        slug: globalWithDraftsSlug,
+        data: { text: 'global count es', _status: 'published' },
+        locale: spanishLocale,
+      })
+
+      const englishWhere = { 'version.text': { equals: 'global count en' } }
+
+      const inEnglish = await payload.countGlobalVersions({
+        global: globalWithDraftsSlug,
+        locale: defaultLocale,
+        where: englishWhere,
+      })
+
+      const inSpanish = await payload.countGlobalVersions({
+        global: globalWithDraftsSlug,
+        locale: spanishLocale,
+        where: englishWhere,
+      })
+
+      expect(inEnglish.totalDocs).toBeGreaterThan(0)
+      expect(inSpanish.totalDocs).toBe(0)
     })
   })
 })

@@ -3,14 +3,14 @@ import React from 'react'
 
 import { Button } from '../../Button/index.js'
 import { Thumbnail } from '../../Thumbnail/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'file-details-draggable'
 
 import type { Data, FileSizes, SanitizedCollectionConfig } from 'payload'
 
 import { DraggableSortableItem } from '../../../elements/DraggableSortable/DraggableSortableItem/index.js'
-import { DragHandleIcon } from '../../../icons/DragHandle/index.js'
+import { AlignJustifiedIcon } from '../../../icons/AlignJustified/index.js'
 import { EditIcon } from '../../../icons/Edit/index.js'
 import { useDocumentDrawer } from '../../DocumentDrawer/index.js'
 
@@ -24,7 +24,7 @@ export type DraggableFileDetailsProps = {
   hasImageSizes?: boolean
   hasMany: boolean
   hideRemoveFile?: boolean
-  imageCacheTag?: string
+  imageCacheTag?: false | string
   isSortable?: boolean
   removeItem?: (index: number) => void
   rowIndex: number
@@ -60,6 +60,7 @@ export const DraggableFileDetails: React.FC<DraggableFileDetailsProps> = (props)
           ]
             .filter(Boolean)
             .join(' ')}
+          key={id}
           ref={draggableSortableItemProps.setNodeRef}
           style={{
             transform: draggableSortableItemProps.transform,
@@ -74,7 +75,7 @@ export const DraggableFileDetails: React.FC<DraggableFileDetailsProps> = (props)
                 {...draggableSortableItemProps.attributes}
                 {...draggableSortableItemProps.listeners}
               >
-                <DragHandleIcon />
+                <AlignJustifiedIcon />
               </div>
             )}
             <Thumbnail
@@ -95,10 +96,9 @@ export const DraggableFileDetails: React.FC<DraggableFileDetailsProps> = (props)
             </DocumentDrawerToggler>
             {!hideRemoveFile && removeItem && (
               <Button
-                buttonStyle="icon-label"
+                buttonStyle="ghost"
                 className={`${baseClass}__remove`}
                 icon="x"
-                iconStyle="none"
                 onClick={() => removeItem(rowIndex)}
                 round
               />

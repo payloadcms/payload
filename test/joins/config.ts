@@ -1,11 +1,10 @@
 import { fileURLToPath } from 'node:url'
 import path from 'path'
+import { createFolderField } from 'payload'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { Categories } from './collections/Categories.js'
 import { CategoriesVersions } from './collections/CategoriesVersions.js'
-import { FolderPoly1 } from './collections/FolderPoly1.js'
-import { FolderPoly2 } from './collections/FolderPoly2.js'
 import { HiddenPosts } from './collections/HiddenPosts.js'
 import { Posts } from './collections/Posts.js'
 import { SelfJoins } from './collections/SelfJoins.js'
@@ -22,6 +21,8 @@ import {
   restrictedCategoriesSlug,
   restrictedPostsSlug,
 } from './shared.js'
+
+const foldersSlug = 'folders'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -45,6 +46,7 @@ export default buildConfigWithDefaults({
           name: 'posts',
         },
       ],
+      versions: false,
     },
     Posts,
     Categories,
@@ -72,6 +74,7 @@ export default buildConfigWithDefaults({
           relationTo: localizedCategoriesSlug,
         },
       ],
+      versions: false,
     },
     {
       slug: localizedCategoriesSlug,
@@ -91,6 +94,7 @@ export default buildConfigWithDefaults({
           localized: true,
         },
       ],
+      versions: false,
     },
     {
       slug: restrictedCategoriesSlug,
@@ -113,6 +117,7 @@ export default buildConfigWithDefaults({
           },
         },
       ],
+      versions: false,
     },
     {
       slug: categoriesJoinRestrictedSlug,
@@ -132,6 +137,7 @@ export default buildConfigWithDefaults({
           on: 'category',
         },
       ],
+      versions: false,
     },
     {
       slug: restrictedPostsSlug,
@@ -157,6 +163,7 @@ export default buildConfigWithDefaults({
           relationTo: restrictedCategoriesSlug,
         },
       ],
+      versions: false,
     },
     {
       slug: collectionRestrictedSlug,
@@ -182,6 +189,7 @@ export default buildConfigWithDefaults({
           relationTo: categoriesJoinRestrictedSlug,
         },
       ],
+      versions: false,
     },
     {
       slug: 'depth-joins-1',
@@ -199,6 +207,7 @@ export default buildConfigWithDefaults({
           maxDepth: 2,
         },
       ],
+      versions: false,
     },
     {
       slug: 'depth-joins-2',
@@ -211,6 +220,7 @@ export default buildConfigWithDefaults({
           maxDepth: 2,
         },
       ],
+      versions: false,
     },
     {
       slug: 'depth-joins-3',
@@ -221,6 +231,7 @@ export default buildConfigWithDefaults({
           relationTo: 'depth-joins-1',
         },
       ],
+      versions: false,
     },
     {
       slug: 'multiple-collections-parents',
@@ -236,6 +247,7 @@ export default buildConfigWithDefaults({
           },
         },
       ],
+      versions: false,
     },
     {
       slug: 'multiple-collections-1',
@@ -256,6 +268,7 @@ export default buildConfigWithDefaults({
           type: 'text',
         },
       ],
+      versions: false,
     },
     {
       slug: 'multiple-collections-2',
@@ -276,39 +289,36 @@ export default buildConfigWithDefaults({
           type: 'text',
         },
       ],
+      versions: false,
     },
     {
-      slug: 'folders',
-      fields: [
-        {
-          type: 'relationship',
-          relationTo: 'folders',
-          name: 'folder',
-        },
-        {
-          name: 'title',
-          type: 'text',
-        },
-        {
-          type: 'join',
+      slug: foldersSlug,
+      admin: {
+        useAsTitle: 'name',
+        group: 'Joins Test',
+      },
+      folders: {
+        collectionSpecific: { fieldName: 'folderType' },
+        joinField: {
           name: 'children',
-          collection: ['folders', 'example-pages', 'example-posts'],
-          on: 'folder',
           admin: {
             defaultColumns: ['title', 'name', 'description'],
           },
         },
+      },
+      fields: [
+        {
+          name: 'name',
+          type: 'text',
+        },
       ],
+      versions: false,
     },
     {
       slug: 'example-pages',
       admin: { useAsTitle: 'title' },
       fields: [
-        {
-          type: 'relationship',
-          relationTo: 'folders',
-          name: 'folder',
-        },
+        createFolderField({ relationTo: foldersSlug }),
         {
           name: 'title',
           type: 'text',
@@ -318,16 +328,13 @@ export default buildConfigWithDefaults({
           type: 'text',
         },
       ],
+      versions: false,
     },
     {
       slug: 'example-posts',
       admin: { useAsTitle: 'title' },
       fields: [
-        {
-          type: 'relationship',
-          relationTo: 'folders',
-          name: 'folder',
-        },
+        createFolderField({ relationTo: foldersSlug }),
         {
           name: 'title',
           type: 'text',
@@ -337,9 +344,30 @@ export default buildConfigWithDefaults({
           type: 'text',
         },
       ],
+      versions: false,
     },
-    FolderPoly1,
-    FolderPoly2,
+    {
+      slug: 'folderPoly1',
+      fields: [
+        {
+          name: 'folderPoly1Title',
+          type: 'text',
+        },
+        createFolderField({ relationTo: foldersSlug }),
+      ],
+      versions: false,
+    },
+    {
+      slug: 'folderPoly2',
+      fields: [
+        {
+          name: 'folderPoly2Title',
+          type: 'text',
+        },
+        createFolderField({ relationTo: foldersSlug }),
+      ],
+      versions: false,
+    },
   ],
   localization: {
     locales: [

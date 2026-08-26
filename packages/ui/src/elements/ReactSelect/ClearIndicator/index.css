@@ -5,20 +5,10 @@
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    color: var(--icon-secondary);
-    transition: color 100ms;
+    color: var(--color-icon-secondary);
 
     &:hover {
-      color: var(--icon-default);
+      color: var(--color-icon);
     }
-
-    &:focus-visible {
-      outline: var(--accessibility-outline);
-    }
-  }
-
-  .clear-indicator__icon {
-    width: var(--spacer-3);
-    height: var(--spacer-3);
   }
 }

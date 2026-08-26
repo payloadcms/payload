@@ -4,6 +4,7 @@ import path from 'path'
 import { getFileByPath } from 'payload'
 import { fileURLToPath } from 'url'
 
+import { getTestSuiteDir } from '../__helpers/shared/getTestSuiteDir.js'
 import { devUser } from '../credentials.js'
 import {
   categoriesJoinRestrictedSlug,
@@ -16,6 +17,7 @@ import {
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+const joinsDir = getTestSuiteDir({ fallbackDir: dirname, suitePath: 'joins' })
 
 export const seed = async (_payload: Payload) => {
   await _payload.create({
@@ -106,7 +108,7 @@ export const seed = async (_payload: Payload) => {
   })
 
   // create an upload with image.png
-  const imageFilePath = path.resolve(dirname, './image.png')
+  const imageFilePath = path.resolve(joinsDir, 'image.png')
   const imageFile = await getFileByPath(imageFilePath)
   const { id: uploadedImage } = await _payload.create({
     collection: uploadsSlug,
@@ -148,68 +150,68 @@ export const seed = async (_payload: Payload) => {
   const root_folder = await _payload.create({
     collection: 'folders',
     data: {
-      folder: null,
-      title: 'Root folder',
+      _h_folders: null,
+      name: 'Root folder',
     },
   })
 
   const page_1 = await _payload.create({
     collection: 'example-pages',
-    data: { title: 'page 1', name: 'Andrew', folder: root_folder },
+    data: { title: 'page 1', name: 'Andrew', _h_folders: root_folder },
   })
 
   const post_1 = await _payload.create({
     collection: 'example-posts',
-    data: { title: 'page 1', description: 'This is post 1', folder: root_folder },
+    data: { title: 'page 1', description: 'This is post 1', _h_folders: root_folder },
   })
 
   const page_2 = await _payload.create({
     collection: 'example-pages',
-    data: { title: 'page 2', name: 'Sophia', folder: root_folder },
+    data: { title: 'page 2', name: 'Sophia', _h_folders: root_folder },
   })
 
   const page_3 = await _payload.create({
     collection: 'example-pages',
-    data: { title: 'page 3', name: 'Michael', folder: root_folder },
+    data: { title: 'page 3', name: 'Michael', _h_folders: root_folder },
   })
 
   const post_2 = await _payload.create({
     collection: 'example-posts',
-    data: { title: 'post 2', description: 'This is post 2', folder: root_folder },
+    data: { title: 'post 2', description: 'This is post 2', _h_folders: root_folder },
   })
 
   const post_3 = await _payload.create({
     collection: 'example-posts',
-    data: { title: 'post 3', description: 'This is post 3', folder: root_folder },
+    data: { title: 'post 3', description: 'This is post 3', _h_folders: root_folder },
   })
 
   const sub_folder_1 = await _payload.create({
     collection: 'folders',
-    data: { folder: root_folder, title: 'Sub Folder 1' },
+    data: { _h_folders: root_folder, name: 'Sub Folder 1' },
   })
 
   const page_4 = await _payload.create({
     collection: 'example-pages',
-    data: { title: 'page 4', name: 'Emma', folder: sub_folder_1 },
+    data: { title: 'page 4', name: 'Emma', _h_folders: sub_folder_1 },
   })
 
   const post_4 = await _payload.create({
     collection: 'example-posts',
-    data: { title: 'post 4', description: 'This is post 4', folder: sub_folder_1 },
+    data: { title: 'post 4', description: 'This is post 4', _h_folders: sub_folder_1 },
   })
 
   const sub_folder_2 = await _payload.create({
     collection: 'folders',
-    data: { folder: root_folder, title: 'Sub Folder 2' },
+    data: { _h_folders: root_folder, name: 'Sub Folder 2' },
   })
 
   const page_5 = await _payload.create({
     collection: 'example-pages',
-    data: { title: 'page 5', name: 'Liam', folder: sub_folder_2 },
+    data: { title: 'page 5', name: 'Liam', _h_folders: sub_folder_2 },
   })
 
   const post_5 = await _payload.create({
     collection: 'example-posts',
-    data: { title: 'post 5', description: 'This is post 5', folder: sub_folder_2 },
+    data: { title: 'post 5', description: 'This is post 5', _h_folders: sub_folder_2 },
   })
 }

@@ -36,6 +36,5 @@ export const Placeholder: CollectionConfig = {
         placeholder: 'Custom placeholder',
       },
     },
-  ],
-  versions: true,
+  ]
 }

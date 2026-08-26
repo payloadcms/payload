@@ -8,18 +8,18 @@ import type {
   TaskConfig,
   TaskHandler,
   TaskHandlerResult,
-  TaskType,
+  TaskSlug,
 } from '../../../config/types/taskTypes.js'
 import type {
   JobLog,
   SingleTaskStatus,
   WorkflowConfig,
-  WorkflowTypes,
+  WorkflowSlug,
 } from '../../../config/types/workflowTypes.js'
 import type { UpdateJobFunction } from './getUpdateJobFunction.js'
 
 import { generateObjectIdHex } from '../../../../utilities/objectIdHex.js'
-import { JobCancelledError, TaskError } from '../../../errors/index.js'
+import { JobCancelledError, JobRunAbortedError, TaskError } from '../../../errors/index.js'
 import { getCurrentDate } from '../../../utilities/getCurrentDate.js'
 import { getTaskHandlerFromConfig } from './importHandlerPath.js'
 
@@ -104,7 +104,7 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
       }
 
       const runner = isInline
-        ? (task as TaskHandler<TaskType>)
+        ? (task as TaskHandler<TaskSlug>)
         : await getTaskHandlerFromConfig(taskConfig)
 
       if (!runner || typeof runner !== 'function') {
@@ -135,7 +135,7 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
               taskSlug,
             }),
             input,
-            job: job as unknown as Job<WorkflowTypes>,
+            job: job as unknown as Job<WorkflowSlug>,
             req,
             tasks: getRunTaskFunction(job, workflowConfig, req, false, updateJob, {
               taskID,
@@ -144,8 +144,8 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
           })
         )?.output
       } catch (err: any) {
-        if (err instanceof JobCancelledError) {
-          // Re-throw JobCancelledError to be handled by the top-level error handler
+        if (err instanceof JobCancelledError || err instanceof JobRunAbortedError) {
+          // Job run aborts are handled by the top-level runner.
           throw err
         }
         throw new TaskError({
@@ -177,9 +177,9 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
         id: generateObjectIdHex(),
         completedAt: getCurrentDate().toISOString(),
         executedAt: executedAt.toISOString(),
-        input,
+        input: input ?? {},
         output,
-        parent: jobConfig.addParentToTaskLog ? parent : undefined,
+        parent,
         state: 'succeeded',
         taskID,
         taskSlug,

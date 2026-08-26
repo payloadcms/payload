@@ -1,14 +1,9 @@
 import type { AdminViewServerProps } from 'payload'
 
-import LinkImport from 'next/link.js'
+import { Button } from '@payloadcms/ui'
 import React from 'react'
 
-const Link = 'default' in LinkImport ? LinkImport.default : LinkImport
-
-import { Button } from '@payloadcms/ui'
-
 import { customNestedViewPath, customViewTitle } from '../../../shared.js'
-import { ClientForm } from './index.client.js'
 
 export function CustomView({ initPageResult }: AdminViewServerProps) {
   const {
@@ -37,19 +32,13 @@ export function CustomView({ initPageResult }: AdminViewServerProps) {
         </li>
       </ul>
       <div className="custom-view__controls">
-        <Button buttonStyle="secondary" el="link" Link={Link} to={`${adminRoute}`}>
+        <Button buttonStyle="secondary" el="link" to={`${adminRoute}`}>
           Go to Dashboard
         </Button>
         &nbsp; &nbsp; &nbsp;
-        <Button
-          buttonStyle="secondary"
-          el="link"
-          Link={Link}
-          to={`${adminRoute}/${customNestedViewPath}`}
-        >
+        <Button buttonStyle="secondary" el="link" to={`${adminRoute}/${customNestedViewPath}`}>
           Go to Nested View
         </Button>
-        <ClientForm />
       </div>
     </div>
   )

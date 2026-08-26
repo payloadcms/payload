@@ -1,5 +1,5 @@
 'use client'
-import type { ClientUser } from 'payload'
+import type { User } from 'payload'
 
 import React from 'react'
 
@@ -7,17 +7,18 @@ import { CheckboxInput } from '../../fields/Checkbox/Input.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useSelection } from '../../providers/Selection/index.js'
 import { Locked } from '../Locked/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'select-row'
 
 export const SelectRow: React.FC<{
   rowData: {
-    _isLocked: boolean
-    _userEditing: ClientUser
-    id: string
+    _isLocked?: boolean
+    _userEditing?: User
+    id: number | string
   }
-}> = ({ rowData }) => {
+  selectRowLabel: string
+}> = ({ rowData, selectRowLabel }) => {
   const { user } = useAuth()
   const { selected, setSelection } = useSelection()
   const { _isLocked, _userEditing } = rowData || {}
@@ -30,9 +31,11 @@ export const SelectRow: React.FC<{
 
   return (
     <CheckboxInput
+      aria-label={selectRowLabel}
       checked={Boolean(selected.get(rowData.id))}
       className={[baseClass, `${baseClass}__checkbox`].join(' ')}
       onToggle={() => setSelection(rowData.id)}
+      variant="muted"
     />
   )
 }

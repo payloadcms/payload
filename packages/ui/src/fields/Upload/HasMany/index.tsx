@@ -5,7 +5,7 @@ import React from 'react'
 
 import { DraggableSortableItem } from '../../../elements/DraggableSortable/DraggableSortableItem/index.js'
 import { DraggableSortable } from '../../../elements/DraggableSortable/index.js'
-import { DragHandleIcon } from '../../../icons/DragHandle/index.js'
+import { AlignJustifiedIcon } from '../../../icons/AlignJustified/index.js'
 import { RelationshipContent } from '../RelationshipContent/index.js'
 import { UploadCard } from '../UploadCard/index.js'
 
@@ -126,14 +126,14 @@ export function UploadComponentHasMany(props: Props) {
                     zIndex: draggableSortableItemProps.isDragging ? 1 : undefined,
                   }}
                 >
-                  <UploadCard size="small">
-                    {draggableSortableItemProps && (
+                  <UploadCard readOnly={readonly} size="small">
+                    {draggableSortableItemProps && isSortable && (
                       <div
                         className={`${baseClass}__drag`}
                         {...draggableSortableItemProps.attributes}
                         {...draggableSortableItemProps.listeners}
                       >
-                        <DragHandleIcon />
+                        <AlignJustifiedIcon />
                       </div>
                     )}
 

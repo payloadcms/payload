@@ -20,6 +20,7 @@ import { Users } from './collections/Users/index.js'
 import { seed } from './seed/index.js'
 import {
   autosaveGlobalSlug,
+  foldersSlug,
   mediaSlug,
   menuItemsSlug,
   menuSlug,
@@ -48,6 +49,24 @@ export const baseConfig: Partial<Config> = {
           type: 'text',
         },
       ],
+      versions: false,
+    },
+    {
+      slug: foldersSlug,
+      hierarchy: {
+        parentFieldName: 'folder',
+      },
+      admin: {
+        useAsTitle: 'name',
+      },
+      fields: [
+        {
+          name: 'name',
+          type: 'text',
+          required: true,
+        },
+      ],
+      versions: false,
     },
   ],
   admin: {
@@ -59,7 +78,6 @@ export const baseConfig: Partial<Config> = {
       beforeLogin: ['/components/BeforeLogin/index.js#BeforeLogin'],
       graphics: {
         Logo: '/components/Logo/index.js#Logo',
-        Icon: '/components/Icon/index.js#Icon',
       },
     },
   },
@@ -71,7 +89,6 @@ export const baseConfig: Partial<Config> = {
   },
   plugins: [
     multiTenantPlugin<ConfigType>({
-      // debug: true,
       userHasAccessToAllTenants: (user) => Boolean(user.roles?.includes('admin')),
       useTenantsCollectionAccess: false,
       tenantField: {
@@ -98,6 +115,7 @@ export const baseConfig: Partial<Config> = {
         ],
       },
       collections: {
+        [foldersSlug]: {},
         [menuItemsSlug]: {
           useTenantAccess: false,
         },
@@ -144,7 +162,9 @@ export const baseConfig: Partial<Config> = {
           if (fullTenant.selectedLocales.includes('allLocales')) {
             return locales
           }
-          return locales.filter((locale) => fullTenant.selectedLocales?.includes(locale.code))
+          return locales.filter((locale) =>
+            fullTenant.selectedLocales?.includes(locale.code as any),
+          )
         }
       }
       return locales

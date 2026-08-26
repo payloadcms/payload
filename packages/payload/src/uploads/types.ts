@@ -2,6 +2,7 @@ import type { ResizeOptions, Sharp, SharpOptions } from 'sharp'
 
 import type { CollectionConfig, TypeWithID } from '../collections/config/types.js'
 import type { PayloadComponent } from '../config/types.js'
+import type { UploadCollectionSlug } from '../index.js'
 import type { PayloadRequest } from '../types/index.js'
 import type { WithMetadata } from './optionallyAppendMetadata.js'
 
@@ -10,19 +11,9 @@ export type FileSize = {
   filesize: null | number
   height: null | number
   mimeType: null | string
-  url?: null | string // TODO V4: make non-optional
+  url: null | string
   width: null | number
 }
-
-// TODO: deprecate in Payload v4.
-/**
- * FileSizeImproved is a more precise type, and will replace FileSize in Payload v4.
- * This type is for internal use only as it will be deprecated in the future.
- * @internal
- */
-export type FileSizeImproved = {
-  url: null | string
-} & FileSize
 
 export type FileSizes = {
   [size: string]: FileSize
@@ -69,44 +60,41 @@ export type GenerateImageName = (args: {
   width: number
 }) => string
 
-export type ImageSize = {
+type ImageSizeBase = {
   /**
    * Admin UI options that control how this image size appears in list views.
-   *
-   * NOTE: In Payload v4, these options (`disableGroupBy`, `disableListColumn` and `disableListFilter`)
-   * should default to `true` so image size subfields are hidden from list columns
-   * and filters by default, reducing noise in the admin UI.
    */
   admin?: {
     /**
-     * If set to true, this image size will not be available
-     * as a selectable groupBy option in the collection list view.
-     * @default false
+     * Controls visibility of this image size in the collection list view.
+     * Defaults to hiding the image size from columns, filters, and group-by to reduce noise.
+     *
+     * - `column` — whether to hide this size from selectable list columns. @default false
+     * - `filter` — whether to hide this size from filter options. @default false
+     * - `groupBy` — whether to hide this size from group-by options. @default false
      */
-    disableGroupBy?: boolean
-    /**
-     * If set to true, this image size will not be available
-     * as a selectable column in the collection list view.
-     * @default false
-     */
-    disableListColumn?: boolean
-    /**
-     * If set to true, this image size will not be available
-     * as a filter option in the collection list view.
-     * @default false
-     */
-    disableListFilter?: boolean
+    disabled?: {
+      column?: boolean
+      filter?: boolean
+      groupBy?: boolean
+    }
   }
-  /**
-   * @deprecated prefer position
-   */
-  crop?: string // comes from sharp package
-  formatOptions?: ImageUploadFormatOptions
   /**
    * Generate a custom name for the file of this image size.
    */
   generateImageName?: GenerateImageName
   name: string
+}
+
+/**
+ * Image size options implemented by Payload's default Sharp image processor.
+ */
+export type SharpImageSizeOptions = {
+  /**
+   * @deprecated prefer position
+   */
+  crop?: string // comes from sharp package
+  formatOptions?: ImageUploadFormatOptions
   trimOptions?: ImageUploadTrimOptions
   /**
    * When an uploaded image is smaller than the defined image size, we have 3 options:
@@ -119,6 +107,28 @@ export type ImageSize = {
    */
   withoutEnlargement?: ResizeOptions['withoutEnlargement']
 } & Omit<ResizeOptions, 'withoutEnlargement'>
+
+/**
+ * Interface to be module-augmented by image processing providers.
+ *
+ * When no provider is registered, ImageSize uses SharpImageSizeOptions.
+ * When providers are registered, ImageSize uses their registered options instead.
+ *
+ * @example
+ * declare module 'payload' {
+ *   interface RegisteredImageSizeOptions {
+ *     myProvider: MyProviderImageSizeOptions
+ *   }
+ * }
+ */
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type -- Intentionally empty so image processing providers can augment it.
+export interface RegisteredImageSizeOptions {}
+
+type ImageSizeOptions = keyof RegisteredImageSizeOptions extends never
+  ? SharpImageSizeOptions
+  : RegisteredImageSizeOptions[keyof RegisteredImageSizeOptions]
+
+export type ImageSize = ImageSizeBase & ImageSizeOptions
 
 export type GetAdminThumbnail = (args: { doc: Record<string, unknown> }) => false | null | string
 
@@ -135,12 +145,35 @@ export type FileAllowList = Array<{
   mimeType: string
 }>
 
+export type UploadFilePreviewClientProps = {
+  filename: string
+  filesize: number
+  /** Resolved URL of the file (data.url). */
+  fileSrc: string
+  height?: number
+  mimeType: string
+  width?: number
+}
+
+type UploadFilePreviewMap = {
+  [mimeTypePattern: string]: PayloadComponent
+}
+
 type Admin = {
   components?: {
     /**
      * The Controls component to extend the upload controls in the admin panel.
      */
     controls?: PayloadComponent[]
+    /**
+     * A custom component to render in place of the default Thumbnail in the upload side panel.
+     *
+     * Can be a single PayloadComponent (renders for all MIME types) or a Record keyed by
+     * MIME type patterns. Pattern resolution priority: exact match → category wildcard
+     * (e.g. `video/*`) → universal fallback (`*`). Falls back to the default Thumbnail
+     * when nothing matches.
+     */
+    filePreview?: PayloadComponent | UploadFilePreviewMap
   }
 }
 
@@ -246,10 +279,10 @@ export type UploadConfig = {
       doc: TypeWithID
       headers?: Headers
       params: {
-        clientUploadContext?: unknown
         collection: string
         filename: string
         prefix?: string
+        uploadReference?: unknown
       }
     },
   ) => Promise<Response> | Promise<void> | Response | void)[]
@@ -303,6 +336,11 @@ export type UploadConfig = {
   staticDir?: string
   trimOptions?: ImageUploadTrimOptions
   /**
+   * Adapter-provided upload instructions.
+   * @internal
+   */
+  uploadInstructions?: UploadInstructionsCapability
+  /**
    * Optionally append metadata to the image during processing.
    *
    * Can be a boolean or a function.
@@ -314,7 +352,60 @@ export type UploadConfig = {
    */
   withMetadata?: WithMetadata
 }
+
+export type UploadInstructionsAccess = (args: {
+  collectionSlug: UploadCollectionSlug
+  req: PayloadRequest
+}) => boolean | Promise<boolean>
+
+export type UploadInstructionsRequest = {
+  collectionSlug: UploadCollectionSlug
+  docPrefix?: string
+  filename: string
+  filesize: number
+  mimeType: string
+}
+
+export type UploadInstructions = {
+  file: {
+    collectionSlug?: UploadCollectionSlug
+    filename: string
+    mimeType: string
+    size: number
+    uploadReference: Record<string, unknown>
+  }
+} & (
+  | {
+      data?: unknown
+      name: string
+      type: 'dispatch'
+    }
+  | {
+      request: {
+        headers?: Record<string, string>
+        method: 'POST' | 'PUT'
+        url: string
+      }
+      type: 'http'
+    }
+)
+
+export type GenerateUploadInstructions = (
+  args: { overrideAccess?: boolean; req: PayloadRequest } & UploadInstructionsRequest,
+) => Promise<UploadInstructions> | UploadInstructions
+
+export type UploadInstructionsCapability = {
+  /** Generates upload instructions. The generator or supporting endpoint must check access. */
+  generate: GenerateUploadInstructions
+  /**
+   * Whether the Admin panel should use these instructions before saving a document.
+   * This can still be useful when upload chunks pass through Payload.
+   */
+  useInAdmin: boolean
+}
 export type checkFileRestrictionsParams = {
+  /** Set to false when the file bytes have not been uploaded yet. */
+  checkFileContents?: boolean
   collection: CollectionConfig
   file: File
   req: PayloadRequest

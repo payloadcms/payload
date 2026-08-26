@@ -1,0 +1,6 @@
+.drag-overlay-preview {
+  opacity: 0.9;
+  box-shadow: var(--elevation-400-menu-panel);
+  border-radius: var(--radius-medium);
+  cursor: grabbing;
+}

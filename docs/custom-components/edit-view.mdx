@@ -73,9 +73,9 @@ _For details on how to build Custom Views, including all available props, see [B
 In addition to swapping out the entire Edit View with a [Custom View](./custom-views), you can also override individual components. This allows you to customize specific parts of the Edit View without swapping out the entire view.
 
 <Banner type="warning">
-  **Important:** Collection and Globals are keyed to a different property in the
-  `admin.components` object and have slightly different options. Be sure to use
-  the correct key for the entity you are working with.
+  **Note:** Collection and Globals share the same `admin.components.edit` key,
+  with slightly different options (e.g., `Upload` is Collection-only). Use the
+  same key, but be aware of which options apply to your entity.
 </Banner>
 
 #### Collections
@@ -110,13 +110,12 @@ The following options are available:
 | `PublishButton`          | A button that publishes the current document. [More details](#publishbutton).                                                |
 | `UnpublishButton`        | A button that unpublishes the current document. [More details](#unpublishbutton).                                            |
 | `PreviewButton`          | A button that previews the current document. [More details](#previewbutton).                                                 |
-| `Description`            | A description of the Collection. [More details](#description).                                                               |
 | `Status`                 | A component that represents the status of the current document. [More details](#status).                                     |
 | `Upload`                 | A file upload component. [More details](#upload).                                                                            |
 
 #### Globals
 
-To override Edit View components for Globals, use the `admin.components.elements` property in your [Global Config](../configuration/globals):
+To override Edit View components for Globals, use the `admin.components.edit` property in your [Global Config](../configuration/globals):
 
 ```ts
 import type { GlobalConfig } from 'payload'
@@ -126,7 +125,7 @@ export const MyGlobal: GlobalConfig = {
   admin: {
     components: {
       // highlight-start
-      elements: {
+      edit: {
         // ...
       },
       // highlight-end
@@ -146,7 +145,6 @@ The following options are available:
 | `PublishButton`          | A button that publishes the current document. [More details](#publishbutton).                                                |
 | `UnpublishButton`        | A button that unpublishes the current document. [More details](#unpublishbutton).                                            |
 | `PreviewButton`          | A button that previews the current document. [More details](#previewbutton).                                                 |
-| `Description`            | A description of the Global. [More details](#description).                                                                   |
 | `Status`                 | A component that represents the status of the global. [More details](#status).                                               |
 
 ### SaveButton
@@ -156,7 +154,7 @@ The `SaveButton` component allows you to render a custom Save Button in the Edit
 #### Configuration Path
 
 - **Collections:** `admin.components.edit.SaveButton`
-- **Globals:** `admin.components.elements.SaveButton`
+- **Globals:** `admin.components.edit.SaveButton`
 
 #### Example for Collections
 
@@ -186,7 +184,7 @@ export const Header: GlobalConfig = {
   slug: 'header',
   admin: {
     components: {
-      elements: {
+      edit: {
         // highlight-start
         SaveButton: '/path/to/CustomSaveButton',
         // highlight-end
@@ -227,7 +225,7 @@ export function MySaveButton(props: SaveButtonClientProps) {
 
 The `beforeDocumentControls` property allows you to render custom components just before the default document action buttons (like Save, Publish, or Preview). This is useful for injecting custom buttons, status indicators, or any other UI elements before the built-in controls.
 
-To add `beforeDocumentControls` components, use the `components.edit.beforeDocumentControls` property in your [Collection Config](../configuration/collections) or `components.elements.beforeDocumentControls` in your [Global Config](../configuration/globals):
+To add `beforeDocumentControls` components, use the `components.edit.beforeDocumentControls` property in your [Collection Config](../configuration/collections) or [Global Config](../configuration/globals):
 
 #### Collections
 
@@ -251,7 +249,7 @@ export const MyCollection: CollectionConfig = {
 export const MyGlobal: GlobalConfig = {
   admin: {
     components: {
-      elements: {
+      edit: {
         // highlight-start
         beforeDocumentControls: ['/path/to/CustomComponent'],
         // highlight-end
@@ -382,7 +380,7 @@ The `SaveDraftButton` component allows you to render a custom Save Draft Button 
 #### Configuration Path
 
 - **Collections:** `admin.components.edit.SaveDraftButton`
-- **Globals:** `admin.components.elements.SaveDraftButton`
+- **Globals:** `admin.components.edit.SaveDraftButton`
 
 #### Example for Collections
 
@@ -418,7 +416,7 @@ export const Header: GlobalConfig = {
   },
   admin: {
     components: {
-      elements: {
+      edit: {
         // highlight-start
         SaveDraftButton: '/path/to/CustomSaveDraftButton',
         // highlight-end
@@ -462,7 +460,7 @@ The `PublishButton` component allows you to render a custom Publish Button in th
 #### Configuration Path
 
 - **Collections:** `admin.components.edit.PublishButton`
-- **Globals:** `admin.components.elements.PublishButton`
+- **Globals:** `admin.components.edit.PublishButton`
 
 #### Example for Collections
 
@@ -498,7 +496,7 @@ export const Header: GlobalConfig = {
   },
   admin: {
     components: {
-      elements: {
+      edit: {
         // highlight-start
         PublishButton: '/path/to/CustomPublishButton',
         // highlight-end
@@ -538,7 +536,7 @@ export function MyPublishButton() {
 
 The `UnpublishButton` property allows you to render a custom Unpublish Button in the Edit View.
 
-To add an `UnpublishButton` component, use the `components.edit.UnpublishButton` property in your [Collection Config](../configuration/collections) or `components.elements.UnpublishButton` in your [Global Config](../configuration/globals):
+To add an `UnpublishButton` component, use the `components.edit.UnpublishButton` property in your [Collection Config](../configuration/collections) or [Global Config](../configuration/globals):
 
 ```ts
 import type { CollectionConfig } from 'payload'
@@ -590,7 +588,7 @@ The `PreviewButton` component allows you to render a custom Preview Button in th
 #### Configuration Path
 
 - **Collections:** `admin.components.edit.PreviewButton`
-- **Globals:** `admin.components.elements.PreviewButton`
+- **Globals:** `admin.components.edit.PreviewButton`
 
 #### Example for Collections
 
@@ -622,7 +620,7 @@ export const Header: GlobalConfig = {
   admin: {
     preview: () => 'https://example.com/preview',
     components: {
-      elements: {
+      edit: {
         // highlight-start
         PreviewButton: '/path/to/CustomPreviewButton',
         // highlight-end
@@ -663,7 +661,7 @@ export function MyPreviewButton(props: PreviewButtonClientProps) {
 
 The `Description` property allows you to render a custom description of the Collection or Global in the Edit View.
 
-To add a `Description` component, use the `components.edit.Description` property in your [Collection Config](../configuration/collections) or `components.elements.Description` in your [Global Config](../configuration/globals):
+To add a `Description` component, use the `components.Description` property in your [Collection Config](../configuration/collections) or [Global Config](../configuration/globals):
 
 ```ts
 import type { CollectionConfig } from 'payload'
@@ -717,7 +715,7 @@ The `Status` component displays the document's draft/published state when versio
 #### Configuration Path
 
 - **Collections:** `admin.components.edit.Status`
-- **Globals:** `admin.components.elements.Status`
+- **Globals:** `admin.components.edit.Status`
 
 #### Example for Collections
 
@@ -753,7 +751,7 @@ export const Header: GlobalConfig = {
   },
   admin: {
     components: {
-      elements: {
+      edit: {
         // highlight-start
         Status: '/path/to/CustomStatus',
         // highlight-end

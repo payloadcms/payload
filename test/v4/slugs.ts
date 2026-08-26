@@ -20,3 +20,66 @@ export const rowFieldsSlug = 'row-fields'
 export const arrayFieldsSlug = 'array-fields'
 export const blocksFieldsSlug = 'blocks-fields'
 export const dateFieldsSlug = 'date-fields'
+export const richTextFieldsSlug = 'rich-text-fields'
+export const foldersSlug = 'folders'
+export const folderItemsSlug = 'folder-items'
+export const draftVersionsSlug = 'draft-versions'
+export const tagsSlug = 'tags'
+export const tagItemsSlug = 'tag-items'
+export const autosaveSlug = 'autosave'
+export const hierarchySlug = 'hierarchy'
+export const joinFieldsSlug = 'join-fields'
+export const joinPostsSlug = 'join-posts'
+export const orderableSlug = 'orderable'
+export const rubbishSlug = 'rubbish'
+export const rubbishWithDraftsSlug = 'rubbish-with-drafts'
+export const searchBarTestSlug = 'search-bar-test'
+export const talksSlug = 'talks'
+export const unauthorizedSlug = 'unauthorized-test'
+export const docControlsSlug = 'doc-controls'
+export const versionsDiffSlug = 'versions-diff'
+export const drawersSlug = 'drawers'
+
+export const collectionSlugs = [
+  'users',
+  textFieldsSlug,
+  textareaFieldsSlug,
+  emailFieldsSlug,
+  numberFieldsSlug,
+  passwordFieldsSlug,
+  checkboxFieldsSlug,
+  selectFieldsSlug,
+  relationshipFieldsSlug,
+  uploadFieldsSlug,
+  uploadsSlug,
+  slugFieldsSlug,
+  codeFieldsSlug,
+  jsonFieldsSlug,
+  collapsibleFieldsSlug,
+  groupFieldsSlug,
+  tabsFieldsSlug,
+  pointFieldsSlug,
+  radioFieldsSlug,
+  rowFieldsSlug,
+  arrayFieldsSlug,
+  blocksFieldsSlug,
+  dateFieldsSlug,
+  foldersSlug,
+  folderItemsSlug,
+  draftVersionsSlug,
+  tagsSlug,
+  tagItemsSlug,
+  autosaveSlug,
+  hierarchySlug,
+  joinFieldsSlug,
+  joinPostsSlug,
+  orderableSlug,
+  rubbishSlug,
+  searchBarTestSlug,
+  talksSlug,
+  unauthorizedSlug,
+  docControlsSlug,
+  versionsDiffSlug,
+  drawersSlug,
+  'payload-query-presets',
+]

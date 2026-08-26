@@ -2,8 +2,7 @@
 
 import type { OptionObject } from 'payload'
 
-import { toast, useAuth, useConfig } from '@payloadcms/ui'
-import { useRouter } from 'next/navigation.js'
+import { toast, useAuth, useConfig, useRouter } from '@payloadcms/ui'
 import { formatAdminURL } from 'payload/shared'
 import React, { createContext } from 'react'
 
@@ -259,12 +258,44 @@ export const TenantSelectionProviderClient = ({
   }, [userID, userChanged, syncTenants, initialValue, router])
 
   /**
+   * Populate tenant options when the provider mounts already-authenticated but
+   * without server-provided options. This happens when a provider setup remounts
+   * this subtree on login (see `config.conditionalProvider`): the remounted
+   * instance initializes `prevUserID` to the current user, so `userChanged` above
+   * is `false` and never fires `syncTenants`, while the server still rendered the
+   * logged-out tree so `initialTenantOptions` is empty — leaving the selector
+   * unrendered. Unlike `router.refresh()`, `syncTenants()` is a plain client fetch
+   * that cannot trigger a remount loop, so this is safe on every framework adapter.
+   */
+  const didInitialSync = React.useRef(false)
+  React.useEffect(() => {
+    if (
+      !didInitialSync.current &&
+      !userChanged &&
+      userID &&
+      tenantOptions.length === 0 &&
+      initialTenantOptions.length === 0
+    ) {
+      didInitialSync.current = true
+      void syncTenants()
+    }
+  }, [userChanged, userID, tenantOptions.length, initialTenantOptions, syncTenants])
+
+  /**
    * If there is no initial value, clear the tenant and refresh the router.
    * Needed for stale tenantIDs set as a cookie.
+   *
+   * Only refresh when there is actually a stale cookie to clear: when no cookie
+   * is present the server already rendered tenant-less, so a refresh is
+   * redundant. This also avoids an infinite loop on framework adapters whose
+   * `router.refresh()` remounts this provider (e.g. TanStack Start) — an
+   * unconditional refresh would re-fire this mount effect and refresh again,
+   * whereas guarding on the (persistent) cookie self-terminates after the one
+   * refresh that clears it. The cookie is cleared either way via `setTenant`.
    */
   React.useEffect(() => {
     if (!initialValue) {
-      setTenant({ id: undefined, refresh: true })
+      setTenant({ id: undefined, refresh: Boolean(getTenantCookie()) })
     }
   }, [initialValue, setTenant])
 

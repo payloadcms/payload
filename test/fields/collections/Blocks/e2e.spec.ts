@@ -1,6 +1,6 @@
 import type { BrowserContext, Page } from '@playwright/test'
 
-import { expect, test } from '@playwright/test'
+import { expect } from '@playwright/test'
 import { copyPasteField } from '__helpers/e2e/copyPasteField.js'
 import {
   addBlock,
@@ -10,6 +10,7 @@ import {
   reorderBlocks,
   selectBlockFromDrawer,
 } from '__helpers/e2e/fields/blocks/index.js'
+import { test } from '__helpers/e2e/playwright.js'
 import { scrollEntirePage } from '__helpers/e2e/scrollEntirePage.js'
 import { toggleBlockOrArrayRow } from '__helpers/e2e/toggleCollapsible.js'
 import path from 'path'
@@ -18,8 +19,6 @@ import { fileURLToPath } from 'url'
 
 import { assertNetworkRequests } from '../../../__helpers/e2e/assertNetworkRequests.js'
 import {
-  ensureCompilationIsDone,
-  initPageConsoleErrorCatch,
   saveDocAndAssert,
   // throttleTest,
 } from '../../../__helpers/e2e/helpers.js'
@@ -28,6 +27,8 @@ import { assertToastErrors } from '../../../__helpers/shared/assertToastErrors.j
 import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { RESTClient } from '../../../__helpers/shared/rest.js'
+import { ensureCompilationIsDone } from '../../../__setup/e2e/ensureCompilationIsDone.js'
+import { initPage } from '../../../__setup/e2e/initPage.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -53,10 +54,7 @@ describe('Block fields', () => {
     }))
 
     context = await browser.newContext()
-    page = await context.newPage()
-    initPageConsoleErrorCatch(page)
-
-    await ensureCompilationIsDone({ page, serverURL })
+    ;({ page } = await initPage({ context, serverURL }))
   })
 
   beforeEach(async () => {
@@ -86,13 +84,13 @@ describe('Block fields', () => {
     url = new AdminUrlUtil(serverURL, 'block-fields')
   })
 
-  test('should open blocks drawer and select first block', async () => {
+  test('should open blocks drawer and select first block', { framework: 'rsc' }, async () => {
     await page.goto(url.create)
 
     await addBlock({
-      page,
-      fieldName: 'blocks',
       blockToSelect: 'Content',
+      fieldName: 'blocks',
+      page,
     })
 
     // ensure the block was appended to the rows
@@ -103,15 +101,21 @@ describe('Block fields', () => {
     )
   })
 
+  test('should hide add button on readOnly blocks field', async () => {
+    await page.goto(url.create)
+
+    await expect(page.locator('#field-readOnly .blocks-field__drawer-toggler')).toBeHidden()
+  })
+
   test('should reset search state in blocks drawer on re-open', async () => {
     await page.goto(url.create)
 
     const blocksDrawer = await openBlocksDrawer({
-      page,
       fieldName: 'blocks',
+      page,
     })
 
-    const searchInput = page.locator('.block-search__input')
+    const searchInput = page.locator('.block-search__input input')
     await searchInput.fill('Number')
 
     // select the first block in the drawer
@@ -131,10 +135,10 @@ describe('Block fields', () => {
     await expect(firstBlockSelector).toContainText('Content')
   })
 
-  test('should open blocks drawer from block row and add below', async () => {
+  test('should open blocks drawer from block row and add below', { framework: 'rsc' }, async () => {
     await page.goto(url.create)
 
-    await addBlockBelow(page, { fieldName: 'blocks', blockToSelect: 'Content' })
+    await addBlockBelow(page, { blockToSelect: 'Content', fieldName: 'blocks' })
 
     // ensure the block was inserted beneath the first in the rows
     const addedRow = page.locator('#field-blocks #blocks-row-1')
@@ -168,9 +172,9 @@ describe('Block fields', () => {
     await page.goto(url.create)
 
     await addBlock({
-      page,
-      fieldName: 'collapsedByDefaultBlocks',
       blockToSelect: 'Localized Content',
+      fieldName: 'collapsedByDefaultBlocks',
+      page,
     })
 
     const row = page.locator(`#collapsedByDefaultBlocks-row-4`)
@@ -184,9 +188,9 @@ describe('Block fields', () => {
     await page.goto(url.create)
 
     await addBlock({
-      page,
-      fieldName: 'collapsedByDefaultBlocks',
       blockToSelect: 'Localized Content',
+      fieldName: 'collapsedByDefaultBlocks',
+      page,
     })
 
     const row = page.locator(`#collapsedByDefaultBlocks-row-4`)
@@ -196,10 +200,10 @@ describe('Block fields', () => {
     await expect(page.locator(`#field-collapsedByDefaultBlocks__4__text`)).toBeHidden()
 
     await toggleBlockOrArrayRow({
-      page,
       fieldName: 'collapsedByDefaultBlocks',
-      targetState: 'open',
+      page,
       rowIndex: 4,
+      targetState: 'open',
     })
 
     await page.locator('input#field-collapsedByDefaultBlocks__4__text').fill('Hello, world!')
@@ -216,9 +220,9 @@ describe('Block fields', () => {
     await expect(page.locator('#field-i18nBlocks .blocks-field__header')).toContainText('Block en')
 
     await addBlock({
-      page,
-      fieldName: 'i18nBlocks',
       blockToSelect: 'Text en',
+      fieldName: 'i18nBlocks',
+      page,
     })
 
     // ensure the block was appended to the rows
@@ -229,13 +233,13 @@ describe('Block fields', () => {
     )
   })
 
-  test('should render custom block row label', async () => {
+  test('should render custom block row label', { framework: 'rsc' }, async () => {
     await page.goto(url.create)
 
     await addBlock({
-      page,
-      fieldName: 'blocks',
       blockToSelect: 'Content',
+      fieldName: 'blocks',
+      page,
     })
 
     await expect(
@@ -249,9 +253,9 @@ describe('Block fields', () => {
     await page.goto(url.create)
 
     await addBlock({
-      page,
-      fieldName: 'blocksWithSimilarConfigs',
       blockToSelect: 'Block A',
+      fieldName: 'blocksWithSimilarConfigs',
+      page,
     })
 
     await page
@@ -268,9 +272,9 @@ describe('Block fields', () => {
     ).toHaveValue('items>0>title')
 
     await addBlock({
-      page,
-      fieldName: 'blocksWithSimilarConfigs',
       blockToSelect: 'Block B',
+      fieldName: 'blocksWithSimilarConfigs',
+      page,
     })
 
     await page
@@ -296,9 +300,9 @@ describe('Block fields', () => {
     await page.goto(url.create)
 
     await addBlock({
-      page,
-      fieldName: 'blocksWithMinRows',
       blockToSelect: 'Block With Min Row',
+      fieldName: 'blocksWithMinRows',
+      page,
     })
 
     const firstRow = page.locator('input[name="blocksWithMinRows.0.blockTitle"]')
@@ -308,8 +312,8 @@ describe('Block fields', () => {
 
     await page.click('#action-save', { delay: 100 })
     await assertToastErrors({
-      page,
       errors: ['Blocks With Min Rows'],
+      page,
     })
   })
 
@@ -338,48 +342,52 @@ describe('Block fields', () => {
   })
 
   describe('row manipulation', () => {
-    test('moving rows should immediately move custom row labels', async () => {
-      await page.goto(url.create)
-      // Ensure blocks are loaded
-      await expect(page.locator('.shimmer-effect')).toHaveCount(0)
+    test(
+      'moving rows should immediately move custom row labels',
+      { framework: 'rsc' },
+      async () => {
+        await page.goto(url.create)
+        // Ensure blocks are loaded
+        await expect(page.locator('.shimmer-effect')).toHaveCount(0)
 
-      // first ensure that the first block has the custom header, and that the second block doesn't
+        // first ensure that the first block has the custom header, and that the second block doesn't
 
-      await expect(
-        page.locator('#field-blocks #blocks-row-0 .blocks-field__block-header'),
-      ).toHaveText('Custom Block Label: Content 01')
+        await expect(
+          page.locator('#field-blocks #blocks-row-0 .blocks-field__block-header'),
+        ).toHaveText('Custom Block Label: Content 01')
 
-      const secondBlockHeader = page.locator(
-        '#field-blocks #blocks-row-1 .blocks-field__block-header',
-      )
+        const secondBlockHeader = page.locator(
+          '#field-blocks #blocks-row-1 .blocks-field__block-header',
+        )
 
-      await expect(secondBlockHeader.locator('.blocks-field__block-pill')).toHaveText('Number')
+        await expect(secondBlockHeader.locator('.blocks-field__block-pill')).toHaveText('Number')
 
-      await expect(secondBlockHeader.locator('input[id="blocks.1.blockName"]')).toHaveValue(
-        'Second block',
-      )
+        await expect(secondBlockHeader.locator('input[id="blocks.1.blockName"]')).toHaveValue(
+          'Second block',
+        )
 
-      await wait(1000)
+        await wait(1000)
 
-      await reorderBlocks({
-        page,
-        fieldName: 'blocks',
-        fromBlockIndex: 0,
-        toBlockIndex: 1,
-      })
+        await reorderBlocks({
+          fieldName: 'blocks',
+          fromBlockIndex: 0,
+          page,
+          toBlockIndex: 1,
+        })
 
-      // Important: do _not_ poll here, use `textContent()` instead of `toHaveText()`
-      // This will prevent Playwright from polling for the change to the DOM
-      await expect(async () => {
-        const text = await page
-          .locator('#field-blocks #blocks-row-1 .blocks-field__block-header')
-          .textContent()
-        expect(text).toMatch(/^Custom Block Label: Content/)
-      }).toPass()
-    })
+        // Important: do _not_ poll here, use `textContent()` instead of `toHaveText()`
+        // This will prevent Playwright from polling for the change to the DOM
+        await expect(async () => {
+          const text = await page
+            .locator('#field-blocks #blocks-row-1 .blocks-field__block-header')
+            .textContent()
+          expect(text).toMatch(/^Custom Block Label: Content/)
+        }).toPass()
+      },
+    )
 
     describe('react hooks', () => {
-      test('should add 2 new block rows', async () => {
+      test('should add 2 new block rows', { framework: 'rsc' }, async () => {
         await page.goto(url.create)
         // Ensure blocks are loaded
         await expect(page.locator('.shimmer-effect')).toHaveCount(0)
@@ -529,15 +537,64 @@ describe('Block fields', () => {
         fieldName: 'readOnly',
         page,
       })
+      const popupBtn = page
+        .locator('#field-groupedBlocks .popup.clipboard-action__popup button.popup-button')
+        .first()
+      await expect(popupBtn).toBeVisible()
+      await popupBtn.click()
+      const disabledPasteBtn = page.locator(
+        '.popup__content div.popup-button-list__disabled:has-text("Paste Field")',
+      )
+      await expect(disabledPasteBtn).toBeVisible()
+    })
+
+    test('should disable paste when the clipboard is empty', async () => {
+      await page.goto(url.create)
+      await page.evaluate(() => localStorage.removeItem('_payloadClipboard'))
+
+      const fieldPopupBtn = page
+        .locator('#field-blocks .popup.clipboard-action__popup button.popup-button')
+        .first()
+      await fieldPopupBtn.click()
+      await expect(
+        page.locator('.popup__content div.popup-button-list__disabled:has-text("Paste Field")'),
+      ).toBeVisible()
+      await page.keyboard.press('Escape')
+
+      const rowPopupBtn = page
+        .locator('#blocks-row-0 .collapsible__actions button.array-actions__button')
+        .first()
+      await rowPopupBtn.click()
+      await expect(
+        page.locator('.popup__content div.popup-button-list__disabled:has-text("Replace Row")'),
+      ).toBeVisible()
+      await expect(
+        page.locator('.popup__content div.popup-button-list__disabled:has-text("Paste Below")'),
+      ).toBeVisible()
+    })
+
+    test('should enable paste after copying a compatible field', async () => {
+      await page.goto(url.create)
+      await page.evaluate(() => localStorage.removeItem('_payloadClipboard'))
+
+      const fieldPopupBtn = page
+        .locator('#field-blocks .popup.clipboard-action__popup button.popup-button')
+        .first()
+      await fieldPopupBtn.click()
+      await expect(
+        page.locator('.popup__content div.popup-button-list__disabled:has-text("Paste Field")'),
+      ).toBeVisible()
+      await page.keyboard.press('Escape')
+
       await copyPasteField({
-        fieldName: 'groupedBlocks',
+        fieldName: 'blocks',
         page,
-        action: 'paste',
       })
-      const pasteErrorToast = page
-        .locator('.payload-toast-item.toast-error')
-        .filter({ hasText: 'Invalid clipboard data.' })
-      await expect(pasteErrorToast).toBeVisible()
+
+      await fieldPopupBtn.click()
+      await expect(
+        page.locator('.popup__content .popup-button-list button:has-text("Paste Field")'),
+      ).toBeVisible()
     })
 
     test('should copy and paste block fields', async () => {
@@ -550,8 +607,8 @@ describe('Block fields', () => {
       await rowTextInput.fill(textVal)
 
       await copyPasteField({
-        page,
         fieldName: 'blocks',
+        page,
       })
 
       await page.reload()
@@ -559,9 +616,9 @@ describe('Block fields', () => {
       await expect(rowTextInput).toHaveValue('first block')
 
       await copyPasteField({
-        page,
         action: 'paste',
         fieldName: 'blocks',
+        page,
       })
 
       await expect(rowTextInput).toHaveValue(textVal)
@@ -577,8 +634,8 @@ describe('Block fields', () => {
       await rowTextInput.fill(textVal)
 
       await copyPasteField({
-        page,
         fieldName: 'blocks',
+        page,
         rowIndex: 0,
       })
 
@@ -587,17 +644,18 @@ describe('Block fields', () => {
       await expect(rowTextInput).toHaveValue('first block')
 
       await copyPasteField({
-        page,
         action: 'paste',
         fieldName: 'blocks',
+        page,
         rowIndex: 0,
       })
 
       await expect(rowTextInput).toHaveValue(textVal)
     })
 
-    test('should copy a block row and paste into a field with the same schema', async () => {
+    test('should paste a copied row below the target row without replacing it', async () => {
       await page.goto(url.create)
+      const field = page.locator('#field-blocks')
 
       await copyPasteField({
         page,
@@ -607,8 +665,32 @@ describe('Block fields', () => {
 
       await copyPasteField({
         page,
-        fieldName: 'duplicate',
+        action: 'paste-below',
+        fieldName: 'blocks',
+        rowIndex: 0,
+      })
+
+      const rows = field.locator('> div.blocks-field__rows > div')
+      await expect(rows).toHaveCount(5)
+
+      await expect(field.locator('#field-blocks__0__text')).toHaveValue('first block')
+      await expect(field.locator('#field-blocks__1__number')).toHaveValue('342')
+      await expect(field.locator('#field-blocks__2__number')).toHaveValue('342')
+    })
+
+    test('should copy a block row and paste into a field with the same schema', async () => {
+      await page.goto(url.create)
+
+      await copyPasteField({
+        fieldName: 'blocks',
+        page,
+        rowIndex: 1,
+      })
+
+      await copyPasteField({
         action: 'paste',
+        fieldName: 'duplicate',
+        page,
       })
 
       const rowsContainer = page.locator('#field-duplicate > div.blocks-field__rows').first()
@@ -628,15 +710,15 @@ describe('Block fields', () => {
       await originalInput.fill(textVal)
 
       await copyPasteField({
-        page,
         fieldName: 'blocks',
+        page,
       })
 
       const field = page.locator('#field-duplicate')
       const fieldInput = field.locator('#field-duplicate__0__text')
       await expect(fieldInput).toHaveValue('first block')
 
-      await copyPasteField({ page, action: 'paste', fieldName: 'duplicate', rowIndex: 0 })
+      await copyPasteField({ action: 'paste', fieldName: 'duplicate', page, rowIndex: 0 })
 
       const rowsContainer = page.locator('#field-duplicate > div.blocks-field__rows').first()
       await expect(rowsContainer).toBeVisible()
@@ -648,7 +730,7 @@ describe('Block fields', () => {
       await page.goto(url.create)
 
       const field = page.locator('#field-blocks')
-      await addBlock({ page, fieldName: 'blocks', blockToSelect: 'Sub Block' })
+      await addBlock({ blockToSelect: 'Sub Block', fieldName: 'blocks', page })
 
       const textInputRowOne = field.locator('#field-blocks__2__subBlocks__1__text')
       await expect(textInputRowOne).toBeVisible()
@@ -657,16 +739,16 @@ describe('Block fields', () => {
       await textInputRowOne.fill(textInputRowOneValue)
 
       await copyPasteField({
-        page,
         fieldName: 'blocks',
+        page,
         rowIndex: 2,
       })
 
       await copyPasteField({
-        page,
-        fieldName: 'blocks',
-        rowIndex: 4,
         action: 'paste',
+        fieldName: 'blocks',
+        page,
+        rowIndex: 4,
       })
 
       const textInputRowTwo = field.locator('#field-blocks__4__subBlocks__1__text')
@@ -678,9 +760,9 @@ describe('Block fields', () => {
       await page.goto(url.create)
 
       await addBlock({
-        page,
-        fieldName: 'blocks',
         blockToSelect: 'Sub Block',
+        fieldName: 'blocks',
+        page,
       })
 
       const field = page.locator('#field-blocks')
@@ -695,20 +777,92 @@ describe('Block fields', () => {
       await expect(subArrayContainer2).toHaveCount(0)
 
       await copyPasteField({
-        page,
         fieldName: 'blocks',
+        page,
         rowIndex: 4,
       })
 
       await copyPasteField({
-        page,
-        fieldName: 'blocks',
-        rowIndex: 2,
         action: 'paste',
+        fieldName: 'blocks',
+        page,
+        rowIndex: 2,
       })
 
       await expect(subArrayContainer).toHaveCount(0)
       await expect(subArrayContainer2).toHaveCount(0)
+    })
+
+    test('should copy a nested block row and paste into a sibling nested block row', async () => {
+      await page.goto(url.create)
+
+      const field = page.locator('#field-blocks')
+
+      const sourceText = field.locator('#field-blocks__2__subBlocks__1__text')
+      await expect(sourceText).toBeVisible()
+
+      const textVal = 'nested block row copy'
+      await sourceText.fill(textVal)
+
+      await copyPasteField({
+        fieldName: 'blocks__2__subBlocks',
+        page,
+        rowIndex: 1,
+      })
+
+      await copyPasteField({
+        action: 'paste',
+        fieldName: 'blocks__2__subBlocks',
+        page,
+        rowIndex: 0,
+      })
+
+      const targetText = field.locator('#field-blocks__2__subBlocks__0__text')
+      await expect(targetText).toBeVisible()
+      await expect(targetText).toHaveValue(textVal)
+    })
+
+    test('should copy a nested block field and paste into a sibling nested block field', async () => {
+      await page.goto(url.create)
+
+      await addBlock({
+        blockToSelect: 'Sub Block',
+        fieldName: 'blocks',
+        page,
+      })
+
+      const field = page.locator('#field-blocks')
+
+      const sourceRows = field.locator('#field-blocks__2__subBlocks > div.blocks-field__rows > div')
+      const targetRows = field.locator('#field-blocks__4__subBlocks > div.blocks-field__rows > div')
+      await expect(sourceRows).toHaveCount(2)
+      await expect(targetRows).toHaveCount(0)
+
+      await copyPasteField({
+        fieldName: 'blocks__2__subBlocks',
+        page,
+      })
+
+      await copyPasteField({
+        action: 'paste',
+        fieldName: 'blocks__4__subBlocks',
+        page,
+      })
+
+      await expect(targetRows).toHaveCount(2)
+    })
+
+    test('should disable paste on a nested block row when the clipboard is empty', async () => {
+      await page.goto(url.create)
+      await page.evaluate(() => localStorage.removeItem('_payloadClipboard'))
+
+      const rowPopupBtn = page
+        .locator('#blocks-2-subBlocks-row-0 .collapsible__actions button.array-actions__button')
+        .first()
+      await rowPopupBtn.click()
+      await expect(
+        page.locator('.popup__content div.popup-button-list__disabled:has-text("Replace Row")'),
+      ).toBeVisible()
     })
 
     test('should generate unique block IDs when pasting blocks across documents', async () => {
@@ -723,17 +877,17 @@ describe('Block fields', () => {
       const firstDocURL = page.url()
 
       await copyPasteField({
-        page,
         fieldName: 'blocks',
+        page,
       })
 
       // Create second document
       await page.goto(url.create)
 
       await copyPasteField({
-        page,
         action: 'paste',
         fieldName: 'blocks',
+        page,
       })
 
       const pastedTextInput = page.locator('#field-blocks__0__text')
@@ -754,7 +908,7 @@ describe('Block fields', () => {
     test('should display admin.images.thumbnail in blocks drawer', async () => {
       await page.goto(url.create)
 
-      const blocksDrawer = await openBlocksDrawer({ page, fieldName: 'blocks' })
+      const blocksDrawer = await openBlocksDrawer({ fieldName: 'blocks', page })
 
       const withIconCard = blocksDrawer
         .locator('.blocks-drawer__block')
@@ -770,7 +924,7 @@ describe('Block fields', () => {
     test('should display imageURL as thumbnail fallback in blocks drawer', async () => {
       await page.goto(url.create)
 
-      const blocksDrawer = await openBlocksDrawer({ page, fieldName: 'blocks' })
+      const blocksDrawer = await openBlocksDrawer({ fieldName: 'blocks', page })
 
       const contentCard = blocksDrawer
         .locator('.blocks-drawer__block')
@@ -803,9 +957,8 @@ describe('Block fields', () => {
       await expect(labels.nth(1)).toHaveText('Block Five')
     })
 
-    // This test has multiple assertNetworkRequests calls (5s timeout each), requiring extended timeout
-    test('ensure dynamic filterOptions are respected', async () => {
-      test.slow() // Triples the default timeout
+    test('ensure dynamic filterOptions are respected', { framework: 'rsc' }, async () => {
+      test.slow()
       await page.goto(url.create)
 
       /**
@@ -848,8 +1001,8 @@ describe('Block fields', () => {
           await page.locator('#field-enabledBlocks').fill('nonexistentblock')
         },
         {
-          minimumNumberOfRequests: 1,
           allowedNumberOfRequests: 2,
+          minimumNumberOfRequests: 1,
         },
       )
       await wait(200) // To be safe, wait to ensure form state has been merged back on the client-side
@@ -870,8 +1023,8 @@ describe('Block fields', () => {
           await page.locator('#field-enabledBlocks').fill('blockTwo')
         },
         {
-          minimumNumberOfRequests: 1,
           allowedNumberOfRequests: 2,
+          minimumNumberOfRequests: 1,
         },
       )
       await wait(200) // To be safe, wait to ensure form state has been merged back on the client-side
@@ -909,8 +1062,8 @@ describe('Block fields', () => {
           await page.locator('#field-enabledBlocks').fill('blockOne')
         },
         {
-          minimumNumberOfRequests: 1,
           allowedNumberOfRequests: 2,
+          minimumNumberOfRequests: 1,
         },
       )
       await wait(200) // To be safe, wait to ensure form state has been merged back on the client-side

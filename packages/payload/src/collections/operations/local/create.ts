@@ -1,5 +1,4 @@
 import type {
-  Document,
   PayloadRequest,
   PopulateType,
   SelectType,
@@ -24,6 +23,7 @@ import {
   type Payload,
   type RequestContext,
   type TypedLocale,
+  type User,
 } from '../../../index.js'
 import { getFileByPath } from '../../../uploads/getFileByPath.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
@@ -105,11 +105,10 @@ type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType> = {
    * @default false
    */
   showHiddenFields?: boolean
-  // TODO: Strongly type User as TypedUser (= User in v4.0)
   /**
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
-  user?: Document
+  user?: null | User
 } & Pick<FindOptions<TSlug, TSelect>, 'select'>
 
 export type Options<

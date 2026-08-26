@@ -15,6 +15,7 @@ const TEST_SUITES = [
   'admin-root',
   'array-update',
   'auth',
+  'base-access',
   'collections-graphql',
   'collections-rest',
   'config',
@@ -26,10 +27,10 @@ const TEST_SUITES = [
   'field-paths',
   'fields-relationship',
   'folders',
-  'folders-browse-by-disabled',
   'form-state',
   'globals',
   'graphql',
+  'hierarchy',
   'hooks',
   'joins',
   'kv',
@@ -54,13 +55,14 @@ const TEST_SUITES = [
   'plugin-stripe',
   'plugins',
   'query-presets',
-  // 'queues', Not supported yet in content api
+  'queues',
   'relationships',
   'sdk',
   'select',
   'sort',
   'storage-azure',
   'storage-s3',
+  'tags',
   'trash',
   'uploads',
   'versions',
@@ -68,6 +70,8 @@ const TEST_SUITES = [
 ]
 
 interface SuiteResult {
+  /** Captured output for a suite that produced no parseable test report. */
+  diagnostic?: string
   duration: number
   failed: boolean
   name: string
@@ -77,7 +81,12 @@ interface SuiteResult {
 
 const isContentAPIMode = process.env.PAYLOAD_DATABASE === 'content-api'
 const contentAPISuiteTimeout = 120000
+// Chatty suites can exceed Node's 1 MiB execSync default; truncated stdout has
+// no JSON report, so the suite is recorded as 0/<collected>.
+const vitestExecMaxBuffer = 64 * 1024 * 1024
 const vitestBinary = './node_modules/.bin/vitest'
+const diagnosticMaxLines = 40
+const diagnosticMaxChars = 4000
 
 function getVitestEnv(options?: { unsetPayloadDatabase?: boolean }): NodeJS.ProcessEnv {
   const env = {
@@ -182,6 +191,32 @@ function parseTestResults(output: string): { passed: number; total: number } {
   }
 }
 
+/**
+ * A suite that reports 0 passing usually died before the JSON reporter flushed,
+ * so the counts alone say nothing about why. Keep the tail of what it printed so
+ * the summary can surface an actionable error instead of a bare `0/<total>`.
+ */
+function extractDiagnostic(output: string): string | undefined {
+  const trimmed = output.trim()
+  if (!trimmed) {
+    return undefined
+  }
+
+  // Drop the JSON report if one was emitted; the interesting output precedes it.
+  const reportIndex = trimmed.lastIndexOf('{"numTotalTestSuites"')
+  const withoutReport = (reportIndex === -1 ? trimmed : trimmed.slice(0, reportIndex)).trim()
+  if (!withoutReport) {
+    return undefined
+  }
+
+  const lines = withoutReport.split('\n').slice(-diagnosticMaxLines)
+  const diagnostic = lines.join('\n')
+
+  return diagnostic.length > diagnosticMaxChars
+    ? `...\n${diagnostic.slice(-diagnosticMaxChars)}`
+    : diagnostic
+}
+
 function parseCollectedTests(output: string): number {
   const jsonStart = output.lastIndexOf('\n[') + 1 || output.indexOf('[')
   if (jsonStart === -1) {
@@ -216,6 +251,7 @@ function getCollectedTestCount(suiteName: string): number {
         cwd: path.join(dirname, '..'),
         encoding: 'utf8',
         env: getVitestEnv({ unsetPayloadDatabase }),
+        maxBuffer: vitestExecMaxBuffer,
         stdio: ['pipe', 'pipe', 'pipe'],
         ...(isContentAPIMode ? { timeout: contentAPISuiteTimeout } : {}),
       })
@@ -335,7 +371,7 @@ function getExplicitSkippedTestCount(suiteName: string): number {
     }
 
     if (ts.isCallExpression(node) && ts.isPropertyAccessExpression(node.expression)) {
-      const { expression, name } = node.expression
+      const { name, expression } = node.expression
       if (
         ts.isIdentifier(expression) &&
         (expression.text === 'it' || expression.text === 'test') &&
@@ -356,10 +392,10 @@ function runTestSuite(suiteName: string): SuiteResult {
   const startTime = Date.now()
   const result: SuiteResult = {
     name: suiteName,
+    duration: 0,
+    failed: false,
     passed: 0,
     total: 0,
-    failed: false,
-    duration: 0,
   }
 
   try {
@@ -370,6 +406,7 @@ function runTestSuite(suiteName: string): SuiteResult {
       cwd: path.join(dirname, '..'),
       encoding: 'utf8',
       env: getVitestEnv(),
+      maxBuffer: vitestExecMaxBuffer,
       stdio: ['pipe', 'pipe', 'pipe'],
       ...(isContentAPIMode ? { timeout: contentAPISuiteTimeout } : {}),
     })
@@ -384,6 +421,10 @@ function runTestSuite(suiteName: string): SuiteResult {
     }
     if (result.total === 0) {
       result.total = getStaticTestCount(suiteName)
+    }
+
+    if (result.passed === 0) {
+      result.diagnostic = extractDiagnostic(output)
     }
   } catch (error: unknown) {
     // Try to parse failure output from both stdout and stderr
@@ -416,6 +457,10 @@ function runTestSuite(suiteName: string): SuiteResult {
     }
     if (result.total === 0) {
       result.total = getStaticTestCount(suiteName)
+    }
+
+    if (result.passed === 0) {
+      result.diagnostic = extractDiagnostic(errorOutput)
     }
   }
 
@@ -513,6 +558,24 @@ function main() {
       const icon = r.passed === 0 ? '❌' : '⚠️'
       console.log(`   ${icon} ${r.name} (${r.passed}/${r.total})`)
     })
+
+    const suitesWithoutReport = results.filter((r) => r.passed === 0 && r.diagnostic)
+
+    if (suitesWithoutReport.length > 0) {
+      console.log('\n' + '='.repeat(80))
+      console.log('🔎 Suites that produced no test report')
+      console.log(
+        'These reported 0 passing because no JSON report was parsed, not because every test failed.',
+      )
+      console.log('='.repeat(80))
+
+      for (const r of suitesWithoutReport) {
+        console.log(`\n--- ${r.name} (${r.passed}/${r.total}) ---`)
+        console.log(r.diagnostic)
+      }
+      console.log()
+    }
+
     process.exit(1)
   } else {
     console.log('✅ All test suites passed!')

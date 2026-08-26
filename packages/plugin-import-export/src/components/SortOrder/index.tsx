@@ -6,7 +6,7 @@ import { FieldLabel, ReactSelect, useDocumentInfo, useField, useListQuery } from
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 
 import { applySortOrder, normalizeQueryParam, stripSortDash } from '../../utilities/sortHelpers.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'sort-order-field'
 
@@ -110,7 +110,6 @@ export const SortOrder: SelectFieldClientComponent = (props) => {
     <div className={baseClass}>
       <FieldLabel label={props.field.label} path={props.path} />
       <ReactSelect
-        className={baseClass}
         disabled={props.readOnly}
         inputId={`field-${props.path.replace(/\./g, '__')}`}
         isClearable={false}

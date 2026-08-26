@@ -28,25 +28,25 @@
       background: transparent;
       border: none;
       border-radius: var(--radius-small);
-      color: var(--icon-default-secondary);
+      color: var(--color-icon-secondary);
       cursor: pointer;
 
       &:hover {
-        color: var(--icon-default-secondary-hover);
-      }
-
-      &:focus-visible {
-        outline: 1px solid var(--border-selected);
+        color: var(--color-icon-secondary-hover);
       }
 
       &:disabled {
-        color: var(--icon-disabled-default);
+        color: var(--color-icon-disabled);
         cursor: not-allowed;
       }
     }
 
-    &.error input {
-      border-color: var(--border-danger-strong);
+    &.error input:not(:focus) {
+      border-color: var(--field-color-border-error);
+
+      &:hover {
+        border-color: var(--field-color-border-error);
+      }
     }
   }
 }

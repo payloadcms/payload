@@ -1,7 +1,7 @@
 'use client'
 import type { PasswordFieldValidation, PayloadRequest } from 'payload'
 
-import { password } from 'payload/shared'
+import { isFieldDisabled, password } from 'payload/shared'
 import React, { useCallback, useMemo } from 'react'
 
 import type { PasswordFieldProps } from './types.js'
@@ -24,7 +24,6 @@ const PasswordFieldComponent: React.FC<PasswordFieldProps> = (props) => {
       admin: {
         className,
         description,
-        disabled: disabledFromProps,
         placeholder,
         rtl,
       } = {} as PasswordFieldProps['field']['admin'],
@@ -108,7 +107,7 @@ const PasswordFieldComponent: React.FC<PasswordFieldProps> = (props) => {
       }}
       path={path}
       placeholder={placeholder}
-      readOnly={disabled || disabledFromProps}
+      readOnly={disabled || isFieldDisabled(field, 'field')}
       required={required}
       rtl={renderRTL}
       showError={showError}

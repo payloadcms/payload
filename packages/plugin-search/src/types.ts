@@ -7,6 +7,7 @@ import type {
   Payload,
   PayloadRequest,
   StaticLabel,
+  TypedLocale,
 } from 'payload'
 
 export type DocToSync = {
@@ -30,21 +31,14 @@ export type BeforeSync = (args: {
 
 export type FieldsOverride = (args: { defaultFields: Field[] }) => Field[]
 
-export type SkipSyncFunction<ConfigTypes = unknown> = (args: {
+export type SkipSyncFunction = (args: {
   collectionSlug: string
   doc: any
-  locale: ConfigTypes extends { locale: unknown } ? ConfigTypes['locale'] : string | undefined
+  locale: TypedLocale | undefined
   req: PayloadRequest
 }) => boolean | Promise<boolean>
 
-export type SearchPluginConfig<ConfigTypes = unknown> = {
-  /**
-   * @deprecated
-   * This plugin gets the api route from the config directly and does not need to be passed in.
-   * As long as you have `routes.api` set in your Payload config, the plugin will use that.
-   * This property will be removed in the next major version.
-   */
-  apiBasePath?: string
+export type SearchPluginConfig = {
   beforeSync?: BeforeSync
   collections?: string[]
   defaultPriorities?: {
@@ -84,7 +78,7 @@ export type SearchPluginConfig<ConfigTypes = unknown> = {
    *   return !tenant.allowedLocales.includes(locale)
    * }
    */
-  skipSync?: SkipSyncFunction<ConfigTypes>
+  skipSync?: SkipSyncFunction
   /**
    * Controls whether drafts are synced to the search index
    *
@@ -101,14 +95,14 @@ export type ResolvedCollectionLabels = {
   [collection: string]: StaticLabel
 }
 
-export type SearchPluginConfigWithLocales<ConfigTypes = unknown> = {
+export type SearchPluginConfigWithLocales = {
   labels?: CollectionLabels
-} & SearchPluginConfig<ConfigTypes>
+} & SearchPluginConfig
 
-export type SanitizedSearchPluginConfig<ConfigTypes = unknown> = {
+export type SanitizedSearchPluginConfig = {
   reindexBatchSize: number
   syncDrafts: boolean
-} & SearchPluginConfigWithLocales<ConfigTypes>
+} & SearchPluginConfigWithLocales
 
 export type SyncWithSearchArgs = {
   collection: string

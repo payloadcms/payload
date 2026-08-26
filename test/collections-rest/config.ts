@@ -32,6 +32,7 @@ const collectionWithName = (collectionSlug: string): CollectionConfig => {
         type: 'text',
       },
     ],
+    versions: false,
   }
 }
 
@@ -166,6 +167,7 @@ export default buildConfigWithDefaults({
           ],
         },
       ],
+      versions: false,
     },
     {
       slug: pointSlug,
@@ -176,6 +178,7 @@ export default buildConfigWithDefaults({
           type: 'point',
         },
       ],
+      versions: false,
     },
     collectionWithName(relationSlug),
     {
@@ -194,6 +197,7 @@ export default buildConfigWithDefaults({
           },
         },
       ],
+      versions: false,
     },
     {
       slug: customIdSlug,
@@ -213,6 +217,7 @@ export default buildConfigWithDefaults({
           ],
         },
       ],
+      versions: false,
     },
     {
       slug: customIdNumberSlug,
@@ -227,6 +232,7 @@ export default buildConfigWithDefaults({
           type: 'text',
         },
       ],
+      versions: false,
     },
     {
       slug: errorOnHookSlug,
@@ -261,6 +267,7 @@ export default buildConfigWithDefaults({
           },
         ],
       },
+      versions: false,
     },
     {
       slug: endpointsSlug,
@@ -270,6 +277,7 @@ export default buildConfigWithDefaults({
         handler: () => new Response(`${method} response`),
         path: `/${method}-test`,
       })),
+      versions: false,
     },
     {
       slug: 'disabled-bulk-edit-docs',
@@ -280,6 +288,18 @@ export default buildConfigWithDefaults({
         },
       ],
       disableBulkEdit: true,
+      versions: false,
+    },
+    {
+      slug: 'disabled-bulk-delete-docs',
+      fields: [
+        {
+          name: 'text',
+          type: 'text',
+        },
+      ],
+      disableBulkDelete: true,
+      versions: false,
     },
     LargeDocuments,
   ],

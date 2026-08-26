@@ -1,8 +1,9 @@
-import type { Payload } from 'payload'
+import type { Payload, UploadInstructions } from 'payload'
 import type { SuiteAPI } from 'vitest'
 
 import * as AWS from '@aws-sdk/client-s3'
 import { getFilePrefix } from '@payloadcms/plugin-cloud-storage/utilities'
+import fs from 'fs'
 import path from 'path'
 import { APIError } from 'payload'
 import { sanitizeFilename } from 'payload/shared'
@@ -10,6 +11,7 @@ import shelljs from 'shelljs'
 import { fileURLToPath } from 'url'
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
 
+import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { Config } from './payload-types.js'
 
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
@@ -17,7 +19,9 @@ import {
   mediaSlug,
   mediaWithCustomURLSlug,
   mediaWithGenerateFileURLSlug,
+  mediaWithOverwriteSlug,
   mediaWithPrefixSlug,
+  mediaWithThrowingHookSlug,
   prefix,
   restrictedMediaSlug,
   testMetadataSlug,
@@ -111,11 +115,11 @@ describe('@payloadcms/plugin-cloud-storage', () => {
       upload: {},
     } as any
 
-    describe('clientUploadContext prefix sanitization', () => {
+    describe('upload reference prefix sanitization', () => {
       it('should return a valid prefix unchanged', async () => {
         const result = await getFilePrefix({
-          clientUploadContext: { prefix: 'media/images' },
           collection: mockCollection,
+          uploadReference: { prefix: 'media/images' },
           filename: 'test.png',
           req: mockReq,
         })
@@ -124,8 +128,8 @@ describe('@payloadcms/plugin-cloud-storage', () => {
 
       it('should strip invalid segments from the prefix', async () => {
         const result = await getFilePrefix({
-          clientUploadContext: { prefix: '../other-collection/private' },
           collection: mockCollection,
+          uploadReference: { prefix: '../other-collection/private' },
           filename: 'test.png',
           req: mockReq,
         })
@@ -135,8 +139,8 @@ describe('@payloadcms/plugin-cloud-storage', () => {
 
       it('should handle deeply nested invalid segments', async () => {
         const result = await getFilePrefix({
-          clientUploadContext: { prefix: 'a/../../outside' },
           collection: mockCollection,
+          uploadReference: { prefix: 'a/../../outside' },
           filename: 'test.png',
           req: mockReq,
         })
@@ -146,8 +150,8 @@ describe('@payloadcms/plugin-cloud-storage', () => {
 
       it('should strip leading slashes from the prefix', async () => {
         const result = await getFilePrefix({
-          clientUploadContext: { prefix: '/absolute/path' },
           collection: mockCollection,
+          uploadReference: { prefix: '/absolute/path' },
           filename: 'test.png',
           req: mockReq,
         })
@@ -157,8 +161,8 @@ describe('@payloadcms/plugin-cloud-storage', () => {
 
       it('should strip dot segments from the prefix', async () => {
         const result = await getFilePrefix({
-          clientUploadContext: { prefix: './relative/./path' },
           collection: mockCollection,
+          uploadReference: { prefix: './relative/./path' },
           filename: 'test.png',
           req: mockReq,
         })
@@ -167,8 +171,8 @@ describe('@payloadcms/plugin-cloud-storage', () => {
 
       it('should normalize backslash separators', async () => {
         const result = await getFilePrefix({
-          clientUploadContext: { prefix: '..\\..\\outside' },
           collection: mockCollection,
+          uploadReference: { prefix: '..\\..\\outside' },
           filename: 'test.png',
           req: mockReq,
         })
@@ -177,8 +181,8 @@ describe('@payloadcms/plugin-cloud-storage', () => {
 
       it('should strip control characters from the prefix', async () => {
         const result = await getFilePrefix({
-          clientUploadContext: { prefix: 'media\x00/images' },
           collection: mockCollection,
+          uploadReference: { prefix: 'media\x00/images' },
           filename: 'test.png',
           req: mockReq,
         })
@@ -187,8 +191,8 @@ describe('@payloadcms/plugin-cloud-storage', () => {
 
       it('should return empty string for a prefix of only invalid segments', async () => {
         const result = await getFilePrefix({
-          clientUploadContext: { prefix: '../../..' },
           collection: mockCollection,
+          uploadReference: { prefix: '../../..' },
           filename: 'test.png',
           req: mockReq,
         })
@@ -197,7 +201,7 @@ describe('@payloadcms/plugin-cloud-storage', () => {
     })
 
     describe('fallback to DB lookup', () => {
-      it('should return empty string when no clientUploadContext and no DB match', async () => {
+      it('should return empty string when there is no upload reference or DB match', async () => {
         const result = await getFilePrefix({
           collection: mockCollection,
           filename: 'test.png',
@@ -265,10 +269,11 @@ describe('@payloadcms/plugin-cloud-storage', () => {
 
   describe('integration (non-composite prefixes)', () => {
     let payload: Payload
+    let restClient: NextRESTClient
     let TEST_BUCKET: string
 
     beforeAll(async () => {
-      ;({ payload } = await initPayloadInt(dirname, undefined, true, 'config.ts'))
+      ;({ payload, restClient } = await initPayloadInt(dirname, undefined, true, 'config.ts'))
       TEST_BUCKET = process.env.S3_BUCKET!
     })
 
@@ -593,6 +598,58 @@ describe('@payloadcms/plugin-cloud-storage', () => {
         })
       })
 
+      it('supports upload instructions when the adapter does not', async () => {
+        await restClient.login({ slug: 'users' })
+
+        const file = fs.readFileSync(path.resolve(dirname, '../uploads/image.png'))
+        const instructionsResponse = await restClient.POST('/upload-instructions', {
+          body: JSON.stringify({
+            collectionSlug: testMetadataSlug,
+            filename: 'staged-image.png',
+            filesize: file.length,
+            mimeType: 'image/png',
+          }),
+        })
+        const instructions = await instructionsResponse.json<UploadInstructions>()
+
+        expect(instructionsResponse.status).toBe(200)
+        expect(instructions.file.uploadReference.uploadId).toBeTruthy()
+
+        if (instructions.type !== 'http') {
+          throw new Error('Expected HTTP upload instructions')
+        }
+
+        const uploadPath = new URL(instructions.request.url, restClient.serverURL).pathname.replace(
+          payload.config.routes.api,
+          '',
+        ) as `/${string}`
+        const uploadResponse = await restClient.PUT(uploadPath, {
+          body: file,
+          headers: instructions.request.headers,
+        })
+
+        expect(uploadResponse.status).toBe(204)
+
+        const formData = new FormData()
+        formData.append('_payload', JSON.stringify({ testNote: 'Staged adapter upload' }))
+        formData.append('file', JSON.stringify(instructions.file))
+
+        const createResponse = await restClient.POST(`/${testMetadataSlug}`, { body: formData })
+        const { doc } = await createResponse.json<{
+          doc: {
+            id: number | string
+            sizes: { thumbnail: { filename: string } }
+            storageProvider: string
+          }
+        }>()
+
+        createdIDs.push(doc.id)
+
+        expect(createResponse.status).toBe(201)
+        expect(doc.storageProvider).toBe('test-adapter')
+        expect(doc.sizes.thumbnail.filename).toBeTruthy()
+      })
+
       it('should persist metadata on update operations', async () => {
         const upload = await payload.create({
           collection: testMetadataSlug,
@@ -641,6 +698,148 @@ describe('@payloadcms/plugin-cloud-storage', () => {
           storageIdChanged: storageIdsAreDifferent,
           timestampChanged: timestampsAreDifferent,
         })
+      })
+    })
+
+    describe('User afterChange hook propagation', () => {
+      const createdIDs: (number | string)[] = []
+
+      afterEach(async () => {
+        for (const id of createdIDs) {
+          try {
+            await payload.delete({ id, collection: mediaWithThrowingHookSlug })
+          } catch (_) {
+            // Ignore
+          }
+        }
+        createdIDs.length = 0
+      })
+
+      it('should surface user afterChange errors that throw during the plugin internal update on create', async () => {
+        await expect(
+          payload.create({
+            collection: mediaWithThrowingHookSlug,
+            data: { shouldThrow: true },
+            filePath: path.resolve(dirname, '../uploads/image.png'),
+          }),
+        ).rejects.toThrow('User afterChange hook throws error')
+      })
+
+      it('should surface user afterChange errors during reupload and preserve the previous file in S3', async () => {
+        const imagePath = path.resolve(dirname, '../uploads/image.png')
+        const buildFile = (name: string) => ({
+          name,
+          data: fs.readFileSync(imagePath),
+          mimetype: 'image/png',
+          size: fs.statSync(imagePath).size,
+        })
+
+        const initial = await payload.create({
+          collection: mediaWithThrowingHookSlug,
+          data: { shouldThrow: false },
+          file: buildFile('initial.png'),
+        })
+
+        createdIDs.push(initial.id)
+
+        const initialKey = `${initial.filename}`
+        const before = await client.send(
+          new AWS.HeadObjectCommand({ Bucket: TEST_BUCKET, Key: initialKey }),
+        )
+        expect(before.$metadata.httpStatusCode).toBe(200)
+
+        await expect(
+          payload.update({
+            id: initial.id,
+            collection: mediaWithThrowingHookSlug,
+            data: { shouldThrow: true },
+            file: buildFile('replacement.png'),
+          }),
+        ).rejects.toThrow('User afterChange hook throws error')
+
+        const after = await client.send(
+          new AWS.HeadObjectCommand({ Bucket: TEST_BUCKET, Key: initialKey }),
+        )
+        expect(after.$metadata.httpStatusCode).toBe(200)
+      })
+    })
+
+    describe('Reupload with overwriteExistingFiles', () => {
+      const createdIDs: (number | string)[] = []
+
+      afterEach(async () => {
+        for (const id of createdIDs) {
+          try {
+            await payload.delete({ id, collection: mediaWithOverwriteSlug })
+          } catch (_) {
+            // Ignore
+          }
+        }
+        createdIDs.length = 0
+      })
+
+      it('should preserve size variants in S3 when reupload reuses the same filename', async () => {
+        const imagePath = path.resolve(dirname, '../uploads/image.png')
+        const buildFile = (name: string) => ({
+          name,
+          data: fs.readFileSync(imagePath),
+          mimetype: 'image/png',
+          size: fs.statSync(imagePath).size,
+        })
+
+        const initial = (await payload.create({
+          collection: mediaWithOverwriteSlug,
+          data: {},
+          file: buildFile('overwrite.png'),
+          overwriteExistingFiles: true,
+        })) as unknown as {
+          filename: string
+          id: number | string
+          sizes: Record<string, { filename: string }>
+        }
+
+        createdIDs.push(initial.id)
+
+        const initialSizeKeys = Object.values(initial.sizes ?? {})
+          .map((s) => s?.filename)
+          .filter((f): f is string => typeof f === 'string')
+
+        expect(initialSizeKeys.length).toBeGreaterThan(0)
+
+        for (const key of [initial.filename, ...initialSizeKeys]) {
+          const head = await client.send(
+            new AWS.HeadObjectCommand({ Bucket: TEST_BUCKET, Key: key }),
+          )
+          expect(head.$metadata.httpStatusCode).toBe(200)
+        }
+
+        const updated = (await payload.update({
+          id: initial.id,
+          collection: mediaWithOverwriteSlug,
+          data: {},
+          file: buildFile('overwrite.png'),
+          overwriteExistingFiles: true,
+        })) as unknown as {
+          filename: string
+          sizes: Record<string, { filename: string }>
+        }
+
+        // Filenames should match because overwriteExistingFiles is enabled.
+        expect(updated.filename).toBe(initial.filename)
+
+        const updatedSizeKeys = Object.values(updated.sizes ?? {})
+          .map((s) => s?.filename)
+          .filter((f): f is string => typeof f === 'string')
+
+        expect(updatedSizeKeys.sort()).toEqual(initialSizeKeys.sort())
+
+        // All keys (main + every size variant) should still exist in S3.
+        for (const key of [updated.filename, ...updatedSizeKeys]) {
+          const head = await client.send(
+            new AWS.HeadObjectCommand({ Bucket: TEST_BUCKET, Key: key }),
+          )
+          expect(head.$metadata.httpStatusCode).toBe(200)
+        }
       })
     })
 

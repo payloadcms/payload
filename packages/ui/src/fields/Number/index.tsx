@@ -1,26 +1,17 @@
 'use client'
 import type { NumberFieldClientComponent, NumberFieldClientProps } from 'payload'
 
-import { getTranslation } from '@payloadcms/translations'
-import { isNumber } from 'payload/shared'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
-import type { Option } from '../../elements/ReactSelect/types.js'
+import type { NumberInputProps } from './types.js'
 
-import { InputStepper } from '../../elements/InputStepper/index.js'
-import { ReactSelect } from '../../elements/ReactSelect/index.js'
-import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
-import { useTranslation } from '../../providers/Translation/index.js'
-import { FieldDescription } from '../FieldDescription/index.js'
-import { FieldError } from '../FieldError/index.js'
-import { FieldLabel } from '../FieldLabel/index.js'
 import { mergeFieldStyles } from '../mergeFieldStyles.js'
-import { fieldBaseClass } from '../shared/index.js'
+import { NumberInput } from './Input.js'
 import './index.css'
 
-const baseClass = 'number'
+export { NumberInput, type NumberInputProps }
 
 const NumberFieldComponent: NumberFieldClientComponent = (props) => {
   const {
@@ -29,7 +20,7 @@ const NumberFieldComponent: NumberFieldClientComponent = (props) => {
       admin: {
         className,
         description,
-        placeholder: placeholderFromProps,
+        placeholder,
         step = 1,
       } = {} as NumberFieldClientProps['field']['admin'],
       hasMany = false,
@@ -45,8 +36,6 @@ const NumberFieldComponent: NumberFieldClientComponent = (props) => {
     readOnly,
     validate,
   } = props
-
-  const { i18n, t } = useTranslation()
 
   const memoizedValidate = useCallback(
     (value, options) => {
@@ -154,96 +143,33 @@ const NumberFieldComponent: NumberFieldClientComponent = (props) => {
 
   const styles = useMemo(() => mergeFieldStyles(field), [field])
 
-  const placeholder =
-    getTranslation(placeholderFromProps, i18n) || (hasMany ? t('general:enterANumber') : undefined)
-
   return (
-    <div
-      className={[
-        fieldBaseClass,
-        baseClass,
-        className,
-        showError && 'error',
-        (readOnly || disabled) && 'read-only',
-        hasMany && 'has-many',
-      ]
-        .filter(Boolean)
-        .join(' ')}
+    <NumberInput
+      AfterInput={AfterInput}
+      BeforeInput={BeforeInput}
+      className={className}
+      Description={Description}
+      description={description}
+      Error={Error}
+      hasMany={hasMany}
+      Label={Label}
+      label={label}
+      localized={localized}
+      max={max}
+      maxRows={maxRows}
+      min={min}
+      onChange={hasMany ? handleHasManyChange : handleChange}
+      onStep={handleStep}
+      path={path}
+      placeholder={placeholder}
+      readOnly={readOnly || disabled}
+      required={required}
+      showError={showError}
+      step={step}
       style={styles}
-    >
-      <RenderCustomComponent
-        CustomComponent={Label}
-        Fallback={
-          <FieldLabel label={label} localized={localized} path={path} required={required} />
-        }
-      />
-      <div className={`${fieldBaseClass}__wrap`}>
-        <RenderCustomComponent
-          CustomComponent={Error}
-          Fallback={<FieldError path={path} showError={showError} />}
-        />
-        {BeforeInput}
-        {hasMany ? (
-          <ReactSelect
-            className={`field-${path.replace(/\./g, '__')}`}
-            components={{ DropdownIndicator: null }}
-            disabled={readOnly || disabled}
-            filterOption={(_, rawInput) => {
-              const isOverHasMany = Array.isArray(value) && value.length >= maxRows
-              return isNumber(rawInput) && !isOverHasMany
-            }}
-            isClearable
-            isCreatable
-            isMulti
-            isSortable
-            noOptionsMessage={() => {
-              const isOverHasMany = Array.isArray(value) && value.length >= maxRows
-              if (isOverHasMany) {
-                return t('validation:limitReached', { max: maxRows, value: value.length + 1 })
-              }
-              return null
-            }}
-            // numberOnly
-            onChange={handleHasManyChange}
-            options={[]}
-            placeholder={placeholder}
-            showError={showError}
-            value={valueToRender as Option[]}
-          />
-        ) : (
-          <div className="form-input-group">
-            <input
-              aria-label={getTranslation(label, i18n) || path}
-              className="form-input"
-              disabled={readOnly || disabled}
-              id={`field-${path.replace(/\./g, '__')}`}
-              max={max}
-              min={min}
-              name={path}
-              onChange={handleChange}
-              onWheel={(e) => {
-                // @ts-expect-error - blur() exists on input elements but not typed on EventTarget
-                e.target.blur()
-              }}
-              placeholder={placeholder}
-              step={step}
-              type="number"
-              value={typeof value === 'number' ? value : ''}
-            />
-            <InputStepper
-              disabled={readOnly || disabled}
-              onDecrement={() => handleStep('down')}
-              onIncrement={() => handleStep('up')}
-            />
-          </div>
-        )}
-        {AfterInput}
-        <RenderCustomComponent
-          CustomComponent={Description}
-          Fallback={<FieldDescription description={description} path={path} />}
-        />
-      </div>
-    </div>
+      value={value as number}
+      valueToRender={valueToRender}
+    />
   )
 }
 

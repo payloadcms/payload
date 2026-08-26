@@ -28,4 +28,5 @@ export const TestMetadata: CollectionConfig = {
       },
     ],
   },
+  versions: false,
 }
