@@ -10,7 +10,11 @@ for (let i = 0; i < 256; i++) {
   HEX_TABLE.push((i < 16 ? '0' : '') + i.toString(16))
 }
 
-const HEX_24_REGEX = /^[0-9a-f]{24}$/i
+const HEX_24_REGEX = /^[0-9a-fA-F]{24}$/
+
+type ObjectIdLike = {
+  toHexString: () => string
+}
 
 const getRandomBytes = (length: number): Uint8Array => {
   const buf = new Uint8Array(length)
@@ -29,6 +33,7 @@ let counter =
 
 export const generateObjectIdHex = (): string => {
   const time = Math.floor(Date.now() / 1000) & 0xffffffff
+  // This matches the BSON ObjectId layout: the 3-byte counter rolls over after 16,777,216 IDs.
   counter = (counter + 1) & 0xffffff
   const inc = counter
 
@@ -48,7 +53,17 @@ export const generateObjectIdHex = (): string => {
   )
 }
 
-export const isValidObjectIdHex = (value: unknown): boolean =>
-  typeof value === 'string' && HEX_24_REGEX.test(value)
+export const getObjectIdHex = (value: unknown): string | undefined => {
+  const hex =
+    typeof value === 'string'
+      ? value
+      : value !== null &&
+          typeof value === 'object' &&
+          typeof (value as Partial<ObjectIdLike>).toHexString === 'function'
+        ? (value as ObjectIdLike).toHexString()
+        : undefined
 
-export const normalizeObjectIdHex = (value: string): string => value.toLowerCase()
+  return typeof hex === 'string' && HEX_24_REGEX.test(hex) ? hex : undefined
+}
+
+export const isValidObjectIdHex = (value: unknown): boolean => getObjectIdHex(value) !== undefined

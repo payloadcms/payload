@@ -188,8 +188,8 @@ export {
 
 export {
   generateObjectIdHex,
+  getObjectIdHex,
   isValidObjectIdHex,
-  normalizeObjectIdHex,
 } from '../utilities/objectIdHex.js'
 export { parseDocumentID } from '../utilities/parseDocumentID.js'
 

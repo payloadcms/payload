@@ -1,15 +1,8 @@
 import { isValidObjectIdHex } from './objectIdHex.js'
 
-export const isValidID = (
-  value: number | string,
-  type: 'number' | 'ObjectID' | 'text',
-): boolean => {
+export const isValidID = (value: unknown, type: 'number' | 'ObjectID' | 'text'): boolean => {
   if (type === 'text' && value) {
-    if (['object', 'string'].includes(typeof value)) {
-      const isObjectID = isValidObjectIdHex(value)
-      return typeof value === 'string' || isObjectID
-    }
-    return false
+    return typeof value === 'string' || isValidObjectIdHex(value)
   }
 
   if (type === 'number' && typeof value === 'number' && !Number.isNaN(value)) {
@@ -17,7 +10,7 @@ export const isValidID = (
   }
 
   if (type === 'ObjectID') {
-    return isValidObjectIdHex(String(value))
+    return isValidObjectIdHex(value)
   }
 
   return false

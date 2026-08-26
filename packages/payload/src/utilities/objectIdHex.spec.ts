@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
-import { generateObjectIdHex, isValidObjectIdHex, normalizeObjectIdHex } from './objectIdHex.js'
+import { isValidID } from './isValidID.js'
+import { generateObjectIdHex, getObjectIdHex, isValidObjectIdHex } from './objectIdHex.js'
 
 describe('objectIdHex', () => {
   describe('generateObjectIdHex', () => {
@@ -50,22 +51,22 @@ describe('objectIdHex', () => {
       expect(isValidObjectIdHex('507f1f77-cf86cd799439011')).toBe(false)
     })
 
-    it('should reject non-string values', () => {
+    it('should accept ObjectId-like values with valid hex strings', () => {
+      const objectId = { toHexString: () => '507f1f77bcf86cd799439011' }
+
+      expect(isValidObjectIdHex(objectId)).toBe(true)
+      expect(getObjectIdHex(objectId)).toBe('507f1f77bcf86cd799439011')
+      expect(isValidID(objectId, 'ObjectID')).toBe(true)
+    })
+
+    it('should reject invalid values', () => {
       expect(isValidObjectIdHex(undefined)).toBe(false)
       expect(isValidObjectIdHex(null)).toBe(false)
       expect(isValidObjectIdHex(123)).toBe(false)
       expect(isValidObjectIdHex({})).toBe(false)
       expect(isValidObjectIdHex([])).toBe(false)
-    })
-  })
-
-  describe('normalizeObjectIdHex', () => {
-    it('should lowercase the input', () => {
-      expect(normalizeObjectIdHex('507F1F77BCF86CD799439011')).toBe('507f1f77bcf86cd799439011')
-    })
-
-    it('should leave already-lowercase input unchanged', () => {
-      expect(normalizeObjectIdHex('507f1f77bcf86cd799439011')).toBe('507f1f77bcf86cd799439011')
+      expect(isValidObjectIdHex({ toHexString: () => 'invalid' })).toBe(false)
+      expect(isValidID({ toHexString: () => 'invalid' }, 'ObjectID')).toBe(false)
     })
   })
 })

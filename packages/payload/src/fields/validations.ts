@@ -32,12 +32,8 @@ import type {
 } from './config/types.js'
 
 import { isNumber } from '../utilities/isNumber.js'
+import { getObjectIdHex } from '../utilities/objectIdHex.js'
 import { isValidID } from '../utilities/isValidID.js'
-
-const isObjectIdLike = (val: unknown): val is { toHexString: () => string } =>
-  val !== null &&
-  typeof val === 'object' &&
-  typeof (val as { toHexString?: unknown }).toHexString === 'function'
 
 export type TextFieldValidation = Validate<string, unknown, unknown, TextField>
 
@@ -684,8 +680,11 @@ const validateFilterOptions: Validate<
           if (typeof val === 'object') {
             if (val?.value) {
               valueIDs.push(val.value)
-            } else if (isObjectIdLike(val)) {
-              valueIDs.push(val.toHexString())
+            } else {
+              const objectIdHex = getObjectIdHex(val)
+              if (objectIdHex) {
+                valueIDs.push(objectIdHex)
+              }
             }
           }
 
@@ -741,8 +740,9 @@ const validateFilterOptions: Validate<
           requestedID = val
         }
 
-        if (typeof val === 'object' && isObjectIdLike(val)) {
-          requestedID = val.toHexString()
+        const objectIdHex = getObjectIdHex(val)
+        if (objectIdHex) {
+          requestedID = objectIdHex
         }
       }
 
