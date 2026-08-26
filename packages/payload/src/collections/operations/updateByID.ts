@@ -16,6 +16,7 @@ import type {
   TypeWithID,
 } from '../config/types.js'
 
+import { assertAPIKeyAssignment } from '../../auth/apiKeys.js'
 import { executeAccess } from '../../auth/executeAccess.js'
 import { hasWhereAccessResult } from '../../auth/types.js'
 import { combineQueries } from '../../database/combineQueries.js'
@@ -176,6 +177,13 @@ export const updateByIDOperation = async <
     if (!docWithLocales) {
       throw new NotFound(req.t)
     }
+
+    assertAPIKeyAssignment({
+      collection: collectionConfig,
+      data,
+      overrideAccess,
+      req,
+    })
 
     // /////////////////////////////////////
     // Generate data for all files and sizes

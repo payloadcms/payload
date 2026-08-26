@@ -1272,6 +1272,210 @@ describe('Auth', () => {
   })
 
   describe('API Key', () => {
+    describe('API key assignment', () => {
+      const staticAPIKey = '01234567-89ab-cdef-0123-456789abcdef'
+
+      it('rejects a caller-supplied API key through REST', async () => {
+        const { token } = await payload.login({
+          collection: slug,
+          data: {
+            email: devUser.email,
+            password: devUser.password,
+          },
+        })
+
+        const response = await restClient.POST(`/${apiKeysSlug}`, {
+          body: JSON.stringify({
+            apiKey: staticAPIKey,
+            enableAPIKey: true,
+          }),
+          headers: {
+            Authorization: `JWT ${token}`,
+          },
+        })
+        const result = await response.json()
+
+        expect(response.status).toBe(400)
+        expect(result.errors[0]?.data?.errors).toEqual([
+          expect.objectContaining({ path: 'apiKey' }),
+        ])
+      })
+
+      it('rejects a caller-supplied API key through GraphQL', async () => {
+        const { token } = await payload.login({
+          collection: slug,
+          data: {
+            email: devUser.email,
+            password: devUser.password,
+          },
+        })
+        const result = await restClient
+          .GRAPHQL_POST({
+            body: JSON.stringify({
+              query: `mutation {
+                createApiKey(data: {
+                  apiKey: "${staticAPIKey}"
+                  enableAPIKey: true
+                }) {
+                  id
+                }
+              }`,
+            }),
+            headers: {
+              Authorization: `JWT ${token}`,
+            },
+          })
+          .then((response) => response.json())
+
+        expect(result.errors[0]?.extensions?.data?.errors).toEqual([
+          expect.objectContaining({ path: 'apiKey' }),
+        ])
+      })
+
+      it('rejects a caller-supplied API key through the Local API without overrideAccess', async () => {
+        const { docs } = await payload.find({
+          collection: slug,
+          limit: 1,
+          where: {
+            email: {
+              equals: devUser.email,
+            },
+          },
+        })
+
+        await expect(
+          payload.create({
+            collection: apiKeysSlug,
+            data: {
+              apiKey: staticAPIKey,
+              enableAPIKey: true,
+            },
+            overrideAccess: false,
+            user: docs[0],
+          }),
+        ).rejects.toMatchObject({
+          data: {
+            errors: [expect.objectContaining({ path: 'apiKey' })],
+          },
+        })
+      })
+
+      it('allows a caller-supplied API key through the Local API with overrideAccess', async () => {
+        const user = await payload.create({
+          collection: apiKeysSlug,
+          data: {
+            apiKey: staticAPIKey,
+            enableAPIKey: true,
+          },
+          overrideAccess: true,
+        })
+
+        expect(user.apiKey).toBe(staticAPIKey)
+
+        await payload.delete({
+          collection: apiKeysSlug,
+          id: user.id,
+        })
+      })
+    })
+
+    describe('server-generated API keys', () => {
+      it('generates an API key when creating an enabled document', async () => {
+        const user = await payload.create({
+          collection: apiKeysSlug,
+          data: {
+            enableAPIKey: true,
+          },
+        })
+
+        expect(user.apiKey).toEqual(expect.any(String))
+        const rawUser = await payload.db.findOne<Record<string, unknown>>({
+          collection: apiKeysSlug,
+          req: { locale: 'en' } as any,
+          where: { id: { equals: user.id } },
+        })
+        expect(rawUser?.apiKeyIndex).toEqual(expect.any(String))
+
+        const response = await restClient
+          .GET(`/${apiKeysSlug}/me`, {
+            headers: {
+              Authorization: `${apiKeysSlug} API-Key ${user.apiKey}`,
+            },
+          })
+          .then((result) => result.json())
+
+        expect(response.user?.id).toBe(user.id)
+      })
+
+      it('generates an API key when enabling a document without one', async () => {
+        const user = await payload.create({
+          collection: apiKeysSlug,
+          data: {
+            enableAPIKey: false,
+          },
+        })
+
+        const enabledUser = await payload.update({
+          collection: apiKeysSlug,
+          id: user.id,
+          data: {
+            enableAPIKey: true,
+          },
+        })
+
+        expect(enabledUser.apiKey).toEqual(expect.any(String))
+
+        const response = await restClient
+          .GET(`/${apiKeysSlug}/me`, {
+            headers: {
+              Authorization: `${apiKeysSlug} API-Key ${enabledUser.apiKey}`,
+            },
+          })
+          .then((result) => result.json())
+
+        expect(response.user?.id).toBe(user.id)
+      })
+
+      it('restores the existing API key when re-enabling a document', async () => {
+        const apiKey = uuid()
+        const user = await payload.create({
+          collection: apiKeysSlug,
+          data: {
+            apiKey,
+            enableAPIKey: true,
+          },
+        })
+
+        await payload.update({
+          collection: apiKeysSlug,
+          id: user.id,
+          data: {
+            enableAPIKey: false,
+          },
+        })
+
+        const reenabledUser = await payload.update({
+          collection: apiKeysSlug,
+          id: user.id,
+          data: {
+            enableAPIKey: true,
+          },
+        })
+
+        expect(reenabledUser.apiKey).toBe(apiKey)
+
+        const response = await restClient
+          .GET(`/${apiKeysSlug}/me`, {
+            headers: {
+              Authorization: `${apiKeysSlug} API-Key ${apiKey}`,
+            },
+          })
+          .then((result) => result.json())
+
+        expect(response.user?.id).toBe(user.id)
+      })
+    })
+
     it('should authenticate via the correct API key user', async () => {
       const usersQuery = await payload.find({
         collection: apiKeysSlug,

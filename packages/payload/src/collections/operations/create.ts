@@ -15,6 +15,7 @@ import type {
   SelectFromCollectionSlug,
 } from '../config/types.js'
 
+import { assertAPIKeyAssignment } from '../../auth/apiKeys.js'
 import { ensureUsernameOrEmail } from '../../auth/ensureUsernameOrEmail.js'
 import { executeAccess } from '../../auth/executeAccess.js'
 import { sendVerificationEmail } from '../../auth/sendVerificationEmail.js'
@@ -154,6 +155,13 @@ export const createOperation = async <
         collectionConfig.access.create,
       )
     }
+
+    assertAPIKeyAssignment({
+      collection: collectionConfig,
+      data,
+      overrideAccess,
+      req,
+    })
 
     // /////////////////////////////////////
     // Generate data for all files and sizes

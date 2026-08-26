@@ -13,6 +13,44 @@ import { canAccessAdmin } from '../../utilities/canAccessAdmin.js'
 
 const encryptKey: FieldHook = ({ req, value }) =>
   value ? req.payload.encrypt(value as string) : null
+
+const createKeyIndex = ({ key, secret }: { key: string; secret: string }): string =>
+  crypto.createHmac('sha256', secret).update(key).digest('hex')
+
+const generateKey: FieldHook = ({
+  data,
+  operation,
+  previousSiblingDoc,
+  previousValue,
+  req,
+  siblingData,
+  value,
+}) => {
+  if (
+    siblingData.enableAPIKey !== true ||
+    (data && Object.prototype.hasOwnProperty.call(data, 'apiKey'))
+  ) {
+    return value
+  }
+
+  const isFirstEnable = operation === 'update' && previousSiblingDoc?.enableAPIKey !== true
+
+  if (operation === 'create' || (isFirstEnable && !previousValue)) {
+    const key = crypto.randomUUID()
+    siblingData.apiKeyIndex = createKeyIndex({ key, secret: req.payload.secret })
+    return key
+  }
+
+  if (isFirstEnable && previousValue) {
+    siblingData.apiKeyIndex = createKeyIndex({
+      key: previousValue as string,
+      secret: req.payload.secret,
+    })
+  }
+
+  return value
+}
+
 const decryptKey: FieldHook = ({ req, value }) => {
   if (!value) {
     return undefined
@@ -109,6 +147,7 @@ export const createAPIKeyFields = ({
       hooks: {
         afterRead: [decryptKey],
         beforeChange: [encryptKey],
+        beforeValidate: [generateKey],
         ...apiKeyField?.hooks,
       },
       label: apiKeyField?.label ?? (({ t }) => t('authentication:apiKey')),
@@ -135,10 +174,7 @@ export const createAPIKeyFields = ({
               return null
             }
             if (data?.apiKey) {
-              return crypto
-                .createHmac('sha256', req.payload.secret)
-                .update(data.apiKey as string)
-                .digest('hex')
+              return createKeyIndex({ key: data.apiKey as string, secret: req.payload.secret })
             }
             return value
           },
