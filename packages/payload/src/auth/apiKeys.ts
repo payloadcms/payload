@@ -39,7 +39,6 @@ export const assertAPIKeyAssignment = ({
   if (
     !collection.auth?.useAPIKey ||
     !Object.prototype.hasOwnProperty.call(data, 'apiKey') ||
-    data.apiKey === null ||
     data.apiKey === undefined
   ) {
     return

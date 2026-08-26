@@ -1413,6 +1413,95 @@ describe('Auth', () => {
         expect(updated.apiKey).toBe(originalAPIKey)
       })
 
+      it('should reject clearing an API key through REST', async () => {
+        const originalAPIKey = uuid()
+        const user = await payload.create({
+          collection: apiKeysSlug,
+          data: {
+            apiKey: originalAPIKey,
+            enableAPIKey: true,
+          },
+        })
+        const { token } = await payload.login({
+          collection: slug,
+          data: {
+            email: devUser.email,
+            password: devUser.password,
+          },
+        })
+
+        const response = await restClient.PATCH(`/${apiKeysSlug}/${user.id}`, {
+          body: JSON.stringify({ apiKey: null }),
+          headers: {
+            Authorization: `JWT ${token}`,
+          },
+        })
+        const result = await response.json()
+        const updated = await payload.findByID({
+          collection: apiKeysSlug,
+          id: user.id,
+        })
+
+        expect(response.status).toBe(400)
+        expect(result.errors[0]?.data?.errors).toEqual([
+          expect.objectContaining({ path: 'apiKey' }),
+        ])
+        expect(updated.apiKey).toBe(originalAPIKey)
+
+        await payload.delete({
+          collection: apiKeysSlug,
+          id: user.id,
+        })
+      })
+
+      it('should reject clearing an API key through the Local API without overrideAccess', async () => {
+        const originalAPIKey = uuid()
+        const user = await payload.create({
+          collection: apiKeysSlug,
+          data: {
+            apiKey: originalAPIKey,
+            enableAPIKey: true,
+          },
+        })
+        const { docs } = await payload.find({
+          collection: slug,
+          limit: 1,
+          where: {
+            email: {
+              equals: devUser.email,
+            },
+          },
+        })
+
+        await expect(
+          payload.update({
+            collection: apiKeysSlug,
+            id: user.id,
+            data: {
+              apiKey: null,
+            },
+            overrideAccess: false,
+            user: docs[0],
+          }),
+        ).rejects.toMatchObject({
+          data: {
+            errors: [expect.objectContaining({ path: 'apiKey' })],
+          },
+        })
+
+        const updated = await payload.findByID({
+          collection: apiKeysSlug,
+          id: user.id,
+        })
+
+        expect(updated.apiKey).toBe(originalAPIKey)
+
+        await payload.delete({
+          collection: apiKeysSlug,
+          id: user.id,
+        })
+      })
+
       it('allows a caller-supplied API key update through the Local API with overrideAccess', async () => {
         const user = await payload.create({
           collection: apiKeysSlug,
