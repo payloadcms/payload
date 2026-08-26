@@ -297,6 +297,7 @@ describe('Versions', () => {
           id: seed.id,
           collection: draftCollectionSlug,
           data: { title: 'seed' },
+          draft: true,
           locale,
           overrideAccess: true,
         })
@@ -336,6 +337,7 @@ describe('Versions', () => {
           id: seed.id,
           collection: draftCollectionSlug,
           data: { title: 'seed' },
+          draft: true,
           locale,
           overrideAccess: true,
         })
@@ -653,6 +655,7 @@ describe('Versions', () => {
           id: seed.id,
           collection: draftCollectionSlug,
           data: { title: 'seed' },
+          draft: true,
           locale,
           overrideAccess: true,
         })
@@ -753,6 +756,7 @@ describe('Versions', () => {
           id: seed.id,
           collection: draftCollectionSlug,
           data: { title: 'seed' },
+          draft: true,
           locale,
           overrideAccess: true,
         })
@@ -795,19 +799,62 @@ describe('Versions', () => {
     })
 
     test('collection — autosave should only update the current document', async () => {
-      await page.goto(autosaveURL.create)
+      // Seed the sibling locales so the later publish clicks (which now validate every
+      // locale) don't get blocked by their otherwise-empty required title field. Autosave
+      // collections don't render #action-save-draft (no showSaveDraftButton opt-in), so a
+      // real publish click is unavoidable here.
+      const seedFirst = await payload.create({
+        collection: autosaveCollectionSlug,
+        data: { title: 'seed-first' },
+        draft: true,
+        overrideAccess: true,
+      })
+
+      for (const locale of ['es', 'de', 'fr']) {
+        await payload.update({
+          id: seedFirst.id,
+          collection: autosaveCollectionSlug,
+          data: { title: 'seed-first' },
+          draft: true,
+          locale,
+          overrideAccess: true,
+        })
+      }
+
+      await page.goto(autosaveURL.edit(seedFirst.id))
+      await waitForFormReady(page)
       await expect(page.locator('#field-title')).toBeEnabled()
       await page.locator('#field-title').fill('first post title')
       await expect(page.locator('#field-description')).toBeEnabled()
       await page.locator('#field-description').fill('first post description')
-      await saveDocAndAssert(page, '#action-save-draft')
-      await page.goto(autosaveURL.create)
+      await saveDocAndAssert(page)
+
+      const seedSecond = await payload.create({
+        collection: autosaveCollectionSlug,
+        data: { title: 'seed-second' },
+        draft: true,
+        overrideAccess: true,
+      })
+
+      for (const locale of ['es', 'de', 'fr']) {
+        await payload.update({
+          id: seedSecond.id,
+          collection: autosaveCollectionSlug,
+          data: { title: 'seed-second' },
+          draft: true,
+          locale,
+          overrideAccess: true,
+        })
+      }
+
+      await page.goto(autosaveURL.edit(seedSecond.id))
+      await waitForFormReady(page)
       await wait(500)
       await expect(page.locator('#field-title')).toBeEnabled()
       await page.locator('#field-title').fill('second post title')
       await expect(page.locator('#field-description')).toBeEnabled()
       await page.locator('#field-description').fill('second post description')
-      await saveDocAndAssert(page, '#action-save-draft')
+      await saveDocAndAssert(page)
       await page.locator('#field-title').fill('updated second post title')
       await page.locator('#field-description').fill('updated second post description')
       await waitForAutoSaveToRunAndComplete(page)
@@ -1683,11 +1730,34 @@ describe('Versions', () => {
     })
 
     test('can still schedule publish once autosave is triggered', async () => {
-      await page.goto(autosaveURL.create)
+      // Seed the sibling locales so the publish click (which now validates every locale)
+      // doesn't get blocked by their otherwise-empty required title field. Autosave
+      // collections don't render #action-save-draft (no showSaveDraftButton opt-in), so a
+      // real publish click is unavoidable here.
+      const seed = await payload.create({
+        collection: autosaveCollectionSlug,
+        data: { title: 'seed' },
+        draft: true,
+        overrideAccess: true,
+      })
+
+      for (const locale of ['es', 'de', 'fr']) {
+        await payload.update({
+          id: seed.id,
+          collection: autosaveCollectionSlug,
+          data: { title: 'seed' },
+          draft: true,
+          locale,
+          overrideAccess: true,
+        })
+      }
+
+      await page.goto(autosaveURL.edit(seed.id))
+      await waitForFormReady(page)
       await page.locator('#field-title').fill('scheduled publish')
       await page.locator('#field-description').fill('scheduled publish description')
 
-      await saveDocAndAssert(page, '#action-save-draft')
+      await saveDocAndAssert(page)
 
       await page.locator('#field-title').fill('scheduled publish updated')
 
