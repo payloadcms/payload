@@ -1,7 +1,7 @@
 import type { PipelineStage } from 'mongoose'
 import type { FindDistinct, FlattenedField } from 'payload'
 
-import { getFieldByPath } from 'payload'
+import { getFieldByPath, resolveBranchQuery } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
@@ -50,7 +50,16 @@ export const findDistinct: FindDistinct = async function (this: MongooseAdapter,
     collectionSlug: args.collection,
   })
 
-  const { where = {} } = args
+  // Distinct values describe the documents the caller can see, so they are subject to
+  // the same branch predicate as a list read. Without it a branch's shadow rows fed
+  // main's distinct values and the branch's own edits were invisible in its own.
+  const where =
+    (await resolveBranchQuery({
+      branch: args.branch,
+      collectionSlug: args.collection,
+      req: args.req,
+      where: args.where,
+    })) ?? {}
 
   let sortAggregation: PipelineStage[] = []
 

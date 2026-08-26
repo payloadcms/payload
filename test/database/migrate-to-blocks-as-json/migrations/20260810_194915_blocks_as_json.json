@@ -233,12 +233,6 @@
           "notNull": true,
           "default": "now()"
         },
-        "snapshot": {
-          "name": "snapshot",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false
-        },
         "published_locale": {
           "name": "published_locale",
           "type": "enum__posts_versioned_v_published_locale",
@@ -334,21 +328,6 @@
           "columns": [
             {
               "expression": "updated_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "_posts_versioned_v_snapshot_idx": {
-          "name": "_posts_versioned_v_snapshot_idx",
-          "columns": [
-            {
-              "expression": "snapshot",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -1611,12 +1590,6 @@
           "notNull": true,
           "default": "now()"
         },
-        "snapshot": {
-          "name": "snapshot",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false
-        },
         "published_locale": {
           "name": "published_locale",
           "type": "enum__global_versioned_v_published_locale",
@@ -1667,21 +1640,6 @@
           "columns": [
             {
               "expression": "updated_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "_global_versioned_v_snapshot_idx": {
-          "name": "_global_versioned_v_snapshot_idx",
-          "columns": [
-            {
-              "expression": "snapshot",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -1815,6 +1773,6 @@
     "tables": {},
     "columns": {}
   },
-  "id": "9a71afb8-4999-4da4-af10-8d1a4e4da2f3",
+  "id": "986c67e4-29a6-4730-843b-df1a02f257c0",
   "prevId": "00000000-0000-0000-0000-000000000000"
 }

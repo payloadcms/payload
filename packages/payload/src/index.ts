@@ -141,6 +141,7 @@ import { authLocal } from './auth/operations/local/auth.js'
 import { APIKeyAuthentication } from './auth/strategies/apiKey.js'
 import { JWTAuthentication } from './auth/strategies/jwt.js'
 import { generateImportMap, type ImportMap } from './bin/generateImportMap/index.js'
+import { getBranchesLocalAPI } from './branching/merge.js'
 import { checkPayloadDependencies } from './checkPayloadDependencies.js'
 import {
   countVersionsLocal,
@@ -495,9 +496,14 @@ export class BasePayload {
 
   blocks: Record<BlockSlug, FlattenedBlock> = {}
 
-  collections: Record<CollectionSlug, Collection> = {}
+  /**
+   * Content branching operations
+   */
+  branches = getBranchesLocalAPI(this)
 
+  collections: Record<CollectionSlug, Collection> = {}
   config!: SanitizedConfig
+
   /**
    * @description Performs count operation
    * @param options
@@ -541,8 +547,8 @@ export class BasePayload {
   ): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
     return createLocal<TSlug, TSelect>(this, options)
   }
-
   crons: Cron[] = []
+
   db!: DatabaseAdapter
 
   decrypt = decrypt
@@ -565,10 +571,10 @@ export class BasePayload {
     return duplicateLocal<TSlug, TSelect>(this, options)
   }
 
-  email!: InitializedEmailAdapter
-
   // TODO: re-implement or remove?
   // errorHandler: ErrorHandler
+
+  email!: InitializedEmailAdapter
 
   encrypt = encrypt
 
@@ -1448,6 +1454,82 @@ export type { ImportMap } from './bin/generateImportMap/index.js'
 
 export { genImportMapIterateFields } from './bin/generateImportMap/iterateFields.js'
 export { migrate as migrateCLI } from './bin/migrate.js'
+export { appendBranchFilter } from './branching/appendBranchFilter.js'
+export { assertBranchReadable } from './branching/assertBranchReadable.js'
+export {
+  applyBranchIDProjection,
+  projectBranchIDs,
+  rewriteBranchIDs,
+  rewriteBranchVersionParents,
+} from './branching/branchIDs.js'
+export {
+  isBranchProjectionActive,
+  withBranchIDSelect,
+  withBranchVersionSelect,
+} from './branching/branchSelect.js'
+export type { DiscardedChange, DiscardOptions, DiscardResult } from './branching/discard.js'
+export { discardBranchChanges } from './branching/discard.js'
+export type {
+  EffectiveOperation,
+  EffectiveWrite,
+  ResolvedChange,
+} from './branching/effectiveOperations.js'
+export { operationsForChange, resolveEffectiveOperations } from './branching/effectiveOperations.js'
+export type { MergeStreamEvent } from './branching/endpoints/merge.js'
+export {
+  branchGlobalNeedsBothRows,
+  pickBranchGlobal,
+  recordBranchGlobalChange,
+  resolveBranchGlobalQuery,
+  resolveBranchGlobalVersionQuery,
+  resolveBranchGlobalWrite,
+} from './branching/globals.js'
+export { getBranchesLocalAPI, mergeBranch } from './branching/merge.js'
+export type {
+  MergeableChange,
+  MergeOptions,
+  MergeProgress,
+  MergeResult,
+  MergeWarning,
+} from './branching/merge.js'
+
+export type { BlockedChange } from './branching/preflight.js'
+export { runMergePreflight } from './branching/preflight.js'
+
+export {
+  isolateBranchState,
+  loadBranchDeletions,
+  loadBranchManifest,
+  resetBranchState,
+  resolveBranch,
+} from './branching/resolveBranch.js'
+export { getBranchPredicateSync, resolveBranchQuery } from './branching/resolveBranchQuery.js'
+export { resolveBranchRowID } from './branching/resolveBranchRowID.js'
+export { resolveBranchDelete, willBranchAbsorbDelete } from './branching/tombstone.js'
+export type {
+  BranchingConfig,
+  BranchOperation,
+  SanitizedBranchingConfig,
+} from './branching/types.js'
+
+export {
+  branchChangesCollectionSlug,
+  branchDocIDField,
+  branchesCollectionSlug,
+  branchField,
+  branchOpField,
+  branchParentField,
+  MAIN_BRANCH,
+} from './branching/types.js'
+export {
+  projectBranchVersionParent,
+  projectBranchVersionParents,
+  resolveBranchOwnVersions,
+  resolveBranchVersionHistoryQuery,
+  resolveBranchVersionParent,
+  resolveBranchVersionQuery,
+} from './branching/versions.js'
+
 export {
   type ClientCollectionConfig,
   createClientCollectionConfig,
@@ -1456,7 +1538,6 @@ export {
   type ServerOnlyCollectionProperties,
   type ServerOnlyUploadProperties,
 } from './collections/config/client.js'
-
 export type {
   AfterChangeHook as CollectionAfterChangeHook,
   AfterDeleteHook as CollectionAfterDeleteHook,
@@ -1495,12 +1576,9 @@ export type {
   TypeWithID,
   TypeWithTimestamps,
 } from './collections/config/types.js'
-
 export type { CompoundIndex, FoldersConfig, TagsConfig } from './collections/config/types.js'
-
 export type { SanitizedCompoundIndex } from './collections/config/types.js'
 export { createDataloaderCacheKey, getDataLoader } from './collections/dataloader.js'
-
 export { countOperation } from './collections/operations/count.js'
 export { createOperation } from './collections/operations/create.js'
 export { deleteOperation } from './collections/operations/delete.js'
@@ -1513,7 +1591,9 @@ export { findVersionByIDOperation } from './collections/operations/findVersionBy
 export { findVersionsOperation } from './collections/operations/findVersions.js'
 export { restoreVersionOperation } from './collections/operations/restoreVersion.js'
 export { updateOperation } from './collections/operations/update.js'
+
 export { updateByIDOperation } from './collections/operations/updateByID.js'
+
 export { buildConfig } from './config/build.js'
 export {
   type ClientConfig,
@@ -1526,9 +1606,7 @@ export {
 } from './config/client.js'
 export { addDefaultsToConfig } from './config/defaults.js'
 export { definePlugin } from './config/definePlugin.js'
-
 export { type OrderableEndpointBody } from './config/orderable/index.js'
-
 export { sanitizeConfig } from './config/sanitize.js'
 export type * from './config/types.js'
 export { combineQueries } from './database/combineQueries.js'
@@ -1551,8 +1629,10 @@ export { readMigrationFiles } from './database/migrations/readMigrationFiles.js'
 export { writeMigrationIndex } from './database/migrations/writeMigrationIndex.js'
 export type * from './database/queryValidation/types.js'
 export type { EntityPolicies, PathToQuery } from './database/queryValidation/types.js'
+
 export { validateQueryPaths } from './database/queryValidation/validateQueryPaths.js'
 export { validateSearchParam } from './database/queryValidation/validateSearchParams.js'
+
 export type {
   BaseDatabaseAdapter,
   BeginTransaction,
@@ -1574,6 +1654,8 @@ export type {
   CreateVersionArgs,
   DatabaseAdapterResult as DatabaseAdapterObj,
   DBIdentifierName,
+  DeleteBranchGlobal,
+  DeleteBranchGlobalArgs,
   DeleteMany,
   DeleteManyArgs,
   DeleteOne,
@@ -1649,13 +1731,6 @@ export {
   ValidationError,
   ValidationErrorName,
 } from './errors/index.js'
-export type { ValidationFieldError } from './errors/index.js'
-
-export { baseBlockFields } from './fields/baseFields/baseBlockFields.js'
-export { baseIDField } from './fields/baseFields/baseIDField.js'
-export { getSlugFallbackValue } from './fields/baseFields/slug/getSlugFallbackValue.js'
-
-export type { SlugFieldClientProps } from './fields/baseFields/slug/types.js'
 
 export interface FieldCustom extends Record<string, any> {}
 
@@ -1666,6 +1741,24 @@ export interface CollectionAdminCustom extends Record<string, any> {}
 export interface GlobalCustom extends Record<string, any> {}
 
 export interface GlobalAdminCustom extends Record<string, any> {}
+
+export type { ValidationFieldError } from './errors/index.js'
+export { baseBlockFields } from './fields/baseFields/baseBlockFields.js'
+
+export { baseIDField } from './fields/baseFields/baseIDField.js'
+
+export interface FieldCustom extends Record<string, any> {}
+
+export interface CollectionCustom extends Record<string, any> {}
+
+export interface CollectionAdminCustom extends Record<string, any> {}
+
+export interface GlobalCustom extends Record<string, any> {}
+
+export interface GlobalAdminCustom extends Record<string, any> {}
+
+export { getSlugFallbackValue } from './fields/baseFields/slug/getSlugFallbackValue.js'
+export type { SlugFieldClientProps } from './fields/baseFields/slug/types.js'
 
 export {
   createClientBlocks,
@@ -1677,17 +1770,6 @@ export {
 export { sanitizeField, sanitizeFields } from './fields/config/sanitize.js'
 
 export type { SanitizeFieldArgs } from './fields/config/sanitize.js'
-
-export interface FieldCustom extends Record<string, any> {}
-
-export interface CollectionCustom extends Record<string, any> {}
-
-export interface CollectionAdminCustom extends Record<string, any> {}
-
-export interface GlobalCustom extends Record<string, any> {}
-
-export interface GlobalAdminCustom extends Record<string, any> {}
-
 export type {
   AdminClient,
   ArrayField,
@@ -1801,17 +1883,16 @@ export type {
   ValueWithRelation,
 } from './fields/config/types.js'
 export { getDefaultValue } from './fields/getDefaultValue.js'
-
 export { traverseFields as afterChangeTraverseFields } from './fields/hooks/afterChange/traverseFields.js'
+
 export { promise as afterReadPromise } from './fields/hooks/afterRead/promise.js'
 
 export { traverseFields as afterReadTraverseFields } from './fields/hooks/afterRead/traverseFields.js'
 export { traverseFields as beforeChangeTraverseFields } from './fields/hooks/beforeChange/traverseFields.js'
+
 export { traverseFields as beforeValidateTraverseFields } from './fields/hooks/beforeValidate/traverseFields.js'
 export { sortableFieldTypes } from './fields/sortableFieldTypes.js'
-
 export { validateBlocksFilterOptions, validations } from './fields/validations.js'
-
 export type {
   ArrayFieldValidation,
   BlocksFieldValidation,
@@ -1843,6 +1924,7 @@ export type {
   UploadFieldValidation,
   UsernameFieldValidation,
 } from './fields/validations.js'
+
 export {
   type ClientGlobalConfig,
   createClientGlobalConfig,
@@ -1850,7 +1932,6 @@ export {
   type ServerOnlyGlobalAdminProperties,
   type ServerOnlyGlobalProperties,
 } from './globals/config/client.js'
-
 export type {
   AfterChangeHook as GlobalAfterChangeHook,
   AfterReadHook as GlobalAfterReadHook,
@@ -1867,7 +1948,6 @@ export type {
 export { docAccessOperation as docAccessOperationGlobal } from './globals/operations/docAccess.js'
 export { findOneOperation } from './globals/operations/findOne.js'
 export { findVersionByIDOperation as findVersionByIDOperationGlobal } from './globals/operations/findVersionByID.js'
-
 export { findVersionsOperation as findVersionsOperationGlobal } from './globals/operations/findVersions.js'
 export { restoreVersionOperation as restoreVersionOperationGlobal } from './globals/operations/restoreVersion.js'
 export { updateOperation as updateOperationGlobal } from './globals/operations/update.js'
@@ -1887,6 +1967,7 @@ export { getInitialTreeData } from './hierarchy/getInitialTreeData.js'
 export type { GetInitialTreeDataArgs, InitialTreeData } from './hierarchy/getInitialTreeData.js'
 export { injectHierarchyButton } from './hierarchy/injectHierarchyButton.js'
 export { resolveHierarchyCollections } from './hierarchy/resolveHierarchyCollections.js'
+
 export type {
   HierarchyConfig,
   SanitizedHierarchyConfig,
@@ -1896,9 +1977,10 @@ export type { Ancestor } from './hierarchy/utils/getAncestors.js'
 export { getAncestors } from './hierarchy/utils/getAncestors.js'
 export * from './kv/adapters/DatabaseKVAdapter.js'
 export * from './kv/adapters/InMemoryKVAdapter.js'
-
 export * from './kv/index.js'
+
 export type {
+  AdminPreferences,
   CollapsedPreferences,
   CollectionPreferences,
   /**
@@ -1917,6 +1999,7 @@ export type {
 } from './preferences/types.js'
 export type { QueryPreset } from './query-presets/types.js'
 export { jobAfterRead } from './queues/config/collection.js'
+
 export type { JobsConfig, RunJobAccess, RunJobAccessArgs } from './queues/config/types/index.js'
 export type {
   RunInlineTaskFunction,
@@ -1931,7 +2014,6 @@ export type {
   TaskOutput,
   TaskSlug,
 } from './queues/config/types/taskTypes.js'
-
 export type {
   ConcurrencyConfig,
   JobLog,
@@ -1941,9 +2023,9 @@ export type {
   WorkflowHandler,
   WorkflowSlug,
 } from './queues/config/types/workflowTypes.js'
+
 export { JobCancelledError } from './queues/errors/index.js'
 export { countRunnableOrActiveJobsForQueue } from './queues/operations/handleSchedules/countRunnableOrActiveJobsForQueue.js'
-
 export { importHandlerPath } from './queues/operations/runJobs/runJob/importHandlerPath.js'
 export {
   _internal_jobSystemGlobals,
@@ -1951,7 +2033,6 @@ export {
   getCurrentDate,
 } from './queues/utilities/getCurrentDate.js'
 export { getLocalI18n } from './translations/getLocalI18n.js'
-
 export * from './types/index.js'
 export { getFileByPath } from './uploads/getFileByPath.js'
 export { _internal_safeFetchGlobal } from './uploads/safeFetch.js'

@@ -43,6 +43,13 @@ export type Arguments<TSlug extends CollectionSlug> = {
   disableVerificationEmail?: boolean
   draft?: boolean
   id: number | string
+  /**
+   * Hook `operation` label, for callers whose write is semantically a create
+   * even though the row already exists. Used by branch merge.
+   *
+   * @internal
+   */
+  operation?: 'create' | 'update'
   overrideAccess?: boolean
   overrideLock?: boolean
   overwriteExistingFiles?: boolean
@@ -217,6 +224,7 @@ export const updateByIDOperation = async <
       fallbackLocale: fallbackLocale!,
       filesToUpload,
       locale: locale!,
+      operation: args.operation,
       overrideAccess: overrideAccess!,
       overrideLock: overrideLock!,
       payload,

@@ -620,12 +620,6 @@
           "notNull": true,
           "default": "now()"
         },
-        "snapshot": {
-          "name": "snapshot",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false
-        },
         "published_locale": {
           "name": "published_locale",
           "type": "enum__posts_versioned_v_published_locale",
@@ -721,21 +715,6 @@
           "columns": [
             {
               "expression": "updated_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "_posts_versioned_v_snapshot_idx": {
-          "name": "_posts_versioned_v_snapshot_idx",
-          "columns": [
-            {
-              "expression": "snapshot",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -2950,12 +2929,6 @@
           "notNull": true,
           "default": "now()"
         },
-        "snapshot": {
-          "name": "snapshot",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false
-        },
         "published_locale": {
           "name": "published_locale",
           "type": "enum__global_versioned_v_published_locale",
@@ -3006,21 +2979,6 @@
           "columns": [
             {
               "expression": "updated_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "_global_versioned_v_snapshot_idx": {
-          "name": "_global_versioned_v_snapshot_idx",
-          "columns": [
-            {
-              "expression": "snapshot",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -3258,6 +3216,6 @@
     "tables": {},
     "columns": {}
   },
-  "id": "bc1003b5-918c-4495-8a72-4f764001d108",
+  "id": "da845d94-9001-4819-be9c-129b5c48ef76",
   "prevId": "00000000-0000-0000-0000-000000000000"
 }

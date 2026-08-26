@@ -10,6 +10,7 @@ import type { RelationshipFilterProps as Props, ValueWithRelation } from './type
 
 import { useDebounce } from '../../../../hooks/useDebounce.js'
 import { useEffectEvent } from '../../../../hooks/useEffectEvent.js'
+import { useBranchParam } from '../../../../providers/Branch/index.js'
 import { useConfig } from '../../../../providers/Config/index.js'
 import { useLocale } from '../../../../providers/Locale/index.js'
 import { useTranslation } from '../../../../providers/Translation/index.js'
@@ -51,6 +52,7 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
   const [hasLoadedFirstOptions, setHasLoadedFirstOptions] = useState(false)
   const { i18n, t } = useTranslation()
   const locale = useLocale()
+  const branch = useBranchParam()
 
   const relationSlugs = hasMultipleRelations ? relationTo : [relationTo]
 
@@ -104,6 +106,7 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
         }
 
         const query = {
+          branch,
           depth: 0,
           limit: maxResultsPerRequest,
           locale: locale?.code,

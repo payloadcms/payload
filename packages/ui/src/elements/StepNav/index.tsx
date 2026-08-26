@@ -126,6 +126,19 @@ const StepNav: React.FC<{
 
   const separator = <span className={`${baseClass}__separator`}>/</span>
 
+  const renderTrail = () =>
+    stepNavItems.map((item, i) => {
+      const isLast = stepNavItems.length === i + 1
+      const isFirst = i === 0
+
+      return (
+        <Fragment key={i}>
+          {renderItem(item, { isFirst, isLast })}
+          {!isLast && separator}
+        </Fragment>
+      )
+    })
+
   const shouldCollapse = canCollapse && isCollapsed
   const collapsedItems = shouldCollapse ? stepNavItems.slice(1, -1) : []
   const lastItem = stepNavItems[stepNavItems.length - 1]
@@ -161,33 +174,13 @@ const StepNav: React.FC<{
             {renderItem(lastItem, { isFirst: false, isLast: true })}
           </Fragment>
         ) : (
-          stepNavItems.map((item, i) => {
-            const isLast = stepNavItems.length === i + 1
-            const isFirst = i === 0
-
-            return (
-              <Fragment key={i}>
-                {renderItem(item, { isFirst, isLast })}
-                {!isLast && separator}
-              </Fragment>
-            )
-          })
+          renderTrail()
         )}
       </nav>
       {canCollapse ? (
         <span aria-hidden="true" className={`${baseClass}__measurer-clip`} inert>
           <div className={`${baseClass}__measurer`} ref={measurerRef}>
-            {stepNavItems.map((item, i) => {
-              const isLast = stepNavItems.length === i + 1
-              const isFirst = i === 0
-
-              return (
-                <Fragment key={i}>
-                  {renderItem(item, { isFirst, isLast })}
-                  {!isLast && separator}
-                </Fragment>
-              )
-            })}
+            {renderTrail()}
           </div>
         </span>
       ) : null}

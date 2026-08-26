@@ -3,6 +3,7 @@ import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 
+import { useBranchParam } from '../../../providers/Branch/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { Chip } from '../../Chip/index.js'
@@ -33,6 +34,7 @@ export const SelectedHierarchies: React.FC<SelectedHierarchiesProps> = ({
 }) => {
   const { config, getEntityConfig } = useConfig()
   const { i18n } = useTranslation()
+  const branch = useBranchParam()
   const [items, setItems] = useState<HierarchyItem[]>([])
   const [isInitialLoad, setIsInitialLoad] = useState(true)
 
@@ -63,6 +65,7 @@ export const SelectedHierarchies: React.FC<SelectedHierarchiesProps> = ({
       const useAsTitle = collectionConfig?.admin?.useAsTitle || 'id'
 
       const query = {
+        branch,
         depth: 0,
         limit: selectedIds.length,
         select: {
@@ -121,7 +124,16 @@ export const SelectedHierarchies: React.FC<SelectedHierarchiesProps> = ({
     }
 
     void fetchItems()
-  }, [selectedIds, selectedIdsKey, hierarchySlug, collectionConfig, serverURL, api, i18n.language])
+  }, [
+    branch,
+    selectedIds,
+    selectedIdsKey,
+    hierarchySlug,
+    collectionConfig,
+    serverURL,
+    api,
+    i18n.language,
+  ])
 
   if (isInitialLoad) {
     return (

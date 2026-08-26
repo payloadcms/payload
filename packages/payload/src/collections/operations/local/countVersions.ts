@@ -8,6 +8,10 @@ import { countVersionsOperation } from '../countVersions.js'
 
 export type CountVersionsOptions<TSlug extends CollectionSlug> = {
   /**
+   * Count versions as seen from this branch. `false` bypasses branching entirely.
+   */
+  branch?: false | string
+  /**
    * the Collection slug to operate against.
    */
   collection: TSlug

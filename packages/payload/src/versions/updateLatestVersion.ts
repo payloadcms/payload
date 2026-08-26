@@ -3,6 +3,8 @@ import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 import type { Payload } from '../index.js'
 import type { JsonObject, PayloadRequest } from '../types/index.js'
 
+import { resolveBranchOwnVersions, resolveBranchVersionParent } from '../branching/versions.js'
+
 type Args<TData extends JsonObject> = {
   collection?: SanitizedCollectionConfig
   global?: SanitizedGlobalConfig
@@ -39,15 +41,29 @@ export async function updateLatestVersion<TData extends JsonObject>({
     sort: '-updatedAt',
   }
 
+  // On a branch, the row to rewrite and the row to rewrite it *as* both differ from
+  // main's. Resolved together because getting one without the other is worse than
+  // getting neither: the unscoped find returns main's latest version as part of the
+  // branch's ancestry (a branch reads main's history as its own past), so unpublishing
+  // on a branch rewrote main's version row in place with the branch's content.
+  const branched = collection
+    ? await resolveBranchVersionParent({
+        collectionSlug: collection.slug,
+        parent: id!,
+        req,
+        versionData: {},
+      })
+    : undefined
+
   if (collection) {
     ;({ docs } = await payload.db.findVersions<TData>({
       ...findVersionArgs,
       collection: collection.slug,
-      where: {
-        parent: {
-          equals: id,
-        },
-      },
+      where: await resolveBranchOwnVersions({
+        id: id!,
+        collectionSlug: collection.slug,
+        req,
+      }),
     }))
   } else {
     ;({ docs } = await payload.db.findGlobalVersions<TData>({
@@ -68,11 +84,15 @@ export async function updateLatestVersion<TData extends JsonObject>({
     versionData: {
       createdAt: new Date(latestVersion.createdAt).toISOString(),
       latest: true,
-      parent: id,
+      // The branch's chain hangs off its shadow row, and `_branch`/`_branchParent` are
+      // columns on the row being replaced — omitting them would strip the row's branch
+      // identity and hand it to main.
+      parent: branched?.parent ?? id,
       updatedAt: now,
       version: {
         ...versionData,
       },
+      ...(branched?.versionData ?? {}),
     },
   }
 

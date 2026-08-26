@@ -2,6 +2,7 @@ import type { TypedFallbackLocale } from '../../../index.js'
 import type { PayloadRequest } from '../../../types/index.js'
 import type { FlattenedField } from '../../config/types.js'
 
+import { resolveBranch } from '../../../branching/resolveBranch.js'
 import { createDataloaderCacheKey } from '../../../collections/dataloader.js'
 
 export const virtualFieldPopulationPromise = async ({
@@ -133,6 +134,7 @@ export const virtualFieldPopulationPromise = async ({
         docIDs.map((docID) => {
           return req.payloadDataLoader.load(
             createDataloaderCacheKey({
+              branch: resolveBranch(req),
               collectionSlug,
               currentDepth: 0,
               depth: 0,
@@ -192,6 +194,7 @@ export const virtualFieldPopulationPromise = async ({
 
     const populatedDoc = await req.payloadDataLoader.load(
       createDataloaderCacheKey({
+        branch: resolveBranch(req),
         collectionSlug: currentField.relationTo,
         currentDepth: 0,
         depth: 0,

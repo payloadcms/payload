@@ -37,6 +37,7 @@ import type {
   Imports,
   InternalImportMap,
 } from '../bin/generateImportMap/index.js'
+import type { BranchingConfig, SanitizedBranchingConfig } from '../branching/types.js'
 import type {
   Collection,
   CollectionAccess,
@@ -1388,6 +1389,23 @@ export type Config = {
    */
   bodyParser?: Partial<BusboyConfig>
   /**
+   * Enable content branching.
+   *
+   * When enabled, editors can create named branches and create, update, delete
+   * and publish documents on them in isolation, then merge selected changes
+   * back to `main`.
+   *
+   * Applies to every eligible collection. Built-in Payload collections and
+   * auth-enabled collections are excluded by default but can opt in with
+   * `branching: true` on the collection itself.
+   *
+   * Enabling this adds `_branch` columns to every included collection, which
+   * requires a migration on relational databases. Disabling it again does not.
+   *
+   * @default false
+   */
+  branching?: boolean | BranchingConfig
+  /**
    * Manage the datamodel of your application
    *
    * @see https://payloadcms.com/docs/configuration/collections#collection-configs
@@ -1747,6 +1765,7 @@ export interface SanitizedConfig
       | 'auth'
       | 'bin'
       | 'blocks'
+      | 'branching'
       | 'collections'
       | 'cookiePrefix'
       | 'cors'
@@ -1795,6 +1814,7 @@ export interface SanitizedConfig
   admin: SanitizedAdminConfig
   auth: Required<NonNullable<Config['auth']>>
   blocks: FlattenedBlock[]
+  branching: SanitizedBranchingConfig
   collections: SanitizedCollectionConfig[]
   /** Default richtext editor to use for richText fields */
   editor?: RichTextAdapter<any, any, any>

@@ -93,7 +93,15 @@ export const createPayloadRequest = async ({
     locale = locales.locale!
   }
 
+  // Materialized here for the same reason `locale` is, and it has to be: operations
+  // hand the database adapter a narrowed request that carries `branch` explicitly
+  // rather than the whole request, so a branch still sitting unread in the query
+  // string is invisible to the read and it resolves against main. Set only when
+  // asked for, so an unbranched request is untouched.
+  const branch = searchParams.get('branch')
+
   const customRequest: CustomPayloadRequestProperties = {
+    ...(branch ? { branch } : {}),
     context: {},
     fallbackLocale: fallbackLocale!,
     hash: urlProperties.hash,

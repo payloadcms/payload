@@ -197,9 +197,21 @@ export const buildSchema = (args: {
         }
       }
 
-      schema.index(indexDefinition, {
+      const indexOptions: IndexOptions = {
         unique: args.buildSchemaOptions.disableUnique ? false : index.unique,
-      })
+      }
+
+      // A missing field is an ordinary value to a MongoDB unique index, unlike a
+      // NULL column in a Postgres or SQLite composite unique constraint, which
+      // always excludes that row from the comparison. `partialFilterExpression`
+      // is what makes the two behave the same.
+      if (index.requireExists?.length) {
+        indexOptions.partialFilterExpression = Object.fromEntries(
+          index.requireExists.map((field) => [field, { $exists: true }]),
+        )
+      }
+
+      schema.index(indexDefinition, indexOptions)
     }
   }
 

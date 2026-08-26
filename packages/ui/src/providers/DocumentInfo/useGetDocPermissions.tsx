@@ -12,6 +12,7 @@ export type GetDocPermissions = (data?: Data) => Promise<void>
 export const useGetDocPermissions = ({
   id,
   api,
+  branch,
   collectionSlug,
   globalSlug,
   i18n,
@@ -22,6 +23,7 @@ export const useGetDocPermissions = ({
   setHasSavePermission,
 }: {
   api: string
+  branch: string | undefined
   collectionSlug: string
   globalSlug: string
   i18n: any
@@ -35,6 +37,7 @@ export const useGetDocPermissions = ({
   React.useCallback(
     async (data: Data) => {
       const params = {
+        branch,
         locale: locale || undefined,
       }
 
@@ -122,6 +125,7 @@ export const useGetDocPermissions = ({
       }
     },
     [
+      branch,
       locale,
       id,
       collectionSlug,

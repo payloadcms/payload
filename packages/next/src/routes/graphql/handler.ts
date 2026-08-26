@@ -7,6 +7,7 @@ import { status as httpStatus } from 'http-status'
 import {
   addDataAndFileToRequest,
   addLocalesToRequestFromData,
+  assertBranchReadable,
   createPayloadRequest,
   headersWithCors,
   logError,
@@ -109,6 +110,18 @@ export const POST =
     if (payload.config.graphQL?.disable) {
       return new Response(null, {
         status: 404,
+      })
+    }
+
+    // GraphQL takes its branch the same way REST does — a query param on the request —
+    // so it needs the same gate (§12.5). Answered as a bare 403 rather than a GraphQL
+    // error body: the request is refused before any operation is parsed.
+    try {
+      await assertBranchReadable({ req })
+    } catch (_err) {
+      return new Response(null, {
+        headers: headersWithCors({ headers: new Headers(), req }),
+        status: 403,
       })
     }
 

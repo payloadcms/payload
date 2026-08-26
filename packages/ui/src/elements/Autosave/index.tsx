@@ -22,6 +22,7 @@ import {
 import { useDebounce } from '../../hooks/useDebounce.js'
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
 import { useQueue } from '../../hooks/useQueue.js'
+import { useBranchParam } from '../../providers/Branch/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
@@ -63,6 +64,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
 
   const currentLocale = useLocale()
   const locale = currentLocale?.code
+  const branch = useBranchParam()
   const { t } = useTranslation()
 
   const interval = getAutosaveInterval(docConfig)
@@ -111,6 +113,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
           const params = qs.stringify(
             {
               autosave: true,
+              branch,
               depth: 0,
               draft: true,
               'fallback-locale': 'null',

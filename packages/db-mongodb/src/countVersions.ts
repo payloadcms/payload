@@ -1,7 +1,11 @@
 import type { CountOptions } from 'mongodb'
 import type { CountVersions } from 'payload'
 
-import { buildVersionCollectionFields, flattenWhereToOperators } from 'payload'
+import {
+  buildVersionCollectionFields,
+  flattenWhereToOperators,
+  resolveBranchVersionHistoryQuery,
+} from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
@@ -11,13 +15,17 @@ import { getSession } from './utilities/getSession.js'
 
 export const countVersions: CountVersions = async function countVersions(
   this: MongooseAdapter,
-  { collection: collectionSlug, locale, req, where = {} },
+  { branch, collection: collectionSlug, locale, req, where = {} },
 ) {
   const { collectionConfig, Model } = getCollection({
     adapter: this,
     collectionSlug,
     versions: true,
   })
+
+  // Shares the list's predicate so the count in the Versions tab can never
+  // disagree with the rows the Versions view actually renders.
+  where = resolveBranchVersionHistoryQuery({ branch, collectionSlug, req, where }) ?? {}
 
   let hasNearConstraint = false
 

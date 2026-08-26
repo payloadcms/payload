@@ -14,6 +14,7 @@ import { usePathname, useRouter, useSearchParams } from '../../../providers/Rout
 import { useRouteTransition } from '../../../providers/RouteTransition/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { formatTimeToNow } from '../../../utilities/formatDocTitle/formatDateTitle.js'
+import { BranchCell } from '../../Versions/cells/Branch/index.js'
 import { Restore } from '../Restore/index.js'
 import './index.css'
 import { SelectComparison } from '../SelectComparison/index.js'
@@ -24,6 +25,7 @@ import { SetStepNav } from './SetStepNav.js'
 const baseClass = 'view-version'
 
 export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
+  branch,
   canUpdate,
   modifiedOnly: modifiedOnlyProp,
   RenderedDiff,
@@ -198,9 +200,12 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
           <div className={`${baseClass}__version-from`}>
             <div className={`${baseClass}__version-from-labels`}>
               <span>{t('version:comparingAgainst')}</span>
-              {versionFromTimeAgo && (
-                <span className={`${baseClass}__time-elapsed`}>{versionFromTimeAgo}</span>
-              )}
+              <span className={`${baseClass}__label-meta`}>
+                {versionFromTimeAgo && (
+                  <span className={`${baseClass}__time-elapsed`}>{versionFromTimeAgo}</span>
+                )}
+                <BranchCell branch={branch?.from} />
+              </span>
             </div>
             <SelectComparison
               collectionSlug={collectionSlug}
@@ -215,7 +220,10 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
           <div className={`${baseClass}__version-to`}>
             <div className={`${baseClass}__version-to-labels`}>
               <span>{t('version:currentlyViewing')}</span>
-              <span className={`${baseClass}__time-elapsed`}>{versionToTimeAgo}</span>
+              <span className={`${baseClass}__label-meta`}>
+                <span className={`${baseClass}__time-elapsed`}>{versionToTimeAgo}</span>
+                <BranchCell branch={branch?.to} />
+              </span>
             </div>
             <div className={`${baseClass}__version-to-version`}>
               {VersionToCreatedAtLabel}
