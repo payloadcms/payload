@@ -41,6 +41,17 @@ describe('createLocalReq', () => {
     expect(req.context).toEqual({ parentValue: 1 })
   })
 
+  it('should share context when nested Local API calls do not pass context', async () => {
+    const req = await createLocalReq({ context: { parentValue: 1 } }, mockPayload)
+
+    const nestedReq = await createLocalReq({ req }, mockPayload)
+    nestedReq.context.nestedValue = 2
+
+    expect(nestedReq).toBe(req)
+    expect(nestedReq.context).toBe(req.context)
+    expect(req.context).toEqual({ nestedValue: 2, parentValue: 1 })
+  })
+
   it('should use req.url when provided and serverURL is undefined', async () => {
     const req = {
       url: 'http://example.com/api/test',

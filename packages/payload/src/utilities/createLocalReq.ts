@@ -137,7 +137,9 @@ export const createLocalReq: CreateLocalReq = async (
     req.headers = new Headers()
   }
 
-  req = isolateObjectProperty(req, 'context')
+  if (typeof context !== 'undefined') {
+    req = isolateObjectProperty(req, 'context')
+  }
   req.context = getRequestContext(req, context)
   req.payloadAPI = req?.payloadAPI || 'local'
   req.payload = payload
