@@ -549,6 +549,29 @@ describe('Auth', () => {
         await expect(apiKeyInput).toHaveValue(apiKey)
         await expect(apiKeyInput).toHaveAttribute('type', 'password')
       })
+
+      test('should hide an existing readable API key when re-enabled', async () => {
+        const existingAPIKey = uuid()
+        const user = await getAPIKeyTestPayload().create({
+          collection: apiKeysWithReadableKeysSlug,
+          data: {
+            apiKey: existingAPIKey,
+            enableAPIKey: false,
+          },
+        })
+        createdIDs.push(user.id)
+        const userURL = new AdminUrlUtil(serverURL, apiKeysWithReadableKeysSlug)
+
+        await page.goto(userURL.edit(user.id))
+        await expect(page.locator('#apiKey')).toBeHidden()
+        await page.locator('#field-enableAPIKey').click()
+
+        const apiKeyInput = page.locator('#apiKey')
+        await expect(apiKeyInput).toHaveValue(existingAPIKey)
+        await expect(apiKeyInput).toHaveAttribute('type', 'password')
+        await page.getByRole('button', { name: 'Show API key' }).click()
+        await expect(apiKeyInput).toHaveAttribute('type', 'text')
+      })
     })
 
     describe('api-keys-with-hidden-keys', () => {
