@@ -4,7 +4,7 @@ import { randomBytes, randomUUID } from 'crypto'
 import { Types } from 'mongoose'
 import path from 'path'
 import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, beforeEach, describe, expect } from 'vitest'
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type {
@@ -17,9 +17,8 @@ import type {
   Relation,
 } from './payload-types.js'
 
-import { it } from '../__helpers/int/vitest.js'
+import { test } from '../__helpers/int/vitest.js'
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
-import { mongooseList } from '../__helpers/shared/isMongoose.js'
 import { devUser } from '../credentials.js'
 import { clearAndSeedEverything } from './seed.js'
 import {
@@ -42,8 +41,6 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 type EasierChained = { id: string; relation: EasierChained }
-
-const mongoIt = mongooseList.includes(process.env.PAYLOAD_DATABASE || '') ? it : it.skip
 
 describe('Relationships', () => {
   beforeAll(async () => {
@@ -503,34 +500,36 @@ describe('Relationships', () => {
 
       // MongoDB dedupes $in at execution, so the bug is only visible in the
       // filter Payload hands to Mongoose — not in the returned docs.
-      mongoIt('should not duplicate IDs in $in when querying through a relationship', async () => {
-        const movie = await payload.create({
-          collection: 'movies',
-          data: { name: 'dup_test_movie' },
-        })
-
-        const Model = (payload.db as any).collections.directors
-        const originalPaginate = Model.paginate.bind(Model)
-        let capturedQuery: any
-        Model.paginate = (query: any, ...rest: any[]) => {
-          capturedQuery = query
-          return originalPaginate(query, ...rest)
-        }
-
-        try {
-          await payload.find({
-            collection: 'directors',
-            where: { 'movie.name': { equals: 'dup_test_movie' } },
+      test.options({ db: 'mongo' })(
+        'should not duplicate IDs in $in when querying through a relationship',
+        async () => {
+          const movie = await payload.create({
+            collection: 'movies',
+            data: { name: 'dup_test_movie' },
           })
-        } finally {
-          Model.paginate = originalPaginate
-        }
 
-        // eslint-disable-next-line vitest/no-standalone-expect
-        expect(capturedQuery.$and[0].movie.$in).toHaveLength(1)
+          const Model = (payload.db as any).collections.directors
+          const originalPaginate = Model.paginate.bind(Model)
+          let capturedQuery: any
+          Model.paginate = (query: any, ...rest: any[]) => {
+            capturedQuery = query
+            return originalPaginate(query, ...rest)
+          }
 
-        await payload.delete({ collection: 'movies', id: movie.id })
-      })
+          try {
+            await payload.find({
+              collection: 'directors',
+              where: { 'movie.name': { equals: 'dup_test_movie' } },
+            })
+          } finally {
+            Model.paginate = originalPaginate
+          }
+
+          expect(capturedQuery.$and[0].movie.$in).toHaveLength(1)
+
+          await payload.delete({ collection: 'movies', id: movie.id })
+        },
+      )
 
       describe('hasMany relationships', () => {
         describe('has-many relationship operators', () => {
@@ -744,9 +743,8 @@ describe('Relationships', () => {
           })
 
           // `near` on a point field is not implemented by the drizzle sqlite adapter
-          it(
+          test.options({ db: (adapter) => !adapter.startsWith('sqlite') })(
             'should support equals with a geospatial nested query',
-            { db: (adapter) => adapter.startsWith('sqlite') === false },
             async () => {
               const nearbyMovie = await payload.create({
                 collection: 'movies',
@@ -942,7 +940,7 @@ describe('Relationships', () => {
           expect(query2.totalDocs).toStrictEqual(2)
         })
 
-        mongoIt('should treat an ObjectId as a relationship ID', async () => {
+        test.options({ db: 'mongo' })('should treat an ObjectId as a relationship ID', async () => {
           const movie = await payload.create({ collection: 'movies', data: {} })
 
           const director = await payload.create({
@@ -967,45 +965,47 @@ describe('Relationships', () => {
         })
 
         // all operator is not supported in Postgres yet for any fields
-        mongoIt('should query using "all" by hasMany relationship field', async () => {
-          const movie1 = await payload.create({
-            collection: 'movies',
-            data: {},
-          })
-          const movie2 = await payload.create({
-            collection: 'movies',
-            data: {},
-          })
+        test.options({ db: 'mongo' })(
+          'should query using "all" by hasMany relationship field',
+          async () => {
+            const movie1 = await payload.create({
+              collection: 'movies',
+              data: {},
+            })
+            const movie2 = await payload.create({
+              collection: 'movies',
+              data: {},
+            })
 
-          await payload.create({
-            collection: 'directors',
-            data: {
-              name: 'Quentin Tarantino',
-              movies: [movie2.id, movie1.id],
-            },
-          })
-
-          await payload.create({
-            collection: 'directors',
-            data: {
-              name: 'Quentin Tarantino',
-              movies: [movie2.id],
-            },
-          })
-
-          const query1 = await payload.find({
-            collection: 'directors',
-            depth: 0,
-            where: {
-              movies: {
-                all: [movie1.id],
+            await payload.create({
+              collection: 'directors',
+              data: {
+                name: 'Quentin Tarantino',
+                movies: [movie2.id, movie1.id],
               },
-            },
-          })
+            })
 
-          // eslint-disable-next-line vitest/no-standalone-expect
-          expect(query1.totalDocs).toStrictEqual(1)
-        })
+            await payload.create({
+              collection: 'directors',
+              data: {
+                name: 'Quentin Tarantino',
+                movies: [movie2.id],
+              },
+            })
+
+            const query1 = await payload.find({
+              collection: 'directors',
+              depth: 0,
+              where: {
+                movies: {
+                  all: [movie1.id],
+                },
+              },
+            })
+
+            expect(query1.totalDocs).toStrictEqual(1)
+          },
+        )
 
         it('should query using "in" by hasMany relationship field', async () => {
           const tree1 = await payload.create({
@@ -2107,38 +2107,40 @@ describe('Relationships', () => {
     })
 
     // all operator is not supported in Postgres yet for any fields
-    mongoIt('should allow REST all querying on polymorphic relationships', async () => {
-      const movie = await payload.create({
-        collection: 'movies',
-        data: {
-          name: 'Pulp Fiction 2',
-        },
-      })
-      await payload.create({
-        collection: polymorphicRelationshipsSlug,
-        data: {
-          polymorphic: {
-            relationTo: 'movies',
-            value: movie.id,
+    test.options({ db: 'mongo' })(
+      'should allow REST all querying on polymorphic relationships',
+      async () => {
+        const movie = await payload.create({
+          collection: 'movies',
+          data: {
+            name: 'Pulp Fiction 2',
           },
-        },
-      })
-
-      const queryOne = await restClient
-        .GET(`/${polymorphicRelationshipsSlug}`, {
-          query: {
-            where: {
-              'polymorphic.value': {
-                all: [movie.id],
-              },
+        })
+        await payload.create({
+          collection: polymorphicRelationshipsSlug,
+          data: {
+            polymorphic: {
+              relationTo: 'movies',
+              value: movie.id,
             },
           },
         })
-        .then((res) => res.json())
 
-      // eslint-disable-next-line vitest/no-standalone-expect
-      expect(queryOne.docs).toHaveLength(1)
-    })
+        const queryOne = await restClient
+          .GET(`/${polymorphicRelationshipsSlug}`, {
+            query: {
+              where: {
+                'polymorphic.value': {
+                  all: [movie.id],
+                },
+              },
+            },
+          })
+          .then((res) => res.json())
+
+        expect(queryOne.docs).toHaveLength(1)
+      },
+    )
 
     it('should allow querying on polymorphic relationships with an object syntax', async () => {
       const movie = await payload.create({
