@@ -9,7 +9,7 @@ import { devUser } from '../credentials.js'
 import { seed } from './seed.js'
 import {
   apiKeysSlug,
-  apiKeysWithFieldReadAccessSlug,
+  apiKeysWithRestrictedFieldAccessSlug,
   apiKeysWithHiddenKeysSlug,
   apiKeysWithReadableKeysSlug,
   BASE_PATH,
@@ -362,7 +362,7 @@ export default buildConfigWithDefaults({
       versions: false,
     },
     {
-      slug: apiKeysWithFieldReadAccessSlug,
+      slug: apiKeysWithRestrictedFieldAccessSlug,
       auth: {
         disableLocalStrategy: true,
         useAPIKey: true,
@@ -385,8 +385,8 @@ export default buildConfigWithDefaults({
         },
       ],
       labels: {
-        plural: 'API Keys With Field Read Access',
-        singular: 'API Key With Field Read Access',
+        plural: 'API Keys With Restricted Field Access',
+        singular: 'API Key With Restricted Field Access',
       },
       versions: false,
     },

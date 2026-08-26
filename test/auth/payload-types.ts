@@ -91,7 +91,7 @@ export type LexicalNodes_BCC912DC =
       | 'api-keys'
       | 'public-users'
       | 'relationsCollection'
-      | 'api-keys-with-field-read-access'
+      | 'api-keys-with-restricted-field-access'
       | 'payload-kv'
       | 'payload-locked-documents'
       | 'payload-preferences'
@@ -105,7 +105,7 @@ export interface Config {
     'disable-local-strategy-password': DisableLocalStrategyPasswordAuthOperations;
     'api-keys': ApiKeyAuthOperations;
     'public-users': PublicUserAuthOperations;
-    'api-keys-with-field-read-access': ApiKeysWithFieldReadAccessAuthOperations;
+    'api-keys-with-restricted-field-access': ApiKeysWithRestrictedFieldAccessAuthOperations;
   };
   blocks: {};
   collections: {
@@ -115,7 +115,7 @@ export interface Config {
     'api-keys': ApiKey;
     'public-users': PublicUser;
     relationsCollection: RelationsCollection;
-    'api-keys-with-field-read-access': ApiKeysWithFieldReadAccess;
+    'api-keys-with-restricted-field-access': ApiKeysWithRestrictedFieldAccess;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -129,7 +129,7 @@ export interface Config {
     'api-keys': ApiKeysSelect<false> | ApiKeysSelect<true>;
     'public-users': PublicUsersSelect<false> | PublicUsersSelect<true>;
     relationsCollection: RelationsCollectionSelect<false> | RelationsCollectionSelect<true>;
-    'api-keys-with-field-read-access': ApiKeysWithFieldReadAccessSelect<false> | ApiKeysWithFieldReadAccessSelect<true>;
+    'api-keys-with-restricted-field-access': ApiKeysWithRestrictedFieldAccessSelect<false> | ApiKeysWithRestrictedFieldAccessSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -153,7 +153,7 @@ export interface Config {
     | DisableLocalStrategyPassword
     | ApiKey
     | PublicUser
-    | ApiKeysWithFieldReadAccess;
+    | ApiKeysWithRestrictedFieldAccess;
   jobs: {
     tasks: unknown;
     workflows: unknown;
@@ -249,7 +249,7 @@ export interface PublicUserAuthOperations {
     password: string;
   };
 }
-export interface ApiKeysWithFieldReadAccessAuthOperations {
+export interface ApiKeysWithRestrictedFieldAccessAuthOperations {
   forgotPassword: {
     email: string;
     password: string;
@@ -412,16 +412,16 @@ export interface RelationsCollection {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "api-keys-with-field-read-access".
+ * via the `definition` "api-keys-with-restricted-field-access".
  */
-export interface ApiKeysWithFieldReadAccess {
+export interface ApiKeysWithRestrictedFieldAccess {
   id: string;
   updatedAt: string;
   createdAt: string;
   enableAPIKey?: boolean | null;
   apiKey?: string | null;
   apiKeyIndex?: string | null;
-  collection: 'api-keys-with-field-read-access';
+  collection: 'api-keys-with-restricted-field-access';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -472,8 +472,8 @@ export interface PayloadLockedDocument {
         value: string | RelationsCollection;
       } | null)
     | ({
-        relationTo: 'api-keys-with-field-read-access';
-        value: string | ApiKeysWithFieldReadAccess;
+        relationTo: 'api-keys-with-restricted-field-access';
+        value: string | ApiKeysWithRestrictedFieldAccess;
       } | null);
   globalSlug?: string | null;
   user:
@@ -498,8 +498,8 @@ export interface PayloadLockedDocument {
         value: string | PublicUser;
       }
     | {
-        relationTo: 'api-keys-with-field-read-access';
-        value: string | ApiKeysWithFieldReadAccess;
+        relationTo: 'api-keys-with-restricted-field-access';
+        value: string | ApiKeysWithRestrictedFieldAccess;
       };
   updatedAt: string;
   createdAt: string;
@@ -532,8 +532,8 @@ export interface PayloadPreference {
         value: string | PublicUser;
       }
     | {
-        relationTo: 'api-keys-with-field-read-access';
-        value: string | ApiKeysWithFieldReadAccess;
+        relationTo: 'api-keys-with-restricted-field-access';
+        value: string | ApiKeysWithRestrictedFieldAccess;
       };
   key?: string | null;
   value?:
@@ -698,9 +698,9 @@ export interface RelationsCollectionSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "api-keys-with-field-read-access_select".
+ * via the `definition` "api-keys-with-restricted-field-access_select".
  */
-export interface ApiKeysWithFieldReadAccessSelect<T extends boolean = true> {
+export interface ApiKeysWithRestrictedFieldAccessSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   enableAPIKey?: T;
@@ -771,7 +771,7 @@ export interface CollectionQueryWidget {
       | 'api-keys'
       | 'public-users'
       | 'relationsCollection'
-      | 'api-keys-with-field-read-access';
+      | 'api-keys-with-restricted-field-access';
     where?:
       | {
           [k: string]: unknown;
@@ -801,7 +801,7 @@ export interface ActivityWidget {
           | 'api-keys'
           | 'public-users'
           | 'relationsCollection'
-          | 'api-keys-with-field-read-access'
+          | 'api-keys-with-restricted-field-access'
         )[]
       | null;
   };

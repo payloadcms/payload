@@ -23,9 +23,9 @@ import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { devUser } from '../credentials.js'
 import {
   apiKeysSlug,
-  apiKeysWithFieldReadAccessSlug,
   apiKeysWithHiddenKeysSlug,
   apiKeysWithReadableKeysSlug,
+  apiKeysWithRestrictedFieldAccessSlug,
   namedSaveToJWTValue,
   partialDisableLocalStrategiesSlug,
   publicUsersSlug,
@@ -1870,7 +1870,7 @@ describe('Auth', () => {
       it('respects custom API key update access', async () => {
         const originalAPIKey = uuid()
         const user = await payload.create({
-          collection: apiKeysWithFieldReadAccessSlug,
+          collection: apiKeysWithRestrictedFieldAccessSlug,
           data: {
             apiKey: originalAPIKey,
             enableAPIKey: true,
@@ -1878,7 +1878,7 @@ describe('Auth', () => {
         })
 
         const response = await restClient.POST(
-          `/${apiKeysWithFieldReadAccessSlug}/generate-api-key/${user.id}`,
+          `/${apiKeysWithRestrictedFieldAccessSlug}/generate-api-key/${user.id}`,
           {
             headers: {
               Authorization: `JWT ${token}`,
@@ -1886,7 +1886,7 @@ describe('Auth', () => {
           },
         )
         const updated = await payload.findByID({
-          collection: apiKeysWithFieldReadAccessSlug,
+          collection: apiKeysWithRestrictedFieldAccessSlug,
           id: user.id,
         })
 

@@ -8,7 +8,11 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { devUser } from '../credentials.js'
-import { apiKeysWithFieldReadAccessSlug, apiKeysWithReadableKeysSlug, slug } from './shared.js'
+import {
+  apiKeysWithReadableKeysSlug,
+  apiKeysWithRestrictedFieldAccessSlug,
+  slug,
+} from './shared.js'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -79,7 +83,7 @@ describe('API key permissions', () => {
       where: { email: { equals: devUser.email } },
     })
     const target = await payload.create({
-      collection: apiKeysWithFieldReadAccessSlug,
+      collection: apiKeysWithRestrictedFieldAccessSlug,
       data: {
         enableAPIKey: true,
       },
@@ -89,7 +93,7 @@ describe('API key permissions', () => {
     const permissions = await getEntityPermissions({
       id: target.id,
       blockReferencesPermissions: {},
-      entity: payload.collections[apiKeysWithFieldReadAccessSlug].config,
+      entity: payload.collections[apiKeysWithRestrictedFieldAccessSlug].config,
       entityType: 'collection',
       fetchData: true,
       operations: ['update'],

@@ -760,8 +760,8 @@ describe('Auth', () => {
       })
     })
 
-    describe('api-keys-with-field-read-access', () => {
-      const collectionSlug = 'api-keys-with-field-read-access'
+    describe('api-keys-with-restricted-field-access', () => {
+      const collectionSlug = 'api-keys-with-restricted-field-access'
 
       beforeAll(() => {
         url = new AdminUrlUtil(serverURL, collectionSlug)
