@@ -43,7 +43,7 @@ export const validationPublishUploadsDir = path.resolve(dirname, 'validation-pub
 type HookEvent = {
   context: Record<string, unknown>
   hook: string
-  operation: string
+  operation: string | undefined
   requestOperation: string | undefined
 }
 
@@ -363,15 +363,29 @@ const runWriteAttempt: CollectionBeforeChangeHook = async ({ data, operation, re
   return data
 }
 
-// Exercises the fix for the operation value that Lexical's Blocks, Link, and Upload features pass
-// down to their nested fields' own `validate` functions, which used to coerce anything other than
-// `create`/`update` to `update`, so nested fields never saw `operation: 'validate'`.
+// Exercises the operation value that Lexical's Blocks, Link, and Upload features pass down to
+// their nested fields' own `validate` functions and `beforeChange` hooks. `validate` used to
+// coerce anything other than `create`/`update` to `update`, so nested fields never saw
+// `operation: 'validate'`; `beforeChange` already threaded it through correctly.
 const nestedFieldValidateBlock: Block = {
   slug: 'nestedFieldValidateBlock',
   fields: [
     {
       name: 'value',
       type: 'text',
+      hooks: {
+        beforeChange: [
+          ({ context, operation, req, value }) => {
+            recordHook({
+              context,
+              hook: 'nestedBlockFieldBeforeChange',
+              operation,
+              requestOperation: req.operation,
+            })
+            return value
+          },
+        ],
+      },
       validate: (value, { operation, req }) => {
         recordHook({
           context: req.context,

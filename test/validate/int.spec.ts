@@ -55,6 +55,29 @@ const dirname = path.dirname(filename)
 const formatGraphQLID = (id: number | string) =>
   payload.db.defaultIDType === 'number' ? id : `"${id}"`
 
+function buildNestedFieldValidateBlockRichText(value: string) {
+  return {
+    root: {
+      type: 'root',
+      children: [
+        {
+          type: 'block',
+          fields: {
+            id: 'nested-field-validate-block',
+            blockType: 'nestedFieldValidateBlock',
+            value,
+          },
+          format: '',
+          version: 2,
+        },
+      ],
+      format: '',
+      indent: 0,
+      version: 1,
+    },
+  }
+}
+
 describe('validate Local API', () => {
   beforeAll(async () => {
     ;({ payload, restClient } = await initPayloadInt(dirname))
@@ -930,26 +953,7 @@ describe('validate Local API', () => {
       const result = await payload.validate({
         collection: validationCollectionSlug,
         data: {
-          blockRichText: {
-            root: {
-              type: 'root',
-              children: [
-                {
-                  type: 'block',
-                  fields: {
-                    id: 'nested-field-validate-block',
-                    blockType: 'nestedFieldValidateBlock',
-                    value: 'nested block value',
-                  },
-                  format: '',
-                  version: 2,
-                },
-              ],
-              format: '',
-              indent: 0,
-              version: 1,
-            },
-          },
+          blockRichText: buildNestedFieldValidateBlockRichText('nested block value'),
           summary: 'candidate summary',
           title: 'Candidate title',
         },
@@ -964,6 +968,27 @@ describe('validate Local API', () => {
       expect(nestedBlockFieldValidateEvent).toBeDefined()
       expect(nestedBlockFieldValidateEvent?.operation).toBe('validate')
       expect(nestedBlockFieldValidateEvent?.requestOperation).toBe('validate')
+    })
+
+    it('should pass the validate operation into beforeChange hooks nested inside a Lexical block', async () => {
+      const result = await payload.validate({
+        collection: validationCollectionSlug,
+        data: {
+          blockRichText: buildNestedFieldValidateBlockRichText('nested block value'),
+          summary: 'candidate summary',
+          title: 'Candidate title',
+        },
+        locale: 'en',
+      })
+
+      expect(result.valid).toBe(true)
+
+      const nestedBlockFieldBeforeChangeEvent = hookEvents.find(
+        ({ hook }) => hook === 'nestedBlockFieldBeforeChange',
+      )
+      expect(nestedBlockFieldBeforeChangeEvent).toBeDefined()
+      expect(nestedBlockFieldBeforeChangeEvent?.operation).toBe('validate')
+      expect(nestedBlockFieldBeforeChangeEvent?.requestOperation).toBe('validate')
     })
 
     it('should apply defaults before validating required fields', async () => {
