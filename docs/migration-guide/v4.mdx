@@ -1704,3 +1704,20 @@ The Admin UI styles were migrated from SCSS to plain CSS. The `@payloadcms/ui/sc
 The `--theme-elevation-*` scale was removed. Use the semantic `--color-*` tokens (e.g. `--color-bg`, `--color-text`, `--color-border`, `--color-icon`) or the raw `--ramp-*` palette instead. See [Customizing CSS](../admin/customizing-css) for the full list of available tokens.
 
 Any custom component `.scss` files you authored should be renamed to `.css` and updated to plain CSS syntax — Payload no longer ships a SCSS toolchain.
+
+### Upload `abortOnLimit` now defaults to `true`
+
+The Payload-wide [`upload.abortOnLimit`](../upload/overview#payload-wide-upload-options) option now defaults to `true`. A file that is bigger than the configured `fileSize` limit now returns an HTTP 413 error by default. Previously, the file was truncated to the limit without any error, and the upload continued.
+
+If your application depends on the old truncate-on-limit behavior, set `abortOnLimit: false` explicitly:
+
+```diff
+export default buildConfig({
+  upload: {
++   abortOnLimit: false,
+    limits: {
+      fileSize: 5000000,
+    },
+  },
+})
+```

@@ -715,7 +715,7 @@ export type FetchAPIFileUploadOptions = {
   /**
    * Returns a HTTP 413 when the file is bigger than the size limit if `true`.
    * Otherwise, it will add a `truncated = true` to the resulting file structure.
-   * @default false
+   * @default true
    */
   abortOnLimit?: boolean | undefined
   /**
