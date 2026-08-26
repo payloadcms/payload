@@ -17,7 +17,6 @@ export const caTranslations: DefaultTranslationsObject = {
       "Si l'adreça de correu electrònic està associada amb un compte, rebràs instruccions per restablir la teva contrasenya aviat. Si no trobes el correu electrònic a la safata d'entrada, revisa la carpeta de correu brossa o no desitjat.",
     confirmGeneration: 'Confirmar generació',
     confirmPassword: 'Confirma la contrasenya',
-    copyAPIKeyBeforeSaving: 'Copia aquesta clau API abans de desar. No la podràs tornar a veure.',
     createFirstUser: 'Crea el primer usuari',
     createUser: 'Crear usuari',
     emailNotValid: 'El correu electrònic proporcionat no és vàlid',

@@ -17,8 +17,6 @@ export const skTranslations: DefaultTranslationsObject = {
       'Ak je e-mailová adresa spojená s účtom, čoskoro dostanete inštrukcie na obnovenie hesla. Skontrolujte prosím svoju spamovú alebo junk mail zložku, ak e-mail nevidíte vo svojej doručenej pošte.',
     confirmGeneration: 'Potvrdiť generovanie',
     confirmPassword: 'Potvrdiť heslo',
-    copyAPIKeyBeforeSaving:
-      'Pred uložením si tento API kľúč skopírujte. Už ho nebudete môcť znova zobraziť.',
     createFirstUser: 'Vytvorenie prvého používateľa',
     createUser: 'Vytvoriť používateľa',
     emailNotValid: 'Zadaný e-mail nie je platný',

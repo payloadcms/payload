@@ -17,7 +17,6 @@ export const thTranslations: DefaultTranslationsObject = {
       'ถ้าที่อยู่อีเมลถูกเชื่อมโยงกับบัญชีผู้ใช้งาน คุณจะได้รับคำแนะนำในการเปลี่ยนรหัสผ่านในไม่ช้า กรุณาตรวจสอบโฟลเดอร์สแปมหรือจัด mail ถ้าคุณไม่เห็นอีเมลในกล่องจดหมายขาเข้า',
     confirmGeneration: 'ยืนยันการสร้าง',
     confirmPassword: 'ยืนยันรหัสผ่าน',
-    copyAPIKeyBeforeSaving: 'คัดลอกคีย์ API นี้ก่อนบันทึก คุณจะไม่สามารถดูคีย์นี้ได้อีก',
     createFirstUser: 'สร้างผู้ใช้แรก',
     createUser: 'สร้างผู้ใช้',
     emailNotValid: 'อีเมลไม่ถูกต้อง',

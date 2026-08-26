@@ -17,8 +17,6 @@ export const ptTranslations: DefaultTranslationsObject = {
       'Se o endereço de email estiver associado a uma conta, você receberá instruções para redefinir sua senha em breve. Por favor, verifique sua pasta de spam ou lixo eletrônico se você não vir o email na sua caixa de entrada.',
     confirmGeneration: 'Confirmar Geração',
     confirmPassword: 'Confirmar Senha',
-    copyAPIKeyBeforeSaving:
-      'Copie esta chave de API antes de salvar. Você não poderá visualizá-la novamente.',
     createFirstUser: 'Criar primeiro usuário',
     createUser: 'Criar usuário',
     emailNotValid: 'O email fornecido não é válido',

@@ -17,8 +17,6 @@ export const huTranslations: DefaultTranslationsObject = {
       'Ha az e-mail cím egy fiókhoz van társítva, hamarosan kapni fog utasításokat a jelszó visszaállításához. Kérjük, ellenőrizze a spam vagy a levélszemét mappát, ha nem látja az e-mailt a bejövő üzenetek között.',
     confirmGeneration: 'Generálás megerősítése',
     confirmPassword: 'Jelszó megerősítése',
-    copyAPIKeyBeforeSaving:
-      'Mentés előtt másold ki ezt az API-kulcsot. Később nem tudod újra megtekinteni.',
     createFirstUser: 'Első felhasználó létrehozása',
     createUser: 'Felhasználó létrehozása',
     emailNotValid: 'A megadott e-mail cím érvénytelen',

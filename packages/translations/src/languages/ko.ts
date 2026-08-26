@@ -17,8 +17,6 @@ export const koTranslations: DefaultTranslationsObject = {
       '이메일 주소가 계정과 연결되어 있다면, 곧 비밀번호를 재설정하는 방법에 대한 지시를 받게 될 것입니다. 인박스에서 이메일을 찾을 수 없다면 스팸 또는 정크 메일 폴더를 확인해 주시기 바랍니다.',
     confirmGeneration: '생성 확인',
     confirmPassword: '비밀번호 확인',
-    copyAPIKeyBeforeSaving:
-      '저장하기 전에 이 API 키를 복사하세요. 저장 후에는 다시 볼 수 없습니다.',
     createFirstUser: '첫 번째 사용자 생성',
     createUser: '사용자 생성',
     emailNotValid: '입력한 이메일은 유효하지 않습니다.',

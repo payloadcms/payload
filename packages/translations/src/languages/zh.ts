@@ -17,7 +17,6 @@ export const zhTranslations: DefaultTranslationsObject = {
       '如果此电子邮件地址已关联到一个账号，您将会很快收到重置密码的说明。如果您在收件箱中看不到此邮件，请检查您的垃圾邮件夹。',
     confirmGeneration: '确认生成',
     confirmPassword: '确认密码',
-    copyAPIKeyBeforeSaving: '请在保存前复制此 API 密钥。保存后将无法再次查看。',
     createFirstUser: '创建第一个用户',
     createUser: '创建用户',
     emailNotValid: '所提供的电子邮件是无效的',

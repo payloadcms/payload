@@ -17,8 +17,6 @@ export const isTranslations: DefaultTranslationsObject = {
       'Ef netfangið er tengt reikningi muntu fá leiðbeiningar um að endurstilla lykilorðið þitt innan skamms. Vinsamlegast athugaðu ruslpóstmöppuna þína ef þú sérð ekki tölvupóstinn í pósthólfinu þínu.',
     confirmGeneration: 'Staðfestu sjálfvirka myndun',
     confirmPassword: 'Staðfestu lykilorð',
-    copyAPIKeyBeforeSaving:
-      'Afritaðu þennan API lykil áður en þú vistar. Þú munt ekki geta séð hann aftur.',
     createFirstUser: 'Skrá fyrsta notanda',
     createUser: 'Búðu til notanda',
     emailNotValid: 'Netfangið er ekki gilt',

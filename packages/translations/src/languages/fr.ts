@@ -17,8 +17,6 @@ export const frTranslations: DefaultTranslationsObject = {
       "Si l'adresse e-mail est associée à un compte, vous recevrez sous peu des instructions pour réinitialiser votre mot de passe. Veuillez vérifier votre dossier de courrier indésirable ou de spam si vous ne voyez pas l'e-mail dans votre boîte de réception.",
     confirmGeneration: 'Confirmer la génération',
     confirmPassword: 'Confirmez le mot de passe',
-    copyAPIKeyBeforeSaving:
-      'Copiez cette clé d’API avant d’enregistrer. Vous ne pourrez plus l’afficher ensuite.',
     createFirstUser: 'Créer le premier utilisateur',
     createUser: 'Créer un utilisateur',
     emailNotValid: 'L’adresse e-mail fournie n’est pas valide',

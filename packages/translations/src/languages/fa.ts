@@ -17,8 +17,6 @@ export const faTranslations: DefaultTranslationsObject = {
       'ایمیلی حاوی لینک بازنشانی رمز عبور برای شما ارسال شد. لطفاً پوشه اسپم (spam) خود را نیز بررسی کنید.',
     confirmGeneration: 'تأیید تولید',
     confirmPassword: 'تکرار رمز عبور',
-    copyAPIKeyBeforeSaving:
-      'پیش از ذخیره، این کلید API را کپی کنید. دیگر نمی‌توانید آن را مشاهده کنید.',
     createFirstUser: 'ایجاد اولین کاربر',
     createUser: 'ایجاد کاربر',
     emailNotValid: 'ایمیل وارد شده معتبر نیست.',

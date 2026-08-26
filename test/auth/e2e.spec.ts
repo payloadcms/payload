@@ -629,7 +629,7 @@ describe('Auth', () => {
         expect(result.docs[0]?.name).toBe('After')
       })
 
-      test('should show a replacement key until it is saved', async () => {
+      test('should rotate an unreadable API key without revealing it', async () => {
         const originalAPIKey = uuid()
         const user = await getAPIKeyTestPayload().create({
           collection: apiKeysWithHiddenKeysSlug,
@@ -648,13 +648,10 @@ describe('Auth', () => {
           .click()
 
         const apiKeyInput = page.locator('#apiKey')
-        await expect(apiKeyInput).toBeEnabled()
-        await expect(apiKeyInput).toHaveAttribute('type', 'text')
-        await expect(apiKeyInput).not.toHaveValue(originalAPIKey)
-        const replacementAPIKey = await apiKeyInput.inputValue()
-        await expect(
-          page.getByText("Copy this API key before saving. You won't be able to view it again."),
-        ).toBeVisible()
+        await expect(apiKeyInput).toBeDisabled()
+        await expect(apiKeyInput).toHaveValue('')
+        await expect(page.getByRole('button', { name: 'Show API key' })).toBeHidden()
+        await expect(page.locator('.copy-to-clipboard')).toBeHidden()
 
         await saveDocAndAssert(page)
         await expect(apiKeyInput).toBeDisabled()
@@ -671,14 +668,13 @@ describe('Auth', () => {
           },
         })
 
-        expect(result.docs[0]?.apiKey).toBe(replacementAPIKey)
+        expect(result.docs[0]?.apiKey).not.toBe(originalAPIKey)
       })
 
-      test('should show a new key when enabling an unreadable API key', async () => {
+      test('should generate an unreadable API key without revealing it when first enabled', async () => {
         const user = await getAPIKeyTestPayload().create({
           collection: apiKeysWithHiddenKeysSlug,
           data: {
-            apiKey: uuid(),
             enableAPIKey: false,
           },
         })
@@ -690,12 +686,10 @@ describe('Auth', () => {
         await page.locator('#field-enableAPIKey').click()
 
         const apiKeyInput = page.locator('#apiKey')
-        await expect(apiKeyInput).toBeEnabled()
-        await expect(apiKeyInput).toHaveAttribute('type', 'text')
-        const newAPIKey = await apiKeyInput.inputValue()
-        await expect(
-          page.getByText("Copy this API key before saving. You won't be able to view it again."),
-        ).toBeVisible()
+        await expect(apiKeyInput).toBeDisabled()
+        await expect(apiKeyInput).toHaveValue('')
+        await expect(page.getByRole('button', { name: 'Show API key' })).toBeHidden()
+        await expect(page.locator('.copy-to-clipboard')).toBeHidden()
 
         await saveDocAndAssert(page)
         await expect(apiKeyInput).toBeDisabled()
@@ -709,41 +703,19 @@ describe('Auth', () => {
           },
         })
 
-        expect(result.docs[0]?.apiKey).toBe(newAPIKey)
+        expect(result.docs[0]?.apiKey).toEqual(expect.any(String))
       })
     })
 
     describe('api-keys-with-field-read-access', () => {
       const collectionSlug = 'api-keys-with-field-read-access'
-      const createdIDs: string[] = []
-
-      afterEach(async () => {
-        for (const id of createdIDs) {
-          await payload.delete({
-            collection: collectionSlug,
-            where: {
-              id: {
-                equals: id,
-              },
-            },
-          })
-        }
-        createdIDs.length = 0
-      })
 
       beforeAll(() => {
         url = new AdminUrlUtil(serverURL, collectionSlug)
       })
 
-      test('should keep modifiable API key fields visible without read access', async () => {
+      test('should hide API key status without read access', async () => {
         await page.goto(url.create)
-
-        await expect(page.locator('.auth-fields')).toBeVisible()
-        await page.locator('#field-enableAPIKey').click()
-        await expect(page.locator('#apiKey')).toBeVisible()
-
-        await saveDocAndAssert(page)
-        createdIDs.push(new URL(page.url()).pathname.split('/').at(-1) as string)
 
         await expect(page.locator('.auth-fields')).toBeVisible()
         await expect(page.locator('#field-enableAPIKey')).toBeHidden()

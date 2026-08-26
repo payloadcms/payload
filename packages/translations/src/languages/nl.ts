@@ -17,8 +17,6 @@ export const nlTranslations: DefaultTranslationsObject = {
       'Als het e-mailadres is gekoppeld aan een account, ontvangt u binnenkort instructies om uw wachtwoord opnieuw in te stellen. Controleer uw spam- of ongewenste e-mailmap als u de e-mail niet in uw inbox ziet.',
     confirmGeneration: 'Bevestigen',
     confirmPassword: 'Wachtwoord bevestigen',
-    copyAPIKeyBeforeSaving:
-      'Kopieer deze API-sleutel voordat je opslaat. Je kunt hem daarna niet opnieuw bekijken.',
     createFirstUser: 'Eerste gebruiker aanmaken',
     createUser: 'Gebruiker aanmaken',
     emailNotValid: 'Het ingevoerde e-mailadres is niet geldig',

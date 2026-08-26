@@ -17,7 +17,6 @@ export const daTranslations: DefaultTranslationsObject = {
       'Hvis e-mailadressen er forbundet med en konto, vil du kort tid modtage instruktioner til at nulstille din adgangskode. Tjek venligst din spam- eller junkmail-mappe, hvis du ikke ser e-mailen i din indbakke.',
     confirmGeneration: 'Bekræft generering',
     confirmPassword: 'Bekræft adgangskode',
-    copyAPIKeyBeforeSaving: 'Kopiér denne API-nøgle, før du gemmer. Du vil ikke kunne se den igen.',
     createFirstUser: 'Opret bruger',
     createUser: 'Opret bruger',
     emailNotValid: 'Ugyldig email',

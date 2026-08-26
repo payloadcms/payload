@@ -17,8 +17,6 @@ export const lvTranslations: DefaultTranslationsObject = {
       'Ja e-pasta adrese ir saistīta ar kontu, drīz saņemsiet norādījumus paroles atiestatīšanai. Lūdzu, pārbaudiet arī surogātpasta mapi, ja e-pasts nav iesūtnē.',
     confirmGeneration: 'Apstiprināt ģenerēšanu',
     confirmPassword: 'Apstiprināt paroli',
-    copyAPIKeyBeforeSaving:
-      'Pirms saglabāšanas nokopējiet šo API atslēgu. Vēlāk to vairs nevarēs apskatīt.',
     createFirstUser: 'Izveidot pirmo lietotāju',
     createUser: 'Izveidot lietotāju',
     emailNotValid: 'Norādītais e-pasts nav derīgs',

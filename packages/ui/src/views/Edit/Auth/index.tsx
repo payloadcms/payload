@@ -121,22 +121,18 @@ export const Auth: React.FC<Props> = (props) => {
       fields: docPermissions.fields,
       operation,
     })
-  const showAPIKey = canReadAPIKey || (operation === 'create' && canModifyAPIKey)
-  const showAPIKeyStatus = canReadAPIKeyStatus || (operation === 'create' && canModifyAPIKeyStatus)
+  const showAPIKeyStatus = canReadAPIKeyStatus
   const apiKeyEnabled = showAPIKeyStatus ? Boolean(enableAPIKey?.value) : Boolean(apiKey?.value)
-  const hasDraftAPIKey = typeof apiKey?.value === 'string' && apiKey.value.length > 0
+  const hasAPIKeyValue = typeof apiKey?.value === 'string' && apiKey.value.length > 0
   const isEnablingAPIKey =
     operation === 'update' &&
     modified &&
     canModifyAPIKey &&
     enableAPIKey?.initialValue !== true &&
     enableAPIKey.value === true
-  const showReadableAPIKey = showAPIKey || hasDraftAPIKey || isEnablingAPIKey
+  const showReadableAPIKey = canReadAPIKey
   const showUnreadableAPIKey =
-    operation === 'update' &&
     !canReadAPIKey &&
-    !hasDraftAPIKey &&
-    !isEnablingAPIKey &&
     ((canReadAPIKeyStatus && apiKeyEnabled) ||
       (!canReadAPIKeyStatus && (canModifyAPIKey || canModifyAPIKeyStatus)))
 
@@ -326,21 +322,15 @@ export const Auth: React.FC<Props> = (props) => {
                 <UnreadableAPIKey
                   canModify={!readOnly && canModifyAPIKey}
                   description={t('authentication:apiKeyNotVisible')}
+                  shouldGenerate={
+                    canModifyAPIKey && apiKeyEnabled && (operation === 'create' || isEnablingAPIKey)
+                  }
                 />
               )}
               {showReadableAPIKey && (
                 <APIKey
-                  description={
-                    !canReadAPIKey && hasDraftAPIKey
-                      ? t('authentication:copyAPIKeyBeforeSaving')
-                      : undefined
-                  }
                   enabled={apiKeyEnabled}
-                  initiallyVisible={
-                    operation === 'create' ||
-                    (isEnablingAPIKey && !hasDraftAPIKey) ||
-                    (!canReadAPIKey && hasDraftAPIKey)
-                  }
+                  initiallyVisible={operation === 'create' || (isEnablingAPIKey && !hasAPIKeyValue)}
                   readOnly={readOnly || !canModifyAPIKey}
                 />
               )}

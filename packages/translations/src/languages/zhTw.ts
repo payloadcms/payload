@@ -17,7 +17,6 @@ export const zhTwTranslations: DefaultTranslationsObject = {
       '如果這個電子郵件地址有對應的帳戶，您將會收到重設密碼的說明。請檢查垃圾郵件或垃圾郵件匣以免錯過郵件。',
     confirmGeneration: '確認產生',
     confirmPassword: '確認密碼',
-    copyAPIKeyBeforeSaving: '請在儲存前複製此 API 金鑰。儲存後將無法再次檢視。',
     createFirstUser: '建立第一位使用者',
     createUser: '建立使用者',
     emailNotValid: '提供的電子郵件無效',

@@ -17,8 +17,6 @@ export const plTranslations: DefaultTranslationsObject = {
       'Jeśli adres e-mail jest powiązany z kontem, wkrótce otrzymasz instrukcje dotyczące zresetowania hasła. Sprawdź folder ze spamem lub niechcianą pocztą, jeśli nie widzisz e-maila w swojej skrzynce odbiorczej.',
     confirmGeneration: 'Potwierdź wygenerowanie',
     confirmPassword: 'Potwierdź hasło',
-    copyAPIKeyBeforeSaving:
-      'Skopiuj ten klucz API przed zapisaniem. Nie będzie można wyświetlić go ponownie.',
     createFirstUser: 'Utwórz pierwszego użytkownika',
     createUser: 'Utwórz użytkownika',
     emailNotValid: 'Podany email jest nieprawidłowy',

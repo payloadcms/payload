@@ -17,7 +17,6 @@ export const arTranslations: DefaultTranslationsObject = {
       'إذا كان عنوان البريد الإلكتروني مرتبطًا بحساب، فستتلقى تعليمات لإعادة تعيين كلمة المرور قريبًا. يرجى التحقق من مجلد البريد العشوائي أو السبام إذا لم تر البريد الإلكتروني في صندوق الوارد.',
     confirmGeneration: 'تأكيد التّوليد',
     confirmPassword: 'تأكيد كلمة المرور',
-    copyAPIKeyBeforeSaving: 'انسخ مفتاح API هذا قبل الحفظ. لن تتمكن من عرضه مرة أخرى.',
     createFirstUser: 'إنشاء المستخدم الأوّل',
     createUser: 'إنشاء مستخدم',
     emailNotValid: 'البريد الإلكتروني غير صالح',

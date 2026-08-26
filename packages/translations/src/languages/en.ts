@@ -17,7 +17,6 @@ export const enTranslations = {
       "If the email address is associated with an account, you will receive instructions to reset your password shortly. Please check your spam or junk mail folder if you don't see the email in your inbox.",
     confirmGeneration: 'Confirm Generation',
     confirmPassword: 'Confirm Password',
-    copyAPIKeyBeforeSaving: "Copy this API key before saving. You won't be able to view it again.",
     createFirstUser: 'Create first user',
     createUser: 'Create user',
     emailNotValid: 'The email provided is not valid',

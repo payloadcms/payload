@@ -17,8 +17,6 @@ export const deTranslations: DefaultTranslationsObject = {
       'Wenn die E-Mail-Adresse mit einem Benutzerkonto verknüpft ist, erhältst du in Kürze Anweisungen zum Zurücksetzen deines Passworts. Bitte überprüfe auch deinen Spam-Ordner, falls du die E-Mail nicht im Posteingang siehst.',
     confirmGeneration: 'Generierung bestätigen',
     confirmPassword: 'Passwort bestätigen',
-    copyAPIKeyBeforeSaving:
-      'Kopiere diesen API-Schlüssel vor dem Speichern. Du kannst ihn danach nicht erneut anzeigen.',
     createFirstUser: 'Erstes Benutzerkonto erstellen',
     createUser: 'Benutzer erstellen',
     emailNotValid: 'Die angegebene E-Mail-Adresse ist ungültig.',

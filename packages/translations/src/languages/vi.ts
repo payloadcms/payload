@@ -17,8 +17,6 @@ export const viTranslations: DefaultTranslationsObject = {
       'Nếu địa chỉ email được liên kết với một tài khoản, bạn sẽ nhận được hướng dẫn để đặt lại mật khẩu trong thời gian ngắn. Vui lòng kiểm tra thư mục spam hoặc thư rác nếu bạn không thấy email trong hộp thư đến của mình.',
     confirmGeneration: 'Xác nhận, tạo API Key',
     confirmPassword: 'Xác nhận mật khẩu',
-    copyAPIKeyBeforeSaving:
-      'Sao chép khóa API này trước khi lưu. Bạn sẽ không thể xem lại khóa này.',
     createFirstUser: 'Tạo người dùng đầu tiên',
     createUser: 'Tạo người dùng',
     emailNotValid: 'Email không chính xác',

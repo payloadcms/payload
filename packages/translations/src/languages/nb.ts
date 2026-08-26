@@ -17,8 +17,6 @@ export const nbTranslations: DefaultTranslationsObject = {
       'Hvis e-postadressen er knyttet til en konto, vil du motta instruksjoner for å tilbakestille passordet ditt snart. Vennligst sjekk spam- eller søppelpost-mappen din hvis du ikke ser e-posten i innboksen din.',
     confirmGeneration: 'Bekreft generering',
     confirmPassword: 'Bekreft passord',
-    copyAPIKeyBeforeSaving:
-      'Kopier denne API-nøkkelen før du lagrer. Du vil ikke kunne se den igjen.',
     createFirstUser: 'Opprett første bruker',
     createUser: 'Opprett bruker',
     emailNotValid: 'E-posten er ikke gyldig',

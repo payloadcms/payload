@@ -47,8 +47,10 @@ const APIKeyLabel = ({ label }: { label: string }) => (
 export const UnreadableAPIKey: React.FC<{
   readonly canModify: boolean
   readonly description: string
-}> = ({ canModify, description }) => {
+  readonly shouldGenerate?: boolean
+}> = ({ canModify, description, shouldGenerate }) => {
   const apiKeyLabel = useAPIKeyLabel()
+  const apiKey = useFormFields(([fields]) => (fields && fields[path]) || null)
   const dispatchFields = useFormFields((reducer) => reducer[1])
   const { setModified } = useForm()
 
@@ -56,6 +58,13 @@ export const UnreadableAPIKey: React.FC<{
     dispatchFields({ type: 'UPDATE', path, value: uuidv4() })
     setModified(true)
   }
+
+  useEffect(() => {
+    if (shouldGenerate && !apiKey?.value) {
+      dispatchFields({ type: 'UPDATE', path, value: uuidv4() })
+      setModified(true)
+    }
+  }, [apiKey?.value, dispatchFields, setModified, shouldGenerate])
 
   return (
     <React.Fragment>

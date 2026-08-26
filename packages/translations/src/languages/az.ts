@@ -17,8 +17,6 @@ export const azTranslations: DefaultTranslationsObject = {
       'Əgər e-poçt ünvanı bir hesabla əlaqəli olsa, tezliklə şifrənizi yenidən qurmaq üçün təlimatlari alacaqsınız. E-poçtu giriş qutunuzda görmürsəniz, zəhmət olmasa spam və ya zibil poçt qovluğunu yoxlayın.',
     confirmGeneration: 'Generasiyani təsdiqlə',
     confirmPassword: 'Şifrəni təsdiq et',
-    copyAPIKeyBeforeSaving:
-      'Yadda saxlamazdan əvvəl bu API açarını kopyalayın. Onu yenidən görə bilməyəcəksiniz.',
     createFirstUser: 'İlk istifadəçini yaradın',
     createUser: 'İstifadəçi yaradın',
     emailNotValid: 'Təqdim olunan e-poçt etibarlı deyil',

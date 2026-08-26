@@ -17,7 +17,6 @@ export const csTranslations: DefaultTranslationsObject = {
       'Pokud je e-mailová adresa spojena s účtem, brzy obdržíte pokyny k resetování vašeho hesla. Pokud e-mail nenajdete ve vaší doručené poště, zkontrolujte prosím složku se spamem nebo nevyžádanou poštou.',
     confirmGeneration: 'Potvrdit generaci',
     confirmPassword: 'Potvrdit heslo',
-    copyAPIKeyBeforeSaving: 'Před uložením si tento API klíč zkopírujte. Znovu jej již neuvidíte.',
     createFirstUser: 'Vytvořit prvního uživatele',
     createUser: 'Vytvořit uživatele',
     emailNotValid: 'Zadaný email není platný',

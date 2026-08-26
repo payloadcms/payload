@@ -17,7 +17,6 @@ export const esTranslations: DefaultTranslationsObject = {
       'Si la dirección de correo electrónico está asociada a una cuenta, recibirás instrucciones para restablecer tu contraseña en breve. Por favor, revisa tu carpeta de spam o correo no deseado si no ves el correo en tu bandeja de entrada.',
     confirmGeneration: 'Confirmar Generación',
     confirmPassword: 'Confirmar Contraseña',
-    copyAPIKeyBeforeSaving: 'Copia esta clave API antes de guardar. No podrás volver a verla.',
     createFirstUser: 'Crear el primer usuario',
     createUser: 'Crear usuario',
     emailNotValid: 'El correo proporcionado es inválido',

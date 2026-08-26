@@ -17,7 +17,6 @@ export const heTranslations: DefaultTranslationsObject = {
       'אם כתובת הדוא"ל מקושרת לחשבון, תקבל הוראות לאיפוס הסיסמה שלך בקרוב. אנא בדוק את תיקיית הספאם או הדואר הזבל אם אתה לא רואה את הדוא"ל בתיבת הדואר הנכנס שלך.',
     confirmGeneration: 'אישור יצירה',
     confirmPassword: 'אישור סיסמה',
-    copyAPIKeyBeforeSaving: 'יש להעתיק את מפתח ה-API לפני השמירה. לא ניתן יהיה להציג אותו שוב.',
     createFirstUser: 'יצירת משתמש ראשון',
     createUser: 'צור משתמש',
     emailNotValid: 'הדוא"ל שסופק אינו תקין',

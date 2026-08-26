@@ -17,8 +17,6 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
       'Ako je e-mail adresa povezana sa nekim nalozima, uskoro ćete dobiti uputstva za resetovanje lozinke. Ako ne vidite e-mail u svojoj prijemnoj pošti, proverite spam ili folder za neželjenu poštu.',
     confirmGeneration: 'Potvrdi kreiranje',
     confirmPassword: 'Potvrdi lozinku',
-    copyAPIKeyBeforeSaving:
-      'Kopirajte ovaj API ključ pre čuvanja. Nećete moći ponovo da ga vidite.',
     createFirstUser: 'Kreiraj prvog korisnika',
     createUser: 'Kreiraj korisnika',
     emailNotValid: 'Adresa e-pošte nije validna',
