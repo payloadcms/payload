@@ -8,6 +8,7 @@ export const etTranslations: DefaultTranslationsObject = {
     alreadyActivated: 'Juba aktiveeritud',
     alreadyLoggedIn: 'Juba sisse logitud',
     apiKey: 'API võti',
+    apiKeyGeneratedOnSave: 'API võtme loomiseks salvestage see dokument.',
     apiKeyNotVisible: 'Teil pole õigust seda API võtit vaadata.',
     authenticated: 'Autenditud',
     backToLogin: 'Tagasi sisselogimise juurde',

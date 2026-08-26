@@ -133,14 +133,6 @@ export const Auth: React.FC<Props> = (props) => {
     !readOnly &&
     canModifyAPIKey &&
     (canReadAPIKeyStatus ? enableAPIKey?.initialValue === true : true)
-  const generateMissingAPIKey =
-    operation === 'update' &&
-    !readOnly &&
-    canReadAPIKey &&
-    canModifyAPIKey &&
-    enableAPIKey?.initialValue !== true &&
-    enableAPIKey?.value === true &&
-    !apiKeyDisplayValue
   const showReadableAPIKey = canReadAPIKey
   const showUnreadableAPIKey =
     !canReadAPIKey &&
@@ -390,7 +382,6 @@ export const Auth: React.FC<Props> = (props) => {
                 <APIKey
                   canGenerate={canGenerateAPIKey}
                   enabled={apiKeyEnabled}
-                  generateIfMissing={generateMissingAPIKey}
                   isFormModified={modified}
                   onGenerated={setAPIKeyDisplayValue}
                   value={apiKeyDisplayValue}

@@ -8,6 +8,7 @@ export const deTranslations: DefaultTranslationsObject = {
     alreadyActivated: 'Bereits aktiviert',
     alreadyLoggedIn: 'Bereits angemeldet',
     apiKey: 'API-Schlüssel',
+    apiKeyGeneratedOnSave: 'Speichern Sie dieses Dokument, um einen API-Schlüssel zu generieren.',
     apiKeyNotVisible: 'Du hast keine Berechtigung, diesen API-Schlüssel anzuzeigen.',
     authenticated: 'Authentifiziert',
     backToLogin: 'Zurück zur Anmeldung',

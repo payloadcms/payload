@@ -8,6 +8,7 @@ export const thTranslations: DefaultTranslationsObject = {
     alreadyActivated: 'เปิดใช้งานแล้ว',
     alreadyLoggedIn: 'ลงชื่อเข้าใช้แล้ว',
     apiKey: 'API Key',
+    apiKeyGeneratedOnSave: 'บันทึกเอกสารนี้เพื่อสร้างคีย์ API',
     apiKeyNotVisible: 'คุณไม่มีสิทธิ์ดูคีย์ API นี้',
     authenticated: 'ได้รับการตรวจสอบแล้ว',
     backToLogin: 'กลับไปหน้าเข้าสู่ระบบ',

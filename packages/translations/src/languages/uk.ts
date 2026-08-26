@@ -8,6 +8,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     alreadyActivated: 'Вже активований',
     alreadyLoggedIn: 'Вже увійшли в систему',
     apiKey: 'API ключ',
+    apiKeyGeneratedOnSave: 'Збережіть цей документ, щоб згенерувати API-ключ.',
     apiKeyNotVisible: 'У вас немає дозволу на перегляд цього API ключа.',
     authenticated: 'Аутентифікований',
     backToLogin: 'Повернутися до входу',

@@ -8,6 +8,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     alreadyActivated: 'Već aktivirano',
     alreadyLoggedIn: 'Već prijavljen',
     apiKey: 'API ključ',
+    apiKeyGeneratedOnSave: 'Sačuvajte ovaj dokument da biste generisali API ključ.',
     apiKeyNotVisible: 'Nemate dozvolu da vidite ovaj API ključ.',
     authenticated: 'Autentifikovan',
     backToLogin: 'Nazad na prijavu',

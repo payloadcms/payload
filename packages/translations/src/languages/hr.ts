@@ -8,6 +8,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     alreadyActivated: 'Već aktivirano',
     alreadyLoggedIn: 'Već prijavljeni',
     apiKey: 'API ključ',
+    apiKeyGeneratedOnSave: 'Spremite ovaj dokument da biste generirali API ključ.',
     apiKeyNotVisible: 'Nemate dopuštenje za prikaz ovog API ključa.',
     authenticated: 'Autenticiran',
     backToLogin: 'Natrag na prijavu',

@@ -11,6 +11,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'authentication:alreadyActivated',
   'authentication:alreadyLoggedIn',
   'authentication:apiKey',
+  'authentication:apiKeyGeneratedOnSave',
   'authentication:apiKeyNotVisible',
   'authentication:authenticated',
   'authentication:backToLogin',

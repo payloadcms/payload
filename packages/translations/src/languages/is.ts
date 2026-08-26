@@ -8,6 +8,7 @@ export const isTranslations: DefaultTranslationsObject = {
     alreadyActivated: 'Þegar virkur',
     alreadyLoggedIn: 'Þegar innskráður',
     apiKey: 'API lykill',
+    apiKeyGeneratedOnSave: 'Vistaðu þetta skjal til að búa til API-lykil.',
     apiKeyNotVisible: 'Þú hefur ekki heimild til að skoða þennan API lykil.',
     authenticated: 'Auðkenndur',
     backToLogin: 'Aftur á innskráningu',

@@ -8,6 +8,7 @@ export const taTranslations: DefaultTranslationsObject = {
     alreadyActivated: 'ஏற்கனவே செயல்படுத்தப்பட்டது',
     alreadyLoggedIn: 'ஏற்கனவே உள்நுழைந்துள்ளீர்கள்',
     apiKey: 'API விசை',
+    apiKeyGeneratedOnSave: 'API விசையை உருவாக்க இந்த ஆவணத்தைச் சேமிக்கவும்.',
     apiKeyNotVisible: 'இந்த API விசையைப் பார்க்க உங்களுக்கு அனுமதி இல்லை.',
     authenticated: 'அங்கீகரிக்கப்பட்டது',
     backToLogin: 'உள்நுழைவுக்கு திரும்ப',

@@ -12,55 +12,22 @@ import { getRequestCollectionWithID } from '../../utilities/getRequestEntity.js'
 import { headersWithCors } from '../../utilities/headersWithCors.js'
 import { assertCanSetAPIKey } from '../apiKeys/assertCanSetAPIKey.js'
 import { generateAPIKey } from '../apiKeys/generateAPIKey.js'
-import { generateAPIKeyFromSeed } from '../apiKeys/generateAPIKeyFromSeed.js'
 import { withServerGeneratedAPIKey } from '../apiKeys/serverGeneratedAPIKeyRequest.js'
 import { executeAccess } from '../executeAccess.js'
 import { hasWhereAccessResult } from '../types.js'
-
-const isTransientTransactionError = (error: unknown): boolean =>
-  typeof error === 'object' &&
-  error !== null &&
-  'hasErrorLabel' in error &&
-  typeof error.hasErrorLabel === 'function' &&
-  error.hasErrorLabel('TransientTransactionError')
 
 const generateAPIKeyForDocument = async ({
   id,
   collection,
   req,
   requestData,
-  retryAPIKey,
 }: {
   collection: Collection
   id: number | string
   req: PayloadRequest
   requestData: JsonObject
-  retryAPIKey?: string
 }): Promise<JsonObject> => {
-  const generateIfMissing = requestData.generateIfMissing === true
-  let generationSeed: string | undefined
-
-  if (generateIfMissing && !retryAPIKey) {
-    const generationDoc = await req.payload.db.findOne<{
-      id: number | string
-      updatedAt?: string
-    }>({
-      collection: collection.config.slug,
-      req,
-      select: { updatedAt: true },
-      where: { id: { equals: id } },
-    })
-
-    if (typeof generationDoc?.updatedAt === 'string') {
-      generationSeed = JSON.stringify([collection.config.slug, String(id), generationDoc.updatedAt])
-    }
-  }
-
-  const apiKey =
-    retryAPIKey ??
-    (generationSeed
-      ? generateAPIKeyFromSeed({ secret: req.payload.secret, seed: generationSeed })
-      : generateAPIKey())
+  const apiKey = generateAPIKey()
   const data = { apiKey }
   const accessResult = await executeAccess(
     {
@@ -116,19 +83,7 @@ const generateAPIKeyForDocument = async ({
     }
   }
 
-  if (generateIfMissing && doc.apiKey) {
-    if (retryAPIKey && doc.apiKey === retryAPIKey) {
-      return data
-    }
-
-    return {}
-  }
-
-  if (generateIfMissing && !generationSeed) {
-    return {}
-  }
-
-  if (!generateIfMissing && doc.enableAPIKey !== true) {
+  if (doc.enableAPIKey !== true) {
     throw new ValidationError(
       {
         id,
@@ -145,29 +100,15 @@ const generateAPIKeyForDocument = async ({
     )
   }
 
-  try {
-    return await withServerGeneratedAPIKey(req, () =>
-      updateByIDOperation({
-        id,
-        collection,
-        data,
-        overrideAccess: false,
-        req,
-      }),
-    )
-  } catch (error) {
-    if (generateIfMissing && !retryAPIKey && isTransientTransactionError(error)) {
-      return generateAPIKeyForDocument({
-        id,
-        collection,
-        req,
-        requestData,
-        retryAPIKey: apiKey,
-      })
-    }
-
-    throw error
-  }
+  return withServerGeneratedAPIKey(req, () =>
+    updateByIDOperation({
+      id,
+      collection,
+      data,
+      overrideAccess: false,
+      req,
+    }),
+  )
 }
 
 export const generateAPIKeyHandler: PayloadHandler = async (req) => {

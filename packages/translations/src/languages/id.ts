@@ -8,6 +8,7 @@ export const idTranslations: DefaultTranslationsObject = {
     alreadyActivated: 'Sudah Diaktifkan',
     alreadyLoggedIn: 'Sudah masuk',
     apiKey: 'API Key',
+    apiKeyGeneratedOnSave: 'Simpan dokumen ini untuk membuat kunci API.',
     apiKeyNotVisible: 'Anda tidak memiliki izin untuk melihat kunci API ini.',
     authenticated: 'Terautentikasi',
     backToLogin: 'Kembali ke halaman masuk',

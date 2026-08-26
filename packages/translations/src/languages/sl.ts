@@ -8,6 +8,7 @@ export const slTranslations: DefaultTranslationsObject = {
     alreadyActivated: 'Že aktivirano',
     alreadyLoggedIn: 'Že prijavljeni',
     apiKey: 'API ključ',
+    apiKeyGeneratedOnSave: 'Shranite ta dokument, da ustvarite ključ API.',
     apiKeyNotVisible: 'Nimate dovoljenja za ogled tega API ključa.',
     authenticated: 'Avtenticirano',
     backToLogin: 'Nazaj na prijavo',

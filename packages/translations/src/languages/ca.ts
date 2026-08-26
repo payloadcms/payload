@@ -8,6 +8,7 @@ export const caTranslations: DefaultTranslationsObject = {
     alreadyActivated: 'Ja activat',
     alreadyLoggedIn: 'Ja has iniciat sessió',
     apiKey: 'Clau API',
+    apiKeyGeneratedOnSave: 'Desa aquest document per generar una clau API.',
     apiKeyNotVisible: 'No tens permís per veure aquesta clau API.',
     authenticated: 'Autenticat',
     backToLogin: "Tornar a l'inici de sessió",

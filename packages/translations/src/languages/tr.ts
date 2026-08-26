@@ -8,6 +8,7 @@ export const trTranslations: DefaultTranslationsObject = {
     alreadyActivated: 'Hesap zaten etkinleştirildi',
     alreadyLoggedIn: 'Hesaba zaten giriş yapıldı',
     apiKey: 'API Anahtarı',
+    apiKeyGeneratedOnSave: 'Bir API anahtarı oluşturmak için bu belgeyi kaydedin.',
     apiKeyNotVisible: 'Bu API anahtarını görüntüleme izniniz yok.',
     authenticated: 'Doğrulandı',
     backToLogin: 'Giriş ekranına geri dön',

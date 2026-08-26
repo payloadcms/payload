@@ -8,6 +8,7 @@ export const faTranslations: DefaultTranslationsObject = {
     alreadyActivated: 'این حساب قبلاً فعال شده است.',
     alreadyLoggedIn: 'شما در حال حاضر وارد شده‌اید.',
     apiKey: 'کلید API',
+    apiKeyGeneratedOnSave: 'برای ایجاد یک کلید API، این سند را ذخیره کنید.',
     apiKeyNotVisible: 'شما اجازه مشاهده این کلید API را ندارید.',
     authenticated: 'احراز هویت شده',
     backToLogin: 'بازگشت به صفحه ورود',

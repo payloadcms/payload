@@ -8,6 +8,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     alreadyActivated: 'Уже активирован',
     alreadyLoggedIn: 'Уже вошли в систему',
     apiKey: 'API ключ',
+    apiKeyGeneratedOnSave: 'Сохраните этот документ, чтобы сгенерировать API-ключ.',
     apiKeyNotVisible: 'У вас нет разрешения на просмотр этого API ключа.',
     authenticated: 'Аутентифицирован',
     backToLogin: 'Вернуться к входу',

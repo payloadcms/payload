@@ -10,16 +10,8 @@ const { setData } = vi.hoisted(() => ({
   setData: vi.fn(),
 }))
 
-vi.mock('../../../elements/APIKeyInput/index.js', () => ({
-  APIKeyInput: () => null,
-}))
-
 vi.mock('../../../elements/GenerateConfirmation/index.js', () => ({
   GenerateConfirmation: () => null,
-}))
-
-vi.mock('../../../fields/FieldDescription/index.js', () => ({
-  FieldDescription: () => null,
 }))
 
 vi.mock('../../../providers/Config/index.js', () => ({
@@ -46,7 +38,10 @@ vi.mock('../../../providers/DocumentInfo/index.js', () => ({
 vi.mock('../../../providers/Translation/index.js', () => ({
   useTranslation: () => ({
     i18n: { language: 'en' },
-    t: (key: string) => key,
+    t: (key: string) =>
+      key === 'authentication:apiKeyGeneratedOnSave'
+        ? 'Save this document to generate an API key.'
+        : key,
   }),
 }))
 
@@ -75,13 +70,12 @@ afterEach(() => {
 })
 
 describe('APIKey', () => {
-  it('should preserve document data when missing-key generation is a no-op', async () => {
+  it('should show an empty pending state until the API key is generated on save', async () => {
     await act(async () => {
       root.render(
         React.createElement(APIKey, {
           canGenerate: true,
           enabled: true,
-          generateIfMissing: true,
           isFormModified: true,
           onGenerated: vi.fn(),
           value: undefined,
@@ -91,7 +85,13 @@ describe('APIKey', () => {
       await Promise.resolve()
     })
 
-    expect(fetch).toHaveBeenCalledOnce()
+    const input = container.querySelector('input')
+
+    expect(input?.value).toBe('')
+    expect(input?.placeholder).toBe('')
+    expect(container.textContent).toContain('Save this document to generate an API key.')
+    expect(container.querySelector('[aria-label="Show API key"]')).toBeNull()
+    expect(fetch).not.toHaveBeenCalled()
     expect(setData).not.toHaveBeenCalled()
   })
 })

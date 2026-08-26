@@ -8,6 +8,7 @@ export const plTranslations: DefaultTranslationsObject = {
     alreadyActivated: 'Już aktywowano',
     alreadyLoggedIn: 'Już zalogowano',
     apiKey: 'Klucz API',
+    apiKeyGeneratedOnSave: 'Zapisz ten dokument, aby wygenerować klucz API.',
     apiKeyNotVisible: 'Nie masz uprawnień do wyświetlenia tego klucza API.',
     authenticated: 'Uwierzytelniony',
     backToLogin: 'Powrót do logowania',

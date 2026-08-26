@@ -8,6 +8,7 @@ export const heTranslations: DefaultTranslationsObject = {
     alreadyActivated: 'כבר הופעל',
     alreadyLoggedIn: 'כבר מחובר',
     apiKey: 'מפתח API',
+    apiKeyGeneratedOnSave: 'יש לשמור מסמך זה כדי ליצור מפתח API.',
     apiKeyNotVisible: 'אין לך הרשאה להציג מפתח API זה.',
     authenticated: 'מאומת',
     backToLogin: 'חזרה להתחברות',

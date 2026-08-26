@@ -8,6 +8,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     alreadyActivated: 'Већ активирано',
     alreadyLoggedIn: 'Већ пријављен',
     apiKey: 'АПИ кључ',
+    apiKeyGeneratedOnSave: 'Сачувајте овај документ да бисте генерисали АПИ кључ.',
     apiKeyNotVisible: 'Немате дозволу да видите овај АПИ кључ.',
     authenticated: 'Autentifikovan',
     backToLogin: 'Назад на пријаву',

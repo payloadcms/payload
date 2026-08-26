@@ -8,6 +8,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     alreadyActivated: 'Jau aktivizēts',
     alreadyLoggedIn: 'Jau pieslēdzies',
     apiKey: 'API atslēga',
+    apiKeyGeneratedOnSave: 'Saglabājiet šo dokumentu, lai ģenerētu API atslēgu.',
     apiKeyNotVisible: 'Jums nav atļaujas skatīt šo API atslēgu.',
     authenticated: 'Autentificēts',
     backToLogin: 'Atpakaļ uz pieslēgšanos',

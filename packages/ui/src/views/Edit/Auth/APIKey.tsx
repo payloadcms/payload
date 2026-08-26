@@ -3,8 +3,7 @@ import type { TextFieldClient } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { formatAdminURL } from 'payload/shared'
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { toast } from 'sonner'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { APIKeyInput } from '../../../elements/APIKeyInput/index.js'
 import { GenerateConfirmation } from '../../../elements/GenerateConfirmation/index.js'
@@ -44,41 +43,37 @@ const useGenerateAPIKey = () => {
   const { id, collectionSlug, setData } = useDocumentInfo()
   const { i18n, t } = useTranslation()
 
-  return useCallback(
-    async ({ generateIfMissing = false } = {}): Promise<{ apiKey?: string }> => {
-      if (!id) {
-        throw new Error(t('general:error'))
-      }
+  return useCallback(async (): Promise<{ apiKey?: string }> => {
+    if (!id) {
+      throw new Error(t('general:error'))
+    }
 
-      const response = await fetch(
-        formatAdminURL({
-          apiRoute: api,
-          path: `/${collectionSlug}/generate-api-key/${id}`,
-        }),
-        {
-          body: generateIfMissing ? JSON.stringify({ generateIfMissing: true }) : undefined,
-          credentials: 'include',
-          headers: {
-            'Accept-Language': i18n.language,
-            'Content-Type': 'application/json',
-          },
-          method: 'post',
+    const response = await fetch(
+      formatAdminURL({
+        apiRoute: api,
+        path: `/${collectionSlug}/generate-api-key/${id}`,
+      }),
+      {
+        credentials: 'include',
+        headers: {
+          'Accept-Language': i18n.language,
+          'Content-Type': 'application/json',
         },
-      )
-      const result = await response.json()
+        method: 'post',
+      },
+    )
+    const result = await response.json()
 
-      if (!response.ok) {
-        throw new Error(result.errors?.[0]?.message ?? t('general:error'))
-      }
+    if (!response.ok) {
+      throw new Error(result.errors?.[0]?.message ?? t('general:error'))
+    }
 
-      if (Object.keys(result).length > 0) {
-        setData(result)
-      }
+    if (Object.keys(result).length > 0) {
+      setData(result)
+    }
 
-      return result
-    },
-    [api, collectionSlug, i18n.language, id, setData, t],
-  )
+    return result
+  }, [api, collectionSlug, i18n.language, id, setData, t])
 }
 
 const APIKeyLabel = ({ label }: { label: string }) => (
@@ -110,23 +105,14 @@ export const APIKey: React.FC<{
   readonly canGenerate: boolean
   readonly description?: string
   readonly enabled: boolean
-  readonly generateIfMissing: boolean
   readonly isFormModified: boolean
   readonly onGenerated: (apiKey: string) => void
   readonly value?: string
-}> = ({
-  canGenerate,
-  description,
-  enabled,
-  generateIfMissing,
-  isFormModified,
-  onGenerated,
-  value,
-}) => {
+}> = ({ canGenerate, description, enabled, isFormModified, onGenerated, value }) => {
   const [highlightedField, setHighlightedField] = useState(false)
-  const requestedMissingKey = useRef(false)
   const apiKeyLabel = useAPIKeyLabel()
   const generateAPIKey = useGenerateAPIKey()
+  const { t } = useTranslation()
 
   useEffect(() => {
     if (highlightedField) {
@@ -147,30 +133,6 @@ export const APIKey: React.FC<{
     }
   }, [generateAPIKey, onGenerated])
 
-  useEffect(() => {
-    if (!generateIfMissing) {
-      requestedMissingKey.current = false
-      return
-    }
-
-    if (value || requestedMissingKey.current) {
-      return
-    }
-
-    requestedMissingKey.current = true
-
-    void generateAPIKey({ generateIfMissing: true })
-      .then((result) => {
-        if (result.apiKey) {
-          onGenerated(result.apiKey)
-          setHighlightedField(true)
-        }
-      })
-      .catch((error) => {
-        toast.error(error instanceof Error ? error.message : 'Error')
-      })
-  }, [generateAPIKey, generateIfMissing, onGenerated, value])
-
   if (!enabled) {
     return null
   }
@@ -185,9 +147,13 @@ export const APIKey: React.FC<{
           highlighted={highlightedField}
           id="apiKey"
           isFormModified={isFormModified}
+          isPending={!value}
           value={value}
         />
         <FieldDescription description={description} path="apiKey" />
+        {!value && (
+          <FieldDescription description={t('authentication:apiKeyGeneratedOnSave')} path="apiKey" />
+        )}
       </div>
       {canGenerate && <GenerateConfirmation generate={generate} />}
     </React.Fragment>

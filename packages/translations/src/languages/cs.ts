@@ -8,6 +8,7 @@ export const csTranslations: DefaultTranslationsObject = {
     alreadyActivated: 'Již aktivováno',
     alreadyLoggedIn: 'Již přihlášen',
     apiKey: 'API klíč',
+    apiKeyGeneratedOnSave: 'Uložte tento dokument, aby se vygeneroval klíč API.',
     apiKeyNotVisible: 'Nemáte oprávnění zobrazit tento API klíč.',
     authenticated: 'Ověřený',
     backToLogin: 'Zpět na přihlášení',

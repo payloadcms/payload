@@ -8,6 +8,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     alreadyActivated: 'Al geactiveerd',
     alreadyLoggedIn: 'Al ingelogd',
     apiKey: 'API-sleutel',
+    apiKeyGeneratedOnSave: 'Sla dit document op om een API-sleutel te genereren.',
     apiKeyNotVisible: 'Je hebt geen toestemming om deze API-sleutel te bekijken.',
     authenticated: 'Geverifieerd',
     backToLogin: 'Terug naar inloggen',

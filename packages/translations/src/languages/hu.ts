@@ -8,6 +8,7 @@ export const huTranslations: DefaultTranslationsObject = {
     alreadyActivated: 'Már aktiválva van',
     alreadyLoggedIn: 'Már bejelentkezett',
     apiKey: 'API-kulcs',
+    apiKeyGeneratedOnSave: 'Mentse el ezt a dokumentumot egy API-kulcs létrehozásához.',
     apiKeyNotVisible: 'Nincs jogosultságod az API-kulcs megtekintéséhez.',
     authenticated: 'Hitelesített',
     backToLogin: 'Vissza a bejelentkezéshez',

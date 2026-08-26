@@ -8,6 +8,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     alreadyActivated: 'Արդեն ակտիվացված է',
     alreadyLoggedIn: 'Արդեն մուտք եք գործել',
     apiKey: 'API բանալի',
+    apiKeyGeneratedOnSave: 'Պահպանեք այս փաստաթուղթը՝ API բանալի ստեղծելու համար։',
     apiKeyNotVisible: 'Դուք այս API բանալին դիտելու թույլտվություն չունեք։',
     authenticated: 'Հաստատված',
     backToLogin: 'Վերադառնալ մուտքի էջ',

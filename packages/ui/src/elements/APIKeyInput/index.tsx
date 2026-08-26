@@ -15,6 +15,7 @@ export type APIKeyInputProps = {
   readonly id?: string
   readonly initiallyVisible?: boolean
   readonly isFormModified?: boolean
+  readonly isPending?: boolean
   readonly value: null | string | undefined
 }
 
@@ -29,6 +30,7 @@ export const APIKeyInput: React.FC<APIKeyInputProps> = ({
   highlighted,
   initiallyVisible = false,
   isFormModified = false,
+  isPending = false,
   value,
 }) => {
   const [showKey, setShowKey] = useState(initiallyVisible)
@@ -66,7 +68,7 @@ export const APIKeyInput: React.FC<APIKeyInputProps> = ({
           className={`${baseClass}__field`}
           disabled={disabled}
           id={id}
-          placeholder={disabled ? '•'.repeat(36) : undefined}
+          placeholder={disabled && !isPending ? '•'.repeat(36) : undefined}
           readOnly
           type={disabled || showKey ? 'text' : 'password'}
           value={keyValue}

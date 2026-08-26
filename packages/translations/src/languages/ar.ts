@@ -8,6 +8,7 @@ export const arTranslations: DefaultTranslationsObject = {
     alreadyActivated: 'تمّ التّفعيل بالفعل',
     alreadyLoggedIn: 'تمّ تسجيل الدّخول بالفعل',
     apiKey: 'مفتاح API',
+    apiKeyGeneratedOnSave: 'احفظ هذا المستند لإنشاء مفتاح API.',
     apiKeyNotVisible: 'ليس لديك إذن لعرض مفتاح API هذا.',
     authenticated: 'مصادق عليه',
     backToLogin: 'العودة لتسجيل الدخول',

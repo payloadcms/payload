@@ -8,6 +8,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     alreadyActivated: 'Allerede aktivert',
     alreadyLoggedIn: 'Allerede logget inn',
     apiKey: 'API-nøkkel',
+    apiKeyGeneratedOnSave: 'Lagre dette dokumentet for å generere en API-nøkkel.',
     apiKeyNotVisible: 'Du har ikke tillatelse til å se denne API-nøkkelen.',
     authenticated: 'Autentisert',
     backToLogin: 'Tilbake til innlogging',

@@ -8,6 +8,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     alreadyActivated: '已啟用',
     alreadyLoggedIn: '已登入',
     apiKey: 'API 金鑰',
+    apiKeyGeneratedOnSave: '儲存此文件以產生 API 金鑰。',
     apiKeyNotVisible: '你沒有權限檢視此 API 金鑰。',
     authenticated: '已驗證',
     backToLogin: '返回登入',

@@ -8,6 +8,7 @@ export const daTranslations: DefaultTranslationsObject = {
     alreadyActivated: 'Allerede aktiveret',
     alreadyLoggedIn: 'Allerede logget ind',
     apiKey: 'API nøgle',
+    apiKeyGeneratedOnSave: 'Gem dette dokument for at generere en API-nøgle.',
     apiKeyNotVisible: 'Du har ikke tilladelse til at se denne API-nøgle.',
     authenticated: 'Godkendt',
     backToLogin: 'Tilbage til login',

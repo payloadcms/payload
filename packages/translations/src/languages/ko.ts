@@ -8,6 +8,7 @@ export const koTranslations: DefaultTranslationsObject = {
     alreadyActivated: '이미 활성화됨',
     alreadyLoggedIn: '이미 로그인됨',
     apiKey: 'API 키',
+    apiKeyGeneratedOnSave: 'API 키를 생성하려면 이 문서를 저장하세요.',
     apiKeyNotVisible: '이 API 키를 볼 권한이 없습니다.',
     authenticated: '인증됨',
     backToLogin: '로그인 화면으로 돌아가기',

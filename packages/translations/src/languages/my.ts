@@ -8,6 +8,7 @@ export const myTranslations: DefaultTranslationsObject = {
     alreadyActivated: 'အတည်ပြုပြီး',
     alreadyLoggedIn: 'ဝင်ရောက်ပြီးသား',
     apiKey: 'API Key',
+    apiKeyGeneratedOnSave: 'API Key တစ်ခု ဖန်တီးရန် ဤစာရွက်စာတမ်းကို သိမ်းဆည်းပါ။',
     apiKeyNotVisible: 'ဤ API Key ကို ကြည့်ရှုရန် သင့်တွင် ခွင့်ပြုချက်မရှိပါ။',
     authenticated: 'အတည်ပြုပြီး',
     backToLogin: 'အကောင့်ထဲ ပြန်ဝင်မည်။',

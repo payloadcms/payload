@@ -8,6 +8,7 @@ export const roTranslations: DefaultTranslationsObject = {
     alreadyActivated: 'Deja activat',
     alreadyLoggedIn: 'Deja autorizat',
     apiKey: 'Cheia API',
+    apiKeyGeneratedOnSave: 'Salvați acest document pentru a genera o cheie API.',
     apiKeyNotVisible: 'Nu aveți permisiunea de a vedea această cheie API.',
     authenticated: 'Autentificat',
     backToLogin: 'Înapoi la login',

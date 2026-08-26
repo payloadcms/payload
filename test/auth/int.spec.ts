@@ -1,6 +1,5 @@
 import type {
   BasePayload,
-  CollectionBeforeChangeHook,
   EmailFieldValidation,
   FieldAffectingData,
   Payload,
@@ -1768,7 +1767,7 @@ describe('Auth', () => {
         expect(updated.apiKey).toBe(originalAPIKey)
       })
 
-      it('generates a missing disabled API key without enabling it', async () => {
+      it('does not generate a missing API key while it is disabled', async () => {
         const user = await payload.create({
           collection: apiKeysWithReadableKeysSlug,
           data: {
@@ -1787,145 +1786,14 @@ describe('Auth', () => {
         )
         const result = await response.json()
         const stored = await payload.findByID({
-          collection: apiKeysWithReadableKeysSlug,
           id: user.id,
-        })
-
-        expect(response.status).toBe(200)
-        expect(result.apiKey).toEqual(expect.any(String))
-        expect(stored.apiKey).toBe(result.apiKey)
-        expect(stored.enableAPIKey).toBe(false)
-
-        const disabledAuthentication = await payload.auth({
-          headers: new Headers({
-            Authorization: `${apiKeysWithReadableKeysSlug} API-Key ${result.apiKey}`,
-          }),
-        })
-
-        expect(disabledAuthentication.user).toBeNull()
-
-        await payload.update({
           collection: apiKeysWithReadableKeysSlug,
-          id: user.id,
-          data: {
-            enableAPIKey: true,
-          },
         })
 
-        const enabled = await payload.findByID({
-          collection: apiKeysWithReadableKeysSlug,
-          id: user.id,
-        })
-        const rawEnabled = await payload.db.findOne<Record<string, unknown>>({
-          collection: apiKeysWithReadableKeysSlug,
-          req: { locale: 'en' } as any,
-          where: { id: { equals: user.id } },
-        })
-
-        expect(enabled.apiKey).toBe(result.apiKey)
-        expect(enabled.enableAPIKey).toBe(true)
-        expect(rawEnabled?.apiKeyIndex).toBe(
-          crypto.createHmac('sha256', payload.secret).update(result.apiKey).digest('hex'),
-        )
-
-        const enabledAuthentication = await payload.auth({
-          headers: new Headers({
-            Authorization: `${apiKeysWithReadableKeysSlug} API-Key ${result.apiKey}`,
-          }),
-        })
-
-        expect(enabledAuthentication.user?.id).toBe(user.id)
-      })
-
-      it('does not replace an existing API key when generating if missing', async () => {
-        const originalAPIKey = uuid()
-        const user = await payload.create({
-          collection: apiKeysWithReadableKeysSlug,
-          data: {
-            apiKey: originalAPIKey,
-            enableAPIKey: false,
-          },
-        })
-
-        const response = await restClient.POST(
-          `/${apiKeysWithReadableKeysSlug}/generate-api-key/${user.id}`,
-          {
-            body: JSON.stringify({ generateIfMissing: true }),
-            headers: {
-              Authorization: `JWT ${token}`,
-            },
-          },
-        )
-        const result = await response.json()
-        const stored = await payload.findByID({
-          collection: apiKeysWithReadableKeysSlug,
-          id: user.id,
-        })
-
-        expect(response.status).toBe(200)
+        expect(response.status).toBe(400)
         expect(result).not.toHaveProperty('apiKey')
-        expect(stored.apiKey).toBe(originalAPIKey)
+        expect(stored.apiKey).toBeNull()
         expect(stored.enableAPIKey).toBe(false)
-      })
-
-      it('returns the same API key across concurrent missing-key requests', async () => {
-        const user = await payload.create({
-          collection: apiKeysWithReadableKeysSlug,
-          data: {
-            enableAPIKey: false,
-          },
-        })
-        const beforeChangeHooks =
-          payload.collections[apiKeysWithReadableKeysSlug].config.hooks.beforeChange
-        let concurrentUpdates = 0
-        let releaseUpdates: (() => void) | undefined
-        const updatesReady = new Promise<void>((resolve) => {
-          releaseUpdates = resolve
-        })
-        const synchronizeUpdates: CollectionBeforeChangeHook = async ({ data }) => {
-          if (typeof data.apiKey === 'string') {
-            concurrentUpdates += 1
-
-            if (concurrentUpdates === 2) {
-              releaseUpdates?.()
-            }
-
-            await updatesReady
-          }
-
-          return data
-        }
-
-        beforeChangeHooks.push(synchronizeUpdates)
-
-        const responses = await Promise.all([
-          restClient.POST(`/${apiKeysWithReadableKeysSlug}/generate-api-key/${user.id}`, {
-            body: JSON.stringify({ generateIfMissing: true }),
-            headers: {
-              Authorization: `JWT ${token}`,
-            },
-          }),
-          restClient.POST(`/${apiKeysWithReadableKeysSlug}/generate-api-key/${user.id}`, {
-            body: JSON.stringify({ generateIfMissing: true }),
-            headers: {
-              Authorization: `JWT ${token}`,
-            },
-          }),
-        ])
-
-        beforeChangeHooks.splice(beforeChangeHooks.indexOf(synchronizeUpdates), 1)
-
-        const results = await Promise.all(responses.map((response) => response.json()))
-        const generatedKeys = results.map((result) => result.apiKey)
-        const stored = await payload.findByID({
-          collection: apiKeysWithReadableKeysSlug,
-          id: user.id,
-        })
-
-        expect(responses.map((response) => response.status)).toEqual([200, 200])
-        expect(generatedKeys).toEqual([expect.any(String), expect.any(String)])
-        expect(new Set(generatedKeys).size).toBe(1)
-        expect(stored.apiKey).toBe(generatedKeys[0])
       })
 
       it('should reject automatic API key creation without field access', async () => {

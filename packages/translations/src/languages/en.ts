@@ -8,6 +8,7 @@ export const enTranslations = {
     alreadyActivated: 'Already Activated',
     alreadyLoggedIn: 'Already logged in',
     apiKey: 'API Key',
+    apiKeyGeneratedOnSave: 'Save this document to generate an API key.',
     apiKeyNotVisible: "You don't have permission to view this API key.",
     authenticated: 'Authenticated',
     backToLogin: 'Back to login',
