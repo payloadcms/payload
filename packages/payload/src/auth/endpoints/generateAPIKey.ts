@@ -11,7 +11,7 @@ import { fieldAffectsData } from '../../fields/config/types.js'
 import { getRequestCollectionWithID } from '../../utilities/getRequestEntity.js'
 import { headersWithCors } from '../../utilities/headersWithCors.js'
 import {
-  assertAPIKeyAssignment,
+  assertCanSetAPIKey,
   generateAPIKey,
   generateAPIKeyFromSeed,
   withServerGeneratedAPIKey,
@@ -63,7 +63,7 @@ const generateAPIKeyForDocument = async ({
     collection.config.access.update,
   )
 
-  assertAPIKeyAssignment({
+  assertCanSetAPIKey({
     collection: collection.config,
     data: requestData,
     overrideAccess: false,

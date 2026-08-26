@@ -51,7 +51,7 @@ export const withServerGeneratedAPIKey = async <T>(
 }
 
 /** Prevents API key assignment outside trusted server and Local API requests. */
-export const assertAPIKeyAssignment = ({
+export const assertCanSetAPIKey = ({
   collection,
   data,
   overrideAccess,

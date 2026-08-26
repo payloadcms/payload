@@ -12,7 +12,7 @@ import type {
   SelectFromCollectionSlug,
 } from '../config/types.js'
 
-import { assertAPIKeyAssignment } from '../../auth/apiKeys.js'
+import { assertCanSetAPIKey } from '../../auth/apiKeys.js'
 import { executeAccess } from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
@@ -138,7 +138,7 @@ export const updateOperation = async <
       )
     }
 
-    assertAPIKeyAssignment({
+    assertCanSetAPIKey({
       collection: collectionConfig,
       data: bulkUpdateData,
       overrideAccess,

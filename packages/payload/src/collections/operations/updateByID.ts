@@ -16,7 +16,7 @@ import type {
   TypeWithID,
 } from '../config/types.js'
 
-import { assertAPIKeyAssignment } from '../../auth/apiKeys.js'
+import { assertCanSetAPIKey } from '../../auth/apiKeys.js'
 import { executeAccess } from '../../auth/executeAccess.js'
 import { hasWhereAccessResult } from '../../auth/types.js'
 import { combineQueries } from '../../database/combineQueries.js'
@@ -178,7 +178,7 @@ export const updateByIDOperation = async <
       throw new NotFound(req.t)
     }
 
-    assertAPIKeyAssignment({
+    assertCanSetAPIKey({
       collection: collectionConfig,
       data,
       overrideAccess,
