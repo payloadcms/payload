@@ -18,7 +18,7 @@ import {
   VersionsCreatedAtCell as CreatedAtCell,
   VersionsIDCell as IDCell,
   SortColumn,
-} from '../../exports/client/index.js'
+} from '../../exports/client/internal.js'
 /* eslint-enable payload/no-imports-from-exports-dir */
 
 export const buildVersionColumns = ({

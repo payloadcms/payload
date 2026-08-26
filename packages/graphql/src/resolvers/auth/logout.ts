@@ -1,6 +1,7 @@
 import type { Collection } from 'payload'
 
-import { generateExpiredPayloadCookie, isolateObjectProperty, logoutOperation } from 'payload'
+import { generateExpiredPayloadCookie, isolateObjectProperty } from 'payload'
+import { logoutOperation } from 'payload/internal'
 
 import type { Context } from '../types.js'
 

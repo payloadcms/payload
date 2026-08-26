@@ -9,6 +9,7 @@ import './index.css'
 
 const baseClass = 'select-all'
 
+/** @internal */
 export const SelectAll: React.FC = () => {
   const { selectAll, toggleAll } = useSelection()
   const { i18n } = useTranslation()

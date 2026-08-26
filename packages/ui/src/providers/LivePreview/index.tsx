@@ -34,6 +34,7 @@ export type LivePreviewProviderProps = {
   previewURL?: string
 } & Pick<LivePreviewContextType, 'typeofLivePreviewURL' | 'url'>
 
+/** @internal */
 export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
   breakpoints: incomingBreakpoints,
   children,

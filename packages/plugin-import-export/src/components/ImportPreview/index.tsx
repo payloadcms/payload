@@ -14,7 +14,7 @@ import {
   useFormFields,
   useTranslation,
 } from '@payloadcms/ui'
-import { formatDocTitle } from '@payloadcms/ui/shared'
+import { formatDocTitle } from '@payloadcms/ui/internal/shared'
 import { fieldAffectsData, getObjectDotNotation } from 'payload/shared'
 import React, { useState, useTransition } from 'react'
 

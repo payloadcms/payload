@@ -5,7 +5,7 @@ import React from 'react'
 
 import { Logo } from '../../elements/Logo/index.js'
 // eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports/client bundle for proper client boundary in prod builds
-import { VerifyClient } from '../../exports/client/index.js'
+import { VerifyClient } from '../../exports/client/internal.js'
 import './index.css'
 
 export const verifyBaseClass = 'verify'

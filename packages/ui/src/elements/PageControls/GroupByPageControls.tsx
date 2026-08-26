@@ -9,6 +9,8 @@ import { SimplePagination } from '../Pagination/SimplePagination/index.js'
 /**
  * Simplified pagination for group-by tables.
  * Shows "X-Y of Z" with prev/next arrows. No page input or per-page selector.
+ *
+ * @internal
  */
 export const GroupByPageControls: React.FC<{
   data: PaginatedDocs

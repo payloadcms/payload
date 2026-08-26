@@ -20,7 +20,7 @@ export const buildParentField = ({
     admin: {
       ...(injectHeaderButton && {
         components: {
-          Field: '@payloadcms/ui#NullField',
+          Field: '@payloadcms/ui/internal#NullField',
         },
       }),
       position: 'sidebar',

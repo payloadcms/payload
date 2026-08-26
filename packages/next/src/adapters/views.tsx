@@ -6,10 +6,8 @@ import type {
   SanitizedConfig,
 } from 'payload'
 
-import { initReq } from '@payloadcms/ui/utilities/initReq'
-import { renderNotFoundPage } from '@payloadcms/ui/views/NotFound/page'
-import { renderRoot } from '@payloadcms/ui/views/Root'
-import { defaultAdminViews } from '@payloadcms/ui/views/Root/adminViews'
+import { defaultAdminViews, renderNotFoundPage, renderRoot } from '@payloadcms/ui/internal/rsc'
+import { initReq } from '@payloadcms/ui/internal/server'
 import { notFound, redirect } from 'next/navigation.js'
 
 import { nextServerAdapter } from './server.js'

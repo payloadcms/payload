@@ -27,6 +27,7 @@ type UserMenuProps = {
   settingsItemGroups?: UserMenuSettingsGroup[]
 }
 
+/** @internal */
 export const UserMenu: React.FC<UserMenuProps> = ({
   CustomAvatar,
   CustomLogoutButton,

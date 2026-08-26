@@ -1,7 +1,7 @@
 import type { RenderableServerComponent } from '@tanstack/react-start/rsc'
 import type { ImportMap, MetaConfig, SanitizedConfig } from 'payload'
 
-import { getViewportContent } from '@payloadcms/ui/shared'
+import { getViewportContent } from '@payloadcms/ui/internal/shared'
 import { renderServerComponent } from '@tanstack/react-start/rsc'
 
 import type { AdminPageMetadata } from './meta.js'
@@ -155,9 +155,9 @@ export async function loadAdminPage({
   search,
   splat,
 }: LoadAdminPageArgs): Promise<LoadAdminPageResult> {
-  const { renderRoot } = await import('@payloadcms/ui/views/Root')
-  const { defaultAdminViews } = await import('@payloadcms/ui/views/Root/adminViews')
-  const { generatePageMetadata } = await import('@payloadcms/ui/views/Root/generatePageMetadata')
+  const { defaultAdminViews, generatePageMetadata, renderRoot } = await import(
+    '@payloadcms/ui/internal/rsc'
+  )
 
   const splatSegments = splat ? splat.split('/').filter(Boolean) : []
   // Match Next's optional-catch-all behavior: the admin root (`/admin`) has no
@@ -204,7 +204,7 @@ export async function loadAdminPage({
   // For users without admin access `renderNotFoundPage` returns the bare
   // `NotFoundClient`, preserving the access-denied behavior.
   const renderNotFound = async (): Promise<LoadAdminPageResult> => {
-    const { renderNotFoundPage } = await import('@payloadcms/ui/views/NotFound/page')
+    const { renderNotFoundPage } = await import('@payloadcms/ui/internal/rsc')
 
     const notFoundNode = await renderNotFoundPage({
       config: Promise.resolve(config),

@@ -9,6 +9,7 @@ import { FieldLabel } from '../../../fields/FieldLabel/index.js'
 import { useTheme } from '../../../providers/Theme/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 
+/** @internal */
 export const ToggleTheme: React.FC = () => {
   const { autoMode, setTheme, theme } = useTheme()
   const { t } = useTranslation()

@@ -32,10 +32,10 @@
       "types": "./src/exports/client/index.ts",
       "default": "./src/exports/client/index.ts"
     },
-    "./internal-client": {
-      "import": "./src/exports/client/internal-client.ts",
-      "types": "./src/exports/client/internal-client.ts",
-      "default": "./src/exports/client/internal-client.ts"
+    "./internal": {
+      "import": "./src/exports/client/internal.ts",
+      "types": "./src/exports/client/internal.ts",
+      "default": "./src/exports/client/internal.ts"
     },
     "./react": {
       "import": "./src/exports/react/index.ts",
@@ -507,10 +507,10 @@
         "types": "./dist/exports/client/index.d.ts",
         "default": "./dist/exports/client/index.js"
       },
-      "./internal-client": {
-        "import": "./dist/exports/client/internal-client.js",
-        "types": "./dist/exports/client/internal-client.d.ts",
-        "default": "./dist/exports/client/internal-client.js"
+      "./internal": {
+        "import": "./dist/exports/client/internal.js",
+        "types": "./dist/exports/client/internal.d.ts",
+        "default": "./dist/exports/client/internal.js"
       },
       "./react": {
         "import": "./dist/exports/react/index.js",

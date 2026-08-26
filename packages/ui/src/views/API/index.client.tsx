@@ -23,6 +23,7 @@ import { LocaleSelector } from './LocaleSelector/index.js'
 
 const baseClass = 'query-inspector'
 
+/** @internal */
 export const APIViewClient: React.FC = () => {
   const { id, collectionSlug, globalSlug, initialData, isTrashed } = useDocumentInfo()
 

@@ -9,10 +9,9 @@ import {
   DialogFooter,
   DialogHeader,
   DialogModal,
-  DocumentLocked,
-  DocumentTakeOver,
   useModal,
 } from '@payloadcms/ui'
+import { DocumentLocked, DocumentTakeOver } from '@payloadcms/ui/internal'
 import React, { useState } from 'react'
 
 import { Section, Variant } from '../shared.js'

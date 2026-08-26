@@ -21,6 +21,7 @@ import './index.css'
 
 const drawerBaseClass = 'list-drawer'
 
+/** @internal */
 export type ListHeaderProps = {
   Actions?: React.ReactNode[]
   className?: string
@@ -41,6 +42,7 @@ export type ListHeaderProps = {
   viewType?: ViewTypes
 }
 
+/** @internal */
 export const CollectionListHeader: React.FC<ListHeaderProps> = ({
   className,
   collectionConfig,

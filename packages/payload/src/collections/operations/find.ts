@@ -57,6 +57,7 @@ export type Arguments = {
 
 const lockDurationDefault = 300 // Default 5 minutes in seconds
 
+/** @internal */
 export const findOperation = async <
   TSlug extends CollectionSlug,
   TSelect extends SelectFromCollectionSlug<TSlug>,

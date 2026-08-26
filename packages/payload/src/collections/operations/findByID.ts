@@ -54,6 +54,7 @@ export type FindByIDArgs = {
 } & Pick<AfterReadArgs<JsonObject>, 'flattenLocales'> &
   Pick<FindOptions<string, SelectType>, 'select'>
 
+/** @internal */
 export const findByIDOperation = async <
   TSlug extends CollectionSlug,
   TDisableErrors extends boolean,

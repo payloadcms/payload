@@ -1,15 +1,16 @@
-import { _internal_jobSystemGlobals, getPayload } from 'payload'
+import { getPayload } from 'payload'
+import { jobSystemGlobals } from 'payload/internal'
 
 import config from './config.crashWorker.js'
 
-const jobID = JSON.parse(process.argv[2] ?? 'null') as number | string | null
+const jobID = JSON.parse(process.argv[2] ?? 'null') as null | number | string
 
 if (jobID === null) {
   throw new Error('A job ID is required')
 }
 
-_internal_jobSystemGlobals.shouldAutoRun = false
-_internal_jobSystemGlobals.shouldAutoSchedule = false
+jobSystemGlobals.shouldAutoRun = false
+jobSystemGlobals.shouldAutoSchedule = false
 
 const payload = await getPayload({ config, cron: false })
 

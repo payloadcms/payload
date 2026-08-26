@@ -2,7 +2,11 @@ import type { SanitizedConfig } from 'payload'
 
 import { getRouteWithoutAdmin } from './getRouteWithoutAdmin.js'
 
-/** Returns true if the given route matches a custom admin view defined in the config. */
+/**
+ * Returns true if the given route matches a custom admin view defined in the config.
+ *
+ * @internal
+ */
 export const isCustomAdminView = ({
   adminRoute,
   config,

@@ -22,6 +22,7 @@ export type Arguments = {
   select?: SelectType
 }
 
+/** @internal */
 export const meOperation = async (args: Arguments): Promise<MeOperationResult> => {
   const { collection, currentToken, depth, draft, joins, populate, req, select } = args
 

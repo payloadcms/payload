@@ -15,6 +15,7 @@ import { HierarchyCell } from './fields/Hierarchy/index.js'
 import { cellComponents } from './fields/index.js'
 import { StatusCell } from './fields/Status/index.js'
 
+/** @internal */
 export const DefaultCell: React.FC<DefaultCellComponentProps> = (props) => {
   const {
     cellData,

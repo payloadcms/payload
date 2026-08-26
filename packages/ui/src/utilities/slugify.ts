@@ -22,6 +22,8 @@ import { slugify as defaultSlugify } from 'payload/shared'
  * The only way to pass server functions to the client (that contain non-serializable data) is if it is globally defined.
  * But we also cannot define this function alongside the server component, as we will not have access to their custom slugify function.
  * See `ServerFunctionsProvider` for more details.
+ *
+ * @internal
  */
 export const slugifyHandler: ServerFunction<
   SlugifyServerFunctionArgs,

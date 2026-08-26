@@ -38,7 +38,12 @@ async function build() {
     outdir: `${directoryArg}/bundled_scss`,
     loader: { '.svg': 'dataurl' },
     packages: 'external',
-    //external: ['*.svg'],
+    external: [
+      '@payloadcms/ui/internal',
+      '@payloadcms/ui/internal/rsc',
+      '@payloadcms/ui/internal/server',
+      '@payloadcms/ui/internal/shared',
+    ],
     plugins: [sassPlugin({ css: 'external' })],
   })
 
@@ -57,9 +62,9 @@ async function build() {
 
   console.log(`${directoryArg}/field/bundled.css bundled successfully`)
 
-  // Bundle `client.ts`
+  // Bundle client entrypoints
   const resultClient = await esbuild.build({
-    entryPoints: ['dist/exports/client/index.js'],
+    entryPoints: ['dist/exports/client/index.js', 'dist/exports/client/internal.js'],
     bundle: true,
     platform: 'browser',
     format: 'esm',
@@ -81,6 +86,10 @@ async function build() {
       '@payloadcms/ui',
       '@payloadcms/ui/*',
       '@payloadcms/ui/client',
+      '@payloadcms/ui/internal',
+      '@payloadcms/ui/internal/rsc',
+      '@payloadcms/ui/internal/server',
+      '@payloadcms/ui/internal/shared',
       '@payloadcms/ui/shared',
       'lexical',
       'lexical/*',
@@ -112,7 +121,7 @@ async function build() {
     ],
     sourcemap: true,
   })
-  console.log('client/index.ts bundled successfully')
+  console.log('client entrypoints bundled successfully')
 
   fs.writeFileSync('meta_client.json', JSON.stringify(resultClient.metafile))
 }

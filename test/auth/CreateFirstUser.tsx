@@ -1,6 +1,6 @@
 import type { AdminViewServerProps } from 'payload'
 
-import { CreateFirstUserView } from '@payloadcms/ui/views/CreateFirstUser'
+import { CreateFirstUserView } from '@payloadcms/ui/internal/rsc'
 import React from 'react'
 
 const CustomMarker = () => (

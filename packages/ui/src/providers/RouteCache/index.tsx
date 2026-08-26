@@ -15,6 +15,7 @@ const Context = createContext<RouteCacheContext>({
   clearRouteCache: () => {},
 })
 
+/** @internal */
 export const RouteCache: React.FC<{ cachingEnabled?: boolean; children: React.ReactNode }> = ({
   cachingEnabled = true,
   children,

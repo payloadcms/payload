@@ -28,6 +28,7 @@ import { RenderServerComponent } from '../../elements/RenderServerComponent/inde
 import { ViewDescription } from '../../exports/client/index.js'
 import { getDocumentPermissions } from '../../utilities/getDocumentPermissions.js'
 
+/** @internal */
 export const renderDocumentSlots: (args: {
   collectionConfig?: SanitizedCollectionConfig
   doc?: Record<string, unknown>
@@ -263,6 +264,7 @@ export const renderDocumentSlots: (args: {
   return components
 }
 
+/** @internal */
 export const renderDocumentSlotsHandler: ServerFunction<{
   collectionSlug: string
   id?: number | string

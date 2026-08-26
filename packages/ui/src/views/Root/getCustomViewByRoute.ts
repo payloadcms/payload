@@ -8,12 +8,17 @@ import type React from 'react'
 
 import { isPathMatchingRoute } from '../../utilities/isPathMatchingRoute.js'
 
+/** @internal */
 export type ViewFromConfig = {
   Component?: React.FC<AdminViewServerProps>
   payloadComponent?: PayloadComponent<AdminViewServerProps>
 }
 
-/** Finds a top-level custom admin view matching the given route. */
+/**
+ * Finds a top-level custom admin view matching the given route.
+ *
+ * @internal
+ */
 export const getCustomViewByRoute = ({
   config,
   currentRoute: currentRouteWithAdmin,

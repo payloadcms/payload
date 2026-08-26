@@ -1,5 +1,6 @@
 import type { CollectionConfig } from '../collections/config/types.js'
 
+/** @internal */
 export const defaultUserCollection: CollectionConfig = {
   slug: 'users',
   admin: {

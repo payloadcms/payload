@@ -33,6 +33,7 @@ export type Arguments = {
   req: PayloadRequest
 }
 
+/** @internal */
 export const resetPasswordOperation = async <TSlug extends AuthCollectionSlug>(
   args: Arguments,
 ): Promise<Result> => {

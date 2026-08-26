@@ -52,6 +52,7 @@ type UserResponse = {
   user?: AuthenticatedUser | null
 }
 
+/** @internal */
 export function AuthProvider({
   children,
   permissions: initialPermissions,

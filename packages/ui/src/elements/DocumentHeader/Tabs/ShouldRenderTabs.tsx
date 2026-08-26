@@ -3,6 +3,7 @@ import type React from 'react'
 
 import { useDocumentInfo } from '../../../providers/DocumentInfo/index.js'
 
+/** @internal */
 export const ShouldRenderTabs: React.FC<{
   children: React.ReactNode
 }> = ({ children }) => {

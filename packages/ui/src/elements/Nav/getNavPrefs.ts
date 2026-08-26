@@ -3,6 +3,7 @@ import type { NavPreferences, PayloadRequest } from 'payload'
 import { PREFERENCE_KEYS } from 'payload/shared'
 import { cache } from 'react'
 
+/** @internal */
 export const getNavPrefs = cache(async (req: PayloadRequest): Promise<NavPreferences> => {
   if (!req?.user?.collection) {
     return { activeTab: undefined, groups: {}, open: true }

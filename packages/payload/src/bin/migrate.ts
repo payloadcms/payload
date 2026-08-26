@@ -36,6 +36,7 @@ type Args = {
   parsedArgs: ParsedArgs
 }
 
+/** @internal */
 export const migrate = async ({ config, migrationDir, parsedArgs }: Args): Promise<void> => {
   const { _: args, file, forceAcceptWarning: forceAcceptFromProps, help } = parsedArgs
 

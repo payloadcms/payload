@@ -2,6 +2,7 @@ import type { PayloadRequest, User } from 'payload'
 
 const globalLockDurationDefault = 300
 
+/** @internal */
 export async function getGlobalData(req: PayloadRequest) {
   const {
     payload: { config },

@@ -8,6 +8,7 @@ import './index.css'
 
 const baseClass = 'sort-row'
 
+/** @internal */
 export const SortRow = () => {
   const { orderableFieldName, query } = useListQuery()
   const isActive = query.sort === orderableFieldName || query.sort === `-${orderableFieldName}`

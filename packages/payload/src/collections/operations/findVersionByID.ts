@@ -29,6 +29,7 @@ export type Arguments = {
   trash?: boolean
 } & Pick<FindOptions<string, SelectType>, 'select'>
 
+/** @internal */
 export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
   args: Arguments,
 ): Promise<TypeWithVersion<TData>> => {

@@ -41,6 +41,8 @@ type CreateServerFunctionHandlerArgs = {
  * differ only in the two injected hooks below — `initReq` and `transformResult`
  * — so there is a single dispatch implementation and the handler sets cannot
  * drift between frameworks.
+ *
+ * @internal
  */
 export const createServerFunctionHandler = ({
   initReq,

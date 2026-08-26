@@ -14,6 +14,7 @@ import './index.css'
 
 const baseClass = 'hierarchy-button'
 
+/** @internal */
 export type HierarchyButtonClientProps = {
   fieldName: string
   hasMany?: boolean
@@ -23,6 +24,7 @@ export type HierarchyButtonClientProps = {
   SmallIcon?: React.ReactNode
 }
 
+/** @internal */
 export const HierarchyButtonClient: React.FC<HierarchyButtonClientProps> = ({
   fieldName,
   hasMany = false,

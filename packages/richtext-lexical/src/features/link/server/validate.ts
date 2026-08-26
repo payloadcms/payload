@@ -1,6 +1,6 @@
 import type { Field } from 'payload'
 
-import { fieldSchemasToFormState } from '@payloadcms/ui/forms/fieldSchemasToFormState'
+import { fieldSchemasToFormState } from '@payloadcms/ui/server'
 
 import type { NodeValidation } from '../../typesServer.js'
 import type { LinkFeatureServerProps } from './index.js'

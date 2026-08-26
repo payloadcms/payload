@@ -21,6 +21,7 @@ const Context = React.createContext<UploadEditsContext>({
   uploadEdits: undefined,
 })
 
+/** @internal */
 export const UploadEditsProvider = ({ children, initialUploadEdits }: UploadEditsProviderProps) => {
   const [uploadEdits, setUploadEdits] = React.useState<UploadEdits>(initialUploadEdits || {})
 

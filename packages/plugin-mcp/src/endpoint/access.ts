@@ -14,6 +14,8 @@ export type GetAuthorizedMCPArgs = {
 /**
  * Authenticates an MCP request and removes items the user cannot access.
  * `overrideAccess` skips Payload and MCP item access checks.
+ *
+ * @internal
  */
 export const getAuthorizedMCP: (args: GetAuthorizedMCPArgs) => Promise<AuthorizedMCP> = async ({
   overrideAccess,
@@ -51,6 +53,7 @@ export const getAuthorizedMCP: (args: GetAuthorizedMCPArgs) => Promise<Authorize
   }
 }
 
+/** @internal */
 export const filterMCPItems = async ({
   items,
   overrideAccess,

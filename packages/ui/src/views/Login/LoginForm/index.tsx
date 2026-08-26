@@ -20,6 +20,7 @@ import './index.css'
 
 const baseClass = 'login__form'
 
+/** @internal */
 export const LoginForm: React.FC<{
   prefillEmail?: string
   prefillPassword?: string

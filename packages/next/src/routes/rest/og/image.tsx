@@ -1,6 +1,6 @@
 import type { ImportMap, PayloadComponent } from 'payload'
 
-import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
+import { RenderServerComponent } from '@payloadcms/ui/rsc'
 import React from 'react'
 
 export const OGImage: React.FC<{

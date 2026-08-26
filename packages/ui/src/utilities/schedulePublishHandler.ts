@@ -8,6 +8,7 @@ import type { UpcomingEvent } from '../elements/PublishButton/ScheduleDrawer/typ
 import { buildUpcomingScheduleWhere } from '../elements/PublishButton/ScheduleDrawer/buildUpcomingScheduleWhere.js'
 import { getDocumentPermissions } from './getDocumentPermissions.js'
 
+/** @internal */
 export type SchedulePublishHandlerArgs = {
   date?: Date
   /**
@@ -18,12 +19,14 @@ export type SchedulePublishHandlerArgs = {
   timezone?: string
 } & Pick<SchedulePublishTaskInput, 'doc' | 'global' | 'type'>
 
+/** @internal */
 export type GetUpcomingScheduledPublishHandlerArgs = {
   collectionSlug?: string
   globalSlug?: string
   id?: number | string
 }
 
+/** @internal */
 export const getUpcomingScheduledPublishHandler: ServerFunction<
   GetUpcomingScheduledPublishHandlerArgs,
   Promise<UpcomingEvent[]>
@@ -77,6 +80,7 @@ export const getUpcomingScheduledPublishHandler: ServerFunction<
   }))
 }
 
+/** @internal */
 export const schedulePublishHandler: ServerFunction<SchedulePublishHandlerArgs> = async ({
   type,
   date,

@@ -31,6 +31,7 @@ const CheckboxIndicator: React.FC<{
   )
 }
 
+/** @internal */
 export const Checkbox: CheckboxFieldDiffClientComponent = ({
   comparisonValue: valueFrom,
   field,

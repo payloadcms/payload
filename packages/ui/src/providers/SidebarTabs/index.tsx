@@ -21,6 +21,7 @@ export type SidebarTabsProviderProps = {
   reloadTabContent: (tabSlug: string, serverArgs?: Partial<RenderTabServerFnArgs>) => void
 }
 
+/** @internal */
 export const SidebarTabsProvider: React.FC<SidebarTabsProviderProps> = ({
   activeTabSlug,
   children,

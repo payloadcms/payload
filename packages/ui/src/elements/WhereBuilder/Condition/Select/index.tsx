@@ -9,6 +9,7 @@ import { useTranslation } from '../../../../providers/Translation/index.js'
 import { ReactSelect } from '../../../ReactSelect/index.js'
 import { formatOptions } from './formatOptions.js'
 
+/** @internal */
 export const Select: React.FC<Props> = ({
   disabled,
   field: {

@@ -36,6 +36,7 @@ const getBlockLabel = (block: ClientBlock, i18n: I18nClient) => {
   return ''
 }
 
+/** @internal */
 export const BlockSelector: React.FC<Props> = (props) => {
   const { blocks, onDoubleClick, onSelect, searchTerm: searchTermFromProps, selectedBlock } = props
 

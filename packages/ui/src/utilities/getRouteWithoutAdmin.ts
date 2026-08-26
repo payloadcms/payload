@@ -1,3 +1,4 @@
+/** @internal */
 export const getRouteWithoutAdmin = ({
   adminRoute,
   route,

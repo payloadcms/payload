@@ -32,6 +32,7 @@ type ListRelationshipContext = {
 
 const Context = createContext({} as ListRelationshipContext)
 
+/** @internal */
 export const RelationshipProvider: React.FC<{ readonly children?: React.ReactNode }> = ({
   children,
 }) => {

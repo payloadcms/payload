@@ -17,6 +17,8 @@ export type Props = {
 /**
  * An input field representing the block's `blockName` property - responsible for reading and saving the `blockName`
  * property from/into the provided path.
+ *
+ * @internal
  */
 export const SectionTitle: React.FC<Props> = (props) => {
   const { customOnChange, customValue, path, readOnly } = props

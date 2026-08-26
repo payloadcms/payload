@@ -11,6 +11,7 @@ import {
 } from '../../../../providers/RouterAdapter/index.js'
 import { Button } from '../../../Button/index.js'
 
+/** @internal */
 export const DocumentTabLink: React.FC<{
   adminRoute: SanitizedConfig['routes']['admin']
   ariaLabel?: string

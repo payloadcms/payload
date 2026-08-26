@@ -244,6 +244,7 @@ export type SET_ALL_ROWS_COLLAPSED = {
   updatedRows: Row[]
 }
 
+/** @internal */
 export type FieldAction =
   | ADD_ROW
   | ADD_SERVER_ERRORS

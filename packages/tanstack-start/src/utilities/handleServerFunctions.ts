@@ -1,4 +1,4 @@
-import { createServerFunctionHandler } from '@payloadcms/ui/utilities/handleServerFunctions'
+import { createServerFunctionHandler } from '@payloadcms/ui/internal/rsc'
 
 import { initReq } from './initReq.server.js'
 import { serializeForRsc } from './serializeForRsc.js'

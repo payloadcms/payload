@@ -4,6 +4,7 @@ import React from 'react'
 import { useNav } from '../../../elements/Nav/context.js'
 import './index.css'
 
+/** @internal */
 export const Wrapper: React.FC<{
   baseClass?: string
   children?: React.ReactNode

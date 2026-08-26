@@ -39,6 +39,7 @@ export type Arguments = {
   showHiddenFields?: boolean
 } & Pick<FindOptions<string, SelectType>, 'select'>
 
+/** @internal */
 export const restoreVersionOperation = async <
   TData extends JsonObject & TypeWithID = JsonObject & TypeWithID,
 >(

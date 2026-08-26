@@ -3,10 +3,11 @@ import type { JsonObject, Payload } from 'payload'
 import {
   getUpcomingScheduledPublishHandler,
   schedulePublishHandler,
-} from '@payloadcms/ui/utilities/schedulePublishHandler'
+} from '@payloadcms/ui/internal/server'
 import fs from 'fs'
 import path from 'path'
-import { createLocalReq, getFileByPath, saveVersion, ValidationError } from 'payload'
+import { createLocalReq, getFileByPath, ValidationError } from 'payload'
+import { saveVersion } from 'payload/internal'
 import { wait } from 'payload/shared'
 import * as qs from 'qs-esm'
 import { fileURLToPath } from 'url'

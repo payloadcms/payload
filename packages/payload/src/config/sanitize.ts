@@ -136,7 +136,7 @@ const addDefaultDashboardWidgets = ({
       type: 'json',
       admin: {
         components: {
-          Field: '@payloadcms/ui#QueryPresetsWhereField',
+          Field: '@payloadcms/ui/internal#QueryPresetsWhereField',
         },
       },
       label: ({ t }) => t('general:filters'),
@@ -146,7 +146,7 @@ const addDefaultDashboardWidgets = ({
       type: 'text',
       admin: {
         components: {
-          Field: '@payloadcms/ui#CollectionQuerySortField',
+          Field: '@payloadcms/ui/internal#CollectionQuerySortField',
         },
       },
       label: ({ t }) => t('dashboard:widgetSortFieldLabel'),
@@ -185,7 +185,7 @@ const addDefaultDashboardWidgets = ({
         components: {
           // Presents an inclusion filter (all collections checked by default) while persisting the
           // inverse as an exclusion list, so collections added later stay visible by default.
-          Field: '@payloadcms/ui#RecentlyViewedCollectionsField',
+          Field: '@payloadcms/ui/internal#RecentlyViewedCollectionsField',
         },
       },
       hasMany: true,
@@ -211,7 +211,7 @@ const addDefaultDashboardWidgets = ({
   })
   dashboard.widgets.push({
     slug: 'collection-query',
-    Component: '@payloadcms/ui/rsc#CollectionQueryWidget',
+    Component: '@payloadcms/ui/internal/rsc#CollectionQueryWidget',
     fields: sanitizeFields({
       config: config as unknown as Config,
       existingFieldNames: new Set(),
@@ -224,7 +224,7 @@ const addDefaultDashboardWidgets = ({
   })
   dashboard.widgets.push({
     slug: 'activity',
-    Component: '@payloadcms/ui/rsc#RecentlyViewedWidget',
+    Component: '@payloadcms/ui/internal/rsc#RecentlyViewedWidget',
     fields: sanitizeFields({
       config: config as unknown as Config,
       existingFieldNames: new Set(),

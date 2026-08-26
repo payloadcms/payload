@@ -1,7 +1,7 @@
 import type { WidgetServerProps } from 'payload'
 
-import { getCollectionCardsData } from '@payloadcms/ui/server'
-import { CollectionCardsClient } from '@payloadcms/ui/widgets/CollectionCards/index.client'
+import { CollectionCardsClient } from '@payloadcms/ui/internal'
+import { getCollectionCardsData } from '@payloadcms/ui/internal/server'
 import React from 'react'
 
 export async function CollectionCards(props: WidgetServerProps) {

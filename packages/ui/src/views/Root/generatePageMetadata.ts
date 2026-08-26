@@ -7,6 +7,7 @@ import { generateListViewMetadata } from '../List/generateListViewMetadata.js'
 import { generateCustomViewMetadata } from './generateCustomViewMetadata.js'
 import { getCustomViewByRoute } from './getCustomViewByRoute.js'
 
+/** @internal */
 export type GeneratePageMetadataArgs = {
   adminViews: AdminViewAdapter<unknown, MetaConfig>
   config: SanitizedConfig
@@ -28,6 +29,8 @@ const oneSegmentMetaKeys: Record<string, AdminViewKey> = {
  * framework adapters — segment-routing logic lives here so adapters do not
  * duplicate it. Returns the framework-agnostic `MetaConfig`; adapters cast to
  * their framework metadata type at the boundary.
+ *
+ * @internal
  */
 export const generatePageMetadata = async ({
   adminViews,

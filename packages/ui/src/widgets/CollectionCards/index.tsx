@@ -1,8 +1,8 @@
 import type { WidgetServerProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { EntityType, getAccessResults } from 'payload'
-import { formatAdminURL } from 'payload/shared'
+import { getAccessResults } from 'payload'
+import { EntityType, formatAdminURL } from 'payload/shared'
 import React from 'react'
 
 // eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports dir for proper client boundary

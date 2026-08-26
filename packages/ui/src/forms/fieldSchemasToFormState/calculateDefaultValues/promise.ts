@@ -9,7 +9,8 @@ import type {
   User,
 } from 'payload'
 
-import { getBlockSelect, getDefaultValue, stripUnselectedFields } from 'payload'
+import { getBlockSelect, stripUnselectedFields } from 'payload'
+import { getDefaultValue } from 'payload/internal'
 import { fieldAffectsData, tabHasName } from 'payload/shared'
 
 import { iterateFields } from './iterateFields.js'

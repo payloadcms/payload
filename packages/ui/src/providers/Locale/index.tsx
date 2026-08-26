@@ -30,6 +30,7 @@ const fetchPreferences = async <T extends Record<string, unknown> | string>(
     method: 'GET',
   })?.then((res) => res.json() as Promise<{ id: string; value: T }>)
 
+/** @internal */
 export const LocaleProvider: React.FC<{ children?: React.ReactNode; locale?: Locale['code'] }> = ({
   children,
   /**

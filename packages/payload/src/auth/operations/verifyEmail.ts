@@ -15,6 +15,7 @@ export type Args = {
   token: string
 }
 
+/** @internal */
 export const verifyEmailOperation = async (args: Args): Promise<boolean> => {
   const { collection, req, token } = args
 

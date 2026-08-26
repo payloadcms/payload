@@ -18,6 +18,7 @@ const ActionsContext = createContext<ActionsContextType>({
 
 export const useActions = () => use(ActionsContext)
 
+/** @internal */
 export const ActionsProvider: React.FC<{
   readonly Actions?: {
     [key: string]: React.ReactNode

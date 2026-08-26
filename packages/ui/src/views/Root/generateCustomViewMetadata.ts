@@ -9,6 +9,7 @@ import type {
 
 import { formatMetadata } from '../../utilities/formatMetadata.js'
 
+/** @internal */
 export const generateCustomViewMetadata = async (args: {
   collectionConfig?: SanitizedCollectionConfig
   config: SanitizedConfig

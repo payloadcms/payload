@@ -1,4 +1,4 @@
-import { RootLayout as UIRootLayout } from '@payloadcms/ui/layouts'
+import { RootLayout as UIRootLayout } from '@payloadcms/ui/internal/rsc'
 // @ts-expect-error - TS6 NodeNext rejects deep imports into `next` (no `exports` field), but Next.js compiler requires this exact specifier
 import { Inter, Roboto_Mono } from 'next/font/google'
 import React from 'react'
@@ -30,7 +30,7 @@ const nextDependencyChecks = {
   },
 }
 
-export { metadata } from '@payloadcms/ui/layouts'
+export { metadata } from '@payloadcms/ui/internal/rsc'
 
 type Props = Omit<
   React.ComponentProps<typeof UIRootLayout>,

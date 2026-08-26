@@ -41,8 +41,10 @@ type BuildTableStateErrorResult = {
   | ErrorResult
 )
 
+/** @internal */
 export type BuildTableStateResult = BuildTableStateErrorResult | BuildTableStateSuccessResult
 
+/** @internal */
 export const buildTableStateHandler: ServerFunction<
   BuildTableStateArgs,
   Promise<BuildTableStateResult>

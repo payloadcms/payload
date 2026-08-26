@@ -13,7 +13,8 @@ import type { DashboardViewClientProps, DashboardViewServerPropsOnly } from './D
 
 import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
 /* eslint-disable payload/no-imports-from-exports-dir -- Server component must reference exports/client bundle for proper client boundary in prod builds */
-import { HydrateAuthProvider, SetStepNav } from '../../exports/client/index.js'
+import { SetStepNav } from '../../exports/client/index.js'
+import { HydrateAuthProvider } from '../../exports/client/internal.js'
 /* eslint-enable payload/no-imports-from-exports-dir */
 import { getGlobalData } from '../../utilities/getGlobalData.js'
 import { getNavGroups } from '../../utilities/getNavGroups.js'

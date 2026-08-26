@@ -14,6 +14,7 @@ type Arguments = {
   req: PayloadRequest
 }
 
+/** @internal */
 export const docAccessOperation = async (args: Arguments): Promise<SanitizedGlobalPermission> => {
   const { data, globalConfig, req } = args
 

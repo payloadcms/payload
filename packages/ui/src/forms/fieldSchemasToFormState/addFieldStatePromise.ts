@@ -20,7 +20,8 @@ import type {
 } from 'payload'
 
 import ObjectIdImport from 'bson-objectid'
-import { getBlockSelect, stripUnselectedFields, validateBlocksFilterOptions } from 'payload'
+import { getBlockSelect, stripUnselectedFields } from 'payload'
+import { validateBlocksFilterOptions } from 'payload/internal'
 import {
   deepCopyObjectSimple,
   fieldAffectsData,

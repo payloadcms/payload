@@ -41,7 +41,8 @@ import {
   GraphQLUnionType,
 } from 'graphql'
 import { DateTimeResolver, EmailAddressResolver } from 'graphql-scalars'
-import { combineQueries, createDataloaderCacheKey, MissingEditorProp, toWords } from 'payload'
+import { combineQueries, MissingEditorProp, toWords } from 'payload'
+import { createDataloaderCacheKey } from 'payload/internal'
 import { fieldAffectsData, tabHasName } from 'payload/shared'
 
 import type { Context } from '../resolvers/types.js'

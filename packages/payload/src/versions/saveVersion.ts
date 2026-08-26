@@ -25,15 +25,19 @@ type Args<T extends JsonObject = JsonObject> = {
   unpublish?: boolean
 }
 
+/** @internal */
 export async function saveVersion<TData extends JsonObject = JsonObject>(
   args: { returning: false } & Args<TData>,
 ): Promise<null>
+/** @internal */
 export async function saveVersion<TData extends JsonObject = JsonObject>(
   args: { returning: true } & Args<TData>,
 ): Promise<JsonObject>
+/** @internal */
 export async function saveVersion<TData extends JsonObject = JsonObject>(
   args: Omit<Args<TData>, 'returning'>,
 ): Promise<JsonObject>
+/** @internal */
 export async function saveVersion<TData extends JsonObject = JsonObject>({
   id,
   autosave,

@@ -7,8 +7,6 @@ import { useEffect, useRef, useState } from 'react'
  *
  * @param propValue - The controlled value from props
  * @param fallbackValue - Value to use when propValue is null or undefined
- *
- * @internal - may change or be removed without a major version bump
  */
 export function useControllableState<T, D>(
   propValue: T,

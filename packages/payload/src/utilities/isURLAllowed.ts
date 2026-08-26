@@ -2,6 +2,7 @@ import type { AllowList } from '../uploads/types.js'
 
 import { escapeRegExp } from './escapeRegExp.js'
 
+/** @internal */
 export const isURLAllowed = (url: string, allowList: AllowList): boolean => {
   try {
     const parsedUrl = new URL(url)

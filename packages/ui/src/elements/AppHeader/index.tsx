@@ -26,6 +26,7 @@ type Props = {
   CustomLogoutButton?: React.ReactNode
   settingsItemGroups?: UserMenuSettingsGroup[]
 }
+/** @internal */
 export function AppHeader({ CustomAvatar, CustomLogoutButton, settingsItemGroups }: Props) {
   const { t } = useTranslation()
   const locale = useLocale()

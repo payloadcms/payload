@@ -42,7 +42,7 @@ export const getQueryPresetsConfig = (config: Config): CollectionConfig => ({
                 clientProps: {
                   i18nKey: 'general:presets',
                 },
-                path: '@payloadcms/ui#QueryPresetsHeading',
+                path: '@payloadcms/ui/internal#QueryPresetsHeading',
               },
             },
           },
@@ -52,8 +52,8 @@ export const getQueryPresetsConfig = (config: Config): CollectionConfig => ({
           type: 'text',
           admin: {
             components: {
-              Cell: '@payloadcms/ui#QueryPresetsGroupByCell',
-              Field: '@payloadcms/ui#QueryPresetsGroupByField',
+              Cell: '@payloadcms/ui/internal#QueryPresetsGroupByCell',
+              Field: '@payloadcms/ui/internal#QueryPresetsGroupByField',
             },
           },
           label: 'Group By',
@@ -63,8 +63,8 @@ export const getQueryPresetsConfig = (config: Config): CollectionConfig => ({
           type: 'json',
           admin: {
             components: {
-              Cell: '@payloadcms/ui#QueryPresetsColumnsCell',
-              Field: '@payloadcms/ui#QueryPresetsColumnField',
+              Cell: '@payloadcms/ui/internal#QueryPresetsColumnsCell',
+              Field: '@payloadcms/ui/internal#QueryPresetsColumnField',
             },
           },
           validate: (value) => {
@@ -86,8 +86,8 @@ export const getQueryPresetsConfig = (config: Config): CollectionConfig => ({
       type: 'json',
       admin: {
         components: {
-          Cell: '@payloadcms/ui#QueryPresetsWhereCell',
-          Field: '@payloadcms/ui#QueryPresetsWhereField',
+          Cell: '@payloadcms/ui/internal#QueryPresetsWhereCell',
+          Field: '@payloadcms/ui/internal#QueryPresetsWhereField',
         },
       },
       hooks: {
@@ -117,7 +117,7 @@ export const getQueryPresetsConfig = (config: Config): CollectionConfig => ({
             clientProps: {
               i18nKey: 'general:access',
             },
-            path: '@payloadcms/ui#QueryPresetsHeading',
+            path: '@payloadcms/ui/internal#QueryPresetsHeading',
           },
         },
       },

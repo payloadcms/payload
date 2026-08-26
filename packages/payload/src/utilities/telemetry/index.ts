@@ -50,6 +50,7 @@ type Args<TEvent extends { type: string } = TelemetryEvent> = {
 
 let baseEvent: BaseEvent | null = null
 
+/** @internal */
 export const sendTelemetryEvent = async <TEvent extends { type: string }>({
   event,
   payload,

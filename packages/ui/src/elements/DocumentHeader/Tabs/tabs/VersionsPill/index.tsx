@@ -6,6 +6,7 @@ import './index.css'
 
 const baseClass = 'pill-version-count'
 
+/** @internal */
 export const VersionsPill: React.FC = () => {
   const { versionCount } = useDocumentInfo()
 

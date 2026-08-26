@@ -92,7 +92,7 @@
     "skills"
   ],
   "scripts": {
-    "build": "rimraf .dist && rimraf tsconfig.tsbuildinfo && pnpm copyfiles && pnpm build:types && pnpm build:swc && pnpm bundle:types && echo skipping esbuild",
+    "build": "rimraf .dist && rimraf tsconfig.tsbuildinfo && pnpm copyfiles && pnpm build:types && pnpm build:swc && pnpm bundle:types && pnpm test:types && echo skipping esbuild",
     "build:bundle-for-analysis": "node ./bundle.js esbuild",
     "build:debug": "pnpm build",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
@@ -103,7 +103,8 @@
     "copyfiles": "copyfiles -u 1 \"src/**/*.{html,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "pretest": "pnpm build"
+    "pretest": "pnpm build",
+    "test:types": "tsc --project test/tsconfig.json"
   },
   "dependencies": {
     "@next/env": "16.3.3",

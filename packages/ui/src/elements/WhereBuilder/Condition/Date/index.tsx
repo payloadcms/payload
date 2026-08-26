@@ -10,6 +10,7 @@ import { DatePickerField } from '../../../DatePicker/index.js'
 
 const baseClass = 'condition-value-date'
 
+/** @internal */
 export const DateFilter: React.FC<Props> = ({ disabled, field: { admin }, onChange, value }) => {
   const { date } = admin || {}
   const {

@@ -1,7 +1,7 @@
 import type { DocumentTabConfig, SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload'
 
 // eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports dir for proper client boundary
-import { VersionsPill } from '../../../../exports/client/index.js'
+import { VersionsPill } from '../../../../exports/client/internal.js'
 
 export const documentViewKeys = ['api', 'default', 'livePreview', 'versions']
 

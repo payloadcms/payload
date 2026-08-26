@@ -4,6 +4,8 @@ import { dynamicImport } from '../../../../utilities/dynamicImport.js'
 
 /**
  * Imports a handler function from a given path.
+ *
+ * @internal
  */
 export async function importHandlerPath<T>(path: string): Promise<T> {
   let runner!: T

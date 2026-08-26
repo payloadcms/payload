@@ -1,7 +1,8 @@
 'use client'
 import type { ClientField, Data, FormState, JsonObject } from 'payload'
 
-import { Drawer, EditDepthProvider, useModal } from '@payloadcms/ui'
+import { Drawer, useModal } from '@payloadcms/ui'
+import { EditDepthProvider } from '@payloadcms/ui/internal'
 import React from 'react'
 
 import { DrawerContent } from './DrawerContent.js'

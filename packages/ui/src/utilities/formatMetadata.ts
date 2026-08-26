@@ -58,6 +58,7 @@ const defaultOpenGraph: MetaConfig['openGraph'] = {
   title: 'Payload App',
 }
 
+/** @internal */
 export const formatMetadata = async (
   args: { serverURL?: string } & MetaConfig,
 ): Promise<MetaConfig> => {

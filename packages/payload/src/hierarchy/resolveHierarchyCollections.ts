@@ -41,6 +41,7 @@ import { injectHierarchyButton } from './injectHierarchyButton.js'
  * - Injects join field when `joinField` is configured
  * - Adds `afterDelete` hook to clear hierarchy references when items are deleted
  * - Populates `relatedCollections` in the sanitized hierarchy config
+ * @internal
  */
 export const resolveHierarchyCollections = (config: Config): void => {
   const hierarchyCollections =
@@ -435,7 +436,7 @@ function injectSidebarTab({
           clientProps: {
             hierarchyCollectionSlug: hierarchyCollection.slug,
           },
-          path: '@payloadcms/ui/rsc#HierarchySidebarTabServer',
+          path: '@payloadcms/ui/internal/rsc#HierarchySidebarTabServer',
         },
         Icon,
       },

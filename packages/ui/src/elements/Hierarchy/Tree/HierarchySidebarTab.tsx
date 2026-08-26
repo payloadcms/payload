@@ -16,6 +16,7 @@ import { HydrateHierarchyProvider } from '../HydrateProvider/index.js'
 import { HierarchySearch } from '../Search/index.js'
 import { HierarchyTree } from './index.js'
 
+/** @internal */
 export const HierarchySidebarTab: React.FC<
   {
     baseFilter?: Record<string, unknown>

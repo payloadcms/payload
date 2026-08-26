@@ -14,6 +14,7 @@ export type GenerateConfirmationProps = {
   setKey: () => void
 }
 
+/** @internal */
 export function GenerateConfirmation(props: GenerateConfirmationProps) {
   const { highlightField, setKey } = props
 

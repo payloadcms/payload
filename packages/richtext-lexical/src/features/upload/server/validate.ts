@@ -1,4 +1,4 @@
-import { fieldSchemasToFormState } from '@payloadcms/ui/forms/fieldSchemasToFormState'
+import { fieldSchemasToFormState } from '@payloadcms/ui/server'
 import { isValidID } from 'payload'
 
 import type { NodeValidation } from '../../typesServer.js'

@@ -20,6 +20,7 @@ type Args = {
   user?: User
 }
 
+/** @internal */
 export const getDocumentData = async ({
   id: idArg,
   collectionSlug,

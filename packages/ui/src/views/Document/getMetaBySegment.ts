@@ -16,6 +16,7 @@ import { generateVersionsViewMetadata } from '../Versions/generateVersionsViewMe
 import { generateEditViewMetadata } from './generateEditViewMetadata.js'
 import { getDocumentView } from './index.js'
 
+/** @internal */
 export type GetMetaBySegmentArgs = {
   adminViews: AdminViewAdapter<unknown, MetaConfig>
   collectionConfig?: null | SanitizedCollectionConfig
@@ -29,6 +30,8 @@ export type GetMetaBySegmentArgs = {
  * Resolves a collection/global document subview from route segments and returns
  * its `MetaConfig`. Shared by all framework adapters — segment-routing logic
  * lives here so adapters do not duplicate it.
+ *
+ * @internal
  */
 export const getMetaBySegment = async ({
   adminViews,

@@ -7,7 +7,7 @@ import * as qs from 'qs-esm'
 import React from 'react'
 
 /* eslint-disable payload/no-imports-from-exports-dir -- Server component must reference exports/client bundle for proper client boundary in prod builds */
-import { NotFoundClient, PageConfigProvider } from '../../exports/client/index.js'
+import { NotFoundClient, PageConfigProvider } from '../../exports/client/internal.js'
 /* eslint-enable payload/no-imports-from-exports-dir */
 import { DefaultTemplate } from '../../templates/Default/index.js'
 import { getClientConfig } from '../../utilities/getClientConfig.js'
@@ -21,6 +21,7 @@ type InitReqFn = (args: {
   overrides?: Parameters<typeof createLocalReq>[0]
 }) => Promise<InitReqResult>
 
+/** @internal */
 export type RenderNotFoundPageArgs = {
   config: Promise<SanitizedConfig>
   importMap: ImportMap
@@ -29,6 +30,7 @@ export type RenderNotFoundPageArgs = {
   searchParams: Promise<{ [key: string]: string | string[] }>
 }
 
+/** @internal */
 export const renderNotFoundPage = async ({
   config: configPromise,
   importMap,

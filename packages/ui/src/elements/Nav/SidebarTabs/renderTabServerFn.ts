@@ -3,15 +3,18 @@ import type React from 'react'
 
 import { RenderServerComponent } from '../../RenderServerComponent/index.js'
 
+/** @internal */
 export type RenderTabServerFnArgs = {
   searchParams?: Record<string, unknown>
   tabSlug: string
 }
 
+/** @internal */
 export type RenderTabServerFnReturnType = {
   component: React.ReactNode
 }
 
+/** @internal */
 export const renderTabHandler: ServerFunction<
   RenderTabServerFnArgs,
   RenderTabServerFnReturnType

@@ -11,6 +11,7 @@ import type {
 import { getClientConfig } from '../../utilities/getClientConfig.js'
 import { renderListView } from './index.js'
 
+/** @internal */
 export const renderListHandler: ServerFunction<
   RenderListServerFnArgs,
   Promise<RenderListServerFnReturnType>

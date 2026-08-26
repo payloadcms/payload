@@ -51,7 +51,7 @@ export function createFolderField(options: CreateFolderFieldOptions): Relationsh
       ...restAdminOverrides,
       components: {
         // NullField renders nothing - the header button handles the UI
-        Field: '@payloadcms/ui#NullField',
+        Field: '@payloadcms/ui/internal#NullField',
         ...componentOverrides,
       },
     },

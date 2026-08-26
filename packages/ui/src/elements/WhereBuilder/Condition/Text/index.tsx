@@ -7,6 +7,7 @@ import type { TextFilterProps as Props } from './types.js'
 import { useTranslation } from '../../../../providers/Translation/index.js'
 import { ReactSelect } from '../../../ReactSelect/index.js'
 
+/** @internal */
 export const Text: React.FC<Props> = (props) => {
   const { disabled, field, onChange, operator, value } = props
   const { i18n, t } = useTranslation()

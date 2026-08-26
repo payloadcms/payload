@@ -7,7 +7,6 @@ import {
   Button,
   Collapsible,
   Drawer,
-  EditDepthProvider,
   ErrorPill,
   Form,
   formatDrawerSlug,
@@ -16,7 +15,6 @@ import {
   Popup,
   PopupList,
   RenderFields,
-  SectionTitle,
   useConfig,
   useDocumentForm,
   useDocumentInfo,
@@ -26,6 +24,7 @@ import {
   useTranslation,
   XIcon,
 } from '@payloadcms/ui'
+import { EditDepthProvider, SectionTitle } from '@payloadcms/ui/internal'
 import { abortAndIgnore } from '@payloadcms/ui/shared'
 import { $getNodeByKey, $getRoot, SKIP_DOM_SELECTION_TAG } from 'lexical'
 import {
@@ -85,6 +84,7 @@ export type BlockComponentProps<TFormData extends Record<string, unknown> = Bloc
   readonly nodeKey: string
 }
 
+/** @internal */
 export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
   const {
     cacheBuster,

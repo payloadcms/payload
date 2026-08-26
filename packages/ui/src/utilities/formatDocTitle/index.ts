@@ -12,6 +12,7 @@ import { formatDate } from './formatDateTitle.js'
 import { formatLexicalDocTitle, isSerializedLexicalEditor } from './formatLexicalDocTitle.js'
 import { formatRelationshipTitle } from './formatRelationshipTitle.js'
 
+/** @internal */
 export const formatDocTitle = ({
   collectionConfig,
   data,

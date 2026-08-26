@@ -14,6 +14,7 @@ const CellPropsContext = React.createContext<DefaultCellComponentProps | null>(n
 
 export const useCellProps = (): DefaultCellComponentProps | null => React.use(CellPropsContext)
 
+/** @internal */
 export const RenderDefaultCell: React.FC<{
   clientProps: DefaultCellComponentProps
   columnIndex: number

@@ -4,6 +4,7 @@ import type { UploadInstructions } from './types.js'
 import { APIError } from '../errors/APIError.js'
 import { getStagedFile } from './stagedUpload.js'
 
+/** @internal */
 export const getFileFromUploadInstructions = async ({
   collectionSlug,
   file,

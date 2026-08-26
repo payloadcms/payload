@@ -10,8 +10,10 @@ import type { WidgetInstanceClient, WidgetItem } from '../index.client.js'
 
 import { RenderServerComponent } from '../../../../../elements/RenderServerComponent/index.js'
 
+/** @internal */
 export type GetDefaultLayoutServerFnArgs = Record<string, never>
 
+/** @internal */
 export type GetDefaultLayoutServerFnReturnType = {
   layout: WidgetInstanceClient[]
 }
@@ -19,6 +21,8 @@ export type GetDefaultLayoutServerFnReturnType = {
 /**
  * Server function to get the default dashboard layout on-demand.
  * Used when resetting the dashboard to its default configuration.
+ *
+ * @internal
  */
 export const getDefaultLayoutHandler: ServerFunction<
   GetDefaultLayoutServerFnArgs,

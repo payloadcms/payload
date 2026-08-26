@@ -9,6 +9,7 @@ import {
   type Where,
 } from 'payload'
 
+/** @internal */
 export const fetchVersion = async <TVersionData extends object = object>({
   id,
   collectionSlug,
@@ -60,6 +61,7 @@ export const fetchVersion = async <TVersionData extends object = object>({
   }
 }
 
+/** @internal */
 export const fetchVersions = async <TVersionData extends object = object>({
   collectionSlug,
   depth,
@@ -138,6 +140,7 @@ export const fetchVersions = async <TVersionData extends object = object>({
   }
 }
 
+/** @internal */
 export const fetchLatestVersion = async <TVersionData extends object = object>({
   collectionSlug,
   depth,

@@ -1,7 +1,7 @@
 import type { ServerFunction } from 'payload'
 
 import { renderTabHandler } from '../elements/Nav/SidebarTabs/renderTabServerFn.js'
-import { _internal_renderFieldHandler } from '../forms/fieldSchemasToFormState/serverFunctions/renderFieldServerFn.js'
+import { renderFieldHandler } from '../forms/fieldSchemasToFormState/serverFunctions/renderFieldServerFn.js'
 import { getDefaultLayoutHandler, renderWidgetHandler } from '../views/Dashboard/serverFunctions.js'
 import { renderDocumentHandler } from '../views/Document/handleServerFunction.js'
 import { renderDocumentSlotsHandler } from '../views/Document/renderDocumentSlots.js'
@@ -30,6 +30,8 @@ import { switchLanguageHandler } from './switchLanguageHandler.js'
  * Start adapter passes a `transformResult` (`serializeForRsc`) to
  * `createServerFunctionHandler` that converts elements into
  * `renderServerComponent` handles.
+ *
+ * @internal
  */
 export const sharedServerFunctions: Record<string, ServerFunction<any, any>> = {
   'copy-data-from-locale': copyDataFromLocaleHandler,
@@ -38,7 +40,7 @@ export const sharedServerFunctions: Record<string, ServerFunction<any, any>> = {
   'get-upcoming-scheduled-publish': getUpcomingScheduledPublishHandler,
   'render-document': renderDocumentHandler,
   'render-document-slots': renderDocumentSlotsHandler,
-  'render-field': _internal_renderFieldHandler,
+  'render-field': renderFieldHandler,
   'render-list': renderListHandler,
   'render-tab': renderTabHandler,
   'render-widget': renderWidgetHandler,

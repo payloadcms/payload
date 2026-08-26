@@ -22,6 +22,7 @@ export type PublishManyProps = {
   where?: Where
 }
 
+/** @internal */
 export const PublishMany: React.FC<PublishManyProps> = (props) => {
   const {
     collection,

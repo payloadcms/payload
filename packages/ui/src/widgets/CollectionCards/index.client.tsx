@@ -15,6 +15,7 @@ import { useTranslation } from '../../providers/Translation/index.js'
 
 const baseClass = 'collections'
 
+/** @internal */
 export const CollectionCardsClient: React.FC<CollectionCardsData> = ({
   adminRoute,
   globalData,

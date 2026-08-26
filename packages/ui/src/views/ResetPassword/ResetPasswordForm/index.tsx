@@ -22,6 +22,7 @@ type Args = {
   readonly token: string
 }
 
+/** @internal */
 export const ResetPasswordForm: React.FC<Args> = ({ token }) => {
   const i18n = useTranslation()
   const {

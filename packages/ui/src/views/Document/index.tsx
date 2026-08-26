@@ -22,7 +22,7 @@ import {
   EditDepthProvider,
   HydrateAuthProvider,
   LivePreviewProvider,
-} from '../../exports/client/index.js'
+} from '../../exports/client/internal.js'
 /* eslint-enable payload/no-imports-from-exports-dir */
 import { buildFormState } from '../../utilities/buildFormState.js'
 import { getDocPreferences } from '../../utilities/getDocPreferences.js'
