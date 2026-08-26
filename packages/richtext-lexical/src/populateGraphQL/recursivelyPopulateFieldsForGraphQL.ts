@@ -1,4 +1,4 @@
-import type { Field, JsonObject, PayloadRequest, RequestContext } from 'payload'
+import type { Field, JsonObject, PayloadRequest, ReadVersion, RequestContext } from 'payload'
 
 import { afterReadTraverseFields } from 'payload'
 
@@ -9,7 +9,6 @@ type NestedRichTextFieldsArgs = {
   currentDepth?: number
   data: unknown
   depth: number
-  draft: boolean
   /**
    * This maps all the population promises to the node types
    */
@@ -27,6 +26,7 @@ type NestedRichTextFieldsArgs = {
   req: PayloadRequest
   showHiddenFields: boolean
   siblingDoc: JsonObject
+  version?: ReadVersion
 }
 
 export const recursivelyPopulateFieldsForGraphQL = ({
@@ -34,7 +34,6 @@ export const recursivelyPopulateFieldsForGraphQL = ({
   currentDepth = 0,
   data,
   depth,
-  draft,
   fieldPromises,
   fields,
   findMany,
@@ -45,6 +44,7 @@ export const recursivelyPopulateFieldsForGraphQL = ({
   req,
   showHiddenFields,
   siblingDoc,
+  version,
 }: NestedRichTextFieldsArgs): void => {
   afterReadTraverseFields({
     collection: null, // Pass from core? This is only needed for hooks, so we can leave this null for now
@@ -52,7 +52,7 @@ export const recursivelyPopulateFieldsForGraphQL = ({
     currentDepth,
     depth,
     doc: data as any, // Looks like it's only needed for hooks and access control, so doesn't matter what we pass here right now
-    draft,
+    draft: version === 'latest' || version === 'draft',
     fallbackLocale: req.fallbackLocale!,
     fieldPromises,
     fields,
@@ -70,5 +70,6 @@ export const recursivelyPopulateFieldsForGraphQL = ({
     showHiddenFields,
     siblingDoc,
     triggerHooks: false,
+    version: version ?? 'published',
   })
 }

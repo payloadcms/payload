@@ -7,7 +7,7 @@ import type { Breadcrumb, NestedDocsPluginConfig } from '../types.js'
 
 export const resaveSelfAfterCreate =
   (pluginConfig: NestedDocsPluginConfig): CollectionAfterChangeHook =>
-  async ({ collection, doc, operation, req }) => {
+  async ({ action, collection, doc, operation, req }) => {
     if (operation !== 'create') {
       return undefined
     }
@@ -19,6 +19,9 @@ export const resaveSelfAfterCreate =
     try {
       await payload.update({
         id: doc.id,
+        ...(collection?.versions?.drafts
+          ? { action: action === 'saveDraft' ? 'saveDraft' : 'publish' }
+          : {}),
         collection: collection.slug,
         data: {
           [breadcrumbSlug]:
@@ -28,7 +31,6 @@ export const resaveSelfAfterCreate =
             })) || [],
         },
         depth: 0,
-        draft: collection?.versions?.drafts && doc._status !== 'published',
         locale,
         req,
       })

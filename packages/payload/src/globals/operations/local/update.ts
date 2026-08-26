@@ -9,8 +9,8 @@ import type {
 import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
 import type {
   DataFromGlobalSlug,
-  DraftFlagFromGlobalSlug,
   SelectFromGlobalSlug,
+  UpdateActionFromGlobalSlug,
 } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
@@ -27,6 +27,11 @@ import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { updateOperation } from '../update.js'
 
 type BaseOptions<TSlug extends GlobalSlug, TSelect extends SelectType> = {
+  /**
+   * Whether the current update should be marked as from autosave.
+   * `versions.drafts.autosave` should be specified.
+   */
+  autosave?: boolean
   /**
    * [Context](https://payloadcms.com/docs/hooks/context), which will then be passed to `context` and `req.context`,
    * which can be read by hooks. Useful if you want to pass additional information to the hooks which
@@ -102,7 +107,7 @@ export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> = Base
   TSlug,
   TSelect
 > &
-  DraftFlagFromGlobalSlug<TSlug>
+  UpdateActionFromGlobalSlug<TSlug>
 
 export async function updateGlobalLocal<
   TSlug extends GlobalSlug,
@@ -113,9 +118,10 @@ export async function updateGlobalLocal<
 ): Promise<TransformGlobalWithSelect<TSlug, TSelect>> {
   const {
     slug: globalSlug,
+    action,
+    autosave,
     data,
     depth,
-    draft,
     overrideAccess = true,
     overrideLock,
     populate,
@@ -133,9 +139,10 @@ export async function updateGlobalLocal<
 
   return updateOperation<TSlug, TSelect>({
     slug: globalSlug as string,
+    action,
+    autosave,
     data: deepCopyObjectSimple(data), // Ensure mutation of data in create operation hooks doesn't affect the original data
     depth,
-    draft,
     globalConfig,
     overrideAccess,
     overrideLock,

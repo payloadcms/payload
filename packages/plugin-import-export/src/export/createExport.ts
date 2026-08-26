@@ -185,7 +185,6 @@ export const createExport = async (args: CreateExportArgs) => {
   const findArgs = {
     collection: collectionSlug,
     depth: 1,
-    draft,
     limit: batchSize,
     locale,
     overrideAccess: false,
@@ -193,6 +192,7 @@ export const createExport = async (args: CreateExportArgs) => {
     select,
     sort,
     user,
+    version: draft ? ('latest' as const) : ('published' as const),
     where,
   }
 

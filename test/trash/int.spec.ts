@@ -947,7 +947,7 @@ describe('trash', () => {
             title: '', // Empty required field
             _status: 'draft',
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         expect(draftDoc.title).toBe('')
@@ -960,6 +960,7 @@ describe('trash', () => {
           data: {
             deletedAt: new Date().toISOString(),
           },
+          action: 'saveDraft',
         })
 
         expect(trashedDoc.deletedAt).toBeDefined()
@@ -982,7 +983,7 @@ describe('trash', () => {
             title: '', // Empty required field
             _status: 'draft',
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         // Trash it
@@ -992,6 +993,7 @@ describe('trash', () => {
           data: {
             deletedAt: new Date().toISOString(),
           },
+          action: 'saveDraft',
         })
 
         // Should be able to restore as draft without validation errors
@@ -1025,7 +1027,7 @@ describe('trash', () => {
             title: '', // Empty required field
             _status: 'draft',
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         // Trash it
@@ -1035,6 +1037,7 @@ describe('trash', () => {
           data: {
             deletedAt: new Date().toISOString(),
           },
+          action: 'saveDraft',
         })
 
         // Should NOT be able to restore as published - should fail validation
@@ -1172,7 +1175,7 @@ describe('trash', () => {
           localizedField: localizedFieldValueEN,
           _status: 'draft',
         },
-        draft: true,
+        action: 'saveDraft',
       })
 
       await payload.update({
@@ -1183,7 +1186,7 @@ describe('trash', () => {
           localizedField: localizedFieldValueES,
           _status: 'draft',
         },
-        draft: true,
+        action: 'saveDraft',
       })
 
       // Bulk trash the document (simulates list view "Move to Trash")
@@ -1193,6 +1196,7 @@ describe('trash', () => {
         data: {
           deletedAt: new Date().toISOString(),
         },
+        action: 'saveDraft',
         where: {
           id: {
             equals: post.id,
@@ -1208,7 +1212,7 @@ describe('trash', () => {
         collection: postsSlug,
         id: post.id,
         locale: 'en',
-        draft: true,
+        version: 'latest',
         trash: true,
       })
 
@@ -1216,7 +1220,7 @@ describe('trash', () => {
         collection: postsSlug,
         id: post.id,
         locale: 'es',
-        draft: true,
+        version: 'latest',
         trash: true,
       })
 

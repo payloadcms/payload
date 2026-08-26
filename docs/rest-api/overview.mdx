@@ -36,6 +36,8 @@ To enhance DX, you can use [Payload SDK](#payload-rest-api-sdk) to query your RE
 - [sort](../queries/sort#rest-api) - specifies the field(s) to use to sort the returned documents by
 - [where](../queries/overview) - specifies advanced filters to use to query documents
 - [joins](/docs/fields/join#rest-api) - specifies the custom request for each join field by name of the field
+- [version](/docs/versions/drafts#reading-with-version) - `'published'`, `'latest'`, or `'draft'` on read operations
+- [action](/docs/versions/drafts#writing-with-action) - `saveDraft`, `publish`, or `unpublish` on write operations
 
 ## Collections
 
@@ -851,7 +853,7 @@ const sdk = new PayloadSDK<Config>({
 // Find operation
 const posts = await sdk.find({
   collection: 'posts',
-  draft: true,
+  version: 'latest',
   limit: 10,
   locale: 'en',
   page: 1,
@@ -862,7 +864,7 @@ const posts = await sdk.find({
 const posts = await sdk.findByID({
   id,
   collection: 'posts',
-  draft: true,
+  version: 'latest',
   locale: 'en',
 })
 

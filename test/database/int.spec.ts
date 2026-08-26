@@ -3813,7 +3813,7 @@ describe('database', () => {
       expect(found.docs[0].id).toBe(doc.id)
     })
 
-    it('should allow to query by virtual field 2x deep with draft:true', async () => {
+    it('should allow to query by virtual field 2x deep with version latest', async () => {
       await payload.delete({ collection: 'virtual-relations', where: {} })
       const category = await payload.create({
         collection: 'categories',
@@ -3826,7 +3826,7 @@ describe('database', () => {
       const doc = await payload.create({ collection: 'virtual-relations', data: { post: post.id } })
       const found = await payload.find({
         collection: 'virtual-relations',
-        draft: true,
+        version: 'latest',
         where: { postCategoryTitle: { equals: '3-category' } },
       })
       expect(found.docs).toHaveLength(1)
@@ -4711,14 +4711,14 @@ describe('database', () => {
     }
   })
 
-  it('should allow to query like by ID with draft: true', async () => {
+  it('should allow to query like by ID with version latest', async () => {
     const category = await payload.create({
       collection: 'categories',
       data: { title: 'category123' },
     })
     const res = await payload.find({
       collection: 'categories',
-      draft: true,
+      version: 'latest',
       where: { id: { like: typeof category.id === 'number' ? `${category.id}` : category.id } },
     })
     expect(res.docs).toHaveLength(1)
@@ -6036,7 +6036,7 @@ describe('database', () => {
         const doc = await payload.create({
           collection: 'categories',
           data: { name: `Category ${i}` },
-          draft: true,
+          action: 'saveDraft',
         })
         createdIds.push(doc.id)
       }
@@ -6048,7 +6048,7 @@ describe('database', () => {
       const resultsNoSort = await payload.find({
         collection: 'categories',
         limit: 10,
-        draft: true,
+        version: 'latest',
         // No sort parameter
       })
 

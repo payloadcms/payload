@@ -2,11 +2,13 @@ import type { SanitizedCollectionConfig } from '../../../collections/config/type
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
 import type { RequestContext } from '../../../index.js'
 import type { JsonObject, PayloadRequest } from '../../../types/index.js'
+import type { WriteAction } from '../../../versions/actions/types.js'
 import type { Field, TabAsField } from '../../config/types.js'
 
 import { promise } from './promise.js'
 
 type Args = {
+  action?: WriteAction
   /**
    * Data of the nearest parent block. If no parent block exists, this will be the `undefined`
    */
@@ -34,6 +36,7 @@ type Args = {
 }
 
 export const traverseFields = async ({
+  action,
   blockData,
   collection,
   context,
@@ -58,6 +61,7 @@ export const traverseFields = async ({
   fields.forEach((field, fieldIndex) => {
     promises.push(
       promise({
+        action,
         blockData,
         collection,
         context,

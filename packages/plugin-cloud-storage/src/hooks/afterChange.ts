@@ -9,17 +9,23 @@ interface Args {
   collection: CollectionConfig
 }
 
+type CloudStorageDocument = {
+  _status?: 'draft' | 'published' | Record<string, 'draft' | 'published'>
+} & FileData &
+  TypeWithID
+
 export const getAfterChangeHook =
-  ({ adapter, collection }: Args): CollectionAfterChangeHook<FileData & TypeWithID> =>
-  async ({ doc, operation, previousDoc, req }) => {
+  ({ adapter, collection }: Args): CollectionAfterChangeHook<CloudStorageDocument> =>
+  async ({ action, doc, operation, previousDoc, req }) => {
     // Skip if this is an internal update to prevent infinite loop
     if (req.context?.skipCloudStorage) {
       return doc
     }
 
-    const isDraftSave = (doc as { _status?: string })._status === 'draft'
+    const isDraftSave = action === 'saveDraft'
     const isDraftOverPublished =
       isDraftSave && (previousDoc as { _status?: string } | undefined)?._status === 'published'
+    const metadataAction = action === 'saveDraft' || action === 'unpublish' ? action : 'publish'
 
     try {
       const files = getIncomingFiles({ data: doc, req })
@@ -63,17 +69,24 @@ export const getAfterChangeHook =
           try {
             await req.payload.update({
               id: doc.id,
+              action: metadataAction,
               collection: collection.slug,
               data: uploadMetadata,
               depth: 0,
-              draft: isDraftSave,
               req,
             })
           } finally {
             delete req.context.skipCloudStorage
           }
 
-          docWithMetadata = { ...doc, ...uploadMetadata }
+          // Adapters often spread the incoming document into their return value,
+          // which can include `_status`. Keep the status from this write so a
+          // saveDraft cannot be reported as published.
+          docWithMetadata = {
+            ...doc,
+            ...uploadMetadata,
+            ...(doc._status !== undefined ? { _status: doc._status } : {}),
+          }
         }
 
         // Delete previous files only after the new upload and metadata

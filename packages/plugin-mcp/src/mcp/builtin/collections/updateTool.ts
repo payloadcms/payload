@@ -32,6 +32,12 @@ export const updateDocumentTool = defineCollectionTool({
   description: DEFAULT_DESCRIPTION,
   input: z.object({
     id: z.union([z.string(), z.number()]).describe('The ID of the document to update').optional(),
+    action: z
+      .enum(['saveDraft', 'publish', 'unpublish'])
+      .describe(
+        'Only if getCollectionSchema includes _status; otherwise _status does not exist. saveDraft saves a draft version; publish updates the published document; unpublish unpublishes. When omitted, recognized data._status infers the action, otherwise update defaults to publish.',
+      )
+      .optional(),
     data: z
       .record(z.string(), z.unknown())
       .describe(
@@ -42,13 +48,6 @@ export const updateDocumentTool = defineCollectionTool({
       .describe('How many levels deep to populate relationships')
       .optional()
       .default(0),
-    draft: z
-      .boolean()
-      .describe(
-        'Only if getCollectionSchema includes _status; otherwise _status does not exist. true saves only a draft version; false updates main and versions. data._status: "published" overrides true.',
-      )
-      .optional()
-      .default(false),
     fallbackLocale: z
       .string()
       .describe('Optional: fallback locale code to use when requested locale is not available')
@@ -94,9 +93,9 @@ export const updateDocumentTool = defineCollectionTool({
 
   const {
     id,
+    action,
     data,
     depth,
-    draft,
     fallbackLocale,
     file: fileInput,
     locale,
@@ -108,7 +107,7 @@ export const updateDocumentTool = defineCollectionTool({
   } = input
 
   logger.info(
-    `Updating document in collection: ${collectionSlug}${id ? ` with ID: ${id}` : ' with where clause'}, draft: ${draft}${locale ? `, locale: ${locale}` : ''}`,
+    `Updating document in collection: ${collectionSlug}${id ? ` with ID: ${id}` : ' with where clause'}, action: ${action}${locale ? `, locale: ${locale}` : ''}`,
   )
 
   try {
@@ -142,10 +141,10 @@ export const updateDocumentTool = defineCollectionTool({
         collection: collectionSlug,
         data: parsedData,
         depth,
-        draft,
         overrideAccess: authorizedMCP.overrideAccess,
         overrideLock,
         req,
+        ...(action ? { action } : {}),
         ...(file ? { file } : {}),
         ...(overwriteExistingFiles ? { overwriteExistingFiles } : {}),
         ...(publishAllLocales !== undefined ? { publishAllLocales } : {}),
@@ -169,11 +168,11 @@ export const updateDocumentTool = defineCollectionTool({
       collection: collectionSlug,
       data: parsedData,
       depth,
-      draft,
       overrideAccess: authorizedMCP.overrideAccess,
       overrideLock,
       req,
       where: whereClause,
+      ...(action ? { action } : {}),
       ...(file ? { file } : {}),
       ...(overwriteExistingFiles ? { overwriteExistingFiles } : {}),
       ...(publishAllLocales !== undefined ? { publishAllLocales } : {}),

@@ -240,43 +240,107 @@ export const Pages: CollectionConfig = {
 }
 ```
 
-### Draft API Usage
+### Version and action APIs
+
+Reads use `version`. Writes use `action`. There is no public `draft` boolean on operations. `_status` stays on documents and in write `data`.
 
 ```ts
-// Create draft
+// Create draft (create/duplicate default is saveDraft when action and _status are omitted)
 await payload.create({
   collection: 'posts',
   data: { title: 'Draft Post' },
-  draft: true, // Saves as draft, skips required field validation
+  action: 'saveDraft',
 })
 
-// Update as draft
+// Publish (update/restore default is publish when action and _status are omitted)
 await payload.update({
   collection: 'posts',
   id: '123',
-  data: { title: 'Updated Draft' },
-  draft: true,
+  data: { title: 'Published Post' },
+  action: 'publish',
 })
 
-// Read with drafts (returns newest draft if available)
-const post = await payload.findByID({
+// Unpublish — explicit action only; `_status: 'draft'` infers saveDraft, never unpublish
+await payload.update({
   collection: 'posts',
   id: '123',
-  draft: true, // Returns draft version if exists
+  action: 'unpublish',
 })
 
-// Query only published (REST API)
-// GET /api/posts (returns only _status: 'published')
+// Reads
+await payload.findByID({ collection: 'posts', id: '123' }) // published (default)
+await payload.findByID({ collection: 'posts', id: '123', version: 'latest' }) // newest draft, else published
+await payload.findByID({ collection: 'posts', id: '123', version: 'draft' }) // draft only, no fallback
 
-// Access control for drafts
+// REST
+// GET /api/posts?version=latest
+// POST /api/posts?action=saveDraft
+// PATCH /api/posts/123?action=publish
+
+// GraphQL
+// query { Posts(version: latest) { docs { title } } }
+// mutation { createPost(data: { title: "Draft" }, action: saveDraft) { title } }
+
+// SDK
+await sdk.find({ collection: 'posts', version: 'latest' })
+```
+
+**Read matrix**
+
+| `version`               | Result                                       |
+| ----------------------- | -------------------------------------------- |
+| omitted / `'published'` | Published main document                      |
+| `'latest'`              | Newest draft if present, otherwise published |
+| `'draft'`               | Newest draft only; empty / not-found if none |
+
+**Write matrix** — precedence is explicit `action`, then recognized `_status`, then operation default. Action always wins; core canonicalizes persisted `_status` from the effective action.
+
+| Operation          | Allowed actions                     | Default     |
+| ------------------ | ----------------------------------- | ----------- |
+| Create / duplicate | `saveDraft`, `publish`              | `saveDraft` |
+| Update             | `saveDraft`, `publish`, `unpublish` | `publish`   |
+| Restore            | `saveDraft`, `publish`              | `publish`   |
+
+`_status: 'draft'` infers `saveDraft`. `_status: 'published'` infers `publish`. Localized `_status` uses the active write locale. Non-draft collections accept omitted/`publish` only; `saveDraft`/`unpublish` throw. `afterChange.action` is the resolved action, or `undefined` without drafts.
+
+Local API and SDK types are always strict. `typescript.strictDraftTypes` is gone — do not add a replacement flag.
+
+**Codemod will not rewrite these — migrate by hand:**
+
+```ts
+// Dynamic write
+await payload.update({
+  collection: 'posts',
+  id,
+  data,
+  action: shouldSaveDraft ? 'saveDraft' : 'publish',
+})
+
+// Preview read from Next.js draftMode
+const { isEnabled: isDraftMode } = await draftMode()
+await payload.find({ collection: 'pages', version: isDraftMode ? 'latest' : 'published' })
+
+// Update that used to pass draft: false without _status — old behavior depended on existing state.
+// Pick explicit action: 'publish' | 'saveDraft' | 'unpublish'.
+```
+
+**Search checklist for leftover `draft` operation arguments:**
+
+```sh
+rg -n "draft:\\s*(true|false)|draft:\\s*\\w|[?&]draft=|strictDraftTypes" src
+```
+
+Do not rewrite `versions.drafts`, document `_status: 'draft'`, or UI "Save Draft" copy. Those are still correct.
+
+Access control still uses `_status`, not `version`:
+
+```ts
 export const Posts: CollectionConfig = {
   slug: 'posts',
   versions: { drafts: true },
   access: {
     read: ({ req: { user } }) => {
-      // Public can only see published
       if (!user) return { _status: { equals: 'published' } }
-      // Authenticated can see all
       return true
     },
   },

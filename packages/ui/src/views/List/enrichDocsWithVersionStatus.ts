@@ -2,7 +2,7 @@ import type { PaginatedDocs, PayloadRequest, SanitizedCollectionConfig } from 'p
 
 /**
  * Enriches list view documents with correct draft status display.
- * When draft=true is used in the query, Payload returns the latest draft version if it exists.
+ * When version=latest is used in the query, Payload returns the newest draft if it exists.
  * This function checks if draft documents also have a published version to determine "changed" status.
  *
  * Performance: Uses a single query to find all documents with "changed" status instead of N queries.
@@ -23,7 +23,7 @@ export async function enrichDocsWithVersionStatus({
   }
 
   // Find all draft documents
-  // When querying with draft:true, we get the latest draft if it exists
+  // When querying with version: 'latest', we get the newest draft if it exists
   // We need to check if these drafts have a published version
   const draftDocs = data.docs.filter((doc) => doc._status === 'draft')
 

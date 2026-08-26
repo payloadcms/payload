@@ -28,6 +28,12 @@ export const duplicateDocumentTool = defineCollectionTool({
   description: DEFAULT_DESCRIPTION,
   input: z.object({
     id: z.union([z.string(), z.number()]).describe('The ID of the document to duplicate'),
+    action: z
+      .enum(['saveDraft', 'publish'])
+      .describe(
+        'Whether to duplicate as a draft (saveDraft) or publish the duplicate (publish). When omitted, recognized data._status infers the action, otherwise duplicate defaults to saveDraft.',
+      )
+      .optional(),
     data: z
       .record(z.string(), z.unknown())
       .describe('Optional: fields to override on the duplicated document')
@@ -40,11 +46,6 @@ export const duplicateDocumentTool = defineCollectionTool({
       .describe('How many levels deep to populate relationships in response')
       .optional()
       .default(0),
-    draft: z
-      .boolean()
-      .describe('Whether to create the duplicate as a draft')
-      .optional()
-      .default(false),
     fallbackLocale: z
       .string()
       .describe('Optional: fallback locale code to use when requested locale is not available')
@@ -81,9 +82,9 @@ export const duplicateDocumentTool = defineCollectionTool({
   const logger = getLogger({ payload })
   const {
     id,
+    action,
     data,
     depth,
-    draft,
     fallbackLocale,
     locale,
     populate,
@@ -103,9 +104,9 @@ export const duplicateDocumentTool = defineCollectionTool({
       id,
       collection: collectionSlug,
       depth,
-      draft,
       overrideAccess: authorizedMCP.overrideAccess,
       req,
+      ...(action ? { action } : {}),
       ...(parsedData ? { data: parsedData } : {}),
       ...(locale ? { locale } : {}),
       ...(fallbackLocale ? { fallbackLocale } : {}),

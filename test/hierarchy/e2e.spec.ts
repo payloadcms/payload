@@ -454,7 +454,7 @@ test.describe('Hierarchy Sidebar', () => {
       test.afterEach(async () => {
         const createdOrganizations = await payload.find({
           collection: 'organizations',
-          draft: true,
+          version: 'latest',
           where: { title: { equals: organizationTitle } },
         })
 
@@ -495,7 +495,7 @@ test.describe('Hierarchy Sidebar', () => {
             const autosavedOrganizations = await payload.find({
               collection: 'organizations',
               depth: 0,
-              draft: true,
+              version: 'latest',
               where: { title: { equals: organizationTitle } },
             })
 

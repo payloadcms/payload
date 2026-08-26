@@ -557,7 +557,7 @@ export const baseConfig: Partial<Config> = {
         content: 'Initial content',
         title: 'Document With Many Versions',
       },
-      draft: true,
+      action: 'saveDraft',
     })
 
     for (let i = 0; i < 20; i++) {
@@ -754,7 +754,7 @@ export const baseConfig: Partial<Config> = {
         title: 'Designing Database Indexes for Search',
         track: 'backend',
       },
-      draft: true,
+      action: 'saveDraft',
     })
 
     // Seed drawers collection: a couple of docs linked via the

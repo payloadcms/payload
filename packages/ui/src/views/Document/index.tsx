@@ -289,7 +289,7 @@ export const renderDocument = async ({
   const formattedParams = new URLSearchParams()
 
   if (hasDraftsEnabled(collectionConfig || globalConfig)) {
-    formattedParams.append('draft', 'true')
+    formattedParams.append('version', 'latest')
   }
 
   if (locale?.code) {
@@ -354,10 +354,10 @@ export const renderDocument = async ({
 
   if (shouldAutosave && !validateDraftData && !idFromArgs && collectionSlug) {
     doc = await payload.create({
+      action: 'saveDraft',
       collection: collectionSlug,
       data: initialData || {},
       depth: 0,
-      draft: true,
       fallbackLocale: false,
       locale: locale?.code,
       req,

@@ -23,7 +23,7 @@ export default async function Page({ params: paramsPromise }: PageParams) {
 
   const pageRes = await payload.find({
     collection: 'pages',
-    draft: true,
+    version: 'latest',
     limit: 1,
     where: {
       slug: {
@@ -56,7 +56,7 @@ export async function generateStaticParams() {
   const pagesRes = await payload.find({
     collection: 'pages',
     depth: 0,
-    draft: true,
+    version: 'latest',
     limit: 100,
   })
 

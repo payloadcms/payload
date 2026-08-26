@@ -5,6 +5,7 @@ const dirname = path.dirname(filename)
 import { APIError, type SanitizedConfig } from 'payload'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
+import { AfterChangeActionCollection } from './collections/AfterChangeAction/index.js'
 import { AfterOperationCollection } from './collections/AfterOperation/index.js'
 import { AfterReadCollection } from './collections/AfterRead/index.js'
 import { BeforeChangeHooks } from './collections/BeforeChange/index.js'
@@ -25,6 +26,7 @@ import Relations from './collections/Relations/index.js'
 import TransformHooks from './collections/Transform/index.js'
 import Users, { seedHooksUsers } from './collections/Users/index.js'
 import { ValueCollection } from './collections/Value/index.js'
+import { AfterChangeActionGlobal } from './globals/AfterChangeAction/index.js'
 import { DataHooksGlobal } from './globals/Data/index.js'
 
 export const HooksConfig: Promise<SanitizedConfig> = buildConfigWithDefaults({
@@ -42,6 +44,7 @@ export const HooksConfig: Promise<SanitizedConfig> = buildConfigWithDefaults({
     TransformHooks,
     Hooks,
     NestedAfterReadHooks,
+    AfterChangeActionCollection,
     NestedAfterChangeHooks,
     ChainingHooks,
     Relations,
@@ -53,7 +56,7 @@ export const HooksConfig: Promise<SanitizedConfig> = buildConfigWithDefaults({
     AfterReadCollection,
     OverrideAccessCollection,
   ],
-  globals: [DataHooksGlobal],
+  globals: [AfterChangeActionGlobal, DataHooksGlobal],
   endpoints: [
     {
       path: '/throw-to-after-error',

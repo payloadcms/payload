@@ -24,6 +24,7 @@ import {
   mediaWithThrowingHookSlug,
   prefix,
   restrictedMediaSlug,
+  testMetadataDraftsSlug,
   testMetadataSlug,
 } from './shared.js'
 import { clearTestBucket, createTestBucket } from './utils.js'
@@ -553,10 +554,12 @@ describe('@payloadcms/plugin-cloud-storage', () => {
 
       afterEach(async () => {
         for (const id of createdIDs) {
-          try {
-            await payload.delete({ id, collection: testMetadataSlug })
-          } catch (e) {
-            // Ignore
+          for (const collection of [testMetadataSlug, testMetadataDraftsSlug]) {
+            try {
+              await payload.delete({ id, collection })
+            } catch (e) {
+              // Ignore
+            }
           }
         }
         createdIDs.length = 0
@@ -596,6 +599,64 @@ describe('@payloadcms/plugin-cloud-storage', () => {
           uploadTimestamp: upload.uploadTimestamp,
           uploadVersion: upload.uploadVersion,
         })
+      })
+
+      it('should persist adapter metadata with afterChange.action even when document _status conflicts', async () => {
+        const upload = await payload.create({
+          action: 'saveDraft',
+          collection: testMetadataDraftsSlug,
+          data: {
+            _status: 'draft',
+            testNote: 'Draft metadata must not be redirected by _status',
+          },
+          filePath: path.resolve(dirname, '../uploads/image.png'),
+        })
+
+        createdIDs.push(upload.id)
+
+        expect(upload._status).toBe('draft')
+        expect(upload.customStorageId).toBeTruthy()
+
+        const latest = await payload.findByID({
+          id: upload.id,
+          collection: testMetadataDraftsSlug,
+          version: 'latest',
+        })
+
+        expect(latest._status).toBe('draft')
+      })
+
+      it('should not republish when persisting metadata during unpublish', async () => {
+        const published = await payload.create({
+          action: 'publish',
+          collection: testMetadataDraftsSlug,
+          data: {
+            testNote: 'Published then unpublished',
+          },
+          filePath: path.resolve(dirname, '../uploads/image.png'),
+        })
+
+        createdIDs.push(published.id)
+
+        const unpublished = await payload.update({
+          id: published.id,
+          action: 'unpublish',
+          collection: testMetadataDraftsSlug,
+          data: {
+            testNote: 'Unpublished with a new file',
+          },
+          filePath: path.resolve(dirname, './image.png'),
+        })
+
+        expect(unpublished._status).toBe('draft')
+
+        const latest = await payload.findByID({
+          id: published.id,
+          collection: testMetadataDraftsSlug,
+          version: 'latest',
+        })
+
+        expect(latest._status).toBe('draft')
       })
 
       it('supports upload instructions when the adapter does not', async () => {

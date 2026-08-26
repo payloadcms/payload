@@ -29,6 +29,12 @@ export const createDocumentsTool = defineCollectionTool({
   },
   description: DEFAULT_DESCRIPTION,
   input: z.object({
+    action: z
+      .enum(['saveDraft', 'publish'])
+      .describe(
+        'Only if getCollectionSchema includes _status; otherwise _status does not exist. saveDraft saves a draft; publish publishes. When omitted, recognized data._status infers the action, otherwise create defaults to saveDraft.',
+      )
+      .optional(),
     depth: z
       .number()
       .int()
@@ -50,13 +56,6 @@ export const createDocumentsTool = defineCollectionTool({
       )
       .min(1)
       .describe('The documents to create, in order'),
-    draft: z
-      .boolean()
-      .describe(
-        'Only if getCollectionSchema includes _status; otherwise _status does not exist. true forces data._status to "draft"; with false, data._status controls draft or published.',
-      )
-      .optional()
-      .default(false),
     fallbackLocale: z
       .string()
       .describe('Optional: fallback locale code to use when requested locale is not available')
@@ -77,7 +76,7 @@ export const createDocumentsTool = defineCollectionTool({
 }).handler(async ({ authorizedMCP, collectionSlug, input, req }) => {
   const payload = req.payload
   const logger = getLogger({ payload })
-  const { depth, documents, draft, fallbackLocale, locale, select } = input
+  const { action, depth, documents, fallbackLocale, locale, select } = input
 
   logger.info(`Creating ${documents.length} documents in collection: ${collectionSlug}`)
 
@@ -119,9 +118,9 @@ export const createDocumentsTool = defineCollectionTool({
           collection: collectionSlug,
           data: parsedData,
           depth,
-          draft,
           overrideAccess: authorizedMCP.overrideAccess,
           req,
+          ...(action ? { action } : {}),
           ...(file ? { file } : {}),
           ...(locale ? { locale } : {}),
           ...(fallbackLocale ? { fallbackLocale } : {}),

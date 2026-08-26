@@ -9,9 +9,11 @@ import type {
   SelectType,
   Where,
 } from '../../types/index.js'
+import type { ReadVersion } from '../../versions/types.js'
 import type { SanitizedGlobalConfig } from '../config/types.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
+import { combineQueries } from '../../database/combineQueries.js'
 import { NotFound } from '../../errors/NotFound.js'
 import { afterRead, type AfterReadArgs } from '../../fields/hooks/afterRead/index.js'
 import { lockedDocumentsCollectionSlug } from '../../locked-documents/config.js'
@@ -19,7 +21,9 @@ import { getSelectMode } from '../../utilities/getSelectMode.js'
 import { hasDraftsEnabled } from '../../utilities/getVersionsConfig.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
-import { replaceWithDraftIfAvailable } from '../../versions/drafts/replaceWithDraftIfAvailable.js'
+import { getPublishedStatusWhere } from '../../versions/read/getPublishedStatusWhere.js'
+import { replaceWithVersion } from '../../versions/read/replaceWithVersion.js'
+import { isVersionedRead, resolveReadVersion } from '../../versions/resolveReadVersion.js'
 
 export type GlobalFindOneArgs = {
   /**
@@ -29,7 +33,6 @@ export type GlobalFindOneArgs = {
   data?: Record<string, unknown>
   depth?: number
   disableErrors?: boolean
-  draft?: boolean
   globalConfig: SanitizedGlobalConfig
   includeLockStatus?: boolean
   overrideAccess?: boolean
@@ -37,6 +40,7 @@ export type GlobalFindOneArgs = {
   req: PayloadRequest
   showHiddenFields?: boolean
   slug: string
+  version?: ReadVersion
 } & Pick<AfterReadArgs<JsonObject>, 'flattenLocales'> &
   Pick<FindOptions<string, SelectType>, 'select'>
 
@@ -47,7 +51,6 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
     slug,
     depth,
     disableErrors,
-    draft: replaceWithVersion = false,
     flattenLocales,
     globalConfig,
     includeLockStatus: includeLockStatusFromArgs,
@@ -57,10 +60,18 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
     req,
     select: incomingSelect,
     showHiddenFields,
+    version,
   } = args
 
   const includeLockStatus =
     includeLockStatusFromArgs && req.payload.collections?.[lockedDocumentsCollectionSlug]
+
+  const draftsEnabledOnGlobal = hasDraftsEnabled(globalConfig)
+  const readVersion = resolveReadVersion({
+    draftsEnabled: draftsEnabledOnGlobal,
+    version,
+  })
+  const queryVersions = isVersionedRead({ version: readVersion }) && draftsEnabledOnGlobal
 
   // /////////////////////////////////////
   // beforeOperation - Global
@@ -118,22 +129,42 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
 
   if (
     globalConfig.versions?.drafts &&
-    replaceWithVersion &&
+    queryVersions &&
     select &&
     getSelectMode(select) === 'include'
   ) {
     dbSelect = { ...select, createdAt: true, updatedAt: true }
   }
+  let where = overrideAccess ? undefined : (accessResult as Where)
+
+  if (readVersion === 'published' && draftsEnabledOnGlobal) {
+    where = combineQueries(
+      where!,
+      getPublishedStatusWhere({
+        entity: globalConfig,
+        locale: locale!,
+        payload: req.payload,
+      }),
+    )
+  }
+
   const docFromDB = await req.payload.db.findGlobal({
     slug,
     locale: locale!,
     req,
     select: dbSelect,
-    where: overrideAccess ? undefined : (accessResult as Where),
+    where,
   })
 
   // Check if no document was returned (Postgres returns {} instead of null)
   const hasDoc = docFromDB && Object.keys(docFromDB).length > 0
+
+  if (!hasDoc && !args.data && readVersion === 'published' && draftsEnabledOnGlobal) {
+    if (!disableErrors) {
+      throw new NotFound(req.t)
+    }
+    return null!
+  }
 
   if (!hasDoc && !args.data && !overrideAccess && accessResult !== true) {
     if (!disableErrors) {
@@ -192,20 +223,37 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
     doc._userEditing = lockStatus?.user?.value ?? null
   }
 
+  if (readVersion === 'draft' && !draftsEnabledOnGlobal) {
+    if (!disableErrors) {
+      throw new NotFound(req.t)
+    }
+    return null!
+  }
+
   // /////////////////////////////////////
-  // Replace document with draft if available
+  // Replace published document with the requested version
   // /////////////////////////////////////
 
-  if (replaceWithVersion && hasDraftsEnabled(globalConfig)) {
-    doc = await replaceWithDraftIfAvailable({
+  if (queryVersions) {
+    const versionedDoc = await replaceWithVersion({
       accessResult,
       doc,
       entity: globalConfig,
       entityType: 'global',
       overrideAccess,
+      policy: readVersion === 'draft' ? 'draft' : 'latest',
       req,
       select,
     })
+
+    if (!versionedDoc) {
+      if (!disableErrors) {
+        throw new NotFound(req.t)
+      }
+      return null!
+    }
+
+    doc = versionedDoc
   }
 
   // /////////////////////////////////////
@@ -247,7 +295,7 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
     context: req.context,
     depth: depth!,
     doc,
-    draft: replaceWithVersion,
+    draft: isVersionedRead({ version: readVersion }),
     fallbackLocale: fallbackLocale!,
     flattenLocales,
     global: globalConfig,
@@ -257,6 +305,7 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
     req,
     select,
     showHiddenFields: showHiddenFields!,
+    version: readVersion,
   })
 
   // /////////////////////////////////////
@@ -272,6 +321,7 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
           global: globalConfig,
           overrideAccess,
           req,
+          version: readVersion,
         })) || doc
     }
   }

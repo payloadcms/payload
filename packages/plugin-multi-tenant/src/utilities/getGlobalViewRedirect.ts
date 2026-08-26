@@ -165,12 +165,12 @@ async function generateCreateRedirect({
     // Autosave is enabled, create a document first
     try {
       const doc = await payload.create({
+        action: 'saveDraft',
         collection: collectionSlug,
         data: {
           tenant: tenantID,
         },
         depth: 0,
-        draft: true,
         select: {
           id: true,
         },

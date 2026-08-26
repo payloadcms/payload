@@ -16,6 +16,7 @@ import type {
   NumberField,
   PointField,
   RadioField,
+  ReadVersion,
   RelationshipField,
   RichTextAdapter,
   RichTextField,
@@ -53,7 +54,21 @@ import { formatOptions } from '../utilities/formatOptions.js'
 import { resolveSelect } from '../utilities/select.js'
 import { buildObjectType, type ObjectTypeConfig } from './buildObjectType.js'
 import { isFieldNullable } from './isFieldNullable.js'
+import { GraphQLReadVersion } from './versionActionEnums.js'
 import { withNullableType } from './withNullableType.js'
+
+function resolveFieldReadVersion(args: { version?: ReadVersion }, context: Context): ReadVersion {
+  if (args.version === 'published' || args.version === 'latest' || args.version === 'draft') {
+    return args.version
+  }
+
+  const queryVersion = context.req.query?.version
+  if (queryVersion === 'published' || queryVersion === 'latest' || queryVersion === 'draft') {
+    return queryVersion
+  }
+
+  return 'published'
+}
 
 function formattedNameResolver({
   field,
@@ -421,6 +436,7 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
         sort: {
           type: GraphQLString,
         },
+        version: { type: GraphQLReadVersion },
         where: {
           type: Array.isArray(field.collection)
             ? GraphQLJSON
@@ -436,7 +452,7 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
         const { count = false, limit, page, sort, where } = args
         const { req } = context
 
-        const draft = Boolean(args.draft ?? context.req.query?.draft)
+        const version = resolveFieldReadVersion(args, context)
         const select = resolveSelect(info, context.select)
 
         const targetField = (field as FlattenedJoinField).targetField
@@ -473,7 +489,6 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
         const { docs, totalDocs } = await req.payload.find({
           collection,
           depth: 0,
-          draft,
           fallbackLocale: req.fallbackLocale,
           // Fetch one extra document to determine if there are more documents beyond the requested limit (used for hasNextPage calculation).
           limit: typeof limit === 'number' && limit > 0 ? limit + 1 : 0,
@@ -484,6 +499,7 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
           req,
           select,
           sort,
+          version,
           where: fullWhere,
         })
 
@@ -634,22 +650,16 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
     type = type || newlyCreatedBlockType
 
     const relationshipArgs: {
-      draft: GraphQLArgumentConfig
       fallbackLocale: GraphQLArgumentConfig
       limit: GraphQLArgumentConfig
       locale: GraphQLArgumentConfig
       page: GraphQLArgumentConfig
+      version: GraphQLArgumentConfig
       where: GraphQLArgumentConfig
     } = {} as any
 
-    const relationsUseDrafts = (Array.isArray(relationTo) ? relationTo : [relationTo])
-      .filter((relation) => graphQLCollections.some((collection) => collection.slug === relation))
-      .some((relation) => graphqlResult.collections[relation].config.versions?.drafts)
-
-    if (relationsUseDrafts) {
-      relationshipArgs.draft = {
-        type: GraphQLBoolean,
-      }
+    relationshipArgs.version = {
+      type: GraphQLReadVersion,
     }
 
     if (config.localization) {
@@ -680,7 +690,7 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
         const locale = args.locale || context.req.locale
         const fallbackLocale = args.fallbackLocale || context.req.fallbackLocale
         let relatedCollectionSlug = field.relationTo
-        const draft = Boolean(args.draft ?? context.req.query?.draft)
+        const version = resolveFieldReadVersion(args, context)
         const select = resolveSelect(info, context.select)
 
         if (hasManyValues) {
@@ -706,13 +716,13 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
                   currentDepth: 0,
                   depth: 0,
                   docID: id,
-                  draft,
                   fallbackLocale,
                   locale,
                   overrideAccess: false,
                   select,
                   showHiddenFields: false,
                   transactionID: context.req.transactionID,
+                  version,
                 }),
               )
 
@@ -756,13 +766,13 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
                 currentDepth: 0,
                 depth: 0,
                 docID: id,
-                draft,
                 fallbackLocale,
                 locale,
                 overrideAccess: false,
                 select,
                 showHiddenFields: false,
                 transactionID: context.req.transactionID,
+                version,
               }),
             )
 
@@ -835,11 +845,11 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
           const populationPromises = []
           const populateDepth =
             field?.maxDepth !== undefined && field?.maxDepth < depth ? field?.maxDepth : depth
+          const version = resolveFieldReadVersion(args, context)
 
           editor?.graphQLPopulationPromises({
             context,
             depth: populateDepth,
-            draft: args.draft,
             field,
             fieldPromises,
             findMany: false,
@@ -850,6 +860,7 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
             req: context.req,
             showHiddenFields: false,
             siblingDoc: parent,
+            version,
           })
           await Promise.all(fieldPromises)
           await Promise.all(populationPromises)
@@ -1053,22 +1064,16 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
     type = type || newlyCreatedBlockType
 
     const relationshipArgs: {
-      draft?: GraphQLArgumentConfig
       fallbackLocale?: GraphQLArgumentConfig
       limit?: GraphQLArgumentConfig
       locale?: GraphQLArgumentConfig
       page?: GraphQLArgumentConfig
+      version?: GraphQLArgumentConfig
       where?: GraphQLArgumentConfig
     } = {} as any
 
-    const relationsUseDrafts = (Array.isArray(relationTo) ? relationTo : [relationTo]).some(
-      (relation) => graphqlResult.collections[relation].config.versions?.drafts,
-    )
-
-    if (relationsUseDrafts) {
-      relationshipArgs.draft = {
-        type: GraphQLBoolean,
-      }
+    relationshipArgs.version = {
+      type: GraphQLReadVersion,
     }
 
     if (config.localization) {
@@ -1099,7 +1104,7 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
         const locale = args.locale || context.req.locale
         const fallbackLocale = args.fallbackLocale || context.req.fallbackLocale
         let relatedCollectionSlug = field.relationTo
-        const draft = Boolean(args.draft ?? context.req.query?.draft)
+        const version = resolveFieldReadVersion(args, context)
         const select = resolveSelect(info, context.select)
 
         if (hasManyValues) {
@@ -1125,13 +1130,13 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
                   currentDepth: 0,
                   depth: 0,
                   docID: id,
-                  draft,
                   fallbackLocale,
                   locale,
                   overrideAccess: false,
                   select,
                   showHiddenFields: false,
                   transactionID: context.req.transactionID,
+                  version,
                 }),
               )
 
@@ -1175,13 +1180,13 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
                 currentDepth: 0,
                 depth: 0,
                 docID: id,
-                draft,
                 fallbackLocale,
                 locale,
                 overrideAccess: false,
                 select,
                 showHiddenFields: false,
                 transactionID: context.req.transactionID,
+                version,
               }),
             )
 

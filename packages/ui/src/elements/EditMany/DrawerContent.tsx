@@ -367,14 +367,14 @@ export const EditManyDrawerContent: React.FC<EditManyDrawerContentProps> = (prop
                   <SaveDraftButton
                     action={formatAdminURL({
                       apiRoute,
-                      path: `/${collection.slug}${queryString}&draft=true`,
+                      path: `/${collection.slug}${queryString}&action=saveDraft`,
                     })}
                     disabled={selectedFields.length === 0}
                   />
                   <PublishButton
                     action={formatAdminURL({
                       apiRoute,
-                      path: `/${collection.slug}${queryString}&draft=true`,
+                      path: `/${collection.slug}${queryString}&action=publish`,
                     })}
                     disabled={selectedFields.length === 0}
                   />

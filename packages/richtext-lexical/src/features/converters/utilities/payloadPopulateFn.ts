@@ -1,4 +1,10 @@
-import { createLocalReq, type Payload, type PayloadRequest, type TypedLocale } from 'payload'
+import {
+  createLocalReq,
+  type Payload,
+  type PayloadRequest,
+  type ReadVersion,
+  type TypedLocale,
+} from 'payload'
 
 import type { HTMLPopulateFn } from '../lexicalToHtml/async/types.js'
 
@@ -8,11 +14,11 @@ export const getPayloadPopulateFn: (
   args: {
     currentDepth: number
     depth: number
-    draft?: boolean
     locale?: TypedLocale
 
     overrideAccess?: boolean
     showHiddenFields?: boolean
+    version?: ReadVersion
   } & (
     | {
         /**
@@ -40,11 +46,11 @@ export const getPayloadPopulateFn: (
 ) => Promise<HTMLPopulateFn> = async ({
   currentDepth,
   depth,
-  draft,
   overrideAccess,
   payload,
   req,
   showHiddenFields,
+  version,
 }) => {
   let reqToUse: PayloadRequest | undefined = req
   if (req === undefined && payload) {
@@ -66,12 +72,12 @@ export const getPayloadPopulateFn: (
       currentDepth,
       data: dataContainer,
       depth,
-      draft: draft ?? false,
       key: 'value',
       overrideAccess: overrideAccess ?? true,
       req: reqToUse,
       select,
       showHiddenFields: showHiddenFields ?? false,
+      version,
     })
 
     return dataContainer.value

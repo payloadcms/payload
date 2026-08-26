@@ -1,4 +1,4 @@
-import type { Collection, PayloadRequest } from 'payload'
+import type { Collection, PayloadRequest, RestoreAction } from 'payload'
 
 import { isolateObjectProperty, restoreVersionOperation } from 'payload'
 
@@ -7,7 +7,7 @@ import type { Context } from '../types.js'
 export type Resolver = (
   _: unknown,
   args: {
-    draft?: boolean
+    action?: RestoreAction
     id: number | string
   },
   context: {
@@ -19,9 +19,9 @@ export function restoreVersionResolver(collection: Collection): Resolver {
   async function resolver(_, args, context: Context) {
     const options = {
       id: args.id,
+      action: args.action,
       collection,
       depth: 0,
-      draft: args.draft,
       req: isolateObjectProperty(context.req, 'transactionID'),
     }
 

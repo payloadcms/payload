@@ -63,7 +63,7 @@ preview: (doc, { req }) => `${req.protocol}//${req.host}/${doc.slug}` // highlig
 
 ## Draft Preview
 
-The Preview feature can be used to achieve "Draft Preview". After clicking the preview button from the Admin Panel, you can enter into "draft mode" within your front-end application. This will allow you to adjust your page queries to include the `draft: true` param. When this param is present on the request, Payload will send back a draft document as opposed to a published one based on the document's `_status` field.
+The Preview feature can be used to achieve "Draft Preview". After clicking the preview button from the Admin Panel, you can enter into "draft mode" within your front-end application. This will allow you to adjust your page queries to `version: 'latest'` (or `version=latest` on REST). Payload then returns the newest saved draft when one exists, otherwise the published document.
 
 To enter draft mode, the URL provided to the `preview` function can point to a custom endpoint in your front-end application that sets a cookie or session variable to indicate that draft mode is enabled. This is framework specific, so the mechanisms here vary from framework to framework although the underlying concept is the same.
 
@@ -200,7 +200,7 @@ export default async function Page({ params: paramsPromise }) {
   const page = await payload.find({
     collection: 'pages',
     depth: 0,
-    draft: isDraftMode, // highlight-line
+    version: isDraftMode ? 'latest' : 'published', // highlight-line
     limit: 1,
     overrideAccess: isDraftMode,
     where: {

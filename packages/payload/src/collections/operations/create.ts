@@ -8,6 +8,7 @@ import type {
   SelectType,
   TransformCollectionWithSelect,
 } from '../../types/index.js'
+import type { CreateAction } from '../../versions/actions/types.js'
 import type {
   Collection,
   DataFromCollectionSlug,
@@ -40,17 +41,18 @@ import { killTransaction } from '../../utilities/killTransaction.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
+import { canonicalizeWriteStatus, resolveAction } from '../../versions/actions/resolveAction.js'
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
 
 export type Arguments<TSlug extends CollectionSlug> = {
+  action?: CreateAction
   autosave?: boolean
   collection: Collection
   data: RequiredDataFromCollectionSlug<TSlug>
   depth?: number
   disableTransaction?: boolean
   disableVerificationEmail?: boolean
-  draft?: boolean
   duplicateFromID?: DataFromCollectionSlug<TSlug>['id']
   overrideAccess?: boolean
   overwriteExistingFiles?: boolean
@@ -92,12 +94,12 @@ export const createOperation = async <
     })
 
     const {
+      action,
       autosave = false,
       collection: { config: collectionConfig },
       collection,
       depth,
       disableVerificationEmail,
-      draft = false,
       duplicateFromID,
       overrideAccess,
       overwriteExistingFiles = false,
@@ -117,15 +119,30 @@ export const createOperation = async <
 
     let { data } = args
 
-    // For creates there is no existing doc — always publish all locales when not a draft.
-    const publishAllLocales =
-      !draft &&
-      (publishAllLocalesArg ?? (hasLocalizeStatusEnabled(collectionConfig) ? false : true))
-    const isSavingDraft = Boolean(draft && hasDraftsEnabled(collectionConfig) && !publishAllLocales)
+    const draftsEnabled = hasDraftsEnabled(collectionConfig)
+    const resolvedAction = resolveAction({
+      action,
+      autosave,
+      draftsEnabled,
+      locale,
+      localizedStatusEnabled: hasLocalizeStatusEnabled(collectionConfig),
+      operation: duplicateFromID ? 'duplicate' : 'create',
+      publishAllLocales: publishAllLocalesArg,
+      status: data && typeof data === 'object' && '_status' in data ? data._status : undefined,
+    })
 
-    if (isSavingDraft) {
-      data._status = 'draft'
-    }
+    data = canonicalizeWriteStatus({
+      action: resolvedAction,
+      data,
+      locale,
+      publishAllLocales: publishAllLocalesArg,
+    })
+
+    // For creates there is no existing doc — always publish all locales when not a draft.
+    const isSavingDraft = resolvedAction === 'saveDraft'
+    const publishAllLocales =
+      !isSavingDraft &&
+      (publishAllLocalesArg ?? (hasLocalizeStatusEnabled(collectionConfig) ? false : true))
 
     let duplicatedFromDocWithLocales: JsonObject = {}
     let duplicatedFromDoc: JsonObject = {}
@@ -133,8 +150,11 @@ export const createOperation = async <
     if (duplicateFromID) {
       const duplicateResult = await getDuplicateDocumentData({
         id: duplicateFromID,
+        action:
+          resolvedAction === 'saveDraft' || resolvedAction === 'publish'
+            ? resolvedAction
+            : undefined,
         collectionConfig,
-        draftArg: isSavingDraft,
         overrideAccess,
         req,
         selectedLocales,
@@ -352,6 +372,7 @@ export const createOperation = async <
         autosave,
         collection: collectionConfig,
         docWithLocales: resultWithLocales,
+        draft: isSavingDraft,
         operation: 'create',
         payload,
         req,
@@ -384,7 +405,6 @@ export const createOperation = async <
       context: req.context,
       depth: depth!,
       doc: resultWithLocales,
-      draft,
       fallbackLocale: fallbackLocale!,
       global: null,
       locale: locale!,
@@ -393,6 +413,7 @@ export const createOperation = async <
       req,
       select,
       showHiddenFields: showHiddenFields!,
+      version: isSavingDraft ? 'latest' : 'published',
     })
 
     // /////////////////////////////////////
@@ -417,6 +438,7 @@ export const createOperation = async <
     // /////////////////////////////////////
 
     result = await afterChange({
+      action: resolvedAction,
       collection: collectionConfig,
       context: req.context,
       data,
@@ -435,6 +457,7 @@ export const createOperation = async <
       for (const hook of collectionConfig.hooks.afterChange) {
         result =
           (await hook({
+            action: resolvedAction as CreateAction | undefined,
             collection: collectionConfig,
             context: req.context,
             data,

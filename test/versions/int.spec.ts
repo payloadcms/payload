@@ -12,6 +12,7 @@ import * as qs from 'qs-esm'
 import { fileURLToPath } from 'url'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
+import type { TypedPayloadSDK } from '../__helpers/shared/getSDK.js'
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { AutosaveMultiSelectPost, DraftPost } from './payload-types.js'
 
@@ -36,11 +37,16 @@ import {
   localizedCollectionSlug,
   localizedGlobalSlug,
   nestedArraySelectCollectionSlug,
+  postCollectionSlug,
+  simpleDraftGlobalSlug,
+  textCollectionSlug,
   versionCollectionSlug,
 } from './slugs.js'
 
 let payload: Payload
 let restClient: NextRESTClient
+let sdk: TypedPayloadSDK
+let sdkAuth: RequestInit
 
 const collectionGraphQLOriginalTitle = 'autosave title'
 
@@ -57,7 +63,7 @@ describe('Versions', () => {
 
   beforeAll(async () => {
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
-    ;({ payload, restClient } = await initPayloadInt(dirname))
+    ;({ payload, restClient, sdk } = await initPayloadInt(dirname))
 
     const newUser = await payload.create({
       collection: 'users',
@@ -80,6 +86,20 @@ describe('Versions', () => {
         password: devUser.password,
       },
     })
+
+    const loginResult = await sdk.login({
+      collection: 'users',
+      data: {
+        email: devUser.email,
+        password: devUser.password,
+      },
+    })
+
+    sdkAuth = {
+      headers: {
+        Authorization: `JWT ${loginResult.token}`,
+      },
+    }
   })
 
   afterAll(async () => {
@@ -102,7 +122,7 @@ describe('Versions', () => {
             description: undefined,
             title: 'i have a title',
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         expect(draft.id).toBeDefined()
@@ -144,7 +164,7 @@ describe('Versions', () => {
           collection: autosaveCollectionSlug,
         })
         expect(updatedPost.title).toBe(updatedTitle)
-        expect(updatedPost._status).toStrictEqual('draft')
+        expect(updatedPost._status).toStrictEqual('published')
         expect(versions.docs[0].id).toBeDefined()
       })
 
@@ -301,7 +321,7 @@ describe('Versions', () => {
           },
         }
         const all = await payload.find(query)
-        const drafts = await payload.find({ ...query, draft: true })
+        const drafts = await payload.find({ ...query, version: 'latest' })
 
         expect(all.docs).toHaveLength(1)
         expect(drafts.docs).toHaveLength(1)
@@ -349,7 +369,7 @@ describe('Versions', () => {
         const fromNonVersionsTable = await payload.findByID({
           id: doc.id,
           collection: autosaveCollectionSlug,
-          draft: false,
+          version: 'published',
         })
 
         // createdAt from non-versions should be the same as version_createdAt in versions
@@ -375,7 +395,7 @@ describe('Versions', () => {
             ],
           },
           depth: 0,
-          draft: true,
+          action: 'saveDraft',
         })
         expect(res.blocks[0]?.array[0]?.relationship).toEqual(post.id)
         const {
@@ -392,7 +412,7 @@ describe('Versions', () => {
         const post = await payload.create({
           collection: 'autosave-posts',
           data: { _status: 'draft', description: 'description', title: 'post' },
-          draft: true,
+          action: 'saveDraft',
         })
 
         await payload.update({
@@ -400,7 +420,7 @@ describe('Versions', () => {
           autosave: true,
           collection: 'autosave-posts',
           data: { title: 'autosave' },
-          draft: true,
+          action: 'saveDraft',
         })
 
         const getVersionsCount = async () => {
@@ -422,7 +442,7 @@ describe('Versions', () => {
           autosave: true,
           collection: 'autosave-posts',
           data: { title: 'post-updated-1' },
-          draft: true,
+          action: 'saveDraft',
         })
 
         expect(await getVersionsCount()).toBe(2)
@@ -432,7 +452,7 @@ describe('Versions', () => {
           autosave: true,
           collection: 'autosave-posts',
           data: { title: 'post-updated-2' },
-          draft: true,
+          action: 'saveDraft',
           where: { id: { equals: post.id } },
         })
         expect(await getVersionsCount()).toBe(2)
@@ -453,7 +473,7 @@ describe('Versions', () => {
           autosave: true,
           collection: autosaveCollectionSlug,
           data: { title: 'Autosaved Title' },
-          draft: true,
+          action: 'saveDraft',
         })
 
         // Simulate page reload: read the latest draft version (what getLatestCollectionVersion does)
@@ -485,7 +505,7 @@ describe('Versions', () => {
           autosave: true,
           collection: autosaveCollectionSlug,
           data: { title: 'Change 1' },
-          draft: true,
+          action: 'saveDraft',
         })
 
         const countAfterFirst = await payload.countVersions({
@@ -499,7 +519,7 @@ describe('Versions', () => {
           autosave: true,
           collection: autosaveCollectionSlug,
           data: { title: 'Change 2' },
-          draft: true,
+          action: 'saveDraft',
         })
 
         const countAfterSecond = await payload.countVersions({
@@ -515,7 +535,7 @@ describe('Versions', () => {
           autosave: true,
           collection: autosaveCollectionSlug,
           data: { title: 'Change 3' },
-          draft: true,
+          action: 'saveDraft',
         })
 
         const countAfterThird = await payload.countVersions({
@@ -543,7 +563,7 @@ describe('Versions', () => {
         const post = await payload.create({
           collection,
           data: { description: 'description' },
-          draft: true,
+          action: 'saveDraft',
         })
 
         const docWithLocales = await payload.findByID({
@@ -574,7 +594,7 @@ describe('Versions', () => {
             title: 'Original Title',
             _status: 'published',
           },
-          draft: false,
+          action: 'publish',
         })
 
         const duplicatedDoc = await payload.create({
@@ -583,7 +603,7 @@ describe('Versions', () => {
           data: {
             _status: 'draft',
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         expect(duplicatedDoc._status).toBe('draft')
@@ -599,14 +619,14 @@ describe('Versions', () => {
             title: 'Draft with partial data',
             _status: 'draft',
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         // description is required but missing — duplicate should still succeed as a draft
         const duplicatedDoc = await payload.duplicate({
           id: originalDoc.id,
           collection: draftCollectionSlug,
-          draft: true,
+          action: 'saveDraft',
         })
 
         expect(duplicatedDoc._status).toBe('draft')
@@ -624,7 +644,7 @@ describe('Versions', () => {
             title: 'REST draft partial',
             _status: 'draft',
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         // Mimics the admin UI: POST to /:collection/:id/duplicate
@@ -647,6 +667,1382 @@ describe('Versions', () => {
       })
     })
 
+    describe('Create and duplicate actions', () => {
+      const createdIDs: Array<{ collection: string; id: number | string }> = []
+
+      afterEach(async () => {
+        for (const { collection, id } of createdIDs) {
+          await payload.delete({ collection, id })
+        }
+        createdIDs.length = 0
+      })
+
+      it('should save a draft when create action is omitted', async () => {
+        const doc = await payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            title: 'Omitted create action',
+          },
+        })
+
+        createdIDs.push({ collection: draftCollectionSlug, id: doc.id })
+
+        expect(doc._status).toBe('draft')
+        expect(doc.description).toBeFalsy()
+      })
+
+      it('should save a draft when create action is saveDraft', async () => {
+        const doc = await payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            title: 'Explicit saveDraft create',
+          },
+          action: 'saveDraft',
+        })
+
+        createdIDs.push({ collection: draftCollectionSlug, id: doc.id })
+
+        expect(doc._status).toBe('draft')
+        expect(doc.description).toBeFalsy()
+      })
+
+      it('should publish when create action is publish and required fields are present', async () => {
+        const doc = await payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            description: 'Published description',
+            title: 'Explicit publish create',
+          },
+          action: 'publish',
+        })
+
+        createdIDs.push({ collection: draftCollectionSlug, id: doc.id })
+
+        expect(doc._status).toBe('published')
+        expect(doc.description).toBe('Published description')
+      })
+
+      it('should reject publish create when required fields are missing', async () => {
+        await expect(
+          // @ts-expect-error - description is required when publishing
+          payload.create({
+            collection: draftCollectionSlug,
+            data: {
+              title: 'Publish missing description',
+            },
+            action: 'publish',
+          }),
+        ).rejects.toThrow(ValidationError)
+      })
+
+      it('should infer saveDraft from _status draft when create action is omitted', async () => {
+        const doc = await payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            title: 'Status draft infers saveDraft',
+            _status: 'draft',
+          },
+        })
+
+        createdIDs.push({ collection: draftCollectionSlug, id: doc.id })
+
+        expect(doc._status).toBe('draft')
+      })
+
+      it('should infer publish from _status published when create action is omitted', async () => {
+        const doc = await payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            description: 'Status published description',
+            title: 'Status published infers publish',
+            _status: 'published',
+          },
+        })
+
+        createdIDs.push({ collection: draftCollectionSlug, id: doc.id })
+
+        expect(doc._status).toBe('published')
+      })
+
+      it('should save a draft when REST create omits draft query and _status', async () => {
+        const response = await restClient.POST(`/${draftCollectionSlug}`, {
+          body: JSON.stringify({
+            title: 'REST omitted create',
+          }),
+        })
+
+        const { doc } = await response.json()
+
+        createdIDs.push({ collection: draftCollectionSlug, id: doc.id })
+
+        expect(response.status).toBe(201)
+        expect(doc._status).toBe('draft')
+        expect(doc.description).toBeFalsy()
+      })
+
+      it('should let explicit create action win when it conflicts with _status', async () => {
+        const data = {
+          description: 'Conflict description',
+          title: 'Action wins over status',
+          _status: 'published' as const,
+        }
+
+        const doc = await payload.create({
+          collection: draftCollectionSlug,
+          data,
+          action: 'saveDraft',
+        })
+
+        createdIDs.push({ collection: draftCollectionSlug, id: doc.id })
+
+        expect(doc._status).toBe('draft')
+        expect(data._status).toBe('published')
+      })
+
+      it('should not infer unpublish from unrecognized _status on create', async () => {
+        const data = {
+          title: 'Unrecognized status stays default',
+          _status: 'unpublished',
+        }
+
+        const doc = await payload.create({
+          collection: draftCollectionSlug,
+          data,
+        })
+
+        createdIDs.push({ collection: draftCollectionSlug, id: doc.id })
+
+        expect(doc._status).toBe('draft')
+        expect(data._status).toBe('unpublished')
+      })
+
+      it('should create a draft upload without a file and require a file when publishing', async () => {
+        const draft = await payload.create({
+          collection: draftWithUploadCollectionSlug,
+          data: {
+            alt: 'Draft upload without file',
+          },
+          action: 'saveDraft',
+        })
+
+        createdIDs.push({ collection: draftWithUploadCollectionSlug, id: draft.id })
+
+        expect(draft._status).toBe('draft')
+
+        await expect(
+          payload.create({
+            collection: draftWithUploadCollectionSlug,
+            data: {
+              alt: 'Published upload without file',
+            },
+            action: 'publish',
+          }),
+        ).rejects.toThrow()
+      })
+
+      it('should save a draft when duplicate action is omitted', async () => {
+        const originalDoc = await payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            description: 'Original published description',
+            title: 'Duplicate omitted action source',
+            _status: 'published',
+          },
+          action: 'publish',
+        })
+
+        createdIDs.push({ collection: draftCollectionSlug, id: originalDoc.id })
+
+        const duplicatedDoc = await payload.duplicate({
+          id: originalDoc.id,
+          collection: draftCollectionSlug,
+        })
+
+        createdIDs.push({ collection: draftCollectionSlug, id: duplicatedDoc.id })
+
+        expect(duplicatedDoc._status).toBe('draft')
+        expect(duplicatedDoc.id).not.toEqual(originalDoc.id)
+        expect(duplicatedDoc.title).toContain('Duplicate omitted action source')
+      })
+
+      it('should publish a duplicate when action is publish', async () => {
+        const originalDoc = await payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            description: 'Original published description',
+            title: 'Duplicate publish source',
+            _status: 'published',
+          },
+          action: 'publish',
+        })
+
+        createdIDs.push({ collection: draftCollectionSlug, id: originalDoc.id })
+
+        const duplicatedDoc = await payload.duplicate({
+          id: originalDoc.id,
+          collection: draftCollectionSlug,
+          action: 'publish',
+        })
+
+        createdIDs.push({ collection: draftCollectionSlug, id: duplicatedDoc.id })
+
+        expect(duplicatedDoc._status).toBe('published')
+        expect(duplicatedDoc.description).toBe('Original published description')
+      })
+
+      it('should infer saveDraft from _status draft when duplicate action is omitted', async () => {
+        const originalDoc = await payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            description: 'Original published description',
+            title: 'Duplicate draft status source',
+            _status: 'published',
+          },
+          action: 'publish',
+        })
+
+        createdIDs.push({ collection: draftCollectionSlug, id: originalDoc.id })
+
+        const duplicatedDoc = await payload.duplicate({
+          id: originalDoc.id,
+          collection: draftCollectionSlug,
+          data: {
+            title: 'Duplicate draft status copy',
+            _status: 'draft',
+          },
+        })
+
+        createdIDs.push({ collection: draftCollectionSlug, id: duplicatedDoc.id })
+
+        expect(duplicatedDoc._status).toBe('draft')
+      })
+
+      it('should let explicit duplicate action win when it conflicts with _status', async () => {
+        const originalDoc = await payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            description: 'Original published description',
+            title: 'Duplicate conflict source',
+            _status: 'published',
+          },
+          action: 'publish',
+        })
+
+        createdIDs.push({ collection: draftCollectionSlug, id: originalDoc.id })
+
+        const data = {
+          title: 'Duplicate conflict copy',
+          _status: 'published' as const,
+        }
+
+        const duplicatedDoc = await payload.duplicate({
+          id: originalDoc.id,
+          collection: draftCollectionSlug,
+          data,
+          action: 'saveDraft',
+        })
+
+        createdIDs.push({ collection: draftCollectionSlug, id: duplicatedDoc.id })
+
+        expect(duplicatedDoc._status).toBe('draft')
+        expect(data._status).toBe('published')
+      })
+
+      it('should perform an ordinary create when drafts are not enabled', async () => {
+        const omitted = await payload.create({
+          collection: textCollectionSlug,
+          data: {
+            text: 'Ordinary omitted create',
+          },
+        })
+
+        createdIDs.push({ collection: textCollectionSlug, id: omitted.id })
+
+        expect(omitted.text).toBe('Ordinary omitted create')
+        expect(omitted._status).toBeUndefined()
+
+        const published = await payload.create({
+          collection: textCollectionSlug,
+          data: {
+            text: 'Ordinary publish create',
+          },
+          action: 'publish',
+        })
+
+        createdIDs.push({ collection: textCollectionSlug, id: published.id })
+
+        expect(published.text).toBe('Ordinary publish create')
+
+        await expect(
+          payload.create({
+            collection: textCollectionSlug,
+            data: {
+              text: 'SaveDraft without drafts',
+            },
+            // @ts-expect-error - saveDraft is invalid when drafts are not enabled
+            action: 'saveDraft',
+          }),
+        ).rejects.toThrow('The action "saveDraft" cannot be used because drafts are not enabled.')
+      })
+    })
+
+    describe('REST version and action parameters', () => {
+      const createdIDs: Array<{ collection: string; id: number | string }> = []
+
+      afterEach(async () => {
+        for (const { collection, id } of createdIDs) {
+          await payload.delete({ collection, id })
+        }
+
+        createdIDs.length = 0
+      })
+
+      it('should read published, latest, and draft representations over REST', async () => {
+        const publishedOnly = await payload.create({
+          action: 'publish',
+          collection: draftCollectionSlug,
+          data: {
+            description: 'Published only',
+            title: 'REST read published only',
+          },
+        })
+        createdIDs.push({ collection: draftCollectionSlug, id: publishedOnly.id })
+
+        const draftOnly = await payload.create({
+          action: 'saveDraft',
+          collection: draftCollectionSlug,
+          data: {
+            title: 'REST read draft only',
+          },
+        })
+        createdIDs.push({ collection: draftCollectionSlug, id: draftOnly.id })
+
+        const publishedWithDraft = await payload.create({
+          action: 'publish',
+          collection: draftCollectionSlug,
+          data: {
+            description: 'Published with draft',
+            title: 'REST read published with draft',
+          },
+        })
+        createdIDs.push({ collection: draftCollectionSlug, id: publishedWithDraft.id })
+
+        await payload.update({
+          id: publishedWithDraft.id,
+          action: 'saveDraft',
+          collection: draftCollectionSlug,
+          data: {
+            title: 'REST read newer draft',
+          },
+        })
+
+        const publishedByID = await restClient.GET(`/${draftCollectionSlug}/${publishedOnly.id}`)
+        expect(publishedByID.status).toBe(200)
+        expect((await publishedByID.json()).title).toBe('REST read published only')
+
+        const latestPublishedOnly = await restClient.GET(
+          `/${draftCollectionSlug}/${publishedOnly.id}?version=latest`,
+        )
+        expect(latestPublishedOnly.status).toBe(200)
+        expect((await latestPublishedOnly.json()).title).toBe('REST read published only')
+
+        const draftOfPublishedOnly = await restClient.GET(
+          `/${draftCollectionSlug}/${publishedOnly.id}?version=draft`,
+        )
+        expect(draftOfPublishedOnly.status).toBe(404)
+
+        const missingPublishedDraftOnly = await restClient.GET(
+          `/${draftCollectionSlug}/${draftOnly.id}`,
+        )
+        expect(missingPublishedDraftOnly.status).toBe(404)
+
+        const latestDraftOnly = await restClient.GET(
+          `/${draftCollectionSlug}/${draftOnly.id}?version=latest`,
+        )
+        expect(latestDraftOnly.status).toBe(200)
+        expect((await latestDraftOnly.json()).title).toBe('REST read draft only')
+
+        const draftOnlyByVersion = await restClient.GET(
+          `/${draftCollectionSlug}/${draftOnly.id}?version=draft`,
+        )
+        expect(draftOnlyByVersion.status).toBe(200)
+
+        const publishedSide = await restClient.GET(
+          `/${draftCollectionSlug}/${publishedWithDraft.id}`,
+        )
+        expect((await publishedSide.json()).title).toBe('REST read published with draft')
+
+        const latestSide = await restClient.GET(
+          `/${draftCollectionSlug}/${publishedWithDraft.id}?version=latest`,
+        )
+        expect((await latestSide.json()).title).toBe('REST read newer draft')
+
+        const listPublished = await restClient.GET(`/${draftCollectionSlug}`, {
+          query: {
+            where: {
+              title: {
+                in: [
+                  'REST read published only',
+                  'REST read draft only',
+                  'REST read published with draft',
+                  'REST read newer draft',
+                ],
+              },
+            },
+          },
+        })
+        const publishedDocs = (await listPublished.json()).docs
+        expect(publishedDocs.map(({ title }) => title).sort()).toEqual([
+          'REST read published only',
+          'REST read published with draft',
+        ])
+
+        const listLatest = await restClient.GET(`/${draftCollectionSlug}`, {
+          query: {
+            version: 'latest',
+            where: {
+              title: {
+                in: [
+                  'REST read published only',
+                  'REST read draft only',
+                  'REST read published with draft',
+                  'REST read newer draft',
+                ],
+              },
+            },
+          },
+        })
+        expect((await listLatest.json()).docs.map(({ title }) => title).sort()).toEqual([
+          'REST read draft only',
+          'REST read newer draft',
+          'REST read published only',
+        ])
+
+        const listDraft = await restClient.GET(`/${draftCollectionSlug}`, {
+          query: {
+            version: 'draft',
+            where: {
+              title: {
+                in: [
+                  'REST read published only',
+                  'REST read draft only',
+                  'REST read published with draft',
+                  'REST read newer draft',
+                ],
+              },
+            },
+          },
+        })
+        expect((await listDraft.json()).docs.map(({ title }) => title).sort()).toEqual([
+          'REST read draft only',
+          'REST read newer draft',
+        ])
+      })
+
+      it('should save a draft when REST create omits action and _status', async () => {
+        const response = await restClient.POST(`/${draftCollectionSlug}`, {
+          body: JSON.stringify({
+            title: 'REST omitted create action',
+          }),
+        })
+
+        const { doc } = await response.json()
+        createdIDs.push({ collection: draftCollectionSlug, id: doc.id })
+
+        expect(response.status).toBe(201)
+        expect(doc._status).toBe('draft')
+      })
+
+      it('should honor body _status and let explicit REST action win', async () => {
+        const publishedFromStatus = await restClient.POST(`/${draftCollectionSlug}`, {
+          body: JSON.stringify({
+            description: 'From status',
+            title: 'REST create from published status',
+            _status: 'published',
+          }),
+        })
+        const publishedDoc = (await publishedFromStatus.json()).doc
+        createdIDs.push({ collection: draftCollectionSlug, id: publishedDoc.id })
+
+        expect(publishedFromStatus.status).toBe(201)
+        expect(publishedDoc._status).toBe('published')
+
+        const actionWins = await restClient.POST(`/${draftCollectionSlug}?action=saveDraft`, {
+          body: JSON.stringify({
+            description: 'Conflict',
+            title: 'REST create action wins',
+            _status: 'published',
+          }),
+        })
+        const draftDoc = (await actionWins.json()).doc
+        createdIDs.push({ collection: draftCollectionSlug, id: draftDoc.id })
+
+        expect(actionWins.status).toBe(201)
+        expect(draftDoc._status).toBe('draft')
+
+        const explicitPublish = await restClient.POST(`/${draftCollectionSlug}?action=publish`, {
+          body: JSON.stringify({
+            description: 'Explicit publish',
+            title: 'REST create explicit publish',
+          }),
+        })
+        const explicitDoc = (await explicitPublish.json()).doc
+        createdIDs.push({ collection: draftCollectionSlug, id: explicitDoc.id })
+
+        expect(explicitPublish.status).toBe(201)
+        expect(explicitDoc._status).toBe('published')
+      })
+
+      it('should publish when REST update has neither action nor status', async () => {
+        const doc = await payload.create({
+          action: 'saveDraft',
+          collection: draftCollectionSlug,
+          data: {
+            title: 'REST update omitted source',
+          },
+        })
+        createdIDs.push({ collection: draftCollectionSlug, id: doc.id })
+
+        const response = await restClient.PATCH(`/${draftCollectionSlug}/${doc.id}`, {
+          body: JSON.stringify({
+            description: 'Now published',
+            title: 'REST update omitted next',
+          }),
+        })
+        const { doc: updated } = await response.json()
+
+        expect(response.status).toBe(200)
+        expect(updated._status).toBe('published')
+        expect(updated.title).toBe('REST update omitted next')
+      })
+
+      it('should honor body _status on REST update and let explicit action win', async () => {
+        const doc = await payload.create({
+          action: 'publish',
+          collection: draftCollectionSlug,
+          data: {
+            description: 'Published',
+            title: 'REST update status inference',
+          },
+        })
+        createdIDs.push({ collection: draftCollectionSlug, id: doc.id })
+
+        const savedFromStatus = await restClient.PATCH(`/${draftCollectionSlug}/${doc.id}`, {
+          body: JSON.stringify({
+            title: 'REST update from draft status',
+            _status: 'draft',
+          }),
+        })
+        expect(savedFromStatus.status).toBe(200)
+        expect((await savedFromStatus.json()).doc._status).toBe('draft')
+
+        const actionWins = await restClient.PATCH(
+          `/${draftCollectionSlug}/${doc.id}?action=publish`,
+          {
+            body: JSON.stringify({
+              description: 'Published again',
+              title: 'REST update action wins',
+              _status: 'draft',
+            }),
+          },
+        )
+        expect(actionWins.status).toBe(200)
+        expect((await actionWins.json()).doc._status).toBe('published')
+      })
+
+      it('should apply explicit REST update actions including unpublish', async () => {
+        const doc = await payload.create({
+          action: 'publish',
+          collection: draftCollectionSlug,
+          data: {
+            description: 'Published',
+            title: 'REST update actions',
+          },
+        })
+        createdIDs.push({ collection: draftCollectionSlug, id: doc.id })
+
+        const savedDraft = await restClient.PATCH(
+          `/${draftCollectionSlug}/${doc.id}?action=saveDraft`,
+          {
+            body: JSON.stringify({
+              title: 'REST update saveDraft',
+            }),
+          },
+        )
+        expect((await savedDraft.json()).doc._status).toBe('draft')
+
+        const unpublished = await restClient.PATCH(
+          `/${draftCollectionSlug}/${doc.id}?action=unpublish`,
+          {
+            body: JSON.stringify({}),
+          },
+        )
+        expect(unpublished.status).toBe(200)
+        expect((await unpublished.json()).doc._status).toBe('draft')
+      })
+
+      it('should restore over REST with omitted publish and explicit saveDraft', async () => {
+        const doc = await payload.create({
+          action: 'publish',
+          collection: draftCollectionSlug,
+          data: {
+            description: 'REST restore published v1',
+            title: 'REST restore v1',
+          },
+        })
+        createdIDs.push({ collection: draftCollectionSlug, id: doc.id })
+
+        await payload.update({
+          id: doc.id,
+          action: 'publish',
+          collection: draftCollectionSlug,
+          data: {
+            title: 'REST restore v2',
+          },
+        })
+
+        const versions = await payload.findVersions({
+          collection: draftCollectionSlug,
+          sort: 'createdAt',
+          where: {
+            parent: {
+              equals: doc.id,
+            },
+          },
+        })
+        const versionToRestore = versions.docs[0]
+
+        const publishedRestore = await restClient.POST(
+          `/${draftCollectionSlug}/versions/${versionToRestore.id}`,
+        )
+        expect(publishedRestore.status).toBe(200)
+
+        const published = await payload.findByID({
+          id: doc.id,
+          collection: draftCollectionSlug,
+        })
+        expect(published.title).toBe('REST restore v1')
+        expect(published._status).toBe('published')
+
+        const draftRestore = await restClient.POST(
+          `/${draftCollectionSlug}/versions/${versionToRestore.id}?action=saveDraft`,
+        )
+        expect(draftRestore.status).toBe(200)
+
+        const latest = await payload.findByID({
+          id: doc.id,
+          collection: draftCollectionSlug,
+          version: 'latest',
+        })
+        expect(latest.title).toBe('REST restore v1')
+        expect(latest._status).toBe('draft')
+      })
+
+      it('should reject invalid REST version and action values and obsolete draft', async () => {
+        const invalidVersion = await restClient.GET(`/${draftCollectionSlug}?version=Latest`)
+        expect(invalidVersion.status).toBe(400)
+
+        const invalidAction = await restClient.POST(`/${draftCollectionSlug}?action=SaveDraft`, {
+          body: JSON.stringify({
+            title: 'REST invalid action',
+          }),
+        })
+        expect(invalidAction.status).toBe(400)
+
+        const createUnpublish = await restClient.POST(`/${draftCollectionSlug}?action=unpublish`, {
+          body: JSON.stringify({
+            title: 'REST create unpublish',
+          }),
+        })
+        expect(createUnpublish.status).toBe(400)
+
+        const obsoleteDraft = await restClient.GET(`/${draftCollectionSlug}?draft=true`)
+        expect(obsoleteDraft.status).toBe(400)
+      })
+
+      it('should read and write draft globals over REST', async () => {
+        await payload.updateGlobal({
+          action: 'publish',
+          data: {
+            title: 'REST global published',
+          },
+          slug: simpleDraftGlobalSlug,
+        })
+
+        const published = await restClient.GET(`/globals/${simpleDraftGlobalSlug}`)
+        expect((await published.json()).title).toBe('REST global published')
+
+        const saveDraft = await restClient.POST(
+          `/globals/${simpleDraftGlobalSlug}?action=saveDraft`,
+          {
+            body: JSON.stringify({
+              title: 'REST global draft',
+            }),
+          },
+        )
+        expect(saveDraft.status).toBe(200)
+
+        const latest = await restClient.GET(`/globals/${simpleDraftGlobalSlug}?version=latest`)
+        expect((await latest.json()).title).toBe('REST global draft')
+
+        const stillPublished = await restClient.GET(`/globals/${simpleDraftGlobalSlug}`)
+        expect((await stillPublished.json()).title).toBe('REST global published')
+      })
+
+      it('should accept version on auth me and reject obsolete draft', async () => {
+        const response = await restClient.GET('/users/me?version=latest')
+        expect(response.status).toBe(200)
+        expect((await response.json()).user.email).toBe(devUser.email)
+
+        const obsoleteDraft = await restClient.GET('/users/me?draft=true')
+        expect(obsoleteDraft.status).toBe(400)
+      })
+    })
+
+    describe('GraphQL version and action parameters', () => {
+      const createdIDs: Array<{ collection: string; id: number | string }> = []
+
+      afterEach(async () => {
+        for (const { collection, id } of createdIDs) {
+          await payload.delete({ collection, id })
+        }
+
+        createdIDs.length = 0
+      })
+
+      const graphqlQuery = async (query: string) =>
+        restClient.GRAPHQL_POST({ body: JSON.stringify({ query }) }).then((res) => res.json())
+
+      it('should read published, latest, and draft representations over GraphQL', async () => {
+        const publishedOnly = await payload.create({
+          action: 'publish',
+          collection: draftCollectionSlug,
+          data: {
+            description: 'Published only',
+            title: 'GQL read published only',
+          },
+        })
+        createdIDs.push({ collection: draftCollectionSlug, id: publishedOnly.id })
+
+        const draftOnly = await payload.create({
+          action: 'saveDraft',
+          collection: draftCollectionSlug,
+          data: {
+            title: 'GQL read draft only',
+          },
+        })
+        createdIDs.push({ collection: draftCollectionSlug, id: draftOnly.id })
+
+        const publishedWithDraft = await payload.create({
+          action: 'publish',
+          collection: draftCollectionSlug,
+          data: {
+            description: 'Published with draft',
+            title: 'GQL read published with draft',
+          },
+        })
+        createdIDs.push({ collection: draftCollectionSlug, id: publishedWithDraft.id })
+
+        await payload.update({
+          id: publishedWithDraft.id,
+          action: 'saveDraft',
+          collection: draftCollectionSlug,
+          data: {
+            title: 'GQL read newer draft',
+          },
+        })
+
+        const publishedByID = await graphqlQuery(`{
+          DraftPost(id: ${formatGraphQLID(publishedOnly.id)}) { title }
+        }`)
+        expect(publishedByID.data.DraftPost.title).toBe('GQL read published only')
+
+        const latestPublishedOnly = await graphqlQuery(`{
+          DraftPost(id: ${formatGraphQLID(publishedOnly.id)}, version: latest) { title }
+        }`)
+        expect(latestPublishedOnly.data.DraftPost.title).toBe('GQL read published only')
+
+        const draftOfPublishedOnly = await graphqlQuery(`{
+          DraftPost(id: ${formatGraphQLID(publishedOnly.id)}, version: draft) { title }
+        }`)
+        expect(draftOfPublishedOnly.data.DraftPost).toBeNull()
+        expect(draftOfPublishedOnly.errors?.[0].message).toBeDefined()
+
+        const missingPublishedDraftOnly = await graphqlQuery(`{
+          DraftPost(id: ${formatGraphQLID(draftOnly.id)}) { title _status }
+        }`)
+        expect(missingPublishedDraftOnly.data.DraftPost).toBeNull()
+        expect(missingPublishedDraftOnly.errors?.[0].message).toBeDefined()
+
+        const latestDraftOnly = await graphqlQuery(`{
+          DraftPost(id: ${formatGraphQLID(draftOnly.id)}, version: latest) { title }
+        }`)
+        expect(latestDraftOnly.data.DraftPost.title).toBe('GQL read draft only')
+
+        const titles = [
+          'GQL read published only',
+          'GQL read draft only',
+          'GQL read published with draft',
+          'GQL read newer draft',
+        ]
+        const titleWhere = titles.map((title) => `"${title}"`).join(', ')
+
+        const listPublished = await graphqlQuery(`{
+          DraftPosts(where: { title: { in: [${titleWhere}] } }) {
+            docs { title }
+          }
+        }`)
+        expect(listPublished.data.DraftPosts.docs.map(({ title }) => title).sort()).toEqual([
+          'GQL read published only',
+          'GQL read published with draft',
+        ])
+
+        const listLatest = await graphqlQuery(`{
+          DraftPosts(version: latest, where: { title: { in: [${titleWhere}] } }) {
+            docs { title }
+          }
+        }`)
+        expect(listLatest.data.DraftPosts.docs.map(({ title }) => title).sort()).toEqual([
+          'GQL read draft only',
+          'GQL read newer draft',
+          'GQL read published only',
+        ])
+
+        const listDraft = await graphqlQuery(`{
+          DraftPosts(version: draft, where: { title: { in: [${titleWhere}] } }) {
+            docs { title }
+          }
+        }`)
+        expect(listDraft.data.DraftPosts.docs.map(({ title }) => title).sort()).toEqual([
+          'GQL read draft only',
+          'GQL read newer draft',
+        ])
+      })
+
+      it('should save a draft when GraphQL create omits action and publish when update omits action', async () => {
+        const created = await graphqlQuery(`mutation {
+          createDraftPost(data: { title: "GQL omitted create", description: "Omitted action" }) {
+            id
+            _status
+          }
+        }`)
+        createdIDs.push({ collection: draftCollectionSlug, id: created.data.createDraftPost.id })
+        expect(created.data.createDraftPost._status).toBe('draft')
+
+        const updated = await graphqlQuery(`mutation {
+          updateDraftPost(id: ${formatGraphQLID(created.data.createDraftPost.id)}, data: { title: "GQL omitted update", description: "Now published" }) {
+            title
+            _status
+          }
+        }`)
+        expect(updated.data.updateDraftPost._status).toBe('published')
+        expect(updated.data.updateDraftPost.title).toBe('GQL omitted update')
+      })
+
+      it('should apply explicit GraphQL update actions including unpublish', async () => {
+        const doc = await payload.create({
+          action: 'publish',
+          collection: draftCollectionSlug,
+          data: {
+            description: 'Published',
+            title: 'GQL update actions',
+          },
+        })
+        createdIDs.push({ collection: draftCollectionSlug, id: doc.id })
+
+        const savedDraft = await graphqlQuery(`mutation {
+          updateDraftPost(id: ${formatGraphQLID(doc.id)}, action: saveDraft, data: { title: "GQL update saveDraft" }) {
+            _status
+          }
+        }`)
+        expect(savedDraft.data.updateDraftPost._status).toBe('draft')
+
+        const unpublished = await graphqlQuery(`mutation {
+          updateDraftPost(id: ${formatGraphQLID(doc.id)}, action: unpublish, data: {}) {
+            _status
+          }
+        }`)
+        expect(unpublished.data.updateDraftPost._status).toBe('draft')
+      })
+
+      it('should restore over GraphQL with omitted publish and explicit saveDraft', async () => {
+        const doc = await payload.create({
+          action: 'publish',
+          collection: draftCollectionSlug,
+          data: {
+            description: 'GQL restore published v1',
+            title: 'GQL restore v1',
+          },
+        })
+        createdIDs.push({ collection: draftCollectionSlug, id: doc.id })
+
+        await payload.update({
+          id: doc.id,
+          action: 'publish',
+          collection: draftCollectionSlug,
+          data: {
+            title: 'GQL restore v2',
+          },
+        })
+
+        const versions = await payload.findVersions({
+          collection: draftCollectionSlug,
+          sort: 'createdAt',
+          where: {
+            parent: {
+              equals: doc.id,
+            },
+          },
+        })
+        const versionToRestore = versions.docs[0]
+
+        const publishedRestore = await graphqlQuery(`mutation {
+          restoreVersionDraftPost(id: ${formatGraphQLID(versionToRestore.id)}) {
+            title
+            _status
+          }
+        }`)
+        expect(publishedRestore.data.restoreVersionDraftPost.title).toBe('GQL restore v1')
+        expect(publishedRestore.data.restoreVersionDraftPost._status).toBe('published')
+
+        const draftRestore = await graphqlQuery(`mutation {
+          restoreVersionDraftPost(id: ${formatGraphQLID(versionToRestore.id)}, action: saveDraft) {
+            title
+            _status
+          }
+        }`)
+        expect(draftRestore.data.restoreVersionDraftPost.title).toBe('GQL restore v1')
+        expect(draftRestore.data.restoreVersionDraftPost._status).toBe('draft')
+      })
+
+      it('should read and write draft globals over GraphQL', async () => {
+        await graphqlQuery(`mutation {
+          updateSimpleDraftGlobal(action: publish, data: { title: "GQL global published" }) {
+            title
+          }
+        }`)
+
+        const published = await graphqlQuery(`{ SimpleDraftGlobal { title } }`)
+        expect(published.data.SimpleDraftGlobal.title).toBe('GQL global published')
+
+        await graphqlQuery(`mutation {
+          updateSimpleDraftGlobal(action: saveDraft, data: { title: "GQL global draft" }) {
+            title
+          }
+        }`)
+
+        const latest = await graphqlQuery(`{ SimpleDraftGlobal(version: latest) { title } }`)
+        expect(latest.data.SimpleDraftGlobal.title).toBe('GQL global draft')
+
+        const stillPublished = await graphqlQuery(`{ SimpleDraftGlobal { title } }`)
+        expect(stillPublished.data.SimpleDraftGlobal.title).toBe('GQL global published')
+      })
+
+      it('should reject saveDraft on a GraphQL collection without drafts', async () => {
+        const { errors } = await graphqlQuery(
+          `mutation { createPost(action: saveDraft, data: {}) { id } }`,
+        )
+
+        expect(errors?.[0].message).toBeDefined()
+      })
+    })
+
+    describe('SDK version and action parameters', () => {
+      const createdIDs: Array<{ collection: string; id: number | string }> = []
+
+      afterEach(async () => {
+        for (const { id, collection } of createdIDs) {
+          await payload.delete({ id, collection })
+        }
+
+        createdIDs.length = 0
+      })
+
+      it('should read published, latest, and draft representations over the SDK', async () => {
+        const publishedOnly = await payload.create({
+          action: 'publish',
+          collection: draftCollectionSlug,
+          data: {
+            description: 'Published only',
+            title: 'SDK read published only',
+          },
+        })
+        createdIDs.push({ id: publishedOnly.id, collection: draftCollectionSlug })
+
+        const draftOnly = await payload.create({
+          action: 'saveDraft',
+          collection: draftCollectionSlug,
+          data: {
+            title: 'SDK read draft only',
+          },
+        })
+        createdIDs.push({ id: draftOnly.id, collection: draftCollectionSlug })
+
+        const publishedWithDraft = await payload.create({
+          action: 'publish',
+          collection: draftCollectionSlug,
+          data: {
+            description: 'Published with draft',
+            title: 'SDK read published with draft',
+          },
+        })
+        createdIDs.push({ id: publishedWithDraft.id, collection: draftCollectionSlug })
+
+        await payload.update({
+          id: publishedWithDraft.id,
+          action: 'saveDraft',
+          collection: draftCollectionSlug,
+          data: {
+            title: 'SDK read newer draft',
+          },
+        })
+
+        const publishedByID = await sdk.findByID(
+          { id: publishedOnly.id, collection: draftCollectionSlug },
+          sdkAuth,
+        )
+        expect(publishedByID.title).toBe('SDK read published only')
+
+        const latestPublishedOnly = await sdk.findByID(
+          { id: publishedOnly.id, collection: draftCollectionSlug, version: 'latest' },
+          sdkAuth,
+        )
+        expect(latestPublishedOnly.title).toBe('SDK read published only')
+
+        await expect(
+          sdk.findByID(
+            { id: publishedOnly.id, collection: draftCollectionSlug, version: 'draft' },
+            sdkAuth,
+          ),
+        ).rejects.toMatchObject({ status: 404 })
+
+        await expect(
+          sdk.findByID({ id: draftOnly.id, collection: draftCollectionSlug }, sdkAuth),
+        ).rejects.toMatchObject({ status: 404 })
+
+        const latestDraftOnly = await sdk.findByID(
+          { id: draftOnly.id, collection: draftCollectionSlug, version: 'latest' },
+          sdkAuth,
+        )
+        expect(latestDraftOnly.title).toBe('SDK read draft only')
+
+        const publishedSide = await sdk.findByID(
+          { id: publishedWithDraft.id, collection: draftCollectionSlug },
+          sdkAuth,
+        )
+        expect(publishedSide.title).toBe('SDK read published with draft')
+
+        const latestSide = await sdk.findByID(
+          { id: publishedWithDraft.id, collection: draftCollectionSlug, version: 'latest' },
+          sdkAuth,
+        )
+        expect(latestSide.title).toBe('SDK read newer draft')
+
+        const titleWhere = {
+          title: {
+            in: [
+              'SDK read published only',
+              'SDK read draft only',
+              'SDK read published with draft',
+              'SDK read newer draft',
+            ],
+          },
+        }
+
+        const publishedDocs = await sdk.find(
+          { collection: draftCollectionSlug, where: titleWhere },
+          sdkAuth,
+        )
+        expect(publishedDocs.docs.map(({ title }) => title).sort()).toEqual([
+          'SDK read published only',
+          'SDK read published with draft',
+        ])
+
+        const latestDocs = await sdk.find(
+          { collection: draftCollectionSlug, version: 'latest', where: titleWhere },
+          sdkAuth,
+        )
+        expect(latestDocs.docs.map(({ title }) => title).sort()).toEqual([
+          'SDK read draft only',
+          'SDK read newer draft',
+          'SDK read published only',
+        ])
+
+        const draftDocs = await sdk.find(
+          { collection: draftCollectionSlug, version: 'draft', where: titleWhere },
+          sdkAuth,
+        )
+        expect(draftDocs.docs.map(({ title }) => title).sort()).toEqual([
+          'SDK read draft only',
+          'SDK read newer draft',
+        ])
+      })
+
+      it('should save a draft when SDK create omits action and _status', async () => {
+        const doc = await sdk.create(
+          {
+            collection: draftCollectionSlug,
+            data: {
+              title: 'SDK omitted create action',
+            },
+          },
+          sdkAuth,
+        )
+        createdIDs.push({ id: doc.id, collection: draftCollectionSlug })
+
+        expect(doc._status).toBe('draft')
+      })
+
+      it('should retain _status in the write body and let explicit SDK action win', async () => {
+        const publishedDoc = await sdk.create(
+          {
+            collection: draftCollectionSlug,
+            data: {
+              _status: 'published',
+              description: 'From status',
+              title: 'SDK create from published status',
+            },
+          },
+          sdkAuth,
+        )
+        createdIDs.push({ id: publishedDoc.id, collection: draftCollectionSlug })
+        expect(publishedDoc._status).toBe('published')
+
+        const actionWins = await sdk.create(
+          {
+            action: 'saveDraft',
+            collection: draftCollectionSlug,
+            data: {
+              _status: 'published',
+              description: 'Conflict',
+              title: 'SDK create action wins',
+            },
+          },
+          sdkAuth,
+        )
+        createdIDs.push({ id: actionWins.id, collection: draftCollectionSlug })
+        expect(actionWins._status).toBe('draft')
+
+        const explicitPublish = await sdk.create(
+          {
+            action: 'publish',
+            collection: draftCollectionSlug,
+            data: {
+              description: 'Explicit publish',
+              title: 'SDK create explicit publish',
+            },
+          },
+          sdkAuth,
+        )
+        createdIDs.push({ id: explicitPublish.id, collection: draftCollectionSlug })
+        expect(explicitPublish._status).toBe('published')
+      })
+
+      it('should publish when SDK update has neither action nor status', async () => {
+        const doc = await payload.create({
+          action: 'saveDraft',
+          collection: draftCollectionSlug,
+          data: {
+            title: 'SDK update omitted source',
+          },
+        })
+        createdIDs.push({ id: doc.id, collection: draftCollectionSlug })
+
+        const updated = await sdk.update(
+          {
+            id: doc.id,
+            collection: draftCollectionSlug,
+            data: {
+              description: 'Now published',
+              title: 'SDK update omitted next',
+            },
+          },
+          sdkAuth,
+        )
+
+        expect(updated._status).toBe('published')
+        expect(updated.title).toBe('SDK update omitted next')
+      })
+
+      it('should honor body _status on SDK update and let explicit action win', async () => {
+        const doc = await payload.create({
+          action: 'publish',
+          collection: draftCollectionSlug,
+          data: {
+            description: 'Published',
+            title: 'SDK update status inference',
+          },
+        })
+        createdIDs.push({ id: doc.id, collection: draftCollectionSlug })
+
+        const savedFromStatus = await sdk.update(
+          {
+            id: doc.id,
+            collection: draftCollectionSlug,
+            data: {
+              _status: 'draft',
+              title: 'SDK update from draft status',
+            },
+          },
+          sdkAuth,
+        )
+        expect(savedFromStatus._status).toBe('draft')
+
+        const actionWins = await sdk.update(
+          {
+            id: doc.id,
+            action: 'publish',
+            collection: draftCollectionSlug,
+            data: {
+              _status: 'draft',
+              description: 'Published again',
+              title: 'SDK update action wins',
+            },
+          },
+          sdkAuth,
+        )
+        expect(actionWins._status).toBe('published')
+      })
+
+      it('should apply explicit SDK update actions including unpublish', async () => {
+        const doc = await payload.create({
+          action: 'publish',
+          collection: draftCollectionSlug,
+          data: {
+            description: 'Published',
+            title: 'SDK update actions',
+          },
+        })
+        createdIDs.push({ id: doc.id, collection: draftCollectionSlug })
+
+        const savedDraft = await sdk.update(
+          {
+            id: doc.id,
+            action: 'saveDraft',
+            collection: draftCollectionSlug,
+            data: {
+              title: 'SDK update saveDraft',
+            },
+          },
+          sdkAuth,
+        )
+        expect(savedDraft._status).toBe('draft')
+
+        const unpublished = await sdk.update(
+          {
+            id: doc.id,
+            action: 'unpublish',
+            collection: draftCollectionSlug,
+            data: {},
+          },
+          sdkAuth,
+        )
+        expect(unpublished._status).toBe('draft')
+      })
+
+      it('should restore over the SDK with omitted publish and explicit saveDraft', async () => {
+        const doc = await payload.create({
+          action: 'publish',
+          collection: draftCollectionSlug,
+          data: {
+            description: 'SDK restore published v1',
+            title: 'SDK restore v1',
+          },
+        })
+        createdIDs.push({ id: doc.id, collection: draftCollectionSlug })
+
+        await payload.update({
+          id: doc.id,
+          action: 'publish',
+          collection: draftCollectionSlug,
+          data: {
+            title: 'SDK restore v2',
+          },
+        })
+
+        const versions = await payload.findVersions({
+          collection: draftCollectionSlug,
+          sort: 'createdAt',
+          where: {
+            parent: {
+              equals: doc.id,
+            },
+          },
+        })
+        const versionToRestore = versions.docs[0]!
+
+        const publishedRestore = await sdk.restoreVersion(
+          {
+            id: versionToRestore.id,
+            collection: draftCollectionSlug,
+          },
+          sdkAuth,
+        )
+        expect(publishedRestore.title).toBe('SDK restore v1')
+        expect(publishedRestore._status).toBe('published')
+
+        const draftRestore = await sdk.restoreVersion(
+          {
+            id: versionToRestore.id,
+            action: 'saveDraft',
+            collection: draftCollectionSlug,
+          },
+          sdkAuth,
+        )
+        expect(draftRestore.title).toBe('SDK restore v1')
+        expect(draftRestore._status).toBe('draft')
+      })
+
+      it('should read and write draft globals over the SDK', async () => {
+        await sdk.updateGlobal(
+          {
+            slug: simpleDraftGlobalSlug,
+            action: 'publish',
+            data: {
+              title: 'SDK global published',
+            },
+          },
+          sdkAuth,
+        )
+
+        const published = await sdk.findGlobal({ slug: simpleDraftGlobalSlug }, sdkAuth)
+        expect(published.title).toBe('SDK global published')
+
+        await sdk.updateGlobal(
+          {
+            slug: simpleDraftGlobalSlug,
+            action: 'saveDraft',
+            data: {
+              title: 'SDK global draft',
+            },
+          },
+          sdkAuth,
+        )
+
+        const latest = await sdk.findGlobal(
+          { slug: simpleDraftGlobalSlug, version: 'latest' },
+          sdkAuth,
+        )
+        expect(latest.title).toBe('SDK global draft')
+
+        const stillPublished = await sdk.findGlobal({ slug: simpleDraftGlobalSlug }, sdkAuth)
+        expect(stillPublished.title).toBe('SDK global published')
+      })
+
+      it('should reject saveDraft on an SDK collection without drafts', async () => {
+        await expect(
+          sdk.create(
+            {
+              action: 'saveDraft',
+              collection: postCollectionSlug,
+              data: {},
+            } as Parameters<typeof sdk.create>[0],
+            sdkAuth,
+          ),
+        ).rejects.toMatchObject({ status: 400 })
+      })
+    })
+
     describe('Query operations', () => {
       beforeAll(async () => {
         // Create test data for query-only tests (pagination, sorting)
@@ -654,7 +2050,7 @@ describe('Versions', () => {
         // Create a document with many versions for pagination testing
         await createDocumentWithManyVersions({
           collection: draftCollectionSlug,
-          draft: true,
+          action: 'saveDraft',
           initialData: {
             description: 'Description',
             radio: 'test',
@@ -708,13 +2104,13 @@ describe('Versions', () => {
       it('should query drafts with sort', async () => {
         const draftsAscending = await payload.find({
           collection: draftCollectionSlug,
-          draft: true,
+          version: 'latest',
           sort: 'title',
         })
 
         const draftsDescending = await payload.find({
           collection: draftCollectionSlug,
-          draft: true,
+          version: 'latest',
           sort: '-title',
         })
 
@@ -728,14 +2124,14 @@ describe('Versions', () => {
       it('should `findVersions` with sort', async () => {
         const draftsAscending = await payload.findVersions({
           collection: draftCollectionSlug,
-          draft: true,
+          version: 'latest',
           limit: 100,
           sort: 'createdAt',
         })
 
         const draftsDescending = await payload.findVersions({
           collection: draftCollectionSlug,
-          draft: true,
+          version: 'latest',
           limit: 100,
           sort: '-createdAt',
         })
@@ -809,7 +2205,7 @@ describe('Versions', () => {
             description: 'version description',
             title: 'version title',
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         let updatedPost = await payload.update({
@@ -825,7 +2221,7 @@ describe('Versions', () => {
             ],
             title: title2,
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         updatedPost = await payload.update({
@@ -843,7 +2239,7 @@ describe('Versions', () => {
             ],
             title: title2,
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         expect(updatedPost.title).toBe(title2)
@@ -854,7 +2250,7 @@ describe('Versions', () => {
         const draftFromUpdatedPost = await payload.findByID({
           id: versionedPost.id,
           collection: draftCollectionSlug,
-          draft: true,
+          version: 'latest',
         })
         expect(draftFromUpdatedPost.title).toBe(title2)
         expect(draftFromUpdatedPost.blocksField).toHaveLength(1)
@@ -878,17 +2274,19 @@ describe('Versions', () => {
 
         expect({ ...restoredVersion }).toMatchObject({
           ...versionToRestore!.version,
+          _status: 'published',
           updatedAt: restoredVersion.updatedAt,
         })
 
         const latestDraft = await payload.findByID({
           id: versionedPost.id,
           collection: draftCollectionSlug,
-          draft: true,
+          version: 'latest',
         })
 
         expect(latestDraft).toMatchObject({
           ...versionToRestore!.version,
+          _status: 'published',
           // timestamps cannot be guaranteed to be the exact same to the milliseconds
           createdAt: latestDraft.createdAt,
           updatedAt: latestDraft.updatedAt,
@@ -900,7 +2298,7 @@ describe('Versions', () => {
         const target = await payload.create({
           collection: draftCollectionSlug,
           data: { description: 'target', title: 'filter-options target' },
-          draft: true,
+          action: 'saveDraft',
         })
 
         const doc = await payload.create({
@@ -910,7 +2308,7 @@ describe('Versions', () => {
             relationWithFilterOptions: [target.id],
             title: 'filter-options doc',
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         await payload.update({
@@ -920,7 +2318,7 @@ describe('Versions', () => {
             relationWithFilterOptions: [target.id],
             title: 'filter-options doc updated',
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         const versions = await payload.findVersions({
@@ -944,7 +2342,7 @@ describe('Versions', () => {
           id: doc.id,
           collection: draftCollectionSlug,
           depth: 0,
-          draft: true,
+          version: 'latest',
         })
         expect(restored.relationWithFilterOptions).toStrictEqual([target.id])
 
@@ -966,7 +2364,7 @@ describe('Versions', () => {
             description: 'initial description',
             title: 'leak test',
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         const blockId = doc.blocksField?.[0]!.id
@@ -989,7 +2387,7 @@ describe('Versions', () => {
             select: ['test1'],
             title: 'leak test',
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         // Find versions and restore the original (oldest) version
@@ -1008,7 +2406,7 @@ describe('Versions', () => {
         const restored = await payload.findByID({
           id: doc.id,
           collection: draftCollectionSlug,
-          draft: true,
+          version: 'latest',
         })
 
         // Top-level fields should NOT have leaked from the updated version
@@ -1040,7 +2438,7 @@ describe('Versions', () => {
           _status: 'published',
           title: 'v2',
         },
-        draft: true,
+        action: 'saveDraft',
       })
 
       // get the version id of the original draft
@@ -1064,7 +2462,7 @@ describe('Versions', () => {
       const latestDraft = await payload.findByID({
         id: originalPost.id,
         collection: draftCollectionSlug,
-        draft: true,
+        version: 'latest',
       })
 
       // assert it has the original post content
@@ -1090,7 +2488,7 @@ describe('Versions', () => {
           description: 'description v2',
           title: 'title v2 en',
         },
-        draft: true,
+        action: 'saveDraft',
       })
 
       const versions = await payload.findVersions({
@@ -1112,6 +2510,376 @@ describe('Versions', () => {
       })
 
       expect(restoredVersion.id).toStrictEqual(originalPost.id)
+    })
+
+    describe('Restore actions', () => {
+      const createdIDs: { collection: string; id: number | string }[] = []
+
+      afterEach(async () => {
+        for (const created of createdIDs) {
+          await payload.delete({
+            collection: created.collection,
+            id: created.id,
+            overrideAccess: true,
+          })
+        }
+
+        createdIDs.length = 0
+
+        await payload.db.deleteVersions({
+          globalSlug: simpleDraftGlobalSlug,
+          where: {},
+        })
+      })
+
+      async function oldestCollectionVersion({
+        collection,
+        parent,
+      }: {
+        collection: string
+        parent: number | string
+      }) {
+        const versions = await payload.findVersions({
+          collection,
+          where: { parent: { equals: parent } },
+        })
+
+        return versions.docs[versions.docs.length - 1]!
+      }
+
+      it('should publish when restore omits action, even if the version is a draft', async () => {
+        const doc = await payload.create({
+          action: 'saveDraft',
+          collection: draftCollectionSlug,
+          data: {
+            description: 'Draft v1',
+            title: 'Restore omitted v1',
+          },
+          overrideAccess: true,
+        })
+
+        createdIDs.push({ collection: draftCollectionSlug, id: doc.id })
+
+        await payload.update({
+          id: doc.id,
+          action: 'saveDraft',
+          collection: draftCollectionSlug,
+          data: {
+            title: 'Restore omitted v2',
+          },
+          overrideAccess: true,
+        })
+
+        const versionToRestore = await oldestCollectionVersion({
+          collection: draftCollectionSlug,
+          parent: doc.id,
+        })
+
+        expect(versionToRestore.version._status).toBe('draft')
+
+        const restored = await payload.restoreVersion({
+          id: versionToRestore.id,
+          collection: draftCollectionSlug,
+          overrideAccess: true,
+        })
+
+        expect(restored._status).toBe('published')
+        expect(restored.title).toBe('Restore omitted v1')
+
+        const published = await payload.findByID({
+          id: doc.id,
+          collection: draftCollectionSlug,
+          overrideAccess: true,
+        })
+
+        expect(published._status).toBe('published')
+        expect(published.title).toBe('Restore omitted v1')
+      })
+
+      it('should publish when restore is given an explicit publish action', async () => {
+        const doc = await payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            description: 'Published v1',
+            title: 'Restore publish v1',
+            _status: 'published',
+          },
+          overrideAccess: true,
+        })
+
+        createdIDs.push({ collection: draftCollectionSlug, id: doc.id })
+
+        await payload.update({
+          id: doc.id,
+          action: 'saveDraft',
+          collection: draftCollectionSlug,
+          data: {
+            title: 'Restore publish v2',
+          },
+          overrideAccess: true,
+        })
+
+        const versionToRestore = await oldestCollectionVersion({
+          collection: draftCollectionSlug,
+          parent: doc.id,
+        })
+
+        const restored = await payload.restoreVersion({
+          id: versionToRestore.id,
+          action: 'publish',
+          collection: draftCollectionSlug,
+          overrideAccess: true,
+        })
+
+        expect(restored._status).toBe('published')
+        expect(restored.title).toBe('Restore publish v1')
+      })
+
+      it('should restore as a draft without replacing the published document', async () => {
+        const doc = await payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            description: 'Published v1',
+            title: 'Restore draft v1',
+            _status: 'published',
+          },
+          overrideAccess: true,
+        })
+
+        createdIDs.push({ collection: draftCollectionSlug, id: doc.id })
+
+        await payload.update({
+          id: doc.id,
+          collection: draftCollectionSlug,
+          data: {
+            title: 'Restore draft v2',
+            _status: 'published',
+          },
+          overrideAccess: true,
+        })
+
+        const versionToRestore = await oldestCollectionVersion({
+          collection: draftCollectionSlug,
+          parent: doc.id,
+        })
+
+        const restored = await payload.restoreVersion({
+          id: versionToRestore.id,
+          action: 'saveDraft',
+          collection: draftCollectionSlug,
+          overrideAccess: true,
+        })
+
+        expect(restored._status).toBe('draft')
+        expect(restored.title).toBe('Restore draft v1')
+
+        const published = await payload.findByID({
+          id: doc.id,
+          collection: draftCollectionSlug,
+          overrideAccess: true,
+        })
+        const latest = await payload.findByID({
+          id: doc.id,
+          collection: draftCollectionSlug,
+          overrideAccess: true,
+          version: 'latest',
+        })
+
+        expect(published._status).toBe('published')
+        expect(published.title).toBe('Restore draft v2')
+        expect(latest._status).toBe('draft')
+        expect(latest.title).toBe('Restore draft v1')
+      })
+
+      it('should restore localized content as a draft without publishing', async () => {
+        const doc = await payload.create({
+          collection: localizedCollectionSlug,
+          data: {
+            text: 'en v1',
+            _status: 'published',
+          },
+          locale: 'en',
+          overrideAccess: true,
+        })
+
+        createdIDs.push({ collection: localizedCollectionSlug, id: doc.id })
+
+        await payload.update({
+          id: doc.id,
+          action: 'publish',
+          collection: localizedCollectionSlug,
+          data: {
+            text: 'es v1',
+          },
+          locale: 'es',
+          overrideAccess: true,
+        })
+
+        await payload.update({
+          id: doc.id,
+          action: 'publish',
+          collection: localizedCollectionSlug,
+          data: {
+            text: 'en v2',
+          },
+          locale: 'en',
+          overrideAccess: true,
+        })
+
+        const versionToRestore = await oldestCollectionVersion({
+          collection: localizedCollectionSlug,
+          parent: doc.id,
+        })
+
+        const restored = await payload.restoreVersion({
+          id: versionToRestore.id,
+          action: 'saveDraft',
+          collection: localizedCollectionSlug,
+          locale: 'en',
+          overrideAccess: true,
+        })
+
+        expect(restored._status).toBe('draft')
+        expect(restored.text).toBe('en v1')
+
+        const publishedEN = await payload.findByID({
+          id: doc.id,
+          collection: localizedCollectionSlug,
+          locale: 'en',
+          overrideAccess: true,
+        })
+        const latestEN = await payload.findByID({
+          id: doc.id,
+          collection: localizedCollectionSlug,
+          locale: 'en',
+          overrideAccess: true,
+          version: 'latest',
+        })
+
+        expect(publishedEN.text).toBe('en v2')
+        expect(latestEN._status).toBe('draft')
+        expect(latestEN.text).toBe('en v1')
+      })
+
+      it('should reject unpublish on restore', async () => {
+        const doc = await payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            description: 'Description',
+            title: 'Restore unpublish',
+            _status: 'published',
+          },
+          overrideAccess: true,
+        })
+
+        createdIDs.push({ collection: draftCollectionSlug, id: doc.id })
+
+        const versionToRestore = await oldestCollectionVersion({
+          collection: draftCollectionSlug,
+          parent: doc.id,
+        })
+
+        await expect(
+          payload.restoreVersion({
+            id: versionToRestore.id,
+            // @ts-expect-error restore does not accept unpublish
+            action: 'unpublish',
+            collection: draftCollectionSlug,
+            overrideAccess: true,
+          }),
+        ).rejects.toThrow(
+          'Invalid action "unpublish". Valid actions for restore are: saveDraft, publish.',
+        )
+      })
+
+      it('should reject saveDraft restore when drafts are not enabled', async () => {
+        const doc = await payload.create({
+          collection: versionCollectionSlug,
+          data: {
+            description: 'Versioned v1',
+            title: `Restore no drafts ${Date.now()}`,
+          },
+          overrideAccess: true,
+        })
+
+        createdIDs.push({ collection: versionCollectionSlug, id: doc.id })
+
+        await payload.update({
+          id: doc.id,
+          collection: versionCollectionSlug,
+          data: {
+            description: 'Versioned v2',
+            title: `Restore no drafts updated ${Date.now()}`,
+          },
+          overrideAccess: true,
+        })
+
+        const versionToRestore = await oldestCollectionVersion({
+          collection: versionCollectionSlug,
+          parent: doc.id,
+        })
+
+        await expect(
+          payload.restoreVersion({
+            id: versionToRestore.id,
+            // @ts-expect-error restore does not accept saveDraft on collections without drafts
+            action: 'saveDraft',
+            collection: versionCollectionSlug,
+            overrideAccess: true,
+          }),
+        ).rejects.toThrow('The action "saveDraft" cannot be used because drafts are not enabled.')
+      })
+
+      it('should restore as a draft via REST action=saveDraft', async () => {
+        const doc = await payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            description: 'REST published v1',
+            title: 'REST restore leftover v1',
+            _status: 'published',
+          },
+          overrideAccess: true,
+        })
+
+        createdIDs.push({ collection: draftCollectionSlug, id: doc.id })
+
+        await payload.update({
+          id: doc.id,
+          collection: draftCollectionSlug,
+          data: {
+            title: 'REST restore leftover v2',
+            _status: 'published',
+          },
+          overrideAccess: true,
+        })
+
+        const versionToRestore = await oldestCollectionVersion({
+          collection: draftCollectionSlug,
+          parent: doc.id,
+        })
+
+        const response = await restClient.POST(
+          `/${draftCollectionSlug}/versions/${versionToRestore.id}?action=saveDraft`,
+        )
+
+        expect(response.status).toBe(200)
+
+        const published = await payload.findByID({
+          id: doc.id,
+          collection: draftCollectionSlug,
+          overrideAccess: true,
+        })
+        const latest = await payload.findByID({
+          id: doc.id,
+          collection: draftCollectionSlug,
+          overrideAccess: true,
+          version: 'latest',
+        })
+
+        expect(published.title).toBe('REST restore leftover v2')
+        expect(latest.title).toBe('REST restore leftover v1')
+        expect(latest._status).toBe('draft')
+      })
     })
 
     it('findVersions - pagination should work correctly', async () => {
@@ -1176,7 +2944,7 @@ describe('Versions', () => {
             _status: 'draft',
             title: patchedTitle,
           },
-          draft: true,
+          action: 'saveDraft',
           locale: 'en',
         })
 
@@ -1190,7 +2958,7 @@ describe('Versions', () => {
             _status: 'draft',
             title: spanishTitle,
           },
-          draft: true,
+          action: 'saveDraft',
           locale: 'es',
         })
 
@@ -1202,7 +2970,7 @@ describe('Versions', () => {
         const draftPost = await payload.findByID({
           id: originalPublishedPost.id,
           collection: autosaveCollectionSlug,
-          draft: true,
+          version: 'latest',
           locale: 'all',
         })
 
@@ -1218,7 +2986,7 @@ describe('Versions', () => {
             description: 'desc',
             title: 'title',
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         await wait(10)
@@ -1229,7 +2997,7 @@ describe('Versions', () => {
           data: {
             title: 'updated title',
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         const createdUpdatedAt = new Date(created.updatedAt)
@@ -1245,7 +3013,7 @@ describe('Versions', () => {
             description: 'desc',
             title: 'title',
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         await wait(10)
@@ -1257,7 +3025,7 @@ describe('Versions', () => {
           data: {
             title: 'updated title',
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         const createdUpdatedAt = new Date(created.updatedAt)
@@ -1275,7 +3043,7 @@ describe('Versions', () => {
             tag: firstDocTag,
             title: 'title 1',
           },
-          draft: false,
+          action: 'publish',
         })
         await payload.update({
           id: doc.id,
@@ -1285,7 +3053,7 @@ describe('Versions', () => {
             tag: firstDocTag,
             title: 'title 2',
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         const doc2 = await payload.create({
@@ -1295,7 +3063,7 @@ describe('Versions', () => {
             tag: ['blog'],
             title: 'title 1-2',
           },
-          draft: false,
+          action: 'publish',
         })
 
         await payload.update({
@@ -1306,7 +3074,7 @@ describe('Versions', () => {
             tag: ['blog'],
             title: 'title 2-2',
           },
-          draft: true,
+          action: 'saveDraft',
         })
         await payload.update({
           id: doc2.id,
@@ -1316,7 +3084,7 @@ describe('Versions', () => {
             tag: ['blog'],
             title: 'title 3-2',
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         const lastDocVersion = await payload.findVersions({
@@ -1348,7 +3116,7 @@ describe('Versions', () => {
           data: {
             outer: [{ inner: [{ days: ['monday'] }] }],
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         expect(updated.outer?.[0]?.inner?.[0]?.days).toEqual(['monday'])
@@ -1359,14 +3127,14 @@ describe('Versions', () => {
         })
       })
 
-      it('should validate when publishing with the draft arg', async () => {
+      it('should validate when publishing', async () => {
         // no title (not valid for publishing)
         const doc = await payload.create({
           collection: draftCollectionSlug,
           data: {
             description: 'desc',
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         await expect(
@@ -1374,7 +3142,7 @@ describe('Versions', () => {
             id: doc.id,
             collection: draftCollectionSlug,
             data: { _status: 'published' },
-            draft: true,
+            action: 'publish',
           }),
         ).rejects.toThrow(ValidationError)
 
@@ -1382,7 +3150,7 @@ describe('Versions', () => {
         const updateManyResult = await payload.update({
           collection: draftCollectionSlug,
           data: { _status: 'published' },
-          draft: true,
+          action: 'publish',
           where: {
             id: { equals: doc.id },
           },
@@ -1399,7 +3167,7 @@ describe('Versions', () => {
         const { id } = await payload.create({
           collection: autosaveCollectionSlug,
           data: { _status: 'draft', description: 'some-description', title: 'my-title' },
-          draft: true,
+          action: 'saveDraft',
         })
 
         // Autosave the same draft, calls db.updateVersion
@@ -1410,7 +3178,7 @@ describe('Versions', () => {
           data: {
             title: 'new-title',
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         const versionsCount = await payload.countVersions({
@@ -1430,7 +3198,7 @@ describe('Versions', () => {
           data: {
             title: 'new-title-2',
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         const versionsCountAfter = await payload.countVersions({
@@ -1480,17 +3248,16 @@ describe('Versions', () => {
           data: {
             title: 'updated title',
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         // bulk publish
         const updated = await payload.update({
           collection: draftCollectionSlug,
           data: {
-            _status: 'published',
             description: 'updated description',
           },
-          draft: true,
+          action: 'publish',
           where: {
             id: {
               in: [doc.id],
@@ -1579,7 +3346,7 @@ describe('Versions', () => {
             description: 'A',
             title: 'A',
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         await payload.update({
@@ -1590,7 +3357,7 @@ describe('Versions', () => {
             description: 'B',
             title: 'B',
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         await payload.update({
@@ -1601,13 +3368,13 @@ describe('Versions', () => {
             description: 'C',
             title: 'C',
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         const mostRecentDraft = await payload.findByID({
           id: originalDraft.id,
           collection: draftCollectionSlug,
-          draft: true,
+          version: 'latest',
         })
 
         expect(mostRecentDraft.title).toStrictEqual('C')
@@ -1653,6 +3420,7 @@ describe('Versions', () => {
 
         const unpublished = await payload.update({
           id: doc.id,
+          action: 'unpublish',
           collection: draftCollectionSlug,
           data: { _status: 'draft' },
           unpublishAllLocales: true,
@@ -1683,6 +3451,7 @@ describe('Versions', () => {
 
         await payload.updateGlobal({
           slug: draftGlobalSlug,
+          action: 'unpublish',
           data: { _status: 'draft' },
           unpublishAllLocales: true,
         })
@@ -1709,6 +3478,7 @@ describe('Versions', () => {
 
         await payload.update({
           id: doc.id,
+          action: 'unpublish',
           collection: draftCollectionSlug,
           data: { _status: 'draft' },
           unpublishAllLocales: true,
@@ -1717,7 +3487,7 @@ describe('Versions', () => {
         const found = await payload.findByID({
           id: doc.id,
           collection: draftCollectionSlug,
-          draft: false,
+          version: 'published',
         })
 
         expect(found._status).toBe('draft')
@@ -1736,6 +3506,7 @@ describe('Versions', () => {
 
         const unpublished = await payload.update({
           id: doc.id,
+          action: 'unpublish',
           collection: draftCollectionSlug,
           data: { _status: 'draft' },
           locale: 'es',
@@ -1756,6 +3527,7 @@ describe('Versions', () => {
 
         const unpublished = await payload.updateGlobal({
           slug: draftGlobalSlug,
+          action: 'unpublish',
           data: { _status: 'draft' },
           fallbackLocale: false,
           locale: 'es',
@@ -1768,6 +3540,484 @@ describe('Versions', () => {
       })
     })
 
+    describe('Update actions', () => {
+      const createdIDs: { collection: string; id: number | string }[] = []
+
+      const draftData = (title: string) => ({
+        description: 'Description',
+        title,
+      })
+
+      afterEach(async () => {
+        for (const created of createdIDs) {
+          await payload.delete({
+            collection: created.collection,
+            id: created.id,
+            overrideAccess: true,
+          })
+        }
+
+        createdIDs.length = 0
+
+        await payload.db.deleteVersions({
+          globalSlug: simpleDraftGlobalSlug,
+          where: {},
+        })
+      })
+
+      async function createDraftOnly(title: string) {
+        const doc = await payload.create({
+          action: 'saveDraft',
+          collection: draftCollectionSlug,
+          data: draftData(title),
+          overrideAccess: true,
+        })
+
+        createdIDs.push({ collection: draftCollectionSlug, id: doc.id })
+        return doc
+      }
+
+      async function createPublishedOnly(title: string) {
+        const doc = await payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            ...draftData(title),
+            _status: 'published',
+          },
+          overrideAccess: true,
+        })
+
+        createdIDs.push({ collection: draftCollectionSlug, id: doc.id })
+        return doc
+      }
+
+      async function createPublishedWithNewerDraft({
+        draftTitle,
+        publishedTitle,
+      }: {
+        draftTitle: string
+        publishedTitle: string
+      }) {
+        const doc = await payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            ...draftData(publishedTitle),
+            _status: 'published',
+          },
+          overrideAccess: true,
+        })
+
+        createdIDs.push({ collection: draftCollectionSlug, id: doc.id })
+
+        await payload.update({
+          id: doc.id,
+          action: 'saveDraft',
+          collection: draftCollectionSlug,
+          data: {
+            title: draftTitle,
+          },
+          overrideAccess: true,
+        })
+
+        return doc
+      }
+
+      it('should publish a draft-only document when update omits action and status', async () => {
+        const doc = await createDraftOnly('Omitted update draft only')
+
+        const updated = await payload.update({
+          id: doc.id,
+          collection: draftCollectionSlug,
+          data: {
+            description: 'Published from omitted update',
+          },
+          overrideAccess: true,
+        })
+
+        expect(updated._status).toBe('published')
+        expect(updated.title).toBe('Omitted update draft only')
+        expect(updated.description).toBe('Published from omitted update')
+      })
+
+      it('should keep a published-only document published when update omits action and status', async () => {
+        const doc = await createPublishedOnly('Omitted update published only')
+
+        const updated = await payload.update({
+          id: doc.id,
+          collection: draftCollectionSlug,
+          data: {
+            description: 'Still published',
+          },
+          overrideAccess: true,
+        })
+
+        expect(updated._status).toBe('published')
+        expect(updated.title).toBe('Omitted update published only')
+        expect(updated.description).toBe('Still published')
+      })
+
+      it('should publish the newer draft when update omits action and status', async () => {
+        const doc = await createPublishedWithNewerDraft({
+          draftTitle: 'Newer draft title',
+          publishedTitle: 'Published title',
+        })
+
+        const updated = await payload.update({
+          id: doc.id,
+          collection: draftCollectionSlug,
+          data: {
+            description: 'Merged into published',
+          },
+          overrideAccess: true,
+        })
+
+        expect(updated._status).toBe('published')
+        expect(updated.title).toBe('Newer draft title')
+        expect(updated.description).toBe('Merged into published')
+
+        const published = await payload.findByID({
+          id: doc.id,
+          collection: draftCollectionSlug,
+          overrideAccess: true,
+        })
+
+        expect(published.title).toBe('Newer draft title')
+        expect(published._status).toBe('published')
+      })
+
+      it('should save a draft without changing published content', async () => {
+        const doc = await createPublishedOnly('Published stays published')
+
+        await payload.update({
+          id: doc.id,
+          action: 'saveDraft',
+          collection: draftCollectionSlug,
+          data: {
+            title: 'Draft only title',
+          },
+          overrideAccess: true,
+        })
+
+        const published = await payload.findByID({
+          id: doc.id,
+          collection: draftCollectionSlug,
+          overrideAccess: true,
+        })
+        const latest = await payload.findByID({
+          id: doc.id,
+          collection: draftCollectionSlug,
+          overrideAccess: true,
+          version: 'latest',
+        })
+
+        expect(published.title).toBe('Published stays published')
+        expect(published._status).toBe('published')
+        expect(latest.title).toBe('Draft only title')
+        expect(latest._status).toBe('draft')
+      })
+
+      it('should unpublish without creating a new version', async () => {
+        const doc = await createPublishedOnly('Unpublish action')
+
+        const initialVersions = await payload.findVersions({
+          collection: draftCollectionSlug,
+          where: { parent: { equals: doc.id } },
+        })
+
+        const unpublished = await payload.update({
+          id: doc.id,
+          action: 'unpublish',
+          collection: draftCollectionSlug,
+          data: {
+            description: 'Unpublished description',
+          },
+          overrideAccess: true,
+        })
+
+        expect(unpublished._status).toBe('draft')
+        expect(unpublished.description).toBe('Unpublished description')
+
+        const afterVersions = await payload.findVersions({
+          collection: draftCollectionSlug,
+          where: { parent: { equals: doc.id } },
+        })
+
+        expect(afterVersions.docs).toHaveLength(initialVersions.docs.length)
+        expect(afterVersions.docs[0].version._status).toBe('draft')
+      })
+
+      it('should infer publish from a fetched published document', async () => {
+        const doc = await createPublishedOnly('Fetched published round trip')
+
+        const fetched = await payload.findByID({
+          id: doc.id,
+          collection: draftCollectionSlug,
+          overrideAccess: true,
+        })
+
+        const updated = await payload.update({
+          id: doc.id,
+          collection: draftCollectionSlug,
+          data: {
+            ...fetched,
+            description: 'Round tripped published',
+          },
+          overrideAccess: true,
+        })
+
+        expect(updated._status).toBe('published')
+        expect(updated.description).toBe('Round tripped published')
+      })
+
+      it('should infer saveDraft from a fetched draft document', async () => {
+        const doc = await createPublishedWithNewerDraft({
+          draftTitle: 'Fetched draft title',
+          publishedTitle: 'Fetched published title',
+        })
+
+        const fetched = await payload.findByID({
+          id: doc.id,
+          collection: draftCollectionSlug,
+          overrideAccess: true,
+          version: 'latest',
+        })
+
+        await payload.update({
+          id: doc.id,
+          collection: draftCollectionSlug,
+          data: {
+            ...fetched,
+            description: 'Round tripped draft',
+          },
+          overrideAccess: true,
+        })
+
+        const published = await payload.findByID({
+          id: doc.id,
+          collection: draftCollectionSlug,
+          overrideAccess: true,
+        })
+        const latest = await payload.findByID({
+          id: doc.id,
+          collection: draftCollectionSlug,
+          overrideAccess: true,
+          version: 'latest',
+        })
+
+        expect(published.title).toBe('Fetched published title')
+        expect(published.description).toBe('Description')
+        expect(latest.title).toBe('Fetched draft title')
+        expect(latest.description).toBe('Round tripped draft')
+        expect(latest._status).toBe('draft')
+      })
+
+      it('should let explicit update action win when it conflicts with _status', async () => {
+        const doc = await createPublishedOnly('Action wins over status')
+
+        await payload.update({
+          id: doc.id,
+          action: 'saveDraft',
+          collection: draftCollectionSlug,
+          data: {
+            _status: 'published',
+            title: 'Draft despite published status',
+          },
+          overrideAccess: true,
+        })
+
+        const published = await payload.findByID({
+          id: doc.id,
+          collection: draftCollectionSlug,
+          overrideAccess: true,
+        })
+        const latest = await payload.findByID({
+          id: doc.id,
+          collection: draftCollectionSlug,
+          overrideAccess: true,
+          version: 'latest',
+        })
+
+        expect(published.title).toBe('Action wins over status')
+        expect(latest.title).toBe('Draft despite published status')
+        expect(latest._status).toBe('draft')
+      })
+
+      it('should not infer an all-locale transition from localized status', async () => {
+        const doc = await payload.create({
+          collection: localizedCollectionSlug,
+          data: {
+            text: 'Localized published',
+            _status: 'published',
+          },
+          locale: 'en',
+          overrideAccess: true,
+        })
+
+        createdIDs.push({ collection: localizedCollectionSlug, id: doc.id })
+
+        await expect(
+          payload.update({
+            id: doc.id,
+            collection: localizedCollectionSlug,
+            data: {
+              _status: {
+                en: 'draft',
+                es: 'published',
+              },
+            },
+            locale: 'all',
+            overrideAccess: true,
+          }),
+        ).rejects.toThrow(
+          'Publishing all locales requires an explicit "publish" action and publishAllLocales: true.',
+        )
+
+        const published = await payload.findByID({
+          id: doc.id,
+          collection: localizedCollectionSlug,
+          locale: 'en',
+          overrideAccess: true,
+        })
+
+        expect(published._status).toBe('published')
+      })
+
+      it('should reject autosave unless the resolved action is saveDraft', async () => {
+        const doc = await createPublishedOnly('Autosave requires saveDraft')
+
+        await expect(
+          payload.update({
+            id: doc.id,
+            action: 'publish',
+            autosave: true,
+            collection: draftCollectionSlug,
+            data: {
+              title: 'Autosave publish',
+            },
+            overrideAccess: true,
+          }),
+        ).rejects.toThrow('autosave is only valid when the resolved action is "saveDraft".')
+      })
+
+      it('should apply one resolved action to every document in a bulk update', async () => {
+        const draftOnly = await createDraftOnly('Bulk draft only')
+        const publishedOnly = await createPublishedOnly('Bulk published only')
+
+        const result = await payload.update({
+          collection: draftCollectionSlug,
+          data: {
+            description: 'Bulk omitted publish',
+          },
+          overrideAccess: true,
+          where: {
+            id: {
+              in: [draftOnly.id, publishedOnly.id],
+            },
+          },
+        })
+
+        expect(result.docs).toHaveLength(2)
+        expect(result.docs.every((doc) => doc._status === 'published')).toBe(true)
+        expect(result.docs.every((doc) => doc.description === 'Bulk omitted publish')).toBe(true)
+      })
+
+      it('should publish a draft global when update omits action and status', async () => {
+        await payload.updateGlobal({
+          slug: simpleDraftGlobalSlug,
+          data: {
+            title: 'Global draft',
+          },
+          action: 'saveDraft',
+          overrideAccess: true,
+        })
+
+        const updated = await payload.updateGlobal({
+          slug: simpleDraftGlobalSlug,
+          data: {
+            title: 'Global published from omitted update',
+          },
+          overrideAccess: true,
+        })
+
+        expect(updated._status).toBe('published')
+        expect(updated.title).toBe('Global published from omitted update')
+      })
+
+      it('should unpublish a global with an explicit action', async () => {
+        await payload.updateGlobal({
+          slug: simpleDraftGlobalSlug,
+          data: {
+            title: 'Global to unpublish',
+            _status: 'published',
+          },
+          overrideAccess: true,
+        })
+
+        const unpublished = await payload.updateGlobal({
+          slug: simpleDraftGlobalSlug,
+          action: 'unpublish',
+          data: {
+            title: 'Global unpublished',
+          },
+          overrideAccess: true,
+        })
+
+        expect(unpublished._status).toBe('draft')
+        expect(unpublished.title).toBe('Global unpublished')
+      })
+
+      it('should perform an ordinary update when drafts are not enabled', async () => {
+        const doc = await payload.create({
+          collection: textCollectionSlug,
+          data: {
+            text: 'Ordinary omitted update',
+          },
+          overrideAccess: true,
+        })
+
+        createdIDs.push({ collection: textCollectionSlug, id: doc.id })
+
+        const updated = await payload.update({
+          id: doc.id,
+          collection: textCollectionSlug,
+          data: {
+            text: 'Ordinary published update',
+          },
+          action: 'publish',
+          overrideAccess: true,
+        })
+
+        expect(updated.text).toBe('Ordinary published update')
+        expect(updated._status).toBeUndefined()
+
+        await expect(
+          payload.update({
+            id: doc.id,
+            collection: textCollectionSlug,
+            data: {
+              text: 'SaveDraft without drafts',
+            },
+            // @ts-expect-error - saveDraft is invalid when drafts are not enabled
+            action: 'saveDraft',
+            overrideAccess: true,
+          }),
+        ).rejects.toThrow('The action "saveDraft" cannot be used because drafts are not enabled.')
+
+        await expect(
+          payload.update({
+            id: doc.id,
+            collection: textCollectionSlug,
+            data: {
+              text: 'Unpublish without drafts',
+            },
+            // @ts-expect-error - unpublish is invalid when drafts are not enabled
+            action: 'unpublish',
+            overrideAccess: true,
+          }),
+        ).rejects.toThrow('The action "unpublish" cannot be used because drafts are not enabled.')
+      })
+    })
+
     describe('Draft Types', () => {
       afterEach(async () => {
         await cleanupDocuments({
@@ -1777,58 +4027,52 @@ describe('Versions', () => {
       })
 
       it('should allow creating drafts without required fields', async () => {
-        // This test validates that when draft: true is set, required fields become optional
-        // TypeScript should not complain about missing 'description' field even though it's required
         const draft = await payload.create({
           collection: draftCollectionSlug,
           data: {
             title: 'Draft without description',
-            // description is required but omitted - should work with draft: true
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         expect(draft.title).toBe('Draft without description')
-        // Different databases return null vs undefined for missing fields
         expect(draft.description).toBeFalsy()
         expect(draft._status).toBe('draft')
       })
 
-      it('should require all required fields when draft is false', async () => {
-        // This validates that required fields are still enforced when draft is false
+      it('should require all required fields when publishing', async () => {
         await expect(
-          // @ts-expect-error - description is required when not creating a draft
+          // @ts-expect-error - description is required when publishing
           payload.create({
             collection: draftCollectionSlug,
             data: {
               title: 'Published without description',
             },
-            draft: false,
+            action: 'publish',
           }),
         ).rejects.toThrow(ValidationError)
       })
 
-      it('should require all required fields when draft is not specified', async () => {
-        // This validates that required fields are still enforced when draft option is omitted
-        await expect(
-          // @ts-expect-error - description is required when draft option is not specified
-          payload.create({
-            collection: draftCollectionSlug,
-            data: {
-              title: 'Post without description',
-            },
-          }),
-        ).rejects.toThrow(ValidationError)
+      it('should save a draft when action is omitted and required fields are missing', async () => {
+        const draft = await payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            title: 'Post without description',
+          },
+        })
+
+        expect(draft._status).toBe('draft')
+        expect(draft.description).toBeFalsy()
       })
 
-      it('should allow all fields to be optional with draft: true', async () => {
+      it('should allow all fields to be optional with saveDraft', async () => {
         // Test that even fields nested in groups can be omitted
         const draft = await payload.create({
           collection: draftCollectionSlug,
           data: {
             // Both title and description are required but omitted
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         expect(draft._status).toBe('draft')
@@ -1961,7 +4205,7 @@ describe('Versions', () => {
                   id: doc.id,
                   collection: draftCollectionSlug,
                   data: {},
-                  draft: true,
+                  action: 'saveDraft',
                 })
                 .then(resolve)
                 .catch(resolve)
@@ -2001,7 +4245,7 @@ describe('Versions', () => {
         const doc = await payload.create({
           collection: autosaveCollectionSlug,
           data: { title: 'original', _status: 'draft' },
-          draft: true,
+          action: 'saveDraft',
         })
 
         // Establish an existing autosave version so updateLatestVersion has something to update
@@ -2010,7 +4254,7 @@ describe('Versions', () => {
           autosave: true,
           collection: autosaveCollectionSlug,
           data: { title: 'first autosave' },
-          draft: true,
+          action: 'saveDraft',
         })
 
         const spy = vi
@@ -2023,7 +4267,7 @@ describe('Versions', () => {
           autosave: true,
           collection: autosaveCollectionSlug,
           data: { title: 'second autosave' },
-          draft: true,
+          action: 'saveDraft',
         })
 
         spy.mockRestore()
@@ -2050,7 +4294,7 @@ describe('Versions', () => {
         const doc = await payload.create({
           collection: autosaveCollectionSlug,
           data: { title: 'original', _status: 'draft' },
-          draft: true,
+          action: 'saveDraft',
         })
 
         const updateVersionSpy = vi
@@ -2066,7 +4310,7 @@ describe('Versions', () => {
             autosave: true,
             collection: autosaveCollectionSlug,
             data: { title: 'will fail' },
-            draft: true,
+            action: 'saveDraft',
           }),
         ).rejects.toThrow('database connection lost')
 
@@ -2128,7 +4372,7 @@ describe('Versions', () => {
           _status: 'draft',
           alt: 'Updated in draft',
         },
-        draft: true,
+        action: 'saveDraft',
         file: draftImageFile,
       })
 
@@ -2140,7 +4384,7 @@ describe('Versions', () => {
       const draftDoc = await payload.findByID({
         id: publishedDoc.id,
         collection: draftWithUploadCollectionSlug,
-        draft: true,
+        version: 'latest',
       })
 
       uploadedFilenames.push(draftDoc.filename)
@@ -2185,14 +4429,14 @@ describe('Versions', () => {
           _status: 'draft',
           alt: 'Draft with new file',
         },
-        draft: true,
+        action: 'saveDraft',
         file: draftImageFile,
       })
 
       const draftDoc = await payload.findByID({
         id: publishedDoc.id,
         collection: draftWithUploadCollectionSlug,
-        draft: true,
+        version: 'latest',
       })
 
       uploadedFilenames.push(draftDoc.filename)
@@ -2227,14 +4471,14 @@ describe('Versions', () => {
           _status: 'draft',
           alt: 'Draft version',
         },
-        draft: true,
+        action: 'saveDraft',
         file: draftImageFile,
       })
 
       const draftDoc = await payload.findByID({
         id: publishedDoc.id,
         collection: draftWithUploadCollectionSlug,
-        draft: true,
+        version: 'latest',
       })
 
       uploadedFilenames.push(draftDoc.filename)
@@ -2244,7 +4488,7 @@ describe('Versions', () => {
         data: {
           _status: 'published',
         },
-        draft: true,
+        action: 'publish',
         where: {
           id: { equals: publishedDoc.id },
         },
@@ -2260,7 +4504,7 @@ describe('Versions', () => {
       expect(republishedDoc.alt).toBe('Draft version')
     })
 
-    it('should create a draft when duplicating a published upload document with draft: true', async () => {
+    it('should create a draft when duplicating a published upload document with action saveDraft', async () => {
       const imageFile = await getFileByPath(path.resolve(dirname, './image.jpg'))
 
       imageFile.name = 'duplicate-source.jpg'
@@ -2282,7 +4526,7 @@ describe('Versions', () => {
         data: {
           alt: 'Duplicated draft',
         },
-        draft: true,
+        action: 'saveDraft',
         duplicateFromID: publishedDoc.id,
       })
 
@@ -2328,7 +4572,7 @@ describe('Versions', () => {
           _status: 'draft',
           alt: 'Updated in draft',
         },
-        draft: true,
+        action: 'saveDraft',
         file: draftImageFile,
       })
 
@@ -2340,7 +4584,7 @@ describe('Versions', () => {
       const draftDoc = await payload.findByID({
         id: publishedDoc.id,
         collection: draftWithUploadCloudStorageCollectionSlug,
-        draft: true,
+        version: 'latest',
       })
 
       expect(mainDoc._status).toBe('published')
@@ -2377,7 +4621,7 @@ describe('Versions', () => {
           _status: 'draft',
           alt: 'Updated in draft',
         },
-        draft: true,
+        action: 'saveDraft',
         file: draftImageFile,
       })
 
@@ -2409,14 +4653,14 @@ describe('Versions', () => {
           _status: 'draft',
           alt: 'Draft version',
         },
-        draft: true,
+        action: 'saveDraft',
         file: draftImageFile,
       })
 
       const draftDoc = await payload.findByID({
         id: publishedDoc.id,
         collection: draftWithUploadCloudStorageCollectionSlug,
-        draft: true,
+        version: 'latest',
       })
 
       const republishedDoc = await payload.update({
@@ -2425,7 +4669,7 @@ describe('Versions', () => {
         data: {
           _status: 'published',
         },
-        draft: true,
+        action: 'publish',
       })
 
       expect(republishedDoc._status).toBe('published')
@@ -2495,7 +4739,7 @@ describe('Versions', () => {
         data: {
           title: updatedTitle1,
         },
-        draft: true,
+        action: 'saveDraft',
       })
 
       // This will be created in the `_draft-posts_versions` collection
@@ -2506,7 +4750,7 @@ describe('Versions', () => {
         data: {
           title: updatedTitle2,
         },
-        draft: true,
+        action: 'saveDraft',
       })
     }
 
@@ -2577,7 +4821,7 @@ describe('Versions', () => {
     it('should not be able to query an old draft version with draft=true', async () => {
       const draftFindResults = await payload.find({
         collection: draftCollectionSlug,
-        draft: true,
+        version: 'latest',
         where: {
           title: {
             equals: updatedTitle1,
@@ -2591,7 +4835,7 @@ describe('Versions', () => {
     it('should be able to query the newest draft version with draft=true', async () => {
       const draftFindResults = await payload.find({
         collection: draftCollectionSlug,
-        draft: true,
+        version: 'latest',
         where: {
           title: {
             equals: updatedTitle2,
@@ -2639,7 +4883,7 @@ describe('Versions', () => {
 
       const draftFindResults = await payload.find({
         collection: draftCollectionSlug,
-        draft: true,
+        version: 'latest',
         where: query,
       })
 
@@ -2650,7 +4894,7 @@ describe('Versions', () => {
     it("should not be able to query old drafts that don't match with draft=true", async () => {
       const draftFindResults = await payload.find({
         collection: draftCollectionSlug,
-        draft: true,
+        version: 'latest',
         where: {
           title: {
             equals: originalTitle,
@@ -2665,14 +4909,14 @@ describe('Versions', () => {
       await createPostWithVersions({ title: 'different document' })
       const allDocs = await payload.find({
         collection: draftCollectionSlug,
-        draft: true,
+        version: 'latest',
       })
 
       expect(allDocs.docs).toHaveLength(2)
 
       const byID = await payload.find({
         collection: draftCollectionSlug,
-        draft: true,
+        version: 'latest',
         where: {
           id: {
             equals: firstDraft.id,
@@ -2687,7 +4931,7 @@ describe('Versions', () => {
       await createPostWithVersions({ title: 'title document 2' })
       const allDocs = await payload.find({
         collection: draftCollectionSlug,
-        draft: true,
+        version: 'latest',
         where: {
           title: {
             like: 'title',
@@ -2699,7 +4943,7 @@ describe('Versions', () => {
 
       const results = await payload.find({
         collection: draftCollectionSlug,
-        draft: true,
+        version: 'latest',
         where: {
           and: [
             {
@@ -3159,7 +5403,7 @@ describe('Versions', () => {
           slug: autoSaveGlobalSlug,
         })
         expect(updatedGlobal.title).toBe(title2)
-        expect(updatedGlobal._status).toStrictEqual('draft')
+        expect(updatedGlobal._status).toStrictEqual('published')
         expect(globalVersionID).toBeDefined()
       })
 
@@ -3170,7 +5414,7 @@ describe('Versions', () => {
             _status: 'draft',
             title: 'Draft',
           },
-          draft: true,
+          action: 'saveDraft',
         })
         expect(draftVersion.title).toStrictEqual('Draft')
         expect(draftVersion._status).toStrictEqual('draft')
@@ -3181,7 +5425,7 @@ describe('Versions', () => {
             _status: 'published',
             title: 'Published',
           },
-          draft: false,
+          action: 'publish',
         })
         expect(publishedVersion.title).toStrictEqual('Published')
         expect(publishedVersion._status).toStrictEqual('published')
@@ -3222,7 +5466,7 @@ describe('Versions', () => {
 
         const fromNonVersionsTable = await payload.findGlobal({
           slug: autoSaveGlobalSlug,
-          draft: false,
+          version: 'published',
         })
 
         // createdAt from non-versions should be the same as version_createdAt in versions
@@ -3350,7 +5594,7 @@ describe('Versions', () => {
           data: {
             title: 'title',
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         await wait(10)
@@ -3360,7 +5604,7 @@ describe('Versions', () => {
           data: {
             title: 'updated title',
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         const createdUpdatedAt = new Date(created.updatedAt)
@@ -3375,7 +5619,7 @@ describe('Versions', () => {
           data: {
             title: 'title',
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         await wait(10)
@@ -3385,7 +5629,7 @@ describe('Versions', () => {
           data: {
             title: 'updated title',
           },
-          draft: true,
+          action: 'saveDraft',
           autosave: true,
         })
 
@@ -3413,7 +5657,7 @@ describe('Versions', () => {
         // Make sure it was updated correctly
         const foundUpdatedGlobal = await payload.findGlobal({
           slug: autoSaveGlobalSlug,
-          draft: true,
+          version: 'latest',
         })
         expect(foundUpdatedGlobal.title).toBe(title2)
 
@@ -3430,10 +5674,182 @@ describe('Versions', () => {
 
         const restoredGlobal = await payload.findGlobal({
           slug: autoSaveGlobalSlug,
-          draft: true,
+          version: 'latest',
         })
 
         expect(restoredGlobal.title).toBe(restore.version.title.en)
+      })
+
+      describe('Restore actions', () => {
+        afterEach(async () => {
+          await payload.db.deleteVersions({
+            globalSlug: simpleDraftGlobalSlug,
+            where: {},
+          })
+        })
+
+        it('should publish when global restore omits action, even if the version is a draft', async () => {
+          await payload.updateGlobal({
+            action: 'saveDraft',
+            data: {
+              title: 'Global restore omitted v1',
+            },
+            overrideAccess: true,
+            slug: simpleDraftGlobalSlug,
+          })
+
+          const firstVersions = await payload.findGlobalVersions({
+            limit: 1,
+            slug: simpleDraftGlobalSlug,
+            sort: '-createdAt',
+          })
+          const versionToRestore = firstVersions.docs[0]!
+
+          expect(versionToRestore.version._status).toBe('draft')
+
+          await payload.updateGlobal({
+            action: 'saveDraft',
+            data: {
+              title: 'Global restore omitted v2',
+            },
+            overrideAccess: true,
+            slug: simpleDraftGlobalSlug,
+          })
+
+          await payload.restoreGlobalVersion({
+            id: versionToRestore.id,
+            overrideAccess: true,
+            slug: simpleDraftGlobalSlug,
+          })
+
+          const published = await payload.findGlobal({
+            overrideAccess: true,
+            slug: simpleDraftGlobalSlug,
+          })
+
+          expect(published._status).toBe('published')
+          expect(published.title).toBe('Global restore omitted v1')
+        })
+
+        it('should publish when global restore is given an explicit publish action', async () => {
+          await payload.updateGlobal({
+            data: {
+              title: 'Global restore publish v1',
+              _status: 'published',
+            },
+            overrideAccess: true,
+            slug: simpleDraftGlobalSlug,
+          })
+
+          const firstVersions = await payload.findGlobalVersions({
+            limit: 1,
+            slug: simpleDraftGlobalSlug,
+            sort: '-createdAt',
+          })
+          const versionToRestore = firstVersions.docs[0]!
+
+          await payload.updateGlobal({
+            action: 'saveDraft',
+            data: {
+              title: 'Global restore publish v2',
+            },
+            overrideAccess: true,
+            slug: simpleDraftGlobalSlug,
+          })
+
+          await payload.restoreGlobalVersion({
+            id: versionToRestore.id,
+            action: 'publish',
+            overrideAccess: true,
+            slug: simpleDraftGlobalSlug,
+          })
+
+          const published = await payload.findGlobal({
+            overrideAccess: true,
+            slug: simpleDraftGlobalSlug,
+          })
+
+          expect(published._status).toBe('published')
+          expect(published.title).toBe('Global restore publish v1')
+        })
+
+        it('should restore a global as a draft with an explicit action', async () => {
+          await payload.updateGlobal({
+            data: {
+              title: 'Global restore draft v1',
+              _status: 'published',
+            },
+            overrideAccess: true,
+            slug: simpleDraftGlobalSlug,
+          })
+
+          const firstVersions = await payload.findGlobalVersions({
+            limit: 1,
+            slug: simpleDraftGlobalSlug,
+            sort: '-createdAt',
+          })
+          const versionToRestore = firstVersions.docs[0]!
+
+          await payload.updateGlobal({
+            data: {
+              title: 'Global restore draft v2',
+              _status: 'published',
+            },
+            overrideAccess: true,
+            slug: simpleDraftGlobalSlug,
+          })
+
+          await payload.restoreGlobalVersion({
+            id: versionToRestore.id,
+            action: 'saveDraft',
+            overrideAccess: true,
+            slug: simpleDraftGlobalSlug,
+          })
+
+          const latest = await payload.findGlobal({
+            overrideAccess: true,
+            slug: simpleDraftGlobalSlug,
+            version: 'latest',
+          })
+          const published = await payload.findGlobal({
+            overrideAccess: true,
+            slug: simpleDraftGlobalSlug,
+          })
+
+          expect(published._status).toBe('published')
+          expect(published.title).toBe('Global restore draft v2')
+          expect(latest._status).toBe('draft')
+          expect(latest.title).toBe('Global restore draft v1')
+        })
+
+        it('should reject unpublish on global restore', async () => {
+          await payload.updateGlobal({
+            data: {
+              title: 'Global restore unpublish',
+              _status: 'published',
+            },
+            overrideAccess: true,
+            slug: simpleDraftGlobalSlug,
+          })
+
+          const versions = await payload.findGlobalVersions({
+            limit: 1,
+            slug: simpleDraftGlobalSlug,
+            sort: '-createdAt',
+          })
+
+          await expect(
+            payload.restoreGlobalVersion({
+              id: versions.docs[0]!.id,
+              // @ts-expect-error restore does not accept unpublish
+              action: 'unpublish',
+              overrideAccess: true,
+              slug: simpleDraftGlobalSlug,
+            }),
+          ).rejects.toThrow(
+            'Invalid action "unpublish". Valid actions for restore are: saveDraft, publish.',
+          )
+        })
       })
     })
 
@@ -3453,7 +5869,7 @@ describe('Versions', () => {
 
         const publishedGlobal = await payload.findGlobal({
           slug: autoSaveGlobalSlug,
-          draft: true,
+          version: 'latest',
         })
 
         const updatedTitle2 = 'Here is a draft global with a patched title'
@@ -3464,7 +5880,7 @@ describe('Versions', () => {
             _status: 'draft',
             title: updatedTitle2,
           },
-          draft: true,
+          action: 'saveDraft',
           locale: 'en',
         })
 
@@ -3474,13 +5890,13 @@ describe('Versions', () => {
             _status: 'draft',
             title: updatedTitle2,
           },
-          draft: true,
+          action: 'saveDraft',
           locale: 'es',
         })
 
         const updatedGlobal = await payload.findGlobal({
           slug: autoSaveGlobalSlug,
-          draft: true,
+          version: 'latest',
           locale: 'all',
         })
 
@@ -3498,7 +5914,7 @@ describe('Versions', () => {
             _status: 'draft',
             title: originalTitle,
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         const updatedTitle2 = 'Now try to publish'
@@ -3521,7 +5937,7 @@ describe('Versions', () => {
 
     async function createAndSetVersionID() {
       const update = `mutation {
-        updateAutosaveGlobal(draft: true, data: {
+        updateAutosaveGlobal(action: saveDraft, data: {
           title: "${globalGraphQLOriginalTitle}"
         }) {
           _status
@@ -3610,7 +6026,7 @@ describe('Versions', () => {
 
         // Update it
         const update = `mutation {
-          updateAutosaveGlobal(draft: true, data: {
+          updateAutosaveGlobal(action: saveDraft, data: {
             title: "${updatedTitle}"
           }) {
             title
@@ -3654,7 +6070,7 @@ describe('Versions', () => {
           description: 'hello',
           title: 'my doc to publish in the future',
         },
-        draft: true,
+        action: 'saveDraft',
       })
 
       expect(draft._status).toStrictEqual('draft')
@@ -3679,7 +6095,7 @@ describe('Versions', () => {
       const retrieved = await payload.findByID({
         id: draft.id,
         collection: draftCollectionSlug,
-        draft: false,
+        version: 'published',
       })
 
       expect(retrieved._status).toStrictEqual('published')
@@ -3698,7 +6114,7 @@ describe('Versions', () => {
           restrictedToUpdate: true,
           title: 'my doc to publish in the future',
         },
-        draft: true,
+        action: 'saveDraft',
       })
 
       expect(draft._status).toStrictEqual('draft')
@@ -3786,7 +6202,7 @@ describe('Versions', () => {
           description: 'hello',
           title: 'my doc to publish in the future',
         },
-        draft: true,
+        action: 'saveDraft',
       })
 
       expect(draft._status).toStrictEqual('draft')
@@ -3836,7 +6252,7 @@ describe('Versions', () => {
           description: 'hello',
           title: 'my doc to publish in the future',
         },
-        draft: true,
+        action: 'saveDraft',
       })
 
       expect(draft._status).toStrictEqual('draft')
@@ -3884,7 +6300,7 @@ describe('Versions', () => {
           _status: 'draft',
           title: 'i will publish',
         },
-        draft: true,
+        action: 'saveDraft',
       })
 
       expect(draft._status).toStrictEqual('draft')
@@ -3953,7 +6369,7 @@ describe('Versions', () => {
           _status: 'draft',
           title: 'draft only',
         },
-        draft: true,
+        action: 'saveDraft',
       })
 
       expect(draft._status).toStrictEqual('draft')
@@ -4182,7 +6598,7 @@ describe('Versions', () => {
           data: {
             text: 'Spanish draft',
           },
-          draft: true,
+          action: 'saveDraft',
           locale: 'es',
         })
 
@@ -4194,7 +6610,7 @@ describe('Versions', () => {
             description: 'My English description',
             text: 'English draft',
           },
-          draft: true,
+          action: 'saveDraft',
           locale: 'en',
         })
 
@@ -4205,7 +6621,7 @@ describe('Versions', () => {
           data: {
             text: 'German draft',
           },
-          draft: true,
+          action: 'saveDraft',
           locale: 'de',
         })
 
@@ -4217,7 +6633,7 @@ describe('Versions', () => {
             _status: 'published',
             text: 'English published 1',
           },
-          draft: false,
+          action: 'publish',
           locale: 'en',
         })
 
@@ -4238,7 +6654,7 @@ describe('Versions', () => {
         const docWithSpanishDraft1 = await payload.findByID({
           id: draft1.id,
           collection: localizedCollectionSlug,
-          draft: true,
+          version: 'latest',
           locale: 'all',
         })
 
@@ -4255,7 +6671,7 @@ describe('Versions', () => {
             _status: 'published',
             text: 'English published 2',
           },
-          draft: false,
+          action: 'publish',
           locale: 'en',
         })
 
@@ -4280,14 +6696,14 @@ describe('Versions', () => {
             _status: 'draft',
             text: 'German draft 1',
           },
-          draft: true,
+          action: 'saveDraft',
           locale: 'de',
         })
 
         const docWithGermanDraft = await payload.findByID({
           id: draft1.id,
           collection: localizedCollectionSlug,
-          draft: true,
+          version: 'latest',
           locale: 'all',
         })
 
@@ -4306,7 +6722,7 @@ describe('Versions', () => {
             _status: 'published',
             text: 'German published 1',
           },
-          draft: false,
+          action: 'publish',
           locale: 'de',
         })
 
@@ -4317,7 +6733,7 @@ describe('Versions', () => {
             _status: 'published',
             text: 'English published 3',
           },
-          draft: false,
+          action: 'publish',
           locale: 'en',
         })
 
@@ -4335,7 +6751,7 @@ describe('Versions', () => {
         const finalDraft = await payload.findByID({
           id: draft1.id,
           collection: localizedCollectionSlug,
-          draft: true,
+          version: 'latest',
           locale: 'all',
         })
 
@@ -4354,7 +6770,7 @@ describe('Versions', () => {
         const finalPublished = await payload.findByID({
           id: draft1.id,
           collection: localizedCollectionSlug,
-          draft: true,
+          version: 'latest',
           locale: 'all',
         })
 
@@ -4369,7 +6785,7 @@ describe('Versions', () => {
           data: {
             text: 'Spanish draft',
           },
-          draft: true,
+          action: 'saveDraft',
           locale: 'es',
         })
 
@@ -4380,7 +6796,7 @@ describe('Versions', () => {
             _status: 'published',
             text: 'English publish',
           },
-          draft: false,
+          action: 'publish',
         })
 
         const publishedOnlyEN = await payload.findByID({
@@ -4399,7 +6815,7 @@ describe('Versions', () => {
           data: {
             text: 'Spanish draft',
           },
-          draft: true,
+          action: 'saveDraft',
           locale: 'es',
         })
 
@@ -4410,7 +6826,7 @@ describe('Versions', () => {
             _status: 'published',
             text: 'English publish',
           },
-          draft: false,
+          action: 'publish',
         })
 
         const publishedOnlyEN = await payload.findByID({
@@ -4428,7 +6844,7 @@ describe('Versions', () => {
           data: {
             _status: 'published',
           },
-          draft: false,
+          action: 'publish',
           publishAllLocales: true,
         })
 
@@ -4448,7 +6864,7 @@ describe('Versions', () => {
           data: {
             text: 'Spanish draft',
           },
-          draft: true,
+          action: 'saveDraft',
           locale: 'es',
         })
 
@@ -4459,7 +6875,7 @@ describe('Versions', () => {
             _status: 'published',
             text: 'German publish',
           },
-          draft: false,
+          action: 'publish',
           locale: 'de',
         })
 
@@ -4480,7 +6896,7 @@ describe('Versions', () => {
           data: {
             text: 'Spanish draft',
           },
-          draft: true,
+          action: 'saveDraft',
           locale: 'es',
         })
 
@@ -4491,7 +6907,7 @@ describe('Versions', () => {
             _status: 'published',
             text: 'English publish',
           },
-          draft: false,
+          action: 'publish',
         })
 
         const publishedOnlyEN = await payload.findByID({
@@ -4522,7 +6938,7 @@ describe('Versions', () => {
           data: {
             text: 'English draft',
           },
-          draft: true,
+          action: 'saveDraft',
           locale: 'en',
         })
 
@@ -4539,7 +6955,7 @@ describe('Versions', () => {
             ],
             text: 'English with blocks',
           },
-          draft: true,
+          action: 'saveDraft',
           locale: 'en',
         })
 
@@ -4557,7 +6973,7 @@ describe('Versions', () => {
             ],
             text: 'English published with blocks',
           },
-          draft: false,
+          action: 'publish',
           locale: 'en',
         })
 
@@ -4604,7 +7020,7 @@ describe('Versions', () => {
             content: 'Spanish draft content',
             title: 'Spanish draft',
           },
-          draft: true,
+          action: 'saveDraft',
           locale: 'es',
         })
 
@@ -4636,7 +7052,7 @@ describe('Versions', () => {
           data: {
             title: 'Another spanish draft',
           },
-          draft: true,
+          action: 'saveDraft',
           locale: 'es',
         })
 
@@ -4647,7 +7063,7 @@ describe('Versions', () => {
             _status: 'published',
             title: 'Eng published',
           },
-          draft: false,
+          action: 'publish',
           locale: 'en',
         })
 
@@ -4669,7 +7085,7 @@ describe('Versions', () => {
             content: 'Spanish draft content',
             title: 'Spanish draft',
           },
-          draft: true,
+          action: 'saveDraft',
           locale: 'es',
         })
 
@@ -4716,7 +7132,7 @@ describe('Versions', () => {
             content: 'Test span draft content',
             title: 'Test span draft',
           },
-          draft: true,
+          action: 'saveDraft',
           locale: 'es',
         })
 
@@ -4748,7 +7164,7 @@ describe('Versions', () => {
             content: 'New spanish draft content',
             title: 'New spanish draft',
           },
-          draft: true,
+          action: 'saveDraft',
           locale: 'es',
         })
 
@@ -4759,7 +7175,7 @@ describe('Versions', () => {
             _status: 'published',
             title: 'New eng',
           },
-          draft: false,
+          action: 'publish',
         })
 
         const allVersions = await payload.findGlobalVersions({
@@ -4777,6 +7193,457 @@ describe('Versions', () => {
         expect(latestVersion.title.es).toStrictEqual('New spanish draft')
         expect(latestVersion.title.en).toStrictEqual('New eng')
       })
+    })
+  })
+
+  describe('version read modes', () => {
+    const createdIDs: (number | string)[] = []
+
+    const draftData = (title: string) => ({
+      description: 'Description',
+      title,
+    })
+
+    afterEach(async () => {
+      for (const id of createdIDs) {
+        await payload.delete({
+          collection: draftCollectionSlug,
+          id,
+          overrideAccess: true,
+        })
+      }
+
+      createdIDs.length = 0
+
+      await payload.delete({
+        collection: postCollectionSlug,
+        overrideAccess: true,
+        where: {
+          id: {
+            exists: true,
+          },
+        },
+      })
+
+      await payload.db.deleteVersions({
+        globalSlug: simpleDraftGlobalSlug,
+        where: {},
+      })
+    })
+
+    async function createDraftOnly(title: string) {
+      const doc = await payload.create({
+        action: 'saveDraft',
+        collection: draftCollectionSlug,
+        data: draftData(title),
+        overrideAccess: true,
+      })
+
+      createdIDs.push(doc.id)
+      return doc
+    }
+
+    async function createPublishedOnly(title: string) {
+      const doc = await payload.create({
+        collection: draftCollectionSlug,
+        data: {
+          ...draftData(title),
+          _status: 'published',
+        },
+        overrideAccess: true,
+      })
+
+      createdIDs.push(doc.id)
+      return doc
+    }
+
+    async function createPublishedWithNewerDraft({
+      draftTitle,
+      publishedTitle,
+    }: {
+      draftTitle: string
+      publishedTitle: string
+    }) {
+      const doc = await payload.create({
+        collection: draftCollectionSlug,
+        data: {
+          ...draftData(publishedTitle),
+          _status: 'published',
+        },
+        overrideAccess: true,
+      })
+
+      createdIDs.push(doc.id)
+
+      await payload.update({
+        id: doc.id,
+        action: 'saveDraft',
+        collection: draftCollectionSlug,
+        data: {
+          title: draftTitle,
+        },
+        overrideAccess: true,
+      })
+
+      return doc
+    }
+
+    it('should return published content for omitted and published collection reads', async () => {
+      const published = await createPublishedWithNewerDraft({
+        draftTitle: 'Draft title',
+        publishedTitle: 'Published title',
+      })
+
+      const omitted = await payload.findByID({
+        id: published.id,
+        collection: draftCollectionSlug,
+        overrideAccess: true,
+      })
+      const explicit = await payload.findByID({
+        id: published.id,
+        collection: draftCollectionSlug,
+        overrideAccess: true,
+        version: 'published',
+      })
+
+      expect(omitted.title).toBe('Published title')
+      expect(explicit.title).toBe('Published title')
+    })
+
+    it('should hide never-published documents from omitted and published collection reads', async () => {
+      const draft = await createDraftOnly('Never published')
+
+      for (const version of [undefined, 'published'] as const) {
+        await expect(
+          payload.findByID({
+            id: draft.id,
+            collection: draftCollectionSlug,
+            overrideAccess: true,
+            version,
+          }),
+        ).rejects.toThrow()
+
+        const result = await payload.find({
+          collection: draftCollectionSlug,
+          overrideAccess: true,
+          version,
+          where: {
+            id: {
+              equals: draft.id,
+            },
+          },
+        })
+
+        expect(result.docs).toHaveLength(0)
+      }
+
+      const latest = await payload.findByID({
+        id: draft.id,
+        collection: draftCollectionSlug,
+        overrideAccess: true,
+        version: 'latest',
+      })
+
+      expect(latest.title).toBe('Never published')
+    })
+
+    it('should fall back to published content for latest collection reads', async () => {
+      const published = await createPublishedOnly('Only published')
+      const withDraft = await createPublishedWithNewerDraft({
+        draftTitle: 'Newer draft',
+        publishedTitle: 'Original published',
+      })
+
+      const latestPublished = await payload.findByID({
+        id: published.id,
+        collection: draftCollectionSlug,
+        overrideAccess: true,
+        version: 'latest',
+      })
+      const latestWithDraft = await payload.findByID({
+        id: withDraft.id,
+        collection: draftCollectionSlug,
+        overrideAccess: true,
+        version: 'latest',
+      })
+
+      expect(latestPublished.title).toBe('Only published')
+      expect(latestWithDraft.title).toBe('Newer draft')
+    })
+
+    it('should exclude documents without drafts from draft-only collection lists', async () => {
+      const draftOnly = await createDraftOnly('Draft only')
+      const publishedOnly = await createPublishedOnly('Published only')
+      const withDraft = await createPublishedWithNewerDraft({
+        draftTitle: 'Has newer draft',
+        publishedTitle: 'Has published',
+      })
+
+      const result = await payload.find({
+        collection: draftCollectionSlug,
+        overrideAccess: true,
+        pagination: false,
+        version: 'draft',
+        where: {
+          id: {
+            in: [draftOnly.id, publishedOnly.id, withDraft.id],
+          },
+        },
+      })
+
+      const titles = result.docs.map((doc) => doc.title).sort()
+      expect(titles).toEqual(['Draft only', 'Has newer draft'])
+    })
+
+    it('should not find published-only documents with draft collection reads', async () => {
+      const published = await createPublishedOnly('Published only by id')
+
+      await expect(
+        payload.findByID({
+          id: published.id,
+          collection: draftCollectionSlug,
+          overrideAccess: true,
+          version: 'draft',
+        }),
+      ).rejects.toThrow()
+
+      const silenced = await payload.findByID({
+        id: published.id,
+        collection: draftCollectionSlug,
+        disableErrors: true,
+        overrideAccess: true,
+        version: 'draft',
+      })
+
+      expect(silenced).toBeNull()
+    })
+
+    it('should not populate published-only relationships on draft reads', async () => {
+      const related = await createPublishedOnly('Related published only')
+      const parent = await payload.create({
+        action: 'saveDraft',
+        collection: draftCollectionSlug,
+        data: {
+          ...draftData('Parent draft'),
+          relation: related.id,
+        },
+        overrideAccess: true,
+      })
+      createdIDs.push(parent.id)
+
+      const draftRead = await payload.findByID({
+        id: parent.id,
+        collection: draftCollectionSlug,
+        depth: 1,
+        overrideAccess: true,
+        version: 'draft',
+      })
+      const latestRead = await payload.findByID({
+        id: parent.id,
+        collection: draftCollectionSlug,
+        depth: 1,
+        overrideAccess: true,
+        version: 'latest',
+      })
+
+      expect(draftRead.relation).toBe(related.id)
+      expect(typeof latestRead.relation).toBe('object')
+      expect((latestRead.relation as { title: string }).title).toBe('Related published only')
+    })
+
+    it('should honor select on latest collection reads', async () => {
+      const doc = await createPublishedWithNewerDraft({
+        draftTitle: 'Selected draft',
+        publishedTitle: 'Selected published',
+      })
+
+      const result = await payload.findByID({
+        id: doc.id,
+        collection: draftCollectionSlug,
+        overrideAccess: true,
+        select: {
+          title: true,
+        },
+        version: 'latest',
+      })
+
+      expect(result.title).toBe('Selected draft')
+      expect(result).not.toHaveProperty('description')
+    })
+
+    it('should populate relationships using the same version', async () => {
+      const related = await createPublishedWithNewerDraft({
+        draftTitle: 'Related draft',
+        publishedTitle: 'Related published',
+      })
+      const parent = await payload.create({
+        collection: draftCollectionSlug,
+        data: {
+          ...draftData('Parent published'),
+          _status: 'published',
+          relation: related.id,
+        },
+        overrideAccess: true,
+      })
+      createdIDs.push(parent.id)
+
+      const published = await payload.findByID({
+        id: parent.id,
+        collection: draftCollectionSlug,
+        depth: 1,
+        overrideAccess: true,
+        version: 'published',
+      })
+      const latest = await payload.findByID({
+        id: parent.id,
+        collection: draftCollectionSlug,
+        depth: 1,
+        overrideAccess: true,
+        version: 'latest',
+      })
+
+      expect(typeof published.relation).toBe('object')
+      expect((published.relation as { title: string }).title).toBe('Related published')
+      expect((latest.relation as { title: string }).title).toBe('Related draft')
+    })
+
+    it('should return no results for draft reads on collections without drafts', async () => {
+      const doc = await payload.create({
+        collection: postCollectionSlug,
+        data: {},
+        overrideAccess: true,
+      })
+
+      const list = await payload.find({
+        collection: postCollectionSlug,
+        overrideAccess: true,
+        version: 'draft',
+        where: {
+          id: {
+            equals: doc.id,
+          },
+        },
+      })
+      const latest = await payload.findByID({
+        id: doc.id,
+        collection: postCollectionSlug,
+        overrideAccess: true,
+        version: 'latest',
+      })
+
+      expect(list.docs).toHaveLength(0)
+      expect(latest.id).toBe(doc.id)
+
+      await expect(
+        payload.findByID({
+          id: doc.id,
+          collection: postCollectionSlug,
+          overrideAccess: true,
+          version: 'draft',
+        }),
+      ).rejects.toThrow()
+    })
+
+    it('should apply the same read modes to globals', async () => {
+      await payload.updateGlobal({
+        data: {
+          _status: 'published',
+          title: 'Published global',
+        },
+        overrideAccess: true,
+        slug: simpleDraftGlobalSlug,
+      })
+
+      await payload.updateGlobal({
+        action: 'saveDraft',
+        data: {
+          title: 'Draft global',
+        },
+        overrideAccess: true,
+        slug: simpleDraftGlobalSlug,
+      })
+
+      const published = await payload.findGlobal({
+        overrideAccess: true,
+        slug: simpleDraftGlobalSlug,
+        version: 'published',
+      })
+      const latest = await payload.findGlobal({
+        overrideAccess: true,
+        slug: simpleDraftGlobalSlug,
+        version: 'latest',
+      })
+      const draft = await payload.findGlobal({
+        overrideAccess: true,
+        slug: simpleDraftGlobalSlug,
+        version: 'draft',
+      })
+
+      expect(published.title).toBe('Published global')
+      expect(latest.title).toBe('Draft global')
+      expect(draft.title).toBe('Draft global')
+    })
+
+    it('should hide a never-published global from omitted and published reads', async () => {
+      await cleanupGlobal({
+        globalSlug: simpleDraftGlobalSlug,
+        payload,
+      })
+
+      await payload.updateGlobal({
+        action: 'saveDraft',
+        data: {
+          title: 'Never published global',
+        },
+        overrideAccess: true,
+        slug: simpleDraftGlobalSlug,
+      })
+
+      for (const version of [undefined, 'published'] as const) {
+        await expect(
+          payload.findGlobal({
+            overrideAccess: true,
+            slug: simpleDraftGlobalSlug,
+            version,
+          }),
+        ).rejects.toThrow()
+      }
+
+      const latest = await payload.findGlobal({
+        overrideAccess: true,
+        slug: simpleDraftGlobalSlug,
+        version: 'latest',
+      })
+
+      expect(latest.title).toBe('Never published global')
+    })
+
+    it('should not find a published-only global with a draft read', async () => {
+      await payload.updateGlobal({
+        data: {
+          _status: 'published',
+          title: 'Only published global',
+        },
+        overrideAccess: true,
+        slug: simpleDraftGlobalSlug,
+      })
+
+      await expect(
+        payload.findGlobal({
+          overrideAccess: true,
+          slug: simpleDraftGlobalSlug,
+          version: 'draft',
+        }),
+      ).rejects.toThrow()
+
+      const silenced = await payload.findGlobal({
+        disableErrors: true,
+        overrideAccess: true,
+        slug: simpleDraftGlobalSlug,
+        version: 'draft',
+      })
+
+      expect(silenced).toBeNull()
     })
   })
 })

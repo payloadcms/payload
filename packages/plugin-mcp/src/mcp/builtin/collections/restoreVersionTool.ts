@@ -22,6 +22,12 @@ export const restoreVersionTool = defineCollectionTool({
   description: DEFAULT_DESCRIPTION,
   input: z.object({
     id: z.string().describe('The ID of the version to restore'),
+    action: z
+      .enum(['saveDraft', 'publish'])
+      .describe(
+        'Whether to restore the version as a draft (saveDraft) or publish it (publish). When omitted, restore defaults to publish.',
+      )
+      .optional(),
     depth: z
       .number()
       .int()
@@ -30,11 +36,6 @@ export const restoreVersionTool = defineCollectionTool({
       .describe('How many levels deep to populate relationships in response')
       .optional()
       .default(0),
-    draft: z
-      .boolean()
-      .describe('Whether to restore the version as a draft')
-      .optional()
-      .default(false),
     fallbackLocale: z
       .string()
       .describe('Optional: fallback locale code to use when requested locale is not available')
@@ -63,7 +64,7 @@ export const restoreVersionTool = defineCollectionTool({
 }).handler(async ({ authorizedMCP, collectionSlug, input, req }) => {
   const payload = req.payload
   const logger = getLogger({ payload })
-  const { id, depth, draft, fallbackLocale, locale, populate, select, showHiddenFields } = input
+  const { id, action, depth, fallbackLocale, locale, populate, select, showHiddenFields } = input
 
   logger.info(`Restoring version in collection: ${collectionSlug} with ID: ${id}`)
 
@@ -72,9 +73,9 @@ export const restoreVersionTool = defineCollectionTool({
       id,
       collection: collectionSlug,
       depth,
-      draft,
       overrideAccess: authorizedMCP.overrideAccess,
       req,
+      ...(action ? { action } : {}),
       ...(fallbackLocale ? { fallbackLocale } : {}),
       ...(locale ? { locale } : {}),
       ...(populate ? { populate: populate as PopulateType } : {}),

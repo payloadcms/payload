@@ -232,7 +232,7 @@ describe('@payloadcms/plugin-nested-docs', () => {
       const initialPublished = await payload.findByID({
         id: childDoc.id,
         collection: 'pages',
-        draft: false,
+        version: 'published',
       })
       expect(initialPublished._status).toBe('published')
       expect(initialPublished.breadcrumbs).toHaveLength(2)
@@ -244,7 +244,7 @@ describe('@payloadcms/plugin-nested-docs', () => {
         data: {
           title: 'Version Child Draft Edit',
         },
-        draft: true,
+        action: 'saveDraft',
       })
 
       // Step 4: Re-publish the parent (triggers resaveChildren)
@@ -262,7 +262,7 @@ describe('@payloadcms/plugin-nested-docs', () => {
       const publishedChild = await payload.findByID({
         id: childDoc.id,
         collection: 'pages',
-        draft: false,
+        version: 'published',
       })
 
       expect(publishedChild).toBeDefined()
@@ -274,7 +274,7 @@ describe('@payloadcms/plugin-nested-docs', () => {
       const draftChild = await payload.findByID({
         id: childDoc.id,
         collection: 'pages',
-        draft: true,
+        version: 'latest',
       })
 
       expect(draftChild).toBeDefined()
@@ -321,7 +321,7 @@ describe('@payloadcms/plugin-nested-docs', () => {
       const updatedDraftChild = await payload.findByID({
         id: draftChild.id,
         collection: 'pages',
-        draft: true,
+        version: 'latest',
       })
 
       expect(updatedDraftChild.breadcrumbs).toHaveLength(2)
@@ -357,7 +357,7 @@ describe('@payloadcms/plugin-nested-docs', () => {
         data: {
           title: 'Breadcrumb Child Draft',
         },
-        draft: true,
+        action: 'saveDraft',
       })
 
       // Update parent slug
@@ -374,7 +374,7 @@ describe('@payloadcms/plugin-nested-docs', () => {
       const published = await payload.findByID({
         id: child.id,
         collection: 'pages',
-        draft: false,
+        version: 'published',
       })
 
       expect(published._status).toBe('published')
@@ -384,7 +384,7 @@ describe('@payloadcms/plugin-nested-docs', () => {
       const draft = await payload.findByID({
         id: child.id,
         collection: 'pages',
-        draft: true,
+        version: 'latest',
       })
 
       expect(draft._status).toBe('draft')
@@ -401,7 +401,7 @@ describe('@payloadcms/plugin-nested-docs', () => {
           title: 'Scheduled Page',
           slug: 'scheduled-page',
         },
-        draft: true,
+        action: 'saveDraft',
       })
 
       expect(draft._status).toBe('draft')
@@ -431,7 +431,7 @@ describe('@payloadcms/plugin-nested-docs', () => {
       const retrieved = await payload.findByID({
         id: draft.id,
         collection: 'pages',
-        draft: false,
+        version: 'published',
       })
 
       expect(retrieved._status).toBe('published')

@@ -19,6 +19,7 @@ export const getLexicalHooks: (args: {
     afterChange: [
       async (args) => {
         const {
+          action,
           collection,
           context: _context,
           data,
@@ -97,6 +98,7 @@ export const getLexicalHooks: (args: {
                 continue
               }
               node = await hook({
+                action,
                 context,
                 node,
                 operation,
@@ -122,6 +124,7 @@ export const getLexicalHooks: (args: {
 
             if (subFields?.length) {
               await afterChangeTraverseFields({
+                action,
                 blockData: nodeSiblingData,
                 collection,
                 context,
@@ -156,7 +159,6 @@ export const getLexicalHooks: (args: {
           context: context,
           currentDepth,
           depth,
-          draft,
           fallbackLocale,
           field,
           fieldPromises,
@@ -176,6 +178,7 @@ export const getLexicalHooks: (args: {
           showHiddenFields,
           triggerAccessControl,
           triggerHooks,
+          version,
         } = args
 
         let { value } = args
@@ -208,7 +211,6 @@ export const getLexicalHooks: (args: {
                 context,
                 currentDepth: currentDepth!,
                 depth: depth!,
-                draft: draft!,
                 fallbackLocale: fallbackLocale!,
                 fieldPromises: fieldPromises!,
                 findMany: findMany!,
@@ -224,6 +226,7 @@ export const getLexicalHooks: (args: {
                 showHiddenFields: showHiddenFields!,
                 triggerAccessControl: triggerAccessControl!,
                 triggerHooks: triggerHooks!,
+                version,
               })
             }
           }
@@ -242,7 +245,7 @@ export const getLexicalHooks: (args: {
                 currentDepth: currentDepth!,
                 depth: depth!,
                 doc: originalDoc,
-                draft: draft!,
+                draft: version === 'latest' || version === 'draft',
                 fallbackLocale: fallbackLocale!,
                 fieldPromises: fieldPromises!,
                 fields: subFields,
@@ -262,6 +265,7 @@ export const getLexicalHooks: (args: {
                 siblingDoc: nodeSiblingData,
                 triggerAccessControl,
                 triggerHooks,
+                version,
               })
             }
           }

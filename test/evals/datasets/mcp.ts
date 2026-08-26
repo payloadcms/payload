@@ -422,7 +422,7 @@ export const mcpDataset: EvalCase[] = [
     verify: async ({ audit, expect, payload, transcript }) => {
       const { docs: draftArticles } = await payload.find({
         collection: 'articles',
-        draft: true,
+        version: 'latest',
         locale: 'en',
         where: { title: { equals: 'MCP Draft Update Saved' } },
       })
@@ -432,7 +432,7 @@ export const mcpDataset: EvalCase[] = [
       const publishedArticle = await payload.findByID({
         id: draftArticle!.id,
         collection: 'articles',
-        draft: false,
+        version: 'published',
         locale: 'en',
       })
 
@@ -466,7 +466,7 @@ export const mcpDataset: EvalCase[] = [
     verify: async ({ audit, expect, payload, transcript }) => {
       const { docs: publishedArticles } = await payload.find({
         collection: 'articles',
-        draft: false,
+        version: 'published',
         locale: 'en',
         where: { title: { equals: 'MCP Published Update Saved' } },
       })
@@ -501,7 +501,7 @@ export const mcpDataset: EvalCase[] = [
     verify: async ({ audit, expect, payload, transcript }) => {
       const { docs: unpublishedArticles } = await payload.find({
         collection: 'articles',
-        draft: false,
+        version: 'published',
         locale: 'en',
         where: { title: { equals: 'MCP Unpublish Target' } },
       })
@@ -536,14 +536,14 @@ export const mcpDataset: EvalCase[] = [
         id: article.id,
         collection: 'articles',
         data: { title: 'MCP Draft Must Not Be Read' },
-        draft: true,
+        action: 'saveDraft',
         locale: 'en',
       })
     },
     verify: async ({ audit, expect, payload, transcript }) => {
       const { docs: publishedArticles } = await payload.find({
         collection: 'articles',
-        draft: false,
+        version: 'published',
         locale: 'en',
         where: { title: { equals: 'MCP Published Read Target' } },
       })
@@ -553,7 +553,7 @@ export const mcpDataset: EvalCase[] = [
       const draftArticle = await payload.findByID({
         id: publishedArticle!.id,
         collection: 'articles',
-        draft: true,
+        version: 'latest',
         locale: 'en',
       })
       const agentResponse = getFinalAgentResponse({ transcript })
@@ -593,14 +593,14 @@ export const mcpDataset: EvalCase[] = [
         id: article.id,
         collection: 'articles',
         data: { title: 'MCP Draft Read Latest Title' },
-        draft: true,
+        action: 'saveDraft',
         locale: 'en',
       })
     },
     verify: async ({ audit, expect, payload, transcript }) => {
       const { docs: draftArticles } = await payload.find({
         collection: 'articles',
-        draft: true,
+        version: 'latest',
         locale: 'en',
         where: { title: { equals: 'MCP Draft Read Latest Title' } },
       })
@@ -641,7 +641,7 @@ export const mcpDataset: EvalCase[] = [
         id: article.id,
         collection: 'articles',
         data: { _status: 'published', title: 'MCP Spanish Published Title' },
-        draft: false,
+        action: 'publish',
         locale: 'es',
         publishAllLocales: false,
       })
@@ -649,14 +649,14 @@ export const mcpDataset: EvalCase[] = [
         id: article.id,
         collection: 'articles',
         data: { title: 'MCP Spanish Draft Title' },
-        draft: true,
+        action: 'saveDraft',
         locale: 'es',
       })
     },
     verify: async ({ audit, expect, payload, transcript }) => {
       const { docs: publishedEnglishArticles } = await payload.find({
         collection: 'articles',
-        draft: false,
+        version: 'published',
         locale: 'en',
         where: { title: { equals: 'MCP English Published Title' } },
       })
@@ -666,13 +666,13 @@ export const mcpDataset: EvalCase[] = [
       const publishedSpanish = await payload.findByID({
         id: publishedEnglish!.id,
         collection: 'articles',
-        draft: false,
+        version: 'published',
         locale: 'es',
       })
       const draftSpanish = await payload.findByID({
         id: publishedEnglish!.id,
         collection: 'articles',
-        draft: true,
+        version: 'latest',
         locale: 'es',
       })
 
@@ -701,7 +701,7 @@ export const mcpDataset: EvalCase[] = [
     verify: async ({ audit, expect, payload, transcript }) => {
       const { docs } = await payload.find({
         collection: 'articles',
-        draft: true,
+        version: 'latest',
         locale: 'en',
         where: { title: { equals: 'MCP Newly Created Draft' } },
       })
@@ -727,7 +727,7 @@ export const mcpDataset: EvalCase[] = [
     verify: async ({ audit, expect, payload, transcript }) => {
       const { docs } = await payload.find({
         collection: 'articles',
-        draft: false,
+        version: 'published',
         locale: 'en',
         where: { title: { equals: 'MCP Newly Created Published' } },
       })
@@ -741,6 +741,94 @@ export const mcpDataset: EvalCase[] = [
         optimalModificationAttempts: 1,
         optimalToolCalls: 2,
         requiredPayloadOperation: { slug: 'articles', kind: 'mutation' },
+        transcript,
+      })
+    },
+  },
+  {
+    bootConfig: true,
+    category: 'mcp',
+    configPath: 'mcp/shared',
+    input:
+      'version-action: Create a new unpublished draft article titled "Version Action Created Draft". Use the v4 action API, not the removed draft boolean.',
+    verify: async ({ audit, expect, payload, transcript }) => {
+      const { docs } = await payload.find({
+        collection: 'articles',
+        locale: 'en',
+        version: 'latest',
+        where: { title: { equals: 'Version Action Created Draft' } },
+      })
+      const article = docs[0]
+      const createCalls = audit.filter(
+        (event) => event.type === 'mcp-tool-call' && event.name === 'createDocuments',
+      )
+      const createCall = createCalls[0]
+      const createInput = createCall?.input as { action?: unknown; draft?: unknown } | undefined
+
+      expect(docs).toHaveLength(1)
+      expect(article?._status).toBe('draft')
+      expect(createInput).not.toHaveProperty('draft')
+      expect(createInput?.action === 'saveDraft' || createInput?.action === undefined).toBe(true)
+
+      return scoreMCPExecution({
+        audit,
+        optimalModificationAttempts: 1,
+        optimalToolCalls: 2,
+        requiredPayloadOperation: { slug: 'articles', kind: 'mutation' },
+        transcript,
+      })
+    },
+  },
+  {
+    bootConfig: true,
+    category: 'mcp',
+    configPath: 'mcp/shared',
+    input:
+      'version-action: Show me the latest unpublished draft of the article currently published as "Version Action Read Published". Ignore the published title.',
+    setup: async ({ payload }) => {
+      const article = await payload.create({
+        collection: 'articles',
+        data: { _status: 'published', title: 'Version Action Read Published' },
+        locale: 'en',
+      })
+
+      await payload.update({
+        id: article.id,
+        action: 'saveDraft',
+        collection: 'articles',
+        data: { title: 'Version Action Read Latest' },
+        locale: 'en',
+      })
+    },
+    verify: async ({ audit, expect, payload, transcript }) => {
+      const { docs: draftArticles } = await payload.find({
+        collection: 'articles',
+        locale: 'en',
+        version: 'latest',
+        where: { title: { equals: 'Version Action Read Latest' } },
+      })
+      const findCalls = audit.filter(
+        (event) => event.type === 'mcp-tool-call' && event.name === 'findDocuments',
+      )
+      const findCall = findCalls[0]
+      const findInput = findCall?.input as { draft?: unknown; version?: unknown } | undefined
+      const agentResponse = getFinalAgentResponse({ transcript })
+
+      expect(draftArticles).toHaveLength(1)
+      expect(agentResponse).toContain('Version Action Read Latest')
+      expect(agentResponse).not.toContain('Version Action Read Published')
+      expect(findInput).not.toHaveProperty('draft')
+      expect(['latest', 'draft']).toContain(findInput?.version)
+
+      return scoreMCPExecution({
+        audit,
+        optimalModificationAttempts: 0,
+        optimalToolCalls: 1,
+        requiredPayloadOperation: {
+          entityType: 'collection',
+          kind: 'read',
+          slug: 'articles',
+        },
         transcript,
       })
     },

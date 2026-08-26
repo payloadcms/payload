@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { SanitizedCollectionConfig, TypeWithID } from '../../collections/config/types.js'
 import type { AccessResult } from '../../config/types.js'
 import type { FindGlobalVersionsArgs, FindVersionsArgs } from '../../database/types.js'
@@ -8,10 +7,12 @@ import type { PayloadRequest, SelectType, Where } from '../../types/index.js'
 import { hasWhereAccessResult } from '../../auth/index.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { docHasTimestamps } from '../../types/index.js'
-import { hasLocalizeStatusEnabled } from '../../utilities/getVersionsConfig.js'
 import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.js'
-import { appendVersionToQueryKey } from './appendVersionToQueryKey.js'
-import { getQueryDraftsSelect } from './getQueryDraftsSelect.js'
+import { appendVersionToQueryKey } from '../drafts/appendVersionToQueryKey.js'
+import { getQueryDraftsSelect } from '../drafts/getQueryDraftsSelect.js'
+import { getDraftStatusWhere } from './getDraftStatusWhere.js'
+
+export type ReplaceWithVersionPolicy = 'draft' | 'latest'
 
 type Arguments<T> = {
   accessResult: AccessResult
@@ -19,57 +20,54 @@ type Arguments<T> = {
   entity: SanitizedCollectionConfig | SanitizedGlobalConfig
   entityType: 'collection' | 'global'
   overrideAccess: boolean
+  policy: ReplaceWithVersionPolicy
   req: PayloadRequest
   select?: SelectType
 }
 
-export const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
+/**
+ * Chooses between a found draft version and the published document.
+ * `latest` falls back to published content. `draft` returns no result when no draft exists.
+ */
+export function applyReplacePolicy<T>({
+  draftVersion,
+  policy,
+  publishedDoc,
+}: {
+  draftVersion: T | undefined
+  policy: ReplaceWithVersionPolicy
+  publishedDoc: T
+}): null | T {
+  if (draftVersion) {
+    return draftVersion
+  }
+
+  if (policy === 'latest') {
+    return publishedDoc
+  }
+
+  return null
+}
+
+/**
+ * Replaces a published document with its newest draft when one exists.
+ *
+ * - `latest`: newest saved draft, otherwise the published document
+ * - `draft`: newest draft only, with no published fallback
+ */
+export const replaceWithVersion = async <T extends TypeWithID>({
   accessResult,
   doc,
   entity,
   entityType,
+  policy,
   req,
   select,
-}: Arguments<T>): Promise<T> => {
+}: Arguments<T>): Promise<null | T> => {
   const { locale, payload } = req
 
-  let queryToBuild: Where = {
-    and: [
-      {
-        'version._status': {
-          equals: 'draft',
-        },
-      },
-    ],
-  }
-
-  if (hasLocalizeStatusEnabled(entity)) {
-    if (locale === 'all') {
-      queryToBuild = {
-        and: [
-          {
-            or: (
-              (payload.config.localization && payload.config.localization.localeCodes) ||
-              []
-            ).map((localeCode) => ({
-              [`version._status.${localeCode}`]: {
-                equals: 'draft',
-              },
-            })),
-          },
-        ],
-      }
-    } else if (locale) {
-      queryToBuild = {
-        and: [
-          {
-            [`version._status.${locale}`]: {
-              equals: 'draft',
-            },
-          },
-        ],
-      }
-    }
+  const queryToBuild: Where = {
+    and: [getDraftStatusWhere({ entity, locale: locale ?? undefined, payload })],
   }
 
   if (entityType === 'collection') {
@@ -125,27 +123,29 @@ export const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
   let draft = versionDocs[0]
 
   if (!draft) {
-    return doc
+    return applyReplacePolicy({
+      draftVersion: undefined,
+      policy,
+      publishedDoc: doc,
+    })
   }
 
   draft = sanitizeInternalFields(draft)
 
-  // Patch globalType onto version doc
   if (entityType === 'global' && 'globalType' in doc) {
     // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
     draft.version.globalType = doc.globalType
   }
 
-  // handle when .version wasn't selected due to projection
   if (!draft.version) {
     draft.version = {} as T
   }
 
-  // Disregard all other draft content at this point,
-  // Only interested in the version itself.
-  // Operations will handle firing hooks, etc.
-
   draft.version.id = doc.id
 
-  return draft.version
+  return applyReplacePolicy({
+    draftVersion: draft.version,
+    policy,
+    publishedDoc: doc,
+  })
 }

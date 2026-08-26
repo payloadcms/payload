@@ -8,7 +8,7 @@ import type {
 } from '../../../index.js'
 import type { PayloadRequest, PopulateType, SelectType } from '../../../types/index.js'
 import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
-import type { DataFromCollectionSlug, DraftFlagFromCollectionSlug } from '../../config/types.js'
+import type { DataFromCollectionSlug, RestoreActionFromCollectionSlug } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
@@ -69,7 +69,7 @@ type BaseOptions<TSlug extends CollectionSlug> = {
 } & Pick<FindOptions<TSlug, SelectType>, 'select'>
 
 export type Options<TSlug extends CollectionSlug> = BaseOptions<TSlug> &
-  DraftFlagFromCollectionSlug<TSlug>
+  RestoreActionFromCollectionSlug<TSlug>
 
 export async function restoreVersionLocal<TSlug extends CollectionSlug>(
   payload: Payload,
@@ -77,6 +77,7 @@ export async function restoreVersionLocal<TSlug extends CollectionSlug>(
 ): Promise<DataFromCollectionSlug<TSlug>> {
   const {
     id,
+    action,
     collection: collectionSlug,
     depth,
     overrideAccess = true,
@@ -97,6 +98,7 @@ export async function restoreVersionLocal<TSlug extends CollectionSlug>(
 
   const args = {
     id,
+    action,
     collection,
     depth,
     overrideAccess,

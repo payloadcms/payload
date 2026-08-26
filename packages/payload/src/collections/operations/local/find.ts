@@ -3,7 +3,6 @@ import type {
   CollectionSlug,
   JoinQuery,
   Payload,
-  PayloadTypes,
   RequestContext,
   TypedFallbackLocale,
   TypedLocale,
@@ -19,7 +18,8 @@ import type {
   Where,
 } from '../../../types/index.js'
 import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
-import type { DraftFlagFromCollectionSlug, SelectFromCollectionSlug } from '../../config/types.js'
+import type { ReadVersion } from '../../../versions/types.js'
+import type { SelectFromCollectionSlug, VersionFromCollectionSlug } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
@@ -179,7 +179,7 @@ export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> = 
   TSlug,
   TSelect
 > &
-  DraftFlagFromCollectionSlug<TSlug>
+  VersionFromCollectionSlug<TSlug>
 
 // Backward compatibility export
 export type FindOptions<TSlug extends CollectionSlug, TSelect extends SelectType> = Options<
@@ -190,16 +190,14 @@ export type FindOptions<TSlug extends CollectionSlug, TSelect extends SelectType
 export async function findLocal<
   TSlug extends CollectionSlug,
   TSelect extends SelectFromCollectionSlug<TSlug>,
-  TDraft extends boolean = false,
+  TVersion extends ReadVersion | undefined = undefined,
 >(
   payload: Payload,
-  options: { draft?: TDraft } & FindOptions<TSlug, TSelect>,
+  options: { version?: TVersion } & FindOptions<TSlug, TSelect>,
 ): Promise<
   PaginatedDocs<
-    TDraft extends true
-      ? PayloadTypes extends { strictDraftTypes: true }
-        ? DraftTransformCollectionWithSelect<TSlug, TSelect>
-        : TransformCollectionWithSelect<TSlug, TSelect>
+    TVersion extends 'draft' | 'latest'
+      ? DraftTransformCollectionWithSelect<TSlug, TSelect>
       : TransformCollectionWithSelect<TSlug, TSelect>
   >
 > {
@@ -208,7 +206,6 @@ export async function findLocal<
     currentDepth,
     depth,
     disableErrors,
-    draft = false,
     includeLockStatus,
     joins,
     limit,
@@ -220,6 +217,7 @@ export async function findLocal<
     showHiddenFields,
     sort,
     trash = false,
+    version,
     where,
   } = options
 
@@ -236,7 +234,6 @@ export async function findLocal<
     currentDepth,
     depth,
     disableErrors,
-    draft,
     includeLockStatus,
     joins,
     limit,
@@ -249,6 +246,7 @@ export async function findLocal<
     showHiddenFields,
     sort,
     trash,
+    version,
     where,
   })
 }

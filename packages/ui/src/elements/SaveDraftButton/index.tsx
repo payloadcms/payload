@@ -43,7 +43,7 @@ export function SaveDraftButton(props: SaveDraftButtonClientProps) {
       return
     }
 
-    const search = `?locale=${locale}&depth=0&fallback-locale=null&draft=true`
+    const search = `?locale=${locale}&depth=0&fallback-locale=null&action=saveDraft`
     let action
     let method = 'POST'
 

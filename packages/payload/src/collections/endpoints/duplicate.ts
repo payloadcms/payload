@@ -5,20 +5,35 @@ import type { PayloadHandler } from '../../config/types.js'
 
 import { getRequestCollectionWithID } from '../../utilities/getRequestEntity.js'
 import { headersWithCors } from '../../utilities/headersWithCors.js'
-import { parseParams } from '../../utilities/parseParams/index.js'
+import {
+  createActionValues,
+  parseEnumParam,
+  parseParams,
+} from '../../utilities/parseParams/index.js'
 import { duplicateOperation } from '../operations/duplicate.js'
 
 export const duplicateHandler: PayloadHandler = async (req) => {
   const { id, collection } = getRequestCollectionWithID(req)
 
-  const { depth, draft = true, populate, select, selectedLocales } = parseParams(req.query)
+  const {
+    action: requestedAction,
+    depth,
+    populate,
+    select,
+    selectedLocales,
+  } = parseParams(req.query)
+  const action = parseEnumParam({
+    allowed: createActionValues,
+    param: 'action',
+    value: requestedAction,
+  })
 
   const doc = await duplicateOperation({
     id,
+    action,
     collection,
     data: req.data,
     depth,
-    draft,
     populate,
     req,
     select,

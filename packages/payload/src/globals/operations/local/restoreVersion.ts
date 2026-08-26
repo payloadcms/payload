@@ -1,7 +1,7 @@
 import type { GlobalSlug, Payload, RequestContext, TypedLocale, User } from '../../../index.js'
 import type { PayloadRequest, PopulateType } from '../../../types/index.js'
 import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
-import type { DataFromGlobalSlug } from '../../config/types.js'
+import type { DataFromGlobalSlug, RestoreActionFromGlobalSlug } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
@@ -59,13 +59,21 @@ export type Options<TSlug extends GlobalSlug> = {
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
   user?: null | User
-}
+} & RestoreActionFromGlobalSlug<TSlug>
 
 export async function restoreGlobalVersionLocal<TSlug extends GlobalSlug>(
   payload: Payload,
   options: Options<TSlug>,
 ): Promise<DataFromGlobalSlug<TSlug>> {
-  const { id, slug: globalSlug, depth, overrideAccess = true, populate, showHiddenFields } = options
+  const {
+    id,
+    slug: globalSlug,
+    action,
+    depth,
+    overrideAccess = true,
+    populate,
+    showHiddenFields,
+  } = options
 
   const globalConfig = payload.globals.config.find((config) => config.slug === globalSlug)
 
@@ -75,6 +83,7 @@ export async function restoreGlobalVersionLocal<TSlug extends GlobalSlug>(
 
   return restoreVersionOperation({
     id,
+    action,
     depth,
     globalConfig,
     overrideAccess,

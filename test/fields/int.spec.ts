@@ -534,7 +534,7 @@ describe('Fields', () => {
       it('should generate the slug from the source on a draft create', async () => {
         const draft = await payload.create({
           collection: 'slug-autosave',
-          draft: true,
+          action: 'saveDraft',
           data: { title: 'Draft One' },
         })
         created.push(draft.id)
@@ -544,7 +544,7 @@ describe('Fields', () => {
       it('should fall back to <singular>-N when a draft is created with no source', async () => {
         const draft = await payload.create({
           collection: 'slug-autosave',
-          draft: true,
+          action: 'saveDraft',
           data: {},
         })
         created.push(draft.id)
@@ -555,7 +555,7 @@ describe('Fields', () => {
         const latestDraft = await payload.findByID({
           collection: 'slug-autosave',
           id: draft.id,
-          draft: true,
+          version: 'latest',
         })
         expect(latestDraft.slug).toBe('slug-autosave-1')
       })
@@ -563,7 +563,7 @@ describe('Fields', () => {
       it('should fall back when the explicit value slugifies to nothing and there is no source', async () => {
         const draft = await payload.create({
           collection: 'slug-autosave',
-          draft: true,
+          action: 'saveDraft',
           data: { slug: '!!!' },
         })
         created.push(draft.id)
@@ -573,14 +573,14 @@ describe('Fields', () => {
       it('should give each source-less draft the next fallback without colliding', async () => {
         const first = await payload.create({
           collection: 'slug-autosave',
-          draft: true,
+          action: 'saveDraft',
           data: {},
         })
         created.push(first.id)
 
         const second = await payload.create({
           collection: 'slug-autosave',
-          draft: true,
+          action: 'saveDraft',
           data: {},
         })
         created.push(second.id)
@@ -592,7 +592,7 @@ describe('Fields', () => {
       it('should reject a draft slug that collides with another draft', async () => {
         const first = await payload.create({
           collection: 'slug-autosave',
-          draft: true,
+          action: 'saveDraft',
           data: { title: 'First', slug: 'shared-draft-slug' },
         })
         created.push(first.id)
@@ -601,7 +601,7 @@ describe('Fields', () => {
         await expect(
           payload.create({
             collection: 'slug-autosave',
-            draft: true,
+            action: 'saveDraft',
             data: { title: 'Second', slug: 'shared-draft-slug' },
           }),
         ).rejects.toThrow()
@@ -610,13 +610,13 @@ describe('Fields', () => {
       it('should reject updating a draft slug to collide with another draft', async () => {
         const a = await payload.create({
           collection: 'slug-autosave',
-          draft: true,
+          action: 'saveDraft',
           data: { title: 'A', slug: 'draft-a' },
         })
         created.push(a.id)
         const b = await payload.create({
           collection: 'slug-autosave',
-          draft: true,
+          action: 'saveDraft',
           data: { title: 'B', slug: 'draft-b' },
         })
         created.push(b.id)
@@ -625,7 +625,7 @@ describe('Fields', () => {
           payload.update({
             collection: 'slug-autosave',
             id: b.id,
-            draft: true,
+            action: 'saveDraft',
             data: { slug: 'draft-a' },
           }),
         ).rejects.toThrow()
@@ -634,7 +634,7 @@ describe('Fields', () => {
       it('should allow the same localized draft slug across locales but reject within a locale', async () => {
         const en = await payload.create({
           collection: 'slug-autosave',
-          draft: true,
+          action: 'saveDraft',
           data: { localizedTitle: 'One', localizedSlug: 'shared-draft-localized' },
           locale: 'en',
         })
@@ -644,7 +644,7 @@ describe('Fields', () => {
         // Same value in a different locale is fine — uniqueness is per-locale.
         const es = await payload.create({
           collection: 'slug-autosave',
-          draft: true,
+          action: 'saveDraft',
           data: { localizedTitle: 'Uno', localizedSlug: 'shared-draft-localized' },
           locale: 'es',
         })
@@ -655,7 +655,7 @@ describe('Fields', () => {
         await expect(
           payload.create({
             collection: 'slug-autosave',
-            draft: true,
+            action: 'saveDraft',
             data: { localizedTitle: 'Two', localizedSlug: 'shared-draft-localized' },
             locale: 'en',
           }),
@@ -665,7 +665,7 @@ describe('Fields', () => {
       it('should fall back to <singular>-N for a source-less localized slug on a draft', async () => {
         const draft = await payload.create({
           collection: 'slug-autosave',
-          draft: true,
+          action: 'saveDraft',
           data: {},
           locale: 'en',
         })
@@ -676,7 +676,7 @@ describe('Fields', () => {
         const latestDraft = await payload.findByID({
           collection: 'slug-autosave',
           id: draft.id,
-          draft: true,
+          version: 'latest',
           locale: 'en',
         })
         expect(latestDraft.localizedSlug).toBe('slug-autosave-1')
@@ -693,7 +693,7 @@ describe('Fields', () => {
       it('should fill every locale of a localized slug on a draft create', async () => {
         const draft = await payload.create({
           collection: 'slug-autosave',
-          draft: true,
+          action: 'saveDraft',
           data: {},
           locale: 'en',
         })
@@ -702,7 +702,7 @@ describe('Fields', () => {
         const allLocales = await payload.findByID({
           collection: 'slug-autosave',
           id: draft.id,
-          draft: true,
+          version: 'latest',
           locale: 'all',
         })
         const localizedSlug = allLocales.localizedSlug as unknown as Record<string, string>
@@ -713,7 +713,7 @@ describe('Fields', () => {
       it('should fall back to a per-locale <singular>-N for localized slugs on a draft', async () => {
         const en = await payload.create({
           collection: 'slug-autosave',
-          draft: true,
+          action: 'saveDraft',
           data: {},
           locale: 'en',
         })
@@ -724,7 +724,7 @@ describe('Fields', () => {
         const es = await payload.update({
           collection: 'slug-autosave',
           id: en.id,
-          draft: true,
+          action: 'saveDraft',
           data: {},
           locale: 'es',
         })
@@ -734,7 +734,7 @@ describe('Fields', () => {
       it('should give a duplicated draft its own unique slug', async () => {
         const original = await payload.create({
           collection: 'slug-autosave',
-          draft: true,
+          action: 'saveDraft',
           data: { title: 'Dup Me', slug: 'dup-me' },
         })
         created.push(original.id)
@@ -750,7 +750,7 @@ describe('Fields', () => {
       it('should keep an explicit slug the user typed on the initial draft', async () => {
         const draft = await payload.create({
           collection: 'slug-autosave',
-          draft: true,
+          action: 'saveDraft',
           data: { title: 'Draft One', slug: 'user-typed' },
         })
         created.push(draft.id)
@@ -760,7 +760,7 @@ describe('Fields', () => {
       it('should freeze the slug across subsequent autosaves once set', async () => {
         const draft = await payload.create({
           collection: 'slug-autosave',
-          draft: true,
+          action: 'saveDraft',
           data: { title: 'Draft One' },
         })
         created.push(draft.id)
@@ -769,7 +769,7 @@ describe('Fields', () => {
         const updated = await payload.update({
           collection: 'slug-autosave',
           id: draft.id,
-          draft: true,
+          action: 'saveDraft',
           data: { title: 'Draft One Updated' },
         })
         expect(updated.slug).toBe('draft-one')
@@ -778,7 +778,7 @@ describe('Fields', () => {
       it('should keep an admin overwrite across subsequent autosaves', async () => {
         const draft = await payload.create({
           collection: 'slug-autosave',
-          draft: true,
+          action: 'saveDraft',
           data: { title: 'Draft One' },
         })
         created.push(draft.id)
@@ -786,14 +786,14 @@ describe('Fields', () => {
         await payload.update({
           collection: 'slug-autosave',
           id: draft.id,
-          draft: true,
+          action: 'saveDraft',
           data: { title: 'Draft Two' },
         })
 
         const overwritten = await payload.update({
           collection: 'slug-autosave',
           id: draft.id,
-          draft: true,
+          action: 'saveDraft',
           data: { slug: 'human-chosen-slug' },
         })
         expect(overwritten.slug).toBe('human-chosen-slug')
@@ -801,7 +801,7 @@ describe('Fields', () => {
         const afterMoreEdits = await payload.update({
           collection: 'slug-autosave',
           id: draft.id,
-          draft: true,
+          action: 'saveDraft',
           data: { title: 'Draft Three' },
         })
         expect(afterMoreEdits.slug).toBe('human-chosen-slug')
@@ -810,7 +810,7 @@ describe('Fields', () => {
       it('should not change an already-set slug on publish or after', async () => {
         const draft = await payload.create({
           collection: 'slug-autosave',
-          draft: true,
+          action: 'saveDraft',
           data: { title: 'Draft One' },
         })
         created.push(draft.id)
@@ -819,7 +819,7 @@ describe('Fields', () => {
         await payload.update({
           collection: 'slug-autosave',
           id: draft.id,
-          draft: true,
+          action: 'saveDraft',
           data: { title: 'Publishable Title' },
         })
 
@@ -1823,7 +1823,7 @@ describe('Fields', () => {
       const array = await payload.create({
         collection: 'select-versions-fields',
         data: { array: [{ hasManyArr: ['a', 'b'] }] },
-        draft: true,
+        action: 'saveDraft',
       })
 
       expect(array.array[0]?.hasManyArr).toStrictEqual(['a', 'b'])
@@ -1847,7 +1847,7 @@ describe('Fields', () => {
         id: data.id,
         collection: 'select-versions-fields',
         data: { hasMany: ['a'] },
-        draft: true,
+        action: 'saveDraft',
       })
       expect(data.hasMany).toStrictEqual(['a'])
 
@@ -1855,7 +1855,7 @@ describe('Fields', () => {
         id: data.id,
         collection: 'select-versions-fields',
         data: { hasMany: ['a', 'b', 'c', 'd'] },
-        draft: true,
+        action: 'saveDraft',
         autosave: true,
       })
       expect(data.hasMany).toStrictEqual(['a', 'b', 'c', 'd'])
@@ -1864,7 +1864,7 @@ describe('Fields', () => {
         id: data.id,
         collection: 'select-versions-fields',
         data: { hasMany: ['a'] },
-        draft: true,
+        action: 'saveDraft',
         autosave: true,
       })
       expect(data.hasMany).toStrictEqual(['a'])
@@ -5345,7 +5345,6 @@ describe('Fields', () => {
           dateWithOffsetTimezone: '2027-08-12T04:30:00.000Z',
           dateWithOffsetTimezone_tz: '+05:30',
         },
-        draft: true,
       })
 
       expect(doc.dateWithOffsetTimezone).toEqual('2027-08-12T04:30:00.000Z')
@@ -5360,7 +5359,6 @@ describe('Fields', () => {
           dateWithMixedTimezones: '2027-08-12T14:00:00.000Z',
           dateWithMixedTimezones_tz: 'America/New_York',
         },
-        draft: true,
       })
 
       expect(doc.dateWithMixedTimezones_tz).toEqual('America/New_York')
@@ -5384,7 +5382,6 @@ describe('Fields', () => {
           dateWithOffsetTimezone: '2027-08-12T04:30:00.000Z',
           dateWithOffsetTimezone_tz: '+05:30',
         },
-        draft: true,
       })
 
       await payload.create({
@@ -5394,7 +5391,6 @@ describe('Fields', () => {
           dateWithOffsetTimezone: '2027-08-12T08:00:00.000Z',
           dateWithOffsetTimezone_tz: '-08:00',
         },
-        draft: true,
       })
 
       const indiaTimezoneResults = await payload.find({
@@ -5420,7 +5416,6 @@ describe('Fields', () => {
           dateWithMixedTimezones: '2027-08-12T14:00:00.000Z',
           dateWithMixedTimezones_tz: 'America/New_York',
         },
-        draft: true,
       })
 
       expect(doc.dateWithMixedTimezones_tz).toEqual('America/New_York')
@@ -5433,7 +5428,6 @@ describe('Fields', () => {
           dateWithMixedTimezones: '2027-08-12T04:30:00.000Z',
           dateWithMixedTimezones_tz: '+05:30',
         },
-        draft: true,
       })
 
       expect(doc2.dateWithMixedTimezones_tz).toEqual('+05:30')
@@ -5448,7 +5442,6 @@ describe('Fields', () => {
           dateWithOffsetTimezone: '2027-08-12T04:30:00.000Z',
           dateWithOffsetTimezone_tz: '+05:30',
         },
-        draft: true,
       })
 
       expect(doc1.dateWithOffsetTimezone_tz).toEqual('+05:30')
@@ -5461,7 +5454,6 @@ describe('Fields', () => {
           dateWithOffsetTimezone: '2027-08-12T16:00:00.000Z',
           dateWithOffsetTimezone_tz: '-08:00',
         },
-        draft: true,
       })
 
       expect(doc2.dateWithOffsetTimezone_tz).toEqual('-08:00')
@@ -5474,7 +5466,6 @@ describe('Fields', () => {
           dateWithOffsetTimezone: '2027-08-12T10:00:00.000Z',
           dateWithOffsetTimezone_tz: '+00:00',
         },
-        draft: true,
       })
 
       expect(doc3.dateWithOffsetTimezone_tz).toEqual('+00:00')
@@ -5493,7 +5484,6 @@ describe('Fields', () => {
             dateWithOffsetTimezone: '2027-08-12T04:30:00.000Z',
             dateWithOffsetTimezone_tz: '+05:30',
           },
-          draft: true,
         })
 
         const query = `
@@ -5525,7 +5515,6 @@ describe('Fields', () => {
             dateWithOffsetTimezone: '2027-08-12T16:00:00.000Z',
             dateWithOffsetTimezone_tz: '-08:00',
           },
-          draft: true,
         })
 
         const query = `
@@ -5551,7 +5540,6 @@ describe('Fields', () => {
             dateWithMixedTimezones: '2027-08-12T14:00:00.000Z',
             dateWithMixedTimezones_tz: 'America/New_York',
           },
-          draft: true,
         })
 
         const query = `
@@ -5646,7 +5634,6 @@ describe('Fields', () => {
             dateWithOffsetTimezone: '2027-08-12T04:30:00.000Z',
             dateWithOffsetTimezone_tz: '+05:30',
           },
-          draft: true,
         })
 
         const mutation = `
@@ -5715,7 +5702,6 @@ describe('Fields', () => {
             dateWithMixedTimezones: '2027-08-12T04:30:00.000Z',
             dateWithMixedTimezones_tz: '+05:30',
           },
-          draft: true,
         })
 
         const mutation = `
@@ -5749,7 +5735,6 @@ describe('Fields', () => {
             dateWithOffsetTimezone: '2027-08-12T04:30:00.000Z',
             dateWithOffsetTimezone_tz: '+05:30',
           },
-          draft: true,
         })
 
         await payload.create({
@@ -5759,7 +5744,6 @@ describe('Fields', () => {
             dateWithOffsetTimezone: '2027-08-12T16:00:00.000Z',
             dateWithOffsetTimezone_tz: '-08:00',
           },
-          draft: true,
         })
 
         const query = `
@@ -5841,7 +5825,6 @@ describe('Fields', () => {
           dateWithTimezoneWithDisabledColumns: '2027-08-12T10:00:00.000Z',
           dateWithTimezoneWithDisabledColumns_tz: 'America/New_York',
         },
-        draft: true,
       })
 
       expect(doc.dateWithTimezoneWithDisabledColumns_tz).toEqual('America/New_York')
@@ -5871,7 +5854,6 @@ describe('Fields', () => {
           ...dataWithoutNoDefaultTz,
           dateWithTimezoneNoDefault: '2027-08-12T14:00:00.000Z',
         },
-        draft: true,
       })
 
       expect(doc.dateWithTimezoneNoDefault_tz).toBeFalsy()
@@ -5886,7 +5868,6 @@ describe('Fields', () => {
           ...dataWithoutMixedTz,
           dateWithMixedTimezones: '2027-08-12T14:00:00.000Z',
         },
-        draft: true,
       })
 
       expect(doc.dateWithMixedTimezones_tz).toEqual('America/New_York')

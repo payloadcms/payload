@@ -815,7 +815,7 @@ const published = await payload.findByID({
   collection: 'pages',
   id: 'page-id',
   context: { computeHierarchyPaths: true },
-  // draft: false (default)
+  // version: 'published' (default)
 })
 // published._h_slugPath: 'products/clothing' (uses published parent title)
 
@@ -823,7 +823,7 @@ const published = await payload.findByID({
 const draft = await payload.findByID({
   collection: 'pages',
   id: 'page-id',
-  draft: true,
+  version: 'latest',
   context: { computeHierarchyPaths: true },
 })
 // draft._h_slugPath: 'products/apparel' (uses draft title if changed)
@@ -831,7 +831,7 @@ const draft = await payload.findByID({
 
 **How it works:**
 
-1. When computing paths, hierarchy fetches ancestors using the same `draft` context
+1. When computing paths, hierarchy fetches ancestors using the same `version` context
 2. If reading a draft, ancestor titles come from draft versions (if they exist)
 3. If reading published, ancestor titles come from published versions
 4. This ensures paths always reflect the correct version's hierarchy state
@@ -871,7 +871,7 @@ await payload.update({
   collection: 'pages',
   id: 'doc-id',
   data: { parent: 'parent-2' },
-  draft: true,
+  action: 'saveDraft',
 })
 
 // Publish only French
@@ -880,7 +880,7 @@ await payload.update({
   id: 'doc-id',
   locale: 'fr',
   data: { _status: 'published' },
-  draft: false,
+  action: 'publish',
 })
 // Result: parent changed to 'parent-2' for ALL locales
 // Paths computed on next read will reflect new parent for all locales

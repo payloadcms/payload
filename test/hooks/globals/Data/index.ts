@@ -2,6 +2,23 @@ import type { GlobalConfig } from 'payload'
 
 export const dataHooksGlobalSlug = 'data-hooks-global'
 
+type CapturedAfterChangeAction = {
+  action: unknown
+}
+
+let lastGlobalAfterChangeAction: CapturedAfterChangeAction | undefined
+let lastFieldAfterChangeAction: CapturedAfterChangeAction | undefined
+
+export const getLastDataGlobalAfterChangeActions = () => ({
+  field: lastFieldAfterChangeAction,
+  global: lastGlobalAfterChangeAction,
+})
+
+export const clearLastDataGlobalAfterChangeActions = () => {
+  lastFieldAfterChangeAction = undefined
+  lastGlobalAfterChangeAction = undefined
+}
+
 export const DataHooksGlobal: GlobalConfig = {
   slug: dataHooksGlobalSlug,
   access: {
@@ -35,7 +52,8 @@ export const DataHooksGlobal: GlobalConfig = {
       },
     ],
     afterChange: [
-      ({ context, global, doc }) => {
+      ({ action, context, global, doc }) => {
+        lastGlobalAfterChangeAction = { action }
         context['global_afterChange_global'] = JSON.stringify(global)
 
         // Needs to be done for both afterRead (for findOne test) and afterChange (for update test), as afterChange is called after afterRead
@@ -63,6 +81,11 @@ export const DataHooksGlobal: GlobalConfig = {
           },
         ],
 
+        afterChange: [
+          ({ action }) => {
+            lastFieldAfterChangeAction = { action }
+          },
+        ],
         afterRead: [
           ({ global, field, context }) => {
             if (context['field_beforeChange_GlobalAndField_override']) {

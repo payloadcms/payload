@@ -57,7 +57,7 @@ type Args = {
 
 export const hierarchyCollectionAfterRead =
   ({ parentFieldName, slugPathFieldName, titlePathFieldName }: Args): CollectionAfterReadHook =>
-  async ({ collection, context, doc, req }) => {
+  async ({ collection, context, doc, req, version }) => {
     // Skip if deleting
     if (context?.isDeleting) {
       return doc
@@ -91,6 +91,7 @@ export const hierarchyCollectionAfterRead =
         req,
         slugPathFieldName,
         titlePathFieldName,
+        version,
       })
 
       // Attach computed paths to document using configured field names

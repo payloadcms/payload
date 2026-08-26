@@ -1,4 +1,10 @@
-import type { Collection, CollectionSlug, DataFromCollectionSlug, PayloadRequest } from 'payload'
+import type {
+  Collection,
+  CollectionSlug,
+  DataFromCollectionSlug,
+  PayloadRequest,
+  UpdateAction,
+} from 'payload'
 
 import { isolateObjectProperty, updateByIDOperation } from 'payload'
 
@@ -7,9 +13,9 @@ import type { Context } from '../types.js'
 export type Resolver<TSlug extends CollectionSlug> = (
   _: unknown,
   args: {
+    action?: UpdateAction
     autosave: boolean
     data: DataFromCollectionSlug<TSlug>
-    draft: boolean
     fallbackLocale?: string
     id: number | string
     locale?: string
@@ -35,25 +41,15 @@ export function updateResolver<TSlug extends CollectionSlug>(
       req.query = {}
     }
 
-    const draft: boolean =
-      (args.draft ?? req.query?.draft === 'false')
-        ? false
-        : req.query?.draft === 'true'
-          ? true
-          : undefined
-    if (typeof draft === 'boolean') {
-      req.query.draft = String(draft)
-    }
-
     context.req = req
 
     const options = {
       id: args.id,
+      action: args.action,
       autosave: args.autosave,
       collection,
       data: args.data as any,
       depth: 0,
-      draft: args.draft,
       req: isolateObjectProperty(req, 'transactionID'),
       trash: args.trash,
     }

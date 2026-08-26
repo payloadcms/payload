@@ -45,6 +45,7 @@ export type CreateArgs<
   TGeneratedTypes extends GeneratedTypes<TGeneratedTypes>,
   TSlug extends keyof TGeneratedTypes['collections'],
 > = {
+  action?: 'publish' | 'saveDraft'
   collection: TSlug
   data: MarkOptional<
     TGeneratedTypes['collections'][TSlug],
@@ -52,7 +53,6 @@ export type CreateArgs<
   >
   depth?: number
   disableTransaction?: boolean
-  draft?: boolean
   fallbackLocale?: string
   file?: File
   filePath?: string
@@ -83,11 +83,11 @@ export type UpdateBaseArgs<
   TGeneratedTypes extends GeneratedTypes<TGeneratedTypes>,
   TSlug extends keyof TGeneratedTypes['collections'],
 > = {
+  action?: 'publish' | 'saveDraft' | 'unpublish'
   autosave?: boolean
   collection: TSlug
   data: DeepPartial<TGeneratedTypes['collections'][TSlug]>
   depth?: number
-  draft?: boolean
   fallbackLocale?: string
   file?: File
   filePath?: string
@@ -118,7 +118,6 @@ export type FindArgs<
   collection: TSlug
   depth?: number
   disableErrors?: boolean
-  draft?: boolean
   fallbackLocale?: string
   limit?: number
   locale?: string
@@ -129,6 +128,7 @@ export type FindArgs<
   sort?: string
   trash?: boolean
   user?: TypeWithID
+  version?: 'draft' | 'latest' | 'published'
   where?: Where
 } & BaseArgs
 

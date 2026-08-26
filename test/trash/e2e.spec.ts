@@ -1278,7 +1278,7 @@ describe('Trash', () => {
         _status: 'draft',
         localizedField: localizedFieldValueEN,
       },
-      draft: true,
+      action: 'saveDraft',
       locale: 'en',
     })
 
@@ -1289,7 +1289,7 @@ describe('Trash', () => {
         _status: 'draft',
         localizedField: localizedFieldValueES,
       },
-      draft: true,
+      action: 'saveDraft',
       locale: 'es',
     })
 
@@ -1343,7 +1343,7 @@ describe('Trash', () => {
         _status: 'draft',
         localizedField: localizedFieldValueEN,
       },
-      draft: true,
+      action: 'saveDraft',
       locale: 'en',
     })
 
@@ -1355,7 +1355,7 @@ describe('Trash', () => {
         _status: 'draft',
         localizedField: localizedFieldValueES,
       },
-      draft: true,
+      action: 'saveDraft',
       locale: 'es',
     })
 

@@ -1,3 +1,5 @@
+import type { ReadVersion } from 'payload'
+
 import { stringify } from 'qs-esm'
 
 import type { HTMLPopulateFn } from '../lexicalToHtml/async/types.js'
@@ -8,12 +10,12 @@ export const getRestPopulateFn: (args: {
    */
   apiURL: string
   depth?: number
-  draft?: boolean
   locale?: string
-}) => HTMLPopulateFn = ({ apiURL, depth, draft, locale }) => {
+  version?: ReadVersion
+}) => HTMLPopulateFn = ({ apiURL, depth, locale, version }) => {
   const populateFn: HTMLPopulateFn = async ({ id, collectionSlug, select }) => {
     const query = stringify(
-      { depth: depth ?? 0, draft: draft ?? false, locale, select },
+      { depth: depth ?? 0, locale, select, version },
       { addQueryPrefix: true },
     )
 

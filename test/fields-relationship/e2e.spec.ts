@@ -776,7 +776,7 @@ describe('Relationship Field', () => {
       data: {
         title: '',
       },
-      draft: true,
+      action: 'saveDraft',
     })
 
     await payload.update({
@@ -785,7 +785,7 @@ describe('Relationship Field', () => {
       data: {
         title: 'Draft Only Title',
       },
-      draft: true,
+      action: 'saveDraft',
     })
 
     // Create the doc that holds the relationship to the draft-only related doc.

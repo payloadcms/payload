@@ -924,7 +924,7 @@ describe('Join Field', () => {
       data: {
         title: 'Version 1 - Draft',
       },
-      draft: true,
+      action: 'saveDraft',
     })
 
     await page.goto(categoriesVersionsURL.edit(categoryVersionsDoc.id))
