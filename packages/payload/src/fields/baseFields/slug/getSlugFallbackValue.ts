@@ -12,6 +12,7 @@ type Args = {
   id?: DefaultDocumentIDType
   /** Locale to scope the uniqueness check to, for a localized slug. */
   locale?: Locale['code']
+  overrideAccess?: boolean
   req: PayloadRequest
   slugify: (value: unknown) => Promise<string | undefined> | string | undefined
 }
@@ -27,6 +28,7 @@ export const getSlugFallbackValue = async ({
   collection,
   field,
   locale,
+  overrideAccess = false,
   req,
   slugify,
 }: Args): Promise<string> => {
@@ -39,6 +41,7 @@ export const getSlugFallbackValue = async ({
     draftsEnabled: hasDraftsEnabled(collection),
     field,
     locale,
+    overrideAccess,
     req,
     startIndex: 1,
     value: (await slugify(base)) || collection.slug,
