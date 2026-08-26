@@ -743,7 +743,8 @@ describe('Versions', () => {
 
       // Seed the sibling locales so the later publish clicks (which now validate every
       // locale) don't get blocked by their otherwise-empty required title field. This adds
-      // one extra version, accounted for in the version-count assertion below.
+      // 4 extra versions (1 create + 3 locale backfills), accounted for in the
+      // version-count assertion below.
       const seed = await payload.create({
         collection: draftCollectionSlug,
         data: { title: 'seed' },
@@ -784,7 +785,7 @@ describe('Versions', () => {
             await page.locator('.doc-tab[aria-label="Versions"] .pill-version-count').textContent(),
           { timeout: POLL_TOPASS_TIMEOUT },
         )
-        .toEqual('3')
+        .toEqual('6')
 
       // fill out draft content in spanish
       await page.locator('#field-title').fill(`${spanishTitle}--draft`)
