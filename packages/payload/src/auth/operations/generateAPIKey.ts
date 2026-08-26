@@ -98,13 +98,37 @@ export const generateAPIKeyOperation = async ({
     )
   }
 
-  return withServerGeneratedAPIKey(req, () =>
-    updateByIDOperation({
-      id,
-      collection,
-      data,
-      overrideAccess: false,
-      req,
-    }),
-  )
+  try {
+    return await withServerGeneratedAPIKey(req, () =>
+      updateByIDOperation({
+        id,
+        collection,
+        data,
+        overrideAccess: false,
+        req,
+        where: generateIfMissing
+          ? {
+              or: [{ apiKey: { equals: null } }, { apiKey: { exists: false } }],
+            }
+          : undefined,
+      }),
+    )
+  } catch (error) {
+    if (generateIfMissing) {
+      const { docs: currentDocs } = await req.payload.find({
+        collection: collection.config.slug,
+        limit: 1,
+        overrideAccess: true,
+        pagination: false,
+        req,
+        where: combineQueries({ id: { equals: id } }, accessResult),
+      })
+
+      if ((currentDocs[0] as JsonObject | undefined)?.apiKey) {
+        return {}
+      }
+    }
+
+    throw error
+  }
 }

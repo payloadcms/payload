@@ -1,5 +1,6 @@
 import type {
   BasePayload,
+  CollectionBeforeChangeHook,
   EmailFieldValidation,
   FieldAffectingData,
   Payload,
@@ -1865,6 +1866,130 @@ describe('Auth', () => {
         expect(result).not.toHaveProperty('apiKey')
         expect(stored.apiKey).toBe(originalAPIKey)
         expect(stored.enableAPIKey).toBe(false)
+      })
+
+      it('should generate a missing API key once across concurrent requests', async () => {
+        const user = await payload.create({
+          collection: apiKeysWithReadableKeysSlug,
+          data: {
+            enableAPIKey: false,
+          },
+        })
+        const beforeChangeHooks =
+          payload.collections[apiKeysWithReadableKeysSlug].config.hooks.beforeChange
+        let concurrentUpdates = 0
+        let releaseUpdates: (() => void) | undefined
+        const updatesReady = new Promise<void>((resolve) => {
+          releaseUpdates = resolve
+        })
+        const synchronizeUpdates: CollectionBeforeChangeHook = async ({ data }) => {
+          if (typeof data.apiKey === 'string') {
+            concurrentUpdates += 1
+
+            if (concurrentUpdates === 2) {
+              releaseUpdates?.()
+            }
+
+            await updatesReady
+          }
+
+          return data
+        }
+
+        beforeChangeHooks.push(synchronizeUpdates)
+
+        const responses = await Promise.all([
+          restClient.POST(`/${apiKeysWithReadableKeysSlug}/generate-api-key/${user.id}`, {
+            body: JSON.stringify({ generateIfMissing: true }),
+            headers: {
+              Authorization: `JWT ${token}`,
+            },
+          }),
+          restClient.POST(`/${apiKeysWithReadableKeysSlug}/generate-api-key/${user.id}`, {
+            body: JSON.stringify({ generateIfMissing: true }),
+            headers: {
+              Authorization: `JWT ${token}`,
+            },
+          }),
+        ])
+
+        beforeChangeHooks.splice(beforeChangeHooks.indexOf(synchronizeUpdates), 1)
+
+        const results = await Promise.all(responses.map((response) => response.json()))
+        const generatedKeys = results.flatMap((result) =>
+          typeof result.apiKey === 'string' ? [result.apiKey] : [],
+        )
+        const stored = await payload.findByID({
+          collection: apiKeysWithReadableKeysSlug,
+          id: user.id,
+        })
+
+        expect(responses.map((response) => response.status)).toEqual([200, 200])
+        expect(generatedKeys).toHaveLength(1)
+        expect(stored.apiKey).toBe(generatedKeys[0])
+      })
+
+      it('should reject automatic API key creation without field access', async () => {
+        const { docs } = await payload.find({
+          collection: slug,
+          limit: 1,
+          where: {
+            email: {
+              equals: devUser.email,
+            },
+          },
+        })
+
+        await expect(
+          payload.create({
+            collection: apiKeysWithRestrictedFieldAccessSlug,
+            data: {
+              enableAPIKey: true,
+            },
+            overrideAccess: false,
+            user: docs[0],
+          }),
+        ).rejects.toBeInstanceOf(Forbidden)
+      })
+
+      it('should reject automatic API key generation without field access', async () => {
+        const user = await payload.create({
+          collection: apiKeysWithRestrictedFieldAccessSlug,
+          data: {
+            enableAPIKey: false,
+          },
+        })
+        const { docs } = await payload.find({
+          collection: slug,
+          limit: 1,
+          where: {
+            email: {
+              equals: devUser.email,
+            },
+          },
+        })
+
+        await expect(
+          payload.update({
+            collection: apiKeysWithRestrictedFieldAccessSlug,
+            id: user.id,
+            data: {
+              enableAPIKey: true,
+            },
+            overrideAccess: false,
+            user: docs[0],
+          }),
+        ).rejects.toBeInstanceOf(Forbidden)
+
+        const stored = await payload.db.findOne<Record<string, unknown>>({
+          collection: apiKeysWithRestrictedFieldAccessSlug,
+          req: { locale: 'en' } as any,
+          where: { id: { equals: user.id } },
+        })
+
+        expect(stored?.enableAPIKey).toBe(false)
+        expect(stored?.apiKey).toBeNull()
+        expect(stored?.apiKeyIndex).toBeNull()
       })
 
       it('respects custom API key update access', async () => {

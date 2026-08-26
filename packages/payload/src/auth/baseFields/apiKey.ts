@@ -8,6 +8,7 @@ import type {
   TextField,
 } from '../../fields/config/types.js'
 
+import { Forbidden } from '../../errors/Forbidden.js'
 import { UnauthorizedError } from '../../errors/UnauthorizedError.js'
 import { canAccessAdmin } from '../../utilities/canAccessAdmin.js'
 import { generateAPIKey } from '../apiKeys.js'
@@ -18,9 +19,14 @@ const encryptKey: FieldHook = ({ req, value }) =>
 const createKeyIndex = ({ key, secret }: { key: string; secret: string }): string =>
   crypto.createHmac('sha256', secret).update(key).digest('hex')
 
-const generateKey: FieldHook = ({
+const generateKey: FieldHook = async ({
+  blockData,
+  collection,
   data,
+  field,
   operation,
+  originalDoc,
+  overrideAccess,
   previousSiblingDoc,
   previousValue,
   req,
@@ -32,6 +38,27 @@ const generateKey: FieldHook = ({
     (data?.apiKey !== null && data?.apiKey !== undefined && data.apiKey !== '')
   ) {
     return value
+  }
+
+  if (
+    !overrideAccess &&
+    (operation === 'create' || operation === 'update') &&
+    'access' in field &&
+    field.access?.[operation]
+  ) {
+    const hasAccess = await field.access[operation]({
+      id: originalDoc?.id,
+      blockData,
+      collection: collection!,
+      data,
+      doc: originalDoc,
+      req,
+      siblingData,
+    })
+
+    if (!hasAccess) {
+      throw new Forbidden(req.t)
+    }
   }
 
   const isFirstEnable = operation === 'update' && previousSiblingDoc?.enableAPIKey !== true

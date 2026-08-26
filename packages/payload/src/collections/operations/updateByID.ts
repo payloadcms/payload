@@ -8,6 +8,7 @@ import type {
   PopulateType,
   SelectType,
   TransformCollectionWithSelect,
+  Where,
 } from '../../types/index.js'
 import type {
   Collection,
@@ -53,6 +54,7 @@ export type Arguments<TSlug extends CollectionSlug> = {
   showHiddenFields?: boolean
   trash?: boolean
   unpublishAllLocales?: boolean
+  where?: Where
 } & Pick<FindOptions<TSlug, SelectType>, 'select'>
 
 export const updateByIDOperation = async <
@@ -100,6 +102,7 @@ export const updateByIDOperation = async <
       showHiddenFields,
       trash = false,
       unpublishAllLocales,
+      where: incomingWhere,
     } = args
 
     if (!id) {
@@ -124,7 +127,9 @@ export const updateByIDOperation = async <
     // Retrieve document
     // /////////////////////////////////////
 
-    const where = { id: { equals: id } }
+    const where = incomingWhere
+      ? combineQueries({ id: { equals: id } }, incomingWhere)
+      : { id: { equals: id } }
 
     let fullWhere = combineQueries(where, accessResults)
 
@@ -234,6 +239,7 @@ export const updateByIDOperation = async <
       select: select!,
       showHiddenFields: showHiddenFields!,
       unpublishAllLocales,
+      where: incomingWhere,
     })
 
     // /////////////////////////////////////

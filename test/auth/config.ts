@@ -379,6 +379,7 @@ export default buildConfigWithDefaults({
           name: 'apiKey',
           type: 'text',
           access: {
+            create: () => false,
             read: () => false,
             update: () => Promise.resolve(false),
           },

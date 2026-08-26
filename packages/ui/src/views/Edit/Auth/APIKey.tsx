@@ -71,7 +71,9 @@ const useGenerateAPIKey = () => {
         throw new Error(result.errors?.[0]?.message ?? t('general:error'))
       }
 
-      setData(result)
+      if (Object.keys(result).length > 0) {
+        setData(result)
+      }
 
       return result
     },

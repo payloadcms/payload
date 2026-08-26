@@ -14,6 +14,7 @@ import type {
   PopulateType,
   SelectType,
   TransformCollectionWithSelect,
+  Where,
 } from '../../../types/index.js'
 import type {
   DataFromCollectionSlug,
@@ -24,6 +25,8 @@ import type {
 
 import { ensureUsernameOrEmail } from '../../../auth/ensureUsernameOrEmail.js'
 import { generatePasswordSaltHash } from '../../../auth/strategies/local/generatePasswordSaltHash.js'
+import { combineQueries } from '../../../database/combineQueries.js'
+import { NotFound } from '../../../errors/NotFound.js'
 import { afterChange } from '../../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../../fields/hooks/afterRead/index.js'
 import { beforeChange } from '../../../fields/hooks/beforeChange/index.js'
@@ -59,6 +62,7 @@ export type SharedUpdateDocumentArgs<TSlug extends CollectionSlug> = {
   select: SelectType
   showHiddenFields: boolean
   unpublishAllLocales?: boolean
+  where?: Where
 }
 
 /**
@@ -98,6 +102,7 @@ export const updateDocument = async <
   select,
   showHiddenFields,
   unpublishAllLocales: unpublishAllLocalesArg,
+  where,
 }: SharedUpdateDocumentArgs<TSlug>): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
   const password = data?.password
   const publishAllLocales =
@@ -360,6 +365,7 @@ export const updateDocument = async <
   // /////////////////////////////////////
 
   let resultWithLocales: JsonObject = result
+  const updateIdentifier = where ? { where: combineQueries({ id: { equals: id } }, where) } : { id }
 
   if (!isSavingDraft) {
     // Ensure updatedAt date is always updated
@@ -367,22 +373,31 @@ export const updateDocument = async <
     if (localizedPublishData) {
       // Single-locale publish: save filtered data to main doc but keep full locale data for
       // the version so draft fetches (replaceWithDraftIfAvailable) return complete data.
-      await req.payload.db.updateOne({
-        id,
+      const updatedDocument = await req.payload.db.updateOne({
         collection: collectionConfig.slug,
         data: dataToUpdate,
         locale,
         req,
+        ...updateIdentifier,
       })
+
+      if (where && !updatedDocument) {
+        throw new NotFound(req.t)
+      }
+
       resultWithLocales = { ...result, updatedAt: dataToUpdate.updatedAt }
     } else {
       resultWithLocales = await req.payload.db.updateOne({
-        id,
         collection: collectionConfig.slug,
         data: dataToUpdate,
         locale,
         req,
+        ...updateIdentifier,
       })
+    }
+
+    if (where && !resultWithLocales) {
+      throw new NotFound(req.t)
     }
   }
 
