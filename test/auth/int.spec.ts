@@ -1868,7 +1868,7 @@ describe('Auth', () => {
         expect(stored.enableAPIKey).toBe(false)
       })
 
-      it('should generate a missing API key once across concurrent requests', async () => {
+      it('returns the same API key across concurrent missing-key requests', async () => {
         const user = await payload.create({
           collection: apiKeysWithReadableKeysSlug,
           data: {
@@ -1916,16 +1916,15 @@ describe('Auth', () => {
         beforeChangeHooks.splice(beforeChangeHooks.indexOf(synchronizeUpdates), 1)
 
         const results = await Promise.all(responses.map((response) => response.json()))
-        const generatedKeys = results.flatMap((result) =>
-          typeof result.apiKey === 'string' ? [result.apiKey] : [],
-        )
+        const generatedKeys = results.map((result) => result.apiKey)
         const stored = await payload.findByID({
           collection: apiKeysWithReadableKeysSlug,
           id: user.id,
         })
 
         expect(responses.map((response) => response.status)).toEqual([200, 200])
-        expect(generatedKeys).toHaveLength(1)
+        expect(generatedKeys).toEqual([expect.any(String), expect.any(String)])
+        expect(new Set(generatedKeys).size).toBe(1)
         expect(stored.apiKey).toBe(generatedKeys[0])
       })
 

@@ -5,7 +5,12 @@ import { updateByIDOperation } from '../../collections/operations/updateByID.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { Forbidden, NotFound, ValidationError } from '../../errors/index.js'
 import { fieldAffectsData } from '../../fields/config/types.js'
-import { assertAPIKeyAssignment, generateAPIKey, withServerGeneratedAPIKey } from '../apiKeys.js'
+import {
+  assertAPIKeyAssignment,
+  generateAPIKey,
+  generateAPIKeyFromSeed,
+  withServerGeneratedAPIKey,
+} from '../apiKeys.js'
 import { executeAccess } from '../executeAccess.js'
 import { hasWhereAccessResult } from '../types.js'
 
@@ -21,7 +26,27 @@ export const generateAPIKeyOperation = async ({
   requestData: JsonObject
 }): Promise<JsonObject> => {
   const generateIfMissing = requestData.generateIfMissing === true
-  const apiKey = generateAPIKey()
+  let generationSeed: string | undefined
+
+  if (generateIfMissing) {
+    const generationDoc = await req.payload.db.findOne<{
+      id: number | string
+      updatedAt?: string
+    }>({
+      collection: collection.config.slug,
+      req,
+      select: { updatedAt: true },
+      where: { id: { equals: id } },
+    })
+
+    if (typeof generationDoc?.updatedAt === 'string') {
+      generationSeed = JSON.stringify([collection.config.slug, String(id), generationDoc.updatedAt])
+    }
+  }
+
+  const apiKey = generationSeed
+    ? generateAPIKeyFromSeed({ secret: req.payload.secret, seed: generationSeed })
+    : generateAPIKey()
   const data = { apiKey }
   const accessResult = await executeAccess(
     {
@@ -81,6 +106,10 @@ export const generateAPIKeyOperation = async ({
     return {}
   }
 
+  if (generateIfMissing && !generationSeed) {
+    return {}
+  }
+
   if (!generateIfMissing && doc.enableAPIKey !== true) {
     throw new ValidationError(
       {
@@ -98,37 +127,13 @@ export const generateAPIKeyOperation = async ({
     )
   }
 
-  try {
-    return await withServerGeneratedAPIKey(req, () =>
-      updateByIDOperation({
-        id,
-        collection,
-        data,
-        overrideAccess: false,
-        req,
-        where: generateIfMissing
-          ? {
-              or: [{ apiKey: { equals: null } }, { apiKey: { exists: false } }],
-            }
-          : undefined,
-      }),
-    )
-  } catch (error) {
-    if (generateIfMissing) {
-      const { docs: currentDocs } = await req.payload.find({
-        collection: collection.config.slug,
-        limit: 1,
-        overrideAccess: true,
-        pagination: false,
-        req,
-        where: combineQueries({ id: { equals: id } }, accessResult),
-      })
-
-      if ((currentDocs[0] as JsonObject | undefined)?.apiKey) {
-        return {}
-      }
-    }
-
-    throw error
-  }
+  return withServerGeneratedAPIKey(req, () =>
+    updateByIDOperation({
+      id,
+      collection,
+      data,
+      overrideAccess: false,
+      req,
+    }),
+  )
 }
