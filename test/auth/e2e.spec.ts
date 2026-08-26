@@ -47,8 +47,8 @@ type APIKeyTestPayload = {
   create: (args: {
     collection: APIKeyTestCollectionSlug
     data: {
-      apiKey: string
-      enableAPIKey: boolean
+      apiKey?: string
+      enableAPIKey?: boolean
       name?: string
     }
   }) => Promise<APIKeyTestDocument>
@@ -522,6 +522,32 @@ describe('Auth', () => {
         await expect(apiKeyInput).toHaveAttribute('type', 'password')
         await page.getByRole('button', { name: 'Show API key' }).click()
         await expect(apiKeyInput).toHaveAttribute('type', 'text')
+      })
+
+      test('should reveal a readable API key when first enabled', async () => {
+        const user = await getAPIKeyTestPayload().create({
+          collection: apiKeysWithReadableKeysSlug,
+          data: {},
+        })
+        createdIDs.push(user.id)
+        const userURL = new AdminUrlUtil(serverURL, apiKeysWithReadableKeysSlug)
+
+        await page.goto(userURL.edit(user.id))
+        await expect(page.locator('#apiKey')).toBeHidden()
+        await page.locator('#field-enableAPIKey').click()
+
+        const apiKeyInput = page.locator('#apiKey')
+        await expect(apiKeyInput).toHaveAttribute('type', 'text')
+        const apiKey = await apiKeyInput.inputValue()
+
+        await page.getByRole('button', { name: 'Hide API key' }).click()
+        await expect(apiKeyInput).toHaveAttribute('type', 'password')
+        await page.getByRole('button', { name: 'Show API key' }).click()
+        await expect(apiKeyInput).toHaveAttribute('type', 'text')
+
+        await saveDocAndAssert(page)
+        await expect(apiKeyInput).toHaveValue(apiKey)
+        await expect(apiKeyInput).toHaveAttribute('type', 'password')
       })
     })
 

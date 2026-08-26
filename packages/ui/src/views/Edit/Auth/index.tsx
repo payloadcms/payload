@@ -129,7 +129,7 @@ export const Auth: React.FC<Props> = (props) => {
     operation === 'update' &&
     modified &&
     canModifyAPIKey &&
-    enableAPIKey?.initialValue === false &&
+    enableAPIKey?.initialValue !== true &&
     enableAPIKey.value === true
   const showReadableAPIKey = showAPIKey || hasDraftAPIKey || isEnablingAPIKey
   const showUnreadableAPIKey =
