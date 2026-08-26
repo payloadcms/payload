@@ -652,9 +652,14 @@ describe('Auth', () => {
         await expect(apiKeyInput).toHaveValue('')
         await expect(page.getByRole('button', { name: 'Show API key' })).toBeHidden()
         await expect(page.locator('.copy-to-clipboard')).toBeHidden()
+        const pendingSaveMessage = page.getByText(
+          'New API Key Generated. You have unsaved changes. Save or discard before continuing.',
+        )
+        await expect(pendingSaveMessage).toBeVisible()
 
         await saveDocAndAssert(page)
         await expect(apiKeyInput).toBeDisabled()
+        await expect(pendingSaveMessage).toBeHidden()
         await expect(
           page.getByText("You don't have permission to view this API key."),
         ).toBeVisible()
@@ -690,9 +695,17 @@ describe('Auth', () => {
         await expect(apiKeyInput).toHaveValue('')
         await expect(page.getByRole('button', { name: 'Show API key' })).toBeHidden()
         await expect(page.locator('.copy-to-clipboard')).toBeHidden()
+        const pendingSaveMessage = page.getByText(
+          'New API Key Generated. You have unsaved changes. Save or discard before continuing.',
+        )
+        await expect(pendingSaveMessage).toBeVisible()
 
         await saveDocAndAssert(page)
         await expect(apiKeyInput).toBeDisabled()
+        await expect(pendingSaveMessage).toBeHidden()
+        await expect(
+          page.getByText("You don't have permission to view this API key."),
+        ).toBeVisible()
 
         const result = await getAPIKeyTestPayload().find({
           collection: apiKeysWithHiddenKeysSlug,

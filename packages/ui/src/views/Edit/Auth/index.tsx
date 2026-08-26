@@ -321,7 +321,11 @@ export const Auth: React.FC<Props> = (props) => {
               {showUnreadableAPIKey && (
                 <UnreadableAPIKey
                   canModify={!readOnly && canModifyAPIKey}
-                  description={t('authentication:apiKeyNotVisible')}
+                  description={
+                    hasAPIKeyValue
+                      ? `${t('authentication:newAPIKeyGenerated')} ${t('general:unsavedChanges')}`
+                      : t('authentication:apiKeyNotVisible')
+                  }
                   shouldGenerate={
                     canModifyAPIKey && apiKeyEnabled && (operation === 'create' || isEnablingAPIKey)
                   }
