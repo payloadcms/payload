@@ -9,4 +9,5 @@ export const MediaWithCompositePrefixes: CollectionConfig = {
     disableLocalStorage: false,
     filenameCompoundIndex: ['filename', 'prefix'],
   },
+  versions: false,
 }

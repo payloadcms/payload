@@ -1,5 +1,6 @@
 import type { CollectionSlug, Payload } from 'payload'
 
+import { buildDefaultEditorState } from '@payloadcms/richtext-lexical'
 import path from 'path'
 import { createLocalReq } from 'payload'
 import { fileURLToPath } from 'url'
@@ -7,8 +8,8 @@ import { afterAll, beforeAll, describe, expect, it, vitest } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
-import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { devUser } from '../credentials.js'
 import { postDoc } from './config.js'
 
 let restClient: NextRESTClient
@@ -108,15 +109,7 @@ describe('dataloader', () => {
       const relationA = await payload.create({
         collection: 'relation-a',
         data: {
-          richText: [
-            {
-              children: [
-                {
-                  text: 'relation a',
-                },
-              ],
-            },
-          ],
+          richText: buildDefaultEditorState({ text: 'relation a' }),
         },
       })
 
@@ -124,15 +117,7 @@ describe('dataloader', () => {
         collection: 'relation-b',
         data: {
           relationship: relationA.id,
-          richText: [
-            {
-              children: [
-                {
-                  text: 'relation b',
-                },
-              ],
-            },
-          ],
+          richText: buildDefaultEditorState({ text: 'relation b' }),
         },
       })
 
@@ -144,27 +129,18 @@ describe('dataloader', () => {
         collection: 'relation-a',
         data: {
           relationship: relationB.id,
-          richText: [
-            {
-              children: [
-                {
-                  text: 'relation a',
-                },
-              ],
-            },
-            {
-              type: 'relationship',
-              children: [
-                {
-                  text: '',
-                },
-              ],
-              relationTo: 'relation-b',
-              value: {
-                id: relationB.id,
+          richText: buildDefaultEditorState({
+            text: 'relation a',
+            nodes: [
+              {
+                type: 'relationship',
+                format: 'left',
+                relationTo: 'relation-b',
+                value: relationB.id,
+                version: 0,
               },
-            },
-          ],
+            ],
+          }),
         },
       })
 
@@ -184,7 +160,8 @@ describe('dataloader', () => {
 
       const innerMostRelationship =
         // @ts-expect-error Deep typing not worth doing
-        relationAWithDepth.relationship.relationship.richText[1].value.relationship.relationship
+        relationAWithDepth.relationship.relationship.richText.root.children[1].value.relationship
+          .relationship
 
       expect(innerMostRelationship).toStrictEqual(relationB.id)
     })

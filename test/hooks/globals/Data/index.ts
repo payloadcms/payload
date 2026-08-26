@@ -96,4 +96,5 @@ export const DataHooksGlobal: GlobalConfig = {
       type: 'text',
     },
   ],
+  versions: false,
 }

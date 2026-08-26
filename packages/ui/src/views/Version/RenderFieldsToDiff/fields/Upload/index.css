@@ -1,0 +1,188 @@
+@layer payload-default {
+  .upload-diff-container .field-diff-content {
+    padding: 0;
+    background: unset;
+  }
+
+  .upload-diff-container .html-diff {
+    background-color: transparent;
+    margin-block: 0;
+    padding-block: 0;
+  }
+
+  .upload-diff-container .diff-no-value {
+    padding: var(--spacer-2) var(--spacer-2-5);
+  }
+
+  .upload-diff-container .field-diff-content > .html-diff__diff-old {
+    padding-left: 0;
+  }
+
+  .upload-diff-container .field-diff-content > .html-diff__diff-new {
+    padding-right: 0;
+  }
+
+  @media (max-width: 768px) {
+    /* Stack hasMany columns vertically */
+    .upload-diff-container--hasMany .field-diff-content {
+      grid-template-columns: 1fr;
+      gap: var(--spacer-2);
+    }
+
+    /*
+     * Suppress the generic mobile column-level styling for uploads.
+     * Individual .upload-diff elements handle their own create/delete backgrounds.
+     */
+    .upload-diff-container .field-diff-content > .html-diff__diff-old,
+    .upload-diff-container .field-diff-content > .html-diff__diff-new {
+      background: transparent;
+      padding: 0;
+      border-radius: 0;
+      min-height: unset;
+      overflow: visible;
+    }
+
+    /* On mobile, remove .upload-diff padding so it sits flush inside the stacked column */
+    .upload-diff-container--hasOne .upload-diff,
+    .upload-diff-container--hasOne
+      .html-diff
+      .upload-diff.upload-diff.upload-diff[data-match-type='create'],
+    .upload-diff-container--hasOne
+      .html-diff
+      .upload-diff.upload-diff.upload-diff[data-match-type='delete'] {
+      padding: 0;
+    }
+  }
+
+  .upload-diff-hasMany {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-2);
+  }
+
+  .upload-diff {
+    min-width: 100%;
+    max-width: fit-content;
+    display: flex;
+    align-items: center;
+    background-color: var(--color-bg-secondary);
+    border-radius: var(--radius-medium);
+    position: relative;
+    font-family: var(--text-body-medium-font-family);
+    padding: var(--spacer-1);
+
+    &[data-match-type] {
+      .upload-diff__thumbnail {
+        background-color: transparent;
+      }
+    }
+
+    &[data-match-type='create'] {
+      background-color: var(--diff-create-parent-bg);
+      color: var(--diff-create-parent-color);
+
+      .upload-diff__info {
+        color: var(--diff-create-parent-color);
+      }
+    }
+
+    &[data-match-type='delete'] {
+      text-decoration-line: none;
+      background-color: var(--diff-delete-parent-bg);
+      color: var(--diff-delete-parent-color);
+
+      .upload-diff__info {
+        text-decoration-line: line-through;
+        text-decoration-color: var(--diff-delete-parent-color);
+        color: var(--diff-delete-parent-color);
+      }
+    }
+  }
+
+  /* Override HTMLDiff generic [data-match-type] styles which have higher specificity */
+  .html-diff .upload-diff.upload-diff.upload-diff[data-match-type='create'],
+  .html-diff .upload-diff.upload-diff.upload-diff[data-match-type='delete'] {
+    border-radius: var(--radius-medium);
+    padding: var(--spacer-1);
+    text-decoration-line: none;
+  }
+
+  .html-diff .upload-diff.upload-diff.upload-diff[data-match-type='create'] {
+    background-color: var(--diff-create-parent-bg);
+    color: var(--diff-create-parent-color);
+  }
+
+  .html-diff .upload-diff.upload-diff.upload-diff[data-match-type='delete'] {
+    background-color: var(--diff-delete-parent-bg);
+    color: var(--diff-delete-parent-color);
+  }
+
+  .upload-diff__card {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+    gap: var(--spacer-2);
+  }
+
+  .upload-diff__thumbnail {
+    width: var(--spacer-4);
+    height: var(--spacer-4);
+    position: relative;
+    overflow: hidden;
+    flex-shrink: 0;
+    border-radius: var(--radius-medium);
+    background-color: var(--color-bg-secondary);
+
+    img,
+    svg {
+      position: absolute;
+      object-fit: cover;
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  .upload-diff__info {
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    font-weight: var(--text-body-medium-font-weight);
+    font-size: var(--text-body-medium-font-size);
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    min-width: var(--stroke-width-small);
+  }
+
+  .upload-diff__pill {
+    border-radius: var(--radius-medium);
+    padding-inline: var(--spacer-1);
+    background-color: var(--color-bg-brand);
+    color: var(--color-text-onbrand);
+    font-size: var(--text-body-medium-font-size);
+    line-height: var(--text-body-medium-line-height);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .upload-diff[data-match-type] .upload-diff__pill {
+    text-decoration-line: none;
+  }
+
+  .upload-diff[data-match-type='create'] .upload-diff__pill {
+    background-color: var(--color-bg-brand);
+    color: var(--color-text-onbrand);
+  }
+
+  .upload-diff[data-match-type='delete'] .upload-diff__pill {
+    background-color: var(--color-bg-danger);
+    color: var(--color-text-oncomponent);
+
+    * {
+      text-decoration-line: none;
+      color: var(--color-text-oncomponent);
+      background-color: transparent;
+    }
+  }
+}

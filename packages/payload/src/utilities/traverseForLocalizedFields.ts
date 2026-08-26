@@ -19,6 +19,9 @@ export const traverseForLocalizedFields = (fields: Field[]): boolean => {
       case 'blocks':
         if (field.blocks) {
           for (const block of field.blocks) {
+            if (typeof block === 'string') {
+              continue
+            }
             if (block.fields && traverseForLocalizedFields(block.fields)) {
               return true
             }

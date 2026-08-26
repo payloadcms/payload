@@ -1,0 +1,25 @@
+@layer payload-default {
+  .LexicalEditorTheme__hr {
+    width: auto !important;
+    padding: calc(var(--spacer-1) / 2);
+    border: none;
+    margin: var(--spacer-3) 0;
+  }
+
+  .LexicalEditorTheme__hr:after {
+    content: '';
+    display: block;
+    height: calc(var(--spacer-1) / 2);
+    background: var(--color-icon-tertiary);
+    transform: translateY(-50%);
+  }
+
+  .LexicalEditorTheme__hr.LexicalEditorTheme__hrSelected {
+    outline: none;
+    user-select: none;
+    border-radius: var(--radius-small);
+    box-shadow:
+      0 0 0 var(--stroke-width-small) var(--color-bg),
+      0 0 0 var(--stroke-width-medium) var(--color-border-selected);
+  }
+}

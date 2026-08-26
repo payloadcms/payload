@@ -90,6 +90,9 @@ export interface Config {
   globals: {};
   globalsSelect: {};
   locale: null;
+  widgets: {
+    collections: CollectionsWidget;
+  };
   user: User;
   jobs: {
     tasks: unknown;
@@ -145,14 +148,7 @@ export interface FieldPath {
     fieldWithinNamedTabWithinCollapsible?: string | null;
   };
   textFieldInUnnamedGroup?: string | null;
-  blocks?:
-    | {
-        textInCollapsibleInCollapsibleBlock?: string | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'CollapsibleBlock';
-      }[]
-    | null;
+  blocks?: CollapsibleBlock[] | null;
   topLevelNamedField_beforeValidate_FieldPaths?:
     | {
         [k: string]: unknown;
@@ -591,6 +587,16 @@ export interface FieldPath {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "CollapsibleBlock".
+ */
+export interface CollapsibleBlock {
+  textInCollapsibleInCollapsibleBlock?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'CollapsibleBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -846,6 +852,16 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collections_widget".
+ */
+export interface CollectionsWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

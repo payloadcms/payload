@@ -1,20 +1,22 @@
 'use client'
 import React from 'react'
 
-export const H1Icon: React.FC = () => (
+const path =
+  'M7 6.5a.5.5 0 0 0-1 0v11a.5.5 0 0 0 1 0V12h6v5.5a.5.5 0 0 0 1 0v-11a.5.5 0 0 0-1 0V11H7zm11 6a.5.5 0 0 0-.777-.416l-1.5 1a.5.5 0 1 0 .554.832l.723-.482V17.5a.5.5 0 0 0 1 0z'
+
+export const H1Icon: React.FC<{
+  readonly className?: string
+}> = ({ className }) => (
   <svg
     aria-hidden="true"
-    className="icon"
+    className={['icon', className].filter(Boolean).join(' ')}
     fill="none"
     focusable="false"
-    height="20"
-    viewBox="0 0 20 20"
-    width="20"
+    height={24}
+    viewBox="0 0 24 24"
+    width={24}
     xmlns="http://www.w3.org/2000/svg"
   >
-    <path
-      d="M4.639 13.5V7.074H6.196V9.648H9.076V7.074H10.642V13.5H9.076V10.836H6.196V13.5H4.639ZM11.5656 9.045V8.019C12.6636 8.019 13.1316 7.731 13.2846 7.065H14.4006V13.5H12.8436V9.045H11.5656Z"
-      fill="currentColor"
-    />
+    <path d={path} fill="currentColor" />
   </svg>
 )

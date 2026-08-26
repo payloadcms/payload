@@ -6,5 +6,6 @@ export type Column = {
   readonly CustomLabel?: React.ReactNode
   readonly field: ClientField
   readonly Heading: React.ReactNode
+  readonly isLinkedColumn?: boolean
   readonly renderedCells: React.ReactNode[]
 }

@@ -16,4 +16,5 @@ export const LargeDocuments: CollectionConfig = {
       ],
     },
   ],
+  versions: false,
 }

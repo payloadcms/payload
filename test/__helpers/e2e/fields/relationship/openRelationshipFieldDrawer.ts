@@ -50,6 +50,7 @@ export async function openRelationshipFieldDrawer({
     await expect(relationToSelector).toBeVisible()
 
     await selectInput({
+      page,
       selectLocator: relationToSelector,
       option: selectRelation,
       multiSelect: false,

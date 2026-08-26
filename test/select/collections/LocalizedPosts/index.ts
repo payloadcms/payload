@@ -155,4 +155,5 @@ export const LocalizedPostsCollection: CollectionConfig = {
       ],
     },
   ],
+  versions: false,
 }

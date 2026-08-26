@@ -81,6 +81,29 @@ export type CancelJobAccessArgs = {
 export type CancelJobAccess = (args: CancelJobAccessArgs) => MaybePromise<boolean>
 export type QueueJobAccess = (args: QueueJobAccessArgs) => MaybePromise<boolean>
 
+export type ProcessingLeaseConfig = {
+  /**
+   * How long a job remains claimed without a successful lease renewal.
+   * This is not a maximum job runtime; active jobs renew their lease automatically.
+   *
+   * @default 1200000 (20 minutes)
+   */
+  duration?: number
+  /**
+   * Minimum time that must remain on a lease before a worker **starts** an update. This gives the
+   * update time to finish before another worker can claim the job.
+   *
+   * Set this to `0` if your database adapter applies the ownership check and update atomically.
+   * If the database update itself is not atomic, increase this value, as another worker
+   * may claim the job before the update finishes.
+   *
+   * It must be less than `duration`.
+   *
+   * @default 30000 (30 seconds)
+   */
+  safetyBuffer?: number
+}
+
 export type SanitizedJobsConfig = {
   /**
    * If set to `true`, the job system is enabled and a payload-jobs collection exists.
@@ -88,16 +111,17 @@ export type SanitizedJobsConfig = {
    */
   enabled?: boolean
   /**
+   * If set to `true`, at least one task or workflow uses concurrency controls.
+   * This property is automatically set during sanitization.
+   */
+  hasConcurrency?: boolean
+  processingLease: Required<ProcessingLeaseConfig>
+  /**
    * If set to `true`, at least one task or workflow has scheduling enabled.
    * This property is automatically set during sanitization.
    */
   scheduling?: boolean
-  /**
-   * If set to `true`, a payload-job-stats global exists.
-   * This property is automatically set during sanitization.
-   */
-  stats?: boolean
-} & JobsConfig
+} & Omit<JobsConfig, 'processingLease'>
 export type JobsConfig = {
   /**
    * Specify access control to determine who can interact with jobs.
@@ -116,13 +140,6 @@ export type JobsConfig = {
      */
     run?: RunJobAccess
   }
-  /** Adds information about the parent job to the task log. This is useful for debugging and tracking the flow of tasks.
-   *
-   * In 4.0, this will default to `true`.
-   *
-   * @default false
-   */
-  addParentToTaskLog?: boolean
   /**
    * Allows you to configure cron jobs that automatically run queued jobs
    * at specified intervals. Note that this does not _queue_ new jobs - only
@@ -136,33 +153,13 @@ export type JobsConfig = {
    */
   deleteJobOnComplete?: boolean
   /**
-   * Specify depth for retrieving jobs from the queue.
-   * This should be as low as possible in order for job retrieval
-   * to be as efficient as possible. Setting it to anything higher than
-   * 0 will drastically affect performance, as less efficient database
-   * queries will be used.
-   *
-   * @default 0
-   * @deprecated - this will be removed in 4.0
-   */
-  depth?: number
-  /**
-   * Enable concurrency controls for workflows and tasks.
-   * When enabled, adds a `concurrencyKey` field to the jobs collection schema.
-   * This allows workflows and tasks to use the `concurrency` option to prevent race conditions.
-   *
-   * **Important:** Enabling this may require a database migration depending on your database adapter,
-   * as it adds a new indexed field to the jobs collection schema.
-   *
-   * @default false
-   * @todo In 4.0, this will default to `true`.
-   */
-  enableConcurrencyControl?: boolean
-  /**
    * Override any settings on the default Jobs collection. Accepts the default collection and allows you to return
    * a new collection.
+   *
+   * @experimental
    */
   jobsCollectionOverrides?: (args: { defaultJobsCollection: CollectionConfig }) => CollectionConfig
+  processingLease?: ProcessingLeaseConfig
   /**
    * Adjust the job processing order using a Payload sort string. This can be set globally or per queue.
    *
@@ -179,16 +176,6 @@ export type JobsConfig = {
         }
       }
     | Sort
-  /**
-   * By default, the job system uses direct database calls for optimal performance.
-   * If you added custom hooks to your jobs collection, you can set this to true to
-   * use the standard Payload API for all job operations. This is discouraged, as it will
-   * drastically affect performance.
-   *
-   * @default false
-   * @deprecated - this will be removed in 4.0
-   */
-  runHooks?: boolean
   /**
    * A function that will be executed before Payload picks up jobs which are configured by the `jobs.autorun` function.
    * If this function returns true, jobs will be queried and picked up. If it returns false, jobs will not be run.

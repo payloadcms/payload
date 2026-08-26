@@ -15,8 +15,8 @@ Payload is a monorepo structured around Next.js, containing the core CMS platfor
   - `packages/db-*` - Database adapters (MongoDB, Postgres, SQLite, Vercel Postgres, D1 SQLite)
   - `packages/drizzle` - Drizzle ORM integration
   - `packages/kv-redis` - Redis key-value store adapter
-  - `packages/richtext-*` - Rich text editors (Lexical, Slate)
-  - `packages/storage-*` - Storage adapters (S3, Azure, GCS, Uploadthing, Vercel Blob, R2)
+  - `packages/richtext-*` - Rich text editors (Lexical)
+  - `packages/storage-*` - Storage adapters (S3, Azure, GCS, Vercel Blob, R2)
   - `packages/email-*` - Email adapters (Nodemailer, Resend)
   - `packages/plugin-*` - Additional functionality plugins
   - `packages/graphql` - GraphQL API layer
@@ -54,7 +54,7 @@ Payload is a monorepo structured around Next.js, containing the core CMS platfor
 
 ### Coding Patterns and Best Practices
 
-- Prefer single object parameters (improves backwards-compatibility)
+- Always use object parameters for function arguments: `fn({ name }: { name: string })` not `fn(name: string)` (improves backwards-compatibility)
 - Prefer types over interfaces (except when extending external types)
 - Prefer functions over classes (classes only for errors/adapters)
 - Prefer pure functions; when mutation is unavoidable, return the mutated object instead of void.
@@ -63,6 +63,22 @@ Payload is a monorepo structured around Next.js, containing the core CMS platfor
 - Use `import type` for types, regular `import` for values, separate statements even from same module
 - Prefix booleans with `is`/`has`/`can`/`should` (e.g., `isValid`, `hasData`) for clarity
 - Prefer self describing function and variable names over generic names with comments to explain their purpose
+- **Translation/Label handling**: Always use `getTranslation` from `@payloadcms/translations` when you need to render labels defined in the config - it already handles functions, strings, and translation objects correctly. Don't write custom if/else logic to handle different label types.
+- **Memoize arrays/objects passed to hooks**: Never pass inline array/object literals to custom hooks - they create new references on every render, breaking memoization and causing unnecessary re-renders or remounts.
+
+  ```typescript
+  // BAD - creates new array every render, breaks hook memoization
+  const [Drawer] = useHierarchyDrawer({
+    filterByCollection: [collectionSlug],
+  })
+
+  // GOOD - memoized, stable reference
+  const filterByCollection = useMemo(() => [collectionSlug], [collectionSlug])
+  const [Drawer] = useHierarchyDrawer({
+    filterByCollection,
+  })
+  ```
+
 - Commenting Guidelines
 
   - Execution flow: Skip comments when code is self-documenting. Keep for complex logic, non-obvious "why", multi-line context, or if following a documented, multi-step flow.
@@ -81,12 +97,13 @@ Each React component should have its own named folder:
 ```
 ComponentName/
 ├── index.tsx       # Component implementation
-└── index.scss      # Styles (if applicable)
+└── index.css       # Styles (if applicable)
 ```
 
-- **Do:** Create a folder per component with `index.tsx` and `index.scss`
-- **Don't:** Place multiple `ComponentName.tsx` files in a single folder with one shared `.scss` file
+- **Do:** Create a folder per component with `index.tsx` and `index.css`
+- **Don't:** Place multiple `ComponentName.tsx` files in a single folder with one shared `.css` file
 - Re-export from barrel files (`index.ts`) when grouping related components in a parent directory
+- New styles should be written in plain CSS, not SCSS - SCSS is being phased out and is no longer linted (see [Writing CSS](#writing-css))
 
 ### Running Dev Server
 
@@ -206,6 +223,32 @@ test/<feature-name>/
 
 Generate types for a test directory: `pnpm run dev:generate-types <directory_name>`
 
+### Visual Regression Testing
+
+Screenshot comparisons live alongside normal e2e tests and are opt-in via the `visual()` helper,
+which applies the `@visual` tag for you:
+
+```ts
+import { expectScreenshot } from '../__helpers/e2e/expectScreenshot.js'
+import { visual } from '../__helpers/e2e/visual.js'
+
+visual('renders the posts list view', async () => {
+  await page.goto(url.list)
+  await expectScreenshot({ page, name: 'posts-list-view.png' })
+})
+```
+
+- Baselines are committed PNGs next to their spec file (`__snapshots__/<spec-file>/<name>.png`).
+- **Baselines must be generated/updated inside the pinned Playwright Docker image**, never on a
+  bare host — font rendering differs enough between operating systems to fail the comparison on
+  CI even when nothing visually changed. Use `pnpm test:visual:update`.
+- On a PR, CI only runs `@visual` tests when the diff could plausibly change rendered UI — e.g.
+  `.css`/`.scss`/`.tsx`/`.jsx`/`.svg` files, any `e2e.spec.ts`/`__snapshots__/**`, or fixture
+  config the current `@visual` tests render (see `needs_visual` in `.github/workflows/main.yml`
+  for the full path list).
+- If the `visual-regression` CI job fails, reproduce and inspect the diff locally with
+  `pnpm test:visual` — there is no CI-posted comment.
+
 ## Linting & Formatting
 
 - `pnpm run lint` - Run linter across all packages
@@ -249,5 +292,167 @@ Examples:
 
 - LLMS.txt: <https://payloadcms.com/llms.txt>
 - LLMS-FULL.txt: <https://payloadcms.com/llms-full.txt>
-- Node version: ^18.20.2 || >=20.9.0
-- pnpm version: ^10.27.0
+- Node version: >=24.15.0
+- pnpm version: ^11.9.0
+
+## Admin Panel
+
+The admin panel is made up of both client and server react components.
+
+### Patterns
+
+ALWAYS use `formatAdminURL` when formatting api and admin routes.
+
+**Building API URLs with query parameters:** Use `qs-esm` to build query strings with proper object syntax instead of manual string concatenation.
+
+Incorrect:
+
+```typescript
+const whereClause = parentId
+  ? `where[${parentFieldName}][equals]=${parentId}`
+  : `where[or][0][${parentFieldName}][exists]=false&where[or][1][${parentFieldName}][equals]=`
+
+const url = `${serverURL}${api}/${collectionSlug}?${whereClause}&limit=${limit}&page=${page}`
+```
+
+Correct:
+
+```typescript
+import { formatAdminURL } from 'payload/shared'
+import * as qs from 'qs-esm'
+
+const where = parentId
+  ? { [parentFieldName]: { equals: parentId } }
+  : {
+      or: [{ [parentFieldName]: { exists: false } }, { [parentFieldName]: { equals: null } }],
+    }
+
+const queryString = qs.stringify({ limit, page, where }, { addQueryPrefix: true })
+const url = formatAdminURL({ apiRoute: api, path: `/${collectionSlug}${queryString}`, serverURL })
+```
+
+**Building server functions, views, or endpoints:** Always use `overrideAccess: false` and pass the `user` to payload operations. Without these, the operation runs with access control disabled, which is a security vulnerability.
+
+Incorrect:
+
+```typescript
+// INSECURE - runs with full access, bypassing all access control
+const docs = await payload.find({
+  collection: 'posts',
+})
+```
+
+Correct:
+
+```typescript
+// SECURE - respects access control for the current user
+const docs = await payload.find({
+  collection: 'posts',
+  overrideAccess: false,
+  user,
+})
+```
+
+### Writing CSS
+
+Stylelint enforces the rules below on `.css` files (SCSS is no longer linted and is being phased out). Run `pnpm run lint:css` to check, or `pnpm run lint` to run all linters.
+
+**Mobile-first media queries only - never `max-width`:**
+
+```css
+/* BAD - rejected by plugin/no-max-width-media-query */
+@media (max-width: 768px) {
+  ...;
+}
+
+/* GOOD */
+@media (min-width: 768px) {
+  ...;
+}
+```
+
+**Only the four canonical breakpoints are allowed in a media query** (`plugin/no-non-standard-breakpoints`): `400px`, `768px`, `1024px`, `1440px`. Don't invent one-off breakpoint values.
+
+**Never use `!important`** (`plugin/no-important`). Refactor selector specificity instead.
+Exceptions to this rule are when it's not possible to do so when dealing with external libraries.
+
+**Prefer logical properties over physical properties** for RTL support:
+
+```css
+/* BAD - physical properties don't flip for RTL */
+padding-left: var(--spacer-3);
+margin-right: var(--spacer-2);
+border-left: 1px solid var(--color-border);
+left: 0;
+
+/* GOOD - logical properties adapt automatically */
+padding-inline-start: var(--spacer-3);
+margin-inline-end: var(--spacer-2);
+border-inline-start: var(--stroke-width-small) solid var(--color-border);
+inset-inline-start: 0;
+```
+
+Use `padding-inline`/`padding-block`, `margin-inline`/`margin-block`, `inset-inline`/`inset-block`, and `border-inline`/`border-block` (with their `-start`/`-end` variants) instead of the `-left`/`-right`/`-top`/`-bottom` equivalents where a direction is implied.
+
+**Prioritize design tokens over hardcoded pixel/rem values:**
+
+Spacing (`width`/`height`, `margin*`, `padding*`, `top`/`right`/`bottom`/`left`, `inset*`, `gap*`, `flex-basis`, etc.) should use a `--spacer-*` token from `packages/ui/src/css/spacing.css`, not a raw pixel or rem value:
+
+| Token          | Pixel |
+| -------------- | ----- |
+| `--spacer-0`   | 0px   |
+| `--spacer-1`   | 4px   |
+| `--spacer-1-5` | 6px   |
+| `--spacer-2`   | 8px   |
+| `--spacer-2-5` | 12px  |
+| `--spacer-3`   | 16px  |
+| `--spacer-4`   | 24px  |
+| `--spacer-5`   | 32px  |
+| `--spacer-6`   | 40px  |
+
+- If the value needed isn't an exact token, round to the nearest `--spacer-*` token rather than hand-writing a one-off value.
+- If a niche value must be precise (not a rounding-friendly case), use `calc()` with a spacer token instead of a raw pixel/rem value, e.g. `calc(var(--spacer-1) * 2.5)` for `10px`.
+- The same principle applies to other token families:
+  - **Colors:** use semantic `--color-*` tokens from `colors.css` (e.g. `--color-bg`, `--color-text-brand`, `--color-border`). Never reference raw `--ramp-*` palette tokens directly outside of `colors.css` as they aren't theme-aware.
+  - **Radius:** use `--radius-*` from `radius.css` (`--radius-small` 2px, `--radius-medium` 5px, `--radius-large` 13px, `--radius-full` 9999px) instead of hardcoded values.
+  - **Stroke width:** use `--stroke-width-small` (1px) / `--stroke-width-medium` (2px) from `theme.css`.
+  - **Box shadows:** use elevation tokens from `elevations.css` (`--elevation-100-canvas`, `--elevation-300-tooltip`, `--elevation-400-menu-panel`, `--elevation-500-modal-window`) instead of a hardcoded `box-shadow`/`rgba()` value - they also handle light/dark theming.
+  - **Typography:** use `--text-*` tokens from `typography.css`.
+
+**No sub-pixel precision** (`plugin/no-subpixel-values`) - applies to whatever raw value remains after the above (e.g. an exception case):
+
+- Pixel values may have at most one decimal place (e.g. `0.5px` is fine, `13.523px` is not).
+- Box-model and position properties - `width`/`height`, `margin*`, `padding*`, `top`/`right`/`bottom`/`left`, `inset*`, `gap*`, `flex-basis`, `min-`/`max-width`/`height` - must be whole numbers with no decimals at all.
+- `font-size`, `letter-spacing`, `line-height`, and custom properties (`--*`) are exempt, since a `var()` can't be statically traced to the property it ends up on.
+
+### RSC/Client Bundling Rules
+
+These rules prevent production bundling issues where client code gets evaluated in server context.
+
+**1. Avoid barrel exports (`export *`) - always use explicit named exports:**
+
+Barrel exports cause bundling issues, break tree-shaking, and can break client/server boundaries in production. Always use explicit named exports.
+
+```typescript
+// BAD - barrel export
+export * from '../../elements/SomeComponent/exports.js'
+
+// GOOD - explicit named exports
+export { SomeComponent } from '../../elements/SomeComponent/index.js'
+export { AnotherComponent } from '../../elements/AnotherComponent/index.js'
+```
+
+**2. Server components must import client components from `exports/client/index.js`:**
+
+When a `.server.tsx` file needs to render a client component, it must import from the client exports bundle, not via relative path. Relative imports don't respect `'use client'` boundaries in production builds.
+
+```typescript
+// BAD - relative import doesn't work in prod
+import { MyClientComponent } from './MyComponent.js'
+
+// GOOD - import from client exports bundle
+// eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports dir for proper client boundary
+import { MyClientComponent } from '../../exports/client/index.js'
+```
+
+**Testing bundling changes:** Always test with `pnpm prepare-run-test-against-prod` followed by `pnpm dev:prod <suite>`. Dev mode (`pnpm dev`) doesn't catch these issues.

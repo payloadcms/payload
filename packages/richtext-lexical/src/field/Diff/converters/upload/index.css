@@ -1,0 +1,175 @@
+@layer payload-default {
+  .lexical-diff {
+    .lexical-upload-diff {
+      min-width: 100%;
+      max-width: fit-content;
+      display: flex;
+      align-items: center;
+      background-color: var(--color-bg);
+      border-radius: var(--radius-medium);
+      outline: var(--stroke-width-small) solid var(--color-border);
+      outline-offset: calc(var(--stroke-width-small) * -1);
+      position: relative;
+      z-index: 2;
+      font-family: var(--text-body-medium-font-family);
+      padding: var(--spacer-2);
+
+      &[data-match-type='create'] {
+        background-color: var(--diff-create-parent-bg);
+        outline-color: var(--diff-create-pill-border);
+        color: var(--diff-create-parent-color);
+
+        .lexical-upload-diff__thumbnail {
+          background-color: var(--diff-create-pill-bg);
+        }
+
+        .lexical-upload-diff__info {
+          color: var(--diff-create-parent-color);
+        }
+
+        .lexical-upload-diff__meta {
+          color: var(--diff-create-parent-color);
+        }
+      }
+
+      &[data-match-type='delete'] {
+        text-decoration-line: none;
+        background-color: var(--diff-delete-parent-bg);
+        outline-color: var(--diff-delete-pill-border);
+        color: var(--diff-delete-parent-color);
+
+        .lexical-upload-diff__thumbnail {
+          background-color: var(--diff-delete-pill-bg);
+        }
+
+        .lexical-upload-diff__info {
+          color: var(--diff-delete-parent-color);
+
+          strong {
+            text-decoration-line: line-through;
+            text-decoration-color: var(--diff-delete-parent-color);
+          }
+        }
+
+        .lexical-upload-diff__meta {
+          text-decoration-line: line-through;
+          text-decoration-color: var(--diff-delete-parent-color);
+          color: var(--diff-delete-parent-color);
+        }
+      }
+    }
+
+    /* Override HTMLDiff generic [data-match-type] styles - specificity must beat 0,4,1 from HTMLDiff */
+    .lexical-upload-diff.lexical-upload-diff[data-enable-match='true'][data-match-type='create'],
+    .lexical-upload-diff.lexical-upload-diff[data-enable-match='true'][data-match-type='delete'] {
+      border-radius: var(--radius-medium);
+      padding: var(--spacer-2);
+      text-decoration-line: none;
+    }
+
+    .lexical-upload-diff.lexical-upload-diff[data-enable-match='true'][data-match-type='create'] {
+      background-color: var(--diff-create-parent-bg);
+      color: var(--diff-create-parent-color);
+    }
+
+    .lexical-upload-diff.lexical-upload-diff[data-enable-match='true'][data-match-type='delete'] {
+      background-color: var(--diff-delete-parent-bg);
+      color: var(--diff-delete-parent-color);
+    }
+
+    .lexical-upload-diff__card {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      width: 100%;
+      gap: var(--spacer-2-5);
+    }
+
+    .lexical-upload-diff__thumbnail {
+      width: var(--spacer-6);
+      height: var(--spacer-6);
+      position: relative;
+      overflow: hidden;
+      flex-shrink: 0;
+      border-radius: var(--radius-medium);
+      background-color: var(--color-bg-secondary);
+
+      img,
+      svg {
+        position: absolute;
+        object-fit: cover;
+        width: 100%;
+        height: 100%;
+      }
+    }
+
+    .lexical-upload-diff__info {
+      flex: 1 0 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: var(--spacer-1);
+      font-size: var(--text-body-medium-font-size);
+      line-height: var(--text-body-medium-line-height);
+      overflow: hidden;
+      min-width: var(--stroke-width-small);
+
+      strong {
+        font-weight: 600;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    }
+
+    .lexical-upload-diff__meta {
+      font-size: var(--text-body-medium-font-size);
+      color: var(--color-text-secondary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Style uploads based on ancestor data-match-type (e.g. from diff wrappers) */
+    [data-match-type='create'] .lexical-upload-diff__info {
+      color: var(--diff-create-parent-color);
+    }
+
+    [data-match-type='create'] .lexical-upload-diff__meta.lexical-upload-diff__meta {
+      color: var(--diff-create-parent-color);
+    }
+
+    [data-match-type='create'] .lexical-upload-diff__thumbnail {
+      background-color: var(--diff-create-pill-bg);
+    }
+
+    [data-match-type='create'] .lexical-upload-diff {
+      background-color: var(--diff-create-parent-bg);
+      outline-color: var(--diff-create-pill-border);
+    }
+
+    [data-match-type='delete'] .lexical-upload-diff__info {
+      color: var(--diff-delete-parent-color);
+
+      strong {
+        text-decoration-line: line-through;
+        text-decoration-color: var(--diff-delete-parent-color);
+      }
+    }
+
+    [data-match-type='delete'] .lexical-upload-diff__meta.lexical-upload-diff__meta {
+      text-decoration-line: line-through;
+      text-decoration-color: var(--diff-delete-parent-color);
+      color: var(--diff-delete-parent-color);
+    }
+
+    [data-match-type='delete'] .lexical-upload-diff__thumbnail {
+      background-color: var(--diff-delete-pill-bg);
+    }
+
+    [data-match-type='delete'] .lexical-upload-diff {
+      background-color: var(--diff-delete-parent-bg);
+      outline-color: var(--diff-delete-pill-border);
+    }
+  }
+}

@@ -1,5 +1,8 @@
+import type { GraphQLInputObjectType } from 'graphql'
 import type { Payload } from 'payload'
 
+import { configToSchema } from '@payloadcms/graphql'
+import { GraphQLNonNull } from 'graphql'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
@@ -25,6 +28,30 @@ describe('graphql', () => {
   })
 
   describe('graphql', () => {
+    it('should return 404 when GraphQL is disabled', async () => {
+      const originalDisable = payload.config.graphQL?.disable
+
+      payload.config.graphQL.disable = true
+
+      try {
+        const response = await restClient.GRAPHQL_POST({
+          body: JSON.stringify({
+            query: `query {
+          Posts {
+            docs {
+              id
+            }
+          }
+        }`,
+          }),
+        })
+
+        expect(response.status).toBe(404)
+      } finally {
+        payload.config.graphQL.disable = originalDisable
+      }
+    })
+
     it('should not be able to query introspection', async () => {
       const query = `query {
         __schema {
@@ -267,6 +294,18 @@ query {
         .then((res) => res.json())
 
       expect(afterDelete.errors).toBeUndefined()
+    })
+
+    describe('nullable schema types', () => {
+      it('should not mark required virtual fields as non-null in the mutation input type', () => {
+        const { schema } = configToSchema(payload.config)
+        const inputType = schema.getType('mutationVirtualFieldInput') as GraphQLInputObjectType
+        const fields = inputType.getFields()
+
+        expect(fields.requiredTitle!.type instanceof GraphQLNonNull).toBe(true)
+        expect(fields.virtualComputed!.type instanceof GraphQLNonNull).toBe(false)
+        expect(fields.virtualFromRelation!.type instanceof GraphQLNonNull).toBe(false)
+      })
     })
   })
 })

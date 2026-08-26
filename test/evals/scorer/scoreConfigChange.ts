@@ -55,11 +55,33 @@ Important scoring guidance:
 - Preserving all existing config unchanged is expected and should not affect the score
 - Adding reasonable supporting code (e.g. an import) alongside the change is fine
 - Only penalize correctness for things that are actually wrong, not for things that are absent
-- Absence of a required property lowers completeness, not correctness`,
+- Absence of a required property lowers completeness, not correctness
+- Read the expected outcome literally. When it names a specific construct
+  (e.g. "field-level hooks.afterRead", "collection-level access", a particular
+  hook lifecycle) or a specific Payload API shape, using a different
+  construct or shape is a structural mismatch — score correctness ≤ 0.4 even
+  if behavior is similar. Only treat differences as "minor" when the
+  construct, location, and API surface are correct and only an option name
+  or value differs.`,
   })
 
-  const score = 0.6 * output.correctness + 0.4 * output.completeness
+  // The schema no longer constrains these to 0–1 (Anthropic compat), so clamp.
+  const correctness = Math.max(0, Math.min(1, output.correctness))
+  const completeness = Math.max(0, Math.min(1, output.completeness))
+  const score = 0.6 * correctness + 0.4 * completeness
   const pass = score >= SCORE_THRESHOLD
 
-  return { ...output, pass, score, usage }
+  return {
+    ...output,
+    completeness,
+    correctness,
+    pass,
+    score,
+    usage: {
+      cachedInputTokens: usage.inputTokenDetails.cacheReadTokens ?? 0,
+      inputTokens: usage.inputTokens ?? 0,
+      outputTokens: usage.outputTokens ?? 0,
+      totalTokens: usage.totalTokens ?? 0,
+    },
+  }
 }

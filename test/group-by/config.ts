@@ -5,6 +5,7 @@ import path from 'path'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { CategoriesCollection } from './collections/Categories/index.js'
 import { MediaCollection } from './collections/Media/index.js'
+import { NoGroupableCollection } from './collections/NoGroupable/index.js'
 import { PagesCollection } from './collections/Pages/index.js'
 import { PostsCollection } from './collections/Posts/index.js'
 import { RelationshipsCollection } from './collections/Relationships/index.js'
@@ -20,6 +21,7 @@ export default buildConfigWithDefaults({
     CategoriesCollection,
     MediaCollection,
     RelationshipsCollection,
+    NoGroupableCollection,
   ],
   admin: {
     importMap: {

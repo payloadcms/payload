@@ -3,7 +3,7 @@ import React from 'react'
 
 import { useField } from '../../../forms/useField/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'section-title'
 
@@ -35,8 +35,9 @@ export const SectionTitle: React.FC<Props> = (props) => {
     })
 
   return (
-    <div className={classes} data-value={customValue || value}>
+    <div className={classes} data-value={customValue || value || t('general:untitled')}>
       <input
+        aria-label={t('fields:blockName')}
         className={`${baseClass}__input`}
         id={path}
         name={path}

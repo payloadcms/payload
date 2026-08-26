@@ -1,0 +1,14 @@
+@layer payload-default {
+  .clear-indicator {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--color-icon-secondary);
+
+    &:hover {
+      color: var(--color-icon);
+    }
+  }
+}

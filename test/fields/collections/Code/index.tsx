@@ -48,6 +48,7 @@ const Code: CollectionConfig = {
       },
     },
   ],
+  versions: false,
 }
 
 export default Code

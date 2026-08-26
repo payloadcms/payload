@@ -1,8 +1,8 @@
+import { stubAdapter } from '@/db-stub.js'
 import { buildConfig } from 'payload'
 
-// db is a required field; the eval fixture uses a stub so the LLM can focus on the specific task
 export default buildConfig({
-  db: null as unknown as Parameters<typeof buildConfig>[0]['db'],
+  db: stubAdapter,
   secret: 'eval-fixture',
   collections: [
     {
@@ -21,6 +21,7 @@ export default buildConfig({
           },
         },
       ],
+      versions: false,
     },
   ],
 })

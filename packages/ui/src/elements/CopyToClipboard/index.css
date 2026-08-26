@@ -1,0 +1,25 @@
+@layer payload-default {
+  .copy-to-clipboard {
+    position: relative;
+    cursor: pointer;
+    vertical-align: middle;
+    border: 0;
+    background: transparent;
+    border-radius: var(--button-radius);
+    color: var(--color-icon);
+    outline: var(--stroke-width-medium) solid transparent;
+    outline-offset: calc(var(--stroke-width-medium) * -1);
+
+    &:hover {
+      background: var(--color-bg-secondary);
+    }
+
+    &:active {
+      background: var(--color-bg-secondary-pressed);
+    }
+
+    &:focus-visible {
+      outline-color: var(--color-border-selected);
+    }
+  }
+}

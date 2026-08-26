@@ -15,4 +15,5 @@ export const AdminThumbnailFunction: CollectionConfig = {
       'https://raw.githubusercontent.com/payloadcms/website/refs/heads/main/public/images/universal-truth.jpg',
   },
   fields: [],
+  versions: false,
 }

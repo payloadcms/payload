@@ -1,0 +1,15 @@
+@layer payload-default {
+  .hierarchy-button {
+    margin: 0;
+    font-weight: normal;
+
+    .btn__content {
+      gap: 0;
+    }
+  }
+
+  .hierarchy-button--read-only {
+    cursor: default;
+    color: var(--color-text-disabled);
+  }
+}

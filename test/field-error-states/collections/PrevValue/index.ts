@@ -61,4 +61,5 @@ export const PrevValue: CollectionConfig = {
       type: 'text',
     },
   ],
+  versions: false,
 }

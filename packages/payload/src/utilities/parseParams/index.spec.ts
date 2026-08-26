@@ -198,14 +198,6 @@ describe('parseParams', () => {
     })
   })
 
-  describe('publishSpecificLocale parameter', () => {
-    it('should pass through publishSpecificLocale as-is', () => {
-      const publishSpecificLocale = 'en'
-      const result = parseParams({ publishSpecificLocale })
-      expect(result.publishSpecificLocale).toBe(publishSpecificLocale)
-    })
-  })
-
   describe('field parameter', () => {
     it('should pass through field as-is', () => {
       const field = 'myField'

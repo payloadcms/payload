@@ -22,4 +22,5 @@ export const ServerComponentsCollection: CollectionConfig = {
       type: 'richText',
     },
   ],
+  versions: false,
 }

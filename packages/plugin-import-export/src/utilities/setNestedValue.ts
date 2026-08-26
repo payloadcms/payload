@@ -1,3 +1,52 @@
+import { APIError } from 'payload'
+
+import { hasUnsupportedFieldPathSegment } from './fieldPath.js'
+
+const MAX_UNVERIFIED_SPARSE_ARRAY_GAP = 1
+
+const createObject = (): Record<string, unknown> => Object.create(null) as Record<string, unknown>
+
+const isArrayIndex = (part: string): boolean => {
+  if (!/^(?:0|[1-9]\d*)$/.test(part)) {
+    return false
+  }
+
+  const index = Number(part)
+
+  return Number.isSafeInteger(index) && index >= 0
+}
+
+const getPathKey = (
+  target: Record<string, unknown> | unknown[],
+  part: string,
+  source: unknown,
+): number | string => {
+  if (!Array.isArray(target) || !isArrayIndex(part)) {
+    return part
+  }
+
+  const index = Number(part)
+
+  if (
+    (Array.isArray(source) && index >= source.length) ||
+    (!Array.isArray(source) && index > target.length + MAX_UNVERIFIED_SPARSE_ARRAY_GAP)
+  ) {
+    throw new APIError('Invalid field path.', 400, null, true)
+  }
+
+  return index
+}
+
+const getSourceValue = (source: unknown, part: string): unknown => {
+  if (source === null || typeof source !== 'object') {
+    return undefined
+  }
+
+  const key = Array.isArray(source) && isArrayIndex(part) ? Number(part) : part
+
+  return (source as Record<number | string, unknown>)[key]
+}
+
 /**
  * Sets a value deeply into a nested object or array, based on a dot-notation path.
  *
@@ -14,52 +63,52 @@
  * @param obj - The target object to mutate.
  * @param path - A dot-separated string path indicating where to assign the value.
  * @param value - The value to set at the specified path.
+ * @param source - The source object used to validate array boundaries.
  */
 
 export const setNestedValue = (
   obj: Record<string, unknown>,
   path: string,
   value: unknown,
+  source?: Record<string, unknown>,
 ): void => {
   const parts = path.split('.')
-  let current: any = obj
 
-  for (let i = 0; i < parts.length; i++) {
-    const part = parts[i]
-    const isLast = i === parts.length - 1
-    const isIndex = !Number.isNaN(Number(part))
-
-    if (isIndex) {
-      const index = Number(part)
-
-      // Ensure the current target is an array
-      if (!Array.isArray(current)) {
-        current = []
-      }
-
-      // Ensure the array slot is initialized
-      if (!current[index]) {
-        current[index] = {}
-      }
-
-      if (isLast) {
-        current[index] = value
-      } else {
-        current = current[index] as Record<string, unknown>
-      }
-    } else {
-      // Ensure the object key exists
-      if (isLast) {
-        if (typeof part === 'string') {
-          current[part] = value
-        }
-      } else {
-        if (typeof current[part as string] !== 'object' || current[part as string] === null) {
-          current[part as string] = {}
-        }
-
-        current = current[part as string] as Record<string, unknown>
-      }
-    }
+  if (hasUnsupportedFieldPathSegment(parts)) {
+    throw new APIError('Invalid field path.', 400, null, true)
   }
+
+  const lastPart = parts.pop()
+
+  if (lastPart === undefined) {
+    return
+  }
+
+  let current: Record<string, unknown> | unknown[] = obj
+  let sourceCurrent: unknown = source
+
+  for (const [i, part] of parts.entries()) {
+    const key = getPathKey(current, part, sourceCurrent)
+    const currentRecord = current as Record<number | string, unknown>
+    const nextPart = parts[i + 1] ?? lastPart
+    const nextSource = getSourceValue(sourceCurrent, part)
+
+    const nextValue = currentRecord[key]
+
+    if (
+      !Object.prototype.hasOwnProperty.call(currentRecord, key) ||
+      typeof nextValue !== 'object' ||
+      nextValue === null
+    ) {
+      currentRecord[key] = isArrayIndex(nextPart) ? [] : createObject()
+    }
+
+    current = currentRecord[key] as Record<string, unknown> | unknown[]
+    sourceCurrent = nextSource
+  }
+
+  const lastKey = getPathKey(current, lastPart, sourceCurrent)
+  const finalRecord = current as Record<number | string, unknown>
+
+  finalRecord[lastKey] = value
 }

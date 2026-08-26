@@ -1,0 +1,27 @@
+@layer payload-default {
+  .file-meta__url {
+    display: flex;
+    gap: var(--spacer-2);
+  }
+
+  .file-meta__url a {
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .file-meta__url a:hover,
+  .file-meta__url a:focus-visible {
+    text-decoration: underline;
+  }
+
+  .file-meta__size-type,
+  .file-meta__url a {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .file-meta__edit {
+    position: relative;
+  }
+}

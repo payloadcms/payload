@@ -71,6 +71,7 @@ export default buildConfigWithDefaults({
           },
         },
       ],
+      versions: false,
     },
   ],
   custom: { name: 'Customer portal' },
@@ -114,6 +115,7 @@ export default buildConfigWithDefaults({
           },
         },
       ],
+      versions: false,
     },
   ],
   onInit: async (payload) => {

@@ -4,6 +4,7 @@ import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core'
 import {
   closestCenter,
   DndContext,
+  DragOverlay,
   KeyboardSensor,
   MouseSensor,
   TouchSensor,
@@ -12,14 +13,29 @@ import {
   useSensors,
 } from '@dnd-kit/core'
 import { SortableContext, sortableKeyboardCoordinates } from '@dnd-kit/sortable'
-import React, { useCallback, useId } from 'react'
+import React, { useCallback, useEffect, useId, useState } from 'react'
 
 import type { Props } from './types.js'
+
+import './index.css'
 
 export { Props }
 
 export const DraggableSortable: React.FC<Props> = (props) => {
-  const { children, className, ids, onDragEnd, onDragStart } = props
+  const { children, className, ids, onDragEnd, onDragStart, renderDragOverlay, sortingStrategy } =
+    props
+  const [activeId, setActiveId] = useState<null | number | string>(null)
+
+  // The overlay is a different element than the drag handle, so its inline cursor
+  // styles don't carry over. So set a body class to show a grabbing cursor everywhere.
+  useEffect(() => {
+    if (activeId !== null) {
+      document.body.classList.add('is-dragging')
+      return () => {
+        document.body.classList.remove('is-dragging')
+      }
+    }
+  }, [activeId])
 
   const dndContextID = useId()
   const sortableContextID = useId()
@@ -50,6 +66,7 @@ export const DraggableSortable: React.FC<Props> = (props) => {
       const { active, over } = event
 
       event.activatorEvent.stopPropagation()
+      setActiveId(null)
 
       if (!active || !over) {
         return
@@ -66,6 +83,10 @@ export const DraggableSortable: React.FC<Props> = (props) => {
     [onDragEnd, ids],
   )
 
+  const handleDragCancel = useCallback(() => {
+    setActiveId(null)
+  }, [])
+
   const handleDragStart = useCallback(
     (event: DragStartEvent) => {
       const { active } = event
@@ -73,6 +94,8 @@ export const DraggableSortable: React.FC<Props> = (props) => {
       if (!active) {
         return
       }
+
+      setActiveId(active.id)
 
       if (typeof onDragStart === 'function') {
         onDragStart({ id: active.id, event })
@@ -86,6 +109,7 @@ export const DraggableSortable: React.FC<Props> = (props) => {
       collisionDetection={closestCenter}
       // Provide stable ID to fix hydration issues: https://github.com/clauderic/dnd-kit/issues/926
       id={dndContextID}
+      onDragCancel={handleDragCancel}
       onDragEnd={handleDragEnd}
       onDragStart={handleDragStart}
       sensors={sensors}
@@ -94,11 +118,15 @@ export const DraggableSortable: React.FC<Props> = (props) => {
         // Provide stable ID to fix hydration issues: https://github.com/clauderic/dnd-kit/issues/926
         id={sortableContextID}
         items={ids}
+        strategy={sortingStrategy}
       >
         <div className={className} ref={setNodeRef}>
           {children}
         </div>
       </SortableContext>
+      {renderDragOverlay && activeId !== null && (
+        <DragOverlay dropAnimation={null}>{renderDragOverlay(activeId)}</DragOverlay>
+      )}
     </DndContext>
   )
 }

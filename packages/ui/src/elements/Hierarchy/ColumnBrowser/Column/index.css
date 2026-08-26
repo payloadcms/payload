@@ -1,0 +1,64 @@
+@layer payload-default {
+  .hierarchy-column {
+    width: 280px;
+    min-width: 280px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    border-right: var(--stroke-width-small) solid var(--color-border);
+    height: 100%;
+    background: var(--color-bg);
+  }
+
+  .hierarchy-column__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacer-2);
+    padding: var(--spacer-1) var(--spacer-3);
+    padding-inline-end: var(--spacer-2);
+    flex-shrink: 0;
+    margin-bottom: var(--spacer-2);
+    border-bottom: var(--stroke-width-small) solid var(--color-border);
+  }
+
+  .hierarchy-column__add-button {
+    flex-shrink: 0;
+    color: var(--color-text-secondary);
+  }
+
+  .hierarchy-column__header-checkbox {
+    flex-shrink: 0;
+  }
+
+  .hierarchy-column__header-title {
+    display: flex;
+    align-items: center;
+    gap: var(--spacer-2);
+    font-weight: 500;
+    color: var(--color-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .hierarchy-column__items {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    margin: 0 var(--spacer-1);
+    gap: var(--spacer-1);
+  }
+
+  .hierarchy-column__loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacer-3);
+  }
+
+  .hierarchy-column__load-more {
+    padding: var(--spacer-1) var(--spacer-2) var(--spacer-1) var(--spacer-2-5);
+  }
+}

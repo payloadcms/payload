@@ -83,7 +83,7 @@ export const getSchemaColumns = ({
 /**
  * Merges schema-derived columns with data-discovered columns.
  * Schema columns provide the base ordering, data columns add any additional
- * columns (e.g., array indices beyond 0, dynamic fields, derived columns from toCSV).
+ * columns (e.g., array indices beyond 0, dynamic fields, derived columns from beforeExport hooks).
  */
 export const mergeColumns = (schemaColumns: string[], dataColumns: string[]): string[] => {
   const result = [...schemaColumns]
@@ -143,7 +143,7 @@ export const mergeColumns = (schemaColumns: string[], dataColumns: string[]): st
     }
   }
 
-  // Remove schema columns that were fully replaced by toCSV-derived columns (e.g. "user" → "user_id", "user_email")
+  // Remove schema columns that were fully replaced by beforeExport-derived columns (e.g. "user" → "user_id", "user_email")
   for (const [schemaCol, derivedCols] of insertedDerived) {
     if (!dataColumns.includes(schemaCol) && derivedCols.length > 0) {
       const idx = result.indexOf(schemaCol)

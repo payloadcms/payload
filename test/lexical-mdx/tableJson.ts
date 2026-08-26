@@ -164,17 +164,7 @@ export const tableJson = {
         {
           children: [
             {
-              children: [
-                {
-                  detail: 0,
-                  format: 0,
-                  mode: 'normal',
-                  style: '',
-                  text: '                         ',
-                  type: 'text',
-                  version: 1,
-                },
-              ],
+              children: [],
               direction: null,
               format: '',
               indent: 0,

@@ -60,6 +60,63 @@ export type SupportedTimezones =
   | 'Pacific/Noumea'
   | 'Pacific/Auckland'
   | 'Pacific/Fiji';
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_9B9C404E".
+ */
+export type LexicalNodes_9B9C404E =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_9B9C404E>
+  | SerializedBlockNode<MyBlock>
+  | SerializedHeadingNode<LexicalNodes_9B9C404E>
+  | {
+      type: 'upload';
+      /**
+       * Lexical's internal serialization version for this node type.
+       */
+      version: number;
+      [k: string]: unknown;
+    }
+  | SerializedQuoteNode<LexicalNodes_9B9C404E>
+  | SerializedListNode<LexicalNodes_9B9C404E>
+  | SerializedListItemNode<LexicalNodes_9B9C404E>
+  | SerializedAutoLinkNode<LexicalNodes_9B9C404E, LexicalLinkFields_0A7E9EC0>
+  | SerializedLinkNode<LexicalNodes_9B9C404E, LexicalLinkFields_0A7E9EC0>
+  | SerializedRelationshipNode<
+      | 'noTimeStamps'
+      | 'categories'
+      | 'simple'
+      | 'simple-localized'
+      | 'categories-custom-id'
+      | 'posts'
+      | 'error-on-unnamed-fields'
+      | 'default-values'
+      | 'relation-a'
+      | 'relation-b'
+      | 'pg-migrations'
+      | 'custom-schema'
+      | 'places'
+      | 'virtual-relations'
+      | 'fields-persistance'
+      | 'custom-ids'
+      | 'fake-custom-ids'
+      | 'relationships-migration'
+      | 'compound-indexes'
+      | 'aliases'
+      | 'blocks-docs'
+      | 'unique-fields'
+      | 'select-has-many'
+      | 'virtual-linked-tenants'
+      | 'virtual-linked-roles'
+      | 'virtual-linked-projects'
+      | 'payload-kv'
+      | 'users'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+    >;
 
 export interface Config {
   auth: {
@@ -138,7 +195,7 @@ export interface Config {
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
-    defaultIDType: string;
+    defaultIDType: number;
   };
   fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es' | 'uk') | ('en' | 'es' | 'uk')[];
   globals: {
@@ -158,6 +215,8 @@ export interface Config {
   locale: 'en' | 'es' | 'uk';
   widgets: {
     collections: CollectionsWidget;
+    'collection-query': CollectionQueryWidget;
+    activity: ActivityWidget;
   };
   user: User;
   jobs: {
@@ -188,7 +247,7 @@ export interface UserAuthOperations {
  * via the `definition` "noTimeStamps".
  */
 export interface NoTimeStamp {
-  id: string;
+  id: number;
   title?: string | null;
 }
 /**
@@ -196,12 +255,12 @@ export interface NoTimeStamp {
  * via the `definition` "categories".
  */
 export interface Category {
-  id: string;
+  id: number;
   title?: string | null;
-  simple?: (string | null) | Simple;
+  simple?: (number | null) | Simple;
   hideout?: {
     camera1?: {
-      time1Image?: (string | null) | Post;
+      time1Image?: (number | null) | Post;
     };
   };
   updatedAt: string;
@@ -213,7 +272,7 @@ export interface Category {
  * via the `definition` "simple".
  */
 export interface Simple {
-  id: string;
+  id: number;
   text?: string | null;
   number?: number | null;
   updatedAt: string;
@@ -224,9 +283,9 @@ export interface Simple {
  * via the `definition` "posts".
  */
 export interface Post {
-  id: string;
+  id: number;
   title: string;
-  category?: (string | null) | Category;
+  category?: (number | null) | Category;
   categoryID?:
     | {
         [k: string]: unknown;
@@ -238,16 +297,16 @@ export interface Post {
     | null;
   categoryTitle?: string | null;
   categorySimpleText?: string | null;
-  categories?: (string | Category)[] | null;
+  categories?: (number | Category)[] | null;
   categoriesCustomID?: (number | CategoriesCustomId)[] | null;
   categoryPoly?: {
     relationTo: 'categories';
-    value: string | Category;
+    value: number | Category;
   } | null;
   categoryPolyMany?:
     | {
         relationTo: 'categories';
-        value: string | Category;
+        value: number | Category;
       }[]
     | null;
   categoryCustomID?: (number | null) | CategoriesCustomId;
@@ -255,11 +314,11 @@ export interface Post {
     | (
         | {
             relationTo: 'categories';
-            value: string | Category;
+            value: number | Category;
           }
         | {
             relationTo: 'simple';
-            value: string | Simple;
+            value: number | Simple;
           }
       )[]
     | null;
@@ -267,11 +326,11 @@ export interface Post {
     | (
         | {
             relationTo: 'categories';
-            value: string | Category;
+            value: number | Category;
           }
         | {
             relationTo: 'simple';
-            value: string | Simple;
+            value: number | Simple;
           }
       )[]
     | null;
@@ -281,31 +340,17 @@ export interface Post {
   numberDefault?: number | null;
   numbersHasMany?: number[] | null;
   publishDate?: string | null;
-  blocks?:
-    | {
-        nested?:
-          | {
-              nested?: unknown[] | null;
-              id?: string | null;
-              blockName?: string | null;
-              blockType: 'block-fourth';
-            }[]
-          | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'block-third';
-      }[]
-    | null;
+  blocks?: BlockThird[] | null;
   testNestedGroup?: {
     nestedLocalizedPolymorphicRelation?:
       | (
           | {
               relationTo: 'categories';
-              value: string | Category;
+              value: number | Category;
             }
           | {
               relationTo: 'simple';
-              value: string | Simple;
+              value: number | Simple;
             }
         )[]
       | null;
@@ -335,14 +380,7 @@ export interface Post {
         id?: string | null;
       }[]
     | null;
-  blocksWithIDs?:
-    | {
-        text?: string | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'block-first';
-      }[]
-    | null;
+  blocksWithIDs?: BlockFirst[] | null;
   group?: {
     text?: string | null;
   };
@@ -364,10 +402,40 @@ export interface CategoriesCustomId {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BlockThird".
+ */
+export interface BlockThird {
+  nested?: BlockFourth[] | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'block-third';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BlockFourth".
+ */
+export interface BlockFourth {
+  nested?: unknown[] | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'block-fourth';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BlockFirst".
+ */
+export interface BlockFirst {
+  text?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'block-first';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "simple-localized".
  */
 export interface SimpleLocalized {
-  id: string;
+  id: number;
   text?: string | null;
   number?: number | null;
   updatedAt: string;
@@ -378,7 +446,7 @@ export interface SimpleLocalized {
  * via the `definition` "error-on-unnamed-fields".
  */
 export interface ErrorOnUnnamedField {
-  id: string;
+  id: number;
   groupWithinUnnamedTab: {
     text: string;
   };
@@ -390,7 +458,7 @@ export interface ErrorOnUnnamedField {
  * via the `definition` "default-values".
  */
 export interface DefaultValue {
-  id: string;
+  id: number;
   title?: string | null;
   defaultValue?: string | null;
   array?:
@@ -417,23 +485,9 @@ export interface DefaultValue {
  * via the `definition` "relation-a".
  */
 export interface RelationA {
-  id: string;
+  id: number;
   title?: string | null;
-  richText?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
+  richText?: LexicalRichText<LexicalNodes_9B9C404E> | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -442,24 +496,10 @@ export interface RelationA {
  * via the `definition` "relation-b".
  */
 export interface RelationB {
-  id: string;
+  id: number;
   title?: string | null;
-  relationship?: (string | null) | RelationA;
-  richText?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
+  relationship?: (number | null) | RelationA;
+  richText?: LexicalRichText<LexicalNodes_9B9C404E> | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -468,14 +508,14 @@ export interface RelationB {
  * via the `definition` "pg-migrations".
  */
 export interface PgMigration {
-  id: string;
-  relation1?: (string | null) | RelationA;
+  id: number;
+  relation1?: (number | null) | RelationA;
   myArray?:
     | {
-        relation2?: (string | null) | RelationB;
+        relation2?: (number | null) | RelationB;
         mySubArray?:
           | {
-              relation3?: (string | null) | RelationB;
+              relation3?: (number | null) | RelationB;
               id?: string | null;
             }[]
           | null;
@@ -483,29 +523,34 @@ export interface PgMigration {
       }[]
     | null;
   myGroup?: {
-    relation4?: (string | null) | RelationB;
+    relation4?: (number | null) | RelationB;
   };
-  myBlocks?:
-    | {
-        relation5?: (string | null) | RelationA;
-        relation6?: (string | null) | RelationB;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'myBlock';
-      }[]
-    | null;
+  myBlocks?: MyBlock_446F4EED[] | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * Multiple blocks resolve to the `MyBlock` interface with different fields, so a content hash is appended to keep the generated types stable and unambiguous. Set a unique `interfaceName` on the block to choose the name yourself. See https://payloadcms.com/docs/typescript/generating-types#block-interface-name-collisions
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "MyBlock_446F4EED".
+ */
+export interface MyBlock_446F4EED {
+  relation5?: (number | null) | RelationA;
+  relation6?: (number | null) | RelationB;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'myBlock';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "custom-schema".
  */
 export interface CustomSchema {
-  id: string;
+  id: number;
   text?: string | null;
   localizedText?: string | null;
-  relationship?: (string | RelationA)[] | null;
+  relationship?: (number | RelationA)[] | null;
   select?: ('a' | 'b' | 'c')[] | null;
   radio?: ('a' | 'b' | 'c') | null;
   array?:
@@ -515,25 +560,28 @@ export interface CustomSchema {
         id?: string | null;
       }[]
     | null;
-  blocks?:
-    | {
-        text?: string | null;
-        localizedText?: string | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'block-second';
-      }[]
-    | null;
+  blocks?: BlockSecond[] | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BlockSecond".
+ */
+export interface BlockSecond {
+  text?: string | null;
+  localizedText?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'block-second';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "places".
  */
 export interface Place {
-  id: string;
+  id: number;
   country?: string | null;
   city?: string | null;
   updatedAt: string;
@@ -544,7 +592,7 @@ export interface Place {
  * via the `definition` "virtual-relations".
  */
 export interface VirtualRelation {
-  id: string;
+  id: number;
   postTitle?: string | null;
   postsTitles?: string[] | null;
   postCategoriesTitles?: string[] | null;
@@ -570,8 +618,8 @@ export interface VirtualRelation {
     | boolean
     | null;
   postLocalized?: string | null;
-  post?: (string | null) | Post;
-  posts?: (string | Post)[] | null;
+  post?: (number | null) | Post;
+  posts?: (number | Post)[] | null;
   customID?: (string | null) | CustomId;
   customIDValue?: string | null;
   updatedAt: string;
@@ -594,7 +642,7 @@ export interface CustomId {
  * via the `definition` "fields-persistance".
  */
 export interface FieldsPersistance {
-  id: string;
+  id: number;
   text?: string | null;
   textHooked?: string | null;
   array?:
@@ -605,24 +653,27 @@ export interface FieldsPersistance {
   textWithinRow?: string | null;
   textWithinCollapsible?: string | null;
   textWithinTabs?: string | null;
-  blockWithVirtual?:
-    | {
-        text?: string | null;
-        virtualField?: string | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'blockWithVirtual';
-      }[]
-    | null;
+  blockWithVirtual?: BlockWithVirtual[] | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BlockWithVirtual".
+ */
+export interface BlockWithVirtual {
+  text?: string | null;
+  virtualField?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'blockWithVirtual';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "fake-custom-ids".
  */
 export interface FakeCustomId {
-  id: string;
+  id: number;
   title?: string | null;
   group?: {
     id?: string | null;
@@ -638,11 +689,11 @@ export interface FakeCustomId {
  * via the `definition` "relationships-migration".
  */
 export interface RelationshipsMigration {
-  id: string;
-  relationship?: (string | null) | DefaultValue;
+  id: number;
+  relationship?: (number | null) | DefaultValue;
   relationship_2?: {
     relationTo: 'default-values';
-    value: string | DefaultValue;
+    value: number | DefaultValue;
   } | null;
   updatedAt: string;
   createdAt: string;
@@ -652,7 +703,7 @@ export interface RelationshipsMigration {
  * via the `definition` "compound-indexes".
  */
 export interface CompoundIndex {
-  id: string;
+  id: number;
   one?: string | null;
   two?: string | null;
   three?: string | null;
@@ -667,7 +718,7 @@ export interface CompoundIndex {
  * via the `definition` "aliases".
  */
 export interface Alias {
-  id: string;
+  id: number;
   thisIsALongFieldNameThatCanCauseAPostgresErrorEvenThoughWeSetAShorterDBName?:
     | {
         nestedArray?:
@@ -687,32 +738,28 @@ export interface Alias {
  * via the `definition` "blocks-docs".
  */
 export interface BlocksDoc {
-  id: string;
-  testBlocksLocalized?:
-    | {
-        text?: string | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'cta';
-      }[]
-    | null;
-  testBlocks?:
-    | {
-        text?: string | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'cta';
-      }[]
-    | null;
+  id: number;
+  testBlocksLocalized?: Cta[] | null;
+  testBlocks?: Cta[] | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Cta".
+ */
+export interface Cta {
+  text?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'cta';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "unique-fields".
  */
 export interface UniqueField {
-  id: string;
+  id: number;
   slugField?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -722,7 +769,7 @@ export interface UniqueField {
  * via the `definition` "select-has-many".
  */
 export interface SelectHasMany {
-  id: string;
+  id: number;
   roles?: ('user' | 'admin' | 'editor')[] | null;
   food?: ('apple' | 'bananabread' | 'banana')[] | null;
   updatedAt: string;
@@ -733,7 +780,7 @@ export interface SelectHasMany {
  * via the `definition` "virtual-linked-tenants".
  */
 export interface VirtualLinkedTenant {
-  id: string;
+  id: number;
   slug: string;
   updatedAt: string;
   createdAt: string;
@@ -743,9 +790,9 @@ export interface VirtualLinkedTenant {
  * via the `definition` "virtual-linked-roles".
  */
 export interface VirtualLinkedRole {
-  id: string;
-  project: string | VirtualLinkedProject;
-  tenant: string | VirtualLinkedTenant;
+  id: number;
+  project: number | VirtualLinkedProject;
+  tenant: number | VirtualLinkedTenant;
   tenantSlug?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -755,9 +802,9 @@ export interface VirtualLinkedRole {
  * via the `definition` "virtual-linked-projects".
  */
 export interface VirtualLinkedProject {
-  id: string;
+  id: number;
   roles?: {
-    docs?: (string | VirtualLinkedRole)[];
+    docs?: (number | VirtualLinkedRole)[];
     hasNextPage?: boolean;
     totalDocs?: number;
   };
@@ -769,7 +816,7 @@ export interface VirtualLinkedProject {
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
-  id: string;
+  id: number;
   key: string;
   data:
     | {
@@ -786,7 +833,7 @@ export interface PayloadKv {
  * via the `definition` "users".
  */
 export interface User {
-  id: string;
+  id: number;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -811,23 +858,23 @@ export interface User {
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: string;
+  id: number;
   document?:
     | ({
         relationTo: 'noTimeStamps';
-        value: string | NoTimeStamp;
+        value: number | NoTimeStamp;
       } | null)
     | ({
         relationTo: 'categories';
-        value: string | Category;
+        value: number | Category;
       } | null)
     | ({
         relationTo: 'simple';
-        value: string | Simple;
+        value: number | Simple;
       } | null)
     | ({
         relationTo: 'simple-localized';
-        value: string | SimpleLocalized;
+        value: number | SimpleLocalized;
       } | null)
     | ({
         relationTo: 'categories-custom-id';
@@ -835,43 +882,43 @@ export interface PayloadLockedDocument {
       } | null)
     | ({
         relationTo: 'posts';
-        value: string | Post;
+        value: number | Post;
       } | null)
     | ({
         relationTo: 'error-on-unnamed-fields';
-        value: string | ErrorOnUnnamedField;
+        value: number | ErrorOnUnnamedField;
       } | null)
     | ({
         relationTo: 'default-values';
-        value: string | DefaultValue;
+        value: number | DefaultValue;
       } | null)
     | ({
         relationTo: 'relation-a';
-        value: string | RelationA;
+        value: number | RelationA;
       } | null)
     | ({
         relationTo: 'relation-b';
-        value: string | RelationB;
+        value: number | RelationB;
       } | null)
     | ({
         relationTo: 'pg-migrations';
-        value: string | PgMigration;
+        value: number | PgMigration;
       } | null)
     | ({
         relationTo: 'custom-schema';
-        value: string | CustomSchema;
+        value: number | CustomSchema;
       } | null)
     | ({
         relationTo: 'places';
-        value: string | Place;
+        value: number | Place;
       } | null)
     | ({
         relationTo: 'virtual-relations';
-        value: string | VirtualRelation;
+        value: number | VirtualRelation;
       } | null)
     | ({
         relationTo: 'fields-persistance';
-        value: string | FieldsPersistance;
+        value: number | FieldsPersistance;
       } | null)
     | ({
         relationTo: 'custom-ids';
@@ -879,52 +926,52 @@ export interface PayloadLockedDocument {
       } | null)
     | ({
         relationTo: 'fake-custom-ids';
-        value: string | FakeCustomId;
+        value: number | FakeCustomId;
       } | null)
     | ({
         relationTo: 'relationships-migration';
-        value: string | RelationshipsMigration;
+        value: number | RelationshipsMigration;
       } | null)
     | ({
         relationTo: 'compound-indexes';
-        value: string | CompoundIndex;
+        value: number | CompoundIndex;
       } | null)
     | ({
         relationTo: 'aliases';
-        value: string | Alias;
+        value: number | Alias;
       } | null)
     | ({
         relationTo: 'blocks-docs';
-        value: string | BlocksDoc;
+        value: number | BlocksDoc;
       } | null)
     | ({
         relationTo: 'unique-fields';
-        value: string | UniqueField;
+        value: number | UniqueField;
       } | null)
     | ({
         relationTo: 'select-has-many';
-        value: string | SelectHasMany;
+        value: number | SelectHasMany;
       } | null)
     | ({
         relationTo: 'virtual-linked-tenants';
-        value: string | VirtualLinkedTenant;
+        value: number | VirtualLinkedTenant;
       } | null)
     | ({
         relationTo: 'virtual-linked-roles';
-        value: string | VirtualLinkedRole;
+        value: number | VirtualLinkedRole;
       } | null)
     | ({
         relationTo: 'virtual-linked-projects';
-        value: string | VirtualLinkedProject;
+        value: number | VirtualLinkedProject;
       } | null)
     | ({
         relationTo: 'users';
-        value: string | User;
+        value: number | User;
       } | null);
   globalSlug?: string | null;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   updatedAt: string;
   createdAt: string;
@@ -934,10 +981,10 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: string;
+  id: number;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   key?: string | null;
   value?:
@@ -957,7 +1004,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: string;
+  id: number;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
@@ -1535,7 +1582,7 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
  * via the `definition` "header".
  */
 export interface Header {
-  id: string;
+  id: number;
   itemsLvl1?:
     | {
         label?: string | null;
@@ -1568,7 +1615,7 @@ export interface Header {
  * via the `definition` "global".
  */
 export interface Global {
-  id: string;
+  id: number;
   text?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -1578,7 +1625,7 @@ export interface Global {
  * via the `definition` "global-2".
  */
 export interface Global2 {
-  id: string;
+  id: number;
   text?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -1588,7 +1635,7 @@ export interface Global2 {
  * via the `definition` "global-3".
  */
 export interface Global3 {
-  id: string;
+  id: number;
   text?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -1598,9 +1645,9 @@ export interface Global3 {
  * via the `definition` "virtual-relation-global".
  */
 export interface VirtualRelationGlobal {
-  id: string;
+  id: number;
   postTitle?: string | null;
-  post?: (string | null) | Post;
+  post?: (number | null) | Post;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -1690,10 +1737,273 @@ export interface CollectionsWidget {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-query_widget".
+ */
+export interface CollectionQueryWidget {
+  data?: {
+    title?: string | null;
+    relatedCollection:
+      | 'noTimeStamps'
+      | 'categories'
+      | 'simple'
+      | 'simple-localized'
+      | 'categories-custom-id'
+      | 'posts'
+      | 'error-on-unnamed-fields'
+      | 'default-values'
+      | 'relation-a'
+      | 'relation-b'
+      | 'pg-migrations'
+      | 'custom-schema'
+      | 'places'
+      | 'virtual-relations'
+      | 'fields-persistance'
+      | 'custom-ids'
+      | 'fake-custom-ids'
+      | 'relationships-migration'
+      | 'compound-indexes'
+      | 'aliases'
+      | 'blocks-docs'
+      | 'unique-fields'
+      | 'select-has-many'
+      | 'virtual-linked-tenants'
+      | 'virtual-linked-roles'
+      | 'virtual-linked-projects'
+      | 'users';
+    where?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    sortField?: string | null;
+    sortDirection?: ('asc' | 'desc') | null;
+    limit?: number | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "activity_widget".
+ */
+export interface ActivityWidget {
+  data?: {
+    excludedCollections?:
+      | (
+          | 'noTimeStamps'
+          | 'categories'
+          | 'simple'
+          | 'simple-localized'
+          | 'categories-custom-id'
+          | 'posts'
+          | 'error-on-unnamed-fields'
+          | 'default-values'
+          | 'relation-a'
+          | 'relation-b'
+          | 'pg-migrations'
+          | 'custom-schema'
+          | 'places'
+          | 'virtual-relations'
+          | 'fields-persistance'
+          | 'custom-ids'
+          | 'fake-custom-ids'
+          | 'relationships-migration'
+          | 'compound-indexes'
+          | 'aliases'
+          | 'blocks-docs'
+          | 'unique-fields'
+          | 'select-has-many'
+          | 'virtual-linked-tenants'
+          | 'virtual-linked-roles'
+          | 'virtual-linked-projects'
+          | 'users'
+        )[]
+      | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "MyBlock".
+ */
+export interface MyBlock {
+  id: string;
+  blockType: 'myBlock';
+  someText?: string | null;
+  someTextRequired: string;
+  radios?: ('option1' | 'option2' | 'option3') | null;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalLinkFields_0A7E9EC0".
+ */
+export interface LexicalLinkFields_0A7E9EC0 {
+  linkType: 'custom' | 'internal';
+  url?: string;
+  doc?: {
+    relationTo: string;
+    value:
+      | string
+      | number
+      | {
+          id: string | number;
+          [k: string]: unknown;
+        };
+  } | null;
+  newTab: boolean;
+  description?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "auth".
  */
 export interface Auth {
   [k: string]: unknown;
+}
+
+/** @internal Core Lexical types — see @payloadcms/richtext-lexical. */
+export type LexicalElementFormat = 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+export type LexicalElementDirection = ('ltr' | 'rtl') | null;
+
+export interface SerializedLexicalElementBase<TChildren> {
+  children: TChildren[];
+  direction: LexicalElementDirection;
+  format: LexicalElementFormat;
+  indent: number;
+  textFormat?: number;
+  textStyle?: string;
+  version: number;
+}
+
+export type LexicalTextMode = 'normal' | 'token' | 'segmented';
+
+export interface SerializedTextNode {
+  type: 'text';
+  detail: number;
+  format: number;
+  mode: LexicalTextMode;
+  style: string;
+  text: string;
+  version: number;
+}
+
+export interface SerializedTabNode {
+  type: 'tab';
+  detail: number;
+  format: number;
+  mode: LexicalTextMode;
+  style: string;
+  text: string;
+  version: number;
+}
+
+export interface SerializedLineBreakNode {
+  type: 'linebreak';
+  version: number;
+}
+
+export interface SerializedParagraphNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'paragraph';
+  textFormat: number;
+  textStyle: string;
+}
+
+export type SerializedBlockNode<TFields extends { blockType: string }> = TFields extends unknown ? {
+  type: 'block';
+  format: LexicalElementFormat;
+  version: number;
+  fields: { id: string; blockName?: string | null } & Omit<TFields, 'id' | 'blockName'>;
+} : never;
+export type SerializedInlineBlockNode<TFields extends { blockType: string }> = TFields extends unknown ? {
+  type: 'inlineBlock';
+  version: number;
+  fields: { id: string } & Omit<TFields, 'id'>;
+} : never;
+
+export interface SerializedHeadingNode<
+  TChildren,
+  TTag extends 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6',
+> extends SerializedLexicalElementBase<TChildren> {
+  type: 'heading';
+  tag: TTag;
+}
+
+export type SerializedUploadNode<TSlugs extends keyof Config['collections'], TFields = { [k: string]: unknown }> = {
+  type: 'upload';
+  format: LexicalElementFormat;
+  id: string;
+  version: number;
+  fields: TFields;
+} & {
+  [TSlug in TSlugs]: {
+    relationTo: TSlug;
+    value: Config['collections'][TSlug]['id'] | Config['collections'][TSlug];
+  };
+}[TSlugs];
+
+export interface SerializedQuoteNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'quote';
+}
+
+export interface SerializedListNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'list';
+  checked?: boolean;
+  listType: 'number' | 'bullet' | 'check';
+  start: number;
+  tag: 'ul' | 'ol';
+}
+
+export interface SerializedListItemNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'listitem';
+  checked?: boolean;
+  value: number;
+}
+
+export interface LexicalLinkFields {
+  [k: string]: unknown;
+  doc?: {
+    relationTo: string;
+    value: Config['db']['defaultIDType'] | { [k: string]: unknown; id: Config['db']['defaultIDType'] };
+  } | null;
+  linkType: 'custom' | 'internal';
+  newTab: boolean;
+  url?: string;
+}
+export interface SerializedLinkNode<TChildren, TFields = LexicalLinkFields> extends SerializedLexicalElementBase<TChildren> {
+  type: 'link';
+  fields: TFields;
+  id?: string;
+}
+export interface SerializedAutoLinkNode<TChildren, TFields = LexicalLinkFields> extends SerializedLexicalElementBase<TChildren> {
+  type: 'autolink';
+  fields: TFields;
+}
+
+export type SerializedRelationshipNode<TSlugs extends keyof Config['collections']> = {
+  type: 'relationship';
+  format: LexicalElementFormat;
+  version: number;
+} & {
+  [TSlug in TSlugs]: {
+    relationTo: TSlug;
+    value: Config['collections'][TSlug]['id'] | Config['collections'][TSlug];
+  };
+}[TSlugs];
+
+/** Shape of a Lexical `richText` field. */
+export interface LexicalRichText<TNode> {
+  root: {
+    children: TNode[];
+    direction: LexicalElementDirection;
+    format: LexicalElementFormat;
+    indent: number;
+    type: 'root';
+    version: number;
+  };
 }
 
 

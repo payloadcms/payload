@@ -1,0 +1,5 @@
+@layer payload-default {
+  .hierarchy-list-header__root-pill {
+    background-color: var(--color-bg-tertiary);
+  }
+}

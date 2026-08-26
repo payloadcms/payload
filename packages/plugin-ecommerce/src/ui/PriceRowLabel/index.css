@@ -2,12 +2,12 @@
   .priceRowLabel {
     display: flex;
     align-items: center;
-    gap: calc(var(--base) * 1);
+    gap: var(--spacer-3);
   }
 
   .priceValue {
     display: flex;
     align-items: center;
-    gap: calc(var(--base) * 0.25);
+    gap: var(--spacer-1);
   }
 }

@@ -1,0 +1,13 @@
+@layer payload-default {
+  .field-type.select {
+    position: relative;
+  }
+
+  .field-type.select.error .rs__control {
+    border-color: var(--field-color-border-error);
+
+    &:hover {
+      border-color: var(--field-color-border-error);
+    }
+  }
+}

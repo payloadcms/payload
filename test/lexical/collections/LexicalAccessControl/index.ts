@@ -48,4 +48,5 @@ export const LexicalAccessControl: CollectionConfig = {
       }),
     },
   ],
+  versions: false,
 }

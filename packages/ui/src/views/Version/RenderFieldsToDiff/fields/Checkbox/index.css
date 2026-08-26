@@ -1,0 +1,97 @@
+@layer payload-default {
+  .checkbox-diff__value {
+    display: flex;
+    align-items: center;
+    gap: var(--spacer-2);
+    position: relative;
+    z-index: 1;
+  }
+
+  .checkbox-diff__value--create::before,
+  .checkbox-diff__value--delete::before {
+    content: '';
+    position: absolute;
+    inset: calc(var(--spacer-2) * -1) 0;
+    display: block;
+    z-index: -1;
+  }
+
+  .checkbox-diff__value--create::before {
+    background-color: var(--diff-create-parent-bg);
+  }
+
+  .checkbox-diff__value--delete::before {
+    background-color: var(--diff-delete-parent-bg);
+  }
+
+  .checkbox-diff__indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--spacer-3);
+    height: var(--spacer-3);
+    border: var(--stroke-width-small) solid var(--color-border-strong);
+    border-radius: var(--radius-medium);
+    background: transparent;
+    flex-shrink: 0;
+    position: relative;
+  }
+
+  .checkbox-diff__indicator--checked {
+    background-color: var(--color-border-strong);
+    border-color: var(--color-border-strong);
+  }
+
+  .checkbox-diff__indicator--create {
+    border-color: var(--color-border-brand);
+    background-color: var(--diff-create-parent-bg);
+  }
+
+  .checkbox-diff__indicator--create.checkbox-diff__indicator--checked {
+    background-color: var(--color-bg-brand);
+    border-color: var(--color-border-selected);
+  }
+
+  .checkbox-diff__indicator--delete {
+    border-color: var(--color-border-danger);
+    background-color: var(--diff-delete-parent-bg);
+  }
+
+  .checkbox-diff__indicator--delete.checkbox-diff__indicator--checked {
+    background-color: var(--color-bg-danger);
+    border-color: var(--color-bg-danger);
+  }
+
+  .checkbox-diff__icon {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .checkbox-diff__icon svg {
+    opacity: 0;
+    color: var(--color-icon-onbrand);
+  }
+
+  .checkbox-diff__indicator--checked .checkbox-diff__icon svg {
+    opacity: 1;
+  }
+
+  .checkbox-diff__label {
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--text-body-medium-font-size);
+    font-weight: var(--text-body-medium-font-weight);
+    line-height: var(--text-body-medium-line-height);
+    color: var(--color-text);
+  }
+
+  .checkbox-diff__label--create {
+    color: var(--diff-create-parent-color);
+  }
+
+  .checkbox-diff__label--delete {
+    color: var(--color-text-danger);
+  }
+}

@@ -112,6 +112,10 @@ export type ReconstructObjectFromTranslationKeys<
  */
 export type DefaultTranslationsObject = typeof enTranslations
 
+export interface CustomTranslationKeys {}
+
+export type CustomTranslationKey = CustomTranslationKeys[keyof CustomTranslationKeys] & string
+
 /**
  * All translation keys unSanitized. E.g. 'general:aboutToDeleteCount_many'
  */
@@ -120,10 +124,13 @@ export type DefaultTranslationKeysUnSanitized = NestedKeysUnSanitized<DefaultTra
 /**
  * All translation keys sanitized. E.g. 'general:aboutToDeleteCount'
  */
-export type DefaultTranslationKeys = NestedKeysStripped<DefaultTranslationsObject>
+export type DefaultTranslationKeys =
+  | CustomTranslationKey
+  | NestedKeysStripped<DefaultTranslationsObject>
 
-export type ClientTranslationKeys<TExtraProps = (typeof clientTranslationKeys)[number]> =
-  TExtraProps
+export type ClientTranslationKeys<
+  TExtraProps = (typeof clientTranslationKeys)[number] | CustomTranslationKey,
+> = TExtraProps
 
 // Use GenericTranslationsObject instead of reconstructing the object from the client keys. This is because reconstructing the object is
 // A) Expensive on performance.

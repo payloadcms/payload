@@ -10,30 +10,28 @@ import { APIError } from '../../errors/index.js'
 import { sanitizeField } from '../../fields/config/sanitize.js'
 import { combineWhereConstraints } from '../../utilities/combineWhereConstraints.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
+import { hasDraftsEnabled } from '../../utilities/getVersionsConfig.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion.js'
 import { generateKeyBetween, generateNKeysBetween } from './fractional-indexing.js'
 import { getJoinScopeContext } from './utils/getJoinScopeContext.js'
 import { getJoinScopeWhereFromDocData } from './utils/getJoinScopeWhereFromDocData.js'
 import { resolvePendingTargetKey } from './utils/resolvePendingTargetKey.js'
 
-export const addOrderableFieldsAndHook = async (
+export const addOrderableFieldsAndHook = (
   collection: CollectionConfig,
   config: Config,
   orderableFieldNames: string[],
   joinFieldPathsByCollection?: Map<string, Map<string, string>>,
-) => {
+): void => {
   // 1. Add fields
   for (const orderableFieldName of orderableFieldNames) {
     const orderField: TextField = {
       name: orderableFieldName,
       type: 'text',
       admin: {
-        disableBulkEdit: true,
         disabled: true,
-        disableGroupBy: true,
-        disableListColumn: true,
-        disableListFilter: true,
         hidden: true,
         readOnly: true,
       },
@@ -48,7 +46,7 @@ export const addOrderableFieldsAndHook = async (
     }
 
     // Sanitize the field using the standard sanitization logic
-    await sanitizeField({
+    sanitizeField({
       collectionConfig: collection,
       config,
       existingFieldNames: new Set(),
@@ -180,6 +178,7 @@ export const addOrderableEndpoint = (
           // Currently only one doc can be moved at a time. We should review this if we want to allow
           // multiple docs to be moved at once in the future.
           id: docsToMove[0],
+          slug: collection.slug,
           data: {},
           req,
         },
@@ -289,8 +288,28 @@ export const addOrderableEndpoint = (
         ? generateNKeysBetween(targetKey, adjacentDocKey, docsToMove.length)
         : generateNKeysBetween(adjacentDocKey, targetKey, docsToMove.length)
 
+    const draftsEnabled = hasDraftsEnabled(collection)
+
     // Update each document with its new order value
     for (const [index, id] of docsToMove.entries()) {
+      let draft: boolean | undefined
+
+      if (draftsEnabled) {
+        const latestVersion = await getLatestCollectionVersion({
+          id,
+          config: collection,
+          payload: req.payload,
+          query: {
+            collection: collection.slug,
+            req,
+            where: { id: { equals: id } },
+          },
+          req,
+        })
+
+        draft = latestVersion?._status === 'draft'
+      }
+
       await req.payload.update({
         id,
         collection: collection.slug,
@@ -298,6 +317,7 @@ export const addOrderableEndpoint = (
           [orderableFieldName]: orderValues[index],
         },
         depth: 0,
+        draft,
         req,
       })
     }

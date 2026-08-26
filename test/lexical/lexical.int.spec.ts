@@ -2,38 +2,49 @@ import type {
   SerializedEditorState,
   SerializedParagraphNode,
 } from '@payloadcms/richtext-lexical/lexical'
-import type { PaginatedDocs, Payload } from 'payload'
+import type { Block, BlocksField, BlockSlug, Config, PaginatedDocs, Payload } from 'payload'
 
 import {
+  BlocksFeature,
   buildEditorState,
   type DefaultNodeTypes,
+  type LexicalRichTextAdapter,
+  lexicalEditor,
+  LinkFeature,
   type SerializedBlockNode,
   type SerializedLinkNode,
   type SerializedRelationshipNode,
   type SerializedUploadNode,
+  UploadFeature,
 } from '@payloadcms/richtext-lexical'
 import path from 'path'
+import { configToJSONSchema, sanitizeConfig } from 'payload'
+import { generateTypes } from 'payload/node'
 import { sanitizeUrl } from 'payload/shared'
 import { fileURLToPath } from 'url'
 import { beforeAll, beforeEach, describe, expect, it as vitestIt } from 'vitest'
 
-import type { LexicalField, LexicalMigrateField, RichTextField } from './payload-types.js'
+import type { LexicalField, RichTextField } from './payload-types.js'
 
 // Sync converters
-import { HeadingHTMLConverter } from '../../packages/richtext-lexical/src/features/converters/lexicalToHtml/sync/converters/heading.js'
-import { LinkHTMLConverter } from '../../packages/richtext-lexical/src/features/converters/lexicalToHtml/sync/converters/link.js'
-import { ListHTMLConverter } from '../../packages/richtext-lexical/src/features/converters/lexicalToHtml/sync/converters/list.js'
-import { TableHTMLConverter } from '../../packages/richtext-lexical/src/features/converters/lexicalToHtml/sync/converters/table.js'
-import { TextHTMLConverter } from '../../packages/richtext-lexical/src/features/converters/lexicalToHtml/sync/converters/text.js'
-import { UploadHTMLConverter } from '../../packages/richtext-lexical/src/features/converters/lexicalToHtml/sync/converters/upload.js'
+import {
+  HeadingHTMLConverter,
+  LinkHTMLConverter,
+  ListHTMLConverter,
+  TableHTMLConverter,
+  TextHTMLConverter,
+  UploadHTMLConverter,
+} from '@payloadcms/richtext-lexical/html'
 
 // Async converters
-import { HeadingHTMLConverterAsync } from '../../packages/richtext-lexical/src/features/converters/lexicalToHtml/async/converters/heading.js'
-import { LinkHTMLConverterAsync } from '../../packages/richtext-lexical/src/features/converters/lexicalToHtml/async/converters/link.js'
-import { ListHTMLConverterAsync } from '../../packages/richtext-lexical/src/features/converters/lexicalToHtml/async/converters/list.js'
-import { TableHTMLConverterAsync } from '../../packages/richtext-lexical/src/features/converters/lexicalToHtml/async/converters/table.js'
-import { TextHTMLConverterAsync } from '../../packages/richtext-lexical/src/features/converters/lexicalToHtml/async/converters/text.js'
-import { UploadHTMLConverterAsync } from '../../packages/richtext-lexical/src/features/converters/lexicalToHtml/async/converters/upload.js'
+import {
+  HeadingHTMLConverterAsync,
+  LinkHTMLConverterAsync,
+  ListHTMLConverterAsync,
+  TableHTMLConverterAsync,
+  TextHTMLConverterAsync,
+  UploadHTMLConverterAsync,
+} from '@payloadcms/richtext-lexical/html-async'
 
 // Diff converter
 import { LinkDiffHTMLConverterAsync } from '../../packages/richtext-lexical/src/field/Diff/converters/link.js'
@@ -43,7 +54,6 @@ import { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import { devUser } from '../credentials.js'
 import { lexicalDocData } from './collections/Lexical/data.js'
 import { generateLexicalLocalizedRichText } from './collections/LexicalLocalized/generateLexicalRichText.js'
-import { lexicalMigrateDocData } from './collections/LexicalMigrate/data.js'
 import { richTextDocData } from './collections/RichText/data.js'
 import { generateLexicalRichText } from './collections/RichText/generateLexicalRichText.js'
 import { textDoc } from './collections/Text/shared.js'
@@ -52,7 +62,6 @@ import { clearAndSeedEverything } from './seed.js'
 import {
   arrayFieldsSlug,
   lexicalFieldsSlug,
-  lexicalMigrateFieldsSlug,
   richTextFieldsSlug,
   textFieldsSlug,
   uploadsSlug,
@@ -357,59 +366,6 @@ describe('Lexical', () => {
     })
   })
 
-  describe('converters and migrations', () => {
-    it('htmlConverter: should output correct HTML for top-level lexical field', async () => {
-      const lexicalDoc: LexicalMigrateField = (
-        await payload.find({
-          collection: lexicalMigrateFieldsSlug,
-          depth: 0,
-          where: {
-            title: {
-              equals: lexicalMigrateDocData.title,
-            },
-          },
-        })
-      ).docs[0] as never
-
-      const htmlField = lexicalDoc?.lexicalSimple_html
-      expect(htmlField).toStrictEqual('<div class="payload-richtext"><p>simple</p></div>')
-    })
-    it('htmlConverter: should output correct HTML for lexical field nested in group', async () => {
-      const lexicalDoc: LexicalMigrateField = (
-        await payload.find({
-          collection: lexicalMigrateFieldsSlug,
-          depth: 0,
-          where: {
-            title: {
-              equals: lexicalMigrateDocData.title,
-            },
-          },
-        })
-      ).docs[0] as never
-
-      const htmlField = lexicalDoc?.groupWithLexicalField?.lexicalInGroupField_html
-      expect(htmlField).toStrictEqual('<div class="payload-richtext"><p>group</p></div>')
-    })
-    it('htmlConverter: should output correct HTML for lexical field nested in array', async () => {
-      const lexicalDoc: LexicalMigrateField = (
-        await payload.find({
-          collection: lexicalMigrateFieldsSlug,
-          depth: 0,
-          where: {
-            title: {
-              equals: lexicalMigrateDocData.title,
-            },
-          },
-        })
-      ).docs[0] as never
-
-      const htmlField1 = lexicalDoc?.arrayWithLexicalField?.[0]?.lexicalInArrayField_html
-      const htmlField2 = lexicalDoc?.arrayWithLexicalField?.[1]?.lexicalInArrayField_html
-
-      expect(htmlField1).toStrictEqual('<div class="payload-richtext"><p>array 1</p></div>')
-      expect(htmlField2).toStrictEqual('<div class="payload-richtext"><p>array 2</p></div>')
-    })
-  })
   describe('advanced - blocks', () => {
     it('should not populate relationships in blocks if depth is 0', async () => {
       const lexicalDoc: LexicalField = (
@@ -744,160 +700,6 @@ describe('Lexical', () => {
       expect(
         (lexicalDocENUpdated.lexicalBlocksSubLocalized.root.children[1].fields as any).counter,
       ).toEqual(210) // Initial: 20. BeforeChange: +1 (21). AfterRead: *10 (210)
-    })
-  })
-
-  describe('richText', () => {
-    it('should allow querying on rich text content', async () => {
-      const emptyRichTextQuery = await payload.find({
-        collection: 'rich-text-fields',
-        where: {
-          'richText.children.text': {
-            like: 'doesnt exist',
-          },
-        },
-      })
-
-      expect(emptyRichTextQuery.docs).toHaveLength(0)
-
-      const workingRichTextQuery = await payload.find({
-        collection: 'rich-text-fields',
-        where: {
-          'richText.children.text': {
-            like: 'hello',
-          },
-        },
-      })
-
-      expect(workingRichTextQuery.docs).toHaveLength(1)
-    })
-
-    it('should show center alignment', async () => {
-      const query = await payload.find({
-        collection: 'rich-text-fields',
-        where: {
-          'richText.children.text': {
-            like: 'hello',
-          },
-        },
-      })
-
-      expect(query.docs[0]?.richText[0]?.textAlign).toEqual('center')
-    })
-
-    it('should populate link relationship', async () => {
-      const query = await payload.find({
-        collection: 'rich-text-fields',
-        where: {
-          'richText.children.linkType': {
-            equals: 'internal',
-          },
-        },
-      })
-
-      const nodes = query.docs[0]?.richText
-      expect(nodes).toBeDefined()
-      const child = nodes?.flatMap((n) => n.children).find((c) => c?.doc)
-      expect(child).toMatchObject({
-        type: 'link',
-        linkType: 'internal',
-      })
-      expect(child.doc.relationTo).toEqual('array-fields')
-
-      if (payload.db.defaultIDType === 'number') {
-        // eslint-disable-next-line vitest/no-conditional-expect
-        expect(typeof child.doc.value.id).toBe('number')
-      } else {
-        // eslint-disable-next-line vitest/no-conditional-expect
-        expect(typeof child.doc.value.id).toBe('string')
-      }
-
-      expect(child.doc.value.items).toHaveLength(6)
-    })
-
-    it('should disallow unsafe query paths', async () => {
-      await expect(
-        payload.find({
-          collection: 'rich-text-fields',
-          where: {
-            'richText.children from': { equals: 5 },
-          },
-        }),
-      ).rejects.toBeTruthy()
-
-      await expect(
-        payload.find({
-          collection: 'rich-text-fields',
-          where: {
-            'richText.children."unsafe"': { equals: 5 },
-          },
-        }),
-      ).rejects.toBeTruthy()
-
-      await expect(
-        payload.find({
-          collection: 'rich-text-fields',
-          where: {
-            'richText.children.(unsafe"': { equals: 5 },
-          },
-        }),
-      ).rejects.toBeTruthy()
-
-      await expect(
-        payload.find({
-          collection: 'rich-text-fields',
-          where: {
-            'richText.children.unsafe="': { equals: 5 },
-          },
-        }),
-      ).rejects.toBeTruthy()
-    })
-
-    it('should disallow unsafe query values', { db: 'drizzle' }, async () => {
-      await expect(
-        payload.find({
-          collection: 'rich-text-fields',
-          where: {
-            'richText.children.value': { equals: 'select(' },
-          },
-        }),
-      ).rejects.toBeTruthy()
-
-      await expect(
-        payload.find({
-          collection: 'rich-text-fields',
-          where: {
-            'richText.children.value': { equals: '"unsafe' },
-          },
-        }),
-      ).rejects.toBeTruthy()
-
-      await expect(
-        payload.find({
-          collection: 'rich-text-fields',
-          where: {
-            'richText.children.value': { equals: `'unsafe` },
-          },
-        }),
-      ).rejects.toBeTruthy()
-
-      await expect(
-        payload.find({
-          collection: 'rich-text-fields',
-          where: {
-            'richText.children.value': { equals: `unsafe\\` },
-          },
-        }),
-      ).rejects.toBeTruthy()
-
-      await expect(
-        payload.find({
-          collection: 'rich-text-fields',
-          where: {
-            'richText.children.value': { equals: `unsafe=` },
-          },
-        }),
-      ).rejects.toBeTruthy()
     })
   })
 
@@ -1470,5 +1272,218 @@ describe('Lexical', () => {
       expect(result).toContain('href="https://example.com/page"')
       expect(result).toContain('data-fields-hash=')
     })
+  })
+})
+
+describe('Lexical root editor sanitization', () => {
+  vitestIt('should resolve referenced blocks after their fields are sanitized', () => {
+    const config = {
+      blocks: [
+        {
+          slug: 'rootBlock',
+          fields: [{ name: 'title', type: 'text' }],
+        },
+      ],
+      collections: [
+        {
+          slug: 'articles',
+          fields: [{ name: 'content', type: 'richText' }],
+        },
+      ],
+      editor: lexicalEditor({
+        features: [BlocksFeature({ blocks: ['rootBlock' as BlockSlug] })],
+      }),
+    } as unknown as Config
+
+    const sanitizedConfig = sanitizeConfig(config)
+    const editor = sanitizedConfig.editor as LexicalRichTextAdapter
+    const blocksFeature = editor.editorConfig.resolvedFeatureMap.get('blocks')!
+    const [blocksField] = blocksFeature.nodes![0]!.getSubFields!({})!
+    const [block] = (blocksField as BlocksField).blocks as Block[]
+
+    expect(block!.fields).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: 'title' }),
+        expect.objectContaining({ name: 'id' }),
+        expect.objectContaining({ name: 'blockName' }),
+      ]),
+    )
+  })
+})
+
+describe('Lexical block interface generation', () => {
+  // A lexical block's interface is named after its slug (PascalCase) or its `interfaceName`.
+  // When two differently-shaped blocks resolve to the same name, each must get its own
+  // interface — the first keeps the clean name, the second gets a content-hash suffix — so
+  // neither is silently mistyped. This mirrors payload core's `registerBlockInterface`.
+  vitestIt(
+    'content-hashes a colliding lexical block instead of silently overwriting it',
+    async () => {
+      const heroEditor = (fieldName: string, fieldType: 'number' | 'text') =>
+        lexicalEditor({
+          features: [
+            BlocksFeature({
+              blocks: [{ slug: 'hero', fields: [{ name: fieldName, type: fieldType }] }],
+            }),
+          ],
+        })
+
+      // Two richText fields each define a `hero` block with DIFFERENT fields, so both
+      // resolve to the `Hero` interface name.
+      const config = {
+        collections: [
+          {
+            slug: 'collisionTest',
+            fields: [
+              { name: 'rt1', type: 'richText', editor: heroEditor('title', 'text') },
+              { name: 'rt2', type: 'richText', editor: heroEditor('subtitle', 'number') },
+            ],
+          },
+        ],
+      } as unknown as Config
+
+      const sanitizedConfig = sanitizeConfig(config)
+      const { jsonSchema } = configToJSONSchema(sanitizedConfig, 'text')
+      const defs = jsonSchema.$defs!
+
+      // Each differently-shaped `hero` gets its own interface (one clean, one hashed).
+      const heroNames = Object.keys(defs).filter((k) => /^Hero(?:_[0-9A-F]{8})?$/.test(k))
+      expect(heroNames).toHaveLength(2)
+
+      // ...and they carry distinct field shapes (not a silent overwrite).
+      const shapeOf = (name: string): string =>
+        Object.keys((defs[name] as { properties: Record<string, unknown> }).properties)
+          .sort()
+          .join(',')
+      expect(shapeOf(heroNames[0]!)).not.toBe(shapeOf(heroNames[1]!))
+    },
+  )
+})
+
+describe('Lexical link fields interface generation', () => {
+  // The node-union name is a content hash of the editor's nodes. A link node only carries a `$ref`
+  // to its `LexicalLinkFields_<hash>` interface, whose *content* lives separately — so two editors
+  // with identical nodes but different custom LinkFeature fields must not hash the same, or one
+  // `LexicalLinkFields_<hash>` would overwrite the other and mistype a field.
+  vitestIt(
+    'gives editors with identical nodes but different custom link fields distinct interfaces',
+    async () => {
+      const linkEditor = (fieldName: string) =>
+        lexicalEditor({
+          features: [
+            LinkFeature({
+              fields: ({ defaultFields }) => [...defaultFields, { name: fieldName, type: 'text' }],
+            }),
+          ],
+        })
+
+      // Two richText fields with the same nodes, differing only in their custom link field.
+      const config = {
+        collections: [
+          {
+            slug: 'linkCollisionTest',
+            fields: [
+              { name: 'rt1', type: 'richText', editor: linkEditor('label') },
+              { name: 'rt2', type: 'richText', editor: linkEditor('trackingId') },
+            ],
+          },
+        ],
+      } as unknown as Config
+
+      const sanitizedConfig = sanitizeConfig(config)
+      const { jsonSchema } = configToJSONSchema(sanitizedConfig, 'text')
+      const defs = jsonSchema.$defs!
+
+      // Each editor gets its own custom-link-fields interface (not a single shared, overwritten one).
+      const linkFieldsNames = Object.keys(defs).filter((k) =>
+        /^LexicalLinkFields_[0-9A-F]{8}$/.test(k),
+      )
+      expect(linkFieldsNames).toHaveLength(2)
+
+      // ...and each carries its own custom field (`label` vs `trackingId`), not a silent overwrite.
+      const propsOf = (name: string): string[] =>
+        Object.keys((defs[name] as { properties: Record<string, unknown> }).properties).sort()
+      expect(propsOf(linkFieldsNames[0]!)).not.toEqual(propsOf(linkFieldsNames[1]!))
+    },
+  )
+})
+
+describe('Lexical upload node type generation', () => {
+  // The upload node's JSON Schema validates configured extra fields strictly, so the generated
+  // TypeScript must expose them too - not erase them to `{ [k: string]: unknown }`.
+  vitestIt('reflects UploadFeature extra fields in the generated upload node type', async () => {
+    const config = {
+      collections: [
+        { slug: 'media', fields: [], upload: true },
+        {
+          slug: 'articles',
+          fields: [
+            {
+              name: 'content',
+              type: 'richText',
+              editor: lexicalEditor({
+                features: [
+                  UploadFeature({
+                    collections: { media: { fields: [{ name: 'caption', type: 'text' }] } },
+                  }),
+                ],
+              }),
+            },
+          ],
+        },
+      ],
+    } as unknown as Config
+
+    const sanitizedConfig = sanitizeConfig(config)
+    // `generateTypes` only needs the ID type - avoid standing up a DB adapter.
+    ;(sanitizedConfig as unknown as { db: { defaultIDType: string } }).db = {
+      defaultIDType: 'text',
+    }
+
+    const generatedTypes = await generateTypes(sanitizedConfig, { log: false, returnString: true })
+
+    // The configured `caption` upload field must survive into the generated upload node type,
+    // not be erased to `{ [k: string]: unknown }`.
+    expect(generatedTypes).toContain('caption')
+  })
+})
+
+describe('Lexical inline block node type generation', () => {
+  // A `BlocksFeature` with `blocks` but no `inlineBlocks` should not make the generated node union
+  // claim the field can contain inline-block nodes - the editor can never produce one.
+  vitestIt('omits the inline-block node type when no inline blocks are configured', async () => {
+    const config = {
+      collections: [
+        {
+          slug: 'articles',
+          fields: [
+            {
+              name: 'content',
+              type: 'richText',
+              editor: lexicalEditor({
+                features: [
+                  BlocksFeature({
+                    blocks: [{ slug: 'myBlock', fields: [{ name: 'title', type: 'text' }] }],
+                  }),
+                ],
+              }),
+            },
+          ],
+        },
+      ],
+    } as unknown as Config
+
+    const sanitizedConfig = sanitizeConfig(config)
+    // `generateTypes` only needs the ID type - avoid standing up a DB adapter.
+    ;(sanitizedConfig as unknown as { db: { defaultIDType: string } }).db = {
+      defaultIDType: 'text',
+    }
+
+    const generatedTypes = await generateTypes(sanitizedConfig, { log: false, returnString: true })
+
+    // The configured block is part of the node union...
+    expect(generatedTypes).toContain('SerializedBlockNode<MyBlock>')
+    // ...but the union must not include an inline-block node
+    expect(generatedTypes).not.toMatch(/SerializedInlineBlockNode<\s*\{\s*blockType:/)
   })
 })

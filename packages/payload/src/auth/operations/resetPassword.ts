@@ -1,7 +1,7 @@
 import { status as httpStatus } from 'http-status'
 
 import type { Collection, DataFromCollectionSlug } from '../../collections/config/types.js'
-import type { AuthCollectionSlug, TypedUser } from '../../index.js'
+import type { AuthCollectionSlug, User } from '../../index.js'
 import type { PayloadRequest } from '../../types/index.js'
 
 import { buildAfterOperation } from '../../collections/operations/utilities/buildAfterOperation.js'
@@ -60,7 +60,7 @@ export const resetPasswordOperation = async <TSlug extends AuthCollectionSlug>(
   }
 
   let sid: string | undefined
-  let user: null | TypedUser = null
+  let user: null | User = null
 
   try {
     const shouldCommit = await initTransaction(req)
@@ -85,7 +85,7 @@ export const resetPasswordOperation = async <TSlug extends AuthCollectionSlug>(
       },
     })
 
-    user = await payload.db.findOne<TypedUser>({
+    user = await payload.db.findOne<User>({
       collection: collectionConfig.slug,
       req,
       where,

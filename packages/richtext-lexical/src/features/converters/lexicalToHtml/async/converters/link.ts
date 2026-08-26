@@ -1,7 +1,7 @@
 import escapeHTML from 'escape-html'
 import { sanitizeUrl } from 'payload/shared'
 
-import type { SerializedAutoLinkNode, SerializedLinkNode } from '../../../../../nodeTypes.js'
+import type { SerializedAutoLinkNode, SerializedLinkNode } from '../../../../../types/nodeTypes.js'
 import type { HTMLConvertersAsync, HTMLPopulateFn } from '../types.js'
 
 export const LinkHTMLConverterAsync: (args: {

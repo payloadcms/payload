@@ -219,16 +219,15 @@ export const promise = async ({
             for (const block of siblingData[field.name] as JsonObject[]) {
               rowIndex++
               if (validationResult.invalidBlockSlugs.includes(block.blockType as string)) {
-                const blockConfigOrSlug = (field.blockReferences ?? field.blocks).find(
-                  (blockFromField) =>
-                    typeof blockFromField === 'string'
-                      ? blockFromField === block.blockType
-                      : blockFromField.slug === block.blockType,
-                ) as Block | undefined
+                const blockConfigOrSlug = field.blocks.find((blockFromField) =>
+                  typeof blockFromField === 'string'
+                    ? blockFromField === block.blockType
+                    : blockFromField.slug === block.blockType,
+                )
                 const blockConfig =
-                  typeof blockConfigOrSlug !== 'string'
-                    ? blockConfigOrSlug
-                    : req.payload.config?.blocks?.[blockConfigOrSlug]
+                  typeof blockConfigOrSlug === 'string'
+                    ? req.payload.blocks[blockConfigOrSlug]
+                    : blockConfigOrSlug
 
                 const blockLabelPath =
                   field?.label === false
@@ -359,7 +358,7 @@ export const promise = async ({
 
           const block: Block | undefined =
             req.payload.blocks[blockTypeToMatch] ??
-            ((field.blockReferences ?? field.blocks).find(
+            (field.blocks.find(
               (curBlock) => typeof curBlock !== 'string' && curBlock.slug === blockTypeToMatch,
             ) as Block | undefined)
 

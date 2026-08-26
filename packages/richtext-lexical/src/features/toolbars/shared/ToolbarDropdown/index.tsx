@@ -11,7 +11,7 @@ import type { ToolbarDropdownGroup, ToolbarGroupItem } from '../../types.js'
 import type { ToolbarGroupState } from '../useToolbarStates.js'
 
 import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider.js'
-import './index.scss'
+import './index.css'
 import { DropDown, DropDownItem } from './DropDown.js'
 
 const ToolbarItem = ({
@@ -19,12 +19,14 @@ const ToolbarItem = ({
   anchorElem,
   editor,
   enabled,
+  iconOnly,
   item,
 }: {
   active?: boolean
   anchorElem: HTMLElement
   editor: LexicalEditor
   enabled?: boolean
+  iconOnly?: boolean
   item: ToolbarGroupItem
 }) => {
   const { i18n } = useTranslation<{}, string>()
@@ -70,7 +72,7 @@ const ToolbarItem = ({
       item={item}
       itemKey={item.key}
       key={item.key}
-      tooltip={title}
+      tooltip={iconOnly ? title : undefined}
     >
       <span className="text">{croppedTitle}</span>
     </DropDownItem>
@@ -108,6 +110,7 @@ export const ToolbarDropdown = ({
             anchorElem={anchorElem}
             editor={editor}
             enabled={groupState.enabledItemKeys.includes(item.key)}
+            iconOnly={group.iconOnly}
             item={item}
             key={item.key}
           />

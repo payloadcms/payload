@@ -1,7 +1,7 @@
 import crypto from 'crypto'
 
 import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
-import type { TypedUser } from '../../index.js'
+import type { User } from '../../index.js'
 import type { Where } from '../../types/index.js'
 import type { AuthStrategyFunction } from '../index.js'
 
@@ -13,33 +13,20 @@ export const APIKeyAuthentication =
     if (authHeader?.startsWith(`${collectionConfig.slug} API-Key `)) {
       const apiKey = authHeader.replace(`${collectionConfig.slug} API-Key `, '')
 
-      // TODO: V4 remove extra algorithm check
-      // api keys saved prior to v3.46.0 will have sha1
-      const sha1APIKeyIndex = crypto.createHmac('sha1', payload.secret).update(apiKey).digest('hex')
-      const sha256APIKeyIndex = crypto
-        .createHmac('sha256', payload.secret)
-        .update(apiKey)
-        .digest('hex')
-
-      const apiKeyConstraints = [
-        {
-          apiKeyIndex: {
-            equals: sha1APIKeyIndex,
-          },
-        },
-        {
-          apiKeyIndex: {
-            equals: sha256APIKeyIndex,
-          },
-        },
-      ]
+      // The stored index was written under whichever secret was active at the
+      // time, so match against the index computed under every keyring secret.
+      const apiKeyIndexes = payload.encryptionKeyring.all.map((key) =>
+        crypto.createHmac('sha256', key.legacyKey).update(apiKey).digest('hex'),
+      )
 
       try {
         const where: Where = {}
         if (collectionConfig.auth?.verify) {
           where.and = [
             {
-              or: apiKeyConstraints,
+              apiKeyIndex: {
+                in: apiKeyIndexes,
+              },
             },
             {
               _verified: {
@@ -48,7 +35,7 @@ export const APIKeyAuthentication =
             },
           ]
         } else {
-          where.or = apiKeyConstraints
+          where.apiKeyIndex = { in: apiKeyIndexes }
         }
 
         const userQuery = await payload.find({
@@ -66,7 +53,7 @@ export const APIKeyAuthentication =
           user!._strategy = 'api-key'
 
           return {
-            user: user as TypedUser,
+            user: user as User,
           }
         }
       } catch (ignore) {

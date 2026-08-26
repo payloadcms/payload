@@ -1,0 +1,30 @@
+@layer payload-default {
+  .form-header {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-2);
+    align-items: center;
+    margin-bottom: var(--spacer-3);
+    text-align: center;
+  }
+
+  .form-header h1 {
+    margin: 0;
+    font-family: var(--text-heading-large-font-family);
+    font-size: var(--text-heading-large-font-size);
+    font-weight: var(--text-heading-large-font-weight);
+    line-height: var(--text-heading-large-line-height);
+    letter-spacing: var(--text-heading-large-letter-spacing);
+    color: var(--color-text);
+  }
+
+  .form-header p {
+    margin: 0;
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--text-body-medium-font-size);
+    font-weight: var(--text-body-medium-font-weight);
+    line-height: var(--text-body-medium-line-height);
+    letter-spacing: var(--text-body-medium-letter-spacing);
+    color: var(--color-text-secondary);
+  }
+}

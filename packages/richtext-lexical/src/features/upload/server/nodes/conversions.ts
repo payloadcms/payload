@@ -5,7 +5,8 @@ import type { DOMConversionOutput } from 'lexical'
 import ObjectID from 'bson-objectid'
 
 import type { $createUploadNode } from '../../client/nodes/UploadNode.js'
-import type { $createUploadServerNode, Internal_UploadData } from './UploadNode.js'
+import type { Internal_UploadData } from '../schema.js'
+import type { $createUploadServerNode } from './UploadNode.js'
 
 export function isGoogleDocCheckboxImg(img: HTMLImageElement): boolean {
   return (

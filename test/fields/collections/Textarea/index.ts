@@ -121,6 +121,7 @@ const TextareaFields: CollectionConfig = {
       },
     },
   ],
+  versions: false,
 }
 
 export default TextareaFields

@@ -1,5 +1,5 @@
-import type { PostgresAdapter } from '@payloadcms/db-postgres/types'
-import type { SQLiteAdapter } from '@payloadcms/db-sqlite/types'
+import type { PostgresAdapter } from '@payloadcms/db-postgres'
+import type { SQLiteAdapter } from '@payloadcms/db-sqlite'
 import type { PgTable } from 'drizzle-orm/pg-core'
 import type { SQLiteTable } from 'drizzle-orm/sqlite-core'
 import type { Payload } from 'payload'

@@ -11,4 +11,5 @@ export const DisableDuplicate: CollectionConfig = {
       type: 'text',
     },
   ],
+  versions: false,
 }

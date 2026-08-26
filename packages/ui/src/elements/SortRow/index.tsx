@@ -2,9 +2,9 @@
 
 import React from 'react'
 
-import { DragHandleIcon } from '../../icons/DragHandle/index.js'
-import './index.scss'
+import { AlignJustifiedIcon } from '../../icons/AlignJustified/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
+import './index.css'
 
 const baseClass = 'sort-row'
 
@@ -14,7 +14,7 @@ export const SortRow = () => {
 
   return (
     <div className={`${baseClass} ${isActive ? 'active' : ''}`} role="button" tabIndex={0}>
-      <DragHandleIcon className={`${baseClass}__icon`} />
+      <AlignJustifiedIcon />
     </div>
   )
 }

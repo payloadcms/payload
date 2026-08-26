@@ -25,9 +25,8 @@ import {
   OverviewField,
   PreviewField,
 } from '@payloadcms/plugin-seo/fields'
-import { slugField } from 'payload'
 
-export const Posts: CollectionConfig<'posts'> = {
+export const Posts: CollectionConfig = {
   slug: 'posts',
   access: {
     create: authenticated,
@@ -37,7 +36,10 @@ export const Posts: CollectionConfig<'posts'> = {
   },
   // This config controls what's populated by default when a post is referenced
   // https://payloadcms.com/docs/queries/select#defaultpopulate-collection-config-property
-  // Type safe if the collection slug generic is passed to `CollectionConfig` - `CollectionConfig<'posts'>
+  // NOTE: the slug generic (CollectionConfig<'pages'>) is dropped to work around a TypeScript 6
+  // regression where a slug-typed config's defaultPopulate is not assignable to buildConfig's
+  // collections array. defaultPopulate falls back to SelectType (keys no longer field-checked);
+  // restore the generic once the core types are fixed.
   defaultPopulate: {
     title: true,
     slug: true,
@@ -214,7 +216,11 @@ export const Posts: CollectionConfig<'posts'> = {
         },
       ],
     },
-    slugField(),
+    {
+      name: 'slug',
+      type: 'slug',
+      useAsSlug: 'title',
+    },
   ],
   hooks: {
     afterChange: [revalidatePost],

@@ -1,4 +1,4 @@
-import type { MongooseUpdateQueryOptions, UpdateQuery } from 'mongoose'
+import type { QueryOptions, UpdateQuery } from 'mongoose'
 import type { Job, UpdateJobs, Where } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
@@ -36,7 +36,7 @@ export const updateJobs: UpdateJobs = async function updateMany(
     timestamps: true,
   })
 
-  let query = await buildQuery({
+  const query = await buildQuery({
     adapter: this,
     collectionSlug: collectionConfig.slug,
     fields: collectionConfig.flattenedFields,
@@ -80,12 +80,16 @@ export const updateJobs: UpdateJobs = async function updateMany(
     updateData = updateOps
   }
 
-  const options: MongooseUpdateQueryOptions = {
-    lean: true,
-    new: true,
+  const baseOptions = {
     session: await getSession(this, req),
     // Timestamps are manually added by the write transform
     timestamps: false,
+  } satisfies QueryOptions
+
+  const findOptions: QueryOptions = {
+    ...baseOptions,
+    lean: true,
+    new: true,
   }
 
   let result: Job[] = []
@@ -93,42 +97,83 @@ export const updateJobs: UpdateJobs = async function updateMany(
   try {
     if (id) {
       if (returning === false) {
-        await Model.updateOne(query, updateData, options)
+        await Model.updateOne(query, updateData, baseOptions)
         transform({ adapter: this, data, fields: collectionConfig.fields, operation: 'read' })
 
         return null
       } else {
-        const doc = await Model.findOneAndUpdate(query, updateData, options)
+        const doc = await Model.findOneAndUpdate(query, updateData, findOptions)
         result = doc ? [doc] : []
       }
-    } else {
-      if (typeof limit === 'number' && limit > 0) {
-        const documentsToUpdate = await Model.find(
-          query,
-          {},
-          { ...options, limit, projection: { _id: 1 }, sort },
-        )
-        if (documentsToUpdate.length === 0) {
-          return null
-        }
-
-        query = { _id: { $in: documentsToUpdate.map((doc) => doc._id) } }
-      }
-
-      await Model.updateMany(query, updateData, options)
+    } else if (limit === 1) {
+      /**
+       * Select, update, and return one job atomically in a single database call.
+       * We can only do this with limit === 1, which can be expressed as findOne.
+       */
+      const doc = await Model.findOneAndUpdate(query, updateData, {
+        ...findOptions,
+        projection: returning === false ? { _id: 1 } : undefined,
+        sort,
+      })
 
       if (returning === false) {
         return null
       }
 
-      result = await Model.find(
+      result = doc ? [doc] : []
+    } else if (typeof limit === 'number' && limit > 1) {
+      const candidates = await Model.find(
         query,
         {},
-        {
-          ...options,
-          sort,
-        },
+        { ...findOptions, limit, projection: { _id: 1 }, sort },
       )
+
+      if (candidates.length === 0) {
+        return null
+      }
+
+      const candidateIDs = candidates.map((candidate) => candidate._id)
+
+      if (typeof data.processingToken === 'string') {
+        /**
+         * `processingToken` identifies this claim update. `processing: true` cannot, because every
+         * worker writes the same value. The token lets us reliably find the jobs this update won.
+         */
+        const claimQuery = {
+          $and: [query, { _id: { $in: candidateIDs } }],
+        }
+
+        await Model.updateMany(claimQuery, updateData, baseOptions)
+
+        if (returning === false) {
+          return null
+        }
+
+        const claimedJobsQuery = {
+          _id: { $in: candidateIDs },
+          processingToken: { $eq: data.processingToken },
+        }
+
+        result = await Model.find(claimedJobsQuery, {}, { ...findOptions, sort })
+      } else {
+        const limitedUpdateQuery = { _id: { $in: candidateIDs } }
+
+        await Model.updateMany(limitedUpdateQuery, updateData, baseOptions)
+
+        if (returning === false) {
+          return null
+        }
+
+        result = await Model.find(limitedUpdateQuery, {}, { ...findOptions, sort })
+      }
+    } else {
+      await Model.updateMany(query, updateData, baseOptions)
+
+      if (returning === false) {
+        return null
+      }
+
+      result = await Model.find(query, {}, { ...findOptions, sort })
     }
   } catch (error) {
     handleError({ collection: collectionConfig.slug, error, req })

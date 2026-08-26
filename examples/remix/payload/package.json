@@ -12,7 +12,7 @@
     }
   },
   "scripts": {
-    "build": "next build",
+    "build": "payload build",
     "dev": "next dev",
     "devsafe": "rm -rf .next && next dev",
     "generate:importmap": "payload generate:importmap",
@@ -36,7 +36,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
     "@types/node": "^22.5.4",
-    "@types/react": "19.2.9",
+    "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
     "eslint": "^9.16.0",
     "eslint-config-next": "15.1.5",

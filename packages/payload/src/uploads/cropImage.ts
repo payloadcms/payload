@@ -17,7 +17,7 @@ type CropImageArgs = {
   file: PayloadRequest['file']
   heightInPixels: number
   req?: PayloadRequest
-  sharp: SanitizedConfig['sharp']
+  sharp: NonNullable<SanitizedConfig['sharp']>
   widthInPixels: number
   withMetadata?: WithMetadata
 }

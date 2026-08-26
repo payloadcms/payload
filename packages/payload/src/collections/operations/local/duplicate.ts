@@ -1,14 +1,8 @@
 import type { DeepPartial } from 'ts-essentials'
 
 import type { CollectionSlug, TypedLocale } from '../../..//index.js'
-import type { FindOptions, Payload, RequestContext } from '../../../index.js'
-import type {
-  Document,
-  PayloadRequest,
-  PopulateType,
-  SelectType,
-  TransformCollectionWithSelect,
-} from '../../../types/index.js'
+import type { FindOptions, Payload, RequestContext, User } from '../../../index.js'
+import type { PayloadRequest, PopulateType, SelectType, TransformCollectionWithSelect } from '../../../types/index.js'
 import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
 import type {
   DraftFlagFromCollectionSlug,
@@ -82,15 +76,17 @@ type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType> = {
    * @default false
    */
   showHiddenFields?: boolean
-  // TODO: Strongly type User as TypedUser (= User in v4.0)
   /**
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
-  user?: Document
+  user?: null | User
 } & Pick<FindOptions<TSlug, TSelect>, 'select'>
 
-export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> =
-  BaseOptions<TSlug, TSelect> & DraftFlagFromCollectionSlug<TSlug>
+export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> = BaseOptions<
+  TSlug,
+  TSelect
+> &
+  DraftFlagFromCollectionSlug<TSlug>
 
 export async function duplicateLocal<
   TSlug extends CollectionSlug,

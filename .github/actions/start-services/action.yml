@@ -30,6 +30,16 @@ runs:
         done
         docker compose -f test/docker-compose.yml --profile storage up -d --wait
 
+    - name: Start Redis
+      shell: bash
+      run: |
+        for i in 1 2 3; do
+          docker compose -f test/docker-compose.yml --profile redis pull && break
+          echo "Pull attempt $i/3 for 'redis' profile failed, retrying in 10s..."
+          sleep 10
+        done
+        docker compose -f test/docker-compose.yml --profile redis up -d --wait
+
     - name: Start MongoDB
       id: mongodb
       if: contains(fromJSON('["mongodb", "cosmosdb", "documentdb", "firestore"]'), inputs.database)
@@ -85,11 +95,17 @@ runs:
       if: inputs.database == 'supabase'
       uses: supabase/setup-cli@v1
       with:
-        version: latest
+        # Pinned instead of `latest` to skip setup-cli's GitHub API release lookup,
+        # which flakes on shared CI runners with "rate limit exceeded" (unauthenticated
+        # 60 req/hr limit). A fixed version short-circuits that call entirely.
+        version: 2.104.0
 
     - name: Initialize Supabase
       if: inputs.database == 'supabase'
       shell: bash
       run: |
         supabase init
-        supabase start
+        # Tests connect directly to Postgres on 54322 (see test/dbAdapters.ts), so exclude every
+        # other service. This kills the flaky edge-runtime container whose Deno-dependency boot
+        # fails health checks with a 502 on CI, and slashes startup time/RAM.
+        supabase start -x edge-runtime,studio,postgres-meta,logflare,vector,imgproxy,storage-api,gotrue,realtime,postgrest,kong,mailpit,supavisor

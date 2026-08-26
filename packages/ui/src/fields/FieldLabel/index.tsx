@@ -10,7 +10,7 @@ import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { generateFieldID } from '../../utilities/generateFieldID.js'
-import './index.scss'
+import './index.css'
 
 export const FieldLabel: React.FC<GenericLabelProps> = (props) => {
   const {
@@ -30,7 +30,9 @@ export const FieldLabel: React.FC<GenericLabelProps> = (props) => {
   const htmlFor = htmlForFromProps || generateFieldID(path, editDepth, uuid)
 
   const { i18n } = useTranslation()
-  const { code, label: localLabel } = useLocale()
+  const locale = useLocale()
+  const code = locale?.code
+  const localLabel = locale?.label
 
   const Element =
     ElementFromProps === 'label' ? (htmlFor ? 'label' : 'span') : ElementFromProps || 'span'
@@ -40,7 +42,7 @@ export const FieldLabel: React.FC<GenericLabelProps> = (props) => {
       <Element className={`field-label${unstyled ? ' unstyled' : ''}`} htmlFor={htmlFor}>
         {getTranslation(label, i18n)}
         {required && !unstyled && <span className="required">*</span>}
-        {localized && !hideLocale && (
+        {localized && !hideLocale && locale && (
           <span className="localized">
             &mdash; {typeof localLabel === 'string' ? localLabel : code}
           </span>

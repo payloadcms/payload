@@ -3,7 +3,7 @@ import { isValidID } from 'payload'
 
 import type { NodeValidation } from '../../typesServer.js'
 import type { UploadFeatureProps } from './index.js'
-import type { SerializedUploadNode } from './nodes/UploadNode.js'
+import type { SerializedUploadNode } from './schema.js'
 
 export const uploadValidation = (
   props: UploadFeatureProps,

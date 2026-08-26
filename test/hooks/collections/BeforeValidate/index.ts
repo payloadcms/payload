@@ -48,4 +48,5 @@ export const BeforeValidateCollection: CollectionConfig = {
       },
     },
   ],
+  versions: false,
 }

@@ -14,7 +14,7 @@ import { useConfig } from '../../../../providers/Config/index.js'
 import { useLocale } from '../../../../providers/Locale/index.js'
 import { useTranslation } from '../../../../providers/Translation/index.js'
 import { ReactSelect } from '../../../ReactSelect/index.js'
-import './index.scss'
+import './index.css'
 import optionsReducer from './optionsReducer.js'
 
 const baseClass = 'condition-value-relationship'
@@ -106,7 +106,7 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
         const query = {
           depth: 0,
           limit: maxResultsPerRequest,
-          locale: locale.code,
+          locale: locale?.code,
           page: loadedRelationship.nextPage,
           select: {
             [fieldToSearch]: true,

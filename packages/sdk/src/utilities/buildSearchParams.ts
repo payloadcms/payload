@@ -75,7 +75,8 @@ export const buildSearchParams = (args: OperationArgs): string => {
   }
 
   if (Object.keys(search).length > 0) {
-    return stringify(search, { addQueryPrefix: true })
+    // @ts-expect-error allowEmptyArrays is not in the type definition for qs-esm, but it is supported
+    return stringify(search, { addQueryPrefix: true, allowEmptyArrays: true })
   }
 
   return ''

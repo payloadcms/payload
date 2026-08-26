@@ -1,7 +1,6 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { waitForAutoSaveToRunAndComplete } from '__helpers/e2e/waitForAutoSaveToRunAndComplete.js'
 import * as path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -11,17 +10,17 @@ import type { Config } from './payload-types.js'
 import { reorderColumns } from '../__helpers/e2e/columns/index.js'
 import {
   changeLocale,
-  ensureCompilationIsDone,
   exactText,
-  initPageConsoleErrorCatch,
   saveDocAndAssert,
   // throttleTest,
 } from '../__helpers/e2e/helpers.js'
 import { navigateToDoc } from '../__helpers/e2e/navigateToDoc.js'
+import { waitForAutoSaveToRunAndComplete } from '../__helpers/e2e/waitForAutoSaveToRunAndComplete.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { RESTClient } from '../__helpers/shared/rest.js'
+import { initPage } from '../__setup/e2e/initPage.js'
 import { EXPECT_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import {
   categoriesJoinRestrictedSlug,
@@ -50,7 +49,7 @@ describe('Join Field', () => {
   let categoriesVersionsURL: AdminUrlUtil
   let versionsURL: AdminUrlUtil
   let categoryID: number | string
-  let rootFolderID: number | string
+  let rootParentID: number | string
 
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
@@ -67,9 +66,7 @@ describe('Join Field', () => {
     versionsURL = new AdminUrlUtil(serverURL, versionsSlug)
 
     const context = await browser.newContext()
-    page = await context.newPage()
-    initPageConsoleErrorCatch(page)
-    await ensureCompilationIsDone({ page, serverURL })
+    ;({ page } = await initPage({ context, serverURL }))
 
     //await throttleTest({ context, delay: 'Slow 4G', page })
   })
@@ -102,8 +99,8 @@ describe('Join Field', () => {
 
     ;({ id: categoryID } = docs[0])
 
-    const folder = await payload.find({ collection: 'folders', sort: 'createdAt', depth: 0 })
-    rootFolderID = folder.docs[0]!.id
+    const folder = await payload.find({ collection: 'folders', depth: 0, sort: 'createdAt' })
+    rootParentID = folder.docs[0]!.id
   })
 
   test('should populate joined relationships in table cells of list view', async () => {
@@ -144,31 +141,32 @@ describe('Join Field', () => {
     await payload.create({
       collection: postsSlug,
       data: {
+        category: category.id,
         title: 'a',
-        category: category.id,
       },
     })
 
     await payload.create({
       collection: postsSlug,
       data: {
+        category: category.id,
         title: 'b',
-        category: category.id,
       },
     })
 
     await payload.create({
       collection: postsSlug,
       data: {
-        title: 'z',
         category: category.id,
+        title: 'z',
       },
     })
 
     await navigateToDoc(page, categoriesURL)
     const joinField = page.locator('#field-relatedPosts.field-type.join')
+    await expect(joinField.locator('.relationship-table table')).toBeVisible()
     await expect(joinField.locator('.row-1 > .cell-title')).toContainText('z')
-    await expect(joinField.locator('.paginator > .clickable-arrow--right')).toBeVisible()
+    await expect(joinField.locator('.paginator')).toBeVisible()
     const rows = joinField.locator('.relationship-table tbody tr')
     await expect(rows).toHaveCount(5)
   })
@@ -305,10 +303,9 @@ describe('Join Field', () => {
     await expect(link).toBeHidden()
 
     await reorderColumns(page, {
-      togglerSelector: '.relationship-table__toggle-columns',
-      columnContainerSelector: '.relationship-table__columns',
       fromColumn: 'Category',
       toColumn: 'Title',
+      togglerSelector: '#field-relatedPosts .columns-button__button',
     })
 
     const newActionColumn = joinField.locator('tbody tr td:nth-child(2)').first()
@@ -319,10 +316,9 @@ describe('Join Field', () => {
 
     // put columns back in original order for the next test
     await reorderColumns(page, {
-      togglerSelector: '.relationship-table__toggle-columns',
-      columnContainerSelector: '.relationship-table__columns',
       fromColumn: 'Title',
       toColumn: 'Category',
+      togglerSelector: '#field-relatedPosts .columns-button__button',
     })
   })
 
@@ -352,9 +348,9 @@ describe('Join Field', () => {
     const innerText = await thead.innerText()
 
     // expect the order of columns to be 'ID', 'Created At', 'Title'
-    // eslint-disable-next-line payload/no-flaky-assertions
+
     expect(innerText.indexOf('ID')).toBeLessThan(innerText.indexOf('Created At'))
-    // eslint-disable-next-line payload/no-flaky-assertions
+
     expect(innerText.indexOf('Created At')).toBeLessThan(innerText.indexOf('Title'))
   })
 
@@ -408,6 +404,204 @@ describe('Join Field', () => {
     ).toBeVisible()
   })
 
+  test('should refresh sibling join tables when a document is created through another join table', async () => {
+    // `relatedPosts` and `noRowTypes` are two separate join fields backed by the
+    // same relationship (collection: posts, on: 'category'). Creating a post through
+    // one table should refresh the other without a full page reload.
+    await page.goto(categoriesURL.edit(categoryID))
+
+    const actingField = page.locator('#field-relatedPosts.field-type.join')
+    const siblingField = page.locator('#field-noRowTypes.field-type.join')
+    await expect(actingField).toBeVisible()
+    await expect(siblingField).toBeVisible()
+
+    const newTitle = 'Sibling Refresh Post'
+
+    // The new document should not be present in the sibling table yet.
+    await expect(siblingField.locator('tbody tr td', { hasText: exactText(newTitle) })).toBeHidden()
+
+    const addButton = actingField.locator(
+      '.relationship-table__actions button.doc-drawer__toggler',
+      { hasText: exactText('Add new') },
+    )
+    await expect(addButton).toBeVisible()
+    await addButton.click()
+
+    const drawer = page.locator('[id^=doc-drawer_posts_1_]')
+    await expect(drawer).toBeVisible()
+
+    const categoryField = drawer.locator('#field-category')
+    await expect(categoryField).toBeVisible({ timeout: EXPECT_TIMEOUT * 5 })
+    await expect(categoryField.locator('.relationship--single-value__text')).toHaveText('example')
+
+    const titleField = drawer.locator('#field-title')
+    await expect(titleField).toBeVisible()
+    await titleField.fill(newTitle)
+
+    await saveDocAndAssert(page, '[id^=doc-drawer_posts_1_] button#action-save')
+    await expect(drawer).toBeHidden()
+
+    // The acting table shows the new row...
+    await expect(actingField.locator('tbody tr td', { hasText: exactText(newTitle) })).toBeVisible()
+
+    // ...and the sibling join table refreshes to show it too, without a page reload.
+    await expect(
+      siblingField.locator('tbody tr td', { hasText: exactText(newTitle) }),
+    ).toBeVisible()
+  })
+
+  test('should refresh sibling join tables when a document is deleted through another join table', async () => {
+    await page.goto(categoriesURL.edit(categoryID))
+
+    const actingField = page.locator('#field-relatedPosts.field-type.join')
+    const siblingField = page.locator('#field-noRowTypes.field-type.join')
+    await expect(actingField).toBeVisible()
+    await expect(siblingField).toBeVisible()
+
+    const title = 'Sibling Delete Post'
+
+    // Create a post through the acting table so it exists in both join tables.
+    const addButton = actingField.locator(
+      '.relationship-table__actions button.doc-drawer__toggler',
+      { hasText: exactText('Add new') },
+    )
+    await expect(addButton).toBeVisible()
+    await addButton.click()
+
+    const createDrawer = page.locator('[id^=doc-drawer_posts_1_]')
+    await expect(createDrawer).toBeVisible()
+
+    const categoryField = createDrawer.locator('#field-category')
+    await expect(categoryField).toBeVisible({ timeout: EXPECT_TIMEOUT * 5 })
+    await expect(categoryField.locator('.relationship--single-value__text')).toHaveText('example')
+
+    const titleField = createDrawer.locator('#field-title')
+    await expect(titleField).toBeVisible()
+    await titleField.fill(title)
+
+    await saveDocAndAssert(page, '[id^=doc-drawer_posts_1_] button#action-save')
+    await expect(createDrawer).toBeHidden()
+
+    // The new row appears in both tables.
+    await expect(actingField.locator('tbody tr td', { hasText: exactText(title) })).toBeVisible()
+    await expect(siblingField.locator('tbody tr td', { hasText: exactText(title) })).toBeVisible()
+
+    // Delete the post through the acting table's own drawer.
+    const editRow = actingField.locator('tbody tr', { hasText: title })
+    await expect(editRow).toBeVisible()
+    const editButton = editRow.locator('button.drawer-link__doc-drawer-toggler').first()
+    await expect(editButton).toBeVisible()
+    await editButton.click()
+
+    const editDrawer = page.locator('[id^=doc-drawer_posts_1_]')
+    await expect(editDrawer).toBeVisible()
+
+    const popupButton = editDrawer.locator('.doc-controls__popup .popup__trigger-wrap button')
+    await expect(popupButton).toBeVisible()
+    await popupButton.click()
+
+    const deleteButton = page.locator('.popup__content #action-delete')
+    await expect(deleteButton).toBeVisible()
+    await deleteButton.click()
+
+    const deleteConfirmModal = page.locator('dialog[id^="delete-"][open]')
+    await expect(deleteConfirmModal).toBeVisible()
+    const confirmDeleteButton = deleteConfirmModal.locator('button[data-dialog-action="confirm"]')
+    await expect(confirmDeleteButton).toBeVisible()
+    await confirmDeleteButton.click()
+    await expect(editDrawer).toBeHidden()
+
+    // Removed from the acting table (optimistic) and the sibling table (cross-table event).
+    await expect(actingField.locator('tbody tr td', { hasText: exactText(title) })).toBeHidden()
+    await expect(siblingField.locator('tbody tr td', { hasText: exactText(title) })).toBeHidden()
+  })
+
+  test('should refresh sibling polymorphic join tables when a document is deleted through another polymorphic join table', async () => {
+    const title = 'Poly Sibling Delete Post'
+
+    // Seed a post linked to this category so it appears in both polymorphic tables.
+    await payload.create({
+      collection: postsSlug,
+      data: {
+        category: categoryID as string,
+        title,
+      },
+    })
+
+    await page.goto(categoriesURL.edit(categoryID))
+
+    const actingField = page.locator('#field-polymorphicJoin.field-type.join')
+    const siblingField = page.locator('#field-polymorphicJoinNoRowTypes.field-type.join')
+    await expect(actingField).toBeVisible()
+    await expect(siblingField).toBeVisible()
+
+    // The seeded post appears in both polymorphic tables.
+    await expect(actingField.locator('tbody tr td', { hasText: exactText(title) })).toBeVisible()
+    await expect(siblingField.locator('tbody tr td', { hasText: exactText(title) })).toBeVisible()
+
+    // Delete the post through the acting table's own row drawer.
+    const editRow = actingField.locator('tbody tr', { hasText: title })
+    await expect(editRow).toBeVisible()
+    const editButton = editRow.locator('button.drawer-link__doc-drawer-toggler').first()
+    await expect(editButton).toBeVisible()
+    await editButton.click()
+
+    const editDrawer = page.locator('[id^=doc-drawer_posts_1_]')
+    await expect(editDrawer).toBeVisible()
+
+    const popupButton = editDrawer.locator('.doc-controls__popup .popup__trigger-wrap button')
+    await expect(popupButton).toBeVisible()
+    await popupButton.click()
+
+    const deleteButton = page.locator('.popup__content #action-delete')
+    await expect(deleteButton).toBeVisible()
+    await deleteButton.click()
+
+    const deleteConfirmModal = page.locator('dialog[id^="delete-"][open]')
+    await expect(deleteConfirmModal).toBeVisible()
+    const confirmDeleteButton = deleteConfirmModal.locator('button[data-dialog-action="confirm"]')
+    await expect(confirmDeleteButton).toBeVisible()
+    await confirmDeleteButton.click()
+    await expect(editDrawer).toBeHidden()
+
+    // Removed from the acting table (optimistic) and the sibling polymorphic table
+    // (cross-table event). The sibling removal is what regresses without the poly-aware
+    // `{ relationTo, value }` lookup.
+    await expect(actingField.locator('tbody tr td', { hasText: exactText(title) })).toBeHidden()
+    await expect(siblingField.locator('tbody tr td', { hasText: exactText(title) })).toBeHidden()
+  })
+
+  test('should keep the drawer closed after deleting through a polymorphic join table', async () => {
+    const title = 'Polymorphic Drawer Delete Post'
+
+    await payload.create({
+      collection: postsSlug,
+      data: {
+        title,
+        category: categoryID as string,
+      },
+    })
+
+    await page.goto(categoriesURL.edit(categoryID))
+
+    const joinField = page.locator('#field-polymorphicJoin.field-type.join')
+    const editRow = joinField.locator('tbody tr', { hasText: title })
+    await expect(editRow).toBeVisible()
+    await editRow.locator('button.drawer-link__doc-drawer-toggler').first().click()
+
+    const editDrawer = page.locator('[id^=doc-drawer_posts_1_]')
+    await expect(editDrawer).toBeVisible()
+    await editDrawer.locator('.doc-controls__popup .popup__trigger-wrap button').click()
+    await page.locator('.popup__content #action-delete').click()
+
+    const deleteConfirmModal = page.locator('dialog[id^="delete-"][open]')
+    await expect(deleteConfirmModal).toBeVisible()
+    await deleteConfirmModal.locator('button[data-dialog-action="confirm"]').click()
+
+    await expect(joinField.locator('tbody tr', { hasText: title })).toBeHidden()
+    await expect(page.locator('.drawer--is-open')).toHaveCount(0)
+  })
+
   test('should edit joined document and update relationship table', async () => {
     await page.goto(categoriesURL.edit(categoryID))
 
@@ -446,8 +640,8 @@ describe('Join Field', () => {
     await payload.create({
       collection: versionsSlug,
       data: {
-        title: 'Test Post',
         categoryVersion: categoryVersionsDoc.id,
+        title: 'Test Post',
       },
     })
 
@@ -497,7 +691,7 @@ describe('Join Field', () => {
     await editButton.click()
     const drawer = page.locator('[id^=doc-drawer_posts_1_]')
     await expect(drawer).toBeVisible()
-    const popupButton = drawer.locator('.doc-controls__popup button.popup-button')
+    const popupButton = drawer.locator('.doc-controls__popup .popup__trigger-wrap button')
     await expect(popupButton).toBeVisible()
     await popupButton.click()
     const deleteButton = page.locator('.popup__content #action-delete')
@@ -505,7 +699,7 @@ describe('Join Field', () => {
     await deleteButton.click()
     const deleteConfirmModal = page.locator('dialog[id^="delete-"][open]')
     await expect(deleteConfirmModal).toBeVisible()
-    const confirmDeleteButton = deleteConfirmModal.locator('button#confirm-action')
+    const confirmDeleteButton = deleteConfirmModal.locator('button[data-dialog-action="confirm"]')
     await expect(confirmDeleteButton).toBeVisible()
     await confirmDeleteButton.click()
     await expect(drawer).toBeHidden()
@@ -633,7 +827,7 @@ describe('Join Field', () => {
   })
 
   test('should render join field with array of collections', async () => {
-    await page.goto(foldersURL.edit(rootFolderID))
+    await page.goto(foldersURL.edit(rootParentID))
     const joinField = page.locator('#field-children.field-type.join')
     await expect(joinField).toBeVisible()
 
@@ -651,9 +845,10 @@ describe('Join Field', () => {
   })
 
   test('should create a new document from join field with array of collections', async () => {
-    await page.goto(foldersURL.edit(rootFolderID))
+    await page.goto(foldersURL.edit(rootParentID))
     const joinField = page.locator('#field-children.field-type.join')
     await expect(joinField).toBeVisible()
+    await expect(joinField.locator('.relationship-table table')).toBeVisible()
 
     const addNewPopupBtn = joinField.locator('.relationship-table__add-new-polymorphic')
     await expect(addNewPopupBtn).toBeVisible()
@@ -688,7 +883,7 @@ describe('Join Field', () => {
     await page.locator('#field-enableErrorOnJoin').click()
     await page.locator('#action-save').click()
 
-    await expect(page.locator('#field-joinWithError')).toContainText('enableErrorOnJoin is true')
+    await expect(page.locator('#field-joinWithError .error-pill')).toBeVisible()
   })
 
   test('should render localized data in table when locale changes', async () => {
@@ -718,8 +913,8 @@ describe('Join Field', () => {
     const versionDoc = await payload.create({
       collection: versionsSlug,
       data: {
-        title: 'Version 1',
         categoryVersion: categoryVersionsDoc.id,
+        title: 'Version 1',
       },
     })
 

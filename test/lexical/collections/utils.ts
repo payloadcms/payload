@@ -5,6 +5,8 @@ import fs from 'fs'
 import path from 'path'
 import { wait } from 'payload/shared'
 
+import { patchPageMethods } from '../../__setup/e2e/patchPageMethods.js'
+
 export type PasteMode = 'blob' | 'html'
 
 function inferMimeFromExt(ext: string): string {
@@ -34,6 +36,7 @@ export class LexicalHelpers {
   page: Page
   constructor(page: Page) {
     this.page = page
+    patchPageMethods(page)
   }
 
   async addLine(
@@ -115,6 +118,47 @@ export class LexicalHelpers {
     return {}
   }
 
+  // Simulates a desktop file drop by firing dragenter/dragover/drop with a
+  // populated DataTransfer, triggering Lexical's `DROP_COMMAND`.
+  async dropFile({ filePath }: { filePath: string }) {
+    const name = path.basename(filePath)
+    const mime = inferMimeFromExt(path.extname(name))
+    const buf = await fs.promises.readFile(filePath)
+    const bytes = Array.from(buf)
+
+    const editor = this.editor.first()
+    await editor.evaluate(
+      (el, p) => {
+        const target = el.querySelector('p, span, br, div') ?? (el as HTMLElement)
+
+        const dt = new DataTransfer()
+        const file = new File([new Uint8Array(p.bytes)], p.name, { type: p.mime })
+        dt.items.add(file)
+
+        const rect = target.getBoundingClientRect()
+        const x = rect.left + Math.max(rect.width / 2, 1)
+        const y = rect.top + Math.max(rect.height / 2, 1)
+
+        const dispatch = (type: 'dragenter' | 'dragover' | 'drop') => {
+          const evt = new DragEvent(type, {
+            bubbles: true,
+            cancelable: true,
+            clientX: x,
+            clientY: y,
+            composed: true,
+            dataTransfer: dt,
+          })
+          target.dispatchEvent(evt)
+        }
+
+        dispatch('dragenter')
+        dispatch('dragover')
+        dispatch('drop')
+      },
+      { name, bytes, mime },
+    )
+  }
+
   async paste(type: 'html' | 'markdown', text: string) {
     await this.page.context().grantPermissions(['clipboard-read', 'clipboard-write'])
 
@@ -141,12 +185,12 @@ export class LexicalHelpers {
 
     if (mode === 'blob') {
       const buf = await fs.promises.readFile(filePath)
-      payload = { kind: 'blob', bytes: Array.from(buf), name, mime }
+      payload = { name, bytes: Array.from(buf), kind: 'blob', mime }
     } else if (mode === 'html') {
       const b64 = await readAsBase64(filePath)
       const src = `data:${mime};base64,${b64}`
       const html = `<img src="${src}" alt="${name}">`
-      payload = { kind: 'html', html }
+      payload = { html, kind: 'html' }
     }
 
     await this.page.evaluate((p) => {
@@ -166,9 +210,9 @@ export class LexicalHelpers {
 
       try {
         const evt = new ClipboardEvent('paste', {
-          clipboardData: dt,
           bubbles: true,
           cancelable: true,
+          clipboardData: dt,
         })
         target.dispatchEvent(evt)
       } catch {
@@ -207,6 +251,10 @@ export class LexicalHelpers {
     if (expectMenuToClose) {
       await expect(slashMenuPopover).toBeHidden()
     }
+  }
+
+  get bulkUploadDrawer() {
+    return this.page.locator('.bulk-upload--file-manager')
   }
 
   get decorator() {

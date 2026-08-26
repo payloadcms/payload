@@ -2,7 +2,7 @@
 import * as React from 'react'
 
 import { useDelay } from '../../hooks/useDelay.js'
-import './index.scss'
+import './index.css'
 
 export type ShimmerEffectProps = {
   readonly animationDelay?: string

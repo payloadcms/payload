@@ -27,4 +27,5 @@ export const BulkUploadsCollection: CollectionConfig = {
       relationTo: ['simple-relationship'],
     },
   ],
+  versions: false,
 }

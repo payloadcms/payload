@@ -1,8 +1,8 @@
 blank_issues_enabled: false
 contact_links:
-  - name: Feature Request
+  - name: Feature Request (v4 only)
     url: https://github.com/payloadcms/payload/discussions
-    about: Suggest an idea to improve Payload in our GitHub Discussions
+    about: Suggest an idea for Payload v4 in GitHub Discussions. Payload v3 is in maintenance mode — new features are not being accepted against v3.
   - name: Question about Payload
     url: https://github.com/payloadcms/payload/discussions
     about: Please ask Payload-related questions in our GitHub Discussions

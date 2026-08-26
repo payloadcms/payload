@@ -1,6 +1,10 @@
 import type { CollectionConfig } from 'payload'
 
-import { slateEditor } from '@payloadcms/richtext-slate'
+import {
+  FixedToolbarFeature,
+  lexicalEditor,
+  RelationshipFeature,
+} from '@payloadcms/richtext-lexical'
 
 import { customTabAdminDescription, slugPluralLabel, slugSingularLabel } from '../shared.js'
 import { postsCollectionSlug, uploadCollectionSlug } from '../slugs.js'
@@ -104,10 +108,8 @@ export const Posts: CollectionConfig = {
             {
               name: 'richText',
               type: 'richText',
-              editor: slateEditor({
-                admin: {
-                  elements: ['relationship'],
-                },
+              editor: lexicalEditor({
+                features: [FixedToolbarFeature(), RelationshipFeature()],
               }),
             },
             {
@@ -244,14 +246,14 @@ export const Posts: CollectionConfig = {
       name: 'disableListColumnText',
       type: 'text',
       admin: {
-        disableListColumn: true,
+        disabled: { column: true },
       },
     },
     {
       name: 'disableListFilterText',
       type: 'text',
       admin: {
-        disableListFilter: true,
+        disabled: { filter: true },
       },
     },
     {
@@ -315,7 +317,7 @@ export const Posts: CollectionConfig = {
           name: 'disableListColumnTextInRow',
           type: 'text',
           admin: {
-            disableListColumn: true,
+            disabled: { column: true },
           },
         },
       ],
@@ -328,7 +330,7 @@ export const Posts: CollectionConfig = {
           name: 'disableListColumnTextInGroup',
           type: 'text',
           admin: {
-            disableListColumn: true,
+            disabled: { column: true },
           },
         },
       ],

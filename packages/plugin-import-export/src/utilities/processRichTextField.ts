@@ -3,6 +3,14 @@
  * Lexical expects certain properties to be numbers, not strings.
  */
 export const processRichTextField = (value: unknown): unknown => {
+  if (typeof value === 'string') {
+    try {
+      value = JSON.parse(value)
+    } catch {
+      return value
+    }
+  }
+
   if (!value || typeof value !== 'object') {
     return value
   }
@@ -19,14 +27,14 @@ export const processRichTextField = (value: unknown): unknown => {
     'textStyle',
   ]
 
-  const processNode = (node: any): any => {
+  const processNode = (node: unknown): unknown => {
     if (!node || typeof node !== 'object') {
       return node
     }
 
     // Process current node's properties
-    const processed: any = {}
-    for (const [key, val] of Object.entries(node)) {
+    const processed: Record<string, unknown> = {}
+    for (const [key, val] of Object.entries(node as Record<string, unknown>)) {
       if (numericProperties.includes(key) && typeof val === 'string') {
         // Convert string numbers to actual numbers
         const num = parseFloat(val)

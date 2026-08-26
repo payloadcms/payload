@@ -14,7 +14,6 @@ export const DoNothingTask: TaskConfig<'DoNothingTask'> = {
   outputSchema: [],
   handler: async ({ input }) => {
     return {
-      state: 'succeeded',
       output: {
         message: input.message,
       },

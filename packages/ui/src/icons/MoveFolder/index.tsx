@@ -1,43 +1,30 @@
 import React from 'react'
 
-import './index.scss'
+import './index.css'
 
-export function MoveFolderIcon() {
+const paths = {
+  // Move folder icon - folder with arrow pointing right
+  16: 'M3 5a1 1 0 0 1 1-1h2.618a1 1 0 0 1 .894.553L8.118 6H12a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5zm1 0v7h8V7H7.882a1 1 0 0 1-.894-.553L6.382 5H4zm-.5 3.5a.5.5 0 0 1 .5-.5h4.293L7.146 6.854a.5.5 0 1 1 .708-.708l2 2a.5.5 0 0 1 0 .708l-2 2a.5.5 0 0 1-.708-.708L8.293 9H4a.5.5 0 0 1-.5-.5',
+  24: 'M5 7a1 1 0 0 1 1-1h3.236a1 1 0 0 1 .894.553L10.882 8H18a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V7zm1 0v10h12V9h-7.118a1 1 0 0 1-.894-.553L9.236 7H6zm-.5 5.5a.5.5 0 0 1 .5-.5h5.293l-1.647-1.646a.5.5 0 0 1 .708-.708l2.5 2.5a.5.5 0 0 1 0 .708l-2.5 2.5a.5.5 0 0 1-.708-.708L11.293 13H6a.5.5 0 0 1-.5-.5',
+}
+
+export function MoveFolderIcon({
+  className,
+  size = 24,
+}: {
+  readonly className?: string
+  readonly size?: 16 | 24
+}) {
   return (
     <svg
-      className="icon icon--move-folder"
+      className={['icon', 'icon--move-folder', className].filter(Boolean).join(' ')}
       fill="none"
-      height="24"
-      viewBox="0 0 24 24"
-      width="24"
+      height={size}
+      viewBox={`0 0 ${size} ${size}`}
+      width={size}
       xmlns="http://www.w3.org/2000/svg"
     >
-      <g filter="url(#filter0_d_278_1086)">
-        <path
-          d="M5.33334 10V7.33334C5.33334 6.97971 5.47382 6.64058 5.72387 6.39053C5.97392 6.14048 6.31305 6 6.66668 6H9.26668C9.48967 5.99782 9.70965 6.0516 9.90648 6.15642C10.1033 6.26124 10.2707 6.41375 10.3933 6.6L10.9333 7.4C11.0547 7.58436 11.22 7.73568 11.4143 7.84041C11.6087 7.94513 11.8259 7.99997 12.0467 8H17.3333C17.687 8 18.0261 8.14048 18.2762 8.39053C18.5262 8.64058 18.6667 8.97971 18.6667 9.33334V16C18.6667 16.3536 18.5262 16.6928 18.2762 16.9428C18.0261 17.1929 17.687 17.3333 17.3333 17.3333H6.66668C6.31305 17.3333 5.97392 17.1929 5.72387 16.9428C5.47382 16.6928 5.33334 16.3536 5.33334 16V15.3333M5.33334 12.6667H12M12 12.6667L10 14.6667M12 12.6667L10 10.6667"
-          stroke="currentColor"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </g>
-      <defs>
-        <filter
-          colorInterpolationFilters="sRGB"
-          filterUnits="userSpaceOnUse"
-          height="26"
-          id="filter0_d_278_1086"
-          width="26"
-          x="-1"
-          y="-1"
-        >
-          <feBlend
-            in="SourceGraphic"
-            in2="effect1_dropShadow_278_1086"
-            mode="normal"
-            result="shape"
-          />
-        </filter>
-      </defs>
+      <path clipRule="evenodd" d={paths[size]} fill="currentColor" fillRule="evenodd" />
     </svg>
   )
 }

@@ -12,4 +12,5 @@ export const MediaWithPrefix: CollectionConfig = {
       type: 'text',
     },
   ],
+  versions: false,
 }

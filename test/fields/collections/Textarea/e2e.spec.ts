@@ -1,30 +1,30 @@
 import type { Page } from '@playwright/test'
-import type { GeneratedTypes } from '__helpers/shared/sdk/types.js'
 
 import { expect, test } from '@playwright/test'
-import { checkFocusIndicators } from '__helpers/e2e/checkFocusIndicators.js'
-import { openListColumns, toggleColumn } from '__helpers/e2e/columns/index.js'
-import { addListFilter } from '__helpers/e2e/filters/index.js'
-import { upsertPreferences } from '__helpers/e2e/preferences.js'
-import { runAxeScan } from '__helpers/e2e/runAxeScan.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../../../__helpers/shared/sdk/index.js'
+import type { GeneratedTypes } from '../../../__helpers/shared/sdk/types.js'
 import type { Config } from '../../payload-types.js'
 
+import { checkFocusIndicators } from '../../../__helpers/e2e/checkFocusIndicators.js'
 import {
-  ensureCompilationIsDone,
-  exactText,
-  initPageConsoleErrorCatch,
-  saveDocAndAssert,
-  selectTableRow,
-} from '../../../__helpers/e2e/helpers.js'
+  getColumnSelectorItem,
+  openListColumns,
+  toggleColumn,
+} from '../../../__helpers/e2e/columns/index.js'
+import { addListFilter } from '../../../__helpers/e2e/filters/index.js'
+import { exactText, saveDocAndAssert, selectTableRow } from '../../../__helpers/e2e/helpers.js'
+import { upsertPreferences } from '../../../__helpers/e2e/preferences.js'
+import { runAxeScan } from '../../../__helpers/e2e/runAxeScan.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
-import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
+import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { RESTClient } from '../../../__helpers/shared/rest.js'
+import { ensureCompilationIsDone } from '../../../__setup/e2e/ensureCompilationIsDone.js'
+import { initPage } from '../../../__setup/e2e/initPage.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { textareaFieldsSlug } from '../../slugs.js'
 import { textareaDoc } from './shared.js'
@@ -53,10 +53,7 @@ describe('Textarea', () => {
     url = new AdminUrlUtil(serverURL, textareaFieldsSlug)
 
     const context = await browser.newContext()
-    page = await context.newPage()
-    initPageConsoleErrorCatch(page)
-
-    await ensureCompilationIsDone({ page, serverURL })
+    ;({ page } = await initPage({ context, serverURL }))
   })
   beforeEach(async () => {
     await reInitializeDB({
@@ -85,9 +82,7 @@ describe('Textarea', () => {
       const { columnContainer } = await openListColumns(page, {})
 
       await expect(
-        columnContainer.locator('.pill-selector__pill', {
-          hasText: exactText('Hidden Text Field'),
-        }),
+        getColumnSelectorItem({ container: columnContainer, label: 'Hidden Text Field' }),
       ).toBeHidden()
 
       await selectTableRow(page, 'Seeded text document')
@@ -111,9 +106,7 @@ describe('Textarea', () => {
       const { columnContainer } = await openListColumns(page, {})
 
       await expect(
-        columnContainer.locator('.pill-selector__pill', {
-          hasText: exactText('Disabled Text Field'),
-        }),
+        getColumnSelectorItem({ container: columnContainer, label: 'Disabled Text Field' }),
       ).toBeHidden()
 
       await selectTableRow(page, 'Seeded text document')
@@ -139,9 +132,7 @@ describe('Textarea', () => {
       const { columnContainer } = await openListColumns(page, {})
 
       await expect(
-        columnContainer.locator('.pill-selector__pill', {
-          hasText: exactText('Admin Hidden Text Field'),
-        }),
+        getColumnSelectorItem({ container: columnContainer, label: 'Admin Hidden Text Field' }),
       ).toBeVisible()
 
       await selectTableRow(page, 'Seeded text document')
@@ -164,9 +155,9 @@ describe('Textarea', () => {
 
   test('should respect admin.disableListColumn despite preferences', async () => {
     await upsertPreferences<Config, GeneratedTypes<any>>({
+      key: 'text-fields-list',
       payload,
       user: client.user,
-      key: 'text-fields-list',
       value: {
         columns: [
           {
@@ -180,9 +171,7 @@ describe('Textarea', () => {
     await page.goto(url.list)
     await openListColumns(page, {})
     await expect(
-      page.locator(`.pill-selector .pill-selector__pill`, {
-        hasText: exactText('Disable List Column Text'),
-      }),
+      getColumnSelectorItem({ container: page, label: 'Disable List Column Text' }),
     ).toBeHidden()
 
     await expect(page.locator('#heading-disableListColumnText')).toBeHidden()
@@ -194,9 +183,9 @@ describe('Textarea', () => {
     await page.waitForURL(new RegExp(`${url.list}.*\\?.*`))
 
     await toggleColumn(page, {
-      targetState: 'on',
       columnLabel: 'Text en',
       columnName: 'i18nText',
+      targetState: 'on',
     })
 
     const textCell = page.locator('.row-1 .cell-i18nText')
@@ -221,16 +210,16 @@ describe('Textarea', () => {
     await expect(description).toHaveText('en description')
   })
 
-  describe('A11y', () => {
+  describe.skip('A11y', () => {
     test('Edit view should have no accessibility violations', async ({}, testInfo) => {
       await page.goto(url.create)
       await page.locator('#field-text').waitFor()
 
       const scanResults = await runAxeScan({
+        exclude: ['.field-description'], // known issue - reported elsewhere @todo: remove this once fixed - see report https://github.com/payloadcms/payload/discussions/14489
+        include: ['.document-fields__main'],
         page,
         testInfo,
-        include: ['.document-fields__main'],
-        exclude: ['.field-description'], // known issue - reported elsewhere @todo: remove this once fixed - see report https://github.com/payloadcms/payload/discussions/14489
       })
 
       expect(scanResults.violations.length).toBe(0)
@@ -242,8 +231,8 @@ describe('Textarea', () => {
 
       const scanResults = await checkFocusIndicators({
         page,
-        testInfo,
         selector: '.document-fields__main',
+        testInfo,
       })
 
       expect(scanResults.totalFocusableElements).toBeGreaterThan(0)

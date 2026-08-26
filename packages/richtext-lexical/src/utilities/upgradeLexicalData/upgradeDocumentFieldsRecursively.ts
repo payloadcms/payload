@@ -4,7 +4,7 @@ import type { Field, FlattenedBlock, Payload } from 'payload'
 import { createHeadlessEditor } from '@lexical/headless'
 import { fieldAffectsData, fieldHasSubFields, fieldIsArrayType, tabHasName } from 'payload/shared'
 
-import type { LexicalRichTextAdapter } from '../../types.js'
+import type { LexicalRichTextAdapter } from '../../types/index.js'
 
 import { getEnabledNodes } from '../../lexical/nodes/index.js'
 
@@ -55,7 +55,7 @@ export const upgradeDocumentFieldsRecursively = ({
 
           const block =
             payload.blocks[blockTypeToMatch] ??
-            ((field.blockReferences ?? field.blocks).find(
+            (field.blocks.find(
               (block) => typeof block !== 'string' && block.slug === blockTypeToMatch,
             ) as FlattenedBlock | undefined)
 

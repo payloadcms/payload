@@ -1,0 +1,60 @@
+@layer payload-default {
+  .rich-text-lexical {
+    --lexical-border-color: var(--color-border);
+
+    &.error {
+      --lexical-border-color: var(--color-border-danger-strong);
+    }
+
+    & > .field-error.tooltip {
+      inset-inline-end: auto;
+      position: static;
+      margin-bottom: 0.2em;
+      max-width: fit-content;
+    }
+
+    .errorBoundary {
+      pre {
+        text-wrap: unset;
+      }
+    }
+  }
+
+  .rich-text-lexical__label-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: var(--spacer-2);
+    gap: var(--spacer-2);
+
+    label.field-label:not(.unstyled) {
+      margin-inline-end: unset;
+      padding-bottom: unset;
+    }
+  }
+
+  .rich-text-lexical__wrap {
+    width: 100%;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-2);
+  }
+
+  @keyframes rich-text-lexical-fade-in-background {
+    from {
+      background-color: transparent;
+    }
+    to {
+      background-color: var(--color-bg-hover);
+    }
+  }
+
+  .rich-text-lexical--read-only {
+    .editor-container {
+      .editor {
+        animation: rich-text-lexical-fade-in-background 0.5s ease forwards;
+        color: var(--color-text-tertiary);
+      }
+    }
+  }
+}

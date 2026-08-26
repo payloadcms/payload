@@ -42,7 +42,11 @@ export const AddNewButton = ({
 
   if (!isPolymorphic) {
     return (
-      <Button buttonStyle={buttonStyle} className={className} onClick={() => onClick()}>
+      <Button
+        buttonStyle={buttonStyle}
+        className={[className, 'doc-drawer__toggler'].filter(Boolean).join(' ')}
+        onClick={() => onClick()}
+      >
         {label}
       </Button>
     )
@@ -83,7 +87,6 @@ export const AddNewButton = ({
             })}
           </PopupList.ButtonGroup>
         )}
-        size="medium"
       />
     </div>
   )

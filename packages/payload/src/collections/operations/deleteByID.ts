@@ -20,6 +20,7 @@ import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { hasScheduledPublishEnabled } from '../../utilities/getVersionsConfig.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { deleteCollectionVersions } from '../../versions/deleteCollectionVersions.js'
 import { deleteScheduledPublishJobs } from '../../versions/deleteScheduledPublishJobs.js'
@@ -82,7 +83,10 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
     // /////////////////////////////////////
 
     const accessResults = !overrideAccess
-      ? await executeAccess({ id, req }, collectionConfig.access.delete)
+      ? await executeAccess(
+          { id, slug: collectionConfig.slug, req },
+          collectionConfig.access.delete,
+        )
       : true
     const hasWhereAccess = hasWhereAccessResult(accessResults)
 
@@ -175,8 +179,12 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
 
     const select = sanitizeSelect({
       fields: collectionConfig.flattenedFields,
-      forceSelect: collectionConfig.forceSelect,
-      select: incomingSelect,
+      select: resolveSelect({
+        config: collectionConfig.select,
+        operation: 'delete',
+        req,
+        select: incomingSelect,
+      }),
     })
 
     // /////////////////////////////////////

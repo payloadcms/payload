@@ -180,6 +180,12 @@ const sanitizeRelationship = ({
 
   if (Array.isArray(value)) {
     result = value.map((val) => {
+      // Skip null/undefined entries so a stray null in a hasMany relationship
+      // array doesn't get coerced or crash downstream sanitization.
+      if (val === null || typeof val === 'undefined') {
+        return val
+      }
+
       // Handle has many - polymorphic
       if (isValidRelationObject(val)) {
         const relatedCollectionForSingleValue = config.collections?.find(
@@ -355,31 +361,26 @@ const stripFields = ({
             let hasNull = false
             for (let i = 0; i < localeData.length; i++) {
               const data = localeData[i]
+
+              if (!data || typeof data !== 'object') {
+                localeData[i] = null
+                hasNull = true
+                continue
+              }
+
               let fields: FlattenedField[] | null = null
 
               if (field.type === 'array') {
                 fields = field.flattenedFields
               } else {
-                let maybeBlock: FlattenedBlock | undefined = undefined
-
-                if (field.blockReferences) {
-                  const maybeBlockReference = field.blockReferences.find((each) => {
-                    const slug = typeof each === 'string' ? each : each.slug
-                    return slug === data.blockType
-                  })
-
-                  if (maybeBlockReference) {
-                    if (typeof maybeBlockReference === 'object') {
-                      maybeBlock = maybeBlockReference
-                    } else {
-                      maybeBlock = config.blocks?.find((each) => each.slug === maybeBlockReference)
-                    }
-                  }
-                }
-
-                if (!maybeBlock) {
-                  maybeBlock = field.blocks.find((each) => each.slug === data.blockType)
-                }
+                const blockOrSlug = field.blocks.find((each) => {
+                  const slug = typeof each === 'string' ? each : each.slug
+                  return slug === data.blockType
+                })
+                const maybeBlock: FlattenedBlock | undefined =
+                  typeof blockOrSlug === 'string'
+                    ? config.blocks?.find((each) => each.slug === blockOrSlug)
+                    : blockOrSlug
 
                 if (maybeBlock) {
                   fields = maybeBlock.flattenedFields
@@ -429,31 +430,26 @@ const stripFields = ({
 
         for (let i = 0; i < fieldData.length; i++) {
           const data = fieldData[i]
+
+          if (!data || typeof data !== 'object') {
+            fieldData[i] = null
+            hasNull = true
+            continue
+          }
+
           let fields: FlattenedField[] | null = null
 
           if (field.type === 'array') {
             fields = field.flattenedFields
           } else {
-            let maybeBlock: FlattenedBlock | undefined = undefined
-
-            if (field.blockReferences) {
-              const maybeBlockReference = field.blockReferences.find((each) => {
-                const slug = typeof each === 'string' ? each : each.slug
-                return slug === data.blockType
-              })
-
-              if (maybeBlockReference) {
-                if (typeof maybeBlockReference === 'object') {
-                  maybeBlock = maybeBlockReference
-                } else {
-                  maybeBlock = config.blocks?.find((each) => each.slug === maybeBlockReference)
-                }
-              }
-            }
-
-            if (!maybeBlock) {
-              maybeBlock = field.blocks.find((each) => each.slug === data.blockType)
-            }
+            const blockOrSlug = field.blocks.find((each) => {
+              const slug = typeof each === 'string' ? each : each.slug
+              return slug === data.blockType
+            })
+            const maybeBlock: FlattenedBlock | undefined =
+              typeof blockOrSlug === 'string'
+                ? config.blocks?.find((each) => each.slug === blockOrSlug)
+                : blockOrSlug
 
             if (maybeBlock) {
               fields = maybeBlock.flattenedFields

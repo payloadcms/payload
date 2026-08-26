@@ -4,7 +4,6 @@ import type { SanitizedCollectionConfig } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
-import { useRouter } from 'next/navigation.js'
 import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { Fragment, useCallback, useState } from 'react'
@@ -15,15 +14,13 @@ import type { DocumentDrawerContextType } from '../DocumentDrawer/Provider.js'
 import { CheckboxInput } from '../../fields/Checkbox/Input.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentTitle } from '../../providers/DocumentTitle/index.js'
+import { useRouter } from '../../providers/RouterAdapter/index.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
 import { Button } from '../Button/index.js'
 import { ConfirmationModal } from '../ConfirmationModal/index.js'
 import { Translation } from '../Translation/index.js'
-import './index.scss'
-
-const baseClass = 'restore-button'
 
 export type Props = {
   readonly buttonId?: string
@@ -191,19 +188,16 @@ export const RestoreButton: React.FC<Props> = (props) => {
                 }}
               />
               {collectionConfig?.versions?.drafts && (
-                <div className={`${baseClass}__checkbox`}>
-                  <CheckboxInput
-                    checked={restoreAsPublished}
-                    id="restore-as-published"
-                    label={t('general:restoreAsPublished')}
-                    name="restore-as-published"
-                    onToggle={(e) => setRestoreAsPublished(e.target.checked)}
-                  />
-                </div>
+                <CheckboxInput
+                  checked={restoreAsPublished}
+                  id="restore-as-published"
+                  label={t('general:restoreAsPublished')}
+                  name="restore-as-published"
+                  onToggle={(e) => setRestoreAsPublished(e.target.checked)}
+                />
               )}
             </Fragment>
           }
-          className={baseClass}
           confirmingLabel={t('general:restoring')}
           heading={t('general:confirmRestoration')}
           modalSlug={modalSlug}

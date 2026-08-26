@@ -8,8 +8,9 @@ import type {
   StaticLabel,
 } from '../../config/types.js'
 import type { ClientField } from '../../fields/config/client.js'
+import type { ClientHierarchyConfig } from '../../hierarchy/types.js'
 import type { Payload } from '../../types/index.js'
-import type { SanitizedUploadConfig } from '../../uploads/types.js'
+import type { SanitizedUploadConfig, UploadInstructionsCapability } from '../../uploads/types.js'
 import type { SanitizedCollectionConfig } from './types.js'
 
 import { createClientFields } from '../../fields/config/client.js'
@@ -25,6 +26,7 @@ export type ServerOnlyCollectionProperties = keyof Pick<
   | 'joins'
   | 'polymorphicJoins'
   | 'sanitizedIndexes'
+  | 'select'
 >
 
 export type ServerOnlyCollectionAdminProperties = keyof Pick<
@@ -34,12 +36,18 @@ export type ServerOnlyCollectionAdminProperties = keyof Pick<
 
 export type ServerOnlyUploadProperties = keyof Pick<
   SanitizedCollectionConfig['upload'],
+  | 'admin'
   | 'adminThumbnail'
   | 'externalFileHeaderFilter'
   | 'handlers'
   | 'modifyResponseHeaders'
+  | 'uploadInstructions'
   | 'withMetadata'
 >
+
+type ClientUploadConfig = {
+  uploadInstructions: Pick<UploadInstructionsCapability, 'useInAdmin'>
+} & Omit<SanitizedUploadConfig, 'uploadInstructions'>
 
 export type ClientCollectionConfig = {
   admin: {
@@ -61,13 +69,15 @@ export type ClientCollectionConfig = {
     'forgotPassword' | 'strategies' | 'verify'
   >
   fields: ClientField[]
+  hierarchy?: ClientHierarchyConfig | false
   labels: {
     plural: StaticLabel
     singular: StaticLabel
   }
+  upload: ClientUploadConfig
 } & Omit<
   SanitizedCollectionConfig,
-  'admin' | 'auth' | 'fields' | 'labels' | ServerOnlyCollectionProperties
+  'admin' | 'auth' | 'fields' | 'hierarchy' | 'labels' | 'upload' | ServerOnlyCollectionProperties
 >
 
 const serverOnlyCollectionProperties: Partial<ServerOnlyCollectionProperties>[] = [
@@ -80,16 +90,19 @@ const serverOnlyCollectionProperties: Partial<ServerOnlyCollectionProperties>[] 
   'flattenedFields',
   'indexes',
   'sanitizedIndexes',
+  'select',
   // `upload`
   // `admin`
   // are all handled separately
 ]
 
 const serverOnlyUploadProperties: Partial<ServerOnlyUploadProperties>[] = [
+  'admin',
   'adminThumbnail',
   'externalFileHeaderFilter',
   'handlers',
   'modifyResponseHeaders',
+  'uploadInstructions',
   'withMetadata',
 ]
 
@@ -238,6 +251,19 @@ export const createClientCollectionConfig = ({
 
         break
 
+      case 'hierarchy': {
+        if (!collection.hierarchy || typeof collection.hierarchy !== 'object') {
+          clientCollection.hierarchy = false
+          break
+        }
+
+        // Strip slugify function as it can't cross server-client boundary
+        const { slugify: _slugify, ...clientHierarchy } = collection.hierarchy
+        clientCollection.hierarchy = clientHierarchy as ClientHierarchyConfig
+
+        break
+      }
+
       case 'labels':
         clientCollection.labels = {
           plural:
@@ -257,7 +283,11 @@ export const createClientCollectionConfig = ({
           break
         }
 
-        clientCollection.upload = {} as SanitizedUploadConfig
+        clientCollection.upload = {
+          uploadInstructions: {
+            useInAdmin: collection.upload.uploadInstructions?.useInAdmin ?? false,
+          },
+        } as ClientUploadConfig
 
         for (const uploadKey in collection.upload) {
           if (serverOnlyUploadProperties.includes(uploadKey as any)) {

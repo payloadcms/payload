@@ -130,16 +130,19 @@ export interface Post {
   title?: string | null;
   'hyphenated-name'?: string | null;
   relationToSelf?: (string | null) | Post;
-  contentBlockField?:
-    | {
-        text?: string | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'content';
-      }[]
-    | null;
+  contentBlockField?: Content[] | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Content".
+ */
+export interface Content {
+  text?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'content';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

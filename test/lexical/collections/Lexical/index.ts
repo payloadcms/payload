@@ -5,13 +5,13 @@ import type { Block, BlockSlug, CollectionConfig } from 'payload'
 import {
   BlocksFeature,
   defaultEditorFeatures,
-  EXPERIMENTAL_TableFeature,
   FixedToolbarFeature,
   getEnabledNodes,
   HeadingFeature,
   lexicalEditor,
   LinkFeature,
   sanitizeServerEditorConfig,
+  TableFeature,
   TreeViewFeature,
   UploadFeature,
 } from '@payloadcms/richtext-lexical'
@@ -124,7 +124,7 @@ export const lexicalBlocks: (Block | BlockSlug)[] = [
         options: ['value1', 'value2', 'value3'],
       },
     ],
-  },
+  } satisfies Block,
   {
     slug: 'myBlockWithBlockAndLabel',
     admin: {
@@ -248,7 +248,6 @@ export const getLexicalFieldsCollection: (args: {
       ...defaultEditorFeatures,
       //TestRecorderFeature(),
       TreeViewFeature(),
-      //HTMLConverterFeature(),
       FixedToolbarFeature(),
       LinkFeature({
         fields: ({ defaultFields }) => [
@@ -284,7 +283,7 @@ export const getLexicalFieldsCollection: (args: {
         blocks,
         inlineBlocks,
       }),
-      EXPERIMENTAL_TableFeature(),
+      TableFeature(),
     ],
   }
   return {
@@ -379,7 +378,7 @@ export const getLexicalFieldsCollection: (args: {
         hooks: {
           afterRead: [
             async ({ data, req, siblingData }) => {
-              const yourSanitizedEditorConfig = await sanitizeServerEditorConfig(
+              const yourSanitizedEditorConfig = sanitizeServerEditorConfig(
                 editorConfig,
                 req.payload.config,
               )
@@ -415,5 +414,6 @@ export const getLexicalFieldsCollection: (args: {
         },
       },
     ],
+    versions: false,
   }
 }

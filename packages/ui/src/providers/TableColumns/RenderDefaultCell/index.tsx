@@ -6,7 +6,7 @@ import React from 'react'
 import { useListDrawerContext } from '../../../elements/ListDrawer/Provider.js'
 import { DefaultCell } from '../../../elements/Table/DefaultCell/index.js'
 import { useTableColumns } from '../../../providers/TableColumns/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'default-cell'
 
@@ -28,7 +28,7 @@ export const RenderDefaultCell: React.FC<{
     columnIndex,
   }
 
-  if (isLinkedColumn && drawerSlug) {
+  if (isLinkedColumn && drawerSlug && clientProps.link !== false) {
     propsToPass.className = `${baseClass}__first-cell`
     propsToPass.link = false
     propsToPass.onClick = ({ collectionSlug: rowColl, rowData }) => {

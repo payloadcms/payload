@@ -1,0 +1,314 @@
+import type {
+  BeforeDocumentControlsServerPropsOnly,
+  DocumentSlots,
+  EditMenuItemsServerPropsOnly,
+  Locale,
+  PayloadComponent,
+  PayloadRequest,
+  PreviewButtonServerPropsOnly,
+  PublishButtonServerPropsOnly,
+  SanitizedCollectionConfig,
+  SanitizedGlobalConfig,
+  SanitizedPermissions,
+  SaveButtonServerPropsOnly,
+  SaveDraftButtonServerPropsOnly,
+  ServerFunction,
+  ServerProps,
+  StaticDescription,
+  UnpublishButtonServerPropsOnly,
+  UploadFilePreviewClientProps,
+  ViewDescriptionClientProps,
+  ViewDescriptionServerPropsOnly,
+} from 'payload'
+
+import { hasDraftsEnabled, matchMimeType } from 'payload/shared'
+
+import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
+// eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports/client bundle for proper client boundary in prod builds
+import { ViewDescription } from '../../exports/client/index.js'
+import { getDocumentPermissions } from '../../utilities/getDocumentPermissions.js'
+
+export const renderDocumentSlots: (args: {
+  collectionConfig?: SanitizedCollectionConfig
+  doc?: Record<string, unknown>
+  globalConfig?: SanitizedGlobalConfig
+  hasSavePermission: boolean
+  id?: number | string
+  locale: Locale
+  permissions: SanitizedPermissions
+  req: PayloadRequest
+}) => DocumentSlots = (args) => {
+  const { id, collectionConfig, doc, globalConfig, hasSavePermission, locale, permissions, req } =
+    args
+
+  const components: DocumentSlots = {} as DocumentSlots
+
+  const unsavedDraftWithValidations = undefined
+
+  const isPreviewEnabled = collectionConfig?.admin?.preview || globalConfig?.admin?.preview
+
+  const serverProps: ServerProps = {
+    id,
+    i18n: req.i18n,
+    locale,
+    payload: req.payload,
+    permissions,
+    server: req.server,
+    user: req.user,
+    // TODO: Add remaining serverProps
+  }
+
+  const BeforeDocumentControls =
+    collectionConfig?.admin?.components?.edit?.beforeDocumentControls ||
+    globalConfig?.admin?.components?.edit?.beforeDocumentControls
+
+  if (BeforeDocumentControls) {
+    components.BeforeDocumentControls = RenderServerComponent({
+      Component: BeforeDocumentControls,
+      importMap: req.payload.importMap,
+      serverProps: serverProps satisfies BeforeDocumentControlsServerPropsOnly,
+    })
+  }
+
+  const BeforeDocumentMeta =
+    collectionConfig?.admin?.components?.edit?.BeforeDocumentMeta ||
+    globalConfig?.admin?.components?.edit?.BeforeDocumentMeta
+
+  if (BeforeDocumentMeta) {
+    components.BeforeDocumentMeta = RenderServerComponent({
+      Component: BeforeDocumentMeta,
+      importMap: req.payload.importMap,
+      serverProps,
+    })
+  }
+
+  const EditMenuItems = collectionConfig?.admin?.components?.edit?.editMenuItems
+
+  if (EditMenuItems) {
+    components.EditMenuItems = RenderServerComponent({
+      Component: EditMenuItems,
+      importMap: req.payload.importMap,
+      serverProps: serverProps satisfies EditMenuItemsServerPropsOnly,
+    })
+  }
+
+  const CustomPreviewButton =
+    collectionConfig?.admin?.components?.edit?.PreviewButton ||
+    globalConfig?.admin?.components?.edit?.PreviewButton
+
+  if (isPreviewEnabled && CustomPreviewButton) {
+    components.PreviewButton = RenderServerComponent({
+      Component: CustomPreviewButton,
+      importMap: req.payload.importMap,
+      serverProps: serverProps satisfies PreviewButtonServerPropsOnly,
+    })
+  }
+
+  const LivePreview =
+    collectionConfig?.admin?.components?.views?.edit?.livePreview ||
+    globalConfig?.admin?.components?.views?.edit?.livePreview
+
+  if (LivePreview?.Component) {
+    components.LivePreview = RenderServerComponent({
+      Component: LivePreview.Component,
+      importMap: req.payload.importMap,
+      serverProps,
+    })
+  }
+
+  const descriptionFromConfig =
+    collectionConfig?.admin?.description || globalConfig?.admin?.description
+
+  const staticDescription: StaticDescription =
+    typeof descriptionFromConfig === 'function'
+      ? descriptionFromConfig({ t: req.i18n.t })
+      : descriptionFromConfig
+
+  const CustomDescription =
+    collectionConfig?.admin?.components?.Description || globalConfig?.admin?.components?.Description
+
+  const hasDescription = CustomDescription || staticDescription
+
+  if (hasDescription) {
+    components.Description = RenderServerComponent({
+      clientProps: {
+        collectionSlug: collectionConfig?.slug,
+        description: staticDescription,
+      } satisfies ViewDescriptionClientProps,
+      Component: CustomDescription,
+      Fallback: ViewDescription,
+      importMap: req.payload.importMap,
+      serverProps: serverProps satisfies ViewDescriptionServerPropsOnly,
+    })
+  }
+
+  if (collectionConfig?.versions?.drafts || globalConfig?.versions?.drafts) {
+    const CustomStatus =
+      collectionConfig?.admin?.components?.edit?.Status ||
+      globalConfig?.admin?.components?.edit?.Status
+
+    if (CustomStatus) {
+      components.Status = RenderServerComponent({
+        Component: CustomStatus,
+        importMap: req.payload.importMap,
+        serverProps,
+      })
+    }
+  }
+
+  if (hasSavePermission) {
+    if (hasDraftsEnabled(collectionConfig || globalConfig)) {
+      const CustomPublishButton =
+        collectionConfig?.admin?.components?.edit?.PublishButton ||
+        globalConfig?.admin?.components?.edit?.PublishButton
+
+      if (CustomPublishButton) {
+        components.PublishButton = RenderServerComponent({
+          Component: CustomPublishButton,
+          importMap: req.payload.importMap,
+          serverProps: serverProps satisfies PublishButtonServerPropsOnly,
+        })
+      }
+
+      const CustomUnpublishButton =
+        collectionConfig?.admin?.components?.edit?.UnpublishButton ||
+        globalConfig?.admin?.components?.edit?.UnpublishButton
+
+      if (CustomUnpublishButton) {
+        components.UnpublishButton = RenderServerComponent({
+          Component: CustomUnpublishButton,
+          importMap: req.payload.importMap,
+          serverProps: serverProps satisfies UnpublishButtonServerPropsOnly,
+        })
+      }
+
+      const CustomSaveDraftButton =
+        collectionConfig?.admin?.components?.edit?.SaveDraftButton ||
+        globalConfig?.admin?.components?.edit?.SaveDraftButton
+
+      const draftsEnabled = hasDraftsEnabled(collectionConfig || globalConfig)
+
+      if ((draftsEnabled || unsavedDraftWithValidations) && CustomSaveDraftButton) {
+        components.SaveDraftButton = RenderServerComponent({
+          Component: CustomSaveDraftButton,
+          importMap: req.payload.importMap,
+          serverProps: serverProps satisfies SaveDraftButtonServerPropsOnly,
+        })
+      }
+    } else {
+      const CustomSaveButton =
+        collectionConfig?.admin?.components?.edit?.SaveButton ||
+        globalConfig?.admin?.components?.edit?.SaveButton
+
+      if (CustomSaveButton) {
+        components.SaveButton = RenderServerComponent({
+          Component: CustomSaveButton,
+          importMap: req.payload.importMap,
+          serverProps: serverProps satisfies SaveButtonServerPropsOnly,
+        })
+      }
+    }
+  }
+
+  if (collectionConfig?.upload && collectionConfig?.admin?.components?.edit?.Upload) {
+    components.Upload = RenderServerComponent({
+      Component: collectionConfig.admin.components.edit.Upload,
+      importMap: req.payload.importMap,
+      serverProps,
+    })
+  }
+
+  if (collectionConfig?.upload && collectionConfig.upload.admin?.components?.controls) {
+    components.UploadControls = RenderServerComponent({
+      Component: collectionConfig.upload.admin.components.controls,
+      importMap: req.payload.importMap,
+      serverProps,
+    })
+  }
+
+  const filePreviewConfig = collectionConfig?.upload?.admin?.components?.filePreview
+  if (collectionConfig?.upload && filePreviewConfig) {
+    const mimeType = (doc?.mimeType as string) ?? ''
+    let filePreviewComponent: PayloadComponent | undefined
+
+    if (
+      typeof filePreviewConfig === 'string' ||
+      (typeof filePreviewConfig === 'object' && 'path' in filePreviewConfig)
+    ) {
+      filePreviewComponent = filePreviewConfig as PayloadComponent
+    } else {
+      filePreviewComponent = matchMimeType(
+        filePreviewConfig as Record<string, PayloadComponent>,
+        mimeType,
+      )
+    }
+
+    if (filePreviewComponent) {
+      components.UploadFilePreview = RenderServerComponent({
+        clientProps: {
+          filename: doc?.filename,
+          filesize: doc?.filesize,
+          fileSrc: doc?.url,
+          height: doc?.height,
+          mimeType,
+          width: doc?.width,
+        } as UploadFilePreviewClientProps,
+        Component: filePreviewComponent,
+        importMap: req.payload.importMap,
+        serverProps,
+      })
+    }
+  }
+
+  return components
+}
+
+export const renderDocumentSlotsHandler: ServerFunction<{
+  collectionSlug: string
+  id?: number | string
+}> = async (args) => {
+  const { id, collectionSlug, locale, permissions, req } = args
+
+  const collectionConfig = req.payload.collections[collectionSlug]?.config
+
+  if (!collectionConfig) {
+    throw new Error(req.t('error:incorrectCollection'))
+  }
+
+  const { hasSavePermission } = await getDocumentPermissions({
+    id,
+    collectionConfig,
+    data: {},
+    req,
+  })
+
+  let doc: Record<string, unknown> | undefined
+  if (id && collectionConfig.upload) {
+    const result = await req.payload.findByID({
+      id,
+      collection: collectionSlug,
+      depth: 0,
+      overrideAccess: false,
+      req,
+      select: {
+        filename: true,
+        filesize: true,
+        height: true,
+        mimeType: true,
+        url: true,
+        width: true,
+      },
+    })
+    doc = result as Record<string, unknown>
+  }
+
+  return renderDocumentSlots({
+    id,
+    collectionConfig,
+    doc,
+    hasSavePermission,
+    locale,
+    permissions,
+    req,
+  })
+}

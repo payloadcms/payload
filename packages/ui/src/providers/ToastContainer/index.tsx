@@ -4,10 +4,11 @@ import type { ClientConfig } from 'payload'
 import React from 'react'
 import { Toaster } from 'sonner'
 
-import { Error } from './icons/Error.js'
-import { Info } from './icons/Info.js'
-import { Success } from './icons/Success.js'
-import { Warning } from './icons/Warning.js'
+import { CheckIcon } from '../../icons/Check/index.js'
+import { InfoIcon } from '../../icons/Info/index.js'
+import { WarningIcon } from '../../icons/Warning/index.js'
+import { XIcon } from '../../icons/X/index.js'
+import './index.css'
 
 export const ToastContainer: React.FC<{
   config: ClientConfig
@@ -18,19 +19,27 @@ export const ToastContainer: React.FC<{
     <Toaster
       className="payload-toast-container"
       closeButton
-      // @ts-expect-error
+      // @ts-expect-error - Sonner's `dir` prop is typed as `Direction`, but passing "undefined" opts out of RTL/LTR handling
       dir="undefined"
       duration={duration ?? 4000}
       expand={expand ?? false}
       gap={8}
       icons={{
-        error: <Error />,
-        info: <Info />,
-        success: <Success />,
-        warning: <Warning />,
+        close: <XIcon size={24} />,
+        error: <WarningIcon />,
+        info: <InfoIcon />,
+        success: <CheckIcon size={24} />,
+        warning: <WarningIcon />,
       }}
-      offset="calc(var(--gutter-h) / 2)"
+      offset={{
+        bottom: 'var(--spacer-6)',
+        right: 'var(--spacer-6)',
+      }}
       position={position ?? 'bottom-right'}
+      style={{
+        width: '280px',
+      }}
+      theme="dark"
       toastOptions={{
         classNames: {
           closeButton: 'payload-toast-close-button',

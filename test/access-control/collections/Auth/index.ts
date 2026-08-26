@@ -51,4 +51,5 @@ export const Auth: CollectionConfig = {
       options: ['admin', 'user'],
     },
   ],
+  versions: false,
 }

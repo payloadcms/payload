@@ -46,7 +46,7 @@ This project includes configuration files for AI-assisted development.
 | ----------------- | ------- | ------ | ----- | --- |
 | Claude Code       | ✅      | ✅     | ✅    | ✅  |
 | Cursor            | ✅      | ✅     | ✅    | ✅  |
-| VS Code + Copilot | ⚠      | ✅     | ❌    | ✅  |
+| VS Code + Copilot | ⚠️      | ✅     | ❌    | ✅  |
 
 We don't use `AGENTS.md` because Cursor loads both `CLAUDE.md` and `AGENTS.md`, which would result in duplicated context. Instead, the AGENTS.md just contains a link to the CLAUDE.md file.
 
@@ -166,6 +166,29 @@ All services are defined in a single `test/docker-compose.yml` using Docker Comp
 
 SQLite databases don't require Docker — they're stored as files in the project.
 
+### Development with Devcontainers
+
+You can run the entire development environment inside a devcontainer.
+
+**Prerequisites:**
+
+- Docker or [OrbStack](https://orbstack.dev) (recommended on macOS for better performance)
+- One of:
+  - VS Code with the [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers), or
+  - The [`@devcontainers/cli`](https://github.com/devcontainers/cli)
+
+**Start the container — pick one:**
+
+- **VS Code:** Open the repo and click "Reopen in Container" when prompted (or run `Dev Containers: Reopen in Container` from the command palette).
+- **CLI (any editor):** From the repo root, run `devcontainer up`, then `devcontainer exec zsh` for a shell. To attach an editor, point it at the running container - e.g. JetBrains "Dev Containers" plugin, Cursor / VS Code "Attach to Running Container", or just use the terminal.
+
+**Then, inside the container:**
+
+1. Run `pnpm docker:start` if you're not using sqlite
+2. Run `pnpm dev <test suite name>`
+
+The default `PAYLOAD_DATABASE` inside the devcontainer is `sqlite`, so the `pnpm docker:start` step is only needed when you switch to mongodb/postgres.
+
 ### Testing with your own database
 
 If you wish to use your own MongoDB database for the `test` directory instead of using the docker database, add the following to your `.env` file:
@@ -180,6 +203,40 @@ POSTGRES_URL=postgres://127.0.0.1:5432/payloadtests # Point this to your locally
 You can run the entire test suite using `pnpm test`. If you wish to only run e2e tests, you can use `pnpm test:e2e`. If you wish to only run int tests, you can use `pnpm test:int`.
 
 By default, `pnpm test:int` will only run int test against MongoDB. To run int tests against postgres, you can use `pnpm test:int:postgres`. You will have to have postgres installed on your system for this to work.
+
+### Visual regression testing
+
+Some e2e tests compare a screenshot of the UI against a committed baseline image instead of (or alongside) asserting on the DOM. These are opt-in: only tests tagged `@visual` run this way, and they live alongside normal e2e tests in the same `e2e.spec.ts` files rather than in a separate directory.
+
+Use the `visual()` helper instead of `test()` — it applies the `@visual` tag for you, so there's nothing to remember:
+
+```ts
+import { expectScreenshot } from '../__helpers/e2e/expectScreenshot.js'
+import { visual } from '../__helpers/e2e/visual.js'
+
+visual('renders the posts list view', async () => {
+  await page.goto(url.list)
+  await expectScreenshot({ page, name: 'posts-list-view.png' })
+})
+```
+
+Baselines are committed PNGs stored next to their spec file, at `__snapshots__/<spec-file>/<name>.png`.
+
+Baselines must be generated or updated inside the pinned Playwright Docker image, never on a bare host. Font rendering differs enough between operating systems that a baseline captured on macOS or Windows will fail the comparison on CI even when nothing visually changed.
+
+```bash
+pnpm docker:start        # MongoDB, if not already running
+pnpm test:visual         # run every suite that has an @visual-tagged test
+pnpm test:visual:update  # accept intentional visual changes and regenerate baselines
+```
+
+Never commit a baseline PNG from any other source — a manual screenshot, a screenshot tool, an editor extension, an AI agent's screenshot capability, or a browser's own "save image" — even if it looks identical to you. Only a PNG written by the commands above is guaranteed to match what CI renders; anything else reads as a match locally and then fails every time on CI.
+
+For a new `visual()` test with no baseline PNG yet, plain `pnpm test:visual` is enough — Playwright writes the missing baseline on that first run. Reach for `pnpm test:visual:update` only to accept changes to baselines that already exist, since it regenerates every baseline the run touches, not just the new one.
+
+To view an interactive report comparing the actual, expected, and diff images for a suite, run `pnpm test:visual:preview <suite>`.
+
+On a PR, CI only runs `@visual` tests when the diff could plausibly change rendered UI (styles, components, screenshots, or the fixture config the current `@visual` tests render). If the `visual-regression` CI job fails, reproduce and inspect the diff locally with the commands above — there is no CI-posted comment, so you'll need to run the tests yourself to see what changed.
 
 ### Pull Requests
 
@@ -207,6 +264,12 @@ If you are committing to [templates](./templates) or [examples](./examples), use
 
 - `chore(templates): adds feature to template`
 - `chore(examples): fixes bug in example`
+
+### Allow edits from maintainers
+
+When opening a PR from a fork, please leave **"Allow edits and access to secrets by maintainers"** enabled on the pull request (it is on by default in the GitHub UI). This lets the Payload team push small fixes — rebases, lint/format cleanup, minor adjustments — directly to your branch so the PR can land without an extra round trip.
+
+If that permission is disabled and we need to push changes to move the PR forward, we may close your PR and re-open an equivalent branch directly in the Payload repository so the team can iterate on it.
 
 ## Previewing docs
 

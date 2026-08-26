@@ -190,7 +190,7 @@ export const promise = async <T>({
 
                   const block: Block | undefined =
                     req.payload.blocks[blockTypeToMatch] ??
-                    ((field.blockReferences ?? field.blocks).find(
+                    (field.blocks.find(
                       (curBlock) =>
                         typeof curBlock !== 'string' && curBlock.slug === blockTypeToMatch,
                     ) as Block | undefined)
@@ -292,7 +292,7 @@ export const promise = async <T>({
 
               const block: Block | undefined =
                 req.payload.blocks[blockTypeToMatch] ??
-                ((field.blockReferences ?? field.blocks).find(
+                (field.blocks.find(
                   (curBlock) => typeof curBlock !== 'string' && curBlock.slug === blockTypeToMatch,
                 ) as Block | undefined)
 

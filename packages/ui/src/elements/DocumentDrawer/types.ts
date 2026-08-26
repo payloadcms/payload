@@ -33,13 +33,16 @@ export type DocumentDrawerProps = {
   Pick<DrawerProps, 'Header'>
 
 export type DocumentTogglerProps = {
+  readonly buttonStyle?: 'dashed' | 'destructive' | 'ghost' | 'pill' | 'primary' | 'secondary'
   readonly children?: React.ReactNode
   readonly className?: string
   readonly collectionSlug: string
   readonly disabled?: boolean
   readonly drawerSlug?: string
+  readonly extraButtonProps?: Record<string, any>
   readonly onClick?: () => void
   readonly operation: Operation
+  readonly tooltip?: string
 } & Readonly<HTMLAttributes<HTMLButtonElement>>
 
 export type UseDocumentDrawerContext = {
@@ -52,7 +55,13 @@ export type UseDocumentDrawerContext = {
 }
 
 export type UseDocumentDrawer = (
-  args: Pick<DocumentDrawerProps, 'collectionSlug' | 'id' | 'overrideEntityVisibility'>,
+  args: {
+    /**
+     * Optional custom drawer slug. If provided, this will be used instead of auto-generating one.
+     * Useful for ensuring stable slugs in contexts where component remounting can cause issues.
+     */
+    drawerSlug?: string
+  } & Pick<DocumentDrawerProps, 'collectionSlug' | 'id' | 'overrideEntityVisibility'>,
 ) => [
   // drawer
   React.FC<

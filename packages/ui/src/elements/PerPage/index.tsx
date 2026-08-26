@@ -1,12 +1,12 @@
 'use client'
-// TODO: abstract the `next/navigation` dependency out from this component
 import { collectionDefaults, isNumber } from 'payload/shared'
 import React from 'react'
 
 import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { Button } from '../Button/index.js'
 import { Popup, PopupList } from '../Popup/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'per-page'
 
@@ -32,25 +32,14 @@ export const PerPage: React.FC<PerPageProps> = ({
 
   return (
     <div className={baseClass}>
+      <span className={`${baseClass}__label`}>{t('general:perPageLabel')}</span>
       <Popup
-        button={
-          <div className={`${baseClass}__base-button`}>
-            <span>{t('general:perPage', { limit: limitToUse })}</span>
-            &nbsp;
-            <ChevronIcon className={`${baseClass}__icon`} />
-          </div>
-        }
         horizontalAlign="right"
         render={({ close }) => (
-          <PopupList.ButtonGroup>
+          <PopupList.RadioGroup>
             {limits.map((limitNumber, i) => (
-              <PopupList.Button
-                className={[
-                  `${baseClass}__button`,
-                  limitNumber === limitToUse && `${baseClass}__button-active`,
-                ]
-                  .filter(Boolean)
-                  .join(' ')}
+              <PopupList.RadioGroupItem
+                active={limitNumber === limitToUse}
                 key={i}
                 onClick={() => {
                   close()
@@ -59,16 +48,23 @@ export const PerPage: React.FC<PerPageProps> = ({
                   }
                 }}
               >
-                {limitNumber === limitToUse && (
-                  <div className={`${baseClass}__chevron`}>
-                    <ChevronIcon direction="right" size="small" />
-                  </div>
-                )}
-                &nbsp;
-                <span>{limitNumber}</span>
-              </PopupList.Button>
+                {limitNumber}
+              </PopupList.RadioGroupItem>
             ))}
-          </PopupList.ButtonGroup>
+          </PopupList.RadioGroup>
+        )}
+        renderButton={({ active, onClick, onKeyDown, ...ariaProps }) => (
+          <Button
+            {...ariaProps}
+            buttonStyle="secondary"
+            className={[active && `${baseClass}--active`].filter(Boolean).join(' ')}
+            extraButtonProps={{ onKeyDown }}
+            icon={<ChevronIcon className={`${baseClass}__icon`} size={16} />}
+            iconPosition="right"
+            onClick={onClick}
+          >
+            {limitToUse}
+          </Button>
         )}
         size="small"
       />

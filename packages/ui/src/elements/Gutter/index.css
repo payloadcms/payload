@@ -1,0 +1,17 @@
+@layer payload-default {
+  .gutter--left {
+    padding-left: var(--gutter-h);
+  }
+
+  .gutter--right {
+    padding-right: var(--gutter-h);
+  }
+
+  .gutter--negative-left {
+    margin-left: calc(-1 * var(--gutter-h));
+  }
+
+  .gutter--negative-right {
+    margin-right: calc(-1 * var(--gutter-h));
+  }
+}

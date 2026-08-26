@@ -60,6 +60,37 @@ export type SupportedTimezones =
   | 'Pacific/Noumea'
   | 'Pacific/Auckland'
   | 'Pacific/Fiji';
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_DFDE7E69".
+ */
+export type LexicalNodes_DFDE7E69 =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_DFDE7E69>
+  | SerializedBlockNode<MyBlock>
+  | SerializedHeadingNode<LexicalNodes_DFDE7E69>
+  | SerializedUploadNode<'uploads'>
+  | SerializedQuoteNode<LexicalNodes_DFDE7E69>
+  | SerializedListNode<LexicalNodes_DFDE7E69>
+  | SerializedListItemNode<LexicalNodes_DFDE7E69>
+  | SerializedAutoLinkNode<LexicalNodes_DFDE7E69, LexicalLinkFields_0A7E9EC0>
+  | SerializedLinkNode<LexicalNodes_DFDE7E69, LexicalLinkFields_0A7E9EC0>
+  | SerializedRelationshipNode<
+      | 'error-fields'
+      | 'validate-drafts-on'
+      | 'validate-drafts-off'
+      | 'validate-drafts-on-autosave'
+      | 'prev-value'
+      | 'prev-value-relation'
+      | 'tab-error-reset'
+      | 'payload-kv'
+      | 'users'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+    >;
 
 export interface Config {
   auth: {
@@ -74,6 +105,7 @@ export interface Config {
     'validate-drafts-on-autosave': ValidateDraftsOnAutosave;
     'prev-value': PrevValue;
     'prev-value-relation': PrevValueRelation;
+    'tab-error-reset': TabErrorReset;
     'payload-kv': PayloadKv;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
@@ -89,6 +121,7 @@ export interface Config {
     'validate-drafts-on-autosave': ValidateDraftsOnAutosaveSelect<false> | ValidateDraftsOnAutosaveSelect<true>;
     'prev-value': PrevValueSelect<false> | PrevValueSelect<true>;
     'prev-value-relation': PrevValueRelationSelect<false> | PrevValueRelationSelect<true>;
+    'tab-error-reset': TabErrorResetSelect<false> | TabErrorResetSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -106,9 +139,12 @@ export interface Config {
     'global-validate-drafts-on': GlobalValidateDraftsOnSelect<false> | GlobalValidateDraftsOnSelect<true>;
   };
   locale: null;
-  user: User & {
-    collection: 'users';
+  widgets: {
+    collections: CollectionsWidget;
+    'collection-query': CollectionQueryWidget;
+    activity: ActivityWidget;
   };
+  user: User;
   jobs: {
     tasks: unknown;
     workflows: unknown;
@@ -178,21 +214,7 @@ export interface ErrorField {
           point: [number, number];
           radio: 'mint' | 'dark_gray';
           relationship: string | User;
-          richtext: {
-            root: {
-              type: string;
-              children: {
-                type: any;
-                version: number;
-                [k: string]: unknown;
-              }[];
-              direction: ('ltr' | 'rtl') | null;
-              format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-              indent: number;
-              version: number;
-            };
-            [k: string]: unknown;
-          };
+          richtext: LexicalRichText<LexicalNodes_DFDE7E69>;
           select: 'mint' | 'dark_gray';
           upload: string | Upload;
           text: string;
@@ -231,21 +253,7 @@ export interface ErrorField {
         point: [number, number];
         radio: 'mint' | 'dark_gray';
         relationship: string | User;
-        richtext: {
-          root: {
-            type: string;
-            children: {
-              type: any;
-              version: number;
-              [k: string]: unknown;
-            }[];
-            direction: ('ltr' | 'rtl') | null;
-            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-            indent: number;
-            version: number;
-          };
-          [k: string]: unknown;
-        };
+        richtext: LexicalRichText<LexicalNodes_DFDE7E69>;
         select: 'mint' | 'dark_gray';
         upload: string | Upload;
         text: string;
@@ -263,65 +271,14 @@ export interface ErrorField {
     arrayText: string;
     id?: string | null;
   }[];
-  layout?:
+  layout?: Block1[] | null;
+  arrayWithMinRows?:
     | {
-        tabText: string;
-        text: string;
-        array?:
-          | {
-              requiredArrayText: string;
-              arrayText?: string | null;
-              group: {
-                text: string;
-                number: number;
-                date: string;
-                checkbox: boolean;
-              };
-              code: string;
-              json:
-                | {
-                    [k: string]: unknown;
-                  }
-                | unknown[]
-                | string
-                | number
-                | boolean
-                | null;
-              email: string;
-              /**
-               * @minItems 2
-               * @maxItems 2
-               */
-              point: [number, number];
-              radio: 'mint' | 'dark_gray';
-              relationship: string | User;
-              richtext: {
-                root: {
-                  type: string;
-                  children: {
-                    type: any;
-                    version: number;
-                    [k: string]: unknown;
-                  }[];
-                  direction: ('ltr' | 'rtl') | null;
-                  format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-                  indent: number;
-                  version: number;
-                };
-                [k: string]: unknown;
-              };
-              select: 'mint' | 'dark_gray';
-              upload: string | Upload;
-              text: string;
-              textarea: string;
-              id?: string | null;
-            }[]
-          | null;
+        name?: string | null;
         id?: string | null;
-        blockName?: string | null;
-        blockType: 'block1';
       }[]
     | null;
+  blocksWithMinRows?: MinRowsBlock[] | null;
   group: {
     text: string;
   };
@@ -351,6 +308,7 @@ export interface User {
       }[]
     | null;
   password?: string | null;
+  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -360,21 +318,7 @@ export interface Upload {
   id: string;
   text?: string | null;
   media?: (string | null) | Upload;
-  richText?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
+  richText?: LexicalRichText<LexicalNodes_DFDE7E69> | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -386,6 +330,63 @@ export interface Upload {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Block1".
+ */
+export interface Block1 {
+  tabText: string;
+  text: string;
+  array?:
+    | {
+        requiredArrayText: string;
+        arrayText?: string | null;
+        group: {
+          text: string;
+          number: number;
+          date: string;
+          checkbox: boolean;
+        };
+        code: string;
+        json:
+          | {
+              [k: string]: unknown;
+            }
+          | unknown[]
+          | string
+          | number
+          | boolean
+          | null;
+        email: string;
+        /**
+         * @minItems 2
+         * @maxItems 2
+         */
+        point: [number, number];
+        radio: 'mint' | 'dark_gray';
+        relationship: string | User;
+        richtext: LexicalRichText<LexicalNodes_DFDE7E69>;
+        select: 'mint' | 'dark_gray';
+        upload: string | Upload;
+        text: string;
+        textarea: string;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'block1';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "MinRowsBlock".
+ */
+export interface MinRowsBlock {
+  name?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'minRowsBlock';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -467,6 +468,19 @@ export interface PrevValueRelation {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tab-error-reset".
+ */
+export interface TabErrorReset {
+  id: string;
+  title?: string | null;
+  errorTab: {
+    requiredInTab: string;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -516,6 +530,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'prev-value-relation';
         value: string | PrevValueRelation;
+      } | null)
+    | ({
+        relationTo: 'tab-error-reset';
+        value: string | TabErrorReset;
       } | null)
     | ({
         relationTo: 'users';
@@ -693,6 +711,23 @@ export interface ErrorFieldsSelect<T extends boolean = true> {
               blockName?: T;
             };
       };
+  arrayWithMinRows?:
+    | T
+    | {
+        name?: T;
+        id?: T;
+      };
+  blocksWithMinRows?:
+    | T
+    | {
+        minRowsBlock?:
+          | T
+          | {
+              name?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
   group?:
     | T
     | {
@@ -773,6 +808,20 @@ export interface PrevValueSelect<T extends boolean = true> {
  */
 export interface PrevValueRelationSelect<T extends boolean = true> {
   previousValueRelation?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tab-error-reset_select".
+ */
+export interface TabErrorResetSelect<T extends boolean = true> {
+  title?: T;
+  errorTab?:
+    | T
+    | {
+        requiredInTab?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -868,10 +917,247 @@ export interface GlobalValidateDraftsOnSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collections_widget".
+ */
+export interface CollectionsWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-query_widget".
+ */
+export interface CollectionQueryWidget {
+  data?: {
+    title?: string | null;
+    relatedCollection:
+      | 'error-fields'
+      | 'uploads'
+      | 'validate-drafts-on'
+      | 'validate-drafts-off'
+      | 'validate-drafts-on-autosave'
+      | 'prev-value'
+      | 'prev-value-relation'
+      | 'tab-error-reset'
+      | 'users';
+    where?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    sortField?: string | null;
+    sortDirection?: ('asc' | 'desc') | null;
+    limit?: number | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "activity_widget".
+ */
+export interface ActivityWidget {
+  data?: {
+    excludedCollections?:
+      | (
+          | 'error-fields'
+          | 'uploads'
+          | 'validate-drafts-on'
+          | 'validate-drafts-off'
+          | 'validate-drafts-on-autosave'
+          | 'prev-value'
+          | 'prev-value-relation'
+          | 'tab-error-reset'
+          | 'users'
+        )[]
+      | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "MyBlock".
+ */
+export interface MyBlock {
+  id: string;
+  blockType: 'myBlock';
+  someText?: string | null;
+  someTextRequired: string;
+  radios?: ('option1' | 'option2' | 'option3') | null;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalLinkFields_0A7E9EC0".
+ */
+export interface LexicalLinkFields_0A7E9EC0 {
+  linkType: 'custom' | 'internal';
+  url?: string;
+  doc?: {
+    relationTo: string;
+    value:
+      | string
+      | number
+      | {
+          id: string | number;
+          [k: string]: unknown;
+        };
+  } | null;
+  newTab: boolean;
+  description?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "auth".
  */
 export interface Auth {
   [k: string]: unknown;
+}
+
+/** @internal Core Lexical types — see @payloadcms/richtext-lexical. */
+export type LexicalElementFormat = 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+export type LexicalElementDirection = ('ltr' | 'rtl') | null;
+
+export interface SerializedLexicalElementBase<TChildren> {
+  children: TChildren[];
+  direction: LexicalElementDirection;
+  format: LexicalElementFormat;
+  indent: number;
+  textFormat?: number;
+  textStyle?: string;
+  version: number;
+}
+
+export type LexicalTextMode = 'normal' | 'token' | 'segmented';
+
+export interface SerializedTextNode {
+  type: 'text';
+  detail: number;
+  format: number;
+  mode: LexicalTextMode;
+  style: string;
+  text: string;
+  version: number;
+}
+
+export interface SerializedTabNode {
+  type: 'tab';
+  detail: number;
+  format: number;
+  mode: LexicalTextMode;
+  style: string;
+  text: string;
+  version: number;
+}
+
+export interface SerializedLineBreakNode {
+  type: 'linebreak';
+  version: number;
+}
+
+export interface SerializedParagraphNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'paragraph';
+  textFormat: number;
+  textStyle: string;
+}
+
+export type SerializedBlockNode<TFields extends { blockType: string }> = TFields extends unknown ? {
+  type: 'block';
+  format: LexicalElementFormat;
+  version: number;
+  fields: { id: string; blockName?: string | null } & Omit<TFields, 'id' | 'blockName'>;
+} : never;
+export type SerializedInlineBlockNode<TFields extends { blockType: string }> = TFields extends unknown ? {
+  type: 'inlineBlock';
+  version: number;
+  fields: { id: string } & Omit<TFields, 'id'>;
+} : never;
+
+export interface SerializedHeadingNode<
+  TChildren,
+  TTag extends 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6',
+> extends SerializedLexicalElementBase<TChildren> {
+  type: 'heading';
+  tag: TTag;
+}
+
+export type SerializedUploadNode<TSlugs extends keyof Config['collections'], TFields = { [k: string]: unknown }> = {
+  type: 'upload';
+  format: LexicalElementFormat;
+  id: string;
+  version: number;
+  fields: TFields;
+} & {
+  [TSlug in TSlugs]: {
+    relationTo: TSlug;
+    value: Config['collections'][TSlug]['id'] | Config['collections'][TSlug];
+  };
+}[TSlugs];
+
+export interface SerializedQuoteNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'quote';
+}
+
+export interface SerializedListNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'list';
+  checked?: boolean;
+  listType: 'number' | 'bullet' | 'check';
+  start: number;
+  tag: 'ul' | 'ol';
+}
+
+export interface SerializedListItemNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'listitem';
+  checked?: boolean;
+  value: number;
+}
+
+export interface LexicalLinkFields {
+  [k: string]: unknown;
+  doc?: {
+    relationTo: string;
+    value: Config['db']['defaultIDType'] | { [k: string]: unknown; id: Config['db']['defaultIDType'] };
+  } | null;
+  linkType: 'custom' | 'internal';
+  newTab: boolean;
+  url?: string;
+}
+export interface SerializedLinkNode<TChildren, TFields = LexicalLinkFields> extends SerializedLexicalElementBase<TChildren> {
+  type: 'link';
+  fields: TFields;
+  id?: string;
+}
+export interface SerializedAutoLinkNode<TChildren, TFields = LexicalLinkFields> extends SerializedLexicalElementBase<TChildren> {
+  type: 'autolink';
+  fields: TFields;
+}
+
+export type SerializedRelationshipNode<TSlugs extends keyof Config['collections']> = {
+  type: 'relationship';
+  format: LexicalElementFormat;
+  version: number;
+} & {
+  [TSlug in TSlugs]: {
+    relationTo: TSlug;
+    value: Config['collections'][TSlug]['id'] | Config['collections'][TSlug];
+  };
+}[TSlugs];
+
+/** Shape of a Lexical `richText` field. */
+export interface LexicalRichText<TNode> {
+  root: {
+    children: TNode[];
+    direction: LexicalElementDirection;
+    format: LexicalElementFormat;
+    indent: number;
+    type: 'root';
+    version: number;
+  };
 }
 
 

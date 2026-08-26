@@ -17,4 +17,5 @@ export const EmailsCollection: CollectionConfig = {
       type: 'text',
     },
   ],
+  versions: false,
 }

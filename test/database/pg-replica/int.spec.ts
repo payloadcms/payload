@@ -1,5 +1,5 @@
 import type { PostgresAdapter } from '@payloadcms/db-postgres'
-import type { DrizzleAdapter } from '@payloadcms/drizzle/types'
+import type { DrizzleAdapter } from '@payloadcms/drizzle'
 
 import path from 'path'
 import { BasePayload, buildConfig, type DatabaseAdapterObj, type Payload } from 'payload'
@@ -31,6 +31,7 @@ describeReplica('postgres read replicas', () => {
           slug: 'users',
           auth: true,
           fields: [],
+          versions: false,
         },
         {
           slug: 'posts',
@@ -54,6 +55,7 @@ describeReplica('postgres read replicas', () => {
               type: 'text',
             },
           ],
+          versions: false,
         },
         {
           slug: 'nav',

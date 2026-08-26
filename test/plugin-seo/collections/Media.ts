@@ -28,6 +28,7 @@ export const Media: CollectionConfig = {
       name: 'richText',
     },
   ],
+  versions: false,
 }
 
 export const uploadsDoc = {

@@ -1,0 +1,74 @@
+@layer payload-default {
+  .where-builder {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-2);
+    padding-block: var(--spacer-3);
+    padding-inline: var(--gutter-h);
+    border-bottom: var(--stroke-width-small) solid var(--color-border);
+
+    .btn {
+      margin: 0;
+      align-self: flex-start;
+    }
+  }
+
+  .where-builder__label {
+    margin: 0;
+    color: var(--color-text);
+  }
+
+  .where-builder__add-or.btn {
+    color: var(--color-text-secondary);
+
+    .icon--circle-plus {
+      width: var(--spacer-4);
+      height: var(--spacer-4);
+    }
+  }
+
+  /* All condition rows share these column tracks so join/field/operator/value/actions stay aligned. */
+  .where-builder__or-filters {
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: minmax(calc(var(--spacer-4) * 2), max-content) 1fr 1fr 1fr auto;
+    column-gap: var(--spacer-2);
+    row-gap: var(--spacer-2);
+    align-items: center;
+  }
+
+  /* Flatten the condition wrappers so each cell is a direct grid item. */
+  .where-builder__and-filters {
+    display: contents;
+  }
+
+  /* Add Filter button sits in column 2 onward, aligned with the field input. */
+  .where-builder__add-or-row {
+    grid-column: 2 / -1;
+  }
+
+  @media (max-width: 768px) {
+    .where-builder__or-filters {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacer-2);
+    }
+
+    .where-builder__and-filters {
+      display: revert;
+      width: 100%;
+    }
+
+    .where-builder__add-or-row {
+      grid-column: revert;
+      align-self: flex-start;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .where-builder {
+      padding-top: var(--spacer-2);
+    }
+  }
+}

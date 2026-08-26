@@ -13,4 +13,5 @@ export const GlobalGroup1B: GlobalConfig = {
       type: 'text',
     },
   ],
+  versions: false,
 }

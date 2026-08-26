@@ -1,62 +1,56 @@
 'use client'
 
 import React from 'react'
+import { toast } from 'sonner'
 
 import { useTranslation } from '../../../providers/Translation/index.js'
-import { Button } from '../../Button/index.js'
+import { getFilesFromClipboard } from '../../../utilities/getFilesFromClipboard.js'
+import { DialogHeader, DialogModal } from '../../Dialog/index.js'
 import { Dropzone } from '../../Dropzone/index.js'
-import { DrawerHeader } from '../Header/index.js'
-import './index.scss'
+import { UploadDropzoneContent } from '../../UploadDropzoneContent/index.js'
+import './index.css'
 
 const baseClass = 'bulk-upload--add-files'
 
 type Props = {
   readonly acceptMimeTypes?: string
-  readonly onCancel: () => void
+  readonly modalSlug: string
   readonly onDrop: (acceptedFiles: FileList) => void
 }
-export function AddFilesView({ acceptMimeTypes, onCancel, onDrop }: Props) {
+export function AddFilesView({ acceptMimeTypes, modalSlug: modalSlug, onDrop }: Props) {
   const { t } = useTranslation()
 
-  const inputRef = React.useRef(null)
+  const handlePasteFromClipboard = React.useCallback(async () => {
+    try {
+      const files = await getFilesFromClipboard()
+      if (!files) {
+        toast.error(t('error:noFileFoundInClipboard'))
+        return
+      }
+      onDrop(files)
+    } catch (_err) {
+      toast.error(t('error:unableToReadClipboard'))
+    }
+  }, [onDrop, t])
 
   return (
-    <div className={baseClass}>
-      <DrawerHeader onClose={onCancel} title={t('upload:addFiles')} />
-      <div className={`${baseClass}__dropArea`}>
-        <Dropzone multipleFiles onChange={onDrop}>
-          <Button
-            buttonStyle="subtle"
-            iconPosition="left"
-            onClick={() => {
-              if (inputRef.current) {
-                inputRef.current.click()
-              }
-            }}
-            size="small"
-          >
-            {t('upload:selectFile')}
-          </Button>
-          <input
-            accept={acceptMimeTypes}
-            aria-hidden="true"
-            className={`${baseClass}__hidden-input`}
-            hidden
-            multiple
-            onChange={(e) => {
-              if (e.target.files && e.target.files.length > 0) {
-                onDrop(e.target.files)
-              }
-            }}
-            ref={inputRef}
-            type="file"
-          />
-
-          <p className={`${baseClass}__dragAndDropText`}>
-            {t('general:or')} {t('upload:dragAndDrop')}
-          </p>
-        </Dropzone>
+    <DialogModal className={baseClass} size="large" slug={modalSlug}>
+      <DialogHeader showClose title={t('upload:addFiles')} />
+      <div className={`${baseClass}__body`}>
+        <div className={`${baseClass}__dropArea`}>
+          <Dropzone multipleFiles onChange={onDrop}>
+            <UploadDropzoneContent
+              acceptMimeTypes={acceptMimeTypes}
+              className={`${baseClass}__dropzoneContent`}
+              multiple
+              onFilesSelected={onDrop}
+              onPasteFromClipboard={handlePasteFromClipboard}
+              pasteButtonClassName={`${baseClass}__pasteFromClipboard`}
+              pasteTooltip={t('upload:pasteFromClipboard')}
+            />
+          </Dropzone>
+        </div>
       </div>
-    </div>
+    </DialogModal>
   )
 }

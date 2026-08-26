@@ -1,5 +1,5 @@
-import type { IncomingAuthType, LoginWithUsernameOptions } from '../../auth/types.js'
-import type { CollectionConfig } from './types.js'
+import type { Auth, IncomingAuthType, LoginWithUsernameOptions } from '../../auth/types.js'
+import type { CollectionConfig, SanitizedCollectionConfig } from './types.js'
 
 import { defaultAccess } from '../../auth/defaultAccess.js'
 
@@ -32,6 +32,7 @@ export const defaults: Partial<CollectionConfig> = {
   hooks: {
     afterChange: [],
     afterDelete: [],
+    afterError: [],
     afterForgotPassword: [],
     afterLogin: [],
     afterLogout: [],
@@ -51,18 +52,20 @@ export const defaults: Partial<CollectionConfig> = {
   indexes: [],
   timestamps: true,
   upload: false,
-  versions: false,
+  versions: true,
 }
 
 export const addDefaultsToCollectionConfig = (collection: CollectionConfig): CollectionConfig => {
+  const access = collection.access
+
   collection.access = {
-    create: defaultAccess,
-    delete: defaultAccess,
-    read: defaultAccess,
-    unlock: defaultAccess,
-    update: defaultAccess,
-    ...(collection.access || {}),
-  }
+    ...access,
+    create: access?.create ?? defaultAccess,
+    delete: access?.delete ?? defaultAccess,
+    read: access?.read ?? defaultAccess,
+    unlock: access?.unlock ?? defaultAccess,
+    update: access?.update ?? defaultAccess,
+  } satisfies SanitizedCollectionConfig['access']
 
   collection.admin = {
     components: {},
@@ -82,65 +85,56 @@ export const addDefaultsToCollectionConfig = (collection: CollectionConfig): Col
   collection.custom = collection.custom ?? {}
   collection.endpoints = collection.endpoints ?? []
   collection.fields = collection.fields ?? []
-  collection.folders = collection.folders ?? false
+  collection.hierarchy = collection.hierarchy ?? false
+
+  const hooks = collection.hooks
 
   collection.hooks = {
-    afterChange: [],
-    afterDelete: [],
-    afterForgotPassword: [],
-    afterLogin: [],
-    afterLogout: [],
-    afterMe: [],
-    afterOperation: [],
-    afterRead: [],
-    afterRefresh: [],
-    beforeChange: [],
-    beforeDelete: [],
-    beforeLogin: [],
-    beforeOperation: [],
-    beforeRead: [],
-    beforeValidate: [],
-    me: [],
-    refresh: [],
-    ...(collection.hooks || {}),
-  }
+    ...hooks,
+    afterChange: hooks?.afterChange ?? [],
+    afterDelete: hooks?.afterDelete ?? [],
+    afterError: hooks?.afterError ?? [],
+    afterForgotPassword: hooks?.afterForgotPassword ?? [],
+    afterLogin: hooks?.afterLogin ?? [],
+    afterLogout: hooks?.afterLogout ?? [],
+    afterMe: hooks?.afterMe ?? [],
+    afterOperation: hooks?.afterOperation ?? [],
+    afterRead: hooks?.afterRead ?? [],
+    afterRefresh: hooks?.afterRefresh ?? [],
+    beforeChange: hooks?.beforeChange ?? [],
+    beforeDelete: hooks?.beforeDelete ?? [],
+    beforeLogin: hooks?.beforeLogin ?? [],
+    beforeOperation: hooks?.beforeOperation ?? [],
+    beforeRead: hooks?.beforeRead ?? [],
+    beforeValidate: hooks?.beforeValidate ?? [],
+    me: hooks?.me ?? [],
+    refresh: hooks?.refresh ?? [],
+  } satisfies SanitizedCollectionConfig['hooks']
 
   collection.timestamps = collection.timestamps ?? true
   collection.upload = collection.upload ?? false
-  collection.versions = collection.versions ?? false
+  collection.versions = collection.versions ?? true
 
   collection.indexes = collection.indexes ?? []
 
   return collection
 }
 
-/**
- * @deprecated - remove in 4.0. This is error-prone, as mutating this object will affect any objects that use the defaults as a base.
- */
-export const authDefaults: IncomingAuthType = {
-  cookies: {
-    sameSite: 'Lax',
-    secure: false,
-  },
-  forgotPassword: {},
-  lockTime: 600000, // 10 minutes
-  loginWithUsername: false,
-  maxLoginAttempts: 5,
-  tokenExpiration: 7200,
-  useSessions: true,
-  verify: false,
-}
-
-export const addDefaultsToAuthConfig = (auth: IncomingAuthType): IncomingAuthType => {
+export const addDefaultsToAuthConfig = (auth: IncomingAuthType): Auth => {
   auth.cookies = {
-    sameSite: 'Lax',
-    secure: false,
     ...(auth.cookies || {}),
-  }
+    sameSite: auth.cookies?.sameSite ?? 'Lax',
+    secure: auth.cookies?.secure ?? false,
+  } satisfies Auth['cookies']
 
+  auth.depth = auth.depth ?? 0
   auth.forgotPassword = auth.forgotPassword ?? {}
   auth.lockTime = auth.lockTime ?? 600000 // 10 minutes
-  auth.loginWithUsername = auth.loginWithUsername ?? false
+  auth.loginWithUsername = auth.loginWithUsername
+    ? addDefaultsToLoginWithUsernameConfig(
+        auth.loginWithUsername === true ? {} : auth.loginWithUsername,
+      )
+    : false
   auth.maxLoginAttempts = auth.maxLoginAttempts ?? 5
   auth.tokenExpiration = auth.tokenExpiration ?? 7200
   auth.useSessions = auth.useSessions ?? true
@@ -151,13 +145,13 @@ export const addDefaultsToAuthConfig = (auth: IncomingAuthType): IncomingAuthTyp
     auth.verify = {}
   }
 
-  return auth
+  return auth as Auth
 }
 
 /**
  * @deprecated - remove in 4.0. This is error-prone, as mutating this object will affect any objects that use the defaults as a base.
  */
-export const loginWithUsernameDefaults: LoginWithUsernameOptions = {
+export const loginWithUsernameDefaults: Required<LoginWithUsernameOptions> = {
   allowEmailLogin: false,
   requireEmail: false,
   requireUsername: true,
@@ -165,10 +159,12 @@ export const loginWithUsernameDefaults: LoginWithUsernameOptions = {
 
 export const addDefaultsToLoginWithUsernameConfig = (
   loginWithUsername: LoginWithUsernameOptions,
-): LoginWithUsernameOptions =>
+): Required<LoginWithUsernameOptions> =>
   ({
-    allowEmailLogin: false,
-    requireEmail: false,
-    requireUsername: true,
-    ...(loginWithUsername || {}),
-  }) as LoginWithUsernameOptions
+    ...loginWithUsername,
+    allowEmailLogin: loginWithUsername.allowEmailLogin ?? false,
+    requireEmail: loginWithUsername.requireEmail ?? false,
+    requireUsername: loginWithUsername.allowEmailLogin
+      ? (loginWithUsername.requireUsername ?? true)
+      : true,
+  }) as Required<LoginWithUsernameOptions>

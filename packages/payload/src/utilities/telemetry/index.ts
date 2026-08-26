@@ -8,9 +8,11 @@ import { fileURLToPath } from 'url'
 import type { Payload } from '../../types/index.js'
 import type { AdminInitEvent } from './events/adminInit.js'
 import type { ServerInitEvent } from './events/serverInit.js'
+import type { FigmaProduct, ProjectCohort } from './getProjectContext.js'
 
 import { findUp } from '../findUp.js'
 import { Conf } from './conf/index.js'
+import { getProjectContext } from './getProjectContext.js'
 import { oneWayHash } from './oneWayHash.js'
 
 export type BaseEvent = {
@@ -18,6 +20,7 @@ export type BaseEvent = {
   dbAdapter: string
   emailAdapter: null | string
   envID: string
+  figmaProduct?: FigmaProduct
   isCI: boolean
   locales: string[]
   localizationDefaultLocale: null | string
@@ -25,6 +28,9 @@ export type BaseEvent = {
   nodeEnv: string
   nodeVersion: string
   payloadVersion: string
+  /** Slugs of installed first-party (`@payloadcms/`) plugins. */
+  plugins: string[]
+  projectCohorts: ProjectCohort[]
   projectID: string
   projectIDSource: 'cwd' | 'git' | 'packageJSON' | 'serverURL'
   uploadAdapters: string[]
@@ -37,14 +43,17 @@ type PackageJSON = {
 
 type TelemetryEvent = AdminInitEvent | ServerInitEvent
 
-type Args = {
-  event: TelemetryEvent
+type Args<TEvent extends { type: string } = TelemetryEvent> = {
+  event: TEvent
   payload: Payload
 }
 
 let baseEvent: BaseEvent | null = null
 
-export const sendEvent = async ({ event, payload }: Args): Promise<void> => {
+export const sendTelemetryEvent = async <TEvent extends { type: string }>({
+  event,
+  payload,
+}: Args<TEvent>): Promise<void> => {
   try {
     if (payload.config.telemetry !== false) {
       const { packageJSON, packageJSONPath } = await getPackageJSON()
@@ -52,6 +61,7 @@ export const sendEvent = async ({ event, payload }: Args): Promise<void> => {
       // Only generate the base event once
       if (!baseEvent) {
         const { projectID, source: projectIDSource } = getProjectID(payload, packageJSON!)
+        const plugins = getInstalledPluginSlugs(payload)
         baseEvent = {
           ciName: ciInfo.isCI ? ciInfo.name : null,
           envID: getEnvID(),
@@ -61,9 +71,15 @@ export const sendEvent = async ({ event, payload }: Args): Promise<void> => {
           payloadVersion: getPayloadVersion(packageJSON!),
           projectID,
           projectIDSource,
+          ...getProjectContext({
+            packages: Object.keys(packageJSON!.dependencies ?? {}),
+            payload,
+            plugins,
+          }),
           ...getLocalizationInfo(payload),
           dbAdapter: payload.db.name,
           emailAdapter: payload.email?.name || null,
+          plugins,
           uploadAdapters: payload.config.upload.adapters,
         }
       }
@@ -171,6 +187,15 @@ const getPackageJSONID = (payload: Payload, packageJSON: PackageJSON): string =>
 export const getPayloadVersion = (packageJSON: PackageJSON): string => {
   return packageJSON?.dependencies?.payload ?? ''
 }
+
+/**
+ * Slugs of installed first-party (`@payloadcms/`) plugins. Custom plugin slugs
+ * are author-defined and can leak project details, so they are never collected.
+ */
+export const getInstalledPluginSlugs = (payload: Payload): string[] =>
+  (payload.config.plugins ?? [])
+    .map((plugin) => plugin.slug)
+    .filter((slug): slug is string => typeof slug === 'string' && slug.startsWith('@payloadcms/'))
 
 export const getLocalizationInfo = (
   payload: Payload,

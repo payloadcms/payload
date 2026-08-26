@@ -282,7 +282,7 @@ const ArrayFields: CollectionConfig = {
           name: 'id',
           type: 'text',
           admin: {
-            disableListFilter: true,
+            disabled: { filter: true },
           },
         },
         {
@@ -301,8 +301,7 @@ const ArrayFields: CollectionConfig = {
       },
     },
   ],
-  slug: arrayFieldsSlug,
-  versions: true,
+  slug: arrayFieldsSlug
 }
 
 export default ArrayFields

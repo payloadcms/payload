@@ -1,6 +1,19 @@
 import type { SerializedLexicalNode } from 'lexical'
 
-import type { DefaultNodeTypes, DefaultTypedEditorState, TypedEditorState } from '../nodeTypes.js'
+import type {
+  DefaultNodeTypes,
+  DefaultTypedEditorState,
+  TypedEditorState,
+} from '../types/nodeTypes.js'
+
+/**
+ * The node union to build with. Accepts either a node union directly (e.g. `DefaultNodeTypes`) or a
+ * generated `richText` field type (e.g. `Post['richText']`), whose nodes are extracted automatically.
+ */
+type BuildNodes<T> =
+  NonNullable<T> extends TypedEditorState<infer TNode extends SerializedLexicalNode>
+    ? TNode
+    : Extract<NonNullable<T>, SerializedLexicalNode>
 
 /**
  * Helper to build lexical editor state JSON from text and/or nodes.
@@ -38,14 +51,28 @@ import type { DefaultNodeTypes, DefaultTypedEditorState, TypedEditorState } from
  *   ],
  * })
  * ```
+ *
+ * @example
+ *
+ * passing a generated `richText` field type — the result is exactly that field's type:
+ *
+ * ```ts
+ * post.richText = buildEditorState<Post['richText']>({ text: 'Hello world' })
+ * ```
  */
-export function buildEditorState<T extends SerializedLexicalNode>({
+export function buildEditorState<
+  T extends
+    | null
+    | SerializedLexicalNode
+    | TypedEditorState<SerializedLexicalNode>
+    | undefined = DefaultNodeTypes,
+>({
   nodes,
   text,
 }: {
-  nodes?: TypedEditorState<T>['root']['children']
+  nodes?: TypedEditorState<BuildNodes<T>>['root']['children']
   text?: string
-}): TypedEditorState<T> {
+}): TypedEditorState<BuildNodes<T>> {
   const editorJSON: DefaultTypedEditorState = {
     root: {
       type: 'root',
@@ -85,7 +112,21 @@ export function buildEditorState<T extends SerializedLexicalNode>({
     editorJSON.root.children.push(...(nodes as any))
   }
 
-  return editorJSON as TypedEditorState<T>
+  if (editorJSON.root.children.length === 0) {
+    // An error will be thrown if the root node has no children
+    editorJSON.root.children.push({
+      type: 'paragraph',
+      children: [],
+      direction: 'ltr',
+      format: '',
+      indent: 0,
+      textFormat: 0,
+      textStyle: '',
+      version: 1,
+    })
+  }
+
+  return editorJSON as TypedEditorState<BuildNodes<T>>
 }
 
 /**

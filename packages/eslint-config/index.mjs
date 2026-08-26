@@ -52,6 +52,7 @@ const baseRules = {
     },
   ],*/
   'payload/no-jsx-import-statements': 'error',
+  'payload/no-conflicting-lexical-markdown-imports': 'warn',
 }
 
 const reactA11yRules = {
@@ -170,6 +171,7 @@ export const rootEslintConfig = [
             '../translations/scripts/translateNewKeys/sortKeys.ts',
             '../translations/scripts/translateNewKeys/translateText.ts',
             '../create-payload-app/bin/cli.js',
+            '../codemod/bin/cli.js',
           ],
         },
         tsconfigRootDir: import.meta.dirname,

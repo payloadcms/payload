@@ -7,15 +7,18 @@
  * Usage: node .github/workflows/e2e.config.ts
  */
 
+import type { TestConfig } from './utilities/e2e-matrix.ts'
+
 import { createE2EConfig } from './utilities/e2e-matrix.ts'
 
-export default createE2EConfig([
+const nextSuites: TestConfig[] = [
   { file: '_community', shards: 1 },
   { file: 'a11y', shards: 1 },
   { file: 'access-control', shards: 2 },
   { file: 'admin__e2e__general', shards: 3 },
   { file: 'admin__e2e__list-view', shards: 4 },
   { file: 'admin__e2e__document-view', shards: 3 },
+  { file: 'admin-routing', shards: 1 },
   { file: 'admin-bar', shards: 1 },
   { file: 'admin-root', shards: 1 },
   { file: 'auth', shards: 1 },
@@ -51,7 +54,7 @@ export default createE2EConfig([
   { file: 'fields__collections__UploadPoly', shards: 1 },
   { file: 'fields__collections__UploadMultiPoly', shards: 1 },
   { file: 'group-by', shards: 1 },
-  { file: 'folders', shards: 3 },
+  { file: 'hierarchy', shards: 1 },
   { file: 'hooks', shards: 1 },
   // TODO: Enable parallel mode again when ensureCompilationIsDone is extracted into a playwright hook. Otherwise,
   // it runs multiple times in parallel, for each single test, which causes the tests to fail occasionally in CI.
@@ -73,12 +76,12 @@ export default createE2EConfig([
   { file: 'lexical__collections__LexicalViewsProvider', shards: 1, parallel: false },
   { file: 'lexical__collections__LexicalViewsProviderDefault', shards: 1, parallel: false },
   { file: 'lexical__collections__LexicalViewsNested', shards: 1, parallel: false },
+  { file: 'lexical__collections__LexicalAutosaveBlock', shards: 1, parallel: false },
 
   { file: 'lexical__collections__OnDemandForm', shards: 1 },
   { file: 'lexical__collections__Lexical__e2e__main', shards: 2 },
   { file: 'lexical__collections__Lexical__e2e__blocks', shards: 2 },
   { file: 'lexical__collections__Lexical__e2e__blocks#config.blockreferences.ts', shards: 2 },
-  { file: 'lexical__collections__RichText', shards: 1 },
   { file: 'query-presets', shards: 1 },
   { file: 'form-state', shards: 1 },
   { file: 'live-preview', shards: 2 },
@@ -86,6 +89,7 @@ export default createE2EConfig([
   { file: 'locked-documents', shards: 1 },
   { file: 'i18n', shards: 1 },
   { file: 'plugin-cloud-storage', shards: 1 },
+  { file: 'storage-azure__client-uploads#client-uploads/config.ts', shards: 1 },
   { file: 'storage-s3__client-uploads#client-uploads/config.ts', shards: 1 },
   { file: 'storage-vercel-blob__client-uploads#client-uploads/config.ts', shards: 1 },
   { file: 'plugin-form-builder', shards: 1 },
@@ -98,7 +102,16 @@ export default createE2EConfig([
   { file: 'queues', shards: 1 },
   { file: 'sort', shards: 1 },
   { file: 'server-url', shards: 1 },
+  { file: 'tags', shards: 1 },
   { file: 'trash', shards: 2 },
   { file: 'versions', shards: 3 },
   { file: 'uploads', shards: 3 },
-])
+]
+
+const tanstackSuites: TestConfig[] = nextSuites.map((suite) => ({
+  ...suite,
+  framework: 'tanstack-start',
+  optional: false,
+}))
+
+export default createE2EConfig([...nextSuites, ...tanstackSuites])
