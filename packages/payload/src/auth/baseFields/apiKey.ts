@@ -11,7 +11,7 @@ import type {
 import { Forbidden } from '../../errors/Forbidden.js'
 import { UnauthorizedError } from '../../errors/UnauthorizedError.js'
 import { canAccessAdmin } from '../../utilities/canAccessAdmin.js'
-import { generateAPIKey } from '../apiKeys.js'
+import { generateAPIKey } from '../apiKeys/generateAPIKey.js'
 
 const encryptKey: FieldHook = ({ req, value }) =>
   value ? req.payload.encrypt(value as string) : null

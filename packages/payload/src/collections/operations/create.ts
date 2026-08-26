@@ -15,7 +15,7 @@ import type {
   SelectFromCollectionSlug,
 } from '../config/types.js'
 
-import { assertCanSetAPIKey } from '../../auth/apiKeys.js'
+import { assertCanSetAPIKey } from '../../auth/apiKeys/assertCanSetAPIKey.js'
 import { ensureUsernameOrEmail } from '../../auth/ensureUsernameOrEmail.js'
 import { executeAccess } from '../../auth/executeAccess.js'
 import { sendVerificationEmail } from '../../auth/sendVerificationEmail.js'

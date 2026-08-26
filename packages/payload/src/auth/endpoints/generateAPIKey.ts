@@ -10,12 +10,10 @@ import { APIError, Forbidden, NotFound, ValidationError } from '../../errors/ind
 import { fieldAffectsData } from '../../fields/config/types.js'
 import { getRequestCollectionWithID } from '../../utilities/getRequestEntity.js'
 import { headersWithCors } from '../../utilities/headersWithCors.js'
-import {
-  assertCanSetAPIKey,
-  generateAPIKey,
-  generateAPIKeyFromSeed,
-  withServerGeneratedAPIKey,
-} from '../apiKeys.js'
+import { assertCanSetAPIKey } from '../apiKeys/assertCanSetAPIKey.js'
+import { generateAPIKey } from '../apiKeys/generateAPIKey.js'
+import { generateAPIKeyFromSeed } from '../apiKeys/generateAPIKeyFromSeed.js'
+import { withServerGeneratedAPIKey } from '../apiKeys/serverGeneratedAPIKeyRequest.js'
 import { executeAccess } from '../executeAccess.js'
 import { hasWhereAccessResult } from '../types.js'
 

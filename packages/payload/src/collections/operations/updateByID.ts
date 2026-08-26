@@ -16,7 +16,7 @@ import type {
   TypeWithID,
 } from '../config/types.js'
 
-import { assertCanSetAPIKey } from '../../auth/apiKeys.js'
+import { assertCanSetAPIKey } from '../../auth/apiKeys/assertCanSetAPIKey.js'
 import { executeAccess } from '../../auth/executeAccess.js'
 import { hasWhereAccessResult } from '../../auth/types.js'
 import { combineQueries } from '../../database/combineQueries.js'
