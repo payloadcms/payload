@@ -17,21 +17,30 @@ import { withServerGeneratedAPIKey } from '../apiKeys/serverGeneratedAPIKeyReque
 import { executeAccess } from '../executeAccess.js'
 import { hasWhereAccessResult } from '../types.js'
 
+const isTransientTransactionError = (error: unknown): boolean =>
+  typeof error === 'object' &&
+  error !== null &&
+  'hasErrorLabel' in error &&
+  typeof error.hasErrorLabel === 'function' &&
+  error.hasErrorLabel('TransientTransactionError')
+
 const generateAPIKeyForDocument = async ({
   id,
   collection,
   req,
   requestData,
+  retryAPIKey,
 }: {
   collection: Collection
   id: number | string
   req: PayloadRequest
   requestData: JsonObject
+  retryAPIKey?: string
 }): Promise<JsonObject> => {
   const generateIfMissing = requestData.generateIfMissing === true
   let generationSeed: string | undefined
 
-  if (generateIfMissing) {
+  if (generateIfMissing && !retryAPIKey) {
     const generationDoc = await req.payload.db.findOne<{
       id: number | string
       updatedAt?: string
@@ -47,9 +56,11 @@ const generateAPIKeyForDocument = async ({
     }
   }
 
-  const apiKey = generationSeed
-    ? generateAPIKeyFromSeed({ secret: req.payload.secret, seed: generationSeed })
-    : generateAPIKey()
+  const apiKey =
+    retryAPIKey ??
+    (generationSeed
+      ? generateAPIKeyFromSeed({ secret: req.payload.secret, seed: generationSeed })
+      : generateAPIKey())
   const data = { apiKey }
   const accessResult = await executeAccess(
     {
@@ -106,6 +117,10 @@ const generateAPIKeyForDocument = async ({
   }
 
   if (generateIfMissing && doc.apiKey) {
+    if (retryAPIKey && doc.apiKey === retryAPIKey) {
+      return data
+    }
+
     return {}
   }
 
@@ -130,15 +145,29 @@ const generateAPIKeyForDocument = async ({
     )
   }
 
-  return withServerGeneratedAPIKey(req, () =>
-    updateByIDOperation({
-      id,
-      collection,
-      data,
-      overrideAccess: false,
-      req,
-    }),
-  )
+  try {
+    return await withServerGeneratedAPIKey(req, () =>
+      updateByIDOperation({
+        id,
+        collection,
+        data,
+        overrideAccess: false,
+        req,
+      }),
+    )
+  } catch (error) {
+    if (generateIfMissing && !retryAPIKey && isTransientTransactionError(error)) {
+      return generateAPIKeyForDocument({
+        id,
+        collection,
+        req,
+        requestData,
+        retryAPIKey: apiKey,
+      })
+    }
+
+    throw error
+  }
 }
 
 export const generateAPIKeyHandler: PayloadHandler = async (req) => {
