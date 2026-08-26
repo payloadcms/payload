@@ -67,6 +67,14 @@ const shouldReupload = (
   return false
 }
 
+/**
+ * Builds the document's file metadata and the list of files to write to disk.
+ *
+ * A file uploaded with `useTempFiles` enabled arrives as a temp file path instead of an
+ * in-memory buffer, and that temp file can be far larger than server memory allows. To avoid
+ * loading it into memory unnecessarily, this skips reading the temp file entirely when local
+ * storage is disabled, and copies it straight to its destination when local storage is enabled.
+ */
 export const generateFileData = async <T>({
   collection: { config: collectionConfig },
   data,
@@ -188,20 +196,11 @@ export const generateFileData = async <T>({
     let fileBuffer!: { data: Buffer; info: OutputInfo }
     let ext
     let mime: string
-    // A tempFilePath alone (no resize/format/trim/constructor options) only forces full sharp
-    // processing when local storage is disabled - see the skipTempFileBuffer comment below for
-    // why that's the one case where reading the whole file into memory is worth avoiding.
-    // Otherwise, this keeps the existing behavior of always running unmodified tempFilePath
-    // images through sharp (EXIF auto-rotation and content-sniffed mime detection).
+    // Depends only on configured resize/format/trim options, not on whether the bytes are on
+    // disk or in memory.
     const fileHasAdjustments =
       fileSupportsResize &&
-      Boolean(
-        resizeOptions ||
-          formatOptions ||
-          trimOptions ||
-          constructorOptions ||
-          (file.tempFilePath && !disableLocalStorage),
-      )
+      Boolean(resizeOptions || formatOptions || trimOptions || constructorOptions)
 
     const sharpOptions: SharpOptions = { ...constructorOptions }
 
@@ -371,31 +370,44 @@ export const generateFileData = async <T>({
       const skipTempFileBuffer =
         disableLocalStorage && Boolean(file.tempFilePath) && !fileBuffer?.data
 
-      let bufferToSave: Buffer
-      if (fileBuffer?.data) {
-        bufferToSave = fileBuffer.data
-      } else if (file.tempFilePath) {
-        bufferToSave = skipTempFileBuffer ? Buffer.alloc(0) : await fs.readFile(file.tempFilePath)
-      } else {
-        bufferToSave = file.data
-      }
+      // When local storage is enabled and the temp file itself is unmodified, copy it straight
+      // to its destination instead of reading it into memory first - a tempFilePath can point at
+      // a file far larger than server memory allows.
+      const shouldCopyFromTempFile =
+        !fileBuffer?.data && Boolean(file.tempFilePath) && !disableLocalStorage
 
-      if (!skipTempFileBuffer) {
+      if (shouldCopyFromTempFile) {
         filesToSave.push({
-          buffer: bufferToSave,
           path: `${staticPath}/${fsSafeName}`,
+          sourcePath: file.tempFilePath!,
         })
+      } else {
+        let bufferToSave: Buffer
+        if (fileBuffer?.data) {
+          bufferToSave = fileBuffer.data
+        } else if (file.tempFilePath) {
+          bufferToSave = skipTempFileBuffer ? Buffer.alloc(0) : await fs.readFile(file.tempFilePath)
+        } else {
+          bufferToSave = file.data
+        }
 
-        // If using temp files and the image is being resized, write the file to the temp path
-        if (fileBuffer?.data || bufferToSave.length > 0) {
-          if (file.tempFilePath) {
-            await fs.writeFile(file.tempFilePath, fileBuffer?.data || bufferToSave) // write fileBuffer to the temp path
-          } else {
-            // Assign the _possibly modified_ file to the request object
-            req.file = {
-              ...file,
-              data: fileBuffer?.data || bufferToSave,
-              size: fileBuffer?.info.size,
+        if (!skipTempFileBuffer) {
+          filesToSave.push({
+            buffer: bufferToSave,
+            path: `${staticPath}/${fsSafeName}`,
+          })
+
+          // If using temp files and the image is being resized, write the file to the temp path
+          if (fileBuffer?.data || bufferToSave.length > 0) {
+            if (file.tempFilePath) {
+              await fs.writeFile(file.tempFilePath, fileBuffer?.data || bufferToSave) // write fileBuffer to the temp path
+            } else {
+              // Assign the _possibly modified_ file to the request object
+              req.file = {
+                ...file,
+                data: fileBuffer?.data || bufferToSave,
+                size: fileBuffer?.info.size,
+              }
             }
           }
         }

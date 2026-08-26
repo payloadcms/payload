@@ -93,6 +93,21 @@ describe('generateFileData', () => {
       expect(toBufferMock).not.toHaveBeenCalled()
     })
 
+    it('does not save anything when no processing is needed', async () => {
+      const { sharp } = createSharpMock()
+
+      const { files } = await generateFileData({
+        collection: createCollection({ disableLocalStorage: true }),
+        config: {} as SanitizedConfig,
+        data: {},
+        operation: 'create',
+        overwriteExistingFiles: true,
+        req: createReq(sharp),
+      })
+
+      expect(files).toEqual([])
+    })
+
     it('still runs sharp processing when resize options are configured', async () => {
       const { sharp, toBufferMock } = createSharpMock()
 
@@ -110,10 +125,10 @@ describe('generateFileData', () => {
   })
 
   describe('when local storage is enabled (default)', () => {
-    it('still runs full sharp processing on a tempFilePath image with no configured adjustments, preserving existing EXIF-rotation and content-sniffing behavior', async () => {
+    it('copies straight from the temp file instead of running sharp processing, when no adjustments are configured', async () => {
       const { sharp, toBufferMock } = createSharpMock()
 
-      await generateFileData({
+      const { files } = await generateFileData({
         collection: createCollection(),
         config: {} as SanitizedConfig,
         data: {},
@@ -122,7 +137,8 @@ describe('generateFileData', () => {
         req: createReq(sharp),
       })
 
-      expect(toBufferMock).toHaveBeenCalledTimes(1)
+      expect(toBufferMock).not.toHaveBeenCalled()
+      expect(files).toEqual([{ path: `${os.tmpdir()}/photo.png`, sourcePath: tempFilePath }])
     })
   })
 })
