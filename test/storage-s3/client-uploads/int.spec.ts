@@ -65,6 +65,7 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-s3 clientUploads', ()
     expect(instructions.request.headers).toEqual({
       'Content-Length': String(file.length),
       'Content-Type': 'image/png',
+      'If-None-Match': '*',
     })
     const { url } = instructions.request
 
@@ -74,6 +75,7 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-s3 clientUploads', ()
       body: file,
       headers: {
         'Content-Type': 'image/png',
+        'If-None-Match': '*',
       },
       method: 'PUT',
     })
@@ -183,6 +185,7 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-s3 clientUploads', ()
       body: file,
       headers: {
         'Content-Type': mimeType,
+        'If-None-Match': '*',
       },
       method: 'PUT',
     })

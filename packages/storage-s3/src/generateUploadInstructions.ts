@@ -65,6 +65,7 @@ export const generateUploadInstructions = ({
         Bucket: bucket,
         ContentLength: filesizeLimit ? Math.min(filesize, filesizeLimit) : undefined,
         ContentType: mimeType,
+        IfNoneMatch: '*',
         Key: fileKey,
       }),
       {
@@ -85,6 +86,7 @@ export const generateUploadInstructions = ({
         headers: {
           'Content-Length': String(filesize),
           'Content-Type': mimeType,
+          'If-None-Match': '*',
         },
         method: 'PUT',
         url,
