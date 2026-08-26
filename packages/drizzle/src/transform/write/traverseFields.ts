@@ -696,6 +696,10 @@ export const traverseFields = ({
     }
 
     if (field.type === 'select' && field.hasMany) {
+      if (fieldData === undefined) {
+        return
+      }
+
       const selectTableName = adapter.tableNameMap.get(`${parentTableName}_${columnName}`)
       if (!selects[selectTableName]) {
         selects[selectTableName] = []

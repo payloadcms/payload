@@ -42,6 +42,7 @@ import { devUser } from '../credentials.js'
 import { seed } from './seed.js'
 import {
   customIDsSlug,
+  customSchemaSlug,
   defaultValuesSlug,
   errorOnUnnamedFieldsSlug,
   fieldsPersistanceSlug,
@@ -2161,6 +2162,66 @@ describe('database', () => {
       expect(doc.array[0].localizedText).toStrictEqual('goodbye')
       expect(doc.blocks[0].text).toStrictEqual('hello')
       expect(doc.blocks[0].localizedText).toStrictEqual('goodbye')
+    })
+
+    it('should preserve omitted hasMany selects when updating an array with db.updateOne', async () => {
+      const doc = await payload.create({
+        collection: customSchemaSlug,
+        data: {
+          array: [{ text: 'array row' }],
+          select: ['a', 'b'],
+        },
+      })
+
+      await payload.db.updateOne({
+        collection: customSchemaSlug,
+        id: doc.id,
+        data: {
+          array: [],
+        },
+      })
+
+      const updated = await payload.findByID({
+        collection: customSchemaSlug,
+        id: doc.id,
+      })
+
+      expect(updated.array).toHaveLength(0)
+      expect(updated.select).toStrictEqual(['a', 'b'])
+
+      await payload.delete({
+        collection: customSchemaSlug,
+        id: doc.id,
+      })
+    })
+
+    it('should clear hasMany selects when provided as an empty array to db.updateOne', async () => {
+      const doc = await payload.create({
+        collection: customSchemaSlug,
+        data: {
+          select: ['a', 'b'],
+        },
+      })
+
+      await payload.db.updateOne({
+        collection: customSchemaSlug,
+        id: doc.id,
+        data: {
+          select: [],
+        },
+      })
+
+      const updated = await payload.findByID({
+        collection: customSchemaSlug,
+        id: doc.id,
+      })
+
+      expect(updated.select).toHaveLength(0)
+
+      await payload.delete({
+        collection: customSchemaSlug,
+        id: doc.id,
+      })
     })
 
     it('arrays should work with both long field names and dbName', async () => {
