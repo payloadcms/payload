@@ -49,6 +49,7 @@ import {
   useDrawerSubmit,
 } from '../../../../utilities/fieldsDrawer/useDrawerSubmit.js'
 import { useLexicalDrawer } from '../../../../utilities/fieldsDrawer/useLexicalDrawer.js'
+import { mergeCurrentFormDataIntoFormState } from '../mergeCurrentFormDataIntoFormState.js'
 import { $isBlockNode } from '../nodes/BlocksNode.js'
 import {
   type BlockCollapsibleWithErrorProps,
@@ -141,18 +142,7 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
 
     // Merge current formData values into the cached form state
     // This ensures that when the component remounts (e.g., due to view changes), we don't lose user edits
-    const mergedState = Object.fromEntries(
-      Object.entries(cachedFormState).map(([fieldName, fieldState]) => [
-        fieldName,
-        fieldName in formData
-          ? {
-              ...fieldState,
-              initialValue: formData[fieldName],
-              value: formData[fieldName],
-            }
-          : fieldState,
-      ]),
-    )
+    const mergedState = mergeCurrentFormDataIntoFormState({ cachedFormState, formData })
 
     // Manually add blockName, as it's not part of cachedFormState
     mergedState.blockName = {
