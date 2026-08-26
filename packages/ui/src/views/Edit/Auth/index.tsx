@@ -134,11 +134,11 @@ export const Auth: React.FC<Props> = (props) => {
   const showReadableAPIKey = showAPIKey || hasDraftAPIKey || isEnablingAPIKey
   const showUnreadableAPIKey =
     operation === 'update' &&
-    canReadAPIKeyStatus &&
-    apiKeyEnabled &&
     !canReadAPIKey &&
     !hasDraftAPIKey &&
-    !isEnablingAPIKey
+    !isEnablingAPIKey &&
+    ((canReadAPIKeyStatus && apiKeyEnabled) ||
+      (!canReadAPIKeyStatus && (canModifyAPIKey || canModifyAPIKeyStatus)))
 
   const hasPermissionToUnlock: boolean = useMemo(() => {
     if (docPermissions) {

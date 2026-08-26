@@ -714,21 +714,28 @@ describe('Auth', () => {
     })
 
     describe('api-keys-with-field-read-access', () => {
-      let user
+      const collectionSlug = 'api-keys-with-field-read-access'
+      const createdIDs: string[] = []
 
-      beforeAll(async () => {
-        url = new AdminUrlUtil(serverURL, 'api-keys-with-field-read-access')
-
-        user = await payload.create({
-          collection: apiKeysSlug,
-          data: {
-            apiKey: uuid(),
-            enableAPIKey: true,
-          },
-        })
+      afterEach(async () => {
+        for (const id of createdIDs) {
+          await payload.delete({
+            collection: collectionSlug,
+            where: {
+              id: {
+                equals: id,
+              },
+            },
+          })
+        }
+        createdIDs.length = 0
       })
 
-      test('should show modifiable API key fields while creating without read access', async () => {
+      beforeAll(() => {
+        url = new AdminUrlUtil(serverURL, collectionSlug)
+      })
+
+      test('should keep modifiable API key fields visible without read access', async () => {
         await page.goto(url.create)
 
         await expect(page.locator('.auth-fields')).toBeVisible()
@@ -736,7 +743,15 @@ describe('Auth', () => {
         await expect(page.locator('#apiKey')).toBeVisible()
 
         await saveDocAndAssert(page)
-        await expect(page.locator('.auth-fields')).toBeHidden()
+        createdIDs.push(new URL(page.url()).pathname.split('/').at(-1) as string)
+
+        await expect(page.locator('.auth-fields')).toBeVisible()
+        await expect(page.locator('#field-enableAPIKey')).toBeHidden()
+        await expect(page.locator('#apiKey')).toBeDisabled()
+        await expect(
+          page.getByText("You don't have permission to view this API key."),
+        ).toBeVisible()
+        await expect(page.getByRole('button', { name: 'Generate new API key' })).toBeVisible()
       })
 
       test('ensure `?redirect=` param is injected into the URL and handled properly after login', async () => {
