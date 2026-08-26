@@ -25,6 +25,7 @@ import {
   UnorderedListFeature,
   UploadFeature,
 } from '@payloadcms/richtext-lexical'
+import { sharpTransformer } from '@payloadcms/transformer-sharp'
 import { buildConfig } from 'payload'
 import { de } from 'payload/i18n/de'
 import { en } from 'payload/i18n/en'
@@ -132,7 +133,6 @@ export async function buildConfigWithDefaults(
     }),
     email: testEmailAdapter,
     secret: 'TEST_SECRET',
-    sharp,
     telemetry: false,
     ...testConfig,
     endpoints: [localAPIEndpoint, reInitEndpoint, ...(testConfig?.endpoints || [])],
@@ -179,6 +179,17 @@ export async function buildConfigWithDefaults(
   const hasMcpPlugin = (config.plugins ?? []).some((p) => p.slug === '@payloadcms/plugin-mcp')
   if (!hasMcpPlugin) {
     config.plugins = [...(config.plugins ?? []), mcpPlugin({})]
+  }
+
+  // Auto-register the Sharp transformer so every test suite keeps its existing
+  // upload-time image processing (imageSizes/resizeOptions/crop/focalPoint).
+  // Suites that need to configure `upload.transformers` themselves (e.g. to add
+  // a custom slug or fixture transformers) set their own array, which wins here.
+  if (!config.upload) {
+    config.upload = {}
+  }
+  if (!config.upload.transformers) {
+    config.upload.transformers = [sharpTransformer({ sharp })]
   }
 
   return await buildConfig(config)

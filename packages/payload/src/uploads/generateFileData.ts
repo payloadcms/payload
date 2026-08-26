@@ -1,5 +1,3 @@
-import type { OutputInfo, Sharp, SharpOptions } from 'sharp'
-
 import { fileTypeFromBuffer } from 'file-type'
 import fs from 'fs/promises'
 import sanitize from 'sanitize-filename'
@@ -7,20 +5,21 @@ import sanitize from 'sanitize-filename'
 import type { Collection } from '../collections/config/types.js'
 import type { SanitizedConfig } from '../config/types.js'
 import type { Document, PayloadRequest } from '../types/index.js'
-import type { FileData, FileToSave, ProbedImageSize, UploadEdits } from './types.js'
+import type { PreparedUploadTransformation } from './transformers/uploadTransformerBridge.js'
+import type { FileData, FileSizes, FileToSave, UploadEdits } from './types.js'
 
 import { FileRetrievalError, FileUploadError, Forbidden, MissingFile } from '../errors/index.js'
 import { isNumber } from '../utilities/isNumber.js'
-import { canResizeImage } from './canResizeImage.js'
 import { checkFileRestrictions } from './checkFileRestrictions.js'
-import { cropImage } from './cropImage.js'
+import { generateImageSizeFilename } from './generateImageSizeFilename.js'
 import { getExternalFile } from './getExternalFile.js'
 import { getFileByPath } from './getFileByPath.js'
 import { getImageSize } from './getImageSize.js'
 import { getSafeFileName } from './getSafeFilename.js'
-import { createImageSizes } from './image-resizing/createImageSizes.js'
-import { isImage } from './isImage.js'
-import { optionallyAppendMetadata } from './optionallyAppendMetadata.js'
+import { parseFilename } from './parseFilename.js'
+import { planTransformerPipeline } from './transformers/planTransformerPipeline.js'
+import { transformUploadFile } from './transformers/transformUploadFile.js'
+import { getUploadTransformerInternal } from './transformers/uploadTransformerBridge.js'
 type Args<T> = {
   collection: Collection
   config: SanitizedConfig
@@ -84,7 +83,7 @@ export const generateFileData = async <T>({
     }
   }
 
-  const { serverURL, sharp } = req.payload.config
+  const { serverURL } = req.payload.config
 
   let file = isDuplicating ? undefined : req.file
 
@@ -97,15 +96,9 @@ export const generateFileData = async <T>({
   })
 
   const {
-    constructorOptions,
     disableLocalStorage,
     focalPoint: focalPointEnabled = true,
-    formatOptions,
-    imageSizes,
-    resizeOptions,
     staticDir,
-    trimOptions,
-    withMetadata,
   } = collectionConfig.upload
 
   const staticPath = staticDir
@@ -175,93 +168,111 @@ export const generateFileData = async <T>({
   let newData = incomingFileData as T
   const filesToSave: FileToSave[] = []
   const fileData: Partial<FileData> = {}
-  const fileIsAnimatedType = ['image/avif', 'image/gif', 'image/webp'].includes(file.mimetype)
-  const cropData =
-    typeof uploadEdits === 'object' && 'crop' in uploadEdits ? uploadEdits.crop : undefined
 
   try {
-    const fileSupportsResize = canResizeImage(file.mimetype)
-    let fsSafeName: string
-    let sharpFile: Sharp | undefined
-    let dimensions: ProbedImageSize | undefined
-    let fileBuffer!: { data: Buffer; info: OutputInfo }
-    let ext
-    let mime: string
-    const fileHasAdjustments =
-      fileSupportsResize &&
-      Boolean(
-        resizeOptions || formatOptions || trimOptions || constructorOptions || file.tempFilePath,
-      )
-
-    const sharpOptions: SharpOptions = { ...constructorOptions }
-
-    if (fileIsAnimatedType) {
-      sharpOptions.animated = true
-    }
-
-    if (sharp && (fileIsAnimatedType || fileHasAdjustments)) {
-      if (file.tempFilePath) {
-        sharpFile = sharp(file.tempFilePath, sharpOptions).rotate() // pass rotate() to auto-rotate based on EXIF data. https://github.com/payloadcms/payload/pull/3081
-      } else {
-        sharpFile = sharp(file.data, sharpOptions).rotate() // pass rotate() to auto-rotate based on EXIF data. https://github.com/payloadcms/payload/pull/3081
-      }
-
-      if (fileHasAdjustments) {
-        if (resizeOptions) {
-          sharpFile = sharpFile.resize(resizeOptions)
-        }
-        if (formatOptions) {
-          sharpFile = sharpFile.toFormat(formatOptions.format, formatOptions.options)
-        }
-        if (trimOptions) {
-          sharpFile = sharpFile.trim(trimOptions)
-        }
-      }
-    }
-
-    if (fileSupportsResize || isImage(file.mimetype)) {
-      dimensions = await getImageSize({ file, sharp })
-      fileData.width = dimensions.width
-      fileData.height = dimensions.height
-    }
-
-    if (sharpFile) {
-      const metadata = await sharpFile.metadata()
-      sharpFile = await optionallyAppendMetadata({
+    const pipeline = await planTransformerPipeline({
+      args: {
+        collectionSlug: collectionConfig.slug,
+        mimeType: file.mimetype,
+        operation: 'upload',
         req,
-        sharpFile,
-        withMetadata: withMetadata!,
-      })
-      fileBuffer = await sharpFile.toBuffer({ resolveWithObject: true })
-      ;({ ext, mime } = (await fileTypeFromBuffer(fileBuffer.data))!) // This is getting an incorrect gif height back.
-      fileData.width = fileBuffer.info.width
-      fileData.height = fileBuffer.info.height
-      fileData.filesize = fileBuffer.info.size
+      },
+      capability: 'transformFile',
+      transformers: req.payload.config.upload.transformers,
+    })
 
-      // Animated GIFs + WebP aggregate the height from every frame, so we need to use divide by number of pages
-      if (metadata.pages) {
-        fileData.height = fileBuffer.info.height / metadata.pages
-        fileData.filesize = fileBuffer.data.length
+    const bridgeTransformer = pipeline.find((transformer) =>
+      Boolean(getUploadTransformerInternal(transformer)?.prepareUpload),
+    )
+
+    const originalWebFile = new File(
+      [file.tempFilePath ? await fs.readFile(file.tempFilePath) : file.data],
+      file.name,
+      { type: file.mimetype },
+    )
+
+    let mainWebFile: File
+    let sizeResults: PreparedUploadTransformation[] = []
+
+    if (bridgeTransformer) {
+      const bridge = getUploadTransformerInternal(bridgeTransformer)!
+
+      const results = await bridge.prepareUpload!({
+        collectionSlug: collectionConfig.slug,
+        file: originalWebFile,
+        req,
+        transform: (task) =>
+          transformUploadFile({
+            collectionSlug: collectionConfig.slug,
+            file: originalWebFile,
+            options: task.options,
+            pipeline,
+            req,
+          }),
+        uploadEdits,
+      })
+
+      const mainResult = results.find((result) => result.fieldPath === 'filename')
+
+      mainWebFile = mainResult?.file ?? originalWebFile
+      fileData.width = mainResult?.width
+      fileData.height = mainResult?.height
+      sizeResults = results.filter((result) => result.fieldPath !== 'filename')
+
+      if (focalPointEnabled && uploadEdits?.focalPoint) {
+        fileData.focalX = isNumber(uploadEdits.focalPoint.x)
+          ? Math.round(uploadEdits.focalPoint.x)
+          : 50
+        fileData.focalY = isNumber(uploadEdits.focalPoint.y)
+          ? Math.round(uploadEdits.focalPoint.y)
+          : 50
       }
     } else {
-      mime = file.mimetype
-      fileData.filesize = file.size
+      mainWebFile = await transformUploadFile({
+        collectionSlug: collectionConfig.slug,
+        file: originalWebFile,
+        options: undefined,
+        pipeline,
+        req,
+      })
+    }
 
-      if (file.name.includes('.')) {
-        ext = file.name.split('.').pop()?.split('?')[0]
-      } else {
-        ext = ''
-      }
+    const fileWasTransformed = mainWebFile !== originalWebFile
+    const mainBuffer = Buffer.from(await mainWebFile.arrayBuffer())
+
+    let mimeType: string
+    let ext: string | undefined
+
+    if (fileWasTransformed) {
+      const typeResult = await fileTypeFromBuffer(mainBuffer)
+      ext = typeResult?.ext
+      mimeType = typeResult?.mime ?? file.mimetype
+    } else {
+      mimeType = file.mimetype
+      ext = file.name.includes('.') ? file.name.split('.').pop()?.split('?')[0] : ''
     }
 
     // Adjust SVG mime type. fromBuffer modifies it.
-    if (mime === 'application/xml' && ext === 'svg') {
-      mime = 'image/svg+xml'
+    if (mimeType === 'application/xml' && ext === 'svg') {
+      mimeType = 'image/svg+xml'
     }
-    fileData.mimeType = mime
+    fileData.mimeType = mimeType
+    fileData.filesize = mainBuffer.length
+
+    if (!bridgeTransformer) {
+      try {
+        const probed = await getImageSize({
+          file: fileWasTransformed ? { ...file, data: mainBuffer } : file,
+        })
+        fileData.width = probed.width
+        fileData.height = probed.height
+      } catch {
+        // Not a recognized image format — leave width/height unset.
+      }
+    }
 
     const baseFilename = sanitize(file.name.substring(0, file.name.lastIndexOf('.')) || file.name)
-    fsSafeName = `${baseFilename}${ext ? `.${ext}` : ''}`
+    let fsSafeName = `${baseFilename}${ext ? `.${ext}` : ''}`
 
     if (!overwriteExistingFiles) {
       // Extract prefix if present (added by plugin-cloud-storage)
@@ -277,144 +288,85 @@ export const generateFileData = async <T>({
 
     fileData.filename = fsSafeName
 
-    let fileForResize = file
+    filesToSave.push({
+      buffer: mainBuffer,
+      path: `${staticPath}/${fsSafeName}`,
+    })
 
-    if (cropData && sharp) {
-      const { data: croppedImage, info } = await cropImage({
-        cropData,
-        dimensions: dimensions!,
-        file,
-        heightInPixels: uploadEdits.heightInPixels!,
-        req,
-        sharp,
-        widthInPixels: uploadEdits.widthInPixels!,
-        withMetadata,
-      })
-
-      // Apply resize after cropping to ensure it conforms to resizeOptions
-      if (resizeOptions && !resizeOptions.withoutEnlargement) {
-        const resizedAfterCrop = await sharp(croppedImage)
-          .resize({
-            fit: resizeOptions?.fit || 'cover',
-            height: resizeOptions?.height,
-            position: resizeOptions?.position || 'center',
-            width: resizeOptions?.width,
-          })
-          .toBuffer({ resolveWithObject: true })
-
-        filesToSave.push({
-          buffer: resizedAfterCrop.data,
-          path: `${staticPath}/${fsSafeName}`,
-        })
-
-        fileForResize = {
-          ...fileForResize,
-          data: resizedAfterCrop.data,
-          size: resizedAfterCrop.info.size,
-        }
-
-        fileData.width = resizedAfterCrop.info.width
-        fileData.height = resizedAfterCrop.info.height
-        if (fileIsAnimatedType) {
-          const metadata = await sharpFile!.metadata()
-          fileData.height = metadata.pages
-            ? resizedAfterCrop.info.height / metadata.pages
-            : resizedAfterCrop.info.height
-        }
-        fileData.filesize = resizedAfterCrop.info.size
-      } else {
-        // If resizeOptions is not present, just save the cropped image
-        filesToSave.push({
-          buffer: croppedImage,
-          path: `${staticPath}/${fsSafeName}`,
-        })
-
-        fileForResize = {
-          ...file,
-          data: croppedImage,
-          size: info.size,
-        }
-
-        fileData.width = info.width
-        fileData.height = info.height
-        if (fileIsAnimatedType) {
-          const metadata = await sharpFile!.metadata()
-          fileData.height = metadata.pages ? info.height / metadata.pages : info.height
-        }
-        fileData.filesize = info.size
-      }
-
-      if (file.tempFilePath) {
-        await fs.writeFile(file.tempFilePath, croppedImage) // write fileBuffer to the temp path
-      } else {
-        req.file = fileForResize
-      }
+    if (file.tempFilePath) {
+      await fs.writeFile(file.tempFilePath, mainBuffer)
     } else {
-      // For non-image files with useTempFiles, read the buffer from the temp file
-      // since file.data is empty when using temp files
-      let bufferToSave: Buffer
-      if (fileBuffer?.data) {
-        bufferToSave = fileBuffer.data
-      } else if (file.tempFilePath) {
-        bufferToSave = await fs.readFile(file.tempFilePath)
-      } else {
-        bufferToSave = file.data
-      }
-
-      filesToSave.push({
-        buffer: bufferToSave,
-        path: `${staticPath}/${fsSafeName}`,
-      })
-
-      // If using temp files and the image is being resized, write the file to the temp path
-      if (fileBuffer?.data || bufferToSave.length > 0) {
-        if (file.tempFilePath) {
-          await fs.writeFile(file.tempFilePath, fileBuffer?.data || bufferToSave) // write fileBuffer to the temp path
-        } else {
-          // Assign the _possibly modified_ file to the request object
-          req.file = {
-            ...file,
-            data: fileBuffer?.data || bufferToSave,
-            size: fileBuffer?.info.size,
-          }
-        }
+      req.file = {
+        ...file,
+        data: mainBuffer,
+        size: mainBuffer.length,
       }
     }
 
-    if (fileSupportsResize && (Array.isArray(imageSizes) || focalPointEnabled !== false)) {
+    if (sizeResults.length > 0) {
       req.payloadUploadSizes = {}
-      // Focal point adjustments
-      const focalPoint =
-        focalPointEnabled && uploadEdits?.focalPoint
-          ? {
-              x: isNumber(uploadEdits.focalPoint.x) ? Math.round(uploadEdits.focalPoint.x) : 50,
-              y: isNumber(uploadEdits.focalPoint.y) ? Math.round(uploadEdits.focalPoint.y) : 50,
-            }
-          : undefined
+      const sizes: FileSizes = {}
+      const { name: baseName, ext: baseExt } = parseFilename(fsSafeName)
 
-      const { sizeData, sizesToSave } = await createImageSizes({
-        config: collectionConfig,
-        dimensions: !cropData
-          ? dimensions!
-          : {
-              ...dimensions,
-              height: fileData.height!,
-              width: fileData.width!,
-            },
-        file: fileForResize,
-        focalPoint,
-        mimeType: fileData.mimeType,
-        req,
-        savedFilename: fsSafeName || file.name,
-        sharp,
-        staticPath: staticPath!,
-        withMetadata,
-      })
+      for (const result of sizeResults) {
+        const sizeName = result.fieldPath.slice('sizes.'.length)
 
-      fileData.sizes = sizeData
-      fileData.focalX = focalPoint?.x
-      fileData.focalY = focalPoint?.y
-      filesToSave.push(...sizesToSave)
+        if (!result.file) {
+          sizes[sizeName] = {
+            filename: null,
+            filesize: null,
+            height: null,
+            mimeType: null,
+            url: null,
+            width: null,
+          }
+          continue
+        }
+
+        const sizeBuffer = Buffer.from(await result.file.arrayBuffer())
+        const sizeTypeResult = await fileTypeFromBuffer(sizeBuffer)
+        const sizeExt = sizeTypeResult?.ext || baseExt
+        const sizeMimeType = sizeTypeResult?.mime || result.mimeType || fileData.mimeType
+
+        req.payloadUploadSizes[sizeName] = sizeBuffer
+
+        const imageSizeConfig = collectionConfig.upload.imageSizes?.find(
+          (imageSize) => imageSize.name === sizeName,
+        )
+
+        const imageNameWithDimensions = imageSizeConfig?.generateImageName
+          ? imageSizeConfig.generateImageName({
+              extension: sizeExt,
+              height: result.height!,
+              originalName: baseName,
+              sizeName,
+              width: result.width!,
+            })
+          : generateImageSizeFilename({
+              extension: sizeExt,
+              height: result.height!,
+              outputImageName: baseName,
+              width: result.width!,
+            })
+
+        const imagePath = `${staticPath}/${imageNameWithDimensions}`
+
+        sizes[sizeName] = {
+          filename: imageNameWithDimensions,
+          filesize: sizeBuffer.length,
+          height: result.height!,
+          mimeType: sizeMimeType,
+          url: null,
+          width: result.width!,
+        }
+
+        filesToSave.push({
+          buffer: sizeBuffer,
+          path: imagePath,
+        })
+      }
+
+      fileData.sizes = sizes
     }
   } catch (err) {
     req.payload.logger.error(err)

@@ -82,13 +82,14 @@ export function createR2Adapter({
 
     staticHandler: (
       req,
-      { headers, params: { filename, prefix: prefixQueryParam, uploadReference } },
+      { headers, params: { filename, operation, prefix: prefixQueryParam, uploadReference } },
     ) =>
       getFile({
         bucket,
         collection,
         filename,
         incomingHeaders: headers,
+        operation,
         prefix,
         prefixQueryParam,
         req,

@@ -75,6 +75,7 @@
     "@payloadcms/storage-s3": "workspace:*",
     "@payloadcms/storage-vercel-blob": "workspace:*",
     "@payloadcms/tanstack-start": "workspace:*",
+    "@payloadcms/transformer-sharp": "workspace:*",
     "@payloadcms/translations": "workspace:*",
     "@payloadcms/ui": "workspace:*",
     "@sentry/nextjs": "^8.33.1",

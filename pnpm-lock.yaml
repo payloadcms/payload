@@ -1052,9 +1052,6 @@ importers:
       rollup-plugin-dts:
         specifier: 6.2.3
         version: 6.2.3(@typescript/typescript6@6.0.2)(rollup@4.59.0)
-      sharp:
-        specifier: 0.32.6
-        version: 0.32.6
 
   packages/payload-cloud:
     dependencies:
@@ -1696,6 +1693,22 @@ importers:
         specifier: '>=8.0.0'
         version: 8.1.0(@types/node@24.12.3)(esbuild@0.28.1)(jiti@2.7.0)(sass-embedded@1.100.0)(sass@1.100.0)(terser@5.48.0)(tsx@4.22.4)(yaml@2.9.0)
 
+  packages/transformer-sharp:
+    dependencies:
+      file-type:
+        specifier: 22.0.1
+        version: 22.0.1
+      sanitize-filename:
+        specifier: 1.6.4
+        version: 1.6.4
+      sharp:
+        specifier: 0.32.6
+        version: 0.32.6
+    devDependencies:
+      payload:
+        specifier: workspace:*
+        version: link:../payload
+
   packages/translations:
     dependencies:
       date-fns:
@@ -1871,6 +1884,9 @@ importers:
       '@payloadcms/richtext-lexical':
         specifier: workspace:*
         version: link:../../packages/richtext-lexical
+      '@payloadcms/transformer-sharp':
+        specifier: workspace:*
+        version: link:../../packages/transformer-sharp
       '@payloadcms/ui':
         specifier: workspace:*
         version: link:../../packages/ui
@@ -1895,9 +1911,6 @@ importers:
       react-dom:
         specifier: 19.2.6
         version: 19.2.6(react@19.2.6)
-      sharp:
-        specifier: 0.34.2
-        version: 0.34.2
     devDependencies:
       '@playwright/test':
         specifier: 1.59.1
@@ -1986,9 +1999,6 @@ importers:
       react-dom:
         specifier: 19.2.6
         version: 19.2.6(react@19.2.6)
-      sharp:
-        specifier: 0.34.2
-        version: 0.34.2
       srvx:
         specifier: 0.11.21
         version: 0.11.21
@@ -2291,6 +2301,9 @@ importers:
       '@payloadcms/richtext-lexical':
         specifier: workspace:*
         version: link:../../packages/richtext-lexical
+      '@payloadcms/transformer-sharp':
+        specifier: workspace:*
+        version: link:../../packages/transformer-sharp
       '@payloadcms/ui':
         specifier: workspace:*
         version: link:../../packages/ui
@@ -2348,9 +2361,6 @@ importers:
       react-hook-form:
         specifier: 7.71.1
         version: 7.71.1(react@19.2.6)
-      sharp:
-        specifier: 0.34.2
-        version: 0.34.2
       tailwind-merge:
         specifier: ^3.4.0
         version: 3.6.0
@@ -2572,6 +2582,9 @@ importers:
       '@payloadcms/tanstack-start':
         specifier: workspace:*
         version: link:../packages/tanstack-start
+      '@payloadcms/transformer-sharp':
+        specifier: workspace:*
+        version: link:../packages/transformer-sharp
       '@payloadcms/translations':
         specifier: workspace:*
         version: link:../packages/translations

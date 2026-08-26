@@ -13,7 +13,6 @@ import type { JSONSchema4 } from 'json-schema'
 import type { Metadata } from 'next'
 import type { DestinationStream, Level, LoggerOptions } from 'pino'
 import type React from 'react'
-import type { default as sharp } from 'sharp'
 
 import type { ComponentRenderer } from '../admin/adapters/render.js'
 import type { ServerAdapter } from '../admin/adapters/server.js'
@@ -72,6 +71,7 @@ import type {
 import type { QueryPreset, QueryPresetConstraints } from '../query-presets/types.js'
 import type { SanitizedJobsConfig } from '../queues/config/types/index.js'
 import type { PayloadRequest, Where } from '../types/index.js'
+import type { UploadTransformer } from '../uploads/transformers/types.js'
 import type { PayloadLogger } from '../utilities/logger.js'
 
 /**
@@ -672,23 +672,6 @@ export type LabelFunction<TTranslationKeys = ClientTranslationKeys> = (args: {
 
 export type StaticLabel = Record<string, string> | string
 
-export type SharpDependency = (
-  input?:
-    | ArrayBuffer
-    | Buffer
-    | Float32Array
-    | Float64Array
-    | Int8Array
-    | Int16Array
-    | Int32Array
-    | string
-    | Uint8Array
-    | Uint8ClampedArray
-    | Uint16Array
-    | Uint32Array,
-  options?: sharp.SharpOptions,
-) => sharp.Sharp
-
 export type CORSConfig = {
   headers?: string[]
   origins: '*' | string[]
@@ -808,6 +791,16 @@ export type FetchAPIFileUploadOptions = {
    */
   useTempFiles?: boolean | undefined
 } & Partial<BusboyConfig>
+
+export type GlobalUploadConfig = {
+  /**
+   * Ordered list of file transformers. Every eligible transformer joins the pipeline
+   * for a given upload or dynamic request in declaration order. Slugs must be unique.
+   *
+   * @see https://payloadcms.com/docs/upload/transformers
+   */
+  transformers?: UploadTransformer[]
+} & FetchAPIFileUploadOptions
 
 export type ErrorResult = {
   data?: any
@@ -1661,11 +1654,6 @@ export type Config = {
    */
   serverURL?: string
   /**
-   * Pass in a local copy of Sharp if you'd like to use it.
-   *
-   */
-  sharp?: SharpDependency
-  /**
    * Storage adapters that handle where uploaded files are stored (S3, GCS, Azure, Vercel Blob, etc.).
    *
    * Adapters are initialized **before** `plugins`, so file handling is fully wired before any plugin
@@ -1684,9 +1672,10 @@ export type Config = {
   /** Control how typescript interfaces are generated from your collections. */
   typescript?: RootTypeScriptConfig
   /**
-   * Customize the handling of incoming file uploads for collections that have uploads enabled.
+   * Customize the handling of incoming file uploads for collections that have uploads enabled,
+   * including the `transformers` pipeline.
    */
-  upload?: FetchAPIFileUploadOptions
+  upload?: GlobalUploadConfig
 }
 
 interface SanitizedAdminConfig
@@ -1810,7 +1799,8 @@ export interface SanitizedConfig
      * Deduped list of adapters used in the project
      */
     adapters: string[]
-  } & FetchAPIFileUploadOptions
+  } & GlobalUploadConfig &
+    Required<Pick<GlobalUploadConfig, 'transformers'>>
 }
 
 export type EditConfig = EditConfigWithoutRoot | EditConfigWithRoot

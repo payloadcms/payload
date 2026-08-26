@@ -1,5 +1,5 @@
 import type { Storage } from '@google-cloud/storage'
-import type { CollectionConfig, PayloadRequest } from 'payload'
+import type { CollectionConfig, FileHandlerOperation, PayloadRequest } from 'payload'
 
 import { ApiError } from '@google-cloud/storage'
 import {
@@ -15,6 +15,7 @@ interface GetFileArgs {
   collectionPrefix?: string
   filename: string
   incomingHeaders?: Headers
+  operation?: FileHandlerOperation
   prefixQueryParam?: string
   req: PayloadRequest
   uploadReference?: unknown
@@ -28,11 +29,14 @@ export async function getFile({
   collectionPrefix = '',
   filename,
   incomingHeaders,
+  operation = 'read',
   prefixQueryParam,
   req,
   uploadReference,
   useCompositePrefixes = false,
 }: GetFileArgs): Promise<Response> {
+  const isTransformSource = operation === 'transform'
+
   try {
     const docPrefix = await getDocPrefix({
       collection,
@@ -53,8 +57,7 @@ export async function getFile({
 
     const [metadata] = await file.getMetadata()
 
-    // Handle range request
-    const rangeHeader = req.headers.get('range')
+    const rangeHeader = isTransformSource ? null : req.headers.get('range')
     const fileSize = Number(metadata.size)
     const rangeResult = getRangeRequestInfo({ fileSize, rangeHeader })
 
@@ -70,7 +73,6 @@ export async function getFile({
 
     let headers = new Headers(incomingHeaders)
 
-    // Add range-related headers from the result
     for (const [key, value] of Object.entries(rangeResult.headers)) {
       headers.append(key, value)
     }
@@ -78,12 +80,12 @@ export async function getFile({
     headers.append('Content-Type', String(metadata.contentType))
     headers.append('ETag', String(metadata.etag))
 
-    // Add Content-Security-Policy header for SVG files to prevent executable code
     if (metadata.contentType === 'image/svg+xml') {
       headers.append('Content-Security-Policy', "script-src 'none'")
     }
 
     if (
+      !isTransformSource &&
       collection.upload &&
       typeof collection.upload === 'object' &&
       typeof collection.upload.modifyResponseHeaders === 'function'
@@ -91,14 +93,13 @@ export async function getFile({
       headers = collection.upload.modifyResponseHeaders({ headers }) || headers
     }
 
-    if (etagFromHeaders && etagFromHeaders === objectEtag) {
+    if (!isTransformSource && etagFromHeaders && etagFromHeaders === objectEtag) {
       return new Response(null, {
         headers,
         status: 304,
       })
     }
 
-    // Manually create a ReadableStream for the web from a Node.js stream.
     const readableStream = new ReadableStream({
       start(controller) {
         const streamOptions =

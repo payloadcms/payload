@@ -84,7 +84,7 @@ export function createAzureAdapter({
 
     staticHandler: (
       req,
-      { headers, params: { filename, prefix: prefixQueryParam, uploadReference } },
+      { headers, params: { filename, operation, prefix: prefixQueryParam, uploadReference } },
     ) =>
       getFile({
         client: getStorageClient(),
@@ -92,6 +92,7 @@ export function createAzureAdapter({
         collectionPrefix: prefix,
         filename,
         incomingHeaders: headers,
+        operation,
         prefixQueryParam,
         req,
         uploadReference,

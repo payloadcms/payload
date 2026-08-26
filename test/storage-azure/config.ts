@@ -1,5 +1,6 @@
 import { BlobServiceClient } from '@azure/storage-blob'
 import { azureStorage } from '@payloadcms/storage-azure'
+import { sharpTransformer } from '@payloadcms/transformer-sharp'
 import dotenv from 'dotenv'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
@@ -13,7 +14,25 @@ import { mediaSlug, mediaWithPrefixSlug, prefix } from './shared.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-let uploadOptions
+const uploadOptions = {
+  transformers: [
+    sharpTransformer({
+      collections: {
+        [mediaSlug]: {
+          imageSizes: [
+            { height: 400, width: 400, crop: 'center', name: 'square' },
+            { width: 900, height: 450, crop: 'center', name: 'sixteenByNineMedium' },
+          ],
+          resizeOptions: {
+            position: 'center',
+            width: 200,
+            height: 200,
+          },
+        },
+      },
+    }),
+  ],
+}
 
 // Load config to work with emulated services
 dotenv.config({

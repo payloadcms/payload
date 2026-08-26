@@ -79,7 +79,7 @@ export function createGcsAdapter({
 
     staticHandler: (
       req,
-      { headers, params: { filename, prefix: prefixQueryParam, uploadReference } },
+      { headers, params: { filename, operation, prefix: prefixQueryParam, uploadReference } },
     ) =>
       getFile({
         bucket,
@@ -88,6 +88,7 @@ export function createGcsAdapter({
         collectionPrefix: prefix,
         filename,
         incomingHeaders: headers,
+        operation,
         prefixQueryParam,
         req,
         uploadReference,

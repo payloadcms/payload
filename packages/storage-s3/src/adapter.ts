@@ -89,7 +89,7 @@ export function createS3Adapter({
 
     staticHandler: async (
       req,
-      { headers, params: { filename, prefix: prefixQueryParam, uploadReference } },
+      { headers, params: { filename, operation, prefix: prefixQueryParam, uploadReference } },
     ) => {
       const { getFile } = await import('./getFile.js')
       return getFile({
@@ -99,6 +99,7 @@ export function createS3Adapter({
         collectionPrefix: prefix,
         filename,
         incomingHeaders: headers,
+        operation,
         prefixQueryParam,
         req,
         signedDownloads,
