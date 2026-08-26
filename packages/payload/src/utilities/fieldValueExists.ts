@@ -34,7 +34,7 @@ export const fieldValueExists = async ({
   draftsEnabled,
   field,
   locale,
-  overrideAccess = true,
+  overrideAccess = false,
   req,
   value,
 }: Args): Promise<boolean> => {

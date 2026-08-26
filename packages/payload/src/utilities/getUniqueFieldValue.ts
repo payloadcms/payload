@@ -36,7 +36,7 @@ export const getUniqueFieldValue = async ({
   draftsEnabled,
   field,
   locale,
-  overrideAccess = true,
+  overrideAccess = false,
   req,
   startIndex = 0,
   value,

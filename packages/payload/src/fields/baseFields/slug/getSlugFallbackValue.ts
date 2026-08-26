@@ -28,7 +28,7 @@ export const getSlugFallbackValue = async ({
   collection,
   field,
   locale,
-  overrideAccess = true,
+  overrideAccess = false,
   req,
   slugify,
 }: Args): Promise<string> => {

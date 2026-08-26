@@ -33,7 +33,16 @@ type Args = {
  */
 export const generateSlug =
   ({ name, localized, slugify: customSlugify, useAsSlug }: Args): FieldHook =>
-  async ({ collection, context, data, operation, originalDoc, overrideAccess, req, value }) => {
+  async ({
+    collection,
+    context,
+    data,
+    operation,
+    originalDoc,
+    overrideAccess = false,
+    req,
+    value,
+  }) => {
     const slugify = (valueToSlugify: unknown) =>
       customSlugify
         ? customSlugify({ data: (data ?? {}) as TypeWithID, req, valueToSlugify })

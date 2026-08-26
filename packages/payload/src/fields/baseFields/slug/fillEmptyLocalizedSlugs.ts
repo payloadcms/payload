@@ -30,7 +30,7 @@ type Args = {
 export const fillEmptyLocalizedSlugs = async ({
   collection,
   data,
-  overrideAccess = true,
+  overrideAccess = false,
   req,
 }: Args): Promise<JsonObject> => {
   const { localization } = req.payload.config

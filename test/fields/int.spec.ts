@@ -851,6 +851,23 @@ describe('Fields', () => {
       created.length = 0
     })
 
+    it('should apply read access when a REST create omits overrideAccess', async () => {
+      const hidden = await payload.create({
+        collection,
+        data: { title: 'REST shared title' },
+      })
+      created.push(hidden.id)
+
+      const response = await restClient.POST(`/${collection}`, {
+        body: JSON.stringify({ title: 'REST shared title' }),
+      })
+      const { doc } = await response.json()
+      created.push(doc.id)
+
+      expect(response.status).toBe(201)
+      expect(doc.slug).toBe('rest-shared-title')
+    })
+
     it('should apply read access when checking a generated slug during create', async () => {
       const hidden = await payload.create({
         collection,
