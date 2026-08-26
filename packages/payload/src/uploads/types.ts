@@ -438,16 +438,28 @@ export type File = {
   tempFilePath?: string
 }
 
-export type FileToSave = {
-  /**
-   * The buffer of the file.
-   */
-  buffer: Buffer
-  /**
-   * The path to save the file.
-   */
-  path: string
-}
+export type FileToSave =
+  | {
+      /**
+       * The buffer of the file.
+       */
+      buffer: Buffer
+      /**
+       * The path to save the file.
+       */
+      path: string
+    }
+  | {
+      /**
+       * The path to save the file.
+       */
+      path: string
+      /**
+       * An existing file on disk to copy to `path`, instead of `buffer` - avoids loading a file
+       * that's already on disk (e.g. a temp file) fully into memory just to write it back out.
+       */
+      sourcePath: string
+    }
 
 type Crop = {
   height: number
