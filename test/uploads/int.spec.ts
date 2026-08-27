@@ -445,6 +445,37 @@ describe('Collections - Uploads', () => {
       })
     })
     describe('update', () => {
+      it('should reject filenames with parent directory segments', async () => {
+        const mediaDoc = (await payload.create({
+          collection: mediaSlug,
+          data: {},
+          file: await getFileByPath(path.resolve(dirname, './image.png')),
+        })) as unknown as Media
+
+        const response = await restClient.PATCH(`/${mediaSlug}/${mediaDoc.id}`, {
+          body: JSON.stringify({
+            filename: `archive/../${mediaDoc.filename}`,
+            sizes: {
+              icon: {
+                filename: `archive/../${mediaDoc.sizes.icon.filename}`,
+              },
+            },
+          }),
+        })
+
+        expect(response.status).toBe(400)
+
+        const unchangedDoc = (await payload.findByID({
+          collection: mediaSlug,
+          id: mediaDoc.id,
+        })) as unknown as Media
+
+        expect(unchangedDoc.filename).toBe(mediaDoc.filename)
+        expect(unchangedDoc.sizes.icon.filename).toBe(mediaDoc.sizes.icon.filename)
+
+        await payload.delete({ collection: mediaSlug, id: mediaDoc.id })
+      })
+
       it('should replace image and delete old files - by ID', async () => {
         const filePath = path.resolve(dirname, './image.png')
         const file = await getFileByPath(filePath)
