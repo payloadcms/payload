@@ -44,6 +44,8 @@ if (process.env.WRITE_DB_ADAPTER !== 'false') {
 process.env.ROOT_DIR = getNextRootDir(testSuiteArg).rootDir
 
 // Hide the test suite arg from commander so the CLI only parses its own args
-process.argv = [process.argv[0]!, process.argv[1]!, ...cliArgs]
+// e.g. `[node, payloadCLI.ts, fields, info]` becomes `[node, payloadCLI.ts, info]`.
+console.log('before', process.argv)
+process.argv = [process.execPath, filename, ...cliArgs]
 
 await bin()

@@ -16,7 +16,9 @@ export const createRunCommand = defineCLICommand({
     const absoluteScriptPath = path.resolve(process.cwd(), args.scriptPath)
     const originalArgv = process.argv
 
-    process.argv = [process.argv[0]!, process.argv[1]!, ...args.scriptArgs]
+    // Make the imported module receive arguments as if it were run directly with Node.
+    // For example, `[node, payload, run, script.ts, first]` becomes `[node, script.ts, first]`.
+    process.argv = [process.execPath, absoluteScriptPath, ...args.scriptArgs]
 
     try {
       await import(pathToFileURL(absoluteScriptPath).toString())
