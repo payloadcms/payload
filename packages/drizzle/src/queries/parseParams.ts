@@ -192,7 +192,12 @@ export function parseParams({
                   ) {
                     formattedValue = val
                   } else if (['in', 'not_in'].includes(operator) && Array.isArray(val)) {
-                    formattedValue = `(${val.map((v) => `${escapeSQLValue(v)}`).join(',')})`
+                    formattedValue = `(${val
+                      .map((v) => {
+                        const escaped = escapeSQLValue(v)
+                        return typeof v === 'string' ? `'${escaped}'` : String(escaped)
+                      })
+                      .join(',')})`
                   } else {
                     formattedValue = `'${operatorKeys[operator].wildcard}${escapeSQLValue(val)}${operatorKeys[operator].wildcard}'`
                   }
