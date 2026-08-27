@@ -6,6 +6,7 @@ import chalk from 'chalk'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { bin } from 'payload/cli'
+import { loadEnv } from 'payload/node'
 
 import { getNextRootDir } from './__helpers/shared/getNextRootDir.js'
 import { setTestEnvPaths } from './__helpers/shared/setTestEnvPaths.js'
@@ -13,6 +14,8 @@ import { generateDatabaseAdapter, getCurrentDatabaseAdapter } from './dbAdapters
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+
+loadEnv()
 
 const [testSuiteArg, ...cliArgs] = process.argv.slice(2)
 
