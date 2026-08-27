@@ -5,7 +5,7 @@ import { serialize } from 'object-to-formdata'
 import path from 'path'
 import { APIError, NotFound } from 'payload'
 import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { Relation } from './config.js'
@@ -23,6 +23,7 @@ import {
   pointSlug,
   postsSlug,
   relationSlug,
+  updateShapesSlug,
 } from './config.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -30,6 +31,10 @@ const dirname = path.dirname(filename)
 
 let restClient: NextRESTClient
 let payload: Payload
+const createdInputBoundaryRecords: Array<{
+  collection: string
+  id: number | string
+}> = []
 
 describe('collections-rest', () => {
   beforeAll(async () => {
@@ -44,6 +49,14 @@ describe('collections-rest', () => {
     await clearDocs()
   })
 
+  afterEach(async () => {
+    for (const { collection, id } of createdInputBoundaryRecords.reverse()) {
+      await payload.delete({ collection: collection as any, id })
+    }
+
+    createdInputBoundaryRecords.length = 0
+  })
+
   describe('CRUD', () => {
     it('should create', async () => {
       const data = {
@@ -52,6 +65,27 @@ describe('collections-rest', () => {
       const doc = await createPost(data)
 
       expect(doc).toMatchObject(data)
+    })
+
+    it('should not persist fields denied by create access', async () => {
+      const inheritedValue = 'managed-value'
+      const data = JSON.parse(
+        `{"title":"constrained","__proto__":{"managedValue":"${inheritedValue}"}}`,
+      )
+      const createdDoc = await payload.create({
+        collection: postsSlug,
+        data,
+        overrideAccess: false,
+      })
+      createdInputBoundaryRecords.push({ collection: postsSlug, id: createdDoc.id })
+
+      const savedDoc = await payload.findByID({
+        id: createdDoc.id,
+        collection: postsSlug,
+      })
+
+      expect(savedDoc).not.toHaveProperty('managedValue', inheritedValue)
+      expect(Object.prototype).not.toHaveProperty('managedValue')
     })
 
     it('should return 400 when request body contains malformed JSON', async () => {
@@ -133,6 +167,206 @@ describe('collections-rest', () => {
       expect(response.status).toEqual(200)
       expect(doc.title).toEqual(updatedTitle)
       expect(doc.description).toEqual(description) // Check was not modified
+    })
+
+    it('should reject invalid array update shapes', async () => {
+      const doc = await payload.create({
+        collection: updateShapesSlug as any,
+        data: {
+          items: [],
+        },
+      })
+      createdInputBoundaryRecords.push({ collection: updateShapesSlug, id: doc.id })
+
+      const response = await restClient.PATCH(`/${updateShapesSlug}/${doc.id}`, {
+        body: JSON.stringify({
+          items: {
+            $push: {
+              id: 'row-id',
+              publicField: 'updated',
+              restrictedField: 'managed',
+            },
+          },
+        }),
+      })
+      const updated = await payload.findByID({
+        id: doc.id,
+        collection: updateShapesSlug as any,
+        depth: 0,
+      })
+
+      expect(updated.items).toEqual([])
+      expect(response.status).toBe(400)
+    })
+
+    it('should accept valid array update shapes', async () => {
+      const doc = await payload.create({
+        collection: updateShapesSlug as any,
+        data: {
+          items: [],
+        },
+      })
+      createdInputBoundaryRecords.push({ collection: updateShapesSlug, id: doc.id })
+
+      const response = await restClient.PATCH(`/${updateShapesSlug}/${doc.id}`, {
+        body: JSON.stringify({
+          items: [
+            {
+              publicField: 'updated',
+            },
+          ],
+        }),
+      })
+      const { doc: updated } = await response.json()
+
+      expect(response.status).toBe(200)
+      expect(updated.items).toMatchObject([
+        {
+          publicField: 'updated',
+        },
+      ])
+    })
+
+    it('should reject invalid blocks update shapes', async () => {
+      const initialBlock = {
+        blockType: 'update-shape-block',
+        publicField: 'initial',
+        restrictedField: 'initial-managed',
+      }
+      const doc = await payload.create({
+        collection: updateShapesSlug as any,
+        data: {
+          content: [initialBlock],
+        },
+      })
+      createdInputBoundaryRecords.push({ collection: updateShapesSlug, id: doc.id })
+
+      const response = await restClient.PATCH(`/${updateShapesSlug}/${doc.id}?draft=true`, {
+        body: JSON.stringify({
+          content: {
+            blockType: 'update-shape-block',
+            publicField: 'updated',
+            restrictedField: 'updated-managed',
+          },
+        }),
+      })
+      const updated = await payload.findByID({
+        id: doc.id,
+        collection: updateShapesSlug as any,
+        depth: 0,
+        draft: true,
+      })
+
+      expect(updated.content).toHaveLength(1)
+      expect(updated.content[0]).toMatchObject(initialBlock)
+      expect(response.status).toBe(400)
+    })
+
+    it('should accept valid blocks update shapes', async () => {
+      const doc = await payload.create({
+        collection: updateShapesSlug as any,
+        data: {
+          content: [],
+        },
+      })
+      createdInputBoundaryRecords.push({ collection: updateShapesSlug, id: doc.id })
+
+      const response = await restClient.PATCH(`/${updateShapesSlug}/${doc.id}?draft=true`, {
+        body: JSON.stringify({
+          content: [
+            {
+              blockType: 'update-shape-block',
+              publicField: 'updated',
+            },
+          ],
+        }),
+      })
+      const { doc: updated } = await response.json()
+
+      expect(response.status).toBe(200)
+      expect(updated.content).toMatchObject([
+        {
+          blockType: 'update-shape-block',
+          publicField: 'updated',
+        },
+      ])
+    })
+
+    it('should accept supported numeric and relationship update shapes', async () => {
+      const relation = await payload.create({
+        collection: relationSlug,
+        data: {
+          name: 'related',
+        },
+      })
+      createdInputBoundaryRecords.push({ collection: relationSlug, id: relation.id })
+      const doc = await payload.create({
+        collection: updateShapesSlug as any,
+        data: {},
+      })
+      createdInputBoundaryRecords.push({ collection: updateShapesSlug, id: doc.id })
+
+      const response = await restClient.PATCH(`/${updateShapesSlug}/${doc.id}?draft=true`, {
+        body: JSON.stringify({
+          numbers: [1, 2],
+          polymorphicRelations: {
+            relationTo: relationSlug,
+            value: relation.id,
+          },
+        }),
+      })
+
+      expect(response.status).toBe(200)
+    })
+
+    it.each([
+      'number object',
+      'relationship object',
+      'polymorphic relationship object',
+      'polymorphic relationship value types',
+    ])('should reject invalid %s draft update shapes', async (shape) => {
+      const relation = await payload.create({
+        collection: relationSlug,
+        data: {
+          name: 'related',
+        },
+      })
+      createdInputBoundaryRecords.push({ collection: relationSlug, id: relation.id })
+      const doc = await payload.create({
+        collection: updateShapesSlug as any,
+        data: {
+          number: 1,
+          relations: [relation.id],
+        },
+      })
+      createdInputBoundaryRecords.push({ collection: updateShapesSlug, id: doc.id })
+      let data
+
+      if (shape === 'number object') {
+        data = { number: { value: 2 } }
+      } else if (shape === 'relationship object') {
+        data = { relations: { value: relation.id } }
+      } else if (shape === 'polymorphic relationship object') {
+        data = {
+          polymorphicRelations: {
+            extra: true,
+            relationTo: relationSlug,
+            value: relation.id,
+          },
+        }
+      } else {
+        data = {
+          polymorphicRelations: {
+            relationTo: {},
+            value: {},
+          },
+        }
+      }
+      const response = await restClient.PATCH(`/${updateShapesSlug}/${doc.id}?draft=true`, {
+        body: JSON.stringify(data),
+      })
+
+      expect(response.status).toBe(400)
     })
 
     it('can handle REST API requests with over 1mb of multipart/form-data', async () => {

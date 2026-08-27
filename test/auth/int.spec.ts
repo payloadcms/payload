@@ -1,3 +1,4 @@
+import type { DrizzleAdapter } from '@payloadcms/drizzle'
 import type {
   BasePayload,
   EmailFieldValidation,
@@ -10,7 +11,7 @@ import type {
 import crypto from 'crypto'
 import { jwtDecode } from 'jwt-decode'
 import path from 'path'
-import { getFieldsToSign } from 'payload'
+import { getFieldsToSign, traverseFields } from 'payload'
 import { email as emailValidation } from 'payload/shared'
 import { fileURLToPath } from 'url'
 import { v4 as uuid } from 'uuid'
@@ -19,6 +20,8 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, vitest } from 'v
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { ApiKey } from './payload-types.js'
 
+// eslint-disable-next-line payload/no-relative-monorepo-imports
+import { transformForWrite } from '../../packages/drizzle/src/transform/write/index.js'
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { devUser } from '../credentials.js'
 import {
@@ -100,6 +103,102 @@ describe('Auth', () => {
       })
 
       expect(response.status).toBe(403)
+    })
+
+    it('should handle constrained session updates', async () => {
+      const marker = 'constrainedSessionUpdate'
+      const inheritedMarker = 'constrainedInheritedSessionUpdate'
+      const protoMarker = 'constrainedProtoUpdate'
+      const constructorMarker = 'constrainedConstructorUpdate'
+      const prototypeMarker = 'constrainedPrototypeUpdate'
+      const inheritedTarget = Object.prototype.toString as unknown as Record<string, unknown>
+      const originalDescriptor = Object.getOwnPropertyDescriptor(Object.prototype, marker)
+      const originalInheritedDescriptor = Object.getOwnPropertyDescriptor(
+        inheritedTarget,
+        inheritedMarker,
+      )
+      const createConstrainedData = (): Record<string, unknown> =>
+        JSON.parse(`{
+          "__proto__": {},
+          "constructor": {},
+          "prototype": {},
+          "__proto__.${protoMarker}": "local",
+          "constructor.${constructorMarker}": "local",
+          "prototype.${prototypeMarker}": "local",
+          "toString.${inheritedMarker}": "local"
+        }`) as Record<string, unknown>
+      const sharedData = createConstrainedData()
+      const drizzleData = createConstrainedData()
+      const sharedProtoTarget = sharedData['__proto__'] as Record<string, unknown>
+      const sharedConstructorTarget = sharedData['constructor'] as Record<string, unknown>
+      const sharedPrototypeTarget = sharedData['prototype'] as Record<string, unknown>
+      const drizzleProtoTarget = drizzleData['__proto__'] as Record<string, unknown>
+      const drizzleConstructorTarget = drizzleData['constructor'] as Record<string, unknown>
+      const drizzlePrototypeTarget = drizzleData['prototype'] as Record<string, unknown>
+      let testError: Error | undefined
+
+      try {
+        traverseFields({ fields: [], fillEmpty: false, ref: sharedData })
+        transformForWrite({
+          adapter: payload.db as DrizzleAdapter,
+          data: drizzleData,
+          fields: [],
+          tableName: 'session_users',
+        })
+
+        const response = await restClient.POST('/session-users/first-register', {
+          body: JSON.stringify({
+            email: 'session-user@example.com',
+            password: 'test-password',
+            sessions: {
+              $push: [
+                { [`__proto__.${marker}`]: 'local' },
+                { [`__proto__.${marker}`]: 'local' },
+                { [`__proto__.${marker}`]: 'local' },
+                { [`toString.${inheritedMarker}`]: 'local' },
+              ],
+            },
+          }),
+        })
+        const { totalDocs } = await payload.count({ collection: 'session-users' })
+
+        expect(response.status).toBe(400)
+        expect(totalDocs).toBe(0)
+        expect(sharedProtoTarget).not.toHaveProperty(protoMarker)
+        expect(sharedConstructorTarget).toHaveProperty(constructorMarker, 'local')
+        expect(sharedPrototypeTarget).toHaveProperty(prototypeMarker, 'local')
+        expect(drizzleProtoTarget).not.toHaveProperty(protoMarker)
+        expect(drizzleConstructorTarget).toHaveProperty(constructorMarker, 'local')
+        expect(drizzlePrototypeTarget).toHaveProperty(prototypeMarker, 'local')
+        expect(Object.hasOwn(sharedData, 'toString')).toBe(true)
+        expect(sharedData['toString']).toHaveProperty(inheritedMarker, 'local')
+        expect(Object.hasOwn(drizzleData, 'toString')).toBe(true)
+        expect(drizzleData['toString']).toHaveProperty(inheritedMarker, 'local')
+        expect(Object.prototype).not.toHaveProperty(marker)
+        expect(inheritedTarget).not.toHaveProperty(inheritedMarker)
+      } catch (error) {
+        testError = error instanceof Error ? error : new Error(String(error))
+      } finally {
+        if (originalDescriptor) {
+          Object.defineProperty(Object.prototype, marker, originalDescriptor)
+        } else {
+          delete (Object.prototype as Record<string, unknown>)[marker]
+        }
+        if (originalInheritedDescriptor) {
+          Object.defineProperty(inheritedTarget, inheritedMarker, originalInheritedDescriptor)
+        } else {
+          delete inheritedTarget[inheritedMarker]
+        }
+      }
+
+      expect(Object.getOwnPropertyDescriptor(Object.prototype, marker)).toEqual(originalDescriptor)
+      expect(Object.getOwnPropertyDescriptor(inheritedTarget, inheritedMarker)).toEqual(
+        originalInheritedDescriptor,
+      )
+
+      if (testError) {
+        throw testError
+      }
     })
 
     it('should login a user successfully', async () => {

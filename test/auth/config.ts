@@ -43,6 +43,11 @@ export default buildConfigWithDefaults({
   },
   collections: [
     {
+      slug: 'session-users',
+      auth: true,
+      fields: [],
+    },
+    {
       slug,
       admin: {
         useAsTitle: 'custom',
