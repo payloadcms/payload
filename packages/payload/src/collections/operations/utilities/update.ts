@@ -38,6 +38,7 @@ import {
   hasLocalizeStatusEnabled,
 } from '../../../utilities/getVersionsConfig.js'
 import { buildLocalizedPublishData } from '../../../versions/buildSingleLocalePublishData.js'
+
 export type SharedUpdateDocumentArgs<TSlug extends CollectionSlug> = {
   autosave: boolean
   collectionConfig: SanitizedCollectionConfig
@@ -54,6 +55,10 @@ export type SharedUpdateDocumentArgs<TSlug extends CollectionSlug> = {
   overrideLock: boolean
   payload: Payload
   populate?: PopulateType
+  /**
+   * When true, this update will not unlock the document.
+   * @default false
+   */
   preserveLock?: boolean
   publishAllLocales?: boolean
   req: PayloadRequest

@@ -33,7 +33,7 @@ import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion.js'
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
-import { updateDocument } from './utilities/update.js'
+import { type SharedUpdateDocumentArgs, updateDocument } from './utilities/update.js'
 
 export type Arguments<TSlug extends CollectionSlug> = {
   autosave?: boolean
@@ -48,14 +48,13 @@ export type Arguments<TSlug extends CollectionSlug> = {
   overrideLock?: boolean
   overwriteExistingFiles?: boolean
   populate?: PopulateType
-  /** @experimental Retains the existing document lock after the update. */
-  preserveLock?: boolean
   publishAllLocales?: boolean
   req: PayloadRequest
   showHiddenFields?: boolean
   trash?: boolean
   unpublishAllLocales?: boolean
-} & Pick<FindOptions<TSlug, SelectType>, 'select'>
+} & Pick<FindOptions<TSlug, SelectType>, 'select'> &
+  Pick<SharedUpdateDocumentArgs<TSlug>, 'preserveLock'>
 
 export const updateByIDOperation = async <
   TSlug extends CollectionSlug,
