@@ -8,6 +8,7 @@ import type {
   CLIInputSchema,
   CLIRuntime,
 } from '../config/types.js'
+import type { MaybePromise } from '../types/index.js'
 
 type CLICommandDefinition<TInput extends CLIInputSchema> = {
   aliases?: string[]
@@ -33,7 +34,7 @@ type CLICommandDefinition<TInput extends CLIInputSchema> = {
       help: CLIHelp
       isJSON: boolean
     } & Pick<CLIRuntime, 'getConfig' | 'getPayload'>,
-  ) => CLICommandResult | number | Promise<CLICommandResult | number | void> | void
+  ) => MaybePromise<CLICommandResult | number | void>
   helpGroup?: string
   input: TInput
 }

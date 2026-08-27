@@ -72,7 +72,7 @@ import type {
 } from '../index.js'
 import type { QueryPreset, QueryPresetConstraints } from '../query-presets/types.js'
 import type { SanitizedJobsConfig } from '../queues/config/types/index.js'
-import type { PayloadRequest, Where } from '../types/index.js'
+import type { MaybePromise, PayloadRequest, Where } from '../types/index.js'
 import type { PayloadLogger } from '../utilities/logger.js'
 
 /**
@@ -200,7 +200,7 @@ export type CLICommand = {
     getPayload: CLIRuntime['getPayload']
     help: CLIHelp
     isJSON: boolean
-  }) => CLICommandResult | number | Promise<CLICommandResult | number | void> | void
+  }) => MaybePromise<CLICommandResult | number | void>
   helpGroup?: string
   input: CLIInputSchema
   readonly schema: Record<string, unknown>
@@ -227,7 +227,7 @@ type Prettify<T> = {
 /**
  * @experimental The plugin API (`order`, `slug`, `options`) may change before being declared stable.
  */
-export type Plugin = ((config: Config) => Config | Promise<Config>) & {
+export type Plugin = ((config: Config) => MaybePromise<Config>) & {
   /** @experimental Plugin options exposed for cross-plugin mutation. */
   options?: Record<string, unknown>
   /** @experimental Execution order - lower values run first. Defaults to 0. */
