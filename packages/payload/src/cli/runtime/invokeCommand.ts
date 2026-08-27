@@ -5,8 +5,8 @@ import { Cron } from 'croner'
 
 import type { CLICommand, CLICommandResult, CLIHelp, CLIRuntime } from '../../config/types.js'
 
+import { getCommandInput } from './getCommandInput.js'
 import { CLICommandError, getCLIErrorOutput, isJSONOutput, writeCLIJSON } from './output.js'
-import { readCommandInput } from './readCommandInput.js'
 import { redirectOutputToStderr } from './redirectOutputToStderr.js'
 
 /**
@@ -34,7 +34,7 @@ export const invokeCLICommand = async ({
   help: CLIHelp
   runtime: CLIRuntime
 }): Promise<void> => {
-  const rawInput = await readCommandInput({ command })
+  const rawInput = await getCommandInput(command)
   const validation = await definition.input['~standard'].validate(rawInput)
 
   if (validation.issues) {
@@ -96,7 +96,8 @@ export const invokeCLICommand = async ({
       }
     }
 
-    const { exitCode, result } = normalizeHandlerResult(handlerResult)
+    const { exitCode, result } =
+      typeof handlerResult === 'number' ? { exitCode: handlerResult } : (handlerResult ?? {})
 
     if (isJSON) {
       writeCLIJSON({
@@ -140,8 +141,3 @@ export const invokeCLICommand = async ({
   )
   process.stdin.resume()
 }
-
-const normalizeHandlerResult = (
-  handlerResult: CLICommandResult | number | void,
-): CLICommandResult =>
-  typeof handlerResult === 'number' ? { exitCode: handlerResult } : (handlerResult ?? {})

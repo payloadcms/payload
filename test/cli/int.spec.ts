@@ -5,7 +5,7 @@ import { access, mkdir, readdir, readFile, rm, writeFile } from 'node:fs/promise
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { createCLI } from 'payload/cli'
-import { readCommandInput } from 'payload/internal'
+import { getCommandInput } from 'payload/internal'
 import { parseArgsStringToArgv } from 'string-argv'
 import { expect } from 'vitest'
 
@@ -803,7 +803,7 @@ function testCLICommand(
         parsedCommand.action(() => undefined)
         await parserCLI.parseAsync(['node', 'payload', ...args])
 
-        const input = JSON.stringify(await readCommandInput({ command: parsedCommand }))
+        const input = JSON.stringify(await getCommandInput(parsedCommand))
 
         if (source === 'file') {
           await writeFile(inputFile, input)
