@@ -6,7 +6,7 @@ import type { JsonObject, PayloadRequest } from '../../types/index.js'
 
 import { updateByIDOperation } from '../../collections/operations/updateByID.js'
 import { combineQueries } from '../../database/combineQueries.js'
-import { APIError, Forbidden, NotFound, ValidationError } from '../../errors/index.js'
+import { APIError, Forbidden, NotFound } from '../../errors/index.js'
 import { fieldAffectsData } from '../../fields/config/types.js'
 import { getRequestCollectionWithID } from '../../utilities/getRequestEntity.js'
 import { headersWithCors } from '../../utilities/headersWithCors.js'
@@ -83,29 +83,13 @@ const generateAPIKeyForDocument = async ({
     }
   }
 
-  if (doc.enableAPIKey !== true) {
-    throw new ValidationError(
-      {
-        id,
-        collection: collection.config.slug,
-        errors: [
-          {
-            message: 'API keys must be enabled before generating a new key.',
-            path: 'enableAPIKey',
-          },
-        ],
-        req,
-      },
-      req.t,
-    )
-  }
-
   return withServerGeneratedAPIKey(req, () =>
     updateByIDOperation({
       id,
       collection,
       data,
       overrideAccess: false,
+      preserveLock: true,
       req,
     }),
   )

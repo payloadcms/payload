@@ -54,6 +54,7 @@ export type SharedUpdateDocumentArgs<TSlug extends CollectionSlug> = {
   overrideLock: boolean
   payload: Payload
   populate?: PopulateType
+  preserveLock?: boolean
   publishAllLocales?: boolean
   req: PayloadRequest
   select: SelectType
@@ -93,6 +94,7 @@ export const updateDocument = async <
   overrideLock,
   payload,
   populate,
+  preserveLock,
   publishAllLocales: publishAllLocalesArg,
   req,
   select,
@@ -134,6 +136,7 @@ export const updateDocument = async <
     collectionSlug: collectionConfig.slug,
     lockErrorMessage: `Document with ID ${id} is currently locked by another user and cannot be updated.`,
     overrideLock,
+    preserveLock,
     req,
   })
 

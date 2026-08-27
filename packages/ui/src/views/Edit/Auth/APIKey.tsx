@@ -3,7 +3,8 @@ import type { TextFieldClient } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { formatAdminURL } from 'payload/shared'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { toast } from 'sonner'
 
 import { APIKeyInput } from '../../../elements/APIKeyInput/index.js'
 import { GenerateConfirmation } from '../../../elements/GenerateConfirmation/index.js'
@@ -34,7 +35,13 @@ const useAPIKeyLabel = () => {
   }, [apiKeyField, i18n])
 }
 
-const useGenerateAPIKey = () => {
+const useGenerateAPIKey = ({
+  onGenerationComplete,
+  onGenerationStart,
+}: {
+  onGenerationComplete?: (updatedAt?: string) => void
+  onGenerationStart?: () => void
+}) => {
   const {
     config: {
       routes: { api },
@@ -43,37 +50,47 @@ const useGenerateAPIKey = () => {
   const { id, collectionSlug, setData } = useDocumentInfo()
   const { i18n, t } = useTranslation()
 
-  return useCallback(async (): Promise<{ apiKey?: string }> => {
-    if (!id) {
-      throw new Error(t('general:error'))
-    }
+  return useCallback(async (): Promise<{ apiKey?: string; updatedAt?: string }> => {
+    onGenerationStart?.()
 
-    const response = await fetch(
-      formatAdminURL({
-        apiRoute: api,
-        path: `/${collectionSlug}/generate-api-key/${id}`,
-      }),
-      {
-        credentials: 'include',
-        headers: {
-          'Accept-Language': i18n.language,
-          'Content-Type': 'application/json',
+    let updatedAt: string | undefined
+
+    try {
+      if (!id) {
+        throw new Error(t('general:error'))
+      }
+
+      const response = await fetch(
+        formatAdminURL({
+          apiRoute: api,
+          path: `/${collectionSlug}/generate-api-key/${id}`,
+        }),
+        {
+          credentials: 'include',
+          headers: {
+            'Accept-Language': i18n.language,
+            'Content-Type': 'application/json',
+          },
+          method: 'post',
         },
-        method: 'post',
-      },
-    )
-    const result = await response.json()
+      )
+      const result = await response.json()
 
-    if (!response.ok) {
-      throw new Error(result.errors?.[0]?.message ?? t('general:error'))
+      if (!response.ok) {
+        throw new Error(result.errors?.[0]?.message ?? t('general:error'))
+      }
+
+      updatedAt = typeof result.updatedAt === 'string' ? result.updatedAt : undefined
+
+      if (Object.keys(result).length > 0) {
+        setData(result)
+      }
+
+      return result
+    } finally {
+      onGenerationComplete?.(updatedAt)
     }
-
-    if (Object.keys(result).length > 0) {
-      setData(result)
-    }
-
-    return result
-  }, [api, collectionSlug, i18n.language, id, setData, t])
+  }, [api, collectionSlug, i18n.language, id, onGenerationComplete, onGenerationStart, setData, t])
 }
 
 const APIKeyLabel = ({ label }: { label: string }) => (
@@ -85,15 +102,24 @@ const APIKeyLabel = ({ label }: { label: string }) => (
 export const UnreadableAPIKey: React.FC<{
   readonly canGenerate: boolean
   readonly description: string
-}> = ({ canGenerate, description }) => {
+  readonly isPending: boolean
+  readonly onGenerationComplete?: (updatedAt?: string) => void
+  readonly onGenerationStart?: () => void
+}> = ({ canGenerate, description, isPending, onGenerationComplete, onGenerationStart }) => {
   const apiKeyLabel = useAPIKeyLabel()
-  const generateAPIKey = useGenerateAPIKey()
+  const generateAPIKey = useGenerateAPIKey({ onGenerationComplete, onGenerationStart })
 
   return (
     <React.Fragment>
       <div className={[fieldBaseClass, 'api-key', 'read-only'].join(' ')}>
         <APIKeyLabel label={apiKeyLabel} />
-        <APIKeyInput aria-label={apiKeyLabel} disabled id="apiKey" value={undefined} />
+        <APIKeyInput
+          aria-label={apiKeyLabel}
+          disabled
+          id="apiKey"
+          isPending={isPending}
+          value={undefined}
+        />
         <FieldDescription description={description} path="apiKey" />
       </div>
       {canGenerate && <GenerateConfirmation generate={async () => void (await generateAPIKey())} />}
@@ -105,13 +131,28 @@ export const APIKey: React.FC<{
   readonly canGenerate: boolean
   readonly description?: string
   readonly enabled: boolean
+  readonly generateOnEnable: boolean
   readonly isFormModified: boolean
   readonly onGenerated: (apiKey: string) => void
+  readonly onGenerationComplete?: (updatedAt?: string) => void
+  readonly onGenerationStart?: () => void
   readonly value?: string
-}> = ({ canGenerate, description, enabled, isFormModified, onGenerated, value }) => {
+}> = ({
+  canGenerate,
+  description,
+  enabled,
+  generateOnEnable,
+  isFormModified,
+  onGenerated,
+  onGenerationComplete,
+  onGenerationStart,
+  value,
+}) => {
   const [highlightedField, setHighlightedField] = useState(false)
+  const [isGenerating, setIsGenerating] = useState(false)
+  const hasGeneratedOnEnable = useRef(false)
   const apiKeyLabel = useAPIKeyLabel()
-  const generateAPIKey = useGenerateAPIKey()
+  const generateAPIKey = useGenerateAPIKey({ onGenerationComplete, onGenerationStart })
   const { t } = useTranslation()
 
   useEffect(() => {
@@ -125,13 +166,31 @@ export const APIKey: React.FC<{
   }, [highlightedField])
 
   const generate = useCallback(async () => {
-    const result = await generateAPIKey()
+    setIsGenerating(true)
 
-    if (result.apiKey) {
-      onGenerated(result.apiKey)
-      setHighlightedField(true)
+    try {
+      const result = await generateAPIKey()
+
+      if (result.apiKey) {
+        onGenerated(result.apiKey)
+        setHighlightedField(true)
+      }
+    } finally {
+      setIsGenerating(false)
     }
   }, [generateAPIKey, onGenerated])
+
+  useEffect(() => {
+    if (!enabled || !generateOnEnable || hasGeneratedOnEnable.current || value) {
+      return
+    }
+
+    hasGeneratedOnEnable.current = true
+    void generate().catch((error) => {
+      hasGeneratedOnEnable.current = false
+      toast.error(error instanceof Error ? error.message : t('general:error'))
+    })
+  }, [enabled, generate, generateOnEnable, t, value])
 
   if (!enabled) {
     return null
@@ -147,13 +206,11 @@ export const APIKey: React.FC<{
           highlighted={highlightedField}
           id="apiKey"
           isFormModified={isFormModified}
+          isLoading={isGenerating}
           isPending={!value}
           value={value}
         />
         <FieldDescription description={description} path="apiKey" />
-        {!value && (
-          <FieldDescription description={t('authentication:apiKeyGeneratedOnSave')} path="apiKey" />
-        )}
       </div>
       {canGenerate && <GenerateConfirmation generate={generate} />}
     </React.Fragment>

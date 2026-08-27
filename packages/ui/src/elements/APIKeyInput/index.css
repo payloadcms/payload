@@ -43,6 +43,10 @@
     line-height: var(--text-body-medium-line-height);
   }
 
+  .api-key-input__field--loading {
+    font-family: var(--font-family-sans);
+  }
+
   .api-key-input__field:focus,
   .api-key-input__field:focus-visible {
     outline: none;

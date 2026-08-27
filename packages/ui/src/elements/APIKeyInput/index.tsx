@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState } from 'react'
 
 import { EyeIcon } from '../../icons/Eye/index.js'
 import { KeyIcon } from '../../icons/Key/index.js'
+import { useTranslation } from '../../providers/Translation/index.js'
 import { CopyToClipboard } from '../CopyToClipboard/index.js'
 import './index.css'
 
@@ -15,6 +16,7 @@ export type APIKeyInputProps = {
   readonly id?: string
   readonly initiallyVisible?: boolean
   readonly isFormModified?: boolean
+  readonly isLoading?: boolean
   readonly isPending?: boolean
   readonly value: null | string | undefined
 }
@@ -30,12 +32,14 @@ export const APIKeyInput: React.FC<APIKeyInputProps> = ({
   highlighted,
   initiallyVisible = false,
   isFormModified = false,
+  isLoading = false,
   isPending = false,
   value,
 }) => {
   const [showKey, setShowKey] = useState(initiallyVisible)
   const wasFormModified = useRef(isFormModified)
   const keyValue = value ?? ''
+  const { t } = useTranslation()
 
   useEffect(() => {
     if (highlighted) {
@@ -65,10 +69,18 @@ export const APIKeyInput: React.FC<APIKeyInputProps> = ({
         <KeyIcon className={`${baseClass}__icon`} />
         <input
           aria-label={ariaLabel}
-          className={`${baseClass}__field`}
+          className={[`${baseClass}__field`, isLoading && `${baseClass}__field--loading`]
+            .filter(Boolean)
+            .join(' ')}
           disabled={disabled}
           id={id}
-          placeholder={disabled && !isPending ? '•'.repeat(36) : undefined}
+          placeholder={
+            isLoading
+              ? `${t('general:loading')}...`
+              : disabled && !isPending
+                ? '•'.repeat(36)
+                : undefined
+          }
           readOnly
           type={disabled || showKey ? 'text' : 'password'}
           value={keyValue}

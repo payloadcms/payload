@@ -40,6 +40,7 @@ type APIKeyTestCollectionSlug =
 
 type APIKeyTestDocument = {
   apiKey?: null | string
+  enableAPIKey?: boolean | null
   id: number | string
   name?: null | string
 }
@@ -441,6 +442,9 @@ describe('Auth', () => {
         const apiKeyLocator = page.locator('#apiKey')
         await expect(apiKeyLocator).toBeDisabled()
         await expect(apiKeyLocator).toHaveValue('')
+        await expect(apiKeyLocator).not.toHaveAttribute('placeholder')
+        await expect(page.getByText('Save this document to generate an API key.')).toBeVisible()
+        await expect(page.getByText("You don't have permission to view this API key.")).toBeHidden()
 
         const createRequestPromise = page.waitForRequest(
           (request) =>
@@ -452,6 +456,8 @@ describe('Auth', () => {
         expect(getPayloadRequestData(createRequest)).not.toHaveProperty('apiKey')
         await expect(apiKeyLocator).toBeDisabled()
         await expect(apiKeyLocator).toHaveValue('')
+        await expect(apiKeyLocator).toHaveAttribute('placeholder', '•'.repeat(36))
+        await expect(page.getByText('Save this document to generate an API key.')).toBeHidden()
         await expect(
           page.getByText("You don't have permission to view this API key."),
         ).toBeVisible()
@@ -516,6 +522,18 @@ describe('Auth', () => {
         createdIDs.length = 0
       })
 
+      test('should explain API key generation on new readable documents', async () => {
+        const userURL = new AdminUrlUtil(serverURL, apiKeysWithReadableKeysSlug)
+
+        await page.goto(userURL.create)
+        await page.locator('#field-enableAPIKey').click()
+
+        const apiKeyInput = page.locator('#apiKey')
+        await expect(apiKeyInput).toHaveValue('')
+        await expect(apiKeyInput).not.toHaveAttribute('placeholder')
+        await expect(page.getByText('Save this document to generate an API key.')).toBeVisible()
+      })
+
       test('should rotate a readable API key', async () => {
         const originalAPIKey = uuid()
         const user = await getAPIKeyTestPayload().create({
@@ -559,7 +577,7 @@ describe('Auth', () => {
         await expect(apiKeyInput).toHaveAttribute('type', 'password')
       })
 
-      test('should generate a readable API key when first enabled and saved', async () => {
+      test('should reveal a generated API key before enabling it on save', async () => {
         const user = await getAPIKeyTestPayload().create({
           collection: apiKeysWithReadableKeysSlug,
           data: {},
@@ -569,21 +587,95 @@ describe('Auth', () => {
 
         await page.goto(userURL.edit(user.id))
         await expect(page.locator('#apiKey')).toBeHidden()
+
+        const generationRequestPromise = page.waitForRequest(
+          (request) =>
+            request.method() === 'POST' &&
+            request.url().includes(`/${apiKeysWithReadableKeysSlug}/generate-api-key/${user.id}`),
+        )
         await page.locator('#field-enableAPIKey').click()
+        await generationRequestPromise
 
         const apiKeyInput = page.locator('#apiKey')
-        await expect(apiKeyInput).toHaveValue('')
-        await expect(apiKeyInput).not.toHaveAttribute('placeholder')
-        await expect(page.getByText('Save this document to generate an API key.')).toBeVisible()
+        await expect(apiKeyInput).not.toHaveValue('')
+        await expect(apiKeyInput).toHaveAttribute('type', 'text')
+        const generatedAPIKey = await apiKeyInput.inputValue()
+        const generatedWhileDisabled = await getAPIKeyTestPayload().find({
+          collection: apiKeysWithReadableKeysSlug,
+          where: { id: { equals: user.id } },
+        })
+
+        expect(generatedWhileDisabled.docs[0]?.apiKey).toBe(generatedAPIKey)
+        expect(generatedWhileDisabled.docs[0]?.enableAPIKey).not.toBe(true)
 
         await saveDocAndAssert(page)
-        await expect(apiKeyInput).not.toHaveValue('')
+        const enabled = await getAPIKeyTestPayload().find({
+          collection: apiKeysWithReadableKeysSlug,
+          where: { id: { equals: user.id } },
+        })
+
+        expect(enabled.docs[0]?.apiKey).toBe(generatedAPIKey)
+        expect(enabled.docs[0]?.enableAPIKey).toBe(true)
         await expect(apiKeyInput).toHaveAttribute('type', 'password')
         await page.getByRole('button', { name: 'Show API key' }).click()
         await expect(apiKeyInput).toHaveAttribute('type', 'text')
       })
 
-      test('should hide an existing readable API key when re-enabled', async () => {
+      test('should not show a conflict modal when API key generation overlaps form state', async () => {
+        const user = await getAPIKeyTestPayload().create({
+          collection: apiKeysWithReadableKeysSlug,
+          data: {},
+        })
+        createdIDs.push(user.id)
+        const userURL = new AdminUrlUtil(serverURL, apiKeysWithReadableKeysSlug)
+        const editURL = userURL.edit(user.id)
+        const generationURL = `${apiURL}/${apiKeysWithReadableKeysSlug}/generate-api-key/${user.id}`
+
+        await page.goto(editURL)
+
+        let markGenerationStored: () => void
+        const generationStored = new Promise<void>((resolve) => {
+          markGenerationStored = resolve
+        })
+        let releaseGenerationResponse: () => void
+        const generationResponseCanContinue = new Promise<void>((resolve) => {
+          releaseGenerationResponse = resolve
+        })
+        let hasBlockedFormState = false
+
+        await page.route(editURL, async (route) => {
+          if (route.request().method() === 'POST' && !hasBlockedFormState) {
+            hasBlockedFormState = true
+            await generationStored
+          }
+
+          await route.continue()
+        })
+        await page.route(generationURL, async (route) => {
+          const response = await route.fetch()
+          markGenerationStored!()
+          await generationResponseCanContinue
+          await route.fulfill({ response })
+        })
+
+        try {
+          const formStateResponse = page.waitForResponse(
+            (response) => response.request().method() === 'POST' && response.url() === editURL,
+          )
+
+          await page.locator('#field-enableAPIKey').click()
+          await formStateResponse
+
+          await expect(page.locator('#document-locked')).toBeHidden()
+          await expect(page.locator('#document-stale-data')).toBeHidden()
+        } finally {
+          releaseGenerationResponse!()
+          await page.unroute(editURL)
+          await page.unroute(generationURL)
+        }
+      })
+
+      test('should rotate an existing readable API key before re-enabling it', async () => {
         const existingAPIKey = uuid()
         const user = await getAPIKeyTestPayload().create({
           collection: apiKeysWithReadableKeysSlug,
@@ -602,8 +694,30 @@ describe('Auth', () => {
         const apiKeyInput = page.locator('#apiKey')
         await expect(apiKeyInput).toHaveValue(existingAPIKey)
         await expect(apiKeyInput).toHaveAttribute('type', 'password')
-        await page.getByRole('button', { name: 'Show API key' }).click()
+        await page.getByRole('button', { name: 'Generate new API key' }).click()
+        await page
+          .locator(`#generate-confirmation-${user.id} [data-dialog-action="confirm"]`)
+          .click()
+
+        await expect(apiKeyInput).not.toHaveValue(existingAPIKey)
         await expect(apiKeyInput).toHaveAttribute('type', 'text')
+        const rotatedAPIKey = await apiKeyInput.inputValue()
+        const rotatedWhileDisabled = await getAPIKeyTestPayload().find({
+          collection: apiKeysWithReadableKeysSlug,
+          where: { id: { equals: user.id } },
+        })
+
+        expect(rotatedWhileDisabled.docs[0]?.apiKey).toBe(rotatedAPIKey)
+        expect(rotatedWhileDisabled.docs[0]?.enableAPIKey).toBe(false)
+
+        await saveDocAndAssert(page)
+
+        const reenabled = await getAPIKeyTestPayload().find({
+          collection: apiKeysWithReadableKeysSlug,
+          where: { id: { equals: user.id } },
+        })
+        expect(reenabled.docs[0]?.apiKey).toBe(rotatedAPIKey)
+        expect(reenabled.docs[0]?.enableAPIKey).toBe(true)
       })
     })
 
@@ -686,6 +800,7 @@ describe('Auth', () => {
         const apiKeyInput = page.locator('#apiKey')
         await expect(apiKeyInput).toBeDisabled()
         await expect(apiKeyInput).toHaveValue('')
+        await expect(apiKeyInput).toHaveAttribute('placeholder', '•'.repeat(36))
         await expect(page.getByRole('button', { name: 'Show API key' })).toBeHidden()
         await expect(page.locator('.copy-to-clipboard')).toBeHidden()
         await expect(
@@ -721,6 +836,7 @@ describe('Auth', () => {
         const apiKeyInput = page.locator('#apiKey')
         await expect(apiKeyInput).toBeDisabled()
         await expect(apiKeyInput).toHaveValue('')
+        await expect(apiKeyInput).toHaveAttribute('placeholder', '•'.repeat(36))
         await expect(page.getByRole('button', { name: 'Show API key' })).toBeHidden()
         await expect(page.locator('.copy-to-clipboard')).toBeHidden()
         await expect(

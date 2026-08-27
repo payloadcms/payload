@@ -6,6 +6,8 @@ export type Props = {
   disableLocalStrategy?: SanitizedCollectionConfig['auth']['disableLocalStrategy']
   email: string
   loginWithUsername: SanitizedCollectionConfig['auth']['loginWithUsername']
+  onAPIKeyGenerationComplete?: (updatedAt?: string) => void
+  onAPIKeyGenerationStart?: () => void
   operation: 'create' | 'update'
   readOnly: boolean
   requirePassword?: boolean

@@ -48,6 +48,8 @@ export type Arguments<TSlug extends CollectionSlug> = {
   overrideLock?: boolean
   overwriteExistingFiles?: boolean
   populate?: PopulateType
+  /** @experimental Retains the existing document lock after the update. */
+  preserveLock?: boolean
   publishAllLocales?: boolean
   req: PayloadRequest
   showHiddenFields?: boolean
@@ -88,6 +90,7 @@ export const updateByIDOperation = async <
       overrideLock,
       overwriteExistingFiles = false,
       populate,
+      preserveLock,
       publishAllLocales,
       req: {
         fallbackLocale,
@@ -229,6 +232,7 @@ export const updateByIDOperation = async <
       overrideLock: overrideLock!,
       payload,
       populate,
+      preserveLock,
       publishAllLocales,
       req,
       select: select!,

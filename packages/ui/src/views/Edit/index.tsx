@@ -187,7 +187,8 @@ export function DefaultEditView({
 
   const hasCheckedForStaleDataRef = useRef(false)
   const originalUpdatedAtRef = useRef(data?.updatedAt)
-  const saveCounterRef = useRef(0)
+  const localUpdateCounterRef = useRef(0)
+  const isGeneratingAPIKeyRef = useRef(false)
   const isSavingRef = useRef(false)
 
   const lockExpiryTime = lastUpdateTime + lockDurationInMilliseconds
@@ -255,6 +256,21 @@ export function DefaultEditView({
     // Refresh to get the latest data
     router.refresh()
   }, [router])
+
+  const handleAPIKeyGenerationStart = useCallback(() => {
+    localUpdateCounterRef.current += 1
+    isGeneratingAPIKeyRef.current = true
+  }, [])
+
+  const handleAPIKeyGenerationComplete = useCallback((updatedAt?: string) => {
+    if (updatedAt) {
+      originalUpdatedAtRef.current = updatedAt
+      hasCheckedForStaleDataRef.current = false
+    }
+
+    isGeneratingAPIKeyRef.current = false
+    setShowStaleDataModal(false)
+  }, [])
 
   const handlePrevent = useCallback((nextHref: null | string) => {
     nextHrefRef.current = nextHref
@@ -473,7 +489,7 @@ export function DefaultEditView({
 
       // Capture save state before the async form-state request so we can detect
       // if a save was triggered while this request was in-flight
-      const saveCounterAtStart = saveCounterRef.current
+      const localUpdateCounterAtStart = localUpdateCounterRef.current
       const isSavingAtStart = isSavingRef.current
 
       // Sync originalUpdatedAt with current data if it's NEWER (e.g., after router.refresh())
@@ -543,7 +559,8 @@ export function DefaultEditView({
       if (
         staleDataState?.isStale &&
         !isSavingAtStart &&
-        saveCounterRef.current === saveCounterAtStart
+        !isGeneratingAPIKeyRef.current &&
+        localUpdateCounterRef.current === localUpdateCounterAtStart
       ) {
         setShowStaleDataModal(true)
       }
@@ -675,6 +692,8 @@ export function DefaultEditView({
       disableLocalStrategy={collectionConfig.auth?.disableLocalStrategy}
       email={data?.email}
       loginWithUsername={auth?.loginWithUsername}
+      onAPIKeyGenerationComplete={handleAPIKeyGenerationComplete}
+      onAPIKeyGenerationStart={handleAPIKeyGenerationStart}
       operation={operation}
       readOnly={!hasSavePermission}
       requirePassword={!id}
@@ -716,7 +735,7 @@ export function DefaultEditView({
           method={id ? 'PATCH' : 'POST'}
           onChange={[onChange]}
           onSubmit={() => {
-            saveCounterRef.current += 1
+            localUpdateCounterRef.current += 1
             isSavingRef.current = true
           }}
           onSuccess={onSave}

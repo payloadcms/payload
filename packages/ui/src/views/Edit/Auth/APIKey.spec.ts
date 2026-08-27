@@ -38,10 +38,7 @@ vi.mock('../../../providers/DocumentInfo/index.js', () => ({
 vi.mock('../../../providers/Translation/index.js', () => ({
   useTranslation: () => ({
     i18n: { language: 'en' },
-    t: (key: string) =>
-      key === 'authentication:apiKeyGeneratedOnSave'
-        ? 'Save this document to generate an API key.'
-        : key,
+    t: (key: string) => key,
   }),
 }))
 
@@ -70,12 +67,13 @@ afterEach(() => {
 })
 
 describe('APIKey', () => {
-  it('should show an empty pending state until the API key is generated on save', async () => {
+  it('should show an empty input before a new document is saved', async () => {
     await act(async () => {
       root.render(
         React.createElement(APIKey, {
           canGenerate: true,
           enabled: true,
+          generateOnEnable: false,
           isFormModified: true,
           onGenerated: vi.fn(),
           value: undefined,
@@ -89,9 +87,51 @@ describe('APIKey', () => {
 
     expect(input?.value).toBe('')
     expect(input?.placeholder).toBe('')
-    expect(container.textContent).toContain('Save this document to generate an API key.')
+    expect(container.textContent).toBe('API Key')
     expect(container.querySelector('[aria-label="Show API key"]')).toBeNull()
     expect(fetch).not.toHaveBeenCalled()
     expect(setData).not.toHaveBeenCalled()
+  })
+
+  it('should show a loading state while generating a missing API key', async () => {
+    let resolveResponse: (response: Response) => void
+    const responsePromise = new Promise<Response>((resolve) => {
+      resolveResponse = resolve
+    })
+    vi.mocked(fetch).mockReturnValue(responsePromise)
+
+    await act(async () => {
+      root.render(
+        React.createElement(APIKey, {
+          canGenerate: true,
+          enabled: true,
+          generateOnEnable: true,
+          isFormModified: true,
+          onGenerated: vi.fn(),
+          value: undefined,
+        }),
+      )
+      await Promise.resolve()
+    })
+
+    const input = container.querySelector('input')
+
+    expect(input?.placeholder).toBe('general:loading...')
+    expect(input?.classList.contains('api-key-input__field--loading')).toBe(true)
+    expect(container.querySelector('.spinner')).toBeNull()
+
+    await act(async () => {
+      resolveResponse!(
+        new Response(JSON.stringify({ apiKey: 'generated-api-key' }), {
+          headers: { 'Content-Type': 'application/json' },
+          status: 200,
+        }),
+      )
+      await responsePromise
+      await Promise.resolve()
+    })
+
+    expect(container.querySelector('.spinner')).toBeNull()
+    expect(input?.classList.contains('api-key-input__field--loading')).toBe(false)
   })
 })

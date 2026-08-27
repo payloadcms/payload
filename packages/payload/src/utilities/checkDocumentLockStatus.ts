@@ -12,6 +12,7 @@ type CheckDocumentLockStatusArgs = {
   lockDurationDefault?: number
   lockErrorMessage?: string
   overrideLock?: boolean
+  preserveLock?: boolean
   req: PayloadRequest
 }
 
@@ -22,6 +23,7 @@ export const checkDocumentLockStatus = async ({
   lockDurationDefault = 300, // Default 5 minutes in seconds
   lockErrorMessage,
   overrideLock = true,
+  preserveLock = false,
   req,
 }: CheckDocumentLockStatusArgs): Promise<void> => {
   const { payload } = req
@@ -96,7 +98,10 @@ export const checkDocumentLockStatus = async ({
     }
   }
 
-  // Perform the delete operation regardless of overrideLock status
+  if (preserveLock) {
+    return
+  }
+
   await payload.db.deleteMany({
     collection: lockedDocumentsCollectionSlug,
     // Not passing req fails on postgres

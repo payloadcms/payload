@@ -1621,16 +1621,20 @@ describe('Auth', () => {
     })
 
     describe('generate API key endpoint', () => {
+      let authenticatedUserID: number | string
       let token: string
 
       beforeAll(async () => {
-        ;({ token } = await payload.login({
+        const loginResult = await payload.login({
           collection: slug,
           data: {
             email: devUser.email,
             password: devUser.password,
           },
-        }))
+        })
+
+        authenticatedUserID = loginResult.user.id
+        token = loginResult.token
       })
 
       it('immediately generates and returns a readable API key', async () => {
@@ -1740,7 +1744,7 @@ describe('Auth', () => {
         expect(updated.apiKey).not.toBe(originalAPIKey)
       })
 
-      it('does not generate an API key while it is disabled', async () => {
+      it('rotates a disabled API key without enabling it', async () => {
         const originalAPIKey = uuid()
         const user = await payload.create({
           collection: apiKeysWithReadableKeysSlug,
@@ -1758,16 +1762,38 @@ describe('Auth', () => {
             },
           },
         )
+        const result = await response.json()
         const updated = await payload.findByID({
-          collection: apiKeysWithReadableKeysSlug,
           id: user.id,
+          collection: apiKeysWithReadableKeysSlug,
         })
 
-        expect(response.status).toBe(400)
-        expect(updated.apiKey).toBe(originalAPIKey)
+        expect(response.status).toBe(200)
+        expect(result.apiKey).toEqual(expect.any(String))
+        expect(result.apiKey).not.toBe(originalAPIKey)
+        expect(updated.apiKey).toBe(result.apiKey)
+        expect(updated.enableAPIKey).toBe(false)
+
+        const oldAuthentication = await restClient
+          .GET(`/${apiKeysWithReadableKeysSlug}/me`, {
+            headers: {
+              Authorization: `${apiKeysWithReadableKeysSlug} API-Key ${originalAPIKey}`,
+            },
+          })
+          .then((authResponse) => authResponse.json())
+        const newAuthentication = await restClient
+          .GET(`/${apiKeysWithReadableKeysSlug}/me`, {
+            headers: {
+              Authorization: `${apiKeysWithReadableKeysSlug} API-Key ${result.apiKey}`,
+            },
+          })
+          .then((authResponse) => authResponse.json())
+
+        expect(oldAuthentication.user).toBeNull()
+        expect(newAuthentication.user).toBeNull()
       })
 
-      it('does not generate a missing API key while it is disabled', async () => {
+      it('generates a missing API key without enabling it', async () => {
         const user = await payload.create({
           collection: apiKeysWithReadableKeysSlug,
           data: {
@@ -1778,7 +1804,6 @@ describe('Auth', () => {
         const response = await restClient.POST(
           `/${apiKeysWithReadableKeysSlug}/generate-api-key/${user.id}`,
           {
-            body: JSON.stringify({ generateIfMissing: true }),
             headers: {
               Authorization: `JWT ${token}`,
             },
@@ -1790,10 +1815,73 @@ describe('Auth', () => {
           collection: apiKeysWithReadableKeysSlug,
         })
 
-        expect(response.status).toBe(400)
-        expect(result).not.toHaveProperty('apiKey')
-        expect(stored.apiKey).toBeNull()
+        expect(response.status).toBe(200)
+        expect(result.apiKey).toEqual(expect.any(String))
+        expect(stored.apiKey).toBe(result.apiKey)
         expect(stored.enableAPIKey).toBe(false)
+
+        const authentication = await restClient
+          .GET(`/${apiKeysWithReadableKeysSlug}/me`, {
+            headers: {
+              Authorization: `${apiKeysWithReadableKeysSlug} API-Key ${result.apiKey}`,
+            },
+          })
+          .then((authResponse) => authResponse.json())
+
+        expect(authentication.user).toBeNull()
+      })
+
+      it('preserves the document lock only for API key generation', async () => {
+        const user = await payload.create({
+          collection: apiKeysWithReadableKeysSlug,
+          data: {
+            enableAPIKey: false,
+          },
+        })
+        const lock = await payload.create({
+          collection: 'payload-locked-documents',
+          data: {
+            document: {
+              relationTo: apiKeysWithReadableKeysSlug,
+              value: user.id,
+            },
+            user: {
+              relationTo: slug,
+              value: authenticatedUserID,
+            },
+          },
+        })
+
+        const response = await restClient.POST(
+          `/${apiKeysWithReadableKeysSlug}/generate-api-key/${user.id}`,
+          {
+            headers: {
+              Authorization: `JWT ${token}`,
+            },
+          },
+        )
+        const locksAfterGeneration = await payload.find({
+          collection: 'payload-locked-documents',
+          where: { id: { equals: lock.id } },
+        })
+
+        expect(response.status).toBe(200)
+        expect(locksAfterGeneration.docs).toHaveLength(1)
+
+        await payload.update({
+          id: user.id,
+          collection: apiKeysWithReadableKeysSlug,
+          data: {
+            apiKey: uuid(),
+          },
+        })
+
+        const locksAfterDirectUpdate = await payload.find({
+          collection: 'payload-locked-documents',
+          where: { id: { equals: lock.id } },
+        })
+
+        expect(locksAfterDirectUpdate.docs).toHaveLength(0)
       })
 
       it('should reject automatic API key creation without field access', async () => {

@@ -30,6 +30,8 @@ export const Auth: React.FC<Props> = (props) => {
     disableLocalStrategy,
     email,
     loginWithUsername,
+    onAPIKeyGenerationComplete,
+    onAPIKeyGenerationStart,
     operation,
     readOnly,
     requirePassword,
@@ -128,11 +130,13 @@ export const Auth: React.FC<Props> = (props) => {
   const apiKeyEnabled = showAPIKeyStatus
     ? Boolean(enableAPIKey?.value)
     : Boolean(apiKeyDisplayValue)
+  const hasAPIKeyToRotate = !canReadAPIKey || Boolean(apiKeyDisplayValue)
   const canGenerateAPIKey =
     operation === 'update' &&
     !readOnly &&
     canModifyAPIKey &&
-    (canReadAPIKeyStatus ? enableAPIKey?.initialValue === true : true)
+    hasAPIKeyToRotate &&
+    (canReadAPIKeyStatus ? apiKeyEnabled : true)
   const showReadableAPIKey = canReadAPIKey
   const showUnreadableAPIKey =
     !canReadAPIKey &&
@@ -375,15 +379,33 @@ export const Auth: React.FC<Props> = (props) => {
               {showUnreadableAPIKey && (
                 <UnreadableAPIKey
                   canGenerate={canGenerateAPIKey}
-                  description={t('authentication:apiKeyNotVisible')}
+                  description={
+                    operation === 'create'
+                      ? t('authentication:apiKeyGeneratedOnSave')
+                      : t('authentication:apiKeyNotVisible')
+                  }
+                  isPending={operation === 'create'}
+                  onGenerationComplete={onAPIKeyGenerationComplete}
+                  onGenerationStart={onAPIKeyGenerationStart}
                 />
               )}
               {showReadableAPIKey && (
                 <APIKey
                   canGenerate={canGenerateAPIKey}
+                  description={
+                    operation === 'create' ? t('authentication:apiKeyGeneratedOnSave') : undefined
+                  }
                   enabled={apiKeyEnabled}
+                  generateOnEnable={
+                    operation === 'update' &&
+                    !readOnly &&
+                    canModifyAPIKey &&
+                    enableAPIKey?.initialValue !== true
+                  }
                   isFormModified={modified}
                   onGenerated={setAPIKeyDisplayValue}
+                  onGenerationComplete={onAPIKeyGenerationComplete}
+                  onGenerationStart={onAPIKeyGenerationStart}
                   value={apiKeyDisplayValue}
                 />
               )}
