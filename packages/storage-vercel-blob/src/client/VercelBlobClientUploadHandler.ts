@@ -43,7 +43,7 @@ export const VercelBlobClientUploadHandler =
       // upload the file directly to Vercel Blob using the signed URL
       const result = await upload(pathname, file, {
         access: 'public',
-        clientPayload: collectionSlug,
+        clientPayload: JSON.stringify({ collectionSlug, mimeType: file.type }),
         contentType: file.type,
         handleUploadUrl: endpointRoute,
       })

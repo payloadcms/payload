@@ -8,6 +8,7 @@ import type {
 import { deleteFile } from './deleteFile.js'
 import { generateURL } from './generateURL.js'
 import { getFile } from './getFile.js'
+import { isAzureClientUploadAllowed } from './isClientUploadAllowed.js'
 import { uploadFile } from './uploadFile.js'
 
 interface CreateAzureAdapterArgs {
@@ -31,7 +32,7 @@ export function createAzureAdapter({
 }: CreateAzureAdapterArgs): Adapter {
   return ({ collection, prefix = '' }): GeneratedAdapter => ({
     name: 'azure',
-    clientUploads,
+    clientUploads: isAzureClientUploadAllowed(collection) ? clientUploads : false,
 
     generateURL: ({ filename, prefix: urlPrefix = '' }) =>
       generateURL({

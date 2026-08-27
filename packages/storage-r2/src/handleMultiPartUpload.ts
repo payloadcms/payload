@@ -3,6 +3,7 @@ import type { PayloadHandler } from 'payload'
 
 import { resolveSignedURLKey } from '@payloadcms/plugin-cloud-storage/utilities'
 import { APIError, Forbidden } from 'payload'
+import { assertClientUploadAllowed } from 'payload/internal'
 
 import type { R2StorageOptions } from './index.js'
 import type { R2Bucket, R2StorageMultipartUploadHandlerParams } from './types.js'
@@ -50,6 +51,12 @@ export const getHandleMultiPartUpload =
         throw new Forbidden(req.t)
       }
     }
+
+    assertClientUploadAllowed({
+      collection: req.payload.collections[collectionSlug]?.config,
+      filename: params.fileName,
+      mimeType: filetype,
+    })
 
     const collectionPrefix = (typeof collectionConfig === 'object' && collectionConfig.prefix) || ''
     const { fileKey, sanitizedFilename } = await resolveSignedURLKey({

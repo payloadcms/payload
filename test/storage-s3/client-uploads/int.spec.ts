@@ -1,5 +1,6 @@
-import type { Payload } from 'payload'
+import type { Payload, PayloadRequest } from 'payload'
 
+import { S3Client } from '@aws-sdk/client-s3'
 import { readFileSync } from 'fs'
 import path from 'path'
 import { assert } from 'ts-essentials'
@@ -8,6 +9,7 @@ import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
 
 import type { NextRESTClient } from '../../__helpers/shared/NextRESTClient.js'
 
+import { getGenerateSignedURLHandler } from '../../../packages/storage-s3/src/generateSignedURL.js'
 import { initPayloadInt } from '../../__helpers/shared/initPayloadInt.js'
 import {
   clearTestBucket,
@@ -37,6 +39,87 @@ const signedURLBody = (
     filesize,
     mimeType,
   })
+
+it('should include the approved upload headers in the signature', async () => {
+  const client = new S3Client({
+    credentials: {
+      accessKeyId: 'access-key',
+      secretAccessKey: 'secret-key',
+    },
+    endpoint: 'http://127.0.0.1:4566',
+    forcePathStyle: true,
+    region: 'us-east-1',
+  })
+  const handler = getGenerateSignedURLHandler({
+    bucket: 'media',
+    collections: { media: true },
+    getStorageClient: () => client,
+  })
+  const req = {
+    json: () =>
+      Promise.resolve({
+        collectionSlug: 'media',
+        filename: 'reference.png',
+        filesize: 128,
+        mimeType: 'image/png',
+      }),
+    payload: {
+      collections: {
+        media: {
+          config: {
+            slug: 'media',
+            upload: true,
+          },
+        },
+      },
+      config: { upload: { limits: { fileSize: MB(10) } } },
+      db: { findOne: () => Promise.resolve(null) },
+    },
+    user: { id: 'user-id' },
+  } as unknown as PayloadRequest
+
+  const response = await handler(req)
+  const { url } = await response.json<{ url: string }>()
+  const signedHeaders = new URL(url).searchParams.get('X-Amz-SignedHeaders')
+
+  expect(signedHeaders?.split(';')).toContain('content-length')
+  expect(signedHeaders?.split(';')).toContain('content-type')
+})
+
+it.each([
+  ['missing', undefined],
+  ['empty', ''],
+  ['non-string', 42],
+])('should validate %s MIME metadata before signing', async (_, mimeType) => {
+  const client = new S3Client({
+    credentials: { accessKeyId: 'access-key', secretAccessKey: 'secret-key' },
+    endpoint: 'http://127.0.0.1:4566',
+    forcePathStyle: true,
+    region: 'us-east-1',
+  })
+  const handler = getGenerateSignedURLHandler({
+    bucket: 'media',
+    collections: { media: true },
+    getStorageClient: () => client,
+  })
+  const req = {
+    json: () =>
+      Promise.resolve({
+        collectionSlug: 'media',
+        filename: 'reference.png',
+        filesize: 128,
+        ...(mimeType === undefined ? {} : { mimeType }),
+      }),
+    payload: {
+      collections: { media: { config: { slug: 'media', upload: true } } },
+      config: { upload: {} },
+      db: { findOne: () => Promise.resolve(null) },
+    },
+    user: { id: 'user-id' },
+  } as unknown as PayloadRequest
+
+  await expect(handler(req)).rejects.toThrow('A valid MIME type is required for client uploads.')
+})
 
 describe('@payloadcms/storage-s3 clientUploads', () => {
   beforeAll(async () => {
@@ -82,6 +165,50 @@ describe('@payloadcms/storage-s3 clientUploads', () => {
     assert(res)
     expect(res.ContentLength).toBe(file.length)
     expect(res.ContentType).toBe('image/png')
+  })
+
+  it('should persist adapter-backed SVG only after document validation', async () => {
+    const safeSVG =
+      '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10"><rect width="10" height="10"/></svg>'
+    const safeForm = new FormData()
+    safeForm.append('_payload', JSON.stringify({ alt: 'Reference graphic' }))
+    safeForm.append('file', new Blob([safeSVG], { type: 'image/svg+xml' }), 'reference.svg')
+
+    const safeResponse = await restClient.POST('/media', { body: safeForm })
+    const { doc } = await safeResponse.json()
+
+    expect(safeResponse.status).toBe(201)
+    expect(doc.filename).toBe('reference.svg')
+    await expect(
+      getAWSClient().headObject({ Bucket: getTestBucketName(), Key: 'reference.svg' }),
+    ).resolves.toMatchObject({ ContentType: 'image/svg+xml' })
+
+    await clearTestBucket()
+
+    for (const file of [
+      new File(
+        ['<svg xmlns="http://www.w3.org/2000/svg"><script>reference()</script></svg>'],
+        'reference.svg',
+        { type: 'image/svg+xml' },
+      ),
+      new File(
+        [
+          '<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg" onload="reference()"><rect/></svg>',
+        ],
+        'reference.xml',
+        { type: 'application/xml' },
+      ),
+    ]) {
+      const formData = new FormData()
+      formData.append('_payload', JSON.stringify({ alt: 'Reference graphic' }))
+      formData.append('file', file)
+
+      const response = await restClient.POST('/media', { body: formData })
+
+      expect(response.status).toBe(400)
+      const objects = await getAWSClient().listObjectsV2({ Bucket: getTestBucketName() })
+      expect(objects.Contents).toBeUndefined()
+    }
   })
 
   it('does not overwrite an existing object through client uploads', async () => {
@@ -150,9 +277,9 @@ describe('@payloadcms/storage-s3 clientUploads', () => {
     expect(errors[0].message).toMatch(/got: 11\.0\dMB/)
   })
 
-  it('should reject file exactly at limit boundary', async () => {
+  it('should enforce the configured file size limit', async () => {
     const response = await restClient.POST(signedURLEndpoint, {
-      body: signedURLBody('media', 'boundary-file.png', MB(10.1), 'image/png'),
+      body: signedURLBody('media', 'boundary-file.png', MB(10) + 1, 'image/png'),
     })
 
     expect(response.status).toBe(400)

@@ -8,7 +8,11 @@ import {
   getFilePrefix as getDocPrefix,
   getFileKey,
 } from '@payloadcms/plugin-cloud-storage/utilities'
-import { getRangeRequestInfo } from 'payload/internal'
+import {
+  getRangeRequestInfo,
+  isXmlMimeType,
+  UPLOAD_CONTENT_SECURITY_POLICY,
+} from 'payload/internal'
 
 export type SignedDownloadsConfig =
   | {
@@ -162,9 +166,9 @@ export async function getFile({
       headers.append('ETag', headObject.ETag)
     }
 
-    // Add Content-Security-Policy header for SVG files to prevent executable code
-    if (headObject.ContentType === 'image/svg+xml') {
-      headers.append('Content-Security-Policy', "script-src 'none'")
+    // Add Content-Security-Policy header for XML-family files
+    if (isXmlMimeType(headObject.ContentType)) {
+      headers.append('Content-Security-Policy', UPLOAD_CONTENT_SECURITY_POLICY)
     }
 
     const etagFromHeaders = req.headers.get('etag') || req.headers.get('if-none-match')

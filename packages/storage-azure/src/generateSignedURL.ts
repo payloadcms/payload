@@ -5,8 +5,11 @@ import type { PayloadHandler } from 'payload'
 import { BlobSASPermissions, generateBlobSASQueryParameters } from '@azure/storage-blob'
 import { resolveSignedURLKey } from '@payloadcms/plugin-cloud-storage/utilities'
 import { APIError, Forbidden } from 'payload'
+import { assertClientUploadAllowed } from 'payload/internal'
 
 import type { AzureStorageOptions } from './index.js'
+
+import { isAzureClientUploadAllowed } from './isClientUploadAllowed.js'
 
 interface Args {
   access?: ClientUploadsAccess
@@ -42,12 +45,22 @@ export const getGenerateSignedURLHandler = ({
       throw new APIError(`Collection ${collectionSlug} was not found in Azure storage options`)
     }
 
+    if (!isAzureClientUploadAllowed(req.payload.collections[collectionSlug]?.config)) {
+      throw new APIError('Azure client uploads require allowRestrictedFileTypes.', 400)
+    }
+
     const collectionPrefix =
       (typeof collectionStorageConfig === 'object' && collectionStorageConfig.prefix) || ''
 
     if (!(await access({ collectionSlug, req }))) {
       throw new Forbidden()
     }
+
+    assertClientUploadAllowed({
+      collection: req.payload.collections[collectionSlug]?.config,
+      filename,
+      mimeType,
+    })
 
     const { fileKey, sanitizedDocPrefix, sanitizedFilename } = await resolveSignedURLKey({
       collectionPrefix,

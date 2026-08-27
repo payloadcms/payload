@@ -2,6 +2,7 @@ import type { PayloadHandler, PayloadRequest, UploadCollectionSlug } from 'paylo
 
 import { handleUpload, type HandleUploadBody } from '@vercel/blob/client'
 import { APIError, Forbidden } from 'payload'
+import { assertClientUploadAllowed } from 'payload/internal'
 
 import type { VercelBlobCollectionOptions } from './authorizeFileOverwrite.js'
 
@@ -36,14 +37,41 @@ export const getClientUploadRoute =
     try {
       const jsonResponse = await handleUpload({
         body,
-        onBeforeGenerateToken: async (pathname: string, collectionSlug: null | string) => {
-          if (!collectionSlug || !Object.hasOwn(collections, collectionSlug)) {
+        onBeforeGenerateToken: async (pathname: string, clientPayload: null | string) => {
+          if (!clientPayload) {
             throw new APIError('No payload was provided')
           }
+
+          let parsed: { collectionSlug?: unknown; mimeType?: unknown }
+          try {
+            parsed = JSON.parse(clientPayload) as {
+              collectionSlug?: unknown
+              mimeType?: unknown
+            }
+          } catch {
+            parsed = { collectionSlug: clientPayload }
+          }
+
+          if (
+            typeof parsed.collectionSlug !== 'string' ||
+            !parsed.collectionSlug ||
+            !Object.hasOwn(collections, parsed.collectionSlug) ||
+            (parsed.mimeType !== undefined && typeof parsed.mimeType !== 'string')
+          ) {
+            throw new APIError('Invalid upload payload', 400)
+          }
+
+          const { collectionSlug, mimeType } = parsed
 
           if (!(await access({ collectionSlug, req }))) {
             throw new Forbidden()
           }
+
+          assertClientUploadAllowed({
+            collection: req.payload.collections[collectionSlug]?.config,
+            filename: pathname,
+            mimeType,
+          })
 
           const allowOverwrite = await authorizeClientOverwrite({
             collections,
@@ -55,6 +83,7 @@ export const getClientUploadRoute =
 
           return {
             addRandomSuffix,
+            ...(mimeType ? { allowedContentTypes: [mimeType] } : {}),
             ...(allowOverwrite && { allowOverwrite: true }),
             cacheControlMaxAge,
           }

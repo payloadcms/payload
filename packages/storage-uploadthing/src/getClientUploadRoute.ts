@@ -5,6 +5,7 @@ import {
   type PayloadRequest,
   type UploadCollectionSlug,
 } from 'payload'
+import { assertClientUploadAllowed } from 'payload/internal'
 
 type Args = {
   access?: (args: {
@@ -43,7 +44,7 @@ export const getClientUploadRoute = ({
         ...('blob' in routerInputConfig ? routerInputConfig.blob : {}),
       },
     })
-      .middleware(async ({ req: rawReq }) => {
+      .middleware(async ({ files, req: rawReq }) => {
         const req = rawReq as PayloadRequest
 
         const collectionSlug = req.searchParams.get('collectionSlug')
@@ -56,6 +57,14 @@ export const getClientUploadRoute = ({
           throw new Forbidden()
         }
 
+        for (const file of files) {
+          assertClientUploadAllowed({
+            collection: req.payload.collections[collectionSlug]?.config,
+            filename: file.name,
+            mimeType: file.type,
+          })
+        }
+
         return {}
       })
       .onUploadComplete(() => {}),
@@ -63,7 +72,5 @@ export const getClientUploadRoute = ({
 
   const { POST } = createRouteHandler({ config: { token }, router: uploadRouter })
 
-  return async (req) => {
-    return POST(req)
-  }
+  return (req) => POST(req)
 }

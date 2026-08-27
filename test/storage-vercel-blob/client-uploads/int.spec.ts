@@ -14,7 +14,7 @@ import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
 import type { NextRESTClient } from '../../__helpers/shared/NextRESTClient.js'
 
 import { initPayloadInt } from '../../__helpers/shared/initPayloadInt.js'
-import { prefix } from '../shared.js'
+import { createClientUploadPayload, prefix } from '../shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -77,7 +77,10 @@ describe('@payloadcms/storage-vercel-blob clientUploads', () => {
 
     const result = await upload(pathname, new Blob([file], { type: 'image/png' }), {
       access: 'public',
-      clientPayload: 'media',
+      clientPayload: createClientUploadPayload({
+        collectionSlug: 'media',
+        mimeType: 'image/png',
+      }),
       contentType: 'image/png',
       handleUploadUrl,
     })
@@ -96,7 +99,11 @@ describe('@payloadcms/storage-vercel-blob clientUploads', () => {
     await expect(
       upload('image.png', new Blob([file], { type: 'image/png' }), {
         access: 'public',
-        clientPayload: 'media',
+        clientPayload: createClientUploadPayload({
+          collectionSlug: 'media',
+          mimeType: 'image/png',
+        }),
+        contentType: 'image/png',
         handleUploadUrl,
         headers: { 'x-disallow-access': 'true' },
       }),
@@ -114,13 +121,52 @@ describe('@payloadcms/storage-vercel-blob clientUploads', () => {
     ).rejects.toThrow()
   })
 
+  it('should preserve legacy payloads only for explicit opt-out collections', async () => {
+    const file = readFileSync(path.resolve(dirname, '../../uploads/image.png'))
+
+    await expect(
+      upload('image.png', new Blob([file], { type: 'image/png' }), {
+        access: 'public',
+        clientPayload: 'media',
+        contentType: 'image/png',
+        handleUploadUrl,
+      }),
+    ).rejects.toThrow()
+
+    await expect(
+      upload('legacy-image.png', new Blob([file], { type: 'image/png' }), {
+        access: 'public',
+        clientPayload: 'legacy-media',
+        contentType: 'image/png',
+        handleUploadUrl,
+      }),
+    ).resolves.toMatchObject({ pathname: 'legacy-image.png' })
+  })
+
+  it.each([
+    ['SVG', 'reference.svg', 'image/svg+xml'],
+    ['XML', 'reference.xml', 'application/xml'],
+  ])('should keep %s files in the document upload path', async (_, filename, mimeType) => {
+    await expect(
+      upload(filename, new Blob(['<document />'], { type: mimeType }), {
+        access: 'public',
+        clientPayload: createClientUploadPayload({ collectionSlug: 'media', mimeType }),
+        contentType: mimeType,
+        handleUploadUrl,
+      }),
+    ).rejects.toThrow()
+  })
+
   it('should upload a file with prefix via client upload flow', async () => {
     const file = readFileSync(path.resolve(dirname, '../../uploads/image.png'))
     const pathname = `${prefix}/image.png`
 
     const result = await upload(pathname, new Blob([file], { type: 'image/png' }), {
       access: 'public',
-      clientPayload: 'media-with-prefix',
+      clientPayload: createClientUploadPayload({
+        collectionSlug: 'media-with-prefix',
+        mimeType: 'image/png',
+      }),
       contentType: 'image/png',
       handleUploadUrl,
     })

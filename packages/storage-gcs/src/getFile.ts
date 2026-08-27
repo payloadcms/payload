@@ -6,7 +6,11 @@ import {
   getFilePrefix as getDocPrefix,
   getFileKey,
 } from '@payloadcms/plugin-cloud-storage/utilities'
-import { getRangeRequestInfo } from 'payload/internal'
+import {
+  getRangeRequestInfo,
+  isXmlMimeType,
+  UPLOAD_CONTENT_SECURITY_POLICY,
+} from 'payload/internal'
 
 interface GetFileArgs {
   bucket: string
@@ -78,9 +82,9 @@ export async function getFile({
     headers.append('Content-Type', String(metadata.contentType))
     headers.append('ETag', String(metadata.etag))
 
-    // Add Content-Security-Policy header for SVG files to prevent executable code
-    if (metadata.contentType === 'image/svg+xml') {
-      headers.append('Content-Security-Policy', "script-src 'none'")
+    // Add Content-Security-Policy header for XML-family files
+    if (isXmlMimeType(metadata.contentType)) {
+      headers.append('Content-Security-Policy', UPLOAD_CONTENT_SECURITY_POLICY)
     }
 
     if (

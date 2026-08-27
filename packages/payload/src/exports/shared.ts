@@ -66,6 +66,12 @@ export { PREFERENCE_KEYS } from '../preferences/keys.js'
 export { validOperators, validOperatorSet } from '../types/constants.js'
 
 export { formatFilesize } from '../uploads/formatFilesize.js'
+export {
+  getSanitizedUploadFilename,
+  isSvgUpload,
+  isXmlUpload,
+  uploadRequiresServerValidation,
+} from '../uploads/getFileTypeIdentity.js'
 export { isImage } from '../uploads/isImage.js'
 export { appendUploadSelectFields } from '../utilities/appendUploadSelectFields.js'
 export { applyLocaleFiltering } from '../utilities/applyLocaleFiltering.js'

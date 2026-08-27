@@ -5,6 +5,7 @@ import * as AWS from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { resolveSignedURLKey } from '@payloadcms/plugin-cloud-storage/utilities'
 import { APIError, Forbidden } from 'payload'
+import { assertClientUploadAllowed, assertClientUploadFileSize } from 'payload/internal'
 
 import type { S3StorageOptions } from './index.js'
 
@@ -62,6 +63,12 @@ export const getGenerateSignedURLHandler = ({
       throw new Forbidden()
     }
 
+    assertClientUploadAllowed({
+      collection: req.payload.collections[collectionSlug]?.config,
+      filename,
+      mimeType,
+    })
+
     const { fileKey, sanitizedDocPrefix, sanitizedFilename } = await resolveSignedURLKey({
       collectionPrefix,
       collectionSlug,
@@ -73,7 +80,13 @@ export const getGenerateSignedURLHandler = ({
 
     const signableHeaders = new Set<string>()
 
+    if (typeof mimeType === 'string' && mimeType) {
+      signableHeaders.add('content-type')
+    }
+
     if (filesizeLimit) {
+      assertClientUploadFileSize(filesize)
+
       if (filesize > filesizeLimit) {
         throw new APIError(
           `Exceeded file size limit. Limit: ${bytesToMB(filesizeLimit).toFixed(2)}MB, got: ${bytesToMB(filesize).toFixed(2)}MB`,

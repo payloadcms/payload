@@ -14,7 +14,11 @@ import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
 import type { NextRESTClient } from '../../__helpers/shared/NextRESTClient.js'
 
 import { initPayloadInt } from '../../__helpers/shared/initPayloadInt.js'
-import { collectionPrefix, mediaWithCompositePrefixesSlug } from '../shared.js'
+import {
+  collectionPrefix,
+  createClientUploadPayload,
+  mediaWithCompositePrefixesSlug,
+} from '../shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -96,7 +100,10 @@ describe('@payloadcms/storage-vercel-blob clientUploads (composite prefixes)', (
     //
     await upload(pathname, new Blob([file], { type: 'image/png' }), {
       access: 'public',
-      clientPayload: mediaWithCompositePrefixesSlug,
+      clientPayload: createClientUploadPayload({
+        collectionSlug: mediaWithCompositePrefixesSlug,
+        mimeType: 'image/png',
+      }),
       contentType: 'image/png',
       handleUploadUrl,
     })
