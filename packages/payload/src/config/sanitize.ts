@@ -17,6 +17,11 @@ import type {
   WidgetInstance,
 } from './types.js'
 
+import {
+  getAPIKeysCollection,
+  payloadAPIKeysCollectionSlug,
+  registerAPIKeysJoinFields,
+} from '../auth/apiKeys/config.js'
 import { defaultUserCollection } from '../auth/defaultUser.js'
 import { authRootEndpoints } from '../auth/endpoints/index.js'
 import { sanitizeCollection } from '../collections/config/sanitize.js'
@@ -343,6 +348,7 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
     ...(config.collections?.map((c) => c.slug) ?? []),
     jobsCollectionSlug,
     lockedDocumentsCollectionSlug,
+    payloadAPIKeysCollectionSlug,
     preferencesCollectionSlug,
   ]
 
@@ -403,6 +409,12 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
   for (let i = 0; i < config.collections!.length; i++) {
     if (collectionSlugs.has(config.collections![i]!.slug)) {
       throw new DuplicateCollection('slug', config.collections![i]!.slug)
+    }
+
+    if (config.collections![i]!.slug === payloadAPIKeysCollectionSlug) {
+      throw new InvalidConfiguration(
+        `The "${payloadAPIKeysCollectionSlug}" collection slug is reserved for Payload's internal API key storage and cannot be used by a user-defined collection.`,
+      )
     }
 
     collectionSlugs.add(config.collections![i]!.slug)
@@ -574,6 +586,21 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
       validRelationships,
     ),
   )
+
+  const apiKeysCollection = getAPIKeysCollection(config as unknown as Config)
+
+  if (apiKeysCollection) {
+    configWithDefaults.collections!.push(
+      sanitizeCollection(
+        config as unknown as Config,
+        apiKeysCollection,
+        richTextSanitizers,
+        validRelationships,
+      ),
+    )
+
+    registerAPIKeysJoinFields(config as unknown as Config)
+  }
 
   const migrations = sanitizeCollection(
     config as unknown as Config,

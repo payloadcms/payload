@@ -2,8 +2,10 @@ import type { ParsedArgs } from 'minimist'
 
 import type { SanitizedConfig } from '../config/types.js'
 
+import { migrateAPIKeys } from '../auth/apiKeys/migration.js'
 import payload from '../index.js'
 import { prettySyncLoggerDestination } from '../utilities/logger.js'
+import { parseMigrateAPIKeysArgs } from './parseMigrateAPIKeysArgs.js'
 
 /**
  * The default logger's options did not allow for forcing sync logging
@@ -16,6 +18,7 @@ const prettySyncLogger = {
 
 export const availableCommands = [
   'migrate',
+  'migrate:api-keys',
   'migrate:create',
   'migrate:down',
   'migrate:refresh',
@@ -69,6 +72,7 @@ export const migrate = async ({ config, migrationDir, parsedArgs }: Args): Promi
   // Barebones instance to access database adapter
   await payload.init({
     config,
+    disableAPIKeyStartupGuard: args[0] === 'migrate:api-keys',
     disableDBConnect: args[0] === 'migrate:create',
     disableOnInit: true,
     ...prettySyncLogger,
@@ -96,6 +100,14 @@ export const migrate = async ({ config, migrationDir, parsedArgs }: Args): Promi
     case 'migrate':
       await adapter.migrate()
       break
+    case 'migrate:api-keys': {
+      const { batchSize, collections, dryRun } = parseMigrateAPIKeysArgs(parsedArgs)
+      const result = await migrateAPIKeys({ batchSize, collections, dryRun, payload })
+      payload.logger.info(
+        `${dryRun ? '[dry run] ' : ''}migrated: ${result.migrated}, scrubbed: ${result.scrubbed}, skipped: ${result.skipped}`,
+      )
+      break
+    }
     case 'migrate:create':
       try {
         await adapter.createMigration({

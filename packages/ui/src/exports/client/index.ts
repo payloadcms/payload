@@ -266,6 +266,7 @@ export { FileDetails } from '../../elements/FileDetails/index.js'
 export { PreviewSizes } from '../../elements/PreviewSizes/index.js'
 export { PreviewButton } from '../../elements/PreviewButton/index.js'
 export { RelationshipTable } from '../../elements/RelationshipTable/index.js'
+export { RegenerateAPIKeyButton } from '../../elements/RegenerateAPIKeyButton/index.js'
 export { TimezonePicker } from '../../elements/TimezonePicker/index.js'
 
 export { BlocksDrawer } from '../../fields/Blocks/BlocksDrawer/index.js'

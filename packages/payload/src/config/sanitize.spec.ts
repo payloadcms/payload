@@ -89,6 +89,46 @@ describe('sanitizeConfig', () => {
     expect(sanitizedConfig.admin.avatar).toBe('gravatar')
   })
 
+  it('should throw when a collection uses the reserved payload-api-keys slug', () => {
+    const config: Config = {
+      ...configDefaults,
+      collections: [
+        {
+          slug: 'payload-api-keys',
+          fields: [],
+        },
+      ],
+    }
+
+    expect(() => sanitizeConfig(config)).toThrow(/payload-api-keys/)
+  })
+
+  it('should register the apiKeys join field on a collection-mode auth collection', () => {
+    const config: Config = {
+      ...configDefaults,
+      collections: [
+        {
+          slug: 'users',
+          auth: {
+            useAPIKey: {
+              storage: 'collection',
+            },
+          },
+          fields: [],
+        },
+      ],
+    }
+
+    const sanitizedConfig = sanitizeConfig(config)
+
+    const users = sanitizedConfig.collections.find((collection) => collection.slug === 'users')
+    const apiKeysField = users?.fields.find((field) => 'name' in field && field.name === 'apiKeys')
+
+    expect(apiKeysField).toMatchObject({ collection: 'payload-api-keys', on: 'owner' })
+    expect(users?.joins['payload-api-keys']).toHaveLength(1)
+    expect(users?.joins['payload-api-keys']?.[0]?.joinPath).toBe('apiKeys')
+  })
+
   it('should populate sanitized localization defaults with no locales', () => {
     const config: Config = {
       ...configDefaults,

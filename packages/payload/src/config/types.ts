@@ -347,6 +347,14 @@ export type InitOptions = {
   cron?: boolean
 
   /**
+   * Skip the collection-mode API-key startup guard, which otherwise refuses to start
+   * when a collection-mode auth collection still has legacy API-key material. Set by
+   * the `payload migrate:api-keys` CLI, which is the only built-in path allowed to
+   * initialize while that material is still being migrated.
+   */
+  disableAPIKeyStartupGuard?: boolean
+
+  /**
    * Disable connect to the database on init
    */
   disableDBConnect?: boolean

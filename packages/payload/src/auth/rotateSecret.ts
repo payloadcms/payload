@@ -1,8 +1,7 @@
-import crypto from 'crypto'
-
 import type { CollectionSlug, Payload } from '../index.js'
+import type { Where } from '../types/index.js'
 
-import { deriveSecretKey } from './crypto.js'
+import { computeAPIKeyIndex, deriveSecretKey } from './crypto.js'
 
 export type RotateSecretArgs = {
   /**
@@ -36,8 +35,11 @@ export type RotateSecretResult = {
 }
 
 /**
- * Re-keys the built-in `apiKey`/`apiKeyIndex` fields from a previous
- * `PAYLOAD_SECRET` to the current one, for every auth collection using API keys.
+ * Re-keys `apiKey`/`apiKeyIndex` fields from a previous `PAYLOAD_SECRET` to the current
+ * one, for every legacy-mode (`useAPIKey: true`) auth collection. Collection-backed keys
+ * (`useAPIKey: { storage: 'collection' }`) are unaffected by secret rotation entirely -
+ * they are matched by a one-way hash of the secret itself, never `payload.secret` - so
+ * there is nothing for this function to do for them.
  *
  * Operates at the database-adapter layer to bypass the `apiKey` field's
  * encrypt/decrypt hooks (which would otherwise corrupt data mid-rotation).
@@ -78,89 +80,119 @@ export const rotateSecret = async ({
   )
 
   for (const slug of targetSlugs) {
-    let page = 1
-    let hasNextPage = true
-
-    while (hasNextPage) {
-      const { docs, hasNextPage: nextPage } = await payload.db.find({
-        collection: slug,
-        limit: batchSize,
-        page,
-        pagination: true,
-        sort: 'id',
-        // Only rows with a lookup index need re-keying. A row can have `apiKey`
-        // ciphertext but a null `apiKeyIndex` (e.g. after unchecking "Enable API
-        // Key"); those are never used for auth, so skip them.
-        where: {
-          and: [{ apiKey: { exists: true } }, { apiKeyIndex: { exists: true } }],
-        },
-      })
-
-      for (const doc of docs as Array<{ id: number | string } & Record<string, unknown>>) {
-        const storedApiKey = doc.apiKey as string | undefined
-        const storedIndex = doc.apiKeyIndex as string | undefined
-
-        if (!storedApiKey || !storedIndex) {
-          continue
-        }
-
-        // The v1 (aes-256-gcm) envelope throws on a wrong key; legacy aes-256-ctr
-        // returns garbage. Either way the HMAC-index check is the source of truth,
-        // so treat a decrypt failure as "does not match this secret".
-        const rawFromOld = tryDecrypt({ hash: storedApiKey, payload, secret: oldSecret })
-
-        if (
-          rawFromOld !== undefined &&
-          apiKeyIndexHmac({ derivedKey: oldDerivedKey, rawApiKey: rawFromOld }) === storedIndex
-        ) {
-          if (!dryRun) {
-            await payload.db.updateOne({
-              id: doc.id,
-              collection: slug,
-              data: {
-                apiKey: payload.encrypt(rawFromOld),
-                apiKeyIndex: apiKeyIndexHmac({ derivedKey: newDerivedKey, rawApiKey: rawFromOld }),
-              },
-              returning: false,
-            })
-          }
-          result.migrated++
-          continue
-        }
-
-        // Confirm the row is already on the current secret (safe re-run).
-        const rawFromNew = tryDecrypt({ hash: storedApiKey, payload })
-
-        if (
-          rawFromNew !== undefined &&
-          apiKeyIndexHmac({ derivedKey: newDerivedKey, rawApiKey: rawFromNew }) === storedIndex
-        ) {
-          result.skipped++
-          continue
-        }
-
-        throw new Error(
-          `rotateSecret: could not verify apiKey for collection "${slug}" id "${String(
-            doc.id,
-          )}" against the provided oldSecret or the current secret. Aborting; rows already migrated in this run are safe to keep - fix the secret and re-run.`,
-        )
-      }
-
-      hasNextPage = Boolean(nextPage)
-      page++
-    }
+    await rekeyAPIKeyRows({
+      slug,
+      batchSize,
+      dryRun,
+      newDerivedKey,
+      oldDerivedKey,
+      oldSecret,
+      payload,
+      result,
+    })
   }
 
   return result
 }
 
-const apiKeyIndexHmac = ({
-  derivedKey,
-  rawApiKey,
+/**
+ * Scans one legacy-mode auth collection's raw `apiKey`/`apiKeyIndex` fields in pages,
+ * re-keying every row that verifies under `oldSecret` and confirming (without writing)
+ * every row already on the current secret.
+ */
+const rekeyAPIKeyRows = async ({
+  slug,
+  batchSize,
+  dryRun,
+  newDerivedKey,
+  oldDerivedKey,
+  oldSecret,
+  payload,
+  result,
 }: {
-  derivedKey: string
-  rawApiKey: string
-}): string => crypto.createHmac('sha256', derivedKey).update(rawApiKey).digest('hex')
+  batchSize: number
+  dryRun: boolean
+  newDerivedKey: string
+  oldDerivedKey: string
+  oldSecret: string
+  payload: Payload
+  result: RotateSecretResult
+  slug: CollectionSlug
+}): Promise<void> => {
+  // Only rows with a lookup index need re-keying. A row can have `apiKey`
+  // ciphertext but a null `apiKeyIndex` (e.g. after unchecking "Enable API
+  // Key"); those are never used for auth, so skip them.
+  const where: Where = {
+    and: [{ apiKey: { exists: true } }, { apiKeyIndex: { exists: true } }],
+  }
+
+  let page = 1
+  let hasNextPage = true
+
+  while (hasNextPage) {
+    const { docs, hasNextPage: nextPage } = await payload.db.find({
+      collection: slug,
+      limit: batchSize,
+      page,
+      pagination: true,
+      sort: 'id',
+      where,
+    })
+
+    for (const doc of docs as Array<{ id: number | string } & Record<string, unknown>>) {
+      const storedApiKey = doc.apiKey as string | undefined
+      const storedIndex = doc.apiKeyIndex as string | undefined
+
+      if (!storedApiKey || !storedIndex) {
+        continue
+      }
+
+      // The v1 (aes-256-gcm) envelope throws on a wrong key; legacy aes-256-ctr
+      // returns garbage. Either way the HMAC-index check is the source of truth,
+      // so treat a decrypt failure as "does not match this secret".
+      const rawFromOld = tryDecrypt({ hash: storedApiKey, payload, secret: oldSecret })
+
+      if (
+        rawFromOld !== undefined &&
+        computeAPIKeyIndex(oldDerivedKey, rawFromOld) === storedIndex
+      ) {
+        if (!dryRun) {
+          await payload.db.updateOne({
+            id: doc.id,
+            collection: slug,
+            data: {
+              apiKey: payload.encrypt(rawFromOld),
+              apiKeyIndex: computeAPIKeyIndex(newDerivedKey, rawFromOld),
+            },
+            returning: false,
+          })
+        }
+        result.migrated++
+        continue
+      }
+
+      // Confirm the row is already on the current secret (safe re-run).
+      const rawFromNew = tryDecrypt({ hash: storedApiKey, payload })
+
+      if (
+        rawFromNew !== undefined &&
+        computeAPIKeyIndex(newDerivedKey, rawFromNew) === storedIndex
+      ) {
+        result.skipped++
+        continue
+      }
+
+      throw new Error(
+        `rotateSecret: could not verify apiKey for collection "${slug}" id "${String(
+          doc.id,
+        )}" against the provided oldSecret or the current secret. Aborting; rows already migrated in this run are safe to keep - fix the secret and re-run.`,
+      )
+    }
+
+    hasNextPage = Boolean(nextPage)
+    page++
+  }
+}
 
 /**
  * Decrypts with the given secret (or the active secret), returning `undefined`

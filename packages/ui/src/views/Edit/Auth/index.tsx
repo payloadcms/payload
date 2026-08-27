@@ -196,7 +196,9 @@ export const Auth: React.FC<Props> = (props) => {
   }, [modified])
 
   const showAuthBlock = enableFields
-  const showAPIKeyBlock = useAPIKey && canReadApiKey
+  // Collection-mode storage (`{ storage: 'collection' }`) is replaced by the apiKeys
+  // join field rendering generically in the field list, not this legacy single-key UI.
+  const showAPIKeyBlock = useAPIKey === true && canReadApiKey
   const showVerifyBlock = verify && isEditing
 
   if (!(showAuthBlock || showAPIKeyBlock || showVerifyBlock)) {

@@ -220,6 +220,49 @@ type AuthCookies = {
   secure?: boolean
 }
 
+export type APIKeyAdministrationAccess = (args: {
+  req: PayloadRequest
+}) => boolean | Promise<boolean>
+
+export type APIKeyAdministrationAccessConfig = {
+  /**
+   * Whether a user authenticated through this collection can delete (revoke) API keys
+   * owned by other users, across any API-key-enabled collection. A caller who satisfies
+   * this also satisfies `readOthers`, even when `readOthers` is not defined.
+   *
+   * Defaults to the same rule Payload uses for admin panel access (`access.admin` on this
+   * collection, or matching `config.admin.user`) when omitted, preserving the original
+   * single-tier "administrator" behavior.
+   *
+   * This can never expose another owner's decrypted secret value - that is enforced
+   * independently of this setting.
+   */
+  manageOthers?: APIKeyAdministrationAccess
+  /**
+   * Whether a user authenticated through this collection can view the metadata (name, key
+   * hint, creation date) of API keys owned by other users, across any API-key-enabled
+   * collection - never their decrypted secret value.
+   *
+   * Defaults to `manageOthers`'s result, or (when that is also undefined) the same rule
+   * Payload uses for admin panel access, preserving the original single-tier
+   * "administrator" behavior.
+   */
+  readOthers?: APIKeyAdministrationAccess
+}
+
+export type UseAPIKeyConfig =
+  | {
+      /**
+       * Access control for viewing and managing OTHER users' API keys - i.e. keys this
+       * collection's users do not own themselves. Omit to keep the default single-tier
+       * behavior, where anyone who satisfies `access.admin` (or `config.admin.user`) can
+       * both view and revoke any owner's keys.
+       */
+      access?: APIKeyAdministrationAccessConfig
+      storage: 'collection'
+    }
+  | boolean
+
 export interface IncomingAuthType {
   /**
    * Set cookie options, including secure, sameSite, and domain. For advanced users.
@@ -287,10 +330,15 @@ export interface IncomingAuthType {
   tokenExpiration?: number
   /**
    * Payload Authentication provides for API keys to be set on each user within an Authentication-enabled Collection.
+   *
+   * - `true` stores the key on the auth document itself. This form is deprecated.
+   * - `{ storage: 'collection' }` stores the key in the shared `payload-api-keys` collection,
+   *   allowing an auth document to own multiple independently revocable keys.
+   *
    * @default false
    * @link https://payloadcms.com/docs/authentication/api-keys
    */
-  useAPIKey?: boolean
+  useAPIKey?: UseAPIKeyConfig
 
   /**
    * Use sessions for authentication. Enabled by default.
