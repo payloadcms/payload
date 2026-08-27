@@ -4,11 +4,34 @@ import type { Payload, Where } from '../../types/index.js'
 import type { AuthStrategyFunction, AuthStrategyResult } from '../index.js'
 
 import { extractJWT } from '../extractJWT.js'
+import { JWT_AUTH_VERSION } from '../jwtAuth.js'
 
-type JWTToken = {
+type DecodedJWTPayload = Record<string, unknown>
+
+type JWTAuthenticationReference = {
   collection: string
-  id: string
+  id: number | string
   sid?: string
+}
+
+const getJWTAuthenticationReference = (
+  token: DecodedJWTPayload,
+): JWTAuthenticationReference | null => {
+  const { id, collection, sid } = token
+
+  if (
+    typeof collection !== 'string' ||
+    (typeof id !== 'number' && typeof id !== 'string') ||
+    (typeof sid !== 'undefined' && typeof sid !== 'string')
+  ) {
+    return null
+  }
+
+  return {
+    id,
+    collection,
+    ...(sid ? { sid } : {}),
+  }
 }
 
 async function autoLogin({
@@ -91,29 +114,54 @@ export const JWTAuthentication: AuthStrategyFunction = async ({
     }
 
     const secretKey = new TextEncoder().encode(payload.secret)
-    const { payload: decodedPayload } = await jwtVerify<JWTToken>(token, secretKey)
-    const collection = payload.collections[decodedPayload.collection]
+    const { payload: decodedPayload, protectedHeader } = await jwtVerify<DecodedJWTPayload>(
+      token,
+      secretKey,
+    )
+
+    if (protectedHeader.authVersion !== JWT_AUTH_VERSION) {
+      throw new Error('Invalid JWT protected header')
+    }
+
+    const authenticationReference = getJWTAuthenticationReference(decodedPayload)
+
+    if (!authenticationReference) {
+      throw new Error('Invalid JWT authentication reference')
+    }
+
+    const collection = Object.prototype.hasOwnProperty.call(
+      payload.collections,
+      authenticationReference.collection,
+    )
+      ? payload.collections[authenticationReference.collection]
+      : undefined
+
+    if (!collection?.config.auth || collection.config.auth.disableLocalStrategy) {
+      throw new Error('JWT authentication requires an auth-enabled local collection')
+    }
 
     const user = (await payload.findByID({
-      id: decodedPayload.id,
-      collection: decodedPayload.collection,
-      depth: isGraphQL ? 0 : collection!.config.auth.depth,
+      id: authenticationReference.id,
+      collection: authenticationReference.collection,
+      depth: isGraphQL ? 0 : collection.config.auth.depth,
     })) as AuthStrategyResult['user']
 
-    if (user && (!collection!.config.auth.verify || user._verified)) {
-      if (collection!.config.auth.useSessions) {
-        const existingSession = (user.sessions || []).find(({ id }) => id === decodedPayload.sid)
+    if (user && (!collection.config.auth.verify || user._verified)) {
+      if (collection.config.auth.useSessions) {
+        const existingSession = (user.sessions || []).find(
+          ({ id }) => id === authenticationReference.sid,
+        )
 
-        if (!existingSession || !decodedPayload.sid) {
+        if (!existingSession || !authenticationReference.sid) {
           return {
             user: null,
           }
         }
 
-        user._sid = decodedPayload.sid
+        user._sid = authenticationReference.sid
       }
 
-      user.collection = collection!.config.slug
+      user.collection = collection.config.slug
       user._strategy = strategyName
       return {
         user,
