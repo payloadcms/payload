@@ -61,6 +61,7 @@ export default buildConfigWithDefaults({
         verify: false,
         forgotPassword: {
           expiration: 300000, // 5 minutes
+          minRequestInterval: 1,
         },
       },
       fields: [

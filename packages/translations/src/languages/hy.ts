@@ -56,6 +56,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     newPassword: 'Նոր գաղտնաբառ',
     passed: 'Հաստատված է',
     passwordResetSuccessfully: 'Գաղտնաբառը հաջողությամբ վերականգնվել է։',
+    resend: 'Կրկին ուղարկել',
     resetPassword: 'Վերականգնել գաղտնաբառը',
     resetPasswordExpiration: 'Գաղտնաբառի վերականգնման ժամկետի ավարտ',
     resetPasswordToken: 'Գաղտնաբառի վերականգնման թոքեն',

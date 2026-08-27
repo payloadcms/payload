@@ -3,7 +3,7 @@ import type { IncomingAuthType } from './types.js'
 
 import { accountLockFields } from './baseFields/accountLock.js'
 import { apiKeyFields } from './baseFields/apiKey.js'
-import { baseAuthFields } from './baseFields/auth.js'
+import { baseAuthFields, resetPasswordRequestedAtField } from './baseFields/auth.js'
 import { emailFieldConfig } from './baseFields/email.js'
 import { sessionsFieldConfig } from './baseFields/sessions.js'
 import { usernameFieldConfig } from './baseFields/username.js'
@@ -45,6 +45,13 @@ export const getBaseAuthFields = (authConfig: IncomingAuthType): Field[] => {
     }
 
     authFields.push(...baseAuthFields)
+
+    if (
+      authConfig.forgotPassword?.minRequestInterval &&
+      authConfig.forgotPassword.minRequestInterval > 0
+    ) {
+      authFields.push(resetPasswordRequestedAtField)
+    }
 
     if (authConfig.verify) {
       authFields.push(...verificationFields)

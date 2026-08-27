@@ -107,6 +107,11 @@ export const resetPasswordOperation = async <TSlug extends AuthCollectionSlug>(
 
     user.resetPasswordExpiration = new Date().toISOString()
 
+    if (collectionConfig.auth.maxLoginAttempts > 0) {
+      user.lockUntil = null
+      user.loginAttempts = 0
+    }
+
     if (collectionConfig.auth.verify) {
       user._verified = Boolean(user._verified)
     }

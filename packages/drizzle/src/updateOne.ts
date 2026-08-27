@@ -7,9 +7,13 @@ import type { DrizzleAdapter } from './types.js'
 
 import { buildQuery } from './queries/buildQuery.js'
 import { selectDistinct } from './queries/selectDistinct.js'
+import { transform } from './transform/read/index.js'
+import { transformForWrite } from './transform/write/index.js'
 import { upsertRow } from './upsertRow/index.js'
+import { shouldUseOptimizedUpsertRow } from './upsertRow/shouldUseOptimizedUpsertRow.js'
 import { getPrimaryDb } from './utilities/getPrimaryDb.js'
 import { getTransaction } from './utilities/getTransaction.js'
+import { markWrite } from './utilities/readAfterWrite.js'
 
 export const updateOne: UpdateOne = async function updateOne(
   this: DrizzleAdapter,
@@ -40,6 +44,45 @@ export const updateOne: UpdateOne = async function updateOne(
       tableName,
       where: whereArg,
     })
+
+    if (options.atomic === true) {
+      if (!shouldUseOptimizedUpsertRow({ data, fields: collection.flattenedFields })) {
+        throw new Error('Atomic where updates only support fields stored on the main table')
+      }
+
+      const { arraysToPush, row } = transformForWrite({
+        adapter: this,
+        data,
+        enableAtomicWrites: true,
+        fields: collection.flattenedFields,
+        tableName,
+      })
+
+      if (arraysToPush && Object.keys(arraysToPush).length) {
+        throw new Error('Atomic where updates do not support array operations')
+      }
+
+      markWrite(this)
+
+      const docs = await (db as LibSQLDatabase)
+        .update(this.tables[tableName])
+        .set(row)
+        .where(where)
+        .returning()
+
+      if (!docs[0]) {
+        return null
+      }
+
+      return transform({
+        adapter: this,
+        config: this.payload.config,
+        data: docs[0],
+        fields: collection.flattenedFields,
+        joinQuery: false,
+        tableName,
+      })
+    }
 
     // selectDistinct will only return if there are joins
     const selectDistinctResult = await selectDistinct({

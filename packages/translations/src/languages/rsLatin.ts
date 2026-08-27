@@ -57,6 +57,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     newPassword: 'Nova lozinka',
     passed: 'Autentifikacija prošla',
     passwordResetSuccessfully: 'Lozinka uspešno resetovana.',
+    resend: 'Pošalji ponovo',
     resetPassword: 'Promena lozinke',
     resetPasswordExpiration: 'Promena roka trajanja lozinke',
     resetPasswordToken: 'Promena lozinke tokena',
