@@ -62,7 +62,7 @@ export async function migrateReset(this: DrizzleAdapter): Promise<MigrationResul
       await commitTransaction(req)
       rolledBack.push(migrationFile.name)
     } catch (err: unknown) {
-      let msg = `Error running migration ${migration.name}.`
+      let msg = `Error running migration ${migrationFile.name}.`
 
       if (err instanceof Error) {
         msg += ` ${err.message}`

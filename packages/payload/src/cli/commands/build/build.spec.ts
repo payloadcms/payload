@@ -372,6 +372,7 @@ describe('build', () => {
     expect(exitCode).toBe(1)
     expect(spawnMock).not.toHaveBeenCalled()
   })
+
 })
 
 describe('detectFramework', () => {
