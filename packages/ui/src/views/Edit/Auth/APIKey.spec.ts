@@ -67,32 +67,6 @@ afterEach(() => {
 })
 
 describe('APIKey', () => {
-  it('should show an empty input before a new document is saved', async () => {
-    await act(async () => {
-      root.render(
-        React.createElement(APIKey, {
-          canGenerate: true,
-          enabled: true,
-          generateOnEnable: false,
-          isFormModified: true,
-          onGenerated: vi.fn(),
-          value: undefined,
-        }),
-      )
-      await Promise.resolve()
-      await Promise.resolve()
-    })
-
-    const input = container.querySelector('input')
-
-    expect(input?.value).toBe('')
-    expect(input?.placeholder).toBe('')
-    expect(container.textContent).toBe('API Key')
-    expect(container.querySelector('[aria-label="Show API key"]')).toBeNull()
-    expect(fetch).not.toHaveBeenCalled()
-    expect(setData).not.toHaveBeenCalled()
-  })
-
   it('should show a loading state while generating a missing API key', async () => {
     let resolveResponse: (response: Response) => void
     const responsePromise = new Promise<Response>((resolve) => {

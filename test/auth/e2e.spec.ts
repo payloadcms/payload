@@ -12,6 +12,7 @@ import type { Config } from './payload-types.js'
 import { login } from '../__helpers/e2e/auth/login.js'
 import { logout } from '../__helpers/e2e/auth/logout.js'
 import { getRoutes, saveDocAndAssert } from '../__helpers/e2e/helpers.js'
+import { currentFramework } from '../__helpers/e2e/playwright.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
@@ -507,8 +508,16 @@ describe('Auth', () => {
 
     describe('api-key-rotation', () => {
       const createdIDs: Array<number | string> = []
+      let markGenerationStored: (() => void) | undefined
+      let releaseGenerationResponse: (() => void) | undefined
 
       afterEach(async () => {
+        markGenerationStored?.()
+        releaseGenerationResponse?.()
+        markGenerationStored = undefined
+        releaseGenerationResponse = undefined
+        await page.unrouteAll({ behavior: 'ignoreErrors' })
+
         for (const id of createdIDs) {
           await getAPIKeyTestPayload().delete({
             collection: apiKeysWithReadableKeysSlug,
@@ -630,22 +639,35 @@ describe('Auth', () => {
         const userURL = new AdminUrlUtil(serverURL, apiKeysWithReadableKeysSlug)
         const editURL = userURL.edit(user.id)
         const generationURL = `${apiURL}/${apiKeysWithReadableKeysSlug}/generate-api-key/${user.id}`
-
         await page.goto(editURL)
 
-        let markGenerationStored: () => void
         const generationStored = new Promise<void>((resolve) => {
           markGenerationStored = resolve
         })
-        let releaseGenerationResponse: () => void
         const generationResponseCanContinue = new Promise<void>((resolve) => {
           releaseGenerationResponse = resolve
         })
-        let hasBlockedFormState = false
+        const isFormStatePOST = (request: Request) => {
+          if (request.method() !== 'POST') {
+            return false
+          }
 
-        await page.route(editURL, async (route) => {
-          if (route.request().method() === 'POST' && !hasBlockedFormState) {
-            hasBlockedFormState = true
+          if (request.url() === editURL) {
+            return true
+          }
+
+          return (
+            currentFramework === 'tanstack-start' &&
+            request.url().includes('/_serverFn/') &&
+            (request.postData() ?? '').includes('form-state')
+          )
+        }
+        const formStateRouteURL = (url: URL) =>
+          url.href === editURL ||
+          (currentFramework === 'tanstack-start' && url.pathname.includes('/_serverFn/'))
+
+        await page.route(formStateRouteURL, async (route) => {
+          if (isFormStatePOST(route.request())) {
             await generationStored
           }
 
@@ -653,26 +675,27 @@ describe('Auth', () => {
         })
         await page.route(generationURL, async (route) => {
           const response = await route.fetch()
-          markGenerationStored!()
+          markGenerationStored?.()
           await generationResponseCanContinue
           await route.fulfill({ response })
         })
 
-        try {
-          const formStateResponse = page.waitForResponse(
-            (response) => response.request().method() === 'POST' && response.url() === editURL,
-          )
+        const formStateResponse = page.waitForResponse((response) =>
+          isFormStatePOST(response.request()),
+        )
+        const generationResponse = page.waitForResponse(
+          (response) => response.request().method() === 'POST' && response.url() === generationURL,
+        )
 
-          await page.locator('#field-enableAPIKey').click()
-          await formStateResponse
+        await page.locator('#field-enableAPIKey').click()
+        await formStateResponse
 
-          await expect(page.locator('#document-locked')).toBeHidden()
-          await expect(page.locator('#document-stale-data')).toBeHidden()
-        } finally {
-          releaseGenerationResponse!()
-          await page.unroute(editURL)
-          await page.unroute(generationURL)
-        }
+        await expect(page.locator('#document-locked')).toBeHidden()
+        await expect(page.locator('#document-stale-data')).toBeHidden()
+
+        releaseGenerationResponse?.()
+        releaseGenerationResponse = undefined
+        await generationResponse
       })
 
       test('should rotate an existing readable API key before re-enabling it', async () => {
