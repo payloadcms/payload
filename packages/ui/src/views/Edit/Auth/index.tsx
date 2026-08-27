@@ -130,6 +130,7 @@ export const Auth: React.FC<Props> = (props) => {
   const apiKeyEnabled = showAPIKeyStatus
     ? Boolean(enableAPIKey?.value)
     : Boolean(apiKeyDisplayValue)
+  const isAPIKeyPendingGeneration = operation === 'create' && canModifyAPIKey
   const hasAPIKeyToRotate = !canReadAPIKey || Boolean(apiKeyDisplayValue)
   const canGenerateAPIKey =
     operation === 'update' &&
@@ -380,11 +381,11 @@ export const Auth: React.FC<Props> = (props) => {
                 <UnreadableAPIKey
                   canGenerate={canGenerateAPIKey}
                   description={
-                    operation === 'create'
+                    isAPIKeyPendingGeneration
                       ? t('authentication:apiKeyGeneratedOnSave')
                       : t('authentication:apiKeyNotVisible')
                   }
-                  isPending={operation === 'create'}
+                  isPending={isAPIKeyPendingGeneration}
                   onGenerationComplete={onAPIKeyGenerationComplete}
                   onGenerationStart={onAPIKeyGenerationStart}
                 />
@@ -393,7 +394,9 @@ export const Auth: React.FC<Props> = (props) => {
                 <APIKey
                   canGenerate={canGenerateAPIKey}
                   description={
-                    operation === 'create' ? t('authentication:apiKeyGeneratedOnSave') : undefined
+                    isAPIKeyPendingGeneration
+                      ? t('authentication:apiKeyGeneratedOnSave')
+                      : undefined
                   }
                   enabled={apiKeyEnabled}
                   generateOnEnable={
