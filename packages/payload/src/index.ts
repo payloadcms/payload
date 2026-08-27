@@ -162,7 +162,7 @@ import { traverseFields } from './utilities/traverseFields.js'
  * useful as users wish to extend built-in fields with custom logic
  */
 export { accountLockFields as baseAccountLockFields } from './auth/baseFields/accountLock.js'
-export { createAPIKeyFields } from './auth/baseFields/apiKey.js'
+export { createAPIKeyFields } from './auth/baseFields/apiKey/index.js'
 export { baseAuthFields } from './auth/baseFields/auth.js'
 export { emailFieldConfig as baseEmailField } from './auth/baseFields/email.js'
 export { sessionsFieldConfig as baseSessionsField } from './auth/baseFields/sessions.js'
