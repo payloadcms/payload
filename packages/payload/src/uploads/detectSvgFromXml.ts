@@ -16,11 +16,12 @@ export function detectSvgFromXml(buffer: Buffer): boolean {
       return false
     }
 
-    // Remove XML declarations, comments, and processing instructions
+    // Remove XML declarations, comments, processing instructions, and DOCTYPE declarations
     const cleanContent = content
       .replace(/<\?xml[^>]*\?>/gi, '')
       .replace(/<!--[\s\S]*?-->/g, '')
       .replace(/<\?[^>]*\?>/g, '')
+      .replace(/<!DOCTYPE[^[>]*(?:\[[\s\S]*?\])?>/gi, '')
       .trim()
 
     // Find the first actual element (root element)
