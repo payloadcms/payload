@@ -39,17 +39,18 @@ export const createInfoCommand = defineCLICommand({
       },
       packages: resolvedDependencies,
     }
-    const primaryDependencies = result.packages.filter(
-      ({ name }) => name === 'payload' || name === 'next',
-    )
-    const otherDependencies = result.packages
-      .filter(({ name }) => name !== 'payload' && name !== 'next')
-      .sort((a, b) => a.name.localeCompare(b.name))
-    const formattedDependencies = [...primaryDependencies, ...otherDependencies]
-      .map(({ name, version }) => `  ${name}: ${version}`)
-      .join('\n')
 
     if (!isJSON) {
+      const primaryDependencies = result.packages.filter(
+        ({ name }) => name === 'payload' || name === 'next',
+      )
+      const otherDependencies = result.packages
+        .filter(({ name }) => name !== 'payload' && name !== 'next')
+        .sort((a, b) => a.name.localeCompare(b.name))
+      const formattedDependencies = [...primaryDependencies, ...otherDependencies]
+        .map(({ name, version }) => `  ${name}: ${version}`)
+        .join('\n')
+
       // eslint-disable-next-line no-console
       console.log(`
 Binaries:
