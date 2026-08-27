@@ -160,5 +160,18 @@ describe('handleAzureUpload', () => {
       expect(blockBlobClientMock).not.toHaveBeenCalled()
       expect(uploadDataMock).not.toHaveBeenCalled()
     })
+
+    it('should throw when the raw PUT is rejected', async () => {
+      const fetchMock = mockSignedURLResponse({ docPrefix: 'docs', url: signedURL })
+      fetchMock.mockResolvedValueOnce({
+        json: () => Promise.resolve({ docPrefix: 'docs', url: signedURL }),
+        ok: true,
+      })
+      fetchMock.mockResolvedValueOnce({ ok: false })
+
+      await expect(invoke({ chunkLargeFiles: false })).rejects.toThrow(
+        'Failed to upload file to Azure Blob Storage',
+      )
+    })
   })
 })

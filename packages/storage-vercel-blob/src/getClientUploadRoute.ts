@@ -3,6 +3,10 @@ import type { PayloadHandler, PayloadRequest, UploadCollectionSlug } from 'paylo
 import { handleUpload, type HandleUploadBody } from '@vercel/blob/client'
 import { APIError, Forbidden } from 'payload'
 
+import type { VercelBlobCollectionOptions } from './authorizeFileOverwrite.js'
+
+import { authorizeClientOverwrite } from './authorizeFileOverwrite.js'
+
 type Args = {
   access?: (args: {
     collectionSlug: UploadCollectionSlug
@@ -10,21 +14,30 @@ type Args = {
   }) => boolean | Promise<boolean>
   addRandomSuffix?: boolean
   cacheControlMaxAge?: number
+  collections: VercelBlobCollectionOptions
   token: string
+  useCompositePrefixes?: boolean
 }
 
 const defaultAccess: Args['access'] = ({ req }) => !!req.user
 
 export const getClientUploadRoute =
-  ({ access = defaultAccess, addRandomSuffix, cacheControlMaxAge, token }: Args): PayloadHandler =>
+  ({
+    access = defaultAccess,
+    addRandomSuffix,
+    cacheControlMaxAge,
+    collections,
+    token,
+    useCompositePrefixes,
+  }: Args): PayloadHandler =>
   async (req) => {
     const body = (await req.json!()) as HandleUploadBody
 
     try {
       const jsonResponse = await handleUpload({
         body,
-        onBeforeGenerateToken: async (_pathname: string, collectionSlug: null | string) => {
-          if (!collectionSlug) {
+        onBeforeGenerateToken: async (pathname: string, collectionSlug: null | string) => {
+          if (!collectionSlug || !Object.hasOwn(collections, collectionSlug)) {
             throw new APIError('No payload was provided')
           }
 
@@ -32,11 +45,19 @@ export const getClientUploadRoute =
             throw new Forbidden()
           }
 
-          return Promise.resolve({
-            addRandomSuffix,
-            allowOverwrite: true,
-            cacheControlMaxAge,
+          const allowOverwrite = await authorizeClientOverwrite({
+            collections,
+            fileKey: pathname,
+            req,
+            requestedCollectionSlug: collectionSlug,
+            useCompositePrefixes,
           })
+
+          return {
+            addRandomSuffix,
+            ...(allowOverwrite && { allowOverwrite: true }),
+            cacheControlMaxAge,
+          }
         },
         onUploadCompleted: async () => {},
         request: req as Request,

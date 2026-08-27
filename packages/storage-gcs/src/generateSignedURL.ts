@@ -65,12 +65,14 @@ export const getGenerateSignedURLHandler = ({
         action: 'write',
         contentType: mimeType,
         expires: Date.now() + 60 * 60 * 5,
+        extensionHeaders: { 'x-goog-if-generation-match': '0' },
         version: 'v4',
       })
 
     return Response.json({
       docPrefix: sanitizedDocPrefix,
       filename: sanitizedFilename,
+      headers: { 'x-goog-if-generation-match': '0' },
       url,
     })
   }

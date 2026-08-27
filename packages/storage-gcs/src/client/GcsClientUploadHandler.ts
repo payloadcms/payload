@@ -31,10 +31,12 @@ export const GcsClientUploadHandler = createClientUploadHandler({
     const {
       docPrefix: sanitizedDocPrefix,
       filename: sanitizedFilename,
+      headers: extraHeaders,
       url,
     } = (await response.json()) as {
       docPrefix: string
       filename?: string
+      headers?: Record<string, string>
       url: string
     }
 
@@ -42,11 +44,19 @@ export const GcsClientUploadHandler = createClientUploadHandler({
       updateFilename(sanitizedFilename)
     }
 
-    await fetch(url, {
+    const upload = await fetch(url, {
       body: file,
-      headers: { 'Content-Length': file.size.toString(), 'Content-Type': file.type },
+      headers: {
+        'Content-Length': file.size.toString(),
+        'Content-Type': file.type,
+        ...extraHeaders,
+      },
       method: 'PUT',
     })
+
+    if (!upload.ok) {
+      throw new Error('Failed to upload file to Google Cloud Storage')
+    }
 
     return {
       prefix: sanitizedDocPrefix,

@@ -66,8 +66,9 @@ export const getGenerateSignedURLHandler = ({
         containerName,
         contentType: mimeType,
         expiresOn: new Date(Date.now() + 60 * 60 * 1000),
-        permissions: BlobSASPermissions.parse('w'),
+        permissions: BlobSASPermissions.parse('c'),
         startsOn: new Date(),
+        version: '2026-04-06',
       },
       getStorageClient().credential as StorageSharedKeyCredential,
     )

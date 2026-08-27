@@ -141,7 +141,9 @@ export const vercelBlobStorage: VercelBlobStoragePlugin =
           typeof options.clientUploads === 'object' ? options.clientUploads.access : undefined,
         addRandomSuffix: optionsWithDefaults.addRandomSuffix,
         cacheControlMaxAge: options.cacheControlMaxAge,
+        collections: options.collections,
         token: options.token ?? '',
+        useCompositePrefixes: optionsWithDefaults.useCompositePrefixes,
       }),
       serverHandlerPath: '/vercel-blob-client-upload-route',
     })

@@ -80,7 +80,7 @@ export const handleAzureUpload = async ({
       concurrency: CONCURRENCY,
     })
   } else {
-    await fetch(url, {
+    const upload = await fetch(url, {
       body: file,
       headers: {
         'Content-Length': file.size.toString(),
@@ -90,6 +90,10 @@ export const handleAzureUpload = async ({
       },
       method: 'PUT',
     })
+
+    if (!upload.ok) {
+      throw new Error('Failed to upload file to Azure Blob Storage')
+    }
   }
 
   return { prefix: sanitizedDocPrefix }
