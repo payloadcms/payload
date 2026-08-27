@@ -1677,6 +1677,18 @@ describe('Auth', () => {
         expect(updateAccess).not.toHaveBeenCalled()
       })
 
+      it('returns a generated API key to its owner', async () => {
+        const response = await restClient.POST(`/${slug}/generate-api-key/${authenticatedUserID}`, {
+          headers: {
+            Authorization: `JWT ${token}`,
+          },
+        })
+        const result = await response.json()
+
+        expect(response.status).toBe(200)
+        expect(result.apiKey).toEqual(expect.any(String))
+      })
+
       it('immediately generates and returns a readable API key', async () => {
         const originalAPIKey = uuid()
         const user = await payload.create({
