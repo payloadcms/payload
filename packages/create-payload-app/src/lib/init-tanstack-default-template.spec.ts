@@ -116,7 +116,7 @@ describe('initTanStack default template', () => {
     )
   })
 
-  it('should copy a Payload layout whose foundation CSS import does not require a host alias', async () => {
+  it('should copy a Payload layout whose styles are scoped to the Payload route', async () => {
     const result = await initTanStack({
       '--no-deps': true,
       '--payload-version': '4.2.0',
@@ -128,7 +128,10 @@ describe('initTanStack default template', () => {
 
     expect(result.success).toBe(true)
     expect(fse.readFileSync(path.join(projectDir, 'src/routes/_payload.tsx'), 'utf8')).toContain(
-      "import '../payload-foundation.css'",
+      "import styles from '../payload.css?url'",
+    )
+    expect(fse.readFileSync(path.join(projectDir, 'src/payload.css'), 'utf8')).toContain(
+      "@import '@payloadcms/ui/css/app.css';",
     )
   })
 })

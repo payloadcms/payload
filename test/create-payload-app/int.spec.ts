@@ -490,6 +490,7 @@ function expectRequiredTanStackFiles({ projectDir }: { projectDir: string }): vo
     'src/collections/Tags.ts',
     'src/collections/Users.ts',
     'src/payload-foundation.css',
+    'src/payload.css',
     'src/payload.config.ts',
     'src/routes/_payload.tsx',
     'src/routes/_payload/admin.$.tsx',
