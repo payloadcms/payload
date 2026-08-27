@@ -30,10 +30,11 @@ export const createAPIKeyFields = ({
     fields.push({
       name: 'enableAPIKey',
       type: 'checkbox',
+      ...enableAPIKeyField,
       access: {
         read: canReadAPIKeyStatus,
+        ...enableAPIKeyField?.access,
       },
-      ...enableAPIKeyField,
       admin: {
         components: {
           Field: false,
@@ -48,10 +49,11 @@ export const createAPIKeyFields = ({
     {
       name: 'apiKey',
       type: 'text',
+      ...apiKeyField,
       access: {
         read: canReadAPIKey,
+        ...apiKeyField?.access,
       },
-      ...apiKeyField,
       admin: {
         components: {
           Field: false,
