@@ -161,7 +161,6 @@ describe('Payload project updates', () => {
         'routes/_payload/api.$.ts': 'fresh API route\n',
         'routes/_payload/importMap.js': 'fresh import map\n',
         'routes/_payload/server.functions.ts': 'fresh server functions\n',
-        'src/payload-foundation.css': 'template Payload CSS\n',
         'src/payload.css': 'template Payload route CSS\n',
         'src/payload.config.ts': 'template Payload config\n',
       },
