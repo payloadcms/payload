@@ -103,6 +103,106 @@ describe('getCachedFormStateIfDataMatches', () => {
         cachedFormState,
         formData: { rows: [{ id: 'row-1', settings: { keep: true } }] },
       }),
+    ).toEqual({
+      ...cachedFormState,
+      'rows.0.settings': {
+        initialValue: { keep: true },
+        value: { keep: true },
+      },
+    })
+  })
+
+  it('should reuse cached field metadata with current scalar values', () => {
+    const validate = () => true
+    const cachedFormState: FormState = {
+      title: {
+        initialValue: 'Before save',
+        passesCondition: true,
+        valid: true,
+        validate,
+        value: 'Before save',
+      },
+    }
+
+    const result = getCachedFormStateIfDataMatches({
+      cachedFormState,
+      formData: { title: 'After save' },
+    })
+
+    expect(result).toEqual({
+      title: {
+        initialValue: 'After save',
+        passesCondition: true,
+        valid: true,
+        validate,
+        value: 'After save',
+      },
+    })
+    expect(cachedFormState.title.value).toBe('Before save')
+  })
+
+  it('should reuse cached row metadata when only values inside existing rows changed', () => {
+    const cachedFormState: FormState = {
+      items: {
+        customComponents: { RowLabel: 'row-label' as never },
+        disableFormData: true,
+        initialValue: 1,
+        rows: [{ id: 'row-1' }],
+        value: 1,
+      },
+      'items.0.id': { initialValue: 'row-1', value: 'row-1' },
+      'items.0.label': {
+        passesCondition: true,
+        initialValue: 'Before save',
+        value: 'Before save',
+      },
+    }
+
+    expect(
+      getCachedFormStateIfDataMatches({
+        cachedFormState,
+        formData: { items: [{ id: 'row-1', label: 'After save' }] },
+      }),
+    ).toEqual({
+      ...cachedFormState,
+      'items.0.label': {
+        passesCondition: true,
+        initialValue: 'After save',
+        value: 'After save',
+      },
+    })
+  })
+
+  it.each([
+    {
+      cachedRow: { id: 'row-1' },
+      currentRow: { id: 'row-2', label: 'After save' },
+      name: 'row identity changed',
+    },
+    {
+      cachedRow: { blockType: 'callout', id: 'row-1' },
+      currentRow: { blockType: 'quote', id: 'row-1', label: 'After save' },
+      name: 'block type changed',
+    },
+    {
+      cachedRow: { id: 'row-1' },
+      currentRow: { label: 'After save' },
+      name: 'row identity disappeared',
+    },
+    {
+      cachedRow: { blockType: 'callout', id: 'row-1' },
+      currentRow: { id: 'row-1', label: 'After save' },
+      name: 'block type disappeared',
+    },
+  ])('should rebuild form state when the $name', ({ cachedRow, currentRow }) => {
+    expect(
+      getCachedFormStateIfDataMatches({
+        cachedFormState: {
+          items: { initialValue: 1, rows: [cachedRow], value: 1 },
+          'items.0.label': { initialValue: 'Before save', value: 'Before save' },
+        },
+        formData: { items: [currentRow] },
+      }),
     ).toBe(false)
   })
 
