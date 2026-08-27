@@ -37,6 +37,7 @@ import {
   collapsibleFieldsSlug,
   customIDNestedSlug,
   dateFieldsSlug,
+  duplicateFieldsSlug,
   groupFieldsSlug,
   numberFieldsSlug,
   relationshipFieldsSlug,
@@ -76,13 +77,215 @@ describe('Fields', () => {
   })
 
   describe('text', () => {
+    const createdDuplicateIDs: (number | string)[] = []
+    const createdTextIDs: (number | string)[] = []
     let doc
     const text = 'text field'
+
     beforeEach(async () => {
       doc = await payload.create({
         collection: 'text-fields',
         data: { text },
       })
+    })
+
+    afterEach(async () => {
+      for (const id of createdDuplicateIDs) {
+        await payload.delete({ collection: duplicateFieldsSlug, id })
+      }
+      createdDuplicateIDs.length = 0
+
+      for (const id of createdTextIDs) {
+        await payload.delete({ collection: textFieldsSlug, id })
+      }
+      createdTextIDs.length = 0
+    })
+
+    it('should use the default for a field disabled during duplication', async () => {
+      const source = await payload.create({
+        collection: duplicateFieldsSlug,
+        data: {
+          disabledText: 'source-value',
+          text,
+        },
+      })
+      createdDuplicateIDs.push(source.id)
+
+      const duplicate = await payload.duplicate({
+        collection: duplicateFieldsSlug,
+        id: source.id,
+      })
+      createdDuplicateIDs.push(duplicate.id)
+
+      expect(duplicate.disabledText).toBe('duplicate-disabled-default')
+    })
+
+    it('should apply nested defaults when a group is disabled during duplication', async () => {
+      const source = await payload.create({
+        collection: duplicateFieldsSlug,
+        data: {
+          disabledGroup: {
+            value: 'source-value',
+          },
+          text,
+        },
+      })
+      createdDuplicateIDs.push(source.id)
+
+      const duplicate = await payload.duplicate({
+        collection: duplicateFieldsSlug,
+        id: source.id,
+      })
+      createdDuplicateIDs.push(duplicate.id)
+
+      expect(duplicate.disabledGroup).toEqual({
+        value: 'duplicate-disabled-group-default',
+      })
+    })
+
+    it('should apply nested defaults when an array is disabled during duplication', async () => {
+      const source = await payload.create({
+        collection: duplicateFieldsSlug,
+        data: {
+          disabledArray: [
+            {
+              value: 'source-value',
+            },
+          ],
+          text,
+        },
+      })
+      createdDuplicateIDs.push(source.id)
+
+      const duplicate = await payload.duplicate({
+        collection: duplicateFieldsSlug,
+        id: source.id,
+      })
+      createdDuplicateIDs.push(duplicate.id)
+
+      expect(duplicate.disabledArray).toHaveLength(1)
+      expect(duplicate.disabledArray?.[0]?.value).toBe('duplicate-disabled-array-default')
+    })
+
+    it('should apply nested defaults when blocks are disabled during duplication', async () => {
+      const source = await payload.create({
+        collection: duplicateFieldsSlug,
+        data: {
+          disabledBlocks: [
+            {
+              blockType: 'disabledBlock',
+              value: 'source-value',
+            },
+          ],
+          text,
+        },
+      })
+      createdDuplicateIDs.push(source.id)
+
+      const duplicate = await payload.duplicate({
+        collection: duplicateFieldsSlug,
+        id: source.id,
+      })
+      createdDuplicateIDs.push(duplicate.id)
+
+      expect(duplicate.disabledBlocks).toHaveLength(1)
+      expect(duplicate.disabledBlocks?.[0]?.value).toBe('duplicate-disabled-block-default')
+    })
+
+    it('should apply a nested field default without discarding its array row', async () => {
+      const source = await payload.create({
+        collection: duplicateFieldsSlug,
+        data: {
+          childDisabledArray: [
+            {
+              preserved: 'preserved-source-value',
+              reset: 'reset-source-value',
+            },
+          ],
+          text,
+        },
+      })
+      createdDuplicateIDs.push(source.id)
+
+      const duplicate = await payload.duplicate({
+        collection: duplicateFieldsSlug,
+        context: {
+          shouldThrowDisabledDuplicateDescendantHook: true,
+        },
+        id: source.id,
+      })
+      createdDuplicateIDs.push(duplicate.id)
+
+      expect(duplicate.childDisabledArray).toHaveLength(1)
+      expect(duplicate.childDisabledArray?.[0]).toMatchObject({
+        preserved: 'preserved-source-value',
+        reset: 'duplicate-disabled-child-default',
+      })
+    })
+
+    it('should accept request data for a field disabled during duplication', async () => {
+      const source = await payload.create({
+        collection: duplicateFieldsSlug,
+        data: {
+          disabledText: 'source-value',
+          text,
+        },
+      })
+      createdDuplicateIDs.push(source.id)
+
+      const duplicate = await payload.duplicate({
+        collection: duplicateFieldsSlug,
+        data: {
+          disabledText: 'request-value',
+        },
+        id: source.id,
+      })
+      createdDuplicateIDs.push(duplicate.id)
+
+      expect(duplicate.disabledText).toBe('request-value')
+    })
+
+    it('should skip beforeDuplicate hooks for a field disabled during duplication', async () => {
+      const source = await payload.create({
+        collection: duplicateFieldsSlug,
+        data: {
+          disabledHookText: 'source-value',
+          text,
+        },
+      })
+      createdDuplicateIDs.push(source.id)
+
+      const duplicate = await payload.duplicate({
+        collection: duplicateFieldsSlug,
+        context: {
+          shouldThrowDisabledDuplicateHook: true,
+        },
+        id: source.id,
+      })
+      createdDuplicateIDs.push(duplicate.id)
+
+      expect(duplicate.disabledHookText).toBe('duplicate-disabled-hook-default')
+    })
+
+    it('should use the localized default for a localized field disabled during duplication', async () => {
+      const source = await payload.create({
+        collection: duplicateFieldsSlug,
+        data: {
+          disabledLocalizedText: 'localized-source-value',
+          text,
+        },
+        locale: 'en',
+      })
+      createdDuplicateIDs.push(source.id)
+
+      const duplicate = await payload.duplicate({
+        collection: duplicateFieldsSlug,
+        id: source.id,
+        locale: 'en',
+      })
+      createdDuplicateIDs.push(duplicate.id)
+
+      expect(duplicate.disabledLocalizedText).toBe('duplicate-disabled-localized-default')
     })
 
     it('creates with default values', () => {

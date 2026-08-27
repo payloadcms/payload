@@ -156,6 +156,10 @@ export const getConfig: () => Partial<Config> = () => ({
     },
     {
       slug: publicUsersSlug,
+      access: {
+        create: () => true,
+        read: () => true,
+      },
       auth: true,
       fields: [],
     },

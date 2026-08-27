@@ -21,7 +21,7 @@ import { miniChalk } from '../../utilities/miniChalk.js'
 import { traverseForLocalizedFields } from '../../utilities/traverseForLocalizedFields.js'
 import { baseVersionFields } from '../../versions/baseFields.js'
 import { versionDefaults } from '../../versions/defaults.js'
-import { defaultCollectionEndpoints } from '../endpoints/index.js'
+import { defaultCollectionEndpoints, duplicateEndpoint } from '../endpoints/index.js'
 import {
   addDefaultsToAuthConfig,
   addDefaultsToCollectionConfig,
@@ -110,6 +110,11 @@ export const sanitizeCollection = async (
     validRelationships,
   })
 
+  if (sanitized.auth) {
+    // disable duplicate for auth enabled collections by default
+    sanitized.disableDuplicate = sanitized.disableDuplicate ?? true
+  }
+
   if (sanitized.endpoints !== false) {
     if (!sanitized.endpoints) {
       sanitized.endpoints = []
@@ -128,7 +133,9 @@ export const sanitizeCollection = async (
     }
 
     for (const endpoint of defaultCollectionEndpoints) {
-      sanitized.endpoints.push(endpoint)
+      if (endpoint !== duplicateEndpoint || sanitized.disableDuplicate !== true) {
+        sanitized.endpoints.push(endpoint)
+      }
     }
   }
 
@@ -299,9 +306,6 @@ export const sanitizeCollection = async (
     sanitized.auth = addDefaultsToAuthConfig(
       typeof sanitized.auth === 'boolean' ? {} : sanitized.auth,
     )
-
-    // disable duplicate for auth enabled collections by default
-    sanitized.disableDuplicate = sanitized.disableDuplicate ?? true
 
     if (sanitized.auth.loginWithUsername) {
       if (sanitized.auth.loginWithUsername === true) {
