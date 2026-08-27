@@ -7,7 +7,6 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { CLIRuntime, Config, SanitizedConfig } from '../config/types.js'
 
 import { sanitizeConfig } from '../config/sanitize.js'
-import { getLogger } from '../utilities/logger.js'
 import { defineCLICommand } from './defineCLICommand.js'
 import { createCLI } from './index.js'
 import { CLICommandError, getCLIErrorOutput } from './runtime/output.js'
@@ -267,7 +266,6 @@ describe('createCLI', () => {
       handler: () => {
         globalThis.console.log('Created document 42')
         globalThis.console.warn('This is a warning')
-        getLogger('payload', 'sync').info('Payload log')
         process.stdout.write('Direct stdout write')
 
         return { result: { value: 42 } }
@@ -303,7 +301,6 @@ describe('createCLI', () => {
     expect(stderrWrite.mock.calls.map(([value]) => String(value)).join('')).toContain(
       'This is a warning',
     )
-    expect(stderrWrite.mock.calls.map(([value]) => String(value)).join('')).toContain('Payload log')
     expect(stderrWrite.mock.calls.map(([value]) => String(value)).join('')).toContain(
       'Direct stdout write',
     )

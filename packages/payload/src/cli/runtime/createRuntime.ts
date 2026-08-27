@@ -46,14 +46,18 @@ export const createCLIRuntime = (): CLIRuntime => {
     async getPayload(options = {}) {
       const config = await getConfig()
       const configuredLogger = config.logger
-      const shouldReplaceLogger =
-        process.env.PAYLOAD_CLI_JSON !== undefined &&
-        configuredLogger !== 'sync' &&
-        typeof configuredLogger === 'object' &&
-        !('options' in configuredLogger)
+      const shouldRedirectLogger = process.env.PAYLOAD_CLI_JSON !== undefined
 
-      if (shouldReplaceLogger) {
-        config.logger = { destination: process.stderr, options: {} }
+      if (shouldRedirectLogger) {
+        config.logger = {
+          destination: process.stderr,
+          options:
+            configuredLogger !== 'sync' &&
+            typeof configuredLogger === 'object' &&
+            'options' in configuredLogger
+              ? configuredLogger.options
+              : {},
+        }
       }
 
       try {
@@ -62,7 +66,7 @@ export const createCLIRuntime = (): CLIRuntime => {
           ...options,
         })
       } finally {
-        if (shouldReplaceLogger) {
+        if (shouldRedirectLogger) {
           config.logger = configuredLogger
         }
       }
