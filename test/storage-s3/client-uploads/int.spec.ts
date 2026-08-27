@@ -58,11 +58,12 @@ describe('@payloadcms/storage-s3 clientUploads', () => {
     expect(url).toBeDefined()
 
     const uploadResponse = await fetch(url, {
-      method: 'PUT',
+      body: file,
       headers: {
         'Content-Type': 'image/png',
+        'If-None-Match': '*',
       },
-      body: file,
+      method: 'PUT',
     })
 
     expect(uploadResponse.ok).toBe(true)
@@ -83,12 +84,42 @@ describe('@payloadcms/storage-s3 clientUploads', () => {
     expect(res.ContentType).toBe('image/png')
   })
 
+  it('does not overwrite an existing object through client uploads', async () => {
+    const file = readFileSync(path.resolve(dirname, '../../uploads/image.png'))
+    const replacement = Buffer.alloc(file.length, 1)
+    const { url } = await restClient
+      .POST(signedURLEndpoint, {
+        body: signedURLBody('media', 'protected.png', file.length, 'image/png'),
+      })
+      .then((res) => res.json<{ url: string }>())
+    const upload = (body: Buffer) =>
+      fetch(url, {
+        body,
+        headers: {
+          'Content-Type': 'image/png',
+          'If-None-Match': '*',
+        },
+        method: 'PUT',
+      })
+
+    await expect(upload(file)).resolves.toMatchObject({ ok: true })
+
+    const overwrite = await upload(replacement)
+    expect(overwrite.status).toBe(412)
+
+    const stored = await getAWSClient().getObject({
+      Bucket: getTestBucketName(),
+      Key: 'protected.png',
+    })
+    expect(Buffer.from(await stored.Body!.transformToByteArray())).toEqual(file)
+  })
+
   it("should reject signed URL generation by access control when 'x-disallow-access' header is set", async () => {
     const response = await restClient.POST(signedURLEndpoint, {
+      body: signedURLBody('media', 'image.png', MB(1), 'image/png'),
       headers: {
         'x-disallow-access': 'true',
       },
-      body: signedURLBody('media', 'image.png', MB(1), 'image/png'),
     })
 
     expect(response.status).toBe(403)
@@ -157,11 +188,12 @@ describe('@payloadcms/storage-s3 clientUploads', () => {
     expect(url).toBeDefined()
 
     const uploadResponse = await fetch(url, {
-      method: 'PUT',
+      body: file,
       headers: {
         'Content-Type': mimeType,
+        'If-None-Match': '*',
       },
-      body: file,
+      method: 'PUT',
     })
 
     if (process.env.S3_ENDPOINT?.includes('localhost')) {

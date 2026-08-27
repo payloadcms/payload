@@ -42,10 +42,12 @@ export const S3ClientUploadHandler = createClientUploadHandler({
     const {
       docPrefix: sanitizedDocPrefix,
       filename: sanitizedFilename,
+      headers,
       url,
     } = (await response.json()) as {
       docPrefix: string
       filename?: string
+      headers: Record<string, string>
       url: string
     }
 
@@ -54,11 +56,15 @@ export const S3ClientUploadHandler = createClientUploadHandler({
     }
 
     // upload the file directly to S3 using the signed URL
-    await fetch(url, {
+    const upload = await fetch(url, {
       body: file,
-      headers: { 'Content-Length': file.size.toString(), 'Content-Type': file.type },
+      headers,
       method: 'PUT',
     })
+
+    if (!upload.ok) {
+      throw new Error(`Upload failed with status ${upload.status}`)
+    }
 
     // return the docPrefix so the client can update the field value accordingly
     return { prefix: sanitizedDocPrefix }

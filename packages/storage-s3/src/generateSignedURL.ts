@@ -92,6 +92,7 @@ export const getGenerateSignedURLHandler = ({
         Bucket: bucket,
         ContentLength: filesizeLimit ? Math.min(filesize, filesizeLimit) : undefined,
         ContentType: mimeType,
+        IfNoneMatch: '*',
         Key: fileKey,
       }),
       {
@@ -103,6 +104,11 @@ export const getGenerateSignedURLHandler = ({
     return Response.json({
       docPrefix: sanitizedDocPrefix,
       filename: sanitizedFilename,
+      headers: {
+        'Content-Length': String(filesize),
+        'Content-Type': mimeType,
+        'If-None-Match': '*',
+      },
       url,
     })
   }
