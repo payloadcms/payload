@@ -23,15 +23,6 @@ export const createInfoCommand = defineCLICommand({
     )
 
     const cpuCores = os.cpus().length
-    const primaryDependencies = resolvedDependencies.filter(
-      ({ name }) => name === 'payload' || name === 'next',
-    )
-    const otherDependencies = resolvedDependencies
-      .filter(({ name }) => name !== 'payload' && name !== 'next')
-      .sort((a, b) => a.name.localeCompare(b.name))
-    const formattedDependencies = [...primaryDependencies, ...otherDependencies]
-      .map(({ name, version }) => `  ${name}: ${version}`)
-      .join('\n')
     const result = {
       binaries: {
         node: process.versions.node,
@@ -48,6 +39,15 @@ export const createInfoCommand = defineCLICommand({
       },
       packages: resolvedDependencies,
     }
+    const primaryDependencies = result.packages.filter(
+      ({ name }) => name === 'payload' || name === 'next',
+    )
+    const otherDependencies = result.packages
+      .filter(({ name }) => name !== 'payload' && name !== 'next')
+      .sort((a, b) => a.name.localeCompare(b.name))
+    const formattedDependencies = [...primaryDependencies, ...otherDependencies]
+      .map(({ name, version }) => `  ${name}: ${version}`)
+      .join('\n')
 
     // eslint-disable-next-line no-console
     console.log(`
@@ -63,7 +63,7 @@ Operating System:
   Arch: ${result.operatingSystem.architecture}
   Version: ${result.operatingSystem.version}
   Available memory (MB): ${result.operatingSystem.availableMemoryMB}
-  Available CPU cores: ${cpuCores > 0 ? cpuCores : 'N/A'}
+  Available CPU cores: ${result.operatingSystem.availableCPUCores ?? 'N/A'}
 `)
   },
   helpGroup: 'Core commands',
