@@ -783,10 +783,41 @@ describe('Document View', () => {
       await page.locator('#field-title').fill('Version 3')
 
       // Wait for the debounced stale check to run
-      // eslint-disable-next-line payload/no-wait-function
       await wait(1000)
 
       await expect(page.locator('.document-stale-data')).toBeHidden()
+
+      // The publish response remains newer than the legacy draft snapshot. A later edit must not
+      // replace the reconciled baseline with that response timestamp again.
+      await page.locator('#field-title').fill('Version 4')
+      await wait(1000)
+
+      await expect(page.locator('.document-stale-data')).toBeHidden()
+    })
+
+    test('should show stale data modal for a concurrent update after publishing active locale', async () => {
+      await page.goto(localizedURL.create)
+      await page.locator('#field-title').fill('Original title')
+      await saveDocAndAssert(page)
+
+      const documentID = new URL(page.url()).pathname.split('/').at(-1)
+      if (!documentID) {
+        throw new Error('Expected the created localized document ID in the URL')
+      }
+
+      await payload.update({
+        id: documentID,
+        collection: localizedCollectionSlug,
+        data: {
+          title: 'Concurrent title',
+        },
+        locale: 'en',
+        overrideAccess: true,
+      })
+
+      await page.locator('#field-title').fill('Local title')
+
+      await expect(page.locator('.document-stale-data')).toBeVisible()
     })
   })
 
@@ -911,9 +942,9 @@ describe('Document View', () => {
       await page.goto(postsUrl.create)
       await page.locator('#field-title').fill('heros')
       await selectInput({
+        filter: 'sean',
         multiSelect: false,
         option: 'sean',
-        filter: 'sean',
         selectLocator: page.locator('#field-relationship'),
         selectType: 'relationship',
       })

@@ -62,7 +62,8 @@ export const handleStaleDataCheck = async ({
       currentUpdatedAt = currentGlobal?.updatedAt as string
     }
 
-    const isStale = currentUpdatedAt && currentUpdatedAt > originalUpdatedAt
+    // Compare timestamps
+    const isStale = currentUpdatedAt && currentUpdatedAt !== originalUpdatedAt
 
     return {
       currentUpdatedAt,
