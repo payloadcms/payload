@@ -1637,6 +1637,46 @@ describe('Auth', () => {
         token = loginResult.token
       })
 
+      afterEach(() => {
+        vitest.restoreAllMocks()
+      })
+
+      it('rejects unauthenticated requests before API key access checks', async () => {
+        const updateAccess = vitest.spyOn(
+          payload.collections[partialDisableLocalStrategiesSlug].config.access,
+          'update',
+        )
+
+        const response = await restClient.POST(
+          `/${partialDisableLocalStrategiesSlug}/generate-api-key/inaccessible-document`,
+          {
+            auth: false,
+          },
+        )
+
+        expect(response.status).toBe(403)
+        expect(updateAccess).not.toHaveBeenCalled()
+      })
+
+      it('rejects collections with API keys disabled before access checks', async () => {
+        const updateAccess = vitest.spyOn(
+          payload.collections[partialDisableLocalStrategiesSlug].config.access,
+          'update',
+        )
+
+        const response = await restClient.POST(
+          `/${partialDisableLocalStrategiesSlug}/generate-api-key/inaccessible-document`,
+          {
+            headers: {
+              Authorization: `JWT ${token}`,
+            },
+          },
+        )
+
+        expect(response.status).toBe(403)
+        expect(updateAccess).not.toHaveBeenCalled()
+      })
+
       it('immediately generates and returns a readable API key', async () => {
         const originalAPIKey = uuid()
         const user = await payload.create({

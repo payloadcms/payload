@@ -6,7 +6,7 @@ import type { JsonObject, PayloadRequest } from '../../types/index.js'
 
 import { updateByIDOperation } from '../../collections/operations/updateByID.js'
 import { combineQueries } from '../../database/combineQueries.js'
-import { APIError, Forbidden, NotFound } from '../../errors/index.js'
+import { Forbidden, NotFound } from '../../errors/index.js'
 import { fieldAffectsData } from '../../fields/config/types.js'
 import { getRequestCollectionWithID } from '../../utilities/getRequestEntity.js'
 import { headersWithCors } from '../../utilities/headersWithCors.js'
@@ -98,8 +98,8 @@ const generateAPIKeyForDocument = async ({
 export const generateAPIKeyHandler: PayloadHandler = async (req) => {
   const { id, collection } = getRequestCollectionWithID(req)
 
-  if (!collection.config.auth?.useAPIKey) {
-    throw new APIError('This collection does not use API keys.', httpStatus.NOT_FOUND)
+  if (!req.user || !collection.config.auth?.useAPIKey) {
+    throw new Forbidden(req.t)
   }
 
   const doc = await generateAPIKeyForDocument({ id, collection, req, requestData: req.data ?? {} })
