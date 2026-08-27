@@ -2,22 +2,53 @@
 title: Hook Lifecycle
 label: Lifecycle
 order: 15
-desc: The exact order that collection hooks, field hooks, validation, and database operations run in Payload.
-keywords: hooks, lifecycle, collections, validation, beforeChange, afterChange, afterRead, beforeRead, documentation, Payload CMS
+desc: The order that collection hooks, field hooks, validation, database operations, and transaction commits run in Payload.
+keywords: hooks, lifecycle, collections, validation, beforeChange, afterChange, afterRead, beforeRead, transactions, documentation, Payload CMS
 ---
 
-This page documents the current hook lifecycle for collection operations in
-Payload, based on the implementation in core. In every collection operation,
-[`beforeOperation`](./collections#beforeoperation) runs first and
-[`afterOperation`](./collections#afteroperation) runs last. If a REST request
-throws, [`afterError`](./collections#aftererror) runs later in request error
-handling, not inline with the CRUD lifecycle itself.
+This page documents the successful-path lifecycle for collection operations in
+Payload. Access control, query sanitization, and other supporting work are
+included only where they affect hook order.
+
+If a hook throws, or an operation returns early after an access check, later
+stages do not run. For REST requests, [`afterError`](./collections#aftererror)
+runs later in request error handling rather than inline with the CRUD lifecycle.
+
+<Banner type="warning">
+  **Mutation hooks are not a post-commit boundary.** For `create`, `updateByID`,
+  `deleteByID`, and `restoreVersion`, Payload commits a transaction only after
+  `afterOperation`. This means `afterChange`, `afterDelete`, and
+  `afterOperation` can run while the mutation is still uncommitted. An external
+  service or a separate database connection may not see the new state, and a
+  later failure can still roll the transaction back. Bulk operations can also
+  use adapter-specific per-document transactions, so do not use any collection
+  hook as a generic guarantee that a commit has completed.
+</Banner>
 
 <Banner type="info">
-  `beforeOperation` currently receives the backward-compatible operation names
-  `read`, `update`, and `delete` for `find` / `findByID`, `updateByID`, and
-  `deleteByID`. `afterOperation` receives the concrete operation name.
+  `beforeOperation` currently receives backward-compatible operation names:
+  `read` for `find`, `findByID`, `findVersions`, and `findVersionByID`; `update`
+  for `updateByID`; and `delete` for `deleteByID`. `afterOperation` receives the
+  concrete operation name.
 </Banner>
+
+## Field Processing
+
+Inside field `beforeChange`, each field is processed in this order:
+
+1. Field condition
+2. Field `beforeChange` hooks
+3. Field validation
+4. Transformation for storage
+
+If you do not define `field.validate`, Payload injects the built-in validator
+for that field type during field sanitization. If you define `field.validate`,
+your function is what runs, so call the built-in validator yourself if you want
+both.
+
+Hooks registered on one field run in array order. Fields at the same traversal
+level are processed in parallel during field lifecycle stages, so do not make a
+field hook depend on a sibling field hook having completed first.
 
 ## Create
 
@@ -26,70 +57,105 @@ handling, not inline with the CRUD lifecycle itself.
 3. [`beforeValidate`](./fields#beforevalidate) - fields
 4. [`beforeValidate`](./collections#beforevalidate) - collection
 5. [`beforeChange`](./collections#beforechange) - collection
-6. [`beforeChange`](./fields#beforechange) - fields
-7. Field validation runs inside field `beforeChange`
-8. Files are written to storage, when applicable
-9. Database create (`payload.db.create()` or the auth registration flow)
-10. Version and auth side effects run, when enabled
-11. [`afterRead`](./fields#afterread) - fields
-12. [`afterRead`](./collections#afterread) - collection
-13. [`afterChange`](./fields#afterchange) - fields
-14. [`afterChange`](./collections#afterchange) - collection
-15. [`afterOperation`](./collections#afteroperation) - collection
-
-Within step 6, each field is processed in this order: field condition, field
-`beforeChange`, `field.validate`, then transformation for storage. If you do
-not define `field.validate`, Payload injects the built-in validator for that
-field type during field sanitization. If you do define `field.validate`, your
-function is what runs, so call the built-in validator yourself if you want both.
+6. [`beforeChange`](./fields#beforechange), validation, and storage
+   transformation - fields
+7. Files are written to local storage, when applicable
+8. Database create or auth registration
+9. Version and auth side effects run, when enabled
+10. [`afterRead`](./fields#afterread) - fields
+11. [`afterRead`](./collections#afterread) - collection
+12. [`afterChange`](./fields#afterchange) - fields
+13. [`afterChange`](./collections#afterchange) - collection
+14. [`afterOperation`](./collections#afteroperation) - collection
+15. Transaction commit, if this operation started the transaction
 
 ## Update and updateByID
 
 1. [`beforeOperation`](./collections#beforeoperation) - collection
 2. Access control and existing document lookup
-3. Payload normalizes the existing document into `originalDoc` using field
-   `afterRead` internals
+3. [`afterRead`](./fields#afterread) runs while Payload normalizes the existing
+   document into `originalDoc`
 4. [`beforeValidate`](./fields#beforevalidate) - fields
 5. [`beforeValidate`](./collections#beforevalidate) - collection
-6. Replacement files are written to storage, when applicable
+6. Replacement files are written to local storage, when applicable
 7. [`beforeChange`](./collections#beforechange) - collection
-8. [`beforeChange`](./fields#beforechange) - fields
-9. Database update (`payload.db.updateOne()`), unless a versioned draft save
-   only writes a version
+8. [`beforeChange`](./fields#beforechange), validation, and storage
+   transformation - fields
+9. Database update, unless a versioned draft only writes a version
 10. Version save runs, when enabled
 11. [`afterRead`](./fields#afterread) - fields
 12. [`afterRead`](./collections#afterread) - collection
 13. [`afterChange`](./fields#afterchange) - fields
 14. [`afterChange`](./collections#afterchange) - collection
 15. [`afterOperation`](./collections#afteroperation) - collection
+16. Transaction commit, if this operation started the transaction
 
-Bulk `update` wraps the request in one outer `beforeOperation` / `afterOperation`
-pair, then runs the document-level update lifecycle above once per matched
+This means a field `afterRead` hook can run once for `originalDoc` normalization
+and again for the returned document during one update.
+
+Bulk `update` wraps the request in one outer `beforeOperation` /
+`afterOperation` pair, then runs the document-level stages above for every
+matched document. Documents may be processed in parallel, depending on the
+database adapter's transaction configuration, so their hooks do not have a
+stable cross-document order.
+
+## Restore Version
+
+`restoreVersion` uses the update field and collection hooks, but reports its
+own name to `beforeOperation` and `afterOperation`:
+
+1. [`beforeOperation`](./collections#beforeoperation) - collection, operation
+   `restoreVersion`
+2. Version and current-document lookup
+3. [`afterRead`](./fields#afterread) runs for both the current document and the
+   version data used for validation
+4. [`beforeValidate`](./fields#beforevalidate) - fields, operation `update`
+5. [`beforeValidate`](./collections#beforevalidate) - collection, operation
+   `update`
+6. [`beforeChange`](./collections#beforechange) - collection, operation
+   `update`
+7. [`beforeChange`](./fields#beforechange), validation, and storage
+   transformation - fields, operation `update`
+8. Database update, when restoring as published, and version save
+9. [`afterRead`](./fields#afterread) - fields
+10. [`afterRead`](./collections#afterread) - collection
+11. [`afterChange`](./fields#afterchange) - fields, operation `update`
+12. [`afterChange`](./collections#afterchange) - collection, operation `update`
+13. [`afterOperation`](./collections#afteroperation) - collection, operation
+    `restoreVersion`
+14. Transaction commit, if this operation started the transaction
+
+Field `afterRead` hooks can therefore run three times during one restore: for
+the current document, the version data used for validation, and the returned
 document.
 
-`restoreVersion` follows the same `beforeValidate` / `beforeChange` /
-`afterRead` / `afterChange` sequence, but its outer operation name is
-`restoreVersion`.
-
 ## Delete and deleteByID
+
+`deleteByID` follows this order:
 
 1. [`beforeOperation`](./collections#beforeoperation) - collection
 2. Access control
 3. [`beforeDelete`](./collections#beforedelete) - collection
-4. Existing document lookup and cleanup for files / versions / scheduled jobs
-5. Database delete (`payload.db.deleteOne()`)
+4. Existing document lookup, lock check, and cleanup for files, versions, and
+   scheduled jobs
+5. Database delete
 6. Preferences cleanup
 7. [`afterRead`](./fields#afterread) - fields
 8. [`afterRead`](./collections#afterread) - collection
 9. [`afterDelete`](./collections#afterdelete) - collection
 10. [`afterOperation`](./collections#afteroperation) - collection
+11. Transaction commit, if this operation started the transaction
 
-Bulk `delete` also uses one outer `beforeOperation` / `afterOperation` pair,
-then runs the document-level delete lifecycle above once per matched document.
+Bulk `delete` runs one outer `beforeOperation`, selects the matching documents,
+and then runs the lock check through `afterDelete` once per document. It cleans
+up preferences after the per-document work, runs one outer `afterOperation`,
+and then commits the outer transaction when applicable. Documents may be
+processed in parallel, so their hooks do not have a stable cross-document
+order.
 
 ## Read Operations
 
-This is the lifecycle for `find`, `findByID`, `findVersions`, and
+This is the successful lifecycle for `find`, `findByID`, `findVersions`, and
 `findVersionByID`:
 
 1. [`beforeOperation`](./collections#beforeoperation) - collection
@@ -99,26 +165,32 @@ This is the lifecycle for `find`, `findByID`, `findVersions`, and
 5. [`afterRead`](./collections#afterread) - collection
 6. [`afterOperation`](./collections#afteroperation) - collection
 
-For `find` and `findVersions`, steps 3 through 5 run once per returned
-document.
+For `find` and `findVersions`, steps 3 through 5 run once per returned document.
+Documents may be transformed in parallel, while each document's hook arrays
+still run in their configured order.
+
+`count`, `countVersions`, and `findDistinct` do not run the document read-hook
+pipeline. They run `beforeOperation`, access and query work, and then
+`afterOperation`.
+
+Authentication operations have their own dedicated collection hooks. See
+[Collection Hooks](./collections) for those hook contracts.
 
 ## Imports
 
 Imports created with
 [`@payloadcms/plugin-import-export`](../plugins/import-export) do not use a
-separate target-collection hook pipeline. After the file is parsed, CSV
-`fromCSV` transforms run, disabled fields are removed, and each row eventually
-calls `payload.create()` or `payload.update()` on the target collection.
+separate target-collection hook pipeline. The plugin parses and transforms each
+row, removes disabled fields, and then calls the Local API for the target
+collection.
 
-That means the same create or update lifecycle above applies to every imported
-row:
+The normal collection lifecycle therefore applies to every imported row:
 
-1. `create` mode runs the create lifecycle for each row
-2. `update` mode first runs `find` to locate the document by `matchField`, then
-   runs the update lifecycle
-3. `upsert` mode first runs `find` by `matchField`, then runs either the update
-   lifecycle or the create lifecycle
+1. `create` mode runs the create lifecycle
+2. `update` mode runs `find` by `matchField`, followed by the update lifecycle
+3. `upsert` mode runs `find` by `matchField`, followed by either the update or
+   create lifecycle
 
-For localized imports, the plugin writes the default locale first and then
-issues additional `update` calls for the remaining locales, so hooks and field
-validation run once per locale-specific write.
+For localized data, the plugin writes the default locale first and then issues
+additional `update` calls for the remaining locales. Hooks and validation run
+for every locale-specific write.
