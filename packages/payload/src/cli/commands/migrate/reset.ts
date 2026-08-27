@@ -4,12 +4,14 @@ import { initializeMigration } from './initialize.js'
 
 export const createMigrateResetCommand = defineCLICommand({
   description: 'Roll back all migrations.',
-  handler: async ({ getPayload }) => {
+  handler: async ({ getPayload, isJSON }) => {
     const { adapter, payload } = await initializeMigration({ getPayload })
 
     const result = await adapter.migrateReset()
 
-    payload.logger.info('Done.')
+    if (!isJSON) {
+      payload.logger.info('Done.')
+    }
 
     return result ? { result } : undefined
   },

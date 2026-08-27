@@ -4,12 +4,14 @@ import { initializeMigration } from './initialize.js'
 
 export const createMigrateDownCommand = defineCLICommand({
   description: 'Roll back the latest migration batch.',
-  handler: async ({ getPayload }) => {
+  handler: async ({ getPayload, isJSON }) => {
     const { adapter, payload } = await initializeMigration({ getPayload })
 
     const result = await adapter.migrateDown()
 
-    payload.logger.info('Done.')
+    if (!isJSON) {
+      payload.logger.info('Done.')
+    }
 
     return result ? { result } : undefined
   },

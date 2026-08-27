@@ -1440,7 +1440,10 @@ test.describe('Lexical upload node type generation', () => {
       defaultIDType: 'text',
     }
 
-    const generatedTypes = await generateTypes(sanitizedConfig, { log: false, returnString: true })
+    const { types: generatedTypes } = await generateTypes(sanitizedConfig, {
+      log: false,
+      returnString: true,
+    })
 
     // The configured `caption` upload field must survive into the generated upload node type,
     // not be erased to `{ [k: string]: unknown }`.
@@ -1479,7 +1482,10 @@ test.describe('Lexical inline block node type generation', () => {
       defaultIDType: 'text',
     }
 
-    const generatedTypes = await generateTypes(sanitizedConfig, { log: false, returnString: true })
+    const { types: generatedTypes } = await generateTypes(sanitizedConfig, {
+      log: false,
+      returnString: true,
+    })
 
     // The configured block is part of the node union...
     expect(generatedTypes).toContain('SerializedBlockNode<MyBlock>')

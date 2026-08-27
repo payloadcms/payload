@@ -15,7 +15,9 @@ export const createGenerateDBSchemaCommand = defineCLICommand({
       throw new Error(`${payload.db.packageName} does not support database schema generation`)
     }
 
-    await payload.db.generateSchema({ ...args, log: isJSON ? false : args.log })
+    const result = await payload.db.generateSchema({ ...args, log: isJSON ? false : args.log })
+
+    return { result }
   },
   helpGroup: 'Core commands',
   input: strictObject({

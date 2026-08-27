@@ -12,10 +12,16 @@ import { getLogger } from '../../utilities/logger.js'
 import { defineCLICommand } from '../defineCLICommand.js'
 import { strictObject } from '../zod.js'
 
+export type GenerateTypesResult = {
+  outputFile: string
+  types?: string
+  written: boolean
+}
+
 export async function generateTypes(
   config: SanitizedConfig,
   options?: { log?: boolean; returnString?: boolean },
-): Promise<string | void> {
+): Promise<GenerateTypesResult> {
   const logger = getLogger('payload', 'sync')
   const outputFile = process.env.PAYLOAD_TS_OUTPUT_PATH || config.typescript.outputFile
 
@@ -77,7 +83,7 @@ export async function generateTypes(
 
   // Return the generated types instead of writing them to disk.
   if (options?.returnString) {
-    return compiled
+    return { outputFile, types: compiled, written: false }
   }
 
   // Diff the compiled types against the existing types file
@@ -85,7 +91,7 @@ export async function generateTypes(
     const existingTypes = await fs.readFile(outputFile, 'utf-8')
 
     if (compiled === existingTypes) {
-      return
+      return { outputFile, written: false }
     }
   } catch (_) {
     // swallow err
@@ -95,17 +101,17 @@ export async function generateTypes(
   if (shouldLog) {
     logger.info(`Types written to ${outputFile}`)
   }
+
+  return { outputFile, written: true }
 }
 
 export const createGenerateTypesCommand = defineCLICommand({
   description: 'Generate TypeScript types from the Payload config.',
-  handler: async ({ getConfig }) => {
+  handler: async ({ getConfig, isJSON }) => {
     const config = await getConfig()
-    const outputFile = process.env.PAYLOAD_TS_OUTPUT_PATH || config.typescript.outputFile
+    const result = await generateTypes(config, { log: !isJSON })
 
-    await generateTypes(config)
-
-    return { result: { outputFile } }
+    return { result }
   },
   helpGroup: 'Core commands',
   input: strictObject({}),

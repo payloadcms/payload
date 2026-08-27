@@ -774,4 +774,4 @@ export type GenerateSchemaArgs = {
   prettify?: boolean
 }
 
-export type GenerateSchema = (args?: GenerateSchemaArgs) => Promise<void>
+export type GenerateSchema = (args?: GenerateSchemaArgs) => Promise<{ outputFile: string }>

@@ -80,6 +80,7 @@ test.describe('CLI', () => {
       if (command.includes('--json')) {
         expect(JSON.parse(output.stdout)).toMatchObject({
           command: 'generate:db-schema',
+          result: { outputFile: schemaFile },
           success: true,
         })
       } else {
@@ -109,6 +110,10 @@ test.describe('CLI', () => {
       if (command.includes('--json')) {
         expect(JSON.parse(output.stdout)).toMatchObject({
           command: 'generate:importmap',
+          result: {
+            outputFile: importMapFile,
+            written: true,
+          },
           success: true,
         })
       } else {
@@ -138,7 +143,10 @@ test.describe('CLI', () => {
       if (command.includes('--json')) {
         expect(JSON.parse(output.stdout)).toMatchObject({
           command: 'generate:types',
-          result: { outputFile: typesFile },
+          result: {
+            outputFile: typesFile,
+            written: true,
+          },
           success: true,
         })
       } else {

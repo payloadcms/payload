@@ -25,7 +25,9 @@ export const createMigrateCreateCommand = defineCLICommand({
         skipEmpty: args.skipEmpty,
       })
 
-      payload.logger.info(result && !result.created ? 'Cancelled.' : 'Done.')
+      if (!isJSON) {
+        payload.logger.info(result && !result.created ? 'Cancelled.' : 'Done.')
+      }
 
       return result ? { result } : undefined
     } catch (error) {
