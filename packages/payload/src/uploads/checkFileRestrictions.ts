@@ -131,6 +131,12 @@ export const checkFileRestrictions = async ({
     }
   }
 
+  const isValidSvgFile = async (): Promise<boolean> => {
+    const buffer = await getFileBuffer()
+
+    return detectSvgFromXml(buffer) && validateSvg(buffer)
+  }
+
   // Secondary mimetype check to assess file type from buffer
   if (configMimeTypes.length > 0) {
     let detected
@@ -168,14 +174,6 @@ export const checkFileRestrictions = async ({
           `File type ${mimeTypeFromExtension} (from extension ${typeFromExtension}) is not allowed.`,
         )
       } else {
-        // SVG security check (text-based files not detectable by buffer)
-        if (typeFromExtension.toLowerCase() === 'svg') {
-          const isSafeSvg = validateSvg(await getFileBuffer())
-          if (!isSafeSvg) {
-            errors.push('SVG file contains potentially harmful content.')
-          }
-        }
-
         // PDF validation
         if (mimeTypeFromExtension === 'application/pdf') {
           const isValidPDF = validatePDF(await getFileBuffer())
@@ -189,6 +187,20 @@ export const checkFileRestrictions = async ({
         req.payload.logger.warn(
           `File buffer returned no detectable MIME type for ${file.name}. Falling back to extension-based validation.`,
         )
+      }
+    }
+
+    const claimedMimeType = file.mimetype.split(';', 1)[0]?.trim().toLowerCase()
+    const shouldValidateAsSvg =
+      detected?.mime === 'image/svg+xml' ||
+      typeFromExtension.toLowerCase() === 'svg' ||
+      claimedMimeType === 'image/svg+xml'
+
+    if (shouldValidateAsSvg) {
+      if (await isValidSvgFile()) {
+        detected = { ext: 'svg', mime: 'image/svg+xml' }
+      } else {
+        errors.push('SVG file is invalid or contains potentially harmful content.')
       }
     }
 
