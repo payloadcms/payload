@@ -509,12 +509,15 @@ describe('Auth', () => {
     describe('api-key-rotation', () => {
       const createdIDs: Array<number | string> = []
       let markGenerationStored: (() => void) | undefined
+      let releaseFormStateResponse: (() => void) | undefined
       let releaseGenerationResponse: (() => void) | undefined
 
       afterEach(async () => {
         markGenerationStored?.()
+        releaseFormStateResponse?.()
         releaseGenerationResponse?.()
         markGenerationStored = undefined
+        releaseFormStateResponse = undefined
         releaseGenerationResponse = undefined
         await page.unrouteAll({ behavior: 'ignoreErrors' })
 
@@ -630,7 +633,7 @@ describe('Auth', () => {
         await expect(apiKeyInput).toHaveAttribute('type', 'text')
       })
 
-      test('should not show a conflict modal when API key generation overlaps form state', async () => {
+      test('should not show a conflict modal when form state resolves after API key generation', async () => {
         const user = await getAPIKeyTestPayload().create({
           collection: apiKeysWithReadableKeysSlug,
           data: {},
@@ -646,6 +649,13 @@ describe('Auth', () => {
         })
         const generationResponseCanContinue = new Promise<void>((resolve) => {
           releaseGenerationResponse = resolve
+        })
+        let markFormStateStarted: (() => void) | undefined
+        const formStateStarted = new Promise<void>((resolve) => {
+          markFormStateStarted = resolve
+        })
+        const formStateResponseCanContinue = new Promise<void>((resolve) => {
+          releaseFormStateResponse = resolve
         })
         const isFormStatePOST = (request: Request) => {
           if (request.method() !== 'POST') {
@@ -668,7 +678,9 @@ describe('Auth', () => {
 
         await page.route(formStateRouteURL, async (route) => {
           if (isFormStatePOST(route.request())) {
+            markFormStateStarted?.()
             await generationStored
+            await formStateResponseCanContinue
           }
 
           await route.continue()
@@ -688,14 +700,20 @@ describe('Auth', () => {
         )
 
         await page.locator('#field-enableAPIKey').click()
-        await formStateResponse
-
-        await expect(page.locator('#document-locked')).toBeHidden()
-        await expect(page.locator('#document-stale-data')).toBeHidden()
+        await formStateStarted
+        await generationStored
 
         releaseGenerationResponse?.()
         releaseGenerationResponse = undefined
         await generationResponse
+        await expect(page.locator('#apiKey')).not.toHaveValue('')
+
+        releaseFormStateResponse?.()
+        releaseFormStateResponse = undefined
+        await formStateResponse
+
+        await expect(page.locator('#document-locked')).toBeHidden()
+        await expect(page.locator('#document-stale-data')).toBeHidden()
       })
 
       test('should rotate an existing readable API key before re-enabling it', async () => {

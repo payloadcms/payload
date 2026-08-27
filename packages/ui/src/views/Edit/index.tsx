@@ -487,9 +487,10 @@ export function DefaultEditView({
     async ({ formState: prevFormState, submitted }) => {
       const controller = handleAbortRef(abortOnChangeRef)
 
-      // Capture save state before the async form-state request so we can detect
-      // if a save was triggered while this request was in-flight
+      // Capture local update state before the async form-state request so we can detect
+      // if a save or API key generation overlaps it.
       const localUpdateCounterAtStart = localUpdateCounterRef.current
+      const isGeneratingAPIKeyAtStart = isGeneratingAPIKeyRef.current
       const isSavingAtStart = isSavingRef.current
 
       // Sync originalUpdatedAt with current data if it's NEWER (e.g., after router.refresh())
@@ -559,6 +560,7 @@ export function DefaultEditView({
       if (
         staleDataState?.isStale &&
         !isSavingAtStart &&
+        !isGeneratingAPIKeyAtStart &&
         !isGeneratingAPIKeyRef.current &&
         localUpdateCounterRef.current === localUpdateCounterAtStart
       ) {
