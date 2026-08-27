@@ -24,10 +24,6 @@ export const prettySyncLoggerDestination: PinoPretty.PrettyStream = build({
 export const defaultLoggerOptions: PinoPretty.PrettyStream = build(prettyOptions)
 
 export const getLogger = (name = 'payload', logger?: Config['logger']): PayloadLogger => {
-  if (process.env.DISABLE_LOGGING === 'true') {
-    return pino({ enabled: false })
-  }
-
   if (!logger) {
     return pino(defaultLoggerOptions)
   }
