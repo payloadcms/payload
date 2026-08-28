@@ -92,6 +92,7 @@
     "lint:css": "stylelint \"packages/ui/src/**/*.css\" \"templates/**/*.css\"",
     "lint:fix": "turbo run lint:fix --log-order=grouped --continue --filter \"!blank\" --filter \"!blank-tanstack\" --filter \"!website\" --filter \"!ecommerce\"",
     "obliterate-playwright-cache-macos": "rm -rf ~/Library/Caches/ms-playwright && find /System/Volumes/Data/private/var/folders -type d -name 'playwright*' -exec rm -rf {} +",
+    "payload": "pnpm runts ./test/payloadCLI.ts",
     "prepare": "husky && pnpm turbo build --filter @payloadcms/typescript-plugin",
     "prepare-run-test-against-prod": "pnpm build:all && rm -rf test/packed && rm -rf test/node_modules && rm -rf app && rm -f test/pnpm-lock.yaml && pnpm run script:pack --all --no-build --dest test/packed && pnpm runts test/setupProd.ts && cd test && pnpm i && cd ..",
     "prepare-run-test-against-prod:ci": "rm -rf test/packed && rm -rf test/node_modules && rm -rf app && rm -f test/pnpm-lock.yaml && pnpm run script:pack --all --no-build --dest test/packed && pnpm runts test/setupProd.ts && cd test && pnpm i && cd ..",

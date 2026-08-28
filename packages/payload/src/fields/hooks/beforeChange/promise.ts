@@ -144,6 +144,7 @@ export const promise = async ({
           indexPath: indexPathSegments,
           operation,
           originalDoc: doc,
+          overrideAccess,
           path: pathSegments,
           previousSiblingDoc: siblingDoc,
           previousValue: siblingDoc[field.name],

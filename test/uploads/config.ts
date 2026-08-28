@@ -14,6 +14,7 @@ import {
 import { AnyImageTypeCollection } from './collections/AnyImageType/index.js'
 import { BulkUploadsCollection } from './collections/BulkUploads/index.js'
 import { BulkUploadsHookErrorCollection } from './collections/BulkUploadsHookError/index.js'
+import { ClientUploadTempFileCollection } from './collections/ClientUploadTempFile/index.js'
 import { CustomUploadFieldCollection } from './collections/CustomUploadField/index.js'
 import { FileMimeType } from './collections/FileMimeType/index.js'
 import { FilePreviewCollection } from './collections/FilePreview/index.js'
@@ -1070,6 +1071,7 @@ export default buildConfigWithDefaults({
     },
     BulkUploadsCollection,
     BulkUploadsHookErrorCollection,
+    ClientUploadTempFileCollection,
     SimpleRelationshipCollection,
     FileMimeType,
     {

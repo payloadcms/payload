@@ -283,7 +283,12 @@ export const createOperation = async <
     // Fill every locale of a localized slug so switching locales never lands on an empty slug. The
     // slug field hook only sees the active locale, so the rest are seeded here on create.
     if (config.localization) {
-      await fillEmptyLocalizedSlugs({ collection: collectionConfig, data: dataWithLocales, req })
+      await fillEmptyLocalizedSlugs({
+        collection: collectionConfig,
+        data: dataWithLocales,
+        overrideAccess,
+        req,
+      })
     }
 
     // /////////////////////////////////////
@@ -471,6 +476,13 @@ export const createOperation = async <
 
     return result
   } catch (error: unknown) {
+    await unlinkTempFiles({
+      collectionConfig: args.collection.config,
+      config: args.req.payload.config,
+      req: args.req,
+    }).catch((unlinkError) => {
+      args.req.payload.logger.error({ err: unlinkError, msg: 'Failed to remove temp file' })
+    })
     await killTransaction(args.req)
     throw error
   }

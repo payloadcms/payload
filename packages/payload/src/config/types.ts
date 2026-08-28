@@ -6,6 +6,7 @@ import type {
   I18nOptions,
   TFunction,
 } from '@payloadcms/translations'
+import type { StandardJSONSchemaV1, StandardSchemaV1 } from '@standard-schema/spec'
 import type { BusboyConfig } from 'busboy'
 import type GraphQL from 'graphql'
 import type { GraphQLFormattedError } from 'graphql'
@@ -36,7 +37,7 @@ import type {
   ImportMap,
   Imports,
   InternalImportMap,
-} from '../bin/generateImportMap/index.js'
+} from '../cli/commands/generateImportMap/generateImportMap.js'
 import type {
   Collection,
   CollectionAccess,
@@ -144,12 +145,63 @@ export type ResolvedComponent<
   serverProps?: TComponentServerProps
 }
 
-export type BinScriptConfig = {
-  key: string
-  scriptPath: string
+/** Shared resources used while the Payload CLI is running. */
+export type CLIRuntime = {
+  /** Directory containing the Payload config, used to resolve relative command paths. */
+  configDir: string
+  destroy: () => Promise<void>
+  getConfig: () => Promise<SanitizedConfig>
+  getPayload: (options?: Omit<InitOptions, 'config'>) => Promise<Payload>
+  readonly isScheduled: boolean
+  markScheduled: () => void
 }
 
-export type BinScript = (config: SanitizedConfig) => Promise<void> | void
+export type CLIHelp = {
+  output: (args?: { command?: string }) => void
+}
+
+export type CLIInputSchema<
+  Input extends Record<string, unknown> = Record<string, unknown>,
+  Output extends Record<string, unknown> = Input,
+> = StandardJSONSchemaV1<Input, Output> & StandardSchemaV1<Input, Output>
+
+export type CLIFieldOverride =
+  | 'argument'
+  | {
+      flags?: string
+      parse?: (value: string) => unknown
+      type?: 'option'
+    }
+  | {
+      parse?: (value: string) => unknown
+      position?: number
+      syntax?: string
+      type: 'argument'
+    }
+  | false
+
+/** A schema-backed command definition created with `defineCLICommand`. */
+export type CLICommand = {
+  aliases?: string[]
+  allowUnknownOption: boolean
+  cli: false | Partial<Record<string, CLIFieldOverride>>
+  description: string
+  handler: (context: {
+    args: Record<string, unknown>
+    getConfig: CLIRuntime['getConfig']
+    getPayload: CLIRuntime['getPayload']
+    help: CLIHelp
+  }) => number | Promise<number | void> | void
+  helpGroup?: string
+  input: CLIInputSchema
+  readonly schema: Record<string, unknown>
+}
+
+/** A CLI command definition, import reference, or `false` to disable the command. */
+export type CLICommandEntry = CLICommand | PayloadComponent
+
+/** CLI commands keyed by their command-line name. */
+export type CLICommands = Record<string, CLICommandEntry>
 
 type Prettify<T> = {
   [K in keyof T]: T[K]
@@ -1383,8 +1435,6 @@ export type Config = {
    * Define Collection and Global access constraints that are combined with document Access Control using AND semantics.
    */
   baseAccess?: BaseAccess
-  /** Custom Payload bin scripts can be injected via the config. */
-  bin?: BinScriptConfig[]
   blocks?: Block[]
   /**
    * Pass additional options to the parser used to process `multipart/form-data` requests.
@@ -1395,6 +1445,13 @@ export type Config = {
    * @experimental This property is experimental and may change in future releases. Use at your own risk.
    */
   bodyParser?: Partial<BusboyConfig>
+  /** Customize the Payload CLI, or set to `false` to disable it. */
+  cli?:
+    | {
+        /** Add, replace, or disable commands by name. Built-in commands are added during sanitization. */
+        commands?: CLICommands
+      }
+    | false
   /**
    * Manage the datamodel of your application
    *
@@ -1753,8 +1810,8 @@ export interface SanitizedConfig
       Config,
       | 'admin'
       | 'auth'
-      | 'bin'
       | 'blocks'
+      | 'cli'
       | 'collections'
       | 'cookiePrefix'
       | 'cors'
@@ -1783,7 +1840,6 @@ export interface SanitizedConfig
     Required<
       Pick<
         Config,
-        | 'bin'
         | 'cookiePrefix'
         | 'cors'
         | 'csrf'
@@ -1803,6 +1859,11 @@ export interface SanitizedConfig
   admin: SanitizedAdminConfig
   auth: Required<NonNullable<Config['auth']>>
   blocks: FlattenedBlock[]
+  cli:
+    | {
+        commands: CLICommands
+      }
+    | false
   collections: SanitizedCollectionConfig[]
   /** Default richtext editor to use for richText fields */
   editor?: RichTextAdapter<any, any, any>

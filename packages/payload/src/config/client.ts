@@ -1,7 +1,7 @@
 import type { I18nClient, TFunction } from '@payloadcms/translations'
 import type { DeepPartial } from 'ts-essentials'
 
-import type { ImportMap } from '../bin/generateImportMap/index.js'
+import type { ImportMap } from '../cli/commands/generateImportMap/generateImportMap.js'
 import type { ClientBlock } from '../fields/config/types.js'
 import type { BlockSlug, User } from '../index.js'
 import type {
@@ -21,7 +21,7 @@ import { type ClientGlobalConfig, createClientGlobalConfigs } from '../globals/c
 export type ServerOnlyRootProperties = keyof Pick<
   SanitizedConfig,
   | 'baseAccess'
-  | 'bin'
+  | 'cli'
   | 'cors'
   | 'csrf'
   | 'custom'
@@ -90,7 +90,7 @@ export const serverOnlyConfigProperties: readonly Partial<ServerOnlyRootProperti
   'onInit',
   'secret',
   'hooks',
-  'bin',
+  'cli',
   'i18n',
   'typescript',
   'cors',
