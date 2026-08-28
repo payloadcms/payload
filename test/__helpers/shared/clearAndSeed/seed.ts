@@ -3,11 +3,11 @@ import * as os from 'node:os'
 import path from 'path'
 import { type Payload } from 'payload'
 
+import type { SeedFunction } from './testDataConfig.js'
+
 import { isErrorWithCode } from '../isErrorWithCode.js'
 import { resetDB } from './reset.js'
 import { createSnapshot, dbSnapshot, restoreFromSnapshot, uploadsDirCache } from './snapshot.js'
-
-type SeedFunction = (_payload: Payload) => Promise<void> | void
 
 export async function seedDB({
   _payload,
@@ -25,7 +25,7 @@ export async function seedDB({
   alwaysSeed?: boolean
   collectionSlugs: string[]
   deleteOnly?: boolean
-  seedFunction: SeedFunction
+  seedFunction?: SeedFunction
   /**
    * Key to uniquely identify the kind of snapshot. Each test suite should pass in a unique key
    */
@@ -37,8 +37,29 @@ export async function seedDB({
    */
   try {
     await resetDB(_payload, collectionSlugs)
-  } catch (error) {
-    console.error('Error in operation (resetting database):', error)
+  } catch (initialResetError) {
+    // Some database integration tests intentionally mutate or drop their schema.
+    // Reinitialize it once and retry so the next test still starts from a known-clean state.
+    // If recovery fails, propagate the error: silently continuing would violate test isolation.
+    if ('drizzle' in _payload.db) {
+      const previousForcePush = process.env.PAYLOAD_FORCE_DRIZZLE_PUSH
+      process.env.PAYLOAD_FORCE_DRIZZLE_PUSH = 'true'
+
+      try {
+        await _payload.db.init()
+        await _payload.db.connect()
+      } finally {
+        if (previousForcePush === undefined) {
+          delete process.env.PAYLOAD_FORCE_DRIZZLE_PUSH
+        } else {
+          process.env.PAYLOAD_FORCE_DRIZZLE_PUSH = previousForcePush
+        }
+      }
+
+      await resetDB(_payload, collectionSlugs)
+    } else {
+      throw initialResetError
+    }
   }
   /**
    * Delete uploads directory if it exists

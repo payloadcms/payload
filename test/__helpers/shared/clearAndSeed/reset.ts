@@ -28,21 +28,34 @@ export async function resetDB(_payload: Payload, collectionSlugs: string[]) {
 
     // Deleting the schema causes issues when restoring the database from a snapshot later on. That's why we only delete the table data here,
     // To avoid having to re-create any table schemas / indexes / whatever
-    const schema = db.drizzle._.schema
-    if (!schema) {
+    const tableNames = Object.keys(db.tables)
+    if (!tableNames.length) {
       return
     }
 
-    const queries = Object.values(schema)
-      .map((table: any) => {
-        return `DELETE FROM ${db.schemaName ? db.schemaName + '.' : ''}${table.dbName};`
-      })
-      .join('')
+    const schemaPrefix = db.schemaName ? `"${db.schemaName.replaceAll('"', '""')}".` : ''
+    const queries = tableNames.map((tableName) => {
+      const escapedTableName = tableName.replaceAll('"', '""')
 
-    await db.execute({
-      drizzle: db.drizzle,
-      raw: queries,
+      return `DELETE FROM ${schemaPrefix}"${escapedTableName}";`
     })
+
+    if (db.name === 'postgres') {
+      await db.execute({
+        drizzle: db.drizzle,
+        raw: queries.join(''),
+      })
+    } else {
+      await db.execute({ drizzle: db.drizzle, raw: 'PRAGMA foreign_keys = off' })
+
+      try {
+        for (const query of queries) {
+          await db.execute({ drizzle: db.drizzle, raw: query })
+        }
+      } finally {
+        await db.execute({ drizzle: db.drizzle, raw: 'PRAGMA foreign_keys = on' })
+      }
+    }
   } else if (
     'clearDatabase' in _payload.db &&
     typeof (_payload.db as any).clearDatabase === 'function'

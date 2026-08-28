@@ -1,7 +1,5 @@
 import type { PostgresAdapter } from '@payloadcms/db-postgres'
 import type { SQLiteAdapter } from '@payloadcms/db-sqlite'
-import type { PgTable } from 'drizzle-orm/pg-core'
-import type { SQLiteTable } from 'drizzle-orm/sqlite-core'
 import type { Payload } from 'payload'
 
 import { sql } from 'drizzle-orm'
@@ -47,13 +45,11 @@ async function restoreFromMongooseSnapshot(collectionsObj, snapshotKey: string) 
 async function createDrizzleSnapshot(db: PostgresAdapter | SQLiteAdapter, snapshotKey: string) {
   const snapshot = {}
 
-  const schema: Record<string, PgTable | SQLiteTable> = db.drizzle._.schema
-  if (!schema) {
+  if (!Object.keys(db.tables).length) {
     return
   }
 
-  for (const tableName in schema) {
-    const table = db.drizzle.query[tableName]['fullSchema'][tableName] //db.drizzle._.schema[tableName]
+  for (const [tableName, table] of Object.entries(db.tables)) {
     const records = await db.drizzle.select().from(table).execute()
     snapshot[tableName] = records
   }
@@ -88,7 +84,7 @@ async function restoreFromDrizzleSnapshot(
       raw: disableFKConstraintChecksQuery,
     })
     for (const tableName in dbSnapshot[snapshotKey]) {
-      const table = db.drizzle.query[tableName]['fullSchema'][tableName]
+      const table = db.tables[tableName]
       await db.execute({
         drizzle: db.drizzle,
         sql: sql`DELETE FROM ${table}`,

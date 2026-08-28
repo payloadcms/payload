@@ -7,6 +7,8 @@ import { expect, test as vitestTest } from 'vitest'
 import type { DatabaseAdapterType } from '../../dbAdapters.js'
 
 import { getCurrentDatabaseAdapter } from '../../dbAdapters.js'
+import { resetAndSeed } from '../shared/clearAndSeed/resetAndSeed.js'
+import { getTestDataConfig } from '../shared/clearAndSeed/testDataConfig.js'
 import { getSDK } from '../shared/getSDK.js'
 import { initPayloadInt } from '../shared/initPayloadInt.js'
 import { mongooseList } from '../shared/isMongoose.js'
@@ -17,67 +19,96 @@ type TestOptions = {
   db?: 'all' | 'drizzle' | 'mongo' | ((adapterType: DatabaseAdapterType) => boolean)
 }
 
-type IntegrationFixtures = {
-  $file: {
-    config: SanitizedConfig
-    payload: Payload
-    testDir: string
-  }
-  $test: {
-    restClient: NextRESTClient
-    sdk: ReturnType<typeof getSDK>
-  }
+type TestSuiteOptions = {
+  config?: Promise<SanitizedConfig> | SanitizedConfig
+  cron?: boolean
+} & TestOptions
+
+type PayloadState = {
+  config?: SanitizedConfig
+  payload?: Payload
+  resetTestData?: boolean
 }
 
-// Keep all fixtures in one extension so Vitest can trace test calls back to their source lines.
-const testWithFixtures = vitestTest.extend<IntegrationFixtures>({
-  config: [
-    async ({ testDir }, use) => {
-      const { config } = await initPayloadInt(testDir, undefined, false)
+const testWithFixtures = vitestTest
+  .extend<'testConfig', Promise<SanitizedConfig> | SanitizedConfig | undefined>(
+    'testConfig',
+    { scope: 'file' },
+    undefined,
+  )
+  .extend<'testCron', boolean>('testCron', { scope: 'file' }, true)
+  .extend<'testSuiteConfigured', boolean>('testSuiteConfigured', { scope: 'file' }, false)
+  .extend<'payloadState', PayloadState>(
+    'payloadState',
+    { scope: 'file' },
+    async ({ testConfig, testCron, testSuiteConfigured }, { onCleanup }) => {
+      if (testSuiteConfigured && !testConfig) {
+        return {}
+      }
 
-      await use(config)
-    },
-    { scope: 'file' },
-  ],
-  payload: [
-    async ({ config }, use) => {
-      const payload = await getPayload({ config, cron: true })
+      const config = testConfig
+        ? await testConfig
+        : (await initPayloadInt(getTestDirectory(), undefined, false)).config
+      const payload = await getPayload({ config, cron: testCron })
 
-      await use(payload)
-      await payload.destroy()
+      onCleanup(() => payload.destroy())
+
+      return { config, payload, resetTestData: testSuiteConfigured }
     },
-    { scope: 'file' },
-  ],
-  restClient: async ({ payload }, use) => {
-    await use(new NextRESTClient(payload.config))
-  },
-  sdk: async ({ payload }, use) => {
-    await use(getSDK(payload.config))
-  },
-  testDir: [
-    // eslint-disable-next-line no-empty-pattern
-    async ({}, use) => {
-      await use(getTestDirectory())
-    },
-    { scope: 'file' },
-  ],
-})
+  )
+  .extend<'config', SanitizedConfig>('config', { scope: 'file' }, ({ payloadState }) => {
+    if (!payloadState.config) {
+      throw new Error(
+        'This integration test requires Payload. Pass its config to test.suite({ config: testConfig })(...).',
+      )
+    }
+
+    return payloadState.config
+  })
+  .extend<'payload', Payload>('payload', { scope: 'file' }, ({ payloadState }) => {
+    if (!payloadState.payload) {
+      throw new Error(
+        'This integration test requires Payload. Pass its config to test.suite({ config: testConfig })(...).',
+      )
+    }
+
+    return payloadState.payload
+  })
+  .extend<'resetTestData', void>('resetTestData', { auto: true }, async ({ payloadState }) => {
+    if (!payloadState.config || !payloadState.payload || !payloadState.resetTestData) {
+      return
+    }
+
+    const testDataConfig = getTestDataConfig(payloadState.config)
+
+    if (!testDataConfig) {
+      throw new Error('Test suite metadata was not registered by buildConfigWithDefaults.')
+    }
+
+    await resetAndSeed({ payload: payloadState.payload, ...testDataConfig })
+  })
+  .extend<'restClient', NextRESTClient>('restClient', ({ payload }) => {
+    return new NextRESTClient(payload.config)
+  })
+  .extend<'sdk', ReturnType<typeof getSDK>>('sdk', ({ payload }) => {
+    return getSDK(payload.config)
+  })
 
 /**
- * Integration test API with Payload's shared fixtures and database filtering.
+ * Integration test API with Payload's shared lifecycle and database filtering.
  *
- * `config`, `payload`, and `testDir` are shared for the test file. `payload` is destroyed
- * automatically after the file finishes. Clients are new for every test so
- * authentication and other mutable state cannot leak into the next test.
- *
- * @example
- * test.options({ db: 'mongo' })('MongoDB only', async ({ payload }) => {
- *   await payload.find({ collection: 'posts' })
- * })
+ * Payload-backed test files supply their config to one root `test.suite`. Payload is initialized
+ * once for the file and destroyed afterward. Before every test, the database and upload directories
+ * are reset, then the suite's optional seed function is run. REST and SDK clients are recreated per
+ * test. Standalone integration tests use `test.suite({})` and do not initialize Payload.
  *
  * @example
- * test.options({ db: 'drizzle' }).describe('Drizzle only', () => {
- *   test('works', async ({ payload }) => { ... })
+ * import testConfig from './config.js'
+ *
+ * test.suite({ config: testConfig })('Posts', () => {
+ *   test('reads posts', async ({ payload }) => {
+ *     await payload.find({ collection: 'posts' })
+ *   })
  * })
  */
 export const test = Object.assign(testWithFixtures, {
@@ -88,7 +119,16 @@ export const test = Object.assign(testWithFixtures, {
       describe: testWithFixtures.describe.runIf(shouldRun),
     })
   },
+  suite: ({ config, cron = true, db }: TestSuiteOptions) => {
+    testWithFixtures.override('testConfig', config)
+    testWithFixtures.override('testCron', cron)
+    testWithFixtures.override('testSuiteConfigured', true)
+
+    return testWithFixtures.describe.runIf(matchesDatabase({ db }))
+  },
 })
+
+export const it = test
 
 const getTestDirectory = (): string => {
   const testPath = expect.getState().testPath
