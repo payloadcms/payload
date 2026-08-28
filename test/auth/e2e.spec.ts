@@ -4,7 +4,6 @@ import { expect, test } from '@playwright/test'
 import path from 'path'
 import { formatAdminURL } from 'payload/shared'
 import { fileURLToPath } from 'url'
-import { v4 as uuid } from 'uuid'
 
 import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { Config } from './payload-types.js'
@@ -19,7 +18,7 @@ import { ensureCompilationIsDone } from '../__setup/e2e/ensureCompilationIsDone.
 import { initPage } from '../__setup/e2e/initPage.js'
 import { devUser } from '../credentials.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
-import { apiKeysSlug, BASE_PATH, slug } from './shared.js'
+import { BASE_PATH, slug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -29,22 +28,16 @@ let payload: PayloadTestSDK<Config>
 
 const { afterAll, beforeAll, beforeEach, describe } = test
 
-const headers = {
-  'Content-Type': 'application/json',
-}
-
 describe('Auth', () => {
   let page: Page
   let context: BrowserContext
   let url: AdminUrlUtil
   let serverURL: string
-  let apiURL: string
   let adminRoute: string
 
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
-    apiURL = formatAdminURL({ apiRoute: '/api', path: '', serverURL })
     url = new AdminUrlUtil(serverURL, slug)
 
     const {
@@ -366,95 +359,7 @@ describe('Auth', () => {
       })
     })
 
-    describe('api-keys', () => {
-      let user
-
-      beforeAll(async () => {
-        url = new AdminUrlUtil(serverURL, apiKeysSlug)
-
-        user = await payload.create({
-          collection: apiKeysSlug,
-          data: {
-            apiKey: uuid(),
-            enableAPIKey: true,
-          },
-        })
-      })
-
-      test('should enable api key', async () => {
-        await page.goto(url.create)
-
-        await page.locator('#field-enableAPIKey').click()
-
-        // assert that the value is set
-        const apiKeyLocator = page.locator('#apiKey')
-        await expect
-          .poll(async () => await apiKeyLocator.inputValue(), { timeout: POLL_TOPASS_TIMEOUT })
-          .toBeDefined()
-
-        const apiKey = await apiKeyLocator.inputValue()
-
-        await saveDocAndAssert(page)
-
-        await expect(async () => {
-          const apiKeyAfterSave = await apiKeyLocator.inputValue()
-          expect(apiKey).toStrictEqual(apiKeyAfterSave)
-        }).toPass({
-          timeout: POLL_TOPASS_TIMEOUT,
-        })
-      })
-
-      test('should disable api key', async () => {
-        await page.goto(url.edit(user.id))
-
-        // click enable api key checkbox
-        await page.locator('#field-enableAPIKey').click()
-
-        // assert that the apiKey field is hidden
-        await expect(page.locator('#apiKey')).toBeHidden()
-
-        await saveDocAndAssert(page)
-
-        // use the api key in a fetch to assert that it is disabled
-        await expect(async () => {
-          const response = await fetch(`${apiURL}/${apiKeysSlug}/me`, {
-            headers: {
-              ...headers,
-              Authorization: `${apiKeysSlug} API-Key ${user.apiKey}`,
-            },
-          }).then((res) => res.json())
-
-          expect(response.user).toBeNull()
-        }).toPass({
-          timeout: POLL_TOPASS_TIMEOUT,
-        })
-      })
-    })
-
     describe('api-keys-with-field-read-access', () => {
-      let user
-
-      beforeAll(async () => {
-        url = new AdminUrlUtil(serverURL, 'api-keys-with-field-read-access')
-
-        user = await payload.create({
-          collection: apiKeysSlug,
-          data: {
-            apiKey: uuid(),
-            enableAPIKey: true,
-          },
-        })
-      })
-
-      test('should hide auth parent container if api keys enabled but no read access', async () => {
-        await page.goto(url.create)
-
-        // assert that the auth parent container is hidden
-        await expect(page.locator('.auth-fields')).toBeHidden()
-
-        await saveDocAndAssert(page)
-      })
-
       test('ensure `?redirect=` param is injected into the URL and handled properly after login', async () => {
         const users = await payload.find({
           collection: slug,

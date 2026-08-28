@@ -22,7 +22,7 @@ This is particularly useful as you can create a "user" that reflects an integrat
 
 Technically, both of these options will work for third-party integrations but the second option with API key is simpler, because it reduces the amount of work that your integrations need to do to be authenticated properly.
 
-To enable API keys on a collection, set the `useAPIKey` auth option to `true`. From there, a new interface will appear in the [Admin Panel](../admin/overview) for each document within the collection that allows you to generate an API key for each user in the Collection.
+To enable API keys on a collection, set the `useAPIKey` auth option to `true`. From there, a new interface will appear in the [Admin Panel](../admin/overview) for each document within the collection that allows you to generate any number of independently revocable API keys for each user in the Collection.
 
 ```ts
 import type { CollectionConfig } from 'payload'
@@ -36,15 +36,42 @@ export const ThirdPartyAccess: CollectionConfig = {
 }
 ```
 
-User API keys are encrypted within the database, meaning that if your database is compromised,
-your API keys will not be.
+Every generated key is stored in a shared, hidden `payload-api-keys` collection, matched only by
+a one-way hash of the key - the plaintext secret is shown once, at creation or regeneration time,
+and is never stored anywhere in a recoverable form. Because keys live in their own collection,
+changing your `PAYLOAD_SECRET` does not invalidate them.
+
+By default, anyone who can access the [Admin Panel](../admin/overview) can view and revoke any
+owner's keys, mirroring `access.admin`. To scope that down, pass an object instead of `true`:
+
+```ts
+import type { CollectionConfig } from 'payload'
+
+export const ThirdPartyAccess: CollectionConfig = {
+  slug: 'third-party-access',
+  auth: {
+    useAPIKey: {
+      access: {
+        // Whether this collection's users can view OTHER owners' key metadata
+        // (name, creation date) - never the decrypted secret.
+        readOthers: ({ req }) => Boolean(req.user?.roles?.includes('admin')),
+        // Whether this collection's users can delete (revoke) OTHER owners' keys.
+        manageOthers: ({ req }) => Boolean(req.user?.roles?.includes('admin')),
+      },
+    },
+  },
+  fields: [],
+}
+```
 
 <Banner type="warning">
-  **Important:**
-  If you change your `PAYLOAD_SECRET`, you will need to regenerate your API keys.
-
-The secret key is used to encrypt the API keys, so if you change the secret, existing API keys will
-no longer be valid.
+  **Breaking change:**
+  In previous versions of Payload, `useAPIKey: true` stored a single encrypted key directly on
+  the auth document, and rotating `PAYLOAD_SECRET` required re-keying that field. If you are
+  upgrading from a version where you already have API keys in production, run
+  `payload migrate:api-keys --dry-run` followed by `payload migrate:api-keys` to convert your
+  existing keys into the new collection before starting Payload - it will refuse to start
+  otherwise.
 
 </Banner>
 

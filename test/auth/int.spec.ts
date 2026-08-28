@@ -10,14 +10,20 @@ import type {
 import crypto from 'crypto'
 import { jwtDecode } from 'jwt-decode'
 import path from 'path'
-import { createLocalReq, Forbidden, getFieldsToSign, refreshOperation, rotateSecret } from 'payload'
+import {
+  createLocalReq,
+  Forbidden,
+  getFieldsToSign,
+  payloadAPIKeysCollectionSlug,
+  refreshOperation,
+  rotateSecret,
+} from 'payload'
 import { email as emailValidation } from 'payload/shared'
 import { fileURLToPath } from 'url'
 import { v4 as uuid } from 'uuid'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vitest } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
-import type { ApiKey } from './payload-types.js'
 
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { devUser } from '../credentials.js'
@@ -392,28 +398,37 @@ describe('Auth', () => {
       })
 
       it('should allow authentication with an API key with useAPIKey', async () => {
-        const apiKey = '0123456789ABCDEFGH'
-
         const user = await payload.create({
           collection: slug,
           data: {
-            apiKey,
-            email: 'dev@example.com',
+            email: 'api-key-basic@example.com',
             password: 'test',
           },
         })
 
+        const key = await payload.create({
+          collection: payloadAPIKeysCollectionSlug,
+          data: { name: 'Basic API key', owner: { relationTo: slug, value: user.id } },
+          overrideAccess: true,
+        })
+
         const response = await restClient.GET(`/${slug}/me`, {
           headers: {
-            Authorization: `${slug} API-Key ${user?.apiKey}`,
+            Authorization: `${slug} API-Key ${key.apiKey}`,
           },
         })
 
         const data = await response.json()
 
         expect(response.status).toBe(200)
-        expect(data.user.email).toBeDefined()
-        expect(data.user.apiKey).toStrictEqual(apiKey)
+        expect(data.user.email).toBe(user.email)
+
+        await payload.delete({
+          id: key.id,
+          collection: payloadAPIKeysCollectionSlug,
+          overrideAccess: true,
+        })
+        await payload.delete({ id: user.id, collection: slug })
       })
 
       it('should refresh a token and reset its expiration', async () => {
@@ -1273,153 +1288,88 @@ describe('Auth', () => {
 
   describe('API Key', () => {
     it('should authenticate via the correct API key user', async () => {
-      const usersQuery = await payload.find({
+      const owner1 = await payload.create({
         collection: apiKeysSlug,
+        data: { email: 'api-key-owner-1@example.com' },
+      })
+      const owner2 = await payload.create({
+        collection: apiKeysSlug,
+        data: { email: 'api-key-owner-2@example.com' },
       })
 
-      const [user1, user2] = usersQuery.docs
+      const key1 = await payload.create({
+        collection: payloadAPIKeysCollectionSlug,
+        data: { name: 'Owner 1 key', owner: { relationTo: apiKeysSlug, value: owner1.id } },
+        overrideAccess: true,
+      })
+      const key2 = await payload.create({
+        collection: payloadAPIKeysCollectionSlug,
+        data: { name: 'Owner 2 key', owner: { relationTo: apiKeysSlug, value: owner2.id } },
+        overrideAccess: true,
+      })
 
       const success = await restClient
-        .GET(`/${apiKeysSlug}/${user2.id}`, {
+        .GET(`/${apiKeysSlug}/${owner2.id}`, {
           headers: {
-            Authorization: `${apiKeysSlug} API-Key ${user2.apiKey}`,
+            Authorization: `${apiKeysSlug} API-Key ${key2.apiKey}`,
           },
         })
         .then((res) => res.json())
 
-      expect(success.apiKey).toStrictEqual(user2.apiKey)
+      expect(success.id).toStrictEqual(owner2.id)
 
-      const fail = await restClient.GET(`/${apiKeysSlug}/${user1.id}`, {
+      const fail = await restClient.GET(`/${apiKeysSlug}/${owner1.id}`, {
         headers: {
-          Authorization: `${apiKeysSlug} API-Key ${user2.apiKey}`,
+          Authorization: `${apiKeysSlug} API-Key ${key2.apiKey}`,
         },
       })
 
       expect(fail.status).toStrictEqual(404)
+
+      await payload.delete({
+        collection: payloadAPIKeysCollectionSlug,
+        overrideAccess: true,
+        where: { id: { in: [key1.id, key2.id] } },
+      })
+      await payload.delete({
+        collection: apiKeysSlug,
+        where: { id: { in: [owner1.id, owner2.id] } },
+      })
     })
 
-    it('should allow authentication with an API key saved with sha1', async () => {
-      const usersQuery = await payload.find({
+    it('should not disturb an owner’s existing key when an unrelated field is updated', async () => {
+      const owner = await payload.create({
         collection: apiKeysSlug,
+        data: { email: 'api-key-unrelated-update@example.com' },
+      })
+      const key = await payload.create({
+        collection: payloadAPIKeysCollectionSlug,
+        data: { name: 'Stable key', owner: { relationTo: apiKeysSlug, value: owner.id } },
+        overrideAccess: true,
       })
 
-      const [user] = usersQuery.docs as [ApiKey]
-
-      const sha1Index = crypto
-        .createHmac('sha256', payload.secret)
-        .update(user.apiKey as string)
-        .digest('hex')
-
-      await payload.db.updateOne({
-        id: user.id,
+      await payload.update({
+        id: owner.id,
         collection: apiKeysSlug,
-        data: {
-          apiKeyIndex: sha1Index,
-        },
+        data: { email: 'api-key-unrelated-update-renamed@example.com' },
       })
 
-      const response = await restClient
-        .GET(`/${apiKeysSlug}/${user?.id}`, {
-          headers: {
-            Authorization: `${apiKeysSlug} API-Key ${user?.apiKey}`,
-          },
-        })
-        .then((res) => res.json())
-
-      expect(response.id).toStrictEqual(user.id)
-    })
-
-    it('should not remove an API key from a user when updating other fields', async () => {
-      const apiKey = uuid()
-      const user = await payload.create({
-        collection: apiKeysSlug,
-        data: {
-          apiKey,
-          enableAPIKey: true,
-        },
-      })
-
-      const updatedUser = await payload.update({
-        id: user.id,
-        collection: apiKeysSlug,
-        data: {
-          enableAPIKey: true,
-        },
-      })
-
-      const userResult = await payload.find({
-        collection: apiKeysSlug,
-        where: {
-          id: {
-            equals: user.id,
-          },
-        },
-      })
-
-      expect(updatedUser.apiKey).toStrictEqual(user.apiKey)
-      expect(userResult.docs[0].apiKey).toStrictEqual(user.apiKey)
-    })
-
-    it('should disable api key after updating apiKey: null', async () => {
-      const apiKey = uuid()
-      const user = await payload.create({
-        collection: apiKeysSlug,
-        data: {
-          apiKey,
-          enableAPIKey: true,
-        },
-      })
-
-      const updatedUser = await payload.update({
-        id: user.id,
-        collection: apiKeysSlug,
-        data: {
-          apiKey: null,
-        },
-      })
-
-      // use the api key in a fetch to assert that it is disabled
       const response = await restClient
         .GET(`/${apiKeysSlug}/me`, {
           headers: {
-            Authorization: `${apiKeysSlug} API-Key ${apiKey}`,
+            Authorization: `${apiKeysSlug} API-Key ${key.apiKey}`,
           },
         })
         .then((res) => res.json())
 
-      expect(updatedUser.apiKey).toBeNull()
-      expect(response.user).toBeNull()
-    })
+      expect(response.user.id).toStrictEqual(owner.id)
 
-    it('should disable api key after updating with enableAPIKey:false', async () => {
-      const apiKey = uuid()
-      const user = await payload.create({
-        collection: apiKeysSlug,
-        data: {
-          apiKey,
-          enableAPIKey: true,
-        },
+      await payload.delete({
+        id: key.id,
+        collection: payloadAPIKeysCollectionSlug,
+        overrideAccess: true,
       })
-
-      const updatedUser = await payload.update({
-        id: user.id,
-        collection: apiKeysSlug,
-        data: {
-          enableAPIKey: false,
-        },
-      })
-
-      // use the api key in a fetch to assert that it is disabled
-      const response = await restClient
-        .GET(`/${apiKeysSlug}/me`, {
-          headers: {
-            Authorization: `${apiKeysSlug} API-Key ${apiKey}`,
-          },
-        })
-        .then((res) => res.json())
-
-      expect(updatedUser.apiKey).toStrictEqual(apiKey)
-      expect(response.user).toBeNull()
+      await payload.delete({ id: owner.id, collection: apiKeysSlug })
     })
   })
 
@@ -2280,26 +2230,27 @@ describe('Auth', () => {
       expect(newKeyId).toBe(payload.encryptionKeyring.active.keyId)
     })
 
-    it('should authenticate an api key indexed under a previous secret, then re-key it', async () => {
+    it('should not authenticate a legacy on-document key over HTTP, even after re-keying it', async () => {
       const rawApiKey = uuid()
       const user = await seedPreRotationV1User({ rawApiKey })
 
       const authHeaders = { Authorization: `${rotateSecretSlug} API-Key ${rawApiKey}` }
 
-      // The old secret is in the keyring (previousSecrets), so the key already
-      // authenticates via its old-secret index - zero downtime during rotation.
+      // API-key auth only ever reads the shared payload-api-keys collection, never the
+      // on-document apiKey/apiKeyIndex fields - so a legacy key never authenticates,
+      // rotated or not. rotateSecret's job is only to keep that leftover ciphertext
+      // decryptable for a later `migrateAPIKeys` run.
       const before = await restClient.GET(`/${rotateSecretSlug}/${user.id}`, {
         headers: authHeaders,
       })
-      expect(before.status).toBe(200)
+      expect(before.status).toBe(403)
 
       await rotateSecret({ collections: [rotateSecretSlug], oldSecret: OLD_SECRET, payload })
 
-      // Still authenticates, now via the current-secret index.
       const after = await restClient.GET(`/${rotateSecretSlug}/${user.id}`, {
         headers: authHeaders,
       })
-      expect(after.status).toBe(200)
+      expect(after.status).toBe(403)
 
       const raw = await payload.db.findOne<any>({
         collection: rotateSecretSlug,

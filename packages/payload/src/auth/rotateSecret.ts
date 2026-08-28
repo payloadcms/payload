@@ -35,11 +35,13 @@ export type RotateSecretResult = {
 }
 
 /**
- * Re-keys `apiKey`/`apiKeyIndex` fields from a previous `PAYLOAD_SECRET` to the current
- * one, for every legacy-mode (`useAPIKey: true`) auth collection. Collection-backed keys
- * (`useAPIKey: { storage: 'collection' }`) are unaffected by secret rotation entirely -
- * they are matched by a one-way hash of the secret itself, never `payload.secret` - so
- * there is nothing for this function to do for them.
+ * Re-keys any leftover on-document `apiKey`/`apiKeyIndex` fields from a previous
+ * `PAYLOAD_SECRET` to the current one, across every API-key-enabled auth collection.
+ * These fields are never used for authentication - keys are matched by a one-way hash of
+ * the secret in the shared `payload-api-keys` collection instead - but un-migrated rows
+ * from a previous Payload version keep this ciphertext around until `migrateAPIKeys`
+ * converts them, so this function keeps that data decryptable across a secret rotation in
+ * the meantime.
  *
  * Operates at the database-adapter layer to bypass the `apiKey` field's
  * encrypt/decrypt hooks (which would otherwise corrupt data mid-rotation).

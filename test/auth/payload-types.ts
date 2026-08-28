@@ -62,15 +62,15 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_BCC912DC".
+ * via the `definition` "LexicalNodes_4D3C0A2E".
  */
-export type LexicalNodes_BCC912DC =
+export type LexicalNodes_4D3C0A2E =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_BCC912DC>
+  | SerializedParagraphNode<LexicalNodes_4D3C0A2E>
   | SerializedBlockNode<MyBlock>
-  | SerializedHeadingNode<LexicalNodes_BCC912DC>
+  | SerializedHeadingNode<LexicalNodes_4D3C0A2E>
   | {
       type: 'upload';
       /**
@@ -79,22 +79,26 @@ export type LexicalNodes_BCC912DC =
       version: number;
       [k: string]: unknown;
     }
-  | SerializedQuoteNode<LexicalNodes_BCC912DC>
-  | SerializedListNode<LexicalNodes_BCC912DC>
-  | SerializedListItemNode<LexicalNodes_BCC912DC>
-  | SerializedAutoLinkNode<LexicalNodes_BCC912DC, LexicalLinkFields_0A7E9EC0>
-  | SerializedLinkNode<LexicalNodes_BCC912DC, LexicalLinkFields_0A7E9EC0>
+  | SerializedQuoteNode<LexicalNodes_4D3C0A2E>
+  | SerializedListNode<LexicalNodes_4D3C0A2E>
+  | SerializedListItemNode<LexicalNodes_4D3C0A2E>
+  | SerializedAutoLinkNode<LexicalNodes_4D3C0A2E, LexicalLinkFields_0A7E9EC0>
+  | SerializedLinkNode<LexicalNodes_4D3C0A2E, LexicalLinkFields_0A7E9EC0>
   | SerializedRelationshipNode<
       | 'users'
       | 'partial-disable-local-strategies'
       | 'disable-local-strategy-password'
       | 'api-keys'
       | 'public-users'
+      | 'rotate-secret'
+      | 'rotate-secret-secondary'
+      | 'rotate-secret-login'
       | 'relationsCollection'
       | 'api-keys-with-field-read-access'
       | 'payload-kv'
       | 'payload-locked-documents'
       | 'payload-preferences'
+      | 'payload-api-keys'
       | 'payload-migrations'
     >;
 
@@ -105,6 +109,9 @@ export interface Config {
     'disable-local-strategy-password': DisableLocalStrategyPasswordAuthOperations;
     'api-keys': ApiKeyAuthOperations;
     'public-users': PublicUserAuthOperations;
+    'rotate-secret': RotateSecretAuthOperations;
+    'rotate-secret-secondary': RotateSecretSecondaryAuthOperations;
+    'rotate-secret-login': RotateSecretLoginAuthOperations;
     'api-keys-with-field-read-access': ApiKeysWithFieldReadAccessAuthOperations;
   };
   blocks: {};
@@ -114,29 +121,56 @@ export interface Config {
     'disable-local-strategy-password': DisableLocalStrategyPassword;
     'api-keys': ApiKey;
     'public-users': PublicUser;
+    'rotate-secret': RotateSecret;
+    'rotate-secret-secondary': RotateSecretSecondary;
+    'rotate-secret-login': RotateSecretLogin;
     relationsCollection: RelationsCollection;
     'api-keys-with-field-read-access': ApiKeysWithFieldReadAccess;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
+    'payload-api-keys': PayloadApiKey;
     'payload-migrations': PayloadMigration;
   };
-  collectionsJoins: {};
+  collectionsJoins: {
+    users: {
+      apiKeys: 'payload-api-keys';
+    };
+    'api-keys': {
+      apiKeys: 'payload-api-keys';
+    };
+    'rotate-secret': {
+      apiKeys: 'payload-api-keys';
+    };
+    'rotate-secret-secondary': {
+      apiKeys: 'payload-api-keys';
+    };
+    'rotate-secret-login': {
+      apiKeys: 'payload-api-keys';
+    };
+    'api-keys-with-field-read-access': {
+      apiKeys: 'payload-api-keys';
+    };
+  };
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     'partial-disable-local-strategies': PartialDisableLocalStrategiesSelect<false> | PartialDisableLocalStrategiesSelect<true>;
     'disable-local-strategy-password': DisableLocalStrategyPasswordSelect<false> | DisableLocalStrategyPasswordSelect<true>;
     'api-keys': ApiKeysSelect<false> | ApiKeysSelect<true>;
     'public-users': PublicUsersSelect<false> | PublicUsersSelect<true>;
+    'rotate-secret': RotateSecretSelect<false> | RotateSecretSelect<true>;
+    'rotate-secret-secondary': RotateSecretSecondarySelect<false> | RotateSecretSecondarySelect<true>;
+    'rotate-secret-login': RotateSecretLoginSelect<false> | RotateSecretLoginSelect<true>;
     relationsCollection: RelationsCollectionSelect<false> | RelationsCollectionSelect<true>;
     'api-keys-with-field-read-access': ApiKeysWithFieldReadAccessSelect<false> | ApiKeysWithFieldReadAccessSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
+    'payload-api-keys': PayloadApiKeysSelect<false> | PayloadApiKeysSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
-    defaultIDType: string;
+    defaultIDType: number;
   };
   fallbackLocale: null;
   globals: {};
@@ -153,6 +187,9 @@ export interface Config {
     | DisableLocalStrategyPassword
     | ApiKey
     | PublicUser
+    | RotateSecret
+    | RotateSecretSecondary
+    | RotateSecretLogin
     | ApiKeysWithFieldReadAccess;
   jobs: {
     tasks: unknown;
@@ -249,6 +286,60 @@ export interface PublicUserAuthOperations {
     password: string;
   };
 }
+export interface RotateSecretAuthOperations {
+  forgotPassword: {
+    email: string;
+    password: string;
+  };
+  login: {
+    email: string;
+    password: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
+    email: string;
+    password: string;
+  };
+}
+export interface RotateSecretSecondaryAuthOperations {
+  forgotPassword: {
+    email: string;
+    password: string;
+  };
+  login: {
+    email: string;
+    password: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
+    email: string;
+    password: string;
+  };
+}
+export interface RotateSecretLoginAuthOperations {
+  forgotPassword: {
+    email: string;
+    password: string;
+  };
+  login: {
+    email: string;
+    password: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
+    email: string;
+    password: string;
+  };
+}
 export interface ApiKeysWithFieldReadAccessAuthOperations {
   forgotPassword: {
     email: string;
@@ -272,7 +363,7 @@ export interface ApiKeysWithFieldReadAccessAuthOperations {
  * via the `definition` "users".
  */
 export interface User {
-  id: string;
+  id: number;
   adminOnlyField?: string | null;
   roles: ('admin' | 'editor' | 'moderator' | 'user' | 'viewer')[];
   loginMetadata?:
@@ -282,7 +373,7 @@ export interface User {
       }[]
     | null;
   namedSaveToJWT?: string | null;
-  richText?: LexicalRichText<LexicalNodes_BCC912DC> | null;
+  richText?: LexicalRichText<LexicalNodes_4D3C0A2E> | null;
   group?: {
     liftedSaveToJWT?: string | null;
   };
@@ -306,6 +397,11 @@ export interface User {
   enableAPIKey?: boolean | null;
   apiKey?: string | null;
   apiKeyIndex?: string | null;
+  apiKeys?: {
+    docs?: (number | PayloadApiKey)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   email: string;
   resetPasswordToken?: string | null;
   resetPasswordExpiration?: string | null;
@@ -325,10 +421,160 @@ export interface User {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-api-keys".
+ */
+export interface PayloadApiKey {
+  id: number;
+  name: string;
+  owner:
+    | {
+        relationTo: 'users';
+        value: number | User;
+      }
+    | {
+        relationTo: 'api-keys';
+        value: number | ApiKey;
+      }
+    | {
+        relationTo: 'rotate-secret';
+        value: number | RotateSecret;
+      }
+    | {
+        relationTo: 'rotate-secret-secondary';
+        value: number | RotateSecretSecondary;
+      }
+    | {
+        relationTo: 'rotate-secret-login';
+        value: number | RotateSecretLogin;
+      }
+    | {
+        relationTo: 'api-keys-with-field-read-access';
+        value: number | ApiKeysWithFieldReadAccess;
+      };
+  apiKeyHash?: string | null;
+  /**
+   * Shown only once, right after creating or regenerating this key. Copy it now - it cannot be viewed again.
+   */
+  apiKey?: string | null;
+  regenerate?: boolean | null;
+  migratedFrom?: {
+    collection?: string | null;
+    documentID?: string | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "api-keys".
+ */
+export interface ApiKey {
+  id: number;
+  updatedAt: string;
+  createdAt: string;
+  enableAPIKey?: boolean | null;
+  apiKey?: string | null;
+  apiKeyIndex?: string | null;
+  apiKeys?: {
+    docs?: (number | PayloadApiKey)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  collection: 'api-keys';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "rotate-secret".
+ */
+export interface RotateSecret {
+  id: number;
+  updatedAt: string;
+  createdAt: string;
+  enableAPIKey?: boolean | null;
+  apiKey?: string | null;
+  apiKeyIndex?: string | null;
+  apiKeys?: {
+    docs?: (number | PayloadApiKey)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  collection: 'rotate-secret';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "rotate-secret-secondary".
+ */
+export interface RotateSecretSecondary {
+  id: number;
+  updatedAt: string;
+  createdAt: string;
+  enableAPIKey?: boolean | null;
+  apiKey?: string | null;
+  apiKeyIndex?: string | null;
+  apiKeys?: {
+    docs?: (number | PayloadApiKey)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  collection: 'rotate-secret-secondary';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "rotate-secret-login".
+ */
+export interface RotateSecretLogin {
+  id: number;
+  updatedAt: string;
+  createdAt: string;
+  enableAPIKey?: boolean | null;
+  apiKey?: string | null;
+  apiKeyIndex?: string | null;
+  apiKeys?: {
+    docs?: (number | PayloadApiKey)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+  collection: 'rotate-secret-login';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "api-keys-with-field-read-access".
+ */
+export interface ApiKeysWithFieldReadAccess {
+  id: number;
+  updatedAt: string;
+  createdAt: string;
+  enableAPIKey?: boolean | null;
+  apiKey?: string | null;
+  apiKeyIndex?: string | null;
+  apiKeys?: {
+    docs?: (number | PayloadApiKey)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  collection: 'api-keys-with-field-read-access';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "partial-disable-local-strategies".
  */
 export interface PartialDisableLocalStrategy {
-  id: string;
+  id: number;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -353,7 +599,7 @@ export interface PartialDisableLocalStrategy {
  * via the `definition` "disable-local-strategy-password".
  */
 export interface DisableLocalStrategyPassword {
-  id: string;
+  id: number;
   password: string;
   updatedAt: string;
   createdAt: string;
@@ -361,23 +607,10 @@ export interface DisableLocalStrategyPassword {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "api-keys".
- */
-export interface ApiKey {
-  id: string;
-  updatedAt: string;
-  createdAt: string;
-  enableAPIKey?: boolean | null;
-  apiKey?: string | null;
-  apiKeyIndex?: string | null;
-  collection: 'api-keys';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "public-users".
  */
 export interface PublicUser {
-  id: string;
+  id: number;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -404,31 +637,18 @@ export interface PublicUser {
  * via the `definition` "relationsCollection".
  */
 export interface RelationsCollection {
-  id: string;
-  rel?: (string | null) | User;
+  id: number;
+  rel?: (number | null) | User;
   text?: string | null;
   updatedAt: string;
   createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "api-keys-with-field-read-access".
- */
-export interface ApiKeysWithFieldReadAccess {
-  id: string;
-  updatedAt: string;
-  createdAt: string;
-  enableAPIKey?: boolean | null;
-  apiKey?: string | null;
-  apiKeyIndex?: string | null;
-  collection: 'api-keys-with-field-read-access';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
-  id: string;
+  id: number;
   key: string;
   data:
     | {
@@ -445,61 +665,85 @@ export interface PayloadKv {
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: string;
+  id: number;
   document?:
     | ({
         relationTo: 'users';
-        value: string | User;
+        value: number | User;
       } | null)
     | ({
         relationTo: 'partial-disable-local-strategies';
-        value: string | PartialDisableLocalStrategy;
+        value: number | PartialDisableLocalStrategy;
       } | null)
     | ({
         relationTo: 'disable-local-strategy-password';
-        value: string | DisableLocalStrategyPassword;
+        value: number | DisableLocalStrategyPassword;
       } | null)
     | ({
         relationTo: 'api-keys';
-        value: string | ApiKey;
+        value: number | ApiKey;
       } | null)
     | ({
         relationTo: 'public-users';
-        value: string | PublicUser;
+        value: number | PublicUser;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret';
+        value: number | RotateSecret;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret-secondary';
+        value: number | RotateSecretSecondary;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret-login';
+        value: number | RotateSecretLogin;
       } | null)
     | ({
         relationTo: 'relationsCollection';
-        value: string | RelationsCollection;
+        value: number | RelationsCollection;
       } | null)
     | ({
         relationTo: 'api-keys-with-field-read-access';
-        value: string | ApiKeysWithFieldReadAccess;
+        value: number | ApiKeysWithFieldReadAccess;
       } | null);
   globalSlug?: string | null;
   user:
     | {
         relationTo: 'users';
-        value: string | User;
+        value: number | User;
       }
     | {
         relationTo: 'partial-disable-local-strategies';
-        value: string | PartialDisableLocalStrategy;
+        value: number | PartialDisableLocalStrategy;
       }
     | {
         relationTo: 'disable-local-strategy-password';
-        value: string | DisableLocalStrategyPassword;
+        value: number | DisableLocalStrategyPassword;
       }
     | {
         relationTo: 'api-keys';
-        value: string | ApiKey;
+        value: number | ApiKey;
       }
     | {
         relationTo: 'public-users';
-        value: string | PublicUser;
+        value: number | PublicUser;
+      }
+    | {
+        relationTo: 'rotate-secret';
+        value: number | RotateSecret;
+      }
+    | {
+        relationTo: 'rotate-secret-secondary';
+        value: number | RotateSecretSecondary;
+      }
+    | {
+        relationTo: 'rotate-secret-login';
+        value: number | RotateSecretLogin;
       }
     | {
         relationTo: 'api-keys-with-field-read-access';
-        value: string | ApiKeysWithFieldReadAccess;
+        value: number | ApiKeysWithFieldReadAccess;
       };
   updatedAt: string;
   createdAt: string;
@@ -509,31 +753,43 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: string;
+  id: number;
   user:
     | {
         relationTo: 'users';
-        value: string | User;
+        value: number | User;
       }
     | {
         relationTo: 'partial-disable-local-strategies';
-        value: string | PartialDisableLocalStrategy;
+        value: number | PartialDisableLocalStrategy;
       }
     | {
         relationTo: 'disable-local-strategy-password';
-        value: string | DisableLocalStrategyPassword;
+        value: number | DisableLocalStrategyPassword;
       }
     | {
         relationTo: 'api-keys';
-        value: string | ApiKey;
+        value: number | ApiKey;
       }
     | {
         relationTo: 'public-users';
-        value: string | PublicUser;
+        value: number | PublicUser;
+      }
+    | {
+        relationTo: 'rotate-secret';
+        value: number | RotateSecret;
+      }
+    | {
+        relationTo: 'rotate-secret-secondary';
+        value: number | RotateSecretSecondary;
+      }
+    | {
+        relationTo: 'rotate-secret-login';
+        value: number | RotateSecretLogin;
       }
     | {
         relationTo: 'api-keys-with-field-read-access';
-        value: string | ApiKeysWithFieldReadAccess;
+        value: number | ApiKeysWithFieldReadAccess;
       };
   key?: string | null;
   value?:
@@ -553,7 +809,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: string;
+  id: number;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
@@ -605,6 +861,7 @@ export interface UsersSelect<T extends boolean = true> {
   enableAPIKey?: T;
   apiKey?: T;
   apiKeyIndex?: T;
+  apiKeys?: T;
   email?: T;
   resetPasswordToken?: T;
   resetPasswordExpiration?: T;
@@ -661,6 +918,7 @@ export interface ApiKeysSelect<T extends boolean = true> {
   enableAPIKey?: T;
   apiKey?: T;
   apiKeyIndex?: T;
+  apiKeys?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -676,6 +934,56 @@ export interface PublicUsersSelect<T extends boolean = true> {
   hash?: T;
   _verified?: T;
   _verificationToken?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "rotate-secret_select".
+ */
+export interface RotateSecretSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  enableAPIKey?: T;
+  apiKey?: T;
+  apiKeyIndex?: T;
+  apiKeys?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "rotate-secret-secondary_select".
+ */
+export interface RotateSecretSecondarySelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  enableAPIKey?: T;
+  apiKey?: T;
+  apiKeyIndex?: T;
+  apiKeys?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "rotate-secret-login_select".
+ */
+export interface RotateSecretLoginSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  enableAPIKey?: T;
+  apiKey?: T;
+  apiKeyIndex?: T;
+  apiKeys?: T;
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
   loginAttempts?: T;
   lockUntil?: T;
   sessions?:
@@ -706,6 +1014,7 @@ export interface ApiKeysWithFieldReadAccessSelect<T extends boolean = true> {
   enableAPIKey?: T;
   apiKey?: T;
   apiKeyIndex?: T;
+  apiKeys?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -734,6 +1043,25 @@ export interface PayloadPreferencesSelect<T extends boolean = true> {
   user?: T;
   key?: T;
   value?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-api-keys_select".
+ */
+export interface PayloadApiKeysSelect<T extends boolean = true> {
+  name?: T;
+  owner?: T;
+  apiKeyHash?: T;
+  apiKey?: T;
+  regenerate?: T;
+  migratedFrom?:
+    | T
+    | {
+        collection?: T;
+        documentID?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -770,6 +1098,9 @@ export interface CollectionQueryWidget {
       | 'disable-local-strategy-password'
       | 'api-keys'
       | 'public-users'
+      | 'rotate-secret'
+      | 'rotate-secret-secondary'
+      | 'rotate-secret-login'
       | 'relationsCollection'
       | 'api-keys-with-field-read-access';
     where?:
@@ -800,6 +1131,9 @@ export interface ActivityWidget {
           | 'disable-local-strategy-password'
           | 'api-keys'
           | 'public-users'
+          | 'rotate-secret'
+          | 'rotate-secret-secondary'
+          | 'rotate-secret-login'
           | 'relationsCollection'
           | 'api-keys-with-field-read-access'
         )[]

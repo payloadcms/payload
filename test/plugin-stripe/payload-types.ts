@@ -74,9 +74,14 @@ export interface Config {
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
+    'payload-api-keys': PayloadApiKey;
     'payload-migrations': PayloadMigration;
   };
-  collectionsJoins: {};
+  collectionsJoins: {
+    customers: {
+      apiKeys: 'payload-api-keys';
+    };
+  };
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     products: ProductsSelect<false> | ProductsSelect<true>;
@@ -84,10 +89,11 @@ export interface Config {
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
+    'payload-api-keys': PayloadApiKeysSelect<false> | PayloadApiKeysSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
-    defaultIDType: string;
+    defaultIDType: number;
   };
   fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es' | 'de') | ('en' | 'es' | 'de')[];
   globals: {};
@@ -95,6 +101,8 @@ export interface Config {
   locale: 'en' | 'es' | 'de';
   widgets: {
     collections: CollectionsWidget;
+    'collection-query': CollectionQueryWidget;
+    activity: ActivityWidget;
   };
   user: User | Customer;
   jobs: {
@@ -143,7 +151,7 @@ export interface CustomerAuthOperations {
  * via the `definition` "users".
  */
 export interface User {
-  id: string;
+  id: number;
   name?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -169,7 +177,7 @@ export interface User {
  * via the `definition` "products".
  */
 export interface Product {
-  id: string;
+  id: number;
   name?: string | null;
   /**
    * All pricing information is managed in Stripe and will be reflected here.
@@ -188,7 +196,7 @@ export interface Product {
  * via the `definition` "customers".
  */
 export interface Customer {
-  id: string;
+  id: number;
   name?: string | null;
   /**
    * All subscriptions are managed in Stripe and will be reflected here. Use the link in the sidebar to go directly to this customer in Stripe to begin managing their subscriptions.
@@ -197,7 +205,7 @@ export interface Customer {
     | {
         stripeSubscriptionID?: string | null;
         stripeProductID?: string | null;
-        product?: (string | null) | Product;
+        product?: (number | null) | Product;
         status?:
           | ('active' | 'canceled' | 'incomplete' | 'incomplete_expired' | 'past_due' | 'trialing' | 'unpaid')
           | null;
@@ -211,6 +219,11 @@ export interface Customer {
   enableAPIKey?: boolean | null;
   apiKey?: string | null;
   apiKeyIndex?: string | null;
+  apiKeys?: {
+    docs?: (number | PayloadApiKey)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   email: string;
   resetPasswordToken?: string | null;
   resetPasswordExpiration?: string | null;
@@ -230,10 +243,34 @@ export interface Customer {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-api-keys".
+ */
+export interface PayloadApiKey {
+  id: number;
+  name: string;
+  owner: {
+    relationTo: 'customers';
+    value: number | Customer;
+  };
+  apiKeyHash?: string | null;
+  /**
+   * Shown only once, right after creating or regenerating this key. Copy it now - it cannot be viewed again.
+   */
+  apiKey?: string | null;
+  regenerate?: boolean | null;
+  migratedFrom?: {
+    collection?: string | null;
+    documentID?: string | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
-  id: string;
+  id: number;
   key: string;
   data:
     | {
@@ -250,29 +287,29 @@ export interface PayloadKv {
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: string;
+  id: number;
   document?:
     | ({
         relationTo: 'users';
-        value: string | User;
+        value: number | User;
       } | null)
     | ({
         relationTo: 'products';
-        value: string | Product;
+        value: number | Product;
       } | null)
     | ({
         relationTo: 'customers';
-        value: string | Customer;
+        value: number | Customer;
       } | null);
   globalSlug?: string | null;
   user:
     | {
         relationTo: 'users';
-        value: string | User;
+        value: number | User;
       }
     | {
         relationTo: 'customers';
-        value: string | Customer;
+        value: number | Customer;
       };
   updatedAt: string;
   createdAt: string;
@@ -282,15 +319,15 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: string;
+  id: number;
   user:
     | {
         relationTo: 'users';
-        value: string | User;
+        value: number | User;
       }
     | {
         relationTo: 'customers';
-        value: string | Customer;
+        value: number | Customer;
       };
   key?: string | null;
   value?:
@@ -310,7 +347,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: string;
+  id: number;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
@@ -378,6 +415,7 @@ export interface CustomersSelect<T extends boolean = true> {
   enableAPIKey?: T;
   apiKey?: T;
   apiKeyIndex?: T;
+  apiKeys?: T;
   email?: T;
   resetPasswordToken?: T;
   resetPasswordExpiration?: T;
@@ -425,6 +463,25 @@ export interface PayloadPreferencesSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-api-keys_select".
+ */
+export interface PayloadApiKeysSelect<T extends boolean = true> {
+  name?: T;
+  owner?: T;
+  apiKeyHash?: T;
+  apiKey?: T;
+  regenerate?: T;
+  migratedFrom?:
+    | T
+    | {
+        collection?: T;
+        documentID?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-migrations_select".
  */
 export interface PayloadMigrationsSelect<T extends boolean = true> {
@@ -442,6 +499,39 @@ export interface CollectionsWidget {
     [k: string]: unknown;
   };
   width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-query_widget".
+ */
+export interface CollectionQueryWidget {
+  data?: {
+    title?: string | null;
+    relatedCollection: 'users' | 'products' | 'customers';
+    where?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    sortField?: string | null;
+    sortDirection?: ('asc' | 'desc') | null;
+    limit?: number | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "activity_widget".
+ */
+export interface ActivityWidget {
+  data?: {
+    excludedCollections?: ('users' | 'products' | 'customers')[] | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

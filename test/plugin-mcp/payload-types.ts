@@ -80,9 +80,14 @@ export interface Config {
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
+    'payload-api-keys': PayloadApiKey;
     'payload-migrations': PayloadMigration;
   };
-  collectionsJoins: {};
+  collectionsJoins: {
+    users: {
+      apiKeys: 'payload-api-keys';
+    };
+  };
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
@@ -97,10 +102,11 @@ export interface Config {
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
+    'payload-api-keys': PayloadApiKeysSelect<false> | PayloadApiKeysSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
-    defaultIDType: string;
+    defaultIDType: number;
   };
   fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es' | 'fr') | ('en' | 'es' | 'fr')[];
   globals: {
@@ -144,7 +150,7 @@ export interface UserAuthOperations {
  * via the `definition` "users".
  */
 export interface User {
-  id: string;
+  id: number;
   rbac?:
     | {
         [k: string]: unknown;
@@ -159,6 +165,11 @@ export interface User {
   enableAPIKey?: boolean | null;
   apiKey?: string | null;
   apiKeyIndex?: string | null;
+  apiKeys?: {
+    docs?: (number | PayloadApiKey)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   email: string;
   resetPasswordToken?: string | null;
   resetPasswordExpiration?: string | null;
@@ -178,10 +189,34 @@ export interface User {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-api-keys".
+ */
+export interface PayloadApiKey {
+  id: number;
+  name: string;
+  owner: {
+    relationTo: 'users';
+    value: number | User;
+  };
+  apiKeyHash?: string | null;
+  /**
+   * Shown only once, right after creating or regenerating this key. Copy it now - it cannot be viewed again.
+   */
+  apiKey?: string | null;
+  regenerate?: boolean | null;
+  migratedFrom?: {
+    collection?: string | null;
+    documentID?: string | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media".
  */
 export interface Media {
-  id: string;
+  id: number;
   alt?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -200,7 +235,7 @@ export interface Media {
  * via the `definition` "dispatch-media".
  */
 export interface DispatchMedia {
-  id: string;
+  id: number;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -218,7 +253,7 @@ export interface DispatchMedia {
  * via the `definition` "posts".
  */
 export interface Post {
-  id: string;
+  id: number;
   /**
    * The title of the post
    */
@@ -230,7 +265,7 @@ export interface Post {
   /**
    * The author of the post
    */
-  author?: (string | null) | User;
+  author?: (number | null) | User;
   /**
    * Geographic location coordinates
    *
@@ -251,7 +286,7 @@ export interface Post {
  * via the `definition` "products".
  */
 export interface Product {
-  id: string;
+  id: number;
   title?: string | null;
   description?: string | null;
   price?: number | null;
@@ -263,7 +298,7 @@ export interface Product {
  * via the `definition` "rolls".
  */
 export interface Roll {
-  id: string;
+  id: number;
   /**
    * The number of sides on the die that was rolled
    */
@@ -275,7 +310,7 @@ export interface Roll {
   /**
    * The user who rolled the die
    */
-  user: string | User;
+  user: number | User;
   updatedAt: string;
   createdAt: string;
 }
@@ -284,7 +319,7 @@ export interface Roll {
  * via the `definition` "modified-prompts".
  */
 export interface ModifiedPrompt {
-  id: string;
+  id: number;
   /**
    * The original prompt
    */
@@ -296,7 +331,7 @@ export interface ModifiedPrompt {
   /**
    * The user sent the prompt to modify
    */
-  user: string | User;
+  user: number | User;
   updatedAt: string;
   createdAt: string;
 }
@@ -305,7 +340,7 @@ export interface ModifiedPrompt {
  * via the `definition` "returned-resources".
  */
 export interface ReturnedResource {
-  id: string;
+  id: number;
   /**
    * The URI of the resource
    */
@@ -317,7 +352,7 @@ export interface ReturnedResource {
   /**
    * The user sent the prompt to modify
    */
-  user: string | User;
+  user: number | User;
   updatedAt: string;
   createdAt: string;
 }
@@ -326,7 +361,7 @@ export interface ReturnedResource {
  * via the `definition` "pages".
  */
 export interface Page {
-  id: string;
+  id: number;
   title: string;
   layout?: (HeroBlock | TextContent)[] | null;
   updatedAt: string;
@@ -358,7 +393,7 @@ export interface TextContent {
  * via the `definition` "field-types".
  */
 export interface FieldType {
-  id: string;
+  id: number;
   /**
    * A simple text field
    */
@@ -427,7 +462,7 @@ export interface FieldType {
   /**
    * An upload field
    */
-  uploadField?: (string | null) | Media;
+  uploadField?: (number | null) | Media;
   /**
    * Text field inside a collapsible container
    */
@@ -454,7 +489,7 @@ export interface FieldType {
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
-  id: string;
+  id: number;
   key: string;
   data:
     | {
@@ -471,52 +506,52 @@ export interface PayloadKv {
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: string;
+  id: number;
   document?:
     | ({
         relationTo: 'users';
-        value: string | User;
+        value: number | User;
       } | null)
     | ({
         relationTo: 'media';
-        value: string | Media;
+        value: number | Media;
       } | null)
     | ({
         relationTo: 'dispatch-media';
-        value: string | DispatchMedia;
+        value: number | DispatchMedia;
       } | null)
     | ({
         relationTo: 'posts';
-        value: string | Post;
+        value: number | Post;
       } | null)
     | ({
         relationTo: 'products';
-        value: string | Product;
+        value: number | Product;
       } | null)
     | ({
         relationTo: 'rolls';
-        value: string | Roll;
+        value: number | Roll;
       } | null)
     | ({
         relationTo: 'modified-prompts';
-        value: string | ModifiedPrompt;
+        value: number | ModifiedPrompt;
       } | null)
     | ({
         relationTo: 'returned-resources';
-        value: string | ReturnedResource;
+        value: number | ReturnedResource;
       } | null)
     | ({
         relationTo: 'pages';
-        value: string | Page;
+        value: number | Page;
       } | null)
     | ({
         relationTo: 'field-types';
-        value: string | FieldType;
+        value: number | FieldType;
       } | null);
   globalSlug?: string | null;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   updatedAt: string;
   createdAt: string;
@@ -526,10 +561,10 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: string;
+  id: number;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   key?: string | null;
   value?:
@@ -549,7 +584,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: string;
+  id: number;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
@@ -566,6 +601,7 @@ export interface UsersSelect<T extends boolean = true> {
   enableAPIKey?: T;
   apiKey?: T;
   apiKeyIndex?: T;
+  apiKeys?: T;
   email?: T;
   resetPasswordToken?: T;
   resetPasswordExpiration?: T;
@@ -777,6 +813,25 @@ export interface PayloadPreferencesSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-api-keys_select".
+ */
+export interface PayloadApiKeysSelect<T extends boolean = true> {
+  name?: T;
+  owner?: T;
+  apiKeyHash?: T;
+  apiKey?: T;
+  regenerate?: T;
+  migratedFrom?:
+    | T
+    | {
+        collection?: T;
+        documentID?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-migrations_select".
  */
 export interface PayloadMigrationsSelect<T extends boolean = true> {
@@ -790,7 +845,7 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
  * via the `definition` "site-settings".
  */
 export interface SiteSetting {
-  id: string;
+  id: number;
   /**
    * The name of the site
    */

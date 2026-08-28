@@ -12,11 +12,13 @@ describe('getAPIKeyStorageMode', () => {
     expect(getAPIKeyStorageMode(true)).toBe(false)
   })
 
-  it('should return legacy when useAPIKey is true', () => {
-    expect(getAPIKeyStorageMode({ useAPIKey: true })).toBe('legacy')
+  it('should return collection when useAPIKey is true', () => {
+    expect(getAPIKeyStorageMode({ useAPIKey: true })).toBe('collection')
   })
 
-  it('should return collection when useAPIKey is configured for collection storage', () => {
-    expect(getAPIKeyStorageMode({ useAPIKey: { storage: 'collection' } })).toBe('collection')
+  it('should return collection when useAPIKey is configured with an access override', () => {
+    expect(getAPIKeyStorageMode({ useAPIKey: { access: { manageOthers: () => true } } })).toBe(
+      'collection',
+    )
   })
 })

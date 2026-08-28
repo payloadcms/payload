@@ -103,16 +103,14 @@ describe('sanitizeConfig', () => {
     expect(() => sanitizeConfig(config)).toThrow(/payload-api-keys/)
   })
 
-  it('should register the apiKeys join field on a collection-mode auth collection', () => {
+  it('should register the apiKeys join field on an API-key-enabled auth collection', () => {
     const config: Config = {
       ...configDefaults,
       collections: [
         {
           slug: 'users',
           auth: {
-            useAPIKey: {
-              storage: 'collection',
-            },
+            useAPIKey: true,
           },
           fields: [],
         },

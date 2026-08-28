@@ -18,7 +18,6 @@ import { useConfig } from '../../../providers/Config/index.js'
 import { useDocumentInfo } from '../../../providers/DocumentInfo/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import './index.css'
-import { APIKey } from './APIKey.js'
 
 const baseClass = 'auth-fields'
 
@@ -33,13 +32,11 @@ export const Auth: React.FC<Props> = (props) => {
     readOnly,
     requirePassword,
     setValidateBeforeSubmit,
-    useAPIKey,
     username,
     verify,
   } = props
 
   const [changingPassword, setChangingPassword] = useState(requirePassword)
-  const enableAPIKey = useFormFields(([fields]) => (fields && fields?.enableAPIKey) || null)
   const dispatchFields = useFormFields((reducer) => reducer[1])
   const modified = useFormModified()
   const { i18n, t } = useTranslation()
@@ -114,21 +111,6 @@ export const Auth: React.FC<Props> = (props) => {
 
   const disabled = readOnly || isInitializing || isTrashed
 
-  const apiKeyPermissions =
-    docPermissions?.fields === true ? true : docPermissions?.fields?.enableAPIKey
-
-  const apiKeyReadOnly =
-    readOnly ||
-    (apiKeyPermissions !== true &&
-      apiKeyPermissions &&
-      typeof apiKeyPermissions === 'object' &&
-      !apiKeyPermissions?.update)
-
-  const enableAPIKeyReadOnly =
-    readOnly || (apiKeyPermissions !== true && !apiKeyPermissions?.update)
-
-  const canReadApiKey = apiKeyPermissions === true || apiKeyPermissions?.read
-
   const hasPermissionToUnlock: boolean = useMemo(() => {
     if (docPermissions) {
       return Boolean('unlock' in docPermissions ? docPermissions.unlock : undefined)
@@ -196,12 +178,9 @@ export const Auth: React.FC<Props> = (props) => {
   }, [modified])
 
   const showAuthBlock = enableFields
-  // Collection-mode storage (`{ storage: 'collection' }`) is replaced by the apiKeys
-  // join field rendering generically in the field list, not this legacy single-key UI.
-  const showAPIKeyBlock = useAPIKey === true && canReadApiKey
   const showVerifyBlock = verify && isEditing
 
-  if (!(showAuthBlock || showAPIKeyBlock || showVerifyBlock)) {
+  if (!(showAuthBlock || showVerifyBlock)) {
     return null
   }
 
@@ -292,20 +271,6 @@ export const Auth: React.FC<Props> = (props) => {
                   </div>
                 )}
             </Fragment>
-          )}
-          {showAPIKeyBlock && (
-            <div className={`${baseClass}__api-key`}>
-              <CheckboxField
-                field={{
-                  name: 'enableAPIKey',
-                  admin: { disabled, readOnly: enableAPIKeyReadOnly },
-                  label: t('authentication:enableAPIKey'),
-                }}
-                path="enableAPIKey"
-                schemaPath={`${collectionSlug}.enableAPIKey`}
-              />
-              <APIKey enabled={!!enableAPIKey?.value} readOnly={apiKeyReadOnly} />
-            </div>
           )}
           {showVerifyBlock && (
             <CheckboxField

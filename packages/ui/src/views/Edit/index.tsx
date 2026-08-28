@@ -226,13 +226,16 @@ export function DefaultEditView({
             : lockedState.user.id
 
         if (!documentLockState.current || lockedUserID !== previousOwnerID) {
+          let hasShownLockedModal = documentLockState.current?.hasShownLockedModal || false
+
           if (previousOwnerID === user.id && lockedUserID !== user.id) {
             setShowTakeOverModal(true)
-            documentLockState.current.hasShownLockedModal = true
+            hasShownLockedModal = true
           }
 
+          // eslint-disable-next-line react-compiler/react-compiler
           documentLockState.current = {
-            hasShownLockedModal: documentLockState.current?.hasShownLockedModal || false,
+            hasShownLockedModal,
             isLocked: true,
             user: lockedState.user as User,
           }
@@ -679,8 +682,6 @@ export function DefaultEditView({
       readOnly={!hasSavePermission}
       requirePassword={!id}
       setValidateBeforeSubmit={setValidateBeforeSubmit}
-      // eslint-disable-next-line react-compiler/react-compiler
-      useAPIKey={auth.useAPIKey}
       username={data?.username}
       verify={auth.verify}
     />

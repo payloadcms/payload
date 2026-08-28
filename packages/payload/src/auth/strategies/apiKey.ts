@@ -1,12 +1,9 @@
 import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
 import type { User } from '../../index.js'
-import type { Where } from '../../types/index.js'
 import type { AuthStrategyFunction } from '../index.js'
 
 import { payloadAPIKeysCollectionSlug } from '../apiKeys/config.js'
 import { hashAPIKeySecret } from '../apiKeys/hash.js'
-import { computeAPIKeyIndex } from '../crypto.js'
-import { getAPIKeyStorageMode } from '../getAPIKeyStorageMode.js'
 
 const parseAPIKeyHeader = ({
   authHeader,
@@ -27,79 +24,13 @@ const parseAPIKeyHeader = ({
 }
 
 /**
- * `auth.useAPIKey: true` (deprecated): the key lives on the auth document itself.
+ * `auth.useAPIKey`: the key lives in the shared `payload-api-keys` collection, matched by
+ * the one-way `apiKeyHash` of the presented secret - there is nothing reversible to
+ * decrypt, so no separate step is needed to avoid it. The lookup selects only
+ * `id`/`owner`, then loads the owner from the header's auth collection. There is no
+ * fallback to on-document fields: deleting a key is a final revocation.
  */
-const legacyAPIKeyAuthentication =
-  (collectionConfig: SanitizedCollectionConfig): AuthStrategyFunction =>
-  async ({ headers, isGraphQL = false, payload }) => {
-    const apiKey = parseAPIKeyHeader({
-      authHeader: headers.get('Authorization'),
-      collectionSlug: collectionConfig.slug,
-    })
-
-    if (!apiKey) {
-      return { user: null }
-    }
-
-    // The stored index was written under whichever secret was active at the
-    // time, so match against the index computed under every keyring secret.
-    const apiKeyIndexes = payload.encryptionKeyring.all.map((key) =>
-      computeAPIKeyIndex(key.legacyKey, apiKey),
-    )
-
-    try {
-      const where: Where = {}
-      if (collectionConfig.auth?.verify) {
-        where.and = [
-          {
-            apiKeyIndex: {
-              in: apiKeyIndexes,
-            },
-          },
-          {
-            _verified: {
-              not_equals: false,
-            },
-          },
-        ]
-      } else {
-        where.apiKeyIndex = { in: apiKeyIndexes }
-      }
-
-      const userQuery = await payload.find({
-        collection: collectionConfig.slug,
-        depth: isGraphQL ? 0 : collectionConfig.auth.depth,
-        limit: 1,
-        overrideAccess: true,
-        pagination: false,
-        where,
-      })
-
-      if (userQuery.docs && userQuery.docs.length > 0) {
-        const user = userQuery.docs[0]
-        user!.collection = collectionConfig.slug
-        user!._strategy = 'api-key'
-
-        return {
-          user: user as User,
-        }
-      }
-    } catch (ignore) {
-      return { user: null }
-    }
-
-    return { user: null }
-  }
-
-/**
- * `auth.useAPIKey: { storage: 'collection' }`: the key lives in the shared
- * `payload-api-keys` collection, matched by the one-way `apiKeyHash` of the presented
- * secret - there is nothing reversible to decrypt, so no separate step is needed to avoid
- * it. The lookup selects only `id`/`owner`, then loads the owner from the header's auth
- * collection. There is no fallback to legacy fields: deleting a collection-mode key is a
- * final revocation.
- */
-const collectionAPIKeyAuthentication =
+export const APIKeyAuthentication =
   (collectionConfig: SanitizedCollectionConfig): AuthStrategyFunction =>
   async ({ headers, isGraphQL = false, payload }) => {
     const apiKey = parseAPIKeyHeader({
@@ -160,10 +91,3 @@ const collectionAPIKeyAuthentication =
       return { user: null }
     }
   }
-
-export const APIKeyAuthentication = (
-  collectionConfig: SanitizedCollectionConfig,
-): AuthStrategyFunction =>
-  getAPIKeyStorageMode(collectionConfig.auth) === 'collection'
-    ? collectionAPIKeyAuthentication(collectionConfig)
-    : legacyAPIKeyAuthentication(collectionConfig)

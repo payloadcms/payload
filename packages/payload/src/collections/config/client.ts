@@ -49,13 +49,6 @@ type ClientUploadConfig = {
   uploadInstructions: Pick<UploadInstructionsCapability, 'useInAdmin'>
 } & Omit<SanitizedUploadConfig, 'uploadInstructions'>
 
-/**
- * `useAPIKey`'s object form's `access.readOthers`/`access.manageOthers` are functions
- * evaluated server-side only - they are never sent to the client (see `client.ts`'s
- * collection sanitizer), so the client only ever sees `storage`.
- */
-type ClientUseAPIKeyConfig = { storage: 'collection' } | boolean
-
 export type ClientCollectionConfig = {
   admin: {
     description?: StaticDescription
@@ -71,7 +64,9 @@ export type ClientCollectionConfig = {
     | 'preview'
     | ServerOnlyCollectionAdminProperties
   >
-  auth?: { useAPIKey?: ClientUseAPIKeyConfig; verify?: true } & Omit<
+  // `useAPIKey`'s object form's `access.readOthers`/`access.manageOthers` are functions
+  // evaluated server-side only, so the client only ever sees whether it is enabled.
+  auth?: { useAPIKey?: boolean; verify?: true } & Omit<
     SanitizedCollectionConfig['auth'],
     'forgotPassword' | 'strategies' | 'useAPIKey' | 'verify'
   >
@@ -201,7 +196,7 @@ export const createClientCollectionConfig = ({
           break
         }
 
-        clientCollection.auth = {} as { verify?: true } & SanitizedCollectionConfig['auth']
+        clientCollection.auth = {} as NonNullable<ClientCollectionConfig['auth']>
 
         if (collection.auth.cookies) {
           clientCollection.auth.cookies = collection.auth.cookies
@@ -235,12 +230,9 @@ export const createClientCollectionConfig = ({
         }
 
         if (collection.auth.useAPIKey) {
-          // Only `storage` is serializable to the client - `access.readOthers`/
-          // `access.manageOthers` are functions evaluated server-side only.
-          clientCollection.auth.useAPIKey =
-            typeof collection.auth.useAPIKey === 'object'
-              ? { storage: collection.auth.useAPIKey.storage }
-              : collection.auth.useAPIKey
+          // `access.readOthers`/`access.manageOthers` are functions evaluated
+          // server-side only, so the client only ever sees that it is enabled.
+          clientCollection.auth.useAPIKey = true
         }
 
         if (collection.auth.tokenExpiration) {

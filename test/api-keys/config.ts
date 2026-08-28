@@ -42,7 +42,6 @@ export default buildConfigWithDefaults({
               req.user?.apiKeyAccessLevel === 'canSee' ||
               req.user?.apiKeyAccessLevel === 'canManage',
           },
-          storage: 'collection',
         },
       },
       fields: [
@@ -66,9 +65,7 @@ export default buildConfigWithDefaults({
     {
       slug: customersSlug,
       auth: {
-        useAPIKey: {
-          storage: 'collection',
-        },
+        useAPIKey: true,
       },
       fields: [],
     },
@@ -77,20 +74,16 @@ export default buildConfigWithDefaults({
       // owner scoping (header slug must equal owner.relationTo) is testable.
       slug: otherCustomersSlug,
       auth: {
-        useAPIKey: {
-          storage: 'collection',
-        },
+        useAPIKey: true,
       },
       fields: [],
     },
     {
       // Verification-required auth collection, so the api-key strategy's rejection
-      // of an unverified owner is testable in collection mode.
+      // of an unverified owner is testable.
       slug: verifiedCustomersSlug,
       auth: {
-        useAPIKey: {
-          storage: 'collection',
-        },
+        useAPIKey: true,
         verify: true,
       },
       fields: [],

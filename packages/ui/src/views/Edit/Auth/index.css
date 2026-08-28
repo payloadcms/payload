@@ -1,7 +1,6 @@
 @layer payload-default {
   .auth-fields,
   .auth-fields__body,
-  .auth-fields__api-key,
   .auth-fields__changing-password {
     display: flex;
     flex-direction: column;
@@ -52,8 +51,7 @@
     justify-content: center;
   }
 
-  .auth-fields__body > .field-type.checkbox label.field-label,
-  .auth-fields__api-key > .field-type.checkbox label.field-label {
+  .auth-fields__body > .field-type.checkbox label.field-label {
     font-weight: var(--text-body-medium-font-weight);
   }
 
@@ -63,9 +61,5 @@
 
   .auth-fields__controls .btn.btn--style-secondary {
     background: transparent;
-  }
-
-  .auth-fields__api-key > .btn.btn--style-secondary {
-    align-self: flex-start;
   }
 }

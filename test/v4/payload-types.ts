@@ -62,19 +62,19 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_861F9846".
+ * via the `definition` "LexicalNodes_CDB1B959".
  */
-export type LexicalNodes_861F9846 =
+export type LexicalNodes_CDB1B959 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_861F9846>
+  | SerializedParagraphNode<LexicalNodes_CDB1B959>
   | SerializedInlineBlockNode<InlineCta>
-  | SerializedAutoLinkNode<LexicalNodes_861F9846, LexicalLinkFields_B540ABDC>
-  | SerializedLinkNode<LexicalNodes_861F9846, LexicalLinkFields_B540ABDC>
+  | SerializedAutoLinkNode<LexicalNodes_CDB1B959, LexicalLinkFields_B540ABDC>
+  | SerializedLinkNode<LexicalNodes_CDB1B959, LexicalLinkFields_B540ABDC>
   | SerializedHorizontalRuleNode
   | SerializedUploadNode<'uploads'>
-  | SerializedQuoteNode<LexicalNodes_861F9846>
+  | SerializedQuoteNode<LexicalNodes_CDB1B959>
   | SerializedRelationshipNode<
       | 'users'
       | 'doc-controls'
@@ -120,26 +120,27 @@ export type LexicalNodes_861F9846 =
       | 'payload-jobs'
       | 'payload-locked-documents'
       | 'payload-preferences'
+      | 'payload-api-keys'
       | 'payload-migrations'
       | 'payload-query-presets'
     >
-  | SerializedListNode<LexicalNodes_861F9846>
-  | SerializedListItemNode<LexicalNodes_861F9846>
-  | SerializedHeadingNode<LexicalNodes_861F9846>;
+  | SerializedListNode<LexicalNodes_CDB1B959>
+  | SerializedListItemNode<LexicalNodes_CDB1B959>
+  | SerializedHeadingNode<LexicalNodes_CDB1B959>;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_21934B6C".
+ * via the `definition` "LexicalNodes_73D4F7FA".
  */
-export type LexicalNodes_21934B6C =
+export type LexicalNodes_73D4F7FA =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_21934B6C>
+  | SerializedParagraphNode<LexicalNodes_73D4F7FA>
   | SerializedBlockNode<Callout>
   | SerializedInlineBlockNode<Kbd>
   | SerializedUploadNode<'uploads', LexicalUploadFields_7C90EEAC>
   | SerializedHorizontalRuleNode
-  | SerializedQuoteNode<LexicalNodes_21934B6C>
+  | SerializedQuoteNode<LexicalNodes_73D4F7FA>
   | SerializedRelationshipNode<
       | 'users'
       | 'doc-controls'
@@ -185,31 +186,32 @@ export type LexicalNodes_21934B6C =
       | 'payload-jobs'
       | 'payload-locked-documents'
       | 'payload-preferences'
+      | 'payload-api-keys'
       | 'payload-migrations'
       | 'payload-query-presets'
     >
-  | SerializedAutoLinkNode<LexicalNodes_21934B6C, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_21934B6C, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_21934B6C>
-  | SerializedListItemNode<LexicalNodes_21934B6C>
-  | SerializedHeadingNode<LexicalNodes_21934B6C>;
+  | SerializedAutoLinkNode<LexicalNodes_73D4F7FA, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_73D4F7FA, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_73D4F7FA>
+  | SerializedListItemNode<LexicalNodes_73D4F7FA>
+  | SerializedHeadingNode<LexicalNodes_73D4F7FA>;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_58E48BA5".
+ * via the `definition` "LexicalNodes_1E28F629".
  */
-export type LexicalNodes_58E48BA5 =
+export type LexicalNodes_1E28F629 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_58E48BA5>
+  | SerializedParagraphNode<LexicalNodes_1E28F629>
   | SerializedBlockNode<MyBlock>
-  | SerializedHeadingNode<LexicalNodes_58E48BA5>
+  | SerializedHeadingNode<LexicalNodes_1E28F629>
   | SerializedUploadNode<'uploads'>
-  | SerializedQuoteNode<LexicalNodes_58E48BA5>
-  | SerializedListNode<LexicalNodes_58E48BA5>
-  | SerializedListItemNode<LexicalNodes_58E48BA5>
-  | SerializedAutoLinkNode<LexicalNodes_58E48BA5, LexicalLinkFields_0A7E9EC0>
-  | SerializedLinkNode<LexicalNodes_58E48BA5, LexicalLinkFields_0A7E9EC0>
+  | SerializedQuoteNode<LexicalNodes_1E28F629>
+  | SerializedListNode<LexicalNodes_1E28F629>
+  | SerializedListItemNode<LexicalNodes_1E28F629>
+  | SerializedAutoLinkNode<LexicalNodes_1E28F629, LexicalLinkFields_0A7E9EC0>
+  | SerializedLinkNode<LexicalNodes_1E28F629, LexicalLinkFields_0A7E9EC0>
   | SerializedRelationshipNode<
       | 'users'
       | 'doc-controls'
@@ -255,23 +257,24 @@ export type LexicalNodes_58E48BA5 =
       | 'payload-jobs'
       | 'payload-locked-documents'
       | 'payload-preferences'
+      | 'payload-api-keys'
       | 'payload-migrations'
       | 'payload-query-presets'
     >;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_93AF23E3".
+ * via the `definition` "LexicalNodes_B87E7796".
  */
-export type LexicalNodes_93AF23E3 =
+export type LexicalNodes_B87E7796 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_93AF23E3>
+  | SerializedParagraphNode<LexicalNodes_B87E7796>
   | SerializedBlockNode<Banner>
   | SerializedInlineBlockNode<Highlight>
-  | SerializedUploadNode<'uploads', LexicalUploadFields_8EB91948>
+  | SerializedUploadNode<'uploads', LexicalUploadFields_648C627D>
   | SerializedHorizontalRuleNode
-  | SerializedQuoteNode<LexicalNodes_93AF23E3>
+  | SerializedQuoteNode<LexicalNodes_B87E7796>
   | SerializedRelationshipNode<
       | 'users'
       | 'doc-controls'
@@ -317,29 +320,30 @@ export type LexicalNodes_93AF23E3 =
       | 'payload-jobs'
       | 'payload-locked-documents'
       | 'payload-preferences'
+      | 'payload-api-keys'
       | 'payload-migrations'
       | 'payload-query-presets'
     >
-  | SerializedAutoLinkNode<LexicalNodes_93AF23E3, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_93AF23E3, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_93AF23E3>
-  | SerializedListItemNode<LexicalNodes_93AF23E3>
-  | SerializedHeadingNode<LexicalNodes_93AF23E3>;
+  | SerializedAutoLinkNode<LexicalNodes_B87E7796, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_B87E7796, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_B87E7796>
+  | SerializedListItemNode<LexicalNodes_B87E7796>
+  | SerializedHeadingNode<LexicalNodes_B87E7796>;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_7D03D692".
+ * via the `definition` "LexicalNodes_C9C58093".
  */
-export type LexicalNodes_7D03D692 =
+export type LexicalNodes_C9C58093 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_7D03D692>
-  | SerializedTableNode<LexicalNodes_7D03D692>
-  | SerializedTableCellNode<LexicalNodes_7D03D692>
-  | SerializedTableRowNode<LexicalNodes_7D03D692>
+  | SerializedParagraphNode<LexicalNodes_C9C58093>
+  | SerializedTableNode<LexicalNodes_C9C58093>
+  | SerializedTableCellNode<LexicalNodes_C9C58093>
+  | SerializedTableRowNode<LexicalNodes_C9C58093>
   | SerializedHorizontalRuleNode
   | SerializedUploadNode<'uploads'>
-  | SerializedQuoteNode<LexicalNodes_7D03D692>
+  | SerializedQuoteNode<LexicalNodes_C9C58093>
   | SerializedRelationshipNode<
       | 'users'
       | 'doc-controls'
@@ -385,27 +389,28 @@ export type LexicalNodes_7D03D692 =
       | 'payload-jobs'
       | 'payload-locked-documents'
       | 'payload-preferences'
+      | 'payload-api-keys'
       | 'payload-migrations'
       | 'payload-query-presets'
     >
-  | SerializedAutoLinkNode<LexicalNodes_7D03D692, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_7D03D692, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_7D03D692>
-  | SerializedListItemNode<LexicalNodes_7D03D692>
-  | SerializedHeadingNode<LexicalNodes_7D03D692>;
+  | SerializedAutoLinkNode<LexicalNodes_C9C58093, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_C9C58093, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_C9C58093>
+  | SerializedListItemNode<LexicalNodes_C9C58093>
+  | SerializedHeadingNode<LexicalNodes_C9C58093>;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_A36BDBF3".
+ * via the `definition` "LexicalNodes_DE342DAF".
  */
-export type LexicalNodes_A36BDBF3 =
+export type LexicalNodes_DE342DAF =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_A36BDBF3>
+  | SerializedParagraphNode<LexicalNodes_DE342DAF>
   | SerializedBlockNode<Code>
   | SerializedHorizontalRuleNode
   | SerializedUploadNode<'uploads'>
-  | SerializedQuoteNode<LexicalNodes_A36BDBF3>
+  | SerializedQuoteNode<LexicalNodes_DE342DAF>
   | SerializedRelationshipNode<
       | 'users'
       | 'doc-controls'
@@ -451,26 +456,27 @@ export type LexicalNodes_A36BDBF3 =
       | 'payload-jobs'
       | 'payload-locked-documents'
       | 'payload-preferences'
+      | 'payload-api-keys'
       | 'payload-migrations'
       | 'payload-query-presets'
     >
-  | SerializedAutoLinkNode<LexicalNodes_A36BDBF3, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_A36BDBF3, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_A36BDBF3>
-  | SerializedListItemNode<LexicalNodes_A36BDBF3>
-  | SerializedHeadingNode<LexicalNodes_A36BDBF3>;
+  | SerializedAutoLinkNode<LexicalNodes_DE342DAF, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_DE342DAF, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_DE342DAF>
+  | SerializedListItemNode<LexicalNodes_DE342DAF>
+  | SerializedHeadingNode<LexicalNodes_DE342DAF>;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_493FC43B".
+ * via the `definition` "LexicalNodes_E2F62417".
  */
-export type LexicalNodes_493FC43B =
+export type LexicalNodes_E2F62417 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_493FC43B>
+  | SerializedParagraphNode<LexicalNodes_E2F62417>
   | SerializedHorizontalRuleNode
   | SerializedUploadNode<'uploads'>
-  | SerializedQuoteNode<LexicalNodes_493FC43B>
+  | SerializedQuoteNode<LexicalNodes_E2F62417>
   | SerializedRelationshipNode<
       | 'users'
       | 'doc-controls'
@@ -516,14 +522,15 @@ export type LexicalNodes_493FC43B =
       | 'payload-jobs'
       | 'payload-locked-documents'
       | 'payload-preferences'
+      | 'payload-api-keys'
       | 'payload-migrations'
       | 'payload-query-presets'
     >
-  | SerializedAutoLinkNode<LexicalNodes_493FC43B, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_493FC43B, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_493FC43B>
-  | SerializedListItemNode<LexicalNodes_493FC43B>
-  | SerializedHeadingNode<LexicalNodes_493FC43B>;
+  | SerializedAutoLinkNode<LexicalNodes_E2F62417, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_E2F62417, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_E2F62417>
+  | SerializedListItemNode<LexicalNodes_E2F62417>
+  | SerializedHeadingNode<LexicalNodes_E2F62417>;
 
 export interface Config {
   auth: {
@@ -576,10 +583,14 @@ export interface Config {
     'payload-jobs': PayloadJob;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
+    'payload-api-keys': PayloadApiKey;
     'payload-migrations': PayloadMigration;
     'payload-query-presets': PayloadQueryPreset;
   };
   collectionsJoins: {
+    users: {
+      apiKeys: 'payload-api-keys';
+    };
     talks: {
       referencedBy: 'talks';
     };
@@ -641,15 +652,20 @@ export interface Config {
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
+    'payload-api-keys': PayloadApiKeysSelect<false> | PayloadApiKeysSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
     'payload-query-presets': PayloadQueryPresetsSelect<false> | PayloadQueryPresetsSelect<true>;
   };
   db: {
-    defaultIDType: string;
+    defaultIDType: number;
   };
   fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es' | 'de') | ('en' | 'es' | 'de')[];
-  globals: {};
-  globalsSelect: {};
+  globals: {
+    'payload-jobs-stats': PayloadJobsStat;
+  };
+  globalsSelect: {
+    'payload-jobs-stats': PayloadJobsStatsSelect<false> | PayloadJobsStatsSelect<true>;
+  };
   locale: 'en' | 'es' | 'de';
   widgets: {
     collections: CollectionsWidget;
@@ -691,7 +707,7 @@ export interface UserAuthOperations {
  * via the `definition` "users".
  */
 export interface User {
-  id: string;
+  id: number;
   name?: string | null;
   roles?: ('admin' | 'user')[] | null;
   updatedAt: string;
@@ -699,6 +715,11 @@ export interface User {
   enableAPIKey?: boolean | null;
   apiKey?: string | null;
   apiKeyIndex?: string | null;
+  apiKeys?: {
+    docs?: (number | PayloadApiKey)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   email: string;
   resetPasswordToken?: string | null;
   resetPasswordExpiration?: string | null;
@@ -718,14 +739,38 @@ export interface User {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-api-keys".
+ */
+export interface PayloadApiKey {
+  id: number;
+  name: string;
+  owner: {
+    relationTo: 'users';
+    value: number | User;
+  };
+  apiKeyHash?: string | null;
+  /**
+   * Shown only once, right after creating or regenerating this key. Copy it now - it cannot be viewed again.
+   */
+  apiKey?: string | null;
+  regenerate?: boolean | null;
+  migratedFrom?: {
+    collection?: string | null;
+    documentID?: string | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "doc-controls".
  */
 export interface DocControl {
-  id: string;
+  id: number;
   title: string;
   content?: string | null;
   test?: string | null;
-  parent?: (string | null) | Folder;
+  parent?: (number | null) | Folder;
   updatedAt: string;
   createdAt: string;
   deletedAt?: string | null;
@@ -736,8 +781,8 @@ export interface DocControl {
  * via the `definition` "folders".
  */
 export interface Folder {
-  id: string;
-  parent?: (string | null) | Folder;
+  id: number;
+  parent?: (number | null) | Folder;
   name: string;
   updatedAt: string;
   createdAt: string;
@@ -749,17 +794,17 @@ export interface Folder {
  * via the `definition` "drawers".
  */
 export interface Drawer {
-  id: string;
+  id: number;
   title: string;
   /**
    * Open or create a related doc to nest another drawer.
    */
-  child?: (string | null) | Drawer;
+  child?: (number | null) | Drawer;
   /**
    * Opens a text-fields doc — different content in the drawer.
    */
-  relatedText?: (string | null) | TextField;
-  relatedRelationship?: (string | null) | RelationshipField;
+  relatedText?: (number | null) | TextField;
+  relatedRelationship?: (number | null) | RelationshipField;
   /**
    * Add a block to open the blocks drawer.
    */
@@ -780,7 +825,7 @@ export interface Drawer {
   /**
    * Use the link and inline block toolbar items to open their drawers.
    */
-  content?: LexicalRichText<LexicalNodes_861F9846> | null;
+  content?: LexicalRichText<LexicalNodes_CDB1B959> | null;
   status?: ('draft' | 'published') | null;
   publishedAt?: string | null;
   updatedAt: string;
@@ -791,7 +836,7 @@ export interface Drawer {
  * via the `definition` "text-fields".
  */
 export interface TextField {
-  id: string;
+  id: number;
   /**
    * The public-facing title of this post
    */
@@ -811,12 +856,12 @@ export interface TextField {
   /**
    * Tags for this post (hierarchy field)
    */
-  _h_tags?: (string | Tag)[] | null;
+  _h_tags?: (number | Tag)[] | null;
   /**
    * Documents that reference this post
    */
   relatedFrom?: {
-    docs?: (string | RelationshipField)[];
+    docs?: (number | RelationshipField)[];
     hasNextPage?: boolean;
     totalDocs?: number;
   };
@@ -828,8 +873,8 @@ export interface TextField {
  * via the `definition` "tags".
  */
 export interface Tag {
-  id: string;
-  _h_tags?: (string | null) | Tag;
+  id: number;
+  _h_tags?: (number | null) | Tag;
   name: string;
   description?: string | null;
   updatedAt: string;
@@ -843,42 +888,42 @@ export interface Tag {
  * via the `definition` "relationship-fields".
  */
 export interface RelationshipField {
-  id: string;
+  id: number;
   /**
    * The author of this post
    */
-  author?: (string | null) | User;
+  author?: (number | null) | User;
   /**
    * Relationship with drawer appearance
    */
-  authorWithDrawer?: (string | null) | User;
+  authorWithDrawer?: (number | null) | User;
   /**
    * The author of this post
    */
-  authorRequired: string | User;
+  authorRequired: number | User;
   /**
    * Select related posts
    */
-  relatedPosts?: (string | TextField)[] | null;
+  relatedPosts?: (number | TextField)[] | null;
   /**
    * This field is disabled
    */
-  authorDisabled?: (string | null) | User;
+  authorDisabled?: (number | null) | User;
   /**
    * This field is read-only
    */
-  authorReadOnly?: (string | null) | User;
+  authorReadOnly?: (number | null) | User;
   /**
    * Can relate to users or text fields
    */
   polymorphic?:
     | ({
         relationTo: 'users';
-        value: string | User;
+        value: number | User;
       } | null)
     | ({
         relationTo: 'text-fields';
-        value: string | TextField;
+        value: number | TextField;
       } | null);
   updatedAt: string;
   createdAt: string;
@@ -994,7 +1039,7 @@ export interface TableBlock {
  * via the `definition` "orderable".
  */
 export interface Orderable {
-  id: string;
+  id: number;
   _order?: string | null;
   title: string;
   priority?: ('high' | 'medium' | 'low') | null;
@@ -1006,7 +1051,7 @@ export interface Orderable {
  * via the `definition` "search-bar-test".
  */
 export interface SearchBarTest {
-  id: string;
+  id: number;
   title: string;
   description?: string | null;
   category?: ('news' | 'blog' | 'tutorial' | 'docs') | null;
@@ -1020,7 +1065,7 @@ export interface SearchBarTest {
  * via the `definition` "talks".
  */
 export interface Talk {
-  id: string;
+  id: number;
   /**
    * Public-facing title of the talk.
    */
@@ -1033,7 +1078,7 @@ export interface Talk {
    * One-paragraph teaser shown in listings.
    */
   shortDescription?: string | null;
-  abstract?: LexicalRichText<LexicalNodes_21934B6C> | null;
+  abstract?: LexicalRichText<LexicalNodes_73D4F7FA> | null;
   track?: ('frontend' | 'backend' | 'devops' | 'design' | 'ai-ml' | 'workshop') | null;
   /**
    * Total runtime in minutes.
@@ -1068,7 +1113,7 @@ export interface Talk {
   /**
    * Wide image used on the talk landing page.
    */
-  heroImage?: (string | null) | Upload;
+  heroImage?: (number | null) | Upload;
   slidesUrl?: string | null;
   recordingUrl?: string | null;
   /**
@@ -1076,7 +1121,7 @@ export interface Talk {
    */
   gallery?:
     | {
-        image: string | Upload;
+        image: number | Upload;
         caption?: string | null;
         id?: string | null;
       }[]
@@ -1095,7 +1140,7 @@ export interface Talk {
     | null;
   metaTitle?: string | null;
   metaDescription?: string | null;
-  ogImage?: (string | null) | Upload;
+  ogImage?: (number | null) | Upload;
   customCss?: string | null;
   /**
    * JSON-LD schema injected into the page head.
@@ -1119,12 +1164,12 @@ export interface Talk {
   /**
    * Other talks attendees might enjoy.
    */
-  relatedTalks?: (string | Talk)[] | null;
+  relatedTalks?: (number | Talk)[] | null;
   /**
    * Talks that list this one as related.
    */
   referencedBy?: {
-    docs?: (string | Talk)[];
+    docs?: (number | Talk)[];
     hasNextPage?: boolean;
     totalDocs?: number;
   };
@@ -1135,12 +1180,12 @@ export interface Talk {
   /**
    * Primary owner of this talk.
    */
-  organizer?: (string | null) | User;
-  coOrganizers?: (string | User)[] | null;
+  organizer?: (number | null) | User;
+  coOrganizers?: (number | User)[] | null;
   /**
    * Hierarchical tags.
    */
-  _h_tags?: (string | Tag)[] | null;
+  _h_tags?: (number | Tag)[] | null;
   isFeatured?: boolean | null;
   isVirtual?: boolean | null;
   /**
@@ -1160,7 +1205,7 @@ export interface Talk {
  * via the `definition` "uploads".
  */
 export interface Upload {
-  id: string;
+  id: number;
   alt?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -1215,7 +1260,7 @@ export interface TalkCta {
  * via the `definition` "TalkImage".
  */
 export interface TalkImage {
-  image: string | Upload;
+  image: number | Upload;
   caption?: string | null;
   align?: ('left' | 'center' | 'right') | null;
   id?: string | null;
@@ -1244,7 +1289,7 @@ export interface TalkQa {
  * via the `definition` "unauthorized-test".
  */
 export interface UnauthorizedTest {
-  id: string;
+  id: number;
   title?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -1254,7 +1299,7 @@ export interface UnauthorizedTest {
  * via the `definition` "array-fields".
  */
 export interface ArrayField {
-  id: string;
+  id: number;
   arrayField?:
     | {
         name?: string | null;
@@ -1314,7 +1359,7 @@ export interface ArrayField {
  * via the `definition` "blocks-fields".
  */
 export interface BlocksField {
-  id: string;
+  id: number;
   /**
    * A block field with multiple block types.
    */
@@ -1425,7 +1470,7 @@ export interface InnerBlock {
  * via the `definition` "checkbox-fields".
  */
 export interface CheckboxField {
-  id: string;
+  id: number;
   enableFeature?: boolean | null;
   enableFeatureRequired: boolean;
   enableFeatureDisabled?: boolean | null;
@@ -1437,7 +1482,7 @@ export interface CheckboxField {
  * via the `definition` "code-fields".
  */
 export interface CodeField {
-  id: string;
+  id: number;
   /**
    * Write JavaScript code
    */
@@ -1470,7 +1515,7 @@ export interface CodeField {
  * via the `definition` "collapsible-fields".
  */
 export interface CollapsibleField {
-  id: string;
+  id: number;
   nestedField?: string | null;
   nestedFieldRequired: string;
   outerText?: string | null;
@@ -1485,7 +1530,7 @@ export interface CollapsibleField {
  * via the `definition` "date-fields".
  */
 export interface DateField {
-  id: string;
+  id: number;
   default?: string | null;
   /**
    * Select a date from the calendar
@@ -1513,7 +1558,7 @@ export interface DateField {
  * via the `definition` "email-fields".
  */
 export interface EmailField {
-  id: string;
+  id: number;
   /**
    * The primary contact email for this account
    */
@@ -1534,7 +1579,7 @@ export interface EmailField {
  * via the `definition` "group-fields".
  */
 export interface GroupField {
-  id: string;
+  id: number;
   /**
    * Enter the shipping address details
    */
@@ -1566,13 +1611,13 @@ export interface GroupField {
  * via the `definition` "join-fields".
  */
 export interface JoinField {
-  id: string;
+  id: number;
   name: string;
   /**
    * This is a join field description. It’s pretty long so I can see how the spacing looks when the text reaches all the way across and is below the other controls.
    */
   relatedPosts?: {
-    docs?: (string | JoinPost)[];
+    docs?: (number | JoinPost)[];
     hasNextPage?: boolean;
     totalDocs?: number;
   };
@@ -1580,7 +1625,7 @@ export interface JoinField {
    * Join field with custom default columns
    */
   postsWithColumns?: {
-    docs?: (string | JoinPost)[];
+    docs?: (number | JoinPost)[];
     hasNextPage?: boolean;
     totalDocs?: number;
   };
@@ -1588,7 +1633,7 @@ export interface JoinField {
    * Join field with default limit of 3
    */
   postsLimited?: {
-    docs?: (string | JoinPost)[];
+    docs?: (number | JoinPost)[];
     hasNextPage?: boolean;
     totalDocs?: number;
   };
@@ -1596,7 +1641,7 @@ export interface JoinField {
    * Join field sorted by title descending
    */
   postsSorted?: {
-    docs?: (string | JoinPost)[];
+    docs?: (number | JoinPost)[];
     hasNextPage?: boolean;
     totalDocs?: number;
   };
@@ -1604,7 +1649,7 @@ export interface JoinField {
    * Join field with row types disabled
    */
   postsNoRowTypes?: {
-    docs?: (string | JoinPost)[];
+    docs?: (number | JoinPost)[];
     hasNextPage?: boolean;
     totalDocs?: number;
   };
@@ -1613,7 +1658,7 @@ export interface JoinField {
      * Join field inside a group
      */
     groupedPosts?: {
-      docs?: (string | JoinPost)[];
+      docs?: (number | JoinPost)[];
       hasNextPage?: boolean;
       totalDocs?: number;
     };
@@ -1626,12 +1671,12 @@ export interface JoinField {
  * via the `definition` "join-posts".
  */
 export interface JoinPost {
-  id: string;
+  id: number;
   title: string;
   /**
    * The parent category (used by join fields)
    */
-  category?: (string | null) | JoinField;
+  category?: (number | null) | JoinField;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -1641,7 +1686,7 @@ export interface JoinPost {
  * via the `definition` "json-fields".
  */
 export interface JsonField {
-  id: string;
+  id: number;
   /**
    * Enter valid JSON data
    */
@@ -1698,7 +1743,7 @@ export interface JsonField {
  * via the `definition` "number-fields".
  */
 export interface NumberField {
-  id: string;
+  id: number;
   /**
    * Listed price in USD, excluding tax
    */
@@ -1731,7 +1776,7 @@ export interface NumberField {
  * via the `definition` "password-fields".
  */
 export interface PasswordField {
-  id: string;
+  id: number;
   /**
    * Must be at least 8 characters
    */
@@ -1758,7 +1803,7 @@ export interface PasswordField {
  * via the `definition` "point-fields".
  */
 export interface PointField {
-  id: string;
+  id: number;
   /**
    * @minItems 2
    * @maxItems 2
@@ -1786,7 +1831,7 @@ export interface PointField {
  * via the `definition` "radio-fields".
  */
 export interface RadioField {
-  id: string;
+  id: number;
   /**
    * Choose the type of content this entry represents.
    */
@@ -1827,27 +1872,27 @@ export interface RadioField {
  * via the `definition` "rich-text-fields".
  */
 export interface RichTextField {
-  id: string;
+  id: number;
   /**
    * The main content of the document.
    */
-  content?: LexicalRichText<LexicalNodes_93AF23E3> | null;
+  content?: LexicalRichText<LexicalNodes_B87E7796> | null;
   /**
    * Rich text table field used to validate description spacing.
    */
-  table?: LexicalRichText<LexicalNodes_7D03D692> | null;
+  table?: LexicalRichText<LexicalNodes_C9C58093> | null;
   /**
    * Rich text code block field used to validate description spacing.
    */
-  code?: LexicalRichText<LexicalNodes_A36BDBF3> | null;
+  code?: LexicalRichText<LexicalNodes_DE342DAF> | null;
   /**
    * Rich text typography field used to validate description spacing.
    */
-  typography?: LexicalRichText<LexicalNodes_493FC43B> | null;
+  typography?: LexicalRichText<LexicalNodes_E2F62417> | null;
   /**
    * Rich text list field used to validate description spacing.
    */
-  lists?: LexicalRichText<LexicalNodes_493FC43B> | null;
+  lists?: LexicalRichText<LexicalNodes_E2F62417> | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -1857,7 +1902,7 @@ export interface RichTextField {
  * via the `definition` "row-fields".
  */
 export interface RowField {
-  id: string;
+  id: number;
   firstName?: string | null;
   lastName?: string | null;
   city?: string | null;
@@ -1888,7 +1933,7 @@ export interface RowField {
  * via the `definition` "select-fields".
  */
 export interface SelectField {
-  id: string;
+  id: number;
   /**
    * The current publication status of this post
    */
@@ -1929,7 +1974,7 @@ export interface SelectField {
  * via the `definition` "slug-fields".
  */
 export interface SlugField {
-  id: string;
+  id: number;
   title?: string | null;
   /**
    * This is the default slug field
@@ -1959,9 +2004,9 @@ export interface SlugField {
  * via the `definition` "tabs-fields".
  */
 export interface TabsField {
-  id: string;
+  id: number;
   title?: string | null;
-  postContent?: LexicalRichText<LexicalNodes_493FC43B> | null;
+  postContent?: LexicalRichText<LexicalNodes_E2F62417> | null;
   featuredImage: string;
   metaTitle?: string | null;
   metaDescription?: string | null;
@@ -1994,7 +2039,7 @@ export interface TabsField {
  * via the `definition` "textarea-fields".
  */
 export interface TextareaField {
-  id: string;
+  id: number;
   /**
    * The main body content for this entry
    */
@@ -2019,9 +2064,9 @@ export interface TextareaField {
  * via the `definition` "folder-items".
  */
 export interface FolderItem {
-  id: string;
+  id: number;
   title: string;
-  parent?: (string | null) | Folder;
+  parent?: (number | null) | Folder;
   updatedAt: string;
   createdAt: string;
 }
@@ -2030,10 +2075,10 @@ export interface FolderItem {
  * via the `definition` "tag-items".
  */
 export interface TagItem {
-  id: string;
+  id: number;
   title: string;
   description?: string | null;
-  _h_tags?: (string | Tag)[] | null;
+  _h_tags?: (number | Tag)[] | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2042,7 +2087,7 @@ export interface TagItem {
  * via the `definition` "rubbish".
  */
 export interface Rubbish {
-  id: string;
+  id: number;
   title: string;
   updatedAt: string;
   createdAt: string;
@@ -2053,7 +2098,7 @@ export interface Rubbish {
  * via the `definition` "rubbish-with-drafts".
  */
 export interface RubbishWithDraft {
-  id: string;
+  id: number;
   title: string;
   updatedAt: string;
   createdAt: string;
@@ -2065,12 +2110,12 @@ export interface RubbishWithDraft {
  * via the `definition` "upload-fields".
  */
 export interface UploadField {
-  id: string;
-  heroImage?: (string | null) | Upload;
-  heroImageRequired: string | Upload;
-  heroImageReadOnly?: (string | null) | Upload;
-  heroImageHasMany?: (string | Upload)[] | null;
-  heroImageHasManyReadOnly?: (string | Upload)[] | null;
+  id: number;
+  heroImage?: (number | null) | Upload;
+  heroImageRequired: number | Upload;
+  heroImageReadOnly?: (number | null) | Upload;
+  heroImageHasMany?: (number | Upload)[] | null;
+  heroImageHasManyReadOnly?: (number | Upload)[] | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2079,7 +2124,7 @@ export interface UploadField {
  * via the `definition` "autosave".
  */
 export interface Autosave {
-  id: string;
+  id: number;
   title: string;
   updatedAt: string;
   createdAt: string;
@@ -2090,7 +2135,7 @@ export interface Autosave {
  * via the `definition` "versions-diff".
  */
 export interface VersionsDiff {
-  id: string;
+  id: number;
   title: string;
   array?:
     | {
@@ -2131,14 +2176,14 @@ export interface VersionsDiff {
    */
   point?: [number, number] | null;
   radio?: ('small' | 'medium' | 'large') | null;
-  relationship?: (string | null) | Tag;
-  relationshipMany?: (string | Tag)[] | null;
+  relationship?: (number | null) | Tag;
+  relationshipMany?: (number | Tag)[] | null;
   select?: ('option-1' | 'option-2' | 'option-3') | null;
   selectMany?: ('option-1' | 'option-2' | 'option-3')[] | null;
   tabText?: string | null;
   tabNumber?: number | null;
-  upload?: (string | null) | Upload;
-  uploadMany?: (string | Upload)[] | null;
+  upload?: (number | null) | Upload;
+  uploadMany?: (number | Upload)[] | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -2168,10 +2213,10 @@ export interface NumberBlock {
  * via the `definition` "draft-versions".
  */
 export interface DraftVersion {
-  id: string;
+  id: number;
   title: string;
   content?: string | null;
-  author?: (string | null) | User;
+  author?: (number | null) | User;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -2181,7 +2226,7 @@ export interface DraftVersion {
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
-  id: string;
+  id: number;
   key: string;
   data:
     | {
@@ -2198,7 +2243,7 @@ export interface PayloadKv {
  * via the `definition` "payload-jobs".
  */
 export interface PayloadJob {
-  id: string;
+  id: number;
   /**
    * Input data provided to the job
    */
@@ -2212,6 +2257,15 @@ export interface PayloadJob {
     | boolean
     | null;
   taskStatus?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  meta?:
     | {
         [k: string]: unknown;
       }
@@ -2247,7 +2301,7 @@ export interface PayloadJob {
         completedAt: string;
         taskSlug: 'inline' | 'schedulePublish';
         taskID: string;
-        input?:
+        input:
           | {
               [k: string]: unknown;
             }
@@ -2275,13 +2329,22 @@ export interface PayloadJob {
           | number
           | boolean
           | null;
+        parent?: {
+          taskSlug?: ('inline' | 'schedulePublish') | null;
+          taskID?: string | null;
+        };
         id?: string | null;
       }[]
     | null;
   taskSlug?: ('inline' | 'schedulePublish') | null;
   queue?: string | null;
   waitUntil?: string | null;
-  processing?: boolean | null;
+  processingUntil?: string | null;
+  processingToken?: string | null;
+  /**
+   * Used for concurrency control. Jobs with the same key are subject to exclusive/supersedes rules.
+   */
+  concurrencyKey?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2290,176 +2353,176 @@ export interface PayloadJob {
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: string;
+  id: number;
   document?:
     | ({
         relationTo: 'users';
-        value: string | User;
+        value: number | User;
       } | null)
     | ({
         relationTo: 'doc-controls';
-        value: string | DocControl;
+        value: number | DocControl;
       } | null)
     | ({
         relationTo: 'drawers';
-        value: string | Drawer;
+        value: number | Drawer;
       } | null)
     | ({
         relationTo: 'orderable';
-        value: string | Orderable;
+        value: number | Orderable;
       } | null)
     | ({
         relationTo: 'search-bar-test';
-        value: string | SearchBarTest;
+        value: number | SearchBarTest;
       } | null)
     | ({
         relationTo: 'talks';
-        value: string | Talk;
+        value: number | Talk;
       } | null)
     | ({
         relationTo: 'unauthorized-test';
-        value: string | UnauthorizedTest;
+        value: number | UnauthorizedTest;
       } | null)
     | ({
         relationTo: 'array-fields';
-        value: string | ArrayField;
+        value: number | ArrayField;
       } | null)
     | ({
         relationTo: 'blocks-fields';
-        value: string | BlocksField;
+        value: number | BlocksField;
       } | null)
     | ({
         relationTo: 'checkbox-fields';
-        value: string | CheckboxField;
+        value: number | CheckboxField;
       } | null)
     | ({
         relationTo: 'code-fields';
-        value: string | CodeField;
+        value: number | CodeField;
       } | null)
     | ({
         relationTo: 'collapsible-fields';
-        value: string | CollapsibleField;
+        value: number | CollapsibleField;
       } | null)
     | ({
         relationTo: 'date-fields';
-        value: string | DateField;
+        value: number | DateField;
       } | null)
     | ({
         relationTo: 'email-fields';
-        value: string | EmailField;
+        value: number | EmailField;
       } | null)
     | ({
         relationTo: 'group-fields';
-        value: string | GroupField;
+        value: number | GroupField;
       } | null)
     | ({
         relationTo: 'join-fields';
-        value: string | JoinField;
+        value: number | JoinField;
       } | null)
     | ({
         relationTo: 'join-posts';
-        value: string | JoinPost;
+        value: number | JoinPost;
       } | null)
     | ({
         relationTo: 'json-fields';
-        value: string | JsonField;
+        value: number | JsonField;
       } | null)
     | ({
         relationTo: 'number-fields';
-        value: string | NumberField;
+        value: number | NumberField;
       } | null)
     | ({
         relationTo: 'password-fields';
-        value: string | PasswordField;
+        value: number | PasswordField;
       } | null)
     | ({
         relationTo: 'point-fields';
-        value: string | PointField;
+        value: number | PointField;
       } | null)
     | ({
         relationTo: 'radio-fields';
-        value: string | RadioField;
+        value: number | RadioField;
       } | null)
     | ({
         relationTo: 'relationship-fields';
-        value: string | RelationshipField;
+        value: number | RelationshipField;
       } | null)
     | ({
         relationTo: 'rich-text-fields';
-        value: string | RichTextField;
+        value: number | RichTextField;
       } | null)
     | ({
         relationTo: 'row-fields';
-        value: string | RowField;
+        value: number | RowField;
       } | null)
     | ({
         relationTo: 'select-fields';
-        value: string | SelectField;
+        value: number | SelectField;
       } | null)
     | ({
         relationTo: 'slug-fields';
-        value: string | SlugField;
+        value: number | SlugField;
       } | null)
     | ({
         relationTo: 'tabs-fields';
-        value: string | TabsField;
+        value: number | TabsField;
       } | null)
     | ({
         relationTo: 'text-fields';
-        value: string | TextField;
+        value: number | TextField;
       } | null)
     | ({
         relationTo: 'textarea-fields';
-        value: string | TextareaField;
+        value: number | TextareaField;
       } | null)
     | ({
         relationTo: 'folders';
-        value: string | Folder;
+        value: number | Folder;
       } | null)
     | ({
         relationTo: 'folder-items';
-        value: string | FolderItem;
+        value: number | FolderItem;
       } | null)
     | ({
         relationTo: 'tags';
-        value: string | Tag;
+        value: number | Tag;
       } | null)
     | ({
         relationTo: 'tag-items';
-        value: string | TagItem;
+        value: number | TagItem;
       } | null)
     | ({
         relationTo: 'rubbish';
-        value: string | Rubbish;
+        value: number | Rubbish;
       } | null)
     | ({
         relationTo: 'rubbish-with-drafts';
-        value: string | RubbishWithDraft;
+        value: number | RubbishWithDraft;
       } | null)
     | ({
         relationTo: 'uploads';
-        value: string | Upload;
+        value: number | Upload;
       } | null)
     | ({
         relationTo: 'upload-fields';
-        value: string | UploadField;
+        value: number | UploadField;
       } | null)
     | ({
         relationTo: 'autosave';
-        value: string | Autosave;
+        value: number | Autosave;
       } | null)
     | ({
         relationTo: 'versions-diff';
-        value: string | VersionsDiff;
+        value: number | VersionsDiff;
       } | null)
     | ({
         relationTo: 'draft-versions';
-        value: string | DraftVersion;
+        value: number | DraftVersion;
       } | null);
   globalSlug?: string | null;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   updatedAt: string;
   createdAt: string;
@@ -2469,10 +2532,10 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: string;
+  id: number;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   key?: string | null;
   value?:
@@ -2492,7 +2555,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: string;
+  id: number;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
@@ -2503,7 +2566,7 @@ export interface PayloadMigration {
  * via the `definition` "payload-query-presets".
  */
 export interface PayloadQueryPreset {
-  id: string;
+  id: number;
   title: string;
   groupBy?: string | null;
   columns?:
@@ -2528,15 +2591,15 @@ export interface PayloadQueryPreset {
   access?: {
     read?: {
       constraint?: ('everyone' | 'onlyMe' | 'specificUsers') | null;
-      users?: (string | User)[] | null;
+      users?: (number | User)[] | null;
     };
     update?: {
       constraint?: ('everyone' | 'onlyMe' | 'specificUsers') | null;
-      users?: (string | User)[] | null;
+      users?: (number | User)[] | null;
     };
     delete?: {
       constraint?: ('everyone' | 'onlyMe' | 'specificUsers') | null;
-      users?: (string | User)[] | null;
+      users?: (number | User)[] | null;
     };
   };
   relatedCollection: 'search-bar-test' | 'select-fields';
@@ -2559,6 +2622,7 @@ export interface UsersSelect<T extends boolean = true> {
   enableAPIKey?: T;
   apiKey?: T;
   apiKeyIndex?: T;
+  apiKeys?: T;
   email?: T;
   resetPasswordToken?: T;
   resetPasswordExpiration?: T;
@@ -3583,6 +3647,7 @@ export interface PayloadKvSelect<T extends boolean = true> {
 export interface PayloadJobsSelect<T extends boolean = true> {
   input?: T;
   taskStatus?: T;
+  meta?: T;
   completedAt?: T;
   totalTried?: T;
   hasError?: T;
@@ -3598,12 +3663,20 @@ export interface PayloadJobsSelect<T extends boolean = true> {
         output?: T;
         state?: T;
         error?: T;
+        parent?:
+          | T
+          | {
+              taskSlug?: T;
+              taskID?: T;
+            };
         id?: T;
       };
   taskSlug?: T;
   queue?: T;
   waitUntil?: T;
-  processing?: T;
+  processingUntil?: T;
+  processingToken?: T;
+  concurrencyKey?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3626,6 +3699,25 @@ export interface PayloadPreferencesSelect<T extends boolean = true> {
   user?: T;
   key?: T;
   value?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-api-keys_select".
+ */
+export interface PayloadApiKeysSelect<T extends boolean = true> {
+  name?: T;
+  owner?: T;
+  apiKeyHash?: T;
+  apiKey?: T;
+  regenerate?: T;
+  migratedFrom?:
+    | T
+    | {
+        collection?: T;
+        documentID?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3675,6 +3767,34 @@ export interface PayloadQueryPresetsSelect<T extends boolean = true> {
   isTemp?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-jobs-stats".
+ */
+export interface PayloadJobsStat {
+  id: number;
+  stats?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-jobs-stats_select".
+ */
+export interface PayloadJobsStatsSelect<T extends boolean = true> {
+  stats?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -3814,10 +3934,10 @@ export interface TaskSchedulePublish {
     locale?: string | null;
     doc?: {
       relationTo: 'doc-controls';
-      value: string | DocControl;
+      value: number | DocControl;
     } | null;
     global?: string | null;
-    user?: (string | null) | User;
+    user?: (number | null) | User;
   };
   output?: unknown;
 }
@@ -3918,7 +4038,7 @@ export interface Banner {
   id: string;
   blockType: 'banner';
   style?: ('info' | 'warning' | 'error' | 'success') | null;
-  content?: LexicalRichText<LexicalNodes_58E48BA5> | null;
+  content?: LexicalRichText<LexicalNodes_1E28F629> | null;
   blockName?: string | null;
 }
 /**
@@ -3933,10 +4053,10 @@ export interface Highlight {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalUploadFields_8EB91948".
+ * via the `definition` "LexicalUploadFields_648C627D".
  */
-export interface LexicalUploadFields_8EB91948 {
-  caption?: LexicalRichText<LexicalNodes_58E48BA5> | null;
+export interface LexicalUploadFields_648C627D {
+  caption?: LexicalRichText<LexicalNodes_1E28F629> | null;
   altText?: string | null;
 }
 /**

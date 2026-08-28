@@ -27,9 +27,7 @@ const buildReq = ({
         [alice.collection]: {
           config: {
             access: { admin: () => isAdmin },
-            auth: useAPIKeyAccess
-              ? { useAPIKey: { access: useAPIKeyAccess, storage: 'collection' } }
-              : undefined,
+            auth: useAPIKeyAccess ? { useAPIKey: { access: useAPIKeyAccess } } : undefined,
           },
         },
       },

@@ -259,7 +259,6 @@ export type UseAPIKeyConfig =
        * both view and revoke any owner's keys.
        */
       access?: APIKeyAdministrationAccessConfig
-      storage: 'collection'
     }
   | boolean
 
@@ -331,9 +330,9 @@ export interface IncomingAuthType {
   /**
    * Payload Authentication provides for API keys to be set on each user within an Authentication-enabled Collection.
    *
-   * - `true` stores the key on the auth document itself. This form is deprecated.
-   * - `{ storage: 'collection' }` stores the key in the shared `payload-api-keys` collection,
-   *   allowing an auth document to own multiple independently revocable keys.
+   * Enabling this (`true`, or an object to configure `access` for administering other
+   * owners' keys) stores keys in the shared `payload-api-keys` collection, allowing an auth
+   * document to own multiple independently revocable keys.
    *
    * @default false
    * @link https://payloadcms.com/docs/authentication/api-keys
