@@ -31,7 +31,7 @@ describe('getFieldsForRowComparison', () => {
   })
 
   describe('blocks fields', () => {
-    it('should return combined fields when block types match', () => {
+    it('should return the matching block fields when block types match', () => {
       const blockAFields: ClientField[] = [
         { name: 'a', type: 'text' },
         { name: 'b', type: 'text' },
@@ -63,7 +63,7 @@ describe('getFieldsForRowComparison', () => {
       expect(fields).toEqual(blockAFields)
     })
 
-    it('should return unique combined fields when block types differ', () => {
+    it('should not merge fields when block types differ', () => {
       const field: BlocksFieldClient = {
         type: 'blocks',
         name: 'myBlocks',
@@ -97,12 +97,7 @@ describe('getFieldsForRowComparison', () => {
         config: {} as any,
       })
 
-      // Should contain all unique fields from both blocks
-      expect(fields).toEqual([
-        { name: 'a', type: 'text' },
-        { name: 'b', type: 'text' },
-        { name: 'c', type: 'text' },
-      ])
+      expect(fields).toEqual([])
     })
   })
 })
