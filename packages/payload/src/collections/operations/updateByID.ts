@@ -31,6 +31,8 @@ import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import {
   getAllLocalesPublicationStatus,
+  normalizeAllLocalesPublicationStatus,
+  reconcileAllLocalesPublicationStatus,
   validateAllLocalesPublicationFlags,
 } from '../../versions/allLocalesPublicationStatus.js'
 import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion.js'
@@ -87,9 +89,10 @@ export const updateByIDOperation = async <
       unpublishAllLocales: Boolean(args.unpublishAllLocales),
     })
 
-    if (initialAllLocalesPublicationStatus) {
-      args.data._status = initialAllLocalesPublicationStatus
-    }
+    const initialAllLocalesPublicationIntent = normalizeAllLocalesPublicationStatus({
+      data: args.data,
+      status: initialAllLocalesPublicationStatus,
+    })
 
     // /////////////////////////////////////
     // beforeOperation - Collection
@@ -143,7 +146,7 @@ export const updateByIDOperation = async <
       unpublishAllLocales: unpublishAllLocalesArg,
     })
 
-    const allLocalesPublicationStatus = getAllLocalesPublicationStatus({
+    const requestedAllLocalesPublicationStatus = getAllLocalesPublicationStatus({
       hasLocalizedStatus: Boolean(
         config.localization && hasLocalizeStatusEnabled(collectionConfig),
       ),
@@ -152,8 +155,13 @@ export const updateByIDOperation = async <
         (publishAllLocalesArg ?? (hasLocalizeStatusEnabled(collectionConfig) ? false : true)),
       unpublishAllLocales: Boolean(unpublishAllLocalesArg),
     })
+    const allLocalesPublicationStatus = reconcileAllLocalesPublicationStatus({
+      data,
+      intent: initialAllLocalesPublicationIntent,
+      status: requestedAllLocalesPublicationStatus,
+    })
     const publicationIntentSurvivedBeforeOperation =
-      !allLocalesPublicationStatus || data._status === allLocalesPublicationStatus
+      !requestedAllLocalesPublicationStatus || Boolean(allLocalesPublicationStatus)
     const publishAllLocales = publicationIntentSurvivedBeforeOperation
       ? publishAllLocalesArg
       : false

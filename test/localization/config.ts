@@ -36,10 +36,13 @@ import {
   portugueseLocale,
   publicationAccessGlobalSlug,
   publicationAccessSlug,
+  publicationAsyncFieldHookSlug,
   publicationBeforeOperationGlobalSlug,
+  publicationBeforeOperationSanitizeGlobalSlug,
   publicationBeforeOperationSlug,
   publicationFieldAccessGlobalSlug,
   publicationFieldAccessSlug,
+  publicationHookGlobalSlug,
   publicationHookSlug,
   relationEnglishTitle,
   relationEnglishTitle2,
@@ -506,13 +509,56 @@ export default buildConfigWithDefaults({
       },
     },
     {
+      slug: publicationAsyncFieldHookSlug,
+      access: openAccess,
+      fields: [
+        {
+          name: 'title',
+          hooks: {
+            beforeChange: [
+              async ({ context, siblingData }) => {
+                if (context.removePublicationIntent) {
+                  await new Promise((resolve) => setTimeout(resolve, 25))
+                  delete siblingData._status
+                }
+              },
+            ],
+          },
+          localized: true,
+          type: 'text',
+        },
+      ],
+      hooks: {
+        beforeOperation: [
+          ({ args, context }) => {
+            if (context.saveAsDraft) {
+              args.draft = true
+              args.publishAllLocales = false
+            }
+
+            return args
+          },
+        ],
+      },
+      versions: {
+        drafts: {
+          localizeStatus: true,
+        },
+      },
+    },
+    {
       slug: publicationHookSlug,
       access: openAccess,
       fields: localizedPublicationFields,
       hooks: {
         beforeChange: [
-          ({ data, operation, originalDoc }) => {
-            if (operation === 'update' && data?._status && data._status !== originalDoc?._status) {
+          ({ context, data, operation, originalDoc }) => {
+            if (
+              !context.seedPublicationStatus &&
+              operation === 'update' &&
+              data?._status &&
+              data._status !== originalDoc?._status
+            ) {
               throw new Error('Publication status changes are not allowed')
             }
 
@@ -605,6 +651,30 @@ export default buildConfigWithDefaults({
       },
     },
     {
+      slug: publicationBeforeOperationSanitizeGlobalSlug,
+      access: {
+        update: () => true,
+      },
+      fields: localizedPublicationFields,
+      hooks: {
+        beforeOperation: [
+          ({ args, context }) => {
+            if (context.sanitizePublicationIntent && args.data?._status === 'published') {
+              delete args.data._status
+              args.publishAllLocales = false
+            }
+
+            return args
+          },
+        ],
+      },
+      versions: {
+        drafts: {
+          localizeStatus: true,
+        },
+      },
+    },
+    {
       slug: publicationFieldAccessGlobalSlug,
       access: {
         update: () => true,
@@ -621,6 +691,33 @@ export default buildConfigWithDefaults({
           type: 'select',
         },
       ],
+      versions: {
+        drafts: {
+          localizeStatus: true,
+        },
+      },
+    },
+    {
+      slug: publicationHookGlobalSlug,
+      access: {
+        update: () => true,
+      },
+      fields: localizedPublicationFields,
+      hooks: {
+        beforeChange: [
+          ({ context, data, originalDoc }) => {
+            if (
+              !context.seedPublicationStatus &&
+              data?._status &&
+              data._status !== originalDoc?._status
+            ) {
+              throw new Error('Publication status changes are not allowed')
+            }
+
+            return data
+          },
+        ],
+      },
       versions: {
         drafts: {
           localizeStatus: true,

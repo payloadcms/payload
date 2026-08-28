@@ -39,6 +39,7 @@ import {
 } from '../../../utilities/getVersionsConfig.js'
 import { mergeLocalizedData } from '../../../utilities/mergeLocalizedData.js'
 import {
+  buildAllLocalesPublicationHookDoc,
   getAllLocalesPublicationStatus,
   hasAuthorizedAllLocalesPublicationStatus,
   validateAllLocalesPublicationFlags,
@@ -226,6 +227,15 @@ export const updateDocument = async <
     req,
   })
 
+  const publicationHookDoc = buildAllLocalesPublicationHookDoc({
+    doc: originalDoc,
+    docWithLocales,
+    status:
+      !statusFieldAccessDenied && data._status === allLocalesPublicationStatus
+        ? allLocalesPublicationStatus
+        : undefined,
+  })
+
   // /////////////////////////////////////
   // beforeValidate - Collection
   // /////////////////////////////////////
@@ -238,7 +248,7 @@ export const updateDocument = async <
           context: req.context,
           data,
           operation: 'update',
-          originalDoc,
+          originalDoc: publicationHookDoc,
           req,
         })) || data
     }
@@ -264,7 +274,7 @@ export const updateDocument = async <
           context: req.context,
           data,
           operation: 'update',
-          originalDoc,
+          originalDoc: publicationHookDoc,
           req,
         })) || data
     }
@@ -281,7 +291,7 @@ export const updateDocument = async <
     collection: collectionConfig,
     context: req.context,
     data: { ...data, id },
-    doc: originalDoc,
+    doc: publicationHookDoc,
     docWithLocales,
     global: null,
     operation: 'update',
@@ -304,10 +314,8 @@ export const updateDocument = async <
 
   let result: JsonObject = await beforeChange({
     ...beforeChangeArgs,
-    onFieldProcessed: ({ path, value }) => {
-      if (path === '_status') {
-        statusFieldValue = value
-      }
+    onDataProcessed: (processedData) => {
+      statusFieldValue = processedData._status
     },
   })
 
@@ -317,6 +325,16 @@ export const updateDocument = async <
     fieldValue: statusFieldValue,
     status: allLocalesPublicationStatus,
   })
+  if (
+    allLocalesPublicationStatus &&
+    !hasAuthorizedPublicationStatus &&
+    typeof statusFieldValue === 'undefined' &&
+    typeof docWithLocales._status === 'object' &&
+    docWithLocales._status !== null
+  ) {
+    result._status = { ...docWithLocales._status }
+  }
+
   let snapshotToSave: JsonObject | undefined
 
   if (config.localization && collectionConfig.versions) {
