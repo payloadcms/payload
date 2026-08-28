@@ -48,6 +48,7 @@ jobs:
               'paulpopus',
               'r1tsuu',
               'GermanJablo',
+              'nathanlentz',
             ];
 
             const type = context.payload.pull_request ? 'pull_request' : 'issue';
