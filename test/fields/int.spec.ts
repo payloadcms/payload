@@ -6,12 +6,12 @@ import { slugifyHandler } from '@payloadcms/ui/utilities/slugify'
 import path from 'path'
 import { createLocalReq, reload } from 'payload'
 import { fileURLToPath } from 'url'
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect } from 'vitest'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { BlockField, GroupField } from './payload-types.js'
 
-import { it } from '../__helpers/int/vitest.js'
+import { test } from '../__helpers/int/vitest.js'
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { isMongoose } from '../__helpers/shared/isMongoose.js'
 import { devUser } from '../credentials.js'
@@ -837,6 +837,148 @@ describe('Fields', () => {
         })
         expect(afterPublish.slug).toBe('draft-one')
       })
+    })
+  })
+
+  describe('slug field read access', () => {
+    const collection = 'slug-field-access'
+    const created: (number | string)[] = []
+
+    afterEach(async () => {
+      for (const id of created) {
+        await payload.delete({ collection, id })
+      }
+      created.length = 0
+    })
+
+    it('should apply read access when a REST create omits overrideAccess', async () => {
+      const hidden = await payload.create({
+        collection,
+        data: { title: 'REST shared title' },
+      })
+      created.push(hidden.id)
+
+      const response = await restClient.POST(`/${collection}`, {
+        body: JSON.stringify({ title: 'REST shared title' }),
+      })
+      const { doc } = await response.json()
+      created.push(doc.id)
+
+      expect(response.status).toBe(201)
+      expect(doc.slug).toBe('rest-shared-title')
+    })
+
+    it('should apply read access when checking a generated slug during create', async () => {
+      const hidden = await payload.create({
+        collection,
+        data: { title: 'Shared title' },
+      })
+      created.push(hidden.id)
+
+      const req = await createLocalReq({ user: user.user }, payload)
+      const createdWithAccess = await payload.create({
+        collection,
+        data: { title: 'Shared title' },
+        overrideAccess: false,
+        req,
+      })
+      created.push(createdWithAccess.id)
+
+      expect(createdWithAccess.slug).toBe('shared-title')
+    })
+
+    it('should apply read access when checking an explicit slug during update', async () => {
+      const hidden = await payload.create({
+        collection,
+        data: { slug: 'shared-slug', title: 'Hidden' },
+      })
+      const editable = await payload.create({
+        collection,
+        data: { slug: 'editable-slug', title: 'Editable' },
+      })
+      created.push(hidden.id, editable.id)
+
+      const req = await createLocalReq({ user: user.user }, payload)
+      const updated = await payload.update({
+        collection,
+        id: editable.id,
+        data: { slug: 'shared-slug' },
+        overrideAccess: false,
+        req,
+      })
+
+      expect(updated.slug).toBe('shared-slug')
+    })
+
+    it('should apply read access while filling localized slugs', async () => {
+      const hidden = await payload.create({
+        collection,
+        data: { localizedTitle: 'Localized title', title: 'Hidden' },
+        locale: 'en',
+      })
+      created.push(hidden.id)
+
+      const req = await createLocalReq({ user: user.user }, payload)
+      const createdWithAccess = await payload.create({
+        collection,
+        data: { localizedTitle: 'Localized title', title: 'Visible' },
+        locale: 'en',
+        overrideAccess: false,
+        req,
+      })
+      created.push(createdWithAccess.id)
+
+      const allLocales = await payload.findByID({
+        collection,
+        id: createdWithAccess.id,
+        locale: 'all',
+      })
+      const hiddenLocales = await payload.findByID({
+        collection,
+        id: hidden.id,
+        locale: 'all',
+      })
+      const localizedSlug = allLocales.localizedSlug as unknown as Record<string, string>
+      const hiddenLocalizedSlug = hiddenLocales.localizedSlug as unknown as Record<string, string>
+
+      expect(localizedSlug.en).toBe('localized-title')
+      expect(localizedSlug.es).toBe(hiddenLocalizedSlug.es)
+    })
+
+    it('should apply read access when choosing a source-less fallback', async () => {
+      const hidden = await payload.create({
+        collection,
+        data: { title: 'Hidden' },
+      })
+      created.push(hidden.id)
+
+      const req = await createLocalReq({ user: user.user }, payload)
+      const createdWithAccess = await payload.create({
+        collection,
+        data: { title: 'Visible' },
+        overrideAccess: false,
+        req,
+      })
+      created.push(createdWithAccess.id)
+
+      expect(createdWithAccess.sourcelessSlug).toBe(hidden.sourcelessSlug)
+    })
+
+    it('should retain elevated slug probes for explicitly elevated Local API creates', async () => {
+      const hidden = await payload.create({
+        collection,
+        data: { title: 'Shared title' },
+      })
+      created.push(hidden.id)
+
+      const elevated = await payload.create({
+        collection,
+        data: { title: 'Shared title' },
+        overrideAccess: true,
+      })
+      created.push(elevated.id)
+
+      expect(elevated.slug).toBe('shared-title-1')
     })
   })
 
@@ -3178,7 +3320,7 @@ describe('Fields', () => {
       expect((idFields[0].admin?.disabled as { filter?: boolean })?.filter).toBe(true)
     })
 
-    it('should query exists true', { db: 'mongo' }, async () => {
+    test.options({ db: 'mongo' })('should query exists true', async () => {
       await payload.delete({ collection: 'array-fields', where: {} })
 
       const withoutCollapsed = await payload.create({
@@ -3226,7 +3368,7 @@ describe('Fields', () => {
       expect(res.docs[0].id).toBe(withCollapsed.id)
     })
 
-    it('should query exists false', { db: 'mongo' }, async () => {
+    test.options({ db: 'mongo' })('should query exists false', async () => {
       await payload.delete({ collection: 'array-fields', where: {} })
 
       const withoutCollapsed = await payload.create({
@@ -3927,9 +4069,8 @@ describe('Fields', () => {
 
     // TODO: re-enable on sqlite once the drizzle sqlite adapter's createJSONQuery supports
     // lexical's `{root: {children: [...]}}` shape
-    it(
+    test.options({ db: (adapter) => adapter.startsWith('sqlite') === false })(
       'should query based on richtext data within a block',
-      { db: (adapter) => adapter.startsWith('sqlite') === false },
       async () => {
         const blockFieldsSuccess = await payload.find({
           collection: 'block-fields',
@@ -3956,9 +4097,8 @@ describe('Fields', () => {
     )
 
     // TODO: re-enable on sqlite — see note above.
-    it(
+    test.options({ db: (adapter) => adapter.startsWith('sqlite') === false })(
       'should query based on richtext data within a localized block, specifying locale',
-      { db: (adapter) => adapter.startsWith('sqlite') === false },
       async () => {
         const blockFieldsSuccess = await payload.find({
           collection: 'block-fields',
@@ -3985,9 +4125,8 @@ describe('Fields', () => {
     )
 
     // TODO: re-enable on sqlite — see note above.
-    it(
+    test.options({ db: (adapter) => adapter.startsWith('sqlite') === false })(
       'should query based on richtext data within a localized block, without specifying locale',
-      { db: (adapter) => adapter.startsWith('sqlite') === false },
       async () => {
         const blockFieldsSuccess = await payload.find({
           collection: 'block-fields',
@@ -4745,7 +4884,7 @@ describe('Fields', () => {
         ).rejects.toBeTruthy()
       })
 
-      it('should disallow unsafe query values', { db: 'drizzle' }, async () => {
+      test.options({ db: 'drizzle' })('should disallow unsafe query values', async () => {
         await expect(
           payload.find({
             collection: 'json-fields',

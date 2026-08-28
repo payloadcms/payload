@@ -1,7 +1,7 @@
 import type { ClientTranslationsObject } from '@payloadcms/translations'
 
 import type { SanitizedPermissions } from '../../auth/index.js'
-import type { ImportMap } from '../../bin/generateImportMap/index.js'
+import type { ImportMap } from '../../cli/commands/generateImportMap/generateImportMap.js'
 import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
 import type { ClientConfig } from '../../config/client.js'
 import type {

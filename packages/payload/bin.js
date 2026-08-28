@@ -1,17 +1,23 @@
 #!/usr/bin/env node
 
+import { Command } from 'commander'
 import path from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 
-const useSwc = process.argv.includes('--use-swc')
-const disableTranspile = process.argv.includes('--disable-transpile')
+const bootstrap = new Command()
+  .helpOption(false)
+  .allowUnknownOption()
+  .argument('[args...]')
+  .option('--disable-transpile')
+  .option('--use-swc')
+  .parse(process.argv)
+const { disableTranspile, useSwc } = bootstrap.opts()
+
+process.argv = [...process.argv.slice(0, 2), ...bootstrap.args]
 
 if (disableTranspile) {
-  // Remove --disable-transpile from arguments
-  process.argv = process.argv.filter((arg) => arg !== '--disable-transpile')
-
   const start = async () => {
-    const { bin } = await import('./dist/bin/index.js')
+    const { bin } = await import('./dist/cli/index.js')
     await bin()
   }
 
@@ -37,15 +43,13 @@ if (disableTranspile) {
       // Use tsx
       let tsImport = (await import('tsx/esm/api')).tsImport
 
-      const { bin } = await tsImport('./dist/bin/index.js', url)
+      const { bin } = await tsImport('./dist/cli/index.js', url)
       await bin()
     }
 
     void start()
   } else if (useSwc) {
     const { register } = await import('node:module')
-    // Remove --use-swc from arguments
-    process.argv = process.argv.filter((arg) => arg !== '--use-swc')
 
     try {
       register('@swc-node/register/esm', url)
@@ -56,7 +60,7 @@ if (disableTranspile) {
     }
 
     const start = async () => {
-      const { bin } = await import('./dist/bin/index.js')
+      const { bin } = await import('./dist/cli/index.js')
       await bin()
     }
 

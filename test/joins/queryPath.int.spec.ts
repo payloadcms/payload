@@ -3,12 +3,11 @@ import { type MongooseAdapter } from '@payloadcms/db-mongodb'
 import { buildConfig, getPayload } from 'payload'
 import { afterEach, expect, it, vi } from 'vitest'
 
-import { describe } from '../__helpers/int/vitest.js'
+import { test } from '../__helpers/int/vitest.js'
 
-describe(
-  'mongodb read path selection',
-  { db: (adapter) => adapter === 'mongodb' || adapter === 'mongodb-atlas' },
-  () => {
+test
+  .options({ db: (adapter) => adapter === 'mongodb' || adapter === 'mongodb-atlas' })
+  .describe('mongodb read path selection', () => {
     const createdIDs: (number | string)[] = []
 
     const getPayloadInstance = async () =>
@@ -147,5 +146,4 @@ describe(
       expect(aggregateSpy).toHaveBeenCalledTimes(1)
       expect(paginateSpy).not.toHaveBeenCalled()
     })
-  },
-)
+  })
