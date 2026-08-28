@@ -4,14 +4,16 @@ import * as qs from 'qs-esm'
 export const path = '/re-initialize'
 
 export const reInitializeDB = async ({
+  deleteOnly,
   serverURL,
   snapshotKey,
   uploadsDir,
-  deleteOnly,
 }: {
   deleteOnly?: boolean
   serverURL: string
-  snapshotKey: string
+  /** @deprecated Supplied only by configs that have not migrated to the fixture yet. */
+  snapshotKey?: string
+  /** @deprecated Upload directories are inferred by migrated configs. */
   uploadsDir?: string | string[]
 }) => {
   const maxAttempts = 50
@@ -24,9 +26,9 @@ export const reInitializeDB = async ({
 
       const queryParams = qs.stringify(
         {
+          deleteOnly,
           snapshotKey,
           uploadsDir,
-          deleteOnly,
         },
         {
           addQueryPrefix: true,
@@ -36,10 +38,10 @@ export const reInitializeDB = async ({
       const response = await fetch(
         formatAdminURL({ apiRoute: '/api', path: `${path}${queryParams}`, serverURL }),
         {
-          method: 'get',
           headers: {
             'Content-Type': 'application/json',
           },
+          method: snapshotKey === undefined && uploadsDir === undefined ? 'post' : 'get',
         },
       )
 

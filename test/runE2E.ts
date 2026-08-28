@@ -191,6 +191,7 @@ async function executePlaywright({
   if (!turbo) {
     spawnDevArgs.push('--no-turbo')
   }
+  spawnDevArgs.push('--no-seed')
 
   process.env.START_MEMORY_DB = 'true'
 
@@ -228,6 +229,8 @@ async function executePlaywright({
   if (prodServer && !portInUse) {
     await waitForServer(e2ePort)
   }
+
+  await resetServer(e2ePort)
 
   const shardFlag = shardArg ? ` --shard=${shardArg}` : ''
   const fullyParallelFlag = fullyParallelArg ? ' --fully-parallel' : ''
@@ -321,4 +324,26 @@ async function waitForServer(port: number, timeoutMs = 8 * 60 * 1000): Promise<v
   }
 
   throw new Error(`Prod server did not start within ${timeoutMs / 1000}s`)
+}
+
+async function resetServer(port: number, timeoutMs = 8 * 60 * 1000): Promise<void> {
+  const url = `http://localhost:${port}/api/re-initialize`
+  const start = Date.now()
+  console.log(`Waiting to reset test data at ${url} …`)
+
+  while (Date.now() - start < timeoutMs) {
+    try {
+      const response = await fetch(url, { method: 'POST' })
+
+      if (response.ok || response.status === 404) {
+        return
+      }
+
+      throw new Error(`${response.status} ${await response.text()}`)
+    } catch {
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+    }
+  }
+
+  throw new Error(`Timed out waiting to reset test data at ${url}`)
 }
