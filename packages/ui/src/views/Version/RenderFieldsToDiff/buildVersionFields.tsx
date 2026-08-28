@@ -460,21 +460,10 @@ const buildVersionField = ({
         }
       }
 
-      let blockFieldsPermissions: SanitizedFieldsPermissions = undefined
-
-      // fieldPermissions will be set here, as the blocks field has a name
-      if (typeof fieldPermissions === 'boolean') {
-        blockFieldsPermissions = fieldPermissions
-      } else if (typeof fieldPermissions?.blocks === 'boolean') {
-        blockFieldsPermissions = fieldPermissions.blocks
-      } else {
-        const permissionsBlockSpecific = fieldPermissions?.blocks?.[blockSlugToMatch]
-        if (typeof permissionsBlockSpecific === 'boolean') {
-          blockFieldsPermissions = permissionsBlockSpecific
-        } else {
-          blockFieldsPermissions = permissionsBlockSpecific?.fields
-        }
-      }
+      const blockFieldsPermissions = getBlockFieldsPermissions({
+        blockSlug: blockSlugToMatch,
+        fieldPermissions,
+      })
 
       const blockDiffArgs = {
         clientSchemaMap,
@@ -495,6 +484,10 @@ const buildVersionField = ({
         ? buildVersionFields({
             ...blockDiffArgs,
             fields: replacedBlock.fields,
+            fieldsPermissions: getBlockFieldsPermissions({
+              blockSlug: replacedBlock.slug,
+              fieldPermissions,
+            }),
             parentSchemaPath: schemaPath + '.' + replacedBlock.slug,
             versionFromSiblingData: fromRow,
             versionToSiblingData: {},
@@ -568,4 +561,24 @@ const buildVersionField = ({
   })
 
   return baseVersionField
+}
+
+const getBlockFieldsPermissions = ({
+  blockSlug,
+  fieldPermissions,
+}: {
+  blockSlug: string
+  fieldPermissions: SanitizedFieldPermissions | undefined
+}): SanitizedFieldsPermissions => {
+  if (typeof fieldPermissions === 'boolean') {
+    return fieldPermissions
+  }
+
+  if (typeof fieldPermissions?.blocks === 'boolean') {
+    return fieldPermissions.blocks
+  }
+
+  const blockPermissions = fieldPermissions?.blocks?.[blockSlug]
+
+  return typeof blockPermissions === 'boolean' ? blockPermissions : blockPermissions?.fields
 }
