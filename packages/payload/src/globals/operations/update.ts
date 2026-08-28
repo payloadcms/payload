@@ -34,6 +34,11 @@ import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { mergeLocalizedData } from '../../utilities/mergeLocalizedData.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
+import {
+  getAllLocalesPublicationStatus,
+  hasAuthorizedAllLocalesPublicationStatus,
+  validateAllLocalesPublicationFlags,
+} from '../../versions/allLocalesPublicationStatus.js'
 import { getLatestGlobalVersion } from '../../versions/getLatestGlobalVersion.js'
 import { saveVersion } from '../../versions/saveVersion.js'
 type Args<TSlug extends GlobalSlug> = {
@@ -106,19 +111,29 @@ export const updateOperation = async <
 
     let { data } = args
 
+    validateAllLocalesPublicationFlags({
+      publishAllLocales: publishAllLocalesArg,
+      unpublishAllLocales: unpublishAllLocalesArg,
+    })
+
     const publishAllLocales =
       !draftArg && (publishAllLocalesArg ?? (hasLocalizeStatusEnabled(globalConfig) ? false : true))
     const unpublishAllLocales =
       typeof unpublishAllLocalesArg === 'string'
         ? unpublishAllLocalesArg === 'true'
         : !!unpublishAllLocalesArg
+    const allLocalesPublicationStatus = getAllLocalesPublicationStatus({
+      hasLocalizedStatus: Boolean(config?.localization && hasLocalizeStatusEnabled(globalConfig)),
+      publishAllLocales,
+      unpublishAllLocales,
+    })
     const isSavingDraft =
       Boolean(draftArg && hasDraftsEnabled(globalConfig)) &&
       data._status !== 'published' &&
       !publishAllLocales
 
-    if (isSavingDraft) {
-      data._status = 'draft'
+    if (allLocalesPublicationStatus || isSavingDraft) {
+      data._status = allLocalesPublicationStatus ?? 'draft'
     }
 
     // /////////////////////////////////////
@@ -240,6 +255,8 @@ export const updateOperation = async <
       }
     }
 
+    const publicationData = { ...data }
+
     // /////////////////////////////////////
     // beforeChange - Fields
     // /////////////////////////////////////
@@ -270,8 +287,16 @@ export const updateOperation = async <
       let currentGlobal: JsonObject | null = null
       let snapshotData: JsonObject | undefined
 
-      if (globalConfig.versions.drafts && globalConfig.versions.drafts.localizeStatus) {
-        if (publishAllLocales || unpublishAllLocales) {
+      if (hasLocalizeStatusEnabled(globalConfig)) {
+        if (
+          hasAuthorizedAllLocalesPublicationStatus({
+            data: publicationData,
+            locale: locale!,
+            localeCodes: config.localization.localeCodes,
+            result,
+            status: allLocalesPublicationStatus,
+          })
+        ) {
           let accessibleLocaleCodes = config.localization.localeCodes
 
           if (config.localization.filterAvailableLocales) {

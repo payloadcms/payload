@@ -38,6 +38,10 @@ import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
+import {
+  getAllLocalesPublicationStatus,
+  hasAuthorizedAllLocalesPublicationStatus,
+} from '../../versions/allLocalesPublicationStatus.js'
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
 
@@ -124,10 +128,17 @@ export const createOperation = async <
     const publishAllLocales =
       !draft &&
       (publishAllLocalesArg ?? (hasLocalizeStatusEnabled(collectionConfig) ? false : true))
+    const allLocalesPublicationStatus = getAllLocalesPublicationStatus({
+      hasLocalizedStatus: Boolean(
+        config.localization && hasLocalizeStatusEnabled(collectionConfig),
+      ),
+      publishAllLocales,
+      unpublishAllLocales: false,
+    })
     const isSavingDraft = Boolean(draft && hasDraftsEnabled(collectionConfig) && !publishAllLocales)
 
-    if (isSavingDraft) {
-      data._status = 'draft'
+    if (allLocalesPublicationStatus || isSavingDraft) {
+      data._status = allLocalesPublicationStatus ?? 'draft'
     }
 
     let duplicatedFromDocWithLocales: JsonObject = {}
@@ -226,6 +237,8 @@ export const createOperation = async <
       }
     }
 
+    const publicationData = { ...data }
+
     // /////////////////////////////////////
     // beforeChange - Fields
     // /////////////////////////////////////
@@ -245,10 +258,14 @@ export const createOperation = async <
 
     if (
       config.localization &&
-      collectionConfig.versions &&
-      collectionConfig.versions.drafts &&
-      collectionConfig.versions.drafts.localizeStatus &&
-      publishAllLocales
+      hasLocalizeStatusEnabled(collectionConfig) &&
+      hasAuthorizedAllLocalesPublicationStatus({
+        data: publicationData,
+        locale: locale!,
+        localeCodes: config.localization.localeCodes,
+        result: resultWithLocales,
+        status: allLocalesPublicationStatus,
+      })
     ) {
       let accessibleLocaleCodes = config.localization.localeCodes
 

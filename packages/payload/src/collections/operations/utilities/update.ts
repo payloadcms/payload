@@ -38,6 +38,11 @@ import {
   hasLocalizeStatusEnabled,
 } from '../../../utilities/getVersionsConfig.js'
 import { mergeLocalizedData } from '../../../utilities/mergeLocalizedData.js'
+import {
+  getAllLocalesPublicationStatus,
+  hasAuthorizedAllLocalesPublicationStatus,
+  validateAllLocalesPublicationFlags,
+} from '../../../versions/allLocalesPublicationStatus.js'
 export type SharedUpdateDocumentArgs<TSlug extends CollectionSlug> = {
   autosave: boolean
   collectionConfig: SanitizedCollectionConfig
@@ -102,6 +107,12 @@ export const updateDocument = async <
   unpublishAllLocales: unpublishAllLocalesArg,
 }: SharedUpdateDocumentArgs<TSlug>): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
   const password = data?.password
+
+  validateAllLocalesPublicationFlags({
+    publishAllLocales: publishAllLocalesArg,
+    unpublishAllLocales: unpublishAllLocalesArg,
+  })
+
   const publishAllLocales =
     !draftArg &&
     (publishAllLocalesArg ?? (hasLocalizeStatusEnabled(collectionConfig) ? false : true))
@@ -109,6 +120,11 @@ export const updateDocument = async <
     typeof unpublishAllLocalesArg === 'string'
       ? unpublishAllLocalesArg === 'true'
       : !!unpublishAllLocalesArg
+  const allLocalesPublicationStatus = getAllLocalesPublicationStatus({
+    hasLocalizedStatus: Boolean(config.localization && hasLocalizeStatusEnabled(collectionConfig)),
+    publishAllLocales,
+    unpublishAllLocales,
+  })
   const isSavingDraft =
     Boolean(draftArg && hasDraftsEnabled(collectionConfig)) &&
     data._status !== 'published' &&
@@ -122,8 +138,8 @@ export const updateDocument = async <
       !isSavingDraft,
   )
 
-  if (isSavingDraft) {
-    data._status = 'draft'
+  if (allLocalesPublicationStatus || isSavingDraft) {
+    data._status = allLocalesPublicationStatus ?? 'draft'
   }
 
   // /////////////////////////////////////
@@ -247,6 +263,8 @@ export const updateDocument = async <
     }
   }
 
+  const publicationData = { ...data }
+
   // /////////////////////////////////////
   // beforeChange - Fields
   // /////////////////////////////////////
@@ -282,8 +300,16 @@ export const updateDocument = async <
     let snapshotData: JsonObject | undefined
     let currentDoc
 
-    if (collectionConfig.versions.drafts && collectionConfig.versions.drafts.localizeStatus) {
-      if (publishAllLocales || unpublishAllLocales) {
+    if (hasLocalizeStatusEnabled(collectionConfig)) {
+      if (
+        hasAuthorizedAllLocalesPublicationStatus({
+          data: publicationData,
+          locale,
+          localeCodes: config.localization.localeCodes,
+          result,
+          status: allLocalesPublicationStatus,
+        })
+      ) {
         let accessibleLocaleCodes = config.localization.localeCodes
 
         if (config.localization.filterAvailableLocales) {

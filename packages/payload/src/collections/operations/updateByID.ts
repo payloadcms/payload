@@ -25,9 +25,14 @@ import { generateFileData } from '../../uploads/generateFileData.js'
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
+import { hasLocalizeStatusEnabled } from '../../utilities/getVersionsConfig.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
+import {
+  getAllLocalesPublicationStatus,
+  validateAllLocalesPublicationFlags,
+} from '../../versions/allLocalesPublicationStatus.js'
 import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion.js'
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
@@ -111,6 +116,25 @@ export const updateByIDOperation = async <
     }
 
     const { data } = args
+
+    validateAllLocalesPublicationFlags({
+      publishAllLocales,
+      unpublishAllLocales,
+    })
+
+    const allLocalesPublicationStatus = getAllLocalesPublicationStatus({
+      hasLocalizedStatus: Boolean(
+        config.localization && hasLocalizeStatusEnabled(collectionConfig),
+      ),
+      publishAllLocales:
+        !draftArg &&
+        (publishAllLocales ?? (hasLocalizeStatusEnabled(collectionConfig) ? false : true)),
+      unpublishAllLocales: Boolean(unpublishAllLocales),
+    })
+
+    if (allLocalesPublicationStatus) {
+      data._status = allLocalesPublicationStatus
+    }
 
     // /////////////////////////////////////
     // Access
