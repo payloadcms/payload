@@ -5,30 +5,20 @@ import { BlobServiceClient } from '@azure/storage-blob'
 import { readFile } from 'node:fs/promises'
 import path from 'path'
 import { fileURLToPath } from 'url'
-import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
+import { expect } from 'vitest'
 
-import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
-
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { test } from '../__helpers/int/vitest.js'
+import testConfig from './config.js'
 import { mediaSlug, mediaWithPrefixSlug, prefix } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-let restClient: NextRESTClient
-let payload: Payload
-
-describe('@payloadcms/storage-azure streamingUploads', () => {
+test.suite({ config: testConfig })('@payloadcms/storage-azure streamingUploads', () => {
   let TEST_CONTAINER: string
   let client: ContainerClient
 
-  beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(
-      dirname,
-      undefined,
-      undefined,
-      path.resolve(dirname, 'streamingUploads.config.ts'),
-    ))
+  test.beforeEach(async () => {
     TEST_CONTAINER = process.env.AZURE_STORAGE_CONTAINER_NAME!
 
     const blobServiceClient = BlobServiceClient.fromConnectionString(
@@ -40,15 +30,11 @@ describe('@payloadcms/storage-azure streamingUploads', () => {
     await clearContainer()
   }, 90000)
 
-  afterAll(async () => {
-    await payload.destroy()
-  })
-
-  afterEach(async () => {
+  test.afterEach(async () => {
     await clearContainer()
   })
 
-  it('preserves mime type when uploaded via rest endpoint', async () => {
+  test('preserves mime type when uploaded via rest endpoint', async ({ restClient }) => {
     const fileBuffer = await readFile(path.resolve(dirname, '../uploads/image.png'))
 
     const data = new FormData()
@@ -62,7 +48,7 @@ describe('@payloadcms/storage-azure streamingUploads', () => {
     expect(response.headers.get('content-type')).toEqual('image/png')
   })
 
-  it('can upload', async () => {
+  test('can upload', async ({ payload }) => {
     const upload = await payload.create({
       collection: mediaSlug,
       data: {},
@@ -70,11 +56,11 @@ describe('@payloadcms/storage-azure streamingUploads', () => {
     })
 
     expect(upload.id).toBeTruthy()
-    await verifyUploads({ collectionSlug: mediaSlug, uploadId: upload.id })
+    await verifyUploads({ payload }, { collectionSlug: mediaSlug, uploadId: upload.id })
     expect(upload.url).toEqual(`/api/${mediaSlug}/file/${String(upload.filename)}`)
   })
 
-  it('can upload with prefix', async () => {
+  test('can upload with prefix', async ({ payload }) => {
     const upload = await payload.create({
       collection: mediaWithPrefixSlug,
       data: {},
@@ -82,17 +68,20 @@ describe('@payloadcms/storage-azure streamingUploads', () => {
     })
 
     expect(upload.id).toBeTruthy()
-    await verifyUploads({
-      collectionSlug: mediaWithPrefixSlug,
-      uploadId: upload.id,
-      prefix,
-    })
+    await verifyUploads(
+      { payload },
+      {
+        collectionSlug: mediaWithPrefixSlug,
+        uploadId: upload.id,
+        prefix,
+      },
+    )
     expect(upload.url).toEqual(
       `/api/${mediaWithPrefixSlug}/file/${String(upload.filename)}?prefix=${encodeURIComponent(prefix)}`,
     )
   })
 
-  it('returns 404 for non-existing file', async () => {
+  test('returns 404 for non-existing file', async ({ restClient }) => {
     const response = await restClient.GET(`/${mediaSlug}/file/nonexistent.png`)
     expect(response.status).toBe(404)
   })
@@ -103,15 +92,18 @@ describe('@payloadcms/storage-azure streamingUploads', () => {
     }
   }
 
-  async function verifyUploads({
-    collectionSlug,
-    uploadId,
-    prefix = '',
-  }: {
-    collectionSlug: CollectionSlug
-    prefix?: string
-    uploadId: number | string
-  }) {
+  async function verifyUploads(
+    { payload }: { payload: Payload },
+    {
+      collectionSlug,
+      uploadId,
+      prefix = '',
+    }: {
+      collectionSlug: CollectionSlug
+      prefix?: string
+      uploadId: number | string
+    },
+  ) {
     const uploadData = (await payload.findByID({
       collection: collectionSlug,
       id: uploadId,

@@ -26,20 +26,56 @@ dotenv.config({
 })
 
 export default buildConfigWithDefaults({
-  admin: {
-    importMap: {
-      baseDir: path.resolve(dirname, '..'),
+  suite: 'storage-s3-client-uploads',
+  config: {
+    admin: {
+      importMap: {
+        baseDir: path.resolve(dirname, '..'),
+      },
+    },
+    collections: [
+      Media,
+      MediaWithPrefix,
+      MediaContainer,
+      MediaHeaderOnly,
+      MediaHeaderOnlyWithSizes,
+      Users,
+    ],
+    storage: [
+      s3Storage({
+        bucket: process.env.S3_BUCKET!,
+        clientUploads: {
+          access: ({ req }) => (req.headers.get('x-disallow-access') ? false : true),
+        },
+        collections: {
+          [mediaHeaderOnlySlug]: true,
+          [mediaHeaderOnlyWithSizesSlug]: true,
+          [mediaSlug]: true,
+          [mediaWithPrefixSlug]: {
+            prefix: 'test-prefix',
+          },
+        },
+        config: {
+          credentials: {
+            accessKeyId: process.env.S3_ACCESS_KEY_ID!,
+            secretAccessKey: process.env.S3_SECRET_ACCESS_KEY!,
+          },
+          endpoint: process.env.S3_ENDPOINT,
+          forcePathStyle: process.env.S3_FORCE_PATH_STYLE === 'true',
+          region: process.env.S3_REGION,
+        },
+      }),
+    ],
+    typescript: {
+      outputFile: path.resolve(dirname, 'payload-types.ts'),
+    },
+    upload: {
+      limits: {
+        fileSize: 10 * 1024 * 1024, // 10 MB
+      },
     },
   },
-  collections: [
-    Media,
-    MediaWithPrefix,
-    MediaContainer,
-    MediaHeaderOnly,
-    MediaHeaderOnlyWithSizes,
-    Users,
-  ],
-  onInit: async (payload) => {
+  seed: async (payload) => {
     await payload.create({
       collection: 'users',
       data: {
@@ -47,38 +83,5 @@ export default buildConfigWithDefaults({
         password: devUser.password,
       },
     })
-  },
-  storage: [
-    s3Storage({
-      collections: {
-        [mediaHeaderOnlySlug]: true,
-        [mediaHeaderOnlyWithSizesSlug]: true,
-        [mediaSlug]: true,
-        [mediaWithPrefixSlug]: {
-          prefix: 'test-prefix',
-        },
-      },
-      bucket: process.env.S3_BUCKET!,
-      clientUploads: {
-        access: ({ req }) => (req.headers.get('x-disallow-access') ? false : true),
-      },
-      config: {
-        credentials: {
-          accessKeyId: process.env.S3_ACCESS_KEY_ID!,
-          secretAccessKey: process.env.S3_SECRET_ACCESS_KEY!,
-        },
-        endpoint: process.env.S3_ENDPOINT,
-        forcePathStyle: process.env.S3_FORCE_PATH_STYLE === 'true',
-        region: process.env.S3_REGION,
-      },
-    }),
-  ],
-  upload: {
-    limits: {
-      fileSize: 10 * 1024 * 1024, // 10 MB
-    },
-  },
-  typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })

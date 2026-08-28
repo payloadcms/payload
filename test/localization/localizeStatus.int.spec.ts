@@ -6,42 +6,29 @@ import { migratePostgresLocalizeStatus } from '@payloadcms/db-postgres/migration
 import { migrateSqliteLocalizeStatus } from '@payloadcms/db-sqlite/migration-utils'
 import { sql as drizzleSql } from 'drizzle-orm'
 import { Types } from 'mongoose'
-import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import { expect } from 'vitest'
 
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { test } from '../__helpers/int/vitest.js'
+import testConfig from './localizeStatus.config.js'
 
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
-
-let payload: Payload
-
-describe('localizeStatus migration', () => {
-  beforeAll(async () => {
-    const result = await initPayloadInt(dirname, undefined, undefined, 'localizeStatus.config.ts')
-    payload = result.payload
-
+test.suite({ config: testConfig })('localizeStatus migration', () => {
+  test.beforeEach(async () => {
     if (process.env.PAYLOAD_DATABASE === 'mongodb' || !process.env.PAYLOAD_DATABASE) {
       // Wait for MongoDB to finish building indexes to avoid
       // "Unable to write to collection due to catalog changes" errors
       await wait(1000)
     }
   })
-  afterAll(async () => {
-    if (payload?.db && typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
-  })
 
-  describe.skipIf(process.env.PAYLOAD_DATABASE !== 'postgres')('PostgreSQL', () => {
+  test.options({ db: (adapter) => adapter === 'postgres' }).describe('PostgreSQL', () => {
     // Reset both test collections to their pre-migration database shape before every
     // scenario so each test is self-contained and order-independent. Real users' databases
     // will be in this pre-migration state; the runtime schema (localizeStatus auto-inferred)
     // is reverted here via raw SQL. Each scenario's migration mutates the schema, so this
     // must run before every test rather than once.
-    beforeEach(async () => {
+    test.beforeEach(async ({ payload }) => {
       const db = payload.db
 
       // testMigrationPosts: title is NOT localized, so versions have no locales table.
@@ -83,8 +70,8 @@ describe('localizeStatus migration', () => {
       await db.drizzle.execute(sql`DELETE FROM test_migration_articles`)
     })
 
-    describe('Scenario 1: Creating new locales table', () => {
-      it('should migrate non-localized _status to localized', async () => {
+    test.describe('Scenario 1: Creating new locales table', () => {
+      test('should migrate non-localized _status to localized', async ({ payload }) => {
         const db = payload.db
 
         // At this point, Payload has created:
@@ -178,8 +165,8 @@ describe('localizeStatus migration', () => {
       })
     })
 
-    describe('Scenario 2: Adding to existing locales table', () => {
-      it('should add _status column to existing locales table', async () => {
+    test.describe('Scenario 2: Adding to existing locales table', () => {
+      test('should add _status column to existing locales table', async ({ payload }) => {
         const db = payload.db
 
         // Schema is in pre-migration state (set up in the beforeEach hook):
@@ -283,8 +270,8 @@ describe('localizeStatus migration', () => {
       })
     })
 
-    describe('Scenario 3: Demonstrate version history migration', () => {
-      it('should show how version rows are transformed', async () => {
+    test.describe('Scenario 3: Demonstrate version history migration', () => {
+      test('should show how version rows are transformed', async ({ payload }) => {
         const db = payload.db
 
         // Create a complex version history
@@ -378,8 +365,8 @@ describe('localizeStatus migration', () => {
       })
     })
 
-    describe('Scenario 4: Test publishedLocale handling', () => {
-      it('should handle publishedLocale correctly', async () => {
+    test.describe('Scenario 4: Test publishedLocale handling', () => {
+      test('should handle publishedLocale correctly', async ({ payload }) => {
         const db = payload.db
 
         // Use testMigrationArticles which has localized fields and thus an existing locales table
@@ -543,8 +530,10 @@ describe('localizeStatus migration', () => {
       })
     })
 
-    describe('Scenario 5: Skip collections without versions', () => {
-      it('should skip migration for collections without versions enabled', async () => {
+    test.describe('Scenario 5: Skip collections without versions', () => {
+      test('should skip migration for collections without versions enabled', async ({
+        payload,
+      }) => {
         // Create a document in the collection without versions
         const doc = await payload.create({
           collection: 'testNoVersions',
@@ -577,11 +566,15 @@ describe('localizeStatus migration', () => {
     })
   })
 
-  describe.skipIf(process.env.PAYLOAD_DATABASE !== 'sqlite')('SQLite', () => {
+  test.options({ db: (adapter) => adapter === 'sqlite' }).describe('SQLite', () => {
     // Mirror the PostgreSQL suite: revert the runtime (post-migration) schema back to its
     // pre-migration shape before every scenario so each test is self-contained. SQLite has no
     // `ADD COLUMN IF NOT EXISTS` / `DROP COLUMN IF EXISTS`, so we guard with pragma_table_info.
-    const columnExists = async (tableName: string, columnName: string): Promise<boolean> => {
+    const columnExists = async (
+      { payload }: { payload: Payload },
+      tableName: string,
+      columnName: string,
+    ): Promise<boolean> => {
       const rows = (await payload.db.drizzle.all(
         drizzleSql.raw(
           `SELECT COUNT(*) as count FROM pragma_table_info('${tableName}') WHERE name = '${columnName}'`,
@@ -591,19 +584,24 @@ describe('localizeStatus migration', () => {
     }
 
     const addColumnIfMissing = async (
+      { payload }: { payload: Payload },
       tableName: string,
       columnName: string,
       definition: string,
     ): Promise<void> => {
-      if (!(await columnExists(tableName, columnName))) {
+      if (!(await columnExists({ payload }, tableName, columnName))) {
         await payload.db.drizzle.run(
           drizzleSql.raw(`ALTER TABLE "${tableName}" ADD COLUMN ${definition}`),
         )
       }
     }
 
-    const dropColumnIfExists = async (tableName: string, columnName: string): Promise<void> => {
-      if (await columnExists(tableName, columnName)) {
+    const dropColumnIfExists = async (
+      { payload }: { payload: Payload },
+      tableName: string,
+      columnName: string,
+    ): Promise<void> => {
+      if (await columnExists({ payload }, tableName, columnName)) {
         // SQLite refuses to drop a column referenced by an index, so drop those indexes first.
         const indexes = (await payload.db.drizzle.all(
           drizzleSql.raw(
@@ -623,39 +621,61 @@ describe('localizeStatus migration', () => {
       }
     }
 
-    beforeEach(async () => {
+    test.beforeEach(async ({ payload }) => {
       const drizzle = payload.db.drizzle
 
       // testMigrationPosts: title is NOT localized, so versions have no locales table pre-migration.
       await drizzle.run(drizzleSql.raw(`DROP TABLE IF EXISTS _test_migration_posts_v_locales`))
       await addColumnIfMissing(
+        { payload },
         '_test_migration_posts_v',
         'version__status',
         `version__status TEXT DEFAULT 'draft'`,
       )
-      await addColumnIfMissing('_test_migration_posts_v', 'snapshot', `snapshot INTEGER`)
-      await addColumnIfMissing('test_migration_posts', '_status', `_status TEXT DEFAULT 'draft'`)
+      await addColumnIfMissing(
+        { payload },
+        '_test_migration_posts_v',
+        'snapshot',
+        `snapshot INTEGER`,
+      )
+      await addColumnIfMissing(
+        { payload },
+        'test_migration_posts',
+        '_status',
+        `_status TEXT DEFAULT 'draft'`,
+      )
       await drizzle.run(drizzleSql.raw(`DELETE FROM _test_migration_posts_v`))
       await drizzle.run(drizzleSql.raw(`DELETE FROM test_migration_posts`))
 
       // testMigrationArticles: title IS localized, so locales tables exist.
       await addColumnIfMissing(
+        { payload },
         '_test_migration_articles_v',
         'version__status',
         `version__status TEXT DEFAULT 'draft'`,
       )
-      await addColumnIfMissing('_test_migration_articles_v', 'snapshot', `snapshot INTEGER`)
-      await dropColumnIfExists('_test_migration_articles_v_locales', 'version__status')
-      await addColumnIfMissing('test_migration_articles', '_status', `_status TEXT DEFAULT 'draft'`)
-      await dropColumnIfExists('test_migration_articles_locales', '_status')
+      await addColumnIfMissing(
+        { payload },
+        '_test_migration_articles_v',
+        'snapshot',
+        `snapshot INTEGER`,
+      )
+      await dropColumnIfExists({ payload }, '_test_migration_articles_v_locales', 'version__status')
+      await addColumnIfMissing(
+        { payload },
+        'test_migration_articles',
+        '_status',
+        `_status TEXT DEFAULT 'draft'`,
+      )
+      await dropColumnIfExists({ payload }, 'test_migration_articles_locales', '_status')
       await drizzle.run(drizzleSql.raw(`DELETE FROM _test_migration_articles_v_locales`))
       await drizzle.run(drizzleSql.raw(`DELETE FROM _test_migration_articles_v`))
       await drizzle.run(drizzleSql.raw(`DELETE FROM test_migration_articles_locales`))
       await drizzle.run(drizzleSql.raw(`DELETE FROM test_migration_articles`))
     })
 
-    describe('Scenario 1: Creating new locales table', () => {
-      it('should migrate non-localized _status to localized', async () => {
+    test.describe('Scenario 1: Creating new locales table', () => {
+      test('should migrate non-localized _status to localized', async ({ payload }) => {
         const drizzle = payload.db.drizzle
 
         const post1 = await payload.create({
@@ -683,8 +703,10 @@ describe('localizeStatus migration', () => {
           payload,
         })
 
-        expect(await tableExists('_test_migration_posts_v_locales')).toBe(true)
-        expect(await columnExists('_test_migration_posts_v', 'version__status')).toBe(false)
+        expect(await tableExists({ payload }, '_test_migration_posts_v_locales')).toBe(true)
+        expect(await columnExists({ payload }, '_test_migration_posts_v', 'version__status')).toBe(
+          false,
+        )
 
         const localesData = (await drizzle.all(
           drizzleSql.raw(
@@ -709,8 +731,8 @@ describe('localizeStatus migration', () => {
       })
     })
 
-    describe('Scenario 2: Adding to existing locales table', () => {
-      it('should add version__status column to existing locales table', async () => {
+    test.describe('Scenario 2: Adding to existing locales table', () => {
+      test('should add version__status column to existing locales table', async ({ payload }) => {
         const drizzle = payload.db.drizzle
 
         const articleResult = (await drizzle.all(
@@ -762,9 +784,9 @@ describe('localizeStatus migration', () => {
           payload,
         })
 
-        expect(await columnExists('_test_migration_articles_v_locales', 'version__status')).toBe(
-          true,
-        )
+        expect(
+          await columnExists({ payload }, '_test_migration_articles_v_locales', 'version__status'),
+        ).toBe(true)
 
         const localesData = (await drizzle.all(
           drizzleSql.raw(
@@ -779,8 +801,8 @@ describe('localizeStatus migration', () => {
       })
     })
 
-    describe('Scenario 3: Test publishedLocale handling', () => {
-      it('should handle publishedLocale correctly', async () => {
+    test.describe('Scenario 3: Test publishedLocale handling', () => {
+      test('should handle publishedLocale correctly', async ({ payload }) => {
         const drizzle = payload.db.drizzle
 
         await drizzle.run(drizzleSql.raw(`DELETE FROM _test_migration_articles_v`))
@@ -869,8 +891,10 @@ describe('localizeStatus migration', () => {
       })
     })
 
-    describe('Scenario 4: Skip collections without versions', () => {
-      it('should skip migration for collections without versions enabled', async () => {
+    test.describe('Scenario 4: Skip collections without versions', () => {
+      test('should skip migration for collections without versions enabled', async ({
+        payload,
+      }) => {
         const doc = await payload.create({
           collection: 'testNoVersions',
           data: { title: 'Test document' },
@@ -886,11 +910,14 @@ describe('localizeStatus migration', () => {
           }),
         ).resolves.not.toThrow()
 
-        expect(await tableExists('_test_no_versions_v')).toBe(false)
+        expect(await tableExists({ payload }, '_test_no_versions_v')).toBe(false)
       })
     })
 
-    async function tableExists(tableName: string): Promise<boolean> {
+    async function tableExists(
+      { payload }: { payload: Payload },
+      tableName: string,
+    ): Promise<boolean> {
       const rows = (await payload.db.drizzle.all(
         drizzleSql.raw(
           `SELECT COUNT(*) as count FROM sqlite_master WHERE type='table' AND name='${tableName}'`,
@@ -900,13 +927,13 @@ describe('localizeStatus migration', () => {
     }
   })
 
-  describe.skipIf(process.env.PAYLOAD_DATABASE !== 'mongodb')('MongoDB', () => {
+  test.options({ db: (adapter) => adapter === 'mongodb' }).describe('MongoDB', () => {
     // Force collection and index creation to finish before the timed writes below.
     // With autoIndex enabled on a fresh database, the first write to a versions
     // collection kicks off async index builds; a subsequent write can then race
     // with that catalog change and fail with a transient "catalog changes" error.
     // Model.init() resolves once autoCreate and autoIndex have completed.
-    beforeAll(async () => {
+    test.beforeEach(async ({ payload }) => {
       const db = payload.db as any
       const slugs = ['testMigrationPosts', 'testMigrationArticles']
 
@@ -916,8 +943,10 @@ describe('localizeStatus migration', () => {
       }
     })
 
-    describe('MongoDB version status migration', () => {
-      it('should migrate version._status from string to per-locale object', async () => {
+    test.describe('MongoDB version status migration', () => {
+      test('should migrate version._status from string to per-locale object', async ({
+        payload,
+      }) => {
         // Step 1: Create a post with a version
         const post = await payload.create({
           collection: 'testMigrationPosts',
@@ -971,7 +1000,7 @@ describe('localizeStatus migration', () => {
         expect(migratedVersion.version._status.de).toBe('published')
       })
 
-      it('should handle publishedLocale when migrating', async () => {
+      test('should handle publishedLocale when migrating', async ({ payload }) => {
         // This test simulates OLD data that was created before localizeStatus existed.
         // Old data has _status as a string and publishedLocale to indicate which locale was published.
         // We insert raw version documents to replicate what old Payload code would have written.

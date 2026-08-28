@@ -20,13 +20,35 @@ dotenv.config({
 })
 
 export default buildConfigWithDefaults({
-  admin: {
-    importMap: {
-      baseDir: path.resolve(dirname),
+  suite: 'storage-gcs',
+  config: {
+    admin: {
+      importMap: {
+        baseDir: path.resolve(dirname),
+      },
     },
+    collections: [Media, MediaWithPrefix, Users],
+    storage: [
+      gcsStorage({
+        bucket: process.env.GCS_BUCKET,
+        collections: {
+          [mediaSlug]: true,
+          [mediaWithPrefixSlug]: {
+            prefix,
+          },
+        },
+        options: {
+          apiEndpoint: process.env.GCS_ENDPOINT,
+          projectId: process.env.GCS_PROJECT_ID,
+        },
+      }),
+    ],
+    typescript: {
+      outputFile: path.resolve(dirname, 'payload-types.ts'),
+    },
+    upload: uploadOptions,
   },
-  collections: [Media, MediaWithPrefix, Users],
-  onInit: async (payload) => {
+  seed: async (payload) => {
     await payload.create({
       collection: 'users',
       data: {
@@ -34,24 +56,5 @@ export default buildConfigWithDefaults({
         password: devUser.password,
       },
     })
-  },
-  storage: [
-    gcsStorage({
-      collections: {
-        [mediaSlug]: true,
-        [mediaWithPrefixSlug]: {
-          prefix,
-        },
-      },
-      bucket: process.env.GCS_BUCKET,
-      options: {
-        apiEndpoint: process.env.GCS_ENDPOINT,
-        projectId: process.env.GCS_PROJECT_ID,
-      },
-    }),
-  ],
-  upload: uploadOptions,
-  typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })

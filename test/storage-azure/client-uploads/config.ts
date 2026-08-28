@@ -24,20 +24,48 @@ dotenv.config({
 })
 
 export default buildConfigWithDefaults({
-  admin: {
-    importMap: {
-      baseDir: path.resolve(dirname, '..'),
+  suite: 'storage-azure-client-uploads',
+  config: {
+    admin: {
+      importMap: {
+        baseDir: path.resolve(dirname, '..'),
+      },
+    },
+    collections: [
+      Media,
+      MediaWithPrefix,
+      MediaWithDocPrefix,
+      MediaHeaderOnly,
+      MediaHeaderOnlyWithSizes,
+      Users,
+    ],
+    storage: [
+      azureStorage({
+        allowContainerCreate: process.env.AZURE_STORAGE_ALLOW_CONTAINER_CREATE === 'true',
+        baseURL: process.env.AZURE_STORAGE_ACCOUNT_BASEURL!,
+        clientUploads: true,
+        collections: {
+          [mediaHeaderOnlySlug]: true,
+          [mediaHeaderOnlyWithSizesSlug]: true,
+          [mediaSlug]: true,
+          // Configure a collection-level prefix on this slug to test that
+          // a custom `prefix.defaultValue` does override the static prefix
+          [mediaWithDocPrefixSlug]: {
+            prefix: 'docprefix-collection',
+          },
+          [mediaWithPrefixSlug]: {
+            prefix,
+          },
+        },
+        connectionString: process.env.AZURE_STORAGE_CONNECTION_STRING!,
+        containerName: process.env.AZURE_STORAGE_CONTAINER_NAME!,
+      }),
+    ],
+    typescript: {
+      outputFile: path.resolve(dirname, 'payload-types.ts'),
     },
   },
-  collections: [
-    Media,
-    MediaWithPrefix,
-    MediaWithDocPrefix,
-    MediaHeaderOnly,
-    MediaHeaderOnlyWithSizes,
-    Users,
-  ],
-  onInit: async (payload) => {
+  seed: async (payload) => {
     await payload.create({
       collection: 'users',
       data: {
@@ -45,30 +73,5 @@ export default buildConfigWithDefaults({
         password: devUser.password,
       },
     })
-  },
-  storage: [
-    azureStorage({
-      collections: {
-        [mediaHeaderOnlySlug]: true,
-        [mediaHeaderOnlyWithSizesSlug]: true,
-        [mediaSlug]: true,
-        // Configure a collection-level prefix on this slug to test that
-        // a custom `prefix.defaultValue` does override the static prefix
-        [mediaWithDocPrefixSlug]: {
-          prefix: 'docprefix-collection',
-        },
-        [mediaWithPrefixSlug]: {
-          prefix,
-        },
-      },
-      allowContainerCreate: process.env.AZURE_STORAGE_ALLOW_CONTAINER_CREATE === 'true',
-      baseURL: process.env.AZURE_STORAGE_ACCOUNT_BASEURL!,
-      clientUploads: true,
-      connectionString: process.env.AZURE_STORAGE_CONNECTION_STRING!,
-      containerName: process.env.AZURE_STORAGE_CONTAINER_NAME!,
-    }),
-  ],
-  typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })

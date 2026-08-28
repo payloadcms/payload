@@ -1,17 +1,14 @@
-import type { Payload } from 'payload'
-
 import path from 'path'
 import { fileURLToPath } from 'url'
-import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
+import { expect } from 'vitest'
 
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { test } from '../__helpers/int/vitest.js'
+import testConfig from './searchBeforeS3.config.js'
 import { mediaSlug } from './shared.js'
 import { clearTestBucket, createTestBucket, verifyUploads } from './test-utils.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
-
-let payload: Payload
 
 /**
  * Verifies that storage adapters initialise before plugins.
@@ -20,23 +17,13 @@ let payload: Payload
  * searchPlugin processes the collection config — fixing the silent upload failure
  * that occurred when s3Storage appeared after searchPlugin in the old `plugins` array.
  */
-describe('Search plugin before S3 - Issue #15431', () => {
-  beforeAll(async () => {
-    ;({ payload } = await initPayloadInt(
-      dirname,
-      'storage-s3-search-before',
-      true,
-      'searchBeforeS3.config.ts',
-    ))
+test.suite({ config: testConfig })('Search plugin before S3 - Issue #15431', () => {
+  test.beforeEach(async () => {
     await createTestBucket()
     await clearTestBucket()
   })
 
-  afterAll(async () => {
-    await payload.destroy()
-  })
-
-  afterEach(async () => {
+  test.afterEach(async ({ payload }) => {
     await payload.delete({
       collection: mediaSlug,
       where: { id: { exists: true } },
@@ -51,7 +38,7 @@ describe('Search plugin before S3 - Issue #15431', () => {
     await clearTestBucket()
   })
 
-  it('should initialise the S3 adapter before the search plugin', () => {
+  test('should initialise the S3 adapter before the search plugin', ({ payload }) => {
     // The S3 adapter must have run its init before searchPlugin consumed the collection
     // config. If it didn't, upload hooks would be absent and the next test's S3 writes
     // would silently fail. Verify the adapter is wired up on the sanitized config.
@@ -61,7 +48,9 @@ describe('Search plugin before S3 - Issue #15431', () => {
     expect(s3Adapter!.collections).toContain(mediaSlug)
   })
 
-  it('should upload all image sizes to S3 when search plugin is listed before S3 plugin', async () => {
+  test('should upload all image sizes to S3 when search plugin is listed before S3 plugin', async ({
+    payload,
+  }) => {
     const upload = await payload.create({
       collection: mediaSlug,
       data: {},
@@ -78,7 +67,7 @@ describe('Search plugin before S3 - Issue #15431', () => {
     })
   })
 
-  it('should create search document when uploading media', async () => {
+  test('should create search document when uploading media', async ({ payload }) => {
     const upload = await payload.create({
       collection: mediaSlug,
       data: {},
