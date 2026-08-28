@@ -29,6 +29,7 @@ type Args<T> = {
   fieldIndex: number
   global: null | SanitizedGlobalConfig
   id?: number | string
+  onFieldAccessDenied?: (path: string) => void
   operation: 'create' | 'update'
   overrideAccess: boolean
   parentIndexPath: string
@@ -61,6 +62,7 @@ export const promise = async <T>({
   field,
   fieldIndex,
   global,
+  onFieldAccessDenied,
   operation,
   overrideAccess,
   parentIndexPath,
@@ -331,6 +333,7 @@ export const promise = async <T>({
           })
 
       if (!result) {
+        onFieldAccessDenied?.(path)
         delete siblingData[field.name!]
       }
     }
@@ -368,6 +371,7 @@ export const promise = async <T>({
               doc,
               fields: field.fields,
               global,
+              onFieldAccessDenied,
               operation,
               overrideAccess,
               parentIndexPath: '',
@@ -422,6 +426,7 @@ export const promise = async <T>({
                 doc,
                 fields: block.fields,
                 global,
+                onFieldAccessDenied,
                 operation,
                 overrideAccess,
                 parentIndexPath: '',
@@ -453,6 +458,7 @@ export const promise = async <T>({
         doc,
         fields: field.fields,
         global,
+        onFieldAccessDenied,
         operation,
         overrideAccess,
         parentIndexPath: indexPath,
@@ -495,6 +501,7 @@ export const promise = async <T>({
         doc,
         fields: field.fields,
         global,
+        onFieldAccessDenied,
         operation,
         overrideAccess,
         parentIndexPath: isNamedGroup ? '' : indexPath,
@@ -581,6 +588,7 @@ export const promise = async <T>({
         doc,
         fields: field.fields,
         global,
+        onFieldAccessDenied,
         operation,
         overrideAccess,
         parentIndexPath: isNamedTab ? '' : indexPath,
@@ -605,6 +613,7 @@ export const promise = async <T>({
         doc,
         fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
         global,
+        onFieldAccessDenied,
         operation,
         overrideAccess,
         parentIndexPath: indexPath,

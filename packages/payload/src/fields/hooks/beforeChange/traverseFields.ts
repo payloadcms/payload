@@ -34,6 +34,7 @@ type Args = {
   global: null | SanitizedGlobalConfig
   id?: number | string
   mergeLocaleActions: (() => Promise<void> | void)[]
+  onFieldProcessed?: (args: { path: string; value: unknown }) => void
   operation: Operation
   overrideAccess: boolean
   parentIndexPath: string
@@ -77,6 +78,7 @@ export const traverseFields = async ({
   fields,
   global,
   mergeLocaleActions,
+  onFieldProcessed,
   operation,
   overrideAccess,
   parentIndexPath,
@@ -107,6 +109,7 @@ export const traverseFields = async ({
         fieldLabelPath,
         global,
         mergeLocaleActions,
+        onFieldProcessed,
         operation,
         overrideAccess,
         parentIndexPath,

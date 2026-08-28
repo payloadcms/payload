@@ -207,6 +207,8 @@ export const updateDocument = async <
   // beforeValidate - Fields
   // /////////////////////////////////////
 
+  let statusFieldAccessDenied = false
+
   data = await beforeValidate<DeepPartial<DataFromCollectionSlug<TSlug>>>({
     id,
     collection: collectionConfig,
@@ -214,6 +216,11 @@ export const updateDocument = async <
     data,
     doc: originalDoc,
     global: null,
+    onFieldAccessDenied: (path) => {
+      if (path === '_status') {
+        statusFieldAccessDenied = true
+      }
+    },
     operation: 'update',
     overrideAccess,
     req,
@@ -293,7 +300,23 @@ export const updateDocument = async <
   // Handle Localized Data Merging
   // /////////////////////////////////////
 
-  let result: JsonObject = await beforeChange(beforeChangeArgs)
+  let statusFieldValue: unknown
+
+  let result: JsonObject = await beforeChange({
+    ...beforeChangeArgs,
+    onFieldProcessed: ({ path, value }) => {
+      if (path === '_status') {
+        statusFieldValue = value
+      }
+    },
+  })
+
+  const hasAuthorizedPublicationStatus = hasAuthorizedAllLocalesPublicationStatus({
+    data: publicationData,
+    fieldAccessDenied: statusFieldAccessDenied,
+    fieldValue: statusFieldValue,
+    status: allLocalesPublicationStatus,
+  })
   let snapshotToSave: JsonObject | undefined
 
   if (config.localization && collectionConfig.versions) {
@@ -301,15 +324,7 @@ export const updateDocument = async <
     let currentDoc
 
     if (hasLocalizeStatusEnabled(collectionConfig)) {
-      if (
-        hasAuthorizedAllLocalesPublicationStatus({
-          data: publicationData,
-          locale,
-          localeCodes: config.localization.localeCodes,
-          result,
-          status: allLocalesPublicationStatus,
-        })
-      ) {
+      if (hasAuthorizedPublicationStatus) {
         let accessibleLocaleCodes = config.localization.localeCodes
 
         if (config.localization.filterAvailableLocales) {
