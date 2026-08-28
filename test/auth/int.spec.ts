@@ -9,18 +9,18 @@ import type {
 
 import crypto from 'crypto'
 import { jwtDecode } from 'jwt-decode'
-import path from 'path'
 import { createLocalReq, Forbidden, getFieldsToSign, refreshOperation, rotateSecret } from 'payload'
 import { email as emailValidation } from 'payload/shared'
 import { fileURLToPath } from 'url'
 import { v4 as uuid } from 'uuid'
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vitest } from 'vitest'
+import { expect, vitest } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { ApiKey } from './payload-types.js'
 
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { test } from '../__helpers/int/vitest.js'
 import { devUser } from '../credentials.js'
+import testConfig from './config.js'
 import {
   apiKeysSlug,
   namedSaveToJWTValue,
@@ -34,27 +34,13 @@ import {
   slug,
 } from './shared.js'
 
-let restClient: NextRESTClient
-let payload: Payload
-
 const { email, password } = devUser
 
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
-
-describe('Auth', () => {
-  beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(dirname))
-  })
-
-  afterAll(async () => {
-    await payload.destroy()
-  })
-
-  describe('GraphQL - admin user', () => {
+test.suite({ config: testConfig })('Auth', () => {
+  test.describe('GraphQL - admin user', () => {
     let token
     let user
-    beforeAll(async () => {
+    test.beforeEach(async ({ restClient }) => {
       const { data } = await restClient
         .GRAPHQL_POST({
           body: JSON.stringify({
@@ -75,13 +61,13 @@ describe('Auth', () => {
       token = data.loginUser.token
     })
 
-    it('should login', () => {
+    test('should login', () => {
       expect(user.id).toBeDefined()
       expect(user.email).toEqual(devUser.email)
       expect(token).toBeDefined()
     })
 
-    it('should have fields saved to JWT', () => {
+    test('should have fields saved to JWT', () => {
       const decoded = jwtDecode<User>(token)
       const { collection, email: jwtEmail, exp, iat, roles } = decoded
 
@@ -92,7 +78,7 @@ describe('Auth', () => {
       expect(exp).toBeDefined()
     })
 
-    it('should not expose strategy on the GraphQL me result', async () => {
+    test('should not expose strategy on the GraphQL me result', async ({ restClient }) => {
       const result = await restClient
         .GRAPHQL_POST({
           body: JSON.stringify({
@@ -111,7 +97,7 @@ describe('Auth', () => {
       expect(result.errors[0].message).toContain('Cannot query field "strategy" on type "usersMe"')
     })
 
-    it('should expose strategy on the GraphQL me user', async () => {
+    test('should expose strategy on the GraphQL me user', async ({ restClient }) => {
       const result = await restClient
         .GRAPHQL_POST({
           body: JSON.stringify({
@@ -132,7 +118,9 @@ describe('Auth', () => {
       expect(result.data.meUser.user._strategy).toBe('local-jwt')
     })
 
-    it('should not expose strategy on the GraphQL refresh token result', async () => {
+    test('should not expose strategy on the GraphQL refresh token result', async ({
+      restClient,
+    }) => {
       const result = await restClient
         .GRAPHQL_POST({
           body: JSON.stringify({
@@ -153,7 +141,7 @@ describe('Auth', () => {
       )
     })
 
-    it('should expose strategy on the GraphQL refresh token user', async () => {
+    test('should expose strategy on the GraphQL refresh token user', async ({ restClient }) => {
       const result = await restClient
         .GRAPHQL_POST({
           body: JSON.stringify({
@@ -175,8 +163,8 @@ describe('Auth', () => {
     })
   })
 
-  describe('REST - admin user', () => {
-    it('should prevent registering a new first user', async () => {
+  test.describe('REST - admin user', () => {
+    test('should prevent registering a new first user', async ({ restClient }) => {
       const response = await restClient.POST(`/${slug}/first-register`, {
         body: JSON.stringify({
           'confirm-password': password,
@@ -188,7 +176,7 @@ describe('Auth', () => {
       expect(response.status).toBe(403)
     })
 
-    it('should login a user successfully', async () => {
+    test('should login a user successfully', async ({ restClient }) => {
       const response = await restClient.POST(`/${slug}/login`, {
         body: JSON.stringify({
           email,
@@ -205,7 +193,7 @@ describe('Auth', () => {
       expect(data.token).toBeDefined()
     })
 
-    it('should not lose data if login throws', async () => {
+    test('should not lose data if login throws', async ({ payload, restClient }) => {
       const testEmail = 'transaction-rollback-test@example.com'
       const testPassword = 'test123'
       const originalArrayData = [{ info: 'original-value-1' }, { info: 'original-value-2' }]
@@ -274,11 +262,11 @@ describe('Auth', () => {
       })
     })
 
-    describe('logged in', () => {
+    test.describe('logged in', () => {
       let token: string | undefined
       let loggedInUser: undefined | User
 
-      beforeAll(async () => {
+      test.beforeEach(async ({ restClient }) => {
         const response = await restClient.POST(`/${slug}/login`, {
           body: JSON.stringify({
             email,
@@ -291,7 +279,9 @@ describe('Auth', () => {
         loggedInUser = data.user
       })
 
-      it('should allow a user to change password without returning password', async () => {
+      test('should allow a user to change password without returning password', async ({
+        payload,
+      }) => {
         const result = await payload.update({
           id: loggedInUser.id,
           collection: slug,
@@ -304,7 +294,7 @@ describe('Auth', () => {
         expect(result.password).toBeUndefined()
       })
 
-      it('should return strategy only on the /me user', async () => {
+      test('should return strategy only on the /me user', async ({ restClient }) => {
         const response = await restClient.GET(`/${slug}/me`, {
           headers: {
             Authorization: `JWT ${token}`,
@@ -320,7 +310,7 @@ describe('Auth', () => {
         expect(data.user._strategy).toBe('local-jwt')
       })
 
-      it('should have fields saved to JWT', () => {
+      test('should have fields saved to JWT', () => {
         const decoded = jwtDecode<User>(token)
         const {
           collection,
@@ -358,7 +348,9 @@ describe('Auth', () => {
         expect(exp).toBeDefined()
       })
 
-      it('should not crash when building JWT for user with missing group/tab fields', () => {
+      test('should not crash when building JWT for user with missing group/tab fields', ({
+        payload,
+      }) => {
         const collectionConfig = payload.collections[slug].config
 
         // Simulate a user document that was created before group/tab fields were added.
@@ -391,7 +383,10 @@ describe('Auth', () => {
         expect(result.collection).toBe(slug)
       })
 
-      it('should allow authentication with an API key with useAPIKey', async () => {
+      test('should allow authentication with an API key with useAPIKey', async ({
+        payload,
+        restClient,
+      }) => {
         const apiKey = '0123456789ABCDEFGH'
 
         const user = await payload.create({
@@ -416,7 +411,7 @@ describe('Auth', () => {
         expect(data.user.apiKey).toStrictEqual(apiKey)
       })
 
-      it('should refresh a token and reset its expiration', async () => {
+      test('should refresh a token and reset its expiration', async ({ restClient }) => {
         const response = await restClient.POST(`/${slug}/refresh-token`, {
           headers: {
             Authorization: `JWT ${token}`,
@@ -429,7 +424,7 @@ describe('Auth', () => {
         expect(data.refreshedToken).toBeDefined()
       })
 
-      it('should return strategy only on the /refresh-token user', async () => {
+      test('should return strategy only on the /refresh-token user', async ({ restClient }) => {
         const response = await restClient.POST(`/${slug}/refresh-token`, {
           headers: {
             Authorization: `JWT ${token}`,
@@ -443,7 +438,10 @@ describe('Auth', () => {
         expect(data.user._strategy).toBe('local-jwt')
       })
 
-      it('should refresh a token and receive an up-to-date user', async () => {
+      test('should refresh a token and receive an up-to-date user', async ({
+        payload,
+        restClient,
+      }) => {
         expect(loggedInUser?.custom).toBe('Hello, world!')
 
         await payload.update({
@@ -466,7 +464,10 @@ describe('Auth', () => {
         expect(data.user.custom).toBe('Goodbye, world!')
       })
 
-      it('keeps apiKey encrypted in DB after refresh operation', async () => {
+      test('keeps apiKey encrypted in DB after refresh operation', async ({
+        payload,
+        restClient,
+      }) => {
         const apiKey = '987e6543-e21b-12d3-a456-426614174999'
         const user = await payload.create({
           collection: slug,
@@ -487,7 +488,20 @@ describe('Auth', () => {
         expect(raw?.apiKey).not.toContain('-') // still ciphertext
       })
 
-      it('returns a user with decrypted apiKey after refresh', async () => {
+      test('returns a user with decrypted apiKey after refresh', async ({
+        payload,
+        restClient,
+      }) => {
+        await payload.create({
+          collection: slug,
+          data: {
+            apiKey: '987e6543-e21b-12d3-a456-426614174999',
+            email: 'user@example.com',
+            enableAPIKey: true,
+            password: 'Password123',
+          },
+        })
+
         const { token } = await payload.login({
           collection: 'users',
           data: { email: 'user@example.com', password: 'Password123' },
@@ -502,7 +516,7 @@ describe('Auth', () => {
         expect(res.user.apiKey).toMatch(/[0-9a-f-]{36}/) // UUID string
       })
 
-      it('should allow a user to be created', async () => {
+      test('should allow a user to be created', async ({ restClient }) => {
         const response = await restClient.POST(`/${slug}`, {
           body: JSON.stringify({
             email: 'name@test.com',
@@ -527,7 +541,7 @@ describe('Auth', () => {
         expect(doc).toHaveProperty('roles')
       })
 
-      it('should allow verification of a user', async () => {
+      test('should allow verification of a user', async ({ payload, restClient }) => {
         const emailToVerify = 'verify@me.com'
         const response = await restClient.POST(`/${publicUsersSlug}`, {
           body: JSON.stringify({
@@ -581,12 +595,12 @@ describe('Auth', () => {
         expect(afterToken).toBeNull()
       })
 
-      describe('User Preferences', () => {
+      test.describe('User Preferences', () => {
         const key = 'test'
         const property = 'store'
         let data
 
-        beforeAll(async () => {
+        test.beforeEach(async ({ restClient }) => {
           const response = await restClient.POST(`/payload-preferences/${key}`, {
             body: JSON.stringify({
               value: { property },
@@ -598,12 +612,12 @@ describe('Auth', () => {
           data = await response.json()
         })
 
-        it('should create', () => {
+        test('should create', () => {
           expect(data.doc.key).toStrictEqual(key)
           expect(data.doc.value.property).toStrictEqual(property)
         })
 
-        it('should read', async () => {
+        test('should read', async ({ restClient }) => {
           const response = await restClient.GET(`/payload-preferences/${key}`, {
             headers: {
               Authorization: `JWT ${token}`,
@@ -614,7 +628,7 @@ describe('Auth', () => {
           expect(data.value.property).toStrictEqual(property)
         })
 
-        it('should update', async () => {
+        test('should update', async ({ payload, restClient }) => {
           const response = await restClient.POST(`/payload-preferences/${key}`, {
             body: JSON.stringify({
               value: { property: 'updated', property2: 'test' },
@@ -655,7 +669,10 @@ describe('Auth', () => {
           expect(result.docs).toHaveLength(1)
         })
 
-        it('should only have one preference per user per key', async () => {
+        test('should only have one preference per user per key', async ({
+          payload,
+          restClient,
+        }) => {
           await restClient.POST(`/payload-preferences/${key}`, {
             body: JSON.stringify({
               value: { property: 'test', property2: 'test' },
@@ -701,7 +718,7 @@ describe('Auth', () => {
           expect(result.docs).toHaveLength(1)
         })
 
-        it('should delete', async () => {
+        test('should delete', async ({ payload, restClient }) => {
           const response = await restClient.DELETE(`/payload-preferences/${key}`, {
             headers: {
               Authorization: `JWT ${token}`,
@@ -735,14 +752,14 @@ describe('Auth', () => {
         })
       })
 
-      describe('Cross-Collection Preference Isolation', () => {
+      test.describe('Cross-Collection Preference Isolation', () => {
         const adminKey = 'cross-collection-admin'
         const publicKey = 'cross-collection-public'
         let publicUserToken: string
         let publicUserId: number | string
         const createdIDs: (number | string)[] = []
 
-        beforeAll(async () => {
+        test.beforeEach(async ({ payload, restClient }) => {
           // Admin creates preference
           const adminPref = await restClient.POST(`/payload-preferences/${adminKey}`, {
             body: JSON.stringify({ value: { data: 'admin-sensitive' } }),
@@ -778,7 +795,7 @@ describe('Auth', () => {
           createdIDs.push((await publicPref.json()).doc.id)
         })
 
-        afterAll(async () => {
+        test.afterAll(async ({ payload }) => {
           await Promise.all(
             createdIDs.map((id) =>
               payload.delete({ collection: 'payload-preferences', id }).catch(() => {}),
@@ -789,7 +806,7 @@ describe('Auth', () => {
           }
         })
 
-        it('should only return own preferences via REST find', async () => {
+        test('should only return own preferences via REST find', async ({ restClient }) => {
           const res = await restClient.GET('/payload-preferences', {
             headers: { Authorization: `JWT ${publicUserToken}` },
           })
@@ -800,7 +817,10 @@ describe('Auth', () => {
           expect(data.docs.some((doc: any) => doc.user.relationTo === 'users')).toBe(false)
         })
 
-        it('should not delete other collection preferences via REST', async () => {
+        test('should not delete other collection preferences via REST', async ({
+          payload,
+          restClient,
+        }) => {
           const before = await payload.find({
             collection: 'payload-preferences',
             where: { 'user.relationTo': { equals: 'users' } },
@@ -819,7 +839,7 @@ describe('Auth', () => {
           expect((after.docs[0]?.value as any)?.data).toBe('admin-sensitive')
         })
 
-        it('should isolate preferences by user ID and collection', async () => {
+        test('should isolate preferences by user ID and collection', async ({ payload }) => {
           const publicPrefs = await payload.find({
             collection: 'payload-preferences',
             where: { 'user.relationTo': { equals: publicUsersSlug } },
@@ -834,10 +854,13 @@ describe('Auth', () => {
         })
       })
 
-      describe('Account Locking', () => {
+      test.describe('Account Locking', () => {
         const userEmail = 'lock@me.com'
 
-        const tryLogin = async (success?: boolean) => {
+        const tryLogin = async (
+          success?: boolean,
+          { restClient }: { restClient: NextRESTClient },
+        ) => {
           const res = await restClient.POST(`/${slug}/login`, {
             body: JSON.stringify(
               success
@@ -854,7 +877,7 @@ describe('Auth', () => {
           return await res.json()
         }
 
-        beforeAll(async () => {
+        test.beforeEach(async ({ restClient }) => {
           const response = await restClient.POST(`/${slug}/login`, {
             body: JSON.stringify({
               email,
@@ -877,7 +900,7 @@ describe('Auth', () => {
           })
         })
 
-        beforeEach(async () => {
+        test.beforeEach(async ({ payload }) => {
           await payload.db.updateOne({
             collection: slug,
             data: {
@@ -895,10 +918,10 @@ describe('Auth', () => {
         const lockedMessage = 'This user is locked due to having too many failed login attempts.'
         const incorrectMessage = 'The email or password provided is incorrect.'
 
-        it('should lock the user after too many attempts', async () => {
-          const user1 = await tryLogin()
-          const user2 = await tryLogin()
-          const user3 = await tryLogin() // Let it call multiple times, therefore the unlock condition has no bug.
+        test('should lock the user after too many attempts', async ({ payload, restClient }) => {
+          const user1 = await tryLogin(undefined, { restClient })
+          const user2 = await tryLogin(undefined, { restClient })
+          const user3 = await tryLogin(undefined, { restClient }) // Let it call multiple times, therefore the unlock condition has no bug.
 
           expect(user1.errors[0].message).toBe(incorrectMessage)
           expect(user2.errors[0].message).toBe(incorrectMessage)
@@ -920,16 +943,19 @@ describe('Auth', () => {
           expect(loginAttempts).toBe(2)
           expect(lockUntil).toBeDefined()
 
-          const successfulLogin = await tryLogin(true)
+          const successfulLogin = await tryLogin(true, { restClient })
           expect(successfulLogin.errors?.[0].message).toBe(
             'This user is locked due to having too many failed login attempts.',
           )
         })
 
-        it('should lock the user after too many parallel attempts', async () => {
+        test('should lock the user after too many parallel attempts', async ({
+          payload,
+          restClient,
+        }) => {
           const tryLoginAttempts = 100
           const users = await Promise.allSettled(
-            Array.from({ length: tryLoginAttempts }, () => tryLogin()),
+            Array.from({ length: tryLoginAttempts }, () => tryLogin(undefined, { restClient })),
           )
 
           expect(users).toHaveLength(tryLoginAttempts)
@@ -967,19 +993,21 @@ describe('Auth', () => {
           expect(incorrectMessages.length).toBeLessThanOrEqual(2)
           expect(lockedMessages.length).toBeGreaterThanOrEqual(tryLoginAttempts - 2)
 
-          const successfulLogin = await tryLogin(true)
+          const successfulLogin = await tryLogin(true, { restClient })
 
           expect(successfulLogin.errors?.[0].message).toBe(
             'This user is locked due to having too many failed login attempts.',
           )
         })
 
-        it('ensure that login session expires if max login attempts is reached within narrow time-frame', async () => {
+        test('ensure that login session expires if max login attempts is reached within narrow time-frame', async ({
+          restClient,
+        }) => {
           const tryLoginAttempts = 5
 
           // If there are 100 parallel login attempts, 99 incorrect and 1 correct one, we do not want the correct one to be able to consistently be able
           // to login successfully.
-          const user = await tryLogin(true)
+          const user = await tryLogin(true, { restClient })
           const firstMeResponse = await restClient.GET(`/${slug}/me`, {
             headers: {
               Authorization: `JWT ${user.token}`,
@@ -993,7 +1021,9 @@ describe('Auth', () => {
           expect(firstMeData.token).toBeDefined()
           expect(firstMeData.user.email).toBeDefined()
 
-          await Promise.allSettled(Array.from({ length: tryLoginAttempts }, () => tryLogin()))
+          await Promise.allSettled(
+            Array.from({ length: tryLoginAttempts }, () => tryLogin(undefined, { restClient })),
+          )
 
           const secondMeResponse = await restClient.GET(`/${slug}/me`, {
             headers: {
@@ -1009,10 +1039,13 @@ describe('Auth', () => {
           expect(secondMeData.token).not.toBeDefined()
         })
 
-        it('should unlock account once lockUntil period is over', async () => {
+        test('should unlock account once lockUntil period is over', async ({
+          payload,
+          restClient,
+        }) => {
           // Lock user
-          await tryLogin()
-          await tryLogin()
+          await tryLogin(undefined, { restClient })
+          await tryLogin(undefined, { restClient })
 
           const loginAfterLimit = await restClient
             .POST(`/${slug}/login`, {
@@ -1090,7 +1123,7 @@ describe('Auth', () => {
       })
     })
 
-    it('should allow forgot-password by email', async () => {
+    test('should allow forgot-password by email', async ({ restClient }) => {
       // TODO: Spy on payload sendEmail function
       const response = await restClient.POST(`/${slug}/forgot-password`, {
         body: JSON.stringify({
@@ -1102,7 +1135,7 @@ describe('Auth', () => {
       expect(response.status).toBe(200)
     })
 
-    it('should allow reset password', async () => {
+    test('should allow reset password', async ({ payload }) => {
       const token = await payload.forgotPassword({
         collection: 'users',
         data: {
@@ -1125,7 +1158,7 @@ describe('Auth', () => {
       expect(result).toBeTruthy()
     })
 
-    it('should enforce access control on the me route', async () => {
+    test('should enforce access control on the me route', async ({ payload, restClient }) => {
       const user = await payload.create({
         collection: slug,
         data: {
@@ -1172,7 +1205,7 @@ describe('Auth', () => {
       expect(editorMe.user.adminOnlyField).toBeUndefined()
     })
 
-    it('should not allow refreshing an invalid token', async () => {
+    test('should not allow refreshing an invalid token', async ({ restClient }) => {
       const response = await restClient.POST(`/${slug}/refresh-token`, {
         body: JSON.stringify({
           token: 'INVALID',
@@ -1186,14 +1219,14 @@ describe('Auth', () => {
     })
   })
 
-  describe('config defaults', () => {
-    it('should default auth.depth to 0 when the collection does not set it', () => {
+  test.describe('config defaults', () => {
+    test('should default auth.depth to 0 when the collection does not set it', ({ payload }) => {
       expect(payload.collections[publicUsersSlug]?.config.auth.depth).toBe(0)
     })
   })
 
-  describe('disableLocalStrategy', () => {
-    it('should allow create of a user with disableLocalStrategy', async () => {
+  test.describe('disableLocalStrategy', () => {
+    test('should allow create of a user with disableLocalStrategy', async ({ payload }) => {
       const email = 'test@example.com'
       const user = await payload.create({
         collection: partialDisableLocalStrategiesSlug,
@@ -1205,7 +1238,9 @@ describe('Auth', () => {
       expect(user.email).toStrictEqual(email)
     })
 
-    it('should retain fields when auth.disableLocalStrategy.enableFields is true', () => {
+    test('should retain fields when auth.disableLocalStrategy.enableFields is true', ({
+      payload,
+    }) => {
       const authFields = payload.collections[partialDisableLocalStrategiesSlug].config.fields
 
         .filter((field) => 'name' in field && field.name)
@@ -1225,7 +1260,7 @@ describe('Auth', () => {
       ])
     })
 
-    it('should prevent login of user with disableLocalStrategy.', async () => {
+    test('should prevent login of user with disableLocalStrategy.', async ({ payload }) => {
       await payload.create({
         collection: partialDisableLocalStrategiesSlug,
         data: {
@@ -1245,7 +1280,7 @@ describe('Auth', () => {
       ).rejects.toThrow('You are not allowed to perform this action.')
     })
 
-    it('rest - should prevent login', async () => {
+    test('rest - should prevent login', async ({ restClient }) => {
       const response = await restClient.POST(`/${partialDisableLocalStrategiesSlug}/login`, {
         body: JSON.stringify({
           email,
@@ -1256,7 +1291,7 @@ describe('Auth', () => {
       expect(response.status).toBe(403)
     })
 
-    it('should allow to use password field', async () => {
+    test('should allow to use password field', async ({ payload }) => {
       const doc = await payload.create({
         collection: 'disable-local-strategy-password',
         data: { password: '123' },
@@ -1271,8 +1306,8 @@ describe('Auth', () => {
     })
   })
 
-  describe('API Key', () => {
-    it('should authenticate via the correct API key user', async () => {
+  test.describe('API Key', () => {
+    test('should authenticate via the correct API key user', async ({ payload, restClient }) => {
       const usersQuery = await payload.find({
         collection: apiKeysSlug,
       })
@@ -1298,7 +1333,10 @@ describe('Auth', () => {
       expect(fail.status).toStrictEqual(404)
     })
 
-    it('should allow authentication with an API key saved with sha1', async () => {
+    test('should allow authentication with an API key saved with sha1', async ({
+      payload,
+      restClient,
+    }) => {
       const usersQuery = await payload.find({
         collection: apiKeysSlug,
       })
@@ -1329,7 +1367,9 @@ describe('Auth', () => {
       expect(response.id).toStrictEqual(user.id)
     })
 
-    it('should not remove an API key from a user when updating other fields', async () => {
+    test('should not remove an API key from a user when updating other fields', async ({
+      payload,
+    }) => {
       const apiKey = uuid()
       const user = await payload.create({
         collection: apiKeysSlug,
@@ -1360,7 +1400,7 @@ describe('Auth', () => {
       expect(userResult.docs[0].apiKey).toStrictEqual(user.apiKey)
     })
 
-    it('should disable api key after updating apiKey: null', async () => {
+    test('should disable api key after updating apiKey: null', async ({ payload, restClient }) => {
       const apiKey = uuid()
       const user = await payload.create({
         collection: apiKeysSlug,
@@ -1391,7 +1431,10 @@ describe('Auth', () => {
       expect(response.user).toBeNull()
     })
 
-    it('should disable api key after updating with enableAPIKey:false', async () => {
+    test('should disable api key after updating with enableAPIKey:false', async ({
+      payload,
+      restClient,
+    }) => {
       const apiKey = uuid()
       const user = await payload.create({
         collection: apiKeysSlug,
@@ -1423,8 +1466,8 @@ describe('Auth', () => {
     })
   })
 
-  describe('Local API', () => {
-    it('should login via the local API', async () => {
+  test.describe('Local API', () => {
+    test('should login via the local API', async ({ payload }) => {
       const authenticated = await payload.login({
         collection: slug,
         data: {
@@ -1436,7 +1479,7 @@ describe('Auth', () => {
       expect(authenticated.token).toBeTruthy()
     })
 
-    it('should return collection property on user documents', async () => {
+    test('should return collection property on user documents', async ({ payload }) => {
       const testEmail = `collection-test-${Date.now()}@example.com`
 
       const createdUser = await payload.create({
@@ -1480,7 +1523,7 @@ describe('Auth', () => {
       expect(deletedUser.collection).toBe(slug)
     })
 
-    it('should return collection property on api-keys auth collection', async () => {
+    test('should return collection property on api-keys auth collection', async ({ payload }) => {
       const createdApiKey = await payload.create({
         collection: apiKeysSlug,
         data: {
@@ -1520,7 +1563,7 @@ describe('Auth', () => {
       expect(deletedApiKey.collection).toBe(apiKeysSlug)
     })
 
-    it('should forget and reset password', async () => {
+    test('should forget and reset password', async ({ payload }) => {
       const forgot = await payload.forgotPassword({
         collection: 'users',
         data: {
@@ -1540,7 +1583,9 @@ describe('Auth', () => {
       expect(reset.user.email).toStrictEqual('dev@payloadcms.com')
     })
 
-    it('should not allow reset password if forgotPassword expiration token is expired', async () => {
+    test('should not allow reset password if forgotPassword expiration token is expired', async ({
+      payload,
+    }) => {
       // Mock Date.now() to simulate the forgotPassword call happening 6 minutes ago (current expiration is set to 5 minutes)
       const originalDateNow = Date.now
       const mockDateNow = vitest.spyOn(Date, 'now').mockImplementation(() => {
@@ -1575,8 +1620,12 @@ describe('Auth', () => {
       ).rejects.toThrow('Token is either invalid or has expired.')
     })
 
-    describe('Login Attempts', () => {
-      async function attemptLogin(email: string, password: string) {
+    test.describe('Login Attempts', () => {
+      async function attemptLogin(
+        email: string,
+        password: string,
+        { payload }: { payload: Payload },
+      ) {
         return payload.login({
           collection: slug,
           data: {
@@ -1587,31 +1636,29 @@ describe('Auth', () => {
         })
       }
 
-      it('should reset the login attempts after a successful login', async () => {
+      test('should reset the login attempts after a successful login', async ({ payload }) => {
         // fail 1
         try {
-          const failedLogin = await attemptLogin(devUser.email, 'wrong-password')
+          const failedLogin = await attemptLogin(devUser.email, 'wrong-password', { payload })
           expect(failedLogin).toBeUndefined()
         } catch (error) {
-          // eslint-disable-next-line vitest/no-conditional-expect
           expect((error as Error).message).toBe('The email or password provided is incorrect.')
         }
 
         // successful login 1
-        const successfulLogin = await attemptLogin(devUser.email, devUser.password)
+        const successfulLogin = await attemptLogin(devUser.email, devUser.password, { payload })
         expect(successfulLogin).toBeDefined()
 
         // fail 2
         try {
-          const failedLogin = await attemptLogin(devUser.email, 'wrong-password')
+          const failedLogin = await attemptLogin(devUser.email, 'wrong-password', { payload })
           expect(failedLogin).toBeUndefined()
         } catch (error) {
-          // eslint-disable-next-line vitest/no-conditional-expect
           expect((error as Error).message).toBe('The email or password provided is incorrect.')
         }
 
         // successful login 2 without exceeding attempts
-        const successfulLogin2 = await attemptLogin(devUser.email, devUser.password)
+        const successfulLogin2 = await attemptLogin(devUser.email, devUser.password, { payload })
         expect(successfulLogin2).toBeDefined()
 
         const user = await payload.findByID({
@@ -1625,32 +1672,29 @@ describe('Auth', () => {
         expect(user.lockUntil).toBeNull()
       })
 
-      it('should lock the user after too many failed login attempts', async () => {
+      test('should lock the user after too many failed login attempts', async ({ payload }) => {
         const now = new Date()
         // fail 1
         try {
-          const failedLogin = await attemptLogin(devUser.email, 'wrong-password')
+          const failedLogin = await attemptLogin(devUser.email, 'wrong-password', { payload })
           expect(failedLogin).toBeUndefined()
         } catch (error) {
-          // eslint-disable-next-line vitest/no-conditional-expect
           expect((error as Error).message).toBe('The email or password provided is incorrect.')
         }
 
         // fail 2
         try {
-          const failedLogin = await attemptLogin(devUser.email, 'wrong-password')
+          const failedLogin = await attemptLogin(devUser.email, 'wrong-password', { payload })
           expect(failedLogin).toBeUndefined()
         } catch (error) {
-          // eslint-disable-next-line vitest/no-conditional-expect
           expect((error as Error).message).toBe('The email or password provided is incorrect.')
         }
 
         // fail 3
         try {
-          const failedLogin = await attemptLogin(devUser.email, 'wrong-password')
+          const failedLogin = await attemptLogin(devUser.email, 'wrong-password', { payload })
           expect(failedLogin).toBeUndefined()
         } catch (error) {
-          // eslint-disable-next-line vitest/no-conditional-expect
           expect((error as Error).message).toBe(
             'This user is locked due to having too many failed login attempts.',
           )
@@ -1673,10 +1717,10 @@ describe('Auth', () => {
         expect(user!.loginAttempts).toBe(2)
         expect(user!.lockUntil).toBeDefined()
         expect(typeof user!.lockUntil).toBe('string')
-        expect(new Date(user!.lockUntil!).getTime()).toBeGreaterThan(now.getTime())
+        expect(new Date(user!.lockUntil).getTime()).toBeGreaterThan(now.getTime())
       })
 
-      it('should allow force unlocking of a user', async () => {
+      test('should allow force unlocking of a user', async ({ payload }) => {
         await payload.unlock({
           collection: slug,
           data: {
@@ -1705,7 +1749,7 @@ describe('Auth', () => {
     })
   })
 
-  describe('Email - format validation', () => {
+  test.describe('Email - format validation', () => {
     const mockT = vitest.fn((key) => key) // Mocks translation function
 
     const mockContext: Parameters<EmailFieldValidation>[1] = {
@@ -1724,7 +1768,7 @@ describe('Auth', () => {
       required: true,
       siblingData: {},
     }
-    it('should allow standard formatted emails', () => {
+    test('should allow standard formatted emails', () => {
       expect(emailValidation('user@example.com', mockContext)).toBe(true)
       expect(emailValidation('user.name+alias@example.co.uk', mockContext)).toBe(true)
       expect(emailValidation('user-name@example.org', mockContext)).toBe(true)
@@ -1732,43 +1776,43 @@ describe('Auth', () => {
       expect(emailValidation("user'payload@example.org", mockContext)).toBe(true)
     })
 
-    it('should not allow emails with double quotes', () => {
+    test('should not allow emails with double quotes', () => {
       expect(emailValidation('"user"@example.com', mockContext)).toBe('validation:emailAddress')
       expect(emailValidation('user@"example.com"', mockContext)).toBe('validation:emailAddress')
       expect(emailValidation('"user@example.com"', mockContext)).toBe('validation:emailAddress')
     })
 
-    it('should not allow emails with spaces', () => {
+    test('should not allow emails with spaces', () => {
       expect(emailValidation('user @example.com', mockContext)).toBe('validation:emailAddress')
       expect(emailValidation('user@ example.com', mockContext)).toBe('validation:emailAddress')
       expect(emailValidation('user name@example.com', mockContext)).toBe('validation:emailAddress')
     })
 
-    it('should not allow emails with consecutive dots', () => {
+    test('should not allow emails with consecutive dots', () => {
       expect(emailValidation('user..name@example.com', mockContext)).toBe('validation:emailAddress')
       expect(emailValidation('user@example..com', mockContext)).toBe('validation:emailAddress')
     })
 
-    it('should not allow emails with invalid domains', () => {
+    test('should not allow emails with invalid domains', () => {
       expect(emailValidation('user@example', mockContext)).toBe('validation:emailAddress')
       expect(emailValidation('user@example..com', mockContext)).toBe('validation:emailAddress')
       expect(emailValidation('user@example.c', mockContext)).toBe('validation:emailAddress')
     })
 
-    it('should not allow domains starting or ending with a hyphen', () => {
+    test('should not allow domains starting or ending with a hyphen', () => {
       expect(emailValidation('user@-example.com', mockContext)).toBe('validation:emailAddress')
       expect(emailValidation('user@example-.com', mockContext)).toBe('validation:emailAddress')
     })
-    it('should not allow emails that start with dot', () => {
+    test('should not allow emails that start with dot', () => {
       expect(emailValidation('.user@example.com', mockContext)).toBe('validation:emailAddress')
     })
-    it('should not allow emails that have a comma', () => {
+    test('should not allow emails that have a comma', () => {
       expect(emailValidation('user,name@example.com', mockContext)).toBe('validation:emailAddress')
     })
   })
 
-  describe('Sessions', () => {
-    it('should set a session on a user', async () => {
+  test.describe('Sessions', () => {
+    test('should set a session on a user', async ({ payload }) => {
       const authenticated = await payload.login({
         collection: slug,
         data: {
@@ -1801,7 +1845,10 @@ describe('Auth', () => {
       expect(matchedSession?.expiresAt).toBeDefined()
     })
 
-    it('should log out a user and delete only the session being logged out', async () => {
+    test('should log out a user and delete only the session being logged out', async ({
+      payload,
+      restClient,
+    }) => {
       const authenticated = await payload.login({
         collection: slug,
         data: {
@@ -1848,7 +1895,7 @@ describe('Auth', () => {
       expect(existingSession?.id).toStrictEqual(decoded2.sid)
     })
 
-    it('should refresh an existing session', async () => {
+    test('should refresh an existing session', async ({ payload, restClient }) => {
       const authenticated = await payload.login({
         collection: slug,
         data: {
@@ -1900,7 +1947,10 @@ describe('Auth', () => {
       )
     })
 
-    it('should reject a refresh when its session is revoked after authentication', async () => {
+    test('should reject a refresh when its session is revoked after authentication', async ({
+      payload,
+      restClient,
+    }) => {
       const authenticated = await payload.login({
         collection: slug,
         data: {
@@ -1934,7 +1984,10 @@ describe('Auth', () => {
       ).rejects.toBeInstanceOf(Forbidden)
     })
 
-    it('should not authenticate a user who has a JWT but its session has been terminated', async () => {
+    test('should not authenticate a user who has a JWT but its session has been terminated', async ({
+      payload,
+      restClient,
+    }) => {
       const authenticated = await payload.login({
         collection: slug,
         data: {
@@ -1972,7 +2025,7 @@ describe('Auth', () => {
       expect(meQuery.user).toBeNull()
     })
 
-    it('should clean up expired sessions when logging in', async () => {
+    test('should clean up expired sessions when logging in', async ({ payload }) => {
       const userWithExpiredSession = await payload.create({
         collection: slug,
         data: {
@@ -2011,7 +2064,7 @@ describe('Auth', () => {
       expect(user2.docs[0]?.sessions).toHaveLength(1)
     })
 
-    it('should not update updatedAt when creating a session', async () => {
+    test('should not update updatedAt when creating a session', async ({ payload }) => {
       // Create a user
       const testUser = await payload.create({
         collection: slug,
@@ -2052,7 +2105,7 @@ describe('Auth', () => {
       expect(userAfterLogin?.sessions?.length).toBeGreaterThan(0)
     })
 
-    it('should not update updatedAt when logging out', async () => {
+    test('should not update updatedAt when logging out', async ({ payload, restClient }) => {
       // Create and login
       const testUser = await payload.create({
         collection: slug,
@@ -2106,7 +2159,10 @@ describe('Auth', () => {
       expect(userAfterLogout?.updatedAt).toEqual(updatedAtAfterLogin)
     })
 
-    it('should not update updatedAt when refreshing a session', async () => {
+    test('should not update updatedAt when refreshing a session', async ({
+      payload,
+      restClient,
+    }) => {
       // Create and login
       const testUser = await payload.create({
         collection: slug,
@@ -2161,7 +2217,7 @@ describe('Auth', () => {
     })
   })
 
-  describe('rotateSecret - PAYLOAD_SECRET rotation', () => {
+  test.describe('rotateSecret - PAYLOAD_SECRET rotation', () => {
     const OLD_SECRET = rotateSecretOldSecret
     const createdIDs: Array<{ collection: string; id: number | string }> = []
 
@@ -2182,15 +2238,18 @@ describe('Auth', () => {
     // Writes a v1-envelope apiKey/apiKeyIndex encrypted under the old secret
     // directly at the DB layer, bypassing field hooks, to simulate data left
     // over from before a rotation (already on the v1 envelope, previous key).
-    const seedPreRotationV1User = async ({
-      collection = rotateSecretSlug,
-      data = {},
-      rawApiKey,
-    }: {
-      collection?: string
-      data?: Record<string, unknown>
-      rawApiKey: string
-    }) => {
+    const seedPreRotationV1User = async (
+      {
+        collection = rotateSecretSlug,
+        data = {},
+        rawApiKey,
+      }: {
+        collection?: string
+        data?: Record<string, unknown>
+        rawApiKey: string
+      },
+      { payload }: { payload: Payload },
+    ) => {
       const user = await payload.create({
         collection,
         data: { apiKey: rawApiKey, enableAPIKey: true, ...data },
@@ -2212,7 +2271,10 @@ describe('Auth', () => {
 
     // Seeds a row whose apiKeyIndex matches neither the old nor the current
     // secret, forcing rotateSecret to fail-closed.
-    const seedCorruptUser = async (collection = rotateSecretSlug) => {
+    const seedCorruptUser = async (
+      collection = rotateSecretSlug,
+      { payload }: { payload: Payload },
+    ) => {
       const rawApiKey = uuid()
       const user = await payload.create({
         collection,
@@ -2233,7 +2295,7 @@ describe('Auth', () => {
       return user
     }
 
-    afterEach(async () => {
+    test.afterEach(async ({ payload }) => {
       const idsByCollection = new Map<string, Array<number | string>>()
       for (const { id, collection } of createdIDs) {
         idsByCollection.set(collection, [...(idsByCollection.get(collection) ?? []), id])
@@ -2244,9 +2306,11 @@ describe('Auth', () => {
       createdIDs.length = 0
     })
 
-    it('should re-key apiKey and apiKeyIndex from the old secret to the current secret', async () => {
+    test('should re-key apiKey and apiKeyIndex from the old secret to the current secret', async ({
+      payload,
+    }) => {
       const rawApiKey = uuid()
-      const user = await seedPreRotationV1User({ rawApiKey })
+      const user = await seedPreRotationV1User({ rawApiKey }, { payload })
 
       const result = await rotateSecret({
         collections: [rotateSecretSlug],
@@ -2265,7 +2329,7 @@ describe('Auth', () => {
       expect(raw.apiKeyIndex).toBe(indexFor(payload.config.secret, rawApiKey))
     })
 
-    it('reencrypt should re-key a value to the active secret', () => {
+    test('reencrypt should re-key a value to the active secret', ({ payload }) => {
       const rawValue = 'super-sensitive-value'
       const oldCiphertext = payload.encrypt(rawValue, { secret: OLD_SECRET })
 
@@ -2280,9 +2344,12 @@ describe('Auth', () => {
       expect(newKeyId).toBe(payload.encryptionKeyring.active.keyId)
     })
 
-    it('should authenticate an api key indexed under a previous secret, then re-key it', async () => {
+    test('should authenticate an api key indexed under a previous secret, then re-key it', async ({
+      payload,
+      restClient,
+    }) => {
       const rawApiKey = uuid()
-      const user = await seedPreRotationV1User({ rawApiKey })
+      const user = await seedPreRotationV1User({ rawApiKey }, { payload })
 
       const authHeaders = { Authorization: `${rotateSecretSlug} API-Key ${rawApiKey}` }
 
@@ -2308,9 +2375,9 @@ describe('Auth', () => {
       expect(raw.apiKeyIndex).toBe(indexFor(payload.config.secret, rawApiKey))
     })
 
-    it('should be idempotent and skip already-migrated rows on re-run', async () => {
+    test('should be idempotent and skip already-migrated rows on re-run', async ({ payload }) => {
       const rawApiKey = uuid()
-      await seedPreRotationV1User({ rawApiKey })
+      await seedPreRotationV1User({ rawApiKey }, { payload })
 
       await rotateSecret({ collections: [rotateSecretSlug], oldSecret: OLD_SECRET, payload })
       const rerun = await rotateSecret({
@@ -2322,14 +2389,16 @@ describe('Auth', () => {
       expect(rerun).toEqual({ migrated: 0, skipped: 1 })
     })
 
-    it('should keep earlier migrations after an abort and complete on a fixed re-run', async () => {
+    test('should keep earlier migrations after an abort and complete on a fixed re-run', async ({
+      payload,
+    }) => {
       const rawApiKey = uuid()
       // The migratable row and the corrupt row live in different collections, and
       // rotateSecret drains collections in the order passed. So the first
       // collection is fully re-keyed before the second aborts - deterministic for
       // any primary-key type (UUID ids don't order by creation like integers do).
-      const migratable = await seedPreRotationV1User({ rawApiKey })
-      const corrupt = await seedCorruptUser(rotateSecretSecondarySlug)
+      const migratable = await seedPreRotationV1User({ rawApiKey }, { payload })
+      const corrupt = await seedCorruptUser(rotateSecretSecondarySlug, { payload })
 
       const rotateArgs = {
         collections: [rotateSecretSlug, rotateSecretSecondarySlug],
@@ -2353,9 +2422,9 @@ describe('Auth', () => {
       expect(rerun).toEqual({ migrated: 0, skipped: 1 })
     })
 
-    it('should abort without writing when the old secret is wrong', async () => {
+    test('should abort without writing when the old secret is wrong', async ({ payload }) => {
       const rawApiKey = uuid()
-      const user = await seedPreRotationV1User({ rawApiKey })
+      const user = await seedPreRotationV1User({ rawApiKey }, { payload })
 
       const before = await payload.db.findOne<any>({
         collection: rotateSecretSlug,
@@ -2379,9 +2448,9 @@ describe('Auth', () => {
       expect(after.apiKeyIndex).toBe(before.apiKeyIndex)
     })
 
-    it('should not modify data during a dry run', async () => {
+    test('should not modify data during a dry run', async ({ payload }) => {
       const rawApiKey = uuid()
-      const user = await seedPreRotationV1User({ rawApiKey })
+      const user = await seedPreRotationV1User({ rawApiKey }, { payload })
 
       const result = await rotateSecret({
         collections: [rotateSecretSlug],
@@ -2402,7 +2471,9 @@ describe('Auth', () => {
       expect(payload.decrypt(raw.apiKey, { secret: OLD_SECRET })).toBe(rawApiKey)
     })
 
-    it('should re-key and upgrade a legacy aes-256-ctr value to the v1 envelope', async () => {
+    test('should re-key and upgrade a legacy aes-256-ctr value to the v1 envelope', async ({
+      payload,
+    }) => {
       const rawApiKey = uuid()
       const user = await payload.create({
         collection: rotateSecretSlug,
@@ -2438,7 +2509,9 @@ describe('Auth', () => {
       expect(raw.apiKeyIndex).toBe(indexFor(payload.config.secret, rawApiKey))
     })
 
-    it('should mask (not throw) an apiKey encrypted under a secret not in the keyring', async () => {
+    test('should mask (not throw) an apiKey encrypted under a secret not in the keyring', async ({
+      payload,
+    }) => {
       const rawApiKey = uuid()
       const user = await payload.create({
         collection: rotateSecretSlug,
@@ -2459,16 +2532,19 @@ describe('Auth', () => {
       expect(doc.apiKey).toBeNull()
     })
 
-    it('should leave password logins working on a rotated collection', async () => {
+    test('should leave password logins working on a rotated collection', async ({ payload }) => {
       const rawApiKey = uuid()
       const loginEmail = 'rotate-login@example.com'
       const loginPassword = 'Password123'
 
-      await seedPreRotationV1User({
-        collection: rotateSecretLoginSlug,
-        data: { email: loginEmail, password: loginPassword },
-        rawApiKey,
-      })
+      await seedPreRotationV1User(
+        {
+          collection: rotateSecretLoginSlug,
+          data: { email: loginEmail, password: loginPassword },
+          rawApiKey,
+        },
+        { payload },
+      )
 
       const result = await rotateSecret({
         collections: [rotateSecretLoginSlug],
@@ -2486,9 +2562,11 @@ describe('Auth', () => {
       expect(token).toBeDefined()
     })
 
-    it('should skip rows that have an apiKey ciphertext but no apiKeyIndex', async () => {
+    test('should skip rows that have an apiKey ciphertext but no apiKeyIndex', async ({
+      payload,
+    }) => {
       const rawApiKey = uuid()
-      const user = await seedPreRotationV1User({ rawApiKey })
+      const user = await seedPreRotationV1User({ rawApiKey }, { payload })
 
       // Simulate a disabled API key: ciphertext present, index cleared.
       await payload.db.updateOne({
@@ -2509,7 +2587,7 @@ describe('Auth', () => {
     })
   })
 
-  describe('encryption envelope (v1) and keyring', () => {
+  test.describe('encryption envelope (v1) and keyring', () => {
     const legacyCtrEncrypt = (value: string, secret: string) => {
       const key = crypto.createHash('sha256').update(secret).digest('hex').slice(0, 32)
       const iv = crypto.randomBytes(16)
@@ -2517,7 +2595,7 @@ describe('Auth', () => {
       return iv.toString('hex') + cipher.update(value, 'utf8', 'hex') + cipher.final('hex')
     }
 
-    it('should encrypt with the v1 aes-256-gcm envelope and round-trip', () => {
+    test('should encrypt with the v1 aes-256-gcm envelope and round-trip', ({ payload }) => {
       const encrypted = payload.encrypt('secret-value')
 
       expect(encrypted.startsWith('v1:')).toBe(true)
@@ -2525,14 +2603,14 @@ describe('Auth', () => {
       expect(payload.decrypt(encrypted)).toBe('secret-value')
     })
 
-    it('should still decrypt legacy aes-256-ctr values', () => {
+    test('should still decrypt legacy aes-256-ctr values', ({ payload }) => {
       const legacy = legacyCtrEncrypt('legacy-value', payload.config.secret)
 
       expect(legacy.startsWith('v1:')).toBe(false)
       expect(payload.decrypt(legacy)).toBe('legacy-value')
     })
 
-    it('should throw when a v1 value has been tampered with', () => {
+    test('should throw when a v1 value has been tampered with', ({ payload }) => {
       const encrypted = payload.encrypt('tamper-me')
       const lastChar = encrypted.slice(-1)
       const tampered = encrypted.slice(0, -1) + (lastChar === 'a' ? 'b' : 'a')
@@ -2540,7 +2618,7 @@ describe('Auth', () => {
       expect(() => payload.decrypt(tampered)).toThrow()
     })
 
-    it('should throw when no keyring secret matches the value key id', () => {
+    test('should throw when no keyring secret matches the value key id', ({ payload }) => {
       const encrypted = payload.encrypt('x', { secret: 'a-secret-not-in-the-keyring' })
 
       expect(() => payload.decrypt(encrypted)).toThrow(/no secret in the keyring/)
@@ -2556,7 +2634,10 @@ describe('Auth', () => {
       return `${data}.${signature}`
     }
 
-    it('should verify a JWT signed under a previous secret, and reject an unknown secret', async () => {
+    test('should verify a JWT signed under a previous secret, and reject an unknown secret', async ({
+      payload,
+      restClient,
+    }) => {
       const { token, user } = await payload.login({ collection: slug, data: { email, password } })
 
       const { exp: _exp, iat: _iat, ...claims } = jwtDecode<Record<string, unknown>>(token)

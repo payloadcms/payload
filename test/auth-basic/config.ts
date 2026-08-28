@@ -6,18 +6,21 @@ const dirname = path.dirname(filename)
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 
 export default buildConfigWithDefaults({
-  admin: {
-    autoLogin: false,
-    importMap: {
-      baseDir: path.resolve(dirname),
-    },
-    components: {
-      views: {
-        dashboard: { Component: './Dashboard.js' },
+  suite: 'auth-basic',
+  config: {
+    admin: {
+      autoLogin: false,
+      importMap: {
+        baseDir: path.resolve(dirname),
+      },
+      components: {
+        views: {
+          dashboard: { Component: './Dashboard.js' },
+        },
       },
     },
-  },
-  typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
+    typescript: {
+      outputFile: path.resolve(dirname, 'payload-types.ts'),
+    },
   },
 })

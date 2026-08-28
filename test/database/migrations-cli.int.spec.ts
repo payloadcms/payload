@@ -8,7 +8,7 @@
 import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
 import { removeFiles } from '../__helpers/shared/removeFiles.js'
@@ -19,16 +19,16 @@ const dirname = path.dirname(filename)
 
 const migrationDir = path.join(dirname, './migrations')
 
-describe('migrations CLI', () => {
-  afterEach(() => {
+test.suite({})('migrations CLI', () => {
+  test.afterEach(() => {
     removeFiles(migrationDir)
   })
 
-  beforeEach(() => {
+  test.beforeEach(() => {
     removeFiles(migrationDir)
   })
 
-  it('should create migration from external file path via CLI (plugin predefined migration)', async () => {
+  test('should create migration from external file path via CLI (plugin predefined migration)', async () => {
     // Tests: Absolute file path imports (goes through Path 2 in getPredefinedMigration.ts)
     // Example: pnpm payload migrate:create --file /absolute/path/to/migration.ts
 
@@ -95,7 +95,7 @@ describe('migrations CLI', () => {
     },
   )
 
-  it('should create migration from package.json export (non-db package)', async () => {
+  test('should create migration from package.json export (non-db package)', async () => {
     // Tests: Path 2 in getPredefinedMigration.ts - module specifier via package.json exports
     // Packages WITHOUT @payloadcms/db-* prefix MUST use package.json exports
     // Example: pnpm payload migrate:create --file payload/__testing__/predefinedMigration

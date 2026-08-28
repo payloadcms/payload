@@ -84,7 +84,6 @@ function isUser(user?: any): user is {
 export const getConfig: () => Partial<Config> = () => ({
   admin: {
     autoLogin: false,
-    user: 'users',
     components: {
       views: {
         dashboard: {
@@ -96,14 +95,15 @@ export const getConfig: () => Partial<Config> = () => ({
     importMap: {
       baseDir: path.resolve(dirname),
     },
+    user: 'users',
   },
   blocks: [
     {
       slug: 'titleblock',
       fields: [
         {
-          type: 'text',
           name: 'title',
+          type: 'text',
         },
       ],
     },
@@ -590,8 +590,8 @@ export const getConfig: () => Partial<Config> = () => ({
         {
           name: 'hiddenWithDefault',
           type: 'text',
-          hidden: true,
           defaultValue: 'default value',
+          hidden: true,
         },
       ],
       versions: false,
@@ -657,25 +657,25 @@ export const getConfig: () => Partial<Config> = () => ({
     {
       slug: 'fields-and-top-access',
       access: {
-        readVersions: () => ({
-          'version.secret': {
-            equals: 'will-success-access-read',
-          },
-        }),
         read: () => ({
           secret: {
             equals: 'will-success-access-read',
           },
         }),
+        readVersions: () => ({
+          'version.secret': {
+            equals: 'will-success-access-read',
+          },
+        }),
       },
-      versions: { drafts: true },
       fields: [
         {
-          type: 'text',
           name: 'secret',
+          type: 'text',
           access: { read: () => false },
         },
       ],
+      versions: { drafts: true },
     },
     BlocksFieldAccess,
     Disabled,
@@ -715,6 +715,13 @@ export const getConfig: () => Partial<Config> = () => ({
       slug: 'where-cache-same',
       access: {
         // All operations return the same where query
+        create: () => true,
+        delete: ({ req: { user } }) => {
+          if (isUser(user) && user.roles?.includes('admin')) {
+            return { userRole: { equals: 'admin' } }
+          }
+          return false
+        },
         read: ({ req: { user } }) => {
           if (isUser(user) && user.roles?.includes('admin')) {
             return { userRole: { equals: 'admin' } }
@@ -727,13 +734,6 @@ export const getConfig: () => Partial<Config> = () => ({
           }
           return false
         },
-        delete: ({ req: { user } }) => {
-          if (isUser(user) && user.roles?.includes('admin')) {
-            return { userRole: { equals: 'admin' } }
-          }
-          return false
-        },
-        create: () => true,
       },
       fields: [
         {
@@ -755,6 +755,13 @@ export const getConfig: () => Partial<Config> = () => ({
       slug: 'where-cache-unique',
       access: {
         // Each operation returns a unique where query
+        create: () => true,
+        delete: ({ req: { user } }) => {
+          if (isUser(user) && user.roles?.includes('admin')) {
+            return { deleteRole: { equals: 'admin' } }
+          }
+          return false
+        },
         read: ({ req: { user } }) => {
           if (isUser(user) && user.roles?.includes('admin')) {
             return { readRole: { equals: 'admin' } }
@@ -767,13 +774,6 @@ export const getConfig: () => Partial<Config> = () => ({
           }
           return false
         },
-        delete: ({ req: { user } }) => {
-          if (isUser(user) && user.roles?.includes('admin')) {
-            return { deleteRole: { equals: 'admin' } }
-          }
-          return false
-        },
-        create: () => true,
       },
       fields: [
         {
@@ -940,208 +940,207 @@ export const getConfig: () => Partial<Config> = () => ({
       versions: false,
     },
   ],
-  onInit: async (payload) => {
-    await payload.create({
-      collection: 'users',
-      data: {
-        email: devUser.email,
-        password: devUser.password,
-      },
-    })
-
-    await payload.create({
-      collection: 'users',
-      data: {
-        email: nonAdminEmail,
-        password: 'test',
-      },
-    })
-
-    // Regular user - can access admin panel but has limited delete permissions
-    await payload.create({
-      collection: 'users',
-      data: {
-        email: regularUserEmail,
-        password: 'test',
-        roles: ['user'],
-      },
-    })
-
-    await payload.create({
-      collection: publicUsersSlug,
-      data: {
-        email: publicUserEmail,
-        password: 'test',
-      },
-    })
-
-    await payload.create({
-      collection: slug,
-      data: {
-        restrictedField: 'restricted',
-      },
-    })
-
-    await payload.create({
-      collection: readOnlySlug,
-      data: {
-        name: 'read-only',
-      },
-    })
-
-    await payload.create({
-      collection: blocksFieldAccessSlug,
-      data: {
-        title: 'Blocks Field Access Test Document',
-        editableBlocks: [
-          {
-            blockType: 'testBlock',
-            title: 'Editable Block',
-            content: 'This block should be fully editable',
-          },
-        ],
-        readOnlyBlocks: [
-          {
-            blockType: 'testBlock2',
-            title: 'Read-Only Block',
-            content: 'This block should be read-only due to field access control',
-          },
-        ],
-        editableBlockRefs: [
-          {
-            blockType: 'titleblock',
-            title: 'Editable Block Reference',
-          },
-        ],
-        readOnlyBlockRefs: [
-          {
-            blockType: 'titleblock',
-            title: 'Read-Only Block Reference',
-          },
-        ],
-        tabReadOnlyTest: {
-          tabReadOnlyBlocks: [
-            {
-              blockType: 'testBlock3',
-              title: 'Tab Read-Only Block',
-              content: 'This block is read-only and inside a tab',
-            },
-          ],
-          tabReadOnlyBlockRefs: [
-            {
-              blockType: 'titleblock',
-              title: 'Tab Read-Only Block Reference',
-            },
-          ],
-        },
-      },
-    })
-
-    await payload.create({
-      collection: restrictedVersionsSlug,
-      data: {
-        name: 'versioned',
-      },
-    })
-
-    await payload.create({
-      collection: siblingDataSlug,
-      data: {
-        array: [
-          {
-            allowPublicReadability: true,
-            text: firstArrayText,
-          },
-          {
-            allowPublicReadability: false,
-            text: secondArrayText,
-          },
-        ],
-      },
-    })
-
-    await payload.updateGlobal({
-      slug: userRestrictedGlobalSlug,
-      data: {
-        name: 'dev@payloadcms.com',
-      },
-    })
-
-    await payload.create({
-      collection: 'regression1',
-      data: {
-        richText4: buildEditorState<DefaultNodeTypes>({ text: 'Text1' }),
-        array: [{ art: buildEditorState<DefaultNodeTypes>({ text: 'Text2' }) }],
-        arrayWithAccessFalse: [
-          { richText6: buildEditorState<DefaultNodeTypes>({ text: 'Text3' }) },
-        ],
-        group1: {
-          text: 'Text4',
-          richText1: buildEditorState<DefaultNodeTypes>({ text: 'Text5' }),
-        },
-        blocks: [
-          {
-            blockType: 'myBlock3',
-            richText7: buildEditorState<DefaultNodeTypes>({ text: 'Text6' }),
-            blockName: 'My Block 1',
-          },
-        ],
-        blocks3: [
-          {
-            blockType: 'myBlock2',
-            richText5: buildEditorState<DefaultNodeTypes>({ text: 'Text7' }),
-            blockName: 'My Block 2',
-          },
-        ],
-        tab1: {
-          richText2: buildEditorState<DefaultNodeTypes>({ text: 'Text8' }),
-          blocks2: [
-            {
-              blockType: 'myBlock',
-              richText3: buildEditorState<DefaultNodeTypes>({ text: 'Text9' }),
-              blockName: 'My Block 3',
-            },
-          ],
-        },
-      },
-    })
-
-    await payload.create({
-      collection: 'regression2',
-      data: {
-        array: [
-          {
-            richText2: buildEditorState<DefaultNodeTypes>({ text: 'Text1' }),
-          },
-        ],
-        group: {
-          text: 'Text2',
-          richText1: buildEditorState<DefaultNodeTypes>({ text: 'Text3' }),
-        },
-      },
-    })
-
-    // Seed read-restricted collection
-    await seedReadRestricted(payload)
-
-    // Seed trash access control collections
-    await payload.create({
-      collection: differentiatedTrashSlug,
-      data: {
-        title: 'Differentiated Doc 1',
-        _status: 'published',
-      },
-    })
-
-    await payload.create({
-      collection: restrictedTrashSlug,
-      data: {
-        title: 'Restricted Doc 1',
-        _status: 'published',
-      },
-    })
-  },
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })
+
+export const seed: NonNullable<Config['onInit']> = async (payload) => {
+  await payload.create({
+    collection: 'users',
+    data: {
+      email: devUser.email,
+      password: devUser.password,
+    },
+  })
+
+  await payload.create({
+    collection: 'users',
+    data: {
+      email: nonAdminEmail,
+      password: 'test',
+    },
+  })
+
+  // Regular user - can access admin panel but has limited delete permissions
+  await payload.create({
+    collection: 'users',
+    data: {
+      email: regularUserEmail,
+      password: 'test',
+      roles: ['user'],
+    },
+  })
+
+  await payload.create({
+    collection: publicUsersSlug,
+    data: {
+      email: publicUserEmail,
+      password: 'test',
+    },
+  })
+
+  await payload.create({
+    collection: slug,
+    data: {
+      restrictedField: 'restricted',
+    },
+  })
+
+  await payload.create({
+    collection: readOnlySlug,
+    data: {
+      name: 'read-only',
+    },
+  })
+
+  await payload.create({
+    collection: blocksFieldAccessSlug,
+    data: {
+      editableBlockRefs: [
+        {
+          blockType: 'titleblock',
+          title: 'Editable Block Reference',
+        },
+      ],
+      editableBlocks: [
+        {
+          blockType: 'testBlock',
+          content: 'This block should be fully editable',
+          title: 'Editable Block',
+        },
+      ],
+      readOnlyBlockRefs: [
+        {
+          blockType: 'titleblock',
+          title: 'Read-Only Block Reference',
+        },
+      ],
+      readOnlyBlocks: [
+        {
+          blockType: 'testBlock2',
+          content: 'This block should be read-only due to field access control',
+          title: 'Read-Only Block',
+        },
+      ],
+      tabReadOnlyTest: {
+        tabReadOnlyBlockRefs: [
+          {
+            blockType: 'titleblock',
+            title: 'Tab Read-Only Block Reference',
+          },
+        ],
+        tabReadOnlyBlocks: [
+          {
+            blockType: 'testBlock3',
+            content: 'This block is read-only and inside a tab',
+            title: 'Tab Read-Only Block',
+          },
+        ],
+      },
+      title: 'Blocks Field Access Test Document',
+    },
+  })
+
+  await payload.create({
+    collection: restrictedVersionsSlug,
+    data: {
+      name: 'versioned',
+    },
+  })
+
+  await payload.create({
+    collection: siblingDataSlug,
+    data: {
+      array: [
+        {
+          allowPublicReadability: true,
+          text: firstArrayText,
+        },
+        {
+          allowPublicReadability: false,
+          text: secondArrayText,
+        },
+      ],
+    },
+  })
+
+  await payload.updateGlobal({
+    slug: userRestrictedGlobalSlug,
+    data: {
+      name: 'dev@payloadcms.com',
+    },
+  })
+
+  await payload.create({
+    collection: 'regression1',
+    data: {
+      array: [{ art: buildEditorState<DefaultNodeTypes>({ text: 'Text2' }) }],
+      arrayWithAccessFalse: [{ richText6: buildEditorState<DefaultNodeTypes>({ text: 'Text3' }) }],
+      blocks: [
+        {
+          blockName: 'My Block 1',
+          blockType: 'myBlock3',
+          richText7: buildEditorState<DefaultNodeTypes>({ text: 'Text6' }),
+        },
+      ],
+      blocks3: [
+        {
+          blockName: 'My Block 2',
+          blockType: 'myBlock2',
+          richText5: buildEditorState<DefaultNodeTypes>({ text: 'Text7' }),
+        },
+      ],
+      group1: {
+        richText1: buildEditorState<DefaultNodeTypes>({ text: 'Text5' }),
+        text: 'Text4',
+      },
+      richText4: buildEditorState<DefaultNodeTypes>({ text: 'Text1' }),
+      tab1: {
+        blocks2: [
+          {
+            blockName: 'My Block 3',
+            blockType: 'myBlock',
+            richText3: buildEditorState<DefaultNodeTypes>({ text: 'Text9' }),
+          },
+        ],
+        richText2: buildEditorState<DefaultNodeTypes>({ text: 'Text8' }),
+      },
+    },
+  })
+
+  await payload.create({
+    collection: 'regression2',
+    data: {
+      array: [
+        {
+          richText2: buildEditorState<DefaultNodeTypes>({ text: 'Text1' }),
+        },
+      ],
+      group: {
+        richText1: buildEditorState<DefaultNodeTypes>({ text: 'Text3' }),
+        text: 'Text2',
+      },
+    },
+  })
+
+  // Seed read-restricted collection
+  await seedReadRestricted(payload)
+
+  // Seed trash access control collections
+  await payload.create({
+    collection: differentiatedTrashSlug,
+    data: {
+      _status: 'published',
+      title: 'Differentiated Doc 1',
+    },
+  })
+
+  await payload.create({
+    collection: restrictedTrashSlug,
+    data: {
+      _status: 'published',
+      title: 'Restricted Doc 1',
+    },
+  })
+}

@@ -40,60 +40,63 @@ const customAuthenticationStrategy: AuthStrategyFunction = async ({ headers, pay
 }
 
 export default buildConfigWithDefaults({
-  admin: {
-    user: 'users',
-    importMap: {
-      baseDir: path.resolve(dirname),
-    },
-  },
-  collections: [
-    {
-      slug: usersSlug,
-      access: {
-        create: () => true,
+  suite: 'auth-custom-strategy',
+  config: {
+    admin: {
+      user: 'users',
+      importMap: {
+        baseDir: path.resolve(dirname),
       },
-      auth: {
-        disableLocalStrategy: true,
-        strategies: [
+    },
+    collections: [
+      {
+        slug: usersSlug,
+        access: {
+          create: () => true,
+        },
+        auth: {
+          disableLocalStrategy: true,
+          strategies: [
+            {
+              name: strategyName,
+              authenticate: customAuthenticationStrategy,
+            },
+          ],
+        },
+        fields: [
           {
-            name: strategyName,
-            authenticate: customAuthenticationStrategy,
+            name: 'code',
+            type: 'text',
+            index: true,
+            label: 'Code',
+            unique: true,
+          },
+          {
+            name: 'secret',
+            type: 'text',
+            label: 'Secret',
+          },
+          {
+            name: 'name',
+            type: 'text',
+            label: 'Name',
+          },
+          {
+            name: 'roles',
+            type: 'select',
+            defaultValue: ['user'],
+            hasMany: true,
+            label: 'Role',
+            options: ['admin', 'editor', 'moderator', 'user', 'viewer'],
+            required: true,
+            saveToJWT: true,
           },
         ],
+        versions: false,
       },
-      fields: [
-        {
-          name: 'code',
-          type: 'text',
-          index: true,
-          label: 'Code',
-          unique: true,
-        },
-        {
-          name: 'secret',
-          type: 'text',
-          label: 'Secret',
-        },
-        {
-          name: 'name',
-          type: 'text',
-          label: 'Name',
-        },
-        {
-          name: 'roles',
-          type: 'select',
-          defaultValue: ['user'],
-          hasMany: true,
-          label: 'Role',
-          options: ['admin', 'editor', 'moderator', 'user', 'viewer'],
-          required: true,
-          saveToJWT: true,
-        },
-      ],
-      versions: false,
+    ],
+    typescript: {
+      outputFile: path.resolve(dirname, 'payload-types.ts'),
     },
-  ],
-  typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })
