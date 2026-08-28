@@ -1,36 +1,25 @@
 import fs from 'fs'
 import path from 'path'
-import { type Payload } from 'payload'
 import { fileURLToPath } from 'url'
 import { promisify } from 'util'
-import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { expect } from 'vitest'
 
-import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
-
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { test } from '../__helpers/int/vitest.js'
 import { createStreamableFile } from '../uploads/createStreamableFile.js'
+import testConfig from './config.js'
 
 const stat = promisify(fs.stat)
-
-let restClient: NextRESTClient
-let payload: Payload
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-describe('@payloadcms/payload--cloud', () => {
-  beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(dirname))
-  })
+test.suite({ config: testConfig })('@payloadcms/payload--cloud', () => {
+  test.describe('tests', () => {
+    test.todo('payload-cloud tests')
 
-  afterAll(async () => {
-    await payload.destroy()
-  })
-
-  describe('tests', () => {
-    it.todo('payload-cloud tests')
-
-    it('should not throw file MIME type error when useTempFiles is true', async () => {
+    test('should not throw file MIME type error when useTempFiles is true', async ({
+      restClient,
+    }) => {
       const formData = new FormData()
       const filePath = path.join(dirname, './image.png')
       const { file, handle } = await createStreamableFile(filePath)
@@ -46,13 +35,13 @@ describe('@payloadcms/payload--cloud', () => {
       expect(response.status).toBe(201)
     })
 
-    it.each([
+    test.for([
       { fileType: 'text', fileName: 'test-document.txt' },
       { fileType: 'PDF', fileName: 'test-pdf.pdf' },
       { fileType: 'audio', fileName: 'audio.mp3' },
     ])(
       'should save $fileType files with correct file size when useTempFiles is true',
-      async ({ fileName }) => {
+      async ({ fileName }, { payload, restClient }) => {
         const formData = new FormData()
         const filePath = path.join(dirname, `./${fileName}`)
         const originalStats = await stat(filePath)

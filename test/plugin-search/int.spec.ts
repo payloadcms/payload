@@ -1,27 +1,16 @@
-import type { Payload } from 'payload'
-
-import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import { expect } from 'vitest'
 
-import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
-
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { test } from '../__helpers/int/vitest.js'
 import { devUser } from '../credentials.js'
+import testConfig from './config.js'
 import { pagesSlug, postsSlug } from './shared.js'
 
-let payload: Payload
-let restClient: NextRESTClient
 let token: string
 
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
-
-describe('@payloadcms/plugin-search', () => {
-  beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(dirname))
-
+test.suite({ config: testConfig })('@payloadcms/plugin-search', () => {
+  test.beforeEach(async ({ restClient }) => {
     const data = await restClient
       .POST('/users/login', {
         body: JSON.stringify({
@@ -34,7 +23,7 @@ describe('@payloadcms/plugin-search', () => {
     token = data.token
   })
 
-  beforeEach(async () => {
+  test.beforeEach(async ({ payload }) => {
     await payload.delete({
       collection: 'search',
       depth: 0,
@@ -66,11 +55,7 @@ describe('@payloadcms/plugin-search', () => {
     ])
   })
 
-  afterAll(async () => {
-    await payload.destroy()
-  })
-
-  it('should add a search collection', async () => {
+  test('should add a search collection', async ({ payload }) => {
     const search = await payload.find({
       collection: 'search',
       depth: 0,
@@ -80,7 +65,7 @@ describe('@payloadcms/plugin-search', () => {
     expect(search).toBeTruthy()
   })
 
-  it('should sync published pages to the search collection', async () => {
+  test('should sync published pages to the search collection', async ({ payload }) => {
     const pageToSync = await payload.create({
       collection: 'pages',
       data: {
@@ -106,7 +91,7 @@ describe('@payloadcms/plugin-search', () => {
     expect(results[0].excerpt).toBe('This is a test page')
   })
 
-  it('should not sync drafts pages to the search collection', async () => {
+  test('should not sync drafts pages to the search collection', async ({ payload }) => {
     const draftPage = await payload.create({
       collection: 'pages',
       data: {
@@ -133,7 +118,9 @@ describe('@payloadcms/plugin-search', () => {
     expect(results).toHaveLength(0)
   })
 
-  it('should not delete a search doc if a published item has a new draft but remains published', async () => {
+  test('should not delete a search doc if a published item has a new draft but remains published', async ({
+    payload,
+  }) => {
     const publishedPage = await payload.create({
       collection: 'pages',
       data: {
@@ -205,7 +192,7 @@ describe('@payloadcms/plugin-search', () => {
     expect(deletedResults).toHaveLength(0)
   })
 
-  it('should sync changes made to an existing search document', async () => {
+  test('should sync changes made to an existing search document', async ({ payload }) => {
     const pageToReceiveUpdates = await payload.create({
       collection: 'pages',
       data: {
@@ -260,7 +247,9 @@ describe('@payloadcms/plugin-search', () => {
     expect(updatedResults[0].excerpt).toBe('This is a test page (updated)')
   })
 
-  it('should clear the search document when the original document is deleted', async () => {
+  test('should clear the search document when the original document is deleted', async ({
+    payload,
+  }) => {
     const page = await payload.create({
       collection: 'pages',
       data: {
@@ -309,7 +298,9 @@ describe('@payloadcms/plugin-search', () => {
     expect(deletedResults).toHaveLength(0)
   })
 
-  it('should clear the proper search document when having the same doc.value but different doc.relationTo', async () => {
+  test('should clear the proper search document when having the same doc.value but different doc.relationTo', async ({
+    payload,
+  }) => {
     const custom_id_1 = await payload.create({
       collection: 'custom-ids-1',
       data: { id: 'custom_id' },
@@ -349,7 +340,7 @@ describe('@payloadcms/plugin-search', () => {
     expect(docAfter.doc.relationTo).toBe('custom-ids-2')
   })
 
-  it('should sync localized data', async () => {
+  test('should sync localized data', async ({ payload }) => {
     const createdDoc = await payload.create({
       collection: 'posts',
       data: {
@@ -388,7 +379,10 @@ describe('@payloadcms/plugin-search', () => {
     expect(syncedSearchData.docs[0].slug).toEqual('es')
   })
 
-  it('should respond with 401 when invalid permissions on user before reindex', async () => {
+  test('should respond with 401 when invalid permissions on user before reindex', async ({
+    payload,
+    restClient,
+  }) => {
     const testCreds = {
       email: 'test@payloadcms.com',
       password: 'test',
@@ -417,7 +411,9 @@ describe('@payloadcms/plugin-search', () => {
     expect(endpointRes.status).toEqual(401)
   })
 
-  it('should respond with 400 when invalid collection args passed to reindex', async () => {
+  test('should respond with 400 when invalid collection args passed to reindex', async ({
+    restClient,
+  }) => {
     const endpointNoArgsRes = await restClient.POST(`/search/reindex`, {
       body: JSON.stringify({}),
       headers: {
@@ -448,7 +444,10 @@ describe('@payloadcms/plugin-search', () => {
     expect(endpointInvalidArrRes.status).toBe(400)
   })
 
-  it('should delete existing search indexes before reindexing', async () => {
+  test('should delete existing search indexes before reindexing', async ({
+    payload,
+    restClient,
+  }) => {
     await payload.create({
       collection: postsSlug,
       data: {
@@ -496,7 +495,7 @@ describe('@payloadcms/plugin-search', () => {
     expect(results).toHaveLength(0)
   })
 
-  it('should reindex whole collections', async () => {
+  test('should reindex whole collections', async ({ payload, restClient }) => {
     await Promise.all([
       payload.create({
         collection: pagesSlug,
@@ -538,7 +537,10 @@ describe('@payloadcms/plugin-search', () => {
     expect(totalAfterReindex).toBe(totalBeforeReindex)
   })
 
-  it('should report correct aggregate counts when reindexing multiple collections', async () => {
+  test('should report correct aggregate counts when reindexing multiple collections', async ({
+    payload,
+    restClient,
+  }) => {
     await Promise.all([
       payload.create({
         collection: postsSlug,
@@ -569,7 +571,10 @@ describe('@payloadcms/plugin-search', () => {
     )
   })
 
-  it('should index locale-specific data for all locales when reindexing multiple collections', async () => {
+  test('should index locale-specific data for all locales when reindexing multiple collections', async ({
+    payload,
+    restClient,
+  }) => {
     // Create a post with distinct slugs per locale — these are mapped into the search doc via beforeSync
     const { id: postId } = await payload.create({
       collection: postsSlug,
@@ -628,7 +633,7 @@ describe('@payloadcms/plugin-search', () => {
     expect(deDoc.slug).toBe('post-slug-de')
   })
 
-  it('should exclude drafts from reindexing by default', async () => {
+  test('should exclude drafts from reindexing by default', async ({ payload, restClient }) => {
     await Promise.all([
       payload.create({
         collection: pagesSlug,
@@ -680,7 +685,7 @@ describe('@payloadcms/plugin-search', () => {
     )
   })
 
-  it('should reindex all configured locales', async () => {
+  test('should reindex all configured locales', async ({ payload, restClient }) => {
     const post = await payload.create({
       collection: postsSlug,
       locale: 'en',
@@ -762,7 +767,7 @@ describe('@payloadcms/plugin-search', () => {
     expect(postAfterReindex?.slug).toStrictEqual(postBeforeReindex?.slug)
   })
 
-  it('should sync trashed documents correctly with search plugin', async () => {
+  test('should sync trashed documents correctly with search plugin', async ({ payload }) => {
     // Create a published post
     const publishedPost = await payload.create({
       collection: postsSlug,
@@ -825,8 +830,8 @@ describe('@payloadcms/plugin-search', () => {
     })
   })
 
-  describe('locale filtering', () => {
-    it('should filter locales when skipSync excludes them', async () => {
+  test.describe('locale filtering', () => {
+    test('should filter locales when skipSync excludes them', async ({ payload }) => {
       // Test config has 3 locales: ['en', 'es', 'de']
       // For 'filtered-locales' collection with syncEnglishOnly: true, only 'en' should be indexed
 
@@ -882,7 +887,7 @@ describe('@payloadcms/plugin-search', () => {
       })
     })
 
-    it('should index all locales when skipSync allows all locales', async () => {
+    test('should index all locales when skipSync allows all locales', async ({ payload }) => {
       // Test config has 3 locales: ['en', 'es', 'de']
       // For 'posts' collection, skipSync returns false for all locales
 
@@ -944,7 +949,7 @@ describe('@payloadcms/plugin-search', () => {
       })
     })
 
-    it('should index all locales when syncEnglishOnly is false', async () => {
+    test('should index all locales when syncEnglishOnly is false', async ({ payload }) => {
       // For 'filtered-locales' collection with syncEnglishOnly: false, all locales should be indexed
 
       // Create a doc with syncEnglishOnly disabled

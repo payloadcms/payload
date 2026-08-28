@@ -1,17 +1,10 @@
-import path from 'path'
-import { type Payload } from 'payload'
 import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { expect } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
-
-let payload: Payload
-let restClient: NextRESTClient
-
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
+import { test } from '../__helpers/int/vitest.js'
+import testConfig from './config.js'
 
 // Helper to create a guest cart with items
 async function createGuestCartWithItems(
@@ -50,18 +43,8 @@ async function createGuestCartWithItems(
   return { cartId, cartSecret }
 }
 
-describe('ecommerce', () => {
-  beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(dirname))
-  })
-
-  afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
-  })
-
-  it('should add a variants collection', async () => {
+test.suite({ config: testConfig })('ecommerce', () => {
+  test('should add a variants collection', async ({ payload }) => {
     const variants = await payload.find({
       collection: 'variants',
       depth: 0,
@@ -71,7 +54,7 @@ describe('ecommerce', () => {
     expect(variants).toBeTruthy()
   })
 
-  it('should only merge plugin translations for supportedLanguages', () => {
+  test('should only merge plugin translations for supportedLanguages', ({ payload }) => {
     // The shared test buildConfig defaults supportedLanguages to { de, en, es }.
     const supportedLangKeys = Object.keys(payload.config.i18n.supportedLanguages).sort()
     expect(supportedLangKeys).toEqual(['de', 'en', 'es'])
@@ -88,8 +71,8 @@ describe('ecommerce', () => {
     expect(arTranslations?.['plugin-ecommerce']).toBeUndefined()
   })
 
-  describe('guest cart access', () => {
-    it('should allow guest users to create carts', async () => {
+  test.describe('guest cart access', () => {
+    test('should allow guest users to create carts', async ({ restClient }) => {
       // Create a cart without authentication
       const cartResponse = await restClient
         .POST('/carts', {
@@ -105,7 +88,7 @@ describe('ecommerce', () => {
       expect(cartResponse.doc.secret).toBeTruthy() // Secret should be returned on creation
     })
 
-    it('should allow access to cart with valid secret', async () => {
+    test('should allow access to cart with valid secret', async ({ restClient }) => {
       // Create a cart without authentication
       const createResponse = await restClient
         .POST('/carts', {
@@ -129,7 +112,7 @@ describe('ecommerce', () => {
       expect(readResponse.secret).toBeUndefined() // Secret should NOT be returned on subsequent reads
     })
 
-    it('should allow updating cart with valid secret', async () => {
+    test('should allow updating cart with valid secret', async ({ restClient }) => {
       // Create a cart without authentication
       const createResponse = await restClient
         .POST('/carts', {
@@ -158,7 +141,7 @@ describe('ecommerce', () => {
       expect(updateResponse.doc.purchasedAt).toBeTruthy()
     })
 
-    it('should allow deleting cart with valid secret', async () => {
+    test('should allow deleting cart with valid secret', async ({ restClient }) => {
       // Create a cart without authentication
       const createResponse = await restClient
         .POST('/carts', {
@@ -180,7 +163,7 @@ describe('ecommerce', () => {
       expect(deleteResponse).toBeTruthy()
     })
 
-    it('should deny access without valid secret', async () => {
+    test('should deny access without valid secret', async ({ restClient }) => {
       // Create a cart without authentication
       const createResponse = await restClient
         .POST('/carts', {
@@ -200,7 +183,7 @@ describe('ecommerce', () => {
       expect(readResponse.status).toBe(403)
     })
 
-    it('should deny access with incorrect secret', async () => {
+    test('should deny access with incorrect secret', async ({ restClient }) => {
       // Create a cart without authentication
       const createResponse = await restClient
         .POST('/carts', {
@@ -221,7 +204,7 @@ describe('ecommerce', () => {
       expect(readResponse.status).toBe(404)
     })
 
-    it('should not expose secret field directly', async () => {
+    test('should not expose secret field directly', async ({ restClient }) => {
       // Create a cart without authentication
       const createResponse = await restClient
         .POST('/carts', {
@@ -244,7 +227,7 @@ describe('ecommerce', () => {
       expect(readResponse.secret).toBeUndefined()
     })
 
-    it('should deny creating cart with custom secret', async () => {
+    test('should deny creating cart with custom secret', async ({ restClient }) => {
       // Try to create a cart with a custom secret
       const createResponse = await restClient.POST('/carts', {
         auth: false,
@@ -260,7 +243,7 @@ describe('ecommerce', () => {
       expect(result.doc.secret).not.toBe('custom-secret')
     })
 
-    it('should deny updating secret field', async () => {
+    test('should deny updating secret field', async ({ restClient }) => {
       // Create a cart without authentication
       const createResponse = await restClient
         .POST('/carts', {
@@ -296,11 +279,11 @@ describe('ecommerce', () => {
     })
   })
 
-  describe('cart item endpoints', () => {
+  test.describe('cart item endpoints', () => {
     let productId: string
     let variantId: string
 
-    beforeAll(async () => {
+    test.beforeEach(async ({ payload }) => {
       // Get an existing product and variant from seed data
       const products = await payload.find({
         collection: 'products',
@@ -315,8 +298,8 @@ describe('ecommerce', () => {
       variantId = variants.docs[0]?.id as string
     })
 
-    describe('add-item endpoint', () => {
-      it('should add an item to a guest cart', async () => {
+    test.describe('add-item endpoint', () => {
+      test('should add an item to a guest cart', async ({ restClient }) => {
         // Create a cart without authentication
         const createResponse = await restClient
           .POST('/carts', {
@@ -357,7 +340,7 @@ describe('ecommerce', () => {
         expect(cartResponse.items[0].quantity).toBe(2)
       })
 
-      it('should add item with variant to cart', async () => {
+      test('should add item with variant to cart', async ({ restClient }) => {
         const createResponse = await restClient
           .POST('/carts', {
             auth: false,
@@ -395,7 +378,7 @@ describe('ecommerce', () => {
         expect(cartResponse.items[0].variant).toBeTruthy()
       })
 
-      it('should increment quantity when adding same item', async () => {
+      test('should increment quantity when adding same item', async ({ restClient }) => {
         const createResponse = await restClient
           .POST('/carts', {
             auth: false,
@@ -442,7 +425,7 @@ describe('ecommerce', () => {
         expect(cartResponse.items[0].quantity).toBe(5)
       })
 
-      it('should require cart ID to add item', async () => {
+      test('should require cart ID to add item', async ({ restClient }) => {
         const addItemResponse = await restClient.POST(`/carts/nonexistent-cart-id/add-item`, {
           auth: false,
           body: JSON.stringify({
@@ -456,7 +439,7 @@ describe('ecommerce', () => {
         expect(addItemResponse.status).not.toBe(200)
       })
 
-      it('should require product in add item request', async () => {
+      test('should require product in add item request', async ({ restClient }) => {
         const createResponse = await restClient
           .POST('/carts', {
             auth: false,
@@ -484,8 +467,8 @@ describe('ecommerce', () => {
       })
     })
 
-    describe('remove-item endpoint', () => {
-      it('should remove an item from cart', async () => {
+    test.describe('remove-item endpoint', () => {
+      test('should remove an item from cart', async ({ restClient }) => {
         const { cartId, cartSecret } = await createGuestCartWithItems(restClient, productId)
 
         // Get cart to find item ID
@@ -517,7 +500,7 @@ describe('ecommerce', () => {
         expect(cartAfter.items).toHaveLength(0)
       })
 
-      it('should fail to remove nonexistent item', async () => {
+      test('should fail to remove nonexistent item', async ({ restClient }) => {
         const { cartId, cartSecret } = await createGuestCartWithItems(restClient, productId)
 
         const removeResponse = await restClient
@@ -534,8 +517,8 @@ describe('ecommerce', () => {
       })
     })
 
-    describe('update-item endpoint', () => {
-      it('should update item quantity directly', async () => {
+    test.describe('update-item endpoint', () => {
+      test('should update item quantity directly', async ({ restClient }) => {
         const { cartId, cartSecret } = await createGuestCartWithItems(restClient, productId)
 
         const cartBefore = await restClient
@@ -565,7 +548,7 @@ describe('ecommerce', () => {
         expect(cartAfter.items[0].quantity).toBe(5)
       })
 
-      it('should increment item quantity with $inc operator', async () => {
+      test('should increment item quantity with $inc operator', async ({ restClient }) => {
         const { cartId, cartSecret } = await createGuestCartWithItems(restClient, productId)
 
         const cartBefore = await restClient
@@ -596,7 +579,7 @@ describe('ecommerce', () => {
         expect(cartAfter.items[0].quantity).toBe(initialQuantity + 3)
       })
 
-      it('should decrement item quantity with $inc operator', async () => {
+      test('should decrement item quantity with $inc operator', async ({ restClient }) => {
         // First create a cart with quantity > 1
         const createResponse = await restClient
           .POST('/carts', {
@@ -650,7 +633,7 @@ describe('ecommerce', () => {
         expect(cartAfter.items[0].quantity).toBe(3)
       })
 
-      it('should remove item when quantity reaches zero', async () => {
+      test('should remove item when quantity reaches zero', async ({ restClient }) => {
         const { cartId, cartSecret } = await createGuestCartWithItems(restClient, productId)
 
         const cartBefore = await restClient
@@ -679,8 +662,8 @@ describe('ecommerce', () => {
       })
     })
 
-    describe('clear endpoint', () => {
-      it('should clear all items from cart', async () => {
+    test.describe('clear endpoint', () => {
+      test('should clear all items from cart', async ({ restClient }) => {
         // Create cart with multiple items
         const createResponse = await restClient
           .POST('/carts', {
@@ -745,7 +728,7 @@ describe('ecommerce', () => {
         expect(cartAfter.items).toHaveLength(0)
       })
 
-      it('should fail to clear nonexistent cart', async () => {
+      test('should fail to clear nonexistent cart', async ({ restClient }) => {
         const clearResponse = await restClient.POST(`/carts/nonexistent-cart-id/clear`, {
           auth: false,
           body: JSON.stringify({
@@ -758,11 +741,11 @@ describe('ecommerce', () => {
     })
   })
 
-  describe('cart merge endpoint', () => {
+  test.describe('cart merge endpoint', () => {
     let productId: string
     let variantId: string
 
-    beforeAll(async () => {
+    test.beforeEach(async ({ payload }) => {
       const products = await payload.find({
         collection: 'products',
         limit: 1,
@@ -776,7 +759,7 @@ describe('ecommerce', () => {
       variantId = variants.docs[0]?.id as string
     })
 
-    it('should merge guest cart into user cart', async () => {
+    test('should merge guest cart into user cart', async ({ payload, restClient }) => {
       // Create a guest cart with items
       const { cartId: guestCartId, cartSecret } = await createGuestCartWithItems(
         restClient,
@@ -842,7 +825,7 @@ describe('ecommerce', () => {
       expect(mergedCart.items.length).toBeGreaterThanOrEqual(1)
     })
 
-    it('should combine quantities when merging same items', async () => {
+    test('should combine quantities when merging same items', async ({ payload, restClient }) => {
       // Create guest cart with product (quantity 3)
       const createResponse = await restClient
         .POST('/carts', {
@@ -927,7 +910,7 @@ describe('ecommerce', () => {
       expect(mergedItem.quantity).toBe(5) // 3 + 2
     })
 
-    it('should delete source cart after merge', async () => {
+    test('should delete source cart after merge', async ({ payload, restClient }) => {
       const { cartId: guestCartId, cartSecret } = await createGuestCartWithItems(
         restClient,
         productId,
@@ -976,7 +959,7 @@ describe('ecommerce', () => {
       expect(guestCartResponse.status).toBe(404)
     })
 
-    it('should require authentication for merge', async () => {
+    test('should require authentication for merge', async ({ restClient }) => {
       const { cartId: guestCartId, cartSecret } = await createGuestCartWithItems(
         restClient,
         productId,
@@ -1010,7 +993,7 @@ describe('ecommerce', () => {
       expect(mergeResponse.message).toContain('Authentication required')
     })
 
-    it('should fail merge with invalid source secret', async () => {
+    test('should fail merge with invalid source secret', async ({ payload, restClient }) => {
       const { cartId: guestCartId } = await createGuestCartWithItems(restClient, productId)
 
       const testUser = await payload.create({
@@ -1052,10 +1035,10 @@ describe('ecommerce', () => {
     })
   })
 
-  describe('authenticated user cart operations', () => {
+  test.describe('authenticated user cart operations', () => {
     let productId: string
 
-    beforeAll(async () => {
+    test.beforeEach(async ({ payload }) => {
       const products = await payload.find({
         collection: 'products',
         limit: 1,
@@ -1063,7 +1046,10 @@ describe('ecommerce', () => {
       productId = products.docs[0]?.id as string
     })
 
-    it('should allow authenticated users to access their cart without secret', async () => {
+    test('should allow authenticated users to access their cart without secret', async ({
+      payload,
+      restClient,
+    }) => {
       const testUser = await payload.create({
         collection: 'users',
         data: {
@@ -1099,7 +1085,10 @@ describe('ecommerce', () => {
       expect(getResponse.id).toBe(cartId)
     })
 
-    it('should allow authenticated users to add items without secret', async () => {
+    test('should allow authenticated users to add items without secret', async ({
+      payload,
+      restClient,
+    }) => {
       const testUser = await payload.create({
         collection: 'users',
         data: {
@@ -1141,7 +1130,10 @@ describe('ecommerce', () => {
       expect(addItemResponse.success).toBe(true)
     })
 
-    it('should not generate secret for authenticated user carts', async () => {
+    test('should not generate secret for authenticated user carts', async ({
+      payload,
+      restClient,
+    }) => {
       const testUser = await payload.create({
         collection: 'users',
         data: {
@@ -1173,10 +1165,10 @@ describe('ecommerce', () => {
     })
   })
 
-  describe('cart transfer to user', () => {
+  test.describe('cart transfer to user', () => {
     let productId: string
 
-    beforeAll(async () => {
+    test.beforeEach(async ({ payload }) => {
       const products = await payload.find({
         collection: 'products',
         limit: 1,
@@ -1184,7 +1176,10 @@ describe('ecommerce', () => {
       productId = products.docs[0]?.id as string
     })
 
-    it('should allow transferring guest cart to user by updating customer field', async () => {
+    test('should allow transferring guest cart to user by updating customer field', async ({
+      payload,
+      restClient,
+    }) => {
       // Create guest cart with items
       const { cartId: guestCartId, cartSecret } = await createGuestCartWithItems(
         restClient,

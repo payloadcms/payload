@@ -1,14 +1,13 @@
-import type { DefaultDocumentIDType, PaginatedDocs, Payload } from 'payload'
+import type { DefaultDocumentIDType, PaginatedDocs } from 'payload'
 
-import path from 'path'
 import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import { expect } from 'vitest'
 
-import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { Relationship } from './payload-types.js'
 
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { test } from '../__helpers/int/vitest.js'
 import { devUser } from '../credentials.js'
+import testConfig from './config.js'
 import {
   menuSlug,
   multiTenantPostsSlug,
@@ -17,17 +16,10 @@ import {
   usersSlug,
 } from './shared.js'
 
-let payload: Payload
-let restClient: NextRESTClient
 let token: string
 
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
-
-describe('@payloadcms/plugin-multi-tenant', () => {
-  beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(dirname))
-
+test.suite({ config: testConfig })('@payloadcms/plugin-multi-tenant', () => {
+  test.beforeEach(async ({ restClient }) => {
     const data = await restClient
       .POST('/users/login', {
         body: JSON.stringify({
@@ -40,12 +32,8 @@ describe('@payloadcms/plugin-multi-tenant', () => {
     token = data.token
   })
 
-  afterAll(async () => {
-    await payload.destroy()
-  })
-
-  describe('tenants', () => {
-    it('should create a tenant', async () => {
+  test.describe('tenants', () => {
+    test('should create a tenant', async ({ payload }) => {
       const tenant1 = await payload.create({
         collection: tenantsSlug,
         data: {
@@ -57,13 +45,13 @@ describe('@payloadcms/plugin-multi-tenant', () => {
       expect(tenant1).toHaveProperty('id')
     })
 
-    describe('relationships', () => {
+    test.describe('relationships', () => {
       let anchorBarRelationships: PaginatedDocs<Relationship>
       let blueDogRelationships: PaginatedDocs<Relationship>
       let anchorBarTenantID: DefaultDocumentIDType
       let blueDogTenantID: DefaultDocumentIDType
 
-      beforeEach(async () => {
+      test.beforeEach(async ({ payload }) => {
         anchorBarRelationships = await payload.find({
           collection: 'relationships',
           where: {
@@ -89,7 +77,9 @@ describe('@payloadcms/plugin-multi-tenant', () => {
         blueDogTenantID = blueDogRelationships.docs[0].tenant.id
       })
 
-      it('ensure relationship document with relationship within same tenant can be created', async () => {
+      test('ensure relationship document with relationship within same tenant can be created', async ({
+        payload,
+      }) => {
         const newRelationship = await payload.create({
           collection: 'relationships',
           data: {
@@ -107,7 +97,9 @@ describe('@payloadcms/plugin-multi-tenant', () => {
         expect(newRelationship.relationship?.title).toBe('Owned by bar with no ac')
       })
 
-      it('ensure relationship document with relationship to different tenant cannot be created if tenant header passed', async () => {
+      test('ensure relationship document with relationship to different tenant cannot be created if tenant header passed', async ({
+        payload,
+      }) => {
         await expect(
           payload.create({
             collection: 'relationships',
@@ -124,7 +116,9 @@ describe('@payloadcms/plugin-multi-tenant', () => {
         ).rejects.toThrow('The following field is invalid: Relationship')
       })
 
-      it('ensure relationship document with relationship to different tenant cannot be created even if no tenant header passed', async () => {
+      test('ensure relationship document with relationship to different tenant cannot be created even if no tenant header passed', async ({
+        payload,
+      }) => {
         // Should filter based on data.tenant instead of tenant cookie
         await expect(
           payload.create({
@@ -142,8 +136,10 @@ describe('@payloadcms/plugin-multi-tenant', () => {
     })
   })
 
-  describe('access control for users with no tenant memberships', () => {
-    it('should return Forbidden error (not 500) for user with no tenants', async () => {
+  test.describe('access control for users with no tenant memberships', () => {
+    test('should return Forbidden error (not 500) for user with no tenants', async ({
+      payload,
+    }) => {
       // Create a user with no tenant memberships
       const noTenantUser = await payload.create({
         collection: usersSlug,
@@ -181,7 +177,9 @@ describe('@payloadcms/plugin-multi-tenant', () => {
       await payload.delete({ id: noTenantUser.id, collection: usersSlug })
     })
 
-    it('should allow user with no tenants to access their own user document', async () => {
+    test('should allow user with no tenants to access their own user document', async ({
+      payload,
+    }) => {
       // Create a user with no tenant memberships
       const noTenantUser = await payload.create({
         collection: usersSlug,
@@ -207,7 +205,9 @@ describe('@payloadcms/plugin-multi-tenant', () => {
       await payload.delete({ id: noTenantUser.id, collection: usersSlug })
     })
 
-    it('should allow admin with empty tenants array to access all documents', async () => {
+    test('should allow admin with empty tenants array to access all documents', async ({
+      payload,
+    }) => {
       // Create an admin user with empty tenants array
       const adminUser = await payload.create({
         collection: usersSlug,
@@ -246,8 +246,10 @@ describe('@payloadcms/plugin-multi-tenant', () => {
     })
   })
 
-  describe('access control with user object passed directly', () => {
-    it('should enforce tenant access when user object is fetched from database', async () => {
+  test.describe('access control with user object passed directly', () => {
+    test('should enforce tenant access when user object is fetched from database', async ({
+      payload,
+    }) => {
       // Create two tenants
       const tenantA = await payload.create({
         collection: tenantsSlug,
@@ -299,8 +301,10 @@ describe('@payloadcms/plugin-multi-tenant', () => {
     })
   })
 
-  describe('tenant cleanup on delete', () => {
-    it('should delete a tenant that has a global collection document without hanging', async () => {
+  test.describe('tenant cleanup on delete', () => {
+    test('should delete a tenant that has a global collection document without hanging', async ({
+      payload,
+    }) => {
       const tenant = await payload.create({
         collection: tenantsSlug,
         data: { name: 'Cleanup Tenant', domain: 'cleanup-tenant.test' },
@@ -324,8 +328,8 @@ describe('@payloadcms/plugin-multi-tenant', () => {
     }, 20000)
   })
 
-  describe('hasMany tenant field filtering', () => {
-    it('should not double-wrap tenant arrays in filterOptions', async () => {
+  test.describe('hasMany tenant field filtering', () => {
+    test('should not double-wrap tenant arrays in filterOptions', async ({ payload }) => {
       const tenant1 = await payload.create({
         collection: tenantsSlug,
         data: { name: 'Tenant 1', domain: 'tenant1.test' },

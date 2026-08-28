@@ -54,7 +54,7 @@ import { richTextDocData } from './collections/RichText/data.js'
 import { generateLexicalRichText } from './collections/RichText/generateLexicalRichText.js'
 import { textDoc } from './collections/Text/shared.js'
 import { uploadsDoc } from './collections/Upload/shared.js'
-import { clearAndSeedEverything } from './seed.js'
+import testConfig from './config.js'
 import {
   arrayFieldsSlug,
   lexicalFieldsSlug,
@@ -68,13 +68,8 @@ let createdJPGDocID: number | string = null
 let createdTextDocID: number | string = null
 let createdRichTextDocID: number | string = null
 
-test.describe('Lexical', () => {
-  test.beforeAll(() => {
-    process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
-  })
-
+test.suite({ config: testConfig })('Lexical', () => {
   test.beforeEach(async ({ payload, restClient }) => {
-    await clearAndSeedEverything(payload)
     await restClient.login({
       slug: 'users',
       credentials: devUser,

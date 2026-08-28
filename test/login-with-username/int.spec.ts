@@ -1,27 +1,12 @@
-import type { Payload } from 'payload'
-
-import path from 'path'
 import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { expect } from 'vitest'
 
+import { test } from '../__helpers/int/vitest.js'
 import { devUser } from '../credentials.js'
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import testConfig from './config.js'
 
-let payload: Payload
-
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
-
-describe('Login With Username Feature', () => {
-  beforeAll(async () => {
-    ;({ payload } = await initPayloadInt(dirname))
-  })
-
-  afterAll(async () => {
-    await payload.destroy()
-  })
-
-  it('should not allow creation with neither email nor username', async () => {
+test.suite({ config: testConfig })('Login With Username Feature', () => {
+  test('should not allow creation with neither email nor username', async ({ payload }) => {
     let errors = []
     try {
       await payload.create({
@@ -37,7 +22,7 @@ describe('Login With Username Feature', () => {
     expect(errors).toHaveLength(2)
   })
 
-  it('should not allow removing both username and email fields', async () => {
+  test('should not allow removing both username and email fields', async ({ payload }) => {
     const emailToUse = 'example@email.com'
     const usernameToUse = 'exampleUser'
 
@@ -89,7 +74,7 @@ describe('Login With Username Feature', () => {
     expect(errors).toHaveLength(2)
   })
 
-  it('should allow login with either username or email', async () => {
+  test('should allow login with either username or email', async ({ payload }) => {
     await payload.create({
       collection: 'login-with-either',
       data: {
@@ -118,7 +103,7 @@ describe('Login With Username Feature', () => {
     expect(loginWithUsername).toHaveProperty('token')
   })
 
-  it('should allow mutliple creates with optional email and username', async () => {
+  test('should allow mutliple creates with optional email and username', async ({ payload }) => {
     // create a user with just email
     await payload.create({
       collection: 'login-with-either',

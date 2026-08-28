@@ -1,155 +1,151 @@
 import type { ProtocolEra } from '@modelcontextprotocol/client'
-import type { Payload } from 'payload'
+import type { Payload, SanitizedConfig } from 'payload'
 
 import { randomUUID } from 'crypto'
-import path from 'path'
-import { fileURLToPath } from 'url'
-import { test as base, onTestFinished } from 'vitest'
+import { onTestFinished } from 'vitest'
 
 import type { TestRBAC } from '../../__helpers/plugins/rbac/index.js'
 import type { NextRESTClient } from '../../__helpers/shared/NextRESTClient.js'
 import type { McpClient } from './mcpClient.js'
 
-import { initPayloadInt } from '../../__helpers/shared/initPayloadInt.js'
+import { test as base } from '../../__helpers/int/vitest.js'
 import { devUser } from '../../credentials.js'
 import { createMcpClient } from './mcpClient.js'
 
-export let payload: Payload
-export let restClient: NextRESTClient
-export let limitedUserId: string
-export let userId: string
-
-export async function getApiKey(rbac: TestRBAC = {}): Promise<string> {
-  const apiKey = randomUUID()
-
-  await payload.update({
-    id: userId,
-    collection: 'users',
-    data: {
-      apiKey,
-      enableAPIKey: true,
-      rbac,
-    },
-    overrideAccess: true,
-  })
-
-  return apiKey
+type McpSetup = {
+  getApiKey: (rbac?: TestRBAC) => Promise<string>
+  getLimitedApiKey: () => Promise<string>
+  limitedUserId: string
+  userId: string
 }
 
-export async function getLimitedApiKey(): Promise<string> {
-  const apiKey = randomUUID()
-
-  await payload.update({
-    id: limitedUserId,
-    collection: 'users',
-    data: {
-      apiKey,
-      enableAPIKey: true,
-    },
-    overrideAccess: true,
-  })
-
-  return apiKey
-}
-
-const fixtureDir = path.dirname(fileURLToPath(import.meta.url))
-const suiteDir = path.resolve(fixtureDir, '..')
-
-type McpTestContext = {
+type McpTestContext = McpSetup & {
   mcp: McpClient
+  payload: Payload
   protocolEra: ProtocolEra
+  restClient: NextRESTClient
 }
 
 type McpTestFunction = (context: McpTestContext) => Promise<void> | void
 
-type ScopedFixtures = {
-  $worker: { _setup: void }
-}
+const payloadTest = base.extend<'mcpSetup', McpSetup>(
+  'mcpSetup',
+  { auto: true },
+  async ({ payload, restClient }) => {
+    const loginResponse: { user: { id: string } } = await restClient
+      .POST('/users/login', {
+        body: JSON.stringify({ email: devUser.email, password: devUser.password }),
+      })
+      .then((res) => res.json())
+    const userId = loginResponse.user.id
 
-const payloadTest = base.extend<ScopedFixtures>({
-  _setup: [
-    // eslint-disable-next-line no-empty-pattern
-    async ({}, use) => {
-      const initialized = await initPayloadInt(suiteDir)
-      payload = initialized.payload
-      restClient = initialized.restClient
+    const limitedUser = await payload.create({
+      collection: 'users',
+      data: {
+        email: 'limited-mcp-user@payloadcms.com',
+        password: randomUUID(),
+        rbac: {
+          globals: {
+            'site-settings': {
+              update: false,
+            },
+          },
+        } satisfies TestRBAC,
+      },
+      overrideAccess: true,
+    })
+    const limitedUserId = limitedUser.id
 
-      const loginResponse: { user: { id: string } } = await restClient
-        .POST('/users/login', {
-          body: JSON.stringify({ email: devUser.email, password: devUser.password }),
-        })
-        .then((res) => res.json())
-      userId = loginResponse.user.id
+    const getApiKey = async (rbac: TestRBAC = {}): Promise<string> => {
+      const apiKey = randomUUID()
 
-      const limitedUser = await payload.create({
+      await payload.update({
+        id: userId,
         collection: 'users',
         data: {
-          email: 'limited-mcp-user@payloadcms.com',
-          password: randomUUID(),
-          rbac: {
-            globals: {
-              'site-settings': {
-                update: false,
-              },
-            },
-          } satisfies TestRBAC,
+          apiKey,
+          enableAPIKey: true,
+          rbac,
         },
         overrideAccess: true,
       })
-      limitedUserId = limitedUser.id
 
-      await use()
+      return apiKey
+    }
 
-      await payload.delete({
+    const getLimitedApiKey = async (): Promise<string> => {
+      const apiKey = randomUUID()
+
+      await payload.update({
         id: limitedUserId,
         collection: 'users',
+        data: {
+          apiKey,
+          enableAPIKey: true,
+        },
         overrideAccess: true,
       })
-      await payload.destroy()
-    },
-    { auto: true, scope: 'worker' },
-  ],
-})
+
+      return apiKey
+    }
+
+    return { getApiKey, getLimitedApiKey, limitedUserId, userId }
+  },
+)
 
 const protocolEras: Array<{ label: string; protocolEra: ProtocolEra }> = [
   { label: '2025 legacy', protocolEra: 'legacy' },
   { label: '2026 modern', protocolEra: 'modern' },
 ]
 
+export const test = Object.assign(payloadTest, {
+  suite: ({ config }: { config: Promise<SanitizedConfig> | SanitizedConfig }) => {
+    payloadTest.override('testConfig', config)
+    payloadTest.override('testSuiteConfigured', true)
+
+    return payloadTest.describe
+  },
+})
+
 /** Registers every MCP integration test independently against both protocol eras. */
-export function it(name: string, test: McpTestFunction, timeout?: number): void {
+export function it(name: string, testFunction: McpTestFunction, timeout?: number): void {
   for (const { label, protocolEra } of protocolEras) {
-    registerMcpTest({ name, label, protocolEra, test, timeout })
+    registerMcpTest({ label, name, protocolEra, testFunction, timeout })
   }
 }
 
 /** Registers an integration test for behavior that exists only in the modern era. */
-export function itModern(name: string, test: McpTestFunction, timeout?: number): void {
-  registerMcpTest({ name, label: '2026 modern', protocolEra: 'modern', test, timeout })
+export function itModern(name: string, testFunction: McpTestFunction, timeout?: number): void {
+  registerMcpTest({
+    label: '2026 modern',
+    name,
+    protocolEra: 'modern',
+    testFunction,
+    timeout,
+  })
 }
 
 const registerMcpTest = ({
-  name,
   label,
+  name,
   protocolEra,
-  test,
+  testFunction,
   timeout,
 }: {
   label: string
   name: string
   protocolEra: ProtocolEra
-  test: McpTestFunction
+  testFunction: McpTestFunction
   timeout?: number
 }): void => {
   payloadTest(
     `${name} [${label}]`,
-    // eslint-disable-next-line no-empty-pattern
-    async ({}) => {
+    async ({ mcpSetup, payload, restClient }) => {
       const mcp = createMcpClient({ protocolEra, restClient })
 
       onTestFinished(() => mcp.close())
 
-      await test({ mcp, protocolEra })
+      await testFunction({ mcp, payload, protocolEra, restClient, ...mcpSetup })
     },
     timeout,
   )

@@ -118,13 +118,9 @@ export const baseConfig: Partial<Config> = {
     fallback: true,
     locales: ['en', 'es', 'he'],
   },
-  onInit: async (payload) => {
-    // IMPORTANT: This should only seed, not clear the database.
-    if (process.env.SEED_IN_CONFIG_ONINIT !== 'false') {
-      await seed(payload)
-    }
-  },
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 }
+
+export { seed }

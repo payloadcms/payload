@@ -27,7 +27,6 @@ let url: AdminUrlUtil
 test.describe('Code', () => {
   test.beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-    process.env.SEED_IN_CONFIG_ONINIT = 'false'
     ;({ serverURL } = await initPayloadE2ENoConfig<Config>({
       dirname,
     }))
@@ -41,8 +40,6 @@ test.describe('Code', () => {
   test.beforeEach(async () => {
     await reInitializeDB({
       serverURL,
-      snapshotKey: 'fieldsTest',
-      uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
     })
 
     if (client) {
