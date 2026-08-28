@@ -191,6 +191,66 @@ test.describe('Bulk Edit', () => {
     )
   })
 
+  test('should respect the list filter when unpublishing all across pages', async () => {
+    await deleteAllPosts()
+
+    const matchingDescription = 'unpublish-me'
+    const otherDescription = 'leave-me-alone'
+
+    for (let i = 1; i <= 3; i++) {
+      await createPost({ title: `Matching post ${i}`, description: matchingDescription })
+      await wait(50)
+    }
+
+    for (let i = 1; i <= 3; i++) {
+      await createPost({ title: `Other post ${i}`, description: otherDescription })
+      await wait(50)
+    }
+
+    await page.goto(postsUrl.list)
+    // Wait until page has limit in the url, to ensure it is fully loaded
+    await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('limit=')
+
+    await addListFilter({
+      page,
+      fieldLabel: 'Description',
+      operatorLabel: 'equals',
+      value: matchingDescription,
+    })
+
+    await page.locator('input#select-all').check()
+    await page.locator('button#select-all-across-pages').click()
+
+    await page.locator('.list-selection__button[aria-label="Unpublish"]').click()
+    await page.locator('#unpublish-posts [data-dialog-action="confirm"]').click()
+
+    await expect
+      .poll(
+        async () => {
+          const { docs } = await payload.find({
+            collection: postsSlug,
+            where: { description: { equals: matchingDescription } },
+          })
+
+          return docs.every((doc) => doc._status === 'draft')
+        },
+        { timeout: POLL_TOPASS_TIMEOUT },
+      )
+      .toBe(true)
+
+    // Documents outside the filter must be untouched
+    const { docs: otherDocs } = await payload.find({
+      collection: postsSlug,
+      where: { description: { equals: otherDescription } },
+    })
+
+    expect(otherDocs).toHaveLength(3)
+
+    for (const doc of otherDocs) {
+      expect(doc._status).toBe('published')
+    }
+  })
+
   test('should update many', async () => {
     await deleteAllPosts()
 
