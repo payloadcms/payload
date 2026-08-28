@@ -208,6 +208,11 @@ export const updateDocument = async <
   // /////////////////////////////////////
 
   let statusFieldAccessDenied = false
+  const publicationFieldPolicyDoc = buildAllLocalesPublicationHookDoc({
+    doc: originalDoc,
+    docWithLocales,
+    status: data._status === allLocalesPublicationStatus ? allLocalesPublicationStatus : undefined,
+  })
 
   data = await beforeValidate<DeepPartial<DataFromCollectionSlug<TSlug>>>({
     id,
@@ -215,6 +220,7 @@ export const updateDocument = async <
     context: req.context,
     data,
     doc: originalDoc,
+    docForHooks: publicationFieldPolicyDoc,
     global: null,
     onFieldAccessDenied: (path) => {
       if (path === '_status') {

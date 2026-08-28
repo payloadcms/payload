@@ -10,6 +10,7 @@ type Args<T extends JsonObject> = {
   context: RequestContext
   data: T
   doc?: T
+  docForHooks?: T
   duplicate?: boolean
   global: null | SanitizedGlobalConfig
   id?: number | string
@@ -33,6 +34,7 @@ export const beforeValidate = async <T extends JsonObject>({
   context,
   data: incomingData,
   doc,
+  docForHooks,
   global,
   onFieldAccessDenied,
   operation,
@@ -45,6 +47,7 @@ export const beforeValidate = async <T extends JsonObject>({
     context,
     data: incomingData,
     doc,
+    docForHooks,
     fields: (collection?.fields || global?.fields)!,
     global,
     onFieldAccessDenied,

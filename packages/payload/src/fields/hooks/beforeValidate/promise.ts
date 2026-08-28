@@ -25,6 +25,7 @@ type Args<T> = {
    * The original data (not modified by any hooks)
    */
   doc: T
+  docForHooks?: T
   field: Field | TabAsField
   fieldIndex: number
   global: null | SanitizedGlobalConfig
@@ -59,6 +60,7 @@ export const promise = async <T>({
   context,
   data,
   doc,
+  docForHooks,
   field,
   fieldIndex,
   global,
@@ -85,6 +87,9 @@ export const promise = async <T>({
   const pathSegments = path ? path.split('.') : []
   const schemaPathSegments = schemaPath ? schemaPath.split('.') : []
   const indexPathSegments = indexPath ? indexPath.split('-').filter(Boolean)?.map(Number) : []
+  const policyDoc = path === '_status' && docForHooks ? docForHooks : doc
+  const policySiblingDoc =
+    path === '_status' && docForHooks ? (docForHooks as JsonObject) : siblingDoc
 
   if (fieldAffectsData(field)) {
     if (field.name === 'id') {
@@ -298,11 +303,11 @@ export const promise = async <T>({
           global,
           indexPath: indexPathSegments,
           operation,
-          originalDoc: doc,
+          originalDoc: policyDoc,
           overrideAccess,
           path: pathSegments,
-          previousSiblingDoc: siblingDoc,
-          previousValue: siblingDoc[field.name],
+          previousSiblingDoc: policySiblingDoc,
+          previousValue: policySiblingDoc[field.name],
           req,
           schemaPath: schemaPathSegments,
           siblingData,
@@ -330,7 +335,7 @@ export const promise = async <T>({
                   blockData,
                   collection,
                   data: data as Partial<T>,
-                  doc,
+                  doc: policyDoc,
                   req,
                   siblingData,
                 }
@@ -338,7 +343,7 @@ export const promise = async <T>({
                   id,
                   blockData,
                   data: data as Partial<T>,
-                  doc,
+                  doc: policyDoc,
                   global: global!,
                   req,
                   siblingData,
