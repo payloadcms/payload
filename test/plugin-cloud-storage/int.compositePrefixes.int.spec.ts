@@ -1,13 +1,13 @@
-import type { Payload } from 'payload'
 import type { SuiteAPI } from 'vitest'
 
 import * as AWS from '@aws-sdk/client-s3'
 import path from 'path'
 import shelljs from 'shelljs'
 import { fileURLToPath } from 'url'
-import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
+import { expect } from 'vitest'
 
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { test } from '../__helpers/int/vitest.js'
+import testConfig from './config.compositePrefixes.js'
 import { collectionPrefix, mediaWithCompositePrefixesSlug } from './shared.js'
 import { clearTestBucket, createTestBucket } from './utils.js'
 
@@ -16,39 +16,33 @@ const dirname = path.dirname(filename)
 
 function describeIfInCIOrHasLocalstack(): SuiteAPI | SuiteAPI['skip'] {
   if (process.env.CI) {
-    return describe
+    return test.describe
   }
 
   const { code } = shelljs.exec(`docker ps | grep localstack`)
 
   if (code !== 0) {
     console.warn('Localstack is not running. Skipping test suite.')
-    return describe.skip
+    return test.describe.skip
   }
 
   console.log('Localstack is running. Running test suite.')
 
-  return describe
+  return test.describe
 }
 
-describe('@payloadcms/plugin-cloud-storage (composite prefixes)', () => {
-  let payload: Payload
+test.suite({ config: testConfig })('@payloadcms/plugin-cloud-storage (composite prefixes)', () => {
   let TEST_BUCKET: string
 
-  beforeAll(async () => {
-    ;({ payload } = await initPayloadInt(dirname, undefined, true, 'config.compositePrefixes.ts'))
+  test.beforeEach(async () => {
     TEST_BUCKET = process.env.S3_BUCKET!
-  })
-
-  afterAll(async () => {
-    await payload.destroy()
   })
 
   let client: AWS.S3Client
 
   describeIfInCIOrHasLocalstack()('S3 composite prefixes', () => {
-    describe('S3', () => {
-      beforeAll(async () => {
+    test.describe('S3', () => {
+      test.beforeAll(async () => {
         client = new AWS.S3({
           credentials: {
             accessKeyId: process.env.S3_ACCESS_KEY_ID!,
@@ -63,11 +57,11 @@ describe('@payloadcms/plugin-cloud-storage (composite prefixes)', () => {
         await clearTestBucket(client)
       })
 
-      afterEach(async () => {
+      test.afterEach(async () => {
         await clearTestBucket(client)
       })
 
-      it('can upload with composite prefixes (collection + doc prefix)', async () => {
+      test('can upload with composite prefixes (collection + doc prefix)', async ({ payload }) => {
         const docPrefix = 'user-123'
 
         const upload = await payload.create({
@@ -93,7 +87,7 @@ describe('@payloadcms/plugin-cloud-storage (composite prefixes)', () => {
         )
       })
 
-      it('can upload with composite prefixes (collection prefix only)', async () => {
+      test('can upload with composite prefixes (collection prefix only)', async ({ payload }) => {
         const upload = await payload.create({
           collection: mediaWithCompositePrefixesSlug,
           data: {},

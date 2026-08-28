@@ -34,7 +34,6 @@ import {
   restrictedMediaSlug,
   testMetadataSlug,
 } from './shared.js'
-import { createTestBucket } from './utils.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -184,42 +183,35 @@ export function buildPluginCloudStorageIntConfig({
   })
 
   return buildConfigWithDefaults({
-    admin: {
-      importMap: {
-        baseDir: path.resolve(dirname),
+    suite: useCompositePrefixes
+      ? 'plugin-cloud-storage-composite-prefixes'
+      : 'plugin-cloud-storage',
+    config: {
+      admin: {
+        importMap: {
+          baseDir: path.resolve(dirname),
+        },
       },
+      collections: [
+        Media,
+        MediaWithCompositePrefixes,
+        MediaWithCustomURL,
+        MediaWithGenerateFileURL,
+        MediaWithOverwrite,
+        MediaWithPrefix,
+        MediaWithThrowingHook,
+        RestrictedMedia,
+        TestMetadata,
+        Users,
+      ],
+      plugins: [testMetadataPlugin],
+      storage: storagePlugin ? [storagePlugin] : [],
+      typescript: {
+        outputFile: path.resolve(dirname, 'payload-types.ts'),
+      },
+      upload: uploadOptions,
     },
-    collections: [
-      Media,
-      MediaWithCompositePrefixes,
-      MediaWithCustomURL,
-      MediaWithGenerateFileURL,
-      MediaWithOverwrite,
-      MediaWithPrefix,
-      MediaWithThrowingHook,
-      RestrictedMedia,
-      TestMetadata,
-      Users,
-    ],
-    onInit: async (payload) => {
-      /*const client = new AWS.S3({
-      endpoint: process.env.S3_ENDPOINT,
-      forcePathStyle: process.env.S3_FORCE_PATH_STYLE === 'true',
-      region: process.env.S3_REGION,
-      credentials: {
-        accessKeyId: process.env.S3_ACCESS_KEY_ID,
-        secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
-      },
-    })
-
-    const makeBucketRes = await client.send(
-      new AWS.CreateBucketCommand({ Bucket: 'payload-bucket' }),
-    )
-
-    if (makeBucketRes.$metadata.httpStatusCode !== 200) {
-      throw new Error(`Failed to create bucket. ${makeBucketRes.$metadata.httpStatusCode}`)
-    }*/
-
+    seed: async (payload) => {
       await payload.create({
         collection: 'users',
         data: {
@@ -228,17 +220,9 @@ export function buildPluginCloudStorageIntConfig({
         },
       })
 
-      await createTestBucket()
-
       payload.logger.info(
         `Using plugin-cloud-storage adapter: ${process.env.PAYLOAD_PUBLIC_CLOUD_STORAGE_ADAPTER}`,
       )
     },
-    plugins: [testMetadataPlugin],
-    storage: storagePlugin ? [storagePlugin] : [],
-    typescript: {
-      outputFile: path.resolve(dirname, 'payload-types.ts'),
-    },
-    upload: uploadOptions,
   })
 }

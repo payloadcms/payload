@@ -1,37 +1,17 @@
-import type { Payload, SanitizedConfig } from 'payload'
-
 import { initI18n } from '@payloadcms/translations'
-import path from 'path'
 import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { expect } from 'vitest'
 
 // eslint-disable-next-line payload/no-relative-monorepo-imports
 import { buildFieldSchemaMap } from '../../packages/ui/src/utilities/buildFieldSchemaMap/index.js'
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { test } from '../__helpers/int/vitest.js'
+import testConfig from './config.js'
 import { fieldPathsSlug } from './shared.js'
 import { testDoc } from './testDoc.js'
 
-let payload: Payload
-let config: SanitizedConfig
-
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
-
-describe('Field Paths', () => {
-  beforeAll(async () => {
-    const initResult = await initPayloadInt(dirname)
-    config = initResult.config
-    payload = initResult.payload
-  })
-
-  afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
-  })
-
-  describe('hooks', () => {
-    it('should pass correct field paths through field hooks', async () => {
+test.suite({ config: testConfig })('Field Paths', () => {
+  test.describe('hooks', () => {
+    test('should pass correct field paths through field hooks', async ({ payload }) => {
       const formatExpectedFieldPaths = (
         fieldIdentifier: string,
         {
@@ -153,8 +133,8 @@ describe('Field Paths', () => {
     })
   })
 
-  describe('field schema map', () => {
-    it('should build a field schema map with correct field schema paths', async () => {
+  test.describe('field schema map', () => {
+    test('should build a field schema map with correct field schema paths', async ({ config }) => {
       const i18n = await initI18n({
         config: config.i18n,
         context: 'client',

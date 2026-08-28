@@ -13,15 +13,21 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 export default buildConfigWithDefaults({
-  admin: {
-    importMap: {
-      baseDir: path.resolve(dirname),
+  suite: 'email',
+  config: {
+    admin: {
+      importMap: {
+        baseDir: path.resolve(dirname),
+      },
+    },
+    collections: [PostsCollection, MediaCollection],
+    email: nodemailerAdapter(),
+    globals: [MenuGlobal],
+    typescript: {
+      outputFile: path.resolve(dirname, 'payload-types.ts'),
     },
   },
-  collections: [PostsCollection, MediaCollection],
-  email: nodemailerAdapter(),
-  globals: [MenuGlobal],
-  onInit: async (payload) => {
+  seed: async (payload) => {
     await payload.create({
       collection: 'users',
       data: {
@@ -51,8 +57,5 @@ export default buildConfigWithDefaults({
       data: {},
       file: imageFile,
     })
-  },
-  typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })

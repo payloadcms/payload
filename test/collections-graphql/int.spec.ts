@@ -4,50 +4,33 @@ import { fileURLToPath } from 'node:url'
 import path from 'path'
 import { getFileByPath, mapAsync } from 'payload'
 import { wait } from 'payload/shared'
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import { expect } from 'vitest'
 
-import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { Post } from './payload-types.js'
 
+import { test } from '../__helpers/int/vitest.js'
 import { idToString } from '../__helpers/shared/idToString.js'
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
-import { clearAndSeedEverything } from './seed.js'
+import testConfig from './config.js'
 import { errorOnHookSlug, pointSlug, relationSlug, slug } from './shared.js'
 
 const formatID = (id: number | string) => (typeof id === 'number' ? id : `"${id}"`)
 
 const title = 'title'
 
-let restClient: NextRESTClient
-let payload: Payload
-
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-describe('collections-graphql', () => {
-  beforeAll(async () => {
-    process.env.SEED_IN_CONFIG_ONINIT = 'false'
-    ;({ payload, restClient } = await initPayloadInt(dirname))
-  })
-
-  afterAll(async () => {
-    await payload.destroy()
-  })
-
-  beforeEach(async () => {
-    await clearAndSeedEverything(payload)
-  })
-
-  describe('CRUD', () => {
+test.suite({ config: testConfig })('collections-graphql', () => {
+  test.describe('CRUD', () => {
     let existingDoc: Post
     let existingDocGraphQLID
 
-    beforeEach(async () => {
-      existingDoc = await createPost()
+    test.beforeEach(async ({ payload }) => {
+      existingDoc = await createPost({ payload })
       existingDocGraphQLID = idToString(existingDoc.id, payload)
     })
 
-    it('should create', async () => {
+    test('should create', async ({ restClient }) => {
       const query = `mutation {
           createPost(data: {title: "${title}"}) {
           id
@@ -64,7 +47,7 @@ describe('collections-graphql', () => {
       expect(doc.id).toBeDefined()
     })
 
-    it('should create using graphql variables', async () => {
+    test('should create using graphql variables', async ({ restClient }) => {
       const query = `mutation Create($title: String!) {
           createPost(data: {title: $title}) {
           id
@@ -86,7 +69,7 @@ describe('collections-graphql', () => {
       expect(doc.id).toBeDefined()
     })
 
-    it('should read', async () => {
+    test('should read', async ({ restClient }) => {
       const query = `query {
         Post(id: ${existingDocGraphQLID}) {
           id
@@ -101,7 +84,7 @@ describe('collections-graphql', () => {
       expect(doc).toMatchObject({ id: existingDoc.id, title })
     })
 
-    it('should find', async () => {
+    test('should find', async ({ restClient }) => {
       const query = `query {
         Posts {
           docs {
@@ -118,7 +101,7 @@ describe('collections-graphql', () => {
       expect(docs).toContainEqual(expect.objectContaining({ id: existingDoc.id }))
     })
 
-    it('should sort by multiple fields', async () => {
+    test('should sort by multiple fields', async ({ payload, restClient }) => {
       const doc1 = await payload.create({ collection: 'sort', data: { title: 'a', number: 1 } })
       const doc2 = await payload.create({ collection: 'sort', data: { title: 'b', number: 1 } })
       const doc3 = await payload.create({ collection: 'sort', data: { title: 'a', number: 2 } })
@@ -142,7 +125,7 @@ describe('collections-graphql', () => {
       expect(docs.map((doc) => doc.id)).toEqual([doc3.id, doc1.id, doc4.id, doc2.id])
     })
 
-    it('should not fail with sort as empty string', async () => {
+    test('should not fail with sort as empty string', async ({ restClient }) => {
       const query = `query {
         Sorts(sort: "") {
           docs {
@@ -161,7 +144,7 @@ describe('collections-graphql', () => {
       expect(docs).toBeTruthy()
     })
 
-    it('should count', async () => {
+    test('should count', async ({ restClient }) => {
       const query = `query {
         countPosts {
           totalDocs
@@ -175,7 +158,7 @@ describe('collections-graphql', () => {
       expect(typeof totalDocs).toBe('number')
     })
 
-    it('should read using multiple queries', async () => {
+    test('should read using multiple queries', async ({ restClient }) => {
       const query = `query {
           postIDs: Posts {
             docs {
@@ -202,7 +185,10 @@ describe('collections-graphql', () => {
       expect(singlePost.id).toBeDefined()
     })
 
-    it('should commit or rollback multiple mutations independently', async () => {
+    test('should commit or rollback multiple mutations independently', async ({
+      payload,
+      restClient,
+    }) => {
       const firstTitle = 'first title'
       const secondTitle = 'second title'
       const first = await payload.create({
@@ -268,7 +254,7 @@ describe('collections-graphql', () => {
       expect(updateSecondResult).toStrictEqual(second)
     })
 
-    it('should retain payload api', async () => {
+    test('should retain payload api', async ({ restClient }) => {
       const query = `
         query {
           PayloadApiTestTwos {
@@ -290,7 +276,7 @@ describe('collections-graphql', () => {
       expect(res.docs[0].relation.payloadAPI).toStrictEqual('GraphQL')
     })
 
-    it('should have access to headers in resolver', async () => {
+    test('should have access to headers in resolver', async ({ restClient }) => {
       const query = `query {
         ContentTypes {
           docs {
@@ -304,7 +290,7 @@ describe('collections-graphql', () => {
       expect(data.ContentTypes?.docs[0]?.contentType).toEqual('application/json')
     })
 
-    it('should update existing', async () => {
+    test('should update existing', async ({ restClient }) => {
       const updatedTitle = 'updated title'
 
       const query = `mutation {
@@ -321,7 +307,7 @@ describe('collections-graphql', () => {
       expect(doc).toMatchObject({ id: existingDoc.id, title: updatedTitle })
     })
 
-    it('should delete', async () => {
+    test('should delete', async ({ restClient }) => {
       const query = `mutation {
         deletePost(id: ${existingDocGraphQLID}) {
           id
@@ -341,9 +327,12 @@ describe('collections-graphql', () => {
     })
   })
 
-  describe('Querying', () => {
-    describe('nested has-many relationship queries', () => {
-      it('should query a nested has-many relationship through GraphQL', async () => {
+  test.describe('Querying', () => {
+    test.describe('nested has-many relationship queries', () => {
+      test('should query a nested has-many relationship through GraphQL', async ({
+        payload,
+        restClient,
+      }) => {
         const recalls = await payload.create({
           collection: relationSlug,
           data: { name: 'recalls' },
@@ -354,17 +343,26 @@ describe('collections-graphql', () => {
           data: { name: 'electric-cars' },
         })
 
-        const mixedPost = await createPost({
-          relationHasManyField: [recalls.id, electricCars.id],
-        })
+        const mixedPost = await createPost(
+          { payload },
+          {
+            relationHasManyField: [recalls.id, electricCars.id],
+          },
+        )
 
-        const electricCarsPost = await createPost({
-          relationHasManyField: [electricCars.id],
-        })
+        const electricCarsPost = await createPost(
+          { payload },
+          {
+            relationHasManyField: [electricCars.id],
+          },
+        )
 
-        const postWithoutRelations = await createPost({
-          relationHasManyField: [],
-        })
+        const postWithoutRelations = await createPost(
+          { payload },
+          {
+            relationHasManyField: [],
+          },
+        )
 
         const fixtureIDFilters = [mixedPost.id, electricCarsPost.id, postWithoutRelations.id]
           .map((id) => `{ id: { equals: ${formatID(id)} } }`)
@@ -391,16 +389,16 @@ describe('collections-graphql', () => {
       })
     })
 
-    describe('Operators', () => {
+    test.describe('Operators', () => {
       let post1: Post
       let post2: Post
 
-      beforeEach(async () => {
-        post1 = await createPost({ title: 'post1' })
-        post2 = await createPost({ title: 'post2' })
+      test.beforeEach(async ({ payload }) => {
+        post1 = await createPost({ payload }, { title: 'post1' })
+        post2 = await createPost({ payload }, { title: 'post2' })
       })
 
-      it('equals', async () => {
+      test('equals', async ({ restClient }) => {
         const query = `query {
           Posts(where:{title: {equals:"${post1.title}"}}) {
             docs {
@@ -417,7 +415,7 @@ describe('collections-graphql', () => {
         expect(docs).toContainEqual(expect.objectContaining({ id: post1.id, title: post1.title }))
       })
 
-      it('not_equals', async () => {
+      test('not_equals', async ({ restClient }) => {
         const query = `query {
           Posts(where:{title: {not_equals:"${post1.title}"}}) {
             docs {
@@ -438,8 +436,8 @@ describe('collections-graphql', () => {
         expect(docsWithWhereTitleNotEqualPostTitle).toHaveLength(0)
       })
 
-      it('like', async () => {
-        const postWithWords = await createPost({ title: 'the quick brown fox' })
+      test('like', async ({ payload, restClient }) => {
+        const postWithWords = await createPost({ payload }, { title: 'the quick brown fox' })
         const query = `query {
           Posts(where:{title: {like:"${postWithWords.title?.split(' ')[1]}"}}) {
             docs {
@@ -457,7 +455,7 @@ describe('collections-graphql', () => {
         expect(docs[0]).toMatchObject({ id: postWithWords.id, title: postWithWords.title })
       })
 
-      it('contains', async () => {
+      test('contains', async ({ restClient }) => {
         const query = `query {
           Posts(where:{title: {contains:"${post1.title?.slice(0, 4)}"}}) {
             docs {
@@ -476,8 +474,8 @@ describe('collections-graphql', () => {
         expect(docs).toContainEqual(expect.objectContaining({ id: post2.id, title: post2.title }))
       })
 
-      it('exists - true', async () => {
-        const withDescription = await createPost({ description: 'description' })
+      test('exists - true', async ({ payload, restClient }) => {
+        const withDescription = await createPost({ payload }, { description: 'description' })
         const query = `query {
           Posts(where:{description: {exists:true}}) {
             docs {
@@ -497,8 +495,8 @@ describe('collections-graphql', () => {
         )
       })
 
-      it('exists - false', async () => {
-        const withDescription = await createPost({ description: 'description' })
+      test('exists - false', async ({ payload, restClient }) => {
+        const withDescription = await createPost({ payload }, { description: 'description' })
         const query = `query {
           Posts(where:{description: {exists:false}}) {
             docs {
@@ -516,16 +514,16 @@ describe('collections-graphql', () => {
         expect(docs).toContainEqual(expect.objectContaining({ id: post1.id }))
       })
 
-      describe('numbers', () => {
+      test.describe('numbers', () => {
         let numPost1: Post
         let numPost2: Post
 
-        beforeEach(async () => {
-          numPost1 = await createPost({ number: 1 })
-          numPost2 = await createPost({ number: 2 })
+        test.beforeEach(async ({ payload }) => {
+          numPost1 = await createPost({ payload }, { number: 1 })
+          numPost2 = await createPost({ payload }, { number: 2 })
         })
 
-        it('greater_than', async () => {
+        test('greater_than', async ({ restClient }) => {
           const query = `query {
             Posts(where:{number: {greater_than:1}}) {
               docs {
@@ -542,7 +540,7 @@ describe('collections-graphql', () => {
           expect(docs.map(({ id }) => id)).toContain(numPost2.id)
         })
 
-        it('greater_than_equal', async () => {
+        test('greater_than_equal', async ({ restClient }) => {
           const query = `query {
             Posts(where:{number: {greater_than_equal:1}}) {
               docs {
@@ -560,7 +558,7 @@ describe('collections-graphql', () => {
           expect(docs).toContainEqual(expect.objectContaining({ id: numPost2.id }))
         })
 
-        it('less_than', async () => {
+        test('less_than', async ({ restClient }) => {
           const query = `query {
             Posts(where:{number: {less_than:2}}) {
               docs {
@@ -578,7 +576,7 @@ describe('collections-graphql', () => {
           expect(docs).toContainEqual(expect.objectContaining({ id: numPost1.id }))
         })
 
-        it('less_than_equal', async () => {
+        test('less_than_equal', async ({ restClient }) => {
           const query = `query {
             Posts(where:{number: {less_than_equal:2}}) {
               docs {
@@ -598,7 +596,7 @@ describe('collections-graphql', () => {
         })
       })
 
-      it('or', async () => {
+      test('or', async ({ restClient }) => {
         const query = `query {
           Posts(
             where: {OR: [{ title: { equals: "${post1.title}" } }, { title: { equals: "${post2.title}" } }]
@@ -619,7 +617,7 @@ describe('collections-graphql', () => {
         expect(docs).toContainEqual(expect.objectContaining({ id: post2.id }))
       })
 
-      it('or - 1 result', async () => {
+      test('or - 1 result', async ({ restClient }) => {
         const query = `query {
           Posts(
             where: {OR: [{ title: { equals: "${post1.title}" } }, { title: { equals: "nope" } }]
@@ -640,8 +638,8 @@ describe('collections-graphql', () => {
         expect(docs).not.toContainEqual(expect.objectContaining({ id: post2.id }))
       })
 
-      it('and', async () => {
-        const specialPost = await createPost({ description: 'special-123123' })
+      test('and', async ({ payload, restClient }) => {
+        const specialPost = await createPost({ payload }, { description: 'special-123123' })
 
         const query = `query {
           Posts(
@@ -666,11 +664,11 @@ describe('collections-graphql', () => {
         expect(docs).toContainEqual(expect.objectContaining({ id: specialPost.id }))
       })
 
-      describe('near', () => {
+      test.describe('near', () => {
         const point = [10, 20]
         const [lat, lng] = point
 
-        it('should return a document near a point', async () => {
+        test('should return a document near a point', async ({ payload, restClient }) => {
           if (payload.db.name === 'sqlite') {
             return
           }
@@ -698,7 +696,7 @@ describe('collections-graphql', () => {
           expect(docs).toHaveLength(1)
         })
 
-        it('should not return a point far away', async () => {
+        test('should not return a point far away', async ({ payload, restClient }) => {
           if (payload.db.name === 'sqlite') {
             return
           }
@@ -726,7 +724,7 @@ describe('collections-graphql', () => {
           expect(docs).toHaveLength(0)
         })
 
-        it('should sort find results by nearest distance', async () => {
+        test('should sort find results by nearest distance', async ({ payload, restClient }) => {
           if (payload.db.name === 'sqlite') {
             return
           }
@@ -775,7 +773,7 @@ describe('collections-graphql', () => {
         })
       })
 
-      describe('within', () => {
+      test.describe('within', () => {
         type Point = [number, number]
         const polygon: Point[] = [
           [9.0, 19.0], // bottom-left
@@ -785,7 +783,10 @@ describe('collections-graphql', () => {
           [9.0, 19.0], // back to starting point to close the polygon
         ]
 
-        it('should return a document with the point inside the polygon', async () => {
+        test('should return a document with the point inside the polygon', async ({
+          payload,
+          restClient,
+        }) => {
           if (payload.db.name === 'sqlite') {
             return
           }
@@ -816,7 +817,10 @@ describe('collections-graphql', () => {
           expect(docs[0].point).toEqual([10, 20])
         })
 
-        it('should not return a document with the point outside the polygon', async () => {
+        test('should not return a document with the point outside the polygon', async ({
+          payload,
+          restClient,
+        }) => {
           if (payload.db.name === 'sqlite') {
             return
           }
@@ -848,7 +852,7 @@ describe('collections-graphql', () => {
         })
       })
 
-      describe('intersects', () => {
+      test.describe('intersects', () => {
         type Point = [number, number]
         const polygon: Point[] = [
           [9.0, 19.0], // bottom-left
@@ -858,7 +862,10 @@ describe('collections-graphql', () => {
           [9.0, 19.0], // back to starting point to close the polygon
         ]
 
-        it('should return a document with the point intersecting the polygon', async () => {
+        test('should return a document with the point intersecting the polygon', async ({
+          payload,
+          restClient,
+        }) => {
           if (payload.db.name === 'sqlite') {
             return
           }
@@ -889,7 +896,10 @@ describe('collections-graphql', () => {
           expect(docs[0].point).toEqual([10, 20])
         })
 
-        it('should not return a document with the point not intersecting a smaller polygon', async () => {
+        test('should not return a document with the point not intersecting a smaller polygon', async ({
+          payload,
+          restClient,
+        }) => {
           if (payload.db.name === 'sqlite') {
             return
           }
@@ -921,8 +931,14 @@ describe('collections-graphql', () => {
         })
       })
 
-      it('can query deeply nested fields within rows, tabs, collapsibles', async () => {
-        const withNestedField = await createPost({ D1: { D2: { D3: { D4: 'nested message' } } } })
+      test('can query deeply nested fields within rows, tabs, collapsibles', async ({
+        payload,
+        restClient,
+      }) => {
+        const withNestedField = await createPost(
+          { payload },
+          { D1: { D2: { D3: { D4: 'nested message' } } } },
+        )
         const query = `{
           Posts(where: { D1__D2__D3__D4: { equals: "nested message" } }) {
             docs {
@@ -951,8 +967,8 @@ describe('collections-graphql', () => {
       })
     })
 
-    describe('relationships', () => {
-      it('should query on relationships with custom IDs', async () => {
+    test.describe('relationships', () => {
+      test('should query on relationships with custom IDs', async ({ restClient }) => {
         const query = `query {
           Posts(where: { title: { equals: "has custom ID relation" }}) {
             docs {
@@ -975,7 +991,7 @@ describe('collections-graphql', () => {
         expect(docs[0].relationToCustomID.id).toStrictEqual(1)
       })
 
-      it('should query on relationships with custom IDs - count', async () => {
+      test('should query on relationships with custom IDs - count', async ({ restClient }) => {
         const query = `query {
           countPosts(where: { title: { equals: "has custom ID relation" }}) {
             totalDocs
@@ -990,7 +1006,10 @@ describe('collections-graphql', () => {
         expect(totalDocs).toStrictEqual(1)
       })
 
-      it('should query a document with a deleted relationship', async () => {
+      test('should query a document with a deleted relationship', async ({
+        payload,
+        restClient,
+      }) => {
         const relation = await payload.create({
           collection: relationSlug,
           data: {
@@ -1032,7 +1051,10 @@ describe('collections-graphql', () => {
         expect(docs[0].relationField).toBeFalsy()
       })
 
-      it('should query a document with a deleted relationship hasMany', async () => {
+      test('should query a document with a deleted relationship hasMany', async ({
+        payload,
+        restClient,
+      }) => {
         const relation = await payload.create({
           collection: relationSlug,
           data: {
@@ -1074,7 +1096,7 @@ describe('collections-graphql', () => {
         expect(docs[0].relationHasManyField).toHaveLength(0)
       })
 
-      it('should query relationships with locale', async () => {
+      test('should query relationships with locale', async ({ payload, restClient }) => {
         const newDoc = await payload.create({
           collection: 'cyclical-relationship',
           data: {
@@ -1112,7 +1134,10 @@ describe('collections-graphql', () => {
         expect(queriedDoc.title).toEqual(queriedDoc.relationToSelf.title)
       })
 
-      it('should still query hasMany relationships when some document was deleted', async () => {
+      test('should still query hasMany relationships when some document was deleted', async ({
+        payload,
+        restClient,
+      }) => {
         const relation_1_draft = await payload.create({
           collection: 'relation',
           data: { _status: 'draft', name: 'relation_1_draft' },
@@ -1160,7 +1185,10 @@ describe('collections-graphql', () => {
         expect(queriedDoc.relationHasManyField[0].id).toBe(relation_2.id)
       })
 
-      it('should still query hasMany relationships when user doesnt have access to some document', async () => {
+      test('should still query hasMany relationships when user doesnt have access to some document', async ({
+        payload,
+        restClient,
+      }) => {
         const relation_1_draft = await payload.create({
           collection: 'relation',
           data: { name: 'restricted' },
@@ -1207,7 +1235,7 @@ describe('collections-graphql', () => {
     })
   })
 
-  it('should query correctly with draft argument', async () => {
+  test('should query correctly with draft argument', async ({ payload, restClient }) => {
     const publishValue = '1'
     const draftValue = '2'
 
@@ -1280,7 +1308,7 @@ describe('collections-graphql', () => {
     expect(queriedDoc2.relationToSelf.title).toEqual(draftValue)
   })
 
-  it('should query upload enabled docs', async () => {
+  test('should query upload enabled docs', async ({ payload, restClient }) => {
     const file = await getFileByPath(path.resolve(dirname, '../uploads/test-image.jpg'))
 
     const mediaDoc = await payload.create({
@@ -1317,8 +1345,10 @@ describe('collections-graphql', () => {
     expect(queriedDoc.media.title).toEqual('example')
   })
 
-  describe('Error Handler', () => {
-    it('should return have an array of errors when making a bad request', async () => {
+  test.describe('Error Handler', () => {
+    test('should return have an array of errors when making a bad request', async ({
+      restClient,
+    }) => {
       const query = `query {
           Posts(where: { title: { exists: true }}) {
               docs {
@@ -1335,7 +1365,9 @@ describe('collections-graphql', () => {
       expect(typeof errors[0].message).toBe('string')
     })
 
-    it('should return have an array of errors when failing to pass validation', async () => {
+    test('should return have an array of errors when failing to pass validation', async ({
+      restClient,
+    }) => {
       const query = `mutation {
           createPost(data: {min: 1}) {
               id
@@ -1355,7 +1387,9 @@ describe('collections-graphql', () => {
       expect(typeof errors[0].locations).toBeDefined()
     })
 
-    it('should return have an array of errors when failing multiple mutations', async () => {
+    test('should return have an array of errors when failing multiple mutations', async ({
+      restClient,
+    }) => {
       const query = `mutation createTest {
           test1:createUser(data: { email: "test@test.com", password: "test" }) {
               email
@@ -1408,7 +1442,9 @@ describe('collections-graphql', () => {
       expect(errors[2].extensions.data.errors[0].path).toEqual('email')
     })
 
-    it('should return the minimum allowed information about internal errors', async () => {
+    test('should return the minimum allowed information about internal errors', async ({
+      restClient,
+    }) => {
       let error
       // language=graphQL
       const query = `query {
@@ -1433,7 +1469,7 @@ describe('collections-graphql', () => {
   })
 })
 
-async function createPost(overrides?: Partial<Post>) {
+async function createPost({ payload }: { payload: Payload }, overrides?: Partial<Post>) {
   const doc = await payload.create({
     collection: slug,
     data: { title: 'title', ...overrides },

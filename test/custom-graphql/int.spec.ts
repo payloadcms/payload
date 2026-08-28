@@ -1,35 +1,19 @@
-import type { Payload } from 'payload'
-
-import path from 'path'
 import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { expect } from 'vitest'
 
-import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
+import { test } from '../__helpers/int/vitest.js'
+import testConfig from './config.js'
 
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
-
-let restClient: NextRESTClient
-let payload: Payload
-
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
-
-describe('Custom GraphQL', () => {
-  beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(dirname))
-  })
-
-  afterAll(async () => {
-    await payload.destroy()
-  })
-
+test.suite({ config: testConfig })('Custom GraphQL', () => {
   if (
     !['cosmosdb', 'firestore', 'sqlite', 'sqlite-uuid', 'sqlite-uuidv7'].includes(
       process.env.PAYLOAD_DATABASE || '',
     )
   ) {
-    describe('Isolated Transaction ID', () => {
-      it('should isolate transaction IDs between queries in the same request', async () => {
+    test.describe('Isolated Transaction ID', () => {
+      test('should isolate transaction IDs between queries in the same request', async ({
+        restClient,
+      }) => {
         const query = `query {
           TransactionID1
           TransactionID2
@@ -45,7 +29,9 @@ describe('Custom GraphQL', () => {
             data.TransactionID2 !== data.TransactionID1,
         ).toBe(true)
       })
-      it('should isolate transaction IDs between mutations in the same request', async () => {
+      test('should isolate transaction IDs between mutations in the same request', async ({
+        restClient,
+      }) => {
         const query = `mutation {
           MutateTransactionID1
           MutateTransactionID2
@@ -63,7 +49,7 @@ describe('Custom GraphQL', () => {
       })
     })
   } else {
-    it('should not run isolated transaction ID tests for sqlite (incl. uuid variants)/firestore/cosmosdb', () => {
+    test('should not run isolated transaction ID tests for sqlite (incl. uuid variants)/firestore/cosmosdb', () => {
       expect(true).toBe(true)
     })
   }
