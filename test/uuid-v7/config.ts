@@ -1,8 +1,10 @@
 import type { PostgresAdapter } from '@payloadcms/db-postgres'
 
 import path from 'path'
-import { buildConfig, type DatabaseAdapterObj } from 'payload'
+import { type DatabaseAdapterObj } from 'payload'
 import { fileURLToPath } from 'url'
+
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -10,36 +12,40 @@ const { databaseAdapter } = (await import(path.resolve(dirname, '../databaseAdap
   databaseAdapter: DatabaseAdapterObj<PostgresAdapter>
 }
 
-export default await buildConfig({
-  db: databaseAdapter,
-  secret: 'uuid-v7-test-secret',
-  admin: {
-    importMap: {
-      baseDir: path.resolve(dirname),
+export default buildConfigWithDefaults({
+  suite: 'uuid-v7',
+  config: {
+    db: databaseAdapter,
+    secret: 'uuid-v7-test-secret',
+    admin: {
+      importMap: {
+        baseDir: path.resolve(dirname),
+      },
     },
+    collections: [
+      {
+        slug: 'posts',
+        fields: [{ name: 'title', type: 'text' }],
+        versions: false,
+      },
+      {
+        slug: 'categories',
+        fields: [{ name: 'name', type: 'text' }],
+        versions: false,
+      },
+      {
+        slug: 'articles',
+        fields: [
+          { name: 'title', type: 'text' },
+          {
+            name: 'category',
+            type: 'relationship',
+            relationTo: 'categories',
+          },
+        ],
+        versions: false,
+      },
+    ],
   },
-  collections: [
-    {
-      slug: 'posts',
-      fields: [{ name: 'title', type: 'text' }],
-      versions: false,
-    },
-    {
-      slug: 'categories',
-      fields: [{ name: 'name', type: 'text' }],
-      versions: false,
-    },
-    {
-      slug: 'articles',
-      fields: [
-        { name: 'title', type: 'text' },
-        {
-          name: 'category',
-          type: 'relationship',
-          relationTo: 'categories',
-        },
-      ],
-      versions: false,
-    },
-  ],
+  disableAutoLogin: true,
 })

@@ -1,35 +1,19 @@
 import type { Payload } from 'payload'
 
 import { renderTabHandler } from '@payloadcms/ui/rsc'
-import path from 'path'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { expect } from 'vitest'
 
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
-
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
+import { test } from '../__helpers/int/vitest.js'
+import testConfig from './config.js'
 
 const tagsSlug = 'tags'
 const postsSlug = 'posts'
 
-let payload: Payload
-
-describe('Tags Helpers', () => {
-  beforeAll(async () => {
-    const result = await initPayloadInt(dirname)
-    payload = result.payload
-  })
-
-  afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
-  })
-
-  describe('createTagsCollection', () => {
-    it('should create a collection with hierarchy enabled', () => {
+test.suite({ config: testConfig })('Tags Helpers', () => {
+  test.describe('createTagsCollection', () => {
+    test('should create a collection with hierarchy enabled', ({ payload }) => {
       const tagsCollection = payload.config.collections.find((c) => c.slug === tagsSlug)
 
       expect(tagsCollection).toBeDefined()
@@ -37,17 +21,16 @@ describe('Tags Helpers', () => {
       expect(tagsCollection?.hierarchy).not.toBe(false)
     })
 
-    it('should have parentFieldName in hierarchy config', () => {
+    test('should have parentFieldName in hierarchy config', ({ payload }) => {
       const tagsCollection = payload.config.collections.find((c) => c.slug === tagsSlug)
       expect(tagsCollection?.hierarchy).not.toBe(false)
 
       if (tagsCollection?.hierarchy !== false) {
-        // eslint-disable-next-line vitest/no-conditional-expect
         expect(tagsCollection?.hierarchy).toHaveProperty('parentFieldName')
       }
     })
 
-    it('should add parent field to tags collection', () => {
+    test('should add parent field to tags collection', ({ payload }) => {
       const tagsCollection = payload.config.collections.find((c) => c.slug === tagsSlug)
       expect(tagsCollection?.hierarchy).not.toBe(false)
 
@@ -57,9 +40,8 @@ describe('Tags Helpers', () => {
           (f: any) => f.name === parentFieldName && f.type === 'relationship',
         )
 
-        // eslint-disable-next-line vitest/no-conditional-expect
         expect(parentField).toBeDefined()
-        // eslint-disable-next-line vitest/no-conditional-expect
+
         expect(parentField).toMatchObject({
           type: 'relationship',
           hasMany: false,
@@ -68,7 +50,7 @@ describe('Tags Helpers', () => {
       }
     })
 
-    it('should add virtual path fields', () => {
+    test('should add virtual path fields', ({ payload }) => {
       const tagsCollection = payload.config.collections.find((c) => c.slug === tagsSlug)
 
       const slugPathField = tagsCollection?.fields.find((f: any) => f.name === '_h_slugPath')
@@ -81,8 +63,8 @@ describe('Tags Helpers', () => {
     })
   })
 
-  describe('createTagField', () => {
-    it('should add tag relationship field to collection', () => {
+  test.describe('createTagField', () => {
+    test('should add tag relationship field to collection', ({ payload }) => {
       const postsCollection = payload.config.collections.find((c) => c.slug === postsSlug)
       const tagField = postsCollection?.fields.find(
         (f: any) => f.name === `_h_${tagsSlug}` && f.type === 'relationship',
@@ -96,7 +78,7 @@ describe('Tags Helpers', () => {
       })
     })
 
-    it('should configure hasMany based on helper options', () => {
+    test('should configure hasMany based on helper options', ({ payload }) => {
       const postsCollection = payload.config.collections.find((c) => c.slug === postsSlug)
       const tagField = postsCollection?.fields.find(
         (f: any) => f.name === `_h_${tagsSlug}` && f.type === 'relationship',
@@ -105,16 +87,19 @@ describe('Tags Helpers', () => {
       expect((tagField as any)?.hasMany).toBe(true)
     })
   })
-  describe('render-tab searchParams precedence', () => {
+  test.describe('render-tab searchParams precedence', () => {
     const tabSlug = 'precedence-tab'
 
-    const getForwardedSearchParams = ({
-      query,
-      searchParams,
-    }: {
-      query?: Record<string, unknown>
-      searchParams?: Record<string, unknown>
-    }): unknown => {
+    const getForwardedSearchParams = (
+      { payload }: { payload: Payload },
+      {
+        query,
+        searchParams,
+      }: {
+        query?: Record<string, unknown>
+        searchParams?: Record<string, unknown>
+      },
+    ): unknown => {
       let forwardedSearchParams: unknown
 
       const Content = (props: { searchParams?: unknown }) => {
@@ -149,26 +134,34 @@ describe('Tags Helpers', () => {
       return forwardedSearchParams
     }
 
-    it('should forward the provided searchParams to the rendered tab', () => {
-      const forwarded = getForwardedSearchParams({
-        query: { parent: 'from-query' },
-        searchParams: { parent: 'from-args' },
-      })
+    test('should forward the provided searchParams to the rendered tab', ({ payload }) => {
+      const forwarded = getForwardedSearchParams(
+        { payload },
+        {
+          query: { parent: 'from-query' },
+          searchParams: { parent: 'from-args' },
+        },
+      )
 
       expect(forwarded).toEqual({ parent: 'from-args' })
     })
 
-    it('should fall back to req.query when searchParams is undefined', () => {
-      const forwarded = getForwardedSearchParams({ query: { parent: 'from-query' } })
+    test('should fall back to req.query when searchParams is undefined', ({ payload }) => {
+      const forwarded = getForwardedSearchParams({ payload }, { query: { parent: 'from-query' } })
 
       expect(forwarded).toEqual({ parent: 'from-query' })
     })
 
-    it('should use an explicitly empty searchParams object instead of falling back to req.query', () => {
-      const forwarded = getForwardedSearchParams({
-        query: { parent: 'from-query' },
-        searchParams: {},
-      })
+    test('should use an explicitly empty searchParams object instead of falling back to req.query', ({
+      payload,
+    }) => {
+      const forwarded = getForwardedSearchParams(
+        { payload },
+        {
+          query: { parent: 'from-query' },
+          searchParams: {},
+        },
+      )
 
       expect(forwarded).toEqual({})
     })

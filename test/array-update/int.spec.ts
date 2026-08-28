@@ -1,27 +1,14 @@
-import type { Payload } from 'payload'
-
-import path from 'path'
 import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { expect } from 'vitest'
 
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { test } from '../__helpers/int/vitest.js'
+import testConfig from './config.js'
 import { arraySlug, complexSlug } from './shared.js'
 
-let payload: Payload
-
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
-
-describe('array-update', () => {
-  beforeAll(async () => {
-    ;({ payload } = await initPayloadInt(dirname))
-  })
-
-  afterAll(async () => {
-    await payload.destroy()
-  })
-
-  it('should persist existing array-based data while updating and passing row ID', async () => {
+test.suite({ config: testConfig })('array-update', () => {
+  test('should persist existing array-based data while updating and passing row ID', async ({
+    payload,
+  }) => {
     const originalText = 'some optional text'
 
     const doc = await payload.create({
@@ -63,7 +50,9 @@ describe('array-update', () => {
     })
   })
 
-  it('should disregard existing array-based data while updating and NOT passing row ID', async () => {
+  test('should disregard existing array-based data while updating and NOT passing row ID', async ({
+    payload,
+  }) => {
     const updatedText = 'here is some new text'
 
     const secondArrayItem = {
@@ -108,7 +97,9 @@ describe('array-update', () => {
     expect(updatedDoc.arrayOfFields?.[1]).toMatchObject(secondArrayItem)
   })
 
-  it('should assign fresh row IDs to each doc on bulk update when row IDs are reused', async () => {
+  test('should assign fresh row IDs to each doc on bulk update when row IDs are reused', async ({
+    payload,
+  }) => {
     const docA = await payload.create({
       collection: arraySlug,
       data: { arrayOfFields: [] },
@@ -152,7 +143,9 @@ describe('array-update', () => {
     )
   })
 
-  it('should preserve existing row IDs of the matching doc during bulk update', async () => {
+  test('should preserve existing row IDs of the matching doc during bulk update', async ({
+    payload,
+  }) => {
     const docWithExistingRow = await payload.create({
       collection: arraySlug,
       data: { arrayOfFields: [{ required: 'existing row' }] },
@@ -190,7 +183,9 @@ describe('array-update', () => {
     expect(updatedOther.arrayOfFields?.[0].required).toBe('updated existing row')
   })
 
-  it('should assign fresh row IDs for localized arrays, groups and blocks on bulk update', async () => {
+  test('should assign fresh row IDs for localized arrays, groups and blocks on bulk update', async ({
+    payload,
+  }) => {
     const docA = await payload.create({ collection: complexSlug, data: {} })
     const docB = await payload.create({ collection: complexSlug, data: {} })
 

@@ -1,31 +1,14 @@
-import type { Payload } from 'payload'
-
-import path from 'path'
 import { fileURLToPath } from 'url'
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import { expect } from 'vitest'
 
 import type { Organization } from './payload-types.js'
 
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { test } from '../__helpers/int/vitest.js'
+import testConfig from './config.js'
 
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
-
-let payload: Payload
-
-describe('Hierarchy', () => {
-  beforeAll(async () => {
-    ;({ payload } = await initPayloadInt(dirname))
-  })
-
-  afterAll(async () => {
-    if (payload) {
-      await payload.destroy()
-    }
-  })
-
-  describe('Collection Config Property', () => {
-    it('should add virtual path fields to collection', () => {
+test.suite({ config: testConfig })('Hierarchy', () => {
+  test.describe('Collection Config Property', () => {
+    test('should add virtual path fields to collection', ({ payload }) => {
       const organizationsCollection = payload.collections.organizations.config
 
       // Check that virtual path fields were added
@@ -40,7 +23,7 @@ describe('Hierarchy', () => {
       expect(titlePathField.virtual).toBe(true)
     })
 
-    it('should hide virtual path fields from the admin panel', () => {
+    test('should hide virtual path fields from the admin panel', ({ payload }) => {
       const organizationsCollection = payload.collections.organizations.config
 
       const slugPathField = organizationsCollection.fields.find((f) => f.name === '_h_slugPath')
@@ -50,26 +33,24 @@ describe('Hierarchy', () => {
       expect(titlePathField.admin.hidden).toBe(true)
     })
 
-    it('should have sanitized hierarchy config', () => {
+    test('should have sanitized hierarchy config', ({ payload }) => {
       const organizationsCollection = payload.collections.organizations.config
 
       expect(organizationsCollection.hierarchy).not.toBe(false)
       if (organizationsCollection.hierarchy !== false) {
-        // eslint-disable-next-line vitest/no-conditional-expect
         expect(organizationsCollection.hierarchy.parentFieldName).toBe('parent')
       }
     })
 
-    it('should support custom field names', () => {
+    test('should support custom field names', ({ payload }) => {
       const deptsCollection = payload.collections.departments.config
 
       expect(deptsCollection.hierarchy).not.toBe(false)
       if (deptsCollection.hierarchy !== false) {
-        // eslint-disable-next-line vitest/no-conditional-expect
         expect(deptsCollection.hierarchy.parentFieldName).toBe('parentDept')
-        // eslint-disable-next-line vitest/no-conditional-expect
+
         expect(deptsCollection.hierarchy.slugPathFieldName).toBe('_breadcrumbSlug')
-        // eslint-disable-next-line vitest/no-conditional-expect
+
         expect(deptsCollection.hierarchy.titlePathFieldName).toBe('_breadcrumbTitle')
       }
 
@@ -82,18 +63,18 @@ describe('Hierarchy', () => {
     })
   })
 
-  describe('Tree Data Generation', () => {
-    beforeEach(async () => {
+  test.describe('Tree Data Generation', () => {
+    test.beforeEach(async ({ payload }) => {
       // Clear existing data before each test
       await payload.delete({ collection: 'organizations', where: {} })
     })
 
-    afterEach(async () => {
+    test.afterEach(async ({ payload }) => {
       // Clean up data after each test
       await payload.delete({ collection: 'organizations', where: {} })
     })
 
-    it('should compute correct paths for root document', async () => {
+    test('should compute correct paths for root document', async ({ payload }) => {
       const rootPage = await payload.create({
         collection: 'organizations',
         context: { computeHierarchyPaths: true },
@@ -107,7 +88,7 @@ describe('Hierarchy', () => {
       expect(rootPage._h_titlePath).toBe('Root Page')
     })
 
-    it('should compute correct paths for nested documents', async () => {
+    test('should compute correct paths for nested documents', async ({ payload }) => {
       // Create root
       const rootPage = await payload.create({
         collection: 'organizations',
@@ -144,7 +125,7 @@ describe('Hierarchy', () => {
       expect(grandchildPage._h_titlePath).toBe('Root/Child/Grandchild')
     })
 
-    it('should compute updated paths when parent changes', async () => {
+    test('should compute updated paths when parent changes', async ({ payload }) => {
       // Create initial tree: Root -> Child -> Grandchild
       const rootPage = await payload.create({
         collection: 'organizations',
@@ -189,7 +170,7 @@ describe('Hierarchy', () => {
       expect(updatedGrandchild._h_titlePath).toBe('Another Root/Child/Grandchild')
     })
 
-    it('should compute updated paths when ancestor title changes', async () => {
+    test('should compute updated paths when ancestor title changes', async ({ payload }) => {
       // Create tree
       const rootPage = await payload.create({
         collection: 'organizations',
@@ -219,7 +200,7 @@ describe('Hierarchy', () => {
       expect(updatedChild._h_titlePath).toBe('Updated Root/Child')
     })
 
-    it('should handle moving to root level', async () => {
+    test('should handle moving to root level', async ({ payload }) => {
       // Create tree
       const rootPage = await payload.create({
         collection: 'organizations',
@@ -244,16 +225,16 @@ describe('Hierarchy', () => {
     })
   })
 
-  describe('Circular Reference Prevention', () => {
-    beforeEach(async () => {
+  test.describe('Circular Reference Prevention', () => {
+    test.beforeEach(async ({ payload }) => {
       await payload.delete({ collection: 'organizations', where: {} })
     })
 
-    afterEach(async () => {
+    test.afterEach(async ({ payload }) => {
       await payload.delete({ collection: 'organizations', where: {} })
     })
 
-    it('should prevent self-referential parent', async () => {
+    test('should prevent self-referential parent', async ({ payload }) => {
       const page = await payload.create({
         collection: 'organizations',
         data: { parent: null, title: 'Test Page' },
@@ -268,7 +249,7 @@ describe('Hierarchy', () => {
       ).rejects.toThrow('Document cannot be its own parent')
     })
 
-    it('should prevent circular reference with direct child', async () => {
+    test('should prevent circular reference with direct child', async ({ payload }) => {
       const parentPage = await payload.create({
         collection: 'organizations',
         data: { parent: null, title: 'Parent' },
@@ -288,7 +269,7 @@ describe('Hierarchy', () => {
       ).rejects.toThrow('Cannot move folder into its own subfolder')
     })
 
-    it('should prevent circular reference with grandchild', async () => {
+    test('should prevent circular reference with grandchild', async ({ payload }) => {
       const grandparent = await payload.create({
         collection: 'organizations',
         data: { parent: null, title: 'Grandparent' },
@@ -313,7 +294,7 @@ describe('Hierarchy', () => {
       ).rejects.toThrow('Cannot move folder into its own subfolder')
     })
 
-    it('should allow moving to a non-circular parent', async () => {
+    test('should allow moving to a non-circular parent', async ({ payload }) => {
       const page1 = await payload.create({
         collection: 'organizations',
         data: { parent: null, title: 'Page 1' },
@@ -343,18 +324,18 @@ describe('Hierarchy', () => {
     })
   })
 
-  describe('Query Patterns', () => {
-    beforeEach(async () => {
+  test.describe('Query Patterns', () => {
+    test.beforeEach(async ({ payload }) => {
       // Clear existing data before each test
       await payload.delete({ collection: 'organizations', where: {} })
     })
 
-    afterEach(async () => {
+    test.afterEach(async ({ payload }) => {
       // Clean up data after each test
       await payload.delete({ collection: 'organizations', where: {} })
     })
 
-    it('should find root documents by querying parent field', async () => {
+    test('should find root documents by querying parent field', async ({ payload }) => {
       const root = await payload.create({
         collection: 'organizations',
         data: { parent: null, title: 'Root' },
@@ -376,7 +357,7 @@ describe('Hierarchy', () => {
       expect(roots.docs[0]!.id).toBe(root.id)
     })
 
-    it('should find direct children by querying parent field', async () => {
+    test('should find direct children by querying parent field', async ({ payload }) => {
       const root = await payload.create({
         collection: 'organizations',
         data: { parent: null, title: 'Root' },
@@ -411,16 +392,16 @@ describe('Hierarchy', () => {
     })
   })
 
-  describe('Custom Field Names', () => {
-    beforeEach(async () => {
+  test.describe('Custom Field Names', () => {
+    test.beforeEach(async ({ payload }) => {
       await payload.delete({ collection: 'departments', where: {} })
     })
 
-    afterEach(async () => {
+    test.afterEach(async ({ payload }) => {
       await payload.delete({ collection: 'departments', where: {} })
     })
 
-    it('should use custom field names for path fields', async () => {
+    test('should use custom field names for path fields', async ({ payload }) => {
       const parentDept = await payload.create({
         collection: 'departments',
         context: { computeHierarchyPaths: true },
@@ -444,18 +425,18 @@ describe('Hierarchy', () => {
     })
   })
 
-  describe('Deep Nesting', () => {
-    beforeEach(async () => {
+  test.describe('Deep Nesting', () => {
+    test.beforeEach(async ({ payload }) => {
       // Clear existing data before each test
       await payload.delete({ collection: 'organizations', where: {} })
     })
 
-    afterEach(async () => {
+    test.afterEach(async ({ payload }) => {
       // Clean up data after each test
       await payload.delete({ collection: 'organizations', where: {} })
     })
 
-    it('should handle deeply nested structures', async () => {
+    test('should handle deeply nested structures', async ({ payload }) => {
       // Create 10-level deep hierarchy
       let currentParent: null | Organization = null
 
@@ -472,21 +453,20 @@ describe('Hierarchy', () => {
 
       // Verify the deepest level has correct slug path
       if (currentParent) {
-        // eslint-disable-next-line vitest/no-conditional-expect
         expect(currentParent._h_slugPath).toContain('/')
         const pathSegments = currentParent._h_slugPath?.split('/')
-        // eslint-disable-next-line vitest/no-conditional-expect
+
         expect(pathSegments).toHaveLength(10) // level-0 through level-9
-        // eslint-disable-next-line vitest/no-conditional-expect
+
         expect(pathSegments?.[0]).toBe('level-0')
-        // eslint-disable-next-line vitest/no-conditional-expect
+
         expect(pathSegments?.[9]).toBe('level-9')
       }
     })
   })
 
-  describe('Draft Versions', () => {
-    it('should compute paths correctly for published and draft versions', async () => {
+  test.describe('Draft Versions', () => {
+    test('should compute paths correctly for published and draft versions', async ({ payload }) => {
       // Create parent and child
       const parent = await payload.create({
         collection: 'organizations',
@@ -540,7 +520,7 @@ describe('Hierarchy', () => {
       expect(draftChild._h_slugPath).toBe('categories/products/apparel')
     })
 
-    it('should compute paths when no draft exists', async () => {
+    test('should compute paths when no draft exists', async ({ payload }) => {
       const parent = await payload.create({
         collection: 'organizations',
         data: { _status: 'published', parent: null, title: 'Services' },
@@ -584,7 +564,7 @@ describe('Hierarchy', () => {
       expect(draftChild._status).toBe('published')
     })
 
-    it('should compute paths for draft-only documents', async () => {
+    test('should compute paths for draft-only documents', async ({ payload }) => {
       const parent1 = await payload.create({
         collection: 'organizations',
         data: { parent: null, title: 'Future' },
@@ -622,7 +602,7 @@ describe('Hierarchy', () => {
       expect(draftChild._status).toBe('draft')
     })
 
-    it('should compute paths for collections without versioning', async () => {
+    test('should compute paths for collections without versioning', async ({ payload }) => {
       const parent = await payload.create({
         collection: 'organizations',
         data: { parent: null, title: 'Electronics' },
@@ -655,8 +635,8 @@ describe('Hierarchy', () => {
     })
   })
 
-  describe('Localization', () => {
-    it('should generate localized paths for each locale', async () => {
+  test.describe('Localization', () => {
+    test('should generate localized paths for each locale', async ({ payload }) => {
       // Create parent with default locale (en)
       const parent = await payload.create({
         collection: 'products',
@@ -729,7 +709,7 @@ describe('Hierarchy', () => {
       })
     })
 
-    it('should update localized paths when parent moves', async () => {
+    test('should update localized paths when parent moves', async ({ payload }) => {
       // Create parent with default locale (en)
       const parent = await payload.create({
         collection: 'products',
@@ -827,7 +807,7 @@ describe('Hierarchy', () => {
       })
     })
 
-    it('should update localized paths when title changes', async () => {
+    test('should update localized paths when title changes', async ({ payload }) => {
       // Create parent with default locale (en)
       const parent = await payload.create({
         collection: 'products',
@@ -917,7 +897,7 @@ describe('Hierarchy', () => {
       })
     })
 
-    it('should handle localized drafts with different titles per locale', async () => {
+    test('should handle localized drafts with different titles per locale', async ({ payload }) => {
       // Create parent with default locale (en)
       const parent = await payload.create({
         collection: 'products',
@@ -1051,7 +1031,7 @@ describe('Hierarchy', () => {
       })
     })
 
-    it('should handle draft-only documents with localized paths', async () => {
+    test('should handle draft-only documents with localized paths', async ({ payload }) => {
       // Create parent as draft for default locale first
       const parent = await payload.create({
         collection: 'products',
@@ -1160,16 +1140,18 @@ describe('Hierarchy', () => {
     })
   })
 
-  describe('Ancestor Cache Performance', () => {
-    beforeEach(async () => {
+  test.describe('Ancestor Cache Performance', () => {
+    test.beforeEach(async ({ payload }) => {
       await payload.delete({ collection: 'organizations', where: {} })
     })
 
-    afterEach(async () => {
+    test.afterEach(async ({ payload }) => {
       await payload.delete({ collection: 'organizations', where: {} })
     })
 
-    it('should cache ancestors when computing paths for multiple documents', async () => {
+    test('should cache ancestors when computing paths for multiple documents', async ({
+      payload,
+    }) => {
       // Create a hierarchy: Root > Category > 5 children
       const root = await payload.create({
         collection: 'organizations',
@@ -1231,7 +1213,7 @@ describe('Hierarchy', () => {
       }
     })
 
-    it('should show cache benefit: 10 docs with shared ancestors', async () => {
+    test('should show cache benefit: 10 docs with shared ancestors', async ({ payload }) => {
       // Create deeper hierarchy
       const root = await payload.create({
         collection: 'organizations',
@@ -1298,17 +1280,17 @@ describe('Hierarchy', () => {
     })
   })
 
-  describe('Slug Field Configuration', () => {
+  test.describe('Slug Field Configuration', () => {
     const createdPageIds: (number | string)[] = []
 
-    afterEach(async () => {
+    test.afterEach(async ({ payload }) => {
       for (const id of createdPageIds) {
         await payload.delete({ collection: 'pages', id }).catch(() => {})
       }
       createdPageIds.length = 0
     })
 
-    it('should use slugField value directly for _h_slugPath', async () => {
+    test('should use slugField value directly for _h_slugPath', async ({ payload }) => {
       // Pages collection has slugField: 'slug' configured
       const page = await payload.create({
         collection: 'pages',
@@ -1326,7 +1308,7 @@ describe('Hierarchy', () => {
       expect(page._h_titlePath).toBe('About Our Company')
     })
 
-    it('should use slugField value for nested documents', async () => {
+    test('should use slugField value for nested documents', async ({ payload }) => {
       // Create root page
       const rootPage = await payload.create({
         collection: 'pages',
@@ -1355,7 +1337,7 @@ describe('Hierarchy', () => {
       expect(childPage._h_titlePath).toBe('Home Page/Our Services')
     })
 
-    it('should fall back to slugified title when slug field is empty', async () => {
+    test('should fall back to slugified title when slug field is empty', async ({ payload }) => {
       const page = await payload.create({
         collection: 'pages',
         context: { computeHierarchyPaths: true },
@@ -1373,10 +1355,10 @@ describe('Hierarchy', () => {
     })
   })
 
-  describe('Select-based Path Computation', () => {
+  test.describe('Select-based Path Computation', () => {
     const createdOrgIds: (number | string)[] = []
 
-    afterEach(async () => {
+    test.afterEach(async ({ payload }) => {
       // Delete in reverse order (children before parents)
       for (const id of [...createdOrgIds].reverse()) {
         try {
@@ -1388,7 +1370,7 @@ describe('Hierarchy', () => {
       createdOrgIds.length = 0
     })
 
-    it('should compute full paths when selecting path fields', async () => {
+    test('should compute full paths when selecting path fields', async ({ payload }) => {
       // Create parent
       const parent = await payload.create({
         collection: 'organizations',
@@ -1418,7 +1400,7 @@ describe('Hierarchy', () => {
       expect(result._h_titlePath).toBe('Parent Org/Child Org')
     })
 
-    it('should not expose auto-added fields in response', async () => {
+    test('should not expose auto-added fields in response', async ({ payload }) => {
       // Create parent
       const parent = await payload.create({
         collection: 'organizations',
@@ -1451,7 +1433,7 @@ describe('Hierarchy', () => {
       expect(result).not.toHaveProperty('title')
     })
 
-    it('should keep explicitly selected fields in response', async () => {
+    test('should keep explicitly selected fields in response', async ({ payload }) => {
       // Create parent
       const parent = await payload.create({
         collection: 'organizations',
@@ -1486,7 +1468,7 @@ describe('Hierarchy', () => {
       expect(result).not.toHaveProperty('parent')
     })
 
-    it('should work with deeply nested hierarchy using select', async () => {
+    test('should work with deeply nested hierarchy using select', async ({ payload }) => {
       // Create 3-level hierarchy
       const level1 = await payload.create({
         collection: 'organizations',

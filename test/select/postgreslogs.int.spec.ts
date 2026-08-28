@@ -1,161 +1,143 @@
 import type { Payload } from 'payload'
 
 import path from 'path'
-import { assert } from 'ts-essentials'
 import { fileURLToPath } from 'url'
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vitest } from 'vitest'
+import { expect, vitest } from 'vitest'
 
 import type { Point, Post } from './payload-types.js'
 
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
-
-let payload: Payload
+import { test } from '../__helpers/int/vitest.js'
+import testConfig from './config.postgreslogs.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-const describePostgres = process.env.PAYLOAD_DATABASE === 'postgres' ? describe : describe.skip
+test.suite({ config: testConfig, db: (adapter) => adapter.startsWith('postgres') })(
+  'Select - with postgres logs',
+  () => {
+    test.describe('Local API - Base', () => {
+      let post: Post
+      let postId: number | string
 
-describePostgres('Select - with postgres logs', () => {
-  // --__--__--__--__--__--__--__--__--__
-  // Boilerplate test setup/teardown
-  // --__--__--__--__--__--__--__--__--__
-  beforeAll(async () => {
-    const initialized = await initPayloadInt(
-      dirname,
-      undefined,
-      undefined,
-      'config.postgreslogs.ts',
-    )
-    assert(initialized.payload)
-    assert(initialized.restClient)
-    ;({ payload } = initialized)
-  })
+      let point: Point
+      let pointId: number | string
 
-  afterAll(async () => {
-    await payload.destroy()
-  })
+      test.beforeEach(async ({ payload }) => {
+        post = await createPost({ payload })
+        postId = post.id
 
-  describe('Local API - Base', () => {
-    let post: Post
-    let postId: number | string
+        point = await createPoint({ payload })
+        pointId = point.id
+      })
 
-    let point: Point
-    let pointId: number | string
+      // Clean up to safely mutate in each test
+      test.afterEach(async ({ payload }) => {
+        await payload.delete({ id: postId, collection: 'posts' })
+        await payload.delete({ id: pointId, collection: 'points' })
+      })
 
-    beforeEach(async () => {
-      post = await createPost()
-      postId = post.id
+      test('ensure optimized db update is still used when using select', async ({ payload }) => {
+        const post = await createPost({ payload })
 
-      point = await createPoint()
-      pointId = point.id
-    })
+        // Count every console log
+        const consoleCount = vitest.spyOn(console, 'log').mockImplementation(() => {})
 
-    // Clean up to safely mutate in each test
-    afterEach(async () => {
-      await payload.delete({ id: postId, collection: 'posts' })
-      await payload.delete({ id: pointId, collection: 'points' })
-    })
+        const res = removeEmptyAndUndefined(
+          await payload.db.updateOne({
+            collection: 'posts',
+            id: post.id,
+            data: {
+              text: 'new text',
+            },
+            select: { text: true, number: true },
+          }),
+        )
 
-    it('ensure optimized db update is still used when using select', async () => {
-      const post = await createPost()
+        expect(consoleCount).toHaveBeenCalledTimes(1) // Should be 1 single sql call if the optimization is used. If not, this would be 2 calls
+        consoleCount.mockRestore()
 
-      // Count every console log
-      const consoleCount = vitest.spyOn(console, 'log').mockImplementation(() => {})
+        expect(res.number).toEqual(1)
+        expect(res.text).toEqual('new text')
+        expect(res.id).toEqual(post.id)
+        expect(Object.keys(res)).toHaveLength(3)
+      })
 
-      const res = removeEmptyAndUndefined(
-        (await payload.db.updateOne({
-          collection: 'posts',
-          id: post.id,
+      // This verifies that select actually improves performance of simple updates for complex collections.
+      // This is possible as no `with` is returned by buildFindManyArgs for the blocks field, only if we have a select that does not select that blocks field.
+      test('ensure simple update of complex collection uses optimized upsertRow with optimized returning() if only simple fields are selected', async ({
+        payload,
+      }) => {
+        const page = await payload.create({
+          collection: 'pages',
           data: {
-            text: 'new text',
+            slug: 'test-page',
+            additional: 'value',
+            blocks: [
+              {
+                id: '123',
+                blockType: 'some',
+                other: 'value',
+                title: 'Test Block',
+              },
+            ],
           },
-          select: { text: true, number: true },
-        })) as any,
-      )
+        })
 
-      expect(consoleCount).toHaveBeenCalledTimes(1) // Should be 1 single sql call if the optimization is used. If not, this would be 2 calls
-      consoleCount.mockRestore()
+        // Count every console log
+        const consoleCount = vitest.spyOn(console, 'log').mockImplementation(() => {})
 
-      expect(res.number).toEqual(1)
-      expect(res.text).toEqual('new text')
-      expect(res.id).toEqual(post.id)
-      expect(Object.keys(res)).toHaveLength(3)
-    })
+        const res = removeEmptyAndUndefined(
+          await payload.db.updateOne({
+            collection: 'pages',
+            id: page.id,
+            select: {
+              slug: true,
+              additional: true,
+            },
+            data: {
+              slug: 'new-slug',
+            },
+          }),
+        )
 
-    // This verifies that select actually improves performance of simple updates for complex collections.
-    // This is possible as no `with` is returned by buildFindManyArgs for the blocks field, only if we have a select that does not select that blocks field.
-    it('ensure simple update of complex collection uses optimized upsertRow with optimized returning() if only simple fields are selected', async () => {
-      const page = await payload.create({
-        collection: 'pages',
-        data: {
-          slug: 'test-page',
+        expect(consoleCount).toHaveBeenCalledTimes(1) // Should be 1 single sql call if the optimization is used. If not, this would be 2 calls
+        consoleCount.mockRestore()
+
+        expect(res.slug).toEqual('new-slug')
+        expect(res.additional).toEqual('value')
+        expect(res.id).toEqual(page.id)
+        expect(Object.keys(res)).toHaveLength(3)
+
+        // Do full find without select just to ensure that the update worked
+        const fullPage: any = await payload.findByID({
+          collection: 'pages',
+          id: page.id,
+        })
+
+        delete fullPage.createdAt
+        delete fullPage.updatedAt
+        delete fullPage.array
+        delete fullPage.content
+
+        expect(fullPage).toEqual({
+          id: page.id,
+          slug: 'new-slug',
           additional: 'value',
+          relatedPage: null,
           blocks: [
             {
               id: '123',
               blockType: 'some',
+              blockName: null,
               other: 'value',
               title: 'Test Block',
             },
           ],
-        },
-      })
-
-      // Count every console log
-      const consoleCount = vitest.spyOn(console, 'log').mockImplementation(() => {})
-
-      const res = removeEmptyAndUndefined(
-        (await payload.db.updateOne({
-          collection: 'pages',
-          id: page.id,
-          select: {
-            slug: true,
-            additional: true,
-          },
-          data: {
-            slug: 'new-slug',
-          },
-        })) as any,
-      )
-
-      expect(consoleCount).toHaveBeenCalledTimes(1) // Should be 1 single sql call if the optimization is used. If not, this would be 2 calls
-      consoleCount.mockRestore()
-
-      expect(res.slug).toEqual('new-slug')
-      expect(res.additional).toEqual('value')
-      expect(res.id).toEqual(page.id)
-      expect(Object.keys(res)).toHaveLength(3)
-
-      // Do full find without select just to ensure that the update worked
-      const fullPage: any = await payload.findByID({
-        collection: 'pages',
-        id: page.id,
-      })
-
-      delete fullPage.createdAt
-      delete fullPage.updatedAt
-      delete fullPage.array
-      delete fullPage.content
-
-      expect(fullPage).toEqual({
-        id: page.id,
-        slug: 'new-slug',
-        additional: 'value',
-        relatedPage: null,
-        blocks: [
-          {
-            id: '123',
-            blockType: 'some',
-            blockName: null,
-            other: 'value',
-            title: 'Test Block',
-          },
-        ],
+        })
       })
     })
-  })
-})
+  },
+)
 
 function removeEmptyAndUndefined(obj: any): any {
   if (Array.isArray(obj)) {
@@ -188,7 +170,7 @@ function removeEmptyAndUndefined(obj: any): any {
 
   return obj
 }
-async function createPost() {
+async function createPost({ payload }: { payload: Payload }) {
   const upload = await payload.create({
     collection: 'upload',
     data: {},
@@ -246,6 +228,6 @@ async function createPost() {
   })
 }
 
-function createPoint() {
+function createPoint({ payload }: { payload: Payload }) {
   return payload.create({ collection: 'points', data: { text: 'some', point: [10, 20] } })
 }

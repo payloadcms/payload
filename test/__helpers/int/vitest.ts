@@ -10,7 +10,6 @@ import { getCurrentDatabaseAdapter } from '../../dbAdapters.js'
 import { resetAndSeed } from '../shared/clearAndSeed/resetAndSeed.js'
 import { getTestDataConfig } from '../shared/clearAndSeed/testDataConfig.js'
 import { getSDK } from '../shared/getSDK.js'
-import { initPayloadInt } from '../shared/initPayloadInt.js'
 import { mongooseList } from '../shared/isMongoose.js'
 import { NextRESTClient } from '../shared/NextRESTClient.js'
 import { runCLICommand } from '../shared/runCLICommand.js'
@@ -35,7 +34,6 @@ type IntegrationFixtures = {
     resolvedConfig: null | SanitizedConfig
     testCron: boolean
     testDir: string
-    testSuiteConfigured: boolean
   }
   $test: {
     cli: (input: Parameters<typeof runCLICommand>[0]) => ReturnType<typeof runCLICommand>
@@ -52,13 +50,24 @@ const testWithFixtures = vitestTest.extend<IntegrationFixtures>({
     void payload
 
     const previousDropDatabase = process.env.PAYLOAD_DROP_DATABASE
+
+    if (previousDropDatabase !== 'true') {
+      throw new Error('The CLI fixture expected PAYLOAD_DROP_DATABASE to be true before setup.')
+    }
+
     // The parent Payload instance already prepared the database. The child CLI process must reuse it.
     process.env.PAYLOAD_DROP_DATABASE = 'false'
 
     try {
+      if (configPath === null) {
+        throw new Error(
+          "This integration test requires Payload. Pass its config path to test.suite({ config: './config.ts' })(...).",
+        )
+      }
+
       await use((input) =>
         runCLICommand(input, {
-          configPath: configPath ?? path.resolve(testDir, 'config.ts'),
+          configPath,
           cwd: testDir,
         }),
       )
@@ -67,14 +76,7 @@ const testWithFixtures = vitestTest.extend<IntegrationFixtures>({
     }
   },
   config: [
-    async ({ resolvedConfig, testDir, testSuiteConfigured }, use) => {
-      if (!testSuiteConfigured) {
-        const { config } = await initPayloadInt(testDir, undefined, false)
-
-        await use(config)
-        return
-      }
-
+    async ({ resolvedConfig }, use) => {
       if (resolvedConfig === null) {
         throw new Error(
           "This integration test requires Payload. Pass its config path to test.suite({ config: './config.ts' })(...).",
@@ -92,17 +94,14 @@ const testWithFixtures = vitestTest.extend<IntegrationFixtures>({
     },
     { scope: 'file' },
   ],
-  payload: async ({ payloadInstance, testSuiteConfigured }, use) => {
-    if (testSuiteConfigured) {
-      const testDataConfig = getTestDataConfig(payloadInstance.config)
+  payload: async ({ payloadInstance }, use) => {
+    const testDataConfig = getTestDataConfig(payloadInstance.config)
 
-      if (!testDataConfig) {
-        throw new Error('Test suite metadata was not registered by buildConfigWithDefaults.')
-      }
-
-      await resetAndSeed({ payload: payloadInstance, ...testDataConfig })
+    if (!testDataConfig) {
+      throw new Error('Test suite metadata was not registered by buildConfigWithDefaults.')
     }
 
+    await resetAndSeed({ payload: payloadInstance, ...testDataConfig })
     await use(payloadInstance)
   },
   payloadInstance: [
@@ -152,13 +151,6 @@ const testWithFixtures = vitestTest.extend<IntegrationFixtures>({
     },
     { scope: 'file' },
   ],
-  testSuiteConfigured: [
-    // eslint-disable-next-line no-empty-pattern
-    async ({}, use) => {
-      await use(false)
-    },
-    { scope: 'file' },
-  ],
 })
 
 /**
@@ -189,7 +181,6 @@ export const test = Object.assign(testWithFixtures, {
   suite(this: typeof testWithFixtures, { config, cron = true, db }: TestSuiteOptions) {
     this.override('configPath', config ? path.resolve(getTestDirectory(), config) : null)
     this.override('testCron', cron)
-    this.override('testSuiteConfigured', true)
 
     return this.describe.runIf(matchesDatabase({ db }))
   },

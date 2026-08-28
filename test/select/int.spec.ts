@@ -5,9 +5,8 @@ import path from 'path'
 import { deepCopyObject } from 'payload'
 import { assert } from 'ts-essentials'
 import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { expect } from 'vitest'
 
-import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type {
   Config,
   DeepPost,
@@ -19,47 +18,31 @@ import type {
   VersionedPost,
 } from './payload-types.js'
 
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { test } from '../__helpers/int/vitest.js'
 import { devUser } from '../credentials.js'
-
-let payload: Payload
-let restClient: NextRESTClient
+import testConfig from './config.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-describe('Select', () => {
-  // --__--__--__--__--__--__--__--__--__
-  // Boilerplate test setup/teardown
-  // --__--__--__--__--__--__--__--__--__
-  beforeAll(async () => {
-    const initialized = await initPayloadInt(dirname)
-    assert(initialized.payload)
-    assert(initialized.restClient)
-    ;({ payload, restClient } = initialized)
-  })
-
-  afterAll(async () => {
-    await payload.destroy()
-  })
-
-  describe('Local API - Base', () => {
+test.suite({ config: testConfig })('Select', () => {
+  test.describe('Local API - Base', () => {
     let post: Post
     let postId: number | string
 
     let point: Point
     let pointId: number | string
 
-    beforeAll(async () => {
-      post = await createPost()
+    test.beforeEach(async ({ payload }) => {
+      post = await createPost({ payload })
       postId = post.id
 
-      point = await createPoint()
+      point = await createPoint({ payload })
       pointId = point.id
     })
 
-    describe('Include mode', () => {
-      it('should select only id as default', async () => {
+    test.describe('Include mode', () => {
+      test('should select only id as default', async ({ payload }) => {
         const res = await payload.findByID({
           id: postId,
           collection: 'posts',
@@ -72,8 +55,8 @@ describe('Select', () => {
         })
       })
 
-      it('customID - should select only id as default', async () => {
-        const { id } = await createCustomID()
+      test('customID - should select only id as default', async ({ payload }) => {
+        const { id } = await createCustomID({ payload })
 
         const res = await payload.findByID({
           id,
@@ -87,7 +70,7 @@ describe('Select', () => {
         })
       })
 
-      it('should select only number', async () => {
+      test('should select only number', async ({ payload }) => {
         const res = await payload.findByID({
           id: postId,
           collection: 'posts',
@@ -103,8 +86,8 @@ describe('Select', () => {
         })
       })
 
-      it('customID - should select only text', async () => {
-        const { id, text } = await createCustomID()
+      test('customID - should select only text', async ({ payload }) => {
+        const { id, text } = await createCustomID({ payload })
 
         const res = await payload.findByID({
           id,
@@ -121,7 +104,7 @@ describe('Select', () => {
         })
       })
 
-      it('should select only select', async () => {
+      test('should select only select', async ({ payload }) => {
         const res = await payload.findByID({
           id: postId,
           collection: 'posts',
@@ -137,7 +120,7 @@ describe('Select', () => {
         })
       })
 
-      it('should select only hasMany select', async () => {
+      test('should select only hasMany select', async ({ payload }) => {
         const res = await payload.findByID({
           id: postId,
           collection: 'posts',
@@ -153,7 +136,7 @@ describe('Select', () => {
         })
       })
 
-      it('should select number and text', async () => {
+      test('should select number and text', async ({ payload }) => {
         const res = await payload.findByID({
           id: postId,
           collection: 'posts',
@@ -171,7 +154,7 @@ describe('Select', () => {
         })
       })
 
-      it('should select relationships', async () => {
+      test('should select relationships', async ({ payload }) => {
         const res_1 = await payload.findByID({
           id: postId,
           collection: 'posts',
@@ -215,7 +198,7 @@ describe('Select', () => {
         })
       })
 
-      it('should select all the fields inside of group', async () => {
+      test('should select all the fields inside of group', async ({ payload }) => {
         const res = await payload.findByID({
           id: postId,
           collection: 'posts',
@@ -231,7 +214,7 @@ describe('Select', () => {
         })
       })
 
-      it('should select text field inside of group', async () => {
+      test('should select text field inside of group', async ({ payload }) => {
         const res = await payload.findByID({
           id: postId,
           collection: 'posts',
@@ -251,7 +234,7 @@ describe('Select', () => {
         })
       })
 
-      it('should select all the fields inside of named tab', async () => {
+      test('should select all the fields inside of named tab', async ({ payload }) => {
         const res = await payload.findByID({
           id: postId,
           collection: 'posts',
@@ -267,7 +250,7 @@ describe('Select', () => {
         })
       })
 
-      it('should select text field inside of named tab', async () => {
+      test('should select text field inside of named tab', async ({ payload }) => {
         const res = await payload.findByID({
           id: postId,
           collection: 'posts',
@@ -287,7 +270,7 @@ describe('Select', () => {
         })
       })
 
-      it('should select text field inside of unnamed tab', async () => {
+      test('should select text field inside of unnamed tab', async ({ payload }) => {
         const res = await payload.findByID({
           id: postId,
           collection: 'posts',
@@ -303,7 +286,7 @@ describe('Select', () => {
         })
       })
 
-      it('should select id as default from array', async () => {
+      test('should select id as default from array', async ({ payload }) => {
         const res = await payload.findByID({
           id: postId,
           collection: 'posts',
@@ -319,7 +302,7 @@ describe('Select', () => {
         })
       })
 
-      it('should select all the fields inside of array', async () => {
+      test('should select all the fields inside of array', async ({ payload }) => {
         const res = await payload.findByID({
           id: postId,
           collection: 'posts',
@@ -335,7 +318,7 @@ describe('Select', () => {
         })
       })
 
-      it('should select text field inside of array', async () => {
+      test('should select text field inside of array', async ({ payload }) => {
         const res = await payload.findByID({
           id: postId,
           collection: 'posts',
@@ -356,7 +339,7 @@ describe('Select', () => {
         })
       })
 
-      it('should select base fields (id, blockType) inside of blocks', async () => {
+      test('should select base fields (id, blockType) inside of blocks', async ({ payload }) => {
         const res = await payload.findByID({
           id: postId,
           collection: 'posts',
@@ -372,7 +355,7 @@ describe('Select', () => {
         })
       })
 
-      it('should select all the fields inside of blocks', async () => {
+      test('should select all the fields inside of blocks', async ({ payload }) => {
         const res = await payload.findByID({
           id: postId,
           collection: 'posts',
@@ -388,7 +371,7 @@ describe('Select', () => {
         })
       })
 
-      it('should select all the fields inside of specific block', async () => {
+      test('should select all the fields inside of specific block', async ({ payload }) => {
         const res = await payload.findByID({
           id: postId,
           collection: 'posts',
@@ -413,7 +396,7 @@ describe('Select', () => {
         })
       })
 
-      it('should select a specific field inside of specific block', async () => {
+      test('should select a specific field inside of specific block', async ({ payload }) => {
         const res = await payload.findByID({
           id: postId,
           collection: 'posts',
@@ -438,7 +421,7 @@ describe('Select', () => {
         })
       })
 
-      it('should select a point field', async () => {
+      test('should select a point field', async ({ payload }) => {
         if (payload.db.name === 'sqlite') {
           return
         }
@@ -456,8 +439,8 @@ describe('Select', () => {
       })
     })
 
-    describe('Exclude mode', () => {
-      it('should exclude only text field', async () => {
+    test.describe('Exclude mode', () => {
+      test('should exclude only text field', async ({ payload }) => {
         const res = await payload.findByID({
           id: postId,
           collection: 'posts',
@@ -474,8 +457,8 @@ describe('Select', () => {
         expect(res).toStrictEqual(expected)
       })
 
-      it('customID - should exclude text', async () => {
-        const { id, createdAt, updatedAt } = await createCustomID()
+      test('customID - should exclude text', async ({ payload }) => {
+        const { id, createdAt, updatedAt } = await createCustomID({ payload })
 
         const res = await payload.findByID({
           id,
@@ -493,7 +476,7 @@ describe('Select', () => {
         })
       })
 
-      it('should exclude number', async () => {
+      test('should exclude number', async ({ payload }) => {
         const res = await payload.findByID({
           id: postId,
           collection: 'posts',
@@ -510,7 +493,7 @@ describe('Select', () => {
         expect(res).toStrictEqual(expected)
       })
 
-      it('should exclude select', async () => {
+      test('should exclude select', async ({ payload }) => {
         const res = await payload.findByID({
           id: postId,
           collection: 'posts',
@@ -527,7 +510,7 @@ describe('Select', () => {
         expect(res).toStrictEqual(expected)
       })
 
-      it('should exclude hasMany select', async () => {
+      test('should exclude hasMany select', async ({ payload }) => {
         const res = await payload.findByID({
           id: postId,
           collection: 'posts',
@@ -544,7 +527,7 @@ describe('Select', () => {
         expect(res).toStrictEqual(expected)
       })
 
-      it('should exclude number and text', async () => {
+      test('should exclude number and text', async ({ payload }) => {
         const res = await payload.findByID({
           id: postId,
           collection: 'posts',
@@ -563,7 +546,7 @@ describe('Select', () => {
         expect(res).toStrictEqual(expected)
       })
 
-      it('should exclude relationships', async () => {
+      test('should exclude relationships', async ({ payload }) => {
         const res = await payload.findByID({
           id: postId,
           collection: 'posts',
@@ -586,7 +569,7 @@ describe('Select', () => {
         expect(res).toStrictEqual(expected)
       })
 
-      it('should exclude group', async () => {
+      test('should exclude group', async ({ payload }) => {
         const res = await payload.findByID({
           id: postId,
           collection: 'posts',
@@ -603,7 +586,7 @@ describe('Select', () => {
         expect(res).toStrictEqual(expected)
       })
 
-      it('should exclude text field inside of group', async () => {
+      test('should exclude text field inside of group', async ({ payload }) => {
         const res = await payload.findByID({
           id: postId,
           collection: 'posts',
@@ -622,7 +605,7 @@ describe('Select', () => {
         expect(res).toStrictEqual(expected)
       })
 
-      it('should exclude array', async () => {
+      test('should exclude array', async ({ payload }) => {
         const res = await payload.findByID({
           id: postId,
           collection: 'posts',
@@ -639,7 +622,7 @@ describe('Select', () => {
         expect(res).toStrictEqual(expected)
       })
 
-      it('should exclude text field inside of array', async () => {
+      test('should exclude text field inside of array', async ({ payload }) => {
         const res = await payload.findByID({
           id: postId,
           collection: 'posts',
@@ -660,7 +643,7 @@ describe('Select', () => {
         })
       })
 
-      it('should exclude blocks', async () => {
+      test('should exclude blocks', async ({ payload }) => {
         const res = await payload.findByID({
           id: postId,
           collection: 'posts',
@@ -677,7 +660,9 @@ describe('Select', () => {
         expect(res).toStrictEqual(expected)
       })
 
-      it('should exclude all the fields inside of specific block while keeping base fields', async () => {
+      test('should exclude all the fields inside of specific block while keeping base fields', async ({
+        payload,
+      }) => {
         const res = await payload.findByID({
           id: postId,
           collection: 'posts',
@@ -697,7 +682,7 @@ describe('Select', () => {
         })
       })
 
-      it('should exclude a specific field inside of specific block', async () => {
+      test('should exclude a specific field inside of specific block', async ({ payload }) => {
         const res = await payload.findByID({
           id: postId,
           collection: 'posts',
@@ -722,7 +707,7 @@ describe('Select', () => {
         })
       })
 
-      it('should exclude a point field', async () => {
+      test('should exclude a point field', async ({ payload }) => {
         if (payload.db.name === 'sqlite') {
           return
         }
@@ -741,17 +726,17 @@ describe('Select', () => {
     })
   })
 
-  describe('Local API - Localization', () => {
+  test.describe('Local API - Localization', () => {
     let post: LocalizedPost
     let postId: number | string
 
-    beforeAll(async () => {
-      post = await createLocalizedPost()
+    test.beforeEach(async ({ payload }) => {
+      post = await createLocalizedPost({ payload })
       postId = post.id
     })
 
-    describe('Include mode', () => {
-      it('should select only id as default', async () => {
+    test.describe('Include mode', () => {
+      test('should select only id as default', async ({ payload }) => {
         const res = await payload.findByID({
           id: postId,
           collection: 'localized-posts',
@@ -763,7 +748,7 @@ describe('Select', () => {
         })
       })
 
-      it('should select only number', async () => {
+      test('should select only number', async ({ payload }) => {
         const res = await payload.findByID({
           id: postId,
           collection: 'localized-posts',
@@ -778,7 +763,7 @@ describe('Select', () => {
         })
       })
 
-      it('should select only select', async () => {
+      test('should select only select', async ({ payload }) => {
         const res = await payload.findByID({
           id: postId,
           collection: 'localized-posts',
@@ -793,7 +778,7 @@ describe('Select', () => {
         })
       })
 
-      it('should select only hasMany select', async () => {
+      test('should select only hasMany select', async ({ payload }) => {
         const res = await payload.findByID({
           id: postId,
           collection: 'localized-posts',
@@ -808,7 +793,7 @@ describe('Select', () => {
         })
       })
 
-      it('should select number and text', async () => {
+      test('should select number and text', async ({ payload }) => {
         const res = await payload.findByID({
           id: postId,
           collection: 'localized-posts',
@@ -825,7 +810,7 @@ describe('Select', () => {
         })
       })
 
-      it('should select all the fields inside of group', async () => {
+      test('should select all the fields inside of group', async ({ payload }) => {
         const res = await payload.findByID({
           id: postId,
           collection: 'localized-posts',
@@ -840,7 +825,7 @@ describe('Select', () => {
         })
       })
 
-      it('should select text field inside of group', async () => {
+      test('should select text field inside of group', async ({ payload }) => {
         const res = await payload.findByID({
           id: postId,
           collection: 'localized-posts',
@@ -859,7 +844,7 @@ describe('Select', () => {
         })
       })
 
-      it('should select localized text field inside of group', async () => {
+      test('should select localized text field inside of group', async ({ payload }) => {
         const res = await payload.findByID({
           id: postId,
           collection: 'localized-posts',
@@ -878,7 +863,7 @@ describe('Select', () => {
         })
       })
 
-      it('should select id as default from array', async () => {
+      test('should select id as default from array', async ({ payload }) => {
         const res = await payload.findByID({
           id: postId,
           collection: 'localized-posts',
@@ -893,7 +878,7 @@ describe('Select', () => {
         })
       })
 
-      it('should select all the fields inside of array', async () => {
+      test('should select all the fields inside of array', async ({ payload }) => {
         const res = await payload.findByID({
           id: postId,
           collection: 'localized-posts',
@@ -908,7 +893,7 @@ describe('Select', () => {
         })
       })
 
-      it('should select text field inside of localized array', async () => {
+      test('should select text field inside of localized array', async ({ payload }) => {
         const res = await payload.findByID({
           id: postId,
           collection: 'localized-posts',
@@ -928,7 +913,7 @@ describe('Select', () => {
         })
       })
 
-      it('should select localized text field inside of array', async () => {
+      test('should select localized text field inside of array', async ({ payload }) => {
         const res = await payload.findByID({
           id: postId,
           collection: 'localized-posts',
@@ -948,7 +933,7 @@ describe('Select', () => {
         })
       })
 
-      it('should select base fields (id, blockType) inside of blocks', async () => {
+      test('should select base fields (id, blockType) inside of blocks', async ({ payload }) => {
         const res = await payload.findByID({
           id: postId,
           collection: 'localized-posts',
@@ -963,7 +948,7 @@ describe('Select', () => {
         })
       })
 
-      it('should select all the fields inside of blocks', async () => {
+      test('should select all the fields inside of blocks', async ({ payload }) => {
         const res = await payload.findByID({
           id: postId,
           collection: 'localized-posts',
@@ -978,7 +963,7 @@ describe('Select', () => {
         })
       })
 
-      it('should select all the fields inside of specific block', async () => {
+      test('should select all the fields inside of specific block', async ({ payload }) => {
         const res = await payload.findByID({
           id: postId,
           collection: 'localized-posts',
@@ -1002,7 +987,7 @@ describe('Select', () => {
         })
       })
 
-      it('should select a specific field inside of specific block', async () => {
+      test('should select a specific field inside of specific block', async ({ payload }) => {
         const res = await payload.findByID({
           id: postId,
           collection: 'localized-posts',
@@ -1026,7 +1011,9 @@ describe('Select', () => {
         })
       })
 
-      it('should select a specific localized field inside of specific block 1', async () => {
+      test('should select a specific localized field inside of specific block 1', async ({
+        payload,
+      }) => {
         const res = await payload.findByID({
           id: postId,
           collection: 'localized-posts',
@@ -1050,7 +1037,9 @@ describe('Select', () => {
         })
       })
 
-      it('should select a specific localized field inside of specific block 2', async () => {
+      test('should select a specific localized field inside of specific block 2', async ({
+        payload,
+      }) => {
         const res = await payload.findByID({
           id: postId,
           collection: 'localized-posts',
@@ -1075,8 +1064,8 @@ describe('Select', () => {
       })
     })
 
-    describe('Exclude mode', () => {
-      it('should exclude only text field', async () => {
+    test.describe('Exclude mode', () => {
+      test('should exclude only text field', async ({ payload }) => {
         const res = await payload.findByID({
           id: postId,
           collection: 'localized-posts',
@@ -1092,7 +1081,7 @@ describe('Select', () => {
         expect(res).toStrictEqual(expected)
       })
 
-      it('should exclude number', async () => {
+      test('should exclude number', async ({ payload }) => {
         const res = await payload.findByID({
           id: postId,
           collection: 'localized-posts',
@@ -1108,7 +1097,7 @@ describe('Select', () => {
         expect(res).toStrictEqual(expected)
       })
 
-      it('should exclude select', async () => {
+      test('should exclude select', async ({ payload }) => {
         const res = await payload.findByID({
           id: postId,
           collection: 'localized-posts',
@@ -1124,7 +1113,7 @@ describe('Select', () => {
         expect(res).toStrictEqual(expected)
       })
 
-      it('should exclude hasMany select', async () => {
+      test('should exclude hasMany select', async ({ payload }) => {
         const res = await payload.findByID({
           id: postId,
           collection: 'localized-posts',
@@ -1140,7 +1129,7 @@ describe('Select', () => {
         expect(res).toStrictEqual(expected)
       })
 
-      it('should exclude number and text', async () => {
+      test('should exclude number and text', async ({ payload }) => {
         const res = await payload.findByID({
           id: postId,
           collection: 'localized-posts',
@@ -1158,7 +1147,7 @@ describe('Select', () => {
         expect(res).toStrictEqual(expected)
       })
 
-      it('should exclude group', async () => {
+      test('should exclude group', async ({ payload }) => {
         const res = await payload.findByID({
           id: postId,
           collection: 'localized-posts',
@@ -1174,7 +1163,7 @@ describe('Select', () => {
         expect(res).toStrictEqual(expected)
       })
 
-      it('should exclude text field inside of group', async () => {
+      test('should exclude text field inside of group', async ({ payload }) => {
         const res = await payload.findByID({
           id: postId,
           collection: 'localized-posts',
@@ -1192,7 +1181,7 @@ describe('Select', () => {
         expect(res).toStrictEqual(expected)
       })
 
-      it('should exclude localized text field inside of group', async () => {
+      test('should exclude localized text field inside of group', async ({ payload }) => {
         const res = await payload.findByID({
           id: postId,
           collection: 'localized-posts',
@@ -1210,7 +1199,7 @@ describe('Select', () => {
         expect(res).toStrictEqual(expected)
       })
 
-      it('should exclude array', async () => {
+      test('should exclude array', async ({ payload }) => {
         const res = await payload.findByID({
           id: postId,
           collection: 'localized-posts',
@@ -1226,7 +1215,7 @@ describe('Select', () => {
         expect(res).toStrictEqual(expected)
       })
 
-      it('should exclude text field inside of array', async () => {
+      test('should exclude text field inside of array', async ({ payload }) => {
         const res = await payload.findByID({
           id: postId,
           collection: 'localized-posts',
@@ -1246,7 +1235,7 @@ describe('Select', () => {
         })
       })
 
-      it('should exclude localized text field inside of array', async () => {
+      test('should exclude localized text field inside of array', async ({ payload }) => {
         const res = await payload.findByID({
           id: postId,
           collection: 'localized-posts',
@@ -1266,7 +1255,7 @@ describe('Select', () => {
         })
       })
 
-      it('should exclude blocks', async () => {
+      test('should exclude blocks', async ({ payload }) => {
         const res = await payload.findByID({
           id: postId,
           collection: 'localized-posts',
@@ -1282,7 +1271,9 @@ describe('Select', () => {
         expect(res).toStrictEqual(expected)
       })
 
-      it('should exclude all the fields inside of specific block while keeping base fields', async () => {
+      test('should exclude all the fields inside of specific block while keeping base fields', async ({
+        payload,
+      }) => {
         const res = await payload.findByID({
           id: postId,
           collection: 'localized-posts',
@@ -1301,7 +1292,7 @@ describe('Select', () => {
         })
       })
 
-      it('should exclude a specific field inside of specific block', async () => {
+      test('should exclude a specific field inside of specific block', async ({ payload }) => {
         const res = await payload.findByID({
           id: postId,
           collection: 'localized-posts',
@@ -1325,7 +1316,9 @@ describe('Select', () => {
         })
       })
 
-      it('should exclude a specific localized field inside of specific block 1', async () => {
+      test('should exclude a specific localized field inside of specific block 1', async ({
+        payload,
+      }) => {
         const res = await payload.findByID({
           id: postId,
           collection: 'localized-posts',
@@ -1349,7 +1342,9 @@ describe('Select', () => {
         })
       })
 
-      it('should exclude a specific localized field inside of specific block 2', async () => {
+      test('should exclude a specific localized field inside of specific block 2', async ({
+        payload,
+      }) => {
         const res = await payload.findByID({
           id: postId,
           collection: 'localized-posts',
@@ -1375,16 +1370,16 @@ describe('Select', () => {
     })
   })
 
-  describe('Local API - Deep Fields', () => {
+  test.describe('Local API - Deep Fields', () => {
     let post: DeepPost
     let postId: number | string
 
-    beforeAll(async () => {
-      post = await createDeepPost()
+    test.beforeEach(async ({ payload }) => {
+      post = await createDeepPost({ payload })
       postId = post.id
     })
 
-    it('should select deply group.array.group.text', async () => {
+    test('should select deply group.array.group.text', async ({ payload }) => {
       const res = await payload.findByID({
         id: postId,
         collection: 'deep-posts',
@@ -1404,7 +1399,7 @@ describe('Select', () => {
       })
     })
 
-    it('should select deply group.array.group.*', async () => {
+    test('should select deply group.array.group.*', async ({ payload }) => {
       const res = await payload.findByID({
         id: postId,
         collection: 'deep-posts',
@@ -1422,7 +1417,7 @@ describe('Select', () => {
       })
     })
 
-    it('should select deply group.blocks.block.text', async () => {
+    test('should select deply group.blocks.block.text', async ({ payload }) => {
       const res = await payload.findByID({
         id: postId,
         collection: 'deep-posts',
@@ -1441,7 +1436,7 @@ describe('Select', () => {
       })
     })
 
-    it('should select deply array.array.text', async () => {
+    test('should select deply array.array.text', async ({ payload }) => {
       const res = await payload.findByID({
         id: postId,
         collection: 'deep-posts',
@@ -1461,16 +1456,16 @@ describe('Select', () => {
     })
   })
 
-  describe('Local API - Versioned Drafts Collection', () => {
+  test.describe('Local API - Versioned Drafts Collection', () => {
     let post: VersionedPost
     let postId: number | string
 
-    beforeAll(async () => {
-      post = await createVersionedPost()
+    test.beforeEach(async ({ payload }) => {
+      post = await createVersionedPost({ payload })
       postId = post.id
     })
 
-    it('should select only id as default', async () => {
+    test('should select only id as default', async ({ payload }) => {
       const res = await payload.findByID({
         id: postId,
         collection: 'versioned-posts',
@@ -1483,7 +1478,7 @@ describe('Select', () => {
       })
     })
 
-    it('should select only number', async () => {
+    test('should select only number', async ({ payload }) => {
       const res = await payload.findByID({
         id: postId,
         collection: 'versioned-posts',
@@ -1499,7 +1494,7 @@ describe('Select', () => {
       })
     })
 
-    it('should exclude only number', async () => {
+    test('should exclude only number', async ({ payload }) => {
       const res = await payload.findByID({
         id: postId,
         collection: 'versioned-posts',
@@ -1515,7 +1510,7 @@ describe('Select', () => {
       expect(res).toStrictEqual(expected)
     })
 
-    it('should select number and text', async () => {
+    test('should select number and text', async ({ payload }) => {
       const res = await payload.findByID({
         id: postId,
         collection: 'versioned-posts',
@@ -1533,7 +1528,7 @@ describe('Select', () => {
       })
     })
 
-    it('payload.find should select number and text', async () => {
+    test('payload.find should select number and text', async ({ payload }) => {
       const res = await payload.find({
         collection: 'versioned-posts',
         draft: true,
@@ -1555,7 +1550,7 @@ describe('Select', () => {
       })
     })
 
-    it('should select base id field inside of array', async () => {
+    test('should select base id field inside of array', async ({ payload }) => {
       const res = await payload.find({
         collection: 'versioned-posts',
         draft: true,
@@ -1575,7 +1570,7 @@ describe('Select', () => {
       })
     })
 
-    it('should select base id field inside of blocks', async () => {
+    test('should select base id field inside of blocks', async ({ payload }) => {
       const res = await payload.find({
         collection: 'versioned-posts',
         draft: true,
@@ -1595,7 +1590,7 @@ describe('Select', () => {
       })
     })
 
-    it('should select with payload.findVersions', async () => {
+    test('should select with payload.findVersions', async ({ payload }) => {
       const res = await payload.findVersions({
         collection: 'versioned-posts',
         limit: 1,
@@ -1622,7 +1617,7 @@ describe('Select', () => {
       expect(doc.version.text).toBe(post.text)
     })
 
-    it('should return a latest version with findByID and draft: true', async () => {
+    test('should return a latest version with findByID and draft: true', async ({ payload }) => {
       const doc = await payload.create({
         collection: 'versioned-posts',
         data: { _status: 'draft', text: 'draft-post' },
@@ -1655,7 +1650,9 @@ describe('Select', () => {
       })
     })
 
-    it('should create versions with complete data when updating with select', async () => {
+    test('should create versions with complete data when updating with select', async ({
+      payload,
+    }) => {
       // First, update the post with select to only return the id field
       const updatedPost = await payload.update({
         id: postId,
@@ -1691,9 +1688,9 @@ describe('Select', () => {
     })
   })
 
-  describe('Local API - Globals', () => {
+  test.describe('Local API - Globals', () => {
     let globalPost: GlobalPost
-    beforeAll(async () => {
+    test.beforeEach(async ({ payload }) => {
       globalPost = await payload.updateGlobal({
         slug: 'global-post',
         data: {
@@ -1703,7 +1700,7 @@ describe('Select', () => {
       })
     })
 
-    it('should select with find', async () => {
+    test('should select with find', async ({ payload }) => {
       const res = await payload.findGlobal({
         slug: 'global-post',
         select: {
@@ -1717,7 +1714,7 @@ describe('Select', () => {
       })
     })
 
-    it('should select with update', async () => {
+    test('should select with update', async ({ payload }) => {
       const res = await payload.updateGlobal({
         slug: 'global-post',
         data: {},
@@ -1733,8 +1730,8 @@ describe('Select', () => {
     })
   })
 
-  describe('Local API - operations', () => {
-    it('should apply select with create', async () => {
+  test.describe('Local API - operations', () => {
+    test('should apply select with create', async ({ payload }) => {
       const res = await payload.create({
         collection: 'posts',
         data: {
@@ -1752,8 +1749,8 @@ describe('Select', () => {
       })
     })
 
-    it('should apply select with updateByID', async () => {
-      const post = await createPost()
+    test('should apply select with updateByID', async ({ payload }) => {
+      const post = await createPost({ payload })
 
       const res = await payload.update({
         id: post.id,
@@ -1768,8 +1765,8 @@ describe('Select', () => {
       })
     })
 
-    it('should apply select with updateBulk', async () => {
-      const post = await createPost()
+    test('should apply select with updateBulk', async ({ payload }) => {
+      const post = await createPost({ payload })
 
       const res = await payload.update({
         collection: 'posts',
@@ -1790,8 +1787,8 @@ describe('Select', () => {
       })
     })
 
-    it('should apply select with deleteByID', async () => {
-      const post = await createPost()
+    test('should apply select with deleteByID', async ({ payload }) => {
+      const post = await createPost({ payload })
 
       const res = await payload.delete({
         id: post.id,
@@ -1805,8 +1802,8 @@ describe('Select', () => {
       })
     })
 
-    it('should apply select with deleteBulk', async () => {
-      const post = await createPost()
+    test('should apply select with deleteBulk', async ({ payload }) => {
+      const post = await createPost({ payload })
 
       const res = await payload.delete({
         collection: 'posts',
@@ -1826,8 +1823,8 @@ describe('Select', () => {
       })
     })
 
-    it('should apply select with duplicate', async () => {
-      const post = await createPost()
+    test('should apply select with duplicate', async ({ payload }) => {
+      const post = await createPost({ payload })
 
       const res = await payload.duplicate({
         id: post.id,
@@ -1842,17 +1839,17 @@ describe('Select', () => {
     })
   })
 
-  describe('REST API - Base', () => {
+  test.describe('REST API - Base', () => {
     let post: Post
     let postId: number | string
 
-    beforeAll(async () => {
-      post = await createPost()
+    test.beforeEach(async ({ payload }) => {
+      post = await createPost({ payload })
       postId = post.id
     })
 
-    describe('Include mode', () => {
-      it('should select only text', async () => {
+    test.describe('Include mode', () => {
+      test('should select only text', async ({ restClient }) => {
         const res = await restClient
           .GET(`/posts/${postId}`, {
             query: {
@@ -1870,7 +1867,7 @@ describe('Select', () => {
         })
       })
 
-      it('should select number and text', async () => {
+      test('should select number and text', async ({ restClient }) => {
         const res = await restClient
           .GET(`/posts/${postId}`, {
             query: {
@@ -1890,7 +1887,7 @@ describe('Select', () => {
         })
       })
 
-      it('should select all the fields inside of group', async () => {
+      test('should select all the fields inside of group', async ({ restClient }) => {
         const res = await restClient
           .GET(`/posts/${postId}`, {
             query: {
@@ -1908,7 +1905,7 @@ describe('Select', () => {
         })
       })
 
-      it('should select text field inside of group', async () => {
+      test('should select text field inside of group', async ({ restClient }) => {
         const res = await restClient
           .GET(`/posts/${postId}`, {
             query: {
@@ -1929,8 +1926,8 @@ describe('Select', () => {
       })
     })
 
-    describe('Exclude mode', () => {
-      it('should exclude only text field', async () => {
+    test.describe('Exclude mode', () => {
+      test('should exclude only text field', async ({ restClient }) => {
         const res = await restClient
           .GET(`/posts/${postId}`, {
             query: {
@@ -1949,7 +1946,7 @@ describe('Select', () => {
         expect(res).toMatchObject(expected)
       })
 
-      it('should exclude number', async () => {
+      test('should exclude number', async ({ restClient }) => {
         const res = await restClient
           .GET(`/posts/${postId}`, {
             query: {
@@ -1968,7 +1965,7 @@ describe('Select', () => {
         expect(res).toMatchObject(expected)
       })
 
-      it('should exclude number and text', async () => {
+      test('should exclude number and text', async ({ restClient }) => {
         const res = await restClient
           .GET(`/posts/${postId}`, {
             query: {
@@ -1989,7 +1986,7 @@ describe('Select', () => {
         expect(res).toMatchObject(expected)
       })
 
-      it('should exclude text field inside of group', async () => {
+      test('should exclude text field inside of group', async ({ restClient }) => {
         const res = await restClient
           .GET(`/posts/${postId}`, {
             query: {
@@ -2012,10 +2009,10 @@ describe('Select', () => {
     })
   })
 
-  describe('REST API - Logged in', () => {
+  test.describe('REST API - Logged in', () => {
     let token: string | undefined
 
-    beforeAll(async () => {
+    test.beforeEach(async ({ restClient }) => {
       const response = await restClient.POST(`/users/login`, {
         body: JSON.stringify({
           email: devUser.email,
@@ -2028,7 +2025,7 @@ describe('Select', () => {
       token = data.token
     })
 
-    it('should return only select fields in user from /me', async () => {
+    test('should return only select fields in user from /me', async ({ restClient }) => {
       const response = await restClient.GET(`/users/me`, {
         headers: {
           Authorization: `JWT ${token}`,
@@ -2049,7 +2046,7 @@ describe('Select', () => {
       expect(data.user.number).not.toBeDefined()
     })
 
-    it('should return all fields by default in user from /me', async () => {
+    test('should return all fields by default in user from /me', async ({ restClient }) => {
       const response = await restClient.GET(`/users/me`, {
         headers: {
           Authorization: `JWT ${token}`,
@@ -2068,7 +2065,7 @@ describe('Select', () => {
     })
   })
 
-  describe('populate / defaultPopulate', () => {
+  test.describe('populate / defaultPopulate', () => {
     let homePage: Page
     let aboutPage: Page
     let expectedHomePage: {
@@ -2089,7 +2086,7 @@ describe('Select', () => {
       slug: string
     }
     let expectedHomePageOverride: { additional: string; id: number | string }
-    beforeAll(async () => {
+    test.beforeEach(async ({ payload }) => {
       homePage = await payload.create({
         collection: 'pages',
         data: {
@@ -2179,7 +2176,9 @@ describe('Select', () => {
       })
     })
 
-    it('local API - should populate with the defaultPopulate select shape', async () => {
+    test('local API - should populate with the defaultPopulate select shape', async ({
+      payload,
+    }) => {
       const result = await payload.findByID({ id: aboutPage.id, collection: 'pages', depth: 1 })
 
       const block = result.content![0]!
@@ -2202,7 +2201,9 @@ describe('Select', () => {
       expect(richTextLexicalRel.value).toStrictEqual(expectedHomePage)
     })
 
-    it('rEST API - should populate with the defaultPopulate select shape', async () => {
+    test('rEST API - should populate with the defaultPopulate select shape', async ({
+      restClient,
+    }) => {
       const restResult = await (
         await restClient.GET(`/pages/${aboutPage.id}`, { query: { depth: 1 } })
       ).json()
@@ -2235,7 +2236,7 @@ describe('Select', () => {
       expect(richTextLexicalRel.value).toMatchObject(expectedHomePage)
     })
 
-    it('graphQL - should retrieve fields against defaultPopulate', async () => {
+    test('graphQL - should retrieve fields against defaultPopulate', async ({ restClient }) => {
       const query = `query {
         Pages {
           docs {
@@ -2289,7 +2290,10 @@ describe('Select', () => {
       expect(richTextLexicalRel.value).toMatchObject(homePage)
     })
 
-    it('graphQL - should return relationship fields when using select flag', async () => {
+    test('graphQL - should return relationship fields when using select flag', async ({
+      payload,
+      restClient,
+    }) => {
       // Create a related document first
       const rel = await payload.create({ collection: 'rels', data: { text: 'graphql-rel-test' } })
 
@@ -2352,7 +2356,10 @@ describe('Select', () => {
       await payload.delete({ id: rel.id, collection: 'rels' })
     })
 
-    it('graphQL - should return polymorphic relationship fields when using select flag', async () => {
+    test('graphQL - should return polymorphic relationship fields when using select flag', async ({
+      payload,
+      restClient,
+    }) => {
       // Create a related document
       const rel = await payload.create({ collection: 'rels', data: { text: 'graphql-poly-test' } })
 
@@ -2427,7 +2434,9 @@ describe('Select', () => {
       await payload.delete({ id: rel.id, collection: 'rels' })
     })
 
-    it('local API - should populate and override defaultSelect select shape from the populate arg', async () => {
+    test('local API - should populate and override defaultSelect select shape from the populate arg', async ({
+      payload,
+    }) => {
       const result = await payload.findByID({
         id: aboutPage.id,
         collection: 'pages',
@@ -2479,7 +2488,9 @@ describe('Select', () => {
       expect(richTextLexicalRel.value).toStrictEqual(expectedHomePageOverride)
     })
 
-    it('rEST API - should populate and override defaultSelect select shape from the populate arg', async () => {
+    test('rEST API - should populate and override defaultSelect select shape from the populate arg', async ({
+      restClient,
+    }) => {
       const result = await restClient
         .GET(`/pages/${aboutPage.id}`, {
           query: {
@@ -2522,7 +2533,7 @@ describe('Select', () => {
       expect(richTextLexicalRel.value).toMatchObject(expectedHomePageOverride)
     })
 
-    it('should apply populate on depth 2', async () => {
+    test('should apply populate on depth 2', async ({ payload }) => {
       const page_1 = await payload.create({
         collection: 'pages',
         data: { slug: 'page-1', blocks: [{ blockType: 'some' }], relatedPage: null },
@@ -2553,7 +2564,9 @@ describe('Select', () => {
     })
   })
 
-  it('should auto-select field2 when caller selects field1 on collections', async () => {
+  test('should auto-select field2 when caller selects field1 on collections', async ({
+    payload,
+  }) => {
     const { id } = await payload.create({
       collection: 'force-select',
       data: { field1: 'one', field2: 'two', text: 'control' },
@@ -2587,7 +2600,7 @@ describe('Select', () => {
     await payload.delete({ id, collection: 'force-select' })
   })
 
-  it('should auto-select field2 when caller selects field1 on globals', async () => {
+  test('should auto-select field2 when caller selects field1 on globals', async ({ payload }) => {
     const { id } = await payload.updateGlobal({
       slug: 'force-select-global',
       data: { field1: 'one', field2: 'two', text: 'control' },
@@ -2605,7 +2618,7 @@ describe('Select', () => {
     })
   })
 
-  it('should pass req + select context to the select function', async () => {
+  test('should pass req + select context to the select function', async ({ payload }) => {
     const calls: Array<{ operation: string; selectKeys?: string[]; userEmail?: string }> = []
 
     const collection = payload.config.collections.find((c) => c.slug === 'force-select')!
@@ -2647,7 +2660,9 @@ describe('Select', () => {
     }
   })
 
-  it('should properly return relationships when using select on block with depth 0', async () => {
+  test('should properly return relationships when using select on block with depth 0', async ({
+    payload,
+  }) => {
     const rel_1 = await payload.create({ collection: 'rels', data: { text: 'rel-1' } })
     const doc = await payload.create({
       collection: 'relationships-blocks',
@@ -2672,7 +2687,7 @@ describe('Select', () => {
     expect(result.blocks[0]?.hasMany).toEqual([rel_1.id])
   })
 
-  it('should populate relationships when using select on block', async () => {
+  test('should populate relationships when using select on block', async ({ payload }) => {
     const rel_1 = await payload.create({ collection: 'rels', data: { text: 'rel-1' } })
     const doc = await payload.create({
       collection: 'relationships-blocks',
@@ -2699,7 +2714,7 @@ describe('Select', () => {
   })
 })
 
-async function createPost() {
+async function createPost({ payload }: { payload: Payload }) {
   const upload = await payload.create({
     collection: 'upload',
     data: {},
@@ -2757,7 +2772,7 @@ async function createPost() {
   })
 }
 
-function createLocalizedPost() {
+function createLocalizedPost({ payload }: { payload: Payload }) {
   return payload.create({
     collection: 'localized-posts',
     data: {
@@ -2814,7 +2829,7 @@ function createLocalizedPost() {
   })
 }
 
-function createDeepPost() {
+function createDeepPost({ payload }: { payload: Payload }) {
   return payload.create({
     collection: 'deep-posts',
     data: {
@@ -2827,7 +2842,7 @@ function createDeepPost() {
   })
 }
 
-function createVersionedPost() {
+function createVersionedPost({ payload }: { payload: Payload }) {
   return payload.create({
     collection: 'versioned-posts',
     data: {
@@ -2839,12 +2854,12 @@ function createVersionedPost() {
   })
 }
 
-function createPoint() {
+function createPoint({ payload }: { payload: Payload }) {
   return payload.create({ collection: 'points', data: { point: [10, 20], text: 'some' } })
 }
 
 let id = 1
 
-function createCustomID() {
+function createCustomID({ payload }: { payload: Payload }) {
   return payload.create({ collection: 'custom-ids', data: { id: id++, text: randomUUID() } })
 }

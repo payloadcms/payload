@@ -1,12 +1,14 @@
 import fs from 'fs/promises'
 import path from 'path'
 import { fileURLToPath } from 'url'
-import { describe, expect, it } from 'vitest'
+import { expect } from 'vitest'
+
+import { test } from '../__helpers/int/vitest.js'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
 
-describe('typescript.postProcess', () => {
-  it('should apply postProcess functions to generated types', async () => {
+test.suite({})('typescript.postProcess', () => {
+  test('should apply postProcess functions to generated types', async () => {
     const outputFile = path.resolve(dirname, 'payload-types.ts')
     const content = await fs.readFile(outputFile, 'utf-8')
 
@@ -15,7 +17,7 @@ describe('typescript.postProcess', () => {
     expect(content).toContain('export type SecondGeneric<K, V> = { key: K; value: V };')
   })
 
-  it('should apply multiple postProcess functions in order', async () => {
+  test('should apply multiple postProcess functions in order', async () => {
     const outputFile = path.resolve(dirname, 'payload-types.ts')
     const content = await fs.readFile(outputFile, 'utf-8')
 

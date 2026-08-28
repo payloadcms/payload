@@ -405,7 +405,6 @@ test.suite({ config: './config.ts' })('database', () => {
 
       expect(createdAtDate.getMilliseconds()).toBeDefined()
 
-      // Cleanup, as this test suite does not use clearAndSeedEverything
       await payload.db.deleteMany({
         collection: postsSlug,
         where: {},
@@ -430,7 +429,6 @@ test.suite({ config: './config.ts' })('database', () => {
       expect(result.createdAt).toStrictEqual(createdAt)
       expect(doc.createdAt).toStrictEqual(createdAt)
 
-      // Cleanup, as this test suite does not use clearAndSeedEverything
       await payload.db.deleteMany({
         collection: postsSlug,
         where: {},
@@ -449,7 +447,6 @@ test.suite({ config: './config.ts' })('database', () => {
 
       expect(result.updatedAt).toStrictEqual(updatedAt)
 
-      // Cleanup, as this test suite does not use clearAndSeedEverything
       await payload.db.deleteMany({
         collection: postsSlug,
         where: {},
@@ -479,7 +476,6 @@ test.suite({ config: './config.ts' })('database', () => {
 
       expect(doc.createdAt).toStrictEqual(createdAt)
 
-      // Cleanup, as this test suite does not use clearAndSeedEverything
       await payload.db.deleteMany({
         collection: postsSlug,
         where: {},
@@ -510,7 +506,6 @@ test.suite({ config: './config.ts' })('database', () => {
 
       expect(doc.updatedAt).toStrictEqual(updatedAt)
 
-      // Cleanup, as this test suite does not use clearAndSeedEverything
       await payload.db.deleteMany({
         collection: postsSlug,
         where: {},
@@ -535,7 +530,6 @@ test.suite({ config: './config.ts' })('database', () => {
 
       expect(result.updatedAt).not.toStrictEqual(post.updatedAt)
 
-      // Cleanup, as this test suite does not use clearAndSeedEverything
       await payload.db.deleteMany({
         collection: postsSlug,
         where: {},
@@ -563,7 +557,6 @@ test.suite({ config: './config.ts' })('database', () => {
 
       expect(result.updatedAt).toStrictEqual(post.updatedAt)
 
-      // Cleanup, as this test suite does not use clearAndSeedEverything
       await payload.db.deleteMany({
         collection: postsSlug,
         where: {},
@@ -612,7 +605,6 @@ test.suite({ config: './config.ts' })('database', () => {
         expect(version.createdAt).toStrictEqual(createdAt)
       }
 
-      // Cleanup, as this test suite does not use clearAndSeedEverything
       await payload.db.deleteMany({
         collection: 'categories',
         where: {},
@@ -665,7 +657,6 @@ test.suite({ config: './config.ts' })('database', () => {
         expect(version.updatedAt).toStrictEqual(updatedAt)
       }
 
-      // Cleanup, as this test suite does not use clearAndSeedEverything
       await payload.db.deleteMany({
         collection: 'categories',
         where: {},

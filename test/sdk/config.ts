@@ -10,36 +10,42 @@ import { PostsCollection } from './collections/Posts.js'
 import { Users } from './collections/Users.js'
 
 export default buildConfigWithDefaults({
-  admin: {
-    importMap: {
-      baseDir: path.resolve(dirname),
+  suite: 'sdk',
+  config: {
+    admin: {
+      importMap: {
+        baseDir: path.resolve(dirname),
+      },
+    },
+    collections: [
+      Users,
+      PostsCollection,
+      EmailsCollection,
+      {
+        slug: 'media',
+        access: { create: () => true, read: () => true, update: () => true },
+        fields: [],
+        upload: { staticDir: path.resolve(dirname, './media') },
+        versions: false,
+      },
+    ],
+    globals: [
+      {
+        slug: 'global',
+        fields: [{ name: 'text', type: 'text' }],
+        versions: true,
+      },
+    ],
+    localization: {
+      defaultLocale: 'en',
+      fallback: true,
+      locales: ['en', 'es', 'de'],
+    },
+    typescript: {
+      outputFile: path.resolve(dirname, 'payload-types.ts'),
     },
   },
-  collections: [
-    Users,
-    PostsCollection,
-    EmailsCollection,
-    {
-      access: { create: () => true, read: () => true, update: () => true },
-      slug: 'media',
-      upload: { staticDir: path.resolve(dirname, './media') },
-      fields: [],
-      versions: false,
-    },
-  ],
-  globals: [
-    {
-      slug: 'global',
-      fields: [{ type: 'text', name: 'text' }],
-      versions: true,
-    },
-  ],
-  localization: {
-    defaultLocale: 'en',
-    fallback: true,
-    locales: ['en', 'es', 'de'],
-  },
-  onInit: async (payload) => {
+  seed: async (payload) => {
     await payload.create({
       collection: 'users',
       data: {
@@ -47,8 +53,5 @@ export default buildConfigWithDefaults({
         password: devUser.password,
       },
     })
-  },
-  typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })

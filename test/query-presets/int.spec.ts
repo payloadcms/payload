@@ -1,27 +1,19 @@
-import type { Payload, User } from 'payload'
-import { describe, beforeAll, afterAll, it, expect } from 'vitest'
+import type { User } from 'payload'
 
-import path from 'path'
 import { fileURLToPath } from 'url'
+import { expect } from 'vitest'
 
+import { test } from '../__helpers/int/vitest.js'
 import { devUser, regularUser } from '../credentials.js'
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import testConfig from './config.js'
 
 const queryPresetsCollectionSlug = 'payload-query-presets'
-
-let payload: Payload
 let adminUser: User
 let editorUser: User
 let publicUser: User
 
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
-
-describe('Query Presets', () => {
-  beforeAll(async () => {
-    // @ts-expect-error: initPayloadInt does not have a proper type definition
-    ;({ payload } = await initPayloadInt(dirname))
-
+test.suite({ config: testConfig })('Query Presets', () => {
+  test.beforeEach(async ({ payload }) => {
     adminUser = await payload
       .login({
         collection: 'users',
@@ -53,12 +45,8 @@ describe('Query Presets', () => {
       ?.then((result) => result.user)
   })
 
-  afterAll(async () => {
-    await payload.destroy()
-  })
-
-  describe('default access control', () => {
-    it('should only allow logged in users to perform actions', async () => {
+  test.describe('default access control', () => {
+    test('should only allow logged in users to perform actions', async ({ payload }) => {
       // create
       try {
         const result = await payload.create({
@@ -149,7 +137,7 @@ describe('Query Presets', () => {
       }
     })
 
-    it('should respect access when set to "specificUsers"', async () => {
+    test('should respect access when set to "specificUsers"', async ({ payload }) => {
       const presetForSpecificUsers = await payload.create({
         collection: queryPresetsCollectionSlug,
         user: adminUser,
@@ -228,7 +216,7 @@ describe('Query Presets', () => {
       }
     })
 
-    it('should respect access when set to "onlyMe"', async () => {
+    test('should respect access when set to "onlyMe"', async ({ payload }) => {
       const presetForOnlyMe = await payload.create({
         collection: queryPresetsCollectionSlug,
         overrideAccess: false,
@@ -305,7 +293,7 @@ describe('Query Presets', () => {
       }
     })
 
-    it('should respect access when set to "everyone"', async () => {
+    test('should respect access when set to "everyone"', async ({ payload }) => {
       const presetForEveryone = await payload.create({
         collection: queryPresetsCollectionSlug,
         overrideAccess: false,
@@ -377,7 +365,7 @@ describe('Query Presets', () => {
       expect(presetUpdatedByEditorUser.title).toBe('Everyone (Update 2)')
     })
 
-    it('should prevent accidental lockout', async () => {
+    test('should prevent accidental lockout', async ({ payload }) => {
       try {
         // create a preset using "specificRoles"
         // this will ensure the user on the request is _NOT_ automatically added to the `users` list
@@ -496,8 +484,8 @@ describe('Query Presets', () => {
     })
   })
 
-  describe('user-defined access control', () => {
-    it('should respect top-level access control overrides', async () => {
+  test.describe('user-defined access control', () => {
+    test('should respect top-level access control overrides', async ({ payload }) => {
       const preset = await payload.create({
         collection: queryPresetsCollectionSlug,
         user: adminUser,
@@ -544,7 +532,9 @@ describe('Query Presets', () => {
       }
     })
 
-    it('should only allow admins to select the "onlyAdmins" preset (via `filterOptions`)', async () => {
+    test('should only allow admins to select the "onlyAdmins" preset (via `filterOptions`)', async ({
+      payload,
+    }) => {
       try {
         const presetForAdminsCreatedByEditor = await payload.create({
           collection: queryPresetsCollectionSlug,
@@ -627,7 +617,7 @@ describe('Query Presets', () => {
       }
     })
 
-    it('should respect access when set to "specificRoles"', async () => {
+    test('should respect access when set to "specificRoles"', async ({ payload }) => {
       const presetForSpecificRoles = await payload.create({
         collection: queryPresetsCollectionSlug,
         user: adminUser,
@@ -706,7 +696,7 @@ describe('Query Presets', () => {
       }
     })
 
-    it('should respect boolean access control results', async () => {
+    test('should respect boolean access control results', async ({ payload }) => {
       // create a preset with the read constraint set to "noone"
       const presetForNoone = await payload.create({
         collection: queryPresetsCollectionSlug,
@@ -743,7 +733,9 @@ describe('Query Presets', () => {
     })
   })
 
-  it.skip('should disable query presets when "enabledQueryPresets" is not true on the collection', async () => {
+  test.skip('should disable query presets when "enabledQueryPresets" is not true on the collection', async ({
+    payload,
+  }) => {
     try {
       const result = await payload.create({
         collection: 'payload-query-presets',
@@ -762,8 +754,8 @@ describe('Query Presets', () => {
     }
   })
 
-  describe('Where object formatting', () => {
-    it('transforms "where" query objects into the "and" / "or" format', async () => {
+  test.describe('Where object formatting', () => {
+    test('transforms "where" query objects into the "and" / "or" format', async ({ payload }) => {
       const result = await payload.create({
         collection: queryPresetsCollectionSlug,
         user: adminUser,
@@ -805,7 +797,7 @@ describe('Query Presets', () => {
       })
     })
 
-    it('should handle empty where and columns fields', async () => {
+    test('should handle empty where and columns fields', async ({ payload }) => {
       const result = await payload.create({
         collection: queryPresetsCollectionSlug,
         user: adminUser,
