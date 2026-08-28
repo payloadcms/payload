@@ -1,7 +1,6 @@
 import { fileURLToPath } from 'node:url'
 import path from 'path'
 import { buildConfig } from 'payload'
-
 import './payload-types.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -33,6 +32,7 @@ export default buildConfig({
           type: 'text',
         },
       ],
+      versions: false,
     },
     {
       slug: 'posts-versioned',
@@ -97,6 +97,7 @@ export default buildConfig({
           ],
         },
       ],
+      versions: false,
     },
     {
       slug: 'posts',
@@ -182,6 +183,7 @@ export default buildConfig({
           ],
         },
       ],
+      versions: false,
     },
   ],
   globals: [
@@ -227,6 +229,7 @@ export default buildConfig({
           ],
         },
       ],
+      versions: false,
     },
   ],
 })

@@ -1,37 +1,21 @@
-import type { AuthCollectionSlug, CookieOptions, Payload, ServerAdapter } from 'payload'
+import type { AuthCollectionSlug, CookieOptions, ServerAdapter } from 'payload'
 
-import path from 'path'
 import { login } from 'payload/auth'
-import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { expect } from 'vitest'
 
-import type { NextRESTClient } from '../../__helpers/shared/NextRESTClient.js'
-
-import { initPayloadInt } from '../../__helpers/shared/initPayloadInt.js'
+import { test } from '../../__helpers/int/vitest.js'
 import { devUser } from '../../credentials.js'
 import config, { collectionSlug, providerCookie } from './config.js'
 
-let restClient: NextRESTClient
-let payload: Payload
-
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
-
-describe('Remove token from auth responses', () => {
-  beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(dirname, 'auth/removed-token'))
-
+test.suite({ config })('Remove token from auth responses', () => {
+  test.beforeEach(async ({ restClient }) => {
     await restClient.POST(`/${collectionSlug}/first-register`, {
       body: JSON.stringify({ ...devUser, 'confirm-password': devUser.password }),
     })
     await restClient.login({ slug: collectionSlug, credentials: devUser })
   })
 
-  afterAll(async () => {
-    await payload.destroy()
-  })
-
-  it('should not include token in response from /login', async () => {
+  test('should not include token in response from /login', async ({ restClient }) => {
     const result = await restClient.login({
       slug: collectionSlug,
       credentials: devUser,
@@ -41,7 +25,7 @@ describe('Remove token from auth responses', () => {
     expect(result.user.roles).toBeUndefined()
   })
 
-  it('should not include token in response from /me', async () => {
+  test('should not include token in response from /me', async ({ restClient }) => {
     const response = await restClient.GET(`/${collectionSlug}/me`)
     const result = await response.json()
     expect(response.status).toBe(200)
@@ -49,7 +33,9 @@ describe('Remove token from auth responses', () => {
     expect(result.user.email).toBeDefined()
   })
 
-  it('should preserve a provider cookie without including its token in the response', async () => {
+  test('should preserve a provider cookie without including its token in the response', async ({
+    restClient,
+  }) => {
     const response = await restClient.POST(`/${collectionSlug}/refresh-token`)
     const result = await response.json()
 
@@ -59,7 +45,9 @@ describe('Remove token from auth responses', () => {
     expect(result.user.email).toBeDefined()
   })
 
-  it('should preserve access-controlled fields in the framework server login result', async () => {
+  test('should preserve access-controlled fields in the framework server login result', async ({
+    config,
+  }) => {
     const setCookies: { name: string; options?: CookieOptions; value: string }[] = []
 
     const serverAdapter: ServerAdapter = {
@@ -102,7 +90,10 @@ describe('Remove token from auth responses', () => {
     expect(setCookies[0]?.value).not.toBe('')
   })
 
-  it('should not include token in response from /reset-password', async () => {
+  test('should not include token in response from /reset-password', async ({
+    payload,
+    restClient,
+  }) => {
     const token = await payload.forgotPassword({
       collection: collectionSlug,
       data: { email: devUser.email },

@@ -7,16 +7,15 @@ import type {
   RequiredDataFromCollectionSlug,
 } from 'payload'
 
-import path from 'path'
 import { createLocalReq, Forbidden } from 'payload'
 import { getEntityPermissions } from 'payload/internal'
 import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, beforeEach, describe, expect, it, vitest } from 'vitest'
+import { expect, vitest } from 'vitest'
 
-import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { FullyRestricted, Post } from './payload-types.js'
 
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { test } from '../__helpers/int/vitest.js'
+import testConfig from './config.js'
 import { requestHeaders } from './getConfig.js'
 import {
   asyncParentSlug,
@@ -35,20 +34,11 @@ import {
   slug,
   unrestrictedSlug,
 } from './shared.js'
-
-let payload: Payload
-let restClient: NextRESTClient
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
-describe('Access Control', () => {
+test.suite({ config: testConfig })('Access Control', () => {
   let post1: Post
   let restricted: FullyRestricted
 
-  beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(dirname))
-  })
-
-  beforeEach(async () => {
+  test.beforeEach(async ({ payload }) => {
     post1 = await payload.create({
       collection: slug,
       data: {},
@@ -60,12 +50,8 @@ describe('Access Control', () => {
     })
   })
 
-  afterAll(async () => {
-    await payload.destroy()
-  })
-
-  describe('Fields', () => {
-    it('should not affect hidden fields when patching data', async () => {
+  test.describe('Fields', () => {
+    test('should not affect hidden fields when patching data', async ({ payload }) => {
       const doc = await payload.create({
         collection: hiddenFieldsSlug,
         data: {
@@ -100,7 +86,9 @@ describe('Access Control', () => {
       expect(updatedDoc.partiallyHiddenArray[0].value).toStrictEqual('private_value')
     })
 
-    it('should not affect hidden fields when patching data - update many', async () => {
+    test('should not affect hidden fields when patching data - update many', async ({
+      payload,
+    }) => {
       const docsMany = await payload.create({
         collection: hiddenFieldsSlug,
         data: {
@@ -137,7 +125,7 @@ describe('Access Control', () => {
       expect(updatedMany.partiallyHiddenArray[0].value).toStrictEqual('private_value')
     })
 
-    it('should be able to restrict access based upon siblingData', async () => {
+    test('should be able to restrict access based upon siblingData', async ({ payload }) => {
       const { id } = await payload.create({
         collection: siblingDataSlug,
         data: {
@@ -174,7 +162,9 @@ describe('Access Control', () => {
       expect(docOverride.array?.[1].text).toBe(secondArrayText)
     })
 
-    it('should use fallback value when trying to update a field without permission', async () => {
+    test('should use fallback value when trying to update a field without permission', async ({
+      payload,
+    }) => {
       const doc = await payload.create({
         collection: hooksSlug,
         data: {
@@ -195,7 +185,7 @@ describe('Access Control', () => {
       expect(updatedDoc.cannotMutateRequired).toBe('original')
     })
 
-    it('should use fallback value when required data is missing', async () => {
+    test('should use fallback value when required data is missing', async ({ payload }) => {
       const doc = await payload.create({
         collection: hooksSlug,
         data: {
@@ -216,7 +206,9 @@ describe('Access Control', () => {
       expect(updatedDoc.cannotMutateRequired).toBe('original')
     })
 
-    it('should pass fallback value through to beforeChange hook when access returns false', async () => {
+    test('should pass fallback value through to beforeChange hook when access returns false', async ({
+      payload,
+    }) => {
       const doc = await payload.create({
         collection: hooksSlug,
         data: {
@@ -239,7 +231,7 @@ describe('Access Control', () => {
       expect(updatedDoc.cannotMutateNotRequired).toBe('cannotMutateNotRequired')
     })
 
-    it('should not return default values for hidden fields with values', async () => {
+    test('should not return default values for hidden fields with values', async ({ payload }) => {
       const doc = await payload.create({
         collection: hiddenFieldsSlug,
         data: {
@@ -259,20 +251,20 @@ describe('Access Control', () => {
       expect(findDoc2.hiddenWithDefault).toBeUndefined()
     })
   })
-  describe('Collections', () => {
-    describe('restricted collection', () => {
-      it('field without read access should not show', async () => {
-        const { id } = await createDoc({ restrictedField: 'restricted' })
+  test.describe('Collections', () => {
+    test.describe('restricted collection', () => {
+      test('field without read access should not show', async ({ payload }) => {
+        const { id } = await createDoc({ payload }, { restrictedField: 'restricted' })
 
         const retrievedDoc = await payload.findByID({ id, collection: slug, overrideAccess: false })
 
         expect(retrievedDoc.restrictedField).toBeUndefined()
       })
 
-      it.each(['AND', 'OR', 'AnD', 'oR'])(
+      test.for(['AND', 'OR', 'AnD', 'oR'])(
         'validates field read access inside case-insensitive %s conditions',
-        async (logicalOperator) => {
-          const { id } = await createDoc({ restrictedField: 'example' })
+        async (logicalOperator, { payload }) => {
+          const { id } = await createDoc({ payload }, { restrictedField: 'example' })
 
           await expect(
             payload.find({
@@ -295,7 +287,7 @@ describe('Access Control', () => {
         },
       )
 
-      it('rejects array-valued field conditions', async () => {
+      test('rejects array-valued field conditions', async ({ payload }) => {
         await expect(
           payload.find({
             collection: slug,
@@ -307,9 +299,11 @@ describe('Access Control', () => {
         ).rejects.toThrow('The following path cannot be queried: restrictedField')
       })
 
-      it('should respect access control for join request where queries of relationship properties', async () => {
-        const post = await createDoc({})
-        await createDoc({ post: post.id, name: 'test' }, 'relation-restricted')
+      test('should respect access control for join request where queries of relationship properties', async ({
+        payload,
+      }) => {
+        const post = await createDoc({ payload }, {})
+        await createDoc({ payload }, { post: post.id, name: 'test' }, 'relation-restricted')
         await expect(
           payload.find({
             collection: 'relation-restricted',
@@ -323,7 +317,7 @@ describe('Access Control', () => {
         ).rejects.toThrow('The following path cannot be queried: restrictedField')
       })
 
-      it('should reject constrained sort paths', async () => {
+      test('should reject constrained sort paths', async ({ payload }) => {
         const requests = [
           payload.find({
             collection: slug,
@@ -394,31 +388,41 @@ describe('Access Control', () => {
         )
       })
 
-      it('field without read access should not show when overrideAccess: true', async () => {
-        const { id, restrictedField } = await createDoc({ restrictedField: 'restricted' })
+      test('field without read access should not show when overrideAccess: true', async ({
+        payload,
+      }) => {
+        const { id, restrictedField } = await createDoc(
+          { payload },
+          { restrictedField: 'restricted' },
+        )
 
         const retrievedDoc = await payload.findByID({ id, collection: slug, overrideAccess: true })
 
         expect(retrievedDoc.restrictedField).toStrictEqual(restrictedField)
       })
 
-      it('field without read access should not show when overrideAccess default', async () => {
-        const { id, restrictedField } = await createDoc({ restrictedField: 'restricted' })
+      test('field without read access should not show when overrideAccess default', async ({
+        payload,
+      }) => {
+        const { id, restrictedField } = await createDoc(
+          { payload },
+          { restrictedField: 'restricted' },
+        )
 
         const retrievedDoc = await payload.findByID({ id, collection: slug })
 
         expect(retrievedDoc.restrictedField).toStrictEqual(restrictedField)
       })
     })
-    describe('non-enumerated request properties passed to access control', () => {
-      it('access control ok when passing request headers', async () => {
+    test.describe('non-enumerated request properties passed to access control', () => {
+      test('access control ok when passing request headers', async ({ payload }) => {
         const req = {
           headers: requestHeaders,
         } as PayloadRequest
         const name = 'name'
         const overrideAccess = false
 
-        const { id } = await createDoc({ name }, relyOnRequestHeadersSlug, {
+        const { id } = await createDoc({ payload }, { name }, relyOnRequestHeadersSlug, {
           overrideAccess,
           req,
         })
@@ -443,16 +447,16 @@ describe('Access Control', () => {
         expect(docsByName.length).toBeGreaterThan(0)
       })
 
-      it('access control fails when omitting request headers', async () => {
+      test('access control fails when omitting request headers', async ({ payload }) => {
         const name = 'name'
         const overrideAccess = false
 
         await expect(() =>
-          createDoc({ name }, relyOnRequestHeadersSlug, {
+          createDoc({ payload }, { name }, relyOnRequestHeadersSlug, {
             overrideAccess,
           }),
         ).rejects.toThrow(Forbidden)
-        const { id } = await createDoc({ name }, relyOnRequestHeadersSlug)
+        const { id } = await createDoc({ payload }, { name }, relyOnRequestHeadersSlug)
 
         await expect(() =>
           payload.findByID({ id, collection: relyOnRequestHeadersSlug, overrideAccess }),
@@ -473,9 +477,9 @@ describe('Access Control', () => {
     })
   })
 
-  describe('Override Access', () => {
-    describe('Fields', () => {
-      it('should allow overrideAccess: false', async () => {
+  test.describe('Override Access', () => {
+    test.describe('Fields', () => {
+      test('should allow overrideAccess: false', async ({ payload }) => {
         const req = async () =>
           await payload.update({
             id: post1.id,
@@ -487,7 +491,7 @@ describe('Access Control', () => {
         await expect(req).rejects.toThrow(Forbidden)
       })
 
-      it('should allow overrideAccess: true', async () => {
+      test('should allow overrideAccess: true', async ({ payload }) => {
         const doc = await payload.update({
           id: post1.id,
           collection: slug,
@@ -498,7 +502,7 @@ describe('Access Control', () => {
         expect(doc).toMatchObject({ id: post1.id })
       })
 
-      it('should allow overrideAccess by default', async () => {
+      test('should allow overrideAccess by default', async ({ payload }) => {
         const doc = await payload.update({
           id: post1.id,
           collection: slug,
@@ -508,7 +512,7 @@ describe('Access Control', () => {
         expect(doc).toMatchObject({ id: post1.id })
       })
 
-      it('should allow overrideAccess: false - update many', async () => {
+      test('should allow overrideAccess: false - update many', async ({ payload }) => {
         const req = async () =>
           await payload.update({
             collection: slug,
@@ -522,7 +526,7 @@ describe('Access Control', () => {
         await expect(req).rejects.toThrow(Forbidden)
       })
 
-      it('should allow overrideAccess: true - update many', async () => {
+      test('should allow overrideAccess: true - update many', async ({ payload }) => {
         const doc = await payload.update({
           collection: slug,
           data: { restrictedField: restricted.id },
@@ -535,7 +539,7 @@ describe('Access Control', () => {
         expect(doc.docs[0]).toMatchObject({ id: post1.id })
       })
 
-      it('should allow overrideAccess by default - update many', async () => {
+      test('should allow overrideAccess by default - update many', async ({ payload }) => {
         const doc = await payload.update({
           collection: slug,
           data: { restrictedField: restricted.id },
@@ -548,10 +552,10 @@ describe('Access Control', () => {
       })
     })
 
-    describe('Collections', () => {
+    test.describe('Collections', () => {
       const updatedName = 'updated'
 
-      it('should allow overrideAccess: false', async () => {
+      test('should allow overrideAccess: false', async ({ payload }) => {
         const req = async () =>
           await payload.update({
             id: restricted.id,
@@ -563,7 +567,7 @@ describe('Access Control', () => {
         await expect(req).rejects.toThrow(Forbidden)
       })
 
-      it('should allow overrideAccess: true', async () => {
+      test('should allow overrideAccess: true', async ({ payload }) => {
         const doc = await payload.update({
           id: restricted.id,
           collection: fullyRestrictedSlug,
@@ -574,7 +578,7 @@ describe('Access Control', () => {
         expect(doc).toMatchObject({ id: restricted.id, name: updatedName })
       })
 
-      it('should allow overrideAccess by default', async () => {
+      test('should allow overrideAccess by default', async ({ payload }) => {
         const doc = await payload.update({
           id: restricted.id,
           collection: fullyRestrictedSlug,
@@ -584,7 +588,7 @@ describe('Access Control', () => {
         expect(doc).toMatchObject({ id: restricted.id, name: updatedName })
       })
 
-      it('should allow overrideAccess: false - update many', async () => {
+      test('should allow overrideAccess: false - update many', async ({ payload }) => {
         const req = async () =>
           await payload.update({
             collection: fullyRestrictedSlug,
@@ -598,7 +602,7 @@ describe('Access Control', () => {
         await expect(req).rejects.toThrow(Forbidden)
       })
 
-      it('should allow overrideAccess: true - update many', async () => {
+      test('should allow overrideAccess: true - update many', async ({ payload }) => {
         const doc = await payload.update({
           collection: fullyRestrictedSlug,
           data: { name: updatedName },
@@ -611,7 +615,7 @@ describe('Access Control', () => {
         expect(doc.docs[0]).toMatchObject({ id: restricted.id, name: updatedName })
       })
 
-      it('should allow overrideAccess by default - update many', async () => {
+      test('should allow overrideAccess by default - update many', async ({ payload }) => {
         const doc = await payload.update({
           collection: fullyRestrictedSlug,
           data: { name: updatedName },
@@ -625,8 +629,8 @@ describe('Access Control', () => {
     })
   })
 
-  describe('Querying', () => {
-    it('should respect query constraint using hidden field', async () => {
+  test.describe('Querying', () => {
+    test('should respect query constraint using hidden field', async ({ payload }) => {
       await payload.create({
         collection: hiddenAccessSlug,
         data: {
@@ -650,7 +654,7 @@ describe('Access Control', () => {
       expect(docs).toHaveLength(1)
     })
 
-    it('should respect query constraint using hidden field on count', async () => {
+    test('should respect query constraint using hidden field on count', async ({ payload }) => {
       await payload.create({
         collection: hiddenAccessCountSlug,
         data: {
@@ -674,7 +678,7 @@ describe('Access Control', () => {
       expect(totalDocs).toBe(1)
     })
 
-    it('should respect query constraint using hidden field on versions', async () => {
+    test('should respect query constraint using hidden field on versions', async ({ payload }) => {
       await payload.create({
         collection: restrictedVersionsSlug,
         data: {
@@ -702,7 +706,9 @@ describe('Access Control', () => {
       expect(docs).toHaveLength(1)
     })
 
-    it('should ignore false access on query constraint added by top collection level access control', async () => {
+    test('should ignore false access on query constraint added by top collection level access control', async ({
+      payload,
+    }) => {
       await payload.create({
         collection: 'fields-and-top-access',
         data: { secret: 'will-fail-access-read' },
@@ -744,7 +750,9 @@ describe('Access Control', () => {
       expect(res).toBeTruthy()
     })
 
-    it('should ignore false access in versions on query constraint added by top collection level access control', async () => {
+    test('should ignore false access in versions on query constraint added by top collection level access control', async ({
+      payload,
+    }) => {
       // clean up
       await payload.delete({ collection: 'fields-and-top-access', where: {} })
 
@@ -782,8 +790,10 @@ describe('Access Control', () => {
     })
   })
 
-  describe('Auth - Local API', () => {
-    it('should not allow reset password if forgotPassword expiration token is expired', async () => {
+  test.describe('Auth - Local API', () => {
+    test('should not allow reset password if forgotPassword expiration token is expired', async ({
+      payload,
+    }) => {
       // Mock Date.now() to simulate the forgotPassword call happening 1 hour ago (default is 1 hour)
       const originalDateNow = Date.now
       const mockDateNow = vitest.spyOn(Date, 'now').mockImplementation(() => {
@@ -819,8 +829,10 @@ describe('Access Control', () => {
     })
   })
 
-  describe('async parent permission inheritance', () => {
-    it('should inherit async parent field permissions to nested children', async () => {
+  test.describe('async parent permission inheritance', () => {
+    test('should inherit async parent field permissions to nested children', async ({
+      payload,
+    }) => {
       const doc = await payload.create({
         collection: asyncParentSlug,
         data: {
@@ -886,7 +898,9 @@ describe('Access Control', () => {
       } satisfies CollectionPermission)
     })
 
-    it('should correctly deny access when async parent denies (non-admin user)', async () => {
+    test('should correctly deny access when async parent denies (non-admin user)', async ({
+      payload,
+    }) => {
       const doc = await payload.create({
         collection: asyncParentSlug,
         data: {
@@ -953,11 +967,11 @@ describe('Access Control', () => {
     })
   })
 
-  describe('Default access - admin auth collection scoping', () => {
+  test.describe('Default access - admin auth collection scoping', () => {
     let adminUser: Record<string, unknown>
     let publicUser: Record<string, unknown>
 
-    beforeAll(async () => {
+    test.beforeEach(async ({ payload }) => {
       const { docs: adminDocs } = await payload.find({
         collection: 'users',
         limit: 1,
@@ -973,7 +987,9 @@ describe('Access Control', () => {
       publicUser = { ...publicDocs[0], collection: publicUsersSlug }
     })
 
-    it('should grant default access to a user from the admin auth collection', async () => {
+    test('should grant default access to a user from the admin auth collection', async ({
+      payload,
+    }) => {
       const doc = await payload.create({
         collection: unrestrictedSlug,
         data: { name: 'created by admin user' },
@@ -984,7 +1000,9 @@ describe('Access Control', () => {
       expect(doc.id).toBeDefined()
     })
 
-    it('should deny default access to a user from a non-admin auth collection', async () => {
+    test('should deny default access to a user from a non-admin auth collection', async ({
+      payload,
+    }) => {
       await expect(
         payload.create({
           collection: unrestrictedSlug,
@@ -998,6 +1016,7 @@ describe('Access Control', () => {
 })
 
 async function createDoc<TSlug extends CollectionSlug = 'posts'>(
+  { payload }: { payload: Payload },
   data: RequiredDataFromCollectionSlug<TSlug>,
   overrideSlug?: TSlug,
   options?: Partial<Parameters<Payload['create']>[0]>,

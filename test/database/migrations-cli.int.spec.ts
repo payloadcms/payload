@@ -8,7 +8,7 @@
 import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
-import { afterEach, beforeEach, describe, expect } from 'vitest'
+import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
 import { removeFiles } from '../__helpers/shared/removeFiles.js'
@@ -18,12 +18,12 @@ const dirname = path.dirname(filename)
 
 const migrationDir = path.join(dirname, './migrations')
 
-describe('migrations CLI', () => {
-  afterEach(() => {
+test.suite({})('migrations CLI', () => {
+  test.afterEach(() => {
     removeFiles(migrationDir)
   })
 
-  beforeEach(() => {
+  test.beforeEach(() => {
     removeFiles(migrationDir)
   })
 

@@ -9,13 +9,16 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 export default buildConfigWithDefaults({
-  admin: {
-    importMap: {
-      baseDir: path.resolve(dirname),
+  suite: 'admin-routing',
+  config: {
+    admin: {
+      importMap: {
+        baseDir: path.resolve(dirname),
+      },
     },
+    collections: [Posts],
   },
-  collections: [Posts],
-  onInit: async (payload) => {
+  seed: async (payload) => {
     const { totalDocs } = await payload.count({
       collection: 'users',
     })

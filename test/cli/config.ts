@@ -3,6 +3,7 @@ import { fileURLToPath } from 'node:url'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { databaseAdapter } from '../databaseAdapter.js'
+import { seed } from './seed.js'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -12,166 +13,171 @@ if (process.env.PAYLOAD_TEST_CLI_CONFIG_LOG === 'true') {
 }
 
 export default buildConfigWithDefaults({
-  admin: {
-    disable: true,
-    importMap: {
-      baseDir: dirname,
-      importMapFile: path.resolve(dirname, 'generated/importMap.js'),
-    },
-  },
-  cli: {
-    commands: {
-      fail: './commands/fail.js#createFailCommand',
-      hello: './commands/hello.js#createHelloCommand',
-    },
-  },
-  collections: [
-    {
-      slug: 'pages',
-      access: {
-        read: () => ({ title: { equals: 'Readable through access control' } }),
-        update: ({ id, req }) => {
-          const idType = req.payload.collections.pages?.customIDType ?? req.payload.db.defaultIDType
-
-          return id === undefined || typeof id === (idType === 'number' ? 'number' : 'string')
-        },
+  suite: 'cli',
+  config: {
+    admin: {
+      disable: true,
+      importMap: {
+        baseDir: dirname,
+        importMapFile: path.resolve(dirname, 'generated/importMap.js'),
       },
-      fields: [
-        {
-          name: 'title',
-          type: 'text',
-          required: true,
-        },
-        {
-          name: 'location',
-          type: 'point',
-        },
-        {
-          name: 'requireMetadata',
-          type: 'checkbox',
-        },
-        {
-          name: 'metadata',
-          type: 'group',
-          admin: {
-            condition: (_data, siblingData) => siblingData.requireMetadata === true,
+    },
+    cli: {
+      commands: {
+        fail: './commands/fail.js#createFailCommand',
+        hello: './commands/hello.js#createHelloCommand',
+      },
+    },
+    collections: [
+      {
+        slug: 'pages',
+        access: {
+          read: () => ({ title: { equals: 'Readable through access control' } }),
+          update: ({ id, req }) => {
+            const idType =
+              req.payload.collections.pages?.customIDType ?? req.payload.db.defaultIDType
+
+            return id === undefined || typeof id === (idType === 'number' ? 'number' : 'string')
           },
-          fields: [
-            {
-              name: 'description',
-              type: 'text',
-              required: true,
+        },
+        fields: [
+          {
+            name: 'title',
+            type: 'text',
+            required: true,
+          },
+          {
+            name: 'location',
+            type: 'point',
+          },
+          {
+            name: 'requireMetadata',
+            type: 'checkbox',
+          },
+          {
+            name: 'metadata',
+            type: 'group',
+            admin: {
+              condition: (_data, siblingData) => siblingData.requireMetadata === true,
             },
-            {
-              name: 'title',
-              type: 'text',
-              required: true,
+            fields: [
+              {
+                name: 'description',
+                type: 'text',
+                required: true,
+              },
+              {
+                name: 'title',
+                type: 'text',
+                required: true,
+              },
+            ],
+          },
+        ],
+        hooks: {
+          beforeValidate: [
+            ({ data }) => {
+              if (data?.title === null) {
+                throw new Error('Invalid data reached the collection operation.')
+              }
+
+              return data
             },
           ],
         },
-      ],
-      hooks: {
-        beforeValidate: [
-          ({ data }) => {
-            if (data?.title === null) {
-              throw new Error('Invalid data reached the collection operation.')
-            }
-
-            return data
-          },
-        ],
-      },
-      versions: {
-        drafts: true,
-      },
-    },
-    {
-      slug: 'media',
-      fields: [
-        {
-          name: 'title',
-          type: 'text',
-          required: true,
-        },
-      ],
-      upload: {
-        staticDir: path.resolve(dirname, 'generated/media'),
-      },
-    },
-    {
-      slug: 'custom-ids',
-      access: {
-        update: ({ id, req }) => {
-          const idType =
-            req.payload.collections['custom-ids']?.customIDType ?? req.payload.db.defaultIDType
-
-          return id === undefined || typeof id === (idType === 'number' ? 'number' : 'string')
+        versions: {
+          drafts: true,
         },
       },
-      fields: [
-        {
-          name: 'id',
-          type: 'text',
-        },
-        {
-          name: 'title',
-          type: 'text',
-          required: true,
-        },
-      ],
-      lockDocuments: false,
-    },
-  ],
-  db: {
-    ...databaseAdapter,
-    init: (args) => {
-      const adapter = databaseAdapter.init(args)
-      adapter.migrationDir = path.resolve(dirname, 'migrations')
-
-      return adapter
-    },
-  },
-  globals: [
-    {
-      slug: 'settings',
-      fields: [
-        {
-          name: 'title',
-          type: 'text',
-          required: true,
-        },
-      ],
-      hooks: {
-        beforeValidate: [
-          ({ data }) => {
-            if (data?.title === null) {
-              throw new Error('Invalid data reached the global operation.')
-            }
-
-            return data
-          },
-        ],
-      },
-    },
-  ],
-  jobs: {
-    deleteJobOnComplete: false,
-    tasks: [
       {
-        slug: 'noop',
-        handler: async ({ req }) => {
-          await req.payload.create({
-            collection: 'pages',
-            data: { title: 'CLI job ran' },
-          } as never)
-
-          return { output: {} }
+        slug: 'media',
+        fields: [
+          {
+            name: 'title',
+            type: 'text',
+            required: true,
+          },
+        ],
+        upload: {
+          staticDir: path.resolve(dirname, 'generated/media'),
         },
-        schedule: [{ cron: '* * * * * *', queue: 'default' }],
+      },
+      {
+        slug: 'custom-ids',
+        access: {
+          update: ({ id, req }) => {
+            const idType =
+              req.payload.collections['custom-ids']?.customIDType ?? req.payload.db.defaultIDType
+
+            return id === undefined || typeof id === (idType === 'number' ? 'number' : 'string')
+          },
+        },
+        fields: [
+          {
+            name: 'id',
+            type: 'text',
+          },
+          {
+            name: 'title',
+            type: 'text',
+            required: true,
+          },
+        ],
+        lockDocuments: false,
       },
     ],
+    db: {
+      ...databaseAdapter,
+      init: (args) => {
+        const adapter = databaseAdapter.init(args)
+        adapter.migrationDir = path.resolve(dirname, 'migrations')
+
+        return adapter
+      },
+    },
+    globals: [
+      {
+        slug: 'settings',
+        fields: [
+          {
+            name: 'title',
+            type: 'text',
+            required: true,
+          },
+        ],
+        hooks: {
+          beforeValidate: [
+            ({ data }) => {
+              if (data?.title === null) {
+                throw new Error('Invalid data reached the global operation.')
+              }
+
+              return data
+            },
+          ],
+        },
+      },
+    ],
+    jobs: {
+      deleteJobOnComplete: false,
+      tasks: [
+        {
+          slug: 'noop',
+          handler: async ({ req }) => {
+            await req.payload.create({
+              collection: 'pages',
+              data: { title: 'CLI job ran' },
+            } as never)
+
+            return { output: {} }
+          },
+          schedule: [{ cron: '* * * * * *', queue: 'default' }],
+        },
+      ],
+    },
+    typescript: {
+      outputFile: path.resolve(dirname, 'generated/payload-types.ts'),
+    },
   },
-  typescript: {
-    outputFile: path.resolve(dirname, 'generated/payload-types.ts'),
-  },
+  seed,
 })

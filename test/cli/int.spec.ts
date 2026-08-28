@@ -9,7 +9,9 @@ import { parseArgsStringToArgv } from 'string-argv'
 import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
-import { clearAndSeedEverything } from './seed.js'
+import { resetAndSeed } from '../__helpers/shared/clearAndSeed/resetAndSeed.js'
+import { getTestDataConfig } from '../__helpers/shared/clearAndSeed/testDataConfig.js'
+import testConfig from './config.js'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
 const CLI_COMMAND_TEST_TIMEOUT = 180_000
@@ -28,13 +30,13 @@ const initialCLIJSONSetting = process.env.PAYLOAD_CLI_JSON
 
 process.env.SQLITE_URL ??= `file:${path.resolve(dirname, 'payload.db')}`
 
-test.describe('CLI', () => {
+test.suite({ config: testConfig })('CLI', () => {
   test.beforeAll(() => {
     process.env.PAYLOAD_FRAMEWORK = 'next'
   })
 
-  test.beforeEach(async ({ payload }) => {
-    await resetCLIState({ payload })
+  test.beforeEach(async () => {
+    await resetCLIArtifacts()
   })
 
   test.afterAll(async () => {
@@ -1514,18 +1516,24 @@ test.describe('CLI', () => {
   })
 })
 
-async function resetCLIState({ payload }: { payload: Payload }): Promise<void> {
+async function resetCLIArtifacts(): Promise<void> {
   await rm(generatedDirectory, { force: true, recursive: true })
   await rm(migrationsDirectory, { force: true, recursive: true })
   await rm(schemaFile, { force: true })
   await mkdir(generatedDirectory, { recursive: true })
   process.env.PAYLOAD_DROP_DATABASE = 'false'
+}
 
-  await payload.delete({
-    collection: 'payload-jobs',
-    where: { id: { exists: true } },
-  } as never)
-  await clearAndSeedEverything(payload)
+async function resetCLIState({ payload }: { payload: Payload }): Promise<void> {
+  await resetCLIArtifacts()
+
+  const testDataConfig = getTestDataConfig(payload.config)
+
+  if (!testDataConfig) {
+    throw new Error('Test suite metadata was not registered by buildConfigWithDefaults.')
+  }
+
+  await resetAndSeed({ payload, ...testDataConfig })
 }
 
 type CLIOutput<TResult = Record<string, unknown>> = {

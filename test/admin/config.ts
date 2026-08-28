@@ -64,249 +64,248 @@ process.env.NEXT_BASE_PATH = BASE_PATH
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 export default buildConfigWithDefaults({
-  admin: {
-    components: {
-      actions: ['/components/actions/AdminButton/index.js#AdminButton'],
-      afterDashboard: [
-        '/components/AfterDashboard/index.js#AfterDashboard',
-        '/components/AfterDashboardClient/index.js#AfterDashboardClient',
-        '/components/DashboardStatus/index.js#DashboardStatus',
-      ],
-      afterNav: ['/components/AfterNav/index.js#AfterNav'],
-      afterNavLinks: ['/components/AfterNavLinks/index.js#AfterNavLinks'],
-      beforeLogin: ['/components/BeforeLogin/index.js#BeforeLogin'],
-      beforeNav: ['/components/BeforeNav/index.js#BeforeNav'],
-      beforeNavLinks: ['/components/BeforeNavLinks/index.js#BeforeNavLinks'],
-      graphics: {
-        Icon: '/components/graphics/Icon.js#Icon',
-        Logo: '/components/graphics/Logo.js#Logo',
-      },
-      header: ['/components/CustomHeader/index.js#CustomHeader'],
-      logout: {
-        Button: '/components/Logout/index.js#Logout',
-      },
-      providers: [
-        '/components/CustomProviderServer/index.js#CustomProviderServer',
-        '/components/CustomProvider/index.js#CustomProvider',
-      ],
-      settingsMenu: [
-        '/components/SettingsMenuItems/Item1.tsx#SettingsMenuItem1',
-        '/components/SettingsMenuItems/Item2.tsx#SettingsMenuItem2',
-      ],
-      views: {
-        // Dashboard: CustomDashboardView,
-        // Account: CustomAccountView,
-        collections: {
-          Component: '/components/views/CustomView/index.js#CustomView',
-          path: '/collections',
+  suite: 'admin',
+  config: {
+    admin: {
+      components: {
+        actions: ['/components/actions/AdminButton/index.js#AdminButton'],
+        afterDashboard: [
+          '/components/AfterDashboard/index.js#AfterDashboard',
+          '/components/AfterDashboardClient/index.js#AfterDashboardClient',
+          '/components/DashboardStatus/index.js#DashboardStatus',
+        ],
+        afterNav: ['/components/AfterNav/index.js#AfterNav'],
+        afterNavLinks: ['/components/AfterNavLinks/index.js#AfterNavLinks'],
+        beforeLogin: ['/components/BeforeLogin/index.js#BeforeLogin'],
+        beforeNav: ['/components/BeforeNav/index.js#BeforeNav'],
+        beforeNavLinks: ['/components/BeforeNavLinks/index.js#BeforeNavLinks'],
+        graphics: {
+          Icon: '/components/graphics/Icon.js#Icon',
+          Logo: '/components/graphics/Logo.js#Logo',
         },
-        CustomDefaultView: {
-          Component: '/components/views/CustomDefault/index.js#CustomDefaultView',
-          path: '/custom-default-view',
+        header: ['/components/CustomHeader/index.js#CustomHeader'],
+        logout: {
+          Button: '/components/Logout/index.js#Logout',
         },
-        CustomMinimalView: {
-          Component: '/components/views/CustomMinimal/index.js#CustomMinimalView',
-          meta: {
-            title: customRootViewMetaTitle,
-          },
-          path: '/custom-minimal-view',
-        },
-        CustomNestedView: {
-          Component: '/components/views/CustomViewNested/index.js#CustomNestedView',
-          exact: true,
-          path: customNestedViewPath,
-        },
-        CustomView: {
-          Component: '/components/views/CustomView/index.js#CustomView',
-          exact: true,
-          path: customViewPath,
-          strict: true,
-        },
-        CustomViewWithParam: {
-          Component: '/components/views/CustomViewWithParam/index.js#CustomViewWithParam',
-          path: customParamViewPath,
-        },
-        ProtectedCustomNestedView: {
-          Component: '/components/views/CustomProtectedView/index.js#CustomProtectedView',
-          exact: true,
-          path: protectedCustomNestedViewPath,
-        },
-        PublicCustomView: {
-          Component: '/components/views/CustomView/index.js#CustomView',
-          exact: true,
-          path: publicCustomViewPath,
-          strict: true,
-        },
-        ButtonShowcase: {
-          Component: '/components/views/ButtonStyles/index.js#ButtonStyles',
-          path: '/button-styles',
-        },
-        TooltipShowcase: {
-          Component: '/components/views/TooltipShowcase/index.js#TooltipShowcase',
-          path: '/tooltip-showcase',
-        },
-      },
-      sidebar: {
-        tabs: [
-          {
-            slug: 'custom-tab',
-            label: 'Folders',
-            components: {
-              Icon: '@payloadcms/ui#FolderIcon',
-              Content: {
-                path: '/components/CustomTab.js#CustomTab',
-                clientProps: {
-                  heading: 'Folders',
-                  content: 'Example folders tab content.',
+        providers: [
+          '/components/CustomProviderServer/index.js#CustomProviderServer',
+          '/components/CustomProvider/index.js#CustomProvider',
+        ],
+        settingsMenu: [
+          '/components/SettingsMenuItems/Item1.tsx#SettingsMenuItem1',
+          '/components/SettingsMenuItems/Item2.tsx#SettingsMenuItem2',
+        ],
+        sidebar: {
+          tabs: [
+            {
+              slug: 'custom-tab',
+              components: {
+                Content: {
+                  clientProps: {
+                    content: 'Example folders tab content.',
+                    heading: 'Folders',
+                  },
+                  path: '/components/CustomTab.js#CustomTab',
                 },
+                Icon: '@payloadcms/ui#FolderIcon',
               },
+              label: 'Folders',
             },
+            {
+              slug: 'custom-tab-2',
+              components: {
+                Content: {
+                  clientProps: {
+                    content: 'Example settings tab content.',
+                    heading: 'Settings',
+                  },
+                  path: '/components/CustomTab.js#CustomTab',
+                },
+                Icon: {
+                  clientProps: {
+                    size: 24,
+                  },
+                  path: '@payloadcms/ui#GearIcon',
+                },
+              },
+              label: 'Settings',
+            },
+          ],
+        },
+        views: {
+          // Dashboard: CustomDashboardView,
+          // Account: CustomAccountView,
+          ButtonShowcase: {
+            Component: '/components/views/ButtonStyles/index.js#ButtonStyles',
+            path: '/button-styles',
+          },
+          collections: {
+            Component: '/components/views/CustomView/index.js#CustomView',
+            path: '/collections',
+          },
+          CustomDefaultView: {
+            Component: '/components/views/CustomDefault/index.js#CustomDefaultView',
+            path: '/custom-default-view',
+          },
+          CustomMinimalView: {
+            Component: '/components/views/CustomMinimal/index.js#CustomMinimalView',
+            meta: {
+              title: customRootViewMetaTitle,
+            },
+            path: '/custom-minimal-view',
+          },
+          CustomNestedView: {
+            Component: '/components/views/CustomViewNested/index.js#CustomNestedView',
+            exact: true,
+            path: customNestedViewPath,
+          },
+          CustomView: {
+            Component: '/components/views/CustomView/index.js#CustomView',
+            exact: true,
+            path: customViewPath,
+            strict: true,
+          },
+          CustomViewWithParam: {
+            Component: '/components/views/CustomViewWithParam/index.js#CustomViewWithParam',
+            path: customParamViewPath,
+          },
+          ProtectedCustomNestedView: {
+            Component: '/components/views/CustomProtectedView/index.js#CustomProtectedView',
+            exact: true,
+            path: protectedCustomNestedViewPath,
+          },
+          PublicCustomView: {
+            Component: '/components/views/CustomView/index.js#CustomView',
+            exact: true,
+            path: publicCustomViewPath,
+            strict: true,
+          },
+          TooltipShowcase: {
+            Component: '/components/views/TooltipShowcase/index.js#TooltipShowcase',
+            path: '/tooltip-showcase',
+          },
+        },
+      },
+      dependencies: {
+        myTestComponent: {
+          type: 'component',
+          clientProps: {
+            test: 'hello',
+          },
+          path: '/components/TestComponent.js#TestComponent',
+        },
+      },
+      importMap: {
+        baseDir: path.resolve(dirname),
+      },
+      livePreview: {
+        collections: [reorderTabsSlug, editMenuItemsSlug],
+        url: `http://localhost:${process.env.PORT || 3000}`,
+      },
+      meta: {
+        description: 'This is a custom meta description',
+        icons: [
+          {
+            type: 'image/png',
+            rel: 'icon',
+            url: '/custom-favicon-dark.png',
           },
           {
-            slug: 'custom-tab-2',
-            label: 'Settings',
-            components: {
-              Icon: {
-                path: '@payloadcms/ui#GearIcon',
-                clientProps: {
-                  size: 24,
-                },
-              },
-              Content: {
-                path: '/components/CustomTab.js#CustomTab',
-                clientProps: {
-                  heading: 'Settings',
-                  content: 'Example settings tab content.',
-                },
-              },
-            },
+            type: 'image/png',
+            media: '(prefers-color-scheme: dark)',
+            rel: 'icon',
+            url: '/custom-favicon-light.png',
           },
         ],
+        openGraph: {
+          description: 'This is a custom OG description',
+          title: 'This is a custom OG title',
+        },
+        titleSuffix: '- Custom Title Suffix',
+      },
+      routes: customAdminRoutes,
+    },
+    collections: [
+      UploadCollection,
+      UploadTwoCollection,
+      Posts,
+      Users,
+      CollectionHidden,
+      CollectionNotInView,
+      CollectionNoApiView,
+      CollectionCustomDocumentControls,
+      CustomViews1,
+      CustomViews2,
+      CustomCollectionView,
+      ReorderTabs,
+      CustomFields,
+      CollectionGroup1A,
+      CollectionGroup1B,
+      CollectionGroup2A,
+      CollectionGroup2B,
+      Geo,
+      Array,
+      DisableDuplicate,
+      DisableCopyToLocale,
+      EditMenuItems,
+      FormatDocURL,
+      BaseListFilter,
+      with300Documents,
+      ListDrawer,
+      Placeholder,
+      UseAsTitleGroupField,
+      DisableBulkEdit,
+      CustomListDrawer,
+      ListViewSelectAPI,
+      Virtuals,
+      NoTimestampsCollection,
+      Localized,
+      FullyFeatured,
+    ],
+    globals: [
+      GlobalHidden,
+      GlobalNotInView,
+      GlobalNoApiView,
+      Global,
+      GlobalCustomDocumentControls,
+      CustomGlobalViews1,
+      CustomGlobalViews2,
+      GlobalGroup1A,
+      GlobalGroup1B,
+      Settings,
+    ],
+    i18n: {
+      translations: {
+        en: {
+          general: {
+            dashboard: 'Home',
+          },
+        },
       },
     },
-    dependencies: {
-      myTestComponent: {
-        type: 'component',
-        clientProps: {
-          test: 'hello',
-        },
-        path: '/components/TestComponent.js#TestComponent',
-      },
-    },
-    importMap: {
-      baseDir: path.resolve(dirname),
-    },
-    livePreview: {
-      collections: [reorderTabsSlug, editMenuItemsSlug],
-      url: `http://localhost:${process.env.PORT || 3000}`,
-    },
-    meta: {
-      description: 'This is a custom meta description',
-      icons: [
+    localization: {
+      defaultLocale: 'en',
+      defaultLocalePublishOption: 'active',
+      locales: [
         {
-          type: 'image/png',
-          rel: 'icon',
-          url: '/custom-favicon-dark.png',
+          code: 'es',
+          label: {
+            en: 'Spanish',
+            es: 'Español',
+          },
         },
         {
-          type: 'image/png',
-          media: '(prefers-color-scheme: dark)',
-          rel: 'icon',
-          url: '/custom-favicon-light.png',
+          code: 'en',
+          label: {
+            en: 'English',
+            es: 'Inglés',
+          },
         },
       ],
-      openGraph: {
-        description: 'This is a custom OG description',
-        title: 'This is a custom OG title',
-      },
-      titleSuffix: '- Custom Title Suffix',
     },
-    routes: customAdminRoutes,
-  },
-  collections: [
-    UploadCollection,
-    UploadTwoCollection,
-    Posts,
-    Users,
-    CollectionHidden,
-    CollectionNotInView,
-    CollectionNoApiView,
-    CollectionCustomDocumentControls,
-    CustomViews1,
-    CustomViews2,
-    CustomCollectionView,
-    ReorderTabs,
-    CustomFields,
-    CollectionGroup1A,
-    CollectionGroup1B,
-    CollectionGroup2A,
-    CollectionGroup2B,
-    Geo,
-    Array,
-    DisableDuplicate,
-    DisableCopyToLocale,
-    EditMenuItems,
-    FormatDocURL,
-    BaseListFilter,
-    with300Documents,
-    ListDrawer,
-    Placeholder,
-    UseAsTitleGroupField,
-    DisableBulkEdit,
-    CustomListDrawer,
-    ListViewSelectAPI,
-    Virtuals,
-    NoTimestampsCollection,
-    Localized,
-    FullyFeatured,
-  ],
-  globals: [
-    GlobalHidden,
-    GlobalNotInView,
-    GlobalNoApiView,
-    Global,
-    GlobalCustomDocumentControls,
-    CustomGlobalViews1,
-    CustomGlobalViews2,
-    GlobalGroup1A,
-    GlobalGroup1B,
-    Settings,
-  ],
-  i18n: {
-    translations: {
-      en: {
-        general: {
-          dashboard: 'Home',
-        },
-      },
+    typescript: {
+      outputFile: path.resolve(dirname, 'payload-types.ts'),
     },
   },
-  localization: {
-    defaultLocale: 'en',
-    defaultLocalePublishOption: 'active',
-    locales: [
-      {
-        code: 'es',
-        label: {
-          en: 'Spanish',
-          es: 'Español',
-        },
-      },
-      {
-        code: 'en',
-        label: {
-          en: 'English',
-          es: 'Inglés',
-        },
-      },
-    ],
-  },
-  onInit: async (payload) => {
-    if (process.env.SEED_IN_CONFIG_ONINIT !== 'false') {
-      await seed(payload)
-    }
-  },
-  typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
-  },
+  seed,
 })
