@@ -29,6 +29,7 @@ import RowFields from './collections/Row/index.js'
 import SelectFields from './collections/Select/index.js'
 import SelectVersionsFields from './collections/SelectVersions/index.js'
 import SlugField from './collections/SlugField/index.js'
+import { SlugFieldAccess } from './collections/SlugFieldAccess/index.js'
 import { SlugFieldAutosave } from './collections/SlugFieldAutosave/index.js'
 import TabsFields from './collections/Tabs/index.js'
 import { TabsFields2 } from './collections/Tabs2/index.js'
@@ -82,6 +83,7 @@ export const collections: CollectionConfig[] = [
   RelationshipFields,
   SelectFields,
   SlugField,
+  SlugFieldAccess,
   SlugFieldAutosave,
   TabsFields2,
   TabsFields,

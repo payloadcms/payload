@@ -109,6 +109,22 @@ describe('Live Preview', () => {
     await ensureCompilationIsDone({ page, serverURL })
   })
 
+  test('should not load Payload admin assets on the TanStack frontend', async () => {
+    // eslint-disable-next-line playwright/no-skipped-test -- this route belongs to the TanStack-only fixture
+    test.skip(process.env.PAYLOAD_FRAMEWORK !== 'tanstack-start')
+
+    await page.goto(`${serverURL}/live-preview/`)
+
+    await expect
+      .poll(() =>
+        page.evaluate(() =>
+          getComputedStyle(document.documentElement).getPropertyValue('--font-family-sans').trim(),
+        ),
+      )
+      .toBe('')
+    await expect(page.locator('link[href*="fonts.googleapis.com"]')).toHaveCount(0)
+  })
+
   test('collection — renders toggler', async () => {
     await navigateToDoc(page, pagesURLUtil)
 

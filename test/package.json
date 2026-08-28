@@ -119,6 +119,7 @@
     "server-only": "^0.0.1",
     "sharp": "0.32.6",
     "shiki": "^4.0.2",
+    "string-argv": "0.3.2",
     "tempy": "^1.0.1",
     "ts-essentials": "10.0.3",
     "typescript": "6.0.3",
