@@ -1322,6 +1322,28 @@ The same change applies to `upload` fields with `hasMany: true`.
 - Remove the `compatibility` block from your config. If your MongoDB data still has the redundant nested-localized shape, flatten the config and run a data migration.
 - Replace any direct `field.localized` reads in custom code with `fieldShouldBeLocalized({ field, parentIsLocalized })` from `payload/shared`.
 
+### Admin UI Publish button now defaults to the active locale, and `localization.defaultLocalePublishOption` has been removed
+
+The Admin UI Publish button now always defaults to publishing only the active locale when a collection or global has localized fields and you have publish permission. "Publish all locales" is available as a secondary option in the Publish button's dropdown. This previously required opting in via `localization.defaultLocalePublishOption: 'active'`; the config option has been removed since active-locale-only is now the permanent default.
+
+**What changes:**
+
+- `localization.defaultLocalePublishOption` no longer exists as a config property or type — remove it from your config.
+- If you had it set to `'active'`, there is no change in Admin UI behavior.
+- If you had it set to `'all'`, or left it unset, the Publish button now publishes only the active locale by default. Use the "Publish all locales" option in the button's dropdown to publish every locale at once.
+
+```diff
+export default buildConfig({
+  localization: {
+    defaultLocale: 'en',
+-   defaultLocalePublishOption: 'active',
+    locales: ['en', 'es'],
+  },
+})
+```
+
+Run `npx @payloadcms/codemod --transform remove-default-locale-publish-option` to remove the property automatically. The codemod surfaces a note for any config that had it set to `'all'`, since that combination previously changed the default and now has no config equivalent.
+
 ### Storage adapters must be declared under `storage`, not `plugins` ([#16596](https://github.com/payloadcms/payload/pull/16596))
 
 Storage adapter packages (`@payloadcms/storage-s3`, `-azure`, `-gcs`, `-r2`, `-vercel-blob`) must now be placed under the top-level `storage` key in your Payload config instead of inside `plugins`.
