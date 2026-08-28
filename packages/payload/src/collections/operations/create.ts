@@ -222,12 +222,19 @@ export const createOperation = async <
     // /////////////////////////////////////
 
     let statusFieldAccessDenied = false
+    const publicationFieldPolicyDoc = buildAllLocalesPublicationHookDoc({
+      doc: duplicatedFromDoc,
+      docWithLocales: duplicatedFromDocWithLocales,
+      status:
+        data._status === allLocalesPublicationStatus ? allLocalesPublicationStatus : undefined,
+    })
 
     data = await beforeValidate({
       collection: collectionConfig,
       context: req.context,
       data,
       doc: duplicatedFromDoc,
+      docForHooks: publicationFieldPolicyDoc,
       global: null,
       onFieldAccessDenied: (path) => {
         if (path === '_status') {

@@ -244,12 +244,19 @@ export const updateOperation = async <
     // /////////////////////////////////////
 
     let statusFieldAccessDenied = false
+    const publicationFieldPolicyDoc = buildAllLocalesPublicationHookDoc({
+      doc: originalDoc,
+      docWithLocales: globalJSON,
+      status:
+        data._status === allLocalesPublicationStatus ? allLocalesPublicationStatus : undefined,
+    })
 
     data = await beforeValidate({
       collection: null,
       context: req.context,
       data,
       doc: originalDoc,
+      docForHooks: publicationFieldPolicyDoc,
       global: globalConfig,
       onFieldAccessDenied: (path) => {
         if (path === '_status') {

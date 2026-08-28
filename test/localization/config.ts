@@ -475,7 +475,19 @@ export default buildConfigWithDefaults({
           name: '_status',
           access: {
             create: () => false,
-            update: () => false,
+            update: ({ data, doc, req }) =>
+              Boolean(req.context.comparePublicationStatus && data?._status === doc?._status),
+          },
+          hooks: {
+            beforeValidate: [
+              ({ context, previousValue, value }) => {
+                if (context.validatePublicationStatus && value !== previousValue) {
+                  throw new Error('Publication status validation is not allowed')
+                }
+
+                return value
+              },
+            ],
           },
           options: ['draft', 'published'],
           type: 'select',
@@ -685,7 +697,19 @@ export default buildConfigWithDefaults({
           name: '_status',
           access: {
             create: () => false,
-            update: () => false,
+            update: ({ data, doc, req }) =>
+              Boolean(req.context.comparePublicationStatus && data?._status === doc?._status),
+          },
+          hooks: {
+            beforeValidate: [
+              ({ context, previousValue, value }) => {
+                if (context.validatePublicationStatus && value !== previousValue) {
+                  throw new Error('Publication status validation is not allowed')
+                }
+
+                return value
+              },
+            ],
           },
           options: ['draft', 'published'],
           type: 'select',

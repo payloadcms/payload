@@ -4371,6 +4371,7 @@ describe('Localization', () => {
         await payload.update({
           id: doc.id,
           collection: publicationFieldAccessSlug as any,
+          context: { comparePublicationStatus: true },
           data: {},
           locale: defaultLocale,
           overrideAccess: false,
@@ -4420,6 +4421,33 @@ describe('Localization', () => {
         })
         expect(unchanged._status[defaultLocale]).toBe('draft')
         expect(unchanged._status[spanishLocale]).toBe('published')
+      })
+
+      it('should expose differing locale status to field beforeValidate hooks', async () => {
+        const doc = await payload.create({
+          collection: publicationFieldAccessSlug as any,
+          data: { _status: 'published', title: 'published' },
+          publishAllLocales: true,
+        })
+        createdDocuments.push({ collection: publicationFieldAccessSlug, id: doc.id })
+        await payload.update({
+          id: doc.id,
+          collection: publicationFieldAccessSlug as any,
+          data: { _status: 'draft' },
+          draft: true,
+          locale: spanishLocale,
+        })
+
+        await expect(
+          payload.update({
+            id: doc.id,
+            collection: publicationFieldAccessSlug as any,
+            context: { validatePublicationStatus: true },
+            data: {},
+            locale: defaultLocale,
+            publishAllLocales: true,
+          }),
+        ).rejects.toThrow('Publication status validation is not allowed')
       })
 
       it('should not infer create field access from duplicated publication status', async () => {
@@ -4473,6 +4501,7 @@ describe('Localization', () => {
 
         await payload.updateGlobal({
           slug: publicationFieldAccessGlobalSlug as any,
+          context: { comparePublicationStatus: true },
           data: {},
           locale: defaultLocale,
           overrideAccess: false,
@@ -4486,6 +4515,30 @@ describe('Localization', () => {
         })
         expect(unchanged._status[defaultLocale]).toBe('published')
         expect(unchanged._status[spanishLocale]).toBe('draft')
+      })
+
+      it('should expose differing global status to field beforeValidate hooks', async () => {
+        await payload.updateGlobal({
+          slug: publicationFieldAccessGlobalSlug as any,
+          data: { _status: 'published', title: 'published' },
+          publishAllLocales: true,
+        })
+        await payload.updateGlobal({
+          slug: publicationFieldAccessGlobalSlug as any,
+          data: { _status: 'draft' },
+          draft: true,
+          locale: spanishLocale,
+        })
+
+        await expect(
+          payload.updateGlobal({
+            slug: publicationFieldAccessGlobalSlug as any,
+            context: { validatePublicationStatus: true },
+            data: {},
+            locale: defaultLocale,
+            publishAllLocales: true,
+          }),
+        ).rejects.toThrow('Publication status validation is not allowed')
       })
 
       it('should publish accessible collection locales when locale is all', async () => {
