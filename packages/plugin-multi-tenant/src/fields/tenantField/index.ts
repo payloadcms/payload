@@ -90,7 +90,7 @@ export const tenantField = ({
         })
         const tenantFromCookie = getTenantFromCookie(req.headers, idType)
         if (tenantFromCookie) {
-          const isValidTenant = await req.payload.count({
+          const { totalDocs } = await req.payload.count({
             collection: tenantsCollectionSlug,
             overrideAccess: false,
             req,
@@ -101,7 +101,7 @@ export const tenantField = ({
               },
             },
           })
-          return isValidTenant ? tenantFromCookie : null
+          return totalDocs > 0 ? tenantFromCookie : null
         }
         if (req.user && isAutosaveEnabled) {
           const userTenants = getUserTenantIDs(req.user, {
