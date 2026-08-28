@@ -995,6 +995,35 @@ describe('Access Control', () => {
       ).rejects.toThrow(Forbidden)
     })
   })
+
+  describe('conditional access (where query) without document data', () => {
+    it('reports permission: false when an access function returns a where constraint and no document data is available', async () => {
+      const anonymousReq = await createLocalReq({}, payload)
+
+      const permissions = await getEntityPermissions({
+        blockReferencesPermissions: {} as any,
+        entity: payload.collections[restrictedVersionsSlug].config,
+        entityType: 'collection',
+        operations: ['read', 'readVersions'],
+        fetchData: false,
+        req: anonymousReq,
+      })
+
+      // Without document data the returned where constraint cannot be
+      // evaluated against an actual document, so we must not report
+      // permission: true (the caller cannot act on every document). The
+      // constraint is still returned for clients that opt into re-deriving
+      // access themselves.
+      expect(permissions.read).toEqual({
+        permission: false,
+        where: { hidden: { not_equals: true } },
+      })
+      expect(permissions.readVersions).toEqual({
+        permission: false,
+        where: { 'version.hidden': { not_equals: true } },
+      })
+    })
+  })
 })
 
 async function createDoc<TSlug extends CollectionSlug = 'posts'>(
