@@ -459,7 +459,9 @@ export const createOperation = async <
       result,
     })
 
-    await unlinkTempFiles({ collectionConfig, config, req })
+    await unlinkTempFiles({ collectionConfig, config, req }).catch((unlinkError) => {
+      req.payload.logger.error({ err: unlinkError, msg: 'Failed to remove temp file' })
+    })
 
     // /////////////////////////////////////
     // Return results

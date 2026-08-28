@@ -18,6 +18,7 @@ import { getExternalFile } from './getExternalFile.js'
 import { getFileByPath } from './getFileByPath.js'
 import { getImageSize } from './getImageSize.js'
 import { getSafeFileName } from './getSafeFilename.js'
+import { hasCropOrResizeEdit } from './hasCropOrResizeEdit.js'
 import { createImageSizes } from './image-resizing/createImageSizes.js'
 import { isAnimatedImage } from './isAnimatedImage.js'
 import { isImage } from './isImage.js'
@@ -48,7 +49,7 @@ const shouldReupload = (
     return false
   }
 
-  if (uploadEdits.crop || uploadEdits.heightInPixels || uploadEdits.widthInPixels) {
+  if (hasCropOrResizeEdit(uploadEdits)) {
     return true
   }
 
@@ -65,6 +66,35 @@ const shouldReupload = (
   }
 
   return false
+}
+
+type TempFileHandling =
+  | { sourcePath: string; type: 'copyFromTempFile' }
+  | { type: 'skip' }
+  | { type: 'useBuffer' }
+
+/**
+ * Decides how to get a file's bytes onto disk when sharp did not need to process it (a processed
+ * file is already an in-memory buffer, so it always takes the `useBuffer` path). Copies straight
+ * from the temp file when possible, rather than reading a potentially large temp file into memory
+ * just to write it back out - see the `generateFileData` function doc for why.
+ */
+const resolveTempFileHandling = ({
+  disableLocalStorage,
+  hasProcessedBuffer,
+  tempFilePath,
+}: {
+  disableLocalStorage: boolean
+  hasProcessedBuffer: boolean
+  tempFilePath: string | undefined
+}): TempFileHandling => {
+  if (hasProcessedBuffer || !tempFilePath) {
+    return { type: 'useBuffer' }
+  }
+
+  return disableLocalStorage
+    ? { type: 'skip' }
+    : { type: 'copyFromTempFile', sourcePath: tempFilePath }
 }
 
 /**
@@ -358,23 +388,23 @@ export const generateFileData = async <T>({
     } else {
       // file.data is empty when useTempFiles is on, so the real content lives at
       // file.tempFilePath instead (see the function doc for why we avoid buffering it).
-      const skipTempFileBuffer =
-        disableLocalStorage && Boolean(file.tempFilePath) && !fileBuffer?.data
+      const tempFileHandling = resolveTempFileHandling({
+        disableLocalStorage: Boolean(disableLocalStorage),
+        hasProcessedBuffer: Boolean(fileBuffer?.data),
+        tempFilePath: file.tempFilePath,
+      })
 
-      const shouldCopyFromTempFile =
-        !fileBuffer?.data && Boolean(file.tempFilePath) && !disableLocalStorage
-
-      if (shouldCopyFromTempFile) {
+      if (tempFileHandling.type === 'copyFromTempFile') {
         filesToSave.push({
           path: `${staticPath}/${fsSafeName}`,
-          sourcePath: file.tempFilePath!,
+          sourcePath: tempFileHandling.sourcePath,
         })
-      } else {
+      } else if (tempFileHandling.type === 'useBuffer') {
         let bufferToSave: Buffer
         if (fileBuffer?.data) {
           bufferToSave = fileBuffer.data
         } else if (file.tempFilePath) {
-          bufferToSave = skipTempFileBuffer ? Buffer.alloc(0) : await fs.readFile(file.tempFilePath)
+          bufferToSave = await fs.readFile(file.tempFilePath)
         } else {
           bufferToSave = file.data
         }
@@ -384,7 +414,7 @@ export const generateFileData = async <T>({
         const fileDataIsPartialView =
           !fileBuffer?.data && !file.tempFilePath && bufferToSave.length !== file.size
 
-        if (!skipTempFileBuffer && !fileDataIsPartialView) {
+        if (!fileDataIsPartialView) {
           filesToSave.push({
             buffer: bufferToSave,
             path: `${staticPath}/${fsSafeName}`,
