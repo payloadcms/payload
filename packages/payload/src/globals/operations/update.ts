@@ -35,8 +35,11 @@ import { killTransaction } from '../../utilities/killTransaction.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import {
+  buildAllLocalesPublicationHookDoc,
   getAllLocalesPublicationStatus,
   hasAuthorizedAllLocalesPublicationStatus,
+  normalizeAllLocalesPublicationStatus,
+  reconcileAllLocalesPublicationStatus,
   validateAllLocalesPublicationFlags,
 } from '../../versions/allLocalesPublicationStatus.js'
 import { buildLocalizedPublishData } from '../../versions/buildSingleLocalePublishData.js'
@@ -84,9 +87,10 @@ export const updateOperation = async <
     unpublishAllLocales: Boolean(args.unpublishAllLocales),
   })
 
-  if (initialAllLocalesPublicationStatus) {
-    args.data._status = initialAllLocalesPublicationStatus
-  }
+  const initialAllLocalesPublicationIntent = normalizeAllLocalesPublicationStatus({
+    data: args.data,
+    status: initialAllLocalesPublicationStatus,
+  })
 
   try {
     const shouldCommit = !args.disableTransaction && (await initTransaction(req))
@@ -140,13 +144,18 @@ export const updateOperation = async <
       typeof unpublishAllLocalesArg === 'string'
         ? unpublishAllLocalesArg === 'true'
         : !!unpublishAllLocalesArg
-    const allLocalesPublicationStatus = getAllLocalesPublicationStatus({
+    const requestedAllLocalesPublicationStatus = getAllLocalesPublicationStatus({
       hasLocalizedStatus: Boolean(config?.localization && hasLocalizeStatusEnabled(globalConfig)),
       publishAllLocales,
       unpublishAllLocales,
     })
+    const allLocalesPublicationStatus = reconcileAllLocalesPublicationStatus({
+      data,
+      intent: initialAllLocalesPublicationIntent,
+      status: requestedAllLocalesPublicationStatus,
+    })
 
-    if (allLocalesPublicationStatus && data._status !== allLocalesPublicationStatus) {
+    if (requestedAllLocalesPublicationStatus && !allLocalesPublicationStatus) {
       publishAllLocales = false
       unpublishAllLocales = false
     }
@@ -251,6 +260,15 @@ export const updateOperation = async <
       req,
     })
 
+    const publicationHookDoc = buildAllLocalesPublicationHookDoc({
+      doc: originalDoc,
+      docWithLocales: globalJSON,
+      status:
+        !statusFieldAccessDenied && data._status === allLocalesPublicationStatus
+          ? allLocalesPublicationStatus
+          : undefined,
+    })
+
     // /////////////////////////////////////
     // beforeValidate - Global
     // /////////////////////////////////////
@@ -262,7 +280,7 @@ export const updateOperation = async <
             context: req.context,
             data,
             global: globalConfig,
-            originalDoc,
+            originalDoc: publicationHookDoc,
             overrideAccess,
             req,
           })) || data
@@ -280,7 +298,7 @@ export const updateOperation = async <
             context: req.context,
             data,
             global: globalConfig,
-            originalDoc,
+            originalDoc: publicationHookDoc,
             overrideAccess,
             req,
           })) || data
@@ -297,7 +315,7 @@ export const updateOperation = async <
       collection: null,
       context: req.context,
       data,
-      doc: originalDoc,
+      doc: publicationHookDoc,
       docWithLocales: globalJSON,
       global: globalConfig,
       operation: 'update' as Operation,
@@ -312,10 +330,8 @@ export const updateOperation = async <
 
     let result: JsonObject = await beforeChange({
       ...beforeChangeArgs,
-      onFieldProcessed: ({ path, value }) => {
-        if (path === '_status') {
-          statusFieldValue = value
-        }
+      onDataProcessed: (processedData) => {
+        statusFieldValue = processedData._status
       },
     })
 
@@ -325,6 +341,16 @@ export const updateOperation = async <
       fieldValue: statusFieldValue,
       status: allLocalesPublicationStatus,
     })
+
+    if (
+      allLocalesPublicationStatus &&
+      !hasAuthorizedPublicationStatus &&
+      typeof statusFieldValue === 'undefined' &&
+      typeof globalJSON._status === 'object' &&
+      globalJSON._status !== null
+    ) {
+      result._status = { ...globalJSON._status }
+    }
 
     if (
       config?.localization &&

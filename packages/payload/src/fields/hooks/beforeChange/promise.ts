@@ -46,7 +46,6 @@ type Args = {
   global: null | SanitizedGlobalConfig
   id?: number | string
   mergeLocaleActions: (() => Promise<void> | void)[]
-  onFieldProcessed?: (args: { path: string; value: unknown }) => void
   operation: Operation
   overrideAccess: boolean
   parentIndexPath: string
@@ -83,7 +82,6 @@ export const promise = async ({
   fieldLabelPath,
   global,
   mergeLocaleActions,
-  onFieldProcessed,
   operation,
   overrideAccess,
   parentIndexPath,
@@ -267,8 +265,6 @@ export const promise = async ({
       }
     }
 
-    onFieldProcessed?.({ path, value: siblingData[field.name!] })
-
     // Push merge locale action if applicable
     if (localization && fieldShouldBeLocalized({ field, parentIsLocalized })) {
       mergeLocaleActions.push(() => {
@@ -322,7 +318,6 @@ export const promise = async ({
               fields: field.fields,
               global,
               mergeLocaleActions,
-              onFieldProcessed,
               operation,
               overrideAccess,
               parentIndexPath: '',
@@ -392,7 +387,6 @@ export const promise = async ({
                 fields: block.fields,
                 global,
                 mergeLocaleActions,
-                onFieldProcessed,
                 operation,
                 overrideAccess,
                 parentIndexPath: '',
@@ -436,7 +430,6 @@ export const promise = async ({
         fields: field.fields,
         global,
         mergeLocaleActions,
-        onFieldProcessed,
         operation,
         overrideAccess,
         parentIndexPath: indexPath,
@@ -507,7 +500,6 @@ export const promise = async ({
         fields: field.fields,
         global,
         mergeLocaleActions,
-        onFieldProcessed,
         operation,
         overrideAccess,
         parentIndexPath: isNamedGroup ? '' : indexPath,
@@ -641,7 +633,6 @@ export const promise = async ({
         fields: field.fields,
         global,
         mergeLocaleActions,
-        onFieldProcessed,
         operation,
         overrideAccess,
         parentIndexPath: isNamedTab ? '' : indexPath,
@@ -675,7 +666,6 @@ export const promise = async ({
         fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
         global,
         mergeLocaleActions,
-        onFieldProcessed,
         operation,
         overrideAccess,
         parentIndexPath: indexPath,

@@ -41,8 +41,11 @@ import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import {
+  buildAllLocalesPublicationHookDoc,
   getAllLocalesPublicationStatus,
   hasAuthorizedAllLocalesPublicationStatus,
+  normalizeAllLocalesPublicationStatus,
+  reconcileAllLocalesPublicationStatus,
 } from '../../versions/allLocalesPublicationStatus.js'
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
@@ -88,9 +91,10 @@ export const createOperation = async <
       unpublishAllLocales: false,
     })
 
-    if (initialAllLocalesPublicationStatus) {
-      args.data._status = initialAllLocalesPublicationStatus
-    }
+    const initialAllLocalesPublicationIntent = normalizeAllLocalesPublicationStatus({
+      data: args.data,
+      status: initialAllLocalesPublicationStatus,
+    })
 
     ensureUsernameOrEmail<TSlug>({
       authOptions: args.collection.config.auth,
@@ -141,16 +145,20 @@ export const createOperation = async <
     let publishAllLocales =
       !draft &&
       (publishAllLocalesArg ?? (hasLocalizeStatusEnabled(collectionConfig) ? false : true))
-    let allLocalesPublicationStatus = getAllLocalesPublicationStatus({
+    const requestedAllLocalesPublicationStatus = getAllLocalesPublicationStatus({
       hasLocalizedStatus: Boolean(
         config.localization && hasLocalizeStatusEnabled(collectionConfig),
       ),
       publishAllLocales,
       unpublishAllLocales: false,
     })
+    const allLocalesPublicationStatus = reconcileAllLocalesPublicationStatus({
+      data,
+      intent: initialAllLocalesPublicationIntent,
+      status: requestedAllLocalesPublicationStatus,
+    })
 
-    if (allLocalesPublicationStatus && data._status !== allLocalesPublicationStatus) {
-      allLocalesPublicationStatus = undefined
+    if (requestedAllLocalesPublicationStatus && !allLocalesPublicationStatus) {
       publishAllLocales = false
     }
 
@@ -230,6 +238,15 @@ export const createOperation = async <
       req,
     })
 
+    const publicationHookDoc = buildAllLocalesPublicationHookDoc({
+      doc: duplicatedFromDoc,
+      docWithLocales: duplicatedFromDocWithLocales,
+      status:
+        !statusFieldAccessDenied && data._status === allLocalesPublicationStatus
+          ? allLocalesPublicationStatus
+          : undefined,
+    })
+
     // /////////////////////////////////////
     // beforeValidate - Collections
     // /////////////////////////////////////
@@ -242,7 +259,7 @@ export const createOperation = async <
             context: req.context,
             data,
             operation: 'create',
-            originalDoc: duplicatedFromDoc,
+            originalDoc: publicationHookDoc,
             req,
           })) || data
       }
@@ -260,7 +277,7 @@ export const createOperation = async <
             context: req.context,
             data,
             operation: 'create',
-            originalDoc: duplicatedFromDoc,
+            originalDoc: publicationHookDoc,
             req,
           })) || data
       }
@@ -278,13 +295,11 @@ export const createOperation = async <
       collection: collectionConfig,
       context: req.context,
       data,
-      doc: duplicatedFromDoc,
+      doc: publicationHookDoc,
       docWithLocales: duplicatedFromDocWithLocales,
       global: null,
-      onFieldProcessed: ({ path, value }) => {
-        if (path === '_status') {
-          statusFieldValue = value
-        }
+      onDataProcessed: (processedData) => {
+        statusFieldValue = processedData._status
       },
       operation: 'create',
       overrideAccess,
@@ -298,6 +313,16 @@ export const createOperation = async <
       fieldValue: statusFieldValue,
       status: allLocalesPublicationStatus,
     })
+
+    if (
+      allLocalesPublicationStatus &&
+      !hasAuthorizedPublicationStatus &&
+      typeof statusFieldValue === 'undefined' &&
+      typeof duplicatedFromDocWithLocales._status === 'object' &&
+      duplicatedFromDocWithLocales._status !== null
+    ) {
+      dataWithLocales._status = { ...duplicatedFromDocWithLocales._status }
+    }
 
     // When locale='all' or when beforeChange doesn't convert the string (e.g. no locale hook ran),
     // the localized _status remains a plain string. Expand it to a per-locale object so MongoDB

@@ -16,7 +16,7 @@ export type Args<T extends JsonObject> = {
   docWithLocales: JsonObject
   global: null | SanitizedGlobalConfig
   id?: number | string
-  onFieldProcessed?: (args: { path: string; value: unknown }) => void
+  onDataProcessed?: (data: T) => void
   operation: Operation
   overrideAccess?: boolean
   req: PayloadRequest
@@ -40,7 +40,7 @@ export const beforeChange = async <T extends JsonObject>({
   doc,
   docWithLocales,
   global,
-  onFieldProcessed,
+  onDataProcessed,
   operation,
   overrideAccess,
   req,
@@ -62,7 +62,6 @@ export const beforeChange = async <T extends JsonObject>({
     fields: (collection?.fields || global?.fields)!,
     global,
     mergeLocaleActions,
-    onFieldProcessed,
     operation,
     overrideAccess: overrideAccess!,
     parentIndexPath: '',
@@ -88,6 +87,8 @@ export const beforeChange = async <T extends JsonObject>({
       req.t,
     )
   }
+
+  onDataProcessed?.(data)
 
   for (const action of mergeLocaleActions) {
     await action()
