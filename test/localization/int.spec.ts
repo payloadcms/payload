@@ -3,7 +3,7 @@ import type { Payload, User, Where } from 'payload'
 import path from 'path'
 import { createLocalReq } from 'payload'
 import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type {
@@ -39,6 +39,10 @@ import {
   localizedPostsSlug,
   localizedSortSlug,
   portugueseLocale,
+  publicationAccessGlobalSlug,
+  publicationAccessSlug,
+  publicationFieldAccessSlug,
+  publicationHookSlug,
   relationEnglishTitle,
   relationEnglishTitle2,
   relationshipLocalizedSlug,
@@ -3983,6 +3987,198 @@ describe('Localization', () => {
   })
 
   describe('localize status', () => {
+    describe('publication authorization', () => {
+      const createdDocuments: Array<{ collection: string; id: number | string }> = []
+
+      afterEach(async () => {
+        for (const { collection, id } of createdDocuments) {
+          await payload.delete({ collection: collection as any, id })
+        }
+        createdDocuments.length = 0
+      })
+
+      it('should authorize publishAllLocales during collection create', async () => {
+        await expect(
+          payload.create({
+            collection: publicationAccessSlug as any,
+            data: { title: 'unauthorized publication' },
+            locale: defaultLocale,
+            overrideAccess: false,
+            publishAllLocales: true,
+          }),
+        ).rejects.toThrow()
+      })
+
+      it('should authorize publishAllLocales during collection update by ID', async () => {
+        const doc = await payload.create({
+          collection: publicationAccessSlug as any,
+          data: { _status: 'draft', title: 'draft' },
+          locale: defaultLocale,
+          publishAllLocales: false,
+        })
+        createdDocuments.push({ collection: publicationAccessSlug, id: doc.id })
+
+        await expect(
+          payload.update({
+            id: doc.id,
+            collection: publicationAccessSlug as any,
+            data: {},
+            locale: defaultLocale,
+            overrideAccess: false,
+            publishAllLocales: true,
+          }),
+        ).rejects.toThrow()
+      })
+
+      it('should authorize unpublishAllLocales during collection update by ID', async () => {
+        const doc = await payload.create({
+          collection: publicationAccessSlug as any,
+          data: { _status: 'published', title: 'published' },
+          locale: defaultLocale,
+          publishAllLocales: true,
+        })
+        createdDocuments.push({ collection: publicationAccessSlug, id: doc.id })
+
+        await expect(
+          payload.update({
+            id: doc.id,
+            collection: publicationAccessSlug as any,
+            data: {},
+            locale: defaultLocale,
+            overrideAccess: false,
+            unpublishAllLocales: true,
+          }),
+        ).rejects.toThrow()
+      })
+
+      it('should pass publication data to collection bulk update access', async () => {
+        const doc = await payload.create({
+          collection: publicationAccessSlug as any,
+          data: { _status: 'draft', title: 'bulk draft' },
+          locale: defaultLocale,
+          publishAllLocales: false,
+        })
+        createdDocuments.push({ collection: publicationAccessSlug, id: doc.id })
+
+        await expect(
+          payload.update({
+            collection: publicationAccessSlug as any,
+            data: { _status: 'published' },
+            overrideAccess: false,
+            where: { id: { equals: doc.id } },
+          }),
+        ).rejects.toThrow()
+      })
+
+      it('should authorize publishAllLocales during collection bulk update', async () => {
+        const doc = await payload.create({
+          collection: publicationAccessSlug as any,
+          data: { _status: 'draft', title: 'bulk draft' },
+          locale: defaultLocale,
+          publishAllLocales: false,
+        })
+        createdDocuments.push({ collection: publicationAccessSlug, id: doc.id })
+
+        await expect(
+          payload.update({
+            collection: publicationAccessSlug as any,
+            data: {},
+            locale: defaultLocale,
+            overrideAccess: false,
+            publishAllLocales: true,
+            where: { id: { equals: doc.id } },
+          }),
+        ).rejects.toThrow()
+      })
+
+      it('should authorize publishAllLocales during global update', async () => {
+        await payload.updateGlobal({
+          slug: publicationAccessGlobalSlug as any,
+          data: { _status: 'draft', title: 'draft' },
+          locale: defaultLocale,
+          publishAllLocales: false,
+        })
+
+        await expect(
+          payload.updateGlobal({
+            slug: publicationAccessGlobalSlug as any,
+            data: {},
+            locale: defaultLocale,
+            overrideAccess: false,
+            publishAllLocales: true,
+          }),
+        ).rejects.toThrow()
+      })
+
+      it('should respect _status field access when unpublishing all locales', async () => {
+        const doc = await payload.create({
+          collection: publicationFieldAccessSlug as any,
+          data: { _status: 'published', title: 'published' },
+          locale: defaultLocale,
+          publishAllLocales: true,
+        })
+        createdDocuments.push({ collection: publicationFieldAccessSlug, id: doc.id })
+
+        await payload.update({
+          id: doc.id,
+          collection: publicationFieldAccessSlug as any,
+          data: {},
+          locale: defaultLocale,
+          overrideAccess: false,
+          unpublishAllLocales: true,
+        })
+
+        const unchanged = await payload.findByID({
+          id: doc.id,
+          collection: publicationFieldAccessSlug as any,
+          draft: false,
+          locale: 'all',
+        })
+        expect(unchanged._status[defaultLocale]).toBe('published')
+        expect(unchanged._status[spanishLocale]).toBe('published')
+      })
+
+      it('should expose publishAllLocales intent to collection hooks', async () => {
+        const doc = await payload.create({
+          collection: publicationHookSlug as any,
+          data: { _status: 'draft', title: 'draft' },
+          locale: defaultLocale,
+          publishAllLocales: false,
+        })
+        createdDocuments.push({ collection: publicationHookSlug, id: doc.id })
+
+        await expect(
+          payload.update({
+            id: doc.id,
+            collection: publicationHookSlug as any,
+            data: {},
+            locale: defaultLocale,
+            publishAllLocales: true,
+          }),
+        ).rejects.toThrow('Publication status changes are not allowed')
+      })
+
+      it('should reject contradictory all-locale publication flags', async () => {
+        const doc = await payload.create({
+          collection: publicationAccessSlug as any,
+          data: { _status: 'draft', title: 'draft' },
+          locale: defaultLocale,
+          publishAllLocales: false,
+        })
+        createdDocuments.push({ collection: publicationAccessSlug, id: doc.id })
+
+        await expect(
+          payload.update({
+            id: doc.id,
+            collection: publicationAccessSlug as any,
+            data: {},
+            publishAllLocales: true,
+            unpublishAllLocales: true,
+          }),
+        ).rejects.toThrow()
+      })
+    })
+
     describe('collections', () => {
       describe('on create', () => {
         it('should set other locales to draft upon creation', async () => {

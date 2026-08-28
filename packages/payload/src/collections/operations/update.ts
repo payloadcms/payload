@@ -23,12 +23,16 @@ import { generateFileData } from '../../uploads/generateFileData.js'
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
-import { hasDraftsEnabled } from '../../utilities/getVersionsConfig.js'
+import { hasDraftsEnabled, hasLocalizeStatusEnabled } from '../../utilities/getVersionsConfig.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { isErrorPublic } from '../../utilities/isErrorPublic.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
+import {
+  getAllLocalesPublicationStatus,
+  validateAllLocalesPublicationFlags,
+} from '../../versions/allLocalesPublicationStatus.js'
 import { buildVersionCollectionFields } from '../../versions/buildCollectionFields.js'
 import { appendVersionToQueryKey } from '../../versions/drafts/appendVersionToQueryKey.js'
 import { getQueryDraftsSort } from '../../versions/drafts/getQueryDraftsSort.js'
@@ -123,6 +127,27 @@ export const updateOperation = async <
     }
 
     const { data: bulkUpdateData } = args
+
+    validateAllLocalesPublicationFlags({
+      publishAllLocales,
+      unpublishAllLocales,
+    })
+
+    const allLocalesPublicationStatus = getAllLocalesPublicationStatus({
+      hasLocalizedStatus: Boolean(
+        config.localization && hasLocalizeStatusEnabled(collectionConfig),
+      ),
+      publishAllLocales:
+        !draftArg &&
+        (publishAllLocales ??
+          (hasLocalizeStatusEnabled(collectionConfig) && locale !== 'all' ? false : true)),
+      unpublishAllLocales: Boolean(unpublishAllLocales),
+    })
+
+    if (allLocalesPublicationStatus) {
+      bulkUpdateData._status = allLocalesPublicationStatus
+    }
+
     const shouldSaveDraft = Boolean(draftArg && hasDraftsEnabled(collectionConfig))
 
     // /////////////////////////////////////
@@ -132,7 +157,7 @@ export const updateOperation = async <
     let accessResult: AccessResult
     if (!overrideAccess) {
       accessResult = await executeAccess(
-        { slug: collectionConfig.slug, req },
+        { slug: collectionConfig.slug, data: bulkUpdateData, req },
         collectionConfig.access.update,
       )
     }

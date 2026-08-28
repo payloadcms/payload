@@ -37,6 +37,11 @@ import {
   hasDraftValidationEnabled,
   hasLocalizeStatusEnabled,
 } from '../../../utilities/getVersionsConfig.js'
+import {
+  getAllLocalesPublicationStatus,
+  hasAuthorizedAllLocalesPublicationStatus,
+  validateAllLocalesPublicationFlags,
+} from '../../../versions/allLocalesPublicationStatus.js'
 import { buildLocalizedPublishData } from '../../../versions/buildSingleLocalePublishData.js'
 export type SharedUpdateDocumentArgs<TSlug extends CollectionSlug> = {
   autosave: boolean
@@ -100,6 +105,12 @@ export const updateDocument = async <
   unpublishAllLocales: unpublishAllLocalesArg,
 }: SharedUpdateDocumentArgs<TSlug>): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
   const password = data?.password
+
+  validateAllLocalesPublicationFlags({
+    publishAllLocales: publishAllLocalesArg,
+    unpublishAllLocales: unpublishAllLocalesArg,
+  })
+
   const publishAllLocales =
     !draftArg &&
     (publishAllLocalesArg ??
@@ -108,6 +119,11 @@ export const updateDocument = async <
     typeof unpublishAllLocalesArg === 'string'
       ? unpublishAllLocalesArg === 'true'
       : !!unpublishAllLocalesArg
+  const allLocalesPublicationStatus = getAllLocalesPublicationStatus({
+    hasLocalizedStatus: Boolean(config.localization && hasLocalizeStatusEnabled(collectionConfig)),
+    publishAllLocales,
+    unpublishAllLocales,
+  })
   const isSavingDraft =
     Boolean(draftArg && hasDraftsEnabled(collectionConfig)) &&
     data._status !== 'published' &&
@@ -121,8 +137,8 @@ export const updateDocument = async <
       !isSavingDraft,
   )
 
-  if (isSavingDraft) {
-    data._status = 'draft'
+  if (allLocalesPublicationStatus || isSavingDraft) {
+    data._status = allLocalesPublicationStatus ?? 'draft'
   }
 
   // /////////////////////////////////////
@@ -246,6 +262,8 @@ export const updateDocument = async <
     }
   }
 
+  const publicationData = { ...data }
+
   // /////////////////////////////////////
   // beforeChange - Fields
   // /////////////////////////////////////
@@ -292,7 +310,15 @@ export const updateDocument = async <
 
   if (config.localization && collectionConfig.versions) {
     if (hasLocalizeStatusEnabled(collectionConfig)) {
-      if (publishAllLocales || unpublishAllLocales) {
+      if (
+        hasAuthorizedAllLocalesPublicationStatus({
+          data: publicationData,
+          locale,
+          localeCodes: config.localization.localeCodes,
+          result,
+          status: allLocalesPublicationStatus,
+        })
+      ) {
         let accessibleLocaleCodes = config.localization.localeCodes
 
         if (config.localization.filterAvailableLocales) {

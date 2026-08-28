@@ -34,6 +34,10 @@ import {
   localizedPostsSlug,
   localizedSortSlug,
   portugueseLocale,
+  publicationAccessGlobalSlug,
+  publicationAccessSlug,
+  publicationFieldAccessSlug,
+  publicationHookSlug,
   relationEnglishTitle,
   relationEnglishTitle2,
   relationshipLocalizedSlug,
@@ -57,6 +61,18 @@ const openAccess: CollectionConfig['access'] = {
   read: () => true,
   update: () => true,
 }
+
+const preventPublicationStatusChange = ({ data }: { data?: Record<string, unknown> }) => {
+  return typeof data?._status === 'undefined'
+}
+
+const localizedPublicationFields: CollectionConfig['fields'] = [
+  {
+    name: 'title',
+    localized: true,
+    type: 'text',
+  },
+]
 
 export default buildConfigWithDefaults({
   admin: {
@@ -437,6 +453,54 @@ export default buildConfigWithDefaults({
     },
     LocalizedWithinLocalized,
     ArrayWithFallbackCollection,
+    {
+      slug: publicationAccessSlug,
+      access: {
+        create: preventPublicationStatusChange,
+        update: preventPublicationStatusChange,
+      },
+      fields: localizedPublicationFields,
+      versions: {
+        drafts: {},
+      },
+    },
+    {
+      slug: publicationFieldAccessSlug,
+      access: openAccess,
+      fields: [
+        ...localizedPublicationFields,
+        {
+          name: '_status',
+          access: {
+            update: () => false,
+          },
+          options: ['draft', 'published'],
+          type: 'select',
+        },
+      ],
+      versions: {
+        drafts: {},
+      },
+    },
+    {
+      slug: publicationHookSlug,
+      access: openAccess,
+      fields: localizedPublicationFields,
+      hooks: {
+        beforeChange: [
+          ({ data, operation, originalDoc }) => {
+            if (operation === 'update' && data?._status && data._status !== originalDoc?._status) {
+              throw new Error('Publication status changes are not allowed')
+            }
+
+            return data
+          },
+        ],
+      },
+      versions: {
+        drafts: {},
+      },
+    },
   ],
   globals: [
     {
@@ -476,6 +540,16 @@ export default buildConfigWithDefaults({
         },
       ],
       slug: globalWithDraftsSlug,
+      versions: {
+        drafts: {},
+      },
+    },
+    {
+      slug: publicationAccessGlobalSlug,
+      access: {
+        update: preventPublicationStatusChange,
+      },
+      fields: localizedPublicationFields,
       versions: {
         drafts: {},
       },
