@@ -22,6 +22,7 @@ type Args<T> = {
   fields: (Field | TabAsField)[]
   global: null | SanitizedGlobalConfig
   id?: number | string
+  onFieldAccessDenied?: (path: string) => void
   operation: 'create' | 'update'
   overrideAccess: boolean
   parentIndexPath: string
@@ -48,6 +49,7 @@ export const traverseFields = async <T>({
   doc,
   fields,
   global,
+  onFieldAccessDenied,
   operation,
   overrideAccess,
   parentIndexPath,
@@ -74,6 +76,7 @@ export const traverseFields = async <T>({
         field,
         fieldIndex,
         global,
+        onFieldAccessDenied,
         operation,
         overrideAccess,
         parentIndexPath,

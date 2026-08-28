@@ -36,6 +36,9 @@ import {
   portugueseLocale,
   publicationAccessGlobalSlug,
   publicationAccessSlug,
+  publicationBeforeOperationGlobalSlug,
+  publicationBeforeOperationSlug,
+  publicationFieldAccessGlobalSlug,
   publicationFieldAccessSlug,
   publicationHookSlug,
   relationEnglishTitle,
@@ -472,12 +475,32 @@ export default buildConfigWithDefaults({
         {
           name: '_status',
           access: {
+            create: () => false,
             update: () => false,
           },
           options: ['draft', 'published'],
           type: 'select',
         },
       ],
+      versions: {
+        drafts: {},
+      },
+    },
+    {
+      slug: publicationBeforeOperationSlug,
+      access: openAccess,
+      fields: localizedPublicationFields,
+      hooks: {
+        beforeOperation: [
+          ({ args }) => {
+            if (args.data?._status === 'published') {
+              throw new Error('Publication is not allowed in beforeOperation')
+            }
+
+            return args
+          },
+        ],
+      },
       versions: {
         drafts: {},
       },
@@ -550,6 +573,48 @@ export default buildConfigWithDefaults({
         update: preventPublicationStatusChange,
       },
       fields: localizedPublicationFields,
+      versions: {
+        drafts: {},
+      },
+    },
+    {
+      slug: publicationBeforeOperationGlobalSlug,
+      access: {
+        update: () => true,
+      },
+      fields: localizedPublicationFields,
+      hooks: {
+        beforeOperation: [
+          ({ args }) => {
+            if (args.data?._status === 'published') {
+              throw new Error('Publication is not allowed in beforeOperation')
+            }
+
+            return args
+          },
+        ],
+      },
+      versions: {
+        drafts: {},
+      },
+    },
+    {
+      slug: publicationFieldAccessGlobalSlug,
+      access: {
+        update: () => true,
+      },
+      fields: [
+        ...localizedPublicationFields,
+        {
+          name: '_status',
+          access: {
+            create: () => false,
+            update: () => false,
+          },
+          options: ['draft', 'published'],
+          type: 'select',
+        },
+      ],
       versions: {
         drafts: {},
       },

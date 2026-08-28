@@ -32,34 +32,16 @@ export const getAllLocalesPublicationStatus = ({
 
 export const hasAuthorizedAllLocalesPublicationStatus = ({
   data,
-  locale,
-  localeCodes,
-  result,
+  fieldAccessDenied,
+  fieldValue,
   status,
 }: {
   data: JsonObject
-  locale: string
-  localeCodes: string[]
-  result: JsonObject
+  fieldAccessDenied: boolean
+  fieldValue: unknown
   status: AllLocalesPublicationStatus | undefined
 }): boolean => {
-  if (!status || data._status !== status) {
-    return false
-  }
-
-  if (typeof result._status === 'string') {
-    return result._status === status
-  }
-
-  if (typeof result._status !== 'object' || result._status === null) {
-    return false
-  }
-
-  if (locale === 'all') {
-    return localeCodes.every((localeCode) => result._status[localeCode] === status)
-  }
-
-  return result._status[locale] === status
+  return Boolean(status && !fieldAccessDenied && data._status === status && fieldValue === status)
 }
 
 export const validateAllLocalesPublicationFlags = ({

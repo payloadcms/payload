@@ -70,6 +70,29 @@ export const updateByIDOperation = async <
   try {
     const shouldCommit = !args.disableTransaction && (await initTransaction(args.req))
 
+    validateAllLocalesPublicationFlags({
+      publishAllLocales: args.publishAllLocales,
+      unpublishAllLocales: args.unpublishAllLocales,
+    })
+
+    const initialCollectionConfig = args.collection.config
+    const initialAllLocalesPublicationStatus = getAllLocalesPublicationStatus({
+      hasLocalizedStatus: Boolean(
+        args.req.payload.config.localization && hasLocalizeStatusEnabled(initialCollectionConfig),
+      ),
+      publishAllLocales:
+        !args.draft &&
+        (args.publishAllLocales ??
+          (hasLocalizeStatusEnabled(initialCollectionConfig) && args.req.locale !== 'all'
+            ? false
+            : true)),
+      unpublishAllLocales: Boolean(args.unpublishAllLocales),
+    })
+
+    if (initialAllLocalesPublicationStatus) {
+      args.data._status = initialAllLocalesPublicationStatus
+    }
+
     // /////////////////////////////////////
     // beforeOperation - Collection
     // /////////////////////////////////////
@@ -92,7 +115,7 @@ export const updateByIDOperation = async <
       overrideLock,
       overwriteExistingFiles = false,
       populate,
-      publishAllLocales,
+      publishAllLocales: publishAllLocalesArg,
       req: {
         fallbackLocale,
         locale,
@@ -103,7 +126,7 @@ export const updateByIDOperation = async <
       select: incomingSelect,
       showHiddenFields,
       trash = false,
-      unpublishAllLocales,
+      unpublishAllLocales: unpublishAllLocalesArg,
     } = args
 
     if (!id) {
@@ -113,8 +136,8 @@ export const updateByIDOperation = async <
     const { data } = args
 
     validateAllLocalesPublicationFlags({
-      publishAllLocales,
-      unpublishAllLocales,
+      publishAllLocales: publishAllLocalesArg,
+      unpublishAllLocales: unpublishAllLocalesArg,
     })
 
     const allLocalesPublicationStatus = getAllLocalesPublicationStatus({
@@ -123,14 +146,18 @@ export const updateByIDOperation = async <
       ),
       publishAllLocales:
         !draftArg &&
-        (publishAllLocales ??
+        (publishAllLocalesArg ??
           (hasLocalizeStatusEnabled(collectionConfig) && locale !== 'all' ? false : true)),
-      unpublishAllLocales: Boolean(unpublishAllLocales),
+      unpublishAllLocales: Boolean(unpublishAllLocalesArg),
     })
-
-    if (allLocalesPublicationStatus) {
-      data._status = allLocalesPublicationStatus
-    }
+    const publicationIntentSurvivedBeforeOperation =
+      !allLocalesPublicationStatus || data._status === allLocalesPublicationStatus
+    const publishAllLocales = publicationIntentSurvivedBeforeOperation
+      ? publishAllLocalesArg
+      : false
+    const unpublishAllLocales = publicationIntentSurvivedBeforeOperation
+      ? unpublishAllLocalesArg
+      : false
 
     // /////////////////////////////////////
     // Access

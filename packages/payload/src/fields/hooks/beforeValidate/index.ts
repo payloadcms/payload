@@ -13,6 +13,7 @@ type Args<T extends JsonObject> = {
   duplicate?: boolean
   global: null | SanitizedGlobalConfig
   id?: number | string
+  onFieldAccessDenied?: (path: string) => void
   operation: 'create' | 'update'
   overrideAccess: boolean
   req: PayloadRequest
@@ -33,6 +34,7 @@ export const beforeValidate = async <T extends JsonObject>({
   data: incomingData,
   doc,
   global,
+  onFieldAccessDenied,
   operation,
   overrideAccess,
   req,
@@ -45,6 +47,7 @@ export const beforeValidate = async <T extends JsonObject>({
     doc,
     fields: (collection?.fields || global?.fields)!,
     global,
+    onFieldAccessDenied,
     operation,
     overrideAccess,
     parentIndexPath: '',
