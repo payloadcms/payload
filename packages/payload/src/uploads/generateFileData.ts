@@ -68,7 +68,7 @@ const shouldReupload = (
   return false
 }
 
-type TempFileHandling =
+export type TempFileHandling =
   | { sourcePath: string; type: 'copyFromTempFile' }
   | { type: 'skip' }
   | { type: 'useBuffer' }
@@ -79,7 +79,7 @@ type TempFileHandling =
  * from the temp file when possible, rather than reading a potentially large temp file into memory
  * just to write it back out - see the `generateFileData` function doc for why.
  */
-const resolveTempFileHandling = ({
+export const resolveTempFileHandling = ({
   disableLocalStorage,
   hasProcessedBuffer,
   tempFilePath,
