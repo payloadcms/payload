@@ -1,0 +1,1 @@
+export function filterHiddenFields(doc: Record<string, any>, hidden: string[]): Record<string, any> { const out = { ...doc }; hidden.forEach(h => delete out[h]); return out; }
