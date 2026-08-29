@@ -1,0 +1,1 @@
+export function hasUniqueValues<T>(items: T[], key: keyof T): boolean { const seen = new Set(); for (const i of items) { if (seen.has(i[key])) return false; seen.add(i[key]); } return true; }
