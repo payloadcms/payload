@@ -8,7 +8,7 @@ Before you submit an issue, please check all existing [open and closed issues](h
 
 ## Security issues & vulnerabilities
 
-If you come across an issue related to security, or a potential attack vector within Payload or one of its dependencies, please DO NOT create a publicly viewable issue. Instead, please contact us directly at [`dev@payloadcms.com`](mailto:dev@payloadcms.com). We will do everything we can to respond to the issue as soon as possible.
+If you come across an issue related to security, or a potential attack vector within Payload or one of its dependencies, please DO NOT create a publicly viewable issue. Instead, please contact us directly at [`security@payloadcms.com`](mailto:security@payloadcms.com). We will do everything we can to respond to the issue as soon as possible.
 
 If you find a vulnerability within the core Payload repository, and we determine that it is remediable and of significant nature, we will be happy to pay you a reward for your findings and diligence. [`Contact us`](mailto:dev@payloadcms.com) to find out more.
 
