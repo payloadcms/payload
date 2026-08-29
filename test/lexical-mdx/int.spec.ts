@@ -262,6 +262,75 @@ describe('Lexical MDX', () => {
       expect(serialized).not.toContain('"type":"link"')
     })
   })
+
+  describe('table markdown: escaped pipes', () => {
+    const escapedPipeTable = [
+      '| Option | Type |',
+      '| --- | --- |',
+      '| relationTo | string \\| string[] |',
+    ].join('\n')
+
+    function tableCellTexts(table: { children?: unknown[] }): string[][] {
+      return (table.children as { children: unknown[] }[]).map((row) =>
+        (row.children as { children: unknown[] }[]).map((cell) =>
+          (cell.children as { children: { text: string }[] }[])
+            .map((paragraph) => paragraph.children.map((text) => text.text).join(''))
+            .join(''),
+        ),
+      )
+    }
+
+    it('should treat an escaped pipe as cell content rather than a column divider', () => {
+      const result = mdxToEditorJSON({ editorConfig, mdxWithFrontmatter: escapedPipeTable })
+      const rootChildren = result.editorState.root.children
+
+      expect(rootChildren).toHaveLength(1)
+      expect(tableCellTexts(rootChildren[0])).toStrictEqual([
+        [' Option ', ' Type '],
+        [' relationTo ', ' string | string[] '],
+      ])
+    })
+
+    it('should escape pipes in cell content on export so the table round-trips', () => {
+      const { editorState } = mdxToEditorJSON({
+        editorConfig,
+        mdxWithFrontmatter: escapedPipeTable,
+      })
+      const markdown = editorJSONToMDX({ editorConfig, editorState })
+
+      expect(markdown).toContain('| string \\| string[] |')
+
+      const reimported = mdxToEditorJSON({ editorConfig, mdxWithFrontmatter: markdown })
+      expect(reimported.editorState.root.children).toStrictEqual(editorState.root.children)
+    })
+
+    it('should treat a pipe preceded by an escaped backslash as a column divider', () => {
+      const result = mdxToEditorJSON({
+        editorConfig,
+        mdxWithFrontmatter: ['| H1 | H2 |', '| --- | --- |', '| path\\\\| b |'].join('\n'),
+      })
+      const rootChildren = result.editorState.root.children
+
+      expect(rootChildren).toHaveLength(1)
+      expect(tableCellTexts(rootChildren[0])).toStrictEqual([
+        [' H1 ', ' H2 '],
+        [' path\\', ' b '],
+      ])
+    })
+
+    it('should round-trip a cell holding a backslash next to an escaped pipe', () => {
+      const { editorState } = mdxToEditorJSON({
+        editorConfig,
+        mdxWithFrontmatter: ['| H1 | H2 |', '| --- | --- |', '| a\\\\\\|b | c |'].join('\n'),
+      })
+
+      expect(tableCellTexts(editorState.root.children[0])[1]).toStrictEqual([' a\\|b ', ' c '])
+
+      const markdown = editorJSONToMDX({ editorConfig, editorState })
+      const reimported = mdxToEditorJSON({ editorConfig, mdxWithFrontmatter: markdown })
+      expect(reimported.editorState.root.children).toStrictEqual(editorState.root.children)
+    })
+  })
 })
 
 function removeUndefinedAndIDRecursively(obj: object) {
