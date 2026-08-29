@@ -1,0 +1,1 @@
+export async function runHookChain<T>(initial: T, hooks: Array<(arg: T) => Promise<T>>): Promise<T> { let cur = initial; for (const h of hooks) cur = await h(cur); return cur; }
