@@ -149,6 +149,14 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
             }
           }
         }
+        // Include computed extras so that fields like `point` (which use
+        // ST_AsGeoJSON expressions stored in findManyArgs.extras) are returned
+        // by the UPDATE ... RETURNING clause instead of being silently dropped.
+        if (findManyArgs.extras) {
+          for (const [name, extra] of Object.entries(findManyArgs.extras)) {
+            selectedFields[name] = extra
+          }
+        }
 
         const docs = await drizzle
           .update(adapter.tables[tableName])
@@ -352,10 +360,17 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
     const relationshipsTableName = `${tableName}${adapter.relationshipsSuffix}`
 
     if (operation === 'update') {
-      // Filter out specific item deletions (those with itemToRemove) from general path deletions
-      const generalRelationshipDeletes = rowToInsert.relationshipsToDelete.filter(
-        (rel) => !('itemToRemove' in rel),
-      )
+      // Filter out specific item deletions (those with itemToRemove) from general path deletions.
+      // Also separate prefix-based deletions (from wiped blocks fields) — they use LIKE queries
+      // instead of exact inArray matching and are handled via pathPrefixesToDelete below.
+      const pathPrefixesToDelete: string[] = []
+      const generalRelationshipDeletes = rowToInsert.relationshipsToDelete.filter((rel) => {
+        if ('pathPrefix' in rel) {
+          pathPrefixesToDelete.push(rel.pathPrefix)
+          return false
+        }
+        return !('itemToRemove' in rel)
+      })
 
       await deleteExistingRowsByPath({
         adapter,
@@ -364,6 +379,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
         parentColumnName: 'parent',
         parentID: insertedRow.id,
         pathColumnName: 'path',
+        pathPrefixesToDelete,
         rows: [...relationsToInsert, ...generalRelationshipDeletes],
         tableName: relationshipsTableName,
       })

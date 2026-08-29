@@ -24,12 +24,20 @@ export type BlockRowToInsert = {
   row: Record<string, unknown>
 }
 
-export type RelationshipToDelete = {
-  itemToRemove?: any // For $remove operations - stores the item data to match
-  locale?: string
-  path: string
-  relationTo?: string // For simple relationships - stores the relationTo field
-}
+export type RelationshipToDelete =
+  | {
+      // Prefix-based deletion: removes all _rels rows whose path starts with `${pathPrefix}.`
+      // Used when a blocks field is wiped so orphaned rows from removed block positions are cleaned up.
+      locale?: string
+      pathPrefix: string
+    }
+  | {
+      itemToRemove?: any // For $remove operations - stores the item data to match
+      locale?: string
+      path: string
+      pathPrefix?: never
+      relationTo?: string // For simple relationships - stores the relationTo field
+    }
 
 export type RelationshipToAppend = {
   locale?: string

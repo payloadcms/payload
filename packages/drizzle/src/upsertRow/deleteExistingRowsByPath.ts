@@ -1,4 +1,4 @@
-import { and, eq, inArray } from 'drizzle-orm'
+import { and, eq, inArray, like, or } from 'drizzle-orm'
 
 import type { DrizzleAdapter, DrizzleTransaction } from '../types.js'
 
@@ -9,6 +9,11 @@ type Args = {
   parentColumnName?: string
   parentID: unknown
   pathColumnName?: string
+  /**
+   * Path prefixes for prefix-based deletions (e.g. from wiped blocks fields).
+   * Deletes all rows whose path starts with `${prefix}.`.
+   */
+  pathPrefixesToDelete?: string[]
   rows: Record<string, unknown>[]
   tableName: string
 }
@@ -20,6 +25,7 @@ export const deleteExistingRowsByPath = async ({
   parentColumnName = '_parentID',
   parentID,
   pathColumnName = '_path',
+  pathPrefixesToDelete,
   rows,
   tableName,
 }: Args): Promise<void> => {
@@ -64,6 +70,24 @@ export const deleteExistingRowsByPath = async ({
       db,
       tableName,
       where: and(...whereConstraints),
+    })
+  }
+
+  // Delete all rows whose path starts with any of the given prefixes.
+  // This cleans up orphaned _rels rows that belong to block positions that were removed:
+  // e.g. if `sections` shrinks from 3 to 1, rows at paths `sections.1.faqs`, `sections.2.faqs`
+  // are no longer referenced and must be purged using a prefix LIKE query.
+  if (pathPrefixesToDelete && pathPrefixesToDelete.length > 0 && pathColumnName) {
+    const prefixConditions = pathPrefixesToDelete.map((prefix) =>
+      like(table[pathColumnName], `${prefix}.%`),
+    )
+    const prefixWhere =
+      prefixConditions.length === 1 ? prefixConditions[0] : or(...prefixConditions)
+
+    await adapter.deleteWhere({
+      db,
+      tableName,
+      where: and(eq(table[parentColumnName], parentID), prefixWhere),
     })
   }
 }
