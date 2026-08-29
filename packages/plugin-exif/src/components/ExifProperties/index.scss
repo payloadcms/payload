@@ -1,0 +1,46 @@
+.exif-properties {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--base) * 0.25);
+
+  &__header {
+    color: var(--theme-text);
+    font-weight: 600;
+    margin-bottom: calc(var(--base) * 0.25);
+  }
+
+  &__table {
+    display: flex;
+    flex-direction: column;
+  }
+
+  &__row {
+    align-items: baseline;
+    display: grid;
+    gap: calc(var(--base) * 0.5);
+    grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+    padding: calc(var(--base) * 0.3) 0;
+  }
+
+  &__col-label {
+    color: var(--theme-elevation-400);
+    font-size: 0.75rem;
+  }
+
+  &__label {
+    color: var(--theme-elevation-500);
+    font-size: 0.8125rem;
+  }
+
+  &__value {
+    color: var(--theme-text);
+    font-size: 0.8125rem;
+    word-break: break-word;
+  }
+
+  &__empty {
+    color: var(--theme-elevation-400);
+    font-size: 0.8125rem;
+    margin: 0;
+  }
+}

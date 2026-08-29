@@ -1,0 +1,7 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "references": [{ "path": "../payload" }, { "path": "../ui" }],
+  "compilerOptions": {
+    "lib": ["DOM", "DOM.Iterable", "ES2022"],
+  }
+}
