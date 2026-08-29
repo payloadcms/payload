@@ -1,0 +1,1 @@
+export function resolveLocalizedField(values: Record<string, any>, locales: string[]): any { for (const l of locales) { if (values[l] !== undefined && values[l] !== null && values[l] !== '') return values[l]; } return null; }
