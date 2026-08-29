@@ -1,0 +1,1 @@
+export class FieldAccessCache { private cache = new Map<string, boolean>(); getKey(userId: string, coll: string, field: string) { return `${userId}:${coll}:${field}`; } get(k: string) { return this.cache.get(k); } set(k: string, v: boolean) { this.cache.set(k, v); } }
