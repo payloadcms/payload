@@ -927,6 +927,63 @@ describe('Form State', () => {
     })
   })
 
+  it('should preserve the existing value reference for an unmodified field when the incoming value is content-identical', () => {
+    /**
+     * The server always sends a freshly (de)serialized value, so an object/array-valued field (e.g. a
+     * relationship or upload field) would otherwise get a brand new reference on every autosave merge, even
+     * though nothing about it changed. Consumers that memoize on this value's identity (e.g. a relationship
+     * field's list drawer filter options) would then needlessly recompute or remount.
+     *
+     * Includes a second, actually-changed field (`title`) so the top-level "return the same object if nothing
+     * changed" optimization in `mergeServerFormState` doesn't short-circuit and mask whether the untouched
+     * `relationshipField` value's reference was itself preserved within the new state object.
+     */
+    const currentRelationshipValue = { relationTo: 'uploads', value: '1' }
+
+    const currentState: Record<string, FieldState> = {
+      title: {
+        value: 'Test Post',
+        initialValue: 'Test Post',
+        valid: true,
+        passesCondition: true,
+      },
+      relationshipField: {
+        value: currentRelationshipValue,
+        initialValue: currentRelationshipValue,
+        valid: true,
+        passesCondition: true,
+      },
+    }
+
+    const incomingStateFromServer: Record<string, FieldState> = {
+      title: {
+        // Actually changed on the server, e.g. by a hook - ensures the overall state is not a no-op.
+        value: 'Test Post (modified on the server)',
+        initialValue: 'Test Post',
+        valid: true,
+        passesCondition: true,
+      },
+      relationshipField: {
+        // Content-identical to `currentRelationshipValue`, but a different object reference -
+        // simulating a value freshly deserialized from the server response.
+        value: { relationTo: 'uploads', value: '1' },
+        initialValue: { relationTo: 'uploads', value: '1' },
+        valid: true,
+        passesCondition: true,
+      },
+    }
+
+    const newState = mergeServerFormState({
+      acceptValues: { overrideLocalChanges: false },
+      currentState,
+      incomingState: incomingStateFromServer,
+    })
+
+    expect(newState.title.value).toBe('Test Post (modified on the server)')
+    expect(newState.relationshipField.value).toBe(currentRelationshipValue)
+    expect(newState.relationshipField.initialValue).toBe(currentRelationshipValue)
+  })
+
   it('should preserve client row data after reorder and delete during autosave', () => {
     /**
      * Regression test for the "ghost item" bug.

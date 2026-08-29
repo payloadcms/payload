@@ -202,6 +202,12 @@ export type ADD_ROW = {
 export type MERGE_SERVER_STATE = {
   acceptValues?: AcceptValues
   prevStateRef?: React.RefObject<FormState>
+  /**
+   * The timestamp (from `Date.now()`) captured when the form state snapshot for this request was taken,
+   * i.e. right before it was sent to the server. Used to detect fields that were edited locally _after_
+   * this request was sent, so their newer value isn't overwritten by this now-stale response.
+   */
+  requestSnapshotTakenAt?: number
   serverState: FormState
   type: 'MERGE_SERVER_STATE'
 }
