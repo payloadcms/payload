@@ -1,0 +1,1 @@
+export function hasExceededQuota(currentBytes: number, incomingBytes: number, maxBytes: number): boolean { return (currentBytes + incomingBytes) > maxBytes; }
