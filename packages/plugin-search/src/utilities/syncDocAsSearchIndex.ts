@@ -19,6 +19,32 @@ export const syncDocAsSearchIndex = async ({
   // Determine sync locale
   const syncLocale = locale || req.locale || undefined
 
+  // A failed search-doc write inside the parent operation's transaction has already
+  // aborted that transaction, so the parent (e.g. a publish) will roll back. Swallowing
+  // the error would let the parent operation report success for a write that did not
+  // persist, so the editor sees a silent revert (#17699). Surface it in that case.
+  //
+  // The rethrow is scoped to callers that have not opted into handling sync errors
+  // themselves: the reindex handler passes `onSyncError` and manages its own transaction
+  // and per-collection recovery, so it stays best-effort exactly as before. It is also a
+  // no-op when there is no shared transaction to abort. Each error object is logged once,
+  // so a rethrow re-caught by an outer handler keeps its original, most specific message.
+  const loggedSyncErrors = new WeakSet<object>()
+  const handleSyncError = (err: unknown, msg: string) => {
+    if (typeof err === 'object' && err !== null) {
+      if (!loggedSyncErrors.has(err)) {
+        payload.logger.error({ err, msg })
+        loggedSyncErrors.add(err)
+      }
+    } else {
+      payload.logger.error({ err, msg })
+    }
+
+    if (req.transactionID && !onSyncError) {
+      throw err
+    }
+  }
+
   if (typeof pluginConfig.skipSync === 'function') {
     try {
       const skipSync = await pluginConfig.skipSync({
@@ -158,10 +184,7 @@ export const syncDocAsSearchIndex = async ({
               where: { id: { in: duplicativeDocIDs } },
             })
           } catch (err: unknown) {
-            payload.logger.error({
-              err,
-              msg: `Error deleting duplicative ${searchSlug} documents.`,
-            })
+            handleSyncError(err, `Error deleting duplicative ${searchSlug} documents.`)
           }
         }
 
@@ -180,10 +203,7 @@ export const syncDocAsSearchIndex = async ({
                 req,
               })
             } catch (err: unknown) {
-              payload.logger.error({
-                err,
-                msg: `Error deleting ${searchSlug} document for trashed doc.`,
-              })
+              handleSyncError(err, `Error deleting ${searchSlug} document for trashed doc.`)
             }
           } else {
             if (doSync) {
@@ -201,7 +221,7 @@ export const syncDocAsSearchIndex = async ({
                   req,
                 })
               } catch (err: unknown) {
-                payload.logger.error({ err, msg: `Error updating ${searchSlug} document.` })
+                handleSyncError(err, `Error updating ${searchSlug} document.`)
               }
             }
 
@@ -244,7 +264,7 @@ export const syncDocAsSearchIndex = async ({
                     req,
                   })
                 } catch (err: unknown) {
-                  payload.logger.error({ err, msg: `Error deleting ${searchSlug} document.` })
+                  handleSyncError(err, `Error deleting ${searchSlug} document.`)
                 }
               }
             }
@@ -262,22 +282,22 @@ export const syncDocAsSearchIndex = async ({
               req,
             })
           } catch (err: unknown) {
-            payload.logger.error({ err, msg: `Error creating ${searchSlug} document.` })
+            handleSyncError(err, `Error creating ${searchSlug} document.`)
           }
         }
       } catch (err: unknown) {
-        payload.logger.error({ err, msg: `Error finding ${searchSlug} document.` })
+        handleSyncError(err, `Error finding ${searchSlug} document.`)
       }
     }
   } catch (err: unknown) {
-    payload.logger.error({
-      err,
-      msg: `Error syncing ${searchSlug} document related to ${collection} with id: '${id}'.`,
-    })
-
     if (onSyncError) {
       onSyncError()
     }
+
+    handleSyncError(
+      err,
+      `Error syncing ${searchSlug} document related to ${collection} with id: '${id}'.`,
+    )
   }
 
   return doc
