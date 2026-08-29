@@ -5,6 +5,7 @@ import type {
   BulkOperationResult,
   CollectionSlug,
   CustomDocumentViewConfig,
+  DateFieldValidation,
   DefaultDocumentViewConfig,
   GeneratedTypes,
   Job,
@@ -82,6 +83,10 @@ import type {
 } from './payload-types.js'
 
 describe('Types testing', () => {
+  test('should type date validation values as serialized strings', () => {
+    expect<Parameters<DateFieldValidation>[0]>().type.toBe<null | string | undefined>()
+  })
+
   test('should fall back when generated types do not include jobs', () => {
     expect<Job['id']>().type.toBe<number | string>()
     expect<Job['processingToken']>().type.toBe<null | string | undefined>()
