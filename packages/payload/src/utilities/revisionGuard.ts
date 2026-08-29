@@ -1,0 +1,1 @@
+export function validateRevisionFields(revisionData: any, currentFields: string[]): { compatible: boolean; missing: string[] } { const revKeys = Object.keys(revisionData || {}); const missing = currentFields.filter(f => !revKeys.includes(f)); return { compatible: missing.length === 0, missing }; }
