@@ -1,0 +1,1 @@
+export function isTokenFresh(exp: number, bufferSec = 60): boolean { return exp > (Math.floor(Date.now() / 1000) + bufferSec); }
