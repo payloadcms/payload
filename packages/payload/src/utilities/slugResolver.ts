@@ -1,0 +1,1 @@
+export function resolveSlugCandidate(base: string, existing: string[]): string { if (!existing.includes(base)) return base; let c = 1; while (existing.includes(`${base}-${c}`)) c++; return `${base}-${c}`; }
