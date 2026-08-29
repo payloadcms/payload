@@ -1,4 +1,4 @@
-import type { Payload, UploadInstructions } from 'payload'
+import type { Payload, SelectType, UploadInstructions } from 'payload'
 import type { SuiteAPI } from 'vitest'
 
 import * as AWS from '@aws-sdk/client-s3'
@@ -6,7 +6,7 @@ import { getFilePrefix } from '@payloadcms/plugin-cloud-storage/utilities'
 import fs from 'fs'
 import path from 'path'
 import { APIError } from 'payload'
-import { sanitizeFilename } from 'payload/shared'
+import { appendUploadSelectFields, sanitizeFilename } from 'payload/shared'
 import shelljs from 'shelljs'
 import { fileURLToPath } from 'url'
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
@@ -508,6 +508,53 @@ describe('@payloadcms/plugin-cloud-storage', () => {
 
           expect(apiResponse.url).toContain('test-cdn.example.com')
           expect(apiResponse.url).toContain(prefix)
+
+          await payload.delete({ id: upload.id, collection: mediaWithCustomURLSlug })
+        })
+
+        it('should generate thumbnailURL from the adapter instead of the payload file route', async () => {
+          const upload = await payload.create({
+            collection: mediaWithCustomURLSlug,
+            data: {},
+            filePath: path.resolve(dirname, '../uploads/image.png'),
+          })
+
+          expect(upload.thumbnailURL).toContain('test-cdn.example.com')
+
+          const apiResponse = await payload.findByID({
+            id: upload.id,
+            collection: mediaWithCustomURLSlug,
+          })
+
+          expect(apiResponse.thumbnailURL).toContain('test-cdn.example.com')
+
+          await payload.delete({ id: upload.id, collection: mediaWithCustomURLSlug })
+        })
+
+        it('should generate thumbnailURL from the adapter when read with the admin thumbnail select', async () => {
+          const upload = await payload.create({
+            collection: mediaWithCustomURLSlug,
+            data: {},
+            filePath: path.resolve(dirname, '../uploads/image.png'),
+          })
+
+          /** The list view only selects the fields required to render admin thumbnails */
+          const select: SelectType = { id: true }
+
+          appendUploadSelectFields({
+            collectionConfig: payload.collections[mediaWithCustomURLSlug].config,
+            select,
+          })
+
+          const apiResponse = await payload.findByID({
+            id: upload.id,
+            collection: mediaWithCustomURLSlug,
+            select,
+          })
+
+          expect(apiResponse.thumbnailURL).toContain('test-cdn.example.com')
+
+          await payload.delete({ id: upload.id, collection: mediaWithCustomURLSlug })
         })
 
         it('should use custom generateFileURL even without disablePayloadAccessControl', async () => {
