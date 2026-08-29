@@ -9,6 +9,7 @@ import { seed } from './seed.js'
 import {
   chainedRelSlug,
   customIdNumberSlug,
+  customIdRowSlug,
   customIdSlug,
   defaultAccessRelSlug,
   polymorphicRelationshipsSlug,
@@ -129,6 +130,11 @@ export default buildConfigWithDefaults({
           relationTo: customIdNumberSlug,
         },
         {
+          name: 'customIdRowRelation',
+          type: 'relationship',
+          relationTo: customIdRowSlug,
+        },
+        {
           name: 'filteredRelation',
           type: 'relationship',
           relationTo: relationSlug,
@@ -223,6 +229,28 @@ export default buildConfigWithDefaults({
         {
           name: 'name',
           type: 'text',
+        },
+      ],
+      versions: false,
+    },
+    {
+      // Regression test: custom text id nested inside a row layout field.
+      // The Drizzle schema builder must find the id via flattened fields,
+      // otherwise FK columns default to integer and startup crashes.
+      slug: customIdRowSlug,
+      fields: [
+        {
+          type: 'row',
+          fields: [
+            {
+              name: 'id',
+              type: 'text',
+            },
+            {
+              name: 'name',
+              type: 'text',
+            },
+          ],
         },
       ],
       versions: false,

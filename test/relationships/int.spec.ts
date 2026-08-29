@@ -24,6 +24,7 @@ import { clearAndSeedEverything } from './seed.js'
 import {
   chainedRelSlug,
   customIdNumberSlug,
+  customIdRowSlug,
   customIdSlug,
   defaultAccessRelSlug,
   polymorphicRelationshipsSlug,
@@ -1281,6 +1282,19 @@ describe('Relationships', () => {
             .GET(`/${slug}/${post.id}`)
             .then((res) => res.json())
           expect(customIdNumberRelation).toMatchObject({ id: generatedCustomIdNumber })
+        })
+
+        it('should resolve FK type correctly when custom text id is nested in a row field', async () => {
+          // Regression: traverseFields used a shallow find on collection.fields.
+          // A custom text id inside a row/group/collapsible was not detected,
+          // causing FK columns to be integer instead of varchar → startup crash.
+          const rowDoc = await payload.create({
+            collection: customIdRowSlug,
+            data: { id: 'row-custom-id', name: 'Row Custom ID' },
+          })
+          expect(rowDoc.id).toBe('row-custom-id')
+
+          await payload.delete({ collection: customIdRowSlug, id: rowDoc.id })
         })
       })
 
