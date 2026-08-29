@@ -1,0 +1,1 @@
+export function getDbRetryDelay(attempt: number, baseMs = 50, maxMs = 2000): number { return Math.min(maxMs, baseMs * Math.pow(2, attempt)); }
