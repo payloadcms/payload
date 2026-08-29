@@ -96,67 +96,9 @@ To install a Database Adapter, you can run **one** of the following commands:
   available.
 </Banner>
 
-#### 2. Copy Payload files into your Next.js app folder
+#### 2. Create a Payload Config
 
-Payload installs directly in your Next.js `/app` folder, and you'll need to place some files into that folder for Payload to run. You can copy these files from the [Blank Template](https://github.com/payloadcms/payload/tree/main/templates/blank/src/app/%28payload%29) on GitHub. Once you have the required Payload files in place in your `/app` folder, you should have something like this:
-
-```plaintext
-app/
-├─ (payload)/
-├── // Payload files
-├─ (my-app)/
-├── // Your app files
-```
-
-_For an exact reference of the `(payload)` directory, see [Project Structure](../admin/overview#project-structure)._
-
-<Banner type="warning">
-  You may need to copy all of your existing frontend files, including your
-  existing root layout, into its own newly created [Route
-  Group](https://nextjs.org/docs/app/building-your-application/routing/route-groups),
-  i.e. `(my-app)`.
-</Banner>
-
-The files that Payload needs to have in your `/app` folder do not regenerate, and will never change. Once you slot them in, you never have to revisit them. They are not meant to be edited and simply import Payload dependencies from `@payloadcms/next` for the REST / GraphQL API and Admin Panel.
-
-You can name the `(my-app)` folder anything you want. The name does not matter and will just be used to clarify your directory structure for yourself. Common names might be `(frontend)`, `(app)`, or similar. [More details](../admin/overview).
-
-#### 3. Add the Payload Plugin to your Next.js config
-
-Payload has a Next.js plugin that it uses to ensure compatibility with some of the packages Payload relies on, like `mongodb` or `drizzle-kit`.
-
-To add the Payload Plugin, use `withPayload` in your `next.config.js`:
-
-```js
-import { withPayload } from '@payloadcms/next/withPayload'
-
-/** @type {import('next').NextConfig} */
-const nextConfig = {
-  // Your Next.js config here
-}
-
-// Make sure you wrap your `nextConfig`
-// with the `withPayload` plugin
-export default withPayload(nextConfig) // highlight-line
-```
-
-<Banner type="warning">
-  **Important:** Payload is a fully ESM project, and that means the
-  `withPayload` function is an ECMAScript module.
-</Banner>
-
-To import the Payload Plugin, you need to make sure your `next.config` file is set up to use ESM.
-
-You can do this in one of two ways:
-
-1. Set your own project to use ESM, by adding `"type": "module"` to your `package.json` file
-2. Give your Next.js config the `.mjs` file extension
-
-In either case, all `require`s and `export`s in your `next.config` file will need to be converted to `import` / `export` if they are not set up that way already.
-
-#### 4. Create a Payload Config and add it to your TypeScript config
-
-Finally, you need to create a [Payload Config](../configuration/overview). Generally the Payload Config is located at the root of your repository, or next to your `/app` folder, and is named `payload.config.ts`.
+Create a [Payload Config](../configuration/overview). Generally the Payload Config is located at the root of your repository, or in your `src` folder next to your `/app` folder, and is named `payload.config.ts`.
 
 Here's what Payload needs at a bare minimum:
 
@@ -190,7 +132,9 @@ export default buildConfig({
 
 Although this is just the bare minimum config, there are _many_ more options that you can control here. To reference the full config and all of its options, [click here](/docs/configuration/overview).
 
-Once you have a Payload Config, update your `tsconfig` to include a `path` that points to it:
+#### 3. Add `@payload-config` to your TypeScript config
+
+Once you have a Payload Config, update your `tsconfig.json` to include a `path` that points to it. The files Payload adds import your config via `@payload-config`, and without this path alias TypeScript and your IDE will report errors across the admin panel and API routes.
 
 ```json
 {
@@ -202,7 +146,84 @@ Once you have a Payload Config, update your `tsconfig` to include a `path` that 
 }
 ```
 
-#### 5. Fire it up!
+If your Payload Config lives in `src`, point to that location instead:
+
+```json
+{
+  "compilerOptions": {
+    "paths": {
+      "@payload-config": ["./src/payload.config.ts"]
+    }
+  }
+}
+```
+
+<Banner type="warning">
+  **Important:** Add this path alias as soon as your `payload.config.ts` exists
+  — ideally before adding the Payload plugin to your Next.js config or copying
+  Payload files into your `app` folder. Most setup errors when adding Payload to
+  an existing app come from a missing `@payload-config` path.
+</Banner>
+
+#### 4. Copy Payload files into your Next.js app folder
+
+Payload installs directly in your Next.js `/app` folder, and you'll need to place some files into that folder for Payload to run. You can copy these files from the [Blank Template](https://github.com/payloadcms/payload/tree/main/templates/blank/src/app/%28payload%29) on GitHub. Once you have the required Payload files in place in your `/app` folder, you should have something like this:
+
+```plaintext
+app/
+├─ (payload)/
+├── // Payload files
+├─ (my-app)/
+├── // Your app files
+```
+
+_For an exact reference of the `(payload)` directory, see [Project Structure](../admin/overview#project-structure)._
+
+The files that Payload needs in your `/app` folder do not regenerate and will never change. Once you slot them in, you never have to revisit them. They are not meant to be edited and simply import Payload dependencies from `@payloadcms/next` for the REST / GraphQL API and Admin Panel.
+
+You can name the `(my-app)` folder anything you want. The name does not matter and will just be used to clarify your directory structure for yourself. Common names might be `(frontend)`, `(app)`, or similar. [More details](../admin/overview).
+
+<Banner type="warning">
+  You may need to copy all of your existing frontend files, including your
+  existing root layout, into its own newly created [Route
+  Group](https://nextjs.org/docs/app/building-your-application/routing/route-groups),
+  i.e. `(my-app)`.
+</Banner>
+
+#### 5. Add the Payload Plugin to your Next.js config
+
+Payload has a Next.js plugin that it uses to ensure compatibility with some of the packages Payload relies on, like `mongodb` or `drizzle-kit`.
+
+To add the Payload Plugin, use `withPayload` in your `next.config.js`:
+
+```js
+import { withPayload } from '@payloadcms/next/withPayload'
+
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  // Your Next.js config here
+}
+
+// Make sure you wrap your `nextConfig`
+// with the `withPayload` plugin
+export default withPayload(nextConfig) // highlight-line
+```
+
+<Banner type="warning">
+  **Important:** Payload is a fully ESM project, and that means the
+  `withPayload` function is an ECMAScript module.
+</Banner>
+
+To import the Payload Plugin, you need to make sure your `next.config` file is set up to use ESM.
+
+You can do this in one of two ways:
+
+1. Set your own project to use ESM, by adding `"type": "module"` to your `package.json` file
+2. Give your Next.js config the `.mjs` file extension
+
+In either case, all `require`s and `export`s in your `next.config` file will need to be converted to `import` / `export` if they are not set up that way already.
+
+#### 6. Fire it up!
 
 After you've reached this point, it's time to boot up Payload. Start your project in your application's folder to get going. By default, the Next.js dev script is `pnpm dev` (or `npm run dev` if using npm).
 
