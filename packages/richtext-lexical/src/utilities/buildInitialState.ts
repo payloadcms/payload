@@ -81,7 +81,7 @@ export async function buildInitialState({
         fields: (context.fieldSchemaMap.get(schemaFieldsPath) as any)?.fields,
         fieldSchemaMap: context.fieldSchemaMap,
         initialBlockData: blockNode.fields,
-        operation: context.operation as any, // TODO: Type
+        operation: context.operation,
         permissions: true,
         preferences: context.preferences,
         readOnly: context.disabled,

@@ -33,36 +33,46 @@ export const getSchedulePublishTask = ({
         user.collection = adminUserSlug
       }
 
+      const isPublishAllLocales = input.locale === undefined
+
       if (input.doc) {
+        const collectionSlug = input.doc.relationTo
+
         // input.doc.value is always a string (#10481); coerce back to the real ID type.
         const idType =
-          req.payload.collections[input.doc.relationTo]?.customIDType ??
+          req.payload.collections[collectionSlug]?.customIDType ??
           req.payload.db?.defaultIDType ??
           'text'
         const id = idType === 'number' ? Number(input.doc.value) : input.doc.value
 
         await req.payload.update({
           id,
-          collection: input.doc.relationTo,
+          collection: collectionSlug,
           data: {
             _status,
           },
           depth: 0,
           locale: input.locale,
           overrideAccess: user === null,
+          publishAllLocales: _status === 'published' && isPublishAllLocales,
+          req,
           user,
         })
       }
 
       if (input.global) {
+        const globalSlug = input.global
+
         await req.payload.updateGlobal({
-          slug: input.global,
+          slug: globalSlug,
           data: {
             _status,
           },
           depth: 0,
           locale: input.locale,
           overrideAccess: user === null,
+          publishAllLocales: _status === 'published' && isPublishAllLocales,
+          req,
           user,
         })
       }

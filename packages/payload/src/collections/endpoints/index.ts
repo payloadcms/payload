@@ -15,6 +15,7 @@ import { findVersionsHandler } from './findVersions.js'
 import { restoreVersionHandler } from './restoreVersion.js'
 import { updateHandler } from './update.js'
 import { updateByIDHandler } from './updateByID.js'
+import { validateByIDHandler, validateHandler } from './validate.js'
 
 export const defaultCollectionEndpoints: Endpoint[] = [
   ...wrapInternalEndpoints([
@@ -42,6 +43,16 @@ export const defaultCollectionEndpoints: Endpoint[] = [
       handler: docAccessHandler,
       method: 'post',
       path: '/access/:id?',
+    },
+    {
+      handler: validateHandler,
+      method: 'post',
+      path: '/validate',
+    },
+    {
+      handler: validateByIDHandler,
+      method: 'post',
+      path: '/:id/validate',
     },
     {
       handler: findVersionsHandler,

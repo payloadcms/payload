@@ -22,6 +22,7 @@ import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { beforeChange } from '../../fields/hooks/beforeChange/index.js'
 import { beforeValidate } from '../../fields/hooks/beforeValidate/index.js'
 import { deepCopyObjectSimple } from '../../index.js'
+import { assertNoValidationWrite } from '../../utilities/assertNoValidationWrite.js'
 import { checkDocumentLockStatus } from '../../utilities/checkDocumentLockStatus.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { getSelectMode } from '../../utilities/getSelectMode.js'
@@ -32,6 +33,7 @@ import {
 } from '../../utilities/getVersionsConfig.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import { resolvePublishAllLocales } from '../../utilities/resolvePublishAllLocales.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { buildLocalizedPublishData } from '../../versions/buildSingleLocalePublishData.js'
@@ -60,6 +62,8 @@ export const updateOperation = async <
 >(
   args: Args<TSlug>,
 ): Promise<TransformGlobalWithSelect<TSlug, TSelect>> => {
+  assertNoValidationWrite(args.req)
+
   const {
     slug,
     autosave,
@@ -101,10 +105,12 @@ export const updateOperation = async <
 
     let { data } = args
 
-    const publishAllLocales =
-      !draftArg &&
-      (publishAllLocalesArg ??
-        (hasLocalizeStatusEnabled(globalConfig) && locale !== 'all' ? false : true))
+    const publishAllLocales = resolvePublishAllLocales({
+      draft: draftArg,
+      hasLocalizeStatusEnabled: hasLocalizeStatusEnabled(globalConfig),
+      locale,
+      publishAllLocalesArg,
+    })
     const unpublishAllLocales =
       typeof unpublishAllLocalesArg === 'string'
         ? unpublishAllLocalesArg === 'true'
@@ -213,6 +219,7 @@ export const updateOperation = async <
             context: req.context,
             data,
             global: globalConfig,
+            operation: 'update',
             originalDoc,
             overrideAccess,
             req,
@@ -231,6 +238,7 @@ export const updateOperation = async <
             context: req.context,
             data,
             global: globalConfig,
+            operation: 'update',
             originalDoc,
             overrideAccess,
             req,
@@ -479,6 +487,7 @@ export const updateOperation = async <
             data,
             doc: result,
             global: globalConfig,
+            operation: 'update',
             overrideAccess,
             previousDoc: originalDoc,
             req,

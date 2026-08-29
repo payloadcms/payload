@@ -43,6 +43,7 @@ export function PublishButton({
   const locale = useLocale()
   const localeCode = locale?.code
   const {
+    blocksMap,
     localization,
     routes: { api },
   } = config
@@ -71,9 +72,9 @@ export function PublishButton({
   const [hasLocalizedFields, setHasLocalizedFields] = useState(false)
 
   useEffect(() => {
-    const hasLocalizedField = traverseForLocalizedFields(entityConfig?.fields)
+    const hasLocalizedField = traverseForLocalizedFields(entityConfig?.fields, { blocksMap })
     setHasLocalizedFields(hasLocalizedField)
-  }, [entityConfig?.fields])
+  }, [blocksMap, entityConfig?.fields])
 
   const isSpecificLocalePublishEnabled = localization && hasLocalizedFields && hasPublishPermission
 

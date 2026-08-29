@@ -375,6 +375,7 @@ export type GraphQLInfo = {
     groupTypes: Record<string, GraphQL.GraphQLObjectType>
     localeInputType?: GraphQL.GraphQLEnumType | GraphQL.GraphQLScalarType
     tabTypes: Record<string, GraphQL.GraphQLObjectType>
+    validationResultType?: GraphQL.GraphQLObjectType
   }
 }
 export type GraphQLExtension = (
@@ -699,6 +700,8 @@ export type LocalizationConfigWithLabels = Prettify<
   } & BaseLocalizationConfig
 >
 
+export type SanitizedLocale = Locale
+
 export type SanitizedLocalizationConfig = Prettify<
   {
     /**
@@ -706,7 +709,8 @@ export type SanitizedLocalizationConfig = Prettify<
      * @example `["en", "es", "fr", "nl", "de", "jp"]`
      */
     localeCodes: string[]
-  } & Omit<LocalizationConfigWithLabels, 'fallback'> &
+    locales: SanitizedLocale[]
+  } & Omit<LocalizationConfigWithLabels, 'fallback' | 'locales'> &
     Required<Pick<LocalizationConfigWithLabels, 'fallback'>>
 >
 
