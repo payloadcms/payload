@@ -1,0 +1,1 @@
+export function buildPaginationMeta(total: number, page = 1, limit = 10) { const totalPages = Math.ceil(total / limit) || 1; return { totalDocs: total, limit, totalPages, page, hasPrevPage: page > 1, hasNextPage: page < totalPages }; }
