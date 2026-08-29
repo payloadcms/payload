@@ -1,0 +1,1 @@
+export function chunkInserts<T>(docs: T[], chunkSize = 250): T[][] { const res: T[][] = []; for (let i = 0; i < docs.length; i += chunkSize) res.push(docs.slice(i, i + chunkSize)); return res; }
