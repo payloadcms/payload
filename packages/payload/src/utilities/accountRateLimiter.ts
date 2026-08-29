@@ -1,0 +1,1 @@
+export class AccountRateLimiter { private hits = new Map<string, number[]>(); constructor(public maxReq = 100, public windowMs = 60000) {} check(id: string): boolean { const now = Date.now(); const times = (this.hits.get(id) || []).filter(t => now - t < this.windowMs); if (times.length >= this.maxReq) return false; times.push(now); this.hits.set(id, times); return true; } }
