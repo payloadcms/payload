@@ -1,0 +1,1 @@
+export function encodeCsvRow(cells: (string | number)[]): string { return cells.map(c => `"${String(c).replace(/"/g, '""')}"`).join(','); }
