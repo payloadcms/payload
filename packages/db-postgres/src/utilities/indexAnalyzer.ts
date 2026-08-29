@@ -1,0 +1,1 @@
+export function hasDuplicateIndex(indices: string[][], candidate: string[]): boolean { const cStr = candidate.join(','); return indices.some(idx => idx.join(',') === cStr); }
