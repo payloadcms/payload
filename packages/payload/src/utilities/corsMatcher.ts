@@ -1,0 +1,1 @@
+export function isAllowedCors(origin: string, list: string[]): boolean { return list.includes('*') || list.includes(origin); }
