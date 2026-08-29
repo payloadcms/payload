@@ -1,0 +1,1 @@
+export function getVersionsToPrune(versions: Array<{ id: string; createdAt: string }>, maxKeep = 20): string[] { if (versions.length <= maxKeep) return []; return versions.slice(0, versions.length - maxKeep).map(v => v.id); }
