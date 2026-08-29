@@ -1,0 +1,1 @@
+export function calcResizedDimensions(w: number, h: number, maxW = 1920, maxH = 1080) { const ratio = Math.min(maxW / w, maxH / h, 1); return { width: Math.round(w * ratio), height: Math.round(h * ratio) }; }
