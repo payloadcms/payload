@@ -4,7 +4,7 @@ import type {
   DataFromCollectionSlug,
   RequiredDataFromCollectionSlug,
 } from '../../collections/config/types.js'
-import type { AuthCollectionSlug } from '../../index.js'
+import type { AuthCollectionSlug, CollectionSlug } from '../../index.js'
 import type { PayloadRequest, SelectType } from '../../types/index.js'
 
 import { Forbidden } from '../../errors/index.js'
@@ -78,9 +78,12 @@ export const registerFirstUserOperation = async <TSlug extends AuthCollectionSlu
     // Register first user
     // /////////////////////////////////////
 
-    const result = await payload.create<TSlug, SelectType>({
-      collection: slug as TSlug,
-      data,
+    // Widened to `CollectionSlug` so the strict `Options` conditional in `create` resolves
+    // to its wide-slug branch. A naked TSlug generic keeps the conditional deferred and
+    // TypeScript can't route this call to a specific branch.
+    const result = await payload.create<CollectionSlug, SelectType>({
+      collection: slug,
+      data: data as RequiredDataFromCollectionSlug<CollectionSlug>,
       overrideAccess: true,
       req,
     })

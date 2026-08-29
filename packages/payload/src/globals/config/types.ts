@@ -46,31 +46,25 @@ export type GlobalsWithoutDrafts = {
 }[GlobalSlug]
 
 /**
- * Conditionally allows or forbids the `draft` property based on global configuration.
- * When `strictDraftTypes` is enabled, the `draft` property is forbidden on globals without drafts.
+ * Allows or forbids the `draft` property based on global configuration.
+ * The `draft` property is forbidden on globals without drafts.
+ *
+ * The conditional lives inside the object so the return shape is always `{ draft?: X }`.
+ * That keeps `Pick<FindOptions, 'select'>` and other indexed accesses stable when
+ * intersected with this helper.
  */
-export type DraftFlagFromGlobalSlug<TSlug extends GlobalSlug> = GeneratedTypes extends {
-  strictDraftTypes: true
+export type DraftFlagFromGlobalSlug<TSlug extends GlobalSlug> = {
+  /**
+   * Whether the global should be queried from the versions table/collection or not. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
+   *
+   * Typed as `never` when the global has no drafts, so passing `draft` fails at compile time.
+   */
+  draft?: GlobalSlug extends TSlug
+    ? boolean
+    : [TSlug] extends [GlobalsWithoutDrafts]
+      ? never
+      : boolean
 }
-  ? TSlug extends GlobalsWithoutDrafts
-    ? {
-        /**
-         * The `draft` property is not allowed because this global does not have `versions.drafts` enabled.
-         */
-        draft?: never
-      }
-    : {
-        /**
-         * Whether the global should be queried from the versions table/collection or not. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
-         */
-        draft?: boolean
-      }
-  : {
-      /**
-       * Whether the global should be queried from the versions table/collection or not. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
-       */
-      draft?: boolean
-    }
 
 export type BeforeValidateHook = (args: {
   context: RequestContext

@@ -213,7 +213,10 @@ export default buildConfigWithDefaults({
               RelationshipFeature(),
               BlocksFeature({
                 blocks: [
-                  { slug: 'cta', fields: [{ name: 'link', type: 'relationship', relationTo: 'pages' }] },
+                  {
+                    slug: 'cta',
+                    fields: [{ name: 'link', type: 'relationship', relationTo: 'pages' }],
+                  },
                 ],
               }),
             ],
@@ -277,7 +280,6 @@ export default buildConfigWithDefaults({
   typescript: {
     generateInputTypes: true,
     outputFile: path.resolve(dirname, 'payload-types.ts'),
-    strictDraftTypes: true,
     postProcess: [
       ({ compiledTypes }) => {
         const genericType = `export type TestPluginGeneric<T> = { value: T };`

@@ -3,7 +3,6 @@ import type {
   CollectionSlug,
   JoinQuery,
   Payload,
-  PayloadTypes,
   RequestContext,
   TypedFallbackLocale,
   TypedLocale,
@@ -197,9 +196,7 @@ export async function findLocal<
 ): Promise<
   PaginatedDocs<
     TDraft extends true
-      ? PayloadTypes extends { strictDraftTypes: true }
-        ? DraftTransformCollectionWithSelect<TSlug, TSelect>
-        : TransformCollectionWithSelect<TSlug, TSelect>
+      ? DraftTransformCollectionWithSelect<TSlug, TSelect>
       : TransformCollectionWithSelect<TSlug, TSelect>
   >
 > {
