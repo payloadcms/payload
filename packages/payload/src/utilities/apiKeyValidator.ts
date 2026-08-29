@@ -1,0 +1,1 @@
+export function isApiKeyExpired(expiresAt: number | null): boolean { if (!expiresAt) return false; return Date.now() > expiresAt; }
