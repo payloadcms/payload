@@ -1,0 +1,1 @@
+export function resolveRelationTarget(rel: { relationTo: string; value: string }) { return { collection: rel.relationTo, id: rel.value }; }
