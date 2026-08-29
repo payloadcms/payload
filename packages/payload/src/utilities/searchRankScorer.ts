@@ -1,0 +1,1 @@
+export function scoreDocMatch(text: string, term: string): number { const t = term.toLowerCase(); return text.toLowerCase().split(t).length - 1; }
