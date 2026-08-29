@@ -1,0 +1,1 @@
+export function evalPassword(p: string): boolean { return p.length >= 8 && /[A-Z]/.test(p) && /[0-9]/.test(p); }
