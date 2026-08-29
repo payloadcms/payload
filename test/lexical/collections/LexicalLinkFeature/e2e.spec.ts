@@ -86,6 +86,33 @@ describe('Lexical Link Feature', () => {
     await expect(checkboxField).toBeChecked()
   })
 
+  test('should open pasted autolinks in a new tab', async ({ page }) => {
+    const lexical = new LexicalHelpers(page)
+    const pastedURL = 'https://example.com'
+    const pastedEmail = 'test@example.com'
+
+    await page.context().grantPermissions(['clipboard-read', 'clipboard-write'])
+    await page.evaluate(
+      async ([email, url]) => {
+        await navigator.clipboard.writeText(`${url} ${email} `)
+      },
+      [pastedEmail, pastedURL],
+    )
+
+    await page.keyboard.press(`ControlOrMeta+v`)
+
+    const links = lexical.editor.locator('a')
+
+    await expect(links).toHaveCount(2)
+    await expect(links.nth(0)).toHaveAttribute('href', pastedURL)
+    await expect(links.nth(0)).toHaveAttribute('rel', /noopener/)
+    await expect(links.nth(0)).toHaveAttribute('target', '_blank')
+
+    await expect(links.nth(1)).toHaveAttribute('href', `mailto:${pastedEmail}`)
+    await expect(links.nth(1)).toHaveAttribute('rel', /noopener/)
+    await expect(links.nth(1)).toHaveAttribute('target', '_blank')
+  })
+
   test('long link on right stays within editor bounds', async ({ page }) => {
     const lexical = new LexicalHelpers(page)
 
@@ -125,9 +152,9 @@ describe('Lexical Link Feature', () => {
           new MouseEvent('mouseover', {
             bubbles: true,
             cancelable: true,
-            view: window,
             clientX: rect.left + rect.width / 2,
             clientY: rect.top + rect.height / 2,
+            view: window,
           }),
         )
       }
@@ -193,9 +220,9 @@ describe('Lexical Link Feature', () => {
           new MouseEvent('mouseover', {
             bubbles: true,
             cancelable: true,
-            view: window,
             clientX: rect.left + rect.width / 2,
             clientY: rect.top + rect.height / 2,
+            view: window,
           }),
         )
       }
@@ -258,9 +285,9 @@ describe('Lexical Link Feature', () => {
           new MouseEvent('mouseover', {
             bubbles: true,
             cancelable: true,
-            view: window,
             clientX: rect.left + rect.width / 2,
             clientY: rect.top + rect.height / 2,
+            view: window,
           }),
         )
       }
@@ -327,9 +354,9 @@ describe('Lexical Link Feature', () => {
           new MouseEvent('mouseover', {
             bubbles: true,
             cancelable: true,
-            view: window,
             clientX: rect.left + rect.width / 2,
             clientY: rect.top + rect.height / 2,
+            view: window,
           }),
         )
       }

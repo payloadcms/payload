@@ -21,11 +21,12 @@ import type { ClientProps } from '../../index.js'
 
 import { $createAutoLinkNode, $isAutoLinkNode, AutoLinkNode } from '../../../nodes/AutoLinkNode.js'
 import { $isLinkNode } from '../../../nodes/LinkNode.js'
+import { buildAutoLinkFields } from './buildAutoLinkFields.js'
 
 type ChangeHandler = (url: null | string, prevUrl: null | string) => void
 
 interface LinkMatcherResult {
-  fields?: LinkFields
+  fields?: Partial<LinkFields>
   index: number
   length: number
   text: string
@@ -174,16 +175,13 @@ function extractMatchingNodes(
 }
 
 function $createAutoLinkNode_(
+  clientProps: ClientProps,
   nodes: TextNode[],
   startIndex: number,
   endIndex: number,
   match: LinkMatcherResult,
 ): TextNode | undefined {
-  const fields = {
-    linkType: 'custom',
-    url: match.url,
-    ...match.fields,
-  } as LinkFields
+  const fields = getAutoLinkFields({ clientProps, match })
 
   const linkNode = $createAutoLinkNode({ fields })
   if (nodes.length === 1) {
@@ -258,6 +256,7 @@ function $createAutoLinkNode_(
 }
 
 function $handleLinkCreation(
+  clientProps: ClientProps,
   nodes: TextNode[],
   matchers: LinkMatcher[],
   onChange: ChangeHandler,
@@ -290,6 +289,7 @@ function $handleLinkCreation(
       const actualMatchStart = invalidMatchEnd + matchStart - matchingOffset
       const actualMatchEnd = invalidMatchEnd + matchEnd - matchingOffset
       const remainingTextNode = $createAutoLinkNode_(
+        clientProps,
         matchingNodes,
         actualMatchStart,
         actualMatchEnd,
@@ -309,6 +309,7 @@ function $handleLinkCreation(
 }
 
 function handleLinkEdit(
+  clientProps: ClientProps,
   linkNode: AutoLinkNode,
   matchers: LinkMatcher[],
   onChange: ChangeHandler,
@@ -343,9 +344,11 @@ function handleLinkEdit(
 
   const url = linkNode.getFields()?.url
   if (url !== match?.url) {
-    const flds = linkNode.getFields()
-    flds.url = match?.url
-    linkNode.setFields(flds)
+    const fields = getAutoLinkFields({
+      clientProps,
+      match,
+    })
+    linkNode.setFields(fields)
     onChange(match.url, url ?? null)
   }
 }
@@ -353,6 +356,7 @@ function handleLinkEdit(
 // Bad neighbors are edits in neighbor nodes that make AutoLinks incompatible.
 // Given the creation preconditions, these can only be simple text nodes.
 function handleBadNeighbors(
+  clientProps: ClientProps,
   textNode: TextNode,
   matchers: LinkMatcher[],
   onChange: ChangeHandler,
@@ -367,16 +371,30 @@ function handleBadNeighbors(
       : false
     if (!startsWithSeparator(text) || startsWithTLD(text, isEmailURI)) {
       previousSibling.append(textNode)
-      handleLinkEdit(previousSibling, matchers, onChange)
+      handleLinkEdit(clientProps, previousSibling, matchers, onChange)
       onChange(null, previousSibling.getFields()?.url ?? null)
     }
   }
 
   if ($isAutoLinkNode(nextSibling) && !endsWithSeparator(text)) {
     replaceWithChildren(nextSibling)
-    handleLinkEdit(nextSibling, matchers, onChange)
+    handleLinkEdit(clientProps, nextSibling, matchers, onChange)
     onChange(null, nextSibling.getFields()?.url ?? null)
   }
+}
+
+function getAutoLinkFields({
+  clientProps,
+  match,
+}: {
+  clientProps: ClientProps
+  match: LinkMatcherResult
+}): LinkFields {
+  return buildAutoLinkFields({
+    matchFields: match.fields,
+    staticFields: clientProps.autoLinks?.fields,
+    url: match.url,
+  })
 }
 
 function replaceWithChildren(node: ElementNode): LexicalNode[] {
@@ -408,6 +426,7 @@ function getTextNodesToMatch(textNode: TextNode): TextNode[] {
 function useAutoLink(
   editor: LexicalEditor,
   matchers: LinkMatcher[],
+  clientProps: ClientProps,
   onChange?: ChangeHandler,
 ): void {
   useEffect(() => {
@@ -426,21 +445,21 @@ function useAutoLink(
         const parent = textNode.getParentOrThrow()
         const previous = textNode.getPreviousSibling()
         if ($isAutoLinkNode(parent)) {
-          handleLinkEdit(parent, matchers, onChangeWrapped)
+          handleLinkEdit(clientProps, parent, matchers, onChangeWrapped)
         } else if (!$isLinkNode(parent)) {
           if (
             textNode.isSimpleText() &&
             (startsWithSeparator(textNode.getTextContent()) || !$isAutoLinkNode(previous))
           ) {
             const textNodesToMatch = getTextNodesToMatch(textNode)
-            $handleLinkCreation(textNodesToMatch, matchers, onChangeWrapped)
+            $handleLinkCreation(clientProps, textNodesToMatch, matchers, onChangeWrapped)
           }
 
-          handleBadNeighbors(textNode, matchers, onChangeWrapped)
+          handleBadNeighbors(clientProps, textNode, matchers, onChangeWrapped)
         }
       }),
     )
-  }, [editor, matchers, onChange])
+  }, [clientProps, editor, matchers, onChange])
 }
 
 const URL_REGEX =
@@ -458,10 +477,10 @@ const MATCHERS = [
   }),
 ]
 
-export const AutoLinkPlugin: PluginComponent<ClientProps> = () => {
+export const AutoLinkPlugin: PluginComponent<ClientProps> = ({ clientProps }) => {
   const [editor] = useLexicalComposerContext()
 
-  useAutoLink(editor, MATCHERS)
+  useAutoLink(editor, MATCHERS, clientProps)
 
   return null
 }
