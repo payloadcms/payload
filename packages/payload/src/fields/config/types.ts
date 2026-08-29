@@ -873,6 +873,7 @@ export type CollapsibleField = {
           >
         } & FieldAdmin['components']
         initCollapsed?: boolean
+        persistCollapsedState?: boolean
       } & FieldAdmin
       label?: Required<FieldBase['label']>
     }
@@ -886,6 +887,7 @@ export type CollapsibleField = {
           >
         } & FieldAdmin['components']
         initCollapsed?: boolean
+        persistCollapsedState?: boolean
       } & FieldAdmin
       label: Required<FieldBase['label']>
     }
@@ -895,6 +897,7 @@ export type CollapsibleField = {
 export type CollapsibleFieldClient = {
   admin?: {
     initCollapsed?: boolean
+    persistCollapsedState?: boolean
   } & AdminClient
   fields: ClientField[]
   label: StaticLabel

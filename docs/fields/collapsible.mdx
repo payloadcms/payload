@@ -60,9 +60,10 @@ export const MyCollapsibleField: Field = {
 
 The Collapsible Field inherits all of the default admin options from the base [Field Admin Config](./overview#admin-options), plus the following additional options:
 
-| Option              | Description                     |
-| ------------------- | ------------------------------- |
-| **`initCollapsed`** | Set the initial collapsed state |
+| Option                      | Description                                                                                                                              |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| **`initCollapsed`**         | Set the initial collapsed state                                                                                                          |
+| **`persistCollapsedState`** | When `true` (default), the Admin Panel remembers the collapsed state per document. Set to `false` to always use `initCollapsed` on mount |
 
 ## Example
 
