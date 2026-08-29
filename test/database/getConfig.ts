@@ -1054,6 +1054,42 @@ export const getConfig: () => Partial<Config> = () => ({
       ],
     },
     {
+      slug: 'reserved-field-names',
+      fields: [
+        {
+          name: 'numbers',
+          type: 'array',
+          fields: [
+            {
+              name: 'drawPosition',
+              type: 'number',
+            },
+          ],
+        },
+        {
+          name: 'texts',
+          type: 'array',
+          fields: [
+            {
+              name: 'value',
+              type: 'text',
+            },
+          ],
+        },
+        {
+          name: 'rels',
+          type: 'array',
+          fields: [
+            {
+              name: 'value',
+              type: 'text',
+            },
+          ],
+        },
+      ],
+      versions: false,
+    },
+    {
       slug: 'virtual-linked-tenants',
       fields: [
         {
