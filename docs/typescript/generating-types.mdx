@@ -18,6 +18,20 @@ payload generate:types
 
 You can run this command whenever you need to regenerate your types, and then you can use these types in your Payload code directly.
 
+### ⚠️ Note for Next.js users
+
+In a default Next.js project (which does **not** include `"type": "module"` in `package.json`), you might encounter an error when running `payload generate:types`.
+
+To fix this, add the following line to your `package.json`:
+
+```json
+{
+  "type": "module"
+}
+```
+
+> 💡 This enables ECMAScript Modules (ESM) which are required for the type generation script to run correctly.
+
 ## Disable declare statement
 
 By default, `generate:types` will add a `declare` statement to your types file, which automatically enables type inference within Payload.
