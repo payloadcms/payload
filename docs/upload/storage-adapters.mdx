@@ -314,18 +314,46 @@ export default buildConfig({
 })
 ```
 
+### Authentication#azure-authentication
+
+The adapter supports two mutually exclusive authentication methods: a `connectionString` (shown above), or an Entra ID `credential` for identity-based authentication without stored secrets — for example a managed identity on Azure App Service or a workload identity on AKS. Pass any [`TokenCredential`](https://learn.microsoft.com/en-us/javascript/api/@azure/core-auth/tokencredential) from `@azure/identity`:
+
+```ts
+import { DefaultAzureCredential } from '@azure/identity'
+
+azureStorage({
+  // ...
+  baseURL: process.env.AZURE_STORAGE_ACCOUNT_BASEURL, // https://<account>.blob.core.windows.net
+  credential: new DefaultAzureCredential(),
+  containerName: process.env.AZURE_STORAGE_CONTAINER_NAME,
+})
+```
+
+When using `credential`:
+
+- `baseURL` must be the storage account's blob endpoint (`https://<account>.blob.core.windows.net`), not a CDN URL, since it is also used to connect to the account.
+- The identity needs the **Storage Blob Data Contributor** role on the storage account or container. Client uploads (`clientUploads`) sign upload URLs with a [user delegation SAS](https://learn.microsoft.com/en-us/rest/api/storageservices/create-user-delegation-sas), whose `generateUserDelegationKey` action is included in that role.
+- For a user-assigned managed identity with `DefaultAzureCredential`, set the `AZURE_CLIENT_ID` environment variable to the identity's client ID (or use `ManagedIdentityCredential` with an explicit client ID).
+
+<Banner type="warning">
+  SAS-based connection strings (containing `SharedAccessSignature=`) work for
+  server uploads but cannot sign upload URLs, so they are not supported with
+  `clientUploads`.
+</Banner>
+
 ### Configuration Options#azure-configuration
 
-| Option                 | Description                                                                              | Default |
-| ---------------------- | ---------------------------------------------------------------------------------------- | ------- |
-| `enabled`              | Whether or not to enable the plugin                                                      | `true`  |
-| `collections`          | Collections to apply the Azure Blob adapter to                                           |         |
-| `allowContainerCreate` | Whether or not to allow the container to be created if it does not exist                 | `false` |
-| `baseURL`              | Base URL for the Azure Blob storage account                                              |         |
-| `connectionString`     | Azure Blob storage connection string                                                     |         |
-| `containerName`        | Azure Blob storage container name                                                        |         |
-| `clientUploads`        | Upload directly to Azure instead of through Payload.                                     |         |
-| `useCompositePrefixes` | Combine collection prefix with document prefix instead of document prefix overriding it. | `false` |
+| Option                 | Description                                                                                            | Default |
+| ---------------------- | ------------------------------------------------------------------------------------------------------ | ------- |
+| `enabled`              | Whether or not to enable the plugin                                                                    | `true`  |
+| `collections`          | Collections to apply the Azure Blob adapter to                                                         |         |
+| `allowContainerCreate` | Whether or not to allow the container to be created if it does not exist                               | `false` |
+| `baseURL`              | Base URL for the Azure Blob storage account (the blob endpoint when using `credential`)                |         |
+| `connectionString`     | Azure Blob storage connection string (mutually exclusive with `credential`)                            |         |
+| `credential`           | Entra ID `TokenCredential` (e.g. `DefaultAzureCredential`), mutually exclusive with `connectionString` |         |
+| `containerName`        | Azure Blob storage container name                                                                      |         |
+| `clientUploads`        | Upload directly to Azure instead of through Payload.                                                   |         |
+| `useCompositePrefixes` | Combine collection prefix with document prefix instead of document prefix overriding it.               | `false` |
 
 ## Google Cloud Storage
 
