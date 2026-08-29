@@ -1,0 +1,1 @@
+export function exportCollectionJsonSchema(name: string, fields: Record<string, string>) { return { $schema: 'http://json-schema.org/draft-07/schema#', title: name, type: 'object', properties: fields }; }
