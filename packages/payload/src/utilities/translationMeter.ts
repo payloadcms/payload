@@ -1,0 +1,1 @@
+export function getTranslationCompleteness(doc: Record<string, any>, fields: string[], locale: string): number { const filled = fields.filter(f => Boolean(doc[f]?.[locale])).length; return Math.round((filled / fields.length) * 100); }
