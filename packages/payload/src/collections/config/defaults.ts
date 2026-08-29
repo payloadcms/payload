@@ -2,6 +2,7 @@ import type { Auth, IncomingAuthType, LoginWithUsernameOptions } from '../../aut
 import type { CollectionConfig, SanitizedCollectionConfig } from './types.js'
 
 import { defaultAccess } from '../../auth/defaultAccess.js'
+import { defaultAuthAccess } from '../../auth/defaultAuthAccess.js'
 
 /**
  * @deprecated - remove in 4.0. This is error-prone, as mutating this object will affect any objects that use the defaults as a base.
@@ -58,13 +59,15 @@ export const defaults: Partial<CollectionConfig> = {
 export const addDefaultsToCollectionConfig = (collection: CollectionConfig): CollectionConfig => {
   const access = collection.access
 
+  const authDefault = collection.auth ? defaultAuthAccess : defaultAccess
+
   collection.access = {
     ...access,
     create: access?.create ?? defaultAccess,
-    delete: access?.delete ?? defaultAccess,
+    delete: access?.delete ?? authDefault,
     read: access?.read ?? defaultAccess,
-    unlock: access?.unlock ?? defaultAccess,
-    update: access?.update ?? defaultAccess,
+    unlock: access?.unlock ?? authDefault,
+    update: access?.update ?? authDefault,
   } satisfies SanitizedCollectionConfig['access']
 
   collection.admin = {
