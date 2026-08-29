@@ -376,3 +376,6 @@ test/payload.db
 test/evals/eval-results/report.html
 # Versioned eval run snapshots (local only — used for run comparison in dashboard)
 test/evals/eval-results/runs/
+*.tmp
+.nx/
+profile.cov
