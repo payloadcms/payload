@@ -1,0 +1,1 @@
+export function getLocaleCascade(lang: string, def = 'en'): string[] { return lang !== def ? [lang, def] : [def]; }
