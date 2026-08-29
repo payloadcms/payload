@@ -39,6 +39,7 @@ export const CollectionWithAccessControl: CollectionConfig = {
     read: () => {...},
     update: () => {...},
     delete: () => {...},
+    validate: () => {...},
 
     // Auth-enabled Collections only
     admin: () => {...},
@@ -53,12 +54,13 @@ export const CollectionWithAccessControl: CollectionConfig = {
 
 The following options are available:
 
-| Function     | Allows/Denies Access                                                 |
-| ------------ | -------------------------------------------------------------------- |
-| **`create`** | Used in the `create` operation. [More details](#create).             |
-| **`read`**   | Used in the `find` and `findByID` operations. [More details](#read). |
-| **`update`** | Used in the `update` operation. [More details](#update).             |
-| **`delete`** | Used in the `delete` operation. [More details](#delete).             |
+| Function       | Allows/Denies Access                                                                                              |
+| -------------- | ----------------------------------------------------------------------------------------------------------------- |
+| **`create`**   | Used in the `create` operation. [More details](#create).                                                          |
+| **`read`**     | Used in the `find` and `findByID` operations. [More details](#read).                                              |
+| **`update`**   | Used in the `update` operation. [More details](#update).                                                          |
+| **`delete`**   | Used in the `delete` operation. [More details](#delete).                                                          |
+| **`validate`** | Optionally overrides `update` access for [on-demand validation](../validation/overview#access-control-and-hooks). |
 
 If a Collection supports [`Authentication`](../authentication/overview), the following additional options are available:
 

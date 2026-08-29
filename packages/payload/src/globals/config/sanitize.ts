@@ -54,6 +54,10 @@ export const sanitizeGlobal = (
     global.access.update = defaultAccess
   }
 
+  if (!global.access.validate) {
+    global.access.validate = global.access.update
+  }
+
   if (!global.hooks.beforeValidate) {
     global.hooks.beforeValidate = []
   }
@@ -189,7 +193,7 @@ export const sanitizeGlobal = (
     })
   }
 
-  for (const operation of ['read', 'update'] as const) {
+  for (const operation of ['read', 'update', 'validate'] as const) {
     global.access[operation] = withBaseAccess({
       slug: global.slug,
       access: global.access[operation],

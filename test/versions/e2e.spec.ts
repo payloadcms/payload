@@ -283,7 +283,27 @@ describe('Versions', () => {
     })
 
     test('should restore version with correct data', async () => {
-      await page.goto(url.create)
+      // Seed the sibling locales so the later publish click (which now validates every
+      // locale) doesn't get blocked by their otherwise-empty required title field.
+      const seed = await payload.create({
+        collection: draftCollectionSlug,
+        data: { title: 'seed' },
+        draft: true,
+        overrideAccess: true,
+      })
+
+      for (const locale of ['es', 'de', 'fr']) {
+        await payload.update({
+          id: seed.id,
+          collection: draftCollectionSlug,
+          data: { title: 'seed' },
+          draft: true,
+          locale,
+          overrideAccess: true,
+        })
+      }
+
+      await page.goto(url.edit(seed.id))
       await waitForFormReady(page)
       await page.locator('#field-title').fill('v1')
       await page.locator('#field-description').fill('hello')
@@ -303,7 +323,28 @@ describe('Versions', () => {
     })
 
     test('should restore version as draft', async () => {
-      await page.goto(url.create)
+      // Seed the sibling locales so the later publish clicks (which now validate every
+      // locale) don't get blocked by their otherwise-empty required title field.
+      const seed = await payload.create({
+        collection: draftCollectionSlug,
+        data: { title: 'seed' },
+        draft: true,
+        overrideAccess: true,
+      })
+
+      for (const locale of ['es', 'de', 'fr']) {
+        await payload.update({
+          id: seed.id,
+          collection: draftCollectionSlug,
+          data: { title: 'seed' },
+          draft: true,
+          locale,
+          overrideAccess: true,
+        })
+      }
+
+      await page.goto(url.edit(seed.id))
+      await waitForFormReady(page)
       await page.locator('#field-title').fill('v1')
       await saveDocAndAssert(page, '#action-save-draft')
       await page.locator('#field-title').fill('v2')
@@ -600,7 +641,28 @@ describe('Versions', () => {
     })
 
     test('collection - should update updatedAt', async () => {
-      await page.goto(url.create)
+      // Seed the sibling locales so the later publish click (which now validates every
+      // locale) doesn't get blocked by their otherwise-empty required title field.
+      const seed = await payload.create({
+        collection: draftCollectionSlug,
+        data: { title: 'seed' },
+        draft: true,
+        overrideAccess: true,
+      })
+
+      for (const locale of ['es', 'de', 'fr']) {
+        await payload.update({
+          id: seed.id,
+          collection: draftCollectionSlug,
+          data: { title: 'seed' },
+          draft: true,
+          locale,
+          overrideAccess: true,
+        })
+      }
+
+      await page.goto(url.edit(seed.id))
+      await waitForFormReady(page)
 
       // fill out doc in english
       await page.locator('#field-title').fill('title')
@@ -679,7 +741,30 @@ describe('Versions', () => {
       const spanishTitle = 'spanish title'
       const englishTitle = 'english title'
 
-      await page.goto(url.create)
+      // Seed the sibling locales so the later publish clicks (which now validate every
+      // locale) don't get blocked by their otherwise-empty required title field. This adds
+      // 4 extra versions (1 create + 3 locale backfills), accounted for in the
+      // version-count assertion below.
+      const seed = await payload.create({
+        collection: draftCollectionSlug,
+        data: { title: 'seed' },
+        draft: true,
+        overrideAccess: true,
+      })
+
+      for (const locale of ['es', 'de', 'fr']) {
+        await payload.update({
+          id: seed.id,
+          collection: draftCollectionSlug,
+          data: { title: 'seed' },
+          draft: true,
+          locale,
+          overrideAccess: true,
+        })
+      }
+
+      await page.goto(url.edit(seed.id))
+      await waitForFormReady(page)
 
       // fill out doc in english
       await page.locator('#field-title').fill(englishTitle)
@@ -700,7 +785,7 @@ describe('Versions', () => {
             await page.locator('.doc-tab[aria-label="Versions"] .pill-version-count').textContent(),
           { timeout: POLL_TOPASS_TIMEOUT },
         )
-        .toEqual('2')
+        .toEqual('6')
 
       // fill out draft content in spanish
       await page.locator('#field-title').fill(`${spanishTitle}--draft`)
@@ -715,13 +800,56 @@ describe('Versions', () => {
     })
 
     test('collection — autosave should only update the current document', async () => {
-      await page.goto(autosaveURL.create)
+      // Seed the sibling locales so the later publish clicks (which now validate every
+      // locale) don't get blocked by their otherwise-empty required title field. Autosave
+      // collections don't render #action-save-draft (no showSaveDraftButton opt-in), so a
+      // real publish click is unavoidable here.
+      const seedFirst = await payload.create({
+        collection: autosaveCollectionSlug,
+        data: { title: 'seed-first' },
+        draft: true,
+        overrideAccess: true,
+      })
+
+      for (const locale of ['es', 'de', 'fr']) {
+        await payload.update({
+          id: seedFirst.id,
+          collection: autosaveCollectionSlug,
+          data: { title: 'seed-first' },
+          draft: true,
+          locale,
+          overrideAccess: true,
+        })
+      }
+
+      await page.goto(autosaveURL.edit(seedFirst.id))
+      await waitForFormReady(page)
       await expect(page.locator('#field-title')).toBeEnabled()
       await page.locator('#field-title').fill('first post title')
       await expect(page.locator('#field-description')).toBeEnabled()
       await page.locator('#field-description').fill('first post description')
       await saveDocAndAssert(page)
-      await page.goto(autosaveURL.create)
+
+      const seedSecond = await payload.create({
+        collection: autosaveCollectionSlug,
+        data: { title: 'seed-second' },
+        draft: true,
+        overrideAccess: true,
+      })
+
+      for (const locale of ['es', 'de', 'fr']) {
+        await payload.update({
+          id: seedSecond.id,
+          collection: autosaveCollectionSlug,
+          data: { title: 'seed-second' },
+          draft: true,
+          locale,
+          overrideAccess: true,
+        })
+      }
+
+      await page.goto(autosaveURL.edit(seedSecond.id))
+      await waitForFormReady(page)
       await wait(500)
       await expect(page.locator('#field-title')).toBeEnabled()
       await page.locator('#field-title').fill('second post title')
@@ -1522,7 +1650,7 @@ describe('Versions', () => {
       await expect(page.locator('#schedule-publish-button')).toBeHidden()
 
       // save draft then try to schedule publish
-      await saveDocAndAssert(page)
+      await saveDocAndAssert(page, '#action-save-draft')
       await page.locator('#schedule-publish-button').click()
 
       // drawer should open
@@ -1554,7 +1682,7 @@ describe('Versions', () => {
       await expect(page.locator('#schedule-publish-button')).toBeHidden()
 
       // save draft then try to schedule publish
-      await saveDocAndAssert(page)
+      await saveDocAndAssert(page, '#action-save-draft')
       await page.locator('#schedule-publish-button').click()
 
       // drawer should open
@@ -1582,7 +1710,7 @@ describe('Versions', () => {
       await page.locator('#field-title').fill('scheduled publish positioning')
       await page.locator('#field-description').fill('scheduled publish positioning description')
 
-      await saveDocAndAssert(page)
+      await saveDocAndAssert(page, '#action-save-draft')
       await page.locator('#schedule-publish-button').click()
 
       await expect(page.locator('.drawer__header')).toBeVisible()
@@ -1603,7 +1731,30 @@ describe('Versions', () => {
     })
 
     test('can still schedule publish once autosave is triggered', async () => {
-      await page.goto(autosaveURL.create)
+      // Seed the sibling locales so the publish click (which now validates every locale)
+      // doesn't get blocked by their otherwise-empty required title field. Autosave
+      // collections don't render #action-save-draft (no showSaveDraftButton opt-in), so a
+      // real publish click is unavoidable here.
+      const seed = await payload.create({
+        collection: autosaveCollectionSlug,
+        data: { title: 'seed' },
+        draft: true,
+        overrideAccess: true,
+      })
+
+      for (const locale of ['es', 'de', 'fr']) {
+        await payload.update({
+          id: seed.id,
+          collection: autosaveCollectionSlug,
+          data: { title: 'seed' },
+          draft: true,
+          locale,
+          overrideAccess: true,
+        })
+      }
+
+      await page.goto(autosaveURL.edit(seed.id))
+      await waitForFormReady(page)
       await page.locator('#field-title').fill('scheduled publish')
       await page.locator('#field-description').fill('scheduled publish description')
 
@@ -1682,7 +1833,7 @@ describe('Versions', () => {
       await page.locator('#field-title').fill('test past times')
       await page.locator('#field-description').fill('test past times description')
 
-      await saveDocAndAssert(page)
+      await saveDocAndAssert(page, '#action-save-draft')
       await page.locator('#schedule-publish-button').click()
       await expect(page.locator('.drawer__header')).toBeVisible()
 
