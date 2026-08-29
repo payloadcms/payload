@@ -544,13 +544,13 @@ export const traverseFields = ({
                 if (adapter.name === 'postgres') {
                   selectFields[path] = sql
                     .raw(
-                      `(select jsonb_agg(${tableName}.value) from ${tableName} where ${tableName}.parent_id = ${parentTable}.id)`,
+                      `(select coalesce(jsonb_agg(${tableName}.value), '[]'::jsonb) from ${tableName} where ${tableName}.parent_id = ${parentTable}.id)`,
                     )
                     .as(path)
                 } else {
                   selectFields[path] = sql
                     .raw(
-                      `(select json_group_array(${tableName}.value) from ${tableName} where ${tableName}.parent_id = ${parentTable}.id)`,
+                      `(select coalesce(json_group_array(${tableName}.value), '[]') from ${tableName} where ${tableName}.parent_id = ${parentTable}.id)`,
                     )
                     .as(path)
                 }
