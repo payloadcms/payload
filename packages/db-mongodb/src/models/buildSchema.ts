@@ -40,10 +40,44 @@ import {
   tabHasName,
 } from 'payload/shared'
 
+/**
+ * The Mongoose schema types that back each {@link MongooseIDType}.
+ */
+export type MongooseSchemaIDType =
+  | typeof mongoose.Schema.Types.BigInt
+  | typeof mongoose.Schema.Types.ObjectId
+  | typeof mongoose.Schema.Types.UUID
+  | typeof Number
+  | typeof String
+
+/**
+ * String values for the `idType` option, so consumers don't need to import `mongoose`.
+ */
+export type MongooseIDType = 'bigint' | 'number' | 'objectId' | 'text' | 'uuid'
+
+const idTypeSchemaMap: Record<MongooseIDType, MongooseSchemaIDType> = {
+  bigint: mongoose.Schema.Types.BigInt,
+  number: Number,
+  objectId: mongoose.Schema.Types.ObjectId,
+  text: String,
+  uuid: mongoose.Schema.Types.UUID,
+}
+
+/**
+ * Resolves an `idType` string (e.g. `'uuid'`) to its Mongoose schema type.
+ * Returns `undefined` for an unknown/empty value.
+ */
+export const resolveMongooseIDType = (
+  idType: MongooseIDType | undefined,
+): MongooseSchemaIDType | undefined => {
+  return idType ? idTypeSchemaMap[idType] : undefined
+}
+
 export type BuildSchemaOptions = {
   allowIDField?: boolean
   disableUnique?: boolean
   draftsEnabled?: boolean
+  idType?: MongooseIDType
   indexSortableFields?: boolean
   options?: SchemaOptions
 }
@@ -64,6 +98,20 @@ const formatDefaultValue = (field: FieldAffectingData) =>
   typeof field.defaultValue !== 'undefined' && typeof field.defaultValue !== 'function'
     ? field.defaultValue
     : undefined
+
+const getIdFieldSchema = (idType: MongooseSchemaIDType): SchemaTypeOptions<unknown> => {
+  const baseSchema: SchemaTypeOptions<unknown> = {
+    type: idType,
+    required: true,
+  }
+
+  // UUID types need a default generator
+  if (idType === mongoose.Schema.Types.UUID) {
+    baseSchema.default = () => new mongoose.Types.UUID()
+  }
+
+  return baseSchema
+}
 
 const formatBaseSchema = ({
   buildSchemaOptions,
@@ -153,17 +201,27 @@ export const buildSchema = (args: {
     const fieldsToSearch = flattenedFields || schemaFields
     const idField = fieldsToSearch.find((field) => fieldAffectsData(field) && field.name === 'id')
     if (idField) {
+      // A user-defined custom `id` field always maps to its declared type. The
+      // adapter-wide `idType` only applies to auto-generated ids (see the `else if` below).
+      const idType =
+        idField.type === 'number'
+          ? payload.db.useBigIntForNumberIDs
+            ? mongoose.Schema.Types.BigInt
+            : Number
+          : String
       fields = {
-        _id:
-          idField.type === 'number'
-            ? payload.db.useBigIntForNumberIDs
-              ? mongoose.Schema.Types.BigInt
-              : Number
-            : String,
+        _id: getIdFieldSchema(idType),
       }
       schemaFields = schemaFields.filter(
         (field) => !(fieldAffectsData(field) && field.name === 'id'),
       )
+    } else {
+      const resolvedIDType = resolveMongooseIDType(buildSchemaOptions.idType)
+      if (resolvedIDType) {
+        fields = {
+          _id: getIdFieldSchema(resolvedIDType),
+        }
+      }
     }
   }
 
@@ -931,11 +989,15 @@ const fieldToSchemaMap = {
 }
 
 const getRelationshipValueType = (field: RelationshipField | UploadField, payload: Payload) => {
+  // Adapter-wide custom ID type (e.g. `idType: 'uuid'`) applies to
+  // every collection's `_id` that doesn't define its own custom `id` field.
+  const adapterIDType = resolveMongooseIDType(payload.db.idType)
+
   if (typeof field.relationTo === 'string') {
     const customIDType = payload.collections[field.relationTo]?.customIDType
 
     if (!customIDType) {
-      return mongoose.Schema.Types.ObjectId
+      return adapterIDType ?? mongoose.Schema.Types.ObjectId
     }
 
     if (customIDType === 'number') {
@@ -958,5 +1020,5 @@ const getRelationshipValueType = (field: RelationshipField | UploadField, payloa
     return mongoose.Schema.Types.Mixed
   }
 
-  return mongoose.Schema.Types.ObjectId
+  return adapterIDType ?? mongoose.Schema.Types.ObjectId
 }

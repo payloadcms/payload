@@ -68,6 +68,16 @@ export const dbAdapters = {
     ${mongoUrlBlock(MONGO)}
   })`,
   },
+  'mongodb-uuid': {
+    ...MONGO,
+    source: `
+  import { mongooseAdapter } from '@payloadcms/db-mongodb'
+
+  export const databaseAdapter = mongooseAdapter({
+    idType: 'uuid',
+    ${mongoUrlBlock(MONGO)}
+  })`,
+  },
   // mongodb-atlas uses Docker-based MongoDB Atlas Local (all-in-one with search)
   // Start with: pnpm docker:start (or --profile mongodb-atlas for just this service)
   // Runs on port 27019 to avoid conflicts with mongodb

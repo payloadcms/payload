@@ -23,6 +23,7 @@ import type {
 import mongoose from 'mongoose'
 import { createDatabaseAdapter, defaultBeginTransaction, findMigrationDir } from 'payload'
 
+import type { MongooseIDType } from './models/buildSchema.js'
 import type {
   CollectionModel,
   GlobalModel,
@@ -140,6 +141,11 @@ export interface Args {
    * NOTE: not recommended for production. This can slow down the initialization of Payload.
    */
   ensureIndexes?: boolean
+  /**
+   * The ID type used for the auto-generated `_id` of collections that don't define a custom `id` field.
+   * One of `'objectId'`, `'uuid'`, `'text'`, `'number'`, or `'bigint'`. Defaults to `'objectId'` (MongoDB's native `ObjectId`).
+   */
+  idType?: MongooseIDType
   migrationDir?: string
   /**
    * typed as any to avoid dependency
@@ -256,6 +262,7 @@ export function mongooseAdapter({
   disableFallbackSort = false,
   disableIndexHints = false,
   ensureIndexes = false,
+  idType,
   migrationDir: migrationDirArg,
   mongoMemoryServer,
   prodMigrations,
@@ -322,6 +329,7 @@ export function mongooseAdapter({
       findGlobalVersions,
       findOne,
       findVersions,
+      idType,
       init,
       migrateFresh,
       migrationDir,
