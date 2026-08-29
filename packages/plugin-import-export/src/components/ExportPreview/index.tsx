@@ -36,8 +36,18 @@ export const ExportPreview: React.FC = () => {
     config: { routes },
   } = useConfig()
   const { collectionSlug } = useDocumentInfo()
-  const { draft, fields, format, limit, locale, sort, where } = useFormFields(([fields]) => {
+  const {
+    collectionSlug: formCollectionSlug,
+    draft,
+    fields,
+    format,
+    limit,
+    locale,
+    sort,
+    where,
+  } = useFormFields(([fields]) => {
     return {
+      collectionSlug: fields['collectionSlug']?.value,
       draft: fields['drafts']?.value,
       fields: fields['fields']?.value,
       format: fields['format']?.value,
@@ -65,12 +75,22 @@ export const ExportPreview: React.FC = () => {
   >>(null)
 
   // Track previous export config to reset preview page when it changes
-  const prevExportConfigRef = useRef({ draft, fields, format, limit, locale, sort, where })
+  const prevExportConfigRef = useRef({
+    draft,
+    fields,
+    format,
+    formCollectionSlug,
+    limit,
+    locale,
+    sort,
+    where,
+  })
 
   // Reset preview page when export config changes
   useEffect(() => {
     const prevConfig = prevExportConfigRef.current
     const configChanged =
+      prevConfig.formCollectionSlug !== formCollectionSlug ||
       prevConfig.draft !== draft ||
       prevConfig.limit !== limit ||
       prevConfig.locale !== locale ||
@@ -80,11 +100,21 @@ export const ExportPreview: React.FC = () => {
 
     if (configChanged) {
       setPreviewPage(1)
-      prevExportConfigRef.current = { draft, fields, format, limit, locale, sort, where }
+      prevExportConfigRef.current = {
+        draft,
+        fields,
+        format,
+        formCollectionSlug,
+        limit,
+        locale,
+        sort,
+        where,
+      }
     }
-  }, [draft, fields, format, limit, locale, sort, where])
+  }, [formCollectionSlug, draft, fields, format, limit, locale, sort, where])
 
-  const targetCollectionSlug = typeof collection === 'string' && collection
+  const targetCollectionSlug =
+    typeof formCollectionSlug === 'string' && formCollectionSlug ? formCollectionSlug : collection
 
   const isCSV = format === 'csv'
 
@@ -193,6 +223,7 @@ export const ExportPreview: React.FC = () => {
       }
     },
     [
+      formCollectionSlug,
       collectionSlug,
       draft,
       fields,
