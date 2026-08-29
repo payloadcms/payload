@@ -1,0 +1,1 @@
+export function generateAuditDiff(prev: any, next: any): Record<string, { from: any; to: any }> { const diff: Record<string, { from: any; to: any }> = {}; const keys = new Set([...Object.keys(prev || {}), ...Object.keys(next || {})]); for (const k of keys) { if (JSON.stringify(prev?.[k]) !== JSON.stringify(next?.[k])) diff[k] = { from: prev?.[k], to: next?.[k] }; } return diff; }
