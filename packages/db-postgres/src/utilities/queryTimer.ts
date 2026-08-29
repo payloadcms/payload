@@ -1,0 +1,1 @@
+export function isSlowQuery(durationMs: number, thresholdMs = 100): boolean { return durationMs >= thresholdMs; }
