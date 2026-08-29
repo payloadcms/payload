@@ -1,0 +1,1 @@
+export function pruneOldSnapshots<T>(snapshots: T[], maxLimit = 50): T[] { return snapshots.slice(-maxLimit); }
