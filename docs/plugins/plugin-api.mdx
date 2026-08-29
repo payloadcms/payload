@@ -74,6 +74,16 @@ The result of `definePlugin` is a factory function — call it with your options
 plugins: [seoPlugin({ collections: ['pages', 'posts'] })]
 ```
 
+<Banner type="warning">
+  The `config` passed to `definePlugin` is the value produced by earlier
+  plugins, not the final runtime config. Execution order controls when a plugin
+  transforms that value, but later plugins can still replace config, collection,
+  or global objects. Hooks and other delayed callbacks should resolve final
+  state from their runtime arguments instead of closing over plugin-time config
+  objects. In hooks, use the runtime `collection` or `global` argument, or read
+  `req.payload.config`.
+</Banner>
+
 ## Execution ordering with `order`
 
 By default, plugins execute in the order they appear in the `plugins` array. Setting `order` lets you declare execution order explicitly, regardless of array position.

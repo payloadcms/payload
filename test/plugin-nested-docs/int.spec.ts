@@ -204,6 +204,28 @@ describe('@payloadcms/plugin-nested-docs', () => {
       createdPageIDs.length = 0
     })
 
+    it('should resave incomplete drafts when a later plugin enables drafts', async () => {
+      const draftPage = await payload.create({
+        collection: 'pages',
+        data: {
+          slug: 'later-plugin-draft',
+          _status: 'draft',
+          title: '',
+        },
+        draft: true,
+      })
+      createdPageIDs.push(draftPage.id)
+
+      const savedDraft = await payload.findByID({
+        id: draftPage.id,
+        collection: 'pages',
+        draft: true,
+      })
+
+      expect(savedDraft._status).toBe('draft')
+      expect(savedDraft.breadcrumbs?.at(-1)?.doc).toBe(draftPage.id)
+    })
+
     it('should preserve published version of child when parent is saved and child has unpublished draft', async () => {
       // Step 1: Create parent page and publish it
       const parentDoc = await payload.create({
