@@ -1,0 +1,1 @@
+export function getLifecycleStatus(isDraft: boolean): '_draft' | '_published' { return isDraft ? '_draft' : '_published'; }
