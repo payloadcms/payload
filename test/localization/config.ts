@@ -33,6 +33,7 @@ import {
   localizedDateFieldsSlug,
   localizedPostsSlug,
   localizedSortSlug,
+  localizedStatusSharedGlobalSlug,
   portugueseLocale,
   relationEnglishTitle,
   relationEnglishTitle2,
@@ -458,6 +459,25 @@ export default buildConfigWithDefaults({
         },
       ],
       slug: 'global-text',
+    },
+    {
+      fields: [
+        {
+          name: 'localizedText',
+          localized: true,
+          type: 'text',
+        },
+        {
+          name: 'sharedText',
+          type: 'text',
+        },
+      ],
+      slug: localizedStatusSharedGlobalSlug,
+      versions: {
+        drafts: {
+          localizeStatus: true,
+        },
+      },
     },
     {
       fields: [
