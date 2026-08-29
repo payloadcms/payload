@@ -2,6 +2,7 @@
 import React, { useState } from 'react'
 
 import { SidebarIcon } from '../../icons/Sidebar/index.js'
+import { useTranslation } from '../../providers/Translation/index.js'
 import { Tooltip } from '../Tooltip/index.js'
 import './index.css'
 
@@ -11,9 +12,9 @@ export const SidebarToggle: React.FC<{
   readonly isActive?: boolean
 }> = ({ isActive = false }) => {
   const [showTooltip, setShowTooltip] = useState(false)
+  const { t } = useTranslation()
 
-  // TODO: translations
-  const label = isActive ? 'Hide Sidebar' : 'Show Sidebar'
+  const label = isActive ? t('general:hideSidebar') : t('general:showSidebar')
 
   return (
     <div
