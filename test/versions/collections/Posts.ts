@@ -16,6 +16,14 @@ const Posts: CollectionConfig = {
       relationTo: autosaveCollectionSlug,
     },
     {
+      name: 'relationToAutosavesWithDrawer',
+      type: 'relationship',
+      admin: {
+        appearance: 'drawer',
+      },
+      relationTo: autosaveCollectionSlug,
+    },
+    {
       name: 'relationToVersions',
       type: 'relationship',
       relationTo: versionCollectionSlug,
