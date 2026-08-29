@@ -246,7 +246,7 @@ export const traverseFields = ({
           depth,
           draftsEnabled,
           fields: field.flattenedFields,
-          forceWithFields,
+          forceWithFields: forceWithFields || arraySelect === true,
           joinQuery,
           locale,
           parentIsLocalized: parentIsLocalized || field.localized,
