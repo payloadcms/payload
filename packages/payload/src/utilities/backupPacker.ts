@@ -1,0 +1,1 @@
+export function packBackupManifest(coll: string, docs: any[]) { return { collection: coll, exportedAt: new Date().toISOString(), total: docs.length, data: docs }; }
