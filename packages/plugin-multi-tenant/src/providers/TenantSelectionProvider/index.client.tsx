@@ -120,6 +120,7 @@ export const TenantSelectionProviderClient = ({
   const router = useRouter()
   const userID = React.useMemo(() => user?.id, [user?.id])
   const prevUserID = React.useRef(userID)
+  const retriedBlindPass = React.useRef(false)
   const userChanged = userID !== prevUserID.current
   const [tenantOptions, setTenantOptions] = React.useState<OptionObject[]>(
     () => initialTenantOptions,
@@ -294,10 +295,21 @@ export const TenantSelectionProviderClient = ({
    * refresh that clears it. The cookie is cleared either way via `setTenant`.
    */
   React.useEffect(() => {
-    if (!initialValue) {
-      setTenant({ id: undefined, refresh: Boolean(getTenantCookie()) })
+    if (initialValue && !selectedTenantID) {
+      setSelectedTenantID(initialValue)
     }
-  }, [initialValue, setTenant])
+  }, [initialValue, selectedTenantID])
+
+  React.useEffect(() => {
+    if (!initialValue) {
+      if (initialTenantOptions.length > 0) {
+        setTenant({ id: undefined, refresh: Boolean(getTenantCookie()) })
+      } else if (!retriedBlindPass.current) {
+        retriedBlindPass.current = true
+        router.refresh()
+      }
+    }
+  }, [initialValue, initialTenantOptions.length, setTenant, router])
 
   /**
    * If there is no selected tenant ID and the entity type is 'global', set the first tenant as selected.
