@@ -1,0 +1,1 @@
+export function renderTemplate(html: string, vars: Record<string, string>): string { return html.replace(/{{(\w+)}}/g, (_, k) => vars[k] || ''); }
