@@ -52,6 +52,24 @@ export default buildConfigWithDefaults({
       // Explicitly disabled — migration should skip collections without versions
       versions: false,
     },
+    // Joined draft collection sorted by a localized field (`_status`) — repros #15248.
+    {
+      slug: 'joinOrgs',
+      fields: [
+        { name: 'title', type: 'text', localized: true },
+        { name: 'repos', type: 'join', collection: 'joinRepos', on: 'org' },
+      ],
+      versions: { drafts: true },
+    },
+    {
+      slug: 'joinRepos',
+      defaultSort: ['_status', '-updatedAt'],
+      fields: [
+        { name: 'org', type: 'relationship', relationTo: 'joinOrgs' },
+        { name: 'title', type: 'text', localized: true },
+      ],
+      versions: { drafts: true },
+    },
   ],
   localization: {
     defaultLocale: 'en',
