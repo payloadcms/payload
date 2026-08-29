@@ -13,6 +13,10 @@ const operatorMap: Record<string, string> = {
   not_equals: '!=',
   not_in: 'in',
   not_like: '!like_regex',
+  less_than: '<',
+  less_than_equal: '<=',
+  greater_than: '>',
+  greater_than_equal: '>=',
 }
 
 const sanitizeValue = (value: unknown, operator?: string): string => {
