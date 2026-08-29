@@ -1,0 +1,1 @@
+export function isAllowedMime(mime: string, allowed: string[]): boolean { return allowed.includes(mime) || allowed.includes('*/*'); }
