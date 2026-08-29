@@ -1,0 +1,1 @@
+export function sanitizeEmailHtml(html: string): string { return html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, ''); }
