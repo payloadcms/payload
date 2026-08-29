@@ -36,6 +36,7 @@ jobs:
       - uses: dorny/paths-filter@fbd0ab8f3e69293af611ebaee6363fc25e6d187d # v4.0.1
         id: filter
         with:
+          base: ${{ github.ref }}
           filters: |
             needs_build:
               - '.github/workflows/main.yml'
@@ -651,8 +652,12 @@ jobs:
     runs-on: ubuntu-24.04
     needs:
       [
+        changes,
         lint,
         build,
+        int-matrix,
+        e2e-matrix,
+        e2e-prep,
         build-and-test-templates,
         tests-unit,
         tests-int,
