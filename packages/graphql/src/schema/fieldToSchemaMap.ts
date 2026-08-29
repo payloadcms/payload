@@ -205,13 +205,22 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
           parentName: interfaceName,
         })
 
+        // Register the type BEFORE forcing field resolution below: `getFields()`
+        // eagerly resolves nested fields, so a block that nests itself (recursive,
+        // depth-limited block structures sharing one slug/interfaceName) would
+        // otherwise re-enter this handler while the registry is still empty and
+        // construct a duplicate GraphQLObjectType with the same name, producing an
+        // invalid schema ("Schema must contain uniquely named types").
+        graphqlResult.types.blockTypes[block.slug] = objectType
+
         if (Object.keys(objectType.getFields()).length) {
           // Store block slug in extensions for use in select building
           objectType.extensions = {
             ...objectType.extensions,
             blockSlug: block.slug,
           }
-          graphqlResult.types.blockTypes[block.slug] = objectType
+        } else {
+          delete graphqlResult.types.blockTypes[block.slug]
         }
       }
 

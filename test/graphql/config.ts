@@ -5,6 +5,7 @@ import path from 'path'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { ContentBlock } from './blocks/ContentBlock.js'
+import { buildRecursiveBlock } from './blocks/RecursiveBlock.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -36,6 +37,14 @@ export default buildConfigWithDefaults({
           name: 'contentBlockField',
           type: 'blocks',
           blocks: [ContentBlock],
+        },
+        {
+          // Recursive, depth-limited block structure: every level is a distinct
+          // config object sharing the same slug + interfaceName. Must build a
+          // single (self-referential) GraphQL type, not one duplicate per level.
+          name: 'recursiveBlockField',
+          type: 'blocks',
+          blocks: [buildRecursiveBlock(3)],
         },
       ],
       versions: false,
