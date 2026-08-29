@@ -460,15 +460,31 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
         const { promises, rowMetadata } = blocksValue.reduce(
           (acc, row, i: number) => {
-            const blockTypeToMatch: string = row.blockType
+            const blockTypeToMatch: string | undefined = row?.blockType
 
             const block =
-              req.payload.blocks[blockTypeToMatch] ??
-              (field.blocks.find(
-                (blockType) => typeof blockType !== 'string' && blockType.slug === blockTypeToMatch,
-              ) as FlattenedBlock | undefined)
+              blockTypeToMatch == null
+                ? undefined
+                : (req.payload.blocks[blockTypeToMatch] ??
+                  (field.blocks.find(
+                    (blockType) =>
+                      typeof blockType !== 'string' && blockType.slug === blockTypeToMatch,
+                  ) as FlattenedBlock | undefined))
 
             if (!block) {
+              if (blockTypeToMatch == null) {
+                // A block row with no `blockType` - e.g. an `undefined` entry rehydrated
+                // from a gap in the persisted `_order` sequence. Throwing here fails
+                // form-state for the entire document and locks editors out of it, so skip
+                // the malformed row with a warning and keep the rest of the form usable
+                // (see #17508). A genuine unknown-but-named block type still throws below.
+                req.payload.logger.warn(
+                  `Skipping malformed block row at "${schemaPath}.${i}": it has no "blockType". ` +
+                    `This usually indicates corrupt block data such as a gap in the persisted "_order" sequence.`,
+                )
+                return acc
+              }
+
               throw new Error(
                 `Block with type "${row.blockType}" was found in block data, but no block with that type is defined in the config for field with schema path ${schemaPath}.`,
               )
