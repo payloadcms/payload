@@ -1,0 +1,1 @@
+export function countLexicalChars(node: any): number { if (!node) return 0; if (node.text) return node.text.length; if (Array.isArray(node.children)) return node.children.reduce((acc: number, c: any) => acc + countLexicalChars(c), 0); return 0; }
