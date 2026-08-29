@@ -2,7 +2,7 @@ import type { PayloadRequest, User } from 'payload'
 
 import { APIError } from 'payload'
 
-import type { ImportResult } from '../types.js'
+import type { ImportDoc, ImportResult } from '../types.js'
 
 import { applyFieldHooks } from '../utilities/applyFieldHooks.js'
 import { getImportFieldFunctions } from '../utilities/getImportFieldFunctions.js'
@@ -49,6 +49,11 @@ export type Import = {
 
 export type CreateImportArgs = {
   defaultVersionStatus?: 'draft' | 'published'
+  /**
+   * The import document that triggered this run, passed through to the collection-level
+   * import hooks. Both callers already hold it, so it is read once and never re-fetched.
+   */
+  importDoc: ImportDoc
   req: PayloadRequest
 } & Import
 
@@ -59,6 +64,7 @@ export const createImport = async ({
   defaultVersionStatus = 'published',
   file,
   format,
+  importDoc,
   importMode = 'create',
   matchField = 'id',
   maxLimit,
@@ -229,6 +235,7 @@ export const createImport = async ({
     docs: documents,
     format,
     hooks: importHooks,
+    importDoc,
     importMode,
     matchField,
     originalDocs,

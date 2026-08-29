@@ -7,6 +7,8 @@ import type {
 
 import type { postsWithHooksSlug } from './shared.js'
 
+import { batchRefFieldName } from './shared.js'
+
 // Recorded invocations — reset between tests via resetHookSpies()
 export const hookCalls = {
   exportAfter: [] as Parameters<ExportAfterHook>[0][],
@@ -24,10 +26,16 @@ export const resetHookSpies = () => {
 
 export const exportBeforeHook: ExportBeforeHook<typeof postsWithHooksSlug> = (args) => {
   hookCalls.exportBefore.push(args)
-  // Mask the `secret` field from exported data
+
+  const batchRef = args.exportDoc[batchRefFieldName]
+
   return args.data.map((row) => {
+    // Mask the `secret` field from exported data
     const { secret: _secret, ...rest } = row as Record<string, unknown>
-    return rest
+
+    // Stamp the editor's reference onto every row, but only when the form supplied one, so
+    // that the tests which do not set it still see unchanged output.
+    return batchRef ? { ...rest, [batchRefFieldName]: batchRef } : rest
   })
 }
 
@@ -37,11 +45,21 @@ export const exportAfterHook: ExportAfterHook = (args) => {
 
 export const importBeforeHook: ImportBeforeHook<typeof postsWithHooksSlug> = (args) => {
   hookCalls.importBefore.push(args)
-  // Append '_imported' suffix to each title for verification
-  return args.data.map((doc) => ({
-    ...doc,
-    title: typeof doc.title === 'string' ? `${doc.title}_imported` : doc.title,
-  }))
+
+  const batchRef = args.importDoc[batchRefFieldName]
+
+  // Append '_imported' to each title for verification, and the editor's reference on top of
+  // that when the form supplied one, so tests can prove an importDoc value reaches the
+  // documents that get created.
+  return args.data.map((doc) => {
+    if (typeof doc.title !== 'string') {
+      return doc
+    }
+
+    const suffix = batchRef ? `_imported_${String(batchRef)}` : '_imported'
+
+    return { ...doc, title: `${doc.title}${suffix}` }
+  })
 }
 
 export const importAfterHook: ImportAfterHook = (args) => {
