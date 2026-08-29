@@ -1,0 +1,1 @@
+export function enforceTenantId(doc: any, expectedTenant: string): boolean { return doc?.tenant === expectedTenant; }
