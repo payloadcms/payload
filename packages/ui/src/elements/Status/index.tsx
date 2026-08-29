@@ -34,6 +34,7 @@ export const Status: React.FC = () => {
 
   const {
     config: {
+      localization,
       routes: { api },
     },
   } = useConfig()
@@ -68,7 +69,7 @@ export const Status: React.FC = () => {
     if (collectionSlug) {
       url = formatAdminURL({
         apiRoute: api,
-        path: `/${collectionSlug}/${id}?locale=${locale}&fallback-locale=null&depth=0`,
+        path: `/${collectionSlug}/${id}?locale=${locale}${localization ? '&fallback-locale=null' : ''}&depth=0`,
       })
       method = 'patch'
     }
@@ -76,7 +77,7 @@ export const Status: React.FC = () => {
     if (globalSlug) {
       url = formatAdminURL({
         apiRoute: api,
-        path: `/globals/${globalSlug}?locale=${locale}&fallback-locale=null&depth=0`,
+        path: `/globals/${globalSlug}?locale=${locale}${localization ? '&fallback-locale=null' : ''}&depth=0`,
       })
       method = 'post'
     }
