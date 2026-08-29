@@ -121,6 +121,18 @@ export default buildConfigWithDefaults({
           type: 'checkbox',
         },
         {
+          name: 'localizedHookLocale',
+          type: 'text',
+          localized: true,
+          hooks: {
+            // Echoes the locale received by the hook so tests can assert that
+            // beforeDuplicate runs each locale with the matching locale arg.
+            beforeDuplicate: [
+              ({ locale, value }) => (value == null ? value : `${value}-${locale}`),
+            ],
+          },
+        },
+        {
           name: 'children',
           hasMany: true,
           relationTo: localizedPostsSlug,

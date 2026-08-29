@@ -332,6 +332,7 @@ export interface LocalizedPost {
   description?: string | null;
   localizedDescription?: string | null;
   localizedCheckbox?: boolean | null;
+  localizedHookLocale?: string | null;
   children?: (string | LocalizedPost)[] | null;
   group?: {
     children?: string | null;
@@ -1404,6 +1405,7 @@ export interface LocalizedPostsSelect<T extends boolean = true> {
   description?: T;
   localizedDescription?: T;
   localizedCheckbox?: T;
+  localizedHookLocale?: T;
   children?: T;
   group?:
     | T
