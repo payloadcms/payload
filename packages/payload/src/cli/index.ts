@@ -6,6 +6,7 @@ import type { CLIRuntime } from '../config/types.js'
 
 import { createCLIHelp } from './program/createHelp.js'
 import { loadCLICommands, validateCLICommandNames } from './program/loadCommands.js'
+import { normalizeHelpArguments } from './program/normalizeHelpArguments.js'
 import { registerCLICommand } from './program/registerCommand.js'
 import { createCLIRuntime } from './runtime/createRuntime.js'
 import { loadEnv } from './runtime/loadEnv.js'
@@ -38,7 +39,7 @@ export const bin = withErrorHandling(async (): Promise<void> => {
   // /////////////////////////////////////
   // Run the CLI with the provided arguments
   // /////////////////////////////////////
-  await cli.parseAsync(process.argv).finally(async () => {
+  await cli.parseAsync(normalizeHelpArguments({ args: process.argv, cli })).finally(async () => {
     // Cleanup runtime
     if (!runtime.isScheduled) {
       await runtime.destroy()

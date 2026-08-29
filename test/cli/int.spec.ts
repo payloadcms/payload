@@ -238,6 +238,13 @@ test.describe('CLI', () => {
     expect(`${output.stdout}\n${output.stderr}`).toContain('Usage: payload info')
   })
 
+  test('info --help --json', async ({ cli }) => {
+    const helpOptionOutput = await cli('info --help --json')
+    const helpCommandOutput = await cli('help info --json')
+
+    expect(JSON.parse(helpOptionOutput.stdout)).toEqual(JSON.parse(helpCommandOutput.stdout))
+  })
+
   test(
     'jobs:handle-schedules --all-queues',
     testCLICommand(async (command, { cli, payload }) => {
