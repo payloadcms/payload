@@ -23,6 +23,6 @@ export const defaultJSXConverters: JSXConverters<DefaultNodeTypes> = {
   ...HorizontalRuleJSXConverter,
   ...ListJSXConverter,
   ...LinkJSXConverter({}),
-  ...UploadJSXConverter,
+  ...UploadJSXConverter(),
   ...TabJSXConverter,
 }
