@@ -1,0 +1,1 @@
+export function isSafeSvg(content: string): boolean { return !/onload|onerror|onclick|<script/i.test(content); }
