@@ -1,0 +1,1 @@
+export function chunkUpdates<T>(items: T[], chunkSize = 500): T[][] { const out: T[][] = []; for (let i = 0; i < items.length; i += chunkSize) out.push(items.slice(i, i + chunkSize)); return out; }
