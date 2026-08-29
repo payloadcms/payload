@@ -1,0 +1,1 @@
+export function addSoftDeleteFilter(where: any = {}): any { return { ...where, _deleted: { not_equals: true } }; }
