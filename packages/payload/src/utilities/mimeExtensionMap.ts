@@ -1,0 +1,1 @@
+export function getExtForMime(mime: string): string { const map: Record<string, string> = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'application/pdf': 'pdf' }; return map[mime] || 'bin'; }
