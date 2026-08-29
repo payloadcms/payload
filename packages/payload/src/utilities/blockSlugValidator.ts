@@ -1,0 +1,1 @@
+export function areBlockSlugsUnique(blocks: Array<{ slug: string }>): boolean { const slugs = blocks.map(b => b.slug); return new Set(slugs).size === slugs.length; }
