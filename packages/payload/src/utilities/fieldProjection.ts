@@ -1,0 +1,1 @@
+export function buildProjection(fields: string[]): Record<string, 1> { return fields.reduce((acc, f) => ({ ...acc, [f]: 1 }), {}); }
