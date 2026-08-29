@@ -476,6 +476,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     selectAllRows: 'Atlasīt visas rindas',
     selectedCount: 'Atlasīti {{count}} {{label}}',
     selectLabel: 'Atlasīt {{label}}',
+    selectRow: undefined,
     selectValue: 'Atlasīt vērtību',
     settings: 'Iestatījumi',
     showAllLabel: 'Rādīt visus {{label}}',
