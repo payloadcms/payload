@@ -1,0 +1,1 @@
+export function isLockedOut(attempts: number, lastAttemptTime: number, maxAttempts = 5, lockDurationMs = 900000): boolean { return attempts >= maxAttempts && (Date.now() - lastAttemptTime < lockDurationMs); }
