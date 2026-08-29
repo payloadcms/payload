@@ -217,7 +217,14 @@ export async function createLocal<
 
   const req = await createLocalReq(options as CreateLocalReqOptions, payload)
 
-  req.file = file ?? (await getFileByPath(filePath!))
+  // Only set req.file when the caller explicitly supplied a file or filePath.
+  // If neither is provided and a req was passed in from a hook, the existing
+  // req.file must be preserved — unconditionally assigning undefined here
+  // would clobber it and break any subsequent hooks or storage adapters that
+  // depend on req.file (e.g. the Azure storage adapter silently failing).
+  if (file !== undefined || filePath !== undefined) {
+    req.file = file ?? (await getFileByPath(filePath!))
+  }
 
   return createOperation<TSlug, TSelect>({
     collection,

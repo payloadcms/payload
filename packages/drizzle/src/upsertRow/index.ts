@@ -149,6 +149,14 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
             }
           }
         }
+        // Include computed extras so that fields like `point` (which use
+        // ST_AsGeoJSON expressions stored in findManyArgs.extras) are returned
+        // by the UPDATE ... RETURNING clause instead of being silently dropped.
+        if (findManyArgs.extras) {
+          for (const [name, extra] of Object.entries(findManyArgs.extras)) {
+            selectedFields[name] = extra
+          }
+        }
 
         const docs = await drizzle
           .update(adapter.tables[tableName])

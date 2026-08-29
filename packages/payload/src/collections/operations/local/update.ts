@@ -250,7 +250,12 @@ async function updateLocal<
   }
 
   const req = await createLocalReq(options as CreateLocalReqOptions, payload)
-  req.file = file ?? (await getFileByPath(filePath!))
+
+  // Only set req.file when the caller explicitly supplied a file or filePath.
+  // Unconditionally assigning undefined clobbers req.file passed in from a hook.
+  if (file !== undefined || filePath !== undefined) {
+    req.file = file ?? (await getFileByPath(filePath!))
+  }
 
   const args = {
     id,
