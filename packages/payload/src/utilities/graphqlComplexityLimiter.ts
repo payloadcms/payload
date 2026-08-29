@@ -1,0 +1,1 @@
+export function isComplexityAcceptable(score: number, maxScore = 1000): boolean { return score <= maxScore; }
