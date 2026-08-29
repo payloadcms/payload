@@ -1,0 +1,1 @@
+export function calcQueryDepth(ast: any): number { if (!ast || !ast.selectionSet) return 1; let max = 0; for (const s of ast.selectionSet.selections) { max = Math.max(max, calcQueryDepth(s)); } return max + 1; }
