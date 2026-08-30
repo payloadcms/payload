@@ -3,6 +3,7 @@ import type { TypeWithVersion } from '../../versions/types.js'
 import type { SanitizedGlobalConfig } from '../config/types.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
+import { APIError } from '../../errors/APIError.js'
 import { NotFound } from '../../errors/index.js'
 import { afterChange } from '../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
@@ -27,6 +28,13 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
   const { id, depth, draft, globalConfig, overrideAccess, populate, showHiddenFields } = args
   const req = args.req!
   const { fallbackLocale, locale, payload } = req
+
+  if (!globalConfig.versions) {
+    throw new APIError(
+      `Versions are not enabled for the global "${globalConfig.slug}".`,
+      400,
+    )
+  }
 
   try {
     const shouldCommit = await initTransaction(req)

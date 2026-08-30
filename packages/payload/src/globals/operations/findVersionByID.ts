@@ -6,6 +6,7 @@ import type { SanitizedGlobalConfig } from '../config/types.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
+import { APIError } from '../../errors/APIError.js'
 import { Forbidden, NotFound } from '../../errors/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { deepCopyObjectSimple } from '../../utilities/deepCopyObject.js'
@@ -41,6 +42,13 @@ export const findVersionByIDOperation = async <T extends TypeWithVersion<T> = an
     select: incomingSelect,
     showHiddenFields,
   } = args
+
+  if (!globalConfig.versions) {
+    throw new APIError(
+      `Versions are not enabled for the global "${globalConfig.slug}".`,
+      400,
+    )
+  }
 
   // /////////////////////////////////////
   // Access

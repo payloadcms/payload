@@ -4,6 +4,7 @@ import type { PayloadRequest, PopulateType, SelectType, Sort, Where } from '../.
 import type { TypeWithVersion } from '../../versions/types.js'
 import type { SanitizedGlobalConfig } from '../config/types.js'
 
+import { APIError } from '../../errors/APIError.js'
 import { executeAccess } from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
@@ -46,6 +47,13 @@ export const findVersionsOperation = async <T extends TypeWithVersion<T>>(
   } = args
   const req = args.req!
   const { fallbackLocale, locale, payload } = req
+
+  if (!globalConfig.versions) {
+    throw new APIError(
+      `Versions are not enabled for the global "${globalConfig.slug}".`,
+      400,
+    )
+  }
 
   const versionFields = buildVersionGlobalFields(payload.config, globalConfig, true)
 
