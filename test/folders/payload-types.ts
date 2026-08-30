@@ -150,6 +150,7 @@ export interface Post {
   title?: string | null;
   heroImage?: (string | null) | Media;
   relatedAutosave?: (string | null) | Autosave;
+  shouldFailMove?: boolean | null;
   folder?: (string | null) | FolderInterface;
   updatedAt: string;
   createdAt: string;
