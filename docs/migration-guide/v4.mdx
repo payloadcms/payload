@@ -105,9 +105,9 @@ When migrating custom scripts:
 - Register commands by import path to keep them out of the Payload config's module graph. Paths use the existing `PayloadComponent` syntax, resolve relative to `payload.config.ts`, and support default or named exports. Direct `CLICommand` values are also accepted.
 - Define the handler's semantic input with a Standard Schema implementation such as Zod. Supported top-level properties become options automatically; use `cli` only to mark positional arguments, hide fields, or override unusual shell syntax.
 - Use the provided `getPayload()` function so Payload can shut down database connections after the command finishes.
-- Return an exit code from the handler when needed. Return `{ exitCode, result }` to also provide structured output for the new global `--json` option. Do not call `process.exit()` from the command.
+- Return an exit code from the handler when needed. Do not call `process.exit()` from the command.
 
-Payload adds built-in command import references to `cli.commands` while sanitizing the config, then applies project entries over those defaults. All built-ins are named exports from `payload/cli/builtin`, and Payload imports a referenced module only once even when it provides several commands. The sanitized map therefore contains the complete local CLI, and built-in and project commands use the same loader. Custom commands appear in `payload --help` and receive Standard Schema validation and generated shell help. A command with the same map key as a built-in command replaces it, while `false` disables that command. Set `cli: false` to disable the entire Payload CLI. Every command accepts `--json` for structured success and error output. Commands also appear with a generated JSON Schema in `payload help --json`, and every command accepts the schema object directly through `--input <json|@file|->`. Command names are case-sensitive. Because custom commands must be registered before the CLI parses input, the Payload config is now loaded before displaying root CLI help.
+Payload adds built-in command import references to `cli.commands` while sanitizing the config, then applies project entries over those defaults. All built-ins are named exports from `payload/cli/builtin`, and Payload imports a referenced module only once even when it provides several commands. The sanitized map therefore contains the complete local CLI, and built-in and custom commands use the same loader. Custom commands appear in `payload --help` and receive Standard Schema validation and generated shell help. A command with the same map key as a built-in command replaces it, while `false` disables that command. Set `cli: false` to disable the entire Payload CLI. Command names are case-sensitive. Because custom commands must be registered before the CLI parses input, the Payload config is now loaded before displaying root CLI help.
 
 See the [Payload CLI documentation](../configuration/cli) for the complete API.
 
@@ -138,29 +138,7 @@ The spawned CLI discovers the Payload config from `cwd` or `PAYLOAD_CONFIG_PATH`
 
 ### Generator helpers now return result objects
 
-The file generation helpers now return information that can also be included in CLI JSON output.
-
-The main breaking change affects `generateTypes` with `returnString: true`. It previously returned the generated source directly:
-
-```ts
-const generatedTypes = await generateTypes(config, {
-  log: false,
-  returnString: true,
-})
-```
-
-It now always returns an object. Read the generated source from `types`:
-
-```ts
-const { types: generatedTypes } = await generateTypes(config, {
-  log: false,
-  returnString: true,
-})
-```
-
-The result also includes `outputFile` and `written`. `written` is `false` when the generated source is returned without writing a file, or when the existing file is already up to date.
-
-`generateImportMap` now returns `{ outputFile, written }`, and `payload.db.generateSchema()` returns `{ outputFile }`. Code that only awaits these functions and ignores their return values does not need to change.
+`generateTypes` now returns `{ types, outputFile, written }` instead of returning the generated source directly when using `returnString: true`. `generateImportMap` now returns `{ outputFile, written }`, and `payload.db.generateSchema()` returns `{ outputFile }`. Code that ignores these return values does not need to change.
 
 ### Default query depth reduced to `1`
 
