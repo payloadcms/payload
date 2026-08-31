@@ -16,15 +16,16 @@ export const assertCanSetAPIKey = ({
   overrideAccess?: boolean
   req: PayloadRequest
 }): void => {
-  const isAPIKeyAssignment =
+  const assignedAPIKeyField =
     collection.auth?.useAPIKey &&
-    Object.prototype.hasOwnProperty.call(data, 'apiKey') &&
-    data.apiKey !== undefined
+    (['apiKey', 'apiKeyIndex'] as const).find(
+      (field) => Object.prototype.hasOwnProperty.call(data, field) && data[field] !== undefined,
+    )
 
   const canAssignAPIKey =
     (req.payloadAPI === 'local' && overrideAccess === true) || isServerGeneratedAPIKeyRequest(req)
 
-  if (!isAPIKeyAssignment || canAssignAPIKey) {
+  if (!assignedAPIKeyField || canAssignAPIKey) {
     return
   }
 
@@ -34,8 +35,8 @@ export const assertCanSetAPIKey = ({
       errors: [
         {
           message:
-            'API keys can only be assigned through the Local API when overrideAccess is enabled.',
-          path: 'apiKey',
+            'API key fields can only be assigned through the Local API when overrideAccess is enabled.',
+          path: assignedAPIKeyField,
         },
       ],
       req,

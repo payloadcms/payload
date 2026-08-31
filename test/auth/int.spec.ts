@@ -1277,6 +1277,7 @@ describe('Auth', () => {
   describe('API Key', () => {
     describe('API key assignment', () => {
       const staticAPIKey = '01234567-89ab-cdef-0123-456789abcdef'
+      const staticAPIKeyIndex = '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef'
 
       it('rejects a caller-supplied API key through REST', async () => {
         const { token } = await payload.login({
@@ -1332,6 +1333,90 @@ describe('Auth', () => {
 
         expect(result.errors[0]?.extensions?.data?.errors).toEqual([
           expect.objectContaining({ path: 'apiKey' }),
+        ])
+      })
+
+      it('should reject a caller-supplied API key index through REST', async () => {
+        const originalAPIKey = uuid()
+        const user = await payload.create({
+          collection: apiKeysSlug,
+          data: {
+            apiKey: originalAPIKey,
+            enableAPIKey: true,
+          },
+        })
+        const storedBefore = await payload.findByID({
+          id: user.id,
+          collection: apiKeysSlug,
+          showHiddenFields: true,
+        })
+        const { token } = await payload.login({
+          collection: slug,
+          data: {
+            email: devUser.email,
+            password: devUser.password,
+          },
+        })
+
+        const response = await restClient.PATCH(`/${apiKeysSlug}/${user.id}`, {
+          body: JSON.stringify({ apiKeyIndex: staticAPIKeyIndex }),
+          headers: {
+            Authorization: `JWT ${token}`,
+          },
+        })
+        const result = await response.json()
+        const storedAfter = await payload.findByID({
+          id: user.id,
+          collection: apiKeysSlug,
+          showHiddenFields: true,
+        })
+
+        await payload.delete({
+          id: user.id,
+          collection: apiKeysSlug,
+        })
+
+        expect(response.status).toBe(400)
+        expect(result.errors[0]?.data?.errors).toEqual([
+          expect.objectContaining({ path: 'apiKeyIndex' }),
+        ])
+        expect(storedAfter.apiKeyIndex).toBe(storedBefore.apiKeyIndex)
+      })
+
+      it('should reject a caller-supplied API key index through GraphQL', async () => {
+        const { token } = await payload.login({
+          collection: slug,
+          data: {
+            email: devUser.email,
+            password: devUser.password,
+          },
+        })
+
+        const { data, errors } = await restClient
+          .GRAPHQL_POST({
+            body: JSON.stringify({
+              query: `mutation {
+                createApiKey(data: { apiKeyIndex: "${staticAPIKeyIndex}" }) {
+                  id
+                }
+              }`,
+            }),
+            headers: {
+              Authorization: `JWT ${token}`,
+            },
+          })
+          .then((response) => response.json())
+
+        if (data?.createApiKey?.id) {
+          await payload.delete({
+            id: data.createApiKey.id,
+            collection: apiKeysSlug,
+          })
+        }
+
+        expect(data?.createApiKey).toBeNull()
+        expect(errors?.[0]?.extensions?.data?.errors).toEqual([
+          expect.objectContaining({ path: 'apiKeyIndex' }),
         ])
       })
 
