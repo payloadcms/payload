@@ -38,9 +38,19 @@ export const deleteScheduledPublishJobs = async ({
               exists: false,
             },
           },
-          {
-            'input.doc.value': ids ? { in: ids } : { equals: id },
-          },
+          ids
+            ? {
+                or: ids.map((id) => ({
+                  'input.doc.value': {
+                    equals: id,
+                  },
+                })),
+              }
+            : {
+                'input.doc.value': {
+                  equals: id,
+                },
+              },
           {
             'input.doc.relationTo': {
               equals: slug,

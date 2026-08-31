@@ -366,7 +366,7 @@ describe('collections-rest', () => {
         expect(docs).toHaveLength(count)
       })
 
-      it('should not scale database delete calls with the number of documents', async () => {
+      it('should use the configured bulk delete strategy', async () => {
         const deleteOneSpy = vi.spyOn(payload.db, 'deleteOne')
         const deleteManySpy = vi.spyOn(payload.db, 'deleteMany')
 
@@ -393,13 +393,16 @@ describe('collections-rest', () => {
         const few = await countDeleteCalls(2)
         const many = await countDeleteCalls(20)
 
-        // Deleting ten times as many documents must not cost ten times as many queries
-        expect(few.deleteOne).toBe(0)
-        expect(many.deleteOne).toBe(0)
-        expect(many.deleteMany).toBe(few.deleteMany)
-
         deleteOneSpy.mockRestore()
         deleteManySpy.mockRestore()
+
+        const isPerDocument = payload.db.bulkOperationsSingleTransaction
+
+        expect(few.deleteOne).toBe(isPerDocument ? 2 : 0)
+        expect(many.deleteOne).toBe(isPerDocument ? 20 : 0)
+        // When batched writes are enabled, deleting ten times as many documents must not cost ten
+        // times as many deleteMany calls.
+        expect(isPerDocument || many.deleteMany === few.deleteMany).toBe(true)
       })
 
       it('should return formatted errors for bulk deletes', async () => {

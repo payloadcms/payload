@@ -62,7 +62,10 @@ export const deleteOperation = async <
   }
 
   try {
-    const shouldCommit = !args.disableTransaction && (await initTransaction(args.req))
+    const shouldCommit =
+      !args.disableTransaction &&
+      !args.req.payload.db.bulkOperationsSingleTransaction &&
+      (await initTransaction(args.req))
     // /////////////////////////////////////
     // beforeOperation - Collection
     // /////////////////////////////////////
