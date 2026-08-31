@@ -149,8 +149,7 @@
     "undici": "7.28.0",
     "uuid": "14.0.0",
     "ws": "^8.16.0",
-    "z-schema": "12.4.4",
-    "zod": "^4.2.0"
+    "zod": "^4.5.4"
   },
   "devDependencies": {
     "@hyrious/esbuild-plugin-commonjs": "0.2.6",
