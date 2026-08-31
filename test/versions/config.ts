@@ -39,6 +39,7 @@ import DraftWithMaxGlobal from './globals/DraftWithMax.js'
 import LocalizedGlobal from './globals/LocalizedGlobal.js'
 import { MaxVersions } from './globals/MaxVersions.js'
 import SimpleDraftGlobal from './globals/SimpleDraft.js'
+import NoVersionsGlobal from './globals/NoVersions.js'
 import { seed } from './seed.js'
 import { BASE_PATH } from './shared.js'
 import { draftWithUploadCloudStorageCollectionSlug } from './slugs.js'
@@ -86,6 +87,7 @@ export default buildConfigWithDefaults({
     MaxVersions,
     DraftUnlimitedGlobal,
     SimpleDraftGlobal,
+    NoVersionsGlobal,
   ],
   indexSortableFields: true,
   localization: {

@@ -28,6 +28,10 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
   const req = args.req!
   const { fallbackLocale, locale, payload } = req
 
+  if (!globalConfig.versions) {
+    throw new NotFound(req.t)
+  }
+
   try {
     const shouldCommit = await initTransaction(req)
 

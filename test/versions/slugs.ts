@@ -61,12 +61,15 @@ export const draftUnlimitedGlobalSlug = 'draft-unlimited-global'
 
 export const draftWithMaxGlobalSlug = 'draft-with-max-global'
 
+export const noVersionsGlobalSlug = 'no-versions-global'
+
 export const globalSlugs = [
   autoSaveGlobalSlug,
   draftGlobalSlug,
   simpleDraftGlobalSlug,
   draftUnlimitedGlobalSlug,
   draftWithMaxGlobalSlug,
+  noVersionsGlobalSlug,
 ]
 
 export const localizedCollectionSlug = 'localized-posts'
