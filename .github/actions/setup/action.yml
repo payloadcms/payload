@@ -34,11 +34,14 @@ runs:
 
     - name: Get versions from .tool-versions or use overrides
       shell: bash
+      env:
+        INPUT_NODE_VERSION: ${{ inputs.node-version }}
+        INPUT_PNPM_VERSION: ${{ inputs.pnpm-version }}
       run: |
         # if node-version input is provided, use it; otherwise, read from .tool-versions
-        if [ "${{ inputs.node-version }}" ]; then
-          echo "Node version override provided: ${{ inputs.node-version }}"
-          echo "NODE_VERSION=${{ inputs.node-version }}" >> $GITHUB_ENV
+        if [ -n "$INPUT_NODE_VERSION" ]; then
+          echo "Node version override provided: $INPUT_NODE_VERSION"
+          echo "NODE_VERSION=$INPUT_NODE_VERSION" >> $GITHUB_ENV
         elif [ -f .tool-versions ]; then
           NODE_VERSION=$(grep '^nodejs ' .tool-versions | awk '{print $2}')
           echo "NODE_VERSION=$NODE_VERSION" >> $GITHUB_ENV
@@ -49,9 +52,9 @@ runs:
         fi
 
         # if pnpm-version input is provided, use it; otherwise, read from .tool-versions
-        if [ "${{ inputs.pnpm-version }}" ]; then
-          echo "Pnpm version override provided: ${{ inputs.pnpm-version }}"
-          echo "PNPM_VERSION=${{ inputs.pnpm-version }}" >> $GITHUB_ENV
+        if [ -n "$INPUT_PNPM_VERSION" ]; then
+          echo "Pnpm version override provided: $INPUT_PNPM_VERSION"
+          echo "PNPM_VERSION=$INPUT_PNPM_VERSION" >> $GITHUB_ENV
         elif [ -f .tool-versions ]; then
           PNPM_VERSION=$(grep '^pnpm ' .tool-versions | awk '{print $2}')
           echo "PNPM_VERSION=$PNPM_VERSION" >> $GITHUB_ENV
@@ -82,9 +85,11 @@ runs:
     - name: Compute Cache Key
       shell: bash
       id: compute-cache-key
+      env:
+        INPUT_PNPM_INSTALL_CACHE_KEY: ${{ inputs.pnpm-install-cache-key }}
       run: |
-        if [ -n "${{ inputs.pnpm-install-cache-key }}" ]; then
-          PNPM_INSTALL_CACHE_KEY="${{ inputs.pnpm-install-cache-key }}"
+        if [ -n "$INPUT_PNPM_INSTALL_CACHE_KEY" ]; then
+          PNPM_INSTALL_CACHE_KEY="$INPUT_PNPM_INSTALL_CACHE_KEY"
         else
           PNPM_INSTALL_CACHE_KEY="pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}"
         fi

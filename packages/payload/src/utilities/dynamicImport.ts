@@ -24,5 +24,9 @@ export async function dynamicImport<T = unknown>(modulePathOrSpecifier: string):
   // Without the eval, the Next.js bundler will throw this error when encountering the import statement:
   // ⚠ Compiled with warnings in X.Xs
   // Critical dependency: the request of a dependency is an expression
+  // SECURITY: validate importPath to prevent injection via single-quote escaping (CWE-95)
+  if (importPath.includes("'") || importPath.includes('\n') || importPath.includes('\r')) {
+    throw new Error('Invalid import path: contains illegal characters')
+  }
   return await eval(`import('${importPath}')`)
 }

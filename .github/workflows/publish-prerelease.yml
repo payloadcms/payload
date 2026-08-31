@@ -37,11 +37,15 @@ jobs:
       - name: Determine release type and debug flag
         id: determine_release_type
         # Use 'internal-debug' if debug mode, 'canary' for main branch, 'internal' for others
+        env:
+          INPUT_DEBUG_BUILD: ${{ inputs.debug_build }}
+          INPUT_DRY_RUN: ${{ inputs.dry_run }}
+          GH_REF_NAME: ${{ github.ref_name }}
         run: |
-          if [[ "${{ inputs.debug_build }}" == "true" ]]; then
+          if [[ "$INPUT_DEBUG_BUILD" == "true" ]]; then
             echo "release_type=internal-debug" >> $GITHUB_OUTPUT
             echo "debug_flag=--debug" >> $GITHUB_OUTPUT
-          elif [[ ${{ github.ref_name }} == "main" ]]; then
+          elif [[ "$GH_REF_NAME" == "main" ]]; then
             echo "release_type=canary" >> $GITHUB_OUTPUT
             echo "debug_flag=" >> $GITHUB_OUTPUT
           else
@@ -49,7 +53,7 @@ jobs:
             echo "debug_flag=" >> $GITHUB_OUTPUT
           fi
 
-          if [[ "${{ inputs.dry_run }}" == "true" ]]; then
+          if [[ "$INPUT_DRY_RUN" == "true" ]]; then
             echo "dry_run_flag=--dry-run" >> $GITHUB_OUTPUT
           else
             echo "dry_run_flag=" >> $GITHUB_OUTPUT

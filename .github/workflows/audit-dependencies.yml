@@ -30,4 +30,6 @@ jobs:
 
       - name: Run audit dependencies script
         id: audit_dependencies
-        run: ./.github/workflows/audit-dependencies.sh ${{ inputs.audit-level }}
+        env:
+          AUDIT_LEVEL: ${{ inputs.audit-level }}
+        run: ./.github/workflows/audit-dependencies.sh "$AUDIT_LEVEL"

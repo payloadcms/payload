@@ -875,8 +875,11 @@ jobs:
     steps:
       # debug github.ref output
       - run: |
-          echo github.ref: ${{ github.ref }}
-          echo isV3: ${{ github.ref == 'refs/heads/main' }}
+          echo "github.ref: $GH_REF"
+          echo "isV3: $IS_V3"
+        env:
+          GH_REF: ${{ github.ref }}
+          IS_V3: ${{ github.ref == 'refs/heads/main' }}
   analyze:
     runs-on: ubuntu-latest
     needs: [changes, build]
