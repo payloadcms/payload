@@ -13,13 +13,17 @@ export const normalizeHelpArguments = ({
   args: string[]
   cli: Command
 }): string[] => {
-  const userArgs = args.slice(2)
+  // Arguments after `--` belong to the program called by the Payload command.
+  // For example, `payload build -- --help` must show the framework's help,
+  // while `payload build --help` must show Payload's build-command help.
+  const separatorPosition = args.indexOf('--', 2)
+  const payloadArguments = args.slice(2, separatorPosition === -1 ? args.length : separatorPosition)
 
-  if (!userArgs.some((argument) => argument === '--help' || argument === '-h')) {
+  if (!payloadArguments.includes('--help') && !payloadArguments.includes('-h')) {
     return args
   }
 
-  const selectedCommand = userArgs
+  const selectedCommand = payloadArguments
     .map((argument) =>
       cli.commands.find(
         (command) => command.name() === argument || command.aliases().includes(argument),
@@ -42,6 +46,6 @@ export const normalizeHelpArguments = ({
     script,
     'help',
     ...(selectedCommand ? [selectedCommand.name()] : []),
-    ...(userArgs.includes('--json') ? ['--json'] : []),
+    ...(payloadArguments.includes('--json') ? ['--json'] : []),
   ]
 }
