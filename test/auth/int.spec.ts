@@ -1802,9 +1802,31 @@ describe('Auth', () => {
           collection: apiKeysWithReadableKeysSlug,
           data: {
             apiKey: originalAPIKey,
-            enableAPIKey: false,
+            enableAPIKey: true,
           },
         })
+
+        const withEnabledKey = await payload.auth({
+          headers: new Headers({
+            Authorization: `${apiKeysWithReadableKeysSlug} API-Key ${originalAPIKey}`,
+          }),
+        })
+
+        expect(withEnabledKey.user?.id).toBe(user.id)
+
+        const disabled = await payload.update({
+          id: user.id,
+          collection: apiKeysWithReadableKeysSlug,
+          data: { enableAPIKey: false },
+        })
+        const withDisabledKey = await payload.auth({
+          headers: new Headers({
+            Authorization: `${apiKeysWithReadableKeysSlug} API-Key ${originalAPIKey}`,
+          }),
+        })
+
+        expect(disabled.enableAPIKey).toBe(false)
+        expect(withDisabledKey.user).toBeNull()
 
         const response = await restClient.POST(
           `/${apiKeysWithReadableKeysSlug}/generate-api-key/${user.id}`,
@@ -1826,23 +1848,13 @@ describe('Auth', () => {
         expect(updated.apiKey).toBe(result.apiKey)
         expect(updated.enableAPIKey).toBe(false)
 
-        const oldAuthentication = await restClient
-          .GET(`/${apiKeysWithReadableKeysSlug}/me`, {
-            headers: {
-              Authorization: `${apiKeysWithReadableKeysSlug} API-Key ${originalAPIKey}`,
-            },
-          })
-          .then((authResponse) => authResponse.json())
-        const newAuthentication = await restClient
-          .GET(`/${apiKeysWithReadableKeysSlug}/me`, {
-            headers: {
-              Authorization: `${apiKeysWithReadableKeysSlug} API-Key ${result.apiKey}`,
-            },
-          })
-          .then((authResponse) => authResponse.json())
+        const withRegeneratedDisabledKey = await payload.auth({
+          headers: new Headers({
+            Authorization: `${apiKeysWithReadableKeysSlug} API-Key ${result.apiKey}`,
+          }),
+        })
 
-        expect(oldAuthentication.user).toBeNull()
-        expect(newAuthentication.user).toBeNull()
+        expect(withRegeneratedDisabledKey.user).toBeNull()
       })
 
       it('generates a missing API key without enabling it', async () => {
