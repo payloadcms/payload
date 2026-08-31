@@ -72,7 +72,7 @@ import type {
 } from '../index.js'
 import type { QueryPreset, QueryPresetConstraints } from '../query-presets/types.js'
 import type { SanitizedJobsConfig } from '../queues/config/types/index.js'
-import type { PayloadRequest, Where } from '../types/index.js'
+import type { MaybePromise, PayloadRequest, Where } from '../types/index.js'
 import type { PayloadLogger } from '../utilities/logger.js'
 
 /**
@@ -156,7 +156,15 @@ export type CLIRuntime = {
   markScheduled: () => void
 }
 
+export type CLICommandDescription = {
+  aliases?: string[]
+  description: string
+  inputSchema: Record<string, unknown>
+  name: string
+}
+
 export type CLIHelp = {
+  commands: CLICommandDescription[]
   output: (args?: { command?: string }) => void
 }
 
@@ -191,10 +199,19 @@ export type CLICommand = {
     getConfig: CLIRuntime['getConfig']
     getPayload: CLIRuntime['getPayload']
     help: CLIHelp
-  }) => number | Promise<number | void> | void
+    isJSON: boolean
+  }) => MaybePromise<CLICommandResult | number | void>
   helpGroup?: string
   input: CLIInputSchema
   readonly schema: Record<string, unknown>
+}
+
+/** Structured data and an optional exit code returned by a Payload CLI command. */
+export type CLICommandResult = {
+  /** Process exit code. Omit this, or use `0`, when the command succeeds. */
+  exitCode?: number
+  /** Data included under `result` when the command uses JSON output. */
+  result?: unknown
 }
 
 /** A CLI command definition, import reference, or `false` to disable the command. */
@@ -210,7 +227,7 @@ type Prettify<T> = {
 /**
  * @experimental The plugin API (`order`, `slug`, `options`) may change before being declared stable.
  */
-export type Plugin = ((config: Config) => Config | Promise<Config>) & {
+export type Plugin = ((config: Config) => MaybePromise<Config>) & {
   /** @experimental Plugin options exposed for cross-plugin mutation. */
   options?: Record<string, unknown>
   /** @experimental Execution order - lower values run first. Defaults to 0. */

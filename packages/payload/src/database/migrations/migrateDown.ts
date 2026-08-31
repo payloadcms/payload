@@ -1,4 +1,4 @@
-import type { BaseDatabaseAdapter } from '../types.js'
+import type { BaseDatabaseAdapter, MigrationResult } from '../types.js'
 
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { createLocalReq } from '../../utilities/createLocalReq.js'
@@ -7,7 +7,7 @@ import { killTransaction } from '../../utilities/killTransaction.js'
 import { getMigrations } from './getMigrations.js'
 import { readMigrationFiles } from './readMigrationFiles.js'
 
-export async function migrateDown(this: BaseDatabaseAdapter): Promise<void> {
+export async function migrateDown(this: BaseDatabaseAdapter): Promise<MigrationResult> {
   const { payload } = this
   const migrationFiles = await readMigrationFiles({ payload })
 
@@ -17,7 +17,7 @@ export async function migrateDown(this: BaseDatabaseAdapter): Promise<void> {
 
   if (!existingMigrations?.length) {
     payload.logger.info({ msg: 'No migrations to rollback.' })
-    return
+    return { migrated: [], rolledBack: [] }
   }
 
   payload.logger.info({
@@ -25,6 +25,7 @@ export async function migrateDown(this: BaseDatabaseAdapter): Promise<void> {
   })
 
   const latestBatchMigrations = existingMigrations.filter(({ batch }) => batch === latestBatch)
+  const rolledBack: string[] = []
 
   for (const migration of latestBatchMigrations) {
     const migrationFile = migrationFiles.find((m) => m.name === migration.name)
@@ -51,13 +52,16 @@ export async function migrateDown(this: BaseDatabaseAdapter): Promise<void> {
       })
 
       await commitTransaction(req)
+      rolledBack.push(migrationFile.name)
     } catch (err: unknown) {
       await killTransaction(req)
       payload.logger.error({
         err,
         msg: `Error running migration ${migrationFile.name}`,
       })
-      process.exit(1)
+      throw err
     }
   }
+
+  return { batch: latestBatch, migrated: [], rolledBack }
 }

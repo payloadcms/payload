@@ -1,9 +1,8 @@
 import { _internal_jobSystemGlobals, _internal_resetJobSystemGlobals, getPayload } from 'payload'
 import { wait } from 'payload/shared'
-import { describe, expect, it } from 'vitest'
+import { describe, expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
-import { runCLICommand } from '../__helpers/shared/runCLICommand.js'
 import { waitUntilAutorunIsDone } from './utilities.js'
 
 describe('Queues - CLI', () => {
@@ -56,14 +55,8 @@ describe('Queues - CLI', () => {
     _internal_resetJobSystemGlobals()
   })
 
-  it('can run migrate CLI without jobs attempting to run', async () => {
-    await runCLICommand(
-      {
-        command: 'migrate',
-        configPath: `${import.meta.dirname}/config.ts`,
-      },
-      { cwd: import.meta.dirname },
-    )
+  test('can run migrate CLI without jobs attempting to run', async ({ cli }) => {
+    await cli('migrate')
 
     // Wait 3 seconds to let potential autorun crons trigger
     await new Promise((resolve) => setTimeout(resolve, 3000))

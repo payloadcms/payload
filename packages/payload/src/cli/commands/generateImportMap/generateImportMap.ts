@@ -40,6 +40,11 @@ export type ImportMap = {
 
 export type AddToImportMap = (payloadComponent?: PayloadComponent | PayloadComponent[]) => void
 
+export type GenerateImportMapResult = {
+  outputFile: string
+  written: boolean
+}
+
 export async function generateImportMap(
   config: SanitizedConfig,
   options?: {
@@ -50,7 +55,7 @@ export async function generateImportMap(
     ignoreResolveError?: boolean
     log: boolean
   },
-): Promise<void> {
+): Promise<GenerateImportMapResult | undefined> {
   const logger = getLogger('payload', 'sync')
   const shouldLog = options?.log ?? true
 
@@ -122,13 +127,18 @@ export async function generateImportMap(
     imports,
   })
 
-  await writeImportMap({
+  const written = await writeImportMap({
     componentMap: importMap,
     force: options?.force,
     importMap: imports,
     importMapFilePath,
     log: shouldLog,
   })
+
+  return {
+    outputFile: importMapFilePath,
+    written,
+  }
 }
 
 export async function writeImportMap({
@@ -143,7 +153,7 @@ export async function writeImportMap({
   importMap: Imports
   importMapFilePath: string
   log?: boolean
-}) {
+}): Promise<boolean> {
   const logger = getLogger('payload', 'sync')
   const imports: string[] = []
   for (const [identifier, { path, specifier }] of Object.entries(importMap)) {
@@ -171,7 +181,7 @@ ${mapKeys.join(',\n')}
       if (log) {
         logger.info('No new imports found, skipping writing import map')
       }
-      return
+      return false
     }
   }
 
@@ -180,4 +190,6 @@ ${mapKeys.join(',\n')}
   }
 
   await fs.writeFile(importMapFilePath, importMapOutputFile)
+
+  return true
 }

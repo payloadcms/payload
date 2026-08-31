@@ -136,6 +136,10 @@ const { code } = await payload.bin({
 
 The spawned CLI discovers the Payload config from `cwd` or `PAYLOAD_CONFIG_PATH`. Configure a custom migration directory through your database adapter instead of passing it as a programmatic CLI override.
 
+### Generator helpers now return result objects
+
+`generateTypes` now returns `{ types, outputFile, written }` instead of returning the generated source directly when using `returnString: true`. `generateImportMap` now returns `{ outputFile, written }`, and `payload.db.generateSchema()` returns `{ outputFile }`. Code that ignores these return values does not need to change.
+
 ### Default query depth reduced to `1`
 
 Queries that omit `depth` now populate one relationship level instead of two. This reduces database work and response size by default.

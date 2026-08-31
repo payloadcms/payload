@@ -53,6 +53,80 @@ pnpm payload migrate:create --help
 pnpm payload jobs:run --help
 ```
 
+## JSON output, help, and input
+
+Every command accepts the global `--json` option. It returns a predictable response that scripts and coding agents can read:
+
+```sh
+pnpm payload generate:types --json
+```
+
+```json
+{
+  "command": "generate:types",
+  "result": {
+    "outputFile": "/project/src/payload-types.ts"
+  },
+  "success": true
+}
+```
+
+You can place `--json` before or after the command. Commands that do not return data omit `result`. Payload writes logs and other command messages to stderr, so stdout remains one valid JSON response. A failed command returns `success: false`, an error code, and an error message. Input validation errors also include the issues and the command's input schema.
+
+Set `PAYLOAD_CLI_JSON` to use JSON output for every command without repeatedly passing `--json`. This is useful when a script or coding agent runs several commands:
+
+```sh
+export PAYLOAD_CLI_JSON=1
+pnpm payload generate:types
+pnpm payload migrate:status
+```
+
+Unset the variable to return to regular terminal output.
+
+Payload can return help as JSON. This is useful for scripts and coding agents that need to know which commands exist and what input they accept.
+
+```sh
+# Describe every command
+pnpm payload help --json
+
+# Describe one command
+pnpm payload help migrate:create --json
+```
+
+For example, you would normally pass the migration name as an argument:
+
+```sh
+pnpm payload migrate:create add-authors
+```
+
+You can pass the same input as JSON with `--input`:
+
+```sh
+pnpm payload migrate:create --input '{"migrationName":"add-authors"}'
+```
+
+To read the input from a file, create `migration-input.json`:
+
+```json
+{
+  "migrationName": "add-authors"
+}
+```
+
+Then add `@` before the file path:
+
+```sh
+pnpm payload migrate:create --input @migration-input.json
+```
+
+To read the same JSON from stdin, pipe it into the command and use `-`:
+
+```sh
+echo '{"migrationName":"add-authors"}' | pnpm payload migrate:create --input -
+```
+
+The JSON is validated in the same way as normal command arguments and options. Do not combine `--input` with other command input.
+
 ## Custom commands
 
 Use `defineCLICommand` to add your own command. Built-in and custom commands use the same API, help system, and input validation.
@@ -84,13 +158,15 @@ export const seedCommand = defineCLICommand({
     })
 
     payload.logger.info('Successfully seeded!')
+
+    return { result: { seeded: true } }
   },
 })
 ```
 
 The `input` schema defines the values the command accepts. Payload uses it to type `args`, validate input, and generate help.
 
-The `z` export from `payload/cli` is Zod Mini. Payload already uses Zod Mini for its built-in commands, so this export adds no extra schema code to the CLI bundle. Use the exported `strictObject` helper for the root input schema.
+The `z` export from `payload/cli` is Zod Mini. Payload already uses Zod Mini for its built-in commands, so this export adds no extra schema code to the CLI bundle. Use the exported `strictObject` helper for the root input schema so Payload can also generate JSON help.
 
 Payload does not export regular Zod because its larger API would increase the bundle size. If you prefer regular Zod's chaining API, add `zod` to your own project and import it directly:
 
@@ -106,7 +182,7 @@ You can also use another schema library. Its schema must support both [Standard 
 
 Call `getPayload()` only when the command needs the Local API. Payload closes the instance when the command finishes.
 
-Return a number from the handler when the command needs to set the process exit code.
+Returning `{ result }` makes that value available in JSON mode through `--json` or `PAYLOAD_CLI_JSON`. Return a number to set only the process exit code, or return `{ exitCode, result }` when you need both. Payload sends `payload.logger.*` and `console.*` output to stderr in JSON mode. Use `isJSON` only when the command should behave differently in JSON mode.
 
 ### Register the command
 
@@ -149,8 +225,12 @@ export default buildConfig({
       hello: defineCLICommand({
         description: 'Print a greeting.',
         input: strictObject({}),
-        handler: () => {
-          console.log('Hello!')
+        handler: ({ isJSON }) => {
+          if (!isJSON) {
+            console.log('Hello!')
+          }
+
+          return { result: { message: 'Hello!' } }
         },
       }),
     },
@@ -186,7 +266,7 @@ defineCLICommand({
 })
 ```
 
-For less common cases, you can use an object to change the flag, argument position, or parser. Set a field to `false` when it should not be exposed as a shell argument or option.
+Set a field to `false` to accept it only through `--input`. For less common cases, you can use an object to change the flag, argument position, or parser.
 
 ### Add, replace, or disable commands
 

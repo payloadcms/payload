@@ -8,7 +8,7 @@ import { strictObject } from '../zod.js'
 
 export const createInfoCommand = defineCLICommand({
   description: 'Print environment and dependency information.',
-  handler: async () => {
+  handler: async ({ isJSON }) => {
     const dependencies = await getDependencies(process.cwd(), [
       ...PAYLOAD_PACKAGE_LIST,
       'next',
@@ -39,18 +39,20 @@ export const createInfoCommand = defineCLICommand({
       },
       packages: resolvedDependencies,
     }
-    const primaryDependencies = result.packages.filter(
-      ({ name }) => name === 'payload' || name === 'next',
-    )
-    const otherDependencies = result.packages
-      .filter(({ name }) => name !== 'payload' && name !== 'next')
-      .sort((a, b) => a.name.localeCompare(b.name))
-    const formattedDependencies = [...primaryDependencies, ...otherDependencies]
-      .map(({ name, version }) => `  ${name}: ${version}`)
-      .join('\n')
 
-    // eslint-disable-next-line no-console
-    console.log(`
+    if (!isJSON) {
+      const primaryDependencies = result.packages.filter(
+        ({ name }) => name === 'payload' || name === 'next',
+      )
+      const otherDependencies = result.packages
+        .filter(({ name }) => name !== 'payload' && name !== 'next')
+        .sort((a, b) => a.name.localeCompare(b.name))
+      const formattedDependencies = [...primaryDependencies, ...otherDependencies]
+        .map(({ name, version }) => `  ${name}: ${version}`)
+        .join('\n')
+
+      // eslint-disable-next-line no-console
+      console.log(`
 Binaries:
   Node: ${result.binaries.node}
   npm: ${result.binaries.npm}
@@ -65,6 +67,9 @@ Operating System:
   Available memory (MB): ${result.operatingSystem.availableMemoryMB}
   Available CPU cores: ${result.operatingSystem.availableCPUCores ?? 'N/A'}
 `)
+    }
+
+    return { result }
   },
   helpGroup: 'Core commands',
   input: strictObject({}),

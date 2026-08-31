@@ -37,16 +37,18 @@ const VITE_CONFIG_FILES = [
 export async function build({
   config,
   forwardedArgs = [],
+  isJSON = false,
   skipTypes = false,
 }: {
   config: SanitizedConfig
   forwardedArgs?: string[]
+  isJSON?: boolean
   skipTypes?: boolean
 }): Promise<number> {
   try {
-    await generateImportMap(config)
+    await generateImportMap(config, { log: !isJSON })
     if (!skipTypes) {
-      await generateTypes(config)
+      await generateTypes(config, { log: !isJSON })
     }
   } catch (err) {
     console.error('Pre-build generation failed:')
@@ -66,7 +68,7 @@ export async function build({
 
   const exitCode = await new Promise<number>((resolve) => {
     const child = spawn(process.execPath, [bin, ...args], {
-      stdio: 'inherit',
+      stdio: isJSON ? ['inherit', 2, 2] : 'inherit',
     })
     child.on('error', (err) => {
       console.error('Failed to run build:')

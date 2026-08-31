@@ -4,11 +4,16 @@ import { initializeMigration } from './initialize.js'
 
 export const createMigrateStatusCommand = defineCLICommand({
   description: 'Show migration status.',
-  handler: async ({ getPayload }) => {
+  handler: async ({ getPayload, isJSON }) => {
     const { adapter, payload } = await initializeMigration({ getPayload })
 
-    await adapter.migrateStatus()
-    payload.logger.info('Done.')
+    const result = await adapter.migrateStatus()
+
+    if (!isJSON) {
+      payload.logger.info('Done.')
+    }
+
+    return result ? { result } : undefined
   },
   helpGroup: 'Migration commands',
   input: strictObject({}),
