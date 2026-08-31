@@ -2,6 +2,7 @@ import type { SelectField, ValidateOptions } from './config/types.js'
 
 import {
   blocks,
+  json,
   number,
   password,
   point,
@@ -10,6 +11,7 @@ import {
   text,
   textarea,
   type BlocksFieldValidation,
+  type JSONFieldValidation,
   type PointFieldValidation,
   type SelectFieldValidation,
 } from './validations.js'
@@ -688,6 +690,64 @@ describe('Field Validations', () => {
         filterOptions: () => ['block1', 'block3'],
       })
       expect(result6).not.toStrictEqual(true)
+    })
+  })
+
+  describe('json', () => {
+    const jsonOptions: Parameters<JSONFieldValidation>[1] = {
+      ...options,
+      name: 'test',
+      type: 'json',
+    }
+
+    it('should validate a value with no jsonSchema', async () => {
+      const result = await json({ foo: 'bar' } as any, jsonOptions)
+      expect(result).toBe(true)
+    })
+
+    it('should show required message when empty', async () => {
+      const result = await json(undefined as any, { ...jsonOptions, required: true })
+      expect(result).toBe('validation:required')
+    })
+
+    it('should show invalid input message when jsonError is set', async () => {
+      const result = await json({} as any, { ...jsonOptions, jsonError: 'parse error' })
+      expect(result).toBe('validation:invalidInput')
+    })
+
+    describe('with jsonSchema', () => {
+      const jsonSchema = {
+        schema: {
+          type: 'object',
+          required: ['name'],
+          properties: {
+            name: { type: 'string' },
+          },
+        },
+        uri: 'a://b/foo.json',
+      }
+
+      it('should pass when the value matches the schema', async () => {
+        const result = await json({ name: 'Alice' } as any, { ...jsonOptions, jsonSchema })
+        expect(result).toBe(true)
+      })
+
+      it('should return an error message when the value violates a required property', async () => {
+        const result = await json({ other: 'field' } as any, { ...jsonOptions, jsonSchema })
+        expect(result).not.toBe(true)
+        expect(typeof result).toBe('string')
+      })
+
+      it('should return an error message when a property has the wrong type', async () => {
+        const result = await json({ name: 123 } as any, { ...jsonOptions, jsonSchema })
+        expect(result).not.toBe(true)
+        expect(typeof result).toBe('string')
+      })
+
+      it('should skip validation for an empty value', async () => {
+        const result = await json(null as any, { ...jsonOptions, jsonSchema })
+        expect(result).toBe(true)
+      })
     })
   })
 

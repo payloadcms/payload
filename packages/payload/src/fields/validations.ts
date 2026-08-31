@@ -377,16 +377,24 @@ export const json: JSONFieldValidation = async (
     try {
       jsonSchema.schema = fetchSchema(jsonSchema)
       const { schema } = jsonSchema
-      const AjvModule = await import('ajv')
+      const ZSchemaModule = await import('z-schema')
       // Handle both ESM default export and CJS interop where the module itself is the constructor
-      const AjvClass: any =
-        'default' in AjvModule && typeof AjvModule.default === 'function'
-          ? AjvModule.default
-          : AjvModule
-      const ajv = new AjvClass()
+      const ZSchema: any =
+        'default' in ZSchemaModule && typeof ZSchemaModule.default?.create === 'function'
+          ? ZSchemaModule.default
+          : ZSchemaModule
+      const validator = ZSchema.create({ safe: true })
 
-      if (!ajv.validate(schema, value)) {
-        return ajv.errorsText()
+      const result = validator.validate(value, schema)
+
+      if (!result.valid) {
+        return (
+          result.err?.details
+            ?.map((detail: { message: string; path?: string }) =>
+              detail.path ? `${detail.path}: ${detail.message}` : detail.message,
+            )
+            .join(', ') ?? result.err?.message
+        )
       }
     } catch (error) {
       return error instanceof Error ? error.message : 'Unknown error'
