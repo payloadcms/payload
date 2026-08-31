@@ -120,7 +120,6 @@
     "@payloadcms/translations": "workspace:*",
     "@standard-schema/spec": "1.1.0",
     "@types/busboy": "1.5.4",
-    "ajv": "8.20.0",
     "bson-objectid": "2.0.4",
     "busboy": "^1.6.0",
     "ci-info": "4.4.0",
@@ -150,6 +149,7 @@
     "undici": "7.28.0",
     "uuid": "14.0.0",
     "ws": "^8.16.0",
+    "z-schema": "12.4.4",
     "zod": "^4.2.0"
   },
   "devDependencies": {

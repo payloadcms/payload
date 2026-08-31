@@ -14,7 +14,7 @@
  * {@link buildBundledPackages}.
  */
 export const ssrExternalPackages: string[] = [
-  'ajv',
+  'z-schema',
   'fast-uri',
   'drizzle-kit',
   'drizzle-kit/api',

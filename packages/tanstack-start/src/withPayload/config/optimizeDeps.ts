@@ -99,16 +99,16 @@ export const optimizeDepsIncludeDefaults: string[] = [
   '@payloadcms/ui > react-select > prop-types > react-is',
   '@payloadcms/ui > date-fns/locale/en-US',
   // Further late discoveries observed re-optimizing mid-run in CI cold starts
-  // (see CI logs: "✨ new dependencies optimized: @dnd-kit/modifiers / ajv /
+  // (see CI logs: "✨ new dependencies optimized: @dnd-kit/modifiers / z-schema /
   // dequal/lite"). The modular dashboard pulls in `@dnd-kit/modifiers` on first
   // render; form-state diffing reaches `dequal/lite` (a distinct entry point
   // from the already-listed `dequal`); client-side field validation reaches
-  // `ajv` *through `payload`* — it is `ssrExternal` server-side but still
+  // `z-schema` *through `payload`* — it is `ssrExternal` server-side but still
   // bundled into the client, and must be pathed via `payload` so the optimizer
   // pre-bundles the exact copy the runtime loads.
   '@payloadcms/ui > @dnd-kit/modifiers',
   '@payloadcms/ui > dequal/lite',
-  'payload > ajv',
+  'payload > z-schema',
   // The storage client-upload suites (esp. vercel-blob) crawl part of the
   // `payload` server runtime into the client bundle and discover these late,
   // triggering several "optimized dependencies changed. reloading" waves that
