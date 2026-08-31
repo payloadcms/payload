@@ -77,6 +77,7 @@ export interface Config {
     'returned-resources': ReturnedResource;
     pages: Page;
     'field-types': FieldType;
+    'localized-items': LocalizedItem;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -94,6 +95,7 @@ export interface Config {
     'returned-resources': ReturnedResourcesSelect<false> | ReturnedResourcesSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
     'field-types': FieldTypesSelect<false> | FieldTypesSelect<true>;
+    'localized-items': LocalizedItemsSelect<false> | LocalizedItemsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -451,6 +453,30 @@ export interface FieldType {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized-items".
+ */
+export interface LocalizedItem {
+  id: string;
+  title?: string | null;
+  items?:
+    | {
+        label?: string | null;
+        rel?: (string | null) | User;
+        id?: string | null;
+      }[]
+    | null;
+  rows?:
+    | {
+        label?: string | null;
+        rel?: (string | null) | User;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -512,6 +538,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'field-types';
         value: string | FieldType;
+      } | null)
+    | ({
+        relationTo: 'localized-items';
+        value: string | LocalizedItem;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -747,6 +777,29 @@ export interface FieldTypesSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized-items_select".
+ */
+export interface LocalizedItemsSelect<T extends boolean = true> {
+  title?: T;
+  items?:
+    | T
+    | {
+        label?: T;
+        rel?: T;
+        id?: T;
+      };
+  rows?:
+    | T
+    | {
+        label?: T;
+        rel?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
@@ -850,7 +903,8 @@ export interface CollectionQueryWidget {
       | 'modified-prompts'
       | 'returned-resources'
       | 'pages'
-      | 'field-types';
+      | 'field-types'
+      | 'localized-items';
     where?:
       | {
           [k: string]: unknown;
@@ -884,6 +938,7 @@ export interface ActivityWidget {
           | 'returned-resources'
           | 'pages'
           | 'field-types'
+          | 'localized-items'
         )[]
       | null;
   };
