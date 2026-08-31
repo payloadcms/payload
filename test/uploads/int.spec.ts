@@ -55,6 +55,72 @@ const stat = promisify(fs.stat)
 let restClient: NextRESTClient
 let payload: Payload
 
+it('should provide the inspected file type for image processing', async () => {
+  const fileContent = Buffer.from(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"><rect width="1" height="1"/></svg>',
+  )
+
+  await expect(
+    checkFileRestrictions({
+      collection: {
+        slug: 'media',
+        upload: { staticDir: '/tmp' },
+      } as any,
+      file: {
+        name: 'reference.avif',
+        data: fileContent,
+        mimetype: 'image/avif',
+        size: fileContent.length,
+      },
+      req: {
+        payload: {
+          logger: { error: () => {}, warn: () => {} },
+        },
+      } as unknown as PayloadRequest,
+    }),
+  ).resolves.toEqual({ ext: 'svg', mime: 'image/svg+xml' })
+})
+
+it.each([
+  { allowRestrictedFileTypes: false, policy: 'enabled' },
+  { allowRestrictedFileTypes: true, policy: 'disabled' },
+])(
+  'should reject invalid ISO base media box boundaries with type checks $policy',
+  async ({ allowRestrictedFileTypes }) => {
+    const fileContent = Buffer.concat([
+      Buffer.alloc(4),
+      Buffer.from('ftypavif'),
+      Buffer.from(
+        '<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"><rect width="1" height="1"/></svg>',
+      ),
+    ])
+
+    await expect(
+      checkFileRestrictions({
+        collection: {
+          slug: 'media',
+          upload: { allowRestrictedFileTypes, mimeTypes: ['image/avif'], staticDir: '/tmp' },
+        } as any,
+        file: {
+          name: 'reference.avif',
+          data: fileContent,
+          mimetype: 'image/avif',
+          size: fileContent.length,
+        },
+        req: {
+          payload: {
+            logger: { error: () => {}, warn: () => {} },
+          },
+        } as unknown as PayloadRequest,
+      }),
+    ).rejects.toMatchObject({
+      data: {
+        errors: [{ message: 'Invalid or corrupted ISO base media file.', path: 'file' }],
+      },
+    })
+  },
+)
+
 it('should inspect temp-file SVG without whole-file reads', async () => {
   const fileContent = Buffer.from(
     '<svg xmlns="http://www.w3.org/2000/svg"><text>Reference</text></svg>',
@@ -83,7 +149,7 @@ it('should inspect temp-file SVG without whole-file reads', async () => {
           },
         } as unknown as PayloadRequest,
       }),
-    ).resolves.toBeUndefined()
+    ).resolves.toEqual({ ext: 'svg', mime: 'image/svg+xml' })
 
     expect(readFileSpy).not.toHaveBeenCalled()
   } finally {
@@ -192,7 +258,7 @@ it('should accept ordinary SVG text content', async () => {
         },
       } as unknown as PayloadRequest,
     }),
-  ).resolves.toBeUndefined()
+  ).resolves.toEqual({ ext: 'svg', mime: 'image/svg+xml' })
 })
 
 it('should accept ordinary non-SVG XML content', async () => {

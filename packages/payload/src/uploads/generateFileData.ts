@@ -21,6 +21,7 @@ import { getSafeFileName } from './getSafeFilename.js'
 import { createImageSizes } from './image-resizing/createImageSizes.js'
 import { isAnimatedImage } from './isAnimatedImage.js'
 import { isImage } from './isImage.js'
+import { isProcessableImage } from './isProcessableImage.js'
 import { optionallyAppendMetadata } from './optionallyAppendMetadata.js'
 type Args<T> = {
   collection: Collection
@@ -171,11 +172,19 @@ export const generateFileData = async <T>({
     }
   }
 
-  await checkFileRestrictions({
+  const detectedFileType = await checkFileRestrictions({
     collection: collectionConfig,
     file,
     req,
   })
+
+  const shouldUseDetectedFileType =
+    detectedFileType &&
+    (isProcessableImage(file.mimetype) || isProcessableImage(detectedFileType.mime))
+
+  if (shouldUseDetectedFileType && detectedFileType.mime !== file.mimetype) {
+    file = { ...file, mimetype: detectedFileType.mime }
+  }
 
   if (!disableLocalStorage) {
     await fs.mkdir(staticPath!, { recursive: true })
@@ -229,7 +238,7 @@ export const generateFileData = async <T>({
     }
 
     if (fileSupportsResize || isImage(file.mimetype)) {
-      dimensions = await getImageSize({ file, sharp })
+      dimensions = await getImageSize({ file, sharp: fileSupportsResize ? sharp : undefined })
       fileData.width = dimensions.width
       fileData.height = dimensions.height
     }
@@ -287,7 +296,7 @@ export const generateFileData = async <T>({
 
     let fileForResize = file
 
-    if (cropData && sharp) {
+    if (cropData && fileSupportsResize && sharp) {
       const { data: croppedImage, info } = await cropImage({
         cropData,
         dimensions: dimensions!,

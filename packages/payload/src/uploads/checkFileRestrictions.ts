@@ -14,6 +14,12 @@ import {
   isSvgUpload,
   isXmlUpload,
 } from './getFileTypeIdentity.js'
+import { isProcessableImage } from './isProcessableImage.js'
+import {
+  isISOBaseMediaMimeType,
+  validateISOBaseMediaBuffer,
+  validateISOBaseMediaFile,
+} from './validateISOBaseMediaFile.js'
 import { inspectSvg, inspectSvgFile } from './validateSvg.js'
 
 /**
@@ -58,7 +64,7 @@ export const checkFileRestrictions = async ({
   collection,
   file,
   req,
-}: checkFileRestrictionsParams): Promise<void> => {
+}: checkFileRestrictionsParams): Promise<{ ext: string; mime: string } | undefined> => {
   const errors: string[] = []
   const { upload: uploadConfig } = collection
   const configMimeTypes =
@@ -87,11 +93,6 @@ export const checkFileRestrictions = async ({
       mimeType.startsWith('audio/') ||
       mimeType === 'application/pdf'
     )
-  }
-
-  // Skip validation if `allowRestrictedFileTypes` is true
-  if (allowRestrictedFileTypes) {
-    return
   }
 
   // For temp files, use fileTypeFromFile so large files (e.g. video) are never loaded into memory
@@ -129,11 +130,6 @@ export const checkFileRestrictions = async ({
     return svgInspection
   }
 
-  if (!isSvg && isXmlUpload({ filename: file.name, mimeType: file.mimetype })) {
-    const inspection = await getSvgInspection()
-    isSvg = inspection.isSvg
-  }
-
   let detected
   try {
     detected =
@@ -148,9 +144,34 @@ export const checkFileRestrictions = async ({
     }
   }
 
-  if (detected?.mime === 'application/xml' && !isSvg) {
+  if (
+    isSvg ||
+    isXmlUpload({ filename: file.name, mimeType: file.mimetype }) ||
+    detected?.mime === 'application/xml' ||
+    (!detected && isProcessableImage(file.mimetype))
+  ) {
     const inspection = await getSvgInspection()
     isSvg = inspection.isSvg
+    if (inspection.isSvg) {
+      detected = { ext: 'svg', mime: 'image/svg+xml' }
+    } else if (inspection.isValid && !detected) {
+      detected = { ext: 'xml', mime: 'application/xml' }
+    }
+  }
+
+  if (detected && isISOBaseMediaMimeType(detected.mime)) {
+    const isValidISOBaseMedia =
+      isTempFile && tempFilePath
+        ? await validateISOBaseMediaFile(tempFilePath)
+        : await validateISOBaseMediaBuffer(file.data)
+
+    if (!isValidISOBaseMedia) {
+      errors.push('Invalid or corrupted ISO base media file.')
+    }
+  }
+
+  if (allowRestrictedFileTypes && errors.length === 0) {
+    return detected
   }
 
   // Secondary mimetype check to assess file type from buffer
@@ -231,4 +252,6 @@ export const checkFileRestrictions = async ({
       errors: [{ message: errors.join(', '), path: 'file' }],
     })
   }
+
+  return detected
 }
