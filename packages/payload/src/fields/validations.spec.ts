@@ -748,6 +748,113 @@ describe('Field Validations', () => {
         const result = await json(null as any, { ...jsonOptions, jsonSchema })
         expect(result).toBe(true)
       })
+
+      it('should return a dotted path in the error message for a nested property violation', async () => {
+        const nestedSchema = {
+          schema: {
+            type: 'object',
+            properties: {
+              address: {
+                type: 'object',
+                properties: {
+                  zip: { type: 'string' },
+                },
+              },
+            },
+          },
+          uri: 'a://b/foo.json',
+        }
+        const result = await json({ address: { zip: 12345 } } as any, {
+          ...jsonOptions,
+          jsonSchema: nestedSchema,
+        })
+        expect(result).toContain('address.zip')
+      })
+
+      it('should return a comma-joined message when multiple properties are invalid', async () => {
+        const multiSchema = {
+          schema: {
+            type: 'object',
+            required: ['name'],
+            properties: {
+              age: { type: 'number' },
+              name: { type: 'string' },
+            },
+          },
+          uri: 'a://b/foo.json',
+        }
+        const result = await json({ age: 'not a number' } as any, {
+          ...jsonOptions,
+          jsonSchema: multiSchema,
+        })
+        expect(result).toContain(', ')
+      })
+    })
+
+    describe('with the JSON field test fixture schema', () => {
+      // Mirrors test/fields/collections/JSON/index.tsx to catch fromJSONSchema gaps for this exact shape
+      const jsonSchema = {
+        schema: {
+          type: 'object',
+          properties: {
+            array: {
+              type: 'array',
+              items: {
+                type: 'object',
+                additionalProperties: false,
+                properties: {
+                  object: {
+                    type: 'object',
+                    additionalProperties: false,
+                    properties: {
+                      array: {
+                        type: 'array',
+                        items: {
+                          type: 'number',
+                        },
+                      },
+                      text: {
+                        type: 'string',
+                      },
+                    },
+                  },
+                  text: {
+                    type: 'string',
+                  },
+                },
+              },
+            },
+            foo: {
+              enum: ['bar', 'foobar'],
+            },
+            number: {
+              enum: [10, 5],
+            },
+          },
+        },
+        uri: 'a://b/foo.json',
+      }
+
+      it('should pass when the value matches the fixture schema', async () => {
+        const result = await json(
+          {
+            array: [{ object: { array: [1, 2], text: 'nested' }, text: 'row' }],
+            foo: 'bar',
+            number: 10,
+          } as any,
+          { ...jsonOptions, jsonSchema },
+        )
+        expect(result).toBe(true)
+      })
+
+      it('should reject additional properties nested inside the array items', async () => {
+        const result = await json(
+          { array: [{ object: { text: 'nested' }, text: 'row', unexpected: true }] } as any,
+          { ...jsonOptions, jsonSchema },
+        )
+        expect(result).not.toBe(true)
+        expect(typeof result).toBe('string')
+      })
     })
   })
 
