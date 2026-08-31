@@ -155,11 +155,11 @@ export const deleteOperation = async <
     type Doc = DataFromCollectionSlug<TSlug>
     type ResultDoc = BulkOperationResult<TSlug, TSelect>['docs'][number]
 
-    const pushError = (id: number | string, error: unknown) => {
+    const pushError = (id: number | string, error: unknown, message?: string) => {
       errors.push({
         id,
         isPublic: error instanceof Error ? isErrorPublic(error, config) : false,
-        message: error instanceof Error ? error.message : 'Unknown error',
+        message: message ?? (error instanceof Error ? error.message : 'Unknown error'),
       })
     }
 
@@ -406,10 +406,15 @@ export const deleteOperation = async <
           },
         })
       } catch (error) {
-        // A batched delete either lands for every id or for none, so it cannot be attributed to a
-        // single document the way a per-document delete could.
+        // The delete covers the whole batch, so a failure here belongs to the batch rather than to
+        // any single document. Say so explicitly, otherwise one batch failure reads as N unrelated
+        // per-document failures.
+        const message = `Bulk delete failed for this batch of ${deletable.length} documents: ${
+          error instanceof Error ? error.message : 'Unknown error'
+        }`
+
         for (const { doc } of deletable) {
-          pushError(doc.id, error)
+          pushError(doc.id, error, message)
         }
 
         return results
