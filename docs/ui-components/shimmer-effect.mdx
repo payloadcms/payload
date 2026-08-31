@@ -1,0 +1,37 @@
+---
+title: ShimmerEffect
+label: Shimmer Effect
+order: 70
+desc: Represent loading content with Payload's ShimmerEffect component.
+keywords: ui, component, shimmer, skeleton, loading
+---
+
+The `ShimmerEffect` component provides a visual placeholder while content is loading. Match its dimensions to the content that will replace it to reduce layout shift.
+
+## Import
+
+```tsx
+import { ShimmerEffect } from '@payloadcms/ui'
+```
+
+## Basic usage
+
+<ComponentPreview component="ShimmerEffect" example="basic" />
+
+## Composing a skeleton
+
+Combine multiple shimmer elements to approximate the final layout.
+
+<ComponentPreview component="ShimmerEffect" example="shapes" />
+
+Loading indicators should not replace an accessible loading label or status when users need to know that work is in progress.
+
+## Common props
+
+| Prop                  | Type               | Default  | Description                                         |
+| --------------------- | ------------------ | -------- | --------------------------------------------------- |
+| `height`              | `number \| string` | `'60px'` | Sets the placeholder height.                        |
+| `width`               | `number \| string` | `'100%'` | Sets the placeholder width.                         |
+| `animationDelay`      | `string`           | `'0ms'`  | Delays the shimmer animation.                       |
+| `transparent`         | `boolean`          | `false`  | Allows the underlying background to remain visible. |
+| `disableInlineStyles` | `boolean`          | `false`  | Leaves dimensions to a custom class or stylesheet.  |

@@ -1,0 +1,29 @@
+---
+title: CopyToClipboard
+label: CopyToClipboard
+order: 110
+desc: Copy a string to the clipboard with Payload's CopyToClipboard component.
+keywords: ui, component, clipboard, copy, tooltip
+---
+
+The `CopyToClipboard` component renders a compact copy control with tooltip feedback. Use it beside values such as IDs, URLs, and API keys.
+
+## Import
+
+```tsx
+import { CopyToClipboard } from '@payloadcms/ui'
+```
+
+## Basic usage
+
+<ComponentPreview component="CopyToClipboard" example="basic" />
+
+The control is not rendered when `value` is empty. Provide surrounding text so users understand what will be copied.
+
+## Common props
+
+| Prop             | Type     | Default                | Description                               |
+| ---------------- | -------- | ---------------------- | ----------------------------------------- |
+| `value`          | `string` | —                      | Value written to the clipboard.           |
+| `defaultMessage` | `string` | Localized copy label   | Tooltip shown before the value is copied. |
+| `successMessage` | `string` | Localized copied label | Tooltip shown after a successful copy.    |

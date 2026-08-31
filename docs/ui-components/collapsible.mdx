@@ -1,0 +1,42 @@
+---
+title: Collapsible
+label: Collapsible
+order: 100
+desc: Show and hide a section of content with Payload's Collapsible component.
+keywords: ui, component, collapsible, disclosure, accordion
+---
+
+The `Collapsible` component groups content beneath a header that can be expanded or collapsed. It manages its own state by default and can also be controlled by a parent component.
+
+## Import
+
+```tsx
+import { Collapsible } from '@payloadcms/ui'
+```
+
+## Basic usage
+
+<ComponentPreview component="Collapsible" example="basic" />
+
+Use a concise header that describes the hidden content. The entire header is used as the toggle target unless `disableHeaderToggle` is enabled.
+
+## Error state
+
+<ComponentPreview component="Collapsible" example="error" />
+
+Use the `error` style when the section contains invalid fields that require attention.
+
+## Common props
+
+| Prop                     | Type                           | Default     | Description                                            |
+| ------------------------ | ------------------------------ | ----------- | ------------------------------------------------------ |
+| `children`               | `ReactNode`                    | —           | Content displayed inside the collapsible section.      |
+| `header`                 | `ReactNode`                    | —           | Content displayed in the section header.               |
+| `actions`                | `ReactNode`                    | —           | Displays controls on the trailing edge of the header.  |
+| `collapsibleStyle`       | `'default' \| 'error'`         | `'default'` | Sets the visual state.                                 |
+| `initCollapsed`          | `boolean`                      | `false`     | Sets the initial uncontrolled state.                   |
+| `isCollapsed`            | `boolean`                      | —           | Controls the collapsed state from a parent component.  |
+| `onToggle`               | `(collapsed: boolean) => void` | —           | Runs when the section is toggled.                      |
+| `disableHeaderToggle`    | `boolean`                      | `false`     | Prevents the header from toggling the section.         |
+| `disableToggleIndicator` | `boolean`                      | `false`     | Hides the trailing chevron.                            |
+| `AfterCollapsible`       | `ReactNode`                    | —           | Renders content after the collapsible content wrapper. |

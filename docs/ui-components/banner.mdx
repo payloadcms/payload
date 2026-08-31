@@ -1,0 +1,38 @@
+---
+title: Banner
+label: Banner
+order: 30
+desc: Display contextual information and status messages with Payload's Banner component.
+keywords: ui, component, banner, notice, status, message
+---
+
+The `Banner` component displays a short message that needs more emphasis than surrounding content. Use its type to communicate the purpose of the message.
+
+## Import
+
+```tsx
+import { Banner } from '@payloadcms/ui'
+```
+
+## Basic usage
+
+<ComponentPreview component="Banner" example="basic" />
+
+## Types
+
+Use `success` to confirm an action, `error` when something failed, and `info` for additional context. Use the default type for neutral messages.
+
+<ComponentPreview component="Banner" example="variants" />
+
+Keep banner copy concise and include the next action when the user must resolve something.
+
+## Common props
+
+| Prop        | Type                                          | Default     | Description                                 |
+| ----------- | --------------------------------------------- | ----------- | ------------------------------------------- |
+| `children`  | `ReactNode`                                   | —           | Message displayed inside the banner.        |
+| `type`      | `'default' \| 'success' \| 'error' \| 'info'` | `'default'` | Sets the message style.                     |
+| `icon`      | `ReactNode`                                   | —           | Displays an icon beside the message.        |
+| `alignIcon` | `'left' \| 'right'`                           | `'right'`   | Positions the icon.                         |
+| `onClick`   | `(event: MouseEvent) => void`                 | —           | Makes the banner actionable.                |
+| `to`        | `string`                                      | —           | Makes the banner navigate to the given URL. |

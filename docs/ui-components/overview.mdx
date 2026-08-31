@@ -1,0 +1,50 @@
+---
+title: UI Components
+label: Overview
+order: 10
+desc: Use the React components that power the Payload Admin Panel in your own Custom Components.
+keywords: ui, components, react, admin panel, custom components, payload ui
+---
+
+The `@payloadcms/ui` package contains the React components used throughout the Payload Admin Panel. You can use these components to build Custom Components that match the surrounding Admin Panel interface and behavior.
+
+Each component guide includes working examples for the selected version of Payload, common props, accessibility guidance, and any providers or setup the component requires.
+
+<Banner type="warning">
+  UI component APIs can change between major versions of Payload. Use the
+  version selector to view examples that match the version installed in your
+  project.
+</Banner>
+
+## Using UI components
+
+Inside a Payload Admin Panel Custom Component, import components from `@payloadcms/ui`:
+
+```tsx
+'use client'
+
+import { Button } from '@payloadcms/ui'
+
+export function SaveButton() {
+  return <Button>Save changes</Button>
+}
+```
+
+Some components depend on context provided by the Admin Panel. Each guide calls out those requirements when a component cannot be rendered independently.
+
+## Components
+
+- [AnimateHeight](./animate-height)
+- [Banner](./banner)
+- [Button](./button)
+- [Card](./card)
+- [Collapsible](./collapsible)
+- [CopyToClipboard](./copy-to-clipboard)
+- [ErrorPill](./error-pill)
+- [Gutter](./gutter)
+- [Hamburger](./hamburger)
+- [Pill](./pill)
+- [PillSelector](./pill-selector)
+- [ShimmerEffect](./shimmer-effect)
+- [Thumbnail](./thumbnail)
+- [Tooltip](./tooltip)

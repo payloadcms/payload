@@ -1,0 +1,34 @@
+---
+title: Tooltip
+label: Tooltip
+order: 150
+desc: Display brief contextual help with Payload's Tooltip component.
+keywords: ui, component, tooltip, help, label
+---
+
+The `Tooltip` component displays a short label or explanation near a control. Its nearest positioned ancestor determines where the tooltip is anchored.
+
+## Import
+
+```tsx
+import { Tooltip } from '@payloadcms/ui'
+```
+
+## Interactive usage
+
+<ComponentPreview component="Tooltip" example="interactive" />
+
+Keep tooltip content brief. Important instructions should remain visible on the page rather than appearing only on hover or focus.
+
+## Common props
+
+| Prop                | Type                            | Default    | Description                                              |
+| ------------------- | ------------------------------- | ---------- | -------------------------------------------------------- |
+| `children`          | `ReactNode`                     | —          | Content displayed inside the tooltip.                    |
+| `show`              | `boolean`                       | `true`     | Controls tooltip visibility.                             |
+| `position`          | `'top' \| 'bottom'`             | Automatic  | Sets the preferred position.                             |
+| `alignCaret`        | `'left' \| 'center' \| 'right'` | `'center'` | Aligns the tooltip caret.                                |
+| `delay`             | `number`                        | `350`      | Delay before showing the tooltip, in milliseconds.       |
+| `staticPositioning` | `boolean`                       | `false`    | Disables automatic position detection.                   |
+| `boundingRef`       | `RefObject<HTMLElement>`        | —          | Sets the boundary used for automatic position detection. |
+| `className`         | `string`                        | —          | Adds a custom class to the tooltip.                      |

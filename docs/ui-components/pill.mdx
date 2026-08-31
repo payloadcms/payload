@@ -1,0 +1,43 @@
+---
+title: Pill
+label: Pill
+order: 50
+desc: Display compact statuses, categories, and actions with Payload's Pill component.
+keywords: ui, component, pill, status, category, tag
+---
+
+The `Pill` component displays compact metadata, a status, or a small action. Keep its label short so it remains easy to scan.
+
+## Import
+
+```tsx
+import { Pill } from '@payloadcms/ui'
+```
+
+## Styles
+
+<ComponentPreview component="Pill" example="styles" />
+
+Use semantic styles only when the label represents that state. For example, use `error` for a failed state rather than decoration.
+
+## Shape
+
+<ComponentPreview component="Pill" example="shapes" />
+
+Pills use Payload's standard small corner radius by default. Add `rounded` when the label should use a fully rounded shape.
+
+## Sizes
+
+<ComponentPreview component="Pill" example="sizes" />
+
+## Common props
+
+| Prop        | Type                                                                                                  | Default    | Description                              |
+| ----------- | ----------------------------------------------------------------------------------------------------- | ---------- | ---------------------------------------- |
+| `children`  | `ReactNode`                                                                                           | —          | Visible pill content.                    |
+| `pillStyle` | `'light' \| 'light-gray' \| 'dark' \| 'white' \| 'always-white' \| 'success' \| 'warning' \| 'error'` | `'light'`  | Sets the visual style.                   |
+| `size`      | `'small' \| 'medium'`                                                                                 | `'medium'` | Sets the pill height and spacing.        |
+| `rounded`   | `boolean`                                                                                             | `false`    | Uses a fully rounded shape.              |
+| `icon`      | `ReactNode`                                                                                           | —          | Displays an icon beside the label.       |
+| `onClick`   | `() => void`                                                                                          | —          | Renders the pill as a button.            |
+| `to`        | `string`                                                                                              | —          | Renders the pill as a navigational link. |

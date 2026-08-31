@@ -1,0 +1,69 @@
+---
+title: Button
+label: Button
+order: 20
+desc: Use Payload's Button component for actions and navigation in Admin Panel Custom Components.
+keywords: ui, component, button, action, link, loading, disabled
+---
+
+The `Button` component lets a user perform an action or navigate to another location. Use its style to communicate the importance and consequence of the action.
+
+## Import
+
+Inside a Payload Admin Panel Custom Component:
+
+```tsx
+import { Button } from '@payloadcms/ui'
+```
+
+You can also import the component directly:
+
+```tsx
+import { Button } from '@payloadcms/ui/elements/Button'
+```
+
+## Basic usage
+
+Use a primary button for the main action in a section or view.
+
+<ComponentPreview component="Button" example="primary" />
+
+## Styles
+
+Use `secondary` for supporting actions. Use `error` when an action is destructive or difficult to reverse.
+
+<ComponentPreview component="Button" example="styles" />
+
+Avoid placing multiple primary buttons next to one another. When actions have equal emphasis, use secondary buttons instead.
+
+## Disabled state
+
+Use `disabled` when an action is temporarily unavailable. When possible, explain what the user must do before the action becomes available.
+
+<ComponentPreview component="Button" example="disabled" />
+
+## Sizes
+
+Buttons support `xsmall`, `small`, `medium`, and `large` sizes. Use `medium` unless the surrounding interface establishes another size.
+
+<ComponentPreview component="Button" example="sizes" />
+
+## Accessibility
+
+- Use a short, action-oriented label that describes what happens next.
+- Provide `aria-label` when an icon-only button has no visible label.
+- Do not rely on color alone to explain a destructive or disabled action.
+- Use `type="submit"` only when the button submits its containing form.
+- Use a link-style button for navigation rather than handling navigation in `onClick`.
+
+## Common props
+
+| Prop          | Type                                                                                                                        | Default     | Description                                      |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------- | ----------- | ------------------------------------------------ |
+| `buttonStyle` | `'primary' \| 'secondary' \| 'error' \| 'dashed' \| 'icon-label' \| 'pill' \| 'subtle' \| 'tab' \| 'transparent' \| 'none'` | `'primary'` | Sets the visual emphasis.                        |
+| `children`    | `ReactNode`                                                                                                                 | —           | Visible button content.                          |
+| `disabled`    | `boolean`                                                                                                                   | `false`     | Prevents interaction.                            |
+| `icon`        | `ReactNode \| 'chevron' \| 'edit' \| 'plus' \| 'x'`                                                                         | —           | Displays an icon beside or instead of the label. |
+| `margin`      | `boolean`                                                                                                                   | `true`      | Applies the default outer margin.                |
+| `size`        | `'xsmall' \| 'small' \| 'medium' \| 'large'`                                                                                | `'medium'`  | Sets the button height and spacing.              |
+| `type`        | `'button' \| 'submit'`                                                                                                      | `'button'`  | Sets the native button type.                     |
