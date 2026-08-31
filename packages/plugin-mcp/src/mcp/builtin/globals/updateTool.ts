@@ -9,6 +9,10 @@ import {
   getGlobalVirtualFieldNames,
   stripVirtualFields,
 } from '../../../utils/getVirtualFieldNames.js'
+import {
+  entityHasLocalizedRowContainers,
+  stripCrossLocaleRowIDs,
+} from '../../../utils/stripCrossLocaleRowIDs.js'
 import { transformPointDataToPayload } from '../../../utils/transformPointDataToPayload.js'
 import { validateGlobalData } from '../validateEntityData.js'
 
@@ -74,6 +78,39 @@ export const updateGlobalTool = defineGlobalTool({
     }
 
     const parsedData = transformPointDataToPayload(inputData)
+
+    // See the collection update tool: row ids echoed from a read of another locale must not be
+    // written into the locale being updated.
+    const globalConfig = payload.config.globals.find((global) => global.slug === globalSlug)
+    if (
+      globalConfig &&
+      locale !== 'all' &&
+      entityHasLocalizedRowContainers({
+        blocks: payload.config.blocks,
+        fields: globalConfig.flattenedFields,
+      })
+    ) {
+      let existingDoc: Record<string, unknown> | undefined
+      try {
+        existingDoc = (await payload.findGlobal({
+          slug: globalSlug,
+          depth: 0,
+          draft,
+          fallbackLocale: false,
+          overrideAccess: authorizedMCP.overrideAccess,
+          req,
+          ...(locale ? { locale } : {}),
+        })) as Record<string, unknown>
+      } catch {
+        // No read access — strip all ids and let the update operation report its own error.
+      }
+      stripCrossLocaleRowIDs({
+        blocks: payload.config.blocks,
+        data: parsedData,
+        existingDoc,
+        fields: globalConfig.flattenedFields,
+      })
+    }
 
     const updateOptions: Parameters<typeof payload.updateGlobal>[0] = {
       slug: globalSlug,

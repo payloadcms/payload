@@ -10,6 +10,10 @@ import {
   stripVirtualFields,
 } from '../../../utils/getVirtualFieldNames.js'
 import { getCollectionInputSchema } from '../../../utils/schemaConversion/getEntityInputSchema.js'
+import {
+  entityHasLocalizedRowContainers,
+  stripCrossLocaleRowIDs,
+} from '../../../utils/stripCrossLocaleRowIDs.js'
 import { transformPointDataToPayload } from '../../../utils/transformPointDataToPayload.js'
 import { whereSchema } from '../../../utils/whereSchema.js'
 import { validateCollectionData } from '../validateEntityData.js'
@@ -133,6 +137,47 @@ export const updateDocumentTool = defineCollectionTool({
 
     const parsedData = transformPointDataToPayload(inputData)
     const file = await resolveFile({ collectionSlug, input: fileInput, req })
+
+    // Row ids inside localized arrays/blocks belong to one locale. A client that read the
+    // document in another locale echoes that locale's row ids back here; drop the ones that
+    // don't exist in the locale being updated so Payload generates fresh ids instead of
+    // storing one row id under two locales (a unique constraint violation on relational
+    // adapters). For updates by `where`, one data payload applies to many documents, so
+    // there is no reference document and every such row id is dropped.
+    const collectionConfig = payload.collections[collectionSlug]?.config
+    if (
+      collectionConfig &&
+      locale !== 'all' &&
+      entityHasLocalizedRowContainers({
+        blocks: payload.config.blocks,
+        fields: collectionConfig.flattenedFields,
+      })
+    ) {
+      let existingDoc: Record<string, unknown> | undefined
+      if (id) {
+        try {
+          existingDoc = (await payload.findByID({
+            id,
+            collection: collectionSlug,
+            depth: 0,
+            draft,
+            fallbackLocale: false,
+            overrideAccess: authorizedMCP.overrideAccess,
+            req,
+            ...(locale ? { locale } : {}),
+          })) as Record<string, unknown>
+        } catch {
+          // Missing document or no read access — strip all ids and let the update
+          // operation report its own error.
+        }
+      }
+      stripCrossLocaleRowIDs({
+        blocks: payload.config.blocks,
+        data: parsedData,
+        existingDoc,
+        fields: collectionConfig.flattenedFields,
+      })
+    }
 
     const whereClause: Where = where ?? {}
 

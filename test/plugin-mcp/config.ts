@@ -8,6 +8,7 @@ import * as z from 'zod'
 import { testRBACPlugin } from '../__helpers/plugins/rbac/index.js'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { FieldTypes } from './collections/FieldTypes.js'
+import { LocalizedItems } from './collections/LocalizedItems.js'
 import { DispatchMedia, Media } from './collections/Media.js'
 import { ModifiedPrompts } from './collections/ModifiedPrompts.js'
 import { Pages } from './collections/Pages.js'
@@ -46,6 +47,7 @@ export default buildConfigWithDefaults({
     ReturnedResources,
     Pages,
     FieldTypes,
+    LocalizedItems,
   ],
   localization: {
     defaultLocale: 'en',
