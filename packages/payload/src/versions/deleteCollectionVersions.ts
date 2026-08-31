@@ -13,6 +13,12 @@ type Args = {
   slug: string
 }
 
+/**
+ * Deletes every version belonging to one parent document, or to many at once via `ids`.
+ *
+ * @internal - this may break or be removed at any time. It is exported from the package root only
+ * so that Payload 2.x `payload/versions` imports keep resolving, not as an API to build on.
+ */
 export const deleteCollectionVersions = async ({
   id,
   slug,
