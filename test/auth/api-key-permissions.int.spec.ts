@@ -4,7 +4,7 @@ import path from 'path'
 import { createLocalReq } from 'payload'
 import { getEntityPermissions } from 'payload/internal'
 import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
 
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { devUser } from '../credentials.js'
@@ -17,6 +17,8 @@ import {
 const dirname = path.dirname(fileURLToPath(import.meta.url))
 
 describe('API key permissions', () => {
+  const createdReadableAPIKeyIDs: Array<number | string> = []
+  const createdRestrictedAPIKeyIDs: Array<number | string> = []
   let payload: Payload
 
   beforeAll(async () => {
@@ -25,6 +27,25 @@ describe('API key permissions', () => {
 
   afterAll(async () => {
     await payload.destroy()
+  })
+
+  afterEach(async () => {
+    for (const id of createdReadableAPIKeyIDs) {
+      await payload.delete({
+        collection: apiKeysWithReadableKeysSlug,
+        where: { id: { equals: id } },
+      })
+    }
+
+    for (const id of createdRestrictedAPIKeyIDs) {
+      await payload.delete({
+        collection: apiKeysWithRestrictedFieldAccessSlug,
+        where: { id: { equals: id } },
+      })
+    }
+
+    createdReadableAPIKeyIDs.length = 0
+    createdRestrictedAPIKeyIDs.length = 0
   })
 
   it('should allow ID-aware field access to read a self-owned API key', async () => {
@@ -61,6 +82,9 @@ describe('API key permissions', () => {
         enableAPIKey: true,
       },
     })
+
+    createdReadableAPIKeyIDs.push(target.id)
+
     const req = await createLocalReq({ user: docs[0] }, payload)
 
     const permissions = await getEntityPermissions({
@@ -88,6 +112,9 @@ describe('API key permissions', () => {
         enableAPIKey: true,
       },
     })
+
+    createdRestrictedAPIKeyIDs.push(target.id)
+
     const req = await createLocalReq({ user: docs[0] }, payload)
 
     const permissions = await getEntityPermissions({

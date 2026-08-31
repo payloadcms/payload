@@ -16,6 +16,24 @@ import { withServerGeneratedAPIKey } from '../apiKeys/serverGeneratedAPIKeyReque
 import { executeAccess } from '../executeAccess.js'
 import { hasWhereAccessResult } from '../types.js'
 
+export const generateAPIKeyHandler: PayloadHandler = async (req) => {
+  const { id, collection } = getRequestCollectionWithID(req)
+
+  if (!req.user || !collection.config.auth?.useAPIKey) {
+    throw new Forbidden(req.t)
+  }
+
+  const doc = await generateAPIKeyForDocument({ id, collection, req, requestData: req.data ?? {} })
+
+  return Response.json(doc, {
+    headers: headersWithCors({
+      headers: new Headers(),
+      req,
+    }),
+    status: httpStatus.OK,
+  })
+}
+
 const generateAPIKeyForDocument = async ({
   id,
   collection,
@@ -83,32 +101,16 @@ const generateAPIKeyForDocument = async ({
     }
   }
 
-  return withServerGeneratedAPIKey(req, () =>
-    updateByIDOperation({
-      id,
-      collection,
-      data,
-      overrideAccess: false,
-      preserveLock: true,
-      req,
-    }),
-  )
-}
-
-export const generateAPIKeyHandler: PayloadHandler = async (req) => {
-  const { id, collection } = getRequestCollectionWithID(req)
-
-  if (!req.user || !collection.config.auth?.useAPIKey) {
-    throw new Forbidden(req.t)
-  }
-
-  const doc = await generateAPIKeyForDocument({ id, collection, req, requestData: req.data ?? {} })
-
-  return Response.json(doc, {
-    headers: headersWithCors({
-      headers: new Headers(),
-      req,
-    }),
-    status: httpStatus.OK,
+  return withServerGeneratedAPIKey({
+    callback: () =>
+      updateByIDOperation({
+        id,
+        collection,
+        data,
+        overrideAccess: false,
+        preserveLock: true,
+        req,
+      }),
+    req,
   })
 }

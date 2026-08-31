@@ -7,10 +7,13 @@ export const isServerGeneratedAPIKeyRequest = (req: PayloadRequest): boolean =>
   serverGeneratedAPIKeyRequests.has(req)
 
 /** Allows API key assignment while Payload persists a server-generated key. */
-export const withServerGeneratedAPIKey = async <T>(
-  req: PayloadRequest,
-  callback: () => Promise<T>,
-): Promise<T> => {
+export const withServerGeneratedAPIKey = async <T>({
+  callback,
+  req,
+}: {
+  callback: () => Promise<T>
+  req: PayloadRequest
+}): Promise<T> => {
   serverGeneratedAPIKeyRequests.add(req)
 
   try {

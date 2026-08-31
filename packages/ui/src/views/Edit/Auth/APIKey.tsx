@@ -16,89 +16,6 @@ import { useTranslation } from '../../../providers/Translation/index.js'
 const baseClass = 'api-key'
 const fieldBaseClass = 'field-type'
 
-const useAPIKeyLabel = () => {
-  const { i18n } = useTranslation()
-  const { getEntityConfig } = useConfig()
-  const { collectionSlug } = useDocumentInfo()
-  const apiKeyField: TextFieldClient = getEntityConfig({ collectionSlug })?.fields?.find(
-    (field) => 'name' in field && field.name === 'apiKey',
-  ) as TextFieldClient
-
-  return useMemo(() => {
-    let label: Record<string, string> | string = 'API Key'
-
-    if (apiKeyField?.label) {
-      label = apiKeyField.label
-    }
-
-    return getTranslation(label, i18n)
-  }, [apiKeyField, i18n])
-}
-
-const useGenerateAPIKey = ({
-  onGenerationComplete,
-  onGenerationStart,
-}: {
-  onGenerationComplete?: (updatedAt?: string) => void
-  onGenerationStart?: () => void
-}) => {
-  const {
-    config: {
-      routes: { api },
-    },
-  } = useConfig()
-  const { id, collectionSlug, setData } = useDocumentInfo()
-  const { i18n, t } = useTranslation()
-
-  return useCallback(async (): Promise<{ apiKey?: string; updatedAt?: string }> => {
-    onGenerationStart?.()
-
-    let updatedAt: string | undefined
-
-    try {
-      if (!id) {
-        throw new Error(t('general:error'))
-      }
-
-      const response = await fetch(
-        formatAdminURL({
-          apiRoute: api,
-          path: `/${collectionSlug}/generate-api-key/${id}`,
-        }),
-        {
-          credentials: 'include',
-          headers: {
-            'Accept-Language': i18n.language,
-            'Content-Type': 'application/json',
-          },
-          method: 'post',
-        },
-      )
-      const result = await response.json()
-
-      if (!response.ok) {
-        throw new Error(result.errors?.[0]?.message ?? t('general:error'))
-      }
-
-      updatedAt = typeof result.updatedAt === 'string' ? result.updatedAt : undefined
-
-      if (Object.keys(result).length > 0) {
-        setData(result)
-      }
-
-      return result
-    } finally {
-      onGenerationComplete?.(updatedAt)
-    }
-  }, [api, collectionSlug, i18n.language, id, onGenerationComplete, onGenerationStart, setData, t])
-}
-
-const APIKeyLabel = ({ label }: { label: string }) => (
-  <label className={`${baseClass}__label field-label`} htmlFor="apiKey">
-    <span>{label}</span>
-  </label>
-)
-
 export const UnreadableAPIKey: React.FC<{
   readonly canGenerate: boolean
   readonly description: string
@@ -216,3 +133,86 @@ export const APIKey: React.FC<{
     </React.Fragment>
   )
 }
+
+const useAPIKeyLabel = () => {
+  const { i18n } = useTranslation()
+  const { getEntityConfig } = useConfig()
+  const { collectionSlug } = useDocumentInfo()
+  const apiKeyField: TextFieldClient = getEntityConfig({ collectionSlug })?.fields?.find(
+    (field) => 'name' in field && field.name === 'apiKey',
+  ) as TextFieldClient
+
+  return useMemo(() => {
+    let label: Record<string, string> | string = 'API Key'
+
+    if (apiKeyField?.label) {
+      label = apiKeyField.label
+    }
+
+    return getTranslation(label, i18n)
+  }, [apiKeyField, i18n])
+}
+
+const useGenerateAPIKey = ({
+  onGenerationComplete,
+  onGenerationStart,
+}: {
+  onGenerationComplete?: (updatedAt?: string) => void
+  onGenerationStart?: () => void
+}) => {
+  const {
+    config: {
+      routes: { api },
+    },
+  } = useConfig()
+  const { id, collectionSlug, setData } = useDocumentInfo()
+  const { i18n, t } = useTranslation()
+
+  return useCallback(async (): Promise<{ apiKey?: string; updatedAt?: string }> => {
+    onGenerationStart?.()
+
+    let updatedAt: string | undefined
+
+    try {
+      if (!id) {
+        throw new Error(t('general:error'))
+      }
+
+      const response = await fetch(
+        formatAdminURL({
+          apiRoute: api,
+          path: `/${collectionSlug}/generate-api-key/${id}`,
+        }),
+        {
+          credentials: 'include',
+          headers: {
+            'Accept-Language': i18n.language,
+            'Content-Type': 'application/json',
+          },
+          method: 'post',
+        },
+      )
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.errors?.[0]?.message ?? t('general:error'))
+      }
+
+      updatedAt = typeof result.updatedAt === 'string' ? result.updatedAt : undefined
+
+      if (Object.keys(result).length > 0) {
+        setData(result)
+      }
+
+      return result
+    } finally {
+      onGenerationComplete?.(updatedAt)
+    }
+  }, [api, collectionSlug, i18n.language, id, onGenerationComplete, onGenerationStart, setData, t])
+}
+
+const APIKeyLabel = ({ label }: { label: string }) => (
+  <label className={`${baseClass}__label field-label`} htmlFor="apiKey">
+    <span>{label}</span>
+  </label>
+)

@@ -1275,11 +1275,60 @@ describe('Auth', () => {
   })
 
   describe('API Key', () => {
+    const createdAPIKeyIDs: Array<number | string> = []
+    const createdHiddenAPIKeyIDs: Array<number | string> = []
+    const createdReadableAPIKeyIDs: Array<number | string> = []
+    const createdRestrictedAPIKeyIDs: Array<number | string> = []
+    const createdLockIDs: Array<number | string> = []
+
+    afterEach(async () => {
+      for (const id of createdLockIDs) {
+        await payload.delete({
+          collection: 'payload-locked-documents',
+          where: { id: { equals: id } },
+        })
+      }
+
+      for (const id of createdReadableAPIKeyIDs) {
+        await payload.delete({
+          collection: apiKeysWithReadableKeysSlug,
+          where: { id: { equals: id } },
+        })
+      }
+
+      for (const id of createdHiddenAPIKeyIDs) {
+        await payload.delete({
+          collection: apiKeysWithHiddenKeysSlug,
+          where: { id: { equals: id } },
+        })
+      }
+
+      for (const id of createdRestrictedAPIKeyIDs) {
+        await payload.delete({
+          collection: apiKeysWithRestrictedFieldAccessSlug,
+          where: { id: { equals: id } },
+        })
+      }
+
+      for (const id of createdAPIKeyIDs) {
+        await payload.delete({
+          collection: apiKeysSlug,
+          where: { id: { equals: id } },
+        })
+      }
+
+      createdAPIKeyIDs.length = 0
+      createdHiddenAPIKeyIDs.length = 0
+      createdReadableAPIKeyIDs.length = 0
+      createdRestrictedAPIKeyIDs.length = 0
+      createdLockIDs.length = 0
+    })
+
     describe('API key assignment', () => {
       const staticAPIKey = '01234567-89ab-cdef-0123-456789abcdef'
       const staticAPIKeyIndex = '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef'
 
-      it('rejects a caller-supplied API key through REST', async () => {
+      it('should reject a caller-supplied API key through REST', async () => {
         const { token } = await payload.login({
           collection: slug,
           data: {
@@ -1305,7 +1354,7 @@ describe('Auth', () => {
         ])
       })
 
-      it('rejects a caller-supplied API key through GraphQL', async () => {
+      it('should reject a caller-supplied API key through GraphQL', async () => {
         const { token } = await payload.login({
           collection: slug,
           data: {
@@ -1345,6 +1394,9 @@ describe('Auth', () => {
             enableAPIKey: true,
           },
         })
+
+        createdAPIKeyIDs.push(user.id)
+
         const storedBefore = await payload.findByID({
           id: user.id,
           collection: apiKeysSlug,
@@ -1369,11 +1421,6 @@ describe('Auth', () => {
           id: user.id,
           collection: apiKeysSlug,
           showHiddenFields: true,
-        })
-
-        await payload.delete({
-          id: user.id,
-          collection: apiKeysSlug,
         })
 
         expect(response.status).toBe(400)
@@ -1420,7 +1467,7 @@ describe('Auth', () => {
         ])
       })
 
-      it('rejects a caller-supplied API key through the Local API without overrideAccess', async () => {
+      it('should reject a caller-supplied API key through the Local API without overrideAccess', async () => {
         const { docs } = await payload.find({
           collection: slug,
           limit: 1,
@@ -1448,7 +1495,7 @@ describe('Auth', () => {
         })
       })
 
-      it('allows a caller-supplied API key through the Local API with overrideAccess', async () => {
+      it('should allow a caller-supplied API key through the Local API with overrideAccess', async () => {
         const user = await payload.create({
           collection: apiKeysSlug,
           data: {
@@ -1458,15 +1505,12 @@ describe('Auth', () => {
           overrideAccess: true,
         })
 
-        expect(user.apiKey).toBe(staticAPIKey)
+        createdAPIKeyIDs.push(user.id)
 
-        await payload.delete({
-          collection: apiKeysSlug,
-          id: user.id,
-        })
+        expect(user.apiKey).toBe(staticAPIKey)
       })
 
-      it('rejects a caller-supplied API key when updating through REST', async () => {
+      it('should reject a caller-supplied API key when updating through REST', async () => {
         const originalAPIKey = uuid()
         const user = await payload.create({
           collection: apiKeysSlug,
@@ -1475,6 +1519,9 @@ describe('Auth', () => {
             enableAPIKey: true,
           },
         })
+
+        createdAPIKeyIDs.push(user.id)
+
         const { token } = await payload.login({
           collection: slug,
           data: {
@@ -1507,6 +1554,9 @@ describe('Auth', () => {
             enableAPIKey: true,
           },
         })
+
+        createdAPIKeyIDs.push(user.id)
+
         const { token } = await payload.login({
           collection: slug,
           data: {
@@ -1532,11 +1582,6 @@ describe('Auth', () => {
           expect.objectContaining({ path: 'apiKey' }),
         ])
         expect(updated.apiKey).toBe(originalAPIKey)
-
-        await payload.delete({
-          collection: apiKeysSlug,
-          id: user.id,
-        })
       })
 
       it('should reject clearing an API key through the Local API without overrideAccess', async () => {
@@ -1548,6 +1593,9 @@ describe('Auth', () => {
             enableAPIKey: true,
           },
         })
+
+        createdAPIKeyIDs.push(user.id)
+
         const { docs } = await payload.find({
           collection: slug,
           limit: 1,
@@ -1580,20 +1628,17 @@ describe('Auth', () => {
         })
 
         expect(updated.apiKey).toBe(originalAPIKey)
-
-        await payload.delete({
-          collection: apiKeysSlug,
-          id: user.id,
-        })
       })
 
-      it('allows a caller-supplied API key update through the Local API with overrideAccess', async () => {
+      it('should allow a caller-supplied API key update through the Local API with overrideAccess', async () => {
         const user = await payload.create({
           collection: apiKeysSlug,
           data: {
             enableAPIKey: true,
           },
         })
+
+        createdAPIKeyIDs.push(user.id)
 
         const updated = await payload.update({
           collection: apiKeysSlug,
@@ -1609,13 +1654,15 @@ describe('Auth', () => {
     })
 
     describe('server-generated API keys', () => {
-      it('generates an API key when creating an enabled document', async () => {
+      it('should generate an API key when creating an enabled document', async () => {
         const user = await payload.create({
           collection: apiKeysSlug,
           data: {
             enableAPIKey: true,
           },
         })
+
+        createdAPIKeyIDs.push(user.id)
 
         expect(user.apiKey).toEqual(expect.any(String))
         const rawUser = await payload.db.findOne<Record<string, unknown>>({
@@ -1636,13 +1683,15 @@ describe('Auth', () => {
         expect(response.user?.id).toBe(user.id)
       })
 
-      it('generates an API key when enabling a document without one', async () => {
+      it('should generate an API key when enabling a document without one', async () => {
         const user = await payload.create({
           collection: apiKeysSlug,
           data: {
             enableAPIKey: false,
           },
         })
+
+        createdAPIKeyIDs.push(user.id)
 
         const enabledUser = await payload.update({
           collection: apiKeysSlug,
@@ -1665,7 +1714,7 @@ describe('Auth', () => {
         expect(response.user?.id).toBe(user.id)
       })
 
-      it('restores the existing API key when re-enabling a document', async () => {
+      it('should restore the existing API key when re-enabling a document', async () => {
         const apiKey = uuid()
         const user = await payload.create({
           collection: apiKeysSlug,
@@ -1674,6 +1723,8 @@ describe('Auth', () => {
             enableAPIKey: true,
           },
         })
+
+        createdAPIKeyIDs.push(user.id)
 
         await payload.update({
           collection: apiKeysSlug,
@@ -1706,8 +1757,6 @@ describe('Auth', () => {
     })
 
     describe('generate API key endpoint', () => {
-      const populatedAuthPeerIDs: Array<number | string> = []
-      const populatedAuthUserIDs: Array<number | string> = []
       let authenticatedUserID: number | string
       let token: string
 
@@ -1724,20 +1773,11 @@ describe('Auth', () => {
         token = loginResult.token
       })
 
-      afterEach(async () => {
+      afterEach(() => {
         vitest.restoreAllMocks()
-
-        for (const id of populatedAuthUserIDs) {
-          await payload.delete({ id, collection: apiKeysWithReadableKeysSlug })
-        }
-        for (const id of populatedAuthPeerIDs) {
-          await payload.delete({ id, collection: apiKeysSlug })
-        }
-        populatedAuthUserIDs.length = 0
-        populatedAuthPeerIDs.length = 0
       })
 
-      it('rejects unauthenticated requests before API key access checks', async () => {
+      it('should reject unauthenticated requests before API key access checks', async () => {
         const updateAccess = vitest.spyOn(
           payload.collections[partialDisableLocalStrategiesSlug].config.access,
           'update',
@@ -1754,7 +1794,7 @@ describe('Auth', () => {
         expect(updateAccess).not.toHaveBeenCalled()
       })
 
-      it('rejects collections with API keys disabled before access checks', async () => {
+      it('should reject collections with API keys disabled before access checks', async () => {
         const updateAccess = vitest.spyOn(
           payload.collections[partialDisableLocalStrategiesSlug].config.access,
           'update',
@@ -1773,7 +1813,7 @@ describe('Auth', () => {
         expect(updateAccess).not.toHaveBeenCalled()
       })
 
-      it('returns a generated API key to its owner', async () => {
+      it('should return a generated API key to its owner', async () => {
         const response = await restClient.POST(`/${slug}/generate-api-key/${authenticatedUserID}`, {
           headers: {
             Authorization: `JWT ${token}`,
@@ -1785,7 +1825,7 @@ describe('Auth', () => {
         expect(result.apiKey).toEqual(expect.any(String))
       })
 
-      it('immediately generates and returns a readable API key', async () => {
+      it('should immediately generate and return a readable API key', async () => {
         const originalAPIKey = uuid()
         const user = await payload.create({
           collection: apiKeysWithReadableKeysSlug,
@@ -1794,6 +1834,8 @@ describe('Auth', () => {
             enableAPIKey: true,
           },
         })
+
+        createdReadableAPIKeyIDs.push(user.id)
 
         const response = await restClient.POST(
           `/${apiKeysWithReadableKeysSlug}/generate-api-key/${user.id}`,
@@ -1818,7 +1860,7 @@ describe('Auth', () => {
         )
       })
 
-      it('applies the generated API key immediately', async () => {
+      it('should apply the generated API key immediately', async () => {
         const originalAPIKey = uuid()
         const user = await payload.create({
           collection: apiKeysSlug,
@@ -1827,6 +1869,8 @@ describe('Auth', () => {
             enableAPIKey: true,
           },
         })
+
+        createdAPIKeyIDs.push(user.id)
 
         const response = await restClient.POST(`/${apiKeysSlug}/generate-api-key/${user.id}`, {
           headers: {
@@ -1862,7 +1906,7 @@ describe('Auth', () => {
         expect(newAuthentication.user?.id).toBe(user.id)
       })
 
-      it('immediately generates an unreadable API key without returning it', async () => {
+      it('should immediately generate an unreadable API key without returning it', async () => {
         const originalAPIKey = uuid()
         const user = await payload.create({
           collection: apiKeysWithHiddenKeysSlug,
@@ -1871,6 +1915,8 @@ describe('Auth', () => {
             enableAPIKey: true,
           },
         })
+
+        createdHiddenAPIKeyIDs.push(user.id)
 
         const response = await restClient.POST(
           `/${apiKeysWithHiddenKeysSlug}/generate-api-key/${user.id}`,
@@ -1892,7 +1938,7 @@ describe('Auth', () => {
         expect(updated.apiKey).not.toBe(originalAPIKey)
       })
 
-      it('rotates a disabled API key without enabling it', async () => {
+      it('should rotate a disabled API key without enabling it', async () => {
         const originalAPIKey = uuid()
         const user = await payload.create({
           collection: apiKeysWithReadableKeysSlug,
@@ -1901,6 +1947,8 @@ describe('Auth', () => {
             enableAPIKey: true,
           },
         })
+
+        createdReadableAPIKeyIDs.push(user.id)
 
         const withEnabledKey = await payload.auth({
           headers: new Headers({
@@ -1961,7 +2009,9 @@ describe('Auth', () => {
           collection: apiKeysSlug,
           data: { apiKey: peerAPIKey, enableAPIKey: true },
         })
-        populatedAuthPeerIDs.push(peer.id)
+
+        createdAPIKeyIDs.push(peer.id)
+
         const apiKey = uuid()
         const user = await payload.create({
           collection: apiKeysWithReadableKeysSlug,
@@ -1971,7 +2021,8 @@ describe('Auth', () => {
             peer: peer.id,
           } as any,
         })
-        populatedAuthUserIDs.push(user.id)
+
+        createdReadableAPIKeyIDs.push(user.id)
 
         const authenticated = await payload.auth({
           headers: new Headers({
@@ -1987,13 +2038,15 @@ describe('Auth', () => {
         expect(authenticatedUser?.peer).not.toHaveProperty('apiKey')
       })
 
-      it('generates a missing API key without enabling it', async () => {
+      it('should generate a missing API key without enabling it', async () => {
         const user = await payload.create({
           collection: apiKeysWithReadableKeysSlug,
           data: {
             enableAPIKey: false,
           },
         })
+
+        createdReadableAPIKeyIDs.push(user.id)
 
         const response = await restClient.POST(
           `/${apiKeysWithReadableKeysSlug}/generate-api-key/${user.id}`,
@@ -2025,13 +2078,16 @@ describe('Auth', () => {
         expect(authentication.user).toBeNull()
       })
 
-      it('preserves the document lock only for API key generation', async () => {
+      it('should preserve the document lock only for API key generation', async () => {
         const user = await payload.create({
           collection: apiKeysWithReadableKeysSlug,
           data: {
             enableAPIKey: false,
           },
         })
+
+        createdReadableAPIKeyIDs.push(user.id)
+
         const lock = await payload.create({
           collection: 'payload-locked-documents',
           data: {
@@ -2045,6 +2101,8 @@ describe('Auth', () => {
             },
           },
         })
+
+        createdLockIDs.push(lock.id)
 
         const response = await restClient.POST(
           `/${apiKeysWithReadableKeysSlug}/generate-api-key/${user.id}`,
@@ -2108,6 +2166,9 @@ describe('Auth', () => {
             enableAPIKey: false,
           },
         })
+
+        createdRestrictedAPIKeyIDs.push(user.id)
+
         const { docs } = await payload.find({
           collection: slug,
           limit: 1,
@@ -2141,7 +2202,7 @@ describe('Auth', () => {
         expect(stored?.apiKeyIndex).toBeNull()
       })
 
-      it('respects custom API key update access', async () => {
+      it('should respect custom API key update access', async () => {
         const originalAPIKey = uuid()
         const user = await payload.create({
           collection: apiKeysWithRestrictedFieldAccessSlug,
@@ -2150,6 +2211,8 @@ describe('Auth', () => {
             enableAPIKey: true,
           },
         })
+
+        createdRestrictedAPIKeyIDs.push(user.id)
 
         const response = await restClient.POST(
           `/${apiKeysWithRestrictedFieldAccessSlug}/generate-api-key/${user.id}`,
@@ -2168,7 +2231,7 @@ describe('Auth', () => {
         expect(updated.apiKey).toBe(originalAPIKey)
       })
 
-      it('rejects a caller-supplied API key', async () => {
+      it('should reject a caller-supplied API key', async () => {
         const originalAPIKey = uuid()
         const user = await payload.create({
           collection: apiKeysWithReadableKeysSlug,
@@ -2177,6 +2240,8 @@ describe('Auth', () => {
             enableAPIKey: true,
           },
         })
+
+        createdReadableAPIKeyIDs.push(user.id)
 
         const response = await restClient.POST(
           `/${apiKeysWithReadableKeysSlug}/generate-api-key/${user.id}`,
@@ -2196,7 +2261,7 @@ describe('Auth', () => {
         expect(updated.apiKey).toBe(originalAPIKey)
       })
 
-      it('requires document update access', async () => {
+      it('should require document update access', async () => {
         const originalAPIKey = uuid()
         const user = await payload.create({
           collection: apiKeysWithReadableKeysSlug,
@@ -2205,6 +2270,8 @@ describe('Auth', () => {
             enableAPIKey: true,
           },
         })
+
+        createdReadableAPIKeyIDs.push(user.id)
 
         const response = await restClient.POST(
           `/${apiKeysWithReadableKeysSlug}/generate-api-key/${user.id}`,
@@ -2221,13 +2288,15 @@ describe('Auth', () => {
         expect(updated.apiKey).toBe(originalAPIKey)
       })
 
-      it('checks document update access before the enabled state', async () => {
+      it('should check document update access before the enabled state', async () => {
         const user = await payload.create({
           collection: apiKeysWithReadableKeysSlug,
           data: {
             enableAPIKey: false,
           },
         })
+
+        createdReadableAPIKeyIDs.push(user.id)
 
         const response = await restClient.POST(
           `/${apiKeysWithReadableKeysSlug}/generate-api-key/${user.id}`,
@@ -2239,13 +2308,15 @@ describe('Auth', () => {
         expect(response.status).toBe(403)
       })
 
-      it('checks document update access before validating a caller-supplied key', async () => {
+      it('should check document update access before validating a caller-supplied key', async () => {
         const user = await payload.create({
           collection: apiKeysWithReadableKeysSlug,
           data: {
             enableAPIKey: true,
           },
         })
+
+        createdReadableAPIKeyIDs.push(user.id)
 
         const response = await restClient.POST(
           `/${apiKeysWithReadableKeysSlug}/generate-api-key/${user.id}`,
