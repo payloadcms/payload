@@ -1621,6 +1621,8 @@ describe('Auth', () => {
     })
 
     describe('generate API key endpoint', () => {
+      const populatedAuthPeerIDs: Array<number | string> = []
+      const populatedAuthUserIDs: Array<number | string> = []
       let authenticatedUserID: number | string
       let token: string
 
@@ -1637,8 +1639,17 @@ describe('Auth', () => {
         token = loginResult.token
       })
 
-      afterEach(() => {
+      afterEach(async () => {
         vitest.restoreAllMocks()
+
+        for (const id of populatedAuthUserIDs) {
+          await payload.delete({ id, collection: apiKeysWithReadableKeysSlug })
+        }
+        for (const id of populatedAuthPeerIDs) {
+          await payload.delete({ id, collection: apiKeysSlug })
+        }
+        populatedAuthUserIDs.length = 0
+        populatedAuthPeerIDs.length = 0
       })
 
       it('rejects unauthenticated requests before API key access checks', async () => {
@@ -1855,6 +1866,40 @@ describe('Auth', () => {
         })
 
         expect(withRegeneratedDisabledKey.user).toBeNull()
+      })
+
+      it('should omit related API keys from the authenticated user', async () => {
+        expect(payload.collections[apiKeysWithReadableKeysSlug].config.auth.depth).toBe(1)
+
+        const peerAPIKey = uuid()
+        const peer = await payload.create({
+          collection: apiKeysSlug,
+          data: { apiKey: peerAPIKey, enableAPIKey: true },
+        })
+        populatedAuthPeerIDs.push(peer.id)
+        const apiKey = uuid()
+        const user = await payload.create({
+          collection: apiKeysWithReadableKeysSlug,
+          data: {
+            apiKey,
+            enableAPIKey: true,
+            peer: peer.id,
+          } as any,
+        })
+        populatedAuthUserIDs.push(user.id)
+
+        const authenticated = await payload.auth({
+          headers: new Headers({
+            Authorization: `${apiKeysWithReadableKeysSlug} API-Key ${apiKey}`,
+          }),
+        })
+        const authenticatedUser = authenticated.user as {
+          peer?: { apiKey?: string; id: number | string } | number
+        } & typeof authenticated.user
+
+        expect(authenticatedUser?.id).toBe(user.id)
+        expect(authenticatedUser?.peer).toMatchObject({ id: peer.id })
+        expect(authenticatedUser?.peer).not.toHaveProperty('apiKey')
       })
 
       it('generates a missing API key without enabling it', async () => {

@@ -9,9 +9,9 @@ import { devUser } from '../credentials.js'
 import { seed } from './seed.js'
 import {
   apiKeysSlug,
-  apiKeysWithRestrictedFieldAccessSlug,
   apiKeysWithHiddenKeysSlug,
   apiKeysWithReadableKeysSlug,
+  apiKeysWithRestrictedFieldAccessSlug,
   BASE_PATH,
   namedSaveToJWTValue,
   partialDisableLocalStrategiesSlug,
@@ -425,7 +425,23 @@ export default buildConfigWithDefaults({
     },
     {
       slug: apiKeysWithReadableKeysSlug,
+      access: {
+        read: ({ req: { user } }) => {
+          if (!user) {
+            return false
+          }
+          if (user.collection === apiKeysWithReadableKeysSlug) {
+            return {
+              id: {
+                equals: user.id,
+              },
+            }
+          }
+          return true
+        },
+      },
       auth: {
+        depth: 1,
         disableLocalStrategy: true,
         useAPIKey: true,
       },
@@ -433,6 +449,11 @@ export default buildConfigWithDefaults({
         {
           name: 'name',
           type: 'text',
+        },
+        {
+          name: 'peer',
+          type: 'relationship',
+          relationTo: apiKeysSlug,
         },
         {
           name: 'apiKey',

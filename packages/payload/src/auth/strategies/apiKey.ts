@@ -1,9 +1,8 @@
 import crypto from 'crypto'
 
 import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
-import type { User } from '../../index.js'
 import type { Where } from '../../types/index.js'
-import type { AuthStrategyFunction } from '../index.js'
+import type { AuthenticatedUser, AuthStrategyFunction } from '../index.js'
 
 export const APIKeyAuthentication =
   (collectionConfig: SanitizedCollectionConfig): AuthStrategyFunction =>
@@ -40,7 +39,7 @@ export const APIKeyAuthentication =
 
         const userQuery = await payload.find({
           collection: collectionConfig.slug,
-          depth: isGraphQL ? 0 : collectionConfig.auth.depth,
+          depth: 0,
           limit: 1,
           overrideAccess: true,
           pagination: false,
@@ -48,12 +47,32 @@ export const APIKeyAuthentication =
         })
 
         if (userQuery.docs && userQuery.docs.length > 0) {
-          const user = userQuery.docs[0]
-          user!.collection = collectionConfig.slug
-          user!._strategy = 'api-key'
+          let user = userQuery.docs[0] as AuthenticatedUser
+          user.collection = collectionConfig.slug
+          user._strategy = 'api-key'
+
+          const depth = isGraphQL ? 0 : collectionConfig.auth.depth!
+
+          // The first query only authenticates the user, so populate separately with access control enabled if needed to protect related credentials.
+          if (depth > 0) {
+            const populatedUser = (await payload.findByID({
+              id: user.id,
+              collection: collectionConfig.slug,
+              depth,
+              disableErrors: true,
+              overrideAccess: false,
+              user,
+            })) as AuthenticatedUser | null
+
+            if (populatedUser) {
+              user = populatedUser
+              user.collection = collectionConfig.slug
+              user._strategy = 'api-key'
+            }
+          }
 
           return {
-            user: user as User,
+            user,
           }
         }
       } catch (ignore) {
