@@ -6,7 +6,7 @@ import {
 } from '@payloadcms/ui/utilities/schedulePublishHandler'
 import fs from 'fs'
 import path from 'path'
-import { createLocalReq, getFileByPath, saveVersion, ValidationError } from 'payload'
+import { createLocalReq, getFileByPath, NotFound, saveVersion, ValidationError } from 'payload'
 import { wait } from 'payload/shared'
 import * as qs from 'qs-esm'
 import { fileURLToPath } from 'url'
@@ -36,6 +36,7 @@ import {
   localizedCollectionSlug,
   localizedGlobalSlug,
   nestedArraySelectCollectionSlug,
+  noVersionsGlobalSlug,
   versionCollectionSlug,
 } from './slugs.js'
 
@@ -3129,6 +3130,14 @@ describe('Versions', () => {
   })
 
   describe('Globals - Local', () => {
+    it('should throw NotFound when findGlobalVersions is called for global without versions', async () => {
+      await expect(
+        payload.findGlobalVersions({
+          slug: noVersionsGlobalSlug,
+        }),
+      ).rejects.toThrow(NotFound)
+    })
+
     let globalVersionID: number | string
     beforeEach(async () => {
       const title2 = 'Here is an updated global title in EN'
@@ -4579,6 +4588,11 @@ describe('Versions', () => {
     })
 
     describe('Globals', () => {
+      it('should return HTTP 404 when GET /api/globals/<slug>/versions is called for global without versions', async () => {
+        const response = await restClient.GET(`/globals/${noVersionsGlobalSlug}/versions`)
+        expect(response.status).toBe(404)
+      })
+
       beforeEach(async () => {
         // Clear global data by resetting to empty values
         await cleanupGlobal({

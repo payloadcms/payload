@@ -42,6 +42,10 @@ export const findVersionByIDOperation = async <T extends TypeWithVersion<T> = an
     showHiddenFields,
   } = args
 
+  if (!globalConfig.versions) {
+    throw new NotFound(req.t)
+  }
+
   // /////////////////////////////////////
   // Access
   // /////////////////////////////////////

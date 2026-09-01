@@ -4,6 +4,7 @@ import type { PayloadRequest, Where } from '../../types/index.js'
 import { executeAccess } from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
+import { NotFound } from '../../errors/index.js'
 import {
   buildVersionGlobalFields,
   type GlobalSlug,
@@ -25,6 +26,10 @@ export const countGlobalVersionsOperation = async <TSlug extends GlobalSlug>(
   const { disableErrors, global, overrideAccess, where } = args
   const req = args.req!
   const { payload } = req
+
+  if (!global.versions) {
+    throw new NotFound(req.t)
+  }
 
   // /////////////////////////////////////
   // beforeOperation - Global
