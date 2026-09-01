@@ -29,6 +29,13 @@ export const registerCLICommand = ({
 
   addCommandInput({ command, definition })
 
+  if (definition.examples?.length) {
+    command.addHelpText(
+      'after',
+      `\nExamples:\n${definition.examples.map((example) => `  ${example}`).join('\n')}`,
+    )
+  }
+
   command.action(() => invokeCLICommand({ command, definition, help, runtime }))
 
   // Let our runtime format the error and clean up Payload instead of exiting immediately.
@@ -58,7 +65,7 @@ export const registerCLICommand = ({
  * registers `[file]`, `--force`, and the shared `--input <json|@file|->` option.
  * This helper also:
  *
- * - infers parsers, descriptions, and choices from the schema
+ * - infers parsers, descriptions, choices, required fields, and defaults from the schema
  * - applies overrides such as positional arguments and custom flags
  * - keeps positional arguments optional in Commander because `--input` may supply
  *   them; the schema still checks whether they are required
@@ -71,6 +78,9 @@ const addCommandInput = ({
   definition: CLICommand
 }): void => {
   const properties = (definition.schema.properties ?? {}) as Record<string, Record<string, unknown>>
+  const requiredFields = new Set(
+    Array.isArray(definition.schema.required) ? definition.schema.required : [],
+  )
   const overrides = definition.cli === false ? {} : definition.cli
 
   if (definition.cli !== false) {
@@ -92,7 +102,7 @@ const addCommandInput = ({
       const isArray = property.type === 'array'
       const argument = new Argument(
         argumentOverride?.syntax ?? `[${field}${isArray ? '...' : ''}]`,
-        typeof property.description === 'string' ? property.description : '',
+        getInputDescription({ isRequired: requiredFields.has(field), property }),
       )
       const parser = argumentOverride?.parse ?? getInferredParser({ property })
 
@@ -104,7 +114,12 @@ const addCommandInput = ({
       command.addArgument(argument)
     }
 
-    for (const [field, property] of Object.entries(properties)) {
+    const options = Object.entries(properties).sort(
+      ([firstField], [secondField]) =>
+        Number(requiredFields.has(secondField)) - Number(requiredFields.has(firstField)),
+    )
+
+    for (const [field, property] of options) {
       const override = overrides[field]
 
       if (override === false || isArgumentOverride(override)) {
@@ -113,9 +128,10 @@ const addCommandInput = ({
 
       const optionOverride = typeof override === 'object' ? override : undefined
       const flags = optionOverride?.flags ?? getInferredOptionFlags({ field, property })
-      const option = new Option(
+      const option = new CLIInputOption(
         flags,
-        typeof property.description === 'string' ? property.description : '',
+        getInputDescription({ isRequired: requiredFields.has(field), property }),
+        field,
       )
       const parser = optionOverride?.parse ?? getInferredParser({ property })
 
@@ -145,9 +161,40 @@ const addCommandInput = ({
   command.addOption(
     new Option(
       '--input <json|@file|->',
-      'Pass the complete command input as JSON, from a file, or from stdin.',
+      'Pass base command input as JSON, from a file, or from stdin; explicit arguments and options override it.',
     ),
   )
+}
+
+const getInputDescription = ({
+  isRequired,
+  property,
+}: {
+  isRequired: boolean
+  property: Record<string, unknown>
+}): string => {
+  const description = typeof property.description === 'string' ? property.description : ''
+  const annotations = [
+    isRequired ? '(required)' : '',
+    'default' in property ? `(default: ${JSON.stringify(property.default)})` : '',
+  ].filter(Boolean)
+
+  return [description, ...annotations].filter(Boolean).join(' ')
+}
+
+/** Keeps a custom flag such as `--file` mapped to its schema field, such as `filePath`. */
+class CLIInputOption extends Option {
+  constructor(
+    flags: string,
+    description: string,
+    private readonly inputField: string,
+  ) {
+    super(flags, description)
+  }
+
+  override attributeName(): string {
+    return this.inputField
+  }
 }
 
 /**
@@ -161,7 +208,7 @@ const isArgumentOverride = (
 ): override is
   | 'argument'
   | {
-      parse?: (value: string) => unknown
+      parse?: (value: string, previous: unknown) => unknown
       position?: number
       syntax?: string
       type: 'argument'

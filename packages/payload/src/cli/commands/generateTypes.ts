@@ -1,5 +1,3 @@
-import type { AcceptedLanguages } from '@payloadcms/translations'
-
 import { initI18n } from '@payloadcms/translations'
 import fs from 'fs/promises'
 import { compile } from 'json-schema-to-typescript'
@@ -9,8 +7,8 @@ import type { SanitizedConfig } from '../../config/types.js'
 import { addSelectGenericsToGeneratedTypes } from '../../utilities/addSelectGenericsToGeneretedTypes.js'
 import { configToJSONSchema } from '../../utilities/configToJSONSchema.js'
 import { getLogger } from '../../utilities/logger.js'
+import { strictObject } from '../../utilities/zod.js'
 import { defineCLICommand } from '../defineCLICommand.js'
-import { strictObject } from '../zod.js'
 
 export type GenerateTypesResult = {
   outputFile: string
@@ -31,9 +29,7 @@ export async function generateTypes(
     logger.info('Compiling TS types for Collections and Globals...')
   }
 
-  const languages = Object.keys(config.i18n.supportedLanguages) as AcceptedLanguages[]
-
-  const language = languages.includes('en') ? 'en' : config.i18n.fallbackLanguage
+  const language = 'en' in config.i18n.supportedLanguages ? 'en' : config.i18n.fallbackLanguage
 
   const i18n = await initI18n({ config: config.i18n, context: 'api', language })
 

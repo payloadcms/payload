@@ -9,8 +9,9 @@ import type { CLIRuntime, Config, SanitizedConfig } from '../config/types.js'
 import { sanitizeConfig } from '../config/sanitize.js'
 import { defineCLICommand } from './defineCLICommand.js'
 import { createCLI } from './index.js'
+import { normalizeHelpArguments } from './program/normalizeHelpArguments.js'
 import { CLICommandError, getCLIErrorOutput } from './runtime/output.js'
-import { strictObject } from './zod.js'
+import { strictObject } from '../utilities/zod.js'
 
 const cliDirectory = path.dirname(fileURLToPath(import.meta.url))
 
@@ -54,6 +55,13 @@ const replacementCommand = defineCLICommand({
 })
 
 describe('createCLI', () => {
+  it('should not treat forwarded help arguments as Payload help', async () => {
+    const cli = await createCLI(createRuntime({ config: createConfig() }))
+    const args = ['node', 'payload', 'build', '--no-types', '--', '--help']
+
+    expect(normalizeHelpArguments({ args, cli })).toEqual(args)
+  })
+
   it('should add built-in command references from one module to the sanitized config', () => {
     const config = createConfig()
 

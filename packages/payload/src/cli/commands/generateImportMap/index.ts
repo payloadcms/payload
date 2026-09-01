@@ -1,5 +1,5 @@
+import { strictObject } from '../../../utilities/zod.js'
 import { defineCLICommand } from '../../defineCLICommand.js'
-import { strictObject } from '../../zod.js'
 import { generateImportMap } from './generateImportMap.js'
 
 export const createGenerateImportMapCommand = defineCLICommand({
