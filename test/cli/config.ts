@@ -28,6 +28,26 @@ export default buildConfigWithDefaults({
   collections: [
     {
       slug: 'pages',
+      access: {
+        read: () => ({ title: { equals: 'Readable through access control' } }),
+      },
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+          required: true,
+        },
+        {
+          name: 'location',
+          type: 'point',
+        },
+      ],
+      versions: {
+        drafts: true,
+      },
+    },
+    {
+      slug: 'media',
       fields: [
         {
           name: 'title',
@@ -35,6 +55,9 @@ export default buildConfigWithDefaults({
           required: true,
         },
       ],
+      upload: {
+        staticDir: path.resolve(dirname, 'generated/media'),
+      },
     },
   ],
   db: {
@@ -46,6 +69,18 @@ export default buildConfigWithDefaults({
       return adapter
     },
   },
+  globals: [
+    {
+      slug: 'settings',
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+          required: true,
+        },
+      ],
+    },
+  ],
   jobs: {
     deleteJobOnComplete: false,
     tasks: [

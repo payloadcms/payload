@@ -303,6 +303,39 @@ export default buildConfig({
 })
 ```
 
+## Working with data from the CLI
+
+Payload includes local commands for inspecting the config and working with collections and globals. They use the Local API, load the current Payload config on every invocation, and bypass access control by default. Run them only from a trusted environment with access to the project.
+
+Start by discovering the available slugs and inspecting the input schema for a collection:
+
+```sh
+pnpm payload getConfigInfo
+pnpm payload getCollectionSchema --slug posts
+```
+
+You can then query data without starting the development server:
+
+```sh
+pnpm payload findDocuments \
+  --slug posts \
+  --where '{"status":{"equals":"published"}}'
+```
+
+Pass `--override-access false` to run a data command through Payload's access control. Local CLI commands do not have a logged-in user, so access is checked as an anonymous request:
+
+```sh
+pnpm payload findDocuments --slug posts --override-access false
+```
+
+The same option is named `overrideAccess` in JSON input:
+
+```sh
+pnpm payload findDocuments --input '{"slug":"posts","overrideAccess":false}'
+```
+
+The built-in read-only data commands cover config and schema inspection, collection queries, counts, distinct values, and collection and global version reads. Use `payload help --json` to list them or `payload help <command> --json` to inspect the exact input accepted by one command.
+
 ## Running commands on a schedule
 
 Use the global `--cron` option to run a command on a cron schedule:
