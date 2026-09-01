@@ -1,8 +1,6 @@
 import type { TFunction } from '@payloadcms/translations'
 import type { JSONSchema4 } from 'json-schema'
 
-import Ajv from 'ajv'
-
 import type { RichTextAdapter } from '../admin/types.js'
 import type { CollectionSlug } from '../index.js'
 import type { Where } from '../types/index.js'
@@ -32,8 +30,8 @@ import type {
 } from './config/types.js'
 
 import { isNumber } from '../utilities/isNumber.js'
-import { getObjectIdHex } from '../utilities/objectIdHex.js'
 import { isValidID } from '../utilities/isValidID.js'
+import { getObjectIdHex } from '../utilities/objectIdHex.js'
 
 export type TextFieldValidation = Validate<string, unknown, unknown, TextField>
 
