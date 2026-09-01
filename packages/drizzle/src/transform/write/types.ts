@@ -28,6 +28,7 @@ export type RelationshipToDelete = {
   itemToRemove?: any // For $remove operations - stores the item data to match
   locale?: string
   path: string
+  prefix?: boolean // For blocks fields - delete all paths starting with this prefix
   relationTo?: string // For simple relationships - stores the relationTo field
 }
 
