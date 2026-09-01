@@ -154,6 +154,7 @@ export const deleteOperation = async <
     })
 
     const errors: BulkOperationResult<TSlug, TSelect>['errors'] = []
+    let didBatchDeleteFail = false
 
     type Doc = DataFromCollectionSlug<TSlug>
     type ResultDoc = BulkOperationResult<TSlug, TSelect>['docs'][number]
@@ -409,6 +410,12 @@ export const deleteOperation = async <
           },
         })
       } catch (error) {
+        didBatchDeleteFail = true
+
+        if (shouldCommit) {
+          await killTransaction(req)
+        }
+
         // The delete covers the whole batch, so a failure here belongs to the batch rather than to
         // any single document. Say so explicitly, otherwise one batch failure reads as N unrelated
         // per-document failures.
@@ -453,12 +460,14 @@ export const deleteOperation = async <
     // Delete Preferences
     // /////////////////////////////////////
 
-    await deleteUserPreferences({
-      collectionConfig,
-      ids: docs.map(({ id }) => id),
-      payload,
-      req,
-    })
+    if (!didBatchDeleteFail) {
+      await deleteUserPreferences({
+        collectionConfig,
+        ids: docs.map(({ id }) => id),
+        payload,
+        req,
+      })
+    }
 
     let result = {
       docs: awaitedDocs.filter((doc): doc is ResultDoc => Boolean(doc)),
@@ -477,7 +486,7 @@ export const deleteOperation = async <
       result,
     })
 
-    if (shouldCommit) {
+    if (shouldCommit && !didBatchDeleteFail) {
       await commitTransaction(req)
     }
 
