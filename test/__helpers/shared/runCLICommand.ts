@@ -10,6 +10,7 @@ type CLIInput =
   | {
       command: string
       configPath?: string
+      reject?: boolean
     }
   | string
 
@@ -17,11 +18,12 @@ type CLIInput =
 export const runCLICommand = async (
   input: CLIInput,
   { cwd = process.cwd() }: { cwd?: string } = {},
-): Promise<{ stderr: string; stdout: string }> => {
+): Promise<{ exitCode: number; stderr: string; stdout: string }> => {
   const command = typeof input === 'string' ? input : input.command
   const configPath = typeof input === 'string' ? undefined : input.configPath
+  const reject = typeof input === 'string' ? true : input.reject
 
-  const { stderr, stdout } = await execa(
+  const { exitCode, stderr, stdout } = await execa(
     process.execPath,
     ['--import', 'tsx', runnerPath, ...parseArgsStringToArgv(command)],
     {
@@ -30,8 +32,9 @@ export const runCLICommand = async (
         ...process.env,
         ...(configPath ? { PAYLOAD_CONFIG_PATH: configPath } : {}),
       },
+      reject,
     },
   )
 
-  return { stderr, stdout }
+  return { exitCode, stderr, stdout }
 }

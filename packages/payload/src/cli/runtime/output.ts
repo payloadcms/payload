@@ -1,5 +1,7 @@
 import { type Command, CommanderError } from 'commander'
 
+import { redirectOutputToStderr, writeToCLIStdout } from './redirectOutputToStderr.js'
+
 export type CLIErrorIssue = {
   message: string
   path?: string
@@ -35,11 +37,58 @@ export class CLICommandError extends Error {
   }
 }
 
-export const isJSONOutput = (command?: Command): boolean =>
-  process.env.PAYLOAD_CLI_JSON !== undefined ||
-  (command
-    ? Boolean(command.optsWithGlobals<{ json?: boolean }>().json)
-    : process.argv.includes('--json'))
+export const isJSONOutput = (command?: Command): boolean => {
+  if (command?.getOptionValueSourceWithGlobals('json') === 'cli') {
+    return Boolean(command.optsWithGlobals<{ json?: boolean }>().json)
+  }
+
+  const separatorPosition = process.argv.indexOf('--', 2)
+  const payloadArguments = process.argv.slice(
+    2,
+    separatorPosition === -1 ? process.argv.length : separatorPosition,
+  )
+  const jsonPosition = payloadArguments.lastIndexOf('--json')
+  const noJSONPosition = payloadArguments.lastIndexOf('--no-json')
+
+  if (jsonPosition !== -1 || noJSONPosition !== -1) {
+    return jsonPosition > noJSONPosition
+  }
+
+  return process.env.PAYLOAD_CLI_JSON !== undefined
+}
+
+/**
+ * Runs CLI work with one effective output mode, then restores the previous process state.
+ * JSON mode redirects diagnostic output and sets `PAYLOAD_CLI_JSON` so Payload loggers use stderr.
+ */
+export const withCLIOutputMode = async <T>({
+  isJSON,
+  run,
+}: {
+  isJSON: boolean
+  run: () => Promise<T> | T
+}): Promise<T> => {
+  const previousJSONSetting = process.env.PAYLOAD_CLI_JSON
+  const restoreOutput = isJSON ? redirectOutputToStderr() : undefined
+
+  if (isJSON) {
+    process.env.PAYLOAD_CLI_JSON = '1'
+  } else {
+    delete process.env.PAYLOAD_CLI_JSON
+  }
+
+  try {
+    return await run()
+  } finally {
+    restoreOutput?.()
+
+    if (previousJSONSetting === undefined) {
+      delete process.env.PAYLOAD_CLI_JSON
+    } else {
+      process.env.PAYLOAD_CLI_JSON = previousJSONSetting
+    }
+  }
+}
 
 export const writeCLIJSON = ({ command, value }: { command?: Command; value: unknown }): void => {
   const output = `${JSON.stringify(value, (_key, item) =>
@@ -47,11 +96,12 @@ export const writeCLIJSON = ({ command, value }: { command?: Command; value: unk
   )}\n`
   const outputConfiguration = command?.configureOutput()
 
-  if (outputConfiguration?.writeOut) {
-    outputConfiguration.writeOut(output)
-  } else {
-    process.stdout.write(output)
-  }
+  writeToCLIStdout({
+    output,
+    write: outputConfiguration?.writeOut
+      ? (value) => outputConfiguration.writeOut?.(value)
+      : undefined,
+  })
 }
 
 export const getCLIErrorOutput = ({

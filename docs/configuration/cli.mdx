@@ -71,7 +71,9 @@ pnpm payload generate:types --json
 }
 ```
 
-You can place `--json` before or after the command. Commands that do not return data omit `result`. Payload writes logs and other command messages to stderr, so stdout remains one valid JSON response. A failed command returns `success: false`, an error code, and an error message. Input validation errors also include the issues and the command's input schema.
+You can place `--json` before or after the command. Commands that do not return data omit `result`. A failed command returns `success: false`, an error code, and an error message. Input validation errors also include the issues and the command's input schema.
+
+In JSON mode, stdout contains exactly one JSON response while logs and other diagnostics stream to stderr. Parse stdout and display or store stderr separately. Do not use `2>&1`: merging the streams makes stdout invalid JSON. Stderr intentionally remains a streaming text channel rather than a second buffered JSON value.
 
 Set `PAYLOAD_CLI_JSON` to use JSON output for every command without repeatedly passing `--json`. This is useful when a script or coding agent runs several commands:
 
@@ -81,7 +83,11 @@ pnpm payload generate:types
 pnpm payload migrate:status
 ```
 
-Unset the variable to return to regular terminal output.
+Unset the variable to return to regular terminal output, or use `--no-json` to override it for one command:
+
+```sh
+PAYLOAD_CLI_JSON=1 pnpm payload info --no-json
+```
 
 Payload can return help as JSON. This is useful for scripts and coding agents that need to know which commands exist and what input they accept.
 
@@ -136,10 +142,12 @@ Use `defineCLICommand` to add your own command. Built-in and custom commands use
 The following example adds a `seed` command. Its code lives in `seed.ts` next to `payload.config.ts`:
 
 ```ts
-import { defineCLICommand, strictObject, z } from 'payload/cli'
+import { strictObject, z } from 'payload'
+import { defineCLICommand } from 'payload/cli'
 
 export const seedCommand = defineCLICommand({
   description: 'Seed the database.',
+  examples: ['payload seed', 'payload seed --clear'],
   input: strictObject({
     clear: z
       ._default(z.boolean(), false)
@@ -164,9 +172,9 @@ export const seedCommand = defineCLICommand({
 })
 ```
 
-The `input` schema defines the values the command accepts. Payload uses it to type `args`, validate input, and generate help.
+The `input` schema defines the values the command accepts. Payload uses it to type `args`, validate input, and generate help. Add `examples` when a complete command makes the arguments easier to understand. Payload includes them in both terminal and JSON help.
 
-The `z` export from `payload/cli` is Zod Mini. Payload already uses Zod Mini for its built-in commands, so this export adds no extra schema code to the CLI bundle. Use the exported `strictObject` helper for the root input schema so Payload can also generate JSON help.
+The `z` export from `payload` is Zod Mini. Payload already uses Zod Mini, so this export adds no extra schema code to the bundle. Use `strictObject` for the root input schema so Payload can also generate JSON help.
 
 Payload does not export regular Zod because its larger API would increase the bundle size. If you prefer regular Zod's chaining API, add `zod` to your own project and import it directly:
 
@@ -217,7 +225,8 @@ You can also pass a command directly. This example defines a small command insid
 
 ```ts
 import { buildConfig } from 'payload'
-import { defineCLICommand, strictObject } from 'payload/cli'
+import { strictObject } from 'payload'
+import { defineCLICommand } from 'payload/cli'
 
 export default buildConfig({
   cli: {

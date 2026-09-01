@@ -20,6 +20,8 @@ const migrationsDirectory = path.resolve(dirname, 'migrations')
 const schemaFile = path.resolve(dirname, 'payload-generated-schema.ts')
 const scriptOutputFile = path.resolve(generatedDirectory, 'script-output.txt')
 const typesFile = path.resolve(generatedDirectory, 'payload-types.ts')
+const initialCLIConfigLogSetting = process.env.PAYLOAD_TEST_CLI_CONFIG_LOG
+const initialCLIJSONSetting = process.env.PAYLOAD_CLI_JSON
 
 process.env.SQLITE_URL ??= `file:${path.resolve(dirname, 'payload.db')}`
 
@@ -36,6 +38,20 @@ test.describe('CLI', () => {
     await rm(generatedDirectory, { force: true, recursive: true })
     await rm(migrationsDirectory, { force: true, recursive: true })
     await rm(schemaFile, { force: true })
+  })
+
+  test.afterEach(() => {
+    if (initialCLIConfigLogSetting === undefined) {
+      delete process.env.PAYLOAD_TEST_CLI_CONFIG_LOG
+    } else {
+      process.env.PAYLOAD_TEST_CLI_CONFIG_LOG = initialCLIConfigLogSetting
+    }
+
+    if (initialCLIJSONSetting === undefined) {
+      delete process.env.PAYLOAD_CLI_JSON
+    } else {
+      process.env.PAYLOAD_CLI_JSON = initialCLIJSONSetting
+    }
   })
 
   test(
@@ -172,11 +188,14 @@ test.describe('CLI', () => {
       if (!command.includes('--json')) {
         expect(output.stdout).toContain('Manage and operate a local Payload project.')
         expect(output.stdout).toContain('generate:types')
+        expect(output.stdout).toContain('--json')
+        expect(output.stdout).not.toContain('--no-json')
         return
       }
 
       const response = JSON.parse(output.stdout) as CLIOutput<{
         commands: Array<{ name: string }>
+        globalOptions: Array<{ flags: string }>
       }>
 
       expect(response).toMatchObject({ command: 'help', success: true })
@@ -201,6 +220,8 @@ test.describe('CLI', () => {
           'run',
         ]),
       )
+      expect(response.result.globalOptions.map(({ flags }) => flags)).toContain('--no-json')
+      expect(response.result.globalOptions.map(({ flags }) => flags)).not.toContain('--json')
     }),
   )
 
@@ -208,6 +229,44 @@ test.describe('CLI', () => {
     const output = await cli('help --help')
 
     expect(`${output.stdout}\n${output.stderr}`).toContain('Usage: payload help')
+  })
+
+  test('help --no-json', async ({ cli }) => {
+    process.env.PAYLOAD_CLI_JSON = '1'
+
+    const output = await cli('help --no-json')
+
+    expect(output.stdout).toContain('--json')
+    expect(output.stdout).not.toContain('--no-json')
+  })
+
+  test('--help (PAYLOAD_CLI_JSON=1)', async ({ cli }) => {
+    process.env.PAYLOAD_CLI_JSON = '1'
+
+    const output = await cli('--help')
+    const response = JSON.parse(output.stdout) as CLIOutput<{
+      globalOptions: Array<{ flags: string }>
+    }>
+
+    expect(response.result.globalOptions.map(({ flags }) => flags)).toContain('--no-json')
+    expect(response.result.globalOptions.map(({ flags }) => flags)).not.toContain('--json')
+  })
+
+  test('payload', async ({ cli }) => {
+    const output = await cli('')
+
+    expect(output.stdout).toContain('Manage and operate a local Payload project.')
+    expect(output.stdout).toContain('--json')
+    expect(output.stdout).not.toContain('--no-json')
+  })
+
+  test('payload (PAYLOAD_CLI_JSON=1)', async ({ cli }) => {
+    process.env.PAYLOAD_CLI_JSON = '1'
+
+    const output = await cli('')
+
+    expect(output.stdout).toContain('--no-json')
+    expect(output.stdout).not.toContain('--json')
   })
 
   test(
@@ -243,6 +302,37 @@ test.describe('CLI', () => {
     const helpCommandOutput = await cli('help info --json')
 
     expect(JSON.parse(helpOptionOutput.stdout)).toEqual(JSON.parse(helpCommandOutput.stdout))
+  })
+
+  test('info (PAYLOAD_CLI_JSON=1)', async ({ cli }) => {
+    process.env.PAYLOAD_CLI_JSON = '1'
+    process.env.PAYLOAD_TEST_CLI_CONFIG_LOG = 'true'
+
+    const output = await cli('info')
+
+    expect(JSON.parse(output.stdout)).toMatchObject({
+      command: 'info',
+      success: true,
+    })
+    expect(output.stderr).toContain('Loading CLI config.')
+  })
+
+  test('info --no-json', async ({ cli }) => {
+    process.env.PAYLOAD_CLI_JSON = '1'
+
+    const output = await cli('info --no-json')
+
+    expect(output.stdout).toContain('Binaries:')
+    expect(output.stdout).not.toContain('"command":"info"')
+  })
+
+  test('info --help --no-json', async ({ cli }) => {
+    process.env.PAYLOAD_CLI_JSON = '1'
+
+    const output = await cli('info --help --no-json')
+
+    expect(`${output.stdout}\n${output.stderr}`).toContain('Usage: payload info')
+    expect(output.stdout).not.toContain('"command":"help"')
   })
 
   test(
@@ -735,9 +825,37 @@ test.describe('CLI', () => {
 
   test('hello --help', async ({ cli }) => {
     const output = await cli('hello --help')
+    const help = `${output.stdout}\n${output.stderr}`.replace(/\s+/g, ' ')
 
-    expect(`${output.stdout}\n${output.stderr}`).toContain('Usage: payload hello')
-    expect(`${output.stdout}\n${output.stderr}`).not.toContain('Hello, Payload!')
+    expect(help).toContain('Usage: payload hello')
+    expect(help).toContain('--name <name> (required)')
+    expect(help).not.toContain('Hello, Payload!')
+  })
+
+  test('fail --json', async ({ cli }) => {
+    const output = await cli({ command: 'fail --json', reject: false })
+
+    expect(output.exitCode).toBe(1)
+    expect(JSON.parse(output.stdout)).toEqual({
+      command: 'fail',
+      error: {
+        code: 'EXPECTED_FAILURE',
+        message: 'Expected CLI failure.',
+      },
+      success: false,
+    })
+    expect(output.stderr).toContain('Preparing to fail.')
+  })
+
+  test('fail --no-json', async ({ cli }) => {
+    process.env.PAYLOAD_CLI_JSON = '1'
+
+    const output = await cli({ command: 'fail --no-json', reject: false })
+
+    expect(output.exitCode).toBe(1)
+    expect(output.stdout).toContain('Preparing to fail.')
+    expect(output.stdout).not.toContain('"success":false')
+    expect(output.stderr).toContain('Expected CLI failure.')
   })
 })
 
@@ -762,7 +880,15 @@ type CLIOutput<TResult = Record<string, unknown>> = {
 }
 
 type CLICommandTestContext = {
-  cli: (command: string) => Promise<{ stderr: string; stdout: string }>
+  cli: (
+    input:
+      | {
+          command: string
+          configPath?: string
+          reject?: boolean
+        }
+      | string,
+  ) => Promise<{ exitCode: number; stderr: string; stdout: string }>
   payload: Payload
 }
 

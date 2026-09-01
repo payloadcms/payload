@@ -159,12 +159,19 @@ export type CLIRuntime = {
 export type CLICommandDescription = {
   aliases?: string[]
   description: string
+  examples?: string[]
   inputSchema: Record<string, unknown>
   name: string
 }
 
+export type CLIGlobalOptionDescription = {
+  description: string
+  flags: string
+}
+
 export type CLIHelp = {
   commands: CLICommandDescription[]
+  globalOptions: CLIGlobalOptionDescription[]
   output: (args?: { command?: string }) => void
 }
 
@@ -177,11 +184,11 @@ export type CLIFieldOverride =
   | 'argument'
   | {
       flags?: string
-      parse?: (value: string) => unknown
+      parse?: (value: string, previous: unknown) => unknown
       type?: 'option'
     }
   | {
-      parse?: (value: string) => unknown
+      parse?: (value: string, previous: unknown) => unknown
       position?: number
       syntax?: string
       type: 'argument'
@@ -194,6 +201,7 @@ export type CLICommand = {
   allowUnknownOption: boolean
   cli: false | Partial<Record<string, CLIFieldOverride>>
   description: string
+  examples?: string[]
   handler: (context: {
     args: Record<string, unknown>
     getConfig: CLIRuntime['getConfig']

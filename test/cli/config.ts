@@ -6,6 +6,11 @@ import { databaseAdapter } from '../databaseAdapter.js'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
 
+if (process.env.PAYLOAD_TEST_CLI_CONFIG_LOG === 'true') {
+  // eslint-disable-next-line no-console
+  console.log('Loading CLI config.')
+}
+
 export default buildConfigWithDefaults({
   admin: {
     disable: true,
@@ -16,6 +21,7 @@ export default buildConfigWithDefaults({
   },
   cli: {
     commands: {
+      fail: './commands/fail.js#createFailCommand',
       hello: './commands/hello.js#createHelloCommand',
     },
   },

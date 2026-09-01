@@ -14,8 +14,15 @@ export const createCLIHelp = ({
     name,
     ...(definition.aliases?.length ? { aliases: definition.aliases } : {}),
     description: definition.description,
+    ...(definition.examples?.length ? { examples: definition.examples } : {}),
     inputSchema: definition.schema,
   })),
+  globalOptions: cli.options
+    .filter((option) => !option.hidden)
+    .map((option) => ({
+      description: option.description,
+      flags: option.flags,
+    })),
   output: ({ command: commandName } = {}) => {
     const selectedCommand = commandName
       ? cli.commands.find(
