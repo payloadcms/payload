@@ -14,7 +14,7 @@ import {
   payloadRscOptions,
   payloadTanstackStartOptions,
   withPayload,
-} from '../dist/exports/vite.js'
+} from '../dist/withPayload/index.js'
 
 const factory = withPayload(undefined, {
   payloadConfigPath: '/tmp/fake-payload.config.ts',
@@ -50,8 +50,25 @@ for (const expected of [
   'payload:react-dom-server-in-rsc',
   'payload:stub-prettier-in-client',
   'payload:dev-transforms',
+  'payload:warm-admin',
 ]) {
   if (!pluginNames.includes(expected)) errors.push(`missing plugin: ${expected}`)
+}
+
+// Admin warming is dev-only and opt-out.
+const noWarmPluginNames = withPayload(undefined, {
+  payloadConfigPath: '/tmp/fake-payload.config.ts',
+  warmAdmin: false,
+})({ command: 'serve', mode: 'development' })
+  .plugins.filter(Boolean)
+  .flat()
+  .map((p) => p?.name)
+  .filter(Boolean)
+if (noWarmPluginNames.includes('payload:warm-admin')) {
+  errors.push('warmAdmin: false must omit payload:warm-admin')
+}
+if (!noWarmPluginNames.includes('payload:dev-transforms')) {
+  errors.push('warmAdmin: false must not drop the other Payload plugins')
 }
 
 // The `~@payloadcms/...` scss tilde importer must be wired for every consumer.
