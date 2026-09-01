@@ -30,10 +30,11 @@ The `upgrade` command has three verbs.
 
 - Hand the orchestration prompt to a detected agent. The agent runs the whole sequence, calling
   `upgrade run` for the mechanical slice as one step.
+- Run the mechanical steps here, the same work as `upgrade run`.
 - Just print the prompt to run it yourself or paste it elsewhere.
 
-Pin an agent with `--agent <claude|codex>` to skip the picker. When there is no TTY (CI) or no
-agent is installed, it prints the prompt instead of prompting.
+Pin an agent with `--agent <claude|codex>` to skip the picker. When there is no TTY (CI), it prints
+the prompt instead of prompting.
 
 ### `upgrade run` (mechanical slice)
 

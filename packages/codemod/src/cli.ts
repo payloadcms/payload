@@ -37,7 +37,11 @@ export async function main(argv: string[] = process.argv.slice(2)): Promise<void
       return
     }
 
-    const { failed } = await runDispatch({ agentFlag: flags.agent, path: flags.path })
+    const { failed } = await runDispatch({
+      agentFlag: flags.agent,
+      path: flags.path,
+      upgradeFlags: { dry: flags.dry, force: flags.force, tag: flags.tag ?? 'canary' },
+    })
     if (failed) {
       process.exitCode = 1
     }

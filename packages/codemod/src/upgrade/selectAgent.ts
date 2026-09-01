@@ -16,8 +16,11 @@ export const AGENTS: Agent[] = [
   { id: 'codex', command: 'codex', label: 'Codex' },
 ]
 
-/** Hand the prompt to `agent`, or print it to stdout for manual use. */
-export type DispatchChoice = { agent: Agent; kind: 'agent' } | { kind: 'print' }
+/**
+ * Hand the prompt to `agent`, run the mechanical slice here, or print the
+ * prompt to stdout for manual use.
+ */
+export type DispatchChoice = { agent: Agent; kind: 'agent' } | { kind: 'print' } | { kind: 'run' }
 
 export type SelectDispatchArgs = {
   /** Value of `--agent`, if the user pinned one. */
@@ -33,8 +36,9 @@ export type SelectDispatchArgs = {
 /**
  * Decide how to dispatch the upgrade, kept pure so the branching is unit-tested
  * without a terminal. `--agent` wins and is strict (unknown or not-installed
- * throws). Otherwise a non-interactive session or an empty install set falls
- * back to printing the prompt; only a TTY with at least one agent opens the picker.
+ * throws). A non-interactive session falls back to printing the prompt. Any TTY
+ * opens the picker, which offers running the mechanical slice or printing even
+ * when no agent is installed.
  */
 export async function selectDispatch({
   agentFlag,
@@ -57,7 +61,7 @@ export async function selectDispatch({
     return { agent: known, kind: 'agent' }
   }
 
-  if (!isInteractive || installed.length === 0) {
+  if (!isInteractive) {
     return { kind: 'print' }
   }
 
