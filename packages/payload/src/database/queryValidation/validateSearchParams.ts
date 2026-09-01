@@ -100,7 +100,10 @@ export async function validateSearchParam({
   promises.push(
     ...paths.map(async ({ collectionSlug, field, invalid, path }, i) => {
       if (invalid) {
-        if (!polymorphicJoin || !SAFE_FIELD_PATH_REGEX.test(incomingPath)) {
+        const isUnknownPolymorphicJoinField =
+          polymorphicJoin && !field && SAFE_FIELD_PATH_REGEX.test(incomingPath)
+
+        if (!isUnknownPolymorphicJoinField) {
           errors.push({ path })
         }
 

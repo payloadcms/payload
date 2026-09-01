@@ -1994,6 +1994,52 @@ describe('Joins Field', () => {
       expect(response.status).toBe(200)
     })
 
+    it('should reject hidden fields in polymorphic join where', async () => {
+      const response = await restClient.GET('/categories', {
+        query: {
+          joins: {
+            polymorphicJoin: {
+              limit: 1,
+              where: { hiddenSecret: { equals: 'secret' } },
+            },
+          },
+          limit: 1,
+        },
+      })
+
+      expect(response.status).toBe(400)
+    })
+
+    it('should reject hidden fields in Local API polymorphic join where', async () => {
+      await expect(
+        payload.find({
+          collection: categoriesSlug,
+          joins: {
+            polymorphicJoin: {
+              where: { hiddenSecret: { equals: 'secret' } },
+            },
+          },
+          overrideAccess: false,
+          user,
+        }),
+      ).rejects.toThrow('The following path cannot be queried: hiddenSecret')
+    })
+
+    it('should reject access-controlled fields in Local API polymorphic join where', async () => {
+      await expect(
+        payload.find({
+          collection: categoriesSlug,
+          joins: {
+            polymorphicJoin: {
+              where: { restrictedField: { equals: 'restricted' } },
+            },
+          },
+          overrideAccess: false,
+          user,
+        }),
+      ).rejects.toThrow('The following path cannot be queried: restrictedField')
+    })
+
     it('should reject unknown operators regardless of value type', async () => {
       const payloads = [
         { title: { bogus_operator: 'primitive' } },
