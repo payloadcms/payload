@@ -239,7 +239,7 @@ Raw collection create, read, update, and delete access is denied by default. You
 
 The dedicated job operations use `jobs.access.queue`, `run`, and `cancel`. Local API calls run these functions when you pass `overrideAccess: false`. The `/run` and `/handle-schedules` endpoints always check `jobs.access.run`.
 
-On `payload.jobs.*`, `overrideAccess` is optional and still defaults to `true`. This is the exception to the [Local API](../local-api/access-control), where the property is required and has no default.
+On `payload.jobs.*`, `overrideAccess` still defaults to `true`. This is the exception to the [Local API](../local-api/access-control), which now defaults to `false`.
 
 Configure access for the dedicated job operations in your Jobs Config:
 

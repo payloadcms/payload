@@ -654,7 +654,7 @@ access: {
 
 ## Important Notes
 
-1. **Local API `overrideAccess`**: The property is **required** on every Local API operation and has no default. When passing a `user`, you almost always want `overrideAccess: false` so that user's permissions apply:
+1. **Local API `overrideAccess`**: Defaults to `false` — Local API operations respect access control unless told otherwise. When passing a `user`, leave it at the default (or set `overrideAccess: false` explicitly) so that user's permissions apply:
 
    ```ts
    // ❌ WRONG: Passes user but bypasses access control

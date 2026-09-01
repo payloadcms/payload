@@ -6,15 +6,15 @@ desc: Learn how to implement and enforce access control in Payload's Local API o
 keywords: server functions, local API, Payload, CMS, access control, permissions, user context, server-side logic, custom workflows, data management, headless CMS, TypeScript, Node.js, backend
 ---
 
-Every Local API operation requires an `overrideAccess` value. There is no default — each call states whether it runs on behalf of a user or as trusted server-side work.
+Every Local API operation accepts an `overrideAccess` option. As of Payload 4, it defaults to `false` — Local API operations **respect Access Control by default**.
 
-- `overrideAccess: false` — respect Access Control. Pass the `user` alongside it.
+- `overrideAccess: false` (default) — respect Access Control. Pass the `user` alongside it.
 - `overrideAccess: true` — skip Access Control. The operation runs with full permissions.
 
 <Banner type="warning">
-  In Payload 3 this property was optional and defaulted to `true`, which meant
-  an operation that said nothing skipped Access Control. See the [migration
-  guide](../migration-guide/v4#overrideaccess-is-now-required-on-local-api-operations).
+  In Payload 3 this property defaulted to `true`, which meant an operation that
+  said nothing skipped Access Control. See the [migration
+  guide](../migration-guide/v4#overrideaccess-now-defaults-to-false-on-local-api-operations).
 </Banner>
 
 ### Respecting Access Control
@@ -52,6 +52,6 @@ const seeded = await payload.create({
 
 ### Choosing a value
 
-Ask who the operation is for. If a person triggered it, use `false` and pass their `user`. If your server triggered it on its own schedule, use `true`.
+Ask who the operation is for. If a person triggered it, pass their `user` — you can set `overrideAccess: false` explicitly, or simply omit the property, since that's now the default. If your server triggered it on its own schedule, set `overrideAccess: true` explicitly.
 
-When you are unsure, `false` is the safer choice: the operation returns less than you expected rather than more.
+When you are unsure, leave the default in place: the operation returns less than you expected rather than more.
