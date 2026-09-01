@@ -161,6 +161,16 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
   const fieldState: FieldState = {}
 
+  if (
+    collectionSlug &&
+    parentPath === '' &&
+    fieldAffectsData(field) &&
+    field.name === 'apiKey' &&
+    req.payload.collections[collectionSlug]?.config.auth?.useAPIKey
+  ) {
+    fieldState.disableFormData = true
+  }
+
   const lastRenderedPath = previousFormState?.[path]?.lastRenderedPath
 
   // Append only if true to avoid sending '$undefined' through the network

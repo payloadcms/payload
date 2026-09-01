@@ -38,6 +38,7 @@ import {
   hasLocalizeStatusEnabled,
 } from '../../../utilities/getVersionsConfig.js'
 import { buildLocalizedPublishData } from '../../../versions/buildSingleLocalePublishData.js'
+
 export type SharedUpdateDocumentArgs<TSlug extends CollectionSlug> = {
   autosave: boolean
   collectionConfig: SanitizedCollectionConfig
@@ -54,6 +55,11 @@ export type SharedUpdateDocumentArgs<TSlug extends CollectionSlug> = {
   overrideLock: boolean
   payload: Payload
   populate?: PopulateType
+  /**
+   * When true, this update will not unlock the document.
+   * @default false
+   */
+  preserveLock?: boolean
   publishAllLocales?: boolean
   req: PayloadRequest
   select: SelectType
@@ -93,6 +99,7 @@ export const updateDocument = async <
   overrideLock,
   payload,
   populate,
+  preserveLock,
   publishAllLocales: publishAllLocalesArg,
   req,
   select,
@@ -134,6 +141,7 @@ export const updateDocument = async <
     collectionSlug: collectionConfig.slug,
     lockErrorMessage: `Document with ID ${id} is currently locked by another user and cannot be updated.`,
     overrideLock,
+    preserveLock,
     req,
   })
 

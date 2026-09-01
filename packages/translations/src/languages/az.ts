@@ -8,6 +8,8 @@ export const azTranslations: DefaultTranslationsObject = {
     alreadyActivated: 'Artıq Aktivləşdirilib',
     alreadyLoggedIn: 'Artıq daxil olunub',
     apiKey: 'API Açarı',
+    apiKeyGeneratedOnSave: 'API açarı yaratmaq üçün bu sənədi yadda saxlayın.',
+    apiKeyNotVisible: 'Bu API açarına baxmaq icazəniz yoxdur.',
     authenticated: 'Doğrulandı',
     backToLogin: 'Girişə qayıt',
     beginCreateFirstUser: 'Başlamaq üçün ilk istifadəçinizi yaradın.',

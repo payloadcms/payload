@@ -18,7 +18,8 @@ import { useConfig } from '../../../providers/Config/index.js'
 import { useDocumentInfo } from '../../../providers/DocumentInfo/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import './index.css'
-import { APIKey } from './APIKey.js'
+import { APIKey, UnreadableAPIKey } from './APIKey.js'
+import { getAPIKeyPermissions } from './getAPIKeyPermissions.js'
 
 const baseClass = 'auth-fields'
 
@@ -29,6 +30,8 @@ export const Auth: React.FC<Props> = (props) => {
     disableLocalStrategy,
     email,
     loginWithUsername,
+    onAPIKeyGenerationComplete,
+    onAPIKeyGenerationStart,
     operation,
     readOnly,
     requirePassword,
@@ -39,11 +42,15 @@ export const Auth: React.FC<Props> = (props) => {
   } = props
 
   const [changingPassword, setChangingPassword] = useState(requirePassword)
+  const apiKey = useFormFields(([fields]) => (fields && fields?.apiKey) || null)
+  const [apiKeyDisplayValue, setAPIKeyDisplayValue] = useState<string | undefined>(() =>
+    typeof apiKey?.value === 'string' ? apiKey.value : undefined,
+  )
   const enableAPIKey = useFormFields(([fields]) => (fields && fields?.enableAPIKey) || null)
   const dispatchFields = useFormFields((reducer) => reducer[1])
   const modified = useFormModified()
   const { i18n, t } = useTranslation()
-  const { docPermissions, isEditing, isInitializing, isTrashed } = useDocumentInfo()
+  const { id, docPermissions, isEditing, isInitializing, isTrashed } = useDocumentInfo()
 
   const {
     config: {
@@ -114,20 +121,28 @@ export const Auth: React.FC<Props> = (props) => {
 
   const disabled = readOnly || isInitializing || isTrashed
 
-  const apiKeyPermissions =
-    docPermissions?.fields === true ? true : docPermissions?.fields?.enableAPIKey
-
-  const apiKeyReadOnly =
-    readOnly ||
-    (apiKeyPermissions !== true &&
-      apiKeyPermissions &&
-      typeof apiKeyPermissions === 'object' &&
-      !apiKeyPermissions?.update)
-
-  const enableAPIKeyReadOnly =
-    readOnly || (apiKeyPermissions !== true && !apiKeyPermissions?.update)
-
-  const canReadApiKey = apiKeyPermissions === true || apiKeyPermissions?.read
+  const { canModifyAPIKey, canModifyAPIKeyStatus, canReadAPIKey, canReadAPIKeyStatus } =
+    getAPIKeyPermissions({
+      fields: docPermissions.fields,
+      operation,
+    })
+  const showAPIKeyStatus = canReadAPIKeyStatus
+  const apiKeyEnabled = showAPIKeyStatus
+    ? Boolean(enableAPIKey?.value)
+    : Boolean(apiKeyDisplayValue)
+  const isAPIKeyPendingGeneration = operation === 'create' && canModifyAPIKey
+  const hasAPIKeyToRotate = !canReadAPIKey || Boolean(apiKeyDisplayValue)
+  const canGenerateAPIKey =
+    operation === 'update' &&
+    !readOnly &&
+    canModifyAPIKey &&
+    hasAPIKeyToRotate &&
+    (canReadAPIKeyStatus ? apiKeyEnabled : true)
+  const showReadableAPIKey = canReadAPIKey
+  const showUnreadableAPIKey =
+    !canReadAPIKey &&
+    ((canReadAPIKeyStatus && apiKeyEnabled) ||
+      (!canReadAPIKeyStatus && (canModifyAPIKey || canModifyAPIKeyStatus)))
 
   const hasPermissionToUnlock: boolean = useMemo(() => {
     if (docPermissions) {
@@ -195,8 +210,66 @@ export const Auth: React.FC<Props> = (props) => {
     }
   }, [modified])
 
+  useEffect(() => {
+    if (typeof apiKey?.value === 'string') {
+      setAPIKeyDisplayValue(apiKey.value)
+    }
+
+    if (apiKey && apiKey.disableFormData !== true) {
+      dispatchFields({ type: 'UPDATE', disableFormData: true, path: 'apiKey' })
+    }
+  }, [apiKey, dispatchFields])
+
+  useEffect(() => {
+    if (
+      modified ||
+      operation !== 'update' ||
+      !id ||
+      !canReadAPIKey ||
+      !apiKeyEnabled ||
+      apiKeyDisplayValue
+    ) {
+      return
+    }
+
+    const controller = new AbortController()
+
+    void fetch(
+      formatAdminURL({
+        apiRoute: api,
+        path: `/${collectionSlug}/${id}`,
+      }),
+      {
+        credentials: 'include',
+        headers: {
+          'Accept-Language': i18n.language,
+        },
+        signal: controller.signal,
+      },
+    )
+      .then((response) => (response.ok ? response.json() : null))
+      .then((result) => {
+        if (typeof result?.apiKey === 'string') {
+          setAPIKeyDisplayValue(result.apiKey)
+        }
+      })
+
+    return () => controller.abort()
+  }, [
+    api,
+    apiKeyDisplayValue,
+    apiKeyEnabled,
+    canReadAPIKey,
+    collectionSlug,
+    i18n.language,
+    id,
+    modified,
+    operation,
+  ])
+
   const showAuthBlock = enableFields
-  const showAPIKeyBlock = useAPIKey && canReadApiKey
+  const showAPIKeyBlock =
+    useAPIKey && (showReadableAPIKey || showUnreadableAPIKey || showAPIKeyStatus)
   const showVerifyBlock = verify && isEditing
 
   if (!(showAuthBlock || showAPIKeyBlock || showVerifyBlock)) {
@@ -293,16 +366,52 @@ export const Auth: React.FC<Props> = (props) => {
           )}
           {showAPIKeyBlock && (
             <div className={`${baseClass}__api-key`}>
-              <CheckboxField
-                field={{
-                  name: 'enableAPIKey',
-                  admin: { disabled, readOnly: enableAPIKeyReadOnly },
-                  label: t('authentication:enableAPIKey'),
-                }}
-                path="enableAPIKey"
-                schemaPath={`${collectionSlug}.enableAPIKey`}
-              />
-              <APIKey enabled={!!enableAPIKey?.value} readOnly={apiKeyReadOnly} />
+              {showAPIKeyStatus && (
+                <CheckboxField
+                  field={{
+                    name: 'enableAPIKey',
+                    admin: { disabled, readOnly: readOnly || !canModifyAPIKeyStatus },
+                    label: t('authentication:enableAPIKey'),
+                  }}
+                  path="enableAPIKey"
+                  schemaPath={`${collectionSlug}.enableAPIKey`}
+                />
+              )}
+              {showUnreadableAPIKey && (
+                <UnreadableAPIKey
+                  canGenerate={canGenerateAPIKey}
+                  description={
+                    isAPIKeyPendingGeneration
+                      ? t('authentication:apiKeyGeneratedOnSave')
+                      : t('authentication:apiKeyNotVisible')
+                  }
+                  isPending={isAPIKeyPendingGeneration}
+                  onGenerationComplete={onAPIKeyGenerationComplete}
+                  onGenerationStart={onAPIKeyGenerationStart}
+                />
+              )}
+              {showReadableAPIKey && (
+                <APIKey
+                  canGenerate={canGenerateAPIKey}
+                  description={
+                    isAPIKeyPendingGeneration
+                      ? t('authentication:apiKeyGeneratedOnSave')
+                      : undefined
+                  }
+                  enabled={apiKeyEnabled}
+                  generateOnEnable={
+                    operation === 'update' &&
+                    !readOnly &&
+                    canModifyAPIKey &&
+                    enableAPIKey?.initialValue !== true
+                  }
+                  isFormModified={modified}
+                  onGenerated={setAPIKeyDisplayValue}
+                  onGenerationComplete={onAPIKeyGenerationComplete}
+                  onGenerationStart={onAPIKeyGenerationStart}
+                  value={apiKeyDisplayValue}
+                />
+              )}
             </div>
           )}
           {showVerifyBlock && (

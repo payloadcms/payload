@@ -1,25 +1,11 @@
-import crypto from 'crypto'
+import type { CheckboxField, Field, TextField } from '../../../fields/config/types.js'
 
-import type { CheckboxField, Field, FieldHook, TextField } from '../../fields/config/types.js'
-
-const encryptKey: FieldHook = ({ req, value }) =>
-  value ? req.payload.encrypt(value as string) : null
-const decryptKey: FieldHook = ({ req, value }) => {
-  if (!value) {
-    return undefined
-  }
-  try {
-    return req.payload.decrypt(value as string)
-  } catch {
-    // The value was encrypted under a secret no longer in the keyring (e.g. a
-    // previousSecret was removed before rotateSecret re-keyed this row). Mask the
-    // field (return null, since an undefined afterRead result is treated as "no
-    // change" and would leak the ciphertext) rather than failing the whole
-    // document read; API key auth is unaffected (it matches the apiKeyIndex), and
-    // running rotateSecret restores the displayed value.
-    return null
-  }
-}
+import { canReadAPIKey } from './canReadAPIKey.js'
+import { canReadAPIKeyStatus } from './canReadAPIKeyStatus.js'
+import { decryptKey } from './decryptKey.js'
+import { encryptKey } from './encryptKey.js'
+import { generateKey } from './generateKey.js'
+import { generateKeyIndex } from './generateKeyIndex.js'
 
 type APIKeyCheckboxFieldOverride = Omit<Partial<CheckboxField>, 'name' | 'type'>
 type APIKeyTextFieldOverride = Omit<
@@ -45,6 +31,10 @@ export const createAPIKeyFields = ({
       name: 'enableAPIKey',
       type: 'checkbox',
       ...enableAPIKeyField,
+      access: {
+        read: canReadAPIKeyStatus,
+        ...enableAPIKeyField?.access,
+      },
       admin: {
         components: {
           Field: false,
@@ -60,6 +50,10 @@ export const createAPIKeyFields = ({
       name: 'apiKey',
       type: 'text',
       ...apiKeyField,
+      access: {
+        read: canReadAPIKey,
+        ...apiKeyField?.access,
+      },
       admin: {
         components: {
           Field: false,
@@ -69,6 +63,8 @@ export const createAPIKeyFields = ({
       hooks: {
         afterRead: [decryptKey],
         beforeChange: [encryptKey],
+        beforeDuplicate: [() => null],
+        beforeValidate: [generateKey],
         ...apiKeyField?.hooks,
       },
       label: apiKeyField?.label ?? (({ t }) => t('authentication:apiKey')),
@@ -83,26 +79,8 @@ export const createAPIKeyFields = ({
       },
       hidden: apiKeyIndexField?.hidden ?? true,
       hooks: {
-        beforeValidate: [
-          ({ data, req, value }) => {
-            if (data?.apiKey === false || data?.apiKey === null || data?.apiKey === '') {
-              return null
-            }
-            if (
-              includeEnableAPIKey &&
-              (data?.enableAPIKey === false || data?.enableAPIKey === null)
-            ) {
-              return null
-            }
-            if (data?.apiKey) {
-              return crypto
-                .createHmac('sha256', req.payload.secret)
-                .update(data.apiKey as string)
-                .digest('hex')
-            }
-            return value
-          },
-        ],
+        beforeDuplicate: [() => null],
+        beforeValidate: [generateKeyIndex({ includeEnableAPIKey })],
         ...apiKeyIndexField?.hooks,
       },
     },

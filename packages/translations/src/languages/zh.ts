@@ -8,6 +8,8 @@ export const zhTranslations: DefaultTranslationsObject = {
     alreadyActivated: '已经激活了',
     alreadyLoggedIn: '已经登入了',
     apiKey: 'API 密钥',
+    apiKeyGeneratedOnSave: '保存此文档以生成 API 密钥。',
+    apiKeyNotVisible: '你没有权限查看此 API 密钥。',
     authenticated: '已通过身份验证的请求',
     backToLogin: '回到登录页面',
     beginCreateFirstUser: '创建您的第一个用户以开始。',

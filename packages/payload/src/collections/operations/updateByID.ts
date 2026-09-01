@@ -16,6 +16,7 @@ import type {
   TypeWithID,
 } from '../config/types.js'
 
+import { assertCanSetAPIKey } from '../../auth/apiKeys/assertCanSetAPIKey.js'
 import { executeAccess } from '../../auth/executeAccess.js'
 import { hasWhereAccessResult } from '../../auth/types.js'
 import { combineQueries } from '../../database/combineQueries.js'
@@ -32,7 +33,7 @@ import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion.js'
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
-import { updateDocument } from './utilities/update.js'
+import { type SharedUpdateDocumentArgs, updateDocument } from './utilities/update.js'
 
 export type Arguments<TSlug extends CollectionSlug> = {
   autosave?: boolean
@@ -52,7 +53,8 @@ export type Arguments<TSlug extends CollectionSlug> = {
   showHiddenFields?: boolean
   trash?: boolean
   unpublishAllLocales?: boolean
-} & Pick<FindOptions<TSlug, SelectType>, 'select'>
+} & Pick<FindOptions<TSlug, SelectType>, 'select'> &
+  Pick<SharedUpdateDocumentArgs<TSlug>, 'preserveLock'>
 
 export const updateByIDOperation = async <
   TSlug extends CollectionSlug,
@@ -87,6 +89,7 @@ export const updateByIDOperation = async <
       overrideLock,
       overwriteExistingFiles = false,
       populate,
+      preserveLock,
       publishAllLocales,
       req: {
         fallbackLocale,
@@ -177,6 +180,13 @@ export const updateByIDOperation = async <
       throw new NotFound(req.t)
     }
 
+    assertCanSetAPIKey({
+      collection: collectionConfig,
+      data,
+      overrideAccess,
+      req,
+    })
+
     // /////////////////////////////////////
     // Generate data for all files and sizes
     // /////////////////////////////////////
@@ -221,6 +231,7 @@ export const updateByIDOperation = async <
       overrideLock: overrideLock!,
       payload,
       populate,
+      preserveLock,
       publishAllLocales,
       req,
       select: select!,

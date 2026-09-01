@@ -12,7 +12,7 @@ export const beforeChange: (args: Props) => CollectionBeforeChangeHook =
       return data
     }
 
-    const userIsCustomer = await isCustomer({ ...hookArgs })
+    const userIsCustomer = await isCustomer(hookArgs)
 
     // Ensure that the customer field is set to the current user's ID if the user is a customer.
     // Admins can set to any customer.

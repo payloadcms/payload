@@ -8,6 +8,8 @@ export const skTranslations: DefaultTranslationsObject = {
     alreadyActivated: 'Už aktivované',
     alreadyLoggedIn: 'Už prihlásený',
     apiKey: 'API kľúč',
+    apiKeyGeneratedOnSave: 'Uložte tento dokument, aby sa vygeneroval kľúč API.',
+    apiKeyNotVisible: 'Nemáte oprávnenie zobraziť tento API kľúč.',
     authenticated: 'Overený',
     backToLogin: 'Späť na prihlásenie',
     beginCreateFirstUser: 'Vytvorte svojho prvého používateľa, aby ste mohli začať.',

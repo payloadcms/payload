@@ -6,6 +6,12 @@ const framework = process.env.PAYLOAD_FRAMEWORK === 'tanstack-start' ? 'tanstack
 const frameworkExport = framework === 'tanstack' ? 'TanStack' : 'Next'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
+import { APIKeysWithHiddenKeys } from './collections/APIKeysWithHiddenKeys.js'
+import { APIKeysWithReadableKeys } from './collections/APIKeysWithReadableKeys.js'
+import { APIKeysWithRestrictedFieldAccess } from './collections/APIKeysWithRestrictedFieldAccess.js'
+import { JWTUsers } from './collections/JWTUsers.js'
+import { RestrictedJWTUsers } from './collections/RestrictedJWTUsers.js'
+import { RestrictedRelationships } from './collections/RestrictedRelationships.js'
 import { seed } from './seed.js'
 import {
   apiKeysSlug,
@@ -358,34 +364,12 @@ export default buildConfigWithDefaults({
       ],
       versions: false,
     },
-    {
-      slug: 'api-keys-with-field-read-access',
-      auth: {
-        disableLocalStrategy: true,
-        useAPIKey: true,
-      },
-      fields: [
-        {
-          name: 'enableAPIKey',
-          type: 'checkbox',
-          access: {
-            read: () => false,
-          },
-        },
-        {
-          name: 'apiKey',
-          type: 'text',
-          access: {
-            read: () => false,
-          },
-        },
-      ],
-      labels: {
-        plural: 'API Keys With Field Read Access',
-        singular: 'API Key With Field Read Access',
-      },
-      versions: false,
-    },
+    APIKeysWithRestrictedFieldAccess,
+    APIKeysWithHiddenKeys,
+    APIKeysWithReadableKeys,
+    JWTUsers,
+    RestrictedJWTUsers,
+    RestrictedRelationships,
   ],
   onInit: seed,
   typescript: {

@@ -1,9 +1,11 @@
 import crypto from 'crypto'
 
 import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
-import type { User } from '../../index.js'
 import type { Where } from '../../types/index.js'
-import type { AuthStrategyFunction } from '../index.js'
+import type { AuthenticatedUser, AuthStrategyFunction } from '../index.js'
+
+import { createLocalReq } from '../../utilities/createLocalReq.js'
+import { afterReadAuthUser } from '../afterReadAuthUser.js'
 
 export const APIKeyAuthentication =
   (collectionConfig: SanitizedCollectionConfig): AuthStrategyFunction =>
@@ -40,7 +42,7 @@ export const APIKeyAuthentication =
 
         const userQuery = await payload.find({
           collection: collectionConfig.slug,
-          depth: isGraphQL ? 0 : collectionConfig.auth.depth,
+          depth: 0,
           limit: 1,
           overrideAccess: true,
           pagination: false,
@@ -48,12 +50,23 @@ export const APIKeyAuthentication =
         })
 
         if (userQuery.docs && userQuery.docs.length > 0) {
-          const user = userQuery.docs[0]
-          user!.collection = collectionConfig.slug
-          user!._strategy = 'api-key'
+          const user = userQuery.docs[0] as AuthenticatedUser
+          user.collection = collectionConfig.slug
+          user._strategy = 'api-key'
+
+          const depth = isGraphQL ? 0 : collectionConfig.auth.depth!
+          const req = await createLocalReq({ user }, payload)
 
           return {
-            user: user as User,
+            user: await afterReadAuthUser({
+              collection: collectionConfig,
+              depth,
+              overrideAccess: false,
+              req,
+              showHiddenFields: false,
+              triggerHooks: false,
+              user,
+            }),
           }
         }
       } catch (ignore) {

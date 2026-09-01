@@ -1,8 +1,9 @@
 'use client'
-import React, { useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 
 import { EyeIcon } from '../../icons/Eye/index.js'
 import { KeyIcon } from '../../icons/Key/index.js'
+import { useTranslation } from '../../providers/Translation/index.js'
 import { CopyToClipboard } from '../CopyToClipboard/index.js'
 import './index.css'
 
@@ -10,8 +11,13 @@ const baseClass = 'api-key-input'
 
 export type APIKeyInputProps = {
   readonly 'aria-label'?: string
+  readonly disabled?: boolean
   readonly highlighted?: boolean
   readonly id?: string
+  readonly initiallyVisible?: boolean
+  readonly isFormModified?: boolean
+  readonly isLoading?: boolean
+  readonly isPending?: boolean
   readonly value: null | string | undefined
 }
 
@@ -22,36 +28,75 @@ export type APIKeyInputProps = {
 export const APIKeyInput: React.FC<APIKeyInputProps> = ({
   id,
   'aria-label': ariaLabel = 'API Key',
+  disabled,
   highlighted,
+  initiallyVisible = false,
+  isFormModified = false,
+  isLoading = false,
+  isPending = false,
   value,
 }) => {
-  const [showKey, setShowKey] = useState(false)
+  const [showKey, setShowKey] = useState(initiallyVisible)
+  const wasFormModified = useRef(isFormModified)
   const keyValue = value ?? ''
+  const { t } = useTranslation()
+
+  useEffect(() => {
+    if (highlighted) {
+      setShowKey(true)
+    }
+  }, [highlighted])
+
+  useEffect(() => {
+    if (wasFormModified.current && !isFormModified) {
+      setShowKey(false)
+    }
+
+    wasFormModified.current = isFormModified
+  }, [isFormModified])
 
   return (
     <div className={baseClass}>
       <div
-        className={[`${baseClass}__control`, highlighted && 'highlight'].filter(Boolean).join(' ')}
+        className={[
+          `${baseClass}__control`,
+          disabled && `${baseClass}__control--disabled`,
+          highlighted && 'highlight',
+        ]
+          .filter(Boolean)
+          .join(' ')}
       >
         <KeyIcon className={`${baseClass}__icon`} />
         <input
           aria-label={ariaLabel}
-          className={`${baseClass}__field`}
+          className={[`${baseClass}__field`, isLoading && `${baseClass}__field--loading`]
+            .filter(Boolean)
+            .join(' ')}
+          disabled={disabled}
           id={id}
+          placeholder={
+            isLoading
+              ? `${t('general:loading')}...`
+              : disabled && !isPending
+                ? '•'.repeat(36)
+                : undefined
+          }
           readOnly
-          type={showKey ? 'text' : 'password'}
+          type={disabled || showKey ? 'text' : 'password'}
           value={keyValue}
         />
-        <button
-          aria-label={showKey ? 'Hide API key' : 'Show API key'}
-          className={`${baseClass}__toggle`}
-          onClick={() => setShowKey((prev) => !prev)}
-          type="button"
-        >
-          <EyeIcon active={showKey} size={24} />
-        </button>
+        {!disabled && (
+          <button
+            aria-label={showKey ? 'Hide API key' : 'Show API key'}
+            className={`${baseClass}__toggle`}
+            onClick={() => setShowKey((prev) => !prev)}
+            type="button"
+          >
+            <EyeIcon active={showKey} size={24} />
+          </button>
+        )}
       </div>
-      <CopyToClipboard value={keyValue} />
+      {!disabled && <CopyToClipboard value={keyValue} />}
     </div>
   )
 }

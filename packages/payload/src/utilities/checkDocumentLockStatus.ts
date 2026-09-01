@@ -1,5 +1,7 @@
 import type { TypeWithID } from '../collections/config/types.js'
+import type { SharedUpdateDocumentArgs } from '../collections/operations/utilities/update.js'
 import type { PaginatedDocs } from '../database/types.js'
+import type { CollectionSlug } from '../index.js'
 import type { JsonObject, PayloadRequest } from '../types/index.js'
 
 import { Locked } from '../errors/index.js'
@@ -13,7 +15,7 @@ type CheckDocumentLockStatusArgs = {
   lockErrorMessage?: string
   overrideLock?: boolean
   req: PayloadRequest
-}
+} & Pick<SharedUpdateDocumentArgs<CollectionSlug>, 'preserveLock'>
 
 export const checkDocumentLockStatus = async ({
   id,
@@ -22,6 +24,7 @@ export const checkDocumentLockStatus = async ({
   lockDurationDefault = 300, // Default 5 minutes in seconds
   lockErrorMessage,
   overrideLock = true,
+  preserveLock = false,
   req,
 }: CheckDocumentLockStatusArgs): Promise<void> => {
   const { payload } = req
@@ -96,7 +99,10 @@ export const checkDocumentLockStatus = async ({
     }
   }
 
-  // Perform the delete operation regardless of overrideLock status
+  if (preserveLock) {
+    return
+  }
+
   await payload.db.deleteMany({
     collection: lockedDocumentsCollectionSlug,
     // Not passing req fails on postgres

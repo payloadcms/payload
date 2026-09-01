@@ -8,6 +8,8 @@ export const svTranslations: DefaultTranslationsObject = {
     alreadyActivated: 'Redan aktiverad',
     alreadyLoggedIn: 'Redan inloggad',
     apiKey: 'API-nyckel',
+    apiKeyGeneratedOnSave: 'Spara det här dokumentet för att generera en API-nyckel.',
+    apiKeyNotVisible: 'Du har inte behörighet att visa den här API-nyckeln.',
     authenticated: 'Autentiserad',
     backToLogin: 'Tillbaka till inloggningen',
     beginCreateFirstUser: 'Skapa din första användare för att börja.',

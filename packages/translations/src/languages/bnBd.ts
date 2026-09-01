@@ -8,6 +8,8 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     alreadyActivated: 'ইতিমধ্যে সক্রিয়',
     alreadyLoggedIn: 'ইতিমধ্যে লগইন করা আছে',
     apiKey: 'এপিআই কী',
+    apiKeyGeneratedOnSave: 'একটি API কী তৈরি করতে এই ডকুমেন্টটি সংরক্ষণ করুন।',
+    apiKeyNotVisible: 'এই এপিআই কী দেখার অনুমতি আপনার নেই।',
     authenticated: 'প্রমাণিত',
     backToLogin: 'লগইনে ফিরে যান',
     beginCreateFirstUser: 'পরিচিতি শুরু করার জন্য আপনার প্রথম ব্যবহারকারী তৈরি করুন।',

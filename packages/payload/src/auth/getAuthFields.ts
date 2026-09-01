@@ -2,7 +2,7 @@ import type { Field, TextField } from '../fields/config/types.js'
 import type { IncomingAuthType } from './types.js'
 
 import { accountLockFields } from './baseFields/accountLock.js'
-import { createAPIKeyFields } from './baseFields/apiKey.js'
+import { createAPIKeyFields } from './baseFields/apiKey/index.js'
 import { baseAuthFields } from './baseFields/auth.js'
 import { emailFieldConfig } from './baseFields/email.js'
 import { sessionsFieldConfig } from './baseFields/sessions.js'

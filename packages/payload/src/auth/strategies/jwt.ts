@@ -3,6 +3,8 @@ import { jwtVerify } from 'jose'
 import type { Payload, Where } from '../../types/index.js'
 import type { AuthStrategyFunction, AuthStrategyResult } from '../index.js'
 
+import { createLocalReq } from '../../utilities/createLocalReq.js'
+import { afterReadAuthUser } from '../afterReadAuthUser.js'
 import { extractJWT } from '../extractJWT.js'
 
 type JWTToken = {
@@ -126,12 +128,17 @@ export const JWTAuthentication: AuthStrategyFunction = async ({
     const user = (await payload.findByID({
       id: decodedPayload.id,
       collection: decodedPayload.collection,
-      depth: isGraphQL ? 0 : collection!.config.auth.depth,
+      depth: 0,
+      overrideAccess: true,
     })) as AuthStrategyResult['user']
 
     if (user && (!collection!.config.auth.verify || user._verified)) {
+      const authenticatedUser = user
+
       if (collection!.config.auth.useSessions) {
-        const existingSession = (user.sessions || []).find(({ id }) => id === decodedPayload.sid)
+        const existingSession = (authenticatedUser.sessions || []).find(
+          ({ id }) => id === decodedPayload.sid,
+        )
 
         if (!existingSession || !decodedPayload.sid) {
           return {
@@ -139,13 +146,25 @@ export const JWTAuthentication: AuthStrategyFunction = async ({
           }
         }
 
-        user._sid = decodedPayload.sid
+        authenticatedUser._sid = decodedPayload.sid
       }
 
-      user.collection = collection!.config.slug
-      user._strategy = strategyName
+      const depth = isGraphQL ? 0 : collection!.config.auth.depth!
+
+      authenticatedUser.collection = collection!.config.slug
+      authenticatedUser._strategy = strategyName
+      const req = await createLocalReq({ user: authenticatedUser }, payload)
+
       return {
-        user,
+        user: await afterReadAuthUser({
+          collection: collection!.config,
+          depth,
+          overrideAccess: false,
+          req,
+          showHiddenFields: false,
+          triggerHooks: false,
+          user: authenticatedUser,
+        }),
       }
     } else {
       if (headers.get('DisableAutologin') !== 'true') {

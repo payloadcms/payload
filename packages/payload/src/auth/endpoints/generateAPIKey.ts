@@ -1,0 +1,116 @@
+import { status as httpStatus } from 'http-status'
+
+import type { Collection } from '../../collections/config/types.js'
+import type { PayloadHandler } from '../../config/types.js'
+import type { JsonObject, PayloadRequest } from '../../types/index.js'
+
+import { updateByIDOperation } from '../../collections/operations/updateByID.js'
+import { combineQueries } from '../../database/combineQueries.js'
+import { Forbidden, NotFound } from '../../errors/index.js'
+import { fieldAffectsData } from '../../fields/config/types.js'
+import { getRequestCollectionWithID } from '../../utilities/getRequestEntity.js'
+import { headersWithCors } from '../../utilities/headersWithCors.js'
+import { assertCanSetAPIKey } from '../apiKeys/assertCanSetAPIKey.js'
+import { generateAPIKey } from '../apiKeys/generateAPIKey.js'
+import { withServerGeneratedAPIKey } from '../apiKeys/serverGeneratedAPIKeyRequest.js'
+import { executeAccess } from '../executeAccess.js'
+import { hasWhereAccessResult } from '../types.js'
+
+export const generateAPIKeyHandler: PayloadHandler = async (req) => {
+  const { id, collection } = getRequestCollectionWithID(req)
+
+  if (!req.user || !collection.config.auth?.useAPIKey) {
+    throw new Forbidden(req.t)
+  }
+
+  const doc = await generateAPIKeyForDocument({ id, collection, req, requestData: req.data ?? {} })
+
+  return Response.json(doc, {
+    headers: headersWithCors({
+      headers: new Headers(),
+      req,
+    }),
+    status: httpStatus.OK,
+  })
+}
+
+const generateAPIKeyForDocument = async ({
+  id,
+  collection,
+  req,
+  requestData,
+}: {
+  collection: Collection
+  id: number | string
+  req: PayloadRequest
+  requestData: JsonObject
+}): Promise<JsonObject> => {
+  const apiKey = generateAPIKey()
+  const data = { apiKey }
+  const accessResult = await executeAccess(
+    {
+      id,
+      slug: collection.config.slug,
+      data,
+      req,
+    },
+    collection.config.access.update,
+  )
+
+  assertCanSetAPIKey({
+    collection: collection.config,
+    data: requestData,
+    overrideAccess: false,
+    req,
+  })
+
+  const { docs } = await req.payload.find({
+    collection: collection.config.slug,
+    limit: 1,
+    overrideAccess: true,
+    pagination: false,
+    req,
+    where: combineQueries({ id: { equals: id } }, accessResult),
+  })
+  const doc = docs[0] as JsonObject | undefined
+
+  if (!doc) {
+    if (hasWhereAccessResult(accessResult)) {
+      throw new Forbidden(req.t)
+    }
+
+    throw new NotFound(req.t)
+  }
+
+  const apiKeyField = collection.config.fields.find(
+    (field) => fieldAffectsData(field) && field.name === 'apiKey',
+  )
+
+  if (apiKeyField && 'access' in apiKeyField && apiKeyField.access?.update) {
+    const hasAccess = await apiKeyField.access.update({
+      id,
+      collection: collection.config,
+      data,
+      doc,
+      req,
+      siblingData: data,
+    })
+
+    if (!hasAccess) {
+      throw new Forbidden(req.t)
+    }
+  }
+
+  return withServerGeneratedAPIKey({
+    callback: () =>
+      updateByIDOperation({
+        id,
+        collection,
+        data,
+        overrideAccess: false,
+        preserveLock: true,
+        req,
+      }),
+    req,
+  })
+}

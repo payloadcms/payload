@@ -29,6 +29,8 @@ export type AfterReadArgs<T extends JsonObject> = {
   req: PayloadRequest
   select?: SelectType
   showHiddenFields: boolean
+  /** Skips field hooks when filtering a document that already ran through `afterRead`. */
+  triggerHooks?: boolean
 }
 
 /**
@@ -59,6 +61,7 @@ export async function afterRead<T extends JsonObject>(args: AfterReadArgs<T>): P
     req,
     select,
     showHiddenFields,
+    triggerHooks = true,
   } = args
 
   const fieldPromises: Promise<void>[] = []
@@ -101,6 +104,7 @@ export async function afterRead<T extends JsonObject>(args: AfterReadArgs<T>): P
     selectMode: select ? getSelectMode(select) : undefined,
     showHiddenFields,
     siblingDoc: incomingDoc,
+    triggerHooks,
   })
 
   /**

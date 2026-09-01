@@ -8,6 +8,8 @@ export const esTranslations: DefaultTranslationsObject = {
     alreadyActivated: 'Ya Activado',
     alreadyLoggedIn: 'Ya has iniciado sesión',
     apiKey: 'Clave API',
+    apiKeyGeneratedOnSave: 'Guarda este documento para generar una clave API.',
+    apiKeyNotVisible: 'No tienes permiso para ver esta clave API.',
     authenticated: 'Autenticado',
     backToLogin: 'Regresar al inicio de sesión',
     beginCreateFirstUser: 'Cree su primer usuario para comenzar.',

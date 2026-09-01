@@ -8,6 +8,8 @@ export const bgTranslations: DefaultTranslationsObject = {
     alreadyActivated: 'Вече активиран',
     alreadyLoggedIn: 'Вече влязъл',
     apiKey: 'API ключ',
+    apiKeyGeneratedOnSave: 'Запазете този документ, за да генерирате API ключ.',
+    apiKeyNotVisible: 'Нямате разрешение да видите този API ключ.',
     authenticated: 'Удостоверен',
     backToLogin: 'Обратно към влизане',
     beginCreateFirstUser: 'Създайте първия си потребител, за да започнете.',

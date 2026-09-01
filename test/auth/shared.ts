@@ -4,6 +4,18 @@ export const publicUsersSlug = 'public-users'
 
 export const apiKeysSlug = 'api-keys'
 
+export const apiKeysWithHiddenKeysSlug = 'api-keys-with-hidden-keys'
+
+export const apiKeysWithReadableKeysSlug = 'api-keys-with-readable-keys'
+
+export const apiKeysWithRestrictedFieldAccessSlug = 'api-keys-with-restricted-field-access'
+
+export const jwtUsersSlug = 'jwt-users'
+
+export const restrictedJWTUsersSlug = 'restricted-jwt-users'
+
+export const restrictedRelationshipsSlug = 'restricted-relationships'
+
 export const rotateSecretSlug = 'rotate-secret'
 
 export const rotateSecretLoginSlug = 'rotate-secret-login'

@@ -8,6 +8,8 @@ export const viTranslations: DefaultTranslationsObject = {
     alreadyActivated: 'Đã được kích hoạt',
     alreadyLoggedIn: 'Đã đăng nhập',
     apiKey: 'API Key',
+    apiKeyGeneratedOnSave: 'Lưu tài liệu này để tạo khóa API.',
+    apiKeyNotVisible: 'Bạn không có quyền xem khóa API này.',
     authenticated: 'Đã xác thực',
     backToLogin: 'Quay lại đăng nhập.',
     beginCreateFirstUser: 'Tạo người dùng đầu tiên của bạn để bắt đầu.',

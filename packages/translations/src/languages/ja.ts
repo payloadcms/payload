@@ -8,6 +8,8 @@ export const jaTranslations: DefaultTranslationsObject = {
     alreadyActivated: 'すでに有効です',
     alreadyLoggedIn: 'すでにログインしています',
     apiKey: 'API Key',
+    apiKeyGeneratedOnSave: 'APIキーを生成するには、このドキュメントを保存してください。',
+    apiKeyNotVisible: 'このAPIキーを表示する権限がありません。',
     authenticated: '認証済み',
     backToLogin: 'ログイン画面へ戻る',
     beginCreateFirstUser: '開始するには最初のユーザーを作成してください。',

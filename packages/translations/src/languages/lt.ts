@@ -8,6 +8,8 @@ export const ltTranslations: DefaultTranslationsObject = {
     alreadyActivated: 'Jau aktyvuota',
     alreadyLoggedIn: 'Jau prisijungęs',
     apiKey: 'API raktas',
+    apiKeyGeneratedOnSave: 'Išsaugokite šį dokumentą, kad būtų sugeneruotas API raktas.',
+    apiKeyNotVisible: 'Neturite leidimo peržiūrėti šio API rakto.',
     authenticated: 'Autentifikuotas',
     backToLogin: 'Grįžti į prisijungimą',
     beginCreateFirstUser: 'Sukurkite savo pirmąjį naudotoją, kad pradėtumėte.',
