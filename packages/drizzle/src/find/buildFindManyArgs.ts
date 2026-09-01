@@ -97,7 +97,7 @@ export const buildFindManyArgs = ({
     withTabledFields,
   })
 
-  if (adapter.tables[`${tableName}_texts`] && withTabledFields.texts) {
+  if (adapter.rawRelations[tableName]?.['_texts'] && withTabledFields.texts) {
     result.with._texts = {
       columns: {
         id: false,
@@ -107,7 +107,7 @@ export const buildFindManyArgs = ({
     }
   }
 
-  if (adapter.tables[`${tableName}_numbers`] && withTabledFields.numbers) {
+  if (adapter.rawRelations[tableName]?.['_numbers'] && withTabledFields.numbers) {
     result.with._numbers = {
       columns: {
         id: false,
@@ -117,7 +117,7 @@ export const buildFindManyArgs = ({
     }
   }
 
-  if (adapter.tables[`${tableName}${adapter.relationshipsSuffix}`] && withTabledFields.rels) {
+  if (adapter.rawRelations[tableName]?.['_rels'] && withTabledFields.rels) {
     result.with._rels = {
       columns: {
         id: false,
