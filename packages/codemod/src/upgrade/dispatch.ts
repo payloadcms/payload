@@ -1,14 +1,15 @@
 /* eslint-disable no-console */
+import * as p from '@clack/prompts'
 import { spawn } from 'node:child_process'
 import { mkdtempSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
-import { createInterface } from 'node:readline/promises'
 
 import type { Agent, DispatchChoice } from './selectAgent.js'
 
 import { renderUpgradePrompt } from './prompt.js'
 import { detectInstalledAgents, selectDispatch } from './selectAgent.js'
+import { resolveSelfCommand } from './selfCommand.js'
 
 type RunDispatchArgs = {
   agentFlag?: string
@@ -73,7 +74,7 @@ function defaultDispatchDeps(): DispatchDeps {
     detectAgents: detectInstalledAgents,
     isInteractive: Boolean(process.stdin.isTTY && process.stdout.isTTY),
     promptChoice: promptChoiceFromTerminal,
-    renderPrompt: renderUpgradePrompt,
+    renderPrompt: () => renderUpgradePrompt({ command: resolveSelfCommand() }),
     spawnAgent: spawnAgentInteractive,
     writePromptFile: (contents) => {
       const dir = mkdtempSync(join(tmpdir(), 'payload-v4-upgrade-'))
@@ -84,21 +85,31 @@ function defaultDispatchDeps(): DispatchDeps {
   }
 }
 
-/** Numbered readline picker: each installed agent, then "print the prompt". */
+/** Clack select: each installed agent, then "print the prompt". */
 async function promptChoiceFromTerminal(agents: Agent[]): Promise<DispatchChoice> {
-  const rl = createInterface({ input: process.stdin, output: process.stdout })
-  try {
-    console.log('How do you want to run the Payload v3 -> v4 upgrade?')
-    agents.forEach((agent, i) => console.log(`  ${i + 1}) Hand off to ${agent.label}`))
-    console.log(`  ${agents.length + 1}) Just print the prompt`)
+  p.intro('Payload v3 -> v4 upgrade')
+  const selection = await p.select({
+    message: 'How do you want to run it?',
+    options: [
+      ...agents.map((agent) => ({
+        hint: `hand the prompt to \`${agent.command}\``,
+        label: agent.label,
+        value: agent.id as string,
+      })),
+      {
+        hint: 'run it yourself or paste it elsewhere',
+        label: 'Just print the prompt',
+        value: 'print',
+      },
+    ],
+  })
 
-    const answer = await rl.question(`Select [1-${agents.length + 1}]: `)
-    const index = Number.parseInt(answer.trim(), 10) - 1
-    const agent = agents[index]
-    return agent ? { agent, kind: 'agent' } : { kind: 'print' }
-  } finally {
-    rl.close()
+  // Cancelling (Ctrl-C) falls back to printing the prompt so the user keeps it.
+  if (p.isCancel(selection)) {
+    return { kind: 'print' }
   }
+  const agent = agents.find((a) => a.id === selection)
+  return agent ? { agent, kind: 'agent' } : { kind: 'print' }
 }
 
 /** Interactive agent session seeded with a one-line pointer to the prompt file. */
