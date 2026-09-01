@@ -7,13 +7,17 @@ import { join, resolve } from 'node:path'
 
 import type { Agent, DispatchChoice } from './selectAgent.js'
 
+import { runUpgrade } from './index.js'
 import { renderUpgradePrompt } from './prompt.js'
 import { detectInstalledAgents, selectDispatch } from './selectAgent.js'
 import { resolveSelfCommand } from './selfCommand.js'
 
+type UpgradeFlags = Parameters<typeof runUpgrade>[0]['flags']
+
 type RunDispatchArgs = {
   agentFlag?: string
   path: string
+  upgradeFlags: UpgradeFlags
 }
 
 export type DispatchDeps = {
@@ -21,6 +25,7 @@ export type DispatchDeps = {
   isInteractive: boolean
   promptChoice: (agents: Agent[]) => Promise<DispatchChoice>
   renderPrompt: () => string
+  runMechanical: (args: { flags: UpgradeFlags; path: string }) => Promise<{ failed: boolean }>
   spawnAgent: (args: { agent: Agent; cwd: string; promptFilePath: string }) => Promise<{
     code: number
   }>
@@ -29,12 +34,11 @@ export type DispatchDeps = {
 
 /**
  * Bare `upgrade`: pick how to run the full v3 -> v4 upgrade. Hands the
- * orchestration prompt to a detected coding agent, or prints it for manual use.
- * The mechanical slice itself runs later, when the agent (or the user) invokes
- * `upgrade run` per the prompt's step 2.
+ * orchestration prompt to a detected coding agent, runs the mechanical slice
+ * here, or prints the prompt for manual use.
  */
 export async function runDispatch(
-  { agentFlag, path }: RunDispatchArgs,
+  { agentFlag, path, upgradeFlags }: RunDispatchArgs,
   deps: DispatchDeps = defaultDispatchDeps(),
 ): Promise<{ failed: boolean }> {
   const installed = deps.detectAgents()
@@ -50,6 +54,10 @@ export async function runDispatch(
   } catch (err) {
     console.error(err instanceof Error ? err.message : String(err))
     return { failed: true }
+  }
+
+  if (choice.kind === 'run') {
+    return deps.runMechanical({ flags: upgradeFlags, path })
   }
 
   const promptText = deps.renderPrompt()
@@ -75,6 +83,7 @@ function defaultDispatchDeps(): DispatchDeps {
     isInteractive: Boolean(process.stdin.isTTY && process.stdout.isTTY),
     promptChoice: promptChoiceFromTerminal,
     renderPrompt: () => renderUpgradePrompt({ command: resolveSelfCommand() }),
+    runMechanical: (args) => runUpgrade(args),
     spawnAgent: spawnAgentInteractive,
     writePromptFile: (contents) => {
       const dir = mkdtempSync(join(tmpdir(), 'payload-v4-upgrade-'))
@@ -85,7 +94,7 @@ function defaultDispatchDeps(): DispatchDeps {
   }
 }
 
-/** Clack select: each installed agent, then "print the prompt". */
+/** Clack select: each installed agent, then run the slice or print the prompt. */
 async function promptChoiceFromTerminal(agents: Agent[]): Promise<DispatchChoice> {
   p.intro('Payload v3 -> v4 upgrade')
   const selection = await p.select({
@@ -97,6 +106,11 @@ async function promptChoiceFromTerminal(agents: Agent[]): Promise<DispatchChoice
         value: agent.id as string,
       })),
       {
+        hint: 'pin versions, install, run the codemods now',
+        label: 'Run the mechanical steps',
+        value: 'run',
+      },
+      {
         hint: 'run it yourself or paste it elsewhere',
         label: 'Just print the prompt',
         value: 'print',
@@ -107,6 +121,9 @@ async function promptChoiceFromTerminal(agents: Agent[]): Promise<DispatchChoice
   // Cancelling (Ctrl-C) falls back to printing the prompt so the user keeps it.
   if (p.isCancel(selection)) {
     return { kind: 'print' }
+  }
+  if (selection === 'run') {
+    return { kind: 'run' }
   }
   const agent = agents.find((a) => a.id === selection)
   return agent ? { agent, kind: 'agent' } : { kind: 'print' }
