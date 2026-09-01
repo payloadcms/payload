@@ -6,12 +6,43 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from
 
 import type { Organization } from './payload-types.js'
 
+import { extractID } from 'payload/shared'
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 let payload: Payload
+
+const deleteAllHierarchyDocuments = async (collection: 'organizations' | 'pages') => {
+  let documents = await payload.find({
+    collection,
+    depth: 0,
+    limit: 0,
+    overrideAccess: true,
+  })
+
+  while (documents.docs.length > 0) {
+    const leaf = documents.docs.find(
+      (document) =>
+        !documents.docs.some(
+          (candidate) => candidate.id !== document.id && extractID(candidate.parent) === document.id,
+        ),
+    )
+
+    if (!leaf) {
+      throw new Error(`Could not find a leaf document in ${collection}`)
+    }
+
+    await payload.delete({ collection, id: leaf.id, overrideAccess: true })
+    documents = await payload.find({
+      collection,
+      depth: 0,
+      limit: 0,
+      overrideAccess: true,
+    })
+  }
+}
 
 describe('Hierarchy', () => {
   beforeAll(async () => {
@@ -57,6 +88,8 @@ describe('Hierarchy', () => {
       if (organizationsCollection.hierarchy !== false) {
         // eslint-disable-next-line vitest/no-conditional-expect
         expect(organizationsCollection.hierarchy.parentFieldName).toBe('parent')
+        // eslint-disable-next-line vitest/no-conditional-expect
+        expect(organizationsCollection.hierarchy.deleteStrategy).toBe('reparent')
       }
     })
 
@@ -73,6 +106,13 @@ describe('Hierarchy', () => {
         expect(deptsCollection.hierarchy.titlePathFieldName).toBe('_breadcrumbTitle')
       }
 
+      const pagesCollection = payload.collections.pages.config
+      expect(pagesCollection.hierarchy).not.toBe(false)
+      if (pagesCollection.hierarchy !== false) {
+        // eslint-disable-next-line vitest/no-conditional-expect
+        expect(pagesCollection.hierarchy.deleteStrategy).toBe('cascade')
+      }
+
       // Verify custom path fields were added
       const slugField = deptsCollection.fields.find((f) => f.name === '_breadcrumbSlug')
       const titleField = deptsCollection.fields.find((f) => f.name === '_breadcrumbTitle')
@@ -80,17 +120,147 @@ describe('Hierarchy', () => {
       expect(slugField).toBeDefined()
       expect(titleField).toBeDefined()
     })
+
+    describe('Delete Strategy', () => {
+      beforeEach(async () => {
+        await deleteAllHierarchyDocuments('organizations')
+        await deleteAllHierarchyDocuments('pages')
+      })
+
+      afterEach(async () => {
+        await deleteAllHierarchyDocuments('organizations')
+        await deleteAllHierarchyDocuments('pages')
+      })
+
+      it('should reparent direct children by default and keep grandchildren attached', async () => {
+        const root = await payload.create({
+          collection: 'organizations',
+          data: { title: 'Root' },
+        })
+        const parent = await payload.create({
+          collection: 'organizations',
+          data: { parent: root.id, title: 'Parent' },
+        })
+        const child = await payload.create({
+          collection: 'organizations',
+          data: { parent: parent.id, title: 'Child' },
+        })
+        const grandchild = await payload.create({
+          collection: 'organizations',
+          data: { parent: child.id, title: 'Grandchild' },
+        })
+
+        await payload.delete({ collection: 'organizations', id: parent.id })
+
+        const updatedChild = await payload.findByID({ collection: 'organizations', id: child.id })
+        expect(extractID(updatedChild.parent)).toBe(root.id)
+        const updatedGrandchild = await payload.findByID({
+          collection: 'organizations',
+          id: grandchild.id,
+        })
+        expect(extractID(updatedGrandchild.parent)).toBe(child.id)
+      })
+
+      it('should move children to the deleted document parent', async () => {
+        const root = await payload.create({
+          collection: 'organizations',
+          data: { title: 'Root' },
+        })
+        const parent = await payload.create({
+          collection: 'organizations',
+          data: { parent: root.id, title: 'Parent' },
+        })
+        const firstChild = await payload.create({
+          collection: 'organizations',
+          data: { parent: parent.id, title: 'First Child' },
+        })
+        const secondChild = await payload.create({
+          collection: 'organizations',
+          data: { parent: parent.id, title: 'Second Child' },
+        })
+
+        await payload.delete({ collection: 'organizations', id: parent.id })
+
+        const updatedFirstChild = await payload.findByID({
+          collection: 'organizations',
+          id: firstChild.id,
+        })
+        expect(extractID(updatedFirstChild.parent)).toBe(root.id)
+        const updatedSecondChild = await payload.findByID({
+          collection: 'organizations',
+          id: secondChild.id,
+        })
+        expect(extractID(updatedSecondChild.parent)).toBe(root.id)
+      })
+
+      it('should move children of a deleted root to null', async () => {
+        const root = await payload.create({
+          collection: 'organizations',
+          data: { title: 'Root' },
+        })
+        const child = await payload.create({
+          collection: 'organizations',
+          data: { parent: root.id, title: 'Child' },
+        })
+
+        await payload.delete({ collection: 'organizations', id: root.id })
+
+        const updatedChild = await payload.findByID({ collection: 'organizations', id: child.id })
+        expect(updatedChild.parent).toBeNull()
+      })
+
+      it("should recursively delete descendants with the cascade strategy", async () => {
+        const root = await payload.create({
+          collection: 'pages',
+          data: { slug: 'root', title: 'Root' },
+        })
+        const child = await payload.create({
+          collection: 'pages',
+          data: { parent: root.id, slug: 'child', title: 'Child' },
+        })
+        const grandchild = await payload.create({
+          collection: 'pages',
+          data: { parent: child.id, slug: 'grandchild', title: 'Grandchild' },
+        })
+
+        await payload.delete({ collection: 'pages', id: root.id })
+
+        await expect(payload.findByID({ collection: 'pages', id: child.id })).rejects.toThrow()
+        await expect(payload.findByID({ collection: 'pages', id: grandchild.id })).rejects.toThrow()
+      })
+
+      it('should abort cascade operations when delete access denies a descendant', async () => {
+        const root = await payload.create({
+          collection: 'pages',
+          data: { slug: 'root', title: 'Root' },
+        })
+        const child = await payload.create({
+          collection: 'pages',
+          data: { parent: root.id, slug: 'protected', title: 'Protected' },
+        })
+        const grandchild = await payload.create({
+          collection: 'pages',
+          data: { parent: child.id, slug: 'grandchild', title: 'Grandchild' },
+        })
+
+        await expect(payload.delete({ collection: 'pages', id: root.id })).rejects.toThrow()
+
+        await expect(payload.findByID({ collection: 'pages', id: root.id })).resolves.toBeDefined()
+        await expect(payload.findByID({ collection: 'pages', id: child.id })).resolves.toBeDefined()
+        await expect(payload.findByID({ collection: 'pages', id: grandchild.id })).resolves.toBeDefined()
+      })
+    })
   })
 
   describe('Tree Data Generation', () => {
     beforeEach(async () => {
       // Clear existing data before each test
-      await payload.delete({ collection: 'organizations', where: {} })
+      await deleteAllHierarchyDocuments('organizations')
     })
 
     afterEach(async () => {
       // Clean up data after each test
-      await payload.delete({ collection: 'organizations', where: {} })
+      await deleteAllHierarchyDocuments('organizations')
     })
 
     it('should compute correct paths for root document', async () => {
@@ -246,11 +416,11 @@ describe('Hierarchy', () => {
 
   describe('Circular Reference Prevention', () => {
     beforeEach(async () => {
-      await payload.delete({ collection: 'organizations', where: {} })
+      await deleteAllHierarchyDocuments('organizations')
     })
 
     afterEach(async () => {
-      await payload.delete({ collection: 'organizations', where: {} })
+      await deleteAllHierarchyDocuments('organizations')
     })
 
     it('should prevent self-referential parent', async () => {
@@ -346,12 +516,12 @@ describe('Hierarchy', () => {
   describe('Query Patterns', () => {
     beforeEach(async () => {
       // Clear existing data before each test
-      await payload.delete({ collection: 'organizations', where: {} })
+      await deleteAllHierarchyDocuments('organizations')
     })
 
     afterEach(async () => {
       // Clean up data after each test
-      await payload.delete({ collection: 'organizations', where: {} })
+      await deleteAllHierarchyDocuments('organizations')
     })
 
     it('should find root documents by querying parent field', async () => {
@@ -447,12 +617,12 @@ describe('Hierarchy', () => {
   describe('Deep Nesting', () => {
     beforeEach(async () => {
       // Clear existing data before each test
-      await payload.delete({ collection: 'organizations', where: {} })
+      await deleteAllHierarchyDocuments('organizations')
     })
 
     afterEach(async () => {
       // Clean up data after each test
-      await payload.delete({ collection: 'organizations', where: {} })
+      await deleteAllHierarchyDocuments('organizations')
     })
 
     it('should handle deeply nested structures', async () => {
@@ -1162,11 +1332,11 @@ describe('Hierarchy', () => {
 
   describe('Ancestor Cache Performance', () => {
     beforeEach(async () => {
-      await payload.delete({ collection: 'organizations', where: {} })
+      await deleteAllHierarchyDocuments('organizations')
     })
 
     afterEach(async () => {
-      await payload.delete({ collection: 'organizations', where: {} })
+      await deleteAllHierarchyDocuments('organizations')
     })
 
     it('should cache ancestors when computing paths for multiple documents', async () => {

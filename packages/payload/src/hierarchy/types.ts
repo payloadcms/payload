@@ -73,6 +73,11 @@ export type HierarchyConfig = {
       }
     | boolean
   /**
+   * How to handle direct children when a hierarchy document is deleted
+   * @default 'reparent'
+   */
+  deleteStrategy?: 'cascade' | 'reparent'
+  /**
    * Configure a join field to query all children (nested hierarchy items and related documents)
    * If not set, no join field is created.
    * You can pass additional JoinField options (admin, defaultLimit, defaultSort, etc.)
@@ -130,6 +135,7 @@ export type SanitizedHierarchyConfig = {
         fieldName: string
       }
     | false
+  deleteStrategy: 'cascade' | 'reparent'
   /**
    * Join field configuration, or undefined if not enabled
    */

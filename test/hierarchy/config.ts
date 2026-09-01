@@ -46,6 +46,10 @@ export const Pages: CollectionConfig = {
   admin: {
     useAsTitle: 'title',
   },
+  access: {
+    delete: () => ({ slug: { not_equals: 'protected' } }),
+    read: () => true,
+  },
   fields: [
     {
       name: 'title',
@@ -67,6 +71,7 @@ export const Pages: CollectionConfig = {
       },
     },
     parentFieldName: 'parent',
+    deleteStrategy: 'cascade',
     slugField: 'slug', // Use dedicated slug field for _h_slugPath
   },
   versions: false,
