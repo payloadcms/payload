@@ -8,10 +8,7 @@ import { initializeMigration } from './initialize.js'
 export const createMigrateAPIKeysCommand = defineCLICommand({
   description: 'Migrate legacy API keys into the payload-api-keys collection.',
   handler: async ({ args, getPayload }) => {
-    const { payload } = await initializeMigration({
-      disableAPIKeyStartupGuard: true,
-      getPayload,
-    })
+    const { payload } = await initializeMigration({ getPayload })
 
     const dryRun = args.dryRun ?? false
 

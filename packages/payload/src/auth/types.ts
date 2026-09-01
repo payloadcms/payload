@@ -259,6 +259,14 @@ export type UseAPIKeyConfig =
        * both view and revoke any owner's keys.
        */
       access?: APIKeyAdministrationAccessConfig
+      /**
+       * A string prepended to every secret generated (on create or regenerate) for a key
+       * owned by this collection - useful for making a key's provenance recognizable at a
+       * glance, or for secret scanners that key off a known pattern.
+       *
+       * @default '' (no prefix)
+       */
+      apiKeyPrefix?: string
     }
   | boolean
 

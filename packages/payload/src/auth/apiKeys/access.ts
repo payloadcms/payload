@@ -3,6 +3,7 @@ import type { PayloadRequest, Where } from '../../types/index.js'
 import type { APIKeyAdministrationAccessConfig, AuthenticatedUser } from '../types.js'
 
 import { isAdministrator } from '../../utilities/canAccessAdmin.js'
+import { getUseAPIKeyConfig } from './getUseAPIKeyConfig.js'
 
 const isNonAPIKeyAuthenticatedUser = (user: AuthenticatedUser | null | undefined): boolean =>
   Boolean(user) && user!._strategy !== 'api-key'
@@ -19,17 +20,8 @@ const ownerWhere = (user: AuthenticatedUser): Where => ({
  */
 const getCallerAPIKeyAdministrationAccess = (
   req: PayloadRequest,
-): APIKeyAdministrationAccessConfig | undefined => {
-  const callerCollectionSlug = req.user?.collection
-
-  if (!callerCollectionSlug) {
-    return undefined
-  }
-
-  const useAPIKey = req.payload.collections[callerCollectionSlug]?.config.auth?.useAPIKey
-
-  return typeof useAPIKey === 'object' ? useAPIKey.access : undefined
-}
+): APIKeyAdministrationAccessConfig | undefined =>
+  getUseAPIKeyConfig(req, req.user?.collection)?.access
 
 /**
  * Whether `req.user` can delete (revoke) API keys owned by other users, across any
@@ -75,15 +67,6 @@ export const canReadOthersAPIKeys = async ({ req }: { req: PayloadRequest }): Pr
   return canManageOthersAPIKeys({ req })
 }
 
-/** Owner only: creating and renaming a key never extends to an administrator. */
-export const apiKeysOwnerOnlyAccess: Access = ({ req }) => {
-  if (!isNonAPIKeyAuthenticatedUser(req.user)) {
-    return false
-  }
-
-  return ownerWhere(req.user as AuthenticatedUser)
-}
-
 /** Owner or read-tier administrator: reading metadata extends to administrators. */
 export const apiKeysOwnerOrReadAccess: Access = async ({ req }) => {
   if (!isNonAPIKeyAuthenticatedUser(req.user)) {
@@ -111,7 +94,8 @@ export const apiKeysOwnerOrManageAccess: Access = async ({ req }) => {
 }
 
 /**
- * Anyone authenticated through a non-API-key strategy may create their own key, or
- * regenerate one they already own (a regular update, gated by `apiKeysOwnerOnlyAccess`).
+ * Anyone authenticated through a non-API-key strategy may create their own key - the
+ * `owner` field's `assignAPIKeyOwner` hook forces it to `req.user`, so there is no
+ * `Where` scoping to do here the way there is for update/delete/read.
  */
 export const apiKeysCreateAccess: Access = ({ req }) => isNonAPIKeyAuthenticatedUser(req.user)

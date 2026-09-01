@@ -6,7 +6,6 @@ import { formatAdminURL } from 'payload/shared'
 import React, { useCallback } from 'react'
 import { toast } from 'sonner'
 
-import { useField } from '../../forms/useField/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -23,9 +22,8 @@ import { Translation } from '../Translation/index.js'
  * how a lost password is reset rather than looked up.
  *
  * Renders nothing for a not-yet-created document (nothing to regenerate) or when the
- * viewer lacks update access to this document (regeneration is owner-only, matching
- * create/rename - an administrator with `manageOthers` access can revoke another owner's
- * key but never mint a new one on their behalf).
+ * viewer lacks update access to this document - the owner, or an administrator with
+ * `manageOthers` access to this key's owning collection.
  */
 export const RegenerateAPIKeyButton: UIFieldClientComponent = ({ readOnly }) => {
   const { id, updateSavedDocumentData } = useDocumentInfo()
@@ -37,7 +35,6 @@ export const RegenerateAPIKeyButton: UIFieldClientComponent = ({ readOnly }) => 
   } = useConfig()
   const { i18n, t } = useTranslation()
   const { closeModal, toggleModal } = useModal()
-  const { setValue } = useField<string>({ path: 'apiKey' })
 
   const modalSlug = `regenerate-api-key-${id}`
 
@@ -57,11 +54,12 @@ export const RegenerateAPIKeyButton: UIFieldClientComponent = ({ readOnly }) => 
       const { doc, errors, message } = await res.json()
 
       if (res.status < 400 && doc?.apiKey) {
-        setValue(doc.apiKey)
-        // Regeneration happens outside the normal form save flow, so the document-info
-        // context's own record of "what's currently saved" needs updating directly -
-        // otherwise its staleness check sees a server updatedAt it didn't cause and warns
-        // that someone else modified the document.
+        // Regeneration happens outside the normal form save flow and already persisted
+        // server-side, so only the document-info context's record of "what's currently
+        // saved" needs updating - not the form's own (never-submitted) field state, which
+        // would mark the form "modified" and enable the Save button for a change that was
+        // never unsaved. The API-key field reads its displayed value from this same
+        // saved-document record, so this alone is enough for the new secret to appear.
         updateSavedDocumentData(doc)
         toast.success(t('authentication:newAPIKeyGenerated'))
       } else {
@@ -72,17 +70,7 @@ export const RegenerateAPIKeyButton: UIFieldClientComponent = ({ readOnly }) => 
     } finally {
       closeModal(modalSlug)
     }
-  }, [
-    apiRoute,
-    closeModal,
-    i18n.language,
-    id,
-    modalSlug,
-    serverURL,
-    setValue,
-    t,
-    updateSavedDocumentData,
-  ])
+  }, [apiRoute, closeModal, i18n.language, id, modalSlug, serverURL, t, updateSavedDocumentData])
 
   if (!id || readOnly) {
     return null

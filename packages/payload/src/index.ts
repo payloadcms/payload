@@ -136,10 +136,6 @@ import type { KVAdapter } from './kv/index.js'
 import type { JobLog, JobTaskStatus } from './queues/config/types/workflowTypes.js'
 import type { TypeWithVersion } from './versions/types.js'
 
-import {
-  assertNoLegacyAPIKeyMaterial,
-  shouldRunAPIKeyStartupGuard,
-} from './auth/apiKeys/startupGuard.js'
 import { buildEncryptionKeyring, decrypt, encrypt, reencrypt } from './auth/crypto.js'
 import { authLocal } from './auth/operations/local/auth.js'
 import { APIKeyAuthentication } from './auth/strategies/apiKey.js'
@@ -167,7 +163,6 @@ import { traverseFields } from './utilities/traverseFields.js'
 export { payloadAPIKeysCollectionSlug } from './auth/apiKeys/config.js'
 export { migrateAPIKeys } from './auth/apiKeys/migration.js'
 export type { MigrateAPIKeysArgs, MigrateAPIKeysResult } from './auth/apiKeys/migration.js'
-export { assertNoLegacyAPIKeyMaterial } from './auth/apiKeys/startupGuard.js'
 /**
  * Export of all base fields that could potentially be
  * useful as users wish to extend built-in fields with custom logic
@@ -1002,10 +997,6 @@ export class BasePayload {
 
     if (!options.disableDBConnect && this.db.connect) {
       await this.db.connect()
-    }
-
-    if (shouldRunAPIKeyStartupGuard(options)) {
-      await assertNoLegacyAPIKeyMaterial({ payload: this })
     }
 
     // Load email adapter

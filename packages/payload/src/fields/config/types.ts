@@ -1679,6 +1679,16 @@ export type JoinField = {
     } & FieldAdmin['components']
     defaultColumns?: string[]
     disableBulkEdit?: never
+    /**
+     * By default, creating a new related document through this join field's "Create New"
+     * drawer closes the drawer immediately once the document is saved. Set to `true` to
+     * leave the drawer open instead - useful when the created document surfaces a
+     * one-time value (e.g. a generated secret) that the drawer closing would hide before
+     * the user has a chance to see or copy it.
+     *
+     * @default false
+     */
+    disableCreateDrawerAutoClose?: boolean
     disableRowTypes?: boolean
     readOnly?: never
   } & FieldAdmin
@@ -1734,7 +1744,12 @@ export type JoinFieldClient = {
     Pick<
       JoinField['admin'],
       // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-      'allowCreate' | 'defaultColumns' | 'disableBulkEdit' | 'disableRowTypes' | 'readOnly'
+      | 'allowCreate'
+      | 'defaultColumns'
+      | 'disableBulkEdit'
+      | 'disableCreateDrawerAutoClose'
+      | 'disableRowTypes'
+      | 'readOnly'
     >
 } & { targetField: Pick<RelationshipFieldClient, 'relationTo'> } & FieldBaseClient &
   Pick<

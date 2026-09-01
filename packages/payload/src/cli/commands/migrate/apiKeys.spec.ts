@@ -23,12 +23,10 @@ describe('createMigrateAPIKeysCommand', () => {
     initializeMigrationMock.mockClear()
   })
 
-  it('disables the API key startup guard while initializing', async () => {
+  it('initializes with the CLI-provided getPayload', async () => {
     await createMigrateAPIKeysCommand.handler({ args: {}, getConfig, getPayload, help })
 
-    expect(initializeMigrationMock).toHaveBeenCalledWith(
-      expect.objectContaining({ disableAPIKeyStartupGuard: true, getPayload }),
-    )
+    expect(initializeMigrationMock).toHaveBeenCalledWith({ getPayload })
   })
 
   it('defaults to no dry run, no batch size override, and no collection filter', async () => {

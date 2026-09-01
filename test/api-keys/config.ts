@@ -71,10 +71,13 @@ export default buildConfigWithDefaults({
     },
     {
       // A second, distinct API-key-enabled auth collection so cross-collection
-      // owner scoping (header slug must equal owner.relationTo) is testable.
+      // owner scoping (header slug must equal owner.relationTo) is testable, configured
+      // with its own `apiKeyPrefix` so prefix configurability is testable too.
       slug: otherCustomersSlug,
       auth: {
-        useAPIKey: true,
+        useAPIKey: {
+          apiKeyPrefix: 'oc_',
+        },
       },
       fields: [],
     },

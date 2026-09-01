@@ -55,9 +55,28 @@ export const ThirdPartyAccess: CollectionConfig = {
         // Whether this collection's users can view OTHER owners' key metadata
         // (name, creation date) - never the decrypted secret.
         readOthers: ({ req }) => Boolean(req.user?.roles?.includes('admin')),
-        // Whether this collection's users can delete (revoke) OTHER owners' keys.
+        // Whether this collection's users can rename, regenerate, or delete (revoke)
+        // OTHER owners' keys. Never exposes another owner's decrypted secret.
         manageOthers: ({ req }) => Boolean(req.user?.roles?.includes('admin')),
       },
+    },
+  },
+  fields: [],
+}
+```
+
+Every generated secret is a run of random characters with no prefix by default. To make a
+collection's keys recognizable at a glance (or to match a pattern your secret-scanning tooling
+expects), set `apiKeyPrefix`:
+
+```ts
+import type { CollectionConfig } from 'payload'
+
+export const ThirdPartyAccess: CollectionConfig = {
+  slug: 'third-party-access',
+  auth: {
+    useAPIKey: {
+      apiKeyPrefix: 'tpa_', // highlight-line
     },
   },
   fields: [],
@@ -70,8 +89,9 @@ export const ThirdPartyAccess: CollectionConfig = {
   the auth document, and rotating `PAYLOAD_SECRET` required re-keying that field. If you are
   upgrading from a version where you already have API keys in production, run
   `payload migrate:api-keys --dry-run` followed by `payload migrate:api-keys` to convert your
-  existing keys into the new collection before starting Payload - it will refuse to start
-  otherwise.
+  existing keys into the new collection before switching a collection over to `useAPIKey`
+  collection storage. Collection storage mode never reads the legacy fields, so any key left
+  unmigrated will stop authenticating with no warning at startup.
 
 </Banner>
 

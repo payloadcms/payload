@@ -17,6 +17,7 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
   id: docID,
   collectionSlug,
   disableActions,
+  disableCreateDrawerAutoClose,
   drawerSlug,
   initialData,
   onDelete: onDeleteFromProps,
@@ -101,7 +102,7 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
 
   const onSave = useCallback<DocumentDrawerProps['onSave']>(
     (args) => {
-      if (args.operation === 'create') {
+      if (args.operation === 'create' && !disableCreateDrawerAutoClose) {
         getDocumentView(args.doc.id)
       }
 
@@ -112,7 +113,7 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
         })
       }
     },
-    [onSaveFromProps, collectionConfig, getDocumentView],
+    [onSaveFromProps, collectionConfig, getDocumentView, disableCreateDrawerAutoClose],
   )
 
   const onDuplicate = useCallback<DocumentDrawerProps['onDuplicate']>(

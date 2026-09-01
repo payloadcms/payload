@@ -2,10 +2,13 @@ import type { Payload, TypeWithID } from 'payload'
 
 import crypto from 'crypto'
 import path from 'path'
-import { assertNoLegacyAPIKeyMaterial, payloadAPIKeysCollectionSlug, rotateSecret } from 'payload'
+import { payloadAPIKeysCollectionSlug, rotateSecret } from 'payload'
 import { fileURLToPath } from 'url'
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 
+import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
+
+import { idToString } from '../__helpers/shared/idToString.js'
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { adminsSlug, customersSlug, otherCustomersSlug, verifiedCustomersSlug } from './config.js'
 
@@ -13,6 +16,7 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 let payload: Payload
+let restClient: NextRESTClient
 
 const createdOwnerIDs: { collection: string; id: number | string }[] = []
 const createdKeyIDs: (number | string)[] = []
@@ -35,13 +39,22 @@ const createOwner = async (collection: string, data: Record<string, unknown> = {
       ...data,
     },
   })
-  createdOwnerIDs.push({ collection, id: owner.id })
+  createdOwnerIDs.push({ id: owner.id, collection })
   return owner
 }
 
+const authenticateWithAPIKey = ({
+  apiKey,
+  collectionSlug,
+}: {
+  apiKey: string
+  collectionSlug: string
+}) =>
+  payload.auth({ headers: new Headers({ Authorization: `${collectionSlug} API-Key ${apiKey}` }) })
+
 describe('payload-api-keys collection', () => {
   beforeAll(async () => {
-    ;({ payload } = await initPayloadInt(dirname))
+    ;({ payload, restClient } = await initPayloadInt(dirname))
   })
 
   afterEach(async () => {
@@ -105,7 +118,7 @@ describe('payload-api-keys collection', () => {
     createdKeyIDs.push(key.id)
 
     expect(key.owner).toMatchObject({ relationTo: customersSlug, value: alice.id })
-    expect(key.apiKey).toMatch(/^plk_/)
+    expect(key.apiKey).toMatch(/^[\w-]{40,}$/)
   })
 
   it('should never return the secret on a subsequent read, even for the owner, even when owner is depth-populated', async () => {
@@ -156,7 +169,7 @@ describe('payload-api-keys collection', () => {
 
     expect(key.owner.relationTo).toBe(customersSlug)
     expect(ownerID(key.owner)).toBe(String(alice.id))
-    expect(key.apiKey).toMatch(/^plk_/)
+    expect(key.apiKey).toMatch(/^[\w-]{40,}$/)
     expect(key.migratedFrom?.collection).toBeFalsy()
     expect(key.migratedFrom?.documentID).toBeFalsy()
 
@@ -229,9 +242,34 @@ describe('payload-api-keys collection', () => {
     expect((deleted as { apiKey?: string }).apiKey).toBeFalsy()
   })
 
-  it('should not let an administrator rename another owner key', async () => {
+  it('should let a manage-tier administrator rename another owner key', async () => {
     const alice = await createOwner(customersSlug)
-    const admin = await createOwner(adminsSlug)
+    const manageTierAdmin = await createOwner(adminsSlug, { apiKeyAccessLevel: 'canManage' })
+    const created = await payload.create({
+      collection: payloadAPIKeysCollectionSlug,
+      data: { name: 'Alice key' },
+      overrideAccess: false,
+      user: alice,
+    })
+    createdKeyIDs.push(created.id)
+
+    const renamed = await payload.update({
+      id: created.id,
+      collection: payloadAPIKeysCollectionSlug,
+      data: { name: 'Renamed by admin' },
+      overrideAccess: false,
+      user: manageTierAdmin,
+    })
+
+    expect(renamed.name).toBe('Renamed by admin')
+    // Owner must stay Alice, not the administrator who renamed the key.
+    expect(renamed.owner.relationTo).toBe(customersSlug)
+    expect(ownerID(renamed.owner)).toBe(String(alice.id))
+  })
+
+  it('should not let a read-tier administrator rename another owner key', async () => {
+    const alice = await createOwner(customersSlug)
+    const readTierAdmin = await createOwner(adminsSlug, { apiKeyAccessLevel: 'canSee' })
     const created = await payload.create({
       collection: payloadAPIKeysCollectionSlug,
       data: { name: 'Alice key' },
@@ -246,7 +284,7 @@ describe('payload-api-keys collection', () => {
         collection: payloadAPIKeysCollectionSlug,
         data: { name: 'Renamed by admin' },
         overrideAccess: false,
-        user: admin,
+        user: readTierAdmin,
       }),
     ).rejects.toThrow()
   })
@@ -674,16 +712,21 @@ describe('payload-api-keys collection', () => {
         user: alice,
       })
 
-      expect(regenerated.apiKey).toMatch(/^plk_/)
+      expect(regenerated.apiKey).toMatch(/^[\w-]{40,}$/)
       expect(regenerated.apiKey).not.toBe(originalSecret)
 
-      const authenticate = (apiKey: string) =>
-        payload.auth({
-          headers: new Headers({ Authorization: `${customersSlug} API-Key ${apiKey}` }),
-        })
-
-      expect((await authenticate(originalSecret)).user).toBeNull()
-      expect((await authenticate(regenerated.apiKey as string)).user?.id).toBe(alice.id)
+      expect(
+        (await authenticateWithAPIKey({ apiKey: originalSecret, collectionSlug: customersSlug }))
+          .user,
+      ).toBeNull()
+      expect(
+        (
+          await authenticateWithAPIKey({
+            apiKey: regenerated.apiKey as string,
+            collectionSlug: customersSlug,
+          })
+        ).user?.id,
+      ).toBe(alice.id)
     })
 
     it('should not change apiKeyHash on a plain rename that does not request regeneration', async () => {
@@ -716,9 +759,49 @@ describe('payload-api-keys collection', () => {
       expect(afterRaw!.apiKeyHash).toBe(beforeRaw!.apiKeyHash)
     })
 
-    it('should not let an administrator regenerate another owner key', async () => {
+    it('should let a manage-tier administrator regenerate another owner key, without reassigning ownership', async () => {
       const alice = await createOwner(customersSlug)
-      const admin = await createOwner(adminsSlug)
+      const manageTierAdmin = await createOwner(adminsSlug, { apiKeyAccessLevel: 'canManage' })
+      const created = await payload.create({
+        collection: payloadAPIKeysCollectionSlug,
+        data: { name: 'Alice key' },
+        overrideAccess: false,
+        user: alice,
+      })
+      createdKeyIDs.push(created.id)
+      const originalSecret = created.apiKey as string
+
+      const regenerated = await payload.update({
+        id: created.id,
+        collection: payloadAPIKeysCollectionSlug,
+        // @ts-expect-error - regenerate is a virtual, non-generated-type sentinel field
+        data: { regenerate: true },
+        overrideAccess: false,
+        user: manageTierAdmin,
+      })
+
+      expect(regenerated.apiKey).not.toBe(originalSecret)
+      // Owner must stay Alice, not the administrator who triggered the regeneration.
+      expect(regenerated.owner.relationTo).toBe(customersSlug)
+      expect(ownerID(regenerated.owner)).toBe(String(alice.id))
+
+      expect(
+        (await authenticateWithAPIKey({ apiKey: originalSecret, collectionSlug: customersSlug }))
+          .user,
+      ).toBeNull()
+      expect(
+        (
+          await authenticateWithAPIKey({
+            apiKey: regenerated.apiKey as string,
+            collectionSlug: customersSlug,
+          })
+        ).user?.id,
+      ).toBe(alice.id)
+    })
+
+    it('should not let a read-tier administrator regenerate another owner key', async () => {
+      const alice = await createOwner(customersSlug)
+      const readTierAdmin = await createOwner(adminsSlug, { apiKeyAccessLevel: 'canSee' })
       const created = await payload.create({
         collection: payloadAPIKeysCollectionSlug,
         data: { name: 'Alice key' },
@@ -734,7 +817,7 @@ describe('payload-api-keys collection', () => {
           // @ts-expect-error - regenerate is a virtual, non-generated-type sentinel field
           data: { regenerate: true },
           overrideAccess: false,
-          user: admin,
+          user: readTierAdmin,
         }),
       ).rejects.toThrow()
     })
@@ -764,6 +847,131 @@ describe('payload-api-keys collection', () => {
     })
   })
 
+  describe('API key prefix', () => {
+    it('should generate a key with no prefix by default', async () => {
+      const alice = await createOwner(customersSlug)
+      const key = await payload.create({
+        collection: payloadAPIKeysCollectionSlug,
+        data: { name: 'Alice key' },
+        overrideAccess: false,
+        user: alice,
+      })
+      createdKeyIDs.push(key.id)
+
+      // base64url randomness can incidentally contain '_'/'-', so assert the full-length
+      // shape rather than the absence of any particular character.
+      expect(key.apiKey).toMatch(/^[\w-]{40,}$/)
+    })
+
+    it('should generate a key with the owning collection’s configured prefix', async () => {
+      const bob = await createOwner(otherCustomersSlug)
+      const key = await payload.create({
+        collection: payloadAPIKeysCollectionSlug,
+        data: { name: 'Bob key' },
+        overrideAccess: false,
+        user: bob,
+      })
+      createdKeyIDs.push(key.id)
+
+      expect(key.apiKey).toMatch(/^oc_/)
+    })
+
+    it('should use the owning collection’s prefix, not the acting administrator’s, when a manage-tier administrator regenerates another owner key', async () => {
+      const bob = await createOwner(otherCustomersSlug)
+      const manageTierAdmin = await createOwner(adminsSlug, { apiKeyAccessLevel: 'canManage' })
+      const created = await payload.create({
+        collection: payloadAPIKeysCollectionSlug,
+        data: { name: 'Bob key' },
+        overrideAccess: false,
+        user: bob,
+      })
+      createdKeyIDs.push(created.id)
+
+      const regenerated = await payload.update({
+        id: created.id,
+        collection: payloadAPIKeysCollectionSlug,
+        // @ts-expect-error - regenerate is a virtual, non-generated-type sentinel field
+        data: { regenerate: true },
+        overrideAccess: false,
+        user: manageTierAdmin,
+      })
+
+      expect(regenerated.apiKey).toMatch(/^oc_/)
+    })
+  })
+
+  describe('GraphQL', () => {
+    it('should let a manage-tier administrator regenerate another owner key via GraphQL', async () => {
+      const alice = await createOwner(customersSlug)
+      const manageTierAdmin = await createOwner(adminsSlug, { apiKeyAccessLevel: 'canManage' })
+      const created = await payload.create({
+        collection: payloadAPIKeysCollectionSlug,
+        data: { name: 'Alice key' },
+        overrideAccess: false,
+        user: alice,
+      })
+      createdKeyIDs.push(created.id)
+      const originalSecret = created.apiKey as string
+
+      await restClient.login({
+        slug: adminsSlug,
+        credentials: { email: manageTierAdmin.email, password: 'Password123!' },
+      })
+
+      const query = `mutation {
+        updatePayloadApiKey(id: ${idToString(created.id, payload)}, data: { regenerate: true }) {
+          apiKey
+        }
+      }`
+
+      const response = await restClient.GRAPHQL_POST({ body: JSON.stringify({ query }) })
+      const { data, errors } = await response.json()
+
+      expect(errors).toBeUndefined()
+      expect(data.updatePayloadApiKey.apiKey).not.toBe(originalSecret)
+
+      // Ownership must stay with Alice, not the administrator who triggered the
+      // regeneration - checked via the local API, since asserting through a polymorphic
+      // relationship union in the GraphQL response itself would just duplicate the
+      // owner-preservation coverage already in the "regenerating a key" describe block.
+      const regeneratedDoc = await payload.findByID({
+        id: created.id,
+        collection: payloadAPIKeysCollectionSlug,
+        depth: 0,
+        overrideAccess: true,
+      })
+      expect(regeneratedDoc.owner).toMatchObject({ relationTo: customersSlug, value: alice.id })
+    })
+
+    it('should not let a read-tier administrator regenerate another owner key via GraphQL', async () => {
+      const alice = await createOwner(customersSlug)
+      const readTierAdmin = await createOwner(adminsSlug, { apiKeyAccessLevel: 'canSee' })
+      const created = await payload.create({
+        collection: payloadAPIKeysCollectionSlug,
+        data: { name: 'Alice key' },
+        overrideAccess: false,
+        user: alice,
+      })
+      createdKeyIDs.push(created.id)
+
+      await restClient.login({
+        slug: adminsSlug,
+        credentials: { email: readTierAdmin.email, password: 'Password123!' },
+      })
+
+      const query = `mutation {
+        updatePayloadApiKey(id: ${idToString(created.id, payload)}, data: { regenerate: true }) {
+          apiKey
+        }
+      }`
+
+      const response = await restClient.GRAPHQL_POST({ body: JSON.stringify({ query }) })
+      const { errors } = await response.json()
+
+      expect(errors?.[0]?.message).toBeTruthy()
+    })
+  })
+
   it('should leave collection-backed keys unaffected by rotateSecret, since they never depend on payload.secret', async () => {
     const alice = await createOwner(customersSlug)
     const key = await payload.create({
@@ -787,40 +995,5 @@ describe('payload-api-keys collection', () => {
     })
     expect(afterRaw!.apiKeyHash).toBe(beforeRaw!.apiKeyHash)
     expect(result.migrated).toBe(0)
-  })
-
-  describe('startup guard', () => {
-    let guardTestOwnerID: number | string | undefined
-
-    afterEach(async () => {
-      if (guardTestOwnerID !== undefined) {
-        await payload.delete({ id: guardTestOwnerID, collection: customersSlug }).catch(() => null)
-        guardTestOwnerID = undefined
-      }
-    })
-
-    it('should refuse to start when legacy API-key material remains on a collection-mode auth collection', async () => {
-      const owner = await createOwner(customersSlug)
-      guardTestOwnerID = owner.id
-      createdOwnerIDs.splice(
-        createdOwnerIDs.findIndex((o) => o.id === owner.id),
-        1,
-      )
-
-      await payload.db.updateOne({
-        id: owner.id,
-        collection: customersSlug,
-        data: { apiKeyIndex: 'leftover-legacy-index' },
-        returning: false,
-      })
-
-      await expect(assertNoLegacyAPIKeyMaterial({ payload })).rejects.toThrow(
-        /legacy API-key data remains/,
-      )
-    })
-
-    it('should start normally when no legacy API-key material remains', async () => {
-      await expect(assertNoLegacyAPIKeyMaterial({ payload })).resolves.toBeUndefined()
-    })
   })
 })

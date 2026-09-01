@@ -7,7 +7,6 @@ import { fieldAffectsData } from '../../fields/config/types.js'
 import { getAPIKeyStorageMode } from '../getAPIKeyStorageMode.js'
 import {
   apiKeysCreateAccess,
-  apiKeysOwnerOnlyAccess,
   apiKeysOwnerOrManageAccess,
   apiKeysOwnerOrReadAccess,
 } from './access.js'
@@ -40,7 +39,7 @@ export const getAPIKeysCollection = (config: Config): CollectionConfig | null =>
       create: apiKeysCreateAccess,
       delete: apiKeysOwnerOrManageAccess,
       read: apiKeysOwnerOrReadAccess,
-      update: apiKeysOwnerOnlyAccess,
+      update: apiKeysOwnerOrManageAccess,
     },
     admin: {
       hidden: true,
@@ -84,6 +83,9 @@ export const getAPIKeysCollection = (config: Config): CollectionConfig | null =>
           update: () => false,
         },
         admin: {
+          components: {
+            Field: '@payloadcms/ui#APIKeyField',
+          },
           description:
             'Shown only once, right after creating or regenerating this key. Copy it now - it cannot be viewed again.',
           readOnly: true,
@@ -165,6 +167,10 @@ export const getAPIKeysJoinField = (): Field => ({
   type: 'join',
   admin: {
     defaultColumns: ['name', 'createdAt'],
+    // A newly created key's secret is only ever visible in the create response - closing
+    // or refetching the drawer immediately after save would show the key with the secret
+    // already hidden again, with no way to get it back short of regenerating.
+    disableCreateDrawerAutoClose: true,
   },
   collection: payloadAPIKeysCollectionSlug,
   label: 'API Keys',
