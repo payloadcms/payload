@@ -21,21 +21,26 @@ export function getIncomingFiles({
 
   let files: File[] = []
 
-  if (file && data.filename && data.mimeType) {
+  const effectiveFilename = data.filename ?? file?.name
+  const effectiveMimeType = data.mimeType ?? file?.mimetype
+
+  if (file && effectiveFilename && effectiveMimeType) {
     const mainFile: File = {
       buffer: file.data,
-      filename: data.filename,
+      clientUploadContext: file.clientUploadContext,
+      filename: effectiveFilename,
       filesize: file.size,
-      mimeType: data.mimeType,
+      mimeType: effectiveMimeType,
       tempFilePath: file.tempFilePath,
       uploadReference: file.uploadReference,
     }
 
     files = [mainFile]
 
-    if (data?.sizes) {
-      Object.entries(data.sizes).forEach(([key, resizedFileData]) => {
-        if (payloadUploadSizes?.[key] && resizedFileData.mimeType) {
+    const sizes = data?.sizes ?? payloadUploadSizes
+    if (sizes) {
+      Object.entries(sizes).forEach(([key, resizedFileData]) => {
+        if (payloadUploadSizes?.[key] && resizedFileData?.mimeType) {
           files = files.concat([
             {
               buffer: payloadUploadSizes[key],
