@@ -5,7 +5,7 @@ Complete reference for all Payload field types with examples.
 ## Text Field
 
 ```ts
-import type { TextField } from 'payload'
+import type { TextField } from 'payload/shared'
 
 const textField: TextField = {
   name: 'title',
@@ -48,7 +48,7 @@ Full prop reference: <https://payloadcms.com/docs/fields/slug>
 ## Rich Text (Lexical)
 
 ```ts
-import type { RichTextField } from 'payload'
+import type { RichTextField } from 'payload/shared'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { HeadingFeature, LinkFeature } from '@payloadcms/richtext-lexical'
 
@@ -149,7 +149,7 @@ const richTextWithToolbars: RichTextField = {
 ## Relationship
 
 ```ts
-import type { RelationshipField } from 'payload'
+import type { RelationshipField } from 'payload/shared'
 
 // Single relationship
 const singleRelationship: RelationshipField = {
@@ -183,7 +183,7 @@ const polymorphicRelationship: PolymorphicRelationshipField = {
 ## Array
 
 ```ts
-import type { ArrayField } from 'payload'
+import type { ArrayField } from 'payload/shared'
 
 const arrayField: ArrayField = {
   name: 'slides',
@@ -215,7 +215,7 @@ const arrayField: ArrayField = {
 ## Blocks
 
 ```ts
-import type { BlocksField, Block } from 'payload'
+import type { BlocksField, Block } from 'payload/shared'
 
 const HeroBlock: Block = {
   slug: 'hero',
@@ -254,7 +254,7 @@ const blocksField: BlocksField = {
 ## Select
 
 ```ts
-import type { SelectField } from 'payload'
+import type { SelectField } from 'payload/shared'
 
 // Use select for genuine taxonomy. For publish state, enable versions.drafts
 // and rely on the auto-injected _status field instead of a custom select.
@@ -282,7 +282,7 @@ const multiSelectField: SelectField = {
 ## Upload
 
 ```ts
-import type { UploadField } from 'payload'
+import type { UploadField } from 'payload/shared'
 
 const uploadField: UploadField = {
   name: 'featuredImage',
@@ -300,7 +300,7 @@ const uploadField: UploadField = {
 Point fields store geographic coordinates with automatic 2dsphere indexing for geospatial queries.
 
 ```ts
-import type { PointField } from 'payload'
+import type { PointField } from 'payload/shared'
 
 const locationField: PointField = {
   name: 'location',
@@ -370,7 +370,7 @@ const intersecting = await payload.find({
 Join fields create reverse relationships, allowing you to access related documents from the "other side" of a relationship.
 
 ```ts
-import type { JoinField } from 'payload'
+import type { JoinField } from 'payload/shared'
 
 // From Users collection - show user's orders
 const ordersJoinField: JoinField = {
@@ -400,7 +400,7 @@ const cartJoinField: JoinField = {
 ## Virtual Fields
 
 ```ts
-import type { TextField } from 'payload'
+import type { TextField } from 'payload/shared'
 
 // Computed from siblings
 const computedVirtualField: TextField = {
@@ -429,7 +429,7 @@ form, such as `virtual: 'author.name'`, is queryable and can be used as
 ## Conditional Fields
 
 ```ts
-import type { UploadField, CheckboxField } from 'payload'
+import type { UploadField, CheckboxField } from 'payload/shared'
 
 // Simple boolean condition
 const enableFeatureField: CheckboxField = {
@@ -469,7 +469,7 @@ const mediaField: UploadField = {
 Radio fields present options as radio buttons for single selection.
 
 ```ts
-import type { RadioField } from 'payload'
+import type { RadioField } from 'payload/shared'
 
 const radioField: RadioField = {
   name: 'priority',
@@ -491,7 +491,7 @@ const radioField: RadioField = {
 Row fields arrange fields horizontally in the admin panel (presentational only).
 
 ```ts
-import type { RowField } from 'payload'
+import type { RowField } from 'payload/shared'
 
 const rowField: RowField = {
   type: 'row',
@@ -515,7 +515,7 @@ const rowField: RowField = {
 Collapsible fields group fields in an expandable/collapsible section.
 
 ```ts
-import type { CollapsibleField } from 'payload'
+import type { CollapsibleField } from 'payload/shared'
 
 const collapsibleField: CollapsibleField = {
   label: ({ data }) => data?.title || 'Advanced Options',
@@ -535,7 +535,7 @@ const collapsibleField: CollapsibleField = {
 UI fields allow fully custom React components in the admin (no data stored).
 
 ```ts
-import type { UIField } from 'payload'
+import type { UIField } from 'payload/shared'
 
 const uiField: UIField = {
   name: 'customMessage',
@@ -552,7 +552,7 @@ const uiField: UIField = {
 ## Tabs & Groups
 
 ```ts
-import type { TabsField, GroupField } from 'payload'
+import type { TabsField, GroupField } from 'payload/shared'
 
 // Tabs
 const tabsField: TabsField = {
@@ -591,7 +591,7 @@ const groupField: GroupField = {
 Create composable field patterns that can be customized with overrides.
 
 ```ts
-import type { Field, GroupField } from 'payload'
+import type { Field, GroupField } from 'payload/shared'
 
 // Utility for deep merging
 const deepMerge = <T>(target: T, source: Partial<T>): T => {
@@ -727,7 +727,7 @@ Type guards for runtime field type checking and safe type narrowing.
 | `valueIsValueWithRelation`  | Value is polymorphic relationship                           | Handle polymorphic relationships         |
 
 ```ts
-import { fieldAffectsData, fieldHasSubFields, fieldIsArrayType } from 'payload'
+import { fieldAffectsData, fieldHasSubFields, fieldIsArrayType } from 'payload/shared'
 
 function processField(field: Field) {
   if (fieldAffectsData(field)) {
