@@ -62,15 +62,15 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_BCC912DC".
+ * via the `definition` "LexicalNodes_A230BCD1".
  */
-export type LexicalNodes_BCC912DC =
+export type LexicalNodes_A230BCD1 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_BCC912DC>
+  | SerializedParagraphNode<LexicalNodes_A230BCD1>
   | SerializedBlockNode<MyBlock>
-  | SerializedHeadingNode<LexicalNodes_BCC912DC>
+  | SerializedHeadingNode<LexicalNodes_A230BCD1>
   | {
       type: 'upload';
       /**
@@ -79,19 +79,27 @@ export type LexicalNodes_BCC912DC =
       version: number;
       [k: string]: unknown;
     }
-  | SerializedQuoteNode<LexicalNodes_BCC912DC>
-  | SerializedListNode<LexicalNodes_BCC912DC>
-  | SerializedListItemNode<LexicalNodes_BCC912DC>
-  | SerializedAutoLinkNode<LexicalNodes_BCC912DC, LexicalLinkFields_0A7E9EC0>
-  | SerializedLinkNode<LexicalNodes_BCC912DC, LexicalLinkFields_0A7E9EC0>
+  | SerializedQuoteNode<LexicalNodes_A230BCD1>
+  | SerializedListNode<LexicalNodes_A230BCD1>
+  | SerializedListItemNode<LexicalNodes_A230BCD1>
+  | SerializedAutoLinkNode<LexicalNodes_A230BCD1, LexicalLinkFields_0A7E9EC0>
+  | SerializedLinkNode<LexicalNodes_A230BCD1, LexicalLinkFields_0A7E9EC0>
   | SerializedRelationshipNode<
       | 'users'
       | 'partial-disable-local-strategies'
       | 'disable-local-strategy-password'
       | 'api-keys'
       | 'public-users'
+      | 'rotate-secret'
+      | 'rotate-secret-secondary'
+      | 'rotate-secret-login'
       | 'relationsCollection'
       | 'api-keys-with-restricted-field-access'
+      | 'api-keys-with-hidden-keys'
+      | 'api-keys-with-readable-keys'
+      | 'jwt-users'
+      | 'restricted-jwt-users'
+      | 'restricted-relationships'
       | 'payload-kv'
       | 'payload-locked-documents'
       | 'payload-preferences'
@@ -105,7 +113,14 @@ export interface Config {
     'disable-local-strategy-password': DisableLocalStrategyPasswordAuthOperations;
     'api-keys': ApiKeyAuthOperations;
     'public-users': PublicUserAuthOperations;
+    'rotate-secret': RotateSecretAuthOperations;
+    'rotate-secret-secondary': RotateSecretSecondaryAuthOperations;
+    'rotate-secret-login': RotateSecretLoginAuthOperations;
     'api-keys-with-restricted-field-access': ApiKeysWithRestrictedFieldAccessAuthOperations;
+    'api-keys-with-hidden-keys': ApiKeysWithHiddenKeyAuthOperations;
+    'api-keys-with-readable-keys': ApiKeysWithReadableKeyAuthOperations;
+    'jwt-users': JwtUserAuthOperations;
+    'restricted-jwt-users': RestrictedJwtUserAuthOperations;
   };
   blocks: {};
   collections: {
@@ -114,8 +129,16 @@ export interface Config {
     'disable-local-strategy-password': DisableLocalStrategyPassword;
     'api-keys': ApiKey;
     'public-users': PublicUser;
+    'rotate-secret': RotateSecret;
+    'rotate-secret-secondary': RotateSecretSecondary;
+    'rotate-secret-login': RotateSecretLogin;
     relationsCollection: RelationsCollection;
     'api-keys-with-restricted-field-access': ApiKeysWithRestrictedFieldAccess;
+    'api-keys-with-hidden-keys': ApiKeysWithHiddenKey;
+    'api-keys-with-readable-keys': ApiKeysWithReadableKey;
+    'jwt-users': JwtUser;
+    'restricted-jwt-users': RestrictedJwtUser;
+    'restricted-relationships': RestrictedRelationship;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -128,8 +151,16 @@ export interface Config {
     'disable-local-strategy-password': DisableLocalStrategyPasswordSelect<false> | DisableLocalStrategyPasswordSelect<true>;
     'api-keys': ApiKeysSelect<false> | ApiKeysSelect<true>;
     'public-users': PublicUsersSelect<false> | PublicUsersSelect<true>;
+    'rotate-secret': RotateSecretSelect<false> | RotateSecretSelect<true>;
+    'rotate-secret-secondary': RotateSecretSecondarySelect<false> | RotateSecretSecondarySelect<true>;
+    'rotate-secret-login': RotateSecretLoginSelect<false> | RotateSecretLoginSelect<true>;
     relationsCollection: RelationsCollectionSelect<false> | RelationsCollectionSelect<true>;
     'api-keys-with-restricted-field-access': ApiKeysWithRestrictedFieldAccessSelect<false> | ApiKeysWithRestrictedFieldAccessSelect<true>;
+    'api-keys-with-hidden-keys': ApiKeysWithHiddenKeysSelect<false> | ApiKeysWithHiddenKeysSelect<true>;
+    'api-keys-with-readable-keys': ApiKeysWithReadableKeysSelect<false> | ApiKeysWithReadableKeysSelect<true>;
+    'jwt-users': JwtUsersSelect<false> | JwtUsersSelect<true>;
+    'restricted-jwt-users': RestrictedJwtUsersSelect<false> | RestrictedJwtUsersSelect<true>;
+    'restricted-relationships': RestrictedRelationshipsSelect<false> | RestrictedRelationshipsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -153,7 +184,14 @@ export interface Config {
     | DisableLocalStrategyPassword
     | ApiKey
     | PublicUser
-    | ApiKeysWithRestrictedFieldAccess;
+    | RotateSecret
+    | RotateSecretSecondary
+    | RotateSecretLogin
+    | ApiKeysWithRestrictedFieldAccess
+    | ApiKeysWithHiddenKey
+    | ApiKeysWithReadableKey
+    | JwtUser
+    | RestrictedJwtUser;
   jobs: {
     tasks: unknown;
     workflows: unknown;
@@ -249,7 +287,133 @@ export interface PublicUserAuthOperations {
     password: string;
   };
 }
+export interface RotateSecretAuthOperations {
+  forgotPassword: {
+    email: string;
+    password: string;
+  };
+  login: {
+    email: string;
+    password: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
+    email: string;
+    password: string;
+  };
+}
+export interface RotateSecretSecondaryAuthOperations {
+  forgotPassword: {
+    email: string;
+    password: string;
+  };
+  login: {
+    email: string;
+    password: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
+    email: string;
+    password: string;
+  };
+}
+export interface RotateSecretLoginAuthOperations {
+  forgotPassword: {
+    email: string;
+    password: string;
+  };
+  login: {
+    email: string;
+    password: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
+    email: string;
+    password: string;
+  };
+}
 export interface ApiKeysWithRestrictedFieldAccessAuthOperations {
+  forgotPassword: {
+    email: string;
+    password: string;
+  };
+  login: {
+    email: string;
+    password: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
+    email: string;
+    password: string;
+  };
+}
+export interface ApiKeysWithHiddenKeyAuthOperations {
+  forgotPassword: {
+    email: string;
+    password: string;
+  };
+  login: {
+    email: string;
+    password: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
+    email: string;
+    password: string;
+  };
+}
+export interface ApiKeysWithReadableKeyAuthOperations {
+  forgotPassword: {
+    email: string;
+    password: string;
+  };
+  login: {
+    email: string;
+    password: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
+    email: string;
+    password: string;
+  };
+}
+export interface JwtUserAuthOperations {
+  forgotPassword: {
+    email: string;
+    password: string;
+  };
+  login: {
+    email: string;
+    password: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
+    email: string;
+    password: string;
+  };
+}
+export interface RestrictedJwtUserAuthOperations {
   forgotPassword: {
     email: string;
     password: string;
@@ -282,7 +446,7 @@ export interface User {
       }[]
     | null;
   namedSaveToJWT?: string | null;
-  richText?: LexicalRichText<LexicalNodes_BCC912DC> | null;
+  richText?: LexicalRichText<LexicalNodes_A230BCD1> | null;
   group?: {
     liftedSaveToJWT?: string | null;
   };
@@ -401,6 +565,60 @@ export interface PublicUser {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "rotate-secret".
+ */
+export interface RotateSecret {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  enableAPIKey?: boolean | null;
+  apiKey?: string | null;
+  apiKeyIndex?: string | null;
+  collection: 'rotate-secret';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "rotate-secret-secondary".
+ */
+export interface RotateSecretSecondary {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  enableAPIKey?: boolean | null;
+  apiKey?: string | null;
+  apiKeyIndex?: string | null;
+  collection: 'rotate-secret-secondary';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "rotate-secret-login".
+ */
+export interface RotateSecretLogin {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  enableAPIKey?: boolean | null;
+  apiKey?: string | null;
+  apiKeyIndex?: string | null;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+  collection: 'rotate-secret-login';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "relationsCollection".
  */
 export interface RelationsCollection {
@@ -422,6 +640,100 @@ export interface ApiKeysWithRestrictedFieldAccess {
   apiKey?: string | null;
   apiKeyIndex?: string | null;
   collection: 'api-keys-with-restricted-field-access';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "api-keys-with-hidden-keys".
+ */
+export interface ApiKeysWithHiddenKey {
+  id: string;
+  name?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  enableAPIKey?: boolean | null;
+  apiKey?: string | null;
+  apiKeyIndex?: string | null;
+  collection: 'api-keys-with-hidden-keys';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "api-keys-with-readable-keys".
+ */
+export interface ApiKeysWithReadableKey {
+  id: string;
+  name?: string | null;
+  peer?: (string | null) | RestrictedRelationship;
+  apiKeyPeer?: (string | null) | ApiKey;
+  updatedAt: string;
+  createdAt: string;
+  enableAPIKey?: boolean | null;
+  apiKey?: string | null;
+  apiKeyIndex?: string | null;
+  collection: 'api-keys-with-readable-keys';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restricted-relationships".
+ */
+export interface RestrictedRelationship {
+  id: string;
+  isPublic?: boolean | null;
+  publicField?: string | null;
+  privateField?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "jwt-users".
+ */
+export interface JwtUser {
+  id: string;
+  peer?: (string | null) | RestrictedRelationship;
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+  collection: 'jwt-users';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restricted-jwt-users".
+ */
+export interface RestrictedJwtUser {
+  id: string;
+  privateField?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+  collection: 'restricted-jwt-users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -468,12 +780,44 @@ export interface PayloadLockedDocument {
         value: string | PublicUser;
       } | null)
     | ({
+        relationTo: 'rotate-secret';
+        value: string | RotateSecret;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret-secondary';
+        value: string | RotateSecretSecondary;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret-login';
+        value: string | RotateSecretLogin;
+      } | null)
+    | ({
         relationTo: 'relationsCollection';
         value: string | RelationsCollection;
       } | null)
     | ({
         relationTo: 'api-keys-with-restricted-field-access';
         value: string | ApiKeysWithRestrictedFieldAccess;
+      } | null)
+    | ({
+        relationTo: 'api-keys-with-hidden-keys';
+        value: string | ApiKeysWithHiddenKey;
+      } | null)
+    | ({
+        relationTo: 'api-keys-with-readable-keys';
+        value: string | ApiKeysWithReadableKey;
+      } | null)
+    | ({
+        relationTo: 'jwt-users';
+        value: string | JwtUser;
+      } | null)
+    | ({
+        relationTo: 'restricted-jwt-users';
+        value: string | RestrictedJwtUser;
+      } | null)
+    | ({
+        relationTo: 'restricted-relationships';
+        value: string | RestrictedRelationship;
       } | null);
   globalSlug?: string | null;
   user:
@@ -498,8 +842,36 @@ export interface PayloadLockedDocument {
         value: string | PublicUser;
       }
     | {
+        relationTo: 'rotate-secret';
+        value: string | RotateSecret;
+      }
+    | {
+        relationTo: 'rotate-secret-secondary';
+        value: string | RotateSecretSecondary;
+      }
+    | {
+        relationTo: 'rotate-secret-login';
+        value: string | RotateSecretLogin;
+      }
+    | {
         relationTo: 'api-keys-with-restricted-field-access';
         value: string | ApiKeysWithRestrictedFieldAccess;
+      }
+    | {
+        relationTo: 'api-keys-with-hidden-keys';
+        value: string | ApiKeysWithHiddenKey;
+      }
+    | {
+        relationTo: 'api-keys-with-readable-keys';
+        value: string | ApiKeysWithReadableKey;
+      }
+    | {
+        relationTo: 'jwt-users';
+        value: string | JwtUser;
+      }
+    | {
+        relationTo: 'restricted-jwt-users';
+        value: string | RestrictedJwtUser;
       };
   updatedAt: string;
   createdAt: string;
@@ -532,8 +904,36 @@ export interface PayloadPreference {
         value: string | PublicUser;
       }
     | {
+        relationTo: 'rotate-secret';
+        value: string | RotateSecret;
+      }
+    | {
+        relationTo: 'rotate-secret-secondary';
+        value: string | RotateSecretSecondary;
+      }
+    | {
+        relationTo: 'rotate-secret-login';
+        value: string | RotateSecretLogin;
+      }
+    | {
         relationTo: 'api-keys-with-restricted-field-access';
         value: string | ApiKeysWithRestrictedFieldAccess;
+      }
+    | {
+        relationTo: 'api-keys-with-hidden-keys';
+        value: string | ApiKeysWithHiddenKey;
+      }
+    | {
+        relationTo: 'api-keys-with-readable-keys';
+        value: string | ApiKeysWithReadableKey;
+      }
+    | {
+        relationTo: 'jwt-users';
+        value: string | JwtUser;
+      }
+    | {
+        relationTo: 'restricted-jwt-users';
+        value: string | RestrictedJwtUser;
       };
   key?: string | null;
   value?:
@@ -688,6 +1088,53 @@ export interface PublicUsersSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "rotate-secret_select".
+ */
+export interface RotateSecretSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  enableAPIKey?: T;
+  apiKey?: T;
+  apiKeyIndex?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "rotate-secret-secondary_select".
+ */
+export interface RotateSecretSecondarySelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  enableAPIKey?: T;
+  apiKey?: T;
+  apiKeyIndex?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "rotate-secret-login_select".
+ */
+export interface RotateSecretLoginSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  enableAPIKey?: T;
+  apiKey?: T;
+  apiKeyIndex?: T;
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "relationsCollection_select".
  */
 export interface RelationsCollectionSelect<T extends boolean = true> {
@@ -706,6 +1153,89 @@ export interface ApiKeysWithRestrictedFieldAccessSelect<T extends boolean = true
   enableAPIKey?: T;
   apiKey?: T;
   apiKeyIndex?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "api-keys-with-hidden-keys_select".
+ */
+export interface ApiKeysWithHiddenKeysSelect<T extends boolean = true> {
+  name?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  enableAPIKey?: T;
+  apiKey?: T;
+  apiKeyIndex?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "api-keys-with-readable-keys_select".
+ */
+export interface ApiKeysWithReadableKeysSelect<T extends boolean = true> {
+  name?: T;
+  peer?: T;
+  apiKeyPeer?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  enableAPIKey?: T;
+  apiKey?: T;
+  apiKeyIndex?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "jwt-users_select".
+ */
+export interface JwtUsersSelect<T extends boolean = true> {
+  peer?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restricted-jwt-users_select".
+ */
+export interface RestrictedJwtUsersSelect<T extends boolean = true> {
+  privateField?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restricted-relationships_select".
+ */
+export interface RestrictedRelationshipsSelect<T extends boolean = true> {
+  isPublic?: T;
+  publicField?: T;
+  privateField?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -770,8 +1300,16 @@ export interface CollectionQueryWidget {
       | 'disable-local-strategy-password'
       | 'api-keys'
       | 'public-users'
+      | 'rotate-secret'
+      | 'rotate-secret-secondary'
+      | 'rotate-secret-login'
       | 'relationsCollection'
-      | 'api-keys-with-restricted-field-access';
+      | 'api-keys-with-restricted-field-access'
+      | 'api-keys-with-hidden-keys'
+      | 'api-keys-with-readable-keys'
+      | 'jwt-users'
+      | 'restricted-jwt-users'
+      | 'restricted-relationships';
     where?:
       | {
           [k: string]: unknown;
@@ -800,8 +1338,16 @@ export interface ActivityWidget {
           | 'disable-local-strategy-password'
           | 'api-keys'
           | 'public-users'
+          | 'rotate-secret'
+          | 'rotate-secret-secondary'
+          | 'rotate-secret-login'
           | 'relationsCollection'
           | 'api-keys-with-restricted-field-access'
+          | 'api-keys-with-hidden-keys'
+          | 'api-keys-with-readable-keys'
+          | 'jwt-users'
+          | 'restricted-jwt-users'
+          | 'restricted-relationships'
         )[]
       | null;
   };

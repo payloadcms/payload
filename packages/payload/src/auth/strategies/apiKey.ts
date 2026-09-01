@@ -4,6 +4,9 @@ import type { SanitizedCollectionConfig } from '../../collections/config/types.j
 import type { Where } from '../../types/index.js'
 import type { AuthenticatedUser, AuthStrategyFunction } from '../index.js'
 
+import { createLocalReq } from '../../utilities/createLocalReq.js'
+import { afterReadAuthUser } from '../afterReadAuthUser.js'
+
 export const APIKeyAuthentication =
   (collectionConfig: SanitizedCollectionConfig): AuthStrategyFunction =>
   async ({ headers, isGraphQL = false, payload }) => {
@@ -47,32 +50,23 @@ export const APIKeyAuthentication =
         })
 
         if (userQuery.docs && userQuery.docs.length > 0) {
-          let user = userQuery.docs[0] as AuthenticatedUser
+          const user = userQuery.docs[0] as AuthenticatedUser
           user.collection = collectionConfig.slug
           user._strategy = 'api-key'
 
           const depth = isGraphQL ? 0 : collectionConfig.auth.depth!
-
-          // The first query only authenticates the user, so populate separately with access control enabled if needed to protect related credentials.
-          if (depth > 0) {
-            const populatedUser = (await payload.findByID({
-              id: user.id,
-              collection: collectionConfig.slug,
-              depth,
-              disableErrors: true,
-              overrideAccess: false,
-              user,
-            })) as AuthenticatedUser | null
-
-            if (populatedUser) {
-              user = populatedUser
-              user.collection = collectionConfig.slug
-              user._strategy = 'api-key'
-            }
-          }
+          const req = await createLocalReq({ user }, payload)
 
           return {
-            user,
+            user: await afterReadAuthUser({
+              collection: collectionConfig,
+              depth,
+              overrideAccess: false,
+              req,
+              showHiddenFields: false,
+              triggerHooks: false,
+              user,
+            }),
           }
         }
       } catch (ignore) {

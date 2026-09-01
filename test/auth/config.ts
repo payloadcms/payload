@@ -6,12 +6,15 @@ const framework = process.env.PAYLOAD_FRAMEWORK === 'tanstack-start' ? 'tanstack
 const frameworkExport = framework === 'tanstack' ? 'TanStack' : 'Next'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
+import { APIKeysWithHiddenKeys } from './collections/APIKeysWithHiddenKeys.js'
+import { APIKeysWithReadableKeys } from './collections/APIKeysWithReadableKeys.js'
+import { APIKeysWithRestrictedFieldAccess } from './collections/APIKeysWithRestrictedFieldAccess.js'
+import { JWTUsers } from './collections/JWTUsers.js'
+import { RestrictedJWTUsers } from './collections/RestrictedJWTUsers.js'
+import { RestrictedRelationships } from './collections/RestrictedRelationships.js'
 import { seed } from './seed.js'
 import {
   apiKeysSlug,
-  apiKeysWithHiddenKeysSlug,
-  apiKeysWithReadableKeysSlug,
-  apiKeysWithRestrictedFieldAccessSlug,
   BASE_PATH,
   namedSaveToJWTValue,
   partialDisableLocalStrategiesSlug,
@@ -361,114 +364,12 @@ export default buildConfigWithDefaults({
       ],
       versions: false,
     },
-    {
-      slug: apiKeysWithRestrictedFieldAccessSlug,
-      auth: {
-        disableLocalStrategy: true,
-        useAPIKey: true,
-      },
-      fields: [
-        {
-          name: 'enableAPIKey',
-          type: 'checkbox',
-          access: {
-            read: () => false,
-          },
-        },
-        {
-          name: 'apiKey',
-          type: 'text',
-          access: {
-            create: () => false,
-            read: () => false,
-            update: () => Promise.resolve(false),
-          },
-        },
-      ],
-      labels: {
-        plural: 'API Keys With Restricted Field Access',
-        singular: 'API Key With Restricted Field Access',
-      },
-      versions: false,
-    },
-    {
-      slug: apiKeysWithHiddenKeysSlug,
-      auth: {
-        disableLocalStrategy: true,
-        useAPIKey: true,
-      },
-      fields: [
-        {
-          name: 'name',
-          type: 'text',
-        },
-        {
-          name: 'apiKey',
-          type: 'text',
-          access: {
-            read: () => false,
-          },
-        },
-        {
-          name: 'enableAPIKey',
-          type: 'checkbox',
-          access: {
-            read: () => true,
-          },
-        },
-      ],
-      labels: {
-        plural: 'API Keys With Hidden Keys',
-        singular: 'API Key With Hidden Key',
-      },
-      versions: false,
-    },
-    {
-      slug: apiKeysWithReadableKeysSlug,
-      access: {
-        read: ({ req: { user } }) => {
-          if (!user) {
-            return false
-          }
-          if (user.collection === apiKeysWithReadableKeysSlug) {
-            return {
-              id: {
-                equals: user.id,
-              },
-            }
-          }
-          return true
-        },
-      },
-      auth: {
-        depth: 1,
-        disableLocalStrategy: true,
-        useAPIKey: true,
-      },
-      fields: [
-        {
-          name: 'name',
-          type: 'text',
-        },
-        {
-          name: 'peer',
-          type: 'relationship',
-          relationTo: apiKeysSlug,
-        },
-        {
-          name: 'apiKey',
-          type: 'text',
-          access: {
-            read: () => true,
-          },
-        },
-      ],
-      labels: {
-        plural: 'API Keys With Readable Keys',
-        singular: 'API Key With Readable Key',
-      },
-      versions: false,
-    },
+    APIKeysWithRestrictedFieldAccess,
+    APIKeysWithHiddenKeys,
+    APIKeysWithReadableKeys,
+    JWTUsers,
+    RestrictedJWTUsers,
+    RestrictedRelationships,
   ],
   onInit: seed,
   typescript: {

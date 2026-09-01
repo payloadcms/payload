@@ -63,6 +63,7 @@ export const createAPIKeyFields = ({
       hooks: {
         afterRead: [decryptKey],
         beforeChange: [encryptKey],
+        beforeDuplicate: [() => null],
         beforeValidate: [generateKey],
         ...apiKeyField?.hooks,
       },
@@ -78,6 +79,7 @@ export const createAPIKeyFields = ({
       },
       hidden: apiKeyIndexField?.hidden ?? true,
       hooks: {
+        beforeDuplicate: [() => null],
         beforeValidate: [generateKeyIndex({ includeEnableAPIKey })],
         ...apiKeyIndexField?.hooks,
       },

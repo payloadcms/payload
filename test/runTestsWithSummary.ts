@@ -15,6 +15,7 @@ const TEST_SUITES = [
   'admin-root',
   'array-update',
   'auth',
+  'auth/api-key',
   'base-access',
   'collections-graphql',
   'collections-rest',
