@@ -13,6 +13,7 @@ import { test } from '../__helpers/int/vitest.js'
 import { clearAndSeedEverything } from './seed.js'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
+const CLI_COMMAND_TEST_TIMEOUT = 180_000
 const generatedDirectory = path.resolve(dirname, 'generated')
 const importMapFile = path.resolve(generatedDirectory, 'importMap.js')
 const inputFile = path.resolve(generatedDirectory, 'input.json')
@@ -20,6 +21,7 @@ const migrationsDirectory = path.resolve(dirname, 'migrations')
 const schemaFile = path.resolve(dirname, 'payload-generated-schema.ts')
 const scriptOutputFile = path.resolve(generatedDirectory, 'script-output.txt')
 const typesFile = path.resolve(generatedDirectory, 'payload-types.ts')
+const whereFile = path.resolve(generatedDirectory, 'where.json')
 const initialCLIConfigLogSetting = process.env.PAYLOAD_TEST_CLI_CONFIG_LOG
 const initialCLIJSONSetting = process.env.PAYLOAD_CLI_JSON
 
@@ -333,6 +335,113 @@ test.describe('CLI', () => {
 
     expect(`${output.stdout}\n${output.stderr}`).toContain('Usage: payload info')
     expect(output.stdout).not.toContain('"command":"help"')
+  })
+
+  test('findDocuments --help --json', async ({ cli }) => {
+    const output = await cli('findDocuments --help --json')
+
+    expect(JSON.parse(output.stdout)).toMatchObject({
+      result: {
+        command: {
+          name: 'findDocuments',
+          inputSchema: {
+            properties: {
+              showHiddenFields: {},
+            },
+          },
+        },
+      },
+    })
+  })
+
+  test(
+    'countDocuments --slug pages',
+    testCLICommand(async (command, { cli }) => {
+      const output = await cli(command)
+
+      if (command.includes('--json')) {
+        expect(JSON.parse(output.stdout)).toMatchObject({
+          command: 'countDocuments',
+          result: { totalDocs: 1 },
+          success: true,
+        })
+      } else {
+        expect(output.stdout).toContain('"totalDocs": 1')
+      }
+    }),
+    CLI_COMMAND_TEST_TIMEOUT,
+  )
+
+  test(
+    'countDocuments --slug pages --override-access false',
+    testCLICommand(async (command, { cli }) => {
+      const output = await cli(command)
+
+      if (command.includes('--json')) {
+        expect(JSON.parse(output.stdout)).toMatchObject({
+          command: 'countDocuments',
+          result: { totalDocs: 0 },
+          success: true,
+        })
+      } else {
+        expect(output.stdout).toContain('"totalDocs": 0')
+      }
+    }),
+    CLI_COMMAND_TEST_TIMEOUT,
+  )
+
+  test('countDocuments --slug pages --override-access yes', async ({ cli }) => {
+    await expect(cli('countDocuments --slug pages --override-access yes')).rejects.toThrow(
+      'Expected true or false.',
+    )
+  })
+
+  test('countDocuments --help', async ({ cli }) => {
+    const output = await cli('countDocuments --help')
+
+    expect(`${output.stdout}\n${output.stderr}`).toContain('--override-access <true|false>')
+  })
+
+  test('countDocuments --slug pages --where @where.json', async ({ cli }) => {
+    await writeFile(whereFile, JSON.stringify({ title: { equals: 'Seeded page' } }))
+
+    const output = await cli(`countDocuments --slug pages --where @${whereFile}`)
+
+    expect(output.stdout).toContain('"totalDocs": 1')
+  })
+
+  test(`countDocuments --input '{"slug":"pages","collection":"pages"}' --json`, async ({ cli }) => {
+    const output = await cli({
+      command: `countDocuments --input '{"slug":"pages","collection":"pages"}' --json`,
+      reject: false,
+    })
+    const response = JSON.parse(output.stdout)
+
+    expect(output.exitCode).toBe(1)
+    expect(response).toMatchObject({
+      command: 'countDocuments',
+      error: {
+        code: 'INVALID_INPUT',
+        inputSchema: { additionalProperties: false },
+      },
+      success: false,
+    })
+  })
+
+  test('findDocuments --slug pages --draft --trash --no-pagination --json', async ({ cli }) => {
+    const output = await cli('findDocuments --slug pages --draft --trash --no-pagination --json')
+
+    expect(JSON.parse(output.stdout)).toMatchObject({
+      command: 'findDocuments',
+      result: { docs: [expect.objectContaining({ title: 'Seeded page' })] },
+      success: true,
+    })
+  })
+
+  test('countDocuments --slug pages --unknown', async ({ cli }) => {
+    await expect(cli('countDocuments --slug pages --unknown')).rejects.toThrow(
+      "unknown option '--unknown'",
+    )
   })
 
   test(
