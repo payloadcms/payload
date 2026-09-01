@@ -8,6 +8,7 @@ import {
 } from '../fields/config/types.js'
 import { APIError, type Payload, type SanitizedCollectionConfig } from '../index.js'
 import { SAFE_FIELD_PATH_REGEX } from '../types/constants.js'
+import { getFieldByPath } from '../utilities/getFieldByPath.js'
 
 export function getLocalizedPaths({
   collectionSlug,
@@ -184,6 +185,19 @@ export function getLocalizedPaths({
                   }
 
                   relatedCollection = payload.collections[matchedField.collection]!.config
+
+                  const joinOnField = getFieldByPath({
+                    fields: relatedCollection.flattenedFields,
+                    path: matchedField.on,
+                  })?.field
+
+                  if (
+                    joinOnField &&
+                    (joinOnField.type === 'relationship' || joinOnField.type === 'upload') &&
+                    Array.isArray(joinOnField.relationTo)
+                  ) {
+                    throw new APIError('Not supported')
+                  }
                 } else {
                   relatedCollection = payload.collections[matchedField.relationTo as string]!.config
                 }

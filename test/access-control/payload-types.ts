@@ -74,6 +74,7 @@ export interface Config {
     users: User;
     'public-users': PublicUser;
     posts: Post;
+    'post-references': PostReference;
     unrestricted: Unrestricted;
     'relation-restricted': RelationRestricted;
     'fully-restricted': FullyRestricted;
@@ -108,11 +109,22 @@ export interface Config {
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
-  collectionsJoins: {};
+  collectionsJoins: {
+    posts: {
+      relatedItems: 'relation-restricted';
+    };
+    'post-references': {
+      joinedPosts: 'posts';
+      joinedPostsMany: 'posts';
+      joinedPostsPolymorphicOn: 'posts';
+      polymorphicJoinedPosts: 'posts' | 'unrestricted';
+    };
+  };
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     'public-users': PublicUsersSelect<false> | PublicUsersSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
+    'post-references': PostReferencesSelect<false> | PostReferencesSelect<true>;
     unrestricted: UnrestrictedSelect<false> | UnrestrictedSelect<true>;
     'relation-restricted': RelationRestrictedSelect<false> | RelationRestrictedSelect<true>;
     'fully-restricted': FullyRestrictedSelect<false> | FullyRestrictedSelect<true>;
@@ -150,7 +162,7 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
-  fallbackLocale: null;
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es') | ('en' | 'es')[];
   globals: {
     settings: Setting;
     test: Test;
@@ -165,7 +177,7 @@ export interface Config {
     'user-restricted-global': UserRestrictedGlobalSelect<false> | UserRestrictedGlobalSelect<true>;
     'read-not-update-global': ReadNotUpdateGlobalSelect<false> | ReadNotUpdateGlobalSelect<true>;
   };
-  locale: null;
+  locale: 'en' | 'es';
   widgets: {
     collections: CollectionsWidget;
   };
@@ -253,6 +265,7 @@ export interface User {
   resetPasswordExpiration?: string | null;
   salt?: string | null;
   hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
   sessions?:
@@ -278,6 +291,7 @@ export interface PublicUser {
   resetPasswordExpiration?: string | null;
   salt?: string | null;
   hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
   sessions?:
@@ -296,12 +310,83 @@ export interface PublicUser {
  */
 export interface Post {
   id: string;
+  title?: string | null;
+  title2?: string | null;
   restrictedField?: string | null;
   group?: {
     restrictedGroupText?: string | null;
   };
   restrictedRowText?: string | null;
   restrictedCollapsibleText?: string | null;
+  relatedItems?: {
+    docs?: (string | RelationRestricted)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  reference?: (string | null) | PostReference;
+  references?: (string | PostReference)[] | null;
+  polymorphicReference?:
+    | ({
+        relationTo: 'post-references';
+        value: string | PostReference;
+      } | null)
+    | ({
+        relationTo: 'unrestricted';
+        value: string | Unrestricted;
+      } | null);
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relation-restricted".
+ */
+export interface RelationRestricted {
+  id: string;
+  name?: string | null;
+  rank?: number | null;
+  post?: (string | null) | Post;
+  postLabel?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "post-references".
+ */
+export interface PostReference {
+  id: string;
+  post?: (string | Post)[] | null;
+  singlePost?: (string | null) | Post;
+  joinedPosts?: {
+    docs?: (string | Post)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  joinedPostsMany?: {
+    docs?: (string | Post)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  polymorphicJoinedPosts?: {
+    docs?: (
+      | {
+          relationTo?: 'posts';
+          value: string | Post;
+        }
+      | {
+          relationTo?: 'unrestricted';
+          value: string | Unrestricted;
+        }
+    )[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  joinedPostsPolymorphicOn?: {
+    docs?: (string | Post)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -312,6 +397,7 @@ export interface Post {
 export interface Unrestricted {
   id: string;
   name?: string | null;
+  reference?: (string | null) | PostReference;
   info?: {
     title?: string | null;
     description?: string | null;
@@ -338,17 +424,6 @@ export interface UserRestrictedCollection {
 export interface CanCreateNotUpdateCollection {
   id: string;
   name?: string | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "relation-restricted".
- */
-export interface RelationRestricted {
-  id: string;
-  name?: string | null;
-  post?: (string | null) | Post;
   updatedAt: string;
   createdAt: string;
 }
@@ -822,6 +897,7 @@ export interface AuthCollection {
   resetPasswordExpiration?: string | null;
   salt?: string | null;
   hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
   _verified?: boolean | null;
   _verificationToken?: string | null;
   loginAttempts?: number | null;
@@ -1006,6 +1082,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'posts';
         value: string | Post;
+      } | null)
+    | ({
+        relationTo: 'post-references';
+        value: string | PostReference;
       } | null)
     | ({
         relationTo: 'unrestricted';
@@ -1196,6 +1276,7 @@ export interface UsersSelect<T extends boolean = true> {
   resetPasswordExpiration?: T;
   salt?: T;
   hash?: T;
+  resetPasswordRequestedAt?: T;
   loginAttempts?: T;
   lockUntil?: T;
   sessions?:
@@ -1218,6 +1299,7 @@ export interface PublicUsersSelect<T extends boolean = true> {
   resetPasswordExpiration?: T;
   salt?: T;
   hash?: T;
+  resetPasswordRequestedAt?: T;
   loginAttempts?: T;
   lockUntil?: T;
   sessions?:
@@ -1233,6 +1315,8 @@ export interface PublicUsersSelect<T extends boolean = true> {
  * via the `definition` "posts_select".
  */
 export interface PostsSelect<T extends boolean = true> {
+  title?: T;
+  title2?: T;
   restrictedField?: T;
   group?:
     | T
@@ -1241,6 +1325,24 @@ export interface PostsSelect<T extends boolean = true> {
       };
   restrictedRowText?: T;
   restrictedCollapsibleText?: T;
+  relatedItems?: T;
+  reference?: T;
+  references?: T;
+  polymorphicReference?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "post-references_select".
+ */
+export interface PostReferencesSelect<T extends boolean = true> {
+  post?: T;
+  singlePost?: T;
+  joinedPosts?: T;
+  joinedPostsMany?: T;
+  polymorphicJoinedPosts?: T;
+  joinedPostsPolymorphicOn?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1250,6 +1352,7 @@ export interface PostsSelect<T extends boolean = true> {
  */
 export interface UnrestrictedSelect<T extends boolean = true> {
   name?: T;
+  reference?: T;
   info?:
     | T
     | {
@@ -1267,7 +1370,9 @@ export interface UnrestrictedSelect<T extends boolean = true> {
  */
 export interface RelationRestrictedSelect<T extends boolean = true> {
   name?: T;
+  rank?: T;
   post?: T;
+  postLabel?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1622,6 +1727,7 @@ export interface AuthCollectionSelect<T extends boolean = true> {
   resetPasswordExpiration?: T;
   salt?: T;
   hash?: T;
+  resetPasswordRequestedAt?: T;
   _verified?: T;
   _verificationToken?: T;
   loginAttempts?: T;

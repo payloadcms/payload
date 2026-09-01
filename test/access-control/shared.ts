@@ -2,6 +2,7 @@ export const firstArrayText = 'first-array-text'
 export const secondArrayText = 'second-array-text'
 
 export const slug = 'posts'
+export const postReferencesSlug = 'post-references'
 export const unrestrictedSlug = 'unrestricted'
 export const readOnlySlug = 'read-only-collection'
 export const readOnlyGlobalSlug = 'read-only-global'

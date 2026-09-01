@@ -27,6 +27,7 @@ import {
   hiddenAccessSlug,
   hiddenFieldsSlug,
   hooksSlug,
+  postReferencesSlug,
   publicUserEmail,
   publicUsersSlug,
   relyOnRequestHeadersSlug,
@@ -499,6 +500,352 @@ describe('Access Control', () => {
   })
 
   describe('Collections', () => {
+    describe('relationship queries', () => {
+      const createdPostIDs: (number | string)[] = []
+      const createdPostReferenceIDs: (number | string)[] = []
+
+      afterEach(async () => {
+        for (const id of createdPostReferenceIDs) {
+          await payload.delete({ collection: postReferencesSlug, id })
+        }
+        createdPostReferenceIDs.length = 0
+
+        for (const id of createdPostIDs) {
+          await payload.delete({ collection: slug, id })
+        }
+        createdPostIDs.length = 0
+      })
+
+      it('should apply related collection access constraints to relationship queries', async () => {
+        const postWithHiddenField = await payload.create({
+          collection: slug,
+          data: {
+            title: 'archived',
+          },
+        })
+
+        const postWithVisibleField = await payload.create({
+          collection: slug,
+          data: {
+            title: 'public',
+          },
+        })
+
+        createdPostIDs.push(postWithHiddenField.id, postWithVisibleField.id)
+
+        const postReference = await payload.create({
+          collection: postReferencesSlug,
+          data: {
+            post: [postWithHiddenField.id, postWithVisibleField.id],
+          },
+        })
+
+        createdPostReferenceIDs.push(postReference.id)
+
+        const response = await restClient.GET(`/${postReferencesSlug}`, {
+          query: {
+            where: {
+              'post.title': {
+                equals: 'archived',
+              },
+            },
+          },
+        })
+        const result = await response.json()
+
+        expect(response.status).toBe(200)
+        expect(result.docs).toHaveLength(0)
+      })
+
+      it('should apply related collection access constraints when querying another related field', async () => {
+        const postWithHiddenField = await payload.create({
+          collection: slug,
+          data: {
+            title: 'archived',
+            title2: 'archived test',
+          },
+        })
+
+        const postWithVisibleField = await payload.create({
+          collection: slug,
+          data: {
+            title: 'public',
+            title2: 'public test',
+          },
+        })
+
+        createdPostIDs.push(postWithHiddenField.id, postWithVisibleField.id)
+
+        const postReference = await payload.create({
+          collection: postReferencesSlug,
+          data: {
+            post: [postWithHiddenField.id, postWithVisibleField.id],
+          },
+        })
+
+        createdPostReferenceIDs.push(postReference.id)
+
+        const response = await restClient.GET(`/${postReferencesSlug}`, {
+          auth: false,
+          query: {
+            where: {
+              'post.title2': {
+                equals: 'archived test',
+              },
+            },
+          },
+        })
+        const result = await response.json()
+
+        expect(response.status).toBe(200)
+        expect(result.docs).toHaveLength(0)
+      })
+
+      it('should apply related collection access constraints to non-hasMany relationship queries', async () => {
+        const archivedPost = await payload.create({
+          collection: slug,
+          data: {
+            title: 'archived',
+          },
+        })
+
+        const publicPost = await payload.create({
+          collection: slug,
+          data: {
+            title: 'public',
+          },
+        })
+
+        createdPostIDs.push(archivedPost.id, publicPost.id)
+
+        const archivedReference = await payload.create({
+          collection: postReferencesSlug,
+          data: {
+            singlePost: archivedPost.id,
+          },
+        })
+
+        const publicReference = await payload.create({
+          collection: postReferencesSlug,
+          data: {
+            singlePost: publicPost.id,
+          },
+        })
+
+        createdPostReferenceIDs.push(archivedReference.id, publicReference.id)
+
+        const hiddenResponse = await restClient.GET(`/${postReferencesSlug}`, {
+          auth: false,
+          query: {
+            where: {
+              'singlePost.title': {
+                equals: 'archived',
+              },
+            },
+          },
+        })
+        const hiddenResult = await hiddenResponse.json()
+
+        expect(hiddenResponse.status).toBe(200)
+        expect(hiddenResult.docs).toHaveLength(0)
+
+        const visibleResponse = await restClient.GET(`/${postReferencesSlug}`, {
+          auth: false,
+          query: {
+            where: {
+              'singlePost.title': {
+                equals: 'public',
+              },
+            },
+          },
+        })
+        const visibleResult = await visibleResponse.json()
+
+        expect(visibleResponse.status).toBe(200)
+        expect(visibleResult.docs).toHaveLength(1)
+        expect(visibleResult.docs[0].id).toBe(publicReference.id)
+      })
+
+      it('should apply related collection access constraints to join field queries', async () => {
+        const postReference = await payload.create({
+          collection: postReferencesSlug,
+          data: {},
+        })
+
+        createdPostReferenceIDs.push(postReference.id)
+
+        const archivedPost = await payload.create({
+          collection: slug,
+          data: {
+            reference: postReference.id,
+            title: 'archived',
+          },
+        })
+
+        const publicPost = await payload.create({
+          collection: slug,
+          data: {
+            reference: postReference.id,
+            title: 'public',
+          },
+        })
+
+        createdPostIDs.push(archivedPost.id, publicPost.id)
+
+        const hiddenResponse = await restClient.GET(`/${postReferencesSlug}`, {
+          auth: false,
+          query: {
+            where: {
+              'joinedPosts.title': {
+                equals: 'archived',
+              },
+            },
+          },
+        })
+        const hiddenResult = await hiddenResponse.json()
+
+        expect(hiddenResponse.status).toBe(200)
+        expect(hiddenResult.docs).toHaveLength(0)
+
+        const visibleResponse = await restClient.GET(`/${postReferencesSlug}`, {
+          auth: false,
+          query: {
+            where: {
+              'joinedPosts.title': {
+                equals: 'public',
+              },
+            },
+          },
+        })
+        const visibleResult = await visibleResponse.json()
+
+        expect(visibleResponse.status).toBe(200)
+        expect(visibleResult.docs).toHaveLength(1)
+        expect(visibleResult.docs[0].id).toBe(postReference.id)
+      })
+
+      it('should apply related collection access constraints to hasMany join field queries', async () => {
+        const postReference = await payload.create({
+          collection: postReferencesSlug,
+          data: {},
+        })
+
+        createdPostReferenceIDs.push(postReference.id)
+
+        const archivedPost = await payload.create({
+          collection: slug,
+          data: {
+            references: [postReference.id],
+            title: 'archived',
+          },
+        })
+
+        const publicPost = await payload.create({
+          collection: slug,
+          data: {
+            references: [postReference.id],
+            title: 'public',
+          },
+        })
+
+        createdPostIDs.push(archivedPost.id, publicPost.id)
+
+        const hiddenResponse = await restClient.GET(`/${postReferencesSlug}`, {
+          auth: false,
+          query: {
+            where: {
+              'joinedPostsMany.title': {
+                equals: 'archived',
+              },
+            },
+          },
+        })
+        const hiddenResult = await hiddenResponse.json()
+
+        expect(hiddenResponse.status).toBe(200)
+        expect(hiddenResult.docs).toHaveLength(0)
+
+        const visibleResponse = await restClient.GET(`/${postReferencesSlug}`, {
+          auth: false,
+          query: {
+            where: {
+              'joinedPostsMany.title': {
+                equals: 'public',
+              },
+            },
+          },
+        })
+        const visibleResult = await visibleResponse.json()
+
+        expect(visibleResponse.status).toBe(200)
+        expect(visibleResult.docs).toHaveLength(1)
+        expect(visibleResult.docs[0].id).toBe(postReference.id)
+      })
+
+      it('should reject nested queries against a polymorphic join field', async () => {
+        const postReference = await payload.create({
+          collection: postReferencesSlug,
+          data: {},
+        })
+
+        createdPostReferenceIDs.push(postReference.id)
+
+        const archivedPost = await payload.create({
+          collection: slug,
+          data: {
+            reference: postReference.id,
+            title: 'archived',
+          },
+        })
+
+        createdPostIDs.push(archivedPost.id)
+
+        await expect(
+          payload.find({
+            collection: postReferencesSlug,
+            overrideAccess: false,
+            where: {
+              'polymorphicJoinedPosts.title': {
+                equals: 'archived',
+              },
+            },
+          }),
+        ).rejects.toThrow('Not supported')
+      })
+
+      it('should reject nested queries against a join with a polymorphic on relationship', async () => {
+        const postReference = await payload.create({
+          collection: postReferencesSlug,
+          data: {},
+        })
+
+        createdPostReferenceIDs.push(postReference.id)
+
+        const archivedPost = await payload.create({
+          collection: slug,
+          data: {
+            polymorphicReference: { relationTo: postReferencesSlug, value: postReference.id },
+            title: 'archived',
+          },
+        })
+
+        createdPostIDs.push(archivedPost.id)
+
+        const where = {
+          'joinedPostsPolymorphicOn.title': {
+            equals: 'archived',
+          },
+        }
+
+        await expect(
+          payload.find({ collection: postReferencesSlug, overrideAccess: false, where }),
+        ).rejects.toThrow('Not supported')
+
+        await expect(
+          payload.find({ collection: postReferencesSlug, overrideAccess: true, where }),
+        ).rejects.toThrow('Not supported')
+      })
+    })
     describe('restricted collection', () => {
       it('field without read access should not show', async () => {
         const { id } = await createDoc({ restrictedField: 'restricted' })

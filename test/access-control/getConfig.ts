@@ -31,6 +31,7 @@ import {
   hiddenAccessSlug,
   hiddenFieldsSlug,
   nonAdminEmail,
+  postReferencesSlug,
   publicUserEmail,
   publicUsersSlug,
   readNotUpdateGlobalSlug,
@@ -167,9 +168,19 @@ export const getConfig: () => Partial<Config> = () => ({
       slug,
       access: {
         ...openAccess,
+        // Unauthenticated callers cannot read posts titled "archived".
+        read: ({ req }) => (req.user ? true : { title: { not_equals: 'archived' } }),
         update: () => false,
       },
       fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+        {
+          name: 'title2',
+          type: 'text',
+        },
         {
           name: 'restrictedField',
           type: 'text',
@@ -230,6 +241,64 @@ export const getConfig: () => Partial<Config> = () => ({
           defaultSort: 'createdAt',
           on: 'post',
         },
+        {
+          name: 'reference',
+          type: 'relationship',
+          relationTo: postReferencesSlug,
+        },
+        {
+          name: 'references',
+          type: 'relationship',
+          hasMany: true,
+          relationTo: postReferencesSlug,
+        },
+        {
+          name: 'polymorphicReference',
+          type: 'relationship',
+          relationTo: [postReferencesSlug, unrestrictedSlug],
+        },
+      ],
+    },
+    {
+      slug: postReferencesSlug,
+      access: openAccess,
+      fields: [
+        {
+          name: 'post',
+          type: 'relationship',
+          hasMany: true,
+          relationTo: slug,
+        },
+        {
+          name: 'singlePost',
+          type: 'relationship',
+          hasMany: false,
+          relationTo: slug,
+        },
+        {
+          name: 'joinedPosts',
+          type: 'join',
+          collection: slug,
+          on: 'reference',
+        },
+        {
+          name: 'joinedPostsMany',
+          type: 'join',
+          collection: slug,
+          on: 'references',
+        },
+        {
+          name: 'polymorphicJoinedPosts',
+          type: 'join',
+          collection: [slug, unrestrictedSlug],
+          on: 'reference',
+        },
+        {
+          name: 'joinedPostsPolymorphicOn',
+          type: 'join',
+          collection: slug,
+          on: 'polymorphicReference',
+        },
       ],
     },
     {
@@ -238,6 +307,11 @@ export const getConfig: () => Partial<Config> = () => ({
         {
           name: 'name',
           type: 'text',
+        },
+        {
+          name: 'reference',
+          type: 'relationship',
+          relationTo: postReferencesSlug,
         },
         {
           name: 'info',
