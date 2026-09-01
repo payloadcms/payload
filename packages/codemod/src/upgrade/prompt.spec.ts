@@ -6,7 +6,14 @@ describe('renderUpgradePrompt', () => {
   it('emits a project-agnostic upgrade command', () => {
     const out = renderUpgradePrompt()
 
-    expect(out).toContain('npx @payloadcms/codemod upgrade run .')
+    expect(out).toContain('npx @payloadcms/codemod upgrade run')
+  })
+
+  it('honors a custom command token so a local build points followers at itself', () => {
+    const out = renderUpgradePrompt({ command: 'node /repo/packages/codemod/bin/cli.js' })
+
+    expect(out).toContain('node /repo/packages/codemod/bin/cli.js upgrade run')
+    expect(out).not.toContain('npx @payloadcms/codemod upgrade run')
   })
 
   it('documents --tag as an inline option rather than baking a value', () => {
@@ -62,5 +69,11 @@ describe('renderUpgradePrompt', () => {
     const out = renderUpgradePrompt()
 
     expect(out.toLowerCase()).not.toContain('figma')
+  })
+
+  it('stays ASCII-clean so it copies without mangled glyphs', () => {
+    const out = renderUpgradePrompt()
+
+    expect(out).not.toContain('—')
   })
 })

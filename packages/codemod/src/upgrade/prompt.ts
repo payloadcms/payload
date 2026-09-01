@@ -4,14 +4,17 @@
  * gates, runs this package's `upgrade` command for the deterministic slice,
  * delegates Next.js to Next's own agent workflow, and points at the migration
  * guide for the judgment work rather than restating any of it. The text is
- * static and project-agnostic — the agent runs it from the project root. Pure:
- * the caller prints it.
+ * project-agnostic (the agent runs it from the project root). `command` is the
+ * token that re-invokes this CLI, so a local checkout points followers at the
+ * local build instead of the published package. Pure: the caller prints it.
  */
-export function renderUpgradePrompt(): string {
+export function renderUpgradePrompt({
+  command = 'npx @payloadcms/codemod',
+}: { command?: string } = {}): string {
   return `You are upgrading this project from Payload v3 to v4, Next.js 16 included.
 
 Ground rule: resolution over intent. A step is done only when it installs, builds, and boots.
-Never report a task complete because the edit looks right — confirm it. A silent gap reads as
+Never report a task complete because the edit looks right. Confirm it. A silent gap reads as
 "checked and fine".
 
 ## 0. Preconditions
@@ -28,7 +31,7 @@ Do not proceed to step 2 until these are complete and committed.
 ## 2. Payload mechanical slice
 Run this from the project root:
 
-    npx @payloadcms/codemod upgrade run .
+    ${command} upgrade run
 
 Add \`--tag <dist-tag>\` to resolve Payload from a non-default dist-tag (default is \`canary\`).
 This pins the Payload packages to v4, removes conflicting overrides, writes the toolchain
@@ -36,7 +39,7 @@ floors, installs, and runs the AST transforms. Read its report:
 - It prints the resolved payload version, the required Next target, and the path to the
   bundled runbook and migration guide. Use those paths below.
 - The unmet \`@payloadcms/next\` peer against Next 15 is EXPECTED at this point. Do NOT downgrade
-  payload to satisfy it — step 3 resolves it by upgrading Next.
+  payload to satisfy it; step 3 resolves it by upgrading Next.
 - Do not hand-edit the versions it pinned.
 
 ## 3. Next.js 16 (delegate to Next's workflow)
@@ -51,12 +54,12 @@ afterward so the \`@payloadcms/next\` peer resolves.
 
 ## 4. Regenerate generated files
 \`payload generate:types && payload generate:importmap\`. Never hand-edit \`payload-types.ts\` or
-\`importMap.js\` — regenerate them.
+\`importMap.js\`; regenerate them.
 
 ## 5. Fix-forward judgment work (against the now-v4 tree)
 These depend on the v4 APIs and types existing, so they follow the upgrade. Open the bundled
 migration guide (\`v4.mdx\`, path printed in step 2) and the bundled runbook
-(\`runbook/payload-v4-upgrade.md\`) and work the items they list — SCSS -> CSS and \`--theme-*\` ->
+(\`runbook/payload-v4-upgrade.md\`) and work the items they list: SCSS -> CSS and \`--theme-*\` ->
 \`--color-*\` token renames, Lexical union type-narrowing, jobs DB migrations, strict cron parsing,
 and anything flagged in the per-transform notes. Consult the guide for each; do not guess from
 memory.
