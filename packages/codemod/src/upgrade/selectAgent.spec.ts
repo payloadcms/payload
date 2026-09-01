@@ -53,14 +53,20 @@ describe('selectDispatch', () => {
     expect(choice).toEqual({ kind: 'print' })
   })
 
-  it('falls back to printing when no agents are installed', async () => {
+  it('opens the picker even when no agents are installed, so run or print stay reachable', async () => {
+    const prompt = vi.fn(async (agents: Agent[]) => {
+      expect(agents).toEqual([])
+      return { kind: 'run' } as DispatchChoice
+    })
+
     const choice = await selectDispatch({
       installed: [],
       isInteractive: true,
-      prompt: neverPrompt,
+      prompt,
     })
 
-    expect(choice).toEqual({ kind: 'print' })
+    expect(prompt).toHaveBeenCalledOnce()
+    expect(choice).toEqual({ kind: 'run' })
   })
 
   it('opens the picker when interactive with at least one agent', async () => {
