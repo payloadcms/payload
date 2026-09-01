@@ -818,8 +818,10 @@ export interface SanitizedCollectionConfig
     >,
     Required<Pick<CollectionConfig, 'admin' | 'custom' | 'indexes' | 'timestamps'>> {
   _sanitized: true
-  access: Pick<CollectionAccess, 'admin' | 'readVersions'> &
-    Required<Pick<CollectionAccess, 'create' | 'delete' | 'read' | 'unlock' | 'update'>>
+  access: Pick<CollectionAccess, 'admin'> &
+    Required<
+      Pick<CollectionAccess, 'create' | 'delete' | 'read' | 'readVersions' | 'unlock' | 'update'>
+    >
   auth: Auth
   endpoints: Endpoint[] | false
   /**

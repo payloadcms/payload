@@ -30,6 +30,10 @@ import {
   hiddenAccessCountSlug,
   hiddenAccessSlug,
   hiddenFieldsSlug,
+  inheritedReadVersionsGlobalSlug,
+  inheritedReadVersionsSlug,
+  inheritedReadVersionsVirtualRelatedSlug,
+  inheritedReadVersionsVirtualSlug,
   nonAdminEmail,
   publicUserEmail,
   publicUsersSlug,
@@ -68,6 +72,17 @@ const PublicReadabilityAccess: FieldAccess = ({ req: { user }, siblingData }) =>
 }
 
 export const requestHeaders = new Headers({ authorization: 'Bearer testBearerToken' })
+let inheritedReadVersionsAllowedID: number | string | undefined
+let inheritedReadVersionsAllowedVersionID: number | string | undefined
+
+export const setInheritedReadVersionsAllowedID = (id: number | string | undefined): void => {
+  inheritedReadVersionsAllowedID = id
+}
+
+export const setInheritedReadVersionsAllowedVersionID = (id: number | string | undefined): void => {
+  inheritedReadVersionsAllowedVersionID = id
+}
+
 const UseRequestHeadersAccess: FieldAccess = ({ req: { headers } }) => {
   return !!headers && headers.get('authorization') === requestHeaders.get('authorization')
 }
@@ -95,6 +110,14 @@ export const getConfig: () => Partial<Config> = () => ({
     },
     importMap: {
       baseDir: path.resolve(dirname),
+    },
+  },
+  baseAccess: {
+    collections: {
+      readVersions: ({ id, slug }) =>
+        slug !== inheritedReadVersionsSlug || inheritedReadVersionsAllowedVersionID === undefined
+          ? true
+          : id === inheritedReadVersionsAllowedVersionID,
     },
   },
   blocks: [
@@ -677,6 +700,55 @@ export const getConfig: () => Partial<Config> = () => ({
         },
       ],
     },
+    {
+      slug: inheritedReadVersionsSlug,
+      access: {
+        read: ({ id }) =>
+          id
+            ? id === inheritedReadVersionsAllowedID
+            : {
+                secret: {
+                  equals: 'allowed',
+                },
+              },
+      },
+      fields: [
+        {
+          name: 'secret',
+          type: 'text',
+        },
+      ],
+      versions: true,
+    },
+    {
+      slug: inheritedReadVersionsVirtualRelatedSlug,
+      access: { read: () => true },
+      fields: [
+        {
+          name: 'label',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      slug: inheritedReadVersionsVirtualSlug,
+      access: {
+        read: () => ({ relatedLabel: { equals: 'allowed' } }),
+      },
+      fields: [
+        {
+          name: 'related',
+          type: 'relationship',
+          relationTo: inheritedReadVersionsVirtualRelatedSlug,
+        },
+        {
+          name: 'relatedLabel',
+          type: 'text',
+          virtual: 'related.label',
+        },
+      ],
+      versions: true,
+    },
     BlocksFieldAccess,
     Disabled,
     RichText,
@@ -858,6 +930,26 @@ export const getConfig: () => Partial<Config> = () => ({
     },
   ],
   globals: [
+    {
+      slug: inheritedReadVersionsGlobalSlug,
+      access: {
+        read: ({ id }) =>
+          id
+            ? false
+            : {
+                visible: {
+                  equals: true,
+                },
+              },
+      },
+      fields: [
+        {
+          name: 'visible',
+          type: 'checkbox',
+        },
+      ],
+      versions: true,
+    },
     {
       slug: 'settings',
       access: {

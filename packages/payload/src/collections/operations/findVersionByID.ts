@@ -7,14 +7,20 @@ import type { Collection, TypeWithID } from '../config/types.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
+import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
 import { APIError, Forbidden, NotFound } from '../../errors/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { buildVersionCollectionFields } from '../../versions/buildCollectionFields.js'
+import {
+  isInheritedReadVersionsAccess,
+  withInheritedReadVersionsParentID,
+} from '../../versions/isInheritedReadVersionsAccess.js'
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
+import { prefetchVersionForInheritedReadAccess } from './utilities/prefetchVersionForInheritedReadAccess.js'
 
 export type Arguments = {
   collection: Collection
@@ -62,14 +68,50 @@ export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
     overrideAccess,
   })
 
+  const where = { id: { equals: id } }
+  const versionFields = buildVersionCollectionFields(payload.config, collectionConfig, true)
+  const select = sanitizeSelect({
+    fields: versionFields,
+    select: resolveSelect({
+      config: collectionConfig.select,
+      operation: 'read',
+      req,
+      select: incomingSelect,
+    }),
+    versions: true,
+  })
+
+  const inheritsReadAccess = isInheritedReadVersionsAccess(collectionConfig.access.readVersions)
+  const shouldPrefetchVersion = !overrideAccess && inheritsReadAccess
+  const prefetched = shouldPrefetchVersion
+    ? await prefetchVersionForInheritedReadAccess<TData>({
+        id,
+        collectionConfig,
+        locale: locale!,
+        req,
+        select,
+        trash,
+      })
+    : undefined
+
   // /////////////////////////////////////
   // Access
   // /////////////////////////////////////
 
   const accessResults = !overrideAccess
     ? await executeAccess(
-        { id, slug: collectionConfig.slug, disableErrors, req },
-        collectionConfig.access.readVersions,
+        {
+          id,
+          slug: collectionConfig.slug,
+          disableErrors,
+          req,
+        },
+        inheritsReadAccess
+          ? (accessArgs) =>
+              collectionConfig.access.readVersions(
+                withInheritedReadVersionsParentID(accessArgs, prefetched?.parentID),
+              )
+          : collectionConfig.access.readVersions,
       )
     : true
 
@@ -80,8 +122,6 @@ export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
 
   const hasWhereAccess = typeof accessResults === 'object'
 
-  const where = { id: { equals: id } }
-
   let fullWhere = combineQueries(where, accessResults)
 
   fullWhere = appendNonTrashedFilter({
@@ -91,32 +131,27 @@ export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
     where: fullWhere,
   })
 
+  sanitizeWhereQuery({ fields: versionFields, payload, where: fullWhere })
+
   // /////////////////////////////////////
   // Find by ID
   // /////////////////////////////////////
 
-  const select = sanitizeSelect({
-    fields: buildVersionCollectionFields(payload.config, collectionConfig, true),
-    select: resolveSelect({
-      config: collectionConfig.select,
-      operation: 'read',
+  let result = prefetched?.version as TypeWithVersion<TData>
+
+  if (!shouldPrefetchVersion || hasWhereAccess) {
+    const versionsQuery = await payload.db.findVersions<TData>({
+      collection: collectionConfig.slug,
+      limit: 1,
+      locale: locale!,
+      pagination: false,
       req,
-      select: incomingSelect,
-    }),
-    versions: true,
-  })
+      select,
+      where: fullWhere,
+    })
 
-  const versionsQuery = await payload.db.findVersions<TData>({
-    collection: collectionConfig.slug,
-    limit: 1,
-    locale: locale!,
-    pagination: false,
-    req,
-    select,
-    where: fullWhere,
-  })
-
-  let result = versionsQuery.docs[0]!
+    result = versionsQuery.docs[0]!
+  }
 
   if (!result) {
     if (!disableErrors) {

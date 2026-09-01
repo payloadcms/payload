@@ -25,8 +25,16 @@ import { formatLabels } from '../../utilities/formatLabels.js'
 import { traverseForLocalizedFields } from '../../utilities/traverseForLocalizedFields.js'
 import { baseVersionFields } from '../../versions/baseFields.js'
 import { versionDefaults } from '../../versions/defaults.js'
+import {
+  isInheritedReadVersionsAccess,
+  markInheritedReadVersionsAccess,
+} from '../../versions/isInheritedReadVersionsAccess.js'
 import { defaultCollectionEndpoints } from '../endpoints/index.js'
-import { addDefaultsToAuthConfig, addDefaultsToCollectionConfig } from './defaults.js'
+import {
+  addDefaultsToAuthConfig,
+  addDefaultsToCollectionConfig,
+  createInheritedReadVersionsAccess,
+} from './defaults.js'
 import { sanitizeCompoundIndexes } from './sanitizeCompoundIndexes.js'
 import { validateUseAsTitle } from './useAsTitle.js'
 
@@ -353,12 +361,20 @@ export const sanitizeCollection = (
   })
 
   if (sanitized.versions) {
-    sanitized.access!.readVersions = withBaseAccess({
+    const inheritsReadAccess = isInheritedReadVersionsAccess(sanitized.access!.readVersions)
+    const readVersions = inheritsReadAccess
+      ? createInheritedReadVersionsAccess(sanitized.access!.read!)
+      : sanitized.access!.readVersions
+    const readVersionsWithBaseAccess = withBaseAccess({
       slug: sanitized.slug,
-      access: sanitized.access?.readVersions,
+      access: readVersions,
       entityType: 'collection',
       operation: 'readVersions',
     })
+
+    sanitized.access!.readVersions = inheritsReadAccess
+      ? markInheritedReadVersionsAccess(readVersionsWithBaseAccess)
+      : readVersionsWithBaseAccess
   }
 
   validateUseAsTitle(sanitized)
