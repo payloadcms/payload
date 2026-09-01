@@ -28,6 +28,8 @@ describeToUse('Postgres relationships v2-v3 migration', () => {
       collections: [
         {
           slug: 'users',
+          // Disable authorship so the runtime schema matches the pre-authorship committed migrations.
+          authorship: false,
           auth: true,
           fields: [],
           versions: false,

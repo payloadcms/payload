@@ -1212,6 +1212,8 @@ describe('Auth', () => {
         .map((field) => (field as FieldAffectingData).name)
 
       expect(authFields).toMatchObject([
+        'createdBy',
+        'updatedBy',
         'updatedAt',
         'createdAt',
         'email',

@@ -4,7 +4,7 @@ import assert from 'assert'
 import mongoose from 'mongoose'
 import path from 'path'
 import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, describe, expect, it, vitest } from 'vitest'
+import { afterAll, afterEach, beforeAll, describe, expect, it, vitest } from 'vitest'
 
 import type { Post } from './payload-types.js'
 
@@ -34,6 +34,12 @@ describePostgres('database - postgres logs', () => {
 
   afterAll(async () => {
     await payload.destroy()
+  })
+
+  // Restore spies after every test so a failed assertion can't leak the `console.log`
+  // spy into later tests and inflate their counts.
+  afterEach(() => {
+    vitest.restoreAllMocks()
   })
 
   it('ensure simple update uses optimized upsertRow with returning()', async () => {

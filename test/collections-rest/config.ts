@@ -55,6 +55,9 @@ export default buildConfigWithDefaults({
     {
       slug: postsSlug,
       access: openAccess,
+      // This suite exercises CRUD/query mechanics with full-document equality
+      // assertions; authorship relationship fields would add populate noise.
+      authorship: false,
       fields: [
         {
           name: 'title',

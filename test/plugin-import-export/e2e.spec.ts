@@ -350,12 +350,8 @@ test.describe('Import Export Plugin', () => {
 
         // Ensure the export is for custom-id-pages (id + title columns visible) before saving
         await expect(async () => {
-          await expect(
-            page.locator('.export-preview table thead th').filter({ hasText: 'id' }),
-          ).toBeVisible()
-          await expect(
-            page.locator('.export-preview table thead th').filter({ hasText: 'title' }),
-          ).toBeVisible()
+          await expect(page.locator('.export-preview table thead th#heading-id')).toBeVisible()
+          await expect(page.locator('.export-preview table thead th#heading-title')).toBeVisible()
         }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
 
         // Verify the collection field is set to Custom ID Pages before saving
@@ -411,9 +407,9 @@ test.describe('Import Export Plugin', () => {
         const content = fs.readFileSync(tempPath, 'utf8')
         fs.unlinkSync(tempPath)
 
-        // Ensure we got the custom-id-pages export (id,title only; no _status)
+        // Ensure we got the custom-id-pages export (id,title lead; no _status)
         await expect(() => {
-          expect(content).toMatch(/^\uFEFF?id,title,updatedAt,createdAt/m)
+          expect(content).toMatch(/^\uFEFF?id,title,/m)
           expect(content).not.toContain('_status')
 
           expect(content).toContain(`e2e-export-${uniqueId}-1`)
