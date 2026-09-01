@@ -156,10 +156,10 @@ This is critical for MongoDB replica sets and Postgres. See [ADAPTERS.md#threadi
 
 ### Access Control in Local API
 
-**Important**: `overrideAccess` is required on every Local API operation. There is no default. Set it to `false` to respect a user's permissions, or `true` to bypass access control.
+**Important**: `overrideAccess` defaults to `false` — Local API respects access control unless told otherwise. Set it to `true` to bypass access control.
 
 ```ts
-// ❌ WRONG: User is passed but access control is bypassed
+// ❌ WRONG: User is passed but access control is bypassed anyway
 const posts = await payload.find({
   collection: 'posts',
   user: currentUser,
