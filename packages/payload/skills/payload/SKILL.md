@@ -306,27 +306,26 @@ export default async function Page() {
 **`overrideAccess: true` bypasses ALL access control**, even when a user is passed.
 
 ```ts
-// ❌ SECURITY BUG: Passes user but ignores their permissions
+// ❌ SECURITY BUG: Passes user but bypasses their permissions anyway
 await payload.find({
   collection: 'posts',
   user: someUser,
   overrideAccess: true, // Access control is BYPASSED!
 })
 
-// ✅ SECURE: Actually enforces the user's permissions
+// ✅ SECURE: Respects the user's permissions — this is the default, overrideAccess can be omitted
 await payload.find({
   collection: 'posts',
   user: someUser,
-  overrideAccess: false, // respect Access Control — this call acts for a user
 })
 ```
 
-`overrideAccess` is **required**. There is no default — every call states its intent.
+`overrideAccess` defaults to `false` — Local API operations respect Access Control unless told otherwise.
 
-- `overrideAccess: false` - operating on behalf of a user (API routes, webhooks, server functions). Pass `user` alongside it.
+- Omit it, or set `overrideAccess: false` - operating on behalf of a user (API routes, webhooks, server functions). Pass `user` alongside it.
 - `overrideAccess: true` - server-side work you trust (cron jobs, seeds, migrations, system tasks)
 
-It is required because omitting it used to skip access control, which made "no access control" the result of not deciding. Never copy a value from a nearby call — pick the one this call means.
+Never set `overrideAccess: true` out of habit or by copying a nearby call — pick the value this call means.
 
 See [QUERIES.md#access-control-in-local-api](reference/QUERIES.md#access-control-in-local-api).
 
@@ -458,7 +457,7 @@ import type { Post, User } from '@/payload-types'
 
 ## Common Gotchas
 
-1. **`overrideAccess` is required on every Local API call** — there is no default to fall back on
+1. **Local API respects access control by default** — set `overrideAccess: true` only for trusted server-side work
 2. **Missing `req` in nested operations** breaks transaction atomicity
 3. **Hook loops** — operations in hooks can re-trigger the same hooks; use `req.context` flags
 4. **Field-level access** returns boolean only, no query constraints

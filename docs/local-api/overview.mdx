@@ -73,7 +73,7 @@ You can specify more options within the Local API vs. REST or GraphQL due to the
 | `select`             | Specify [select](../queries/select) to control which fields to include to the result.                                                                                                                                                                                                                                                                                 |
 | `populate`           | Specify [populate](../queries/select#populate) to control which fields to include to the result from populated documents.                                                                                                                                                                                                                                             |
 | `fallbackLocale`     | Specify a [fallback locale](/docs/configuration/localization) to use for any returned documents. This can be a single locale or array of locales.                                                                                                                                                                                                                     |
-| `overrideAccess`     | **Required.** Set to `false` to respect [Access Control](./access-control), or `true` to skip it.                                                                                                                                                                                                                                                                     |
+| `overrideAccess`     | Skip [Access Control](./access-control). Set to `true` to bypass it for trusted server-side work; defaults to `false`, which respects it.                                                                                                                                                                                                                             |
 | `overrideLock`       | By default, document locks are ignored (`true`). Set to `false` to enforce locks and prevent operations when a document is locked by another user. [More details](../admin/locked-documents).                                                                                                                                                                         |
 | `user`               | The user to run access control checks against. Pass this whenever `overrideAccess` is `false`.                                                                                                                                                                                                                                                                        |
 | `showHiddenFields`   | Opt-in to receiving hidden fields. By default, they are hidden from returned documents in accordance to your config.                                                                                                                                                                                                                                                  |
@@ -99,8 +99,8 @@ const post = await payload.find({
 <Banner type="warning">
   **Note:**
 
-Every Local API operation requires an `overrideAccess` value. Pass `false` to respect Access
-Control, along with the `user` to check against, or `true` to skip it. See [Access
+By default, Local API operations respect Access Control. Pass `overrideAccess: true` to skip
+it, for trusted server-side work such as cron jobs, seeding, and migrations. See [Access
 Control](./access-control).
 
 </Banner>

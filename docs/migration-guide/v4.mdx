@@ -22,34 +22,27 @@ The codemod is idempotent and safe to run on a partially-migrated project.
 
 ## Breaking Changes
 
-### `overrideAccess` is now required on Local API operations
+### `overrideAccess` now defaults to `false` on Local API operations
 
-Local API operations previously defaulted `overrideAccess` to `true`, so omitting it skipped Access Control. The property is now required — every call states which mode it wants.
+Local API operations previously defaulted `overrideAccess` to `true`, so omitting it skipped Access Control. It now defaults to `false`, so an omitted value respects Access Control instead.
 
 ```diff
 const posts = await payload.find({
   collection: 'posts',
-+ overrideAccess: false,
-  user,
++ overrideAccess: true, // preserves the Payload 3 default
 })
 ```
 
-- `overrideAccess: false` — respect Access Control. Use this whenever the operation acts on behalf of a user, and pass `user` alongside it.
+- `overrideAccess: false` (the new default) — respect Access Control. Use this whenever the operation acts on behalf of a user, and pass `user` alongside it.
 - `overrideAccess: true` — bypass Access Control. Use this for trusted server-side work such as cron jobs, seeding, and migrations.
 
-It is required because omitting it used to skip Access Control. That made "no Access Control" the result of not deciding, which is the wrong default for a security control.
-
-**TypeScript projects** get a compile error naming every call site. The codemod inserts `overrideAccess: true`, which preserves the Payload 3 behavior:
+The property stays optional, and there is no compile error for either TypeScript or JavaScript projects — a call that omitted `overrideAccess` before still compiles after upgrading, it just behaves differently: it now enforces Access Control instead of skipping it. Run the codemod to find every affected call site and restore the previous behavior explicitly:
 
 ```bash
 npx @payloadcms/codemod
 ```
 
-Review the results afterwards and change every call that acts on behalf of a user to `overrideAccess: false`.
-
-**JavaScript projects**, and any call reaching the Local API through `as any` or a loosely typed options object, get no compile error. Those calls now behave as `overrideAccess: false` and respect Access Control. Payload logs a warning once per operation naming the call. Run the codemod on these projects too.
-
-There is no runtime error for a missing value. It resolves to `false`, which is the strict outcome, so an un-migrated project returns too little rather than exposing too much.
+Review the results afterwards. Leave the property off, or set it to `overrideAccess: false`, wherever the operation acts on behalf of a user — that is the more secure outcome and is now the default.
 
 #### Cases the codemod leaves behind
 
