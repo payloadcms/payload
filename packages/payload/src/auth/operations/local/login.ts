@@ -32,7 +32,7 @@ export async function loginLocal<TSlug extends AuthCollectionSlug>(
     collection: collectionSlug,
     data,
     depth,
-    overrideAccess = true,
+    overrideAccess = false,
     showHiddenFields,
   } = options
 

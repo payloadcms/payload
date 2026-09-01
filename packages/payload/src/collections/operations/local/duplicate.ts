@@ -2,7 +2,12 @@ import type { DeepPartial } from 'ts-essentials'
 
 import type { CollectionSlug, TypedLocale } from '../../..//index.js'
 import type { FindOptions, Payload, RequestContext, User } from '../../../index.js'
-import type { PayloadRequest, PopulateType, SelectType, TransformCollectionWithSelect } from '../../../types/index.js'
+import type {
+  PayloadRequest,
+  PopulateType,
+  SelectType,
+  TransformCollectionWithSelect,
+} from '../../../types/index.js'
 import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
 import type {
   DraftFlagFromCollectionSlug,
@@ -53,8 +58,9 @@ type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType> = {
   locale?: TypedLocale
   /**
    * Skip access control.
-   * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the front-end.
-   * @default true
+   * Set to `true` if you want to bypass Access Control for the operation, for example for
+   * trusted server-side work such as cron jobs, seeding, and migrations.
+   * @default false
    */
   overrideAccess?: boolean
   /**
@@ -102,7 +108,7 @@ export async function duplicateLocal<
     depth,
     disableTransaction,
     draft,
-    overrideAccess = true,
+    overrideAccess = false,
     populate,
     select,
     selectedLocales,
