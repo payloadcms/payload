@@ -2,6 +2,7 @@ import type { RequiredDataFromCollectionSlug } from '../collections/config/types
 import type { AuthCollection, CollectionSlug, PayloadRequest } from '../index.js'
 
 import { ValidationError } from '../errors/index.js'
+import { isLocalStrategyEnabled } from './localStrategy.js'
 
 type ValidateUsernameOrEmailArgs<TSlug extends CollectionSlug> = {
   authOptions: AuthCollection['config']['auth']
@@ -19,7 +20,7 @@ type ValidateUsernameOrEmailArgs<TSlug extends CollectionSlug> = {
     }
 )
 export const ensureUsernameOrEmail = <TSlug extends CollectionSlug>({
-  authOptions: { disableLocalStrategy, loginWithUsername },
+  authOptions: { localStrategy, loginWithUsername },
   collectionSlug,
   data,
   operation,
@@ -30,7 +31,7 @@ export const ensureUsernameOrEmail = <TSlug extends CollectionSlug>({
   // and neither are provided
   // so we need to manually validate
   if (
-    !disableLocalStrategy &&
+    isLocalStrategyEnabled(localStrategy) &&
     loginWithUsername &&
     !loginWithUsername.requireEmail &&
     !loginWithUsername.requireUsername

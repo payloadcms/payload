@@ -8,6 +8,7 @@ import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.j
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import { isLocalStrategyEnabled } from '../localStrategy.js'
 
 export type Args = {
   collection: Collection
@@ -18,7 +19,7 @@ export type Args = {
 export const verifyEmailOperation = async (args: Args): Promise<boolean> => {
   const { collection, req, token } = args
 
-  if (collection.config.auth.disableLocalStrategy) {
+  if (!isLocalStrategyEnabled(collection.config.auth.localStrategy)) {
     throw new Forbidden(req.t)
   }
   if (!Object.prototype.hasOwnProperty.call(args, 'token')) {

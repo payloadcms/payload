@@ -71,7 +71,7 @@ import type { CollectionConfig } from 'payload'
 export const APIKeys: CollectionConfig = {
   slug: 'api-keys',
   auth: {
-    disableLocalStrategy: true,
+    localStrategy: false,
     useAPIKey: true,
   },
   fields: [],

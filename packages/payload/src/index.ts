@@ -23,6 +23,7 @@ import type {
 } from './collections/config/types.js'
 
 import { getRegisteredDevReloadStrategy } from './admin/adapters/devReload.js'
+import { isLocalStrategyEnabled } from './auth/localStrategy.js'
 import {
   forgotPasswordLocal,
   type Options as ForgotPasswordOptions,
@@ -1061,7 +1062,7 @@ export class BasePayload {
         }
 
         // 3. if localStrategy flag is true
-        if (!collection.auth.disableLocalStrategy && !jwtStrategyEnabled) {
+        if (isLocalStrategyEnabled(collection.auth.localStrategy) && !jwtStrategyEnabled) {
           jwtStrategyEnabled = true
         }
       }

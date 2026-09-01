@@ -8,6 +8,7 @@ import { emailFieldConfig } from './baseFields/email.js'
 import { sessionsFieldConfig } from './baseFields/sessions.js'
 import { usernameFieldConfig } from './baseFields/username.js'
 import { verificationFields } from './baseFields/verification.js'
+import { shouldIncludeAuthFields } from './localStrategy.js'
 
 export const getBaseAuthFields = (authConfig: IncomingAuthType): Field[] => {
   const authFields: Field[] = []
@@ -16,11 +17,7 @@ export const getBaseAuthFields = (authConfig: IncomingAuthType): Field[] => {
     authFields.push(...createAPIKeyFields())
   }
 
-  if (
-    !authConfig.disableLocalStrategy ||
-    (typeof authConfig.disableLocalStrategy === 'object' &&
-      authConfig.disableLocalStrategy.enableFields)
-  ) {
+  if (shouldIncludeAuthFields(authConfig.localStrategy)) {
     const emailField = { ...emailFieldConfig }
     let usernameField: TextField | undefined
 

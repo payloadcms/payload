@@ -10,6 +10,7 @@ import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { getFieldsToSign } from '../getFieldsToSign.js'
 import { jwtSign } from '../jwt.js'
+import { isLocalStrategyEnabled } from '../localStrategy.js'
 import { removeExpiredSessions } from '../sessions.js'
 
 export type Result = {
@@ -73,7 +74,10 @@ export const refreshOperation = async (incomingArgs: Arguments): Promise<Result>
 
     const sid = args.req.user._sid
 
-    if (collectionConfig.auth.useSessions && !collectionConfig.auth.disableLocalStrategy) {
+    if (
+      collectionConfig.auth.useSessions &&
+      isLocalStrategyEnabled(collectionConfig.auth.localStrategy)
+    ) {
       if (!Array.isArray(user.sessions) || !sid) {
         throw new Forbidden(args.req.t)
       }

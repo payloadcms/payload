@@ -25,7 +25,9 @@ const customAuthenticationStrategy: AuthStrategyFunction = async ({ headers, pay
   })
 
   const user = usersQuery.docs[0] || null
-  if (!user) return { user: null }
+  if (!user) {
+    return { user: null }
+  }
 
   return {
     responseHeaders: new Headers({
@@ -53,7 +55,7 @@ export default buildConfigWithDefaults({
         create: () => true,
       },
       auth: {
-        disableLocalStrategy: true,
+        localStrategy: false,
         strategies: [
           {
             name: strategyName,

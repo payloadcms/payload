@@ -23,6 +23,7 @@ import type {
 } from '../../config/types.js'
 
 import { ensureUsernameOrEmail } from '../../../auth/ensureUsernameOrEmail.js'
+import { shouldIncludeAuthFields } from '../../../auth/localStrategy.js'
 import { generatePasswordSaltHash } from '../../../auth/strategies/local/generatePasswordSaltHash.js'
 import { afterChange } from '../../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../../fields/hooks/afterRead/index.js'
@@ -115,9 +116,7 @@ export const updateDocument = async <
   const shouldSavePassword = Boolean(
     password &&
       collectionConfig.auth &&
-      (!collectionConfig.auth.disableLocalStrategy ||
-        (typeof collectionConfig.auth.disableLocalStrategy === 'object' &&
-          collectionConfig.auth.disableLocalStrategy.enableFields)) &&
+      shouldIncludeAuthFields(collectionConfig.auth.localStrategy) &&
       !isSavingDraft,
   )
 

@@ -9,6 +9,7 @@ import type { SanitizedConfig } from '../config/types.js'
 import type { FieldAffectingData, FlattenedField, Option } from '../fields/config/types.js'
 import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 
+import { shouldIncludeAuthFields } from '../auth/localStrategy.js'
 import { MissingEditorProp } from '../errors/MissingEditorProp.js'
 import { fieldAffectsData, fieldIsVirtual } from '../fields/config/types.js'
 import { generateJobsJSONSchemas } from '../queues/config/generateJobsJSONSchemas.js'
@@ -1015,13 +1016,7 @@ export function entityToJSONSchema(
     })
   }
 
-  if (
-    'auth' in entity &&
-    entity.auth &&
-    (!entity.auth?.disableLocalStrategy ||
-      (typeof entity.auth?.disableLocalStrategy === 'object' &&
-        entity.auth.disableLocalStrategy.enableFields))
-  ) {
+  if ('auth' in entity && entity.auth && shouldIncludeAuthFields(entity.auth?.localStrategy)) {
     mutableFields.push({
       name: 'password',
       type: 'text',

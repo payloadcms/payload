@@ -231,19 +231,6 @@ export interface IncomingAuthType {
    */
   depth?: number
   /**
-   * Advanced - disable Payload's built-in local auth strategy. Only use this property if you have replaced Payload's auth mechanisms with your own.
-   */
-  disableLocalStrategy?:
-    | {
-        /**
-         * Include auth fields on the collection even though the local strategy is disabled.
-         * Useful when you do not want the database or types to vary depending on the auth configuration.
-         */
-        enableFields?: true
-        optionalPassword?: true
-      }
-    | true
-  /**
    * Customize the way that the forgotPassword operation functions.
    * @link https://payloadcms.com/docs/authentication/email#forgot-password
    */
@@ -256,6 +243,37 @@ export interface IncomingAuthType {
     generateEmailHTML?: GenerateForgotPasswordEmailHTML
     generateEmailSubject?: GenerateForgotPasswordEmailSubject
   }
+  /**
+   * Controls Payload's built-in local auth strategy.
+   *
+   * - `true` (default): enable the local strategy with the standard auth fields.
+   * - `false`: disable the local strategy entirely and drop the auth fields.
+   * - Object form: fine-grained control over field inclusion and password requirements
+   *   (usually combined with a custom `strategies` implementation).
+   *
+   * @default true
+   */
+  localStrategy?:
+    | {
+        /**
+         * Force auth fields (email, password, etc.) to be excluded from (`true`) or
+         * included in (`false`) the collection schema, overriding the default that
+         * follows `enabled`. Useful when replacing Payload's auth without changing
+         * the database or types.
+         */
+        disableFields?: boolean
+        /**
+         * Whether the local auth strategy is enabled. When `false`, Payload's local
+         * login / register / reset flows are turned off and the auth fields are
+         * dropped from the schema unless `disableFields: false` is set.
+         */
+        enabled: boolean
+        /**
+         * Make the password optional in GraphQL mutations.
+         */
+        optionalPassword?: boolean
+      }
+    | boolean
   /**
    * Set the time (in milliseconds) that a user should be locked out if they fail authentication more times than maxLoginAttempts allows for.
    */

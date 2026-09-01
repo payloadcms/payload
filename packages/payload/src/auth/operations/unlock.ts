@@ -17,6 +17,7 @@ import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { executeAccess } from '../executeAccess.js'
 import { getLoginOptions } from '../getLoginOptions.js'
+import { isLocalStrategyEnabled } from '../localStrategy.js'
 import { resetLoginAttempts } from '../strategies/local/resetLoginAttempts.js'
 
 export type Arguments<TSlug extends AuthCollectionSlug> = {
@@ -48,7 +49,7 @@ export const unlockOperation = async <TSlug extends AuthCollectionSlug>(
       args.data.username.toLowerCase().trim()) ||
     null
 
-  if (collectionConfig.auth.disableLocalStrategy) {
+  if (!isLocalStrategyEnabled(collectionConfig.auth.localStrategy)) {
     throw new Forbidden(req.t)
   }
   if (!sanitizedEmail && !sanitizedUsername) {

@@ -24,6 +24,7 @@ import { getFieldsToSign } from '../getFieldsToSign.js'
 import { getLoginOptions } from '../getLoginOptions.js'
 import { isUserLocked } from '../isUserLocked.js'
 import { jwtSign } from '../jwt.js'
+import { isLocalStrategyEnabled } from '../localStrategy.js'
 import { addSessionToUser, revokeSession } from '../sessions.js'
 import { authenticateLocalStrategy } from '../strategies/local/authenticate.js'
 import { incrementLoginAttempts } from '../strategies/local/incrementLoginAttempts.js'
@@ -74,7 +75,7 @@ export const loginOperation = async <TSlug extends AuthCollectionSlug>(
 ): Promise<LoginResult<TSlug>> => {
   let args = incomingArgs
 
-  if (args.collection.config.auth.disableLocalStrategy) {
+  if (!isLocalStrategyEnabled(args.collection.config.auth.localStrategy)) {
     throw new Forbidden(args.req.t)
   }
 
