@@ -111,16 +111,19 @@ export const FieldTypes: CollectionConfig = {
       name: 'groupField',
       type: 'group',
       admin: {
+        condition: (_data, siblingData) => siblingData.requireGroupField === true,
         description: 'A group field with nested properties',
       },
       fields: [
         {
           name: 'groupText',
           type: 'text',
+          required: true,
         },
         {
           name: 'groupNumber',
           type: 'number',
+          required: true,
         },
       ],
     },
@@ -205,6 +208,10 @@ export const FieldTypes: CollectionConfig = {
           ],
         },
       ],
+    },
+    {
+      name: 'requireGroupField',
+      type: 'checkbox',
     },
   ],
   versions: false,

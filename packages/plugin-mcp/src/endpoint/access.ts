@@ -95,12 +95,11 @@ const checkItemAccess = async ({
     case 'collectionTool':
       return (
         !item.tool.access ||
-        (await item.tool.access({ collectionSlug: item.collectionSlug, permissions, req }))
+        (await item.tool.access({ slug: item.collectionSlug, permissions, req }))
       )
     case 'globalTool':
       return (
-        !item.tool.access ||
-        (await item.tool.access({ globalSlug: item.globalSlug, permissions, req }))
+        !item.tool.access || (await item.tool.access({ slug: item.globalSlug, permissions, req }))
       )
     case 'prompt':
       return !item.prompt.access || (await item.prompt.access({ permissions, req }))

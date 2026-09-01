@@ -1,17 +1,16 @@
-import {
-  type CollectionSlug,
-  entityToStandaloneJSONSchema,
-  type FlattenedField,
-  type GlobalSlug,
-  type PayloadRequest,
-  type SanitizedCollectionConfig,
-  type SanitizedCollectionPermission,
-  type SanitizedGlobalConfig,
-  type SanitizedGlobalPermission,
-} from 'payload'
+import type {
+  CollectionSlug,
+  FlattenedField,
+  GlobalSlug,
+  PayloadRequest,
+  SanitizedCollectionConfig,
+  SanitizedCollectionPermission,
+  SanitizedGlobalConfig,
+  SanitizedGlobalPermission,
+} from '../../index.js'
+import type { EntityInputSchema } from './types.js'
 
-import type { JsonSchemaType } from '../../types.js'
-
+import { entityToStandaloneJSONSchema } from '../configToJSONSchema.js'
 import { filterFieldsByAccess } from './filterFieldsByAccess.js'
 import { sanitizeEntitySchema } from './sanitizeEntitySchema.js'
 
@@ -23,7 +22,7 @@ export const getCollectionInputSchema = ({
   collectionSlug: CollectionSlug
   permissions?: SanitizedCollectionPermission
   req: PayloadRequest
-}): JsonSchemaType | null => {
+}): EntityInputSchema | null => {
   const collection = req.payload.collections[collectionSlug]?.config
 
   if (!collection) {
@@ -52,7 +51,7 @@ export const getGlobalInputSchema = ({
   globalSlug: GlobalSlug
   permissions?: SanitizedGlobalPermission
   req: PayloadRequest
-}): JsonSchemaType | null => {
+}): EntityInputSchema | null => {
   const global = req.payload.config.globals.find((globalConfig) => globalConfig.slug === globalSlug)
 
   if (!global) {
@@ -81,7 +80,7 @@ const buildEntityInputSchema = ({
   entity: SanitizedCollectionConfig | SanitizedGlobalConfig
   fields?: FlattenedField[]
   req: PayloadRequest
-}): JsonSchemaType => {
+}): EntityInputSchema => {
   // The core schema generator reads flattenedFields from the entity and has no fields argument.
   const entityForSchema = { ...entity, flattenedFields: fields }
   const schema = entityToStandaloneJSONSchema({
@@ -90,7 +89,7 @@ const buildEntityInputSchema = ({
     entity: entityForSchema,
     i18n: req.i18n,
     variant: 'input',
-  }) as unknown as JsonSchemaType
+  }) as unknown as EntityInputSchema
 
   return sanitizeEntitySchema(schema)
 }

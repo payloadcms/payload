@@ -122,7 +122,7 @@ export default buildConfigWithDefaults({
             },
 
             // Custom collection-scoped tool — exposed once as `publish`, with
-            // collectionSlug deciding which collection it acts on.
+            // slug deciding which collection it acts on.
             publish: defineCollectionTool({
               annotations: {
                 title: 'Publish Post',
@@ -135,10 +135,10 @@ export default buildConfigWithDefaults({
               input: z.object({
                 id: z.string().describe('The post ID to publish.'),
               }),
-            }).handler(async ({ collectionSlug, input, authorizedMCP, req }) => {
+            }).handler(async ({ slug, input, authorizedMCP, req }) => {
               const result = await req.payload.update({
                 id: input.id,
-                collection: collectionSlug,
+                collection: slug,
                 data: { _status: 'published' },
                 req,
                 overrideAccess: authorizedMCP.overrideAccess,
@@ -147,7 +147,7 @@ export default buildConfigWithDefaults({
                 content: [
                   {
                     type: 'text' as const,
-                    text: `Published ${collectionSlug} ${input.id}.\n\`\`\`json\n${JSON.stringify(result)}\n\`\`\``,
+                    text: `Published ${slug} ${input.id}.\n\`\`\`json\n${JSON.stringify(result)}\n\`\`\``,
                   },
                 ],
               }
