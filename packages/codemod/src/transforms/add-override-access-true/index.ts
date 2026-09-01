@@ -8,7 +8,7 @@ import type { Transform } from '../../types.js'
  * Local API methods that accept `overrideAccess`.
  *
  * Excludes `auth` and `verifyEmail`, which have no such option, and
- * `resetPassword`, which already declares it required.
+ * `resetPassword`, which has no destructuring default to preserve.
  */
 const LOCAL_API_OPERATIONS = new Set([
   'count',
@@ -36,7 +36,8 @@ const LOCAL_API_OPERATIONS = new Set([
 
 /**
  * Adds an explicit `overrideAccess: true` to Local API calls that omit it,
- * preserving the Payload 3 default of skipping access control.
+ * preserving the Payload 3 default of skipping access control now that
+ * Payload 4 changes the default to `false`.
  *
  * Only matches calls on a receiver named `payload` — `payload.find(...)` and
  * `req.payload.find(...)`. Internal operations such as `findOperation(...)` are
@@ -110,7 +111,7 @@ export const addOverrideAccessTrue: Transform = {
     return { filesChanged: [...filesChanged] }
   },
   description:
-    'Add an explicit `overrideAccess: true` to Local API calls that omit it. Payload 4 requires the property; `true` preserves the Payload 3 default of skipping access control. Review each inserted value and switch to `false` wherever the operation acts on behalf of a user.',
+    'Add an explicit `overrideAccess: true` to Local API calls that omit it. Payload 4 changes the default to `false`; `true` preserves the Payload 3 default of skipping access control. Review each inserted value and switch to `false` wherever the operation acts on behalf of a user.',
 }
 
 type Insertion = {
