@@ -314,12 +314,17 @@ pnpm payload getConfigInfo
 pnpm payload getCollectionSchema --slug posts
 ```
 
-You can then query data without starting the development server:
+You can then query and update data without starting the development server:
 
 ```sh
 pnpm payload findDocuments \
   --slug posts \
   --where '{"status":{"equals":"published"}}'
+
+pnpm payload updateDocument \
+  --slug posts \
+  --id 1 \
+  --data '{"title":"Updated title"}'
 ```
 
 Pass `--override-access false` to run a data command through Payload's access control. Local CLI commands do not have a logged-in user, so access is checked as an anonymous request:
@@ -334,7 +339,63 @@ The same option is named `overrideAccess` in JSON input:
 pnpm payload findDocuments --input '{"slug":"posts","overrideAccess":false}'
 ```
 
-The built-in read-only data commands cover config and schema inspection, collection queries, counts, distinct values, and collection and global version reads. Use `payload help --json` to list them or `payload help <command> --json` to inspect the exact input accepted by one command.
+`createDocuments` accepts a JSON array, keeping each document's data and optional upload file together:
+
+```sh
+pnpm payload createDocuments \
+  --slug media \
+  --documents '[{"data":{"alt":"Company logo"},"file":"./images/logo.png"}]'
+```
+
+For longer input, put the array in a file:
+
+```json
+[{ "data": { "title": "First post" } }, { "data": { "title": "Second post" } }]
+```
+
+```sh
+pnpm payload createDocuments --slug posts --documents @documents.json
+```
+
+You can instead pass the command input through `--input`. Explicit arguments and options override values from the JSON input:
+
+```json
+{
+  "slug": "posts",
+  "documents": [
+    { "data": { "title": "First post" } },
+    { "data": { "title": "Second post" } }
+  ]
+}
+```
+
+```sh
+pnpm payload createDocuments --input @create-posts.json
+```
+
+`createDocuments` and `updateDocument` return affected document IDs by default.
+Pass `--returning` when you need the complete documents:
+
+```sh
+pnpm payload updateDocument \
+  --slug posts \
+  --id 1 \
+  --data '{"title":"Updated title"}' \
+  --returning
+```
+
+Use `--select` with `--returning` to choose which fields come back:
+
+```sh
+pnpm payload updateDocument \
+  --slug posts \
+  --id 1 \
+  --data '{"title":"Updated title"}' \
+  --returning \
+  --select '{"title":true}'
+```
+
+The built-in data commands cover collection queries, counts, distinct values, create, update, delete, duplicate, and version operations. Globals have matching schema, read, update, count-version, find-version, and restore-version commands. Use `payload help --json` to list them or `payload help <command> --json` to inspect the exact input accepted by one command.
 
 ## Running commands on a schedule
 
