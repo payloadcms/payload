@@ -64,6 +64,25 @@ export const resaveChildren =
     })
 
     if (sortedChildren.length) {
+      // Resaving a child re-runs this hook for that child. A cyclic parent relationship would
+      // otherwise bounce updates between the documents forever, so skip any document that is
+      // already being resaved further up the current chain.
+      const resavingDocIDs =
+        (req.context.nestedDocsResavingDocIDs as Set<string>) || new Set<string>()
+      req.context.nestedDocsResavingDocIDs = resavingDocIDs
+
+      const docKey = `${collection.slug}:${String(doc.id)}`
+
+      if (resavingDocIDs.has(docKey)) {
+        req.payload.logger.warn(
+          `Nested Docs plugin detected a circular parent relationship in the "${collection.slug}" collection. Skipped re-saving the children of the document with ID ${String(doc.id)}.`,
+        )
+
+        return undefined
+      }
+
+      resavingDocIDs.add(docKey)
+
       try {
         for (const child of sortedChildren) {
           const isDraft = child._status !== 'published'
@@ -97,6 +116,8 @@ export const resaveChildren =
             400,
           )
         }
+      } finally {
+        resavingDocIDs.delete(docKey)
       }
     }
 
