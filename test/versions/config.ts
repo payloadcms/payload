@@ -16,14 +16,14 @@ import DraftsNoReadVersions from './collections/DraftsNoReadVersions.js'
 import DraftWithChangeHook from './collections/DraftsWithChangeHook.js'
 import DraftsWithCustomUnpublish from './collections/DraftsWithCustomUnpublish.js'
 import DraftWithMax from './collections/DraftsWithMax.js'
-import DraftsWithValidate from './collections/DraftsWithValidate.js'
-import ErrorOnUnpublish from './collections/ErrorOnUnpublish.js'
-import LocalizedPosts from './collections/Localized.js'
 import { DraftsWithUpload } from './collections/DraftsWithUpload.js'
 import {
   DraftsWithUploadCloudStorage,
   mockCloudStorageAdapter,
 } from './collections/DraftsWithUploadCloudStorage.js'
+import DraftsWithValidate from './collections/DraftsWithValidate.js'
+import ErrorOnUnpublish from './collections/ErrorOnUnpublish.js'
+import LocalizedPosts from './collections/Localized.js'
 import { Media } from './collections/Media.js'
 import { Media2 } from './collections/Media2.js'
 import Posts from './collections/Posts.js'
@@ -37,6 +37,7 @@ import DraftUnlimitedGlobal from './globals/DraftUnlimited.js'
 import DraftWithMaxGlobal from './globals/DraftWithMax.js'
 import LocalizedGlobal from './globals/LocalizedGlobal.js'
 import { MaxVersions } from './globals/MaxVersions.js'
+import RestoreAccessGlobal from './globals/RestoreAccess.js'
 import SimpleDraftGlobal from './globals/SimpleDraft.js'
 import { seed } from './seed.js'
 import { BASE_PATH } from './shared.js'
@@ -84,6 +85,7 @@ export default buildConfigWithDefaults({
     MaxVersions,
     DraftUnlimitedGlobal,
     SimpleDraftGlobal,
+    RestoreAccessGlobal,
   ],
   indexSortableFields: true,
   localization: {
