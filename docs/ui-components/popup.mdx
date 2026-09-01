@@ -1,0 +1,37 @@
+---
+title: Popup
+label: Popup
+order: 180
+desc: Display an anchored menu or custom surface with Payload's Popup component.
+keywords: ui, component, popup, menu, actions, overlay
+---
+
+The `Popup` component renders a trigger and positions its content in a portal. Use `PopupList` helpers to build compact action menus.
+
+## Import
+
+```tsx
+import { Popup, PopupList } from '@payloadcms/ui'
+```
+
+## Action menu
+
+<ComponentPreview component="Popup" example="menu" />
+
+Popup content supports keyboard navigation and automatically flips when there is not enough viewport space in the preferred direction.
+
+## Common props
+
+| Prop              | Type                                              | Default    | Description                                            |
+| ----------------- | ------------------------------------------------- | ---------- | ------------------------------------------------------ |
+| `button`          | `ReactNode`                                       | —          | Content rendered inside the trigger.                   |
+| `children`        | `ReactNode`                                       | —          | Content rendered inside the popup.                     |
+| `render`          | `({ close }) => ReactNode`                        | —          | Renders content with a function for closing the popup. |
+| `size`            | `'small' \| 'medium' \| 'large' \| 'fit-content'` | `'medium'` | Sets the popup content width.                          |
+| `buttonSize`      | `'xsmall' \| 'small' \| 'medium' \| 'large'`      | —          | Sets the trigger padding.                              |
+| `horizontalAlign` | `'left' \| 'center' \| 'right'`                   | `'left'`   | Sets the preferred horizontal alignment.               |
+| `verticalAlign`   | `'top' \| 'bottom'`                               | `'bottom'` | Sets the preferred vertical position.                  |
+| `initActive`      | `boolean`                                         | `false`    | Sets the initial uncontrolled open state.              |
+| `forceOpen`       | `boolean`                                         | —          | Controls the open state externally.                    |
+| `disabled`        | `boolean`                                         | `false`    | Prevents the trigger from opening the popup.           |
+| `showOnHover`     | `boolean`                                         | `false`    | Opens the popup while the trigger is hovered.          |
