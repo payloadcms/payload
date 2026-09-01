@@ -46,7 +46,9 @@ export const reInitializeDB = async ({
       )
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
+        const message = await getErrorMessage(response)
+
+        throw new Error(`HTTP error! status: ${response.status}${message ? `; ${message}` : ''}`)
       }
 
       const timeTaken = Date.now() - startTime
@@ -65,4 +67,23 @@ export const reInitializeDB = async ({
       attempt++
     }
   }
+}
+
+const getErrorMessage = async (response: Response): Promise<string | undefined> => {
+  try {
+    const body: unknown = await response.json()
+
+    if (
+      body !== null &&
+      typeof body === 'object' &&
+      'message' in body &&
+      typeof body.message === 'string'
+    ) {
+      return body.message
+    }
+  } catch {
+    // The response may not be JSON if the application server itself failed.
+  }
+
+  return undefined
 }

@@ -49,9 +49,7 @@ export const createReInitEndpoint = ({ seed, suite }: TestDataConfig): Endpoint 
       )
     } catch (err) {
       payload.logger.error(err)
-      return Response.json(err, {
-        status: httpStatus.BAD_REQUEST,
-      })
+      return createErrorResponse(err)
     }
   }
 
@@ -104,11 +102,19 @@ const legacyHandler: PayloadHandler = async (req) => {
     )
   } catch (err) {
     payload.logger.error(err)
-    return Response.json(err, {
-      status: httpStatus.BAD_REQUEST,
-    })
+    return createErrorResponse(err)
   }
 }
+
+const createErrorResponse = (error: unknown): Response =>
+  Response.json(
+    {
+      message: error instanceof Error ? error.message : String(error),
+    },
+    {
+      status: httpStatus.INTERNAL_SERVER_ERROR,
+    },
+  )
 
 /** @deprecated Migrate the config to `buildConfigWithDefaults({ config, seed, suite })`. */
 export const reInitEndpoint: Endpoint = {
