@@ -88,6 +88,7 @@ export const runJSONJob = async ({
         error instanceof WorkflowError
           ? error
           : new WorkflowError({
+              cause: error,
               job,
               message:
                 typeof error === 'object' && error && 'message' in error
