@@ -13,6 +13,7 @@ import { runTransforms } from './runner.js'
 import { runDispatch } from './upgrade/dispatch.js'
 import { runUpgrade } from './upgrade/index.js'
 import { renderUpgradePrompt } from './upgrade/prompt.js'
+import { resolveSelfCommand } from './upgrade/selfCommand.js'
 import { loadPackageJsons, serializePackageJson } from './utils/packageJson.js'
 import { loadProject } from './utils/project.js'
 
@@ -21,7 +22,7 @@ export async function main(argv: string[] = process.argv.slice(2)): Promise<void
 
   if (flags.command === 'upgrade') {
     if (flags.upgrade === 'prompt') {
-      console.log(renderUpgradePrompt())
+      console.log(renderUpgradePrompt({ command: resolveSelfCommand() }))
       return
     }
 

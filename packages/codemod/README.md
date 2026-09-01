@@ -70,6 +70,10 @@ The prompt sequences the upgrade (mechanical slice via `upgrade run`, then Next.
 codemods and agent workflow, then regeneration, judgment work, and verification) and points at the
 bundled runbook and migration guide for detail rather than restating them.
 
+The mechanical-slice command inside the prompt re-invokes this CLI. A published install emits
+`npx @payloadcms/codemod`; a source checkout emits `node <bin>` so followers run the local build.
+Set `PAYLOAD_CODEMOD_COMMAND` to override the emitted token.
+
 ## How it works
 
 The tool loads your project via [ts-morph](https://ts-morph.com/), using your `tsconfig.json` when present, otherwise globbing `**/*.{ts,tsx,js,jsx}` (excluding `node_modules`, `dist`, `.next`, `build`). Each registered transform is applied in order against the shared project; changes are saved at the end unless `--dry` or `--print` is passed.
