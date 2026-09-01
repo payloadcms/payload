@@ -1,0 +1,35 @@
+---
+title: Table
+label: Table
+order: 250
+desc: Display pre-rendered column data with Payload's Table component.
+keywords: ui, component, table, data, rows, columns
+---
+
+The `Table` component renders Payload's responsive table structure and styles. Columns define their heading and provide one rendered cell for each row.
+
+## Import
+
+```tsx
+import { Table } from '@payloadcms/ui'
+import type { ClientField, Column } from 'payload'
+```
+
+## Basic usage
+
+<ComponentPreview component="Table" example="basic" />
+
+Keep each column's `renderedCells` array in the same order as `data`. Columns with `active: false` are omitted from the table.
+
+## Rendering cells
+
+`renderedCells` accepts React nodes, so simple custom tables can format values directly. Payload also exports `DefaultCell` for rendering values from Payload field configurations. `DefaultCell` expects the Config and Translation providers available inside the Admin Panel.
+
+## Common props
+
+| Prop          | Type                        | Default     | Description                                          |
+| ------------- | --------------------------- | ----------- | ---------------------------------------------------- |
+| `data`        | `Record<string, unknown>[]` | —           | Rows rendered by the table.                          |
+| `columns`     | `Column[]`                  | —           | Defines headings, fields, and rendered cell content. |
+| `appearance`  | `'default' \| 'condensed'`  | `'default'` | Selects the table's spacing and border treatment.    |
+| `BeforeTable` | `ReactNode`                 | —           | Renders content immediately before the table.        |

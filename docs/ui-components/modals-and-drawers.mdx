@@ -1,0 +1,74 @@
+---
+title: Modals and Drawers
+label: Modals and Drawers
+order: 160
+desc: Present focused actions and supporting content in Payload modals and drawers.
+keywords: ui, components, modal, confirmation, drawer, overlay
+---
+
+Payload provides several overlay surfaces for focused actions and supporting content. The Admin Panel supplies the modal context these components use.
+
+## Import
+
+```tsx
+import {
+  ConfirmationModal,
+  Drawer,
+  DrawerContentContainer,
+  DrawerToggler,
+  FullscreenModal,
+  Modal,
+  useModal,
+} from '@payloadcms/ui'
+```
+
+## Confirmation modal
+
+<ComponentPreview component="ModalsAndDrawers" example="confirmation" />
+
+Give the trigger and modal the same `modalSlug`. Call `openModal` with that slug to display the modal. `ConfirmationModal` closes itself after `onConfirm` resolves or when the user cancels.
+
+## Drawer
+
+<ComponentPreview component="ModalsAndDrawers" example="drawer" />
+
+Use `DrawerToggler` or `openModal` to open a `Drawer`. The trigger and drawer must share the same `slug`.
+
+`DrawerContentContainer` adds the standard content spacing used inside Payload drawers. Set `gutter={false}` on `Drawer` when the drawer's contents manage their own horizontal spacing.
+
+## Choosing a surface
+
+- Use `ConfirmationModal` to confirm a focused action.
+- Use `Drawer` for supporting content that should remain connected to the current view.
+- Use `Modal` for a custom dialog and `FullscreenModal` when the content needs the full viewport.
+- Use `ItemsDrawer` for Payload's provider-backed document selection workflow rather than a generic drawer.
+
+## Common props
+
+### ConfirmationModal
+
+| Prop              | Type                          | Default | Description                                             |
+| ----------------- | ----------------------------- | ------- | ------------------------------------------------------- |
+| `modalSlug`       | `string`                      | —       | Connects the modal to its trigger.                      |
+| `heading`         | `ReactNode`                   | —       | Displays the modal heading.                             |
+| `body`            | `ReactNode`                   | —       | Displays the confirmation message.                      |
+| `onConfirm`       | `() => Promise<void> \| void` | —       | Runs when the user confirms the action.                 |
+| `onCancel`        | `() => void`                  | —       | Runs after the user cancels the action.                 |
+| `confirmLabel`    | `string`                      | —       | Replaces the translated confirm label.                  |
+| `confirmingLabel` | `string`                      | —       | Replaces the label shown while confirmation is pending. |
+| `cancelLabel`     | `string`                      | —       | Replaces the translated cancel label.                   |
+
+### Drawer
+
+| Prop         | Type        | Default | Description                                         |
+| ------------ | ----------- | ------- | --------------------------------------------------- |
+| `slug`       | `string`    | —       | Connects the drawer to its trigger.                 |
+| `title`      | `string`    | —       | Displays the default drawer heading.                |
+| `children`   | `ReactNode` | —       | Renders the drawer content.                         |
+| `gutter`     | `boolean`   | `true`  | Applies Payload's horizontal gutter to the content. |
+| `Header`     | `ReactNode` | —       | Replaces the default drawer header.                 |
+| `hoverTitle` | `boolean`   | —       | Adds the title as a native tooltip on the heading.  |
+
+## Provider requirements
+
+These components use the modal, translation, and drawer-depth contexts supplied by the Payload Admin Panel. When composing them outside the Admin Panel, provide the equivalent contexts before rendering the components.

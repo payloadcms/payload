@@ -1,0 +1,34 @@
+---
+title: Dropzone
+label: Dropzone
+order: 100
+desc: Accept files through drag, drop, and paste interactions with Payload's Dropzone component.
+keywords: ui, component, dropzone, upload, file, drag and drop
+---
+
+The `Dropzone` component adds drag, drop, and paste handling to a container. It passes the selected `FileList` to `onChange` and applies Payload's drop-target styles.
+
+## Import
+
+```tsx
+import { Dropzone } from '@payloadcms/ui'
+```
+
+## Basic usage
+
+<ComponentPreview component="Dropzone" example="basic" />
+
+`Dropzone` does not render a file input or open the system file picker. Render those controls as children when users should be able to browse for files in addition to dropping them.
+
+When `multipleFiles` is disabled, dropping more than one file passes only the first file to `onChange`.
+
+## Common props
+
+| Prop            | Type                        | Default     | Description                                        |
+| --------------- | --------------------------- | ----------- | -------------------------------------------------- |
+| `children`      | `ReactNode`                 | —           | Content and file-selection controls in the target. |
+| `onChange`      | `(files: FileList) => void` | —           | Runs when files are dropped, pasted, or supplied.  |
+| `multipleFiles` | `boolean`                   | `false`     | Allows more than one file to be returned.          |
+| `disabled`      | `boolean`                   | `false`     | Disables drag, drop, and paste listeners.          |
+| `dropzoneStyle` | `'default' \| 'none'`       | `'default'` | Enables or removes Payload's drop-target styles.   |
+| `className`     | `string`                    | —           | Adds a class to the dropzone container.            |

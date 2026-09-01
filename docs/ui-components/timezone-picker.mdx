@@ -1,0 +1,34 @@
+---
+title: TimezonePicker
+label: TimezonePicker
+order: 270
+desc: Select a timezone with Payload's TimezonePicker component.
+keywords: ui, component, timezone, select, localization, date
+---
+
+The `TimezonePicker` component combines Payload's translated timezone label with a compact `ReactSelect` input. Supply the timezones that are valid for the current feature or project.
+
+## Import
+
+```tsx
+import { TimezonePicker } from '@payloadcms/ui'
+```
+
+## Basic usage
+
+<ComponentPreview component="TimezonePicker" example="basic" />
+
+Store an IANA timezone identifier such as `America/Detroit` rather than a fixed UTC offset so daylight-saving changes can be handled correctly.
+
+Inside the Admin Panel, Payload provides the translation context used by the label. Rendering the picker outside the Admin Panel requires the same UI providers.
+
+## Common props
+
+| Prop               | Type                           | Default | Description                                      |
+| ------------------ | ------------------------------ | ------- | ------------------------------------------------ |
+| `id`               | `string`                       | —       | Identifies the underlying select input.          |
+| `options`          | `SelectFieldClient['options']` | —       | Timezones displayed in the select menu.          |
+| `selectedTimezone` | `string`                       | —       | Value of the currently selected timezone.        |
+| `onChange`         | `(timezone: string) => void`   | —       | Runs when the selected timezone changes.         |
+| `required`         | `boolean`                      | `false` | Marks the picker as required and prevents clear. |
+| `readOnly`         | `boolean`                      | `false` | Prevents the timezone from being changed.        |
