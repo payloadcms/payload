@@ -773,14 +773,37 @@ function testCLICommand(
     const command = task.name
     const args = parseArgsStringToArgv(command)
     const commandName = args[0]!
-    const variants = [
-      [false, 'shell'],
-      [true, 'shell'],
-      [false, 'inline'],
-      [true, 'inline'],
-      [false, 'file'],
-      [true, 'file'],
-    ] as const
+    const runtime: CLIRuntime = {
+      configDir: dirname,
+      destroy: () => Promise.resolve(),
+      getConfig: () => Promise.resolve(payload.config),
+      getPayload: () => Promise.resolve(payload),
+      isScheduled: false,
+      markScheduled: () => undefined,
+    }
+    const parserCLI = await createCLI(runtime)
+    const parsedCommand = parserCLI.commands.find(
+      (command) => command.name() === commandName || command.aliases().includes(commandName),
+    )
+
+    if (!parsedCommand) {
+      throw new Error(`Could not find CLI command '${commandName}'.`)
+    }
+
+    parsedCommand.action(() => undefined)
+    await parserCLI.parseAsync(['node', 'payload', ...args])
+
+    const input = await getCommandInput(parsedCommand)
+    const hasInput = typeof input === 'object' && input !== null && Object.keys(input).length > 0
+    const inputVariants = hasInput
+      ? ([
+          [false, 'inline'],
+          [true, 'inline'],
+          [false, 'file'],
+          [true, 'file'],
+        ] as const)
+      : []
+    const variants = [[false, 'shell'], [true, 'shell'], ...inputVariants] as const
 
     for (const [index, [isJSON, source]] of variants.entries()) {
       if (index > 0) {
@@ -790,33 +813,13 @@ function testCLICommand(
       let commandToRun = command
 
       if (source !== 'shell') {
-        const runtime: CLIRuntime = {
-          configDir: dirname,
-          destroy: () => Promise.resolve(),
-          getConfig: () => Promise.resolve(payload.config),
-          getPayload: () => Promise.resolve(payload),
-          isScheduled: false,
-          markScheduled: () => undefined,
-        }
-        const parserCLI = await createCLI(runtime)
-        const parsedCommand = parserCLI.commands.find(
-          (command) => command.name() === commandName || command.aliases().includes(commandName),
-        )
-
-        if (!parsedCommand) {
-          throw new Error(`Could not find CLI command '${commandName}'.`)
-        }
-
-        parsedCommand.action(() => undefined)
-        await parserCLI.parseAsync(['node', 'payload', ...args])
-
-        const input = JSON.stringify(await getCommandInput(parsedCommand))
+        const serializedInput = JSON.stringify(input)
 
         if (source === 'file') {
-          await writeFile(inputFile, input)
+          await writeFile(inputFile, serializedInput)
           commandToRun = `${commandName} --input @${inputFile}`
         } else {
-          commandToRun = `${commandName} --input '${input}'`
+          commandToRun = `${commandName} --input '${serializedInput}'`
         }
       }
 

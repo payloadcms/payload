@@ -1,6 +1,7 @@
+import type { PayloadRequest } from 'payload'
+
 import { McpServer, type ServerContext } from '@modelcontextprotocol/server'
-import { APIError, type PayloadRequest } from 'payload'
-import { z } from 'zod'
+import { APIError, strictObject, z } from 'payload'
 
 import type {
   AuthorizedMCP,
@@ -35,6 +36,8 @@ export const buildMcpServer = ({
   pluginConfig: SanitizedMCPPluginConfig
   req: PayloadRequest
 }): McpServer => {
+  z.config(z.locales.en())
+
   const serverOptions = pluginConfig.mcp?.serverOptions || {}
   const server = new McpServer(
     { name: 'Payload MCP Server', version: '1.0.0', ...serverOptions.serverInfo },
@@ -68,7 +71,7 @@ export const buildMcpServer = ({
 
   /**
    * Runs a collection/global tool call:
-   * - reads `collectionSlug` / `globalSlug` from the input
+   * - reads `slug` from the input
    * - runs access control: errors if `authorizedMCP.items` has no entry for this tool + slug
    * - runs the tool handler and finalizes its response
    */
@@ -82,16 +85,15 @@ export const buildMcpServer = ({
     serverContext: ServerContext
   }): Promise<MCPToolResponse> => {
     const entity = item.type === 'collectionTool' ? 'collection' : 'global'
-    const slugKey = item.type === 'collectionTool' ? 'collectionSlug' : 'globalSlug'
     const toolInput = (input ?? {}) as Record<string, unknown>
-    const slug = toolInput[slugKey] as string | undefined
+    const slug = toolInput.slug as string | undefined
 
     if (!slug) {
       return {
         content: [
           {
             type: 'text',
-            text: `Error: "${item.mcpName}" requires ${slugKey}. Use getConfigInfo to inspect ${entity} slugs.`,
+            text: `Error: "${item.mcpName}" requires slug. Use getConfigInfo to inspect ${entity} slugs.`,
           },
         ],
         isError: true,
@@ -126,8 +128,8 @@ export const buildMcpServer = ({
       serverContext,
     }
     const response = await (match.type === 'collectionTool'
-      ? match.tool.handler({ ...handlerArgs, collectionSlug: slug })
-      : match.tool.handler({ ...handlerArgs, globalSlug: slug }))
+      ? match.tool.handler({ ...handlerArgs, slug })
+      : match.tool.handler({ ...handlerArgs, slug }))
 
     return finalizeToolResponse({
       input: toolInput,
@@ -149,10 +151,7 @@ export const buildMcpServer = ({
           }
           registeredEntityTools.add(item.mcpName)
 
-          const inputSchema = withSlugInput({
-            name: item.type === 'collectionTool' ? 'collectionSlug' : 'globalSlug',
-            input: item.tool.input,
-          })
+          const inputSchema = withSlugInput({ input: item.tool.input })
 
           server.registerTool(
             item.mcpName,
@@ -246,39 +245,50 @@ export const buildMcpServer = ({
   return server
 }
 
-const withSlugInput = ({
-  name,
-  input,
-}: {
-  input?: ToolInputSchema
-  name: 'collectionSlug' | 'globalSlug'
-}): ToolInputSchema => {
-  const description = name === 'collectionSlug' ? 'The collection slug' : 'The global slug'
-  const slugSchema = z.string().describe(description)
+const withSlugInput = ({ input }: { input?: ToolInputSchema }): ToolInputSchema => {
+  const description = 'The target slug.'
+  const slugSchema = z.string().check(z.describe(description))
 
   if (!input) {
-    return z.object({ [name]: slugSchema })
+    return strictObject({ slug: slugSchema }) as unknown as ToolInputSchema
   }
 
-  if (input instanceof z.ZodObject) {
-    return input.extend({ [name]: slugSchema })
+  if (typeof input === 'object' && input !== null && '~standard' in input) {
+    const schema = input['~standard'].jsonSchema.input({ target: 'draft-2020-12' })
+    const properties = schema.properties as Record<string, unknown> | undefined
+
+    if (properties?.slug) {
+      return input
+    }
+
+    return addSlugToJSONSchema({ description, schema: schema as JsonSchemaType })
   }
 
-  const schema = input as {
+  return addSlugToJSONSchema({ description, schema: input })
+}
+
+const addSlugToJSONSchema = ({
+  description,
+  schema,
+}: {
+  description: string
+  schema: JsonSchemaType
+}): JsonSchemaType => {
+  const objectSchema = schema as {
     properties?: Record<string, JsonSchemaType>
     required?: string[]
   } & JsonSchemaType
 
   return {
-    ...schema,
+    ...objectSchema,
     type: 'object',
     properties: {
-      ...schema.properties,
-      [name]: {
+      ...objectSchema.properties,
+      slug: {
         type: 'string',
         description,
       },
     },
-    required: Array.from(new Set([name, ...(schema.required ?? [])])),
+    required: Array.from(new Set(['slug', ...(objectSchema.required ?? [])])),
   }
 }
