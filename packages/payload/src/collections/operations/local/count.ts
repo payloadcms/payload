@@ -28,8 +28,9 @@ export type CountOptions<TSlug extends CollectionSlug> = {
   locale?: TypedLocale
   /**
    * Skip access control.
-   * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the front-end.
-   * @default true
+   * Set to `true` if you want to bypass Access Control for the operation, for example for
+   * trusted server-side work such as cron jobs, seeding, and migrations.
+   * @default false
    */
   overrideAccess?: boolean
   /**
@@ -63,7 +64,7 @@ export async function countLocal<TSlug extends CollectionSlug>(
   const {
     collection: collectionSlug,
     disableErrors,
-    overrideAccess = true,
+    overrideAccess = false,
     trash = false,
     where,
   } = options

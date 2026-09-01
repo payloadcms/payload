@@ -230,7 +230,7 @@ export const findDistinctOperation = async (
           fallbackLocale: req.fallbackLocale || null,
           field: sanitizedField,
           locale: req.locale || null,
-          overrideAccess: args.overrideAccess ?? true,
+          overrideAccess: args.overrideAccess ?? false,
           parentIsLocalized: false,
           populate,
           req,

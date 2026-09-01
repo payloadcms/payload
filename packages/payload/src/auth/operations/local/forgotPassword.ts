@@ -27,7 +27,7 @@ export async function forgotPasswordLocal<T extends AuthCollectionSlug>(
     data,
     disableEmail,
     expiration,
-    overrideAccess = true,
+    overrideAccess = false,
   } = options
 
   const collection = payload.collections[collectionSlug]

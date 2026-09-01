@@ -28,8 +28,9 @@ export type CountVersionsOptions<TSlug extends CollectionSlug> = {
   locale?: TypedLocale
   /**
    * Skip access control.
-   * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the front-end.
-   * @default true
+   * Set to `true` if you want to bypass Access Control for the operation, for example for
+   * trusted server-side work such as cron jobs, seeding, and migrations.
+   * @default false
    */
   overrideAccess?: boolean
   /**
@@ -51,7 +52,7 @@ export async function countVersionsLocal<TSlug extends CollectionSlug>(
   payload: Payload,
   options: CountVersionsOptions<TSlug>,
 ): Promise<{ totalDocs: number }> {
-  const { collection: collectionSlug, disableErrors, overrideAccess = true, where } = options
+  const { collection: collectionSlug, disableErrors, overrideAccess = false, where } = options
 
   const collection = payload.collections[collectionSlug]
 
