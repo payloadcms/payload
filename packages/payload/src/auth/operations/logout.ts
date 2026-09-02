@@ -69,23 +69,18 @@ export const logoutOperation = async (incomingArgs: Arguments): Promise<boolean>
         throw new APIError('No User', httpStatus.BAD_REQUEST)
       }
 
-      if (allSessions) {
-        userWithSessions.sessions = []
-      } else {
-        const sessionsAfterLogout = (userWithSessions?.sessions || []).filter(
-          (s) => s.id !== req?.user?._sid,
-        )
-
-        userWithSessions.sessions = sessionsAfterLogout
-      }
-
-      // Prevent updatedAt from being updated when only removing a session
-      ;(userWithSessions as any).updatedAt = null
+      const sessions = allSessions
+        ? []
+        : (userWithSessions.sessions || []).filter((session) => session.id !== req.user?._sid)
 
       await req.payload.db.updateOne({
         id: user.id,
         collection: collectionConfig.slug,
-        data: userWithSessions,
+        data: {
+          sessions,
+          // Prevent updatedAt from being updated when only removing a session
+          updatedAt: null,
+        },
         req,
         returning: false,
       })
