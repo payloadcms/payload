@@ -32,7 +32,7 @@
     "react-dom": "19.2.6"
   },
   "devDependencies": {
-    "@playwright/test": "1.59.1",
+    "@playwright/test": "1.62.1",
     "@testing-library/react": "16.3.0",
     "@types/node": "24.12.3",
     "@types/react": "19.2.14",
@@ -45,7 +45,7 @@
     "tsx": "4.22.4",
     "typescript": "6.0.3",
     "vite-tsconfig-paths": "6.0.5",
-    "vitest": "4.1.6"
+    "vitest": "4.1.11"
   },
   "packageManager": "pnpm@10.33.0",
   "engines": {
