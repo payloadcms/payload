@@ -3,10 +3,64 @@ import type { Endpoint, PayloadHandler } from 'payload'
 import { status as httpStatus } from 'http-status'
 import * as qs from 'qs-esm'
 
+import type { TestDataConfig } from './testDataConfig.js'
+
 import { path } from './reInitializeDB.js'
+import { resetAndSeed } from './resetAndSeed.js'
 import { seedDB } from './seed.js'
 
-const handler: PayloadHandler = async (req) => {
+export const createReInitEndpoint = ({ seed, suite }: TestDataConfig): Endpoint => {
+  let resetQueue = Promise.resolve()
+
+  const handler: PayloadHandler = async (req) => {
+    const { payload } = req
+
+    if (!req.url) {
+      throw new Error('Request URL is required')
+    }
+
+    const query: {
+      deleteOnly?: string
+    } = qs.parse(req.url.split('?')[1] ?? '', {
+      depth: 10,
+      ignoreQueryPrefix: true,
+    })
+
+    const reset = resetQueue.then(async () => {
+      await resetAndSeed({
+        deleteOnly: query.deleteOnly === 'true',
+        payload,
+        seed,
+        suite,
+      })
+    })
+    resetQueue = reset.catch(() => undefined)
+
+    try {
+      await reset
+
+      return Response.json(
+        {
+          message: 'Database reset and seed run successfully.',
+        },
+        {
+          status: httpStatus.OK,
+        },
+      )
+    } catch (err) {
+      payload.logger.error(err)
+      return createErrorResponse(err)
+    }
+  }
+
+  return {
+    handler,
+    method: 'post',
+    path,
+  }
+}
+
+const legacyHandler: PayloadHandler = async (req) => {
   process.env.SEED_IN_CONFIG_ONINIT = 'true'
   const { payload } = req
 
@@ -23,7 +77,7 @@ const handler: PayloadHandler = async (req) => {
     ignoreQueryPrefix: true,
   })
 
-  let uploadsDir = query.uploadsDir as string | string[]
+  let uploadsDir = query.uploadsDir
   if (typeof uploadsDir === 'object') {
     uploadsDir = Object.values(uploadsDir)
   }
@@ -32,12 +86,10 @@ const handler: PayloadHandler = async (req) => {
     await seedDB({
       _payload: payload,
       collectionSlugs: payload.config.collections.map(({ slug }) => slug),
+      deleteOnly: query.deleteOnly === 'true',
       seedFunction: payload.config.onInit,
       snapshotKey: String(query.snapshotKey),
-      // uploadsDir can be string or stringlist
       uploadsDir,
-      // query value will be a string of 'true' or 'false'
-      deleteOnly: query.deleteOnly === 'true',
     })
 
     return Response.json(
@@ -50,14 +102,23 @@ const handler: PayloadHandler = async (req) => {
     )
   } catch (err) {
     payload.logger.error(err)
-    return Response.json(err, {
-      status: httpStatus.BAD_REQUEST,
-    })
+    return createErrorResponse(err)
   }
 }
 
+const createErrorResponse = (error: unknown): Response =>
+  Response.json(
+    {
+      message: error instanceof Error ? error.message : String(error),
+    },
+    {
+      status: httpStatus.INTERNAL_SERVER_ERROR,
+    },
+  )
+
+/** @deprecated Migrate the config to `buildConfigWithDefaults({ config, seed, suite })`. */
 export const reInitEndpoint: Endpoint = {
-  path,
+  handler: legacyHandler,
   method: 'get',
-  handler,
+  path,
 }
