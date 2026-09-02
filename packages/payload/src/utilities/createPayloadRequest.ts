@@ -124,8 +124,10 @@ export const createPayloadRequest = async ({
 
   const { responseHeaders, user } = await executeAuthStrategies({
     canSetHeaders,
+    fallbackLocale: fallbackLocale || undefined,
     headers: req.headers,
     isGraphQL,
+    locale: locale || undefined,
     payload,
   })
 

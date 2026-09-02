@@ -64,6 +64,17 @@ export default buildConfigWithDefaults({
       baseDir: path.resolve(dirname),
     },
   },
+  endpoints: [
+    {
+      handler: (req) =>
+        Response.json({
+          locale: req.locale,
+          name: req.user && 'name' in req.user ? req.user.name : null,
+        }),
+      method: 'get',
+      path: '/whoami',
+    },
+  ],
   collections: [
     RichTextCollection,
     BlocksCollection,
@@ -81,6 +92,7 @@ export default buildConfigWithDefaults({
         {
           name: 'name',
           label: { en: 'Full name' },
+          localized: true,
           type: 'text',
         },
         {
