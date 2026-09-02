@@ -5,13 +5,12 @@ import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
 import { removeFiles } from '../__helpers/shared/removeFiles.js'
-import testConfig from './config.js'
 import { mediaSlug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-test.suite({ config: testConfig })('@payloadcms/plugin-seo', () => {
+test.suite({ config: './config.ts' })('@payloadcms/plugin-seo', () => {
   let page = null
   let mediaDoc = null
   let mediaDoc2 = null

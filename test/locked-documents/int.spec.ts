@@ -9,13 +9,12 @@ import type { Post, User } from './payload-types.js'
 
 import { test } from '../__helpers/int/vitest.js'
 import { devUser } from '../credentials.js'
-import testConfig from './config.js'
 import { menuSlug } from './globals/Menu/index.js'
 import { pagesSlug, postsSlug } from './slugs.js'
 
 const lockedDocumentCollection = 'payload-locked-documents'
 
-test.suite({ config: testConfig })('Locked documents', () => {
+test.suite({ config: './config.ts' })('Locked documents', () => {
   let post: Post
   let user: any
   let user2: any

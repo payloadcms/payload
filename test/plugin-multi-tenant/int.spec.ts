@@ -7,7 +7,6 @@ import type { Relationship } from './payload-types.js'
 
 import { test } from '../__helpers/int/vitest.js'
 import { devUser } from '../credentials.js'
-import testConfig from './config.js'
 import {
   menuSlug,
   multiTenantPostsSlug,
@@ -18,7 +17,7 @@ import {
 
 let token: string
 
-test.suite({ config: testConfig })('@payloadcms/plugin-multi-tenant', () => {
+test.suite({ config: './config.ts' })('@payloadcms/plugin-multi-tenant', () => {
   test.beforeEach(async ({ restClient }) => {
     const data = await restClient
       .POST('/users/login', {

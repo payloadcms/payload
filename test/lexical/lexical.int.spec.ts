@@ -54,7 +54,6 @@ import { richTextDocData } from './collections/RichText/data.js'
 import { generateLexicalRichText } from './collections/RichText/generateLexicalRichText.js'
 import { textDoc } from './collections/Text/shared.js'
 import { uploadsDoc } from './collections/Upload/shared.js'
-import testConfig from './config.js'
 import {
   arrayFieldsSlug,
   lexicalFieldsSlug,
@@ -68,7 +67,7 @@ let createdJPGDocID: number | string = null
 let createdTextDocID: number | string = null
 let createdRichTextDocID: number | string = null
 
-test.suite({ config: testConfig })('Lexical', () => {
+test.suite({ config: './config.ts' })('Lexical', () => {
   test.beforeEach(async ({ payload, restClient }) => {
     await restClient.login({
       slug: 'users',

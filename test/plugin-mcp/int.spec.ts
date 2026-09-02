@@ -9,7 +9,6 @@ import { expect, vi } from 'vitest'
 import type { TestFileServer } from '../__helpers/shared/startTestFileServer.js'
 
 import { startTestFileServer } from '../__helpers/shared/startTestFileServer.js'
-import testConfig from './config.js'
 import { getToolDoc, getToolText } from './helpers/mcpClient.js'
 import { it, itModern, test } from './helpers/mcpFixtures.js'
 const dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -101,7 +100,7 @@ function draft2020Violations(schema: unknown, rootPath: string): string[] {
   walk(schema, rootPath)
   return errors
 }
-test.suite({ config: testConfig })('@payloadcms/plugin-mcp', () => {
+test.suite({ config: './config.ts' })('@payloadcms/plugin-mcp', () => {
   test.afterEach(() => {
     vi.unstubAllEnvs()
   })

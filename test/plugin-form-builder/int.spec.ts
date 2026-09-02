@@ -11,7 +11,6 @@ import { serializeLexical } from '../../packages/plugin-form-builder/src/utiliti
 import { replaceDoubleCurlys } from '../../packages/plugin-form-builder/src/utilities/replaceDoubleCurlys.js'
 import { test } from '../__helpers/int/vitest.js'
 import { createStreamableFile } from '../uploads/createStreamableFile.js'
-import testConfig from './config.js'
 import { documentsSlug, formsSlug, formSubmissionsSlug, mediaSlug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -22,7 +21,7 @@ const testImagePath = path.resolve(dirname, '../uploads/image.png')
 const testPdfPath = path.resolve(dirname, '../uploads/test-pdf.pdf')
 let form: Form
 
-test.suite({ config: testConfig })('@payloadcms/plugin-form-builder', () => {
+test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
   test.beforeEach(async ({ payload }) => {
     const formConfig: Omit<Form, 'createdAt' | 'id' | 'updatedAt'> = {
       confirmationType: 'message',

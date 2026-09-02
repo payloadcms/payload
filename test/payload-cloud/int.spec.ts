@@ -6,14 +6,13 @@ import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
 import { createStreamableFile } from '../uploads/createStreamableFile.js'
-import testConfig from './config.js'
 
 const stat = promisify(fs.stat)
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-test.suite({ config: testConfig })('@payloadcms/payload--cloud', () => {
+test.suite({ config: './config.ts' })('@payloadcms/payload--cloud', () => {
   test.describe('tests', () => {
     test.todo('payload-cloud tests')
 

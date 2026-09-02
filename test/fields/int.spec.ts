@@ -26,7 +26,6 @@ import {
 } from './collections/Tabs/constants.js'
 import { tabsDoc } from './collections/Tabs/shared.js'
 import { defaultText } from './collections/Text/shared.js'
-import testConfig from './config.js'
 import {
   arrayFieldsSlug,
   blockFieldsSlug,
@@ -43,7 +42,7 @@ import {
 
 let user: any
 
-test.suite({ config: testConfig })('Fields', () => {
+test.suite({ config: './config.ts' })('Fields', () => {
   test.beforeEach(async ({ payload, restClient }) => {
     await restClient.login({
       slug: 'users',

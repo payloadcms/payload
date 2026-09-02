@@ -4,12 +4,11 @@ import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
 import { devUser } from '../credentials.js'
-import testConfig from './config.js'
 import { pagesSlug, postsSlug } from './shared.js'
 
 let token: string
 
-test.suite({ config: testConfig })('@payloadcms/plugin-search', () => {
+test.suite({ config: './config.ts' })('@payloadcms/plugin-search', () => {
   test.beforeEach(async ({ restClient }) => {
     const data = await restClient
       .POST('/users/login', {

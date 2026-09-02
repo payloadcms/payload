@@ -4,9 +4,9 @@ import { expect } from 'vitest'
 import type { ReaderPluginOptions } from './config.js'
 
 import { test } from '../__helpers/int/vitest.js'
-import testConfig, { pagesSlug } from './config.js'
+import { pagesSlug } from './config.js'
 
-test.suite({ config: testConfig })('Collections - Plugins', () => {
+test.suite({ config: './config.ts' })('Collections - Plugins', () => {
   test('created pages collection', async ({ payload }) => {
     const { id } = await payload.create({
       collection: pagesSlug,

@@ -18,9 +18,8 @@ const dirname = path.dirname(filename)
 import type { CollectionPopulationRequestHandler } from '../../packages/live-preview/src/types.js'
 
 import { test } from '../__helpers/int/vitest.js'
-import testConfig from './config.js'
 
-test.suite({ config: testConfig })('Collections - Live Preview', () => {
+test.suite({ config: './config.ts' })('Collections - Live Preview', () => {
   const serverURL: string = `http://localhost:${process.env.PORT || 3000}`
 
   let testPost: Post

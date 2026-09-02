@@ -14,7 +14,6 @@ import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
 import { postsSlug } from './collections/Posts/index.js'
-import testConfig from './config.js'
 import { editorJSONToMDX, mdxToEditorJSON } from './mdx/hooks.js'
 import { codeTest1 } from './tests/code1.test.js'
 import { defaultTests } from './tests/default.test.js'
@@ -44,7 +43,7 @@ export type Test = {
 }
 type Tests = Array<Test>
 
-test.suite({ config: testConfig })('Lexical MDX', () => {
+test.suite({ config: './config.ts' })('Lexical MDX', () => {
   // --__--__--__--__--__--__--__--__--__
   // Boilerplate test setup/teardown
   // --__--__--__--__--__--__--__--__--__

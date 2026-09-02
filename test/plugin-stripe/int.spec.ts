@@ -2,9 +2,8 @@ import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
-import testConfig from './config.js'
 
-test.suite({ config: testConfig })('Stripe Plugin', () => {
+test.suite({ config: './config.ts' })('Stripe Plugin', () => {
   test('should create products', async ({ payload }) => {
     const product = await payload.create({
       collection: 'products',

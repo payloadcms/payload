@@ -4,7 +4,6 @@ import { expect } from 'vitest'
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
 import { test } from '../__helpers/int/vitest.js'
-import testConfig from './config.js'
 
 // Helper to create a guest cart with items
 async function createGuestCartWithItems(
@@ -43,7 +42,7 @@ async function createGuestCartWithItems(
   return { cartId, cartSecret }
 }
 
-test.suite({ config: testConfig })('ecommerce', () => {
+test.suite({ config: './config.ts' })('ecommerce', () => {
   test('should add a variants collection', async ({ payload }) => {
     const variants = await payload.find({
       collection: 'variants',

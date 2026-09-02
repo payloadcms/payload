@@ -4,12 +4,11 @@ import { expect } from 'vitest'
 import type { Page } from './payload-types.js'
 
 import { test } from '../__helpers/int/vitest.js'
-import testConfig from './config.js'
 import { pagesSlug } from './shared.js'
 
 let page: Page
 
-test.suite({ config: testConfig })('@payloadcms/plugin-redirects', () => {
+test.suite({ config: './config.ts' })('@payloadcms/plugin-redirects', () => {
   test.beforeEach(async ({ payload }) => {
     page = await payload.create({
       collection: 'pages',
