@@ -56,7 +56,11 @@ export const addDataAndFileToRequest: AddDataAndFileToRequest = async (req) => {
       }
 
       if (fields?._payload && typeof fields._payload === 'string') {
-        req.data = JSON.parse(fields._payload)
+        try {
+          req.data = JSON.parse(fields._payload)
+        } catch {
+          throw new APIError('Invalid JSON in _payload field', 400)
+        }
       }
 
       if (!req.file && fields?.file && typeof fields?.file === 'string') {

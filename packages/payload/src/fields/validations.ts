@@ -847,9 +847,7 @@ export const upload: UploadFieldValidation = async (value, options) => {
 
     if (invalidRelationships.length > 0) {
       return `This relationship field has the following invalid relationships: ${invalidRelationships
-        .map((err, invalid) => {
-          return `${err} ${JSON.stringify(invalid)}`
-        })
+        .map((value) => JSON.stringify(value))
         .join(', ')}`
     }
   }
@@ -950,9 +948,7 @@ export const relationship: RelationshipFieldValidation = async (value, options) 
 
     if (invalidRelationships.length > 0) {
       return `This relationship field has the following invalid relationships: ${invalidRelationships
-        .map((err, invalid) => {
-          return `${err} ${JSON.stringify(invalid)}`
-        })
+        .map((value) => JSON.stringify(value))
         .join(', ')}`
     }
   }
@@ -1075,15 +1071,12 @@ export const point: PointFieldValidation = (value = ['', ''], { req: { t }, requ
   const lat = parseFloat(String(value[1]))
   if (
     required &&
-    ((value[0] && value[1] && typeof lng !== 'number' && typeof lat !== 'number') ||
-      Number.isNaN(lng) ||
-      Number.isNaN(lat) ||
-      (Array.isArray(value) && value.length !== 2))
+    (Number.isNaN(lng) || Number.isNaN(lat) || (Array.isArray(value) && value.length !== 2))
   ) {
     return t('validation:requiresTwoNumbers')
   }
 
-  if ((value[1] && Number.isNaN(lng)) || (value[0] && Number.isNaN(lat))) {
+  if ((value[0] && Number.isNaN(lng)) || (value[1] && Number.isNaN(lat))) {
     return t('validation:invalidInput')
   }
 

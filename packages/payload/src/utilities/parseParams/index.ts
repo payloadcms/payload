@@ -72,7 +72,11 @@ export const numberParams = ['depth', 'limit', 'page']
  *   c. `sort` provided as a comma-separated string or array is converted to an array of strings
  */
 export const parseParams = (params: RawParams): ParsedParams => {
-  const parsedParams = (params || {}) as ParsedParams
+  if (!params || typeof params !== 'object') {
+    return {} as ParsedParams
+  }
+
+  const parsedParams = params as ParsedParams
 
   // iterate through known params to make this very fast
   for (const key of booleanParams) {
