@@ -168,7 +168,7 @@
     "@typescript/native": "catalog:",
     "@vitest/ui": "4.1.11",
     "ai": "6.0.206",
-    "axe-core": "4.11.0",
+    "axe-core": "4.13.0",
     "chalk": "^4.1.2",
     "comment-json": "^4.2.3",
     "copyfiles": "catalog:",
