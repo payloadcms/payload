@@ -8,10 +8,12 @@ import { fileURLToPath } from 'url'
 import type { Payload } from '../../types/index.js'
 import type { AdminInitEvent } from './events/adminInit.js'
 import type { ServerInitEvent } from './events/serverInit.js'
+import type { FeatureInfo } from './featureInfo/types.js'
 import type { FigmaProduct, ProjectCohort } from './getProjectContext.js'
 
 import { findUp } from '../findUp.js'
 import { Conf } from './conf/index.js'
+import { getFeatureInfo } from './featureInfo/getFeatureInfo.js'
 import { getProjectContext } from './getProjectContext.js'
 import { oneWayHash } from './oneWayHash.js'
 
@@ -21,6 +23,7 @@ export type BaseEvent = {
   emailAdapter: null | string
   envID: string
   figmaProduct?: FigmaProduct
+  frameworkAdapter: 'next' | 'tanstack-start' | 'unknown'
   isCI: boolean
   locales: string[]
   localizationDefaultLocale: null | string
@@ -34,7 +37,7 @@ export type BaseEvent = {
   projectID: string
   projectIDSource: 'cwd' | 'git' | 'packageJSON' | 'serverURL'
   uploadAdapters: string[]
-}
+} & FeatureInfo
 
 type PackageJSON = {
   dependencies: Record<string, string | undefined>
@@ -62,6 +65,7 @@ export const sendTelemetryEvent = async <TEvent extends { type: string }>({
       if (!baseEvent) {
         const { projectID, source: projectIDSource } = getProjectID(payload, packageJSON!)
         const plugins = getInstalledPluginSlugs(payload)
+        const packages = Object.keys(packageJSON!.dependencies ?? {})
         baseEvent = {
           ciName: ciInfo.isCI ? ciInfo.name : null,
           envID: getEnvID(),
@@ -72,10 +76,12 @@ export const sendTelemetryEvent = async <TEvent extends { type: string }>({
           projectID,
           projectIDSource,
           ...getProjectContext({
-            packages: Object.keys(packageJSON!.dependencies ?? {}),
+            packages,
             payload,
             plugins,
           }),
+          frameworkAdapter: getFrameworkAdapter(packages),
+          ...getFeatureInfo(payload.config),
           ...getLocalizationInfo(payload),
           dbAdapter: payload.db.name,
           emailAdapter: payload.email?.name || null,
@@ -186,6 +192,18 @@ const getPackageJSONID = (payload: Payload, packageJSON: PackageJSON): string =>
 
 export const getPayloadVersion = (packageJSON: PackageJSON): string => {
   return packageJSON?.dependencies?.payload ?? ''
+}
+
+const getFrameworkAdapter = (packages: string[]): 'next' | 'tanstack-start' | 'unknown' => {
+  if (packages.includes('@payloadcms/tanstack-start')) {
+    return 'tanstack-start'
+  }
+
+  if (packages.includes('@payloadcms/next')) {
+    return 'next'
+  }
+
+  return 'unknown'
 }
 
 /**
