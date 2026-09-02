@@ -19,13 +19,33 @@ dotenv.config({
 })
 
 export default buildConfigWithDefaults({
-  admin: {
-    importMap: {
-      baseDir: path.resolve(dirname, '..'),
+  suite: 'storage-vercel-blob-client-uploads',
+  config: {
+    admin: {
+      importMap: {
+        baseDir: path.resolve(dirname, '..'),
+      },
+    },
+    collections: [Media, MediaWithPrefix, MediaContainer, Users],
+    storage: [
+      vercelBlobStorage({
+        clientUploads: {
+          access: ({ req }) => (req.headers.get('x-disallow-access') ? false : true),
+        },
+        collections: {
+          [mediaSlug]: true,
+          [mediaWithPrefixSlug]: {
+            prefix,
+          },
+        },
+        token: process.env.BLOB_READ_WRITE_TOKEN,
+      }),
+    ],
+    typescript: {
+      outputFile: path.resolve(dirname, 'payload-types.ts'),
     },
   },
-  collections: [Media, MediaWithPrefix, MediaContainer, Users],
-  onInit: async (payload) => {
+  seed: async (payload) => {
     await payload.create({
       collection: 'users',
       data: {
@@ -33,22 +53,5 @@ export default buildConfigWithDefaults({
         password: devUser.password,
       },
     })
-  },
-  storage: [
-    vercelBlobStorage({
-      clientUploads: {
-        access: ({ req }) => (req.headers.get('x-disallow-access') ? false : true),
-      },
-      collections: {
-        [mediaSlug]: true,
-        [mediaWithPrefixSlug]: {
-          prefix,
-        },
-      },
-      token: process.env.BLOB_READ_WRITE_TOKEN,
-    }),
-  ],
-  typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })

@@ -1,16 +1,16 @@
 import type { ContainerClient } from '@azure/storage-blob'
-import type { Payload, UploadInstructions } from 'payload'
+import type { UploadInstructions } from 'payload'
 
 import { BlobServiceClient, BlockBlobClient } from '@azure/storage-blob'
 import { readFileSync } from 'node:fs'
 import { readFile } from 'node:fs/promises'
 import path from 'path'
 import { fileURLToPath } from 'url'
-import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
+import { expect, vi } from 'vitest'
 
 import type { NextRESTClient } from '../../__helpers/shared/NextRESTClient.js'
 
-import { initPayloadInt } from '../../__helpers/shared/initPayloadInt.js'
+import { test } from '../../__helpers/int/vitest.js'
 import { mediaSlug } from '../shared.js'
 import { mediaHeaderOnlySlug } from './collections/MediaHeaderOnly.js'
 import { mediaHeaderOnlyWithSizesSlug } from './collections/MediaHeaderOnlyWithSizes.js'
@@ -18,13 +18,10 @@ import { mediaWithDocPrefixSlug } from './collections/MediaWithDocPrefix.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
-
-let payload: Payload
-let restClient: NextRESTClient
 let containerClient: ContainerClient
 let TEST_CONTAINER: string
 
-describe('@payloadcms/storage-azure clientUploads', () => {
+test.suite({ config: './config.ts' })('@payloadcms/storage-azure clientUploads', () => {
   const clearContainer = async () => {
     for await (const blob of containerClient.listBlobsFlat()) {
       await containerClient.deleteBlob(blob.name)
@@ -42,11 +39,13 @@ describe('@payloadcms/storage-azure clientUploads', () => {
     file,
     filename,
     mimeType,
+    restClient,
   }: {
     collectionSlug: string
     file: Buffer
     filename: string
     mimeType: string
+    restClient: NextRESTClient
   }) => {
     const instructions = (await restClient
       .POST('/upload-instructions', {
@@ -74,9 +73,7 @@ describe('@payloadcms/storage-azure clientUploads', () => {
     return form
   }
 
-  beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(dirname))
-
+  test.beforeEach(async () => {
     TEST_CONTAINER = process.env.AZURE_STORAGE_CONTAINER_NAME!
     containerClient = BlobServiceClient.fromConnectionString(
       process.env.AZURE_STORAGE_CONNECTION_STRING!,
@@ -85,11 +82,7 @@ describe('@payloadcms/storage-azure clientUploads', () => {
     await clearContainer()
   }, 90000)
 
-  afterAll(async () => {
-    await payload.destroy()
-  })
-
-  afterEach(async () => {
+  test.afterEach(async () => {
     await clearContainer()
   })
 
@@ -98,7 +91,10 @@ describe('@payloadcms/storage-azure clientUploads', () => {
    * endpoint should sanitize the filename (e.g. `duplicate-target-1.png`) so the
    * browser SDK upload lands on a fresh blob instead of overwriting the existing one.
    */
-  it('sanitizes the filename when a duplicate already exists', async () => {
+  test('sanitizes the filename when a duplicate already exists', async ({
+    payload,
+    restClient,
+  }) => {
     const dupFilename = 'duplicate-target.png'
     const fileBuffer = await readFile(`${dirname}/../../uploads/image.png`)
 
@@ -147,7 +143,7 @@ describe('@payloadcms/storage-azure clientUploads', () => {
     await payload.delete({ id: seedDoc.id, collection: mediaSlug })
   })
 
-  it('preserves a user-defined prefix.defaultValue across the plugin', async () => {
+  test('preserves a user-defined prefix.defaultValue across the plugin', async ({ payload }) => {
     const upload = await payload.create({
       collection: mediaWithDocPrefixSlug,
       data: {},
@@ -175,17 +171,19 @@ describe('@payloadcms/storage-azure clientUploads', () => {
    * depends on the uploaded MIME type as well as collection configuration, so `audio/mpeg`
    * selects `'none'` while `image/jpeg` selects `'header'`.
    */
-  describe('header-only and no-content requirements (real Azure handler)', () => {
+  test.describe('header-only and no-content requirements (real Azure handler)', () => {
     const createdIds: (number | string)[] = []
 
-    afterEach(async () => {
+    test.afterEach(async ({ payload }) => {
       for (const id of createdIds) {
         await payload.delete({ id, collection: mediaHeaderOnlySlug })
       }
       createdIds.length = 0
     })
 
-    it('does not read a client-uploaded non-image when metadata is sufficient', async () => {
+    test('does not read a client-uploaded non-image when metadata is sufficient', async ({
+      restClient,
+    }) => {
       const file = readFileSync(path.resolve(dirname, '../../uploads/audio.mp3'))
       expect(file.length).toBe(23_334)
 
@@ -194,6 +192,7 @@ describe('@payloadcms/storage-azure clientUploads', () => {
         file,
         filename: 'no-content-tripwire.mp3',
         mimeType: 'audio/mpeg',
+        restClient,
       })
 
       const getPropertiesSpy = vi.spyOn(BlockBlobClient.prototype, 'getProperties')
@@ -216,7 +215,9 @@ describe('@payloadcms/storage-azure clientUploads', () => {
       }
     })
 
-    it('creates a document from a client-uploaded image via the real Azure handler', async () => {
+    test('creates a document from a client-uploaded image via the real Azure handler', async ({
+      restClient,
+    }) => {
       const file = readFileSync(path.resolve(dirname, '../../uploads/2mb.jpg'))
       expect(file.length).toBe(2_215_474)
 
@@ -225,6 +226,7 @@ describe('@payloadcms/storage-azure clientUploads', () => {
         file,
         filename: 'header-only-tripwire.jpg',
         mimeType: 'image/jpeg',
+        restClient,
       })
 
       const getPropertiesSpy = vi.spyOn(BlockBlobClient.prototype, 'getProperties')
@@ -262,17 +264,19 @@ describe('@payloadcms/storage-azure clientUploads', () => {
    * requirement anyway - handing `createImageSizes` a truncated buffer and crashing instead of
    * fetching the full file through the real Azure handler.
    */
-  describe('imageSizes with a large upload (real Azure handler)', () => {
+  test.describe('imageSizes with a large upload (real Azure handler)', () => {
     const createdIds: (number | string)[] = []
 
-    afterEach(async () => {
+    test.afterEach(async ({ payload }) => {
       for (const id of createdIds) {
         await payload.delete({ id, collection: mediaHeaderOnlyWithSizesSlug })
       }
       createdIds.length = 0
     })
 
-    it('creates a document and generates image sizes from a large client-uploaded image via the real Azure handler', async () => {
+    test('creates a document and generates image sizes from a large client-uploaded image via the real Azure handler', async ({
+      restClient,
+    }) => {
       const file = readFileSync(path.resolve(dirname, '../../uploads/2mb.jpg'))
       expect(file.length).toBe(2_215_474)
 
@@ -281,6 +285,7 @@ describe('@payloadcms/storage-azure clientUploads', () => {
         file,
         filename: 'large-with-sizes.jpg',
         mimeType: 'image/jpeg',
+        restClient,
       })
 
       const downloadSpy = vi.spyOn(BlockBlobClient.prototype, 'download')

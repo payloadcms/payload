@@ -59,487 +59,493 @@ const openAccess: CollectionConfig['access'] = {
 }
 
 export default buildConfigWithDefaults({
-  admin: {
-    importMap: {
-      baseDir: path.resolve(dirname),
-    },
-  },
-  collections: [
-    RichTextCollection,
-    BlocksCollection,
-    NestedArray,
-    NestedFields,
-    LocalizedDrafts,
-    LocalizedDateFields,
-    AllFieldsLocalized,
-    {
-      admin: {
-        listSearchableFields: 'name',
-      },
-      auth: true,
-      fields: [
-        {
-          name: 'name',
-          label: { en: 'Full name' },
-          type: 'text',
-        },
-        {
-          name: 'relation',
-          relationTo: localizedPostsSlug,
-          type: 'relationship',
-        },
-      ],
-      slug: 'users',
-      versions: false,
-    },
-    {
-      slug: localizedPostsSlug,
-      access: openAccess,
-      admin: {
-        useAsTitle: 'title',
-      },
-      fields: [
-        {
-          name: 'title',
-          label: { en: 'Full title' },
-          index: true,
-          localized: true,
-          type: 'text',
-        },
-        {
-          name: 'description',
-          type: 'text',
-        },
-        {
-          name: 'localizedDescription',
-          localized: true,
-          type: 'text',
-        },
-        {
-          name: 'localizedCheckbox',
-          localized: true,
-          type: 'checkbox',
-        },
-        {
-          name: 'children',
-          hasMany: true,
-          relationTo: localizedPostsSlug,
-          type: 'relationship',
-        },
-        {
-          name: 'group',
-          fields: [
-            {
-              name: 'children',
-              type: 'text',
-            },
-          ],
-          type: 'group',
-        },
-        {
-          name: 'unique',
-          type: 'text',
-          localized: true,
-          unique: true,
-        },
-      ],
-      versions: false,
-    },
-    NoLocalizedFieldsCollection,
-    ArrayCollection,
-    {
-      fields: [
-        {
-          name: 'title',
-          localized: true,
-          required: true,
-          type: 'text',
-        },
-        {
-          type: 'tabs',
-          tabs: [
-            {
-              label: 'SEO',
-              fields: [
-                {
-                  name: 'seoTitle',
-                  type: 'text',
-                  localized: true,
-                  unique: true,
-                },
-              ],
-            },
-            {
-              label: 'Main Nav',
-              fields: [
-                {
-                  name: 'nav',
-                  type: 'group',
-                  fields: [
-                    {
-                      name: 'layout',
-                      blocks: [
-                        {
-                          fields: [
-                            {
-                              name: 'text',
-                              type: 'text',
-                            },
-                            {
-                              name: 'nestedArray',
-                              type: 'array',
-                              fields: [
-                                {
-                                  name: 'text',
-                                  type: 'text',
-                                },
-                                {
-                                  name: 'l2',
-                                  type: 'array',
-                                  fields: [
-                                    {
-                                      name: 'l3',
-                                      type: 'array',
-                                      fields: [
-                                        {
-                                          name: 'l4',
-                                          type: 'array',
-                                          fields: [
-                                            {
-                                              name: 'superNestedText',
-                                              type: 'text',
-                                            },
-                                          ],
-                                        },
-                                      ],
-                                    },
-                                  ],
-                                },
-                              ],
-                            },
-                          ],
-                          slug: 'text',
-                        },
-                        {
-                          fields: [
-                            {
-                              name: 'number',
-                              type: 'number',
-                            },
-                          ],
-                          slug: 'number',
-                        },
-                      ],
-                      localized: true,
-                      required: true,
-                      type: 'blocks',
-                    },
-                  ],
-                },
-              ],
-            },
-            {
-              name: 'myTab',
-              fields: [
-                {
-                  name: 'text',
-                  type: 'text',
-                },
-                {
-                  name: 'group',
-                  type: 'group',
-                  localized: true,
-                  fields: [
-                    {
-                      name: 'nestedArray2',
-                      type: 'array',
-                      fields: [
-                        {
-                          name: 'nestedText',
-                          type: 'text',
-                        },
-                      ],
-                    },
-                    {
-                      name: 'nestedText',
-                      type: 'text',
-                    },
-                  ],
-                },
-              ],
-            },
-          ],
-        },
-      ],
-      slug: withRequiredLocalizedFields,
-      versions: false,
-    },
-    {
-      access: openAccess,
-      fields: [
-        // Relationship
-        {
-          name: 'localizedRelationship',
-          relationTo: localizedPostsSlug,
-          type: 'relationship',
-        },
-        // Relation hasMany
-        {
-          name: 'localizedRelationHasManyField',
-          hasMany: true,
-          relationTo: localizedPostsSlug,
-          type: 'relationship',
-        },
-        // Relation multiple relationTo
-        {
-          name: 'localizedRelationMultiRelationTo',
-          relationTo: [localizedPostsSlug, cannotCreateDefaultLocale],
-          type: 'relationship',
-        },
-        // Relation multiple relationTo hasMany
-        {
-          name: 'localizedRelationMultiRelationToHasMany',
-          hasMany: true,
-          relationTo: [localizedPostsSlug, cannotCreateDefaultLocale],
-          type: 'relationship',
-        },
-      ],
-      slug: withLocalizedRelSlug,
-      versions: false,
-    },
-    {
-      fields: [
-        {
-          name: 'relationship',
-          localized: true,
-          relationTo: localizedPostsSlug,
-          type: 'relationship',
-        },
-        {
-          name: 'relationshipHasMany',
-          hasMany: true,
-          localized: true,
-          relationTo: localizedPostsSlug,
-          type: 'relationship',
-        },
-        {
-          name: 'relationMultiRelationTo',
-          localized: true,
-          relationTo: [localizedPostsSlug, cannotCreateDefaultLocale],
-          type: 'relationship',
-        },
-        {
-          name: 'relationMultiRelationToHasMany',
-          hasMany: true,
-          localized: true,
-          relationTo: [localizedPostsSlug, cannotCreateDefaultLocale],
-          type: 'relationship',
-        },
-        {
-          name: 'arrayField',
-          fields: [
-            {
-              name: 'nestedRelation',
-              label: 'Nested Relation',
-              relationTo: localizedPostsSlug,
-              type: 'relationship',
-            },
-          ],
-          label: 'Array Field',
-          localized: true,
-          type: 'array',
-        },
-      ],
-      slug: relationshipLocalizedSlug,
-      versions: false,
-    },
-    {
-      access: {
-        ...openAccess,
-        create: ({ req }) => req.locale !== defaultLocale,
-      },
-      fields: [
-        {
-          name: 'name',
-          type: 'text',
-        },
-      ],
-      slug: cannotCreateDefaultLocale,
-      versions: false,
-    },
-    {
-      access: {
-        ...openAccess,
-        update: ({ req }) => req.locale === spanishLocale,
-      },
-      fields: [
-        {
-          name: 'title',
-          type: 'text',
-          localized: true,
-        },
-      ],
-      slug: localeRestrictedSlug,
-      versions: false,
-    },
-    NestedToArrayAndBlock,
-    Group,
-    Tab,
-    {
-      slug: localizedSortSlug,
-      access: openAccess,
-      fields: [
-        {
-          name: 'title',
-          index: true,
-          localized: true,
-          type: 'text',
-        },
-        {
-          name: 'date',
-          type: 'date',
-          localized: true,
-        },
-      ],
-      versions: false,
-    },
-    {
-      slug: blocksWithLocalizedSameName,
-      fields: [
-        {
-          type: 'blocks',
-          name: 'blocks',
-          blocks: [
-            {
-              slug: 'block_first',
-              fields: [
-                {
-                  name: 'title',
-                  type: 'text',
-                  localized: true,
-                },
-              ],
-            },
-            {
-              slug: 'block_second',
-              fields: [
-                {
-                  name: 'title',
-                  type: 'text',
-                  localized: true,
-                },
-              ],
-            },
-          ],
-        },
-      ],
-      versions: false,
-    },
-    LocalizedWithinLocalized,
-    ArrayWithFallbackCollection,
-  ],
-  globals: [
-    {
-      fields: [
-        {
-          name: 'array',
-          fields: [
-            {
-              name: 'text',
-              localized: true,
-              type: 'text',
-            },
-          ],
-          type: 'array',
-        },
-      ],
-      slug: 'global-array',
-      versions: false,
-    },
-    {
-      fields: [
-        {
-          name: 'text',
-          localized: true,
-          type: 'text',
-        },
-      ],
-      slug: 'global-text',
-      versions: false,
-    },
-    {
-      fields: [
-        {
-          name: 'text',
-          localized: true,
-          type: 'text',
-        },
-      ],
-      slug: globalWithDraftsSlug,
-      versions: {
-        drafts: {},
+  suite: 'localization',
+  config: {
+    admin: {
+      importMap: {
+        baseDir: path.resolve(dirname),
       },
     },
-  ],
-  localization: {
-    filterAvailableLocales: ({ locales }) => {
-      return locales.filter((locale) => locale.code !== 'xx')
-    },
-    defaultLocale,
-    fallback: true,
-    locales: [
+    collections: [
+      RichTextCollection,
+      BlocksCollection,
+      NestedArray,
+      NestedFields,
+      LocalizedDrafts,
+      LocalizedDateFields,
+      AllFieldsLocalized,
       {
-        code: 'xx',
-        label: 'FILTERED',
+        slug: 'users',
+        admin: {
+          listSearchableFields: 'name',
+        },
+        auth: true,
+        fields: [
+          {
+            name: 'name',
+            type: 'text',
+            label: { en: 'Full name' },
+          },
+          {
+            name: 'relation',
+            type: 'relationship',
+            relationTo: localizedPostsSlug,
+          },
+        ],
+        versions: false,
       },
       {
-        code: defaultLocale,
-        label: {
-          de: 'Englisch',
-          en: 'English',
-          es: 'Inglés',
+        slug: localizedPostsSlug,
+        access: openAccess,
+        admin: {
+          useAsTitle: 'title',
         },
-        rtl: false,
+        fields: [
+          {
+            name: 'title',
+            type: 'text',
+            index: true,
+            label: { en: 'Full title' },
+            localized: true,
+          },
+          {
+            name: 'description',
+            type: 'text',
+          },
+          {
+            name: 'localizedDescription',
+            type: 'text',
+            localized: true,
+          },
+          {
+            name: 'localizedCheckbox',
+            type: 'checkbox',
+            localized: true,
+          },
+          {
+            name: 'children',
+            type: 'relationship',
+            hasMany: true,
+            relationTo: localizedPostsSlug,
+          },
+          {
+            name: 'group',
+            type: 'group',
+            fields: [
+              {
+                name: 'children',
+                type: 'text',
+              },
+            ],
+          },
+          {
+            name: 'unique',
+            type: 'text',
+            localized: true,
+            unique: true,
+          },
+        ],
+        versions: false,
+      },
+      NoLocalizedFieldsCollection,
+      ArrayCollection,
+      {
+        slug: withRequiredLocalizedFields,
+        fields: [
+          {
+            name: 'title',
+            type: 'text',
+            localized: true,
+            required: true,
+          },
+          {
+            type: 'tabs',
+            tabs: [
+              {
+                fields: [
+                  {
+                    name: 'seoTitle',
+                    type: 'text',
+                    localized: true,
+                    unique: true,
+                  },
+                ],
+                label: 'SEO',
+              },
+              {
+                fields: [
+                  {
+                    name: 'nav',
+                    type: 'group',
+                    fields: [
+                      {
+                        name: 'layout',
+                        type: 'blocks',
+                        blocks: [
+                          {
+                            slug: 'text',
+                            fields: [
+                              {
+                                name: 'text',
+                                type: 'text',
+                              },
+                              {
+                                name: 'nestedArray',
+                                type: 'array',
+                                fields: [
+                                  {
+                                    name: 'text',
+                                    type: 'text',
+                                  },
+                                  {
+                                    name: 'l2',
+                                    type: 'array',
+                                    fields: [
+                                      {
+                                        name: 'l3',
+                                        type: 'array',
+                                        fields: [
+                                          {
+                                            name: 'l4',
+                                            type: 'array',
+                                            fields: [
+                                              {
+                                                name: 'superNestedText',
+                                                type: 'text',
+                                              },
+                                            ],
+                                          },
+                                        ],
+                                      },
+                                    ],
+                                  },
+                                ],
+                              },
+                            ],
+                          },
+                          {
+                            slug: 'number',
+                            fields: [
+                              {
+                                name: 'number',
+                                type: 'number',
+                              },
+                            ],
+                          },
+                        ],
+                        localized: true,
+                        required: true,
+                      },
+                    ],
+                  },
+                ],
+                label: 'Main Nav',
+              },
+              {
+                name: 'myTab',
+                fields: [
+                  {
+                    name: 'text',
+                    type: 'text',
+                  },
+                  {
+                    name: 'group',
+                    type: 'group',
+                    fields: [
+                      {
+                        name: 'nestedArray2',
+                        type: 'array',
+                        fields: [
+                          {
+                            name: 'nestedText',
+                            type: 'text',
+                          },
+                        ],
+                      },
+                      {
+                        name: 'nestedText',
+                        type: 'text',
+                      },
+                    ],
+                    localized: true,
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+        versions: false,
       },
       {
-        code: spanishLocale,
-        label: {
-          de: 'Spanisch',
-          en: 'Spanish',
-          es: 'Español',
-        },
-        rtl: false,
+        slug: withLocalizedRelSlug,
+        access: openAccess,
+        fields: [
+          // Relationship
+          {
+            name: 'localizedRelationship',
+            type: 'relationship',
+            relationTo: localizedPostsSlug,
+          },
+          // Relation hasMany
+          {
+            name: 'localizedRelationHasManyField',
+            type: 'relationship',
+            hasMany: true,
+            relationTo: localizedPostsSlug,
+          },
+          // Relation multiple relationTo
+          {
+            name: 'localizedRelationMultiRelationTo',
+            type: 'relationship',
+            relationTo: [localizedPostsSlug, cannotCreateDefaultLocale],
+          },
+          // Relation multiple relationTo hasMany
+          {
+            name: 'localizedRelationMultiRelationToHasMany',
+            type: 'relationship',
+            hasMany: true,
+            relationTo: [localizedPostsSlug, cannotCreateDefaultLocale],
+          },
+        ],
+        versions: false,
       },
       {
-        code: portugueseLocale,
-        fallbackLocale: spanishLocale,
-        label: {
-          de: 'Portugiesisch',
-          en: 'Portuguese',
-          es: 'Portugués',
-        },
+        slug: relationshipLocalizedSlug,
+        fields: [
+          {
+            name: 'relationship',
+            type: 'relationship',
+            localized: true,
+            relationTo: localizedPostsSlug,
+          },
+          {
+            name: 'relationshipHasMany',
+            type: 'relationship',
+            hasMany: true,
+            localized: true,
+            relationTo: localizedPostsSlug,
+          },
+          {
+            name: 'relationMultiRelationTo',
+            type: 'relationship',
+            localized: true,
+            relationTo: [localizedPostsSlug, cannotCreateDefaultLocale],
+          },
+          {
+            name: 'relationMultiRelationToHasMany',
+            type: 'relationship',
+            hasMany: true,
+            localized: true,
+            relationTo: [localizedPostsSlug, cannotCreateDefaultLocale],
+          },
+          {
+            name: 'arrayField',
+            type: 'array',
+            fields: [
+              {
+                name: 'nestedRelation',
+                type: 'relationship',
+                label: 'Nested Relation',
+                relationTo: localizedPostsSlug,
+              },
+            ],
+            label: 'Array Field',
+            localized: true,
+          },
+        ],
+        versions: false,
       },
       {
-        code: 'ar',
-        label: {
-          de: 'Arabisch',
-          en: 'Arabic',
-          es: 'Árabe',
+        slug: cannotCreateDefaultLocale,
+        access: {
+          ...openAccess,
+          create: ({ req }) => req.locale !== defaultLocale,
         },
-        rtl: true,
+        fields: [
+          {
+            name: 'name',
+            type: 'text',
+          },
+        ],
+        versions: false,
       },
       {
-        code: hungarianLocale,
-        label: {
-          de: 'Ungarische',
-          en: 'Hungarian',
-          es: 'Húngaro',
+        slug: localeRestrictedSlug,
+        access: {
+          ...openAccess,
+          update: ({ req }) => req.locale === spanishLocale,
         },
-        rtl: false,
+        fields: [
+          {
+            name: 'title',
+            type: 'text',
+            localized: true,
+          },
+        ],
+        versions: false,
+      },
+      NestedToArrayAndBlock,
+      Group,
+      Tab,
+      {
+        slug: localizedSortSlug,
+        access: openAccess,
+        fields: [
+          {
+            name: 'title',
+            type: 'text',
+            index: true,
+            localized: true,
+          },
+          {
+            name: 'date',
+            type: 'date',
+            localized: true,
+          },
+        ],
+        versions: false,
+      },
+      {
+        slug: blocksWithLocalizedSameName,
+        fields: [
+          {
+            name: 'blocks',
+            type: 'blocks',
+            blocks: [
+              {
+                slug: 'block_first',
+                fields: [
+                  {
+                    name: 'title',
+                    type: 'text',
+                    localized: true,
+                  },
+                ],
+              },
+              {
+                slug: 'block_second',
+                fields: [
+                  {
+                    name: 'title',
+                    type: 'text',
+                    localized: true,
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+        versions: false,
+      },
+      LocalizedWithinLocalized,
+      ArrayWithFallbackCollection,
+    ],
+    globals: [
+      {
+        slug: 'global-array',
+        fields: [
+          {
+            name: 'array',
+            type: 'array',
+            fields: [
+              {
+                name: 'text',
+                type: 'text',
+                localized: true,
+              },
+            ],
+          },
+        ],
+        versions: false,
+      },
+      {
+        slug: 'global-text',
+        fields: [
+          {
+            name: 'text',
+            type: 'text',
+            localized: true,
+          },
+        ],
+        versions: false,
+      },
+      {
+        slug: globalWithDraftsSlug,
+        fields: [
+          {
+            name: 'text',
+            type: 'text',
+            localized: true,
+          },
+        ],
+        versions: {
+          drafts: {},
+        },
       },
     ],
+    localization: {
+      defaultLocale,
+      fallback: true,
+      filterAvailableLocales: ({ locales }) => {
+        return locales.filter((locale) => locale.code !== 'xx')
+      },
+      locales: [
+        {
+          code: 'xx',
+          label: 'FILTERED',
+        },
+        {
+          code: defaultLocale,
+          label: {
+            de: 'Englisch',
+            en: 'English',
+            es: 'Inglés',
+          },
+          rtl: false,
+        },
+        {
+          code: spanishLocale,
+          label: {
+            de: 'Spanisch',
+            en: 'Spanish',
+            es: 'Español',
+          },
+          rtl: false,
+        },
+        {
+          code: portugueseLocale,
+          fallbackLocale: spanishLocale,
+          label: {
+            de: 'Portugiesisch',
+            en: 'Portuguese',
+            es: 'Portugués',
+          },
+        },
+        {
+          code: 'ar',
+          label: {
+            de: 'Arabisch',
+            en: 'Arabic',
+            es: 'Árabe',
+          },
+          rtl: true,
+        },
+        {
+          code: hungarianLocale,
+          label: {
+            de: 'Ungarische',
+            en: 'Hungarian',
+            es: 'Húngaro',
+          },
+          rtl: false,
+        },
+      ],
+    },
+    typescript: {
+      outputFile: path.resolve(dirname, 'payload-types.ts'),
+    },
   },
-  onInit: async (payload) => {
+  seed: async (payload) => {
     // On a fresh database with autoIndex enabled, the first write to a collection (or its
     // versions collection) kicks off async index builds. A subsequent seeding write can then
     // race that catalog change and fail with a transient MongoDB "catalog changes" error.
@@ -573,8 +579,8 @@ export default buildConfigWithDefaults({
     await payload.create({
       collection: localizedDateFieldsSlug,
       data: {
-        localizedDate: new Date().toISOString(),
         date: new Date().toISOString(),
+        localizedDate: new Date().toISOString(),
       },
     })
 
@@ -659,8 +665,8 @@ export default buildConfigWithDefaults({
     })
 
     await payload.update({
-      collection: relationshipLocalizedSlug,
       id: relationshipLocalized.id,
+      collection: relationshipLocalizedSlug,
       data: {
         relationMultiRelationTo: { relationTo: collection, value: localizedPost.id },
       },
@@ -668,6 +674,7 @@ export default buildConfigWithDefaults({
     })
 
     const globalArray = await payload.updateGlobal({
+      slug: 'global-array',
       data: {
         array: [
           {
@@ -678,10 +685,10 @@ export default buildConfigWithDefaults({
           },
         ],
       },
-      slug: 'global-array',
     })
 
     await payload.updateGlobal({
+      slug: 'global-array',
       data: {
         array: globalArray.array.map((row, i) => ({
           ...row,
@@ -689,10 +696,6 @@ export default buildConfigWithDefaults({
         })),
       },
       locale: 'es',
-      slug: 'global-array',
     })
-  },
-  typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })
