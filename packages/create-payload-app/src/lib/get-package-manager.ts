@@ -49,6 +49,10 @@ function getEnvironmentPackageManager(): PackageManager {
     return 'bun'
   }
 
+  if (userAgent.startsWith('nub')) {
+    return 'nub'
+  }
+
   return 'npm'
 }
 
