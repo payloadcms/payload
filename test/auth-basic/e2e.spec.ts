@@ -98,7 +98,6 @@ describe('Auth (Basic)', () => {
     await reInitializeDB({
       deleteOnly: true,
       serverURL,
-      snapshotKey: 'auth-basic',
     })
 
     await payload.delete({

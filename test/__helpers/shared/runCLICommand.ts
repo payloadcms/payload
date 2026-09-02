@@ -9,7 +9,6 @@ const runnerPath = path.resolve(dirname, 'runPayloadCLI.ts')
 type CLIInput =
   | {
       command: string
-      configPath?: string
       reject?: boolean
     }
   | string
@@ -17,10 +16,9 @@ type CLIInput =
 /** Runs the real Payload CLI in an isolated process against a test project. */
 export const runCLICommand = async (
   input: CLIInput,
-  { cwd = process.cwd() }: { cwd?: string } = {},
+  { configPath, cwd = process.cwd() }: { configPath: string; cwd?: string },
 ): Promise<{ exitCode: number; stderr: string; stdout: string }> => {
   const command = typeof input === 'string' ? input : input.command
-  const configPath = typeof input === 'string' ? undefined : input.configPath
   const reject = typeof input === 'string' ? true : input.reject
 
   const { exitCode, stderr, stdout } = await execa(
@@ -30,7 +28,7 @@ export const runCLICommand = async (
       cwd,
       env: {
         ...process.env,
-        ...(configPath ? { PAYLOAD_CONFIG_PATH: configPath } : {}),
+        PAYLOAD_CONFIG_PATH: configPath,
       },
       reject,
     },

@@ -1,14 +1,11 @@
 /**
- * Standalone CLI migration tests.
- *
- * These tests verify that predefined migrations are correctly imported and created via the CLI.
- * Isolated from the main database tests to avoid connection pool issues from the CLI's
- * separate Payload instance.
+ * Verifies that predefined migrations are correctly imported and created through the CLI.
+ * This remains separate from the main database test file to limit connection-pool contention.
  */
 import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
-import { afterEach, beforeEach, describe, expect } from 'vitest'
+import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
 import { removeFiles } from '../__helpers/shared/removeFiles.js'
@@ -18,12 +15,12 @@ const dirname = path.dirname(filename)
 
 const migrationDir = path.join(dirname, './migrations')
 
-describe('migrations CLI', () => {
-  afterEach(() => {
+test.suite({ config: './config.ts' })('migrations CLI', () => {
+  test.afterEach(() => {
     removeFiles(migrationDir)
   })
 
-  beforeEach(() => {
+  test.beforeEach(() => {
     removeFiles(migrationDir)
   })
 

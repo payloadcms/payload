@@ -21,6 +21,8 @@ describe('Queues - CLI', () => {
       },
     })
 
+    const previousDropDatabase = process.env.PAYLOAD_DROP_DATABASE
+
     process.env.PAYLOAD_DROP_DATABASE = 'false'
 
     // Second instance of payload with the only purpose of running cron jobs
@@ -53,6 +55,12 @@ describe('Queues - CLI', () => {
     await _payload2.destroy()
     await payload.destroy()
     _internal_resetJobSystemGlobals()
+
+    if (previousDropDatabase === undefined) {
+      delete process.env.PAYLOAD_DROP_DATABASE
+    } else {
+      process.env.PAYLOAD_DROP_DATABASE = previousDropDatabase
+    }
   })
 
   test('can run migrate CLI without jobs attempting to run', async ({ cli }) => {
