@@ -1,5 +1,5 @@
 import type { ProtocolEra } from '@modelcontextprotocol/client'
-import type { Payload, SanitizedConfig } from 'payload'
+import type { Payload } from 'payload'
 
 import { randomUUID } from 'crypto'
 import { onTestFinished } from 'vitest'
@@ -99,12 +99,7 @@ const protocolEras: Array<{ label: string; protocolEra: ProtocolEra }> = [
 ]
 
 export const test = Object.assign(payloadTest, {
-  suite: ({ config }: { config: Promise<SanitizedConfig> | SanitizedConfig }) => {
-    payloadTest.override('testConfig', config)
-    payloadTest.override('testSuiteConfigured', true)
-
-    return payloadTest.describe
-  },
+  suite: base.suite,
 })
 
 /** Registers every MCP integration test independently against both protocol eras. */
