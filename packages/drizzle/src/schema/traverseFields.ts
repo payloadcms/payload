@@ -771,6 +771,13 @@ export const traverseFields = ({
 
       case 'radio':
       case 'select': {
+        const isLocalized =
+          Boolean(isFieldLocalized && adapter.payload.config.localization) ||
+          withinLocalizedArrayOrBlock ||
+          forceLocalized
+
+        const isLocalizedVersionStatusField = field.name === '_status' && isLocalized
+
         const enumName = createTableName({
           adapter,
           config: field,
@@ -849,11 +856,6 @@ export const traverseFields = ({
             },
           }
 
-          const isLocalized =
-            Boolean(isFieldLocalized && adapter.payload.config.localization) ||
-            withinLocalizedArrayOrBlock ||
-            forceLocalized
-
           if (isLocalized) {
             baseColumns.locale = {
               name: 'locale',
@@ -914,12 +916,17 @@ export const traverseFields = ({
           }
         } else {
           targetTable[fieldName] = withDefault(
-            {
-              name: columnName,
-              type: 'enum',
-              enumName,
-              options,
-            },
+            isLocalizedVersionStatusField
+              ? {
+                  name: columnName,
+                  type: 'varchar',
+                }
+              : {
+                  name: columnName,
+                  type: 'enum',
+                  enumName,
+                  options,
+                },
             field,
           )
         }

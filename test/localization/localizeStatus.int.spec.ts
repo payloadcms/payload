@@ -5,16 +5,18 @@ import { sql } from '@payloadcms/db-postgres'
 import { migratePostgresLocalizeStatus } from '@payloadcms/db-postgres/migration-utils'
 import { migrateSqliteLocalizeStatus } from '@payloadcms/db-sqlite/migration-utils'
 import { sql as drizzleSql } from 'drizzle-orm'
+import fs from 'fs/promises'
 import { Types } from 'mongoose'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+const generatedSchemaFile = path.resolve(dirname, 'generated-localize-status-schema.ts')
 
 let payload: Payload
 
@@ -33,6 +35,10 @@ describe('localizeStatus migration', () => {
     if (payload?.db && typeof payload.db.destroy === 'function') {
       await payload.db.destroy()
     }
+  })
+
+  afterEach(async () => {
+    await fs.rm(generatedSchemaFile, { force: true })
   })
 
   describe.skipIf(process.env.PAYLOAD_DATABASE !== 'postgres')('PostgreSQL', () => {
@@ -280,6 +286,102 @@ describe('localizeStatus migration', () => {
           expect(row._status).toBeDefined()
           expect(['draft', 'published']).toContain(row._status)
         })
+      })
+
+      it('should generate varchar columns for localized status after the Postgres migration', async () => {
+        const db = payload.db
+
+        const articleResult = await db.drizzle.execute(sql`
+          INSERT INTO test_migration_articles (_status, created_at, updated_at)
+          VALUES ('draft', NOW(), NOW())
+          RETURNING id
+        `)
+        const articleId = articleResult.rows[0].id
+
+        await db.drizzle.execute(sql`
+          INSERT INTO test_migration_articles_locales (_locale, _parent_id, title)
+          VALUES
+            ('en', ${articleId}, 'English Title'),
+            ('es', ${articleId}, 'Título Español'),
+            ('de', ${articleId}, 'German Title')
+        `)
+
+        const draftVersionResult = await db.drizzle.execute(sql`
+          INSERT INTO _test_migration_articles_v (parent_id, version__status, created_at, updated_at)
+          VALUES (${articleId}, 'draft', NOW(), NOW())
+          RETURNING id
+        `)
+        const draftVersionId = draftVersionResult.rows[0].id
+
+        for (const locale of ['en', 'es', 'de']) {
+          await db.drizzle.execute(sql`
+            INSERT INTO _test_migration_articles_v_locales (_locale, _parent_id)
+            VALUES (${locale}, ${draftVersionId})
+          `)
+        }
+
+        const publishedVersionResult = await db.drizzle.execute(sql`
+          INSERT INTO _test_migration_articles_v (parent_id, version__status, created_at, updated_at)
+          VALUES (${articleId}, 'published', NOW() + INTERVAL '1 second', NOW() + INTERVAL '1 second')
+          RETURNING id
+        `)
+        const publishedVersionId = publishedVersionResult.rows[0].id
+
+        for (const locale of ['en', 'es', 'de']) {
+          await db.drizzle.execute(sql`
+            INSERT INTO _test_migration_articles_v_locales (_locale, _parent_id)
+            VALUES (${locale}, ${publishedVersionId})
+          `)
+        }
+
+        await migratePostgresLocalizeStatus({
+          collectionSlug: 'testMigrationArticles',
+          db,
+          payload,
+          sql,
+        })
+
+        const columnTypes = await db.drizzle.execute(sql`
+          SELECT table_name, column_name, data_type
+          FROM information_schema.columns
+          WHERE table_schema = 'public'
+            AND (
+              (table_name = 'test_migration_articles_locales' AND column_name = '_status')
+              OR (table_name = '_test_migration_articles_v_locales' AND column_name = 'version__status')
+            )
+          ORDER BY table_name ASC, column_name ASC
+        `)
+
+        expect(columnTypes.rows).toEqual([
+          {
+            column_name: 'version__status',
+            data_type: 'character varying',
+            table_name: '_test_migration_articles_v_locales',
+          },
+          {
+            column_name: '_status',
+            data_type: 'character varying',
+            table_name: 'test_migration_articles_locales',
+          },
+        ])
+
+        await payload.db.generateSchema({
+          log: false,
+          outputFile: generatedSchemaFile,
+        })
+
+        const generatedSchema = await fs.readFile(generatedSchemaFile, 'utf-8')
+
+        expect(generatedSchema).not.toContain('export const enum_test_migration_articles_status')
+        expect(generatedSchema).not.toContain(
+          'export const enum__test_migration_articles_v_version_status',
+        )
+        expect(generatedSchema).toMatch(
+          /'_test_migration_articles_v_locales'[\s\S]*version__status: varchar\('version__status'/,
+        )
+        expect(generatedSchema).toMatch(
+          /'test_migration_articles_locales'[\s\S]*_status: varchar\('_status'/,
+        )
       })
     })
 
