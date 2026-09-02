@@ -1,16 +1,14 @@
-import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
 import { devUser } from '../credentials.js'
 import { postsSlug } from './collections/Posts/index.js'
-import testConfig from './config.js'
 
 let token: string
 
 const { email, password } = devUser
 
-test.suite({ config: testConfig })('Admin (Root) Tests', () => {
+test.suite({ config: './config.ts' })('Admin (Root) Tests', () => {
   // --__--__--__--__--__--__--__--__--__
   // Boilerplate test setup/teardown
   // --__--__--__--__--__--__--__--__--__

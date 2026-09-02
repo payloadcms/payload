@@ -19,7 +19,6 @@ import type { ApiKey } from './payload-types.js'
 
 import { test } from '../__helpers/int/vitest.js'
 import { devUser } from '../credentials.js'
-import testConfig from './config.js'
 import {
   apiKeysSlug,
   namedSaveToJWTValue,
@@ -35,7 +34,7 @@ import {
 
 const { email, password } = devUser
 
-test.suite({ config: testConfig })('Auth', () => {
+test.suite({ config: './config.ts' })('Auth', () => {
   test.describe('GraphQL - admin user', () => {
     let token
     let user

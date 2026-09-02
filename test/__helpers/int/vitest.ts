@@ -21,18 +21,16 @@ type TestOptions = {
 }
 
 type TestSuiteOptions = {
-  config?: Promise<SanitizedConfig> | SanitizedConfig
+  config?: string
   cron?: boolean
 } & TestOptions
-
-type TestConfig = null | Promise<SanitizedConfig> | SanitizedConfig
 
 type IntegrationFixtures = {
   $file: {
     config: SanitizedConfig
+    configPath: null | string
     /** Raw file-scoped instance for suite hooks. Tests should use `payload`. */
     payloadInstance: Payload
-    testConfig: TestConfig
     testCron: boolean
     testDir: string
     testSuiteConfigured: boolean
@@ -47,29 +45,52 @@ type IntegrationFixtures = {
 
 // Keep all fixtures in one extension so Vitest can trace test calls back to their source lines.
 const testWithFixtures = vitestTest.extend<IntegrationFixtures>({
-  cli: async ({ testDir }, use) => {
-    await use(async (input: Parameters<typeof runCLICommand>[0]) => {
-      const configPath = typeof input === 'string' ? undefined : input.configPath
+  cli: async ({ configPath, payload, testDir }, use) => {
+    // Resolving this dependency initializes Payload and resets and seeds the database first.
+    void payload
 
-      await initPayloadInt(testDir, undefined, false, configPath)
+    const previousDropDatabase = process.env.PAYLOAD_DROP_DATABASE
+    // The parent Payload instance already prepared the database. The child CLI process must reuse it.
+    process.env.PAYLOAD_DROP_DATABASE = 'false'
 
-      return runCLICommand(input, { cwd: testDir })
-    })
+    try {
+      await use((input) =>
+        runCLICommand(input, {
+          configPath: configPath ?? path.resolve(testDir, 'config.ts'),
+          cwd: testDir,
+        }),
+      )
+    } finally {
+      process.env.PAYLOAD_DROP_DATABASE = previousDropDatabase
+    }
   },
   config: [
-    async ({ testConfig, testSuiteConfigured }, use) => {
-      if (testSuiteConfigured && testConfig === null) {
+    async ({ configPath, testDir, testSuiteConfigured }, use) => {
+      if (!testSuiteConfigured) {
+        const { config } = await initPayloadInt(testDir, undefined, false)
+
+        await use(config)
+        return
+      }
+
+      if (configPath === null) {
         throw new Error(
-          'This integration test requires Payload. Pass its config to test.suite({ config: testConfig })(...).',
+          "This integration test requires Payload. Pass its config path to test.suite({ config: './config.ts' })(...).",
         )
       }
 
-      const config =
-        testConfig !== null
-          ? await testConfig
-          : (await initPayloadInt(getTestDirectory(), undefined, false)).config
+      const { default: config } = (await import(configPath)) as {
+        default: Promise<SanitizedConfig> | SanitizedConfig
+      }
 
-      await use(config)
+      await use(await config)
+    },
+    { scope: 'file' },
+  ],
+  configPath: [
+    // eslint-disable-next-line no-empty-pattern
+    async ({}, use) => {
+      await use(null)
     },
     { scope: 'file' },
   ],
@@ -104,13 +125,6 @@ const testWithFixtures = vitestTest.extend<IntegrationFixtures>({
   sdk: async ({ payload }, use) => {
     await use(getSDK(payload.config))
   },
-  testConfig: [
-    // eslint-disable-next-line no-empty-pattern
-    async ({}, use) => {
-      await use(null)
-    },
-    { scope: 'file' },
-  ],
   testCron: [
     // eslint-disable-next-line no-empty-pattern
     async ({}, use) => {
@@ -144,9 +158,7 @@ const testWithFixtures = vitestTest.extend<IntegrationFixtures>({
  * do not initialize Payload.
  *
  * @example
- * import testConfig from './config.js'
- *
- * test.suite({ config: testConfig })('Posts', () => {
+ * test.suite({ config: './config.ts' })('Posts', () => {
  *   test('reads posts', async ({ payload }) => {
  *     await payload.find({ collection: 'posts' })
  *   })
@@ -161,7 +173,10 @@ export const test = Object.assign(testWithFixtures, {
     })
   },
   suite: ({ config, cron = true, db }: TestSuiteOptions) => {
-    testWithFixtures.override('testConfig', config ?? null)
+    testWithFixtures.override(
+      'configPath',
+      config ? path.resolve(getTestDirectory(), config) : null,
+    )
     testWithFixtures.override('testCron', cron)
     testWithFixtures.override('testSuiteConfigured', true)
 

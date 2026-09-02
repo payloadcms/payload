@@ -5,9 +5,9 @@ import { expect } from 'vitest'
 
 import { test } from '../../__helpers/int/vitest.js'
 import { devUser } from '../../credentials.js'
-import config, { collectionSlug, providerCookie } from './config.js'
+import { collectionSlug, providerCookie } from './shared.js'
 
-test.suite({ config })('Remove token from auth responses', () => {
+test.suite({ config: './config.ts' })('Remove token from auth responses', () => {
   test.beforeEach(async ({ restClient }) => {
     await restClient.POST(`/${collectionSlug}/first-register`, {
       body: JSON.stringify({ ...devUser, 'confirm-password': devUser.password }),

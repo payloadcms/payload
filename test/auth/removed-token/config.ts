@@ -4,9 +4,7 @@ import { fileURLToPath } from 'node:url'
 import path from 'path'
 
 import { buildConfigWithDefaults } from '../../buildConfigWithDefaults.js'
-
-export const collectionSlug = 'users'
-export const providerCookie = 'provider-access-token=refreshed; HttpOnly; Path=/'
+import { collectionSlug, providerCookie } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)

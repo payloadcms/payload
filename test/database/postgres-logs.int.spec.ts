@@ -4,9 +4,8 @@ import { expect, vitest } from 'vitest'
 import type { Post } from './payload-types.js'
 
 import { test } from '../__helpers/int/vitest.js'
-import testConfig from './config.postgreslogs.js'
 
-test.suite({ config: testConfig, db: (adapter) => adapter.startsWith('postgres') })(
+test.suite({ config: './config.postgreslogs.ts', db: (adapter) => adapter.startsWith('postgres') })(
   'database - postgres logs',
   () => {
     test('ensure simple update uses optimized upsertRow with returning()', async ({ payload }) => {

@@ -36,7 +36,6 @@ import { sanitizeQueryValue } from '../../packages/db-mongodb/src/queries/saniti
 import { test } from '../__helpers/int/vitest.js'
 import { removeFiles } from '../__helpers/shared/removeFiles.js'
 import { devUser } from '../credentials.js'
-import testConfig from './config.js'
 import {
   customIDsSlug,
   customSchemaSlug,
@@ -56,7 +55,7 @@ const collection = postsSlug
 const title = 'title'
 process.env.PAYLOAD_CONFIG_PATH = path.join(dirname, 'config.ts')
 
-test.suite({ config: testConfig })('database', () => {
+test.suite({ config: './config.ts' })('database', () => {
   test.beforeEach(async ({ payload, restClient }) => {
     payload.db.migrationDir = path.join(dirname, './migrations')
 

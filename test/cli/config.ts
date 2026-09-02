@@ -8,12 +8,10 @@ import { seed } from './seed.js'
 const dirname = path.dirname(fileURLToPath(import.meta.url))
 
 if (process.env.PAYLOAD_TEST_CLI_CONFIG_LOG === 'true') {
-  // eslint-disable-next-line no-console
   console.log('Loading CLI config.')
 }
 
 export default buildConfigWithDefaults({
-  suite: 'cli',
   config: {
     admin: {
       disable: true,
@@ -180,4 +178,5 @@ export default buildConfigWithDefaults({
     },
   },
   seed,
+  suite: 'cli',
 })

@@ -2,16 +2,14 @@ import type { CollectionPermission, PayloadRequest } from 'payload'
 
 import { createLocalReq } from 'payload'
 import { getEntityPermissions } from 'payload/internal'
-import { fileURLToPath } from 'url'
 import { expect, vitest } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
-import testConfig from './config.postgreslogs.js'
 import { whereCacheSameSlug, whereCacheUniqueSlug } from './shared.js'
 
 let req: PayloadRequest
 
-test.suite({ config: testConfig, db: (adapter) => adapter.startsWith('postgres') })(
+test.suite({ config: './config.postgreslogs.ts', db: (adapter) => adapter.startsWith('postgres') })(
   'Access Control - postgres logs',
   () => {
     test.beforeEach(async ({ payload }) => {

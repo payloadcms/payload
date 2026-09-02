@@ -9,13 +9,11 @@ import type {
 
 import { createLocalReq, Forbidden } from 'payload'
 import { getEntityPermissions } from 'payload/internal'
-import { fileURLToPath } from 'url'
 import { expect, vitest } from 'vitest'
 
 import type { FullyRestricted, Post } from './payload-types.js'
 
 import { test } from '../__helpers/int/vitest.js'
-import testConfig from './config.js'
 import { requestHeaders } from './getConfig.js'
 import {
   asyncParentSlug,
@@ -34,7 +32,7 @@ import {
   slug,
   unrestrictedSlug,
 } from './shared.js'
-test.suite({ config: testConfig })('Access Control', () => {
+test.suite({ config: './config.ts' })('Access Control', () => {
   let post1: Post
   let restricted: FullyRestricted
 
