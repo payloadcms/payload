@@ -1429,8 +1429,8 @@ describe('Queues - Payload', () => {
       expect(payload.config.jobs.processingLease.duration).toBe(20 * 60 * 1000)
       expect(payload.config.jobs.processingLease.safetyBuffer).toBe(30_000)
       payload.config.jobs.deleteJobOnComplete = false
-      payload.config.jobs.processingLease.duration = 600
-      payload.config.jobs.processingLease.safetyBuffer = 50
+      payload.config.jobs.processingLease.duration = 5000
+      payload.config.jobs.processingLease.safetyBuffer = 300
 
       const postTitle = 'created by the healthy worker'
       const job = await payload.jobs.queue({
@@ -1451,7 +1451,7 @@ describe('Queues - Payload', () => {
         )
         .toBeTruthy()
       // Wait longer than the original lease. Heartbeats must keep the first worker active.
-      await wait(900)
+      await wait(6000)
 
       const secondWorkerResult = await payload.jobs.run({ silent: true })
       const firstWorkerResult = await firstWorker
