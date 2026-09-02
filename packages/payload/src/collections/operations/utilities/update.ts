@@ -38,6 +38,12 @@ import {
   hasLocalizeStatusEnabled,
 } from '../../../utilities/getVersionsConfig.js'
 import { mergeLocalizedData } from '../../../utilities/mergeLocalizedData.js'
+import {
+  buildAllLocalesPublicationHookDoc,
+  getAllLocalesPublicationStatus,
+  hasAuthorizedAllLocalesPublicationStatus,
+  validateAllLocalesPublicationFlags,
+} from '../../../versions/allLocalesPublicationStatus.js'
 export type SharedUpdateDocumentArgs<TSlug extends CollectionSlug> = {
   autosave: boolean
   collectionConfig: SanitizedCollectionConfig
@@ -101,19 +107,28 @@ export const updateDocument = async <
   showHiddenFields,
   unpublishAllLocales: unpublishAllLocalesArg,
 }: SharedUpdateDocumentArgs<TSlug>): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
+  validateAllLocalesPublicationFlags({
+    publishAllLocales: publishAllLocalesArg,
+    unpublishAllLocales: unpublishAllLocalesArg,
+  })
+
   const publishAllLocales =
-    !draftArg &&
-    (publishAllLocalesArg ?? (hasLocalizeStatusEnabled(collectionConfig) ? false : true))
+    !draftArg && (publishAllLocalesArg ?? !hasLocalizeStatusEnabled(collectionConfig))
   const unpublishAllLocales =
     typeof unpublishAllLocalesArg === 'string'
       ? unpublishAllLocalesArg === 'true'
       : !!unpublishAllLocalesArg
+  const allLocalesPublicationStatus = getAllLocalesPublicationStatus({
+    hasLocalizedStatus: Boolean(config.localization && hasLocalizeStatusEnabled(collectionConfig)),
+    publishAllLocales,
+    unpublishAllLocales,
+  })
   const isSavingDraft =
     Boolean(draftArg && hasDraftsEnabled(collectionConfig)) &&
     data._status !== 'published' &&
     !publishAllLocales
-  if (isSavingDraft) {
-    data._status = 'draft'
+  if (allLocalesPublicationStatus || isSavingDraft) {
+    data._status = allLocalesPublicationStatus ?? 'draft'
   }
 
   // /////////////////////////////////////
@@ -181,13 +196,26 @@ export const updateDocument = async <
   // beforeValidate - Fields
   // /////////////////////////////////////
 
+  let statusFieldAccessDenied = false
+  const publicationFieldPolicyDoc = buildAllLocalesPublicationHookDoc({
+    doc: originalDoc,
+    docWithLocales,
+    status: data._status === allLocalesPublicationStatus ? allLocalesPublicationStatus : undefined,
+  })
+
   data = await beforeValidate<DeepPartial<DataFromCollectionSlug<TSlug>>>({
     id,
     collection: collectionConfig,
     context: req.context,
     data,
     doc: originalDoc,
+    docForHooks: publicationFieldPolicyDoc,
     global: null,
+    onFieldAccessDenied: (path) => {
+      if (path === '_status') {
+        statusFieldAccessDenied = true
+      }
+    },
     operation: 'update',
     overrideAccess,
     req,
@@ -203,6 +231,15 @@ export const updateDocument = async <
       !isSavingDraft,
   )
 
+  const publicationHookDoc = buildAllLocalesPublicationHookDoc({
+    doc: originalDoc,
+    docWithLocales,
+    status:
+      !statusFieldAccessDenied && data._status === allLocalesPublicationStatus
+        ? allLocalesPublicationStatus
+        : undefined,
+  })
+
   // /////////////////////////////////////
   // beforeValidate - Collection
   // /////////////////////////////////////
@@ -215,7 +252,7 @@ export const updateDocument = async <
           context: req.context,
           data,
           operation: 'update',
-          originalDoc,
+          originalDoc: publicationHookDoc,
           req,
         })) || data
     }
@@ -241,11 +278,13 @@ export const updateDocument = async <
           context: req.context,
           data,
           operation: 'update',
-          originalDoc,
+          originalDoc: publicationHookDoc,
           req,
         })) || data
     }
   }
+
+  const publicationData = { ...data }
 
   // /////////////////////////////////////
   // beforeChange - Fields
@@ -256,7 +295,7 @@ export const updateDocument = async <
     collection: collectionConfig,
     context: req.context,
     data: { ...data, id },
-    doc: originalDoc,
+    doc: publicationHookDoc,
     docWithLocales,
     global: null,
     operation: 'update',
@@ -275,15 +314,39 @@ export const updateDocument = async <
   // Handle Localized Data Merging
   // /////////////////////////////////////
 
-  let result: JsonObject = await beforeChange(beforeChangeArgs)
+  let statusFieldValue: unknown
+
+  let result: JsonObject = await beforeChange({
+    ...beforeChangeArgs,
+    onDataProcessed: (processedData) => {
+      statusFieldValue = processedData._status
+    },
+  })
+
+  const hasAuthorizedPublicationStatus = hasAuthorizedAllLocalesPublicationStatus({
+    data: publicationData,
+    fieldAccessDenied: statusFieldAccessDenied,
+    fieldValue: statusFieldValue,
+    status: allLocalesPublicationStatus,
+  })
+  if (
+    allLocalesPublicationStatus &&
+    !hasAuthorizedPublicationStatus &&
+    typeof statusFieldValue === 'undefined' &&
+    typeof docWithLocales._status === 'object' &&
+    docWithLocales._status !== null
+  ) {
+    result._status = { ...docWithLocales._status }
+  }
+
   let snapshotToSave: JsonObject | undefined
 
   if (config.localization && collectionConfig.versions) {
     let snapshotData: JsonObject | undefined
     let currentDoc
 
-    if (collectionConfig.versions.drafts && collectionConfig.versions.drafts.localizeStatus) {
-      if (publishAllLocales || unpublishAllLocales) {
+    if (hasLocalizeStatusEnabled(collectionConfig)) {
+      if (hasAuthorizedPublicationStatus) {
         let accessibleLocaleCodes = config.localization.localeCodes
 
         if (config.localization.filterAvailableLocales) {

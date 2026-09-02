@@ -25,9 +25,16 @@ import { generateFileData } from '../../uploads/generateFileData.js'
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
+import { hasLocalizeStatusEnabled } from '../../utilities/getVersionsConfig.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
+import {
+  getAllLocalesPublicationStatus,
+  normalizeAllLocalesPublicationStatus,
+  reconcileAllLocalesPublicationStatus,
+  validateAllLocalesPublicationFlags,
+} from '../../versions/allLocalesPublicationStatus.js'
 import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion.js'
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
@@ -65,6 +72,27 @@ export const updateByIDOperation = async <
   try {
     const shouldCommit = !args.disableTransaction && (await initTransaction(args.req))
 
+    validateAllLocalesPublicationFlags({
+      publishAllLocales: args.publishAllLocales,
+      unpublishAllLocales: args.unpublishAllLocales,
+    })
+
+    const initialCollectionConfig = args.collection.config
+    const initialAllLocalesPublicationStatus = getAllLocalesPublicationStatus({
+      hasLocalizedStatus: Boolean(
+        args.req.payload.config.localization && hasLocalizeStatusEnabled(initialCollectionConfig),
+      ),
+      publishAllLocales:
+        !args.draft &&
+        (args.publishAllLocales ?? !hasLocalizeStatusEnabled(initialCollectionConfig)),
+      unpublishAllLocales: Boolean(args.unpublishAllLocales),
+    })
+
+    const initialAllLocalesPublicationIntent = normalizeAllLocalesPublicationStatus({
+      data: args.data,
+      status: initialAllLocalesPublicationStatus,
+    })
+
     // /////////////////////////////////////
     // beforeOperation - Collection
     // /////////////////////////////////////
@@ -91,7 +119,7 @@ export const updateByIDOperation = async <
       overrideLock,
       overwriteExistingFiles = false,
       populate,
-      publishAllLocales,
+      publishAllLocales: publishAllLocalesArg,
       publishSpecificLocale,
       req: {
         fallbackLocale,
@@ -103,7 +131,7 @@ export const updateByIDOperation = async <
       select: incomingSelect,
       showHiddenFields,
       trash = false,
-      unpublishAllLocales,
+      unpublishAllLocales: unpublishAllLocalesArg,
     } = args
 
     if (!id) {
@@ -111,6 +139,33 @@ export const updateByIDOperation = async <
     }
 
     const { data } = args
+
+    validateAllLocalesPublicationFlags({
+      publishAllLocales: publishAllLocalesArg,
+      unpublishAllLocales: unpublishAllLocalesArg,
+    })
+
+    const requestedAllLocalesPublicationStatus = getAllLocalesPublicationStatus({
+      hasLocalizedStatus: Boolean(
+        config.localization && hasLocalizeStatusEnabled(collectionConfig),
+      ),
+      publishAllLocales:
+        !draftArg && (publishAllLocalesArg ?? !hasLocalizeStatusEnabled(collectionConfig)),
+      unpublishAllLocales: Boolean(unpublishAllLocalesArg),
+    })
+    const allLocalesPublicationStatus = reconcileAllLocalesPublicationStatus({
+      data,
+      intent: initialAllLocalesPublicationIntent,
+      status: requestedAllLocalesPublicationStatus,
+    })
+    const publicationIntentSurvivedBeforeOperation =
+      !requestedAllLocalesPublicationStatus || Boolean(allLocalesPublicationStatus)
+    const publishAllLocales = publicationIntentSurvivedBeforeOperation
+      ? publishAllLocalesArg
+      : false
+    const unpublishAllLocales = publicationIntentSurvivedBeforeOperation
+      ? unpublishAllLocalesArg
+      : false
 
     // /////////////////////////////////////
     // Access

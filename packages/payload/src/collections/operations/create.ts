@@ -39,6 +39,13 @@ import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
+import {
+  buildAllLocalesPublicationHookDoc,
+  getAllLocalesPublicationStatus,
+  hasAuthorizedAllLocalesPublicationStatus,
+  normalizeAllLocalesPublicationStatus,
+  reconcileAllLocalesPublicationStatus,
+} from '../../versions/allLocalesPublicationStatus.js'
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
 
@@ -71,6 +78,22 @@ export const createOperation = async <
 
   try {
     const shouldCommit = !args.disableTransaction && (await initTransaction(args.req))
+
+    const initialCollectionConfig = args.collection.config
+    const initialPublishAllLocales =
+      !args.draft && (args.publishAllLocales ?? !hasLocalizeStatusEnabled(initialCollectionConfig))
+    const initialAllLocalesPublicationStatus = getAllLocalesPublicationStatus({
+      hasLocalizedStatus: Boolean(
+        args.req.payload.config.localization && hasLocalizeStatusEnabled(initialCollectionConfig),
+      ),
+      publishAllLocales: initialPublishAllLocales,
+      unpublishAllLocales: false,
+    })
+
+    const initialAllLocalesPublicationIntent = normalizeAllLocalesPublicationStatus({
+      data: args.data,
+      status: initialAllLocalesPublicationStatus,
+    })
 
     ensureUsernameOrEmail<TSlug>({
       authOptions: args.collection.config.auth,
@@ -122,9 +145,26 @@ export const createOperation = async <
 
     let { data } = args
 
-    const publishAllLocales =
-      !draft &&
-      (publishAllLocalesArg ?? (hasLocalizeStatusEnabled(collectionConfig) ? false : true))
+    // For creates there is no existing doc — always publish all locales when not a draft.
+    let publishAllLocales =
+      !draft && (publishAllLocalesArg ?? !hasLocalizeStatusEnabled(collectionConfig))
+    const requestedAllLocalesPublicationStatus = getAllLocalesPublicationStatus({
+      hasLocalizedStatus: Boolean(
+        config.localization && hasLocalizeStatusEnabled(collectionConfig),
+      ),
+      publishAllLocales,
+      unpublishAllLocales: false,
+    })
+    const allLocalesPublicationStatus = reconcileAllLocalesPublicationStatus({
+      data,
+      intent: initialAllLocalesPublicationIntent,
+      status: requestedAllLocalesPublicationStatus,
+    })
+
+    if (requestedAllLocalesPublicationStatus && !allLocalesPublicationStatus) {
+      publishAllLocales = false
+    }
+
     const isSavingDraft = Boolean(draft && hasDraftsEnabled(collectionConfig) && !publishAllLocales)
 
     if (isSavingDraft) {
@@ -189,15 +229,38 @@ export const createOperation = async <
     // beforeValidate - Fields
     // /////////////////////////////////////
 
+    let statusFieldAccessDenied = false
+    const publicationFieldPolicyDoc = buildAllLocalesPublicationHookDoc({
+      doc: duplicatedFromDoc,
+      docWithLocales: duplicatedFromDocWithLocales,
+      status:
+        data._status === allLocalesPublicationStatus ? allLocalesPublicationStatus : undefined,
+    })
+
     data = await beforeValidate({
       collection: collectionConfig,
       context: req.context,
       data,
       doc: duplicatedFromDoc,
+      docForHooks: publicationFieldPolicyDoc,
       global: null,
+      onFieldAccessDenied: (path) => {
+        if (path === '_status') {
+          statusFieldAccessDenied = true
+        }
+      },
       operation: 'create',
       overrideAccess: overrideAccess!,
       req,
+    })
+
+    const publicationHookDoc = buildAllLocalesPublicationHookDoc({
+      doc: duplicatedFromDoc,
+      docWithLocales: duplicatedFromDocWithLocales,
+      status:
+        !statusFieldAccessDenied && data._status === allLocalesPublicationStatus
+          ? allLocalesPublicationStatus
+          : undefined,
     })
 
     // /////////////////////////////////////
@@ -212,7 +275,7 @@ export const createOperation = async <
             context: req.context,
             data,
             operation: 'create',
-            originalDoc: duplicatedFromDoc,
+            originalDoc: publicationHookDoc,
             req,
           })) || data
       }
@@ -230,35 +293,60 @@ export const createOperation = async <
             context: req.context,
             data,
             operation: 'create',
-            originalDoc: duplicatedFromDoc,
+            originalDoc: publicationHookDoc,
             req,
           })) || data
       }
     }
 
+    const publicationData = { ...data }
+
     // /////////////////////////////////////
     // beforeChange - Fields
     // /////////////////////////////////////
+
+    let statusFieldValue: unknown
+    const docWithLocalesForFields = statusFieldAccessDenied
+      ? { ...duplicatedFromDocWithLocales, _status: {} }
+      : duplicatedFromDocWithLocales
 
     const resultWithLocales = await beforeChange<JsonObject>({
       collection: collectionConfig,
       context: req.context,
       data,
-      doc: duplicatedFromDoc,
-      docWithLocales: duplicatedFromDocWithLocales,
+      doc: publicationHookDoc,
+      docWithLocales: docWithLocalesForFields,
       global: null,
+      onDataProcessed: (processedData) => {
+        statusFieldValue = processedData._status
+      },
       operation: 'create',
       overrideAccess,
       req,
       skipValidation: isSavingDraft && !hasDraftValidationEnabled(collectionConfig),
     })
 
+    const hasAuthorizedPublicationStatus = hasAuthorizedAllLocalesPublicationStatus({
+      data: publicationData,
+      fieldAccessDenied: statusFieldAccessDenied,
+      fieldValue: statusFieldValue,
+      status: allLocalesPublicationStatus,
+    })
+
+    if (
+      allLocalesPublicationStatus &&
+      !hasAuthorizedPublicationStatus &&
+      !statusFieldAccessDenied &&
+      typeof statusFieldValue === 'undefined' &&
+      typeof duplicatedFromDocWithLocales._status === 'object' &&
+      duplicatedFromDocWithLocales._status !== null
+    ) {
+      resultWithLocales._status = { ...duplicatedFromDocWithLocales._status }
+    }
     if (
       config.localization &&
-      collectionConfig.versions &&
-      collectionConfig.versions.drafts &&
-      collectionConfig.versions.drafts.localizeStatus &&
-      publishAllLocales
+      hasLocalizeStatusEnabled(collectionConfig) &&
+      hasAuthorizedPublicationStatus
     ) {
       let accessibleLocaleCodes = config.localization.localeCodes
 

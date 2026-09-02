@@ -10,9 +10,11 @@ type Args<T extends JsonObject> = {
   context: RequestContext
   data: T
   doc?: T
+  docForHooks?: T
   duplicate?: boolean
   global: null | SanitizedGlobalConfig
   id?: number | string
+  onFieldAccessDenied?: (path: string) => void
   operation: 'create' | 'update'
   overrideAccess: boolean
   req: PayloadRequest
@@ -32,7 +34,9 @@ export const beforeValidate = async <T extends JsonObject>({
   context,
   data: incomingData,
   doc,
+  docForHooks,
   global,
+  onFieldAccessDenied,
   operation,
   overrideAccess,
   req,
@@ -43,8 +47,10 @@ export const beforeValidate = async <T extends JsonObject>({
     context,
     data: incomingData,
     doc,
+    docForHooks,
     fields: (collection?.fields || global?.fields)!,
     global,
+    onFieldAccessDenied,
     operation,
     overrideAccess,
     parentIndexPath: '',
