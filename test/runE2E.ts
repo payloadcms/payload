@@ -329,21 +329,29 @@ async function waitForServer(port: number, timeoutMs = 8 * 60 * 1000): Promise<v
 async function resetServer(port: number, timeoutMs = 8 * 60 * 1000): Promise<void> {
   const url = `http://localhost:${port}/api/re-initialize`
   const start = Date.now()
+  let lastConnectionError: unknown
   console.log(`Waiting to reset test data at ${url} …`)
 
   while (Date.now() - start < timeoutMs) {
+    let response: Response
+
     try {
-      const response = await fetch(url, { method: 'POST' })
-
-      if (response.ok || response.status === 404) {
-        return
-      }
-
-      throw new Error(`${response.status} ${await response.text()}`)
-    } catch {
+      response = await fetch(url, { method: 'POST' })
+    } catch (error) {
+      lastConnectionError = error
       await new Promise((resolve) => setTimeout(resolve, 1000))
+      continue
     }
+
+    if (response.ok || response.status === 404) {
+      return
+    }
+
+    throw new Error(`Failed to reset test data: ${response.status} ${await response.text()}`)
   }
 
-  throw new Error(`Timed out waiting to reset test data at ${url}`)
+  const connectionError =
+    lastConnectionError instanceof Error ? `: ${lastConnectionError.message}` : ''
+
+  throw new Error(`Timed out waiting to reset test data at ${url}${connectionError}`)
 }
