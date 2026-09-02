@@ -36,15 +36,16 @@ Payload includes the following commands by default.
 
 ### Migration commands
 
-| Command                 | What it does                                       |
-| ----------------------- | -------------------------------------------------- |
-| `migrate`               | Run all pending migrations.                        |
-| `migrate:create [name]` | Create a migration.                                |
-| `migrate:down`          | Roll back the latest migration batch.              |
-| `migrate:fresh`         | Clear the database and run all migrations again.   |
-| `migrate:refresh`       | Roll back completed migrations and run them again. |
-| `migrate:reset`         | Roll back all migrations.                          |
-| `migrate:status`        | Show which migrations have and have not run.       |
+| Command                 | What it does                                                  |
+| ----------------------- | ------------------------------------------------------------- |
+| `migrate`               | Run all pending migrations.                                   |
+| `migrate:api-keys`      | Migrate legacy API keys into the payload-api-keys collection. |
+| `migrate:create [name]` | Create a migration.                                           |
+| `migrate:down`          | Roll back the latest migration batch.                         |
+| `migrate:fresh`         | Clear the database and run all migrations again.              |
+| `migrate:refresh`       | Roll back completed migrations and run them again.            |
+| `migrate:reset`         | Roll back all migrations.                                     |
+| `migrate:status`        | Show which migrations have and have not run.                  |
 
 Use `--help` to see the arguments and options for a command:
 

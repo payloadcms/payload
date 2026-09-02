@@ -1,9 +1,11 @@
-import crypto from 'crypto'
-
 import type { CheckboxField, Field, FieldHook, TextField } from '../../fields/config/types.js'
 
-const encryptKey: FieldHook = ({ req, value }) =>
+import { computeAPIKeyIndex } from '../crypto.js'
+
+/** Reused by the collection-backed `payload-api-keys` `apiKey` field. */
+export const encryptAPIKeyField: FieldHook = ({ req, value }) =>
   value ? req.payload.encrypt(value as string) : null
+const encryptKey = encryptAPIKeyField
 const decryptKey: FieldHook = ({ req, value }) => {
   if (!value) {
     return undefined
@@ -95,10 +97,7 @@ export const createAPIKeyFields = ({
               return null
             }
             if (data?.apiKey) {
-              return crypto
-                .createHmac('sha256', req.payload.secret)
-                .update(data.apiKey as string)
-                .digest('hex')
+              return computeAPIKeyIndex(req.payload.secret, data.apiKey as string)
             }
             return value
           },

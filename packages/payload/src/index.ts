@@ -160,6 +160,9 @@ import { defaultNextJsDevReloadStrategy } from './utilities/nextJsDevReloadStrat
 import { serverInit as serverInitTelemetry } from './utilities/telemetry/events/serverInit.js'
 import { traverseFields } from './utilities/traverseFields.js'
 
+export { payloadAPIKeysCollectionSlug } from './auth/apiKeys/config.js'
+export { migrateAPIKeys } from './auth/apiKeys/migration.js'
+export type { MigrateAPIKeysArgs, MigrateAPIKeysResult } from './auth/apiKeys/migration.js'
 /**
  * Export of all base fields that could potentially be
  * useful as users wish to extend built-in fields with custom logic
@@ -167,18 +170,14 @@ import { traverseFields } from './utilities/traverseFields.js'
 export { accountLockFields as baseAccountLockFields } from './auth/baseFields/accountLock.js'
 export { createAPIKeyFields } from './auth/baseFields/apiKey.js'
 export { baseAuthFields } from './auth/baseFields/auth.js'
+
 export { emailFieldConfig as baseEmailField } from './auth/baseFields/email.js'
 export { sessionsFieldConfig as baseSessionsField } from './auth/baseFields/sessions.js'
 export { usernameFieldConfig as baseUsernameField } from './auth/baseFields/username.js'
 export { verificationFields as baseVerificationFields } from './auth/baseFields/verification.js'
-
 export { defaultUserCollection } from './auth/defaultUser.js'
 export { executeAccess } from './auth/executeAccess.js'
 export { executeAuthStrategies } from './auth/executeAuthStrategies.js'
-export { extractAccessFromPermission } from './auth/extractAccessFromPermission.js'
-export { getAccessResults } from './auth/getAccessResults.js'
-export { getFieldsToSign } from './auth/getFieldsToSign.js'
-export { getLoginOptions } from './auth/getLoginOptions.js'
 
 /**
  * Shape constraint for PayloadTypes.
@@ -1407,6 +1406,10 @@ interface RequestContext {
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface DatabaseAdapter extends BaseDatabaseAdapter {}
 export type { Payload, RequestContext }
+export { extractAccessFromPermission } from './auth/extractAccessFromPermission.js'
+export { getAccessResults } from './auth/getAccessResults.js'
+export { getFieldsToSign } from './auth/getFieldsToSign.js'
+export { getLoginOptions } from './auth/getLoginOptions.js'
 export * from './auth/index.js'
 export { jwtSign } from './auth/jwt.js'
 export { accessOperation } from './auth/operations/access.js'

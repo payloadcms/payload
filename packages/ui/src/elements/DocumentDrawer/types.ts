@@ -12,6 +12,16 @@ export type DocumentDrawerProps = {
    */
   readonly collectionSlug: string
   readonly disableActions?: boolean
+  /**
+   * By default, saving a new document from the "create" view re-renders the drawer as a
+   * freshly-fetched edit view for that document. Set to `true` to keep the current create
+   * view's already-updated form state mounted instead - necessary when the create
+   * response carries a one-time value (e.g. a generated secret) that a subsequent fetch
+   * would not be able to return again.
+   *
+   * @default false
+   */
+  readonly disableCreateDrawerAutoClose?: boolean
   readonly drawerSlug?: string
   /**
    * The ID of the document to be edited.

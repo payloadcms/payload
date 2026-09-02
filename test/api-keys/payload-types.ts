@@ -63,14 +63,17 @@ export type SupportedTimezones =
 
 export interface Config {
   auth: {
-    users: UserAuthOperations;
-    customers: CustomerAuthOperations;
+    'api-key-admins': ApiKeyAdminAuthOperations;
+    'api-key-customers': ApiKeyCustomerAuthOperations;
+    'api-key-other-customers': ApiKeyOtherCustomerAuthOperations;
+    'api-key-verified-customers': ApiKeyVerifiedCustomerAuthOperations;
   };
   blocks: {};
   collections: {
-    users: User;
-    products: Product;
-    customers: Customer;
+    'api-key-admins': ApiKeyAdmin;
+    'api-key-customers': ApiKeyCustomer;
+    'api-key-other-customers': ApiKeyOtherCustomer;
+    'api-key-verified-customers': ApiKeyVerifiedCustomer;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -78,14 +81,24 @@ export interface Config {
     'payload-migrations': PayloadMigration;
   };
   collectionsJoins: {
-    customers: {
+    'api-key-admins': {
+      apiKeys: 'payload-api-keys';
+    };
+    'api-key-customers': {
+      apiKeys: 'payload-api-keys';
+    };
+    'api-key-other-customers': {
+      apiKeys: 'payload-api-keys';
+    };
+    'api-key-verified-customers': {
       apiKeys: 'payload-api-keys';
     };
   };
   collectionsSelect: {
-    users: UsersSelect<false> | UsersSelect<true>;
-    products: ProductsSelect<false> | ProductsSelect<true>;
-    customers: CustomersSelect<false> | CustomersSelect<true>;
+    'api-key-admins': ApiKeyAdminsSelect<false> | ApiKeyAdminsSelect<true>;
+    'api-key-customers': ApiKeyCustomersSelect<false> | ApiKeyCustomersSelect<true>;
+    'api-key-other-customers': ApiKeyOtherCustomersSelect<false> | ApiKeyOtherCustomersSelect<true>;
+    'api-key-verified-customers': ApiKeyVerifiedCustomersSelect<false> | ApiKeyVerifiedCustomersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -93,24 +106,24 @@ export interface Config {
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
-    defaultIDType: number;
+    defaultIDType: string;
   };
-  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es' | 'de') | ('en' | 'es' | 'de')[];
+  fallbackLocale: null;
   globals: {};
   globalsSelect: {};
-  locale: 'en' | 'es' | 'de';
+  locale: null;
   widgets: {
     collections: CollectionsWidget;
     'collection-query': CollectionQueryWidget;
     activity: ActivityWidget;
   };
-  user: User | Customer;
+  user: ApiKeyAdmin | ApiKeyCustomer | ApiKeyOtherCustomer | ApiKeyVerifiedCustomer;
   jobs: {
     tasks: unknown;
     workflows: unknown;
   };
 }
-export interface UserAuthOperations {
+export interface ApiKeyAdminAuthOperations {
   forgotPassword: {
     email: string;
     password: string;
@@ -128,7 +141,43 @@ export interface UserAuthOperations {
     password: string;
   };
 }
-export interface CustomerAuthOperations {
+export interface ApiKeyCustomerAuthOperations {
+  forgotPassword: {
+    email: string;
+    password: string;
+  };
+  login: {
+    email: string;
+    password: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
+    email: string;
+    password: string;
+  };
+}
+export interface ApiKeyOtherCustomerAuthOperations {
+  forgotPassword: {
+    email: string;
+    password: string;
+  };
+  login: {
+    email: string;
+    password: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
+    email: string;
+    password: string;
+  };
+}
+export interface ApiKeyVerifiedCustomerAuthOperations {
   forgotPassword: {
     email: string;
     password: string;
@@ -148,79 +197,21 @@ export interface CustomerAuthOperations {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users".
+ * via the `definition` "api-key-admins".
  */
-export interface User {
-  id: number;
-  name?: string | null;
-  updatedAt: string;
-  createdAt: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  sessions?:
-    | {
-        id: string;
-        createdAt?: string | null;
-        expiresAt: string;
-      }[]
-    | null;
-  password?: string | null;
-  collection: 'users';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "products".
- */
-export interface Product {
-  id: number;
-  name?: string | null;
+export interface ApiKeyAdmin {
+  id: string;
   /**
-   * All pricing information is managed in Stripe and will be reflected here.
+   * Controls what this account can see/do with OTHER users’ API keys, for manually testing the payload-api-keys access model. Never affects visibility of your own keys, and never exposes another owner’s decrypted secret regardless of level.
    */
-  price?: {
-    stripePriceID?: string | null;
-    stripeJSON?: string | null;
-  };
-  stripeID?: string | null;
-  skipSync?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "customers".
- */
-export interface Customer {
-  id: number;
-  name?: string | null;
-  /**
-   * All subscriptions are managed in Stripe and will be reflected here. Use the link in the sidebar to go directly to this customer in Stripe to begin managing their subscriptions.
-   */
-  subscriptions?:
-    | {
-        stripeSubscriptionID?: string | null;
-        stripeProductID?: string | null;
-        product?: (number | null) | Product;
-        status?:
-          | ('active' | 'canceled' | 'incomplete' | 'incomplete_expired' | 'past_due' | 'trialing' | 'unpaid')
-          | null;
-        id?: string | null;
-      }[]
-    | null;
-  stripeID?: string | null;
-  skipSync?: boolean | null;
+  apiKeyAccessLevel: 'none' | 'canSee' | 'canManage';
   updatedAt: string;
   createdAt: string;
   enableAPIKey?: boolean | null;
   apiKey?: string | null;
   apiKeyIndex?: string | null;
   apiKeys?: {
-    docs?: (number | PayloadApiKey)[];
+    docs?: (string | PayloadApiKey)[];
     hasNextPage?: boolean;
     totalDocs?: number;
   };
@@ -239,38 +230,148 @@ export interface Customer {
       }[]
     | null;
   password?: string | null;
-  collection: 'customers';
+  collection: 'api-key-admins';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-api-keys".
  */
 export interface PayloadApiKey {
-  id: number;
+  id: string;
   name: string;
-  owner: {
-    relationTo: 'customers';
-    value: number | Customer;
-  };
+  owner:
+    | {
+        relationTo: 'api-key-admins';
+        value: string | ApiKeyAdmin;
+      }
+    | {
+        relationTo: 'api-key-customers';
+        value: string | ApiKeyCustomer;
+      }
+    | {
+        relationTo: 'api-key-other-customers';
+        value: string | ApiKeyOtherCustomer;
+      }
+    | {
+        relationTo: 'api-key-verified-customers';
+        value: string | ApiKeyVerifiedCustomer;
+      };
   apiKeyHash?: string | null;
   /**
    * Shown only once, right after creating or regenerating this key. Copy it now - it cannot be viewed again.
    */
   apiKey?: string | null;
   regenerate?: boolean | null;
-  migratedFrom?: {
-    collection?: string | null;
-    documentID?: string | null;
-  };
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "api-key-customers".
+ */
+export interface ApiKeyCustomer {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  enableAPIKey?: boolean | null;
+  apiKey?: string | null;
+  apiKeyIndex?: string | null;
+  apiKeys?: {
+    docs?: (string | PayloadApiKey)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+  collection: 'api-key-customers';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "api-key-other-customers".
+ */
+export interface ApiKeyOtherCustomer {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  enableAPIKey?: boolean | null;
+  apiKey?: string | null;
+  apiKeyIndex?: string | null;
+  apiKeys?: {
+    docs?: (string | PayloadApiKey)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+  collection: 'api-key-other-customers';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "api-key-verified-customers".
+ */
+export interface ApiKeyVerifiedCustomer {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  enableAPIKey?: boolean | null;
+  apiKey?: string | null;
+  apiKeyIndex?: string | null;
+  apiKeys?: {
+    docs?: (string | PayloadApiKey)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  _verified?: boolean | null;
+  _verificationToken?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+  collection: 'api-key-verified-customers';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
-  id: number;
+  id: string;
   key: string;
   data:
     | {
@@ -287,29 +388,41 @@ export interface PayloadKv {
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: number;
+  id: string;
   document?:
     | ({
-        relationTo: 'users';
-        value: number | User;
+        relationTo: 'api-key-admins';
+        value: string | ApiKeyAdmin;
       } | null)
     | ({
-        relationTo: 'products';
-        value: number | Product;
+        relationTo: 'api-key-customers';
+        value: string | ApiKeyCustomer;
       } | null)
     | ({
-        relationTo: 'customers';
-        value: number | Customer;
+        relationTo: 'api-key-other-customers';
+        value: string | ApiKeyOtherCustomer;
+      } | null)
+    | ({
+        relationTo: 'api-key-verified-customers';
+        value: string | ApiKeyVerifiedCustomer;
       } | null);
   globalSlug?: string | null;
   user:
     | {
-        relationTo: 'users';
-        value: number | User;
+        relationTo: 'api-key-admins';
+        value: string | ApiKeyAdmin;
       }
     | {
-        relationTo: 'customers';
-        value: number | Customer;
+        relationTo: 'api-key-customers';
+        value: string | ApiKeyCustomer;
+      }
+    | {
+        relationTo: 'api-key-other-customers';
+        value: string | ApiKeyOtherCustomer;
+      }
+    | {
+        relationTo: 'api-key-verified-customers';
+        value: string | ApiKeyVerifiedCustomer;
       };
   updatedAt: string;
   createdAt: string;
@@ -319,15 +432,23 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: number;
+  id: string;
   user:
     | {
-        relationTo: 'users';
-        value: number | User;
+        relationTo: 'api-key-admins';
+        value: string | ApiKeyAdmin;
       }
     | {
-        relationTo: 'customers';
-        value: number | Customer;
+        relationTo: 'api-key-customers';
+        value: string | ApiKeyCustomer;
+      }
+    | {
+        relationTo: 'api-key-other-customers';
+        value: string | ApiKeyOtherCustomer;
+      }
+    | {
+        relationTo: 'api-key-verified-customers';
+        value: string | ApiKeyVerifiedCustomer;
       };
   key?: string | null;
   value?:
@@ -347,7 +468,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: number;
+  id: string;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
@@ -355,12 +476,16 @@ export interface PayloadMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users_select".
+ * via the `definition` "api-key-admins_select".
  */
-export interface UsersSelect<T extends boolean = true> {
-  name?: T;
+export interface ApiKeyAdminsSelect<T extends boolean = true> {
+  apiKeyAccessLevel?: T;
   updatedAt?: T;
   createdAt?: T;
+  enableAPIKey?: T;
+  apiKey?: T;
+  apiKeyIndex?: T;
+  apiKeys?: T;
   email?: T;
   resetPasswordToken?: T;
   resetPasswordExpiration?: T;
@@ -378,38 +503,9 @@ export interface UsersSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "products_select".
+ * via the `definition` "api-key-customers_select".
  */
-export interface ProductsSelect<T extends boolean = true> {
-  name?: T;
-  price?:
-    | T
-    | {
-        stripePriceID?: T;
-        stripeJSON?: T;
-      };
-  stripeID?: T;
-  skipSync?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "customers_select".
- */
-export interface CustomersSelect<T extends boolean = true> {
-  name?: T;
-  subscriptions?:
-    | T
-    | {
-        stripeSubscriptionID?: T;
-        stripeProductID?: T;
-        product?: T;
-        status?: T;
-        id?: T;
-      };
-  stripeID?: T;
-  skipSync?: T;
+export interface ApiKeyCustomersSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   enableAPIKey?: T;
@@ -421,6 +517,60 @@ export interface CustomersSelect<T extends boolean = true> {
   resetPasswordExpiration?: T;
   salt?: T;
   hash?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "api-key-other-customers_select".
+ */
+export interface ApiKeyOtherCustomersSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  enableAPIKey?: T;
+  apiKey?: T;
+  apiKeyIndex?: T;
+  apiKeys?: T;
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "api-key-verified-customers_select".
+ */
+export interface ApiKeyVerifiedCustomersSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  enableAPIKey?: T;
+  apiKey?: T;
+  apiKeyIndex?: T;
+  apiKeys?: T;
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  _verified?: T;
+  _verificationToken?: T;
   loginAttempts?: T;
   lockUntil?: T;
   sessions?:
@@ -471,12 +621,6 @@ export interface PayloadApiKeysSelect<T extends boolean = true> {
   apiKeyHash?: T;
   apiKey?: T;
   regenerate?: T;
-  migratedFrom?:
-    | T
-    | {
-        collection?: T;
-        documentID?: T;
-      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -507,7 +651,11 @@ export interface CollectionsWidget {
 export interface CollectionQueryWidget {
   data?: {
     title?: string | null;
-    relatedCollection: 'users' | 'products' | 'customers';
+    relatedCollection:
+      | 'api-key-admins'
+      | 'api-key-customers'
+      | 'api-key-other-customers'
+      | 'api-key-verified-customers';
     where?:
       | {
           [k: string]: unknown;
@@ -529,7 +677,9 @@ export interface CollectionQueryWidget {
  */
 export interface ActivityWidget {
   data?: {
-    excludedCollections?: ('users' | 'products' | 'customers')[] | null;
+    excludedCollections?:
+      | ('api-key-admins' | 'api-key-customers' | 'api-key-other-customers' | 'api-key-verified-customers')[]
+      | null;
   };
   width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }

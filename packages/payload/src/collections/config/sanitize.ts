@@ -9,7 +9,9 @@ import type {
   SanitizedJoins,
 } from './types.js'
 
+import { deleteOwnerAPIKeysBeforeDelete } from '../../auth/apiKeys/ownerCleanup.js'
 import { authCollectionEndpoints } from '../../auth/endpoints/index.js'
+import { getAPIKeyStorageMode } from '../../auth/getAPIKeyStorageMode.js'
 import { getBaseAuthFields } from '../../auth/getAuthFields.js'
 import { withBaseAccess, withBaseAdminAccess } from '../../auth/withBaseAccess.js'
 import { TimestampsRequired } from '../../errors/TimestampsRequired.js'
@@ -332,6 +334,10 @@ export const sanitizeCollection = (
     }
 
     sanitized.fields = mergeBaseFields(sanitized.fields, getBaseAuthFields(sanitized.auth))
+
+    if (getAPIKeyStorageMode(sanitized.auth) === 'collection') {
+      sanitized.hooks!.beforeDelete!.push(deleteOwnerAPIKeysBeforeDelete)
+    }
   }
 
   if (collection?.admin?.pagination?.limits?.length) {

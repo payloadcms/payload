@@ -53,6 +53,16 @@ export const deriveKeyV1 = (secret: string): Buffer =>
 export const keyIdFor = (v1Key: Buffer): string =>
   crypto.createHash('sha256').update(v1Key).digest('hex').slice(0, 16)
 
+/**
+ * The API key lookup index: an HMAC-SHA256 of the raw key under a derived secret
+ * (see {@link deriveSecretKey}). Kept as one shared implementation since it is
+ * computed on write (`apiKey` field hook), on lookup (the api-key auth strategy,
+ * under every keyring secret), and during `rotateSecret`/migration re-keying -
+ * all of these must agree on the exact same bytes.
+ */
+export const computeAPIKeyIndex = (derivedKey: string, rawApiKey: string): string =>
+  crypto.createHmac('sha256', derivedKey).update(rawApiKey).digest('hex')
+
 export const buildEncryptionKey = (secret: string): EncryptionKey => {
   const v1Key = deriveKeyV1(secret)
   return {

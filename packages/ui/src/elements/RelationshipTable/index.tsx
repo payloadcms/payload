@@ -204,7 +204,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
 
   const onDrawerSave = useCallback<DocumentDrawerProps['onSave']>(
     ({ doc, operation }) => {
-      if (operation === 'create') {
+      if (operation === 'create' && !field.admin?.disableCreateDrawerAutoClose) {
         closeDrawer()
       }
 
@@ -221,7 +221,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
 
       void renderTable(withNewOrUpdatedData)
     },
-    [data?.docs, renderTable, closeDrawer],
+    [data?.docs, renderTable, closeDrawer, field.admin?.disableCreateDrawerAutoClose],
   )
 
   const onDrawerDelete = useCallback<DocumentDrawerProps['onDelete']>(
@@ -455,6 +455,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
       )}
       {AfterInput}
       <DocumentDrawer
+        disableCreateDrawerAutoClose={field.admin?.disableCreateDrawerAutoClose}
         initialData={initialDrawerData}
         onDelete={onDrawerDelete}
         onSave={onDrawerSave}

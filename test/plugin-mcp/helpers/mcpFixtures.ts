@@ -3,6 +3,7 @@ import type { Payload } from 'payload'
 
 import { randomUUID } from 'crypto'
 import path from 'path'
+import { payloadAPIKeysCollectionSlug } from 'payload'
 import { fileURLToPath } from 'url'
 import { test as base, onTestFinished } from 'vitest'
 
@@ -19,37 +20,42 @@ export let restClient: NextRESTClient
 export let limitedUserId: string
 export let userId: string
 
-export async function getApiKey(rbac: TestRBAC = {}): Promise<string> {
-  const apiKey = randomUUID()
+// `userId` is the persistent dev user, never deleted between tests, so keys minted for it
+// via getApiKey are tracked here and cleaned up in the worker teardown below.
+const createdDevUserKeyIDs: Array<number | string> = []
 
+export async function getApiKey(rbac: TestRBAC = {}): Promise<string> {
   await payload.update({
     id: userId,
     collection: 'users',
-    data: {
-      apiKey,
-      enableAPIKey: true,
-      rbac,
-    },
+    data: { rbac },
     overrideAccess: true,
   })
 
-  return apiKey
+  const key = await payload.create({
+    collection: payloadAPIKeysCollectionSlug,
+    data: {
+      name: `MCP test key ${randomUUID()}`,
+      owner: { relationTo: 'users', value: userId },
+    },
+    overrideAccess: true,
+  })
+  createdDevUserKeyIDs.push(key.id)
+
+  return key.apiKey as string
 }
 
 export async function getLimitedApiKey(): Promise<string> {
-  const apiKey = randomUUID()
-
-  await payload.update({
-    id: limitedUserId,
-    collection: 'users',
+  const key = await payload.create({
+    collection: payloadAPIKeysCollectionSlug,
     data: {
-      apiKey,
-      enableAPIKey: true,
+      name: `MCP limited test key ${randomUUID()}`,
+      owner: { relationTo: 'users', value: limitedUserId },
     },
     overrideAccess: true,
   })
 
-  return apiKey
+  return key.apiKey as string
 }
 
 const fixtureDir = path.dirname(fileURLToPath(import.meta.url))
@@ -100,6 +106,14 @@ const payloadTest = base.extend<ScopedFixtures>({
 
       await use()
 
+      if (createdDevUserKeyIDs.length > 0) {
+        await payload.delete({
+          collection: payloadAPIKeysCollectionSlug,
+          overrideAccess: true,
+          where: { id: { in: createdDevUserKeyIDs } },
+        })
+        createdDevUserKeyIDs.length = 0
+      }
       await payload.delete({
         id: limitedUserId,
         collection: 'users',

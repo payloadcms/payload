@@ -64,9 +64,11 @@ export type ClientCollectionConfig = {
     | 'preview'
     | ServerOnlyCollectionAdminProperties
   >
-  auth?: { verify?: true } & Omit<
+  // `useAPIKey`'s object form's `access.readOthers`/`access.manageOthers` are functions
+  // evaluated server-side only, so the client only ever sees whether it is enabled.
+  auth?: { useAPIKey?: boolean; verify?: true } & Omit<
     SanitizedCollectionConfig['auth'],
-    'forgotPassword' | 'strategies' | 'verify'
+    'forgotPassword' | 'strategies' | 'useAPIKey' | 'verify'
   >
   fields: ClientField[]
   hierarchy?: ClientHierarchyConfig | false
@@ -194,7 +196,7 @@ export const createClientCollectionConfig = ({
           break
         }
 
-        clientCollection.auth = {} as { verify?: true } & SanitizedCollectionConfig['auth']
+        clientCollection.auth = {} as NonNullable<ClientCollectionConfig['auth']>
 
         if (collection.auth.cookies) {
           clientCollection.auth.cookies = collection.auth.cookies
@@ -228,7 +230,9 @@ export const createClientCollectionConfig = ({
         }
 
         if (collection.auth.useAPIKey) {
-          clientCollection.auth.useAPIKey = collection.auth.useAPIKey
+          // `access.readOthers`/`access.manageOthers` are functions evaluated
+          // server-side only, so the client only ever sees that it is enabled.
+          clientCollection.auth.useAPIKey = true
         }
 
         if (collection.auth.tokenExpiration) {

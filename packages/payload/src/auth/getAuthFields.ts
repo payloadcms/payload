@@ -1,6 +1,7 @@
 import type { Field, TextField } from '../fields/config/types.js'
 import type { IncomingAuthType } from './types.js'
 
+import { getAPIKeysJoinField } from './apiKeys/config.js'
 import { accountLockFields } from './baseFields/accountLock.js'
 import { createAPIKeyFields } from './baseFields/apiKey.js'
 import { baseAuthFields } from './baseFields/auth.js'
@@ -8,12 +9,17 @@ import { emailFieldConfig } from './baseFields/email.js'
 import { sessionsFieldConfig } from './baseFields/sessions.js'
 import { usernameFieldConfig } from './baseFields/username.js'
 import { verificationFields } from './baseFields/verification.js'
+import { getAPIKeyStorageMode } from './getAPIKeyStorageMode.js'
 
 export const getBaseAuthFields = (authConfig: IncomingAuthType): Field[] => {
   const authFields: Field[] = []
 
   if (authConfig.useAPIKey) {
     authFields.push(...createAPIKeyFields())
+
+    if (getAPIKeyStorageMode(authConfig) === 'collection') {
+      authFields.push(getAPIKeysJoinField())
+    }
   }
 
   if (

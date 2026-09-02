@@ -26,6 +26,7 @@ const defaultCLICommands: CLICommands = {
   'jobs:handle-schedules': 'payload/cli/builtin#createJobsHandleSchedulesCommand',
   'jobs:run': 'payload/cli/builtin#createJobsRunCommand',
   migrate: 'payload/cli/builtin#createMigrateCommand',
+  'migrate:api-keys': 'payload/cli/builtin#createMigrateAPIKeysCommand',
   'migrate:create': 'payload/cli/builtin#createMigrateCreateCommand',
   'migrate:down': 'payload/cli/builtin#createMigrateDownCommand',
   'migrate:fresh': 'payload/cli/builtin#createMigrateFreshCommand',
