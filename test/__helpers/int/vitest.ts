@@ -34,6 +34,7 @@ type IntegrationFixtures = {
     payloadInstance: Payload
     testConfig: TestConfig
     testCron: boolean
+    testDir: string
     testSuiteConfigured: boolean
   }
   $test: {
@@ -114,6 +115,13 @@ const testWithFixtures = vitestTest.extend<IntegrationFixtures>({
     // eslint-disable-next-line no-empty-pattern
     async ({}, use) => {
       await use(true)
+    },
+    { scope: 'file' },
+  ],
+  testDir: [
+    // eslint-disable-next-line no-empty-pattern
+    async ({}, use) => {
+      await use(getTestDirectory())
     },
     { scope: 'file' },
   ],
