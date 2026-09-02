@@ -9,16 +9,8 @@ export type AuthArgs = {
    * Specify if it's possible for auth strategies to set headers within this operation.
    */
   canSetHeaders?: boolean
-  /**
-   * Fallback locale used when loading the authenticated user document.
-   * Applied via `createLocalReq` for Local API calls.
-   */
   fallbackLocale?: false | TypedLocale
   headers: Request['headers']
-  /**
-   * Locale used when loading the authenticated user document.
-   * Applied via `createLocalReq` for Local API calls.
-   */
   locale?: 'all' | TypedLocale
   req?: Omit<PayloadRequest, 'user'>
 }

@@ -186,17 +186,9 @@ export type AuthStrategyFunctionArgs = {
    * Specifies whether or not response headers can be set from this strategy.
    */
   canSetHeaders?: boolean
-  /**
-   * Fallback locale to use when a localized field is missing in `locale`.
-   * Forwarded to Local API user lookups inside strategies.
-   */
   fallbackLocale?: TypedFallbackLocale
   headers: Request['headers']
   isGraphQL?: boolean
-  /**
-   * Locale used when loading the authenticated user document.
-   * Forwarded to Local API user lookups inside strategies.
-   */
   locale?: 'all' | TypedLocale
   payload: Payload
   /**

@@ -10,6 +10,6 @@ export const authLocal = async (payload: Payload, options: AuthArgs): Promise<Au
   return await authOperation({
     canSetHeaders: Boolean(options.canSetHeaders),
     headers,
-    req: await createLocalReq({ fallbackLocale, locale, req }, payload),
+    req: await createLocalReq({ fallbackLocale, locale: locale ?? undefined, req }, payload),
   })
 }
