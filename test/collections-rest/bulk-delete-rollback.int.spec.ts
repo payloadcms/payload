@@ -1,29 +1,12 @@
-import type { Payload } from 'payload'
+import { expect, vi } from 'vitest'
 
-import path from 'path'
-import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
+import { test } from '../__helpers/int/vitest.js'
+import testConfig, { postsSlug } from './config.js'
 
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
-import { postsSlug } from './config.js'
-
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
-
-let payload: Payload
-
-describe('Collections REST - bulk delete rollback', () => {
-  beforeAll(async () => {
-    ;({ payload } = await initPayloadInt(dirname))
-  })
-
-  afterAll(async () => {
-    await payload.destroy()
-  })
-
-  it.skipIf(
+test.suite({ config: testConfig })('Collections REST - bulk delete rollback', () => {
+  test.skipIf(
     process.env.PAYLOAD_DATABASE === 'cosmosdb' || process.env.PAYLOAD_DATABASE === 'documentdb',
-  )('should roll back when the batched deleteMany fails', async () => {
+  )('should roll back when the batched deleteMany fails', async ({ payload }) => {
     const title = 'bulk-delete-failure'
 
     await payload.create({

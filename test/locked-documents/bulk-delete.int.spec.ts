@@ -1,30 +1,17 @@
-import type { Payload } from 'payload'
-
-import path from 'path'
 import { NotFound } from 'payload'
-import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { expect } from 'vitest'
 
-import type { User } from './payload-types.js'
-
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { test } from '../__helpers/int/vitest.js'
+import testConfig from './config.js'
 import { postsSlug } from './slugs.js'
 
 const lockedDocumentCollection = 'payload-locked-documents'
 
-let payload: Payload
-
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
-
-describe('Locked documents - bulk delete', () => {
-  let deletingUser: User
-  let otherUser: User
-
-  beforeAll(async () => {
-    ;({ payload } = await initPayloadInt(dirname))
-
-    deletingUser = await payload.create({
+test.suite({ config: testConfig })('Locked documents - bulk delete', () => {
+  // Bulk delete resolves the lock state of the whole batch in a single query, rather than one
+  // query per document like deleting a single document does
+  test('should skip locked documents but delete the unlocked ones', async ({ payload }) => {
+    const deletingUser = await payload.create({
       collection: 'users',
       data: {
         email: 'bulk-delete-owner@payloadcms.com',
@@ -32,22 +19,14 @@ describe('Locked documents - bulk delete', () => {
       },
     })
 
-    otherUser = await payload.create({
+    const otherUser = await payload.create({
       collection: 'users',
       data: {
         email: 'bulk-delete-other@payloadcms.com',
         password: 'test',
       },
     })
-  })
 
-  afterAll(async () => {
-    await payload.destroy()
-  })
-
-  // Bulk delete resolves the lock state of the whole batch in a single query, rather than one
-  // query per document like deleting a single document does
-  it('should skip locked documents but delete the unlocked ones', async () => {
     const lockedPost = await payload.create({
       collection: postsSlug,
       data: {
