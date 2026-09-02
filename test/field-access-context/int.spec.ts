@@ -3,13 +3,12 @@ import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
-import testConfig from './config.js'
 import { childrenSlug, globalSlug, parentsSlug, readAccessLog, resetAccessLog } from './shared.js'
 
 const childIDs: (number | string)[] = []
 const parentIDs: (number | string)[] = []
 
-test.suite({ config: testConfig })('field access collection context', () => {
+test.suite({ config: './config.ts' })('field access collection context', () => {
   test.afterEach(async ({ payload }) => {
     for (const id of parentIDs) {
       await payload.delete({ id, collection: parentsSlug })

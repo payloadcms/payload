@@ -5,11 +5,10 @@ import { expect } from 'vitest'
 // eslint-disable-next-line payload/no-relative-monorepo-imports
 import { buildFieldSchemaMap } from '../../packages/ui/src/utilities/buildFieldSchemaMap/index.js'
 import { test } from '../__helpers/int/vitest.js'
-import testConfig from './config.js'
 import { fieldPathsSlug } from './shared.js'
 import { testDoc } from './testDoc.js'
 
-test.suite({ config: testConfig })('Field Paths', () => {
+test.suite({ config: './config.ts' })('Field Paths', () => {
   test.describe('hooks', () => {
     test('should pass correct field paths through field hooks', async ({ payload }) => {
       const formatExpectedFieldPaths = (

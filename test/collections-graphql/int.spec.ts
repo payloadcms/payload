@@ -10,7 +10,6 @@ import type { Post } from './payload-types.js'
 
 import { test } from '../__helpers/int/vitest.js'
 import { idToString } from '../__helpers/shared/idToString.js'
-import testConfig from './config.js'
 import { errorOnHookSlug, pointSlug, relationSlug, slug } from './shared.js'
 
 const formatID = (id: number | string) => (typeof id === 'number' ? id : `"${id}"`)
@@ -20,7 +19,7 @@ const title = 'title'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-test.suite({ config: testConfig })('collections-graphql', () => {
+test.suite({ config: './config.ts' })('collections-graphql', () => {
   test.describe('CRUD', () => {
     let existingDoc: Post
     let existingDocGraphQLID

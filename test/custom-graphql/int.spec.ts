@@ -2,9 +2,8 @@ import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
-import testConfig from './config.js'
 
-test.suite({ config: testConfig })('Custom GraphQL', () => {
+test.suite({ config: './config.ts' })('Custom GraphQL', () => {
   if (
     !['cosmosdb', 'firestore', 'sqlite', 'sqlite-uuid', 'sqlite-uuidv7'].includes(
       process.env.PAYLOAD_DATABASE || '',

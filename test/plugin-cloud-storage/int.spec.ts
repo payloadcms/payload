@@ -14,7 +14,6 @@ import { expect } from 'vitest'
 import type { Config } from './payload-types.js'
 
 import { test } from '../__helpers/int/vitest.js'
-import testConfig from './config.js'
 import {
   mediaSlug,
   mediaWithCustomURLSlug,
@@ -102,7 +101,7 @@ export function describeIfInCIOrHasLocalstack(): SuiteAPI | SuiteAPI['skip'] {
   return test.describe
 }
 
-test.suite({ config: testConfig })('@payloadcms/plugin-cloud-storage', () => {
+test.suite({ config: './config.ts' })('@payloadcms/plugin-cloud-storage', () => {
   test.describe('getFilePrefix', () => {
     const mockReq = {
       payload: {

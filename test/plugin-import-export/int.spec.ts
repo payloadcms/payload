@@ -10,7 +10,6 @@ import { expect } from 'vitest'
 import { test } from '../__helpers/int/vitest.js'
 import { devUser, regularUser } from '../credentials.js'
 import { clearTestBucket, createTestBucket } from '../storage-s3/test-utils.js'
-import testConfig from './config.js'
 import { readCSV, readJSON } from './helpers.js'
 import { richTextData } from './seed/richTextData.js'
 import { customIdPagesSlug, postsWithS3Slug } from './shared.js'
@@ -21,7 +20,7 @@ let restrictedUser: any
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-test.suite({ config: testConfig })('@payloadcms/plugin-import-export', () => {
+test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export', () => {
   test.beforeEach(async ({ payload }) => {
     const loginResult = await payload.login({
       collection: 'users',

@@ -2,7 +2,6 @@ import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
-import testConfig from './config.js'
 import {
   applicationEndpoint,
   collectionSlug,
@@ -14,7 +13,7 @@ import {
   rootEndpoint,
 } from './shared.js'
 
-test.suite({ config: testConfig })('Endpoints', () => {
+test.suite({ config: './config.ts' })('Endpoints', () => {
   test.describe('Collections', () => {
     test('should GET a static endpoint', async ({ restClient }) => {
       const response = await restClient.GET(`/${collectionSlug}/say-hello/joe-bloggs`)

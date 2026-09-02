@@ -7,11 +7,11 @@ import { expect, vitest } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
 import { devUser } from '../credentials.js'
-import testConfig, { postDoc } from './config.js'
+import { postDoc } from './config.js'
 
 let token: string
 
-test.suite({ config: testConfig })('dataloader', () => {
+test.suite({ config: './config.ts' })('dataloader', () => {
   test.beforeEach(async ({ payload }) => {
     const loginResult = await payload.login({
       collection: 'users',

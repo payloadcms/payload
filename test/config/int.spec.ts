@@ -7,13 +7,12 @@ import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
-import testConfig from './config.js'
 import { testFilePath } from './testFilePath.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-test.suite({ config: testConfig })('Config', () => {
+test.suite({ config: './config.ts' })('Config', () => {
   test.describe('payload config', () => {
     test('allows a custom field at the config root', ({ payload }) => {
       const { config } = payload

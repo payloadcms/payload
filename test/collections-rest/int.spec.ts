@@ -13,7 +13,7 @@ import type { Post } from './payload-types.js'
 import { test } from '../__helpers/int/vitest.js'
 import { getFormDataSize } from '../__helpers/shared/getFormDataSize.js'
 import { largeDocumentsCollectionSlug } from './collections/LargeDocuments.js'
-import testConfig, {
+import {
   customIdNumberSlug,
   customIdSlug,
   endpointsSlug,
@@ -24,7 +24,7 @@ import testConfig, {
   relationSlug,
 } from './config.js'
 
-test.suite({ config: testConfig })('collections-rest', () => {
+test.suite({ config: './config.ts' })('collections-rest', () => {
   test.beforeEach(async ({ payload }) => {
     await clearDocs({ payload })
   })

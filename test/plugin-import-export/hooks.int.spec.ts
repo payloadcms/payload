@@ -6,7 +6,6 @@ import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
 import { devUser } from '../credentials.js'
-import testConfig from './config.js'
 import { readCSV, readJSON } from './helpers.js'
 import { hookCalls, resetHookSpies } from './hookSpies.js'
 import { postsWithColumnMapSlug, postsWithHooksSlug } from './shared.js'
@@ -18,7 +17,7 @@ const dirname = path.dirname(filename)
 
 const createdHookPostIDs: (number | string)[] = []
 
-test.suite({ config: testConfig })('@payloadcms/plugin-import-export — hooks', () => {
+test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export — hooks', () => {
   test.beforeEach(async ({ payload }) => {
     const loginResult = await payload.login({
       collection: 'users',

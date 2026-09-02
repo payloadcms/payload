@@ -6,7 +6,6 @@ import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
 import { devUser } from '../credentials.js'
-import testConfig from './config.js'
 import { readCSV, readJSON } from './helpers.js'
 import { postsWithFieldHooksSlug } from './shared.js'
 
@@ -14,8 +13,9 @@ let user: AuthenticatedUser
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+const configPath = './config.ts'
 
-test.suite({ config: testConfig })('@payloadcms/plugin-import-export — field-level hooks', () => {
+test.suite({ config: configPath })('@payloadcms/plugin-import-export — field-level hooks', () => {
   test.beforeEach(async ({ payload }) => {
     const loginResult = await payload.login({
       collection: 'users',

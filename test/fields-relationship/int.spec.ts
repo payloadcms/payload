@@ -5,12 +5,11 @@ import type { Collection1 } from './payload-types.js'
 
 import { test } from '../__helpers/int/vitest.js'
 import { devUser } from '../credentials.js'
-import testConfig from './config.js'
 import { collection1Slug, versionedRelationshipFieldSlug } from './slugs.js'
 
 const { email, password } = devUser
 
-test.suite({ config: testConfig })('Relationship Fields', () => {
+test.suite({ config: './config.ts' })('Relationship Fields', () => {
   test.beforeEach(async ({ restClient }) => {
     await restClient.login({
       slug: 'users',

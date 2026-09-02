@@ -7,7 +7,6 @@ import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
-import testConfig from './config.compositePrefixes.js'
 import { collectionPrefix, mediaWithCompositePrefixesSlug } from './shared.js'
 import { clearTestBucket, createTestBucket } from './utils.js'
 
@@ -31,7 +30,9 @@ function describeIfInCIOrHasLocalstack(): SuiteAPI | SuiteAPI['skip'] {
   return test.describe
 }
 
-test.suite({ config: testConfig })('@payloadcms/plugin-cloud-storage (composite prefixes)', () => {
+const configPath = './config.compositePrefixes.ts'
+
+test.suite({ config: configPath })('@payloadcms/plugin-cloud-storage (composite prefixes)', () => {
   let TEST_BUCKET: string
 
   test.beforeEach(async () => {

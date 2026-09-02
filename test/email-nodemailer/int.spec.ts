@@ -5,7 +5,6 @@ import { fileURLToPath } from 'url'
 import { expect, type Mock, vi } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
-import testConfig from './config.js'
 
 let mockedSendEmail: Mock
 
@@ -17,7 +16,7 @@ type EmailReturnType = {
   to: string
 }
 
-test.suite({ config: testConfig })('@payloadcms/email-nodemailer', () => {
+test.suite({ config: './config.ts' })('@payloadcms/email-nodemailer', () => {
   test.beforeEach(async () => {
     mockedSendEmail = vi.fn()
   })
