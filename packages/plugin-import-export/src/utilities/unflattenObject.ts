@@ -2,6 +2,7 @@ import type { FlattenedField, PayloadRequest } from 'payload'
 
 import type { ImportFieldHookEntry } from '../types.js'
 
+import { flatKeyToPathSegments } from './flatKeyToPathSegments.js'
 import { getBlockFlattenedFields, getNestedFlattenedFields } from './flattenedFields.js'
 import { postProcessDocument } from './unflattenPostProcess.js'
 
@@ -78,6 +79,14 @@ export const unflattenObject = ({
 
   const arrayLikeNames = new Set<string>()
   collectArrayLikeNames(fields, arrayLikeNames)
+
+  const localization = req?.payload?.config?.localization
+
+  const segmentArgs = {
+    blocksBySlug: req?.payload?.blocks,
+    fields,
+    localeCodes: localization ? localization.localeCodes : undefined,
+  }
 
   // Sort keys to ensure array indices are processed in order
   const sortedKeys = Object.keys(data).sort((a, b) => {
@@ -184,7 +193,10 @@ export const unflattenObject = ({
     }
 
     // Example: "blocks_0_content_text" -> ["blocks", "0", "content", "text"]
-    const pathSegments = flatKey.split('_')
+    // Resolved against the field schema so names that contain underscores stay
+    // intact ("vat_number"), falling back to a naive split for keys the schema
+    // cannot account for — extra CSV columns, or populated relationship data.
+    const pathSegments = flatKeyToPathSegments({ ...segmentArgs, flatKey }) ?? flatKey.split('_')
     let currentObject: Record<string, unknown> = result
 
     for (let i = 0; i < pathSegments.length; i++) {

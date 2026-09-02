@@ -29,3 +29,5 @@ export const postsWithHooksImportSlug = 'posts-with-hooks-import'
 export const postsWithFieldHooksSlug = 'posts-with-field-hooks'
 
 export const postsWithColumnMapSlug = 'posts-with-column-map'
+
+export const postsWithSnakeCaseFieldsSlug = 'posts-with-snake-case-fields'

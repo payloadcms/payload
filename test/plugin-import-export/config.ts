@@ -26,6 +26,7 @@ import { PostsWithFieldHooks } from './collections/PostsWithFieldHooks.js'
 import { PostsWithHooks } from './collections/PostsWithHooks.js'
 import { PostsWithLimits } from './collections/PostsWithLimits.js'
 import { PostsWithS3 } from './collections/PostsWithS3.js'
+import { PostsWithSnakeCaseFields } from './collections/PostsWithSnakeCaseFields.js'
 import { Users } from './collections/Users.js'
 import {
   exportAfterHook,
@@ -71,6 +72,7 @@ export default buildConfigWithDefaults({
     PostsWithHooks,
     PostsWithFieldHooks,
     PostsWithColumnMap,
+    PostsWithSnakeCaseFields,
     Media,
     CustomIdPages,
   ],
