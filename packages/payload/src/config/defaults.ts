@@ -8,6 +8,9 @@ const defaultCLICommands: CLICommands = {
   countDocuments: 'payload/cli/builtin#createCountDocumentsCommand',
   countGlobalVersions: 'payload/cli/builtin#createCountGlobalVersionsCommand',
   countVersions: 'payload/cli/builtin#createCountVersionsCommand',
+  createDocuments: 'payload/cli/builtin#createCreateDocumentsCommand',
+  deleteDocuments: 'payload/cli/builtin#createDeleteDocumentsCommand',
+  duplicateDocument: 'payload/cli/builtin#createDuplicateDocumentCommand',
   findDistinct: 'payload/cli/builtin#createFindDistinctCommand',
   findDocuments: 'payload/cli/builtin#createFindDocumentsCommand',
   findGlobal: 'payload/cli/builtin#createFindGlobalCommand',
@@ -32,7 +35,11 @@ const defaultCLICommands: CLICommands = {
   'migrate:refresh': 'payload/cli/builtin#createMigrateRefreshCommand',
   'migrate:reset': 'payload/cli/builtin#createMigrateResetCommand',
   'migrate:status': 'payload/cli/builtin#createMigrateStatusCommand',
+  restoreGlobalVersion: 'payload/cli/builtin#createRestoreGlobalVersionCommand',
+  restoreVersion: 'payload/cli/builtin#createRestoreVersionCommand',
   run: 'payload/cli/builtin#createRunCommand',
+  updateDocument: 'payload/cli/builtin#createUpdateDocumentCommand',
+  updateGlobal: 'payload/cli/builtin#createUpdateGlobalCommand',
 }
 
 export const addDefaultsToConfig = (config: Config): Config => {

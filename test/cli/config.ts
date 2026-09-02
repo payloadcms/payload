@@ -30,6 +30,11 @@ export default buildConfigWithDefaults({
       slug: 'pages',
       access: {
         read: () => ({ title: { equals: 'Readable through access control' } }),
+        update: ({ id, req }) => {
+          const idType = req.payload.collections.pages?.customIDType ?? req.payload.db.defaultIDType
+
+          return id === undefined || typeof id === (idType === 'number' ? 'number' : 'string')
+        },
       },
       fields: [
         {
@@ -41,7 +46,41 @@ export default buildConfigWithDefaults({
           name: 'location',
           type: 'point',
         },
+        {
+          name: 'requireMetadata',
+          type: 'checkbox',
+        },
+        {
+          name: 'metadata',
+          type: 'group',
+          admin: {
+            condition: (_data, siblingData) => siblingData.requireMetadata === true,
+          },
+          fields: [
+            {
+              name: 'description',
+              type: 'text',
+              required: true,
+            },
+            {
+              name: 'title',
+              type: 'text',
+              required: true,
+            },
+          ],
+        },
       ],
+      hooks: {
+        beforeValidate: [
+          ({ data }) => {
+            if (data?.title === null) {
+              throw new Error('Invalid data reached the collection operation.')
+            }
+
+            return data
+          },
+        ],
+      },
       versions: {
         drafts: true,
       },
@@ -58,6 +97,29 @@ export default buildConfigWithDefaults({
       upload: {
         staticDir: path.resolve(dirname, 'generated/media'),
       },
+    },
+    {
+      slug: 'custom-ids',
+      access: {
+        update: ({ id, req }) => {
+          const idType =
+            req.payload.collections['custom-ids']?.customIDType ?? req.payload.db.defaultIDType
+
+          return id === undefined || typeof id === (idType === 'number' ? 'number' : 'string')
+        },
+      },
+      fields: [
+        {
+          name: 'id',
+          type: 'text',
+        },
+        {
+          name: 'title',
+          type: 'text',
+          required: true,
+        },
+      ],
+      lockDocuments: false,
     },
   ],
   db: {
@@ -79,6 +141,17 @@ export default buildConfigWithDefaults({
           required: true,
         },
       ],
+      hooks: {
+        beforeValidate: [
+          ({ data }) => {
+            if (data?.title === null) {
+              throw new Error('Invalid data reached the global operation.')
+            }
+
+            return data
+          },
+        ],
+      },
     },
   ],
   jobs: {

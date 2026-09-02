@@ -1,5 +1,10 @@
 import { readFileSync } from 'node:fs'
 import path from 'node:path'
+import * as z from 'zod/mini'
+
+export const localFileSchema = z
+  .string()
+  .check(z.minLength(1), z.describe('Local upload file path.'))
 
 export const parseBoolean = (value: string): boolean => {
   if (value === 'true') {
@@ -29,6 +34,18 @@ export const parseJSON = (value: string): unknown => {
     throw new Error(error instanceof Error ? error.message : 'Invalid JSON.')
   }
 }
+
+export const parseDocuments = (value: string, previous: unknown): unknown[] => {
+  const parsed = parseJSON(value)
+  const previousValues = Array.isArray(previous) ? previous : []
+
+  return [...previousValues, ...(Array.isArray(parsed) ? parsed : [parsed])]
+}
+
+export const parseSelectedLocales = (value: string, previous: unknown): string[] => [
+  ...(Array.isArray(previous) ? previous : []),
+  ...value.split(',').filter(Boolean),
+]
 
 export const parseSort = (value: string, previous: unknown): string | string[] => {
   if (Array.isArray(previous)) {
