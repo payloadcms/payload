@@ -69,6 +69,7 @@ export const initReq = async function ({
     const { responseHeaders, user } = await executeAuthStrategies({
       canSetHeaders,
       headers,
+      locale: typeof overrides?.locale === 'string' ? overrides.locale : undefined,
       payload,
     })
 

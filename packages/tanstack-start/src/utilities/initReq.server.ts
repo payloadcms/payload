@@ -59,13 +59,6 @@ export async function initReq({
     language: languageCode,
   })
 
-  const { responseHeaders, user } = await executeAuthStrategies({
-    headers,
-    payload,
-  })
-
-  const { req: reqOverrides, ...optionsOverrides } = overrides || {}
-
   // Parse the active URL's query string so that `req.query` (and thus
   // `getRequestLocale`, access checks, etc.) reflect things like `?locale=es`
   // even when the caller (e.g. the root layout loader) hasn't explicitly
@@ -83,6 +76,16 @@ export async function initReq({
   } catch {
     queryFromUrl = undefined
   }
+
+  const queryLocale = typeof queryFromUrl?.locale === 'string' ? queryFromUrl.locale : undefined
+
+  const { responseHeaders, user } = await executeAuthStrategies({
+    headers,
+    locale: queryLocale,
+    payload,
+  })
+
+  const { req: reqOverrides, ...optionsOverrides } = overrides || {}
 
   const req = await createLocalReq(
     {

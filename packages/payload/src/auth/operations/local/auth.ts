@@ -5,11 +5,11 @@ import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { auth as authOperation } from '../auth.js'
 
 export const authLocal = async (payload: Payload, options: AuthArgs): Promise<AuthResult> => {
-  const { headers, req } = options
+  const { fallbackLocale, headers, locale, req } = options
 
   return await authOperation({
     canSetHeaders: Boolean(options.canSetHeaders),
     headers,
-    req: await createLocalReq({ req }, payload),
+    req: await createLocalReq({ fallbackLocale, locale: locale ?? undefined, req }, payload),
   })
 }

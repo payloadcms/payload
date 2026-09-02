@@ -1,4 +1,11 @@
-import type { CollectionSlug, GlobalSlug, Payload, User } from '../index.js'
+import type {
+  CollectionSlug,
+  GlobalSlug,
+  Payload,
+  TypedFallbackLocale,
+  TypedLocale,
+  User,
+} from '../index.js'
 import type { PayloadRequest, Where } from '../types/index.js'
 
 /**
@@ -179,8 +186,10 @@ export type AuthStrategyFunctionArgs = {
    * Specifies whether or not response headers can be set from this strategy.
    */
   canSetHeaders?: boolean
+  fallbackLocale?: TypedFallbackLocale
   headers: Request['headers']
   isGraphQL?: boolean
+  locale?: 'all' | TypedLocale
   payload: Payload
   /**
    * The AuthStrategy name property from the payload config.
