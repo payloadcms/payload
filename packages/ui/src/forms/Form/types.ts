@@ -147,6 +147,7 @@ export type GetData = () => Data
 export type GetSiblingData = (path: string) => Data
 export type GetDataByPath = <T = unknown>(path: string) => T
 export type SetModified = (modified: boolean) => void
+export type RequestFormStateRefresh = () => void
 export type SetSubmitted = (submitted: boolean) => void
 export type SetProcessing = (processing: boolean) => void
 
@@ -320,6 +321,10 @@ export type Context = {
     subFieldState?: FormState
   }) => void
   replaceState: (state: FormState) => void
+  /**
+   * Requests fresh server form state without marking the form as modified.
+   */
+  requestFormStateRefresh: RequestFormStateRefresh
   reset: Reset
   /**
    * If the form has started processing in the background (e.g.

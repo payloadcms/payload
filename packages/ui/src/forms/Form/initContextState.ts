@@ -6,6 +6,7 @@ import type {
   CreateFormData,
   DispatchFields,
   GetSiblingData,
+  RequestFormStateRefresh,
   Reset,
   SetModified,
   SetProcessing,
@@ -25,6 +26,7 @@ const setProcessing: SetProcessing = () => undefined
 const setBackgroundProcessing: SetProcessing = () => undefined
 const setSubmitted: SetSubmitted = () => undefined
 const reset: Reset = () => undefined
+const requestFormStateRefresh: RequestFormStateRefresh = () => undefined
 
 export const initContextState: Context = {
   addFieldRow: () => undefined,
@@ -45,6 +47,7 @@ export const initContextState: Context = {
   removeFieldRow: () => undefined,
   replaceFieldRow: () => undefined,
   replaceState: () => undefined,
+  requestFormStateRefresh,
   reset,
   setBackgroundProcessing,
   setDisabled: () => undefined,
