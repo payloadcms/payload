@@ -1,0 +1,47 @@
+{
+  "type": "object",
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "plugin-search": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "resultDocument": {
+          "type": "string"
+        },
+        "resultDocumentUrl": {
+          "type": "string"
+        },
+        "resultPriority": {
+          "type": "string"
+        },
+        "resultTitle": {
+          "type": "string"
+        },
+        "searchResult": {
+          "type": "string"
+        },
+        "searchResults": {
+          "type": "string"
+        },
+        "searchResultsDescription": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "resultDocument",
+        "resultDocumentUrl",
+        "resultPriority",
+        "resultTitle",
+        "searchResult",
+        "searchResults",
+        "searchResultsDescription"
+      ]
+    }
+  },
+  "required": ["plugin-search"]
+}

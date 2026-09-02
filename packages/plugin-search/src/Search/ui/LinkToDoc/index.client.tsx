@@ -1,15 +1,14 @@
 'use client'
 
-import { CopyToClipboard, FieldLabel, Link, useConfig, useField } from '@payloadcms/ui'
+import { CopyToClipboard, Link, useConfig, useField, useTranslation } from '@payloadcms/ui'
 import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
-import './index.css'
+import type { PluginSearchTranslationKeys, PluginSearchTranslations } from '../../../translations/index.js'
 
-const baseClass = 'link-to-doc'
-
-export const LinkToDocClient: React.FC = () => {
+export const LinkToDocClient: React.FC<{ label?: React.JSX.Element | string }> = ({ label }) => {
   const { config } = useConfig()
+  const { t } = useTranslation<PluginSearchTranslations, PluginSearchTranslationKeys>()
 
   const {
     routes: {
@@ -31,9 +30,16 @@ export const LinkToDocClient: React.FC = () => {
   })
 
   return (
-    <div className={baseClass}>
-      <div className={`${baseClass}__header`}>
-        <FieldLabel htmlFor={baseClass} label="Doc URL" />
+    <div style={{ marginBottom: 'var(--spacing-field, 1rem)' }}>
+      <div>
+        <span
+          className="label"
+          style={{
+            color: '#9A9A9A',
+          }}
+        >
+          {typeof label === 'string' ? label : t('plugin-search:resultDocumentUrl')}
+        </span>
         <CopyToClipboard value={href} />
       </div>
       <div className={`${baseClass}__url`}>
