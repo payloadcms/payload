@@ -14,12 +14,16 @@ import { executeAccess } from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
 import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
-import { APIError } from '../../errors/index.js'
+import { APIError, Locked } from '../../errors/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { deleteUserPreferences } from '../../preferences/deleteUserPreferences.js'
 import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
-import { checkDocumentLockStatus } from '../../utilities/checkDocumentLockStatus.js'
+import {
+  checkDocumentLockStatus,
+  deleteDocumentLocks,
+  getLockedDocumentIds,
+} from '../../utilities/checkDocumentLockStatus.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { hasScheduledPublishEnabled } from '../../utilities/getVersionsConfig.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
@@ -58,7 +62,10 @@ export const deleteOperation = async <
   }
 
   try {
-    const shouldCommit = !args.disableTransaction && (await initTransaction(args.req))
+    const shouldCommit =
+      !args.disableTransaction &&
+      !args.req.payload.db.bulkOperationsSingleTransaction &&
+      (await initTransaction(args.req))
     // /////////////////////////////////////
     // beforeOperation - Collection
     // /////////////////////////////////////
@@ -147,82 +154,136 @@ export const deleteOperation = async <
     })
 
     const errors: BulkOperationResult<TSlug, TSelect>['errors'] = []
+    let didBatchDeleteFail = false
 
-    const promises = docs.map(async (doc) => {
-      let result
+    type Doc = DataFromCollectionSlug<TSlug>
+    type ResultDoc = BulkOperationResult<TSlug, TSelect>['docs'][number]
 
-      const { id } = doc
+    const pushError = (id: number | string, error: unknown, message?: string) => {
+      errors.push({
+        id,
+        isPublic: error instanceof Error ? isErrorPublic(error, config) : false,
+        message: message ?? (error instanceof Error ? error.message : 'Unknown error'),
+      })
+    }
 
-      try {
-        // Each document gets its own transaction when singleTransaction is enabled
-        let docShouldCommit = false
-        if (req.payload.db.bulkOperationsSingleTransaction) {
-          docShouldCommit = await initTransaction(req)
+    // /////////////////////////////////////
+    // beforeDelete - Collection, and associated files
+    // /////////////////////////////////////
+
+    const runBeforeDeleteWork = async (doc: Doc) => {
+      if (collectionConfig.hooks?.beforeDelete?.length) {
+        for (const hook of collectionConfig.hooks.beforeDelete) {
+          await hook({
+            id: doc.id,
+            collection: collectionConfig,
+            context: req.context,
+            req,
+          })
         }
+      }
 
-        // /////////////////////////////////////
-        // Handle potentially locked documents
-        // /////////////////////////////////////
+      await deleteAssociatedFiles({
+        collectionConfig,
+        config,
+        doc,
+        overrideDelete: true,
+        req,
+      })
+    }
+
+    // /////////////////////////////////////
+    // afterRead - Fields, afterRead - Collection, afterDelete - Collection
+    // /////////////////////////////////////
+
+    const runAfterDeleteWork = async (doc: Doc): Promise<ResultDoc> => {
+      let result = await afterRead({
+        collection: collectionConfig,
+        context: req.context,
+        depth: depth!,
+        doc,
+        // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
+        draft: undefined,
+        fallbackLocale: fallbackLocale!,
+        global: null,
+        locale: locale!,
+        overrideAccess: overrideAccess!,
+        populate,
+        req,
+        select,
+        showHiddenFields: showHiddenFields!,
+      })
+
+      // Add collection property for auth collections
+      if (collectionConfig.auth) {
+        result = { ...result, collection: collectionConfig.slug }
+      }
+
+      if (collectionConfig.hooks?.afterRead?.length) {
+        for (const hook of collectionConfig.hooks.afterRead) {
+          result =
+            (await hook({
+              collection: collectionConfig,
+              context: req.context,
+              doc: result || doc,
+              overrideAccess,
+              req,
+            })) || result
+        }
+      }
+
+      if (collectionConfig.hooks?.afterDelete?.length) {
+        for (const hook of collectionConfig.hooks.afterDelete) {
+          result =
+            (await hook({
+              id: doc.id,
+              collection: collectionConfig,
+              context: req.context,
+              doc: result,
+              req,
+            })) || result
+        }
+      }
+
+      return result as ResultDoc
+    }
+
+    /**
+     * One transaction and one set of database calls per document. Only used when
+     * `bulkOperationsSingleTransaction` is enabled, which requires each document to be committed
+     * on its own and therefore cannot share a batched write with the rest of the operation.
+     */
+    const deleteDocumentIndividually = async (doc: Doc): Promise<null | ResultDoc> => {
+      try {
+        const docShouldCommit = await initTransaction(req)
 
         await checkDocumentLockStatus({
-          id,
+          id: doc.id,
           collectionSlug: collectionConfig.slug,
-          lockErrorMessage: `Document with ID ${id} is currently locked and cannot be deleted.`,
+          lockErrorMessage: `Document with ID ${doc.id} is currently locked and cannot be deleted.`,
           overrideLock,
           req,
         })
 
-        // /////////////////////////////////////
-        // beforeDelete - Collection
-        // /////////////////////////////////////
-
-        if (collectionConfig.hooks?.beforeDelete?.length) {
-          for (const hook of collectionConfig.hooks.beforeDelete) {
-            await hook({
-              id,
-              collection: collectionConfig,
-              context: req.context,
-              req,
-            })
-          }
-        }
-
-        await deleteAssociatedFiles({
-          collectionConfig,
-          config,
-          doc,
-          overrideDelete: true,
-          req,
-        })
-
-        // /////////////////////////////////////
-        // Delete versions
-        // /////////////////////////////////////
+        await runBeforeDeleteWork(doc)
 
         if (collectionConfig.versions) {
           await deleteCollectionVersions({
-            id,
+            id: doc.id,
             slug: collectionConfig.slug,
             payload,
             req,
           })
         }
 
-        // /////////////////////////////////////
-        // Delete scheduled posts
-        // /////////////////////////////////////
         if (hasScheduledPublishEnabled(collectionConfig)) {
           await deleteScheduledPublishJobs({
-            id,
+            id: doc.id,
             slug: collectionConfig.slug,
             payload,
             req,
           })
         }
-
-        // /////////////////////////////////////
-        // Delete document
-        // /////////////////////////////////////
 
         await payload.db.deleteOne({
           collection: collectionConfig.slug,
@@ -230,122 +291,186 @@ export const deleteOperation = async <
           returning: false,
           where: {
             id: {
-              equals: id,
+              equals: doc.id,
             },
           },
         })
 
-        // /////////////////////////////////////
-        // afterRead - Fields
-        // /////////////////////////////////////
+        const result = await runAfterDeleteWork(doc)
 
-        result = await afterRead({
-          collection: collectionConfig,
-          context: req.context,
-          depth: depth!,
-          doc: result || doc,
-          // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-          draft: undefined,
-          fallbackLocale: fallbackLocale!,
-          global: null,
-          locale: locale!,
-          overrideAccess: overrideAccess!,
-          populate,
-          req,
-          select,
-          showHiddenFields: showHiddenFields!,
-        })
-
-        // /////////////////////////////////////
-        // Add collection property for auth collections
-        // /////////////////////////////////////
-
-        if (collectionConfig.auth) {
-          result = { ...result, collection: collectionConfig.slug }
-        }
-
-        // /////////////////////////////////////
-        // afterRead - Collection
-        // /////////////////////////////////////
-
-        if (collectionConfig.hooks?.afterRead?.length) {
-          for (const hook of collectionConfig.hooks.afterRead) {
-            result =
-              (await hook({
-                collection: collectionConfig,
-                context: req.context,
-                doc: result || doc,
-                overrideAccess,
-                req,
-              })) || result
-          }
-        }
-
-        // /////////////////////////////////////
-        // afterDelete - Collection
-        // /////////////////////////////////////
-
-        if (collectionConfig.hooks?.afterDelete?.length) {
-          for (const hook of collectionConfig.hooks.afterDelete) {
-            result =
-              (await hook({
-                id,
-                collection: collectionConfig,
-                context: req.context,
-                doc: result,
-                req,
-              })) || result
-          }
-        }
-
-        // /////////////////////////////////////
-        // 8. Return results
-        // /////////////////////////////////////
         if (docShouldCommit) {
           await commitTransaction(req)
         }
 
         return result
       } catch (error) {
-        const isPublic = error instanceof Error ? isErrorPublic(error, config) : false
+        await killTransaction(req)
+        pushError(doc.id, error)
 
-        if (req.payload.db.bulkOperationsSingleTransaction) {
-          await killTransaction(req)
+        return null
+      }
+    }
+
+    /**
+     * Deletes the whole batch using a constant number of database calls, independent of how many
+     * documents matched. Hooks still run per document, they just no longer each carry a write.
+     */
+    const deleteDocumentsInBulk = async (): Promise<(null | ResultDoc)[]> => {
+      const results: (null | ResultDoc)[] = new Array(docs.length).fill(null)
+
+      // /////////////////////////////////////
+      // Handle potentially locked documents
+      // /////////////////////////////////////
+
+      const lockedIds = await getLockedDocumentIds({
+        collectionSlug: collectionConfig.slug,
+        ids: docs.map(({ id }) => id),
+        overrideLock,
+        req,
+      })
+
+      const unlocked: { doc: Doc; index: number }[] = []
+
+      docs.forEach((doc, index) => {
+        if (lockedIds.has(String(doc.id))) {
+          pushError(
+            doc.id,
+            new Locked(`Document with ID ${doc.id} is currently locked and cannot be deleted.`),
+          )
+
+          return
         }
-        errors.push({
-          id: doc.id,
-          isPublic,
-          message: error instanceof Error ? error.message : 'Unknown error',
+
+        unlocked.push({ doc, index })
+      })
+
+      await deleteDocumentLocks({
+        collectionSlug: collectionConfig.slug,
+        ids: unlocked.map(({ doc }) => doc.id),
+        req,
+      })
+
+      const deletable: { doc: Doc; index: number }[] = []
+
+      await Promise.all(
+        unlocked.map(async (entry) => {
+          try {
+            await runBeforeDeleteWork(entry.doc)
+            deletable.push(entry)
+          } catch (error) {
+            pushError(entry.doc.id, error)
+          }
+        }),
+      )
+
+      if (!deletable.length) {
+        return results
+      }
+
+      const ids = deletable.map(({ doc }) => doc.id)
+
+      // /////////////////////////////////////
+      // Delete versions
+      // /////////////////////////////////////
+
+      if (collectionConfig.versions) {
+        await deleteCollectionVersions({
+          slug: collectionConfig.slug,
+          ids,
+          payload,
+          req,
         })
       }
-      return null
-    })
 
-    // Process sequentially when using single transaction mode to avoid shared state issues
-    // Process in parallel when using one transaction for better performance
-    let awaitedDocs
+      // /////////////////////////////////////
+      // Delete scheduled posts
+      // /////////////////////////////////////
+
+      if (hasScheduledPublishEnabled(collectionConfig)) {
+        await deleteScheduledPublishJobs({
+          slug: collectionConfig.slug,
+          ids,
+          payload,
+          req,
+        })
+      }
+
+      // /////////////////////////////////////
+      // Delete documents
+      // /////////////////////////////////////
+
+      try {
+        await payload.db.deleteMany({
+          collection: collectionConfig.slug,
+          req,
+          where: {
+            id: {
+              in: ids,
+            },
+          },
+        })
+      } catch (error) {
+        didBatchDeleteFail = true
+
+        if (shouldCommit) {
+          await killTransaction(req)
+        }
+
+        // The delete covers the whole batch, so a failure here belongs to the batch rather than to
+        // any single document. Say so explicitly, otherwise one batch failure reads as N unrelated
+        // per-document failures.
+        const message = `Bulk delete failed for this batch of ${deletable.length} documents: ${
+          error instanceof Error ? error.message : 'Unknown error'
+        }`
+
+        for (const { doc } of deletable) {
+          pushError(doc.id, error, message)
+        }
+
+        return results
+      }
+
+      await Promise.all(
+        deletable.map(async (entry) => {
+          try {
+            results[entry.index] = await runAfterDeleteWork(entry.doc)
+          } catch (error) {
+            pushError(entry.doc.id, error)
+          }
+        }),
+      )
+
+      return results
+    }
+
+    let awaitedDocs: (null | ResultDoc)[]
+
     if (req.payload.db.bulkOperationsSingleTransaction) {
+      // Process sequentially so that each document's transaction is isolated from the next
       awaitedDocs = []
-      for (const promise of promises) {
-        awaitedDocs.push(await promise)
+
+      for (const doc of docs) {
+        awaitedDocs.push(await deleteDocumentIndividually(doc))
       }
     } else {
-      awaitedDocs = await Promise.all(promises)
+      awaitedDocs = await deleteDocumentsInBulk()
     }
 
     // /////////////////////////////////////
     // Delete Preferences
     // /////////////////////////////////////
 
-    await deleteUserPreferences({
-      collectionConfig,
-      ids: docs.map(({ id }) => id),
-      payload,
-      req,
-    })
+    if (!didBatchDeleteFail) {
+      await deleteUserPreferences({
+        collectionConfig,
+        ids: docs.map(({ id }) => id),
+        payload,
+        req,
+      })
+    }
 
     let result = {
-      docs: awaitedDocs.filter(Boolean),
+      docs: awaitedDocs.filter((doc): doc is ResultDoc => Boolean(doc)),
       errors,
     }
 
@@ -361,7 +486,7 @@ export const deleteOperation = async <
       result,
     })
 
-    if (shouldCommit) {
+    if (shouldCommit && !didBatchDeleteFail) {
       await commitTransaction(req)
     }
 
