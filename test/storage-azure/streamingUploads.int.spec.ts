@@ -8,13 +8,12 @@ import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
-import testConfig from './config.js'
 import { mediaSlug, mediaWithPrefixSlug, prefix } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-test.suite({ config: testConfig })('@payloadcms/storage-azure streamingUploads', () => {
+test.suite({ config: './config.ts' })('@payloadcms/storage-azure streamingUploads', () => {
   let TEST_CONTAINER: string
   let client: ContainerClient
 

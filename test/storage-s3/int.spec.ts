@@ -3,7 +3,6 @@ import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
-import testConfig from './config.js'
 import {
   mediaSlug,
   mediaWithAlwaysInsertFieldsSlug,
@@ -23,7 +22,7 @@ import {
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-test.suite({ config: testConfig })('@payloadcms/storage-s3', () => {
+test.suite({ config: './config.ts' })('@payloadcms/storage-s3', () => {
   test.beforeEach(async () => {
     await createTestBucket()
     await clearTestBucket()

@@ -3,10 +3,9 @@ import { wait } from 'payload/shared'
 import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
-import testConfig from './config.js'
 import { waitUntilAutorunIsDone } from './utilities.js'
 
-test.suite({ config: testConfig, cron: false })('Queues - CLI', () => {
+test.suite({ config: './config.ts', cron: false })('Queues - CLI', () => {
   test('ensure consecutive getPayload call with cron: true will autorun jobs', async ({
     config,
     payload,

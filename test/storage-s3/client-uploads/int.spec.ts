@@ -15,7 +15,6 @@ import {
   getTestBucketName,
   MB,
 } from '../test-utils.js'
-import testConfig from './config.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -35,7 +34,7 @@ const signedURLBody = (
     mimeType,
   })
 
-test.suite({ config: testConfig })('@payloadcms/storage-s3 clientUploads', () => {
+test.suite({ config: './config.ts' })('@payloadcms/storage-s3 clientUploads', () => {
   test.beforeEach(async () => {
     await createTestBucket()
     await clearTestBucket()

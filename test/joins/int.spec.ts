@@ -10,7 +10,6 @@ import type { Category, Config, DepthJoins1, DepthJoins3, Post, Singular } from 
 import { test } from '../__helpers/int/vitest.js'
 import { idToString } from '../__helpers/shared/idToString.js'
 import { devUser } from '../credentials.js'
-import testConfig from './config.js'
 import {
   categoriesJoinRestrictedSlug,
   categoriesSlug,
@@ -26,7 +25,7 @@ let token: string
 
 const { email, password } = devUser
 
-test.suite({ config: testConfig })('Joins Field', () => {
+test.suite({ config: './config.ts' })('Joins Field', () => {
   let category: Category
   let otherCategory: Category
   let categoryID

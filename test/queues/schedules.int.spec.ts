@@ -5,7 +5,6 @@ import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
 import { devUser } from '../credentials.js'
-import testConfig from './config.schedules.js'
 import { timeFreeze, timeTravel, waitUntilAutorunIsDone, withoutAutoRun } from './utilities.js'
 
 let token: string
@@ -15,7 +14,7 @@ const { email, password } = devUser
 _internal_jobSystemGlobals.shouldAutoRun = false
 _internal_jobSystemGlobals.shouldAutoSchedule = false
 
-test.suite({ config: testConfig })(
+test.suite({ config: './config.schedules.ts' })(
   'Queues - scheduling, without automatic scheduling handling',
   () => {
     test.afterAll(async () => {

@@ -10,7 +10,6 @@ import { expect } from 'vitest'
 
 import { test } from '../../__helpers/int/vitest.js'
 import { prefix } from '../shared.js'
-import testConfig from './config.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -36,7 +35,7 @@ const uploadMetadata = (collectionSlug?: string, filesize = 1) => ({
   mimeType: 'image/png',
 })
 
-test.suite({ config: testConfig })('@payloadcms/storage-vercel-blob clientUploads', () => {
+test.suite({ config: './config.ts' })('@payloadcms/storage-vercel-blob clientUploads', () => {
   test.afterEach(async () => {
     const { blobs } = await list()
     if (blobs.length > 0) {

@@ -11,9 +11,8 @@ import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
-import testConfig from './localizeStatus.config.js'
 
-test.suite({ config: testConfig })('localizeStatus migration', () => {
+test.suite({ config: './localizeStatus.config.ts' })('localizeStatus migration', () => {
   test.beforeEach(async () => {
     if (process.env.PAYLOAD_DATABASE === 'mongodb' || !process.env.PAYLOAD_DATABASE) {
       // Wait for MongoDB to finish building indexes to avoid

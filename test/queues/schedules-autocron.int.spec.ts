@@ -5,7 +5,6 @@ import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
 import { devUser } from '../credentials.js'
-import testConfig from './config.schedules-autocron.js'
 
 let token: string
 
@@ -14,7 +13,7 @@ const { email, password } = devUser
 _internal_jobSystemGlobals.shouldAutoRun = false
 _internal_jobSystemGlobals.shouldAutoSchedule = false
 
-test.suite({ config: testConfig })(
+test.suite({ config: './config.schedules-autocron.ts' })(
   'Queues - scheduling, with automatic scheduling handling',
   () => {
     test.afterAll(async () => {

@@ -15,7 +15,6 @@ import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
 import { devUser } from '../credentials.js'
-import testConfig from './config.js'
 import { waitUntilAutorunIsDone } from './utilities.js'
 
 const { email, password } = devUser
@@ -25,7 +24,7 @@ const dirname = path.dirname(filename)
 _internal_jobSystemGlobals.shouldAutoRun = false
 _internal_jobSystemGlobals.shouldAutoSchedule = false
 
-test.suite({ config: testConfig })('Queues - Payload', () => {
+test.suite({ config: './config.ts' })('Queues - Payload', () => {
   let processingLeaseDefaults: {
     duration: number
     safetyBuffer: number

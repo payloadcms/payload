@@ -25,7 +25,6 @@ import { groupSlug } from './collections/Group/index.js'
 import { nestedToArrayAndBlockCollectionSlug } from './collections/NestedToArrayAndBlock/index.js'
 import { noLocalizedFieldsCollectionSlug } from './collections/NoLocalizedFields/index.js'
 import { tabSlug } from './collections/Tab/index.js'
-import testConfig from './config.js'
 import {
   allFieldsLocalizedSlug,
   defaultLocale,
@@ -52,7 +51,7 @@ import {
 const collection = localizedPostsSlug
 const global = 'global-text'
 
-test.suite({ config: testConfig })('Localization', () => {
+test.suite({ config: './config.ts' })('Localization', () => {
   test.describe('Localization with fallback true', () => {
     let post1: LocalizedPost
     let postWithLocalizedData: LocalizedPost

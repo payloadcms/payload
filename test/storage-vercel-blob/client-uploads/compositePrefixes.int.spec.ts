@@ -8,7 +8,6 @@ import { expect } from 'vitest'
 
 import { test } from '../../__helpers/int/vitest.js'
 import { collectionPrefix, mediaWithCompositePrefixesSlug } from '../shared.js'
-import testConfig from './config.compositePrefixes.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -17,7 +16,7 @@ dotenv.config({ path: path.resolve(dirname, '../../plugin-cloud-storage/.env.emu
 
 const createdDocIDs: Array<number | string> = []
 
-test.suite({ config: testConfig })(
+test.suite({ config: './config.compositePrefixes.ts' })(
   '@payloadcms/storage-vercel-blob clientUploads (composite prefixes)',
   () => {
     test.afterEach(async ({ payload }) => {

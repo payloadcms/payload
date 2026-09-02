@@ -4,7 +4,6 @@ import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
-import testConfig from './config.js'
 import {
   mediaSlug,
   mediaWithAlwaysInsertFieldsSlug,
@@ -20,7 +19,7 @@ const dirname = path.dirname(filename)
 
 dotenv.config({ path: path.resolve(dirname, '../plugin-cloud-storage/.env.emulated') })
 
-test.suite({ config: testConfig })('@payloadcms/storage-vercel-blob', () => {
+test.suite({ config: './config.ts' })('@payloadcms/storage-vercel-blob', () => {
   test.beforeEach(async () => {
     await clearTestBlobs()
   })

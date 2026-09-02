@@ -3,7 +3,6 @@ import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
-import testConfig from './searchBeforeS3.config.js'
 import { mediaSlug } from './shared.js'
 import { clearTestBucket, createTestBucket, verifyUploads } from './test-utils.js'
 
@@ -17,71 +16,74 @@ const dirname = path.dirname(filename)
  * searchPlugin processes the collection config — fixing the silent upload failure
  * that occurred when s3Storage appeared after searchPlugin in the old `plugins` array.
  */
-test.suite({ config: testConfig })('Search plugin before S3 - Issue #15431', () => {
-  test.beforeEach(async () => {
-    await createTestBucket()
-    await clearTestBucket()
-  })
-
-  test.afterEach(async ({ payload }) => {
-    await payload.delete({
-      collection: mediaSlug,
-      where: { id: { exists: true } },
+test.suite({ config: './searchBeforeS3.config.ts' })(
+  'Search plugin before S3 - Issue #15431',
+  () => {
+    test.beforeEach(async () => {
+      await createTestBucket()
+      await clearTestBucket()
     })
-    // Only delete from search if the collection exists
-    if (payload.collections['search']) {
+
+    test.afterEach(async ({ payload }) => {
       await payload.delete({
-        collection: 'search',
+        collection: mediaSlug,
         where: { id: { exists: true } },
       })
-    }
-    await clearTestBucket()
-  })
-
-  test('should initialise the S3 adapter before the search plugin', ({ payload }) => {
-    // The S3 adapter must have run its init before searchPlugin consumed the collection
-    // config. If it didn't, upload hooks would be absent and the next test's S3 writes
-    // would silently fail. Verify the adapter is wired up on the sanitized config.
-    const s3Adapter = payload.config.storage.find((a) => a.name === 's3')
-
-    expect(s3Adapter).toBeDefined()
-    expect(s3Adapter!.collections).toContain(mediaSlug)
-  })
-
-  test('should upload all image sizes to S3 when search plugin is listed before S3 plugin', async ({
-    payload,
-  }) => {
-    const upload = await payload.create({
-      collection: mediaSlug,
-      data: {},
-      filePath: path.resolve(dirname, '../uploads/image.png'),
+      // Only delete from search if the collection exists
+      if (payload.collections['search']) {
+        await payload.delete({
+          collection: 'search',
+          where: { id: { exists: true } },
+        })
+      }
+      await clearTestBucket()
     })
 
-    expect(upload.id).toBeTruthy()
-    expect(upload.filename).toBeTruthy()
+    test('should initialise the S3 adapter before the search plugin', ({ payload }) => {
+      // The S3 adapter must have run its init before searchPlugin consumed the collection
+      // config. If it didn't, upload hooks would be absent and the next test's S3 writes
+      // would silently fail. Verify the adapter is wired up on the sanitized config.
+      const s3Adapter = payload.config.storage.find((a) => a.name === 's3')
 
-    await verifyUploads({
-      collectionSlug: mediaSlug,
-      uploadId: upload.id,
+      expect(s3Adapter).toBeDefined()
+      expect(s3Adapter!.collections).toContain(mediaSlug)
+    })
+
+    test('should upload all image sizes to S3 when search plugin is listed before S3 plugin', async ({
       payload,
-    })
-  })
+    }) => {
+      const upload = await payload.create({
+        collection: mediaSlug,
+        data: {},
+        filePath: path.resolve(dirname, '../uploads/image.png'),
+      })
 
-  test('should create search document when uploading media', async ({ payload }) => {
-    const upload = await payload.create({
-      collection: mediaSlug,
-      data: {},
-      filePath: path.resolve(dirname, '../uploads/image.png'),
+      expect(upload.id).toBeTruthy()
+      expect(upload.filename).toBeTruthy()
+
+      await verifyUploads({
+        collectionSlug: mediaSlug,
+        uploadId: upload.id,
+        payload,
+      })
     })
 
-    const { docs: searchDocs } = await payload.find({
-      collection: 'search',
-      where: {
-        'doc.value': { equals: upload.id },
-        'doc.relationTo': { equals: mediaSlug },
-      },
-    })
+    test('should create search document when uploading media', async ({ payload }) => {
+      const upload = await payload.create({
+        collection: mediaSlug,
+        data: {},
+        filePath: path.resolve(dirname, '../uploads/image.png'),
+      })
 
-    expect(searchDocs.length).toBe(1)
-  })
-})
+      const { docs: searchDocs } = await payload.find({
+        collection: 'search',
+        where: {
+          'doc.value': { equals: upload.id },
+          'doc.relationTo': { equals: mediaSlug },
+        },
+      })
+
+      expect(searchDocs.length).toBe(1)
+    })
+  },
+)
