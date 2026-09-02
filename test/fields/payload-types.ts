@@ -281,8 +281,12 @@ export interface Config {
     defaultIDType: string;
   };
   fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es') | ('en' | 'es')[];
-  globals: {};
-  globalsSelect: {};
+  globals: {
+    'select-options': SelectOption;
+  };
+  globalsSelect: {
+    'select-options': SelectOptionsSelect<false> | SelectOptionsSelect<true>;
+  };
   locale: 'en' | 'es';
   widgets: {
     collections: CollectionsWidget;
@@ -995,6 +999,7 @@ export interface CheckboxField {
   id: string;
   checkbox: boolean;
   checkboxNotRequired?: boolean | null;
+  checkboxRequiresTrue?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1276,7 +1281,7 @@ export interface EmailField {
  */
 export interface RadioField {
   id: string;
-  radio?: ('one' | 'two' | 'three') | null;
+  radio: 'one' | 'two' | 'three';
   radioWithJsxLabelOption?: ('one' | 'two' | 'three') | null;
   updatedAt: string;
   createdAt: string;
@@ -2887,6 +2892,7 @@ export interface LocalizedTabsBlockSelect<T extends boolean = true> {
 export interface CheckboxFieldsSelect<T extends boolean = true> {
   checkbox?: T;
   checkboxNotRequired?: T;
+  checkboxRequiresTrue?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3932,6 +3938,38 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "select-options".
+ */
+export interface SelectOption {
+  id: string;
+  options?:
+    | {
+        value: string;
+        label: string;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "select-options_select".
+ */
+export interface SelectOptionsSelect<T extends boolean = true> {
+  options?:
+    | T
+    | {
+        value?: T;
+        label?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

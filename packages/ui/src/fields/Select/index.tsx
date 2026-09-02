@@ -15,6 +15,7 @@ import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import { SelectInput } from './Input.js'
+import { mergeFilterOptionLabels } from './mergeFilterOptionLabels.js'
 
 export const formatOptions = (options: Option[]): OptionObject[] =>
   options.map((option) => {
@@ -76,6 +77,11 @@ const SelectFieldComponent: SelectFieldClientComponent = (props) => {
     validate: memoizedValidate,
   })
 
+  const optionsToRender = useMemo(
+    () => mergeFilterOptionLabels({ options, selectFilterOptions }),
+    [options, selectFilterOptions],
+  )
+
   const onChange: ReactSelectAdapterProps['onChange'] = useCallback(
     (selectedOption: OptionObject | OptionObject[]) => {
       if (!readOnly || disabled) {
@@ -126,7 +132,7 @@ const SelectFieldComponent: SelectFieldClientComponent = (props) => {
       localized={localized}
       name={name}
       onChange={onChange}
-      options={options}
+      options={optionsToRender}
       path={path}
       placeholder={placeholder}
       readOnly={readOnly || disabled}

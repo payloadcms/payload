@@ -8,7 +8,7 @@ import type { ServerProps } from '../../config/types.js'
 import type { PaginatedDocs } from '../../database/types.js'
 import type { CollectionPreferences } from '../../preferences/types.js'
 import type { QueryPreset } from '../../query-presets/types.js'
-import type { ResolvedFilterOptions, Where } from '../../types/index.js'
+import type { ResolvedListFilterOptions, Where } from '../../types/index.js'
 import type { Column } from '../elements/Table.js'
 import type { Data, ViewTypes } from '../types.js'
 import type { RelatedDocumentsGrouped } from './hierarchyList.js'
@@ -101,7 +101,7 @@ export type ListViewClientProps = {
   queryPreset?: QueryPreset
   queryPresetPermissions?: SanitizedCollectionPermission
   renderedFilters?: Map<string, React.ReactNode>
-  resolvedFilterOptions?: Map<string, ResolvedFilterOptions>
+  resolvedFilterOptions?: Map<string, ResolvedListFilterOptions>
   viewType: ViewTypes
 } & ListViewSlots
 
