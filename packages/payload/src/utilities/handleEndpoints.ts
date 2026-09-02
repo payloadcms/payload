@@ -216,31 +216,45 @@ export const handleEndpoints = async ({
       )
     }
 
+    const reqMethod = req.method?.toLowerCase()
+
+    const findEndpoint = (targetMethod: string) =>
+      endpoints?.find((endpoint) => {
+        if (endpoint.method !== targetMethod) {
+          return false
+        }
+
+        const pathMatchFn = match(endpoint.path, { decode: decodeURIComponent })
+
+        const matchResult = pathMatchFn(adjustedPathname)
+
+        if (!matchResult) {
+          return false
+        }
+
+        req.routeParams = matchResult.params as Record<string, unknown>
+
+        // Inject to routeParams the slug as well so it can be used later
+        if (collection) {
+          req.routeParams.collection = collection.config.slug
+        } else if (globalConfig) {
+          req.routeParams.global = globalConfig.slug
+        }
+
+        return true
+      })
+
     // Find the relevant endpoint configuration
-    const endpoint = endpoints?.find((endpoint) => {
-      if (endpoint.method !== req.method?.toLowerCase()) {
-        return false
-      }
+    let endpoint = findEndpoint(reqMethod!)
 
-      const pathMatchFn = match(endpoint.path, { decode: decodeURIComponent })
-
-      const matchResult = pathMatchFn(adjustedPathname)
-
-      if (!matchResult) {
-        return false
-      }
-
-      req.routeParams = matchResult.params as Record<string, unknown>
-
-      // Inject to routeParams the slug as well so it can be used later
-      if (collection) {
-        req.routeParams.collection = collection.config.slug
-      } else if (globalConfig) {
-        req.routeParams.global = globalConfig.slug
-      }
-
-      return true
-    })
+    // Per RFC 9110 §9.3.2, HEAD must behave identically to GET except that the
+    // server must not send a response body. Fall back to the GET endpoint so that
+    // HEAD /file/:filename returns the same status and headers as GET.
+    let isHeadViaGetFallback = false
+    if (!endpoint && reqMethod === 'head') {
+      endpoint = findEndpoint('get')
+      isHeadViaGetFallback = Boolean(endpoint)
+    }
 
     if (endpoint) {
       handler = endpoint.handler
@@ -267,7 +281,15 @@ export const handleEndpoints = async ({
 
     const response = await handler(req)
 
-    return new Response(response.body, {
+    // For HEAD requests resolved via the GET fallback, cancel the body stream
+    // (e.g. an open fs.ReadStream) so the file handle is released immediately,
+    // then return an empty body — headers and status are preserved as required
+    // by RFC 9110 §9.3.2.
+    if (isHeadViaGetFallback && response.body) {
+      await response.body.cancel()
+    }
+
+    return new Response(isHeadViaGetFallback ? null : response.body, {
       headers: headersWithCors({
         headers: mergeHeaders(req.responseHeaders ?? new Headers(), response.headers),
         req,
