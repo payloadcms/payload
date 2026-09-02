@@ -19,17 +19,6 @@ export type AzureStorageOptions = {
   allowContainerCreate: boolean
 
   /**
-   * When enabled, fields (like the prefix field) will always be inserted into
-   * the collection schema regardless of whether the plugin is enabled. This
-   * ensures a consistent schema across all environments.
-   *
-   * This will be enabled by default in Payload v4.
-   *
-   * @default false
-   */
-  alwaysInsertFields?: boolean
-
-  /**
    * Base URL for the Azure Blob storage account
    */
   baseURL: string
@@ -107,7 +96,23 @@ export const azureStorage: AzureStorageFactory = (
     const isPluginDisabled = azureStorageOptions.enabled === false
 
     if (isPluginDisabled) {
-      return incomingConfig
+      // Still call cloudStoragePlugin with adapter: null so fields (like prefix) are
+      // inserted into the schema, keeping it consistent across environments.
+      const collectionsWithoutAdapter: CloudStoragePluginOptions['collections'] = Object.entries(
+        azureStorageOptions.collections,
+      ).reduce(
+        (acc, [slug, collOptions]) => ({
+          ...acc,
+          [slug]: { ...(collOptions === true ? {} : collOptions), adapter: null },
+        }),
+        {} as Record<string, CollectionOptions>,
+      )
+
+      return cloudStoragePlugin({
+        collections: collectionsWithoutAdapter,
+        enabled: false,
+        useCompositePrefixes: azureStorageOptions.useCompositePrefixes,
+      })(incomingConfig)
     }
 
     const createContainerIfNotExists = () => {
@@ -162,7 +167,6 @@ export const azureStorage: AzureStorageFactory = (
     }
 
     return cloudStoragePlugin({
-      alwaysInsertFields: azureStorageOptions.alwaysInsertFields,
       collections: collectionsWithAdapter,
       useCompositePrefixes: azureStorageOptions.useCompositePrefixes,
     })(config)

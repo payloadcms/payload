@@ -26,17 +26,6 @@ export type VercelBlobStorageOptions = {
   addRandomSuffix?: boolean
 
   /**
-   * When enabled, fields (like the prefix field) will always be inserted into
-   * the collection schema regardless of whether the plugin is enabled. This
-   * ensures a consistent schema across all environments.
-   *
-   * This will be enabled by default in Payload v4.
-   *
-   * @default false
-   */
-  alwaysInsertFields?: boolean
-
-  /**
    * Cache-Control max-age in seconds
    *
    * @default 365 * 24 * 60 * 60 // (1 Year)
@@ -125,24 +114,22 @@ export const vercelBlobStorage: VercelBlobStorageFactory = (
 
     // If the plugin is disabled or no token is provided, do not enable the plugin
     if (isPluginDisabled) {
-      if (options.alwaysInsertFields) {
-        const collectionsWithoutAdapter: CloudStoragePluginOptions['collections'] = Object.entries(
-          options.collections,
-        ).reduce(
-          (acc, [slug, collOptions]) => ({
-            ...acc,
-            [slug]: { ...(collOptions === true ? {} : collOptions), adapter: null },
-          }),
-          {} as Record<string, CollectionOptions>,
-        )
-        return cloudStoragePlugin({
-          alwaysInsertFields: true,
-          collections: collectionsWithoutAdapter,
-          enabled: false,
-          useCompositePrefixes: options.useCompositePrefixes,
-        })(incomingConfig)
-      }
-      return incomingConfig
+      // Still call cloudStoragePlugin with adapter: null so fields (like prefix) are
+      // inserted into the schema, keeping it consistent across environments.
+      const collectionsWithoutAdapter: CloudStoragePluginOptions['collections'] = Object.entries(
+        options.collections,
+      ).reduce(
+        (acc, [slug, collOptions]) => ({
+          ...acc,
+          [slug]: { ...(collOptions === true ? {} : collOptions), adapter: null },
+        }),
+        {} as Record<string, CollectionOptions>,
+      )
+      return cloudStoragePlugin({
+        collections: collectionsWithoutAdapter,
+        enabled: false,
+        useCompositePrefixes: options.useCompositePrefixes,
+      })(incomingConfig)
     }
 
     const adapter = createVercelBlobAdapter({
@@ -188,7 +175,6 @@ export const vercelBlobStorage: VercelBlobStorageFactory = (
     }
 
     return cloudStoragePlugin({
-      alwaysInsertFields: options.alwaysInsertFields,
       collections: collectionsWithAdapter,
       useCompositePrefixes: options.useCompositePrefixes,
     })(config)
