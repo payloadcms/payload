@@ -267,12 +267,14 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-cloud-storage', () => 
   })
 
   test.describe('integration (non-composite prefixes)', () => {
-    const TEST_BUCKET = process.env.S3_BUCKET!
-
     let client: AWS.S3Client
+    let TEST_BUCKET: string
+
     describeIfInCIOrHasLocalstack()('plugin-cloud-storage (non-composite prefixes)', () => {
       test.describe('S3', () => {
         test.beforeAll(async () => {
+          TEST_BUCKET = process.env.S3_BUCKET!
+
           client = new AWS.S3({
             credentials: {
               accessKeyId: process.env.S3_ACCESS_KEY_ID!,
