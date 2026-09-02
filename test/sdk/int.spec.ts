@@ -9,7 +9,6 @@ import type { Post } from './payload-types.js'
 import { test } from '../__helpers/int/vitest.js'
 import { createStreamableFile } from '../uploads/createStreamableFile.js'
 import { emailsSlug } from './collections/Emails.js'
-import testConfig from './config.js'
 
 let post: Post
 let postTrash: Post
@@ -22,7 +21,7 @@ const testUserCredentials = {
   password: '123456',
 }
 
-test.suite({ config: testConfig })('@payloadcms/sdk', () => {
+test.suite({ config: './config.ts' })('@payloadcms/sdk', () => {
   test.beforeEach(async ({ payload }) => {
     post = await payload.create({ collection: 'posts', data: { number: 1, number2: 3 } })
     postTrash = await payload.create({

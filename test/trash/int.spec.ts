@@ -14,11 +14,10 @@ import { postsSlug } from './collections/Posts/index.js'
 import { registrationsSlug } from './collections/Registrations/index.js'
 import { restrictedCollectionSlug } from './collections/RestrictedCollection/index.js'
 import { usersSlug } from './collections/Users/index.js'
-import testConfig from './config.js'
 
 let user: any
 
-test.suite({ config: testConfig })('trash', () => {
+test.suite({ config: './config.ts' })('trash', () => {
   let restrictedCollectionDoc: RestrictedCollection
   let postsDocOne: Post
   let postsDocTwo: Post

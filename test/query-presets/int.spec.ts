@@ -5,14 +5,13 @@ import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
 import { devUser, regularUser } from '../credentials.js'
-import testConfig from './config.js'
 
 const queryPresetsCollectionSlug = 'payload-query-presets'
 let adminUser: User
 let editorUser: User
 let publicUser: User
 
-test.suite({ config: testConfig })('Query Presets', () => {
+test.suite({ config: './config.ts' })('Query Presets', () => {
   test.beforeEach(async ({ payload }) => {
     adminUser = await payload
       .login({

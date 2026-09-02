@@ -2,10 +2,9 @@ import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
-import testConfig from './config.js'
 import { arraySlug, complexSlug } from './shared.js'
 
-test.suite({ config: testConfig })('array-update', () => {
+test.suite({ config: './config.ts' })('array-update', () => {
   test('should persist existing array-based data while updating and passing row ID', async ({
     payload,
   }) => {

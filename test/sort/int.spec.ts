@@ -11,9 +11,8 @@ import { draftsSlug } from './collections/Drafts/index.js'
 import { nonUniqueSortSlug } from './collections/NonUniqueSort/index.js'
 import { orderableSlug } from './collections/Orderable/index.js'
 import { orderableJoinSlug } from './collections/OrderableJoin/index.js'
-import testConfig from './config.js'
 
-test.suite({ config: testConfig })('Sort', () => {
+test.suite({ config: './config.ts' })('Sort', () => {
   test.describe('Local API', () => {
     test.beforeEach(async ({ payload }) => {
       await createData(payload, 'posts', [

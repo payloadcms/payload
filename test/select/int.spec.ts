@@ -20,12 +20,11 @@ import type {
 
 import { test } from '../__helpers/int/vitest.js'
 import { devUser } from '../credentials.js'
-import testConfig from './config.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-test.suite({ config: testConfig })('Select', () => {
+test.suite({ config: './config.ts' })('Select', () => {
   test.describe('Local API - Base', () => {
     let post: Post
     let postId: number | string

@@ -6,9 +6,8 @@ import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
-import testConfig from './config.js'
 
-test.suite({ config: testConfig })('KV Adapters', () => {
+test.suite({ config: './config.ts' })('KV Adapters', () => {
   const testKVAdapter = async (payload: Payload, adapter?: KVAdapterResult) => {
     if (adapter) {
       payload.kv = adapter.init({ payload })

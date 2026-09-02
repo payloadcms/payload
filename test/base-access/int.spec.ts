@@ -2,7 +2,7 @@ import { createLocalReq, Forbidden, getAccessResults } from 'payload'
 import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
-import testConfig, { denyHeader, postsSlug, settingsSlug, tenantHeader } from './config.js'
+import { denyHeader, postsSlug, settingsSlug, tenantHeader } from './config.js'
 
 const createRequest = async ({
   headers,
@@ -20,7 +20,7 @@ const createRequest = async ({
     payload,
   )
 
-test.suite({ config: testConfig })('baseAccess', () => {
+test.suite({ config: './config.ts' })('baseAccess', () => {
   test('should combine base and collection query constraints', async ({ payload }) => {
     for (const data of [
       {

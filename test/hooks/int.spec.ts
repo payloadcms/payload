@@ -22,11 +22,11 @@ import {
 import { relationsSlug } from './collections/Relations/index.js'
 import { transformSlug } from './collections/Transform/index.js'
 import { hooksUsersSlug } from './collections/Users/index.js'
-import testConfig, { HooksConfig } from './config.js'
+import { HooksConfig } from './config.js'
 import { dataHooksGlobalSlug } from './globals/Data/index.js'
 import { afterReadSlug, beforeValidateSlug, overrideAccessSlug } from './shared.js'
 
-test.suite({ config: testConfig })('Hooks', () => {
+test.suite({ config: './config.ts' })('Hooks', () => {
   test.options({ db: 'mongo' }).describe('transform actions', () => {
     test('should create and not throw an error', async ({ payload }) => {
       // the collection has hooks that will cause an error if transform actions is not handled properly

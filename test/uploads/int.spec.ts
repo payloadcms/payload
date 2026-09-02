@@ -20,7 +20,6 @@ import { getExternalFile } from '../../packages/payload/src/uploads/getExternalF
 // eslint-disable-next-line payload/no-relative-monorepo-imports
 import { tempFileHandler } from '../../packages/payload/src/uploads/fetchAPI-multipart/handlers.js'
 import { test } from '../__helpers/int/vitest.js'
-import testConfig from './config.js'
 import { createStreamableFile } from './createStreamableFile.js'
 import {
   adminThumbnailSizeSlug,
@@ -52,7 +51,7 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 const stat = promisify(fs.stat)
 
-test.suite({ config: testConfig })('Collections - Uploads', () => {
+test.suite({ config: './config.ts' })('Collections - Uploads', () => {
   test.beforeEach(async ({ restClient }) => {
     await restClient.login({ slug: usersSlug })
   })

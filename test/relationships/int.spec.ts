@@ -17,7 +17,6 @@ import type {
 
 import { test } from '../__helpers/int/vitest.js'
 import { devUser } from '../credentials.js'
-import testConfig from './config.js'
 import {
   chainedRelSlug,
   customIdNumberSlug,
@@ -33,7 +32,7 @@ import {
 
 type EasierChained = { id: string; relation: EasierChained }
 
-test.suite({ config: testConfig })('Relationships', () => {
+test.suite({ config: './config.ts' })('Relationships', () => {
   test.beforeEach(async ({ restClient }) => {
     await restClient.login({ slug: usersSlug, credentials: devUser })
   })

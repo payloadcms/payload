@@ -18,7 +18,6 @@ import type { AutosaveMultiSelectPost, DraftPost } from './payload-types.js'
 import { test } from '../__helpers/int/vitest.js'
 import { devUser } from '../credentials.js'
 import { cloudStorageDeletedFilenames } from './collections/DraftsWithUploadCloudStorage.js'
-import testConfig from './config.js'
 import {
   cleanupDocuments,
   cleanupGlobal,
@@ -50,7 +49,7 @@ const dirname = path.dirname(filename)
 const formatGraphQLID = ({ payload }: { payload: Payload }, id: number | string) =>
   payload.db.defaultIDType === 'number' ? id : `"${id}"`
 
-test.suite({ config: testConfig })('Versions', () => {
+test.suite({ config: './config.ts' })('Versions', () => {
   let user: JsonObject
 
   test.beforeEach(async ({ restClient }) => {

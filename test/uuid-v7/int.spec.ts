@@ -4,14 +4,13 @@ import { validate as uuidValidate } from 'uuid'
 import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
-import testConfig from './config.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 process.env.PAYLOAD_CONFIG_PATH = path.join(dirname, 'config.ts')
 
-test.suite({ config: testConfig, db: (adapter) => adapter === 'postgres-uuidv7' })(
+test.suite({ config: './config.ts', db: (adapter) => adapter === 'postgres-uuidv7' })(
   'UUID v7 idType (postgres)',
   () => {
     test('should expose uuidv7 adapter idType', ({ payload }) => {

@@ -2,12 +2,11 @@ import { NotFound } from 'payload'
 import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
-import testConfig from './config.js'
 import { postsSlug } from './slugs.js'
 
 const lockedDocumentCollection = 'payload-locked-documents'
 
-test.suite({ config: testConfig })('Locked documents - bulk delete', () => {
+test.suite({ config: './config.ts' })('Locked documents - bulk delete', () => {
   // Bulk delete resolves the lock state of the whole batch in a single query, rather than one
   // query per document like deleting a single document does
   test('should skip locked documents but delete the unlocked ones', async ({ payload }) => {

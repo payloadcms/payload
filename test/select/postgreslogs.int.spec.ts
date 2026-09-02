@@ -7,12 +7,11 @@ import { expect, vitest } from 'vitest'
 import type { Point, Post } from './payload-types.js'
 
 import { test } from '../__helpers/int/vitest.js'
-import testConfig from './config.postgreslogs.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-test.suite({ config: testConfig, db: (adapter) => adapter.startsWith('postgres') })(
+test.suite({ config: './config.postgreslogs.ts', db: (adapter) => adapter.startsWith('postgres') })(
   'Select - with postgres logs',
   () => {
     test.describe('Local API - Base', () => {

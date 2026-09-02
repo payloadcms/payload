@@ -2,7 +2,7 @@ import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
-import testConfig, {
+import {
   accessControlSlug,
   arraySlug,
   defaultValueSlug,
@@ -11,7 +11,7 @@ import testConfig, {
   spanishLocale,
 } from './config.js'
 
-test.suite({ config: testConfig })('globals', () => {
+test.suite({ config: './config.ts' })('globals', () => {
   test.describe('REST', () => {
     test('should create', async ({ restClient }) => {
       const title = 'update'
