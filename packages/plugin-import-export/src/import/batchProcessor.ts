@@ -356,6 +356,16 @@ async function processImportBatch({
           delete updateData.createdAt
           delete updateData.updatedAt
 
+          // Only handle _status for versioned collections
+          let draftOption: boolean | undefined
+          if (collectionHasVersions) {
+            // Use defaultVersionStatus from config if _status not provided
+            const statusValue = updateData._status || options.defaultVersionStatus
+            const isPublished = statusValue !== 'draft'
+            draftOption = !isPublished
+            updateData._status = statusValue
+          }
+
           // Check if we have multi-locale data and extract it
           const { flatData, hasMultiLocale, localeUpdates } = extractMultiLocaleData(
             updateData,
@@ -389,7 +399,7 @@ async function processImportBatch({
               collection: collectionSlug,
               data: flatData,
               depth: 0,
-              // Don't specify draft - this creates a new draft for versioned collections
+              draft: draftOption,
               overrideAccess: false,
               req: defaultLocaleReq,
               user,
@@ -428,14 +438,12 @@ async function processImportBatch({
                 })
               }
 
-              // Update the document - don't specify draft to let Payload handle versions properly
-              // This will create a new draft version for collections with versions enabled
               savedDocument = await req.payload.update({
                 id: existingDoc.id as number | string,
                 collection: collectionSlug,
                 data: updateData,
                 depth: 0,
-                // Don't specify draft - this creates a new draft for versioned collections
+                draft: draftOption,
                 overrideAccess: false,
                 req,
                 user,
