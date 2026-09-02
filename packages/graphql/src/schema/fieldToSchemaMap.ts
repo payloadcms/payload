@@ -718,15 +718,15 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
 
               if (result) {
                 if (isRelatedToManyCollections) {
-                  results.push({
+                  results[i] = {
                     relationTo: collectionSlug,
                     value: {
                       ...result,
                       collection: collectionSlug,
                     },
-                  })
+                  }
                 } else {
-                  results.push(result)
+                  results[i] = result
                 }
               }
             }
@@ -739,7 +739,10 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
           }
 
           await Promise.all(resultPromises)
-          return results
+          // Assigned by index above so the populated order matches the stored
+          // order regardless of which dataloader promise settles first. Filter
+          // out holes left by skipped (invalid collection / missing) entries.
+          return results.filter((result) => result !== undefined)
         }
 
         let id = value
@@ -1137,15 +1140,15 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
 
               if (result) {
                 if (isRelatedToManyCollections) {
-                  results.push({
+                  results[i] = {
                     relationTo: collectionSlug,
                     value: {
                       ...result,
                       collection: collectionSlug,
                     },
-                  })
+                  }
                 } else {
-                  results.push(result)
+                  results[i] = result
                 }
               }
             }
@@ -1158,7 +1161,10 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
           }
 
           await Promise.all(resultPromises)
-          return results
+          // Assigned by index above so the populated order matches the stored
+          // order regardless of which dataloader promise settles first. Filter
+          // out holes left by skipped (invalid collection / missing) entries.
+          return results.filter((result) => result !== undefined)
         }
 
         let id = value
