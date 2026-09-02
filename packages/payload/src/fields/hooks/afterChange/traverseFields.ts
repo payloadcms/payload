@@ -19,10 +19,7 @@ type Args = {
   global: null | SanitizedGlobalConfig
   operation: 'create' | 'update'
   parentIndexPath: string
-  /**
-   * @todo make required in v4.0
-   */
-  parentIsLocalized?: boolean
+  parentIsLocalized: boolean
   parentPath: string
   parentSchemaPath: string
   previousDoc: JsonObject
@@ -68,7 +65,7 @@ export const traverseFields = async ({
         global,
         operation,
         parentIndexPath,
-        parentIsLocalized: parentIsLocalized!,
+        parentIsLocalized,
         parentPath,
         parentSchemaPath,
         previousDoc,
