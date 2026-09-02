@@ -1083,17 +1083,20 @@ export const point: PointFieldValidation = (value = ['', ''], { req: { t }, requ
     return t('validation:requiresTwoNumbers')
   }
 
-  if ((value[1] && Number.isNaN(lng)) || (value[0] && Number.isNaN(lat))) {
+  const hasLng = value[0] !== null && value[0] !== undefined && value[0] !== ''
+  const hasLat = value[1] !== null && value[1] !== undefined && value[1] !== ''
+
+  if ((hasLat && Number.isNaN(lng)) || (hasLng && Number.isNaN(lat))) {
     return t('validation:invalidInput')
   }
 
   // Validate longitude bounds (-180 to 180)
-  if (value[0] && !Number.isNaN(lng) && (lng < -180 || lng > 180)) {
+  if (hasLng && !Number.isNaN(lng) && (lng < -180 || lng > 180)) {
     return t('validation:longitudeOutOfBounds')
   }
 
   // Validate latitude bounds (-90 to 90)
-  if (value[1] && !Number.isNaN(lat) && (lat < -90 || lat > 90)) {
+  if (hasLat && !Number.isNaN(lat) && (lat < -90 || lat > 90)) {
     return t('validation:latitudeOutOfBounds')
   }
 
