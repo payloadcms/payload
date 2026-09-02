@@ -27,14 +27,13 @@ import { hasDraftsEnabled } from '../../utilities/getVersionsConfig.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { isErrorPublic } from '../../utilities/isErrorPublic.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
-import { resolveSelect } from '../../utilities/resolveSelect.js'
-import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { buildVersionCollectionFields } from '../../versions/buildCollectionFields.js'
 import { appendVersionToQueryKey } from '../../versions/drafts/appendVersionToQueryKey.js'
 import { getQueryDraftsSort } from '../../versions/drafts/getQueryDraftsSort.js'
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
 import { copyDataWithFreshRowIDs } from './utilities/copyDataWithFreshRowIDs.js'
+import { getOperationSelect } from './utilities/getOperationSelect.js'
 import { sanitizeSortQuery } from './utilities/sanitizeSortQuery.js'
 import { updateDocument } from './utilities/update.js'
 
@@ -252,14 +251,11 @@ export const updateOperation = async <
           docShouldCommit = await initTransaction(req)
         }
 
-        const select = sanitizeSelect({
-          fields: collectionConfig.flattenedFields,
-          select: resolveSelect({
-            config: collectionConfig.select,
-            operation: 'update',
-            req,
-            select: incomingSelect,
-          }),
+        const select = getOperationSelect({
+          collectionConfig,
+          incomingSelect,
+          operation: 'update',
+          req,
         })
 
         // ///////////////////////////////////////////////

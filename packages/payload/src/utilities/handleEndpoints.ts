@@ -1,5 +1,4 @@
 import { status as httpStatus } from 'http-status'
-import { match } from 'path-to-regexp'
 
 import type { Collection } from '../collections/config/types.js'
 import type { Endpoint, PayloadHandler, SanitizedConfig } from '../config/types.js'
@@ -7,6 +6,7 @@ import type { APIError } from '../errors/APIError.js'
 import type { GlobalConfig } from '../globals/config/types.js'
 import type { PayloadRequest } from '../types/index.js'
 
+import { compileEndpoints } from './compileEndpoints.js'
 import { createPayloadRequest } from './createPayloadRequest.js'
 import { formatAdminURL } from './formatAdminURL.js'
 import { headersWithCors } from './headersWithCors.js'
@@ -217,20 +217,20 @@ export const handleEndpoints = async ({
     }
 
     // Find the relevant endpoint configuration
-    const endpoint = endpoints?.find((endpoint) => {
+    const compiledEndpoints = endpoints ? compileEndpoints(endpoints) : []
+
+    const endpoint = compiledEndpoints.find((endpoint) => {
       if (endpoint.method !== req.method?.toLowerCase()) {
         return false
       }
 
-      const pathMatchFn = match(endpoint.path, { decode: decodeURIComponent })
-
-      const matchResult = pathMatchFn(adjustedPathname)
+      const matchResult = endpoint.matcher(adjustedPathname)
 
       if (!matchResult) {
         return false
       }
 
-      req.routeParams = matchResult.params as Record<string, unknown>
+      req.routeParams = matchResult.params
 
       // Inject to routeParams the slug as well so it can be used later
       if (collection) {

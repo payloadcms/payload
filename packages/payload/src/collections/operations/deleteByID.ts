@@ -20,12 +20,12 @@ import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { hasScheduledPublishEnabled } from '../../utilities/getVersionsConfig.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
-import { resolveSelect } from '../../utilities/resolveSelect.js'
-import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { deleteCollectionVersions } from '../../versions/deleteCollectionVersions.js'
 import { deleteScheduledPublishJobs } from '../../versions/deleteScheduledPublishJobs.js'
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
+import { getOperationSelect } from './utilities/getOperationSelect.js'
+import { runCollectionHooks } from './utilities/runCollectionHooks.js'
 
 export type Arguments<TSlug extends CollectionSlug, TSelect extends SelectType> = {
   collection: Collection
@@ -94,16 +94,17 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
     // beforeDelete - Collection
     // /////////////////////////////////////
 
-    if (collectionConfig.hooks?.beforeDelete?.length) {
-      for (const hook of collectionConfig.hooks.beforeDelete) {
-        await hook({
+    await runCollectionHooks({
+      hooks: collectionConfig.hooks?.beforeDelete,
+      invoke: (hook) =>
+        hook({
           id,
           collection: collectionConfig,
           context: req.context,
           req,
-        })
-      }
-    }
+        }),
+      payload: undefined,
+    })
 
     // /////////////////////////////////////
     // Retrieve document
@@ -177,14 +178,11 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
       })
     }
 
-    const select = sanitizeSelect({
-      fields: collectionConfig.flattenedFields,
-      select: resolveSelect({
-        config: collectionConfig.select,
-        operation: 'delete',
-        req,
-        select: incomingSelect,
-      }),
+    const select = getOperationSelect({
+      collectionConfig,
+      incomingSelect,
+      operation: 'delete',
+      req,
     })
 
     // /////////////////////////////////////
@@ -241,35 +239,29 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
     // afterRead - Collection
     // /////////////////////////////////////
 
-    if (collectionConfig.hooks?.afterRead?.length) {
-      for (const hook of collectionConfig.hooks.afterRead) {
-        result =
-          (await hook({
-            collection: collectionConfig,
-            context: req.context,
-            doc: result,
-            overrideAccess,
-            req,
-          })) || result
-      }
-    }
+    result = await runCollectionHooks({
+      hooks: collectionConfig.hooks?.afterRead,
+      invoke: (hook, doc) =>
+        hook({ collection: collectionConfig, context: req.context, doc, overrideAccess, req }),
+      payload: result,
+    })
 
     // /////////////////////////////////////
     // afterDelete - Collection
     // /////////////////////////////////////
 
-    if (collectionConfig.hooks?.afterDelete?.length) {
-      for (const hook of collectionConfig.hooks.afterDelete) {
-        result =
-          (await hook({
-            id,
-            collection: collectionConfig,
-            context: req.context,
-            doc: result,
-            req,
-          })) || result
-      }
-    }
+    result = await runCollectionHooks({
+      hooks: collectionConfig.hooks?.afterDelete,
+      invoke: (hook, doc) =>
+        hook({
+          id,
+          collection: collectionConfig,
+          context: req.context,
+          doc,
+          req,
+        }),
+      payload: result,
+    })
 
     // /////////////////////////////////////
     // afterOperation - Collection
