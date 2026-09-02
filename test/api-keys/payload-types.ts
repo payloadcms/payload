@@ -106,7 +106,7 @@ export interface Config {
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
-    defaultIDType: number;
+    defaultIDType: string;
   };
   fallbackLocale: null;
   globals: {};
@@ -200,7 +200,7 @@ export interface ApiKeyVerifiedCustomerAuthOperations {
  * via the `definition` "api-key-admins".
  */
 export interface ApiKeyAdmin {
-  id: number;
+  id: string;
   /**
    * Controls what this account can see/do with OTHER users’ API keys, for manually testing the payload-api-keys access model. Never affects visibility of your own keys, and never exposes another owner’s decrypted secret regardless of level.
    */
@@ -211,7 +211,7 @@ export interface ApiKeyAdmin {
   apiKey?: string | null;
   apiKeyIndex?: string | null;
   apiKeys?: {
-    docs?: (number | PayloadApiKey)[];
+    docs?: (string | PayloadApiKey)[];
     hasNextPage?: boolean;
     totalDocs?: number;
   };
@@ -237,24 +237,24 @@ export interface ApiKeyAdmin {
  * via the `definition` "payload-api-keys".
  */
 export interface PayloadApiKey {
-  id: number;
+  id: string;
   name: string;
   owner:
     | {
         relationTo: 'api-key-admins';
-        value: number | ApiKeyAdmin;
+        value: string | ApiKeyAdmin;
       }
     | {
         relationTo: 'api-key-customers';
-        value: number | ApiKeyCustomer;
+        value: string | ApiKeyCustomer;
       }
     | {
         relationTo: 'api-key-other-customers';
-        value: number | ApiKeyOtherCustomer;
+        value: string | ApiKeyOtherCustomer;
       }
     | {
         relationTo: 'api-key-verified-customers';
-        value: number | ApiKeyVerifiedCustomer;
+        value: string | ApiKeyVerifiedCustomer;
       };
   apiKeyHash?: string | null;
   /**
@@ -262,10 +262,6 @@ export interface PayloadApiKey {
    */
   apiKey?: string | null;
   regenerate?: boolean | null;
-  migratedFrom?: {
-    collection?: string | null;
-    documentID?: string | null;
-  };
   updatedAt: string;
   createdAt: string;
 }
@@ -274,14 +270,14 @@ export interface PayloadApiKey {
  * via the `definition` "api-key-customers".
  */
 export interface ApiKeyCustomer {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   enableAPIKey?: boolean | null;
   apiKey?: string | null;
   apiKeyIndex?: string | null;
   apiKeys?: {
-    docs?: (number | PayloadApiKey)[];
+    docs?: (string | PayloadApiKey)[];
     hasNextPage?: boolean;
     totalDocs?: number;
   };
@@ -307,14 +303,14 @@ export interface ApiKeyCustomer {
  * via the `definition` "api-key-other-customers".
  */
 export interface ApiKeyOtherCustomer {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   enableAPIKey?: boolean | null;
   apiKey?: string | null;
   apiKeyIndex?: string | null;
   apiKeys?: {
-    docs?: (number | PayloadApiKey)[];
+    docs?: (string | PayloadApiKey)[];
     hasNextPage?: boolean;
     totalDocs?: number;
   };
@@ -340,14 +336,14 @@ export interface ApiKeyOtherCustomer {
  * via the `definition` "api-key-verified-customers".
  */
 export interface ApiKeyVerifiedCustomer {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   enableAPIKey?: boolean | null;
   apiKey?: string | null;
   apiKeyIndex?: string | null;
   apiKeys?: {
-    docs?: (number | PayloadApiKey)[];
+    docs?: (string | PayloadApiKey)[];
     hasNextPage?: boolean;
     totalDocs?: number;
   };
@@ -375,7 +371,7 @@ export interface ApiKeyVerifiedCustomer {
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
-  id: number;
+  id: string;
   key: string;
   data:
     | {
@@ -392,41 +388,41 @@ export interface PayloadKv {
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: number;
+  id: string;
   document?:
     | ({
         relationTo: 'api-key-admins';
-        value: number | ApiKeyAdmin;
+        value: string | ApiKeyAdmin;
       } | null)
     | ({
         relationTo: 'api-key-customers';
-        value: number | ApiKeyCustomer;
+        value: string | ApiKeyCustomer;
       } | null)
     | ({
         relationTo: 'api-key-other-customers';
-        value: number | ApiKeyOtherCustomer;
+        value: string | ApiKeyOtherCustomer;
       } | null)
     | ({
         relationTo: 'api-key-verified-customers';
-        value: number | ApiKeyVerifiedCustomer;
+        value: string | ApiKeyVerifiedCustomer;
       } | null);
   globalSlug?: string | null;
   user:
     | {
         relationTo: 'api-key-admins';
-        value: number | ApiKeyAdmin;
+        value: string | ApiKeyAdmin;
       }
     | {
         relationTo: 'api-key-customers';
-        value: number | ApiKeyCustomer;
+        value: string | ApiKeyCustomer;
       }
     | {
         relationTo: 'api-key-other-customers';
-        value: number | ApiKeyOtherCustomer;
+        value: string | ApiKeyOtherCustomer;
       }
     | {
         relationTo: 'api-key-verified-customers';
-        value: number | ApiKeyVerifiedCustomer;
+        value: string | ApiKeyVerifiedCustomer;
       };
   updatedAt: string;
   createdAt: string;
@@ -436,23 +432,23 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: number;
+  id: string;
   user:
     | {
         relationTo: 'api-key-admins';
-        value: number | ApiKeyAdmin;
+        value: string | ApiKeyAdmin;
       }
     | {
         relationTo: 'api-key-customers';
-        value: number | ApiKeyCustomer;
+        value: string | ApiKeyCustomer;
       }
     | {
         relationTo: 'api-key-other-customers';
-        value: number | ApiKeyOtherCustomer;
+        value: string | ApiKeyOtherCustomer;
       }
     | {
         relationTo: 'api-key-verified-customers';
-        value: number | ApiKeyVerifiedCustomer;
+        value: string | ApiKeyVerifiedCustomer;
       };
   key?: string | null;
   value?:
@@ -472,7 +468,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: number;
+  id: string;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
@@ -625,12 +621,6 @@ export interface PayloadApiKeysSelect<T extends boolean = true> {
   apiKeyHash?: T;
   apiKey?: T;
   regenerate?: T;
-  migratedFrom?:
-    | T
-    | {
-        collection?: T;
-        documentID?: T;
-      };
   updatedAt?: T;
   createdAt?: T;
 }

@@ -123,29 +123,6 @@ export const getAPIKeysCollection = (config: Config): CollectionConfig | null =>
           },
         },
       },
-      {
-        name: 'migratedFrom',
-        type: 'group',
-        access: {
-          create: () => false,
-          update: () => false,
-        },
-        admin: {
-          hidden: true,
-        },
-        fields: [
-          {
-            name: 'collection',
-            type: 'text',
-          },
-          {
-            // Not `id`: Mongoose gives object subdocuments an automatic `id` virtual
-            // getter, which shadows a same-named field and silently drops its value.
-            name: 'documentID',
-            type: 'text',
-          },
-        ],
-      },
     ],
     hooks: {
       beforeValidate: [assignAPIKeyCredential],

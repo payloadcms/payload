@@ -53,8 +53,8 @@ type LegacyRow = {
  * Each row is then migrated as: create/verify the `payload-api-keys` document, verify it
  * via a raw read, and only then clear the legacy source fields - so an interruption
  * between those steps never clears a source without a verified target, and a rerun finds
- * the same deterministic target (keyed by `migratedFrom.collection`/`migratedFrom.documentID`)
- * instead of creating a duplicate.
+ * the same deterministic target (looked up by the row's own `apiKeyHash`, which is
+ * unique and reproducible from the same decrypted secret) instead of creating a duplicate.
  *
  * The decrypted plaintext is used only to compute the new document's one-way
  * `apiKeyHash` - it is never written anywhere, including to the migrated document itself
@@ -223,43 +223,6 @@ const migrateRow = async ({
     return
   }
 
-  const existingTarget = await payload.db.find({
-    collection: payloadAPIKeysCollectionSlug,
-    limit: 1,
-    pagination: false,
-    where: {
-      and: [
-        { 'migratedFrom.collection': { equals: slug } },
-        { 'migratedFrom.documentID': { equals: String(doc.id) } },
-      ],
-    },
-  })
-
-  if (existingTarget.docs.length > 0) {
-    const target = existingTarget.docs[0] as { owner?: { relationTo?: string; value?: unknown } }
-
-    if (target.owner?.relationTo !== slug || String(target.owner.value) !== String(doc.id)) {
-      throw new Error(
-        `migrateAPIKeys: an existing payload-api-keys record claims migratedFrom "${slug}"/"${String(
-          doc.id,
-        )}" but belongs to a different owner. Aborting; no further writes have been made.`,
-      )
-    }
-
-    // An earlier, interrupted run already created and verified this target - clear the
-    // source without recreating it.
-    if (!dryRun) {
-      await payload.db.updateOne({
-        id: doc.id,
-        collection: slug,
-        data: { apiKey: null, apiKeyIndex: null, enableAPIKey: false },
-        returning: false,
-      })
-    }
-    result.skipped++
-    return
-  }
-
   let plaintext: string | undefined
 
   for (const key of payload.encryptionKeyring.all) {
@@ -280,18 +243,50 @@ const migrateRow = async ({
     )
   }
 
+  const apiKeyHash = hashAPIKeySecret(plaintext)
+
+  const existingTarget = await payload.db.find({
+    collection: payloadAPIKeysCollectionSlug,
+    limit: 1,
+    pagination: false,
+    where: { apiKeyHash: { equals: apiKeyHash } },
+  })
+
+  if (existingTarget.docs.length > 0) {
+    const target = existingTarget.docs[0] as { owner?: { relationTo?: string; value?: unknown } }
+
+    if (target.owner?.relationTo !== slug || String(target.owner.value) !== String(doc.id)) {
+      throw new Error(
+        `migrateAPIKeys: an existing payload-api-keys record for this secret belongs to a different owner than collection "${slug}" id "${String(
+          doc.id,
+        )}". Aborting; no further writes have been made.`,
+      )
+    }
+
+    // An earlier, interrupted run already created and verified this target - clear the
+    // source without recreating it.
+    if (!dryRun) {
+      await payload.db.updateOne({
+        id: doc.id,
+        collection: slug,
+        data: { apiKey: null, apiKeyIndex: null, enableAPIKey: false },
+        returning: false,
+      })
+    }
+    result.skipped++
+    return
+  }
+
   if (dryRun) {
     result.migrated++
     return
   }
 
-  const migratedFrom = { collection: slug, documentID: String(doc.id) }
   const created = await payload.db.create({
     collection: payloadAPIKeysCollectionSlug,
     data: {
       name: 'Migrated API key',
-      apiKeyHash: hashAPIKeySecret(plaintext),
-      migratedFrom,
+      apiKeyHash,
       owner: { relationTo: slug, value: doc.id },
     },
   })

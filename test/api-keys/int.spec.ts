@@ -149,7 +149,7 @@ describe('payload-api-keys collection', () => {
     expect(foundPopulated.apiKey).toBeFalsy()
   })
 
-  it('should ignore client-supplied owner, apiKeyHash, and migratedFrom on create', async () => {
+  it('should ignore client-supplied owner and apiKeyHash on create', async () => {
     const alice = await createOwner(customersSlug)
     const admin = await createOwner(adminsSlug)
 
@@ -159,7 +159,6 @@ describe('payload-api-keys collection', () => {
         name: 'Alice key',
         // @ts-expect-error - intentionally supplying fields the caller should not control
         apiKeyHash: 'attacker-chosen-hash',
-        migratedFrom: { collection: 'x', documentID: '1' },
         owner: { relationTo: adminsSlug, value: admin.id },
       },
       overrideAccess: false,
@@ -170,8 +169,6 @@ describe('payload-api-keys collection', () => {
     expect(key.owner.relationTo).toBe(customersSlug)
     expect(ownerID(key.owner)).toBe(String(alice.id))
     expect(key.apiKey).toMatch(/^[\w-]{40,}$/)
-    expect(key.migratedFrom?.collection).toBeFalsy()
-    expect(key.migratedFrom?.documentID).toBeFalsy()
 
     const raw = await payload.db.findOne<{ apiKeyHash: string }>({
       collection: payloadAPIKeysCollectionSlug,

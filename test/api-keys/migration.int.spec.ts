@@ -62,6 +62,14 @@ const seedActiveLegacyRow = async ({
   })
 }
 
+const findMigratedTarget = async (collection: string, id: number | string) =>
+  payload.db.find({
+    collection: payloadAPIKeysCollectionSlug,
+    where: {
+      and: [{ 'owner.relationTo': { equals: collection } }, { 'owner.value': { equals: id } }],
+    },
+  })
+
 const seedDisabledLegacyRow = async ({
   collection,
   id,
@@ -125,10 +133,7 @@ describe('migrateAPIKeys', () => {
     })
     expect(rawOwner!.apiKeyIndex).toBe(indexForActiveSecret(rawApiKey))
 
-    const migratedDocs = await payload.db.find({
-      collection: payloadAPIKeysCollectionSlug,
-      where: { 'migratedFrom.documentID': { equals: String(owner.id) } },
-    })
+    const migratedDocs = await findMigratedTarget(customersSlug, owner.id)
     expect(migratedDocs.docs).toHaveLength(0)
   })
 
@@ -154,10 +159,7 @@ describe('migrateAPIKeys', () => {
     expect(rawOwnerAfter!.apiKeyIndex).toBeFalsy()
     expect(rawOwnerAfter!.enableAPIKey).toBeFalsy()
 
-    const migratedDocs = await payload.db.find({
-      collection: payloadAPIKeysCollectionSlug,
-      where: { 'migratedFrom.documentID': { equals: String(owner.id) } },
-    })
+    const migratedDocs = await findMigratedTarget(customersSlug, owner.id)
     expect(migratedDocs.docs).toHaveLength(1)
     createdKeyIDs.push(migratedDocs.docs[0]!.id)
     expect(migratedDocs.docs[0]!.name).toBe('Migrated API key')
@@ -184,10 +186,7 @@ describe('migrateAPIKeys', () => {
     })
     expect(rawOwnerAfter!.apiKey).toBeFalsy()
 
-    const migratedDocs = await payload.db.find({
-      collection: payloadAPIKeysCollectionSlug,
-      where: { 'migratedFrom.documentID': { equals: String(owner.id) } },
-    })
+    const migratedDocs = await findMigratedTarget(customersSlug, owner.id)
     expect(migratedDocs.docs).toHaveLength(0)
   })
 
@@ -197,10 +196,7 @@ describe('migrateAPIKeys', () => {
     await seedActiveLegacyRow({ collection: customersSlug, id: owner.id, rawApiKey })
 
     await migrateAPIKeys({ collections: [customersSlug], payload })
-    const migratedDocs = await payload.db.find({
-      collection: payloadAPIKeysCollectionSlug,
-      where: { 'migratedFrom.documentID': { equals: String(owner.id) } },
-    })
+    const migratedDocs = await findMigratedTarget(customersSlug, owner.id)
     createdKeyIDs.push(migratedDocs.docs[0]!.id)
 
     const secondRun = await migrateAPIKeys({ collections: [customersSlug], payload })
@@ -208,10 +204,7 @@ describe('migrateAPIKeys', () => {
     expect(secondRun.migrated).toBe(0)
     expect(secondRun.scrubbed).toBe(0)
 
-    const stillOneTarget = await payload.db.find({
-      collection: payloadAPIKeysCollectionSlug,
-      where: { 'migratedFrom.documentID': { equals: String(owner.id) } },
-    })
+    const stillOneTarget = await findMigratedTarget(customersSlug, owner.id)
     expect(stillOneTarget.docs).toHaveLength(1)
   })
 
@@ -221,10 +214,7 @@ describe('migrateAPIKeys', () => {
     await seedActiveLegacyRow({ collection: customersSlug, id: owner.id, rawApiKey })
 
     await migrateAPIKeys({ collections: [customersSlug], payload })
-    const migratedDocs = await payload.db.find({
-      collection: payloadAPIKeysCollectionSlug,
-      where: { 'migratedFrom.documentID': { equals: String(owner.id) } },
-    })
+    const migratedDocs = await findMigratedTarget(customersSlug, owner.id)
     createdKeyIDs.push(migratedDocs.docs[0]!.id)
 
     // Simulate an interruption that created the target but never cleared the source.
@@ -235,10 +225,7 @@ describe('migrateAPIKeys', () => {
     expect(resumedRun.migrated).toBe(0)
     expect(resumedRun.skipped).toBe(1)
 
-    const stillOneTarget = await payload.db.find({
-      collection: payloadAPIKeysCollectionSlug,
-      where: { 'migratedFrom.documentID': { equals: String(owner.id) } },
-    })
+    const stillOneTarget = await findMigratedTarget(customersSlug, owner.id)
     expect(stillOneTarget.docs).toHaveLength(1)
 
     const rawOwnerAfter = await payload.db.findOne<{ apiKeyIndex: null | string }>({
@@ -279,10 +266,7 @@ describe('migrateAPIKeys', () => {
     })
     expect(rawValidOwnerAfter!.apiKeyIndex).toBe(indexForActiveSecret(validRawApiKey))
 
-    const migratedDocs = await payload.db.find({
-      collection: payloadAPIKeysCollectionSlug,
-      where: { 'migratedFrom.documentID': { equals: String(validOwner.id) } },
-    })
+    const migratedDocs = await findMigratedTarget(customersSlug, validOwner.id)
     expect(migratedDocs.docs).toHaveLength(0)
   })
 
@@ -305,17 +289,11 @@ describe('migrateAPIKeys', () => {
     const result = await migrateAPIKeys({ collections: [customersSlug], payload })
     expect(result.migrated).toBe(1)
 
-    const includedTarget = await payload.db.find({
-      collection: payloadAPIKeysCollectionSlug,
-      where: { 'migratedFrom.documentID': { equals: String(includedOwner.id) } },
-    })
+    const includedTarget = await findMigratedTarget(customersSlug, includedOwner.id)
     expect(includedTarget.docs).toHaveLength(1)
     createdKeyIDs.push(includedTarget.docs[0]!.id)
 
-    const excludedTarget = await payload.db.find({
-      collection: payloadAPIKeysCollectionSlug,
-      where: { 'migratedFrom.documentID': { equals: String(excludedOwner.id) } },
-    })
+    const excludedTarget = await findMigratedTarget(otherCustomersSlug, excludedOwner.id)
     expect(excludedTarget.docs).toHaveLength(0)
 
     const rawExcludedOwner = await payload.db.findOne<{ apiKeyIndex: null | string }>({
