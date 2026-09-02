@@ -29,7 +29,15 @@ export const connect: Connect = async function connect(
     ...this.connectOptions,
   }
 
-  if (hotReload) {
+  const shouldDropDatabase = !hotReload && process.env.PAYLOAD_DROP_DATABASE === 'true'
+
+  // Mongoose starts building indexes as soon as the connection opens, and does not
+  // wait for those builds to finish. They then run at the same time as the drop below
+  // and as the first writes from `onInit`, which makes MongoDB reject the write with
+  // `Cannot create collection - database is in the process of being dropped` or
+  // `Unable to write to collection due to catalog changes`. Build the indexes after
+  // the drop instead, and wait for them.
+  if (hotReload || shouldDropDatabase) {
     connectionOptions.autoIndex = false
   }
 
@@ -81,19 +89,21 @@ export const connect: Connect = async function connect(
       this.beginTransaction = defaultBeginTransaction()
     }
 
-    if (!hotReload) {
-      if (process.env.PAYLOAD_DROP_DATABASE === 'true') {
-        this.payload.logger.info('---- DROPPING DATABASE ----')
-        await this.connection.dropDatabase()
+    if (shouldDropDatabase) {
+      this.payload.logger.info('---- DROPPING DATABASE ----')
+      await this.connection.dropDatabase()
 
-        this.payload.logger.info('---- DROPPED DATABASE ----')
-      }
+      this.payload.logger.info('---- DROPPED DATABASE ----')
     }
 
-    if (this.ensureIndexes) {
+    // Version models were previously left to Mongoose's background builds, so their
+    // indexes were still missing when `connect` resolved. `globals` is excluded because
+    // every global shares that one collection through a discriminator, and their
+    // auto-named indexes collide with each other.
+    if (this.ensureIndexes || shouldDropDatabase) {
       await Promise.all(
-        this.payload.config.collections.map(async (coll) => {
-          await this.collections[coll.slug]?.ensureIndexes()
+        [...Object.values(this.collections), ...Object.values(this.versions)].map(async (model) => {
+          await model.ensureIndexes()
         }),
       )
     }
