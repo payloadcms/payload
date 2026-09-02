@@ -194,8 +194,7 @@ export const buildColumnState = (args: BuildColumnStateArgs): Column[] => {
           ? serverField.admin.components.Label
           : undefined
 
-      // TODO: customComponent will be optional in v4
-      const clientProps: Omit<ClientComponentProps, 'customComponents'> = {
+      const clientProps: ClientComponentProps = {
         field: clientField,
       }
 
