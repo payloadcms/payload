@@ -6,7 +6,7 @@ import { readFileSync } from 'node:fs'
 import { readFile } from 'node:fs/promises'
 import path from 'path'
 import { fileURLToPath } from 'url'
-import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
+import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 
 import type { NextRESTClient } from '../../__helpers/shared/NextRESTClient.js'
 
@@ -29,6 +29,49 @@ describe('@payloadcms/storage-azure clientUploads', () => {
     for await (const blob of containerClient.listBlobsFlat()) {
       await containerClient.deleteBlob(blob.name)
     }
+  }
+
+  /**
+   * Completes the browser-equivalent side of a client upload (requesting upload instructions,
+   * then PUTting the file straight to Azure) and returns the form data for the follow-up document
+   * POST. Callers must install any `BlockBlobClient` spies after this resolves, so the browser's
+   * own Azure SDK calls don't pollute server-side read-count assertions.
+   */
+  const stageAzureClientUpload = async ({
+    collectionSlug,
+    file,
+    filename,
+    mimeType,
+  }: {
+    collectionSlug: string
+    file: Buffer
+    filename: string
+    mimeType: string
+  }) => {
+    const instructions = (await restClient
+      .POST('/upload-instructions', {
+        body: JSON.stringify({
+          collectionSlug,
+          filename,
+          filesize: file.length,
+          mimeType,
+        }),
+      })
+      .then((res) => res.json())) as UploadInstructions
+
+    if (instructions.type !== 'dispatch') {
+      throw new Error('Expected dispatch upload instructions')
+    }
+
+    const { url } = instructions.data as { url: string }
+    await new BlockBlobClient(url).uploadData(file, {
+      blobHTTPHeaders: { blobContentType: mimeType },
+    })
+
+    const form = new FormData()
+    form.append('file', JSON.stringify(instructions.file))
+
+    return form
   }
 
   beforeAll(async () => {
@@ -127,8 +170,12 @@ describe('@payloadcms/storage-azure clientUploads', () => {
    * the server cloned the request via `Object.create` to add the range header) - completing the
    * full round trip end to end is the only way to exercise the real handler for this path, since
    * unit tests mock the handler and never see that crash.
+   *
+   * The same collection also covers the `'none'` content requirement: content requirement
+   * depends on the uploaded MIME type as well as collection configuration, so `audio/mpeg`
+   * selects `'none'` while `image/jpeg` selects `'header'`.
    */
-  describe('header-only content requirement (real Azure handler)', () => {
+  describe('header-only and no-content requirements (real Azure handler)', () => {
     const createdIds: (number | string)[] = []
 
     afterEach(async () => {
@@ -138,44 +185,73 @@ describe('@payloadcms/storage-azure clientUploads', () => {
       createdIds.length = 0
     })
 
-    it('creates a document from a client-uploaded image via the real Azure handler', async () => {
-      const file = readFileSync(path.resolve(dirname, '../../uploads/image.png'))
+    it('does not read a client-uploaded non-image when metadata is sufficient', async () => {
+      const file = readFileSync(path.resolve(dirname, '../../uploads/audio.mp3'))
+      expect(file.length).toBe(23_334)
 
-      const instructions = (await restClient
-        .POST('/upload-instructions', {
-          body: JSON.stringify({
-            collectionSlug: mediaHeaderOnlySlug,
-            filename: 'header-only.png',
-            filesize: file.length,
-            mimeType: 'image/png',
-          }),
-        })
-        .then((res) => res.json())) as UploadInstructions
+      const form = await stageAzureClientUpload({
+        collectionSlug: mediaHeaderOnlySlug,
+        file,
+        filename: 'no-content-tripwire.mp3',
+        mimeType: 'audio/mpeg',
+      })
 
-      if (instructions.type !== 'dispatch') {
-        throw new Error('Expected dispatch upload instructions')
+      const getPropertiesSpy = vi.spyOn(BlockBlobClient.prototype, 'getProperties')
+      const downloadSpy = vi.spyOn(BlockBlobClient.prototype, 'download')
+
+      try {
+        const createRes = await restClient.POST(`/${mediaHeaderOnlySlug}`, { body: form })
+        expect(createRes.status).toBe(201)
+
+        const { doc } = await createRes.json()
+        createdIds.push(doc.id)
+
+        expect(doc.filesize).toBe(23_334)
+        expect(doc.mimeType).toBe('audio/mpeg')
+        expect(getPropertiesSpy).not.toHaveBeenCalled()
+        expect(downloadSpy).not.toHaveBeenCalled()
+      } finally {
+        getPropertiesSpy.mockRestore()
+        downloadSpy.mockRestore()
       }
+    })
 
-      const { url } = instructions.data as { url: string }
-      await new BlockBlobClient(url).uploadData(file, {
-        blobHTTPHeaders: { blobContentType: 'image/png' },
+    it('creates a document from a client-uploaded image via the real Azure handler', async () => {
+      const file = readFileSync(path.resolve(dirname, '../../uploads/2mb.jpg'))
+      expect(file.length).toBe(2_215_474)
+
+      const form = await stageAzureClientUpload({
+        collectionSlug: mediaHeaderOnlySlug,
+        file,
+        filename: 'header-only-tripwire.jpg',
+        mimeType: 'image/jpeg',
       })
 
-      const createFormData = new FormData()
-      createFormData.append('file', JSON.stringify(instructions.file))
+      const getPropertiesSpy = vi.spyOn(BlockBlobClient.prototype, 'getProperties')
+      const downloadSpy = vi.spyOn(BlockBlobClient.prototype, 'download')
 
-      const createRes = await restClient.POST(`/${mediaHeaderOnlySlug}`, {
-        body: createFormData,
-      })
+      try {
+        const createRes = await restClient.POST(`/${mediaHeaderOnlySlug}`, { body: form })
+        expect(createRes.status).toBe(201)
 
-      expect(createRes.status).toBe(201)
-      const { doc } = await createRes.json()
-      createdIds.push(doc.id)
+        const { doc } = await createRes.json()
+        createdIds.push(doc.id)
 
-      expect(doc.width).toBe(1600)
-      expect(doc.height).toBe(1600)
-      expect(doc.filesize).toBe(file.length)
-      expect(doc.mimeType).toBe('image/png')
+        expect(doc.width).toBe(9000)
+        expect(doc.height).toBe(9000)
+        expect(doc.filesize).toBe(2_215_474)
+        expect(doc.mimeType).toBe('image/jpeg')
+
+        expect(getPropertiesSpy).toHaveBeenCalledTimes(1)
+        expect(downloadSpy).toHaveBeenCalledTimes(1)
+
+        const [offset, count] = downloadSpy.mock.calls[0]!
+        expect(offset).toBe(0)
+        expect(count).toBe(1024 * 1024)
+      } finally {
+        getPropertiesSpy.mockRestore()
+        downloadSpy.mockRestore()
+      }
     })
   })
 
@@ -198,44 +274,40 @@ describe('@payloadcms/storage-azure clientUploads', () => {
 
     it('creates a document and generates image sizes from a large client-uploaded image via the real Azure handler', async () => {
       const file = readFileSync(path.resolve(dirname, '../../uploads/2mb.jpg'))
-      expect(file.length).toBeGreaterThan(1024 * 1024)
+      expect(file.length).toBe(2_215_474)
 
-      const instructions = (await restClient
-        .POST('/upload-instructions', {
-          body: JSON.stringify({
-            collectionSlug: mediaHeaderOnlyWithSizesSlug,
-            filename: 'large-with-sizes.jpg',
-            filesize: file.length,
-            mimeType: 'image/jpeg',
-          }),
+      const form = await stageAzureClientUpload({
+        collectionSlug: mediaHeaderOnlyWithSizesSlug,
+        file,
+        filename: 'large-with-sizes.jpg',
+        mimeType: 'image/jpeg',
+      })
+
+      const downloadSpy = vi.spyOn(BlockBlobClient.prototype, 'download')
+
+      try {
+        const createRes = await restClient.POST(`/${mediaHeaderOnlyWithSizesSlug}`, {
+          body: form,
         })
-        .then((res) => res.json())) as UploadInstructions
 
-      if (instructions.type !== 'dispatch') {
-        throw new Error('Expected dispatch upload instructions')
+        expect(createRes.status).toBe(201)
+        const { doc } = await createRes.json()
+        createdIds.push(doc.id)
+
+        expect(doc.filesize).toBe(file.length)
+        expect(doc.mimeType).toBe('image/jpeg')
+        expect(doc.sizes.thumbnail.width).toBe(400)
+        expect(doc.sizes.thumbnail.height).toBe(300)
+        expect(doc.sizes.thumbnail.filename).toBeTruthy()
+
+        expect(downloadSpy).toHaveBeenCalledTimes(1)
+
+        const [offset, count] = downloadSpy.mock.calls[0]!
+        expect(offset).toBe(0)
+        expect(count).toBeUndefined()
+      } finally {
+        downloadSpy.mockRestore()
       }
-
-      const { url } = instructions.data as { url: string }
-      await new BlockBlobClient(url).uploadData(file, {
-        blobHTTPHeaders: { blobContentType: 'image/jpeg' },
-      })
-
-      const createFormData = new FormData()
-      createFormData.append('file', JSON.stringify(instructions.file))
-
-      const createRes = await restClient.POST(`/${mediaHeaderOnlyWithSizesSlug}`, {
-        body: createFormData,
-      })
-
-      expect(createRes.status).toBe(201)
-      const { doc } = await createRes.json()
-      createdIds.push(doc.id)
-
-      expect(doc.filesize).toBe(file.length)
-      expect(doc.mimeType).toBe('image/jpeg')
-      expect(doc.sizes.thumbnail.width).toBe(400)
-      expect(doc.sizes.thumbnail.height).toBe(300)
-      expect(doc.sizes.thumbnail.filename).toBeTruthy()
     }, 60000)
   })
 })
