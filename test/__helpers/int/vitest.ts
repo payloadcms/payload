@@ -31,6 +31,8 @@ type IntegrationFixtures = {
     configPath: null | string
     /** Raw file-scoped instance for suite hooks. Tests should use `payload`. */
     payloadInstance: Payload
+    /** Config supplied to `test.suite`, imported automatically before file hooks run. */
+    resolvedConfig: null | SanitizedConfig
     testCron: boolean
     testDir: string
     testSuiteConfigured: boolean
@@ -65,7 +67,7 @@ const testWithFixtures = vitestTest.extend<IntegrationFixtures>({
     }
   },
   config: [
-    async ({ configPath, testDir, testSuiteConfigured }, use) => {
+    async ({ resolvedConfig, testDir, testSuiteConfigured }, use) => {
       if (!testSuiteConfigured) {
         const { config } = await initPayloadInt(testDir, undefined, false)
 
@@ -73,17 +75,13 @@ const testWithFixtures = vitestTest.extend<IntegrationFixtures>({
         return
       }
 
-      if (configPath === null) {
+      if (resolvedConfig === null) {
         throw new Error(
           "This integration test requires Payload. Pass its config path to test.suite({ config: './config.ts' })(...).",
         )
       }
 
-      const { default: config } = (await import(configPath)) as {
-        default: Promise<SanitizedConfig> | SanitizedConfig
-      }
-
-      await use(await config)
+      await use(resolvedConfig)
     },
     { scope: 'file' },
   ],
@@ -122,6 +120,21 @@ const testWithFixtures = vitestTest.extend<IntegrationFixtures>({
   restClient: async ({ payload }, use) => {
     await use(new NextRESTClient(payload.config))
   },
+  resolvedConfig: [
+    async ({ configPath }, use) => {
+      if (configPath === null) {
+        await use(null)
+        return
+      }
+
+      const { default: config } = (await import(configPath)) as {
+        default: Promise<SanitizedConfig> | SanitizedConfig
+      }
+
+      await use(await config)
+    },
+    { auto: true, scope: 'file' },
+  ],
   sdk: async ({ payload }, use) => {
     await use(getSDK(payload.config))
   },
@@ -151,11 +164,12 @@ const testWithFixtures = vitestTest.extend<IntegrationFixtures>({
 /**
  * Integration test API with Payload's shared lifecycle and database filtering.
  *
- * Payload-backed test files supply their config to one root `test.suite`. Payload is initialized
- * lazily, once per file, and destroyed afterward. Before every test that uses Payload, REST, or the
- * SDK, the database and upload directories are reset and the suite's optional seed function is run.
- * REST and SDK clients are recreated per test. Standalone integration tests use `test.suite({})` and
- * do not initialize Payload.
+ * Payload-backed test files supply their config to one root `test.suite`. The config module is
+ * imported once before file hooks run. Payload is initialized lazily, once per file, and destroyed
+ * afterward. Before every test that uses Payload, REST, or the SDK, the database and upload
+ * directories are reset and the suite's optional seed function is run. REST and SDK clients are
+ * recreated per test. Standalone integration tests use `test.suite({})` and do not initialize
+ * Payload.
  *
  * @example
  * test.suite({ config: './config.ts' })('Posts', () => {
