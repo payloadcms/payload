@@ -112,7 +112,9 @@ describePostgres('postgres vector custom column', () => {
 
     const similarity = sql<number>`1 - (${cosineDistance(payload.db.tables.posts.embedding, catEmbedding)})`
 
-    const db = payload.db.drizzle as PostgresDB
+    // Read through the primary. `payload.db.drizzle` is the withReplicas() handle, whose
+    // reads default to a replica; querying it right after a write races replication lag.
+    const db = (payload.db.primaryDrizzle ?? payload.db.drizzle) as PostgresDB
 
     const res = await db
       .select()
@@ -234,7 +236,9 @@ describePostgres('postgres vector custom column', () => {
 
     const distance = sql<number>`(${l2Distance(payload.db.tables.posts.embedding, catEmbedding)})`
 
-    const db = payload.db.drizzle as PostgresDB
+    // Read through the primary. `payload.db.drizzle` is the withReplicas() handle, whose
+    // reads default to a replica; querying it right after a write races replication lag.
+    const db = (payload.db.primaryDrizzle ?? payload.db.drizzle) as PostgresDB
 
     const res = await db
       .select()
@@ -346,7 +350,9 @@ describePostgres('postgres vector custom column', () => {
 
     const similarity = sql<number>`1 - (${jaccardDistance(payload.db.tables.posts.embedding, catEmbedding)})`
 
-    const db = payload.db.drizzle as PostgresDB
+    // Read through the primary. `payload.db.drizzle` is the withReplicas() handle, whose
+    // reads default to a replica; querying it right after a write races replication lag.
+    const db = (payload.db.primaryDrizzle ?? payload.db.drizzle) as PostgresDB
 
     const res = await db
       .select()
