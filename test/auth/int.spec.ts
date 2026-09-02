@@ -441,6 +441,82 @@ describe('Auth', () => {
         expect(data.refreshedToken).toBeDefined()
       })
 
+      describe('refresh collection identity', () => {
+        const alternateUserIDs: (number | string)[] = []
+
+        beforeAll(async () => {
+          const alternateUser = await payload.create({
+            collection: publicUsersSlug,
+            data: {
+              id: loggedInUser!.id,
+              email: 'refresh-collection@example.com',
+              password,
+            },
+          })
+
+          alternateUserIDs.push(alternateUser.id)
+        })
+
+        afterAll(async () => {
+          for (const id of alternateUserIDs) {
+            await payload.delete({
+              id,
+              collection: publicUsersSlug,
+            })
+          }
+        })
+
+        it('should not refresh through a different auth collection via REST', async () => {
+          const response = await restClient.POST(`/${publicUsersSlug}/refresh-token`, {
+            headers: {
+              Authorization: `JWT ${token}`,
+            },
+          })
+
+          expect(response.status).toBe(403)
+        })
+
+        it('should not refresh through a different auth collection via GraphQL', async () => {
+          const response = await restClient.GRAPHQL_POST({
+            body: JSON.stringify({
+              query: `mutation {
+                refreshTokenPublicUser {
+                  refreshedToken
+                }
+              }`,
+            }),
+            headers: {
+              Authorization: `JWT ${token}`,
+            },
+          })
+
+          const result = await response.json()
+
+          expect(result.data.refreshTokenPublicUser).toBeNull()
+          expect(result.errors[0].extensions.statusCode).toBe(403)
+        })
+
+        it('should refresh through the authenticated collection via GraphQL', async () => {
+          const response = await restClient.GRAPHQL_POST({
+            body: JSON.stringify({
+              query: `mutation {
+                refreshTokenUser {
+                  refreshedToken
+                }
+              }`,
+            }),
+            headers: {
+              Authorization: `JWT ${token}`,
+            },
+          })
+
+          const result = await response.json()
+
+          expect(result.errors).toBeUndefined()
+          expect(result.data.refreshTokenUser.refreshedToken).toBeDefined()
+        })
+      })
+
       it('should refresh a token and receive an up-to-date user', async () => {
         expect(loggedInUser?.custom).toBe('Hello, world!')
 
