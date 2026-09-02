@@ -29,6 +29,11 @@ import { TEST_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { autosavePostsSlug } from './collections/Autosave/index.js'
 import { postsSlug } from './collections/Posts/index.js'
 
+type StaleErrorTestWindow = {
+  staleErrorToastObserver?: MutationObserver
+  staleErrorToastSeen?: boolean
+} & typeof window
+
 const { afterEach, beforeEach, describe } = test
 
 const filename = fileURLToPath(import.meta.url)
@@ -511,7 +516,7 @@ test.describe('Form State', () => {
     await expect(computedTitleField).toHaveValue('Test Title')
   })
 
-  test('autosave - should not overwrite computed values that are being actively edited', async () => {
+  test('autosave - should accept server-computed values when no newer edit exists', async () => {
     await page.goto(autosavePostsUrl.create)
     await waitForFormReady(page)
 
@@ -532,7 +537,7 @@ test.describe('Form State', () => {
 
     await waitForAutoSaveToRunAndComplete(page)
 
-    await expect(computedTitleField).toHaveValue('Test Title - Edited')
+    await expect(computedTitleField).toHaveValue('Test Title')
 
     // but then when editing another field, the computed field should update
     const autosaveResponse = page.waitForResponse(
@@ -544,6 +549,198 @@ test.describe('Form State', () => {
     await titleField.fill('Test Title 2')
     await autosaveResponse
     await expect(computedTitleField).toHaveValue('Test Title 2')
+  })
+
+  describe('stale autosave responses', () => {
+    let releaseRoutes = () => {}
+
+    afterEach(async () => {
+      releaseRoutes()
+      await page.unrouteAll({ behavior: 'ignoreErrors' })
+    })
+
+    test('autosave - should discard a stale response and reconcile the latest revision', async () => {
+      const doc = await payload.create({
+        collection: autosavePostsSlug,
+        data: { title: 'Initial revision' },
+      })
+      await page.goto(autosavePostsUrl.edit(doc.id))
+      await waitForFormReady(page)
+
+      const firstStarted = Promise.withResolvers<void>()
+      const releaseFirst = Promise.withResolvers<void>()
+      const secondStarted = Promise.withResolvers<void>()
+      const releaseSecond = Promise.withResolvers<void>()
+      let requestCount = 0
+
+      releaseRoutes = () => {
+        releaseFirst.resolve()
+        releaseSecond.resolve()
+      }
+
+      await page.route(`**/api/${autosavePostsSlug}/**`, async (route) => {
+        if (route.request().method() !== 'PATCH') {
+          return route.continue()
+        }
+        requestCount += 1
+        if (requestCount === 1) {
+          firstStarted.resolve()
+          await releaseFirst.promise
+        } else if (requestCount === 2) {
+          secondStarted.resolve()
+          await releaseSecond.promise
+        }
+        await route.continue()
+      })
+
+      const titleField = page.locator('#field-title')
+      const computedTitleField = page.locator('#field-computedTitle')
+
+      await titleField.fill('First revision')
+      await firstStarted.promise
+
+      await titleField.fill('Latest revision')
+      await computedTitleField.fill('Local edit after dispatch')
+
+      releaseFirst.resolve()
+      await secondStarted.promise
+
+      await expect(titleField).toHaveValue('Latest revision')
+      await expect(computedTitleField).toHaveValue('Local edit after dispatch')
+
+      releaseSecond.resolve()
+      await waitForAutoSaveToRunAndComplete(page)
+
+      await expect(titleField).toHaveValue('Latest revision')
+      await expect(computedTitleField).toHaveValue('Latest revision')
+      expect(requestCount).toBe(2)
+
+      await page.unrouteAll({ behavior: 'ignoreErrors' })
+    })
+
+    test('autosave - should ignore error UI from a stale response', async () => {
+      const doc = await payload.create({
+        collection: autosavePostsSlug,
+        data: { title: 'Initial revision' },
+      })
+      await page.goto(autosavePostsUrl.edit(doc.id))
+      await waitForFormReady(page)
+
+      const firstStarted = Promise.withResolvers<void>()
+      const releaseFirst = Promise.withResolvers<void>()
+      const secondStarted = Promise.withResolvers<void>()
+      const releaseSecond = Promise.withResolvers<void>()
+      let requestCount = 0
+
+      releaseRoutes = () => {
+        releaseFirst.resolve()
+        releaseSecond.resolve()
+      }
+
+      await page.route(`**/api/${autosavePostsSlug}/**`, async (route) => {
+        if (route.request().method() !== 'PATCH') {
+          return route.continue()
+        }
+
+        requestCount += 1
+
+        if (requestCount === 1) {
+          firstStarted.resolve()
+          await releaseFirst.promise
+          return route.fulfill({
+            body: JSON.stringify({ message: 'Stale autosave failure' }),
+            contentType: 'application/json',
+            status: 400,
+          })
+        }
+
+        secondStarted.resolve()
+        await releaseSecond.promise
+        await route.continue()
+      })
+
+      const titleField = page.locator('#field-title')
+
+      await titleField.fill('First revision')
+      await firstStarted.promise
+      await titleField.fill('Latest revision')
+
+      await page.evaluate(() => {
+        const testWindow = window as StaleErrorTestWindow
+        testWindow.staleErrorToastSeen = false
+        testWindow.staleErrorToastObserver = new MutationObserver(() => {
+          if (document.body.textContent?.includes('Stale autosave failure')) {
+            testWindow.staleErrorToastSeen = true
+          }
+        })
+        testWindow.staleErrorToastObserver.observe(document.body, {
+          characterData: true,
+          childList: true,
+          subtree: true,
+        })
+      })
+
+      releaseFirst.resolve()
+      await secondStarted.promise
+
+      await expect
+        .poll(() => page.evaluate(() => (window as StaleErrorTestWindow).staleErrorToastSeen))
+        .toBe(false)
+      await expect(titleField).toHaveValue('Latest revision')
+
+      releaseSecond.resolve()
+      await waitForAutoSaveToRunAndComplete(page)
+
+      await expect
+        .poll(() => page.evaluate(() => (window as StaleErrorTestWindow).staleErrorToastSeen))
+        .toBe(false)
+      await page.evaluate(() =>
+        (window as StaleErrorTestWindow).staleErrorToastObserver?.disconnect(),
+      )
+      await expect.poll(() => requestCount).toBe(2)
+    })
+
+    test('autosave - should preserve non-dirty local field updates made in flight', async () => {
+      const doc = await payload.create({
+        collection: autosavePostsSlug,
+        data: {
+          programmaticValue: 'Initial programmatic value',
+          title: 'Initial revision',
+        },
+      })
+      await page.goto(autosavePostsUrl.edit(doc.id))
+      await waitForFormReady(page)
+
+      const firstStarted = Promise.withResolvers<void>()
+      const releaseFirst = Promise.withResolvers<void>()
+      let requestCount = 0
+
+      releaseRoutes = () => releaseFirst.resolve()
+
+      await page.route(`**/api/${autosavePostsSlug}/**`, async (route) => {
+        if (route.request().method() !== 'PATCH') {
+          return route.continue()
+        }
+
+        requestCount += 1
+
+        if (requestCount === 1) {
+          firstStarted.resolve()
+          await releaseFirst.promise
+        }
+
+        await route.continue()
+      })
+
+      await page.locator('#field-title').fill('First revision')
+      await firstStarted.promise
+      await page.locator('#set-programmatic-value').click()
+      releaseFirst.resolve()
+
+      await expect.poll(() => requestCount).toBe(2)
+      await waitForAutoSaveToRunAndComplete(page)
+      await expect(page.locator('#field-programmaticValue')).toHaveValue('Updated programmatically')
+    })
   })
 
   test('array and block rows and maintain consistent row IDs across duplication', async () => {

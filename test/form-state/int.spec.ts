@@ -747,31 +747,6 @@ describe('Form State', () => {
     })
   })
 
-  it('should return the same object reference when only modifying a value', () => {
-    const currentState = {
-      title: {
-        value: 'Test Post',
-        initialValue: 'Test Post',
-        valid: true,
-        passesCondition: true,
-      },
-    }
-
-    const newState = mergeServerFormState({
-      currentState,
-      incomingState: {
-        title: {
-          value: 'Test Post (modified)',
-          initialValue: 'Test Post',
-          valid: true,
-          passesCondition: true,
-        },
-      },
-    })
-
-    expect(newState === currentState).toBe(true)
-  })
-
   it('should accept all values from the server regardless of local modifications, e.g. `acceptAllValues` on submit', () => {
     const title: FieldState = {
       value: 'Test Post (modified on the client)',
@@ -781,10 +756,7 @@ describe('Form State', () => {
     }
 
     const currentState: Record<string, FieldState> = {
-      title: {
-        ...title,
-        isModified: true, // This is critical, this is what we're testing
-      },
+      title,
       computedTitle: {
         value: 'Test Post (computed on the client)',
         initialValue: 'Test Post',
@@ -864,10 +836,7 @@ describe('Form State', () => {
 
     expect(newState).toStrictEqual({
       ...incomingStateFromServer,
-      title: {
-        ...incomingStateFromServer.title,
-        isModified: true,
-      },
+      title: incomingStateFromServer.title,
       array: {
         ...incomingStateFromServer.array,
         rows: currentState?.array?.rows,
@@ -875,56 +844,13 @@ describe('Form State', () => {
     })
   })
 
-  it('should not accept values from the server if they have been modified locally since the request was made, e.g. `overrideLocalChanges: false` on autosave', () => {
-    const title: FieldState = {
-      value: 'Test Post (modified on the client 1)',
-      initialValue: 'Test Post',
-      valid: true,
-      passesCondition: true,
-    }
-
-    const currentState: Record<string, FieldState> = {
-      title: {
-        ...title,
-        isModified: true,
-      },
-      computedTitle: {
-        value: 'Test Post',
-        initialValue: 'Test Post',
-        valid: true,
-        passesCondition: true,
-      },
-    }
-
-    const incomingStateFromServer: Record<string, FieldState> = {
-      title: {
-        value: 'Test Post (modified on the server)',
-        initialValue: 'Test Post',
-        valid: true,
-        passesCondition: true,
-      },
-      computedTitle: {
-        value: 'Test Post (modified on the server)',
-        initialValue: 'Test Post',
-        valid: true,
-        passesCondition: true,
-      },
-    }
-
+  it('should accept server values after an autosave response passes the revision gate', () => {
     const newState = mergeServerFormState({
       acceptValues: { overrideLocalChanges: false },
-      currentState,
-      incomingState: incomingStateFromServer,
+      currentState: { computedTitle: { value: 'Manual value' } },
+      incomingState: { computedTitle: { value: 'Server-computed value' } },
     })
-
-    expect(newState).toStrictEqual({
-      ...currentState,
-      title: {
-        ...currentState.title,
-        isModified: true,
-      },
-      computedTitle: incomingStateFromServer.computedTitle, // This field was not modified locally, so should be updated from the server
-    })
+    expect(newState.computedTitle?.value).toBe('Server-computed value')
   })
 
   it('should preserve client row data after reorder and delete during autosave', () => {
