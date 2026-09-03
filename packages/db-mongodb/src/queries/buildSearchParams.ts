@@ -247,6 +247,18 @@ export async function buildSearchParam({
     })
   }
 
+  // Refuse plain-object (or array-of-plain-object) values for text-matching operators
+  // before sanitizeQueryValue can splice them into a rawQuery. The legitimate nested-where
+  // shapes for `contains` on hasMany relationship / join fields are handled by the two
+  // `build*ContainsSearchParam` branches above.
+  if (
+    (operator === 'contains' || operator === 'like' || operator === 'not_like') &&
+    (isNestedRelationshipQuery(val) ||
+      (Array.isArray(val) && val.some((entry) => isNestedRelationshipQuery(entry))))
+  ) {
+    throw new APIError(`Invalid value for "${operator}" on path "${path}": expected a string.`, 400)
+  }
+
   if (path) {
     const sanitizedQueryValue = sanitizeQueryValue({
       field,

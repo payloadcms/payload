@@ -99,6 +99,27 @@ export async function validateSearchParam({
   const isNestedHasManyQuery =
     operator === 'contains' && hasNestedWhere && Boolean(relatedCollectionSlug)
 
+  const isJoinContainsQuery =
+    operator === 'contains' &&
+    relationshipField?.type === 'join' &&
+    typeof relationshipField.collection === 'string' &&
+    hasNestedWhere
+
+  // Plain-object values would be merged as raw query fragments.
+  if (operator === 'like' || operator === 'not_like' || operator === 'contains') {
+    const isValidNestedContains =
+      operator === 'contains' && (isNestedHasManyQuery || isJoinContainsQuery)
+
+    const containsPlainObject =
+      isNestedRelationshipQuery(val) ||
+      (Array.isArray(val) && val.some((entry) => isNestedRelationshipQuery(entry)))
+
+    if (containsPlainObject && !isValidNestedContains) {
+      errors.push({ path: incomingPath })
+      return
+    }
+  }
+
   if (isNestedHasManyQuery && relatedCollectionSlug) {
     // Validate the nested query against the related collection.
     promises.push(
