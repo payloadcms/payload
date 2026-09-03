@@ -12,18 +12,38 @@ import { Users } from './collections/Users.js'
 import { seed } from './seed/index.js'
 
 export default buildConfigWithDefaults({
-  admin: {
-    importMap: {
-      baseDir: path.resolve(dirname),
+  suite: 'plugin-nested-docs',
+  config: {
+    admin: {
+      importMap: {
+        baseDir: path.resolve(dirname),
+      },
+    },
+    collections: [Pages, Categories, Users],
+    localization: {
+      defaultLocale: 'en',
+      fallback: true,
+      locales: ['en', 'es', 'de'],
+    },
+    plugins: [
+      nestedDocsPlugin({
+        collections: ['pages'],
+        generateLabel: (_, doc) => doc.title as string,
+        generateURL: (docs) => docs.reduce((url, doc) => `${url}/${doc.slug}`, ''),
+      }),
+      nestedDocsPlugin({
+        breadcrumbsFieldSlug: 'categorization',
+        collections: ['categories'],
+        generateLabel: (_, doc) => doc.name as string,
+        generateURL: (docs) => docs.reduce((url, doc) => `${url}/${doc.name}`, ''),
+        parentFieldSlug: 'owner',
+      }),
+    ],
+    typescript: {
+      outputFile: path.resolve(dirname, 'payload-types.ts'),
     },
   },
-  collections: [Pages, Categories, Users],
-  localization: {
-    defaultLocale: 'en',
-    fallback: true,
-    locales: ['en', 'es', 'de'],
-  },
-  onInit: async (payload) => {
+  seed: async (payload) => {
     await payload.create({
       collection: 'users',
       data: {
@@ -33,22 +53,5 @@ export default buildConfigWithDefaults({
     })
 
     await seed(payload)
-  },
-  plugins: [
-    nestedDocsPlugin({
-      collections: ['pages'],
-      generateLabel: (_, doc) => doc.title as string,
-      generateURL: (docs) => docs.reduce((url, doc) => `${url}/${doc.slug}`, ''),
-    }),
-    nestedDocsPlugin({
-      breadcrumbsFieldSlug: 'categorization',
-      collections: ['categories'],
-      generateLabel: (_, doc) => doc.name as string,
-      generateURL: (docs) => docs.reduce((url, doc) => `${url}/${doc.name}`, ''),
-      parentFieldSlug: 'owner',
-    }),
-  ],
-  typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })

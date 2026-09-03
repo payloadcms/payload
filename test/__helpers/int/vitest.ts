@@ -186,15 +186,12 @@ export const test = Object.assign(testWithFixtures, {
       describe: testWithFixtures.describe.runIf(shouldRun),
     })
   },
-  suite: ({ config, cron = true, db }: TestSuiteOptions) => {
-    testWithFixtures.override(
-      'configPath',
-      config ? path.resolve(getTestDirectory(), config) : null,
-    )
-    testWithFixtures.override('testCron', cron)
-    testWithFixtures.override('testSuiteConfigured', true)
+  suite(this: typeof testWithFixtures, { config, cron = true, db }: TestSuiteOptions) {
+    this.override('configPath', config ? path.resolve(getTestDirectory(), config) : null)
+    this.override('testCron', cron)
+    this.override('testSuiteConfigured', true)
 
-    return testWithFixtures.describe.runIf(matchesDatabase({ db }))
+    return this.describe.runIf(matchesDatabase({ db }))
   },
 })
 
