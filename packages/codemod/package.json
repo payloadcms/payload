@@ -45,7 +45,7 @@
     "@types/node": "24.12.3",
     "rimraf": "6.0.1",
     "typescript": "6.0.3",
-    "vitest": "4.1.11"
+    "vitest": "5.0.0"
   },
   "engines": {
     "node": ">=24.15.0"

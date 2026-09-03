@@ -45,7 +45,7 @@
     "tsx": "4.22.4",
     "typescript": "6.0.3",
     "vite-tsconfig-paths": "6.0.5",
-    "vitest": "4.1.11"
+    "vitest": "5.0.0"
   },
   "engines": {
     "node": ">=24.15.0",
