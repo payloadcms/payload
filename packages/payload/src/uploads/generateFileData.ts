@@ -7,6 +7,7 @@ import sanitize from 'sanitize-filename'
 import type { Collection } from '../collections/config/types.js'
 import type { SanitizedConfig } from '../config/types.js'
 import type { Document, PayloadRequest } from '../types/index.js'
+import type { ExternalUploadSource } from './sanitizeUploadData.js'
 import type { FileData, FileToSave, ProbedImageSize, UploadEdits } from './types.js'
 
 import { FileRetrievalError, FileUploadError, Forbidden, MissingFile } from '../errors/index.js'
@@ -27,6 +28,7 @@ type Args<T> = {
   config: SanitizedConfig
   data: T
   draft?: boolean
+  externalUploadSource?: ExternalUploadSource
   isDuplicating?: boolean
   operation: 'create' | 'update'
   originalDoc?: T
@@ -80,6 +82,7 @@ export const generateFileData = async <T>({
   collection: { config: collectionConfig },
   data,
   draft,
+  externalUploadSource,
   isDuplicating,
   operation,
   originalDoc,
@@ -125,9 +128,12 @@ export const generateFileData = async <T>({
 
   if (
     !file &&
-    (isDuplicating || shouldReupload(uploadEdits, incomingFileData as Record<string, unknown>))
+    (externalUploadSource ||
+      isDuplicating ||
+      shouldReupload(uploadEdits, incomingFileData as Record<string, unknown>))
   ) {
-    const { filename, url } = incomingFileData as unknown as FileData
+    const fileSourceData = externalUploadSource ?? (incomingFileData as unknown as FileData)
+    const { filename, url } = fileSourceData
     if (filename && (filename.includes('../') || filename.includes('..\\'))) {
       throw new Forbidden(req.t)
     }
@@ -137,18 +143,18 @@ export const generateFileData = async <T>({
     }
 
     try {
-      if (!disableLocalStorage && isLocalFile) {
+      if (!externalUploadSource && !disableLocalStorage && isLocalFile) {
         const filePath = `${staticPath}/${filename}`
         const response = await getFileByPath(filePath)
         file = response
         overwriteExistingFiles = true
       } else if (filename && url) {
         file = await downloadFileToBuffer({
-          data: incomingFileData as unknown as FileData,
+          data: fileSourceData,
           req,
           uploadConfig: collectionConfig.upload,
         })
-        overwriteExistingFiles = true
+        overwriteExistingFiles = !externalUploadSource
       }
     } catch (err: unknown) {
       throw new FileRetrievalError(req.t, err instanceof Error ? err.message : undefined)

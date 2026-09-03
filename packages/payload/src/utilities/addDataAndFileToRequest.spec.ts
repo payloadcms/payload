@@ -99,6 +99,9 @@ describe('addDataAndFileToRequest', () => {
             },
           },
         },
+        db: {
+          findOne: vi.fn(async () => null),
+        },
         config: {
           bodyParser: {},
           upload: {},

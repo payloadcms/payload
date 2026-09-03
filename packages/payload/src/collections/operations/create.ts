@@ -27,6 +27,7 @@ import { beforeChange } from '../../fields/hooks/beforeChange/index.js'
 import { beforeValidate } from '../../fields/hooks/beforeValidate/index.js'
 import { saveVersion } from '../../index.js'
 import { generateFileData } from '../../uploads/generateFileData.js'
+import { getExternalUploadSource, sanitizeUploadData } from '../../uploads/sanitizeUploadData.js'
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles.js'
 import { uploadFiles } from '../../uploads/uploadFiles.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
@@ -68,10 +69,18 @@ export const createOperation = async <
   incomingArgs: Arguments<TSlug>,
 ): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
   let args = incomingArgs
+  let externalUploadSource: ReturnType<typeof getExternalUploadSource>
 
   try {
     const shouldCommit = !args.disableTransaction && (await initTransaction(args.req))
 
+    // Keep a remote URL only as an ephemeral file source, then strip all submitted generated
+    // identity before untrusted create hooks run. The fetched file receives new server-owned
+    // identity before persistence.
+    if (args.collection.config.upload && !args.overrideAccess) {
+      externalUploadSource = getExternalUploadSource(args.data)
+      args = { ...args, data: sanitizeUploadData(args.data, 'create') }
+    }
     ensureUsernameOrEmail<TSlug>({
       authOptions: args.collection.config.auth,
       collectionSlug: args.collection.config.slug,
@@ -164,6 +173,7 @@ export const createOperation = async <
       config,
       data,
       draft: isSavingDraft,
+      externalUploadSource,
       isDuplicating: Boolean(duplicateFromID),
       operation: 'create',
       originalDoc: duplicatedFromDoc,

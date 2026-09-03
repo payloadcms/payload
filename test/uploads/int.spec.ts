@@ -27,6 +27,7 @@ import {
   anyImagesSlug,
   clientUploadTempFileSlug,
   enlargeSlug,
+  fileAccessMediaSlug,
   focalNoSizesSlug,
   focalOnlySlug,
   mediaSlug,
@@ -54,6 +55,406 @@ const stat = promisify(fs.stat)
 test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - Uploads', () => {
   test.beforeAll(async ({ restClientInstance: restClient }) => {
     await restClient.login({ slug: usersSlug })
+  })
+
+  test.describe('file access with generated image sizes', () => {
+    const createdIDs: (number | string)[] = []
+    const staticDir = path.resolve(dirname, `./${fileAccessMediaSlug}`)
+
+    test.afterEach(async ({ payload }) => {
+      for (const id of createdIDs) {
+        await payload.delete({ id, collection: fileAccessMediaSlug as CollectionSlug })
+      }
+      createdIDs.length = 0
+      fs.rmSync(staticDir, { force: true, recursive: true })
+    })
+
+    test('should keep generated file data bound to its upload document', async ({
+      payload,
+      restClient,
+    }) => {
+      const restrictedFile = await getFileByPath(path.resolve(dirname, './test-image.png'))
+
+      restrictedFile!.name = `restricted-${randomUUID()}.png`
+      const restrictedDoc = await payload.create({
+        collection: fileAccessMediaSlug as CollectionSlug,
+        data: { prefix: 'restricted', visibility: 'restricted' },
+        file: restrictedFile,
+      })
+
+      createdIDs.push(restrictedDoc.id)
+
+      const readableFile = await getFileByPath(path.resolve(dirname, './image.png'))
+
+      readableFile!.name = `readable-${randomUUID()}.png`
+      const readableDoc = await payload.create({
+        collection: fileAccessMediaSlug as CollectionSlug,
+        data: { prefix: 'public', visibility: 'public' },
+        file: readableFile,
+      })
+
+      createdIDs.push(readableDoc.id)
+
+      const updateResponse = await restClient.PATCH(`/${fileAccessMediaSlug}/${readableDoc.id}`, {
+        body: JSON.stringify({
+          filename: restrictedDoc.filename,
+          prefix: 'restricted',
+          sizes: {
+            thumbnail: {
+              ...readableDoc.sizes.thumbnail,
+              filename: restrictedDoc.sizes.thumbnail.filename,
+            },
+          },
+          url: restrictedDoc.url,
+          visibility: 'public',
+        }),
+      })
+
+      expect(updateResponse.status).toBe(200)
+
+      const updatedDoc = await payload.findByID({
+        id: readableDoc.id,
+        collection: fileAccessMediaSlug as CollectionSlug,
+      })
+
+      expect(updatedDoc.filename).toBe(readableDoc.filename)
+      expect(updatedDoc.prefix).toBe('public')
+      expect(updatedDoc.sizes.thumbnail.filename).toBe(readableDoc.sizes.thumbnail.filename)
+      expect(updatedDoc.url).toBe(readableDoc.url)
+
+      const fileResponse = await restClient.GET(
+        `/${fileAccessMediaSlug}/file/${restrictedDoc.filename}`,
+      )
+
+      expect(fileResponse.status).toBe(403)
+    })
+
+    test('should reject invalid submitted filenames', async ({ payload, restClient }) => {
+      const file = await getFileByPath(path.resolve(dirname, './image.png'))
+      file!.name = `valid-${randomUUID()}.png`
+
+      const doc = await payload.create({
+        collection: fileAccessMediaSlug as CollectionSlug,
+        data: { prefix: 'public', visibility: 'public' },
+        file,
+      })
+      createdIDs.push(doc.id)
+
+      const filenameResponse = await restClient.PATCH(`/${fileAccessMediaSlug}/${doc.id}`, {
+        body: JSON.stringify({ filename: '../invalid.png' }),
+      })
+      expect(filenameResponse.status).toBe(400)
+
+      const sizeFilenameResponse = await restClient.PATCH(`/${fileAccessMediaSlug}/${doc.id}`, {
+        body: JSON.stringify({
+          sizes: { thumbnail: { filename: '..\\invalid-thumbnail.png' } },
+        }),
+      })
+      expect(sizeFilenameResponse.status).toBe(400)
+    })
+
+    test('should use stored file data when editing an image', async ({ payload, restClient }) => {
+      const file = await getFileByPath(path.resolve(dirname, './image.png'))
+      file!.name = `editable-${randomUUID()}.png`
+
+      const doc = await payload.create({
+        collection: fileAccessMediaSlug as CollectionSlug,
+        data: { prefix: 'public', visibility: 'public' },
+        file,
+      })
+      createdIDs.push(doc.id)
+
+      const updateResponse = await restClient.PATCH(`/${fileAccessMediaSlug}/${doc.id}`, {
+        body: JSON.stringify({ focalX: 75, focalY: 25 }),
+      })
+      expect(updateResponse.status).toBe(200)
+
+      const updatedDoc = await payload.findByID({
+        id: doc.id,
+        collection: fileAccessMediaSlug as CollectionSlug,
+      })
+
+      expect(updatedDoc.filename).toBe(doc.filename)
+      expect(updatedDoc.focalX).toBe(75)
+      expect(updatedDoc.focalY).toBe(25)
+      expect(updatedDoc.prefix).toBe('public')
+      expect(updatedDoc.sizes.thumbnail.filename).toBe(doc.sizes.thumbnail.filename)
+      expect(updatedDoc.url).toBe(doc.url)
+    })
+
+    test('should preserve each document file data during a bulk metadata update', async ({
+      payload,
+      restClient,
+    }) => {
+      const docs = await Promise.all(
+        ['first', 'second'].map(async (name) => {
+          const file = await getFileByPath(path.resolve(dirname, './image.png'))
+          file!.name = `${name}-${randomUUID()}.png`
+
+          const doc = await payload.create({
+            collection: fileAccessMediaSlug as CollectionSlug,
+            data: { prefix: name, visibility: 'public' },
+            file,
+          })
+          createdIDs.push(doc.id)
+          return doc
+        }),
+      )
+
+      const updateResponse = await restClient.PATCH(`/${fileAccessMediaSlug}`, {
+        body: JSON.stringify({
+          filename: 'submitted.png',
+          prefix: 'submitted',
+          sizes: { thumbnail: { filename: 'submitted-thumbnail.png' } },
+          url: '/api/file-access-media/file/submitted.png',
+        }),
+        query: { where: { id: { in: docs.map(({ id }) => id) } } },
+      })
+      expect(updateResponse.status).toBe(200)
+
+      for (const doc of docs) {
+        const updatedDoc = await payload.findByID({
+          id: doc.id,
+          collection: fileAccessMediaSlug as CollectionSlug,
+        })
+
+        expect(updatedDoc.filename).toBe(doc.filename)
+        expect(updatedDoc.prefix).toBe(doc.prefix)
+        expect(updatedDoc.requestMetadata).toContain('PATCH:application/json:')
+        expect(updatedDoc.sizes.thumbnail.filename).toBe(doc.sizes.thumbnail.filename)
+        expect(updatedDoc.url).toBe(doc.url)
+      }
+    })
+
+    test('should replace and crop files independently during a bulk update', async ({
+      payload,
+      restClient,
+    }) => {
+      const docs = await Promise.all(
+        ['first', 'second'].map(async (name) => {
+          const file = await getFileByPath(path.resolve(dirname, './image.png'))
+          file!.name = `${name}-${randomUUID()}.png`
+
+          const doc = await payload.create({
+            collection: fileAccessMediaSlug as CollectionSlug,
+            data: { prefix: name, visibility: 'public' },
+            file,
+          })
+          createdIDs.push(doc.id)
+          return doc
+        }),
+      )
+      const replacementPath = path.resolve(dirname, './test-image.png')
+      const metadata = await payload.config.sharp!(replacementPath).metadata()
+      const height = Math.floor(metadata.height! / 2)
+      const width = Math.floor(metadata.width! / 2)
+      const { file, handle } = await createStreamableFile(replacementPath)
+      const formData = new FormData()
+      formData.append('_payload', JSON.stringify({ prefix: 'replacement' }))
+      formData.append('file', file)
+
+      const uploadConfig = payload.config.upload
+      const originalUseTempFiles = uploadConfig.useTempFiles
+      uploadConfig.useTempFiles = true
+
+      try {
+        const response = await restClient.PATCH(`/${fileAccessMediaSlug}`, {
+          body: formData,
+          file,
+          query: {
+            uploadEdits: {
+              crop: { height: 50, unit: '%', width: 50, x: 0, y: 0 },
+              heightInPixels: height,
+              widthInPixels: width,
+            },
+            where: { id: { in: docs.map(({ id }) => id) } },
+          },
+        })
+        expect(response.status).toBe(200)
+
+        const updatedDocs = await Promise.all(
+          docs.map(({ id }) =>
+            payload.findByID({ id, collection: fileAccessMediaSlug as CollectionSlug }),
+          ),
+        )
+        expect(new Set(updatedDocs.map(({ filename }) => filename)).size).toBe(2)
+        expect(updatedDocs.every(({ prefix }) => prefix === 'replacement')).toBe(true)
+
+        const outputBuffers = await Promise.all(
+          updatedDocs.map(({ filename }) => fs.promises.readFile(path.join(staticDir, filename))),
+        )
+        for (const output of outputBuffers) {
+          await expect(payload.config.sharp!(output).metadata()).resolves.toMatchObject({
+            height,
+            width,
+          })
+        }
+        expect(outputBuffers[0]).toEqual(outputBuffers[1])
+      } finally {
+        uploadConfig.useTempFiles = originalUseTempFiles
+        await handle.close()
+      }
+    })
+
+    test('should replace a file while retaining its stored prefix', async ({
+      payload,
+      restClient,
+    }) => {
+      const file = await getFileByPath(path.resolve(dirname, './image.png'))
+      file!.name = `replace-${randomUUID()}.png`
+
+      const doc = await payload.create({
+        collection: fileAccessMediaSlug as CollectionSlug,
+        data: { prefix: 'public', visibility: 'public' },
+        file,
+      })
+      createdIDs.push(doc.id)
+
+      const { file: replacement, handle } = await createStreamableFile(
+        path.resolve(dirname, './test-image.png'),
+      )
+      const formData = new FormData()
+      formData.append('file', replacement)
+
+      const updateResponse = await restClient.PATCH(`/${fileAccessMediaSlug}/${doc.id}`, {
+        body: formData,
+        file: replacement,
+      })
+      await handle.close()
+      expect(updateResponse.status).toBe(200)
+
+      const updatedDoc = await payload.findByID({
+        id: doc.id,
+        collection: fileAccessMediaSlug as CollectionSlug,
+      })
+
+      expect(updatedDoc.filename).not.toBe(doc.filename)
+      expect(updatedDoc.prefix).toBe('public')
+      expect(updatedDoc.sizes.thumbnail.filename).toBeTruthy()
+    })
+
+    test('should replace a file using its submitted prefix', async ({ payload, restClient }) => {
+      const file = await getFileByPath(path.resolve(dirname, './image.png'))
+      file!.name = `replace-prefix-${randomUUID()}.png`
+
+      const doc = await payload.create({
+        collection: fileAccessMediaSlug as CollectionSlug,
+        data: { prefix: 'current', visibility: 'public' },
+        file,
+      })
+      createdIDs.push(doc.id)
+
+      const { file: replacement, handle } = await createStreamableFile(
+        path.resolve(dirname, './test-image.png'),
+      )
+      const formData = new FormData()
+      formData.append('_payload', JSON.stringify({ prefix: 'replacement' }))
+      formData.append('file', replacement)
+
+      const updateResponse = await restClient.PATCH(`/${fileAccessMediaSlug}/${doc.id}`, {
+        body: formData,
+        file: replacement,
+      })
+      await handle.close()
+      expect(updateResponse.status).toBe(200)
+
+      const updatedDoc = await payload.findByID({
+        id: doc.id,
+        collection: fileAccessMediaSlug as CollectionSlug,
+      })
+
+      expect(updatedDoc.filename).not.toBe(doc.filename)
+      expect(updatedDoc.prefix).toBe('replacement')
+      expect(updatedDoc.sizes.thumbnail.filename).toBeTruthy()
+    })
+
+    test('should retain current file data when restoring a version', async ({
+      payload,
+      restClient,
+    }) => {
+      const currentFile = await getFileByPath(path.resolve(dirname, './image.png'))
+      currentFile!.name = `current-${randomUUID()}.png`
+      let currentDoc = await payload.create({
+        collection: fileAccessMediaSlug as CollectionSlug,
+        data: { prefix: 'current', visibility: 'public' },
+        file: currentFile,
+      })
+      createdIDs.push(currentDoc.id)
+
+      const storedURLs = { en: currentDoc.url, es: '/localized-current.png' }
+      const storedThumbnailURL = '/stored-thumbnail.png'
+      await payload.db.updateOne({
+        id: currentDoc.id,
+        collection: fileAccessMediaSlug,
+        data: { ...currentDoc, thumbnailURL: storedThumbnailURL, url: storedURLs },
+      })
+      currentDoc = await payload.findByID({
+        id: currentDoc.id,
+        collection: fileAccessMediaSlug as CollectionSlug,
+      })
+
+      const otherFile = await getFileByPath(path.resolve(dirname, './test-image.png'))
+      otherFile!.name = `other-${randomUUID()}.png`
+      const otherDoc = await payload.create({
+        collection: fileAccessMediaSlug as CollectionSlug,
+        data: { prefix: 'other', visibility: 'restricted' },
+        file: otherFile,
+      })
+      createdIDs.push(otherDoc.id)
+
+      const { docs: versions } = await payload.findVersions({
+        collection: fileAccessMediaSlug as CollectionSlug,
+        where: { parent: { equals: currentDoc.id } },
+      })
+      const version = versions[0]!
+
+      await payload.db.updateVersion({
+        id: version.id,
+        collection: fileAccessMediaSlug,
+        versionData: {
+          ...version.version,
+          filename: otherDoc.filename,
+          filesize: 1,
+          focalX: 1,
+          focalY: 1,
+          height: 1,
+          mimeType: 'image/jpeg',
+          prefix: otherDoc.prefix,
+          sizes: otherDoc.sizes,
+          thumbnailURL: '/version-thumbnail.jpg',
+          url: { en: otherDoc.url, es: '/otro.png', fr: '/autre.png' },
+          width: 1,
+        },
+      })
+
+      const restoreResponse = await restClient.POST(
+        `/${fileAccessMediaSlug}/versions/${version.id}`,
+      )
+      expect(restoreResponse.status).toBe(200)
+
+      const restoredDoc = await payload.findByID({
+        id: currentDoc.id,
+        collection: fileAccessMediaSlug as CollectionSlug,
+      })
+      const restoredStoredDoc = await payload.db.findOne({
+        collection: fileAccessMediaSlug,
+        where: { id: { equals: currentDoc.id } },
+      })
+
+      expect(restoredDoc.filename).toBe(currentDoc.filename)
+      expect(restoredDoc.filesize).toBe(currentDoc.filesize)
+      expect(restoredDoc.focalX).toBe(currentDoc.focalX)
+      expect(restoredDoc.focalY).toBe(currentDoc.focalY)
+      expect(restoredDoc.height).toBe(currentDoc.height)
+      expect(restoredDoc.mimeType).toBe(currentDoc.mimeType)
+      expect(restoredDoc.prefix).toBe(currentDoc.prefix)
+      expect(restoredDoc.sizes).toEqual(currentDoc.sizes)
+      expect(restoredDoc.thumbnailURL).toBe(currentDoc.thumbnailURL)
+      expect(restoredDoc.url).toBe(currentDoc.url)
+      expect(restoredDoc.width).toBe(currentDoc.width)
+      expect(restoredStoredDoc.url).toEqual(storedURLs)
+      expect(restoredStoredDoc.thumbnailURL).toBe(storedThumbnailURL)
+    })
   })
 
   test.describe('REST API', () => {
@@ -275,6 +676,61 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
         expect(sizes).toHaveProperty('tablet')
         expect(sizes).toHaveProperty('mobile')
         expect(sizes).toHaveProperty('icon')
+      })
+
+      test('creates from a remote source without reusing submitted file identity', async ({
+        payload,
+        restClient,
+      }) => {
+        const originalFile = await getFileByPath(path.resolve(dirname, './image.png'))
+        originalFile!.name = `remote-source-${randomUUID()}.png`
+        const originalBytes = Buffer.from(originalFile!.data)
+        const createdIDs: (number | string)[] = []
+        const originalDoc = await payload.create({
+          collection: skipSafeFetchMediaSlug as CollectionSlug,
+          data: {},
+          file: originalFile,
+        })
+        createdIDs.push(originalDoc.id)
+
+        const remoteBytes = await fs.promises.readFile(path.resolve(dirname, './test-image.png'))
+        const sourceServer = createServer((_req, res) => {
+          res.writeHead(200, {
+            'Content-Length': remoteBytes.length,
+            'Content-Type': 'image/png',
+          })
+          res.end(remoteBytes)
+        })
+        await new Promise((resolve) => sourceServer.listen(0, '127.0.0.1', resolve))
+        const sourceURL = `http://127.0.0.1:${(sourceServer.address() as AddressInfo).port}/image.png`
+
+        try {
+          const response = await restClient.POST(`/${skipSafeFetchMediaSlug}`, {
+            body: JSON.stringify({
+              filename: originalDoc.filename,
+              url: sourceURL,
+            }),
+          })
+          expect(response.status).toBe(201)
+
+          const { doc } = await response.json<{
+            doc: { filename: string; id: number | string; url: string }
+          }>()
+          createdIDs.push(doc.id)
+
+          expect(doc.filename).not.toBe(originalDoc.filename)
+          expect(doc.url).not.toBe(sourceURL)
+          await expect(
+            fs.promises.readFile(path.resolve(dirname, './media', originalDoc.filename)),
+          ).resolves.toEqual(originalBytes)
+        } finally {
+          await Promise.all(
+            createdIDs.map((id) =>
+              payload.delete({ collection: skipSafeFetchMediaSlug as CollectionSlug, id }),
+            ),
+          )
+          await new Promise((resolve) => sourceServer.close(resolve))
+        }
       })
 
       test('should URL encode filenames with spaces in both main url and size urls', async ({

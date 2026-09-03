@@ -22,6 +22,12 @@ import { combineQueries } from '../../database/combineQueries.js'
 import { APIError, Forbidden, NotFound } from '../../errors/index.js'
 import { type CollectionSlug, deepCopyObjectSimple, type FindOptions } from '../../index.js'
 import { generateFileData } from '../../uploads/generateFileData.js'
+import {
+  getLocalizedUploadProperties,
+  getUploadDestinationPrefix,
+  mergeUploadDataWithDocument,
+  sanitizeUploadData,
+} from '../../uploads/sanitizeUploadData.js'
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
@@ -65,6 +71,18 @@ export const updateByIDOperation = async <
   try {
     const shouldCommit = !args.disableTransaction && (await initTransaction(args.req))
 
+    if (args.collection.config.upload && !args.overrideAccess) {
+      const uploadDestinationPrefix = getUploadDestinationPrefix(args.data, args.req.file)
+      const data = sanitizeUploadData(args.data, 'update')
+
+      args = {
+        ...args,
+        data:
+          uploadDestinationPrefix !== undefined && typeof data === 'object' && data !== null
+            ? { ...data, prefix: uploadDestinationPrefix }
+            : data,
+      }
+    }
     // /////////////////////////////////////
     // beforeOperation - Collection
     // /////////////////////////////////////
@@ -105,7 +123,7 @@ export const updateByIDOperation = async <
       throw new APIError('Missing ID of document to update.', httpStatus.BAD_REQUEST)
     }
 
-    const { data } = args
+    let { data } = args
 
     // /////////////////////////////////////
     // Access
@@ -175,6 +193,18 @@ export const updateByIDOperation = async <
     }
     if (!docWithLocales) {
       throw new NotFound(req.t)
+    }
+
+    if (collectionConfig.upload && !overrideAccess) {
+      data = mergeUploadDataWithDocument(data, docWithLocales, {
+        locale:
+          locale === 'all' || !locale
+            ? config.localization
+              ? config.localization.defaultLocale
+              : undefined
+            : locale,
+        localizedProperties: getLocalizedUploadProperties(collectionConfig.flattenedFields),
+      })
     }
 
     // /////////////////////////////////////

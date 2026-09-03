@@ -25,6 +25,7 @@ const createReq = (
       collections: {
         media: {
           config: {
+            fields: [{ name: 'prefix', type: 'text' }],
             upload: {
               disableLocalStorage: true,
               handlers,
@@ -32,6 +33,9 @@ const createReq = (
             },
           },
         },
+      },
+      db: {
+        findOne: vi.fn(async () => null),
       },
       config: {
         upload: {},
@@ -130,6 +134,65 @@ describe('getFileFromUploadInstructions', () => {
         req,
       }),
     ).rejects.toThrow()
+  })
+
+  it('rejects an upload reference that matches an existing generated filename', async () => {
+    const handler = vi.fn(async () => new Response('existing file', { status: 200 }))
+    const req = createReq([handler], {
+      imageSizes: [{ height: 100, name: 'preview', width: 100 }],
+      mimeTypes: ['image/*'],
+    })
+    vi.mocked(req.payload.db.findOne).mockResolvedValueOnce({ id: 'existing' })
+
+    await expect(
+      getFileFromUploadInstructions({
+        collectionSlug: 'media',
+        file: createUploadReferenceFile({
+          filename: 'preview.png',
+          mimeType: 'image/png',
+          uploadReference: { prefix: 'private' },
+        }),
+        req,
+      }),
+    ).rejects.toThrow('Invalid upload reference.')
+
+    expect(handler).not.toHaveBeenCalled()
+    expect(req.payload.db.findOne).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          or: [
+            { filename: { equals: 'preview.png' } },
+            { 'sizes.preview.filename': { equals: 'preview.png' } },
+          ],
+        },
+      }),
+    )
+  })
+
+  it.each([
+    {
+      filename: 'preview.png',
+      label: 'prefix',
+      uploadReference: { prefix: '../private' },
+    },
+    {
+      filename: 'nested/preview.png',
+      label: 'filename',
+      uploadReference: { prefix: 'private' },
+    },
+  ])('rejects a non-canonical provider $label', async ({ filename, uploadReference }) => {
+    const handler = vi.fn(async () => new Response('other file', { status: 200 }))
+    const req = createReq([handler])
+
+    await expect(
+      getFileFromUploadInstructions({
+        collectionSlug: 'media',
+        file: createUploadReferenceFile({ filename, uploadReference }),
+        req,
+      }),
+    ).rejects.toThrow('Invalid upload reference.')
+
+    expect(handler).not.toHaveBeenCalled()
   })
 
   it('skips fetching entirely when nothing downstream needs the file content', async () => {
@@ -273,6 +336,9 @@ describe('getFileFromUploadInstructions', () => {
               },
             },
           },
+        },
+        db: {
+          findOne: vi.fn(async () => null),
         },
         config: {
           upload: {},

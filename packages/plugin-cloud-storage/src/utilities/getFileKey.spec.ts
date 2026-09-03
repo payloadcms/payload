@@ -120,6 +120,20 @@ describe('getFileKey', () => {
   })
 
   describe('sanitization', () => {
+    it.each(['./media/./images', 'media\\images', '/media//images'])(
+      'should canonicalize equivalent prefix paths',
+      (docPrefix) => {
+        const result = getFileKey({ docPrefix, filename: 'test.png' })
+
+        expect(result).toEqual({
+          fileKey: 'media/images/test.png',
+          sanitizedCollectionPrefix: '',
+          sanitizedDocPrefix: 'media/images',
+          sanitizedFilename: 'test.png',
+        })
+      },
+    )
+
     it('should remove path traversal segments from collectionPrefix', () => {
       const result = getFileKey({
         collectionPrefix: '../../../etc',

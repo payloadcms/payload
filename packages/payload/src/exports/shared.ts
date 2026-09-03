@@ -192,6 +192,8 @@ export { reduceFieldsToValues } from '../utilities/reduceFieldsToValues.js'
 
 export { sanitizeFilename } from '../utilities/sanitizeFilename.js'
 
+export { sanitizeUploadPrefix } from '../utilities/sanitizeUploadPrefix.js'
+
 export { sanitizeUrl } from '../utilities/sanitizeUrl.js'
 
 export { sanitizeUserDataForEmail } from '../utilities/sanitizeUserDataForEmail.js'

@@ -1,6 +1,9 @@
 import type { DeepPartial } from 'ts-essentials'
 
 import { status as httpStatus } from 'http-status'
+import { randomUUID } from 'node:crypto'
+import fs from 'node:fs/promises'
+import path from 'node:path'
 
 import type { AccessResult } from '../../config/types.js'
 import type { PayloadRequest, PopulateType, SelectType, Sort, Where } from '../../types/index.js'
@@ -20,12 +23,19 @@ import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
 import { APIError } from '../../errors/index.js'
 import { type CollectionSlug, type FindOptions } from '../../index.js'
 import { generateFileData } from '../../uploads/generateFileData.js'
+import {
+  getLocalizedUploadProperties,
+  getUploadDestinationPrefix,
+  mergeUploadDataWithDocument,
+  sanitizeUploadData,
+} from '../../uploads/sanitizeUploadData.js'
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { hasDraftsEnabled } from '../../utilities/getVersionsConfig.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { isErrorPublic } from '../../utilities/isErrorPublic.js'
+import { isolateObjectProperty } from '../../utilities/isolateObjectProperty.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
@@ -80,6 +90,18 @@ export const updateOperation = async <
   try {
     const shouldCommit = !args.disableTransaction && (await initTransaction(args.req))
 
+    if (args.collection.config.upload && !args.overrideAccess) {
+      const uploadDestinationPrefix = getUploadDestinationPrefix(args.data, args.req.file)
+      const data = sanitizeUploadData(args.data, 'update')
+
+      args = {
+        ...args,
+        data:
+          uploadDestinationPrefix !== undefined && typeof data === 'object' && data !== null
+            ? { ...data, prefix: uploadDestinationPrefix }
+            : data,
+      }
+    }
     // /////////////////////////////////////
     // beforeOperation - Collection
     // /////////////////////////////////////
@@ -226,24 +248,24 @@ export const updateOperation = async <
       docs = query.docs
     }
 
-    // /////////////////////////////////////
-    // Generate data for all files and sizes
-    // /////////////////////////////////////
-
-    const { data, files: filesToUpload } = await generateFileData({
-      collection,
-      config,
-      data: bulkUpdateData,
-      operation: 'update',
-      overwriteExistingFiles,
-      req,
-      throwOnMissingFile: false,
-    })
+    const sharedGeneratedFileData =
+      !collectionConfig.upload || overrideAccess
+        ? await generateFileData({
+            collection,
+            config,
+            data: bulkUpdateData,
+            operation: 'update',
+            overwriteExistingFiles,
+            req,
+            throwOnMissingFile: false,
+          })
+        : null
 
     const errors: BulkOperationResult<TSlug, TSelect>['errors'] = []
 
-    const promises = docs.map(async (docWithLocales) => {
+    const processDocument = async (docWithLocales: (typeof docs)[number]) => {
       const { id } = docWithLocales
+      let documentTempFilePath: string | undefined
 
       try {
         // Each document gets its own transaction when singleTransaction is enabled
@@ -251,6 +273,43 @@ export const updateOperation = async <
         if (req.payload.db.bulkOperationsSingleTransaction) {
           docShouldCommit = await initTransaction(req)
         }
+
+        const documentFile = req.file ? { ...req.file } : undefined
+        if (collectionConfig.upload && !overrideAccess && documentFile?.tempFilePath) {
+          const extension = path.extname(documentFile.tempFilePath)
+          documentTempFilePath = path.join(
+            path.dirname(documentFile.tempFilePath),
+            `${path.basename(documentFile.tempFilePath, extension)}-${randomUUID()}${extension}`,
+          )
+          await fs.copyFile(documentFile.tempFilePath, documentTempFilePath)
+          documentFile.tempFilePath = documentTempFilePath
+        }
+
+        let documentReq = req
+        if (collectionConfig.upload && !overrideAccess) {
+          documentReq = isolateObjectProperty(req, ['file', 'payloadUploadSizes'])
+          documentReq.file = documentFile
+          documentReq.payloadUploadSizes = {}
+        }
+        const generatedFileData =
+          sharedGeneratedFileData ??
+          (await generateFileData({
+            collection,
+            config,
+            data: mergeUploadDataWithDocument(bulkUpdateData, docWithLocales, {
+              locale:
+                locale === 'all' || !locale
+                  ? config.localization
+                    ? config.localization.defaultLocale
+                    : undefined
+                  : locale,
+              localizedProperties: getLocalizedUploadProperties(collectionConfig.flattenedFields),
+            }),
+            operation: 'update',
+            overwriteExistingFiles,
+            req: documentReq,
+            throwOnMissingFile: false,
+          }))
 
         const select = sanitizeSelect({
           fields: collectionConfig.flattenedFields,
@@ -272,7 +331,7 @@ export const updateOperation = async <
           config,
           data: copyDataWithFreshRowIDs({
             config,
-            data,
+            data: generatedFileData.data,
             existingDoc: docWithLocales,
             fields: collectionConfig.fields,
           }),
@@ -280,14 +339,14 @@ export const updateOperation = async <
           docWithLocales,
           draftArg,
           fallbackLocale: fallbackLocale!,
-          filesToUpload,
+          filesToUpload: generatedFileData.files,
           locale: locale!,
           overrideAccess: overrideAccess!,
           overrideLock: overrideLock!,
           payload,
           populate,
           publishAllLocales,
-          req,
+          req: documentReq,
           select: select!,
           showHiddenFields: showHiddenFields!,
           unpublishAllLocales,
@@ -317,27 +376,38 @@ export const updateOperation = async <
           isPublic,
           message: error instanceof Error ? error.message : 'Unknown error',
         })
+      } finally {
+        if (documentTempFilePath) {
+          await fs.rm(documentTempFilePath, { force: true }).catch((error) => {
+            req.payload.logger.error({ err: error, msg: 'Failed to remove temp file copy' })
+          })
+        }
       }
       return null
-    })
+    }
+
+    // Upload processing may mutate its temp file while cropping, so each document must finish
+    // before the next document starts. This only applies when an actual file is being written
+    // (`req.file`); metadata-only bulk updates use isolated per-document request state and can
+    // stay parallel. Other bulk updates retain their existing parallel behavior.
+    const processSequentially =
+      req.payload.db.bulkOperationsSingleTransaction ||
+      Boolean(collectionConfig.upload && !overrideAccess && req.file)
+    let awaitedDocs: (DataFromCollectionSlug<TSlug> | null)[]
+    if (processSequentially) {
+      awaitedDocs = []
+      for (const doc of docs) {
+        awaitedDocs.push(await processDocument(doc))
+      }
+    } else {
+      awaitedDocs = await Promise.all(docs.map(processDocument))
+    }
 
     await unlinkTempFiles({
       collectionConfig,
       config,
       req,
     })
-
-    // Process sequentially when using single transaction mode to avoid shared state issues
-    // Process in parallel when using one transaction for better performance
-    let awaitedDocs: (DataFromCollectionSlug<TSlug> | null)[]
-    if (req.payload.db.bulkOperationsSingleTransaction) {
-      awaitedDocs = []
-      for (const promise of promises) {
-        awaitedDocs.push(await promise)
-      }
-    } else {
-      awaitedDocs = await Promise.all(promises)
-    }
 
     let result = {
       docs: awaitedDocs.filter(Boolean),

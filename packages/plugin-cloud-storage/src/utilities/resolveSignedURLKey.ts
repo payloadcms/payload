@@ -1,6 +1,7 @@
 import type { PayloadRequest } from 'payload'
 
 import { getSafeFileName } from 'payload/internal'
+import { sanitizeFilename } from 'payload/shared'
 
 import { getFileKey } from './getFileKey.js'
 
@@ -29,10 +30,10 @@ export async function resolveSignedURLKey({
   req,
   useCompositePrefixes = false,
 }: Args) {
+  const normalizedFilename = sanitizeFilename(filename)
   const sanitizedFilename = await getSafeFileName({
     collectionSlug,
-    desiredFilename: filename,
-    prefix: docPrefix,
+    desiredFilename: normalizedFilename,
     req,
   })
 
