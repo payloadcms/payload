@@ -123,14 +123,18 @@ export const JWTAuthentication: AuthStrategyFunction = async ({
     const decodedPayload = await verifyWithKeyring({ payload, token })
     const collection = payload.collections[decodedPayload.collection]
 
+    if (!collection) {
+      return { user: null }
+    }
+
     const user = (await payload.findByID({
       id: decodedPayload.id,
       collection: decodedPayload.collection,
-      depth: isGraphQL ? 0 : collection!.config.auth.depth,
+      depth: isGraphQL ? 0 : collection.config.auth.depth,
     })) as AuthStrategyResult['user']
 
-    if (user && (!collection!.config.auth.verify || user._verified)) {
-      if (collection!.config.auth.useSessions) {
+    if (user && (!collection.config.auth.verify || user._verified)) {
+      if (collection.config.auth.useSessions) {
         const existingSession = (user.sessions || []).find(({ id }) => id === decodedPayload.sid)
 
         if (!existingSession || !decodedPayload.sid) {
@@ -142,7 +146,7 @@ export const JWTAuthentication: AuthStrategyFunction = async ({
         user._sid = decodedPayload.sid
       }
 
-      user.collection = collection!.config.slug
+      user.collection = collection.config.slug
       user._strategy = strategyName
       return {
         user,

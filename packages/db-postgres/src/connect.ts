@@ -87,7 +87,7 @@ export const connect: Connect = async function connect(
     }
 
     if (!hotReload) {
-      if (process.env.PAYLOAD_DROP_DATABASE === 'true') {
+      if (process.env.NODE_ENV !== 'production' && process.env.PAYLOAD_DROP_DATABASE === 'true') {
         this.payload.logger.info(`---- DROPPING TABLES SCHEMA(${this.schemaName || 'public'}) ----`)
         await this.dropDatabase({ adapter: this })
         this.payload.logger.info('---- DROPPED TABLES ----')
