@@ -136,6 +136,7 @@ export const addDefaultsToAuthConfig = (auth: IncomingAuthType): Auth => {
       )
     : false
   auth.maxLoginAttempts = auth.maxLoginAttempts ?? 5
+  auth.maxSessions = auth.maxSessions ?? 20
   auth.tokenExpiration = auth.tokenExpiration ?? 7200
   auth.useSessions = auth.useSessions ?? true
   auth.verify = auth.verify ?? false

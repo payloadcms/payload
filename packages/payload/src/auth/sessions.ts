@@ -46,6 +46,15 @@ export const addSessionToUser = async ({
     } else {
       user.sessions = removeExpiredSessions(user.sessions)
       user.sessions.push(session)
+
+      const maxSessions = collectionConfig.auth.maxSessions
+      if (
+        typeof maxSessions === 'number' &&
+        maxSessions > 0 &&
+        user.sessions.length > maxSessions
+      ) {
+        user.sessions = user.sessions.slice(-maxSessions)
+      }
     }
 
     await payload.db.updateOne({

@@ -270,6 +270,11 @@ export interface IncomingAuthType {
    * Only allow a user to attempt logging in X amount of times. Automatically locks out a user from authenticating if this limit is passed. Set to 0 to disable.
    */
   maxLoginAttempts?: number
+  /**
+   * Maximum number of active sessions to retain per user. Older sessions are evicted when exceeded.
+   * @default 20
+   */
+  maxSessions?: number
   /***
    * Set to true if you want to remove the token from the returned authentication API responses such as login or refresh.
    */
@@ -323,6 +328,7 @@ export interface Auth
       | 'lockTime'
       | 'loginWithUsername'
       | 'maxLoginAttempts'
+      | 'maxSessions'
       | 'strategies'
       | 'tokenExpiration'
       | 'useSessions'
@@ -334,6 +340,7 @@ export interface Auth
         | 'forgotPassword'
         | 'lockTime'
         | 'maxLoginAttempts'
+        | 'maxSessions'
         | 'strategies'
         | 'tokenExpiration'
         | 'useSessions'
